@@ -73,7 +73,7 @@ struct auth_replay
  {
   char *server; /* null-terminated */
   char *client; /* null-terminated */
-  krb5_ui_2 cmsec;
+  krb5_int32 cusec;
   krb5_timestamp ctime;
  }
 ;
@@ -82,7 +82,7 @@ static int hash(rep, hsize)
 struct auth_replay *rep;
 int hsize;
 {
- return (((rep->cmsec + rep->ctime + *rep->server + *rep->client)
+ return (((rep->cusec + rep->ctime + *rep->server + *rep->client)
 	 % hsize) + hsize) % hsize;
  /* We take this opportunity to once again complain about C's idiotic %. */
 }
@@ -92,7 +92,7 @@ krb5_tkt_authent *auth;
 struct auth_replay *rep;
 {
  krb5_error_code retval;
- rep->cmsec = auth->authenticator->cmsec;
+ rep->cusec = auth->authenticator->cusec;
  rep->ctime = auth->authenticator->ctime;
  if (retval = krb5_unparse_name(auth->ticket->server,&rep->server))
    return retval; /* shouldn't happen */
@@ -114,7 +114,7 @@ struct auth_replay *old;
 struct auth_replay *new;
 krb5_deltat t;
 {
- if ((old->cmsec == new->cmsec) && /* most likely to distinguish */
+ if ((old->cusec == new->cusec) && /* most likely to distinguish */
      (old->ctime == new->ctime) &&
      (strcmp(old->client,new->client) == 0) &&
      (strcmp(old->server,new->server) == 0)) /* always true */
@@ -332,7 +332,7 @@ krb5_rcache id;
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
      case 0: break; default: FREE3; return KRB5_RC_IO; break;
     }
-   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->cmsec,sizeof(rep->cmsec))) 
+   switch(krb5_rc_io_read(&t->d,(krb5_pointer) &rep->cusec,sizeof(rep->cusec))) 
     {
      case KRB5_RC_IO_EOF: FREE3; goto end_loop;
      case 0: break; default: FREE3; return KRB5_RC_IO; break;
@@ -386,7 +386,7 @@ krb5_tkt_authent *auth;
    return KRB5_RC_IO;
  if (krb5_rc_io_write(&t->d,(krb5_pointer) rep->server,i))
    return KRB5_RC_IO;
- if (krb5_rc_io_write(&t->d,(krb5_pointer) &rep->cmsec,sizeof(rep->cmsec)))
+ if (krb5_rc_io_write(&t->d,(krb5_pointer) &rep->cusec,sizeof(rep->cusec)))
    return KRB5_RC_IO;
  if (krb5_rc_io_write(&t->d,(krb5_pointer) &rep->ctime,sizeof(rep->ctime)))
    return KRB5_RC_IO;
@@ -461,7 +461,7 @@ krb5_rcache id;
      return KRB5_RC_IO;
    if (krb5_rc_io_write(&tmp,(krb5_pointer) q->rep.server,i))
      return KRB5_RC_IO;
-   if (krb5_rc_io_write(&tmp,(krb5_pointer) &q->rep.cmsec,sizeof(q->rep.cmsec)))
+   if (krb5_rc_io_write(&tmp,(krb5_pointer) &q->rep.cusec,sizeof(q->rep.cusec)))
      return KRB5_RC_IO;
    if (krb5_rc_io_write(&tmp,(krb5_pointer) &q->rep.ctime,sizeof(q->rep.ctime)))
      return KRB5_RC_IO;

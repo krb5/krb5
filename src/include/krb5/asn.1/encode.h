@@ -209,6 +209,17 @@ krb5_error_code encode_krb5_as_req
 		   (translator_func) KRB5_KRB__ERROR2krb5_error, \
 		   (free_func) free_KRB5_KRB__ERROR)
 
+#define encode_krb5_authdata(pauth, output) \
+    krb5_encode_generic((krb5_const_pointer)pauth,  output, \
+		   (encoder_func) encode_KRB5_AuthorizationData, \
+		   (translator_func) krb5_authdata2KRB5_AuthorizationData, \
+		   (free_func) free_KRB5_AuthorizationData)
+#define decode_krb5_authdata(pauth, output) \
+    krb5_decode_generic(pauth, (krb5_pointer *) output, \
+		   (decoder_func) decode_KRB5_AuthorizationData, \
+		   (translator_func) KRB5_AuthorizationData2krb5_authdata, \
+		   (free_func) free_KRB5_AuthorizationData)
+
 /* ASN.1 encoding knowledge; KEEP IN SYNC WITH ASN.1 defs! */
 /* here we use some knowledge of ASN.1 encodings */
 /* 

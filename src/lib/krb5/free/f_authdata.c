@@ -25,8 +25,11 @@ krb5_authdata **val;
 {
     register krb5_authdata **temp;
 
-    for (temp = val; *temp; temp++)
+    for (temp = val; *temp; temp++) {
+	if ((*temp)->contents)
+	    xfree((*temp)->contents);
 	xfree(*temp);
+    }
     xfree(val);
     return;
 }

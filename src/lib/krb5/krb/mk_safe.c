@@ -41,14 +41,18 @@ krb5_error_code
 krb5_mk_safe(DECLARG(const krb5_data *, userdata),
 	     DECLARG(const krb5_cksumtype, sumtype),
 	     DECLARG(const krb5_keyblock *, key),
-	     DECLARG(const krb5_fulladdr *, sender_addr),
-	     DECLARG(const krb5_fulladdr *, recv_addr),
+	     DECLARG(const krb5_address *, sender_addr),
+	     DECLARG(const krb5_address *, recv_addr),
+	     DECLARG(krb5_int32, seq_number),
+	     DECLARG(krb5_int32, safe_flags),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, userdata)
 OLDDECLARG(const krb5_cksumtype, sumtype)
 OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_fulladdr *, sender_addr)
-OLDDECLARG(const krb5_fulladdr *, recv_addr)
+OLDDECLARG(const krb5_address *, sender_addr)
+OLDDECLARG(const krb5_address *, recv_addr)
+OLDDECLARG(krb5_int32, seq_number)
+OLDDECLARG(krb5_int32, safe_flags)
 OLDDECLARG(krb5_data *, outbuf)
 {
     krb5_error_code retval;
@@ -59,20 +63,25 @@ OLDDECLARG(krb5_data *, outbuf)
 
     if (!valid_cksumtype(sumtype))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
+    if (!is_coll_proof_cksum(sumtype) || !is_keyed_cksum(sumtype))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     safemsg.user_data = *userdata;
-    safemsg.s_address = sender_addr->address;
-    safemsg.r_address = recv_addr->address;
-
-    if (retval = krb5_ms_timeofday(&safemsg.timestamp, &safemsg.msec))
-	return retval;
-
-    if (krb5_fulladdr_order(sender_addr, recv_addr) > 0)
-	safemsg.msec = (safemsg.msec & MSEC_VAL_MASK) | MSEC_DIRBIT;
+    safemsg.s_address = (krb5_address *)sender_addr;
+    if (recv_addr)
+	safemsg.r_address = (krb5_address *)recv_addr;
     else
-	/* this should be a no-op, but just to be sure... */
-	safemsg.msec = safemsg.msec & MSEC_VAL_MASK;
+	safemsg.r_address = 0;
 
+    if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+	if (retval = krb5_us_timeofday(&safemsg.timestamp, &safemsg.usec))
+	    return retval;
+    }
+    if (safe_flags & KRB5_SAFE_DOSEQUENCE) {
+	safemsg.seq_number = seq_number;
+     } else
+	 safemsg.seq_number = 0;
+    
     /* to do the checksum stuff, we need to encode the message with a
        zero-length zero-type checksum, then checksum the encoding, then
        re-encode with the 

@@ -32,14 +32,5 @@ KRB5_KDC__REP2krb5_tgs_rep(val, error)
 const register struct type_KRB5_TGS__REP *val;
 register int *error;
 {
-    krb5_msgtype type;
-    register krb5_kdc_rep *retval;
-
-    retval = KRB5_KDC__REP2krb5_kdc_rep(val, &type, error);
-    if (retval && (type != KRB5_TGS_REP)) {
-	krb5_free_kdc_rep(retval);
-	*error = ISODE_50_LOCAL_ERR_BADMSGTYPE;
-	return 0;
-    }
-    return retval;
+    return KRB5_KDC__REP2krb5_kdc_rep(val, error);
 }

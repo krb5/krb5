@@ -27,7 +27,6 @@ krb5_enc_tkt_part **partto;
 {
     krb5_error_code retval;
     krb5_enc_tkt_part *tempto;
-    krb5_data *scratch;
 
     if (!(tempto = (krb5_enc_tkt_part *)malloc(sizeof(*tempto))))
 	return ENOMEM;
@@ -48,16 +47,20 @@ krb5_enc_tkt_part **partto;
 	xfree(tempto);
 	return retval;
     }
-    if (retval = krb5_copy_data(&partfrom->transited, &scratch)) {
+    tempto->transited = partfrom->transited;
+    tempto->transited.tr_contents.data =
+	malloc(sizeof(partfrom->transited.tr_contents.length));
+    if (!tempto->transited.tr_contents.data) {
 	krb5_free_principal(tempto->client);
 	krb5_free_keyblock(tempto->session);
 	xfree(tempto);
 	return retval;
     }
-    tempto->transited = *scratch;
-    xfree(scratch);
+    memcpy((char *)tempto->transited.tr_contents.data,
+	   (char *)partfrom->transited.tr_contents.data,
+	   partfrom->transited.tr_contents.length);
     if (retval = krb5_copy_addresses(partfrom->caddrs, &tempto->caddrs)) {
-	xfree(tempto->transited.data);
+	xfree(tempto->transited.tr_contents.data);
 	krb5_free_principal(tempto->client);
 	krb5_free_keyblock(tempto->session);
 	xfree(tempto);
@@ -67,7 +70,7 @@ krb5_enc_tkt_part **partto;
 	if (retval = krb5_copy_authdata(partfrom->authorization_data,
 					&tempto->authorization_data)) {
 	    krb5_free_address(tempto->caddrs);
-	    xfree(tempto->transited.data);
+	    xfree(tempto->transited.tr_contents.data);
 	    krb5_free_principal(tempto->client);
 	    krb5_free_keyblock(tempto->session);
 	    xfree(tempto);

@@ -33,9 +33,9 @@ krb5_error_code krb5_unlock_file
 		   char * ));
 krb5_error_code krb5_timeofday
 	PROTOTYPE((krb5_int32 * ));
-krb5_error_code krb5_ms_timeofday
+krb5_error_code krb5_us_timeofday
 	PROTOTYPE((krb5_int32 *,
-		   krb5_ui_2 * ));
+		   krb5_int32 * ));
 int krb5_net_read
 	PROTOTYPE((int ,
 		   char *,

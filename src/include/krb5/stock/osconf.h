@@ -44,7 +44,7 @@
 #define	DEFAULT_KDC_ETYPE	ETYPE_DES_CBC_CRC
 #define	DEFAULT_KDC_KEYTYPE	KEYTYPE_DES
 
-#define KDC_PORTNAME	"kerberos5"	/* for /etc/services or equiv. */
+#define KDC_PORTNAME	"kerberos"	/* for /etc/services or equiv. */
 
 #define MAX_DGRAM_SIZE	4096
 #define MAX_SKDC_TIMEOUT 30

@@ -67,6 +67,8 @@ OLDDECLARG(krb5_keyblock *,key)
 
 
     if (fromkeyboard) {
+	krb5_data scratch;
+
 	if (retval = krb5_read_password(krb5_mkey_pwd_prompt1,
 					twice ? krb5_mkey_pwd_prompt2 : 0,
 					password,
@@ -75,7 +77,10 @@ OLDDECLARG(krb5_keyblock *,key)
 
 	pwd.data = password;
 	pwd.length = size;
-	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd, mname);
+	if (retval = krb5_principal2salt(mname, &scratch))
+	    return retval;
+	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd, &scratch);
+	xfree(scratch.data);
 	memset(password, 0, sizeof(password)); /* erase it */
 	return retval;
 

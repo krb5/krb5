@@ -42,15 +42,19 @@ krb5_error_code
 krb5_mk_priv(DECLARG(const krb5_data *, userdata),
 	     DECLARG(const krb5_enctype, etype),
 	     DECLARG(const krb5_keyblock *, key),
-	     DECLARG(const krb5_fulladdr *, sender_addr),
-	     DECLARG(const krb5_fulladdr *, recv_addr),
+	     DECLARG(const krb5_address *, sender_addr),
+	     DECLARG(const krb5_address *, recv_addr),
+	     DECLARG(krb5_int32, seq_number),
+	     DECLARG(krb5_int32, priv_flags),
 	     DECLARG(krb5_pointer, i_vector),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, userdata)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_fulladdr *, sender_addr)
-OLDDECLARG(const krb5_fulladdr *, recv_addr)
+OLDDECLARG(const krb5_address *, sender_addr)
+OLDDECLARG(const krb5_address *, recv_addr)
+OLDDECLARG(krb5_int32, seq_number)
+OLDDECLARG(krb5_int32, priv_flags)
 OLDDECLARG(krb5_pointer, i_vector)
 OLDDECLARG(krb5_data *, outbuf)
 {
@@ -66,19 +70,21 @@ OLDDECLARG(krb5_data *, outbuf)
     privmsg.enc_part.kvno = 0;	/* XXX allow user-set? */
 
     privmsg_enc_part.user_data = *userdata;
-    privmsg_enc_part.s_address = sender_addr->address;
-    privmsg_enc_part.r_address = recv_addr->address;
-
-    if (retval = krb5_ms_timeofday(&privmsg_enc_part.timestamp,
-				   &privmsg_enc_part.msec))
-	return retval;
-
-    if (krb5_fulladdr_order(sender_addr, recv_addr) > 0)
-	privmsg_enc_part.msec =
-	    (privmsg_enc_part.msec & MSEC_VAL_MASK) | MSEC_DIRBIT;
+    privmsg_enc_part.s_address = (krb5_address *)sender_addr;
+    if (recv_addr)
+	privmsg_enc_part.r_address = (krb5_address *)recv_addr;
     else
-	/* this should be a no-op, but just to be sure... */
-	privmsg_enc_part.msec = privmsg_enc_part.msec & MSEC_VAL_MASK;
+	privmsg_enc_part.r_address = 0;
+
+    if (!(priv_flags & KRB5_PRIV_NOTIME)) {
+	if (retval = krb5_us_timeofday(&privmsg_enc_part.timestamp,
+				       &privmsg_enc_part.usec))
+	    return retval;
+    }
+    if (priv_flags & KRB5_PRIV_DOSEQUENCE) {
+	privmsg_enc_part.seq_number = seq_number;
+    } else
+	privmsg_enc_part.seq_number = 0;
 
     /* start by encoding to-be-encrypted part of the message */
 

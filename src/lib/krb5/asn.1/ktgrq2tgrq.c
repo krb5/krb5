@@ -33,7 +33,7 @@ const register krb5_kdc_req *val;
 register int *error;
 {
     register struct type_KRB5_KDC__REQ__BODY *retval;
-    
+
     retval = (struct type_KRB5_KDC__REQ__BODY *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
@@ -80,12 +80,22 @@ register int *error;
 	    goto errout;
 	}
     }
-    retval->ctime = unix2gentime(val->ctime, error);
-    if (!retval->ctime) {
-	goto errout;
-    }
     retval->nonce = val->nonce;
-    retval->etype = val->etype;
+    retval->etype = (struct element_KRB5_8 *)malloc(sizeof(*retval->etype)+
+						    max(0,val->netypes-1)*sizeof(integer));
+    if (!retval->etype)
+	goto errout;
+    
+#if 0
+    for (i = 0; i < val->netypes; i++) {
+	retval->etype->element_KRB5_9[i] = val->etype[i];
+    }
+    retval->etype->nelem = val->netypes;
+#else
+    /* XXX !@#*)@# busted ASN.1 compiler */
+    retval->etype->element_KRB5_9 = val->etype[0];
+    retval->etype->nelem = 1;
+#endif
  
     if (val->addresses) {
 	retval->addresses =
@@ -94,22 +104,22 @@ register int *error;
 	    goto errout;
 	}
     }
-    if (val->authorization_data) {
+    if (val->authorization_data.ciphertext.data) {
 	retval->authorization__data =
-	    krb5_authdata2KRB5_AuthorizationData(val->authorization_data,
+	    krb5_enc_data2KRB5_EncryptedData(&(val->authorization_data),
 						 error);
 	if (!retval->authorization__data)
 	    goto errout;
     }
     if (val->second_ticket) {
-	struct element_KRB5_6 *adtk;
+	struct element_KRB5_10 *adtk;
 	krb5_ticket * const *temp;
 	register int i;
 
 	/* count elements */
 	for (i = 0, temp = val->second_ticket; *temp; temp++,i++);
 
-	adtk = (struct element_KRB5_6 *)xmalloc(sizeof(*adtk) +
+	adtk = (struct element_KRB5_10 *)xmalloc(sizeof(*adtk) +
 						max(0,i-1)*sizeof(adtk->Ticket));
 	if (!adtk) {
 	    *error = ENOMEM;
@@ -131,8 +141,8 @@ register int *error;
 	}
 	retval->additional__tickets = adtk;
     } else {
-	struct element_KRB5_6 *adtk;
-	adtk = (struct element_KRB5_6 *)xmalloc(sizeof(*adtk));
+	struct element_KRB5_10 *adtk;
+	adtk = (struct element_KRB5_10 *)xmalloc(sizeof(*adtk));
 	if (!adtk) {
 	    *error = ENOMEM;
 	    goto errout;
@@ -160,16 +170,16 @@ register int *error;
     xbzero(retval, sizeof(*retval));
     retval->pvno = KRB5_PVNO;
     retval->msg__type = val->msg_type;
-    retval->padata__type = val->padata_type;
-    retval->padata = krb5_data2qbuf(&(val->padata));
-    if (!retval->padata) {
-	xfree(retval);
-	*error = ENOMEM;
-	return(0);
+    if (val->padata) {
+	retval->padata = krb5_pa_data2KRB5_PA__DATA(val->padata, error);
+	if (*error) {
+	    xfree(retval);
+	    return 0;
+	}
     }
     retval->req__body = krb5_kdc_req2KRB5_KDC__REQ__BODY(val, error);
     if (!retval->req__body) {
-	xfree(retval);
+	free_KRB5_TGS__REQ(retval);
 	return(0);
     }
     return(retval);

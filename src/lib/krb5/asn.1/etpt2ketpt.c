@@ -33,7 +33,7 @@ const register struct type_KRB5_EncTicketPart *val;
 register int *error;
 {
     register krb5_enc_tkt_part *retval;
-    krb5_data *temp;
+    krb5_transited *temp;
 
     retval = (krb5_enc_tkt_part *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -61,7 +61,8 @@ register int *error;
     if (!retval->client) {
 	goto errout;
     }
-    temp = qbuf2krb5_data(val->transited, error);
+
+    temp = KRB5_TransitedEncoding2krb5_transited(val->transited, error);
     if (temp) {
 	retval->transited = *temp;
 	xfree(temp);
@@ -73,10 +74,12 @@ register int *error;
     if (*error) {
 	goto errout;
     }	
-    retval->times.starttime = gentime2unix(val->starttime, error);
-    if (*error) {
-	goto errout;
-    }	
+    if (val->starttime) {
+	retval->times.starttime = gentime2unix(val->starttime, error);
+	if (*error) {
+	    goto errout;
+	}	
+    }
     retval->times.endtime = gentime2unix(val->endtime, error);
     if (*error) {
 	goto errout;

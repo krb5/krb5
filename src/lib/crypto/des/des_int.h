@@ -160,7 +160,7 @@ extern krb5_error_code mit_des_random_key
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
     PROTOTYPE((const krb5_keytype, krb5_keyblock *, const krb5_data *,
-	       krb5_const_principal ));
+	       const krb5_data *));
 
 /* weak_key.c */
 extern int mit_des_is_weak_key PROTOTYPE((mit_des_cblock ));

@@ -34,42 +34,74 @@ extern char *krb5_default_pwd_prompt1;
 static krb5_error_code
 pwd_keyproc(DECLARG(const krb5_keytype, type),
 	    DECLARG(krb5_keyblock **, key),
-	    DECLARG(krb5_const_pointer, keyseed))
+            DECLARG(krb5_const_pointer, keyseed),
+            DECLARG(krb5_pa_data **,padata))
 OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
 OLDDECLARG(krb5_const_pointer, keyseed)
+OLDDECLARG(krb5_pa_data **,padata)
 {
+    krb5_data salt;
     krb5_error_code retval;
-    struct pwd_keyproc_arg *arg, arg2;
+    const struct pwd_keyproc_arg *arg;
+    struct pwd_keyproc_arg arg2;
     char pwdbuf[BUFSIZ];
     int pwsize = sizeof(pwdbuf);
+    char f_salt = 0, use_salt = 0;
 
     if (!valid_keytype(type))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
-    arg = (struct pwd_keyproc_arg *)keyseed;
+    if (padata) {
+        krb5_pa_data **ptr;
+
+        for (ptr = padata; *ptr; ptr++)
+        {
+            if ((*ptr)->pa_type == KRB5_PADATA_PW_SALT)
+            {
+                /* use KDC-supplied salt, instead of default */
+                salt.length = (*ptr)->length;
+                salt.data = (char *)(*ptr)->contents;
+		use_salt = 1;
+                break;
+            }
+        }
+    }
+    arg = (const struct pwd_keyproc_arg *)keyseed;
+    if (!use_salt) {
+	/* need to use flattened principal */
+	if (retval = krb5_principal2salt(arg->who, &salt))
+	    return(retval);
+	f_salt = 1;
+    }
+
     if (!arg->password.length) {
 	if (retval = krb5_read_password(krb5_default_pwd_prompt1,
 					0,
-					pwdbuf, &pwsize))
+					pwdbuf, &pwsize)) {
+	    if (f_salt) xfree(salt.data);
 	    return retval;
+	}
 	arg2 = *arg;
+        arg2.password.length = pwsize;
+        arg2.password.data = pwdbuf;
 	arg = &arg2;
-	arg->password.length = pwsize;
-	arg->password.data = pwdbuf;
     }
     *key = (krb5_keyblock *)malloc(sizeof(**key));
-    if (!*key)
+    if (!*key) {
+	if (f_salt) xfree(salt.data);
 	return ENOMEM;
-    
+    }    
     if (retval = (*krb5_keytype_array[type]->system->
 		  string_to_key)(type,
 				 *key,
 				 &arg->password,
-				 arg->who)) {
+                                 &salt)) {
 	free((char *) *key);
+	if (f_salt) xfree(salt.data);
 	return(retval);
     }
+    if (f_salt) xfree(salt.data);
     return 0;
 }
 

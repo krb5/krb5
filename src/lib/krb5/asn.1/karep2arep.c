@@ -47,6 +47,17 @@ register int *error;
 	return(0);
     }
 
-    retval->cmsec = val->cmsec;
+    retval->cusec = val->cusec;
+    if (val->subkey) {
+	retval->subkey = krb5_keyblock2KRB5_EncryptionKey(val->subkey, error);
+	if (!retval->subkey) {
+	    free_KRB5_EncAPRepPart(retval);
+	    return 0;
+	}
+    }
+    if (val->seq_number) {
+	retval->seq__number = val->seq_number;
+	retval->optionals |= opt_KRB5_EncAPRepPart_seq__number;
+    }
     return(retval);
 }

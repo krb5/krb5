@@ -49,17 +49,21 @@ register int *error;
 	xfree(retval);
 	return(0);
     }
-
-    retval->checksum = KRB5_Checksum2krb5_checksum(val->cksum, error);
-    if (!retval->checksum) {
-	krb5_free_authenticator(retval);
-	return(0);
+    if (val->cksum) {
+	retval->checksum = KRB5_Checksum2krb5_checksum(val->cksum, error);
+	if (!retval->checksum) {
+	    krb5_free_authenticator(retval);
+	    return(0);
+	}
     }
-    retval->cmsec = val->cmsec;
+    retval->cusec = val->cusec;
     retval->ctime = gentime2unix(val->ctime, error);
     if (*error) {
 	krb5_free_authenticator(retval);
 	return(0);
+    }
+    if (val->optionals & opt_KRB5_Authenticator_seq__number) {
+	retval->seq_number = val->seq__number;
     }
     return(retval);
 }

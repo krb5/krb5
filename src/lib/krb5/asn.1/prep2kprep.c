@@ -50,20 +50,33 @@ register int *error;
 	xfree(retval);
 	return(0);
     }
-    retval->timestamp = gentime2unix(val->timestamp, error);
-    if (*error) {
-    errout:
-	krb5_free_priv_enc_part(retval);
-	return(0);
+    if (val->timestamp) {
+	if (!(val->optionals & opt_KRB5_EncKrbPrivPart_usec)) {
+	    /* must have usec if we have timestamp */
+	    *error = ISODE_50_LOCAL_ERR_BADCOMBO;
+	    goto errout;
+	}
+
+	retval->timestamp = gentime2unix(val->timestamp, error);
+	if (*error) {
+	errout:
+	    krb5_free_priv_enc_part(retval);
+	    return(0);
+	}
+	retval->usec = val->usec;
     }
-    retval->msec = val->msec;
     retval->s_address = KRB5_HostAddress2krb5_addr(val->s__address, error);
     if (!retval->s_address) {
 	goto errout;
     }
-    retval->r_address = KRB5_HostAddress2krb5_addr(val->r__address, error);
-    if (!retval->r_address) {
-	goto errout;
+    if (val->r__address) {
+	retval->r_address = KRB5_HostAddress2krb5_addr(val->r__address, error);
+	if (!retval->r_address) {
+	    goto errout;
+	}
+    }
+    if (val->optionals & opt_KRB5_EncKrbPrivPart_seq__number) {
+	retval->seq_number = val->seq__number;
     }
     return(retval);
 }

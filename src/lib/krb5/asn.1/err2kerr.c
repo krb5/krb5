@@ -51,16 +51,16 @@ register int *error;
 	    return(0);
 	}	
     }
-    if (val->optionals & opt_KRB5_KRB__ERROR_cmsec)
-	retval->cmsec = val->cmsec;
+    if (val->optionals & opt_KRB5_KRB__ERROR_cusec)
+	retval->cusec = val->cusec;
     else
-	retval->cmsec = 0;
+	retval->cusec = 0;
 
     retval->stime = gentime2unix(val->stime, error);
     if (*error) {
 	goto errout;
     }	
-    retval->smsec = val->smsec;
+    retval->susec = val->susec;
     retval->error = val->error__code;
     if (val->crealm && val->cname) {
 	retval->client = KRB5_PrincipalName2krb5_principal(val->cname,

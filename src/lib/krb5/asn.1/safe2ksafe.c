@@ -42,7 +42,7 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    temp = qbuf2krb5_data(val->user__data, error);
+    temp = qbuf2krb5_data(val->safe__body->user__data, error);
     if (temp) {
 	retval->user_data = *temp;
 	xfree(temp);
@@ -50,24 +50,39 @@ register int *error;
 	xfree(retval);
 	return(0);
     }
-    retval->timestamp = gentime2unix(val->timestamp, error);
-    if (*error) {
-    errout:
-	krb5_free_safe(retval);
-	return(0);
+    if (val->safe__body->timestamp) {
+	if (!(val->safe__body->optionals & opt_KRB5_KRB__SAFE__BODY_usec)) {
+	    /* must have usec if we have timestamp */
+	    *error = ISODE_50_LOCAL_ERR_BADCOMBO;
+	    goto errout;
+	}
+	retval->timestamp = gentime2unix(val->safe__body->timestamp, error);
+	if (*error) {
+	errout:
+	    krb5_free_safe(retval);
+	    return(0);
+	}
+	retval->usec = val->safe__body->usec;
     }
-    retval->msec = val->msec;
-    retval->s_address = KRB5_HostAddress2krb5_addr(val->s__address, error);
+    retval->s_address = KRB5_HostAddress2krb5_addr(val->safe__body->s__address,
+						   error);
     if (!retval->s_address) {
 	goto errout;
     }
-    retval->r_address = KRB5_HostAddress2krb5_addr(val->r__address, error);
-    if (!retval->r_address) {
-	goto errout;
+    if (val->safe__body->r__address) {
+	retval->r_address =
+	    KRB5_HostAddress2krb5_addr(val->safe__body->r__address, error);
+	if (!retval->r_address) {
+	    goto errout;
+	}
     }
-    retval->checksum = KRB5_Checksum2krb5_checksum(val->cksum, error);
+    retval->checksum = KRB5_Checksum2krb5_checksum(val->cksum,
+						   error);
     if (!retval->checksum) {
 	goto errout;
+    }
+    if (val->safe__body->optionals & opt_KRB5_KRB__SAFE__BODY_seq__number) {
+	retval->seq_number = val->safe__body->seq__number;
     }
     return(retval);
 }

@@ -49,14 +49,18 @@ Returns system errors, integrity errors.
 krb5_error_code
 krb5_rd_priv(DECLARG(const krb5_data *, inbuf),
 	     DECLARG(const krb5_keyblock *, key),
-	     DECLARG(const krb5_fulladdr *, sender_addr),
-	     DECLARG(const krb5_fulladdr *, recv_addr),
+	     DECLARG(const krb5_address *, sender_addr),
+	     DECLARG(const krb5_address *, recv_addr),
+	     DECLARG(krb5_int32, seq_number),
+	     DECLARG(krb5_int32, priv_flags),
 	     DECLARG(krb5_pointer, i_vector),
 	     DECLARG(krb5_data *, outbuf))
 OLDDECLARG(const krb5_data *, inbuf)
 OLDDECLARG(const krb5_keyblock *, key)
-OLDDECLARG(const krb5_fulladdr *, sender_addr)
-OLDDECLARG(const krb5_fulladdr *, recv_addr)
+OLDDECLARG(const krb5_address *, sender_addr)
+OLDDECLARG(const krb5_address *, recv_addr)
+OLDDECLARG(krb5_int32, seq_number)
+OLDDECLARG(krb5_int32, priv_flags)
 OLDDECLARG(krb5_pointer, i_vector)
 OLDDECLARG(krb5_data *, outbuf)
 {
@@ -66,7 +70,6 @@ OLDDECLARG(krb5_data *, outbuf)
     krb5_priv_enc_part *privmsg_enc_part;
     krb5_data scratch;
     krb5_timestamp currenttime;
-    krb5_ui_2 computed_direction;
 
     if (!krb5_is_krb_priv(inbuf))
 	return KRB5KRB_AP_ERR_MSG_TYPE;
@@ -142,25 +145,28 @@ OLDDECLARG(krb5_data *, outbuf)
 #define cleanup_data() {(void)memset(privmsg_enc_part->user_data.data,0,privmsg_enc_part->user_data.length); (void)xfree(privmsg_enc_part->user_data.data);}
 #define cleanup_mesg() {(void)xfree(privmsg_enc_part);}
 
-    if (retval = krb5_timeofday(&currenttime)) {
-	cleanup_data();
-	cleanup_mesg();
-	return retval;
+    if (!(priv_flags & KRB5_PRIV_NOTIME)) {
+	if (retval = krb5_timeofday(&currenttime)) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return retval;
+	}
+	if (!in_clock_skew(privmsg_enc_part->timestamp)) {
+	    cleanup_data();
+	    cleanup_mesg();  
+	    return KRB5KRB_AP_ERR_SKEW;
+	}
+	/* replay detection goes here... XXX */
     }
-    if (!in_clock_skew(privmsg_enc_part->timestamp)) {
-	cleanup_data();
-	cleanup_mesg();  
-	return KRB5KRB_AP_ERR_SKEW;
-    }
 
-    /* 
-     * check with the replay cache should be inserted here !!!! 
-     */
+    if (priv_flags & KRB5_PRIV_DOSEQUENCE)
+	if (privmsg_enc_part->seq_number != seq_number) {
+	    cleanup_data();
+	    cleanup_mesg();
+	    return KRB5KRB_AP_ERR_BADSEQ;
+	}
 
-
-    if (sender_addr) {
-	krb5_fulladdr temp_sender;
-	krb5_fulladdr temp_recip;
+    if (privmsg_enc_part->r_address) {
 	krb5_address **our_addrs;
 	
 	if (retval = krb5_os_localaddr(&our_addrs)) {
@@ -175,21 +181,8 @@ OLDDECLARG(krb5_data *, outbuf)
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
 	krb5_free_address(our_addrs);
-
-	temp_recip = *recv_addr;
-	temp_recip.address = privmsg_enc_part->r_address;
-
-	temp_sender = *sender_addr;
-	temp_sender.address = privmsg_enc_part->s_address;
-
-	computed_direction = ((krb5_fulladdr_order(&temp_sender, &temp_recip) >
-			       0) ? MSEC_DIRBIT : 0); 
-	if (computed_direction != (privmsg_enc_part->msec & MSEC_DIRBIT)) {
-	    cleanup_data();
-	    cleanup_mesg();
-	    return KRB5KRB_AP_ERR_BADDIRECTION;
-	}
     }
+    /* XXX check sender's address */
 
     /* everything is ok - return data to the user */
 

@@ -27,6 +27,8 @@ krb5_authenticator *val;
 	xfree(val->checksum);
     if (val->client)
 	krb5_free_principal(val->client);
+    if (val->subkey)
+	krb5_free_keyblock(val->subkey);
     xfree(val);
     return;
 }

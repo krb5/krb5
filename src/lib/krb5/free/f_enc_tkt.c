@@ -27,8 +27,8 @@ krb5_enc_tkt_part *val;
 	krb5_free_keyblock(val->session);
     if (val->client)
 	krb5_free_principal(val->client);
-    if (val->transited.data)
-	xfree(val->transited.data);
+    if (val->transited.tr_contents.data)
+	xfree(val->transited.tr_contents.data);
     if (val->caddrs)
 	krb5_free_address(val->caddrs);
     if (val->authorization_data)

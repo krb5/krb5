@@ -28,10 +28,8 @@ static char rcsid_kkdcr2kdcr_c[] =
 
 struct type_KRB5_TGS__REP *
 krb5_kdc_rep2KRB5_KDC__REP(DECLARG(const register krb5_kdc_rep *,val),
-			   DECLARG(const krb5_msgtype, type),
 			   DECLARG(register int *,error))
 OLDDECLARG(const register krb5_kdc_rep *,val)
-OLDDECLARG(const krb5_msgtype, type)
 OLDDECLARG(register int *,error)
 {
     register struct type_KRB5_TGS__REP *retval;
@@ -44,7 +42,14 @@ OLDDECLARG(register int *,error)
     xbzero(retval, sizeof(*retval));
 
     retval->pvno = KRB5_PVNO;
-    retval->msg__type = type;
+    retval->msg__type = val->msg_type;
+
+    if (val->padata) {
+	retval->padata = krb5_pa_data2KRB5_PA__DATA(val->padata, error);
+	if (*error) {
+	    goto errout;
+	}
+    }
 
     retval->crealm = krb5_data2qbuf(val->client[0]);
     if (!retval->crealm) {

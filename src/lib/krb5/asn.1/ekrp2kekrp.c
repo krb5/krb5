@@ -84,14 +84,16 @@ register int *error;
 	}
     }
     retval->server = KRB5_PrincipalName2krb5_principal(val->sname,
-						       val->realm,
+						       val->srealm,
 						       error);
     if (!retval->server) {
 	goto errout;
     }
-    retval->caddrs = KRB5_HostAddresses2krb5_address(val->caddr, error);
-    if (!retval->caddrs) {
-	goto errout;
+    if (val->caddr) {
+	retval->caddrs = KRB5_HostAddresses2krb5_address(val->caddr, error);
+	if (!retval->caddrs) {
+	    goto errout;
+	}
     }
     return(retval);
 }

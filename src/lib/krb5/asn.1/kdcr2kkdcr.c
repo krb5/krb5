@@ -28,9 +28,8 @@ static char rcsid_kdcr2kkdcr_c[] =
 /* ISODE defines max(a,b) */
 
 krb5_kdc_rep *
-KRB5_KDC__REP2krb5_kdc_rep(val, type, error)
+KRB5_KDC__REP2krb5_kdc_rep(val, error)
 const register struct type_KRB5_TGS__REP *val;
-krb5_msgtype *type;
 register int *error;
 {
     register krb5_kdc_rep *retval;
@@ -43,8 +42,16 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    *type = val->msg__type;
+    retval->msg_type = val->msg__type;
 
+    if (val->padata) {
+	retval->padata = KRB5_PA__DATA2krb5_pa_data(val->padata, error);
+	if (*error) {
+	    xfree(retval);
+	    return 0;
+
+	}
+    }
     retval->client = KRB5_PrincipalName2krb5_principal(val->cname,
 						       val->crealm,
 						       error);

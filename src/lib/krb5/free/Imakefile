@@ -14,6 +14,7 @@ OBJS=	\
 	f_address.o	\
 	f_ap_rep.o	\
 	f_ap_req.o	\
+	f_arep_enc.o	\
 	f_authdata.o	\
 	f_authent.o	\
 	f_cksum.o	\
@@ -26,6 +27,7 @@ OBJS=	\
 	f_kdc_req.o	\
 	f_keyblock.o	\
 	f_last_req.o	\
+	f_padata.o	\
 	f_princ.o	\
 	f_priv.o	\
 	f_priv_enc.o	\
@@ -37,6 +39,7 @@ OBJS=	\
 SRCS=	\
 	f_addr.c	\
 	f_address.c	\
+	f_arep_enc.c	\
 	f_ap_rep.c	\
 	f_ap_req.c	\
 	f_authdata.c	\
@@ -51,6 +54,7 @@ SRCS=	\
 	f_kdc_req.c	\
 	f_keyblock.c	\
 	f_last_req.c	\
+	f_padata.c	\
 	f_princ.c	\
 	f_priv.c	\
 	f_priv_enc.c	\

@@ -21,6 +21,4 @@
 
 #define krb5_free_data(val) { xfree((val)->data); xfree(val);}
 
-#define krb5_free_ap_rep_enc_part xfree
-
 #endif /* KRB5_FREE__ */

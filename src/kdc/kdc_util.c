@@ -132,12 +132,22 @@ krb5_ticket **ticket;
     struct kparg who;
     krb5_error_code retval;
     krb5_checksum our_cksum;
-    krb5_data *scratch;
+    krb5_data *scratch, scratch2;
+    krb5_pa_data **tmppa;
 
-    if (request->padata_type != KRB5_PADATA_AP_REQ)
+    if (!request->padata)
+	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+    for (tmppa = request->padata; *tmppa; tmppa++) {
+	if ((*tmppa)->pa_type == KRB5_PADATA_AP_REQ)
+	    break;
+    }
+    if (!*tmppa)			/* cannot find any AP_REQ */
 	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
 
-    if (retval = decode_krb5_ap_req(&request->padata, &apreq))
+    scratch2.length = (*tmppa)->length;
+    scratch2.data = (char *)(*tmppa)->contents;
+
+    if (retval = decode_krb5_ap_req(&scratch2, &apreq))
 	return retval;
 
 #define cleanup_apreq() {krb5_free_ap_req(apreq); *ticket = 0;}
@@ -163,7 +173,8 @@ krb5_ticket **ticket;
 	return KRB5KDC_ERR_POLICY;
     }
 
-    /* XXX perhaps we should optimize the case of the TGS ? */
+    /* XXX perhaps we should optimize the case of the TGS, by having
+       the key always hanging around? */
 
     nprincs = 1;
     if (retval = krb5_db_get_principal(apreq->ticket->server,

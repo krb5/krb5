@@ -55,18 +55,20 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_ticket ticket_reply, *header_ticket;
     int st_idx = 0;
     krb5_enc_tkt_part enc_tkt_reply;
-    krb5_data enc_tkt_transited;
+    krb5_transited enc_tkt_transited;
+    int newtransited = 0;
     krb5_error_code retval;
     int nprincs;
     krb5_boolean more;
     krb5_timestamp kdc_time;
     krb5_keyblock *session_key;
-    int newtransited = 0;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;
     char *cname = 0, *sname = 0, *fromstring = 0;
     krb5_last_req_entry *nolrarray[1];
     krb5_address *noaddrarray[1];
+    krb5_enctype useetype;
+    register int i;
 
     if ((retval = kdc_process_tgs_req(request, from, &header_ticket))) {
 	if (!header_ticket || !header_ticket->enc_part2)
@@ -130,14 +132,19 @@ krb5_data **response;			/* filled in with a response packet */
 				 response));
     }
 
-#define cleanup() { krb5_free_ticket(header_ticket); krb5_db_free_principal(&server, 1);}
+#define tkt_cleanup() {krb5_free_ticket(header_ticket); }
+#define cleanup() { krb5_db_free_principal(&server, 1);}
 
     if (retval = krb5_timeofday(&kdc_time)) {
+	tkt_cleanup();
 	cleanup();
 	return(retval);
     }
     
-    if (!valid_etype(request->etype)) {
+    for (i = 0; i < request->netypes; i++)
+	if (valid_etype(request->etype[i]))
+	    break;
+    if (i == request->netypes) {
 	/* unsupported etype */
 
 	cleanup();
@@ -145,6 +152,7 @@ krb5_data **response;			/* filled in with a response packet */
 				 header_ticket,
 				 KDC_ERR_ETYPE_NOSUPP, response));
     }
+    useetype = request->etype[i];
 
     if (isflagset(request->kdc_options, KDC_OPT_REUSE_SKEY)) {
 	/* decrypt second ticket, and examine */
@@ -165,23 +173,23 @@ krb5_data **response;			/* filled in with a response packet */
 	session_key = request->second_ticket[st_idx]->enc_part2->session;
 	st_idx++;
     } else {
-	if (retval = (*(krb5_csarray[request->etype]->system->random_key))(krb5_csarray[request->etype]->random_sequence, &session_key)) {
+	if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
 	    /* random key failed */
+	    tkt_cleanup();
 	    cleanup();
 	    return(retval);
 	}
     }
 
 #undef cleanup
-#define cleanup() { krb5_free_ticket(header_ticket); \
-		   krb5_db_free_principal(&server, 1); \
+#define cleanup() { krb5_db_free_principal(&server, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
 		   free((char *)session_key->contents); \
 		   session_key->contents = 0; }
 
     ticket_reply.server = request->server; /* XXX careful for realm... */
-    ticket_reply.enc_part.etype = request->etype;
+    ticket_reply.enc_part.etype = useetype;
     ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
@@ -333,21 +341,83 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.times.renew_till = 0; /* XXX */
     }
 
+    /* starttime is optional, and treated as authtime if not present.
+       so we can nuke it if it matches */
+    if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
+	enc_tkt_reply.times.starttime = 0;
+
     /* assemble any authorization data */
-    if (request->authorization_data) {
+    if (request->authorization_data.ciphertext.data) {
+	krb5_encrypt_block eblock;
+	krb5_data scratch;
+
+	/* decrypt the authdata in the request */
+	if (!valid_etype(request->authorization_data.etype)) {
+	    cleanup();
+	    return prepare_error_tgs(request, header_ticket,
+				     KDC_ERR_ETYPE_NOSUPP, response);
+	}
+	/* put together an eblock for this encryption */
+
+	krb5_use_cstype(&eblock, request->authorization_data.etype);
+
+	scratch.length = request->authorization_data.ciphertext.length;
+	if (!(scratch.data =
+	      malloc(request->authorization_data.ciphertext.length))) {
+	    tkt_cleanup();
+	    cleanup();
+	    return(ENOMEM);
+	}
+	/* do any necessary key pre-processing */
+	if (retval = krb5_process_key(&eblock,
+				      header_ticket->enc_part2->session)) {
+	    free(scratch.data);
+	    tkt_cleanup();
+	    cleanup();
+	    return(retval);
+	}
+
+	/* call the encryption routine */
+	if (retval = krb5_decrypt((krb5_pointer) request->authorization_data.ciphertext.data,
+				  (krb5_pointer) scratch.data,
+				  scratch.length, &eblock, 0)) {
+	    (void) krb5_finish_key(&eblock);
+	    free(scratch.data);
+	    tkt_cleanup();
+	    cleanup();
+	    return retval;
+	}
+	if (retval = krb5_finish_key(&eblock)) {
+	    free(scratch.data);
+	    tkt_cleanup();
+	    cleanup();
+	    return retval;
+	}
+	/* scratch now has the authorization data, so we decode it */
+	retval = decode_krb5_authdata(&scratch, request->unenc_authdata);
+	free(scratch.data);
+	if (retval) {
+	    tkt_cleanup();
+	    cleanup();
+	    return retval;
+	}
+
 	if (retval =
-	    concat_authorization_data(request->authorization_data,
+	    concat_authorization_data(request->unenc_authdata,
 				      header_ticket->enc_part2->authorization_data, 
 				      &enc_tkt_reply.authorization_data)) {
+	    tkt_cleanup();
 	    cleanup();
 	    return retval;
 	}
     } else
 	enc_tkt_reply.authorization_data =
 	    header_ticket->enc_part2->authorization_data;
+
     enc_tkt_reply.session = session_key;
     enc_tkt_reply.client = header_ticket->enc_part2->client;
-    enc_tkt_reply.transited = empty_string; /* equivalent of "" */
+    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
 
     /* realm compare is like strcmp, but knows how to deal with these args */
     if (realm_compare(realm_of_tgt(header_ticket),
@@ -356,28 +426,35 @@ krb5_data **response;			/* filled in with a response packet */
 	enc_tkt_reply.transited = header_ticket->enc_part2->transited;
     } else {
 	/* assemble new transited field into allocated storage */
-	enc_tkt_transited.data = 0;
-	enc_tkt_transited.length = 0;
+	if (header_ticket->enc_part2->transited.tr_type !=
+	    KRB5_DOMAIN_X500_COMPRESS) {
+	    tkt_cleanup();
+	    cleanup();
+	    return KRB5KDC_ERR_TRTYPE_NOSUPP;
+	}
+	enc_tkt_transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+	enc_tkt_transited.tr_contents.data = 0;
+	enc_tkt_transited.tr_contents.length = 0;
 	enc_tkt_reply.transited = enc_tkt_transited;
 	if (retval =
-	    add_to_transited(&header_ticket->enc_part2->transited,
-			       &enc_tkt_reply.transited,
+	    add_to_transited(&header_ticket->enc_part2->transited.tr_contents,
+			       &enc_tkt_reply.transited.tr_contents,
 			       header_ticket->server,
 			       enc_tkt_reply.client,
 			       request->server)) {
+	    tkt_cleanup();
 	    cleanup();
 	    return retval;
 	}
 	newtransited = 1;
     }
 #undef cleanup
-#define cleanup() { krb5_free_ticket(header_ticket); \
-		   krb5_db_free_principal(&server, 1); \
+#define cleanup() { krb5_db_free_principal(&server, 1); \
 		   memset((char *)session_key->contents, 0, \
 			  session_key->length); \
 		   free((char *)session_key->contents); \
 		   session_key->contents = 0; \
-		   if (newtransited) free(enc_tkt_reply.transited.data);}
+		   if (newtransited) free(enc_tkt_reply.transited.tr_contents.data);}
 
     ticket_reply.enc_part2 = &enc_tkt_reply;
 
@@ -391,6 +468,7 @@ krb5_data **response;			/* filled in with a response packet */
 	    }
 	if (retval = krb5_encrypt_tkt_part(request->second_ticket[st_idx]->enc_part2->session,
 					   &ticket_reply)) {
+	    tkt_cleanup();
 	    cleanup();
 	    return retval;
 	}
@@ -399,6 +477,7 @@ krb5_data **response;			/* filled in with a response packet */
 	/* convert server.key into a real key (it may be encrypted
 	   in the database) */
 	if (retval = KDB_CONVERT_KEY_OUTOF_DB(&server.key, &encrypting_key)) {
+	    tkt_cleanup();
 	    cleanup();
 	    return retval;
 	}
@@ -409,27 +488,30 @@ krb5_data **response;			/* filled in with a response packet */
 	free((char *)encrypting_key.contents);
 
 	if (retval) {
+	    tkt_cleanup();
 	    cleanup();
 	    return retval;
 	}
     }
 
     if (newtransited)
-	free(enc_tkt_reply.transited.data);
+	free(enc_tkt_reply.transited.tr_contents.data);
     krb5_db_free_principal(&server, 1);
 
 #undef cleanup
 
     /* Start assembling the response */
+    reply.msg_type = KRB5_TGS_REP;
+    reply.padata = 0;		/* always */
     reply.client = header_ticket->enc_part2->client;
-    reply.enc_part.etype = request->etype;
+    reply.enc_part.etype = useetype;
     reply.enc_part.kvno = 0;		/* We are using the session key */
     reply.ticket = &ticket_reply;
 
     reply_encpart.session = session_key;
     reply_encpart.nonce = request->nonce;
 
-    /* copy the time fields EXCEPT for authtime; it's location
+    /* copy the time fields EXCEPT for authtime; its location
        is used for ktime */
     reply_encpart.times = enc_tkt_reply.times;
     reply_encpart.times.authtime = kdc_time;
@@ -446,6 +528,7 @@ krb5_data **response;			/* filled in with a response packet */
 				 &reply, response);
     memset((char *)session_key->contents, 0, session_key->length);
     free((char *)session_key->contents);
+    tkt_cleanup();
     session_key->contents = 0;
     return retval;
 }
@@ -461,10 +544,10 @@ krb5_data **response;
     krb5_error_code retval;
     krb5_data *scratch;
 
-    errpkt.ctime = request->ctime;
-    errpkt.cmsec = 0;
+    errpkt.ctime = request->nonce;
+    errpkt.cusec = 0;
 
-    if (retval = krb5_ms_timeofday(&errpkt.stime, &errpkt.smsec)) {
+    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec)) {
 	krb5_free_ticket(ticket);
 	return(retval);
     }

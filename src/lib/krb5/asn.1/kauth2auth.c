@@ -41,32 +41,32 @@ register int *error;
     }
 
     xbzero(retval, sizeof(*retval));
-    retval->authenticator__vno = (struct type_KRB5_AuthenticatorVersion *)
-	xmalloc(sizeof(*retval->authenticator__vno));
-    if (!retval->authenticator__vno) {
+    retval->authenticator__vno = KRB5_PVNO;
+    retval->crealm = krb5_data2qbuf(val->client[0]);
+    if (!retval->crealm) {
 	*error = ENOMEM;
     errout:
 	free_KRB5_Authenticator(retval);
 	return(0);
     }
-    retval->authenticator__vno->parm = KRB5_PVNO;
-    retval->crealm = krb5_data2qbuf(val->client[0]);
-    if (!retval->crealm) {
-	*error = ENOMEM;
-	goto errout;
-    }
     retval->cname = krb5_principal2KRB5_PrincipalName(val->client, error);
     if (!retval->cname) {
 	goto errout;
     }
-    retval->cksum = krb5_checksum2KRB5_Checksum(val->checksum, error);
-    if (!retval->cksum) {
-	goto errout;
+    if (val->checksum) {
+	retval->cksum = krb5_checksum2KRB5_Checksum(val->checksum, error);
+	if (!retval->cksum) {
+	    goto errout;
+	}
     }
-    retval->cmsec = val->cmsec;
+    retval->cusec = val->cusec;
     retval->ctime = unix2gentime(val->ctime, error);
     if (!retval->ctime) {
 	goto errout;
+    }
+    if (val->seq_number) {
+	retval->seq__number = val->seq_number;
+	retval->optionals |= opt_KRB5_Authenticator_seq__number;
     }
     return(retval);
 }

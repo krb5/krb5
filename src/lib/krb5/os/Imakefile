@@ -22,7 +22,6 @@ OBJS= \
 	localaddr.o	\
 	locate_kdc.o	\
 	lock_file.o	\
-	mstime.o	\
 	net_read.o	\
 	net_write.o	\
 	osconfig.o	\
@@ -30,7 +29,8 @@ OBJS= \
 	read_pwd.o	\
 	sendto_kdc.o	\
 	timeofday.o	\
-	unlck_file.o
+	unlck_file.o	\
+	ustime.o
 
 SRCS= \
 	an_to_ln.c	\
@@ -45,7 +45,6 @@ SRCS= \
 	localaddr.c	\
 	locate_kdc.c	\
 	lock_file.c	\
-	mstime.c	\
 	net_read.c	\
 	net_write.c	\
 	osconfig.c	\
@@ -53,6 +52,8 @@ SRCS= \
 	rnd_confoun.c	\
 	sendto_kdc.c	\
 	timeofday.c	\
-	unlck_file.c
+	unlck_file.c	\
+	ustime.c
+
 
 NormalLibraryTarget(os,${OBJS})

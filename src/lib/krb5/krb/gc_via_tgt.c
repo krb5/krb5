@@ -66,6 +66,7 @@ OLDDECLARG(krb5_creds *, cred)
 			       cred->server,
 			       tgt->addresses,
 			       cred->authdata,
+			       0,		/* no padata */
 			       0,		/* no second ticket */
 			       tgt, &tgsrep))
 	return retval;
@@ -116,6 +117,12 @@ OLDDECLARG(krb5_creds *, cred)
 	      dec_rep->enc_part2->session->length);\
 		  krb5_free_kdc_rep(dec_rep); }
 
+    if (dec_rep->msg_type != KRB5_TGS_REP) {
+	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	cleanup();
+	return retval;
+    }
+    
     /* now it's decrypted and ready for prime time */
 
     if (!krb5_principal_compare(dec_rep->client, tgt->client)) {

@@ -47,20 +47,29 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    retval->timestamp = unix2gentime(val->timestamp, error);
-    if (!retval->timestamp) {
-    errout:
-	free_KRB5_EncKrbPrivPart(retval);
-	return(0);
+    if (val->timestamp) {
+	retval->timestamp = unix2gentime(val->timestamp, error);
+	if (!retval->timestamp) {
+	errout:
+	    free_KRB5_EncKrbPrivPart(retval);
+	    return(0);
+	}
+	retval->usec = val->usec;
+	retval->optionals |= opt_KRB5_EncKrbPrivPart_usec;
     }
-    retval->msec = val->msec;
     retval->s__address = krb5_addr2KRB5_HostAddress(val->s_address, error);
     if (!retval->s__address) {
 	goto errout;
     }
-    retval->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
-    if (!retval->r__address) {
-	goto errout;
+    if (val->r_address) {
+	retval->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
+	if (!retval->r__address) {
+	    goto errout;
+	}
+    }
+    if (val->seq_number) {
+	retval->seq__number = val->seq_number;
+	retval->optionals |= opt_KRB5_EncKrbPrivPart_seq__number;
     }
     return(retval);
 }

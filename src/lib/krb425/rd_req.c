@@ -144,7 +144,7 @@ char *fn;
 		goto out;
 	} else
 		memcpy((char*)ad->session,
-		       authd.ticket->enc_part2->session->contents,
+		       (char*)authd.ticket->enc_part2->session->contents,
 		       sizeof(C_Block));
 
 	ad->life = authd.ticket->enc_part2->times.endtime;
@@ -155,14 +155,14 @@ char *fn;
 		r = KFAILURE;
 		goto out;
 	} else
-		memcpy((char *)&ad->address + sizeof(ad->address) - 4,
-		       authd.ticket->enc_part2->caddrs[0]->contents, 4);
+		memcpy((char*)&ad->address + sizeof(ad->address) - 4,
+		       (char*)authd.ticket->enc_part2->caddrs[0]->contents, 4);
 
 	if (authd.ticket->enc_part2->authorization_data &&
 	    authd.ticket->enc_part2->authorization_data[0]) {
 		ad->reply.length = authd.ticket->enc_part2->authorization_data[0]->length;
-		memcpy(ad->reply.dat,
-		       authd.ticket->enc_part2->authorization_data[0]->contents,
+		memcpy((char*)ad->reply.dat,
+		       (char*)authd.ticket->enc_part2->authorization_data[0]->contents,
 		       min(ad->reply.length, MAX_KTXT_LEN));
 		ad->reply.mbz = 0;
 	}

@@ -81,11 +81,10 @@ krb5_tkt_authent *tktauthent;
     krb5_error_code retval;
     krb5_keyblock *tkt_key;
     krb5_keyblock tkt_key_real;
-    krb5_timestamp currenttime;
+    krb5_timestamp currenttime, starttime;
 
 
-    if ((server != NULL) &&
-	(!krb5_principal_compare(server, req->ticket->server)))
+    if (server && !krb5_principal_compare(server, req->ticket->server))
 	return KRB5KRB_AP_WRONG_PRINC;
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
@@ -162,7 +161,14 @@ krb5_tkt_authent *tktauthent;
 	return retval;
     }
     tktauthent->ticket = 0;
-    if (req->ticket->enc_part2->times.starttime - currenttime > krb5_clockskew) {
+
+    /* if starttime is not in ticket, then treat it as authtime */
+    if (req->ticket->enc_part2->times.starttime != 0)
+	starttime = req->ticket->enc_part2->times.starttime;
+    else
+	starttime = req->ticket->enc_part2->times.authtime;
+
+    if (starttime - currenttime > krb5_clockskew) {
 	clean_authenticator();
 	return KRB5KRB_AP_ERR_TKT_NYV;	/* ticket not yet valid */
     }	

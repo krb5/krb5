@@ -26,6 +26,9 @@ static char rcsid_tgrq2ktgrq_c[] =
 #include <krb5/ext-proto.h>
 
 /* ISODE defines max(a,b) */
+#ifndef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#endif
 
 krb5_kdc_req *
 KRB5_KDC__REQ__BODY2krb5_kdc_req(val, error)
@@ -33,6 +36,7 @@ const register struct type_KRB5_KDC__REQ__BODY *val;
 register int *error;
 {
     register krb5_kdc_req *retval;
+    krb5_enc_data *temp;
 
     retval = (krb5_kdc_req *)xmalloc(sizeof(*retval));
     if (!retval) {
@@ -74,14 +78,21 @@ register int *error;
 	    goto errout;
 	}
     }
-    retval->ctime = gentime2unix(val->ctime, error);
-    if (*error) {
-	goto errout;
-    }
     retval->nonce = val->nonce;
 
-    retval->etype = val->etype;
-
+    retval->etype = (krb5_enctype *) xmalloc(sizeof(*(retval->etype))*min(1,val->etype->nelem));
+    if (!retval->etype)
+	goto errout;
+#if 0
+    for (i = 0; i < val->etype->nelem; i++) {
+	retval->etype[i] = val->etype->element_KRB5_9[i];
+    }
+    val->netypes = val->etype->nelem;
+#else
+    /* XXX @#$#@ broken ASN.1 compiler */
+    retval->etype[0] = val->etype->element_KRB5_9;
+    retval->netypes = 1;
+#endif
 
     if (val->addresses) {
 	retval->addresses =
@@ -91,16 +102,17 @@ register int *error;
 	}
     }
     if (val->authorization__data) {
-	retval->authorization_data =
-	    KRB5_AuthorizationData2krb5_authdata(val->
-						 authorization__data,
-						 error);
-	if (*error)
+	temp = KRB5_EncryptedData2krb5_enc_data(val->authorization__data,
+						error);
+	if (temp) {
+	    retval->authorization_data = *temp;
+	    xfree(temp);
+	} else
 	    goto errout;
     }
     if (val->additional__tickets) {
 	register krb5_ticket **aticks;
-        register struct element_KRB5_6 *tptr;
+        register struct element_KRB5_10 *tptr;
 	register int i;
 
 	tptr = val->additional__tickets;
@@ -128,19 +140,14 @@ const register struct type_KRB5_TGS__REQ *val;
 register int *error;
 {
     register krb5_kdc_req *retval;
-    krb5_data *temp;
 
     if (!(retval = KRB5_KDC__REQ__BODY2krb5_kdc_req(val->req__body, error)))
 	return retval;
 
     retval->msg_type = val->msg__type;
-    retval->padata_type = val->padata__type;
     if (val->padata) {
-	temp = qbuf2krb5_data(val->padata, error);
-	if (temp) {
-	    retval->padata = *temp;
-	    xfree(temp);
-	} else {
+	retval->padata = KRB5_PA__DATA2krb5_pa_data(val->padata, error);
+	if (!retval->padata) {
 	    krb5_free_kdc_req(retval);
 	    return(0);
 	}

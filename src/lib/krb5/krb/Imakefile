@@ -40,6 +40,7 @@ OBJS=	addr_comp.o	\
 	mk_req_ext.o	\
 	mk_safe.o	\
 	parse.o		\
+	pr_to_salt.o	\
 	princ_comp.o	\
 	rd_error.o	\
 	rd_priv.o	\
@@ -84,6 +85,7 @@ SRCS=	addr_comp.c	\
 	mk_req_ext.c	\
 	mk_safe.c	\
 	parse.c		\
+	pr_to_salt.c	\
 	princ_comp.c	\
 	rd_error.c	\
 	rd_priv.c	\
@@ -98,3 +100,4 @@ SRCS=	addr_comp.c	\
 	walk_rtree.c
 
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
+INCLUDES=-I../../include

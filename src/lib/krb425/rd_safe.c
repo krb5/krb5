@@ -30,8 +30,6 @@ MSG_DAT *msg;
 	krb5_data inbuf;
 	krb5_data out;
 	krb5_keyblock keyb;
-	krb5_fulladdr sfaddr;
-	krb5_fulladdr rfaddr;
 	krb5_address saddr;
 	krb5_address raddr;
 	krb5_error_code r;
@@ -52,16 +50,10 @@ MSG_DAT *msg;
 	memcpy(sa, (char *)&sender->sin_addr, 4);
 	memcpy(ra, (char *)&receiver->sin_addr, 4);
 
-	sfaddr.address = &saddr;
-	sfaddr.port = sender->sin_port;
-
-	rfaddr.address = &raddr;
-	rfaddr.port = receiver->sin_port;
-
 	inbuf.data = (char *)in;
 	inbuf.length = in_length;
 
-	if (r = krb5_rd_safe(&inbuf, &keyb, &sfaddr, &rfaddr, &out)) {
+	if (r = krb5_rd_safe(&inbuf, &keyb, &saddr, &raddr, 0, 0, &out)) {
 #ifdef	EBUG
 		ERROR(r)
 #endif

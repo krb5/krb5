@@ -53,6 +53,8 @@ krb5_error_code krb5_mk_req_extended
 		   const krb5_checksum *,
 		   const krb5_ticket_times *,
 		   const krb5_flags,
+		   krb5_int32,
+		   krb5_keyblock *,
 		   krb5_ccache,
 		   krb5_creds *,
 		   krb5_authenticator *,
@@ -79,14 +81,16 @@ krb5_error_code krb5_rd_error
 krb5_error_code krb5_rd_safe
 	PROTOTYPE((const krb5_data *,
 		   const krb5_keyblock *,
-		   const krb5_fulladdr *,
-		   const krb5_fulladdr *,
+		   const krb5_address *,
+		   const krb5_address *,
+		   krb5_int32, krb5_int32,
 		   krb5_data * ));
 krb5_error_code krb5_rd_priv
 	PROTOTYPE((const krb5_data *,
 		   const krb5_keyblock *,
-		   const krb5_fulladdr *,
-		   const krb5_fulladdr *,
+		   const krb5_address *,
+		   const krb5_address *,
+		   krb5_int32, krb5_int32,
 		   krb5_pointer,
 		   krb5_data * ));
 krb5_error_code krb5_parse_name
@@ -157,6 +161,8 @@ krb5_error_code krb5_kt_remove_entry
 krb5_error_code krb5_kt_add_entry
 	PROTOTYPE((krb5_keytab,
 		   krb5_keytab_entry * ));
+krb5_error_code krb5_principal2salt
+	PROTOTYPE((krb5_const_principal, krb5_data *));
 
 /* librc.spec--see rcache.h */
 
@@ -220,7 +226,10 @@ void krb5_free_checksum
 	PROTOTYPE((krb5_checksum *));
 void krb5_free_keyblock
 	PROTOTYPE((krb5_keyblock *));
-
+void krb5_free_pa_data
+	PROTOTYPE((krb5_pa_data **));
+void krb5_free_ap_rep_enc_part
+	PROTOTYPE((krb5_ap_rep_enc_part *));
 
 #include <krb5/widen.h>
 
@@ -242,6 +251,7 @@ krb5_error_code krb5_send_tgs
 		   krb5_const_principal,
 		   krb5_address * const *,
 		   krb5_authdata * const *,
+		   krb5_pa_data * const *,
 		   const krb5_data *,
 		   krb5_creds *,
 		   krb5_response * ));
@@ -252,8 +262,9 @@ krb5_error_code krb5_get_in_tkt
 		   const krb5_enctype,
 		   const krb5_keytype,
 		   krb5_error_code (* )(const krb5_keytype,
-					krb5_keyblock **,
-					krb5_const_pointer ),
+                                        krb5_keyblock **,
+                                        krb5_const_pointer,
+                                        krb5_pa_data **),
 		   krb5_const_pointer,
 		   krb5_error_code (* )(const krb5_keyblock *,
 					krb5_const_pointer,
@@ -317,15 +328,17 @@ krb5_error_code krb5_mk_safe
 	PROTOTYPE((const krb5_data *,
 		   const krb5_cksumtype ,
 		   const krb5_keyblock *,
-		   const krb5_fulladdr *,
-		   const krb5_fulladdr *,
+		   const krb5_address *,
+		   const krb5_address *,
+		   krb5_int32, krb5_int32,
 		   krb5_data * ));
 krb5_error_code krb5_mk_priv
 	PROTOTYPE((const krb5_data *,
 		   const krb5_enctype,
 		   const krb5_keyblock *,
-		   const krb5_fulladdr *,
-		   const krb5_fulladdr *,
+		   const krb5_address *,
+		   const krb5_address *,
+		   krb5_int32, krb5_int32,
 		   krb5_pointer,
 		   krb5_data * ));
 krb5_error_code krb5_cc_register

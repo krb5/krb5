@@ -52,7 +52,7 @@ static char rcsid_get_in_tkt_c[] =
 
 
 extern krb5_deltat krb5_clockskew;
-#define in_clock_skew(date) (abs((date)-request.ctime) < krb5_clockskew)
+#define in_clock_skew(date) (abs((date)-request.nonce) < krb5_clockskew)
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
@@ -60,7 +60,8 @@ extern krb5_deltat krb5_clockskew;
 #include <krb5/widen.h>
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
 						   krb5_keyblock **,
-						   krb5_const_pointer ));
+						   krb5_const_pointer,
+						   krb5_pa_data **));
 #include <krb5/narrow.h>
 
 typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
@@ -95,13 +96,13 @@ OLDDECLARG(krb5_ccache, ccache)
     krb5_data *packet;
     krb5_data reply;
     krb5_keyblock *decrypt_key;
+    krb5_enctype etypes[1];
+    krb5_timestamp time_now;
 
     request.msg_type = KRB5_AS_REQ;
 
     /* AS_REQ has no pre-authentication. */
-    request.padata_type = 0;
-    request.padata.data = 0;
-    request.padata.length = 0;
+    request.padata = 0;
 
     request.kdc_options = options;
     request.client = creds->client;
@@ -110,14 +111,20 @@ OLDDECLARG(krb5_ccache, ccache)
     request.from = creds->times.starttime;
     request.till = creds->times.endtime;
     request.rtime = creds->times.renew_till;
-    if (retval = krb5_timeofday(&request.ctime))
+    if (retval = krb5_timeofday(&time_now))
 	return(retval);
+
     /* XXX we know they are the same size... */
-    request.nonce = (krb5_int32) request.ctime;
-    request.etype = etype;
+    request.nonce = (krb5_int32) time_now;
+
+    etypes[0] = etype;
+    request.etype = etypes;
+    request.netypes = 1;
     request.addresses = (krb5_address **) addrs;
     request.second_ticket = 0;
-    request.authorization_data = 0;
+    request.authorization_data.ciphertext.length = 0;
+    request.authorization_data.ciphertext.data = 0;
+    request.unenc_authdata = 0;
 
     /* encode & send to KDC */
     if (retval = encode_krb5_as_req(&request, &packet))
@@ -129,14 +136,12 @@ OLDDECLARG(krb5_ccache, ccache)
 
     /* now decode the reply...could be error or as_rep */
 
-    if (!krb5_is_as_rep(&reply) && !krb5_is_krb_error(&reply))
-	    return KRB5KRB_AP_ERR_MSG_TYPE;
-    if (retval = decode_krb5_as_rep(&reply, &as_reply)) {
-	if (decode_krb5_error(&reply, &err_reply))
-	    return retval;		/* some other reply--??? */
+    if (krb5_is_krb_error(&reply)) {
+	if (retval = decode_krb5_error(&reply, &err_reply))
+            return retval;              /* some other reply--??? */
 	/* it was an error */
 
-	if ((err_reply->ctime != request.ctime) ||
+	if ((err_reply->ctime != request.nonce) ||
 	    !krb5_principal_compare(err_reply->server, request.server) ||
 	    !krb5_principal_compare(err_reply->client, request.client))
 	    retval = KRB5_KDCREP_MODIFIED;
@@ -149,10 +154,19 @@ OLDDECLARG(krb5_ccache, ccache)
 	return retval;
     }
 
+    if (!krb5_is_as_rep(&reply))
+	return KRB5KRB_AP_ERR_MSG_TYPE;
+    if (retval = decode_krb5_as_rep(&reply, &as_reply))
+	return retval;		/* some other reply--??? */
+
+    if (as_reply->msg_type != KRB5_AS_REP)
+        return KRB5KRB_AP_ERR_MSG_TYPE;
+
     /* it was a kdc_rep--decrypt & check */
 
     /* generate the key */
-    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed)) {
+    if (retval = (*key_proc)(keytype, &decrypt_key, keyseed,
+			     as_reply->padata)) {
 	krb5_free_kdc_rep(as_reply);
 	return retval;
     }
@@ -166,6 +180,9 @@ OLDDECLARG(krb5_ccache, ccache)
     }
 
     /* check the contents for sanity: */
+    if (!as_reply->enc_part2->times.starttime)
+	as_reply->enc_part2->times.starttime =
+	    as_reply->enc_part2->times.authtime;
     if (!krb5_principal_compare(as_reply->client, request.client)
 	|| !krb5_principal_compare(as_reply->enc_part2->server, request.server)
 	|| !krb5_principal_compare(as_reply->ticket->server, request.server)

@@ -30,7 +30,7 @@ krb5_const_principal pr;
 krb5_data *ret;
 {
     int size, offset;
-    krb5_data **prp;
+    krb5_data * const * prp;
     
 
     if (pr == 0) {

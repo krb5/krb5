@@ -22,7 +22,7 @@ static char rcsid_in_tkt_skey_c [] =
 #include <krb5/ext-proto.h>
 
 struct skey_keyproc_arg {
-    krb5_keyblock *key;
+    const krb5_keyblock *key;
     krb5_principal server;		/* it's a pointer, really! */
 };
 
@@ -34,10 +34,12 @@ struct skey_keyproc_arg {
 static krb5_error_code
 skey_keyproc(DECLARG(const krb5_keytype, type),
 	     DECLARG(krb5_keyblock **, key),
-	     DECLARG(krb5_const_pointer, keyseed))
+	     DECLARG(krb5_const_pointer, keyseed),
+	     DECLARG(krb5_pa_data **, padata))
 OLDDECLARG(const krb5_keytype, type)
 OLDDECLARG(krb5_keyblock **, key)
 OLDDECLARG(krb5_const_pointer, keyseed)
+OLDDECLARG(krb5_pa_data **,padata)
 {
     krb5_keyblock *realkey;
     const struct skey_keyproc_arg *arg;
@@ -129,7 +131,7 @@ OLDDECLARG(krb5_creds *, creds)
     krb5_keytype keytype;
 
     if (key) {
-	arg.key = (krb5_keyblock *)key;
+	arg.key = key;
 	arg.server = 0;
 	keytype = key->keytype;
     } else {

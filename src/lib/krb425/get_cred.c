@@ -86,12 +86,13 @@ CREDENTIALS *c;
 	set_string(c->instance, REALM_SZ, creds.server[2]);
 
 	c->ticket_st.length = creds.ticket.length;
-	memcpy(c->ticket_st.dat,
-	       creds.ticket.data,
+	memcpy((char *)c->ticket_st.dat,
+	       (char *)creds.ticket.data,
 	       min(c->ticket_st.length, MAX_KTXT_LEN));
 	c->ticket_st.mbz = 0;
 
-	memcpy((char*)c->session, creds.keyblock.contents, sizeof(C_Block));
+	memcpy((char*)c->session, (char *)creds.keyblock.contents,
+	       sizeof(C_Block));
 
 	c->issue_date = creds.times.starttime;
 	c->lifetime = creds.times.endtime;

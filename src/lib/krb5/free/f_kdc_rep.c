@@ -23,6 +23,8 @@ void
 krb5_free_kdc_rep(val)
 krb5_kdc_rep *val;
 {
+    if (val->padata)
+	krb5_free_pa_data(val->padata);
     if (val->client)
 	krb5_free_principal(val->client);
     if (val->ticket)

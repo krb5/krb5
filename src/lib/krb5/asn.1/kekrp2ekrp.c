@@ -83,8 +83,8 @@ register int *error;
 	    goto errout;
 	}
     }
-    retval->realm = krb5_data2qbuf(val->server[0]);
-    if (!retval->realm) {
+    retval->srealm = krb5_data2qbuf(val->server[0]);
+    if (!retval->srealm) {
 	*error = ENOMEM;
 	goto errout;
     }
@@ -92,9 +92,11 @@ register int *error;
     if (!retval->sname) {
 	goto errout;
     }
-    retval->caddr = krb5_address2KRB5_HostAddresses(val->caddrs, error);
-    if (!retval->caddr) {
-	goto errout;
+    if (val->caddrs) {
+	retval->caddr = krb5_address2KRB5_HostAddresses(val->caddrs, error);
+	if (!retval->caddr) {
+	    goto errout;
+	}
     }
     return(retval);
 }

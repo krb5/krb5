@@ -8,7 +8,7 @@
 #  <krb5/copyright.h>.
 # 
 DEFINES = -DBACKWARD_COMPAT
-INCLUDES = $(KRB4INCLUDES) -I$(TOP)/include/stdc-incl
+INCLUDES = $(KRB4INCLUDES)
 SRCS= \
 	kdc5_err.c \
 	dispatch.c \

@@ -47,6 +47,8 @@ typedef struct _krb5_enc_data {
     krb5_data ciphertext;
 } krb5_enc_data;
 
+#include <krb5/widen.h>
+
 /* could be used in a table to find an etype and initialize a block */
 typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*encrypt_func) PROTOTYPE((krb5_const_pointer /* in */,
@@ -65,7 +67,7 @@ typedef struct _krb5_cryptosystem_entry {
     krb5_error_code (*string_to_key) PROTOTYPE((const krb5_keytype,
 						krb5_keyblock *,
 						const krb5_data *,
-						krb5_const_principal));
+ 	                                        const krb5_data *));
     krb5_error_code  (*init_random_key) PROTOTYPE((const krb5_keyblock *,
 						   krb5_pointer *));
     krb5_error_code  (*finish_random_key) PROTOTYPE((krb5_pointer *));
@@ -82,6 +84,8 @@ typedef struct _krb5_cryptosystem_entry {
 					    table index) */
 } krb5_cryptosystem_entry;
 
+#include <krb5/narrow.h>
+
 typedef struct _krb5_cs_table_entry {
     krb5_cryptosystem_entry *system;
     krb5_pointer random_sequence;	/* from init_random_key() */
@@ -96,6 +100,8 @@ typedef struct _krb5_checksum_entry {
 					     krb5_checksum * /* out_cksum */));
     int checksum_length;		/* length of stuff returned by
 					   sum_func */
+    unsigned int is_collision_proof:1;
+    unsigned int uses_key:1;
 } krb5_checksum_entry;
 
 /* per Kerberos v5 protocol spec */
@@ -144,6 +150,9 @@ extern int krb5_max_cksum;		/* max entry in array */
 #define valid_keytype(ktype)     ((ktype <= krb5_max_keytype) && (ktype > 0) && krb5_keytype_array[ktype])
 
 #define valid_cksumtype(cktype)     ((cktype <= krb5_max_cksum) && (cktype > 0) && krb5_cksumarray[cktype])
+
+#define is_coll_proof_cksum(cktype) (krb5_cksumarray[cktype]->is_collision_proof)
+#define is_keyed_cksum(cktype) (krb5_cksumarray[cktype]->uses_key)
 
 /* set up *eblockp to use etype */
 #define krb5_use_cstype(eblockp, etype) (eblockp)->crypto_entry = krb5_csarray[(etype)]->system

@@ -62,18 +62,20 @@ register int *error;
     if (!retval->cname) {
 	goto errout;
     }
-    retval->transited = krb5_data2qbuf(&(val->transited));
+    retval->transited =
+	krb5_transited2KRB5_TransitedEncoding(&(val->transited), error);
     if (!retval->transited) {
-	*error = ENOMEM;
 	goto errout;
     }
     retval->authtime = unix2gentime(val->times.authtime, error);
     if (!retval->authtime) {
 	goto errout;
     }
-    retval->starttime = unix2gentime(val->times.starttime, error);
-    if (!retval->starttime) {
-	goto errout;
+    if (val->times.starttime) {
+	retval->starttime = unix2gentime(val->times.starttime, error);
+	if (!retval->starttime) {
+	    goto errout;
+	}
     }
     retval->endtime = unix2gentime(val->times.endtime, error);
     if (!retval->endtime) {

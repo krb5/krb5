@@ -31,8 +31,6 @@ struct sockaddr_in *receiver;
 	krb5_data inbuf;
 	krb5_data out5;
 	krb5_keyblock keyb;
-	krb5_fulladdr sfaddr;
-	krb5_fulladdr rfaddr;
 	krb5_address saddr;
 	krb5_address raddr;
 	krb5_error_code r;
@@ -53,19 +51,15 @@ struct sockaddr_in *receiver;
 	memcpy(sa, (char *)&sender->sin_addr, 4);
 	memcpy(ra, (char *)&receiver->sin_addr, 4);
 
-	sfaddr.address = &saddr;
-	sfaddr.port = sender->sin_port;
-
-	rfaddr.address = &raddr;
-	rfaddr.port = receiver->sin_port;
-
 	inbuf.data = (char *)in;
 	inbuf.length = in_length;
 
 	if (r = krb5_mk_priv(&inbuf,
 			     KEYTYPE_DES,
 			     &keyb,
-			     &sfaddr, &rfaddr,
+			     &saddr, &raddr,
+			     0,		/* no sequence number */
+			     0,		/* default flags (none) */
 			     0, &out5)) {
 #ifdef	EBUG
 		ERROR(r);
@@ -73,7 +67,7 @@ struct sockaddr_in *receiver;
 		return(-1);
 	}
 
-	memcpy(out, out5.data, out5.length);
+	memcpy((char *)out, out5.data, out5.length);
 	free(out5.data);
 	return(out5.length);
 }

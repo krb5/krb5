@@ -38,16 +38,17 @@ extern krb5_deltat krb5_clockskew;
  returns system errors, integrity errors
  */
 krb5_error_code
-krb5_rd_safe(inbuf, key, sender_addr, recv_addr, outbuf)
+krb5_rd_safe(inbuf, key, sender_addr, recv_addr, seq_number, safe_flags, outbuf)
 const krb5_data *inbuf;
 const krb5_keyblock *key;
-const krb5_fulladdr *sender_addr;
-const krb5_fulladdr *recv_addr;
+const krb5_address *sender_addr;
+const krb5_address *recv_addr;
+krb5_int32 seq_number;
+krb5_int32 safe_flags;
 krb5_data *outbuf;
 {
     krb5_error_code retval;
     krb5_safe *message;
-    krb5_ui_2 computed_direction;
     krb5_checksum our_cksum, *his_cksum;
     krb5_octet zero_octet = 0;
     krb5_data *scratch;
@@ -63,22 +64,30 @@ krb5_data *outbuf;
 
     if (!valid_cksumtype(message->checksum->checksum_type))
 	return KRB5_PROG_SUMTYPE_NOSUPP;
+    if (!is_coll_proof_cksum(message->checksum->checksum_type) ||
+	!is_keyed_cksum(message->checksum->checksum_type))
+	return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     if (retval = krb5_timeofday(&currenttime)) {
 	cleanup();
 	return retval;
     }
-    /* in_clock_skew #defined above */
-    if (!in_clock_skew(message->timestamp)) {
-	cleanup();
-	return KRB5KRB_AP_ERR_SKEW;
+    if (!(safe_flags & KRB5_SAFE_NOTIME)) {
+	/* in_clock_skew #defined above */
+	if (!in_clock_skew(message->timestamp)) {
+	    cleanup();
+	    return KRB5KRB_AP_ERR_SKEW;
+	}
+	/* replay detection goes here... XXX */
     }
 
-    /* replay detection goes here... XXX */
+    if (safe_flags & KRB5_SAFE_DOSEQUENCE)
+	if (message->seq_number != seq_number) {
+	    cleanup();
+	    return KRB5KRB_AP_ERR_BADSEQ;
+	}
 
-    if (sender_addr) {
-	krb5_fulladdr temp_sender;
-	krb5_fulladdr temp_recip;
+    if (message->r_address) {
 	krb5_address **our_addrs;
 	
 	if (retval = krb5_os_localaddr(&our_addrs)) {
@@ -91,20 +100,9 @@ krb5_data *outbuf;
 	    return KRB5KRB_AP_ERR_BADADDR;
 	}
 	krb5_free_address(our_addrs);
-
-	temp_recip = *recv_addr;
-	temp_recip.address = message->r_address;
-
-	temp_sender = *sender_addr;
-	temp_sender.address = message->s_address;
-
-	computed_direction = ((krb5_fulladdr_order(&temp_sender, &temp_recip) >
-			       0) ? MSEC_DIRBIT : 0); 
-	if (computed_direction != (message->msec & MSEC_DIRBIT)) {
-	    cleanup();
-	    return KRB5KRB_AP_ERR_BADDIRECTION;
-	}
     }
+
+    /* XXX check sender's address */
 
     /* verify the checksum */
     /* to do the checksum stuff, we need to re-encode the message with a

@@ -66,6 +66,8 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_timestamp kdc_time;
     krb5_keyblock *session_key;
     krb5_keyblock encrypting_key;
+    krb5_enctype useetype;
+    register int i;
 
     krb5_timestamp until, rtime;
     char *cname = 0, *sname = 0, *fromstring = 0;
@@ -130,14 +132,18 @@ krb5_data **response;			/* filled in with a response packet */
 	return(retval);
     }
 
-    if (!valid_etype(request->etype)) {
+    for (i = 0; i < request->netypes; i++)
+	if (valid_etype(request->etype[i]))
+	    break;
+    if (i == request->netypes) {
 	/* unsupported etype */
 
 	cleanup();
 	return(prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response));
     }
+    useetype = request->etype[i];
 
-    if (retval = (*(krb5_csarray[request->etype]->system->random_key))(krb5_csarray[request->etype]->random_sequence, &session_key)) {
+    if (retval = (*(krb5_csarray[useetype]->system->random_key))(krb5_csarray[useetype]->random_sequence, &session_key)) {
 	/* random key failed */
 	cleanup();
 	return(retval);
@@ -153,7 +159,7 @@ krb5_data **response;			/* filled in with a response packet */
 
 
     ticket_reply.server = request->server;
-    ticket_reply.enc_part.etype = request->etype;
+    ticket_reply.enc_part.etype = useetype;
     ticket_reply.enc_part.kvno = server.kvno;
 
     enc_tkt_reply.flags = 0;
@@ -182,7 +188,9 @@ krb5_data **response;			/* filled in with a response packet */
 
     enc_tkt_reply.session = session_key;
     enc_tkt_reply.client = request->client;
-    enc_tkt_reply.transited = empty_string; /* equivalent of "" */
+    enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+    enc_tkt_reply.transited.tr_contents = empty_string; /* equivalent of "" */
+
     enc_tkt_reply.times.authtime = kdc_time;
 
     if (isflagset(request->kdc_options, KDC_OPT_POSTDATED)) {
@@ -227,6 +235,11 @@ krb5_data **response;			/* filled in with a response packet */
     } else
 	enc_tkt_reply.times.renew_till = 0; /* XXX */
 
+    /* starttime is optional, and treated as authtime if not present.
+       so we can nuke it if it matches */
+    if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
+	enc_tkt_reply.times.starttime = 0;
+
     enc_tkt_reply.caddrs = request->addresses;
     enc_tkt_reply.authorization_data = 0; /* XXX? */
 
@@ -259,9 +272,14 @@ krb5_data **response;			/* filled in with a response packet */
 		   free(ticket_reply.enc_part.ciphertext.data);}
 
     /* Start assembling the response */
+    reply.msg_type = KRB5_AS_REP;
+
+    reply.padata = 0;
+    /* XXX put in padata salting stuff here*/
+
     reply.client = request->client;
     /* XXX need separate etypes for ticket encryption and kdc_rep encryption */
-    reply.enc_part.etype = request->etype;
+    reply.enc_part.etype = useetype;
     reply.enc_part.kvno = client.kvno;
     reply.ticket = &ticket_reply;
 
@@ -309,10 +327,10 @@ krb5_data **response;
     krb5_error_code retval;
     krb5_data *scratch;
 
-    errpkt.ctime = request->ctime;
-    errpkt.cmsec = 0;
+    errpkt.ctime = request->nonce;
+    errpkt.cusec = 0;
 
-    if (retval = krb5_ms_timeofday(&errpkt.stime, &errpkt.smsec))
+    if (retval = krb5_us_timeofday(&errpkt.stime, &errpkt.susec))
 	return(retval);
     errpkt.error = error;
     errpkt.server = request->server;

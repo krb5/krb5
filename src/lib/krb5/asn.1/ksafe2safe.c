@@ -33,7 +33,8 @@ const register krb5_safe *val;
 register int *error;
 {
     register struct type_KRB5_KRB__SAFE *retval;
- 
+    register struct type_KRB5_KRB__SAFE__BODY *rv2;
+
     retval = (struct type_KRB5_KRB__SAFE *)xmalloc(sizeof(*retval));
     if (!retval) {
 	*error = ENOMEM;
@@ -41,33 +42,50 @@ register int *error;
     }
     xbzero(retval, sizeof(*retval));
 
-    retval->pvno = KRB5_PVNO;
-    retval->msg__type = KRB5_SAFE;
-
-    retval->user__data = krb5_data2qbuf(&(val->user_data));
-    if (!retval->user__data) {
+    rv2 = (struct type_KRB5_KRB__SAFE__BODY *)xmalloc(sizeof(*rv2));
+    if (!rv2) {
 	xfree(retval);
 	*error = ENOMEM;
 	return(0);
     }
-    retval->timestamp = unix2gentime(val->timestamp, error);
-    if (!retval->timestamp) {
-    errout:
-	free_KRB5_KRB__SAFE(retval);
+
+    retval->pvno = KRB5_PVNO;
+    retval->msg__type = KRB5_SAFE;
+    retval->safe__body = rv2;
+
+    rv2->user__data = krb5_data2qbuf(&(val->user_data));
+    if (!rv2->user__data) {
+	xfree(retval);
+	*error = ENOMEM;
 	return(0);
     }
-    retval->msec = val->msec;
-    retval->s__address = krb5_addr2KRB5_HostAddress(val->s_address, error);
-    if (!retval->s__address) {
+    if (val->timestamp) {
+	rv2->timestamp = unix2gentime(val->timestamp, error);
+	if (!rv2->timestamp) {
+	errout:
+	    free_KRB5_KRB__SAFE(retval);
+	    return(0);
+	}
+	rv2->usec = val->usec;
+	rv2->optionals |= opt_KRB5_KRB__SAFE__BODY_usec;
+    }
+    rv2->s__address = krb5_addr2KRB5_HostAddress(val->s_address, error);
+    if (!rv2->s__address) {
 	goto errout;
     }
-    retval->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
-    if (!retval->r__address) {
-	goto errout;
+    if (val->r_address) {
+	rv2->r__address = krb5_addr2KRB5_HostAddress(val->r_address, error);
+	if (!rv2->r__address) {
+	    goto errout;
+	}
     }
     retval->cksum = krb5_checksum2KRB5_Checksum(val->checksum, error);
     if (!retval->cksum) {
 	goto errout;
+    }
+    if (val->seq_number) {
+	rv2->seq__number = val->seq_number;
+	rv2->optionals |= opt_KRB5_KRB__SAFE__BODY_seq__number;
     }
     return(retval);
 }

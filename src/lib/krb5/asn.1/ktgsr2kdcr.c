@@ -33,5 +33,5 @@ const register krb5_kdc_rep *val;
 register int *error;
 {
     return (struct type_KRB5_TGS__REP *)
-	krb5_kdc_rep2KRB5_KDC__REP(val, KRB5_TGS_REP, error);
+	krb5_kdc_rep2KRB5_KDC__REP(val, error);
 }

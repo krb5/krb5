@@ -116,7 +116,7 @@ krb5_kdc_rep *KRB5_KDC__REP2krb5_as_rep
 
 /* kdcr2kkdcr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_kdc_rep
-	PROTOTYPE((const struct type_KRB5_TGS__REP *, krb5_msgtype *, int *));
+	PROTOTYPE((const struct type_KRB5_TGS__REP *, int *));
 
 /* kdcr2ktgsr.c */
 krb5_kdc_rep *KRB5_KDC__REP2krb5_tgs_rep
@@ -220,17 +220,31 @@ struct type_KRB5_TicketFlags *krb5_flags2KRB5_TicketFlags
 krb5_flags KRB5_TicketFlags2krb5_flags
 	PROTOTYPE((const struct type_KRB5_TicketFlags *,int *));
 
-#include <krb5/widen.h>
+/* kpadt2padt.c */
+struct type_KRB5_PA__DATA *krb5_pa_data2KRB5_PA__DATA
+    PROTOTYPE((krb5_pa_data **, int *));
+
+/* ktran2tran.c */
+struct type_KRB5_TransitedEncoding *krb5_transited2KRB5_TransitedEncoding
+    PROTOTYPE((const krb5_transited *, int *));
+
+/* padt2kpadt.c */
+krb5_pa_data **KRB5_PA__DATA2krb5_pa_data
+    PROTOTYPE((struct type_KRB5_PA__DATA *, int *));
+
+/* tran2ktran.c */
+krb5_transited *KRB5_TransitedEncoding2krb5_transited
+    PROTOTYPE((const struct type_KRB5_TransitedEncoding *, int *));
+
+/* kkdcr2kdcr.c */
+struct type_KRB5_TGS__REP *krb5_kdc_rep2KRB5_KDC__REP
+	PROTOTYPE((const krb5_kdc_rep *, int *));
+
+/* #include <krb5/widen.h> */
 
 /* Only put things which don't have pointers to the narrow types in this
    section */
 
-/* kkdcr2kdcr.c */
-struct type_KRB5_TGS__REP *krb5_kdc_rep2KRB5_KDC__REP
-	PROTOTYPE((const krb5_kdc_rep *,
-		   const krb5_msgtype,
-		   int *));
-
-#include <krb5/narrow.h>
+/* #include <krb5/narrow.h> */
 
 #endif /* KRB5_ASN1DEFS__ */

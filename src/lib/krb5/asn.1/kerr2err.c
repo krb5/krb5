@@ -51,9 +51,9 @@ register int *error;
 	    return(0);
 	}
     }
-    if (val->cmsec) {
-	retval->cmsec = val->cmsec;
-	retval->optionals = opt_KRB5_KRB__ERROR_cmsec;
+    if (val->cusec) {
+	retval->cusec = val->cusec;
+	retval->optionals = opt_KRB5_KRB__ERROR_cusec;
     }
 
     retval->stime = unix2gentime(val->stime, error);
@@ -62,7 +62,7 @@ register int *error;
 	free_KRB5_KRB__ERROR(retval);
 	return(0);
     }
-    retval->smsec = val->smsec;
+    retval->susec = val->susec;
     retval->error__code = val->error;
 
     if (val->client) {

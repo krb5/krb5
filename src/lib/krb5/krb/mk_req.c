@@ -73,6 +73,8 @@ krb5_data *outbuf;
 				  checksum,
 				  &creds.times,
 				  krb5_kdc_default_options,
+				  0,	/* no sequence number */
+				  0,	/* no sub-key */
 				  ccache,
 				  &creds,
 				  0, 	/* We don't need the authenticator */

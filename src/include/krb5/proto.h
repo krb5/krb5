@@ -32,6 +32,18 @@
 #define	KRB5_ERROR	((krb5_msgtype)30) /* Error response */
 
 /* PADATA types */
-#define	KRB5_PADATA_AP_REQ	((krb5_octet)1)
+#define	KRB5_PADATA_AP_REQ	1
+#define	KRB5_PADATA_TGS_REQ	KRB5_PADATA_AP_REQ
+#define KRB5_PADATA_ENC_TIMESTAMPS	2
+#define	KRB5_PADATA_PW_SALT	3
+
+/* Transited encoding types */
+#define	KRB5_DOMAIN_X500_COMPRESS	1
+
+/* alternate authentication types */
+#define	KRB5_ALTAUTH_ATT_CHALLENGE_RESPONSE	64
+
+/* authorization data types */
+#define	KRB5_AUTHDATA_OSF_DCE	64
 
 #endif /* KRB5_PROTO__ */

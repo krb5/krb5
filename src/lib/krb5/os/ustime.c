@@ -25,9 +25,8 @@ static char rcsid_mstime_c[] =
 extern int errno;
 
 krb5_error_code
-krb5_ms_timeofday(seconds, milliseconds)
-register krb5_int32 *seconds;
-register krb5_ui_2 *milliseconds;
+krb5_us_timeofday(seconds, microseconds)
+register krb5_int32 *seconds, *microseconds;
 {
     struct timeval tv;
 
@@ -36,6 +35,6 @@ register krb5_ui_2 *milliseconds;
 	return (krb5_error_code) errno;
     }
     *seconds = tv.tv_sec;
-    *milliseconds = tv.tv_usec / 1000;
+    *microseconds = tv.tv_usec;
     return 0;
 }

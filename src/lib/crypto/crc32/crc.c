@@ -149,13 +149,6 @@ krb5_checksum *outcksum;
     register int idx;
     int i;
 
-    data = (u_char *)seed;
-    for (i=0; i<seed_length;i++) {
-	idx = (data[i] ^ c);
-	idx &= 0xff;
-	c >>= 8;
-	c ^= crc_table[idx];
-    }
     data = (u_char *)in;
     for (i=0; i<in_length;i++) {
 	idx = (data[i] ^ c);
@@ -177,4 +170,6 @@ krb5_checksum *outcksum;
 krb5_checksum_entry crc32_cksumtable_entry = {
     crc32_sum_func,
     CRC32_CKSUM_LENGTH, /* CRC-32 is 4 octets */
+    0,					/* not collision proof */
+    0,					/* doesn't use key */
 };

@@ -36,7 +36,7 @@ int cvt;
 		}
 		keyblock.length = 8;
 		keyblock.keytype = KEYTYPE_DES;
-		memcpy(keyblock.contents, key, 8);
+		memcpy((char *)keyblock.contents, (char *)key, 8);
 	}
 	return(KSUCCESS);
 }

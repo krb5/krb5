@@ -39,15 +39,25 @@ register int *error;
 	*error = ENOMEM;
 	return(0);
     }
-    /* xbzero not needed, since structure is simple */
-    /* xbzero(retval, sizeof(*retval)); */
+    xbzero(retval, sizeof(*retval));
 
     retval->ctime = gentime2unix(val->ctime, error);
     if (*error) {
 	xfree(retval);
 	return(0);
     }	
-    retval->cmsec = val->cmsec;
+    retval->cusec = val->cusec;
+
+    if (val->subkey) {
+	retval->subkey = KRB5_EncryptionKey2krb5_keyblock(val->subkey,
+							  error);
+	if (!retval->subkey) {
+	    krb5_free_ap_rep_enc_part(retval);
+	    return 0;
+	}
+    }
+    if (val->optionals & opt_KRB5_EncAPRepPart_seq__number)
+	retval->seq_number = val->seq__number;
 
     return(retval);
 }

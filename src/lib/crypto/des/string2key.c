@@ -34,7 +34,7 @@ extern int des_debug;
 	It is the responsibility of the caller to release this storage
 	when the generated key no longer needed.
 
-	The routine may use "princ" to seed or alter the conversion
+	The routine may use "salt" to seed or alter the conversion
 	algorithm.
 
 	If the particular function called does not know how to make a
@@ -46,11 +46,11 @@ extern int des_debug;
 krb5_error_code mit_des_string_to_key (DECLARG(const krb5_keytype, keytype),
 				       DECLARG(krb5_keyblock *,keyblock),
 				       DECLARG(const krb5_data *,data),
-				       DECLARG(krb5_const_principal, princ))
+				       DECLARG(const krb5_data *, salt))
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(krb5_keyblock *,keyblock)
 OLDDECLARG(const krb5_data *,data)
-OLDDECLARG(krb5_const_principal, princ)
+OLDDECLARG(const krb5_data *, salt)
 {
     char copystr[512];
 
@@ -81,15 +81,13 @@ OLDDECLARG(krb5_const_principal, princ)
     keyblock->length = sizeof(mit_des_cblock);
     key = keyblock->contents;
 
+    /* XXX todo: make it work in face of embedded NUL's */
     memset(copystr, 0, sizeof(copystr));
     j = min(data->length, 511);
     (void) strncpy(copystr, data->data, j);
-    if ( princ != 0 )
-	for (i=0; princ[i] != 0 && j < 511; i++) {
-	    (void) strncpy(copystr+j, princ[i]->data, 
-			   min(princ[i]->length, 511-j));
-	    j += min(princ[i]->length, 511-j);
-	}
+    if (salt) {
+	strncpy (copystr + j, salt->data, min(salt->length, 511-j));
+    }
 
     /* convert copystr to des key */
     forward = 1;
