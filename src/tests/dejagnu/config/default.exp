@@ -2237,6 +2237,15 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    return 0
 	}
+	"usage: rlogin" -
+	"illegal option -- x" -
+	"invalid option -- x" {
+	    note "$testname: rlogin doesn't like command-line flags"
+	    unsupported "$testname"
+	    set timeout $old_timeout
+	    stop_root_shell
+	    return 0
+	}
 	-re "$ROOT_PROMPT" { }
 	timeout {
 	    perror "timeout from rlogin $hostname -l root"
@@ -2247,7 +2256,7 @@ proc setup_root_shell { testname } {
 	    return 0
 	}
 	eof {
-	    if $got_refused {
+	    if {$got_refused} {
 		# reported some errors, continued, and failed
 		note "$testname test requires ability to log in as root"
 		unsupported $testname
