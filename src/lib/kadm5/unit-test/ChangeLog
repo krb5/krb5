@@ -1,3 +1,10 @@
+Mon Oct 14 07:04:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Only try to run tests if both runtest and the tcl
+		libraries present.
+
+	* configure.in: Check for runtest and Tcl.
+
 Fri Oct  4 08:31:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* sizes-test.c: Removed program.

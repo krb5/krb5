@@ -46,7 +46,12 @@ server-iter-test: iter-test.o $(SRVDEPLIBS)
 # The unit-test targets
 #
 
-check unit-test:: unit-test-client unit-test-server
+check:: check-@RUNTEST@-@DO_TCL@
+
+check-- check-runtest- check--tcl::
+	@echo "Either tcl or runtest is unavailable. Kadm5 unit tests not run"
+
+check-runtest-tcl unit-test:: unit-test-client unit-test-server
 
 unit-test-client: unit-test-client-setup unit-test-client-body \
 	unit-test-client-cleanup
