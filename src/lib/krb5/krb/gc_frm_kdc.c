@@ -62,7 +62,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 {
     krb5_creds tgt, tgtq;
     krb5_creds **ret_tgts = 0;
-    krb5_principal *tgs_list, next_server;
+    krb5_principal *tgs_list, *next_server;
     krb5_error_code retval;
     int nservers;
     krb5_enctype etype;
@@ -113,13 +113,13 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	/* walk the list BACKWARDS until we find a cached
 	   TGT, then move forward obtaining TGTs until we get the last
 	   TGT needed */
-	for (next_server = tgs_list[0]; next_server; next_server++);
-	nservers = next_server - tgs_list[0];
+	for (next_server = tgs_list; *next_server; next_server++);
+	nservers = next_server - tgs_list;
 	next_server--;
 
 	/* next_server now points to the last TGT */
-	for (; next_server >= tgs_list[0]; next_server--) {
-	    tgtq.server = next_server;
+	for (; next_server >= tgs_list; next_server--) {
+	    tgtq.server = *next_server;
 	    retval = krb5_cc_retrieve_cred (ccache,
 					    0, /* default is client & server */
 					    &tgtq,
@@ -134,24 +134,31 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	    next_server++;
 	    break;			/* found one! */
 	}
-	krb5_free_realm_tree(tgs_list);
+	if (next_server < tgs_list) {
+	    /* didn't find any */
+	    retval = KRB5_NO_TKT_IN_RLM;
+	    krb5_free_realm_tree(tgs_list);
+	    goto out;
+	}
 	/* allocate storage for TGT pointers. */
 	ret_tgts = (krb5_creds **)calloc(nservers+1, sizeof(krb5_creds));
 	if (!ret_tgts) {
 	    retval = ENOMEM;
+	    krb5_free_realm_tree(tgs_list);
 	    goto out;
 	}
 	*tgts = ret_tgts;
-	for (nservers = 0; next_server; next_server++, nservers++) {
+	for (nservers = 0; *next_server; next_server++, nservers++) {
 
 	    if (!valid_keytype(tgt.keyblock.keytype)) {
 		retval = KRB5_PROG_KEYTYPE_NOSUPP;
+		krb5_free_realm_tree(tgs_list);
 		goto out;
 	    }
 	    /* now get the TGTs */
 	    tgtq.times = tgt.times;
 	    tgtq.client = tgt.client;
-	    tgtq.server = next_server;
+	    tgtq.server = *next_server;
 	    tgtq.is_skey = FALSE;	
 	    tgtq.ticket_flags = tgt.ticket_flags;
 
@@ -160,14 +167,19 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 					       flags2options(tgtq.ticket_flags),
 					       etype,
 					       krb5_kdc_req_sumtype,
-					       &tgtq))
+					       &tgtq)) {
+		krb5_free_realm_tree(tgs_list);
 		goto out;
+	    }
 	    /* save tgt in return array */
-	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers]))
+	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers])) {
+		krb5_free_realm_tree(tgs_list);
 		goto out;
+	    }
 	    /* XXX need to clean up stuff pointed to by tgtq? */
 	    tgt = tgtq;
 	}
+	krb5_free_realm_tree(tgs_list);
     }
     /* got/finally have tgt! */
     if (!valid_keytype(tgt.keyblock.keytype)) {
