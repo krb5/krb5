@@ -14,9 +14,5 @@ $(OBJS): kpasswd_strings.h
 $(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
-install::
-	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(CLIENT_BINDIR)/$(PROG)
-	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(CLIENT_MANDIR)/$(PROG).1
-
 clean::
 	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)

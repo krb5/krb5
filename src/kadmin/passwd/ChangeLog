@@ -1,3 +1,7 @@
+Fri Jan 30 15:29:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove install rules.
+
 Wed Feb  5 22:59:43 1997  Tom Yu  <tlyu@mit.edu>
 
 	* unit-test/configure.in: Tweak TCL_LIB -> TCL_LIBS.
