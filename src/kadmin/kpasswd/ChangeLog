@@ -1,3 +1,9 @@
+
+Fri Apr 28 10:14:12 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Use new library libkadm.  Remove unused reference to libkdb5.
+	* Use size_t instead of int for size calculations.
+	* Remove inclusion of some unnecessary system include files.
+
 Thu Apr 27 16:46:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 
 	Initial implementation of new kpasswd which uses new administrative

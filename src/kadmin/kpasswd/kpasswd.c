@@ -31,11 +31,7 @@
 /*
  * Include files.
  */
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/param.h>
-
-#include "krb5.h"
+#include "k5-int.h"
 #include "adm_defs.h"
 #include "adm.h"
 
@@ -258,7 +254,7 @@ main(argc, argv)
     /* From now on, all error legs via 'goto cleanup' */
 
     if (name) {
-	int prompt_len;
+	size_t prompt_len;
 
 	prompt_len = strlen(kpwd_old_pwd_name_fmt) - 2 + strlen(name) + 1;
 	opwd_prompt = (char *) malloc(prompt_len);
