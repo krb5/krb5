@@ -1820,6 +1820,7 @@ krb5_change_password
 			int *result_code, krb5_data *result_code_string,
 			krb5_data *result_string));
 
+#ifndef macintosh
 krb5_error_code krb5_set_config_files
 	KRB5_PROTOTYPE ((krb5_context, krb5_const char FAR * FAR *));
 
@@ -1828,6 +1829,8 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_get_default_config_files
 
 KRB5_DLLIMP void KRB5_CALLCONV krb5_free_config_files
 	KRB5_PROTOTYPE((char **filenames));
+
+#endif
 
 krb5_error_code krb5_secure_config_files
 	KRB5_PROTOTYPE ((krb5_context));
@@ -2387,11 +2390,6 @@ KRB5_PROTOTYPE((krb5_context context,
 		krb5_ccache ccache,
 		char *in_tkt_service));
 
-/* Macintoh CFM-68K magic incantation */
-#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
-#pragma import reset
-#endif
-
 /*
  * The realm iterator functions
  */
@@ -2413,6 +2411,11 @@ KRB5_DLLIMP void KRB5_CALLCONV krb5_free_realm_string
 
 #ifdef __cplusplus
 }
+#endif
+
+/* Macintoh CFM-68K magic incantation */
+#if defined(macintosh) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
 #endif
 
 #endif /* KRB5_GENERAL__ */

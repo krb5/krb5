@@ -1,3 +1,8 @@
+1999-07-21 Miro Jurisic   <meeroh@mit.edu>
+
+	* profile.hin, prof_file.c, prof_init.c, prof_int.h:
+		MacOS now uses file specifiers rather than file paths
+
 1999-07-14 Miro Jurisic   <meeroh@mit.edu>
 
 	* profile.hin: added #ifdef __cplusplus extern "C" 

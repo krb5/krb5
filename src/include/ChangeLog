@@ -1,3 +1,9 @@
+1999-07-21  Miro Jurisic  <meeroh@.mit.edu>
+
+	* krb5.hin: #ifdefed out krb5_set_config_files, 
+		krb5_get_default_config_files, and krb5_free_confilg_files
+		on the Mac
+
 1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
 
 	* krb5.hin (krb5_get_default_config_files, krb5_free_config_files): 
