@@ -723,6 +723,7 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
 {
     krb5_error_code status;
     size_t blocksize;
+    krb5_boolean similar;
 
     if (!encrypt_flag) {
 	rcmd_stream_init_normal();
@@ -735,6 +736,18 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck)
     do_lencheck = lencheck;
     input = v5_des_read;
     output = v5_des_write;
+
+    if (status = krb5_c_enctype_compare(bsd_context, ENCTYPE_DES_CBC_CRC,
+					keyblock->enctype,
+					&similar)) {
+	/* XXX what do I do? */
+	abort();
+    }
+
+    if (similar) {
+	encivec.length = 0;
+	return;
+    }
 
     if (status = krb5_c_block_size(bsd_context, keyblock->enctype,
 				   &blocksize)) {
@@ -866,7 +879,8 @@ static int v5_des_read(fd, buf, len)
     plain.data = storage;
 
     /* decrypt info */
-    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE, &encivec,
+    if (krb5_c_decrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+		       encivec.length?&encivec:0,
 		       &cipher, &plain)) {
 	/* probably out of sync */
 	errno = EIO;
@@ -905,7 +919,8 @@ static int v5_des_write(fd, buf, len)
     cipher.ciphertext.length = sizeof(des_outpkt)-4;
     cipher.ciphertext.data = desoutbuf.data;
 
-    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE, &encivec,
+    if (krb5_c_encrypt(bsd_context, keyblock, KCMD_KEYUSAGE,
+		       encivec.length?&encivec:0,
 		       &plain, &cipher)) {
 	errno = EIO;
 	return(-1);
