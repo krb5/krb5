@@ -70,6 +70,8 @@ typedef unsigned char	u_char;
 #define HAVE_SRAND
 #define HAVE_ERRNO
 #define HAVE_STRDUP
+#define HAVE_GETADDRINFO
+#define HAVE_GETNAMEINFO
 #define NO_USERID
 #define NO_PASSWORD
 #define HAVE_STRERROR

@@ -1,3 +1,7 @@
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-mac.h (HAVE_GETADDRINFO, HAVE_GETNAMEINFO): Define.
+
 2004-11-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (struct _krb5_cc_ops): Add new function pointer field
