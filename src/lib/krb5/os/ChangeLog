@@ -1,8 +1,13 @@
-
 Tue May 16 10:33:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* gmt_mktime.c	- Use the actual year instead of the number of years
 			  since 1900 when determining if a year has a leapday.
 			  Makes dates after February in the year 2000 correct.
+
+Mon May 15 05:08:05 1995    <tytso@rsx-11.mit.edu>
+
+	* ktdefname.c (krb5_kt_default_name): Use the KRB5_KTNAME
+		environment variable to override the default location of
+		the keytab.
 
 Mon May  8 22:19:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 

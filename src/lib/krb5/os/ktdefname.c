@@ -34,10 +34,18 @@ krb5_kt_default_name(context, name, namesize)
     char *name;
     int namesize;
 {
-    strncpy(name, krb5_defkeyname, namesize);
-    if ((size_t) namesize < strlen(krb5_defkeyname))
-	return KRB5_CONFIG_NOTENUFSPACE;
-    else
-	return 0;
+    char *cp;
+
+    cp = getenv("KRB5_KTNAME");
+    if (cp) {
+	strncpy(name, cp, namesize);
+	if (strlen(cp) >= namesize)
+	    return KRB5_CONFIG_NOTENUFSPACE;
+    } else {
+	strncpy(name, krb5_defkeyname, namesize);
+	if ((size_t) namesize < strlen(krb5_defkeyname))
+	    return KRB5_CONFIG_NOTENUFSPACE;
+    }
+    return 0;
 }
     
