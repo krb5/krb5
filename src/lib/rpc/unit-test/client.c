@@ -5,6 +5,11 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.15  1998/02/12 21:40:16  tlyu
+ * 	* client.c (main): Tweak the kludge variable
+ * 	krb5_gss_dbg_clietn_expcreds so we can send expired creds to the
+ * 	server.
+ *
  * Revision 1.14  1996/11/12 21:29:54  bjaspan
  * 	* lib/helpers.exp, client.c, server.c, config/unix.exp,
  *  	Makefile.in: test GSS-RPC with both TCP and UDP transport layers
@@ -122,6 +127,9 @@ main(argc, argv)
      extern char *optarg;
      extern int svc_debug_gssapi, misc_debug_gssapi, auth_debug_gssapi;
      int c;
+
+     extern int krb5_gss_dbg_client_expcreds;
+     krb5_gss_dbg_client_expcreds = 1;
 
      whoami = argv[0];
      count = 1026;
