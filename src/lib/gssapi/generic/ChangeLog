@@ -1,3 +1,8 @@
+Tue Feb 27 17:49:54 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h (size_t): Make sure size_t and uid_t are defined under
+	        MS-DOS.
+
 Sat Feb 24 21:30:53 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapi.h (GSS_S_DUPLICATE_ELEMENT): New error code function.

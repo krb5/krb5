@@ -31,6 +31,16 @@
 #define GSS_SIZEOF_INT      2
 #define GSS_SIZEOF_SHORT    2
 #define GSS_SIZEOF_LONG     4
+
+#ifndef _SIZE_T_DEFINED
+typedef unsigned int size_t;
+#define _SIZE_T_DEFINED
+#endif /* _SIZE_T_DEFINED */
+
+#ifndef _UID_T_DEFINED
+typedef unsigned int uid_t;
+#define _UID_T_DEFINED
+#endif
 #else /* _MSDOS_ */
 
 #if defined(USE_AUTOCONF_H)
@@ -72,7 +82,7 @@
 #define FAR
 #define INTERFACE
 #endif /* FAR */
-#endif
+#endif /* _MSDOS */
 
 /*
  * Make sure we have a definition for PROTOTYPE.
