@@ -25,6 +25,7 @@
  */
 
 #include <stdio.h>
+#include <sys/time.h>
 
 #include "k5-int.h"
 #include "com_err.h"
@@ -33,12 +34,20 @@
 #define KRB5_DEFAULT_LIFE 60*60*8 /* 8 hours */
 #define KRB5_RENEWABLE_LIFE 60*60*2 /* 2 hours */
 
+struct h_timer {
+    float	ht_cumulative;
+    float	ht_min;
+    float	ht_max;
+    krb5_int32	ht_observations;
+};
+
 extern int optind;
 extern char *optarg;
 char *prog;
 
 static int brief;
 static char *cur_realm = 0;
+static int do_timer = 0;
 
 krb5_error_code
 krb5_parse_lifetime (time, len)
@@ -89,6 +98,21 @@ static krb5_enctype etype = 0xffff;
 static krb5_context test_context;
 static krb5_keytype keytype;
 
+struct timeval	tstart_time, tend_time;
+struct timezone	dontcare;
+
+struct h_timer in_tkt_times = { 0.0, 1000000.0, -1.0, 0 };
+struct h_timer tgs_req_times = { 0.0, 1000000.0, -1.0, 0 };
+/*
+ * Timer macros.
+ */
+#define	swatch_on()	((void) gettimeofday(&tstart_time, &dontcare))
+#define	swatch_eltime()	((gettimeofday(&tend_time, &dontcare)) ? -1.0 :	\
+			 (((float) (tend_time.tv_sec -			\
+				    tstart_time.tv_sec)) +		\
+			  (((float) (tend_time.tv_usec -		\
+				     tstart_time.tv_usec))/1000000.0)))
+
 void
 main(argc, argv)
     int argc;
@@ -123,8 +147,11 @@ main(argc, argv)
     errors = 0;
     keytypedone = 0;
 
-    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:")) != EOF) {
+    while ((option = getopt(argc, argv, "D:p:n:c:R:k:P:e:bvr:t")) != EOF) {
 	switch (option) {
+	case 't':
+	    do_timer = 1;
+	    break;
 	case 'b':
 	    brief = 1;
 	    break;
@@ -254,6 +281,24 @@ main(argc, argv)
       }
     }
     fprintf (stderr, "\nTried %d.  Got %d errors.\n", n_tried, errors);
+    if (do_timer) {
+	if (in_tkt_times.ht_observations)
+	    fprintf(stderr, 
+		    "%8d  AS_REQ requests: %9.6f average (min: %9.6f, max:%9.6f)\n",
+		    in_tkt_times.ht_observations,
+		    in_tkt_times.ht_cumulative /
+		    (float) in_tkt_times.ht_observations,
+		    in_tkt_times.ht_min,
+		    in_tkt_times.ht_max);
+	if (tgs_req_times.ht_observations)
+	    fprintf(stderr, 
+		    "%8d TGS_REQ requests: %9.6f average (min: %9.6f, max:%9.6f)\n",
+		    tgs_req_times.ht_observations,
+		    tgs_req_times.ht_cumulative /
+		    (float) tgs_req_times.ht_observations,
+		    tgs_req_times.ht_min,
+		    tgs_req_times.ht_max);
+    }
 
     (void) krb5_cc_close(test_context, ccache);
 
@@ -319,6 +364,8 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     krb5_keyblock 	* keyblock = NULL;
     krb5_auth_context 	  auth_context = NULL;
     krb5_data		  request_data;
+    char		* sname;
+    float		  dt;
 
     if (brief)
       fprintf(stderr, "\tprinc (%d) client (%d) for server (%d)\n", 
@@ -331,11 +378,16 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     memset((char *)&creds, 0, sizeof(creds));
 
     /* Do client side */
-    if (retval = krb5_build_principal(context, &creds.server, strlen(hostname), 
-				      hostname, service, NULL, NULL)) {
-	com_err(prog, retval, "while building principal for %s", hostname);
-	return retval;
+    sname = (char *) malloc(strlen(service)+strlen(hostname)+2);
+    if (sname) {
+	sprintf(sname, "%s@%s", service, hostname);
+	retval = krb5_parse_name(context, sname, &creds.server);
+	free(sname);
     }
+    else
+	retval = ENOMEM;
+    if (retval)
+	return(retval);
 
     /* obtain ticket & session key */
     if (retval = krb5_cc_get_principal(context, ccache, &creds.client)) {
@@ -352,6 +404,9 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     }
 
     krb5_free_cred_contents(context, &creds);
+
+    if (do_timer)
+	swatch_on();
 
     if (retval = krb5_mk_req_extended(context, &auth_context, 0, NULL,
 			            credsp, &request_data)) {
@@ -385,6 +440,16 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	com_err(prog, retval, "while decoding AP_REQ for %s", hostname); 
         krb5_auth_con_free(context, auth_context);
 	goto cleanup_keyblock;
+    }
+
+    if (do_timer) {
+	dt = swatch_eltime();
+	tgs_req_times.ht_cumulative += dt;
+	tgs_req_times.ht_observations++;
+	if (dt > tgs_req_times.ht_max)
+	    tgs_req_times.ht_max = dt;
+	if (dt < tgs_req_times.ht_min)
+	    tgs_req_times.ht_min = dt;
     }
 
     krb5_auth_con_free(context, auth_context);
@@ -429,6 +494,7 @@ int get_tgt (context, p_client_str, p_client, ccache)
     krb5_creds my_creds;
     krb5_timestamp start;
     krb5_principal tgt_server;
+    float dt;
 
     if (!brief)
       fprintf(stderr, "\tgetting TGT for %s\n", p_client_str);
@@ -473,9 +539,21 @@ int get_tgt (context, p_client_str, p_client, ccache)
     my_creds.times.endtime = start + lifetime;
     my_creds.times.renew_till = 0;
 
+    if (do_timer)
+	swatch_on();
+
     code = krb5_get_in_tkt_with_password(context, options, 0,
 					 NULL, patype, p_client_str, ccache,
 					 &my_creds, 0);
+    if (do_timer) {
+	dt = swatch_eltime();
+	in_tkt_times.ht_cumulative += dt;
+	in_tkt_times.ht_observations++;
+	if (dt > in_tkt_times.ht_max)
+	    in_tkt_times.ht_max = dt;
+	if (dt < in_tkt_times.ht_min)
+	    in_tkt_times.ht_min = dt;
+    }
     my_creds.server = my_creds.client = 0;
     krb5_free_principal(context, tgt_server);
     krb5_free_cred_contents(context, &my_creds);
