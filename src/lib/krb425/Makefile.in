@@ -11,6 +11,8 @@ LIBS = @LIBS@
 CFLAGS = -g $(DEFS) -I$(SRCTOP)/include/kerberosIV
 LDFLAGS = -g
 
+EHDRDIR = $(BUILDTOP)/include/kerberosIV
+
 RM = rm -f
 CP = cp
 
@@ -19,7 +21,7 @@ AWK = @AWK@
 BUILDTOP = ../..
 SRCTOP = $(srcdir)/$(BUILDTOP)
 
-all:: krb_err.h $(OBJS)
+all:: krb_err.h includes $(OBJS)
 
 OBJS=	425data.o \
 	425error.o \
