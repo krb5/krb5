@@ -131,7 +131,6 @@ main(argc, argv)
 
     if (retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
 			       SAMPLE_VERSION, server, 
-			       NULL,	/* default rc type */
 			       0,	/* no flags */
 			       NULL,	/* default keytab */
 			       &ticket)) {
