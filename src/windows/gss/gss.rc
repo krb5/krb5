@@ -12,6 +12,8 @@
 #define GSS_OK                      100
 #define GSS_CANCEL                  101
 
+gss ICON gss.ico
+
 OPENGSSAPIDLG DIALOG 63, 65, 175, 51
 STYLE DS_ABSALIGN | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Open GSSAPI Connection"
