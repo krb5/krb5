@@ -1,3 +1,8 @@
+2003-08-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* getdate.y (bcopy): Don't bother with HAVE_BCOPY and HAVE_MEMCPY
+	tests; always define the macro if it's not already defined.
+
 2003-06-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.c (strdate): Increase size of buffer to 40.  Use sizeof

@@ -108,7 +108,7 @@ struct my_timeb {
 /* Some old versions of bison generate parsers that use bcopy.
    That loses on systems that don't provide the function, so we have
    to redefine it here.  */
-#if !defined (HAVE_BCOPY) && defined (HAVE_MEMCPY) && !defined (bcopy)
+#ifndef bcopy
 #define bcopy(from, to, len) memcpy ((to), (from), (len))
 #endif
 
