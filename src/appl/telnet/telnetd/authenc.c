@@ -44,7 +44,7 @@ net_write(str, len)
 {
 	if (len < 0)
 		return 0;
-	return netwrite(str, len);
+	return netwrite(str, (size_t) len);
 }
 
 void

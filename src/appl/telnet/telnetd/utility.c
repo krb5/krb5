@@ -126,7 +126,7 @@ ptyflush()
 		DIAG((TD_REPORT | TD_PTYDATA),
 		     netprintf("td: ptyflush %d chars\r\n", n));
 		DIAG(TD_PTYDATA, printdata("pd", pbackp, n));
-		n = write(pty, pbackp, n);
+		n = write(pty, pbackp, (unsigned) n);
 	}
 	if (n < 0) {
 		if (errno == EWOULDBLOCK || errno == EINTR)
@@ -224,7 +224,7 @@ netclear()
 
     while (nfrontp > thisitem) {
 	if (wewant(thisitem)) {
-	    int length;
+	    unsigned int length;
 
 	    next = thisitem;
 	    do {
@@ -273,7 +273,7 @@ netflush()
 	 * write the entire buffer in non-OOB mode.
 	 */
 	if ((neturg == 0) || (not42 == 0)) {
-	    n = write(net, nbackp, n);	/* normal write */
+	    n = write(net, nbackp, (unsigned) n);	/* normal write */
 	} else {
 	    n = neturg - nbackp;
 	    /*
@@ -330,7 +330,7 @@ netflush()
  * Thou shalt not call this with a "%s" format; use netputs instead.
  * We also don't deal with floating point widths in here.
  */
-void
+static void
 netprintf_ext(int noflush, int seturg, const char *fmt, va_list args)
 {
 	size_t remain;
@@ -413,7 +413,7 @@ netprintf_noflush(const char *fmt, ...)
  * netflush() if needed.
  */
 int
-netwrite(const char *buf, size_t len)
+netwrite(const unsigned char *buf, size_t len)
 {
 	size_t remain;
 
@@ -437,7 +437,7 @@ netwrite(const char *buf, size_t len)
 void
 netputs(const char *s)
 {
-	netwrite(s, strlen(s));
+	netwrite((const unsigned char *) s, strlen(s));
 }
 
 /*
@@ -463,7 +463,7 @@ fatal(f, msg)
 		netflush();
 	}
 #endif	/* ENCRYPTION */
-	(void) write(f, buf, (int)strlen(buf));
+	(void) write(f, buf, strlen(buf));
 	sleep(1);	/*XXX*/
 	exit(1);
 }
@@ -693,7 +693,7 @@ printsub(direction, pointer, length)
 	    switch (pointer[1]) {
 	    case TELQUAL_IS:
 		netputs("IS \"");
-		netwrite((char *)pointer + 2, (size_t)(length - 2));
+		netwrite(pointer + 2, (size_t)(length - 2));
 		netputs("\"");
 		break;
 	    case TELQUAL_SEND:
@@ -713,7 +713,7 @@ printsub(direction, pointer, length)
 	    switch (pointer[1]) {
 	    case TELQUAL_IS:
 		netputs("IS ");
-		netwrite((char *)pointer + 2, (size_t)(length - 2));
+		netwrite(pointer + 2, (size_t)(length - 2));
 		break;
 	    default:
 		if (pointer[1] == 1)
@@ -962,7 +962,7 @@ do {						\
 	    switch (pointer[1]) {
 	    case TELQUAL_IS:
 		netputs("IS \"");
-		netwrite((char *)pointer + 2, (size_t)(length - 2));
+		netwrite(pointer + 2, (size_t)(length - 2));
 		netputs("\"");
 		break;
 	    case TELQUAL_SEND:
@@ -1063,7 +1063,8 @@ do {						\
 		netputs(((pointer[3] & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON)
 			? "|ENCRYPT" : "");
 
-		auth_printsub(&pointer[1], length - 1, buf, sizeof(buf));
+		auth_printsub(&pointer[1], length - 1, (unsigned char *)buf, 
+			      sizeof(buf));
 		netputs(buf);
 		break;
 
@@ -1150,7 +1151,8 @@ do {						\
 		    netprintf("%d (unknown)", pointer[2]);
 		netputs(" ");
 
-		encrypt_printsub(&pointer[1], length - 1, buf, sizeof(buf));
+		encrypt_printsub(&pointer[1], length - 1, 
+				 (unsigned char *) buf, sizeof(buf));
 		netputs(buf);
 		break;
 

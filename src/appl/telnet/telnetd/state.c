@@ -1633,7 +1633,7 @@ send_status()
 	ADD(IAC);
 	ADD(SE);
 
-	netwrite(statusbuf, ncp - statusbuf);
+	netwrite(statusbuf, (unsigned) (ncp - statusbuf));
 	netflush();	/* Send it on its way */
 
 	DIAG(TD_OPTIONS,

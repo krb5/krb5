@@ -855,7 +855,7 @@ tty_iscrnl()
  */
 struct termspeeds {
 	int	speed;
-	int	value;
+	speed_t	value;
 } termspeeds[] = {
 	{ 0,     B0 },    { 50,    B50 },   { 75,    B75 },
 	{ 110,   B110 },  { 134,   B134 },  { 150,   B150 },
@@ -1437,7 +1437,7 @@ addarg(argv, val)
 	if (cpp == &argv[(long)argv[-1]]) {
 		--argv;
 		*argv = (char *)((long)(*argv) + 10);
-		argv = (char **)realloc(argv, (long)(*argv) + 2);
+		argv = (char **)realloc(argv, sizeof(*argv) * ((long)(*argv) + 2));
 		if (argv == NULL)
 			return(NULL);
 		argv++;

@@ -25,6 +25,30 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS(string.h arpa/nameser.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/filio.h sys/stream.h sys/utsname.h memory.h)
 AC_CHECK_FUNCS(gettosbyname vsnprintf)
 KRB5_AC_INET6
+dnl
+dnl Test if speed_t needs to be defined
+AC_CACHE_CHECK([if speed_t is defined], krb5_cv_type_speed_t,
+[AC_TRY_COMPILE(dnl
+[#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifndef	USE_TERMIO
+#include <sgtty.h>
+#else
+# ifdef	SYSV_TERMIO
+# include <termio.h>
+# else
+# include <termios.h>
+# endif
+#endif
+],[speed_t termspeed],krb5_cv_type_speed_t=yes, krb5_cv_type_speed_t=no)])
+if test $krb5_cv_type_speed_t = no; then
+   AC_DEFINE(speed_t, int)
+fi;
+dnl
+dnl
 dnl Make our operating system-specific security checks and definitions for
 dnl login.
 dnl

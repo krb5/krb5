@@ -180,7 +180,7 @@ extern void
 extern void netprintf (const char *, ...);
 extern void netprintf_urg (const char *fmt, ...);
 extern void netprintf_noflush (const char *fmt, ...);
-extern int netwrite (const char *, size_t);
+extern int netwrite (const unsigned char *, size_t);
 extern void netputs (const char *);
 
 #ifdef	ENCRYPTION
