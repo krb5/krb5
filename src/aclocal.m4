@@ -304,11 +304,29 @@ define(CopyHeader,[
 divert(9)dnl
 
 includes:: $1
+	-mkdir $2
 	-if cmp $1 $2/$1 >/dev/null 2>&1; then \
 		echo ; \
 	else \
 		[$](RM) $2/$1 ; \
 		[$](CP) $1 $2/$1; \
+	fi
+
+divert(0)dnl
+])dnl
+dnl
+dnl copy source header file into include dir -- CopySrcHeader(hfile,hdir)
+dnl
+define(CopySrcHeader,[
+divert(9)dnl
+
+includes:: $1
+	-mkdir $2
+	-if cmp $(srcdir)/$1 $2/$1 >/dev/null 2>&1; then \
+		echo ; \
+	else \
+		[$](RM) $2/$1 ; \
+		[$](CP) $(srcdir)/$1 $2/$1; \
 	fi
 
 divert(0)dnl
