@@ -30,12 +30,15 @@
 #include <gssrpc/rpc.h>
 /*
  * This file should only contain common data (global data) that is exported
- * by public interfaces 
+ * by public interfaces.
+ *
+ * Actually initialized to prevent creation of common blocks, which
+ * can be problematic on some architectures.
  */
-struct opaque_auth _null_auth;
+struct opaque_auth _null_auth = {0};
 #ifdef FD_SETSIZE
-fd_set svc_fdset;
+fd_set svc_fdset = {0};
 #else
-int svc_fds;
+int svc_fds = 0;
 #endif /* def FD_SETSIZE */
-struct rpc_createerr rpc_createerr;
+struct rpc_createerr rpc_createerr = {0};
