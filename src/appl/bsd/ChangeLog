@@ -1,3 +1,8 @@
+2003-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* krshd.c (main): Use LOG_AUTH syslog facility, not LOG_DAEMON,
+	for consistency with krlogind.c.
+
 2003-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* kcmd.c (kcmd_connect): Log errors if a connect to port 0 is
