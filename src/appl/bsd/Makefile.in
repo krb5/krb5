@@ -19,6 +19,7 @@ DEFINES= $(RSH) $(RPROGS) \
  	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\"
 
 all:: rsh rcp rlogin krshd krlogind login.krb5
+clean:: rsh rcp rlogin krshd krlogind login.krb5
 
 rsh: krsh.o kcmd.o forward.o
 	$(CC) $(CFLAGS) -o rsh krsh.o kcmd.o forward.o $(KLIB) $(LIBS)
