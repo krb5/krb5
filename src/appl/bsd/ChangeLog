@@ -1,3 +1,8 @@
+Thu Aug 18 18:55:36 1994  Mark Eichin  (eichin@perdiem)
+
+	* configure.in (LOGINLIBS): always substitute it, even if it isn't
+	set.
+
 Tue Aug 16 22:41:25 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* krlogind.c: add sys/ioctl.h.

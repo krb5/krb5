@@ -12,11 +12,13 @@ AC_HAVE_LIBRARY(-lndbm)
 AC_HAVE_LIBRARY(-ldbm)
 dnl
 dnl AIX has them all; SCO might too
+LOGINLIBS=
 AC_HAVE_LIBRARY(-lodm,
   AC_HAVE_LIBRARY(-ls,
     AC_HAVE_LIBRARY(-lcfg, 
       LOGINLIBS="-lodm -ls -lcfg" 
-      AC_SUBST(LOGINLIBS))))
+      )))
+AC_SUBST(LOGINLIBS)
 dnl
 AC_VFORK
 AC_FUNC_CHECK(strsave,AC_DEFINE(HAS_STRSAVE))
