@@ -65,6 +65,9 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #include <fcntl.h>
 #include <time.h>
 #include <pwd.h>
+#ifdef HAVE_SHADOW
+#include <shadow.h>
+#endif
 #include <setjmp.h>
 #include <netdb.h>
 #include <errno.h>
@@ -468,6 +471,9 @@ sgetpwnam(name)
 {
 	static struct passwd save;
 	register struct passwd *p;
+#ifdef HAVE_SHADOW
+	register struct spwd *sp;
+#endif
 	char *sgetsave();
 
 	if ((p = getpwnam(name)) == NULL)
@@ -481,7 +487,14 @@ sgetpwnam(name)
 	}
 	save = *p;
 	save.pw_name = sgetsave(p->pw_name);
+#ifdef HAVE_SHADOW
+	if ((sp = getspnam(name)) == NULL)
+	    save.pw_passwd = sgetsave(p->pw_passwd);
+	else
+	    save.pw_passwd = sgetsave(sp->sp_pwdp);
+#else
 	save.pw_passwd = sgetsave(p->pw_passwd);
+#endif
 	save.pw_gecos = sgetsave(p->pw_gecos);
 	save.pw_dir = sgetsave(p->pw_dir);
 	save.pw_shell = sgetsave(p->pw_shell);
