@@ -245,19 +245,40 @@ krb5_error_code krb5_rc_io_move (context, new, old)
     krb5_rc_iostuff *new;
     krb5_rc_iostuff *old;
 {
- if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
-   return KRB5_RC_IO_UNKNOWN;
- (void) krb5_rc_io_close(context, new);
- new->fn = malloc(strlen(old->fn)+1);
- if (new->fn == 0)
-   return ENOMEM;
- strcpy(new->fn, old->fn);
-#ifdef macintosh
- new->fd = fcntl(old->fd, F_DUPFD);
+#if defined(_MSDOS) || defined(_WIN32)
+    /*
+     * Work around provided by Tom Sanfilippo to work around poor
+     * Windows emulation of POSIX functions.  Rename and dup has
+     * different semantics!
+     */
+    char *fn = NULL;
+    GETDIR;
+    close(new->fd);
+    unlink(new->fn);
+    close(old->fd);
+    if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
+	return KRB5_RC_IO_UNKNOWN;
+    if (!(fn = malloc(strlen(new->fn) - dirlen + 1)))
+	return KRB5_RC_IO_MALLOC;
+    strcpy(fn, new->fn + dirlen);
+    krb5_rc_io_close(context, new);
+    krb5_rc_io_open(context, new, fn);
+    free(fn);
 #else
- new->fd = dup(old->fd);
+    if (rename(old->fn,new->fn) == -1) /* MUST be atomic! */
+	return KRB5_RC_IO_UNKNOWN;
+    (void) krb5_rc_io_close(context, new);
+    new->fn = malloc(strlen(old->fn)+1);
+    if (new->fn == 0)
+	return ENOMEM;
+    strcpy(new->fn, old->fn);
+#ifdef macintosh
+    new->fd = fcntl(old->fd, F_DUPFD);
+#else
+    new->fd = dup(old->fd);
 #endif
- return 0;
+#endif
+    return 0;
 }
 
 krb5_error_code krb5_rc_io_write (context, d, buf, num)
