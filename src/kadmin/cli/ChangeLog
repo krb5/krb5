@@ -1,3 +1,7 @@
+2004-05-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadmin.h, keytab.c: Remove inclusion of k5-int.h.
+
 2004-05-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* getdate.y: Include krb5.h and kadmin.h.

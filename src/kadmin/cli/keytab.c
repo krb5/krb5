@@ -40,7 +40,6 @@ static char *rcsid = "$Header$";
 #include <string.h>
 
 #include <krb5.h>
-#include <k5-int.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
 #include "kadmin.h"
