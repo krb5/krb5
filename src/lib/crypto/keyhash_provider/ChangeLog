@@ -1,3 +1,9 @@
+2001-10-28  Jeff Altman <jaltman@columbia.edu>
+
+        * Makefile.in - added dependency info for hmac_md5.c
+          Fixed typo $(OUTP)hmac_md5.c -> $(OUTPRE)hmac_md5.c which prevented
+          builds on Windows.
+
 2001-10-23  Sam Hartman  <hartmans@mit.edu>
 
 	* t_cksum.c (main): Include usage argument to verify
