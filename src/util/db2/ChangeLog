@@ -1,3 +1,7 @@
+Thu Aug 22 23:13:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Add dummy rule for Makefiles.
+
 Wed Jul 31 03:35:47 1996  Tom Yu  <tlyu@mit.edu>
 
 	* obj/Makefile.in: Add -Dfoo=my_foo when compiling replacement

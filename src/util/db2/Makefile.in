@@ -10,5 +10,7 @@ distclean::
 
 install::
 
+Makefiles::
+
 realclean::
 	rm -rf configure db-config.h.in
