@@ -240,8 +240,10 @@ master key name '%s'\n",
 	com_err(argv[0], retval, "while calculated master key salt");
 	exit_status++; return;
     }
-    if (retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
-				      &pwd, &master_salt, &master_keyblock)) {
+
+    retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
+				  &pwd, &master_salt, &master_keyblock);
+    if (retval) {
 	com_err(argv[0], retval, "while transforming master key from password");
 	exit_status++; return;
     }
@@ -261,7 +263,7 @@ master key name '%s'\n",
 		global_params.dbname);
 	exit_status++; return;
     }
-    if (retval = krb5_db_fini(util_context)) {
+    if ((retval = krb5_db_fini(util_context))) {
         com_err(argv[0], retval, "while closing current database");
         exit_status++; return;
     }
@@ -287,10 +289,11 @@ master key name '%s'\n",
      * it; delete the file below if it was not requested.  DO NOT EXIT
      * BEFORE DELETING THE KEYFILE if do_stash is not set.
      */
-    if (retval = krb5_db_store_mkey(util_context,
-				    global_params.stash_file,
-				    master_princ,
-				    &master_keyblock)) {
+    retval = krb5_db_store_mkey(util_context,
+			    global_params.stash_file,
+			    master_princ,
+			    &master_keyblock);
+    if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	printf("Warning: couldn't stash master key.\n");
     }
@@ -324,7 +327,6 @@ tgt_keysalt_iterate(ksent, ptr)
     struct iterate_args	*iargs;
     krb5_keyblock	key;
     krb5_int32		ind;
-    krb5_pointer rseed;
     krb5_data	pwd;
 
     iargs = (struct iterate_args *) ptr;
@@ -338,7 +340,8 @@ tgt_keysalt_iterate(ksent, ptr)
      */
     pwd.data = mkey_password;
     pwd.length = strlen(mkey_password);
-    if (kret = krb5_c_random_seed(context, &pwd))
+    kret = krb5_c_random_seed(context, &pwd);
+    if (kret)
 	return kret;
 
     if (!(kret = krb5_dbe_create_key_data(iargs->ctx, iargs->dbentp))) {

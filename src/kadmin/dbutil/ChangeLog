@@ -1,3 +1,12 @@
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm5_create.c: Add prototype for static
+	add_admin_princs(). Cleanup calling of add_admin_princs() to be
+	consistant with prototype.
+
+	* kdb5_create.c, kdb5_stash.c, kdb5_destroy.c: Cleanup assignments
+	in conditionals.
+
 Mon Feb 26 15:01:27 2001  Ezra Peisach  <epeisach@mit.edu>
 
 	* loadv4.c, ovload.c, kdb5_util.h, kdb5_util.c, kadm5_create.c,

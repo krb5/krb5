@@ -51,6 +51,7 @@ static char *rcsid = "$Header$";
 
 static int add_admin_princ(void *handle, krb5_context context,
 		    char *name, char *realm, int attrs, int lifetime);
+static int add_admin_princs(void *handle, krb5_context context, char *realm);
 
 #define ERR 1
 #define OK 0
@@ -119,7 +120,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
 	  return retval;
      }
 
-     retval = add_admin_princs(handle, &context, params->realm);
+     retval = add_admin_princs(handle, context, params->realm);
 
      kadm5_destroy(handle);
 
@@ -229,25 +230,25 @@ int add_admin_princ(void *handle, krb5_context context,
 		    char *name, char *realm, int attrs, int lifetime)
 {
      char *fullname;
-     int nprincs;
      krb5_error_code ret;
      kadm5_principal_ent_rec ent;
 
      memset(&ent, 0, sizeof(ent));
 
      fullname = build_name_with_realm(name, realm);
-     if (ret = krb5_parse_name(context, fullname, &ent.principal)) {
+     ret = krb5_parse_name(context, fullname, &ent.principal);
+     if (ret) {
 	  com_err(progname, ret, str_PARSE_NAME);
 	  return(ERR);
      }
      ent.max_life = lifetime;
      ent.attributes = attrs | KRB5_KDB_DISALLOW_ALL_TIX;
      
-     if (ret = kadm5_create_principal(handle, &ent,
-					   (KADM5_PRINCIPAL |
-					    KADM5_MAX_LIFE |
-					    KADM5_ATTRIBUTES),
-					   "to-be-random")) {
+     ret = kadm5_create_principal(handle, &ent,
+				  (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
+				   KADM5_ATTRIBUTES),
+				  "to-be-random");
+     if (ret) {
 	  if (ret != KADM5_DUP) {
 	       com_err(progname, ret, str_PUT_PRINC, fullname);
 	       krb5_free_principal(context, ent.principal);

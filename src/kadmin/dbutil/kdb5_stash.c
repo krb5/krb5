@@ -83,8 +83,6 @@ char *argv[];
     char *keyfile = 0;
     krb5_context context;
 
-    int enctypedone = 0;
-
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
@@ -121,50 +119,59 @@ char *argv[];
 	exit_status++; return; 
     }
 
-    if (retval = krb5_db_set_name(context, dbname)) {
+    retval = krb5_db_set_name(context, dbname);
+    if (retval) {
 	com_err(argv[0], retval, "while setting active database to '%s'",
 		dbname);
 	exit_status++; return; 
     }
 
     /* assemble & parse the master key name */
-
-    if (retval = krb5_db_setup_mkey_name(context, mkey_name, realm, 
-					 &mkey_fullname, &master_princ)) {
+    retval = krb5_db_setup_mkey_name(context, mkey_name, realm, 
+				     &mkey_fullname, &master_princ);
+    if (retval) {
 	com_err(argv[0], retval, "while setting up master key name");
 	exit_status++; return; 
     }
 
-    if (retval = krb5_db_init(context)) {
+    retval = krb5_db_init(context);
+    if (retval) {
 	com_err(argv[0], retval, "while initializing the database '%s'",
 		dbname);
 	exit_status++; return; 
     }
 
     /* TRUE here means read the keyboard, but only once */
-    if (retval = krb5_db_fetch_mkey(context, master_princ,
-				    master_keyblock.enctype,
-				    TRUE, FALSE, (char *) NULL,
-				    0, &master_keyblock)) {
+    retval = krb5_db_fetch_mkey(context, master_princ,
+				master_keyblock.enctype,
+				TRUE, FALSE, (char *) NULL,
+				0, &master_keyblock);
+    if (retval) {
 	com_err(argv[0], retval, "while reading master key");
 	(void) krb5_db_fini(context);
 	exit_status++; return; 
     }
-    if (retval = krb5_db_verify_master_key(context, master_princ, 
-					   &master_keyblock)) {
+
+    retval = krb5_db_verify_master_key(context, master_princ, 
+				       &master_keyblock);
+    if (retval) {
 	com_err(argv[0], retval, "while verifying master key");
 	(void) krb5_db_fini(context);
 	exit_status++; return; 
     }	
-    if (retval = krb5_db_store_mkey(context, keyfile, master_princ, 
-				    &master_keyblock)) {
+
+    retval = krb5_db_store_mkey(context, keyfile, master_princ, 
+				&master_keyblock);
+    if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
 	(void) krb5_db_fini(context);
 	exit_status++; return; 
     }
     memset((char *)master_keyblock.contents, 0, master_keyblock.length);
-    if (retval = krb5_db_fini(context)) {
+
+    retval = krb5_db_fini(context);
+    if (retval) {
 	com_err(argv[0], retval, "closing database '%s'", dbname);
 	exit_status++; return; 
     }
