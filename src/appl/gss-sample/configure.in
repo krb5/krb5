@@ -1,6 +1,5 @@
 AC_INIT(gss-client.c)
 CONFIG_RULES
-USE_ANAME
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
 AC_CONST
 AC_PROG_INSTALL
