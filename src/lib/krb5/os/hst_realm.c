@@ -119,15 +119,21 @@ krb5_try_realm_txt_rr(prefix, name, realm)
         if ( strlen(prefix) + strlen(name) + 3 > MAX_DNS_NAMELEN )
             return KRB5_ERR_HOST_REALM_UNKNOWN;
         sprintf(host,"%s.%s", prefix, name);
-    }
-    /* Realm names don't (normally) end with ".", but if the query
-       doesn't end with "." and doesn't get an answer as is, the
-       resolv code will try appending the local domain.  Since the
-       realm names are absolutes, let's stop that.  */
-    h = host + strlen (host);
-    if (h > host && h[-1] != '.')
-	strcpy (h, ".");
 
+        /* Realm names don't (normally) end with ".", but if the query
+           doesn't end with "." and doesn't get an answer as is, the
+           resolv code will try appending the local domain.  Since the
+           realm names are absolutes, let's stop that.  
+
+           But only if a name has been specified.  If we are performing
+           a search on the prefix alone then the intention is to allow
+           the local domain or domain search lists to be expanded.
+        */
+
+        h = host + strlen (host);
+        if (h > host && h[-1] != '.')
+            strcpy (h, ".");
+    }
     size = res_search(host, C_IN, T_TXT, answer.bytes, sizeof(answer.bytes));
 
     if (size < 0)
