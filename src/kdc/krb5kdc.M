@@ -24,9 +24,6 @@ krb5kdc \- Kerberos V5 KDC
 .B \-M
 .I mkeyname
 ] [
-.B \-R
-.I replycache
-] [
 .B \-m
 ]
 .br
@@ -60,11 +57,6 @@ The
 .I mkeyname
 option specifies the principal name for the master key in the database;
 the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
-.PP
-The
-.B \-R
-option specifies the replay cache to be used; the default is KDCRCACHE
-(usually "dfl:krb5kdc_rcache").
 .PP
 The
 .B \-m
