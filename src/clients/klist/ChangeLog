@@ -1,3 +1,7 @@
+1999-08-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Use standard windows exe link flags.
+
 Mon May 10 15:13:58 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
