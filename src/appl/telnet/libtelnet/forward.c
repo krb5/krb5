@@ -54,17 +54,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, lusername)
     if (retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL)) 
 	return(retval);
 
-    if (*line && (tty = strchr(line, '/')) && (tty = strchr(tty+1, '/'))) {
-	++tty;
-	sprintf(ccname, "FILE:/tmp/krb5cc_%s", tty);
-	while (tty = strchr(tty, '/')) {
-	    tty++;
-	    *((char *)strrchr(ccname, '/')) = '_';
-	}
-    } else
-	/* since default will be based on uid and we haven't changed yet */
-	sprintf(ccname, "FILE:/tmp/krb5cc_%d", pwd->pw_uid);
-
+    sprintf(ccname, "FILE:/tmp/krb5cc_p%d", getpid());
     setenv(KRB5_ENV_CCNAME, ccname, 1);
 
     if (retval = krb5_cc_resolve(context, ccname, &ccache))
