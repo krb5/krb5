@@ -42,6 +42,7 @@ Internet File Transfer Protocol server
 [\fB\-d\fP] [\fB\-l\fP] [\fB\-t\fP \fItimeout\fP] [\fB\-T\fP
 \fImaxtimeout\fP] [\fB\-p\fP \fIport\fP] [\fB\-r\fP \fIrealm-file\fP]
 [\fB\-s\fP \fIsrvtab\fP]
+[\fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
 .SH DESCRIPTION
 .B Ftpd
 is the
@@ -95,6 +96,18 @@ Sets the name of the
 .I srvtab
 file to use.  The default value is normally
 .IR /etc/krb-srvtab .
+.TP
+\fB\-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+Controls the form of the remote hostname passed to login(1).
+Specifying \fBip\fP results in the numeric IP address always being
+passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
+maximum length of the hostname passed to login(1) before it will be
+passed as a numeric IP address.  If \fImaxhostlen\fP is 0, then the
+system default, as determined by the utmp or utmpx structures, is
+used.  The \fBnostriplocal\fP and \fBstriplocal\fP options, which must
+be preceded by a comma, control whether or not the local host domain
+is stripped from the remote hostname.  By default, the equivalent of
+\fBstriplocal\fP is in effect.
 .PP
 The ftp server currently supports the following ftp requests; case is
 not distinguished.

@@ -1,3 +1,7 @@
+Mon Nov 25 16:20:35 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in (check): Remove install rule to fix pmake problem. [236]
+
 Wed Sep 11 18:55:38 1996  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (memmove.o): add -DMEMMOVE to compile as memmove

@@ -203,7 +203,17 @@ asn1_error_code asn1_encode_generaltime(buf, val, retlen)
   gmt_time = val + EPOCH;
   gtime = gmtime(&gmt_time);
 
-  /* Time encoding: YYYYMMDDhhmmssZ */
+  /*
+   * Time encoding: YYYYMMDDhhmmssZ
+   *
+   * Sanity check this just to be paranoid, as gmtime can return NULL,
+   * and some bogus implementations might overrun on the sprintf.
+   */
+  if (gtime == NULL ||
+      gtime->tm_year > 9999 || gtime->tm_mon > 11 ||
+      gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
+      gtime->tm_min > 59 || gtime->tm_sec > 59)
+    return ASN1_BAD_GMTIME;
   sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
 	  1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
 	  gtime->tm_hour, gtime->tm_min, gtime->tm_sec);

@@ -1,3 +1,7 @@
+Thu Dec  5 21:59:34 1996  Tom Yu  <tlyu@mit.edu>
+
+	* klist.M: v5srvtab -> krb5.keytab [279]
+
 Wed Nov  6 12:02:59 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* klist.c (main): Check the error return from krb5_init_context(),

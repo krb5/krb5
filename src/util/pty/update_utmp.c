@@ -55,11 +55,14 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
 
     strncpy(ent.ut_line, line+sizeof("/dev/")-1, sizeof(ent.ut_line));
     ent.ut_time = time(0);
-#ifndef NO_UT_PID
+#ifdef NO_UT_PID
+    if (process_type == PTY_LOGIN_PROCESS)
+	return 0;
+#else /* NO_UT_PID */
     ent.ut_pid = pid;
-    switch ( process_type ) {
+    switch (process_type) {
     case PTY_LOGIN_PROCESS:
-	ent . ut_type = LOGIN_PROCESS;
+	ent.ut_type = LOGIN_PROCESS;
 	break;
     case PTY_USER_PROCESS:
 	ent.ut_type = USER_PROCESS;
@@ -133,12 +136,18 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
     strncpy(utx.ut_user, ent.ut_user, sizeof(ent.ut_user));
     strncpy(utx.ut_id, ent.ut_id, sizeof(ent.ut_id));
     strncpy(utx.ut_line, ent.ut_line, sizeof(ent.ut_line));
-    utx.ut_pid = ent.ut_pid;
+    utx.ut_pid = pid;		/* kludge for Irix, etc. to avoid trunc. */
     utx.ut_type = ent.ut_type;
 #ifdef UT_EXIT_STRUCTURE_DIFFER
     utx.ut_exit.ut_exit = ent.ut_exit.e_exit;
 #else
-    utx.ut_exit = ent.ut_exit;
+/* KLUDGE for now; eventually this will be a feature test... See PR#[40] */
+#ifdef __hpux	
+    utx.ut_exit.__e_termination = ent.ut_exit.e_termination;
+    utx.ut_exit.__e_exit = ent.ut_exit.e_exit;
+#else
+    /*xxx do nothing for now; we don't even know the structure member exists*/
+#endif
 #endif
     utx.ut_tv.tv_sec = ent.ut_time;
     utx.ut_tv.tv_usec = 0;
@@ -185,5 +194,9 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
 
 #endif /* HAVE_SETUTENT */
 
-    return ptyint_update_wtmp(&ent, host, userbuf);
+    /* Don't record LOGIN_PROCESS entries. */
+    if (process_type == PTY_LOGIN_PROCESS)
+      return 0;
+    else
+      return ptyint_update_wtmp(&ent, host, userbuf);
 }

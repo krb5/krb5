@@ -12,6 +12,8 @@ klogind \- remote login server
 [
 .B \-kr54cpPe
 ]
+[
+[ \fB\-w\fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]] ]
 .SH DESCRIPTION
 .I Klogind
 is the server for the 
@@ -121,6 +123,24 @@ client terminal's baud rate and terminal type, as found in the
 environment variable, ``TERM''; see .IR environ (7).  The screen or
 window size of the terminal is requested from the client, and window
 size changes from the client are propagated to the pseudo terminal.
+
+.PP
+.I Klogind
+supports the following options to control the form of the hostname
+passed to login(1):
+
+.TP
+\fB\-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+Controls the form of the remote hostname passed to login(1).
+Specifying \fBip\fP results in the numeric IP address always being
+passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
+maximum length of the hostname passed to login(1) before it will be
+passed as a numeric IP address.  If \fImaxhostlen\fP is 0, then the
+system default, as determined by the utmp or utmpx structures, is
+used.  The \fBnostriplocal\fP and \fBstriplocal\fP options, which must
+be preceded by a comma, control whether or not the local host domain
+is stripped from the remote hostname.  By default, the equivalent of
+\fBstriplocal\fP is in effect.
 
 .PP
 .I Klogind

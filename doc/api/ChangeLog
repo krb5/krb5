@@ -1,3 +1,9 @@
+1999-01-20  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5.tex (krb5_mk_safe): Fix reference to a non-existent flag.
+		(KRB5_AUTH_CONTEXT_DO_TIME_NOTIME should have been
+		KRB5_AUTH_CONTEXT_DO_TIME).  [krb5-doc/528]
+
 Thu Jun  6 15:50:39 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.tex: Update function prototype for krb5_encrypt_tkt_part

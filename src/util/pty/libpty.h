@@ -41,6 +41,7 @@ long pty_update_utmp (int process_type,int pid,  char *user, char *line, char *h
 long pty_logwtmp (char *tty, char * user, char *host);
 
 long pty_cleanup(char *slave, int pid, int update_utmp);
+long pty_make_sane_hostname(struct sockaddr_in *, int, int, int, char **);
 #else /*__STDC__*/
 long pty_init();
 long pty_getpty();
@@ -52,6 +53,7 @@ long pty_initialize_slave();
 long pty_update_utmp();
 long pty_logwtmp();
 long pty_cleanup();
+long pty_make_sane_hostname();
 #endif /* __STDC__*/
 #define __LIBPTY_H__
 #endif

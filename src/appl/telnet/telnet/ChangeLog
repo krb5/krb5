@@ -1,3 +1,35 @@
+Fri Apr 30 15:23:39 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Fix to define HAVE_SETUPTERM instead of
+	HAS_SETUPTERM (due to merge botch).
+
+1999-04-13    <tytso@rsts-11.mit.edu>
+
+	* configure.in: Check for setupterm() in libncurses in addition to
+		libcurses.  (Will be needed for Linux/Redhat 6.0)
+
+Tue Nov 26 20:41:31 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: Check for apra/inet.h
+
+	* commands.c: Remove explicit declaration of inet_addr, and
+	declare INADDR_NONE to be 0xffffffff again, but mask off the lower
+	32 bits while doing the compare.
+
+Sat Nov 23 00:33:58 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* commands.c (tn): Patch from mycroft@mit.edu for Alpha NetBSD.
+  	Comparing to -1 is not 64-bit clean.
+ 	[233]
+	(INADDR_NONE): Mycroft suggests using -1 not 0xffffffff if I have
+ 	to define it ourselves. [233]
+
+	Fri Nov 22 15:48:57 1996  unknown  <bjaspan@mit.edu>
+
+	* commands.c (sourceroute): use sizeof instead of h_length to
+ 	determine number of bytes of addr to copy from DNS response
+ 	[krb5-misc/211]
+
 Thu Nov 14 14:25:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sys_bsd.c(intr): Added checks to intr_waiting and intr_happened

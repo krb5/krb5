@@ -47,7 +47,9 @@
 	#define MAX_KPW_LEN	        128
 	/* include space for '.' and '@' */
 	#define	MAX_K_NAME_SZ	    (ANAME_SZ + INST_SZ + REALM_SZ + 2)
+#ifdef CYGNUS
 	#define ORGANIZATION        "Cygnus Support"
+#endif
 
     #define CREDENTIALS         char
 #endif
@@ -2139,9 +2141,11 @@ kwin_command (
     		strcpy(copyright, "        Kerberos 5 for Windows\n");
         #endif
 		strcat(copyright, "\n                Version 1.00\n\n");
+#ifdef CYGNUS
 		strcat(copyright, "          For support, contact:\n");
 		strcat(copyright, ORGANIZATION);
 		strcat(copyright, " - (415) 903-1400");
+#endif
 		MessageBox(hwnd, copyright, "Kerberos", MB_OK);
 
 		return TRUE;

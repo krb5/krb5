@@ -48,7 +48,7 @@ krb5_os_get_tty_uio(context, uio)
     int 		fd;
     char		read_string[BUFSIZ];
     char		*cp;
-    char		ch;
+    int			ch;
 
     /* get the file descriptor associated with stdin */
     fd=fileno(stdin);

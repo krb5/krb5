@@ -25,12 +25,22 @@
 #define WTMP_FILE _PATH_WTMP
 #endif
 
+#if !defined(WTMPX_FILE) && defined(_PATH_WTMPX) && defined(HAVE_UPDWTMPX)
+#define WTMPX_FILE _PATH_WTMPX
+#endif
 
 /* if it is *still* missing, assume SunOS */
 #ifndef WTMP_FILE
 #define	WTMP_FILE	"/usr/adm/wtmp"
 #endif
 
+#if defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 1)
+/* This is ugly, but the lack of standardization in the utmp/utmpx
+ * space, and what glibc implements and doesn't make available, is
+ * even worse.
+ */
+#undef HAVE_UPDWTMPX		/* Don't use updwtmpx for glibc 2.1 */
+#endif
 
 long ptyint_update_wtmp (ent , host, user)
     struct utmp *ent;
@@ -40,6 +50,7 @@ long ptyint_update_wtmp (ent , host, user)
     struct utmp ut;
     struct stat statb;
     int fd;
+    time_t uttime;
 #ifdef HAVE_UPDWTMPX
     struct utmpx utx;
 
@@ -71,7 +82,8 @@ long ptyint_update_wtmp (ent , host, user)
 #ifndef NO_UT_HOST
 	  (void)strncpy(ut.ut_host, ent->ut_host, sizeof(ut.ut_host));
 #endif
-	  (void)time(&ut.ut_time);
+	  (void)time(&uttime);
+	  ut.ut_time = uttime;
 #if defined(HAVE_GETUTENT) && defined(USER_PROCESS)
 	  if (ent->ut_name) {
 	    if (!ut.ut_pid)
