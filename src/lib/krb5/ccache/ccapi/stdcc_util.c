@@ -37,7 +37,7 @@ int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray)
 			/* Allocate the array of pointers: */
 			for (dataPtr = ccCreds->addresses; *dataPtr != NULL; numRecords++, dataPtr++) {}
 
-			v5Creds->addresses = (krb5_address **) malloc (sizeof(krb5_address *) * numRecords + 1);
+			v5Creds->addresses = (krb5_address **) malloc (sizeof(krb5_address *) * (numRecords + 1));
 			if (v5Creds->addresses == NULL)
 				return ENOMEM;
 
@@ -75,7 +75,7 @@ int copyCCDataArrayToK5(cc_creds *ccCreds, krb5_creds *v5Creds, char whichArray)
 			/* Allocate the array of pointers: */
 			for (dataPtr = ccCreds->authdata; *dataPtr != NULL; numRecords++, dataPtr++) {}
 
-			v5Creds->authdata = (krb5_authdata **) malloc (sizeof(krb5_authdata *) * numRecords + 1);
+			v5Creds->authdata = (krb5_authdata **) malloc (sizeof(krb5_authdata *) * (numRecords + 1));
 			if (v5Creds->authdata == NULL)
 				return ENOMEM;
 			
@@ -123,7 +123,7 @@ int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 			/* Allocate the array of pointers: */
 			for (addrPtr = v5Creds->addresses; *addrPtr != NULL; numRecords++, addrPtr++) {}
 
-			ccCreds->addresses = (cc_data **) malloc (sizeof(cc_data *) * numRecords + 1);
+			ccCreds->addresses = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
 			if (ccCreds->addresses == NULL)
 				return ENOMEM;
 
@@ -160,7 +160,7 @@ int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 			/* Allocate the array of pointers: */
 			for (authPtr = v5Creds->authdata; *authPtr != NULL; numRecords++, authPtr++) {}
 
-			ccCreds->authdata = (cc_data **) malloc (sizeof(cc_data *) * numRecords + 1);
+			ccCreds->authdata = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
 			if (ccCreds->authdata == NULL)
 				return ENOMEM;
 			

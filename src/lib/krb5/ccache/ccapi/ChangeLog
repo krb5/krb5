@@ -1,3 +1,11 @@
+2000-04-07  Jeffrey Altman <jaltman@columbia.edu>
+
+	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+
+          memory was being allocated as   (sizeof(foo) * count + 1)
+          instead of                      (sizeof(foo) * (count + 1))
+
 2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
 
 	* stdcc_util.c (copyCCDataArrayToK5, copyCCDataArrayToK5): 
