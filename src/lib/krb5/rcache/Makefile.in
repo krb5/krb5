@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=rcache
-##DOS##OBJFILE=..\$(MYNAME).lst
+##DOS##OBJFILE=..\$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS = \

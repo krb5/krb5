@@ -2,7 +2,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=posix
-##DOS##OBJFILE=..\$(MYNAME).lst
+##DOS##OBJFILE=..\$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS=setenv.o @LIBOBJS@
