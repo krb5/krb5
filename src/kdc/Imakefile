@@ -26,6 +26,7 @@ SRCS= \
 	network.c \
 	policy.c \
 	extern.c \
+	replay.c \
 	kerberos_v4.c
 
 OBJS= \
@@ -38,6 +39,7 @@ OBJS= \
 	network.o \
 	policy.o \
 	extern.o \
+	replay.o \
 	kerberos_v4.o
 
 ErrorTableObjectRule()
