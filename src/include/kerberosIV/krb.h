@@ -396,6 +396,9 @@ char *tkt_string();
 /* until we do V4 compat under DOS, just turn this off */
 #define INTERFACE
 #define FAR
+#define	_fmemcpy	memcpy
+#define	_fstrncpy	strncpy
+#define	far_fputs	fputs
 /* and likewise, just drag in the unix time interface */
 #define	TIME_GMT_UNIXSEC	unix_time_gmt_unixsec((unsigned KRB4_32 *)0)
 #define	TIME_GMT_UNIXSEC_US(us)	unix_time_gmt_unixsec((us))
