@@ -217,8 +217,15 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 	data->comment = 0;
 	data->filespec = expanded_filename;
 
+	retval = k5_mutex_init(&data->lock);
+	if (retval) {
+	    profile_close_file(prf);
+	    return retval;
+	}
+
 	retval = profile_update_file(prf);
 	if (retval) {
+		k5_mutex_destroy(&data->lock);
 		profile_close_file(prf);
 		return retval;
 	}
@@ -247,11 +254,20 @@ errcode_t profile_update_file_data(prf_data_t data)
 #endif
 	FILE *f;
 
+	retval = k5_mutex_lock(&data->lock);
+	if (retval)
+	    return retval;
+
 #ifdef HAVE_STAT
-	if (stat(data->filespec, &st))
-		return errno;
-	if (st.st_mtime == data->timestamp)
-		return 0;
+	if (stat(data->filespec, &st)) {
+	    retval = errno;
+	    k5_mutex_unlock(&data->lock);
+	    return retval;
+	}
+	if (st.st_mtime == data->timestamp) {
+	    k5_mutex_unlock(&data->lock);
+	    return 0;
+	}
 	if (data->root) {
 		profile_free_node(data->root);
 		data->root = 0;
@@ -266,13 +282,16 @@ errcode_t profile_update_file_data(prf_data_t data)
 	 * memory image is correct.  That is, we won't reread the
 	 * profile file if it changes.
 	 */
-	if (data->root)
-		return 0;
+	if (data->root) {
+	    k5_mutex_unlock(&data->lock);
+	    return 0;
+	}
 #endif
 	errno = 0;
 	f = fopen(data->filespec, "r");
 	if (f == NULL) {
 		retval = errno;
+		k5_mutex_unlock(&data->lock);
 		if (retval == 0)
 			retval = ENOENT;
 		return retval;
@@ -283,11 +302,14 @@ errcode_t profile_update_file_data(prf_data_t data)
 		data->flags |= PROFILE_FILE_RW;
 	retval = profile_parse_file(f, &data->root);
 	fclose(f);
-	if (retval)
-		return retval;
+	if (retval) {
+	    k5_mutex_unlock(&data->lock);
+	    return retval;
+	}
 #ifdef HAVE_STAT
 	data->timestamp = st.st_mtime;
 #endif
+	k5_mutex_unlock(&data->lock);
 	return 0;
 }
 
@@ -307,12 +329,18 @@ errcode_t profile_flush_file_data(prf_data_t data)
 	profile_filespec_t new_file;
 	profile_filespec_t old_file;
 	errcode_t	retval = 0;
-	
+
 	if (!data || data->magic != PROF_MAGIC_FILE_DATA)
 		return PROF_MAGIC_FILE_DATA;
+
+	retval = k5_mutex_lock(&data->lock);
+	if (retval)
+	    return retval;
 	
-	if ((data->flags & PROFILE_FILE_DIRTY) == 0)
-		return 0;
+	if ((data->flags & PROFILE_FILE_DIRTY) == 0) {
+	    k5_mutex_unlock(&data->lock);
+	    return 0;
+	}
 
 	retval = ENOMEM;
 	
@@ -379,6 +407,7 @@ errcode_t profile_flush_file_data(prf_data_t data)
 	retval = 0;
 	
 errout:
+	k5_mutex_unlock(&data->lock);
 	if (new_file)
 		free(new_file);
 	if (old_file)
@@ -401,6 +430,15 @@ void profile_dereference_data(prf_data_t data)
 #else
     profile_free_file_data(data);
 #endif
+}
+
+int profile_lock_global()
+{
+    return k5_mutex_lock(&g_shared_trees_mutex);
+}
+int profile_unlock_global()
+{
+    return k5_mutex_unlock(&g_shared_trees_mutex);
 }
 
 void profile_free_file(prf_file_t prf)

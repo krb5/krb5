@@ -32,12 +32,19 @@ static errcode_t rw_setup(profile_t profile)
 		return PROF_MAGIC_PROFILE;
 
 	file = profile->first_file;
+
 	if (!(file->data->flags & PROFILE_FILE_RW))
-		return PROF_READ_ONLY;
+	    return PROF_READ_ONLY;
+
+	retval = profile_lock_global();
+	if (retval)
+	    return retval;
 
 	/* Don't update the file if we've already made modifications */
-	if (file->data->flags & PROFILE_FILE_DIRTY)
-		return 0;
+	if (file->data->flags & PROFILE_FILE_DIRTY) {
+	    profile_unlock_global();
+	    return 0;
+	}
 
 #ifdef SHARE_TREE_DATA
 	if ((file->data->flags & PROFILE_FILE_SHARED) != 0) {
@@ -63,6 +70,7 @@ static errcode_t rw_setup(profile_t profile)
 	    }
 
 	    if (retval != 0) {
+		profile_unlock_global();
 		free(new_data);
 		return retval;
 	    }
@@ -71,6 +79,7 @@ static errcode_t rw_setup(profile_t profile)
 	}
 #endif /* SHARE_TREE_DATA */
 
+	profile_unlock_global();
 	retval = profile_update_file(file);
 	
 	return retval;
@@ -101,30 +110,33 @@ profile_update_relation(profile_t profile, const char **names,
 	if (!old_value || !*old_value)
 		return PROF_EINVAL;
 
+	retval = k5_mutex_lock(&profile->first_file->data->lock);
+	if (retval)
+	    return retval;
 	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
 					   &state, &section);
-		if (retval)
-			return retval;
+		if (retval) {
+		    k5_mutex_unlock(&profile->first_file->data->lock);
+		    return retval;
+		}
 	}
 
 	state = 0;
 	retval = profile_find_node(section, *cpp, old_value, 0, &state, &node);
-	if (retval)
-		return retval;
-
-	if (new_value)
+	if (retval == 0) {
+	    if (new_value)
 		retval = profile_set_relation_value(node, new_value);
-	else
+	    else
 		retval = profile_remove_node(node);
-	if (retval)
-		return retval;
-
-	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
+	}
+	if (retval == 0)
+	    profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
+	k5_mutex_unlock(&profile->first_file->data->lock);
 	
-	return 0;
+	return retval;
 }
 
 /* 
@@ -139,7 +151,7 @@ profile_clear_relation(profile_t profile, const char **names)
 	struct profile_node *section, *node;
 	void		*state;
 	const char	**cpp;
-	
+
 	retval = rw_setup(profile);
 	if (retval)
 		return retval;
@@ -193,30 +205,32 @@ profile_rename_section(profile_t profile, const char **names,
 	if (names == 0 || names[0] == 0 || names[1] == 0)
 		return PROF_BAD_NAMESET;
 
+	retval = k5_mutex_lock(&profile->first_file->data->lock);
+	if (retval)
+	    return retval;
 	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
 		retval = profile_find_node(section, *cpp, 0, 1,
 					   &state, &section);
-		if (retval)
-			return retval;
+		if (retval) {
+		    k5_mutex_unlock(&profile->first_file->data->lock);
+		    return retval;
+		}
 	}
 
 	state = 0;
 	retval = profile_find_node(section, *cpp, 0, 1, &state, &node);
-	if (retval)
-		return retval;
-
-	if (new_name)
+	if (retval == 0) {
+	    if (new_name)
 		retval = profile_rename_node(node, new_name);
-	else
+	    else
 		retval = profile_remove_node(node);
-	if (retval)
-		return retval;
-
-	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
-	
-	return 0;
+	}
+	if (retval == 0)
+	    profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
+	k5_mutex_unlock(&profile->first_file->data->lock);
+	return retval;
 }
 
 /*
@@ -244,6 +258,9 @@ profile_add_relation(profile_t profile, const char **names,
 	if (names == 0 || names[0] == 0 || names[1] == 0)
 		return PROF_BAD_NAMESET;
 
+	retval = k5_mutex_lock(&profile->first_file->data->lock);
+	if (retval)
+	    return retval;
 	section = profile->first_file->data->root;
 	for (cpp = names; cpp[1]; cpp++) {
 		state = 0;
@@ -251,24 +268,31 @@ profile_add_relation(profile_t profile, const char **names,
 					   &state, &section);
 		if (retval == PROF_NO_SECTION)
 			retval = profile_add_node(section, *cpp, 0, &section);
-		if (retval)
-			return retval;
+		if (retval) {
+		    k5_mutex_unlock(&profile->first_file->data->lock);
+		    return retval;
+		}
 	}
 
 	if (new_value == 0) {
 		retval = profile_find_node(section, *cpp, 0, 1, &state, 0);
-		if (retval == 0)
-			return PROF_EXISTS;
-		else if (retval != PROF_NO_SECTION)
-			return retval;
+		if (retval == 0) {
+		    k5_mutex_unlock(&profile->first_file->data->lock);
+		    return PROF_EXISTS;
+		} else if (retval != PROF_NO_SECTION) {
+		    k5_mutex_unlock(&profile->first_file->data->lock);
+		    return retval;
+		}
 	}
 
 	retval = profile_add_node(section, *cpp, new_value, 0);
-	if (retval)
-		return retval;
+	if (retval) {
+	    k5_mutex_unlock(&profile->first_file->data->lock);
+	    return retval;
+	}
 
 	profile->first_file->data->flags |= PROFILE_FILE_DIRTY;
-	
+	k5_mutex_unlock(&profile->first_file->data->lock);
 	return 0;
 }
 

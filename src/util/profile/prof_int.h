@@ -10,6 +10,8 @@
 #define PROFILE_SUPPORTS_FOREIGN_NEWLINES
 #endif
 
+/* N.B.: The locking code for the non-sharing case is not complete.
+   Be sure to fix it if you turn off this flag.  */
 #define SHARE_TREE_DATA
 
 #include "k5-thread.h"
@@ -27,9 +29,15 @@ typedef long prf_magic_t;
 /*
  * This is the structure which stores the profile information for a
  * particular configuration file.
+ *
+ * Locking strategy:
+ * - filespec is fixed after creation
+ * - refcount and next should only be tweaked with the global lock held
+ * - other fields can be tweaked after grabbing the in-struct lock
  */
 struct _prf_data_t {
 	prf_magic_t	magic;
+	k5_mutex_t	lock;
 	char		*comment;
 	profile_filespec_t filespec;
 	struct profile_node *root;

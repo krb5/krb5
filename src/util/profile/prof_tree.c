@@ -454,6 +454,10 @@ errcode_t profile_node_iterator(void **iter_p, struct profile_node **ret_node,
 
 	if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
 		return PROF_MAGIC_ITERATOR;
+	if (iter->file && iter->file->magic != PROF_MAGIC_FILE)
+	    return PROF_MAGIC_FILE;
+	if (iter->file && iter->file->data->magic != PROF_MAGIC_FILE_DATA)
+	    return PROF_MAGIC_FILE_DATA;
 	/*
 	 * If the file has changed, then the node pointer is invalid,
 	 * so we'll have search the file again looking for it.
@@ -463,6 +467,8 @@ errcode_t profile_node_iterator(void **iter_p, struct profile_node **ret_node,
 		skip_num = iter->num;
 		iter->node = 0;
 	}
+	if (iter->node && iter->node->magic != PROF_MAGIC_NODE)
+	    return PROF_MAGIC_NODE;
 get_new_file:
 	if (iter->node == 0) {
 		if (iter->file == 0 ||
@@ -495,9 +501,10 @@ get_new_file:
 		 */
 		section = iter->file->data->root;
 		for (cpp = iter->names; cpp[iter->done_idx]; cpp++) {
-			for (p=section->first_child; p; p = p->next)
+			for (p=section->first_child; p; p = p->next) {
 				if (!strcmp(p->name, *cpp) && !p->value)
 					break;
+			}
 			if (!p) {
 				section = 0;
 				break;
