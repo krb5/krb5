@@ -1,3 +1,7 @@
+2002-03-14 Alexandra Ellwood <lxs@mit.edu>
+    * appdefault.c, get_in_tkt.c: made conf_yes and conf_no const to 
+    improve load time on Mach-O
+
 2002-03-13  Sam Hartman  <hartmans@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred): Don't  check IP addresses; improves
