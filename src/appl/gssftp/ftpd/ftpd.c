@@ -2058,8 +2058,8 @@ char *data;
 			return 0;
 		}
 		if (!(hp = gethostbyname(localname))) {
-			reply(501, "couldn't canonicalize local hostname (%d)\n", h_errno);
-			syslog(LOG_ERR, "Couldn't canonicalize local hostname (%d)", h_errno);
+			reply(501, "couldn't canonicalize local hostname\n");
+			syslog(LOG_ERR, "Couldn't canonicalize local hostname");
 			return 0;
 		}
 		strcpy(localname, hp->h_name);

@@ -1,3 +1,8 @@
+Tue Sep 29 19:25:09 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* ftpd.c (auth_data): Don't use h_errno, it's not fully portable,
+		and it's not worth it.
+
 1998-08-28  Geoffrey King  <gjking@mit.edu>
 
 	* ftpd.c (login): New function.  Essentially, the old pass
