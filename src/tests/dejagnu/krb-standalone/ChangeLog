@@ -1,3 +1,9 @@
+Sun Mar  3 14:35:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* rcp.exp, rsh.exp: Change name of kshd to match current executable
+		name. Change calling arguments to match current usage.
+	
+
 Sat Jan 27 01:10:39 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kadmin.exp: use a longer password for kadmin_modify test to meet

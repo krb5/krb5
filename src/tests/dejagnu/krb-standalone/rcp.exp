@@ -12,7 +12,7 @@ if ![info exists RCP] {
 }
 
 if ![info exists KRSHD] {
-    set KRSHD [findfile $objdir/../../appl/bsd/krshd]
+    set KRSHD [findfile $objdir/../../appl/bsd/kshd]
 }
 
 # Make sure .k5login is reasonable.
@@ -40,7 +40,7 @@ proc start_rsh_daemon { } {
 
     # The -D argument tells it to accept a single connection, so we
     # don't need to use inetd.  The 3544 is the port to listen at.
-    spawn $KRSHD -K -D 3544 -P [file dirname $RCP] -S $tmppwd/srvtab -M KRBTEST.COM
+    spawn $KRSHD -k -c -D 3544 -P [file dirname $RCP] -S $tmppwd/srvtab -M KRBTEST.COM
     set krshd_spawn_id $spawn_id
     set krshd_pid [exp_pid]
 
