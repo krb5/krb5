@@ -81,26 +81,26 @@ store_32_le (unsigned int val, unsigned char *p)
 static inline void
 store_64_be (UINT64_TYPE val, unsigned char *p)
 {
-    p[0] = (val >> 56) & 0xff;
-    p[1] = (val >> 48) & 0xff;
-    p[2] = (val >> 40) & 0xff;
-    p[3] = (val >> 32) & 0xff;
-    p[4] = (val >> 24) & 0xff;
-    p[5] = (val >> 16) & 0xff;
-    p[6] = (val >>  8) & 0xff;
-    p[7] = (val      ) & 0xff;
+    p[0] = (unsigned char)((val >> 56) & 0xff);
+    p[1] = (unsigned char)((val >> 48) & 0xff);
+    p[2] = (unsigned char)((val >> 40) & 0xff);
+    p[3] = (unsigned char)((val >> 32) & 0xff);
+    p[4] = (unsigned char)((val >> 24) & 0xff);
+    p[5] = (unsigned char)((val >> 16) & 0xff);
+    p[6] = (unsigned char)((val >>  8) & 0xff);
+    p[7] = (unsigned char)((val      ) & 0xff);
 }
 static inline void
 store_64_le (UINT64_TYPE val, unsigned char *p)
 {
-    p[7] = (val >> 56) & 0xff;
-    p[6] = (val >> 48) & 0xff;
-    p[5] = (val >> 40) & 0xff;
-    p[4] = (val >> 32) & 0xff;
-    p[3] = (val >> 24) & 0xff;
-    p[2] = (val >> 16) & 0xff;
-    p[1] = (val >>  8) & 0xff;
-    p[0] = (val      ) & 0xff;
+    p[7] = (unsigned char)((val >> 56) & 0xff);
+    p[6] = (unsigned char)((val >> 48) & 0xff);
+    p[5] = (unsigned char)((val >> 40) & 0xff);
+    p[4] = (unsigned char)((val >> 32) & 0xff);
+    p[3] = (unsigned char)((val >> 24) & 0xff);
+    p[2] = (unsigned char)((val >> 16) & 0xff);
+    p[1] = (unsigned char)((val >>  8) & 0xff);
+    p[0] = (unsigned char)((val      ) & 0xff);
 }
 static inline unsigned short
 load_16_be (unsigned char *p)
