@@ -131,7 +131,7 @@ extern void usage P((void));
  * passed off to getopt().
  */
 char valid_opts[] = {
-	'd', ':', 'h', 'k', 'n', 'S', ':', 'u', ':', 'U',
+	'd', ':', 'h', 'k', 'L', ':', 'n', 'S', ':', 'u', ':', 'U',
 #ifdef	AUTHENTICATION
 	'a', ':', 'X', ':',
 #endif
@@ -155,6 +155,9 @@ char valid_opts[] = {
 #endif
 #ifdef	SecurID
 	's',
+#endif
+#ifdef KRB5
+	'R', ':', 't', ':',
 #endif
 	'\0'
 };
@@ -296,6 +299,14 @@ main(argc, argv)
 #endif	/* defined(LINEMODE) && defined(KLUDGELINEMODE) */
 			break;
 
+		case 'L':
+		    {
+		        extern char *login_program;
+
+			login_program = optarg;
+			break;
+		    }
+
 		case 'n':
 			keepalive = 0;
 			break;
@@ -328,6 +339,16 @@ main(argc, argv)
 		    }
 #endif	/* CRAY */
 
+#ifdef KRB5
+		case 'R':
+		    {
+			extern char *krb5_override_default_realm;
+
+			krb5_override_default_realm = optarg;
+			break;
+		    }
+#endif	/* KRB5 */
+
 #ifdef	SecurID
 		case 's':
 			/* SecurID required */
@@ -345,6 +366,16 @@ main(argc, argv)
 						"-S flag not supported\n");
 #endif
 			break;
+
+#ifdef KRB5
+		case 't':
+		    {
+			extern char *telnet_srvtab;
+
+			telnet_srvtab = optarg;
+			break;
+		    }
+#endif	/* KRB5 */
 
 		case 'u':
 			utmp_len = atoi(optarg);

@@ -1,3 +1,11 @@
+Fri Apr 21 12:47:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	From Ian Taylor <ian@cygnus.com>.
+	* telnetd.c (valid_opts): Add 'L'.  If KRB5, add -R and -t.
+	(main): Handle -L.  If KRB5, handle -R and -t.
+	* sys_term.c (login_program): New global variable.
+	(start_login): Use login_program instead of LOGIN_PROGRAM.
+
 Wed Mar 29 15:39:39 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Add dependency on libtelnet.a

@@ -48,6 +48,8 @@
 #include "k5-int.h"
 #endif
 
+char *login_program = LOGIN_PROGRAM;
+
 #if defined(CRAY) || defined(__hpux)
 # define PARENT_DOES_UTMP
 #endif
@@ -1711,10 +1713,10 @@ start_login(host, autologin, name)
 		close(pty);
 #endif
 	closelog();
-	execv(LOGIN_PROGRAM, argv);
+	execv(login_program, argv);
 
-	syslog(LOG_ERR, "%s: %m\n", LOGIN_PROGRAM);
-	fatalperror(net, LOGIN_PROGRAM);
+	syslog(LOG_ERR, "%s: %m\n", login_program);
+	fatalperror(net, login_program);
 	/*NOTREACHED*/
 }
 
