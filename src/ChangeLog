@@ -1,3 +1,12 @@
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Require autoconf 2.52 only.
+
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Require autoconf 2.53.
+	(CONFIG_RULES): Always set AUTOCONFINCFLAGS to --include.
+
 2003-04-10  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4: Revert requrement of autoconf-2.53, since MacOS X

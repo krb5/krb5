@@ -1,3 +1,8 @@
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (configure): Try running autoconf with --include, and if
+	that doesn't work, try --localdir.  Don't use AUTOCONFINCFLAGS.
+
 2003-04-01  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (KDB5_DEPLIBS): Don't depend on $(DB_DEPLIB) anymore.
