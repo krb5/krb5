@@ -94,7 +94,7 @@ krb5_rd_req(context, auth_context, inbuf, server, keytab,
     retval = krb5_rd_req_decoded(context, auth_context, request, server, 
 				 keytab, ap_req_options, ticket);
 
-    if (new_keytab == NULL)
+    if (new_keytab != NULL)
         (void) krb5_kt_close(context, new_keytab);
 
 cleanup_auth_context:

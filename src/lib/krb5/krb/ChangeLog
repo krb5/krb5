@@ -1,3 +1,8 @@
+Fri Mar 31 00:44:26 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rd_req.c (krb5_rd_req): Fix typo which caused new_keytab to not
+		get freed, causing a memory leak.
+
 Thu Mar 30 15:49:27 1995 Keith Vetter (keithv@fusion.com)
 
 	* rd_req.c: removed unused local variable.
