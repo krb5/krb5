@@ -164,7 +164,7 @@ make_seal_token_v1 (krb5_context context,
     md5cksum.length = sumlen;
 
 
-    if ((plain = (unsigned char *) xmalloc(msglen)) == NULL) {
+    if ((plain = (unsigned char *) xmalloc(msglen ? msglen : 1)) == NULL) {
       xfree(t);
       return(ENOMEM);
     }
@@ -184,20 +184,17 @@ make_seal_token_v1 (krb5_context context,
 
     /* 8 = head of token body as specified by mech spec */
     if (! (data_ptr =
-	   (char *) xmalloc(8 + 
-			    ((bigend || (toktype != KG_TOK_SEAL_MSG))
-			     ? text->length : tmsglen)))) {
+	   (char *) xmalloc(8 + (bigend ? text->length : msglen)))) {
       xfree(plain);
       xfree(t);
       return(ENOMEM);
     }
     (void) memcpy(data_ptr, ptr-2, 8);
-    if (bigend || (toktype != KG_TOK_SEAL_MSG))
+    if (bigend)
       (void) memcpy(data_ptr+8, text->value, text->length);
     else
       (void) memcpy(data_ptr+8, plain, msglen);
-    plaind.length = 8 + 
-	((bigend || (toktype != KG_TOK_SEAL_MSG))? text->length : msglen);
+    plaind.length = 8 + (bigend ? text->length : msglen);
     plaind.data = data_ptr;
     code = krb5_c_make_checksum(context, md5cksum.checksum_type, seq,
 				sign_usage, &plaind, &md5cksum);

@@ -1,6 +1,16 @@
+2001-10-30  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5unseal.c: Fix whitespace in copyright message.
+
+	* k5seal.c (make_seal_token_v1): Cleanup code for mic
+	tokens. Essentially revert code to Sam's 10/25 code, with one
+	correction - allocation of data_ptr - use msglen and not tmsglen.
+	Additionally, do not rely on malloc(0) being non-NULL. 
+	
 2001-10-27  Sam Hartman  <hartmans@mit.edu>
 
-	* k5seal.c (make_seal_token_v1): Use usage 15 only for  mic tokens, not for seal tokens without encryption
+	* k5seal.c (make_seal_token_v1): Use usage 15 only for mic tokens,
+	not for seal tokens without encryption
 
 2001-10-26  Ezra Peisach  <epeisach@mit.edu>
 
