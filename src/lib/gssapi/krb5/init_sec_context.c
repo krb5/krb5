@@ -115,14 +115,15 @@ static krb5_error_code get_credentials(context, cred, server, now,
 	in_creds.keyblock.enctype = enctypes[i];
 	code = krb5_get_credentials(context, 0, cred->ccache, 
 				    &in_creds, out_creds);
-	if (code == KRB5_CC_NOT_KTYPE)
-	    continue;
-	if (code == 0)
+	if (code != KRB5_CC_NOT_KTYPE)
 	    break;
     }
     if (enctypes[i] == 0) {
-	return KRB5_CONFIG_ETYPE_NOSUPP;
+	code = KRB5_CONFIG_ETYPE_NOSUPP;
+	goto cleanup;
     }
+    if (code)
+	goto cleanup;
 
     /*
      * Enforce a stricter limit (without timeskew forgiveness at the

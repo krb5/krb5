@@ -290,11 +290,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 				      &(ap_req.length),
 				      &ptr, KG_TOK_CTX_AP_REQ,
 				      input_token->length))) {
-       if (! cred->rfc_mech) {
-	   code = G_WRONG_MECH;
-	   major_status = GSS_S_DEFECTIVE_TOKEN;
-	   goto fail;
-       }
        mech_used = gss_mech_krb5;
    } else if ((code == G_WRONG_MECH) &&
 	      !(code = g_verify_token_header((gss_OID) gss_mech_krb5_old,
@@ -308,11 +303,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	* compatibility, and use it to decide when to use the
 	* old behavior.
 	*/
-       if (! cred->prerfc_mech) {
-	   code = G_WRONG_MECH;
-	   major_status = GSS_S_DEFECTIVE_TOKEN;
-	   goto fail;
-       }
        mech_used = gss_mech_krb5_old;
    } else {
        major_status = GSS_S_DEFECTIVE_TOKEN;
