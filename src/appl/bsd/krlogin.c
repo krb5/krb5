@@ -77,32 +77,33 @@ char copyright[] =
 #ifdef _AIX
 #include <termio.h>
 #endif
-#endif
+#else /* POSIX_TERMIOS */
+#include <sgtty.h>
+#endif /* POSIX_TERMIOS */
 
 #ifdef HAVE_SYS_SOCKIO_H
 /* for SIOCATMARK */
 #include <sys/sockio.h>
 #endif
 
-/****** MWE *****/
+#ifdef HAVE_STREAMS
+#include <sys/stream.h>
+#include <sys/stropts.h>
+#endif
+
 #ifdef __SCO__
 /* for TIOCPKT_* */
 #include <sys/spt.h>
 /* for struct winsize */
-#include <sys/stream.h>
 #include <sys/ptem.h>
 #endif
-/****** MWE *****/
 
-/****** MWE *****/
-/* formerly __svr4__ but that's not defined by suncc */
-#ifdef HAVE_STREAMS
+#ifdef HAVE_SYS_PTYVAR_H
 #include <sys/tty.h>
 #include <sys/ttold.h>
 /* solaris actually uses packet mode, so the real macros are needed too */
 #include <sys/ptyvar.h>
 #endif
-/****** MWE *****/
 
 /* how do we tell apart irix 5 and irix 4? */
 #if defined(__sgi) && defined(__mips)
@@ -121,14 +122,11 @@ char copyright[] =
 #include <sys/ioctl_compat.h>
 #endif
 
-#ifdef POSIX_TERMIOS
 #ifdef CRAY
 #include <sys/ttold.h>
 #endif
-#else /* !POSIX_TERMIOS */
-#include <sgtty.h>
-#endif /* POSIX_TERMIOS */
-     
+
+
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
