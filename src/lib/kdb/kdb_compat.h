@@ -25,7 +25,7 @@ typedef struct _old_krb5_db_entry {
     krb5_int32 salt_type:8,
  	       salt_length:24;
     krb5_octet *salt;
-    krb5_encrypted_keyblock alt_key;
+    old_krb5_encrypted_keyblock alt_key;
     krb5_int32 alt_salt_type:8,
  	       alt_salt_length:24;
     krb5_octet *alt_salt;
