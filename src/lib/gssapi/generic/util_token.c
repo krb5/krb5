@@ -60,12 +60,17 @@ static int der_length_size(length)
       return(1);
    else if (length < (1<<8))
       return(2);
+#if (SIZEOF_INT == 2)
+   else
+       return(3);
+#else
    else if (length < (1<<16))
       return(3);
    else if (length < (1<<24))
       return(4);
    else
       return(5);
+#endif
 }
 
 static void der_write_length(buf, length)
@@ -76,10 +81,12 @@ static void der_write_length(buf, length)
       *(*buf)++ = (unsigned char) length;
    } else {
       *(*buf)++ = (unsigned char) (der_length_size(length)+127);
+#if (SIZEOF_INT > 2)
       if (length >= (1<<24))
 	 *(*buf)++ = (unsigned char) (length>>24);
       if (length >= (1<<16))
 	 *(*buf)++ = (unsigned char) ((length>>16)&0xff);
+#endif
       if (length >= (1<<8))
 	 *(*buf)++ = (unsigned char) ((length>>8)&0xff);
       *(*buf)++ = (unsigned char) (length&0xff);
@@ -103,6 +110,8 @@ static int der_read_length(buf, bufsize)
    if (sf & 0x80) {
       if ((sf &= 0x7f) > ((*bufsize)-1))
 	 return(-1);
+      if (sf > SIZEOF_INT)
+	  return (-1);
       ret = 0;
       for (; sf; sf--) {
 	 ret = (ret<<8) + (*(*buf)++);

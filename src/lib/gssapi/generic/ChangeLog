@@ -1,3 +1,9 @@
+Thu Feb 29 19:39:23 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* util_token.c (der_length_size, der_write_size): Fix to work on
+		16-bit platforms (we don't allow greater than 64k tokens
+		on these platforms).
+
 Tue Feb 27 17:49:54 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* gssapi.h (size_t): Make sure size_t and uid_t are defined under
