@@ -14,43 +14,13 @@
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
 #define NEED_SOCKETS
+#define NEED_LOWLEVEL_IO         
 
 #include <stdio.h> /* for P_tmpdir */
 #include <krb5.h>
 #include "rc_base.h"
 #include "rc_dfl.h"
 #include "rc_io.h"
-
-/* Ugly. Microsoft, in stdc mode, doesn't support the low-level i/o
- * routines directly. Rather, they only export the _<function> version.
- * The following defines works around this problem. Perhaps this should
- * go into config.h but leave it here for now until we see how prevalent
- * this problem is.
- */
-#ifdef MSDOS_FILESYSTEM
-#include <fcntl.h>
-#include <io.h>
-#include <process.h>
-#define O_RDONLY        _O_RDONLY
-#define O_WRONLY        _O_WRONLY
-#define O_RDWR          _O_RDWR
-#define O_APPEND        _O_APPEND
-#define O_CREAT         _O_CREAT
-#define O_TRUNC         _O_TRUNC
-#define O_EXCL          _O_EXCL
-#define O_TEXT          _O_TEXT
-#define O_BINARY        _O_BINARY
-#define O_NOINHERIT     _O_NOINHERIT
-#define stat            _stat
-#define getpid          _getpid
-#define unlink          _unlink
-#define lseek           _lseek
-#define write           _write
-#define open            _open
-#define close           _close
-#define read            _read
-#define fstat           _fstat
-#endif
 
 #ifndef O_BINARY
 #define O_BINARY    0

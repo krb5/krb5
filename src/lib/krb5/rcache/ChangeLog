@@ -1,3 +1,8 @@
+Tue Mar 7 12:33:29 1995 Keith Vetter (keithv@fusion.com)
+
+	* rc_io.c: moved the enabling defines for low-level io, e.g. read,
+           write, lseek, etc., out of here and into k5-config.h.
+
 Thu Mar 2 11:55:00 1995 Keith Vetter (keithv@fusion.com)
 
 	* rc_io.c: changed NEED_WINSOCK_H to NEED_SOCKETS
