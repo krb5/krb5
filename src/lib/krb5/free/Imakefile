@@ -8,6 +8,7 @@ OBJS=	\
 	f_authdata.o	\
 	f_authent.o	\
 	f_cksum.o	\
+	f_creds.o	\
 	f_enc_kdc.o	\
 	f_enc_tkt.o	\
 	f_error.o	\
@@ -31,6 +32,7 @@ SRCS=	\
 	f_authdata.c	\
 	f_authent.c	\
 	f_cksum.c	\
+	f_creds.c	\
 	f_enc_kdc.c	\
 	f_enc_tkt.c	\
 	f_error.c	\
