@@ -1,5 +1,13 @@
 Wed Jan 10 21:14:31 1996  Theodore Y. Ts'o  <tytso@dcl>
 
+	* fcc.h (KRB5_FCC_DEFAULT_VNO): Remove KRB5_FCC_DEFAULT_VNO; now
+		set in init_ctx.c.
+
+	* fcc_maybe.c (krb5_fcc_open_file): 
+	* fcc_gennew.c (krb5_fcc_generate_new): Use
+		context->fcc_default_format to determine the credentials
+		cache type.
+
 	* fcc_read.c (krb5_fcc_read_keyblock): If reading in a version 3
 		credentials cache, ignore the second enctype stored in the
 		ccache; just read it into a dummy variable.

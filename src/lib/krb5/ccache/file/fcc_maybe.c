@@ -34,8 +34,6 @@
           
 #include "fcc.h"
 
-int krb5_fcc_default_format = KRB5_FCC_DEFAULT_FVNO;
-
 #ifdef KRB5_USE_INET
 #if !defined(_WINSOCKAPI_) && !defined(HAVE_MACSOCK_H)
 #include <netinet/in.h>
@@ -254,8 +252,8 @@ krb5_fcc_open_file (context, id, mode)
 	 /* write the version number */
 	 int errsave, cnt;
 
-	 fcc_fvno = htons(krb5_fcc_default_format);
-	 data->version = krb5_fcc_default_format;
+	 fcc_fvno = htons(context->fcc_default_format);
+	 data->version = context->fcc_default_format;
 	 if ((cnt = write(fd, (char *)&fcc_fvno, sizeof(fcc_fvno))) !=
 	     sizeof(fcc_fvno)) {
 	     errsave = errno;

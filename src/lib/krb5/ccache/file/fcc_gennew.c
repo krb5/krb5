@@ -106,7 +106,7 @@ krb5_fcc_generate_new (context, id)
 	  retcode = krb5_fcc_interpret(context, errno);
           goto err_out;
      } else {
-	  krb5_int16 fcc_fvno = htons(KRB5_FCC_DEFAULT_FVNO);
+	  krb5_int16 fcc_fvno = htons(context->fcc_default_format);
 	  krb5_int16 fcc_flen = 0;
 	  int errsave, cnt;
 
@@ -127,7 +127,7 @@ krb5_fcc_generate_new (context, id)
               goto err_out;
 	  }
 	  /* For version 4 we save a length for the rest of the header */
-	  if (KRB5_FCC_DEFAULT_FVNO == KRB5_FCC_FVNO_4) {
+	  if (context->fcc_default_format == KRB5_FCC_FVNO_4) {
 	    if ((cnt = write(ret, (char *)&fcc_flen, sizeof(fcc_flen)))
 	        != sizeof(fcc_flen)) {
 	        errsave = errno;
