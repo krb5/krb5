@@ -23,7 +23,7 @@ static char rcsid_in_tkt_skey_c [] =
 
 struct skey_keyproc_arg {
     const krb5_keyblock *key;
-    krb5_principal server;		/* it's a pointer, really! */
+    krb5_principal client;		/* it's a pointer, really! */
 };
 
 /*
@@ -52,17 +52,17 @@ OLDDECLARG(krb5_pa_data **,padata)
     if (!valid_keytype(type))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
-    if (arg->server) {
+    if (arg->client) {
 	/* do keytab stuff */
 	/* else we need to fetch from system key place */
 	if (retval = krb5_kt_default(&kt_id))
 	    return retval;
-	if (retval = krb5_kt_get_entry(kt_id, arg->server,
+	if (retval = krb5_kt_get_entry(kt_id, arg->client,
 				       0, /* don't have vno available */
 				       &kt_ent))
 	    return retval;
     }
-#define cleanup() {if (arg->server) (void) krb5_kt_free_entry(&kt_ent);}
+#define cleanup() {if (arg->client) (void) krb5_kt_free_entry(&kt_ent);}
 
     realkey = (krb5_keyblock *)malloc(sizeof(*realkey));
     if (!realkey) {
@@ -132,11 +132,11 @@ OLDDECLARG(krb5_creds *, creds)
 
     if (key) {
 	arg.key = key;
-	arg.server = 0;
+	arg.client = 0;
 	keytype = key->keytype;
     } else {
 	arg.key = 0;
-	arg.server = creds->server;
+	arg.client = creds->client;
 	if (!valid_etype(etype))
 	    return(KRB5_PROG_ETYPE_NOSUPP);
 
