@@ -1090,7 +1090,7 @@ startslave(host, autologin, autoname)
 	int autologin;
 	char *autoname;
 {
-int syncpipe[2];
+	int syncpipe[2];
 	register int i;
 #ifdef	NEWINIT
 	extern char *ptyip;
@@ -1099,8 +1099,8 @@ int syncpipe[2];
 	register int n;
 #endif	/* NEWINIT */
 
-if ( pipe(syncpipe) < 0 ) 
-    fatal(net, "failed getting synchronization pipe");
+	if ( pipe(syncpipe) < 0 ) 
+		fatal(net, "failed getting synchronization pipe");
     
 #if	defined(AUTHENTICATION)
 	if (!autoname || !autoname[0])
@@ -1117,31 +1117,30 @@ if ( pipe(syncpipe) < 0 )
 	if ((i = fork()) < 0)
 		fatalperror(net, "fork");
 	if (i) {
-char c;
+		char c;
 
 		void sigjob P((int));
-slavepid = i; /* So we can clean it up later */
+		slavepid = i; /* So we can clean it up later */
 #ifdef	CRAY
 		(void) signal(WJSIGNAL, sigjob);
 #endif
 
 		/* Wait for child before writing to parent side of pty.*/
-(void) close(syncpipe[1]);
-if ( read(syncpipe[0], &c, 1) == 0 ) {
-  /* Slave side died */
-  fatal ( net, "Slave failed to initialize");
-}
+		(void) close(syncpipe[1]);
+		if ( read(syncpipe[0], &c, 1) == 0 ) {
+			/* Slave side died */
+			fatal ( net, "Slave failed to initialize");
+		}
 
 		close(syncpipe[0]);
-
 		
-			} else {
+	} else {
 		
 		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line,
 				 host, PTY_TTYSLOT_USABLE);
 		getptyslave(autologin);
 
-/* Notify our parent we're ready to continue.*/
+		/* Notify our parent we're ready to continue.*/
 		write(syncpipe[1],"y",1);
 		close(syncpipe[0]);
 		close(syncpipe[1]);
@@ -1474,7 +1473,10 @@ addarg(argv, val)
 cleanup(sig)
 	int sig;
 {
-    pty_cleanup(line,slavepid,1);
+	pty_cleanup(line,slavepid,1);
+#ifdef KRB5
+	kerberos5_cleanup();
+#endif
     
 	(void) shutdown(net, 2);
 	exit(1);

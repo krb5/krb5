@@ -1,3 +1,7 @@
+Thu Apr 11 21:44:39 1996  Richard Basch  <basch@lehman.com>
+
+	* sys_term.c (cleanup): Call the Kerberos 5 cleanup routine, also.
+
 Wed Mar 27 00:27:32 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* telnetd.c: remove inclusion of netdb.h; it's already in defs.h,
