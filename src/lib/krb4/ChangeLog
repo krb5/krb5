@@ -1,3 +1,18 @@
+2001-06-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb4int.h: Add prototypes for ad_print, krb_svc_init,
+	krb_svc_init_preauth, krb_get_svc_in_tkt_preauth, kset_logfile,
+	krb_log, krb_set_logfile, krb_set_lifetime, month_sname,
+	krb_rd_preauth, krb_net_rd_preauth, krb_net_rd_sendauth,
+	krb_stime, krb_start_session, krb_end_session,
+	krb_get_default_user, krb_set_default_user.
+
+	* ad_print.c, g_svc_in_tkt.c, klog.c, log.c, mk_req.c,
+ 	month_sname.c, rd_preauth.c, sendauth.c, stime.c, unix_glue.c:
+ 	Include krb4int.h for prototypes.
+
+	* decomp_tkt.c: Include krb54proto.h for decomp_tkt_krb5() prototype.
+
 2001-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb4int.h: Add prototypes for krb__get_realmsfile(),

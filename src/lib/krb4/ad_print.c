@@ -13,6 +13,7 @@
 #define	DEFINE_SOCKADDR		/* Request definitions for sockets */
 #include "krb.h"
 #include "des.h"
+#include "krb4int.h"
 #include <stdio.h>
 
 #ifndef _WINDOWS

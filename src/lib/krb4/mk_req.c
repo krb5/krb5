@@ -29,6 +29,7 @@
 #include "prot.h"
 #include "des.h"
 #include <string.h>
+#include "krb4int.h"
 
 extern int krb_ap_req_debug;
 static int lifetime = 255;		/* Default based on the TGT */

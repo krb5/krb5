@@ -12,6 +12,7 @@
 #define	DEFINE_SOCKADDR
 #define NEED_TIME_H
 #include "krb.h"
+#include "krb4int.h"
 #include <stdio.h>                      /* for sprintf() */
 
 /*
@@ -28,7 +29,6 @@ char *krb_stime(t)
     static char st[40];
     static time_t adjusted_time;
     struct tm *tm;
-    char *month_sname();
 
     adjusted_time = *t - CONVERT_TIME_EPOCH;
     tm = localtime(&adjusted_time);

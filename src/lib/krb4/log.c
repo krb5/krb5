@@ -24,7 +24,7 @@
 #endif
 #include <stdio.h>
 
-#include "krb.h"
+#include "krb4int.h"
 #include <klog.h>
 
 static char *log_name = KRBLOG;
@@ -52,9 +52,6 @@ static is_open;
  *
  * The return value is undefined.
  */
-
-/* should be in a header */
-char *month_sname();
 
 /*VARARGS1 */
 void krb_log(format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)

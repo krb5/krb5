@@ -9,6 +9,7 @@
 
 #include "krb.h"
 #include <sys/time.h>
+#include "krb4int.h"
 
 /* Start and end Kerberos library access.  On Unix, this is a No-op.  */
 int

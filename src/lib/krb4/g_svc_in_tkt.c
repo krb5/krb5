@@ -10,6 +10,7 @@
 #include "mit-copyright.h"
 #include "krb.h"
 #include "prot.h"
+#include "krb4int.h"
 #include <string.h>
 
 #ifndef NULL

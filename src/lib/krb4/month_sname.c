@@ -14,6 +14,9 @@
  * month.  Returns 0 if the argument is out of range.
  */
 
+#include <krb.h>
+#include "krb4int.h"
+
 const char *month_sname(n)
     int n;
 {
