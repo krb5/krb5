@@ -31,7 +31,9 @@
 #include <netinet/in.h>
 #endif
 #include <krb.h>
-#include "krb524.h"
+#include "krb524d.h"
+
+static int krb524d_debug = 0;
 
 static int
 krb524int_krb_create_ticket(KTEXT, unsigned int, char *, char *, char *, long,
@@ -104,7 +106,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD4 &&
 	  v5etkt->session->enctype != ENCTYPE_DES_CBC_MD5) ||
 	 v5etkt->session->length != sizeof(C_Block)) {
-	  if (krb524_debug)
+	  if (krb524d_debug)
 	       fprintf(stderr, "v5 session keyblock type %d length %d != C_Block size %d\n",
 		       v5etkt->session->enctype,
 		       v5etkt->session->length,
@@ -121,7 +123,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	give out a v4 ticket with as much of the v5 lifetime is available
 	"now" instead. */
      if ((ret = krb5_timeofday(context, &server_time))) {
-         if (krb524_debug)
+         if (krb524d_debug)
 	      fprintf(stderr, "krb5_timeofday failed!\n");
 	 krb5_free_enc_tkt_part(context, v5etkt);
 	 v5tkt->enc_part2 = NULL;
@@ -139,7 +141,7 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
 	  if (v4endtime > v5etkt->times.endtime)
 	      server_time -= v4endtime - v5etkt->times.endtime;
      } else {
-          if (krb524_debug)
+          if (krb524d_debug)
 	       fprintf(stderr, "v5 ticket time out of bounds\n");
 	  krb5_free_enc_tkt_part(context, v5etkt);
 	  v5tkt->enc_part2 = NULL;
@@ -156,14 +158,14 @@ int krb524_convert_tkt_skey(context, v5tkt, v4tkt, v5_skey, v4_skey,
      kaddr.contents = (krb5_octet *)&sinp->sin_addr;
 
      if (!krb5_address_search(context, &kaddr, v5etkt->caddrs)) {
-	 if (krb524_debug)
+	 if (krb524d_debug)
 	     fprintf(stderr, "Invalid v5creds address information.\n");
 	 krb5_free_enc_tkt_part(context, v5etkt);
 	 v5tkt->enc_part2 = NULL;
 	 return KRB524_BADADDR;
      }
 
-     if (krb524_debug)
+     if (krb524d_debug)
 	printf("startime = %ld, authtime = %ld, lifetime = %ld\n",
 	       (long) v5etkt->times.starttime,
 	       (long) v5etkt->times.authtime,

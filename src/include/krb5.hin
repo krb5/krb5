@@ -1661,6 +1661,13 @@ krb5_error_code KRB5_CALLCONV krb5_524_conv_principal
 	(krb5_context context, krb5_const_principal princ, 
 		char *name, char *inst, char *realm);
 
+#define KRB524_SERVICE "krb524"
+#define KRB524_PORT 4444
+
+struct credentials;
+int krb524_convert_creds_kdc
+	(krb5_context context, krb5_creds *v5creds, 
+	struct credentials *v4creds);
 
 /* libkt.spec */
 #if KRB5_PRIVATE

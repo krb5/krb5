@@ -1,3 +1,9 @@
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* lifetime.c (krb_life_to_time, krb_time_to_life): Rewrite to use
+	support functions in the krb5 library via krb5int_accessor.  Moved
+	old implementation into krb5 library.
+
 2003-05-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Add setting of KRB_ERR on Windows.

@@ -1,3 +1,13 @@
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c: New file, moved from krb524/conv_creds.c and
+	krb524/encode.c.  Rename exported encode routine, make other
+	encode and decode routines static.  If KRB5_KRB4_COMPAT is not
+	defined, return an error.
+	* v4lifetime.c: New file, moved from lib/krb4/lifetime.c.  Renamed
+	functions, changed interface to use krb5 types.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add them.
+
 2003-05-23  Sam Hartman  <hartmans@mit.edu>
 
 	* get_in_tkt.c (krb5_get_init_creds): Initialize options based on

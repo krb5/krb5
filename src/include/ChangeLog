@@ -1,3 +1,22 @@
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5.h): Include krb524_err.h.
+	(krb524_err.h): Depend on rebuild-error-tables like krb5_err.h and
+	friends.  Add a null command to cause make to recheck the
+	timestamp on the files possibly updated.
+	(clean-unix): Get rid of it.
+	* k5-int.h (KRb5INT_ACCESS_STRUCT_VERSION): Update to 7.
+	(struct ktext) [!defined(ANAME_SZ)]: Declare forward.
+	(krb5int_access): Delete krb5_locate_kdc, krb5_locate_server,
+	krb5_max_dgram_size and timeout fields.  Add krb_life_to_time,
+	krb_time_to_life, and krb524_encode_v4tkt function pointer
+	fields.  Reorder fields, and add comments.
+	(krb5int_krb_life_to_time, krb5int_krb_time_to_life,
+	krb5int_encode_v4tkt, krb5int_524_sendto_kdc): Declare.
+	* krb5.hin (KRB524_SERVICE, KRB524_PORT): New macros.
+	(struct credentials): Declare forward.
+	(krb524_convert_creds_kdc): Declare.
+
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Add prototype for krb5int_auth_con_chkseqnum.

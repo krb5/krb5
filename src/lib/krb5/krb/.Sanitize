@@ -37,6 +37,7 @@ chk_trans.c
 cleanup.h
 configure
 configure.in
+conv_creds.c
 conv_princ.c
 copy_addrs.c
 copy_athctr.c
@@ -104,6 +105,7 @@ t_ref_kerb.out
 t_ser.c
 tgtname.c
 unparse.c
+v4lifetime.c
 valid_times.c
 walk_rtree.c
 

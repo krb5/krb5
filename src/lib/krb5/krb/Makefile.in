@@ -23,6 +23,7 @@ STLIBOBJS= \
 	bld_princ.o	\
 	chk_trans.o	\
 	chpw.o		\
+	conv_creds.o	\
 	conv_princ.o	\
 	copy_addrs.o	\
 	copy_auth.o	\
@@ -93,6 +94,7 @@ STLIBOBJS= \
 	str_conv.o	\
 	tgtname.o	\
 	unparse.o	\
+	v4lifetime.o	\
 	valid_times.o	\
 	vfy_increds.o	\
 	vic_opt.o	\
@@ -107,6 +109,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)bld_princ.$(OBJEXT)	\
 	$(OUTPRE)chk_trans.$(OBJEXT)	\
 	$(OUTPRE)chpw.$(OBJEXT)		\
+	$(OUTPRE)conv_creds.$(OBJEXT)	\
 	$(OUTPRE)conv_princ.$(OBJEXT)	\
 	$(OUTPRE)copy_addrs.$(OBJEXT)	\
 	$(OUTPRE)copy_auth.$(OBJEXT)	\
@@ -177,6 +180,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
 	$(OUTPRE)tgtname.$(OBJEXT)	\
 	$(OUTPRE)unparse.$(OBJEXT)	\
+	$(OUTPRE)v4lifetime.$(OBJEXT)	\
 	$(OUTPRE)valid_times.$(OBJEXT)	\
 	$(OUTPRE)vfy_increds.$(OBJEXT)	\
 	$(OUTPRE)vic_opt.$(OBJEXT)	\
@@ -192,6 +196,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/brand.c	\
 	$(srcdir)/chk_trans.c	\
 	$(srcdir)/chpw.c	\
+	$(srcdir)/conv_creds.c	\
 	$(srcdir)/conv_princ.c	\
 	$(srcdir)/copy_addrs.c	\
 	$(srcdir)/copy_auth.c	\
@@ -262,6 +267,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
+	$(srcdir)/v4lifetime.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/vfy_increds.c \
 	$(srcdir)/vic_opt.c	\
@@ -406,6 +412,12 @@ chpw.so chpw.po $(OUTPRE)chpw.$(OBJEXT): chpw.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/krb5_err.h \
   auth_con.h
+conv_creds.so conv_creds.po $(OUTPRE)conv_creds.$(OBJEXT): conv_creds.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP)
 conv_princ.so conv_princ.po $(OUTPRE)conv_princ.$(OBJEXT): conv_princ.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -748,6 +760,11 @@ tgtname.so tgtname.po $(OUTPRE)tgtname.$(OBJEXT): tgtname.c $(SRCTOP)/include/k5
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h int-proto.h
 unparse.so unparse.po $(OUTPRE)unparse.$(OBJEXT): unparse.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h
+v4lifetime.so v4lifetime.po $(OUTPRE)v4lifetime.$(OBJEXT): v4lifetime.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \

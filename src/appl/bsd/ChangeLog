@@ -1,3 +1,9 @@
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't use libkrb524.a any more.
+	* login.c: Don't include krb524.h.
+	(try_convert524): Don't call krb524_init_ets.
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* krcp.c (main): Rename getlocalsubkey -> getsendsubkey.

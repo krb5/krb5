@@ -46,6 +46,7 @@ STLIBOBJS= \
 	read_pwd.o	\
 	realm_dom.o	\
 	realm_iter.o	\
+	send524.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
 	timeofday.o	\
@@ -89,6 +90,7 @@ OBJS= \
 	$(OUTPRE)read_pwd.$(OBJEXT)	\
 	$(OUTPRE)realm_dom.$(OBJEXT)	\
 	$(OUTPRE)realm_iter.$(OBJEXT)	\
+	$(OUTPRE)send524.$(OBJEXT)	\
 	$(OUTPRE)sendto_kdc.$(OBJEXT)	\
 	$(OUTPRE)sn2princ.$(OBJEXT)	\
 	$(OUTPRE)timeofday.$(OBJEXT)	\
@@ -132,6 +134,7 @@ SRCS= \
 	$(srcdir)/realm_dom.c	\
 	$(srcdir)/realm_iter.c	\
 	$(srcdir)/port2ip.c	\
+	$(srcdir)/send524.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
 	$(srcdir)/timeofday.c	\
@@ -405,6 +408,12 @@ port2ip.so port2ip.po $(OUTPRE)port2ip.$(OBJEXT): port2ip.c $(SRCTOP)/include/k5
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h os-proto.h
+send524.so send524.po $(OUTPRE)send524.$(OBJEXT): send524.c $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
+  os-proto.h
 sendto_kdc.so sendto_kdc.po $(OUTPRE)sendto_kdc.$(OBJEXT): sendto_kdc.c $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-int.h \

@@ -60,7 +60,7 @@
 #include <netinet/in.h>
 
 #include <krb.h>
-#include "krb524.h"
+#include "krb524d.h"
 
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);
@@ -111,6 +111,8 @@ static RETSIGTYPE request_exit(signo)
      signalled = 1;
 }
 
+int (*encode_v4tkt)(KTEXT, char *, unsigned int *) = 0;
+
 int main(argc, argv)
      int argc;
      char **argv;
@@ -131,6 +133,22 @@ int main(argc, argv)
      if (retval) {
 	     com_err(whoami, retval, "while initializing krb5");
 	     exit(1);
+     }
+
+     {
+	 krb5int_access k5int;
+	 retval = krb5int_accessor(&k5int, KRB5INT_ACCESS_VERSION);
+	 if (retval != 0) {
+	     com_err(whoami, retval,
+		     "while accessing krb5 library internal support");
+	     exit(1);
+	 }
+	 encode_v4tkt = k5int.krb524_encode_v4tkt;
+	 if (encode_v4tkt == NULL) {
+	     com_err(whoami, 0,
+		     "krb4 support disabled in krb5 support library");
+	     exit(1);
+	 }
      }
 
      argv++; argc--;

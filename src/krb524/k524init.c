@@ -37,7 +37,6 @@
 #endif
 
 #include <krb.h>
-#include "krb524.h"
 
 extern int optind;
 extern char *optarg;
@@ -91,8 +90,6 @@ int main(argc, argv)
 	 fprintf(stderr, "Usage: %s [-p principal] [-n]\n", prog);
 	 exit(1);
      }
-
-     krb524_init_ets(context);
 
      if ((code = krb5_cc_default(context, &cc))) {
 	  com_err(prog, code, "opening default credentials cache");

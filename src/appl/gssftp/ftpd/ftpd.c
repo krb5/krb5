@@ -130,7 +130,6 @@ extern int yyparse(void);
 #ifdef KRB5_KRB4_COMPAT
 #include <krb5.h>
 #include <krb.h>
-#include <krb524.h>
 
 AUTH_DAT kdata;
 KTEXT_ST ticket;
@@ -314,9 +313,6 @@ main(argc, argv, envp)
 
 #ifdef GSSAPI
 	krb5_init_context(&kcontext);
-#ifdef KRB5_KRB4_COMPAT
-	krb524_init_ets(kcontext);
-#endif
 #endif
 
 	while ((c = getopt(argc, argv, option_string)) != -1) {

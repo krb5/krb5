@@ -1,3 +1,9 @@
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't use libkrb524.a any more.
+	* ftpd.c: Don't include krb524.h.
+	(main): Don't call krb524_init_ets.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
