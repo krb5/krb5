@@ -1,3 +1,9 @@
+2001-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (AI_V4MAPPED, AI_ADDRCONFIG, AI_ALL,
+	AI_DEFAULT): Define as bogus values, since they're part of
+	getipnodeby* API, not getaddrinfo API.
+
 2001-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* socket-utils.h: New file.

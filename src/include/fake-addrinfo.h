@@ -80,14 +80,17 @@ struct addrinfo {
 #define	AI_CANONNAME	0x02
 #undef	AI_NUMERICHOST
 #define	AI_NUMERICHOST	0x04
+/* N.B.: AI_V4MAPPED, AI_ADDRCONFIG, AI_ALL, and AI_DEFAULT are part
+   of the spec for getipnodeby*, and *not* part of the spec for
+   getaddrinfo.  Don't use them!  */
 #undef	AI_V4MAPPED
-#define	AI_V4MAPPED	0x08	/* ignored */
+#define	AI_V4MAPPED	eeeevil!
 #undef	AI_ADDRCONFIG
-#define	AI_ADDRCONFIG	0x10	/* ignored */
+#define	AI_ADDRCONFIG	eeeevil!
 #undef	AI_ALL
-#define	AI_ALL		0x20	/* ignored */
-
-#define AI_DEFAULT	(AI_V4MAPPED | AI_ADDRCONFIG)
+#define	AI_ALL		eeeevil!
+#undef	AI_DEFAULT
+#define AI_DEFAULT	eeeevil!
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -150,9 +153,6 @@ char *gai_strerror (int code);
 #endif /* HAVE_GETADDRINFO */
 
 /* Fudge things on older gai implementations.  */
-#ifndef AI_DEFAULT
-# define AI_DEFAULT 0 /* (AI_V4MAPPED | AI_ADDRCONFIG) */
-#endif
 /* AIX 4.3.3 is based on RFC 2133; no AI_NUMERICHOST.  */
 #ifndef AI_NUMERICHOST
 # define AI_NUMERICHOST 0
