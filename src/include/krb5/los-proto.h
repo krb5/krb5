@@ -43,6 +43,9 @@ int krb5_net_read
 int krb5_net_write
 	PROTOTYPE((int fd,
 		   char *buf,
-		   int len ));
+		 /* get all the addresses of this host */
+krb5_error_code krb5_os_localaddr
+	PROTOTYPE((krb5_address ***addr));
+
 
 #endif /* __KRB5_LIBOS_PROTO__ */
