@@ -1,7 +1,8 @@
 AC_INIT(client.c)
 CONFIG_RULES
-dnl set $(host)
-AC_CANONICAL_HOST
+dnl sets $(krb5_cv_host)
+KRB5_BUILD_PROGRAM
+dnl
 AC_CHECK_HEADERS(unistd.h)
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
@@ -12,7 +13,7 @@ if test "$PERL" = perl -a "$RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
 fi
 AC_SUBST(DO_TEST)
 changequote(<<, >>)
-case "$host" in
+case "$krb5_cv_host" in
 *-*-solaris2.[012345]*)
 	PASS=tcp
 	;;
@@ -24,5 +25,4 @@ changequote([, ])
 AC_SUBST(PASS)
 dnl
 CHECK_SIGNALS
-KRB5_BUILD_PROGRAM
 V5_AC_OUTPUT_MAKEFILE
