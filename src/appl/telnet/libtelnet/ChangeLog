@@ -1,3 +1,8 @@
+2004-12-20  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos.c (kerberos4_status): Null-terminate the correct
+	string.  Reported by Marcin Garski.
+
 2004-11-15  Tom Yu  <tlyu@mit.edu>
 
 	* auth-proto.h, auth.c: Merge Athena changes for requiring
