@@ -31,7 +31,7 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#ifdef macintosh
+#if defined(macintosh) || defined(__MACH__)
 #include "CCache.h"
 #endif
 
@@ -186,7 +186,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 }
 #endif
 
-#if defined (macintosh)
+#if defined (macintosh) || defined(__MACH__)
 
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {

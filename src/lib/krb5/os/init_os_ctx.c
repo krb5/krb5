@@ -484,7 +484,7 @@ krb5_get_profile (ctx, profile)
     return retval;
 }	
 
-#ifndef macintosh
+#if !defined(macintosh) && !defined(__MACH__)
 
 krb5_error_code
 krb5_set_config_files(ctx, filenames)

@@ -1,3 +1,9 @@
+2000-10-02	Alexandra Ellwood <lxs@mit.edu>
+
+	* ccdefname.c, init_os_ctx.c, prompter.c, prompterusr.c. read_pwd.c
+        timeofday.c: Added #defines for Mac OS X (__MACH__) to mimic macintosh
+        behavior
+
 2000-09-28  Miro Jurisic  <meeroh@mit.edu>
 
 	* c_us_time.c: Fixed Mac code to use the correct epoch
