@@ -1,3 +1,7 @@
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * krb5.hin : Remove krb5_enctype from krb5_string_to_key() args.
+
 Thu Nov  9 00:04:52 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Remove etype_info from the argument list of
