@@ -19,6 +19,7 @@ AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/sockio.h)
 AC_REPLACE_FUNCS(getdtablesize)
 AC_HAVE_FUNCS(getcwd getusershell seteuid setreuid setresuid)
 AC_CHECK_LIB(crypt,crypt) dnl 
+AC_CHECK_LIB(util,logwtmp)
 dnl 
 dnl copied from appl/bsd/configure.in
 AC_MSG_CHECKING([setenv])
