@@ -1,0 +1,5 @@
+Thu Oct 13 16:58:53 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* config.h: Define PROVIDE_DES_CBC_MD5 so that we include this
+		cryptosystem.
+

@@ -140,6 +140,7 @@ typedef int krb5_sigtype;
 #endif /* SYSV */
 
 /* XXX these should be parameterized soon... */
+#define PROVIDE_DES_CBC_MD5
 #define PROVIDE_DES_CBC_CRC
 #define PROVIDE_RAW_DES_CBC
 #define PROVIDE_CRC32
