@@ -1,3 +1,10 @@
+Fri Apr 28 16:12:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in (PATH): use internal AC_CHECK_ECHO_N because change
+	in path might change behavior of echo (example: solaris, native
+	shell, with GNU echo (-n) in user path, but only Solaris echo (\c)
+	in path here.)
+
 Fri Apr 28 07:52:45 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* login.c: Lots of lint cleanup; declare functions before they
