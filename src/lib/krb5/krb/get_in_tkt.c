@@ -58,7 +58,7 @@ extern krb5_deltat krb5_clockskew;
 
 typedef krb5_error_code (*git_key_proc) PROTOTYPE((const krb5_keytype,
 						   krb5_keyblock **,
-						   krb5_pointer ));
+						   krb5_const_pointer ));
 typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((const krb5_keyblock *,
 						       krb5_const_pointer,
 						       krb5_kdc_rep * ));
@@ -182,8 +182,8 @@ OLDDECLARG(krb5_ccache, ccache)
 	    (request.till != 0) &&
 	    (as_reply->enc_part2->times.renew_till > request.till))
 	) {
-	bzero((char *)as_reply->enc_part2->session.contents,
-	      as_reply->enc_part2->session.length);
+	bzero((char *)as_reply->enc_part2->session->contents,
+	      as_reply->enc_part2->session->length);
 	krb5_free_kdc_rep(as_reply);
 	return KRB5_KDCREP_MODIFIED;
     }
@@ -193,8 +193,8 @@ OLDDECLARG(krb5_ccache, ccache)
     /* fill in the credentials */
     if (retval = krb5_copy_keyblock(as_reply->enc_part2->session,
 				    &creds->keyblock)) {
-	bzero((char *)as_reply->enc_part2->session.contents,
-	      as_reply->enc_part2->session.length);
+	bzero((char *)as_reply->enc_part2->session->contents,
+	      as_reply->enc_part2->session->length);
 	krb5_free_kdc_rep(as_reply);
 	return retval;
     }
