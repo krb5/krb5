@@ -41,5 +41,24 @@ request kadmin_cpw, "Change password",
 request kadmin_getprinc, "Get principal",
 	get_principal, getprinc;
 
+request kadmin_addpol, "Add policy",
+	add_policy, addpol;
+
+request kadmin_modpol, "Modify policy",
+	modify_policy, modpol;
+
+request kadmin_delpol, "Delete policy",
+	delete_policy, delpol;
+
+request kadmin_getpol, "Get policy",
+	get_policy, getpol;
+
+request kadmin_getprivs, "Get privileges",
+	get_privs, getprivs;
+
+# list_requests is generic -- unrelated to Kerberos
+request	ss_list_requests, "List available requests.",
+	list_requests, lr, "?";
+
 request	ss_quit, "Exit program.",
 	quit, exit, q;
