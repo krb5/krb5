@@ -1,3 +1,9 @@
+Thu Mar 16 21:24:43 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Eliminate, comes in from pre.in.
+	(all-mac):  Add.
+	(localaddr.c, ustime.c, memmove.c):  Fix paths to work on Mac.
+
 Tue Mar 14 17:23:02 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: no longer need to bring in ustime and localaddr for
