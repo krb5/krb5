@@ -1,5 +1,8 @@
 2003-02-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.hin (krb5_princ_component): Return NULL if going off the
+	end of the array.
+
 	* configure.in: Check for sys/select.h and time.h.
 
 2003-02-07  Tom Yu  <tlyu@mit.edu>

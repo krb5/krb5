@@ -267,7 +267,10 @@ typedef const krb5_principal_data *krb5_const_principal;
 #define	krb5_princ_size(context, princ) (princ)->length
 #define	krb5_princ_type(context, princ) (princ)->type
 #define	krb5_princ_name(context, princ) (princ)->data
-#define	krb5_princ_component(context, princ,i) ((princ)->data + i)
+#define	krb5_princ_component(context, princ,i)		\
+	    (((i) < krb5_princ_size(context, princ))	\
+	     ? (princ)->data + (i)			\
+	     : NULL)
 
 /*
  * end "base-defs.h"
