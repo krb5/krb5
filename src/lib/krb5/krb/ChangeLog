@@ -1,3 +1,8 @@
+2003-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* serialize.c (krb5_ser_pack_int64, krb5_ser_unpack_int64): New
+	functions.
+
 2003-09-02  Tom Yu  <tlyu@mit.edu>
 
 	* conv_creds.c (krb524_convert_creds_plain): Apply patch from
