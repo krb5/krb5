@@ -616,21 +616,8 @@ int main(argc, argv)
 		    _res.retrans = 1;
 #endif /* BIND_HACK */
 
-#ifdef _IBMR2
-		    krbval = setuidx(ID_REAL|ID_EFFECTIVE, pwd->pw_uid);
-#else
-		    krbval = setreuid(pwd->pw_uid, -1);
-#endif
-		    if (krbval) {
-			/* can't set ruid to user! */
-			krbval = -1;
-			fprintf(stderr,
-				"login: Can't set ruid for ticket file.\n");
-		    } else
-			krbval = krb_get_pw_in_tkt(username, "",
-						   realm, "krbtgt",
-						   realm,
-						   DEFAULT_TKT_LIFE, pp2);
+		    krbval = krb_get_pw_in_tkt(username, "", realm, "krbtgt",
+					       realm, DEFAULT_TKT_LIFE, pp2);
 		    memset (pp2, 0, sizeof(pp2));
 #ifdef HAVE_SETPRIORITY
 		    (void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
@@ -639,6 +626,8 @@ int main(argc, argv)
 		    case INTK_OK:
 			kpass_ok = 1;
 			krbflag = 1;
+			strcpy(tkfile, tkt_string());
+			(void) chown(tkfile, pwd->pw_uid, pwd->pw_gid);
 			break;	
 
 		    /* These errors should be silent */
@@ -798,10 +787,7 @@ bad_login:
 
 	(void)chown(ttyn, pwd->pw_uid,
 	    (gr = getgrnam(TTYGRPNAME)) ? gr->gr_gid : pwd->pw_gid);
-#ifdef KRB4
-	if(krbflag)
-	    (void) chown(getenv(KRB_ENVIRON), pwd->pw_uid, pwd->pw_gid);
-#endif
+
 	(void)chmod(ttyn, 0620);
 #ifdef KRB4
 #ifdef SETPAG

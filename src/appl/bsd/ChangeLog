@@ -1,3 +1,12 @@
+Fri Apr 28 20:33:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* login.c (main): Don't use setreuid() to play games with the real
+		uid, since not all systems have setreuid().  This method
+		of communicating to in_tkt what the correct owner of the
+		ticket file is completely broken, anyway.  We skip the
+		setreuid() entirely, and then chown the ticket file to the
+		correct owner and group afterwards.
+
 Fri Apr 28 17:59:19 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* Makefile.in (KLIB): include KRB4_LIB directly, to satisfy both
