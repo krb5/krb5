@@ -428,7 +428,7 @@ krb5_encode_princ_contents(context, content, entry)
 
 	for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
 	    krb5_int16 type = entry->key_data[i].key_data_type[j];
-	    krb5_int16 length = entry->key_data[i].key_data_length[j];
+	    krb5_ui_2  length = entry->key_data[i].key_data_length[j];
 
     	    krb5_kdb_encode_int16(type, nextloc);
 	    nextloc += 2;
