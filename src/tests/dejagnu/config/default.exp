@@ -289,7 +289,7 @@ proc setup_kerberos_files { } {
 	puts $conffile "		max_renewable_life = 3:00:00"
 	puts $conffile "		default_principal_expiration = 99.12.31.23.59.59"
 	puts $conffile "		default_principal_flags = -postdateable -forwardable"
-	puts $conffile "		supported_keytypes = des:normal des:v4 des:norealm des:onlyrealm"
+	puts $conffile "		supported_enctypes = des:normal des:v4 des:norealm des:onlyrealm"
 	puts $conffile "	\}"
 	puts $conffile ""
 	close $conffile

@@ -1,3 +1,7 @@
+Sat Sep  9 16:28:48 1995  Ezra Peisach  (epeisach@dcl)
+
+	* default.exp: supported_keytypes -> supported_enctypes
+
 Sat Aug 26 17:57:47 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* default.exp - Determine location of t_inetd.
