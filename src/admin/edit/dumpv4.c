@@ -48,8 +48,10 @@ struct dump_record {
 	char	*realm;
 };
 
-static krb5_encrypt_block master_encblock;
-static krb5_keyblock master_keyblock;
+extern krb5_encrypt_block master_encblock;
+extern krb5_keyblock master_keyblock;
+extern char *cur_realm;
+extern krb5_principal master_princ;
 extern krb5_boolean dbactive;
 extern int exit_status;
 extern krb5_context edit_context;
@@ -311,55 +313,9 @@ void dump_v4db(argc, argv)
 int handle_keys(arg)
     struct dump_record *arg;
 {
-    krb5_error_code retval;
-    char *defrealm;
-    char *mkey_name = 0;
-    char *mkey_fullname;
-    krb5_principal master_princ;
-
-    if (retval = krb5_get_default_realm(edit_context, &defrealm)) {
-      com_err(arg->comerr_name, retval, 
-	      "while retrieving default realm name");
-      exit(1);
-    }	    
-    arg->realm = defrealm;
-
-    /* assemble & parse the master key name */
-
-    if (retval = krb5_db_setup_mkey_name(edit_context, mkey_name, arg->realm, 
-					 &mkey_fullname, &master_princ)) {
-	com_err(arg->comerr_name, retval, "while setting up master key name");
-	exit(1);
-    }
-
-    krb5_use_cstype(edit_context, &master_encblock, DEFAULT_KDC_ETYPE);
-    master_keyblock.keytype = DEFAULT_KDC_KEYTYPE;
-    if (retval = krb5_db_fetch_mkey(edit_context, master_princ, 
-				    &master_encblock, 0,
-				    0, (char *) NULL, 0, &master_keyblock)) {
-	com_err(arg->comerr_name, retval, "while reading master key");
-	exit(1);
-    }
-    if (retval = krb5_process_key(edit_context, &master_encblock, 
-				    &master_keyblock)) {
-	com_err(arg->comerr_name, retval, "while processing master key");
-	exit(1);
-    }
+    arg->realm = cur_realm;
     arg->v5master = &master_encblock;
-
-#ifndef	KDB4_DISABLE
-    /* now master_encblock is set up for the database, we need the v4 key */
-    if (kdb_get_master_key (0, arg->v4_master_key, arg->v4_master_key_schedule) != 0)
-      {
-	com_err(arg->comerr_name, 0, "Couldn't read v4 master key.");
-	exit(1);
-      }
-#else	/* KDB4_DISABLE */
-    des_read_password(arg->v4_master_key, "Kerberos master key: ", 1);
-    printf("\n");
-    key_sched(arg->v4_master_key, arg->v4_master_key_schedule);
-#endif	/* KDB4_DISABLE */
-    return 0;
+    return(0);
 }
 
 handle_one_key(arg, v5master, v5key, v4key)
