@@ -33,7 +33,7 @@ krb5_dbe_create_key_data(context, entry)
 {
     if (entry->n_key_data) {
 	if (entry->key_data = (krb5_key_data *)realloc(entry->key_data, 
-				sizeof(krb5_key_data) * entry->n_key_data + 1))
+				sizeof(krb5_key_data) * (entry->n_key_data + 1)))
     	    memset(entry->key_data + entry->n_key_data,0,sizeof(krb5_key_data));
 	else 
 	    return ENOMEM;

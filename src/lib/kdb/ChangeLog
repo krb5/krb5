@@ -1,4 +1,9 @@
 
+Mon Jul 31 15:55:46 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_xdr.c - Correctly parenthesize realloc() expression in create_key
+		_data().
+
+
 Thu Jul 27 15:28:41 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdbint.h - Obsolete.
 
