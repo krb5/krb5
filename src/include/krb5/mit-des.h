@@ -11,10 +11,10 @@
  * MIT Data Encryption Standard software implementation declarations.
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
-#ifndef __MIT_DES__
-#define __MIT_DES__
+#ifndef __KRB5_MIT_DES__
+#define __KRB5_MIT_DES__
 
 typedef octet des_cblock[8];	/* crypto-block size */
 
@@ -33,4 +33,4 @@ typedef struct des_ks_struct { des_cblock _; } des_key_schedule[16];
 
 #define DES_CBC_CKSUM_LENGTH		(4*sizeof(octet)) /* XXX ? */
 
-#endif /* __MIT_DES__ */
+#endif /* __KRB5_MIT_DES__ */

@@ -11,10 +11,10 @@
  * <<< Description >>>
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
-#ifndef __KRB5_TYPEDEFS__
-#define __KRB5_TYPEDEFS__
+#ifndef __KRB5_BASE_DEFS__
+#define __KRB5_BASE_DEFS__
 
 #include <krb5/wordsize.h>
 
@@ -33,4 +33,4 @@ typedef krb5_ui_2	krb5_keytype;
 typedef krb5_ui_2	krb5_enctype;
 typedef krb5_ui_2	krb5_cksumtype;
 
-#endif /* __KRB5_TYPEDEFS__ */
+#endif /* __KRB5_BASE_DEFS__ */

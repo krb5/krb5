@@ -11,10 +11,10 @@
  * Word-size related definition.
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
-#ifndef __KRB_WORDSIZE__
-#define __KRB_WORDSIZE__
+#ifndef __KRB5_WORDSIZE__
+#define __KRB5_WORDSIZE__
 
 #ifdef BITS16
 #define __OK
@@ -36,4 +36,4 @@ typedef	unsigned char	octet;
 
 #undef __OK
 
-#endif /* __KRB_WORDSIZE__ */
+#endif /* __KRB5_WORDSIZE__ */

@@ -11,10 +11,10 @@
  * hostaddr definitions for Kerberos version 5.
  */
 
-#include <krb5/mit-copyright.h>
+#include <krb5/copyright.h>
 
-#ifndef __KRB_HOSTADDR__
-#define __KRB_HOSTADDR__
+#ifndef __KRB5_HOSTADDR__
+#define __KRB5_HOSTADDR__
 
 /* structure for address */
 typedef struct _krb5_address {
@@ -34,5 +34,5 @@ typedef struct _krb5_address {
 /* macros to determine if a type is a local type */
 #define ADDRTYPE_IS_LOCAL(addrtype) (addrtype & 0x8000)
 
-#endif /* __KRB_HOSTADDR__ */
+#endif /* __KRB5_HOSTADDR__ */
 
