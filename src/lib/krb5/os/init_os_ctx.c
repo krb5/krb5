@@ -135,22 +135,24 @@ krb5_os_init_context(ctx)
         filenames[1] = 0;
     }
 
+	retval = profile_init(filenames, &ctx->profile);
+
 #else /* _WINDOWS */
 #ifdef _MACINTOSH
 	filenames[0] = GetMacProfilePathName();
 	filenames[1] = 0;
+	retval = profile_init(filenames, &ctx->profile);
 #else
 	/*
 	 * When the profile routines are later enhanced, we will try
 	 * including a config file from user's home directory here.
 	 */
-	name = getenv("KRB5_CONFIG");
-	filenames[0] = name ? name : DEFAULT_PROFILE_FILENAME;
-	filenames[1] = 0;
+	if(!name) name = DEFAULT_PROFILE_PATH;
+
+	retval = profile_init_path(name, &ctx->profile);
 #endif /* _MACINTOSH */
 #endif /* _WINDOWS */
 
-	retval = profile_init(filenames, &ctx->profile);
 	if (retval)
 	    ctx->profile = 0;
 

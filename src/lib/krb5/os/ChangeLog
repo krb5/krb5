@@ -1,3 +1,8 @@
+Tue Sep 26 22:46:01 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* init_os_ctx.c (krb5_os_init_context): use profile_init_path for
+	unix, and DEFAULT_PROFILE_PATH.
+
 Fri Sep 29 16:31:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* osconfig.c: Remove krb5_lname_file; it's not used any more.
