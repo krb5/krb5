@@ -1,3 +1,8 @@
+1999-08-04  Danilo Almeida  <dalmeida@mit.edu>
+
+	* k5-int.h: Keep invariant that profile_in_memory member of context
+	is only sensible if KRB5_DNS_LOOKUP is defined.
+
 1999-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin: Wrap all declarations in `extern "C"' for C++, not

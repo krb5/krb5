@@ -990,7 +990,9 @@ struct _krb5_context {
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
 	int		scc_default_format;
+#ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
+#endif /* KRB5_DNS_LOOKUP */
 };
 
 /* could be used in a table to find an etype and initialize a block */
