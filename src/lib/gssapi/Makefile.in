@@ -107,7 +107,7 @@ clean-windows::
 # repeated rebuilds in certain cases.  With the no-op command, it
 # appears to be properly serializing the subdir processing and local
 # compiles... so far.
-$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h: all-recurse
+$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h: all-recurse
 	: $@ updated by recursion rule
 
 # @lib_frag@

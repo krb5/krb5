@@ -1,3 +1,7 @@
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5/gssapi_krb5.h): Depend on recursion rule.
+
 2004-06-08  Sam Hartman  <hartmans@mit.edu>
 
 	* configure.in: If stdint.h exists, include in gssapi_krb5.h
