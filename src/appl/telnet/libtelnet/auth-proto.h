@@ -36,8 +36,8 @@
 /*
  * Copyright (C) 1990 by the Massachusetts Institute of Technology
  *
- * Export of this software from the United States of America is assumed
- * to require a specific license from the United States Government.
+ * Export of this software from the United States of America may
+ * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
  * 

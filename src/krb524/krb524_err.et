@@ -1,7 +1,7 @@
 # Copyright 1993 by Geer Zolot Associates.  All Rights Reserved.
 # 
-# Export of this software from the United States of America is assumed
-# to require a specific license from the United States Government.  It
+# Export of this software from the United States of America may
+# require a specific license from the United States Government.  It
 # is the responsibility of any person or organization contemplating
 # export to obtain such a license before exporting.
 # 
