@@ -98,6 +98,17 @@ void dump_db(argc, argv)
 		return;
 	}
 	if (argc == 2) {
+		/*
+		 * Make sure that we don't open and truncate on the fopen,
+		 * since that may hose an on-going kprop process.
+		 * 
+		 * We could also control this by opening for read and
+		 * write, doing an flock with LOCK_EX, and then
+		 * truncating the file once we have gotten the lock,
+		 * but that would involve more OS dependancies than I
+		 * want to get into.
+		 */
+		unlink(argv[1]);
 		if (!(f = fopen(argv[1], "w"))) {
 			com_err(argv[0], errno,
 				"While opening file %s for writing", argv[1]);
