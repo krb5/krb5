@@ -41,4 +41,7 @@
 
 #endif /* LSBFIRST */
 
+/* For krb4 library internal use only.  */
+extern int krb4int_address_less (struct sockaddr_in *, struct sockaddr_in *);
+
 #endif /*  LSB_ADDR_COMP_DEFS */

@@ -1,3 +1,7 @@
+2002-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* lsb_addr_cmp.h (krb4int_address_less): Declare.
+
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.h (KRB5_EXPORTVAR): Don't define.
