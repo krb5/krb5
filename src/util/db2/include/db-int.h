@@ -205,4 +205,7 @@ void	 __dbpanic __P((DB *dbp));
 #define	S_ISSOCK(m)	((m & 0170000) == 0140000)	/* socket */
 #endif
 
+#ifndef O_BINARY
+#define O_BINARY	0		/* Needed for Win32 compiles */
+#endif
 #endif /* _DB_INT_H_ */

@@ -73,9 +73,9 @@ dbminit(file)
 {
 	if (__cur_db != NULL)
 		(void)dbm_close(__cur_db);
-	if ((__cur_db = dbm_open(file, O_RDWR, 0)) != NULL)
+	if ((__cur_db = dbm_open(file, O_RDWR|O_BINARY, 0)) != NULL)
 		return (0);
-	if ((__cur_db = dbm_open(file, O_RDONLY, 0)) != NULL)
+	if ((__cur_db = dbm_open(file, O_RDONLY|O_BINARY, 0)) != NULL)
 		return (0);
 	return (-1);
 }

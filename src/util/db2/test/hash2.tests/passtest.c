@@ -30,7 +30,7 @@ main(void)
     passwd.lorder = 4321;
 	
 
-    db = dbopen("/usr/tmp/passwd.db", O_RDWR|O_CREAT|O_TRUNC, 0664, DB_HASH, 
+    db = dbopen("/usr/tmp/passwd.db", O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0664, DB_HASH, 
 		&passwd);
     if (!db) {
 	fprintf(stderr, "create_db: couldn't create database file\n");
@@ -66,7 +66,7 @@ main(void)
     get_key = (char *)malloc(100);
     get_val = (char *)malloc(300);
 
-    db = dbopen("/usr/tmp/passwd.db", O_RDWR, 0664, DB_HASH, &passwd);
+    db = dbopen("/usr/tmp/passwd.db", O_RDWR|O_BINARY, 0664, DB_HASH, &passwd);
     if (!db)
       fprintf(stderr, "Could not open db!\n");
     n = 0;
@@ -123,7 +123,7 @@ main(void)
     keys = fopen("yp.keys", "rt");
     vals = fopen("yp.total", "rt");
 
-    db = dbopen("/usr/tmp/passwd.db", O_RDWR, 0664, DB_HASH, &passwd);
+    db = dbopen("/usr/tmp/passwd.db", O_RDWR|O_BINARY, 0664, DB_HASH, &passwd);
     n = 0;
     while ((get_key = fgets(get_key, 100, keys)) != NULL) {
 	if (n % 1000 == 0)
@@ -151,7 +151,7 @@ main(void)
     keys = fopen("yp.keys", "rt");
     vals = fopen("yp.total", "rt");
 	
-    db = dbopen("/usr/tmp/passwd.db", O_RDWR, 0664, DB_HASH, &passwd);
+    db = dbopen("/usr/tmp/passwd.db", O_RDWR|O_BINARY, 0664, DB_HASH, &passwd);
     n = 0;
     while ((get_key = fgets(get_key, 100, keys)) != NULL) {
 	n += 2;

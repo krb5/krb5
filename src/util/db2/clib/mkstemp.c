@@ -42,6 +42,10 @@ static char sccsid[] = "@(#)mktemp.c	8.1 (Berkeley) 6/4/93";
 #include <stdio.h>
 #include <ctype.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
 static int _gettemp();
 
 mkstemp(path)
@@ -92,7 +96,7 @@ _gettemp(path, doopen)
 	for (;;) {
 		if (doopen) {
 			if ((*doopen =
-			    open(path, O_CREAT|O_EXCL|O_RDWR, 0600)) >= 0)
+			    open(path, O_CREAT|O_EXCL|O_RDWR|O_BINARY, 0600)) >= 0)
 				return(1);
 			if (errno != EEXIST)
 				return(0);

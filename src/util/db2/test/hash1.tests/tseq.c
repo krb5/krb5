@@ -63,7 +63,7 @@ char **argv;
 	FILE *fp;
 	int	stat;
 
-	if (!(dbp = dbopen( "hashtest", O_RDONLY, 0400, DB_HASH, NULL))) {
+	if (!(dbp = dbopen( "hashtest", O_RDONLY|O_BINARY, 0400, DB_HASH, NULL))) {
 		/* create table */
 		fprintf(stderr, "cannot open: hash table\n" );
 		exit(1);

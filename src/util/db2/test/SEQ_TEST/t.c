@@ -23,7 +23,7 @@ void main(int argc, char *argv[]) {
     printf("Unable to open %s\n","data");
     exit(25);
   }
-  if ((dbp = dbopen("test.db",O_RDWR | O_CREAT, 0664
+  if ((dbp = dbopen("test.db",O_RDWR | O_CREAT | O_BINARY, 0664
        , DB_BTREE, NULL )) == NULL) {
     printf("\n Open error on test.db %d %s\n",errno,strerror(errno));
     exit(25);
@@ -43,7 +43,7 @@ void main(int argc, char *argv[]) {
   printf("%d Records in\n",out);
   dbp->close(dbp);
   
-  if ((dbp = dbopen("test.db", O_RDWR, 0664
+  if ((dbp = dbopen("test.db", O_RDWR | O_BINARY, 0664
        , DB_BTREE, NULL )) == NULL) {
     printf("\n Error on dbopen %d %s\n",errno,strerror(errno));
     exit(61);

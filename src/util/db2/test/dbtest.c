@@ -99,7 +99,7 @@ main(argc, argv)
 
 	infoarg = NULL;
 	fname = NULL;
-	oflags = O_CREAT | O_RDWR;
+	oflags = O_CREAT | O_RDWR | O_BINARY;
 	sflag = 0;
 	while ((ch = getopt(argc, argv, "f:i:lo:s")) != EOF)
 		switch (ch) {

@@ -201,7 +201,7 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 			goto einval;
 		}
 		
-		if ((t->bt_fd = open(fname, flags, mode)) < 0)
+		if ((t->bt_fd = open(fname, flags | O_BINARY, mode)) < 0)
 			goto err;
 
 	} else {
@@ -427,6 +427,11 @@ tmp()
 #else
 	sigsetmask(oset);
 #endif
+#ifdef __CYGWIN32__
+      /* Ensure the fd is in binary mode. */
+      setmode(fd, O_BINARY);
+#endif /* __CYGWIN32__ */
+
 	return(fd);
 }
 

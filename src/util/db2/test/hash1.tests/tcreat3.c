@@ -72,7 +72,7 @@ char **argv;
 	ctl.nelem = atoi(*argv++);
 	ctl.lorder = 0;
 	if (!(dbp = dbopen( "hashtest",
-	    O_CREAT|O_TRUNC|O_RDWR, 0600, DB_HASH, &ctl))){
+	    O_CREAT|O_TRUNC|O_RDWR|O_BINARY, 0600, DB_HASH, &ctl))){
 		/* create table */
 		fprintf(stderr, "cannot create: hash table (size %d)\n",
 			INITIAL);

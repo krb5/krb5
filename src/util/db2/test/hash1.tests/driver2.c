@@ -81,7 +81,7 @@ main(argc, argv)
 	info.hash = my_hash;
 #endif
 	info.lorder = 0;
-	if (!(db = dbopen("bigtest", O_RDWR | O_CREAT, 0644, DB_HASH, &info))) {
+	if (!(db = dbopen("bigtest", O_RDWR | O_CREAT | O_BINARY, 0644, DB_HASH, &info))) {
 		sprintf(buf, "dbopen: failed on file bigtest");
 		perror(buf);
 		exit(1);

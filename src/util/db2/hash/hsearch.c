@@ -61,7 +61,7 @@ hcreate(nel)
 	info.cachesize = 0;
 	info.hash = NULL;
 	info.lorder = 0;
-	dbp = (DB *)__hash_open(NULL, O_CREAT | O_RDWR, 0600, &info, 0);
+	dbp = (DB *)__hash_open(NULL, O_CREAT | O_RDWR | O_BINARY, 0600, &info, 0);
 	return (dbp != NULL);
 }
 

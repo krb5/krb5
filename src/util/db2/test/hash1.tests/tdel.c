@@ -74,7 +74,7 @@ char **argv;
 	ctl.cachesize = 1024 * 1024;	/* 1 MEG */
 	ctl.lorder = 0;
 	argc -= 2;
-	if (!(dbp = dbopen( NULL, O_CREAT|O_RDWR, 0400, DB_HASH, &ctl))) {
+	if (!(dbp = dbopen( NULL, O_CREAT|O_RDWR|O_BINARY, 0400, DB_HASH, &ctl))) {
 		/* create table */
 		fprintf(stderr, "cannot create: hash table size %d)\n",
 			INITIAL);

@@ -169,10 +169,10 @@ main(argc, argv)
 	argv += optind;
 
 	if (recno)
-		db = dbopen(*argv == NULL ? NULL : *argv, O_RDWR,
+		db = dbopen(*argv == NULL ? NULL : *argv, O_RDWR|O_BINARY,
 		    0, DB_RECNO, NULL);
 	else
-		db = dbopen(*argv == NULL ? NULL : *argv, O_CREAT|O_RDWR,
+		db = dbopen(*argv == NULL ? NULL : *argv, O_CREAT|O_RDWR|O_BINARY,
 		    0600, DB_BTREE, &b);
 
 	if (db == NULL) {

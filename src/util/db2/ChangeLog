@@ -1,4 +1,28 @@
-Thu Jan 15 11:34:13 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Wed Jan 21 10:17:34 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* btree/bt_open.c: Added O_BINARY for __CYGWIN32__.
+	* clib/mkstemp.c: Added O_BINARY for __CYGWIN32__.
+	* db/db.c: Added O_BINARY for __CYGWIN32__.
+	* hash/dbm.c: Added O_BINARY for __CYGWIN32__.
+	* hash/hash.c: Added O_BINARY for __CYGWIN32__.
+	* hash/hsearch.c: Added O_BINARY for __CYGWIN32__.
+	* include/db-int.h: Added O_BINARY for __CYGWIN32__.
+	* recno/rec_open.c: Added O_BINARY for __CYGWIN32__.
+	* test/dbtest.c: Added O_BINARY for __CYGWIN32__.
+	* test/SEQ_TEST/t.c: Added O_BINARY for __CYGWIN32__.
+	* test/btree.tests/main.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/driver2.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/tcreat3.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/tdel.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/thash4.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/tread2.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/tseq.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash1.tests/tverify.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash2.tests/bigtest.c: Added O_BINARY for __CYGWIN32__.
+	* test/hash2.tests/passtest.c: Added O_BINARY for __CYGWIN32__.
+	Changes originally by Jeremy Allison (jra@cygnus.com)
+
+Thu Jan 15 11:34:13 1998  Ezra Peisach  <epeisach@mit.edu>
 
 	* hash/hash_bigkey.c (collect_key, collect_data): Cast malloc
 	return value to correct types. (raeburn@cygnus.com)
@@ -55,7 +79,7 @@ Wed Aug 28 17:25:10 1996  Tom Yu  <tlyu@mit.edu>
 	* include/db.h: Check SIZEOF_INT rather than UINT_MAX; it's broken
 		under Ultrix.
 
-Thu Aug 22 23:13:32 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Thu Aug 22 23:13:32 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* Makefile.in: Add dummy rule for Makefiles.
 
@@ -76,7 +100,7 @@ Fri Jul 26 00:41:45 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 	* Makefile.in (install): Add a blank install target to keep the
 		top-level "make install" happy.
 
-Tue Jul 23 16:08:43 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+Tue Jul 23 16:08:43 1996  Ezra Peisach  <epeisach@mit.edu>
 
 	* hash/dbm.c: Copy elements from the datum to an internal
 	DBT. Handles case of differences in size of size fields.

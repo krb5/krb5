@@ -20,7 +20,7 @@ main(void)
 	info.nelem = 0;
 	info.hash = NULL;
 
-	db = dbopen("big2.db", O_RDWR|O_CREAT|O_TRUNC, 0664, DB_HASH, &info);
+	db = dbopen("big2.db", O_RDWR|O_CREAT|O_TRUNC|O_BINARY, 0664, DB_HASH, &info);
 	data = malloc(800 * sizeof(int));
 	for (n = 0; n < 800; n++)
 		data[n] = 0xDEADBEEF;

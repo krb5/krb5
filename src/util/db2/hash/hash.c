@@ -140,7 +140,7 @@ __hash_open(file, flags, mode, info, dflags)
 		new_table = 1;
 	}
 	if (file) {
-		if ((hashp->fp = open(file, flags, mode)) == -1)
+		if ((hashp->fp = open(file, flags|O_BINARY, mode)) == -1)
 			RETURN_ERROR(errno, error0);
 		(void)fcntl(hashp->fp, F_SETFD, 1);
 	}
