@@ -1,3 +1,8 @@
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * do_as_req.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
+	* do_as_req.c: Add a missing #ifdef KRBCONF_KDC_MODIFIES_KDB
+		for update_client and updating the database.
 
 Tue Aug 15 14:32:54 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* extern.h - Add key/salt list to per-realm data.

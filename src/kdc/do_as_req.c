@@ -557,8 +557,10 @@ errout:
     if (sname)
 	    free(sname);
     if (c_nprincs) {
+#ifdef	KRBCONF_KDC_MODIFIES_KDB
 	if (update_client)
 	    krb5_db_put_principal(kdc_context, &client, &c_nprincs);
+#endif	/* KRBCONF_KDC_MODIFIES_KDB */
 	krb5_db_free_principal(kdc_context, &client, c_nprincs);
     }
     if (s_nprincs)
