@@ -62,6 +62,14 @@ First, make sure you have sed, gawk, cat, and cp.
 4) nmake install [NODEBUG=1]           # Copy headers, libs, executables
 
 
+Notes on MS2MIT:
+---------------
+
+ms2mit is not built by default.  To build it, make sure you are using
+a recent version of the MS Platform SDK, cd into src/windows/ms2mit and
+run nmake.
+
+
 Notes on the install Target:
 ---------------------------
 
