@@ -1,3 +1,8 @@
+Tue Jan  6 17:11:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* in_tkt.c: Conditionalize use of macro do_seteuid, rather than
+	redefining setreuid. [krb5-libs/521]
+
 Sat Dec  6 22:17:28 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* dest_tkt.c: Add <string.h> for memset prototype.
