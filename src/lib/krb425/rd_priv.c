@@ -29,7 +29,7 @@
 #ifndef hpux
 #include <arpa/inet.h>
 #endif
-
+#include <netinet/in.h>
 long
 krb_rd_priv(in, in_length, sched, key, sender, receiver, msg)
 u_char *in;

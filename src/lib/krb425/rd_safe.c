@@ -29,6 +29,7 @@
 #ifndef hpux
 #include <arpa/inet.h>
 #endif
+#include <netinet/in.h>
 
 long
 krb_rd_safe(in, in_length, key, sender, receiver, msg)
