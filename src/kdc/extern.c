@@ -55,3 +55,5 @@ krb5_kvno tgs_kvno;
 
 static krb5_data tgs_data[3] = { {0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME}, {0, 0, 0}};
 krb5_principal_data tgs_server_struct = { 0, { 0, 0, 0}, tgs_data, 2, 0};
+
+short primary_port = 0;

@@ -50,4 +50,6 @@ extern krb5_kvno tgs_kvno;
 extern krb5_principal_data tgs_server_struct;
 #define	tgs_server (&tgs_server_struct)
 
+extern short primary_port;
+
 #endif /* __KRB5_KDC_EXTERN__ */

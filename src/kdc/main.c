@@ -133,7 +133,7 @@ void
 usage(name)
 char *name;
 {
-    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname]\n", name);
+    fprintf(stderr, "usage: %s [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterkeytype] [-M masterkeyname] [-p port]\n", name);
     return;
 }
 
@@ -156,7 +156,7 @@ char **argv;
 
     extern char *optarg;
 
-    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:")) != EOF) {
+    while ((c = getopt(argc, argv, "r:d:mM:k:R:e:p:")) != EOF) {
 	switch(c) {
 	case 'r':			/* realm name for db */
 	    db_realm = optarg;
@@ -176,6 +176,9 @@ char **argv;
 	    break;
 	case 'R':
 	    rcname = optarg;
+	    break;
+	case 'p':
+	    primary_port = atoi(optarg);
 	    break;
 	case 'e':
 	    kdc_etype = atoi(optarg);

@@ -1,3 +1,10 @@
+Wed Jan 25 23:20:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* network.c (setup_network), main.c (process_args): Allow the
+		primary port that the KDC listens on be configurable on the
+		command line.  If the appropriate /etc/services entries
+		aren't found, use compiled in defaults.
+
 Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
 
         * Removed all narrow types and references to wide.h and narrow.h

@@ -49,6 +49,7 @@
 extern char *krb5_kdc_udp_portname;
 extern char *krb5_kdc_sec_udp_portname;
 extern int errno;
+extern short primary_port;
 
 static int udp_port_fd = -1;
 static int sec_udp_port_fd = -1;
@@ -65,22 +66,26 @@ const char *prog;
 
     FD_ZERO(&select_fds);
     select_nfsd = 0;
-    sp = getservbyname(krb5_kdc_udp_portname, "udp");
-    if (!sp) {
-	com_err(prog, 0, "%s/udp service unknown\n",
-		krb5_kdc_udp_portname);
-	return KDC5_NOPORT;
-    }
-    if ((udp_port_fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
-	retval = errno;
-	com_err(prog, 0, "Cannot create server socket");
-	return retval;
-    }
     memset((char *)&sin, 0, sizeof(sin));
-    sin.sin_port = sp->s_port;
+    if (primary_port) {
+	 sin.sin_port = htons(primary_port);
+    } else {
+	 sp = getservbyname(krb5_kdc_udp_portname, "udp");
+	 if (!sp)
+	     sin.sin_port = htons(KRB5_DEFAULT_PORT);
+	 else
+	     sin.sin_port = sp->s_port;
+    }
+    
+    if ((udp_port_fd = socket(PF_INET, SOCK_DGRAM, 0)) == -1) {
+	 retval = errno;
+	 com_err(prog, 0, "Cannot create server socket");
+	 return retval;
+    }
+    
     if (bind(udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
 	retval = errno;
-	com_err(prog, 0, "Cannot bind server socket");
+	com_err(prog, 0, "Cannot bind server socket to fd %d", udp_port_fd);
 	return retval;
     }
     FD_SET(udp_port_fd, &select_fds);
@@ -94,7 +99,7 @@ const char *prog;
 	    return 0;		/* No secondary listening port defined */
 
     sp = getservbyname(krb5_kdc_sec_udp_portname, "udp");
-    if (!sp) {
+    if (!sp && sin.sin_port != htons(KRB5_DEFAULT_SEC_PORT)) {
 	com_err(prog, 0, "%s/udp service unknown\n",
 		krb5_kdc_sec_udp_portname);
 	return 0;		/* Don't give an error if we can't */
@@ -105,7 +110,7 @@ const char *prog;
 	return 0;		/* Don't give an error we we can't do this */
     }
     memset((char *)&sin, 0, sizeof(sin));
-    sin.sin_port = sp->s_port;
+    sin.sin_port = sp ? sp->s_port : htons(KRB5_DEFAULT_SEC_PORT);
     if (bind(sec_udp_port_fd, (struct sockaddr *)&sin, sizeof(sin)) == -1) {
 	com_err(prog, errno, "while trying to bind secondary server socket");
 	return 0;		/* Don't give an error if we can't do this */
