@@ -44,8 +44,9 @@ krb5_scc_start_seq_get(id, cursor)
 	  return KRB5_CC_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
-     MAYBE_OPEN (id, "r");
-     fseek(((krb5_scc_data *) id->data)->file, 0, 0);
+     MAYBE_OPEN (id, SCC_OPEN_RDONLY);
+     /* skip over vno at beginning of file */
+     fseek(((krb5_scc_data *) id->data)->file, sizeof(krb5_int16), 0);
 
      krb5_scc_skip_principal(id);
      fcursor->pos = ftell(((krb5_scc_data *) id->data)->file);
