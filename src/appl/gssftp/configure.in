@@ -36,6 +36,7 @@ SETENVSRC='$(srcdir)/../bsd/setenv.c'
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])
+AC_DEFINE([NEED_SETENV])
 fi
 dnl
 dnl
