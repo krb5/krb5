@@ -26,8 +26,9 @@ kpasswd: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 	$(CC) $(CFLAGS) -o kpasswd $(OBJS) $(KLIB) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) kpasswd ${DESTDIR}$(CLIENT_BINDIR)/kpasswd
-	$(INSTALL_DATA) $(srcdir)/kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)/kpasswd.1
+	$(INSTALL_PROGRAM) $(C)kpasswd ${DESTDIR}$(CLIENT_BINDIR)$(S)kpasswd_old
+	$(INSTALL_DATA) $(srcdir)$(S)kpasswd.M ${DESTDIR}$(CLIENT_MANDIR)$(S)kpasswd_old.1
+
 
 clean::
 	$(RM) kpasswd

@@ -1,3 +1,7 @@
+
+Mon May 22 09:57:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Install kadmind as kadmind_old.  Manpage too.
+
 Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
 
         * adm_process.c: (krb5_recvauth()): No longer needs the rc_type arg.

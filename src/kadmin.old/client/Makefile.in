@@ -41,8 +41,8 @@ kadmin: $(KDBDEPLIB) $(OBJS) $(DEPKLIB)
 	$(LD) $(CFLAGS) -o kadmin $(OBJS) $(KLIB) $(LIBS)
 
 install::
-	$(INSTALL_PROGRAM) kadmin ${DESTDIR}$(CLIENT_BINDIR)/kadmin
-	$(INSTALL_DATA) $(srcdir)/kadmin.M ${DESTDIR}$(CLIENT_MANDIR)/kadmin.1
+	$(INSTALL_PROGRAM) $(C)kadmin ${DESTDIR}$(CLIENT_BINDIR)$(S)kadmin_old
+	$(INSTALL_DATA) $(srcdir)$(S)kadmin.M ${DESTDIR}$(CLIENT_MANDIR)$(S)kadmin_old.1
 
 clean::
 	$(RM) kadmin

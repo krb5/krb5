@@ -1,3 +1,7 @@
+
+Mon May 22 09:55:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Install old kadmin as kadmin_old.  Manpage too.
+
 Mon May  1 23:19:10 1995  Theodore Y. Ts'o  (tytso@dcl)
 
         * kadmin.c (main): Fix really broken way client and client_name
