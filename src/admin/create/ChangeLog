@@ -1,3 +1,12 @@
+Wed Sep 13 19:02:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdb5_create.c (tgt_keysalt_iterate): Don't bash the master key
+		encblock when creating the various TGT keys.  Otherwise,
+		the keys end up getting encrypted using the wrong
+		encryption algorithm.  Initialize a new encblock,
+		random_encblock, from the master key password.
+		(main):  Prompt for the master key password ourselves, and
+		store it away so that it can be used by tgt_keysalt_iterate.
 
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
