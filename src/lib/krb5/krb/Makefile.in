@@ -139,7 +139,8 @@ all:: $(OBJS)
 COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
-	free_rtree.o bld_pr_ext.o $(COMERRLIB) $(TOPLIBD)/libkrb5.a
+	free_rtree.o bld_pr_ext.o $(COMERRLIB) $(TOPLIBD)/libkrb5.a \
+	$(TOPLIBD)/libcrypto.a
 
 t_walk_rtree: $(T_WALK_RTREE_OBJS)
 	$(CC) -o t_walk_rtree $(T_WALK_RTREE_OBJS)

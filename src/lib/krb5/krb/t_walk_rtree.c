@@ -20,7 +20,7 @@ main(argc, argv)
 	krb5_init_context(&context);
 	krb5_init_ets(context);
 	
-	if (argc < 3 && argc > 4) {
+	if (argc < 3 || argc > 4) {
 		fprintf(stderr,
 			"Usage: %s client-realm server-realm [sep_char]\n",
 			argv[0]);

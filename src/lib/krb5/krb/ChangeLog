@@ -1,3 +1,9 @@
+Sat Apr 22 11:06:45 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* Makefile.in: t_walk_rtree needs libcrypto
+
+	* t_walk_rtree.c: error in checking for argument count
+
 Thu Apr 20 16:23:23 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* copy_addrs.c, copy_athctr.c, copy_auth.c, copy_cksum.c,
