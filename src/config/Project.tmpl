@@ -19,13 +19,16 @@
           DEPKLIB = $(TOP)/lib/krb/libkrb.a \
                     $(TOP)/lib/des/libdes.a \
                     $(TOP)/lib/ccache/libcred.a \
-                    $(TOP)/lib/ccache/libcred.a \
                     $(TOP)/lib/ccache/file/libfcc.a \
+		    $(TOP)/lib/rcache/librc.a \
                     $(TOP)/lib/os-4.3/libos.a \
                     $(TOP)/error_tables/libkrberrs.a \
-                    $(TOP)/asn.1/libasn1.a
+                    $(TOP)/asn.1/libasn1.a \
+                    $(TOP)/lib/free/libkfree.a \
+                    $(TOP)/lib/cryptoconf.o
 
              KLIB = $(DEPKLIB) $(ISODE)/libisode.a -ldes -lcom_err
+           KDBLIB = $(TOP)/lib/kdb/libkdb.a
 
 #ifdef UseInstalled
             IMAKE = imake		/* assume BINDIR in path */
