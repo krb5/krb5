@@ -27,7 +27,7 @@ SHLIB_EXPLIBS=-lkrb5 -lcom_err -ldes425 -lk5crypto
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-EHDRDIR=$(BUILDTOP)$(S)include
+EHDRDIR=$(BUILDTOP)$(S)include$(S)kerberosIV
 
 OBJS	= \
 	$(OUTPRE)cr_auth_repl.$(OBJEXT) \
@@ -189,7 +189,6 @@ CODE=$(SRCS) Makefile.in krb_err.et
 
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
-
 
 all-unix:: krb_err.h includes all-liblinks
 
