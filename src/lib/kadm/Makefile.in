@@ -30,7 +30,7 @@ SRCS=	$(srcdir)/adm_conn.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/keysalt.c
 
-all:: all-$(WHAT) $(BASE_OBJS) 
+all:: $(BASE_OBJS) 
 
 all-unix:: $(DB_OBJS) $(UNIX_OBJS)
 all-unix:: libkadm.a
@@ -46,7 +46,6 @@ install:: libkadm.a
 	$(INSTALL_DATA) libkadm.a $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libkadm.a
 
-clean::	clean-$(WHAT)
 clean-unix::
 	$(RM) libkadm.$(LIBEXT) $(UNIX_OBJS)
 clean-mac::
@@ -76,8 +75,6 @@ t_ktentry:	$(T_KTENTRY_OBJS)
 	$(LD) -o t_ktentry $(T_KTENTRY_OBJS) $(LIBS)
 
 TEST_PROGS	= t_dbentry t_ktentry
-
-check::	check-$(WHAT)
 
 check-unix::	$(TEST_PROGS)
 	./t_dbentry -r 100

@@ -53,8 +53,6 @@ SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 EXT_LIB= libdes425.a $(TOPLIBD)/libcrypto.a
 DEPKLIB= $(TOPLIBD)/libcrypto.a
 
-all:: all-$(WHAT)
-
 all-unix:: shared $(OBJS)
 all-mac:: $(OBJS)
 all-windows:: $(OBJS)
@@ -65,8 +63,6 @@ shared:
 verify: verify.o libdes425.a $(DEPKLIB)
 	$(CC) -o $@ verify.o $(LDFLAGS) $(EXT_LIB)
 
-check:: check-$(WHAT)
-
 check-unix:: verify
 	./verify -z
 	./verify -m
@@ -74,7 +70,7 @@ check-unix:: verify
 
 check-windows::
 
-clean:: clean-$(WHAT)
+clean:: 
 	$(RM) verify$(EXEEXT) verify.$(OBJEXT)
 
 clean-unix::

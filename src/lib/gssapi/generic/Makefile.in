@@ -61,20 +61,16 @@ SRCS= $(ETSRCS) $(CCSRCS)
 OBJS= $(ETOBJS) $(CCOBJS)
 HDRS= $(ETHDRS)
 
-all:: all-$(WHAT) $(SRCS) $(HDRS) includes $(OBJS)
+all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
 
-all-unix::
+all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
 
-all-mac::
-
-all-windows::
+all-windows:: $(SRCS) $(HDRS) includes $(OBJS)
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 	copy gssapi.h $(EHDRDIR)
 	copy gssapi_generic.h $(EHDRDIR)
 
 unixmac: $(SRCS) $(HDRS) includes
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(ETHDRS) $(ETSRCS)

@@ -93,9 +93,9 @@ HDRS= $(ETHDRS)
 
 EHDRDIR=$(TOP)/include/gssapi
 
-all:: $(SRCS) $(HDRS) includes $(OBJS)
-
-clean:: clean-$(WHAT)
+all-unix:: $(SRCS) $(HDRS) includes $(OBJS)
+all-mac:: $(SRCS) $(HDRS) includes $(OBJS)
+all-windows:: $(SRCS) $(HDRS) includes $(OBJS)
 
 clean-unix::
 	$(RM) $(ETHDRS) $(ETSRCS)

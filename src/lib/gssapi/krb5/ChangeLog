@@ -1,3 +1,8 @@
+Mon Sep 25 16:52:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
 Sun Sep 24 10:39:13 1995  John Rivlin (jrivlin@fusion.com)
 	* gssapiP_krb5.h: Fixed kb_seal_size prototype
 

@@ -1,4 +1,3 @@
-WHAT=unix
 CFLAGS = $(CCOPTS) $(DEFS) $(DEFINES)
 DEFINES=-I$(srcdir)/../../include/kerberosIV
 
@@ -168,7 +167,6 @@ all:: all-really
 # NMAKE expands the macros in dependency lines before it finishes reading
 # the whole file (sigh)...
 all-really:: all-$(WHAT)
-install:: install-$(WHAT)
 
 # We want *library* compiler options...
 DBG=$(DBG_LIB)
@@ -241,7 +239,7 @@ kerberos.dll: kerberos.def winsock.lib \
 	del c.lib
 	rc /p /k $@
 
-clean:: clean-$(WHAT)
+clean:: 
 	-$(RM) $(LIBNAME)
 	-$(RM) *.$(OBJEXT)
 
@@ -273,8 +271,6 @@ install-unix::
 	$(RANLIB)    $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
 	$(CHMOD) 444 $(DESTDIR)$(KRB5_LIBDIR)/$(LIBNAME)
 
-
-check:: check-$(WHAT)
 
 check-unix:: $(TEST_PROGS)
 check-mac:: $(TEST_PROGS)

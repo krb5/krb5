@@ -3,8 +3,6 @@ TST=if test -n "`cat DONE`" ; then
 ##DOSBUILDTOP = ..\..
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-all:: all-$(WHAT)
-
 all-unix::
 
 all-mac::
@@ -17,8 +15,6 @@ libgssapi_krb5.a: generic/DONE krb5/DONE
 install:: libgssapi_krb5.a
 	$(INSTALL_DATA) libgssapi_krb5.a $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/libgssapi_krb5.a
-
-clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) libgssapi_krb5.a
