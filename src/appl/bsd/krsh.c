@@ -374,7 +374,7 @@ main(argc, argv0)
         exit(1);
     }
 #ifdef HAVE_ISATTY
-    if(isatty(2)) {
+    if(encrypt_flag&&isatty(2)) {
 	write(2,SECURE_MESSAGE, strlen(SECURE_MESSAGE));
     }
 #endif
@@ -683,3 +683,4 @@ int des_write(fd, buf, len)
     else return(len); 
 }
 #endif /* KERBEROS */
+
