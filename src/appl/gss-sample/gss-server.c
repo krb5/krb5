@@ -496,13 +496,13 @@ int test_import_export_context(context)
 	/*
 	 * Attempt to save and then restore the context.
 	 */
-	gettimeofday(&tm1);
+	gettimeofday(&tm1, (struct timezone *)0);
 	maj_stat = gss_export_sec_context(&min_stat, context, &context_token);
 	if (maj_stat != GSS_S_COMPLETE) {
 		display_status("exporting context", maj_stat, min_stat);
 		return 1;
 	}
-	gettimeofday(&tm2);
+	gettimeofday(&tm2, (struct timezone *)0);
 	if (verbose && log)
 		fprintf(log, "Exported context: %d bytes, %7.4f seconds\n",
 			context_token.length, timeval_subtract(&tm2, &tm1));
@@ -511,7 +511,7 @@ int test_import_export_context(context)
 		display_status("importing context", maj_stat, min_stat);
 		return 1;
 	}
-	gettimeofday(&tm1);
+	gettimeofday(&tm1, (struct timezone *)0);
 	if (verbose && log)
 		fprintf(log, "Importing context: %7.4f seconds\n",
 			timeval_subtract(&tm1, &tm2));
