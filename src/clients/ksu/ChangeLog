@@ -1,3 +1,8 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* ccache.c, heuristic.c, main.c: Return of krb5_cc_get_name() is
+	const char *.
+
 2000-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS): Put @SETENVOBJ@ on same line as xmalloc.o to

@@ -398,7 +398,7 @@ krb5_error_code find_either_ticket (context, cc, client, end_server, found)
     krb5_principal kdc_server;
     krb5_error_code retval;
     krb5_boolean temp_found = FALSE;
-    char * cc_source_name;
+    const char * cc_source_name;
     struct stat st_temp;
 
     cc_source_name = krb5_cc_get_name(context, cc);
@@ -535,7 +535,7 @@ krb5_error_code get_best_princ_for_target(context, source_uid, target_uid,
 {
 
     princ_info princ_trials[10];
-    char * cc_source_name;
+    const char * cc_source_name;
     krb5_principal cc_def_princ = NULL;
     krb5_principal temp_client;
     krb5_principal target_client;

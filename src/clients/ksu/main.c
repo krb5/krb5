@@ -885,7 +885,7 @@ static void sweep_up(context, cc)
     krb5_ccache cc;
 {
     krb5_error_code retval; 
-    char * cc_name;
+    const char * cc_name;
     struct stat  st_temp;
 
     krb5_seteuid(0);
