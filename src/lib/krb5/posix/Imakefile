@@ -47,18 +47,25 @@ STOBJS=strdup.o
 STSRCS=$(SRCDIR)strdup.c
 #endif
 #if HasStrerror
-PEOBJS=
-PESRCS=
+SEOBJS=
+SESRCS=
 #else
-PEOBJS=strerror.o
-PESRCS=$(SRCDIR)strerror.c
+SEOBJS=strerror.o
+SESRCS=$(SRCDIR)strerror.c
+#endif
+#if HasMemmove
+MMOBJS=
+MMSRCS=
+#else
+MMOBJS= memmove.o
+MMSRCS= $(SRCDIR)memmove.c
 #endif
 
 INCLUDES=$(STDC_TOP_INCLUDES)
 
-OBJS =	$(PEOBJS) $(VSOBJS) $(VPOBJS) $(STOBJS)
+OBJS =	$(MMOBJS) $(SEOBJS) $(VSOBJS) $(VPOBJS) $(STOBJS)
 
-SRCS =	$(PESRCS) $(VSSRCS) $(VPSRCS) $(STSRCS)
+SRCS =	$(MMSRCS) $(SESRCS) $(VSSRCS) $(VPSRCS) $(STSRCS)
 
 SubdirLibraryRule($(OBJS))
 
