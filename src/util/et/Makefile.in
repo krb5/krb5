@@ -21,7 +21,7 @@ LINTFLAGS=-uhvb
 LINTFILES= error_message.c et_name.c init_et.c com_err.c
 LIBOBJS= error_message.o et_name.o init_et.o com_err.o
 # for et_lex.lex.c include in error_table.y
-LOCALINCLUDE=-I. 
+LOCALINCLUDE=-I. -I$(srcdir)
 
 FILES=	Makefile et_name.c error_message.c compile_et.c \
 		et_lex.lex.l error_table.y init_et.c \

@@ -30,7 +30,7 @@ TOP=$(BUILDTOP)
 # hard coded .. is so that ss/ss_err.h works
 # hard coded ../et is so com_err.h works
 # CFLAGS= -I${INCDIR} -I. -I.. -I../et -g
-LOCALINCLUDE= -I. -I$(srcdir)/.. -I$(srcdir)/../et -I..
+LOCALINCLUDE= -I. -I$(srcdir)/ -I$(srcdir)/.. -I$(srcdir)/../et -I..
 
 # for the library
 

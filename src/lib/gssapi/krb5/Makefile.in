@@ -6,7 +6,7 @@ VPATH = @srcdir@
 DEFS = @DEFS@
 LIBS = @LIBS@
  
-CFLAGS = -g $(DEFS)
+CFLAGS = -g $(DEFS) -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 LDFLAGS = -g
 
 RM = rm -f
@@ -22,6 +22,12 @@ all:: $(OBJS)
 ETSRCS= gssapi_krb5_err.c
 ETOBJS= gssapi_krb5_err.o
 ETHDRS= gssapi_krb5_err.h
+
+gssapi_krb5_err.o: gssapi_krb5_err.c
+
+gssapi_krb5_err.h: gssapi_krb5_err.et
+
+gssapi_krb5_err.c: gssapi_krb5_err.et
 
 CCSRCS = \
 	$(srcdir)/accept_sec_context.c \
