@@ -483,6 +483,8 @@ static void deep_free_cc_v5_creds (cc_creds* creds) {
 	
 	deep_free_cc_data_array (creds -> addresses);
 	deep_free_cc_data_array (creds -> authdata);
+	
+	free(creds);
 }
 
 static void deep_free_cc_creds (cred_union creds) {
