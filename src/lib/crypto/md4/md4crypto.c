@@ -59,7 +59,7 @@ krb5_checksum *outcksum;
 	    *output++ = (working.buffer[i] >> j) & 0xFF;
 
     keyblock.length = seed_length;
-    keyblock.contents = seed;
+    keyblock.contents = (krb5_octet *)seed;
     keyblock.keytype = KEYTYPE_DES;
 
     if (retval = mit_des_process_key(&eblock, &keyblock))
