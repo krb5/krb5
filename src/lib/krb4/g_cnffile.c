@@ -45,7 +45,6 @@ krb__v5_get_file(s)
 		krb5_xfree(full_name);
 	    }
 	}
-	krb5_free_context(context);
 	return cnffile;
 }
 
