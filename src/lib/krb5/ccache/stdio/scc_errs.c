@@ -25,6 +25,9 @@ int errnum;
 {
     register int retval;
     switch (errnum) {
+#ifdef ELOOP
+    case ELOOP:				/* Bad symlink is like no file. */
+#endif
     case ENOENT:
 	retval = KRB5_FCC_NOFILE;
 	break;
@@ -32,9 +35,6 @@ int errnum;
     case EACCES:
     case EISDIR:
     case ENOTDIR:
-#ifdef ELOOP
-    case ELOOP:				/* XXX */
-#endif
     case ETXTBSY:
     case EBUSY:
     case EROFS:
