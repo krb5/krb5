@@ -237,6 +237,16 @@ kerbsrc.zip: awk-windows-mac
 	cp Makefile.bak Makefile
 	rm -f $(CLEANUP)
 
+kerbsrc-nt.zip: awk-windows
+        rm -f Makefile.bak
+        mv Makefile Makefile.bak
+        cp Makefile.in Makefile
+        rm -f kerbsrc.zip
+        $(ZIP) -Dl kerbsrc-nt.zip $(ZIPFILES) -x $(ZIPLONGEXCLUDE)
+        $(ZIP) -D kerbsrc-nt.zip $(ZIPBINARYFILES)
+        cp Makefile.bak Makefile
+        rm -f $(ZIPCLEANUP)
+
 kerbsrc.mac: awk-windows-mac
 	rm -f excludefiles 
 	/bin/ls $(MACEXCLUDE) >excludefiles
