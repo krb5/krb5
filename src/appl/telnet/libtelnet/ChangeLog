@@ -1,3 +1,10 @@
+2000-04-28  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kerberos5.c (kerberos5_is): Don't overflow buffer "errbuf".
+	* spx.c (spx_init, spx_send, spx_is): Don't overflow buffer
+	"targ_printable".
+	(spx_status): Don't overflow buffer "acl_file".
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -1,3 +1,9 @@
+2000-04-27  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* krlogin.c (main): Don't overflow buffer "term".
+	* krshd.c (doit): Don't overflow buffer "cmdbuf".
+	* login.c (afs_login): Don't overflow buffer "aklog_path".
+
 2000-03-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for alpha*-dec-osf* instead of

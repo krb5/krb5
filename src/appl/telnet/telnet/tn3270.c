@@ -397,10 +397,11 @@ settranscom(argc, argv)
 	   return 1;
 	}
 	transcom = tline;
-	(void) strcpy(transcom, argv[1]);
+	(void) strncpy(transcom, argv[1], sizeof(tline) - 1);
+	tline[sizeof(tline) - 1] = '\0';
 	for (i = 2; i < argc; ++i) {
-	    (void) strcat(transcom, " ");
-	    (void) strcat(transcom, argv[i]);
+	    (void) strncat(transcom, " ", sizeof(tline) - 1 - (transcom - tline));
+	    (void) strncat(transcom, argv[i], sizeof(tline) - 1 - (transcom - tline));
 	}
 	return 1;
 }

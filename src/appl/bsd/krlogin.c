@@ -559,7 +559,8 @@ main(argc, argv)
 	if (tcgetattr(0, &ttyb) == 0) {
 		int ospeed = cfgetospeed (&ttyb);
 
-		(void) strcat(term, "/");
+                term[sizeof(term) - 1] = '\0';
+		(void) strncat(term, "/", sizeof(term) - 1 - strlen(term));
 		if (ospeed >= 50)
 			/* On some systems, ospeed is the baud rate itself,
 			   not a table index.  */
@@ -567,15 +568,16 @@ main(argc, argv)
 		else if (ospeed >= sizeof(speeds)/sizeof(char*))
 			/* Past end of table, but not high enough to
 			   look like a real speed.  */
-			(void) strcat (term, speeds[sizeof(speeds)/sizeof(char*) - 1]);
+			(void) strncat (term, speeds[sizeof(speeds)/sizeof(char*) - 1], sizeof(term) - 1 - strlen(term));
 		else {
-			(void) strcat(term, speeds[ospeed]);
+			(void) strncat(term, speeds[ospeed], sizeof(term) - 1 - strlen(term));
 		}
+                term[sizeof (term) - 1] = '\0';
 	}
 #else
     if (ioctl(0, TIOCGETP, &ttyb) == 0) {
-	(void) strcat(term, "/");
-	(void) strcat(term, speeds[ttyb.sg_ospeed]);
+	(void) strncat(term, "/", sizeof(term) - 1 - strlen(term));
+	(void) strncat(term, speeds[ttyb.sg_ospeed], sizeof(term) - 1 - strlen(term));
     }
 #endif
     (void) get_window_size(0, &winsize);

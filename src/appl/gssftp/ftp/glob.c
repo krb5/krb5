@@ -118,7 +118,7 @@ ftpglob(v)
 
 	globerr = 0;
 	gpath = agpath; gpathp = gpath; *gpathp = 0;
-	lastgpathp = &gpath[sizeof agpath - 2];
+	lastgpathp = &gpath[sizeof agpath - 1];
 	ginit(agargv); globcnt = 0;
 	collect(v);
 	if (globcnt == 0 && (gflag&1)) {
@@ -198,7 +198,8 @@ expand(as)
 					globerr = "Unknown user name after ~";
 				(void) strcpy(gpath, gpath + 1);
 			} else
-				(void) strcpy(gpath, home);
+				(void) strncpy(gpath, home, FTP_BUFSIZ - 1);
+			gpath[FTP_BUFSIZ - 1] = '\0';
 			gpathp = strend(gpath);
 		}
 	}
@@ -324,8 +325,9 @@ pend:
 doit:
 		savec = *pm;
 		*pm = 0;
-		(void) strcpy(lm, pl);
-		(void) strcat(restbuf, pe + 1);
+		(void) strncpy(lm, pl, sizeof(restbuf) - 1 - (lm - restbuf));
+		restbuf[sizeof(restbuf) - 1] = '\0';
+		(void) strncat(restbuf, pe + 1, sizeof(restbuf) - 1 - strlen(restbuf));
 		*pm = savec;
 		if (s == 0) {
 			sgpathp = gpathp;

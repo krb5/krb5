@@ -173,7 +173,8 @@ spx_init(ap, server)
 		str_data[3] = TELQUAL_REPLY;
 		gethostname(lhostname, sizeof(lhostname));
 		strcpy(targ_printable, "SERVICE:rcmd@");
-		strcat(targ_printable, lhostname);
+		strncat(targ_printable, lhostname, sizeof(targ_printable) - 1 - 13);
+		targ_printable[sizeof(targ_printable) - 1] = '\0';
 		input_name_buffer.length = strlen(targ_printable);
 		input_name_buffer.value = targ_printable;
 		major_status = gss_import_name(&status,
@@ -216,7 +217,8 @@ spx_send(ap)
 
 	printf("[ Trying SPX ... ]\n");
 	strcpy(targ_printable, "SERVICE:rcmd@");
-	strcat(targ_printable, RemoteHostName);
+	strncat(targ_printable, RemoteHostName, sizeof(targ_printable) - 1 - 13);
+	targ_printable[sizeof(targ_printable) - 1] = '\0';
 
 	input_name_buffer.length = strlen(targ_printable);
 	input_name_buffer.value = targ_printable;
@@ -324,7 +326,8 @@ spx_is(ap, data, cnt)
 		gethostname(lhostname, sizeof(lhostname));
 
 		strcpy(targ_printable, "SERVICE:rcmd@");
-		strcat(targ_printable, lhostname);
+		strncat(targ_printable, lhostname, sizeof(targ_printable) - 1 - 13);
+		targ_printable[sizeof(targ_printable) - 1] = '\0';
 
 		input_name_buffer.length = strlen(targ_printable);
 		input_name_buffer.value = targ_printable;
@@ -479,7 +482,7 @@ spx_status(ap, name, level)
 
 	gss_buffer_desc  fullname_buffer, acl_file_buffer;
 	gss_OID          fullname_type;
-        char acl_file[160], fullname[160];
+        char acl_file[MAXPATHLEN], fullname[160];
         int major_status, status = 0;
 	struct passwd  *pwd;
 
@@ -494,8 +497,9 @@ spx_status(ap, name, level)
           return(AUTH_USER);   /*  not authenticated  */
         }
 
-	strcpy(acl_file, pwd->pw_dir);
-	strcat(acl_file, "/.sphinx");
+	acl_file[sizeof(acl_file) - 1] = '\0';
+	strncpy(acl_file, pwd->pw_dir, sizeof(acl_file) - 1);
+	strncat(acl_file, "/.sphinx", sizeof(acl_file) - 1 - strlen(acl_file));
         acl_file_buffer.value = acl_file;
         acl_file_buffer.length = strlen(acl_file);
 

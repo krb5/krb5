@@ -2861,10 +2861,11 @@ cmdrc(m1, m2)
     if (rcname == 0) {
 	rcname = getenv("HOME");
 	if (rcname)
-	    strcpy(rcbuf, rcname);
+	    strncpy(rcbuf, rcname, sizeof(rcbuf) - 1);
 	else
 	    rcbuf[0] = '\0';
-	strcat(rcbuf, "/.telnetrc");
+	rcbuf[sizeof(rcbuf) - 1] = '\0';
+	strncat(rcbuf, "/.telnetrc", sizeof(rcbuf) - 1 - strlen(rcbuf));
 	rcname = rcbuf;
     }
 
