@@ -49,6 +49,8 @@ kadm_entry2princ(entry, princ)
      Principal *princ;
 {
   char realm[REALM_SZ];		/* dummy values only */
+  krb5_tl_mod_princ *mprinc;
+  krb5_key_data *pkey;
   krb5_error_code retval;
 
   /* NOTE: does not convert the key */
@@ -58,14 +60,29 @@ kadm_entry2princ(entry, princ)
   if (retval)
     return retval;
   princ->exp_date = entry.expiration;
-  strncpy(ctime((const time_t *) &entry.expiration), princ->exp_date_txt,
+  strncpy(princ->exp_date_txt, ctime((const time_t *) &entry.expiration),
 	  DATE_SZ);
   princ->attributes = entry.attributes;
   princ->max_life = entry.max_life / (60 * 5);
   princ->kdc_key_ver = entry.mkvno;
   princ->key_version = entry.key_data[0].key_data_kvno;
+
+  retval = krb5_dbe_decode_mod_princ_data(kadm_context, &entry, &mprinc);
   if (retval)
     return retval;
+  princ->mod_date = mprinc->mod_date;
+  strncpy(princ->mod_date_txt,
+	  ctime((const time_t *) &mprinc->mod_date),
+	  DATE_SZ);
+  krb5_free_principal(kadm_context, mprinc->mod_princ);
+  krb5_xfree(mprinc);
+
+  /* Find the V4 key */
+  retval = kadm_find_keytype(&entry, KEYTYPE_DES, KRB5_KDB_SALTTYPE_V4, &pkey);
+  if (retval)
+    return retval;
+  princ->key_version = pkey->key_data_kvno;
+
   return 0;
 }
 
@@ -75,6 +92,8 @@ kadm_princ2entry(princ, entry)
      krb5_db_entry *entry;
 {
   krb5_error_code retval;
+  krb5_tl_mod_princ mprinc;
+  krb5_key_data	*kdatap;
 
   /* NOTE: does not convert the key */
   memset(entry, 0, sizeof (*entry));
@@ -89,10 +108,31 @@ kadm_princ2entry(princ, entry)
   entry->expiration = princ.exp_date;
   entry->attributes = princ.attributes;
 
-  if (!(retval = krb5_dbe_create_key_data(kadm_context, entry))) {
-    entry->key_data[0].key_data_type[0] = (krb5_int16) KEYTYPE_DES;
-    entry->key_data[0].key_data_type[1] = (krb5_int16) KRB5_KDB_SALTTYPE_V4; 
-    entry->key_data[0].key_data_kvno = (krb5_int16) princ.key_version;
+  retval = krb5_425_conv_principal(kadm_context, princ.mod_name,
+				   princ.mod_instance,
+				   server_parm.krbrlm, &mprinc.mod_princ);
+  if (retval)
+    return(retval);
+  mprinc.mod_date = princ.mod_date;
+
+  retval = krb5_dbe_encode_mod_princ_data(kadm_context, &mprinc, entry);
+  if (retval)
+    return(retval);
+
+  if (mprinc.mod_princ)
+    krb5_free_principal(kadm_context, mprinc.mod_princ);
+
+  if (retval = kadm_find_keytype(entry,
+				 KEYTYPE_DES,
+				 KRB5_KDB_SALTTYPE_V4,
+				 &kdatap)) {
+    if (!(retval = krb5_dbe_create_key_data(kadm_context, entry)))
+      kdatap = &entry->key_data[entry->n_key_data-1];
+  }
+  if (kdatap) {
+    kdatap->key_data_type[0] = (krb5_int16) KEYTYPE_DES;
+    kdatap->key_data_type[1] = (krb5_int16) KRB5_KDB_SALTTYPE_V4; 
+    kdatap->key_data_kvno = (krb5_int16) princ.key_version;
   }
   return(retval);
 }
@@ -155,7 +195,9 @@ Kadm_vals *valsout;
   krb5_db_entry newentry, tmpentry;
   krb5_boolean more;
   krb5_keyblock newpw;
-  krb5_tl_mod_princ	mprinc;
+  krb5_tl_mod_princ mprinc;
+  krb5_key_data *pkey;
+  krb5_keysalt	sblock;
   int numfound;
 
   if (!check_access(rname, rinstance, rrealm, ADDACL)) {
@@ -193,19 +235,33 @@ Kadm_vals *valsout;
   newpw.etype = ETYPE_UNKNOWN;
   if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL)
     failadd(KADM_NOMEM);
+
+  if (retval = kadm_find_keytype(&newentry,
+				 KEYTYPE_DES,
+				 KRB5_KDB_SALTTYPE_V4,
+				 &pkey)) {
+    if (!(retval = krb5_dbe_create_key_data(kadm_context, &newentry)))
+      pkey = &newentry.key_data[newentry.n_key_data-1];
+  }
+  if (retval)
+    failadd(retval);
+
   data_i.key_low = ntohl(data_i.key_low);
   data_i.key_high = ntohl(data_i.key_high);
   memcpy(newpw.contents, &data_i.key_low, 4);
   memcpy((char *)(((krb5_int32 *) newpw.contents) + 1), &data_i.key_high, 4);
   newpw.length = 8;
   newpw.keytype = KEYTYPE_DES;
+  sblock.type = KRB5_KDB_SALTTYPE_V4;
+  sblock.data.length = 0;
+  sblock.data.data = (char *) NULL;
   /* encrypt new key in master key */
   retval = krb5_dbekd_encrypt_key_data(kadm_context,
 				       &server_parm.master_encblock,
 				       &newpw,
-				       (krb5_keysalt *) NULL,
+				       &sblock,
 				       (int) ++data_i.key_version,
-				       &newentry.key_data[0]);
+				       pkey);
   memset((char *)newpw.contents, 0, newpw.length);
   free(newpw.contents);
   if (retval) {
@@ -437,6 +493,8 @@ Kadm_vals *valsout;		/* the actual record which is returned */
   krb5_principal theprinc;
   krb5_db_entry newentry, odata;
   krb5_tl_mod_princ mprinc;
+  krb5_key_data	*pkey;
+  krb5_keysalt sblock;
 
   if (wildcard(valsin1->name) || wildcard(valsin1->instance)) {
       failmod(KADM_ILL_WILDCARD);
@@ -485,18 +543,28 @@ Kadm_vals *valsout;		/* the actual record which is returned */
       temp_key.key_high = ntohl(temp_key.key_high);
       memcpy(newpw.contents, &temp_key.key_low, 4);
       memcpy(newpw.contents + 4, &temp_key.key_high, 4);
-      if (newentry.key_data[0].key_data_contents[0]) {
-	krb5_xfree(newentry.key_data[0].key_data_contents[0]);
-	newentry.key_data[0].key_data_contents[0] = (krb5_octet *) NULL;
+      if (retval = kadm_find_keytype(&newentry,
+				     KEYTYPE_DES,
+				     KRB5_KDB_SALTTYPE_V4,
+				     &pkey)) {
+	krb5_db_free_principal(kadm_context, &newentry, 1);
+	memset((char *)&temp_key, 0, sizeof (temp_key));
+	failmod(retval);
+      }
+      if (pkey->key_data_contents[0]) {
+	krb5_xfree(pkey->key_data_contents[0]);
+	pkey->key_data_contents[0] = (krb5_octet *) NULL;
       }
       /* encrypt new key in master key */
+      sblock.type = KRB5_KDB_SALTTYPE_V4;
+      sblock.data.length = 0;
+      sblock.data.data = (char *) NULL;
       retval = krb5_dbekd_encrypt_key_data(kadm_context,
 					   &server_parm.master_encblock,
 					   &newpw,
-					   (krb5_keysalt *) NULL,
-					   (int) newentry.key_data[0].
-					   	key_data_kvno+1,
-					   &newentry.key_data[0]);
+					   &sblock,
+					   (int) pkey->key_data_kvno+1,
+					   pkey);
       memset(newpw.contents, 0, newpw.length);
       free(newpw.contents);
       memset((char *)&temp_key, 0, sizeof(temp_key));
@@ -576,6 +644,8 @@ des_cblock newpw;
   krb5_error_code retval;
   krb5_keyblock localpw;
   krb5_db_entry odata;
+  krb5_key_data *pkey;
+  krb5_keysalt sblock;
 
   if (strcmp(server_parm.krbrlm, rrealm)) {
       syslog(LOG_ERR, "change key request from wrong realm, '%s.%s@%s'!\n",
@@ -608,15 +678,24 @@ des_cblock newpw;
     free(localpw.contents);
     failchange(retval);
   } else if (numfound == 1) {
-    odata.key_data[0].key_data_kvno++;
+    if (retval = kadm_find_keytype(&odata,
+				   KEYTYPE_DES,
+				   KRB5_KDB_SALTTYPE_V4,
+				   &pkey)) {
+      failchange(retval);
+    }
+    pkey->key_data_kvno++;
     odata.mkvno = server_parm.mkvno;
     numfound = 1;
+    sblock.type = KRB5_KDB_SALTTYPE_V4;
+    sblock.data.length = 0;
+    sblock.data.data = (char *) NULL;
     retval = krb5_dbekd_encrypt_key_data(kadm_context,
 					 &server_parm.master_encblock,
 					 &localpw,
-					 (krb5_keysalt *) NULL,
-					 (int) odata.key_data[0].key_data_kvno,
-					 &odata.key_data[0]);
+					 &sblock,
+					 (int) pkey->key_data_kvno,
+					 pkey);
     memset(localpw.contents, 0, localpw.length);
     free(localpw.contents);
     if (retval) {
@@ -855,6 +934,7 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
   krb5_db_entry odata;
   krb5_boolean more;
   krb5_keyblock newpw;
+  krb5_key_data *pkey;
 
   if (!check_access(rname, rinstance, rrealm, STABACL))
     failsrvtab(KADM_UNAUTH);
@@ -878,8 +958,14 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     krb5_free_principal(kadm_context, inprinc);
     failsrvtab(retval);
   } else if (numfound) {
-    odata.key_data[0].key_data_kvno++;
-  } else {
+    retval = kadm_find_keytype(&odata, KEYTYPE_DES, KRB5_KDB_SALTTYPE_V4,
+			       &pkey);
+    if (retval) {
+      krb5_free_principal(kadm_context, inprinc);
+      failsrvtab(retval);
+    }
+  }
+  else {
     /*
      * This is a new srvtab entry that we're creating
      */
@@ -891,9 +977,15 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
     odata.mkvno = server_parm.mkvno;
     odata.expiration = server_parm.expiration;
     odata.attributes = 0;
-    if (!krb5_dbe_create_key_data(kadm_context, &odata))
-      odata.key_data[0].key_data_kvno = 1;
+    if (!krb5_dbe_create_key_data(kadm_context, &odata)) {
+      pkey = &odata.key_data[0];
+      memset(pkey, 0, sizeof(*pkey));
+      pkey->key_data_ver = 2;
+      pkey->key_data_type[0] = KEYTYPE_DES;
+      pkey->key_data_type[1] = KRB5_KDB_SALTTYPE_V4;
+    }
   }
+  pkey->key_data_kvno++;
 
 #ifdef NOENCRYPTION
   memset(new_key, 0, sizeof(new_key));
@@ -936,8 +1028,8 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
 				       &server_parm.master_encblock,
 				       &newpw,
 				       (krb5_keysalt *) NULL,
-				       (int) odata.key_data[0].key_data_kvno,
-				       &odata.key_data[0]);
+				       (int) pkey->key_data_kvno,
+				       pkey);
   memset((char *)newpw.contents, 0, 8);
   free(newpw.contents);
   if (retval) {
@@ -962,3 +1054,31 @@ kadm_chg_srvtab(rname, rinstance, rrealm, values)
 }
 
 #undef failsrvtab
+
+krb5_error_code
+kadm_find_keytype(dbentp, keytype, salttype, kentp)
+     krb5_db_entry	*dbentp;
+     krb5_keytype	keytype;
+     krb5_int32		salttype;
+     krb5_key_data	**kentp;
+{
+  int			i;
+  int			maxkvno;
+  krb5_key_data	*datap;
+
+  maxkvno = -1;
+  datap = (krb5_key_data *) NULL;
+  for (i=0; i<dbentp->n_key_data; i++) {
+    if ((dbentp->key_data[i].key_data_type[0] == keytype) &&
+	((dbentp->key_data[i].key_data_type[1] == salttype) ||
+	 (salttype < 0))) {
+      maxkvno = dbentp->key_data[i].key_data_kvno;
+      datap = &dbentp->key_data[i];
+    }
+  }
+  if (maxkvno >= 0) {
+    *kentp = datap;
+    return(0);
+  }
+  return(ENOENT);    
+}
