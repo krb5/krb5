@@ -12,6 +12,6 @@
 	localhost = __REALM__
 
 [logging]
-	admin_server = SYSLOG=ERR:LOCAL6
-	kdc = SYSLOG=ERR:LOCAL6
-	default = SYSLOG=ERR:LOCAL6
+	admin_server = FILE:/krb5/syslog
+	kdc = FILE:/krb5/syslog
+	default = FILE:/krb5/syslog
