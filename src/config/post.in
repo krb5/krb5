@@ -11,7 +11,7 @@ check::
 			sed -e 's;$(srcdir)/;$$(srcdir)/;g' > .depend; \
 	else :; fi
 
-depend: .depend
+depend:: .depend
 	if test -n "$(SRCS)" ; then \
 		sed -e '/^# +++ Dependency line eater +++/,$$d' \
 			< $(srcdir)/Makefile.in | cat - .depend \
