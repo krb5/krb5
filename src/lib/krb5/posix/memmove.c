@@ -40,8 +40,12 @@
 static char sccsid[] = "@(#)bcopy.c	5.11 (Berkeley) 6/21/91";
 #endif /* LIBC_SCCS and not lint */
 
-#include <sys/cdefs.h>
+#include <krb5/osconf.h>
+#ifdef USE_STRING_H
 #include <string.h>
+#else
+#include <strings.h>
+#endif
 
 /*
  * sizeof(word) MUST BE A POWER OF TWO
