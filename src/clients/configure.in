@@ -12,7 +12,7 @@ fi
 AC_SUBST(SETENVOBJ)
 AC_CHECK_HEADERS(unistd.h pwd.h arpa/inet.h)
 case $krb5_cv_host in
-alpha-dec-osf*)
+alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
 		AC_DEFINE(HAVE_SETLUID)
 		KSU_LIBS="$KSU_LIBS -lsecurity"

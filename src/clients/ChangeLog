@@ -1,3 +1,8 @@
+2000-03-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for alpha*-dec-osf* instead of
+	alpha-dec-osf*.
+
 2000-02-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* configure.in: Test for <arpa/inet.h> include file for inet_ntop

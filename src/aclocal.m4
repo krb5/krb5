@@ -1119,7 +1119,7 @@ CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
 
 # Set up architecture-specific variables.
 case $krb5_cv_host in
-alpha-dec-osf*)
+alpha*-dec-osf*)
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBSEXT='.so.$(LIBMAJOR)'
 	SHLIBEXT=.so
