@@ -569,8 +569,6 @@ compat_decrypt_key (in5, out4)
 }
 /* array of name-components + NULL ptr
  */
-static krb5_data search_stg[3];
-static krb5_data *search[4] ={ &search_stg[0], &search_stg[1], &search_stg[2]};
 #define MIN5 300
 #define HR21 255
 
@@ -582,6 +580,12 @@ kerb_get_principal(name, inst, principal, maxn, more)
     unsigned int maxn;          /* max number of name structs to return */
     int    *more;               /* more tuples than room for */
 {
+    /* Note that neither of these structures should be passed to the
+       krb5_free* functions, because the pointers within them point
+       to data with other references.  */
+    krb5_data search_stg[2];
+    krb5_principal_data search;
+
     krb5_db_entry entries;	/* filled in by krb5_db_get_principal() */
     int nprinc;			/* how many found */
     krb5_boolean more5;		/* are there more? */
@@ -607,15 +611,20 @@ kerb_get_principal(name, inst, principal, maxn, more)
      *     v5: realm/name/instance
      *     in v5, null instance means the null-component doesn't exist.
      */
-    search_stg[0].data = local_realm;
-    search_stg[1].data = name;
-    search_stg[2].data = inst;
-    for ( i = 0; i < 3; i++) {
-	if (! search[i])		search[i] = &search_stg[i];
-	if (!*( search[i]->data))	search[i] = NULL;
-	else search[i]->length = strlen( search[i]->data);
-    }
-    if (retval = krb5_db_get_principal( search, &entries, &nprinc, &more5)) {
+
+    krb5_princ_set_realm_data (&search, local_realm);
+    krb5_princ_set_realm_length (&search, strlen(local_realm));
+    search.data = search_stg;
+    search.length = 1 + (inst != 0);
+    search.type = 0;
+    search_stg[0].data = name;
+    search_stg[0].length = strlen(name);
+    if (inst)
+      {
+	search_stg[1].data = inst;
+	search_stg[1].length = strlen(inst);
+      }
+    if (retval = krb5_db_get_principal(&search, &entries, &nprinc, &more5)) {
 	more = 0;
         return( 0);
     }
