@@ -1,3 +1,8 @@
+Tue Jul  7 16:59:03 1998  Tom Yu  <tlyu@mit.edu>
+
+	* chk_trans.c: Fix up previous fix; short-circuit out when
+	trans->length == 0.
+
 Wed Jul  1 17:59:26 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* chk_trans.c (krb5_check_transited_list): Fix use of an

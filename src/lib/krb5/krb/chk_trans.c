@@ -40,9 +40,10 @@ krb5_data      *realm2;
   krb5_error_code retval = 0;
   krb5_principal  *tgs_list;
 
-  if (!trans || !trans->data)  return(0);
+  if (trans == NULL || trans->data == NULL || trans->length == 0)
+    return(0);
   trans_length = trans->data[trans->length-1] ?
-      trans->length : trans->length - 1;
+    trans->length : trans->length - 1;
 
   for (i = 0; i < trans_length; i++)
     if (trans->data[i] == '\0') {
