@@ -37,6 +37,22 @@ alpha-dec-osf*)
 	)
 	;;
 esac
+dnl 
+dnl After beta6 this functionality will be integrated with aclocal.m4
+AC_ARG_WITH([krb4],
+[  --without-krb4          don't include Kerberos V4 backwards compatibility
+  --with-krb4             use V4 libraries included with V5 (default)
+  --with-krb4=KRB4DIR     use preinstalled V4 libraries],
+,
+withval=yes
+)dnl
+if test $withval = no; then
+	AC_MSG_RESULT(no krb4 support)
+else 
+	AC_MSG_RESULT(Adding in krb4 support)
+	LOGINLIBS="../../krb524/libkrb524.a $LOGINLIBS"
+fi
+dnl
 dnl
 AC_SUBST(LOGINLIBS)
 dnl

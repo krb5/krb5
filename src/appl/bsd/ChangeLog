@@ -1,3 +1,11 @@
+Mon Jun  3 21:26:34 1996  Tom Yu  <tlyu@mit.edu>
+
+	* login.c: Ezra's patches to trim unsed arg from
+		verify_krb_v5_tgt, etc.
+
+	* Makefile.in,configure.in: allow compilation w/o krb4 (Ezra's
+		patches)
+
 Sun May 19 15:22:06 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* login.c (destroy_tickets main):  Use a secure context
