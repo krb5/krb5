@@ -40,6 +40,7 @@
 
 #include <krb5/osconf.h>
 #include <krb5/config.h>
+#include <sys/types.h>
 #ifdef USE_STRING_H
 #include <string.h>
 #else
