@@ -1,3 +1,10 @@
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (.depend): Refuse to do anything if srcdir is ".".  Find
+	a shortcut name for SRCTOP to eliminate "foo/.." subsequences, in
+	case the compiler does the same.  Run depfix.sed after the
+	directory-specific substitutions, not before.
+
 2001-08-07  Ezra Peisach  <epeisach@mit.edu>
 
 	* post.in (all-recurse clean-recurse distclean-recurse
