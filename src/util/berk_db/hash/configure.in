@@ -37,7 +37,9 @@ main()
   if (!f) exit(1);
   fprintf(f, "%d\n", sizeof(k.dsize));
   exit(0);
-}], ac_cv_sizeof_datum_dsize=`cat conftestval`)])dnl
+}], ac_cv_sizeof_datum_dsize=`cat conftestval`,
+ AC_MSG_ERROR(Can't determine size of datum.dsize.)
+)])dnl
 AC_MSG_RESULT($ac_cv_sizeof_datum_dsize)
 AC_DEFINE_UNQUOTED(SIZEOF_DATUM_DSIZE, $ac_cv_sizeof_datum_dsize)
 
@@ -56,7 +58,9 @@ main()
   if (!f) exit(1);
   fprintf(f, "%d\n", sizeof(k.size));
   exit(0);
-}], ac_cv_sizeof_dbt_size=`cat conftestval`)])dnl
+}], ac_cv_sizeof_dbt_size=`cat conftestval`,
+ AC_MSG_ERROR(Can't determine size of DBT.size.)
+)])dnl
 AC_MSG_RESULT($ac_cv_sizeof_dbt_size)
 AC_DEFINE_UNQUOTED(SIZEOF_DBT_SIZE, $ac_cv_sizeof_dbt_size)
 
