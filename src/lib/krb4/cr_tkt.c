@@ -14,6 +14,13 @@
 #include "prot.h"
 #include <string.h>
 #include <krb5.h>
+
+static int krb_cr_tkt_int PROTOTYPE((KTEXT tkt, unsigned char flags, 
+				     char *pname, char *pinstance, 
+				     char *prealm, long paddress,
+				     char *session, short life, long time_sec,
+				     char *sname, char *sinstance, 
+				     C_Block key, krb5_keyblock *k5key));
 /*
  * Create ticket takes as arguments information that should be in a
  * ticket, and the KTEXT object in which the ticket should be

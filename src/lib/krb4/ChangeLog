@@ -1,3 +1,8 @@
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* cr_tkt.c (krb_cr_tkt_int): Add static prototype.
+	* decomp_tkt.c: (dcmp_tkt_int): Add static prototype
+
 1999-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,

@@ -19,6 +19,12 @@
 extern int krb_debug;
 #endif
 
+static int dcmp_tkt_int PROTOTYPE((KTEXT tkt, unsigned char *flags, 
+				   char *pname, char *pinstance, char *prealm,
+				   unsigned KRB4_32 *paddress, C_Block session,
+				   int *life, unsigned KRB4_32 *time_sec, 
+				   char *sname, char *sinstance, C_Block key, 
+				   Key_schedule key_s, krb5_keyblock *k5key));
 /*
  * This routine takes a ticket and pointers to the variables that
  * should be filled in based on the information in the ticket.  It
