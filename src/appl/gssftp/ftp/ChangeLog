@@ -1,3 +1,20 @@
+Fri Jul 26 20:55:12 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* secure.c (secure_putbyte): Reset nout to zero on errorso we
+        don't overflow our buffer.
+
+	* ftp.c (sendrequest): If there is an error in secure_write, break
+        out of the loop.
+
+	* secure.c(FUDGE_FACTOR): Define for GSSAPI so writes don't fail.
+        i chose a value of 64, which is larger than the apparent 52 bytes
+        of additional data but I'm not sure 52 is constant.
+
+	(secure_putbuf): Set bufsize to the size we actually allocate
+	     Also, write foure bytes for net_len no matter how long it
+	     actually is.  I would rather declare it a 32-bit type but am not
+	     sure whether to use the GSSAPI, krb4, or krb5 32-bit int.
+
 Wed Jul 10 16:40:19 1996  Marc Horowitz  <marc@mit.edu>
 
 	* cmdtab.c (cmdtab[]), cmds.c (delete_file): rename delete() to

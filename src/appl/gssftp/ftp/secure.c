@@ -54,6 +54,10 @@ static unsigned int nout, bufp;	/* number of chars in ucbuf,
 				 */
 #endif /* KERBEROS */
 
+#ifdef GSSAPI
+#define FUDGE_FACTOR 64 /*It appears to add 52 byts, but I'm not usre it is a constant--hartmans*/
+#endif /*GSSAPI*/
+
 #ifndef FUDGE_FACTOR		/* In case no auth types define it. */
 #define FUDGE_FACTOR 0
 #endif
@@ -136,11 +140,12 @@ unsigned char c;
 	int ret;
 
 	ucbuf[nout++] = c;
-	if (nout == MAX - FUDGE_FACTOR)
-		if (ret = secure_putbuf(fd, ucbuf, nout))
-			return(ret);
-		else	nout = 0;
-	return(c);
+	if (nout == MAX - FUDGE_FACTOR) {
+	  ret = secure_putbuf(fd, ucbuf, nout);
+	  nout = 0;
+	  return(ret?ret:c);
+	}
+return (c);
 }
 
 /* returns:
@@ -202,11 +207,11 @@ unsigned int nbyte;
  *	-2  on security error
  */
 secure_putbuf(fd, buf, nbyte)
-int fd;
+  int fd;
 unsigned char *buf;
 unsigned int nbyte;
 {
-	static char *outbuf;		/* output ciphertext */
+  static char *outbuf;		/* output ciphertext */
 	static unsigned int bufsize;	/* size of outbuf */
 	long length;
 	u_long net_len;
@@ -217,7 +222,7 @@ unsigned int nbyte;
 		if (outbuf?
 		    (outbuf = realloc(outbuf, (unsigned) (nbyte + FUDGE_FACTOR))):
 		    (outbuf = malloc((unsigned) (nbyte + FUDGE_FACTOR)))) {
-			bufsize = nbyte + FUDGE_FACTOR;
+		  			bufsize = out_buf.length;
 		} else {
 			bufsize = 0;
 			secure_error("%s (in malloc of PROT buffer)",
@@ -278,7 +283,7 @@ unsigned int nbyte;
 	}
 #endif /* GSSAPI */
 	net_len = htonl((u_long) length);
-	if (looping_write(fd, &net_len, sizeof(net_len)) == -1) return(-1);
+	if (looping_write(fd, &net_len, 4) == -1) return(-1);
 	if (looping_write(fd, outbuf, length) != length) return(-1);
 	return(0);
 }

@@ -892,6 +892,8 @@ sendrequest(cmd, local, remote, printnames)
 				}
 				(void) fflush(stdout);
 			}
+			if (d <= 0 ) 
+  break;
 		}
 		if (hash && bytes > 0) {
 			if (bytes < HASHBYTES)
