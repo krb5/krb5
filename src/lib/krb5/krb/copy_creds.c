@@ -11,7 +11,7 @@
  */
 
 #if !defined(lint) && !defined(SABER)
-static char rcsid_copy_cred_c [] =
+static char rcsid_copy_creds_c [] =
 "$Id$";
 #endif	/* !lint & !SABER */
 
@@ -29,7 +29,7 @@ static char rcsid_copy_cred_c [] =
  */
 
 krb5_error_code
-krb5_copy_cred(incred, outcred)
+krb5_copy_creds(incred, outcred)
 krb5_creds *incred, **outcred;
 {
     krb5_creds *tempcred;
