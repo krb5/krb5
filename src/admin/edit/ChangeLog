@@ -1,4 +1,14 @@
 
+Wed Jul 12 12:01:04 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Temporarily add --with-kdb4 option.  Default is without
+		kdb4.  Without kdb4 enables a define.  With kdb4 uses -lkdb4 and
+		-l[n]dbm libraries.
+	* dumpv4.c -  Conditionalize references to kdb4 routines with
+		KDB4_DISABLE.  Replace two required routines:
+			kdb_encrypt_key -> pcbc_encrypt
+			kdb_get_master_key -> des_read_password/printf/key_sched
+
+
 Fri Jul 7 15:38:00 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove all explicit library handling and LDFLAGS.
 	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.

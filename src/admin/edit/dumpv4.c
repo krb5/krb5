@@ -266,9 +266,18 @@ void dump_v4db(argc, argv)
 
 	  fprintf(f,"K M 255 1 1 0 ");
 	  
+#ifndef	KDB4_DISABLE
 	  kdb_encrypt_key (arg.v4_master_key, v4key, 
 			   arg.v4_master_key, arg.v4_master_key_schedule, 
 			   ENCRYPT);
+#else	/* KDB4_DISABLE */
+	  pcbc_encrypt((C_Block *) arg.v4_master_key,
+		       (C_Block *) v4key,
+		       (long) sizeof(C_Block),
+		       arg.v4_master_key_schedule,
+		       (C_Block *) arg.v4_master_key,
+		       ENCRYPT);
+#endif	/* KDB4_DISABLE */
 
 	  for (i=0; i<8; i++) {
 	    fprintf(f, "%02x", ((unsigned char*)v4key)[i]);
@@ -324,12 +333,18 @@ int handle_keys(arg)
     }
     arg->v5master = &master_encblock;
 
+#ifndef	KDB4_DISABLE
     /* now master_encblock is set up for the database, we need the v4 key */
     if (kdb_get_master_key (0, arg->v4_master_key, arg->v4_master_key_schedule) != 0)
       {
 	com_err(arg->comerr_name, 0, "Couldn't read v4 master key.");
 	exit(1);
       }
+#else	/* KDB4_DISABLE */
+    des_read_password(arg->v4_master_key, "Kerberos master key: ", 1);
+    printf("\n");
+    key_sched(arg->v4_master_key, arg->v4_master_key_schedule);
+#endif	/* KDB4_DISABLE */
     return 0;
 }
 
@@ -355,9 +370,18 @@ handle_one_key(arg, v5master, v5key, v4key)
     /* v4v5key.length = sizeof(v4key); */
 
     memcpy(v4key, v5plainkey.contents, sizeof(des_cblock));
+#ifndef	KDB4_DISABLE
     kdb_encrypt_key (v4key, v4key, 
 		     arg->v4_master_key, arg->v4_master_key_schedule, 
 		     ENCRYPT);
+#else	/* KDB4_DISABLE */
+    pcbc_encrypt((C_Block *) v4key,
+		 (C_Block *) v4key,
+		 (long) sizeof(C_Block),
+		 arg->v4_master_key_schedule,
+		 (C_Block *) arg->v4_master_key,
+		 ENCRYPT);
+#endif	/* KDB4_DISABLE */
 
     return 0;
 }

@@ -1,10 +1,20 @@
 AC_INIT(kdb5_convert.c)
 CONFIG_RULES
 AC_PROG_INSTALL
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
+AC_ARG_WITH([kdb4],
+[  --with-kdb4		use Kerberos version 4 database library.
+  --without-kdb4	Avoid using Kerberos version 4 database library.],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using Kerberos version 4 database library)
+	USE_KDB4_LIBRARY
+	AC_CHECK_LIB(ndbm,main)
+	AC_CHECK_LIB(dbm,main)
+else
+	AC_DEFINE(KDB4_DISABLE)
+fi
 USE_KDB5_LIBRARY
-USE_KDB4_LIBRARY
 USE_KRB4_LIBRARY
 KRB5_LIBRARIES
 V5_USE_SHARED_LIB

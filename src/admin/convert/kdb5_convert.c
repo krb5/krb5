@@ -84,7 +84,11 @@ krb5_error_code fixup_database PROTOTYPE((krb5_context, char *));
 	
 int create_local_tgt = 0;
 
-#ifdef ODBM
+/*
+ * I can't say for sure what ODBM is for, but when KDB4_DISABLE is defined,
+ * we are to avoid compiling any references to KDB4 functions.
+ */
+#if	defined(ODBM) || defined(KDB4_DISABLE)
 static void
 usage(who, status)
 char *who;
@@ -93,7 +97,7 @@ int status;
     fprintf(stderr, "usage: %s [-d v5dbpathname] [-t] [-n] [-r realmname] [-K] [-k keytype]\n\
 \t[-e etype] [-M mkeyname] -f inputfile\n",
 	    who);
-    fprintf(stderr, "\t(You must supply a v4 database dump file for this version of %s\n",who);
+    fprintf(stderr, "\t(You must supply a v4 database dump file for this version of %s)\n",who);
     exit(status);
 }
 #else
@@ -186,7 +190,7 @@ char *argv[];
 	    tempdb = 1;
 	    break;
 	case 'D':			/* set db name */
-#ifdef ODBM
+#if	defined(ODBM) || defined(KDB4_DISABLE)
 	    usage(PROGNAME, 1);
 #else
 	    if (v4dumpfile)
@@ -228,7 +232,7 @@ char *argv[];
 	}
     }
 
-#ifdef ODBM
+#if	defined(ODBM) || defined(KDB4_DISABLE)
     if (!v4dumpfile) {
 	usage(PROGNAME, 1);
     }
@@ -382,10 +386,14 @@ master key name '%s'\n",
 	exit(1);
     }
 
+#ifndef	KDB4_DISABLE
     if (v4dumpfile)
 	retval = process_v4_dump(context, v4dumpfile, realm);
     else
 	retval = kerb_db_iterate(enter_in_v5_db, realm);
+#else	/* KDB4_DISABLE */
+    retval = process_v4_dump(context, v4dumpfile, realm);
+#endif	/* KDB4_DISABLE */
     putchar('\n');
     if (retval)
 	com_err(PROGNAME, retval, "while translating entries to the database");
@@ -415,7 +423,7 @@ master key name '%s'\n",
 void
 v4fini()
 {
-#ifndef ODBM
+#if	!defined(ODBM) && !defined(KDB4_DISABLE)
     kerb_fini();
 #endif
 }
@@ -426,9 +434,10 @@ char *pname, *name;
 int manual;
 char *dumpfile;
 {
-#ifndef ODBM
+#if	!defined(ODBM) && !defined(KDB4_DISABLE)
     kerb_init();
 #endif
+#if	!defined(KDB4_DISABLE)
     if (name) {
 	if (kerb_db_set_name(name) != 0) {
 	    com_err(pname, 0,
@@ -441,7 +450,15 @@ char *dumpfile;
 	com_err(pname, 0, "Couldn't read v4 master key.");
 	return 1;
     }
-#ifndef ODBM
+#else	/* KDB4_DISABLE */
+    /*
+     * Always reads from terminal.
+     */
+    des_read_password(master_key, "Kerberos master key: ", 1);
+    printf("\n");
+    key_sched(master_key, master_key_schedule);
+#endif	/* !KDB4_DISABLE */
+#if	!defined(ODBM) && !defined(KDB4_DISABLE)
     if (!dumpfile) {
 	if ((master_key_version = kdb_verify_master_key(master_key,
 							master_key_schedule,
@@ -489,8 +506,17 @@ Principal *princ;
 	 */
 	memcpy(key_from_db, (char *)&princ->key_low, 4);
 	memcpy(((long *) key_from_db) + 1, (char *)&princ->key_high, 4);
+#ifndef	KDB4_DISABLE
 	kdb_encrypt_key (key_from_db, key_from_db, 
 			 master_key, master_key_schedule, DECRYPT);
+#else	/* KDB4_DISABLE */
+	pcbc_encrypt((C_Block *) key_from_db,
+		     (C_Block *) key_from_db,
+		     (long) sizeof(C_Block),
+		     master_key_schedule,
+		     (C_Block *) master_key,
+		     DECRYPT);
+#endif	/* KDB4_DISABLE */
 	val = memcmp((char *) master_key, (char *) key_from_db,
 		     sizeof(master_key));
 	memset((char *)key_from_db, 0, sizeof(key_from_db));
@@ -532,7 +558,16 @@ Principal *princ;
 
     memcpy((char *)v4key, (char *)&(princ->key_low), 4);
     memcpy((char *) (((long *) v4key) + 1), (char *)&(princ->key_high), 4);
+#ifndef	KDB4_DISABLE
     kdb_encrypt_key (v4key, v4key, master_key, master_key_schedule, DECRYPT);
+#else	/* KDB4_DISABLE */
+    pcbc_encrypt((C_Block *) v4key,
+		 (C_Block *) v4key,
+		 (long) sizeof(C_Block),
+		 master_key_schedule,
+		 (C_Block *) master_key,
+		 DECRYPT);
+#endif	/* KDB4_DISABLE */
 
     v4v5key.magic = KV5M_KEYBLOCK;
     v4v5key.etype = master_keyblock.etype;

@@ -6,12 +6,22 @@ AC_HAVE_HEADERS(unistd.h sys/timeb.h alloca.h)
 AC_HAVE_FUNCS(ftime timezone)
 AC_CONST
 AC_HEADER_STDC
-AC_CHECK_LIB(ndbm,main)
-AC_CHECK_LIB(dbm,main)
 AC_HAVE_FUNCS(getcwd)
 SS_RULES
+AC_ARG_WITH([kdb4],
+[  --with-kdb4		use Kerberos version 4 database library.
+  --without-kdb4	Avoid using Kerberos version 4 database library.],
+,
+withval=no)dnl
+if test "$withval" = yes; then
+	AC_MSG_RESULT(Using Kerberos version 4 database library)
+	USE_KDB4_LIBRARY
+	AC_CHECK_LIB(ndbm,main)
+	AC_CHECK_LIB(dbm,main)
+else
+	AC_DEFINE(KDB4_DISABLE)
+fi
 USE_KDB5_LIBRARY
-USE_KDB4_LIBRARY
 USE_KRB4_LIBRARY
 USE_SS_LIBRARY
 KRB5_LIBRARIES
