@@ -138,9 +138,10 @@ long pty_update_utmp (process_type, pid, username, line, host, flags)
 #ifdef UT_EXIT_STRUCTURE_DIFFER
     utx.ut_exit.ut_exit = ent.ut_exit.e_exit;
 #else
-#ifdef __hpux
-	utx.ut_exit.__e_termination = ent.ut_exit.e_termination;
-	utx.ut_exit.__e_exit = ent.ut_exit.e_exit;
+/* KLUDGE for now; eventually this will be a feature test... See PR#[40] */
+#ifdef __hpux	
+    utx.ut_exit.__e_termination = ent.ut_exit.e_termination;
+    utx.ut_exit.__e_exit = ent.ut_exit.e_exit;
 #else
     utx.ut_exit = ent.ut_exit;
 #endif
