@@ -1,3 +1,10 @@
+2000-10-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): If an error
+	occurs after the auth_context is established, but before the
+	krb5_gss_ctx_id_rec is established, release our pointer to the
+	replay cache and invoke krb5_auth_con_free(). (krb5-libs/855)
+
 2000-10-03  Ezra Peisach  <epeisach@mit.edu>
 
 	* add_cred.c (krb5_gss_add_cred): krb5_cc_get_type() and
