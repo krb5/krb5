@@ -30,7 +30,7 @@ static char rcsid_rcsid_fcc_write_c[] =
  "$Id$";
 #endif /* !lint && !SABER */
 
-
+#include <errno.h>
 #include "fcc.h"
 
 #define CHECK(ret) if (ret != KRB5_OK) return ret;
