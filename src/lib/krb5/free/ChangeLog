@@ -1,3 +1,12 @@
+Fri Feb  3 01:45:04 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* f_kdc_rep.c => f_kdc_rp.c
+	* f_kdc_req.c => f_kdc_rq.c
+	* f_ticket.c  => f_tckt.c
+	* f_tickets.c => f_tckts.c
+	* Makefile.in was updated to match.
+
 Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
 
     * Added krb5_context to all krb5_routines

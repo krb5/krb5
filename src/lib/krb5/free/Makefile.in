@@ -18,8 +18,8 @@ OBJS=	\
 	f_enc_kdc.o	\
 	f_enc_tkt.o	\
 	f_error.o	\
-	f_kdc_rep.o	\
-	f_kdc_req.o	\
+	f_kdc_rp.o	\
+	f_kdc_rq.o	\
 	f_keyblock.o	\
 	f_last_req.o	\
 	f_padata.o	\
@@ -27,8 +27,8 @@ OBJS=	\
 	f_priv.o	\
 	f_priv_enc.o	\
 	f_safe.o	\
-	f_ticket.o	\
-	f_tickets.o	\
+	f_tckt.o	\
+	f_tckts.o	\
 	f_tgt_cred.o	\
 	f_tkt_auth.o	\
 	f_pwd_data.o	\
@@ -51,8 +51,8 @@ SRCS=	\
 	$(srcdir)/f_enc_kdc.c	\
 	$(srcdir)/f_enc_tkt.c	\
 	$(srcdir)/f_error.c	\
-	$(srcdir)/f_kdc_rep.c	\
-	$(srcdir)/f_kdc_req.c	\
+	$(srcdir)/f_kdc_rp.c	\
+	$(srcdir)/f_kdc_rq.c	\
 	$(srcdir)/f_keyblock.c	\
 	$(srcdir)/f_last_req.c	\
 	$(srcdir)/f_padata.c	\
@@ -60,8 +60,8 @@ SRCS=	\
 	$(srcdir)/f_priv.c	\
 	$(srcdir)/f_priv_enc.c	\
 	$(srcdir)/f_safe.c	\
-	$(srcdir)/f_ticket.c	\
-	$(srcdir)/f_tickets.c	\
+	$(srcdir)/f_tckt.c	\
+	$(srcdir)/f_tckts.c	\
 	$(srcdir)/f_tgt_cred.c	\
 	$(srcdir)/f_tkt_auth.c	\
 	$(srcdir)/f_pwd_data.c	\
