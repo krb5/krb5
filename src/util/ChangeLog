@@ -1,3 +1,8 @@
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: Now expects four values passed in; generates
+	complete sed script, with quoting for ".." in pathnames.
+
 2002-09-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* reconf: Give up if autoreconf fails.
