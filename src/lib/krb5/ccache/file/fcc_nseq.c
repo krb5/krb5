@@ -18,8 +18,6 @@ static char rcsid_fcc_nseq_c[] =
 
 #include "fcc.h"
 
-/* XXX Deal with kret values */
-
 /*
  * Requires:
  * cursor is a krb5_cc_cursor originally obtained from

@@ -58,7 +58,7 @@ krb5_fcc_default_name ()
 
      /* No.  Use TKT_ROOT and uid */
      else {
-	  /* XXX It'd be nice if we didn't have to pull in printf */
+	  /* It'd be nice if we didn't have to pull in printf */
 	  sprintf(krb5_default_name_string, "%s%d", TKT_ROOT, getuid());
      }
 

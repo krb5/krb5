@@ -19,8 +19,6 @@ static char rcsid_scc_nseq_c[] =
 
 #include "scc.h"
 
-/* XXX Deal with kret values */
-
 /*
  * Requires:
  * cursor is a krb5_cc_cursor originally obtained from
