@@ -31,16 +31,16 @@ typedef struct _krb5_cc_ops {
 	int (*init) PROTOTYPE((krb5_ccache, krb5_principal));
 	int (*destroy) PROTOTYPE((krb5_ccache));
 	int (*close) PROTOTYPE((krb5_ccache));
-	int (*store) PROTOTYPE((krb5_ccache, krb5_credentials *));
+	int (*store) PROTOTYPE((krb5_ccache, krb5_creds *));
 	int (*retrieve) PROTOTYPE((krb5_ccache, krb5_flags,
-				   krb5_credentials *, krb5_credentials *));
+				   krb5_creds *, krb5_creds *));
 	int (*get_princ) PROTOTYPE((krb5_ccache, krb5_principal *));
 	int (*get_first) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
 	int (*get_next) PROTOTYPE((krb5_ccache, krb5_cc_cursor *,
-				   krb5_credentials *));
+				   krb5_creds *));
 	int (*end_get) PROTOTYPE((krb5_ccache, krb5_cc_cursor *));
 	int (*remove_cred) PROTOTYPE((krb5_ccache, krb5_flags,
-				      krb5_credentials *));
+				      krb5_creds *));
 	int (*set_flags) PROTOTYPE((krb5_ccache, krb5_cflags));
 } krb5_cc_ops;
 
