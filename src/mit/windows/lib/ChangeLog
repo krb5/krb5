@@ -1,0 +1,6 @@
+Mon May 17 18:47:15 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* vs.dll, vswin.lib: Remove as we no longer support win16.
+	* vs32.dll, vsnt.lib: Move to i386 subdirectory.
+	* i386: Add directory for i386-specific win32 libraries.
+
