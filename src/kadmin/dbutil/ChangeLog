@@ -1,3 +1,8 @@
+Wed Nov 13 00:06:40 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dump.c (load_db): lock the database directly (having fixed the
+	lock/unlock code) to avoid reopening on every record.
+
 Mon Nov 11 16:50:25 1996  Mark Eichin  <eichin@cygnus.com>
 
 	* kadmin/dbutil dumpv4 expiration ("never") fixes

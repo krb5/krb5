@@ -196,8 +196,10 @@ static const char stdin_name[] = "standard input";
 static const char restfail_fmt[] = "%s: %s restore failed\n";
 static const char close_err_fmt[] = "%s: cannot close database (%s)\n";
 static const char dbinit_err_fmt[] = "%s: cannot initialize database (%s)\n";
+static const char dblock_err_fmt[] = "%s: cannot initialize database lock (%s)\n";
 static const char dbname_err_fmt[] = "%s: cannot set database name to %s (%s)\n";
 static const char dbdelerr_fmt[] = "%s: cannot delete bad database %s (%s)\n";
+static const char dbunlockerr_fmt[] = "%s: cannot unlock database %s (%s)\n";
 static const char dbrenerr_fmt[] = "%s: cannot rename database %s to %s (%s)\n";
 static const char dbcreaterr_fmt[] = "%s: cannot create database %s (%s)\n";
 static const char dfile_err_fmt[] = "%s: cannot open %s (%s)\n";
@@ -2088,6 +2090,18 @@ load_db(argc, argv)
 	 exit_status++;
 	 goto error;
     }
+    /* 
+     * grab an extra lock, since there are no other users
+     */
+    if (!update) {
+	 kret = krb5_db_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+	 if (kret) {
+		 fprintf(stderr, dblock_err_fmt,
+			 programname, error_message(kret));
+		 exit_status++;
+		 goto error;
+	 }
+    }
     
     if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
 		     f, verbose, load, tmppol_db)) {
@@ -2096,6 +2110,12 @@ load_db(argc, argv)
 	 exit_status++;
     }
 
+    if (!update && (kret = krb5_db_unlock(kcontext))) {
+	 /* change this error? */
+	 fprintf(stderr, dbunlockerr_fmt,
+		 programname, dbname_tmp, error_message(kret));
+	 exit_status++;
+    }
     if (kret = krb5_db_fini(kcontext)) {
 	 fprintf(stderr, close_err_fmt,
 		 programname, error_message(kret));
