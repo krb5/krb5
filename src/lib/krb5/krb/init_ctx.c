@@ -66,6 +66,7 @@
    des-crc for now.  */
 #define DEFAULT_ETYPE_LIST	\
 	"des3-cbc-sha1 arcfour-hmac-md5 " \
+	"aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 " \
 	"des-cbc-crc des-cbc-md5 des-cbc-md4 "
 
 #if (defined(_WIN32))

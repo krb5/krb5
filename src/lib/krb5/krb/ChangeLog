@@ -1,3 +1,8 @@
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (DEFAULT_ETYPE_LIST): Add AES with 256 bits at the
+	front of the list.  No 128-bit support by defaut.
+
 2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
 
 	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Check principal name
