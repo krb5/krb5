@@ -1,3 +1,8 @@
+2001-02-27	Alexandra Ellwood <lxs@mit.edu>
+
+	* stdcc.h, stdcc_util.h: Updated Mac OS #defines and #includes for new 
+	header layout and Mac OS X frameworks
+
 2000-10-02	Alexandra Ellwood <lxs@mit.edu>
 
         * stdcc_util.c: now Mac OS X uses get_time_offsets to store offset time
