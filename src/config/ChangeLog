@@ -1,3 +1,8 @@
+1999-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* config.guess: Recognize Rhapsody OS.
+	* config.sub: Recognize OS name "rhapsody*".
+
 1999-08-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (*-recurse): If an error occurs when using -k, report an
