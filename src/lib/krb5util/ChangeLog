@@ -1,3 +1,7 @@
+Mon Mar 23 17:34:50 1998  Tom Yu  <tlyu@mit.edu>
+
+	* seteuid.c (krb5_setegid): Fix typo: seteuid -> setegid.
+
 Sun Feb 22 19:22:18 1998  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add checks for set{re,e,res}gid().

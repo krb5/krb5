@@ -60,7 +60,7 @@ int krb5_setegid(egid_in)
     gid_t egid = (gid_t) egid_in;
 
 #ifdef HAVE_SETEGID
-    return (seteuid(egid));
+    return (setegid(egid));
 #else
 #ifdef HAVE_SETRESGID
     return (setresgid(getgid(), egid, getegid()));
