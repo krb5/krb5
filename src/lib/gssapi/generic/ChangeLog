@@ -1,3 +1,12 @@
+2003-05-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(EHDRDIR)$(S)timestamp): New target, used for
+	ensuring $(EHDRDIR) exists.
+	(clean-unix): Delete the dummy file.
+	($(EHDRDIR)$(S)gssapi.h): Depend on it, instead of creating the
+	directory here.
+	($(EHDRDIR)$(S)gssapi_generic.h): Likewise.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * disp_com_err_status.c, gssapi_generic.h:  

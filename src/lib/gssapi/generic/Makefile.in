@@ -25,12 +25,14 @@ MK_EHDRDIR=if test -d $(EHDRDIR); then :; else (set -x; mkdir $(EHDRDIR)); fi
 
 gssapi-include: $(EHDRDIR)$(S)gssapi.h
 
-$(EHDRDIR)$(S)gssapi.h: gssapi.h
-	@$(MK_EHDRDIR)
+$(EHDRDIR)$(S)gssapi.h: $(EHDRDIR)$(S)timestamp gssapi.h
 	$(CP) gssapi.h $@
-$(EHDRDIR)$(S)gssapi_generic.h: $(srcdir)$(S)gssapi_generic.h
-	@$(MK_EHDRDIR)
+$(EHDRDIR)$(S)gssapi_generic.h: $(EHDRDIR)$(S)timestamp $(srcdir)$(S)gssapi_generic.h
 	$(CP) $(srcdir)$(S)gssapi_generic.h $@
+
+$(EHDRDIR)$(S)timestamp:
+	$(MK_EHDRDIR)
+	echo timestamp > $(EHDRDIR)$(S)timestamp
 
 $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
@@ -119,7 +121,8 @@ win-create-ehdrdir:
 	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
 
 clean-unix:: clean-libobjs
-	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS)
+	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS) \
+		$(EHDRDIR)$(S)timestamp
 
 clean-windows::
 	$(RM) $(HDRS)
