@@ -298,3 +298,7 @@ Fixed prebinding on Mac OS X
 3.2b5
 from tag Mac_GSSKerberos5_3_2b5
 Removed version strings from the Mac OS X project
+
+3.2b6
+from tag Mac_GSSKerberos5_3_2b6
+Fixed resource fork handling in profile lib
