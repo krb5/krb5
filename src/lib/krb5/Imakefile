@@ -36,34 +36,36 @@ VPOBJS=
 VPSRCS=
 #else
 VPOBJS=vfprintf.o vsprintf.o
-VPSRCS=vfprintf.c vsprintf.c
+VPSRCS=$(SRCDIR)vfprintf.c $(SRCDIR)vsprintf.c
 #endif
 #ifdef HasVsyslog
 VSOBJS=
 VSSRCS=
 #else
 VSOBJS=syslog.o
-VSSRCS=syslog.c
+VSSRCS=$(SRCDIR)syslog.c
 #endif
 #ifdef HasStrdup
 STOBJS=
 STSRCS=
 #else
 STOBJS=strdup.o
-STSRCS=strdup.c
+STSRCS=$(SRCDIR)strdup.c
+#endif
+#ifndef HasStrerror
+PEOBJS=perror.o
+PESRCS=$(SRCDIR)perror.c
 #endif
 
 INCLUDES=$(STDC_TOP_INCLUDES)
 
 OBJS =	\
 	cryptoconf.o \
-	perror.o \
-	$(VSOBJS) $(VPOBJS) $(STOBJS)
+	$(PEOBJS) $(VSOBJS) $(VPOBJS) $(STOBJS)
 
 SRCS =	\
-	cryptoconf.c \
-	perror.c \
-	$(VSSRCS) $(VPSRCS) $(STSRCS)
+	$(SRCDIR)cryptoconf.c \
+	$(PESRCS) $(VSSRCS) $(VPSRCS) $(STSRCS)
 
 MakeSubdirs($(SUBDIRS))
 
@@ -113,9 +115,12 @@ asn.1/Makefile::
 
 #endif	/* UseSedHack */
 
-AdditiveLibraryTarget(krb5,$(OBJS))
+AdditiveLibraryTarget(krb5,$(OBJS),-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -l$(DESLIB) $(ISODELIB) -lcom_err)
 
-RanlibLibraryTarget(des5)
+RanlibLibraryTarget($(DESLIB),)
 
 Krb5InstallLibrary(krb5,$(KRB5_LIBDIR))
-Krb5InstallLibrary(des5,$(KRB5_LIBDIR))
+Krb5InstallLibrary($(DESLIB),$(KRB5_LIBDIR))
+
+SharedLibraryTarget(kdb5,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -lkrb5 -l$(DESLIB) $(ISODELIB) -lcom_err)
+/* SharedLibraryTarget(des425,-L$(KRB5_LIBDIR) -Lshared $(LDLOCATIONS) -l$(DESLIB)) */
