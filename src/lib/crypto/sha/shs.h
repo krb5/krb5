@@ -31,8 +31,7 @@ typedef struct {
                LONG data[ 16 ];             /* SHS data buffer */
                } SHS_INFO;
 
-/* Message digest functions */
-
+/* Message digest functions (shs.c) */
 void shsInit
 	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
 void shsUpdate
@@ -41,12 +40,21 @@ void shsFinal
 	KRB5_PROTOTYPE((SHS_INFO *shsInfo));
 
 
+/* Keyed Message digest functions (hmac_sha.c) */
+krb5_error_code hmac_sha
+	KRB5_PROTOTYPE((krb5_octet *text,
+			int text_len,
+			krb5_octet *key,
+			int key_len,
+			krb5_octet *digest));
+
+
 #define NIST_SHA_CKSUM_LENGTH		SHS_DIGESTSIZE
-#define	NIST_SHA_DES3_CKSUM_LENGTH	24
-#define	NIST_SHA_DES3_CONFOUND_LENGTH	8
+#define HMAC_SHA_CKSUM_LENGTH		SHS_DIGESTSIZE
+
 
 extern krb5_checksum_entry
     nist_sha_cksumtable_entry,
-    nist_sha_des3_cksumtable_entry;
+    hmac_sha_cksumtable_entry;
 
 #endif /* _SHS_DEFINED */

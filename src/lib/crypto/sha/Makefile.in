@@ -7,9 +7,16 @@ CFLAGS = $(CCOPTS) $(DEFS) -I$(srcdir)/../des
 	$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 @SHARED_RULE@
 
-OBJS=	shs.$(OBJEXT) sha_glue.$(OBJEXT) sha_crypto.$(OBJEXT)
+OBJS=	shs.$(OBJEXT)		\
+	hmac_sha.$(OBJEXT)	\
+	sha_crypto.$(OBJEXT)	\
+	sha_glue.$(OBJEXT)
 
-SRCS=	$(srcdir)/shs.c $(srcdir)/sha_glue.c $(srcdir)/sha_crypto.c
+SRCS=	$(srcdir)/shs.c		\
+	$(srcdir)/hmac_sha.c	\
+	$(srcdir)/sha_crypto.c	\
+	$(srcdir)/sha_glue.c
+
 
 all-unix:: shared $(OBJS) 
 all-mac:: shared $(OBJS) 

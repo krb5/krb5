@@ -28,6 +28,9 @@ krb5_sha_sum_func(in, in_length, seed, seed_length, outcksum)
     krb5_octet *input = (krb5_octet *)in;
     SHS_INFO working;
 
+    if (outcksum->length < SHS_DIGESTSIZE)
+	return KRB5_BAD_MSIZE;
+    
     shsInit(&working);
     shsUpdate(&working, input, in_length);
     shsFinal(&working);

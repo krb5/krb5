@@ -1,3 +1,12 @@
+Tue May 14 17:09:36 1996  Richard Basch  <basch@lehman.com>
+
+	* .Sanitize: reflect current files
+	* Makefile.in: added hmac-sha
+	* hmac_sha.c: implement HMAC-SHA
+	* sha_crypto.c: use hmac-sha
+	* sha_glue.c: sanity check the passed in checksum length
+	* shs.h: replaced sha-des3 with hmac-sha
+
 Fri May 10 11:19:53 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* shs.c (longReverse): Remove extraneous \.

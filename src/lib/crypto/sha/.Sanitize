@@ -28,10 +28,11 @@ ChangeLog
 Makefile.in
 configure
 configure.in
-shs.c
-shs.h
 sha_crypto.c
 sha_glue.c
+shs.c
+shs.h
+hmac_sha.c
 t_shs.c
 
 Things-to-lose:
