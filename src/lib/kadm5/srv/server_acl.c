@@ -643,39 +643,37 @@ acl_find_entry(kcontext, principal, dest_princ)
 	    continue;
 
 	/* We've matched the principal.  If we have a target, then try it */
-	if (entry->ae_target) {
-	    if (!strcmp(entry->ae_target, "*"))
-		break;
+	if (entry->ae_target && strcmp(entry->ae_target, "*")) {
 	    if (!entry->ae_target_princ && !entry->ae_target_bad) {
 		kret = krb5_parse_name(kcontext, entry->ae_target,
 				       &entry->ae_target_princ);
 		if (kret)
 		    entry->ae_target_bad = 1;
 	    }
-	}
-	if (entry->ae_target_bad) {
-	    DPRINT(DEBUG_ACL, acl_debug_level,
-		   ("Bad target in ACL entry for %s\n", entry->ae_name));
-	    entry->ae_name_bad = 1;
-	    continue;
-	}
-	if (entry->ae_target && !dest_princ)
-	    matchgood = 0;
-	else if (entry->ae_target && entry->ae_target_princ && dest_princ) {
-	    if (acl_match_data(&entry->ae_target_princ->realm,
-			       &dest_princ->realm, 1, (wildstate_t *)0) &&
-		(entry->ae_target_princ->length == dest_princ->length)) {
-		for (i=0; i<dest_princ->length; i++) {
-		    if (!acl_match_data(&entry->ae_target_princ->data[i],
-					&dest_princ->data[i], 1, &state)) {
-			matchgood = 0;
-			break;
-		    }
-		}
+	    if (entry->ae_target_bad) {
+	        DPRINT(DEBUG_ACL, acl_debug_level,
+		       ("Bad target in ACL entry for %s\n", entry->ae_name));
+	        entry->ae_name_bad = 1;
+	        continue;
 	    }
-	    else
-		matchgood = 0;
-	}
+	    if (!dest_princ)
+	        matchgood = 0;
+	    else if (entry->ae_target_princ && dest_princ) {
+	        if (acl_match_data(&entry->ae_target_princ->realm,
+			           &dest_princ->realm, 1, (wildstate_t *)0) &&
+		    (entry->ae_target_princ->length == dest_princ->length)) {
+		    for (i=0; i<dest_princ->length; i++) {
+		        if (!acl_match_data(&entry->ae_target_princ->data[i],
+			  		    &dest_princ->data[i], 1, &state)) {
+			    matchgood = 0;
+			    break;
+		        }
+		    }
+	        }
+	        else
+		    matchgood = 0;
+	    }
+        }
 	if (!matchgood)
 	    continue;
 

@@ -1,3 +1,11 @@
+2002-03-02  Sam Hartman  <hartmans@mit.edu>
+
+	* server_acl.c (acl_find_entry):  Patch from sxw@sxw.org.uk:
+	patch to correct handling of ACL targets.  Previous patch from
+	Matt Crawford  seems to only work for * targets where it ignores
+	the restrictions.  This patch seems to work for all the semantics
+	described in MATt's original message, at least as far as I tested.
+
 2001-10-22  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (kadm5_decrypt_key): For now, coerce enctype of
