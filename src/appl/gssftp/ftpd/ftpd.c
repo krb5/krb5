@@ -1182,6 +1182,7 @@ void send_data(instr, outstr, blksize)
 	transflag++;
 	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(outstr));
 		return;
 	}
 	switch (type) {
@@ -2200,8 +2201,9 @@ send_file_list(whichfiles)
 		simple = 1;
 	}
 
-	if (setjmp(urgcatch)) {
+	if (sigsetjmp(urgcatch, 1)) {
 		transflag = 0;
+		(void)secure_flush(fileno(dout));
 		return;
 	}
 	while (dirname = *dirlist++) {

@@ -3,6 +3,11 @@ Fri Apr 10 20:06:31 1998  Tom Yu  <tlyu@mit.edu>
 	* ftpd.c (receive_data):
 	(send_data): Add support for sigsetjmp().
 	(main): Use sigaction() if we can to avoid SysV lossage.
+	(send_file_list): Oops missed a sigsetjmp() call.
+	(send_data): Add call to secure_flush() to send a zero length
+	buffer when aborting.
+	(send_file_list): Add call to secure_flush() to send a zero length
+	buffer when aborting.
 
 	* ftpcmd.y (PBSZ): Remove restriction on shrinking buffer size.
 
