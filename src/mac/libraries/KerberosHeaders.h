@@ -17,6 +17,7 @@
 #define NO_PASSWORD
 #define HAVE_LABS
 #define ANSI_STDIO
+#define USE_CCAPI
 
 #include <unix.h>
 #include <ctype.h>
