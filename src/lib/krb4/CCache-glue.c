@@ -73,8 +73,8 @@ Boolean			gHaveDefaultPrincipal = false;
  * is the right one to blow away.
  */
 
-int
-in_tkt (
+int KRB5_CALLCONV
+krb_in_tkt (
 	char*		pname,
 	char*		pinst,
 	char*		realm)
@@ -104,6 +104,16 @@ in_tkt (
 		return KFAILURE;
     else
         return KSUCCESS;
+}
+
+int KRB5_CALLCONV
+in_tkt(
+    char	*name,
+    char	*inst)
+{
+    char	realm[REALM_SZ];
+    krb_get_lrealm(realm, 1);
+    return krb_in_tkt(name, inst, realm);
 }
 
 int KRB5_CALLCONV

@@ -1,3 +1,10 @@
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* CCache-glue.c (krb_in_tkt): Rename from in_tkt().
+	(in_tkt): Implement in terms of krb_in_tkt() to match existing
+	Unix and Windows API.  This shouldn't be a problem because it
+	appears to be considered an internal API on Mac.
+
 2003-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* password_to_key.c (krb5_passwd_to_key): Replace snprintf() call
