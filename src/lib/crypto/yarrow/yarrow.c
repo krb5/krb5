@@ -71,6 +71,8 @@ static int Yarrow_Load_State( Yarrow_CTX *y );
 static int Yarrow_Save_State( Yarrow_CTX *y );
 #endif
 
+static int yarrow_gate_locked(Yarrow_CTX* y);
+
 static const byte zero_block[CIPHER_BLOCK_SIZE] = { 0, };
 
 static const char* const yarrow_str_error[] = {
