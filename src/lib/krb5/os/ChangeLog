@@ -1,3 +1,25 @@
+Fri Apr 21 11:38:45 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* def_realm.c (krb5_get_default_realm): Use the profile code to
+		get the default realm from [libdefaults]/default_realm.
+
+	* get_krbhst.c (krb5_get_krbhst): Use the profile code to get the
+		list of Kerberos servers for a particualar realm from 
+		[realms]/<realm>/kdc
+
+	* realm_dom.c (krb5_get_realm_domain):  Use the profile code to
+		get the default domain postfix for a realm (used only to
+		convert V4 -> V5 principals) from 
+		[realms]/<realm>/default_domain
+
+	* hst_realm.c (krb5_get_host_realm): Use the profile code to get
+		the default realm given a particular host from
+		[domain_realm]/<host|domain>
+
+	* init_os_ctx.c (krb5_os_init_context): When the OS context is
+		initialized, also initialize the profile file.  This loads
+		in the /etc/krb5.conf file.
+
 Wed Apr 19 13:50:19 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
 
 	* def_realm.c: (krb5_get_default_realm) - remove global default realm.

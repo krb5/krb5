@@ -49,8 +49,10 @@ krb5_get_default_realm(context, lrealm)
     krb5_context context;
     char **lrealm;
 {
+#ifdef OLD_CONFIG_FILE
     FILE *config_file;
     char realmbuf[BUFSIZ];
+#endif
     char *realm;
     char *cp;
 
@@ -58,6 +60,7 @@ krb5_get_default_realm(context, lrealm)
 	    return KV5M_CONTEXT;
 
     if (!context->default_realm) {
+#ifdef OLD_CONFIG_FILE
 	    krb5_find_config_files();
 	    if (!(config_file = fopen(krb5_config_file, "r")))
 		    /* can't open */
@@ -82,6 +85,18 @@ krb5_get_default_realm(context, lrealm)
 		    return ENOMEM;
 
 	    strcpy(context->default_realm, realmbuf);
+#else
+	    /*
+	     * XXX should try to figure out a reasonable default based
+	     * on the host's DNS domain.
+	     */
+	    context->default_realm = 0;
+	    profile_get_string(context->profile, "libdefaults",
+			       "default_realm", 0, 0,
+			       &context->default_realm);
+	    if (context->default_realm == 0)
+		return(KRB5_CONFIG_BADFORMAT);
+#endif
     }
     
     realm = context->default_realm;

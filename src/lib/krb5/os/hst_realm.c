@@ -77,6 +77,8 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
+#ifdef OLD_CONFIG_FILES
+
 #define DEF_REALMNAME_SIZE	256
 
 extern char *krb5_trans_file;
@@ -232,5 +234,72 @@ krb5_get_host_realm(context, host, realmsp)
     return 0;
 }
 
+#else
 
+krb5_error_code
+krb5_get_host_realm(context, host, realmsp)
+    krb5_context context;
+    const char *host;
+    char ***realmsp;
+{
+    char **retrealms;
+    char *domain, *default_realm, *realm, *cp;
+    krb5_error_code retval;
+    char local_host[MAXHOSTNAMELEN+1];
 
+    if (host)
+	strncpy(local_host, host, MAXHOSTNAMELEN);
+    else {
+	if (gethostname(local_host, sizeof(local_host)-1) == -1)
+	    return errno;
+    }
+    local_host[sizeof(local_host)-1] = '\0';
+    for (cp = local_host; *cp; cp++) {
+	if (isupper(*cp))
+	    *cp = tolower(*cp);
+    }
+    domain = strchr(local_host, '.');
+
+    /* prepare default */
+    if (domain) {
+	if (!(default_realm = malloc(strlen(domain+1)+1)))
+	    return ENOMEM;
+	strcpy(default_realm, domain+1);
+	/* Upper-case realm */
+	for (cp = default_realm; *cp; cp++)
+	    if (islower(*cp))
+		*cp = toupper(*cp);
+    } else {
+	retval = krb5_get_default_realm(context, &default_realm);
+	if (retval) {
+	    krb5_xfree(retrealms);
+	    return retval;
+	}
+    }
+
+    retval = profile_get_string(context->profile, "domain_realm", local_host,
+				0, default_realm, &realm);
+    free(default_realm);
+    if (retval)
+	return retval;
+    default_realm = realm;
+
+    retval = profile_get_string(context->profile, "domain_realm", domain,
+				0, default_realm, &realm);
+    free(default_realm);
+    if (retval)
+	return retval;
+
+    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
+	free(realm);
+	return ENOMEM;
+    }
+
+    retrealms[0] = realm;
+    retrealms[1] = 0;
+    
+    *realmsp = retrealms;
+    return 0;
+}
+
+#endif

@@ -42,6 +42,8 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#ifdef OLD_CONFIG_FILES
+
 /* for old Unixes and friends ... */
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
@@ -180,3 +182,19 @@ krb5_get_realm_domain(context, realm, domain)
 	}
     }
 }
+
+#else
+
+krb5_error_code
+krb5_get_realm_domain(context, realm, domain)
+    krb5_context context;
+    const char *realm;
+    char **domain;
+{
+    krb5_error_code retval;
+
+    retval = profile_get_string(context->profile, "realms", realm,
+			       "default_domain", realm, domain);
+    return retval;
+}
+#endif

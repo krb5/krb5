@@ -54,6 +54,8 @@
  * hostname added to the list returned.
  */
 
+#ifdef OLD_CONFIG_FILES
+
 extern char *krb5_config_file;		/* extern so can be set at
 					   load/runtime */
 
@@ -155,3 +157,50 @@ krb5_get_krbhst(context, realm, hostlist)
     return retval;
 }
 
+#else
+krb5_error_code
+krb5_get_krbhst(context, realm, hostlist)
+    krb5_context context;
+    const krb5_data *realm;
+    char ***hostlist;
+{
+    char	**values, **cpp, *cp;
+    const char	*realm_kdc_names[4];
+    krb5_error_code	retval;
+
+    realm_kdc_names[0] = "realms";
+    realm_kdc_names[1] = realm->data;
+    realm_kdc_names[2] = "kdc";
+    realm_kdc_names[3] = 0;
+
+    if (context->profile == 0)
+	return KRB5_CONFIG_CANTOPEN;
+
+    retval = profile_get_values(context->profile, realm_kdc_names, &values);
+    if (retval == PROF_NO_SECTION)
+	return KRB5_REALM_UNKNOWN;
+    if (retval == PROF_NO_RELATION)
+	return KRB5_CONFIG_BADFORMAT;
+    if (retval)
+	return retval;
+
+    /*
+     * Do cleanup over the list.  We allow for some extra field to be
+     * added to the kdc line later (maybe the port number)
+     */
+    for (cpp = values; *cpp; cpp++) {
+	cp = strchr(*cpp, ' ');
+	if (cp)
+	    *cp = 0;
+	cp = strchr(*cpp, '\t');
+	if (cp)
+	    *cp = 0;
+	cp = strchr(*cpp, ',');
+	if (cp)
+	    *cp = 0;
+    }
+
+    *hostlist = values;
+    return 0;
+}
+#endif

@@ -30,6 +30,9 @@ krb5_os_init_context(ctx)
 	krb5_context ctx;
 {
 	krb5_os_context os_ctx;
+	krb5_error_code	retval;
+	char *name;
+	char *filenames[2];
 	
 	if (ctx->os_context)
 		return 0;
@@ -41,6 +44,20 @@ krb5_os_init_context(ctx)
 	os_ctx->magic = KV5M_OS_CONTEXT;
 
 	ctx->os_context = (void *) os_ctx;
+
+#ifndef OLD_CONFIG_FILES
+	/*
+	 * When the profile routines are later enhanced, we will try
+	 * including a config file from user's home directory here.
+	 */
+	name = getenv("KRB5_CONFIG");
+	filenames[0] == name ? name : DEFAULT_PROFILE_FILENAME;
+	filenames[1] = 0;
+
+	retval = profile_init(filenames, &ctx->profile);
+	if (retval)
+	    ctx->profile = 0;
+#endif
 	
 	return 0;
 }
@@ -59,4 +76,7 @@ krb5_os_free_context(ctx)
 	os_ctx->magic = 0;
 	free(os_ctx);
 	ctx->os_context = 0;
+
+	if (ctx->profile)
+	    profile_release(ctx->profile);
 }
