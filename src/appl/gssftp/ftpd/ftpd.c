@@ -1073,7 +1073,7 @@ login(passwd)
 {
 	if (have_creds) {
 #ifdef GSSAPI
-		char *ccname = krb5_cc_get_name(kcontext, ccache);
+		const char *ccname = krb5_cc_get_name(kcontext, ccache);
 		chown(ccname, pw->pw_uid, pw->pw_gid);
 #endif
 #ifdef KRB5_KRB4_COMPAT

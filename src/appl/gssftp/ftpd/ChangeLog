@@ -1,3 +1,7 @@
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* ftpd.c (login): Return of krb5_cc_get_name is now const char *.
+
 2000-08-25  Tom Yu  <tlyu@mit.edu>
 
 	* ftpcmd.y: Fix up grammar so that single character token names
