@@ -75,6 +75,7 @@ char * v4_klog KRB5_PROTOTYPE((int, const char *, ...));
 #else
 char * v4_klog KRB5_PROTOTYPE((int, char *, va_dcl));
 #endif
+#define klog v4_klog
 
 /* take this out when we don't need it anymore */
 int krbONE = 1;
@@ -257,7 +258,6 @@ krb5_data **resp;
     return(retval);
 }
 
-#define klog v4_klog
 #ifdef HAVE_STDARG_H
 char * v4_klog( int type, const char *format, ...)
 #else

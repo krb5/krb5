@@ -1,3 +1,8 @@
+Thu Feb  5 19:17:25 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Move macro definition of klog earlier so that it
+	actually gets used inside process_v4().
+
 Wed Feb  4 14:15:20 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* kerberos_v4.c (process_v4): Check the length of the incoming V4
