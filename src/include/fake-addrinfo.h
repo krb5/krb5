@@ -364,13 +364,16 @@ static int translate_h_errno (int h)
     case NO_ADDRESS:
 #endif
 	return EAI_NODATA;
+    default:
+	return EAI_SYSTEM;
     }
 }
 
 #endif /* FAI_IMPLEMENTATION */
 
-#define HAVE_GETADDRINFO	/* fake it */
-#define HAVE_GETNAMEINFO	/* well, soon... */
+#define HAVE_GETADDRINFO
+#undef  HAVE_GETNAMEINFO
+#define HAVE_GETNAMEINFO
 
 #endif /* HAVE_GETADDRINFO */
 

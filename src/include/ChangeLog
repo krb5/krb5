@@ -1,5 +1,9 @@
 2001-07-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* fake-addrinfo.h (translate_h_errno): Supply a default value in
+	case some unrecognized code is returned.
+	(HAVE_GETNAMEINFO): Undefine before defining, just in case.
+
 	* krb5.hin (krb5_os_hostaddr): Declaration moved...
 	* k5-int.h (krb5_os_hostaddr): ...to here.
 
