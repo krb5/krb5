@@ -1,3 +1,8 @@
+Fri May 10 01:46:25 1996  Richard Basch  <basch@lehman.com>
+
+	* d3_str2ky.c d3_procky.c des_int.h init_rkey.c:
+	Replace des3-md5 with des3-sha
+
 Thu May  2 18:29:01 1996  Richard Basch  <basch@lehman.com>
 
 	* d3_rndky.c new_rn_key.c: Removed (obsolete).

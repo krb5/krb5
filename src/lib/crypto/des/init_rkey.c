@@ -62,7 +62,7 @@ mit_des_init_random_key (eblock, seedblock, state)
 	enctype = ENCTYPE_DES_CBC_RAW;
 	break;
 
-    case ENCTYPE_DES3_CBC_MD5:
+    case ENCTYPE_DES3_CBC_SHA:
     case ENCTYPE_DES3_CBC_RAW:
 	enctype = ENCTYPE_DES3_CBC_RAW;
 	break;
