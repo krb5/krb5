@@ -1,3 +1,8 @@
+Tue Dec 19 17:10:06 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kparse.h (LineNbr): Remove declaration of LineNbr; no longer
+		exported by kparse.c
+
 Sun Nov 12 05:18:05 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* krb.h (KEYFILE): change to call krb__get_srvtabname with a

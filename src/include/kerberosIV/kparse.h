@@ -86,6 +86,4 @@ typedef struct {
 
 #define PARMCOUNT(P) (sizeof(P)/sizeof(P[0]))
 
-extern int LineNbr;		/* current line # in parameter file */
-
 #endif /* KPARSE_DEFS */
