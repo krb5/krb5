@@ -1,4 +1,9 @@
 
+Thu Jul 27 15:25:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapiP_generic.h - Include k5-int.h instead of k5-config.h and
+		conditionally k5-sockets.h.
+
+
 Fri Jul 7 16:22:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove LDFLAGS, it's set by configure.
 

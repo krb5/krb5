@@ -23,11 +23,7 @@
 #ifndef _GSSAPIP_GENERIC_H_
 #define _GSSAPIP_GENERIC_H_
 
-#include "k5-config.h"
-#ifdef NEED_SOCKETS
-#include "k5-sockets.h"
-#endif
-
+#include "k5-int.h"
 #include "gssapi.h"
 
 #include "gssapi_err_generic.h"
