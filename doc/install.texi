@@ -891,12 +891,12 @@ to search for libraries, this may make it difficult for developers to
 work with the shared libraries.
 
 @node AIX Shared Library Support, Solaris 5.3 Shared Library Support, NetBSD Shared Library Support, Shared Library Support
-@subsection AIX  Shared Library Support
+@subsection AIX Shared Library Support
 
         AIX specifies shared library versions by combining multiple
 versions into a single file.  Because of the complexity of this process,
 no automatic procedure for building multi-versioned shared libraries is
-provided.Therefore, supporting multiple versions of the Kerberos shared
+provided. Therefore, supporting multiple versions of the Kerberos shared
 libraries under AIX will require significant work on the part of a
 programmer famiiliar with AIX internals.  
 
@@ -1811,7 +1811,7 @@ options required by each server are presented.
 @subsection Levels of Security
 
         Before installing Kerberized servers, it is a good idea to
-decide on a security policy for your workstation.  While developing a
+decide on a security policy for your environment.  While developing a
 comprehensive security policy is beyond the scope of these instructions,
 there are several interactions between Kerberos servers and non-Kerberos
 servers, as well as different modes in which Kerberos servers can run
@@ -1824,11 +1824,11 @@ connections:
 Encrypted Kerberos connections are the most secure services provided by
 the Kerberos environment.  Only encrypted services provide
 confidentiality---encryption is required to make sure a passive
-eavesdropper does not collect sensitive data, such as passwords, typed
+eavesdropper does not collect sensitive data, such as passwords, sent
 over connections.  Besides providing confidentiality, encryption
 provides protection against active attacks.  Without encryption or some
 other form of integrity, an attacker may be able to insert commands or
-change data in an authenticated session.l
+change data in an authenticated session.
 
 
 @item
@@ -1837,9 +1837,9 @@ encryption.  Without encryption, there is no confidentiality, and some
 active attacks are possible.  However, unencrypted services are faster
 and are available commercially outside the United States.  In addition,
 the window of exposure to attack is generally limited to the lifetime of
-a session---it is difficult to start a new session if a Kerberos
-authentication exchange must take place at the beginning of every
-session.
+a session---it is difficult for an attacker who does not have tickets to
+start a new session if a Kerberos authentication exchange must take
+place at the beginning of every session.
 
 @item
 Passworded services provide the next lower level of security.
@@ -1858,7 +1858,7 @@ services such as Kerberos for root logins by administrators.
 
 @item
 The least secure common category of services are trust or host-based
-services.These services use an IP address or client-supplied assertion
+services.  These services use an IP address or client-supplied assertion
 to provide authentication.  Examples of host-based services include
 @samp{rlogin}, @samp{rsh}, and the @samp{on} or @samp{rexd} service.  It
 is generally sufficient to know that a user exists on a target system,
@@ -1868,46 +1868,48 @@ disabled; there are few situations in which an a security policy is both
 compatible with Kerberos and host-based services.
 @end enumerate
 
-        Next, decide whether Kerberos4 compatibility is necessary.
-Unencrypted Kerberos4 services suffer from all the problems of
+        Next, decide whether Kerberos V4 compatibility is necessary.
+Unencrypted Kerberos V4 services suffer from all the problems of
 unencrypted Kerberos V5 services: lack of confidentiality and
 susceptibility to active attack.  In addition, the lack of a replay cache
-in Kerberos4makes these active attacks much easier.  Also, design bugs
-in the Kerberos4 BSD utilities such as @samp{rlogin}, @samp{rsh} and
+in Kerberos V4makes these active attacks much easier.  Also, design bugs
+in the Kerberos V4 BSD utilities such as @samp{rlogin}, @samp{rsh} and
 @samp{rcp} cause the availability of an unencrypted service to
 significantly decrease the security of a system, even if only the
 encrypted service is ever used.  For example, a system that runs both
-encrypted and unencrypted Kerberos4 @samp{rlogin} servers is less secure
+encrypted and unencrypted Kerberos V4 @samp{rlogin} servers is less secure
 than a system only running the encrypted service, even if users only
 ever connect to the encrypted service.
 
-        Therefore, if Kerberos4 interoperability is desired or required,
-try to avoid running unencrypted Kerberos4 services wherever possible.
+        Therefore, if Kerberos V4 interoperability is desired or required,
+try to avoid running unencrypted Kerberos V4 services wherever possible.
 In particular, only enable encrypted @samp{rlogin} if at all possible.
-Naturally, some environments will require additional Kerberos4
-functionality, like @samp{rsh}.The Kerberos V5 versions of these services,
-with Kerberos4 interoperability enabled are not any weaker than their
-Kerberos4 counterparts.  So, if the existing Kerberos4 security policy
+Naturally, some environments will require additional Kerberos V4
+functionality, like @samp{rsh}. The Kerberos V5 versions of these services
+with Kerberos V4 interoperability enabled are not any weaker than their
+Kerberos V4 counterparts.  So, if the existing Kerberos4 security policy
 allows these services, then enabling them under the Kerberos V5 security
 policy should not be a problem.
 
-        Finally, the issue of compatibility with older Kerberos V5 clients
-must be considered.  For the most part, this compatibility is automatic,
-and has few security implications. The major exception to this is the
-BSD utilities.  Until Kerberos V5 Beta6, these utilities inherited a few
-design defects from the Kerberos V4 BSD utilities.  In particular, the
-presence of an unencrypted service that was never used adversely effected
-the security of an encrypted service.  The solution that was adopted
-preserves compatibility with Kerberos V5 Beta5 clients.  Unfortunately,
-older clients are incompatible with this scheme.  If interoperability
-with older clients is necessary, then the new scheme for checksums can
-be disabled on the server.  This results in slightly less secure
-operation, but allows for compatibility with the older clients.
+        Finally, the issue of compatibility with older Kerberos V5
+clients must be considered.  For the most part, this compatibility is
+automatic, and has few security implications. The major exception to
+this is the BSD utilities.  Until Kerberos V5 Beta6, these utilities
+inherited a few design defects from the Kerberos V4 BSD utilities.  In
+particular, the presence of an unencrypted service that was never used
+adversely effected the security of an encrypted service.  The solution
+that was adopted preserves compatibility with Kerberos V5 Beta5 clients.
+Unfortunately, older clients are incompatible with this scheme.  If
+interoperability with older clients is necessary, then the new scheme
+for checksums can be disabled on the server.  If these checksums are
+disabled, there is a short window between when a connection is opened
+and when the replay cache is updated where an active attack is possible.
 Alternatively, sites wishing to enable all security features may wish to
 disable compatibility with Kerberos V5 Beta5 BSD utilities.
 @xref{Checksums}, for full details.
 
-        In conclusion, as you prepare to install Kerberos clients, you should have answers to  the following questions:
+        In conclusion, as you prepare to install Kerberos application
+servers, you should have answers to the following questions:
 
 @enumerate
 
@@ -2016,7 +2018,7 @@ Try using the Kerberos applications to connect to the host.
 @subsection BSD Utilities
 
         This section describes installing servers for the BSD utilities:
-@samp{kshd} and @samp{klogind}.The @samp{klogind} server implementsthe
+@samp{kshd} and @samp{klogind}. The @samp{klogind} server implementsthe
 protocol used by the Kerberized @samp{rlogin} client.  The @samp{kshd}
 server implements the protocol used by the @samp{rsh} and @samp{rcp}
 clients.
@@ -2083,7 +2085,7 @@ to meet the configuration needs of different sites:
 The @samp{-c} option to both @samp{kshd} and @samp{klogind} requires
 that checksums be present and valid.  This only works with clients more
 recent than Kerberos V5, Beta6.  An error will be given when an older
-client tries to connect.  This option is incompatible with Kerberos V4,
+client tries to connect.  This option is incompatible with Kerberos V4;
 Kerberos V4 clients do not include a checksum.  If this option is used
 in conjunction with the @samp{-4} option for Kerberos V4 compatibility,
 a warning about the configuration error will be logged on each
@@ -2091,7 +2093,7 @@ connection.
 
 @item
 If no checksum-related option is specified, then checksums will be
-validated if they are present, but not required.This is compatible with
+validated if they are present, but not required.  This is compatible with
 Kerberos V4 and Kerberos V5 clients as early as Kerberos V5, Beta5.
 
 @item
@@ -2186,7 +2188,7 @@ applications.
 @table @code
 
 @item host
-Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, @samp{ftp}and other
+Used by @samp{telnet}, @samp{rlogin}, @samp{rsh}, @samp{rcp}, @samp{ftp} and other
 services which generally give login access to the host. 
 
 @item pop

@@ -1,3 +1,8 @@
+Sun Apr 21 14:01:29 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* install.texi (Installing Kerberos Applications): Updated to fix
+ 	jhawk's comments to this section.
+
 Sat Apr 20 03:27:27 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* install.texi (Top): Remade master menu.
