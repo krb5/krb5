@@ -1,4 +1,4 @@
-CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG_GSSAPI -I$(srcdir)/..
+CFLAGS = $(CCOPTS) $(DEFS) -DDEBUG_GSSAPI
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libgssrpc.lib
