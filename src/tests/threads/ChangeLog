@@ -1,3 +1,8 @@
+2004-12-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof1.c: New file.
+	* Makefile.in (prof1, prof1.o): New targets.
+
 2004-08-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in, t_rcache.c: New files.

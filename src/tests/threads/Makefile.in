@@ -24,6 +24,11 @@ syms: syms.o
 run-syms: syms
 	$(RUN_SETUP) ./syms
 
+prof1: prof1.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o prof1 prof1.o $(KRB5_BASE_LIBS) -lpthread
+
+prof1.o: prof1.c
+
 check-unix:: run-t_rcache
 
 install::
