@@ -23,9 +23,8 @@ BUILDTOP=$(REL)$(U)
 # PERFORMANCE OF THIS SOFTWARE.
 # 
 
-LIBNAME=krb524
 ##WIN32##!if 0
-LIB=$(LIBNAME)
+LIB=krb524
 ##WIN32##!endif
 LIBMAJOR=1
 LIBMINOR=0
@@ -38,10 +37,14 @@ PROG_RPATH=$(KRB5_LIBDIR)
 KRB524_DEPLIB	= libkrb524.a
 KRB524_LIB	= libkrb524.a
 
+##WIN32##!ifdef USE_ALTERNATE_KRB4_INCLUDES
+##WIN32##KRB4_INCLUDES=-I$(USE_ALTERNATE_KRB4_INCLUDES)
+##WIN32##!endif
 
-##WIN32##KRB4_INCLUDES = -I../../../krb4/krbv4/include -I../../../krb4/include
-##WIN32##K4LIB = ../../../krb4/krbv4/krbdll/$(OUTPRE)krbv4w32.lib
-###WIN32##K4LIB = ../lib/$(OUTPRE)krb4_32.lib
+##WIN32##!ifdef USE_ALTERNATE_KRB4_LIB
+##WIN32##K4LIB=$(USE_ALTERNATE_KRB4_LIB)
+##WIN32##!endif
+
 K524DEF = krb524.def
 WINLIBS = kernel32.lib wsock32.lib user32.lib shell32.lib oldnames.lib \
 	version.lib advapi32.lib gdi32.lib
@@ -78,7 +81,7 @@ all-unix:: all-libs
 
 all-unix:: krb524d krb524test k524init
 
-all-windows:: $(OUTPRE)$(LIBNAME).lib $(OUTPRE)k524init.exe
+all-windows:: $(OUTPRE)krb524.lib $(OUTPRE)k524init.exe
 
 krb524test: libkrb524.a test.o $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
@@ -89,7 +92,7 @@ krb524d: krb524d.o $(KADMSRV_DEPLIBS) $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 k524init: k524init.o  $(KRB524_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init k524init.o $(KRB524_LIB) $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)$(LIBNAME).lib: $(STLIBOBJS) $(K4LIB) $(KLIB)
+$(OUTPRE)krb524.lib: $(STLIBOBJS) $(K4LIB) $(KLIB)
 	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
 
 $(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib

@@ -1,3 +1,9 @@
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix build so we don't try to build an extra lib.
+	Fix up krb524 build so we default to krb5's krb4 but can use an
+	alternate.
+
 2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Make krb524 library and k524init program build on
