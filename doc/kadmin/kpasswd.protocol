@@ -7,8 +7,8 @@
 		   **DRAFT**  **DRAFT**  **DRAFT**
 
 			   by Theodore Ts'o
-			     March 10, 1995
-
+			  September 7, 1995
+				   
 Rationale
 =========
 
@@ -42,7 +42,11 @@ The protocol used by the password changing protocol is intentionally
 very simple.  This is to encourage its widespread implementation, even
 in cases where there are size constraints (i.e., in a terminal server).
 
-The protocol will use a TCP stream connection, using port XXX.
+The protocol will use a TCP stream connection using port 464.  The
+symbolic name of this port is kpasswd:
+
+		kpasswd		464/tcp
+
 
 The following encoding standards are used throughout.
 
