@@ -57,3 +57,8 @@ Changes in 1.1a3:
 1.1b13
  fixed win-mac.h to not conflict with MSL stat.h
  updated to CCache 2.0b5
+ 
+1.1b14-1.1b19 skipped
+ 
+1.1b20
+ fixed glue to include gss_krb5_ccache_name
