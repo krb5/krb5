@@ -300,6 +300,7 @@ typedef struct _krb5_encrypt_block {
     krb5_keyblock FAR *key;
     krb5_pointer priv;			/* for private use, e.g. DES
 					   key schedules */
+    krb5_int32 priv_size;		/* Size of private data */
 } krb5_encrypt_block;
 
 typedef struct _krb5_enc_data {
@@ -1191,6 +1192,9 @@ typedef struct _krb5_kt_ops {
 	KRB5_NPROTOTYPE((krb5_context,
 		    krb5_keytab,
 		  krb5_keytab_entry FAR *));
+
+    /* Handle for serializer */
+    void * serializer;
 } krb5_kt_ops;
 
 #define krb5_kt_get_type(context, keytab) (*(keytab)->ops->prefix)
