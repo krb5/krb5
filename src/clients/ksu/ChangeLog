@@ -1,3 +1,10 @@
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* heuristic.c (get_closest_principal): Don't try to examine
+	principal name components after the last.
+	* krb_auth_su.c (get_best_principal): Check principal name length
+	before examining components.
+
 2002-12-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* authorization.c, heuristic.c, ksu.h: Use uid_t instead of int in
