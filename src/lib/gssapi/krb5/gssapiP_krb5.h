@@ -288,7 +288,15 @@ krb5_error_code kg_ctx_internalize (krb5_context kcontext,
 
 OM_uint32 kg_get_context (OM_uint32 *minor_status,
 				    krb5_context *context);
-	
+
+OM_uint32 kg_sync_ccache_name (OM_uint32 *minor_status);
+
+OM_uint32 kg_get_ccache_name (OM_uint32 *minor_status, 
+                              const char **out_name);
+
+OM_uint32 kg_set_ccache_name (OM_uint32 *minor_status, 
+                              const char *name);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 krb5_gss_acquire_cred
