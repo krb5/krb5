@@ -1,3 +1,9 @@
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (profile_iterator_create): NAMES argument points to
+	const pointers.
+	* profile.hin (profile_iterator_create): Declaration updated.
+
 2003-12-14 Jeffrey Altman <jaltman@mit.edu>
 
    * all files: move prof-int.h to be the first include file

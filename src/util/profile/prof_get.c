@@ -438,7 +438,7 @@ cleanup:
 errcode_t KRB5_CALLCONV
 profile_iterator_create(profile, names, flags, ret_iter)
 	profile_t	profile;
-	const char	**names;
+	const char	*const *names;
 	int		flags;
 	void		**ret_iter;
 {

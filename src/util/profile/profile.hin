@@ -87,7 +87,7 @@ long KRB5_CALLCONV profile_get_subsection_names
 	(profile_t profile, const char **names, char ***ret_names);
 
 long KRB5_CALLCONV profile_iterator_create
-	(profile_t profile, const char **names,
+	(profile_t profile, const char *const *names,
 		   int flags, void **ret_iter);
 
 void KRB5_CALLCONV profile_iterator_free
