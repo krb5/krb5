@@ -98,6 +98,12 @@ get_salt_from_key (krb5_context, krb5_principal,
 
 void limit_string (char *name);
 
+void
+ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype);
+
+void
+rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
+
 /* do_as_req.c */
 krb5_error_code process_as_req (krb5_kdc_req *,
 					  const krb5_fulladdr *,

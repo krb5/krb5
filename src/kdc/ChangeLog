@@ -1,3 +1,20 @@
+2001-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str): New function; construct a string
+	containing a list of enctypes, given a number and list of
+	enctypes.
+	(rep_etypes2str): New function; construct a string indicating all
+	three enctypes associated with a KDC reply.
+
+	* kdc_util.h: Add prototypes for ktypes2str() and
+	rep_etypes2str().
+
+	* do_as_req.c (process_as_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+
+	* do_tgs_req.c (process_tgs_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* network.c (setup_network): Cast argument to isspace() to int.

@@ -31,6 +31,7 @@
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
+#include <ctype.h>
 #include <syslog.h>
 #include "adm.h"
 #include "adm_proto.h"
@@ -1536,4 +1537,69 @@ void limit_string(char *name)
 	name[i++] = '.';
 	name[i] = '\0';
 	return;
+}
+
+/*
+ * L10_256 = log10(256**x), rounded up.
+ */
+#define L10_256(x) ((int)((x) * 2.41 + 0.5))
+
+void
+ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
+{
+    int i;
+    char stmp[L10_256(sizeof(krb5_enctype)) + 3];
+
+    if (nktypes < 0
+	|| len < sizeof(" etypes {}") + L10_256(sizeof(krb5_enctype)))
+	return;
+
+    sprintf(s, "%d etypes {", nktypes);
+    for (i = 0; i < nktypes; i++) {
+	sprintf(stmp, "%s%d", i ? " " : "", ktype[i]);
+	if (strlen(s) + strlen(stmp) + 2 > len)
+	    break;
+	strcat(s, stmp);
+    }
+    if (i < nktypes) {
+	/*
+	 * We broke out of the loop. Try to truncate the list.
+	 */
+	for (i = strlen(s); i > 0; i--) {
+	    if (!isdigit((int)s[i]) && len - i > sizeof("...}")) {
+		s[i] = '\0';
+		strcat(s, "...");
+		break;
+	    }
+	}
+    }
+    strcat(s, "}");
+    return;
+}
+
+void
+rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
+{
+    char stmp[sizeof("skey=") + L10_256(sizeof(krb5_enctype)) + 1];
+
+    if (len < (3 * (L10_256(sizeof(krb5_enctype)) + 3)
+	       + sizeof("etypes {rep= tkt= skey=}")))
+	return;
+
+    sprintf(s, "etypes {rep=%ld", (long)rep->enc_part.enctype);
+
+    if (rep->ticket != NULL) {
+	sprintf(stmp, " tkt=%ld", (long)rep->ticket->enc_part.enctype);
+	strcat(s, stmp);
+    }
+
+    if (rep->ticket != NULL
+	&& rep->ticket->enc_part2 != NULL
+	&& rep->ticket->enc_part2->session != NULL) {
+	sprintf(stmp, " skey=%ld",
+		(long)rep->ticket->enc_part2->session->enctype);
+	strcat(s, stmp);
+    }
+    strcat(s, "}");
+    return;
 }
