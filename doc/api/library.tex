@@ -1,4 +1,4 @@
-\documentstyle[newcen,fixunder,functions,changebar,twoside,fancyheadings,backslash]{article}
+\documentstyle[newcen,fixunder,functions,changebar,twoside,fancyheadings]{article}
 \setlength{\oddsidemargin}{0.25in}
 \setlength{\evensidemargin}{-0.25in}
 \setlength{\topmargin}{-.5in}
@@ -9,7 +9,7 @@
 \makeindex
 \newif\ifdraft
 \drafttrue
-\typein{Draft flag? (type \backslash draftfalse<CR> if not draft...)}
+\typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
 \ifdraft
 \pagestyle{fancy}
 \lhead[\fancyplain{}\thepage]{\fancyplain{}{\sl \leftmark}}
