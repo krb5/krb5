@@ -25,8 +25,8 @@
 #include "k5-int.h"
 #include "kdb_dbc.h"
 
-krb5_error_code krb5_ktkdb_get_entry(krb5_context, krb5_keytab, krb5_principal,
-		   krb5_kvno, krb5_enctype, krb5_keytab_entry *);
+krb5_error_code krb5_ktkdb_get_entry KRB5_PROTOTYPE((krb5_context, krb5_keytab, krb5_principal,
+			krb5_kvno, krb5_enctype, krb5_keytab_entry *));
 
 krb5_kt_ops krb5_kt_kdb_ops = {
     0,

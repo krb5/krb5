@@ -77,6 +77,7 @@ struct timezone	dontcare;
 krb5_principal	*recorded_principals = (krb5_principal *) NULL;
 char		**recorded_names = (char **) NULL;
 
+#ifdef BERK_DB_DBM
 extern DBM	*db_dbm_open PROTOTYPE((char *, int, int));
 extern void     db_dbm_close PROTOTYPE((DBM *));
 extern datum    db_dbm_fetch PROTOTYPE((DBM *, datum));
@@ -105,6 +106,7 @@ static kdb5_dispatch_table berkeley_dispatch = {
     db_dbm_dirfno,		/* Get Database FD num	*/
     (int (*)()) NULL		/* Get Database FD num	*/
 };
+#endif
 
 /*
  * The following prototypes are necessary in case dbm_error and
@@ -483,11 +485,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     krb5_init_ets(kcontext);
 
     switch (db_type) {
+#ifdef BERK_DB_DBM
     case DB_BERKELEY:
 	op = "setting up Berkeley database operations";
 	if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
 	    goto goodbye;
 	break;
+#endif
     case DB_DBM:
 	op = "setting up DBM database operations";
 	if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
@@ -901,10 +905,12 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
 		krb5_init_context(&ccontext);
 		krb5_init_ets(ccontext);
 		switch (db_type) {
+#ifdef BERK_DB_DBM
 		case DB_BERKELEY:
 		    if (kret = kdb5_db_set_dbops(ccontext, &berkeley_dispatch))
 			exit(1);
 		    break;
+#endif
 		case DB_DBM:
 		    if (kret = kdb5_db_set_dbops(ccontext, &dbm_dispatch))
 			exit(1);
@@ -997,11 +1003,13 @@ do_testing(db, passes, verbose, timing, rcases, check, save_db, dontclean,
     if (db_created) {
 	if (!kret && !save_db) {
 	    switch (db_type) {
+#ifdef BERK_DB_DBM
 	    case DB_BERKELEY:
 		op = "setting up Berkeley database operations";
 		if (kret = kdb5_db_set_dbops(kcontext, &berkeley_dispatch))
 		    goto goodbye1;
 		break;
+#endif
 	    case DB_DBM:
 		op = "setting up DBM database operations";
 		if (kret = kdb5_db_set_dbops(kcontext, &dbm_dispatch))
