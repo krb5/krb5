@@ -258,8 +258,7 @@ krb5_error_code kg_decrypt (krb5_context context,
 				      krb5_pointer out,
 				      unsigned int length);
 
-OM_uint32 kg_seal (krb5_context context,
-		  OM_uint32 *minor_status,
+OM_uint32 kg_seal (OM_uint32 *minor_status,
 		  gss_ctx_id_t context_handle,
 		  int conf_req_flag,
 		  int qop_req,
@@ -268,8 +267,7 @@ OM_uint32 kg_seal (krb5_context context,
 		  gss_buffer_t output_message_buffer,
 		  int toktype);
 
-OM_uint32 kg_unseal (krb5_context context,
-		    OM_uint32 *minor_status,
+OM_uint32 kg_unseal (OM_uint32 *minor_status,
 		    gss_ctx_id_t context_handle,
 		    gss_buffer_t input_token_buffer,
 		    gss_buffer_t message_buffer,
@@ -277,8 +275,7 @@ OM_uint32 kg_unseal (krb5_context context,
 		    int *qop_state,
 		    int toktype);
 
-OM_uint32 kg_seal_size (krb5_context context,
-				  OM_uint32 *minor_status,
+OM_uint32 kg_seal_size (OM_uint32 *minor_status,
 				  gss_ctx_id_t context_handle,
 				  int conf_req_flag,
 				  gss_qop_t qop_req,
@@ -568,6 +565,8 @@ OM_uint32 krb5_gss_import_sec_context
 	    gss_buffer_t,		/* interprocess_token */
 	    gss_ctx_id_t *		/* context_handle */
 	    );
+
+krb5_error_code krb5_gss_ser_init(krb5_context);
 
 OM_uint32 krb5_gss_release_oid
 (OM_uint32 *,		/* minor_status */

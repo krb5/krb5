@@ -316,9 +316,8 @@ make_seal_token_v1 (krb5_context context,
    and do not encode the ENC_TYPE, MSG_LENGTH, or MSG_TEXT fields */
 
 OM_uint32
-kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
+kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 	input_message_buffer, conf_state, output_message_buffer, toktype)
-    krb5_context context;
     OM_uint32 *minor_status;
     gss_ctx_id_t context_handle;
     int conf_req_flag;
@@ -331,6 +330,7 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
     krb5_gss_ctx_id_rec *ctx;
     krb5_error_code code;
     krb5_timestamp now;
+    krb5_context context;
 
     output_message_buffer->length = 0;
     output_message_buffer->value = NULL;
@@ -359,6 +359,7 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
 	return(GSS_S_NO_CONTEXT);
     }
 
+    context = ctx->k5_context;
     if ((code = krb5_timeofday(context, &now))) {
 	*minor_status = code;
 	return(GSS_S_FAILURE);

@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/ser_sctx.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -322,6 +322,11 @@ kg_ctx_size(kcontext, arg, sizep)
 
 	if (!kret)
 	    kret = krb5_size_opaque(kcontext,
+				    KV5M_CONTEXT,
+				    (krb5_pointer) ctx->k5_context,
+				    &required);
+	if (!kret)
+	    kret = krb5_size_opaque(kcontext,
 				    KV5M_AUTH_CONTEXT,
 				    (krb5_pointer) ctx->auth_context,
 				    &required);
@@ -442,6 +447,12 @@ kg_ctx_externalize(kcontext, arg, buffer, lenremain)
 
 	    if (!kret)
 		kret = krb5_externalize_opaque(kcontext,
+					       KV5M_CONTEXT,
+					       (krb5_pointer) ctx->k5_context,
+					       &bp, &remain);
+
+	    if (!kret)
+		kret = krb5_externalize_opaque(kcontext,
 					       KV5M_AUTH_CONTEXT,
 					       (krb5_pointer) ctx->auth_context,
 					       &bp, &remain);
@@ -510,6 +521,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 	    (ctx = (krb5_gss_ctx_id_rec *)
 	     xmalloc(sizeof(krb5_gss_ctx_id_rec)))) {
 	    memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
+
+	    ctx->k5_context = kcontext;
 
 	    /* Get static data */
 	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
@@ -597,6 +610,12 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
 		    kret = 0;
 	    }
 		
+	    if (!kret)
+		kret = krb5_internalize_opaque(kcontext,
+					       KV5M_CONTEXT,
+					       (krb5_pointer *) &ctx->k5_context,
+					       &bp, &remain);
+
 	    if (!kret)
 		kret = krb5_internalize_opaque(kcontext,
 					       KV5M_AUTH_CONTEXT,

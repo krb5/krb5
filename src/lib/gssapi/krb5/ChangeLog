@@ -1,3 +1,27 @@
+2004-03-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5seal.c (kg_seal): Extract the krb5 context from the security
+	context instead of requiring it be passed in as an argument.
+	* k5unseal.c (kg_unseal): Likewise.
+	* gssapiP_krb5.h (kg_seal, kg_unseal): Declarations updated.
+	* delete_sec_context.c, process_context_token.c, seal.c, sign.c,
+	unseal.c, verify.c: Callers changed.
+	* inq_context.c (krb5_gss_inquire_context): Use krb5 context
+	contained in security context instead of calling kg_get_context.
+	* wrap_size_limit.c (krb5_gss_wrap_size_limit): Likewise.
+
+	* import_sec_context.c (krb5_gss_ser_init): New function.
+	(krb5_gss_import_sec_context): Create a krb5 context locally to
+	use for the import.
+	* export_sec_context.c (krb5_gss_export_sec_context): Use the
+	krb5 context in the security context.
+	* gssapiP_krb5.h (krb5_gss_ser_init): Declare.
+	* gssapi_krb5.c (kg_get_context): Don't call krb5 serialization
+	initialization code here.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Free the
+	new krb5 context in an error case not caught before.
+
 2004-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapiP_krb5.h (struct _krb5_gss_ctx_id_rec): Add a krb5

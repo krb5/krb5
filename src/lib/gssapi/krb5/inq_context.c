@@ -43,9 +43,6 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
    krb5_timestamp now;
    krb5_deltat lifetime;
 
-   if (GSS_ERROR(kg_get_context(minor_status, &context)))
-      return(GSS_S_FAILURE);
-
    if (initiator_name)
       *initiator_name = (gss_name_t) NULL;
    if (acceptor_name)
@@ -66,6 +63,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
    init = NULL;
    accept = NULL;
+   context = ctx->k5_context;
 
    if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;

@@ -287,6 +287,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    /*SUPPRESS 29*/
    if (*context_handle != GSS_C_NO_CONTEXT) {
       *minor_status = 0;
+      krb5_free_context(context);
       return(GSS_S_FAILURE);
    }
 

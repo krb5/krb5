@@ -161,18 +161,6 @@ kg_get_context(minor_status, context)
    if (!kg_context) {
 	   if ((code = krb5_init_context(&kg_context)))
 		   goto fail;
-	   if ((code = krb5_ser_context_init(kg_context)))
-		   goto fail;
-	   if ((code = krb5_ser_auth_context_init(kg_context)))
-		   goto fail;
-	   if ((code = krb5_ser_ccache_init(kg_context)))
-		   goto fail;
-	   if ((code = krb5_ser_rcache_init(kg_context)))
-		   goto fail;
-	   if ((code = krb5_ser_keytab_init(kg_context)))
-		   goto fail;
-	   if ((code = krb5_ser_auth_context_init(kg_context)))
-	       goto fail;
    }
    *context = kg_context;
    *minor_status = 0;

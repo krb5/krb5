@@ -83,14 +83,10 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     OM_uint32		req_output_size;
     OM_uint32		*max_input_size;
 {
-    krb5_context	context;
     krb5_gss_ctx_id_rec	*ctx;
     OM_uint32		data_size, conflen;
     OM_uint32		ohlen;
     int			overhead;
-
-    if (GSS_ERROR(kg_get_context(minor_status, &context)))
-       return(GSS_S_FAILURE);
 
     /* only default qop is allowed */
     if (qop_req != GSS_C_QOP_DEFAULT) {
@@ -147,7 +143,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     /* Calculate the token size and subtract that from the output size */
     overhead = 7 + ctx->mech_used->length;
     data_size = req_output_size;
-    conflen = kg_confounder_size(context, ctx->enc);
+    conflen = kg_confounder_size(ctx->k5_context, ctx->enc);
     data_size = (conflen + data_size + 8) & (~(OM_uint32)7);
     ohlen = g_token_size((gss_OID) ctx->mech_used,
 			 (unsigned int) (data_size + ctx->cksum_size + 14))
