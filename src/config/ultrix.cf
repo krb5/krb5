@@ -8,6 +8,7 @@
  */
 
 #define OSName            Ultrix-32 3.1
+#define OS_Ultrix         1
 #define OSMajorVersion    3
 #define OSMinorVersion    1
 #define SystemV NO
