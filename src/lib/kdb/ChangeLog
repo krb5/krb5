@@ -1,4 +1,10 @@
 
+Thu Jun 22 11:59:28 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb_dbm.c - Replace static kdb context with context which is attached
+		to krb5 context.  This allows for multiple open databases
+		within the same process.
+
+
 Thu Jun 15 18:04:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit copying of archive library to library
 		directory.  Add dependency on all-$(WHAT)
