@@ -99,7 +99,7 @@ krb5_principal *principal;
 	    return(ENOMEM);
 	}
     }
-    retprinc[0]->length = strlen(realmname)+1;
+    retprinc[0]->length = strlen(realmname);
     retprinc[0]->data = realmname;
 
     /* cp points to the beginning of the current component,
