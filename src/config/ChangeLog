@@ -1,3 +1,7 @@
+Thu Aug  4 03:52:23 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* pre.in: strip installed programs by default
+
 Sun Jul  3 04:41:54 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* post.in: whoops, now making sure errors don't get returned if
