@@ -1,3 +1,8 @@
+Fri Sep  8 19:52:34 1995  Ezra Peisach  (epeisach@dcl)
+
+	* decrypt_key.c: Upon error, after freeing contents field, set to
+		null to indicate to upper levels that it is really empty.
+
 Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * decrypt_key.c, encrypt_key.c, fetch_mkey.c, kdb_compat.c,

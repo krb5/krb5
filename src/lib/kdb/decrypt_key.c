@@ -62,6 +62,8 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 			       key_data->key_data_length[0] - 2, 
 			       eblock, 0))) {
     	krb5_xfree(keyblock->contents);
+	keyblock->contents = 0;
+	keyblock->length = 0;
 	return retval;
     }
 
@@ -72,6 +74,8 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
 	    if (keysalt->data.length = key_data->key_data_length[1]) {
 		if (!(keysalt->data.data=(char *)malloc(keysalt->data.length))){
 		    krb5_xfree(keyblock->contents);
+		    keyblock->contents = 0;
+		    keyblock->length = 0;
 		    return ENOMEM;
 		}
 		memcpy(keysalt->data.data, key_data->key_data_contents[1],
