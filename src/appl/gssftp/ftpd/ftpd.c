@@ -170,7 +170,6 @@ int have_creds;		/* User has credentials on disk */
 #include "ftpd_var.h"
 #include "secure.h"
 
-extern	int errno;
 extern	char *crypt();
 extern	char version[];
 extern	char *home;		/* pointer to home directory for glob */

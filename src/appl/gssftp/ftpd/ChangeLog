@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* ftpd.c: Don't declare errno.
+
 2003-01-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftpd.c (auth_data): Kerberos v4 checksum must be a 32-bit

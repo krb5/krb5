@@ -101,8 +101,8 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	 * By the time krb5_rd_cred is called here (after krb5_rd_req has been
 	 * called in krb5_gss_accept_sec_context), the "keyblock" field of
 	 * auth_context contains a pointer to the session key, and the
-	 * "remote_subkey" field might contain a session subkey.  Either of
-	 * these (the "remote_subkey" if it isn't NULL, otherwise the
+	 * "recv_subkey" field might contain a session subkey.  Either of
+	 * these (the "recv_subkey" if it isn't NULL, otherwise the
 	 * "keyblock") might have been used to encrypt the encrypted part of
 	 * the KRB_CRED message that contains the forwarded credentials.  (The
 	 * Java Crypto and Security Implementation from the DSTC in Australia
@@ -592,8 +592,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        goto fail;
    }
 
-   if ((code = krb5_auth_con_getremotesubkey(context, auth_context,
-					     &ctx->subkey))) { 
+   if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
+					   &ctx->subkey))) { 
        major_status = GSS_S_FAILURE;      
        goto fail;
    }
@@ -719,6 +719,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 				       &ctx->seq_send);
 
        /* the reply token hasn't been sent yet, but that's ok. */
+       ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
        ctx->established = 1;
 
        token.length = g_token_size((gss_OID) mech_used, ap_rep.length);

@@ -161,9 +161,15 @@ retval = KRB5_FWD_BAD_PRINCIPAL;
       kdcoptions &= ~(KDC_OPT_FORWARDABLE);
 
     if ((retval = krb5_get_cred_via_tkt(context, &tgt, kdcoptions,
-					addrs, &creds, &pcreds)))
-        goto errout;
-
+					addrs, &creds, &pcreds))) {
+	if (enctype) {
+	    creds.keyblock.enctype = 0;
+	    if ((retval = krb5_get_cred_via_tkt(context, &tgt, kdcoptions,
+						addrs, &creds, &pcreds))) 
+		goto errout;
+	}
+	else goto errout;
+    }
     retval = krb5_mk_1cred(context, auth_context, pcreds,
                            &scratch, &replaydata);
     krb5_free_creds(context, pcreds);

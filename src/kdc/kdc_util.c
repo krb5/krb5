@@ -150,7 +150,8 @@ realm_compare(krb5_principal princ1, krb5_principal princ2)
  */
 krb5_boolean krb5_is_tgs_principal(krb5_principal principal)
 {
-	if ((krb5_princ_component(kdc_context, principal, 0)->length ==
+	if ((krb5_princ_size(kdc_context, principal) > 0) &&
+	    (krb5_princ_component(kdc_context, principal, 0)->length ==
 	     KRB5_TGS_NAME_SIZE) &&
 	    (!memcmp(krb5_princ_component(kdc_context, principal, 0)->data,
 		     KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
@@ -312,8 +313,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	goto cleanup_auth_context;
     }
 
-    if ((retval = krb5_auth_con_getremotesubkey(kdc_context,
-						auth_context, subkey)))
+    if ((retval = krb5_auth_con_getrecvsubkey(kdc_context,
+					      auth_context, subkey)))
 	goto cleanup_auth_context;
 
     if ((retval = krb5_auth_con_getauthenticator(kdc_context, auth_context,
@@ -1162,7 +1163,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 	    return KRB_AP_ERR_NOT_US;
 	}
 	/* ...and that the second component matches the server realm... */
-	if ((krb5_princ_component(kdc_context, ticket->server, 1)->length !=
+	if ((krb5_princ_size(kdc_context, ticket->server) <= 1) ||
+	    (krb5_princ_component(kdc_context, ticket->server, 1)->length !=
 	     krb5_princ_realm(kdc_context, request->server)->length) ||
 	    memcmp(krb5_princ_component(kdc_context, ticket->server, 1)->data,
 		   krb5_princ_realm(kdc_context, request->server)->data,

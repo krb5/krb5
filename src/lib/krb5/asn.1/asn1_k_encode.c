@@ -27,6 +27,7 @@
 #include "asn1_k_encode.h"
 #include "asn1_make.h"
 #include "asn1_encode.h"
+#include <assert.h>
 
 /**** asn1 macros ****/
 #if 0
@@ -708,14 +709,18 @@ asn1_error_code asn1_encode_krb_cred_info(asn1buf *buf, const krb5_cred_info *va
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info_entry *val, unsigned int *retlen)
+asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info_entry *val,
+					     unsigned int *retlen, int etype_info2)
 {
   asn1_setup();
 
+  assert(val->s2kparams.data == NULL || etype_info2);
   if(val == NULL || (val->length > 0 && val->length != KRB5_ETYPE_NO_SALT &&
 		     val->salt == NULL))
      return ASN1_MISSING_FIELD;
-
+  if(val->s2kparams.data != NULL)
+      asn1_addlenfield(val->s2kparams.length, val->s2kparams.data, 2,
+		       asn1_encode_octetstring);
   if (val->length >= 0 && val->length != KRB5_ETYPE_NO_SALT)
 	  asn1_addlenfield(val->length,val->salt,1,
 			   asn1_encode_octetstring);
@@ -725,7 +730,8 @@ asn1_error_code asn1_encode_etype_info_entry(asn1buf *buf, const krb5_etype_info
   asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry **val, unsigned int *retlen)
+asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry **val,
+				       unsigned int *retlen, int etype_info2)
 {
     asn1_setup();
     int i;
@@ -734,7 +740,7 @@ asn1_error_code asn1_encode_etype_info(asn1buf *buf, const krb5_etype_info_entry
   
     for(i=0; val[i] != NULL; i++); /* get to the end of the array */
     for(i--; i>=0; i--){
-	retval = asn1_encode_etype_info_entry(buf,val[i],&length);
+	retval = asn1_encode_etype_info_entry(buf,val[i],&length, etype_info2);
 	if(retval) return retval;
 	sum += length;
     }

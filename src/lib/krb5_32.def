@@ -36,8 +36,10 @@ EXPORTS
 	krb5_auth_con_getlocalseqnumber
 	krb5_auth_con_getlocalsubkey
 	krb5_auth_con_getrcache			; KRB5_CALLCONV_WRONG
+	krb5_auth_con_getrecvsubkey
 	krb5_auth_con_getremoteseqnumber
 	krb5_auth_con_getremotesubkey
+	krb5_auth_con_getsendsubkey
 	krb5_auth_con_init
 	krb5_auth_con_initivector		; DEPRECATED
 	krb5_auth_con_setaddrs			; KRB5_CALLCONV_WRONG
@@ -45,6 +47,8 @@ EXPORTS
 	krb5_auth_con_setflags
 	krb5_auth_con_setports
 	krb5_auth_con_setrcache
+	krb5_auth_con_setrecvsubkey
+	krb5_auth_con_setsendsubkey
 	krb5_auth_con_setuseruserkey
 	krb5_build_principal
 	krb5_build_principal_ext
@@ -63,6 +67,7 @@ EXPORTS
 	krb5_c_random_make_octets
 	krb5_c_random_seed
 	krb5_c_string_to_key
+krb5_c_string_to_key_with_params
 	krb5_c_valid_cksumtype
 	krb5_c_valid_enctype
 	krb5_c_verify_checksum
@@ -204,6 +209,8 @@ EXPORTS
 	krb5_sendauth
 	krb5_set_default_realm
 	krb5_set_default_tgs_enctypes
+krb5_set_password
+krb5_set_password_using_ccache
 	krb5_set_principal_realm
 	krb5_sname_to_principal
 	krb5_string_to_cksumtype

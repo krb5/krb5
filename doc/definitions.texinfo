@@ -43,7 +43,7 @@ default was set.
 the following should be consistent with the variables set in
 krb5/src/lib/krb5/krb/init_ctx.c
 @end ignore
-@set DefaultETypeList des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
+@set DefaultETypeList aes256-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
 @comment DEFAULT_ETYPE_LIST
 @set DefaultDefaultTgsEnctypes @value{DefaultETypeList}
 @set DefaultDefaultTktEnctypes @value{DefaultETypeList}
@@ -146,7 +146,7 @@ krb5/src/appl/bsd/login.c
 the following defaults should be consistent with the values set in
 krb5/src/kdc/kerberos_v4
 @end ignore
-@set DefaultV4Mode nopreauth
+@set DefaultV4Mode  none
 @comment KDC_V4_DEFAULT_MODE
 
 @ignore

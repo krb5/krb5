@@ -32,7 +32,12 @@ LIBOBJS=@LIBOBJS@
 SETENVSRC=@SETENVSRC@
 SETENVOBJ=@SETENVOBJ@
 
-LIB=    libtelnet.a
+LIB=telnet
+LIBMAJOR=0
+LIBMINOR=0
+RELDIR=../../../appl/telnet/libtelnet
+STOBJLISTS=OBJS.ST
+
 SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/encrypt.c \
 	$(srcdir)/genget.c \
@@ -52,20 +57,15 @@ SRCS=   $(srcdir)/auth.c \
 	$(srcdir)/strftime.c \
 	$(srcdir)/strerror.c
 
-OBJS=   auth.o encrypt.o genget.o \
+STLIBOBJS=   auth.o encrypt.o genget.o \
 	misc.o kerberos.o kerberos5.o forward.o spx.o enc_des.o \
 	$(LIBOBJS) getent.o $(SETENVOBJ)
 
 TELNET_H= $(srcdir)/../arpa/telnet.h
 
-all:: $(LIB)
-$(LIB): $(OBJS)
-	$(RM) $(LIB)
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
+all:: all-libs
 
-clean::
-	$(RM) $(LIB)
+clean:: clean-libs clean-libobjs
 
 auth.o: $(TELNET_H)
 auth.o: encrypt.h
@@ -88,6 +88,10 @@ enc_des.o: encrypt.h
 enc_des.o: key-proto.h
 enc_des.o: misc-proto.h
 install::
+
+# @lib_frag@
+# @libobj_frag@
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

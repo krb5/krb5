@@ -678,11 +678,21 @@ krb5_error_code encode_krb5_alt_method(const krb5_alt_method *rep, krb5_data **c
 krb5_error_code encode_krb5_etype_info(const krb5_etype_info_entry **rep, krb5_data **code)
 {
   krb5_setup();
-  retval = asn1_encode_etype_info(buf,rep,&length);
+  retval = asn1_encode_etype_info(buf,rep,&length, 0);
   if(retval) return retval;
   sum += length;
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_etype_info2(const krb5_etype_info_entry **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_etype_info(buf,rep,&length, 1);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+  
 
 krb5_error_code encode_krb5_enc_data(const krb5_enc_data *rep, krb5_data **code)
 {
@@ -820,5 +830,22 @@ krb5_error_code encode_krb5_predicted_sam_response(const krb5_predicted_sam_resp
   retval = asn1_encode_predicted_sam_response(buf,rep,&length);
   if(retval) return retval;
   sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_setpw_req(const krb5_principal target,
+				      char *password, krb5_data **code)
+{
+  /* Macros really want us to have a variable called rep which we do not need*/
+  const char *rep = "dummy string";
+
+  krb5_setup();
+
+  krb5_addfield(target,2,asn1_encode_realm);
+  krb5_addfield(target,1,asn1_encode_principal_name);
+  krb5_addlenfield(strlen(password), password,0,asn1_encode_octetstring);
+  krb5_makeseq();
+
+
   krb5_cleanup();
 }

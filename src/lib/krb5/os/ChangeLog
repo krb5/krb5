@@ -1,3 +1,37 @@
+2003-05-06  Alexandra Ellwood  <lxs@mit.edu>
+        * init_os_ctx.c: Added support for KLL's __KLAllowHomeDirectoryAccess()
+        function so that krb4, krb5 and gssapi will not access the user's homedir
+        if the application forbids it.
+
+2003-04-28  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Locate server in realm of
+	creds.server, not in realm of target principal because target
+	principal is null in the  changepw case.
+
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Call
+	krb5_setpw_result_code_string not krb5_setpw_result_code_string  
+
+2003-04-24  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): return error from
+	auth_con_setaddrs not last socket errno if auth_con_setaddrs fails 
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Patches from Paul Nelson
+	to implement Microsoft set password protocol  
+	(krb5_set_password_using_ccache): Use kadmin/changepw in target realm, not local realm and use a two-component principal
+	(krb5_change_set_password): Find the kpasswd server for the realm
+	of the target principal not the client 
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* read_pwd.c (krb5_read_password): Always free temporary storage
+	used for verification version of password.
+
 2003-03-06  Alexandra Ellwood <lxs@mit.edu>
 
     * c_ustime.c: Removed Mac OS 9 code.

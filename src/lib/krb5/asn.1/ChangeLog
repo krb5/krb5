@@ -1,3 +1,27 @@
+2003-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_decode.c (decode_krb5_etype_info2): New function; currently
+	the same code as decode_krb5_etype_info.  This means that we can
+	manage to accept s2kparams in etype_info which is wrong but
+	probably harmless.
+
+	* asn1_k_decode.c (asn1_decode_etype_info_entry): Add etype_info2
+	support 
+
+	* asn1_k_encode.c (asn1_encode_etype_info_entry):  Add support for
+	etype-info2 
+
+	* krb5_encode.c (encode_krb5_etype_info2): New function
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5_encode.c (encode_krb5_setpw_req): new function
+
+2003-04-13  Ezra Peisach  <epeisach@mit.edu>
+
+	* asn1_k_decode.c (asn1_decode_kdc_req_body): Fix memory leak if
+	optional server field is lacking,
+
 2003-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_get.c (asn1_get_tag): Deleted.

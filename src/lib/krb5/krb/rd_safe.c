@@ -161,9 +161,8 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context, const krb5_da
 	return KRB5_RC_REQUIRED;
 
     /* Get keyblock */
-    if ((keyblock = auth_context->remote_subkey) == NULL)
-	if ((keyblock = auth_context->local_subkey) == NULL)
-            keyblock = auth_context->keyblock;
+    if ((keyblock = auth_context->recv_subkey) == NULL)
+	keyblock = auth_context->keyblock;
 
 {
     krb5_address * premote_fulladdr = NULL;

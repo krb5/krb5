@@ -1,3 +1,18 @@
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Add passes for testing AES.
+	(start_kerberos_daemons): Add a small delay between starting the
+	"tail -f" processes and appending the markers to their files.
+	(spawn_xterm): Add RLOGIN, RLOGIND, FTP, and FTPD to the list of
+	variables to export to the environment.  Check that variables are
+	defined before exporting them.
+
+2003-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (v4kinit): Expect failure when kiniting to a des3
+	TGT, due to fix for MITKRB5-SA-2003-004.
+	(setup_kadmind_srvtab): Remove.  It's not needed anymore.
+
 2003-02-04  Tom Yu  <tlyu@mit.edu>
 
 	* default.exp (start_kerberos_daemons): Use correct argument to

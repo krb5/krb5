@@ -282,12 +282,15 @@ typedef struct _krb5_alt_method {
  * A null-terminated array of this structure is returned by the KDC as
  * the data part of the ETYPE_INFO preauth type.  It informs the
  * client which encryption types are supported.
+ * The  same data structure is used by both etype-info and etype-info2
+ * but s2kparams must be null when encoding etype-info.
  */
 typedef struct _krb5_etype_info_entry {
 	krb5_magic	magic;
 	krb5_enctype	etype;
 	unsigned int	length;
 	krb5_octet	*salt;
+    krb5_data s2kparams;
 } krb5_etype_info_entry;
 
 /* 
@@ -903,6 +906,8 @@ void krb5_free_etype_info
 /*
  * End "preauth.h"
  */
+krb5_error_code
+krb5int_copy_data_contents (krb5_context, const krb5_data *, krb5_data *);
 
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     (krb5_context,
@@ -911,6 +916,7 @@ typedef krb5_error_code (*krb5_gic_get_as_key_fct)
 		     krb5_prompter_fct,
 		     void *prompter_data,
 		     krb5_data *salt,
+     krb5_data *s2kparams,
 		     krb5_keyblock *as_key,
 		     void *gak_data);
 
@@ -933,7 +939,8 @@ krb5_get_init_creds
 krb5_error_code krb5_do_preauth
 (krb5_context, krb5_kdc_req *,
 		krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *, krb5_enctype *,
+		krb5_data *salt, krb5_data *s2kparams,
+ krb5_enctype *,
 		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);
@@ -1004,6 +1011,17 @@ struct _krb5_context {
 	   type code.  Aside from the 2**16 size limit, we put no
 	   absolute limit on the UDP packet size.  */
 	int		udp_pref_limit;
+
+	/* This is the tgs_ktypes list as read from the profile, or
+	   set to compiled-in defaults.  The application code cannot
+	   override it.  This is used for session keys for
+	   intermediate ticket-granting tickets used to acquire the
+	   requested ticket (the session key of which may be
+	   constrained by tgs_ktypes above).  */
+	krb5_enctype	*conf_tgs_ktypes;
+	int		conf_tgs_ktypes_count;
+	/* Use the _configured version?  */
+	krb5_boolean	use_conf_ktypes;
 
 #ifdef KRB5_DNS_LOOKUP
         krb5_boolean    profile_in_memory;
@@ -1221,6 +1239,8 @@ krb5_error_code encode_krb5_alt_method
 
 krb5_error_code encode_krb5_etype_info
 	(const krb5_etype_info_entry **, krb5_data **code);
+krb5_error_code encode_krb5_etype_info2
+	(const krb5_etype_info_entry **, krb5_data **code);
 
 krb5_error_code encode_krb5_enc_data
     	(const krb5_enc_data *, krb5_data **);
@@ -1269,6 +1289,9 @@ krb5_error_code encode_krb5_sam_response
 
 krb5_error_code encode_krb5_predicted_sam_response
        (const krb5_predicted_sam_response * , krb5_data **);
+
+krb5_error_code encode_krb5_setpw_req
+(const krb5_principal target, char *password, krb5_data **code);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c
@@ -1394,6 +1417,9 @@ krb5_error_code decode_krb5_alt_method
 	(const krb5_data *output, krb5_alt_method **rep);
 
 krb5_error_code decode_krb5_etype_info
+	(const krb5_data *output, krb5_etype_info_entry ***rep);
+
+krb5_error_code decode_krb5_etype_info2
 	(const krb5_data *output, krb5_etype_info_entry ***rep);
 
 krb5_error_code decode_krb5_enc_data
@@ -1558,6 +1584,29 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 
 void krb5int_set_prompt_types
 	(krb5_context, krb5_prompt_type *);
+
+/* set and change password helpers */
+
+krb5_error_code krb5int_mk_chpw_req
+	(krb5_context context, krb5_auth_context auth_context,
+ 			krb5_data *ap_req, char *passwd, krb5_data *packet);
+krb5_error_code krb5int_rd_chpw_rep
+	(krb5_context context, krb5_auth_context auth_context,
+		       krb5_data *packet, int *result_code,
+		       krb5_data *result_data);
+krb5_error_code KRB5_CALLCONV krb5_chpw_result_code_string
+	(krb5_context context, int result_code,
+			char **result_codestr);
+krb5_error_code  krb5int_mk_setpw_req
+	(krb5_context context, krb5_auth_context auth_context,
+ 			krb5_data *ap_req, krb5_principal targetprinc, char *passwd, krb5_data *packet);
+krb5_error_code krb5int_rd_setpw_rep
+	(krb5_context context, krb5_auth_context auth_context,
+		       krb5_data *packet, int *result_code,
+		       krb5_data *result_data);
+krb5_error_code krb5int_setpw_result_code_string
+	(krb5_context context, int result_code,
+			const char **result_codestr);
 
 
 
