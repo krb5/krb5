@@ -1,3 +1,8 @@
+Fri Apr 28 13:35:25 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* read_passwd.c (des_read_pw_string): Add des_read_pw_string,
+		since it's used by the V4 login.c code.
+
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
