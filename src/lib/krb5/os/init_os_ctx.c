@@ -275,7 +275,7 @@ os_get_default_config_files(pfiles, secure)
 	if (err == memFullErr)
 		return ENOMEM;
 	else if (err != noErr)
-		return ENFILE;
+		return ENOENT;
 	
 #else /* !macintosh */
 #if defined(_MSDOS) || defined(_WIN32)

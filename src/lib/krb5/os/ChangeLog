@@ -1,3 +1,8 @@
+2000-06-14  Miro Jurisic  <meeroh@mit.edu>
+
+	* init_os_ctx.c (os_get_default_config_files):  
+	Return ENOENT when file is not found on MacOS (not ENFILE)
+
 2000-06-09  Miro Jurisic  <meeroh@mit.edu>
 
 	* init_os_ctx.c (os_get_default_config_files):  
