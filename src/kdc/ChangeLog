@@ -1,3 +1,35 @@
+2003-04-02  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Avoid infinite loop if request
+	does not contain des-cbc-crc and database does 
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* do_tgs_req.c (process_tgs_req): Check that principal name
+	component 1 is present before examining it.
+	* kdc_util.c (krb5_is_tgs_principal, validate_tgs_request): Check
+	principal name length before examining components.
+
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (verify_enc_timestamp): Save decryption error, in
+	case we get NO_MATCHING_KEY later.  This allows us to log a more
+	sane error if an incorrect password is used for encrypting the
+	enc-timestamp preauth.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (initialize_realms): Add support to call
+	enable_v4_crossrealm if the user wants insecure operation 
+
+	* kerberos_v4.c: Add enable_v4_crossrealm.  By default krb4
+	cross-realm is not allowed as it is insecure.  Also, remove
+	support for generating krb4 tickets encrypted in 3DES as they are
+	insecure. 
+
+	* kdc_util.h: Define enable_v4_crossrealm, new function to enable
+	secure krb4 cross-realm authentication 
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* main.c (init_realm): Update call to krb5_ktdb_resolve().

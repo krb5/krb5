@@ -446,6 +446,10 @@ kerberos5_is(ap, data, cnt)
 		 * first component of a service name especially since
 		 * the default is of length 4.
 		 */
+		if (krb5_princ_size(telnet_context,ticket->server) < 1) {
+		    (void) strcpy(errbuf, "malformed service name");
+		    goto errout;
+		}
 		if (krb5_princ_component(telnet_context,ticket->server,0)->length < 256) {
 		    char princ[256];
 		    strncpy(princ,	
@@ -727,13 +731,20 @@ kerberos5_status(ap, name, level)
 	if (level < AUTH_USER)
 		return(level);
 
+	/*
+	 * Always copy in UserNameRequested if the authentication
+	 * is valid, because the higher level routines need it.
+	 * the name buffer comes from telnetd/telnetd{-ktd}.c
+	 */
+	if (UserNameRequested) {
+		strncpy(name, UserNameRequested, 255);
+		name[255] = '\0';
+	}
+
 	if (UserNameRequested &&
 	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
 			 UserNameRequested))
 	{
-		/* the name buffer comes from telnetd/telnetd{-ktd}.c */
-		strncpy(name, UserNameRequested, 255);
-		name[255] = '\0';
 		return(AUTH_VALID);
 	} else
 		return(AUTH_USER);

@@ -1,3 +1,51 @@
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_setpw_result_code_string): Make internal 
+
+2003-04-25  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_rd_setpw_rep): Fix error handling; allow
+	krberrors to be read correctly; fix memory alloctaion so that
+	allocated structures are freed. 
+
+2003-04-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* kfree.c (krb5_free_pwd_sequences): Correction to previous
+	fix. Free contents of krb5_data - not just the pointer.
+
+2003-04-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kfree.c (krb5_free_pwd_sequences): Actually free the entire
+	sequence of passwd_phase_elements and not just the first one.
+
+2003-04-16  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_mk_setpw_req): Use encode_krb5_setpw_req.  Fix
+	memory handling to free data that is allocated  
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* chpw.c (krb5int_mk_setpw_req krb5int_rd_setpw_rep): New function
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Check principal name
+	length before examining components.
+
+	* parse.c (krb5_parse_name): Double-check principal name length
+	before filling in components.
+
+	* srv_rcache.c (krb5_get_server_rcache): Check for null pointer
+	supplied in place of name.
+
+	* unparse.c (krb5_unparse_name_ext): Don't move buffer pointer
+	backwards if nothing has been put into the buffer yet.
+
+2003-04-01  Sam Hartman  <hartmans@mit.edu>
+
+	* rd_req.c (krb5_rd_req): If AUTH_CONTEXT_DO_TIME is cleared,
+	don't set up a replay cache. 
+
 2003-03-08  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_kerb.c: Only include krb.h if krb4 support compiled in,

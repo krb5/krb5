@@ -303,10 +303,10 @@ int main(argc, argv)
 #ifndef LOG_ODELAY /* 4.2 syslog */
     openlog(progname, LOG_PID);
 #else
-#ifndef LOG_DAEMON
-#define LOG_DAEMON 0
+#ifndef LOG_AUTH
+#define LOG_AUTH 0
 #endif
-    openlog(progname, LOG_PID | LOG_ODELAY, LOG_DAEMON);	
+    openlog(progname, LOG_PID | LOG_ODELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
     
 #ifdef KERBEROS

@@ -6,36 +6,21 @@
 Unpacking the Source Distribution
 ---------------------------------
 
-The source distribution of Kerberos 5 comes in three gzipped tarfiles,
-krb5-1.3.src.tar.gz, krb5-1.3.doc.tar.gz, and krb5-1.3.crypto.tar.gz.
-The krb5-1.3.doc.tar.gz contains the doc/ directory and this README
-file.  The krb5-1.3.src.tar.gz contains the src/ directory and this
-README file, except for the crypto library sources, which are in
-krb5-1.3.crypto.tar.gz.
-
-Instruction on how to extract the entire distribution follow.  These
-directions assume that you want to extract into a directory called
-DIST.
+The source distribution of Kerberos 5 comes in a gzipped tarfile,
+krb5-1.3.tar.gz.  Instructions on how to extract the entire
+distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	mkdir DIST
-	cd DIST
-	gtar zxpf krb5-1.3.src.tar.gz
-	gtar zxpf krb5-1.3.crypto.tar.gz
-	gtar zxpf krb5-1.3.doc.tar.gz
+	gtar zxpf krb5-1.3.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	mkdir DIST
-	cd DIST
-	gzcat krb5-1.3.src.tar.gz | tar xpf -
-	gzcat krb5-1.3.crypto.tar.gz | tar xpf -
-	gzcat krb5-1.3.doc.tar.gz | tar xpf -
+	gzcat krb5-1.3.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into DIST/krb5-1.3/src
-and the documentation into DIST/krb5-1.3/doc.
+Both of these methods will extract the sources into krb5-1.3/src and
+the documentation into krb5-1.3/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -138,6 +123,21 @@ Major changes listed by ticket ID
 
 * [1189, 1251] The KfM krb4 library source base has been merged.
 
+* [1377, 1442, 1443] The Microsoft set-password protocol has been
+  implemented.  (needs confirmation)  Thanks to Paul Nelson.
+
+* [1385, 1395, 1410] The krb4 protocol vulnerabilities
+  [MITKRB5-SA-2003-004] have been worked around.  Note that this will
+  disable krb4 cross-realm functionality, as well as krb4 triple-DES
+  functionality.  Please see doc/krb4-xrealm.txt for details of the
+  patch.
+
+* [1393] The xdrmem integer overflows [MITKRB5-SA-2003-003] have
+  been fixed.
+
+* [1397] The krb5_principal buffer bounds problems
+  [MITKRB5-SA-2003-005] have been fixed.  Thanks to Nalin Dahyabhai.
+
 Minor changes listed by ticket ID
 ---------------------------------
 
@@ -172,6 +172,11 @@ Minor changes listed by ticket ID
 
 * [771] .rconf files are excluded from the release now.
 
+* [772] LOG_AUTHPRIV syslog facility is now usable for logging on
+  systems that support it.
+
+* [844] krshd now syslogs using the LOG_AUTH facility.
+
 * [850] Berekely DB build is better integrated into the krb5 library
   build process.
 
@@ -188,6 +193,8 @@ Minor changes listed by ticket ID
 
 * [953] des3 no longer failing on Windows due to SHA1 implementation
   problems.
+
+* [970] A minor inconsistency in ccache.tex has been fixed.
 
 * [971] option parsing bugs rendered irrelevant by removal of unused
   gss mechanism.
@@ -210,6 +217,9 @@ Minor changes listed by ticket ID
 * [1063] Initial credentials acquisition failures related to client
   host having a large number of local network interfaces should be
   fixed now.
+
+* [1064] krb5_auth_con_genaddrs() no longer inappropriately returns -1
+  on some error cases.
 
 * [1065, 1225] krb5_get_init_creds_password() should properly warn about
   password expiration.
@@ -264,6 +274,9 @@ Minor changes listed by ticket ID
 * [1240] Windows calling conventions for krb5int_c_combine_keys() have
   been aligned.
 
+* [1242] Build system incompatibilities with Debian's chimeric
+  autoconf installation have been worked around.
+
 * [1256] Incorrect sizes passed to memset() in combine_keys()
   operations have been corrected.
 
@@ -287,18 +300,55 @@ Minor changes listed by ticket ID
 * [1311] Output from krb5-config no longer contains spurious uses of
   $(PURE).
 
+* [1324] The KDC no longer logs an inappropriate "no matching key"
+  error when an encrypted timestamp preauth password is incorrect.
+
+* [1342] gawk is no longer required for building kerbsrc.zip for the
+  Windows build.
+
 * [1346] gss_krb5_ccache_name() no longer attempts to return a pointer
   to freed memory.
 
+* [1352] GSS_C_PROT_READY_FLAG is no longer asserted inappropriately
+  during GSSAPI context establishment.
+
 * [1356] krb5_gss_accept_sec_context() no longer attempts to validate
   a null credential if one is passed in.
+
+* [1362] The "-a user" option to telnetd now does the right thing.
+  Thanks to Nathan Neulinger.
+
+* [1363] ksu no longer inappropriately syslogs to stderr.
 
 * [1357] krb__get_srvtab_name() no longer leaks memory.
 
 * [1373] Handling of SAM preauth no longer attempts to stuff a size_t
   into an unsigned int.
 
-[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]
+* [1387] BIND versions later than 8 now supported.
+
+* [1392] The getaddrinfo() wrapper should work better on AIX.
+
+* [1400] If DO_TIME is not set in the auth_context, and no replay
+  cache is available, no replay cache will be used.
+
+* [1406] libdb is no longer installed.  If you installed
+  krb5-1.3-alpha1, you should ensure that no spurious libdb is left in
+  your install tree.
+
+* [1412] ETYPE_INFO handling no longer goes into an infinite loop.
+
+* [1414] libtelnet is now built using the same library build framework
+  as the rest of the tree.
+
+* [1417] A minor memory leak in krb5_read_password() has been fixed.
+
+* [1419] A memory leak in asn1_decode_kdc_req_body() has been fixed.
+
+* [1439] krb5_free_pwd_sequences() now correctly frees the entire
+  sequence of elements.
+
+--[ DELETE BEFORE RELEASE ---changes to unreleased code, etc.--- ]--
 
 * [1054] KRB-CRED messages for RC4 are encrypted now.
 
@@ -311,6 +361,16 @@ Minor changes listed by ticket ID
 * [1223] asn1_decode_oid, asn1_encode_oid implemented
 
 * [1276] Generated dependencies handle --without-krb4 properly now.
+
+* [1384, 1413] Use of autoconf-2.52 in util/reconf will now cause a
+  warning.
+
+* [1388] DNS support is turned on in KfM.
+
+* [1391] Fix kadmind startup failure with krb4 vuln patch.
+
+* [1409] get_ad_tkt() now prompts for password if there are no tickets
+  (in KfM).
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
@@ -493,6 +553,9 @@ providing patches for numerous buffer overruns.
 
 Thanks to Christopher Thompson and Marcus Watts for discovering the
 ftpd security bug.
+
+Thanks to Paul Nelson of Thursby Software Systems for implementing the
+Microsoft set password protocol.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jay Berkenbilt, Richard Basch, Mitch

@@ -204,6 +204,8 @@ EXPORTS
 	krb5_sendauth
 	krb5_set_default_realm
 	krb5_set_default_tgs_enctypes
+krb5_set_password
+krb5_set_password_using_ccache
 	krb5_set_principal_realm
 	krb5_sname_to_principal
 	krb5_string_to_cksumtype

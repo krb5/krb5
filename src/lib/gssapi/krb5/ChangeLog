@@ -1,3 +1,14 @@
+2003-03-14  Sam Hartman  <hartmans@mit.edu>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Set
+	prot_ready here
+
+	* init_sec_context.c (krb5_gss_init_sec_context):  Set prot_ready
+	after context established
+
+	* gssapiP_krb5.h (KG_IMPLFLAGS): Don't claim prot_ready until the
+	context is established  because we don't currently support it.  
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * disp_status.c, gssapi_krb5.h, gssapiP_krb5.h: 
