@@ -1,0 +1,55 @@
+Intermediates = "$(BUILT_PRODUCTS_DIR)/Kerberos5.intermediates" ;
+IntermediateBuild = "$(Intermediates)/build" ;
+Sources = "$(SRCROOT)/../Sources" ;
+
+Reconf = "$(Sources)/util/reconf" ;
+Configure = "$(Sources)/configure" ;
+Makefile = "$(IntermediateBuild)/Makefile" ;
+
+#
+# Note: in this jam script we have separated the dependency tree from the 
+# actual scripts.  This is so that CVS checkouts trigger a rebuild but the jam
+# script doesn't need to know how the reconf and configure scripts work.
+#
+
+# Reconf <configure> : <configure.in>
+rule Reconf
+{
+    DEPENDS "$(1)" : "$(1).in" "$(Reconf)" ;
+}
+actions Reconf
+{
+    cd "$(Sources)" && /bin/sh "$(Reconf)" -f
+}
+
+# Configure <makefile> : <configure>
+rule Configure
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    Reconf "$(2)" : "$(2).in" ;
+    Clean.Remove clean "$(1:D)" ;
+}
+actions Configure
+{
+    mkdir -p "$(1:D)"
+    cd "$(1:D)" && /bin/sh "$(2)" --prefix=/usr CFLAGS="-fno-common" || rm -f "$(1)"
+}
+
+# Make <stamp file> <build dir> : <makefile>
+rule Make
+{
+    DEPENDS "$(1)" : "$(2)" ;
+    Configure "$(2)" : "$(Configure)" ;
+    Clean.Remove clean "$(1)" ;
+}
+actions Make
+{
+    mkdir -p "$(1:D)"
+    cd "$(1:D)" && make && touch "$(1)" && echo "### HAPPINESS ###"
+}
+
+Make "$(IntermediateBuild)/make.stamp" : "$(Makefile)" ;
+
+DEPENDS all : "$(IntermediateBuild)/make.stamp" ;
+DEPENDS install : all ;
+DEPENDS installhdrs : all ;
