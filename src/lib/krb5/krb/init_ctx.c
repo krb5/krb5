@@ -221,6 +221,8 @@ init_common (context, secure)
 	ctx->fcc_default_format = tmp + 0x0500;
 	ctx->scc_default_format = tmp + 0x0500;
 	ctx->prompt_types = 0;
+
+	ctx->udp_pref_limit = -1;
 	*context = ctx;
 	return 0;
 

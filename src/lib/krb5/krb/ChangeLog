@@ -1,3 +1,7 @@
+2002-08-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (init_common): Initialize udp_pref_limit field.
+
 2002-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* t_ser.c (ser_ccache_test): Remove references to STDIO ccaches.
