@@ -1,3 +1,8 @@
+2001-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* ktf_g_ent.c (krb5_ktfile_get_entry): Coerce enctype for now to
+	restore 1.0.x enctype similarity behavior.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* ktfile.h, ser_ktf.c: Make prototypes unconditional.
