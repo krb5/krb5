@@ -7,7 +7,8 @@
 	(Tprintf, Tperror): New macros.  Print stuff if TEST is defined,
 	otherwise be silent but cause same evaluations to happen.
 
-	* localaddr.c: Include fake-addrinfo.c, not fake-addrinfo.h.
+	* localaddr.c (TEST || DEBUG): Include fake-addrinfo.c, not
+	fake-addrinfo.h.
 
 2001-08-31  Ken Raeburn  <raeburn@mit.edu>
 
