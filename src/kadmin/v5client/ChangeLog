@@ -1,4 +1,12 @@
 
+Thu Jun 1 14:31:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kadmin5.c: Change the default admin instance name to "kadmin"
+	* kadmin5.c(kadmin_list): Compare principals to each of the supplied
+		regular expressions instead of only to the last one.  This
+		is slightly inefficient, but correct.
+	* kadmin5.M: Document the change in default instance name.
+
+
 Mon May 15 10:57:17 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kadmin5.M	- Change default principal name for kadmin5.
 

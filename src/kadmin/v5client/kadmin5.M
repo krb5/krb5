@@ -45,7 +45,7 @@ specifies the default realm.
 .B principal
 specifies a principal name to use instead of the default 
 .I user
-.B /kadmin5@realm.
+.B /kadmin@realm.
 .IP \-m
 specifies that multiple operations will be permitted for only one entry of the
 administrative principal's password.
@@ -73,7 +73,7 @@ Principals who may perform administrative operations are controlled by the
 .I kadmind5
 access control list.  The default administrative principal is
 .I user
-.B /kadmin5@realm.
+.B /kadmin@realm.
 .PP
 One command may be specified on the command line, or if no command is provided,
 an interactive command loop is entered for the administrator to enter commands.

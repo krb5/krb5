@@ -64,7 +64,7 @@ static char		*re_string = (char *) NULL;
 static const char *help_option		= "-help";
 static const char *verbose_option	= "-verbose";
 static const char *force_option		= "-force";
-static const char *kadmin_instance	= "kadmin5";
+static const char *kadmin_instance	= "kadmin";
 
 static const char *wr_ktab_type		= "WRFILE";
 
@@ -1046,20 +1046,7 @@ kadmin_list(argc, argv)
     requestname = argv[0];
     error = 0;
     verbose = 0;
-#if	HAVE_REGCOMP
-    if (match_error = regcomp(&match_exp, lprinc_all_regexp, REG_EXTENDED)) {
-	errmsg_size = regerror(match_error,
-			       &match_exp,
-			       match_errmsg,
-			       sizeof(match_errmsg));
-	com_err(requestname, 0, lprinc_regexp_fmt, lprinc_all_regexp,
-		match_errmsg);
-	return;
-    }
-#else	/* HAVE_REGCOMP */
-    re_comp(".*");	/* Accept everything */
-#endif	/* HAVE_REGCOMP */
-    
+
     for (i=1; i<argc; i++) {
 	if (!strcmp(argv[i], help_option)) {
 	    com_err(argv[0], 0, lprinc_usage_fmt, argv[0], verbose_option);
@@ -1070,32 +1057,14 @@ kadmin_list(argc, argv)
 	    verbose = 1;
 	    continue;
 	}
-#if	HAVE_REGCOMP
-	if (match_error = regcomp(&match_exp, argv[i], REG_EXTENDED)) {
-	    errmsg_size = regerror(match_error,
-				   &match_exp,
-				   match_errmsg,
-				   sizeof(match_errmsg));
-	    com_err(requestname, 0, lprinc_regexp_fmt, argv[i], match_errmsg);
-	    error = 1;
-	}
-	else
-	    continue;
-#else	/* HAVE_REGCOMP */
-	if (!(re_result = re_comp(argv[i]))) {
-	    continue;
-	}
-	else {
-	    com_err(argv[0], 0, lprinc_regexp_fmt, re_result);
-	    error = 1;
-	}
-#endif	/* HAVE_REGCOMP */
     }
+    
     if (!error) {
 	char 		*next;
 	char 		*nnext;
 	krb5_ui_4	valid;
 	krb5_db_entry	*dbentry;
+	int		match;
 
 	if (dbentry = (krb5_db_entry *) malloc(sizeof(krb5_db_entry))) {
 	    memset((char *) dbentry, 0, sizeof(*dbentry));
@@ -1116,50 +1085,71 @@ kadmin_list(argc, argv)
 			com_err(argv[0], 0, cant_get_fmt, lprinc_first_msg);
 			break;
 		    }
+		    match = 0;
+		    for (i=1; i<argc; i++) {
+			if (!strcmp(argv[i], verbose_option))
+			    continue;
 #if	HAVE_REGCOMP
-		    if (match_error = regexec(&match_exp,
-					      next,
-					      1,
-					      &match_match,
-					      0)) {
-			if (match_error != REG_NOMATCH) {
+			if (match_error = regcomp(&match_exp,
+						  argv[i],
+						  REG_EXTENDED)) {
 			    errmsg_size = regerror(match_error,
 						   &match_exp,
 						   match_errmsg,
 						   sizeof(match_errmsg));
 			    com_err(requestname, 0,
-				    lprinc_regsrch_fmt,
+				    lprinc_regexp_fmt,
 				    argv[i],
-				    next,
 				    match_errmsg);
 			    error = 1;
+			    break;
 			}
-		    }
-		    else {
-			/*
-			 * We have a match.  See if it matches the whole
-			 * name.
-			 */
-			if ((match_match.rm_so == 0) &&
-			    (match_match.rm_eo == strlen(next))) {
-			    if (verbose) {
-				kadmin_print_entry(next, valid, dbentry);
+			if (match_error = regexec(&match_exp,
+						  next,
+						  1,
+						  &match_match,
+						  0)) {
+			    if (match_error != REG_NOMATCH) {
+				errmsg_size = regerror(match_error,
+						       &match_exp,
+						       match_errmsg,
+						       sizeof(match_errmsg));
+				com_err(requestname, 0,
+					lprinc_regsrch_fmt,
+					argv[i],
+					next,
+					match_errmsg);
+				error = 1;
 			    }
-			    else {
-				printf("%s\n", next);
-			    }
-			}
-		    }
-#else	/* HAVE_REGCOMP */
-		    if (re_exec(next)) {
-			if (verbose) {
-			    kadmin_print_entry(next, valid, dbentry);
 			}
 			else {
-			    printf("%s\n", next);
+			    /*
+			     * We have a match.  See if it matches the whole
+			     * name.
+			     */
+			    if ((match_match.rm_so == 0) &&
+				(match_match.rm_eo == strlen(next))) {
+				match = 1;
+			    }
 			}
-		    }
+#else	/* HAVE_REGCOMP */
+			if (!(re_result = re_comp(argv[i]))) {
+			    com_err(argv[0], 0, lprinc_regexp_fmt, re_result);
+			    error = 1;
+			    break;
+			}
+			if (re_exec(next))
+			    match = 1;
 #endif	/* HAVE_REGCOMP */
+		    }
+		    if (error)
+			break;
+		    if (match || (argc == 1)) {
+			if (verbose)
+			    kadmin_print_entry(next, valid, dbentry);
+			else
+			    printf("%s\n", next);
+		    }
 		    free(next);
 		    next = nnext;
 		    krb5_db_free_principal(kcontext, dbentry, 1);
