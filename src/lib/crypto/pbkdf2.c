@@ -218,7 +218,10 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     char tmp[40];
     size_t blocksize, hashsize;
     krb5_error_code err;
+    krb5_keyblock k;
 
+    k = *key;
+    key = &k;
     if (debug_hmac)
 	printk(" test key", key);
     h->block_size(&blocksize);
