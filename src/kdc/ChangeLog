@@ -1,4 +1,10 @@
-Mon Aug 18 12:29:08 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+Mon Aug 18 12:29:08 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Initialize authtime to 0 so it
+        is set before potentially used in case the packet has an error.
+
+	* kdc_preauth.c (get_sam_edata): Remove unused variables.
 
 	* kdc_util.h: Added prototype for setup_server_realm().
 

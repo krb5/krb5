@@ -75,7 +75,7 @@ krb5_data **response;			/* filled in with a response packet */
     krb5_error_code retval = 0;
     int nprincs = 0;
     krb5_boolean more;
-    krb5_timestamp kdc_time, authtime;
+    krb5_timestamp kdc_time, authtime=0;
     krb5_keyblock *session_key = 0;
     krb5_timestamp until, rtime;
     krb5_keyblock encrypting_key;

@@ -611,7 +611,6 @@ get_sam_edata(context, request, client, server, pa_data)
     krb5_predicted_sam_response	psr;
     krb5_data *			scratch;
     int 			i = 0;
-    int 			start = 0;
     krb5_encrypt_block		eblock;
     krb5_keyblock encrypting_key;
     char response[9];
@@ -632,13 +631,11 @@ get_sam_edata(context, request, client, server, pa_data)
      */
 
     {
-      char *uname;
       int npr = 1;
       krb5_boolean more;
       krb5_db_entry assoc;
       krb5_key_data  *assoc_key;
       krb5_principal newp;
-      int newlen;
       int probeslot;
 
       sc.sam_type = 0;
