@@ -1,4 +1,4 @@
-2000-06-26  Ezra Peisach  <epeisach@zif.mit.edu>
+2000-06-26  Ezra Peisach  <epeisach@mit.edu>
 
 	* prof_init.c (profile_init_path): Use profile_filespec_t instead
 	     of char *. (change  provided by Nathan Neulinger <nneul@umr.edu>)
