@@ -81,6 +81,9 @@ SubdirLibraryRule($(OBJS))
 
 Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 
+includes::
+	@-mkdir $(EHDRDIR)
+
 CopyHeader(gssapi.h,$(EHDRDIR))
 CopyHeader(gssapi_generic.h,$(EHDRDIR))
 
