@@ -571,7 +571,7 @@ asn1_error_code asn1_encode_sequence_of_pa_data(buf, val, retlen)
   asn1_setup();
   int i;
 
-  if(val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
+  if (val == NULL) return ASN1_MISSING_FIELD;
 
   for(i=0; val[i] != NULL; i++);
   for(i--; i>=0; i--){

@@ -514,6 +514,8 @@ if(*(array) == NULL) return ENOMEM;\
       get_element(elt,decoder);\
       array_append(val,size,elt,type);\
     }\
+    if (*val == NULL)\
+	*val = (type **)malloc(sizeof(type*));\
     (*val)[size] = NULL;\
     end_sequence_of(buf);\
   }\

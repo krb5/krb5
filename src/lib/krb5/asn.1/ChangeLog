@@ -1,3 +1,18 @@
+Fri Aug 25 21:43:42 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5_encode.c (encode_krb5_padata_sequence): New function which
+		encodes a sequence of pa_data elements
+
+	* krb5_decode.c (decode_krb5_padata_sequence): New function which
+		decodes a sequence of pa_data elements.
+
+	* asn1_k_encode.c (asn1_encode_sequence_of_pa_data): Make it
+		possible to encode sequence of zero pa_data elements.
+
+	* asn1_k_decode.c (decode_array_body): Make it possible to decode
+		SEQUENCE OF encodinges of zero items (which is legal
+		according to ASN.1)
+
 Sat Jun 17 00:00:33 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* asn1_get.c (asn1_get_tag): Added change to allow for 

@@ -603,3 +603,15 @@ krb5_error_code decode_krb5_pwd_data(code, rep)
     end_structure (); }
   cleanup();
 }
+
+krb5_error_code decode_krb5_padata_sequence(code, rep)
+     const krb5_data * code;
+     krb5_pa_data ***rep;
+{
+  setup_buf_only();
+  *rep = 0;
+  retval = asn1_decode_sequence_of_pa_data(&buf,rep);
+  if(retval) return (krb5_error_code)retval;
+  cleanup();
+}
+

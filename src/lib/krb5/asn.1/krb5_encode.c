@@ -719,3 +719,17 @@ krb5_error_code encode_krb5_pwd_data(rep, code)
   krb5_makeseq();
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_padata_sequence(rep, code)
+     const krb5_pa_data ** rep;
+     krb5_data ** code;
+{
+  krb5_setup();
+
+  retval = asn1_encode_sequence_of_pa_data(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+
+  krb5_cleanup();
+}
+
