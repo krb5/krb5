@@ -1,3 +1,11 @@
+1998-05-24  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* copy_ccache.c (gss_krb5_copy_ccache): Fix bugs in copy_ccache.c,
+		which never compiled cleanly (since it wasn't added to the
+		Makefile correctly originally).
+
+	* k5seal.c (make_seal_token): Clean up -Wall flames
+
 1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* inq_cred.c (krb5_gss_inquire_cred): 

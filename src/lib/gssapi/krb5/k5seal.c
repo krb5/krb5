@@ -45,7 +45,7 @@ make_seal_token(context, enc_ed, seq_ed, seqnum, direction, text, token,
    char *data_ptr;
    krb5_checksum md5cksum;
    krb5_checksum cksum;
-   int conflen, tmsglen, tlen;
+   int conflen=0, tmsglen, tlen;
    unsigned char *t, *ptr;
 
    /* create the token buffer */
@@ -315,17 +315,17 @@ kg_seal(context, minor_status, context_handle, conf_req_flag, qop_req,
       return(GSS_S_NO_CONTEXT);
    }
 
-   if (code = krb5_timeofday(context, &now)) {
+   if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }
 
-   if (code = make_seal_token(context, &ctx->enc, &ctx->seq,
-			      &ctx->seq_send, ctx->initiate,
-			      input_message_buffer, output_message_buffer,
-			      ctx->signalg, ctx->cksum_size, ctx->sealalg,
-			      conf_req_flag, toktype, ctx->big_endian,
-			      ctx->mech_used)) {
+   if ((code = make_seal_token(context, &ctx->enc, &ctx->seq,
+			       &ctx->seq_send, ctx->initiate,
+			       input_message_buffer, output_message_buffer,
+			       ctx->signalg, ctx->cksum_size, ctx->sealalg,
+			       conf_req_flag, toktype, ctx->big_endian,
+			       ctx->mech_used))) {
       *minor_status = code;
       return(GSS_S_FAILURE);
    }

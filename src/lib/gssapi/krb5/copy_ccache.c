@@ -14,7 +14,7 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
    krb5_context context;
 
    /* validate the cred handle */
-   stat = krb5_gss_validate_cred(minor_status, creds);
+   stat = krb5_gss_validate_cred(minor_status, cred_handle);
    if (stat)
        return(stat);
    
@@ -32,7 +32,7 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
        *minor_status = code;
        return(GSS_S_FAILURE);
    }
-   while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &creds, &cursor)) 
+   while (!code && !krb5_cc_next_cred(context, k5creds->ccache, &cursor, &creds)) 
        code = krb5_cc_store_cred(context, out_ccache, &creds);
    krb5_cc_end_seq_get(context, k5creds->ccache, &cursor);
 
