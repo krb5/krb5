@@ -165,7 +165,8 @@ check-unix:: t_nfold t_encrypt t_prng t_hmac t_pkcs5
 	$(RUN_SETUP) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
 	$(RUN_SETUP) ./t_hmac
-	$(RUN_SETUP) ./t_pkcs5
+
+#	$(RUN_SETUP) ./t_pkcs5
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)

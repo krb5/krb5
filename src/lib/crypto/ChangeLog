@@ -1,3 +1,7 @@
+2002-10-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (check-unix): Don't run t_pkcs5.
+
 2002-10-24  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
 
 	* Makefile.in, combine_keys.c: New file to implement
