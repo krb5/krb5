@@ -1,3 +1,7 @@
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * gss_libinit.c: implement cleanup of mutexes, static vars, etc for Windows
+
 2004-07-29  Sam Hartman  <hartmans@mit.edu>
 
 	* libgssapi_krb5.exports: Add lucid context routines and gss_krb5_set_allowable_enctypes

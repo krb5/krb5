@@ -6,6 +6,11 @@
 	interfering with the global list of thread specific data
 	(used for library termination).
 
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * threads.c: implement cleanup of static vars on library
+                unload (for Windows)
+
 2004-12-15  Jeffrey Altman <jaltman@mit.edu>
 
         * Makefile.in: rename krb5support_32.dll to k5sprt32.dll

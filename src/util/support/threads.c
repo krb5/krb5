@@ -311,12 +311,15 @@ int k5_key_delete (k5_key_t keynum)
     /* XXX Memory leak here!
        Need to destroy the associated data for all threads.
        But watch for race conditions in case threads are going away too.  */
+    assert(destructors_set[keynum] == 1);
+    destructors_set[keynum] = 0;
+    destructors[keynum] = 0;
     LeaveCriticalSection(&key_lock);
 
 #else /* POSIX */
 
-    /* Not written yet.  */
-    abort();
+    /* Not written yet -- resource leak!  */
+    /* abort(); */
 
 #endif
 

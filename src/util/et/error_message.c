@@ -37,6 +37,7 @@ extern const int sys_nerr;
 /*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
 /*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
 static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+static int terminated = 0;	/* for debugging shlib fini sequence errors */
 
 MAKE_INIT_FUNCTION(com_err_initialize);
 MAKE_FINI_FUNCTION(com_err_terminate);
@@ -44,6 +45,7 @@ MAKE_FINI_FUNCTION(com_err_terminate);
 int com_err_initialize(void)
 {
     int err;
+    terminated = 0;
     err = k5_mutex_finish_init(&et_list_lock);
     if (err)
 	return err;
@@ -56,12 +58,13 @@ int com_err_initialize(void)
     return 0;
 }
 
-static int terminated = 0;	/* for debugging shlib fini sequence errors */
 void com_err_terminate(void)
 {
     struct dynamic_et_list *e, *enext;
     if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING())
 	return;
+    k5_key_delete(K5_KEY_COM_ERR);
+    k5_mutex_destroy(&com_err_hook_lock);
     k5_mutex_lock(&et_list_lock);
     for (e = et_list_dynamic; e; e = enext) {
 	enext = e->next;
