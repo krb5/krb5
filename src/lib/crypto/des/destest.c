@@ -26,6 +26,7 @@
 
 
 #include "k5-int.h"
+#include "des_int.h"
 #include "com_err.h"
 
 extern int errno;
@@ -71,7 +72,7 @@ char *argv[];
             com_err("des test", retval, "can't process key");
             exit(-1);
         }
-	mit_des_ecb_encrypt(input, output2,
+	mit_des_ecb_encrypt(&input, &output2,
 			    (struct mit_des_ks_struct *)eblock.priv,1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
@@ -86,7 +87,7 @@ char *argv[];
 	/*
 	 * Now try decrypting....
 	 */
-	mit_des_ecb_encrypt(output, output2,
+	mit_des_ecb_encrypt(&output, &output2,
 			    (struct mit_des_ks_struct *)eblock.priv,0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
