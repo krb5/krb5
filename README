@@ -159,6 +159,10 @@ Major changes listed by ticket ID
 * [1491] The client-side functionality of the krb524 library has been
   moved into the krb5 library.
 
+* [1551] The heuristic for locating the Kerberos v4 KDC by prepending
+  "kerberos." to the realm name if no config file or DNS information
+  is available has been removed.
+
 Minor changes listed by ticket ID
 ---------------------------------
 
