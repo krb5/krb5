@@ -26,7 +26,7 @@ LOCALINCLUDES=-I.. -I$(srcdir)/..
 CFLAGS = $(CCOPTS) $(AUTH_DEF) $(OTHERDEFS) $(DEFS) $(LOCALINCLUDES)
 ARPA_TELNET= $(srcdir)/../arpa/telnet.h
 
-SRCS=	commands.c main.c network.c ring.c \
+SRCS=	authenc.c commands.c main.c network.c ring.c \
 	sys_bsd.c telnet.c terminal.c \
 	utilities.c $(GETOPT_SRC)
 ALLHC=	$(SRCS) \

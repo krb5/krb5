@@ -1,3 +1,7 @@
+Mon Aug  7 19:39:36 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Add authenc.c to the SRCS list; authenc.o is
+		in the OBJS list, after all.
 
 Fri Jul 7 15:49:55 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove explicit library handling.
