@@ -1,3 +1,9 @@
+Mon Aug  7 19:36:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* reconf: If using the autoconf in the local tree, invoke it using
+		/bin/sh, so that it works even if autoconf has been
+		checked out from SCCS without the execute bit set.
+
 Wed Jul 26 15:39:53 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* configure.in (SHLIB_TAIL_COMP): Add pty to CONFIG_DIRS

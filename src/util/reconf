@@ -1,8 +1,10 @@
 #!/bin/sh
 
 force=
-autoreconf=./util/autoconf/autoreconf
+autoreconfprog=./util/autoconf/autoreconf
 verbose=false
+
+autoreconf="/bin/sh $autoreconfprog"
 
 usage="Usage: $0 [--force] [--verbose] [--help]"
 for option
@@ -20,7 +22,7 @@ do
 done
 
 
-if test ! -f $autoreconf ; then
+if test ! -f $autoreconfprog ; then
 	if autoreconf --version | grep -q "version 2.[123456789]" && \
 	   autoconf --version  | grep -q "version 2.[123456789]" && \
 	   autoheader --version | grep -q "version 2.[123456789]" ; then
