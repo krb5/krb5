@@ -14,6 +14,10 @@ SRCS= \
 	$(TYPESSRCS)	\
 	encode.c 	\
 	decode.c	\
+	decode_arp.c	\
+	decode_arq.c	\
+	encode_arp.c	\
+	encode_arq.c	\
 	adat2kadat.c	\
 	addr2kaddr.c	\
 	adr2kadr.c	\
@@ -69,6 +73,10 @@ OBJS= \
 	$(TYPESOBJS)	\
 	encode.o	\
 	decode.o	\
+	decode_arp.o	\
+	decode_arq.o	\
+	encode_arp.o	\
+	encode_arq.o	\
 	adat2kadat.o	\
 	addr2kaddr.o	\
 	adr2kadr.o	\
