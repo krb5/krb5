@@ -148,7 +148,7 @@ END {
 	print "" > outfile
 	print "extern struct error_table et_" table_name "_error_table;" > outfile
 	print "" > outfile
-	print "#ifdef unix" > outfile
+	print "#if !(defined(_MSDOS)||defined(_WIN32))" > outfile
 	print "/* for compatibility with older versions... */" > outfile
 	print "extern void initialize_" table_name "_error_table ();" > outfile
 	print "#define init_" table_name "_err_tbl initialize_" table_name "_error_table" > outfile
@@ -157,3 +157,4 @@ END {
 	print "#define initialize_" table_name "_error_table()" > outfile
 	print "#endif" > outfile
 }
+

@@ -76,7 +76,7 @@ KRB5_DLLIMP extern errcode_t KRB5_CALLCONV add_error_table
 KRB5_DLLIMP extern errcode_t KRB5_CALLCONV remove_error_table
 	ET_P((const struct error_table FAR *));
 
-#ifdef unix
+#if !(defined(_MSDOS)||defined(_WIN32))
 /*
  * The display routine should be application specific.  A global hook,
  * may cause inappropriate display procedures to be called between

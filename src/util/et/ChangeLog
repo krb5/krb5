@@ -1,3 +1,15 @@
+Sat Feb 22 02:22:01 1997  Sam Hartman  <hartmans@mit.edu>
+
+	* error_message.c: Remove #ifdef unix
+
+Sat Feb 22 02:18:47 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* et_h.awk (char_shift): Avoid #ifdef unix
+
+Sat Feb 22 02:04:20 1997  Sam Hartman  <hartmans@mit.edu>
+
+	* com_err.c: Remove #ifdef unix
+
 Sat Feb 22 00:34:05 1997  Sam Hartman  <hartmans@luminous.MIT.EDU>
 
 	* Makefile.in (LIBMAJOR):  Bump to 3 so that the krb5 lib is preferred to the NetBSD system library.

@@ -128,7 +128,7 @@ KRB5_DLLIMP void KRB5_CALLCONV_C com_err(whoami, code, fmt, va_alist)
 	va_end(ap);
 }
 
-#ifdef unix
+#if !(defined(_MSDOS)||defined(_WIN32))
 et_old_error_hook_func set_com_err_hook (new_proc)
 	et_old_error_hook_func new_proc;
 {

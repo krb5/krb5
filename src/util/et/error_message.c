@@ -39,7 +39,7 @@ extern const int sys_nerr;
 
 static char buffer[ET_EBUFSIZ];
 
-#ifndef unix
+#if defined(_MSDOS)||defined(_WIN32)
 static struct et_list * _et_list = (struct et_list *) NULL;
 #else
 /* Old interface compatibility */
