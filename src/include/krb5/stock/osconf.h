@@ -89,8 +89,8 @@
 #define RCTMPDIR	"@KRB5RCTMPDIR"	/* directory to store replay caches */
 
 #define KRB5_PATH_TTY	"/dev/tty"
-#define KRB5_PATH_LOGIN	"@EXEC_PREFIX/sbin/login.krb5"
-#define KRB5_PATH_RLOGIN "@EXEC_PREFIX/bin/rlogin"
+#define KRB5_PATH_LOGIN	"@SBINDIR/login.krb5"
+#define KRB5_PATH_RLOGIN "@BINDIR/rlogin"
 
 #define KRB5_ENV_CCNAME	"KRB5CCNAME"
 
