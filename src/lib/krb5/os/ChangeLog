@@ -1,4 +1,3 @@
-
 Tue Apr 25 21:58:23 1995  Chris Procenzano (proven@mit.edu)
 
 	* Makefile.in : Added source files mk_faddr.c and genaddrs.c.
@@ -11,6 +10,10 @@ Tue Apr 25 21:58:23 1995  Chris Procenzano (proven@mit.edu)
 	* gen_rname.c (krb5_gen_replay_name()) : Fixed to take any type of
 		krb5_address and generate a rcache name.
 	* os-proto.h (krb5_make_full_ipaddr()) : Removed prototype.
+
+Tue Apr 25 14:09:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* t_std_conf.c (main): Add declaration of optarg.
 
 Tue Apr 25 04:50:13 1995  Chris Procenzano (proven@mit.edu)
 

@@ -163,6 +163,7 @@ main(argc, argv)
 	int	c;
 	krb5_context	ctx;
 	krb5_error_code	retval;
+	extern char *optarg;
 
 	retval = krb5_init_context(&ctx);
 	if (retval) {
