@@ -114,10 +114,12 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     krb5_data		*pwdata;
 {
     krb5_boolean	pwret;
-    krb5_int32		num_keys, num_dkeys;
+    krb5_int32		num_keys, num_dkeys, tmpn;
     krb5_key_data	*key_list, *dkey_list, *kent, *tmp;
     krb5_key_salt_tuple	keysalt;
     krb5_error_code	kret;
+    krb5_key_data	*skey_list;
+    krb5_int16		nskeys;
     int			i;
 
     DPRINT(DEBUG_CALLS, debug_level, ("* passwd_check_opass_ok()\n"));
@@ -126,6 +128,10 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
     /* Initialize */
     num_keys = num_dkeys = 0;
     key_list = dkey_list = (krb5_key_data *) NULL;
+    nskeys = dbentp->n_key_data;
+    skey_list = dbentp->key_data;
+    dbentp->n_key_data = 0;
+    dbentp->key_data = (krb5_key_data *) NULL;
 
     /* Make key(s) using alleged old password */
     kret = key_string_to_keys(kcontext,
@@ -137,12 +143,12 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
 			      &key_list);
 
     /* Now decrypt database entries */
-    num_dkeys = dbentp->n_key_data;
+    num_dkeys = nskeys;
     if (!kret)
 	kret = key_decrypt_keys(kcontext,
 				dbentp,
 				&num_dkeys,
-				dbentp->key_data,
+				skey_list,
 				&dkey_list);
     if (kret)
 	goto cleanup;
@@ -151,7 +157,9 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
      * Compare decrypted keys.  If they differ, then we're wrong!
      */
     tmp = dbentp->key_data;
+    tmpn = dbentp->n_key_data;
     dbentp->key_data = dkey_list;
+    dbentp->n_key_data = num_dkeys;
     for (i=0; i<num_keys; i++) {
 	keysalt.ks_keytype = (krb5_keytype) key_list[i].key_data_type[0];
 	keysalt.ks_salttype = (krb5_int32) key_list[i].key_data_type[1];
@@ -166,6 +174,7 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
 	}
     }
     dbentp->key_data = tmp;
+    dbentp->n_key_data = tmpn;
 
  cleanup:
     if (kret)
@@ -174,6 +183,10 @@ passwd_check_opass_ok(kcontext, debug_level, princ, dbentp, pwdata)
 	key_free_key_data(key_list, num_keys);
     if (num_dkeys && dkey_list)
 	key_free_key_data(dkey_list, num_dkeys);
+    if (dbentp->key_data && dbentp->n_key_data)
+	key_free_key_data(dbentp->key_data, dbentp->n_key_data);
+    dbentp->key_data = skey_list;
+    dbentp->n_key_data = nskeys;
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X passwd_check_opass_ok() = %d\n", pwret));
     return(pwret);
@@ -192,15 +205,70 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 {
     krb5_error_code	kret;
     krb5_db_entry	entry2write;
+    int			nwrite;
+#ifdef	USE_KDB5_CPW
+    krb5_int32		n_keysalts;
+    krb5_key_salt_tuple	*keysalts;
+    char		*tmppw;
+#else	/* USE_KDB5_CPW */
     krb5_int32		num_keys;
     krb5_key_data	*key_list;
     krb5_tl_data	*pwchg;
     krb5_tl_mod_princ	modent;
-    int			nwrite;
     krb5_timestamp	now;
+#endif	/* USE_KDB5_CPW */
 
     DPRINT(DEBUG_CALLS, debug_level, ("* passwd_set_npass()\n"));
 
+#ifdef	USE_KDB5_CPW
+    keysalts = (krb5_key_salt_tuple *) NULL;
+    n_keysalts = 0;
+
+    /* Copy our database entry */
+    memcpy((char *) &entry2write, (char *) dbentp, sizeof(krb5_db_entry));
+
+    /*
+     * Zap stuff which we're not going to use.
+     *
+     * We're going to recreate the whole tl_data and key_data structures,
+     * so blast what we copied from above.
+     */
+    entry2write.tl_data = (krb5_tl_data *) NULL;
+    entry2write.n_tl_data = 0;
+    entry2write.key_data = (krb5_key_data *) NULL;
+    entry2write.n_key_data = 0;
+    entry2write.princ = (krb5_principal) NULL;
+
+    /*
+     * Generate the key/salt tuple list from our key list.
+     */
+    if (!(kret = krb5_copy_principal(kcontext,
+				     dbentp->princ,
+				     &entry2write.princ)) &&
+	!(kret = key_dbent_to_keysalts(dbentp, &n_keysalts, &keysalts))) {
+	/* Get scratch space for our password */
+	if (tmppw = (char *) malloc((size_t) (pwdata->length+1))) {
+	    memcpy(tmppw, pwdata->data, pwdata->length);
+	    tmppw[pwdata->length] = '\0';
+	    /*
+	     * Change the password.
+	     */
+	    kret = krb5_dbe_cpw(kcontext,
+				key_master_encblock(),
+				keysalts,
+				n_keysalts,
+				tmppw,
+				&entry2write);
+	    memset(tmppw, 0, pwdata->length);
+	    free(tmppw);
+	}
+	else
+	    kret = ENOMEM;
+	krb5_xfree(keysalts);
+    }
+    if (kret)
+	goto cleanup;
+#else	/* USE_KDB5_CPW */
     /* Initialize */
     num_keys = 0;
     key_list = (krb5_key_data *) NULL;
@@ -266,6 +334,7 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
 	kret = krb5_dbe_encode_mod_princ_data(kcontext, &modent, &entry2write);
 	krb5_free_principal(kcontext, modent.mod_princ);
     }
+#endif	/* USE_KDB5_CPW */
 
     /* Now write the entry */
     nwrite = 1;
@@ -278,8 +347,11 @@ passwd_set_npass(kcontext, debug_level, princ, dbentp, pwdata)
     (void) krb5_db_free_principal(kcontext, &entry2write, 1);
 
  cleanup:
+#ifndef	USE_KDB5_CPW
     if (num_keys && key_list)
 	key_free_key_data(key_list, num_keys);
+#endif	/* USE_KDB5_CPW */
+
     DPRINT(DEBUG_CALLS, debug_level,
 	   ("X passwd_set_npass() = %d\n", kret));
     return(kret);

@@ -308,6 +308,7 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
     krb5_boolean	is_pwchange;
 {
     krb5_error_code	kret = 0;
+#ifndef	USE_KDB5_CPW
     krb5_timestamp	now;
     krb5_tl_data	*pwchg, *def_pwchg;
     krb5_tl_data	*new, *def;
@@ -315,6 +316,7 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
     krb5_int32		num_keys, num_ekeys, num_rkeys;
     krb5_key_data	*key_list;
     krb5_key_data	*ekey_list;
+#endif	/* USE_KDB5_CPW */
     DPRINT(DEBUG_CALLS, debug_level, ("* admin_merge_dbentries()\n"));
 
     /*
@@ -323,11 +325,15 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
      * 	and that we don't have a password and the random-password option.
      */
     kret = EINVAL;
+#ifndef	USE_KDB5_CPW
     num_keys = num_ekeys = num_rkeys = 0;
     key_list = (krb5_key_data *) NULL;
     ekey_list = (krb5_key_data *) NULL;
+#endif	/* USE_KDB5_CPW */
     if (dbentp->princ &&
+#ifndef	USE_KDB5_CPW
 	!(kret = krb5_timeofday(kcontext, &now)) &&
+#endif	/* USE_KDB5_CPW */
 	(!password || ((valid & KRB5_ADM_M_RANDOMKEY) == 0))) {
 
 	/*
@@ -351,7 +357,9 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 	dbentp->last_failed = defaultp->last_failed;
 	dbentp->fail_auth_count = defaultp->fail_auth_count;
 	dbentp->len = defaultp->len;
+	kret = 0;
 
+#ifndef	USE_KDB5_CPW
 	/*
 	 * Now merge tagged data.  This is a little bit painful, hold on.
 	 * First see if we already have a last change block.  If so, then just
@@ -416,7 +424,6 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		krb5_free_principal(kcontext, modent.mod_princ);
 	    }
 	}
-
 	if (!kret) {
 	    /* See if this is a random key or not */
 	    if (password) {
@@ -496,12 +503,15 @@ admin_merge_dbentries(kcontext, debug_level, who, defaultp,
 		}
 	    }
 	}
+#endif	/* USE_KDB5_CPW */
     }
 
+#ifndef	USE_KDB5_CPW
     if (key_list)
 	key_free_key_data(key_list, num_keys);
     if (ekey_list)
 	key_free_key_data(ekey_list, num_ekeys);
+#endif	/* USE_KDB5_CPW */
     DPRINT(DEBUG_CALLS, debug_level, ("X admin_merge_dbentries()=%d\n", kret));
     return(kret);
 }
@@ -538,6 +548,10 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
     char		*new_password;
     krb5_int32		operation;
     const char		*op_msg;
+#ifdef	USE_KDB5_CPW
+    krb5_int32		n_keysalts;
+    krb5_key_salt_tuple	*keysalts;
+#endif	/* USE_KDB5_CPW */
 #ifdef	DEBUG
     char		*dbg_op_msg;
 #endif	/* DEBUG */
@@ -679,8 +693,73 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 							       valid_mask,
 							       &new_dbentry,
 							       pword_data.data,
-							       pwd_supplied)
-				  )) {
+							       pwd_supplied))
+#ifdef	USE_KDB5_CPW
+				&&
+				!(kret = key_dbent_to_keysalts(&new_dbentry,
+							       &n_keysalts,
+							       &keysalts))
+#endif	/* USE_KDB5_CPW */
+				) {
+#ifdef	USE_KDB5_CPW
+				/*
+				 * Determine if this is a random key or not.
+				 */
+				if ((valid_mask & KRB5_ADM_M_RANDOMKEY) ||
+				    (!pword_data.data && should_exist))	{
+				    /* Random key */
+				    /*
+				     * Determine if this is a change or a
+				     * create operation.
+				     */
+				    if (should_exist) {
+					new_dbentry.key_data =
+					    cur_dbentry.key_data;
+					new_dbentry.n_key_data =
+					    cur_dbentry.n_key_data;
+					cur_dbentry.key_data =
+					    (krb5_key_data *) NULL;
+					cur_dbentry.n_key_data = 0;
+					kret = krb5_dbe_crk(kcontext,
+							    key_master_encblock(),
+							    keysalts,
+							    n_keysalts,
+							    &new_dbentry);
+				    }
+				    else
+					kret = krb5_dbe_ark(kcontext,
+							    key_master_encblock(),
+							    keysalts,
+							    n_keysalts,
+							    &new_dbentry);
+				}
+				else {
+				    if (should_exist) {
+					new_dbentry.key_data =
+					    cur_dbentry.key_data;
+					new_dbentry.n_key_data =
+					    cur_dbentry.n_key_data;
+					cur_dbentry.key_data =
+					    (krb5_key_data *) NULL;
+					cur_dbentry.n_key_data = 0;
+					kret = krb5_dbe_cpw(kcontext,
+							    key_master_encblock(),
+							    keysalts,
+							    n_keysalts,
+							    pword_data.data,
+							    &new_dbentry);
+				    }
+				    else
+					kret = krb5_dbe_apw(kcontext,
+							    key_master_encblock(),
+							    keysalts,
+							    n_keysalts,
+							    pword_data.data,
+							    &new_dbentry);
+				}
+				krb5_xfree(keysalts);
+				if (!kret) {
+#endif	/* USE_KDB5_CPW */
 				int nument = 1;
 
 				/* Write the entry. */
@@ -706,6 +785,18 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 					    arglist[0].data,
 					    client_name);
 				}
+#ifdef	USE_KDB5_CPW
+			        }
+				else {
+				    /*
+				     * Couldn't use the apw/cpw/ark/crk
+				     */
+				    DPRINT(DEBUG_PROTO, debug_level,
+					   ("= password set failed for %s\n",
+					    dbg_op_msg));
+				    retval = KRB5_ADM_SYSTEM_ERROR;
+				}
+#endif	/* USE_KDB5_CPW */
 
 				/*
 				 * Clean up droppings from
@@ -746,12 +837,10 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 			       ("= argument list bad for %s\n", dbg_op_msg));
 			retval = KRB5_ADM_BAD_OPTION;
 		    }
-		    krb5_db_free_principal(kcontext,
-					   ((should_exist) ? 
-					    &new_dbentry : &cur_dbentry),
-					   1);
 		    if (should_exist)
-			principal = (krb5_principal) NULL;
+			krb5_db_free_principal(kcontext, &cur_dbentry, 1);
+		    krb5_db_free_principal(kcontext, &new_dbentry, 1);
+		    principal = (krb5_principal) NULL;
 		}
 		else {
 		    /* Database entry failed or yielded unexpected results */
@@ -906,11 +995,20 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 				orig_entry.princ = new_principal;
 
 				/* Update our stats */
-				if (!krb5_dbe_decode_mod_princ_data(kcontext,
-								    &orig_entry,
-								    &mprinc)) {
-				    krb5_free_principal(kcontext,
-							mprinc->mod_princ);
+				mprinc = (krb5_tl_mod_princ *) NULL;
+				(void) krb5_dbe_decode_mod_princ_data(kcontext,
+								      &orig_entry,
+								      &mprinc);
+				if (!mprinc) {
+				    mprinc = (krb5_tl_mod_princ *)
+					malloc(sizeof(krb5_tl_mod_princ));
+				    if (mprinc)
+					memset(mprinc, 0, sizeof(*mprinc));
+				}
+				if (mprinc) {
+				    if (mprinc->mod_princ)
+					krb5_free_principal(kcontext,
+							    mprinc->mod_princ);
 				    krb5_copy_principal(kcontext,
 							client,
 							&mprinc->mod_princ);
