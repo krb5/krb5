@@ -1,3 +1,11 @@
+1999-02-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k5-int.h: Add an entry to the os_context to store the default
+		ccache name.
+
+	* krb5.hin (krb5_cc_set_default_name): Add function prototype
+		which sets the defulat ccache name.
+	
 Thu Jan 21 15:23:28 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin: Fix realm iterator prototypes so that they use
