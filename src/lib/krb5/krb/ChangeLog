@@ -1,3 +1,8 @@
+2001-01-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* preauth.c: Don't use PROTOTYPE macro, just always use the
+	prototypes.
+
 2001-01-19  Tom Yu  <tlyu@mit.edu>
 
 	* preauth.c: Remove uses of KRB5_NPROTOTYPE() macro.

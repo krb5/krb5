@@ -121,20 +121,20 @@ static krb5_preauth_ops preauth_systems[] = {
 };
 
 static krb5_error_code find_pa_system
-    PROTOTYPE((krb5_preauthtype type, krb5_preauth_ops **Preauth_proc));
+    (krb5_preauthtype type, krb5_preauth_ops **Preauth_proc);
 
 /* some typedef's for the function args to make things look a bit cleaner */
 
-typedef krb5_error_code (*git_key_proc) PROTOTYPE((krb5_context,
-						   const krb5_enctype,
-						   krb5_data *,
-						   krb5_const_pointer,
-						   krb5_keyblock **));
+typedef krb5_error_code (*git_key_proc) (krb5_context,
+					 const krb5_enctype,
+					 krb5_data *,
+					 krb5_const_pointer,
+					 krb5_keyblock **);
 
-typedef krb5_error_code (*git_decrypt_proc) PROTOTYPE((krb5_context,
-						       const krb5_keyblock *,
-						       krb5_const_pointer,
-						       krb5_kdc_rep * ));
+typedef krb5_error_code (*git_decrypt_proc) (krb5_context,
+					     const krb5_keyblock *,
+					     krb5_const_pointer,
+					     krb5_kdc_rep *);
 
 krb5_error_code krb5_obtain_padata(context, preauth_to_use, key_proc,
 				   key_seed, creds, request)
