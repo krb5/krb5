@@ -54,7 +54,7 @@ typedef struct gss_ctx_id_desc {
 } *gss_ctx_id_t;
 
 /* structure for address */
-typedef struct gss_channel_bindings_desc {
+typedef struct gss_channel_bindings_struct {
     OM_uint32		initiator_addrtype;
     gss_buffer_desc	initiator_address;
     OM_uint32		acceptor_addrtype;
