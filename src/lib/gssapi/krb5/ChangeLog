@@ -1,3 +1,14 @@
+Tue Feb 27 17:53:22 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): Remove dead
+		code which used geteuid().
+
+	* Makefile.in (gssapi_err_krb5.$(OBJEXT)): Add Windows production
+		to add file to library.
+
+	* pname_to_uid.c: Don't try to compile pname_to_uid.c for MS-DOS
+		or Macintosh.
+
 Mon Feb 26 18:08:57 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* k5mech.c : do not declare kg_context static as it is declared in another file, and declared extern in a header.

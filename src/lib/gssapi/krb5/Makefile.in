@@ -23,6 +23,11 @@ ETHDRS= gssapi_err_krb5.h
 gssapi_err_krb5.$(OBJEXT): gssapi_err_krb5.c
 	$(CC) $(CFLAGS) -c $*.c
 @SHARED_RULE_LOCAL@
+##DOS!if defined(LIBNAME)
+##DOS!if "$(LIBCMD)"!="rem"
+##DOS	$(LIBCMD) /nologo $(LIBNAME) -+$@;
+##DOS!endif
+##DOS!endif
 
 gssapi_err_krb5.h: gssapi_err_krb5.et
 

@@ -11,7 +11,6 @@
 #include "../mechglue/mglueP.h"
 
 #include "gssapiP_krb5.h"
-
 /*
  * These are the extern declarations, one group per mechanism. They are
  * contained in the files named <mech>_gssd_extern_srvr.conf.

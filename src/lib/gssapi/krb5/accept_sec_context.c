@@ -23,7 +23,6 @@
 #include "gssapiP_krb5.h"
 #include "rsa-md5.h"
 #include <memory.h>
-#include <pwd.h>
 
 /* Decode, decrypt and store the forwarded creds in the local ccache. */
 static krb5_error_code
@@ -96,8 +95,6 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
    krb5_ticket * ticket = NULL;
    int option_id;
    krb5_data option;
-   char user_id [1024];
-   struct passwd *pw_entry;
    krb5_auth_context auth_context_cred = NULL;
 
 
@@ -269,9 +266,6 @@ krb5_gss_accept_sec_context(ct, minor_status, context_handle,
 
 		    TREAD_STR(ptr, ptr2, bigend);
 		    option.data = (char FAR *) ptr2;
-
-		    pw_entry = getpwuid(geteuid());
-		    strcpy(user_id, pw_entry->pw_name);
 
 		    /* get a temporary auth_context structure for the
 		       call to rd_and_store_for_creds() and clear its flags */

@@ -25,12 +25,14 @@
 
 #include "gssapiP_krb5.h"
 #include <gssapi/gssapi.h>
+#if !defined(_MSDOS) && !defined(_MACINTOSH)
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <string.h>
 #include <pwd.h>
 #include <sys/types.h>
+#endif	/* !_MSDOS && !_MACINTOSH */
 
 /* 
  * This function will probably get replaced with the gsscred stuff...
@@ -44,6 +46,9 @@ gss_OID name_type;
 gss_OID mech_type;
 uid_t * uid;
 {
+#if defined(_MSDOS) || defined(_MACINTOSH)
+	return (0);		/* failure */
+#else
 
 	struct passwd	*pw;
 	static unsigned char	krb5principalname[] =
@@ -85,4 +90,6 @@ uid_t * uid;
 	} else {
 		return(0);
 	}
+	
+#endif
 }
