@@ -51,4 +51,5 @@ error_code KADM5_BAD_SERVER_PARAMS, "Illegal configuration parameter for local K
 error_code KADM5_AUTH_LIST, "Operation requires ``list'' privilege"
 error_code KADM5_AUTH_CHANGEPW, "Operation requires ``change-password'' privilege"
 error_code KADM5_GSS_ERROR, "GSS-API (or Kerberos) error"
+error_code KADM5_BAD_TL_TYPE, "Programmer error!  Illegal tagged data list type"
 end
