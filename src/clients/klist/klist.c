@@ -649,48 +649,67 @@ show_credential(cred)
     krb5_free_unparsed_name(kcontext, sname);
 }
 
+#define NEED_SOCKETS
+#include "k5-int.h" /* for ss2sin etc */
+#define FAI_PREFIX klist
+#define FAI_IMPLEMENTATION
+#include "fake-addrinfo.h"
+
 void one_addr(a)
     krb5_address *a;
 {
-    struct hostent *h = 0;
+    struct sockaddr_storage ss;
+    int err;
+    char namebuf[NI_MAXHOST];
 
-    if ((a->addrtype == ADDRTYPE_INET && a->length == 4)
-#ifdef AF_INET6
-	|| (a->addrtype == ADDRTYPE_INET6 && a->length == 16)
-#endif
-	) {
-	int af = AF_INET;
-#ifdef AF_INET6
-	if (a->addrtype == ADDRTYPE_INET6)
-	    af = AF_INET6;
-#endif
-	if (!no_resolve) {
-	    h = gethostbyaddr(a->contents, (int) a->length, af);
-	    if (h) {
-		printf("%s", h->h_name);
-		return;
-	    }
-	}
-	if (no_resolve || !h) {
-#ifdef HAVE_INET_NTOP
-	    char buf[46];
-	    const char *name = inet_ntop(af, a->contents, buf, sizeof(buf));
-	    if (name) {
-		printf ("%s", name);
-		return;
-	    }
-#else
-	    if (a->addrtype == ADDRTYPE_INET) {
-		printf("%d.%d.%d.%d", a->contents[0], a->contents[1],
-		       a->contents[2], a->contents[3]);
-		return;
-	    }
-#endif
-	    printf("unprintable address (type %d)", a->addrtype);
+    memset (&ss, 0, sizeof (ss));
+
+    switch (a->addrtype) {
+    case ADDRTYPE_INET:
+	if (a->length != 4) {
+	broken:
+	    printf ("broken address (type %d length %d)",
+		    a->addrtype, a->length);
 	    return;
 	}
+	{
+	    struct sockaddr_in *sinp = ss2sin (&ss);
+	    sinp->sin_family = AF_INET;
+#ifdef HAVE_SA_LEN
+	    sinp->sin_len = sizeof (struct sockaddr_in);
+#endif
+	    memcpy (&sinp->sin_addr, a->contents, 4);
+	}
+	break;
+#ifdef KRB5_USE_INET6
+    case ADDRTYPE_INET6:
+	if (a->length != 16)
+	    goto broken;
+	{
+	    struct sockaddr_in6 *sin6p = ss2sin6 (&ss);
+	    sin6p->sin6_family = AF_INET6;
+#ifdef HAVE_SA_LEN
+	    sin6p->sin6_len = sizeof (struct sockaddr_in6);
+#endif
+	    memcpy (&sin6p->sin6_addr, a->contents, 16);
+	}
+	break;
+#endif
+    default:
+	printf ("unknown addrtype %d", a->addrtype);
+	return;
     }
-    printf("unknown addr type %d", a->addrtype);
+
+    namebuf[0] = 0;
+    err = getnameinfo (ss2sa (&ss), socklen (ss2sa (&ss)),
+		       namebuf, sizeof (namebuf), 0, 0,
+		       no_resolve ? NI_NUMERICHOST : 0);
+    if (err) {
+	printf ("unprintable address (type %d, error %d %s)", a->addrtype, err,
+		gai_strerror (err));
+	return;
+    }
+    printf ("%s", namebuf);
 }
 
 void
