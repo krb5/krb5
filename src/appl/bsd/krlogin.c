@@ -1127,7 +1127,10 @@ jmp_buf	rcvtop;
 krb5_sigtype
   oob()
 {
-    int out = FWRITE, atmark, n;
+#ifndef POSIX_TERMIOS
+    int out = FWRITE;
+#endif
+    int atmark, n;
     int rcvd = 0;
     char waste[BUFSIZ], mark;
 #ifdef POSIX_TERMIOS

@@ -1,3 +1,7 @@
+Sun Aug  7 04:43:24 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* krlogin.c (oob): FWRITE (and out) not needed w/POSIX_TERMIOS
+
 Fri Aug  5 18:47:00 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* configure.in: test for sigprocmask and sigset_t to set POSIX_SIGNALS.
