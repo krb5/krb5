@@ -1,5 +1,9 @@
 2004-04-26  Ken Raeburn  <raeburn@mit.edu>
 
+	* lib.in (PARSE_OBJLISTS): New variable.
+	(lib$(LIB)$(STLIBEXT), lib$(LIB)$(SHLIBVEXT)): Use it.
+	(lib$(LIB)$(PFLIBEXT)): Use it.
+
 	* shlib.conf (INIT_FINI_PREP): New variable.  Default to a no-op,
 	but let each platform set setup routines to process
 	initialization and finalization options for the default

@@ -29,22 +29,19 @@ PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
 
 dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=.PF): all-recurse
 
+# Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
+PARSE_OBJLISTS= set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
+
 lib$(LIB)$(STLIBEXT): $(STOBJLISTS)
 	$(RM) $@
 	@echo "building static $(LIB) library"
-	@dirs=`echo $(STOBJLISTS) | \
-		sed -e 's%/OBJS.ST%%g' -e 's%OBJS.ST%.%'`; \
-		$(AR) cq $@ `for d in $$dirs; do \
-			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
-				$$d/OBJS.ST; done`
+	set -x; objlist=`$(PARSE_OBJLISTS) $(STOBJLISTS)` && $(AR) cq $@ $$objlist
 	$(RANLIB) $@
 
 lib$(LIB)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
 	@echo "building shared $(LIB) library ($(LIBMAJOR).$(LIBMINOR))"
-	@objlist=`set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS.SH$$//; s/^/ /; s/ $$//; s/ / $$e/g;' $(SHOBJLISTS)` && \
-		set -x && \
-		$(MAKE_SHLIB_COMMAND)
+	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
 
 lib$(LIB)$(SHLIBSEXT): lib$(LIB)$(SHLIBVEXT)
 	$(RM) $@
@@ -56,11 +53,7 @@ lib$(LIB)$(SHLIBEXT): lib$(LIB)$(SHLIBVEXT)
 lib$(LIB)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
 	@echo "building profiled $(LIB) library"
-	@dirs=`echo $(PFOBJLISTS) | \
-		sed -e 's%/OBJS.PF%%g' -e 's%OBJS.PF%.%'`; \
-		$(AR) cq $@ `for d in $$dirs; do \
-			sed -e '/^$$/d' -e "s%^%$$d/%" -e "s% % $$d/%g" \
-				$$d/OBJS.PF; done`
+	set -x; objlist=`$(PARSE_OBJLISTS) $(PFOBJLISTS)` && $(AR) cq $@ $$objlist
 	$(RANLIB) $@
 
 $(TOPLIBD)/lib$(LIB)$(STLIBEXT): lib$(LIB)$(STLIBEXT)
