@@ -1072,6 +1072,14 @@ fi],
 	CC_LINK="$CC_LINK_STATIC"
 )dnl
 
+if test -n "$EXTRA_LIB_TARGETS"; then
+  LIBLIST="$LIBLIST $EXTRA_LIB_TARGETS"
+fi
+LIBLINKS="$LIBLIST $EXTRA_LIBLINK_TARGETS"
+LIBINSTLIST="$LIBINSTLIST $EXTRA_LIBINST_TARGETS"
+AC_SUBST(EXTRA_CLEAN_TARGETS)
+AC_SUBST(EXTRA_CLEAN_LINKS)
+
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
 fi
@@ -1105,7 +1113,8 @@ AC_DEFUN(KRB5_LIB_PARAMS,
 krb5_cv_host=$host])
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([V5_SET_TOPDIR])
-. $ac_topdir/config/shlib.conf])
+. $ac_topdir/config/shlib.conf
+AC_SUBST(LIB_LINK_OPT)])
 dnl
 dnl The following was written by jhawk@mit.edu
 dnl

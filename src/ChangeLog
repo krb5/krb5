@@ -1,3 +1,10 @@
+2000-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_AUX): Fold in values of EXTRA_LIB_TARGETS,
+	EXTRA_LIBLINK_TARGETS, EXTRA_LIBINST_TARGETS set in shlib.conf.
+	Substitute EXTRA_CLEAN_TARGETS and EXTRA_CLEAN_LINKS.
+	(KRB5_LIB_PARAMS): Substitute LIB_LINK_OPT.
+
 2000-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (KRB5_AC_CHECK_INET6): Require "struct
