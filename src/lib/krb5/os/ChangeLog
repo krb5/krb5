@@ -1,3 +1,12 @@
+Sat Feb 17 00:05:38 1996  Theodore Y. Ts'o  <tytso@pao.MIT.EDU>
+
+	* def_realm.c (krb5_get_default_realm): If the configuration file
+		does not exist (context->profile == NULL) return
+		KRB5_CONFIG_CANTOPEN; if the default realm is not defined
+		in the configuration file, return an error message saying
+		so.   These changes just make the diagnostic error
+		messages more clear.
+
 Thu Jan 11 18:32:54 1996  Ezra Peisach  (epeisach@paris)
 
 	* Makefile.in (check-unix): Ultrix test does not support -x.
