@@ -32,6 +32,7 @@ static char rcsid_do_as_req_c[] =
 
 #include <syslog.h>
 #ifdef KRB5_USE_INET
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #endif
 
