@@ -64,7 +64,8 @@
 				 ACL_MODIFY	| \
 				 ACL_CHANGEPW	| \
 				 ACL_INQUIRE	| \
-				 ACL_LIST)
+				 ACL_LIST	| \
+				 ACL_SETKEY)
 
 krb5_error_code acl_init
 	KRB5_PROTOTYPE((krb5_context,

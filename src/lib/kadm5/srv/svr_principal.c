@@ -1319,7 +1319,7 @@ kadm5_setv4key_principal(void *server_handle,
 					  &master_encblock,
 					  keyblock, &keysalt,
 					  kvno + 1,
-					  &kdb.key_data[i])) {
+					  kdb.key_data)) {
 	goto done;
     }
 
