@@ -1,0 +1,4 @@
+1999-06-13  Geoffrey King  <gjking@mit.edu>
+
+	* Initial checkin of ghudson's code to implement the SRVTAB keytab
+	type, which can read a krb4 srvtab.

@@ -28,15 +28,16 @@ ChangeLog
 Makefile.in
 configure
 configure.in
-db
-file
-srvtab
-ktadd.c
-ktbase.c
-ktdefault.c
-ktfr_entry.c
-ktremove.c
-read_servi.c
+kts_close.c
+kts_endget.c
+kts_g_ent.c
+kts_g_name.c
+kts_next.c
+kts_ops.c
+kts_resolv.c
+kts_ssget.c
+kts_util.c
+ktsrvtab.h
 
 Things-to-lose:
 

@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/krb5/keytab
 mydir=keytab
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-LOCAL_SUBDIRS = file
+LOCAL_SUBDIRS = file srvtab
 
 CFLAGS = $(CCOPTS) $(DEFS)
 
@@ -11,7 +11,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
 
-MAC_SUBDIRS = file
+MAC_SUBDIRS = file srvtab
 
 STLIBOBJS= \
 	ktadd.o		\
@@ -39,10 +39,13 @@ SRCS=	\
 
 all-windows:: subdirs $(OBJFILE)
 
-##DOSsubdirs:: file\$(OUTPRE)file.lst
+##DOSsubdirs:: file\$(OUTPRE)file.lst srvtab\$(OUTPRE)srvtab.lst
 ##DOSfile\$(OUTPRE)file.lst::
 ##DOS	cd file
 ##DOS	@echo Making in krb5\keytab\file
+##DOS	$(MAKE) -$(MFLAGS)
+##DOS	cd ..\srvtab
+##DOS	@echo Making in krb5\keytab\srvtab
 ##DOS	$(MAKE) -$(MFLAGS)
 ##DOS	cd ..
 

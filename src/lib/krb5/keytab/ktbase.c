@@ -26,13 +26,23 @@
 
 #include "k5-int.h"
 
-struct krb5_kt_typelist
- {
-  krb5_kt_ops *ops;
-  struct krb5_kt_typelist *next;
- };
-static struct krb5_kt_typelist krb5_kt_typelist_dfl = { &krb5_kt_dfl_ops, 0 };
-static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_dfl;
+extern krb5_kt_ops krb5_ktf_ops;
+extern krb5_kt_ops krb5_kts_ops;
+
+struct krb5_kt_typelist {
+    krb5_kt_ops *ops;
+    struct krb5_kt_typelist *next;
+};
+static struct krb5_kt_typelist krb5_kt_typelist_file  = {
+    &krb5_ktf_ops,
+    0
+};
+static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
+    &krb5_kts_ops,
+    &krb5_kt_typelist_file
+};
+static struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
+
 
 /*
  * Register a new key table type

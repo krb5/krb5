@@ -1,0 +1,52 @@
+thisconfigdir=./../..
+myfulldir=lib/krb5/keytab/srvtab
+mydir=keytab/srvtab
+BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)$(S)$(U)
+
+CFLAGS = $(CCOPTS) $(DEFS)
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=keytab\srvtab
+##DOS##OBJFILE=$(OUTPRE)file.lst
+##WIN16##LIBNAME=..\..\krb5.lib
+
+STLIBOBJS= \
+	kts_close.o	\
+	kts_endget.o	\
+	kts_g_ent.o	\
+	kts_g_name.o	\
+	kts_next.o	\
+	kts_ops.o	\
+	kts_resolv.o	\
+	kts_ssget.o	\
+	kts_util.o
+
+OBJS=	\
+	$(OUTPRE)kts_close.$(OBJEXT)	\
+	$(OUTPRE)kts_endget.$(OBJEXT)	\
+	$(OUTPRE)kts_g_ent.$(OBJEXT)	\
+	$(OUTPRE)kts_g_name.$(OBJEXT)	\
+	$(OUTPRE)kts_next.$(OBJEXT)	\
+	$(OUTPRE)kts_ops.$(OBJEXT)	\
+	$(OUTPRE)kts_resolv.$(OBJEXT)	\
+	$(OUTPRE)kts_ssget.$(OBJEXT)	\
+	$(OUTPRE)kts_util.$(OBJEXT)
+
+
+SRCS=	\
+	$(srcdir)/kts_close.c	\
+	$(srcdir)/kts_endget.c	\
+	$(srcdir)/kts_g_ent.c	\
+	$(srcdir)/kts_g_name.c	\
+	$(srcdir)/kts_next.c	\
+	$(srcdir)/kts_ops.c	\
+	$(srcdir)/kts_resolv.c	\
+	$(srcdir)/kts_ssget.c	\
+	$(srcdir)/kts_util.c
+
+all-windows:: subdirs $(OBJFILE)
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
