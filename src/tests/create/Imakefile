@@ -8,8 +8,6 @@
 #  For copying and distribution information, please see the file
 #  <krb5/copyright.h>.
 # 
-#TOP=/afs/net/project/krb5/@sys
-TOP=/mit/krb5/build/@sys
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
