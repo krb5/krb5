@@ -1,3 +1,9 @@
+Mon Jun 24 09:45:04 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* bld_princ.c (krb5_build_principal_va): Change const to
+ 		krb5_const, so that it works on compilers that don't
+ 		support const.
+
 Mon Jun 17 20:23:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* str_conv.c (krb5_string_to_timestamp): Ensure that all fields of

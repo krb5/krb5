@@ -38,7 +38,7 @@ krb5_build_principal_va(context, princ, rlen, realm, ap)
     krb5_context context;
     krb5_principal princ;
     int rlen;
-    const char *realm;
+    krb5_const char *realm;
     va_list ap;
 {
     register int i, count = 0;
