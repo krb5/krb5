@@ -1,3 +1,11 @@
+2002-11-07  Ezra Peisach  <epeisach@bu.edu>
+
+	* conv_princ.c (strnchr): Make length argument unsigned int.
+
+	* preauth2.c: Add parentheses around assignment used as truth
+	value. Cleanup unused variable.
+
+
 2002-10-30  Tom Yu  <tlyu@mit.edu>
 
 	* chk_trans.c (krb5_check_transited_list): Style nit: check

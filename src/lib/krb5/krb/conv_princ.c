@@ -119,7 +119,7 @@ static const struct krb_convert sconv_list[] = {
  * char *strnchr(s, c, n)
  *   char *s;
  *   char c;
- *   int n;
+ *   unsigned int n;
  *
  * returns a pointer to the first occurrence of character c in the
  * string s, or a NULL pointer if c does not occur in in the string;
@@ -128,7 +128,8 @@ static const struct krb_convert sconv_list[] = {
  * This falls in the "should have been in the ANSI C library"
  * category. :-)
  */
-static char *strnchr(register char *s, register char c, register int n)
+static char *strnchr(register char *s, register char c, 
+		     register unsigned int n)
 {
      if (n < 1) 
 	  return 0;

@@ -282,8 +282,8 @@ krb5_error_code pa_sam(krb5_context context,
 	if (etype && *etype == 0)
 	   *etype = ENCTYPE_DES_CBC_CRC;
 
-	if (ret = (gak_fct)(context, request->client, *etype, prompter,
-			prompter_data, salt, as_key, gak_data))
+	if ((ret = (gak_fct)(context, request->client, *etype, prompter,
+			prompter_data, salt, as_key, gak_data)))
 	   return(ret);
     }
     sprintf(name, "%.*s",
@@ -501,7 +501,7 @@ krb5_error_code pa_sam_2(krb5_context context,
    tmp_data.length = in_padata->length;
    tmp_data.data = (char *)in_padata->contents;
 
-   if (retval = decode_krb5_sam_challenge_2(&tmp_data, &sc2))
+   if ((retval = decode_krb5_sam_challenge_2(&tmp_data, &sc2)))
 	return(retval);
 
    retval = decode_krb5_sam_challenge_2_body(&sc2->sam_challenge_2_body, &sc2b);
@@ -573,8 +573,8 @@ krb5_error_code pa_sam_2(krb5_context context,
    prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
    krb5int_set_prompt_types(context, &prompt_type);
 
-   if (retval = ((*prompter)(context, prompter_data, name,
-				banner, 1, &kprompt))) {
+   if ((retval = ((*prompter)(context, prompter_data, name,
+				banner, 1, &kprompt)))) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
 	krb5int_set_prompt_types(context, 0);
@@ -585,7 +585,8 @@ krb5_error_code pa_sam_2(krb5_context context,
 
    /* Generate salt used by string_to_key() */
    if ((salt->length == -1) && (salt->data == NULL)) {
-	if (retval = krb5_principal2salt(context, request->client, &defsalt)) {
+	if ((retval = 
+	     krb5_principal2salt(context, request->client, &defsalt))) {
 	   krb5_free_sam_challenge_2(context, sc2);
 	   krb5_free_sam_challenge_2_body(context, sc2b);
 	   return(retval);
@@ -598,7 +599,6 @@ krb5_error_code pa_sam_2(krb5_context context,
    /* Get encryption key to be used for checksum and sam_response */
    if (!(sc2b->sam_flags & KRB5_SAM_USE_SAD_AS_KEY)) {
 	/* as_key = string_to_key(password) */
-	int i;
 
 	if (as_key->length) {
 	   krb5_free_keyblock_contents(context, as_key);
