@@ -94,7 +94,7 @@ krb5_error_code krb5_gen_portaddr
 	       krb5_const_pointer,
 	       krb5_address **));
 krb5_error_code krb5_create_secure_file
-	PROTOTYPE((const char const * pathname));
+	PROTOTYPE((const char * pathname));
 krb5_error_code krb5_sync_disk_file
 	PROTOTYPE((FILE *fp));
 
