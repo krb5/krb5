@@ -1,3 +1,10 @@
+Thu Mar 16 21:23:03 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Remove, conflicts with pre.in.
+	(all):  Remove all-$(WHAT) stuff.
+	(t_mddriver):  Make it build on Mac.
+	(check):  Use $(EXEEXT).
+
 Tue Mar 14 17:24:57 1995 Keith Vetter (keithv@fusion.com)
 
 	* md5crypto.c: removed method for DLL data since everything's
