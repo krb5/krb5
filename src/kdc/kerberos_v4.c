@@ -392,7 +392,14 @@ kerb_get_principal(name, inst, principal, maxn, more)
 			       ENCTYPE_DES_CBC_CRC,
 			       KRB5_KDB_SALTTYPE_V4,
 			       -1,
-			       &pkey)) {
+			       &pkey) &&
+	krb5_dbe_find_enctype(kdc_context,
+			       &entries,
+			       ENCTYPE_DES_CBC_CRC,
+			       -1,
+			       -1,
+			       &pkey))
+    {
 	lt = klog(L_KRB_PERR, "KDC V4: principal %s.%s isn't V4 compatible",
 		  name, inst);
 	krb5_db_free_principal(kdc_context, &entries, nprinc);
