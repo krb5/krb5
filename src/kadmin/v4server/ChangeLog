@@ -1,3 +1,7 @@
+2001-07-09  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin_server.c: Provide prototype for do_child and declare static.
+
 2001-07-01  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_server.h: Add prototypes for missing acl_ functions.

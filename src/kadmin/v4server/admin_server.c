@@ -75,6 +75,7 @@ static void cleanexit(int);
 static int kadm_listen(void);
 static void process_client(int, struct sockaddr_in *);
 static void kill_children(void);
+static krb5_sigtype do_child(int);
 
 
 /* close the system log file */
@@ -291,7 +292,6 @@ kadm_listen()
     struct sockaddr_in peer;
     int addrlen;
     int pid;
-    krb5_sigtype do_child();
 #ifdef POSIX_SIGNALS
     struct sigaction new_act;
 
@@ -571,7 +571,7 @@ static void process_client(fd, who)
     /*NOTREACHED*/
 }
 
-krb5_sigtype
+static krb5_sigtype
 do_child(sig)
 	int sig;
 {
