@@ -610,7 +610,7 @@ define(V5_AC_OUTPUT_MAKEFILE,
 dnl OPTIMIZE THIS FOR COMMON CASE!!
 filelist=""
 for x in $ac_v5_makefile_dirs; do
-  filelist="$filelist $x/Makefile.tmp:$x/Makefile.in $x/pre.tmp:$ac_prepend $x/post.tmp:$ac_postpend"
+  filelist="$filelist $x/Makefile.tmp:$ac_prepend+$x/Makefile.in+$ac_postpend"
 done
 AC_OUTPUT($filelist,
 [EOF
@@ -668,12 +668,12 @@ changequote([,])dnl
 	`
     test "$s" = "" && s=.
     echo creating $d/Makefile
-    cat - $d/pre.tmp $d/Makefile.tmp $d/post.tmp append.tmp > $d/Makefile <<EOX
+    cat - $d/Makefile.tmp append.tmp > $d/Makefile <<EOX
 thisconfigdir=$x
 SRCTOP=$s
 BUILDTOP=$x$ac_reltopdir
 EOX
-    rm  $d/pre.tmp $d/Makefile.tmp $d/post.tmp
+    rm  $d/Makefile.tmp
 # sed -f $CONF_FRAGDIR/mac-mf.sed < Makefile > MakeFile
   fi
 done
