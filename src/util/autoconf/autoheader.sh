@@ -1,6 +1,6 @@
-#! /bin/sh
+#! @SHELL@
 # autoheader -- create `config.h.in' from `configure.in'
-# Copyright (C) 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1996, 1998 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -239,6 +239,10 @@ if test -n "$libs"; then
 /* Define if you have the ${lib} library (-l${lib}).  */
 #undef HAVE_LIB${sym}"
   done
+fi
+
+if test -n "$verbatim"; then
+  echo "$verbatim"
 fi
 
 # Handle the case where @BOTTOM@ is the first line of acconfig.h.

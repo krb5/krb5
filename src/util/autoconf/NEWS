@@ -1,3 +1,34 @@
+Major changes in release 2.13:
+
+* Support for building on Win32 systems where the only available C or
+  C++ compiler is the Microsoft Visual C++ command line compiler
+  (`cl').  Additional support for building on Win32 systems which are
+  using the Cygwin or Mingw32 environments.
+* Support for alternative object file and executable file extensions.
+  On Win32, for example, these are .obj and .exe. These are discovered
+  using AC_OBJEXT and AC_EXEEXT, which substitute @OBJEXT@ and
+  @EXEEXT@ in the output, respectively.
+* New macros: AC_CACHE_LOAD, AC_CACHE_SAVE, AC_FUNC_SELECT_ARGTYPES,
+  AC_VALIDATE_CACHED_SYSTEM_TUPLE, AC_SEARCH_LIBS, AC_TRY_LINK_FUNC,
+  AC_C_STRINGIZE, AC_CHECK_FILE(S), AC_PROG_F77 (and friends).
+* AC_DEFINE now has an optional third argument for a description to be
+  placed in the config header input file (e.g. config.h.in).
+* The C++ code fragment compiled for the C++ compiler test had to be
+  improved to include an explicit return type for main(). This was
+  causing failures on systems using recent versions of the EGCS C++
+  compiler.
+* Fixed an important bug in AC_CHECK_TYPE that would cause a configure
+  script to report that `sometype_t' was present when only `type_t'
+  was defined.
+* Merge of the FSF version of config.guess and config.sub to modernise
+  these scripts. Add support for a few new hosts in config.guess.
+  Incorporate latest versions of install-sh, mkinstalldirs and
+  texinfo.tex from the FSF. 
+* autoreconf is capable of running automake if necessary (and
+  applicable).
+* Support for Fortran 77. See the Texinfo documentation for details.
+* Bug fixes and workarounds for quirky bugs in vendor utilities.
+
 Major changes in release 2.12:
 
 * AC_OUTPUT and AC_CONFIG_HEADER can create output files by

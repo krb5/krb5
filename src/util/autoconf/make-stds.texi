@@ -209,11 +209,12 @@ don't need to replace them with other programs.
 Each program-name variable should come with an options variable that is
 used to supply options to the program.  Append @samp{FLAGS} to the
 program-name variable name to get the options variable name---for
-example, @code{BISONFLAGS}.  (The name @code{CFLAGS} is an exception to
-this rule, but we keep it because it is standard.)  Use @code{CPPFLAGS}
-in any compilation command that runs the preprocessor, and use
-@code{LDFLAGS} in any compilation command that does linking as well as
-in any direct use of @code{ld}.
+example, @code{BISONFLAGS}.  (The names @code{CFLAGS} for the C
+compiler, @code{YFLAGS} for yacc, and @code{LFLAGS} for lex, are
+exceptions to this rule, but we keep them because they are standard.)
+Use @code{CPPFLAGS} in any compilation command that runs the
+preprocessor, and use @code{LDFLAGS} in any compilation command that
+does linking as well as in any direct use of @code{ld}.
 
 If there are C compiler options that @emph{must} be used for proper
 compilation of certain files, do not include them in @code{CFLAGS}.
@@ -238,6 +239,9 @@ in the default value of @code{CFLAGS} as well.
 Put @code{CFLAGS} last in the compilation command, after other variables
 containing compiler options, so the user can use @code{CFLAGS} to
 override the others.
+
+@code{CFLAGS} should be used in every invocation of the C compiler,
+both those which do compilation and those which do linking.
 
 Every Makefile should define the variable @code{INSTALL}, which is the
 basic command for installing a file into the system.
@@ -355,14 +359,11 @@ files.  This directory should normally be @file{/usr/local/etc}, but
 write it as @file{$(prefix)/etc}.
 (If you are using Autoconf, write it as @samp{@@sysconfdir@@}.)
 
-@c rewritten to avoid overfull hbox --tower
-Do not install executables
-@c here
-in this directory (they probably
-belong in @file{$(libexecdir)} or @file{$(sbindir)}).  Also do not
-install files that are modified in the normal course of their use
-(programs whose purpose is to change the configuration of the system
-excluded).  Those probably belong in @file{$(localstatedir)}.
+Do not install executables here in this directory (they probably belong
+in @file{$(libexecdir)} or @file{$(sbindir)}).  Also do not install
+files that are modified in the normal course of their use (programs
+whose purpose is to change the configuration of the system excluded).
+Those probably belong in @file{$(localstatedir)}.
 
 @item sharedstatedir
 The directory for installing architecture-independent data files which
@@ -415,7 +416,7 @@ should normally be @file{/usr/local/include}, but write it as
 @file{$(prefix)/include}.
 (If you are using Autoconf, write it as @samp{@@includedir@@}.)
 
-Most compilers other than GCC do not look for header files in
+Most compilers other than GCC do not look for header files in directory
 @file{/usr/local/include}.  So installing the header files this way is
 only useful with GCC.  Sometimes this is not a problem because some
 libraries are only really intended to work with GCC.  But some libraries

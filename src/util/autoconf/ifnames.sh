@@ -1,4 +1,4 @@
-#! /bin/sh
+#! @SHELL@
 # ifnames - print the identifiers used in C preprocessor conditionals
 # Copyright (C) 1994, 1995 Free Software Foundation, Inc.
 

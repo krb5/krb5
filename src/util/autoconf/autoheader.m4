@@ -90,9 +90,21 @@ define([AC_CONFIG_H], patsubst($1, [ .*$], []))dnl
 ])
 
 define([AC_DEFINE], [#
+ifelse([$3],,[#
 @@@syms="$syms $1"@@@
-])
+], [#
+@@@verbatim="$verbatim
+/* $3 */
+#undef $1
+"@@@
+])])
 
 define([AC_DEFINE_UNQUOTED], [#
+ifelse([$3],,[#
 @@@syms="$syms $1"@@@
-])
+], [#
+@@@verbatim="$verbatim
+/* $3 */
+#undef $1
+"@@@
+])])

@@ -1,5 +1,5 @@
 # Makefile for Autoconf.
-# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1998 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,6 +32,10 @@ PERL = @PERL@
 
 # Programs that are ALWAYS installed (and are created in the build dir).
 ASCRIPTS = autoconf autoheader autoreconf autoupdate ifnames 
+
+# M4 input that is frozen.
+M4FROZEN = autoconf.m4f autoheader.m4f
+
 # All programs, including those only installed if you have perl.
 SCRIPTS = $(ASCRIPTS) @SCRIPTS@
 
@@ -52,7 +56,7 @@ infodir = @infodir@
 
 #### End of system configuration section. ####
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 
 SUBDIRS = testsuite
 
@@ -74,13 +78,14 @@ DISTFILES = AUTHORS COPYING ChangeLog ChangeLog.1 INSTALL \
 	standards.texi make-stds.texi standards.info*
 
 editsh = sed -e 's,@''datadir''@,$(acdatadir),g' -e \
-	's,@''M4''@,$(M4),g'  -e 's,@''AWK''@,$(AWK),g'
+	's,@''M4''@,$(M4),g'  -e 's,@''AWK''@,$(AWK),g' \
+	-e 's,@''SHELL''@,$(SHELL),g'
 editpl = sed -e 's,@''datadir''@,$(acdatadir),g' -e 's,@''PERL''@,$(PERL),g'
 
-all: ${SCRIPTS} info
+all: ${SCRIPTS} ${M4FROZEN} info
 
 .SUFFIXES:
-.SUFFIXES: .sh .pl
+.SUFFIXES: .sh .pl .m4 .m4f
 
 .sh:
 	rm -f $@ $@.tmp
@@ -89,6 +94,17 @@ all: ${SCRIPTS} info
 .pl:
 	rm -f $@ $@.tmp
 	$(editpl) $< > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
+
+.m4.m4f:
+	@case `$(M4) --help </dev/null 2>&1` in \
+	*reload-state*) echo freezing $*.m4; \
+	  $(M4) -F $*.m4f -I${srcdir} ${srcdir}/$*.m4 ;; \
+	*traditional*) ;; \
+	*) echo Error: Autoconf requires GNU m4 1.1 or later; exit 1 ;; \
+	esac
+
+autoconf.m4f: autoconf.m4 acgeneral.m4 acspecific.m4 acoldnames.m4
+autoheader.m4f: autoheader.m4 acgeneral.m4 acspecific.m4 acoldnames.m4
 
 info: autoconf.info @standards_info@ INSTALL
 
@@ -124,18 +140,14 @@ installdirs:
 	$(SHELL) ${srcdir}/mkinstalldirs $(bindir) $(infodir) $(acdatadir)
 
 install: all $(M4FILES) acconfig.h installdirs install-info
-	@case `$(M4) --help < /dev/null 2>&1` in \
-	*reload-state*) echo installing frozen m4 files; \
-	  $(M4) -F $(acdatadir)/autoconf.m4f -I${srcdir} ${srcdir}/autoconf.m4 ; \
-	  $(M4) -F $(acdatadir)/autoheader.m4f -I${srcdir} ${srcdir}/autoheader.m4 ;; \
-	*traditional*) ;; \
-	*) echo Error: Autoconf requires GNU m4 1.1 or later; exit 1 ;; \
-	esac
 	for p in $(ASCRIPTS); do \
 	  $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`; \
 	done
+	for i in $(M4FROZEN); do \
+	  $(INSTALL_DATA) $$i $(acdatadir)/$$i; \
+	done
 	for i in $(M4FILES) acconfig.h; do \
-	$(INSTALL_DATA) $(srcdir)/$$i $(acdatadir)/$$i; \
+	  $(INSTALL_DATA) $(srcdir)/$$i $(acdatadir)/$$i; \
 	done
 	-if test -f autoscan; then \
 	$(INSTALL_PROGRAM) autoscan $(bindir)/`echo autoscan|sed '$(transform)'`; \
@@ -172,9 +184,9 @@ ${srcdir}/configure: configure.in $(M4FILES)
 	$(M4) autoconf.m4 configure.in > configure.tmp && \
 	chmod +x configure.tmp && mv configure.tmp configure
 Makefile: Makefile.in config.status
-	./config.status
+	$(SHELL) ./config.status
 config.status: configure
-	./config.status --recheck
+	$(SHELL) ./config.status --recheck
 
 maintainer-clean::
 	@echo "This command is intended for maintainers to use;"

@@ -1,4 +1,4 @@
-#! /bin/sh
+#! @SHELL@
 # autoupdate - modernize a configure.in
 # Copyright (C) 1994 Free Software Foundation, Inc.
 

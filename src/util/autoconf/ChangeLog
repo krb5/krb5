@@ -1,15 +1,389 @@
-Thu Jun 19 22:30:06 1997  Tom Yu  <tlyu@mit.edu>
+1999-01-05  Ben Elliston  <bje@cygnus.com>
 
-	* acgeneral.m4 (AC_CHECK_PROG, AC_PATH_PROG): Fix bug in previous
-	patch; add double quotes to protect things.
+	* Version 2.13.
 
-Wed Jun 18 16:13:11 1997  Tom Yu  <tlyu@mit.edu>
+1999-01-04  Ben Elliston  <bje@cygnus.com>
 
-	* acgeneral.m4 (AC_CHECK_PROG, AC_PATH_PROG): Assign the path to
-	ac_dummy and then expand it, rather than simply tacking on
-	$ac_dummy to the path.  This works around POSIX.2 word splitting
-	semantics, in which even things like a:b:c:$PATH don't get
-	word-split as you might expect on a pre-POSIX shell.
+	* autoconf.texi (AC_CHECK_FILE): Document.
+	(AC_CHECK_FILES): Likewise.
+	(AC_SEARCH_LIBS): Likewise.
+	(AC_FUNC_SELECT_ARGTYPES): Use Jeff Garzik's version.
+	(AC_C_STRINGIZE): Likewise.
+	(AC_CYGWIN): Document.
+	(AC_EXEEXT): Likewise.
+	(AC_OBJEXT): Likewise.
+	(AC_MINGW32): Likewise.
+	(AC_TRY_LINK_FUNC): Likewise.
+	(AC_VALIDATE_CACHED_SYSTEM_TUPLE): Likewise.
+	
+1999-01-01  Ben Elliston  <bje@cygnus.com>
+
+	* NEWS: Update.
+
+	* acspecific.m4 (AC_PROG_CXX_WORKS): Specify an explicit return
+	type for `main' to keep modern C++ compilers happy.
+
+1998-12-28  Jeff Garzik  <jgarzik@pobox.com>
+
+	* autoconf.texi:
+	  (AC_SEARCH_LIBS, AC_CHECK_FILE, AC_CHECK_FILES,
+	   AC_TRY_LINK_FUNC): Document.
+	  (AC_CHECK_LIB): Indicate the absence of
+	  	action-if-not-found will not kill default action.
+	  (AC_SYS_INTERPRETER): Alphabetize with rest of section,
+	  	s/ac_cv_sys_interpreter/interpval/
+
+	* acgeneral.m4:
+	  (AC_TRY_LINK_FUNC): Fix arg transposition.
+	  (AC_SEARCH_LIBS): Require autoconf 2.13, add other-libs arg.
+	  (AC_CHECK_FILES): Add underscore to HAVE_file define.
+
+	* acspecific.m4:
+	  (AC_SYS_INTERPRETER): New shell var 'interpval' stores
+	  	internal var ac_cv_sys_interpreter.
+
+1998-12-27  Ben Elliston  <bje@cygnus.com>
+
+	* autoconf.texi (AC_PROG_INSTALL): Update.
+	(AC_FUNC_ALLOCA): Correct code fragment.
+	(AC_FUNC_SELECT_ARGTYPES): Document.
+	(AC_C_STRINGIZE): Likewise.
+	(AC_VALIDATE_CACHED_SYSTEM_TUPLE): Likewise.
+	
+	* acspecific.m4 (AC_CYGWIN): Rename from `AC_CYGWIN32'.
+	(AC_CYGWIN32): Warn about deprecated usage. Forward to AC_CYGWIN.
+
+	* config.sub: Drop `32' from `Cygwin32'.
+
+	* config.guess: Likewise.
+
+	* NEWS: Update.
+
+	* configure: Rebuild.
+
+1998-12-26  Ben Elliston  <bje@cygnus.com>
+
+	* autoreconf.sh (stamp): Add missing quote.
+
+	* mkinstalldirs: Write output which is not diagnostic to standard
+	output and not standard error. Suggested by Steve Robbins
+	<steve@nyongwa.montreal.qc.ca>.
+
+1998-12-11  Matthew D. Langston  <langston@SLAC.Stanford.EDU>
+	
+	* acconfig.h, acgeneral.m4, acspecific.m4, autoconf.texi: Change
+	all of the Fortran 77 code to use the new `F77' prefix instead of
+	the older `FC' prefix.
+
+1998-12-11  Ben Elliston  <bje@cygnus.com>
+
+	* acgeneral.m4 (AC_ACVERSION): Bump to 2.13.
+
+	* autoconf.texi (EDITION): Likewise.
+	(VERSION): Likewise.
+
+1998-10-30  Jeff Garzik <jgarzik@pobox.com>
+
+	* autoconf.texi: Document AC_CACHE_LOAD and AC_CACHE_SAVE. Explain
+	how AC_CACHE_SAVE can be used as a means of syncing the cache to
+	disk prior to doing something potentially fatal in configure.
+
+1998-10-29  Alexandre Oliva  <oliva@dcc.unicamp.br>
+
+	* autoreconf.sh: Support several automake command line options,
+	and run aclocal and automake when needed. Also, create stamp files
+	just like automake's Makefiles would do for config headers.
+	Additional contributions from Tom Tromey <tromey@cygnus.com>.
+	
+1998-10-24  Matthew D. Langston  <langston@SLAC.Stanford.EDU>
+
+	* acgeneral.m4 (AC_LANG_FORTRAN77): Remove [] (i.e. the m4 quotes)
+	since it was confusing the testsuite.  Also make `f77' the default
+	for FC, otherwise the testsuite fails.
+
+	* autoconf.texi (Fortran 77 Compiler Characteristics): Added new
+	node documenting the new AC_F77_LIBRARY_LDFLAGS macro.
+
+	* acspecific.m4 (AC_F77_LIBRARY_LDFLAGS): New macro to determine
+	the linker flags (e.g. `-L' and `-l') for the Fortran 77 intrinsic
+	and run-time libraries.
+
+1998-10-24  Ben Elliston  <bje@cygnus.com>
+
+	* acspecific.m4 (AC_FUNC_SELECT_ARGTYPES): New macro. Detects the
+	types of formal arguments to select(). Contributed by Lars Hecking
+	<lhecking@nmrc.ucc.ie>.
+
+	* acconfig.h (SELECT_TYPE_ARG1): Add.
+	(SELECT_TYPE_ARG234): Likewise.
+	(SELECT_TYPE_ARG5): Likewise.
+
+	* config.guess: Hide warnings emitted by the HP linker when
+	generating a PA 2.0 object file. Contributed by Marcus Thiessel
+	<marcus@xemacs.org>.
+	
+1998-10-20  Ben Elliston  <bje@cygnus.com>
+
+	* acgeneral.m4 (AC_LANG_RESTORE): Fix a typo spotted by Noah
+	Elliott <elliott@hera.llnl.gov>.
+
+1998-10-09  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in (autoconf.m4f): New target.
+	(autoheader.m4f): Likewise.
+
+1998-10-08  Ben Elliston  <bje@cygnus.com>
+
+	* acgeneral.m4 (AC_TRY_LINK_FUNC): Fix macro ordering.
+
+Sun Oct  4 21:57:20 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* autoconf.texi (Defining Symbols): Documented third argument to
+	AC_DEFINE.
+	* autoheader.m4 (AC_DEFINE_UNQUOTED): Generate `verbatim'
+	assignment if third argument given.
+	(AC_DEFINE): Likewise.
+	* acgeneral.m4 (AC_DEFINE): Handle case where $# is 3.
+	(AC_DEFINE_UNQUOTED): Likewise.
+	* autoheader.sh: Echo $verbatim if not empty.
+
+1998-10-03  Ben Elliston  <bje@cygnus.com>
+
+	* acconfig.h (FC_NO_MINUS_C_MINUS_O): Add to complete the Fortran
+	77 support.
+
+	* README: Update bug reporting address. Include maintainer info.
+
+1998-10-02  Ben Elliston  <bje@cygnus.com>
+
+	* acgeneral.m4 (AC_VALIDATE_CACHED_SYSTEM_TUPLE): New macro. This
+	macro can be used to ensure that a configure script will not run
+	on a second system without removing the cache and re-running
+	configure. Contributed by Alexandre Oliva <oliva@dcc.unicamp.br>.
+
+1998-09-29  Ben Elliston  <bje@cygnus.com>
+
+	* acgeneral.m4 (AC_SEARCH_LIBS): New macro. Searches a series of
+	libraries for a given function. Contributed by Jim Blandy
+	<jimb@cygnus.com>.
+	(AC_TRY_LINK_FUNC): New macro. Again, from Jim.
+
+1998-09-28  Ben Elliston  <bje@cygnus.com>
+
+	* config.guess: Detect multiprocessor DC/OSx running on Pyramid
+	MIServer machines.  Contributed by Graham K. Jenkins
+	<Graham.K.Jenkins@corpmail.telstra.com.au>.
+
+	* acgeneral.m4 (AC_CHECK_PROG): Fix a bug if the supplied path
+	contains colons. This was observed with some versions of NetBSD
+	`sh' and some versions of `bash'.
+	(AC_PATH_PROG): Likewise. Contributed by Tom Yu <tlyu@mit.edu>.
+
+1998-09-27  Ben Elliston  <bje@cygnus.com>
+
+	* Makefile.in (all): Generate frozen .m4 files at build time.
+	(install): Do not freeze .m4 files. Install pre-frozen .m4f files
+	using $(INSTALL_DATA).
+	(.m4.m4f): Freeze files if m4 supports stored internal state.
+	Contributed by Karl Heuer <kwzh@gnu.org>.
+	
+	* install-sh: Import latest version from the FSF.
+
+	* mkinstalldirs: Likewise.
+
+	* config.guess: Apply the sysconf(2) test to HP 9000/600-series,
+	9000/802, 9000/804 and 9000/892 machines.  Contributed by Pavel
+	Roskin <pavel.roskin@ecsoft.co.uk>.
+	Detect UnixWare 7.  Contributed by Paul Gampe <paulg@apnic.net>.
+
+	* acspecific.m4 (AC_PROG_INSTALL): Substitute `INSTALL_SCRIPT'.
+	Contributed by Franc,ois Pinard <pinard@iro.umontreal.ca>.
+	(AC_C_STRINGIZE): New macro to test the availability of the
+	stringizing operator in the C preprocessor. Contributed by Arnold
+	Robbins <arnold@gnu.org> on behalf of the GNU AWK project.
+
+	* acconfig.h (HAVE_STRINGIZE): Add for the AC_C_STRINGIZE macro.
+		
+	* testsuite/Makefile.in (check): If DejaGNU is not installed,
+	print a warning and skip the `dejacheck' target (which will fail).
+	(site.exp): Use tests to guard commands from generating error
+	messages if `site.exp' or `site.bak' do not exist. Contributed by
+	Karl Heuer <kwzh@gnu.org>.
+	(dejacheck): Remove unused target.
+	
+1998-09-26  Ben Elliston  <bje@cygnus.com>
+
+	* texinfo.tex: Import latest version from the FSF.
+
+	* config.guess: Treat all SPARC variant processors running BSD/OS
+	as just `sparc' for compatibility reasons.  Contributed by Chris
+	Torek <torek@bsdi.com>.
+
+	* acgeneral.m4 (AC_CHECK_FILE): New macro. Checks for the
+	existence of a file in the file system (native only).
+	Contributed by Ken Raeburn <raeburn@cygnus.com>.
+	(AC_CHECK_FILES): Likewise.
+
+1998-09-15  Didier Verna  <verna@inf.enst.fr>
+
+	* acspecific.m4 (AC_PATH_XTRA): use X_EXTRA_LIBS add-on libraries 
+	in the test for libICE. It is needed at least under Solaris.
+
+1998-09-15  Ben Elliston  <bje@cygnus.com>
+
+	* config.guess: Handle strange processor ID assignments on AIX
+	machines.  Contributed by Didier Desseaux <didess@infonie.fr>.
+
+Sat Sep 12 16:25:00 1998  Aaron Crane  <aaronc@pobox.com>
+
+	* acgeneral.m4 (AC_CHECK_TYPE): Changed the egrep regex to avoid
+	incorrectly assuming that if foobar_t is defined, then so is
+	bar_t.
+
+Tue Sep  8 14:06:04 1998  Matthew D. Langston  <langston@SLAC.Stanford.EDU>
+
+        * acgeneral.m4: Make the following macros Fortran 77 aware
+        (i.e. conditionalize whether to `#include "confdefs.h"', etc.):
+        (AC_TRY_COMPILE)
+        (AC_TRY_LINK)
+        (AC_CHECK_LIB)
+
+        * acgeneral.m4 (AC_LANG_FORTRAN77): Rename `AC_LANG_FORTRAN' to
+        `AC_LANG_FORTRAN77'.  Change the Fortran 77 language macro from
+        `FORTRAN' to `FORTRAN77'.
+        (AC_LANG_RESTORE): Change the Fortran 77 language macro from
+        `FORTRAN' to `FORTRAN77'
+
+        * autoconf.texi: Updated Fortran 77 documentation, particularly
+        for `AC_TRY_COMPILE', `AC_TRY_LINK' and `AC_CHECK_LIB'.
+
+Thu Sep  3 09:34:39 1998  Matthew D. Langston  <langston@SLAC.Stanford.EDU>
+
+        * autoconf.texi: Added Fortran 77 documentation.
+
+        * acspecific.m4 (AC_PROG_FC): New macro.  Determine a Fortran
+        compiler to use.
+        (AC_PROG_FC_WORKS): New macro.
+        (AC_PROG_FC_GNU): New macro.
+        (AC_PROG_FC_G): New macro.
+        (AC_PROG_FC_C_O): New macro.
+
+        * acgeneral.m4: Add FFLAGS (Fortran 77 flags).
+        (AC_LANG_FORTRAN): New macro.
+        (AC_LANG_RESTORE): Make Fortran 77 aware.
+        (AC_TRY_COMPILER): Make Fortran 77 aware (i.e. conditionalize
+        whether to `#include "confdefs.h"').
+
+Thu Jun 18 12:13:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acspecific.m4 (AC_EXEEXT): Correct setting of ac_exeext when
+	there is no extension.
+
+Mon Jun  1 12:30:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acgeneral.m4 (AC_CHECK_PROG): Set IFS to just ":" when searching
+	through PATH.
+	(AC_PATH_PROG): Likewise.
+	* acspecific.m4 (AC_PROG_INSTALL): Likewise.
+	(AC_PROG_CC): On cygwin32, if neither gcc nor cc
+	are found, look for cl.
+	(AC_PROG_CXX): Look for cl after all other choices.
+	* configure: Rebuild.
+
+Thu May 28 18:37:36 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acgeneral.m4 (AC_ACVERSION): Bump to 2.12.2.
+
+	Add support for Visual C++:
+	* acgeneral.m4 (ac_exeext, ac_objext): New variables.
+	(ac_link): Use ac_exeext.
+	(AC_TRY_COMPILER, AC_TRY_LINK, AC_TRY_RUN_NATIVE): Likewise.
+	(AC_TRY_CPP): Remove lines from stderr which contain only the name
+	of the file.
+	(AC_REPLACE_FUNCS): Use ac_objext.
+	* acspecific.m4 (AC_PROG_CC): Check whether compiler supports -g
+	even if it is not gcc.
+	(AC_PROG_CXX): Likewise.
+	(AC_PROG_CPP): Try running the compiler with the -nologo option.
+	(AC_FUNC_ALLOCA): Check for _MSC_VER.  Use ac_objext.
+	(AC_FUNC_MEMCMP): Use ac_objext.
+	(AC_STRUCT_ST_BLOCKS): Likewise.
+	(AC_OBJEXT): New macro.
+	(AC_CYGWIN32, AC_MINGW32, AC_EXEEXT): New macros.
+	* configure: Rebuild.
+
+	* Makefile.in (editsh): Substitute for SHELL.
+	(Makefile, config.status): Use $(SHELL) when running
+	config.status.
+	* autoconf.sh: Change initial /bin/sh to @SHELL@.
+	* autoheader.sh: Likewise.
+	* autoreconf.sh: Likewise.
+	* autoupdate.sh: Likewise.
+	* ifnames.sh: Likewise.
+
+Thu Apr 30 16:29:00 1998  Syd Polk  <spolk@cygnus.com>
+
+	* acspecific.m4 (SETPGRP_VOID): The test for setpgrp needs
+	to have unistd.h included or the DEC compiler does not
+	flag the error that triggers setting the variable.
+
+Tue Nov 18 14:21:38 1997  Eric Mumpower  <nocturne@cygnus.com>
+
+	* autoreconf.sh: Do the right thing when AC_CONFIG_HEADER is
+	given more than one filename. As noted in the "Invoking
+	autoheader" node of the info files, autoheader will use the first
+	file argument given to AC_CONFIG_HEADER. Prior to this patch,
+	autoreconf would end up executing incorrect shell code (e.g.
+	"test ! -f 1.h 2.h.in") in such cases.
+	Patch submitted in parallel to bug-gnu-utils@prep.ai.mit.edu.
+	
+Fri Oct  3 18:10:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Add a grep when checking whether
+ 	set quotes correctly, to avoid a cache overflow on HP-UX 9.
+	* configure: Rebuild.
+
+Wed Sep 11 15:35:19 1997  Chris Provenzano  <proven@cygnus.com>
+
+	* acgeneral.m4 : Always set SHELL and substitute SHELL.
+	When looking for a path for an executable allow the
+	user to override with an DOS path.
+	* configure : New configure generated by autoconf.
+
+Thu Sep  4 22:30:40 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* acspecific (AC_PROC_INSTALL): Don't use installbsd on OSF..
+
+Wed Sep  3 23:00:44 1997  Chris Provenzano  <proven@cygnus.com>
+
+	* configure : New configure generated by autoconf.
+	* Makefile.in : Set SHELL=@SHELL@. configure now substiutes
+	${CONFIG_SHELL-/bin/sh} in for @SHELL@ at configure time.
+
+Mon Aug 11 01:40:37 1997  Jason Molenda  <crash@cygnus.co.jp>
+
+	* acspecific (AC_FUNC_VFORK): If cross-compiling, set
+	$ac_cv_func_vfork_works to $ac_cv_func_vfork (assume vfork works
+	if present).
+
+Tue Aug  5 23:00:05 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* acgeneral.m4 (AC_VERSION): Set to 2.12.1.
+	(AC_CANONICAL_HOST): Use CONFIG_SHELL to run $ac_config_sub and
+	$ac_config_guess.
+	(AC_CANONICAL_TARGET, AC_CANONICAL_BUILD): Likewise.
+
+Tue Dec 10 19:38:59 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acgeneral.m4 (AC_CACHE_SAVE): Use grep to prevent overflowing
+	HP-UX 9.05 /bin/sh buffer in case statement.  From Eric Backus
+	<ericb@lsid.hp.com>.
+
+Mon Dec  9 23:39:17 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
+
+	* acspecific.m4 (AC_FUNC_GETLOADAVG): Add a semicolon between
+	shell variable assignments; the evaluation order varies between
+	implementations. 
 
 Tue Nov 26 13:00:28 1996  David J MacKenzie  <djm@catapult.va.pubnix.com>
 

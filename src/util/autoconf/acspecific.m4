@@ -1,6 +1,6 @@
 dnl Macros that test for specific features.
 dnl This file is part of Autoconf.
-dnl Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+dnl Copyright (C) 1992, 93, 94, 95, 96, 1998 Free Software Foundation, Inc.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -75,6 +75,12 @@ AC_DEFUN(AC_PROG_CC,
 AC_CHECK_PROG(CC, gcc, gcc)
 if test -z "$CC"; then
   AC_CHECK_PROG(CC, cc, cc, , , /usr/ucb/cc)
+  if test -z "$CC"; then
+    case "`uname -s`" in
+    *win32* | *WIN32*)
+      AC_CHECK_PROG(CC, cl, cl) ;;
+    esac
+  fi
   test -z "$CC" && AC_MSG_ERROR([no acceptable cc found in \$PATH])
 fi
 
@@ -83,52 +89,112 @@ AC_PROG_CC_GNU
 
 if test $ac_cv_prog_gcc = yes; then
   GCC=yes
+else
+  GCC=
+fi
+
 dnl Check whether -g works, even if CFLAGS is set, in case the package
 dnl plays around with CFLAGS (such as to build both debugging and
 dnl normal versions of a library), tasteless as that idea is.
-  ac_test_CFLAGS="${CFLAGS+set}"
-  ac_save_CFLAGS="$CFLAGS"
-  CFLAGS=
-  AC_PROG_CC_G
-  if test "$ac_test_CFLAGS" = set; then
-    CFLAGS="$ac_save_CFLAGS"
-  elif test $ac_cv_prog_cc_g = yes; then
+ac_test_CFLAGS="${CFLAGS+set}"
+ac_save_CFLAGS="$CFLAGS"
+CFLAGS=
+AC_PROG_CC_G
+if test "$ac_test_CFLAGS" = set; then
+  CFLAGS="$ac_save_CFLAGS"
+elif test $ac_cv_prog_cc_g = yes; then
+  if test "$GCC" = yes; then
     CFLAGS="-g -O2"
   else
-    CFLAGS="-O2"
+    CFLAGS="-g"
   fi
 else
-  GCC=
-  test "${CFLAGS+set}" = set || CFLAGS="-g"
+  if test "$GCC" = yes; then
+    CFLAGS="-O2"
+  else
+    CFLAGS=
+  fi
 fi
 ])
 
 AC_DEFUN(AC_PROG_CXX,
 [AC_BEFORE([$0], [AC_PROG_CXXCPP])dnl
-AC_CHECK_PROGS(CXX, $CCC c++ g++ gcc CC cxx cc++, gcc)
+AC_CHECK_PROGS(CXX, $CCC c++ g++ gcc CC cxx cc++ cl, gcc)
 
 AC_PROG_CXX_WORKS
 AC_PROG_CXX_GNU
 
 if test $ac_cv_prog_gxx = yes; then
   GXX=yes
+else
+  GXX=
+fi
+
 dnl Check whether -g works, even if CXXFLAGS is set, in case the package
 dnl plays around with CXXFLAGS (such as to build both debugging and
 dnl normal versions of a library), tasteless as that idea is.
-  ac_test_CXXFLAGS="${CXXFLAGS+set}"
-  ac_save_CXXFLAGS="$CXXFLAGS"
-  CXXFLAGS=
-  AC_PROG_CXX_G
-  if test "$ac_test_CXXFLAGS" = set; then
-    CXXFLAGS="$ac_save_CXXFLAGS"
-  elif test $ac_cv_prog_cxx_g = yes; then
+ac_test_CXXFLAGS="${CXXFLAGS+set}"
+ac_save_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS=
+AC_PROG_CXX_G
+if test "$ac_test_CXXFLAGS" = set; then
+  CXXFLAGS="$ac_save_CXXFLAGS"
+elif test $ac_cv_prog_cxx_g = yes; then
+  if test "$GXX" = yes; then
     CXXFLAGS="-g -O2"
   else
-    CXXFLAGS="-O2"
+    CXXFLAGS="-g"
   fi
 else
-  GXX=
-  test "${CXXFLAGS+set}" = set || CXXFLAGS="-g"
+  if test "$GXX" = yes; then
+    CXXFLAGS="-O2"
+  else
+    CXXFLAGS=
+  fi
+fi
+])
+
+dnl Determine a Fortran 77 compiler to use.  If `F77' is not already set
+dnl in the environment, check for `g77', `f77' and `f2c', in that order.
+dnl Set the output variable `F77' to the name of the compiler found.
+dnl 
+dnl If using `g77' (the GNU Fortran 77 compiler), then `AC_PROG_F77'
+dnl will set the shell variable `G77' to `yes', and empty otherwise.  If
+dnl the output variable `FFLAGS' was not already set in the environment,
+dnl then set it to `-g -02' for `g77' (or `-O2' where `g77' does not
+dnl accept `-g').  Otherwise, set `FFLAGS' to `-g' for all other Fortran
+dnl 77 compilers.
+dnl 
+dnl AC_PROG_F77()
+AC_DEFUN(AC_PROG_F77,
+[AC_BEFORE([$0], [AC_PROG_CPP])dnl
+if test -z "$F77"; then
+  AC_CHECK_PROGS(F77, g77 f77 f2c)
+    test -z "$F77" && AC_MSG_ERROR([no acceptable Fortran 77 compiler found in \$PATH])
+fi
+
+AC_PROG_F77_WORKS
+AC_PROG_F77_GNU
+
+if test $ac_cv_prog_g77 = yes; then
+  G77=yes
+dnl Check whether -g works, even if FFLAGS is set, in case the package
+dnl plays around with FFLAGS (such as to build both debugging and
+dnl normal versions of a library), tasteless as that idea is.
+  ac_test_FFLAGS="${FFLAGS+set}"
+  ac_save_FFLAGS="$FFLAGS"
+  FFLAGS=
+  AC_PROG_F77_G
+  if test "$ac_test_FFLAGS" = set; then
+    FFLAGS="$ac_save_FFLAGS"
+  elif test $ac_cv_prog_f77_g = yes; then
+    FFLAGS="-g -O2"
+  else
+    FFLAGS="-O2"
+  fi
+else
+  G77=
+  test "${FFLAGS+set}" = set || FFLAGS="-g"
 fi
 ])
 
@@ -151,7 +217,7 @@ AC_DEFUN(AC_PROG_CXX_WORKS,
 [AC_MSG_CHECKING([whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) works])
 AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
-AC_TRY_COMPILER([main(){return(0);}], ac_cv_prog_cxx_works, ac_cv_prog_cxx_cross)
+AC_TRY_COMPILER([int main(){return(0);}], ac_cv_prog_cxx_works, ac_cv_prog_cxx_cross)
 AC_LANG_RESTORE
 AC_MSG_RESULT($ac_cv_prog_cxx_works)
 if test $ac_cv_prog_cxx_works = no; then
@@ -160,6 +226,30 @@ fi
 AC_MSG_CHECKING([whether the C++ compiler ($CXX $CXXFLAGS $LDFLAGS) is a cross-compiler])
 AC_MSG_RESULT($ac_cv_prog_cxx_cross)
 cross_compiling=$ac_cv_prog_cxx_cross
+])
+
+dnl Test whether the Fortran 77 compiler can compile and link a trivial
+dnl Fortran program.  Also, test whether the Fortran 77 compiler is a
+dnl cross-compiler (which may realistically be the case if the Fortran
+dnl compiler is `g77').
+dnl 
+dnl AC_PROG_F77_WORKS()
+AC_DEFUN(AC_PROG_F77_WORKS,
+[AC_MSG_CHECKING([whether the Fortran 77 compiler ($F77 $FFLAGS $LDFLAGS) works])
+AC_LANG_SAVE
+AC_LANG_FORTRAN77
+AC_TRY_COMPILER(dnl
+[      program conftest
+      end
+], ac_cv_prog_f77_works, ac_cv_prog_f77_cross)
+AC_LANG_RESTORE
+AC_MSG_RESULT($ac_cv_prog_f77_works)
+if test $ac_cv_prog_f77_works = no; then
+  AC_MSG_ERROR([installation or configuration problem: Fortran 77 compiler cannot create executables.])
+fi
+AC_MSG_CHECKING([whether the Fortran 77 compiler ($F77 $FFLAGS $LDFLAGS) is a cross-compiler])
+AC_MSG_RESULT($ac_cv_prog_f77_cross)
+cross_compiling=$ac_cv_prog_f77_cross
 ])
 
 AC_DEFUN(AC_PROG_CC_GNU,
@@ -190,6 +280,24 @@ else
   ac_cv_prog_gxx=no
 fi])])
 
+dnl Test whether for Fortran 77 compiler is `g77' (the GNU Fortran 77
+dnl Compiler).  This test depends on whether the Fortran 77 compiler can
+dnl do CPP pre-processing.
+dnl 
+dnl AC_PROG_F77_GNU()
+AC_DEFUN(AC_PROG_F77_GNU,
+[AC_CACHE_CHECK(whether we are using GNU Fortran 77, ac_cv_prog_g77,
+[cat > conftest.fpp <<EOF
+#ifdef __GNUC__
+  yes
+#endif
+EOF
+if AC_TRY_COMMAND($F77 -E conftest.fpp) | egrep yes >/dev/null 2>&1; then
+  ac_cv_prog_g77=yes
+else
+  ac_cv_prog_g77=no
+fi])])
+
 AC_DEFUN(AC_PROG_CC_G,
 [AC_CACHE_CHECK(whether ${CC-cc} accepts -g, ac_cv_prog_cc_g,
 [echo 'void f(){}' > conftest.c
@@ -208,6 +316,24 @@ if test -z "`${CXX-g++} -g -c conftest.cc 2>&1`"; then
   ac_cv_prog_cxx_g=yes
 else
   ac_cv_prog_cxx_g=no
+fi
+rm -f conftest*
+])])
+
+dnl Test whether the Fortran 77 compiler can accept the `-g' option to
+dnl enable debugging.
+dnl 
+dnl AC_PROG_F77_G()
+AC_DEFUN(AC_PROG_F77_G,
+[AC_CACHE_CHECK(whether $F77 accepts -g, ac_cv_prog_f77_g,
+[cat > conftest.f << EOF
+       program conftest
+       end
+EOF
+if test -z "`$F77 -g -c conftest.f 2>&1`"; then
+  ac_cv_prog_f77_g=yes
+else
+  ac_cv_prog_f77_g=no
 fi
 rm -f conftest*
 ])])
@@ -282,6 +408,45 @@ else
 fi
 ])
 
+dnl Test if the Fortran 77 compiler accepts the options `-c' and `-o'
+dnl simultaneously, and define `F77_NO_MINUS_C_MINUS_O' if it does not.
+dnl
+dnl The usefulness of this macro is questionable, as I can't really see
+dnl why anyone would use it.  The only reason I include it is for
+dnl completeness, since a similar test exists for the C compiler.
+dnl 
+dnl AC_PROG_F77_C_O
+AC_DEFUN(AC_PROG_F77_C_O,
+[AC_BEFORE([$0], [AC_PROG_F77])dnl
+AC_MSG_CHECKING(whether $F77 understand -c and -o together)
+set dummy $F77; ac_f77="`echo [$]2 |
+changequote(, )dnl
+sed -e 's/[^a-zA-Z0-9_]/_/g' -e 's/^[0-9]/_/'`"
+changequote([, ])dnl
+AC_CACHE_VAL(ac_cv_prog_f77_${ac_f77}_c_o,
+[cat > conftest.f << EOF
+       program conftest
+       end
+EOF
+# We do the `AC_TRY_EVAL' test twice because some compilers refuse to
+# overwrite an existing `.o' file with `-o', although they will create
+# one.
+ac_try='$F77 $FFLAGS -c conftest.f -o conftest.o 1>&AC_FD_CC'
+if AC_TRY_EVAL(ac_try) && test -f conftest.o && AC_TRY_EVAL(ac_try); then
+  eval ac_cv_prog_f77_${ac_f77}_c_o=yes
+else
+  eval ac_cv_prog_f77_${ac_f77}_c_o=no
+fi
+rm -f conftest*
+])dnl
+if eval "test \"`echo '$ac_cv_prog_f77_'${ac_f77}_c_o`\" = yes"; then
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+  AC_DEFINE(F77_NO_MINUS_C_MINUS_O)
+fi
+])
+
 dnl Define SET_MAKE to set ${MAKE} if make doesn't.
 AC_DEFUN(AC_PROG_MAKE_SET,
 [AC_MSG_CHECKING(whether ${MAKE-make} sets \${MAKE})
@@ -340,7 +505,10 @@ dnl with a fresh cross-compiler works.
 Syntax Error], ,
   CPP="${CC-cc} -E -traditional-cpp"
   AC_TRY_CPP([#include <assert.h>
-Syntax Error], , CPP=/lib/cpp))
+Syntax Error], ,
+  CPP="${CC-cc} -nologo -E"
+  AC_TRY_CPP([#include <assert.h>
+Syntax Error], , CPP=/lib/cpp)))
   ac_cv_prog_CPP="$CPP"])dnl
   CPP="$ac_cv_prog_CPP"
 else
@@ -430,25 +598,27 @@ AC_DEFUN(AC_PROG_INSTALL,
 # SunOS /usr/etc/install
 # IRIX /sbin/install
 # AIX /bin/install
+# AIX 4 /usr/bin/installbsd, which doesn't work without a -g flag
 # AFS /usr/afsws/bin/install, which mishandles nonexistent args
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 AC_MSG_CHECKING(for a BSD compatible install)
 if test -z "$INSTALL"; then
 AC_CACHE_VAL(ac_cv_path_install,
-[  IFS="${IFS= 	}"; ac_save_IFS="$IFS"; IFS="${IFS}:"
+[  IFS="${IFS= 	}"; ac_save_IFS="$IFS"; IFS=":"
   for ac_dir in $PATH; do
     # Account for people who put trailing slashes in PATH elements.
     case "$ac_dir/" in
     /|./|.//|/etc/*|/usr/sbin/*|/usr/etc/*|/sbin/*|/usr/afsws/bin/*|/usr/ucb/*) ;;
     *)
       # OSF1 and SCO ODT 3.0 have their own names for install.
-      for ac_prog in ginstall installbsd scoinst install; do
+      # Don't use installbsd from OSF since it installs stuff as root
+      # by default.
+      for ac_prog in ginstall scoinst install; do
         if test -f $ac_dir/$ac_prog; then
 	  if test $ac_prog = install &&
             grep dspmsg $ac_dir/$ac_prog >/dev/null 2>&1; then
 	    # AIX install.  It has an incompatible calling convention.
-	    # OSF/1 installbsd also uses dspmsg, but is usable.
 	    :
 	  else
 	    ac_cv_path_install="$ac_dir/$ac_prog -c"
@@ -479,6 +649,9 @@ AC_MSG_RESULT($INSTALL)
 # It thinks the first close brace ends the variable substitution.
 test -z "$INSTALL_PROGRAM" && INSTALL_PROGRAM='${INSTALL}'
 AC_SUBST(INSTALL_PROGRAM)dnl
+
+test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL_PROGRAM}'
+AC_SUBST(INSTALL_SCRIPT)dnl
 
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 AC_SUBST(INSTALL_DATA)dnl
@@ -1047,6 +1220,10 @@ fi
 AC_DEFUN(AC_FUNC_SETPGRP,
 [AC_CACHE_CHECK(whether setpgrp takes no argument, ac_cv_func_setpgrp_void,
 AC_TRY_RUN([
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 /*
  * If this system has a BSD-style setpgrp, which takes arguments, exit
  * successfully.
@@ -1169,7 +1346,8 @@ main() {
 	 );
   }
 }],
-ac_cv_func_vfork_works=yes, ac_cv_func_vfork_works=no, AC_CHECK_FUNC(vfork))])
+ac_cv_func_vfork_works=yes, ac_cv_func_vfork_works=no, AC_CHECK_FUNC(vfork)
+ac_cv_func_vfork_works=$ac_cv_func_vfork)])
 if test $ac_cv_func_vfork_works = no; then
   AC_DEFINE(vfork, fork)
 fi
@@ -1227,14 +1405,19 @@ AC_CACHE_CHECK([for alloca], ac_cv_func_alloca_works,
 #ifdef __GNUC__
 # define alloca __builtin_alloca
 #else
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
+# ifdef _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
 # else
-#  ifdef _AIX
- #pragma alloca
+#  if HAVE_ALLOCA_H
+#   include <alloca.h>
 #  else
-#   ifndef alloca /* predefined by HP cc +Olibcalls */
+#   ifdef _AIX
+ #pragma alloca
+#   else
+#    ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
+#    endif
 #   endif
 #  endif
 # endif
@@ -1250,7 +1433,7 @@ if test $ac_cv_func_alloca_works = no; then
   # that cause trouble.  Some versions do not even contain alloca or
   # contain a buggy version.  If you still want to use their alloca,
   # use ar to extract alloca.o from them instead of compiling alloca.c.
-  ALLOCA=alloca.o
+  ALLOCA=alloca.${ac_objext}
   AC_DEFINE(C_ALLOCA)
 
 AC_CACHE_CHECK(whether alloca needs Cray hooks, ac_cv_os_cray,
@@ -1306,7 +1489,7 @@ AC_CHECK_LIB(util, getloadavg,
 if test $ac_have_func = no; then
   # There is a commonly available library for RS/6000 AIX.
   # Since it is not a standard part of AIX, it might be installed locally.
-  ac_getloadavg_LIBS="$LIBS" LIBS="-L/usr/local/lib $LIBS"
+  ac_getloadavg_LIBS="$LIBS"; LIBS="-L/usr/local/lib $LIBS"
   AC_CHECK_LIB(getloadavg, getloadavg,
     LIBS="-lgetloadavg $LIBS", LIBS="$ac_getloadavg_LIBS")
 fi
@@ -1471,8 +1654,48 @@ main()
 }
 ], ac_cv_func_memcmp_clean=yes, ac_cv_func_memcmp_clean=no,
 ac_cv_func_memcmp_clean=no)])
-test $ac_cv_func_memcmp_clean = no && LIBOBJS="$LIBOBJS memcmp.o"
+test $ac_cv_func_memcmp_clean = no && LIBOBJS="$LIBOBJS memcmp.${ac_objext}"
 AC_SUBST(LIBOBJS)dnl
+])
+
+AC_DEFUN(AC_FUNC_SELECT_ARGTYPES,
+[AC_MSG_CHECKING([types of arguments for select()])
+ AC_CACHE_VAL(ac_cv_func_select_arg234,dnl
+ [AC_CACHE_VAL(ac_cv_func_select_arg1,dnl
+  [AC_CACHE_VAL(ac_cv_func_select_arg5,dnl
+   [for ac_cv_func_select_arg234 in 'fd_set *' 'int *' 'void *'; do
+     for ac_cv_func_select_arg1 in 'int' 'size_t' 'unsigned long' 'unsigned'; do
+      for ac_cv_func_select_arg5 in 'struct timeval *' 'const struct timeval *'; do
+       AC_TRY_COMPILE(dnl
+[#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+extern select ($ac_cv_func_select_arg1,$ac_cv_func_select_arg234,$ac_cv_func_select_arg234,$ac_cv_func_select_arg234,$ac_cv_func_select_arg5);],,dnl
+        [ac_not_found=no ; break 3],ac_not_found=yes)
+      done
+     done
+    done
+   ])dnl AC_CACHE_VAL
+  ])dnl AC_CACHE_VAL
+ ])dnl AC_CACHE_VAL
+ if test "$ac_not_found" = yes; then
+  ac_cv_func_select_arg1=int 
+  ac_cv_func_select_arg234='int *' 
+  ac_cv_func_select_arg5='struct timeval *'
+ fi
+ AC_MSG_RESULT([$ac_cv_func_select_arg1,$ac_cv_func_select_arg234,$ac_cv_func_select_arg5])
+ AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG1,$ac_cv_func_select_arg1)
+ AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG234,($ac_cv_func_select_arg234))
+ AC_DEFINE_UNQUOTED(SELECT_TYPE_ARG5,($ac_cv_func_select_arg5))
 ])
 
 
@@ -1535,7 +1758,7 @@ ac_cv_struct_st_blocks=yes, ac_cv_struct_st_blocks=no)])
 if test $ac_cv_struct_st_blocks = yes; then
   AC_DEFINE(HAVE_ST_BLOCKS)
 else
-  LIBOBJS="$LIBOBJS fileblocks.o"
+  LIBOBJS="$LIBOBJS fileblocks.${ac_objext}"
 fi
 AC_SUBST(LIBOBJS)dnl
 ])
@@ -1728,9 +1951,260 @@ if test $ac_cv_c_const = no; then
 fi
 ])
 
+AC_DEFUN(AC_C_STRINGIZE, [
+AC_REQUIRE([AC_PROG_CPP])
+AC_MSG_CHECKING([for preprocessor stringizing operator])
+AC_CACHE_VAL(ac_cv_c_stringize,
+AC_EGREP_CPP([#teststring],[
+#define x(y) #y
+
+char *s = x(teststring);
+], ac_cv_c_stringize=no, ac_cv_c_stringize=yes))
+if test "${ac_cv_c_stringize}" = yes
+then
+        AC_DEFINE(HAVE_STRINGIZE)
+fi
+AC_MSG_RESULT([${ac_cv_c_stringize}])
+])dnl
+
 define(AC_ARG_ARRAY,
 [errprint(__file__:__line__: [$0] has been removed; don't do unportable things with arguments
 )m4exit(4)])
+
+dnl Check the object extension used by the compiler: typically .o or
+dnl .obj.  If this is called, some other behaviour will change,
+dnl determined by ac_objext.
+AC_DEFUN(AC_OBJEXT,
+[AC_MSG_CHECKING([for object suffix])
+AC_CACHE_VAL(ac_cv_objext,
+[rm -f conftest*
+echo 'int i = 1;' > conftest.$ac_ext
+if AC_TRY_EVAL(ac_compile); then
+  for ac_file in conftest.*; do
+    case $ac_file in
+    *.c) ;;
+    *) ac_cv_objext=`echo $ac_file | sed -e s/conftest.//` ;;
+    esac
+  done
+else
+  AC_MSG_ERROR([installation or configuration problem; compiler does not work])
+fi
+rm -f conftest*])
+AC_MSG_RESULT($ac_cv_objext)
+OBJEXT=$ac_cv_objext
+ac_objext=$ac_cv_objext
+AC_SUBST(OBJEXT)])
+
+dnl Determine the linker flags (e.g. `-L' and `-l') for the Fortran 77
+dnl intrinsic and run-time libraries that are required to successfully
+dnl link a Fortran 77 program or shared library.  The output variable
+dnl FLIBS is set to these flags.
+dnl 
+dnl This macro is intended to be used in those situations when it is
+dnl necessary to mix, e.g. C++ and Fortran 77, source code into a single
+dnl program or shared library.
+dnl 
+dnl For example, if object files from a C++ and Fortran 77 compiler must
+dnl be linked together, then the C++ compiler/linker must be used for
+dnl linking (since special C++-ish things need to happen at link time
+dnl like calling global constructors, instantiating templates, enabling
+dnl exception support, etc.).
+dnl 
+dnl However, the Fortran 77 intrinsic and run-time libraries must be
+dnl linked in as well, but the C++ compiler/linker doesn't know how to
+dnl add these Fortran 77 libraries.  Hence, the macro
+dnl `AC_F77_LIBRARY_LDFLAGS' was created to determine these Fortran 77
+dnl libraries.
+dnl
+dnl This macro was packaged in its current form by Matthew D. Langston
+dnl <langston@SLAC.Stanford.EDU>.  However, nearly all of this macro
+dnl came from the `OCTAVE_FLIBS' macro in `octave-2.0.13/aclocal.m4',
+dnl and full credit should go to John W. Eaton for writing this
+dnl extremely useful macro.  Thank you John.
+dnl
+dnl AC_F77_LIBRARY_LDFLAGS()
+AC_DEFUN(AC_F77_LIBRARY_LDFLAGS,
+[AC_MSG_CHECKING([for Fortran 77 libraries])
+AC_REQUIRE([AC_PROG_F77])
+AC_REQUIRE([AC_CANONICAL_HOST])
+AC_CACHE_VAL(ac_cv_flibs,
+[changequote(, )dnl
+dnl Write a minimal program and compile it with -v.  I don't know what
+dnl to do if your compiler doesn't have -v...
+echo "      END" > conftest.f
+foutput=`${F77} -v -o conftest conftest.f 2>&1`
+dnl
+dnl The easiest thing to do for xlf output is to replace all the commas
+dnl with spaces.  Try to only do that if the output is really from xlf,
+dnl since doing that causes problems on other systems.
+dnl
+xlf_p=`echo $foutput | grep xlfentry`
+if test -n "$xlf_p"; then
+  foutput=`echo $foutput | sed 's/,/ /g'`
+fi
+dnl
+ld_run_path=`echo $foutput | \
+  sed -n -e 's/^.*LD_RUN_PATH *= *\([^ ]*\).*/\1/p'`
+dnl
+dnl We are only supposed to find this on Solaris systems...
+dnl Uh, the run path should be absolute, shouldn't it?
+dnl
+case "$ld_run_path" in
+  /*)
+    if test "$ac_cv_prog_gcc" = yes; then
+      ld_run_path="-Xlinker -R -Xlinker $ld_run_path"
+    else
+      ld_run_path="-R $ld_run_path"
+    fi
+  ;;
+  *)
+    ld_run_path=
+  ;;
+esac
+dnl
+flibs=
+lflags=
+dnl
+dnl If want_arg is set, we know we want the arg to be added to the list,
+dnl so we don't have to examine it.
+dnl
+want_arg=
+dnl
+for arg in $foutput; do
+  old_want_arg=$want_arg
+  want_arg=
+dnl
+dnl None of the options that take arguments expect the argument to
+dnl start with a -, so pretend we didn't see anything special.
+dnl
+  if test -n "$old_want_arg"; then
+    case "$arg" in
+      -*)
+        old_want_arg=
+      ;;
+    esac
+  fi
+  case "$old_want_arg" in
+    '')
+      case $arg in
+        /*.a)
+          exists=false
+          for f in $lflags; do
+            if test x$arg = x$f; then
+              exists=true
+            fi
+          done
+          if $exists; then
+            arg=
+          else
+            lflags="$lflags $arg"
+          fi
+        ;;
+        -bI:*)
+          exists=false
+          for f in $lflags; do
+            if test x$arg = x$f; then
+              exists=true
+            fi
+          done
+          if $exists; then
+            arg=
+          else
+            if test "$ac_cv_prog_gcc" = yes; then
+              lflags="$lflags -Xlinker $arg"
+            else
+              lflags="$lflags $arg"
+            fi
+          fi
+        ;;
+        -lang* | -lcrt0.o | -lc | -lgcc)
+          arg=
+        ;;
+        -[lLR])
+          want_arg=$arg
+          arg=
+        ;;
+        -[lLR]*)
+          exists=false
+          for f in $lflags; do
+            if test x$arg = x$f; then
+              exists=true
+            fi
+          done
+          if $exists; then
+            arg=
+          else
+            case "$arg" in
+              -lkernel32)
+                case "$canonical_host_type" in
+                  *-*-cygwin*)
+                    arg=
+                  ;;
+                  *)
+                    lflags="$lflags $arg"
+                  ;;
+                esac
+              ;;
+              -lm)
+              ;;
+              *)
+                lflags="$lflags $arg"
+              ;;
+            esac
+          fi
+        ;;
+        -u)
+          want_arg=$arg
+          arg=
+        ;;
+        -Y)
+          want_arg=$arg
+          arg=
+        ;;
+        *)
+          arg=
+        ;;
+      esac
+    ;;
+    -[lLR])
+      arg="$old_want_arg $arg"
+    ;;
+    -u)
+      arg="-u $arg"
+    ;;
+    -Y)
+dnl
+dnl Should probably try to ensure unique directory options here too.
+dnl This probably only applies to Solaris systems, and then will only
+dnl work with gcc...
+dnl
+      arg=`echo $arg | sed -e 's%^P,%%'`
+      SAVE_IFS=$IFS
+      IFS=:
+      list=
+      for elt in $arg; do
+        list="$list -L$elt"
+      done
+      IFS=$SAVE_IFS
+      arg="$list"
+    ;;
+  esac
+dnl
+  if test -n "$arg"; then
+    flibs="$flibs $arg"
+  fi
+done
+if test -n "$ld_run_path"; then
+  flibs_result="$ld_run_path $flibs"
+else
+  flibs_result="$flibs"
+fi
+changequote([, ])dnl
+ac_cv_flibs="$flibs_result"])
+FLIBS="$ac_cv_flibs"
+AC_SUBST(FLIBS)dnl
+AC_MSG_RESULT($FLIBS)
+])
 
 
 dnl ### Checks for operating system services
@@ -1751,6 +2225,7 @@ else
    ac_cv_sys_interpreter=no
 fi
 rm -f conftest])
+interpval="$ac_cv_sys_interpreter"
 ])
 
 define(AC_HAVE_POUNDBANG,
@@ -2127,7 +2602,7 @@ dnl FIXME banish uname from this macro!
   # libraries we check for below, so use a different variable.
   #  --interran@uluru.Stanford.EDU, kb@cs.umb.edu.
   AC_CHECK_LIB(ICE, IceConnectionNumber,
-    [X_PRE_LIBS="$X_PRE_LIBS -lSM -lICE"])
+    [X_PRE_LIBS="$X_PRE_LIBS -lSM -lICE"], , $X_EXTRA_LIBS)
   LDFLAGS="$ac_save_LDFLAGS"
 
 fi
@@ -2136,6 +2611,70 @@ AC_SUBST(X_PRE_LIBS)dnl
 AC_SUBST(X_LIBS)dnl
 AC_SUBST(X_EXTRA_LIBS)dnl
 ])
+
+dnl The old Cygwin32 macro is deprecated.
+AC_DEFUN(AC_CYGWIN32,
+[AC_OBSOLETE([$0], [; instead use AC_CYGWIN])dnl
+AC_CYGWIN])
+
+dnl Check for Cygwin.  This is a way to set the right value for
+dnl EXEEXT.
+AC_DEFUN(AC_CYGWIN,
+[AC_CACHE_CHECK(for Cygwin environment, ac_cv_cygwin,
+[AC_TRY_COMPILE(,[
+#ifndef __CYGWIN__
+#define __CYGWIN__ __CYGWIN32__
+#endif
+return __CYGWIN__;],
+ac_cv_cygwin=yes, ac_cv_cygwin=no)
+rm -f conftest*])
+CYGWIN=
+test "$ac_cv_cygwin" = yes && CYGWIN=yes])
+
+dnl Check for mingw32.  This is another way to set the right value for
+dnl EXEEXT.
+AC_DEFUN(AC_MINGW32,
+[AC_CACHE_CHECK(for mingw32 environment, ac_cv_mingw32,
+[AC_TRY_COMPILE(,[return __MINGW32__;],
+ac_cv_mingw32=yes, ac_cv_mingw32=no)
+rm -f conftest*])
+MINGW32=
+test "$ac_cv_mingw32" = yes && MINGW32=yes])
+
+dnl Check for the extension used for executables.  This knows that we
+dnl add .exe for Cygwin or mingw32.  Otherwise, it compiles a test
+dnl executable.  If this is called, the executable extensions will be
+dnl automatically used by link commands run by the configure script.
+AC_DEFUN(AC_EXEEXT,
+[AC_REQUIRE([AC_CYGWIN])
+AC_REQUIRE([AC_MINGW32])
+AC_MSG_CHECKING([for executable suffix])
+AC_CACHE_VAL(ac_cv_exeext,
+[if test "$CYGWIN" = yes || test "$MINGW32" = yes; then
+  ac_cv_exeext=.exe
+else
+  rm -f conftest*
+  echo 'int main () { return 0; }' > conftest.$ac_ext
+  ac_cv_exeext=
+  if AC_TRY_EVAL(ac_link); then
+    for file in conftest.*; do
+      case $file in
+      *.c | *.o | *.obj) ;;
+      *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
+      esac
+    done
+  else
+    AC_MSG_ERROR([installation or configuration problem: compiler cannot create executables.])
+  fi
+  rm -f conftest*
+  test x"${ac_cv_exeext}" = x && ac_cv_exeext=no
+fi])
+EXEEXT=""
+test x"${ac_cv_exeext}" != xno && EXEEXT=${ac_cv_exeext}
+AC_MSG_RESULT(${ac_cv_exeext})
+dnl Setting ac_exeext will implicitly change the ac_link command.
+ac_exeext=$EXEEXT
+AC_SUBST(EXEEXT)])
 
 
 dnl ### Checks for UNIX variants

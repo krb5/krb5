@@ -33,6 +33,7 @@ packages' configuration headers or Makefile.in files.  You can use the
 program `autoheader' to automatically create a configuration header
 from a `configure.in', based on the information in `acconfig.h'.
 
-Mail suggestions and bug reports for Autoconf to
-bug-gnu-utils@prep.ai.mit.edu.  Please include the Autoconf version
-number, which you can get by running "autoconf --version".
+Mail suggestions and bug reports for Autoconf to autoconf@gnu.org.
+Please include the Autoconf version number, which you can get by running
+"autoconf --version".  The current autoconf maintainer is Ben Elliston
+<bje@cygnus.com>.
