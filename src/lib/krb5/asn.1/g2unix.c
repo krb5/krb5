@@ -46,12 +46,15 @@ register int *error;
     utcp = str2gent(tmp, strlen(tmp));
     if (utcp == NULLUTC) {
 	*error = EINVAL;
+	free(tmp);
 	return(0);
     }
     retval = gtime(ut2tm(utcp));
     if (retval == NOTOK) {
 	*error = EINVAL;
+	free(tmp);
 	return(0);
     }
+    free(tmp);
     return(retval);
 }
