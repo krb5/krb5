@@ -814,8 +814,8 @@ typedef struct _krb5_pa_enc_ts {
     krb5_int32		pausec;
 } krb5_pa_enc_ts;
 
-typedef krb5_error_code (krb5_preauth_obtain_proc)
-    KRB5_PROTOTYPE((krb5_context,
+typedef krb5_error_code (*krb5_preauth_obtain_proc)
+    KRB5_NPROTOTYPE((krb5_context,
 		    krb5_pa_data *,
 		    krb5_etype_info,
 		    krb5_keyblock *, 
@@ -829,8 +829,8 @@ typedef krb5_error_code (krb5_preauth_obtain_proc)
 		    krb5_kdc_req *,
 		    krb5_pa_data **));
 
-typedef krb5_error_code (krb5_preauth_process_proc)
-    KRB5_PROTOTYPE((krb5_context,
+typedef krb5_error_code (*krb5_preauth_process_proc)
+    KRB5_NPROTOTYPE((krb5_context,
 		    krb5_pa_data *,
 		    krb5_kdc_req *,
 		    krb5_kdc_rep *,
@@ -853,18 +853,18 @@ typedef struct _krb5_preauth_ops {
     krb5_magic magic;
     int     type;
     int	flags;
-    krb5_preauth_obtain_proc	*obtain;
-    krb5_preauth_process_proc	*process;
+    krb5_preauth_obtain_proc	obtain;
+    krb5_preauth_process_proc	process;
 } krb5_preauth_ops;
 
 krb5_error_code krb5_obtain_padata
     	KRB5_PROTOTYPE((krb5_context,
 		krb5_pa_data **,
-		krb5_error_code ( * )(krb5_context,
-	   			      krb5_const krb5_enctype,
-                                      krb5_data *,
-                                      krb5_const_pointer,
-                                      krb5_keyblock **),
+		krb5_error_code ( * )KRB5_NPROTOTYPE((krb5_context,
+						      krb5_const krb5_enctype,
+						      krb5_data *,
+						      krb5_const_pointer,
+						      krb5_keyblock **)),
 		krb5_const_pointer, 
 		krb5_creds *,
 		krb5_kdc_req *));
@@ -873,16 +873,16 @@ krb5_error_code krb5_process_padata
 	KRB5_PROTOTYPE((krb5_context,
 		krb5_kdc_req *,
 		krb5_kdc_rep *,
-		krb5_error_code ( * )(krb5_context,
-	   			      krb5_const krb5_enctype,
-                                      krb5_data *,
-                                      krb5_const_pointer,
-                                      krb5_keyblock **),
+		krb5_error_code ( * )KRB5_NPROTOTYPE((krb5_context,
+						      krb5_const krb5_enctype,
+						      krb5_data *,
+						      krb5_const_pointer,
+						      krb5_keyblock **)),
 		krb5_const_pointer,
-		krb5_error_code ( * )(krb5_context,
-				      krb5_const krb5_keyblock *,
-				      krb5_const_pointer,
-				      krb5_kdc_rep * ),
+		krb5_error_code ( * )KRB5_NPROTOTYPE((krb5_context,
+						      krb5_const krb5_keyblock *,
+						      krb5_const_pointer,
+						      krb5_kdc_rep * )),
 		krb5_keyblock **, 	
 		krb5_creds *, 
 		krb5_int32 *));		

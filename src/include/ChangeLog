@@ -1,3 +1,11 @@
+Sun Nov 26 19:23:35 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* k5-int.h: Ultrix is broken.  Hacked around by redefining the
+		typedefs of preauth_obtain_data_proc and
+		preauth_process_proc to be pointers to the functions
+		rather than the functions themselves.  Also made some
+		things KRB5_NPROTOTYPE.
+
 Fri Nov 17 22:29:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin, k5-int.h: Moved prototype for encode_kdc_rep to
