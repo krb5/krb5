@@ -1,3 +1,8 @@
+2002-09-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (DEFAULT_KDC_PORTLIST): Define as
+	DEFAULT_KDC_UDP_PORTLIST.
+
 2002-09-15  Tom Yu  <tlyu@mit.edu>
 
 	* kerberos_v4.c (check_princ): Call strftime() with correct number

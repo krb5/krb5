@@ -587,6 +587,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	if (aprof)
 	     krb5_aprof_finish(aprof);
     }
+#define DEFAULT_KDC_PORTLIST DEFAULT_KDC_UDP_PORTLIST
     if (default_ports == 0)
 	default_ports = strdup(DEFAULT_KDC_PORTLIST);
     /*
