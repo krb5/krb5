@@ -416,7 +416,7 @@ KRB5_DLLIMP void KRB5_CALLCONV
 krb5_free_config_files(filenames)
 	char **filenames;
 {
-    free_filenames(filenames);
+    free_filespecs(filenames);
 }
 
 #endif /* macintosh */

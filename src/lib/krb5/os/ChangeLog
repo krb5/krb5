@@ -4,6 +4,7 @@
 	missed name changes in the patch Miro just checked in but forgot
 	to mention here, in which Mac filespecs are used instead of
 	filenames.
+	(krb5_free_config_files): Ditto.
 
 1999-06-30  Ken Raeburn  <raeburn@mit.edu>
 
