@@ -1,3 +1,9 @@
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJFILEDEP, OBJFILELIST) [DOS]: Include locally
+	built object files.
+	(OBJFILE, LIBOBJS, LOCALINCLUDES) [DOS]: Define.
+
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MAC_SUBDIRS): Don't set.
