@@ -119,72 +119,73 @@ register krb5_creds * cred;
     if (retval)
 	return retval;
 
-#undef cleanup
-#define cleanup() {\
-	memset((char *)dec_rep->enc_part2->session->contents, 0,\
-	      dec_rep->enc_part2->session->length);\
-		  krb5_free_kdc_rep(dec_rep); }
-
     if (dec_rep->msg_type != KRB5_TGS_REP) {
-	cleanup();
-	return KRB5KRB_AP_ERR_MSG_TYPE;
+	retval = KRB5KRB_AP_ERR_MSG_TYPE;
+	goto errout;
     }
     
     /* now it's decrypted and ready for prime time */
 
     if (!krb5_principal_compare(dec_rep->client, tgt->client)) {
-	cleanup();
-	return KRB5_KDCREP_MODIFIED;
+	retval = KRB5_KDCREP_MODIFIED;
+	goto errout;
     }
     /* put pieces into cred-> */
-    if (retval = krb5_copy_keyblock_contents(dec_rep->enc_part2->session,
-					     &cred->keyblock)) {
-	cleanup();
-	return retval;
+    if (cred->keyblock.contents) {
+	memset(&cred->keyblock.contents, 0, cred->keyblock.length);
+	krb5_xfree(cred->keyblock.contents);
     }
-    memset((char *)dec_rep->enc_part2->session->contents, 0,
-	  dec_rep->enc_part2->session->length);
-
-#undef cleanup
-#define cleanup() {\
-	memset((char *)cred->keyblock.contents, 0, cred->keyblock.length);\
-		  krb5_free_kdc_rep(dec_rep); }
+    if (retval = krb5_copy_keyblock_contents(dec_rep->enc_part2->session,
+					     &cred->keyblock))
+	goto errout;
 
     /* Should verify that the ticket is what we asked for. */
     cred->times = dec_rep->enc_part2->times;
     cred->ticket_flags = dec_rep->enc_part2->flags;
     cred->is_skey = TRUE;
-    if (dec_rep->enc_part2->caddrs) {
-	if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
-					 &cred->addresses)) {
-	    cleanup();
-	    return retval;
-	}
-    } else {
-	/* no addresses in the list means we got what we had */
-	if (retval = krb5_copy_addresses(tgt->addresses,
-					 &cred->addresses)) {
-	    cleanup();
-	    return retval;
-	}
-    }
-    if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
-				     &cred->server)) {
-	cleanup();
-	return retval;
-    }
-
-    if (retval = encode_krb5_ticket(dec_rep->ticket, &scratch)) {
-	cleanup();
+    if (cred->addresses)
 	krb5_free_addresses(cred->addresses);
-	return retval;
-    }
+    if (dec_rep->enc_part2->caddrs)
+	retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
+				     &cred->addresses);
+    else
+	/* no addresses in the list means we got what we had */
+	retval = krb5_copy_addresses(tgt->addresses, &cred->addresses);
+    if (retval)
+	    goto errout;
+    
+    if (cred->server)
+	krb5_free_principal(cred->server);
+    if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
+				     &cred->server))
+	goto errout;
+
+    if (retval = encode_krb5_ticket(dec_rep->ticket, &scratch))
+	goto errout;
 
     cred->ticket = *scratch;
     krb5_xfree(scratch);
 
+errout:
+    if (retval) {
+	if (cred->keyblock.contents) {
+	    memset((char *)cred->keyblock.contents, 0, cred->keyblock.length);
+	    krb5_xfree(cred->keyblock.contents);
+	    cred->keyblock.contents = 0;
+	}
+	if (cred->addresses) {
+	    krb5_free_addresses(cred->addresses);
+	    cred->addresses = 0;
+	}
+	if (cred->server) {
+	    krb5_free_principal(cred->server);
+	    cred->server = 0;
+	}
+    }
+    memset((char *)dec_rep->enc_part2->session->contents, 0,
+	   dec_rep->enc_part2->session->length);
     krb5_free_kdc_rep(dec_rep);
-    return 0;
+    return retval;
 }
 
 /*

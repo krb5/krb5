@@ -67,7 +67,7 @@ krb5_enc_tkt_part **partto;
 	    krb5_free_principal(tempto->client);
 	    krb5_free_keyblock(tempto->session);
 	    krb5_xfree(tempto);
-	    return retval;
+	    return ENOMEM;
 	}
 	memcpy((char *)tempto->transited.tr_contents.data,
 	       (char *)partfrom->transited.tr_contents.data,
@@ -111,8 +111,10 @@ krb5_ticket **pto;
 	return ENOMEM;
     *tempto = *from;
     retval = krb5_copy_principal(from->server, &tempto->server);
-    if (retval)
+    if (retval) {
+	krb5_xfree(tempto);
 	return retval;
+    }
     retval = krb5_copy_data(&from->enc_part.ciphertext, &scratch);
     if (retval) {
 	krb5_free_principal(tempto->server);

@@ -320,6 +320,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
     if (retval = krb5_copy_addresses(as_reply->enc_part2->caddrs,
 				     &creds->addresses)) {
 	cleanup_key();
+	krb5_free_kdc_rep(as_reply);
 	return retval;
     }
     creds->second_ticket.length = 0;
@@ -330,6 +331,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	krb5_free_kdc_rep(as_reply);
 	krb5_free_addresses(creds->addresses);
 	cleanup_key();
+	krb5_free_kdc_rep(as_reply);
 	return retval;
     }	
     creds->ticket = *packet;
@@ -342,6 +344,7 @@ OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 	krb5_xfree(creds->ticket.data);
 	krb5_free_addresses(creds->addresses);
 	cleanup_key();
+	krb5_free_kdc_rep(as_reply);
 	return retval;
     }
     if (ret_as_reply)

@@ -78,11 +78,15 @@ krb5_data *outbuf;
 
 #define cleanup() krb5_free_safe(message)
 
-    if (!valid_cksumtype(message->checksum->checksum_type))
+    if (!valid_cksumtype(message->checksum->checksum_type)) {
+	cleanup();
 	return KRB5_PROG_SUMTYPE_NOSUPP;
+    }
     if (!is_coll_proof_cksum(message->checksum->checksum_type) ||
-	!is_keyed_cksum(message->checksum->checksum_type))
+	!is_keyed_cksum(message->checksum->checksum_type)) {
+	cleanup();
 	return KRB5KRB_AP_ERR_INAPP_CKSUM;
+    }
 
     if (!(safe_flags & KRB5_SAFE_NOTIME)) {
 	krb5_donot_replay replay;

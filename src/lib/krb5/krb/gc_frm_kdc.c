@@ -73,7 +73,7 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 {
     krb5_creds tgt, tgtq;
     krb5_creds **ret_tgts = 0;
-    krb5_principal *tgs_list, *next_server;
+    krb5_principal *tgs_list = 0, *next_server;
     krb5_principal final_server;
     krb5_error_code retval;
     int nservers;
@@ -82,6 +82,9 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 
     /* in case we never get a TGT, zero the return */
     *tgts = 0;
+    
+    memset((char *)&tgtq, 0, sizeof(tgtq));
+    memset((char *)&tgt, 0, sizeof(tgt));
 
     /*
      * we know that the desired credentials aren't in the cache yet.
@@ -99,20 +102,14 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
      *  realm's KDC; so we use KRB5_TC_MATCH_SRV_NAMEONLY below)
      */
 
-    /*
-     * we're sharing some substructure here, which is dangerous.
-     * Be sure that if you muck with things here that tgtq.* doesn't share
-     * any substructure before you deallocate/clean up/whatever.
-     */
-    memset((char *)&tgtq, 0, sizeof(tgtq));
-    tgtq.client = cred->client;
-
+    if (retval = krb5_copy_principal(cred->client, &tgtq.client))
+	goto errout;
     if (retval = krb5_tgtname(krb5_princ_realm(cred->server),
 			      krb5_princ_realm(cred->client), &final_server))
-	return retval;
-    tgtq.server = final_server;
+	goto errout;
+    if (retval = krb5_copy_principal(final_server, &tgtq.server))
+	goto errout;
 
-    /* try to fetch it directly */
     retval = krb5_cc_retrieve_cred (ccache,
 				    KRB5_TC_MATCH_SRV_NAMEONLY,
 				    &tgtq,
@@ -120,16 +117,16 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 
     if (retval != 0) {
 	if (retval != KRB5_CC_NOTFOUND)
-	    goto out;
+	    goto errout;
 	/* don't have the right TGT in the cred cache.  Time to iterate
 	   across realms to get the right TGT. */
 
 	/* get a list of realms to consult */
-	retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
-				      krb5_princ_realm(cred->server),
-				      &tgs_list, KRB5_REALM_BRANCH_CHAR);
-	if (retval)
-	    goto out;
+	if (retval = krb5_walk_realm_tree(krb5_princ_realm(cred->client),
+					  krb5_princ_realm(cred->server),
+					  &tgs_list, KRB5_REALM_BRANCH_CHAR))
+	    goto errout;
+
 	/* walk the list BACKWARDS until we find a cached
 	   TGT, then move forward obtaining TGTs until we get the last
 	   TGT needed */
@@ -140,16 +137,16 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 
 	/* next_server now points to the last TGT */
 	for (; next_server >= tgs_list; next_server--) {
-	    tgtq.server = *next_server;
+	    krb5_free_principal(tgtq.server);
+	    if (retval = krb5_copy_principal(*next_server, &tgt.server))
+		goto errout;
 	    retval = krb5_cc_retrieve_cred (ccache,
 					    KRB5_TC_MATCH_SRV_NAMEONLY,
 					    &tgtq,
 					    &tgt);
 	    if (retval) {
-		if (retval != KRB5_CC_NOTFOUND) {
-		    krb5_free_realm_tree(tgs_list);
-		    goto out;
-		}
+		if (retval != KRB5_CC_NOTFOUND)
+		    goto errout;
 		continue;
 	    }
 	    next_server++;
@@ -158,38 +155,38 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 	if (next_server < tgs_list) {
 	    /* didn't find any */
 	    retval = KRB5_NO_TKT_IN_RLM;
-	    krb5_free_realm_tree(tgs_list);
-	    goto out;
+	    goto errout;
 	}
 	/* allocate storage for TGT pointers. */
 	ret_tgts = (krb5_creds **)calloc(nservers+1, sizeof(krb5_creds));
 	if (!ret_tgts) {
 	    retval = ENOMEM;
-	    krb5_free_realm_tree(tgs_list);
-	    goto out;
+	    goto errout;
 	}
 	*tgts = ret_tgts;
 	for (nservers = 0; *next_server; next_server++, nservers++) {
-
 	    krb5_data *tmpdata;
 
 	    if (!valid_keytype(tgt.keyblock.keytype)) {
 		retval = KRB5_PROG_KEYTYPE_NOSUPP;
-		krb5_free_realm_tree(tgs_list);
-		goto out;
+		goto errout;
 	    }
 	    /* now get the TGTs */
+	    krb5_free_cred_contents(&tgtq);
 	    memset((char *)&tgtq, 0, sizeof(tgtq));
 	    tgtq.times = tgt.times;
-	    tgtq.client = tgt.client;
+	    if (retval = krb5_copy_principal(tgt.client, &tgtq.client))
+		goto errout;
 
 	    /* ask each realm for a tgt to the end */
-	    if (retval = krb5_copy_data(krb5_princ_realm(*next_server), &tmpdata)) {
-		krb5_free_realm_tree(tgs_list);
-		goto out;
+	    if (retval = krb5_copy_data(krb5_princ_realm(*next_server),
+					&tmpdata)) {
+		goto errout;
 	    }
+	    free(krb5_princ_realm(final_server)->data);
 	    krb5_princ_set_realm(final_server, tmpdata);
-	    tgtq.server = final_server;
+	    if (retval = krb5_copy_principal(final_server, &tgtq.server))
+		goto errout;
 
 	    tgtq.is_skey = FALSE;
 	    tgtq.ticket_flags = tgt.ticket_flags;
@@ -199,10 +196,9 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 					       flags2options(tgtq.ticket_flags),
 					       etype,
 					       krb5_kdc_req_sumtype,
-					       &tgtq)) {
-		krb5_free_realm_tree(tgs_list);
-		goto out;
-	    }
+					       &tgtq))
+		goto errout;
+
 	    /* make sure the returned ticket is somewhere in the remaining
 	       list, but we can tolerate different expected issuing realms */
 	    while (*++next_server &&
@@ -210,28 +206,21 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 					   &(tgtq.server[1])));
 	    if (!next_server) {
 		/* what we got back wasn't in the list! */
-		krb5_free_realm_tree(tgs_list);
 		retval = KRB5_KDCREP_MODIFIED;
-		goto out;
+		goto errout;
 	    }
 							   
 	    /* save tgt in return array */
-	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers])) {
-		krb5_free_realm_tree(tgs_list);
-		goto out;
-	    }
+	    if (retval = krb5_copy_creds(&tgtq, &ret_tgts[nservers]))
+		goto errout;
 	    tgt = *ret_tgts[nservers];
 	    returning_tgt = 1;		/* don't free it below... */
-	    tgtq.client = 0;
-	    tgtq.server = 0;
-	    krb5_free_cred_contents(&tgtq);
 	}
-	krb5_free_realm_tree(tgs_list);
     }
     /* got/finally have tgt! */
     if (!valid_keytype(tgt.keyblock.keytype)) {
 	retval = KRB5_PROG_KEYTYPE_NOSUPP;
-	goto out;
+	goto errout;
     }
     etype = krb5_keytype_array[tgt.keyblock.keytype]->system->proto_enctype;
 
@@ -246,10 +235,13 @@ krb5_get_cred_from_kdc (ccache, cred, tgts)
 				       etype,
 				       krb5_kdc_req_sumtype,
 				       cred);
-    
+errout:
     if (!returning_tgt)
 	krb5_free_cred_contents(&tgt);
-out:
-    krb5_free_principal(final_server);
+    if (final_server)
+	    krb5_free_principal(final_server);
+    krb5_free_cred_contents(&tgtq);
+    if (tgs_list)
+	krb5_free_realm_tree(tgs_list);
     return retval;
 }

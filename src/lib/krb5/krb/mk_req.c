@@ -69,9 +69,10 @@ krb5_data *outbuf;
     /* obtain ticket & session key */
 
     memset((char *)&creds, 0, sizeof(creds));
-    creds.server = (krb5_principal) server;
+    if (retval = krb5_copy_principal(server, &creds.server))
+	goto errout;
     if (retval = krb5_cc_get_principal(ccache, &creds.client))
-	return(retval);
+	goto errout;
     /* creds.times.endtime = 0; -- memset 0 takes care of this
      				   zero means "as long as possible" */
     /* creds.keyblock.keytype = 0; -- as well as this.
@@ -81,7 +82,7 @@ krb5_data *outbuf;
     if (retval = krb5_get_credentials(krb5_kdc_default_options,
 				      ccache,
 				      &creds))
-	return(retval);
+	goto errout;
 
     retval = krb5_mk_req_extended(ap_req_options,
 				  checksum,
@@ -92,9 +93,8 @@ krb5_data *outbuf;
 				  &creds,
 				  0, 	/* We don't need the authenticator */
 				  outbuf);
-    /* creds.server and the rest of the creds.* fields are filled in
-       by the ccache fetch or the kdc fetch, so we should allow it to be
-       freed */
+
+errout:
     krb5_free_cred_contents(&creds);
     return retval;
 }

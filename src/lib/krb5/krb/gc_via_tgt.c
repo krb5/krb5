@@ -143,6 +143,10 @@ OLDDECLARG(krb5_creds *, cred)
 	return KRB5_KDCREP_MODIFIED;
     }
     /* put pieces into cred-> */
+    if (cred->keyblock.contents) {
+	memset(&cred->keyblock.contents, 0, cred->keyblock.length);
+	krb5_xfree(cred->keyblock.contents);
+    }
     if (retval = krb5_copy_keyblock_contents(dec_rep->enc_part2->session,
 					     &cred->keyblock)) {
 	cleanup();
@@ -188,6 +192,9 @@ OLDDECLARG(krb5_creds *, cred)
 
     cred->ticket_flags = dec_rep->enc_part2->flags;
     cred->is_skey = FALSE;
+    if (cred->addresses) {
+	krb5_free_addresses(cred->addresses);
+    }
     if (dec_rep->enc_part2->caddrs) {
 	if (retval = krb5_copy_addresses(dec_rep->enc_part2->caddrs,
 					 &cred->addresses)) {
@@ -205,7 +212,8 @@ OLDDECLARG(krb5_creds *, cred)
     /*
      * Free cred->server before overwriting it.
      */
-    krb5_free_principal(cred->server);
+    if (cred->server)
+	krb5_free_principal(cred->server);
     if (retval = krb5_copy_principal(dec_rep->enc_part2->server,
 				     &cred->server)) {
 	cleanup();
