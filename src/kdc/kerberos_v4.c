@@ -673,10 +673,9 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 
     case AUTH_MSG_KDC_REQUEST:
 	{
-#ifdef notdef
-	    u_long  time_ws;	/* Workstation time */
-#endif
 	    int    req_life;	/* Requested liftime */
+	    unsigned int request_backdate =  0; /*How far to backdate
+						  in seconds.*/
 	    char   *service;	/* Service name */
 	    char   *instance;	/* Service instance */
 #ifdef notdef
@@ -749,7 +748,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	     * kerb_time, which is potentially problematic.
 	     */
 	    if (v4endtime > v4req_end)
-		kerb_time.tv_sec -= v4endtime - v4req_end;
+		request_backdate = v4endtime - v4req_end;
 
 #ifdef NOENCRYPTION
 	    memset(session_key, 0, sizeof(C_Block));
@@ -770,7 +769,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    krb_create_ticket(tk, k_flags, a_name_data.name,
 			      a_name_data.instance, local_realm,
 			      client_host.s_addr, (char *) session_key,
-			      lifetime, kerb_time.tv_sec,
+			      lifetime, kerb_time.tv_sec - request_backdate,
 			      s_name_data.name, s_name_data.instance,
 			      key);
 

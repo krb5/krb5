@@ -1,3 +1,9 @@
+2004-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Only backdate the rquest in the
+	issued ticket.  Client libraries tend to verify that the
+	backdating falls within clockskew.  a
+
 2003-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
