@@ -8,13 +8,13 @@
  * For copying and distribution information, please see the file
  * <krb5/mit-copyright.h>.
  *
- * <<< Description >>>
+ * Function prototypes for asn1 glue routines.
  */
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_ASN1DEFS__
-#define __KRB5_ASN1DEFS__
+#ifndef KRB5_ASN1DEFS__
+#define KRB5_ASN1DEFS__
 
 /* asn1glue.c */
 struct type_UNIV_UTCTime *unix2utctime
@@ -176,4 +176,4 @@ krb5_priv_enc_part *KRB5_EncKrbPrivPart2krb5_priv_enc_part
 	PROTOTYPE((struct type_KRB5_EncKrbPrivPart *,
 		   int * ));
 
-#endif /* __KRB5_ASN1DEFS__ */
+#endif /* KRB5_ASN1DEFS__ */
