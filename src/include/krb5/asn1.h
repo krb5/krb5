@@ -13,13 +13,12 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __KRB5_ASN1__
-#define __KRB5_ASN1__
+#ifndef KRB5_ASN1__
+#define KRB5_ASN1__
 
 #include "../../asn.1/KRB5-types.h"
-#include "../../asn.1/krb5_free.h"
 #include "../../asn.1/asn1defs.h"
 #include "../../asn.1/KRB5-types-aux.h"
 #include "../../asn.1/encode.h"
 
-#endif /* __KRB5_ASN1__ */
+#endif /* KRB5_ASN1__ */
