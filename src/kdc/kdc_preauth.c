@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_preauth.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -431,6 +431,18 @@ cleanup:
     return (retval);
 }
 
+static krb5_boolean
+request_contains_enctype (krb5_context context,  const krb5_kdc_req *request,
+			  krb5_enctype enctype)
+{
+    int i;
+    for (i =0; i < request->nktypes; i++)
+	if (request->ktype[i] == enctype)
+	    return 1;
+    return 0;
+}
+
+
 static krb5_error_code
 verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
@@ -542,6 +554,13 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 	    db_etype = ENCTYPE_DES_CBC_CRC;
 	
 	while (1) {
+	    if (!request_contains_enctype(context,
+					  request, db_etype)) {
+		if (db_etype = ENCTYPE_DES_CBC_CRC)
+                    continue;
+                else break;
+            }
+
 	    if ((entry[i] = malloc(sizeof(krb5_etype_info_entry))) == NULL) {
 		retval = ENOMEM;
 		goto cleanup;

@@ -1,5 +1,5 @@
 /*
- * Copyright 1995 by the Massachusetts Institute of Technology.  All
+ * Copyright 1995, 2003 by the Massachusetts Institute of Technology.  All
  * Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -825,6 +825,76 @@ static const pa_types_t pa_types[] = {
     },
 };
 
+static void
+sort_etype_info(krb5_context  context, krb5_kdc_req *request,
+                krb5_etype_info_entry **etype_info)
+{
+/* Originally adapted from a proposed solution in ticket 1006.  This
+ * solution  is  not efficient, but implementing an efficient sort
+ * with a comparison function based on order in the kdc request would
+ * be difficult.*/
+    krb5_etype_info_entry *tmp;
+    int i, j, e;
+    krb5_boolean similar;
+
+    if (etype_info == NULL)
+	return;
+
+    /* First, move up etype_info_entries whose enctype exactly matches a
+     * requested enctype.
+     */
+    e = 0;
+    for ( i = 0 ; i < request->nktypes && etype_info[e] != NULL ; i++ )
+    {
+	if (request->ktype[i] == etype_info[e]->etype)
+	{
+	    e++;
+	    continue;
+	}
+	for ( j = e+1 ; etype_info[j] ; j++ )
+	    if (request->ktype[i] == etype_info[j]->etype)
+		break;
+	if (etype_info[j] == NULL)
+	    continue;
+
+	tmp = etype_info[j];
+	etype_info[j] = etype_info[e];
+	etype_info[e] = tmp;
+	e++;
+    }
+
+    /* Then move up etype_info_entries whose enctype is similar to a
+     * requested enctype.
+     */
+    for ( i = 0 ; i < request->nktypes && etype_info[e] != NULL ; i++ )
+    {
+	if (krb5_c_enctype_compare(context, request->ktype[i], etype_info[e]->etype, &similar) != 0)
+	    continue;
+
+	if (similar)
+	{
+	    e++;
+	    continue;
+	}
+	for ( j = e+1 ; etype_info[j] ; j++ )
+	{
+	    if (krb5_c_enctype_compare(context, request->ktype[i], etype_info[j]->etype, &similar) != 0)
+		continue;
+
+	    if (similar)
+		break;
+	}
+	if (etype_info[j] == NULL)
+	    continue;
+
+	tmp = etype_info[j];
+	etype_info[j] = etype_info[e];
+	etype_info[e] = tmp;
+	e++;
+    }
+}
+
+
 krb5_error_code
 krb5_do_preauth(krb5_context context,
 		krb5_kdc_req *request,
@@ -891,6 +961,7 @@ krb5_do_preauth(krb5_context context,
 		    etype_info = NULL;
 		    break;
 		}
+                sort_etype_info(context, request, etype_info);
 		salt->data = (char *) etype_info[0]->salt;
 		salt->length = etype_info[0]->length;
 		*etype = etype_info[0]->etype;
