@@ -1200,6 +1200,7 @@ typedef struct _krb5_cc_ops krb5_cc_ops;
 
 /* for set_flags and other functions */
 #define KRB5_TC_OPENCLOSE		0x00000001
+#define KRB5_TC_NOTICKET                0x00000002
 
 const char * KRB5_CALLCONV
 krb5_cc_get_name (krb5_context context, krb5_ccache cache);

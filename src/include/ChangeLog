@@ -1,3 +1,7 @@
+2004-09-01  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5.hin: define KRB5_TC_NOTICKET for use with krb5_cc_set_flags
+
 2004-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (fai_add_hosts_by_name): Handle case where
