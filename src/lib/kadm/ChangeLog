@@ -1,3 +1,10 @@
+Fri Jun 2 17:56:03 1995 Keith Vetter (keithv@fusion.com)
+
+	* adm_conn.c: used SOCKET_ERRNO instead of errno and 
+	   added prototypes for the local functions.
+	* adm_rw.c: added prototypes for the local functions so that
+	   ints get promoted to longs correctly on the PC.
+
 Wed May 31 08:10:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (DB_OBJS): Change DBOBJS to DB_OBJS to match rest of

@@ -38,6 +38,33 @@
  * Strings
  */
 static char *kadm_cache_name_fmt =	"FILE:/tmp/tkt_kpw_%d";
+
+/*
+ * Prototypes for local functions
+ */
+static krb5_error_code kadm_get_ccache
+	PROTOTYPE((krb5_context,
+		   char *,
+		   krb5_ccache *,
+		   krb5_principal *));
+static krb5_error_code kadm_get_creds
+	PROTOTYPE((krb5_context,
+		krb5_ccache ,
+		krb5_principal,
+		krb5_creds  *,
+		char *,
+		char *));
+static krb5_error_code kadm_contact_server
+	PROTOTYPE((krb5_context,
+		krb5_data *,
+		int *,
+		krb5_address **,
+		krb5_address **));
+static krb5_error_code kadm_get_auth
+	PROTOTYPE((krb5_context,
+		krb5_auth_context * *,
+		krb5_address *,
+		krb5_address *));
 
 /*
  * kadm_get_ccache()	- Initialze a credentials cache.
@@ -323,7 +350,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 	    /* Open a tcp socket */
 	    *sockp = socket(PF_INET, SOCK_STREAM, 0);
 	    if (*sockp < 0) {
-		kret = errno;
+		kret = SOCKET_ERRNO;
 		goto cleanup;
 	    }
 	    else kret = 0;
@@ -333,6 +360,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 			(struct sockaddr *) &in_remote,
 			sizeof(in_remote)) < 0) {
 		/* Failed, go to next address */
+		kret = SOCKET_ERRNO;
 		close(*sockp);
 		*sockp = -1;
 		continue;
@@ -344,7 +372,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 			    (struct sockaddr *) &in_local,
 			    &addr_len) < 0) {
 		/* Couldn't get our local address? */
-		kret = errno;
+		kret = SOCKET_ERRNO;
 		goto cleanup;
 	    }
 	    else {
@@ -403,7 +431,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 		/* Open a tcp socket */
 		*sockp = socket(PF_INET, SOCK_STREAM, 0);
 		if (*sockp < 0) {
-		    kret = errno;
+		    kret = SOCKET_ERRNO;
 		    goto cleanup;
 		}
 		else kret = 0;
@@ -411,6 +439,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 		if (connect(*sockp,
 			    (struct sockaddr *) &in_remote,
 			    sizeof(in_remote)) < 0) {
+		    kret = SOCKET_ERRNO;
 		    close(*sockp);
 		    *sockp = -1;
 		    continue;
@@ -421,7 +450,7 @@ kadm_contact_server(kcontext, realmp, sockp, local, remote)
 		if (getsockname(*sockp,
 				(struct sockaddr *) &in_local,
 				&addr_len) < 0) {
-		    kret = errno;
+		    kret = SOCKET_ERRNO;
 		    goto cleanup;
 		}
 		else {

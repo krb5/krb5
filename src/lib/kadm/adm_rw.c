@@ -30,6 +30,12 @@
 #include "adm_proto.h"
 
 /*
+ * Local prototypes (needed or else the PC will pass fail).
+ */
+static void kadm_copyin_int32 PROTOTYPE((char *, krb5_int32 *));
+static void kadm_copyout_int32 PROTOTYPE((krb5_int32, char *));
+
+/*
  * Routines to [de]serialize integers.
  *
  * kadm_copyin_int32	- Move a 32-bit integer fron network byte order to
@@ -290,7 +296,8 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
     krb5_error_code	ret;
     krb5_data		msg_data;
     krb5_replay_data	replay_data;
-    krb5_int32	ac_flags;
+    krb5_int32		ac_flags;
+    krb5_int32		len32;
 
     /*
      * First check that our auth context has the right flags in it.
@@ -341,8 +348,9 @@ krb5_read_adm_cmd(kcontext, sock, ctx, nargs, arglist)
 			    /* First get the length of the reply component */
 			    if (curr + sizeof(krb5_int32) - msg_data.data <=
 				msg_data.length) {
-				kadm_copyin_int32(curr,
-						  &xarglist[i].length);
+
+				kadm_copyin_int32(curr, &len32);
+				xarglist[i].length = (int) len32;
 				curr += sizeof(krb5_int32);
 
 				/* Then get the memory for the actual data */
@@ -417,7 +425,8 @@ krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
     krb5_error_code	ret;
     krb5_data		msg_data;
     krb5_replay_data	replay_data;
-    krb5_int32	ac_flags;
+    krb5_int32		ac_flags;
+    krb5_int32		len32;
 
     /*
      * First check that our auth context has the right flags in it.
@@ -470,8 +479,8 @@ krb5_read_adm_reply(kcontext, sock, ctx, cmd_stat, ncomps, complist)
 			    /* First get the length of the reply component */
 			    if (curr + sizeof(krb5_int32) - msg_data.data <=
 				msg_data.length) {
-				kadm_copyin_int32(curr,
-						  &xcomplist[i].length);
+				kadm_copyin_int32(curr, &len32);
+				xcomplist[i].length = (int) len32;
 				curr += sizeof(krb5_int32);
 
 				/* Then get the memory for the actual data */
