@@ -1155,22 +1155,22 @@ dnl
 AC_DEFUN(AC_LIBRARY_NET, [
    # Most operating systems have gethostbyname() in the default searched
    # libraries (i.e. libc):
-   AC_CHECK_FUNC(gethostbyname, ,
+   AC_CHECK_FUNC(gethostbyname, , [
      # Some OSes (eg. Solaris) place it in libnsl:
-     AC_CHECK_LIB(nsl, gethostbyname, , 
+     AC_CHECK_LIB(nsl, gethostbyname, , [
        # Some strange OSes (SINIX) have it in libsocket:
-       AC_CHECK_LIB(socket, gethostbyname, ,
+       AC_CHECK_LIB(socket, gethostbyname, , [
           # Unfortunately libsocket sometimes depends on libnsl.
           # AC_CHECK_LIB's API is essentially broken so the following
           # ugliness is necessary:
           AC_CHECK_LIB(socket, gethostbyname,
              LIBS="-lsocket -lnsl $LIBS",
-               AC_CHECK_LIB(resolv, gethostbyname,
-			    LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv),
+               [AC_CHECK_LIB(resolv, gethostbyname,
+			     LIBS="-lresolv $LIBS" ; RESOLV_LIB=-lresolv)],
              -lnsl)
-       )
-     )
-   )
+       ])
+     ])
+   ])
   AC_CHECK_FUNC(socket, , AC_CHECK_LIB(socket, socket, ,
     AC_CHECK_LIB(socket, socket, LIBS="-lsocket -lnsl $LIBS", , -lnsl)))
   KRB5_AC_ENABLE_DNS
