@@ -1,17 +1,40 @@
 /*
- *	$Source$
- *	$Author$
- *	$Id$
+ * $Source$
+ * $Author$
+ * $Id$
+ *
+ * Copyright 1990 by the Massachusetts Institute of Technology.
+ *
+ * For copying and distribution information, please see the file
+ * <krb5/copyright.h>.
+ *
+ * Definitions for the MD4 checksum.
  */
 
 /*
  * md4.h from RFC1186
  *
  * $Log$
- * Revision 5.0  1990/11/07 14:12:21  jtkohl
- * Initial code from RFC
+ * Revision 5.1  1990/11/08 11:30:49  jtkohl
+ * add STDC function prototypes
+ * add declaration of MDreverse
+ * add Kerberos V5 additions.
  *
+ * Revision 5.0  90/11/07  14:12:21  jtkohl
+ * Initial code from RFC
+ * 
  */
+
+#include <krb5/copyright.h>
+
+#ifndef KRB5_RSA_MD4__
+#define KRB5_RSA_MD4__
+
+#define RSA_MD4_CKSUMTYPE	4
+
+#define RSA_MD4_CKSUM_LENGTH	(4*sizeof(krb5_int32))
+
+extern krb5_checksum_entry rsa_md4_cksumtable_entry;
 
 /*
 ** ********************************************************************
@@ -22,6 +45,7 @@
 ** ********************************************************************
 */
 
+#ifdef BITS32
 /* MDstruct is the data structure for a message digest computation.
 */
 typedef struct {
@@ -29,13 +53,20 @@ typedef struct {
   unsigned char count[8]; /* Number of bits processed so far */
   unsigned int done;      /* Nonzero means MD computation finished */
 } MDstruct, *MDptr;
+#else
+ error: you gotta fix this implementation to deal with non-32 bit words;
+#endif
 
 /* MDbegin(MD)
 ** Input: MD -- an MDptr
 ** Initialize the MDstruct prepatory to doing a message digest
 ** computation.
 */
+#ifdef __STDC__
+extern void MDbegin(MDptr);
+#else
 extern void MDbegin();
+#endif
 
 /* MDupdate(MD,X,count)
 ** Input: MD -- an MDptr
@@ -50,7 +81,11 @@ extern void MDbegin();
 ** every MD computation should end with one call to MDupdate with a
 ** count less than 512.  Zero is OK for a count.
 */
+#ifdef __STDC__
+extern void MDupdate(MDptr, unsigned char *, unsigned int);
+#else
 extern void MDupdate();
+#endif
 
 /* MDprint(MD)
 ** Input: MD -- an MDptr
@@ -59,8 +94,23 @@ extern void MDupdate();
 ** of buffer[3].
 ** Each byte is printed with high-order hexadecimal digit first.
 */
+#ifdef __STDC__
+extern void MDprint(MDptr);
+#else
 extern void MDprint();
+#endif
+
+/* MDreverse(X)
+** Reverse the byte-ordering of every int in X.
+** Assumes X is an array of 16 ints.
+*/
+#ifdef __STDC__
+extern void MDreverse(unsigned int *);
+#else
+extern void MDreverse();
+#endif
 
 /*
 ** End of md4.h
 */
+#endif /* KRB5_RSA_MD4__ */
