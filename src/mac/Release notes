@@ -175,3 +175,8 @@ Changes in 1.1a3:
 3.0d8
  from tag Mac_GSSKerberos5_3_0d8
  now following the krb5-1-2 branch (except in util/profile)
+
+3.0d8
+ from tag Mac_GSSKerberos5_3_0a1
+ fixed krb5_cc_default
+ workaround for hostname resolution problems
