@@ -18,7 +18,7 @@ else
 	kdb4=
 	krb4=
 fi
-CONFIG_DIRS(crypto des425 $kdb4 $krb4 krb5 kdb gssapi kadm)
+CONFIG_DIRS(crypto des425 $kdb4 krb5 $krb4 krb5util kdb gssapi kadm)
 AC_PROG_ARCHIVE
 AC_PROG_RANLIB
 DO_SUBDIRS
