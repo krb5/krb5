@@ -1,3 +1,8 @@
+2004-09-30  Jeffrey Altman <jaltman@mit.edu>
+
+        * hst_realm.c: provide definition for MAXDNAME if 
+          KRB5_DNS_LOOKUP is not defined.
+
 2004-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (T_STD_CONF_OBJS): Include dnsglue.o.

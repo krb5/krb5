@@ -65,7 +65,6 @@
  * host names should be in the usual form (e.g. FOO.BAR.BAZ)
  */
 
-#include "dnsglue.h"
 
 #define NEED_SOCKETS
 #include "k5-int.h"
@@ -81,6 +80,8 @@
 #include "fake-addrinfo.h"
 
 #ifdef KRB5_DNS_LOOKUP
+
+#include "dnsglue.h"
 /*
  * Try to look up a TXT record pointing to a Kerberos realm
  */
@@ -152,6 +153,10 @@ errout:
     }
     return retval;
 }
+#else /* KRB5_DNS_LOOKUP */
+#ifndef MAXDNAME
+#define MAXDNAME (16 * MAXHOSTNAMELEN)
+#endif /* MAXDNAME */
 #endif /* KRB5_DNS_LOOKUP */
 
 krb5_error_code krb5int_translate_gai_error (int);
