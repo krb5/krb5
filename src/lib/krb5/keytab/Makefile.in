@@ -2,14 +2,11 @@ thisconfigdir=./..
 myfulldir=lib/krb5/keytab
 mydir=keytab
 BUILDTOP=$(REL)$(U)$(S)$(U)$(S)$(U)
-LOCAL_SUBDIRS = file srvtab
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keytab
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 ##WIN16##LIBNAME=..\krb5.lib
-
-MAC_SUBDIRS = file srvtab
 
 STLIBOBJS= \
 	ktadd.o		\
@@ -18,6 +15,8 @@ STLIBOBJS= \
 	ktfr_entry.o	\
 	ktremove.o	\
 	ktfns.o		\
+	kt_file.o	\
+	kt_srvtab.o	\
 	read_servi.o
 
 OBJS=	\
@@ -27,6 +26,8 @@ OBJS=	\
 	$(OUTPRE)ktfr_entry.$(OBJEXT)	\
 	$(OUTPRE)ktremove.$(OBJEXT)	\
 	$(OUTPRE)ktfns.$(OBJEXT)	\
+	$(OUTPRE)kt_file.$(OBJEXT)	\
+	$(OUTPRE)kt_srvtab.$(OBJEXT)	\
 	$(OUTPRE)read_servi.$(OBJEXT)
 
 SRCS=	\
@@ -36,37 +37,20 @@ SRCS=	\
 	$(srcdir)/ktfr_entry.c	\
 	$(srcdir)/ktremove.c	\
 	$(srcdir)/ktfns.c	\
+	$(srcdir)/kt_file.c	\
+	$(srcdir)/kt_srvtab.c	\
 	$(srcdir)/read_servi.c
 
-all-windows:: subdirs $(OBJFILE)
+all-windows:: $(OBJFILE)
 
-##DOSsubdirs:: file\$(OUTPRE)file.lst srvtab\$(OUTPRE)srvtab.lst
-##DOSfile\$(OUTPRE)file.lst::
-##DOS	cd file
-##DOS	@echo Making in krb5\keytab\file
-##DOS	$(MAKE) -$(MFLAGS)
-##DOS	cd ..
-##DOSsrvtab\$(OUTPRE)srvtab.lst::
-##DOS	cd srvtab
-##DOS	@echo Making in krb5\keytab\srvtab
-##DOS	$(MAKE) -$(MFLAGS)
-##DOS	cd ..
-
-##DOS$(OBJFILE): $(OBJS) file\$(OUTPRE)file.lst srvtab\$(OUTPRE)srvtab.lst
+##DOS$(OBJFILE): $(OBJS)
 ##DOS	$(RM) $(OBJFILE)
-##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj file\$(OUTPRE)*.obj srvtab\$(OUTPRE)*.obj > $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj > $(OBJFILE)
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 
 clean-windows::
-	cd file
-	@echo Making clean in krb5\keytab\file
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\srvtab
-	@echo Making clean in krb5\keytab\srvtab
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
 	@echo Making clean in krb5\keytab
 	$(RM) $(OBJFILE)
 
@@ -77,30 +61,36 @@ clean-windows::
 #
 ktadd.so ktadd.po $(OUTPRE)ktadd.$(OBJEXT): ktadd.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 ktbase.so ktbase.po $(OUTPRE)ktbase.$(OBJEXT): ktbase.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 ktdefault.so ktdefault.po $(OUTPRE)ktdefault.$(OBJEXT): ktdefault.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 ktfr_entry.so ktfr_entry.po $(OUTPRE)ktfr_entry.$(OBJEXT): ktfr_entry.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 ktremove.so ktremove.po $(OUTPRE)ktremove.$(OBJEXT): ktremove.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 ktfns.so ktfns.po $(OUTPRE)ktfns.$(OBJEXT): ktfns.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
+kt_file.so kt_file.po $(OUTPRE)kt_file.$(OBJEXT): kt_file.c
+kt_srvtab.so kt_srvtab.po $(OUTPRE)kt_srvtab.$(OBJEXT): kt_srvtab.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 read_servi.so read_servi.po $(OUTPRE)read_servi.$(OBJEXT): read_servi.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
-  $(BUILDTOP)/include/com_err.h $(SRCTOP)/include/krb5/kdb.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/profile.h
 

@@ -1,3 +1,10 @@
+2002-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't set up keytab/file or keytab/srvtab
+	subdirectories.
+	* Makefile.in (STOBJLISTS): Delete keytab/file/OBJS.ST and
+	keytab/srvtab/OBJS.ST.
+
 2002-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBMINOR): Bump due to changes in error tables.

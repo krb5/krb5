@@ -24,7 +24,7 @@ STOBJLISTS= \
 	error_tables/OBJS.ST \
 	asn.1/OBJS.ST \
 	ccache/OBJS.ST \
-	keytab/OBJS.ST keytab/file/OBJS.ST keytab/srvtab/OBJS.ST \
+	keytab/OBJS.ST \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
 	os/OBJS.ST \
