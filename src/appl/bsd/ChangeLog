@@ -1,3 +1,7 @@
+Fri Apr 28 17:59:19 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (KLIB): include KRB4_LIB directly, to satisfy both
+	versions of the dependencies.
 
 Fri Apr 28 16:55:14 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- change position of KRB4_LIB for krshd and krlogind
