@@ -467,6 +467,19 @@ extern krb5_cksumtype krb5_max_cksum;		/* max entry in array */
 #define krb5_verify_checksum(context, ctype, cksum, in, in_length, seed, seed_length) ((*krb5_cksumarray[ctype]->sum_verf_func)(cksum, in, in_length, seed, seed_length))
 
 /*
+ * encryption routine prototypes
+ */
+krb5_error_code krb5_encrypt_data
+	KRB5_PROTOTYPE((krb5_context context, krb5_keyblock *key, 
+		   krb5_pointer ivec, krb5_data *data, 
+		   krb5_enc_data *enc_data));
+
+krb5_error_code krb5_decrypt_data
+	KRB5_PROTOTYPE((krb5_context context, krb5_keyblock *key, 
+		   krb5_pointer ivec, krb5_enc_data *data, 
+		   krb5_data *enc_data));
+
+/*
  * end "encryption.h"
  */
 
