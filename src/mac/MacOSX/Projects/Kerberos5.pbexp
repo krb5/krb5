@@ -10,25 +10,25 @@
     _krb5_address_compare
 	_krb5_address_order
 	_krb5_address_search
-
+#
 	_krb5_init_context
     _krb5_init_secure_context
 	_krb5_free_context
-#
 #
 # Crypto API (Commented out ones needed for LPRng)
 	_krb5_c_encrypt
 	_krb5_c_decrypt
 	_krb5_c_encrypt_length
 	_krb5_c_block_size
+	_krb5_c_make_random_key
+	_krb5_c_random_make_octets
+	_krb5_c_random_seed
+#
+# Will be added for 1.3
+#    _krb5_c_random_os_entropy
+#    _krb5_c_random_add_entropy
 #    _krb5_c_init_state
 #    _krb5_c_free_state
-#
-	_krb5_c_make_random_key
-#    _krb5_c_random_add_entropy
-	_krb5_c_random_make_octets
-#    _krb5_c_random_os_entropy
-	_krb5_c_random_seed
 #    
 	_krb5_c_string_to_key
 	_krb5_c_enctype_compare
@@ -42,22 +42,6 @@
 #	_krb5_c_valid_cksumtype
 #	_krb5_c_is_coll_proof_cksum
 #	_krb5_c_is_keyed_cksum
-#
-# Old crypto API
-	_krb5_decrypt
-	_krb5_encrypt
-	_krb5_process_key
-	_krb5_finish_key
-	_krb5_string_to_key
-	_krb5_init_random_key
-	_krb5_finish_random_key
-	_krb5_random_key
-	_krb5_eblock_enctype
-	_krb5_use_enctype
-	_krb5_encrypt_size
-	_krb5_checksum_size
-	_krb5_calculate_checksum
-	_krb5_verify_checksum
 #
 	_krb5_auth_con_genaddrs
 	_krb5_auth_con_init
@@ -100,7 +84,6 @@
     _krb5_cc_copy_creds
 #
 # Keytab interface (add macros)
-#
 #    _krb5_kt_get_type
 #    _krb5_kt_get_name
 #    _krb5_kt_close
@@ -138,6 +121,8 @@
 	_krb5_verify_init_creds_opt_init
 	_krb5_verify_init_creds_opt_set_ap_req_nofail
 #
+    _krb5_set_default_tgs_enctypes
+#
 	_krb5_free_tgt_creds
 #
 	_krb5_get_credentials
@@ -155,6 +140,16 @@
 	_krb5_rd_priv
 	_krb5_mk_safe
 	_krb5_rd_safe
+#
+    _krb5_mk_ncred
+    _krb5_mk_1cred
+	_krb5_rd_cred
+#
+	_krb5_recvauth
+	_krb5_sendauth
+    _krb5_recvauth_version
+#
+ 	_krb5_fwd_tgt_creds
 #
 	_krb5_parse_name
 	_krb5_unparse_name
@@ -220,26 +215,7 @@
 	_krb5_sname_to_principal
 	_krb5_change_password
 #
-# Do we want these?  Probably not.
-#    _krb5_set_config_files
-#    _krb5_get_default_config_files
-#    _krb5_free_config_files
-#
 	_krb5_get_profile
-#
-# Old initial tickets API
-	_krb5_get_in_tkt
-	_krb5_get_in_tkt_with_keytab
-	_krb5_get_in_tkt_with_password
-	_krb5_get_in_tkt_with_skey
-#
-	_krb5_recvauth
-	_krb5_sendauth
-    _krb5_recvauth_version
-#
-	_krb5_rd_cred
-#
- 	_krb5_fwd_tgt_creds
 #
     _krb5_read_password
 #
@@ -270,18 +246,46 @@
 #
 	_krb5_decode_ticket
 #
-# Do we want these?  Probably not.
-#    _krb5_appdefault_string
-#    _krb5_appdefault_boolean
+    _krb5_appdefault_string
+    _krb5_appdefault_boolean
 #
     _krb524_convert_creds_kdc
+#
+#
+# DEPRECATED:
+#
+# Used by LPRng, deprecated
+     _krb5_auth_con_initivector
+# Old initial tickets API
+	_krb5_get_in_tkt
+	_krb5_get_in_tkt_with_keytab
+	_krb5_get_in_tkt_with_password
+	_krb5_get_in_tkt_with_skey
+#
+# Old crypto API
+	_krb5_decrypt
+	_krb5_encrypt
+	_krb5_process_key
+	_krb5_finish_key
+	_krb5_string_to_key
+	_krb5_init_random_key
+	_krb5_finish_random_key
+	_krb5_random_key
+	_krb5_eblock_enctype
+	_krb5_use_enctype
+	_krb5_encrypt_size
+	_krb5_checksum_size
+	_krb5_calculate_checksum
+	_krb5_verify_checksum
 #    
-# Functions to be removed!!!
+#
+# PRIVATE
+#
 #    _krb5_decrypt_tkt_part
 #
 #    _krb5_auth_con_set_req_cksumtype
 #    _krb5_auth_con_set_safe_cksumtype
-#    _krb5_auth_con_initivector
+#
 #    _krb5_auth_con_getivector
 #    _krb5_auth_con_setivector
 #

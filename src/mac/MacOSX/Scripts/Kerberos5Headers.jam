@@ -81,7 +81,6 @@ OSConf "$(IntermediatePrivateHeaders)/osconf.h" :	"$(SRCROOT)/../Headers/Kerbero
 Cp "$(IntermediatePrivateHeaders)/autoconf.h" : 	"$(SRCROOT)/../Headers/MacOSX/Kerberos5Prefix.h" ;
 Cp "$(IntermediateHeaders)/KerberosProfileInit.h" :	"$(SRCROOT)/../Headers/MacOSX/KerberosProfileInit.h" ;
 Cp "$(IntermediateHeaders)/Kerberos5Init.h" :		"$(SRCROOT)/../Headers/MacOSX/Kerberos5Init.h" ;
-Cp "$(IntermediateHeaders)/Kerberos524Init.h" :		"$(SRCROOT)/../Headers/MacOSX/Kerberos524Init.h" ;
 Cp "$(IntermediateHeaders)/GSSInit.h" :				"$(SRCROOT)/../Headers/MacOSX/GSSInit.h" ;
 
 DEPENDS all :	"$(IntermediateHeaders)"
@@ -94,7 +93,6 @@ DEPENDS all :	"$(IntermediateHeaders)"
                 "$(IntermediatePrivateHeaders)/autoconf.h" 
                 "$(IntermediateHeaders)/KerberosProfileInit.h"
                 "$(IntermediateHeaders)/Kerberos5Init.h"
-                "$(IntermediateHeaders)/Kerberos524Init.h"
                 "$(IntermediateHeaders)/GSSInit.h" ;
                 
 Clean.Remove clean :    "$(IntermediateHeaders)"
@@ -107,7 +105,6 @@ Clean.Remove clean :	"$(IntermediateHeaders)/profile.h"
                         "$(IntermediatePrivateHeaders)/autoconf.h" 
                         "$(IntermediateHeaders)/KerberosProfileInit.h"
                         "$(IntermediateHeaders)/Kerberos5Init.h"
-                        "$(IntermediateHeaders)/Kerberos524Init.h"
                         "$(IntermediateHeaders)/GSSInit.h" ;
 
 DEPENDS install : all ;
