@@ -335,13 +335,15 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
      ENCTYPE_ARCFOUR_HMAC,
      ENCTYPE_DES_CBC_CRC,
      ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4,
-     0
    };
+#define N_WANTED_ENCTYPES (sizeof(wanted_enctypes)/sizeof(wanted_enctypes[0]))
+   krb5_enctype requested_enctypes[N_WANTED_ENCTYPES + 1];
+   krb5_enctype *default_enctypes = 0;
    krb5_error_code code; 
    krb5_gss_ctx_id_rec *ctx, *ctx_free;
    krb5_timestamp now;
    gss_buffer_desc token;
-   int i, err;
+   int i, j, k, err;
    int default_mech = 0;
    OM_uint32 major_status;
 
@@ -469,8 +471,52 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 				      &ctx->there)))
 	  goto fail;
 
+      code = krb5_get_tgs_ktypes (context, 0, &default_enctypes);
+      if (code)
+	  goto fail;
+      /* "i" denotes *next* slot to fill.  Don't forget to save room
+	 for a trailing zero.  */
+      i = 0;
+      for (j = 0;
+	   (default_enctypes[j] != 0
+	    /* This part should be redundant, but let's be paranoid.  */
+	    && i < N_WANTED_ENCTYPES);
+	   j++) {
+
+	  int is_duplicate_enctype;
+	  int is_wanted_enctype;
+
+	  krb5_enctype e = default_enctypes[j];
+
+	  /* Is this enctype one of the ones we want for GSSAPI?  */
+	  is_wanted_enctype = 0;
+	  for (k = 0; k < N_WANTED_ENCTYPES; k++) {
+	      if (wanted_enctypes[k] == e) {
+		  is_wanted_enctype = 1;
+		  break;
+	      }
+	  }
+	  /* If unwanted, go to the next one. */
+	  if (!is_wanted_enctype)
+	      continue;
+
+	  /* Is this enctype already in the list of enctypes to
+	     request?  (Is it a duplicate?)  */
+	  is_duplicate_enctype = 0;
+	  for (k = 0; k < i; k++) {
+	      if (requested_enctypes[k] == e) {
+		  is_duplicate_enctype = 1;
+		  break;
+	      }
+	  }
+	  /* If it is not a duplicate, add it. */
+	  if (!is_duplicate_enctype)
+	      requested_enctypes[i++] = e;
+      }
+      requested_enctypes[i++] = 0;
+
       if ((code = get_credentials(context, cred, ctx->there, now,
-				  ctx->endtime, wanted_enctypes, &k_cred)))
+				  ctx->endtime, requested_enctypes, &k_cred)))
 	  goto fail;
 
       if (default_mech) {

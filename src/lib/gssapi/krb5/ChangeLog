@@ -3,6 +3,10 @@
 	* accept_sec_context.c (rd_and_store_for_creds): Remove
 	registration of memory ccache type.
 
+	* init_sec_context.c (krb5_gss_init_sec_context): Instead of
+	asking for the enctypes supported by the GSS code, use that set as
+	a filter on the default enctypes and use the resulting list.
+
 2002-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi_krb5.c (gss_mech_krb5_v2, gss_mech_set_krb5_v2,
