@@ -53,11 +53,10 @@ krb5_keyblock *out;
     /* remember the contents of the encrypted version has a sizeof(in->length)
        integer length of the real embedded key, followed by the
        encrypted key, so the offset here is needed */
-    if (retval = (*eblock->crypto_entry->
-		  decrypt_func)((krb5_pointer) (((char *) in->contents) +
-						sizeof(in->length)),
-				(krb5_pointer) out->contents,
-				in->length-sizeof(in->length), eblock, 0)) {
+    if (retval = krb5_decrypt((krb5_pointer) (((char *) in->contents) +
+					      sizeof(in->length)),
+			      (krb5_pointer) out->contents,
+			      in->length-sizeof(in->length), eblock, 0)) {
 	free((char *)out->contents);
 	out->contents = 0;
 	out->length = 0;
