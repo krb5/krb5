@@ -1,3 +1,8 @@
+2000-10-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* reconf: Pass "-m util/autoconf" to autoreconf only if we are
+	using the source trees version of autoconf.
+
 2000-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* reconf: Look for autoconf 2.12 or later.  Don't use "grep -q",

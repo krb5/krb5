@@ -2,6 +2,7 @@
 
 force=
 autoreconfprog=./util/autoconf/autoreconf
+autoreconfoptions="-m util/autoconf"
 verbose=false
 
 autoreconf="/bin/sh $autoreconfprog"
@@ -28,6 +29,7 @@ if test ! -f $autoreconfprog ; then
 	   autoconf --version  | grep "$pat" >/dev/null && \
 	   autoheader --version | grep "$pat" >/dev/null; then
 		autoreconf=autoreconf
+		autoreconfoptions=
 		echo "Using" `autoconf --version` "found in your path..."
 	else
 		echo "Couldn't find autoconf 2.12 or higher in your path."
@@ -40,6 +42,6 @@ if test ! -f $autoreconfprog ; then
 fi
 
 if $verbose ; then 
-	echo $autoreconf -m util/autoconf -l . --verbose $force 
+	echo $autoreconf $autoreconfoptions -l . --verbose $force 
 fi
-$autoreconf -m util/autoconf -l . --verbose $force 
+$autoreconf $autoreconfoptions  -l . --verbose $force 
