@@ -69,6 +69,8 @@ static char *prflags[] = {
     "REQUIRES_PRE_AUTH",	/* 0x00000080 */
     "REQUIRES_HW_AUTH",		/* 0x00000100 */
     "REQUIRES_PWCHANGE",	/* 0x00000200 */
+    "UNKNOWN_0x00000400",	/* 0x00000400 */
+    "UNKNOWN_0x00000800,	/* 0x00000800 */
     "DISALLOW_SVR",		/* 0x00001000 */
     "PWCHANGE_SERVICE"		/* 0x00002000 */
 };
@@ -182,23 +184,15 @@ void kadmin_delprinc(argc, argv)
 {
     ovsec_kadm_ret_t retval;
     krb5_principal princ;
-    int i;
+    char *canon;
     char reply[5];
 
-    if (argc > 3) {
-	fprintf(stderr, "delete_principal: too many arguments\n");
+    if (argc < 2 || argc > 3) {
+	fprintf(stderr, "delete_principal: wrong number of arguments\n");
 	return;
     }
-    if (argc == 1) {
-	printf("Are you sure you want to delete the principal \"%s\"? (yes/no): ", argv[1]);
-	fgets(reply, sizeof (reply), stdin);
-	if (strcmp("yes\n", reply)) {
-	    fprintf(stderr, "Principal \"%s\" not deleted\n", argv[1]);
-	    return;
-	}
-    }
-    if ((argc == 2) && ((i = strlen(argv[1])) == 6) &&
-	strcmp("-force", argv[1]) || (i != 6)) {
+    if (argc == 3 &&
+	(strlen(argv[1]) == 6 ? strcmp("-force", argv[1]) : 1)) {
 	fprintf(stderr, "delete_principal: bad arguments\n");
 	return;
     }
@@ -207,14 +201,33 @@ void kadmin_delprinc(argc, argv)
 	com_err("delete_principal", retval, "while parsing principal name");
 	return;
     }
+    retval = krb5_unparse_name(princ, &canon);
+    if (retval) {
+	com_err("delete_principal", retval,
+		"while canonicalizing principal");
+	krb5_free_principal(princ);
+	return;
+    }
+    if (argc == 2) {
+	printf("Are you sure you want to delete the principal \"%s\"? (yes/no): ", canon);
+	fgets(reply, sizeof (reply), stdin);
+	if (strcmp("yes\n", reply)) {
+	    fprintf(stderr, "Principal \"%s\" not deleted\n", canon);
+	    free(canon);
+	    krb5_free_principal(princ);
+	    return;
+	}
+    }
     retval = ovsec_kadm_delete_principal(princ);
     krb5_free_principal(princ);
     if (retval) {
 	com_err("delete_principal", retval,
-		"while deleteing principal \"%s\"", argv[argc - 1]);
+		"while deleteing principal \"%s\"", canon);
+	free(canon);
 	return;
     }
-    printf("Principal \"%s\" deleted.\nMake sure that you have removed this principal from all ACLs before reusing.\n", argv[argc - 1]);
+    printf("Principal \"%s\" deleted.\nMake sure that you have removed this principal from all ACLs before reusing.\n", canon);
+    free(canon);
     return;
 }
 
@@ -223,27 +236,17 @@ void kadmin_renprinc(argc, argv)
     char *argv[];
 {
     krb5_principal oldprinc, newprinc;
-    int i;
+    char *oldcanon, *newcanon;
     char reply[5];
     ovsec_kadm_ret_t retval;
 
-    if (argc > 4 || argc < 3) {
+    if (argc < 3 || argc > 4) {
 	fprintf(stderr, "rename_principal: wrong number of arguments\n");
 	return;
     }
-    if (argc == 3) {
-	printf("Are you sure you want to rename the principal \"%s\" to \"%s\"? (yes/no): ",
-	       argv[1], argv[2]);
-	fgets(reply, sizeof (reply), stdin);
-	if (strcmp("yes\n", reply)) {
-	    fprintf(stderr, "rename_principal: \"%s\" NOT renamed to \"%s\".\n",
-		    argv[1], argv[2]);
-	    return;
-	}
-    }
-    if ((argc == 4) && ((i = strlen(argv[1])) == 6) &&
-	!strcmp("-force", argv[1]) || (i != 6)) {
-	fprintf(stderr, "rename_principal: wrong arguments\n");
+    if (argc == 4 &&
+	(strlen(argv[1]) == 6 ? strcmp("-force", argv[1]) : 1)) {
+	fprintf(stderr, "rename_principal: bad arguments\n");
 	return;
     }
     retval = krb5_parse_name(argv[argc - 2], &oldprinc);
@@ -257,17 +260,51 @@ void kadmin_renprinc(argc, argv)
 	com_err("rename_principal", retval, "while parsing new principal");
 	return;
     }
+    retval = krb5_unparse_name(oldprinc, &oldcanon);
+    if (retval) {
+	com_err("rename_principal", retval,
+		"while canonicalizing old principal");
+	krb5_free_principal(newprinc);
+	krb5_free_principal(oldprinc);
+	return;
+    }
+    retval = krb5_unparse_name(newprinc, &newcanon);
+    if (retval) {
+	com_err("rename_principal", retval,
+		"while canonicalizing new principal");
+	free(oldcanon);
+	krb5_free_principal(newprinc);
+	krb5_free_principal(oldprinc);
+	return;
+    }
+    if (argc == 3) {
+	printf("Are you sure you want to rename the principal \"%s\" to \"%s\"? (yes/no): ",
+	       oldcanon, newacnon);
+	fgets(reply, sizeof (reply), stdin);
+	if (strcmp("yes\n", reply)) {
+	    fprintf(stderr,
+		    "rename_principal: \"%s\" NOT renamed to \"%s\".\n",
+		    oldcanon, newcanon);
+	    free(newcanon);
+	    free(oldcanon);
+	    krb5_free_principal(newprinc);
+	    krb5_free_principal(oldprinc);
+	    return;
+	}
+    }
     retval = ovsec_kadm_rename_principal(oldprinc, newprinc);
     krb5_free_principal(oldprinc);
     krb5_free_principal(newprinc);
     if (retval) {
 	com_err("rename_principal", retval,
-		"while renaming \"%s\" to \"%s\".", argv[argc - 2],
-		argv[argc - 1]);
+		"while renaming \"%s\" to \"%s\".", oldcanon,
+		newcanon);
+	free(newcanon);
+	free(oldcanon);
 	return;
     }
     fprintf("Principal \"%s\" renamed to \"%s\".\nMake sure that you have removed \"%s\" from all ACLs before reusing.\n",
-	    argv[argc - 2], argv[argc - 1], argv[argc - 2]);
+	    oldcanon, newcanon, newcanon);
     return;
 }
 
@@ -278,9 +315,10 @@ void kadmin_cpw(argc, argv)
     ovsec_kadm_ret_t retval;
     static char newpw[1024];
     static char prompt1[1024], prompt2[1024];
+    char *canon;
     krb5_principal princ;
 
-    if (argc > 4) {
+    if (argc < 2 || argc > 4) {
 	fprintf(stderr, "change_password: too many arguments\n");
 	return;
     }
@@ -289,15 +327,23 @@ void kadmin_cpw(argc, argv)
 	com_err("change_password", retval, "while parsing principal name");
 	return;
     }
+    retval = krb5_unparse_name(princ, &canon);
+    if (retval) {
+	com_err("change_password", retval, "while canonicalizing principal");
+	krb5_free_principal(princ);
+	return;
+    }
     if ((argc == 4) && (strlen(argv[1]) == 3) && !strcmp("-pw", argv[1])) {
 	retval = ovsec_kadm_chpass_principal(princ, argv[2]);
 	krb5_free_principal(princ);
 	if (retval) {
 	    com_err("change_password", retval,
-		    "while changing password for \"%s\".", argv[3]);
+		    "while changing password for \"%s\".", canon);
+	    free(canon);
 	    return;
 	}
-	printf("Password for \"%s\" changed.\n", argv[3]);
+	printf("Password for \"%s\" changed.\n", canon);
+	free(canon);
 	return;
     } else if ((argc == 3) && (strlen(argv[1]) == 8) &&
 	       !strcmp("-randkey", argv[1])) {
@@ -306,11 +352,13 @@ void kadmin_cpw(argc, argv)
 	krb5_free_principal(princ);
 	if (retval) {
 	    com_err("change_password", retval,
-		    "while randomizing key for \"%s\".", argv[2]);
+		    "while randomizing key for \"%s\".", canon);
+	    free(canon);
 	    return;
 	}
 	memset(newkey->contents, 0, newkey->length);
-	printf("Key for \"%s\" randomized.\n", argv[2]);
+	printf("Key for \"%s\" randomized.\n", canon);
+	free(canon);
 	return;
     } else if (argc == 2) {
 	int i = sizeof (newpw) - 1;
@@ -324,7 +372,8 @@ void kadmin_cpw(argc, argv)
 				    newpw, &i);
 	if (retval) {
 	    com_err("change_password", retval,
-		    "while reading password for \"%s\".", argv[1]);
+		    "while reading password for \"%s\".", canon);
+	    free(canon);
 	    krb5_free_principal(princ);
 	    return;
 	}
@@ -333,23 +382,26 @@ void kadmin_cpw(argc, argv)
 	memset(newpw, 0, sizeof (newpw));
 	if (retval) {
 	    com_err("change_password", retval,
-		    "while changing password for \"%s\".", argv[1]);
+		    "while changing password for \"%s\".", canon);
+	    free(canon);
 	    return;
 	}
-	printf("Password for \"%s\" changed.", argv[1]);
+	printf("Password for \"%s\" changed.", canon);
+	free(canon);
 	return;
     }
-    fprintf(stderr, "change_password: bad args\n");
+    fprintf(stderr, "change_password: bad arguments\n");
+    free(canon);
     krb5_free_principal(princ);
     return;
 }
 
-int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
+int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, caller)
     int argc;
     char *argv[];
     ovsec_kadm_principal_ent_t oprinc;
     u_int32 *mask;
-    char **pass;
+    char **pass, *caller;
 {
     int i, j;
     struct timeb now;
@@ -443,9 +495,154 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass)
 		}
 	    }
 	}
-	retval = krb5_parse_name(argv[i], &oprinc->principal);
-	if (retval)
-	    return -1;
-	*mask |= OVSEC_KADM_PRINCIPAL;
     }
+    if (i != argc - 1) {
+	fprintf("%s: parser lost count!\n", caller);
+	return -1;
+    }
+    retval = krb5_parse_name(argv[i], &oprinc->principal);
+    if (retval) {
+	com_err(caller, retval, "while parsing principal");
+	return -1;
+    }
+    *mask |= OVSEC_KADM_PRINCIPAL;
+    return 0;
+}
+
+void kadmin_addprinc(argc, argv)
+    int argc;
+    char *argv[];
+{
+    ovsec_kadm_principal_ent_rec princ;
+    u_int32 mask;
+    char *pass, *canon;
+    krb5_error_code retval;
+
+    if (kadmin_parse_princ_args(argc, argv,
+				&princ, &mask, pass, "add_principal")) {
+	fprintf(stderr, "add_principal: bad arguments\n");
+	return;
+    }
+    retval = krb5_unparse_name(princ->principal, &canon);
+    if (retval) {
+	com_err("add_principal",
+		retval, "while canonicalizing principal");
+	krb5_free_principal(princ->principal);
+	return;
+    }
+    retval = ovsec_kadm_create_principal(&princ, mask, pass);
+    krb5_free_principal(princ->principal);
+    if (retval) {
+	com_err("add_principal", retval, "while creating \"%s\".",
+		canon);
+	free(canon);
+	return;
+    }
+    printf("Principal \"%s\" created.\n", canon);
+    free(canon);
+}
+
+void kadmin_modprinc(argc, argv)
+    int argc;
+    char *argv[];
+{
+    ovsec_kadm_principal_ent_rec princ;
+    u_int32 mask;
+    krb5_error_code retval;
+    char *pass, *canon;
+
+    if (kadmin_parse_princ_args(argc, argv,
+				&princ, &mask, pass, "modify_principal")) {
+	fprintf(stderr, "modify_principal: bad arguments\n");
+	return;
+    }
+    retval = krb5_unparse_name(princ->principal, &canon);
+    if (retval) {
+	com_err("modify_principal", retval,
+		"while canonicalizing principal");
+	krb5_free_principal(princ->principal);
+	return;
+    }
+    retval = ovsec_kadm_modify_principal(&princ, mask);
+    if (retval) {
+	com_err("modify_principal", retval, "while modifying \"%s\".",
+		argv[argc - 1]);
+	return;
+    }
+}
+
+void kadmin_getprinc(argc, argv)
+    int argc;
+    char *argv[];
+{
+    ovsec_kadm_principal_ent_t dprinc;
+    krb5_principal princ;
+    krb5_error_code retval;
+    char *canon, *modcanon;
+    int i;
+
+    if (argc < 2 || argc > 3) {
+	fprintf(stderr, "get_principal: wrong number of arguments\n");
+	return;
+    }
+    if (argc == 3 &&
+	(strlen(argv[1]) == 6 ? !strcmp("-terse", argv[1]) : 1)) {
+	fprintf(stderr, "get_principal: bad arguments\n");
+	return;
+    }
+    retval = krb5_parse_name(argv[argc - 1], &princ);
+    if (retval) {
+	com_err("get_principal", retval, "while parsing principal");
+	return;
+    }
+    retval = krb5_unparse_name(princ, &canon);
+    if (retval) {
+	com_err("get_principal", retval, "while canonicalizing principal");
+	krb5_free_principal(princ);
+	return;
+    }
+    retval = ovsec_kadm_get_principal(princ, &dprinc);
+    krb5_free_principal(princ);
+    if (retval) {
+	com_err("get_principal", retval, "while retrieving \"%s\".", canon);
+	free(canon);
+	krb5_free_principal(princ);
+	return;
+    }
+    retval = krb5_unparse_name(princ->mod_name, &modcanon);
+    if (retval) {
+	com_err("get_principal", retval, "while unparsing modname");
+	ovsec_kadm_free_principal_ent(dprinc);
+	free(canon);
+	krb5_free_principal(princ);
+	return;
+    }
+    if (argc == 2) {
+	printf("Principal: %s\n", canon);
+	printf("Expiration date: %d\n", dprinc->princ_expire_time);
+	printf("Last password change: %d\n", dprinc->last_pwd_change);
+	printf("Password expiration date: %d\n", dprinc->pw_expiration);
+	printf("Maximum life: %d\n", dprinc->max_life);
+	printf("Last modified: by %s\n\ton %d\n",
+	       modcanon, dprinc->mod_date);
+	printf("Attributes: ");
+	for (i = 0; i < sizeof (prflags) / sizeof (char *); i++) {
+	    if (dprinc->attributes & (krb5_flags) 1 << i)
+		printf("%s%s", i ? ", " : "", prflags[i]);
+	}
+	printf("\n");
+	printf("Key version: %d\n", dprinc->kvno);
+	printf("Master key version: %d\n", dprinc->mkvno);
+	printf("Policy: %s\n", dprinc->policy);
+    } else {
+	printf("\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\n",
+	       canon, dprinc->princ_expire_time, dprinc->last_pwd_change,
+	       dprinc->pw_expiration, dprinc->max_life, modcanon,
+	       dprinc->mod_date, dprinc->attributes, dprinc->kvno,
+	       dprinc->mkvno, dprinc->policy);
+    }
+    free(modcanon);
+    ovsec_kadm_free_principal_ent(dprinc);
+    free(canon);
+    krb5_free_principal(princ);
 }

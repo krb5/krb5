@@ -23,14 +23,23 @@
 
 command_table kadmin_cmds;
 
+request kadmin_addprinc, "Add principal",
+	add_prinicpal, addprinc, ank;
+
 request kadmin_delprinc, "Delete principal",
 	delete_principal, delprinc;
+
+request kadmin_modprinc, "Modify principal",
+	modify_principal, modprinc;
 
 request kadmin_renprinc, "Rename principal",
 	rename_principal, renprinc;
 
 request kadmin_cpw, "Change password",
 	change_password, cpw;
+
+request kadmin_getprinc, "Get principal",
+	get_principal, getprinc;
 
 request	ss_quit, "Exit program.",
 	quit, exit, q;
