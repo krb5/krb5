@@ -315,6 +315,7 @@ proc setup_kerberos_files { } {
     puts $conffile "	$REALMNAME = \{"
     puts $conffile "		kdc = $hostname:3088"
     puts $conffile "		admin_server = $hostname:3750"
+    puts $conffile "		kpasswd_server = $hostname:3751"
     puts $conffile "		default_domain = $domain"
     puts $conffile "	\}"
     puts $conffile ""

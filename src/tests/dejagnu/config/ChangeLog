@@ -1,3 +1,7 @@
+Fri Jan 30 23:48:57 1998  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add kpasswd_server to krb5.conf.
+
 Wed Jan 21 11:39:11 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* default.exp: Added kpasswd_port variable to kdc.conf creation.
