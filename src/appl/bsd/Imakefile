@@ -55,7 +55,7 @@ SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 #ifdef CrayArchitecture
 all::	rsh rcp rlogin krshd
 #else
-all::	rsh rcp rlogin krshd krlogind login.krb
+all::	rsh rcp rlogin krshd krlogind login.krb5
 #endif
 
 NormalProgramTarget(rsh,krsh.o kcmd.o forward.o,$(DEPLIBS),$(LOCAL_LIBRARIES),)
