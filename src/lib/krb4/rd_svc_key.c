@@ -181,9 +181,12 @@ int read_service_key(service,instance,realm,kvno,file,key)
 	krb5_kt_free_entry(context, &kt_entry);
     }
     krb5_free_context(context);
+
+    if (! retval)
+	return KSUCCESS;
 #endif
     
-    return (retval ? kret : KSUCCESS);
+    return kret;
 }
 
 /* kvno is passed by reference, so that if it is zero, and we find a match,
