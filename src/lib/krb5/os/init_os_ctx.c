@@ -259,9 +259,9 @@ os_get_default_config_files(pfiles, secure)
     if (!name)
         return KRB5_CONFIG_CANTOPEN; /* should never happen */
     
-    filenames = malloc(2 * sizeof(char *));
-    filenames[0] = name;
-    filenames[1] = 0;
+    files = malloc(2 * sizeof(char *));
+    files[0] = name;
+    files[1] = 0;
 #else /* !_MSDOS && !_WIN32 */
     char* filepath = 0;
     int n_entries, i;
@@ -322,14 +322,23 @@ os_init_paths(ctx, secure)
     profile_filespec_t *files = 0;
 
     ctx->profile_secure = secure;
+    ctx->profile_in_memory = 0;
 
     retval = os_get_default_config_files(&files, secure);
 
-    if (!retval)
+    if (!retval) {
         retval = profile_init(files, &ctx->profile);
+     
+        /* if none of the filenames can be opened use an empty profile */
+        if ( retval == ENOENT ) {
+            retval = profile_init(NULL,&ctx->profile);
+            if ( !retval )
+                ctx->profile_in_memory = 1;
+        }   
 
-    if (files)
-        free_filespecs(files);
+        if (files)
+            free_filespecs(files);
+    }
 
     if (retval)
         ctx->profile = 0;
@@ -448,13 +457,17 @@ krb5_os_free_context(ctx)
 	if (!os_ctx)
 		return;
 
-	if (os_ctx->default_ccname)
+        if (os_ctx->default_ccname) {
 		free(os_ctx->default_ccname);
+                os_ctx->default_ccname = 0;
+        }
 
 	os_ctx->magic = 0;
 	free(os_ctx);
 	ctx->os_context = 0;
 
-	if (ctx->profile)
+        if (ctx->profile) {
 	    profile_release(ctx->profile);
+            ctx->profile = 0;
+        }
 }
