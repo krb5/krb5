@@ -119,7 +119,7 @@ so don't @code{#undef} any of these names.
 @itemx freeaddrinfo
 @itemx gai_strerror
 @itemx struct addrinfo
-Always include the header file @code{fake-addrinfo.h} before using
+Always include the header file @file{fake-addrinfo.h} before using
 these.  If the native system doesn't provide them, the header file
 will, using static functions that will call @code{gethostbyname} and
 the like in the native libraries.  (This also happens to be the way
@@ -134,14 +134,14 @@ provide IPv6 support, but the API will be consistent.
 
 @item struct sockaddr_storage
 @itemx socklen_t
-These are provided by @code{socket-utils.h}, if the native headers
+These are provided by @file{socket-utils.h}, if the native headers
 don't provide them.  @code{sockaddr_storage} contains a
 @code{sockaddr_in}, so by definition it's big enough to hold one; it
 also has some extra padding which will probably make it big enough to
 hold a @code{sockaddr_in6} if the resulting binary should get run on a
 kernel with IPv6 support.
 
-Question: Should these simply be moved into @code{port-sockets.h}?
+Question: Should these simply be moved into @file{port-sockets.h}?
 
 @end table
 
@@ -155,7 +155,7 @@ Somewhere between IRIX 6.5.14 and 6.5.16, partial IPv6 support was
 introduced to the extent that the configuration system detects the
 IPv6 support and attempts to use it. Code compiles, but then upon
 linking, one discovers that ``in6addr_any'' is not defined in any
-system library. A work around the header file @code{fake-addrinfo.h}
+system library. A work around the header file @file{fake-addrinfo.h}
 is provided by providing a static copy. This run time IPv6 code has
 still not been tested.
 
@@ -222,7 +222,7 @@ below are the largest number of bytes we've seen left unused at the
 end of the supplied buffer when there were more entries to return.
 These values may of coures be dependent on the configurations of the
 particular systems we wre testing with.  (See
-@code{lib/krb5/os/t_gifconf.c} for the test program.)
+@file{lib/krb5/os/t_gifconf.c} for the test program.)
 
 NetBSD 1.5-alpha: The returned @code{ifc_len} is the desired amount of
 space, always.  The returned list may be truncated if there isn't
@@ -246,7 +246,7 @@ buffer is filled in with as many entries as will fit, and the size
 used is returned in @code{ifc_len}.  The list is truncated if needed,
 with no indication.  Largest gap: 31.  @emph{However}, this interface
 does not return any IPv6 addresses.  They must be read from a file
-under @code{/proc}.  (This appears to be what the @samp{ifconfig}
+under @file{/proc}.  (This appears to be what the @samp{ifconfig}
 program does.)
 
 IRIX 6.5.7: The buffer is filled in with as many entries as will fit
@@ -397,7 +397,7 @@ this has not been a priority for us, since most modern systems have
 these functions anyways.  And if they don't, they probably don't have
 real IPv6 support either.
 
-Including @code{fake-addrinfo.h} will enable the wrapper or
+Including @file{fake-addrinfo.h} will enable the wrapper or
 replacement versions when needed.  Depending on the system
 configuration, this header file may define several static functions
 (and declare them @code{inline} under GNU C), and leave it to the
@@ -438,6 +438,11 @@ with a few changes.  A few issues with the proposal have been
 discussed on the @samp{krbdev} mailing list, and you can find the
 discussion in the list archives.
 
+
+If @code{pthread_once} is not provided in functional form in the
+default libraries, and weak references are not supported, we always
+link against the pthread libraries.
+
 @node Shared Libraries,  , Thread Safety, Top
 @chapter Shared Libraries
 
@@ -445,10 +450,11 @@ discussion in the list archives.
 
 @menu
 * Shared Library Theory::       
+* Advanced Shared Library Requirements::  
 * Operating System Notes for Shared Libraries::  
 @end menu
 
-@node Shared Library Theory, Operating System Notes for Shared Libraries, Shared Libraries, Shared Libraries
+@node Shared Library Theory, Advanced Shared Library Requirements, Shared Libraries, Shared Libraries
 @section Theory of How Shared Libraries are Used
 
 An explanation of how shared libraries are implemented on a given
@@ -482,7 +488,143 @@ link time, or both.@footnote{Both are necessary sometimes as the shared
 libraries are dependent on other shared libraries} The build process
 will hardwire a path to the installed destination.
 
-@node Operating System Notes for Shared Libraries,  , Shared Library Theory, Shared Libraries
+@node Advanced Shared Library Requirements, Operating System Notes for Shared Libraries, Shared Library Theory, Shared Libraries
+@section Advanced Shared Library Requirements
+
+In order to better support some multithreading models, and permit the
+libraries to clean up internally maintained caches of information,
+we've imposed new requirements on the OS shared library support.
+
+Specifically, we want the ability to run certain bits of code in a
+thread-safe manner at library load time, on multithreading platforms
+not supporting @code{pthread_once}, and we want the ability to run
+cleanup code when the library is unloaded.
+
+In general, where platforms have initialization functions, we don't
+always get an opportunity to return an error from them.  However, the
+system functions we call can return errors.  So a framework has been
+built that attempts to combine the @code{pthread_once} and load-time
+initialization approaches, and add the ability to store an error code
+indicating success or failure of the initialization routine.
+
+The main implementation of this framework is in @file{k5-platform.h}.
+Some additional information, specifically the names of the
+initialization and finalization functions, are stored in the makefiles
+used to generate each of the UNIX libraries, in @file{win_glue.c}, and
+somewhere in the Mac OS X support (XXX not added yet?).  How the
+information is used depends on the platform:
+
+@itemize @bullet
+
+@item
+On platforms without any thread support, a simple flag is used, on the
+assumption that the library code will have sole control over the
+process execution until the initialization function returns.  (It's
+generally a bad idea to call any ``interesting'' function like
+@code{longjmp} or Kerberos functions from signal handlers; now it's a
+slightly worse idea.)
+
+@item
+On platforms supporting @code{pthread_once}, library initialization is
+generally delayed until the point where the library code needs to
+verify that the initialization succeeded.  If @code{pthread_once} may
+not have been linked into the executable and we can tell (for example,
+with weak symbol references), this is combined with the simple-flag
+approach above.
+
+@item
+On Windows, the library initialization function is run from
+@file{win_glue.c} at load time; it should complete before the
+library's symbol table is made accessible to the calling process.
+
+@end itemize
+
+The library finalization code is similarly platform-dependent.  If the
+compiler or linker lets us specify that a function should be called as
+a finalization function (for example, @code{gcc}'s ``destructor''
+attribute), we use it.
+
+The internal interface currently used within the code of the Kerberos
+libraries consists of four macros:
+
+@deftypefn Macro MAKE_INIT_FUNCTION(@var{fname})
+Declares @var{fname}, a function taking no arguments and returning
+@code{int}, to be an initialization function.  This macro must be used
+before the function is declared, and it must be defined in the current
+file as:
+@example
+int @var{fname} (void) @{ ... @}
+@end example
+This macro will define additional data and possibly function objects,
+and will declare @var{fname}, though it may or may not declare
+@var{fname} as @code{static}.  (Under C rules, the declaration above
+is compatible with a declaration of the function as @code{static}, and
+@code{static} does apply, as long as the @code{static} declaration
+comes first.)
+
+When the function is invoked, the return value --- zero or an error
+code --- will be saved away, and returned any time
+@code{CALL_INIT_FUNCTION} is used.
+
+There may be only one initialization function declared this way in
+each UNIX library, currently.
+@end deftypefn
+
+@deftypefn Macro MAKE_FINI_FUNCTION(@var{fname})
+This is similar to @code{MAKE_INIT_FUNCTION} except that @var{fname}
+is to be a library finalization function.
+@example
+void @var{fname} (void) @{ ... @}
+@end example
+
+There may be only one finalization function declared this way in each
+UNIX library, currently.
+@end deftypefn
+
+@deftypefn Macro CALL_INIT_FUNCTION(@var{fname})
+This macro ensures that the initialization function @var{fname} is
+called at this point, if it has not been called already.  The macro
+returns an error code that indicates success (zero), an error in the
+OS support (@i{e.g.}, if @code{pthread_once} returns an error), or an
+error returned by the initialization function.
+
+Currently, all uses of @code{CALL_INIT_FUNCTION} must be in the same
+file as the use of @code{MAKE_INIT_FUNCTION}, and must come after it.
+@end deftypefn
+
+@deftypefn Macro INITIALIZER_RAN(@var{fname})
+This macro returns non-zero iff the initialization function designated
+by @var{fname} (and previously declared in the current file with
+@code{MAKE_INIT_FUNCTION}) has been run, and returned no error
+indication.
+
+Since the finalization function might always be invoked through linker
+support and initialization functions only sometimes invoked via
+@code{pthread_once} in other functions that may not ever be called,
+finalization functions should check whether the objects to be
+destroyed have actually been created.  This macro provides one way of
+doing that.
+@end deftypefn
+
+Note that all of this assumes shared libraries.  If static linking is
+done, our options are a bit more limited.  We assume
+@code{pthread_once} is available if there is any thread support
+(@i{i.e.}, we don't support static linking on Windows), and we assume
+that finalization code would be called only when the process is
+exiting, at which point all resources should be freed up anyways, so
+it doesn't really matter whether our cleanup code gets called.  In
+fact, it should be more efficient if it does not.
+
+While one of our goals is to be able to repeatedly load, use, and
+unload the MIT Kerberos libraries under a plugin architecture without
+memory or other resource leaks, the main goal was to provide hooks
+through which the library threading support could be properly
+initialized on various platforms.  The hooks we've added should be
+sufficient for each library to free up any internal caches of
+information at unload time, and we have added some of that support,
+but it is not complete at this time.
+
+@node Operating System Notes for Shared Libraries,  , Advanced Shared Library Requirements, Shared Libraries
 @section Operating System Notes for Shared Libraries
 
 From time to time users or developers suggest using GNU @code{Libtool}

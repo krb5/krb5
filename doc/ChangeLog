@@ -1,8 +1,11 @@
 2004-07-20  Ken Raeburn  <raeburn@mit.edu>
 
-	* implementor.texinfo (NetBSD Shared Library Support, Solaris
-	Shared Library Support): Outdated sections deleted.
+	* implementor.texinfo: Changed @code to @file where files are
+	referenced.
+	(NetBSD Shared Library Support, Solaris Shared Library Support):
+	Outdated sections deleted.
 	(Shared Library Theory): Fixed typo.
+	(Advanced Shared Library Requirements): New section.
 
 2004-06-10  Ken Raeburn  <raeburn@mit.edu>
 
