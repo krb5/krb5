@@ -401,20 +401,19 @@ krb5_rcache id;
 	goto io_fail;
     }
 
+    if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay)))) {
+	retval = KRB5_RC_MALLOC;
+	goto io_fail;
+    }
+    rep->client = NULL;
+    rep->server = NULL;
+
     /* now read in each auth_replay and insert into table */
     for (;;) {
-	rep = NULL;
 	if (krb5_rc_io_mark(context, &t->d)) {
 	    retval = KRB5_RC_IO;
 	    goto io_fail;
 	}
-	
-	if (!(rep = (krb5_donot_replay *) malloc(sizeof(krb5_donot_replay)))) {
-	    retval = KRB5_RC_MALLOC;
-	    goto io_fail;
-	}
-	rep->client = NULL;
-	rep->server = NULL;
 	
 	retval = krb5_rc_io_fetch (context, t, rep, (int) max_size);
 
@@ -424,22 +423,18 @@ krb5_rcache id;
 	    goto io_fail;
 
 	
-	if (alive(context, rep,t->lifespan) == CMP_EXPIRED) {
-	    krb5_rc_free_entry(context, &rep);
-	    continue;
+	if (alive(context, rep,t->lifespan) != CMP_EXPIRED) {
+	    if (store(context, id, rep) == CMP_MALLOC) {
+		retval = KRB5_RC_MALLOC; goto io_fail;
+	    } 
 	}
-
-	if (store(context, id,rep) == CMP_MALLOC) {/* can't be a replay */
-	    retval = KRB5_RC_MALLOC; goto io_fail;
-	} 
 	/*
-	 *  store() copies the server & client fields to make sure
-	 *  they don't get stomped on by other callers, so we need to
-	 *  free them
+	 *  free fields allocated by rc_io_fetch
 	 */
 	FREE(rep->server);
 	FREE(rep->client);
-	rep = NULL;
+	rep->server = 0;
+	rep->client = 0;
     }
     retval = 0;
     krb5_rc_io_unmark(context, &t->d);

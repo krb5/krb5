@@ -1,3 +1,9 @@
+Mon May  1 23:10:26 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* rc_dfl.c (krb5_rc_dfl_recover): Fix memory leaks in this
+		function.  The krb5_donot_replay structure was not being
+		freed properly.
+
 Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
 
 	* *.[ch]: removed unneeded INTERFACE from non-api functions.
