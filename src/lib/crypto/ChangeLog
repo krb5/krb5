@@ -1,3 +1,8 @@
+2004-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_encrypt, t_prng, t_hmac, t_pkcs5, vectors,
+	t_cts): Link test programs against thread support library.
+
 2004-05-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* libk5crypto.exports: Add the DES tables back in; libdes425 uses

@@ -53,7 +53,7 @@ run-aes-gen: aes-gen
 check:: run-aes-gen
 
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 check:: run-aes-test
 run-aes-test: aes-test

@@ -61,9 +61,9 @@ TOBJS = $(OUTPRE)key_sched.$(OBJEXT) $(OUTPRE)f_sched.$(OBJEXT) $(OUTPRE)f_cbc.$
 	$(OUTPRE)f_tables.$(OBJEXT) $(OUTPRE)f_cksum.$(OBJEXT)
 
 verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
-	$(COM_ERR_DEPLIB)
+	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
-		-lcom_err
+		-lcom_err $(SUPPORT_LIB)
 
 destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS)
 	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS)
@@ -72,8 +72,8 @@ TAFSS2KOBJS =								\
 	t_afss2k.$(OBJEXT) $(TOBJS)					\
 	afsstring2key.$(OBJEXT) f_parity.$(OBJEXT) weak_key.$(OBJEXT)
 
-t_afss2k$(EXEEXT): $(TAFSS2KOBJS) $(COM_ERR_DEPLIB)
-	$(CC_LINK) -o $@ $(TAFSS2KOBJS) -lcom_err
+t_afss2k$(EXEEXT): $(TAFSS2KOBJS) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ $(TAFSS2KOBJS) -lcom_err $(SUPPORT_LIB)
 
 check-unix:: verify destest t_afss2k
 	$(RUN_SETUP) ./verify -z

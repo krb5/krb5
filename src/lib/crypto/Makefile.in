@@ -183,23 +183,23 @@ t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT)
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) nfold.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) 
-	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err
+	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
 
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB)
+	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB)
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 
 clean::

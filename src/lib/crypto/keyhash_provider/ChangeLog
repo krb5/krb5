@@ -1,3 +1,8 @@
+2004-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_cksum4, t_cksum5): Link test programs against
+	thread support library.
+
 2003-12-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* descbc.c (mit_des_zeroblock): Don't define here.
