@@ -1,3 +1,19 @@
+1999-01-29  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ccdefname.c: Add a new function krb5_cc_set_default_name(),
+		which is used set the default ccname stored in the
+		krb5_context.  All of the OS-specific functions to
+		determine the default ccname is moved to this function.
+		The krb5_cc_default_name() function now just reads the
+		default ccname from the os_context, and will call
+		krb5_cc_set_default_name() to set the default ccname if
+		necessary.
+
+	* t_std_conf: Added functions to test krb5_cc_default_name and
+		krb5_cc_set_default_name().  Fixed the call to
+		krb5_locate_kdc to support the new variables added by
+		the Cygnus initial ticket API merge.
+
 1999-01-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* localaddr.c: On the macintosh, check to see if getmyipaddr
