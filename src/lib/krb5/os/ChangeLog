@@ -1,3 +1,17 @@
+Wed Jun  7 14:43:56 1995    <tytso@rsx-11.mit.edu>
+
+	* def_realm.c (krb5_get_default_realm), get_krbhst.c
+		(krb5_get_krbhst), hst_realm.c (krb5_get_host_realm), 
+		init_os_ctx.c (krb5_os_init_context), osconfig.c, 
+		realm_dom.c (krb5_get_realm_domain): Remove old ifdef'ed
+		code which read in krb.conf and krb.realms.
+
+	* read_pwd.c (krb5_read_password): Remove old #ifdef notdef code.
+		Significantly simplified and cleaned up function.
+		Removed BSD 4.3 compatibility code.  (If we ever need
+		to make this work on a non-POSIX system, we'll supply
+		POSIX termios emulation functions in src/lib/krb5/posix.)
+
 Fri Jun 2 17:54:12 1995 Keith Vetter (keithv@fusion.com)
 
 	* net_read.c, net_write.c: made to work with sockets.

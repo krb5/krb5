@@ -49,10 +49,6 @@ krb5_get_default_realm(context, lrealm)
     krb5_context context;
     char **lrealm;
 {
-#ifdef OLD_CONFIG_FILE
-    FILE *config_file;
-    char realmbuf[BUFSIZ];
-#endif
     char *realm;
     char *cp;
 
@@ -60,32 +56,6 @@ krb5_get_default_realm(context, lrealm)
 	    return KV5M_CONTEXT;
 
     if (!context->default_realm) {
-#ifdef OLD_CONFIG_FILE
-	    krb5_find_config_files();
-	    if (!(config_file = fopen(krb5_config_file, "r")))
-		    /* can't open */
-		    return KRB5_CONFIG_CANTOPEN;
-
-	    if (fgets(realmbuf, sizeof(realmbuf), config_file) == NULL) {
-		    fclose(config_file);
-		    return(KRB5_CONFIG_BADFORMAT);
-	    }
-	    fclose(config_file);
-	    
-	    realmbuf[BUFSIZ-1] = '0';
-	    cp = strchr(realmbuf, '\n');
-	    if (cp)
-		    *cp = '\0';
-	    cp = strchr(realmbuf, ' ');
-	    if (cp)
-		    *cp = '\0';
-
-	    context->default_realm = malloc(strlen (realmbuf) + 1);
-	    if (!context->default_realm)
-		    return ENOMEM;
-
-	    strcpy(context->default_realm, realmbuf);
-#else
 	    /*
 	     * XXX should try to figure out a reasonable default based
 	     * on the host's DNS domain.
@@ -96,7 +66,6 @@ krb5_get_default_realm(context, lrealm)
 			       &context->default_realm);
 	    if (context->default_realm == 0)
 		return(KRB5_CONFIG_BADFORMAT);
-#endif
     }
     
     realm = context->default_realm;

@@ -46,7 +46,6 @@ krb5_os_init_context(ctx)
 
 	ctx->os_context = (void *) os_ctx;
 
-#ifndef OLD_CONFIG_FILES
 #ifdef _WINDOWS
     {
         char defname[160];                      /* Default value */
@@ -78,7 +77,7 @@ krb5_os_init_context(ctx)
 	retval = profile_init(filenames, &ctx->profile);
 	if (retval)
 	    ctx->profile = 0;
-#endif
+
 	/*
 	 * We ignore errors if the profile can not be initialized,
 	 * since there must be a way to get a context even if the

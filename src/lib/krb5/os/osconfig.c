@@ -24,15 +24,8 @@
  * Definition of default configuration parameters.
  */
 
-#ifdef OLD_CONFIG_FILES
-#define NEED_WINDOWS
-#endif
 #include "k5-int.h"
 
-#ifdef OLD_CONFIG_FILES
-char *krb5_config_file = DEFAULT_CONFIG_FILENAME;
-char *krb5_trans_file = DEFAULT_TRANS_FILENAME;
-#endif
 char *krb5_defkeyname  = DEFAULT_KEYTAB_NAME;
 #ifdef USE_DBM_LNAME
 char *krb5_lname_file = DEFAULT_LNAME_FILENAME;
@@ -45,44 +38,4 @@ int krb5_skdc_timeout_1 = SKDC_TIMEOUT_1;
 
 char *krb5_default_pwd_prompt1 = DEFAULT_PWD_STRING1;
 char *krb5_default_pwd_prompt2 = DEFAULT_PWD_STRING2;
-
-#ifdef OLD_CONFIG_FILES
-/*
- * On Windows, we want to let the user specify in the kerberos.ini file
- * where the config and realms files, krb.con and krb.rea, reside. If they
- * aren't specified then we fall back to having them in the windows
- * directory. We use the same format as the K4 version for compatability.
- *
- * Note: these values can change asynchronously so we can't cache the values.
- */
-krb5_error_code
-krb5_find_config_files ()
-{
-#ifdef _WINDOWS
-    static char cnfname[160];                   /* For krb.con */
-    static char realmsname[160];                /* For krb.rea */
-    char defname[160];                          /* Default value */
-
-    /* First locate krb.con file */
-    GetWindowsDirectory(defname, sizeof(defname));
-    strcat (defname, "\\");
-    strcat (defname, DEFAULT_CONFIG_FILENAME);
-	GetPrivateProfileString(INI_FILES, INI_KRB_CONF, defname,
-    	cnfname, sizeof(cnfname), KERBEROS_INI);
-    
-    /* Now locate krb.rea file */
-    GetWindowsDirectory(defname, sizeof(defname));
-    strcat (defname, "\\");
-    strcat (defname, DEFAULT_TRANS_FILENAME);
-	GetPrivateProfileString(INI_FILES, INI_KRB_REALMS, defname,
-    	realmsname, sizeof(realmsname), KERBEROS_INI);
-
-    krb5_config_file = cnfname;
-    krb5_trans_file = realmsname;
-
-#endif /* _WINDOWS */
-
-    return 0;
-}
-#endif /* OLD_CONFIG_FILES */
 

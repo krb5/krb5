@@ -31,39 +31,11 @@
 #include <signal.h>
 #include <setjmp.h>
 
-#ifdef sun
-#include <sgtty.h>
-#endif
-
-extern int errno;
-
-#ifdef ECHO_PASSWORD
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); return errcode;
-#else
-
-/* POSIX_* are auto-magically defined in <krb5/config.h> at source
-   configuration time. */
-
-#ifdef POSIX_TERMIOS
+#ifndef ECHO_PASSWORD
 #include <termios.h>
-#else
-#include <sys/ioctl.h>
-#endif /* POSIX_TERMIOS */
-
-#ifdef POSIX_TERMIOS
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); tcsetattr(fd, TCSANOW, &save_control); return errcode;
-#else
-#ifdef sun
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); stty(fd, (char *)&tty_savestate); return errcode;
-#else /* !sun */
-#define cleanup(errcode) (void) signal(SIGINT, ointrfunc); ioctl(fd, TIOCSETP, (char *)&tty_savestate); return errcode;
-#endif /* sun */
-#endif /* POSIX_TERMIOS */
-
 #endif /* ECHO_PASSWORD */
 
 static jmp_buf pwd_jump;
-
 
 static krb5_sigtype
 intr_routine()
@@ -86,22 +58,13 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     register char *ptr;
     int scratchchar;
     krb5_sigtype (*ointrfunc)();
+    krb5_error_code errcode;
 #ifndef ECHO_PASSWORD
-#ifdef POSIX_TERMIOS
     struct termios echo_control, save_control;
     int fd;
 
     /* get the file descriptor associated with stdin */
     fd=fileno(stdin);
-
-#ifdef notdef
-    /* don't want to read password from anything but a terminal */
-    if (!isatty(fd)) {
-        fprintf(stderr,"Can only read password from a tty\n"); /* XXX */
-        errno=ENOTTY; /* say innapropriate ioctl for device */
-	return errno;
-    }
-#endif /* notdef */
 
     if (tcgetattr(fd, &echo_control) == -1)
 	return errno;
@@ -111,56 +74,11 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     
     if (tcsetattr(fd, TCSANOW, &echo_control) == -1)
 	return errno;
-#else
-    /* 4.3BSD style */
-    struct sgttyb tty_state, tty_savestate;
-    int fd;
-
-    /* get the file descriptor associated with stdin */
-    fd=fileno(stdin);
-
-#ifdef notdef
-    /* don't want to read password from anything but a terminal */
-    if (!isatty(fd)) {
-        fprintf(stderr,"Can only read password from a tty\n"); /* XXX */
-        errno=ENOTTY; /* say innapropriate ioctl for device */
-	return errno;
-    }
-#endif /* notdef */
-
-    /* save terminal state */
-    if (
-#ifdef sun
-	gtty(fd,(char *)&tty_savestate)
-#else
-	ioctl(fd,TIOCGETP,(char *)&tty_savestate)
-#endif
-	== -1) 
-	return errno;
-
-    tty_state = tty_savestate;
-
-    tty_state.sg_flags &= ~ECHO;
-    if (
-#ifdef sun
-	stty(fd,(char *)&tty_state)
-#else
-	ioctl(fd,TIOCSETP,(char *)&tty_state)
-#endif
-	== -1)
-	return errno;
-#endif
-
 #endif /* ECHO_PASSWORD */
 
     if (setjmp(pwd_jump)) {
-	/* interrupted */
-	if (readin_string) {
-	    (void) memset((char *)readin_string, 0, *size_return);
-	    krb5_xfree(readin_string);
-	}
-	(void) memset(return_pwd, 0, *size_return);
-	cleanup(KRB5_LIBOS_PWDINTR);
+	errcode = KRB5_LIBOS_PWDINTR; 	/* we were interrupted... */
+	goto cleanup;
     }
     /* save intrfunc */
     ointrfunc = signal(SIGINT, intr_routine);
@@ -171,16 +89,15 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
     (void) memset(return_pwd, 0, *size_return);
 
     if (fgets(return_pwd, *size_return, stdin) == NULL) {
-	/* error */
 	(void) putchar('\n');
-	(void) memset(return_pwd, 0, *size_return);
-	cleanup(KRB5_LIBOS_CANTREADPWD);
+	errcode = KRB5_LIBOS_CANTREADPWD;
+	goto cleanup;
     }
     (void) putchar('\n');
     /* fgets always null-terminates the returned string */
 
     /* replace newline with null */
-    if (ptr = strchr(return_pwd, '\n'))
+    if ((ptr = strchr(return_pwd, '\n')))
 	*ptr = '\0';
     else /* flush rest of input line */
 	do {
@@ -193,21 +110,18 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 	(void) fflush(stdout);
 	readin_string = malloc(*size_return);
 	if (!readin_string) {
-	    (void) memset(return_pwd, 0, *size_return);
-	    cleanup(ENOMEM);
+	    errcode = ENOMEM;
+	    goto cleanup;
 	}
 	(void) memset((char *)readin_string, 0, *size_return);
 	if (fgets((char *)readin_string, *size_return, stdin) == NULL) {
-	    /* error */
 	    (void) putchar('\n');
-	    (void) memset((char *)readin_string, 0, *size_return);
-	    (void) memset(return_pwd, 0, *size_return);
-	    krb5_xfree(readin_string);
-	    cleanup(KRB5_LIBOS_CANTREADPWD);
+	    errcode = KRB5_LIBOS_CANTREADPWD;
+	    goto cleanup;
 	}
 	(void) putchar('\n');
 
-	if (ptr = strchr((char *)readin_string, '\n'))
+	if ((ptr = strchr((char *)readin_string, '\n')))
 	    *ptr = '\0';
         else /* need to flush */
 	    do {
@@ -216,36 +130,29 @@ krb5_read_password(context, prompt, prompt2, return_pwd, size_return)
 	    
 	/* compare */
 	if (strncmp(return_pwd, (char *)readin_string, *size_return)) {
-	    (void) memset((char *)readin_string, 0, *size_return);
-	    (void) memset(return_pwd, 0, *size_return);
-	    krb5_xfree(readin_string);
-	    cleanup(KRB5_LIBOS_BADPWDMATCH);
+	    errcode = KRB5_LIBOS_BADPWDMATCH;
+	    goto cleanup;
 	}
-	(void) memset((char *)readin_string, 0, *size_return);
-	krb5_xfree(readin_string);
     }
     
-    /* reset intrfunc */
+    errcode = 0;
+    
+cleanup:
     (void) signal(SIGINT, ointrfunc);
-
 #ifndef ECHO_PASSWORD
-#ifdef POSIX_TERMIOS
-    if (tcsetattr(fd, TCSANOW, &save_control) == -1)
-	return errno;
-#else
-    if (
-#ifdef sun
-	stty(fd, (char *)&tty_savestate)
-#else
-	ioctl(fd, TIOCSETP, (char *)&tty_savestate)
+    if ((tcsetattr(fd, TCSANOW, &save_control) == -1) &&
+	errcode == 0)
+	    return errno;
 #endif
-	== -1)
-	return errno;
-#endif
-#endif /* ECHO_PASSWORD */
-    *size_return = strlen(return_pwd);
-
-    return 0;
+    if (readin_string) {
+	    memset((char *)readin_string, 0, *size_return);
+	    krb5_xfree(readin_string);
+    }
+    if (errcode)
+	    memset(return_pwd, 0, *size_return);
+    else
+	    *size_return = strlen(return_pwd);
+    return errcode;
 }
 #else /* MSDOS */
 /* Don't expect to be called, just define it for sanity and the linker.
