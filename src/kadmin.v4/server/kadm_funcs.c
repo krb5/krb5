@@ -136,6 +136,7 @@ kadm_princ2entry(princ, entry)
       kdatap = &entry->key_data[entry->n_key_data-1];
   }
   if (kdatap) {
+    kdatap->key_data_ver = 2;
     kdatap->key_data_type[0] = (krb5_int16) ENCTYPE_DES_CBC_CRC;
     kdatap->key_data_type[1] = (krb5_int16) KRB5_KDB_SALTTYPE_V4; 
     kdatap->key_data_kvno = (krb5_int16) princ.key_version;
@@ -241,15 +242,12 @@ Kadm_vals *valsout;
   if ((newpw.contents = (krb5_octet *)malloc(8)) == NULL)
     failadd(KADM_NOMEM);
 
-  if (retval = krb5_dbe_find_enctype(kadm_context,
-				     &newentry,
-				     ENCTYPE_DES_CBC_CRC,
-				     KRB5_KDB_SALTTYPE_V4,
-				     -1,
-				     &pkey)) {
-    if (!(retval = krb5_dbe_create_key_data(kadm_context, &newentry)))
-      pkey = &newentry.key_data[newentry.n_key_data-1];
-  }
+  retval = krb5_dbe_find_enctype(kadm_context,
+				 &newentry,
+				 ENCTYPE_DES_CBC_CRC,
+				 KRB5_KDB_SALTTYPE_V4,
+				 -1,
+				 &pkey);
   if (retval)
     failadd(retval);
 
