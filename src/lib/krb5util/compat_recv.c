@@ -417,7 +417,7 @@ char *version;			 /* version string (filled in) */
 			       tmp_buf,
 			       (unsigned long) sizeof(cksum),
 			       schedule,
-			       kdata->session,
+			       &kdata->session,
 			       laddr,
 			       faddr);
 	if (priv_len < 0) {
