@@ -1,4 +1,4 @@
-Copyright @copyright{} 1985-1999 by the Massachusetts Institute of Technology. 
+Copyright @copyright{} 1985-2000 by the Massachusetts Institute of Technology. 
 
 @quotation  
 Export of software employing encryption from the United States of
