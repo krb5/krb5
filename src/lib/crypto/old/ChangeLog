@@ -1,3 +1,8 @@
+Thu Dec 10 22:16:14 1998  Tom Yu  <tlyu@mit.edu>
+
+	* old_decrypt.c (krb5_old_decrypt): Actually compare the
+	calculated checksum against the provided checksum.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are

@@ -90,7 +90,7 @@ krb5_old_decrypt(enc, hash, key, usage, ivec, input, arg_output)
     if (ret = ((*(hash->hash))(1, &output, &cksum)))
 	goto cleanup;
 
-    if (memcmp(cksum.data, output.data+blocksize, cksum.length) != 0) {
+    if (memcmp(cksum.data, cksumdata, cksum.length) != 0) {
 	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
 	goto cleanup;
     }
