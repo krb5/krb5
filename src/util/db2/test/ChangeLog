@@ -1,10 +1,21 @@
+2002-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test: Use "/bin/." instead of "/bin" in find commands in
+	case /bin itself is a symlink.
+	(test8): Check exit status of dbtest program.
+
+	* dbtest.c (compare): Exit with error indication if comparison of
+	contents indicates a difference.
+	(get): Exit with error indication after printing message if key
+	not found.
+
 2002-01-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* run.test (test8): If test reports an error, exit with error
 	indication.
 
-	* dbtest.c (compare): Exit with error indication if comparison
-	fails.
+	* dbtest.c (compare): Exit with error indication if size
+	comparison fails.
 
 2000-06-26  Ken Raeburn  <raeburn@mit.edu>
 
