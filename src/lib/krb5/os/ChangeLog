@@ -1,3 +1,17 @@
+2003-03-06  Alexandra Ellwood <lxs@mit.edu>
+
+    * c_ustime.c: Removed Mac OS 9 code.
+    
+    * ccdefname.c: Conditionalize on USE_CCAPI and not TARGET_OS_MAC
+    so Darwin builds work.
+    
+    * init_os_ctx.c: Modified to use DEFAULT_SECURE_PROFILE_PATH and
+    DEFAULT_PROFILE_PATH for KfM homedir-relative config files.
+    
+    * read_pwd.c: Cast to remove const warnings.
+    
+    * timeofday.c: Do the same thing on the Mac as on Unix.
+
 2003-03-04  Sam Hartman  <hartmans@mit.edu>
 
 	* sendto_kdc.c (service_tcp_fd): Don't call shutdown on end of write because some implementations cannot deal with half-closed TCP sockets.

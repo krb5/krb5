@@ -48,7 +48,7 @@ krb5_read_password(krb5_context context, const char *prompt, const char *prompt2
     krb5_error_code retval;
     reply_data.length = *size_return; /* NB: size_return is also an input */
     reply_data.data = return_pwd;
-    k5prompt.prompt = (const char *) prompt;
+    k5prompt.prompt = (char *)prompt;
     k5prompt.hidden = 1;
     k5prompt.reply = &reply_data;
     retval =  krb5_prompter_posix(NULL,
@@ -58,7 +58,7 @@ krb5_read_password(krb5_context context, const char *prompt, const char *prompt2
 	krb5_data verify_data;
 	verify_data.data = malloc(*size_return);
 	verify_data.length = *size_return;
-	k5prompt.prompt = (const char *) prompt2;
+	k5prompt.prompt = (char *)prompt2;
 	k5prompt.reply = &verify_data;
 	if (!verify_data.data)
 	    return ENOMEM;

@@ -31,8 +31,8 @@
 #include "k5-int.h"
 #include <stdio.h>
 
-#if TARGET_OS_MAC
-#include <Kerberos/CredentialsCache.h>
+#if defined(USE_CCAPI)
+#include <CredentialsCache.h>
 #endif
 
 #if defined(_WIN32)
@@ -186,7 +186,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 }
 #endif
 
-#if TARGET_OS_MAC
+#if defined(USE_CCAPI)
 
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {

@@ -167,7 +167,6 @@ get_from_registry(
 static void
 free_filespecs(profile_filespec_t *files)
 {
-#if !TARGET_OS_MAC
     char **cp;
 
     if (files == 0)
@@ -175,11 +174,12 @@ free_filespecs(profile_filespec_t *files)
     
     for (cp = files; *cp; cp++)
 	free(*cp);
-#endif
     free(files);
 }
 
-static krb5_error_code
+/* This function is needed by KfM's KerberosPreferences API 
+ * because it needs to be able to specify "secure" */
+krb5_error_code
 os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
 {
     profile_filespec_t* files;
@@ -234,8 +234,12 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
     unsigned int ent_len;
     const char *s, *t;
 
-    if (!secure) filepath = getenv("KRB5_CONFIG");
-    if (!filepath) filepath = DEFAULT_PROFILE_PATH;
+    if (secure) {
+        filepath = DEFAULT_SECURE_PROFILE_PATH;
+    } else { 
+        filepath = getenv("KRB5_CONFIG");
+        if (!filepath) filepath = DEFAULT_PROFILE_PATH;
+    }
 
     /* count the distinct filename components */
     for(s = filepath, n_entries = 1; *s; s++) {
