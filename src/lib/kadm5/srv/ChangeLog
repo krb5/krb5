@@ -1,3 +1,11 @@
+Sun Feb 18 17:40:23 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* adb_openclose.c, adb_policy.c, server_acl.c, server_dict.c,
+        server_init.c, server_kdb.c, server_misc.c, svr_iters.c,
+        svr_principal.c: Cleanup assignments in conditionals, variables
+        sadowing one another, unused variables and declared some functions
+        as static.
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* svr_chpass_util.c (kadm5_chpass_principal_util): Change msg_len

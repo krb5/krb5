@@ -72,7 +72,7 @@ struct iter_data {
  *	other characters are copied
  *	regexp is anchored with ^ and $
  */
-kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
+static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
 {
      int append_realm;
      char *p;
@@ -127,7 +127,7 @@ kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
      return KADM5_OK;
 }
 
-void get_either_iter(struct iter_data *data, char *name)
+static void get_either_iter(struct iter_data *data, char *name)
 {
      if (
 #ifdef SOLARIS_REGEXPS
@@ -146,7 +146,7 @@ void get_either_iter(struct iter_data *data, char *name)
 	  free(name);
 }
 
-void get_pols_iter(void *data, osa_policy_ent_t entry)
+static void get_pols_iter(void *data, osa_policy_ent_t entry)
 {
      char *name;
 
@@ -155,7 +155,7 @@ void get_pols_iter(void *data, osa_policy_ent_t entry)
      get_either_iter(data, name);
 }
 
-void get_princs_iter(void *data, krb5_principal princ)
+static void get_princs_iter(void *data, krb5_principal princ)
 {
      struct iter_data *id = (struct iter_data *) data;
      char *name;
@@ -172,7 +172,10 @@ kadm5_ret_t kadm5_get_either(int princ,
 				       int *count)
 {
      struct iter_data data;
-     char *msg, *regexp;
+#ifdef BSD_REGEXPS
+     char *msg;
+#endif
+     char *regexp;
      int ret;
      kadm5_server_handle_t handle = server_handle;
      

@@ -41,6 +41,7 @@ adb_policy_close(kadm5_server_handle_t handle)
     return KADM5_OK;
 }
 
+#ifdef HESIOD
 /* stolen from v4sever/kadm_funcs.c */
 static char *
 reverse(str)
@@ -61,7 +62,9 @@ reverse(str)
 	
 	return(newstr);
 }
+#endif /* HESIOD */
 
+#if 0
 static int
 lower(str)
 	char	*str;
@@ -77,7 +80,9 @@ lower(str)
 	}
 	return(effect);
 }
+#endif
 
+#ifdef HESIOD
 static int
 str_check_gecos(gecos, pwstr)
 	char	*gecos;
@@ -110,6 +115,7 @@ str_check_gecos(gecos, pwstr)
 	}
 	return 0;
 }
+#endif /* HESIOD */
 
 /* some of this is stolen from gatekeeper ... */
 kadm5_ret_t
@@ -156,13 +162,12 @@ passwd_check(kadm5_server_handle_t handle,
 	if((find_word(password) == KADM5_OK))
 	    return KADM5_PASS_Q_DICT;
 	else { 
-	    char	*cp;
-	    int	c, n = krb5_princ_size(handle->context, principal);
+	    int	i, n = krb5_princ_size(handle->context, principal);
 	    cp = krb5_princ_realm(handle->context, principal)->data;
 	    if (strcasecmp(cp, password) == 0)
 		return KADM5_PASS_Q_DICT;
-	    for (c = 0; c < n ; c++) {
-		cp = krb5_princ_component(handle->context, principal, c)->data;
+	    for (i = 0; i < n ; i++) {
+		cp = krb5_princ_component(handle->context, principal, i)->data;
 		if (strcasecmp(cp, password) == 0)
 		    return KADM5_PASS_Q_DICT;
 #ifdef HESIOD

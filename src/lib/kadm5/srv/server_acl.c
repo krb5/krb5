@@ -35,6 +35,7 @@
 #include "k5-int.h"
 #include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
+#include "adm_proto.h"
 #include "server_acl.h"
 #include <ctype.h>
 
@@ -277,7 +278,6 @@ acl_parse_restrictions(s, rpp)
 {
     char		*sp, *tp, *ap;
     static const char	*delims = "\t\n\f\v\r ,";
-    krb5_error_code	ret;
     krb5_deltat		dt;
     krb5_flags		flag;
     krb5_error_code	code;
@@ -287,7 +287,7 @@ acl_parse_restrictions(s, rpp)
 
     *rpp = (restriction_t *) NULL;
     code = 0;
-    if (s)
+    if (s) {
 	if (!(sp = strdup(s))	/* Don't munge the original */
 	    || !(*rpp = (restriction_t *) malloc(sizeof(restriction_t)))) {
 	    code = ENOMEM;
@@ -345,6 +345,7 @@ acl_parse_restrictions(s, rpp)
 		}
 	    }
 	}
+    }
     if (sp)
 	free(sp);
     if (*rpp && code) {
@@ -481,12 +482,13 @@ acl_load_acl_file()
 
     DPRINT(DEBUG_CALLS, acl_debug_level, ("* acl_load_acl_file()\n"));
     /* Open the ACL file for read */
-    if (afp = fopen(acl_acl_file, "r")) {
+    afp = fopen(acl_acl_file, "r");
+    if (afp) {
 	alineno = 1;
 	aentpp = &acl_list_head;
 
 	/* Get a non-comment line */
-	while (alinep = acl_get_line(afp, &alineno)) {
+	while ((alinep = acl_get_line(afp, &alineno))) {
 	    /* Parse it */
 	    *aentpp = acl_parse_line(alinep);
 	    /* If syntax error, then fall out */
@@ -503,7 +505,8 @@ acl_load_acl_file()
 	fclose(afp);
 
 	if (acl_catchall_entry) {
-	     if (*aentpp = acl_parse_line(acl_catchall_entry)) {
+	     *aentpp = acl_parse_line(acl_catchall_entry);
+	     if (*aentpp) {
 		  acl_list_tail = *aentpp;
 	     }
 	     else {
@@ -770,7 +773,9 @@ acl_check(kcontext, caller, opmask, principal, restrictions)
        return(code);
 
     retval = 0;
-    if (aentry = acl_find_entry(kcontext, caller_princ, principal)) {
+
+    aentry = acl_find_entry(kcontext, caller_princ, principal);
+    if (aentry) {
 	if ((aentry->ae_op_allowed & opmask) == opmask) {
 	    retval = 1;
 	    if (restrictions) {
@@ -792,8 +797,6 @@ acl_check(kcontext, caller, opmask, principal, restrictions)
 kadm5_ret_t
 kadm5_get_privs(void *server_handle, long *privs)
 {
-     kadm5_server_handle_t handle = server_handle;
-
      CHECK_HANDLE(server_handle);
 
      /* this is impossible to do with the current interface.  For now,

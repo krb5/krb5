@@ -18,20 +18,20 @@ extern	int errno;
 
 #define OPENLOCK(db, mode) \
 { \
-       int ret; \
+       int olret; \
 	    if (db == NULL) \
 		 return EINVAL; \
 	    else if (db->magic != OSA_ADB_POLICY_DB_MAGIC) \
 		 return OSA_ADB_DBINIT; \
-	    else if ((ret = osa_adb_open_and_lock(db, mode)) != OSA_ADB_OK) \
-		 return ret; \
+	    else if ((olret = osa_adb_open_and_lock(db, mode)) != OSA_ADB_OK) \
+		 return olret; \
 	    }
 
 #define CLOSELOCK(db) \
 { \
-     int ret; \
-     if ((ret = osa_adb_close_and_unlock(db)) != OSA_ADB_OK) \
-	  return ret; \
+     int cl_ret; \
+     if ((cl_ret = osa_adb_close_and_unlock(db)) != OSA_ADB_OK) \
+	  return cl_ret; \
 }
 
 osa_adb_ret_t osa_adb_create_policy_db(kadm5_config_params *params)

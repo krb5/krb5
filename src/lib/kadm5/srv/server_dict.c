@@ -20,12 +20,13 @@ static char *rcsid = "$Header$";
 #ifdef HAVE_MEMORY_H
 #include    <memory.h>
 #endif
+#include    "adm_proto.h"
 #include    <syslog.h>
 #include    "server_internal.h"
 
 static char	    **word_list = NULL;	    /* list of word pointers */
 static char	    *word_block = NULL;	    /* actual word data */
-static int	    word_count = 0;	    /* number of words */
+static unsigned int word_count = 0;	    /* number of words */
 extern int	    errno;
 
 /*
@@ -46,7 +47,7 @@ extern int	    errno;
 static int
 word_compare(const void *s1, const void *s2)
 {
-    return (strcasecmp(*(char **)s1, *(char **)s2));
+    return (strcasecmp(*(const char **)s1, *(const char **)s2));
 }
 
 /*
