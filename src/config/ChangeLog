@@ -1,3 +1,8 @@
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: We don't need aix.bincmds anymore for AIX.  Use the
+	-blibpath flag instead.
+
 2001-01-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (COMPILE_ET): New variable.
