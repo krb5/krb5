@@ -144,14 +144,16 @@ OLDDECLARG(krb5_ccache, ccache)
     /* XXX check the contents for sanity... */
 
     /* fill in the credentials */
-    creds->keyblock = *as_reply->enc_part2->session;
-    if (!(creds->keyblock.contents = (krb5_octet *)malloc(creds->keyblock.length))) {
+    if (retval = krb5_copy_keyblock(as_reply->enc_part2->session,
+				    &creds->keyblock)) {
 	krb5_free_kdc_rep(as_reply);
-	return ENOMEM;
+	return retval;
     }
-
-    bcopy((char *)as_reply->enc_part2->session->contents,
-	  (char *)creds->keyblock.contents, creds->keyblock.length);
+#define cleanup_key() {bzero((char *)creds->keyblock.contents, \
+			     creds->keyblock.length); \
+		       free((char *)creds->keyblock.contents); \
+		       creds->keyblock.contents = 0; \
+		       creds->keyblock.length = 0;}
 
     creds->times = as_reply->enc_part2->times;
     creds->is_skey = FALSE;		/* this is an AS_REQ, so cannot
@@ -160,11 +162,10 @@ OLDDECLARG(krb5_ccache, ccache)
     creds->second_ticket.length = 0;
     creds->second_ticket.data = 0;
 
-
     retval = encode_krb5_ticket(as_reply->ticket, &packet);
     krb5_free_kdc_rep(as_reply);
     if (retval) {
-	free((char *)creds->keyblock.contents);
+	cleanup_key();
 	return retval;
     }	
     creds->ticket = *packet;
@@ -174,7 +175,7 @@ OLDDECLARG(krb5_ccache, ccache)
     if (retval = krb5_cc_store_cred(ccache, creds)) {
 	/* clean up the pieces */
 	free((char *)creds->ticket.data);
-	free((char *)creds->keyblock.contents);
+	cleanup_key();
 	return retval;
     }
     return 0;
