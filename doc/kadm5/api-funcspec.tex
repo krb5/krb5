@@ -1233,6 +1233,12 @@ principal and realm name.  ``none'' means no salt, which is compatible
 with Kerberos V4.  ``keep'' means maintain the previous salt when a
 key is changed.
 
+If the either admin principal or policy databases are reloaded using
+the tools described in section \ref{sec:tools}, the admin server must
+be shut down during the process.  If the admin server is left running
+during the import process, at best the server may use old information
+and at worst the database may become inconsistent.
+
 \subsection{Protocol and Port Number}
 
 The admin server accepts TCP Sun RPC connections.  The port number
@@ -1393,6 +1399,7 @@ admin@REALM.COM, addr = 192.231.148.12
 \end{itemize}
 
 \section{Tools}
+\label{sec:tools}
 
 Three tools will be provided to create and manage the admin databases.
 This need only run on the admin server machine and do not need to
