@@ -131,8 +131,8 @@ gic_dialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
  * broken environment
  */
 krb5_error_code KRB5_CALLCONV
-gic_prompter(krb5_context ctx, void *data, const char *banner,
-	     int num_prompts, krb5_prompt prompts[])
+gic_prompter(krb5_context ctx, void *data, const char *name,
+	     const char *banner, int num_prompts, krb5_prompt prompts[])
 {
 	int       rc;
 	void     *dlg;
@@ -145,7 +145,8 @@ gic_prompter(krb5_context ctx, void *data, const char *banner,
 	if (gd->width == 0)
 		gd->width = 450;
 
-	dlg = vardlg_build((WORD)(gd->width), gd->banner, (WORD)num_prompts, prompts, (WORD)(gd->id));
+	dlg = vardlg_build((WORD)(gd->width), name, gd->banner,
+			   (WORD)num_prompts, prompts, (WORD)(gd->id));
 
 	rc = DialogBoxIndirect(gd->hinstance, (LPDLGTEMPLATE)dlg, gd->hwnd, gic_dialog);
 

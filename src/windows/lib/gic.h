@@ -23,6 +23,6 @@ typedef struct {
 } gic_data;
 
 krb5_error_code KRB5_CALLCONV gic_prompter(krb5_context, void *, const char *,
-					   int, krb5_prompt []);
+					   const char *, int, krb5_prompt []);
 
 #endif /* _WINDOWS_LIB_GIC_H */

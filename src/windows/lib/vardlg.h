@@ -25,7 +25,7 @@
  * If there are items, we also create a Cancel button and one (label, entry)
  * fields for each item.
  */
-void *vardlg_build(WORD, const char *, WORD, krb5_prompt *, WORD);
+void *vardlg_build(WORD, const char *, const char *, WORD, krb5_prompt *, WORD);
 
 void  vardlg_config(HWND, WORD, const char *, WORD, krb5_prompt *, WORD);
 

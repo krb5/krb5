@@ -171,8 +171,8 @@ ADD_DLGITEM(unsigned char *dlg, short x, short y, short cx, short cy,
  * fields for each item.
  */
 void *
-vardlg_build(WORD cx, const char *banner, WORD n, krb5_prompt prompts[],
-	     WORD id)
+vardlg_build(WORD cx, const char *name, const char *banner,
+	     WORD n, krb5_prompt prompts[], WORD id)
 {
 	unsigned char *p;
 	WORD i;
@@ -187,7 +187,10 @@ vardlg_build(WORD cx, const char *banner, WORD n, krb5_prompt prompts[],
 	/*
 	 * Store the dialog template
 	 */
-	p += ADD_DLGTEMPLATE(p, 0, 0, cx, 0, "KerbNet", "MS Sans Serif", 8,
+	p += ADD_DLGTEMPLATE(p, 0, 0, cx, 0, name ?
+			     strlen(name) < 30 ? name : "Kerberos V5" :
+			     "Kerberos V5",
+			     "MS Sans Serif", 8,
 			     (WORD)(n * 2 + 3));
 
 	/*
