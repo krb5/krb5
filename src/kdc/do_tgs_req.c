@@ -523,6 +523,10 @@ krb5_data **response;
     krb5_error_code retval;
     krb5_data *scratch;
 
+
+    syslog(LOG_INFO, "TGS_REQ: %s while processing request",
+	   error_message(error+KRB5KDC_ERR_NONE));
+
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
 
