@@ -219,7 +219,7 @@ try_new_version:
       */
      if (call_arg.version < 4 && (mech_type == gss_mech_krb5 ||
 				  mech_type == GSS_C_NULL_OID))
-	  mech_type = gss_mech_krb5_old;
+	  mech_type = (gss_OID) gss_mech_krb5_old;
 #endif
 
      if (!bindings_failed && call_arg.version >= 3) {

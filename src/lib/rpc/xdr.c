@@ -156,6 +156,8 @@ xdr_u_int(xdrs, up)
 	} else {
 		return (xdr_short(xdrs, (short *)up));
 	}
+	/*NOTREACHED*/
+	return(FALSE);
 #endif
 }
 
@@ -515,6 +517,7 @@ xdr_int32(xdrs, ip)
   case XDR_FREE:
     return (TRUE);    
   }
+  return(FALSE);
 }
 
 bool_t
@@ -538,6 +541,7 @@ xdr_u_int32(xdrs, up)
   case XDR_FREE:
     return (TRUE);    
   }
+  return(FALSE);
 }
 
 /*
