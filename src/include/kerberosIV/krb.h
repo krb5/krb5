@@ -496,6 +496,8 @@ KRB5_DLLIMP int KRB5_CALLCONV krb_get_lrealm
 /* g_phost.c */
 KRB5_DLLIMP char FAR * KRB5_CALLCONV krb_get_phost
 	PROTOTYPE((char FAR * alias));
+/* get_pw_tkt */
+int get_pw_tkt PROTOTYPE((char *, char *, char *, char *));
 /* g_pw_in_tkt.c */
 KRB5_DLLIMP int KRB5_CALLCONV krb_get_pw_in_tkt
 	PROTOTYPE((char FAR *user, char FAR *instance, char FAR *realm,
@@ -640,6 +642,9 @@ char * tkt_string
 	PROTOTYPE((void));
 void krb_set_tkt_string
 	PROTOTYPE((char *));
+
+/* unix_time.c */
+unsigned KRB4_32 unix_time_gmt_unixsec PROTOTYPE((unsigned KRB4_32 *));
 
 /*
  * Internal prototypes
