@@ -1,3 +1,7 @@
+Tue Apr 30 00:38:14 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* Makefile.in (libcrypto.$(STEXT)): Remove before creating.
+
 Sat Mar 30 22:52:46 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* cryptoconf.c: Fixed comments describing the various checksum

@@ -51,6 +51,7 @@ all-mac:: $(OBJS)
 all-windows:: $(OBJS)
 
 libcrypto.$(STEXT): $(LIBDONE)
+	-rm -f $@ libcrypto.stamp
 	if test -f $@ ; then \
 		for i in $(LIB_SUBDIRS) ; \
 		do \
