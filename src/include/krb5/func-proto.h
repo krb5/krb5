@@ -68,12 +68,12 @@ krb5_error_code krb5_get_in_tkt
 		   krb5_address **,
 		   krb5_enctype,
 		   krb5_keytype,
-		   int (*key_proc )(krb5_keytype,
+		   int (* )(krb5_keytype,
 				    krb5_keyblock **,
 				    krb5_pointer ),
 		   krb5_pointer,
-		   int (*decrypt_proc )(krb5_data *,
-					krb5_kdc_rep *_rep,
+		   int (* )(krb5_data *,
+					krb5_kdc_rep *,
 					krb5_keyblock *,
 					krb5_pointer ),
 		   krb5_pointer,
@@ -96,7 +96,7 @@ krb5_error_code krb5_get_in_tkt_with_skey
 		   krb5_creds * ));
 krb5_error_code krb5_mk_req
 	PROTOTYPE((krb5_principal,
-		   krb5_flags ap_req,
+		   krb5_flags,
 		   krb5_checksum *,
 		   krb5_ccache,
 		   krb5_data * ));
@@ -113,7 +113,7 @@ krb5_error_code krb5_rd_req
 		   krb5_principal,
 		   krb5_address *,
 		   krb5_pointer,
-		   int (*keyproc )(krb5_pointer,
+		   int (* )(krb5_pointer,
 				   krb5_principal,
 				   krb5_kvno,
 				   krb5_keyblock ** ),
@@ -180,7 +180,7 @@ krb5_error_code krb5_free_krbhst
 krb5_error_code krb5_kt_register
 	PROTOTYPE((krb5_kt_ops * ));
 krb5_error_code krb5_kt_resolve
-	PROTOTYPE((char *_name,
+	PROTOTYPE((char *,
 		   krb5_keytab * ));
 krb5_error_code krb5_kt_get_name
 	PROTOTYPE((krb5_keytab,
@@ -236,7 +236,7 @@ krb5_error_code krb5_rc_get_lifespan
 		   krb5_deltat * ));
 krb5_error_code krb5_rc_resolve
 	PROTOTYPE((krb5_rcache *,
-		   char *_name ));
+		   char * ));
 krb5_error_code krb5_rc_generate_new
 	PROTOTYPE((krb5_rcache *,
 		   krb5_rc_ops * ));
@@ -259,7 +259,7 @@ krb5_error_code krb5_cc_destroy
 krb5_error_code krb5_cc_close
 	PROTOTYPE((krb5_ccache ));
 krb5_error_code krb5_cc_store_cred
-	PROTOTYPE((krb5_ccache id,
+	PROTOTYPE((krb5_ccache,
 		   krb5_creds * ));
 krb5_error_code krb5_cc_retrieve_cred
 	PROTOTYPE((krb5_ccache,
@@ -288,7 +288,7 @@ krb5_error_code krb5_cc_resolve
 		   krb5_ccache * ));
 krb5_error_code krb5_cc_generate_new
 	PROTOTYPE((krb5_cc_ops *,
-		   krb5_ccache *id ));
+		   krb5_ccache * ));
 krb5_error_code krb5_cc_register
 	PROTOTYPE((krb5_cc_ops *,
 		   krb5_boolean ));
