@@ -689,7 +689,7 @@ Exch $R0
 FunctionEnd
 
 Function RestartRequired
-Exch $R1 ;Original Variable
+Push $R1 ;Original Variable
 Push $R2
 Push $R3 ;Counter Variable
 
@@ -700,16 +700,26 @@ StrCpy $R3 "0" 0 ;Counter Variable
 EnumRegValue $R2 HKCU "Software\Microsoft\Windows\CurrentVersion\RunOnce" $R3
 StrCmp $R2 "" 0 FoundRestart
 
-;Next Check Local Machine Key
+;Next Check Local Machine RunOnce Key
 EnumRegValue $R2 HKLM "Software\Microsoft\Windows\CurrentVersion\RunOnce" $R3
+StrCmp $R2 "" 0 FoundRestart
+
+EnumRegValue $R2 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\FileRenameOperations" $R3
+StrCmp $R2 "" 0 FoundRestart
+
+NextValue:
+EnumRegValue $R2 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager" $R3
 StrCmp $R2 "" ExitFunc 0
+StrCmp $R2 "PendingFileRenameOperations" FoundRestart 0
+IntOp $R3 $R3 + 1
+Goto NextValue
 
 FoundRestart:
 StrCpy $R1 "1" 1
 
 ExitFunc:
-Pop $R2
 Pop $R3
+Pop $R2
 Exch $R1
 FunctionEnd
 

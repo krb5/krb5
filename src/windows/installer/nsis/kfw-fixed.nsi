@@ -237,6 +237,23 @@ Section "KfW Client" secClient
   File "${KFW_BIN_DIR}\wshelp32.pdb"
   File "${KFW_BIN_DIR}\xpprof32.pdb"
 
+!IFDEF CL_1400
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr80d.dll"    "$INSTDIR\bin\msvcr80d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcr80d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp80d.dll"    "$INSTDIR\bin\msvcp80d.dll"  "$INSTDIR"
+  File "${SYSTEMDIR}\msvcp80d.pdb"                                           
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc80d.dll"      "$INSTDIR\bin\mfc80d.dll"    "$INSTDIR"
+  File "${SYSTEMDIR}\mfc80d.pdb"                                             
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHS.DLL"    "$INSTDIR\bin\MFC80CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHT.DLL"    "$INSTDIR\bin\MFC80CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80DEU.DLL"    "$INSTDIR\bin\MFC80DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ENU.DLL"    "$INSTDIR\bin\MFC80ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ESP.DLL"    "$INSTDIR\bin\MFC80ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80FRA.DLL"    "$INSTDIR\bin\MFC80FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ITA.DLL"    "$INSTDIR\bin\MFC80ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80JPN.DLL"    "$INSTDIR\bin\MFC80JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80KOR.DLL"    "$INSTDIR\bin\MFC80KOR.DLL"  "$INSTDIR"
+!ELSE                                                                   
 !IFDEF CL_1310
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr71d.dll"    "$INSTDIR\bin\msvcr71d.dll"  "$INSTDIR"
   File "${SYSTEMDIR}\msvcr71d.pdb"                                           
@@ -279,6 +296,21 @@ Section "KfW Client" secClient
   File "${SYSTEMDIR}\msvcrtd.pdb"                                            
 !ENDIF                                                                  
 !ENDIF                                                                  
+!ENDIF
+!ELSE                                                                   
+!IFDEF CL_1400
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc80.dll"       "$INSTDIR\bin\mfc80.dll"     "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr80.dll"     "$INSTDIR\bin\msvcr80.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp80.dll"     "$INSTDIR\bin\msvcp80.dll"   "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHS.DLL"    "$INSTDIR\bin\MFC80CHS.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHT.DLL"    "$INSTDIR\bin\MFC80CHT.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80DEU.DLL"    "$INSTDIR\bin\MFC80DEU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ENU.DLL"    "$INSTDIR\bin\MFC80ENU.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ESP.DLL"    "$INSTDIR\bin\MFC80ESP.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80FRA.DLL"    "$INSTDIR\bin\MFC80FRA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80ITA.DLL"    "$INSTDIR\bin\MFC80ITA.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80JPN.DLL"    "$INSTDIR\bin\MFC80JPN.DLL"  "$INSTDIR"
+  !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80KOR.DLL"    "$INSTDIR\bin\MFC80KOR.DLL"  "$INSTDIR"
 !ELSE                                                                   
 !IFDEF CL_1310                                                          
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc71.dll"       "$INSTDIR\bin\mfc71.dll"     "$INSTDIR"
@@ -313,6 +345,7 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcrt.dll"      "$INSTDIR\bin\msvcrt.dll"    "$INSTDIR"
 !ENDIF                                                                  
 !ENDIF                                                                  
+!ENDIF
 !ENDIF                                                                  
   !insertmacro ReplaceDLL "${SYSTEMDIR}\psapi.dll"       "$INSTDIR\bin\psapi.dll"     "$INSTDIR"
    
@@ -409,24 +442,29 @@ addAllowTgtKey:
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup" $R0
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" "AllowTGTSessionKey" "1"
   ReadRegDWORD $R0 HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" 
-  WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackupXP" $R0
+  WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup2" $R0
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" "1"
 skipAllowTgtKey:  
 
   ; The following are keys added for Terminal Server compatibility
   ; http://support.microsoft.com/default.aspx?scid=kb;EN-US;186499
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno.exe" "Flags" 0x408
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit.exe" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95g" "Flags" 0x408
 
 SectionEnd
 
@@ -611,14 +649,15 @@ uninst:
 
   Push $R1
   Call RestartRequired
-  Exch $R1
-  StrCmp $R1 "1" RestartRequired RestartNotRequired 
+  Pop $R1
+  StrCmp $R1 "1" Restart DoNotRestart
 
-RestartRequired:
+Restart:
    MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Please reboot and then restart the installer."
    Abort
+   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Abort failed"
  
-RestartNotRequired:
+DoNotRestart:
 no_remove_uninstaller:
 
 contInstall:
@@ -880,6 +919,7 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
    Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\leash32.exe"
 !ifdef OLDHELP
    Delete /REBOOTOK "$INSTDIR\bin\leash32.hlp"
 !else
@@ -914,6 +954,14 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.pdb"
 
+!IFDEF CL_1400
+   Delete /REBOOTOK "$INSTDIR\bin\msvcr80d.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\msvcr80d.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\msvcp80d.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\msvcp80d.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\mfc80d.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\mfc80d.pdb"
+!ELSE
 !IFDEF CL_1310
    Delete /REBOOTOK "$INSTDIR\bin\msvcr71d.dll"
    Delete /REBOOTOK "$INSTDIR\bin\msvcr71d.pdb"
@@ -938,6 +986,21 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\msvcrtd.pdb"
 !ENDIF
 !ENDIF
+!ENDIF
+!ELSE
+!IFDEF CL_1400
+   Delete /REBOOTOK "$INSTDIR\bin\mfc80.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\msvcr80.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\msvcp80.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80CHS.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80CHT.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80DEU.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80ENU.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80ESP.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80FRA.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80ITA.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80JPN.DLL"
+   Delete /REBOOTOK "$INSTDIR\bin\MFC80KOR.DLL"
 !ELSE
 !IFDEF CL_1310
    Delete /REBOOTOK "$INSTDIR\bin\mfc71.dll"
@@ -973,6 +1036,7 @@ StartRemove:
 !ENDIF
 !ENDIF
 !ENDIF
+!ENDIF
    Delete /REBOOTOK "$INSTDIR\bin\psapi.dll"
 
   RMDir  "$INSTDIR\bin"
@@ -1004,22 +1068,27 @@ StartRemove:
   ; Restore previous value of AllowTGTSessionKey 
   ReadRegDWORD $R0 HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup"
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" "AllowTGTSessionKey" $R0
-  ReadRegDWORD $R0 HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackupXP"
+  ReadRegDWORD $R0 HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "AllowTGTSessionKeyBackup2"
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" $R0
 
   ; The following are keys added for Terminal Server compatibility
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno.exe"
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit.exe"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95g"
 
   DeleteRegKey HKLM "${KFW_REGKEY_ROOT}\Client\CurrentVersion"
   DeleteRegKey HKLM "${KFW_REGKEY_ROOT}\Client"
