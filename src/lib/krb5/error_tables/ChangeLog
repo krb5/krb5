@@ -1,3 +1,9 @@
+Fri Mar 31 16:06:21 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in (BUILDTOP2, etc): Back out previous change so that
+		it doesn't break people who are using VPATH to have
+		separate build directories.  (See comments in the Makefile.)
+
 Tue Mar 28 18:29:44 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (BUILDTOP2, etc):  Make it possible

@@ -4,13 +4,19 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSLIBNAME=..\krb5.lib
 ##DOS!include $(BUILDTOP)\config\windows.in
 
-EHDRDIR=$(BUILDTOP2)$(S)include$(S)krb5
+EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
 
 # The "unixmac" and "includes" rules need to run in Makefile.in,
 # without all the support glop like $(S) and $(BUILDTOP)...so, fake it.
-BUILDTOP2 = ../../..
-SRCTOP2 = $(BUILDTOP2)
-EHDRDIR2=$(BUILDTOP2)/include/krb5
+#
+# Faking things breaks VPATH support, which is a requirement for me -- TYT.
+# You need to do this right!  Whatever config tools that you're using under
+# the macintosh, is going to need to handle BUILDTOP and SRCTOP explicitly.
+# Setting BUILDTOP and SRCTOP to be the same is Right Out.
+#
+#BUILDTOP2 = ../../..
+#SRCTOP2 = $(BUILDTOP2)
+#EHDRDIR2=$(BUILDTOP2)/include/krb5
 
 HDRS= asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h adm_err.h
 OBJS= asn1_err.$(OBJEXT) kdb5_err.$(OBJEXT) krb5_err.$(OBJEXT) \
@@ -73,21 +79,26 @@ clean-windows::
 
 includes:: $(HDRS)
 	for x in $(HDRS); do \
-	if cmp $$x $(EHDRDIR2)/$$x >/dev/null 2>&1; then :; \
+	if cmp $$x $(EHDRDIR)/$$x >/dev/null 2>&1; then :; \
 	else \
-		(set -x; rm -f $(EHDRDIR2)/$$x;	cp $$x $(EHDRDIR2)/$$x) \
+		(set -x; rm -f $(EHDRDIR)/$$x;	cp $$x $(EHDRDIR)/$$x) \
 	fi; done
 
 clean::
 	for x in $(HDRS); do \
-		rm -f $(EHDRDIR2)/$$x; \
+		rm -f $(EHDRDIR)/$$x; \
 	done
 
-.SUFFIXES:  .h .c .et .ct
-
-.et.h:
-	awk -f $(SRCTOP2)/util/et/et_h.awk outfile=$*.h $<
-
-.et.c:
-	awk -f $(SRCTOP2)/util/et/et_c.awk outfile=$*.c $<
-
+# 
+# This stuff is already dropped in by the autoconf generated configure scripts.
+# (Blame Mark, not me for that; this was before we had pre.in and post.in, 
+# we should probably move the error table rules from aclocal.m4 to pre.in)
+#
+#.SUFFIXES:  .h .c .et .ct
+#
+#.et.h:
+#	awk -f $(SRCTOP2)/util/et/et_h.awk outfile=$*.h $<
+#
+#.et.c:
+#	awk -f $(SRCTOP2)/util/et/et_c.awk outfile=$*.c $<
+#
