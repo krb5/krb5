@@ -1,3 +1,7 @@
+Wed May 03 03:30:51 1995  Chris Provenzano (proven@mit.edu)
+
+        * kpropd.c: (krb5_recvauth()): No longer needs the rc_type arg.
+
 Fri Apr 14 15:23:29 1995    <tytso@rsx-11.mit.edu>
 
 	* kpropd.c (load_database): kpropd uses fork instead of vfork,

@@ -516,7 +516,7 @@ kerberos_authenticate(context, fd, clientp, sin)
     }
 
     if (retval = krb5_recvauth(context, &auth_context, (void *) &fd,
-			       kprop_version, server, "dfl", 0, NULL, &ticket)){
+			       kprop_version, server, 0, NULL, &ticket)){
 	syslog(LOG_ERR, "Error in krb5_recvauth: %s", error_message(retval));
 	exit(1);
     }
