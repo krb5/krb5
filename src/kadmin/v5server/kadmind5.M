@@ -27,7 +27,9 @@ kadmind5 \- network daemon for Kerberos version 5 database information
 .SH SYNOPSIS
 .B kadmind5
 [
-.B \-i
+.B \-m
+] [
+.B \-n
 ] [
 .B \-a
 aclfile
@@ -49,6 +51,9 @@ debugmask
 ] [
 .B \-M
 mkeyname
+] [
+.B \-T
+keytab
 ]
 .SH DESCRIPTION
 .I kadmind5
@@ -71,11 +76,14 @@ specifies the name of the master key.
 .IP \-k
 .B mkeytype
 specifies the master key type.
-.IP \-i
-Indicates that the master key name is to be entered interactively.
+.IP \-m
+Indicates that the master key name is to be entered manually.
 .IP \-e
 .B enctype
 specifies the encryption type which is to be used.
+.IP \-T
+.B keytab
+specifies the name of the service key table.
 .PP
 .B ACL flag
 .IP \-a
@@ -95,6 +103,8 @@ seconds.
 .IP \-D
 Enables certain debugging features and messages selected by
 .B debugmask.
+.IP \-n
+Specifies that the daemon is not to operate in the background.
 .PP
 
 .SH ACL FILE
@@ -115,7 +125,7 @@ control access for a particular principal.
 .IP principal
 may specify a partially or fully qualified Kerberos version 5
 principal name.  Each component of the name may be wildcarded using
-the asterick (
+the asterisk (
 .B *
 ) character.
 .IP operation-mask
@@ -144,6 +154,9 @@ database.
 .I i
 [Dis]allows inquiries to the database.
 .TP i
+.I e
+[Dis]allows extraction of service key entries.
+.TP i
 .I p
 Short for
 .I adm.
@@ -154,7 +167,7 @@ Short for
 .TP i
 .I x or *
 Short for
-.I admcoi.
+.I admcoie.
 .PP
 Some examples of valid entries here are:
 .TP 2i
@@ -173,10 +186,10 @@ applies to all principals in realm "realm" whose first component is
 else's password or change his/her own.
 .TP 2i
 .I * o
-A catchall entry.  The
+The catchall entry.  The
 .B operation-mask
 applies to all principals and indicates that they may change their own
-passwords.
+passwords.  This entry is the default entry.
 
 .SH FILES
 .TP 2i
