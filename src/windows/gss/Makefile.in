@@ -13,7 +13,7 @@ BUILDTOP=..\..
 KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
 KFWLIB= $(BUILDTOP)\..\..\..\..\target\lib\$(CPU)\$(OUTPRE_DBG)\krbcc32.lib
 !endif
-LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 $(KFWINC)
+LOCALINCLUDES= /I$(BUILDTOP) /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 $(KFWINC)
 
 ##### RC Compiler
 RFLAGS	= $(LOCALINCLUDES)

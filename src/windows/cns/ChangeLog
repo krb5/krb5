@@ -1,3 +1,7 @@
+2004-09-30  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: add $(BUILDTOP) to include path for patchlevel.h
+
 2004-01-30  Jeffrey Altman <jaltman@mit.edu>
 
     * options.c, cnsres5.rc, cns.h, cns_reg.c cns_reg.h, cns.c:

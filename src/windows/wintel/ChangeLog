@@ -1,3 +1,7 @@
+2004-09-30  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: Add $(BUILDTOP) to include path for patchlevel.h
+
 2002-06-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SYSLIBS): Use ws2_32.lib instead of wsock32.lib.

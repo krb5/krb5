@@ -15,7 +15,7 @@ KVERSION= 5
 KRB	= KRB$(KVERSION)
 
 BUILDTOP=..\..
-LOCALINCLUDES= /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
+LOCALINCLUDES= /I$(BUILDTOP) /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 \
 	   /I$(BUILDTOP)\lib\crypto\des
 RESFILE	= $(OUTPRE)telnet.res
 XOBJS	= $(RESFILE) $(OUTPRE)k5stream.obj $(OUTPRE)enc_des.obj

@@ -17,7 +17,7 @@ LIBDIR 	 = $(BUILDTOP)\lib\krb
 KLIB 	 = $(LIBDIR)\kerberos.lib 
 RESFILE  = $(OUTPRE)cnsres4.res
 XOBJS    = $(RESFILE)
-LOCALINCLUDES = /I$(BUILDTOP)\include
+LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)\include
 !endif
 
 !if $(KVERSION) == 5
@@ -25,7 +25,7 @@ BUILDTOP =..\..
 LIBDIR	 = $(BUILDTOP)\lib
 RESFILE  = $(OUTPRE)cnsres5.res
 XOBJS    = $(RESFILE) $(OUTPRE)kpasswd.obj $(OUTPRE)cns_reg.obj
-LOCALINCLUDES = /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
+LOCALINCLUDES = /I$(BUILDTOP) /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5
 !endif
 
 ##### C Compiler
