@@ -27,7 +27,7 @@ client.c server.c: rpc_test.h
 check unit-test:: unit-test-@DO_TEST@
 
 unit-test-:
-	@echo "The rpc tests require PERL, Tcl, and runtest"
+	@echo "The rpc tests require Perl, Tcl, and runtest"
 	@echo "No tests run here"
 
 unit-test-ok:: unit-test-setup unit-test-body unit-test-cleanup
