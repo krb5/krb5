@@ -66,6 +66,8 @@
 #define KRB5_DEFAULT_PORT	88
 #define KRB5_DEFAULT_SEC_PORT	750
 
+#define DEFAULT_KDC_PORTLIST	"88,750"
+
 #define MAX_DGRAM_SIZE	4096
 #define MAX_SKDC_TIMEOUT 30
 #define SKDC_TIMEOUT_SHIFT 2		/* left shift of timeout for backoff */

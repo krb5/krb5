@@ -2,6 +2,7 @@ Thu Oct  5 21:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* osconf.h (DEFAULT_KDC_PROFILE): Change the name of the kdc
 		configuration file to be kdc.conf.
+		Added DEFAULT_KDC_PORTLIST.
 
 Tue Sep 26 22:47:15 1995  Mark Eichin  <eichin@cygnus.com>
 
