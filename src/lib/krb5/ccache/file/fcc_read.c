@@ -25,7 +25,7 @@ static char fcc_read_c[] = "$Id$";
  * Reads len bytes from the cache id, storing them in buf.
  *
  * Errors:
- * KRB5_EOF - there were not len bytes available
+ * KRB5_CC_END - there were not len bytes available
  * system errors (read)
  */
 krb5_error_code
@@ -38,9 +38,9 @@ krb5_fcc_read(id, buf, len)
 
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *) buf, len);
      if (ret == -1)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      else if (ret != len)
-	  return KRB5_EOF;
+	  return KRB5_CC_END;
      else
 	  return KRB5_OK;
 }
@@ -59,7 +59,7 @@ krb5_fcc_read(id, buf, len)
  *
  * Errors:
  * system errors (read errors)
- * KRB5_NOMEM
+ * KRB5_CC_NOMEM
  */
 
 krb5_error_code
@@ -89,13 +89,13 @@ krb5_fcc_read_principal(id, princ)
       */
      *princ = (krb5_principal) calloc(length+1, sizeof(krb5_data *));
      if (*princ == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      for (i=0; i < length; i++) {
 	  (*princ)[i] = (krb5_data *) malloc(sizeof(krb5_data));
 	  if ((*princ)[i] == NULL) {
 	      krb5_free_principal(*princ);
-	      return KRB5_NOMEM;
+	      return KRB5_CC_NOMEM;
           }	  
 	  kret = krb5_fcc_read_data(id, (*princ)[i]);
 	  CHECK(kret);
@@ -128,13 +128,13 @@ krb5_fcc_read_addrs(id, addrs)
       */
      *addrs = (krb5_address **) calloc(length+1, sizeof(krb5_address *));
      if (*addrs == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      for (i=0; i < length; i++) {
 	  (*addrs)[i] = (krb5_address *) malloc(sizeof(krb5_address));
 	  if ((*addrs)[i] == NULL) {
 	      krb5_free_address(*addrs);
-	      return KRB5_NOMEM;
+	      return KRB5_CC_NOMEM;
 	  }	  
 	  kret = krb5_fcc_read_addr(id, (*addrs)[i]);
 	  CHECK(kret);
@@ -164,18 +164,18 @@ krb5_fcc_read_keyblock(id, keyblock)
      keyblock->contents = (unsigned char *) malloc(keyblock->length*
 						   sizeof(krb5_octet));
      if (keyblock->contents == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
      
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *)keyblock->contents,
 		(keyblock->length)*sizeof(krb5_octet));
 
      if (ret < 0) {
 	 xfree(keyblock->contents);
-	 return errno;
+	 return krb5_fcc_interpret(errno);
      }
      if (ret != (keyblock->length)*sizeof(krb5_octet)) {
 	 xfree(keyblock->contents);
-	 return KRB5_EOF;
+	 return KRB5_CC_END;
      }
 
      return KRB5_OK;
@@ -200,17 +200,17 @@ krb5_fcc_read_data(id, data)
 
      data->data = (char *) malloc(data->length);
      if (data->data == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *)data->data,
 		data->length);
      if (ret == -1) {
 	 xfree(data->data);
-	 return errno;
+	 return krb5_fcc_interpret(errno);
      }
      if (ret != data->length) {
 	 xfree(data->data);
-	 return KRB5_EOF;
+	 return KRB5_CC_END;
      }
      return KRB5_OK;
  errout:
@@ -237,17 +237,17 @@ krb5_fcc_read_addr(id, addr)
 
      addr->contents = (krb5_octet *) malloc(addr->length);
      if (addr->contents == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      ret = read(((krb5_fcc_data *) id->data)->fd, (char *)addr->contents,
 		(addr->length)*sizeof(krb5_octet));
      if (ret == -1) {
 	  xfree(addr->contents);
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      }
      if (ret != (addr->length)*sizeof(krb5_octet)) {
 	  xfree(addr->contents);
-	  return KRB5_EOF;
+	  return KRB5_CC_END;
      }
      return KRB5_OK;
  errout:

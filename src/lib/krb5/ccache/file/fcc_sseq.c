@@ -28,7 +28,7 @@ static char fcc_sseq_c[] = "$Id$";
  * of the final krb5_fcc_end_seq_get, the results are undefined.
  *
  * Errors:
- * KRB5_NOMEM
+ * KRB5_CC_NOMEM
  * system errors
  */
 krb5_error_code
@@ -41,13 +41,13 @@ krb5_fcc_start_seq_get(id, cursor)
      
      fcursor = (krb5_fcc_cursor *) malloc(sizeof(krb5_fcc_cursor));
      if (fcursor == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      /* Make sure we start reading right after the primary principal */
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
 	  if (ret < 0)
-	       return errno;
+	       return krb5_fcc_interpret(errno);
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else

@@ -56,15 +56,21 @@ krb5_fcc_next_cred(id, cursor, creds)
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
 	  if (ret < 0)
-	       return errno;
+	       return krb5_fcc_interpret(errno);
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
 
      fcursor = (krb5_fcc_cursor *) *cursor;
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, fcursor->pos, L_SET);
-     if (ret < 0)
-	  return errno;
+     if (ret < 0) {
+	 ret = krb5_fcc_interpret(errno);
+	 if (OPENCLOSE(id)) {
+	     (void) close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *)id->data)->fd = -1;
+	 }
+	 return ret;
+     }
 
      kret = krb5_fcc_read_principal(id, &creds->client);
      TCHECK(kret);
@@ -88,11 +94,11 @@ krb5_fcc_next_cred(id, cursor, creds)
      fcursor->pos = tell(((krb5_fcc_data *) id->data)->fd);
      cursor = (krb5_cc_cursor *) fcursor;
 
+lose:
      if (OPENCLOSE(id)) {
 	  close(((krb5_fcc_data *) id->data)->fd);
 	  ((krb5_fcc_data *) id->data)->fd = -1;
      }
-lose:
      if (kret != KRB5_OK) {
 	 if (creds->client)
 	     krb5_free_principal(creds->client);

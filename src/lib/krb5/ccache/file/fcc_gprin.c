@@ -28,7 +28,7 @@ static char fcc_gprinc_c[] = "$Id$";
  *
  * Errors:
  * system errors
- * KRB5_NOMEM
+ * KRB5_CC_NOMEM
  */
 krb5_error_code
 krb5_fcc_get_principal(id, princ)

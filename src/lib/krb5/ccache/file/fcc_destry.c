@@ -31,38 +31,65 @@ krb5_error_code krb5_fcc_destroy(id)
      struct stat buf;
      unsigned long size;
      char zeros[BUFSIZ];
-     int ret, i;
+     register int ret, i;
      
      if (OPENCLOSE(id)) {
 	  ret = open(((krb5_fcc_data *) id->data)->filename, O_RDWR, 0);
 	  if (ret < 0)
-	       return errno;
+	       return krb5_fcc_interpret(errno);
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
      else
 	  lseek(((krb5_fcc_data *) id->data)->fd, 0, L_SET);
 
      ret = unlink(((krb5_fcc_data *) id->data)->filename);
-     if (ret < 0)
-	 return errno;
+     if (ret < 0) {
+	 ret = krb5_fcc_interpret(errno);
+	 if (OPENCLOSE(id)) {
+	     (void) close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *) id->data)->fd = -1;
+	 }
+	 return ret;
+     }
      
      ret = fstat(((krb5_fcc_data *) id->data)->fd, &buf);
-     if (ret < 0)
-	  return errno;
+     if (ret < 0) {
+	 ret = krb5_fcc_interpret(errno);
+	 if (OPENCLOSE(id)) {
+	     (void) close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *) id->data)->fd = -1;
+	 }
+	 return ret;
+     }
 
      /* XXX This may not be legal XXX */
      size = (unsigned long) buf.st_size;
 
      bzero(zeros, BUFSIZ);
      for (i=0; i < size / BUFSIZ; i++)
-	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0)
-	       return errno;
+	  if (write(((krb5_fcc_data *) id->data)->fd, zeros, BUFSIZ) < 0) {
+	      ret = krb5_fcc_interpret(errno);
+	      if (OPENCLOSE(id)) {
+		  (void) close(((krb5_fcc_data *)id->data)->fd);
+		  ((krb5_fcc_data *) id->data)->fd = -1;
+	      }
+	      return ret;
+	  }
 
-     if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0)
-	  return errno;
+     if (write(((krb5_fcc_data *) id->data)->fd, zeros, size % BUFSIZ) < 0) {
+	 ret = krb5_fcc_interpret(errno);
+	 if (OPENCLOSE(id)) {
+	     (void) close(((krb5_fcc_data *)id->data)->fd);
+	     ((krb5_fcc_data *) id->data)->fd = -1;
+	 }
+	 return ret;
+     }
 
-     close(((krb5_fcc_data *) id->data)->fd);
+     ret = close(((krb5_fcc_data *) id->data)->fd);
      ((krb5_fcc_data *) id->data)->fd = -1;
 
-     return KRB5_OK;
+     if (ret)
+	 ret = krb5_fcc_interpret(errno);
+
+     return ret;
 }

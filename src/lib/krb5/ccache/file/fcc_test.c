@@ -97,7 +97,7 @@ void fcc_test()
      kret = krb5_fcc_start_seq_get(id, &cursor);
      CHECK(kret, "start_seq_get");
      kret = 0;
-     while (kret != KRB5_EOF) {
+     while (kret != KRB5_CC_END) {
 	  printf("Calling next_cred\n");
 	  kret = krb5_fcc_next_cred(id, &cursor, &creds);
 	  CHECK(kret, "next_cred");

@@ -44,13 +44,13 @@ krb5_fcc_store(id, creds)
 	  ret = open(((krb5_fcc_data *) id->data)->filename,
 		     O_RDWR | O_APPEND, 0);
 	  if (ret < 0)
-	       return errno;
+	       return krb5_fcc_interpret(errno);
 	  ((krb5_fcc_data *) id->data)->fd = ret;
      }
 
      ret = lseek(((krb5_fcc_data *) id->data)->fd, 0, L_XTND);
      if (ret < 0)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
 
      ret = krb5_fcc_store_principal(id, creds->client);
      TCHECK(ret);

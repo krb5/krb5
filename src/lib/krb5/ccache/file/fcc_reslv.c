@@ -35,7 +35,7 @@ extern krb5_cc_ops krb5_fcc_ops;
  * A filled in krb5_ccache structure "id".
  *
  * Errors:
- * KRB5_NOMEM - there was insufficient memory to allocate the
+ * KRB5_CC_NOMEM - there was insufficient memory to allocate the
  * 		krb5_ccache.  id is undefined.
  * permission errors
  */
@@ -48,14 +48,14 @@ krb5_fcc_resolve (id, residual)
      
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
      if (lid == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      lid->ops = &krb5_fcc_ops;
      
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
 	  xfree(lid);
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
      }
 
      ((krb5_fcc_data *) lid->data)->filename = (char *)
@@ -64,7 +64,7 @@ krb5_fcc_resolve (id, residual)
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
 	  xfree(((krb5_fcc_data *) lid->data));
 	  xfree(lid);
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
      }
 
      /* default to open/close on every trn */

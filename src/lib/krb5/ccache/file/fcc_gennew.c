@@ -30,7 +30,7 @@ extern krb5_cc_ops krb5_fcc_ops;
  * The filled in krb5_ccache id.
  *
  * Errors:
- * KRB5_NOMEM - there was insufficient memory to allocate the
+ * KRB5_CC_NOMEM - there was insufficient memory to allocate the
  * 		krb5_ccache.  id is undefined.
  * system errors (from open)
  */
@@ -45,7 +45,7 @@ krb5_fcc_generate_new (id)
      /* Allocate memory */
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
      if (lid == NULL)
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      lid->ops = &krb5_fcc_ops;
 
@@ -55,7 +55,7 @@ krb5_fcc_generate_new (id)
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
 	  xfree(lid);
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
      }
 
      ((krb5_fcc_data *) lid->data)->filename = (char *)
@@ -63,7 +63,7 @@ krb5_fcc_generate_new (id)
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
 	  xfree(((krb5_fcc_data *) lid->data));
 	  xfree(lid);
-	  return KRB5_NOMEM;
+	  return KRB5_CC_NOMEM;
      }
 
      ((krb5_fcc_data *) lid->data)->flags = 0;
@@ -74,7 +74,7 @@ krb5_fcc_generate_new (id)
      /* Make sure the file name is reserved */
      ret = open(((krb5_fcc_data *) lid->data)->filename, O_CREAT | O_EXCL, 0);
      if (ret == -1)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      else {
 	  /* Ignore user's umask, set mode = 0600 */
 	  fchmod(ret, S_IREAD | S_IWRITE);

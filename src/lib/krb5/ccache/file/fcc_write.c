@@ -40,7 +40,7 @@ krb5_fcc_write(id, buf, len)
 
      ret = write(((krb5_fcc_data *)id->data)->fd, (char *) buf, len);
      if (ret < 0)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      return KRB5_OK;
 }
 
@@ -120,9 +120,9 @@ krb5_fcc_store_keyblock(id, keyblock)
      ret = write(((krb5_fcc_data *) id->data)->fd, (char *)keyblock->contents,
 		 (keyblock->length)*sizeof(krb5_octet));
      if (ret < 0)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      if (ret != (keyblock->length)*sizeof(krb5_octet))
-	 return KRB5_EOF;
+	 return KRB5_CC_END;
      
      return KRB5_OK;
 }
@@ -141,9 +141,9 @@ krb5_fcc_store_addr(id, addr)
      ret = write(((krb5_fcc_data *) id->data)->fd, (char *)addr->contents,
 		 (addr->length)*sizeof(krb5_octet));
      if (ret < 0)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
      if (ret != (addr->length)*sizeof(krb5_octet))
-	 return KRB5_EOF;
+	 return KRB5_CC_END;
      return KRB5_OK;
 }
 
@@ -159,7 +159,7 @@ krb5_fcc_store_data(id, data)
      CHECK(ret);
      ret = write(((krb5_fcc_data *) id->data)->fd, data->data, data->length);
      if (ret == -1)
-	  return errno;
+	  return krb5_fcc_interpret(errno);
 
      return KRB5_OK;
 }

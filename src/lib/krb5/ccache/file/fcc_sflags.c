@@ -49,7 +49,7 @@ krb5_fcc_set_flags(id, flags)
 	if (OPENCLOSE(id)) {
 	    ret = open(((krb5_fcc_data *) id->data)->filename, O_RDONLY, 0);
 	    if (ret < 0)
-		return errno;
+		return krb5_fcc_interpret(errno);
 	    ((krb5_fcc_data *) id->data)->fd = ret;
 	}
     }

@@ -30,13 +30,20 @@ krb5_error_code
 krb5_fcc_close(id)
    krb5_ccache id;
 {
+     register int closeval = KRB5_OK;
+
      if (OPENCLOSE(id)) {
-	 close(((krb5_fcc_data *) id->data)->fd);
+	 closeval = close(((krb5_fcc_data *) id->data)->fd);
 	 ((krb5_fcc_data *) id->data)->fd = -1;
+	 if (closeval == -1) {
+	     closeval = krb5_fcc_interpret(errno);
+	 } else
+	     closeval = KRB5_OK;
+		 
      }
      xfree(((krb5_fcc_data *) id->data)->filename);
      xfree(((krb5_fcc_data *) id->data));
      xfree(id);
 
-     return KRB5_OK;
+     return closeval;
 }

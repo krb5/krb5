@@ -45,7 +45,7 @@ static krb5_boolean standard_fields_match
  * Errors:
  * system errors
  * permission errors
- * KRB5_NOMEM
+ * KRB5_CC_NOMEM
  */
 krb5_error_code
 krb5_fcc_retrieve(id, whichfields, mcreds, creds)
@@ -94,7 +94,7 @@ krb5_fcc_retrieve(id, whichfields, mcreds, creds)
 
      /* If we get here, a match wasn't found */
      krb5_fcc_end_seq_get(id, &cursor);
-     return KRB5_NOTFOUND;
+     return KRB5_CC_NOTFOUND;
 }
 
 static krb5_boolean
