@@ -10,7 +10,7 @@
 krb5_context test_context;
 int error_count = 0;
 
-void main(argc, argv)
+int main(argc, argv)
 	int argc;
 	char **argv;
 {
@@ -497,6 +497,7 @@ void main(argc, argv)
   }
   
   exit(error_count);
+  return(error_count);
 }
 
 

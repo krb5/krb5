@@ -1,3 +1,13 @@
+Mon Mar 30 13:51:58 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ktest_equal.h: Add prototypes for ktest_equal_sam_challenge and 
+	ktest_equal_sam_response
+
+	* ktest.c (ktest_make_sample_sam_response): Remove unused variable.
+
+	* krb5_decode_test.c, krb5_decode_test.c (main): Declare main as
+        int not void.
+
 Wed Feb 18 16:27:56 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up

@@ -716,8 +716,6 @@ krb5_error_code ktest_make_sample_sam_challenge(p)
 krb5_error_code ktest_make_sample_sam_response(p)
      krb5_sam_response * p;
 {
-  krb5_error_code retval;
-
   p->magic = KV5M_SAM_RESPONSE;
   p->sam_type = 42; /* information */
   p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY; /* KRB5_SAM_* values */

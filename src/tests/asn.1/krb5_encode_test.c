@@ -11,6 +11,7 @@
 krb5_context test_context;
 int error_count = 0;
 int do_trval = 0;
+int trval2();
 
 void encoder_print_results(code, typestring, description)
 	krb5_data *code;
@@ -82,7 +83,8 @@ void PRS(argc, argv)
 	print_context_shortcut = 1;
 }
 
-void main(argc, argv)
+int
+main(argc, argv)
 	int	argc;
 	char	**argv;
 {
@@ -588,6 +590,7 @@ void main(argc, argv)
 #endif
 
   exit(error_count);
+  return(error_count);
 }
 
 
