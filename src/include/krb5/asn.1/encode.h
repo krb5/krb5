@@ -18,22 +18,22 @@
 
 typedef	int (*encoder_func) PROTOTYPE((PE *, int, int, char *, krb5_pointer));
 typedef void (*free_func) PROTOTYPE((krb5_pointer ));
-typedef krb5_pointer (*translator_func) PROTOTYPE((krb5_pointer, int * ));
+typedef krb5_pointer (*translator_func) PROTOTYPE((krb5_const_pointer, int * ));
 typedef int (*decoder_func) PROTOTYPE((PE, int, int, char *, krb5_pointer));
 
 /* encode.c */
 krb5_error_code krb5_encode_generic
     PROTOTYPE((krb5_const_pointer,
 	       krb5_data **,
-	       int (* )PROTOTYPE ((PE *,int,int,char *,krb5_pointer )),
-	       krb5_pointer (* )PROTOTYPE ((krb5_const_pointer,int *)),
-	       void (* )PROTOTYPE ((krb5_pointer ))));
+	       encoder_func,
+	       translator_func,
+	       free_func));
 krb5_error_code krb5_decode_generic
 	PROTOTYPE((const krb5_data *,
 		   krb5_pointer *,
-		   int (* )PROTOTYPE ((PE,int,int,char *,krb5_pointer )),
-		   krb5_pointer (* )PROTOTYPE ((krb5_pointer,int *)),
-		   void (* )PROTOTYPE ((krb5_pointer ))));
+		   decoder_func,
+		   translator_func,
+		   free_func));
 
 /* decode_arp.c */
 krb5_error_code decode_krb5_as_rep
