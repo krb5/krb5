@@ -111,7 +111,7 @@ char *argv[];
     char *dbname = 0;
     char defrealm[BUFSIZ];
     int keytypedone = 0;
-    krb5_enctype etype = -1;
+    krb5_enctype etype = 0xffff;
     int sci_idx, code;
     extern krb5_kt_ops krb5_ktf_writable_ops;
     char	*request = NULL;
@@ -170,7 +170,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == -1)
+    if (etype == 0xffff)
 	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {

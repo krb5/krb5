@@ -61,7 +61,7 @@ char *argv[];
     char *keyfile = 0;
 
     int keytypedone = 0;
-    krb5_enctype etype = -1;
+    krb5_enctype etype = 0xffff;
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
@@ -107,7 +107,7 @@ char *argv[];
 	exit(1);
     }
 
-    if (etype == -1)
+    if (etype == 0xffff)
 	etype = krb5_keytype_array[master_keyblock.keytype]->system->proto_enctype;
 
     if (!valid_etype(etype)) {
