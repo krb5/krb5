@@ -1,6 +1,6 @@
 AC_INIT(configure.in)
 CONFIG_RULES
-CONFIG_DIRS(stdio file)
+CONFIG_DIRS(stdio file memory)
 AC_PROG_ARCHIVE
 AC_PROG_ARCHIVE_ADD
 AC_PROG_RANLIB
