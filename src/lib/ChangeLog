@@ -1,3 +1,8 @@
+Sun May 24 22:31:39 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (CLEANLIBS): Remove lib/kadm from the list of
+		directories built in the windows build.
+
 Wed Feb 18 16:04:58 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (thisconfigdir): Remove trailing slash.

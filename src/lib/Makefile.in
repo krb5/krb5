@@ -5,7 +5,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 ##DOSBUILDTOP = ..
 ##DOSVERS_DIR = \vers
 
-MAC_SUBDIRS = crypto krb5 gssapi kadm
+MAC_SUBDIRS = crypto krb5 gssapi
 
 all-unix::
 
@@ -28,8 +28,7 @@ clean-windows::
 
 CLIBS = $(BUILDTOP)\util\et\comerr.lib
 KLIBS = krb5\krb5.lib crypto\crypto.lib \
-	$(BUILDTOP)\util\profile\profile.lib \
-	kadm\kadm.lib des425\des425.lib
+	$(BUILDTOP)\util\profile\profile.lib des425\des425.lib
 GLIBS = gssapi\gssapi.lib
 K4LIBS = krb4\krb4.lib
 
@@ -179,9 +178,6 @@ all-windows::
 	@echo Making in lib\krb5
 	cd ..\krb5
 	-$(MAKE) -$(MFLAGS) 
-	@echo Making in lib\kadm
-	cd ..\kadm
-	-$(MAKE) -$(MFLAGS) 
 	@echo Making in lib\des425
 	cd ..\des425
 	-$(MAKE) -$(MFLAGS) 
@@ -203,9 +199,6 @@ clean-windows::
 	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\krb5
 	cd ..\krb5
-	-$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in lib\kadm
-	cd ..\kadm
 	-$(MAKE) -$(MFLAGS) clean
 	@echo Making clean in lib\des425
 	cd ..\des425
