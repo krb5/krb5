@@ -142,18 +142,22 @@ OLDDECLARG(krb5_pa_data **,padata)
 krb5_error_code
 krb5_get_in_tkt_with_password(DECLARG(const krb5_flags, options),
 			      DECLARG(krb5_address * const *, addrs),
+			      DECLARG(const krb5_preauthtype, pre_auth_type),
 			      DECLARG(const krb5_enctype, etype),
 			      DECLARG(const krb5_keytype, keytype),
 			      DECLARG(const char *, password),
 			      DECLARG(krb5_ccache, ccache),
-			      DECLARG(krb5_creds *, creds))
+			      DECLARG(krb5_creds *, creds), 
+			      DECLARG(krb5_kdc_rep **, ret_as_reply))
 OLDDECLARG(const krb5_flags, options)
 OLDDECLARG(krb5_address * const *, addrs)
+OLDDECLARG(const krb5_preauthtype, pre_auth_type)
 OLDDECLARG(const krb5_enctype, etype)
 OLDDECLARG(const krb5_keytype, keytype)
 OLDDECLARG(const char *, password)
 OLDDECLARG(krb5_ccache, ccache)
 OLDDECLARG(krb5_creds *, creds)
+OLDDECLARG(krb5_kdc_rep **, ret_as_reply)
 {
     krb5_error_code retval;
     struct pwd_keyproc_arg keyseed;
@@ -166,10 +170,10 @@ OLDDECLARG(krb5_creds *, creds)
 	keyseed.password.length = 0;
     keyseed.who = creds->client;
 
-    retval = krb5_get_in_tkt(options, addrs, etype, keytype, pwd_keyproc,
-			     (krb5_pointer) &keyseed,
+    retval = krb5_get_in_tkt(options, addrs, pre_auth_type, etype,
+			     keytype, pwd_keyproc, (krb5_pointer) &keyseed,
 			     krb5_kdc_rep_decrypt_proc, 0,
-			     creds, ccache);
+			     creds, ccache, ret_as_reply);
     return retval;
 }
 
