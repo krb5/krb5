@@ -47,7 +47,6 @@ krb5_enc_tkt_part **partto;
     *tempto = *partfrom;
     if (retval = krb5_copy_keyblock(partfrom->session,
 				    &tempto->session)) {
-	xfree(tempto->session);
 	xfree(tempto);
 	return retval;
     }
@@ -58,7 +57,7 @@ krb5_enc_tkt_part **partto;
     }
     tempto->transited = partfrom->transited;
     tempto->transited.tr_contents.data =
-	malloc(sizeof(partfrom->transited.tr_contents.length));
+	malloc(partfrom->transited.tr_contents.length);
     if (!tempto->transited.tr_contents.data) {
 	krb5_free_principal(tempto->client);
 	krb5_free_keyblock(tempto->session);
