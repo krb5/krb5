@@ -93,7 +93,8 @@ va_list ap;
     }
     princ->data = data;
     princ->length = i;
-    /* Set princ->type */
+    princ->type = KRB5_NT_UNKNOWN;
+    princ->magic = KV5M_PRINCIPAL;
     return 0;
 }
 

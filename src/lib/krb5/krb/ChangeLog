@@ -1,5 +1,8 @@
 Wed Nov 30 17:10:39 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* bld_princ.c (krb5_build_principal_va): Set the principal's type
+		and magic number.
+
         * Makefile.in: Build new test driver (t_walk_rtree) for
 		krb5_walk_realm_tree.
 
