@@ -1,3 +1,8 @@
+Thu Aug  1 11:13:46 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+	* configure.in (withval): Link -ldyn as it is needed by the kadm5
+		shared library.  
+
 Tue Jul 23 22:26:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Build logger.o from the libkadm5 directory.  This
