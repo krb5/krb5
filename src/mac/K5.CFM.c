@@ -33,7 +33,7 @@ OSErr __initializeK5(CFragInitBlockPtr ibp)
 	    add_error_table(&et_kv5m_error_table);
 	    add_error_table(&et_kdb5_error_table);
 	    add_error_table(&et_asn1_error_table);
-	    add_error_table(&et_prof_error_table);
+//	    add_error_table(&et_prof_error_table);
 	    add_error_table(&et_kadm_error_table);
 	}
 	
@@ -47,7 +47,7 @@ void __terminateK5(void)
     remove_error_table(&et_kv5m_error_table);
     remove_error_table(&et_kdb5_error_table);
     remove_error_table(&et_asn1_error_table);
-    remove_error_table(&et_prof_error_table);
+//    remove_error_table(&et_prof_error_table);
     remove_error_table(&et_kadm_error_table);
 
 	__terminate();
