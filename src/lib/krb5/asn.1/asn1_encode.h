@@ -58,6 +58,9 @@ asn1_error_code asn1_encode_integer
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
+asn1_error_code asn1_encode_enumerated
+(asn1buf *buf, const long val, unsigned int *retlen);
+
 asn1_error_code asn1_encode_unsigned_integer
 	(asn1buf *buf, const unsigned long val, 
 		   unsigned int *retlen);

@@ -1,3 +1,13 @@
+2002-07-02  Sam Hartman  <hartmans@mit.edu>
+
+	* asn1_encode.h: Document asn1_encode_enumerated
+
+	* asn1_encode.c (asn1_encode_enumerated): New function; split out
+	asn1_encode_integer's guts into asn1_encode_integer_interal and
+	add this function to add different universal tag for enumerated 
+
+	* krbasn1.h (ASN1_ENUMERATED): enumerated is universal 10
+
 2002-10-07  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_get.c (asn1_get_tag_indef): Stomp on asn1class,

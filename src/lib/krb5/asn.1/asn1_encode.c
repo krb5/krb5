@@ -29,12 +29,11 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-asn1_error_code asn1_encode_integer(asn1buf *buf, long val,
-				    unsigned int *retlen)
+static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,  long val,
+						    unsigned int *retlen)
 {
   asn1_error_code retval;
   unsigned int length = 0;
-  unsigned int partlen;
   long valcopy;
   int digit;
   
@@ -57,7 +56,41 @@ asn1_error_code asn1_encode_integer(asn1buf *buf, long val,
     length++;
   }
 
-  retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen); 
+
+  *retlen = length;
+  return 0;
+}
+
+asn1_error_code asn1_encode_integer(asn1buf * buf,  long val,
+ unsigned int *retlen)
+{
+  asn1_error_code retval;
+  unsigned int length = 0;
+  unsigned  int partlen;
+  retval = asn1_encode_integer_internal(buf, val, &partlen);
+  if (retval) return retval;
+
+  length = partlen;
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_INTEGER,length, &partlen); 
+  if(retval) return retval;
+  length += partlen;
+
+  *retlen = length;
+  return 0;
+}
+
+asn1_error_code
+asn1_encode_enumerated(asn1buf * buf, const long val,
+		       unsigned int *retlen)
+{
+  asn1_error_code retval;
+  unsigned int length = 0;
+  unsigned  int partlen;
+  retval = asn1_encode_integer_internal(buf, val, &partlen);
+  if (retval) return retval;
+
+  length = partlen;
+    retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,ASN1_ENUMERATED,length, &partlen); 
   if(retval) return retval;
   length += partlen;
 
