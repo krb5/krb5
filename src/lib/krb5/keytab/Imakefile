@@ -9,7 +9,6 @@ NormalLibraryObjectRule()
 OBJS=	\
 	ktadd.o		\
 	ktdefault.o	\
-	ktdefname.o	\
 	ktdir.o		\
 	ktfr_entry.o	\
 	ktregister.o	\
@@ -21,7 +20,6 @@ SRCS=	\
 	ktadd.c		\
 	ktdir.c		\
 	ktdefault.c	\
-	ktdefname.c	\
 	ktfr_entry.c	\
 	ktregister.c	\
 	ktremove.c	\
