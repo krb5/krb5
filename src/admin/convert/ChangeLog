@@ -1,3 +1,7 @@
+Thu Sep 29 22:21:21 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when libraries change.
+
 Thu Sep 15 17:11:30 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* kdb5_convert.c (add_principal, enter_in_v5_db):  Make the key

@@ -1,3 +1,7 @@
+Thu Sep 29 22:20:25 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when libraries change.
+
 Wed Jun 29 00:22:07 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* kdb5_destroy.c: fix things to call krb5_init_ets

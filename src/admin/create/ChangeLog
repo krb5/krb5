@@ -1,3 +1,7 @@
+Thu Sep 29 22:19:37 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when libraries change.
+
 Tue Jul 19 18:56:59 1994  Tom Yu  (tlyu at dragons-lair)
 
 	* kdb5_create.c: start kvno and mkno at 1, not 0.
