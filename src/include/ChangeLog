@@ -1,5 +1,7 @@
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
+	* krb5.hin (KRB5_NPROTOTYPE): Delete.
+
 	* k5-int.h, krb5.hin: Use prototypes unconditionally.
 
 	* krb5.hin (krb5_const, krb5_pointer, krb5_const_pointer): Always

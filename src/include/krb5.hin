@@ -212,7 +212,6 @@ typedef	void FAR * krb5_pointer;
 typedef void krb5_const FAR * krb5_const_pointer;
 
 #define KRB5_PROTOTYPE(x) x
-#define	KRB5_NPROTOTYPE(x) KRB5_PROTOTYPE(x)
 
 typedef struct krb5_principal_data {
     krb5_magic magic;
