@@ -27,6 +27,7 @@
 #include <winsock.h>
 
 #include <gssapi/gssapi_generic.h>
+#include <gssapi\gssapi_krb5.h>
 #include "gss.h"
 #include "gss-misc.h"
 
@@ -546,27 +547,34 @@ static void parse_oid(char *mechanism, gss_OID *oid)
 int
 gss (char *server_host, char *service_name, char *mechanism, char *msg, int port,
      int verbose, int delegate, int v1_format, int auth_flag, int wrap_flag,
-     int encrypt_flag, int mic_flag, int ccount, int mcount)
+     int encrypt_flag, int mic_flag, int ccount, int mcount, char *ccache)
 {
     int use_file = 0;
     OM_uint32 deleg_flag = (delegate ? GSS_C_DELEG_FLAG : 0), min_stat;
     gss_OID oid = GSS_C_NULL_OID;
+    OM_uint32     minor_status;
     int i;
     int rc = 0;
 
-	 if (ccount <= 0)  ccount = 1;
-	 if (mcount <= 0)  mcount = 1;
+    if (ccount <= 0)  ccount = 1;
+    if (mcount <= 0)  mcount = 1;
 
-     if (mechanism && mechanism[0])
-         parse_oid(mechanism, &oid);
+    if (mechanism && mechanism[0])
+        parse_oid(mechanism, &oid);
 
-     for (i = 0; i < ccount; i++) {
-         if (call_server(server_host, port, oid, service_name,
+    /* By using this function the independence between the application and
+     * the underlying authentication system is broken
+     */
+    if ( ccache && ccache[0] )
+        gss_krb5_ccache_name(&minor_status, ccache, NULL);
+
+    for (i = 0; i < ccount; i++) {
+        if (call_server(server_host, port, oid, service_name,
                          deleg_flag, auth_flag, wrap_flag, encrypt_flag, mic_flag,
                          v1_format, msg, use_file, mcount) < 0)
-             rc = -1;
-             break;
-     }
+            rc = -1;
+        break;
+    }
 
     if (oid != GSS_C_NULL_OID)
         (void) gss_release_oid(&min_stat, &oid);

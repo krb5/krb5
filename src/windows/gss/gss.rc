@@ -1,7 +1,5 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
-
-#include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -11,6 +9,7 @@
 #define APSTUDIO_HIDDEN_SYMBOLS
 #include "windows.h"
 #undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -31,34 +30,38 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-GSS                     ICON    DISCARDABLE     "gss.ico"
+GSS                     ICON                    "gss.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-GSSAPIDLG DIALOG DISCARDABLE 63, 65, 330, 311
-STYLE DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | WS_SYSMENU
+GSSAPIDLG DIALOGEX 63, 65, 330, 311
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
 CAPTION "Test GSSAPI Connection"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    RTEXT           "Hostname:",IDC_STATIC_PORT,5,12,60,10,NOT WS_GROUP
-    COMBOBOX        GSS_HOST_NAME,70,9,246,60,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+    RTEXT           "Hostname:",IDC_STATIC_HOST,5,12,60,10,NOT WS_GROUP
+    COMBOBOX        GSS_HOST_NAME,70,9,245,60,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
                     WS_VSCROLL | WS_GROUP | WS_TABSTOP
     DEFPUSHBUTTON   "Test",GSS_OK,80,290,51,14,WS_GROUP
     PUSHBUTTON      "Exit",GSS_CANCEL,185,290,51,14
     RTEXT           "Port:",IDC_STATIC_PORT,16,27,50,8
     EDITTEXT        GSS_PORT,70,25,40,14,ES_RIGHT | ES_AUTOHSCROLL | 
                     ES_NUMBER
-    COMBOBOX        GSS_SERVICE_NAME,69,41,246,30,CBS_DROPDOWN | CBS_SORT | 
+    COMBOBOX        GSS_SERVICE_NAME,70,41,245,60,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
     RTEXT           "GSS Service Name:",IDC_STATIC_SERVICE,1,44,64,8
-    COMBOBOX        GSS_MECHANISM,70,110,245,30,CBS_DROPDOWN | 
+    COMBOBOX        GSS_CCACHE_NAME,70,69,245,60,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "CCache Name:",IDC_STATIC_CCACHE,16,71,49,8
+    COMBOBOX        GSS_MECHANISM,70,110,245,60,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     RTEXT           "Mechanism (OID):",IDC_STATIC_MECH,0,115,65,8
     RTEXT           "Test Message:",IDC_STATIC_MSG,0,55,65,8
-    COMBOBOX        GSS_MESSAGE,70,55,245,30,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+    COMBOBOX        GSS_MESSAGE,70,55,245,60,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "The following items are optional and should only be altered by those who understand their implications.",
                     IDC_STATIC_OPTIONS,10,85,305,20
@@ -95,12 +98,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE 
 BEGIN
     "resrc1.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE 
 BEGIN
     "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
     "#include ""windows.h""\r\n"
@@ -109,7 +112,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
