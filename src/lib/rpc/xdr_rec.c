@@ -538,8 +538,6 @@ get_input_bytes(rstrm, addr, len)
 {
 	register size_t current;
 
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
-	_log("%s:%d: %s wants %d bytes\n", SFILE, __LINE__, __func__, len);
 	while (len > 0) {
 		current = (size_t)((long)rstrm->in_boundry - 
 				(long)rstrm->in_finger);

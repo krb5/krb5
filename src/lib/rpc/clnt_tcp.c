@@ -440,7 +440,6 @@ readtcp(ctptr, buf, len)
 		return (0);
 
 #endif /* def FD_SETSIZE */
-#define SFILE (strrchr(__FILE__,'/') ? 1+strrchr(__FILE__,'/') : __FILE__)
 	while (TRUE) {
 		readfds = mask;
 		tout = ct->ct_wait;
@@ -448,8 +447,6 @@ readtcp(ctptr, buf, len)
 			       &tout)) {
 		case 0:
 			ct->ct_error.re_status = RPC_TIMEDOUT;
-			_log("%s:%d: %s select says 0\n", SFILE, __LINE__, __func__);
-	    if (fork() == 0) abort();
 			return (-1);
 
 		case -1:
@@ -457,8 +454,6 @@ readtcp(ctptr, buf, len)
 				continue;
 			ct->ct_error.re_status = RPC_CANTRECV;
 			ct->ct_error.re_errno = errno;
-			_log("%s:%d: %s select says error %d/%s\n", SFILE, __LINE__, __func__,
-			     errno, error_message(errno));
 			return (-1);
 		}
 		break;
@@ -466,7 +461,6 @@ readtcp(ctptr, buf, len)
 	switch (len = read(ct->ct_sock, buf, (size_t) len)) {
 
 	case 0:
-	    _log("%s:%d: %s %d bytes\n", SFILE, __LINE__, __func__, len);
 		/* premature eof */
 		ct->ct_error.re_errno = ECONNRESET;
 		ct->ct_error.re_status = RPC_CANTRECV;
@@ -474,12 +468,9 @@ readtcp(ctptr, buf, len)
 		break;
 
 	case -1:
-	    _log("%s:%d: %s %d bytes\n", SFILE, __LINE__, __func__, len);
 		ct->ct_error.re_errno = errno;
 		ct->ct_error.re_status = RPC_CANTRECV;
 		break;
-	default:
-	    _log("%s:%d: %s %d bytes\n", SFILE, __LINE__, __func__, len);
 	}
 	return (len);
 }
@@ -495,12 +486,10 @@ writetcp(ctptr, buf, len)
 
 	for (cnt = len; cnt > 0; cnt -= i, buf += i) {
 		if ((i = write(ct->ct_sock, buf, (size_t) cnt)) == -1) {
-	    _log("%s:%d: %s %d bytes\n", SFILE, __LINE__, __func__, len);
 			ct->ct_error.re_errno = errno;
 			ct->ct_error.re_status = RPC_CANTSEND;
 			return (-1);
 		}
-	    _log("%s:%d: %s %d bytes\n", SFILE, __LINE__, __func__, len);
 	}
 	return (len);
 }

@@ -581,13 +581,11 @@ static bool_t auth_gssapi_marshall(auth, xdrs)
 	  
 	  PRINTF(("gssapi_marshall: sending seq_num %d\n", seq_num));
 	  
-	  _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
 	  if (auth_gssapi_seal_seq(AUTH_PRIVATE(auth)->context, seq_num,
 				   &out_buf) == FALSE) {
 	       PRINTF(("gssapi_marhshall: seal failed\n"));
 	  }
-	  _log("%s:%d: in %s\n", SFILE, __LINE__, __func__);
-
+	  
 	  auth->ah_verf.oa_base = out_buf.value;
 	  auth->ah_verf.oa_length = out_buf.length;
 	  
