@@ -9,7 +9,7 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs getpwnam_r getpwuid_r gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen)
+AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen)
 AC_CHECK_FUNCS( mkstemp)
 AC_HEADER_STDARG
 AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h)
@@ -50,6 +50,8 @@ fi
 ])
 dnl
 
+AC_CHECK_FUNC(getpwnam_r,ac_cv_func_getpwnam_r=yes,ac_cv_func_getpwnam_r=no)
+AC_CHECK_FUNC(getpwuid_r,ac_cv_func_getpwuid_r=yes,ac_cv_func_getpwuid_r=no)
 if test "$ac_cv_func_getpwnam_r" = yes; then
   AC_MSG_CHECKING([return type of getpwnam_r])
   AC_CACHE_VAL(krb5_cv_getpwnam_r_return_type,
@@ -68,7 +70,7 @@ if test "$ac_cv_func_getpwnam_r" = yes; then
   if test $krb5_cv_getpwnam_r_return_type = int; then
     AC_DEFINE(GETPWNAM_R_RETURNS_INT, 1, [Define if getpwnam_r returns an int])
   elif test $krb5_cv_getpwnam_r_return_type = unknown; then
-    AC_MSG_WARN([Cannot determine getpwnam_r return type, disabling])
+    AC_MSG_WARN([Cannot determine getpwnam_r return type, disabling getpwnam_r])
     ac_cv_func_getpwnam_r=no
   fi
 fi
@@ -77,23 +79,38 @@ if test "$ac_cv_func_getpwnam_r" = yes; then
   AC_CACHE_VAL(krb5_cv_getpwnam_r_args,
   [AC_TRY_COMPILE([#include <pwd.h>
    struct passwd pwx; char buf[1024];],
-   [getpwnam_r("", &pwx, buf, sizeof(buf));],
-   krb5_cv_getpwnam_r_args=4,krb5_cv_getpwnam_r_args=5)])
+   [getpwnam_r("", &pwx, buf, sizeof(buf));], args4=yes, args4=no)
+   AC_TRY_COMPILE([#include <pwd.h>
+   struct passwd pwx, *p; char buf[1024];],
+   [getpwnam_r("", &pwx, buf, sizeof(buf), &p);], args5=yes, args5=no)
+   case $args4/$args5 in
+     yes/no) krb5_cv_getpwnam_r_args=4 ;;
+     no/yes) krb5_cv_getpwnam_r_args=5 ;;
+     *) krb5_cv_getpwnam_r_args=unknown ;;
+   esac])
   AC_MSG_RESULT($krb5_cv_getpwnam_r_args)
-  if test "$krb5_cv_getpwnam_r_args" = 4; then
-    AC_DEFINE(GETPWNAM_R_4_ARGS,1,[Define if getpwnam_r exists but takes only 4 arguments (e.g., POSIX draft 6 implementations like some Solaris releases).])
+  if test "$krb5_cv_getpwnam_r_args" = unknown; then
+    AC_MSG_WARN([Cannot determine number of arguments to getpwnam_r, disabling its use.])
+    ac_cv_func_getpwnam_r=no
+  else
+    AC_DEFINE(HAVE_GETPWNAM_R,1,[Define if getpwnam_r is available and useful.])
+    if test "$krb5_cv_getpwnam_r_args" = 4; then
+      AC_DEFINE(GETPWNAM_R_4_ARGS,1,[Define if getpwnam_r exists but takes only 4 arguments (e.g., POSIX draft 6 implementations like some Solaris releases).])
+    fi
   fi
 fi
 
+if test "$ac_cv_func_getpwnam_r" = no && test "$ac_cv_func_getpwuid_r" = yes; then
+  # Actually, we could do this check, and the corresponding checks
+  # for return type and number of arguments, but I doubt we'll run
+  # into a system where we'd get to use getpwuid_r but not getpwnam_r.
+  AC_MSG_NOTICE([getpwnam_r not useful, so disabling getpwuid_r too])
+  ac_cv_func_getpwuid_r=no
+fi
 if test "$ac_cv_func_getpwuid_r" = yes; then
-  AC_MSG_CHECKING([number of arguments to getpwuid_r])
-  AC_CACHE_VAL(krb5_cv_getpwuid_r_args,
-  [AC_TRY_COMPILE([#include <pwd.h>
-   struct passwd pwx; char buf[1024];],
-   [getpwuid_r(0, &pwx, buf, sizeof(buf));],
-   krb5_cv_getpwuid_r_args=4,krb5_cv_getpwuid_r_args=5)])
-  AC_MSG_RESULT($krb5_cv_getpwuid_r_args)
-  if test "$krb5_cv_getpwuid_r_args" = 4; then
+  AC_DEFINE(HAVE_GETPWUID_R,1,[Define if getpwuid_r is available and useful.])
+  # Hack: Assume getpwuid_r is the shorter form if getpwnam_r is.
+  if test "$krb5_cv_getpwnam_r_args" = 4; then
     AC_DEFINE(GETPWUID_R_4_ARGS,1,[Define if getpwuid_r exists but takes only 4 arguments (e.g., POSIX draft 6 implementations like some Solaris releases).])
   fi
 fi
