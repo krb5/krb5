@@ -1,3 +1,7 @@
+2000-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add KRB524_DEPLIB and KRB524_LIB
+
 2000-01-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (KADM_COMM_LIBS): Drop krb5util library.
