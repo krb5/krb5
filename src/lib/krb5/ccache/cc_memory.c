@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_memory.c
  *
- * Copyright 1990,1991,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2000,2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,78 +26,79 @@
  *
  * implementation of memory-based credentials cache
  */
-/*
- * mcc_store.c had:
- * Copyright 1995 Locus Computing Corporation
- *
- */
 #include "k5-int.h"
 #include <errno.h>
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_close
+static krb5_error_code KRB5_CALLCONV krb5_mcc_close
 	(krb5_context, krb5_ccache id );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_destroy 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_destroy 
 	(krb5_context, krb5_ccache id );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_end_seq_get 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_end_seq_get 
 	(krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_generate_new 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_generate_new 
 	(krb5_context, krb5_ccache *id );
 
-const char * KRB5_CALLCONV krb5_mcc_get_name 
+static const char * KRB5_CALLCONV krb5_mcc_get_name 
 	(krb5_context, krb5_ccache id );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_get_principal 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_get_principal 
 	(krb5_context, krb5_ccache id , krb5_principal *princ );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_initialize 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_initialize 
 	(krb5_context, krb5_ccache id , krb5_principal princ );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_next_cred 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_next_cred 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_cc_cursor *cursor , 
 		   krb5_creds *creds );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_resolve 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_resolve 
 	(krb5_context, krb5_ccache *id , const char *residual );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_retrieve 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_retrieve 
 	(krb5_context, 
 		   krb5_ccache id , 
 		   krb5_flags whichfields , 
 		   krb5_creds *mcreds , 
 		   krb5_creds *creds );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_start_seq_get 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_start_seq_get 
 	(krb5_context, krb5_ccache id , krb5_cc_cursor *cursor );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_store 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_store 
 	(krb5_context, krb5_ccache id , krb5_creds *creds );
 
-krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
 	(krb5_context, krb5_ccache id , krb5_flags flags );
 
 extern const krb5_cc_ops krb5_mcc_ops;
-krb5_error_code krb5_change_cache (void);
+extern krb5_error_code krb5_change_cache (void);
 
 #define KRB5_OK 0
 
 typedef struct _krb5_mcc_link {
-     struct _krb5_mcc_link *next;
-     krb5_creds *creds;
+    struct _krb5_mcc_link *next;
+    krb5_creds *creds;
 } krb5_mcc_link, *krb5_mcc_cursor;
 
 typedef struct _krb5_mcc_data {
-     struct _krb5_mcc_data *next;
-     char *name;
-     krb5_principal prin;
-     krb5_mcc_cursor link;
+    char *name;
+    k5_mutex_t lock;
+    krb5_principal prin;
+    krb5_mcc_cursor link;
 } krb5_mcc_data;
 
-static krb5_mcc_data *mcc_head = 0;
+typedef struct krb5_mcc_list_node {
+    struct krb5_mcc_list_node *next;
+    krb5_mcc_data *cache;
+} krb5_mcc_list_node;
+
+k5_mutex_t krb5int_mcc_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+static krb5_mcc_list_node *mcc_head = 0;
 
 /*
  * Modifies:
@@ -111,7 +112,7 @@ static krb5_mcc_data *mcc_head = 0;
  * system errors
  * permission errors
  */
-void krb5_mcc_free (krb5_context context, krb5_ccache id);
+static void krb5_mcc_free (krb5_context context, krb5_ccache id);
 
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
@@ -120,7 +121,7 @@ krb5_mcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 
     krb5_mcc_free(context, id);
     ret = krb5_copy_principal(context, princ,
-        &((krb5_mcc_data *)id->data)->prin);
+			      &((krb5_mcc_data *)id->data)->prin);
     if (ret == KRB5_OK)
         krb5_change_cache();
     return ret;
@@ -145,17 +146,19 @@ krb5_mcc_close(krb5_context context, krb5_ccache id)
 void
 krb5_mcc_free(krb5_context context, krb5_ccache id)
 {
-	krb5_mcc_cursor curr,next;
-     
-     for (curr = ((krb5_mcc_data *)id->data)->link; curr;)
-     {
+    krb5_mcc_cursor curr,next;
+    krb5_mcc_data *d;
+
+    d = (krb5_mcc_data *) id->data;
+    for (curr = d->link; curr;) {
 	krb5_free_creds(context, curr->creds);
 	next = curr->next;
 	krb5_xfree(curr);
 	curr = next;
-     }
-     ((krb5_mcc_data *)id->data)->link = NULL;
-     krb5_free_principal(context, ((krb5_mcc_data *)id->data)->prin);
+    }
+    d->link = NULL;
+    krb5_free_principal(context, d->prin);
+    k5_mutex_destroy(&d->lock);
 }
 
 /*
@@ -168,29 +171,33 @@ krb5_mcc_free(krb5_context context, krb5_ccache id)
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_destroy(krb5_context context, krb5_ccache id)
 {
-     krb5_mcc_data *curr;
+    krb5_mcc_list_node **curr, *node;
+    krb5_mcc_data *d;
+    krb5_error_code err;
 
-     if (mcc_head && ((krb5_mcc_data *)id->data) == mcc_head)
-	mcc_head = mcc_head->next;
-     else {
-	for (curr=mcc_head; curr; curr=curr->next)
-		if (curr->next == ((krb5_mcc_data *)id->data)) {
-			curr->next = curr->next->next;
-			break;
-		}
-     }
-     
-     krb5_mcc_free(context, id);
+    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    if (err)
+	return err;
 
-     krb5_xfree(((krb5_mcc_data *)id->data)->name);
-     krb5_xfree(id->data); 
-     krb5_xfree(id);
-#if 0
-     --krb5_cache_sessions;
-#endif
+    d = (krb5_mcc_data *)id->data;
+    for (curr = &mcc_head; *curr; curr = &(*curr)->next) {
+	if ((*curr)->cache == d) {
+	    node = *curr;
+	    *curr = node->next;
+	    free(node);
+	    break;
+	}
+    }
+    k5_mutex_unlock(&krb5int_mcc_mutex);
 
-     krb5_change_cache ();
-     return KRB5_OK;
+    krb5_mcc_free(context, id);
+    krb5_xfree(d->name);
+    k5_mutex_destroy(&d->lock);
+    krb5_xfree(d); 
+    krb5_xfree(id);
+
+    krb5_change_cache ();
+    return KRB5_OK;
 }
 
 /*
@@ -212,51 +219,42 @@ krb5_mcc_destroy(krb5_context context, krb5_ccache id)
  *              krb5_ccache.  id is undefined.
  * permission errors
  */
+static krb5_error_code new_mcc_data (const char *, krb5_mcc_data **);
+
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
 {
-     krb5_ccache lid;
-     krb5_mcc_data *ptr;
+    krb5_ccache lid;
+    krb5_mcc_list_node *ptr;
+    krb5_error_code err;
+    krb5_mcc_data *d;
 
-     
-     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-     if (lid == NULL)
-	  return KRB5_CC_NOMEM;
-
-     lid->ops = &krb5_mcc_ops;
-     
-     for (ptr = mcc_head; ptr; ptr=ptr->next)
-	if (!strcmp(ptr->name, residual))
-	    break;
-     if (ptr) {
-     lid->data = ptr;
-     } else {
-     lid->data = (krb5_pointer) malloc(sizeof(krb5_mcc_data));
-     if (lid->data == NULL) {
-	  krb5_xfree(lid);
-	  return KRB5_CC_NOMEM;
-     }
-
-     ((krb5_mcc_data *) lid->data)->name = (char *)
-	malloc(strlen(residual) + 1);
-     if (((krb5_mcc_data *)lid->data)->name == NULL) {
-	krb5_xfree(((krb5_mcc_data *)lid->data));
-	krb5_xfree(lid);
+    lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
+    if (lid == NULL)
 	return KRB5_CC_NOMEM;
-     }
-     strcpy(((krb5_mcc_data *)lid->data)->name, residual);
-     ((krb5_mcc_data *)lid->data)->link = 0L;
-     ((krb5_mcc_data *)lid->data)->prin = 0L;
 
+    lid->ops = &krb5_mcc_ops;
 
-     ((krb5_mcc_data *)lid->data)->next = mcc_head;
-     mcc_head = (krb5_mcc_data *)lid->data;
-#if 0
-     ++krb5_cache_sessions;
-#endif
-     }
-     *id = lid; 
-     return KRB5_OK;
+    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    if (err)
+	return err;
+    for (ptr = mcc_head; ptr; ptr=ptr->next)
+	if (!strcmp(ptr->cache->name, residual))
+	    break;
+    if (ptr)
+	d = ptr->cache;
+    else {
+	err = new_mcc_data(residual, &d);
+	if (err) {
+	    k5_mutex_unlock(&krb5int_mcc_mutex);
+	    krb5_xfree(lid);
+	    return err;
+	}
+    }
+    k5_mutex_unlock(&krb5int_mcc_mutex);
+    lid->data = d;
+    *id = lid; 
+    return KRB5_OK;
 }
 
 /*
@@ -273,11 +271,19 @@ krb5_mcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
  * system errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
+krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id,
+		       krb5_cc_cursor *cursor)
 {
      krb5_mcc_cursor mcursor;
-     
-     mcursor = ((krb5_mcc_data *)id->data)->link;
+     krb5_error_code err;
+     krb5_mcc_data *d;
+
+     d = id->data;
+     err = k5_mutex_lock(&d->lock);
+     if (err)
+	 return err;
+     mcursor = d->link;
+     k5_mutex_unlock(&d->lock);
      *cursor = (krb5_cc_cursor) mcursor;
      return KRB5_OK;
 }
@@ -303,12 +309,16 @@ krb5_mcc_start_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *cur
  * system errors
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor, krb5_creds *creds)
+krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
+		   krb5_cc_cursor *cursor, krb5_creds *creds)
 {
      krb5_mcc_cursor mcursor;
      krb5_error_code retval;
      krb5_data *scratch;
 
+     /* Once the node in the linked list is created, it's never
+	modified, so we don't need to worry about locking here.  (Note
+	that we don't support _remove_cred.)  */
      mcursor = (krb5_mcc_cursor) *cursor;
      if (mcursor == NULL)
 	return KRB5_CC_END;
@@ -383,6 +393,55 @@ krb5_mcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
      return KRB5_OK;
 }
 
+/* Utility routine: Creates the back-end data for a memory cache, and
+   threads it into the global linked list.
+
+   Call with the global list lock held.  */
+static krb5_error_code
+new_mcc_data (const char *name, krb5_mcc_data **dataptr)
+{
+    krb5_error_code err;
+    krb5_mcc_data *d;
+    krb5_mcc_list_node *n;
+
+    d = malloc(sizeof(krb5_mcc_data));
+    if (d == NULL)
+	return KRB5_CC_NOMEM;
+
+    err = k5_mutex_init(&d->lock);
+    if (err) {
+	krb5_xfree(d);
+	return err;
+    }
+
+    d->name = malloc(strlen(name) + 1);
+    if (d->name == NULL) {
+	k5_mutex_destroy(&d->lock);
+	krb5_xfree(d);
+	return KRB5_CC_NOMEM;
+    }
+    d->link = NULL;
+    d->prin = NULL;
+
+    /* Set up the filename */
+    strcpy(d->name, name);
+
+    n = malloc(sizeof(krb5_mcc_list_node));
+    if (n == NULL) {
+	free(d->name);
+	k5_mutex_destroy(&d->lock);
+	free(d);
+	return KRB5_CC_NOMEM;
+    }
+
+    n->cache = d;
+    n->next = mcc_head;
+    mcc_head = n;
+
+    *dataptr = d;
+    return 0;
+}
+
 /*
  * Effects:
  * Creates a new file cred cache whose name is guaranteed to be
@@ -400,47 +459,35 @@ krb5_mcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 {
-     krb5_ccache lid;
-     char scratch[6+1]; /* 6 for the scratch part, +1 for NUL */
-     
-     /* Allocate memory */
-     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
-     if (lid == NULL)
-	  return KRB5_CC_NOMEM;
+    krb5_ccache lid;
+    char scratch[6+1]; /* 6 for the scratch part, +1 for NUL */
+    krb5_error_code err;
+    krb5_mcc_data *d;
 
-     lid->ops = &krb5_mcc_ops;
+    /* Allocate memory */
+    lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
+    if (lid == NULL)
+	return KRB5_CC_NOMEM;
 
-     (void) strcpy(scratch, "XXXXXX");
-     mktemp(scratch);
+    lid->ops = &krb5_mcc_ops;
 
-     lid->data = (krb5_pointer) malloc(sizeof(krb5_mcc_data));
-     if (lid->data == NULL) {
-	  krb5_xfree(lid);
-	  return KRB5_CC_NOMEM;
-     }
+    (void) strcpy(scratch, "XXXXXX");
+    mktemp(scratch);
 
-     ((krb5_mcc_data *) lid->data)->name = (char *)
-	  malloc(strlen(scratch) + 1);
-     if (((krb5_mcc_data *) lid->data)->name == NULL) {
-	  krb5_xfree(((krb5_mcc_data *) lid->data));
-	  krb5_xfree(lid);
-	  return KRB5_CC_NOMEM;
-     }
-     ((krb5_mcc_data *) lid->data)->link = NULL;
-     ((krb5_mcc_data *) lid->data)->prin = NULL;
-
-     /* Set up the filename */
-     strcpy(((krb5_mcc_data *) lid->data)->name, scratch);
-
-     *id = lid;
-#if 0
-     ++krb5_cache_sessions;
-#endif
-     ((krb5_mcc_data *)lid->data)->next = mcc_head;
-     mcc_head = (krb5_mcc_data *)lid->data;
-
-     krb5_change_cache ();
-     return KRB5_OK;
+    err = k5_mutex_lock(&krb5int_mcc_mutex);
+    if (err) {
+	free(lid);
+	return err;
+    }
+    err = new_mcc_data(scratch, &d);
+    k5_mutex_unlock(&krb5int_mcc_mutex);
+    if (err) {
+	krb5_xfree(lid);
+	return err;
+    }
+    lid->data = d;
+    krb5_change_cache ();
+    return KRB5_OK;
 }
 
 /*
@@ -473,8 +520,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_mcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *princ)
 {
      krb5_mcc_data *ptr = (krb5_mcc_data *)id->data;
-     if (!ptr->prin)
-     {
+     if (!ptr->prin) {
         *princ = 0L;
         return KRB5_FCC_NOFILE;
      }
@@ -482,41 +528,11 @@ krb5_mcc_get_principal(krb5_context context, krb5_ccache id, krb5_principal *pri
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_mcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields, krb5_creds *mcreds, krb5_creds *creds)
+krb5_mcc_retrieve(krb5_context context, krb5_ccache id, krb5_flags whichfields,
+		  krb5_creds *mcreds, krb5_creds *creds)
 {
     return krb5_cc_retrieve_cred_default (context, id, whichfields,
 					  mcreds, creds);
-}
-
-#define CHECK(ret) if (ret != KRB5_OK) return ret;
-
-/*
- * Modifies:
- * the memory cache
- *
- * Effects:
- * stores creds in the memory cred cache
- *
- * Errors:
- * system errors
- * storage failure errors
- */
-krb5_error_code KRB5_CALLCONV
-krb5_mcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
-{
-     krb5_error_code ret;
-     krb5_mcc_cursor mcursor;
-
-     mcursor = (krb5_mcc_cursor)malloc(sizeof(krb5_mcc_link));
-     if (mcursor == NULL)
-	return KRB5_CC_NOMEM;
-     ret = krb5_copy_creds(context, creds, &mcursor->creds);
-     if (ret == KRB5_OK) {
-	mcursor->next = ((krb5_mcc_data *)id->data)->link;
-	((krb5_mcc_data *)id->data)->link = mcursor;
-	krb5_change_cache();
-     }
-     return ret;
 }
 
 /* 
@@ -550,7 +566,30 @@ krb5_mcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     return KRB5_OK;
 }
 
-#define NEED_WINDOWS
+/* store: Save away creds in the ccache.  */
+krb5_error_code KRB5_CALLCONV
+krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
+{
+    krb5_error_code err;
+    krb5_mcc_link *new_node;
+    krb5_mcc_data *mptr = (krb5_mcc_data *)id->data;
+
+    new_node = malloc(sizeof(sizeof(krb5_mcc_link)));
+    if (new_node == NULL)
+	return errno;
+    err = krb5_copy_creds(ctx, creds, &new_node->creds);
+    if (err) {
+	free(new_node);
+	return err;
+    }
+    err = k5_mutex_lock(&mptr->lock);
+    if (err)
+	return err;
+    new_node->next = mptr->link;
+    mptr->link = new_node;
+    k5_mutex_unlock(&mptr->lock);
+    return 0;
+}
 
 const krb5_cc_ops krb5_mcc_ops = {
      0,

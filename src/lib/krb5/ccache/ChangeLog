@@ -1,3 +1,13 @@
+2004-06-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_memory.c: Include k5-thread.h.
+	(krb5int_mcc_mutex): New lock.
+	(krb5_mcc_store): Rewrite.
+	(NEED_WINDOWS): Don't define.
+	(krb5_mcc_*): All functions now static.
+	* cc-int.h (krb5int_mcc_mutex): Declare.
+	* ccbase.c (krb5int_cc_initialize): Initialize it.
+
 2004-06-24  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (krb5_fcc_read_data): Combine stdio and posix versions

@@ -56,7 +56,14 @@ static k5_mutex_t cc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 int
 krb5int_cc_initialize(void)
 {
-    return k5_mutex_finish_init(&cc_typelist_lock);
+    int err;
+    err = k5_mutex_finish_init(&krb5int_mcc_mutex);
+    if (err)
+	return err;
+    err = k5_mutex_finish_init(&cc_typelist_lock);
+    if (err)
+	return err;
+    return 0;
 }
 
 void
