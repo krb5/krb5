@@ -151,7 +151,9 @@ WINMAKEFILES=Makefile \
 	lib\krb5\ccache\ccapi\Makefile \
 	lib\krb5\error_tables\Makefile \
 	lib\krb5\keytab\Makefile \
-	lib\krb5\keytab\file\Makefile lib\krb5\krb\Makefile \
+	lib\krb5\keytab\file\Makefile \
+	lib\krb5\keytab\srvtab\Makefile \
+	lib\krb5\krb\Makefile \
 	lib\krb5\os\Makefile lib\krb5\posix\Makefile \
 	lib\krb5\rcache\Makefile \
 	util\Makefile \
@@ -231,9 +233,11 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\error_tables\Makefile: lib\krb5\error_tables\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\keytab\Makefile: lib\krb5\keytab\Makefile.in $(MKFDEP)
+##DOS##lib\krb5\keytab\Makefile: $$@.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\krb5\keytab\file\Makefile: lib\krb5\keytab\file\Makefile.in $(MKFDEP)
+##DOS##lib\krb5\keytab\file\Makefile: $$@.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\krb5\keytab\srvtab\Makefile: $$@.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\krb5\krb\Makefile: lib\krb5\krb\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@

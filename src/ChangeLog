@@ -1,3 +1,8 @@
+1999-06-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Create Makefile.in for srvtab keytab code during
+		win32 build.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.
