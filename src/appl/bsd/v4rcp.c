@@ -524,7 +524,7 @@ notreg:
 			}
 		}
 		(void) sprintf(buf, "C%04o %ld %s\n",
-		    (unsigned int) stb.st_mode&07777, stb.st_size, last);
+		    (unsigned int) stb.st_mode&07777, (long) stb.st_size, last);
 		kstream_write (krem, buf, strlen (buf));
 		if (response() < 0) {
 			(void) close(f);

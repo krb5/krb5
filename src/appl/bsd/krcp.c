@@ -887,7 +887,7 @@ void rsource(name, statp)
 	    return;
 	}
     }
-    (void) sprintf(buf, "D%04o %d %s\n", statp->st_mode&07777, 0, last);
+    (void) sprintf(buf, "D%04lo %d %s\n", statp->st_mode&07777, 0, last);
     (void) rcmd_stream_write(rem, buf, strlen(buf), 0);
     if (response() < 0) {
 	closedir(d);

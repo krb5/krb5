@@ -263,6 +263,7 @@ void oob KRB5_PROTOTYPE((void));
 krb5_sigtype	lostpeer KRB5_PROTOTYPE((int));
 void setsignal KRB5_PROTOTYPE((int sig, krb5_sigtype (*act)()));
 static int read_wrapper(int fd, char *buf, int size, int *got_esc);
+static void prf(char *f);
 void try_normal(char **);
 static void mode(int);
 #ifdef POSIX_SIGNALS
@@ -1782,12 +1783,11 @@ int f;
 
 
 
-/*VARARGS*/
-prf(f, a1, a2, a3, a4, a5)
+static void
+prf(f)
      char *f;
-     char *a1, *a2, *a3, *a4, *a5;
 {
-    fprintf(stderr, f, a1, a2, a3, a4, a5);
+    fprintf(stderr, f);
     fprintf(stderr, CRLF);
 }
 

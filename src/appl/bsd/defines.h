@@ -65,3 +65,6 @@ krb5_error_code rd_and_store_for_creds(krb5_context context,
 				       krb5_data *inbuf, krb5_ticket *ticket,
 				       krb5_ccache *ccache);
 
+#ifdef NEED_SETENV
+extern int setenv(char *, char *, int);
+#endif

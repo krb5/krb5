@@ -236,6 +236,7 @@ struct winsize {
 #include <libpty.h>
 #ifdef HAVE_UTMP_H
 #include <utmp.h>
+#include <k5-util.h>
 #endif
 
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
@@ -906,7 +907,7 @@ char    oobdata[] = {0};
 #endif
 
 static 
-int sendoob(fd, byte)
+void sendoob(fd, byte)
      int fd;
      char *byte;
 {

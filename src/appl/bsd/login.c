@@ -291,6 +291,10 @@ static const char *krb_get_err_text(kerror)
 
 #define MAXENVIRON	32
 
+#ifdef NEED_SETENV
+extern int setenv(char *, char *, int);
+#endif
+
 /*
  * This bounds the time given to login.  Not a define so it can
  * be patched on machines where it's too small.
@@ -523,7 +527,7 @@ void k_init (ttyn)
 
     /* Set up the credential cache environment variable */
     if (!getenv(KRB5_ENV_CCNAME)) {
-	sprintf(ccfile, "FILE:/tmp/krb5cc_p%d", getpid());
+	sprintf(ccfile, "FILE:/tmp/krb5cc_p%ld", (long) getpid());
 	setenv(KRB5_ENV_CCNAME, ccfile, 1);
 	krb5_cc_set_default_name(kcontext, ccfile);
 	unlink(ccfile+strlen("FILE:"));
@@ -2128,9 +2132,10 @@ void dolastlog(quiet, tty)
 		printf("Last login: %.*s ", 24-5, (char *)ctime(&ll.ll_time));
 
 		if (*ll.ll_host != '\0')
-		    printf("from %.*s\n", sizeof(ll.ll_host), ll.ll_host);
+		    printf("from %.*s\n", (int) sizeof(ll.ll_host), 
+			   ll.ll_host);
 		else
-		    printf("on %.*s\n", sizeof(ll.ll_line), ll.ll_line);
+		    printf("on %.*s\n", (int) sizeof(ll.ll_line), ll.ll_line);
 	    }
 	    (void)lseek(fd, (off_t)pwd->pw_uid * sizeof(ll), SEEK_SET);
 	}

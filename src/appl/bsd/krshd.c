@@ -162,6 +162,7 @@ char copyright[] =
 #include <kerberosIV/krb.h>
 Key_schedule v4_schedule;
 #endif
+#include <k5-util.h>
 
 #ifdef HAVE_PATHS_H
 #include <paths.h>
