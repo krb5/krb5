@@ -641,7 +641,7 @@ AC_CACHE_VAL(krb5_cv_sockaddr_sa_len,
 sa.sa_len;],
 krb5_cv_sockaddr_sa_len=yes,krb5_cv_sockaddr_sa_len=no)])
 AC_MSG_RESULT([$]krb5_cv_sockaddr_sa_len)
-if $krb5_cv_sockaddr_sa_len= yes; then
+if test $krb5_cv_sockaddr_sa_len = yes; then
    AC_DEFINE_UNQUOTED(HAVE_SA_LEN)
    fi
 ])
