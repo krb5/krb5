@@ -1,4 +1,5 @@
 thisconfigdir=./
 BUILDTOP=$(U)$(U)
+LOCAL_SUBDIRS=ftp ftpd
 CFLAGS = $(CCOPTS)
 LDFLAGS = -g
