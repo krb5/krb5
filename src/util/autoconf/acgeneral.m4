@@ -939,8 +939,9 @@ EOF
 ])
 
 dnl Similar, but perform shell substitutions $ ` \ once on VALUE.
+dnl The 'tr' is to fix more Ultrix sh brain damage
 define(AC_DEFINE_UNQUOTED,
-[cat >> confdefs.h <<EOF
+[cat <<EOF | tr '\201-\377' '\001-\177' >> confdefs.h 
 [#define] $1 ifelse($#, 2, [$2], 1)
 EOF
 ])
