@@ -24,4 +24,4 @@ ErrorTableObjectRule()
 
 all::	krb5kdc $(SRCS)
 
-NormalProgramTarget(krb5kdc,$(OBJS),$(KDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)
+NormalProgramTarget(krb5kdc,$(OBJS),$(DEPKDBLIB) $(DEPKLIB),$(KDBLIB) $(KLIB),)

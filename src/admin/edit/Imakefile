@@ -1,4 +1,4 @@
-DEPLIBS = $(KDBLIB) $(DEPKLIB)
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
 OBJS= kdb5_edit.o kdb5_ed_ct.o
 SRCS= kdb5_edit.c kdb5_ed_ct.c

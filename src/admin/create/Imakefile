@@ -1,4 +1,4 @@
-DEPLIBS = $(KDBLIB) $(DEPKLIB)
+DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB)
 
 SimpleProgramTarget(kdb5_create)
