@@ -1,0 +1,83 @@
+# Copyright 1993 by OpenVision Technologies, Inc.
+# 
+# Permission to use, copy, modify, distribute, and sell this software
+# and its documentation for any purpose is hereby granted without fee,
+# provided that the above copyright notice appears in all copies and
+# that both that copyright notice and this permission notice appear in
+# supporting documentation, and that the name of OpenVision not be used
+# in advertising or publicity pertaining to distribution of the software
+# without specific, written prior permission. OpenVision makes no
+# representations about the suitability of this software for any
+# purpose.  It is provided "as is" without express or implied warranty.
+# 
+# OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+# INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+# EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+# CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+# USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+# OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+This directory contains a sample GSS-API client and server
+application.  Each invocation of the client performs the following
+exchange with the server:
+
+	1.  The client and server establish a GSS-API context.  The
+	server prints the identity of the client.
+
+	2.  The client sends a sealed (encrypted) message to the
+	server.
+
+	3.  The server decrypts the message and prints it.
+
+	4.  The server produces a signature block for the message and
+	sends it to the client.
+
+	5.  The client verifies the signature block.
+
+Obviously, this exchange does not perform a tremendously valuable
+function; however, it demostrates the use of primary GSS-API
+interfaces.
+
+The server's command line usage is
+
+	gss-server [-port port] service_name
+
+where service_name is a GSS-API service name of the form
+"service@host".  The server will accept TCP connections on port
+(default 4444) and establish contexts as service_name.
+
+The client's command line usage is
+
+	gss-client [-port port] host service_name msg
+
+where host is the host running the server, service_name is the service
+name that the server will establish connections as, and msg is the
+message.  The client connects to the TCP on <host:port> (default 4444)
+and performs the exchange.
+
+If you are using this sample application with OpenVision's Kerberos 5
+GSS-API mechanism:
+
+1.  Link the client and server with -lgssapi_krb5 -lkrb5 -lcrypto
+-lisode -lcom_err.
+
+2.  Make sure that the principal corresponding to service_name is in
+the default keytab on the server host, and that the gss-server process
+can read the keytab.  For example, the service name "host@server"
+corresponds to the Kerberos principal "host/server.domain.com@REALM".
+
+This sample application uses the following GSS-API functions:
+
+	gss_accept_sec_context		gss_release_buffer
+	gss_acquire_cred		gss_release_cred
+	gss_delete_sec_context		gss_release_name
+	gss_display_name		gss_seal
+	gss_display_status		gss_sign
+	gss_import_name			gss_unseal
+	gss_init_sec_context		gss_verify
+
+Barry Jaspan, bjaspan@security.ov.com
+OpenVision Technologies, Inc.
+
+$Id$
