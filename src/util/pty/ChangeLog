@@ -1,3 +1,8 @@
+Mon Apr  6 19:35:33 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* update_utmp.c (pty_update_utmp): Don't record LOGIN_PROCESS
+	entries, as they confuse last on some systems. [pty/569]
+
 Thu Mar 12 18:09:25 1998  Tom Yu  <tlyu@mit.edu>
 
 	* update_utmp.c (pty_update_utmp): Fix bogus entry of
