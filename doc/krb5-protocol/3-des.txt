@@ -26,8 +26,8 @@ produce three DES keys sans parity.  The 168 bits are then expanded to
 include odd parity, for use within the DES routines.  The three DES keys
 are then used to encrypt themselves in 3-DES CBC mode, and the result is
 parity adjusted.  Any weak or semi-weak DES keys are first strengthened
-by eXclusive-ORing the first octet with the value 0xF0 prior to their
-use.
+by eXclusive-ORing the key with the constant 0x00000000000000F0 prior to
+its use.
 
 The n-fold operation used by the string-to-key algorithm 
 replicates the input bit array X until its length is the least common
