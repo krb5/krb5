@@ -1,3 +1,8 @@
+
+Tue Dec 12 01:26:30 1995  Chris Provenzano (proven@mit.edu)
+
+	* configure.in : Added subdirectory db.
+
 Fri Oct  6 22:04:28 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
