@@ -198,6 +198,9 @@ Changes in 1.1a3:
  from tag Mac_GSSKerberos5_3_0fc1
  no changes on the Mac side
 
-3.0fc1
+3.0fc2
  from tag Mac_GSSKerberos5_3_0fc2
  fixed memory leak in krb5_425_conv_principal
+
+3.0
+ from tag Mac_GSSKerberos5_3_0
