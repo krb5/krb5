@@ -320,6 +320,17 @@ integer_convert(asn1_decode_authdatatype,krb5_authdatatype)
 unsigned_integer_convert(asn1_decode_ui_2,krb5_ui_2)
 unsigned_integer_convert(asn1_decode_ui_4,krb5_ui_4)
 
+asn1_error_code asn1_decode_seqnum(asn1buf *buf, krb5_ui_4 *val)
+{
+  asn1_error_code retval;
+  unsigned long n;
+
+  retval = asn1_decode_maybe_unsigned(buf, &n);
+  if (retval) return retval;
+  *val = (krb5_ui_4)n & 0xffffffff;
+  return 0;
+}
+
 asn1_error_code asn1_decode_msgtype(asn1buf *buf, krb5_msgtype *val)
 {
   asn1_error_code retval;

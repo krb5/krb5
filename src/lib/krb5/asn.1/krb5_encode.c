@@ -166,7 +166,7 @@ krb5_error_code encode_krb5_authenticator(const krb5_authenticator *rep, krb5_da
 
   /* seq-number[7]		INTEGER OPTIONAL */
   if(rep->seq_number != 0)
-    krb5_addfield(rep->seq_number,7,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,7,asn1_encode_unsigned_integer);
 
   /* subkey[6]			EncryptionKey OPTIONAL */
   if(rep->subkey != NULL)
@@ -305,6 +305,7 @@ krb5_error_code encode_krb5_enc_kdc_rep_part(const krb5_enc_kdc_rep_part *rep, k
 #ifdef KRB5_ENCKRB5KDCREPPART_COMPAT
   krb5_apptag(26);
 #else
+  /* XXX WRONG!!! Should use 25 || 26, not the outer KDC_REP tags! */
   if (rep->msg_type == KRB5_AS_REP) { krb5_apptag(ASN1_KRB_AS_REP); }
   else if (rep->msg_type == KRB5_TGS_REP) { krb5_apptag(ASN1_KRB_TGS_REP); }
   else return KRB5_BADMSGTYPE;
@@ -395,7 +396,7 @@ krb5_error_code encode_krb5_ap_rep_enc_part(const krb5_ap_rep_enc_part *rep, krb
 
   /* seq-number[3]	INTEGER OPTIONAL */
   if(rep->seq_number)
-    krb5_addfield(rep->seq_number,3,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,3,asn1_encode_unsigned_integer);
 
   /* subkey[2]		EncryptionKey OPTIONAL */
   if(rep->subkey != NULL)
@@ -510,7 +511,7 @@ krb5_error_code encode_krb5_enc_priv_part(const krb5_priv_enc_part *rep, krb5_da
 
   /* seq-number[3]	INTEGER OPTIONAL */
   if(rep->seq_number)
-    krb5_addfield(rep->seq_number,3,asn1_encode_integer);
+    krb5_addfield(rep->seq_number,3,asn1_encode_unsigned_integer);
 
   /* usec[2]		INTEGER OPTIONAL */
   if(rep->timestamp){

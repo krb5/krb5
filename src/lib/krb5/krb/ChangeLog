@@ -1,3 +1,10 @@
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* auth_con.h: Sequence numbers are now unsigned.
+
+	* gen_seqnum.c (krb5_generate_seq_number): Constrain initial
+	sequence number space to facilitate backwards compatibility.
+
 2003-05-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* ser_ctx.c (krb5_context_internalize): Copy read-in OS context

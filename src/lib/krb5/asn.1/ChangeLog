@@ -1,3 +1,25 @@
+2003-05-18  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_decode.c (asn1_decode_maybe_unsigned): New function; decode
+	negative 32-bit numbers into positive unsigned numbers for the
+	sake of backwards compatibility with old code.
+
+	* asn1_decode.h: Add prototype for asn1_decode_maybe_unsigned.
+
+	* asn1_k_decode.c (asn1_decode_seqnum): New function; wrapper
+	around asn1_decode_maybe_unsigned.
+
+	* asn1_k_decode.h: Add prototype for asn1_decode_seqnum.
+
+	* krb5_decode.c (decode_krb5_authenticator) 
+	(decode_krb5_ap_rep_enc_part, decode_krb5_enc_priv_part): Sequence
+	numbers are now unsigned.  Use asn1_decode_seqnum to handle
+	backwards compat with negative sequence numbers.
+
+	* krb5_encode.c (encode_krb5_authenticator) 
+	(encode_krb5_ap_rep_enc_part, encode_krb5_enc_priv_part): Sequence
+	numbers are now unsigned.
+
 2003-05-06  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5_decode.c (decode_krb5_etype_info2): New function; currently

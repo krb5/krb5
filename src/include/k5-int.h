@@ -1050,7 +1050,7 @@ typedef struct _krb5_safe {
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time,
 					   optional */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
     krb5_address *s_address;	/* sender address */
     krb5_address *r_address;	/* recipient address, optional */
     krb5_checksum *checksum;	/* data integrity checksum */
@@ -1066,7 +1066,7 @@ typedef struct _krb5_priv_enc_part {
     krb5_data user_data;		/* user data */
     krb5_timestamp timestamp;		/* client time, optional */
     krb5_int32 usec;			/* microsecond portion of time, opt. */
-    krb5_int32 seq_number;		/* sequence #, optional */
+    krb5_ui_4 seq_number;		/* sequence #, optional */
     krb5_address *s_address;	/* sender address */
     krb5_address *r_address;	/* recipient address, optional */
 } krb5_priv_enc_part;
