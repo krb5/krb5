@@ -38,6 +38,7 @@ main(argc, argv)
     char **argv;
 {
     krb5_context kcontext;
+    krb5_error_code retval;
     int c;
     krb5_ccache cache = NULL;
     char *cache_name = NULL;
@@ -45,8 +46,11 @@ main(argc, argv)
     int errflg=0;
     int quiet = 0;	
     
-    krb5_init_context(&kcontext);
-    krb5_init_ets(kcontext);
+    retval = krb5_init_context(&kcontext);
+    if (retval) {
+	    com_err(argv[0], status, "while initializing krb5");
+	    exit(1);
+    }
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
