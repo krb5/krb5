@@ -1,3 +1,8 @@
+2003-02-08  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* Makefile.in, configure.in, fakeka.c: New file to implement
+	a basic kaserver using the KDC database.
+
 2003-02-04  Sam Hartman  <hartmans@mit.edu>
 
 	* krb5kdc.M: Document default v4 mode of none
