@@ -1,3 +1,14 @@
+Tue Nov  1 14:49:00 1994    (tytso@rsx-11)
+
+	* configure.in: 
+	* Makefile.in:
+	* libupdate.sh: Add support for the new libupdate shell script.
+		It automatically updates a library from a file listing of
+		constituent .o files.  It only calls "ar" if it absolutely
+		has to, in order to speed things up for partial
+		recompilations.  (ar is dreadfully slow if you're using
+		one based on the BFD library.) 
+
 Tue Oct 11 19:07:09 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* kbuild (MAKETARGETS): default to "all check" for make, but allow

@@ -1,5 +1,16 @@
 CFLAGS = $(CCOPTS)
 LDFLAGS = -g
 
+editsh = sed -e 's,@''ARADD''@,$(ARADD),g' -e 's,@''ARCHIVE''@,$(ARCHIVE),g'
+
+all:: libupdate
+
+libupdate: $(srcdir)/libupdate.sh
+	rm -f $@ $@.tmp
+	$(editsh) $< > $@.tmp && chmod +x $@.tmp && mv $@.tmp $@
+
+clean::
+	$(RM) libupdate
+	
 install::
 	@echo nothing to install in util
