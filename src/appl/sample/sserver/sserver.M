@@ -44,9 +44,8 @@ The service name used by \fIsserver\fP and \fIsclient\fP is
 \fBsample\fP.  Hence, \fIsserver\fP will require that there be a keytab
 entry for the service "sample/hostname.domain.name@REALM.NAME".  This
 keytab is generated using the
-.IR krb5_edit(8)
-program.  The keytab file is installed in whatever
-directory is defined by V5Srvtabdir (usually /etc) as "v5srvtab".
+.IR kadmin(8)
+program.  The keytab file is usually installed as "/etc/krb5.keytab".
 .PP
 The 
 .B \-S
@@ -66,7 +65,7 @@ sample          13135/tcp
 .PP
 When using \fIsclient,\fP you will first have to have an entry in the Kerberos
 database, by using 
-.IR kdb5_edit(8),
+.IR kadmin(8),
 and then you have to get Kerberos
 tickets, by using 
 .IR kinit(8).  
@@ -112,7 +111,7 @@ didn't restart \fIinetd\fP after editing inetd.conf.
 /krb5/bin/sclient: Server not found in Kerberos database while using sendauth
 .PP
 This means that the "sample/hostname@LOCAL.REALM" service was not
-defined in the Kerberos database; it should be created using \fIkdb5_edit,\fP
+defined in the Kerberos database; it should be created using \fIkadmin,\fP
 and a keytab file needs to be generated to make the key for that service
 principal available for \fIssclient\fP.
 .PP
