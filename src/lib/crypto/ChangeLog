@@ -1,3 +1,8 @@
+2001-11-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (check-unix): Use $(srcdir) in file specification
+	for input to t_prng.
+
 2001-11-19  Sam Hartman  <hartmans@mit.edu>
 
 	* Makefile.in (check-unix): Run t_prng
