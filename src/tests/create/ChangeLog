@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:37:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling and LDFLAGS.
+	* configure.in - Add USE_KDB5_LIBRARY and KRB5_LIBRARIES
+
+
 Thu Jun 15 18:10:55 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Remove DBMLIB.
 	* configure.in - Remove check for dbm libraries.  Use shared library

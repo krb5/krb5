@@ -1,19 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-KDBLIB=$(TOPLIBD)/libkdb5.a 
-DEPKDBLIB=$(TOPLIBD)/libkdb5.a 
 
 all:: kdb5_verify
 
-KLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-DEPKLIB = $(KDBLIB) $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB)
-
-DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
-
 kdb5_verify: kdb5_verify.o $(DEPLIBS)
-	$(CC) $(CFLAGS) -o kdb5_verify kdb5_verify.o $(KLIB) $(LIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdb5_verify kdb5_verify.o $(LIBS)
 
 kdb5_verify.o:	$(srcdir)/kdb5_verify.c
 

@@ -1,14 +1,12 @@
 CFLAGS = $(CCOPTS) $(DEFS) $(LOCALINCLUDES)
-LDFLAGS = -g
 
 OBJS=resolve.o
 SRCS=$(srcdir)/resolve.c
 
 all:: resolve
 
-
-resolve: $(OBJS)
-	$(LD) $(CFLAGS) -o resolve $(OBJS) $(LIBS)
+resolve: $(OBJS) $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o resolve $(OBJS) $(LIBS)
 
 check:: resolve
 	./resolve

@@ -1,16 +1,9 @@
 CFLAGS = $(CCOPTS) $(DEFS) 
-LDFLAGS = -g
-
-COMERRLIB=$(BUILDTOP)/util/et/libcom_err.a
-DBMLIB=
 
 all:: kdc5_hammer
 
-KLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-DEPKLIB = $(TOPLIBD)/libkrb5.a $(TOPLIBD)/libcrypto.a $(COMERRLIB) $(DBMLIB)
-
-kdc5_hammer: kdc5_hammer.o $(DEPKLIB)
-	$(CC) $(CFLAGS) -o kdc5_hammer kdc5_hammer.o $(KLIB) $(LIBS)
+kdc5_hammer: kdc5_hammer.o $(DEPLIBS)
+	$(LD) $(LDFLAGS) $(LDARGS) -o kdc5_hammer kdc5_hammer.o $(LIBS)
 
 kdc5_hammer.o:	$(srcdir)/kdc5_hammer.c
 

@@ -1,3 +1,8 @@
+
+Fri Jul 7 16:36:12 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling and LDFLAGS.
+	* configure.in - Add KRB5_LIBRARIES and V5_USE_SHARED_LIB.
+
 Tue Jun 20 14:56:53 1995    <tytso@rsx-11.mit.edu>
 
 	* ktest.h, ktest_equal.h: Change PROTOTYPE to KRB5_PROTOTYPE

@@ -1,4 +1,9 @@
 
+Fri Jul 7 16:37:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling and LDFLAGS.
+	* configure.in - Add KRB5_LIBRARIES and V5_USE_SHARED_LIB.
+
+
 Thu Jun 22 12:02:48 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdc5_hammer.c - Change generation of server principals so that
 		we can use kdc5_hammer with kdb5_mkdums.  Also add logic
