@@ -1,25 +1,9 @@
 Kerberos 5 Release 1.0 README file
 ----------------------------------
 
-    It was the dawn of the second system of mankind, ten years
-    after the release of Kerberos 4.  The Kerberos Project was a
-    dream given form. Its goal: to prevent another war by
-    creating a place where clients and servers could work out
-    their connections peacefully.  It's a protected port -- home
-    away from home for rsh, rlogin, kftp, and khttp.  Clients and
-    servers wrapped in two million, five hundred thousand lines
-    of spinning code, all alone on the disk.  It can be a
-    dangerous place, but it's out last best hope for security.
-
-    This is the story of the last of the Kerberos releases.  The
-    year is 1996.  The name of the software is Kerberos 5.
-
-[The above is Copyright (c) 1996 Jered Floyd.  XXX Need to get
-permission if we're actually going to use this; it's also been
-modified slightly.]
-
 Contents:
 ---------
+
 Legal Administrivia
 Building and Installing Kerberos 5
 Notes and Major Changes
@@ -83,7 +67,6 @@ kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
 
 Building and Installing Kerberos 5
 ----------------------------------
-
 The first file you should look at is doc/install.ps; it contains the
 notes for building and installing Kerberos 5.  The info file
 krb5-install.info has the same information in info file format.  You
@@ -102,10 +85,33 @@ kerberos-admin.info and krb5-user.info, respectively.
 Notes and Major Changes
 -----------------------
 
-The default keytab name has changed from /etc/v5srvtab to /etc/krb5.keytab.
+* The default keytab name has changed from /etc/v5srvtab to
+/etc/krb5.keytab.
+
+* login.krb5 no longer defaults to getting krb4 tickets.
+
+* Windows DLL names have changed. XXX need more info here
+
+* The directory structure used for installations has changed.  Please
+see the install document for more details.
+
+* krshd has been modified to accept krb4 rcp connections.
+
+* For as yet unknown reasons, make check fails for NetBSD and OSF/1
+under some circumstances.  XXX should this be here?
+
+* Under NetBSD, "make install" doesn't work.  Please see the build
+instructions for more details.  XXX should this be here?
+
+* The gssrpc library has symbol collisions with the rpc library in
+some of the libcs in certain operating systems, notably NetBSD.  For
+those platforms which have rpc in libc and also contain NIS in libc,
+compiling with static libraries will not work because of this
+conflict.  XXX should this be here?
 
 Acknowledgements
 ----------------
+
 Appreciation Time!!!!  There are far too many people to try to thank
 them all; many people have contributed to the development of Kerberos
 V5.  This is only a partial listing....
