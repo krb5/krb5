@@ -1,0 +1,28 @@
+Fri Jan 30 16:06:13 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kpasswd.c:
+	* kpasswd.M:
+	* Makefile.in:
+	* configure.in: New: Cygnus kpasswd client.
+
+Mon Mar 31 23:49:34 1997  Marc Horowitz  <marc@cygnus.com>
+
+	* Makefile.in (install-all install-kdc install-server install-client install-unix): install the new man page
+
+Sat Mar 29 14:31:51 1997  Mark Eichin  <eichin@cygnus.com>
+
+	* kpasswd.c (main): use fprintf correctly in usage.
+
+Tue Mar  4 21:47:48 1997  Marc Horowitz  <marc@cygnus.com>
+
+	* kpasswd.c (main): retool for new init_creds interface
+
+Wed Feb 19 21:00:12 1997  Marc Horowitz  <marc@cygnus.com>
+
+	* kpasswd.c: use the string version of the chpw result_code in the
+ 	error message.
+
+Mon Feb  3 17:50:30 1997  Marc Horowitz  <marc@cygnus.com>
+
+	* kpasswd.c: new password change client
+	* Makefile.in: new directory
