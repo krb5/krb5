@@ -436,8 +436,17 @@ main(argc, argv)
 #ifdef VDISCRD
 	tc.c_cc[VDISCRD] = CFLUSH;
 #endif
+#ifdef VDISCARD
+        tc.c_cc[VDISCARD] = CDISCARD;
+#endif
 #ifdef VWERSE
 	tc.c_cc[VWERSE] = CWERASE;
+#endif
+#ifdef VWERASE
+        tc.c_cc[VWERASE] = CWERASE;
+#endif
+#ifdef VSTATUS
+        tc.c_cc[VSTATUS] = CSTATUS;
 #endif
 #endif /* NO_INIT_CC */
 	tcsetattr(0, TCSANOW, &tc);

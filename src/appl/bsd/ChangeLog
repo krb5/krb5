@@ -1,5 +1,8 @@
 Wed Oct 19 12:36:47 1994  Theodore Y. Ts'o  (tytso@dcl)
 
+	* login.c (main): Add other termios c_cc initializations for the
+		ALPHA. 
+
 	* krlogind.c (protocol): Make protocol buffers be unsigned, since
 		we're comparing against unsigned data.
 
