@@ -47,8 +47,10 @@ krb5_creds **outcred;
 	goto cleanclient;
     if (retval = krb5_copy_keyblock(&incred->keyblock, &tempcred->keyblock))
 	goto cleanserver;
-    if (retval = krb5_copy_data(&incred->ticket, &scratch))
+    if (retval = krb5_copy_addresses(incred->addresses, &tempcred->addresses))
 	goto cleanblock;
+    if (retval = krb5_copy_data(&incred->ticket, &scratch))
+	goto cleanaddrs;
     tempcred->ticket = *scratch;
     free((char *)scratch);
     if (retval = krb5_copy_data(&incred->second_ticket,
@@ -63,6 +65,8 @@ krb5_creds **outcred;
 
  cleanticket:
     free(tempcred->ticket.data);
+ cleanaddrs:
+    krb5_free_address(tempcred->addresses);
  cleanblock:
     free((char *)tempcred->keyblock.contents);
  cleanserver:
