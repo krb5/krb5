@@ -25,5 +25,5 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
-SUBDIRS=telnet sample simple bsd popper movemail user_user 
+SUBDIRS=telnet sample simple bsd popper movemail user_user gss-sample
 MakeSubdirs($(SUBDIRS))
