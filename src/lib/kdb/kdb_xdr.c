@@ -67,6 +67,8 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
 				   &unparse_mod_princ))
 	return(retval);
 
+    unparse_mod_princ_size = (int) strlen(unparse_mod_princ) + 1;
+
     if ((nextloc = malloc(unparse_mod_princ_size + 4)) == NULL)
 	return ENOMEM;
 
@@ -79,8 +81,6 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
 	    break;
 	}
     }
-
-    unparse_mod_princ_size = strlen(unparse_mod_princ) + 1;
 
     if ((*tl_data) || 
 	/* Only zero data if it is freshly allocated */
@@ -128,7 +128,7 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
     	    *(((krb5_octet *)(&(*mod_princ)->mod_date)) + 3) = *nextloc++;
 
 	    /* Mod Princ */
-    	    if (retval = krb5_parse_name(context, nextloc, 
+    	    if (retval = krb5_parse_name(context, (const char *) nextloc, 
 					 &((*mod_princ)->mod_princ))) 
 		break;
     	    if ((strlen(nextloc) + 1 + 4) != tl_data->tl_data_length) {
