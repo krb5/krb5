@@ -212,4 +212,11 @@ error_code KRB5_LNAME_NOTRANS,		"No translation available for requested principa
 error_code KRB5_LNAME_BADFORMAT,	"Improper format of translation database entry"
 
 error_code KRB5_CRYPTO_INTERNAL,	"Cryptosystem internal error"
+
+error_code KRB5_KT_BADNAME,		"Key table name malformed"
+error_code KRB5_KT_UNKNOWN_TYPE,	"Unknown Key table type" 
+error_code KRB5_KT_NOTFOUND,		"Key table entry not found"
+error_code KRB5_KT_END,			"End of key table reached"
+error_code KRB5_KT_NOWRITE,		"Cannot write to specified key table"
+
 end
