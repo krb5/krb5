@@ -1,3 +1,8 @@
+Fri Sep 20 16:58:08 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in: added support for KADM5 unit test system; could
+	stand some cleaning
+
 Tue Jul  9 15:02:00 1996  Marc Horowitz  <marc@mit.edu>
 
 	* pre.in (SRVLIBS, SRVDEPLIBS, CLNTLIBS, CLNTDEPLIBS): added for
