@@ -629,6 +629,13 @@ adm_mod_old_key(context, auth_context, cmdname, customer_name)
 				       -1,
 				       &kdata))
 		kdata->key_data_kvno = atoi(tempstr);
+	    if (!krb5_dbe_find_enctype(context,
+				       &entry,
+				       ENCTYPE_DES_CBC_MD5,
+				       KRB5_KDB_SALTTYPE_AFS3,
+				       -1,
+				       &kdata))
+		kdata->key_data_kvno = atoi(tempstr);
 	}
 	
 	if (msg_data.data[3] == KMODATTR) {
