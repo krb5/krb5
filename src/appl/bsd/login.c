@@ -534,14 +534,14 @@ main(argc, argv)
 			checknologin();
 
 		/*
-		 * Disallow automatic login to root; if not invoked by
-		 * root, disallow if the uid's differ.
+		 * Disallow automatic login to root.
+		 * If not invoked by root, disallow if the uid's differ.
 		 */
 		if (fflag && pwd) {
 			int uid = (int) getuid();
 
-			passwd_req = pwd->pw_uid == 0 ||
-			    (uid && uid != pwd->pw_uid);
+			passwd_req =
+			    (pwd->pw_uid == 0 || (uid && uid != pwd->pw_uid));
 		}
 
 		/*
@@ -551,17 +551,20 @@ main(argc, argv)
 
 		if (Fflag && pwd) {
 			int uid = (int) getuid();
-			passwd_req = uid && uid != pwd->pw_uid;
+			passwd_req = (uid && uid != pwd->pw_uid);
 		}
 
 		/*
 		 * If no remote login authentication and a password exists
 		 * for this user, prompt for one and verify it.
 		 */
-		if (!passwd_req || pwd && !*(pwd->pw_passwd))
+		if (!passwd_req) break;
 #ifdef HAVE_SHADOW
-		    if (spwd && !*(spwd->sp_pwdp))
+		if (spwd) {
+		    if (!*(spwd->sp_pwdp)) break;
+		} else
 #endif
+		    if (pwd && !*(pwd->pw_passwd))
 			break;
 
 #ifdef KRB4
@@ -677,14 +680,16 @@ bad_login:
 #ifdef HAVE_SETPRIORITY
 		(void) setpriority(PRIO_PROCESS, 0, -4 + PRIO_OFFSET);
 #endif
-		p = crypt(getpass("password:"), salt);
+		p = crypt(getpass("Password:"), salt);
 #ifdef HAVE_SETPRIORITY
 		(void) setpriority(PRIO_PROCESS, 0, 0 + PRIO_OFFSET);
 #endif
-		if (pwd && !strcmp(p, pwd->pw_passwd))
 #ifdef HAVE_SHADOW
-		    if (spwd && !strcmp(p, spwd->sp_pwdp))
+		if (spwd && !strcmp(p, spwd->sp_pwdp))
+		    break;
+		else
 #endif
+		    if (pwd && !strcmp(p, pwd->pw_passwd))
 			break;
 #endif /* KRB4 */
 
