@@ -1,3 +1,11 @@
+2004-05-25  Tom Yu  <tlyu@mit.edu>
+
+	* aesopt.h (PLATFORM_BYTE_ORDER): Treat _WIN32 as always
+	little-endian.  Default to little-endian if there's no other
+	compile-time way to detect endianness, noting it as a guess.
+	(SAFE_IO): Error out if SAFE_IO is not set and endianness was
+	guessed.
+
 2004-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (aes-test): Link test program against thread support
