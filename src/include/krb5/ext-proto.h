@@ -13,18 +13,16 @@
 
 #include <krb5/copyright.h>
 
-#ifndef __EXT_PROTO__
-#define __EXT_PROTO__
+#ifndef KRB5_EXT_PROTO__
+#define KRB5_EXT_PROTO__
 
 #ifdef __STDC__
 #include <stdlib.h>
 #else
-
 extern char *malloc(), *index(), *calloc();
 extern char *getenv();
+#endif /* ! __STDC__ */
 
 #include <string.h>
 
-#endif /* ! __STDC__ */
-
-#endif /* __EXT_PROTO__ */
+#endif /* KRB5_EXT_PROTO__ */
