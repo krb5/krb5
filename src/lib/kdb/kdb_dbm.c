@@ -583,7 +583,6 @@ krb5_db_entry *entry;
     krb5_principal princ, mod_princ;
     krb5_error_code retval;
     int	sizeleft;
-    int keysize;
     int major_version = 0, minor_version = 0;
 
     /*
