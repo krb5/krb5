@@ -17,34 +17,20 @@ struct Session {
 };
 typedef struct Session Session;
 
-OSErr		GetNumSessions PROTOTYPE ((int *n));
-OSErr		GetNthSession PROTOTYPE ((const int n, char *name,
-					  char *instance, char *realm));
-OSErr		DeleteSession PROTOTYPE ((const char *name,
-					  const char *instance,
-					  const char *realm));
-
-OSErr		GetCredentials PROTOTYPE ((const char *name,
-					   const char *instance,
-					   const char *realm,
-					   CREDENTIALS *cr));	
-		/* name, instance, and realm of service wanted should be
-		   set in *cr before calling */
-OSErr		AddCredentials PROTOTYPE ((const char *name,
-					   const char *instance,
-					   const char *realm,
-					   const CREDENTIALS *cr));
-OSErr		DeleteCredentials PROTOTYPE ((const char *uname,
-					      const char *uinst,
-					      const char *urealm,
-					      const char *sname,
-					      const char *sinst,
-					      const char *srealm));
-OSErr		GetNumCredentials PROTOTYPE ((const char *name,
-					      const char *instance,
-					      const char *realm, int *n));
-OSErr		GetNthCredentials PROTOTYPE ((const char *uname,
-					      const char *uinst,
-					      const char *urealm, char *sname,
-					      char *sinst, char *srealm,
-					      const int n));
+OSErr GetNumSessions(int *n);
+OSErr GetNthSession(const int n, char *name, char *instance, char *realm);
+OSErr DeleteSession(const char *name, const char *instance, const char *realm);
+OSErr GetCredentials(const char *name, const char *instance, const char *realm,
+		     CREDENTIALS *cr);	
+/* name, instance, and realm of service wanted should be set in *cr
+   before calling */
+OSErr AddCredentials(const char *name, const char *instance, const char *realm,
+		     const CREDENTIALS *cr);
+OSErr DeleteCredentials(const char *uname, const char *uinst,
+			const char *urealm, const char *sname,
+			const char *sinst, const char *srealm);
+OSErr GetNumCredentials(const char *name, const char *instance,
+			const char *realm, int *n);
+OSErr GetNthCredentials(const char *uname, const char *uinst,
+			const char *urealm, char *sname, char *sinst,
+			char *srealm, const int n);

@@ -1,3 +1,7 @@
+2001-04-13  Danilo Almeida  <dalmeida@mit.edu>
+
+	* memcache.h: Don't use macro PROTOTYPE.
+
 2001-04-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* cr_err_repl.c (req_act_vno): Delete commented-out declaration.
