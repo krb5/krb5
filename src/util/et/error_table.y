@@ -1,12 +1,8 @@
 %{
 #include <stdio.h>
 char *str_concat(), *ds(), *quote();
-#ifndef __STDC__
-#ifdef _AIX
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#else
-char *malloc(), *realloc(); 
-#endif
 #endif
 char *current_token = (char *)NULL;
 extern char *table_name;
