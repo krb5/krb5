@@ -1,3 +1,6 @@
+2002-03-28 Alexandra Ellwood <lxs@mit.edu>
+    * gssapi.hin: Conditionalized pragmas for Metrowerks
+
 2002-03-07 Alexandra Ellwood <lxs@mit.edu>
     * gssapi.hin: Added check for CFM compiles.  Removed dependency on 
     PRAGMA_* macros.  Moved check struct alignment check before struct declarations.

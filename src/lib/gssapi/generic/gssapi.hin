@@ -45,9 +45,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-    #pragma import on
+    #if defined(__MWERKS__)
+        #pragma import on
+        #pragma enumsalwaysint on
+    #endif
     #pragma options align=mac68k
-    #pragma enumsalwaysint on
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -800,9 +802,11 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 	));
 
 #if TARGET_OS_MAC
-    #pragma enumsalwaysint reset
+    #if defined(__MWERKS__)
+        #pragma enumsalwaysint reset
+        #pragma import reset
+    #endif
 	#pragma options align=reset
-    #pragma import reset
 #endif
 
 #ifdef __cplusplus
