@@ -1,12 +1,13 @@
 #ifndef ARCFOUR_H
 #define ARCFOUR_H
 
-void
+extern void
 krb5_arcfour_encrypt_length(krb5_const struct krb5_enc_provider *,
 			krb5_const struct krb5_hash_provider *,
 			size_t,
 			size_t *);
 
+extern 
 krb5_error_code krb5_arcfour_encrypt(krb5_const struct krb5_enc_provider *,
 			krb5_const struct krb5_hash_provider *,
 			krb5_const krb5_keyblock *,
@@ -15,6 +16,7 @@ krb5_error_code krb5_arcfour_encrypt(krb5_const struct krb5_enc_provider *,
      			krb5_const krb5_data *,
 			krb5_data *);
 
+extern 
 krb5_error_code krb5_arcfour_decrypt(krb5_const struct krb5_enc_provider *,
 			krb5_const struct krb5_hash_provider *,
 			krb5_const krb5_keyblock *,
@@ -23,11 +25,11 @@ krb5_error_code krb5_arcfour_decrypt(krb5_const struct krb5_enc_provider *,
 			krb5_const krb5_data *,
 			krb5_data *);
 
-krb5_error_code krb5_arcfour_string_to_key(
+extern krb5_error_code krb5_arcfour_string_to_key(
      krb5_const struct krb5_enc_provider *,
      krb5_const krb5_data *,
      krb5_const krb5_data *,
      krb5_keyblock *);
 
-const struct krb5_enc_provider krb5int_enc_arcfour;
+extern const struct krb5_enc_provider krb5int_enc_arcfour;
 #endif /* ARCFOUR_H */

@@ -1,3 +1,8 @@
+2001-10-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* arcfour.h: Declare krb5int_enc_arcfour extern so that multiple
+	copies are not generated (etypes.c, and arcfour.c).
+
 2001-10-22  Sam Hartman  <hartmans@mit.edu>
 
 	* arcfour-int.h: Make krb5int_arcfour_translate_usage non-static so the hash can use it
