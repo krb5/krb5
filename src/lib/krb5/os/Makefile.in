@@ -9,7 +9,6 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
-##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
 	accessor.o	\

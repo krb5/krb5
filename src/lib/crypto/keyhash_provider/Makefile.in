@@ -9,7 +9,6 @@ LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../md4 \
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keyhash_provider
 ##DOS##OBJFILE=..\$(OUTPRE)kh_pro.lst
-##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

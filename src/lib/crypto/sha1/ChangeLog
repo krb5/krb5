@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* shs.h (nist_sha_cksumtable_entry, hmac_sha_cksumtable_entry):

@@ -6,7 +6,6 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=error_tables
 ##DOS##OBJFILE=..\$(OUTPRE)err_tbls.lst
-##WIN16##LIBNAME=..\krb5.lib
 
 THDRDIR=$(BUILDTOP)$(S)include
 EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5

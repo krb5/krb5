@@ -9,7 +9,6 @@ LOCALINCLUDES = $(WIN_INCLUDES)
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = ccache\file
 ##DOS##OBJFILE = $(OUTPRE)file.lst
-##WIN16##LIBNAME=..\..\krb5.lib
 
 STLIBOBJS 	= \
 	stdcc.o \

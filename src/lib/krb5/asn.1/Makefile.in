@@ -6,7 +6,6 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=asn.1
 ##DOS##OBJFILE=..\$(OUTPRE)asn1.lst
-##WIN16##LIBNAME=..\krb5.lib
 
 EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
 

@@ -7,7 +7,6 @@ LOCALINCLUDES = -I$(srcdir)/..
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=dk
 ##DOS##OBJFILE=..\$(OUTPRE)dk.lst
-##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

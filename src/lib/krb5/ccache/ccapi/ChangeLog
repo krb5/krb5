@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-03-06  Alexandra Ellwood <lxs@mit.edu>
 
     * stdcc.h, stdcc_util.h: Removed Mac header goober.

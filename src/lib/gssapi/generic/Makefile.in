@@ -7,7 +7,6 @@ LOCALINCLUDES = -I. -I$(srcdir)
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=generic
 ##DOS##OBJFILE=..\$(OUTPRE)generic.lst
-##WIN16##LIBNAME=..\gssapi.lib
 
 ##DOS##DLL_EXP_TYPE=GSS
 

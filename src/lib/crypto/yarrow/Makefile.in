@@ -7,7 +7,6 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../sha1 -I$(srcdir)/../enc_provider
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=yarrow
 ##DOS##OBJFILE=..\$(OUTPRE)yarrow.lst
-##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

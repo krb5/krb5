@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-07-14  Tom Yu  <tlyu@mit.edu>
 
 	* accept_sec_context.c (krb5_gss_accept_sec_context): Call

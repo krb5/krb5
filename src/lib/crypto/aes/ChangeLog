@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes_s2k.c (DEFAULT_ITERATION_COUNT): New macro; define to 4096.

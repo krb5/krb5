@@ -7,7 +7,6 @@ LOCALINCLUDES = -I. -I$(srcdir) -I../generic -I$(srcdir)/../generic
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb5
 ##DOS##OBJFILE = ..\$(OUTPRE)krb5.lst
-##WIN16##LIBNAME=..\gssapi.lib
 
 ##DOS##DLL_EXP_TYPE=GSS
 

@@ -7,7 +7,6 @@ LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../arcfour -I$(srcdir)/../aes
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=enc_provider
 ##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
-##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

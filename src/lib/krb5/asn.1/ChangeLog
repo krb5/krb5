@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-06-20  Sam Hartman  <hartmans@mit.edu>
 
 	* asn1_k_decode.h (asn1_decode_etype_info2): Prototype.  Also

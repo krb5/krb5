@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes.c (enc): Replaced function with a macro.

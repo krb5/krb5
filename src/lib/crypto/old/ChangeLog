@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-05-23  Sam Hartman  <hartmans@mit.edu>
 
 	* des_stringtokey.c (krb5int_des_string_to_key): If param has  one

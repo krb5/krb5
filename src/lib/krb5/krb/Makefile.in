@@ -11,7 +11,6 @@ LOCALINCLUDES = -I$(srcdir)/../os
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
-##WIN16##LIBNAME=..\krb5.lib
 
 STLIBOBJS= \
 	addr_comp.o	\

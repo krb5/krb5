@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-05-22  Tom Yu  <tlyu@mit.edu>
 
 	* kt_file.c (krb5_ktfile_get_entry): Check principal name prior to

@@ -1,3 +1,7 @@
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
 2003-04-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* dk_encrypt.c (krb5int_aes_dk_encrypt): Set output length
