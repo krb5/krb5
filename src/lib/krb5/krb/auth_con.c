@@ -26,6 +26,14 @@ krb5_auth_con_free(context, auth_context)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
 {
+    if (auth_context->local_addr) 
+	free(auth_context->local_addr);
+    if (auth_context->remote_addr) 
+	free(auth_context->remote_addr);
+    if (auth_context->local_port) 
+	free(auth_context->local_port);
+    if (auth_context->remote_port) 
+	free(auth_context->remote_port);
     if (auth_context->authentp) 
 	krb5_free_authenticator(context, auth_context->authentp);
     if (auth_context->keyblock) 
@@ -132,17 +140,53 @@ krb5_auth_con_getaddrs(context, auth_context, local_addr, remote_addr)
     return 0 ;
 }
 
-/* XXX this call is a hack. Fixed when I do the servers. */
 krb5_error_code
-krb5_auth_con_setkey(context, auth_context, keyblock)
+krb5_auth_con_setports(context, auth_context, local_port, remote_port)
     krb5_context      	  context;
     krb5_auth_context 	* auth_context;
-    krb5_keyblock       * keyblock;		
+    krb5_address      	* local_port;
+    krb5_address      	* remote_port;
 {
-    if (auth_context->keyblock)
-	krb5_free_keyblock(context, auth_context->keyblock);
-    return(krb5_copy_keyblock(context, keyblock, &(auth_context->keyblock)));
+    /* Free old addresses */
+    if (auth_context->local_port) 
+	free(auth_context->local_port);
+    if (auth_context->remote_port) 
+	free(auth_context->remote_port);
+
+    if (local_port) {
+	if ((auth_context->local_port = (krb5_address *)
+		malloc(sizeof(krb5_address) + local_port->length)) == NULL) {
+	    return ENOMEM;
+	}
+	auth_context->local_port->addrtype = local_port->addrtype;
+	auth_context->local_port->length = local_port->length;
+	auth_context->local_port->contents = (krb5_octet *)
+	  auth_context->local_port + sizeof(krb5_address);
+	memcpy(auth_context->local_port->contents,
+	       local_port->contents, local_port->length);
+    } else {
+	auth_context->local_port = NULL;
+    }
+
+    if (remote_port) {
+	if ((auth_context->remote_port = (krb5_address *)
+		malloc(sizeof(krb5_address) + remote_port->length)) == NULL) {
+	    if (auth_context->local_port)
+		free(auth_context->local_port);
+	    return ENOMEM;
+	}
+	auth_context->remote_port->addrtype = remote_port->addrtype;
+	auth_context->remote_port->length = remote_port->length;
+	auth_context->remote_port->contents = (krb5_octet *)
+	  auth_context->remote_port + sizeof(krb5_address);
+	memcpy(auth_context->remote_port->contents,
+	       remote_port->contents, remote_port->length);
+    } else {
+	auth_context->remote_port = NULL;
+    }
+    return 0;
 }
+
 
 /*
  * This function overloads the keyblock field. It is only useful prior to

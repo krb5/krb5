@@ -1,3 +1,19 @@
+Mon May 01 15:56:32 1995  Chris Provenzano (proven@mit.edu)
+
+        * auth_con.c (krb5_auth_con_free()) :
+		Free all the data associated with the auth_context.
+
+	* auth_con.c (krb5_auth_con_setkey()) : Removed.
+	* mk_rep.c (mk_rep()),
+                The krb5_mk_rep() routine must always encode the data in
+                the keyblock of the ticket, not the subkey.
+
+	* cleanup.h, auth_con.c (krb5_auth_con_setports()) : Added.
+        * auth_con.h, mk_cred.c (mk_cred()), mk_priv.c (mk_priv()),
+	* mk_safe.c (mk_safe()), rd_cred.c (rd_cred()), 
+	* rd_priv.c (rd_priv()), rd_safe.c (rd_safe()) :
+		Changes to auth_context to better support full addresses.
+
 Sat Apr 29 00:09:40 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* srv_rcache.c (krb5_get_server_rcache): Fix fencepost error which

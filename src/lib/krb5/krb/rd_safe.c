@@ -24,7 +24,8 @@
  * krb5_rd_safe()
  */
 
-#include "k5-int.h"
+#include <k5-int.h>
+#include "cleanup.h"
 #include "auth_con.h"
 
 extern krb5_deltat krb5_clockskew;
@@ -188,10 +189,43 @@ krb5_rd_safe(context, auth_context, inbuf, outbuf, outdata)
         if ((keyblock = auth_context->remote_subkey) == NULL)
             keyblock = auth_context->keyblock;
 
-    if (retval = krb5_rd_safe_basic(context, inbuf, keyblock,
-      auth_context->local_addr, auth_context->remote_addr,
-      &replaydata, outbuf))
+{
+    krb5_address * premote_fulladdr = NULL;
+    krb5_address * plocal_fulladdr = NULL;
+    krb5_address remote_fulladdr;
+    krb5_address local_fulladdr;
+    CLEANUP_INIT(2);
+
+    if (auth_context->local_addr) {
+        if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
+                                 auth_context->local_port, &local_fulladdr))){
+            CLEANUP_PUSH(&local_fulladdr.contents, free);
+	    plocal_fulladdr = &local_fulladdr;
+        } else {
+	    return retval;
+        }
+    }
+
+    if (auth_context->remote_addr) {
+        if (!(retval = krb5_make_fulladdr(context, auth_context->remote_addr,
+                                 auth_context->remote_port, &remote_fulladdr))){
+            CLEANUP_PUSH(&remote_fulladdr.contents, free);
+	    premote_fulladdr = &remote_fulladdr;
+        } else {
+            CLEANUP_DONE();
+	    return retval;
+        }
+    }
+
+    if (retval = krb5_rd_safe_basic(context, inbuf, keyblock, plocal_fulladdr, 
+				    premote_fulladdr, &replaydata, outbuf)) {
+	CLEANUP_DONE();
 	return retval;
+    }
+
+    CLEANUP_DONE();
+}
+
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
 	krb5_donot_replay replay;

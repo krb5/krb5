@@ -8,6 +8,21 @@
  *
  * MODIFIED
  * $Log$
+ * Revision 5.10  1995/05/01 20:49:45  proven
+ *         * auth_con.c (krb5_auth_con_free()) :
+ * 		Free all the data associated with the auth_context.
+ *
+ * 	* auth_con.c (krb5_auth_con_setkey()) : Removed.
+ * 	* mk_rep.c (mk_rep()),
+ *                 The krb5_mk_rep() routine must always encode the data in
+ *                 the keyblock of the ticket, not the subkey.
+ *
+ * 	* cleanup.h, auth_con.c (krb5_auth_con_setports()) : Added.
+ *         * auth_con.h, mk_cred.c (mk_cred()), mk_priv.c (mk_priv()),
+ * 	* mk_safe.c (mk_safe()), rd_cred.c (rd_cred()),
+ * 	* rd_priv.c (rd_priv()), rd_safe.c (rd_safe()) :
+ * 		Changes to auth_context to better support full addresses.
+ *
  * Revision 5.9  1995/04/28 01:18:18  keithv
  * Fixes so that the Unix changes no longer breaks on the PC.
  *
@@ -36,6 +51,7 @@
  *
  */
 #include <k5-int.h>
+#include "cleanup.h"
 #include "auth_con.h"
 
 #include <stddef.h>           /* NULL */
@@ -285,18 +301,51 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
         }
     }
 
+{
+    krb5_address * premote_fulladdr = NULL;
+    krb5_address * plocal_fulladdr = NULL;
+    krb5_address remote_fulladdr;
+    krb5_address local_fulladdr;
+    CLEANUP_INIT(2);
+
+    if (auth_context->local_addr) {
+        if (!(retval = krb5_make_fulladdr(context, auth_context->local_addr,
+                                 auth_context->local_port, &local_fulladdr))) {
+            CLEANUP_PUSH(&local_fulladdr.contents, free);
+	    plocal_fulladdr = &local_fulladdr;
+        } else {
+            goto error;
+        }
+    }
+
+    if (auth_context->remote_addr) {
+        if (!(retval = krb5_make_fulladdr(context, auth_context->remote_addr,
+                                 auth_context->remote_port, &remote_fulladdr))){
+            CLEANUP_PUSH(&remote_fulladdr.contents, free);
+	    premote_fulladdr = &remote_fulladdr;
+        } else {
+            CLEANUP_DONE();
+            goto error;
+        }
+    }
+
     /* Setup creds structure */
     if (retval = krb5_mk_ncred_basic(context, ppcreds, ncred, keyblock,
-		     		     &replaydata, auth_context->local_addr, 
-				     auth_context->remote_addr, pcred))
-	goto cleanup_tickets;
+		     		     &replaydata, plocal_fulladdr, 
+				     premote_fulladdr, pcred)) {
+	CLEANUP_DONE();
+	goto error;
+    }
+
+    CLEANUP_DONE();
+}
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
 
         if (retval = krb5_gen_replay_name(context, auth_context->local_addr,
                                           "_forw", &replay.client)) 
-            goto cleanup_tickets;
+            goto error;
 
         replay.server = "";             /* XXX */
         replay.cusec = replaydata.usec;
@@ -304,7 +353,7 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
         if (retval = krb5_rc_store(context, auth_context->rcache, &replay)) {
             /* should we really error out here? XXX */
             krb5_xfree(replay.client);
-            goto cleanup_tickets;
+            goto error;
         }
         krb5_xfree(replay.client);
     }
@@ -312,7 +361,7 @@ krb5_mk_ncred(context, auth_context, ppcreds, ppdata, outdata)
     /* Encode creds structure */
     retval = encode_krb5_cred(pcred, ppdata);
 
-cleanup_tickets:
+error:
     if (retval) {
 	if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) 
 	 || (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE))

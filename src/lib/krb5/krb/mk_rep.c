@@ -43,7 +43,6 @@ krb5_mk_rep(context, auth_context, outbuf)
     krb5_data 		* outbuf;
 {
     krb5_error_code 	  retval;
-    krb5_keyblock	* keyblock;
     krb5_keytype 	  keytype;
     krb5_enctype 	  etype;
     krb5_ap_rep_enc_part  repl;
@@ -52,13 +51,8 @@ krb5_mk_rep(context, auth_context, outbuf)
     krb5_data 		* scratch;
     krb5_data 		* toutbuf;
 
-    if (auth_context->remote_subkey)
-	keyblock = auth_context->remote_subkey;
-    else
-	keyblock = auth_context->keyblock;
-
     /* verify a valid etype is available */
-    if (!valid_keytype(keytype = keyblock->keytype))
+    if (!valid_keytype(keytype = auth_context->keyblock->keytype))
 	return KRB5_PROG_KEYTYPE_NOSUPP;
 
     etype = krb5_keytype_array[keytype]->system->proto_enctype;
@@ -70,7 +64,7 @@ krb5_mk_rep(context, auth_context, outbuf)
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
 	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
 	(auth_context->local_seq_number == 0)) {
-	if (retval = krb5_generate_seq_number(context, keyblock,
+	if (retval = krb5_generate_seq_number(context, auth_context->keyblock,
                                               &auth_context->local_seq_number))
             return(retval);
     }
@@ -107,7 +101,7 @@ krb5_mk_rep(context, auth_context, outbuf)
     }
 
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, keyblock)) 
+    if (retval = krb5_process_key(context, &eblock, auth_context->keyblock)) 
 	goto cleanup_encpart;
 
     /* call the encryption routine */

@@ -47,7 +47,6 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 {
     krb5_error_code 	  retval;
     krb5_ap_rep 	* reply;
-    krb5_keyblock	* keyblock;
     krb5_encrypt_block 	  eblock;
     krb5_data 	 	  scratch;
 
@@ -73,13 +72,8 @@ krb5_rd_rep(context, auth_context, inbuf, repl)
 	return(ENOMEM);
     }
 
-    if (auth_context->local_subkey) 
-	keyblock = auth_context->local_subkey;
-    else
-	keyblock = auth_context->keyblock;
-
     /* do any necessary key pre-processing */
-    if (retval = krb5_process_key(context, &eblock, keyblock)) {
+    if (retval = krb5_process_key(context, &eblock, auth_context->keyblock)) {
 	goto errout;
     }
 
