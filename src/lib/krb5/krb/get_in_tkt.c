@@ -315,6 +315,8 @@ cleanup:
 	krb5_free_keyblock(decrypt_key);
     if (request.padata)
 	free(request.padata);
+    if (!addrs)
+	krb5_free_addresses(request.addresses);
     return retval;
     
     /*
@@ -336,8 +338,6 @@ cred_cleanup:
 	krb5_free_addresses(creds->addresses);
 	creds->addresses = 0;
     }
-    
-
-    
+    goto cleanup;
 }
 
