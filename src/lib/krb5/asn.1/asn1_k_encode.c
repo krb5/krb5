@@ -778,7 +778,7 @@ asn1_error_code asn1_encode_etype_info_entry(buf, val, retlen)
      return ASN1_MISSING_FIELD;
 
   if (val->length)
-	  asn1_addlenfield(val->length,val->salt,1,
+	  asn1_addlenfield((int) val->length,val->salt,1,
 			   asn1_encode_octetstring);
   asn1_addfield(val->etype,0,asn1_encode_integer);
   asn1_makeseq();

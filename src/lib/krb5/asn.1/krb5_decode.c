@@ -700,9 +700,9 @@ krb5_error_code decode_krb5_alt_method(code, rep)
   setup(free);
   alloc_field(*rep,krb5_alt_method);
   { begin_structure();
-    get_field((*rep)->method,0,asn1_decode_int);
+    get_field((int) (*rep)->method,0,asn1_decode_int);
     if (tagnum == 1) {
-	get_lenfield((*rep)->length,(*rep)->data,1,asn1_decode_octetstring);
+	get_lenfield((int) (*rep)->length,(*rep)->data,1,asn1_decode_octetstring);
     } else {
 	(*rep)->length = 0;
 	(*rep)->data = 0;

@@ -1,3 +1,8 @@
+Wed Sep 13 10:51:31 1995 Keith Vetter (keithv@fusion.com)
+
+        * asn1_k_decode.c, asn1_k_encode.c, krb5_dec.c, krb5_enc.c: 32
+		bit word being passed as an int.
+
 Wed Sep 20 11:50:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5_decode.c (setup_buf_only): Declare cleanup routine as

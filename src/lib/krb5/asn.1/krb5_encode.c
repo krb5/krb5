@@ -705,7 +705,7 @@ krb5_error_code encode_krb5_alt_method(rep, code)
 
   /* method-data[1]		OctetString OPTIONAL */
   if(rep->data != NULL && rep->length > 0)
-    krb5_addlenfield(rep->length,rep->data,1,asn1_encode_octetstring);
+    krb5_addlenfield((int) rep->length,rep->data,1,asn1_encode_octetstring);
 
   /* method-type[0]		Integer */
   krb5_addfield(rep->method,0,asn1_encode_integer);
