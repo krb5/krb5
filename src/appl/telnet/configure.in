@@ -5,7 +5,7 @@ dnl
 dnl from old libtelnet/configure.in, plus additional header & func checks
 dnl
 AC_REPLACE_FUNCS([strcasecmp strdup setsid strerror strftime getopt herror parsetos])
-AC_CHECK_FUNCS(setenv unsetenv getenv gettosbyname cgetent gettosbyname setupterm vsnprintf)
+AC_CHECK_FUNCS(setenv unsetenv getenv gettosbyname cgetent gettosbyname vsnprintf)
 AC_CHECK_HEADERS(stdlib.h string.h unistd.h arpa/nameser.h sys/select.h arpa/inet.h sys/filio.h curses.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/stream.h sys/utsname.h memory.h)
 if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   || test $ac_cv_func_getenv = no; then
@@ -56,6 +56,7 @@ LIBS="$LIBS -ltermcap",
   AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
 ))
 KRB5_AC_INET6
+AC_CHECK_FUNCS(setupterm)
 AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
 if test -z "$ac_termio"; then
 AC_CHECK_HEADER(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
