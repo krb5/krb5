@@ -20,6 +20,7 @@ static char SccsId[] = "@(#)pop_init.c  1.12    8/16/90";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include "popper.h"
 
 #ifdef KERBEROS
@@ -39,13 +40,10 @@ krb5_principal ext_client;
 char *client_name;
 #endif /* KRB5 */
 #endif /* KERBEROS */
-#ifdef BIND43
-#include <arpa/nameser.h>
-#include <resolv.h>
-#endif
 
 extern int      errno;
-
+int             sp = 0;             /*  Socket pointer */
+                                    /*  we use this later */
 /* 
  *  init:   Start a Post Office Protocol session
  */
@@ -64,7 +62,6 @@ char    **      argmessage;
     int                     len;
     extern char         *   optarg;
     int                     options = 0;
-    int                     sp = 0;             /*  Socket pointer */
     char                *   trace_file_name;
 
     /*  Initialize the POP parameter block */
@@ -188,9 +185,15 @@ char    **      argmessage;
         the POP parameter block */
     else {
 
-#ifndef BIND43
+#ifndef BIND43HACK
         p->client = ch->h_name;
 #else
+	/*
+	 * There's no reason for this. In any case, reset res options.
+	 */
+
+#       include <arpa/nameser.h>
+#       include <resolv.h>
 
         /*  Distrust distant nameservers */
         extern struct state     _res;
@@ -225,8 +228,13 @@ char    **      argmessage;
                 p->client = p->ipaddr;
             }
         }
-#endif BIND43
+	/*  restore bind state */
+        _res.options |= RES_DEFNAMES;
+
+#endif /* BIND43HACK */
     }
+
+    fcntl(sp, F_SETFL, SO_KEEPALIVE);
 
     /*  Create input file stream for TCP/IP communication */
     if ((p->input = fdopen(sp,"r")) == NULL){
@@ -260,10 +268,12 @@ char    **      argmessage;
 }
 
 
+
 authenticate(p, addr)
      POP     *p;
      struct sockaddr_in *addr;
 {
+
 #ifdef KERBEROS
 #ifdef KRB4
     Key_schedule schedule;
@@ -290,22 +300,9 @@ authenticate(p, addr)
 	    kdata.pinst, kdata.prealm, inet_ntoa(addr->sin_addr));
 #endif /* DEBUG */
 
-#endif /* KRB4 */
-#ifdef KRB5
-    krb5_error_code retval;
-    krb5_principal server;
-    register char *cp;
-    struct hostent *hp;
-    extern struct state     _res;
-    int sock = 0;			/* socket fd # */
+    strcpy(p->user, kdata.pname);
 
     krb5_init_ets();
-
-#ifdef BIND43
-    /*undo some damage*/
-    _res.options |= RES_DEFNAMES;
-#endif
-
 
     if (retval = krb5_sname_to_principal(p->myhost, "pop", TRUE, &server)) {
 	pop_msg(p, POP_FAILURE,
