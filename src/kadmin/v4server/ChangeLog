@@ -1,3 +1,8 @@
+Wed Jun 18 18:38:45 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_funcs.c (kadm_chg_srvtab): Remove extraneous macros that
+	were elaborate contortions to avoid using goto.
+
 Mon May 26 22:44:21 1997  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (OBJS): Build kadm_funcs.c again.

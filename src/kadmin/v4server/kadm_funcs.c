@@ -950,15 +950,13 @@ static void nuke_keyblocks(keyblocks, nkeys)
  * principal to a random key, which the admin server will return to
  * the client.
  */
-#define failsrvtab(code) {  syslog(LOG_ERR, "change_srvtab: FAILED changing '%s.%s' by '%s.%s@%s' (%s)", values->name, values->instance, rname, rinstance, rrealm, error_message(code)); return code; }
-
 int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     char *rname;		/* requestors name */
     char *rinstance;		/* requestors instance */
     char *rrealm;		/* requestors realm */
     Kadm_vals *values;
 {
-    int isnew, ret;
+    int isnew;
     krb5_principal inprinc;
     krb5_error_code retval;
     krb5_keyblock *keyblocks;
@@ -975,20 +973,26 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
 	}
     memset(&princ_ent, 0, sizeof (princ_ent)); /* XXX */
 
-    if (!check_access(rname, rinstance, rrealm, STABACL))
-	failsrvtab(KADM_UNAUTH);
-    if (wildcard(rname) || wildcard(rinstance))
-	failsrvtab(KADM_ILL_WILDCARD);
-    if ((ret = kadm_check_srvtab(values->name, values->instance)))
-	failsrvtab(ret);
+    if (!check_access(rname, rinstance, rrealm, STABACL)) {
+	retval = (krb5_error_code) KADM_UNAUTH;
+	goto err;
+    }
+    if (wildcard(rname) || wildcard(rinstance)) {
+	retval = (krb5_error_code) KADM_ILL_WILDCARD;
+	goto err;
+    }
+    retval = (krb5_error_code) kadm_check_srvtab(values->name,
+						 values->instance);
+    if (retval)
+	goto err;
 
     retval = krb5_425_conv_principal(kadm_context, values->name,
 				     values->instance,
 				     server_parm.krbrlm, &inprinc);
     if (retval)
-	failsrvtab(retval);
+	goto err;
     /*
-     * OK, get the entry
+     * OK, get the entry, and create it if it doesn't exist.
      */
     retval = kadm5_get_principal(kadm5_handle, inprinc, &princ_ent,
 				 KADM5_PRINCIPAL_NORMAL_MASK);
@@ -997,38 +1001,33 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
 	isnew = 1;
 	retval = krb5_copy_principal(kadm_context, inprinc,
 				     &princ_ent.principal);
-	if (retval) {
-	    krb5_free_principal(kadm_context, inprinc);
-	    failsrvtab(retval);
-	}
+	if (retval)
+	    goto err_princ;
 
 	princ_ent.attributes = KRB5_KDB_DISALLOW_ALL_TIX;
 
 	retval = kadm5_create_principal(kadm5_handle, &princ_ent,
 					KADM5_PRINCIPAL|KADM5_ATTRIBUTES,
 					dummybuf);
-	if (retval) {
-	    kadm5_free_principal_ent(kadm5_handle, &princ_ent);
-	    krb5_free_principal(kadm_context, inprinc);
-	    failsrvtab(retval);
-	}
+	if (retval)
+	    goto err_princ_ent;
 	break;
     case 0:
 	isnew = 0;
 	break;
     default:
-	krb5_free_principal(kadm_context, inprinc);
-	failsrvtab(retval);
+	goto err_princ;
 	break;
     }
+
     /* randomize */
     retval = kadm5_randkey_principal(kadm5_handle, inprinc,
 				     &keyblocks, &nkeys);
     if (retval) {
 	if (isnew)
-	    kadm5_free_principal_ent(kadm5_handle, &princ_ent);
-	krb5_free_principal(kadm_context, inprinc);
-	failsrvtab(retval);
+	    goto err_princ_ent;
+	else
+	    goto err_princ;
     }
 
     if (isnew) {
@@ -1037,10 +1036,8 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
 	retval = kadm5_modify_principal(kadm5_handle, &princ_ent,
 					KADM5_ATTRIBUTES);
 	kadm5_free_principal_ent(kadm5_handle, &princ_ent);
-	if (retval) {
-	    krb5_free_principal(kadm_context, inprinc);
-	    failsrvtab(retval);
-	}
+	if (retval)
+	    goto err_princ;
     }
 
     for (i = 0; i < nkeys; i++) {
@@ -1076,10 +1073,9 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     nuke_keyblocks(keyblocks, nkeys);
     retval = kadm5_get_principal(kadm5_handle, inprinc, &princ_ent,
 				 KADM5_PRINCIPAL_NORMAL_MASK);
-    krb5_free_principal(kadm_context, inprinc);
-    if (retval) {
-	failsrvtab(retval);
-    }
+    if (retval)
+	goto err_princ;
+
     values->exp_date = princ_ent.princ_expire_time;
     values->max_life = princ_ent.kvno; /* XXX kludge for backwards compat */
     memset(values->fields, 0, sizeof(values->fields));
@@ -1093,12 +1089,22 @@ int kadm_chg_srvtab(rname, rinstance, rrealm, values)
     SET_FIELD(KADM_DESKEY, values->fields);
 
     kadm5_free_principal_ent(kadm5_handle, &princ_ent);
+    krb5_free_principal(kadm_context, inprinc);
 
     syslog(LOG_INFO, "change_srvtab: service '%s.%s' %s by %s.%s@%s.",
 	   values->name, values->instance,
 	   isnew ? "created" : "changed",
 	   rname, rinstance, rrealm);
     return KADM_DATA;
-}
 
-#undef failsrvtab
+err_princ_ent:
+    kadm5_free_principal_ent(kadm5_handle, &princ_ent);
+err_princ:
+    krb5_free_principal(kadm_context, inprinc);
+err:
+    syslog(LOG_ERR,
+	   "change_srvtab: FAILED changing '%s.%s' by '%s.%s@%s' (%s)",
+	   values->name, values->instance,
+	   rname, rinstance, rrealm, error_message(retval));
+    return retval;
+}
