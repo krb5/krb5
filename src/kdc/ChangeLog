@@ -1,3 +1,8 @@
+Fri Nov 17 22:41:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_as_req.c (process_as_req): Removed extra eblock argument from
+		call to krb5_encode_kdc_rep.
+
 Mon Nov 13 19:40:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* kdc_util.h: Added new prototypes for return_padata() and

@@ -396,7 +396,7 @@ krb5_data **response;			/* filled in with a response packet */
     reply.enc_part.enctype = encrypting_key.enctype;
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart, 
-				  &eblock, &encrypting_key,  &reply, response);
+				  &encrypting_key,  &reply, response);
     memset((char *)encrypting_key.contents, 0, encrypting_key.length);
     krb5_xfree(encrypting_key.contents);
 
