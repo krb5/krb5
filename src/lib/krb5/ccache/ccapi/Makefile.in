@@ -11,7 +11,7 @@ STLIBOBJS 	= \
 	stdcc.o \
 	stdcc_util.o 
 
-OBJS 	= stdcc.${OBJEXT} stdcc_util.${OBJEXT}
+OBJS 	= stdcc.$(OBJEXT) stdcc_util.$(OBJEXT)
 
 SRCS 	= $(srcdir)/stdcc.c $(srcdir)/stdcc_util.c 
 
