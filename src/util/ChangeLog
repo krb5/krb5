@@ -1,5 +1,8 @@
 2000-06-30  Tom Yu  <tlyu@mit.edu>
 
+	* Makefile.in (all-unix, clean_unix): Removed util/db2 include
+	symlinking rules.
+
 	* Makefile.in (all-unix, clean_unix): Update for current geography
 	of util/db2; needs to be moved to util/db2/Makefile.in at some
 	point.
