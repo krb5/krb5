@@ -19,10 +19,11 @@ static char rcsid_princ_comp_c[] =
 #include <krb5/copyright.h>
 
 #include <krb5/krb5.h>
+#include <krb5/ext-proto.h>
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
-#endif min
+#endif /* min */
 
 krb5_boolean
 krb5_principal_compare(princ1, princ2)
