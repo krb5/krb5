@@ -244,7 +244,7 @@
     _krb5_read_password
     _krb5_prompter_posix
     _krb5_kuserok
-    _krb5_aname_to_localname    
+    _krb5_aname_to_localname
 	_krb5_build_principal_va
 	_krb5_rc_default
 	_krb5_rc_default_name
