@@ -260,17 +260,24 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
     int err;
     char portbuf[10], secportbuf[10];
 
-    Tprintf ("adding hostname %s, ports %d,%d\n", hostname,
-	     ntohs (port), ntohs (secport));
+    Tprintf ("adding hostname %s, ports %d,%d, family %d, socktype %d\n",
+	     hostname, ntohs (port), ntohs (secport),
+	     family, socktype);
 
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = family;
     hint.ai_socktype = socktype;
+#ifdef AI_NUMERICSERV
+    hint.ai_flags = AI_NUMERICSERV;
+#endif
     sprintf(portbuf, "%d", ntohs(port));
     sprintf(secportbuf, "%d", ntohs(secport));
     err = getaddrinfo (hostname, portbuf, &hint, &addrs);
-    if (err)
+    if (err) {
+	Tprintf ("\tgetaddrinfo(\"%s\", \"%s\", ...)\n\treturns %d: %s\n",
+		 hostname, portbuf, err, gai_strerror (err));
 	return translate_ai_error (err);
+    }
     anext = 0;
     for (a = addrs; a != 0 && err == 0; a = anext) {
 	anext = a->ai_next;
@@ -460,7 +467,8 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 					 SOCK_STREAM, family);
 	}
 	if (code) {
-	    Tprintf ("error %d returned from add_host_to_list\n", code);
+	    Tprintf ("error %d (%s) returned from add_host_to_list\n", code,
+		     error_message (code));
 	    if (hostlist)
 		profile_free_list (hostlist);
 	    if (masterlist)
@@ -495,6 +503,7 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 }
 #endif
 
+#ifdef KRB5_DNS_LOOKUP
 static krb5_error_code
 krb5_locate_srv_dns_1 (const krb5_data *realm,
 		       const char *service,
@@ -534,8 +543,9 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 				 (strcmp("_tcp", protocol)
 				  ? SOCK_DGRAM
 				  : SOCK_STREAM), family);
-	if (code)
+	if (code) {
 	    break;
+	}
 	if (entry == head) {
 	    free(entry->host);
 	    free(entry);
@@ -548,6 +558,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
     krb5int_free_srv_dns_data(head);
     return code;
 }
+#endif
 
 /*
  * Wrapper function for the two backends

@@ -1,3 +1,10 @@
+2004-11-15  Tom Yu  <tlyu@mit.edu>
+
+	* telnet.exp (telnet_test): Work around possible race condition
+	with client's resetting of terminal mode when returning from
+	interactive command mode.  Test whether requiring encryption
+	works.
+
 2004-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* rlogin.exp (start_rlogin_daemon, rlogin_test): Use portbase to

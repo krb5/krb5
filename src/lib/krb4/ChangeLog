@@ -1,3 +1,8 @@
+2004-12-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* RealmsConfig-glue.c (krb_get_krbhst): Check if DNS should be
+	used for getting KDC names before actually using it.
+
 2004-07-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* macsock.c: Deleted.

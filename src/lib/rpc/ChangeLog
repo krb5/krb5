@@ -1,3 +1,8 @@
+2004-11-18  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-unix): Install into KRB5_INCDIR/gssrpc,
+	rather than just KRB5_INCDIR.
+
 2004-10-25  Tom Yu  <tlyu@mit.edu>
 
 	* auth_gss.c (authgss_get_private_data): New function.
