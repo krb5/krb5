@@ -175,7 +175,7 @@ typedef unsigned char	u_char;
 #include <errno.h>
 #include "krb5.h"
 
-#ifdef NEED_SOCKETS
+#if 1 /* def NEED_SOCKETS */
 #include "port-sockets.h"
 #include "socket-utils.h"
 #else
@@ -468,7 +468,8 @@ krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 				 const krb5_data *, krb5_data *, int, int);
 krb5_error_code krb5int_sendto_udp (krb5_context, const krb5_data *,
-				    const struct addrlist *, krb5_data *);
+				    const struct addrlist *, krb5_data *,
+				    struct sockaddr *, socklen_t *);
 krb5_error_code krb5int_sendto_tcp (krb5_context context, const krb5_data *,
 				    const struct addrlist *, krb5_data *);
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
@@ -1571,7 +1572,8 @@ typedef struct _krb5int_access {
 				   unsigned int icount, const krb5_data *input,
 				   krb5_data *output);
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
-				   const struct addrlist *, krb5_data *reply);
+				   const struct addrlist *, krb5_data *reply,
+				   struct sockaddr *, socklen_t *);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

@@ -1,3 +1,11 @@
+2002-07-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h: Always include socket support headers; don't check
+	NEED_SOCKETS.
+	(krb5int_sendto_udp): Update prototype.
+	(struct _krb5int_access): Update sendto_udp field declaracion to
+	match krb5int_sendto_udp.
+
 2002-07-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* port-sockets.h (SOCKET_WRITEV) [!_WIN32]: Use TMP after setting

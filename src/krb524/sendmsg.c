@@ -108,7 +108,7 @@ krb524_sendto_kdc (context, message, realm, reply)
     if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    retval = internals.sendto_udp (context, message, &al, reply);
+    retval = internals.sendto_udp (context, message, &al, reply, 0, 0);
     internals.free_addrlist (&al);
     return retval;
 }

@@ -108,7 +108,8 @@ krb5_sendto_kdc (context, message, realm, reply, use_master, tcp_only)
 	&& message->length < 1500
 	&& ! krb5_locate_kdc(context, realm, &addrs, use_master, SOCK_DGRAM)) {
 	if (addrs.naddrs > 0) {
-	    retval = krb5int_sendto_udp (context, message, &addrs, reply);
+	    retval = krb5int_sendto_udp (context, message, &addrs, reply,
+					 0, 0);
 	    krb5int_free_addrlist (&addrs);
 	    if (retval == 0)
 		return 0;
@@ -173,7 +174,8 @@ static void print_fdsets (FILE *, fd_set *, fd_set *, fd_set *, int);
 
 krb5_error_code
 krb5int_sendto_udp (krb5_context context, const krb5_data *message,
-		    const struct addrlist *addrs, krb5_data *reply)
+		    const struct addrlist *addrs, krb5_data *reply,
+		    struct sockaddr *localaddr, socklen_t *localaddrlen)
 {
     int host, i;
     unsigned int timeout;
@@ -323,6 +325,15 @@ krb5int_sendto_udp (krb5_context context, const krb5_data *message,
 		reply->length = cc;
 		retval = 0;
 		dfprintf((stderr, "got answer on fd %d\n", socklist[host]));
+		if (localaddr != 0 && localaddrlen != 0 && *localaddrlen > 0) {
+		    if (getsockname(socklist[host], localaddr, localaddrlen) == SOCKET_ERROR) {
+			/* Don't report it, just go on.  */
+#ifdef DEBUG
+			dperror("getsockname");
+#endif
+			*localaddrlen = 0;
+		    }
+		}
 		goto out;
 	    } else if (nready == 0) {
 		/* timeout */
