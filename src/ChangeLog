@@ -3,7 +3,8 @@
 	* aclocal.m4 (CHOOSE_ET, CHOOSE_SS): New macros.
 	(CONFIG_RULES): Invoke them.
 	* configure.in: Configure util/et and util/ss only if they're
-	going to be used.
+	going to be used.  Configure lib/krb4 and krb524 only if KRB4_LIB
+	is non-empty; this may not be right for "--with-krb4=/some/dir".
 
 2002-08-26  Ezra Peisach  <epeisach@bu.edu>
 

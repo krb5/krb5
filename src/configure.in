@@ -86,7 +86,15 @@ fi
 if test "$SS_VERSION" = k5 ; then
   AC_CONFIG_SUBDIRS(util/ss)
 fi
-AC_CONFIG_SUBDIRS(util/profile util/pty util/db2 include lib/crypto lib/krb5 lib/des425 lib/krb4 lib/kdb lib/gssapi lib/rpc lib/kadm5 krb524 kdc kadmin slave clients appl tests)
+AC_CONFIG_SUBDIRS(util/profile util/pty util/db2 include lib/crypto lib/krb5 lib/des425)
+if test -n "$KRB4_LIB"; then
+  AC_CONFIG_SUBDIRS(lib/krb4)
+fi
+AC_CONFIG_SUBDIRS(lib/kdb lib/gssapi lib/rpc lib/kadm5)
+if test -n "$KRB4_LIB"; then
+  AC_CONFIG_SUBDIRS(krb524)
+fi
+AC_CONFIG_SUBDIRS(kdc kadmin slave clients appl tests)
 AC_OUTPUT_COMMANDS([chmod +x krb5-config])
 AC_OUTPUT_COMMANDS([echo timestamp > krb5-stamp-h])
 K5_GEN_FILE(krb5-config)
