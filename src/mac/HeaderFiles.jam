@@ -190,7 +190,7 @@ Cp	"$(GSSKRB5_TEMP_DIR)/GSS/gssapi.h" : "$(GSSKRB5_TEMP_DIR)/gssapi.h" ;
 
 Mkdir "$(GSSKRB5_TEMP_DIR)/Kerberos5" ;
 DEPENDS "$(GSSKRB5_TEMP_DIR)/Kerberos5/krb5.h" : "$(GSSKRB5_TEMP_DIR)/Kerberos5" ;
-Cp	"$(GSSKRB5_TEMP_DIR)/Kerbesos5/krb5.h" : "$(GSSKRB5_TEMP_DIR)/krb5.h" ;
+Cp	"$(GSSKRB5_TEMP_DIR)/Kerberos5/krb5.h" : "$(GSSKRB5_TEMP_DIR)/krb5.h" ;
 
 Mkdir "$(GSSKRB5_TEMP_DIR)/KerberosProfile" ;
 DEPENDS "$(GSSKRB5_TEMP_DIR)/KerberosProfile/profile.h" : "$(GSSKRB5_TEMP_DIR)/KerberosProfile" ;
