@@ -108,9 +108,10 @@ char copyright[] =
 
 #ifdef POSIX_TERMIOS
 #include <termios.h>
-#ifdef _AIX
-#include <termio.h>
+#ifndef CNUL
+#define CNUL (char) 0
 #endif
+
 #endif
 
 #ifdef _IBMR2
@@ -528,7 +529,7 @@ int main(argc, argv)
 #endif
 		int read_long_pw_string();
 #endif /* KRB4 */
-#if defined(TIOCSETD)
+#if defined(TIOCSETD)&&(!defined(POSIX_TERMIOS))
 		ioctlval = 0;
 		(void)ioctl(0, TIOCSETD, (char *)&ioctlval);
 #endif
@@ -1335,8 +1336,8 @@ void doremoteterm(tp)
 #ifdef POSIX_TERMIOS
  	/* set all standard echo, edit, and job control options */
 	/* but leave any extensions */
- 	tp->c_lflag |= ECHO|ECHOE|ECHOK|ICANON|ISIG;
-	tp->c_lflag &= ~(NOFLSH|TOSTOP|IEXTEN);
+ 	tp->c_lflag |= ECHO|ECHOE|ECHOK|ICANON|ISIG|IEXTEN;
+	tp->c_lflag &= ~(NOFLSH|TOSTOP);
 #ifdef ECHOCTL
 	/* Not POSIX, but if we have it, we probably want it */
  	tp->c_lflag |= ECHOCTL;

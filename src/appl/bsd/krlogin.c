@@ -67,9 +67,10 @@ char copyright[] =
 
 #ifdef POSIX_TERMIOS
 #include <termios.h>
-#ifdef _AIX
-#include <termio.h>
+#ifndef CNUL
+#define CNUL (char) 0
 #endif
+
 #else /* POSIX_TERMIOS */
 #include <sgtty.h>
 #endif /* POSIX_TERMIOS */

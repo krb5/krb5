@@ -1,9 +1,33 @@
+Mon Jul 31 17:07:59 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* login.c (main): Don't call TIOCSETD under Posix.
+	 * Include iexten in terminal flags.
+
+
+	* krlogin.c:  Don't include termio.h here either.
+
+	* login.c: Remove special casing of AIX to include termio.h; it
+        breaks almost all terminal handling, because it's the
+        compatibility file for applications written for the RT.  Instead,
+        just define CNUL if not already defined by ttychars.h
+
+
 Sat Jul 29 04:37:33 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* configure.in: Don't link with -lkadm
 
+
+Fri Jul 28 16:49:02 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (LOCAL_LIBRARIES): include -lpty; also included in
+        DEPLOCAL_LIBRARIES.
+
+	* krlogind.c (doit): Use pipe for synchronization so pty can be opened in slave.  Use libpty for pty handling.
+	(cleanup):  Use pty_cleanup to do most work.
+
 Thu Jul 27 15:02:03 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krshd.c - Check for interrupted select.  Should fix bug #1555.
+
 
 Thu Jul 13 17:49:54 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 

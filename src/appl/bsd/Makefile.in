@@ -6,6 +6,9 @@ SETENVOBJ=@SETENVOBJ@
 LOGINLIBS = @LOGINLIBS@
 LIBOBJS=@LIBOBJS@
 
+LOCAL_LIBRARIES=-lpty
+DEPLOCAL_LIBRARIES=$(TOPLIBD)/../util/pty/libpty.a
+
 SRCS= krcp.c krlogin.c krsh.c kcmd.c forward.c logutil.c $(SETENVSRC) \
 	login.c krshd.c krlogind.c
 OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o logutil.o $(SETENVOBJ) \

@@ -210,6 +210,7 @@ struct winsize {
      
 #include "krb5.h"
 #include <kerberosIV/krb.h>
+#include <libpty.h>
 
 int auth_sys = 0;	/* Which version of Kerberos used to authenticate */
 
@@ -508,7 +509,8 @@ void doit(f, fromp)
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
-    
+    int retval;
+int syncpipe[2];
     netf = -1;
     alarm(60);
     read(f, &c, 1);
@@ -518,6 +520,10 @@ void doit(f, fromp)
     }
 
     alarm(0);
+    /* Initialize syncpipe */
+    if (pipe( syncpipe ) < 0 )
+	fatalperror ( f , "");
+    
 
 #ifdef POSIX_SIGNALS
     /* Initialize "sa" structure. */
@@ -572,76 +578,19 @@ void doit(f, fromp)
 #endif
     
     write(f, "", 1);
-    if (getpty(&p,line))
-      fatal(f, "Out of ptys");
+    if (retval = pty_getpty(&p,line)) {
+	com_err(progname, retval, "while getting master pty");
+	exit(2);
+    }
+    
     Pfd = p;
 #ifdef TIOCSWINSZ
     (void) ioctl(p, TIOCSWINSZ, &win);
 #endif
     
-#ifdef VHANG_FIRST
-    vfd = open(line, O_RDWR);
-    if (vfd < 0)
-      fatalperror(f, line);
-#ifdef NOFCHMOD
-    if (chmod(line, 0))
-      fatalperror(f, line);
-#else
-    if (fchmod(vfd, 0))
-      fatalperror(f, line);
-#endif
-    if (f == 0) {  /* if operating standalone, do not reset tty!! */
-#ifdef POSIX_SIGNALS
-	sa.sa_handler = SIG_IGN;
-	(void) sigaction(SIGHUP, &sa, (struct sigaction *)0);
-	vhangup();
-	sa.sa_handler = SIG_DFL;
-	(void) sigaction(SIGHUP, &sa, (struct sigaction *)0);
-#else
-	signal(SIGHUP, SIG_IGN);
-	vhangup();
-	signal(SIGHUP, SIG_DFL);
-#endif
-    }
-#endif /* VHANG_FIRST */
 
-#ifdef TIOCNOTTY
-      {
-        int con_fd;
-        /* Void tty association first */
-        if ((con_fd = open("/dev/tty", O_RDWR)) >= 0) {
-          ioctl(con_fd, TIOCNOTTY, 0);
-          close(con_fd);
-        }
-      }
-#endif
 
-#ifdef HAVE_SETSID
-    (void) setsid();
-#endif
 
-#ifdef ultrix
-    /* The Ultrix (and other BSD tty drivers) require the process group
-     * to be zero, in order to acquire the new tty as a controlling tty. */
-    (void) setpgrp(0, 0);
-#endif
-
-    t = open(line, O_RDWR);
-    if (t < 0)
-      fatalperror(f, line);
-
-#ifdef ultrix
-    setpgrp(0, getpid());
-#endif
-	
-#if defined(VHANG_FIRST) && !defined(VHANG_NO_CLOSE)
-    (void) close(vfd);
-#endif
-
-#ifdef TIOCSCTTY
-    if(ioctl(t, TIOCSCTTY, 0) < 0) /* set controlling tty */
-      fatalperror(f, "setting controlling tty");
-#endif
 
 #ifdef POSIX_SIGNALS
     sa.sa_handler = cleanup;
@@ -660,48 +609,14 @@ void doit(f, fromp)
 #else
 	struct sgttyb b;
 #endif /* POSIX_TERMIOS */
-
-#ifdef HAVE_STREAMS
-#ifdef HAVE_LINE_PUSH
-	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
-	if (line_push(t) < 0)
-	  fatalperror(f, "IPUSH");
-#else
-#ifdef sun
-	while (ioctl (t, I_POP, 0) == 0); /*Clear out any old lined's*/
-	if (ioctl(t, I_PUSH, "ptem") < 0)
-	  fatalperror(f, "IPUSH-ptem");
-	if (ioctl(t, I_PUSH, "ldterm") < 0)
-	  fatalperror(f, "IPUSH-ldterm");
-	if (ioctl(t, I_PUSH, "ttcompat") < 0)
-	  fatalperror(f, "IPUSH-ttcompat");
-#endif /* sun */
-#endif /* HAVE_LINE_PUSH */
-#endif /* HAVE_STREAMS */
+	if ( retval = pty_open_slave(line, &t)) {
+	    com_err(progname,retval, "while opening slave");
+	    exit(1);
+	}
 	
-	/*
-	 * Under Ultrix 3.0, the pgrp of the slave pty terminal
-	 * needs to be set explicitly.  Why rlogind works at all
-	 * without this on 4.3BSD is a mystery.
-	 */
-	close(f), close(p);
-	dup2(t, 0), dup2(t, 1), dup2(t, 2);
-	if (t > 2)
-	  close(t);
-
-#ifdef GETPGRP_ONEARG
-	pid = getpgrp(getpid());
-#else
-	pid = getpgrp();
-#endif
-
-#ifdef TIOCSPGRP
-	ioctl(0, TIOCSPGRP, &pid);
-#endif
 
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
-	tcsetpgrp(0, pid);
-	tcgetattr(0,&new_termio);
+	tcgetattr(t,&new_termio);
 	new_termio.c_lflag &=  ~(ICANON|ECHO|ISIG);
 	/* so that login can read the authenticator */
 	new_termio.c_iflag &= ~(IXON|IXANY|BRKINT|INLCR|ICRNL|ISTRIP);
@@ -709,11 +624,11 @@ void doit(f, fromp)
 	/* new_termio.c_oflag = 0; */
 	new_termio.c_cc[VMIN] = 1;
 	new_termio.c_cc[VTIME] = 0;
-	tcsetattr(0,TCSANOW,&new_termio);
+	tcsetattr(t,TCSANOW,&new_termio);
 #else
-	(void)ioctl(0, TIOCGETP, &b);
+	(void)ioctl(t, TIOCGETP, &b);
 	b.sg_flags = RAW|ANYP;
-	(void)ioctl(0, TIOCSETP, &b);
+	(void)ioctl(t, TIOCSETP, &b);
 #endif /* POSIX_TERMIOS */
 
 	pid = 0;			/*reset pid incase exec fails*/
@@ -726,7 +641,15 @@ void doit(f, fromp)
 	 **      and we don't get the right tty affiliation, and
 	 **      other kinds of hell breaks loose ...
 	 */
-	(void) write(1, &c, 1);
+	(void) write(syncpipe[1], &c, 1);
+	(void) close(syncpipe[1]);
+	(void) close(syncpipe[0]);
+		
+	close(f), close(p);
+	dup2(t, 0), dup2(t, 1), dup2(t, 2);
+	if (t > 2)
+	  close(t);
+
 	
 #if defined(sysvimp)
 	setcompat (COMPAT_CLRPGROUP | (getcompat() & ~COMPAT_BSDTTY));
@@ -779,7 +702,7 @@ void doit(f, fromp)
 
 	    ent.ut_pid = getpid();
 	    ent.ut_type = LOGIN_PROCESS;
-	    update_utmp(&ent, "rlogin", line, ""/*host*/);
+	    pty_update_utmp(&ent, "rlogin", line, ""/*host*/);
 	}
 #endif
 
@@ -802,14 +725,16 @@ void doit(f, fromp)
      **      turning off echo on the slave side ...
      **      The master blocks here until it reads a byte.
      */
-    close(t);
-    if (read(p, &c, 1) != 1) {
+    
+    if (read(syncpipe[0], &c, 1) != 1) {
 	/*
 	 * Problems read failed ...
 	 */
 	sprintf(buferror, "Cannot read slave pty %s ",line);
 	fatalperror(p,buferror);
     }
+    close(syncpipe[0]);
+    close(syncpipe[1]);
     
 #if defined(KERBEROS) 
     if (do_encrypt) {
@@ -1047,25 +972,7 @@ protocol(f, p)
 
 krb5_sigtype cleanup()
 {
-    struct utmp ut;
-    
-#ifndef NO_UT_PID
-    ut.ut_pid = 0;
-    ut.ut_type = DEAD_PROCESS;
-#endif
-    update_utmp(&ut, "", line, (char *)0);
-    
-    (void)chmod(line, 0666);
-    (void)chown(line, 0, 0);
-#ifndef HAVE_STREAMS
-    line[strlen("/dev/")] = 'p';
-    (void)chmod(line, 0666);
-    (void)chown(line, 0, 0);
-#endif
-#ifdef VHANG_LAST
-    close(Pfd);
-    vhangup();
-#endif
+pty_cleanup (line, pid, 1);
     shutdown(netf, 2);
     exit(1);
 }
