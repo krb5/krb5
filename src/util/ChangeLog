@@ -1,3 +1,8 @@
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix, clean-unix): Add new rule to build fake
+	root directory for _RLD_ROOT hacks.
+
 2003-12-05  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (DL_COMPILE, DL_COMPILE_TAIL): New variables to

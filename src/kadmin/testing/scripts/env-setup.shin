@@ -22,12 +22,14 @@ PROG_LIBPATH=-L@RBUILD@/lib
 BUILDTOP=@RBUILD@
 # XXX kludge!
 PROG_RPATH=@RBUILD@/lib
+# XXX more kludge!
+FAKEDEST=@RBUILD@/util/fakedest
 # This converts $(TOPLIBD) to $TOPLIBD
 cat > /tmp/env_setup$$ <<\EOF
 @KRB5_RUN_ENV@
 EOF
 
-foo=`sed -e 's/(//g' -e 's/)//g' /tmp/env_setup$$`
+foo=`sed -e 's/(//g' -e 's/)//g' -e 's/\\\$\\\$/\$/g' /tmp/env_setup$$`
 eval $foo
 
 # This will get put in setup.csh for convenience
