@@ -269,6 +269,8 @@ void krb5_free_authenticator
 	PROTOTYPE((krb5_authenticator * ));
 void krb5_free_address
 	PROTOTYPE((krb5_address ** ));
+void krb5_free_addr
+	PROTOTYPE((krb5_address * ));
 void krb5_free_authdata
 	PROTOTYPE((krb5_authdata ** ));
 void krb5_free_enc_tkt_part
