@@ -30,7 +30,7 @@ krb5_principal_compare(princ1, princ2)
 krb5_const_principal princ1;
 krb5_const_principal princ2;
 {
-    register krb5_data **p1, **p2;
+    register const krb5_data **p1, **p2;
 
     for (p1 = princ1, p2 = princ2; *p1  && *p2; p1++, p2++)
 	if (strncmp((*p1)->data, (*p2)->data, min((*p1)->length,
