@@ -38,7 +38,7 @@
 #if defined(_MSDOS) || defined(_WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
-#define	DEFAULT_KEYTAB_NAME	"FILE:%s\\v5srvtab"
+#define	DEFAULT_KEYTAB_NAME	"FILE:%s\\krb5kt"
 #else /* !_WINDOWS */
 #define DEFAULT_PROFILE_PATH	"/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define	DEFAULT_KEYTAB_NAME	"FILE:/etc/krb5.keytab"

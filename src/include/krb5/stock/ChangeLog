@@ -1,3 +1,8 @@
+Wed Nov 13 23:58:30 1996  Tom Yu  <tlyu@mit.edu>
+
+	* osconf.h (DEFAULT_KEYTAB_NAME): Change DOS version of this to
+	FILE:%s\\krb5kt to match "krb5cc".
+
 Tue Nov 12 18:40:08 1996  Tom Yu  <tlyu@mit.edu>
 
 	* osconf.h: Change DEFAULT_KEYTAB_NAME to /etc/krb5.keytab under
