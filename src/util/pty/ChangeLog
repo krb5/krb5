@@ -1,3 +1,11 @@
+Fri Aug  4 13:59:11 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* libpty.h (pty_cleanup): Fix argument type of pid to patch that
+		used in the C file.  Include <utmpx.h> if present.  Only
+		include <utmp.h> if it is present.
+	
+	* configure.in: Check for utmp.h and utmpx.h
+
 Fri Aug  4 00:59:20 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* Makefile.in: use libupdate so to not get multiple copies of
