@@ -1,0 +1,63 @@
+#!/bin/sh
+#
+# Kerberos V5 build tool.  Builds Kerberos V5 using a specified 
+# configuration file to control which support programs are used to
+# compile it, which options are given to configure, etc.
+#
+
+CONFIG=$1
+BUILD_PATH=./build-path
+
+if test ${CONFIG}x = x ]; then
+	echo "You must specify an build configuration file!"
+	exit 1
+fi
+
+
+SRCDIR=`sed -e '/^SRCDIR:/!d' -e 's/SRCDIR: *//' $CONFIG`
+CONFIG_OPTS=`sed -e '/^CONFIG_OPTS:/!d' -e 's/CONFIG_OPTS: *//' $CONFIG`
+CC=`sed -e '/^CC:/!d' -e 's/CC: *//' $CONFIG`
+CC_OPTS=`sed -e '/^CC_OPTS:/!d' -e 's/CC_OPTS: *//' $CONFIG`
+KRB4=`sed -e '/^KRB4:/!d' -e 's/KRB4: *//' $CONFIG`
+
+CMD_PROGS=`cat $CONFIG | sed -e '1,/BEGIN CMD_LIST/d' \
+			       -e '/END CMD_LIST/,$d' \
+			       -e '/^$/d' -e '/^\#/d'`
+
+if test ${CC}x != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-cc=${CC}"
+fi
+
+if test ${CC_OPTS}x != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-ccopts=${CC_OPTS}"
+fi
+
+if test ${KRB4}x != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-krb4=${KRB4}"
+fi
+
+/bin/rm -rf $BUILD_PATH
+mkdir $BUILD_PATH
+cd $BUILD_PATH
+
+for i in $CMD_PROGS
+do
+	ln -s $i
+done
+
+cd ..
+
+PATH=`pwd`/$BUILD_PATH
+export PATH
+echo "Build path is $PATH"
+
+$SRCDIR/configure $CONFIG_OPTS
+
+echo "Configuration done.  Building using the command:"
+echo "	(setenv PATH $PATH; make)"
+echo " "
+
+make
