@@ -1,4 +1,9 @@
 
+Wed Jul 12 12:25:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Temporarily add --with-kdb4 to select building of
+		kdb4 directory.  Default is disabled.
+
+
 Thu Jun 15 17:57:26 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* configure.in - Do not build K4 directories if we're not supposed to.
 		Remove LinkFile() logic and put it in each subdirectory.
