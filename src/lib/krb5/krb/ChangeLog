@@ -1,3 +1,12 @@
+
+Thu May 11 18:30:21 1995  Chris Provenzano (proven@mit.edu)
+
+	* mk_cred.c (krb5_mk_cred()), mk_priv.c (krb5_mk_priv()),
+	* mk_safe.c (krb5_mk_safe()), rd_cred.c (krb5_rd_cred()),
+	* rd_priv.c (krb5_rd_prev()), rd_safe.c (krb5_rd_safe()):
+		Pass the contents pointer returned from krb5_make_fulladdr()
+		to free() not the address of the pointer.
+
 Tue May  9 08:34:21 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean): Remove t_kerb and t_kerb.o
