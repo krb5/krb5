@@ -12,6 +12,7 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <gssrpc/rpc.h>
 #include <arpa/inet.h>  /* inet_ntoa */
 #include <gssapi/gssapi.h>
@@ -44,12 +45,20 @@ void usage()
      exit(1);
 }
 
+void handlesig(void)
+{
+    exit(0);
+}
+
 main(int argc, char **argv)
 {
      int c, prot;
      auth_gssapi_name names[2];
      register SVCXPRT *transp;
      extern int optind;
+#ifdef POSIX_SIGNALS
+     struct sigaction sa;
+#endif     
 
      names[0].name = SERVICE_NAME;
      names[0].type = (gss_OID) gss_nt_service_name;
@@ -115,6 +124,18 @@ main(int argc, char **argv)
      _svcauth_gssapi_set_log_badverf_func(rpc_test_badverf, NULL);
      _svcauth_gssapi_set_log_miscerr_func(log_miscerr, NULL);
 
+#ifdef POSIX_SIGNALS
+     (void) sigemptyset(&sa.sa_mask);
+     sa.sa_flags = 0;
+     sa.sa_handler = handlesig;
+     (void) sigaction(SIGHUP, &sa, NULL);
+     (void) sigaction(SIGINT, &sa, NULL);
+     (void) sigaction(SIGTERM, &sa, NULL);
+#else
+     signal(SIGHUP, handlesig);
+     signal(SIGINT, handlesig);
+     signal(SIGTERM, handlesig);
+#endif
      printf("running\n");
      
      svc_run();
