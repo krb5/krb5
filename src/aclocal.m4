@@ -953,6 +953,9 @@ if test -n "$tcl_ok_conf" ; then
   fi
   CPPFLAGS="$old_CPPFLAGS"
   tcl_lib=yes
+else
+  # If we read a tclConfig.sh file, it probably set this.
+  TCL_LIBS=
 fi  
 AC_SUBST(TCL_INCLUDES)
 AC_SUBST(TCL_LIBS)
@@ -1145,6 +1148,7 @@ AC_SUBST(LIBLIST)
 AC_SUBST(LIBLINKS)
 AC_SUBST(MAKE_SHLIB_COMMAND)
 AC_SUBST(SHLIB_EXPFLAGS)
+AC_SUBST(SHLIB_EXPORT_FILE_DEP)
 AC_SUBST(INSTALL_SHLIB)
 AC_SUBST(STLIBEXT)
 AC_SUBST(SHLIBEXT)
