@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 37;
+	objectVersion = 38;
 	objects = {
 		F52B1677022FD39801120112 = {
 			isa = PBXFileReference;
@@ -4234,7 +4234,7 @@
 			refType = 4;
 		};
 		F5CFD5E6022D8A9901120112 = {
-			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Errors.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
+			buildArgumentsString = "\"-sJAMFILE=$(SRCROOT)/../Scripts/Kerberos5Errors.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -4245,7 +4245,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /usr/bin/jam;
+			buildToolPath = "./../../../Common/Scripts/jam-2.4";
 			dependencies = (
 			);
 			isa = PBXLegacyTarget;
@@ -4359,7 +4359,7 @@
 			refType = 4;
 		};
 		F5CFD629022D922C01120112 = {
-			buildArgumentsString = "-d1 JAMFILE=\"$(SRCROOT)/../Scripts/Kerberos5Headers.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
+			buildArgumentsString = "\"-sJAMFILE=$(SRCROOT)/../Scripts/Kerberos5Headers.jam\" \"-sSRCROOT=$(SRCROOT)\" \"-sSYMROOT=$(SYMROOT)\" \"-sOBJROOT=$(OBJROOT)\" \"-sDSTROOT=$(DSTROOT)\" \"-sOTHER_CFLAGS=$(OTHER_CFLAGS)\" \"-sOPTIMIZATION_CFLAGS=$(OPTIMIZATION_CFLAGS)\" $(ACTION)";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -4370,7 +4370,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /usr/bin/jam;
+			buildToolPath = "./../../../Common/Scripts/jam-2.4";
 			dependencies = (
 				F5CFD62A022D922C01120112,
 			);
