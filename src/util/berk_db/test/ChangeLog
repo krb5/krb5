@@ -1,3 +1,11 @@
+
+Tue Jun 13 16:00:18 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* dbtest.c - Check for HAVE_INDEX.  If we have it, then use it,
+		otherwise use strchr.
+	* configure.in - check for index(3).
+	* Makefile.in - check for /bin/sh5, if present, use it because some
+		system's /bin/sh doesn't understand some Bourne shell syntax.
+
 Sun Jun 11 02:33:32 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: fix intial value of CDEFS_INCLUDE so that make

@@ -83,6 +83,11 @@ int ofd = STDOUT_FILENO;		/* Standard output fd. */
 DB *XXdbp;				/* Global for gdb. */
 int XXlineno;				/* Fast breakpoint for gdb. */
 
+/* index(3) not present on sysV machines */
+#ifndef	HAVE_INDEX
+#define	index	strchr
+#endif	/* HAVE_INDEX */
+
 int
 main(argc, argv)
 	int argc;
