@@ -239,10 +239,12 @@ krb_rd_req(authent,service,instance,from_addr,ad,fn)
 			     fn,(char *)skey) == 0) {
 		if ((status = krb_set_key((char *)skey,0)))
 			return(status);
+#ifdef KRB4_USE_KEYTAB
 	} else if (krb54_get_service_keyblock(service,instance,
 		       realm, (int) s_kvno,fn, &keyblock) == 0) {
 		krb_set_key_krb5(krb5__krb4_context, &keyblock);
 		krb5_free_keyblock_contents(krb5__krb4_context, &keyblock);
+#endif
 	} else
 		return(RD_AP_UNDEC);
 	
