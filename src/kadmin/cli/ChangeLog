@@ -1,3 +1,11 @@
+2000-02-27  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.c (kadmin_parse_princ_args): Remove keepold argument to
+	match new kadm5 library.
+	(kadmin_addprinc_usage): Remove keepold argument from usage
+	summary.
+	(kadmin_addprinc): Update kadm5 calls to no longer use keepold.
+
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.c (kadmin_modprinc): Complain if -pw option is given,

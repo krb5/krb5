@@ -319,7 +319,6 @@ create_principal3_1(cprinc3_arg *arg, struct svc_req *rqstp)
     } else {
 	 ret.code = kadm5_create_principal_3((void *)handle,
 					     &arg->rec, arg->mask,
-					     arg->keepold,
 					     arg->n_ks_tuple,
 					     arg->ks_tuple,
 					     arg->passwd);

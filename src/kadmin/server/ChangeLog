@@ -1,3 +1,7 @@
+2000-02-27  Tom Yu  <tlyu@mit.edu>
+
+	* server_stubs.c (create_principal3_1): Remove keepold argument.
+
 2000-02-18  Tom Yu  <tlyu@mit.edu>
 
 	* kadm_rpc_svc.c (kadm_1): Update to include new api functions.

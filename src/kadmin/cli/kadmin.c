@@ -668,14 +668,13 @@ void kadmin_cpw(argc, argv)
 }
 
 int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
-    keepold, ks_tuple, n_ks_tuple, caller)
+			    ks_tuple, n_ks_tuple, caller)
     int argc;
     char *argv[];
     kadm5_principal_ent_t oprinc;
     long *mask;
     char **pass;
     int *randkey;
-    int *keepold;
     krb5_key_salt_tuple **ks_tuple;
     int *n_ks_tuple;
     char *caller;
@@ -689,7 +688,6 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     *pass = NULL;
     *n_ks_tuple = 0;
     *ks_tuple = NULL;
-    *keepold = 0;
     time(&now);
     *randkey = 0;
     for (i = 1; i < argc - 1; i++) {
@@ -812,10 +810,6 @@ int kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    }
 	    continue;
 	}
-	if (!strcmp("-keepold", argv[i])) {
-	    ++*keepold;
-	    continue;
-	}
 	for (j = 0; j < sizeof (flags) / sizeof (struct pflag); j++) {
 	    if (strlen(argv[i]) == flags[j].flaglen + 1 &&
 		!strcmp(flags[j].flagname,
@@ -856,7 +850,7 @@ void kadmin_addprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife]\n\t\t[-keepold] [-e keysaltlist]\n\t\t[{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "%s%s%s",
 	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
@@ -885,7 +879,7 @@ void kadmin_addprinc(argc, argv)
     kadm5_policy_ent_rec defpol;
     long mask;
     int randkey = 0, i;
-    int keepold, n_ks_tuple;
+    int n_ks_tuple;
     krb5_key_salt_tuple *ks_tuple;
     char *pass, *canon;
     krb5_error_code retval;
@@ -903,7 +897,7 @@ void kadmin_addprinc(argc, argv)
     princ.attributes = 0;
     if (kadmin_parse_princ_args(argc, argv,
 				&princ, &mask, &pass, &randkey,
-				&keepold, &ks_tuple, &n_ks_tuple,
+				&ks_tuple, &n_ks_tuple,
 				"add_principal")) {
 	 kadmin_addprinc_usage("add_principal");
 	 return;
@@ -965,8 +959,8 @@ void kadmin_addprinc(argc, argv)
 	pass = newpw;
     }
     mask |= KADM5_PRINCIPAL;
-    if (keepold || ks_tuple != NULL) {
-	retval = kadm5_create_principal_3(handle, &princ, mask, keepold,
+    if (ks_tuple != NULL) {
+	retval = kadm5_create_principal_3(handle, &princ, mask,
 					  n_ks_tuple, ks_tuple, pass);
     } else {
 	retval = kadm5_create_principal(handle, &princ, mask, pass);
@@ -981,9 +975,9 @@ void kadmin_addprinc(argc, argv)
 	return;
     }
     if (randkey) {		/* more special stuff for -randkey */
-	if (keepold || ks_tuple != NULL) {
+	if (ks_tuple != NULL) {
 	    retval = kadm5_randkey_principal_3(handle, princ.principal,
-					       keepold,
+					       FALSE,
 					       n_ks_tuple, ks_tuple,
 					       NULL, NULL);
 	} else {
@@ -1029,7 +1023,7 @@ void kadmin_modprinc(argc, argv)
     krb5_error_code retval;
     char *pass, *canon;
     int randkey = 0;
-    int keepold = 0, n_ks_tuple = 0;
+    int n_ks_tuple = 0;
     krb5_key_salt_tuple *ks_tuple;
 
     if (argc < 2) {
@@ -1066,15 +1060,10 @@ void kadmin_modprinc(argc, argv)
     retval = kadmin_parse_princ_args(argc, argv,
 				     &princ, &mask,
 				     &pass, &randkey,
-				     &keepold, &ks_tuple, &n_ks_tuple,
+				     &ks_tuple, &n_ks_tuple,
 				     "modify_principal");
     if (ks_tuple != NULL) {
 	free(ks_tuple);
-	kadmin_modprinc_usage("modify_principal");
-	free(canon);
-	return;
-    }
-    if (keepold) {
 	kadmin_modprinc_usage("modify_principal");
 	free(canon);
 	return;
