@@ -31,6 +31,7 @@
 	_krb5_c_free_state
 #
 	_krb5_c_string_to_key
+	_krb5_c_string_to_key_with_params
 	_krb5_c_enctype_compare
 	_krb5_c_make_checksum
 	_krb5_c_verify_checksum
