@@ -18,5 +18,7 @@ CRCTESTOBJ = crctest.o
 
 Krb5LibraryTarget(crc32,$(OBJS))
 
+OtherdirLibraryTarget(..,des5,$(OBJS))
+
 NormalProgramTarget(crctest,$(CRCTESTOBJ),libcrc32.a,libcrc32.a,)
 
