@@ -56,7 +56,7 @@ char * get_dir_of_file();
    ill specified arguments to commands */        
 
 void usage (){
-	fprintf(stderr, "Usage: %s [target user] [-n principal] [-c source cachename] [-C target cachename] [-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a [args... ] ] \n", prog_name);
+	fprintf(stderr, "Usage: %s [target user] [-n principal] [-c source cachename] [-C target cachename] [-k] [-D] [-r time] [-pf] [-l lifetime] [-zZ] [-q] [-e command [args... ] ] [-a [args... ] ]\n", prog_name);
 
 }
 
@@ -75,7 +75,7 @@ main (argc, argv)
 int hp =0;
 int some_rest_copy = 0;	
 int all_rest_copy = 0;	
-char localhostname [MAXHOSTNAMELEN];
+char *localhostname = NULL;
 opt_info options;
 int option=0;
 int statusp=0;
@@ -181,13 +181,13 @@ char * dir_of_cc_source;
             /* when integrating this remember to pass in pargc, pargv and
                take care of params argument */
 	    optind --;	
-	    if (auth_debug){printf("Before get_params optind=%d \n", optind);}
+	    if (auth_debug){printf("Before get_params optind=%d\n", optind);}
 
             if ((retval = get_params( & optind, pargc, pargv, &params))){
                 com_err(prog_name, retval, "when gathering parameters");
                 errflg++;
             }
-            if(auth_debug){ printf("After get_params optind=%d \n", optind);}
+            if(auth_debug){ printf("After get_params optind=%d\n", optind);}
                 done = 1;
             break;
 	case 'p':
@@ -225,7 +225,7 @@ char * dir_of_cc_source;
 	    some_rest_copy = 1;	
 	    if(all_rest_copy || use_source_cache){  	
 		fprintf(stderr, 
-			"-z option is mutually exclusive with -Z and -C . \n"); 
+			"-z option is mutually exclusive with -Z and -C .\n"); 
 		errflg++;
 	    }	
 	    break;	
@@ -233,7 +233,7 @@ char * dir_of_cc_source;
 	    all_rest_copy = 1;	
 	    if(some_rest_copy || use_source_cache){  	
 		fprintf(stderr, 
-			"-Z option is mutually exclusive with -z and -C . \n"); 
+			"-Z option is mutually exclusive with -z and -C .\n"); 
 		errflg++;
 	    } 	
 	    break;	
@@ -254,7 +254,7 @@ char * dir_of_cc_source;
 			if ( strchr(cc_target_tag, ':')){
 				cc_target_tag_tmp=strchr(cc_target_tag,':') + 1;
 				if(!stat(cc_target_tag_tmp, &st_temp )){
-					fprintf(stderr,"File %s exists \n",
+					fprintf(stderr,"File %s exists\n",
 						cc_target_tag_tmp);	
 					errflg++;
 				}
@@ -278,7 +278,7 @@ char * dir_of_cc_source;
 			cc_source_tag_tmp = strchr(cc_source_tag, ':') + 1;
 
 			if( stat( cc_source_tag_tmp, &st_temp)){
-				fprintf(stderr,"File %s does not exist \n",
+				fprintf(stderr,"File %s does not exist\n",
 					cc_source_tag_tmp);	
 				errflg++;
 
@@ -297,12 +297,12 @@ char * dir_of_cc_source;
 	    break;
 	case 'e': 
 	    cmd = strdup(optarg);
-            if(auth_debug){printf("Before get_params optind=%d \n", optind);}
+            if(auth_debug){printf("Before get_params optind=%d\n", optind);}
             if ((retval = get_params( & optind, pargc, pargv, &params))){
                 com_err(prog_name, retval, "when gathering parameters");
                 errflg++;
             }
-            if(auth_debug){printf("After get_params optind=%d \n", optind);}
+            if(auth_debug){printf("After get_params optind=%d\n", optind);}
             done = 1;
 
             if (auth_debug){
@@ -367,11 +367,6 @@ char * dir_of_cc_source;
 
 	init_auth_names(target_pwd->pw_dir);
 
-	if (gethostname (localhostname, MAXHOSTNAMELEN)){
-		fprintf (stderr, " failed to get localhostname\n");
-		exit(1);
-	}
-
 	/***********************************/
 
 	if (cc_source_tag == NULL){
@@ -412,7 +407,7 @@ char * dir_of_cc_source;
 		exit(1);
 	}
 
-	if ( stat(cc_source_tag_tmp, &st_temp)){ 
+	if (stat(cc_source_tag_tmp, &st_temp)){ 
 		if (use_source_cache){
 
 			dir_of_cc_source = get_dir_of_file(cc_source_tag_tmp); 
@@ -482,8 +477,8 @@ char * dir_of_cc_source;
 
 		if ((source_uid == 0) && (target_uid != 0)) {
 
-			if ((retval =krb5_ccache_copy_restricted(ksu_context,  cc_source,
-				cc_target_tag,client,&cc_target, &stored))){
+			if ((retval = krb5_ccache_copy_restricted(ksu_context,  cc_source,
+				cc_target_tag, client, &cc_target, &stored))){
 	    			com_err (prog_name, retval, 
 				     "while copying cache %s to %s",
 				     krb5_cc_get_name(ksu_context, cc_source),cc_target_tag);
@@ -528,7 +523,7 @@ char * dir_of_cc_source;
 					exit(1);
 				}
 
-          			fprintf(stderr,"WARNING: Your password may be exposed if you enter it here and are logged \n");
+          			fprintf(stderr,"WARNING: Your password may be exposed if you enter it here and are logged\n");
                 		fprintf(stderr,"         in remotely using an unsecure (non-encrypted) channel.\n");
 				if (krb5_get_tkt_via_passwd (ksu_context, &cc_target, client,
 					 kdc_server, &options, 
@@ -560,7 +555,6 @@ char * dir_of_cc_source;
        		auth_val = krb5_auth_check(ksu_context, client, localhostname, &options,
 				target_user,cc_target, &path_passwd); 
 		
-
 		/* if kerbereros authentication failed then exit */     
 		if (auth_val ==FALSE){
 			fprintf(stderr, "Authentication failed.\n");
@@ -635,18 +629,18 @@ char * dir_of_cc_source;
 				syslog(LOG_WARNING, "%s",exec_cmd);
 			}
  			fprintf(stderr,
-	       "Account %s: authorization for %s for execution of %s failed \n",
+	       "Account %s: authorization for %s for execution of %s failed\n",
 			   	target_user, client_name, cmd );
 			syslog(LOG_WARNING,
-	       "Account %s: authorization for %s for execution of %s failed \n",
+	       "Account %s: authorization for %s for execution of %s failed",
 			   	target_user, client_name, cmd );
 			
 		    }else{
  			fprintf(stderr,
-				"Account %s: authorization of %s failed \n",
+				"Account %s: authorization of %s failed\n",
 			   	target_user, client_name);
 			syslog(LOG_WARNING,
-				"Account %s: authorization of %s failed \n",
+				"Account %s: authorization of %s failed",
 			   	target_user, client_name);
 
 		    }
@@ -717,7 +711,7 @@ char * dir_of_cc_source;
       /* set the cc env name to target */         	
 
       if(set_env_var( KRB5_ENV_CCNAME, cc_target_tag)){
-		fprintf(stderr,"ksu: couldn't set environment variable %s \n",
+		fprintf(stderr,"ksu: couldn't set environment variable %s\n",
 			KRB5_ENV_CCNAME);
 	        sweep_up(ksu_context, use_source_cache, cc_target);
 	        exit(1);
@@ -804,8 +798,8 @@ char * dir_of_cc_source;
 	switch ((child_pid = fork())) {
 	default:
 	    if (auth_debug){
-	 	printf(" The childs pid is %d \n", child_pid);
-        	printf(" The parents pid is %d \n", getpid());
+	 	printf(" The child pid is %d\n", child_pid);
+        	printf(" The parent pid is %d\n", getpid());
 	    }
             while ((ret_pid = waitpid(child_pid, &statusp, WUNTRACED)) != -1) {
 		if (WIFSTOPPED(statusp)) {

@@ -1,3 +1,9 @@
+Wed Apr 10 20:24:49 1996  Richard Basch  <basch@lehman.com>
+
+	* main.c, krb_auth_su.c: Mostly cosmetic cleanup of output
+	statements.  Also, rather than computing the default host key,
+	let the library routine do it.
+
 Wed Mar 13 17:45:11 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.in: Use AC_HEADER_STDARG.

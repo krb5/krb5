@@ -102,7 +102,7 @@ krb5_boolean zero_password;
 	*/
        if( krb5_fast_auth(context, client, server, target_user, cc) == TRUE){
 	  	if (auth_debug ){ 	
-			fprintf (stderr,"Athenticated via fast_auth \n");
+			fprintf (stderr,"Authenticated via fast_auth \n");
 		}
 		return TRUE;
         }
@@ -202,11 +202,12 @@ krb5_boolean zero_password;
 		krb5_free_tgt_creds(context, tgts);
 	}
 
-	if ((retval = krb5_verify_tkt_def(context, client, server, 
-					  &out_creds->keyblock, 
-					  &out_creds->ticket, &target_tkt))){
-		com_err(prog_name, retval, "while verifing ticket for server"); 
-		return (FALSE);
+	retval = krb5_verify_tkt_def(context, client, server, 
+				     &out_creds->keyblock, &out_creds->ticket,
+				     &target_tkt);
+	if (retval) {
+	    com_err(prog_name, retval, "while verifying ticket for server");
+	    if (retval != ENOENT) return (FALSE);
 	}
 
 	if ((retval = krb5_cc_store_cred(context,  cc, out_creds))){
