@@ -23,6 +23,7 @@ static char rcsid_klist_c [] =
 #include <krb5/isode_err.h>
 #include <krb5/ext-proto.h>
 #include <com_err.h>
+#include <errno.h>
 
 extern int optind;
 extern char *optarg;
@@ -84,11 +85,17 @@ main(argc, argv)
 	cache = krb5_cc_default();
 
     flags = 0;				/* turns off OPENCLOSE mode */
-    if (code = (*cache->ops->set_flags)(cache, flags)) {
-	com_err(argv[0], code, "while setting cache flags");
+    if (code = krb5_cc_set_flags(cache, flags)) {
+	if (code == ENOENT) {
+	    com_err(argv[0], code, "(ticket cache %s)",
+		    krb5_cc_get_name(cache));
+	} else
+	    com_err(argv[0], code,
+		    "while setting cache flags (ticket cache %s)",
+		    krb5_cc_get_name(cache));
 	exit(1);
     }
-    if (code = (*cache->ops->get_princ)(cache, &princ)) {
+    if (code = krb5_cc_get_principal(cache, &princ)) {
 	com_err(argv[0], code, "while retrieving principal name");
 	exit(1);
     }
@@ -99,11 +106,11 @@ main(argc, argv)
     printf("Ticket cache: %s\nDefault principal: %s\n",
 	   (*cache->ops->get_name)(cache), name);
     free(name);
-    if (code = (*cache->ops->get_first)(cache, &cur)) {
+    if (code = krb5_cc_start_seq_get(cache, &cur)) {
 	com_err(argv[0], code, "while starting to retrieve tickets");
 	exit(1);
     }
-    while (!(code = (*cache->ops->get_next)(cache, &cur, &creds))) {
+    while (!(code = krb5_cc_next_cred(cache, &cur, &creds))) {
 	code = krb5_unparse_name(creds.client, &name);
 	if (code) {
 	    com_err(argv[0], code, "while unparsing client name");
@@ -118,7 +125,7 @@ main(argc, argv)
 	printf("C: %s\tS:%s\n", name, sname);
     }
     if (code == KRB5_CC_END) {
-	if (code = (*cache->ops->end_get)(cache, &cur)) {
+	if (code = krb5_cc_end_seq_get(cache, &cur)) {
 	    com_err(argv[0], code, "while finishing ticket retrieval");
 	    exit(1);
 	}
