@@ -1036,7 +1036,7 @@ void sink(argc, argv)
 	    return;
 	}
 	
-#define getnum(t) (t) = 0; while (isdigit(*cp)) (t) = (t) * 10 + (*cp++ - '0');
+#define getnum(t) (t) = 0; while (isdigit((int) *cp)) (t) = (t) * 10 + (*cp++ - '0');
 	if (*cp == 'T') {
 	    setimes++;
 	    cp++;
@@ -1079,7 +1079,7 @@ void sink(argc, argv)
 	if (*cp++ != ' ')
 	  SCREWUP("mode not delimited");
 	size = 0;
-	while (isdigit(*cp))
+	while (isdigit((int) *cp))
 	  size = size * 10 + (*cp++ - '0');
 	if (*cp++ != ' ')
 	  SCREWUP("size not delimited");

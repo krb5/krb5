@@ -1,5 +1,9 @@
 2001-06-18  Ezra Peisach  <epeisach@mit.edu>
 
+	* krcp.c (sink): Cast argument to isdigit() to int.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
 	* loginpaths.h: If _PATH_DEFPATH is defined, undefine LPATH and
 	RPATH before redefining.
 
