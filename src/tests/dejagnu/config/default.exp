@@ -39,7 +39,8 @@ if ![info exists KEY] {
 
 # Clear away any files left over from a previous run.
 # We can't use them now because we don't know the right KEY.
-catch "exec rm -f tmpdir/db.ok tmpdir/srvtab"
+# krb5.conf might change if running tests on another host
+catch "exec rm -f tmpdir/db.ok tmpdir/srvtab tmpdir/krb5.conf"
 
 # Put the installed kerberos directories on PATH.
 # This needs to be fixed for V5.
@@ -164,6 +165,7 @@ proc get_hostname { } {
     global RESOLVE
     global hostname
     global localhostname
+    global domain
 
     if {[info exists hostname] && [info exists localhostname]} {
 	return 1
@@ -183,11 +185,12 @@ proc get_hostname { } {
     }
     close $file
     catch "exec rm -f tmpdir/hostname" exec_output
-    regexp "^\[^.\]*" $hostname localhostname
+    regexp "^(\[^.\]*)\.(.*)$" $hostname foo localhostname domain
 
     set hostname [string tolower $hostname]
     set localhostname [string tolower $localhostname]
-    verbose "hostname: $hostname; localhostname: $localhostname"
+    set domain [string tolower $domain]
+    verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
 
     return 1
 }
@@ -199,6 +202,7 @@ proc get_hostname { } {
 
 proc setup_kerberos_files { } {
     global hostname
+    global domain
 
     if ![get_hostname] { 
 	return 0
@@ -215,6 +219,10 @@ proc setup_kerberos_files { } {
     puts $conffile "		kdc = $hostname:3088"
     puts $conffile "		admin_server = $hostname:3750"
     puts $conffile "	\}"
+    puts $conffile ""
+    puts $conffile "\[domain_realm\]"
+    puts $conffile "	.$domain = KRBTEST.COM"
+    puts $conffile "	$domain = KRBTEST.COM"
     close $conffile
     }
 
@@ -730,18 +738,19 @@ proc add_random_key { kkey standalone } {
 
 # setup_srvtab
 # Set up a srvtab file.  start_kerberos_daemons and add_random_key
-# host/$hostname must be called before this procedure.  If the
+# $id/$hostname must be called before this procedure.  If the
 # argument is non-zero, call pass at relevant points.  Returns 1 on
-# success, 0 on failure.
+# success, 0 on failure. If the id field is not provided, host is used.
 
-proc setup_srvtab { standalone } {
+proc setup_srvtab { standalone {id host} } {
     global KDB5_EDIT
     global KEY
     global tmppwd
     global hostname
     global spawn_id
+    global last_service
 
-    if {!$standalone && [file exists tmpdir/srvtab]} {
+    if {!$standalone && [file exists tmpdir/srvtab] && $last_service == $id} {
 	return 1
     }
 
@@ -775,8 +784,8 @@ proc setup_srvtab { standalone } {
     expect "Enter KDC database master key"
     send "masterkey$KEY\r"
     expect "kdb5_edit:"
-    send "xst $hostname host\r"
-    expect "'host/$hostname@KRBTEST.COM' added to keytab"
+    send "xst $hostname $id\r"
+    expect "'$id/$hostname@KRBTEST.COM' added to keytab"
     expect "kdb5_edit:"
     send "quit\r"
     expect "\r"
@@ -803,6 +812,9 @@ proc setup_srvtab { standalone } {
     # Make the srvtab file globally readable in case we are using a
     # root shell and the srvtab is NFS mounted.
     catch "exec chmod a+r tmpdir/srvtab"
+
+    # Remember what we just extracted
+    set last_service $id
 
     return 1
 }

@@ -1,3 +1,10 @@
+Wed May 10 16:53:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Added domain_realm stanza to krb5.conf.
+	               setup_srvtab: Takes optional service name to
+		       		       extract. 
+
+
 Fri May 05 09:21:21 1995  Chris Provenzano (proven@mit.edu)
 
 	* default.exp : Removed FILE: part of env(KRB5CCNAME).
