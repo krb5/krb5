@@ -42,6 +42,7 @@ static char rcsid_an_to_ln_c[] =
 
  lnsize specifies the maximum length name that is to be filled into
  lname.
+ The translation will be null terminated in all non-error returns.
 
  returns system errors, NOT_ENOUGH_SPACE
 */
@@ -82,17 +83,20 @@ char *lname;
     contents = dbm_fetch(db, key);
 
     xfree(princ_name);
-    (void) dbm_close(db);
 
     if (contents.dptr == NULL) {
 	retval = KRB5_LNAME_NOTRANS;
     } else {
 	strncpy(lname, contents.dptr, lnsize);
-	if (lnsize < contents.dsize-1)	/* -1 for the null */
+	if (lnsize < contents.dsize)
 	    retval = KRB5_CONFIG_NOTENUFSPACE;
+	else if (lname[contents.dsize-1] != '\0')
+	    retval = KRB5_LNAME_BADFORMAT;
 	else
 	    retval = 0;
     }
+    /* can't close until we copy the contents. */
+    (void) dbm_close(db);
     return retval;
 }
 #else
