@@ -1,3 +1,9 @@
+2001-04-03  Tom Yu  <tlyu@mit.edu>
+
+	* setenv.c: Add conditionals for compilation of setenv, unsetenv,
+	and getenv such that they only get compiled if they don't already
+	exist. [pullup from krb5-1-2-2-branch]
+
 2000-10-17  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb_auth_su.c (krb5_get_tkt_via_passwd): Argument to
