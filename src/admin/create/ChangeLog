@@ -1,3 +1,9 @@
+Thu Oct  6 23:29:07 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_create.c (main): Add a new option so that the master key
+		password can be entered on the command line --- for
+		testing only; not documented!!
+
 Mon Oct  3 19:10:01 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile.in: Use $(srcdir) to find manual page for make install.

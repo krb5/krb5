@@ -129,15 +129,17 @@ char *argv[];
     char *mkey_name = 0;
     char *mkey_fullname;
     char *defrealm;
+    char *mkey_password = 0;
     int keytypedone = 0;
     krb5_enctype etype = 0xffff;
+    krb5_data scratch, pwd;
 
     krb5_init_ets();
 
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    while ((optchar = getopt(argc, argv, "d:r:k:M:e:")) != EOF) {
+    while ((optchar = getopt(argc, argv, "d:r:k:M:e:P:")) != EOF) {
 	switch(optchar) {
 	case 'd':			/* set db name */
 	    dbname = optarg;
@@ -151,6 +153,9 @@ char *argv[];
 	    break;
 	case 'M':			/* master key name in DB */
 	    mkey_name = optarg;
+	    break;
+        case 'P':		/* Only used for testing!!! */
+	    mkey_password = optarg;
 	    break;
 	case 'e':
 	    etype = atoi(optarg);
@@ -217,16 +222,35 @@ char *argv[];
 master key name '%s'\n",
 	   dbname, realm, mkey_fullname);
 
-    printf("You will be prompted for the database Master Password.\n");
-    printf("It is important that you NOT FORGET this password.\n");
-    fflush(stdout);
+    if (mkey_password) {
+	pwd.data = mkey_password;
+	pwd.length = strlen(mkey_password);
+	retval = krb5_principal2salt(master_princ, &scratch);
+	if (retval) {
+	    com_err(argv[0], retval, "while calculated master key salt");
+	    exit(1);
+	}
+	retval = krb5_string_to_key(&master_encblock, master_keyblock.keytype,
+				    &master_keyblock, &pwd, &scratch);
+	if (retval) {
+	    com_err(argv[0], retval,
+		    "while transforming master key from password");
+	    exit(1);
+	}
+	free(scratch.data);
+    } else {
+	printf("You will be prompted for the database Master Password.\n");
+	printf("It is important that you NOT FORGET this password.\n");
+	fflush(stdout);
 
-    /* TRUE here means read the keyboard, and do it twice */
-    if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE, TRUE,
-				    0, &master_keyblock)) {
-	com_err(argv[0], retval, "while reading master key");
-	exit(1);
+	/* TRUE here means read the keyboard, and do it twice */
+	if (retval = krb5_db_fetch_mkey(master_princ, &master_encblock, TRUE,
+					TRUE, 0, &master_keyblock)) {
+	    com_err(argv[0], retval, "while reading master key");
+	    exit(1);
+	}
     }
+    
     if (retval = krb5_process_key(&master_encblock, &master_keyblock)) {
 	com_err(argv[0], retval, "while processing master key");
 	exit(1);
