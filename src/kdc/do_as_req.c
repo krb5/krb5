@@ -31,13 +31,7 @@ static char rcsid_do_as_req_c[] =
 
 #include "kdc_util.h"
 #include "policy.h"
-
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;		/* max entry in array */
-extern krb5_data empty_string;		/* initialized to {0, ""} */
-extern krb5_timestamp infinity;		/* greater than every valid timestamp */
-extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
-extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */
+#include "extern.h"
 
 static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
 						int,
@@ -49,9 +43,11 @@ static krb5_error_code prepare_error_as PROTOTYPE((krb5_as_req *,
 
 /* XXX needs lots of cleanup and modularizing */
 
+/*ARGSUSED*/
 krb5_error_code
-process_as_req(request, response)
+process_as_req(request, from, response)
 register krb5_as_req *request;
+krb5_fulladdr *from;			/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -109,7 +105,7 @@ krb5_data **response;			/* filled in with a response packet */
 	return(prepare_error_as(request, KDC_ERR_ETYPE_NOSUPP, response));
     }
 
-    if (retval = (*(csarray[request->etype]->system->random_key))(csarray[request->etype]->random_sequence, &session_key)) {
+    if (retval = (*(krb5_csarray[request->etype]->system->random_key))(krb5_csarray[request->etype]->random_sequence, &session_key)) {
 	/* random key failed */
 	cleanup();
 	return(retval);

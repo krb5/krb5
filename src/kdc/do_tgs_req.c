@@ -31,22 +31,19 @@ static char rcsid_do_tgs_req_c[] =
 
 #include "kdc_util.h"
 #include "policy.h"
+#include "extern.h"
 
-extern krb5_cs_table_entry *csarray[];
-extern int max_cryptosystem;		/* max entry in array */
-extern krb5_data empty_string;		/* initialized to {0, ""} */
-extern krb5_timestamp infinity;		/* greater than every valid timestamp */
-extern krb5_deltat max_life_for_realm;	/* XXX should be a parameter? */
-extern krb5_deltat max_renewable_life_for_realm; /* XXX should be a parameter? */
 
 static krb5_error_code prepare_error_tgs PROTOTYPE((krb5_tgs_req *,
 						int,
 						krb5_data **));
 static krb5_error_code decrypt_second_ticket PROTOTYPE((krb5_ticket *));
 
+/*ARGSUSED*/
 krb5_error_code
-process_tgs_req(request, response)
+process_tgs_req(request, from, response)
 register krb5_tgs_req *request;
+krb5_fulladdr *from;			/* who sent it ? */
 krb5_data **response;			/* filled in with a response packet */
 {
 
@@ -121,7 +118,7 @@ krb5_data **response;			/* filled in with a response packet */
 	}
 	session_key = second_ticket->enc_part2->session;
     } else {
-	if (retval = (*(csarray[request->etype]->system->random_key))(csarray[request->etype]->random_sequence, &session_key)) {
+	if (retval = (*(krb5_csarray[request->etype]->system->random_key))(krb5_csarray[request->etype]->random_sequence, &session_key)) {
 	    /* random key failed */
 	    cleanup();
 	    return(retval);
@@ -303,7 +300,7 @@ krb5_data **response;			/* filled in with a response packet */
     } else {
 	/* assemble new transited field into allocated storage */
 	if (retval =
-	    compress_transited(header_ticket->enc_part2->transited,
+	    compress_transited(&header_ticket->enc_part2->transited,
 			       header_ticket->server,
 			       &enc_tkt_reply.transited)) {
 	    cleanup();
