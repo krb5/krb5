@@ -1,3 +1,7 @@
+Wed Aug 10 12:46:12 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* pop_dropcopy.c (pop_dropcopy): Change L_XTND to SEEK_END.
+
 Tue Aug  9 16:50:08 1994  Tom Yu  (tlyu@dragons-lair)
 
 	* configure.in: check for dbm as well as ndbm

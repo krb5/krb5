@@ -143,7 +143,7 @@ struct passwd	*	pwp;
 #endif
     
     /* May have grown or shrunk between open and lock! */
-    offset = lseek(dfd,0,L_XTND);
+    offset = lseek(dfd,0,SEEK_END);
 
     /*  Open the user's maildrop, If this fails,  no harm in assuming empty */
     if ((mfd = open(p->drop_name,O_RDWR)) > 0) {
