@@ -1,3 +1,9 @@
+Sun Feb 25 20:32:57 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Check for arpa/nameser.h
+
+	* commands.c : use MAXDNAME as maximum length of a domain.
+
 Sun Nov 12 04:53:17 1995  Mark W. Eichin  <eichin@cygnus.com>
 
 	* main.c: initialize line (to avoid splitting up forward.c.)

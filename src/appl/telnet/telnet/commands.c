@@ -82,8 +82,12 @@
 #include <netinet/ip.h>
 
 
-#ifndef       MAXHOSTNAMELEN
-#define       MAXHOSTNAMELEN 64
+#if HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
+
+#ifndef MAXDNAME
+#define MAXDNAME 256 /*per the rfc*/
 #endif
 
 #if	defined(IPPROTO_IP) && defined(IP_TOS)
@@ -91,7 +95,7 @@ int tos = -1;
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 
 char	*hostname;
-static char _hostname[MAXHOSTNAMELEN];
+static char _hostname[MAXDNAME];
 
 extern char *getenv();
 
