@@ -1,3 +1,8 @@
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (enctypes): Variable deleted.
+	(_kadm5_init_any): Pass a null pointer instead of enctypes.
+
 2003-01-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
