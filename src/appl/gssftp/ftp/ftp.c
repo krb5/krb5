@@ -1983,7 +1983,7 @@ int do_auth()
 
 #ifdef GSSAPI
 	if (command("AUTH %s", "GSSAPI") == CONTINUE) {
-	  OM_uint32 maj_stat, min_stat;
+	  OM_uint32 maj_stat, min_stat, dummy_stat;
 	  gss_name_t target_name;
 	  gss_buffer_desc send_tok, recv_tok, *token_ptr;
 	  char stbuf[FTP_BUFSIZ];
@@ -2048,7 +2048,6 @@ int do_auth()
 	      if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED){
 		if (trial == n_gss_trials-1)
 		  user_gss_error(maj_stat, min_stat, "initializing context");
-		(void) gss_release_name(&min_stat, &target_name);
 		/* could just be that we missed on the service name */
 		goto outer_loop;
 	      }
@@ -2059,6 +2058,7 @@ int do_auth()
 		oldverbose = verbose;
 		verbose = (trial == n_gss_trials-1)?0:-1;
 		kerror = radix_encode(send_tok.value, out_buf, &len, 0);
+		gss_release_buffer(&dummy_stat, &send_tok);
 		if (kerror)  {
 		  fprintf(stderr, "Base 64 encoding failed: %s\n",
 			  radix_error(kerror));
@@ -2104,12 +2104,11 @@ int do_auth()
 		/* get out of loop clean */
 	      gss_complete_loop:
 		trial = n_gss_trials-1;
-		gss_release_buffer(&min_stat, &send_tok);
-		gss_release_name(&min_stat, &target_name);
 		goto outer_loop;
 	      }
 	    } while (maj_stat == GSS_S_CONTINUE_NEEDED);
     outer_loop:
+	    gss_release_name(&dummy_stat, &target_name);
 	    if (maj_stat == GSS_S_COMPLETE)
 	        break;
 	  }

@@ -1,3 +1,9 @@
+2003-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* ftp.c (do_auth): Call gss_release_buffer() on send_tok
+	immediately after sending it.  Call gss_release_name() on
+	target_name at outer_loop instead of inside the loop.
+
 2003-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftp.c (recvrequest): Add new argument indicating whether "-" and
