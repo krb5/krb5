@@ -1,3 +1,8 @@
+
+Tue Apr 25 21:41:46 1995 Chris Provenzano (proven@mit.edu)
+
+	* sserver.c: Initialize auth_context to NULL before using.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * sserver.c: Use new calling convention for krb5_recvauth().
