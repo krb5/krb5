@@ -1,3 +1,8 @@
+Tue Aug  8 21:32:30 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* kdb_cpw.c (add_key_rnd): remove bletcherous aggregate
+		initializer stuff and use build_principal_ext like we
+		should have in the first place to build the tgt principal.
 
 Tue Aug 8 17:35:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* encrypt_key.c - When allocating the actual key_data_contents use the

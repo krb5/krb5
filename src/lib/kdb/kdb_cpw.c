@@ -75,17 +75,7 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_db_entry	* db_entry;
     int			  kvno;
 {
-    krb5_data 		  krbtgt_princ_entries[] = {
-	{ 0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME },
-	{ 0, 0, 0 }, 
-    };
-    krb5_principal_data	  krbtgt_princ = {
-	0,					/* magic number */
-        {0, 0, 0},                      	/* krb5_data realm */
-	(krb5_data *) NULL,           		/* krb5_data *data */
-        2,                              	/* int length */
-        KRB5_NT_SRV_INST                	/* int type */
-    };
+    krb5_principal	  krbtgt_princ;
     krb5_keyblock	  krbtgt_keyblock, * key;
     krb5_pointer 	  krbtgt_seed;	
     krb5_encrypt_block	  krbtgt_eblock;
@@ -94,20 +84,23 @@ add_key_rnd(context, master_eblock, ks_tuple, ks_tuple_count, db_entry, kvno)
     int			  max_kvno, one, i, j;
     krb5_error_code	  retval;
 
-    krbtgt_princ.data = krbtgt_princ_entries;
-    krb5_princ_set_realm_length(context, &krbtgt_princ, 
-				db_entry->princ->realm.length);
-    krb5_princ_set_realm_data(context, &krbtgt_princ, 
-			      db_entry->princ->realm.data);
-    krb5_princ_component(context, &krbtgt_princ, 1)->length = 
-			db_entry->princ->realm.length;
-    krb5_princ_component(context, &krbtgt_princ, 1)->data = 
-			db_entry->princ->realm.data;
+    retval = krb5_build_principal_ext(context, &krbtgt_princ,
+				      db_entry->princ->realm.length,
+				      db_entry->princ->realm.data,
+				      KRB5_TGS_NAME_SIZE,
+				      KRB5_TGS_NAME,
+				      db_entry->princ->realm.length,
+				      db_entry->princ->realm.data);
+    if (retval)
+	return retval;
 
     /* Get tgt from database */
-    if (retval = krb5_db_get_principal(context, &krbtgt_princ, &krbtgt_entry,
-				       &one, &more))
+    retval = krb5_db_get_principal(context, krbtgt_princ, &krbtgt_entry,
+				   &one, &more)) {
+    krb5_free_principal(krbtgt_princ); /* don't need it anymore */
+    if (retval)
 	return(retval);
+    }
     if ((one > 1) || (more)) {
 	krb5_db_free_principal(context, &krbtgt_entry, one);
 	return KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
