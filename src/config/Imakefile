@@ -5,21 +5,15 @@
  * the first time.
  */
 
-DEPLIBS = 
-HEADERS = imakemdep.h 
-CFFILES = $(HEADERS) Imake.rules Imake.tmpl Project.tmpl site.def *.bac *.cf
-DEFINES = $(SIGNAL_DEFINES)
+includes:: all ccimake
+
+DEFINES= `./ccimake`
 
 #undef ImakeDependency
 #define ImakeDependency(dummy) @@\
 Makefile::  imake
 
 SimpleProgramTarget(imake)
-
-BuildIncludes($(HEADERS),config,..)
-
-MakeDirectories(install,$(CONFIGDIR))
-InstallMultipleDestFlags(install,$(CFFILES),$(CONFIGDIR),$(INSTDATFLAGS))
 
 depend::
 
