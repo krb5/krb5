@@ -123,7 +123,7 @@ krb5_error_code krb5_rd_req
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   krb5_const_pointer,
+		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_rd_req_decoded
@@ -135,7 +135,7 @@ krb5_error_code krb5_rd_req_decoded
 					krb5_principal,
 					krb5_kvno,
 					krb5_keyblock ** ),
-		   krb5_const_pointer,
+		   krb5_pointer,
 		   krb5_rcache,
 		   krb5_tkt_authent * ));
 krb5_error_code krb5_mk_rep
