@@ -55,6 +55,9 @@
 #endif
 #endif
 
+#define DEFAULT_UDP_PREF_LIMIT	 1465
+#define HARD_UDP_LIMIT		32700
+
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
  * return the response (if any) in 'reply'.
@@ -83,8 +86,10 @@ krb5_sendto_kdc (context, message, realm, reply, use_master, tcp_only)
      */
 
     /*
-     * DO NOT depend on this staying as two separate loops.  We may change
-     * the order, or we may integrate them into one loop.
+     * DO NOT depend on this staying as two separate loops.  We may
+     * change the order, or we may integrate them into one loop.
+     * Integration is preferred, since it would keep the total delay
+     * time down when a timeout occurs.
      *
      * BUG: This code won't return "interesting" errors (e.g., out of mem,
      * bad config file) from locate_kdc.  KRB5_REALM_CANT_RESOLVE can be
@@ -102,10 +107,28 @@ krb5_sendto_kdc (context, message, realm, reply, use_master, tcp_only)
     fprintf(stderr, "\", use_master=%d, tcp_only=%d)\n", use_master, tcp_only);
 #endif
 
+    if (!tcp_only && context->udp_pref_limit < 0) {
+	int tmp;
+	retval = profile_get_integer(context->profile,
+				     "libdefaults", "udp_preference_limit", 0,
+				     DEFAULT_UDP_PREF_LIMIT, &tmp);
+	if (retval)
+	    return retval;
+	if (tmp < 0)
+	    tmp = DEFAULT_UDP_PREF_LIMIT;
+	else if (tmp > HARD_UDP_LIMIT)
+	    /* In the unlikely case that a *really* big value is
+	       given, let 'em use as big as we think we can support.
+	       Well, almost 64K is probably doable, but let's be, um,
+	       a little conservative.  */
+	    tmp = HARD_UDP_LIMIT;
+	context->udp_pref_limit = tmp;
+    }
+
     retval = (use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
 
     if (!tcp_only
-	&& message->length < 1500
+	&& message->length <= context->udp_pref_limit
 	&& ! krb5_locate_kdc(context, realm, &addrs, use_master, SOCK_DGRAM)) {
 	if (addrs.naddrs > 0) {
 	    retval = krb5int_sendto_udp (context, message, &addrs, reply,
@@ -118,6 +141,18 @@ krb5_sendto_kdc (context, message, realm, reply, use_master, tcp_only)
     if (! krb5_locate_kdc(context, realm, &addrs, use_master, SOCK_STREAM)) {
 	if (addrs.naddrs > 0) {
 	    retval = krb5int_sendto_tcp (context, message, &addrs, reply);
+	    krb5int_free_addrlist (&addrs);
+	    if (retval == 0)
+		return 0;
+	}
+    }
+    if (!tcp_only
+	&& message->length > context->udp_pref_limit
+	&& message->length <= HARD_UDP_LIMIT
+	&& ! krb5_locate_kdc(context, realm, &addrs, use_master, SOCK_DGRAM)) {
+	if (addrs.naddrs > 0) {
+	    retval = krb5int_sendto_udp (context, message, &addrs, reply,
+					 0, 0);
 	    krb5int_free_addrlist (&addrs);
 	    if (retval == 0)
 		return 0;

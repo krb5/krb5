@@ -1,3 +1,12 @@
+2002-08-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (DEFAULT_UDP_PREF_LIMIT, HARD_UDP_LIMIT): New
+	macros.
+	(debug_log_connect): Look up "udp_preference_limit" in libdefaults
+	part of profile; try TCP before UDP if the packet size is larger
+	than specified.  Don't try UDP at all if the packet is over about
+	32K.
+
 2002-07-23  Ezra Peisach  <epeisach@bu.edu>
 
 	* localaddr.c (get_localaddrs): Add prototype before being used
