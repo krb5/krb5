@@ -674,6 +674,9 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	     struct addrinfo **result)
 {
     int aierr;
+#ifdef _AIX
+    struct addrinfo *ai;
+#endif
 
     aierr = (*gaiptr) (name, serv, hint, result);
     if (aierr || *result == 0)
@@ -751,26 +754,23 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 #endif
 
 #ifdef _AIX
-    for (; ai; ai = ai->ai_next) {
+    for (ai = *result; ai; ai = ai->ai_next) {
 	/* AIX 4.3.3 libc is broken.  It doesn't set the family or len
 	   fields of the sockaddr structures.  */
 	if (ai->ai_addr->sa_family == 0)
 	    ai->ai_addr->sa_family = ai->ai_family;
-#ifdef HAVE_SA_LEN /* always true on aix, actually */
+#ifdef HAVE_SA_LEN /* always true on AIX, actually */
 	if (ai->ai_addr->sa_len == 0)
 	    ai->ai_addr->sa_len = ai->ai_addrlen;
 #endif
     }
 #endif
 
-    /* Not dealt with yet:
+    /* Not dealt with currently:
 
        - Some versions of GNU libc can lose some IPv4 addresses in
 	 certain cases when multiple IPv4 and IPv6 addresses are
-	 available.
-
-       - Wrapping a possibly-missing system version, as we'll need to
-	 do for Windows.  */
+	 available.  */
 
     return 0;
 }

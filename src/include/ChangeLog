@@ -1,3 +1,8 @@
+2002-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h (getaddrinfo) [_AIX]: Declare and initialize
+	variable "ai".
+
 2002-04-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for gethostbyname_r, gethostbyaddr_r,
