@@ -185,7 +185,8 @@ recognition of their trademark status should be given).
 
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
-kadmin/dbutil, kadmin/server, lib/kadm, and portions of lib/rpc:
+kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
+of lib/rpc:
 
    Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
 
