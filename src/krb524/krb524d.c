@@ -29,15 +29,8 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-#include <krb5/kdb.h>
-#include <krb5/kdb_dbm.h>
-#ifdef PROVIDE_DES_CBC_CRC
-#include <krb5/mit-des.h>
-#endif
+#include "k5-int.h"
 #include <krb.h>
-
 #include "krb524.h"
 
 #define TIMEOUT 60

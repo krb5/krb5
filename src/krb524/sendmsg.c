@@ -22,14 +22,11 @@
  * backoff retry algorithm.  This is based on krb5_sendto_kdc.
  */
 
-#include <krb5/krb5.h>
-#include <krb5/ext-proto.h>
+#include "krb5.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-
-#include <krb5/los-proto.h>
 
 #ifdef _AIX
 #include <sys/select.h>

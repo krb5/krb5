@@ -21,7 +21,7 @@
  */
 
 #include <stdio.h>
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include <krb.h>
 
 extern int optind;

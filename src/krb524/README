@@ -86,7 +86,7 @@ ticket file is initialized.
 Using libkrb524.a
 ======================================================================
 
-To use libkrb524.a, #include <krb524.h>, link against libkrb524.a,
+To use libkrb524.a, #include "krb524.h", link against libkrb524.a,
 call krb524_init_ets() at the beginning of your program, and call one
 of the following two functions:
 

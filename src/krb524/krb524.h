@@ -26,7 +26,7 @@
 #define KRB524_SERVICE "krb524"
 #define KRB524_PORT 4444
 
-#include <krb524_err.h>
+#include "krb524_err.h"
 
 extern int krb524_debug;
 

@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <krb5/krb5.h>
+#include "krb5.h"
 #include <krb.h>
 
 #include "krb524.h"

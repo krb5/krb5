@@ -1,3 +1,7 @@
+Tue Feb 28 02:31:22 1995  John Gilmore  (gnu at toad.com)
+
+	* README, *.[ch]:  Avoid <...> includes for our include files.
+
 Thu Sep 15 10:47:27 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* Makefile, README, RELEASE_NOTES, conv_creds.c, conv_princ.c,

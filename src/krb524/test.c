@@ -29,9 +29,7 @@
 
 #include <des.h>
 #include <krb.h>
-#include <krb5/krb5.h>
-#include <krb5/asn1.h>
-
+#include "k5-int.h"
 #include "krb524.h"
 
 #define KEYSIZE 8
