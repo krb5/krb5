@@ -554,7 +554,7 @@ krb5_locate_kdc(context, realm, addr_pp, naddrs, master_index, nmasters)
 				   addr_pp, naddrs);
         if ( master_index && nmasters ) {
 
-            code = krb5_locate_srv_dns(realm, "_kadmin", "_tcp",
+            code = krb5_locate_srv_dns(realm, "_kerberos-adm", "_tcp",
                                         &admin_addr_p, &nadmin_addrs);
             if ( code ) {
                 free(*addr_pp);

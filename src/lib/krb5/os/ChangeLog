@@ -1,3 +1,9 @@
+1999-06-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Kerberos admin service name is
+	"kerberos-adm", not "kadmin", so look up "_kerberos-adm._tcp" in
+	DNS.
+
 1999-06-21  Ken Raeburn  <raeburn@mit.edu>
 	and Jeffrey Altman and Ken Hornstein
 
