@@ -29,6 +29,11 @@
 
 #if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 #include <win-mac.h>
+
+/* Macintoh CFM-68K magic incantation */
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import on
+#endif
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -697,5 +702,10 @@ PROTOTYPE(	(OM_uint32  *,		/* minor_status */
 
 /* XXXX This is a necessary evil until the spec is fixed */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
+
+/* Macintoh CFM-68K magic incantation */
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
+#endif
 
 #endif /* _GSSAPI_H_ */

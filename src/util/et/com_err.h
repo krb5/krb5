@@ -20,8 +20,15 @@
 #define unix
 #endif
 
-#if defined(_MSDOS) || defined (_WIN32)
+#if defined(__MWERKS__) || defined(applec) || defined(THINK_C)
+#define _MACINTOSH
+#endif
+
+#if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 #include <win-mac.h>
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import on
+#endif
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -99,6 +106,10 @@ extern et_old_error_hook_func reset_com_err_hook
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
 #endif
 
 #define __COM_ERR_H

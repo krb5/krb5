@@ -60,6 +60,9 @@
 
 #if defined(_MSDOS) || defined(_WIN32) || defined(_MACINTOSH)
 #include "win-mac.h"
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import on
+#endif
 #endif
 
 #if defined(_MSDOS) || defined(_WIN32)
@@ -1305,6 +1308,10 @@ KRB5_DLLIMP krb5_error_code KRB5_CALLCONV krb5_ser_unpack_bytes
 		size_t,
 		krb5_octet FAR * FAR *,
 		size_t FAR *));
+
+#if defined(_MACINTOSH) && defined(__CFM68K__) && !defined(__USING_STATIC_LIBS__)
+#pragma import reset
+#endif
 
 /*
  * Convenience function for structure magic number
