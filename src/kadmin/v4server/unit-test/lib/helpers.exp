@@ -71,7 +71,7 @@ proc server_start { name cmdline should_listen args } {
 	    verbose "Couldn't connect to V4 kpasswd server; retrying ($num_tries so far)."
 	}
 
-	spawn $VFOURSERVER -k $env(K5ROOT)/ovsec_adm.srvtab $cmdline
+	spawn $VFOURSERVER $cmdline
 	set server_id $spawn_id
 
 	foreach test $args {
