@@ -7,6 +7,30 @@ if (defined ($ENV{'KERBSRCROOT'}))
 	$ROOT='.';
 }
 
+# if we get "maclist" as a command line argument, print out a
+# list of files we need.  Else, generate a makefile.
+
+if (defined($ARGV[0]) && $ARGV[0] eq "maclist")
+{
+	print(STDERR "Creating maclist.\n");
+	print(join(" ", &make_macfile_maclist(&make_macfile_list())), "\n");
+	print(STDERR "Done.\n");
+	exit;
+}	
+
+# if we get "macdirs" as a command line argument, print out a
+# list of directories we need.  Else, generate a makefile.
+
+if (defined($ARGV[0]) && $ARGV[0] eq "macdirs")
+{
+	print(STDERR "Creating macdirs.\n");
+	@MFSRCD=grep(s/(.*:)[^:]*\.c$/$1/, &make_macfile_maclist(&make_macfile_list()));
+	@MFSRCD=&uniq(sort(@MFSRCD));
+	print(join(" ", @MFSRCD), "\n");
+	print(STDERR "Done.\n");
+	exit;
+}	
+
 print(STDERR "Creating makefile.\n");
 
 @MACLIST=&make_macfile_maclist(&make_macfile_list());

@@ -427,6 +427,8 @@ GSSLib : GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K
 ##
 ################################################################################
 
+# This target punts things that get created during an MPW build
+
 clean : autogenerate-clean
 	Delete -i {GSSOBJS68K} {GSSOBJSPPC} {GSSOBJS68KCFM} \
 		{K5OBJS68K} {K5OBJSPPC} {K5OBJS68KCFM} \
@@ -434,8 +436,15 @@ clean : autogenerate-clean
 		{GSSSHLIBOBJ68KCFM} {GSSSHLIBOBJPPC} \
 		{K5SHLIBOBJ68KCFM} {K5SHLIBOBJPPC}
 
+# This target also punts everything that gets created in other ways during normal
+# build process (CW files etc)
+
 dist-clean : clean
-	Delete -i -y /bin
+	Delete -i -y /bin \
+		"/mac/libraries/Metrowerks/CW Pro 2/MIT C.CFM68K DLL.prj Data" \
+		"/mac/libraries/Metrowerks/CW Pro 2/MIT C.PPC DLL.prj Data" \
+		"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimeCFM68K DLL.prj Data" \
+		"/mac/libraries/Metrowerks/CW Pro 2/MIT RuntimePPC DLL.prj Data"
 	Delete -i GSSLib GSSLibraryPPC GSSLibrary68K K5LibraryPPC K5Library68K \
 		GSSLibrary68K.MAP GSSLibrary68K.SYM GSSLibraryPPC.MAP GSSLibraryPPC.xSYM \
 		K5Library68K.MAP K5Library68K.SYM K5LibraryPPC.MAP K5LibraryPPC.xSYM \
