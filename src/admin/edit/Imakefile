@@ -9,8 +9,8 @@
 # 
 DEPLIBS = $(DEPKDBLIB) $(DEPKLIB)
 LOCAL_LIBRARIES = $(KDBLIB) $(KLIB) $(SSLIB)
-OBJS= kdb5_edit.o kdb5_ed_ct.o
-SRCS= kdb5_edit.c kdb5_ed_ct.c
+OBJS= kdb5_edit.o kdb5_ed_ct.o dump.o
+SRCS= kdb5_edit.c kdb5_ed_ct.c dump.c
 
 all:: kdb5_edit
 
@@ -23,3 +23,5 @@ clean::
 	$(RM) kdb5_ed_ct.c
 
 NormalProgramTarget(kdb5_edit,$(OBJS),$(DEPLIBS),$(LOCAL_LIBRARIES),)
+
+SaberProgramTarget(kdb5_edit,$(SRCS),$(OBJS),$(LOCAL_LIBARIES),)
