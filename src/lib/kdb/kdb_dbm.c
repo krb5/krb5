@@ -370,7 +370,7 @@ krb5_dbm_db_init(context)
     /*
      * Check for presence of our context, if not present, allocate one.
      */
-    if (kret = k5dbm_init_context(context))
+    if ((kret = k5dbm_init_context(context)))
 	return(kret);
     db_ctx = context->db_context;
 
@@ -498,7 +498,7 @@ krb5_dbm_db_set_name(context, name)
     /*
      * Check for presence of our context, if not present, allocate one.
      */
-    if (kret = k5dbm_init_context(context))
+    if ((kret = k5dbm_init_context(context)))
 	return(kret);
     db_ctx = context->db_context;
     if (name == NULL)
@@ -655,7 +655,7 @@ krb5_dbm_db_end_read(context, age)
     time_t age2;
     krb5_error_code retval;
 
-    if (retval = krb5_dbm_db_get_age(context, NULL, &age2))
+    if ((retval = krb5_dbm_db_get_age(context, NULL, &age2)))
 	return retval;
     if (age2 != age || age == -1) {
 	return KRB5_KDB_DB_CHANGED;
@@ -903,7 +903,7 @@ krb5_dbm_db_destroy(context, dbname)
 	tmpcontext = 0;
 	if (!context->db_context) {
 	    tmpcontext = 1;
-	    if (retval = k5dbm_init_context(context))
+	    if ((retval = k5dbm_init_context(context)))
 		return(retval);
 	}
 	if (KDBM_DATA_EXT(context->db_context) &&
@@ -914,8 +914,8 @@ krb5_dbm_db_destroy(context, dbname)
 	    (retval = destroy_file_suffix(dbname, 
 					  KDBM_INDEX_EXT(context->db_context))))
 		return(retval);
-	if (retval = destroy_file_suffix(dbname,
-					 KDBM_LOCK_EXT(context->db_context)))
+	if ((retval = destroy_file_suffix(dbname,
+					 KDBM_LOCK_EXT(context->db_context))))
 		return(retval);
 	if (tmpcontext) {
 	    k5dbm_clear_context((db_context_t *) context->db_context);
@@ -954,7 +954,7 @@ krb5_dbm_db_rename(context, from, to)
     tmpcontext = 0;
     if (!context->db_context) {
 	tmpcontext = 1;
-	if (retval = k5dbm_init_context(context))
+	if ((retval = k5dbm_init_context(context)))
 	    return(retval);
     }
     if (KDBM_INDEX_EXT(context->db_context)) {
@@ -980,7 +980,7 @@ krb5_dbm_db_rename(context, from, to)
 	goto errout;
     }
 
-    if (retval = krb5_dbm_db_start_update(context, to, &trans))
+    if ((retval = krb5_dbm_db_start_update(context, to, &trans)))
 	goto errout;
     
     if (((!fromdir && !todir) ||
@@ -1042,10 +1042,10 @@ krb5_boolean *more;			/* are there more? */
 
     db_ctx = (db_context_t *) context->db_context;
     for (try = 0; try < KRB5_DBM_MAX_RETRY; try++) {
-	if (retval = krb5_dbm_db_start_read(context, &transaction))
+	if ((retval = krb5_dbm_db_start_read(context, &transaction)))
 	    return(retval);
 
-	if (retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED))
+	if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED)))
 	    return(retval);
 
 	if (db_ctx->db_dbm_ctx)
@@ -1062,7 +1062,7 @@ krb5_boolean *more;			/* are there more? */
 	*more = FALSE;
 
 	/* XXX deal with wildcard lookups */
-	if (retval = krb5_encode_princ_dbmkey(context, &key, searchfor))
+	if ((retval = krb5_encode_princ_dbmkey(context, &key, searchfor)))
 	    goto cleanup;
 
 	contents = KDBM_FETCH(db_ctx, db, key);
@@ -1070,7 +1070,8 @@ krb5_boolean *more;			/* are there more? */
 
 	if (contents.dptr == NULL)
 	    found = 0;
-	else if (retval = krb5_decode_princ_contents(context,&contents,entries))
+	else if ((retval = krb5_decode_princ_contents(context,
+						      &contents,entries)))
 	    goto cleanup;
 	else found = 1;
 
@@ -1142,7 +1143,7 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 	errout(KRB5_KDB_DBNOTINITED);
 
     db_ctx = (db_context_t *) context->db_context;
-    if (retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE)))
 	errout(retval);
 
     if (db_ctx->db_dbm_ctx)
@@ -1161,10 +1162,12 @@ krb5_dbm_db_put_principal(context, entries, nentries)
 
     /* for each one, stuff temps, and do replace/append */
     for (i = 0; i < *nentries; i++) {
-	if (retval = krb5_encode_princ_contents(context, &contents, entries))
+	if ((retval = krb5_encode_princ_contents(context, &contents,
+						 entries)))
 	    break;
 
-	if (retval = krb5_encode_princ_dbmkey(context, &key, entries->princ)) {
+	if ((retval = krb5_encode_princ_dbmkey(context, &key,
+					       entries->princ))) {
 	    krb5_free_princ_contents(context, &contents);
 	    break;
 	}
@@ -1208,7 +1211,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
-    if (retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_EXCLUSIVE)))
 	return(retval);
 
     if (db_ctx->db_dbm_ctx)
@@ -1222,7 +1225,7 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	}
     }
 
-    if (retval = krb5_encode_princ_dbmkey(context, &key, searchfor))
+    if ((retval = krb5_encode_princ_dbmkey(context, &key, searchfor)))
 	goto cleanup;
 
     contents = KDBM_FETCH(db_ctx, db, key);
@@ -1231,7 +1234,8 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 	*nentries = 0;
     } else {
 	memset((char *)&entry, 0, sizeof(entry));
-	if (retval = krb5_decode_princ_contents(context, &contents, &entry))
+	if ((retval = krb5_decode_princ_contents(context, &contents,
+						 &entry)))
 	    goto cleankey;
 	*nentries = 1;
 	/* Clear encrypted key contents */
@@ -1241,7 +1245,8 @@ krb5_dbm_db_delete_principal(context, searchfor, nentries)
 		       entry.key_data[i].key_data_length[0]); 
 	    }
 	}
-	if (retval = krb5_encode_princ_contents(context, &contents2, &entry))
+	if ((retval = krb5_encode_princ_contents(context, &contents2,
+						 &entry)))
 	    goto cleancontents;
 
 	if (KDBM_STORE(db_ctx, db, key, contents2, DBM_REPLACE))
@@ -1282,7 +1287,7 @@ krb5_dbm_db_iterate (context, func, func_arg)
 	return KRB5_KDB_DBNOTINITED;
 
     db_ctx = (db_context_t *) context->db_context;
-    if (retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED))
+    if ((retval = krb5_dbm_db_lock(context, KRB5_DBM_SHARED)))
 	return retval;
 
     if (db_ctx->db_dbm_ctx)
@@ -1299,7 +1304,8 @@ krb5_dbm_db_iterate (context, func, func_arg)
     for (key = KDBM_FIRSTKEY (db_ctx, db);
 	 key.dptr != NULL; key = KDBM_NEXTKEY(db_ctx, db)) {
 	contents = KDBM_FETCH (db_ctx, db, key);
-	if (retval = krb5_decode_princ_contents(context, &contents, &entries))
+	if ((retval = krb5_decode_princ_contents(context, &contents,
+						 &entries)))
 	    break;
 	retval = (*func)(func_arg, &entries);
 	krb5_dbe_free_contents(context, &entries);
@@ -1321,7 +1327,7 @@ krb5_dbm_db_set_lockmode(context, mode)
     db_context_t *db_ctx;
 
     old = mode;
-    if (db_ctx = (db_context_t *) context->db_context) {
+    if ((db_ctx = (db_context_t *) context->db_context)) {
 	old = db_ctx->db_nb_locks;
 	db_ctx->db_nb_locks = mode;
     }

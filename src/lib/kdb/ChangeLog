@@ -1,3 +1,23 @@
+Fri Aug  4 23:26:22 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* setup_mkey.c (krb5_db_setup_mkey_name): Add parens to shut up
+		gcc -Wall
+
+	* fetch_mkey.c (krb5_db_fetch_mkey): Add parens to shut up gcc
+		-Wall
+
+	* verify_mky.c (krb5_db_verify_master_key): Add parens to shut up
+		gcc -Wall
+
+	* kdb_xdr.c: Add parens to shut up gcc -Wall
+
+	* kdb_dbm.c: Add parens to shut up gcc -Wall
+
+	* decrypt_key.c (krb5_dbekd_decrypt_key_data): Add parens to shut
+		up gcc -Wall
+
+	* encrypt_key.c (krb5_dbekd_encrypt_key_data): Add parens to shut
+		up gcc -Wall
 
 Fri Aug 4 16:22:46 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* kdb_xdr,{de,en}crypt_key.c - Use encode/decode macros to [de]serialize

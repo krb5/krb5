@@ -30,9 +30,10 @@ krb5_auth_to_rep(context, auth, rep)
  krb5_error_code retval;
  rep->cusec = auth->authenticator->cusec;
  rep->ctime = auth->authenticator->ctime;
- if (retval = krb5_unparse_name(context, auth->ticket->server,&rep->server))
+ if ((retval = krb5_unparse_name(context, auth->ticket->server, &rep->server)))
    return retval; /* shouldn't happen */
- if (retval = krb5_unparse_name(context, auth->authenticator->client,&rep->client)) {
+ if ((retval = krb5_unparse_name(context, auth->authenticator->client,
+				 &rep->client))) {
      FREE(rep->server);
      return retval; /* shouldn't happen. */
  }

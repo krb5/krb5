@@ -37,7 +37,7 @@ krb5_keytab_entry *entry;
     krb5_error_code     kerror;
     krb5_int32          delete_point;
 
-    if (kerror = krb5_ktfileint_openw(context, id)) {
+    if ((kerror = krb5_ktfileint_openw(context, id))) {
 	return kerror;
     }
 
@@ -46,8 +46,9 @@ krb5_keytab_entry *entry;
      * is exited with a break statement.
      */
     while (TRUE) {
-	if (kerror = krb5_ktfileint_internal_read_entry(context, id, &cur_entry,
-                                                            &delete_point))
+	if ((kerror = krb5_ktfileint_internal_read_entry(context, id,
+							 &cur_entry,
+							 &delete_point)))
   	    break;
 
 	if ((entry->vno == cur_entry.vno) &&

@@ -67,7 +67,7 @@ krb5_kt_read_service_key(context, keyprocarg, principal, vno, keytype, key)
 		       sizeof(keytabname) - 1);
     }
 
-    if (kerror = krb5_kt_resolve(context, (char *)keytabname, &id))
+    if ((kerror = krb5_kt_resolve(context, (char *)keytabname, &id)))
 	return (kerror);
 
     kerror = krb5_kt_get_entry(context, id, principal, vno, keytype, &entry);

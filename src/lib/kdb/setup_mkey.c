@@ -61,7 +61,7 @@ krb5_db_setup_mkey_name(context, keyname, realm, fullname, principal)
     strcat(fname, REALM_SEP_STRING);
     strcat(fname, realm);
 
-    if (retval = krb5_parse_name(context, fname, principal))
+    if ((retval = krb5_parse_name(context, fname, principal)))
 	return retval;
     if (fullname)
 	*fullname = fname;

@@ -1,3 +1,6 @@
+Fri Aug  4 22:04:08 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* conv_princ.c: Add braces to initializer to shut up gcc -Wall
 
 Fri Jul 7 16:31:06 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Find com_err in TOPLIBD.

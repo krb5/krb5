@@ -42,7 +42,7 @@ krb5_ktfile_get_entry(context, id, principal, kvno, keytype, entry)
     krb5_error_code kerror = 0;
 
     /* Open the keyfile for reading */
-    if (kerror = krb5_ktfileint_openr(context, id))
+    if ((kerror = krb5_ktfileint_openr(context, id)))
 	return(kerror);
     
     /* 
@@ -53,7 +53,7 @@ krb5_ktfile_get_entry(context, id, principal, kvno, keytype, entry)
     cur_entry.vno = 0;
     cur_entry.key.contents = 0;
     while (TRUE) {
-	if (kerror = krb5_ktfileint_read_entry(context, id, &new_entry))
+	if ((kerror = krb5_ktfileint_read_entry(context, id, &new_entry)))
 	    break;
 
 	if (krb5_principal_compare(context, principal, new_entry.principal)) {

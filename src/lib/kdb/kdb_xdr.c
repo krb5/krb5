@@ -32,13 +32,13 @@ krb5_dbe_create_key_data(context, entry)
     krb5_db_entry	* entry;
 {
     if (entry->n_key_data) {
-	if (entry->key_data = (krb5_key_data *)realloc(entry->key_data, 
-				sizeof(krb5_key_data) * (entry->n_key_data + 1)))
+	if ((entry->key_data = (krb5_key_data *)realloc(entry->key_data, 
+	         sizeof(krb5_key_data) * (entry->n_key_data + 1))))
     	    memset(entry->key_data + entry->n_key_data,0,sizeof(krb5_key_data));
 	else 
 	    return ENOMEM;
     } else { 
-	if (entry->key_data = (krb5_key_data *)malloc(sizeof(krb5_key_data))) 
+	if ((entry->key_data = (krb5_key_data *)malloc(sizeof(krb5_key_data))))
     	    memset(entry->key_data, 0, sizeof(krb5_key_data));
 	else 
 	    return ENOMEM;
@@ -63,8 +63,8 @@ krb5_dbe_encode_mod_princ_data(context, mod_princ, entry)
      * Need 04 bytes for date
      * Need XX bytes for string
      */
-    if (retval = krb5_unparse_name(context, mod_princ->mod_princ, 
-				   &unparse_mod_princ))
+    if ((retval = krb5_unparse_name(context, mod_princ->mod_princ, 
+				   &unparse_mod_princ)))
 	return(retval);
 
     unparse_mod_princ_size = (int) strlen(unparse_mod_princ) + 1;
@@ -124,8 +124,8 @@ krb5_dbe_decode_mod_princ_data(context, entry, mod_princ)
 	    nextloc += 4;
 
 	    /* Mod Princ */
-    	    if (retval = krb5_parse_name(context, (const char *) nextloc, 
-					 &((*mod_princ)->mod_princ))) 
+    	    if ((retval = krb5_parse_name(context, (const char *) nextloc, 
+					 &((*mod_princ)->mod_princ))))
 		break;
     	    if ((strlen((char *) nextloc) + 1 + 4) !=
 		tl_data->tl_data_length) {
@@ -202,7 +202,7 @@ krb5_encode_princ_contents(context, content, entry)
      */
     content->dsize = entry->len + entry->e_length;
 
-    if (retval = krb5_unparse_name(context, entry->princ, &unparse_princ))
+    if ((retval = krb5_unparse_name(context, entry->princ, &unparse_princ)))
 	return(retval);
 
     unparse_princ_size = strlen(unparse_princ) + 1;
@@ -451,7 +451,7 @@ krb5_decode_princ_contents(context, content, entry)
 	/* Check for extra data */
     if (entry->len > KRB5_KDB_V1_BASE_LENGTH) {
 	entry->e_length = entry->len - KRB5_KDB_V1_BASE_LENGTH;
-	if (entry->e_data = (krb5_octet *)malloc(entry->e_length)) {
+	if ((entry->e_data = (krb5_octet *)malloc(entry->e_length))) {
 	    memcpy(entry->e_data, nextloc, entry->e_length);
 	    nextloc += entry->e_length;
 	} else {
@@ -473,7 +473,7 @@ krb5_decode_princ_contents(context, content, entry)
     i = (int) i16;
     nextloc += 2;
 
-    if (retval = krb5_parse_name(context, nextloc, &(entry->princ))) 
+    if ((retval = krb5_parse_name(context, nextloc, &(entry->princ))))
 	goto error_out;
     if ((i != (strlen(nextloc) + 1)) || (sizeleft < i)) {
 	retval = KRB5_KDB_TRUNCATED_RECORD;

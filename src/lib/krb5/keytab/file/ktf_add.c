@@ -35,7 +35,7 @@ krb5_ktfile_add(context, id, entry)
 {
     krb5_error_code retval;
 
-    if (retval = krb5_ktfileint_openw(context, id))
+    if ((retval = krb5_ktfileint_openw(context, id)))
 	return retval;
     if (fseek(KTFILEP(id), 0, 2) == -1)
 	return KRB5_KT_END;

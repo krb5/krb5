@@ -1,3 +1,13 @@
+Fri Aug  4 22:07:46 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* rc_conv.c (krb5_auth_to_rep): Add parens to shut up gcc -Wall
+
+	* rc_io.c: Add parens to shut up gcc -Wall
+
+	* rc_dfl.c: Add parens to shut up gcc -Wall
+
+	* rc_base.c: Add parens to shut up gcc -Wall
+
 Thu Jul 20 22:34:47 1995  Mark Eichin  <eichin@cygnus.com>
 
 	* rc_dfl.c (rc_store): rename from store() to avoid conflict with

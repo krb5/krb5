@@ -55,16 +55,16 @@ struct krb_convert {
  * we'll fix that in the next release.
  */
 static struct krb_convert sconv_list[] = {
-    "kadmin",	"kadmin",	0,
-    "rcmd",	"host",		DO_REALM_CONVERSION,
-    "discuss",	"discuss",	DO_REALM_CONVERSION,
-    "rvdsrv",	"rvdsrv",	DO_REALM_CONVERSION,
-    "sample",	"sample",	DO_REALM_CONVERSION,
-    "olc",	"olc",		DO_REALM_CONVERSION,
-    "pop",	"pop",		DO_REALM_CONVERSION,
-    "sis",	"sis",		DO_REALM_CONVERSION,
-    "rfs",	"rfs",		DO_REALM_CONVERSION,
-    0,		0,
+    {"kadmin",	"kadmin",	0},
+    {"rcmd",	"host",		DO_REALM_CONVERSION},
+    {"discuss",	"discuss",	DO_REALM_CONVERSION},
+    {"rvdsrv",	"rvdsrv",	DO_REALM_CONVERSION},
+    {"sample",	"sample",	DO_REALM_CONVERSION},
+    {"olc",	"olc",		DO_REALM_CONVERSION},
+    {"pop",	"pop",		DO_REALM_CONVERSION},
+    {"sis",	"sis",		DO_REALM_CONVERSION},
+    {"rfs",	"rfs",		DO_REALM_CONVERSION},
+    {0,		0,		0},
 };
 
 /*

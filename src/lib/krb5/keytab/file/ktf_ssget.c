@@ -36,7 +36,7 @@ krb5_kt_cursor *cursorp;
     krb5_error_code retval;
     long *fileoff;
 
-    if (retval = krb5_ktfileint_openr(context, id))
+    if ((retval = krb5_ktfileint_openr(context, id)))
 	return retval;
 
     if (!(fileoff = (long *)malloc(sizeof(*fileoff)))) {

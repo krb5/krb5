@@ -40,7 +40,7 @@ krb5_kt_cursor *cursor;
 
     if (fseek(KTFILEP(id), *fileoff, 0) == -1)
 	return KRB5_KT_END;
-    if (kerror = krb5_ktfileint_read_entry(context, id, &cur_entry))
+    if ((kerror = krb5_ktfileint_read_entry(context, id, &cur_entry)))
 	return kerror;
     *fileoff = ftell(KTFILEP(id));
     *entry = cur_entry;

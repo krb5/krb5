@@ -122,7 +122,7 @@ krb5_kuserok(context, principal, luser)
 	linebuf[BUFSIZ-1] = '\0';
 	newline = NULL;
 	/* nuke the newline if it exists */
-	if (newline = strchr(linebuf, '\n'))
+	if ((newline = strchr(linebuf, '\n')))
 	    *newline = '\0';
 	if (!strcmp(linebuf, princname)) {
 	    isok = TRUE;

@@ -56,10 +56,10 @@ krb5_dbekd_decrypt_key_data(context, eblock, key_data, keyblock, keysalt)
     ptr = key_data->key_data_contents[0];
     krb5_kdb_decode_int16(ptr, keyblock->length);
     ptr += 2;
-    if (retval = krb5_decrypt(context, (krb5_pointer) ptr,
-			      (krb5_pointer)keyblock->contents,
-			      key_data->key_data_length[0] - 2, 
-			      eblock, 0)) {
+    if ((retval = krb5_decrypt(context, (krb5_pointer) ptr,
+			       (krb5_pointer)keyblock->contents,
+			       key_data->key_data_length[0] - 2, 
+			       eblock, 0))) {
     	krb5_xfree(keyblock->contents);
 	return retval;
     }

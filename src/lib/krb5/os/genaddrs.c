@@ -53,7 +53,7 @@ krb5_auth_con_genaddrs(context, auth_context, fd, flags)
     ssize = sizeof(struct sockaddr);
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_ADDR)) {
-    	if (retval = getsockname(fd, (struct sockaddr *) &lsaddr, &ssize)) 
+    	if ((retval = getsockname(fd, (struct sockaddr *) &lsaddr, &ssize)))
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR) {
@@ -75,7 +75,7 @@ krb5_auth_con_genaddrs(context, auth_context, fd, flags)
 
     if ((flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) ||
 	(flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_ADDR)) {
-        if (retval = getpeername(fd, (struct sockaddr *) &rsaddr, &ssize))
+        if ((retval = getpeername(fd, (struct sockaddr *) &rsaddr, &ssize)))
 	    return retval;
 
     	if (flags & KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR) {

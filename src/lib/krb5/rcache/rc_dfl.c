@@ -191,10 +191,11 @@ krb5_deltat lifespan;
 
     t->lifespan = lifespan;
 #ifndef NOIOSTUFF
-    if (retval = krb5_rc_io_creat(context, &t->d,&t->name))
+    if ((retval = krb5_rc_io_creat(context, &t->d,&t->name)))
 	return retval;
-    if (krb5_rc_io_write(context, &t->d,(krb5_pointer) &t->lifespan,sizeof(t->lifespan))
-	|| krb5_rc_io_sync(context, &t->d))
+    if ((krb5_rc_io_write(context, &t->d,
+			  (krb5_pointer) &t->lifespan, sizeof(t->lifespan))
+	 || krb5_rc_io_sync(context, &t->d)))
 	return KRB5_RC_IO;
 #endif
     return 0;
@@ -210,7 +211,7 @@ krb5_error_code krb5_rc_dfl_close_no_free(context, id)
  FREE(t->h);
  if (t->name)
      FREE(t->name);
- while (q = t->a)
+ while ((q = t->a))
   {
    t->a = q->na;
    FREE(q->rep.client);
@@ -390,7 +391,7 @@ krb5_rcache id;
     krb5_error_code retval;
     long max_size;
 
-    if (retval = krb5_rc_io_open(context, &t->d,t->name))
+    if ((retval = krb5_rc_io_open(context, &t->d, t->name)))
 	return retval;
  
     max_size = krb5_rc_io_size(context, &t->d);

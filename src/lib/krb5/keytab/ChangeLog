@@ -1,3 +1,11 @@
+Fri Aug  4 21:48:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* read_servi.c (krb5_kt_read_service_key): add more parens to shut
+		up gcc -Wall
+
+	* ktdefault.c (krb5_kt_default): add more parens to shut up gcc
+		-Wall
+
 Fri Jun  9 19:33:33 1995    <tytso@rsx-11.mit.edu>
 
 	* configure.in: Remove standardized set of autoconf macros, which

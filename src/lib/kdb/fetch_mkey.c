@@ -71,10 +71,10 @@ krb5_db_fetch_mkey(context, mname, eblock, fromkeyboard, twice, keyfile, salt, k
     if (fromkeyboard) {
 	krb5_data scratch;
 
-	if (retval = krb5_read_password(context, krb5_mkey_pwd_prompt1,
-					twice ? krb5_mkey_pwd_prompt2 : 0,
-					password,
-					&size))
+	if ((retval = krb5_read_password(context, krb5_mkey_pwd_prompt1,
+					 twice ? krb5_mkey_pwd_prompt2 : 0,
+					 password,
+					 &size)))
 	    return(retval);
 
 	pwd.data = password;

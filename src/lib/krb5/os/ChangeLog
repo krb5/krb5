@@ -1,3 +1,13 @@
+Fri Aug  4 22:51:15 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* kuserok.c (krb5_kuserok): Add parens to shut up gcc -Wall
+
+	* genaddrs.c (krb5_auth_con_genaddrs): Add parens to shut up gcc
+		-Wall
+
+	* an_to_ln.c: Include ctype.h to get some prototypes; also add
+		parens to shut up gcc -Wall
+
 Fri Jul 28 23:28:11 1995  Sam Hartman  <hartmans@tertius.mit.edu>
 
 	* sn2princ.c (krb5_sname_to_principal): GDon't use default realm

@@ -91,7 +91,7 @@ char * krb5_rc_default_type(context)
     krb5_context context;
 {
  char *s;
- if (s = getenv("KRB5RCACHETYPE"))
+ if ((s = getenv("KRB5RCACHETYPE")))
    return s;
  else
    return "dfl";
@@ -101,7 +101,7 @@ char * krb5_rc_default_name(context)
     krb5_context context;
 {
  char *s;
- if (s = getenv("KRB5RCACHENAME"))
+ if ((s = getenv("KRB5RCACHENAME")))
    return s;
  else
    return (char *) 0;
@@ -117,13 +117,13 @@ krb5_rc_default(context, id)
     if (!(*id = (krb5_rcache )malloc(sizeof(**id))))
 	return KRB5_RC_MALLOC;
 
-    if (retval = krb5_rc_resolve_type(context, id, 
-			   	      krb5_rc_default_type(context))) {
+    if ((retval = krb5_rc_resolve_type(context, id, 
+				       krb5_rc_default_type(context)))) {
 	FREE(*id);
 	return retval;
     }
-    if (retval = krb5_rc_resolve(context, *id, 
-				 krb5_rc_default_name(context)))
+    if ((retval = krb5_rc_resolve(context, *id, 
+				 krb5_rc_default_name(context))))
 	FREE(*id);
     return retval;
 }
@@ -151,13 +151,13 @@ krb5_error_code krb5_rc_resolve_full(context, id, string_name)
 	return KRB5_RC_MALLOC;
     }
 
-    if (retval = krb5_rc_resolve_type(context, id,type)) {
+    if ((retval = krb5_rc_resolve_type(context, id,type))) {
 	FREE(type);
 	FREE(*id);
 	return retval;
     }
     FREE(type);
-    if (retval = krb5_rc_resolve(context, *id,residual + 1))
+    if ((retval = krb5_rc_resolve(context, *id,residual + 1)))
 	FREE(*id);
     return retval;
 }

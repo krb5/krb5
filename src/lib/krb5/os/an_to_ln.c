@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include <ctype.h>
 #if	HAVE_REGEX_H
 #include <regex.h>
 #endif	/* HAVE_REGEX_H */
@@ -84,7 +85,7 @@ aname_full_to_mapping_name(fprincname)
 	    atp = &fprincname[strlen(fprincname)];
 	mlen = (size_t) (atp - fprincname);
 	
-	if (mname = (char *) malloc(mlen+1)) {
+	if ((mname = (char *) malloc(mlen+1))) {
 	    strncpy(mname, fprincname, mlen);
 	    mname[mlen] = '\0';
 	}
@@ -113,7 +114,7 @@ db_an_to_ln(context, dbname, aname, lnsize, lname)
     datum key, contents;
     char *princ_name;
 
-    if (retval = krb5_unparse_name(context, aname, &princ_name))
+    if ((retval = krb5_unparse_name(context, aname, &princ_name)))
 	return(retval);
     key.dptr = princ_name;
     key.dsize = strlen(princ_name)+1;	/* need to store the NULL for
@@ -611,7 +612,7 @@ default_an_to_ln(context, aname, lnsize, lname)
 
     realm_length = krb5_princ_realm(context, aname)->length;
     
-    if (retval = krb5_get_default_realm(context, &def_realm)) {
+    if ((retval = krb5_get_default_realm(context, &def_realm))) {
 	return(retval);
     }
     if (((size_t) realm_length != strlen(def_realm)) ||
@@ -681,7 +682,7 @@ krb5_aname_to_localname(context, aname, lnsize, lname)
     if (!(kret = krb5_get_default_realm(context, &realm))) {
 	/* Flatten the name */
 	if (!(kret = krb5_unparse_name(context, aname, &pname))) {
-	    if (mname = aname_full_to_mapping_name(pname)) {
+	    if ((mname = aname_full_to_mapping_name(pname))) {
 		/*
 		 * Search first for explicit mappings of the form:
 		 *

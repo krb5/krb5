@@ -122,8 +122,8 @@ int mode;
 	} else				/* some other error */
 	    return errno;
     }
-    if (kerror = krb5_lock_file(context, KTFILEP(id), KTFILENAME(id),
-				mode)) {
+    if ((kerror = krb5_lock_file(context, KTFILEP(id), KTFILENAME(id),
+				 mode))) {
 	(void) fclose(KTFILEP(id));
 	KTFILEP(id) = 0;
 	return kerror;
@@ -737,7 +737,7 @@ krb5_int32 *commit_point;
                  */
                 zero_point = ftell(KTFILEP(id));
                 setbuf(KTFILEP(id), iobuf);
-                while (size = xfread(iobuf, 1, sizeof(iobuf), KTFILEP(id))) {
+                while ((size = xfread(iobuf, 1, sizeof(iobuf), KTFILEP(id)))) {
                     if (size != sizeof(iobuf)) {
                         remainder = size % sizeof(krb5_int32);
                         if (remainder) {

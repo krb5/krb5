@@ -209,7 +209,8 @@ krb5_error_code krb5_rc_io_open (context, d, fn)
 	    goto fail;
     }
  }
-    if (retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,  sizeof(rc_vno)))  
+    if ((retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,
+				  sizeof(rc_vno))))
 	goto unlk;
 
 
