@@ -9,6 +9,9 @@ static char *rcsid = "$Header$";
  *
  *
  * $Log$
+ * Revision 1.3  1994/06/13 21:54:50  eichin
+ * rewrite linux hack so it works (should autoconf it)
+ *
  * Revision 1.2  1994/06/12 23:52:02  tytso
  * Take out old linux specific hack which doesn't work anymore.
  *
@@ -117,6 +120,7 @@ int	mask;
     return omask;
 }
 
+#ifndef linux
 int	sigsetmask (mask)
 int	mask;
 {
@@ -146,6 +150,7 @@ int	mask;
 
     return omask;
 }
+#endif
 
 #endif
 #endif
