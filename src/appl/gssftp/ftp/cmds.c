@@ -167,6 +167,7 @@ setpeer(argc, argv)
 		mode = MODE_S;
 		stru = STRU_F;
 		(void) strcpy(bytename, "8"), bytesize = 8;
+		do_auth();
 		if (autologin)
 			(void) login(argv[1]);
 

@@ -1,3 +1,12 @@
+Fri Feb 16 15:50:51 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp.c (do_auth): return status handling fixes from kbalk@hp.com.
+
+Tue Jan 16 19:05:31 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* ftp.c (login): move do_auth ...
+	* cmds.c (setpeer): ... to just before login call.
+
 Mon Feb 5 09:06:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* configure.in: Check for stdlib.h

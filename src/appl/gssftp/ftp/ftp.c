@@ -255,7 +255,6 @@ login(host)
 	char *user, *pass, *acct, *getenv(), *getlogin(), *mygetpass();
 	int n, aflag = 0;
 
-	do_auth();
 	user = pass = acct = 0;
 	if (ruserpass(host, &user, &pass, &acct) < 0) {
 		code = -1;
@@ -592,25 +591,34 @@ getreply(expecteof)
 			return(getreply(expecteof));
 		ibuf[0] = obuf[i] = '\0';
 		if (code && n == '6')
-		    if (code != 631 && code != 632 && code != 633)
+		    if (code != 631 && code != 632 && code != 633) {
 			printf("Unknown reply: %d %s\n", code, obuf);
-		    else safe = code == 631;
+			n = '5';
+		    } else safe = code;
 		if (obuf[0])	/* if there is a string to decode */
-		    if (!auth_type)
+		    if (!auth_type) {
 			printf("Cannot decode reply:\n%d %s\n", code, obuf);
+			n = '5';
+		    }
 #ifdef NOENCRYPTION
-		    else if (code == 632)
+		    else if (code == 632) {
 			printf("Cannot decrypt %d reply: %s\n", code, obuf);
+			n = '5';
+		    }
 #endif
 #ifdef NOCONFIDENTIAL
-		    else if (code == 633)
+		    else if (code == 633) {
 			printf("Cannot decrypt %d reply: %s\n", code, obuf);
+			n = '5';
+		    }
 #endif
 		    else {
 			int len;
-			if (kerror = radix_encode(obuf, ibuf, &len, 1))
+			if (kerror = radix_encode(obuf, ibuf, &len, 1)) {
 			    printf("Can't base 64 decode reply %d (%s)\n\"%s\"\n",
 					code, radix_error(kerror), obuf);
+			    n = '5';
+			}
 #ifdef KERBEROS
 			else if (strcmp(auth_type, "KERBEROS_V4") == 0)
 				if ((kerror = safe ?
@@ -620,12 +628,13 @@ getreply(expecteof)
 				: krb_rd_priv((unsigned char *)ibuf, len,
 					schedule, &cred.session,
 					&hisctladdr, &myctladdr, &msg_data))
-				!= KSUCCESS)
+				!= KSUCCESS) {
 				  printf("%d reply %s! (krb_rd_%s: %s)\n", code,
 					safe ? "modified" : "garbled",
 					safe ? "safe" : "priv",
 					krb_get_err_text(kerror));
-				else {
+				  n = '5';
+				} else {
 				  if (verbose) printf("%c:", safe ? 'S' : 'P');
 				  memcpy(ibuf, msg_data.app_data,
 					msg_data.app_length);
@@ -648,6 +657,7 @@ getreply(expecteof)
 				if (maj_stat != GSS_S_COMPLETE) {
 				  user_gss_error(maj_stat, min_stat, 
 						 "failed unsealing reply");
+				  n = '5';
 				} else {
 				  memcpy(ibuf, msg_buf.value, 
 					 msg_buf.length);
@@ -1818,7 +1828,7 @@ char realm[REALM_SZ + 1];
 
 #ifdef GSSAPI
 /* for testing, we don't have an ftp key yet */
-char* gss_services[] = { /* "ftp",*/ "host", 0 };
+char* gss_services[] = { "ftp", "host", 0 };
 #endif /* GSSAPI */
 
 do_auth()
@@ -2016,6 +2026,8 @@ do_auth()
 	      }
 	    } while (maj_stat == GSS_S_CONTINUE_NEEDED);
     outer_loop:
+	    if (maj_stat == GSS_S_COMPLETE)
+	        break;
 	    ;
 	  }
 	  verbose = oldverbose;
