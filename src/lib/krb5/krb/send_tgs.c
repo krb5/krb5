@@ -170,7 +170,7 @@ OLDDECLARG(krb5_response *,rep)
     }
 
     if (!(ap_checksum.contents = (krb5_octet *)
-	  malloc(krb5_cksumarray[sumtype]->checksum_length))) {
+	  malloc(krb5_checsum_size(sumtype)))) {
 	if (sec_ticket)
 	    krb5_free_ticket(sec_ticket);
 	krb5_free_data(scratch);
@@ -178,12 +178,12 @@ OLDDECLARG(krb5_response *,rep)
 	return ENOMEM;
     }
 
-    if (retval = (*(krb5_cksumarray[sumtype]->
-		    sum_func))(scratch->data,
-			       scratch->length,
-			       (krb5_pointer) usecred->keyblock.contents,
-			       usecred->keyblock.length,
-			       &ap_checksum)) {
+    if (retval = krb5_calculate_checksum(sumtype,
+					 scratch->data,
+					 scratch->length,
+					 (krb5_pointer) usecred->keyblock.contents,
+					 usecred->keyblock.length,
+					 &ap_checksum)) {
 	if (sec_ticket)
 	    krb5_free_ticket(sec_ticket);
 	xfree(ap_checksum.contents);
