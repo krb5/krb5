@@ -78,14 +78,15 @@
 #
 # GSS-API compatibility symbols from gssapi_generic.h 
 # (the same as rfc 2744 symbols)
+# (Only exported on Mac OS X, not on Mac OS 9)
 #
     
-	gss_nt_user_name
-	gss_nt_machine_uid_name
-	gss_nt_string_uid_name
-	gss_nt_service_name_v2
-	gss_nt_service_name
-	gss_nt_exported_name
+#	gss_nt_user_name
+#	gss_nt_machine_uid_name
+#	gss_nt_string_uid_name
+#	gss_nt_service_name_v2
+#	gss_nt_service_name
+#	gss_nt_exported_name
 
 #
 # KRB5 Mechanism GSS-API object identifier from rfc 1964
