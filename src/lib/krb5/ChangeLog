@@ -1,3 +1,10 @@
+2000-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't generate Makefile in ccache/file,
+	ccache/stdio, ccache/memory.
+	* Makefile.in (LOCAL_SUBDIRS, LIB_SUBDIRS, LIBDONE, STOBJLISTS):
+	Delete references to those directories.
+
 2000-07-01  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (SHLIB_EXPLIBS): Use $(LIBS) not @RESOLV_LIB@ in
