@@ -55,8 +55,6 @@ static char rd_req_dec_c[] =
 
 static krb5_error_code decrypt_authenticator PROTOTYPE((const krb5_ap_req *,
 							krb5_authenticator **));
-static krb5_error_code copy_ticket PROTOTYPE((krb5_ticket *, krb5_ticket **));
-
 extern krb5_deltat krb5_clockskew;
 #define in_clock_skew(date) (abs((date)-currenttime) < krb5_clockskew)
 
@@ -105,8 +103,10 @@ krb5_tkt_authent *tktauthent;
 	retval = krb5_kt_get_entry(keytabid, req->ticket->server,
 				   req->ticket->skvno, &ktentry);
 	(void) krb5_kt_close(keytabid);
-	tkt_key_real = ktentry.key;
-	tkt_key = &tkt_key_real;
+	if (!retval) {
+	    retval = krb5_copy_keyblock(&ktentry.key, &tkt_key_real);
+	    tkt_key = &tkt_key_real;
+	}
 	(void) krb5_kt_free_entry(&ktentry);
     }
     if (retval)
@@ -164,7 +164,7 @@ krb5_tkt_authent *tktauthent;
 	clean_authenticator();
 	return KRB5KRB_AP_ERR_TKT_INVALID;
     }
-    if (retval = copy_ticket(req->ticket, &tktauthent->ticket)) {
+    if (retval = krb5_copy_ticket(req->ticket, &tktauthent->ticket)) {
 	clean_authenticator();
     } else
 	tktauthent->ap_options = req->ap_options;
@@ -223,23 +223,4 @@ krb5_authenticator **authpp;
     clean_scratch();
     return retval;
 }
-static krb5_error_code
-copy_ticket(from, pto)
-krb5_ticket *from;
-krb5_ticket **pto;
-{
-    krb5_error_code retval;
-    krb5_data *scratch;
 
-    /* use a trick here---encoding a ticket & decoding it will
-       result in a freshly allocated data structure */
-    
-    if (retval = encode_krb5_ticket(from, &scratch))
-	return ENOMEM;			/* lie a little, since we cheat */
-    retval = decode_krb5_ticket(scratch, pto);
-    krb5_free_data(scratch);
-    if (retval)
-	return ENOMEM;
-    else
-	return 0;
-}
