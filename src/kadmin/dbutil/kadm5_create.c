@@ -31,7 +31,6 @@ int add_admin_princ(void *handle, krb5_context context,
 
 extern char *progname;
 
-extern krb5_encrypt_block master_encblock;
 extern krb5_keyblock master_keyblock;
 extern krb5_db_entry master_db;
 
