@@ -1,5 +1,7 @@
 2001-08-30  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for ipv6 support.
+
 	* ext.h: Always use prototype declarations.
 	(P): Definitions deleted.
 

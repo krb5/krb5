@@ -24,6 +24,7 @@ fi
 AC_HEADER_TIME
 AC_CHECK_HEADERS(string.h arpa/nameser.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/filio.h sys/stream.h sys/utsname.h memory.h)
 AC_CHECK_FUNCS(gettosbyname vsnprintf)
+KRB5_AC_INET6
 dnl Make our operating system-specific security checks and definitions for
 dnl login.
 dnl
