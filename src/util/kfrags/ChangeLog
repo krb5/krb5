@@ -1,3 +1,7 @@
+Tue Oct 18 14:38:58 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* base.conf: add "sort" since "make check" needs it.
+
 Tue Oct 11 19:10:13 1994  Mark Eichin  (eichin@cygnus.com)
 
 	* ucb.conf: add "ranlib" for ucb, it's a common element.
