@@ -1,3 +1,7 @@
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* reconf: Drop support for 2.52 and earlier.
+
 2003-04-10  Tom Yu  <tlyu@mit.edu>
 
 	* reconf: Warn if autoconf-2.52 is used, as it generates buggy

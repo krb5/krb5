@@ -24,9 +24,9 @@ do
   esac
 done
 
-# Currently (2000-10-03) we need 2.13 or later.
+# Currently (2003-04-23) we need 2.53 or later.
 # The pattern also recognizes 2.40 and up.
-patb="2.(1[3-9])|([4-9][0-9])"
+patb="2.(1[0-9][0-9])|(5[3-9])|([6-9][0-9])"
 
 # sedcmd1 recognizes the older 2.12 version, and sedcmd2 the newer 2.49
 sedcmd1="s,.*version \(.*\)$,\1,"
@@ -39,21 +39,10 @@ if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/
     autoreconfoptions=
     autoconfversion=`autoconf --version | sed -e "$sedcmd1" -e "$sedcmd2"`
 	echo "Using autoconf version $autoconfversion found in your path..."
-	# Determine if localdir needs to be relative or absolute
-	case "$autoconfversion" in
-	  2.1*)
-	       localdir=.
-	       ;;
-	     *)
-	       localdir=`pwd`
-	       ;;
-	esac
+	localdir=`pwd`
 
 	# Determine if we need to patch autoreconf for 2.53
 	case "$autoconfversion" in
-	  2.52)
-	       echo "WARNING: autoconf 2.52 is known to generate buggy configure scripts!"
-	       ;;
 	  2.53)
 	       echo "Patching autoreconf"
 	       # Walk the path to find autoreconf
@@ -79,20 +68,9 @@ if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/
 	       ;;
 	esac
 
-	# Determine the proper argument to autoreconf 
-	case "$autoconfversion" in
-	  2.1*)
-	       localdirarg="-l"
-	       ;;
-	  2.5[23])
-	       localdirarg="-l"
-	       ;;
-	    *)
-	       localdirarg="-I"
-	       ;;
-	esac
+	localdirarg="-I"
 else
-	echo "Couldn't find autoconf 2.13 or higher in your path."
+	echo "Couldn't find autoconf 2.53 or higher in your path."
 	echo " "
 	echo "Please install or add to your path and re-run ./util/reconf"
 	exit 1
