@@ -15,11 +15,9 @@ BEGIN
 
 -- Define "better" names
 
-SessionKey ::= OCTET STRING
 Realm ::= GeneralString
 PrincipalName ::= SEQUENCE OF GeneralString
 EncryptedData ::= OCTET STRING
-Checksum ::= OCTET STRING
 
 -- Message types from protocol spec
 
@@ -63,15 +61,25 @@ ChecksumType ::= INTEGER {
 	des-mac(4)
 }
 
+-- EncryptionKey 
+EncryptionKey ::= SEQUENCE {
+	keytype[0]			KeyType,
+	session[1]			OCTET STRING
+}
+
+Checksum ::= SEQUENCE {
+	cksumtype[0]			ChecksumType,
+	checksum[1]			OCTET STRING
+}
+
 -- Unencrypted authenticator
 Authenticator ::= SEQUENCE  {
 	authenticator-vno[0]		AuthenticatorVersion,
 	crealm[1]			Realm,
 	cname[2]			PrincipalName,
-	checksumType[3]			ChecksumType,
-	checksum[4]			Checksum,
-	cmsec[5]			INTEGER,
-	ctime[6]			UTCTime
+	cksum[3]			Checksum,
+	cmsec[4]			INTEGER,
+	ctime[5]			UTCTime
 }
 
 AuthenticatorVersion ::= INTEGER {krb5(5)}
@@ -81,17 +89,16 @@ EncryptedAuthenticator ::= OCTET STRING
 -- Encrypted part of ticket
 EncTicketPart ::= SEQUENCE {
 	flags[0]			TicketFlags,
-	keytype[1]			KeyType,
-	session[2]			SessionKey,
-	crealm[3]			Realm,
-	cname[4]			PrincipalName,
-	transited[5]			GeneralString,
-	authtime[6]			UTCTime,
-	starttime[7]			UTCTime,
-	endtime[8]			UTCTime,
-	renewTill[9]			UTCTime OPTIONAL,
-	caddr[10]			HostAddresses,
-	authorization-data[11]		AuthorizationData OPTIONAL
+	key[1]				EncryptionKey,
+	crealm[2]			Realm,
+	cname[3]			PrincipalName,
+	transited[4]			GeneralString,
+	authtime[5]			UTCTime,
+	starttime[6]			UTCTime,
+	endtime[7]			UTCTime,
+	renewTill[8]			UTCTime OPTIONAL,
+	caddr[9]			HostAddresses,
+	authorization-data[10]		AuthorizationData OPTIONAL
 }
 
 
@@ -174,16 +181,15 @@ KDC-REP ::= [APPLICATION 1] SEQUENCE {
 }
 
 EncKDCRepPart ::= SEQUENCE {
-	keytype[0]			KeyType,
-	session[1]			SessionKey,
-	last-req[2]			LastReq,
-	ctime[3]			UTCTime,
-	ktime[4]			UTCTime,
-	key-exp[5]			UTCTime,
-	flags[6]			TicketFlags,
-	starttime[7]			UTCTime,
-	endtime[8]			UTCTime,
-	renew-till[6]			UTCTime OPTIONAL,
+	key[0]				EncryptionKey,
+	last-req[1]			LastReq,
+	ctime[2]			UTCTime,
+	ktime[3]			UTCTime,
+	key-exp[4]			UTCTime,
+	flags[5]			TicketFlags,
+	starttime[6]			UTCTime,
+	endtime[7]			UTCTime,
+	renew-till[8]			UTCTime OPTIONAL,
 	srealm[9]			Realm,
 	sname[10]			PrincipalName,
 	caddr[11]			HostAddresses
@@ -261,8 +267,7 @@ KRB-SAFE ::= [APPLICATION 6] SEQUENCE {
 	timestamp[3]			UTCTime,
 	msec[4]				INTEGER,
 	addresses[5]			HostAddresses,
-	checksumType[6]			ChecksumType,
-	checksum[7]			Checksum			
+	checksum[6]			Checksum			
 }
 
 KRB-PRIV ::= [APPLICATION 7] SEQUENCE {
