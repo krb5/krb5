@@ -1,3 +1,8 @@
+2004-10-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (TEST_PROGS): Add t_locate_kdc.
+	(check-unix): Run t_locate_kdc to test fetching DNS SRV records.
+
 2004-10-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* localaddr.c (foreach_localaddr): Be more careful not to walk

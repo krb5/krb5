@@ -153,7 +153,7 @@ clean-unix:: clean-libobjs
 shared:
 	mkdir shared
 
-TEST_PROGS= t_std_conf t_an_to_ln
+TEST_PROGS= t_std_conf t_an_to_ln t_locate_kdc
 
 T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
 		hst_realm.o init_os_ctx.o locate_kdc.o dnsglue.o 
@@ -200,6 +200,8 @@ check-unix:: $(TEST_PROGS)
 		-r pgp.good.idea -r no_domain > test.out
 	cmp test.out $(srcdir)/ref_std_conf.out
 	$(RM) test.out
+	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
+	$(KRB5_RUN_ENV) ./t_locate_kdc ATHENA.MIT.EDU
 
 #
 # Do some aname-to-lname testing.
