@@ -27,7 +27,7 @@
 #ifndef KRB5_OSCONF__
 #define KRB5_OSCONF__
 
-#if !defined(_MSDOS)
+#if !defined(_MSDOS) || !defined(_WIN32)
     /* Don't try to pull in autoconf.h for Windows, since it's not used */
 #ifndef KRB5_AUTOCONF__
 #define KRB5_AUTOCONF__
@@ -35,7 +35,7 @@
 #endif
 #endif
 
-#if defined(_WINDOWS) || defined(WIN32)
+#if defined(_MSDOS) || defined(_WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
 #define	DEFAULT_KEYTAB_NAME	"FILE:%s\\v5srvtab"

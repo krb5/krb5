@@ -1,3 +1,7 @@
+Wed Jun 12 00:44:07 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* syslog.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
+
 Thu Jun 22 16:12:23 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES

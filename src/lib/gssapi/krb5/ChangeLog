@@ -1,3 +1,8 @@
+Wed Jun 12 00:48:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pname_to_uid.c: Add #ifdef _WIN32 in places where we had #ifdef
+	 	_MSDOS
+
 Fri Jun  7 14:52:56 1996  Kevin L Mitchell  <klmitch@mit.edu>
 
 	* accept_sec_context.c, init_sec_context.c, inq_context.c,

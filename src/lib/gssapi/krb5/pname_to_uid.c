@@ -25,7 +25,7 @@
  */
 
 #include "gssapiP_krb5.h"
-#if !defined(_MSDOS) && !defined(_MACINTOSH)
+#if !defined(_MSDOS) && !defined(_WIN32) && !defined(_MACINTOSH)
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
