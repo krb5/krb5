@@ -1,3 +1,9 @@
+1999-06-28  Tom Yu  <tlyu@mit.edu>
+
+	* enc_helper.c (krb5_encrypt_helper): NULL out the pointer to the
+	ciphertext if there is an error; this prevents stuff farther up
+	from freeing freed memory.
+
 1999-06-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* init_ctx.c (krb5_free_context): Set field pointers to NULL after
