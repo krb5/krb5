@@ -51,6 +51,9 @@
 #define HasGcc YES
  */
 
+#define	UseVolatile YES
+#define	UseVoid YES
+
 #define	ArCmd ar cru
 #define LintLibFlag -o
 

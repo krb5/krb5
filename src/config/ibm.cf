@@ -41,6 +41,9 @@
 #define	HasInet			YES
 #define	WantPrototypes		YES
 #define	NeedNarrowPrototypes	YES
+#define	UseVoid			YES
+#define	UseConst		YES
+#define	UseVolatile		YES
 
 #define HCRevision	21025
 
@@ -70,6 +73,7 @@
 #define	HasPosixTypes		YES
 #define	HasStrdup		YES
 #define	HasVfprintf		YES
+#define	HasAnsiStdio		YES
 
 #define	HasInet			YES
 /* There is a compiler bug on the PS/2 running AIX 1.2.1:
@@ -78,11 +82,27 @@
 #define	WantPrototypes		YES
 #define	NeedNarrowPrototypes	YES
 #define	UseStdarg		YES
+#define	UseVoid			YES
+#define	UseVolatile		YES
 #ifdef PS2Architecture
 #define DesDefines -DBIG -DLSBFIRST
+/* The standard PS/2 compiler generates incorrect warnings when
+   "const" is used and does not make const variables read only,
+   so there is no reason to use const.  */
+/* If you are using hc on a PS/2, you may need to use the following
+   options:
+	-Hoff=recognize_library	(inlined memcpy has bugs)
+	-Hon=long_enums		(make enums 4 bytes long for vsc compatbility)
+ */
 #else
+#define	CcCmd xlc
+#define	UseTimeH
+#define	UseSysTimeH
 #define DesDefines -DBIG -DMSBFIRST -DMUSTALIGN
+#define	UseConst		YES
 #endif
+
+#define	RanlibCmd		\:
 
 #endif /* RT */
 
