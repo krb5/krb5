@@ -1,3 +1,7 @@
+2004-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for getpwnam_r, gmtime_r, and localtime_r.
+
 2004-06-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h: Error out at compile time if thread support is
