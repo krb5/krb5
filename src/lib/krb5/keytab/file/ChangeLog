@@ -1,3 +1,7 @@
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * ktf_util.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
 
 Tue Aug 29 13:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in, .Sanitize, ser_ktf.c - Add new module to support

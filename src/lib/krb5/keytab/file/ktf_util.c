@@ -407,7 +407,6 @@ krb5_int32 *delete_point;
     
     /* key contents */
     ret_entry->key.magic = KV5M_KEYBLOCK;
-    ret_entry->key.etype = ETYPE_UNKNOWN;
     
     if (!xfread(&count, sizeof(count), 1, KTFILEP(id))) {
 	error = KRB5_KT_END;
