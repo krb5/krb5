@@ -12,6 +12,7 @@ aes_rval aes_dec_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
 
 #define CHECK_SIZES 0
 
+#if 0
 static void printd (const char *descr, krb5_data *d) {
     int i, j;
     const int r = 16;
@@ -34,6 +35,8 @@ static void printd (const char *descr, krb5_data *d) {
     }
     printf("\n");
 }
+#endif
+
 #define enc(OUT, IN, CTX) (aes_enc_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
 #define dec(OUT, IN, CTX) (aes_dec_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
 
@@ -68,7 +71,7 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	/* XXX Used for DK function.  */
 	enc(output->data, input->data, &ctx);
     } else {
-	int nleft;
+	unsigned int nleft;
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    xorblock(tmp, input->data + blockno * BLOCK_SIZE);
@@ -123,7 +126,6 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 	    abort();
 	dec(output->data, input->data, &ctx);
     } else {
-	int nleft;
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    dec(tmp2, input->data + blockno * BLOCK_SIZE, &ctx);

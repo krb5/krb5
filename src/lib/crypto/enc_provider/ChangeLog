@@ -1,3 +1,7 @@
+2004-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* aes.c (krb5int_aes_encrypt): Signed/unsigned warning fix. 
+
 2004-02-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes.c (krb5int_aes_encrypt, krb5int_aes_decrypt): Copy out value
