@@ -53,19 +53,19 @@ krb5_encrypt_block *eblock;
     }	
 
     /* do any necessary key pre-processing */
-    if (retval = (*eblock->crypto_entry->process_key)(eblock, mkey)) {
+    if (retval = krb5_process_key(eblock, mkey)) {
 	return(retval);
     }
     if (retval = krb5_kdb_decrypt_key(eblock, &master_entry.key, &tempkey)) {
-	(void) (*eblock->crypto_entry->finish_key)(eblock);
+	(void) krb5_finish_key(eblock);
 	return retval;
     }
     if (bcmp((char *)mkey->contents, (char *)tempkey.contents,
 	      mkey->length)) {
 	retval = KRB5_KDB_BADMASTERKEY;
-	(void) (*eblock->crypto_entry->finish_key)(eblock);
+	(void) krb5_finish_key(eblock);
     } else
-	retval = (*eblock->crypto_entry->finish_key)(eblock);
+	retval = krb5_finish_key(eblock);
     
     return retval;
 }

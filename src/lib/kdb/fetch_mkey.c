@@ -75,10 +75,7 @@ OLDDECLARG(krb5_keyblock *,key)
 
 	pwd.data = password;
 	pwd.length = size;
-	retval = (*eblock->crypto_entry->string_to_key)(key->keytype,
-							key,
-							&pwd,
-							mname);
+	retval = krb5_string_to_key(eblock, key->keytype, key, &pwd, mname);
 	bzero(password, sizeof(password)); /* erase it */
 	return retval;
 
