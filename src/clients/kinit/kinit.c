@@ -130,6 +130,8 @@ main(argc, argv)
 	exit(1);
     }
 
+    bzero(&my_creds, sizeof(my_creds));
+    
     my_creds.client = me;
     my_creds.server = server;
 
