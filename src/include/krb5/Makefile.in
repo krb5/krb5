@@ -19,7 +19,7 @@ all-mac:: $(BUILT_HEADERS)
 all-windows::
 	$(RM) osconf.h autoconf.h autoconf.stamp
 	copy stock\osconf.h osconf.h
-	echo #include "win-mac.h" > autoconf.h
+	copy ..\win-mac.h autoconf.h
 
 # Should only rebuild autoconf.h here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.

@@ -1,3 +1,8 @@
+Fri Apr 16 17:07:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't constantly recreate autoconf.h
+		with #include "win-mac.h"
+
 1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* kdb.h: Add new TL types provided by Frank Cusack's preauth patch
