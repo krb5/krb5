@@ -266,7 +266,7 @@ setup_network(context, prog)
      }
 
     if (bind(client_server_info.server_socket,
-		&client_server_info.server_name, 
+		(struct sockaddr *) &client_server_info.server_name, 
 		sizeof(client_server_info.server_name)) < 0) {
 	retval = errno;
         krb5_free_principal(context, client_server_info.server);
