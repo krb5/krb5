@@ -1,3 +1,10 @@
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Integrate config commands from kdc, krb524, and
+	slave directories.  Don't configure those directories; generate
+	their makefiles directly.  Use AC_HELP_STRING in AC_ARG_ENABLE
+	and AC_ARG_WITH messages.  Substitute @LIBUTIL@.
+
 2004-02-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Configure lib/apputils, not util/apputils.

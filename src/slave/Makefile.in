@@ -1,6 +1,7 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=slave
-mydir=.
+mydir=slave
+MY_SUBDIRS=.
 BUILDTOP=$(REL)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -17,10 +18,10 @@ SRCS= $(CLIENTSRCS) $(SERVERSRCS)
 
 
 kprop: $(CLIENTOBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o kprop $(CLIENTOBJS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o kprop $(CLIENTOBJS) $(KRB5_BASE_LIBS) @LIBUTIL@
 
 kpropd: $(SERVEROBJS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
-	$(CC_LINK) -o kpropd $(SERVEROBJS) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
+	$(CC_LINK) -o kpropd $(SERVEROBJS) $(KRB5_BASE_LIBS) $(APPUTILS_LIB) @LIBUTIL@
 
 install::
 	for f in kprop kpropd; do \
