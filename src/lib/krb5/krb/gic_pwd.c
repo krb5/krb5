@@ -287,6 +287,7 @@ cleanup:
 
    if (ret == 0) {
       krb5_timestamp now;
+      krb5_last_req_entry **last_req;
       int hours;
 
       /* XXX 7 days should be configurable.  This is all pretty ad hoc,
@@ -294,7 +295,7 @@ cleanup:
 	 with timezones, etc. */
 
       if (prompter &&
-	  (in_tkt_service &&
+	  (!in_tkt_service ||
 	   (strcmp(in_tkt_service, "kadmin/changepw") != 0)) &&
 	  ((ret = krb5_timeofday(context, &now)) == 0) &&
 	  as_reply->enc_part2->key_exp &&
@@ -313,6 +314,44 @@ cleanup:
 	 /* ignore an error here */
          /* PROMPTER_INVOCATION */
 	 (*prompter)(context, data, 0, banner, 0, 0);
+      } else if (prompter &&
+		 (!in_tkt_service ||
+		  (strcmp(in_tkt_service, "kadmin/changepw") != 0)) &&
+		 as_reply->enc_part2 && as_reply->enc_part2->last_req) {
+	 /*
+	  * Check the last_req fields
+	  */
+
+	 for (last_req = as_reply->enc_part2->last_req; *last_req; last_req++)
+	    if ((*last_req)->lr_type == KRB5_LRQ_PW_EXPTIME) {
+	       krb5_deltat delta;
+	       char ts[256];
+
+	       if ((ret = krb5_timeofday(context, &now)))
+		  break;
+
+	       if ((ret = krb5_timestamp_to_string((*last_req)->value,
+						   ts, sizeof(ts))))
+		  break;
+
+	       delta = (*last_req)->value - now;
+
+	       if (delta < 3600)
+		  sprintf(banner,
+		    "Warning: Your password will expire in less than one "
+		     "hour on %s", ts);
+	       else if (delta < 86400*2)
+		  sprintf(banner,
+		     "Warning: Your password will expire in %d hour%s on %s",
+		     delta / 3600, delta < 7200 ? "" : "s", ts);
+	       else
+		  sprintf(banner,
+		     "Warning: Your password will expire in %d days on %s",
+		     delta / 86400, ts);
+	       /* ignore an error here */
+	       /* PROMPTER_INVOCATION */
+	       (*prompter)(context, data, 0, banner, 0, 0);
+	    }
       }
    }
 

@@ -839,6 +839,7 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_LRQ_ONE_LAST_RENEWAL	(-4)
 #define KRB5_LRQ_ALL_LAST_REQ		5
 #define KRB5_LRQ_ONE_LAST_REQ		(-5)
+#define KRB5_LRQ_PW_EXPTIME		6
 
 /* PADATA types */
 #define KRB5_PADATA_NONE		0
