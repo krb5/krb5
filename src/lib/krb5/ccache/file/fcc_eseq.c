@@ -30,7 +30,9 @@ static char fcc_eseq_c[] = "$Id$";
  * and invalidates the cursor (it must never be used after this call).
  */
 krb5_error
-krb5_fcc_end_seq_get(krb5_ccache id, krb5_cc_cursor *cursor)
+krb5_fcc_end_seq_get(id, cursor)
+   krb5_ccache id;
+   krb5_cc_cursor *cursor;
 {
 #ifdef OPENCLOSE
 #else

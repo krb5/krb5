@@ -36,7 +36,9 @@ static char fcc_read_c[] = "$Id$";
  */
 
 krb5_error
-krb5_fcc_read_principal(krb5_ccache id, krb5_principal princ)
+krb5_fcc_read_principal(id, princ)
+   krb5_ccache id;
+   krb5_principal princ;
 {
      krb5_error kret;
      krb5_int32 length;
@@ -58,7 +60,9 @@ krb5_fcc_read_principal(krb5_ccache id, krb5_principal princ)
 }
 
 krb5_error
-krb5_fcc_read_keyblock(krb5_ccache id, krb5_keyblock *keyblock)
+krb5_fcc_read_keyblock(id, keyblock)
+   krb5_ccache id;
+   krb5_keyblock *keyblock;
 {
      krb5_error kret;
      int ret;
@@ -76,7 +80,9 @@ krb5_fcc_read_keyblock(krb5_ccache id, krb5_keyblock *keyblock)
 }
 
 krb5_error
-krb5_fcc_read_data(krb5_ccache id, krb5_data *data)
+krb5_fcc_read_data(id, data)
+   krb5_ccache id;
+   krb5_data *data;
 {
      krb5_error kret;
      int ret;
@@ -101,31 +107,41 @@ krb5_fcc_read_data(krb5_ccache id, krb5_data *data)
 }
 
 krb5_error
-krb5_fcc_read_int32(krb5_ccache id, krb5_int32 *i)
+krb5_fcc_read_int32(id, i)
+   krb5_ccache id;
+   krb5_int32 *i;
 {
      return krb5_fcc_read(id, i, sizeof(krb5_int32));
 }
 
 krb5_error
-krb5_fcc_read_keytype(krb5_ccache id, krb5_keytype *k)
+krb5_fcc_read_keytype(id, k)
+   krb5_ccache id;
+   krb5_keytype *k;
 {
      return krb5_fcc_read(id, k, sizeof(krb5_keytype));
 }
 
 krb5_error
-krb5_fcc_read_int(krb5_ccache id, int *i)
+krb5_fcc_read_int(id, i)
+   krb5_ccache id;
+   int *i;
 {
      return krb5_fcc_read(id, i, sizeof(int));
 }
 
 krb5_error
-krb5_fcc_read_bool(krb5_ccache id, krb5_boolean *b)
+krb5_fcc_read_bool(id, b)
+   krb5_ccache id;
+   krb5_boolean *b;
 {
      return krb5_fcc_read(id, b, sizeof(krb5_boolean));
 }
 
 krb5_error
-krb5_fcc_read_times(krb5_ccache id, krb5_ticket_times *t)
+krb5_fcc_read_times(id, t)
+   krb5_ccache id;
+   krb5_ticket_times *t;
 {
      return krb5_fcc_read(id, t, sizeof(krb5_ticket_times));
 }

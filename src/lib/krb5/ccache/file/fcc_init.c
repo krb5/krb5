@@ -31,7 +31,9 @@ static char fcc_resolve_c[] = "$Id$";
  * permission errors
  */
 krb5_error
-krb5_fcc_initialize(krb5_ccache id, krb5_principal princ)
+krb5_fcc_initialize(id, princ)
+   krb5_ccache id;
+   krb5_principal princ;
 {
      int ret;
 

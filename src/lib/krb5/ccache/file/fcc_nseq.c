@@ -38,7 +38,10 @@ static char fcc_nseq_c[] = "$Id$";
  * system errors
  */
 krb5_error
-krb5_fcc_next_cred(krb5_ccache id, krb5_creds *creds, krb5_cc_cursor *cursor)
+krb5_fcc_next_cred(id, creds, cursor)
+   krb5_ccache id;
+   krb5_creds *creds;
+   krb5_cc_cursor *cursor;
 {
      int ret;
      krb5_error kret;

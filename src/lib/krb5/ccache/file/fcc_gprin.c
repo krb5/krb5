@@ -30,7 +30,9 @@ static char fcc_gprinc_c[] = "$Id$";
  * KRB5_NOMEM
  */
 krb5_error
-krb5_fcc_get_principal(krb5_ccache id, krb5_principal *princ)
+krb5_fcc_get_principal(id, princ)
+   krb5_ccache id;
+   krb5_principal *princ;
 {
 #ifdef OPENCLOSE
      id->data->fd = open(id->data->filename, O_RDONLY, 0);

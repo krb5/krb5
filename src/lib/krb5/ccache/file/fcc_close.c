@@ -16,6 +16,8 @@ static char fcc_resolve_c[] = "$Id$";
 
 #include <krb5/copyright.h>
 
+#include "fcc.h"
+
 /*
  * Modifies:
  * id
@@ -29,7 +31,8 @@ static char fcc_resolve_c[] = "$Id$";
  * permission errors
  */
 krb5_error
-krb5_fcc_close(krb5_ccache id)
+krb5_fcc_close(id)
+   krb5_ccache id;
 {
      int ret;
 

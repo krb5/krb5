@@ -40,7 +40,9 @@ extern struct krb5_cc_ops krb5_fcc_ops;
  * permission errors
  */
 krb5_error
-krb5_fcc_resolve (krb5_ccache id, char *residual)
+krb5_fcc_resolve (id, residual)
+   krb5_ccache id;
+   char *residual;
 {
      int ret;
      

@@ -24,7 +24,8 @@ static char fcc_destry_c[] = "$Id$";
  * system errors
  */
 krb5_error
-krb5_fcc_destroy(krb5_ccache id)
+krb5_fcc_destroy(id)
+   krb5_ccache id;
 {
      struct stat buf;
      unsigned long size;

@@ -32,7 +32,8 @@ static char fcc_resolve_c[] = "$Id$";
  * 		krb5_ccache.  id is undefined.
  */
 krb5_err
-krb5_fcc_generate_new (krb5_ccache id)
+krb5_fcc_generate_new (id)
+   krb5_ccache id;
 {
      char scratch[100];  /* XXX Is this large enough */
      

@@ -32,7 +32,9 @@ static char fcc_sseq_c[] = "$Id$";
  * system errors
  */
 krb5_error
-krb5_fcc_start_seq_get(krb5_ccache id, krb5_cc_cursor *cursor)
+krb5_fcc_start_seq_get(id, cursor)
+   krb5_ccache id;
+   krb5_cc_cursor *cursor;
 {
      krb5_fcc_cursor *fcursor;
      

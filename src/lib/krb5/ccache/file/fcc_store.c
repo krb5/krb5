@@ -40,7 +40,9 @@ static char fcc_store_c[] = "$Id$";
  * storage failure errors
  */
 krb5_error
-krb5_fcc_store(krb5_ccache id, krb5_creds *creds)
+krb5_fcc_store(id, creds)
+   krb5_ccache id;
+   krb5_creds *creds;
 {
 #define TCHECK(ret) if (ret != KRB5_OK) goto lose;
      krb5_error ret;
@@ -96,7 +98,9 @@ lose:
  */
 
 static krb5_error
-krb5_fcc_store_principal(krb5_ccache id, krb5_principal princ)
+krb5_fcc_store_principal(id, princ)
+   krb5_ccache id;
+   krb5_principal princ;
 {
      krb5_error ret;
      krb5_principal temp;
@@ -118,7 +122,9 @@ krb5_fcc_store_principal(krb5_ccache id, krb5_principal princ)
 }
 
 static krb5_error
-krb5_store_keyblock(krb5_ccache id, krb5_keyblock *keyblock)
+krb5_store_keyblock(id, keyblock)
+   krb5_ccache id;
+   krb5_keyblock *keyblock;
 {
      krb5_error ret;
 
@@ -135,7 +141,9 @@ krb5_store_keyblock(krb5_ccache id, krb5_keyblock *keyblock)
 
 
 static krb5_error
-krb5_fcc_store_data(krb5_ccache id, krb5_data *data)
+krb5_fcc_store_data(id, data)
+   krb5_ccache id;
+   krb5_data *data;
 {
      krb5_error ret;
 

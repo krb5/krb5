@@ -26,7 +26,8 @@ static char fcc_resolve_c[] = "$Id$";
  * The name of the file cred cache id.
  */
 char *
-krb5_fcc_get_name (krb5_ccache id)
+krb5_fcc_get_name (id)
+   krb5_ccache id;
 {
      return (char *) id->data->filename;
 }
