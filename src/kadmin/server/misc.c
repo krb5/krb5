@@ -147,7 +147,5 @@ check_min_life(void *server_handle, krb5_principal principal)
         }
     }
 
-    ret = kadm5_free_principal_ent(handle->lhandle, &princ);
-    if (ret)
-	return ret;
+    return kadm5_free_principal_ent(handle->lhandle, &princ);
 }

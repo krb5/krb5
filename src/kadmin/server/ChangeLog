@@ -1,3 +1,7 @@
+2004-10-28  Tom Yu  <tlyu@mit.edu>
+
+	* misc.c (check_min_life): Actually return a value on success.
+
 2004-10-27  Tom Yu  <tlyu@mit.edu>
 
 	* misc.c, misc.h: New function check_min_life(), containing common
