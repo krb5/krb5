@@ -1,3 +1,10 @@
+Wed Sep 13 23:53:19 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kprop.h (KPROP_SRVTAB, KPROP_DEFAULT_FILE, KPROPD_DEFAULT_FILE,
+	KPROPD_DEFAULT_KDB5_EDIT, KPROPD_DEFAULT_KRB_DB, KPROPD_ACL_FILE):
+	removed configurable pathnames, they are now in osconf.h (which
+	gets included here via k5-int.h).
+
 Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
 
         * kprop.c, kpropd.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
