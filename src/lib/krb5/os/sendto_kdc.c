@@ -206,4 +206,17 @@ krb5_sendto_kdc (context, message, realm, reply)
     }
     return retval;
 }
+#else /* MSDOS */
+
+/* Stub for now to satisfy the linker in making the DLL.
+*/
+krb5_error_code INTERFACE
+krb5_sendto_kdc (context, message, realm, reply)
+    krb5_context context;
+    const krb5_data * message;
+    const krb5_data * realm;
+    krb5_data * reply;
+{
+   return 0;
+}
 #endif
