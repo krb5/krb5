@@ -62,8 +62,7 @@ To Build the Macintosh version of Kerberos 5 and GSS:
 	   folder contained in the "System Folder".
 	   
 	   2) To install the shared libraries (optional), simply copy the 
-	   "GSS Library" and "Kerberos 5 Library" files to the "Extensions" 
-	   folder in the "System Folder".
+	   "GSSLib" file to the "Extensions" folder in the "System Folder".
 
 
 --- Getting Started Programming ---
