@@ -39,3 +39,5 @@ install:: libkrb5.a
 	$(CP) libkrb5.a $(KRB5_LIBDIR)/lib/libkrb5.a
 	$(RANLIB) $(KRB5_LIBDIR)/lib/libkrb5.a
 
+clean::
+	$(RM) libkrb5.a

@@ -69,3 +69,5 @@ config.h: $(CONFSRC)
 	if cmp -s config.new config.h ; then true; \
 	else $(RM) config.h ; $(CP) config.new config.h ; fi
 
+clean::
+	$(RM) config.h config.new osconf.h osconf.new

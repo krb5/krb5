@@ -32,3 +32,6 @@ install:: libdes425.a
 	$(RM) $(KRB5_LIBDIR)/libdes425.a
 	$(CP) libdes425.a $(KRB5_LIBDIR)/libdes425.a
 	$(RANLIB) $(KRB5_LIBDIR)/libdes425.a
+
+clean::
+	$(RM) libkrb5.a libcrypto.a libgssapi_krb5.a libdes425.a libkrb425.a

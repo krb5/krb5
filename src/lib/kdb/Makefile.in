@@ -58,3 +58,5 @@ install:: libkdb5.a
 clean::
 	$(RM) $(OBJS)
 
+clean::
+	$(RM) libkdb5.a

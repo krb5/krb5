@@ -26,3 +26,5 @@ install:: libgssapi_krb5.a
 	$(CP) libgssapi_krb5.a $(KRB5_LIBDIR)/lib/libgssapi_krb5.a
 	$(RANLIB) $(KRB5_LIBDIR)/lib/libgssapi_krb5.a
 
+clean::
+	$(RM) libgssapi_krb5.a

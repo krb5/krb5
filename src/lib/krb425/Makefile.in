@@ -91,3 +91,8 @@ install:: libkrb425.a
 clean::
 	$(RM) $(OBJS)
 
+clean::
+	$(RM) libkrb425.a
+
+clean::
+	$(RM) krb_err.h krb_err.c
