@@ -342,6 +342,7 @@ Returns system errors.
 \funcarg{krb5_ccache}{ccache}
 \funcinout
 \funcarg{krb5_creds *}{creds}
+\funcarg{krb5_authenticator *}{authentp}
 \funcout
 \funcarg{krb5_data *}{outbuf}
 \end{funcdecl}
@@ -370,7 +371,13 @@ If \funcparam{ap_req_options} specifies AP_OPTS_USE_SESSION_KEY, then
 \funcparam{creds{\ptsto}ticket} must contain the appropriate
 ENC-TKT-IN-SKEY ticket.
 
-\funcparam{checksum} specifies the checksum to be used in the authenticator.
+\funcparam{checksum} specifies the checksum to be used in the
+authenticator.
+
+If \funcparam{authentp} is non-NULL, it krb5_mk_req_extended will store
+a copy of authenticator there, with the principal and checksum fields
+nulled out.  (This is to prevent pointer sharing problems; the caller
+shouldn't need these fields anyway, since the caller supplied them.)
 
 The \funcparam{outbuf} buffer storage is allocated, and should be freed
 by the caller when finished.
