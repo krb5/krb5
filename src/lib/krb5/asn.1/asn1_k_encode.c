@@ -807,14 +807,21 @@ asn1_error_code asn1_encode_sam_challenge_2(asn1buf *buf, const krb5_sam_challen
       return ASN1_MISSING_FIELD;
 
   asn1_addfield((const krb5_checksum **) val->sam_cksum, 1, asn1_encode_sequence_of_checksum);
-  asn1buf_insert_octetstring(buf, val->sam_challenge_2_body.length,
-			     (unsigned char *)val->sam_challenge_2_body.data);
+  retval = asn1buf_insert_octetstring(buf, val->sam_challenge_2_body.length,
+				      (unsigned char *)val->sam_challenge_2_body.data);
+  if(retval){
+	  asn1buf_destroy(&buf);
+	  return retval; 
+  }
   sum += val->sam_challenge_2_body.length;
   retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0,
 			  val->sam_challenge_2_body.length, &length);
-  if(retval) return retval;
+  if(retval) {
+	  asn1buf_destroy(&buf);
+	  return retval;
+  }
   sum += length;
-
+  
   asn1_makeseq();
   asn1_cleanup();
 }

@@ -821,8 +821,8 @@ asn1_error_code asn1_decode_sam_challenge_2(asn1buf *buf, krb5_sam_challenge_2 *
     if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) 
       return ASN1_BAD_ID;
     save = subbuf.next;
-    { sequence_of(&subbuf);
-      end_sequence_of(&subbuf);
+    { sequence_of_no_tagvars(&subbuf);
+      end_sequence_of_no_tagvars(&subbuf);
     }
     end = subbuf.next;
     if ((val->sam_challenge_2_body.data = (char *) malloc(end - save)) == NULL)

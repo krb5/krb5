@@ -1,5 +1,16 @@
 2002-11-07  Ezra Peisach  <epeisach@bu.edu>
 
+	* asn1_k_encode.c (asn1_encode_sam_challenge_2): Test for error
+	returned from asn1buf_insert_oxtetstring and cleanup strctures
+	properly.
+
+	* asn1_k_decode.c (asn1_decode_sam_challenge_2_body): Change
+	sequence_of/end_sequence_of to use
+	sequence_of_no_tagvars/end_sequence_of_no_tagravs to avoid
+	shadowing variables.
+
+2002-11-07  Ezra Peisach  <epeisach@bu.edu>
+
 	* asn1_k_encode.c (add_optstring): Add optional string only if
 	length > 0.
 
