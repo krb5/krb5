@@ -89,14 +89,19 @@ kg_encrypt(context, key, iv, in, out, length)
 {
    krb5_error_code code;
    size_t blocksize;
-   krb5_data ivd, inputd;
+   krb5_data ivd, *pivd, inputd;
    krb5_enc_data outputd;
 
-   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
-      return(code);
+   if (iv) {
+       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+	   return(code);
 
-   ivd.length = blocksize;
-   ivd.data = iv;
+       ivd.length = blocksize;
+       ivd.data = iv;
+       pivd = &ivd;
+   } else {
+       pivd = NULL;
+   }
 
    inputd.length = length;
    inputd.data = in;
@@ -107,7 +112,7 @@ kg_encrypt(context, key, iv, in, out, length)
    return(krb5_c_encrypt(context, key,
 			 /* XXX this routine is only used for the old
 			    bare-des stuff which doesn't use the
-			    key usage */ 0, &ivd, &inputd, &outputd));
+			    key usage */ 0, pivd, &inputd, &outputd));
 }
 
 /* length is the length of the cleartext. */
@@ -123,20 +128,22 @@ kg_decrypt(context, key, iv, in, out, length)
 {
    krb5_error_code code;
    size_t blocksize, enclen;
-   krb5_data ivd, outputd;
+   krb5_data ivd, *pivd, outputd;
    krb5_enc_data inputd;
 
-   if (code = krb5_c_block_size(context, key->enctype, &blocksize))
-      return(code);
+   if (iv) {
+       if (code = krb5_c_block_size(context, key->enctype, &blocksize))
+	   return(code);
 
-   if (code = krb5_c_encrypt_length(context, key->enctype, length, &enclen))
-      return(code);
-
-   ivd.length = blocksize;
-   ivd.data = iv;
+       ivd.length = blocksize;
+       ivd.data = iv;
+       pivd = &ivd;
+   } else {
+       pivd = NULL;
+   }
 
    inputd.enctype = ENCTYPE_UNKNOWN;
-   inputd.ciphertext.length = enclen;
+   inputd.ciphertext.length = length;
    inputd.ciphertext.data = in;
 
    outputd.length = length;
@@ -145,5 +152,5 @@ kg_decrypt(context, key, iv, in, out, length)
    return(krb5_c_decrypt(context, key,
 			 /* XXX this routine is only used for the old
 			    bare-des stuff which doesn't use the
-			    key usage */ 0, &ivd, &inputd, &outputd));
+			    key usage */ 0, pivd, &inputd, &outputd));
 }
