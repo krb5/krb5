@@ -221,11 +221,12 @@ o Returns
 	NOT_AUTHORIZED		- not allowed to perform this
 	P_DOES_NOT_EXIST	- principal does not exist
 o Supplemental Returns
-	<octet-string>		- if successful
+	<keytab-entry>		- if successful
 	error message text	- if failure
 o Description
 	If the specified name/instance exists in the database, then
-	extract the service key entry and return it in <octet-string>.
+	extract the service key entry and return it in <keytab-entry>.
+	The description of <keytab-entry> follows below.
 o Access Required
 	Client principal must have EXTRACT permission.
 
@@ -270,4 +271,21 @@ INQUIRE-PRINCIPAL); or both Settable and Returnable.
 Note: The value for SALTTYPE is a comma-separated list of strings.  The
 individual values for these may be either "KRB5" or "KRB4" or a site-specific
 value.
+
+Keytab Entry
+------------
+If the EXTRACT SERVICE KEY function is supported, then the successful
+response to this command is the key entry.  This is a series of 6
+reply components as follows:
+
+component	type		value
+---------	---------------	-----------------------------------------
+	1	<string>	Principal name
+	2	<integer>	Key entry timestamp
+	3	<integer>	Key's version number.
+	4	<integer>	Key's keytype.
+	5	<integer>	Key's encryption type.
+	6	<octet-string>	Key's key value.
+
+All of these components are mandatory.
 
