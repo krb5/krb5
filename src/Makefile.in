@@ -348,11 +348,10 @@ kerbsrc.zip: dos-Makefile awk-windows-mac winfile.list
 	$(ZIP) -Dk kerbsrc.zip $(WINBINARYFILES)
 	rm -f $(CLEANUP)
 
-kerbsrc-nt.zip: Makefile.sav awk-windows-mac winfile.list
+kerbsrc-nt.zip: awk-windows-mac winfile.list
 	rm -f kerbsrc-nt.zip
 	$(ZIP) -Dl kerbsrc-nt.zip `cat winfile.list`
 	$(ZIP) -D kerbsrc-nt.zip $(WINBINARYFILES)
-	mv Makefile.sav Makefile
 	rm -f $(CLEANUP)
 
 dos-zipfiles: dos-Makefile awk-windows-mac winfile.list
