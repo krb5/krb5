@@ -1,3 +1,11 @@
+Fri Jan 19 23:16:17 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* mk_req.c (krb5_mk_req): krb5_get_credentials does not take
+		default_kdc_options. 
+
+	* sendauth.c (krb5_sendauth): krb5_get_credentials does not take
+		default_kdc_options. 
+
 Wed Jan 10 21:01:36 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* init_ctx.c (krb5_init_context): Added checking of profile for

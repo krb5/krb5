@@ -33,8 +33,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define WORKING_RCACHE
-
 static char *sendauth_version = "KRB5_SENDAUTH_V1.0";
 
 krb5_error_code
@@ -140,8 +138,7 @@ krb5_sendauth(context, auth_context,
 		in_creds = &creds;
 	}
 	if (!in_creds->ticket.length) {
-	    if ((retval = krb5_get_credentials(context,
-					       context->kdc_default_options,
+	    if ((retval = krb5_get_credentials(context, 0,
 					       use_ccache, in_creds, &credsp)))
 		    goto error_return;
 	    credspout = credsp;
