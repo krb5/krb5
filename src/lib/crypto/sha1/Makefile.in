@@ -4,7 +4,7 @@ CFLAGS = $(CCOPTS) $(DEFS)
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=sha1
-##DOS##OBJFILE=..\sha2.lst
+##DOS##OBJFILE=..\sha1.lst
 ##WIN16##LIBNAME=..\crypto.lib
 
 PROG_LIBPATH=-L$(TOPLIBD)
