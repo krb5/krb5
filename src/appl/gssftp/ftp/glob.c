@@ -39,15 +39,19 @@ static char sccsid[] = "@(#)glob.c	5.9 (Berkeley) 2/25/91";
  * C-shell glob for random programs.
  */
 
-#include <sys/param.h>
 #include <sys/stat.h>
-#include <dirent.h>
 
-#include <pwd.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
+
+#ifndef _WIN32
+#include <sys/param.h>
+#include <dirent.h>
+#include <pwd.h>
+#endif
 
 #ifdef POSIX
 #include <limits.h>
@@ -77,7 +81,6 @@ static	short gflag;
 char	**ftpglob();
 char	*globerr;
 char	*home;
-extern	int errno;
 static	char *strspl PROTOTYPE((char *, char *)), *strend PROTOTYPE((char *));
 char	**copyblk PROTOTYPE((char **));
 
@@ -90,7 +93,9 @@ static int amatch PROTOTYPE((char *, char *)),
   execbrc PROTOTYPE((char *, char *)), match PROTOTYPE((char *, char *));
 static int digit PROTOTYPE((int)), letter PROTOTYPE((int)),
   any PROTOTYPE((int, char *));
+#ifndef _WIN32
 static int gethdir PROTOTYPE((char *));
+#endif
 static int tglob PROTOTYPE((int ));
 
 static	int globcnt;
@@ -196,6 +201,7 @@ expand(as)
 
 	sgpathp = gpathp;
 	cs = as;
+#ifndef _WIN32
 	if (*cs == '~' && gpathp == gpath) {
 		addpath('~');
 		for (cs++; letter(*cs) || digit(*cs) || *cs == '-';)
@@ -212,6 +218,7 @@ expand(as)
 			gpathp = strend(gpath);
 		}
 	}
+#endif
 	while (!any(*cs, globchars)) {
 		if (*cs == 0) {
 			if (!globbed)
@@ -239,6 +246,38 @@ endit:
 	gpathp = sgpathp;
 	*gpathp = 0;
 }
+
+#ifdef _WIN32
+
+static void
+matchdir(pattern)
+	char *pattern;
+{
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA file_data;
+	char *base = *gpath ? gpath : ".";
+	char *buffer = 0;
+
+	buffer = malloc(strlen(base) + strlen("\\*") + 1);
+	if (!buffer) return;
+	strcpy(buffer, base);
+	strcat(buffer, "\\*");
+	hFile = FindFirstFile(buffer, &file_data);
+	if (hFile == INVALID_HANDLE_VALUE) {
+		if (!globbed)
+			globerr = "Bad directory components";
+		return;
+	}
+	do {
+		if (match(file_data.cFileName, pattern)) {
+			Gcat(gpath, file_data.cFileName);
+			globcnt++;
+		}
+	} while (FindNextFile(hFile, &file_data));
+	FindClose(hFile);
+}
+
+#else /* !_WIN32 */
 
 static void
 matchdir(pattern)
@@ -285,6 +324,8 @@ patherr1:
 patherr2:
 	globerr = "Bad directory components";
 }
+
+#endif /* !_WIN32 */
 
 static int
 execbrc(p, s)
@@ -710,6 +751,8 @@ strend(cp)
 		cp++;
 	return (cp);
 }
+
+#ifndef _WIN32
 /*
  * Extract a home directory from the password file
  * The argument points to a buffer where the name of the
@@ -726,3 +769,4 @@ static int gethdir(mhome)
 	(void) strcpy(mhome, pp->pw_dir);
 	return (0);
 }
+#endif

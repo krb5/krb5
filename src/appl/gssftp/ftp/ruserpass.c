@@ -49,11 +49,14 @@ static char sccsid[] = "@(#)ruserpass.c	5.3 (Berkeley) 3/1/91";
 #include <errno.h>
 #include "ftp_var.h"
 
+#ifdef _WIN32
+#include <win-mac.h>
+#endif
+
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN 64
 #endif
 
-char	*renvlook(), *getenv();
 static int token PROTOTYPE((void));
 static	FILE *cfile;
 

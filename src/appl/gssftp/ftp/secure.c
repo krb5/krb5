@@ -20,6 +20,10 @@ extern MSG_DAT msg_data;
 extern Key_schedule schedule;
 #endif /* KRB5_KRB4_COMPAT */
 
+#ifdef _WIN32
+#undef ERROR
+#endif
+
 #include <arpa/ftp.h>
 
 #include <stdio.h>
@@ -31,7 +35,9 @@ extern Key_schedule schedule;
 #include <unistd.h>
 #endif
 #include <sys/types.h>
+#ifndef _WIN32
 #include <netinet/in.h>
+#endif
 #include <errno.h>
 
 #ifndef HAVE_STRERROR

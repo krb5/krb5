@@ -53,12 +53,21 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 
 #include <stdio.h>
 #include "ftp_var.h"
+#ifndef _WIN32
 #ifndef KRB5_KRB4_COMPAT
 /* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
+#include <netdb.h>
 #endif
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <pwd.h>
+#endif /* !_WIN32 */
+
+#ifdef _WIN32
+#include <io.h>
+#undef ERROR
+#endif
 
 #include <arpa/ftp.h>
 
@@ -66,17 +75,13 @@ static char sccsid[] = "@(#)main.c	5.18 (Berkeley) 3/1/91";
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
-#include <netdb.h>
-#endif
-#include <pwd.h>
 
-#define sig_t my_sig_t
-#define sigtype krb5_sigtype
-typedef sigtype (*sig_t)();
+#include <port-sockets.h>
 
+#ifndef _WIN32
 uid_t	getuid();
+#endif
+
 sigtype	intr PROTOTYPE((int)), lostpeer PROTOTYPE((int));
 extern	char *home;
 char	*getlogin();
@@ -97,9 +102,19 @@ main(argc, argv)
 {
 	register char *cp;
 	int top;
+#ifndef _WIN32
 	struct passwd *pw = NULL;
+#endif
 	char homedir[MAXPATHLEN];
 	char *progname = argv[0];
+
+#ifdef _WIN32
+	DWORD optionValue = SO_SYNCHRONOUS_NONALERT;
+	if (setsockopt(INVALID_SOCKET, SOL_SOCKET, SO_OPENTYPE, (char *)&optionValue, sizeof(optionValue)) == SOCKET_ERROR) {
+		fprintf(stderr, "ftp: cannot enable synchronous sockets\n");
+		exit(1);
+	}
+#endif
 
 	sp = getservbyname("ftp", "tcp");
 	if (sp == 0) {
@@ -197,6 +212,14 @@ main(argc, argv)
 	/*
 	 * Set up the home directory in case we're globbing.
 	 */
+#ifdef _WIN32
+	cp = getenv("HOME");
+	if (cp != NULL) {
+		home = homedir;
+		(void) strncpy(home, cp, sizeof(homedir) - 1);
+		homedir[sizeof(homedir) - 1] = '\0';
+	}
+#else /* !_WIN32 */
 	cp = getlogin();
 	if (cp != NULL) {
 		pw = getpwnam(cp);
@@ -208,17 +231,22 @@ main(argc, argv)
 		(void) strncpy(home, pw->pw_dir, sizeof(homedir) - 1);
 		homedir[sizeof(homedir) - 1] = '\0';
 	}
+#endif /* !_WIN32 */
 	if (argc > 0) {
 		if (setjmp(toplevel))
 			exit(0);
 		(void) signal(SIGINT, intr);
+#ifdef SIGPIPE
 		(void) signal(SIGPIPE, lostpeer);
+#endif
 		setpeer(argc + 1, argv - 1);
 	}
 	top = setjmp(toplevel) == 0;
 	if (top) {
 		(void) signal(SIGINT, intr);
+#ifdef SIGPIPE
 		(void) signal(SIGPIPE, lostpeer);
+#endif
 	}
 	for (;;) {
 		cmdscanner(top);
@@ -239,21 +267,21 @@ lostpeer(sig)
 	int sig;
 {
 	extern FILE *cout;
-	extern int data;
+	extern SOCKET data;
 	extern char *auth_type;
 	extern int clevel;
 	extern int dlevel;
 
 	if (connected) {
 		if (cout != NULL) {
-			(void) shutdown(fileno(cout), 1+1);
-			(void) fclose(cout);
+			(void) shutdown(SOCKETNO(fileno(cout)), 1+1);
+			(void) FCLOSE_SOCKET(cout);
 			cout = NULL;
 		}
-		if (data >= 0) {
+		if (data != INVALID_SOCKET) {
 			(void) shutdown(data, 1+1);
-			(void) close(data);
-			data = -1;
+			(void) closesocket(data);
+			data = INVALID_SOCKET;
 		}
 		connected = 0;
 		auth_type = NULL;
@@ -262,8 +290,8 @@ lostpeer(sig)
 	pswitch(1);
 	if (connected) {
 		if (cout != NULL) {
-			(void) shutdown(fileno(cout), 1+1);
-			(void) fclose(cout);
+			(void) shutdown(SOCKETNO(fileno(cout)), 1+1);
+			(void) FCLOSE_SOCKET(cout);
 			cout = NULL;
 		}
 		connected = 0;
@@ -347,7 +375,9 @@ cmdscanner(top)
 			break;
 	}
 	(void) signal(SIGINT, intr);
+#ifdef SIGPIPE
 	(void) signal(SIGPIPE, lostpeer);
+#endif
 }
 
 struct cmd *
@@ -432,7 +462,7 @@ S0:
 	switch (*sb) {
 
 	case '\0':
-		goto OUT;
+		goto EXIT;
 
 	case ' ':
 	case '\t':
@@ -459,7 +489,7 @@ S1:
 	case ' ':
 	case '\t':
 	case '\0':
-		goto OUT;	/* end of token */
+		goto EXIT;	/* end of token */
 
 	case '\\':
 		sb++; goto S2;	/* slurp next character */
@@ -477,7 +507,7 @@ S2:
 	switch (*sb) {
 
 	case '\0':
-		goto OUT;
+		goto EXIT;
 
 	default:
 		*ap++ = *sb++;
@@ -489,7 +519,7 @@ S3:
 	switch (*sb) {
 
 	case '\0':
-		goto OUT;
+		goto EXIT;
 
 	case '"':
 		sb++; goto S1;
@@ -500,7 +530,7 @@ S3:
 		goto S3;
 	}
 
-OUT:
+EXIT:
 	if (got_one)
 		*ap++ = '\0';
 	argbase = ap;			/* update storage pointer */

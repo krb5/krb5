@@ -61,18 +61,37 @@
 static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #endif /* not lint */
 
+#ifdef _WIN32
+#include <windows.h>
+#include <winsock.h>
+#include <sys/timeb.h>
+#include <time.h>
+#include <crtdbg.h>
+#undef ERROR
+#define NOSTBLKSIZE
+
+#define popen _popen
+#define pclose _pclose
+#define sleep(secs) Sleep(secs * 1000)
+int gettimeofday(struct timeval *tv, void *tz);
+
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#ifndef _WIN32
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #ifndef KRB5_KRB4_COMPAT
 /* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
 #include <sys/socket.h>
+#include <netdb.h>
 #endif
 #include <sys/time.h>
 #include <sys/file.h>
@@ -83,6 +102,9 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <netinet/in.h>
 #include <netinet/in_systm.h>
 #include <netinet/ip.h>
+#include <pwd.h>
+#endif
+
 #include <arpa/ftp.h>
 #include <arpa/telnet.h>
 
@@ -90,22 +112,10 @@ static char sccsid[] = "@(#)ftp.c	5.38 (Berkeley) 4/22/91";
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
-#ifndef KRB5_KRB4_COMPAT
-/* krb.h gets this, and Ultrix doesn't protect vs multiple inclusion */
-#include <netdb.h>
-#endif
 #include <fcntl.h>
-#include <pwd.h>
-#ifndef STDARG
-#if (defined(__STDC__) && ! defined(VARARGS)) || defined(HAVE_STDARG_H)
-#define STDARG
-#endif
-#endif
-#ifdef STDARG
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
+
+#include <port-sockets.h>
 
 #ifndef L_SET
 #define L_SET 0
@@ -154,18 +164,16 @@ static void abort_remote PROTOTYPE((FILE *));
 static void tvsub PROTOTYPE((struct timeval *, struct timeval *, struct timeval *));
 static char *gunique PROTOTYPE((char *));
 
-#define sig_t my_sig_t
-#define sigtype krb5_sigtype
-typedef sigtype (*sig_t)();
-
 struct	sockaddr_in hisctladdr;
 struct	sockaddr_in hisdataaddr;
 struct	sockaddr_in data_addr;
-int	data = -1;
+SOCKET	data = -1;
 int	abrtflag = 0;
 int	ptflag = 0;
 struct	sockaddr_in myctladdr;
+#ifndef _WIN32
 uid_t	getuid();
+#endif
 sig_t	lostpeer();
 off_t	restart_point = 0;
 jmp_buf ptabort;
@@ -207,77 +215,87 @@ hookup(host, port)
 			return((char *) 0);
 		}
 		hisctladdr.sin_family = hp->h_addrtype;
-		memcpy((caddr_t)&hisctladdr.sin_addr, hp->h_addr_list[0],
+		memcpy(&hisctladdr.sin_addr, hp->h_addr_list[0],
 		       sizeof(hisctladdr.sin_addr));
 		(void) strncpy(hostnamebuf, hp->h_name, sizeof(hostnamebuf));
 	}
 	hostname = hostnamebuf;
 	s = socket(hisctladdr.sin_family, SOCK_STREAM, 0);
-	if (s < 0) {
-		perror("ftp: socket");
+	if (s == INVALID_SOCKET) {
+		PERROR_SOCKET("ftp: socket");
 		code = -1;
 		return (0);
 	}
 	hisctladdr.sin_port = port;
-	while (connect(s, (struct sockaddr *)&hisctladdr, sizeof (hisctladdr)) < 0) {
+	while (connect(s, (struct sockaddr *)&hisctladdr, sizeof (hisctladdr)) == SOCKET_ERROR) {
 		if (hp && hp->h_addr_list[1]) {
-			int oerrno = errno;
+			int oerrno = SOCKET_ERRNO;
+#ifndef _WIN32
 			extern char *inet_ntoa();
-
+#endif
 			fprintf(stderr, "ftp: connect to address %s: ",
 				inet_ntoa(hisctladdr.sin_addr));
-			errno = oerrno;
-			perror((char *) 0);
+			SOCKET_SET_ERRNO(oerrno);
+			PERROR_SOCKET((char *) 0);
 			hp->h_addr_list++;
-			memcpy((caddr_t)&hisctladdr.sin_addr,
+			memcpy(&hisctladdr.sin_addr,
 			       hp->h_addr_list[0], 
 			       sizeof(hisctladdr.sin_addr));
 			fprintf(stdout, "Trying %s...\n",
 				inet_ntoa(hisctladdr.sin_addr));
-			(void) close(s);
+			(void) closesocket(s);
 			s = socket(hisctladdr.sin_family, SOCK_STREAM, 0);
-			if (s < 0) {
-				perror("ftp: socket");
+			if (s == INVALID_SOCKET) {
+				PERROR_SOCKET("ftp: socket");
 				code = -1;
 				return (0);
 			}
 			continue;
 		}
-		perror("ftp: connect");
+		PERROR_SOCKET("ftp: connect");
 		code = -1;
 		goto bad;
 	}
 	len = sizeof (myctladdr);
-	if (getsockname(s, (struct sockaddr *)&myctladdr, &len) < 0) {
-		perror("ftp: getsockname");
+	if (getsockname(s, (struct sockaddr *)&myctladdr, &len) == SOCKET_ERROR) {
+		PERROR_SOCKET("ftp: getsockname");
 		code = -1;
 		goto bad;
 	}
 #ifdef IP_TOS
 #ifdef IPTOS_LOWDELAY
 	tos = IPTOS_LOWDELAY;
-	if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(int)) < 0)
-		perror("ftp: setsockopt TOS (ignored)");
+	if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(int)) == SOCKET_ERROR) {
+		PERROR_SOCKET("ftp: setsockopt TOS (ignored)");
+	}
 #endif
 #endif
-	cin = fdopen(s, "r");
-	cout = fdopen(s, "w");
+	cin = FDOPEN_SOCKET(s, "r");
+	cout = FDOPEN_SOCKET(s, "w");
 	if (cin == NULL || cout == NULL) {
 		fprintf(stderr, "ftp: fdopen failed.\n");
-		if (cin)
-			(void) fclose(cin);
-		if (cout)
-			(void) fclose(cout);
+		if (cin) {
+			(void) FCLOSE_SOCKET(cin);
+			cin = NULL;
+		}
+		if (cout) {
+			(void) FCLOSE_SOCKET(cout);
+			cout = NULL;
+		}
 		code = -1;
 		goto bad;
 	}
 	if (verbose)
 		printf("Connected to %s.\n", hostname);
 	if (getreply(0) > 2) { 	/* read startup message from server */
-		if (cin)
-			(void) fclose(cin);
-		if (cout)
-			(void) fclose(cout);
+		if (cin) {
+			(void) FCLOSE_SOCKET(cin);
+			cin = NULL;
+		}
+		if (cout) {
+			(void) FCLOSE_SOCKET(cout);
+			cout = NULL;
+		}
 		code = -1;
 		goto bad;
 	}
@@ -286,15 +304,15 @@ hookup(host, port)
 	int on = 1;
 
 	if (setsockopt(s, SOL_SOCKET, SO_OOBINLINE, (char *)&on, sizeof(on))
-		< 0 && debug) {
-			perror("ftp: setsockopt");
+		== SOCKET_ERROR && debug) {
+			PERROR_SOCKET("ftp: setsockopt");
 		}
 	}
 #endif /* SO_OOBINLINE */
 
 	return (hostname);
 bad:
-	(void) close(s);
+	(void) closesocket(s);
 	return ((char *)0);
 }
 
@@ -316,6 +334,7 @@ int login(host)
 		myname = getenv("LOGNAME");
 		if (myname == NULL)
 			myname = getenv("USER");
+#ifndef _WIN32
 		if (myname == NULL)
 			myname = getlogin();
 		if (myname == NULL) {
@@ -324,6 +343,16 @@ int login(host)
 			if (pp != NULL)
 				myname = pp->pw_name;
 		}
+#else
+		if (myname == NULL) {
+			static char buffer[200];
+			int len = sizeof(buffer);
+			if (GetUserName(buffer, &len))
+				myname = buffer;
+			else
+				myname = "<Unknown>";
+		}
+#endif
 		if (myname)
 			printf("Name (%s:%s): ", host, myname);
 		else
@@ -471,19 +500,10 @@ static int secure_command(cmd)
 	return(1);
 }
 
-#ifdef STDARG
 int command(char *fmt, ...)
-#else
-/*VARARGS*/
-int command(va_alist)
-va_dcl
-#endif
 {
 	char in[FTP_BUFSIZ];
 	va_list ap;
-#ifndef STDARG
-	char *fmt;
-#endif
 	int r;
 	sig_t oldintr;
 
@@ -491,12 +511,7 @@ va_dcl
 	if (debug) {
 		if (proxflag) printf("%s ", hostname);
 		printf("---> ");
-#ifdef STDARG
 		va_start(ap, fmt);
-#else
-		va_start(ap);
-		fmt = va_arg(ap, char *);
-#endif
 		if (strncmp("PASS ", fmt, 5) == 0)
 			printf("PASS XXXX");
 		else 
@@ -511,12 +526,7 @@ va_dcl
 		return (0);
 	}
 	oldintr = signal(SIGINT, cmdabort);
-#ifdef STDARG
 	va_start(ap, fmt);
-#else
-	va_start(ap);
-	fmt = va_arg(ap, char *);
-#endif
 	vsprintf(in, fmt, ap);
 	va_end(ap);
 again:	if (secure_command(in) == 0)
@@ -531,7 +541,7 @@ again:	if (secure_command(in) == 0)
 		goto again;
 	}
 #endif
-	if (abrtflag && oldintr != SIG_IGN)
+	if (abrtflag && oldintr && oldintr != SIG_IGN)
 		(*oldintr)(SIGINT);
 	(void) signal(SIGINT, oldintr);
 	return(r);
@@ -761,7 +771,7 @@ int getreply(expecteof)
 		(void) signal(SIGINT,oldintr);
 		if (code == 421 || originalcode == 421)
 			lostpeer();
-		if (abrtflag && oldintr != cmdabort && oldintr != SIG_IGN)
+		if (abrtflag && oldintr && oldintr != cmdabort && oldintr != SIG_IGN)
 			(*oldintr)(SIGINT);
 		if (reply_parse) {
 			*reply_ptr = '\0';
@@ -802,23 +812,13 @@ abortsend(sig)
 	longjmp(sendabort, 1);
 }
 
-#ifdef STDARG
 void secure_error(char *fmt, ...)
-#else
-/* VARARGS1 */
-void secure_error(fmt, p1, p2, p3, p4, p5)
-	char *fmt;
-#endif
 {
-#ifdef STDARG
 	va_list ap;
 
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
-#else
-	fprintf(stderr, fmt, p1, p2, p3, p4, p5);
-#endif
 	putc('\n', stderr);
 }
 
@@ -831,8 +831,8 @@ void sendrequest(cmd, local, remote, printnames)
 	struct stat st;
 	struct timeval start, stop;
 	register int c, d;
-	FILE *volatile fin, *volatile dout = 0, *popen();
-	int (*volatile closefunc)(), pclose(), fclose();
+	FILE *volatile fin, *volatile dout = 0;
+	int (*volatile closefunc)();
 	volatile sig_t oldintr, oldintp;
 	volatile long bytes = 0, hashbytes = HASHBYTES;
 	char *volatile lmode;
@@ -858,14 +858,16 @@ void sendrequest(cmd, local, remote, printnames)
 		while (cpend) {
 			(void) getreply(0);
 		}
-		if (data >= 0) {
-			(void) close(data);
-			data = -1;
+		if (data != INVALID_SOCKET) {
+			(void) closesocket(data);
+			data = INVALID_SOCKET;
 		}
 		if (oldintr)
 			(void) signal(SIGINT,oldintr);
+#ifdef SIGPIPE
 		if (oldintp)
 			(void) signal(SIGPIPE,oldintp);
+#endif
 		code = -1;
 		return;
 	}
@@ -873,18 +875,29 @@ void sendrequest(cmd, local, remote, printnames)
 	if (strcmp(local, "-") == 0)
 		fin = stdin;
 	else if (*local == '|') {
+#ifdef SIGPIPE
 		oldintp = signal(SIGPIPE,SIG_IGN);
+#endif
 		fin = popen(local + 1, "r");
 		if (fin == NULL) {
 			perror(local + 1);
 			(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 			(void) signal(SIGPIPE, oldintp);
+#endif
 			code = -1;
 			return;
 		}
 		closefunc = pclose;
 	} else {
+#ifdef _WIN32
+		if ((curtype == TYPE_I) || (curtype == TYPE_L))
+			fin = fopen(local, "rb");
+		else
+			fin = fopen(local, "rt");
+#else /* !_WIN32 */
 		fin = fopen(local, "r");
+#endif /* !_WIN32 */			
 		if (fin == NULL) {
 			fprintf(stderr, "local: %s: %s\n", local,
 				strerror(errno));
@@ -904,8 +917,10 @@ void sendrequest(cmd, local, remote, printnames)
 	}
 	if (initconn()) {
 		(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 		if (oldintp)
 			(void) signal(SIGPIPE, oldintp);
+#endif
 		code = -1;
 		if (closefunc != NULL)
 			(*closefunc)(fin);
@@ -937,8 +952,10 @@ void sendrequest(cmd, local, remote, printnames)
 	if (remote) {
 		if (command("%s %s", cmd, remote) != PRELIM) {
 			(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 			if (oldintp)
 				(void) signal(SIGPIPE, oldintp);
+#endif
 			if (closefunc != NULL)
 				(*closefunc)(fin);
 			return;
@@ -946,8 +963,10 @@ void sendrequest(cmd, local, remote, printnames)
 	} else
 		if (command("%s", cmd) != PRELIM) {
 			(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 			if (oldintp)
 				(void) signal(SIGPIPE, oldintp);
+#endif
 			if (closefunc != NULL)
 				(*closefunc)(fin);
 			return;
@@ -956,7 +975,9 @@ void sendrequest(cmd, local, remote, printnames)
 	if (dout == NULL)
 		goto die;
 	(void) gettimeofday(&start, (struct timezone *)0);
+#ifdef SIGPIPE
 	oldintp = signal(SIGPIPE, SIG_IGN);
+#endif
 	switch (curtype) {
 
 	case TYPE_I:
@@ -1035,29 +1056,36 @@ void sendrequest(cmd, local, remote, printnames)
 	(void) gettimeofday(&stop, (struct timezone *)0);
 	if (closefunc != NULL)
 		(*closefunc)(fin);
-	(void) fclose(dout);
+	(void) FCLOSE_SOCKET(dout);
+	dout = NULL;
 	(void) getreply(0);
 	(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 	if (oldintp)
 		(void) signal(SIGPIPE, oldintp);
+#endif
 	if (bytes > 0)
 		ptransfer("sent", bytes, &start, &stop);
 	return;
 die:
 	(void) gettimeofday(&stop, (struct timezone *)0);
 	(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 	if (oldintp)
 		(void) signal(SIGPIPE, oldintp);
+#endif
 	if (!cpend) {
 		code = -1;
 		return;
 	}
-	if (data >= 0) {
-		(void) close(data);
-		data = -1;
+	if (data != INVALID_SOCKET) {
+		(void) closesocket(data);
+		data = INVALID_SOCKET;
 	}
-	if (dout)
-		(void) fclose(dout);
+	if (dout) {
+		(void) FCLOSE_SOCKET(dout);
+		dout = NULL;
+	}
 	(void) getreply(0);
 	code = -1;
 	if (closefunc != NULL && fin != NULL)
@@ -1115,9 +1143,9 @@ void recvrequest(cmd, local, remote, lmode, printnames)
 		while (cpend) {
 			(void) getreply(0);
 		}
-		if (data >= 0) {
-			(void) close(data);
-			data = -1;
+		if (data != INVALID_SOCKET) {
+			(void) closesocket(data);
+			data = INVALID_SOCKET;
 		}
 		if (oldintr)
 			(void) signal(SIGINT, oldintr);
@@ -1202,7 +1230,9 @@ void recvrequest(cmd, local, remote, lmode, printnames)
 	if (strcmp(local, "-") == 0)
 		fout = stdout;
 	else if (*local == '|') {
+#ifdef SIGPIPE
 		oldintp = signal(SIGPIPE, SIG_IGN);
+#endif
 		fout = popen(local + 1, "w");
 		if (fout == NULL) {
 			perror(local+1);
@@ -1210,7 +1240,16 @@ void recvrequest(cmd, local, remote, lmode, printnames)
 		}
 		closefunc = pclose;
 	} else {
+#ifdef _WIN32
+		int old_fmode = _fmode;
+
+		if ((curtype == TYPE_I) || (curtype == TYPE_L))
+			_fmode = _O_BINARY;
+#endif /* _WIN32 */
 		fout = fopen(local, lmode);
+#ifdef _WIN32
+		_fmode = old_fmode;
+#endif
 		if (fout == NULL) {
 			fprintf(stderr, "local: %s: %s\n", local,
 				strerror(errno));
@@ -1355,10 +1394,13 @@ break2:
 	if (closefunc != NULL)
 		(*closefunc)(fout);
 	(void) signal(SIGINT, oldintr);
+#ifdef SIGPIPE
 	if (oldintp)
 		(void) signal(SIGPIPE, oldintp);
+#endif
 	(void) gettimeofday(&stop, (struct timezone *)0);
-	(void) fclose(din);
+	(void) FCLOSE_SOCKET(din);
+	din = NULL;
 	(void) getreply(0);
 	if (bytes > 0 && is_retr)
 		ptransfer("received", bytes, &start, &stop);
@@ -1368,8 +1410,10 @@ die:
 /* abort using RFC959 recommended IP,SYNC sequence  */
 
 	(void) gettimeofday(&stop, (struct timezone *)0);
+#ifdef SIGPIPE
 	if (oldintp)
 		(void) signal(SIGPIPE, oldintr);
+#endif
 	(void) signal(SIGINT, SIG_IGN);
 	if (!cpend) {
 		code = -1;
@@ -1379,14 +1423,16 @@ die:
 
 	abort_remote(din);
 	code = -1;
-	if (data >= 0) {
-		(void) close(data);
-		data = -1;
+	if (data != INVALID_SOCKET) {
+		(void) closesocket(data);
+		data = INVALID_SOCKET;
 	}
 	if (closefunc != NULL && fout != NULL)
 		(*closefunc)(fout);
-	if (din)
-		(void) fclose(din);
+	if (din) {
+		(void) FCLOSE_SOCKET(din);
+		din = NULL;
+	}
 	if (bytes > 0)
 		ptransfer("received", bytes, &start, &stop);
 	(void) signal(SIGINT, oldintr);
@@ -1406,13 +1452,13 @@ static int initconn()
 
 	if (passivemode) {
 		data = socket(AF_INET, SOCK_STREAM, 0);
-		if (data < 0) {
-			perror("ftp: socket");
+		if (data == INVALID_SOCKET) {
+			PERROR_SOCKET("ftp: socket");
 			return(1);
 		}
 		if (options & SO_DEBUG &&
-		    setsockopt(data, SOL_SOCKET, SO_DEBUG, (char *)&on, sizeof (on)) < 0)
-			perror("ftp: setsockopt (ignored)");
+		    setsockopt(data, SOL_SOCKET, SO_DEBUG, (char *)&on, sizeof (on)) == SOCKET_ERROR)
+			PERROR_SOCKET("ftp: setsockopt (ignored)");
 		if (command("PASV") != COMPLETE) {
 			printf("Passive mode refused.  Turning off passive mode.\n");
 			passivemode = 0;
@@ -1436,15 +1482,15 @@ static int initconn()
 		data_addr.sin_addr.s_addr = htonl((a1<<24)|(a2<<16)|(a3<<8)|a4);
 		data_addr.sin_port = htons((p1<<8)|p2);
 
-		if (connect(data, (struct sockaddr *) &data_addr, sizeof(data_addr))<0) {
-			perror("ftp: connect");
+		if (connect(data, (struct sockaddr *) &data_addr, sizeof(data_addr)) == SOCKET_ERROR) {
+			PERROR_SOCKET("ftp: connect");
 			return(1);
 		}
 #ifdef IP_TOS
 #ifdef IPTOS_THROUGHPUT
 	on = IPTOS_THROUGHPUT;
-	if (setsockopt(data, IPPROTO_IP, IP_TOS, (char *)&on, sizeof(int)) < 0)
-		perror("ftp: setsockopt TOS (ignored)");
+	if (setsockopt(data, IPPROTO_IP, IP_TOS, (char *)&on, sizeof(int)) == SOCKET_ERROR)
+		PERROR_SOCKET("ftp: setsockopt TOS (ignored)");
 #endif
 #endif
 		hisdataaddr = data_addr;
@@ -1456,34 +1502,34 @@ noport:
 	data_addr = myctladdr;
 	if (sendport)
 		data_addr.sin_port = 0;	/* let system pick one */ 
-	if (data != -1)
-		(void) close(data);
+	if (data != INVALID_SOCKET)
+		(void) closesocket(data);
 	data = socket(AF_INET, SOCK_STREAM, 0);
-	if (data < 0) {
-		perror("ftp: socket");
+	if (data == INVALID_SOCKET) {
+		PERROR_SOCKET("ftp: socket");
 		if (tmpno)
 			sendport = 1;
 		return (1);
 	}
 	if (!sendport)
-		if (setsockopt(data, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof (on)) < 0) {
-			perror("ftp: setsockopt (reuse address)");
+		if (setsockopt(data, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof (on)) == SOCKET_ERROR) {
+			PERROR_SOCKET("ftp: setsockopt (reuse address)");
 			goto bad;
 		}
-	if (bind(data, (struct sockaddr *)&data_addr, sizeof (data_addr)) < 0) {
-		perror("ftp: bind");
+	if (bind(data, (struct sockaddr *)&data_addr, sizeof (data_addr)) == SOCKET_ERROR) {
+		PERROR_SOCKET("ftp: bind");
 		goto bad;
 	}
 	if (options & SO_DEBUG &&
-	    setsockopt(data, SOL_SOCKET, SO_DEBUG, (char *)&on, sizeof (on)) < 0)
-		perror("ftp: setsockopt (ignored)");
+	    setsockopt(data, SOL_SOCKET, SO_DEBUG, (char *)&on, sizeof (on)) == SOCKET_ERROR)
+		PERROR_SOCKET("ftp: setsockopt (ignored)");
 	len = sizeof (data_addr);
-	if (getsockname(data, (struct sockaddr *)&data_addr, &len) < 0) {
-		perror("ftp: getsockname");
+	if (getsockname(data, (struct sockaddr *)&data_addr, &len) == SOCKET_ERROR) {
+		PERROR_SOCKET("ftp: getsockname");
 		goto bad;
 	}
-	if (listen(data, 1) < 0)
-		perror("ftp: listen");
+	if (listen(data, 1) == SOCKET_ERROR)
+		PERROR_SOCKET("ftp: listen");
 	if (sendport) {
 		a = (char *)&data_addr.sin_addr;
 		p = (char *)&data_addr.sin_port;
@@ -1504,13 +1550,13 @@ noport:
 #ifdef IP_TOS
 #ifdef IPTOS_THROUGHPUT
 	on = IPTOS_THROUGHPUT;
-	if (setsockopt(data, IPPROTO_IP, IP_TOS, (char *)&on, sizeof(int)) < 0)
-		perror("ftp: setsockopt TOS (ignored)");
+	if (setsockopt(data, IPPROTO_IP, IP_TOS, (char *)&on, sizeof(int)) == SOCKET_ERROR)
+		PERROR_SOCKET("ftp: setsockopt TOS (ignored)");
 #endif
 #endif
 	return (0);
 bad:
-	(void) close(data), data = -1;
+	(void) closesocket(data), data = INVALID_SOCKET;
 	if (tmpno)
 		sendport = 1;
 	return (1);
@@ -1523,25 +1569,25 @@ dataconn(lmode)
 	int s, fromlen = sizeof (hisdataaddr), tos;
 
 #ifndef NO_PASSIVE_MODE
-if (passivemode)
-	return (fdopen(data, lmode));
+	if (passivemode)
+		return (FDOPEN_SOCKET(data, lmode));
 #endif
 	s = accept(data, (struct sockaddr *) &hisdataaddr, &fromlen);
-	if (s < 0) {
-		perror("ftp: accept");
-		(void) close(data), data = -1;
+	if (s == INVALID_SOCKET) {
+		PERROR_SOCKET("ftp: accept");
+		(void) closesocket(data), data = INVALID_SOCKET;
 		return (NULL);
 	}
-	(void) close(data);
+	(void) closesocket(data);
 	data = s;
 #ifdef IP_TOS
 #ifdef IPTOS_THROUGHPUT
 	tos = IPTOS_THROUGHPUT;
-	if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(int)) < 0)
-		perror("ftp: setsockopt TOS (ignored)");
+	if (setsockopt(s, IPPROTO_IP, IP_TOS, (char *)&tos, sizeof(int)) == SOCKET_ERROR)
+		PERROR_SOCKET("ftp: setsockopt TOS (ignored)");
 #endif
 #endif
-	return (fdopen(data, lmode));
+	return (FDOPEN_SOCKET(data, lmode));
 }
 
 static void ptransfer(direction, bytes, t0, t1)
@@ -1704,7 +1750,8 @@ void pswitch(flag)
 	(void) signal(SIGINT, oldintr);
 	if (abrtflag) {
 		abrtflag = 0;
-		(*oldintr)(SIGINT);
+		if (oldintr)
+			(*oldintr)(SIGINT);
 	}
 }
 
@@ -1822,7 +1869,7 @@ die:
 	pswitch(!proxy);
 	if (cpend) {
 		FD_ZERO(&mask);
-		FD_SET(fileno(cin), &mask);
+		FD_SET(SOCKETNO(fileno(cin)), &mask);
 		if ((nfnd = empty(&mask, 10)) <= 0) {
 			if (nfnd < 0) {
 				perror("abort");
@@ -1849,7 +1896,7 @@ void reset()
 
 	FD_ZERO(&mask);
 	while (nfnd > 0) {
-		FD_SET(fileno(cin), &mask);
+		FD_SET(SOCKETNO(fileno(cin)), &mask);
 		if ((nfnd = empty(&mask,0)) < 0) {
 			perror("reset");
 			code = -1;
@@ -1911,6 +1958,27 @@ gunique(local)
 #ifdef KRB5_KRB4_COMPAT
 char realm[REALM_SZ + 1];
 #endif /* KRB5_KRB4_COMPAT */
+
+#ifdef _WIN32
+const gss_OID_desc krb5_gss_oid_array[] = {
+   /* this is the official, rfc-specified OID */
+   {9, "\052\206\110\206\367\022\001\002\002"},
+   /* this is the unofficial, wrong OID */
+   {5, "\053\005\001\005\002"},
+   /* this is the v2 assigned OID */
+   {9, "\052\206\110\206\367\022\001\002\003"},
+   /* these two are name type OID's */
+   {10, "\052\206\110\206\367\022\001\002\002\001"},
+   {10, "\052\206\110\206\367\022\001\002\002\002"},
+   { 0, 0 }
+};
+
+const gss_OID_desc * const gss_mech_krb5 = krb5_gss_oid_array+0;
+const gss_OID_desc * const gss_mech_krb5_old = krb5_gss_oid_array+1;
+const gss_OID_desc * const gss_mech_krb5_v2 = krb5_gss_oid_array+2;
+const gss_OID_desc * const gss_nt_krb5_name = krb5_gss_oid_array+3;
+const gss_OID_desc * const gss_nt_krb5_principal = krb5_gss_oid_array+4;
+#endif
 
 #ifdef GSSAPI
 struct {
@@ -2192,14 +2260,14 @@ FILE *din;
 	 * after urgent byte rather than before as is protocol now
 	 */
 	sprintf(buf, "%c%c%c", IAC, IP, IAC);
-	if (send(fileno(cout), buf, 3, MSG_OOB) != 3)
-		perror("abort");
+	if (send(SOCKETNO(fileno(cout)), buf, 3, MSG_OOB) != 3)
+		PERROR_SOCKET("abort");
 	putc(DM, cout);
 	(void) secure_command("ABOR");
 	FD_ZERO(&mask);
-	FD_SET(fileno(cin), &mask);
+	FD_SET(SOCKETNO(fileno(cin)), &mask);
 	if (din) { 
-		FD_SET(fileno(din), &mask);
+		FD_SET(SOCKETNO(fileno(din)), &mask);
 	}
 	if ((nfnd = empty(&mask, 10)) <= 0) {
 		if (nfnd < 0) {
@@ -2209,7 +2277,7 @@ FILE *din;
 			code = -1;
 		lostpeer();
 	}
-	if (din && FD_ISSET(fileno(din), &mask)) {
+	if (din && FD_ISSET(SOCKETNO(fileno(din)), &mask)) {
 		/* Security: No threat associated with this read. */
 		while (read(fileno(din), buf, FTP_BUFSIZ) > 0)
 			/* LOOP */;
@@ -2270,3 +2338,61 @@ void secure_gss_error(maj_stat, min_stat, s)
   return;
 }
 #endif /* GSSAPI */
+
+#ifdef _WIN32
+
+int gettimeofday(struct timeval *tv, void *tz)
+{
+	struct _timeb tb;
+	_tzset();
+	_ftime(&tb);
+	if (tv) {
+		tv->tv_sec = tb.time;
+		tv->tv_usec = tb.millitm * 1000;
+	}
+#if 0
+	if (tz) {
+		tz->tz_minuteswest = tb.timezone;
+		tz->tz_dsttime = tb.dstflag;
+	}
+#else
+	_ASSERTE(!tz);
+#endif
+	return 0;
+}
+
+int fclose_socket(FILE* f)
+{
+	int rc = 0;
+	SOCKET _s = _get_osfhandle(_fileno(f));
+
+	rc = fclose(f);
+	if (rc)
+		return rc;
+	if (closesocket(_s) == SOCKET_ERROR)
+		return SOCKET_ERRNO;
+	return 0;
+}
+
+FILE* fdopen_socket(SOCKET s, char* mode)
+{
+	int o_mode = 0;
+	int old_fmode = _fmode;
+	FILE* f = 0;
+
+	if (strstr(mode, "a+")) o_mode |= _O_RDWR | _O_APPEND;
+	if (strstr(mode, "r+")) o_mode |= _O_RDWR;
+	if (strstr(mode, "w+")) o_mode |= _O_RDWR;
+	if (strchr(mode, 'a')) o_mode |= _O_WRONLY | _O_APPEND;
+	if (strchr(mode, 'r')) o_mode |= _O_RDONLY;
+	if (strchr(mode, 'w')) o_mode |= _O_WRONLY;
+
+	/* In theory, _open_osfhandle only takes: _O_APPEND, _O_RDONLY, _O_TEXT */
+
+	_fmode = _O_BINARY;
+	f = fdopen(_open_osfhandle(s, o_mode), mode);
+	_fmode = old_fmode;
+
+	return f;
+}
+#endif

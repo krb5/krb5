@@ -44,10 +44,18 @@ static char sccsid[] = "@(#)cmds.c	5.26 (Berkeley) 3/5/91";
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <sys/param.h>
+
+#include <port-sockets.h>
+
+#ifdef _WIN32
+#include <sys/stat.h>
+#include <direct.h>
+#include <mbstring.h>
+#undef ERROR
+#else
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <sys/socket.h>
+#endif
 
 #include <arpa/ftp.h>
 
@@ -55,10 +63,8 @@ static char sccsid[] = "@(#)cmds.c	5.26 (Berkeley) 3/5/91";
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <netdb.h>
 #include <ctype.h>
 #include <time.h>
-#include <netinet/in.h>
 
 #ifdef HAVE_GETCWD
 #define getwd(x) getcwd(x,MAXPATHLEN)
@@ -67,14 +73,9 @@ static char sccsid[] = "@(#)cmds.c	5.26 (Berkeley) 3/5/91";
 #include "ftp_var.h"
 #include "pathnames.h"
 
-#define sig_t my_sig_t
-#define sigtype krb5_sigtype
-typedef sigtype (*sig_t)();
-
 extern	char *globerr;
 extern	char *home;
 extern	char *remglob();
-extern	char *getenv();
 #ifndef HAVE_STRERROR
 #define strerror(error) (sys_errlist[error])
 #ifdef NEED_SYS_ERRLIST
@@ -207,7 +208,8 @@ void setpeer(argc, argv)
 #endif
 #endif
 
-#if defined(unix) && (NBBY == 8 || defined(linux))
+/* XXX - WIN32 - Is this really ok for Win32 (binary vs text mode)? */
+#if defined(unix) && (NBBY == 8 || defined(linux)) || defined(_WIN32)
 /*
  * this ifdef is to keep someone form "porting" this to an incompatible
  * system and not checking this out. This way they have to think about it.
@@ -1038,7 +1040,11 @@ remglob(argv,doswitch)
 	char *argv[];
 	int doswitch;
 {
+#ifdef _WIN32
+	char *temp = NULL;
+#else
 	char temp[16];
+#endif
 	static char buf[MAXPATHLEN];
 	static FILE *ftemp = NULL;
 	static char **args;
@@ -1065,9 +1071,17 @@ remglob(argv,doswitch)
 		return (cp);
 	}
 	if (ftemp == NULL) {
+#ifdef _WIN32
+		temp = _tempnam(_PATH_TMP, "ftpglob");
+		if (temp == NULL) {
+			printf("can't get temporary file name\n");
+			return (NULL);
+		}
+#else
 		(void) strncpy(temp, _PATH_TMP, sizeof(temp) - 1);
 		temp[sizeof(temp) - 1] = '\0';
 		(void) mktemp(temp);
+#endif /* !_WIN32 */
 		oldverbose = verbose, verbose = 0;
 		oldhash = hash, hash = 0;
 		if (doswitch) {
@@ -1081,6 +1095,10 @@ remglob(argv,doswitch)
 		verbose = oldverbose; hash = oldhash;
 		ftemp = fopen(temp, "r");
 		(void) unlink(temp);
+#ifdef _WIN32
+		free(temp);
+		temp = NULL;
+#endif /* _WIN32 */
 		if (ftemp == NULL) {
 			printf("can't find list of remote files, oops\n");
 			return (NULL);
@@ -1496,6 +1514,78 @@ usage:
  * Do a shell escape
  */
 /*ARGSUSED*/
+#ifdef _WIN32
+void shell(int argc, char **argv)
+{
+	char *AppName;
+	char ShellCmd[MAX_PATH];
+	char CmdLine[MAX_PATH];
+	int i;
+	PROCESS_INFORMATION ProcessInformation;
+	BOOL Result;
+	STARTUPINFO StartupInfo;
+	int NumBytes;
+
+#ifdef _DEBUG
+	if (trace)
+	{
+		fprintf(stderr, "entered shell\n");
+		fprintf(stderr, "arguments = \n");
+		fprintf(stderr, "   argc = %d\n", argc);
+		for (i = 0; i < argc; i++)
+		{
+			fprintf(stderr, "    argv %d = %s\n", i, argv[i]);
+		}
+	}
+#endif /* _DEBUG */
+
+	NumBytes = GetEnvironmentVariable("COMSPEC", ShellCmd, sizeof(ShellCmd));
+
+	if (NumBytes == 0)
+	{
+		code = -1;
+		return;
+	}
+
+	AppName = ShellCmd;
+	_mbscpy(CmdLine, ShellCmd);
+
+	if (argc > 1)
+	{
+		_mbsncat(CmdLine, " /C", sizeof(CmdLine));
+	}
+
+	for (i = 1; i < argc; i++)
+	{
+		_mbsncat(CmdLine, " ", sizeof(CmdLine));
+		_mbsncat(CmdLine, argv[i], sizeof(CmdLine));
+	}
+	CmdLine[sizeof(CmdLine)-1] = 0;
+
+	memset(&StartupInfo, 0, sizeof(StartupInfo));
+	StartupInfo.cb = sizeof(StartupInfo);
+	Result = CreateProcess(AppName,              /* command name */
+			       CmdLine,              /* command line w/args */
+			       NULL,                 /* sec attr (app) */
+			       NULL,                 /* sec attr (thread) */
+			       FALSE,                /* inherit flags */
+			       0,                    /* creation flags */
+			       NULL,                 /* environment */
+			       NULL,                 /* working directory */
+			       &StartupInfo,         /* startup info struct */
+			       &ProcessInformation); /* process info struct */
+
+	if (Result)
+	{
+		WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
+		CloseHandle(ProcessInformation.hProcess);
+		code = 0;
+	}
+	else {
+		code = -1;
+	}
+}
+#else
 void shell(argc, argv)
 	int argc;
 	char **argv;
@@ -1555,6 +1645,7 @@ void shell(argc, argv)
 	}
 	return;
 }
+#endif
 
 /*
  * Send new user information (re-login)
@@ -1806,17 +1897,17 @@ void quit()
 void disconnect()
 {
 	extern FILE *cout;
-	extern int data;
+	extern SOCKET data;
 
 	if (!connected)
 		return;
 	(void) command("QUIT");
 	if (cout) {
-		(void) fclose(cout);
+		(void) FCLOSE_SOCKET(cout);	
+		cout = NULL;
 	}
-	cout = NULL;
 	connected = 0;
-	data = -1;
+	data = INVALID_SOCKET;
 	if (!proxy) {
 		macnum = 0;
 	}
@@ -1908,8 +1999,7 @@ void account(argc,argv)
 jmp_buf abortprox;
 
 static sigtype
-proxabort(sig)
-	int sig;
+proxabort(int sig)
 {
 	extern int proxy;
 

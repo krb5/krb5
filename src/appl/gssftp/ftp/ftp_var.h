@@ -33,6 +33,33 @@
  *	@(#)ftp_var.h	5.9 (Berkeley) 6/1/90
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#ifdef _WIN32
+int fclose_socket(FILE* f);
+FILE* fdopen_socket(SOCKET s, char* mode);
+#define FCLOSE_SOCKET(f) fclose_socket(f)
+#define FDOPEN_SOCKET(s, mode) fdopen_socket(s, mode)
+#define SOCKETNO(fd) _get_osfhandle(fd)
+#define PERROR_SOCKET(str) do { errno = SOCKET_ERRNO; perror(str); } while(0)
+#else
+#define FCLOSE_SOCKET(f) fclose(f)
+#define FDOPEN_SOCKET(s, mode) fdopen(s, fd)
+#define SOCKETNO(fd) (fd)
+#define PERROR_SOCKET(str) perror(str)
+#endif
+
+#ifdef _WIN32
+typedef void (*sig_t)(int);
+typedef void sigtype;
+#else
+#define sig_t my_sig_t
+#define sigtype krb5_sigtype
+typedef sigtype (*sig_t)();
+#endif
+
 /*
  * FTP global variables.
  */
@@ -74,7 +101,13 @@ extern int	passivemode;	/* passive mode enabled */
 extern char	*altarg;	/* argv[1] with no shell-like preprocessing  */
 extern char	ntin[17];	/* input translation table */
 extern char	ntout[17];	/* output translation table */
+#ifdef _WIN32
+#ifndef MAXPATHLEN
+#define MAXPATHLEN MAX_PATH
+#endif
+#else
 #include <sys/param.h>
+#endif
 extern char	mapin[MAXPATHLEN];	/* input map template */
 extern char	mapout[MAXPATHLEN];	/* output map template */
 extern int	clevel;		/* command channel protection level */
@@ -134,12 +167,11 @@ extern char macbuf[4096];
 #endif
 
 extern	char *tail();
-extern	int errno;
+#ifndef _WIN32
 extern	char *mktemp();
-
-#if (defined(STDARG) || (defined(__STDC__) && ! defined(VARARGS))) || defined(HAVE_STDARG_H)
-extern int command(char *, ...);
 #endif
+
+extern int command(char *, ...);
 
 #ifndef PROTOTYPE
 #define PROTOTYPE(x) x
