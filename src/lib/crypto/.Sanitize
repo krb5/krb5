@@ -30,9 +30,12 @@ configure
 configure.in
 crc32
 cryptoconf.c
+decrypt_data.c
 des
+des3_md5.c
 des_crc.c
 des_md5.c
+encrypt_data.c
 md4
 md5
 os

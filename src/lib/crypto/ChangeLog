@@ -1,3 +1,8 @@
+Mon Mar 11 10:59:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* des_crc.c (mit_des_crc_decrypt_func): Add const to pointer
+		cast for suncc warning.
+
 Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Folded in danw's changes to allow
