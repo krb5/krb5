@@ -88,7 +88,7 @@ static const char *wr_ktab_type		= "WRFILE";
 static const char *gent_opterr_fmt	= "- cannot decode protocol";
 static const char *gen_conn_err_fmt	= "- cannot connect to server";
 static const char *db_print_header	= "------------------------------------\n";
-static const char *db_print_1_fmt	= "Principal: %s (key version %d)\n";
+static const char *db_print_1_fmt	= "Principal: %s\n";
 static const char *db_print_2_fmt	= "Maximum ticket lifetime: %s\n";
 static const char *db_print_2a_fmt	= "Maximum renewable lifetime: %s\n";
 static const char *db_print_3_fmt	= "Principal expiration: %s\n";
@@ -97,10 +97,10 @@ static const char *db_print_4_fmt	= "Last password change: %s\n";
 static const char *db_print_5_fmt	= "Last successful entry: %s\n";
 static const char *db_print_6_fmt	= "Last unsuccessful entry: %s";
 static const char *db_print_6_opt_fmt	= " - failed %d times";
-static const char *db_print_7_fmt	= "Last modified by: %s (%s)\n\t[master version %d]\n";
+static const char *db_print_7_fmt	= "Last modified by: %s (%s)\n";
 static const char *db_print_8_fmt	= "Flags: %s\n";
-static const char *db_print_9_fmt	= "Salt: %s";
-static const char *db_print_9a_fmt	= ", %s";
+static const char *db_print_ufo_tl_fmt	= "Unknown Tagged Data: Tag=%d, Length=%d\n";
+static const char *db_print_9_fmt	= "Key: Type=%s, Salt=%s, Version=%d\n";
 static const char *db_print_trailer	= "------------------------------------\n";
 
 static const char *db_indef_dt_msg	= "indefinite";
@@ -274,9 +274,15 @@ kadmin_print_entry(name, valid, dbentp)
     krb5_ui_4		valid;
     krb5_db_entry	*dbentp;
 {
+    krb5_tl_data	*tl;
+    krb5_tl_mod_princ	*modprinc;
+    krb5_timestamp	now;
+    int			i;
+    char		keytype[128];
+    char		salttype[128];
+
     printf(db_print_header);
-    printf(db_print_1_fmt, name,
-	   ((valid & KRB5_ADM_M_KVNO) ? dbentp->kvno : -1));
+    printf(db_print_1_fmt, name);
     printf(db_print_2_fmt,
 	   ((valid & KRB5_ADM_M_MAXLIFE) ?
 	    delta2string(dbentp->max_life) : db_indef_dt_msg));
@@ -289,9 +295,6 @@ kadmin_print_entry(name, valid, dbentp)
     printf(db_print_3a_fmt,
 	   ((valid & KRB5_ADM_M_PWEXPIRATION) ?
 	    abs2string(dbentp->pw_expiration) : db_never_msg));
-    printf(db_print_4_fmt,
-	   ((valid & KRB5_ADM_M_LASTPWCHANGE) ?
-	    abs2string(dbentp->last_pwd_change) : db_never_msg));
     printf(db_print_5_fmt,
 	   ((valid & KRB5_ADM_M_LASTSUCCESS) ?
 	    abs2string(dbentp->last_success) : db_never_msg));
@@ -303,25 +306,44 @@ kadmin_print_entry(name, valid, dbentp)
 	printf("\n");
     }
 
-    if (valid & KRB5_ADM_M_MODNAME) {
-	char *mname;
-	if (!krb5_unparse_name(kcontext, dbentp->mod_name, &mname)) {
-	    printf(db_print_7_fmt, mname,
-		   ((valid & KRB5_ADM_M_MODDATE) ?
-		    abs2string(dbentp->mod_date) : db_never_msg),
-		   ((valid & KRB5_ADM_M_MKVNO) ? dbentp->mkvno : -1));
-	    krb5_xfree(mname);
-	}
-    }
     printf(db_print_8_fmt,
 	   ((valid & KRB5_ADM_M_FLAGS) ?
 	    dbflags2string(dbentp->attributes) : ""));
-    if (valid & KRB5_ADM_M_SALTTYPE) {
-	printf(db_print_9_fmt, salt2string(dbentp->salt_type));
-	if (dbentp->salt_type != dbentp->alt_salt_type)
-	    printf(db_print_9a_fmt, salt2string(dbentp->alt_salt_type));
-	printf("\n");
+
+    for (tl=dbentp->tl_data; tl; tl = tl->tl_data_next) {
+	switch (tl->tl_data_type) {
+	case KRB5_TL_LAST_PWD_CHANGE:
+	    *(((krb5_octet *) (&now))) = tl->tl_data_contents[0];
+	    *(((krb5_octet *) (&now)) + 1) = tl->tl_data_contents[1];
+	    *(((krb5_octet *) (&now)) + 2) = tl->tl_data_contents[2];
+	    *(((krb5_octet *) (&now)) + 3) = tl->tl_data_contents[3];
+	    printf(db_print_4_fmt, abs2string(now));
+	    break;
+	case KRB5_TL_MOD_PRINC:
+	    *(((krb5_octet *) (&now))) = tl->tl_data_contents[0];
+	    *(((krb5_octet *) (&now)) + 1) = tl->tl_data_contents[1];
+	    *(((krb5_octet *) (&now)) + 2) = tl->tl_data_contents[2];
+	    *(((krb5_octet *) (&now)) + 3) = tl->tl_data_contents[3];
+	    printf(db_print_7_fmt, &tl->tl_data_contents[4], abs2string(now));
+	    break;
+	default:
+	    printf(db_print_ufo_tl_fmt, tl->tl_data_type, tl->tl_data_length);
+	    break;
+	}
     }
+    for (i=0; i<dbentp->n_key_data; i++) {
+	krb5_keytype_to_string((krb5_keytype) dbentp->key_data[i].
+			       key_data_type[0],
+			       keytype,
+			       sizeof(keytype));
+	krb5_salttype_to_string((krb5_keytype) dbentp->key_data[i].
+				key_data_type[1],
+				salttype,
+				sizeof(salttype));
+	printf(db_print_9_fmt, keytype, salttype,
+	       (int) dbentp->key_data[i].key_data_kvno);
+    }
+
     printf(db_print_trailer);
 }
 
