@@ -664,6 +664,7 @@ extern char *memcpy P((char *, const char *, int));
 #ifndef memset
 extern char *memset P((char *, int, int));
 #endif
+extern char *calloc P((unsigned int, unsigned int));
 extern char *malloc P((unsigned int));
 extern char *realloc P((char *, unsigned int));
 extern void free P((char *));
