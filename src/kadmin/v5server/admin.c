@@ -373,16 +373,16 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 	    if (!(kret = krb5_parse_name(kcontext,
 					 arglist[0].data,
 					 &principal))) {
-		int		howmany;
+		int		how_many;
 		krb5_boolean	more;
 
-		howmany = 1;
+		how_many = 1;
 
 		/* Try to get the entry */
 		kret = krb5_db_get_principal(kcontext,
 					     principal,
 					     &cur_dbentry,
-					     &howmany,
+					     &how_many,
 					     &more);
 
 		/*
@@ -390,8 +390,8 @@ admin_add_modify(kcontext, debug_level, ticket, nargs, arglist,
 		 * If we're adding, there'd better not be an entry.
 		 */
 		if (!kret &&
-		    ((should_exist && howmany) ||
-		     (!should_exist && !howmany))) {
+		    ((should_exist && how_many) ||
+		     (!should_exist && !how_many))) {
 
 		    /* We need to have a principal */
 		    new_dbentry.principal = principal;
@@ -661,18 +661,18 @@ admin_delete_rename(kcontext, debug_level, ticket, original, new)
 	    if (!(kret = krb5_parse_name(kcontext,
 					 original,
 					 &orig_principal))) {
-		int		howmany;
+		int		how_many;
 		krb5_boolean	more;
 
-		howmany = 1;
+		how_many = 1;
 
 		/* Try to get the entry */
 		if (!(kret = krb5_db_get_principal(kcontext,
 						   orig_principal,
 						   &orig_entry,
-						   &howmany,
+						   &how_many,
 						   &more))
-		    && howmany) {
+		    && how_many) {
 
 		    /*
 		     * We've got the entry.  If we're renaming, we have
