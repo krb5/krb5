@@ -1386,7 +1386,7 @@ statcmd()
 		sprintf(&str[strlen(str)], ", FORM: %s", formnames[form]);
 	if (type == TYPE_L)
 #if 1
-		strcat(str, " 8");
+		strncat(str, " 8", sizeof (str) - strlen(str) - 1);
 #else
 /* this is silly. -- eichin@cygnus.com */
 #if NBBY == 8
@@ -1460,7 +1460,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 		 */
 		if (n) sprintf(in, "%d%c", n, cont_char);
 		else in[0] = '\0';
-		strcat(in, buf);
+		strncat(in, buf, sizeof (in) - strlen(in) - 1);
 #ifdef KERBEROS
 		if (strcmp(auth_type, "KERBEROS_V4") == 0)
 		  if ((length = level == PROT_P ?
