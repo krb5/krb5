@@ -205,7 +205,7 @@ krb5_marc_dk_encrypt(enc, hash, key, usage, ivec, input, output)
     (*(enc->keysize))(&keybytes, &keylength);
     plainlen = krb5_roundup(blocksize+4+input->length, blocksize);
 
-    krb5_dk_encrypt_length(enc, hash, input->length, &enclen);
+    krb5_marc_dk_encrypt_length(enc, hash, input->length, &enclen);
 
     /* key->length, ivec will be tested in enc->encrypt */
 

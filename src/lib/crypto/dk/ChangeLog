@@ -1,3 +1,9 @@
+1999-06-28  Tom Yu  <tlyu@mit.edu>
+
+	* dk_encrypt.c (krb5_marc_dk_encrypt): Call
+	krb5_marc_dk_encrypt_length() instead of krb5_dk_encrypt_length()
+	to prevent blocksize errors.
+
 Mon May 10 15:16:34 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Do win32 build in subdir.
