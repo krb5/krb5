@@ -1,3 +1,8 @@
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* server.c (log_badauth_display_status_1): Do not assume that
+	gss_buffer_desc strings are '\0' terminated.
+
 2001-06-05  Ezra Peisach  <epeisach@mit.edu>
 
 	* server.c (log_badauth_display_status_1): Need value element of

@@ -167,11 +167,11 @@ static void rpc_test_badverf(gss_name_t client, gss_name_t server,
      (void) gss_display_name(&minor_stat, client, &client_name, &type);
      (void) gss_display_name(&minor_stat, server, &server_name, &type);
 
-     printf("rpc_test server: bad verifier from %s at %s:%d for %s\n",
-	    (char *) client_name.value,
+     printf("rpc_test server: bad verifier from %.*s at %s:%d for %.*s\n",
+	    (int) client_name.length, (char *) client_name.value,
 	    inet_ntoa(rqst->rq_xprt->xp_raddr.sin_addr), 
 	    ntohs(rqst->rq_xprt->xp_raddr.sin_port),
-	    (char *) server_name.value);
+	    (int) server_name.length, (char *) server_name.value);
 
      (void) gss_release_buffer(&minor_stat, &client_name);
      (void) gss_release_buffer(&minor_stat, &server_name);
@@ -240,12 +240,13 @@ void log_badauth_display_status_1(OM_uint32 code, int type, int rec)
 		    log_badauth_display_status_1(minor_stat,
 						 GSS_C_MECH_CODE, 1);
 	       } else
-		    printf("GSS-API authentication error %s: "
-			   "recursive failure!\n", (char *)msg.value);
+		    printf("GSS-API authentication error %.*s: "
+			   "recursive failure!\n", (int) msg.length, 
+			   (char *)msg.value);
 	       return;
 	  }
 	  
-	  printf(", %s", (char *)msg.value); 
+	  printf(", %.*s", (int) msg.length, (char *)msg.value); 
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)
