@@ -173,10 +173,6 @@ char copyright[] =
 
 #include "loginpaths.h"
 
-#ifndef SETPGRP_TWOARG
-#define setpgrp(a,b) setpgrp()
-#endif
-
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
 #endif
@@ -1112,7 +1108,11 @@ doit(f, fromp)
 #endif
 	    exit(0);
 	}
+#ifdef SETPGRP_TWOARG
 	setpgrp(0, getpid());
+#else
+	setpgrp();
+#endif
 	(void) close(s); (void) close(pv[0]);
 	dup2(pv[1], 2);
 	(void) close(pv[1]);

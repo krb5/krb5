@@ -1,3 +1,11 @@
+Tue Nov  8 23:52:58 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krshd.c (setpgrp): Defining setpgrp(a,b) to setpgrp() if
+		SETPGRP_TWOARG is not set can cause infinite macro
+		recursion on some C preprocessors.  Fix by putting the
+		#ifdef for SETPGRP_TWOARG where setpgrp is actually
+		called, instead of trying to redefine setpgrp().
+
 Mon Nov  7 21:22:00 1994  Theodore Y. Ts'o  (tytso@dcl)
 
 	* configure.in: Add check for stdlib.h
