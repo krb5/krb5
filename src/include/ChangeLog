@@ -1,5 +1,8 @@
 2002-06-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* socket-utils.h (ss2sin6): Enable compilation of inline function
+	version.
+
 	* configure.in: Check for seteuid, setresuid, setreuid, setegid,
 	setresgid and setregid.
 	* k5-util.h: Include sys/types.h, unistd.h, and stdlib.h if

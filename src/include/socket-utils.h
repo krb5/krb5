@@ -80,7 +80,7 @@ static __inline__ struct sockaddr_in *sa2sin (struct sockaddr *sa)
 {
     return (struct sockaddr_in *) sa;
 }
-#ifdef KRB5_USE_INET6xxNotUsed
+#ifdef KRB5_USE_INET6
 static __inline__ struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
 {
     return (struct sockaddr_in6 *) sa;
