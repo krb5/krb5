@@ -1,3 +1,11 @@
+Fri May  7 15:26:44 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* adm_proto.h: Fix the existing kludge to deal with the fact that
+		krb5_realm_params is defined in two, count them two,
+		header files.  There's real ugliness here that needs
+		cleaning up eventually, but I don't have the time now to
+		deal with it.
+
 Fri Apr 16 17:07:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in (all-windows): Don't constantly recreate autoconf.h

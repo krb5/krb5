@@ -33,7 +33,12 @@ typedef struct _krb5_db_entry krb5_db_entry;
 #endif	/* KRB5_KDB5__ */
 
 /* Ditto for adm.h */
-#ifndef	KRB5_ADM_H__
+
+/*
+ * XXXX krb5_realm params is defined in two header files!!!!
+ * This really needs to be fixed!!!
+ */
+#if !defined(KRB5_ADM_H__) && !defined(__KADM5_ADMIN_H__)
 struct ___krb5_realm_params;
 typedef struct ___krb5_realm_params krb5_realm_params;
 
