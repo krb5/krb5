@@ -1,0 +1,13 @@
+#	$Source$
+#	$Author$
+#	$Id$
+#
+#  Copyright 1990 by the Massachusetts Institute of Technology.
+# 
+#  For copying and distribution information, please see the file
+#  <krb5/copyright.h>.
+# 
+all:: config.h osconfig.h
+
+ProcessStockHeader(stock/config.h,config.h)
+ProcessStockHeader(stock/osconfig.h,osconfig.h)
