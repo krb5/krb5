@@ -841,8 +841,7 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 
 \numtest{32}{
 \Reason{Accepts 0 (never) for pw_expiration when there's a policy with
-	non-zero pw_max_life, but actually sets pw_expiration to now +
-	pw_max_life.}
+	non-zero pw_max_life, and sets pw_expiration to zero.
 \Status{Implemented}	
 }
 
@@ -864,9 +863,7 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 }
 
 \numtest{36}{
-\Reason{Accepts non-zero pw_expiration and limits it to now +
-	pw_max_life when it's later than now + non-zero pw_max_life in
-	policy.}
+\Reason{Accepts and sets non-zero pw_expiration greater than now_pw_max_life.}
 \Status{Implemented}	
 }
 
@@ -1182,22 +1179,22 @@ ccache without credentials for ADMIN_SERVICE or CHANGEPW_SERVICE.}
 
 \numtest{29}{
 \Priority{High}
-\Reason{Sets pw_expiration to 0 (never) if there's no policy and no
-	specified pw_expiration.}
+\Reason{Sets pw_expiration to 0 (never) when a policy is cleared and
+no pw_expiration is specified.}
 \Status{Implemented}	
 }
 
 \numtest{30}{
 \Priority{High}
 \Reason{Sets pw_expiration to 0 (never) if it isn't specified and the
-	policy has a 0 (never) pw_max_life.}
+	new policy has a 0 (never) pw_max_life.}
 \Status{Implemented}	
 }
 
 \numtest{31}{
 \Priority{High}
 \Reason{Sets pw_expiration to now + pw_max_life if it isn't specified
-	and the policy has a non-zero pw_max_life.}
+	and the new policy has a non-zero pw_max_life.}
 \Status{Implemented}	
 }
 

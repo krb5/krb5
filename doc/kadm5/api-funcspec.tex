@@ -1154,16 +1154,18 @@ count by one.
 
 \item Set the pw_expiration field.
 \begin{enumerate}
-\item If the POLICY bit is not set, then
-\begin{enumerate}
-\item if the PW_EXPIRATION bit is set, set pw_expiration to the given
-value, else
-\item set pw_expiration to never.
+\item If the POLICY bit is set in mask, then if pw_max_life is non-zero,
+set pw_expiration to now + pw_maxlife, otherwise set pw_max_life to
+never.
+\item If the PW_EXPIRATION bit is set in mask, set pw_expiration to
+the requested value, overriding the value set above.
 \end{enumerate}
-\item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
-the sooner of the given value and now + pw_max_life.
-\item Otherwise, set pw_expiration to now + pw_max_life.
-\end{enumerate}
+NOTE: This is a change from the original semantics, in which policy
+expiration was enforced even on administrators.  The old semantics are
+not preserved, even for version 1 callers, because this is a
+server-specific policy decision; besides, the new semantics are less
+restrictive, so all previous callers should continue to function
+properly.
 
 \item Set mod_date to now and set mod_name to caller.
 \item Set last_pwd_change to now.
@@ -1240,20 +1242,41 @@ policy.
 aux_attributes is set, decrement policy count on old policy.
 \end{enumerate}
 
-\item Set pw_expiration according to the new policy.
+\item Set pw_expiration appropriately.  pw_expiration can change if:
+the POLICY bit is set in mask, so the principal is changing to a
+policy (either from another policy or no policy); the POLICY_CLR bit
+is set in mask, so the principal is changing to no policy; or
+PW_EXPIRATION is set.
 \begin{enumerate}
-\item If the POLICY bit is not set in aux_attributes, then
-\begin{enumerate}
-\item if the PW_EXPIRATION bit is set, set pw_expiration to the given
-value, else
-\item set pw_expiration to never.
-\end{enumerate}
-\item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
-the sooner of the given value and last_pwd_change + pw_max_life.
-\item Otherwise, set pw_expiration to last_pwd_change + pw_max_life.
+\item If the POLICY bit is set in mask, set pw_expiration to
+last_pwd_change + pw_max_life if pw_max_life is non-zero, otherwise
+set pw_expiration to never.
+\item If the POLICY_CLR biti s set in mask, set pw_expiration to
+never.
+\item If PW_EXPIRATION is set, set pw_expiration to the requested
+value, overriding the value from the previous two cases.  NOTE: This
+is a change from the original semantics, in which policy expiration
+was enforced even on administrators.  The old semantics are not
+preserved, even for version 1 callers, because this is a
+server-specific policy decision; besides, the new semantics are less
+restrictive, so all previous callers should continue to function
+properly.
 \end{enumerate}
 
-\item Update the fields specified in the mask.
+% Here is the previous, and confusing, text of pw_expiration semantics:
+%\begin{enumerate}
+%\item If the POLICY bit is not set in aux_attributes, then
+%\begin{enumerate}
+%\item if the PW_EXPIRATION bit is set, set pw_expiration to the given
+%value, else
+%\item set pw_expiration to never.
+%\end{enumerate}
+%\item Otherwise, if the PW_EXPIRATION bit is set, set pw_expiration to
+%the sooner of the given value and last_pwd_change + pw_max_life.
+%\item Otherwise, set pw_expiration to last_pwd_change + pw_max_life.
+%\end{enumerate}
+
+\item Update the remaining fields specified in the mask.
 \item Update mod_name field to caller and mod_date to now.
 \end{enumerate}
 
