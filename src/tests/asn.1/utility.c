@@ -86,6 +86,8 @@ krb5_error_code krb5_data_hex_parse(d, s)
     }
     d->data[i] = (char)digit;
   }
+  if (copy)
+    free(copy);
   return 0;
 }
 
