@@ -1,3 +1,7 @@
+Fri Oct 21 17:30:00 1998  Miro Jurisic <meeroh@mit.edu>
+	* Makefile.initial: added auto-detection of CodeWarrior version
+	* Makefile.tmpl: added CodeWarrior Pro4 files and fixed -map on krb5 68k lib
+
 Fri Sep 8 15:50:00 1998  Miro Jurisic <meeroh@mit.edu>
 	* CFMGlue.c: Added check for Code Fragment Manager
 

@@ -1,5 +1,23 @@
-all Ä build-makefile create-directories build-cw-projects
-	echo # Open {TargDir}:mac:libraries:BeforeBuild.prj in CodeWarrior IDE 2.1 and build it
+################################################################################
+##
+## Figure out CodeWarrior version
+##
+################################################################################
+
+CodeWarrior_Linker_Version = ¶`mwlink68k -version | search /Runtime/ | streamedit -d -e "/([0-9.]*)¨1/ print ¨1"¶`
+CodeWarrior_Linker_Pro2 = "2.0"
+CodeWarrior_Linker_Pro4 = "2.2"
+CodeWarrior_Version = `if ({CodeWarrior_Linker_Version} == {CodeWarrior_Linker_Pro2}); ¶
+							echo Pro2; ¶
+						else if ({CodeWarrior_Linker_Version} == {CodeWarrior_Linker_Pro4}); ¶
+							echo Pro4; ¶
+						end;`
+CodeWarrior_IDE = "CodeWarrior "{CodeWarrior_Version}" IDE"
+CodeWarrior_Projects = :mac:Libraries:Metrowerks:{CodeWarrior_Version}:
+CodeWarrior_Project = "`Directory`mac:libraries:CodeWarrior Dependencies:{CodeWarrior_Version}.prj"
+
+
+all Ä create-directories build-cw-projects build-makefile
 
 ################################################################################
 ##
@@ -34,9 +52,9 @@ create-directories Ä
 ################################################################################
 
 build-cw-projects Ä
-	(Echo "with timeout of 1200 seconds"; ¶
-	Echo "Tell application ¶"CodeWarrior IDE 2.1¶""; ¶
-	Echo "Open ¶"{TargDir}:mac:libraries:BeforeBuild.prj¶" as alias"; ¶
-	Echo "Make Project"; ¶
-	Echo "end"; ¶
-	Echo "end") | Catenate | perl :mac:RunAppleScript.pl
+		(Echo "with timeout of 1200 seconds"; ¶
+		Echo "Tell application ¶"{CodeWarrior_IDE}¶""; ¶
+		Echo "Open ¶"{CodeWarrior_Project}¶" as alias"; ¶
+		Echo "Make Project"; ¶
+		Echo "end"; ¶
+		Echo "end") | Catenate | perl :mac:RunAppleScript.pl
