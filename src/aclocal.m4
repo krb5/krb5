@@ -246,7 +246,7 @@ AC_MSG_CHECKING(for IPv6 compile-time support)
 AC_CACHE_VAL(krb5_cv_inet6,[
 dnl NetBSD and Linux both seem to have gotten get*info but not getipnodeby*
 dnl as of the time I'm writing this, so we'll use get*info only.
-if test "$ac_cv_func_inet_ntop != "yes ; then
+if test "$ac_cv_func_inet_ntop" != "yes" ; then
   krb5_cv_inet6=no
 else
 AC_TRY_COMPILE([
