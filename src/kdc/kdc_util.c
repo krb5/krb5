@@ -81,67 +81,6 @@ krb5_principal princ;
 		       krb5_princ_realm(princ)->length)) ? FALSE : TRUE);
 }
 
-krb5_error_code
-decrypt_tgs_req(tgs_req, from)
-krb5_tgs_req *tgs_req;
-const krb5_fulladdr *from;
-{
-    krb5_error_code retval;
-    krb5_data scratch;
-    krb5_encrypt_block eblock;
-    krb5_tgs_req_enc_part *local_encpart;
-
-    if (retval = kdc_process_tgs_req(tgs_req, from))
-	return(retval);
-
-    if (tgs_req->tgs_request2->enc_part.length) {
-	/* decrypt encrypted part, attach to enc_part2 */
-
-	if (!valid_etype(tgs_req->tgs_request2->etype)) /* XXX wrong etype to use? */
-	    return KRB5KDC_ERR_ETYPE_NOSUPP;
-
-	scratch.length = tgs_req->tgs_request2->enc_part.length;
-	if (!(scratch.data = malloc(tgs_req->tgs_request2->enc_part.length))) {
-	    return(ENOMEM);
-	}
-	/* put together an eblock for this encryption */
-
-	eblock.crypto_entry = krb5_csarray[tgs_req->tgs_request2->etype]->system; /* XXX */
-	/* do any necessary key pre-processing */
-	if (retval = krb5_process_key(&eblock,
-				      tgs_req->header2->ticket->enc_part2->session)) {
-	    free(scratch.data);
-	    return(retval);
-	}
-
-	/* call the encryption routine */
-	if (retval = krb5_decrypt((krb5_pointer) tgs_req->tgs_request2->enc_part.data,
-				  (krb5_pointer) scratch.data,
-				  scratch.length, &eblock,
-				  0)) {
-	    (void) krb5_finish_key(&eblock);
-	    free(scratch.data);
-	    return retval;
-	}
-
-#define clean_scratch() {bzero(scratch.data, scratch.length); free(scratch.data);}
-
-	if (retval = krb5_finish_key(&eblock)) {
-	    clean_scratch();
-	    return retval;
-	}
-	if (retval = decode_krb5_tgs_req_enc_part(&scratch, &local_encpart)) {
-	    clean_scratch();
-	    return retval;
-	}
-	clean_scratch();
-#undef clean_scratch
-
-	tgs_req->tgs_request2->enc_part2 = local_encpart;
-    }
-    return 0;
-}
-
 struct kparg {
     krb5_db_entry *dbentry;
     krb5_keyblock *key;
@@ -175,11 +114,12 @@ OLDDECLARG(krb5_keyblock **, key)
 
 
 krb5_error_code 
-kdc_process_tgs_req(request, from)
-krb5_tgs_req *request;
+kdc_process_tgs_req(request, from, ticket)
+krb5_kdc_req *request;
 const krb5_fulladdr *from;
+krb5_ticket **ticket;
 {
-    register krb5_ap_req *apreq;
+    register krb5_ap_req apreq;
     int nprincs;
     krb5_boolean more;
     krb5_db_entry server;
@@ -188,36 +128,52 @@ const krb5_fulladdr *from;
     struct kparg who;
     krb5_error_code retval;
     krb5_checksum our_cksum;
+    krb5_data *scratch;
 
-    if (retval = decode_krb5_ap_req(&request->header, &request->header2))
+    if (request->padata_type != KRB5_PADATA_AP_REQ)
+	return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+
+    if (retval = decode_krb5_ap_req(&request->padata, &apreq))
 	return retval;
-    if (retval = decode_krb5_real_tgs_req(&request->tgs_request, &request->tgs_request2))
-	return retval;
-    krb5_free_data(request->tgs_request2->server[0]);
-    if (retval = krb5_copy_data(request->header2->ticket->server[0],
-				  &request->tgs_request2->server[0])) {
-	request->tgs_request2->server[0] = 0;
-	/* XXX mem leak of rest of server components... */
+
+#define cleanup_apreq() {if (apreq.ticket) krb5_free_ticket(apreq.ticket);\
+if (apreq.authenticator.ciphertext.data) xfree(apreq.authenticator.ciphertext.data);}
+
+    /* XXX why copy here? */
+    krb5_free_data(request->server[0]);
+    if (retval = krb5_copy_data(apreq.ticket->server[0],
+				  &request->server[0])) {
+	register krb5_data **foo;
+	request->server[0] = 0;
+	for (foo = &request->server[1]; *foo; foo++)
+	    krb5_free_data(*foo);
+	/* XXX mem leak plugged? */
+	cleanup_apreq();
 	return retval;
     }
 
-    apreq = request->header2;
-    if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
-	isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED))
+    if (isflagset(apreq.ap_options, AP_OPTS_USE_SESSION_KEY) ||
+	isflagset(apreq.ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
+	cleanup_apreq();
 	return KRB5KDC_ERR_POLICY;
+    }
 
     /* XXX perhaps we should optimize the case of the TGS ? */
 
     nprincs = 1;
-    if (retval = krb5_db_get_principal(apreq->ticket->server,
+    if (retval = krb5_db_get_principal(apreq.ticket->server,
 				       &server, &nprincs,
-				       &more))
+				       &more)) {
+	cleanup_apreq();
 	return(retval);
+    }
     if (more) {
 	krb5_db_free_principal(&server, nprincs);
+	cleanup_apreq();
 	return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     } else if (nprincs != 1) {
 	krb5_db_free_principal(&server, nprincs);
+	cleanup_apreq();
 	return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
     }
     /* convert server.key into a real key (it may be encrypted
@@ -225,53 +181,64 @@ const krb5_fulladdr *from;
     if (retval = kdc_convert_key(&server.key, &encrypting_key,
 				 CONVERT_OUTOF_DB)) {
 	krb5_db_free_principal(&server, nprincs);
+	cleanup_apreq();
 	return retval;
     }
     who.dbentry = &server;
     who.key = &encrypting_key;
-    if (retval = krb5_rd_req_decoded(apreq, apreq->ticket->server,
-				     from->address,
-				     0,	/* no fetchfrom */
-				     kdc_rdreq_keyproc,
-				     (krb5_pointer)&who,
-				     kdc_rcache,
-				     &authdat)) {
-	krb5_db_free_principal(&server, nprincs);
-	bzero((char *)encrypting_key.contents, encrypting_key.length);
-	free((char *)encrypting_key.contents);
-
-	return(retval);
-    }
+    retval = krb5_rd_req_decoded(&apreq, apreq.ticket->server,
+				 from->address,
+				 0,	/* no fetchfrom */
+				 kdc_rdreq_keyproc,
+				 (krb5_pointer)&who,
+				 kdc_rcache,
+				 &authdat);
     krb5_db_free_principal(&server, nprincs);
     bzero((char *)encrypting_key.contents, encrypting_key.length);
     free((char *)encrypting_key.contents);
+    if (retval) {
+	cleanup_apreq();
+	return(retval);
+    }
 
     /* now rearrange output from rd_req_decoded */
-
 
     our_cksum.checksum_type = authdat.authenticator->checksum->checksum_type;
     if (!valid_cksumtype(our_cksum.checksum_type)) {
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
-	return KRB5KDC_ERR_ETYPE_NOSUPP; /* XXX cktype nosupp */
+	cleanup_apreq();
+	return KRB5KDC_ERR_SUMTYPE_NOSUPP;
     }	
+
     /* check application checksum vs. tgs request */
-#ifdef notdef
     if (!(our_cksum.contents = (krb5_octet *)
 	  malloc(krb5_cksumarray[our_cksum.checksum_type]->checksum_length))) {
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
+	cleanup_apreq();
 	return ENOMEM; /* XXX cktype nosupp */
     }
+
+    /* encode the body, verify the checksum */
+    if (retval = encode_krb5_kdc_req_body(request, &scratch)) {
+	krb5_free_authenticator(authdat.authenticator);
+	krb5_free_ticket(authdat.ticket);
+	cleanup_apreq();
+	return retval; /* XXX should be in kdc range */
+    }
+
     if (retval = (*krb5_cksumarray[our_cksum.checksum_type]->
-		  sum_func)(in,		/* where to? */
-			    in_length,	/* input length */
+		  sum_func)(scratch->data,
+			    scratch->length,
 			    authdat.ticket->enc_part2->session->contents, /* seed */
 			    authdat.ticket->enc_part2->session->length,	/* seed length */
 			    &our_cksum)) {
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
 	xfree(our_cksum.contents);
+	xfree(scratch->data);
+	cleanup_apreq();
 	return retval;
     }
     if (our_cksum.length != authdat.authenticator->checksum->length ||
@@ -281,16 +248,22 @@ const krb5_fulladdr *from;
 	krb5_free_authenticator(authdat.authenticator);
 	krb5_free_ticket(authdat.ticket);
 	xfree(our_cksum.contents);
+	xfree(scratch->data);
+	cleanup_apreq();
 	return KRB5KRB_AP_ERR_BAD_INTEGRITY; /* XXX wrong code? */
     }
+    xfree(scratch->data);
     xfree(our_cksum.contents);
-#endif
+
     /* don't need authenticator anymore */
     krb5_free_authenticator(authdat.authenticator);
 
     /* ticket already filled in by rd_req_dec, so free the ticket */
     krb5_free_ticket(authdat.ticket);
-
+    *ticket = apreq.ticket;
+    apreq.ticket = 0;
+    if (apreq.authenticator.ciphertext.data)
+	xfree(apreq.authenticator.ciphertext.data);
     return 0;
 }
 
