@@ -25,7 +25,7 @@ struct _krb5_kt_ops krb5_ktf_writable_ops = {
     krb5_ktfile_resolve,
     krb5_ktfile_get_name, 
     krb5_ktfile_close,
-    krb5_ktfile_get,
+    krb5_ktfile_get_entry,
     krb5_ktfile_start_seq_get,
     krb5_ktfile_get_next,
     krb5_ktfile_end_get,
