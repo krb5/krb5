@@ -1,5 +1,7 @@
 thisconfigdir=.
 BUILDTOP=$(REL)$(U)$(S)$(U)
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 ##DOS##BUILDTOP = ..\..
 ##DOS##OBJFILE=profile.lst
 ##DOS##LIBNAME=profile.lib
@@ -28,7 +30,8 @@ SRCS = $(srcdir)/prof_tree.c \
 	prof_err.c \
 	$(srcdir)/prof_init.c
 
-LIBS = ../et/libcom_err.$(LIBEXT)
+DEPLIBS = $(COM_ERR_DEPLIB)
+MLIBS = -lcom_err $(GEN_LIB)
 
 LIB=profile
 LIBMAJOR=1
@@ -59,11 +62,11 @@ awk-windows:
 	if exist prof_err.h copy profile.hin+prof_err.h profile.h
 	if exist profile.h copy profile.h $(BUILDTOP)\include\profile.h
 
-test_parse: test_parse.$(OBJEXT) $(OBJS) $(LIBS)
-	$(CC) -o test_parse test_parse.$(OBJEXT) $(OBJS) $(LIBS)
+test_parse: test_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_parse test_parse.$(OBJEXT) $(OBJS) $(MLIBS)
 
-test_profile: test_profile.$(OBJEXT) $(OBJS) $(LIBS)
-	$(CC) -o test_profile test_profile.$(OBJEXT) $(OBJS) $(LIBS)
+test_profile: test_profile.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) $(OBJS) $(MLIBS)
 
 test_parse.exe: 
 	$(CC) $(CFLAGS2) -o test_parse.exe test_parse.c \

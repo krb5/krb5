@@ -1,3 +1,10 @@
+Mon Mar  2 16:19:58 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Integrate in the krb5 build tree rules.
+	(use CC_LINK, etc).
+
+	* configure.in: Add AC_BUILD_PROGRAM for test programs.
+
 Wed Feb 18 16:33:38 1998  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
