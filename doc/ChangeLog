@@ -1,4 +1,12 @@
 Fri Sep  6 12:59:43 1996  Jeff Bigler  <jcb@viola.cygnus.com>
+	
+	* install.texinfo: new name for cyg-install.texinfo
+
+	* install-old.texi: new name for install.texi (so we know what's
+	what.)
+
+	* Makefile (install-guide): renamed cyg-install.texinfo to
+	install.texinfo.
 
 	* man2ps: shell script to create postscript include files for
 	user's guide.

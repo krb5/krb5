@@ -24,14 +24,14 @@ admin-guide-info::
 install-guide-full:: install-guide install-guide-info install-guide-html
 
 install-guide::
-	$(DVI) cyg-install.texinfo
+	$(DVI) install.texinfo
 	$(DVIPS) install
 
 install-guide-html::
-	$(HTML) cyg-install.texinfo		
+	$(HTML) install.texinfo		
 
 install-guide-info::
-	$(INFO) cyg-install.texinfo
+	$(INFO) install.texinfo
 
 user-guide-full:: user-guide user-guide-info user-guide-html
 
@@ -63,6 +63,6 @@ clean-tarfiles::
 	$(RM) *.tar *.tar.gz *.tgz
 
 tgz::
-	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo cyg-install.texinfo texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
+	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo install.texinfo texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
 	$(GZIP) krb5-docs.tar
 	$(MV) krb5-docs.tar.gz krb5-docs.tgz
