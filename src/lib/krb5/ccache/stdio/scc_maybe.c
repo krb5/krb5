@@ -166,8 +166,9 @@ krb5_scc_open_file (id, mode)
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;
 	 }
-	 if ((scc_fvno != htons(KRB5_SCC_FVNO)) &&
-	     (scc_fvno != htons(KRB5_SCC_FVNO_1))) {
+	 if ((scc_fvno != htons(KRB5_SCC_FVNO_1)) &&
+	     (scc_fvno != htons(KRB5_SCC_FVNO_2)) &&
+	     (scc_fvno != htons(KRB5_SCC_FVNO_3))) {
 	     (void) krb5_unlock_file(f, data->filename);
 	     (void) fclose(f);
 	     return KRB5_CCACHE_BADVNO;

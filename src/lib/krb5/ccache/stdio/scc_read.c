@@ -87,12 +87,12 @@ krb5_scc_read_principal(id, princ)
     if (data->version == KRB5_SCC_FVNO_1) {
 	type = KRB5_NT_UNKNOWN;
     } else {
-        /* Read the principal type */
+        /* Read principal type */
         kret = krb5_scc_read_int32(id, &type);
         if (kret != KRB5_OK)
 	    return kret;
     }
-    
+
     /* Read the number of components */
     kret = krb5_scc_read_int32(id, &length);
     if (kret != KRB5_OK)
@@ -108,15 +108,20 @@ krb5_scc_read_principal(id, princ)
     tmpprinc = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (tmpprinc == NULL)
 	return KRB5_CC_NOMEM;
-    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
-    if (tmpprinc->data == 0) {
-	free((char *)tmpprinc);
-	return KRB5_CC_NOMEM;
-    }
+    if (length) {
+	    tmpprinc->data = (krb5_data *) malloc(length * sizeof(krb5_data));
+	    if (tmpprinc->data == 0) {
+		    free((char *)tmpprinc);
+		    return KRB5_CC_NOMEM;
+	    }
+    } else
+	    tmpprinc->data = 0;
+    tmpprinc->magic = KV5M_PRINCIPAL;
     tmpprinc->length = length;
     tmpprinc->type = type;
 
     kret = krb5_scc_read_data(id, krb5_princ_realm(tmpprinc));
+
     i = 0;
     CHECK(kret);
 
@@ -179,33 +184,39 @@ krb5_scc_read_keyblock(id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
+     krb5_scc_data *data = (krb5_scc_data *)id->data;
      krb5_error_code kret;
-     int ret;
+     krb5_ui_2 ui2;
+     krb5_int32 int32;
 
+     keyblock->magic = KV5M_KEYBLOCK;
      keyblock->contents = 0;
 
-     kret = krb5_scc_read_keytype(id, &keyblock->keytype);
+     kret = krb5_scc_read_ui_2(id, &ui2);
+     keyblock->keytype = ui2;
      CHECK(kret);
-     kret = krb5_scc_read_int(id, &keyblock->length);
+     if ((data->version == KRB5_SCC_FVNO_1) ||
+	 (data->version == KRB5_SCC_FVNO_2))
+	     keyblock->etype = ETYPE_UNKNOWN;
+     else {
+	     kret = krb5_scc_read_ui_2(id, &ui2);
+	     keyblock->etype = ui2;
+	     CHECK(kret);
+     }
+
+     kret = krb5_scc_read_int32(id, &int32);
      CHECK(kret);
+     keyblock->length = int32;
+     if ( keyblock->length == 0 )
+	     return KRB5_OK;
      keyblock->contents = (unsigned char *) malloc(keyblock->length*
 						   sizeof(krb5_octet));
      if (keyblock->contents == NULL)
 	  return KRB5_CC_NOMEM;
      
-     errno = 0;
-     ret = fread((char *)keyblock->contents, 1,
-		 (keyblock->length)*sizeof(krb5_octet),
-		 ((krb5_scc_data *) id->data)->file);
-
-     if ((ret == 0) && errno) {
-	 krb5_xfree(keyblock->contents);
-	 return krb5_scc_interpret(errno);
-     }
-     if (ret != (keyblock->length)*sizeof(krb5_octet)) {
-	 krb5_xfree(keyblock->contents);
-	 return KRB5_CC_END;
-     }
+     kret = krb5_scc_read(id, keyblock->contents, keyblock->length);
+     if (kret)
+	 goto errout;
 
      return KRB5_OK;
  errout:
@@ -220,29 +231,26 @@ krb5_scc_read_data(id, data)
    krb5_data *data;
 {
      krb5_error_code kret;
-     int ret;
 
+     data->magic = KV5M_DATA;
      data->data = 0;
 
      kret = krb5_scc_read_int32(id, &data->length);
      CHECK(kret);
 
+     if (data->length == 0) {
+	data->data = 0;
+	return KRB5_OK;
+     }
+
      data->data = (char *) malloc(data->length+1);
      if (data->data == NULL)
 	  return KRB5_CC_NOMEM;
 
-     errno = 0;
-     ret = fread((char *)data->data, 1,
-		 data->length, ((krb5_scc_data *) id->data)->file);
-     if ((ret == 0) && errno) {
-	 krb5_xfree(data->data);
-	 return krb5_scc_interpret(errno);
-     }
-     if (ret != data->length) {
-	 krb5_xfree(data->data);
-	 return KRB5_CC_END;
-     }
-     data->data[data->length] = 0; /* Null terminate just in case.... */
+     kret = krb5_scc_read(id, data->data, data->length);
+     CHECK(kret);
+     
+     data->data[data->length] = 0; /* Null terminate, just in case.... */
      return KRB5_OK;
  errout:
      if (data->data)
@@ -256,31 +264,30 @@ krb5_scc_read_addr(id, addr)
    krb5_address *addr;
 {
      krb5_error_code kret;
-     int ret;
+     krb5_ui_2 ui2;
+     krb5_int32 int32;
 
+     addr->magic = KV5M_ADDRESS;
      addr->contents = 0;
 
-     kret = krb5_scc_read_ui_2(id, &addr->addrtype);
+     kret = krb5_scc_read_ui_2(id, &ui2);
      CHECK(kret);
+     addr->addrtype = ui2;
+     
+     kret = krb5_scc_read_int32(id, &int32);
+     CHECK(kret);
+     addr->length = int32;
 
-     kret = krb5_scc_read_int(id, &addr->length);
-     CHECK(kret);
+     if (addr->length == 0)
+	     return KRB5_OK;
 
      addr->contents = (krb5_octet *) malloc(addr->length);
      if (addr->contents == NULL)
 	  return KRB5_CC_NOMEM;
 
-     errno = 0;
-     ret = fread((char *)addr->contents, 1, (addr->length)*sizeof(krb5_octet),
-		 ((krb5_scc_data *) id->data)->file);
-     if ((ret == 0) && errno) {
-	  krb5_xfree(addr->contents);
-	  return krb5_scc_interpret(errno);
-     }
-     if (ret != (addr->length)*sizeof(krb5_octet)) {
-	  krb5_xfree(addr->contents);
-	  return KRB5_CC_END;
-     }
+     kret = krb5_scc_read(id, addr->contents, addr->length);
+     CHECK(kret);
+
      return KRB5_OK;
  errout:
      if (addr->contents)
@@ -293,7 +300,20 @@ krb5_scc_read_int32(id, i)
    krb5_ccache id;
    krb5_int32 *i;
 {
-     return krb5_scc_read(id, (krb5_pointer) i, sizeof(krb5_int32));
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_error_code retval;
+    unsigned char buf[4];
+
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2)) 
+	return krb5_scc_read(id, (krb5_pointer) i, sizeof(krb5_int32));
+    else {
+	retval = krb5_scc_read(id, buf, 4);
+	if (retval)
+	    return retval;
+	*i = (((((buf[0] << 8) + buf[1]) << 8 ) + buf[2]) << 8) + buf[3];
+	return 0;
+    }
 }
 
 krb5_error_code
@@ -301,47 +321,63 @@ krb5_scc_read_ui_2(id, i)
    krb5_ccache id;
    krb5_ui_2 *i;
 {
-     return krb5_scc_read(id, (krb5_pointer) i, sizeof(krb5_ui_2));
-}
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_error_code retval;
+    unsigned char buf[2];
+    
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2))
+	return krb5_scc_read(id, (krb5_pointer) i, sizeof(krb5_ui_2));
+    else {
+	retval = krb5_scc_read(id, buf, 2);
+	if (retval)
+	    return retval;
+	*i = (buf[0] << 8) + buf[1];
+	return 0;
+    }
+}    
 
 krb5_error_code
-krb5_scc_read_keytype(id, k)
+krb5_scc_read_octet(id, i)
    krb5_ccache id;
-   krb5_keytype *k;
+   krb5_octet *i;
 {
-     return krb5_scc_read(id, (krb5_pointer) k, sizeof(krb5_keytype));
-}
+    return krb5_scc_read(id, (krb5_pointer) i, 1);
+}    
 
-krb5_error_code
-krb5_scc_read_int(id, i)
-   krb5_ccache id;
-   int *i;
-{
-     return krb5_scc_read(id, (krb5_pointer) i, sizeof(int));
-}
-
-krb5_error_code
-krb5_scc_read_bool(id, b)
-   krb5_ccache id;
-   krb5_boolean *b;
-{
-     return krb5_scc_read(id, (krb5_pointer) b, sizeof(krb5_boolean));
-}
 
 krb5_error_code
 krb5_scc_read_times(id, t)
    krb5_ccache id;
    krb5_ticket_times *t;
 {
-     return krb5_scc_read(id, (krb5_pointer) t, sizeof(krb5_ticket_times));
-}
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_error_code retval;
+    krb5_int32 i;
+    
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2))
+	return krb5_scc_read(id, (krb5_pointer) t, sizeof(krb5_ticket_times));
+    else {
+	retval = krb5_scc_read_int32(id, &i);
+	CHECK(retval);
+	t->authtime = i;
+	
+	retval = krb5_scc_read_int32(id, &i);
+	CHECK(retval);
+	t->starttime = i;
 
-krb5_error_code
-krb5_scc_read_flags (id, f)
-    krb5_ccache id;
-    krb5_flags *f;
-{
-    return krb5_scc_read (id, (krb5_pointer) f, sizeof (krb5_flags));
+	retval = krb5_scc_read_int32(id, &i);
+	CHECK(retval);
+	t->endtime = i;
+
+	retval = krb5_scc_read_int32(id, &i);
+	CHECK(retval);
+	t->renew_till = i;
+    }
+    return 0;
+errout:
+    return retval;
 }
 
 krb5_error_code
@@ -360,29 +396,29 @@ krb5_scc_read_authdata(id, a)
      CHECK(kret);
 
      if (length == 0)
-         return KRB5_OK;
+	 return KRB5_OK;
 
      /* Make *a able to hold length pointers to krb5_authdata structs
       * Add one extra for a null-terminated list
       */
      *a = (krb5_authdata **) calloc(length+1, sizeof(krb5_authdata *));
      if (*a == NULL)
-          return KRB5_CC_NOMEM;
+	  return KRB5_CC_NOMEM;
 
      for (i=0; i < length; i++) {
-          (*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
-          if ((*a)[i] == NULL) {
-              krb5_free_authdata(*a);
-              return KRB5_CC_NOMEM;
-          }
-          kret = krb5_scc_read_authdatum(id, (*a)[i]);
-          CHECK(kret);
+	  (*a)[i] = (krb5_authdata *) malloc(sizeof(krb5_authdata));
+	  if ((*a)[i] == NULL) {
+	      krb5_free_authdata(*a);
+	      return KRB5_CC_NOMEM;
+	  }	  
+	  kret = krb5_scc_read_authdatum(id, (*a)[i]);
+	  CHECK(kret);
      }
 
      return KRB5_OK;
  errout:
      if (*a)
-         krb5_free_authdata(*a);
+	 krb5_free_authdata(*a);
      return kret;
 }
 
@@ -392,33 +428,32 @@ krb5_scc_read_authdatum(id, a)
     krb5_authdata *a;
 {
     krb5_error_code kret;
+    krb5_int32 int32;
     int ret;
-
+    
+    a->magic = KV5M_AUTHDATA;
     a->contents = NULL;
 
     kret = krb5_scc_read_ui_2(id, &a->ad_type);
     CHECK(kret);
-    kret = krb5_scc_read_int(id, &a->length);
+    kret = krb5_scc_read_int32(id, &int32);
     CHECK(kret);
+    a->length = int32;
+    
+    if (a->length == 0 )
+	    return KRB5_OK;
 
     a->contents = (krb5_octet *) malloc(a->length);
     if (a->contents == NULL)
-        return KRB5_CC_NOMEM;
-    errno = 0;
-    ret = fread ((char *)a->contents, 1,
-		 (a->length)*sizeof(krb5_octet),
-		 ((krb5_scc_data *) id->data)->file);
-    if ((ret == 0) && errno) {
-	krb5_xfree(a->contents);
-	return krb5_scc_interpret(errno);
-    }
-    if (ret != (a->length)*sizeof(krb5_octet)) {
-	krb5_xfree(a->contents);
-	return KRB5_CC_END;
-    }
-    return KRB5_OK;
-errout:
-    if (a->contents)
-	krb5_xfree(a->contents);
-    return kret;
+	return KRB5_CC_NOMEM;
+
+    kret = krb5_scc_read(id, a->contents, a->length);
+    CHECK(kret);
+    
+     return KRB5_OK;
+ errout:
+     if (a->contents)
+	 krb5_xfree(a->contents);
+     return kret;
+    
 }

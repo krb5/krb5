@@ -58,6 +58,8 @@ krb5_scc_next_cred(id, cursor, creds)
      int ret;
      krb5_error_code kret;
      krb5_scc_cursor *fcursor;
+     krb5_int32 int32;
+     krb5_octet octet;
 
 #define Z(field)	creds->field = 0
      Z (client);
@@ -87,10 +89,12 @@ krb5_scc_next_cred(id, cursor, creds)
      TCHECK(kret);
      kret = krb5_scc_read_times(id, &creds->times);
      TCHECK(kret);
-     kret = krb5_scc_read_bool(id, &creds->is_skey);
+     kret = krb5_scc_read_octet(id, &octet);
      TCHECK(kret);
-     kret = krb5_scc_read_flags(id, &creds->ticket_flags);
+     creds->is_skey = octet;
+     kret = krb5_scc_read_int32(id, &int32);
      TCHECK(kret);
+     creds->ticket_flags = int32;
      kret = krb5_scc_read_addrs(id, &creds->addresses);
      TCHECK(kret);
      kret = krb5_scc_read_authdata (id, &creds->authdata);

@@ -1,3 +1,21 @@
+Fri Nov 18 14:47:33 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+        * scc-proto.h, scc.h, scc_maybe.c (krb5_scc_open_file), scc_nseq.c
+	(krb5_scc_next_cred), scc_store.c (krb5_scc_store), scc_read.c,
+	scc_write.c:  Changes to implement SCC format version #3, which
+		is architecture independent, and includes the key
+		encryption type information.
+
+Wed Nov 16 23:40:16 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* scc_gennew.c (krb5_scc_generate_new): Generate new ccaches using
+		whatever version is marked as the default.
+
+	* scc_read.c (krb5_scc_read_keyblock): Insert keyblock magic
+		number and initialize etype value.  Also add magic numbers
+		for the krb5_principal, krb5_data, krb5_address, and
+		krb5_authdata structures.
+
 Thu Oct 13 17:24:00 1994  Theodore Y. Ts'o  (tytso@maytag)
 
 	* configure.in: Add ISODE_DEFS

@@ -91,11 +91,11 @@ krb5_scc_store_principal(id, princ)
 	 */
 	tmp++;
     } else {
-        ret = krb5_scc_store_int32(id, &type);
-        CHECK(ret);
+	ret = krb5_scc_store_int32(id, type);
+	CHECK(ret);
     }
     
-    ret = krb5_scc_store_int32(id, &tmp);
+    ret = krb5_scc_store_int32(id, tmp);
     CHECK(ret);
 
     ret = krb5_scc_store_data(id, krb5_princ_realm(princ));
@@ -123,7 +123,7 @@ krb5_scc_store_addrs(id, addrs)
      while (*temp++)
 	  length += 1;
 
-     ret = krb5_scc_store_int32(id, &length);
+     ret = krb5_scc_store_int32(id, length);
      CHECK(ret);
      for (i=0; i < length; i++) {
 	  ret = krb5_scc_store_addr(id, addrs[i]);
@@ -138,22 +138,19 @@ krb5_scc_store_keyblock(id, keyblock)
    krb5_ccache id;
    krb5_keyblock *keyblock;
 {
+     krb5_scc_data *data = (krb5_scc_data *)id->data;
      krb5_error_code ret;
 
-     ret = krb5_scc_store_keytype(id, &keyblock->keytype);
+     ret = krb5_scc_store_ui_2(id, keyblock->keytype);
      CHECK(ret);
-     ret = krb5_scc_store_int(id, &keyblock->length);
+     if ((data->version != KRB5_SCC_FVNO_1) &&
+	 (data->version != KRB5_SCC_FVNO_2)) {
+	 ret = krb5_scc_store_ui_2(id, keyblock->etype);
+	 CHECK(ret);
+     }
+     ret = krb5_scc_store_int32(id, keyblock->length);
      CHECK(ret);
-     errno = 0;
-     ret = fwrite((char *)keyblock->contents, 1,
-		  (keyblock->length)*sizeof(krb5_octet),
-		  ((krb5_scc_data *) id->data)->file);
-     if ((ret == 0) && errno)
-	  return krb5_scc_interpret(errno);
-     if (ret != (keyblock->length)*sizeof(krb5_octet))
-	 return KRB5_CC_END;
-     
-     return KRB5_OK;
+     return krb5_scc_write(id, (char *) keyblock->contents, keyblock->length);
 }
 
 krb5_error_code
@@ -163,19 +160,11 @@ krb5_scc_store_addr(id, addr)
 {
      krb5_error_code ret;
 
-     ret = krb5_scc_store_ui_2(id, &addr->addrtype);
+     ret = krb5_scc_store_ui_2(id, addr->addrtype);
      CHECK(ret);
-     ret = krb5_scc_store_int(id, &addr->length);
+     ret = krb5_scc_store_int32(id, addr->length);
      CHECK(ret);
-     errno = 0;
-     ret = fwrite((char *)addr->contents, 1,
-		  (addr->length)*sizeof(krb5_octet),
-		  ((krb5_scc_data *) id->data)->file);
-     if ((ret == 0) && errno)
-	  return krb5_scc_interpret(errno);
-     if (ret != (addr->length)*sizeof(krb5_octet))
-	 return KRB5_CC_END;
-     return KRB5_OK;
+     return krb5_scc_write(id, (char *) addr->contents, addr->length);
 }
 
 
@@ -186,56 +175,66 @@ krb5_scc_store_data(id, data)
 {
      krb5_error_code ret;
 
-     ret = krb5_scc_store_int32(id, &data->length);
+     ret = krb5_scc_store_int32(id, data->length);
      CHECK(ret);
-     errno = 0;
-     ret = fwrite(data->data, 1, data->length,
-		  ((krb5_scc_data *) id->data)->file);
-     if ((ret == 0) && errno)
-	  return krb5_scc_interpret(errno);
-     else if (ret != data->length)
-	 return KRB5_CC_END;
-     return KRB5_OK;
+     return krb5_scc_write(id, data->data, data->length);
 }
 
 krb5_error_code
 krb5_scc_store_int32(id, i)
    krb5_ccache id;
-   krb5_int32 *i;
+   krb5_int32 i;
 {
-     return krb5_scc_write(id, (char *) i, sizeof(krb5_int32));
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    unsigned char buf[4];
+
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2)) 
+	return krb5_scc_write(id, (char *) &i, sizeof(krb5_int32));
+    else {
+	buf[3] = i & 0xFF;
+	i >>= 8;
+	buf[2] = i & 0xFF;
+	i >>= 8;
+	buf[1] = i & 0xFF;
+	i >>= 8;
+	buf[0] = i & 0xFF;
+	
+	return krb5_scc_write(id, buf, 4);
+    }
 }
 
 krb5_error_code
 krb5_scc_store_ui_2(id, i)
-   krb5_ccache id;
-   krb5_ui_2 *i;
+    krb5_ccache id;
+    krb5_int32 i;
 {
-     return krb5_scc_write(id, (char *) i, sizeof(krb5_ui_2));
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_ui_2 ibuf;
+    unsigned char buf[2];
+    
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2)) {
+	ibuf = i;
+	return krb5_scc_write(id, (char *) &ibuf, sizeof(krb5_ui_2));
+    } else {
+	buf[1] = i & 0xFF;
+	i >>= 8;
+	buf[0] = i & 0xFF;
+	
+	return krb5_scc_write(id, buf, 2);
+    }
 }
    
 krb5_error_code
-krb5_scc_store_keytype(id, k)
-   krb5_ccache id;
-   krb5_keytype *k;
+krb5_scc_store_octet(id, i)
+    krb5_ccache id;
+    krb5_int32 i;
 {
-     return krb5_scc_write(id, (char *) k, sizeof(krb5_keytype));
-}
-   
-krb5_error_code
-krb5_scc_store_int(id, i)
-   krb5_ccache id;
-   int *i;
-{
-     return krb5_scc_write(id, (char *) i, sizeof(int));
-}
-   
-krb5_error_code
-krb5_scc_store_bool(id, b)
-   krb5_ccache id;
-   krb5_boolean *b;
-{
-     return krb5_scc_write(id, (char *) b, sizeof(krb5_boolean));
+    krb5_octet ibuf;
+
+    ibuf = i;
+    return krb5_scc_write(id, (char *) &ibuf, 1);
 }
    
 krb5_error_code
@@ -243,17 +242,25 @@ krb5_scc_store_times(id, t)
    krb5_ccache id;
    krb5_ticket_times *t;
 {
-     return krb5_scc_write(id, (char *) t, sizeof(krb5_ticket_times));
+    krb5_scc_data *data = (krb5_scc_data *)id->data;
+    krb5_error_code retval;
+
+    if ((data->version == KRB5_SCC_FVNO_1) ||
+	(data->version == KRB5_SCC_FVNO_2))
+	return krb5_scc_write(id, (char *) t, sizeof(krb5_ticket_times));
+    else {
+	retval = krb5_scc_store_int32(id, t->authtime);
+	CHECK(retval);
+	retval = krb5_scc_store_int32(id, t->starttime);
+	CHECK(retval);
+	retval = krb5_scc_store_int32(id, t->endtime);
+	CHECK(retval);
+	retval = krb5_scc_store_int32(id, t->renew_till);
+	CHECK(retval);
+	return 0;
+    }
 }
    
-krb5_error_code
-krb5_scc_store_flags(id, f)
-   krb5_ccache id;
-   krb5_flags *f;
-{
-     return krb5_scc_write(id, (char *) f, sizeof(krb5_flags));
-}
-
 krb5_error_code
 krb5_scc_store_authdata(id, a)
     krb5_ccache id;
@@ -264,15 +271,15 @@ krb5_scc_store_authdata(id, a)
     krb5_int32 i, length=0;
 
     if (a != NULL) {
-        for (temp=a; *temp; temp++)
-            length++;
+	for (temp=a; *temp; temp++)
+	    length++;
     }
 
-    ret = krb5_scc_store_int32(id, &length);
+    ret = krb5_scc_store_int32(id, length);
     CHECK(ret);
     for (i=0; i<length; i++) {
-        ret = krb5_scc_store_authdatum (id, a[i]);
-        CHECK(ret);
+	ret = krb5_scc_store_authdatum (id, a[i]);
+	CHECK(ret);
     }
     return KRB5_OK;
 }
@@ -283,9 +290,9 @@ krb5_scc_store_authdatum (id, a)
     krb5_authdata *a;
 {
     krb5_error_code ret;
-    ret = krb5_scc_store_ui_2(id, &a->ad_type);
+    ret = krb5_scc_store_ui_2(id, a->ad_type);
     CHECK(ret);
-    ret = krb5_scc_store_int32(id, &a->length);
+    ret = krb5_scc_store_int32(id, a->length);
     CHECK(ret);
     return krb5_scc_write(id, (krb5_pointer) a->contents, a->length);
 }

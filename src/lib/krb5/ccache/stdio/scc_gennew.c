@@ -102,7 +102,7 @@ krb5_scc_generate_new (id)
 	     retcode = krb5_scc_interpret (errno);
 	     goto err_out;
      } else {
-	 krb5_int16 scc_fvno = htons(KRB5_SCC_FVNO);
+	 krb5_int16 scc_fvno = htons(KRB5_SCC_DEFAULT_FVNO);
 
 	 if (!fwrite((char *)&scc_fvno, sizeof(scc_fvno), 1, f)) {
 	     retcode = krb5_scc_interpret(errno);

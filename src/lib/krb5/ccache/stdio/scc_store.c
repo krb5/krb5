@@ -62,9 +62,9 @@ krb5_scc_store(id, creds)
      TCHECK(ret);
      ret = krb5_scc_store_times(id, &creds->times);
      TCHECK(ret);
-     ret = krb5_scc_store_bool(id, &creds->is_skey);
+     ret = krb5_scc_store_octet(id, creds->is_skey);
      TCHECK(ret);
-     ret = krb5_scc_store_flags(id, &creds->ticket_flags);
+     ret = krb5_scc_store_int32(id, creds->ticket_flags);
      TCHECK(ret);
      ret = krb5_scc_store_addrs(id, creds->addresses);
      TCHECK(ret);
