@@ -85,9 +85,10 @@ $(OUTPRE)ftpd.$(OBJEXT): ftpd.c $(srcdir)/../arpa/ftp.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(BUILDTOP)/include/krb524.h \
-  $(BUILDTOP)/include/krb524_err.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
-  ftpd_var.h secure.h
+  $(BUILDTOP)/include/krb524_err.h $(SRCTOP)/include/socket-utils.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi_krb5.h ftpd_var.h \
+  secure.h
 $(OUTPRE)ftpcmd.$(OBJEXT): ftpcmd.c $(srcdir)/../arpa/ftp.h \
   $(SRCTOP)/include/syslog.h ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/kerberosIV/krb.h \

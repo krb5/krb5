@@ -113,8 +113,8 @@ $(OUTPRE)sys_term.$(OBJEXT): sys_term.c telnetd.h defs.h \
   ext.h pathnames.h $(COM_ERR_DEPS) $(BUILDTOP)/include/libpty.h \
   $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/profile.h
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/profile.h
 $(OUTPRE)utility.$(OBJEXT): utility.c telnetd.h defs.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/syslog.h \
