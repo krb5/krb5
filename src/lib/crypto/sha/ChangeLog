@@ -1,7 +1,7 @@
 Sat Jun  8 07:44:35 1996  Ezra Peisach  (epeisach@mit.edu)
 
 	* shs.c (longReverse): Test for big vs little endian failed for
-		big endian machines.
+		little endian machines.
 
 Thu Jun  6 15:43:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
