@@ -648,6 +648,7 @@ link-fat-all :Êlink-fat link-fat-debug
 	MergeFragment "Kerberos5GlobalsLib.PPC" "MIT Kerberos Library"
 	MergeFragment "Kerberos5GlobalsDataLib.PPC" "MIT Kerberos Library"
 	DeRez -only "'cfrg'(0)" "MIT Kerberos Library" "{RIncludes}"CodeFragments.r | StreamEdit -s /mac/FragmentAlias.mpw | Rez -a -o "MIT Kerberos Library" -i "{RIncludes}"
+	Rez "/mac/MITKerberosLib.r" -a -o "MIT Kerberos Library"
 	SetFile -c 'Krb ' "MIT Kerberos Library"
 	
 
@@ -668,6 +669,7 @@ link-fat-all :Êlink-fat link-fat-debug
 #	MergeFragment "Kerberos5GlobalsLib.68K.debug" "MIT Kerberos Library.debug"
 #	MergeFragment "Kerberos5GlobalsDataLib.68K" "MIT Kerberos Library.debug"
 	DeRez -only "'cfrg'(0)" "MIT Kerberos Library.debug" "{RIncludes}"CodeFragments.r | StreamEdit -s /mac/FragmentAlias.mpw | Rez -a -o "MIT Kerberos Library.debug" -i "{RIncludes}"
+	Rez "/mac/MITKerberosLib.r" -a -o "MIT Kerberos Library.debug"
 	SetFile -c 'Krb ' "MIT Kerberos Library.debug"
 	
 ################################################################################
