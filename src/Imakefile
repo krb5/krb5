@@ -10,13 +10,16 @@
 #define IHaveSubdirs
 #define PassCDebugFlags
 
+/* default target... */
+all::
+
 #ifdef UseComErrInstalled
 COMERRDIR=
-all::
+world::
 	$(RM) include/com_err.h
 #else
 COMERRDIR=comerr
-all::
+world::
 	$(RM) include/com_err.h
 	$(LN) ../comerr/com_err.h include/com_err.h
 #endif
@@ -30,19 +33,28 @@ UNIFDIR=
 #else
 UNIFDIR=util/unifdef
 #endif
-all::
-	make includes
+world::
+	make ${MFLAGS} mastermakefiles
+	make ${MFLAGS} depend
+	make ${MFLAGS} all
 
-        SUBDIRS = $(UNIFDIR) include $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
-  LNINSTALLDIRS = 
+SUBDIRS = $(UNIFDIR) include $(COMERRDIR) $(SSDIR) lib kdc admin clients appl
+LNINSTALLDIRS = 
 
 MakeSubdirs($(SUBDIRS))
 
 depend:: includes
 
 /**/# rebuild the Makefiles in the master source tree
+#ifdef UseImakeInstalled
+mastermakefiles::
+	-$(MV) Makefile Makefile.bak
+	$(MAKE) -f Makefile.bak Makefile
+	$(MAKE) Makefiles
+#else
 mastermakefiles::
 	cd $(IMAKESRC); $(MAKE) -f Makefile.ini clean; $(MAKE) -f Makefile.ini BOOTSTRAPCFLAGS="$(BOOTSTRAPCFLAGS)"
 	-$(MV) Makefile Makefile.bak
 	$(MAKE) -f Makefile.bak Makefile
 	$(MAKE) Makefiles
+#endif
