@@ -32,7 +32,7 @@ SRCS= $(ETSRCS) init_ets.c
 OBJS= $(ETOBJS) init_ets.o
 HDRS= $(ETHDRS)
 
-EHDRDIR=$(TOP)/include/krb5/error_tables
+EHDRDIR=$(TOP)/include/krb5
 
 NormalLibraryObjectRule()
 ErrorTableObjectRule()
@@ -50,3 +50,6 @@ CopyHeader(kdb5_err.h,$(EHDRDIR))
 OtherdirLibraryTarget($(TOP)/lib,krb5,$(OBJS))
 
 DependTarget()
+
+Krb5InstallHeaders($(ETHDRS), $(KRB5_INCDIR)/krb5)
+
