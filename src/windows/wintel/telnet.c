@@ -267,6 +267,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
        	GetPrivateProfileString(INI_HOSTS, INI_HOST "0", "", buf, 128, 
             TELNET_INI);
        	tmpCommaLoc = strchr(buf, ',');
+        if (tmpCommaLoc == NULL) {
+            strcat (buf, ",");
+            tmpCommaLoc = strchr(buf, ',');
+        }
        	if (tmpCommaLoc) {
 			tmpCommaLoc++;
 			if (con->backspace == VK_BACK)
@@ -466,6 +470,7 @@ SaveHostName (char *host, int port)
     }
 
     if (comma) {
+        ++comma;                                // Past the comma
         while (*comma == ' ')                   // Past leading white space
             ++comma;
         bs = VK_BACK;                           // Default for unknown entry
