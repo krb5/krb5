@@ -8,6 +8,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 PROG = kadmin
 OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o keytab.o
 
+LOCALINCLUDES=-I$(srcdir)
+
 all:: $(PROG).local $(PROG)
 
 $(PROG).local: $(OBJS) $(SS_DEPLIB) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)

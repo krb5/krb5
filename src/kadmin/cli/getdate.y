@@ -857,11 +857,15 @@ difftm(a, b)
      )*60 + (a->tm_sec - b->tm_sec);
 }
 
+/* For get_date extern declaration compatibility check... yuck.  */
+#include <krb5.h>
+#include "kadmin.h"
+
 time_t
-get_date(p, now)
+get_date(p)
     char		*p;
-    struct my_timeb	*now;
 {
+    struct my_timeb	*now = NULL;
     struct tm		*tm, gmt;
     struct my_timeb	ftz;
     time_t		Start;

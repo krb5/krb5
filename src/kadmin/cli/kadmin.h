@@ -50,6 +50,19 @@ extern void kadmin_getprivs(int argc, char *argv[]);
 extern void kadmin_keytab_add(int argc, char *argv[]);
 extern void kadmin_keytab_remove(int argc, char *argv[]);
 
+#ifdef TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
+
+extern time_t get_date(char *);
+
 /* Yucky global variables */
 extern krb5_context context;
 extern char *krb5_defkeyname;	 

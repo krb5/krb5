@@ -87,7 +87,6 @@ char *getenv();
 int exit_status = 0;
 char *def_realm = NULL;
 char *whoami = NULL;
-time_t get_date();
 
 void *handle = NULL;
 krb5_context context;
@@ -756,7 +755,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
@@ -772,7 +771,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
@@ -788,7 +787,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
@@ -804,7 +803,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
@@ -1318,7 +1317,7 @@ kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    if (++i > argc -2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);
@@ -1333,7 +1332,7 @@ kadmin_parse_policy_args(argc, argv, policy, mask, caller)
 	    if (++i > argc - 2)
 		return -1;
 	    else {
-		date = get_date(argv[i], NULL);
+		date = get_date(argv[i]);
  		if (date == (time_t)-1) {
 		     fprintf(stderr, "Invalid date specification \"%s\".\n",
 			     argv[i]);

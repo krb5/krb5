@@ -1,3 +1,14 @@
+2004-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* getdate.y: Include krb5.h and kadmin.h.
+	(get_date): Drop second argument; always use NULL.
+	* kadmin.h: Include time.h and/or sys/time.h.
+	(get_date): Declare.
+	* kadmin.c (get_date): Don't declare.
+	(kadmin_parse_princ_args, kadmin_parse_policy_args): Drop second
+	argument to get_date.
+	* Makefile.in (LOCALINCLUDES): Define.
+
 2003-08-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* getdate.y (bcopy): Don't bother with HAVE_BCOPY and HAVE_MEMCPY
