@@ -92,21 +92,24 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
     ap_req.data = ptr;
     ptr += ap_req.length;
 
-    if (ret = krb5_auth_con_init(context, &auth_context)) {
+    ret = krb5_auth_con_init(context, &auth_context);
+    if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strcpy(strresult, "Failed initializing auth context");
 	goto chpwfail;
     }
 
-    if (ret = krb5_auth_con_setflags(context, auth_context,
-				     KRB5_AUTH_CONTEXT_DO_SEQUENCE)) {
+    ret = krb5_auth_con_setflags(context, auth_context,
+				 KRB5_AUTH_CONTEXT_DO_SEQUENCE);
+    if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strcpy(strresult, "Failed initializing auth context");
 	goto chpwfail;
     }
 	
-    if (ret = krb5_build_principal(context, &changepw, strlen(realm), realm,
-				   "kadmin", "changepw", NULL)) {
+    ret = krb5_build_principal(context, &changepw, strlen(realm), realm,
+			       "kadmin", "changepw", NULL);
+    if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strcpy(strresult, "Failed building kadmin/changepw principal");
 	goto chpwfail;
@@ -188,8 +191,9 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
        specified.  when rd_priv is called, *only* a remote address
        is specified.  Are we having fun yet?  */
 
-    if (ret = krb5_auth_con_setaddrs(context, auth_context, NULL,
-				     &remote_kaddr)) {
+    ret = krb5_auth_con_setaddrs(context, auth_context, NULL,
+			     &remote_kaddr);
+    if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strcpy(strresult, "Failed storing client internet address");
 	goto chpwfail;
@@ -205,7 +209,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
 
     /* construct the ap-rep */
 
-    if (ret = krb5_mk_rep(context, auth_context, &ap_rep)) {
+    ret = krb5_mk_rep(context, auth_context, &ap_rep);
+    if (ret) {
 	numresult = KRB5_KPASSWD_AUTHERROR;
 	strcpy(strresult, "Failed replying to application request");
 	goto chpwfail;
@@ -216,7 +221,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sin, req, rep)
     cipher.length = (req->data + req->length) - ptr;
     cipher.data = ptr;
 
-    if (ret = krb5_rd_priv(context, auth_context, &cipher, &clear, &replay)) {
+    ret = krb5_rd_priv(context, auth_context, &cipher, &clear, &replay);
+    if (ret) {
 	numresult = KRB5_KPASSWD_HARDERROR;
 	strcpy(strresult, "Failed decrypting request");
 	goto chpwfail;
@@ -269,14 +275,16 @@ chpwfail:
     cipher.length = 0;
 
     if (ap_rep.length) {
-	if (ret = krb5_auth_con_setaddrs(context, auth_context, &local_kaddr,
-					 NULL)) {
+	ret = krb5_auth_con_setaddrs(context, auth_context, &local_kaddr,
+				     NULL);
+	if (ret) {
 	    numresult = KRB5_KPASSWD_HARDERROR;
 	    strcpy(strresult,
 		   "Failed storing client and server internet addresses");
 	} else {
-	    if (ret = krb5_mk_priv(context, auth_context, &clear, &cipher,
-				   &replay)) {
+	    ret = krb5_mk_priv(context, auth_context, &clear, &cipher,
+			       &replay);
+	    if (ret) {
 		numresult = KRB5_KPASSWD_HARDERROR;
 		strcpy(strresult, "Failed encrypting reply");
 	    }
@@ -298,7 +306,8 @@ chpwfail:
 	krberror.ctime = 0;
 	krberror.cusec = 0;
 	krberror.susec = 0;
-	if (ret = krb5_timeofday(context, &krberror.stime))
+	ret = krb5_timeofday(context, &krberror.stime);
+	if (ret)
 	    goto bailout;
 
 	/* this is really icky.  but it's what all the other callers
@@ -309,9 +318,11 @@ chpwfail:
 	    krberror.error = KRB_ERR_GENERIC;
 
 	krberror.client = NULL;
-	if (ret = krb5_build_principal(context, &krberror.server,
-				       strlen(realm), realm,
-				       "kadmin", "changepw", NULL))
+
+	ret = krb5_build_principal(context, &krberror.server,
+				   strlen(realm), realm,
+				   "kadmin", "changepw", NULL);
+	if (ret)
 	    goto bailout;
 	krberror.text.length = 0;
 	krberror.e_data = clear;

@@ -1,4 +1,8 @@
-Sun Feb 18 16:23:59 2001  Ezra Peisach  <epeisach@mit.edu>
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* misc.c, schpw.c: Cleanup assignments in conditionals.
+
+2001-02-18  Ezra Peisach  <epeisach@mit.edu>
 
 	* kadm_rpc_svc.c, server_stubs.c: Rename all server side dispatch
         routines to end in _svc so as to not conflict with prototypes of

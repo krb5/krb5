@@ -44,13 +44,13 @@ chpass_principal_wrapper(void *server_handle,
     kadm5_principal_ent_rec	princ;
     kadm5_server_handle_t	handle = server_handle;
 
-    if (ret = krb5_timeofday(handle->context, &now))
+    ret = krb5_timeofday(handle->context, &now);
+    if (ret)
 	return ret;
 
-    if((ret = kadm5_get_principal(handle->lhandle, principal,
-				  &princ,
-				  KADM5_PRINCIPAL_NORMAL_MASK)) !=
-       KADM5_OK) 
+    ret = kadm5_get_principal(handle->lhandle, principal,
+			      &princ, KADM5_PRINCIPAL_NORMAL_MASK);
+    if(ret != KADM5_OK) 
 	 return ret;
     if(princ.aux_attributes & KADM5_POLICY) {
 	if((ret=kadm5_get_policy(handle->lhandle,
@@ -64,12 +64,16 @@ chpass_principal_wrapper(void *server_handle,
 	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
 	    return KADM5_PASS_TOOSOON;
 	}
-	if (ret = kadm5_free_policy_ent(handle->lhandle, &pol)) {
+
+	ret = kadm5_free_policy_ent(handle->lhandle, &pol);
+	if (ret) {
 	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
 	    return ret;
         }
     }
-    if (ret = kadm5_free_principal_ent(handle->lhandle, &princ))
+
+    ret = kadm5_free_principal_ent(handle->lhandle, &princ);
+    if (ret)
 	 return ret;
     
     return kadm5_chpass_principal(server_handle, principal, password);
@@ -107,13 +111,13 @@ randkey_principal_wrapper(void *server_handle,
     kadm5_principal_ent_rec	princ;
     kadm5_server_handle_t	handle = server_handle;
 
-    if (ret = krb5_timeofday(handle->context, &now))
+    ret = krb5_timeofday(handle->context, &now);
+    if (ret)
 	return ret;
 
-    if((ret = kadm5_get_principal(handle->lhandle,
-				  principal, &princ,
-				  KADM5_PRINCIPAL_NORMAL_MASK)) !=
-       OSA_ADB_OK) 
+    ret = kadm5_get_principal(handle->lhandle, principal, 
+			      &princ, KADM5_PRINCIPAL_NORMAL_MASK);
+    if(ret != OSA_ADB_OK) 
 	 return ret;
     if(princ.aux_attributes & KADM5_POLICY) {
 	if((ret=kadm5_get_policy(handle->lhandle,
@@ -127,12 +131,16 @@ randkey_principal_wrapper(void *server_handle,
 	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
 	    return KADM5_PASS_TOOSOON;
 	}
-	if (ret = kadm5_free_policy_ent(handle->lhandle, &pol)) {
+
+	ret = kadm5_free_policy_ent(handle->lhandle, &pol);
+	if (ret) {
 	    (void) kadm5_free_principal_ent(handle->lhandle, &princ);
 	    return ret;
         }
     }
-    if (ret = kadm5_free_principal_ent(handle->lhandle, &princ))
+
+    ret = kadm5_free_principal_ent(handle->lhandle, &princ);
+    if (ret)
 	 return ret;
     return kadm5_randkey_principal(server_handle, principal, keys, n_keys);
 }
