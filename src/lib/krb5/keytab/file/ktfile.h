@@ -41,7 +41,10 @@ typedef struct _krb5_ktfile_data {
 #define KTFILEP(id) (((krb5_ktfile_data *)(id)->data)->openf)
 
 extern struct _krb5_kt_ops krb5_ktf_ops;
+extern struct _krb5_kt_ops krb5_ktf_writable_ops;
 krb5_error_code krb5_ktfile_resolve PROTOTYPE((char *,
+					       krb5_keytab *));
+krb5_error_code krb5_ktfile_wresolve PROTOTYPE((char *,
 					       krb5_keytab *));
 krb5_error_code krb5_ktfile_get_name PROTOTYPE((krb5_keytab,
 						char *,
