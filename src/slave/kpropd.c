@@ -138,6 +138,7 @@ void do_standalone()
 	struct	sockaddr_in	sin, frominet;
 	struct servent *sp;
 	int	finet, fromlen, s;
+	int	ret;
 	
 	finet = socket(AF_INET, SOCK_STREAM, 0);
 	if (finet < 0) {
@@ -152,10 +153,22 @@ void do_standalone()
 	memset((char *) &sin,0, sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = sp->s_port;
-	if (bind(finet, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
+	if ((ret = bind(finet, (struct sockaddr *) &sin, sizeof(sin))) < 0) {
+	    if (debug) {
+		int on = 1;
+		fprintf(stderr,
+			"%s: attempting to rebind socket with SO_REUSEADDR\n",
+			progname);
+		if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR,
+			       (char *)&on, sizeof(on)) < 0)
+		    com_err(progname, errno, "in setsockopt(SO_REUSEADDR)");
+		ret = bind(finet, (struct sockaddr *) &sin, sizeof(sin));
+	    }
+	    if (ret < 0) {
 		perror("bind");
 		com_err(progname, errno, "while binding listener socket");
 		exit(1);
+	    }
 	}
 	if (!debug)
 		daemon(1, 0);	    
@@ -172,6 +185,8 @@ void do_standalone()
 		exit(1);
 	}
 	while (1) {
+		int child_pid;
+	    
 		memset((char *)&frominet, 0, sizeof(frominet));
 		fromlen = sizeof(frominet);
 		s = accept(finet, (struct sockaddr *) &frominet, &fromlen);
@@ -182,15 +197,25 @@ void do_standalone()
 					"from accept system call");
 			continue;
 		}
-		if (debug || fork() == 0) {
-			(void) signal(SIGCHLD, SIG_IGN);
+		if (debug)
+			child_pid = 0;
+		else
+			child_pid = fork();
+		switch (child_pid) {
+		case -1:
+			com_err(progname, errno, "while forking");
+			exit(1);
+		case 0:
 			(void) close(finet);
 
 			doit(s);
 			close(s);
-			exit(0);
+			_exit(0);
+		default:
+			wait(0);
+			close(s);
+			
 		}
-		close(s);
 	}
 }
 
@@ -749,6 +774,7 @@ load_database(context, kdb5_edit, database_file_name)
 {
 	static char	*edit_av[4];
 	int	error_ret, save_stderr;
+	int	child_pid;
 
 	/* <sys/param.h> has been included, so BSD will be defined on
 	   BSD systems */
@@ -773,10 +799,7 @@ load_database(context, kdb5_edit, database_file_name)
 	edit_av[2] = request;
 	edit_av[3] = NULL;
 
-#ifndef BSD
-#define	vfork fork
-#endif
-	switch(vfork()) {
+	switch(child_pid = fork()) {
 	case -1:
 		com_err(progname, errno, "while trying to fork %s",
 			kdb5_edit);
@@ -798,9 +821,11 @@ load_database(context, kdb5_edit, database_file_name)
 			dup2(save_stderr, 2);
 		com_err(progname, retval, "while trying to exec %s",
 			kdb5_edit);
-		exit(1);
+		_exit(1);
 		/*NOTREACHED*/
 	default:
+		if (debug)
+		    printf("Child PID is %d\n", child_pid);
 		if (wait(&waitb) < 0) {
 			com_err(progname, errno, "while waiting for %s",
 				kdb5_edit);

@@ -1,3 +1,27 @@
+Fri Apr 14 15:23:29 1995    <tytso@rsx-11.mit.edu>
+
+	* kpropd.c (load_database): kpropd uses fork instead of vfork,
+		because it's closing file descriptors in the child.
+
+		Print out the pid of the child process if debugging is
+		enabled. 
+
+		Use _exit() instead exit() after a fork(), so that child
+		process doesn't cause the stdio buffers don't get flushed
+		twice.
+
+		When debugging is enabled and kpropd can't bind to the
+		port, it should try binding again after setting
+		SO_REUSEADDR on the socket.  This avoids problems when
+		debugging modifications to kprop/kpropd or its setup, when
+		kpropd is run twice quickly in succession. 
+
+		kpropd shouldn't signal(SIGCHLD, SIG_IGN) in the parent.
+		Instead, it should wait() until the child exits.  This was
+		causing problems because setting SIGCHLD to SIG_IGN under
+		SYSV causes child processes to get reaped automatically,
+		so the wait() for kdb5_edit was failing.
+
 Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
 
         * kprop.c : Use new calling conventions for krb5_sendauth(),
