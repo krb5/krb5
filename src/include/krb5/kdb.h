@@ -195,6 +195,7 @@ krb5_error_code	krb5_db_fetch_mkey
 		   krb5_encrypt_block *, 
 		   krb5_boolean,
 		   krb5_boolean, 
+		   char *,
 		   krb5_data *, 
 		   krb5_keyblock * ));
 
