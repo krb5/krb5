@@ -1,3 +1,18 @@
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: include krb5/ccache/memory and windows/lib in
+		the list of directories built by the Windows build.
+		When building kerbsrc-nt.zip, put a copy of mkbin.bat
+		in the top-level build directory.  Fix bug in
+		kerbsrc-nt.zip building where it wasn't creating the
+		initial Makefile (although the dos-zipfiles target did
+		the right thing).
+
+1998-05-26  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* aclocal.m4 (KRB5_LIB_PARAMS): Remove "untested" comment from
+		freebsd.  Add section for openbsd.
+
 Sun May 24 22:09:12 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* Makefile.in: Remove lib/kadm and lib/krb5/free from the list of

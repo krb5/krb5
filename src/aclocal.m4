@@ -1067,8 +1067,19 @@ mips-*-netbsd*)
 	PROFFLAGS=-pg
 	;;
 
-# untested...
 *-*-freebsd*)
+	PICFLAGS=-fpic
+	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
+	SHLIBEXT=.so
+	LDCOMBINE='ld -Bshareable'
+	SHLIB_EXPFLAGS='-R$(SHLIB_RDIRS) $(SHLIB_DIRS) $(SHLIB_EXPLIBS)'
+	CC_LINK_SHARED='$(CC) $(PROG_LIBPATH) -R$(PROG_RPATH)'
+	CC_LINK_STATIC='$(CC) $(PROG_LIBPATH)'
+	RUN_ENV='LD_LIBRARY_PATH=`echo $(PROG_LIBPATH) | sed -e "s/-L//g" -e "s/ /:/g"`; export LD_LIBRARY_PATH;'
+	PROFFLAGS=-pg
+	;;
+
+*-*-openbsd*)
 	PICFLAGS=-fpic
 	SHLIBVEXT='.so.$(LIBMAJOR).$(LIBMINOR)'
 	SHLIBEXT=.so
