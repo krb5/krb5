@@ -471,7 +471,7 @@ shared libraries with version numbers in the internal module names, so
 that the shared libraries are compatible with this scheme.
 Unfortunately, combining two shared libraries requires internal
 knowledge of the AIX shared library system beyond the scope of this
-document.  Practicallyspeaking, only one version of AIX shared libraries
+document.  Practically speaking, only one version of AIX shared libraries
 can be supported on a system, unless the multi-version library is
 constructed by a programmer familiar with the AIX internals.}
 
@@ -495,27 +495,12 @@ operating system type and then uses those variables in the build
 process has proven to be easier to debug and adequate to the task of
 building shared libraries for Kerberos.
 
-
 @menu
-* NetBSD Shared Library Support::  
 * AIX Shared Library Support::  
-* Solaris  Shared Library Support::  
 * Alpha OSF/1 Shared Library Support::  
 @end menu
 
-@node NetBSD Shared Library Support, AIX Shared Library Support, Operating System Notes for Shared Libraries, Operating System Notes for Shared Libraries
-@subsection NetBSD Shared Library Support
-
-XXX I think this is horribly out of date and reflects pre-elf NetBSD.
-
-Shared library support has been tested under NetBSD 1.0A using 
-GCC 2.4.5. Due to the vagaries of the loader in the operating system,
-the library load path needs to be specified in building libraries and in
-linking with them. Unless the library is placed in a standard location
-to search for libraries, this may make it difficult for developers to
-work with the shared libraries.
-
-@node AIX Shared Library Support, Solaris  Shared Library Support, NetBSD Shared Library Support, Operating System Notes for Shared Libraries
+@node AIX Shared Library Support, Alpha OSF/1 Shared Library Support, Operating System Notes for Shared Libraries, Operating System Notes for Shared Libraries
 @subsection AIX Shared Library Support
 
         AIX specifies shared library versions by combining multiple
@@ -538,19 +523,7 @@ compiler works fine.  In addition, the AIX 4.1 linker is able to build a
 shared @samp{libkrb5.a} when GNU C is used.
 
 
-@node Solaris  Shared Library Support, Alpha OSF/1 Shared Library Support, AIX Shared Library Support, Operating System Notes for Shared Libraries
-@subsection Solaris  Shared Library Support
-
-Shared library support only works when using the Sunsoft C
-compiler. We are currently using version 3.0.1.  Modern versions of
-Solaris do not have this problem.
-
-
-The path to the shared library must be specified at link time as well as
-when creating libraries. 
-
-
-@node Alpha OSF/1 Shared Library Support,  , Solaris  Shared Library Support, Operating System Notes for Shared Libraries
+@node Alpha OSF/1 Shared Library Support,  , AIX Shared Library Support, Operating System Notes for Shared Libraries
 @subsection Alpha OSF/1 Shared Library Support
 
 Shared library support has been tested with V2.1 and higher of the

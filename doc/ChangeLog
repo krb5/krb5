@@ -1,3 +1,9 @@
+2004-07-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* implementor.texinfo (NetBSD Shared Library Support, Solaris
+	Shared Library Support): Outdated sections deleted.
+	(Shared Library Theory): Fixed typo.
+
 2004-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.texinfo (Supported Encryption Types): Reflect new AES
