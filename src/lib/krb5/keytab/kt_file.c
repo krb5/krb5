@@ -1,4 +1,3 @@
-#include <netinet/in.h> /* for htons etc */
 /*
  * lib/krb5/keytab/kt_file.c
  *
@@ -27,6 +26,7 @@
  */
 
 #define NEED_SOCKETS
+#include <netinet/in.h>
 #include "k5-int.h"
 #include <stdio.h>
 
