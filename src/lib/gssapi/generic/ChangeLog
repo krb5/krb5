@@ -1,3 +1,8 @@
+Fri Jun 27 08:44:54 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add definition of GSS_C_NO_NAME (per
+		draft-ietf-cbind-04.txt)
+
 Sun Aug 17 14:31:26 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* util_token.c (g_verify_token_header): Change local char *

@@ -204,6 +204,7 @@ typedef	int		gss_cred_usage_t;
 /*
  * Various Null values.
  */
+#define GSS_C_NO_NAME ((gss_name_t) 0)
 #define GSS_C_NO_BUFFER ((gss_buffer_t) 0)
 #define GSS_C_NO_OID ((gss_OID) 0)
 #define GSS_C_NO_OID_SET ((gss_OID_set) 0)
