@@ -1,3 +1,8 @@
+2003-02-13  Sam Hartman  <hartmans@mit.edu>
+
+	* gic_keytab.c (krb5_get_as_key_keytab): Nathan Neulinger points
+	out that  the AS key is double freed; fix.
+
 2003-02-11  Sam Hartman  <hartmans@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred): Free creds using krb5_free_tgt_creds

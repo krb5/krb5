@@ -24,7 +24,7 @@ krb5_get_as_key_keytab(
 	if (as_key->enctype == etype)
 	    return(0);
 
-	krb5_free_keyblock(context, as_key);
+	krb5_free_keyblock_contents(context, as_key);
 	as_key->length = 0;
     }
 
