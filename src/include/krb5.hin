@@ -58,6 +58,9 @@
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
+    #if TARGET_RT_MAC_CFM
+        #error "Use KfM 4.0 SDK headers for CFM compilation."
+    #endif
 
 	/* This is an API divergence in 1.2.3 needed for proper functioning
 	on Mac OS X. This will be reconciled in 1.3 */
@@ -113,17 +116,10 @@
 extern "C" {
 #endif
 
-/* Macintoh CFM-68K magic incantation */
-#if PRAGMA_IMPORT
-#pragma import on
-#endif
-
-#if PRAGMA_STRUCT_ALIGN
-	#pragma options align=mac68k
-#elif PRAGMA_STRUCT_PACKPUSH
-	#pragma pack(push, 2)
-#elif PRAGMA_STRUCT_PACK
-	#pragma pack(2)
+#if TARGET_OS_MAC
+    #pragma import on
+    #pragma options align=mac68k
+    #pragma enumsalwaysint on
 #endif
 
 /*
@@ -2531,19 +2527,10 @@ typedef krb5_int32 krb5_prompt_type;
 KRB5_DLLIMP krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	KRB5_PROTOTYPE((krb5_context context));
 
-/* Macintosh CFM-68K magic incantation */
-#if PRAGMA_STRUCT_ALIGN
+#if TARGET_OS_MAC
+    #pragma enumsalwaysint reset
 	#pragma options align=reset
-#elif PRAGMA_STRUCT_PACKPUSH
-	#pragma pack(pop)
-#elif PRAGMA_STRUCT_PACK
-	#pragma pack()
-#endif
-
-#ifdef PRAGMA_IMPORT_OFF
-#pragma import off
-#elif PRAGMA_IMPORT
-#pragma import reset
+    #pragma import reset
 #endif
 
 #ifdef __cplusplus
