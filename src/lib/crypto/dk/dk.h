@@ -79,3 +79,7 @@ krb5_error_code krb5_dk_make_checksum
 		const krb5_keyblock *key, krb5_keyusage usage,
 		const krb5_data *input, krb5_data *output);
 
+krb5_error_code
+krb5_derive_random(const struct krb5_enc_provider *enc,
+		   const krb5_keyblock *inkey, krb5_data *outrnd,
+		   const krb5_data *in_constant);

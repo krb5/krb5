@@ -193,6 +193,7 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
     return(0);
 }
 
+#if 0
 #include "etypes.h"
 void
 krb5_random2key (krb5_enctype enctype, krb5_data *inblock,
@@ -213,3 +214,4 @@ krb5_random2key (krb5_enctype enctype, krb5_data *inblock,
 
     enc->make_key (inblock, outkey);
 }
+#endif

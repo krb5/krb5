@@ -1,3 +1,9 @@
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* derive.c (krb5_random2key): Don't compile.
+
+	* dk.h (krb5_derive_random): Declare.
+
 2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
 
 	* dk.h: As below.
