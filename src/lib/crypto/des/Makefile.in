@@ -80,7 +80,7 @@ check-unix:: destest verify
 
 check-windows::
 
-clean:: clean-$(what)
+clean:: clean-$(WHAT)
 	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) verify.$(OBJEXT)
 
 clean-unix::
