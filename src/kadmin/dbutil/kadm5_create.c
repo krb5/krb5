@@ -173,7 +173,29 @@ static char *build_name_with_realm(char *name, char *realm)
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
   krb5_error_code ret = 0;
-  
+  char service_name[MAXHOSTNAMELEN + 8];
+  char localname[MAXHOSTNAMELEN];
+  struct hostent *hp;
+
+  if (gethostname(localname, MAXHOSTNAMELEN)) {
+      ret = errno;
+      perror("gethostname");
+      goto clean_and_exit;
+  }
+  hp = gethostbyname(localname);
+  if (hp == NULL) {
+      ret = errno;
+      perror("gethostbyname");
+      goto clean_and_exit;
+  }
+  sprintf(service_name, "kadmin/%s", hp->h_name);
+
+  if ((ret = add_admin_princ(handle, context,
+			     service_name, realm,
+			     KRB5_KDB_DISALLOW_TGT_BASED,
+			     ADMIN_LIFETIME)))
+      goto clean_and_exit;
+
   if ((ret = add_admin_princ(handle, context,
 			     KADM5_ADMIN_SERVICE, realm,
 			     KRB5_KDB_DISALLOW_TGT_BASED,
