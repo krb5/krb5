@@ -115,7 +115,6 @@ libdir/lib/**/libname.a:						@@\
      TOP_INCLUDES = -I$(TOP)/include $(STDC_TOP_INCLUDES)
         CONFIGSRC = $(TOP)/config
          IMAKESRC = $(CONFIGSRC)
-            ISODE = /mit/isode/isode-6.0
           POFLAGS = PosyFlags
           PYFLAGS = PepyFlags
              PEPY = PepyCmd
@@ -128,7 +127,7 @@ libdir/lib/**/libname.a:						@@\
            DESLIB = $(TOP)/lib/des/libdes.a
           KRB5LIB = $(TOP)/lib/libkrb5.a
            CRCLIB = $(TOP)/lib/crc-32/libcrc32.a
-         ISODELIB = $(ISODE)/@sys/lib/libisode.a
+         ISODELIB = IsodeLib
 
            DBMLIB = DbmLib
           DEPKLIB = $(KRB5LIB) $(DESLIB) $(OSLIB) $(CRCLIB)
