@@ -1,3 +1,20 @@
+2000-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* sock2p.c: New file.
+	(inet_ntop): Define if system doesn't provide it.
+	(sockaddr2p): New function.
+	* Makefile.in (SRCS, OBJS): Add sock2p.
+	* kdc_util.h (inet_ntop, sockaddr2p): Declare them.
+
+	* network.c (add_fd): New function.  Reallocate udp_port_fds array
+	as needed here.
+	(setup_port): Use add_fd to record new sockets.  Use inet_ntop
+	unconditionally.  Disable ipv6 support until process_packet and
+	friends will support it.
+	(process_packet): Ignore ECONNREFUSED when reading UDP packets.
+	Fill in port field of faddr properly, dependent on address
+	family.  Use sockaddr2p when logging source address.
+
 2000-03-12  Ezra Peisach  <epeisach@mit.edu>
 
 	* replay.c, kdb_util.h (kdc_check_lookaside, kdc_insert_lookaside): 
@@ -43,7 +60,6 @@
 	with an ifdef.
 
 2000-02-25  Ken Raeburn  <raeburn@mit.edu>
-	    Alec H. Peterson  <ahp@hilander.com>
 
 	* configure.in: Invoke KRB5_AC_INET6.
 	* network.c (max_udp_sockets): New variable.
@@ -53,6 +69,9 @@
 	(setup_network): On failure, exit.
 	(process_packet): Handle inet6 addresses when building
 	krb5_address structure.
+
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+	    Alec H. Peterson  <ahp@hilander.com>
 
 	* configure.in: Invoke KRB5_SOCKADDR_SA_LEN.
 	* network.c: Include <sys/ioctl.h>, <syslog.h>, <net/if.h>.

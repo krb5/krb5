@@ -27,6 +27,7 @@ SRCS= \
 	$(SRCTOP)/lib/kadm5/logger.c \
 	$(srcdir)/main.c \
 	$(srcdir)/network.c \
+	$(srcdir)/sock2p.c \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
 	$(srcdir)/replay.c \
@@ -42,6 +43,7 @@ OBJS= \
 	logger.o \
 	main.o \
 	network.o \
+	sock2p.o \
 	policy.o \
 	extern.o \
 	replay.o \

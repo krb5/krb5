@@ -226,6 +226,25 @@ struct socksetup {
 };
 
 static int
+add_fd (struct socksetup *data, int sock)
+{
+    if (n_sockets == max_udp_sockets) {
+	int *new_fds;
+	int new_max = max_udp_sockets + n_udp_ports;
+	new_fds = safe_realloc(udp_port_fds, new_max * sizeof(int));
+	if (new_fds == 0) {
+	    data->retval = errno;
+	    com_err(data->prog, data->retval, "cannot save socket info");
+	    return 1;
+	}
+	udp_port_fds = new_fds;
+	max_udp_sockets = new_max;
+    }
+    udp_port_fds[n_sockets++] = sock;
+    return 0;
+}
+
+static int
 setup_port(void *P_data, struct sockaddr *addr)
 {
     struct socksetup *data = P_data;
@@ -258,25 +277,24 @@ setup_port(void *P_data, struct sockaddr *addr)
 		select_nfds = sock;
 	    krb5_klog_syslog (LOG_INFO, "listening on fd %d: %s port %d", sock,
 			     inet_ntoa (sin->sin_addr), udp_port_nums[i]);
+	    if (add_fd (data, sock))
+		return 1;
 	}
     }
     break;
-#ifdef KRB5_USE_INET6
+#ifdef AF_INET6
     case AF_INET6:
+#ifdef KRB5_USE_INET6x /* Not ready yet -- fix process_packet and callees.  */
 	/* XXX We really should be using a single AF_INET6 socket and
 	   specify/receive local address info through sendmsg/recvmsg
 	   control data.  */
     {
 	struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) addr, psin6;
 	for (i = 0; i < n_udp_ports; i++) {
-#ifdef HAVE_INET_NTOP
-	    char abuf[46] = { 0 };
-	    const char *addr_str = 0;
-	    addr_str = inet_ntop (sin6->sin6_family, &sin6->sin6_addr, abuf,
-				  sizeof (abuf));
-#endif
-	    if (addr_str == 0)
-		addr_str = "[some ipv6 address]";
+	    char addr_str[46] = { 0 };
+	    if (0 == inet_ntop (sin6->sin6_family, &sin6->sin6_addr, addr_str,
+				sizeof (addr_str)))
+		strcpy (addr_str, "?");
 	    sock = socket (PF_INET6, SOCK_DGRAM, 0);
 	    if (sock == -1) {
 		data->retval = errno;
@@ -299,27 +317,23 @@ setup_port(void *P_data, struct sockaddr *addr)
 		select_nfds = sock;
 	    krb5_klog_syslog (LOG_INFO, "listening on fd %d: %s port %d", sock,
 			      addr_str, udp_port_nums[i]);
+	    if (add_fd (data, sock))
+		return 1;
 	}
     }
+#else
+    {
+	static int first = 1;
+	if (!first) {
+	    krb5_klog_syslog (LOG_INFO, "skipping local ipv6 addresses");
+	    first = 0;
+	}
+    }
+#endif /* use inet6 */
+#endif /* AF_INET6 */
     break;
-#endif
     default:
 	break;
-    }
-    if (sock >= 0) {
-	if (n_sockets == max_udp_sockets) {
-	    int *new_fds;
-	    int new_max = max_udp_sockets + n_udp_ports;
-	    new_fds = safe_realloc(udp_port_fds, new_max * sizeof(int));
-	    if (new_fds == 0) {
-		data->retval = errno;
-		com_err(data->prog, data->retval, "cannot save socket info");
-		return 1;
-	    }
-	    udp_port_fds = new_fds;
-	    max_udp_sockets = new_max;
-	}
-	udp_port_fds[n_sockets++] = sock;
     }
     return 0;
 }
@@ -376,11 +390,7 @@ void process_packet(port_fd, prog, portnum)
     int cc, saddr_len;
     krb5_fulladdr faddr;
     krb5_error_code retval;
-#ifdef KRB5_USE_INET6
-    struct sockaddr_storage saddr;
-#else
     struct sockaddr_in saddr;
-#endif
     krb5_address addr;
     krb5_data request;
     krb5_data *response;
@@ -393,7 +403,12 @@ void process_packet(port_fd, prog, portnum)
     cc = recvfrom(port_fd, pktbuf, sizeof(pktbuf), 0,
 		  (struct sockaddr *)&saddr, &saddr_len);
     if (cc == -1) {
-	if (errno != EINTR)
+	if (errno != EINTR
+	    /* This is how Linux indicates that a previous
+	       transmission was refused, e.g., if the client timed out
+	       before getting the response packet.  */
+	    && errno != ECONNREFUSED
+	    )
 	    com_err(prog, errno, "while receiving from network");
 	return;
     }
@@ -402,19 +417,20 @@ void process_packet(port_fd, prog, portnum)
 
     request.length = cc;
     request.data = pktbuf;
-    faddr.port = ntohs(saddr.sin_port);
     faddr.address = &addr;
     switch (((struct sockaddr *)&saddr)->sa_family) {
     case AF_INET:
 	addr.addrtype = ADDRTYPE_INET;
 	addr.length = 4;
 	addr.contents = (krb5_octet *) &((struct sockaddr_in *)&saddr)->sin_addr;
+	faddr.port = ntohs(((struct sockaddr_in *)&saddr)->sin_port);
 	break;
-#ifdef KRB5_USE_INET6
+#ifdef KRB5_USE_INET6x
     case AF_INET6:
 	addr.addrtype = ADDRTYPE_INET6;
 	addr.length = 16;
 	addr.contents = (krb5_octet *) &((struct sockaddr_in6 *)&saddr)->sin6_addr;
+	faddr.port = ntohs(((struct sockaddr_in6 *)&saddr)->sin6_port);
 	break;
 #endif
     default:
@@ -431,9 +447,13 @@ void process_packet(port_fd, prog, portnum)
     cc = sendto(port_fd, response->data, response->length, 0,
 		(struct sockaddr *)&saddr, saddr_len);
     if (cc == -1) {
+	char addrbuf[46];
+	int portno;
         krb5_free_data(kdc_context, response);
+	sockaddr2p ((struct sockaddr *) &saddr, addrbuf, sizeof (addrbuf),
+		    &portno);
 	com_err(prog, errno, "while sending reply to %s/%d",
-		inet_ntoa(saddr.sin_addr), ntohs(saddr.sin_port));
+		addrbuf, ntohs(portno));
 	return;
     }
     if (cc != response->length) {
