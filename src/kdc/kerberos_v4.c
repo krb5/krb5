@@ -233,11 +233,11 @@ krb5_data **resp;
         return(retval);
 
     if (!*local_realm) {		/* local-realm name already set up */
-	/* XXX assumes realm is null-terminated! */
 	lrealm = master_princ->realm.data;
-	if (strlen(lrealm) < sizeof(local_realm))
-	    strcpy(local_realm, lrealm);
-	else
+	if (master_princ->realm.length < sizeof(local_realm)) {
+	    memcpy(local_realm, lrealm, master_princ->realm.length);
+	    local_realm[master_princ->realm.length] = '\0';
+	} else
 	    retval = KRB5_CONFIG_NOTENUFSPACE;
     }
     /* convert client_fulladdr to client_sockaddr:
@@ -1127,7 +1127,8 @@ set_tgtkey(r, kvno)
 
     if (!K4KDC_ENCTYPE_OK(k5key.enctype)) {
 	krb_set_key_krb5(kdc_context, &k5key);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
     } else {
 	/* unseal tgt key from master key */
@@ -1136,7 +1137,8 @@ set_tgtkey(r, kvno)
 	kdb_encrypt_key(key, key, master_key,
 			master_key_schedule, DECRYPT);
 	krb_set_key((char *) key, 0);
-	strcpy(lastrealm, r);
+	strncpy(lastrealm, r, sizeof(lastrealm) - 1);
+	lastrealm[sizeof(lastrealm) - 1] = '\0';
 	last_kvno = kvno;
     }
     krb5_free_keyblock_contents(kdc_context, &k5key);

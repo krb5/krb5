@@ -657,7 +657,8 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
 
     clst = strlen(current) - 1;
     if (current[0] == ' ') {
-      strcpy(exp, current+1);
+      strncpy(exp, current+1, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
     }
     else if ((current[0] == '/') && (prev[0] == '/')) {
       strncpy(exp, prev, sizeof(exp) - 1);
@@ -678,7 +679,8 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
       strncat(exp, prev, sizeof(exp) - 1 - strlen(exp));
     }
     else {
-      strcpy(exp, current);
+      strncpy(exp, current, sizeof(exp) - 1);
+      exp[sizeof(exp) - 1] = '\0';
     }
 
     /* read field into next */
@@ -804,8 +806,10 @@ add_to_transited(tgt_trans, new_trans, tgs, client, server)
     strcat(trans, current);
     new_trans->length = strlen(trans) + 1;
 
-    strcpy(prev, exp);
-    strcpy(current, next);
+    strncpy(prev, exp, sizeof(prev) - 1);
+    prev[sizeof(prev) - 1] = '\0';
+    strncpy(current, next, sizeof(current) - 1);
+    current[sizeof(current) - 1] = '\0';
   }
 
   if (!added) {
