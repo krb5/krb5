@@ -20,10 +20,13 @@ static char rcsid_dispatch_c[] =
 #include <krb5/asn1.h>
 #include <krb5/krb5_err.h>
 #include <krb5/isode_err.h>
+#include <krb5/kdb.h>
+#include "kdc_util.h"
 
 krb5_error_code
-dispatch(pkt, response)
+dispatch(pkt, from, response)
 krb5_data *pkt;
+krb5_fulladdr *from;
 krb5_data **response;
 {
 
@@ -43,7 +46,7 @@ krb5_data **response;
 	retval = decode_krb5_as_req(pkt, &as_req);
 	switch (retval) {
 	case 0:
-	    retval = process_as_req(as_req, response);
+	    retval = process_as_req(as_req, from, response);
 	    krb5_free_as_req(as_req);
 	    break;
 	default:
@@ -51,8 +54,8 @@ krb5_data **response;
 	}
     case 0:
 	/* it's now decoded, but still has an encrypted part to work on */
-	if (!(retval = decrypt_tgs_req(tgs_req)))
-	    retval = process_tgs_req(tgs_req, response);
+	if (!(retval = decrypt_tgs_req(tgs_req, from)))
+	    retval = process_tgs_req(tgs_req, from, response);
 	krb5_free_tgs_req(tgs_req);
 	break;
     }
