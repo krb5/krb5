@@ -54,7 +54,7 @@ struct krb_convert {
  * kadmin/REALM.NAME.  It should be kadmin/kerberos.master.host, but
  * we'll fix that in the next release.
  */
-static struct krb_convert sconv_list[] = {
+static const struct krb_convert sconv_list[] = {
     {"kadmin",	"kadmin",	0},
     {"rcmd",	"host",		DO_REALM_CONVERSION},
     {"discuss",	"discuss",	DO_REALM_CONVERSION},
@@ -110,7 +110,7 @@ krb5_524_conv_principal(context, princ, name, inst, realm)
     char *inst;
     char *realm;
 {
-     struct krb_convert *p;
+     const struct krb_convert *p;
      krb5_data *compo;
      char *c;
 
@@ -178,7 +178,7 @@ krb5_425_conv_principal(context, name, instance, realm, princ)
    const char	*realm;
    krb5_principal	*princ;
 {
-     struct krb_convert *p;
+     const struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */
      krb5_error_code retval;
      char *domain, *cp;

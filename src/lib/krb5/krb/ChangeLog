@@ -1,3 +1,18 @@
+Tue Apr 30 18:19:01 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* t_ser.c (stuff): New variable.
+	(ser_acontext_test, ser_eblock_test, ser_cksum_test): Use it,
+	instead of assuming it's valid to treat &FUNCTION as a data
+	pointer.
+
+	* conv_princ.c (sconv_list): Now const.
+	(krb5_*_conv_principal): Use pointer to const for it.
+
+	Tue Apr 23 19:39:59 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* get_creds.c (krb5_get_credentials): this isn't the kernel, so
+	don't return negative errno values.
+
 Sat Apr 27 19:14:21 1996  Richard Basch  <basch@lehman.com>
 
 	* fwd_tgt.c (krb5_fwd_tgt_creds): fixed a possible null dereference.

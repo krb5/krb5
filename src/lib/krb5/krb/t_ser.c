@@ -28,6 +28,11 @@
 #include "k5-int.h"
 #include "auth_con.h"
 
+static const char stuff[]="You can't take a pointer to a function and convert \
+it to a pointer to char; ANSI doesn't say it'll work, and in fact on the HPPA \
+you can lose some bits of the function pointer, and get a pointer that you \
+can't safely dereference.  This test file used to make this mistake, often.";
+
 /*
  * Dump an external representation.
  */
@@ -336,7 +341,7 @@ ser_acontext_test(kcontext, verbose)
 		    adataent.magic = KV5M_AUTHDATA;
 		    adataent.ad_type = 123;
 		    adataent.length = 128;
-		    adataent.contents = (krb5_octet *) ser_acontext_test;
+		    adataent.contents = (krb5_octet *) stuff;
 		    adatalist[0] = &adataent;
 		    adatalist[1] = &adataent;
 		    adatalist[2] = (krb5_authdata *) NULL;
@@ -512,7 +517,7 @@ ser_eblock_test(kcontext, verbose)
     krb5_use_enctype(kcontext, &eblock, DEFAULT_KDC_ENCTYPE);
     if (!(kret = ser_data(verbose, "> NULL eblock",
 			  (krb5_pointer) &eblock, KV5M_ENCRYPT_BLOCK))) {
-	eblock.priv = (krb5_pointer) ser_eblock_test;
+	eblock.priv = (krb5_pointer) stuff;
 	eblock.priv_size = 8;
 	if (!(kret = ser_data(verbose, "> eblock with private data",
 			      (krb5_pointer) &eblock,
@@ -589,11 +594,7 @@ ser_cksum_test(kcontext, verbose)
 	checksum.checksum_type = 123;
 	checksum.length = sizeof(ckdata);
 	checksum.contents = ckdata;
-#if 0
-	memcpy(ckdata, (char *) &ser_cksum_test, sizeof(ckdata)); 
-#else
-	memcpy(ckdata, (char *) &ser_princ_test, sizeof(ckdata)); 
-#endif
+	memcpy(ckdata, (char *) &stuff, sizeof(ckdata)); 
 	if (!(kret = ser_data(verbose, "> checksum with data",
 			      (krb5_pointer) &checksum, KV5M_CHECKSUM))) {
 	    if (verbose)

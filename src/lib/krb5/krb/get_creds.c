@@ -57,7 +57,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     krb5_flags fields;
 
     if (!in_creds || !in_creds->server || !in_creds->client)
-        return -EINVAL;
+        return EINVAL;
 
     memset((char *)&mcreds, 0, sizeof(krb5_creds));
     mcreds.magic = KV5M_CREDS;
@@ -86,7 +86,7 @@ krb5_get_credentials(context, options, ccache, in_creds, out_creds)
     }
 
     if ((ncreds = (krb5_creds *)malloc(sizeof(krb5_creds))) == NULL)
-	return -ENOMEM;
+	return ENOMEM;
 
     memset((char *)ncreds, 0, sizeof(krb5_creds));
     ncreds->magic = KV5M_CREDS;
