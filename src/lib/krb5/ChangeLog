@@ -1,3 +1,7 @@
+Fri Nov  3 21:31:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Added the ccache/memory subdirectory.
+
 Fri Oct  6 22:05:44 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Remove ##DOS!include of config/windows.in.

@@ -2,14 +2,14 @@
 
 TST=if test -n "`cat DONE`" ; then
 
-LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file \
+LIB_SUBDIRS= error_tables asn.1 ccache ccache/stdio ccache/file ccache/memory \
 	keytab keytab/file krb rcache free os posix $(BUILDTOP)/util/profile \
 	$(BUILDTOP)/util/berk_db/hash
 LIBUPDATE= $(BUILDTOP)/util/libupdate
 LIBDONE= error_tables/DONE asn.1/DONE ccache/DONE ccache/stdio/DONE \
-		ccache/file/DONE keytab/DONE keytab/file/DONE krb/DONE \
-		rcache/DONE free/DONE os/DONE posix/DONE \
-		$(BUILDTOP)/util/profile/DONE \
+		ccache/file/DONE ccache/memory/DONE keytab/DONE \
+		keytab/file/DONE krb/DONE rcache/DONE free/DONE os/DONE \
+		posix/DONE $(BUILDTOP)/util/profile/DONE \
 		$(BUILDTOP)/util/berk_db/hash/DONE
 #
 # Depends on KRB4_LIB, KRB4_CRYPTO_LIB and libcrypto, expect two unresolved
