@@ -1,3 +1,5 @@
+#include "prof_int.h"
+
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
@@ -5,8 +7,6 @@
 #endif
 #include <errno.h>
 #include <ctype.h>
-
-#include "prof_int.h"
 
 void dump_profile (struct profile_node *root, int level);
 

@@ -1,3 +1,75 @@
+2004-05-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for endian.h and machine/endian.h.
+
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (hmac1): Make a local copy of the supplied keyblock
+	structure, in case we want to modify it.
+
+2004-02-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_encrypt.c (compare_results): New function.
+	(main): Use it to check decryption results against the original
+	plaintext.  When testing with cipher state, encrypt and then
+	decrypt (and verify) two messages.
+	* Makefile.in (t_encrypt$(EXEEXT)): Depend on CRYPTO_DEPLIB.
+
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_cts.c (test_cts): Process encryption and decryption IVs
+	separately, make sure they match, and display the value.
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c (krb5_enctypes_list): Fill in required_ctype field.
+	* mandatory_sumtype.c: New file.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Build it.
+
+2003-07-13  Kenneth Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (foo): Never call com_err.
+
+2003-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* checksum_length.c (krb5_c_checksum_length): Handle trunc_size.
+
+2003-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* cksumtypes.c (krb5_cksumtypes_list): Add aes128/256 hmacs, with
+	new trunc_size field.
+
+	* make_checksum.c (krb5_c_make_checksum): If trunc_size is
+	specified, shrink the computed checksum down to the indicated
+	size.
+
+2003-06-05  Sam Hartman  <hartmans@mit.edu>
+
+	* string_to_key.c (krb5_c_string_to_key_with_params): Only allow
+	AFS s2k  for DES enctypes
+
+2003-05-15  Sam Hartman  <hartmans@mit.edu>
+
+	* combine_keys.c (enctype_ok): new function to determine if we support combine_keys for a particular enctype
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* etypes.c (krb5_enctypes_list): Add names aes128-cts and
+	aes256-cts as aliases.
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* string_to_key.c: Move krb5_c_string_to_key_with_params to krb5.h
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* pbkdf2.c (krb5int_pbkdf2): Provide a temporary buffer for the
+	output from F, if the remaining space in the output buffer isn't
+	big enough.  Free the temporary buffers before returning.
+
+	* etypes.c (krb5_enctypes_list): Use krb5int_aes_encrypt_length,
+	and krb5int_aes_dk_encrypt, and krb5int_aes_dk_decrypt for AES.
+
 2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
 
     * prng.c: use Unix randomness sources on Mac OS X.

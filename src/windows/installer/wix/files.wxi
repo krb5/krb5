@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+  Copyright (C) 2004 by the Massachusetts Institute of Technology.
+  All rights reserved.
+ 
+  Export of this software from the United States of America may
+    require a specific license from the United States Government.
+    It is the responsibility of any person or organization contemplating
+    export to obtain such a license before exporting.
+ 
+  WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+  distribute this software and its documentation for any purpose and
+  without fee is hereby granted, provided that the above copyright
+  notice appear in all copies and that both that copyright notice and
+  this permission notice appear in supporting documentation, and that
+  the name of M.I.T. not be used in advertising or publicity pertaining
+  to distribution of the software without specific, written prior
+  permission.  Furthermore if you modify this software you must label
+  your software as modified software and not distribute it in such a
+  fashion that it might be confused with the original M.I.T. software.
+  M.I.T. makes no representations about the suitability of
+  this software for any purpose.  It is provided "as is" without express
+  or implied warranty.
+  
+  -->
+<Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
+<Directory Id="TARGETDIR" Name="SourceDir">
+    <Directory Id="ProgramFilesFolder">
+        <Directory Id="dirMIT" Name="MIT">
+            <Directory Id="KERBEROSDIR" Name="Kerberos">
+                <Directory Id="dirbin" Name="bin" src="$(var.BinDir)">
+                    <Component Id="cmf_aklog_exe" Guid="38840074-3D15-45CB-8022-C4A603FC697A" DiskId="1">
+	                    <File Id="fil_aklog_exe" LongName="aklog.exe" Name="aklog.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_aklog_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_aklog_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_comerr32_dll" Guid="D8F455F9-E648-4C61-A69D-7116ADEC2DBB" DiskId="1">
+	                    <File Id="fil_comerr32_dll" LongName="comerr32.dll" Name="comerr32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_gss_exe" Guid="8CAF09C4-68A2-46DC-A618-AEF16D832E54" DiskId="1">
+	                    <File Id="fil_gss_exe" LongName="gss.exe" Name="gss.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_gss_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_gss_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_gss_client_exe" Guid="983E0887-0C8B-49AB-8F59-DFE3A4E45E89" DiskId="1">
+	                    <File Id="fil_gss_client_exe" LongName="gss-client.exe" Name="gss-clnt.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_gss_client_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_gss_client_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_gss_server_exe" Guid="B165FE41-D0DD-4DFC-92E6-A99ADA23BE8B" DiskId="1">
+	                    <File Id="fil_gss_server_exe" LongName="gss-server.exe" Name="gss-srvr.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_gss_server_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_gss_server_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_gssapi32_dll" Guid="5B0F2989-BB85-40BF-BB7A-E77693972CF9" DiskId="1">
+	                    <File Id="fil_gssapi32_dll" LongName="gssapi32.dll" Name="gssapi32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_k524init_exe" Guid="20BE4EA5-C465-4AF3-9A4F-BB80934167E3" DiskId="1">
+	                    <File Id="fil_k524init_exe" LongName="k524init.exe" Name="k524init.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_k524init_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_k524init_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_kclnt32_dll" Guid="D396C1E7-080E-49F5-92BA-73BCEDF09C8E" DiskId="1">
+	                    <File Id="fil_kclnt32_dll" LongName="kclnt32.dll" Name="kclnt32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_kdestroy_exe" Guid="D1E9C111-7760-4EE6-86CF-D4B4064B0ABA" DiskId="1">
+	                    <File Id="fil_kdestroy_exe" LongName="kdestroy.exe" Name="kdestroy.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kdestroy_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_kinit_exe" Guid="80643A09-EF28-4714-BC62-B64FC5B17CAA" DiskId="1">
+	                    <File Id="fil_kinit_exe" LongName="kinit.exe" Name="kinit.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kinit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kinit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_klist_exe" Guid="24FB6003-BC7A-4BF1-9503-82D398EC02D7" DiskId="1">
+	                    <File Id="fil_klist_exe" LongName="klist.exe" Name="klist.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_klist_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_klist_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_kpasswd_exe" Guid="3FA4AB96-FF12-460A-814E-3380E220787C" DiskId="1">
+	                    <File Id="fil_kpasswd_exe" LongName="kpasswd.exe" Name="kpasswd.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kpasswd_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kpasswd_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_kvno_exe" Guid="7759D524-1F88-4483-975F-DDD33A511512" DiskId="1">
+	                    <File Id="fil_kvno_exe" LongName="kvno.exe" Name="kvno.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kvno_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kvno_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_krb5_32_dll" Guid="31E40356-CBAC-4FC6-9A34-C6F6C72A27CA" DiskId="1">
+	                    <File Id="fil_krb5_32_dll" LongName="krb5_32.dll" Name="krb5_32.dll" KeyPath="yes" />
+	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[dirbin]" />
+                    </Component>
+                    <Component Id="cmf_krb524_dll" Guid="98685874-A9AA-4BC5-9830-271D9CF52C17" DiskId="1">
+	                    <File Id="fil_krb524_dll" LongName="krb524.dll" Name="krb524.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_krbcc32_dll" Guid="A50FA27D-F203-4C19-9047-B7976171FB94" DiskId="1">
+	                    <File Id="fil_krbcc32_dll" LongName="krbcc32.dll" Name="krbcc32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_krbcc32s_exe" Guid="7D5F0817-DACF-4B54-BB8D-94DD63626DB5" DiskId="1">
+	                    <File Id="fil_krbcc32s_exe" LongName="krbcc32s.exe" Name="krbcc32s.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_krbcc32s_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\krbcc32s" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\krbcc32s" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_krbv4w32_dll" Guid="DFA23F6C-5297-4876-AF52-6F7CF2CB34AC" DiskId="1">
+	                    <File Id="fil_krbv4w32_dll" LongName="krbv4w32.dll" Name="krbv4w32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_leash32_exe" Guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7" DiskId="1">
+	                    <File Id="fil_leash32_exe" LongName="leash32.exe" Name="leash32.exe" KeyPath="yes">
+							<Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" />
+	                    </File>
+	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="csc_leashStartup" Guid="3408C97D-68D6-4207-9142-BF82F7C62DC0" DiskId="1">
+                        <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="sc_leash32_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe"/>
+                    </Component>
+                <?ifdef OldHelp?>
+                    <Component Id="cmf_leash32_hlp" Guid="919616D6-1605-4A79-8E33-C18A0D0F25E3" DiskId="1">
+	                    <File Id="fil_leash32_hlp" LongName="leash32.hlp" Name="leash32.hlp" KeyPath="yes" />
+                    </Component>
+                <?else?>
+                    <Component Id="cmf_leash32_chm" Guid="C50E5E0A-B822-4419-855B-1713637BCA6A" DiskId="1">
+	                    <File Id="fil_leash32_chm" LongName="leash32.chm" Name="leash32.chm" KeyPath="yes" />
+                    </Component>
+                <?endif?>
+                    <Component Id="cmf_leashw32_dll" Guid="8C145D48-A2FC-4C28-BC05-4368545F1184" DiskId="1">
+	                    <File Id="fil_leashw32_dll" LongName="leashw32.dll" Name="leashw32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_ms2mit_exe" Guid="63D189DC-5EE4-49E2-B5E9-6E74A28602C8" DiskId="1">
+	                    <File Id="fil_ms2mit_exe" LongName="ms2mit.exe" Name="ms2mit.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_ms2mit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_wshelp32_dll" Guid="B9D9F5F1-CA93-4F56-B6F8-343F21484CDE" DiskId="1">
+	                    <File Id="fil_wshelp32_dll" LongName="wshelp32.dll" Name="wshelp32.dll" KeyPath="yes" />
+                    </Component>
+                    <Component Id="cmf_xpprof32_dll" Guid="A7DF8BAF-7188-4C24-89FB-C8EB51571FD2" DiskId="1">
+	                    <File Id="fil_xpprof32_dll" LongName="xpprof32.dll" Name="xpprof32.dll" KeyPath="yes" />
+                    </Component>
+                    
+                    <!-- Debug symbols -->
+                <?ifdef Debug?>
+                    <Component Id="cmf_bin_debug" Guid="C8468854-8261-4781-8119-A612636841E3" DiskId="1">
+	                    <File Id="fil_aklog_pdb" LongName="aklog.pdb" Name="aklog.pdb" />
+	                    <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
+	                    <File Id="fil_gss_pdb" LongName="gss.pdb" Name="gss.pdb" />
+	                    <File Id="fil_gss_client_pdb" LongName="gss-client.pdb" Name="gss-clnt.pdb" />
+	                    <File Id="fil_gss_server_pdb" LongName="gss-server.pdb" Name="gss-srvr.pdb" />
+	                    <File Id="fil_gssapi32_pdb" LongName="gssapi32.pdb" Name="gssapi32.pdb" />
+	                    <File Id="fil_k524init_pdb" LongName="k524init.pdb" Name="k524init.pdb" />
+	                    <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
+	                    <File Id="fil_kdestroy_pdb" LongName="kdestroy.pdb" Name="kdestroy.pdb" />
+	                    <File Id="fil_kinit_pdb" LongName="kinit.pdb" Name="kinit.pdb" />
+	                    <File Id="fil_klist_pdb" LongName="klist.pdb" Name="klist.pdb" />
+	                    <File Id="fil_kpasswd_pdb" LongName="kpasswd.pdb" Name="kpasswd.pdb" />
+	                    <File Id="fil_kvno_pdb" LongName="kvno.pdb" Name="kvno.pdb" />
+	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
+	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
+	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
+	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
+	                    <File Id="fil_krbv4w32_pdb" LongName="krbv4w32.pdb" Name="krbv4w32.pdb" />
+	                    <File Id="fil_leash32_pdb" LongName="leash32.pdb" Name="leash32.pdb" />
+	                    <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
+	                    <File Id="fil_ms2mit_pdb" LongName="ms2mit.pdb" Name="ms2mit.pdb" />
+	                    <File Id="fil_wshelp32_pdb" LongName="wshelp32.pdb" Name="wshelp32.pdb" />
+	                    <File Id="fil_xpprof32_pdb" LongName="xpprof32.pdb" Name="xpprof32.pdb" />
+                    </Component>
+                <?endif?>
+                
+                    <!-- Runtime -->
+                <?ifndef Debug?>
+                    <?ifdef CL1200?>
+                        <Component Id="cmf_mfc42_dll" Guid="BE2D0D08-E26E-4906-BEEA-1C550BA9B405" DiskId="1">
+	                        <File Id="fil_mfc42_dll" LongName="mfc42.dll" Name="mfc42.dll" src="$(var.SystemDir)mfc42.dll" KeyPath="yes" />
+                        </Component>
+                        <Component Id="cmf_msvcp60_dll" Guid="7DBB5E61-AA59-4FD8-87CA-7F139D355050" DiskId="1">
+	                        <File Id="fil_msvcp60_dll" LongName="msvcp60.dll" Name="msvcp60.dll" src="$(var.SystemDir)msvcp60.dll" KeyPath="yes" />
+                        </Component>
+                        <Component Id="cmf_msvcrt_dll" Guid="07B1612B-F52B-4A22-BC20-948BB7D50916" DiskId="1">
+	                        <File Id="fil_msvcrt_dll" LongName="msvcrt.dll" Name="msvcrt.dll" src="$(var.SystemDir)msvcrt.dll" KeyPath="yes" />
+                        </Component>
+                    <?else?>
+                        <?ifdef CL1300?>
+                            <Component Id="cmf_mfc70_dll" Guid="E064D66F-45A5-46FA-A0C0-EE68B5DCA248" DiskId="1">
+	                            <File Id="fil_mfc70_dll" LongName="mfc70.dll" Name="mfc70.dll" src="$(var.SystemDir)mfc70.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcr70_dll" Guid="3489059D-B8C5-4F9A-9DF9-CC8F19B97898" DiskId="1">
+	                            <File Id="fil_msvcr70_dll" LongName="msvcr70.dll" Name="msvcr70.dll" src="$(var.SystemDir)msvcr70.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcp70_dll" Guid="E3E6DC28-A229-45D7-804B-BC5A2CAB86B6" DiskId="1">
+	                            <File Id="fil_msvcp70_dll" LongName="msvcp70.dll" Name="msvcp70.dll" src="$(var.SystemDir)msvcp70.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
+	                            <File Id="fil_mfc70chs_dll" LongName="mfc70chs.dll" Name="mfc70chs.dll" src="$(var.SystemDir)mfc70chs.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
+	                            <File Id="fil_mfc70cht_dll" LongName="mfc70cht.dll" Name="mfc70cht.dll" src="$(var.SystemDir)mfc70cht.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
+	                            <File Id="fil_mfc70deu_dll" LongName="mfc70deu.dll" Name="mfc70deu.dll" src="$(var.SystemDir)mfc70deu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
+	                            <File Id="fil_mfc70enu_dll" LongName="mfc70enu.dll" Name="mfc70enu.dll" src="$(var.SystemDir)mfc70enu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
+	                            <File Id="fil_mfc70esp_dll" LongName="mfc70esp.dll" Name="mfc70esp.dll" src="$(var.SystemDir)mfc70esp.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
+	                            <File Id="fil_mfc70fra_dll" LongName="mfc70fra.dll" Name="mfc70fra.dll" src="$(var.SystemDir)mfc70fra.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
+	                            <File Id="fil_mfc70ita_dll" LongName="mfc70ita.dll" Name="mfc70ita.dll" src="$(var.SystemDir)mfc70ita.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
+	                            <File Id="fil_mfc70jpn_dll" LongName="mfc70jpn.dll" Name="mfc70jpn.dll" src="$(var.SystemDir)mfc70jpn.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
+	                            <File Id="fil_mfc70kor_dll" LongName="mfc70kor.dll" Name="mfc70kor.dll" src="$(var.SystemDir)mfc70kor.dll" KeyPath="yes" />
+                            </Component>
+                        <?else?> <!-- CL1310 -->
+                            <Component Id="cmf_mfc71_dll" Guid="6A4854A8-35AE-42CB-9671-9F6F096BE20C" DiskId="1">
+	                            <File Id="fil_mfc71_dll" LongName="mfc71.dll" Name="mfc71.dll" src="$(var.SystemDir)mfc71.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcr71_dll" Guid="C6952DEE-E62A-4635-9CE8-405F1E459FB2" DiskId="1">
+	                            <File Id="fil_msvcr71_dll" LongName="msvcr71.dll" Name="msvcr71.dll" src="$(var.SystemDir)msvcr71.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcp71_dll" Guid="CA7D0EDE-0B81-4709-86E9-31DC8543918F" DiskId="1">
+	                            <File Id="fil_msvcp71_dll" LongName="msvcp71.dll" Name="msvcp71.dll" src="$(var.SystemDir)msvcp71.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
+	                            <File Id="fil_mfc71chs_dll" LongName="mfc71chs.dll" Name="mfc71chs.dll" src="$(var.SystemDir)mfc71chs.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
+	                            <File Id="fil_mfc71cht_dll" LongName="mfc71cht.dll" Name="mfc71cht.dll" src="$(var.SystemDir)mfc71cht.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
+	                            <File Id="fil_mfc71deu_dll" LongName="mfc71deu.dll" Name="mfc71deu.dll" src="$(var.SystemDir)mfc71deu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
+	                            <File Id="fil_mfc71enu_dll" LongName="mfc71enu.dll" Name="mfc71enu.dll" src="$(var.SystemDir)mfc71enu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
+	                            <File Id="fil_mfc71esp_dll" LongName="mfc71esp.dll" Name="mfc71esp.dll" src="$(var.SystemDir)mfc71esp.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
+	                            <File Id="fil_mfc71fra_dll" LongName="mfc71fra.dll" Name="mfc71fra.dll" src="$(var.SystemDir)mfc71fra.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
+	                            <File Id="fil_mfc71ita_dll" LongName="mfc71ita.dll" Name="mfc71ita.dll" src="$(var.SystemDir)mfc71ita.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
+	                            <File Id="fil_mfc71jpn_dll" LongName="mfc71jpn.dll" Name="mfc71jpn.dll" src="$(var.SystemDir)mfc71jpn.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
+	                            <File Id="fil_mfc71kor_dll" LongName="mfc71kor.dll" Name="mfc71kor.dll" src="$(var.SystemDir)mfc71kor.dll" KeyPath="yes" />
+                            </Component>
+                        <?endif?>
+                    <?endif?>
+                <?else?> <!-- Debug -->
+                    <?ifdef CL1200?>
+                        <Component Id="cmf_mfc42d_dll" Guid="B7360C15-61FA-409F-8F0A-87B96FB30BBD" DiskId="1">
+	                        <File Id="fil_mfc42d_dll" LongName="mfc42d.dll" Name="mfc42d.dll" src="$(var.SystemDir)mfc42d.dll" KeyPath="yes" />
+                        </Component>
+                        <Component Id="cmf_msvcp60d_dll" Guid="BFF28D63-B60A-48B6-A403-A7DE00BDB37E" DiskId="1">
+	                        <File Id="fil_msvcp60d_dll" LongName="msvcp60d.dll" Name="msvcp60d.dll" src="$(var.SystemDir)msvcp60d.dll" KeyPath="yes" />
+                        </Component>
+                        <Component Id="cmf_msvcrtd_dll" Guid="69069738-3202-43C3-92A3-4139816B6527" DiskId="1">
+	                        <File Id="fil_msvcrtd_dll" LongName="msvcrtd.dll" Name="msvcrtd.dll" src="$(var.SystemDir)msvcrtd.dll" KeyPath="yes" />
+                        </Component>
+                        <Component Id="cmf_runtime_debug1200" Guid="3FAD9513-AB33-4eed-9359-E96F8D5ABD2A" DiskId="1">
+	                        <File Id="fil_mfc42d_pdb" LongName="mfc42d.pdb" Name="mfc42d.pdb" src="$(var.SystemDir)mfc42d.pdb" />
+	                        <File Id="fil_msvcp60d_pdb" LongName="msvcp60d.pdb" Name="msvcp60d.pdb" src="$(var.SystemDir)msvcp60d.pdb" />
+	                        <File Id="fil_msvcrtd_pdb" LongName="msvcrtd.pdb" Name="msvcrtd.pdb" src="$(var.SystemDir)msvcrtd.pdb" KeyPath="yes" />
+                        </Component>
+                    <?else?>
+                        <?ifdef CL1300?>
+                            <Component Id="cmf_mfc70d_dll" Guid="40C7120A-9B28-4DD1-86D0-9F66056A2463" DiskId="1">
+	                            <File Id="fil_mfc70d_dll" LongName="mfc70d.dll" Name="mfc70d.dll" src="$(var.SystemDir)mfc70d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcr70d_dll" Guid="D0A7B06E-6F65-4559-A99A-63C4C837BE0E" DiskId="1">
+	                            <File Id="fil_msvcr70d_dll" LongName="msvcr70d.dll" Name="msvcr70d.dll" src="$(var.SystemDir)msvcr70d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcp70d_dll" Guid="DC82F644-8705-4C89-BE63-4CD6680BF580" DiskId="1">
+	                            <File Id="fil_msvcp70d_dll" LongName="msvcp70d.dll" Name="msvcp70d.dll" src="$(var.SystemDir)msvcp70d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
+	                            <File Id="fil_mfc70chs_dll" LongName="mfc70chs.dll" Name="mfc70chs.dll" src="$(var.SystemDir)mfc70chs.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
+	                            <File Id="fil_mfc70cht_dll" LongName="mfc70cht.dll" Name="mfc70cht.dll" src="$(var.SystemDir)mfc70cht.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
+	                            <File Id="fil_mfc70deu_dll" LongName="mfc70deu.dll" Name="mfc70deu.dll" src="$(var.SystemDir)mfc70deu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
+	                            <File Id="fil_mfc70enu_dll" LongName="mfc70enu.dll" Name="mfc70enu.dll" src="$(var.SystemDir)mfc70enu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
+	                            <File Id="fil_mfc70esp_dll" LongName="mfc70esp.dll" Name="mfc70esp.dll" src="$(var.SystemDir)mfc70esp.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
+	                            <File Id="fil_mfc70fra_dll" LongName="mfc70fra.dll" Name="mfc70fra.dll" src="$(var.SystemDir)mfc70fra.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
+	                            <File Id="fil_mfc70ita_dll" LongName="mfc70ita.dll" Name="mfc70ita.dll" src="$(var.SystemDir)mfc70ita.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
+	                            <File Id="fil_mfc70jpn_dll" LongName="mfc70jpn.dll" Name="mfc70jpn.dll" src="$(var.SystemDir)mfc70jpn.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
+	                            <File Id="fil_mfc70kor_dll" LongName="mfc70kor.dll" Name="mfc70kor.dll" src="$(var.SystemDir)mfc70kor.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_runtime_debug1300" Guid="157D7DE8-6AFE-44b3-A317-840667C76D0D" DiskId="1">
+	                            <File Id="fil_mfc70d_pdb" LongName="mfc70d.pdb" Name="mfc70d.pdb" src="$(var.SystemDir)mfc70d.pdb" />
+	                            <File Id="fil_msvcr70d_pdb" LongName="msvcr70d.pdb" Name="msvcr70d.pdb" src="$(var.SystemDir)msvcr70d.pdb" KeyPath="yes" />
+	                            <File Id="fil_msvcp70d_pdb" LongName="msvcp70d.pdb" Name="msvcp70d.pdb" src="$(var.SystemDir)msvcp70d.pdb" />
+                            </Component>
+                        <?else?> <!-- CL1310 -->
+                            <Component Id="cmf_mfc71d_dll" Guid="0E0A47A3-892C-4526-8591-C719E1A184F2" DiskId="1">
+	                            <File Id="fil_mfc71d_dll" LongName="mfc71d.dll" Name="mfc71d.dll" src="$(var.SystemDir)mfc71d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcr71d_dll" Guid="CB2A282D-CF73-4DA8-929D-8035776F4FB8" DiskId="1">
+	                            <File Id="fil_msvcr71d_dll" LongName="msvcr71d.dll" Name="msvcr71d.dll" src="$(var.SystemDir)msvcr71d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_msvcp71d_dll" Guid="7D6003B6-B3A1-417A-BE16-5DDD52023456" DiskId="1">
+	                            <File Id="fil_msvcp71d_dll" LongName="msvcp71d.dll" Name="msvcp71d.dll" src="$(var.SystemDir)msvcp71d.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
+	                            <File Id="fil_mfc71chs_dll" LongName="mfc71chs.dll" Name="mfc71chs.dll" src="$(var.SystemDir)mfc71chs.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
+	                            <File Id="fil_mfc71cht_dll" LongName="mfc71cht.dll" Name="mfc71cht.dll" src="$(var.SystemDir)mfc71cht.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
+	                            <File Id="fil_mfc71deu_dll" LongName="mfc71deu.dll" Name="mfc71deu.dll" src="$(var.SystemDir)mfc71deu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
+	                            <File Id="fil_mfc71enu_dll" LongName="mfc71enu.dll" Name="mfc71enu.dll" src="$(var.SystemDir)mfc71enu.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
+	                            <File Id="fil_mfc71esp_dll" LongName="mfc71esp.dll" Name="mfc71esp.dll" src="$(var.SystemDir)mfc71esp.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
+	                            <File Id="fil_mfc71fra_dll" LongName="mfc71fra.dll" Name="mfc71fra.dll" src="$(var.SystemDir)mfc71fra.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
+	                            <File Id="fil_mfc71ita_dll" LongName="mfc71ita.dll" Name="mfc71ita.dll" src="$(var.SystemDir)mfc71ita.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
+	                            <File Id="fil_mfc71jpn_dll" LongName="mfc71jpn.dll" Name="mfc71jpn.dll" src="$(var.SystemDir)mfc71jpn.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
+	                            <File Id="fil_mfc71kor_dll" LongName="mfc71kor.dll" Name="mfc71kor.dll" src="$(var.SystemDir)mfc71kor.dll" KeyPath="yes" />
+                            </Component>
+                            <Component Id="cmf_runtime_debug1310" Guid="0125814E-9EED-4d57-A4E6-3E685CE5AB5C" DiskId="1">
+	                            <File Id="fil_mfc71d_pdb" LongName="mfc71d.pdb" Name="mfc71d.pdb" src="$(var.SystemDir)mfc71d.pdb" />
+	                            <File Id="fil_msvcr71d_pdb" LongName="msvcr71d.pdb" Name="msvcr71d.pdb" src="$(var.SystemDir)msvcr71d.pdb" KeyPath="yes" />
+	                            <File Id="fil_msvcp71d_pdb" LongName="msvcp71d.pdb" Name="msvcp71d.pdb" src="$(var.SystemDir)msvcp71d.pdb" />
+                            </Component>
+                        <?endif?>
+                    <?endif?>
+                <?endif?>
+                
+                    <Component Id="cmf_psapi_dll" Guid="877F4DD5-8AE0-451C-8F4D-C27F6F30D221" DiskId="1">
+	                    <File Id="fil_psapi_dll" LongName="psapi.dll" Name="psapi.dll" src="$(var.SystemDir)psapi.dll" KeyPath="yes" />
+                    </Component>
+                
+                </Directory> <!-- /bin -->
+                
+                <Directory Id="dirinc" Name="inc" src="$(var.IncDir)">
+                    <Directory Id="dirinc_kclient" Name="kclient" src="$(var.IncDir)kclient\">
+                        <Component Id="cmp_dirinc_kclient" Guid="96215203-7FF5-4576-AAC5-F5035B64CC37" DiskId="1">
+                            <File Id="fil_kclient_h" LongName="kclient.h" Name="kclient.h" KeyPath="yes" />
+                            <File Id="fil_kcmacerr_h" LongName="kcmacerr.h" Name="kcmacerr.h" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_krb4" Name="krb4" src="$(var.IncDir)krb4\">
+                        <Component Id="cmp_dirinc_krb4" Guid="5D2E3F2E-87AE-4905-84AC-AC503662D1B0" DiskId="1">
+                            <File Id="fil_com_err_h" LongName="com_err.h" Name="com_err.h" />
+                            <File Id="fil_conf_pc_h" LongName="conf-pc.h" Name="conf-pc.h" />
+                            <File Id="fil_conf_h" LongName="conf.h" Name="conf.h" />
+                            <File Id="fil_des_h" LongName="des.h" Name="des.h" />
+                            <File Id="fil_kadm_err_h" LongName="kadm_err.h" Name="kadm_err.h" />
+                            <File Id="fil_krb_h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
+                            <File Id="fil_krberr_h" LongName="krberr.h" Name="krberr.h" />
+                            <File Id="fil_mit_copy_h" LongName="mit_copy.h" Name="mit_copy.h" />
+                            <File Id="fil_osconf_h" LongName="osconf.h" Name="osconf.h" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_krb5" Name="krb5" src="$(var.IncDir)krb5\">
+                        <Directory Id="dirinc_krb5_gssapi" Name="gssapi" src="$(var.IncDir)\krb5\gssapi\">
+                            <Component Id="cmp_dirinc_krb5_gssapi" Guid="BD3C190B-1EBB-4d14-81DD-B2000DC4EAC7" DiskId="1">
+                                <File Id="fil_gssapi_h" LongName="gssapi.h" Name="gssapi.h" KeyPath="yes" />
+                                <File Id="fil_gssapi_generic_h" LongName="gssapi_generic.h" Name="GSSAPI~1.H" />
+                                <File Id="fil_gssapi_krb5_h" LongName="gssapi_krb5.h" Name="GSSAPI~2.H" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dirinc_krb5_KerberosIV" LongName="KerberosIV" Name="krb4" src="$(var.IncDir)\krb5\KerberosIV\">
+                            <Component Id="cmp_dirinc_krb5_KerberosIV" Guid="307B8031-2589-4f92-A303-EF4231328490" DiskId="1">
+                                <File Id="fil_des_.h" LongName="des.h" Name="des.h" />
+                                <File Id="fil_kadm_err_.h" LongName="kadm_err.h" Name="kadm_err.h" />
+                                <File Id="fil_krb_.h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
+                                <File Id="fil_krb_err_.h" LongName="krb_err.h" Name="krb_err.h" />
+                                <File Id="fil_mit_copyright_.h" LongName="mit-copyright.h" Name="MIT-CO~1.H" />
+                            </Component>
+                        </Directory>
+                        <Component Id="cmp_dirinc_krb5" Guid="7FD8008B-2F46-4613-8A09-989F643258F1" DiskId="1">
+                            <File Id="fil_com_err_.h" LongName="com_err.h" Name="com_err.h" />
+                            <File Id="fil_krb5_.h" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
+                            <File Id="fil_profile_.h" LongName="profile.h" Name="profile.h" />
+                            <File Id="fil_win_mac_.h" LongName="win-mac.h" Name="win-mac.h" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_krbcc" Name="krbcc" src="$(var.IncDir)krbcc\">
+                        <Component Id="cmp_dirinc_krbcc" Guid="2CE4B708-7D45-41e4-8A53-BF2D78451A81" DiskId="1">
+                            <File Id="fil_cacheapi_h" LongName="cacheapi.h" Name="cacheapi.h" KeyPath="yes" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_leash" Name="leash" src="$(var.IncDir)leash\">
+                        <Component Id="cmp_dirinc_leash" Guid="FCF269AB-D9BC-49bd-B9F3-D6EA9697D8D7" DiskId="1">
+                            <File Id="fil_leasherr_h" LongName="leasherr.h" Name="leasherr.h" />
+                            <File Id="fil_leashinfo_h" LongName="leashinfo.h" Name="LEASHI~1.H" />
+                            <File Id="fil_leashwin_h" LongName="leashwin.h" Name="leashwin.h" KeyPath="yes" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_loadfuncs" LongName="loadfuncs" Name="loadfunc" src="$(var.IncDir)loadfuncs\">
+                        <Component Id="cmp_dirinc_loadfuncs" Guid="C8E59D05-4502-498b-A107-1DF65C3A27D3" DiskId="1">
+                            <File Id="fil_loadfuncs_afs_h" LongName="loadfuncs-afs.h" Name="LOADFU~1.H" />
+                            <File Id="fil_loadfuncs_afs36_h" LongName="loadfuncs-afs36.h" Name="LOADFU~2.H" />
+                            <File Id="fil_loadfuncs_com_err_h" LongName="loadfuncs-com_err.h" Name="LOADFU~3.H" />
+                            <File Id="fil_loadfuncs_krb_h" LongName="loadfuncs-krb.h" Name="LOADFU~4.H" />
+                            <File Id="fil_loadfuncs_krb5_h" LongName="loadfuncs-krb5.h" Name="LOC37B~1.H" />
+                            <File Id="fil_loadfuncs_krb524_h" LongName="loadfuncs-krb524.h" Name="LOCEB8~1.H" />
+                            <File Id="fil_loadfuncs_leash_h" LongName="loadfuncs-leash.h" Name="LOF608~1.H" />
+                            <File Id="fil_loadfuncs_lsa_h" LongName="loadfuncs-lsa.h" Name="LO1903~1.H" />
+                            <File Id="fil_loadfuncs_profile_h" LongName="loadfuncs-profile.h" Name="LOD197~1.H" />
+                            <File Id="fil_loadfuncs_wshelper_h" LongName="loadfuncs-wshelper.h" Name="LO8FF4~1.H" />
+                            <File Id="fil_loadfuncs_c" LongName="loadfuncs.c" Name="LOADFU~1.C" />
+                            <File Id="fil_loadfuncs_h" LongName="loadfuncs.h" Name="LO87BD~1.H" KeyPath="yes" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinc_wshelper" Name="wshelper" src="$(var.IncDir)wshelper\">
+                        <Component Id="cmp_dirinc_wshelper" Guid="5A4FCD76-6DC6-455c-B465-FD8123252EBD" DiskId="1">
+                            <File Id="fil_hesiod_h" LongName="hesiod.h" Name="hesiod.h" />
+                            <File Id="fil_mitwhich_h" LongName="mitwhich.h" Name="mitwhich.h" />
+                            <File Id="fil_resolv_h" LongName="resolv.h" Name="resolv.h" />
+                            <File Id="fil_wshelper_h" LongName="wshelper.h" Name="wshelper.h" KeyPath="yes" />
+                        </Component>
+                        <Directory Id="dirinc_wshelper_arpa" Name="arpa" src="$(var.IncDir)\wshelper\arpa\">
+                            <Component Id="cmp_dirinc_wshelper_arpa" Guid="42A19215-91D6-4cd6-8BE8-95105849B862" DiskId="1">
+                                <File Id="fil_nameser_h" LongName="nameser.h" Name="nameser.h" KeyPath="yes" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                
+                <Directory Id="dirlib" Name="lib" src="$(var.LibDir)">
+                    <Directory Id="dirlib_i386" Name="i386" src="$(var.LibDir)">
+                        <Component Id="cmp_dirlib_i386" Guid="CFEE3ED4-92D4-49e1-BB78-8BCBC60C3E57" DiskId="1">
+                            <File Id="fil_comerr32_lib" LongName="comerr32.lib" Name="comerr32.lib" />
+                            <File Id="fil_delaydlls_lib" LongName="delaydlls.lib" Name="DELAYD~1.LIB" />
+                            <File Id="fil_getopt_lib" LongName="getopt.lib" Name="getopt.lib" />
+                            <File Id="fil_gssapi32_lib" LongName="gssapi32.lib" Name="gssapi32.lib" />
+                            <File Id="fil_kclnt32_lib" LongName="kclnt32.lib" Name="kclnt32.lib" />
+                            <File Id="fil_krb524_lib" LongName="krb524.lib" Name="krb524.lib" />
+                            <File Id="fil_krb5_32_lib" LongName="krb5_32.lib" Name="krb5_32.lib" KeyPath="yes" />
+                            <File Id="fil_krbcc32_lib" LongName="krbcc32.lib" Name="krbcc32.lib" />
+                            <File Id="fil_krbv4w32_lib" LongName="krbv4w32.lib" Name="krbv4w32.lib" />
+                            <File Id="fil_leashw32_lib" LongName="leashw32.lib" Name="leashw32.lib" />
+                            <File Id="fil_loadfuncs_lib" LongName="loadfuncs.lib" Name="LOADFU~1.LIB" />
+                            <File Id="fil_wshelp32_lib" LongName="wshelp32.lib" Name="wshelp32.lib" />
+                            <File Id="fil_xpprof32_lib" LongName="xpprof32.lib" Name="xpprof32.lib" />
+                        </Component>
+                    </Directory>
+                </Directory>
+                
+                <Directory Id="dirinstall" Name="install" src="$(var.InstallDir)">
+                    <Directory Id="dirinstall_nsis" Name="nsis" src="$(var.InstallDir)nsis\">
+                        <Component Id="cmp_dirinstall_nsis" Guid="711C3910-5369-44f3-A023-E09E86A1C749" DiskId="1">
+                            <File Id="fil_kfw_fixed_nsi" LongName="kfw-fixed.nsi" Name="KFW-FI~1.NSI" KeyPath="yes" />
+                            <File Id="fil_kfw_ico" LongName="kfw.ico" Name="kfw.ico" />
+                            <File Id="fil_kfw_nsi" LongName="kfw.nsi" Name="kfw.nsi" />
+                            <File Id="fil_KfWConfigPage_ini" LongName="KfWConfigPage.ini" Name="KFWCON~1.INI" />
+                            <File Id="fil_KfWConfigPage2_ini" LongName="KfWConfigPage2.ini" Name="KFWCON~2.INI" />
+                            <File Id="fil_killer_cpp" LongName="killer.cpp" Name="killer.cpp" />
+                            <File Id="fil_licenses_rtf" LongName="licenses.rtf" Name="licenses.rtf" />
+                            <File Id="fil_site_local_nsi" LongName="site-local.nsi" Name="SITE-L~1.NSI" />
+                            <File Id="fil_utils_nsi" LongName="utils.nsi" Name="utils.nsi" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="dirinstall_wix" Name="wix" src="$(var.InstallDir)wix\">
+                        <Component Id="cmp_dirinstall_wix" Guid="14DD16AB-6920-4ee1-8B78-623F39DB70BB" DiskId="1">
+                            <File Id="fil_config_wxi" LongName="config.wxi" Name="config.wxi" />
+                            <File Id="fil_features_wxi" LongName="features.wxi" Name="features.wxi" />
+                            <File Id="fil_files_wxi" LongName="files.wxi" Name="files.wxi" />
+                            <File Id="fil_kfw_wxs" LongName="kfw.wxs" Name="kfw.wxs" KeyPath="yes" />
+                            <File Id="fil_Makefile_" LongName="Makefile" Name="Makefile" />
+                            <File Id="fil_property_wxi" LongName="property.wxi" Name="property.wxi" />
+                            <File Id="fil_site_local_wxi" LongName="site-local.wxi" Name="SITE-L~1.WXI" />
+                        </Component>
+                        <Directory Id="dirinstall_wix_lang" Name="lang" src="$(var.InstallDir)wix\lang\">
+                            <Component Id="cmp_dirinstall_wix_lang" Guid="70741A69-1103-4B54-B146-2E14C271945D" DiskId="1">
+                                <File Id="fil_config_1033_wxi" LongName="config_1033.wxi" Name="CONFIG~1.WXI" KeyPath="yes" />
+                                <File Id="fil_strings_1033_wxl" LongName="strings_1033.wxl" Name="STRING~1.WXL" />
+                                <File Id="fil_ui_1033_wxi" LongName="ui_1033.wxi" Name="ui_1033.wxi" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dirinstall_wix_Binary" Name="Binary" src="$(var.InstallDir)wix\Binary\">
+                            <Component Id="cmp_dirinstall_wix_Binary" Guid="5F021D71-A398-41FD-8F9C-9C0665C18660" DiskId="1">
+                                <File Id="fil_bannrbmp_bmp" LongName="bannrbmp.bmp" Name="bannrbmp.bmp" />
+                                <File Id="fil_completi_ico" LongName="completi.ico" Name="completi.ico" />
+                                <File Id="fil_custicon_ico" LongName="custicon.ico" Name="custicon.ico" />
+                                <File Id="fil_dlgbmp_bmp" LongName="dlgbmp.bmp" Name="dlgbmp.bmp" />
+                                <File Id="fil_exclamic_ico" LongName="exclamic.ico" Name="exclamic.ico" />
+                                <File Id="fil_info_bmp" LongName="info.bmp" Name="info.bmp" />
+                                <File Id="fil_insticon_ico" LongName="insticon.ico" Name="insticon.ico" />
+                                <File Id="fil_new_bmp" LongName="new.bmp" Name="new.bmp" />
+                                <File Id="fil_removico_ico" LongName="removico.ico" Name="removico.ico" />
+                                <File Id="fil_repairic_ico" LongName="repairic.ico" Name="repairic.ico" />
+                                <File Id="fil_up_bmp" LongName="up.bmp" Name="up.bmp" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="dirinstall_wix_custom" Name="custom" src="$(var.InstallDir)wix\custom\">
+                            <Component Id="cmp_dirinstall_wix_custom" Guid="872AA948-39B0-4CDC-B764-7EB69F280E50" DiskId="1">
+                                <File Id="fil_custom_cpp" LongName="custom.cpp" Name="custom.cpp" KeyPath="yes" />
+                                <File Id="fil_custom_h" LongName="custom.h" Name="custom.h" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                
+                
+                <Directory Id="dirdoc" Name="doc" src="$(var.DocDir)">
+                    <Component Id="efl_leash_userdoc_pdf" Guid="68FB24DD-5EC2-4db1-AD42-5B9DDEC247C5" DiskId="1">
+                        <File Id="fil_leash_userdoc_pdf" LongName="leash_userdoc.pdf" Name="leash.pdf" KeyPath="yes">
+							<Shortcut Id="sc_leash_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Leash User Documentation.lnk" Name="leashdoc.lnk" />
+                        </File>
+                    </Component>
+                    <Component Id="efl_relnotes_html" Guid="C65F920A-039D-4839-848F-0AD7B445F376" DiskId="1">
+                        <File Id="fil_relnotes_html" LongName="relnotes.html" Name="RELNOT~1.HTM" KeyPath="yes">
+							<Shortcut Id="sc_relnotes_html" Advertise="no" Directory="dirShortcut" LongName="Release Notes.lnk" Name="relnotes.lnk" />
+                        </File>
+                    </Component>
+                </Directory>
+            
+            </Directory> <!-- /Kerberos -->
+        </Directory> <!-- /MIT -->
+    </Directory> <!-- /Program Files -->
+    <Directory Id="WindowsFolder">
+        <Component Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+	        <File Id="fil_krb5_ini" LongName="krb5.ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
+        </Component>
+        <Component Id="cmf_krb_con" Guid="5E91A051-CF14-45FF-BF64-CEE78A7A90C2" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+	        <File Id="fil_krb_con" LongName="krb.con" Name="krb.con" src="$(var.ConfigDir)krb.con" KeyPath="yes" />
+        </Component>
+        <Component Id="cmf_krbrealm_con" Guid="D667B54F-1C98-43FB-87C6-0F0517623B90" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+	        <File Id="fil_krbrealm_con" LongName="krbrealm.con" Name="krbrealm.con" src="$(var.ConfigDir)krbrealm.con" KeyPath="yes" />
+        </Component>
+    </Directory>
+    
+    <Directory Id="ProgramMenuFolder">
+        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="$(loc.ProductNameShort)">
+        </Directory>
+    </Directory>
+    <Directory Id="StartupFolder">
+    </Directory>
+    
+    <Component Id="rcm_common" Guid="486D84B6-CCE5-4b95-B8E2-7DFBDB4CF9A2">
+        <Registry Id="reg_common0" Root="HKLM" Key="$(var.KfwRegRoot)" Action="createKeyAndRemoveKeyOnUninstall" />
+        <Registry Id="reg_common1" Root="HKLM" Key="$(var.KfwRegRoot)" KeyPath="yes" />
+        <Registry Id="reg_common2" Root="HKLM" Key="$(var.KfwRegRoot)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
+    <?ifdef Debug?>
+        <Registry Id="reg_common3" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_common4" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Name="Debug" Type="integer" Value="1"/>
+        <Registry Id="reg_common5" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_common6" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Name="Debug" Type="integer" Value="1"/>
+    <?else?>
+        <Registry Id="reg_common7" Root="HKLM" Key="$(var.KfwRegRoot)\CurrentVersion" Action="removeKeyOnInstall"/>
+        <Registry Id="reg_common8" Root="HKLM" Key="$(var.KfwRegRoot)\$(var.VersionString)" Action="removeKeyOnInstall"/>
+    <?endif?>
+    </Component>
+    
+    <Component Id="rcm_client" Guid="901179B2-7369-43b1-ACF3-4C7F37482CC7">
+        <Registry Id="reg_client0" Root="HKLM" Key="$(var.KfwRegRoot)\Client" Action="createKeyAndRemoveKeyOnUninstall"/>
+
+        <Registry Id="reg_client1" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_client2" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" />
+        <Registry Id="reg_client3" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_client4" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_client5" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_client6" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_client7" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_client8" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_client9" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_client10" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+
+        <Registry Id="reg_client11" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_client12" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" KeyPath="yes" />
+        <Registry Id="reg_client13" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_client14" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_client15" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_client16" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_client17" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_client18" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_client19" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_client20" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+    </Component>
+
+    <Component Id="rcm_sdk" Guid="96AA90C7-8C60-4341-A15B-3DEDF29DA9F1">
+        <Registry Id="reg_sdk0" Root="HKLM" Key="$(var.KfwRegRoot)\SDK" Action="createKeyAndRemoveKeyOnUninstall"/>
+
+        <Registry Id="reg_sdk1" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_sdk2" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" />
+        <Registry Id="reg_sdk3" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_sdk4" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_sdk5" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_sdk6" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_sdk7" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_sdk8" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_sdk9" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_sdk10" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+
+        <Registry Id="reg_sdk11" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_sdk12" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" KeyPath="yes" />
+        <Registry Id="reg_sdk13" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_sdk14" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_sdk15" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_sdk16" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_sdk17" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_sdk18" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_sdk19" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_sdk20" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+    </Component>
+    
+    <Component Id="rcm_docs" Guid="C7EADA0F-8FF7-4e7b-9372-5553BDD5812F">
+        <Registry Id="reg_docs0" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation" Action="createKeyAndRemoveKeyOnUninstall"/>
+
+        <Registry Id="reg_docs1" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_docs2" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" />
+        <Registry Id="reg_docs3" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_docs4" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_docs5" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_docs6" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_docs7" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_docs8" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_docs9" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_docs10" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+
+        <Registry Id="reg_docs11" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Action="createKeyAndRemoveKeyOnUninstall"/>
+        <Registry Id="reg_docs12" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" KeyPath="yes" />
+        <Registry Id="reg_docs13" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="VersionString" Type="string" Value="$(var.VersionString)" />
+        <Registry Id="reg_docs14" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Title" Type="string" Value="KfW" />
+        <Registry Id="reg_docs15" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Description" Type="string" Value="$(var.ProductFullName)" />
+        <Registry Id="reg_docs16" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PathName" Type="string" Value="[KERBEROSDIR]" />
+        <Registry Id="reg_docs17" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="Software Type" Type="string" Value="Authentication" />
+        <Registry Id="reg_docs18" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MajorVersion" Type="integer" Value="$(var.VersionMajor)" />
+        <Registry Id="reg_docs19" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
+        <Registry Id="reg_docs20" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
+    </Component>
+
+</Directory>
+</Include>

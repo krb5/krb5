@@ -71,6 +71,8 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context, const krb5_dat
 
     /* now decode the decrypted stuff */
     retval = decode_krb5_ap_rep_enc_part(&scratch, repl);
+    if (retval)
+	goto clean_scratch;
 
     /* Check reply fields */
     if (((*repl)->ctime != auth_context->authentp->ctime) ||
@@ -81,8 +83,24 @@ krb5_rd_rep(krb5_context context, krb5_auth_context auth_context, const krb5_dat
 
     /* Set auth subkey */
     if ((*repl)->subkey) {
+	if (auth_context->recv_subkey) {
+	    krb5_free_keyblock(context, auth_context->recv_subkey);
+	    auth_context->recv_subkey = NULL;
+	}
 	retval = krb5_copy_keyblock(context, (*repl)->subkey,
-				    &auth_context->remote_subkey);
+				    &auth_context->recv_subkey);
+	if (retval)
+	    goto clean_scratch;
+	if (auth_context->send_subkey) {
+	    krb5_free_keyblock(context, auth_context->send_subkey);
+	    auth_context->send_subkey = NULL;
+	}
+	retval = krb5_copy_keyblock(context, (*repl)->subkey,
+				    &auth_context->send_subkey);
+	if (retval) {
+	    krb5_free_keyblock(context, auth_context->send_subkey);
+	    auth_context->send_subkey = NULL;
+	}
     }
 
     /* Get remote sequence number */

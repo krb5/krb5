@@ -181,6 +181,9 @@ if test $krb5_cv_has_type_socklen_t = yes; then
 fi
 dnl
 dnl
+KRB5_AC_NEED_BIND_8_COMPAT
+dnl
+dnl
 AC_ARG_ENABLE([athena],
 [  --enable-athena         build with MIT Project Athena configuration],
 AC_DEFINE(KRB5_ATHENA_COMPAT,1,[Define if MIT Project Athena default configuration should be used]),)

@@ -146,7 +146,7 @@ line: while (<>) {
 	&Pick('>', $outfile) &&
 	    (print $fh
 
-	      '#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))');
+	      '#if !defined(_WIN32)');
 	&Pick('>', $outfile) &&
 	    (print $fh 'extern void initialize_' . $table_name .
 
@@ -239,17 +239,7 @@ line: while (<>) {
 &Pick('>', $outfile) &&
     (print $fh '');
 &Pick('>', $outfile) &&
-    (print $fh
-
-      '#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))');
-&Pick('>', $outfile) &&
-    (print $fh '#include <KerberosComErr/KerberosComErr.h>');
-&Pick('>', $outfile) &&
-    (print $fh '#else');
-&Pick('>', $outfile) &&
     (print $fh '#include <com_err.h>');
-&Pick('>', $outfile) &&
-    (print $fh '#endif');
 &Pick('>', $outfile) &&
     (print $fh '');
 if ($tab_base_high == 0) {
@@ -273,7 +263,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh
 
-      '#if !defined(_WIN32) && !defined(macintosh) && !(defined(__MACH__) && defined(__APPLE__))');
+      '#if !defined(_WIN32)');
 &Pick('>', $outfile) &&
     (print $fh 'void initialize_' . $table_name . '_error_table (void)');
 &Pick('>', $outfile) &&

@@ -1,3 +1,31 @@
+2003-05-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* keytab.c (is_xrealm_tgt): Use strncmp instead of strcmp - as
+	principal and realm name do not need to be null terminated.
+
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove $(SHLIB_DBLIB_DEPS) and related variables.
+	(SHLIB_EXPDEPS): Remove $(SHLIB_DBLIB_DEPS).
+	(SHLIB_EXPLIBS): Change $(DB_LIB) to $(KDB5_DB_LIB).
+	(DBOBJLISTS, STOBJLISTS): Pull in object lists of in-tree libdb so
+	we don't need to install libdb.  Don't do this if building with
+	system libdb, though, since we need to explicitly link against the
+	system libdb in that case.
+
+2003-03-18  Tom Yu  <tlyu@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry): Do not perform the enctype
+	comparison if the requested enctype is a wildcard.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* keytab.c (krb5_ktkdb_get_entry):  Match only against the first
+	enctype  for non-cross-realm tickets so we will only accept
+	tickets that the current configuration would have issued.  For
+	cross-realm tickets be liberal and match against the specified
+	enctype. 
+
 2003-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* kdb_xdr.c (krb5_dbe_search_enctype): Check for ktype > 0 rather

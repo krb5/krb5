@@ -1,3 +1,33 @@
+2004-05-25  Tom Yu  <tlyu@mit.edu>
+
+	* aesopt.h (PLATFORM_BYTE_ORDER): Treat _WIN32 as always
+	little-endian.  Default to little-endian if there's no other
+	compile-time way to detect endianness, noting it as a guess.
+	(SAFE_IO): Error out if SAFE_IO is not set and endianness was
+	guessed.
+
+2004-05-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* aesopt.h (PLATFORM_BYTE_ORDER): Check for _MIPSEB, _MIPSEL.  If
+	endian.h or machine/endian.h is available, include it instead of
+	sys/param.h.  Don't mess around with multibyte character
+	constants.
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes_s2k.c (DEFAULT_ITERATION_COUNT): New macro; define to 4096.
+	(MAX_ITERATION_COUNT): New macro.
+	(krb5int_aes_string_to_key): Use them.
+
+2003-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* uitypes.h: Use inttypes.h if HAVE_INTTYPES_H is defined.
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes_s2k.c (krb5int_aes_string_to_key): Return an error if the
+	supplied iteration count is really, really large.
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* aes_s2k.c, aes_s2k.h: New files.

@@ -64,15 +64,12 @@ krb5_read_password(krb5_context context, const char *prompt, const char *prompt2
 	    return ENOMEM;
 	retval = krb5_prompter_posix(NULL,
 				     NULL,NULL, NULL, 1, &k5prompt);
-	if (retval) {
-	    free(verify_data.data);
-	} else {
+	if (retval == 0) {
 	    /* compare */
-	    if (strncmp(return_pwd, (char *)verify_data.data, *size_return)) {
+	    if (strncmp(return_pwd, (char *)verify_data.data, *size_return))
 		retval = KRB5_LIBOS_BADPWDMATCH;
-		free(verify_data.data);
-	    }
 	}
+	free(verify_data.data);
     }
     if (!retval)
 	*size_return = k5prompt.reply->length;

@@ -1,3 +1,165 @@
+2004-07-15  Alexandra Ellwood  <lxs@mit.edu>
+
+	* init_os_ctx.c (krb5_os_init_context, krb5_os_free_context) 
+          ccdefname.c (krb5_cc_set_default_name):
+        Removed default_ccprincipal field from krb5_context
+
+2004-06-02  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (do_replacement): Patch from Bill Dodd to fix missing
+	braces in previous security patch.
+
+2004-06-01  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c (rule_an_to_ln): Fix buffer overflow when parsing
+	principal names into components. 
+	(do_replacement): likewise
+	(aname_replacer): Support error return from do_replacement
+
+2004-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* an_to_ln.c: Patch from Matt Crawford  to allow matching on
+	realms of cross-realm principals.
+
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (get_so_error): New function.
+	(service_tcp_fd): Call it for write fds as well as exception fds.
+
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (start_connection): Close socket if connect() call
+	fails for an unexpected reason.
+
+2004-02-09  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_locate_kpasswd): Run htons on the default port
+
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * dnssrv.c:  wrap within #ifdef KRB5_DNS_LOOKUP to prevent references
+      to resolver functions when DNS support is not being compiled 
+
+2003-12-18  Jeffrey Altman <jaltman@mit.edu>
+
+    * accessor.c: Add new functions for use by gssapi
+
+2003-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* an_to_ln.c (krb5_aname_to_localname): Don't write one byte past
+	the end of a string.  Found by Christopher Nebergall.
+
+2003-10-27  Jeffrey Altman <jaltman@mit.edu>
+
+    * sendto_kdc.c: sockets must be closed with closesocket() and 
+      and not close() in order to ensure portability among different
+      operating systems.
+
+2003-08-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnssrv.c: New file; split out DNS SRV RR query support...
+	* locate_kdc.c: ...from here.  Always compile in the calls.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Add it.
+
+2003-07-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (krb5_locate_kdc): Always pass 0 to locate_server
+	as the get_masters argument.  Instead, if get_masters is set,
+	look up "master_kdc" in the config file instead of "kdc".
+
+2003-07-09  Alexandra Ellwood  <lxs@mit.edu>
+
+        * toffset.c: Export and krb5_set_real_time for Samba.
+
+2003-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (struct srv_dns_entry): Moved to k5-int.h.
+	(krb5int_make_srv_query_realm): Renamed from make_srv_query_realm.
+	(krb5int_free_srv_dns_data): New function.
+	(krb5_locate_srv_dns_1): Use it.
+
+	* accessor.c (krb5int_accessor): Fill in make_srv_query_realm and
+	free_srv_dns_data fields.
+
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (make_srv_query_realm): Punt if strdup fails.
+	Always return what data we can, even if memory allocation or other
+	problems prevent us from returning more.
+	(krb5_locate_srv_dns_1): Always return what data we can.  Fix
+	memory leak.  Free up temporary storage as quickly as possible,
+	while building up address list to return.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c (krb5int_accessor): Initialize restored locate_server
+	field.
+
+	* locate_kdc.c (struct srv_dns_entry): Move to top level.
+	(make_srv_query_realm): Separate from krb5_locate_srv_dns_1; just
+	do query and return results.
+	(krb5_locate_srv_dns_1): Call it, and build addlist entries.
+	Check for one RR with a target of ".", and return an error.
+	(krb5_locate_srv_dns): Deleted.
+
+	* t_locate_kdc.c (main): Call krb5_locate_srv_dns_1.
+
+	* changepw.c (krb5_locate_kpasswd): Check specifically for certain
+	errors before using fallback heuristics.
+
+2003-06-03  Alexandra Ellwood  <lxs@mit.edu>
+
+        * init_os_ctx.c: Included header to get __KLAllowHomeDirectoryAccess().
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* send524.c (krb5int_524_sendto_kdc): Enable support on Windows
+	always.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* send524.c: New file, moved from krb524/sendmsg.c.  Rename
+	function to have krb5int_ prefix.  If KRB5_KRB4_COMPAT not
+	defined, return an error.
+	* accessor.c (krb5int_accessor): Update for deleted and added
+	fields.  If KRB5_KRB4_COMPAT is not defined, just use null
+	pointers for the new fields.
+
+2003-05-06  Alexandra Ellwood  <lxs@mit.edu>
+
+        * init_os_ctx.c: Added support for KLL's __KLAllowHomeDirectoryAccess()
+        function so that krb4, krb5 and gssapi will not access the user's homedir
+        if the application forbids it.
+
+2003-04-28  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Locate server in realm of
+	creds.server, not in realm of target principal because target
+	principal is null in the  changepw case.
+
+2003-04-27  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Call
+	krb5_setpw_result_code_string not krb5_setpw_result_code_string  
+
+2003-04-24  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): return error from
+	auth_con_setaddrs not last socket errno if auth_con_setaddrs fails 
+
+2003-04-15  Sam Hartman  <hartmans@mit.edu>
+
+	* changepw.c (krb5_change_set_password): Patches from Paul Nelson
+	to implement Microsoft set password protocol  
+	(krb5_set_password_using_ccache): Use kadmin/changepw in target realm, not local realm and use a two-component principal
+	(krb5_change_set_password): Find the kpasswd server for the realm
+	of the target principal not the client 
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* read_pwd.c (krb5_read_password): Always free temporary storage
+	used for verification version of password.
+
 2003-03-06  Alexandra Ellwood <lxs@mit.edu>
 
     * c_ustime.c: Removed Mac OS 9 code.
