@@ -1,3 +1,8 @@
+2000-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* schpw.c (process_chpw_request): Add new argument to call to
+	chpass_principal_util()
+
 2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
 
 	* kadm_rpc_svc.c: Check for existance of <memory.h>.
