@@ -1,3 +1,9 @@
+2000-05-04  Miro Jurisic  <meeroh@mit.edu>
+
+	* stdcc_util.c (dupCCtoK5, dupK5toCC): 
+		Conditionalized local/KDC time conversions for Mac-only
+		until we figure out what to do about that
+
 2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
 
 	* winccld.h: Define CC_API_VER2 for all Windows code using ccapi.

@@ -196,7 +196,7 @@ int copyK5DataArrayToCC(krb5_creds *v5Creds, cc_creds *ccCreds, char whichArray)
 
 void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest) 
 {
-	krb5_int32 offset_seconds, offset_microseconds;
+	krb5_int32 offset_seconds = 0, offset_microseconds = 0;
 	int err;
 	
 	/*
@@ -214,8 +214,10 @@ void dupCCtoK5(krb5_context context, cc_creds *src, krb5_creds *dest)
 	memcpy(dest->keyblock.contents, src->keyblock.data, dest->keyblock.length);
 	
 	/* copy times */
+#ifdef macintosh
 	err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
 	if (err) return;
+#endif
 	dest->times.authtime   = src->authtime     + offset_seconds;
 	dest->times.starttime  = src->starttime    + offset_seconds;
 	dest->times.endtime    = src->endtime      + offset_seconds;
@@ -252,7 +254,7 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 {
 	cc_creds *c;
 	int err;
-	krb5_int32 offset_seconds, offset_microseconds;
+	krb5_int32 offset_seconds = 0, offset_microseconds = 0;
 #ifdef macintosh
 	char *tempname = NULL;
 #endif
@@ -307,8 +309,10 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
 		c->keyblock.data = NULL;
 	}
 
+#ifdef macintosh
 	err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
 	if (err) return;
+#endif
 	c->authtime     = creds->times.authtime   - offset_seconds;
 	c->starttime    = creds->times.starttime  - offset_seconds;
 	c->endtime      = creds->times.endtime    - offset_seconds;
