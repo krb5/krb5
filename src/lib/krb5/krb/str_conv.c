@@ -500,7 +500,7 @@ krb5_timestamp_to_sfstring(timestamp, buffer, buflen, pad)
 	if (buflen >= sftime_default_len) {
 	    sprintf(buffer, sftime_default_fmt,
 		    tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
-		    tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
+		    tmp->tm_hour, tmp->tm_min);
 	    ndone = strlen(buffer);
 	}
     }

@@ -1,3 +1,26 @@
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_ctx.c (get_profile_etype_list): Update name of the des3
+	entry in the default etype list.
+
+	* init_ctx.c (get_profile_etype_list): New argument DESONLY; if
+	set, ignore any ktype values other than NULL, DES_CBC_CRC, and
+	DES_CBC_MD5.
+	(krb5_get_default_in_tkt_ktypes, krb5_get_tgs_ktypes): Set it.
+	(krb5_get_permitted_enctypes): Don't set it.
+
+	* fwd_tgt.c (krb5_fwd_tgt_creds): Use KRB5_TC_SUPPORTED_KTYPES
+	when calling krb5_cc_retrieve_cred.
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Ditto.
+	* get_creds.c (krb5_get_credentials_core): Set that flag.
+	(krb5_get_credentials): Check for KRB5_CC_NOT_KTYPE error return.
+
+	* t_ser.c (main): Disable eblock serialization test, since the
+	code it tests was disabled nearly a year ago.
+
+	* str_conv.c (krb5_timestamp_to_sfstring): Don't pass extra
+	argument to sprintf.
+
 1999-08-10	Alexandra Ellwood	<lxs@mit.edu>
 
 	* chpw.c (krb5_mk_chpw_req):
