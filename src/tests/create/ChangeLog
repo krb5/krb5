@@ -1,3 +1,8 @@
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c (main): Invoke krb5_free_context when finished. 
+	(add_princ): Use krb5_free_principal to prevent memory leak.
+
 2001-10-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb5_mkdums.c: Make prototypes unconditional.

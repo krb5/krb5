@@ -203,6 +203,7 @@ char *argv[];
 	com_err(progname, retval, "while closing database");
 	exit(1);
     }
+    krb5_free_context(test_context);
     exit(0);
 }
 
@@ -235,6 +236,7 @@ add_princ(context, str_newprinc)
     if ((retval = krb5_copy_principal(context, newprinc, &newentry.princ))) {
       	com_err(progname, retval, "while encoding princ to db entry for '%s'", 
 	        princ_name);
+	krb5_free_principal(context, newprinc);
 	goto error;
     }
 
@@ -245,12 +247,14 @@ add_princ(context, str_newprinc)
 	retval = krb5_timeofday(context, &now);
 	if (retval) {
 	    com_err(progname, retval, "while fetching date");
+	    krb5_free_principal(context, newprinc);
 	    goto error;
 	}
 	retval = krb5_dbe_update_mod_princ_data(context, &newentry, now,
 					       master_princ);
 	if (retval) {
 	    com_err(progname, retval, "while encoding mod_princ data");
+	    krb5_free_principal(context, newprinc);
 	    goto error;
 	}
     }
@@ -262,8 +266,11 @@ add_princ(context, str_newprinc)
         if ((retval = krb5_principal2salt(context, newprinc, &salt))) {
 	    com_err(progname, retval, "while converting princ to salt for '%s'",
 		    princ_name);
+	    krb5_free_principal(context, newprinc);
 	    goto error;
         }
+
+	krb5_free_principal(context, newprinc);
 
     	pwd.length = strlen(princ_name);
     	pwd.data = princ_name;  /* must be able to regenerate */
