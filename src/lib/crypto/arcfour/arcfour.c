@@ -8,7 +8,7 @@ of RSA Data Security)
 */
 #include "k5-int.h"
 #include "arcfour-int.h"
-const unsigned char *l40 = "fortybits";
+const  char *l40 = "fortybits";
 
 void
 krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
@@ -29,7 +29,35 @@ krb5_arcfour_encrypt_length(enc, hash, inputlen, length)
 
 static krb5_keyusage arcfour_translate_usage(krb5_keyusage usage)
 {
-  return usage;
+  switch (usage) {
+  case 1:			/* AS-REQ PA-ENC-TIMESTAMP padata timestamp,  */
+    /*Microsoft does not actually support this padata, not sure which usage they would use*/
+    return 1;
+  case 2:			/* ticket from kdc */
+    return 2;
+  case 3:			/* as-rep encrypted part */
+    return 8;
+  case 4:			/* tgs-req authz data */
+    return 4;			/* xxx Microsoft doesn't say */
+  case 5:			/* tgs-req authz data in subkey */
+    return 5;			/* xxx Microsoft doesn't say */
+  case 6:			/* tgs-req authenticator cksum */
+    return 6;			/* xxx Microsoft  doesn't say*/
+case 7:				/* tgs-req authenticator */
+  return 7;
+    case 8:
+    return 8;
+  case 9:			/* tgs-rep encrypted with subkey */
+    return 8;
+  case 10:			/* ap-rep authentication cksum */
+    return 10;			/* xxx Microsoft didn't say */
+  case 11:			/* app-req authenticator */
+    return 11;
+  case 12:			/* app-rep encrypted part */
+    return 12;
+  default:
+      return usage;
+}
 }
 
 krb5_error_code
@@ -58,7 +86,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
     return (ENOMEM);
   memcpy(&k1, key, sizeof (krb5_keyblock));
   k1.length=d1.length;
-  k1.contents=d1.data;
+  k1.contents= (void *) d1.data;
 
   d2.length=keybytes;
   d2.data=malloc(d2.length);
@@ -68,7 +96,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
   }
   memcpy(&k2, key, sizeof (krb5_keyblock));
   k2.length=d2.length;
-  k2.contents=d2.data;
+  k2.contents=(void *) d2.data;
 
   d3.length=keybytes;
   d3.data=malloc(d3.length);
@@ -79,7 +107,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
   }
   memcpy(&k3, key, sizeof (krb5_keyblock));
   k3.length=d3.length;
-  k3.contents=d3.data;
+  k3.contents= (void *) d3.data;
   
   salt.length=14;
   salt.data=malloc(salt.length);
@@ -129,7 +157,7 @@ krb5_arcfour_encrypt(enc, hash, key, usage, ivec, input, output)
 
   memcpy(k2.contents, k1.contents, k2.length);
 
-  if (key->enctype==ENCTYPE_ARCFOUR_HMAC)
+  if (key->enctype==ENCTYPE_ARCFOUR_HMAC_EXP)
     memset(k1.contents+7, 0xab, 9);
 
   ret=krb5_c_random_make_octets(/* XXX */ 0, &confounder);
@@ -185,7 +213,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
     return (ENOMEM);
   memcpy(&k1, key, sizeof (krb5_keyblock));
   k1.length=d1.length;
-  k1.contents=d1.data;
+  k1.contents= (void *) d1.data;
   
   d2.length=keybytes;
   d2.data=malloc(d2.length);
@@ -195,7 +223,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
   }
   memcpy(&k2, key, sizeof(krb5_keyblock));
   k2.length=d2.length;
-  k2.contents=d2.data;
+  k2.contents= (void *) d2.data;
 
   d3.length=keybytes;
   d3.data=malloc(d3.length);
@@ -206,7 +234,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
   }
   memcpy(&k3, key, sizeof(krb5_keyblock));
   k3.length=d3.length;
-  k3.contents=d3.data;
+  k3.contents= (void *) d3.data;
 
   salt.length=14;
   salt.data=malloc(salt.length);
@@ -214,6 +242,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
     free(d1.data);
     free(d2.data);
     free(d3.data);
+    return (ENOMEM);
   }
 
   ciphertext.length=input->length-hashsize;
@@ -225,6 +254,7 @@ krb5_arcfour_decrypt(enc, hash, key, usage, ivec, input, output)
     free(d2.data);
     free(d3.data);
     free(salt.data);
+    return (ENOMEM);
   }
 
   checksum.length=hashsize;
