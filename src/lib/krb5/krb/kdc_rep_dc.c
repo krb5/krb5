@@ -40,19 +40,19 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
     krb5_data scratch;
     krb5_enc_kdc_rep_part *local_encpart;
 
-    if (!valid_etype(dec_rep->etype))
+    if (!valid_etype(dec_rep->enc_part.etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* set up scratch decrypt/decode area */
 
-    scratch.length = dec_rep->enc_part.length;
-    if (!(scratch.data = malloc(dec_rep->enc_part.length))) {
+    scratch.length = dec_rep->enc_part.ciphertext.length;
+    if (!(scratch.data = malloc(dec_rep->enc_part.ciphertext.length))) {
 	return(ENOMEM);
     }
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[dec_rep->etype]->system;
+    eblock.crypto_entry = krb5_csarray[dec_rep->enc_part.etype]->system;
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, key)) {
@@ -61,7 +61,7 @@ OLDDECLARG(krb5_kdc_rep *, dec_rep)
     }
 
     /* call the decryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) dec_rep->enc_part.data,
+    if (retval = krb5_decrypt((krb5_pointer) dec_rep->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
 	(void) krb5_finish_key(&eblock);

@@ -23,7 +23,7 @@ static char rcsid_decrypt_tk_c[] =
 #include <krb5/ext-proto.h>
 
 /*
- Takes encrypted dec_ticket->enc_part, encrypts with dec_ticket->etype
+ Decrypts dec_ticket->enc_part
  using *srv_key, and places result in dec_ticket->enc_part2.
  The storage of dec_ticket->enc_part2 will be allocated before return.
 
@@ -41,15 +41,15 @@ register krb5_ticket *ticket;
     krb5_data scratch;
     krb5_error_code retval;
 
-    if (!valid_etype(ticket->etype))
+    if (!valid_etype(ticket->enc_part.etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[ticket->etype]->system;
+    eblock.crypto_entry = krb5_csarray[ticket->enc_part.etype]->system;
 
-    scratch.length = ticket->enc_part.length;
-    if (!(scratch.data = malloc(ticket->enc_part.length)))
+    scratch.length = ticket->enc_part.ciphertext.length;
+    if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
 	return(ENOMEM);
 
     /* do any necessary key pre-processing */
@@ -59,7 +59,7 @@ register krb5_ticket *ticket;
     }
 
     /* call the encryption routine */
-    if (retval = krb5_decrypt((krb5_pointer) ticket->enc_part.data,
+    if (retval = krb5_decrypt((krb5_pointer) ticket->enc_part.ciphertext.data,
 			      (krb5_pointer) scratch.data,
 			      scratch.length, &eblock, 0)) {
 	(void) krb5_finish_key(&eblock);

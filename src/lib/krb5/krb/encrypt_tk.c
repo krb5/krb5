@@ -23,13 +23,15 @@ static char rcsid_encrypt_tk_c[] =
 #include <krb5/ext-proto.h>
 
 /*
- Takes unencrypted dec_ticket & dec_tkt_part, encrypts with dec_ticket->etype
+ Takes unencrypted dec_ticket & dec_tkt_part, encrypts with
+ dec_ticket->enc_part.etype
  using *srv_key, and places result in dec_ticket->enc_part.
- The string dec_ticket->enc_part will be allocated  before formatting.
+ The string dec_ticket->enc_part.ciphertext will be allocated before
+ formatting.
 
  returns errors from encryption routines, system errors
 
- enc_part->data allocated & filled in with encrypted stuff
+ enc_part->ciphertext.data allocated & filled in with encrypted stuff
 */
 
 krb5_error_code
@@ -44,7 +46,7 @@ register krb5_ticket *dec_ticket;
 
     /* encrypt the encrypted part */
 
-    if (!valid_etype(dec_ticket->etype))
+    if (!valid_etype(dec_ticket->enc_part.etype))
 	return KRB5_PROG_ETYPE_NOSUPP;
 
     /*  start by encoding the to-be-encrypted part. */
@@ -56,23 +58,31 @@ register krb5_ticket *dec_ticket;
 
     /* put together an eblock for this encryption */
 
-    eblock.crypto_entry = krb5_csarray[dec_ticket->etype]->system;
-    dec_ticket->enc_part.length = krb5_encrypt_size(scratch->length,
-						    eblock.crypto_entry);
+    eblock.crypto_entry = krb5_csarray[dec_ticket->enc_part.etype]->system;
+    dec_ticket->enc_part.ciphertext.length =
+	krb5_encrypt_size(scratch->length,
+			  eblock.crypto_entry);
     /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data, dec_ticket->enc_part.length))) {
+    if (!(scratch->data = realloc(scratch->data,
+				  dec_ticket->enc_part.ciphertext.length))) {
 	/* may destroy scratch->data */
 	xfree(scratch);
 	return ENOMEM;
     }
     bzero(scratch->data + scratch->length,
-	  dec_ticket->enc_part.length - scratch->length);
-    if (!(dec_ticket->enc_part.data = malloc(dec_ticket->enc_part.length))) {
+	  dec_ticket->enc_part.ciphertext.length - scratch->length);
+    if (!(dec_ticket->enc_part.ciphertext.data =
+	  malloc(dec_ticket->enc_part.ciphertext.length))) {
 	retval = ENOMEM;
 	goto clean_scratch;
     }
 
-#define cleanup_encpart() {(void) bzero(dec_ticket->enc_part.data, dec_ticket->enc_part.length); free(dec_ticket->enc_part.data); dec_ticket->enc_part.length = 0; dec_ticket->enc_part.data = 0;}
+#define cleanup_encpart() {\
+(void) bzero(dec_ticket->enc_part.ciphertext.data, \
+	     dec_ticket->enc_part.ciphertext.length); \
+free(dec_ticket->enc_part.ciphertext.data); \
+dec_ticket->enc_part.ciphertext.length = 0; \
+dec_ticket->enc_part.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, srv_key)) {
@@ -83,7 +93,7 @@ register krb5_ticket *dec_ticket;
 
     /* call the encryption routine */
     if (retval = krb5_encrypt((krb5_pointer) scratch->data,
-			      (krb5_pointer) dec_ticket->enc_part.data,
+			      (krb5_pointer) dec_ticket->enc_part.ciphertext.data,
 			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }

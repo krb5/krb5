@@ -128,23 +128,32 @@ krb5_data *outbuf;
     /* put together an eblock for this encryption */
 
     eblock.crypto_entry = krb5_csarray[etype]->system;
-    request.authenticator.length = krb5_encrypt_size(scratch->length,
-						     eblock.crypto_entry);
+    request.authenticator.etype = etype;
+    request.authenticator.kvno = 0; /* XXX user set? */
+    request.authenticator.ciphertext.length =
+	krb5_encrypt_size(scratch->length, eblock.crypto_entry);
     /* add padding area, and zero it */
-    if (!(scratch->data = realloc(scratch->data, request.authenticator.length))) {
+    if (!(scratch->data = realloc(scratch->data,
+				  request.authenticator.ciphertext.length))) {
 	/* may destroy scratch->data */
 	xfree(scratch);
 	retval = ENOMEM;
 	goto clean_ticket;
     }
     bzero(scratch->data + scratch->length,
-	  request.authenticator.length - scratch->length);
-    if (!(request.authenticator.data = malloc(request.authenticator.length))) {
+	  request.authenticator.ciphertext.length - scratch->length);
+    if (!(request.authenticator.ciphertext.data =
+	  malloc(request.authenticator.ciphertext.length))) {
 	retval = ENOMEM;
 	goto clean_scratch;
     }
 
-#define cleanup_encpart() {(void) bzero(request.authenticator.data, request.authenticator.length); free(request.authenticator.data); request.authenticator.length = 0; request.authenticator.data = 0;}
+#define cleanup_encpart() {\
+(void) bzero(request.authenticator.ciphertext.data, \
+	     request.authenticator.ciphertext.length); \
+free(request.authenticator.ciphertext.data); \
+request.authenticator.ciphertext.length = 0; \
+request.authenticator.ciphertext.data = 0;}
 
     /* do any necessary key pre-processing */
     if (retval = krb5_process_key(&eblock, &creds->keyblock)) {
@@ -155,7 +164,7 @@ krb5_data *outbuf;
 
     /* call the encryption routine */
     if (retval = krb5_encrypt((krb5_pointer) scratch->data,
-			      (krb5_pointer) request.authenticator.data,
+			      (krb5_pointer) request.authenticator.ciphertext.data,
 			      scratch->length, &eblock, 0)) {
 	goto clean_prockey;
     }
