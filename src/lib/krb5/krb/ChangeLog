@@ -3,6 +3,10 @@
 	* ser_actx.c (krb5_auth_context_externalize): Do bounds checking
 	on converted size value.
 
+	* fwd_tgt.c (krb5_fwd_tgt_creds): If no session key has been set,
+	try getting credentials and use the session key type as a hint
+	for the enctype to use for the forwarded credentials.
+
 2002-02-27  Sam Hartman  <hartmans@mit.edu>
 
 	* rd_cred.c (krb5_rd_cred_basic): Don't check IP addresses; if
