@@ -113,11 +113,12 @@ struct kparg {
  * "principal" argument.
  */
 static krb5_error_code
-kdc_rdreq_keyproc(context, keyprocarg, principal, vno, key)
+kdc_rdreq_keyproc(context, keyprocarg, principal, vno, keytype, key)
     krb5_context context;
     krb5_pointer keyprocarg;
     krb5_principal principal;
     krb5_kvno vno;
+    krb5_keytype keytype;
     krb5_keyblock ** key;
 {
     register struct kparg *whoisit = (struct kparg *)keyprocarg;

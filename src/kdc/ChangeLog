@@ -1,3 +1,7 @@
+Wed Feb 01 21:07:03 1995  Chris Provenzano (proven@mit.edu)
+
+	* kdc_util.c (kdc_rdreq_keyproc()) Add krb5_keytype() arg.
+
 Wed Jan 25 23:20:07 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* network.c (setup_network), main.c (process_args): Allow the
