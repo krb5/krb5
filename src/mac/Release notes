@@ -110,3 +110,12 @@ Changes in 1.1a3:
  separated profile lib
  fixed krb5 library CFM version numbers
  fixed makefile and perl scripts to build form arbitrary root
+
+2.5a1 - Monday, July 26, 1999 1:00:00 PM
+ changed profile lib to use FSSpecs
+ added krb5_get_profile
+ reverted GSS library fragment name to GSSLibrary
+ removed "MIT Kerberos¥GSSLib" alias
+ removed "K5Library alias"
+ removed com_err exports from krb5 lib
+ fixed win-mac.h redefinition of size_t
