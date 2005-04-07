@@ -210,7 +210,7 @@ gssapi_krb5.h: gssapi_krb5.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi_krb5.h prologue. */"; \
-	echo "$(include_stdint)" ; \
+	$(include_stdint) ; \
 	echo "/* End of gssapi_krb5.h prologue. */"; \
 	cat $(srcdir)/gssapi_krb5.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e

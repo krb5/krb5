@@ -1,3 +1,8 @@
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi.h): Use awk hack to work around quoting
+	problem.
+
 2005-02-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (gssapi.h): Change SIZEOF symbols to start with GSS_
