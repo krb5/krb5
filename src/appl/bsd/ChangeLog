@@ -1,3 +1,10 @@
+2005-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* krlogind.c (doit): Change 0 to (char*)NULL in execl* calls.
+	Patch provided by Michael Calmer.
+	* krshd.c (doit): Likewise.
+	* login.c (main): Likewise.
+
 2004-10-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* kcmd.c (kcmd_connect): Set *addrfamilyp with the address family
