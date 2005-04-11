@@ -129,6 +129,74 @@ recommend discussing them on the kerberos@mit.edu mailing list.
 
 ----------------------------------------------------------------------
 
+Major changes in 1.4.1
+----------------------
+
+* [2913] The kadmin client library now performs authentication flavor
+  fallback in a useful way when attempting to contact a pre-1.4 kadmin
+  daemon.
+
+* [2988] Fix telnet client buffer overflow vulnerabilities.
+  [MITKRB5-SA-2005-001]
+
+Minor changes in 1.4.1
+----------------------
+
+* [2888] On Windows, restore library state to uninialized when library
+  is unloaded.
+
+* [2906] Map ns_rr_class to ns_rr_cl for some versions of BIND.
+
+* [2916] Perform some cleanup on library unload to avoid leaks.
+
+* [2918] krb5_get_init_creds_password() now correctly handles an empty
+  string passed in as a password argument.
+
+* [2924] gss_mech_xxx symbols are now exported on Windows.
+
+* [2942] Fix null pointer deref possible in threaded program calls to
+  profile library.
+
+* [2949] The delta-time parser no longer conflicts with some symbols
+  in HP-UX header files.
+
+* [2950] Deleted profile nodes are now correctly skipped by the
+  iterator.
+
+* [2953] Handle variang gmtime_r() on HP-UX 10.
+
+* [2955] Conditionalize the use of reverse DNS lookups in
+  krb5_sname_to_principal().
+
+* [2960] gssapi.h no longer leaks preprocessor symbols.
+
+* [2961] Fix some missing build dependencies in util/ss.
+
+* [2962] Fix case of @MAINT@ substitution breaking Windows build.
+
+* [2963] On windows, fix dangerous 64-bit time_t * to long *
+  conversions.
+
+* [2964] Fix invalid return value from krb5_c_is_keyed_cksum() during
+  error conditions.
+
+* [2971] thread_termination now correctly frees thread-specific data.
+
+* [2974] krb5_get_init_creds_keytab() no longer produces spurious
+  KRB5_REALM_UNKNOWN errors when a master KDC is not listed in the
+  configuration.
+
+* [2975] Fix missing semicolon in x-deltat.y which was causing some
+  versions of Bison to produce un-compilable C files.
+
+* [2981] Restores some shared library support for HP-UX 10.
+
+* [2992] Fix some Makefile quoting problems which were preventing
+  gssapi_krb5.h from being created on AIX 5.
+
+* [3000] Cast null pointer arguments to variadic functions, which is
+  necessary on some 64-bit platforms.
+
 Major changes in 1.4
 --------------------
 
