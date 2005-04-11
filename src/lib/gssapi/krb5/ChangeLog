@@ -1,3 +1,8 @@
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi_krb5.h): Use awk hack to work around quoting
+	problem.
+
 2005-01-13 Jeffrey Altman <jaltman@mit.edu>
 
         * init_sec_context.c, acquire_cred.c: fix calls to 
