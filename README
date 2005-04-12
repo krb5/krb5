@@ -1,4 +1,4 @@
-		   Kerberos Version 5, Release 1.4
+		  Kerberos Version 5, Release 1.4.1
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,14 +7,14 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a tarfile,
-krb5-1.4-signed.tar.  The tarfile contains a gzipped tarfile,
-krb5-1.4.tar.gz, and its corresponding PGP signature,
-krb5-1.4.tar.gz.asc.
+krb5-1.4.1-signed.tar.  The tarfile contains a gzipped tarfile,
+krb5-1.4.1.tar.gz, and its corresponding PGP signature,
+krb5-1.4.1.tar.gz.asc.
 
 You will need the GNU gzip program, and preferably, the GNU tar
 program, to extract the source distribution.
 
-The distribution will extract into a subdirectory "krb5-1.4" of the
+The distribution will extract into a subdirectory "krb5-1.4.1" of the
 current directory.
 
 Building and Installing Kerberos 5
