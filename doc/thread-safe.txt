@@ -140,10 +140,11 @@ Uses: ctype macros
 
 Uses: getaddrinfo, getnameinfo.  According to current specifications,
 getaddrinfo should be thread-safe; some implementations are not, and
-we're not attempting to figure out which ones.
+we're not attempting to figure out which ones.  NetBSD 1.6, for
+example, had an unsafe implementation.
 
 Uses: res_ninit, res_nsearch.  If these aren't available, the non-'n'
-versions will be used, and they are not thread-safe.
+versions will be used, and they are sometimes not thread-safe.
 
 Uses: mkstemp, mktemp -- Are these, or our uses of them, likely to be
 thread-safe?
@@ -158,17 +159,24 @@ Uses: tcgetattr, tcsetattr.  This is also in the password-prompting
 code.  These are fine as long as no other threads are accessing the
 same terminal at the same time.
 
+Uses: fopen.  This is thread-safe, actually, but a multi-threaded
+server is likely to be using lots of file descriptors.  On 32-bit
+Solaris platforms, fopen will not work if the next available file
+descriptor number is 256 or higher.  This can cause the keytab code to
+fail.
+
 Statics: prompter.c: interrupt flag
 
 Statics: ccdefops.c: default operations table pointer
 
-Statics: ktdefname.c: variable to override default keytab name, NEEDS LOCKING
+Statics: ktdefname.c: variable to override default keytab name, NO
+LOCKING.  DON'T TOUCH THESE VARIABLES, at least in threaded programs.
 
 Statics: conv_creds.c: debug variable
 
 Statics: sendto_kdc.c: debug variable, in export list for KDC
 
-Statics: parse.c: default realm cache, NOT THREAD SAFE
+Statics: parse.c: default realm cache, changed to not cache
 
 Statics: krb5_libinit.c: lib init aux data
 
@@ -182,8 +190,6 @@ Statics: c_ustime.c: last timestamp, to implement "microseconds must
 always increment"
 
 Statics: ktbase.c, ccbase.c, rc_base.c: type registries and mutexes.
-
-Needs work: keytab locking
 
 ----------------
 

@@ -205,7 +205,8 @@ KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = @includedir@
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/gssapi \
-	$(KRB5_INCDIR)/kerberosIV
+	$(KRB5_INCDIR)/kerberosIV \
+	$(KRB5_INCDIR)/gssrpc
 
 #
 # Macros used by the KADM5 (OV-based) unit test system.

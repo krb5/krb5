@@ -1,3 +1,7 @@
+2005-03-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * tktlist.c: do not mix pointers to long and time_t 
+
 2004-09-30  Jeffrey Altman <jaltman@mit.edu>
 
         * Makefile.in: add $(BUILDTOP) to include path for patchlevel.h

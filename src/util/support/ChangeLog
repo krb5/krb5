@@ -1,3 +1,27 @@
+2005-03-20  Alexandra Ellwood  <lxs@mit.edu>
+
+	* threads.c (thread_termination): Free array of pointers
+	to thread-specific data (t) on thread termination.  Use
+	existing mutex to prevent the deletion of the array from
+	interfering with the global list of thread specific data
+	(used for library termination).
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (k5_key_delete) [pthread case]: Reset flags and
+	destructor function pointer to unset state.
+	(krb5int_thread_support_init, krb5int_thread_support_fini): If
+	SHOW_INITFINI_FUNCS is defined, print some tracing messages.
+
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * threads.c: implement cleanup of static vars on library
+                unload (for Windows)
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: rename krb5support_32.dll to k5sprt32.dll
+
 2004-10-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5support.exports: Export krb5int_fac, _lock_fac,

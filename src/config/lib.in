@@ -57,7 +57,32 @@ binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
 	echo >> binutils.versions "};"
 
 osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
-	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.exports
+	$(RM) osf1.tmp osf1.exports
+	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.tmp
+	for f in . $(LIBINITFUNC); do \
+	  if test "$$f" != "." ; then \
+	    echo " -init $$f"__auxinit >> osf1.tmp; \
+	  else :; fi; \
+	done
+	a=""; \
+	for f in . $(LIBFINIFUNC); do \
+	  if test "$$f" != "." ; then \
+	    a="-fini $$f $$a"; \
+	  else :; fi; \
+	done; echo " $$a" >> osf1.tmp; \
+	mv -f osf1.tmp osf1.exports
+
+hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) hpux10.tmp hpux10.exports
+	sed "s/^/+e /" < $(SHLIB_EXPORT_FILE) > hpux10.tmp
+	a=""; \
+	for f in . $(LIBFINIFUNC); do \
+	  if test "$$f" != .; then \
+	    a="+I $${f}__auxfini $$a"; \
+	  else :; fi; \
+	done; echo "$$a" >> hpux10.tmp
+	echo "+e errno" >> hpux10.tmp
+	mv -f hpux10.tmp hpux10.exports
 
 lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	$(RM) $@
@@ -120,7 +145,7 @@ install-profiled:
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(PFLIBEXT)
 
 Makefile: $(SRCTOP)/config/lib.in
-config.status: $(SRCTOP)/config/shlib.conf
+$(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
 
 # Use the following if links need to be made to $(TOPLIBD):
 # all-unix:: all-liblinks

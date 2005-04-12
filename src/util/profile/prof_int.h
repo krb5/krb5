@@ -11,8 +11,11 @@
 #endif
 
 #include "k5-thread.h"
+#include "k5-platform.h"
 #include "com_err.h"
 #include "profile.h"
+
+#define STAT_ONCE_PER_SECOND
 
 #if defined(_WIN32)
 #define SIZEOF_INT      4
@@ -27,24 +30,41 @@ typedef long prf_magic_t;
  * particular configuration file.
  *
  * Locking strategy:
- * - filespec is fixed after creation
+ * - filespec, fslen are fixed after creation
  * - refcount and next should only be tweaked with the global lock held
  * - other fields can be tweaked after grabbing the in-struct lock
  */
 struct _prf_data_t {
 	prf_magic_t	magic;
 	k5_mutex_t	lock;
-	char		*comment;
 	struct profile_node *root;
+#ifdef STAT_ONCE_PER_SECOND
+	time_t		last_stat;
+#endif
 	time_t		timestamp; /* time tree was last updated from file */
 	int		flags;	/* r/w, dirty */
 	int		upd_serial; /* incremented when data changes */
+	char		*comment;
+
+	size_t		fslen;
+
+	/* Some separation between fields controlled by different
+	   mutexes.  Theoretically, both could be accessed at the same
+	   time from different threads on different CPUs with separate
+	   caches.  Don't let the threads clobber each other's
+	   changes.  One mutex controlling the whole thing would be
+	   better, but sufficient separation might suffice.
+
+	   This is icky.  I just hope it's adequate.
+
+	   For next major release, fix this.  */
+	union { double d; void *p; UINT64_TYPE ll; k5_mutex_t m; } pad;
+
 	int		refcount; /* prf_file_t references */
 	struct _prf_data_t *next;
 	/* Was: "profile_filespec_t filespec".  Now: flexible char
 	   array ... except, we need to work in C89, so an array
 	   length must be specified.  */
-	size_t		fslen;
 	const char	filespec[sizeof("/etc/krb5.conf")];
 };
 

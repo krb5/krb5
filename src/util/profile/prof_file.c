@@ -66,6 +66,8 @@ void profile_library_finalizer(void)
 
 static void profile_free_file_data(prf_data_t);
 
+#if 0
+
 #define scan_shared_trees_locked()				\
 	{							\
 	    prf_data_t d;					\
@@ -77,6 +79,7 @@ static void profile_free_file_data(prf_data_t);
 		assert(d->fslen <= 1000); /* XXX */		\
 		assert(d->filespec[d->fslen] == 0);		\
 		assert(d->fslen = strlen(d->filespec));		\
+		assert(d->root != NULL);			\
 	    }							\
 	}
 
@@ -88,6 +91,13 @@ static void profile_free_file_data(prf_data_t);
 	    scan_shared_trees_locked();			\
 	    k5_mutex_unlock(&g_shared_trees_mutex);	\
 	}
+
+#else
+
+#define scan_shared_trees_locked()	{ ; }
+#define scan_shared_trees_unlocked()	{ ; }
+
+#endif
 
 static int rw_access(const_profile_filespec_t filespec)
 {
@@ -242,9 +252,9 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 		break;
 	}
 	if (data) {
-	    retval = profile_update_file_data(data);
 	    data->refcount++;
 	    (void) k5_mutex_unlock(&g_shared_trees_mutex);
+	    retval = profile_update_file_data(data);
 	    free(expanded_filename);
 	    prf->data = data;
 	    *ret_prof = prf;
@@ -263,7 +273,8 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 
 	retval = k5_mutex_init(&data->lock);
 	if (retval) {
-	    profile_close_file(prf);
+	    free(data);
+	    free(prf);
 	    return retval;
 	}
 
@@ -295,6 +306,9 @@ errcode_t profile_update_file_data(prf_data_t data)
 	errcode_t retval;
 #ifdef HAVE_STAT
 	struct stat st;
+#ifdef STAT_ONCE_PER_SECOND
+	time_t now;
+#endif
 #endif
 	FILE *f;
 
@@ -303,12 +317,22 @@ errcode_t profile_update_file_data(prf_data_t data)
 	    return retval;
 
 #ifdef HAVE_STAT
+#ifdef STAT_ONCE_PER_SECOND
+	now = time(0);
+	if (now == data->last_stat && data->root != NULL) {
+	    k5_mutex_unlock(&data->lock);
+	    return 0;
+	}
+#endif
 	if (stat(data->filespec, &st)) {
 	    retval = errno;
 	    k5_mutex_unlock(&data->lock);
 	    return retval;
 	}
-	if (st.st_mtime == data->timestamp) {
+#ifdef STAT_ONCE_PER_SECOND
+	data->last_stat = now;
+#endif
+	if (st.st_mtime == data->timestamp && data->root != NULL) {
 	    k5_mutex_unlock(&data->lock);
 	    return 0;
 	}
@@ -350,6 +374,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 	    k5_mutex_unlock(&data->lock);
 	    return retval;
 	}
+	assert(data->root != NULL);
 #ifdef HAVE_STAT
 	data->timestamp = st.st_mtime;
 #endif
@@ -504,19 +529,19 @@ errcode_t profile_flush_file_data_to_file(prf_data_t data, const char *outfile)
 void profile_dereference_data(prf_data_t data)
 {
     int err;
-    scan_shared_trees_unlocked();
     err = k5_mutex_lock(&g_shared_trees_mutex);
     if (err)
 	return;
     profile_dereference_data_locked(data);
     (void) k5_mutex_unlock(&g_shared_trees_mutex);
-    scan_shared_trees_unlocked();
 }
 void profile_dereference_data_locked(prf_data_t data)
 {
+    scan_shared_trees_locked();
     data->refcount--;
     if (data->refcount == 0)
 	profile_free_file_data(data);
+    scan_shared_trees_locked();
 }
 
 int profile_lock_global()
@@ -556,12 +581,13 @@ static void profile_free_file_data(prf_data_t data)
 	    }
 	}
     }
-	if (data->root)
-		profile_free_node(data->root);
-	if (data->comment)
-		free(data->comment);
-	data->magic = 0;
-	free(data);
+    if (data->root)
+	profile_free_node(data->root);
+    if (data->comment)
+	free(data->comment);
+    data->magic = 0;
+    k5_mutex_destroy(&data->lock);
+    free(data);
     scan_shared_trees_locked();
 }
 

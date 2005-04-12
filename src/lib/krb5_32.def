@@ -168,6 +168,7 @@ krb5_c_string_to_key_with_params
 	krb5_init_keyblock
 	krb5_init_random_key
 	krb5_init_secure_context
+        krb5_is_thread_safe
 	krb5_kt_add_entry
 	krb5_kt_close
 	krb5_kt_default
@@ -193,7 +194,7 @@ krb5_c_string_to_key_with_params
 	krb5_os_localaddr
 	krb5_parse_name
 	krb5_principal_compare
-	krb5_principal2salt
+	krb5_principal2salt                     ; KRB5_CALLCONV_WRONG
 	krb5_process_key
 	krb5_prompter_posix
 	krb5_random_key
@@ -211,8 +212,8 @@ krb5_c_string_to_key_with_params
 	krb5_sendauth
 	krb5_set_default_realm
 	krb5_set_default_tgs_enctypes
-krb5_set_password
-krb5_set_password_using_ccache
+        krb5_set_password
+        krb5_set_password_using_ccache
 	krb5_set_principal_realm
 	krb5_set_real_time
 	krb5_sname_to_principal

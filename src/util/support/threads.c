@@ -117,30 +117,36 @@ static void thread_termination(void *);
 
 static void thread_termination (void *tptr)
 {
-    int i, pass, none_found;
-    struct tsd_block *t = tptr;
-
-    /* Make multiple passes in case, for example, a libkrb5 cleanup
-       function wants to print out an error message, which causes
-       com_err to allocate a thread-specific buffer, after we just
-       freed up the old one.
-
-       Shouldn't actually happen, if we're careful, but check just in
-       case.  */
-
-    pass = 0;
-    none_found = 0;
-    while (pass < 4 && !none_found) {
-	none_found = 1;
-	for (i = 0; i < K5_KEY_MAX; i++) {
-	    if (destructors_set[i] && destructors[i] && t->values[i]) {
-		void *v = t->values[i];
-		t->values[i] = 0;
-		(*destructors[i])(v);
-		none_found = 0;
-	    }
-	}
-    }
+    int err = k5_mutex_lock(&key_lock);
+    if (err == 0) {
+        int i, pass, none_found;
+        struct tsd_block *t = tptr;
+        
+        /* Make multiple passes in case, for example, a libkrb5 cleanup
+            function wants to print out an error message, which causes
+            com_err to allocate a thread-specific buffer, after we just
+            freed up the old one.
+            
+            Shouldn't actually happen, if we're careful, but check just in
+            case.  */
+        
+        pass = 0;
+        none_found = 0;
+        while (pass < 4 && !none_found) {
+            none_found = 1;
+            for (i = 0; i < K5_KEY_MAX; i++) {
+                if (destructors_set[i] && destructors[i] && t->values[i]) {
+                    void *v = t->values[i];
+                    t->values[i] = 0;
+                    (*destructors[i])(v);
+                    none_found = 0;
+                }
+            }
+        }
+        free (t);
+        err = k5_mutex_unlock(&key_lock);
+   }
+    
     /* remove thread from global linked list */
 }
 
@@ -305,12 +311,28 @@ int k5_key_delete (k5_key_t keynum)
     /* XXX Memory leak here!
        Need to destroy the associated data for all threads.
        But watch for race conditions in case threads are going away too.  */
+    assert(destructors_set[keynum] == 1);
+    destructors_set[keynum] = 0;
+    destructors[keynum] = 0;
     LeaveCriticalSection(&key_lock);
 
 #else /* POSIX */
 
-    /* Not written yet.  */
-    abort();
+    {
+	int err;
+
+	/* XXX RESOURCE LEAK:
+
+	   Need to destroy the allocated objects first!  */
+
+	err = k5_mutex_lock(&key_lock);
+	if (err == 0) {
+	    assert(destructors_set[keynum] == 1);
+	    destructors_set[keynum] = 0;
+	    destructors[keynum] = NULL;
+	    k5_mutex_unlock(&key_lock);
+	}
+    }
 
 #endif
 
@@ -328,6 +350,10 @@ extern void krb5int_fini_fac(void);
 int krb5int_thread_support_init (void)
 {
     int err;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_init\n");
+#endif
 
 #ifndef ENABLE_THREADS
 
@@ -363,6 +389,10 @@ void krb5int_thread_support_fini (void)
 {
     if (! INITIALIZER_RAN (krb5int_thread_support_init))
 	return;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_fini\n");
+#endif
 
 #ifndef ENABLE_THREADS
 

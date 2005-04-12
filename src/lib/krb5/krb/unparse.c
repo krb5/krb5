@@ -26,7 +26,7 @@
  *
  * krb5_unparse_name() routine
  *
- * Rewritten by Theodore Ts'o to propoerly unparse principal names
+ * Rewritten by Theodore Ts'o to properly unparse principal names
  * which have the component or realm separator as part of one of their
  * components.
  */
@@ -66,7 +66,7 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 	krb5_int32 nelem;
 	register unsigned int totalsize = 0;
 
-	if (!principal)
+	if (!principal || !name)
 		return KRB5_PARSE_MALFORMED;
 
 	cp = krb5_princ_realm(context, principal)->data;
@@ -99,17 +99,17 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 	 * We need only n-1 seperators for n components, but we need
 	 * an extra byte for the NULL at the end.
 	 */
-	if (*name) {
-		if (*size < (totalsize)) {
-			*size = totalsize;
-			*name = realloc(*name, totalsize);
-		}
-	} else {
-		*name = malloc(totalsize);
-		if (size)
-			*size = totalsize;
-	}
-	
+        if (size) {
+            if (*name && (*size < totalsize)) {
+                *name = realloc(*name, totalsize);
+            } else {
+                *name = malloc(totalsize);
+            }
+            *size = totalsize;
+        } else {
+            *name = malloc(totalsize);
+        }
+
 	if (!*name)
 		return ENOMEM;
 
@@ -191,7 +191,8 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 krb5_error_code KRB5_CALLCONV
 krb5_unparse_name(krb5_context context, krb5_const_principal principal, register char **name)
 {
-	*name = NULL;
+        if (name)                       /* name == NULL will return error from _ext */
+            *name = NULL;
 	return(krb5_unparse_name_ext(context, principal, name, NULL));
 }
 

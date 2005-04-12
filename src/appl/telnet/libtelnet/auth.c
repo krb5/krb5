@@ -85,6 +85,7 @@
 int auth_debug_mode = 0;
 int auth_has_failed = 0;
 int auth_enable_encrypt = 0;
+int auth_client_non_unix = 0;
 static 	char	*Name = "Noname";
 static	int	Server = 0;
 static	Authenticator	*authenticated = 0;
@@ -337,14 +338,27 @@ auth_request()
 		authenticating = 1;
 		while (ap->type) {
 			if (i_support & ~i_wont_support & typemask(ap->type)) {
-				if (auth_debug_mode) {
-					printf(">>>%s: Sending type %d %d\r\n",
-						Name, ap->type, ap->way);
+				if (ap->type == AUTHTYPE_KERBEROS_V4 ||
+				    !auth_client_non_unix) {
+					if (auth_debug_mode) {
+						printf(">>>%s: Sending type %d %d\r\n",
+						       Name, ap->type, ap->way);
+					}
+					*e++ = ap->type;
+					*e++ = ap->way;
 				}
-				*e++ = ap->type;
-				*e++ = ap->way;
 			}
 			++ap;
+		}
+		if (auth_client_non_unix) {
+			ap = authenticators;
+			while (ap->type) {
+				if (i_support & ~i_wont_support & typemask(ap->type)) {
+					*e++ = ap->type;
+					*e++ = ap->way;
+				}
+				++ap;
+			}
 		}
 		*e++ = IAC;
 		*e++ = SE;
@@ -562,7 +576,7 @@ auth_intr(sig)
 	auth_finished(0, AUTH_REJECT);
 }
 
-	int
+	void
 auth_wait(name)
 	char *name;
 {
@@ -570,7 +584,7 @@ auth_wait(name)
 		printf(">>>%s: in auth_wait.\r\n", Name);
 
 	if (Server && !authenticating)
-		return(0);
+		return;
 
 	(void) signal(SIGALRM, auth_intr);
 	alarm(30);
@@ -579,7 +593,12 @@ auth_wait(name)
 			break;
 	alarm(0);
 	(void) signal(SIGALRM, SIG_DFL);
+}
 
+	int
+auth_check(name)
+	char *name;
+{
 	/*
 	 * Now check to see if the user is valid or not
 	 */

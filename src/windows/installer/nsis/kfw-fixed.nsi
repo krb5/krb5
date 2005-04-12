@@ -118,6 +118,8 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
 
   LangString DESC_secClient ${LANG_ENGLISH} "Client: Allows you to utilize MIT Kerberos from your Windows PC."
   
+  LangString DESC_secDebug ${LANG_ENGLISH} "Debug Symbols: Used for debugging problems with MIT Kerberos for Windows"
+  
   LangString DESC_secSDK ${LANG_ENGLISH} "SDK: Allows you to build MIT Kerberos aware applications."
   
   LangString DESC_secDocs ${LANG_ENGLISH} "Documentation: Release Notes and User Manuals."
@@ -197,6 +199,7 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kpasswd.exe"         "$INSTDIR\bin\kpasswd.exe"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kvno.exe"            "$INSTDIR\bin\kvno.exe"          "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5_32.dll"         "$INSTDIR\bin\krb5_32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\k5sprt32.dll"        "$INSTDIR\bin\k5sprt32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb524.dll"          "$INSTDIR\bin\krb524.dll"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
@@ -209,41 +212,17 @@ Section "KfW Client" secClient
 !endif                                                                         
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\mit2ms.exe"          "$INSTDIR\bin\mit2ms.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kcpytkt.exe"          "$INSTDIR\bin\kcpytkt.exe"        "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdeltkt.exe"          "$INSTDIR\bin\kdeltkt.exe"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp32.dll"        "$INSTDIR\bin\wshelp32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof32.dll"        "$INSTDIR\bin\xpprof32.dll"      "$INSTDIR"
   
 !ifdef DEBUG
-  File "${KFW_BIN_DIR}\aklog.pdb"
-  File "${KFW_BIN_DIR}\comerr32.pdb"
-  File "${KFW_BIN_DIR}\gss.pdb"
-  File "${KFW_BIN_DIR}\gss-client.pdb"
-  File "${KFW_BIN_DIR}\gss-server.pdb"
-  File "${KFW_BIN_DIR}\gssapi32.pdb"
-  File "${KFW_BIN_DIR}\k524init.pdb"
-  File "${KFW_BIN_DIR}\kclnt32.pdb"
-  File "${KFW_BIN_DIR}\kdestroy.pdb"
-  File "${KFW_BIN_DIR}\kinit.pdb"
-  File "${KFW_BIN_DIR}\klist.pdb"
-  File "${KFW_BIN_DIR}\kpasswd.pdb"
-  File "${KFW_BIN_DIR}\kvno.pdb"
-  File "${KFW_BIN_DIR}\krb5_32.pdb"
-  File "${KFW_BIN_DIR}\krb524.pdb"
-  File "${KFW_BIN_DIR}\krbcc32.pdb"
-  File "${KFW_BIN_DIR}\krbcc32s.pdb"
-  File "${KFW_BIN_DIR}\krbv4w32.pdb"
-  File "${KFW_BIN_DIR}\leashw32.pdb"
-  File "${KFW_BIN_DIR}\leash32.pdb"
-  File "${KFW_BIN_DIR}\ms2mit.pdb"
-  File "${KFW_BIN_DIR}\wshelp32.pdb"
-  File "${KFW_BIN_DIR}\xpprof32.pdb"
-
 !IFDEF CL_1400
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr80d.dll"    "$INSTDIR\bin\msvcr80d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcr80d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp80d.dll"    "$INSTDIR\bin\msvcp80d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcp80d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc80d.dll"      "$INSTDIR\bin\mfc80d.dll"    "$INSTDIR"
-  File "${SYSTEMDIR}\mfc80d.pdb"                                             
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHS.DLL"    "$INSTDIR\bin\MFC80CHS.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80CHT.DLL"    "$INSTDIR\bin\MFC80CHT.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC80DEU.DLL"    "$INSTDIR\bin\MFC80DEU.DLL"  "$INSTDIR"
@@ -256,11 +235,8 @@ Section "KfW Client" secClient
 !ELSE                                                                   
 !IFDEF CL_1310
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr71d.dll"    "$INSTDIR\bin\msvcr71d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcr71d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp71d.dll"    "$INSTDIR\bin\msvcp71d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcp71d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc71d.dll"      "$INSTDIR\bin\mfc71d.dll"    "$INSTDIR"
-  File "${SYSTEMDIR}\mfc71d.pdb"                                             
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHS.DLL"    "$INSTDIR\bin\MFC71CHS.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71CHT.DLL"    "$INSTDIR\bin\MFC71CHT.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC71DEU.DLL"    "$INSTDIR\bin\MFC71DEU.DLL"  "$INSTDIR"
@@ -273,11 +249,8 @@ Section "KfW Client" secClient
 !ELSE                                                                   
 !IFDEF CL_1300                                                          
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr70d.dll"    "$INSTDIR\bin\msvcr70d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcr70d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp70d.dll"    "$INSTDIR\bin\msvcp70d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcp70d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc70d.dll"      "$INSTDIR\bin\mfc70d.dll"    "$INSTDIR"
-  File "${SYSTEMDIR}\mfc70d.pdb"                                             
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHS.DLL"    "$INSTDIR\bin\MFC70CHS.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70CHT.DLL"    "$INSTDIR\bin\MFC70CHT.DLL"  "$INSTDIR"
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70DEU.DLL"    "$INSTDIR\bin\MFC70DEU.DLL"  "$INSTDIR"
@@ -289,11 +262,8 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${SYSTEMDIR}\MFC70KOR.DLL"    "$INSTDIR\bin\MFC70KOR.DLL"  "$INSTDIR"
 !ELSE                                                                   
   !insertmacro ReplaceDLL "${SYSTEMDIR}\mfc42d.dll"      "$INSTDIR\bin\mfc42d.dll"    "$INSTDIR"
-  File "${SYSTEMDIR}\mfc42d.pdb"                                             
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcp60d.dll"    "$INSTDIR\bin\msvcp60d.dll"  "$INSTDIR"
-  File "${SYSTEMDIR}\msvcp60d.pdb"                                           
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcrtd.dll"     "$INSTDIR\bin\msvcrtd.dll"   "$INSTDIR"
-  File "${SYSTEMDIR}\msvcrtd.pdb"                                            
 !ENDIF                                                                  
 !ENDIF                                                                  
 !ENDIF
@@ -461,10 +431,68 @@ skipAllowTgtKey:
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k95g" "Flags" 0x408
+
+SectionEnd
+
+Section "Debug Symbols" secDebug
+
+  SetOutPath "$INSTDIR\bin"
+  File "${KFW_BIN_DIR}\aklog.pdb"
+  File "${KFW_BIN_DIR}\comerr32.pdb"
+  File "${KFW_BIN_DIR}\gss.pdb"
+  File "${KFW_BIN_DIR}\gss-client.pdb"
+  File "${KFW_BIN_DIR}\gss-server.pdb"
+  File "${KFW_BIN_DIR}\gssapi32.pdb"
+  File "${KFW_BIN_DIR}\k524init.pdb"
+  File "${KFW_BIN_DIR}\kclnt32.pdb"
+  File "${KFW_BIN_DIR}\kdestroy.pdb"
+  File "${KFW_BIN_DIR}\kinit.pdb"
+  File "${KFW_BIN_DIR}\klist.pdb"
+  File "${KFW_BIN_DIR}\kpasswd.pdb"
+  File "${KFW_BIN_DIR}\kvno.pdb"
+  File "${KFW_BIN_DIR}\krb5_32.pdb"
+  File "${KFW_BIN_DIR}\k5sprt32.pdb"
+  File "${KFW_BIN_DIR}\krb524.pdb"
+  File "${KFW_BIN_DIR}\krbcc32.pdb"
+  File "${KFW_BIN_DIR}\krbcc32s.pdb"
+  File "${KFW_BIN_DIR}\krbv4w32.pdb"
+  File "${KFW_BIN_DIR}\leashw32.pdb"
+  File "${KFW_BIN_DIR}\leash32.pdb"
+  File "${KFW_BIN_DIR}\ms2mit.pdb"
+  File "${KFW_BIN_DIR}\mit2ms.pdb"
+  File "${KFW_BIN_DIR}\kcpytkt.pdb"
+  File "${KFW_BIN_DIR}\kdeltkt.pdb"
+  File "${KFW_BIN_DIR}\wshelp32.pdb"
+  File "${KFW_BIN_DIR}\xpprof32.pdb"
+
+!IFDEF DEBUG
+!IFDEF CL_1400
+  File "${SYSTEMDIR}\msvcr80d.pdb"                                           
+  File "${SYSTEMDIR}\msvcp80d.pdb"                                           
+  File "${SYSTEMDIR}\mfc80d.pdb"                                             
+!ELSE                                                                   
+!IFDEF CL_1310
+  File "${SYSTEMDIR}\msvcr71d.pdb"                                           
+  File "${SYSTEMDIR}\msvcp71d.pdb"                                           
+  File "${SYSTEMDIR}\mfc71d.pdb"                                             
+!ELSE                                                                   
+!IFDEF CL_1300                                                          
+  File "${SYSTEMDIR}\msvcr70d.pdb"                                           
+  File "${SYSTEMDIR}\msvcp70d.pdb"                                           
+  File "${SYSTEMDIR}\mfc70d.pdb"                                             
+!ELSE                                                                   
+  File "${SYSTEMDIR}\mfc42d.pdb"                                             
+  File "${SYSTEMDIR}\msvcp60d.pdb"                                           
+  File "${SYSTEMDIR}\msvcrtd.pdb"                                            
+!ENDIF                                                                  
+!ENDIF                                                                  
+!ENDIF
+!ENDIF
 
 SectionEnd
 
@@ -806,6 +834,17 @@ DoNotRestart:
 no_remove_uninstaller:
 
 contInstall:
+   ; Never install debug symbols unless explicitly selected, except in DEBUG mode
+!IFNDEF DEBUG
+   SectionGetFlags ${secDebug} $0
+   IntOp $0 $0 & ${SECTION_OFF}
+   SectionSetFlags ${secDebug} $0
+!ELSE
+   SectionGetFlags ${secDebug} $0
+   IntOp $0 $0 | ${SF_SELECTED}
+   SectionSetFlags ${secDebug} $0
+!ENDIF
+
    ; Our logic should be like this.
    ;     1) If no KfW components are installed, we do a clean install with default options. (Client/Docs)
    ;     2) If existing modules are installed, we keep them selected
@@ -1019,6 +1058,7 @@ FunctionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${secClient} $(DESC_secClient)
   !insertmacro MUI_DESCRIPTION_TEXT ${secSDK} $(DESC_secSDK)
   !insertmacro MUI_DESCRIPTION_TEXT ${secDocs} $(DESC_secDocs)
+  !insertmacro MUI_DESCRIPTION_TEXT ${secDebug} $(DESC_secDebug)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
  
 ;--------------------------------
@@ -1060,6 +1100,7 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.exe"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.dll" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.dll"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
@@ -1072,10 +1113,12 @@ StartRemove:
 !endif
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\mit2ms.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.exe"  
+   Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.dll"
 
-!IFDEF DEBUG
    Delete /REBOOTOK "$INSTDIR\bin\aklog.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss.pdb"
@@ -1090,15 +1133,20 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kpasswd.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\kvno.pdb"   
    Delete /REBOOTOK "$INSTDIR\bin\krb5_32.pdb" 
+   Delete /REBOOTOK "$INSTDIR\bin\k5sprt32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krb524.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\mit2ms.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\kcpytkt.pdb"  
+   Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.pdb"
 
+!IFDEF DEBUG
 !IFDEF CL_1400
    Delete /REBOOTOK "$INSTDIR\bin\msvcr80d.dll"
    Delete /REBOOTOK "$INSTDIR\bin\msvcr80d.pdb"

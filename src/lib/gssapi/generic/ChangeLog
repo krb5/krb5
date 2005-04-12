@@ -1,3 +1,19 @@
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi.h): Use awk hack to work around quoting
+	problem.
+
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (gssapi.h): Change SIZEOF symbols to start with GSS_
+	when extracting from autoconf.h.  Don't look for HAVE_ or USE_
+	symbols.  Add ${include_xom} to the prologue.
+	(include_xom): New variable.
+	* gssapi.hin: Always include stddef.h unconditionally.  Don't
+	conditionally include xom.h here.
+	(GSS_SIZEOF_INT, GSS_SIZEOF_LONG, GSS_SIZEOF_SHORT): Don't
+	define, except on Windows.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.hin: Don't test macintosh or __MWERKS__.

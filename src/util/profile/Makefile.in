@@ -157,27 +157,28 @@ check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 #
 prof_tree.so prof_tree.po $(OUTPRE)prof_tree.$(OBJEXT): prof_tree.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_file.so prof_file.po $(OUTPRE)prof_file.$(OBJEXT): prof_file.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/k5-platform.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_parse.so prof_parse.po $(OUTPRE)prof_parse.$(OBJEXT): prof_parse.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_get.so prof_get.po $(OUTPRE)prof_get.$(OBJEXT): prof_get.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_set.so prof_set.po $(OUTPRE)prof_set.$(OBJEXT): prof_set.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 prof_err.so prof_err.po $(OUTPRE)prof_err.$(OBJEXT): prof_err.c $(COM_ERR_DEPS)
 prof_init.so prof_init.po $(OUTPRE)prof_init.$(OBJEXT): prof_init.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 test_parse.so test_parse.po $(OUTPRE)test_parse.$(OBJEXT): test_parse.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 test_profile.so test_profile.po $(OUTPRE)test_profile.$(OBJEXT): test_profile.c prof_int.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h argv_parse.h
+  $(SRCTOP)/include/k5-platform.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  argv_parse.h
 
