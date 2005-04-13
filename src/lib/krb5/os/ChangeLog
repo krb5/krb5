@@ -1,3 +1,27 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c (NEED_SOCKETS): Don't define.
+	* c_ustime.c (NEED_SOCKETS): Don't define.
+	* changepw.c (NEED_SOCKETS): Don't define.
+	* dnsglue.h (NEED_SOCKETS): Don't define.
+	* full_ipadr.c (NEED_SOCKETS): Don't define.
+	* gen_rname.c (NEED_SOCKETS): Don't define.
+	* genaddrs.c (NEED_SOCKETS): Don't define.
+	* hostaddr.c (NEED_SOCKETS): Don't define.
+	* hst_realm.c (NEED_SOCKETS): Don't define.
+	* krbfileio.c (NEED_LOWLEVEL_IO): Don't define.
+	* localaddr.c (NEED_SOCKETS): Don't define.
+	* locate_kdc.c (NEED_SOCKETS): Don't define.
+	* mk_faddr.c (NEED_SOCKETS): Don't define.
+	* net_read.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+	* net_write.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+	* port2ip.c (NEED_SOCKETS): Don't define.
+	* read_msg.c (NEED_SOCKETS): Don't define.
+	* send524.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+	* sendto_kdc.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+	* sn2princ.c (NEED_SOCKETS): Don't define.
+	* write_msg.c (NEED_SOCKETS): Don't define.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* kuserok.c (krb5_kuserok): Use k5_getpwnam_r.

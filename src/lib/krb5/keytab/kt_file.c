@@ -25,7 +25,6 @@
  * 
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include <stdio.h>
 

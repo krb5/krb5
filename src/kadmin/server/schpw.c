@@ -1,4 +1,3 @@
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include <kadm5/admin.h>
 #include <syslog.h>

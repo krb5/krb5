@@ -27,7 +27,6 @@
  * Take an ADDRPORT address and split into IP addr & port.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 
 #ifdef HAVE_NETINET_IN_H

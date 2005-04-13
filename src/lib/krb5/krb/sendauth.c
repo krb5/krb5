@@ -27,7 +27,6 @@
  * convenience sendauth/recvauth functions
  */
 
-#define NEED_SOCKETS
 
 #include "k5-int.h"
 #include "com_err.h"

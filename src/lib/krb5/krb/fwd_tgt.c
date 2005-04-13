@@ -24,7 +24,6 @@
  * or implied warranty.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

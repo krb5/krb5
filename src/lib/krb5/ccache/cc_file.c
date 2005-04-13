@@ -77,8 +77,6 @@ etc.
  */
 #include "k5-int.h"
 
-#define NEED_SOCKETS    /* Only for ntohs, etc. */
-#define NEED_LOWLEVEL_IO
 
 #include <stdio.h>
 #include <errno.h>

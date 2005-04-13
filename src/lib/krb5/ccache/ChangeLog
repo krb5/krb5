@@ -1,3 +1,7 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (struct _krb5_fcc_data): Fields disk_file_lock,

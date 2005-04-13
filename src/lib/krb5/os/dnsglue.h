@@ -45,7 +45,6 @@
 
 #ifdef KRB5_DNS_LOOKUP
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
 #ifdef WSHELPER

@@ -28,8 +28,6 @@
  * as necessary.
  */
 
-#define NEED_SOCKETS
-#define NEED_LOWLEVEL_IO
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 

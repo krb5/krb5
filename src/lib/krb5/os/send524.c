@@ -26,8 +26,6 @@
  */
 
 /* Grab socket stuff.  This might want to go away later. */
-#define NEED_SOCKETS
-#define NEED_LOWLEVEL_IO
 #include "fake-addrinfo.h" /* for custom addrinfo if needed */
 #include "k5-int.h"
 

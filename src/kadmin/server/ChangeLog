@@ -1,3 +1,7 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* schpw.c (NEED_SOCKETS): Don't define.
+
 2004-10-28  Tom Yu  <tlyu@mit.edu>
 
 	* misc.c (check_min_life): Actually return a value on success.

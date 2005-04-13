@@ -27,7 +27,6 @@
  * Write a message to the network
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include <errno.h>
 

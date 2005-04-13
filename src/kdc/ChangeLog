@@ -1,3 +1,10 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (NEED_SOCKETS): Don't define.
+	* do_as_req.c (NEED_SOCKETS): Don't define.
+	* do_tgs_req.c (NEED_SOCKETS): Don't define.
+	* network.c (NEED_SOCKETS): Don't define.
+
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (closedown_network): Free each connection data

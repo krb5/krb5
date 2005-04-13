@@ -27,7 +27,6 @@
  * get socket addresses for KDC.
  */
 
-#define NEED_SOCKETS
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 #include "os-proto.h"

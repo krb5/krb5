@@ -26,7 +26,6 @@
  * Dispatch an incoming packet.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include <syslog.h>
 #include "kdc_util.h"

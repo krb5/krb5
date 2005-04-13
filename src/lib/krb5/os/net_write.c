@@ -25,8 +25,6 @@
  * 
  */
 
-#define NEED_LOWLEVEL_IO
-#define NEED_SOCKETS
 #include "k5-int.h"
 
 /*

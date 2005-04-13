@@ -28,7 +28,6 @@
  * a replay cache tag string.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
 

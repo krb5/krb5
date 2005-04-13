@@ -36,7 +36,6 @@
  * to a V4 sendauth.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #if !defined(_MACINTOSH)
 #ifdef KRB5_KRB4_COMPAT

@@ -29,7 +29,6 @@
  * Added by Paul W. Nelson, Thursby Software Systems, Inc.
  */
 
-#define NEED_SOCKETS
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 #include "os-proto.h"

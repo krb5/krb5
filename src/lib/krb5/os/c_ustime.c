@@ -27,7 +27,6 @@
  * krb5_mstimeofday for BSD 4.3
  */
  
-#define	NEED_SOCKETS
 #include "k5-int.h"
 #include "k5-thread.h"
 

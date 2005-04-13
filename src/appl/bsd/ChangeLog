@@ -1,3 +1,7 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* compat_recv.c (NEED_SOCKETS): Don't define.
+
 2005-04-05  Ken Raeburn  <raeburn@mit.edu>
 
 	* krlogind.c (doit): Change 0 to (char*)NULL in execl* calls.

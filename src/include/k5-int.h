@@ -159,14 +159,8 @@ typedef INT64_TYPE krb5_int64;
 #include "krb5.h"
 #include "profile.h"
 
-#if 1 /* def NEED_SOCKETS */
 #include "port-sockets.h"
 #include "socket-utils.h"
-#else
-#ifndef SOCK_DGRAM
-struct sockaddr;
-#endif
-#endif
 
 /* Get mutex support; currently used only for the replay cache.  */
 #include "k5-thread.h"

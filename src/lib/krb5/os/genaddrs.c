@@ -27,7 +27,6 @@
  * Take an IP addr & port and generate a full IP address.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include "os-proto.h"
 

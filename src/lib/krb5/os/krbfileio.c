@@ -36,7 +36,6 @@
 static char *VersionID = "@(#)krbfileio.c	2 - 08/22/91";
 #endif
 
-#define NEED_LOWLEVEL_IO                        /* Need open(), etc. */
 
 #include "k5-int.h"
 #ifdef HAVE_SYS_FILE_H

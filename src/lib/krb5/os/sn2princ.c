@@ -28,7 +28,6 @@
  * form.
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 #include "fake-addrinfo.h"
 #include <ctype.h>

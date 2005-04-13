@@ -18,8 +18,6 @@
 #endif
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
-#define NEED_SOCKETS
-#define NEED_LOWLEVEL_IO
 
 #include "krb5.h"
 #include <stdio.h> /* for P_tmpdir */

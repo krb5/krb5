@@ -33,7 +33,6 @@
  * XNS support is untested, but "Should just work".  (Hah!)
  */
 
-#define NEED_SOCKETS
 #include "k5-int.h"
 
 #if !defined(_WIN32)

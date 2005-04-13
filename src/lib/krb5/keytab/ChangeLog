@@ -1,3 +1,8 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (NEED_SOCKETS): Don't define.
+	* kt_srvtab.c (NEED_SOCKETS): Don't define.
+
 2004-11-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c (krb5_ktfile_wresolve): Initialize mutex here too.

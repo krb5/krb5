@@ -1,3 +1,7 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc_io.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
+
 2005-01-15  Jeffrey Altman <jaltman@mit.edu>
 
         * rc_dfl.c: Move the extraction of the struct dfl_data

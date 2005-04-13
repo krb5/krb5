@@ -1,3 +1,8 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h: Remove disabled code that used to be part of the
+	non-NEED_SOCKETS case.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for getpwnam_r and getpwuid_r with
