@@ -1,3 +1,8 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-unix): Don't build aes-gen by default, leave it
+	for 'make check'.
+
 2004-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* vbaxam.doc: File deleted.

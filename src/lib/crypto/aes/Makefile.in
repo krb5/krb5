@@ -38,7 +38,7 @@ GEN_OBJS=\
 
 ##DOS##LIBOBJS = $(OBJS)
 
-all-unix:: all-libobjs aes-gen
+all-unix:: all-libobjs # aes-gen
 
 includes:: depend
 
