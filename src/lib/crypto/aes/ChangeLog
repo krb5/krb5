@@ -1,5 +1,10 @@
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* aesopt.h: On PalmOS, include FloatMgr.h to get endianness flag.
+	(ENC_UNROLL, DEC_UNROLL, ENC_ROUND, LAST_ENC_ROUND, DEC_ROUND,
+	LAST_DEC_ROUND, KEY_SCHED): If CONFIG_SMALL is defined, set to
+	NONE or NO_TABLES as appropriate.
+
 	* aes_s2k.c (krb5int_aes_string_to_key): Widen bytes of iteration
 	count before shifting.
 
