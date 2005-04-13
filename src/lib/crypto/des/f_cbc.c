@@ -61,7 +61,7 @@ krb5int_des_cbc_encrypt(const mit_des_cblock *in,
 			const mit_des_key_schedule schedule,
 			const mit_des_cblock ivec)
 {
-	register unsigned DES_INT32 left, right;
+	unsigned DES_INT32 left, right;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
@@ -92,14 +92,11 @@ krb5int_des_cbc_encrypt(const mit_des_cblock *in,
 		 * forward.  Otherwise we have to fart around.
 		 */
 		if (length >= 8) {
-			left  ^= ((*ip++) & FF_UINT32) << 24;
-			left  ^= ((*ip++) & FF_UINT32) << 16;
-			left  ^= ((*ip++) & FF_UINT32) <<  8;
-			left  ^=  (*ip++) & FF_UINT32;
-			right ^= ((*ip++) & FF_UINT32) << 24;
-			right ^= ((*ip++) & FF_UINT32) << 16;
-			right ^= ((*ip++) & FF_UINT32) <<  8;
-			right ^=  (*ip++) & FF_UINT32;
+			unsigned DES_INT32 temp;
+			GET_HALF_BLOCK(temp, ip);
+			left  ^= temp;
+			GET_HALF_BLOCK(temp, ip);
+			right ^= temp;
 			length -= 8;
 		} else {
 			/*
@@ -148,7 +145,7 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
 			const mit_des_key_schedule schedule,
 			const mit_des_cblock ivec)
 {
-	register unsigned DES_INT32 left, right;
+	unsigned DES_INT32 left, right;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;
@@ -240,3 +237,19 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
 		}
 	}
 }
+
+#ifdef CONFIG_SMALL
+void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
+			       unsigned DES_INT32 *right,
+			       const unsigned DES_INT32 *kp)
+{
+    DES_DO_ENCRYPT_1 (*left, *right, kp);
+}
+
+void krb5int_des_do_decrypt_2 (unsigned DES_INT32 *left,
+			       unsigned DES_INT32 *right,
+			       const unsigned DES_INT32 *kp)
+{
+    DES_DO_DECRYPT_1 (*left, *right, kp);
+}
+#endif

@@ -51,7 +51,7 @@ krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
 			 const mit_des_key_schedule ks3,
 			 const mit_des_cblock ivec)
 {
-    register unsigned DES_INT32 left, right;
+    unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;
     const unsigned char *ip;
     unsigned char *op;
@@ -137,7 +137,7 @@ krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
 			 const mit_des_key_schedule ks3,
 			 const mit_des_cblock ivec)
 {
-    register unsigned DES_INT32 left, right;
+    unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;
     const unsigned char *ip;
     unsigned char *op;

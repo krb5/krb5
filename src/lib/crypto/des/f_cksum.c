@@ -33,7 +33,7 @@ mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
 		  unsigned long length, const mit_des_key_schedule schedule,
 		  const krb5_octet *ivec)
 {
-	register unsigned DES_INT32 left, right;
+	unsigned DES_INT32 left, right;
 	const unsigned DES_INT32 *kp;
 	const unsigned char *ip;
 	unsigned char *op;

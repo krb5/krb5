@@ -1,3 +1,22 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* d3_cbc.c (krb5int_des3_cbc_encrypt, krb5int_des3_cbc_decrypt):
+	Don't declare left and right variables as registers.
+	* f_cksum.c (mit_des_cbc_cksum): Likewise.
+	* f_cbc.c (krb5int_des_cbc_encrypt, krb5int_des_cbc_decrypt):
+	Likewise.
+	(krb5int_des_cbc_encrypt): For full blocks, use GET_HALF_BLOCK to
+	read and then xor, instead of processing each byte individually.
+	(krb5int_des_do_encrypt_2, krb5int_des_do_decrypt_2)
+	[CONFIG_SMALL]: New functions, wrapping large macros with the DES
+	inner loops.
+	* f_tables.h (DES_DO_ENCRYPT_1, DES_DO_DECRYPT_1): Renamed from
+	non-_1 names.
+	(krb5int_des_do_encrypt_2, krb5int_des_do_decrypt_2): Declare if
+	CONFIG_SMALL is defined.
+	(DES_DO_ENCRYPT, DES_DO_DECRYPT): Expand to _1 macros or _2
+	function calls depending on whether CONFIG_SMALL is defined.
+
 2004-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (verify, t_afss2k): Link test programs against

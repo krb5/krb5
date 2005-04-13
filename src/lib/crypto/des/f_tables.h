@@ -200,7 +200,7 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * at each stage of the encryption, so that by comparing the output to
  * a known good machine, the location of the first error can be found.
  */
-#define	DES_DO_ENCRYPT(left, right, kp) \
+#define	DES_DO_ENCRYPT_1(left, right, kp) \
 	do { \
 		register int i; \
 		register unsigned DES_INT32 temp1; \
@@ -218,7 +218,7 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
 		DEB (("  after FP %8lX %8lX \n", left, right)); \
 	} while (0)
 
-#define	DES_DO_DECRYPT(left, right, kp) \
+#define	DES_DO_DECRYPT_1(left, right, kp) \
 	do { \
 		register int i; \
 		register unsigned DES_INT32 temp2; \
@@ -230,6 +230,20 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
 		} \
 		DES_FINAL_PERM((left), (right), (temp2)); \
 	} while (0)
+
+#ifdef CONFIG_SMALL
+extern void krb5int_des_do_encrypt_2(unsigned DES_INT32 *l,
+				     unsigned DES_INT32 *r,
+				     const unsigned DES_INT32 *k);
+extern void krb5int_des_do_decrypt_2(unsigned DES_INT32 *l,
+				     unsigned DES_INT32 *r,
+				     const unsigned DES_INT32 *k);
+#define DES_DO_ENCRYPT(L,R,K) krb5int_des_do_encrypt_2(&(L), &(R), (K))
+#define DES_DO_DECRYPT(L,R,K) krb5int_des_do_decrypt_2(&(L), &(R), (K))
+#else
+#define DES_DO_ENCRYPT DES_DO_ENCRYPT_1
+#define DES_DO_DECRYPT DES_DO_DECRYPT_1
+#endif
 
 /*
  * These are handy dandy utility thingies for straightening out bytes.
