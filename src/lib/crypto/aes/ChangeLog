@@ -1,5 +1,8 @@
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* aes_s2k.c (krb5int_aes_string_to_key): Widen bytes of iteration
+	count before shifting.
+
 	* Makefile.in (all-unix): Don't build aes-gen by default, leave it
 	for 'make check'.
 
