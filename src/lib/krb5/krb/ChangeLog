@@ -1,5 +1,9 @@
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (BISONFLAGS): Drop -v.
+	($(srcdir)/deltat.c): Change to source directory before
+	rebuilding, so path to source tree doesn't get inserted.
+
 	* fwd_tgt.c (NEED_SOCKETS): Don't define.
 	* recvauth.c (NEED_SOCKETS): Don't define.
 	* sendauth.c (NEED_SOCKETS): Don't define.

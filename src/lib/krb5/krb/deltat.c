@@ -68,7 +68,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 38 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 38 "x-deltat.y"
 
 
 #include <ctype.h>
@@ -168,10 +168,10 @@ static int yyparse (void *);
 #endif
 
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 125 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 125 "x-deltat.y"
 typedef union YYSTYPE { int val; } YYSTYPE;
 /* Line 191 of yacc.c.  */
-#line 175 "../../../../src/lib/krb5/krb/deltat.c"
+#line 175 "deltat.c"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -183,7 +183,7 @@ typedef union YYSTYPE { int val; } YYSTYPE;
 
 
 /* Line 214 of yacc.c.  */
-#line 187 "../../../../src/lib/krb5/krb/deltat.c"
+#line 187 "deltat.c"
 
 #if ! defined (yyoverflow) || YYERROR_VERBOSE
 
@@ -1077,74 +1077,74 @@ yyreduce:
   switch (yyn)
     {
         case 6:
-#line 138 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 138 "x-deltat.y"
     { yyval.val = - yyvsp[0].val; ;}
     break;
 
   case 9:
-#line 140 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 140 "x-deltat.y"
     { yyval.val = yyvsp[0].val; ;}
     break;
 
   case 10:
-#line 141 "../../../../src/lib/krb5/krb/x-deltat.y"
-    { YYERROR ;}
+#line 141 "x-deltat.y"
+    { YYERROR; ;}
     break;
 
   case 11:
-#line 143 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 143 "x-deltat.y"
     { DO (yyvsp[-2].val,  0,  0, yyvsp[0].val); ;}
     break;
 
   case 12:
-#line 144 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 144 "x-deltat.y"
     { DO ( 0, yyvsp[-2].val,  0, yyvsp[0].val); ;}
     break;
 
   case 13:
-#line 145 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 145 "x-deltat.y"
     { DO ( 0,  0, yyvsp[-2].val, yyvsp[0].val); ;}
     break;
 
   case 14:
-#line 146 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 146 "x-deltat.y"
     { DO ( 0,  0,  0, yyvsp[-1].val); ;}
     break;
 
   case 15:
-#line 147 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 147 "x-deltat.y"
     { DO (yyvsp[-6].val, yyvsp[-4].val, yyvsp[-2].val, yyvsp[0].val); ;}
     break;
 
   case 16:
-#line 148 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 148 "x-deltat.y"
     { DO ( 0, yyvsp[-4].val, yyvsp[-2].val, yyvsp[0].val); ;}
     break;
 
   case 17:
-#line 149 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 149 "x-deltat.y"
     { DO ( 0, yyvsp[-2].val, yyvsp[0].val,  0); ;}
     break;
 
   case 18:
-#line 150 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 150 "x-deltat.y"
     { DO ( 0,  0,  0, yyvsp[0].val); ;}
     break;
 
   case 20:
-#line 155 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 155 "x-deltat.y"
     { if (HOUR_NOT_OK(yyvsp[-2].val)) YYERROR;
 	                                  DO_SUM(yyval.val, yyvsp[-2].val * 3600, yyvsp[0].val); ;}
     break;
 
   case 22:
-#line 159 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 159 "x-deltat.y"
     { if (MIN_NOT_OK(yyvsp[-2].val)) YYERROR;
 	                                  DO_SUM(yyval.val, yyvsp[-2].val * 60, yyvsp[0].val); ;}
     break;
 
   case 23:
-#line 162 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 162 "x-deltat.y"
     { yyval.val = 0; ;}
     break;
 
@@ -1152,7 +1152,7 @@ yyreduce:
     }
 
 /* Line 993 of yacc.c.  */
-#line 1156 "../../../../src/lib/krb5/krb/deltat.c"
+#line 1156 "deltat.c"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1377,7 +1377,7 @@ yyreturn:
 }
 
 
-#line 165 "../../../../src/lib/krb5/krb/x-deltat.y"
+#line 165 "x-deltat.y"
 
 
 static int
