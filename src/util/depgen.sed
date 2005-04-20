@@ -68,41 +68,16 @@ s|\([^ ][^ ]*\)|\
 s;\1/[^ ]* ;;g\
 s;\1/[^ ]*$;;g\
 \
-# Recognize $(SRCTOP) and make it a variable reference.\
-# (Is this step needed, given the substitutions below?)|
+# Recognize $(SRCTOP) and variants.|
 p
 x
 
 # Drop the last (possibly empty?) word, gcc's prefix.  Then save four words.
 s, [^ ]*$,,
-
 h
-s/ .*$//
-s,\.,\\.,g
-s,^,s; ,
-s,$,/; $(SRCTOP)/;g,
-p
-x
-
-# now recognize $(srcdir) and make it a variable reference
-# too, unless followed by "/../"
-h
-s/^[^ ]* [^ ]* //
-s/[^ ]*$//
-s/\./\\./g
-s|^\(.*\)$|\
-# Now make $(srcdir) variable references, unless followed by "/../".\
-s; \1/; $(srcdir);g\
-s; $(srcdir)/\.\./; \1/../;\
-\
-# Recognize variants of $(SRCTOP).|
-p
-x
 
 # just process first "word"
-h
 s/ .*$//
-
 # replace multiple slashes with one single one
 s,///*,/,g
 # replace /./ with /

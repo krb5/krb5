@@ -1,3 +1,8 @@
+2005-04-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: Delete faulty check for $(srcdir), and redundant
+	check for $(SRCTOP).
+
 2004-12-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.sed: Don't change foo.o to $(OUTPRE)foo.$(OBJEXT) here.
