@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -7,37 +7,34 @@ dnl Figure out the top of the source and build trees.  We depend on localdir
 dnl being a relative pathname; we could make it general later, but for now 
 dnl this is good enough.
 dnl
+dnl esyscmd([test -r aclocal.m4 && echo YES])
+define([fileexists],[dnl
+pushdef([x],esyscmd([if test -r $1; then echo YES;else echo NO; fi]))dnl
+dnl Strip out newline.
+ifelse(x,[YES
+],[YES],x,[NO
+],[NO],UNKNOWN)[]popdef([x])])
+define([K5_TOPDIR],dnl
+ifelse(fileexists(./aclocal.m4),YES,[.],[dnl
+ifelse(fileexists(../aclocal.m4),YES,[..],[dnl
+ifelse(fileexists(../../aclocal.m4),YES,[../..],[dnl
+ifelse(fileexists(../../../aclocal.m4),YES,[../../..],[dnl
+ifelse(fileexists(../../../../aclocal.m4),YES,[../../../..],[dnl
+errprint(__file__:__line__: Cannot find path to aclocal.m4[
+])m4exit(1)UNKNOWN])])])])]))
+dnl
 AC_DEFUN(V5_SET_TOPDIR,[dnl
-ifdef([AC_LOCALDIR], [dnl AC_LOCALDIR exists in 2.13, but not newer autoconfs.
-ac_reltopdir=AC_LOCALDIR
-case "$ac_reltopdir" in 
-/*)
-	echo "Configure script built with absolute localdir pathname"
-	exit 1
-	;;
-"")
-	ac_reltopdir=.
-	;;
-esac
-],[
-ac_reltopdir=
-for x in . .. ../.. ../../.. ../../../..; do
-	if test "x$ac_reltopdir" = "x" -a -r "$srcdir/$x/aclocal.m4" ; then
-		ac_reltopdir=$x
-	fi
-done
-if test "x$ac_reltopdir" = "x"; then
-	echo "Configure could not determine the relative topdir"
-	exit 1
+ac_reltopdir="K5_TOPDIR"
+if test ! -r "$srcdir/K5_TOPDIR/aclocal.m4"; then
+  AC_MSG_ERROR([Configure could not determine the relative topdir])
 fi
-])
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
 krb5_pre_in=$ac_config_fragdir/pre.in
 krb5_post_in=$ac_config_fragdir/post.in
 # echo "Looking for $srcdir/$ac_config_fragdir"
 if test -d "$srcdir/$ac_config_fragdir"; then
-  AC_CONFIG_AUX_DIR($ac_config_fragdir)
+  AC_CONFIG_AUX_DIR(K5_TOPDIR/config)
 else
   AC_MSG_ERROR([can not find config/ directory in $ac_reltopdir])
 fi

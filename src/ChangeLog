@@ -1,3 +1,11 @@
+2005-04-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (fileexists, K5_TOPDIR): New macros.
+	(V5_SET_TOPDIR): Don't test for AC_LOCALDIR any more.  Use
+	K5_TOPDIR computed at autoconf time, but still verify that the
+	contents are what we expect.  Don't use shell variables in the
+	argument to AC_CONFIG_AUX_DIR.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for getpwnam_r and getpwuid_r in the
