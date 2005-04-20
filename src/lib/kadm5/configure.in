@@ -5,7 +5,6 @@ AC_PROG_AWK
 AC_CHECK_HEADERS(syslog.h memory.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
 KRB5_AC_REGEX_FUNCS
-AC_CANONICAL_HOST
 dnl The following are tests for the presence of programs required for testing 
 AC_CHECK_PROG(RUNTEST,runtest,runtest)
 AC_CHECK_PROG(PERL,perl,perl)

@@ -1,3 +1,8 @@
+2005-04-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't invoke AC_CANONICAL_HOST explicitly,
+	CONFIG_RULES already does it.
+
 2004-08-20  Tom Yu  <tlyu@mit.edu>
 
 	* admin.h (KADM5_CONFIG_NO_AUTH): New flag.
