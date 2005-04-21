@@ -841,7 +841,14 @@ be safe) and build the shared libraries anyways.
 You will also need to configure the build tree with
 @samp{--disable-thread-support} if you are on HPUX 10 and do not have
 the DCE development package installed, because that's where the
-@code{pthread.h} header file is found.
+@code{pthread.h} header file is found.  (We don't know if our code
+will work with such a package installed, because according to some HP
+documentation, their @code{pthread.h} has to be included before any
+other header files, and our code doesn't do that.)
+
+If you use GCC, it may work, but some versions of GCC have omitted
+certain important preprocessor defines, like @code{__STDC_EXT__} and
+@code{__hpux}.
 
 @node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
 @subsection Solaris versions 2.0 through 2.3

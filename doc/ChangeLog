@@ -1,3 +1,10 @@
+2005-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* build.texinfo (HPUX): Add some notes about the thread support
+	and gcc.
+
+	* defintions.texinfo (RELEASE, PREVRELEASE): Updated.
+
 2005-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* build.texinfo (HPUX): Update with current state of shared
