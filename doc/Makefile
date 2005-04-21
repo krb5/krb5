@@ -140,6 +140,15 @@ krb425-guide-info:: krb425.info
 krb425.info: $(KRB425_DEPS)
 	$(INFO) krb425.texinfo
 
+.PHONY: implementor.ps implementor.pdf implementor.info
+implementor.pdf: implementor.ps
+	$(PSPDF) implementor.ps
+implementor.ps: implementor.texinfo
+	$(DVI) implementor.texinfo
+	$(DVIPS) implementor
+implementor.info: implementor.texinfo
+	$(INFO) implementor.texinfo
+
 .PHONY: clean
 clean:: clean-all
 
@@ -152,7 +161,7 @@ clean-final::
 
 .PHONY: clean-tex
 clean-tex::
-	$(RM) *.aux *.cp *.dvi *.fn *.ky *.log *.pg *.toc *.tp *.vr
+	$(RM) *.aux *.cp *.dvi *.fn *.ky *.log *.pg *.toc *.tp *.vr *.fns *.vrs *.tps
 
 .PHONY: clean-backup
 clean-backup::

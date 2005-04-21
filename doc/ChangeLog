@@ -1,5 +1,11 @@
 2005-04-21  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile (clean-tex): Delete *.fns, *.vrs, *.tps too.
+	(implementor.pdf, implementor.ps, implementor.info): New targets.
+
+	* implementor.texinfo (Local Addresses): Drop Mac OS 9, add
+	Solaris 9, HP-UX 11.
+
 	* build.texinfo (HPUX): Add some notes about the thread support
 	and gcc.
 
