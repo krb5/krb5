@@ -1,6 +1,6 @@
-Copyright @copyright{} 1985-2002 by the Massachusetts Institute of Technology. 
+Copyright @copyright{} 1985-2002,2005 by the Massachusetts Institute of Technology.
 
-@quotation  
+@quotation
 Export of software employing encryption from the United States of
 America may require a specific license from the United States
 Government.  It is the responsibility of any person or organization
