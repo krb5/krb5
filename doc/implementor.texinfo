@@ -17,7 +17,8 @@
 @end iftex
 
 @include definitions.texinfo
-@set EDITION b7-1
+@c @set EDITION b7-1
+@set EDITION [working copy]
 
 @finalout                               @c don't print black warning boxes
 
@@ -114,7 +115,7 @@ Windows systems.
 
 Our makefiles are intended to support building from the top level with
 a POSIX-compliant version of @code{make}, and parallel builds using
-GNU @code{make}.  This sometimes comes at the cost of efficiency with
+GNU @code{make}.  The latter sometimes comes at the cost of efficiency with
 non-GNU versions; for example, some targets in some directories will
 always be rebuilt with certain versions of @code{make}, even though
 the real dependencies are not out of date, because some versions of
@@ -163,10 +164,11 @@ so don't @code{#undef} any of these names.
 @itemx struct addrinfo
 Always include the header file @file{fake-addrinfo.h} before using
 these.  If the native system doesn't provide them, the header file
-will, using static functions that will call @code{gethostbyname} and
-the like in the native libraries.  (This also happens to be the way
-the Winsock 2 headers work, depending on some of the predefined macros
-indicating the target OS version.)
+will, using support functions that will call @code{gethostbyname} and
+the like in the native libraries.  (This is similar to how the Winsock
+2 headers work, depending on some of the predefined macros indicating
+the target OS version, though they define the support functions
+directly in the header, as our code used to do.)
 
 We also provide ``wrapper'' versions on some systems where a native
 implementation exists but the data it returns is broken in some way.
@@ -195,11 +197,11 @@ consider dropping support for systems without IPv6 support.
 
 Somewhere between IRIX 6.5.14 and 6.5.16, partial IPv6 support was
 introduced to the extent that the configuration system detects the
-IPv6 support and attempts to use it. Code compiles, but then upon
+IPv6 support and attempts to use it.  Code compiles, but then upon
 linking, one discovers that ``in6addr_any'' is not defined in any
-system library. A work around the header file @file{fake-addrinfo.h}
-is provided by providing a static copy. This run time IPv6 code has
-still not been tested.
+system library.  The header file @file{fake-addrinfo.h} provides a
+static copy as a workaround.  This run time IPv6 code has still not
+been tested.
 
 Some utility functions or macros are also provided to give a
 convenient shorthand for some operations, and to retain compile-time
@@ -226,7 +228,8 @@ type checking under GCC.
 @node Local Addresses, Host Address Lookup, IPv6 Support, Top
 @chapter Local Addresses
 
-(Last update: 2002-03-13.)
+(Last update: 2005-04-21, but most of the information dates back to
+early 2002.)
 
 Different systems have different ways of finding the local network
 addresses.
@@ -238,10 +241,6 @@ address being treated as the one local network address.  Future
 versions of the Windows code should be able to actually examine local
 interfaces.
 
-On Mac OS 9 and earlier, a Mac-specific interface is used to look up
-local addresses.  Presumably, on Mac OS X we'll use that or the
-general UNIX code.
-
 On (most?) UNIX systems, there is an @code{ioctl} called
 @code{SIOCGIFCONF} which gets interface configuration information.
 The behavior of this @code{ioctl} varies across UNIX systems though.
@@ -250,16 +249,19 @@ buffer isn't big enough, the behavior isn't well defined.  Sometimes
 you get an error, sometimes you get incomplete data.  Sometimes you
 get a clear indication that more space was needed, sometimes not.  A
 couple of systems have additional @code{ioctl}s that can be used to
-determine or at least estimate the correct size for the buffer.
-Solaris has introduced @code{SIOCGLIFCONF} for querying IPv6
+determine or at least estimate the correct size for the buffer.  In
+Solaris, Sun has introduced @code{SIOCGLIFCONF} for querying IPv6
 addresses, and restricts @code{SIOCGIFCONF} to IPv4 only.  (** We
-should actually check if that's true.)
+should actually check if that's true.)  They also added
+@code{SIOCGIFNUM} and @code{SIOCGLIFNUM} for querying the number of
+interfaces.  HP-UX 11 also has @code{SIOCGLIFCONF}, but it requires a
+different data structure, and we haven't finished that support yet.
 
 We (Ken Raeburn in particular) ran some tests on various systems to
 see what would happen with buffers of various sizes from much smaller
 to much larger than needed for the actual data.  The buffers were
 filled with specific byte values, and then checked to see how much of
-the buffer was actually written to.  The "largest gap" values listed
+the buffer was actually written to.  The ``largest gap'' values listed
 below are the largest number of bytes we've seen left unused at the
 end of the supplied buffer when there were more entries to return.
 These values may of coures be dependent on the configurations of the
@@ -277,8 +279,8 @@ is used; sometimes N-1 bytes; occasionally, the buffer must have quite
 a bit of extra room before the next structure will be added.  Largest
 gap: 39.
 
-Solaris 7,8: Return @code{EINVAL} if the buffer space is too small for
-all the data to be returned, including when @code{ifc_len} is 0.
+Solaris 7,8,9: Return @code{EINVAL} if the buffer space is too small
+for all the data to be returned, including when @code{ifc_len} is 0.
 Solaris is the only system I've found so far that actually returns an
 error.  No gap.  However, @code{SIOCGIFNUM} may be used to query the
 number of interfaces.
@@ -304,14 +306,14 @@ interfaces.  Sometimes it's smaller than the supplied value, even if
 the returned list is truncated.  The list is filled in with as many
 entries as will fit; no overrun.  Largest gap: 143.
 
-Older AIX: We're told by W. David Shambroom (DShambroom@@gte.com) in
-PR krb5-kdc/919 that older versions of AIX have a bug in the
-@code{SIOCGIFCONF} @code{ioctl} which can cause them to overrun the
-supplied buffer.  However, we don't yet have details as to which
-version, whether the overrun amount was bounded (e.g., one
-@code{ifreq}'s worth) or not, whether it's a real buffer overrun or
-someone assuming it was because @code{ifc_len} was increased, etc.
-Once we've got details, we can try to work around the problem.
+Older AIX: We're told by W. David Shambroom in RT ticket 919 that
+older versions of AIX have a bug in the @code{SIOCGIFCONF}
+@code{ioctl} which can cause them to overrun the supplied buffer.
+However, we don't yet have details as to which version, whether the
+overrun amount was bounded (e.g., one @code{ifreq}'s worth) or not,
+whether it's a real buffer overrun or someone assuming it was because
+@code{ifc_len} was increased, @i{etc}.  Once we've got details, we can
+try to work around the problem.
 
 Digital UNIX 4.0F: If input @code{ifc_len} is zero, return an
 @code{ifc_len} that's big enough to include all entries.  (Actually,
@@ -326,8 +328,8 @@ indicated when the input @code{ifc_len} is zero is larger.  (We got
 
 So... if the returned @code{ifc_len} is bigger than the supplied one,
 we'll need at least that much space -- but possibly more -- to hold
-all the results.  If the returned value is smaller or the same, we may
-still need more space.
+all the results.  If the returned value is a little smaller or the
+same, we may still need more space.
 
 The heuristic we're using on most systems now is to keep growing the
 buffer until the unused space is larger than an @code{ifreq} structure
@@ -341,7 +343,7 @@ does not support looking up IPv6 addresses, both of which are becoming
 more important.  New standards have been in development that should
 address both of these problems.  The most promising is
 @code{getaddrinfo} and friends, which is part of the Austin Group and
-UNIX 98(?) specifications.  Code in the MIT tree is gradually being
+UNIX 98(?) specifications.  Code in the MIT tree has mostly been
 converted to use this interface.
 
 @quotation
@@ -459,13 +461,9 @@ these functions anyways.  And if they don't, they probably don't have
 real IPv6 support either.
 
 Including @file{fake-addrinfo.h} will enable the wrapper or
-replacement versions when needed.  Depending on the system
-configuration, this header file may define several static functions
-(and declare them @code{inline} under GNU C), and leave it to the
-compiler to discard any unused code.  This may produce warnings on
-some systems, and if the compiler isn't being too clever, may cause
-several kilobytes of excess storage to be consumed on these backwards
-systems.
+replacement versions when needed.  The functions are actually defined
+in the support library in @file{src/util/support}, added in the 1.4
+release.
 
 Do not assume that @code{ai_canonname} will be set when the
 @code{AI_CANONNAME} flag is set.  Check for a null pointer before
@@ -608,17 +606,19 @@ If @code{pthread_once} is not provided in functional form in the
 default libraries, and weak references are not supported, we always
 link against the pthread libraries.  (Tru64, AIX.)
 
-System routines: getaddrinfo (not always implemented thread-safe),
-gethostbyname_r, gmtime_r, getpwnam_r, res_nsearch.
+System routines: @code{getaddrinfo} (not always implemented
+thread-safe), @code{gethostbyname_r}, @code{gmtime_r},
+@code{getpwnam_r} (but interfaces vary, see @file{k5-platform.h}),
+@code{res_nsearch} (but watch for resource leaks).
 
-Unsafe system routines: setenv, setlocale.
+Unsafe system routines: @code{setenv}, @code{setlocale}.
 
 @node Internal Thread API,  , Thread System Requirements, Thread Safety
 @section Internal Thread API
 
 Some ideas were discussed on the @samp{krbdev} mailing list, and while
 the current implementation does largely resemble the scheme Ken
-Raeburn proposed.
+Raeburn proposed, some details have changed.
 
 The following macros in @file{k5-thread.h} implement a locking scheme
 similar to POSIX threads, with fewer features.
@@ -640,11 +640,11 @@ The mutex may be used only within the current process.  It should not
 be created in memory shared between processes.  (Will it work in a
 child process after @code{fork()}?  I think so.)
 
-Depending on compile-time options, the @code{k5_mutex_t} object may
-contain more than an operating-system mutex; it may also contain
-debugging information such as the file and line number in the Kerberos
-code where the last mutex operation was performed, information for
-gathering statistics on mutex usage, @i{etc}.
+The @code{k5_mutex_t} object contains more than an operating-system
+mutex; it may also contain debugging information such as the file and
+line number in the Kerberos code where the last mutex operation was
+performed, information for gathering statistics on mutex usage,
+@i{etc}., depending on compile-time options.
 
 This type @emph{is not} a simple typedef for the native OS mutex
 object, to prevent programmers from accidentally assuming that
@@ -653,6 +653,18 @@ available.  (If someone wishes to make use of native thread system
 features in random library code, they'll have to go further out of
 their way to do it, and such changes probably won't be accepted in the
 main Kerberos code base at MIT.)
+
+If thread support is disabled, a simple flag will be stored in place
+of the operating-system mutex.  This flag indicates the ``locked''
+state, and is checked in the @code{k5_mutex_lock} and
+@code{k5_mutex_unlock} macros so that we can detect some cases of
+improperly written code even if thread support is not built in.  The
+other debugging fields will still be present as well.
+
+If POSIX thread support and weak references are available, both the
+POSIX mutex and a flag will be included; which one is used is
+determined at run time depending on whether the thread support
+routines are available.
 @end deftp
 
 @defvr Macro K5_MUTEX_PARTIAL_INITIALIZER
@@ -710,7 +722,7 @@ code and other stuff.  So the Kerberos library code should use the
 macros above, and ports to new thread systems should be done through
 the @code{k5_os_} layer.
 
-Thread-local storage is managed through another interface layer
+Thread-local storage is managed through another interface layer:
 
 @deftp {Enumerator} k5_key_t
 This is an enumeration type which indicates which of the per-thread
@@ -786,10 +798,10 @@ can be supported on a system, unless the multi-version library is
 constructed by a programmer familiar with the AIX internals.}
 
 All operating systems (that we have seen) provide a means for programs
-to specify the location of shared libraries. On different operating
+to specify the location of shared libraries.  On different operating
 systems, this is either specified when creating the shared library, and
 link time, or both.@footnote{Both are necessary sometimes as the shared
-libraries are dependent on other shared libraries} The build process
+libraries are dependent on other shared libraries.}  The build process
 will hardwire a path to the installed destination.
 
 @node Advanced Shared Library Requirements, Operating System Notes for Shared Libraries, Shared Library Theory, Shared Libraries
@@ -841,12 +853,48 @@ On Windows, the library initialization function is run from
 @file{win_glue.c} at load time; it should complete before the
 library's symbol table is made accessible to the calling process.
 
+Windows note: There are limitations on what @code{DllMain} should do
+in the initialization and finalization cases, and unfortunately we've
+found that we do some of these things (specifically, calling
+@code{WSAStartup} and @code{WSACleanup}, and loading other libraries
+which do so also).  Until we can rectify this problem, there is a
+chance that explicitly unloading an MIT Kerberos library from an
+application (more specifically, from within the @code{DllMain} of
+another library) may cause a deadlock.
 @end itemize
 
-The library finalization code is similarly platform-dependent.  If the
-compiler or linker lets us specify that a function should be called as
-a finalization function (for example, @code{gcc}'s ``destructor''
-attribute), we use it.
+Library finalization is similarly dependent on the platform and
+configuration:
+
+@itemize @bullet
+
+@item
+In static-library builds, since the library will be unloaded only when
+the entire process calls @code{exit} or @code{exec} or otherwise
+ceases to exist in its current form, freeing up memory resources in
+the process, finalization can be skipped.
+
+@item
+On UNIX platforms with library finalization support in shared
+libraries, the (OS-level) finalization function is specified to run
+the library's (shim-level) finalization function.  If @code{gcc}'s
+``destructor'' attribute appears to work, we use that.
+
+@item
+On UNIX platforms without library finalization function support,
+the finalization functions won't get called if the library is
+unloaded.  Resources (probably just memory) will be leaked.
+
+@item
+On Windows, the finalization code is run out of @code{DllMain} in
+@file{win_glue.c} at unload time.  See the warnings above.
+
+@end itemize
+
+If there are other limitations on what operations can be performed in
+shared library initialization and finalization routines on some
+systems, the MIT Kerberos team would appreciate specific information
+on these limitations.
 
 The internal interface currently used within the code of the Kerberos
 libraries consists of four macros:
@@ -860,19 +908,19 @@ be defined in the current file as:
 @example
 int @var{fname} (void) @{ ... @}
 @end example
-This macro will define additional data and possibly function objects,
+This macro may define additional data and function objects,
 and will declare @var{fname}, though it may or may not declare
 @var{fname} as @code{static}.  (Under C rules, the declaration above
 is compatible with a declaration of the function as @code{static}, and
-@code{static} does apply, as long as the @code{static} declaration
+@code{static} linkage does apply, as long as the @code{static} declaration
 comes first.)
 
 When the function is invoked, the return value --- zero or an error
 code --- will be saved away, and returned any time
 @code{CALL_INIT_FUNCTION} is used.
 
-There may be only one initialization function declared this way in
-each UNIX library, currently.
+There can be multiple initialization functions defined this way in a
+library.
 @end defmac
 
 @defmac MAKE_FINI_FUNCTION (@var{fname})
@@ -883,8 +931,7 @@ no longer in use and is being unloaded from the address space.
 void @var{fname} (void) @{ ... @}
 @end example
 
-There may be only one finalization function declared this way in each
-UNIX library, currently.
+There may be multiple finalization functions defined for a library.
 @end defmac
 
 @deftypefn Macro int CALL_INIT_FUNCTION (@var{fname})
@@ -911,6 +958,13 @@ finalization functions should check whether the objects to be
 destroyed have actually been created.  This macro provides one way of
 doing that.
 @end deftypefn
+
+The @file{Makefile.in} for the library must define two variables,
+@code{LIBINITFUNC} and @code{LIBFINIFUNC}, containing a (possibly
+empty) list of the names of the initialization and finalization
+functions for the library as built under UNIX, ordered from
+lowest-level (initialized first, finalized last) to highest-level.
+(Windows and Mac OS X builds work differently.)
 
 Note that all of this assumes shared libraries.  If static linking is
 done, our options are a bit more limited.  We assume
@@ -944,9 +998,11 @@ The export lists are stored in the directories in which each UNIX
 library is built, and the commands set up at configuration time by
 @file{shlib.conf} can specify any processing to be done on those files
 (@i{e.g.}, insertion of leading underscores or linker command-line
-arguments.
+arguments).
 
-(updated 7/20/2004)
+For some systems with somewhat non-trivial commands that need to be
+run to convert the export list into the proper form, file targets can be
+defined in @file{config/lib.in}.  
 
 @node Operating System Notes for Shared Libraries,  , Advanced Shared Library Requirements, Shared Libraries
 @section Operating System Notes for Shared Libraries

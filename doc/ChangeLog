@@ -1,10 +1,23 @@
 2005-04-21  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile (clean-tex): Delete *.fns, *.vrs, *.tps too.
-	(implementor.pdf, implementor.ps, implementor.info): New targets.
-
 	* implementor.texinfo (Local Addresses): Drop Mac OS 9, add
 	Solaris 9, HP-UX 11.
+	(IPv6 Support, Host Address Lookup): Update for fake getaddrinfo
+	code moved to support library.
+	(Thread System Requirements): Use @code when listing function
+	names.  Add a couple notes about some problematic routines.
+	(Internal Thread API): Update k5_mutex_t description to indicate
+	there's always non-OS data included.  Describe case where thread
+	support is disabled.
+	(Advanced Shared Library Requirements): Describe recently raised
+	Windows DllMain issues.  Describe finalization code.  Multiple
+	init/fini functions are now allowed in a library.  Describe
+	LIBINITFUNC and LIBFINIFUNC makefile variables.  Mention lib.in
+	can have rules for generating temporary files for dealing with
+	export lists.
+
+	* Makefile (clean-tex): Delete *.fns, *.vrs, *.tps too.
+	(implementor.pdf, implementor.ps, implementor.info): New targets.
 
 	* build.texinfo (HPUX): Add some notes about the thread support
 	and gcc.
