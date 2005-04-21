@@ -1,3 +1,8 @@
+2005-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* depgen.sed: Deleted.
+	* depfix2.pl: New file.
+
 2005-04-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* depgen.sed: Delete faulty check for $(srcdir), and redundant

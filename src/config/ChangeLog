@@ -1,3 +1,10 @@
+2005-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (depend-dependencies): Use (and depend on) depfix2.pl
+	instead of .depfix2.sed.
+	(.depfix2.sed): Target deleted.
+	(DEPTARGETS): Delete .depfix2.sed and .depfix2.tmp.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* lib.in (hpux10.exports): New target, constructed similar to
