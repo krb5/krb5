@@ -56,7 +56,6 @@ This file contains internal implementor's information for the
 @c is:
 @c
 @c @node New Section Name
-
 @c @section New Section Name
 @c
 @c M-x texinfo-every-node-update will take care of calculating the
@@ -67,10 +66,7 @@ This file contains internal implementor's information for the
 @menu
 * Introduction::                
 * Compiler and OS Requirements::  
-* Socket API::                  
-* IPv6 Support::                
-* Local Addresses::             
-* Host Address Lookup::         
+* Networking::                  
 * Thread Safety::               
 * Shared Libraries::            
 * Porting Issues::              
@@ -84,7 +80,7 @@ This file contains internal implementor's information for
 from install.texi; eventually it will have more detailed information on
 the internals of the @value{PRODUCT}.
 
-@node Compiler and OS Requirements, Socket API, Introduction, Top
+@node Compiler and OS Requirements, Networking, Introduction, Top
 @chapter Compiler and OS Requirements
 
 The basic Kerberos libraries are entirely written in C.
@@ -124,8 +120,18 @@ targets to manage building in subdirectories in parallel builds.
 (Actually, this is more my view of how we've been doing things than
 official policy.  ---Ken)
 
-@node Socket API, IPv6 Support, Compiler and OS Requirements, Top
-@chapter Socket API
+@node Networking, Thread Safety, Compiler and OS Requirements, Top
+@chapter Networking
+
+@menu
+* Socket API::                  
+* IPv6 Support::                
+* Local Addresses::             
+* Host Address Lookup::         
+@end menu
+
+@node Socket API, IPv6 Support, Networking, Networking
+@section Socket API
 
 Someone should describe the API subset we're allowed to use with
 sockets, how and when to use @code{SOCKET_ERRNO}, @i{etc}.
@@ -133,8 +139,8 @@ sockets, how and when to use @code{SOCKET_ERRNO}, @i{etc}.
 Note that all new code doing hostname and address translation should
 use @code{getaddrinfo} and friends.  (@xref{Host Address Lookup}.)
 
-@node IPv6 Support, Local Addresses, Socket API, Top
-@chapter IPv6 Support
+@node IPv6 Support, Local Addresses, Socket API, Networking
+@section IPv6 Support
 
 Most of the IPv6 support is keyed on the macro @code{KRB5_USE_INET6}.
 If this macro is not defined, there should be no references to
@@ -225,8 +231,8 @@ type checking under GCC.
 
 @end table
 
-@node Local Addresses, Host Address Lookup, IPv6 Support, Top
-@chapter Local Addresses
+@node Local Addresses, Host Address Lookup, IPv6 Support, Networking
+@section Local Addresses
 
 (Last update: 2005-04-21, but most of the information dates back to
 early 2002.)
@@ -335,8 +341,8 @@ The heuristic we're using on most systems now is to keep growing the
 buffer until the unused space is larger than an @code{ifreq} structure
 by some safe margin.
 
-@node Host Address Lookup, Thread Safety, Local Addresses, Top
-@chapter Host Address Lookup
+@node Host Address Lookup,  , Local Addresses, Networking
+@section Host Address Lookup
 
 The traditional @code{gethostbyname} function is not thread-safe, and
 does not support looking up IPv6 addresses, both of which are becoming
@@ -469,7 +475,7 @@ Do not assume that @code{ai_canonname} will be set when the
 @code{AI_CANONNAME} flag is set.  Check for a null pointer before
 using it.
 
-@node Thread Safety, Shared Libraries, Host Address Lookup, Top
+@node Thread Safety, Shared Libraries, Networking, Top
 @chapter Thread Safety
 
 Work is still needed as this section is being written.  However, we've
