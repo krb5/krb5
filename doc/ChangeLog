@@ -19,6 +19,7 @@
 	(Internal Thread API): Move the k5_os_ descriptions there.
 	(Networking): New chapter node, incorporates Socket API, IPv6
 	Support, Local Addresses, and Host Address Lookup.
+	(Porting Issues): Fix up formatting.
 
 	* Makefile (clean-tex): Delete *.fns, *.vrs, *.tps too.
 	(implementor.pdf, implementor.ps, implementor.info): New targets.

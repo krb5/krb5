@@ -1127,22 +1127,22 @@ config/post.in are incorporated into each generate Makefile.  Various
 configure options.  (Aside from always using the config/ fragments,
 this is typical of GNU Autoconf based software configuration.)
 
-Windows host: The "wconfig" program generates the Makefiles in
+Windows host: The ``wconfig'' program generates the Makefiles in
 subdirectories, with config/win-pre.in and config/win-post.in used in
-combination with each Makefile.in, and lines starting "##WIN32##" are
-uncommented, but @@FOO@@ substitutions are not done.  Instead of
-generating autoconf.h, it's copied from include/win-mac.h, where we've
-hardcoded some of the parameters we care about, and just left a bunch
-of others out.  If you work with a Windows host, you may want to
-provide your own makefile fragments, and a replacement for win-mac.h
-or some additional data to go into it conditionalized on some
-preprocessor symbol for pSOS.
+combination with each Makefile.in, and lines starting @code{##WIN32##}
+are uncommented, but @code{@@FOO@@} substitutions are not done.
+Instead of generating @file{autoconf.h}, it's copied from
+@file{include/win-mac.h}, where we've hardcoded some of the parameters
+we care about, and just left a bunch of others out.  If you work with
+a Windows host, you may want to provide your own makefile fragments,
+and a replacement for @file{win-mac.h} or some additional data to go
+into it conditionalized on some preprocessor symbol for pSOS.
 
 There are also places where we assume that certain header files or
 functions are available, because both (most) UNIX and Windows
 platforms (that we care about currently) provide them.  And probably a
-handful of places where we check for _WIN32 to decide between "the
-Windows way" and "everything else" (i.e., UNIX); you might need to add
+handful of places where we check for @code{_WIN32} to decide between ``the
+Windows way'' and ``everything else'' (i.e., UNIX); you might need to add
 a third branch for pSOS.  And some places where we've got hooks for
 Kerberos for Mac support, which you can probably ignore.
 
@@ -1156,18 +1156,18 @@ build those programs.
 In the current 1.4 beta code, our library wants to find routines for
 making DNS queries (SRV and TXT RR queries specifically) that are
 outside the scope of getaddrinfo and friends.  We also look for
-/dev/random as a strong random number source, and text files for
-configuration information.  Our code assumes that allocating and
+@file{/dev/random} as a strong random number source, and text files
+for configuration information.  Our code assumes that allocating and
 reallocating lots of little (or not so little) bits of memory isn't
 too horribly expensive, and we don't take any special pains to keep
 our stack size small.  Depending how pSOS works, you may need to add
 to the thread support code.  (The MIT code doesn't create threads, but
 will do locking and such to allow multiple threads to share global
-data.  The code in include/k5-thread.h is, uh, kind of involved, and
-some pains have been taken to use macros whenever possible to allow
-assert() calls during debugging to report useful line numbers.)  There
-are probably other minor issues to deal with, I'm just making some
-guesses.
+data.  The code in @file{include/k5-thread.h} is, uh, kind of
+involved, and some pains have been taken to use macros whenever
+possible to allow @code{assert()} calls during debugging to report
+useful line numbers.)  There are probably other minor issues to deal
+with, I'm just making some guesses.
 
 > - what type of Data formats exchanged between Client and Server?
 
@@ -1187,7 +1187,6 @@ If you want client code support as well under pSOS, then you may have
 to deal with DNS queries to find the KDC,
 AS-REQ/AS-REP/TGS-REQ/TGS-REP message exchanges, and generating AP-REQ
 and accepting AP-REP messages, etc.
-
 
 @contents
 @bye
