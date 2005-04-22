@@ -479,6 +479,7 @@ made a lot of progress.
 * Kerberos API Thread Safety::  
 * Thread System Requirements::  
 * Internal Thread API::         
+* Thread Shim Layer Implementation::  
 @end menu
 
 @node Kerberos API Thread Safety, Thread System Requirements, Thread Safety, Thread Safety
@@ -613,7 +614,7 @@ thread-safe), @code{gethostbyname_r}, @code{gmtime_r},
 
 Unsafe system routines: @code{setenv}, @code{setlocale}.
 
-@node Internal Thread API,  , Thread System Requirements, Thread Safety
+@node Internal Thread API, Thread Shim Layer Implementation, Thread System Requirements, Thread Safety
 @section Internal Thread API
 
 Some ideas were discussed on the @samp{krbdev} mailing list, and while
@@ -710,17 +711,15 @@ a single macro returning the current state, to be checked with
 @code{assert}.
 @end deftypefn
 
-Mutexes are assumed not to be recursive (@i{i.e.}, if a thread has the
-mutex locked already, attempting to lock it again is an error).  There
-is also no support assumed for ``trylock'' or ``lock with timeout''
-operations.
+Mutexes should be assumed not to be recursive; if a thread has the
+mutex locked already, attempting to lock it again is an error and may
+have unpredictable results (error return, abort, data corruption).
+There is also no support assumed for ``trylock'' or ``lock with
+timeout'' operations.
 
-The operating system interface is similar to the above interface, with
-@code{k5_os_} names used for the OS mutex manipulation code.  The type
-and macros indicated above are wrappers that optionally add debugging
-code and other stuff.  So the Kerberos library code should use the
-macros above, and ports to new thread systems should be done through
-the @code{k5_os_} layer.
+Kerberos library code should use the macros above, and ports to new
+thread systems should be done through the @code{k5_os_} layer.
+(@xref{Thread Shim Layer Implementation}.)
 
 Thread-local storage is managed through another interface layer:
 
@@ -758,6 +757,29 @@ they'll be in the Kerberos support library, and any exported symbols
 will use the @code{krb5int_} prefix.  The shorter @code{k5_} prefix is
 just for convenience, and should not be visible to any application
 code.
+
+@node Thread Shim Layer Implementation,  , Internal Thread API, Thread Safety
+@section Thread Shim Layer Implementation
+
+Each of the @code{k5_mutex_} macros has a corresponding
+@code{k5_os_mutex_} macro which incorporates the operating system's
+mutex object, a flag for non-threaded systems, or both if the use of
+the OS pthread support is left until run time.  The @code{k5_mutex_}
+wrappers add debugging information like the file and line number of
+the last lock or unlock call, where the mutex was created, @i{etc}.
+There may also be statistical information gathered, such as how long a
+thread waits for a mutex or how long the mutex is held.  This is all
+defined in @file{k5-thread.h}.
+
+The thread-specific storage support is defined as macros expanding to
+similar function names with the @code{krb5int_} prefix, which
+functions are defined in @file{util/support/threads.c}.  POSIX,
+Windows, and non-threaded versions are defined so far.
+
+The code for collecting and reporting statistics is also mainly in
+that file.  Macros defined in @file{k5-thread.h} will expand to
+include calls to these functions, if @code{DEBUG_THREADS_STATS} is
+defined, or do nothing.
 
 @node Shared Libraries, Porting Issues, Thread Safety, Top
 @chapter Shared Libraries
