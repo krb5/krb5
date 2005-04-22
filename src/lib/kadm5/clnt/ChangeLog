@@ -1,3 +1,13 @@
+2005-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (kadm5_get_init_creds, kadm5_gic_iter) 
+	(kadm5_setup_gss, kadm5_rpc_auth): New functions, containing parts
+	of _kadm5_init_any.
+	(_kadm5_init_any): Bits broken out into helper functions.
+	(kadm5_get_init_creds): Fall back from kadmin/fqdn to kadmin/admin
+	if NULL service name passed in.
+	(kadm5_rpc_auth): Fall back from RPCSEC_GSS to AUTH_GSSAPI.
+
 2004-10-25  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c (_kadm5_init_any): Pass req_flags and cred to

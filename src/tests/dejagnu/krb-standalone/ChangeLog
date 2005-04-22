@@ -1,3 +1,24 @@
+2005-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp (kadmin_add_rnd): Add "flags" arg, defaulting to
+	empty string.
+	(kadmin_test): Add test for fallback to kadmin/admin if
+	kadmin/fqdn is missing.
+
+2005-01-14  Tom Yu  <tlyu@mit.edu>
+
+	* kadmin.exp (kadmin_list): Check for communication failure.
+	(kadmin_test): Create a large number of principals, then attempt
+	to list, in order to check for fixed-size buffer problems in
+	RPCSEC_GSS.
+
+2004-12-20  Tom Yu  <tlyu@mit.edu>
+
+	* pwhist.exp: New file.  Perform some sanity checking on password
+	history mechanism, including erroneous loss of history when
+	growing the history array.  Also tries to trigger some known
+	buffer overflows and memory leaks.
+
 2004-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.exp (run_client, doit): Use portbase to compute all port

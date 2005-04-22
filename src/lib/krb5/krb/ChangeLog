@@ -1,3 +1,52 @@
+2005-03-22  Tom Yu  <tlyu@mit.edu>
+
+	* x-deltat.y (wsnum): Add missing semicolon following YYERROR,
+	which was preventing bison-1.75 from producing compilable C
+	output.
+
+	* gic_keytab.c (krb5_get_init_creds_keytab): When calling
+	krb5_get_init_creds() for the second time (with use_master=1),
+	also accept KRB5_REALM_UNKNOWN as a soft error, and use the result
+	from the first call to krb5_get_init_creds().  This can happen
+	when no master KDC is configured.
+
+2005-03-14  Jeffrey Altman <jaltman@mit.edu>
+
+        * Makefile.in: fix maintainer mode since it is not supported on 
+          Windows.
+
+2005-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* x-deltat.y (tok_WS): Renamed terminal from "WS", which conflicts
+	with HP-UX 10 header files.  Updated all productions.
+	(mylex): Updated.
+	* Makefile.in ($(srcdir)/deltat.c): Enable dependencies in
+	maintainer mode.
+	* deltat.c: Updated.
+
+2005-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* gic_pwd.c (krb5_get_init_creds_password): Fix so empty password
+	string causes prompting and doesn't cause truncation of password
+	to zero characters.
+
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+        * unparse.c: krb5_unparse_name, krb5_unparse_name_ext()
+          prevent null pointer dereferencing if either 'name' or 'size'    
+          are NULL.
+
+2005-01-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * cp_key_cnt.c, copy_princ.c:
+          prevent krb5_copy_principal() and krb5_copy_keyblock() from
+          calling malloc(0).  On platforms in which malloc(0) returns   
+          NULL, these functions will return an ENOMEM error the way
+          they were written.  
+
+2005-01-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* parse.c (krb5_parse_name): Don't cache the default realm name.
+
 2004-10-26  Tom Yu  <tlyu@mit.edu>
 
 	* mk_req_ext.c (krb5_mk_req_extended): Free keyblock before

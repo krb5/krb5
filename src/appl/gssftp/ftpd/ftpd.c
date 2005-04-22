@@ -260,6 +260,7 @@ static void end_login(void);
 static int disallowed_user(char *);
 static int restricted_user(char *);
 static int checkuser(char *);
+static char *gunique(char *);
 
 #ifdef SETPROCTITLE
 char	**Argv = NULL;		/* pointer to argument vector */
@@ -293,9 +294,9 @@ main(argc, argv, envp)
 	extern char *optarg;
 	extern int optopt;
 #ifdef KRB5_KRB4_COMPAT
-	char *option_string = "AaCcdlp:r:s:T:t:U:u:vw:";
+	char *option_string = "AaCcdElp:r:s:T:t:U:u:vw:";
 #else /* !KRB5_KRB4_COMPAT */
-	char *option_string = "AaCcdlp:r:T:t:U:u:vw:";
+	char *option_string = "AaCcdElp:r:T:t:U:u:vw:";
 #endif /* KRB5_KRB4_COMPAT */
 	ftpusers = _PATH_FTPUSERS_DEFAULT;
 
@@ -326,6 +327,11 @@ main(argc, argv, envp)
 
 		case 'd':
 			debug = 1;
+			break;
+
+		case 'E':
+			if (!authlevel)
+				authlevel = AUTHLEVEL_AUTHENTICATE;
 			break;
 
 		case 'l':
@@ -1274,7 +1280,6 @@ store_file(name, fmode, unique)
 	FILE *fout, *din;
 	struct stat st;
 	int (*closefunc)();
-	static char *gunique();
 
 	if (logging > 1) syslog(LOG_NOTICE, "put %s", path_expand(name));
 

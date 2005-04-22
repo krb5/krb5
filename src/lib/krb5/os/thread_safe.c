@@ -1,7 +1,7 @@
 /*
- * lib/kdb/setup_mkey.c
+ * lib/krb5/os/thread_safec
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,51 +24,17 @@
  * or implied warranty.
  * 
  *
- * krb5_kdb_setup_mkey()
+ * krb5_is_thread_safe() function.
  */
 
 #include "k5-int.h"
 
-/*
- * Given a key name and a realm name, construct a principal which can be used
- * to fetch the master key from the database.
- * 
- * If the key name is NULL, the default key name will be used.
- */
-
-#define	REALM_SEP_STRING	"@"
-
-krb5_error_code
-krb5_db_setup_mkey_name(context, keyname, realm, fullname, principal)
-    krb5_context context;
-    const char *keyname;
-    const char *realm;
-    char **fullname;
-    krb5_principal *principal;
+krb5_boolean KRB5_CALLCONV
+krb5_is_thread_safe(void)
 {
-    krb5_error_code retval;
-    size_t keylen;
-    size_t rlen = strlen(realm);
-    char *fname;
-    
-    if (!keyname)
-	keyname = KRB5_KDB_M_NAME;	/* XXX external? */
-
-    keylen = strlen(keyname);
-	 
-    fname = malloc(keylen+rlen+strlen(REALM_SEP_STRING)+1);
-    if (!fname)
-	return ENOMEM;
-
-    strcpy(fname, keyname);
-    strcat(fname, REALM_SEP_STRING);
-    strcat(fname, realm);
-
-    if ((retval = krb5_parse_name(context, fname, principal)))
-	return retval;
-    if (fullname)
-	*fullname = fname;
-    else
-	free(fname);
+#if defined(ENABLE_THREADS)
+    return 1;
+#else
     return 0;
+#endif
 }

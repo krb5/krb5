@@ -212,7 +212,8 @@ functions which parse the Kerberos configuration files (@code{krb5.conf}
 and @code{kdc.conf}).  Also in this directory are the Kerberos error table
 library and utilities (@i{et}), the Sub-system library and utilities
 (@i{ss}), database utilities (@i{db2}), pseudo-terminal utilities
-(@i{pty}), and bug-reporting program @code{send-pr}.
+(@i{pty}), bug-reporting program @code{send-pr}, and a generic
+support library @code{support} used by several of our other libraries.
 
 @node Build Requirements, Unpacking the Sources, Organization of the Source Directory, Building Kerberos V5
 @section Build Requirements
@@ -232,6 +233,8 @@ If you wish to keep a separate @dfn{build tree}, which contains the compiled
 will need a @samp{make} program which supports @samp{VPATH}, or
 you will need to use a tool such as @samp{lndir} to produce a symbolic
 link tree for your build tree.
+
+@c Library support...
 
 @node Unpacking the Sources, Doing the Build, Build Requirements, Building Kerberos V5
 @section Unpacking the Sources
@@ -366,6 +369,11 @@ libraries into @code{DESTDIR/PREFIX/lib}, etc.
 
 Note that if you want to test the build (see @ref{Testing the Build}),
 you usually do not need to do a @code{make install} first.
+
+Some implementations of @samp{make} allow multiple commands to be run in
+parallel, for faster builds.  We test our Makefiles in parallel builds with
+GNU @samp{make} only; they may not be compatible with other parallel build
+implementations.
 
 @node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
 @section Testing the Build
@@ -894,6 +902,12 @@ Run something like
 
 as root, where @code{nnnn} is the pid of the shell whose priority
 limit you wish to raise.
+
+Sun has released kernel patches for this race condition.  Apply patch
+117171-11 for sparc, or patch 117172-11 for x86.  Later revisions of
+the patches should also work.  It is not necessary to run ``make
+check'' from a shell with elevated priority limits once the patch has
+been applied.
 
 @node SGI Irix 5.X, Ultrix 4.2/3, Solaris 9, OS Incompatibilities
 @subsection SGI Irix 5.X

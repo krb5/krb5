@@ -5,6 +5,7 @@ kadmin \- Kerberos V5 database administration program
 .TP
 .B kadmin
 .ad l
+[\fB\-O\fP | \fB\-N\fP]
 [\fB\-r\fP \fIrealm\fP] [\fB\-p\fP \fIprincipal\fP] [\fB\-q\fP \fIquery\fP]
 .br
 [[\fB-c\fP \fIcache_name\fP] | [\fB-k\fP [\fB-t\fP
@@ -140,7 +141,12 @@ to prompt for the master database password.
 \fB\-e\fP \fIenc:salt_list\fP
 Sets the list of encryption types and salt types to be used for any new
 keys created.
-
+.TP
+.B \-O
+Force use of old AUTH_GSSAPI authentication flavor.
+.TP
+.B \-N
+Prevent fallback to AUTH_GSSAPI authentication flavor.
 .SH DATE FORMAT 
 Various commands in kadmin can take a variety of date formats,
 specifying durations or absolute times.  Examples of valid formats are:

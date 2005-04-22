@@ -203,7 +203,7 @@ else {
 &Pick('>', $outfile) &&
     (print $fh 'extern void initialize_' . $table_name .
 
-      '_error_table () /*@modifies internalState@*/;');
+      '_error_table (void) /*@modifies internalState@*/;');
 &Pick('>', $outfile) &&
     (print $fh '#else');
 &Pick('>', $outfile) &&

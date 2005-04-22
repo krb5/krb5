@@ -191,10 +191,10 @@ install-unix:: install-libs
 
 install-unix::
 	for i in $(SRC_HDRS); do \
-		(set -x; $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(KRB5_INCDIR)$(S)$$i) ; \
+		(set -x; $(INSTALL_DATA) $(srcdir)/$$i $(DESTDIR)$(KRB5_INCDIR)$(S)gssrpc$(S)$$i) ; \
 	done
 	for i in $(BUILD_HDRS); do \
-		(set -x; $(INSTALL_DATA) $$i $(DESTDIR)$(KRB5_INCDIR)$(S)$$i) ; \
+		(set -x; $(INSTALL_DATA) $$i $(DESTDIR)$(KRB5_INCDIR)$(S)gssrpc$(S)$$i) ; \
 	done
 
 BUILD_HDRS = types.h

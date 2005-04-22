@@ -44,19 +44,43 @@
    At top level, before the functions are defined or even declared:
    MAKE_INIT_FUNCTION(init_fn);
    MAKE_FINI_FUNCTION(fini_fn);
+   Then:
    int init_fn(void) { ... }
    void fini_fn(void) { if (INITIALIZER_RAN(init_fn)) ... }
-
    In code, in the same file:
    err = CALL_INIT_FUNCTION(init_fn);
 
    To trigger or verify the initializer invocation from another file,
-   an additional function must be created.
+   a helper function must be created.
+
+   This model handles both the load-time execution (Windows) and
+   delayed execution (pthread_once) approaches, and should be able to
+   guarantee in both cases that the init function is run once, in one
+   thread, before other stuff in the library is done; furthermore, the
+   finalization code should only run if the initialization code did.
+   (Maybe I could've made the "if INITIALIZER_RAN" test implicit, via
+   another function hidden in macros, but this is hairy enough
+   already.)
 
    The init_fn and fini_fn names should be chosen such that any
    exported names staring with those names, and optionally followed by
    additional characters, fits in with any namespace constraints on
    the library in question.
+
+
+   There's also PROGRAM_EXITING() currently always defined as zero.
+   If there's some trivial way to find out if the fini function is
+   being called because the program that the library is linked into is
+   exiting, we can just skip all the work because the resources are
+   about to be freed up anyways.  Generally this is likely to be the
+   same as distinguishing whether the library was loaded dynamically
+   while the program was running, or loaded as part of program
+   startup.  On most platforms, I don't think we can distinguish these
+   cases easily, and it's probably not worth expending any significant
+   effort.  (Note in particular that atexit() won't do, because if the
+   library is explicitly loaded and unloaded, it would have to be able
+   to deregister the atexit callback function.  Also, the system limit
+   on atexit callbacks may be small.)
 
 
    Implementation outline:
@@ -78,6 +102,11 @@
    just check the flag) and returns the stored error code (or the
    pthread_once error).
 
+   (That's the basic idea.  With some debugging assert() calls and
+   such, it's a bit more complicated.  And we also need to handle
+   doing the pthread test at run time on systems where that works, so
+   we use the k5_once_t stuff instead.)
+
    UNIX, with compiler support: MAKE_FINI_FUNCTION declares the
    function as a destructor, and the run time linker support or
    whatever will cause it to be invoked when the library is unloaded,
@@ -91,12 +120,20 @@
    UNIX, no library finalization support: The finalization function
    never runs, and we leak memory.  Tough.
 
+   DELAY_INITIALIZER will be defined by the configure script if we
+   want to use k5_once instead of load-time initialization.  That'll
+   be the preferred method on most systems except Windows, where we
+   have to initialize some mutexes.
+
+
 
 
    For maximum flexibility in defining the macros, the function name
    parameter should be a simple name, not even a macro defined as
    another name.  The function should have a unique name, and should
    conform to whatever namespace is used by the library in question.
+   (We do have export lists, but (1) they're not used for all
+   platforms, and (2) they're not used for static libraries.)
 
    If the macro expansion needs the function to have been declared, it
    must include a declaration.  If it is not necessary for the symbol
@@ -110,7 +147,8 @@
 
    This is going to be compiler- and environment-specific, and may
    require some support at library build time, and/or "asm"
-   statements.
+   statements.  But through macro expansion and auxiliary functions,
+   we should be able to handle most things except #pragma.
 
    It's okay for this code to require that the library be built
    with the same compiler and compiler options throughout, but
@@ -129,7 +167,12 @@
    work, we'll only have memory leaks in a load/use/unload cycle.  If
    anyone (like, say, the OS vendor) complains about this, they can
    tell us how to get a shared library finalization function invoked
-   automatically.  */
+   automatically.
+
+   Currently there's --disable-delayed-initialization for preventing
+   the initialization from being delayed on UNIX, but that's mainly
+   just for testing the linker options for initialization, and will
+   probably be removed at some point.  */
 
 /* Helper macros.  */
 
@@ -194,8 +237,11 @@ static inline int k5_call_init_function(k5_init_t *i)
    multiple active threads mucking around in our library at this
    point.  So ignore the once_t object and just look at the flag.
 
-   XXX Could we have problems with memory coherence between
-   processors if we don't invoke mutex/once routines?  */
+   XXX Could we have problems with memory coherence between processors
+   if we don't invoke mutex/once routines?  Probably not, the
+   application code should already be coordinating things such that
+   the library code is not in use by this point, and memory
+   synchronization will be needed there.  */
 # define INITIALIZER_RAN(NAME)	\
 	(JOIN__2(NAME, once).did_run && JOIN__2(NAME, once).error == 0)
 
@@ -206,6 +252,7 @@ static inline int k5_call_init_function(k5_init_t *i)
 /* Run initializer at load time, via GCC/C++ hook magic.  */
 
 # ifdef USE_LINKER_INIT_OPTION
+     /* Both gcc and linker option??  Favor gcc.  */
 #  define MAYBE_DUMMY_INIT(NAME)		\
 	void JOIN__2(NAME, auxinit) () { }
 # else
@@ -231,6 +278,8 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 	 ? JOIN__2(NAME, ran).error		\
 	 : (abort(),0))
 # define INITIALIZER_RAN(NAME)	(JOIN__2(NAME,ran).did_run == 3 && JOIN__2(NAME, ran).error == 0)
+
+# define PROGRAM_EXITING()		(0)
 
 #elif defined(USE_LINKER_INIT_OPTION) || defined(_WIN32)
 
@@ -271,8 +320,34 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
    matter what compiler we're using.  Do it the same way
    regardless.  */
 
-# define MAKE_FINI_FUNCTION(NAME)	\
+# ifdef __hpux
+
+     /* On HP-UX, we need this auxiliary function.  At dynamic load or
+	unload time (but *not* program startup and termination for
+	link-time specified libraries), the linker-indicated function
+	is called with a handle on the library and a flag indicating
+	whether it's being loaded or unloaded.
+
+	The "real" fini function doesn't need to be exported, so
+	declare it static.
+
+	As usual, the final declaration is just for syntactic
+	convenience, so the top-level invocation of this macro can be
+	followed by a semicolon.  */
+
+#  include <dl.h>
+#  define MAKE_FINI_FUNCTION(NAME)					    \
+	static void NAME(void);						    \
+	void JOIN__2(NAME, auxfini)(shl_t, int); /* silence gcc warnings */ \
+	void JOIN__2(NAME, auxfini)(shl_t h, int l) { if (!l) NAME(); }	    \
+	static void NAME(void)
+
+# else /* not hpux */
+
+#  define MAKE_FINI_FUNCTION(NAME)	\
 	void NAME(void)
+
+# endif
 
 #elif defined(__GNUC__) && defined(DESTRUCTOR_ATTR_WORKS)
 /* If we're using gcc, if the C++ support works, the compiler should

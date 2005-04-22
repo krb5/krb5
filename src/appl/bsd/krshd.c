@@ -1521,10 +1521,10 @@ void doit(f, fromp)
       cp = pwd->pw_shell;
     
     if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
-	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, 0);
+	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, (char *)NULL);
     }
     else {
-	execl(pwd->pw_shell, cp, "-c", cmdbuf, 0);
+	execl(pwd->pw_shell, cp, "-c", cmdbuf, (char *)NULL);
     }
     perror(pwd->pw_shell);
     perror(cp);

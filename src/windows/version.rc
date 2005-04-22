@@ -59,7 +59,7 @@
 #if !defined(_WIN32)
 #error not win32??
 #else
-#define K5_ORIGINAL_NAME "krb5support32.dll\0"
+#define K5_ORIGINAL_NAME "k5sprt32.dll\0"
 #endif
 #endif /* support */
 

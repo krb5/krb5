@@ -193,7 +193,7 @@ char *kadmin_startup(argc, argv)
 	 exit(1);
     }
 		     
-    while ((optchar = getopt(argc, argv, "r:p:kq:w:d:s:mc:t:e:O")) != EOF) {
+    while ((optchar = getopt(argc, argv, "r:p:kq:w:d:s:mc:t:e:ON")) != EOF) {
 	switch (optchar) {
 	case 'r':
 	    def_realm = optarg;
@@ -243,6 +243,9 @@ char *kadmin_startup(argc, argv)
 	    break;
 	case 'O':
 	    params.mask |= KADM5_CONFIG_OLD_AUTH_GSSAPI;
+	    break;
+	case 'N':
+	    params.mask |= KADM5_CONFIG_AUTH_NOFALLBACK;
 	    break;
 	default:
 	    usage();

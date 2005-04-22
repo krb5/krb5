@@ -45,7 +45,7 @@ krb5_c_is_keyed_cksum(krb5_cksumtype ctype)
 
     /* ick, but it's better than coredumping, which is what the
        old code would have done */
-    return -1U;
+    return 0;   /* error case */
 }
 
 krb5_boolean KRB5_CALLCONV

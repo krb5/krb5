@@ -1,3 +1,63 @@
+2005-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): After checking skip_num
+	counter, also skip over deleted nodes.
+	* prof_test1 (test3): New proc.
+	(top level): Run it.
+
+2005-02-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Check that the root node
+	pointer is not null; raise assertion failure if it is.
+
+	* prof_int.h: Include k5-platform.h.
+	(struct _prf_data_t): Reorder fields, and insert some padding.
+
+	* prof_file.c (scan_shared_trees_locked): Check that the "root"
+	field isn't null.
+	(profile_open_file): Update the in-memory file contents after
+	updating the refcount instead of before.
+	(profile_update_file_data): If the root node in the file data is
+	null, always do the update.  Check that it's not null before
+	returning a success indication.
+	(profile_dereference_data_locked): Scan linked list of file data
+	objects for sanity check, before and after.
+	(profile_dereference_data_locked): Don't do it here.
+
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_free_file_data): Destroy mutex before
+	freeing containing structure.
+
+2004-12-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): When the iterator has a
+	current file, lock it, and unlock it before changing it or
+	returning.
+
+2004-11-04  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_init.c, profile.hin: added profile_is_modified
+	and profile_is_writable so that callers can check to see
+	if profile_release() will fail before calling it.
+
+2004-11-04  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_set.c: profile calls which set values should not fail 
+        if file is not writable.  You can now write to a different 
+        file with profile_flush_to_file() or buffer with 
+        profile_flush_to_buffer().
+
+2004-10-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (STAT_ONCE_PER_SECOND): Define.
+	(struct _prf_data_t) [STAT_ONCE_PER_SECOND]: New field LAST_STAT.
+	* prof_file.c (scan_shared_trees_locked,
+	scan_shared_trees_unlocked): Redefine to do nothing for now.
+	(profile_update_file_data) [STAT_ONCE_PER_SECOND]: If the current
+	time is the same time as the last stat of the file, just return;
+	otherwise, save away the current time.
+
 2004-10-26  Ken Raeburn  <raeburn@mit.edu>
 
 	Permit exporting profile file data into a buffer.

@@ -605,7 +605,7 @@ proc test152 {} {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
 		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "GSS_ERROR"
+    } "KRB5_FCC_NOFILE"
 }
 if {$RPC} test152
 
@@ -618,7 +618,7 @@ proc test153 {} {
 	kadm5_init_with_creds testuser null $KADM5_ADMIN_SERVICE \
 		null $KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
 		server_handle
-    } "GSS_ERROR"
+    } "KRB5_CC_NOTFOUND"
 }
 if {$RPC} test153
 

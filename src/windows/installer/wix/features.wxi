@@ -39,9 +39,21 @@
             Description="$(loc.KerberosClientDesc)"
             InstallDefault="local"
             Title="$(loc.KerberosClientTitle)"
-            FollowParent="yes"
             Level="30">
             
+            <?ifdef DebugSyms?>
+	    	<Feature 
+                    Id="feaKfwClientDebug" 
+                    AllowAdvertise="no" 
+                    Description="$(loc.StrKerberosClientDebugDesc)" 
+                    Display="expand"
+		    InstallDefault="$(var.DebugSymInstallDefault)" 
+                    Level="$(var.DebugSymLowLevel)" 
+                    Title="$(loc.StrKerberosClientDebugTitle)">
+                        <ComponentRef Id="cmf_bin_debug"/>
+	        </Feature>
+	    <?endif?>
+
             <ComponentRef Id="cmf_aklog_exe" />
             <ComponentRef Id="cmf_comerr32_dll" />
             <ComponentRef Id="cmf_gss_exe" />
@@ -51,11 +63,14 @@
             <ComponentRef Id="cmf_k524init_exe" />
             <ComponentRef Id="cmf_kclnt32_dll" />
             <ComponentRef Id="cmf_kdestroy_exe" />
+            <ComponentRef Id="cmf_kcpytkt_exe" />
+            <ComponentRef Id="cmf_kdeltkt_exe" />
             <ComponentRef Id="cmf_kinit_exe" />
             <ComponentRef Id="cmf_klist_exe" />
             <ComponentRef Id="cmf_kpasswd_exe" />
             <ComponentRef Id="cmf_kvno_exe" />
             <ComponentRef Id="cmf_krb5_32_dll" />
+            <ComponentRef Id="cmf_k5sprt32_dll" />
             <ComponentRef Id="cmf_krb524_dll" />
             <ComponentRef Id="cmf_krbcc32_dll" />
             <ComponentRef Id="cmf_krbcc32s_exe" />
@@ -106,13 +121,10 @@
             <ComponentRef Id="rcm_leashdll_17" />
             
             <ComponentRef Id="cmf_ms2mit_exe" />
+            <ComponentRef Id="cmf_mit2ms_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
             <ComponentRef Id="cmf_xpprof32_dll" />
 
-        <?ifdef Debug?>            
-            <ComponentRef Id="cmf_bin_debug"/>
-        <?endif?>
-        
             <ComponentRef Id="cmf_psapi_dll" />
             
         <?ifndef Debug?>

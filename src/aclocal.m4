@@ -1379,7 +1379,7 @@ AC_DEFUN(AC_LIBRARY_NET, [
     # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
 _KRB5_AC_CHECK_RES_FUNCS(res_nsearch res_search ns_initparse dnl
-ns_name_uncompress dn_skipname)
+ns_name_uncompress dn_skipname res_ndestroy)
     if test $krb5_cv_func_res_nsearch = no \
       && test $krb5_cv_func_res_search = no; then
 	# Attempt to link with res_search(), in case it's not prototyped.
@@ -1636,14 +1636,37 @@ dnl KRB5_AC_PRIOCNTL_HACK
 dnl
 dnl
 AC_DEFUN([KRB5_AC_PRIOCNTL_HACK],
+[AC_REQUIRE([AC_PROG_AWK])dnl
+AC_REQUIRE([AC_LANG_COMPILER_REQUIRE])dnl
+AC_CACHE_CHECK([whether to use priocntl hack], [krb5_cv_priocntl_hack],
 [case $krb5_cv_host in
 *-*-solaris2.9*)
-	PRIOCNTL_HACK=1
+	if test "$cross_compiling" = yes; then
+		krb5_cv_priocntl_hack=yes
+	else
+		# Solaris patch 117171-11 (sparc) or 117172-11 (x86)
+		# fixes the Solaris 9 bug where final pty output
+		# gets lost on close.
+		if showrev -p | $AWK 'BEGIN { e = 1 }
+/Patch: 11717[[12]]/ { x = index[]([$]2, "-");
+if (substr[]([$]2, x + 1, length([$]2) - x) >= 11)
+{ e = 0 } else { e = 1 } }
+END { exit e; }'; then
+			krb5_cv_priocntl_hack=no
+		else
+			krb5_cv_priocntl_hack=yes
+		fi
+	fi
 	;;
 *)
-	PRIOCNTL_HACK=0
+	krb5_cv_priocntl_hack=no
 	;;
-esac
+esac])
+if test "$krb5_cv_priocntl_hack" = yes; then
+	PRIOCNTL_HACK=1
+else
+	PRIOCNTL_HACK=0
+fi
 AC_SUBST(PRIOCNTL_HACK)])
 dnl
 dnl

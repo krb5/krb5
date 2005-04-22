@@ -36,6 +36,31 @@
 #include <sys/param.h>
 #endif
 
+#if !defined(DEFAULT_RDNS_LOOKUP)
+#define DEFAULT_RDNS_LOOKUP 1
+#endif
+
+static int
+maybe_use_reverse_dns (krb5_context context, int defalt)
+{
+    krb5_error_code code;
+    char * value = NULL;
+    int use_rdns = 0;
+
+    code = profile_get_string(context->profile, "libdefaults",
+                              "rdns", 0, 0, &value);
+    if (code)
+        return defalt;
+
+    if (value == 0)
+	return defalt;
+
+    use_rdns = _krb5_conf_boolean(value);
+    profile_release_string(value);
+    return use_rdns;
+}
+
+
 krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(krb5_context context, const char *hostname, const char *sname, krb5_int32 type, krb5_principal *ret_princ)
 {
@@ -93,26 +118,29 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 		freeaddrinfo(ai);
 		return ENOMEM;
 	    }
-	    /*
-	     * Do a reverse resolution to get the full name, just in
-	     * case there's some funny business going on.  If there
-	     * isn't an in-addr record, give up.
-	     */
-	    /* XXX: This is *so* bogus.  There are several cases where
-	       this won't get us the canonical name of the host, but
-	       this is what we've trained people to expect.  We'll
-	       probably fix it at some point, but let's try to
-	       preserve the current behavior and only shake things up
-	       once when it comes time to fix this lossage.  */
-	    err = getnameinfo(ai->ai_addr, ai->ai_addrlen,
-			      hnamebuf, sizeof(hnamebuf), 0, 0, NI_NAMEREQD);
-	    freeaddrinfo(ai);
-	    if (err == 0) {
-		free(remote_host);
-		remote_host = strdup(hnamebuf);
-		if (!remote_host)
-		    return ENOMEM;
-	    }
+
+            if (maybe_use_reverse_dns(context, DEFAULT_RDNS_LOOKUP)) {
+                /*
+                 * Do a reverse resolution to get the full name, just in
+                 * case there's some funny business going on.  If there
+                 * isn't an in-addr record, give up.
+                 */
+                /* XXX: This is *so* bogus.  There are several cases where
+                   this won't get us the canonical name of the host, but
+                   this is what we've trained people to expect.  We'll
+                   probably fix it at some point, but let's try to
+                   preserve the current behavior and only shake things up
+                   once when it comes time to fix this lossage.  */
+                err = getnameinfo(ai->ai_addr, ai->ai_addrlen,
+                                   hnamebuf, sizeof(hnamebuf), 0, 0, NI_NAMEREQD);
+                freeaddrinfo(ai);
+                if (err == 0) {
+                    free(remote_host);
+                    remote_host = strdup(hnamebuf);
+                    if (!remote_host)
+                        return ENOMEM;
+                }
+            }
 	} else /* type == KRB5_NT_UNKNOWN */ {
 	    remote_host = strdup(hostname);
 	}

@@ -1,3 +1,8 @@
+2005-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* tcl_kadm5.c (unparse_err): Add entries for KRB5_CC_NOTFOUND and
+	KRB5_FCC_NOFILE, to handle changes in client_init.c.
+
 2004-07-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* tcl_kadm5.c (parse_flags, parse_keysalts, parse_key_data,

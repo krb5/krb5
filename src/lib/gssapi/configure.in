@@ -7,8 +7,13 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_HEADER(stdint.h,[
-	include_stdint="\\#include <stdint.h>"], )
+	include_stdint='awk '\''END{printf("%cinclude <stdint.h>\n", 35);}'\'' < /dev/null'],
+	include_stdint='echo "/* no stdint.h */"')
 AC_SUBST(include_stdint)
+AC_CHECK_HEADER(xom.h,[
+	include_xom='awk '\''END{printf("%cinclude <xom.h>\n", 35);}'\'' < /dev/null'], [
+	include_xom='echo "/* no xom.h */"'])
+AC_SUBST(include_xom)
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS
 V5_AC_OUTPUT_MAKEFILE(. generic krb5)
