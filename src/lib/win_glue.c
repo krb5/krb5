@@ -1,31 +1,7 @@
-/* 
- * WinSock support.
- *
- * Do the WinSock initialization call, keeping all the hair here.
- *
- * This routine is called by SOCKET_INITIALIZE in include/c-windows.h.
- * The code is pretty much copied from winsock.txt from winsock-1.1,
- * available from:
- * ftp://sunsite.unc.edu/pub/micro/pc-stuff/ms-windows/winsock/winsock-1.1
- *
- * Note: WSAStartup and WSACleanup is called here (and only here).
- * This assumes that under Windows, we only use this library via the
- * DLL.  Note that calls to WSAStartup and WSACleanup must be in
- * matched pairs.  If there is a missing WSACleanup call when a
- * program exits, under Lan Workplace, the name resolver will stop
- * working. 
- */
-
 #ifdef KRB4
 #include <kerberosIV/krb.h>
 #endif
 #include "k5-int.h"
-
-#ifndef NEED_WINSOCK
-#if defined(KRB4) || defined(KRB5) || defined(GSSAPI)
-#define NEED_WINSOCK 1
-#endif
-#endif
 
 #ifdef KRB4
 #include <kerberosIV/krb_err.h>
@@ -365,32 +341,13 @@ HINSTANCE get_lib_instance()
 static int
 control(int mode)
 {
-#ifdef NEED_WINSOCK
-    WORD wVersionRequested;
-    WSADATA wsaData;
-    int err;
-#endif
-
     switch(mode) {
     case DLL_STARTUP:
-#ifdef NEED_WINSOCK
-	wVersionRequested = 0x0101;		/* We need version 1.1 */
-	if ((err = WSAStartup (wVersionRequested, &wsaData)))
-	    return err;
-	if (wVersionRequested != wsaData.wVersion) {
-	    /* DLL couldn't support our version of the spec */
-	    WSACleanup ();
-	    return -104;			/* FIXME -- better error? */
-	}
-#endif
 	break;
 
     case DLL_SHUTDOWN:
 #ifdef KRB5
 	krb5_stdcc_shutdown();
-#endif
-#ifdef NEED_WINSOCK
-	WSACleanup ();
 #endif
 	break;
 

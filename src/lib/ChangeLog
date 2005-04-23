@@ -1,3 +1,8 @@
+2005-04-22  Jeffrey Altman <jaltman@mit.edu>
+
+        * win_glue.c:  Remove calls to WSAStartup/WSACleanup because
+        they can result in deadlocks when called from DllMain().
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* win_glue.c (NEED_SOCKETS): Don't define.

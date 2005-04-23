@@ -1,3 +1,11 @@
+2005-04-22  Jeffrey Altman <jaltman@mit.edu>
+
+        * init_os_ctx.c:  use krb5_init_ctx and krb5_free_ctx
+        to initialize and cleanup the winsock stack.  WSAStartup/
+        WSACleanup are only supposed to increment/decrement a 
+        reference counter if they have been previously called
+        within the application.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* accessor.c (NEED_SOCKETS): Don't define.
