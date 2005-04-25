@@ -173,8 +173,15 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 	&& not_ktype)
 	retval = KRB5_CC_NOT_KTYPE;
 
-    if (!retval)
-	retval = krb5_cc_store_cred(context, ccache, *out_creds);
+    if (!retval) {
+        /* the purpose of the krb5_get_credentials call is to 
+         * obtain a set of credentials for the caller.  the 
+         * krb5_cc_store_cred() call is to optimize performance
+         * for future calls.  Ignore any errors, since the credentials
+         * are still valid even if we fail to store them in the cache.
+         */
+	krb5_cc_store_cred(context, ccache, *out_creds);
+    }
     return retval;
 }
 
