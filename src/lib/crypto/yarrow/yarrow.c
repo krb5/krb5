@@ -26,11 +26,7 @@
 #include "port-sockets.h"
 #else
 #   include <unistd.h>
-#   if defined(macintosh)
-#       include <Memory.h>
-#   else
-#       include <netinet/in.h>
-#   endif
+#   include <netinet/in.h>
 #endif
 #if !defined(YARROW_NO_MATHLIB)
 #include <math.h>
@@ -262,21 +258,22 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
     Source* source;
     size_t new_entropy;
     size_t estimate;
+  
+    if (do_lock) {
+	    TRY( LOCK() );
+	    locked = 1;
+    }
+    k5_assert_locked(&krb5int_yarrow_lock);
 
     if (!y) { THROW( YARROW_BAD_ARG ); }
 
     if (source_id >= y->num_sources) { THROW( YARROW_BAD_SOURCE ); }
   
     source = &y->source[source_id];
-  
+
     if(source->pool != YARROW_FAST_POOL && source->pool != YARROW_SLOW_POOL)
     {
 	THROW( YARROW_BAD_SOURCE );
-    }
-
-    if (do_lock) {
-	    TRY( LOCK() );
-	    locked = 1;
     }
 
     /* hash in the sample */
@@ -672,8 +669,8 @@ static int Yarrow_Save_State( Yarrow_CTX *y )
 static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 {
     EXCEP_DECL;
-    HASH_CTX* fast_pool = &y->pool[YARROW_FAST_POOL];
-    HASH_CTX* slow_pool = &y->pool[YARROW_SLOW_POOL];
+    HASH_CTX* fast_pool;
+    HASH_CTX* slow_pool;
     byte digest[HASH_DIGEST_SIZE];
     HASH_CTX hash;
     byte v_0[HASH_DIGEST_SIZE];
@@ -681,7 +678,10 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
     krb5_ui_4 big_endian_int32;
     COUNTER i;
 
+    k5_assert_locked(&krb5int_yarrow_lock);
     if (!y) { THROW( YARROW_BAD_ARG ); }
+    fast_pool = &y->pool[YARROW_FAST_POOL];
+    slow_pool = &y->pool[YARROW_SLOW_POOL];
     if( pool != YARROW_FAST_POOL && pool != YARROW_SLOW_POOL )
     {
 	THROW( YARROW_BAD_ARG );

@@ -1,3 +1,11 @@
+2005-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* yarrow.c: Delete old macintosh support.
+	(yarrow_input_maybe_locking): Do the optional locking, and verify
+	that the mutex is locked, before doing anything else.
+	(yarrow_reseed_locked): Verify that the global mutex is locked
+	before doing anything else.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* yarrow.c (yarrow_reseed_locked): Renamed from
