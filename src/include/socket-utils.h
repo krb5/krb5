@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2005 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -54,8 +54,9 @@
 #include "krb5/autoconf.h"
 /* for sockaddr_storage */
 #include "port-sockets.h"
+/* for "inline" if needed */
+#include "k5-platform.h"
 
-#if defined (__GNUC__)
 /*
  * There's a lot of confusion between pointers to different sockaddr
  * types, and pointers with different degrees of indirection, as in
@@ -66,36 +67,29 @@
  * The casts to (void *) are to get GCC to shut up about alignment
  * increasing.
  */
-static __inline__ struct sockaddr_in *sa2sin (struct sockaddr *sa)
+static inline struct sockaddr_in *sa2sin (struct sockaddr *sa)
 {
     return (struct sockaddr_in *) (void *) sa;
 }
 #ifdef KRB5_USE_INET6
-static __inline__ struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
+static inline struct sockaddr_in6 *sa2sin6 (struct sockaddr *sa)
 {
     return (struct sockaddr_in6 *) (void *) sa;
 }
 #endif
-static __inline__ struct sockaddr *ss2sa (struct sockaddr_storage *ss)
+static inline struct sockaddr *ss2sa (struct sockaddr_storage *ss)
 {
     return (struct sockaddr *) ss;
 }
-static __inline__ struct sockaddr_in *ss2sin (struct sockaddr_storage *ss)
+static inline struct sockaddr_in *ss2sin (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in *) ss;
 }
 #ifdef KRB5_USE_INET6
-static __inline__ struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
+static inline struct sockaddr_in6 *ss2sin6 (struct sockaddr_storage *ss)
 {
     return (struct sockaddr_in6 *) ss;
 }
-#endif
-#else
-#define sa2sin(S)	((struct sockaddr_in *)(S))
-#define sa2sin6(S)	((struct sockaddr_in6 *)(S))
-#define ss2sa(S)	((struct sockaddr *)(S))
-#define ss2sin(S)	((struct sockaddr_in *)(S))
-#define ss2sin6(S)	((struct sockaddr_in6 *)(S))
 #endif
 
 #if !defined (socklen)

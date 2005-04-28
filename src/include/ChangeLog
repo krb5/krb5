@@ -1,3 +1,11 @@
+2005-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* port-sockets.h: On PalmOS, include autoconf.h and netdb.h, and
+	define socklen_t.
+	* socket-utils.h: Include k5-platform.h.
+	(sa2sin, sa2sin6, ss2sa, ss2sin, ss2sin6): Always use inline
+	function form, and use "inline" instead of "__inline__".
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h: Remove disabled code that used to be part of the
