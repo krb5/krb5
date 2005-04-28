@@ -1,5 +1,9 @@
 2005-04-28  Ken Raeburn  <raeburn@mit.edu>
 
+	* k5-int.h: Include fcntl.h only if HAVE_FCNTL_H is defined.
+	(krb5int_zap_data): For PalmOS without gcc, call memset but
+	without the volatile cast.
+
 	* port-sockets.h: On PalmOS, include autoconf.h and netdb.h, and
 	define socklen_t.
 	* socket-utils.h: Include k5-platform.h.
