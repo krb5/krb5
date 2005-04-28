@@ -86,7 +86,8 @@ $(OUTPRE)commands.$(OBJEXT): commands.c $(srcdir)/../arpa/telnet.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h
 $(OUTPRE)main.$(OBJEXT): main.c $(srcdir)/../libtelnet/auth.h \
   $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
   $(srcdir)/../libtelnet/enc-proto.h ring.h externs.h \
