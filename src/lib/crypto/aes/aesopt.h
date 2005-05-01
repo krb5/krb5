@@ -387,7 +387,7 @@
 
 /*  8. FIXED OR DYNAMIC TABLES
 
-    When this section is included the tables used by the code are comipled 
+    When this section is included the tables used by the code are compiled 
     statically into the binary file.  Otherwise they are computed once when 
     the code is first used.
 */
