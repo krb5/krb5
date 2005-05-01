@@ -5,7 +5,10 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include "krb5/autoconf.h"
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 #define byte unsigned char 
 

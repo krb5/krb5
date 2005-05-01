@@ -1,3 +1,8 @@
+2005-05-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* ytypes.h: Include autoconf.h.  Include sys/types.h only if it
+	exists.
+
 2005-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* yarrow.c: Delete old macintosh support.
