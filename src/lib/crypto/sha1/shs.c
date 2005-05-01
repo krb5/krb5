@@ -112,6 +112,32 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
     E = digest[ 4 ];
     memcpy(eData, data, sizeof (eData));
 
+#ifdef CONFIG_SMALL
+
+    {
+	int i;
+	SHS_LONG temp;
+	for (i = 0; i < 20; i++) {
+	    SHS_LONG x = (i < 16) ? eData[i] : expand(eData, i);
+	    subRound(A, B, C, D, E, f1, K1, x);
+	    temp = E, E = D, D = C, C = B, B = A, A = temp;
+	}
+	for (i = 20; i < 40; i++) {
+	    subRound(A, B, C, D, E, f2, K2, expand(eData, i));
+	    temp = E, E = D, D = C, C = B, B = A, A = temp;
+	}
+	for (i = 40; i < 60; i++) {
+	    subRound(A, B, C, D, E, f3, K3, expand(eData, i));
+	    temp = E, E = D, D = C, C = B, B = A, A = temp;
+	}
+	for (i = 60; i < 80; i++) {
+	    subRound(A, B, C, D, E, f4, K4, expand(eData, i));
+	    temp = E, E = D, D = C, C = B, B = A, A = temp;
+	}
+    }
+
+#else
+
     /* Heavy mangling, in 4 sub-rounds of 20 interations each. */
     subRound( A, B, C, D, E, f1, K1, eData[  0 ] );
     subRound( E, A, B, C, D, f1, K1, eData[  1 ] );
@@ -196,6 +222,8 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
     subRound( D, E, A, B, C, f4, K4, expand( eData, 77 ) );
     subRound( C, D, E, A, B, f4, K4, expand( eData, 78 ) );
     subRound( B, C, D, E, A, f4, K4, expand( eData, 79 ) );
+
+#endif
 
     /* Build message digest */
     digest[ 0 ] += A;
