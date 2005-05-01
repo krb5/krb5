@@ -1,3 +1,7 @@
+2005-05-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* md5.c (Transform) [CONFIG_SMALL]: Roll loops for each round.
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* md5.c: Use ANSI C style function definitions.

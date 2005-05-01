@@ -204,6 +204,60 @@ static void Transform (krb5_ui_4 *buf, krb5_ui_4 *in)
 {
   register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
+#ifdef CONFIG_SMALL
+
+  int i;
+#define ROTATE { krb5_ui_4 temp; temp = d, d = c, c = b, b = a, a = temp; }
+  for (i = 0; i < 16; i++) {
+      const unsigned char round1s[] = { 7, 12, 17, 22 };
+      const krb5_ui_4 round1consts[] = {
+	  3614090360UL,	  3905402710UL,	   606105819UL,	  3250441966UL,
+	  4118548399UL,	  1200080426UL,	  2821735955UL,	  4249261313UL,
+	  1770035416UL,	  2336552879UL,	  4294925233UL,	  2304563134UL,
+	  1804603682UL,	  4254626195UL,	  2792965006UL,	  1236535329UL,
+      };
+      FF (a, b, c, d, in[i], round1s[i%4], round1consts[i]);
+      ROTATE;
+  }
+  for (i = 0; i < 16; i++) {
+      const unsigned char round2s[] = { 5, 9, 14, 20 };
+      const krb5_ui_4 round2consts[] = {
+	  4129170786UL,	  3225465664UL,	   643717713UL,	  3921069994UL,
+	  3593408605UL,	    38016083UL,	  3634488961UL,	  3889429448UL,
+	   568446438UL,	  3275163606UL,	  4107603335UL,	  1163531501UL,
+	  2850285829UL,	  4243563512UL,	  1735328473UL,	  2368359562UL,
+      };
+      int r2index = (1 + i * 5) % 16;
+      GG (a, b, c, d, in[r2index], round2s[i%4], round2consts[i]);
+      ROTATE;
+  }
+  for (i = 0; i < 16; i++) {
+      static const unsigned char round3s[] = { 4, 11, 16, 23 };
+      static const krb5_ui_4 round3consts[] = {
+	  4294588738UL,	  2272392833UL,	  1839030562UL,	  4259657740UL,
+	  2763975236UL,	  1272893353UL,	  4139469664UL,	  3200236656UL,
+	   681279174UL,	  3936430074UL,	  3572445317UL,	    76029189UL,
+	  3654602809UL,	  3873151461UL,	   530742520UL,	  3299628645UL,
+      };
+      int r3index = (5 + i * 3) % 16;
+      HH (a, b, c, d, in[r3index], round3s[i%4], round3consts[i]);
+      ROTATE;
+  }
+  for (i = 0; i < 16; i++) {
+      static const unsigned char round4s[] = { 6, 10, 15, 21 };
+      static const krb5_ui_4 round4consts[] = {
+	  4096336452UL,	  1126891415UL,	  2878612391UL,	  4237533241UL,
+	  1700485571UL,	  2399980690UL,	  4293915773UL,	  2240044497UL,
+	  1873313359UL,	  4264355552UL,	  2734768916UL,	  1309151649UL,
+	  4149444226UL,	  3174756917UL,	   718787259UL,	  3951481745UL,
+      };
+      int r4index = (7 * i) % 16;
+      II (a, b, c, d, in[r4index], round4s[i%4], round4consts[i]);
+      ROTATE;
+  }
+
+#else
+
   /* Round 1 */
 #define S11 7
 #define S12 12
@@ -291,6 +345,8 @@ static void Transform (krb5_ui_4 *buf, krb5_ui_4 *in)
   II ( d, a, b, c, in[11], S42, 3174756917UL); /* 62 */
   II ( c, d, a, b, in[ 2], S43,  718787259UL); /* 63 */
   II ( b, c, d, a, in[ 9], S44, 3951481745UL); /* 64 */
+
+#endif /* small? */
 
   buf[0] += a;
   buf[1] += b;
