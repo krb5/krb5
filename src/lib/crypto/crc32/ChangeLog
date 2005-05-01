@@ -1,3 +1,7 @@
+2005-05-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_crc.c (main): Don't run timing test for now.
+
 2005-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* crc-32.h (mit_crc32): Remove gratuitous "const" in argument

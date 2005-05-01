@@ -1,7 +1,7 @@
 /*
  * lib/crypto/crc32/t_crc.c
  *
- * Copyright 2002 by the Massachusetts Institute of Technology.
+ * Copyright 2002,2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -205,7 +205,9 @@ verify(void)
 int
 main(void)
 {
+#if 0
     timetest(64*1024, 1024);
+#endif
     verify();
     exit(0);
 }
