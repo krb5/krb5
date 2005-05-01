@@ -167,6 +167,28 @@ static void Transform (krb5_ui_4 *buf, krb5_ui_4 *in)
 {
   register krb5_ui_4 a = buf[0], b = buf[1], c = buf[2], d = buf[3];
 
+#ifdef CONFIG_SMALL
+  int i;
+#define ROTATE { krb5_ui_4 temp; temp = d, d = c, c = b, b = a, a = temp; }
+  for (i = 0; i < 16; i++) {
+      static const unsigned char round1consts[] = { 3, 7, 11, 19, };
+      FF (a, b, c, d, in[i], round1consts[i%4]); ROTATE;
+  }
+  for (i = 0; i < 16; i++) {
+      static const unsigned char round2indices[] = {
+	  0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15
+      };
+      static const unsigned char round2consts[] = { 3, 5, 9, 13 };
+      GG (a, b, c, d, in[round2indices[i]], round2consts[i%4]); ROTATE;
+  }
+  for (i = 0; i < 16; i++) {
+      static const unsigned char round3indices[] = {
+	  0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15
+      };
+      static const unsigned char round3consts[] = { 3, 9, 11, 15 };
+      HH (a, b, c, d, in[round3indices[i]], round3consts[i%4]); ROTATE;
+  }
+#else
   /* Round 1 */
   FF (a, b, c, d, in[ 0],  3);
   FF (d, a, b, c, in[ 1],  7);
@@ -220,6 +242,7 @@ static void Transform (krb5_ui_4 *buf, krb5_ui_4 *in)
   HH (d, a, b, c, in[11],  9);
   HH (c, d, a, b, in[ 7], 11);
   HH (b, c, d, a, in[15], 15);
+#endif
 
   buf[0] += a;
   buf[1] += b;
