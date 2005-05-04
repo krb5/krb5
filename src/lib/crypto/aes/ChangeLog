@@ -1,3 +1,7 @@
+2005-05-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (aes-gen): Use CC_LINK.  Reported by Mike Friedman.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* aesopt.h: On PalmOS, include FloatMgr.h to get endianness flag.
