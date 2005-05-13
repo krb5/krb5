@@ -1,3 +1,8 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (thisconfigdir, mydir): Updated for configure
+	change.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* des.h, krb.h: Don't test for macintosh or __MWERKS__.

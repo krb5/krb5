@@ -6,6 +6,11 @@
 	(KRB5_GETSOCKNAME_ARGS): Likewise.  Only define the macros in one
 	place.
 
+	* configure.in: Merged content from include/configure.in.  Don't
+	configure include directory any more; build its makefiles and
+	autoconf.h directly.  Provide comment template when defining C
+	macros.
+
 2005-04-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (fileexists, K5_TOPDIR): New macros.

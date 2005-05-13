@@ -1,3 +1,11 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Deleted, content merged into ../configure.in.
+	* Makefile.in (thisconfigdir, mydir): Updated for configure
+	change.
+	($(srcdir)/krb5/autoconf.stmp): Use $(thisconfigdir) when
+	locating configure.in and autom4te.cache.
+
 2005-04-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h: Include fcntl.h only if HAVE_FCNTL_H is defined.

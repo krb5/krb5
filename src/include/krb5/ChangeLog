@@ -1,3 +1,8 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (thisconfigdir, mydir): Updated for configure
+	change.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_proto.h, kdb.h, kdb_dbc.h, kdb_kt.h: Don't test macintosh.
