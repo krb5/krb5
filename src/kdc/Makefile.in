@@ -178,8 +178,8 @@ $(OUTPRE)replay.$(OBJEXT): replay.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h kdc_util.h extern.h
-$(OUTPRE)kerberos_v4.$(OBJEXT): kerberos_v4.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+$(OUTPRE)kerberos_v4.$(OBJEXT): kerberos_v4.c $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
