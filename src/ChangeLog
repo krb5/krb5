@@ -1,3 +1,11 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (AC_KRB5_TCL_FIND_CONFIG): Provide comment template
+	when defining C macros.
+	(KRB5_GETPEERNAME_ARGS): Likewise.
+	(KRB5_GETSOCKNAME_ARGS): Likewise.  Only define the macros in one
+	place.
+
 2005-04-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (fileexists, K5_TOPDIR): New macros.

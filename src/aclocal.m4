@@ -957,9 +957,9 @@ if test -n "$tcl_ok_conf" ; then
     TCL_MAYBE_RPATH=
   fi
   CPPFLAGS="$old_CPPFLAGS $TCL_INCLUDES"
-  AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
+  AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H,1,[Define if tcl.h is available]) tcl_header=yes)
   if test $tcl_header=no; then
-     AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
+     AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H,1,[Define if tcl/tcl.h is available]) tcl_header=yes)
   fi
   CPPFLAGS="$old_CPPFLAGS"
   tcl_lib=yes
@@ -1472,8 +1472,8 @@ dnl =============================================================
 dnl Internal function for testing for getpeername prototype
 dnl
 AC_DEFUN([KRB5_GETPEERNAME_ARGS],[
-AC_DEFINE([GETPEERNAME_ARG2_TYPE],GETSOCKNAME_ARG2_TYPE)
-AC_DEFINE([GETPEERNAME_ARG3_TYPE],GETSOCKNAME_ARG3_TYPE)
+AC_DEFINE([GETPEERNAME_ARG2_TYPE],GETSOCKNAME_ARG2_TYPE,[Type of getpeername second argument.])
+AC_DEFINE([GETPEERNAME_ARG3_TYPE],GETSOCKNAME_ARG3_TYPE,[Type of getpeername second argument.])
 ])
 dnl
 dnl =============================================================
@@ -1491,11 +1491,7 @@ extern int getsockname(int, $1, $2);
     eval "krb5_cv_getsockname_proto_$krb5_lib_var=no")])
 if eval "test \"`echo '$krb5_cv_getsockname_proto_'$krb5_lib_var`\" = yes"; then
 	AC_MSG_RESULT(yes)
-	sock_set=yes
-	res1=`echo "$1" | tr -d '*' | sed -e 's/ *$//'`
-	res2=`echo "$2" | tr -d '*' | sed -e 's/ *$//'`
-	AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1)
-	AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2)
+	sock_set=yes; res1="$1"; res2="$2"
 else
 	AC_MSG_RESULT(no)
 fi
@@ -1516,11 +1512,13 @@ do
 done
 if test "$sock_set" = no; then
   AC_MSG_NOTICE(assuming struct sockaddr and socklen_t for getsockname args)
-  res1=`echo "struct sockaddr *" | tr -d '*' | sed -e 's/ *$//'`
-  AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1)
-  res2=`echo "socklen_t *" | tr -d '*' | sed -e 's/ *$//'`
-  AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2)
+  res1="struct sockaddr *"
+  res2="socklen_t *"
 fi
+res1=`echo "$res1" | tr -d '*' | sed -e 's/ *$//'`
+res2=`echo "$res2" | tr -d '*' | sed -e 's/ *$//'`
+AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG2_TYPE],$res1,[Type of pointer target for argument 2 to getsockname])
+AC_DEFINE_UNQUOTED([GETSOCKNAME_ARG3_TYPE],$res2,[Type of pointer target for argument 3 to getsockname])
 ])
 dnl
 dnl
