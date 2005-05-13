@@ -1,3 +1,8 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c: Include autoconf.h before testing
+	KRB5_KRB4_COMPAT.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* dispatch.c (NEED_SOCKETS): Don't define.
