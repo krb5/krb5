@@ -32,7 +32,7 @@
  * com_err error table, but the text is static in krb_err.c.  We can't
  * alias it by making a pointer to it, either, so we have to suck in
  * another copy of it that is named differently.   */
-#if TARGET_OS_MAC
+#if TARGET_OS_MAC && !defined(DEPEND)
 #undef initialize_krb_error_table
 #define initialize_krb_error_table	krb4int_init_krb_err_tbl
 void krb4int_init_krb_err_tbl(void);

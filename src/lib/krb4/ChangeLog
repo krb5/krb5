@@ -1,3 +1,7 @@
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* err_txt.c: Don't include krb_err.c if DEPEND is defined.
+
 2004-12-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* RealmsConfig-glue.c (krb_get_krbhst): Check if DNS should be
