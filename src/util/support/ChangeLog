@@ -1,3 +1,8 @@
+2005-05-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (fai_add_hosts_by_name): Pass null pointer
+	instead of telnet as service name.
+
 2005-03-20  Alexandra Ellwood  <lxs@mit.edu>
 
 	* threads.c (thread_termination): Free array of pointers
