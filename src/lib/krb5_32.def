@@ -64,6 +64,8 @@ EXPORTS
 	krb5_c_keyed_checksum_types
 	krb5_c_make_checksum
 	krb5_c_make_random_key
+krb5_c_prf
+krb5_c_prf_length
 	krb5_c_random_make_octets
 	krb5_c_random_seed
 	krb5_c_string_to_key

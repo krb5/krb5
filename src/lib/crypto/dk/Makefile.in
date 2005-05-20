@@ -18,6 +18,7 @@ STLIBOBJS=\
 	dk_decrypt.o	\
 	dk_encrypt.o	\
 	derive.o	\
+	dk_prf.o  \
 	stringtokey.o
 
 OBJS=\
@@ -25,12 +26,14 @@ OBJS=\
 	$(OUTPRE)dk_decrypt.$(OBJEXT)	\
 	$(OUTPRE)dk_encrypt.$(OBJEXT)	\
 	$(OUTPRE)derive.$(OBJEXT)	\
+	$(OUTPRE)dk_prf.$(OBJEXT) \
 	$(OUTPRE)stringtokey.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/checksum.c	\
 	$(srcdir)/dk_decrypt.c	\
 	$(srcdir)/dk_encrypt.c	\
+	$(srcdir)/dk_prf.c \
 	$(srcdir)/derive.c	\
 	$(srcdir)/stringtokey.c
 

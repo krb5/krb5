@@ -69,6 +69,11 @@ krb5_error_code krb5int_dk_string_to_key
 		const krb5_data *string, const krb5_data *salt,
 		const krb5_data *params, krb5_keyblock *key);
 
+krb5_error_code 
+krb5int_dk_prf(const struct krb5_enc_provider *enc,
+	       const struct krb5_hash_provider *hash,
+	       const krb5_keyblock *key, const krb5_data *in, krb5_data *out);
+
 krb5_error_code krb5_derive_key
 (const struct krb5_enc_provider *enc,
 		const krb5_keyblock *inkey,

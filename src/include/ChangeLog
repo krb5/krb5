@@ -1,3 +1,7 @@
+2005-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h (krb5int_c_ free_keyblock init_keyblock free_keyblock_contents):  new
+
 2005-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Deleted, content merged into ../configure.in.
@@ -5,6 +9,12 @@
 	change.
 	($(srcdir)/krb5/autoconf.stmp): Use $(thisconfigdir) when
 	locating configure.in and autom4te.cache.
+
+2005-05-06  Sam Hartman  <hartmans@mit.edu>
+
+	
+	* krb5.hin: Add krb5_c_prf_length
+
 
 2005-04-28  Ken Raeburn  <raeburn@mit.edu>
 
@@ -106,6 +116,7 @@
 	(k5_debug_make_loc): Change "lineno" to type int.
 	(k5_debug_make_loc): Likewise for argument "line".
 
+
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
 
         * krb5.hin: add prototype for krb5_is_thread_safe
@@ -124,10 +135,17 @@
 
 	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.
 
+
 2004-12-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
 	(struct _krb5int_access): Add function pointer field use_dns_kdc.
+
+2004-12-07  Sam Hartman  <hartmans@mit.edu>
+
+	* k5-int.h: Add prf_length to the keytype function
+
+	* krb5.hin: Add krb5_c_prf
 
 2004-12-06  Ken Raeburn  <raeburn@mit.edu>
 

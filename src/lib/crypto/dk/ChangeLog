@@ -1,3 +1,15 @@
+2005-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* dk_prf.c (krb5int_dk_prf):  Use k5crypto versions of keyblock memory management
+
+2004-12-09  Sam Hartman  <hartmans@mit.edu>
+
+	* dk.h: Add krb5_dk_prf
+
+	* Makefile.in (SRCS): Add dk_prf.c
+
+	* dk_prf.c (krb5int_dk_prf): New function
+
 2004-03-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* derive.c (krb5_random2key): Don't compile.

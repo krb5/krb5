@@ -609,16 +609,23 @@ typedef krb5_error_code (*krb5_crypt_func) (const struct krb5_enc_provider *enc,
 typedef krb5_error_code (*krb5_str2key_func) (const struct krb5_enc_provider *enc, const krb5_data *string,
   const krb5_data *salt, const krb5_data *parm, krb5_keyblock *key);
 
+typedef krb5_error_code (*krb5_prf_func)(
+					 const struct krb5_enc_provider *enc, const struct krb5_hash_provider *hash,
+					 const krb5_keyblock *key,
+					 krb5_data *in, krb5_data *out);
+
 struct krb5_keytypes {
     krb5_enctype etype;
     char *in_string;
     char *out_string;
     const struct krb5_enc_provider *enc;
     const struct krb5_hash_provider *hash;
+  size_t prf_length;
     krb5_encrypt_length_func encrypt_len;
     krb5_crypt_func encrypt;
     krb5_crypt_func decrypt;
     krb5_str2key_func str2key;
+  krb5_prf_func prf;
     krb5_cksumtype required_ctype;
 };
 
@@ -706,6 +713,14 @@ krb5_error_code krb5int_default_free_state
 krb5_error_code krb5int_c_combine_keys
 (krb5_context context, krb5_keyblock *key1, krb5_keyblock *key2,
 		krb5_keyblock *outkey);
+
+void  krb5int_c_free_keyblock
+(krb5_context, krb5_keyblock *key);
+void  krb5int_c_free_keyblock_contents
+	(krb5_context, krb5_keyblock *);
+krb5_error_code   krb5int_c_init_keyblock
+		(krb5_context, krb5_enctype enctype,
+		size_t length, krb5_keyblock **out); 
 
 /*
  * Internal - for cleanup.

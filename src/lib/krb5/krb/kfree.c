@@ -340,18 +340,13 @@ krb5_free_kdc_req(krb5_context context, krb5_kdc_req *val)
 void KRB5_CALLCONV
 krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key)
 {
-     if (key->contents) {
-	  memset(key->contents, 0, key->length);
-	  krb5_xfree(key->contents);
-	  key->contents = 0;
-     }
+    krb5int_c_free_keyblock_contents (context, key);
 }
 
 void KRB5_CALLCONV
 krb5_free_keyblock(krb5_context context, register krb5_keyblock *val)
 {
-    krb5_free_keyblock_contents(context, val);
-    krb5_xfree(val);
+    krb5int_c_free_keyblock (context, val);
 }
 
 

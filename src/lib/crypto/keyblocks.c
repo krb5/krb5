@@ -1,7 +1,7 @@
 /*
- * lib/krb5/krb/init_keyblock.c
+ * lib/crypto/keyblocks.c
  *
- * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2002, 2005 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -33,9 +33,47 @@
 #include "k5-int.h"
 #include <assert.h>
 
-krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
+krb5_error_code   krb5int_c_init_keyblock
 	(krb5_context context, krb5_enctype enctype,
 	 size_t length, krb5_keyblock **out)
 {
-  return krb5int_c_init_keyblock (context, enctype, length, out);
+    krb5_keyblock *kb;
+    kb = malloc (sizeof(krb5_keyblock));
+    assert (out);
+    *out = NULL;
+    if (!kb) {
+	return ENOMEM;
+    }
+    kb->magic = KV5M_KEYBLOCK;
+    kb->enctype = enctype;
+    kb->length = length;
+    if(length) {
+	kb->contents = malloc (length);
+	if(!kb->contents) {
+	    free (kb);
+	    return ENOMEM;
+	}
+    } else {
+	kb->contents = NULL;
+    }
+    *out = kb;
+    return 0;
+}
+
+
+void KRB5_CALLCONV
+krb5int_c_free_keyblock(krb5_context context, register krb5_keyblock *val)
+{
+    krb5_free_keyblock_contents(context, val);
+    krb5_xfree(val);
+}
+
+void 
+krb5int_c_free_keyblock_contents(krb5_context context, register krb5_keyblock *key)
+{
+     if (key->contents) {
+       krb5int_zap_data (key->contents, key->length);
+	  krb5_xfree(key->contents);
+	  key->contents = 0;
+     }
 }

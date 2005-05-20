@@ -1,3 +1,22 @@
+2005-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* keyblocks.c :  File to contain memory management for keyblocks
+	moved from libkrb5  
+
+	* Makefile.in (SRCS):  keyblocks.c is new
+
+	* etypes.c: Add PRF for AES
+
+	* Makefile.in (t_prf$(EXEEXT)): New output for prf test framework
+
+2005-05-18  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in :  Add prf.c
+
+	* prf.c t_prf.c: New file
+
+	* etypes.c: Adjust structures to support the PRF declarations.
+
 2005-03-15  Jeffrey Altman <jaltman@mit.edu>
 
         * keyed_cksum.c: (krb5_c_is_keyed_cksum): this is a boolean 

@@ -1,7 +1,7 @@
 /*
- * lib/krb5/krb/init_keyblock.c
+ * lib/crypto/dk/prf.c
  *
- * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -25,17 +25,40 @@
  * 
  * 
  *
- * krb5_init_keyblock- a function to set up 
- *  an empty keyblock
+ * This file contains an implementation of the RFC 3961 PRF for
+ *simplified profile enctypes.
  */
 
-
 #include "k5-int.h"
-#include <assert.h>
+#include "dk.h"
 
-krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
-	(krb5_context context, krb5_enctype enctype,
-	 size_t length, krb5_keyblock **out)
+krb5_error_code
+krb5int_dk_prf (const struct krb5_enc_provider *enc,
+		const struct krb5_hash_provider *hash,
+		const krb5_keyblock *key,
+		const krb5_data *in, krb5_data *out)
 {
-  return krb5int_c_init_keyblock (context, enctype, length, out);
+  krb5_data tmp;
+  krb5_data prfconst;
+  krb5_keyblock *kp = NULL;
+  krb5_error_code ret = 0;
+  
+  prfconst.data = (char *) "prf";
+  prfconst.length = 3;
+  tmp.length = hash->hashsize;
+  tmp.data = malloc(hash->hashsize);
+  if (tmp.data == NULL)
+    return ENOMEM;
+  hash->hash(1, in, &tmp);
+  tmp.length = (tmp.length/enc->block_size)*enc->block_size; /*truncate to block size*/
+  ret = krb5int_c_init_keyblock(0, key->enctype,
+			   key->length, &kp);
+    if (ret == 0)
+      ret = krb5_derive_key(enc, key, kp, &prfconst);
+  if (ret == 0)
+    ret = enc->encrypt(kp, NULL, &tmp, out);
+      if (kp)
+	krb5int_c_free_keyblock(0, kp);
+  free (tmp.data);
+  return ret;
 }
