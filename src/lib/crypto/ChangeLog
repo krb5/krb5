@@ -1,3 +1,9 @@
+2005-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* keyblocks.c (krb5int_c_free_keyblock): Call
+	krb5int_c_free_keyblock_contents instead of
+	krb5_free_keyblock_contents.
+
 2005-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* keyblocks.c :  File to contain memory management for keyblocks
