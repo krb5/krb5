@@ -1314,21 +1314,6 @@ krb5_error_code encode_krb5_sam_response_2
 krb5_error_code encode_krb5_predicted_sam_response
 	(const krb5_predicted_sam_response * , krb5_data **);
 
-krb5_error_code encode_krb5_sam_challenge
-       (const krb5_sam_challenge * , krb5_data **);
-
-krb5_error_code encode_krb5_sam_key
-       (const krb5_sam_key * , krb5_data **);
-
-krb5_error_code encode_krb5_enc_sam_response_enc
-       (const krb5_enc_sam_response_enc * , krb5_data **);
-
-krb5_error_code encode_krb5_sam_response
-       (const krb5_sam_response * , krb5_data **);
-
-krb5_error_code encode_krb5_predicted_sam_response
-       (const krb5_predicted_sam_response * , krb5_data **);
-
 krb5_error_code encode_krb5_setpw_req
 (const krb5_principal target, char *password, krb5_data **code);
 
@@ -1470,20 +1455,8 @@ krb5_error_code decode_krb5_enc_data
 krb5_error_code decode_krb5_pa_enc_ts
 	(const krb5_data *output, krb5_pa_enc_ts **rep);
 
-krb5_error_code decode_krb5_sam_challenge
-	(const krb5_data *, krb5_sam_challenge **);
-
 krb5_error_code decode_krb5_sam_key
 	(const krb5_data *, krb5_sam_key **);
-
-krb5_error_code decode_krb5_enc_sam_response_enc
-	(const krb5_data *, krb5_enc_sam_response_enc **);
-
-krb5_error_code decode_krb5_sam_response
-	(const krb5_data *, krb5_sam_response **);
-
-krb5_error_code decode_krb5_predicted_sam_response
-	(const krb5_data *, krb5_predicted_sam_response **);
 
 /*************************************************************************
  * End of prototypes for krb5_decode.c
@@ -1513,9 +1486,6 @@ krb5_error_code krb5_encode_kdc_rep
 		krb5_kdc_rep *,
 		krb5_data ** );
 
-krb5_error_code krb5_validate_times
-	(krb5_context, 
-		krb5_ticket_times *);
 krb5_boolean krb5int_auth_con_chkseqnum
 	(krb5_context ctx, krb5_auth_context ac, krb5_ui_4 in_seq);
 /*

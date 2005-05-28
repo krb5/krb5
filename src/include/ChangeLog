@@ -1,3 +1,11 @@
+2005-05-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (encode_krb5_sam_challenge, encode_krb5_sam_key,
+	encode_krb5_enc_sam_response_enc, encode_krb5_sam_response,
+	decode_krb5_sam_challenge, decode_krb5_enc_sam_response_enc,
+	decode_krb5_sam_response, decode_krb5_predicted_sam_response,
+	krb5_validate_times): Delete duplicate declarations.
+
 2005-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h (krb5int_c_ free_keyblock init_keyblock free_keyblock_contents):  new
