@@ -1,3 +1,9 @@
+2005-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (krb5int_pthread_loaded) [HAVE_PRAGMA_WEAK_REF]:
+	Declare.
+	(K5_PTHREADS_LOADED) [HAVE_PRAGMA_WEAK_REF]: Use it.
+
 2005-05-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (encode_krb5_sam_challenge, encode_krb5_sam_key,
