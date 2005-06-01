@@ -1,3 +1,14 @@
+2005-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c [HAVE_PRAGMA_WEAK_REF]: Declare
+	pthread_{g,s}etspecific, pthread_key_{create,delete},
+	pthread_{create,join} as weak references.
+	(krb5int_pthread_loaded, loaded_test_aux) [HAVE_PRAGMA_WEAK_REF]:
+	New functions.
+	(flag_pthread_loaded, loaded_test_once) [HAVE_PRAGMA_WEAK_REF]:
+	New variables.
+	* libkrb5support.exports: Add krb5int_pthread_loaded.
+
 2005-05-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.c (fai_add_hosts_by_name): Pass null pointer
