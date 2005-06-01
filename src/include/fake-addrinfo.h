@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001,2002,2003,2004 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002,2003,2004,2005 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -756,7 +756,36 @@ static inline int fai_add_hosts_by_name (const char *name,
 	   we never have to look up an IPv6 address if we are always
 	   asked for IPv4 only, but let's deal with that later, if we
 	   have to.  */
-	aierr = system_getaddrinfo(name, "telnet", &myhints, &ai);
+	/* Try NULL for the service for now.
+
+	   It would be nice to use the requested service name, and not
+	   have to patch things up, but then we'd be doing multiple
+	   queries for the same host when we get different services.
+	   We were using "telnet" for a little more confidence that
+	   getaddrinfo would heed the hints to only give us stream
+	   socket types (with no socket type and null service name, we
+	   might get stream *and* dgram *and* raw, for each address,
+	   or only raw).  The RFC 3493 description of ai_socktype
+	   sometimes associates it with the specified service,
+	   sometimes not.
+
+	   But on Mac OS X (10.3, 10.4) they've "extended" getaddrinfo
+	   to make SRV RR queries.  (Please, somebody, show me
+	   something in the specs that actually supports this?  RFC
+	   3493 says nothing about it, but it does say getaddrinfo is
+	   the new way to look up hostnames.  RFC 2782 says SRV
+	   records should *not* be used unless the application
+	   protocol spec says to do so.  The Telnet spec does not say
+	   to do it.)  And then they complain when our code
+	   "unexpectedly" seems to use this "extension" in cases where
+	   they don't want it to be used.
+
+	   Fortunately, it appears that if we specify ai_socktype as
+	   SOCK_STREAM and use a null service name, we only get one
+	   copy of each address on all the platforms I've tried,
+	   although it may not have ai_socktype filled in properly.
+	   So, we'll fudge it with that for now.  */
+	aierr = system_getaddrinfo(name, NULL, &myhints, &ai);
 	if (aierr) {
 	    krb5int_unlock_fac();
 	    return aierr;

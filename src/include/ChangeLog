@@ -1,3 +1,8 @@
+2005-05-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (fai_add_hosts_by_name): Pass null pointer
+	instead of telnet as service name.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h: Expand on init/fini comments some more.
