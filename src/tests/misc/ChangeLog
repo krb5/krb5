@@ -1,3 +1,8 @@
+2005-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (test_getpw): Depend on, and link against, the
+	support library.
+
 2005-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* test_getpw.c: New file.

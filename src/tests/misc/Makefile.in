@@ -14,8 +14,8 @@ all:: test_getpw
 check:: test_getpw
 	$(RUN_SETUP) ./test_getpw
 
-test_getpw: $(srcdir)/../misc/test_getpw.c ../../include/krb5/autoconf.h
-	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(srcdir)/../misc/test_getpw.c
+test_getpw: $(srcdir)/../misc/test_getpw.c ../../include/krb5/autoconf.h $(SUPPORT_DEPLIB)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(srcdir)/../misc/test_getpw.c $(SUPPORT_LIB)
 
 install::
 
