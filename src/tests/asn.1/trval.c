@@ -192,7 +192,7 @@ int main(argc, argv)
 }
 #endif
 
-static int convert_nibble(ch)
+static int convert_nibble(int ch)
 {
     if (isdigit(ch))
 	return (ch - '0');
