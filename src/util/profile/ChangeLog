@@ -1,3 +1,10 @@
+2005-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* profile.swg (errcode_t* tcl8 argout typemap): Cast return value
+	from error_message to char* to silence Sun compiler warning.
+	(errcode_t tcl8 out typemap): Likewise.
+	* profile_tcl.c: Regenerated.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for getpwuid_r here.

@@ -1243,7 +1243,7 @@ _wrap_profile_init_path(ClientData clientData, Tcl_Interp *interp, int objc, Tcl
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1279,7 +1279,7 @@ _wrap_profile_init(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj 
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1316,7 +1316,7 @@ _wrap_profile_flush(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1341,7 +1341,7 @@ _wrap_profile_flush_to_file(ClientData clientData, Tcl_Interp *interp, int objc,
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1408,7 +1408,7 @@ _wrap_profile_get_values(ClientData clientData, Tcl_Interp *interp, int objc, Tc
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1469,7 +1469,7 @@ _wrap_profile_get_string(ClientData clientData, Tcl_Interp *interp, int objc, Tc
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1517,7 +1517,7 @@ _wrap_profile_get_integer(ClientData clientData, Tcl_Interp *interp, int objc, T
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1553,7 +1553,7 @@ _wrap_profile_get_boolean(ClientData clientData, Tcl_Interp *interp, int objc, T
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1595,7 +1595,7 @@ _wrap_profile_get_relation_names(ClientData clientData, Tcl_Interp *interp, int 
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1658,7 +1658,7 @@ _wrap_profile_get_subsection_names(ClientData clientData, Tcl_Interp *interp, in
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1720,7 +1720,7 @@ _wrap_profile_iterator_create(ClientData clientData, Tcl_Interp *interp, int obj
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1757,7 +1757,7 @@ _wrap_profile_iterator_free(ClientData clientData, Tcl_Interp *interp, int objc,
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1795,7 +1795,7 @@ _wrap_profile_iterator(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1861,7 +1861,7 @@ _wrap_profile_update_relation(ClientData clientData, Tcl_Interp *interp, int obj
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1903,7 +1903,7 @@ _wrap_profile_clear_relation(ClientData clientData, Tcl_Interp *interp, int objc
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1946,7 +1946,7 @@ _wrap_profile_rename_section(ClientData clientData, Tcl_Interp *interp, int objc
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -1989,7 +1989,7 @@ _wrap_profile_add_relation(ClientData clientData, Tcl_Interp *interp, int objc, 
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }
@@ -2032,7 +2032,7 @@ _wrap_profile_flush_to_buffer(ClientData clientData, Tcl_Interp *interp, int obj
         if (result) {
             /* There could be a memory leak here in the SWIG-Tcl layer,
             	   I'm not sure.  Not going to worry about it though.  */
-            Tcl_SetResult(interp, error_message(result), TCL_STATIC);
+            Tcl_SetResult(interp, (char *) error_message(result), TCL_STATIC);
             SWIG_fail;
         }
     }

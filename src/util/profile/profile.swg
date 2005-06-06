@@ -73,7 +73,7 @@ typedef void **iter_t; /* ick */
     if (*$1) {
 	/* There could be a memory leak here in the SWIG-Tcl layer,
 	   I'm not sure.  Not going to worry about it though.  */
-	Tcl_SetResult(interp, error_message(*$1), TCL_STATIC);
+	Tcl_SetResult(interp, (char *) error_message(*$1), TCL_STATIC);
 	SWIG_fail;
     }
 }
@@ -83,7 +83,7 @@ typedef void **iter_t; /* ick */
     if ($1) {
 	/* There could be a memory leak here in the SWIG-Tcl layer,
 	   I'm not sure.  Not going to worry about it though.  */
-	Tcl_SetResult(interp, error_message($1), TCL_STATIC);
+	Tcl_SetResult(interp, (char *) error_message($1), TCL_STATIC);
 	SWIG_fail;
     }
 }
