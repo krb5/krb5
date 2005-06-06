@@ -1,3 +1,9 @@
+2005-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Put #undef for the PACKAGE_* symbols at the start
+	of autoconf.h.  Use a leading comment to hide the #undef from the
+	autoconf substitutions.
+
 2005-06-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Identify package in AC_INIT call.
