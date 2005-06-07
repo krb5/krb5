@@ -1,3 +1,11 @@
+2005-06-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (MAYBE_DEFINE_CALLINIT_FUNCTION)
+	[DELAY_INITIALIZER]: New macro.  If not __GNUC__, define
+	k5_call_init_function in the expansion; otherwise, do nothing.
+	(MAKE_INIT_FUNCTION) [DELAY_INITIALIZER]: Use it.
+	(k5_call_init_function): Don't define function form at top level.
+
 2005-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (krb5int_pthread_loaded) [HAVE_PRAGMA_WEAK_REF]:

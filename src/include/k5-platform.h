@@ -196,22 +196,6 @@ typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init
 # else
 #  define MAYBE_DUMMY_INIT(NAME)
 # endif
-# define MAKE_INIT_FUNCTION(NAME)				\
-	static int NAME(void);					\
-	MAYBE_DUMMY_INIT(NAME)					\
-	/* forward declaration for use in initializer */	\
-	static void JOIN__2(NAME, aux) (void);			\
-	static k5_init_t JOIN__2(NAME, once) =			\
-		{ K5_ONCE_INIT, 0, 0, JOIN__2(NAME, aux) };	\
-	static void JOIN__2(NAME, aux) (void)			\
-	{							\
-	    JOIN__2(NAME, once).did_run = 1;			\
-	    JOIN__2(NAME, once).error = NAME();			\
-	}							\
-	/* so ';' following macro use won't get error */	\
-	static int NAME(void)
-# define CALL_INIT_FUNCTION(NAME)	\
-	k5_call_init_function(& JOIN__2(NAME, once))
 # ifdef __GNUC__
 /* Do it in macro form so we get the file/line of the invocation if
    the assertion fails.  */
@@ -223,17 +207,36 @@ typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init
 		 ? k5int_err						\
 		 : (assert(k5int_i->did_run != 0), k5int_i->error));	\
 	    }))
+#  define MAYBE_DEFINE_CALLINIT_FUNCTION
 # else
-static inline int k5_call_init_function(k5_init_t *i)
-{
-    int err;
-    err = k5_once(&i->once, i->fn);
-    if (err)
-	return err;
-    assert (i->did_run != 0);
-    return i->error;
-}
+#  define MAYBE_DEFINE_CALLINIT_FUNCTION			\
+	static inline int k5_call_init_function(k5_init_t *i)	\
+	{							\
+	    int err;						\
+	    err = k5_once(&i->once, i->fn);			\
+	    if (err)						\
+		return err;					\
+	    assert (i->did_run != 0);				\
+	    return i->error;					\
+	}
 # endif
+# define MAKE_INIT_FUNCTION(NAME)				\
+	static int NAME(void);					\
+	MAYBE_DUMMY_INIT(NAME)					\
+	/* forward declaration for use in initializer */	\
+	static void JOIN__2(NAME, aux) (void);			\
+	static k5_init_t JOIN__2(NAME, once) =			\
+		{ K5_ONCE_INIT, 0, 0, JOIN__2(NAME, aux) };	\
+	MAYBE_DEFINE_CALLINIT_FUNCTION				\
+	static void JOIN__2(NAME, aux) (void)			\
+	{							\
+	    JOIN__2(NAME, once).did_run = 1;			\
+	    JOIN__2(NAME, once).error = NAME();			\
+	}							\
+	/* so ';' following macro use won't get error */	\
+	static int NAME(void)
+# define CALL_INIT_FUNCTION(NAME)	\
+	k5_call_init_function(& JOIN__2(NAME, once))
 /* This should be called in finalization only, so we shouldn't have
    multiple active threads mucking around in our library at this
    point.  So ignore the once_t object and just look at the flag.
