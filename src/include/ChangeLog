@@ -1,3 +1,16 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (load_*): Change argument type to point to const.
+	(K5_BE, K5_LE): New macros, defined based on architecture macros
+	for certain big-endian and little-endian platforms, respectively.
+	(PUT, GET) [__GNUC__]: New macros.  Use GCC's packed-structure
+	support to do unaligned loads and stores.
+	(PUTSWAPPED, GETSWAPPED) [__GNUC__]: Similar, but invoke a
+	SWAP<size> macro (not defined yet) to swap the bytes of the
+	value.
+	(store_*, load_*): Use these macros when using GCC, depending on
+	endianness and availability of the SWAP<size> macros.
+
 2005-06-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (MAYBE_DEFINE_CALLINIT_FUNCTION)

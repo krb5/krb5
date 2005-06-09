@@ -1,7 +1,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003, 2004 Massachusetts Institute of Technology.
+ * Copyright 2003, 2004, 2005 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -413,37 +413,109 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
    unaligned word stores and gcc/asm instructions for byte swaps,
    etc.)  */
 
+/* Optimize for GCC on architectures with known byte orders.
+
+   MIPS can use either byte order, but the preprocessor tells us which
+   mode we're compiling for.  The GCC config files indicate that
+   variants of Alpha and IA64 might be out there with both byte
+   orders, but until we encounter the "wrong" ones in the real world,
+   just go with the default (unless there are cpp predefines to help
+   us there too).
+
+   As far as I know, only PDP11 and ARM (which we don't handle here)
+   have strange byte orders where an 8-byte value isn't laid out as
+   either 12345678 or 87654321.
+
+   See also lib/crypto/aes/aesopt.h for code checking available header
+   files for endianness preprocessor macros.  */
+#if defined(__i386__) || defined(_MIPSEL) || defined(__alpha__) || defined(__ia64__)
+# define K5_LE	/* little-endian */
+#endif
+#if defined(__hppa__) || defined(__rs6000__) || defined(__sparc__) || defined(_MIPSEB) || defined(__m68k__) || defined(__sparc64__) || defined(__ppc__) || defined(__ppc64__)
+# define K5_BE	/* big-endian */
+#endif
+
+/* GCC's packed structures can be written to with any alignment; the
+   compiler will use byte operations, unaligned-word operations, or
+   normal memory ops as appropriate for the architecture.
+
+   This assumes the availability of uint##_t types, which should work
+   on most of our platforms except Windows, where we're not using
+   GCC.  */
+#ifdef __GNUC__
+# define PUT(SIZE,PTR,VAL)	(((struct { uint##SIZE##_t i; } __attribute__((packed)) *)(PTR))->i = (VAL))
+# define GET(SIZE,PTR)		(((const struct { uint##SIZE##_t i; } __attribute__((packed)) *)(PTR))->i)
+# define PUTSWAPPED(SIZE,PTR,VAL)	PUT(SIZE,PTR,SWAP##SIZE(VAL))
+# define GETSWAPPED(SIZE,PTR)		SWAP##SIZE(GET(SIZE,PTR))
+#endif
+/* To do: Define SWAP16, SWAP32, SWAP64 macros to byte-swap values
+   with the indicated numbers of bits.
+
+   Linux: byteswap.h, bswap_16 etc.
+   Solaris 10: none
+   Mac OS X: machine/endian.h or byte_order.h, NXSwap{Short,Int,LongLong}
+   NetBSD: sys/bswap.h, bswap16 etc.  */
+
 static inline void
 store_16_be (unsigned int val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(16,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+    PUTSWAPPED(16,p,val);
+#else
     p[0] = (val >>  8) & 0xff;
     p[1] = (val      ) & 0xff;
+#endif
 }
 static inline void
 store_16_le (unsigned int val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(16,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+    PUTSWAPPED(16,p,val);
+#else
     p[1] = (val >>  8) & 0xff;
     p[0] = (val      ) & 0xff;
+#endif
 }
 static inline void
 store_32_be (unsigned int val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(32,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+    PUTSWAPPED(32,p,val);
+#else
     p[0] = (val >> 24) & 0xff;
     p[1] = (val >> 16) & 0xff;
     p[2] = (val >>  8) & 0xff;
     p[3] = (val      ) & 0xff;
+#endif
 }
 static inline void
 store_32_le (unsigned int val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(32,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+    PUTSWAPPED(32,p,val);
+#else
     p[3] = (val >> 24) & 0xff;
     p[2] = (val >> 16) & 0xff;
     p[1] = (val >>  8) & 0xff;
     p[0] = (val      ) & 0xff;
+#endif
 }
 static inline void
 store_64_be (UINT64_TYPE val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(64,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+    PUTSWAPPED(64,p,val);
+#else
     p[0] = (unsigned char)((val >> 56) & 0xff);
     p[1] = (unsigned char)((val >> 48) & 0xff);
     p[2] = (unsigned char)((val >> 40) & 0xff);
@@ -452,10 +524,16 @@ store_64_be (UINT64_TYPE val, unsigned char *p)
     p[5] = (unsigned char)((val >> 16) & 0xff);
     p[6] = (unsigned char)((val >>  8) & 0xff);
     p[7] = (unsigned char)((val      ) & 0xff);
+#endif
 }
 static inline void
 store_64_le (UINT64_TYPE val, unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(64,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+    PUTSWAPPED(64,p,val);
+#else
     p[7] = (unsigned char)((val >> 56) & 0xff);
     p[6] = (unsigned char)((val >> 48) & 0xff);
     p[5] = (unsigned char)((val >> 40) & 0xff);
@@ -464,36 +542,73 @@ store_64_le (UINT64_TYPE val, unsigned char *p)
     p[2] = (unsigned char)((val >> 16) & 0xff);
     p[1] = (unsigned char)((val >>  8) & 0xff);
     p[0] = (unsigned char)((val      ) & 0xff);
+#endif
 }
 static inline unsigned short
-load_16_be (unsigned char *p)
+load_16_be (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(16,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+    return GETSWAPPED(16,p);
+#else
     return (p[1] | (p[0] << 8));
+#endif
 }
 static inline unsigned short
-load_16_le (unsigned char *p)
+load_16_le (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(16,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+    return GETSWAPPED(16,p);
+#else
     return (p[0] | (p[1] << 8));
+#endif
 }
 static inline unsigned int
-load_32_be (unsigned char *p)
+load_32_be (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(32,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+    return GETSWAPPED(32,p);
+#else
     return (p[3] | (p[2] << 8) | (p[1] << 16) | (p[0] << 24));
+#endif
 }
 static inline unsigned int
-load_32_le (unsigned char *p)
+load_32_le (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(32,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+    return GETSWAPPED(32,p);
+#else
     return (p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24));
+#endif
 }
 static inline UINT64_TYPE
-load_64_be (unsigned char *p)
+load_64_be (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(64,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+    return GETSWAPPED(64,p);
+#else
     return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
+#endif
 }
 static inline UINT64_TYPE
-load_64_le (unsigned char *p)
+load_64_le (const unsigned char *p)
 {
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(64,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+    return GETSWAPPED(64,p);
+#else
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
+#endif
 }
 
 
