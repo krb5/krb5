@@ -1,3 +1,9 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* f_tables.h: Include k5-platform.h.
+	(GET_HALF_BLOCK): Use load_32_be.
+	(PUT_HALF_BLOCK): Use store_32_be.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* d3_cbc.c (krb5int_des3_cbc_encrypt, krb5int_des3_cbc_decrypt):

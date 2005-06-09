@@ -14,6 +14,7 @@
 #ifndef	__DES_TABLES_H__
 #define	__DES_TABLES_H__	/* nothing */
 
+#include "k5-platform.h"
 /*
  * These may be declared const if you wish.  Be sure to change the
  * declarations in des_tables.c as well.
@@ -249,17 +250,8 @@ extern void krb5int_des_do_decrypt_2(unsigned DES_INT32 *l,
  * These are handy dandy utility thingies for straightening out bytes.
  * Included here because they're used a couple of places.
  */
-#define	GET_HALF_BLOCK(lr, ip) \
-	(lr) = ((unsigned DES_INT32)(*(ip)++)) << 24; \
-	(lr) |= ((unsigned DES_INT32)(*(ip)++)) << 16; \
-	(lr) |= ((unsigned DES_INT32)(*(ip)++)) << 8; \
-	(lr) |= (unsigned DES_INT32)(*(ip)++)
-
-#define	PUT_HALF_BLOCK(lr, op) \
-	*(op)++ = (unsigned char) (((lr) >> 24) & 0xff); \
-	*(op)++ = (unsigned char) (((lr) >> 16) & 0xff); \
-	*(op)++ = (unsigned char) (((lr) >>  8) & 0xff); \
-	*(op)++ = (unsigned char) ( (lr)        & 0xff)
+#define	GET_HALF_BLOCK(lr, ip)	((lr) = load_32_be(ip), (ip) += 4)
+#define PUT_HALF_BLOCK(lr, op)	(store_32_be(lr, op), (op) += 4)
 
 /* Shorthand that we'll need in several places, for creating values that
    really can hold 32 bits regardless of the prevailing int size.  */
