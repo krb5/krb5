@@ -24,6 +24,8 @@
  * or implied warranty.
  */
 
+/* Since fd_set is large on some platforms (8K on AIX 5.2), this
+   probably shouldn't be allocated in automatic storage.  */
 struct select_state {
     int max, nfds;
     fd_set rfds, wfds, xfds;
