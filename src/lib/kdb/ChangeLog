@@ -1,3 +1,7 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_dbm.c: Unused file deleted.
+
 2004-07-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb_db2.c (krb5_db2_db_get_principal): Rename local variable
