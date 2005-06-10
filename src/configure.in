@@ -139,10 +139,28 @@ AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen)
-AC_CHECK_FUNCS( mkstemp)
+AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen bswap16 bswap64 mkstemp)
 AC_HEADER_STDARG
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h)
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h)
+dnl bswap_16 is a macro in byteswap.h under GNU libc
+AC_MSG_CHECKING(for bswap_16)
+AC_CACHE_VAL(krb5_cv_bswap_16,[
+AC_TRY_LINK([#if HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif],[bswap_16(37);],krb5_cv_bswap_16=yes,krb5_cv_bswap_16=no)])
+AC_MSG_RESULT($krb5_cv_bswap_16)
+if test "$krb5_cv_bswap_16" = yes; then
+  AC_DEFINE(HAVE_BSWAP_16,1,[Define to 1 if bswap_16 is available via byteswap.h])
+fi
+AC_MSG_CHECKING(for bswap_64)
+AC_CACHE_VAL(krb5_cv_bswap_64,[
+AC_TRY_LINK([#if HAVE_BYTESWAP_H
+#include <byteswap.h>
+#endif],[bswap_64(37);],krb5_cv_bswap_64=yes,krb5_cv_bswap_64=no)])
+AC_MSG_RESULT($krb5_cv_bswap_64)
+if test "$krb5_cv_bswap_64" = yes; then
+  AC_DEFINE(HAVE_BSWAP_64,1,[Define to 1 if bswap_64 is available via byteswap.h])
+fi
 dnl
 dnl Check what the return types for gethostbyname_r and getservbyname_r are.
 dnl

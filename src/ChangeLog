@@ -1,3 +1,9 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for headers byteswap.h, sys/bswap.h,
+	machine/endian.h, machine/byte_order.h, and functions bswap16,
+	bswap64, bswap_16, and bswap_64.
+
 2005-06-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Put #undef for the PACKAGE_* symbols at the start
