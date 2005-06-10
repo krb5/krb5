@@ -71,8 +71,17 @@ main(argc, argv)
     char *argv[];
 {
     char block1[17], block2[17], block3[17];
-
+#if 0
     mit_des_cblock key, input, output, output2;
+#else
+    /* Force tests of unaligned accesses.  */
+    union { unsigned char c[8*4+3]; long l; } u;
+    unsigned char *ioblocks = u.c;
+    unsigned char *input = ioblocks+1;
+    unsigned char *output = ioblocks+10;
+    unsigned char *output2 = ioblocks+19;
+    unsigned char *key = ioblocks+27;
+#endif
     mit_des_key_schedule sched;
     int num = 0;
     int retval;
@@ -89,7 +98,7 @@ main(argc, argv)
             fprintf(stderr, "des test: can't process key");
             exit(1);
         }
-	mit_des_cbc_encrypt((const mit_des_cblock *) &input, &output2, 8, 
+	mit_des_cbc_encrypt((const mit_des_cblock *) input, output2, 8,
 			    sched, zeroblock, 1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
@@ -104,7 +113,7 @@ main(argc, argv)
 	/*
 	 * Now try decrypting....
 	 */
-	mit_des_cbc_encrypt((const mit_des_cblock *) &output, &output2, 8, 
+	mit_des_cbc_encrypt((const mit_des_cblock *) output, output2, 8,
 			    sched, zeroblock, 0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
