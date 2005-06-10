@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/sendto_kdc.c
  *
- * Copyright 1990,1991,2001,2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2002,2004,2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -946,14 +946,14 @@ service_udp_fd(struct conn_state *conn, struct select_state *selstate,
 
 static int
 service_fds (struct select_state *selstate,
-	     struct conn_state *conns, size_t n_conns, int *winning_conn)
+	     struct conn_state *conns, size_t n_conns, int *winning_conn,
+	     struct select_state *seltemp)
 {
     int e, selret;
-    struct select_state sel_results;
 
     e = 0;
     while (selstate->nfds > 0
-	   && (e = krb5int_cm_call_select(selstate, &sel_results, &selret)) == 0) {
+	   && (e = krb5int_cm_call_select(selstate, seltemp, &selret)) == 0) {
 	int i;
 
 	dprint("service_fds examining results, selret=%d\n", selret);
@@ -969,11 +969,11 @@ service_fds (struct select_state *selstate,
 	    if (conns[i].fd == INVALID_SOCKET)
 		continue;
 	    ssflags = 0;
-	    if (FD_ISSET(conns[i].fd, &sel_results.rfds))
+	    if (FD_ISSET(conns[i].fd, &seltemp->rfds))
 		ssflags |= SSF_READ, selret--;
-	    if (FD_ISSET(conns[i].fd, &sel_results.wfds))
+	    if (FD_ISSET(conns[i].fd, &seltemp->wfds))
 		ssflags |= SSF_WRITE, selret--;
-	    if (FD_ISSET(conns[i].fd, &sel_results.xfds))
+	    if (FD_ISSET(conns[i].fd, &seltemp->xfds))
 		ssflags |= SSF_EXCEPTION, selret--;
 	    if (!ssflags)
 		continue;
@@ -1033,7 +1033,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     krb5_error_code retval;
     struct conn_state *conns;
     size_t n_conns, host;
-    struct select_state select_state;
+    struct select_state *sel_state;
     struct timeval now;
     int winning_conn = -1, e = 0;
     unsigned char message_len_buf[4];
@@ -1054,12 +1054,19 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	conns[i].fd = INVALID_SOCKET;
     }
 
-    select_state.max = 0;
-    select_state.nfds = 0;
-    select_state.end_time.tv_sec = select_state.end_time.tv_usec = 0;
-    FD_ZERO(&select_state.rfds);
-    FD_ZERO(&select_state.wfds);
-    FD_ZERO(&select_state.xfds);
+    /* One for use here, listing all our fds in use, and one for
+       temporary use in service_fds, for the fds of interest.  */
+    sel_state = malloc(2 * sizeof(*sel_state));
+    if (sel_state == NULL) {
+	free(conns);
+	return ENOMEM;
+    }
+    sel_state->max = 0;
+    sel_state->nfds = 0;
+    sel_state->end_time.tv_sec = sel_state->end_time.tv_usec = 0;
+    FD_ZERO(&sel_state->rfds);
+    FD_ZERO(&sel_state->wfds);
+    FD_ZERO(&sel_state->xfds);
 
     message_len_buf[0] = (message->length >> 24) & 0xff;
     message_len_buf[1] = (message->length >> 16) & 0xff;
@@ -1081,18 +1088,19 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	    dprint("host %d\n", host);
 
 	    /* Send to the host, wait for a response, then move on. */
-	    if (maybe_send(&conns[host], &select_state))
+	    if (maybe_send(&conns[host], sel_state))
 		continue;
 
 	    retval = getcurtime(&now);
 	    if (retval)
 		goto egress;
-	    select_state.end_time = now;
-	    select_state.end_time.tv_sec += 1;
-	    e = service_fds(&select_state, conns, host+1, &winning_conn);
+	    sel_state->end_time = now;
+	    sel_state->end_time.tv_sec += 1;
+	    e = service_fds(sel_state, conns, host+1, &winning_conn,
+			    sel_state+1);
 	    if (e)
 		break;
-	    if (pass > 0 && select_state.nfds == 0)
+	    if (pass > 0 && sel_state->nfds == 0)
 		/*
 		 * After the first pass, if we close all fds, break
 		 * out right away.  During the first pass, it's okay,
@@ -1108,16 +1116,16 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	/* Possible optimization: Find a way to integrate this select
 	   call with the last one from the above loop, if the loop
 	   actually calls select.  */
-	select_state.end_time.tv_sec += delay_this_pass;
-	e = service_fds(&select_state, conns, host+1, &winning_conn);
+	sel_state->end_time.tv_sec += delay_this_pass;
+	e = service_fds(sel_state, conns, host+1, &winning_conn, sel_state+1);
 	if (e)
 	    break;
-	if (select_state.nfds == 0)
+	if (sel_state->nfds == 0)
 	    break;
 	delay_this_pass *= 2;
     }
 
-    if (select_state.nfds == 0) {
+    if (sel_state->nfds == 0) {
 	/* No addresses?  */
 	retval = KRB5_KDC_UNREACH;
 	goto egress;
@@ -1150,5 +1158,6 @@ egress:
     free(conns);
     if (reply->data != udpbuf)
 	free(udpbuf);
+    free(sel_state);
     return retval;
 }
