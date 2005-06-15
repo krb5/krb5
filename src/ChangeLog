@@ -1,3 +1,7 @@
+2005-06-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for endian.h.
+
 2005-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for headers byteswap.h, sys/bswap.h,

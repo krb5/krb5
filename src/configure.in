@@ -141,7 +141,7 @@ AC_PROG_LEX
 AC_C_CONST
 AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield dlopen bswap16 bswap64 mkstemp)
 AC_HEADER_STDARG
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h)
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h)
 dnl bswap_16 is a macro in byteswap.h under GNU libc
 AC_MSG_CHECKING(for bswap_16)
 AC_CACHE_VAL(krb5_cv_bswap_16,[
