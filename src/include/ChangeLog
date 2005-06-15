@@ -1,3 +1,16 @@
+2005-06-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h: Include endian.h if it's available, or
+	machine/endian.h if it's available.  Include byteswap.h if
+	available.
+	(K5_LE, K5_BE): Define based on endianness macros from header
+	files, if available.  Only do the architecture tests if this
+	fails.
+	(SWAP16, SWAP32, SWAP64): Define if byteswap.h and bswap_16 are
+	available.
+	({load,store}_{16,32,64}_le): Disable building of little-endian
+	versions, which aren't currently used.
+
 2005-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h (load_*): Change argument type to point to const.
