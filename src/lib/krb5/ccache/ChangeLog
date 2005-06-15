@@ -1,3 +1,7 @@
+2005-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (dereference): Fix test is list-walking loop.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (NEED_SOCKETS, NEED_LOWLEVEL_IO): Don't define.
