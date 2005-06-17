@@ -16,7 +16,7 @@
 #include <db.h>
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
-#include "../adb_err.h"
+#include "adb_err.h"
 #include <com_err.h>
 
 typedef	long		osa_adb_ret_t;

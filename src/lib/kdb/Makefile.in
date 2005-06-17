@@ -7,6 +7,7 @@ KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_C
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 CFLAGS=@CFLAGS@ -DKDB5_USE_LIB_KDB_DB2
+LOCALINCLUDES= -I.
 
 LIBBASE=kdb5
 LIBMAJOR=4
@@ -39,7 +40,7 @@ SRCS= \
 	$(srcdir)/decrypt_key.c \
 	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
-	$(srcdir)/adb_err.c \
+	adb_err.c \
 	$(srcdir)/err_handle.c \
 	$(srcdir)/keytab.c
 
@@ -85,7 +86,7 @@ kdb5.so kdb5.po $(OUTPRE)kdb5.$(OBJEXT): kdb5.c $(SRCTOP)/include/k5-int.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/krb5/osconf.h \
-  kdb5.h err_handle.h adb_err.h
+  kdb5.h err_handle.h ./adb_err.h
 encrypt_key.so encrypt_key.po $(OUTPRE)encrypt_key.$(OBJEXT): \
   encrypt_key.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
