@@ -313,7 +313,7 @@ void init_master(context, params)
 
      use_master = 0;
      if ((ret = kadm5_init(whoami, NULL, KADM5_ADMIN_SERVICE, params,
-			   KADM5_STRUCT_VERSION, KADM5_API_VERSION_2,
+			   KADM5_STRUCT_VERSION, KADM5_API_VERSION_2, NULL,
 			   &handle))) {
 	  com_err(whoami, ret, "initializing kadm5 library");
 	  cleanup_and_exit(1, context);

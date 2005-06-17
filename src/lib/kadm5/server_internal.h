@@ -21,7 +21,6 @@
 #include    <krb5/kdb.h>
 #include    <kadm5/admin.h>
 #include    "admin_internal.h"
-#include    "adb.h"
 
 typedef struct _kadm5_server_handle_t {
 	krb5_ui_4	magic_number;
@@ -31,8 +30,25 @@ typedef struct _kadm5_server_handle_t {
 	krb5_principal	current_caller;
 	kadm5_config_params  params;
 	struct _kadm5_server_handle_t *lhandle;
-	osa_adb_policy_t policy_db;
+        char **db_args;
 } kadm5_server_handle_rec, *kadm5_server_handle_t;
+
+#define OSA_ADB_PRINC_VERSION_1  0x12345C01
+
+typedef struct _osa_pw_hist_t {
+  int n_key_data;
+  krb5_key_data *key_data;
+} osa_pw_hist_ent, *osa_pw_hist_t;
+                                                                                                                     typedef struct _osa_princ_ent_t {
+  int                         version;
+  char                        *policy;
+  long                        aux_attributes;
+  unsigned int                old_key_len;
+  unsigned int                old_key_next;
+  krb5_kvno                   admin_history_kvno;
+  osa_pw_hist_ent             *old_keys;
+} osa_princ_ent_rec, *osa_princ_ent_t;
+
 
 kadm5_ret_t    adb_policy_init(kadm5_server_handle_t handle);
 kadm5_ret_t    adb_policy_close(kadm5_server_handle_t handle);
@@ -55,6 +71,7 @@ krb5_error_code     kdb_put_entry(kadm5_server_handle_t handle,
 krb5_error_code     kdb_delete_entry(kadm5_server_handle_t handle,
 				     krb5_principal name);
 krb5_error_code     kdb_iter_entry(kadm5_server_handle_t handle,
+				   char *match_entry,
 				   void (*iter_fct)(void *, krb5_principal), 
 				   void *data);
 
@@ -114,5 +131,10 @@ extern	krb5_principal	current_caller;
      GENERIC_CHECK_HANDLE(handle, KADM5_OLD_SERVER_API_VERSION, \
 			  KADM5_NEW_SERVER_API_VERSION) \
      SERVER_CHECK_HANDLE(handle)
+
+bool_t          xdr_osa_princ_ent_rec(XDR *xdrs, osa_princ_ent_t objp);
+
+void
+osa_free_princ_ent(osa_princ_ent_t val);
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

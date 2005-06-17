@@ -59,4 +59,5 @@ error_code KADM5_SETKEY_DUP_ENCTYPES, "Multiple values for single or folded enct
 error_code KADM5_SETV4KEY_INVAL_ENCTYPE, "Invalid enctype for setv4key"
 error_code KADM5_SETKEY3_ETYPE_MISMATCH, "Mismatched enctypes for setkey3"
 error_code KADM5_MISSING_KRB5_CONF_PARAMS, "Missing parameters in krb5.conf required for kadmin client"
+error_code KADM5_XDR_FAILURE,		"XDR encoding error"
 end

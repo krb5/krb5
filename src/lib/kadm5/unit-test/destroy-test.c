@@ -22,7 +22,7 @@ int main()
      for(x = 0; x < TEST_NUM; x++) {
 	ret = ovsec_kadm_init("admin", "admin", "ovsec_adm/admin", 0,
 			      OVSEC_KADM_STRUCT_VERSION,
-			      OVSEC_KADM_API_VERSION_1,
+			      OVSEC_KADM_API_VERSION_1, NULL,
 			      &server_handle);
 	if(ret != OVSEC_KADM_OK) {
 	    com_err("test", ret, "init");

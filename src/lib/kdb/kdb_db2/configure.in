@@ -1,0 +1,22 @@
+AC_INIT(configure.in)
+CONFIG_RULES
+AC_CHECK_HEADERS(unistd.h)
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+
+AC_CHECK_FUNCS(srand48 srand srandom umask)
+
+dnl AIX is unusual in that it wants all symbols resolved at link time
+dnl  Fortunately, it will allow us to link the kdb library now, even if
+dnl it is linked again later.
+case $krb5_cv_host in
+*-*-aix*)
+	LIBS="$LIBS -ldb"
+	;;
+esac
+KRB5_RUN_FLAGS
+dnl The following is for check...
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+V5_AC_OUTPUT_MAKEFILE

@@ -42,7 +42,7 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
     } else {
 	realm = r;
     }
-	    
+
     if ((ret = krb5_db_setup_mkey_name(handle->context,
 				       handle->params.mkey_name,
 				       realm, NULL, &master_princ)))
@@ -60,9 +60,6 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
     if (ret)
 	goto done;
 				 
-    if ((ret = krb5_db_init(handle->context)) != KSUCCESS)
-	goto done;
-
     if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
 					 &master_keyblock))) {
 	  krb5_db_fini(handle->context);
@@ -264,7 +261,7 @@ kdb_get_entry(kadm5_server_handle_t handle,
 	if (! xdr_osa_princ_ent_rec(&xdrs, adb)) {
 	   xdr_destroy(&xdrs);
 	   krb5_db_free_principal(handle->context, kdb, 1);
-	   return(OSA_ADB_XDR_FAILURE);
+	   return(KADM5_XDR_FAILURE);
 	}
 	xdr_destroy(&xdrs);
     }
@@ -346,7 +343,7 @@ kdb_put_entry(kadm5_server_handle_t handle,
     xdralloc_create(&xdrs, XDR_ENCODE); 
     if(! xdr_osa_princ_ent_rec(&xdrs, adb)) {
 	xdr_destroy(&xdrs);
-	return(OSA_ADB_XDR_FAILURE);
+	return(KADM5_XDR_FAILURE);
     }
     tl_data.tl_data_type = KRB5_TL_KADM_DATA;
     tl_data.tl_data_length = xdr_getpos(&xdrs);
@@ -395,7 +392,7 @@ kdb_iter_func(krb5_pointer data, krb5_db_entry *kdb)
 }
 
 krb5_error_code
-kdb_iter_entry(kadm5_server_handle_t handle,
+kdb_iter_entry(kadm5_server_handle_t handle, char *match_entry,
 	       void (*iter_fct)(void *, krb5_principal), void *data)
 {
     iter_data id;
@@ -404,11 +401,10 @@ kdb_iter_entry(kadm5_server_handle_t handle,
     id.func = iter_fct;
     id.data = data;
 
-    ret = krb5_db_iterate(handle->context, kdb_iter_func, &id);
+    ret = krb5_db_iterate(handle->context, match_entry, kdb_iter_func, &id);
     if (ret)
 	return(ret);
 
     return(0);
 }
-
 

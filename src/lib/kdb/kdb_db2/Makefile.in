@@ -1,0 +1,78 @@
+thisconfigdir=.
+myfulldir=lib/kdb/kdb_db2
+mydir=.
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LIBBASE=kdb_db2
+LIB=$(LIBBASE)
+LIBMAJOR=4
+LIBMINOR=0
+RELDIR=kdb/kdb_db2
+SO_EXT=.so
+# Depends on libk5crypto and libkrb5
+
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+DBDIR = $(BUILDTOP)/util/db2
+DBOBJLISTS = $(DBOBJLISTS-@DB_VERSION@)
+DBOBJLISTS-sys =
+DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
+	$(DBDIR)/db/OBJS.ST $(DBDIR)/mpool/OBJS.ST $(DBDIR)/recno/OBJS.ST \
+	$(DBDIR)/clib/OBJS.ST
+
+all:: lib$(LIB)$(SO_EXT)
+
+SRCS= \
+	$(srcdir)/kdb_xdr.c \
+	$(srcdir)/adb_openclose.c \
+	$(srcdir)/adb_policy.c \
+	$(srcdir)/kdb_db2.c \
+	$(srcdir)/pol_xdr.c \
+	$(srcdir)/db2_exp.c
+
+STOBJLISTS=OBJS.ST $(DBOBJLISTS)
+STLIBOBJS= \
+	kdb_xdr.o \
+	adb_openclose.o \
+	adb_policy.o \
+	kdb_db2.o \
+	pol_xdr.o \
+	db2_exp.o
+
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+
+lib$(LIB)$(SO_EXT):  db2_exp.o # lib$(LIB)$(STLIBEXT)
+	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -lgssrpc -ldb $(SHLIB_EXPLIBS) 
+
+clean::
+	$(RM) lib$(LIB)$(SO_EXT) db2_exp.o
+
+
+t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kdb t_kdb.o $(OBJS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
+
+check::	t_kdb
+	$(RM) test_db
+	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcv
+	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcvr
+
+clean::
+	$(RM) t_kdb t_kdb.o
+
+
+adb_openclose.c adb_policy.c : ../adb_err.h
+
+# @lib_frag@
+# @libobj_frag@
+

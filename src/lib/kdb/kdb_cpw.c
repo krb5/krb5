@@ -52,7 +52,6 @@
  */
 
 #include "k5-int.h"
-#include "krb5/adm.h"
 #include <stdio.h>
 #include <errno.h>
 
@@ -86,11 +85,11 @@ cleanup_key_data(context, count, data)
     for (i = 0; i < count; i++) {
 	for (j = 0; j < data[i].key_data_ver; j++) {
 	    if (data[i].key_data_length[j]) {
-	    	free(data[i].key_data_contents[j]);
+	    	krb5_db_free(context, data[i].key_data_contents[j]);
 	    }
 	}
     }
-    free(data);
+    krb5_db_free(context, data);
 }
 
 static krb5_error_code
@@ -106,8 +105,13 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
     krb5_keyblock	  key;
     krb5_db_entry	  krbtgt_entry;
     krb5_boolean	  more;
-    int			  max_kvno, one, i, j;
+    int			  max_kvno, one, i, j, k;
     krb5_error_code	  retval;
+    krb5_key_data         tmp_key_data;
+    krb5_key_data        *tptr;
+
+    memset( &tmp_key_data, 0, sizeof(tmp_key_data));
+
 
     retval = krb5_build_principal_ext(context, &krbtgt_princ,
 				      db_entry->princ->realm.length,
@@ -176,19 +180,59 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
 					     &key)))
 	    goto add_key_rnd_err;
 
+
+	/* db library will free this. Since, its a so, it could actually be using different memory management
+	   function. So, its better if the memory is allocated by the db's malloc. So, a temporary memory is used
+	   here which will later be copied to the db_entry */
     	retval = krb5_dbekd_encrypt_key_data(context, master_key, 
 					     &key, NULL, kvno, 
-					     &db_entry->key_data[db_entry->n_key_data-1]);
+					     &tmp_key_data); 
 
 	krb5_free_keyblock_contents(context, &key);
-
-	if (retval)
+	if( retval )
 	    goto add_key_rnd_err;
+
+	tptr = &db_entry->key_data[db_entry->n_key_data-1];
+
+	tptr->key_data_ver = tmp_key_data.key_data_ver;
+	tptr->key_data_kvno = tmp_key_data.key_data_kvno;
+
+	for( k = 0; k < tmp_key_data.key_data_ver; k++ )
+	{
+	    tptr->key_data_type[k] = tmp_key_data.key_data_type[k];
+	    tptr->key_data_length[k] = tmp_key_data.key_data_length[k];
+	    if( tmp_key_data.key_data_contents[k] )
+	    {
+		tptr->key_data_contents[k] = krb5_db_alloc(context, NULL, tmp_key_data.key_data_length[k]);
+		if( tptr->key_data_contents[k] == NULL )
+		{
+		    cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
+		    db_entry->key_data = NULL;
+		    db_entry->n_key_data = 0;
+		    retval = ENOMEM;
+		    goto add_key_rnd_err;
+		}
+		memcpy( tptr->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
+
+		memset( tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
+		free( tmp_key_data.key_data_contents[k] );
+		tmp_key_data.key_data_contents[k] = NULL;
+	    }
+	}
+
     }
 
 add_key_rnd_err:
     krb5_db_free_principal(context, &krbtgt_entry, one);
 
+    for( i = 0; i < tmp_key_data.key_data_ver; i++ )
+    {
+	if( tmp_key_data.key_data_contents[i] )
+	{
+	    memset( tmp_key_data.key_data_contents[i], 0, tmp_key_data.key_data_length[i]);
+	    free( tmp_key_data.key_data_contents[i] );
+	}
+    }
     return(retval);
 }
 
@@ -242,6 +286,7 @@ krb5_dbe_crk(context, master_key, ks_tuple, ks_tuple_count, keepold, db_entry)
 	    db_entry->key_data[i+n_new_key_data] = key_data[i];
 	    memset(&key_data[i], 0, sizeof(krb5_key_data));
 	}
+	krb5_db_free(context, key_data); /* we moved the cotents to new memory. But, the original block which contained the data */
     } else {
 	cleanup_key_data(context, key_data_count, key_data);
     }
@@ -321,7 +366,11 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
     krb5_keysalt	  key_salt;
     krb5_keyblock	  key;
     krb5_data	  	  pwd;
-    int			  i, j;
+    int			  i, j, k;
+    krb5_key_data         tmp_key_data;
+    krb5_key_data        *tptr;
+
+    memset( &tmp_key_data, 0, sizeof(tmp_key_data));
 
     retval = 0;
 
@@ -424,18 +473,56 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	    key_salt.data.length = 
 	      krb5_princ_realm(context, db_entry->princ)->length;
 
-	if ((retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
-		     (const krb5_keysalt *)&key_salt,
-		     kvno, &db_entry->key_data[db_entry->n_key_data-1]))) {
-	    if (key_salt.data.data)
-		 free(key_salt.data.data);
-	    krb5_xfree(key.contents);
-	    return(retval);
-	}
+	/* memory allocation to be done by db. So, use temporary block and later copy
+	   it to the memory allocated by db */
+	retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
+					     (const krb5_keysalt *)&key_salt,
+					     kvno, &tmp_key_data);
 	if (key_salt.data.data)
-	     free(key_salt.data.data);
+	    free(key_salt.data.data);
 	krb5_xfree(key.contents);
+
+	if( retval )
+	    return retval;
+
+	tptr = &db_entry->key_data[db_entry->n_key_data-1];
+
+	tptr->key_data_ver = tmp_key_data.key_data_ver;
+	tptr->key_data_kvno = tmp_key_data.key_data_kvno;
+
+	for( k = 0; k < tmp_key_data.key_data_ver; k++ )
+	{
+	    tptr->key_data_type[k] = tmp_key_data.key_data_type[k];
+	    tptr->key_data_length[k] = tmp_key_data.key_data_length[k];
+	    if( tmp_key_data.key_data_contents[k] )
+	    {
+		tptr->key_data_contents[k] = krb5_db_alloc(context, NULL, tmp_key_data.key_data_length[k]);
+		if( tptr->key_data_contents[k] == NULL )
+		{
+		    cleanup_key_data(context, db_entry->n_key_data, db_entry->key_data);
+		    db_entry->key_data = NULL;
+		    db_entry->n_key_data = 0;
+		    retval = ENOMEM;
+		    goto add_key_pwd_err;
+		}
+		memcpy( tptr->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
+
+		memset( tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
+		free( tmp_key_data.key_data_contents[k] );
+		tmp_key_data.key_data_contents[k] = NULL;
+	    }
+	}
     }
+ add_key_pwd_err:
+    for( i = 0; i < tmp_key_data.key_data_ver; i++ )
+    {
+	if( tmp_key_data.key_data_contents[i] )
+	{
+	    memset( tmp_key_data.key_data_contents[i], 0, tmp_key_data.key_data_length[i]);
+	    free( tmp_key_data.key_data_contents[i] );
+	}
+    }
+
     return(retval);
 }
 
@@ -446,7 +533,7 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
  * As a side effect all old keys are nuked if keepold is false.
  */
 krb5_error_code
-krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
+krb5_dbe_def_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	     new_kvno, keepold, db_entry)
     krb5_context	  context;
     krb5_keyblock       * master_key;
@@ -495,6 +582,7 @@ krb5_dbe_cpw(context, master_key, ks_tuple, ks_tuple_count, passwd,
 	    db_entry->key_data[i+n_new_key_data] = key_data[i];
 	    memset(&key_data[i], 0, sizeof(krb5_key_data));
 	}
+	krb5_db_free( context, key_data );
     } else {
 	cleanup_key_data(context, key_data_count, key_data);
     }
@@ -556,3 +644,5 @@ krb5_dbe_apw(context, master_key, ks_tuple, ks_tuple_count, passwd, db_entry)
     }
     return(retval);
 }
+
+

@@ -5,6 +5,11 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.2.26.1  2005/06/17 21:11:24  raeburn
+ * Initial checkin of Novell Database Abstraction Layer changes.
+ * Patches applied to 1.4.1 release code, updated to trunk, makefile dependencies
+ * deleted when they caused cvs merge conflicts.
+ *
  * Revision 1.2  1998/02/14 02:32:58  tlyu
  * 	* client_init.c:
  * 	* client_principal.c:
@@ -65,6 +70,7 @@ static char *rcsid = "$Header$";
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    "client_internal.h"
+#include    "err_handle.h"
 
 kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
 {
@@ -76,5 +82,10 @@ kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
 	  return KADM5_RPC_ERROR;
      else if (r->code == KADM5_OK)
 	  *privs = r->privs;
+
+     if(r->code)
+     {
+	 krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
+     }
      return r->code;
 }

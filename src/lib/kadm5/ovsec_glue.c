@@ -6,10 +6,11 @@ ovsec_kadm_ret_t ovsec_kadm_init_with_password(char *client_name, char *pass,
 					       char *realm,
 					       krb5_ui_4 struct_version,
 					       krb5_ui_4 api_version,
+					       char **db_args,
 					       void **server_handle)
 {
      return kadm5_init_with_password(client_name, pass, service_name,
-				     realm, struct_version, api_version, 
+				     realm, struct_version, api_version, db_args,
 				     server_handle);
 }
 
@@ -18,10 +19,11 @@ ovsec_kadm_ret_t ovsec_kadm_init_with_skey(char *client_name, char *keytab,
 					   char *realm,
 					   krb5_ui_4 struct_version,
 					   krb5_ui_4 api_version,
+					   char **db_args,
 					   void **server_handle)
 {
      return kadm5_init_with_skey(client_name, keytab, service_name, realm,
-				 struct_version, api_version,
+				 struct_version, api_version, db_args,
 				 server_handle);
 }
 
@@ -30,10 +32,11 @@ ovsec_kadm_ret_t ovsec_kadm_init(char *client_name, char *from_stash,
 				 char *realm,
 				 krb5_ui_4 struct_version,
 				 krb5_ui_4 api_version,
+				 char **db_args,
 				 void **server_handle)
 {
      return kadm5_init(client_name, from_stash, service_name,
-		       realm, struct_version, api_version,
+		       realm, struct_version, api_version, db_args,
 		       server_handle);
 }
 

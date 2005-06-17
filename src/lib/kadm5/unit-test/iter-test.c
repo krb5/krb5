@@ -16,7 +16,7 @@ int main(int argc, char **argv)
      
      ret = ovsec_kadm_init("admin", "admin", OVSEC_KADM_ADMIN_SERVICE, 0,
 			   OVSEC_KADM_STRUCT_VERSION,
-			   OVSEC_KADM_API_VERSION_1,
+			   OVSEC_KADM_API_VERSION_1, NULL,
 			   &server_handle);
      if (ret != OVSEC_KADM_OK) {
 	  com_err("iter-test", ret, "while initializing");

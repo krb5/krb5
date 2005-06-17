@@ -323,7 +323,10 @@ add_princ(context, str_newprinc)
     fprintf(stdout, "Added %s to database\n", princ_name);
 
 error: /* Do cleanup of newentry regardless of error */
+#if 0
     krb5_dbe_free_contents(context, &newentry);
+#endif
+    krb5_db_free_principal(context, &newentry, 1);
     return;
 }
 
@@ -337,11 +340,13 @@ char *dbname;
     krb5_boolean more;
     krb5_data pwd, scratch;
 
+#if 0
     if ((retval = krb5_db_set_name(test_context, dbname))) {
 	com_err(pname, retval, "while setting active database to '%s'",
 		dbname);
 	return(1);
     }
+#endif
     /* assemble & parse the master key name */
 
     if ((retval = krb5_db_setup_mkey_name(test_context, mkey_name, cur_realm, 
@@ -375,7 +380,10 @@ char *dbname;
 	    return(1);
 	}
     }
+#if 0
     if ((retval = krb5_db_init(test_context))) {
+#endif
+    if ((retval = krb5_db_open(test_context, NULL, KRB5_KDB_OPEN_RO))) {
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }

@@ -5,11 +5,12 @@ BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 SRCS=$(srcdir)/kdb5_mkdums.c
+KDB5_DEP_LIBS=-lpthread -ldl
 
 all:: kdb5_mkdums
 
 kdb5_mkdums: kdb5_mkdums.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o kdb5_mkdums kdb5_mkdums.o $(KDB5_LIBS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o kdb5_mkdums kdb5_mkdums.o $(KDB5_DEP_LIBS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
 
 all:: kdb5_mkdums
 

@@ -21,7 +21,6 @@ static char *rcsid = "$Header$";
 #include	<sys/types.h>
 #include	<string.h>
 #include	<kadm5/admin.h>
-#include	"adb.h"
 #ifdef SOLARIS_REGEXPS
 #include	<regexpr.h>
 #endif
@@ -230,18 +229,18 @@ static kadm5_ret_t kadm5_get_either(int princ,
 
      if (princ) {
 	  data.context = handle->context;
-	  ret = kdb_iter_entry(handle, get_princs_iter, (void *) &data);
+	  ret = kdb_iter_entry(handle, exp, get_princs_iter, (void *) &data);
      } else {
-	  ret = osa_adb_iter_policy(handle->policy_db, get_pols_iter, (void *)&data);
+	  ret = krb5_db_iter_policy(handle->context, exp, get_pols_iter, (void *)&data);
      }
      
      free(regexp);
 #ifdef POSIX_REGEXPS
      regfree(&data.preg);
 #endif
-     if (ret == OSA_ADB_OK && data.malloc_failed)
+     if ( !ret && data.malloc_failed)
 	  ret = ENOMEM;
-     if (ret != OSA_ADB_OK) {
+     if ( ret ) {
 	  for (i = 0; i < data.n_names; i++)
 	       free(data.names[i]);
 	  free(data.names);

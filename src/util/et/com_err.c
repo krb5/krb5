@@ -32,6 +32,7 @@
 
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 k5_mutex_t com_err_hook_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+krb5_errcode_2_string_func error_message = krb5_errcode_2_string;
 
 static void default_com_err_proc (const char *whoami, errcode_t code,
 				  const char *fmt, va_list ap)

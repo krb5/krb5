@@ -5,6 +5,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES = -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+KDB_DEP_LIB=-ldl -lpthread
 
 all:: init-test destroy-test client-handle-test client-iter-test
 all:: randkey-test server-handle-test lock-test server-iter-test 
@@ -40,26 +41,26 @@ client-setkey-test: setkey-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 
 randkey-test: randkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o randkey-test randkey-test.o \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 server-handle-test: handle-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-handle-test handle-test.o \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 lock-test: lock-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o lock-test lock-test.o \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 server-iter-test: iter-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-iter-test iter-test.o \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 setkey-test.o: $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
 	$(CC) $(ALL_CFLAGS) -UUSE_KADM5_API_VERSION -DUSE_KADM5_API_VERSION=2 -c $(SRCTOP)/lib/kadm5/unit-test/setkey-test.c
 
 server-setkey-test: setkey-test.o $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o server-setkey-test setkey-test.o \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+		$(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 #
 # The unit-test targets

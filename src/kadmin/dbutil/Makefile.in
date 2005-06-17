@@ -6,16 +6,20 @@ DEFINES = -DKDB4_DISABLE
 LOCALINCLUDES = -I. @KRB4_INCLUDES@ 
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)
+KDB_DEP_LIB=-ldl -lpthread
 
 PROG = kdb5_util
-OBJS	= kdb5_util.o dump.o dumpv4.o loadv4.o \
-	kdb5_create.o kadm5_create.o string_table.o kdb5_stash.o \
-	kdb5_destroy.o ovload.o import_err.o strtok.o
+###OBJS	= kdb5_util.o dump.o dumpv4.o loadv4.o \
+###	kdb5_create.o kadm5_create.o string_table.o kdb5_stash.o \
+###	kdb5_destroy.o ovload.o import_err.o strtok.o
+###
+
+OBJS = kdb5_util.o kdb5_create.o kadm5_create.o string_table.o kdb5_destroy.o kdb5_stash.o import_err.o strtok.o dump.o ovload.o
 
 all:: $(PROG)
 
 $(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
-	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KRB4COMPAT_LIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB4COMPAT_LIBS)
 
 import_err.c import_err.h: $(srcdir)/import_err.et
 

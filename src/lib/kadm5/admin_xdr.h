@@ -7,6 +7,7 @@
 
 #include    <kadm5/admin.h>
 #include    "kadm_rpc.h"
+#include    "server_internal.h"
 
 bool_t      xdr_ui_4(XDR *xdrs, krb5_ui_4 *objp);
 bool_t	    xdr_nullstring(XDR *xdrs, char **objp);
@@ -59,3 +60,5 @@ bool_t	    xdr_krb5_int32(XDR *xdrs, krb5_int32 *objp);
 bool_t	    xdr_krb5_enctype(XDR *xdrs, krb5_enctype *objp);
 bool_t      xdr_krb5_salttype(XDR *xdrs, krb5_int32 *objp);
 bool_t	    xdr_krb5_keyblock(XDR *xdrs, krb5_keyblock *objp);
+bool_t      xdr_krb5_key_data(XDR *xdrs, krb5_key_data *objp);
+bool_t      xdr_osa_pw_hist_ent(XDR *xdrs, osa_pw_hist_ent *objp);

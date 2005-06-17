@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
+#include <krb5/kdb.h>
 
 char *whoami;
 
@@ -20,8 +20,7 @@ static void usage()
 
 int main(int argc, char **argv)
 {
-     osa_adb_ret_t ret;
-     osa_adb_policy_t policy_db;
+     krb5_error_code ret;
      osa_policy_ent_t entry;
      krb5_context context;
      kadm5_config_params params;
@@ -36,7 +35,7 @@ int main(int argc, char **argv)
      }
 
      initialize_ovk_error_table();
-     initialize_adb_error_table();
+/*      initialize_adb_error_table(); */
      initialize_ovku_error_table();
 
      params.mask = 0;
@@ -52,8 +51,8 @@ int main(int argc, char **argv)
 	  exit(1);
      }
 
-     ret = osa_adb_open_policy(&policy_db, &params);
-     if (ret != OSA_ADB_OK) {
+     ret = krb5_db_open( context, NULL, KRB5_KDB_OPEN_RW);
+     if (ret) {
 	  com_err(whoami, ret, "while opening database");
 	  exit(1);
      }
@@ -61,38 +60,39 @@ int main(int argc, char **argv)
      argc--; argv++;
      while (argc) {
 	  if (strcmp(*argv, "shared") == 0) {
-	       ret = osa_adb_get_lock(policy_db, OSA_ADB_SHARED);
-	       if (ret != OSA_ADB_OK)
+	       ret = krb5_db_lock(context, KRB5_DB_LOCKMODE_SHARED);
+	       if (ret)
 		    com_err(whoami, ret, "while getting shared lock");
 	       else
 		    printf("shared\n");
 	  } else if (strcmp(*argv, "exclusive") == 0) {
-	       ret = osa_adb_get_lock(policy_db, OSA_ADB_EXCLUSIVE);
-	       if (ret != OSA_ADB_OK)
+	       ret = krb5_db_lock(context, KRB5_DB_LOCKMODE_EXCLUSIVE );
+	       if (ret)
 		    com_err(whoami, ret, "while getting exclusive lock");
 	       else
 		    printf("exclusive\n");
 	  } else if (strcmp(*argv, "permanent") == 0) {
-	       ret = osa_adb_get_lock(policy_db, OSA_ADB_PERMANENT);
-	       if (ret != OSA_ADB_OK)
+	       ret = krb5_db_lock(context, KRB5_DB_LOCKMODE_EXCLUSIVE );
+	       if (ret)
 		    com_err(whoami, ret, "while getting permanent lock");
 	       else
 		    printf("permanent\n");
 	  } else if (strcmp(*argv, "release") == 0) {
-	       ret = osa_adb_release_lock(policy_db);
-	       if (ret != OSA_ADB_OK)
+	       ret = krb5_db_unlock(context);
+	       if (ret)
 		    com_err(whoami, ret, "while releasing lock");
 	       else
 		    printf("released\n");
 	  } else if (strcmp(*argv, "get") == 0) {
+	       int cnt = 1;
 	       argc--; argv++;
 	       if (!argc) usage();
-	       if ((ret = osa_adb_get_policy(policy_db, *argv,
-					     &entry)) != OSA_ADB_OK) {
+	       if ((ret = krb5_db_get_policy(context, *argv,
+					     &entry, &cnt)) ) {
 		    com_err(whoami, ret, "while getting policy");
 	       } else {
 		    printf("retrieved\n");
-		    osa_free_policy_ent(entry);
+		    krb5_db_free_policy(context, entry);
 	       }
 	  } else if (strcmp(*argv, "wait") == 0) {
 	       getchar();
@@ -105,8 +105,8 @@ int main(int argc, char **argv)
 	  argc--; argv++;
      }
 
-     ret = osa_adb_close_policy(policy_db);
-     if (ret != OSA_ADB_OK) {
+     ret = krb5_db_fini(context);
+     if (ret) {
 	  com_err(whoami, ret, "while closing database");
 	  exit(1);
      }

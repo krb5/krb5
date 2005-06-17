@@ -43,7 +43,6 @@
 #include	<k5-int.h>
 #include	<com_err.h>
 #include	<kadm5/kadm_err.h>
-#include	<kadm5/adb_err.h>
 #include	<kadm5/chpass_util_strings.h>
 
 #define KADM5_ADMIN_SERVICE	"kadmin/admin"
@@ -204,11 +203,6 @@ typedef struct _kadm5_policy_ent_t {
 	long		policy_refcnt;
 } kadm5_policy_ent_rec, *kadm5_policy_ent_t;
 
-typedef struct __krb5_key_salt_tuple {
-     krb5_enctype	ks_enctype;
-     krb5_int32		ks_salttype;
-} krb5_key_salt_tuple;
-
 /*
  * Data structure returned by kadm5_get_config_params()
  */
@@ -304,6 +298,7 @@ kadm5_ret_t    kadm5_init(char *client_name, char *pass,
 #endif
 			  krb5_ui_4 struct_version,
 			  krb5_ui_4 api_version,
+			  char **db_args,
 			  void **server_handle);
 kadm5_ret_t    kadm5_init_with_password(char *client_name,
 					char *pass, 
@@ -315,6 +310,7 @@ kadm5_ret_t    kadm5_init_with_password(char *client_name,
 #endif
 					krb5_ui_4 struct_version,
 					krb5_ui_4 api_version,
+					char **db_args,
 					void **server_handle);
 kadm5_ret_t    kadm5_init_with_skey(char *client_name,
 				    char *keytab,
@@ -326,6 +322,7 @@ kadm5_ret_t    kadm5_init_with_skey(char *client_name,
 #endif
 				    krb5_ui_4 struct_version,
 				    krb5_ui_4 api_version,
+				    char **db_args,
 				    void **server_handle);
 #if USE_KADM5_API_VERSION > 1
 kadm5_ret_t    kadm5_init_with_creds(char *client_name,
@@ -334,6 +331,7 @@ kadm5_ret_t    kadm5_init_with_creds(char *client_name,
 				     kadm5_config_params *params,
 				     krb5_ui_4 struct_version,
 				     krb5_ui_4 api_version,
+				     char **db_args,
 				     void **server_handle);
 #endif
 kadm5_ret_t    kadm5_lock(void *server_handle);
@@ -594,6 +592,7 @@ ovsec_kadm_ret_t    ovsec_kadm_init(char *client_name, char *pass,
 				    char *service_name, char *realm,
 				    krb5_ui_4 struct_version,
 				    krb5_ui_4 api_version,
+				    char **db_args,
 				    void **server_handle);
 ovsec_kadm_ret_t    ovsec_kadm_init_with_password(char *client_name,
 						  char *pass, 
@@ -601,6 +600,7 @@ ovsec_kadm_ret_t    ovsec_kadm_init_with_password(char *client_name,
 						  char *realm, 
 						  krb5_ui_4 struct_version,
 						  krb5_ui_4 api_version,
+						  char ** db_args,
 						  void **server_handle);
 ovsec_kadm_ret_t    ovsec_kadm_init_with_skey(char *client_name,
 					      char *keytab,
@@ -608,6 +608,7 @@ ovsec_kadm_ret_t    ovsec_kadm_init_with_skey(char *client_name,
 					      char *realm,
 					      krb5_ui_4 struct_version,
 					      krb5_ui_4 api_version,
+					      char **db_args,
 					      void **server_handle);
 ovsec_kadm_ret_t    ovsec_kadm_flush(void *server_handle);
 ovsec_kadm_ret_t    ovsec_kadm_destroy(void *server_handle);

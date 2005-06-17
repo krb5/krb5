@@ -1229,6 +1229,7 @@ else
 	OBJLISTS=OBJS.ST
 	LIBINSTLIST=install-static
 	DEPLIBEXT=$STLIBEXT
+	CFLAGS="$CFLAGS -D_KDB5_STATIC_LINK"
 fi
 
 # Check whether to build shared libraries.

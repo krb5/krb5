@@ -6,6 +6,7 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+CFLAGS=@CFLAGS@ -DKDB5_USE_LIB_KDB_DB2
 
 LIBBASE=kdb5
 LIBMAJOR=4
@@ -30,29 +31,25 @@ DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
 all:: 
 
 SRCS= \
-	$(srcdir)/keytab.c \
+	$(srcdir)/kdb5.c \
 	$(srcdir)/encrypt_key.c \
 	$(srcdir)/decrypt_key.c \
+	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
-	$(srcdir)/kdb_db2.c \
-	$(srcdir)/kdb_xdr.c \
-	$(srcdir)/verify_mky.c \
-	$(srcdir)/fetch_mkey.c \
-	$(srcdir)/setup_mkey.c \
-	$(srcdir)/store_mkey.c
+	$(srcdir)/adb_err.c \
+	$(srcdir)/err_handle.c \
+	$(srcdir)/keytab.c
 
 STOBJLISTS=OBJS.ST $(DBOBJLISTS)
 STLIBOBJS= \
-	keytab.o \
+	kdb5.o \
 	encrypt_key.o \
 	decrypt_key.o \
+	kdb_default.o \
 	kdb_cpw.o \
-	kdb_db2.o \
-	kdb_xdr.o \
-	verify_mky.o \
-	fetch_mkey.o \
-	setup_mkey.o \
-	store_mkey.o
+	adb_err.o \
+	err_handle.o \
+	keytab.o
 
 all-unix:: all-liblinks
 install-unix:: install-libs
