@@ -30,6 +30,9 @@ DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
 
 all:: 
 
+adb_err.$(OBJEXT): adb_err.c
+adb_err.c adb_err.h: $(srcdir)/adb_err.et
+
 SRCS= \
 	$(srcdir)/kdb5.c \
 	$(srcdir)/encrypt_key.c \
