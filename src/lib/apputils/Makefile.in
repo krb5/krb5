@@ -42,7 +42,8 @@ SRCS=	$(srcdir)/daemon.c \
 daemon.so daemon.po $(OUTPRE)daemon.$(OBJEXT): daemon.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
 dummy.so dummy.po $(OUTPRE)dummy.$(OBJEXT): dummy.c

@@ -72,15 +72,22 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 #
 threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h cache-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/fake-addrinfo.h
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  cache-addrinfo.h $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/socket-utils.h
 init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
   init-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
   fake-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h

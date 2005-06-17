@@ -136,12 +136,15 @@ install-unix:: install-libs
 #
 krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): \
   krb5_libinit.c $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/krb5_err.h \
-  $(BUILDTOP)/include/kv5m_err.h $(BUILDTOP)/include/asn1_err.h \
-  $(BUILDTOP)/include/kdb5_err.h krb5_libinit.h $(SRCTOP)/include/k5-platform.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
+  $(BUILDTOP)/include/krb5_err.h $(BUILDTOP)/include/kv5m_err.h \
+  $(BUILDTOP)/include/asn1_err.h $(BUILDTOP)/include/kdb5_err.h \
+  krb5_libinit.h $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(srcdir)/ccache/cc-int.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(srcdir)/keytab/kt-int.h $(srcdir)/rcache/rc-int.h \
-  $(srcdir)/os/os-proto.h
+  $(srcdir)/os/os-proto.h $(SRCTOP)/include/k5-thread.h

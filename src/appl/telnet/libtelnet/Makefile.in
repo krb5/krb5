@@ -109,9 +109,9 @@ misc.so misc.po $(OUTPRE)misc.$(OBJEXT): misc.c misc.h \
 kerberos.so kerberos.po $(OUTPRE)kerberos.$(OBJEXT): \
   kerberos.c $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h encrypt.h enc-proto.h \
-  auth.h auth-proto.h misc.h misc-proto.h
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h encrypt.h \
+  enc-proto.h auth.h auth-proto.h misc.h misc-proto.h
 kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
   kerberos5.c $(srcdir)/../arpa/telnet.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/syslog.h encrypt.h \
