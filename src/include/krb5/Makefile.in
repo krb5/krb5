@@ -69,6 +69,6 @@ clean::
 	$(RM) osconf.new $(BUILT_HEADERS)
 
 clean-unix::
-	$(RM) $(ET_HEADERS) autoconf.h autoconf.stamp
+	$(RM) $(ET_HEADERS) autoconf.stamp
 clean-windows::
 	$(RM) osconf.h autoconf.h autoconf.stamp
