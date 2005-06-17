@@ -92,7 +92,7 @@ void com_err_terminate(void)
 #endif
 
 const char * KRB5_CALLCONV
-krb5_errcode_2_string(long code)
+error_message(long code)
     /*@modifies internalState@*/
 {
 	unsigned long offset;

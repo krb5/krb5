@@ -37,15 +37,13 @@ struct error_table {
 extern "C" {
 #endif
 
-  typedef const char * KRB5_CALLCONV (*krb5_errcode_2_string_func)(long code);
-
 /* Public interfaces */
 extern void KRB5_CALLCONV_C com_err
 	(const char *, errcode_t, const char *, ...);
 extern void KRB5_CALLCONV com_err_va
 	(const char *whoami, errcode_t code, const char *fmt,
 	 va_list ap);
-  extern /*@observer@*//*@dependent@*/ const char * KRB5_CALLCONV (*error_message)
+extern /*@observer@*//*@dependent@*/ const char * KRB5_CALLCONV error_message
 	(errcode_t)
        /*@modifies internalState@*/;
 extern errcode_t KRB5_CALLCONV add_error_table
@@ -54,8 +52,6 @@ extern errcode_t KRB5_CALLCONV add_error_table
 extern errcode_t KRB5_CALLCONV remove_error_table
 	(const struct error_table *)
        /*@modifies internalState@*/;
-       /*@observer@*//*@dependent@*/ const char * KRB5_CALLCONV krb5_errcode_2_string
-       (errcode_t);
 
 #if !defined(_WIN32)
 /*

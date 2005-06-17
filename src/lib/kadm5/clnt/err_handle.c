@@ -20,7 +20,9 @@ static char *_csrc = "@(#) %filespec: err_handle.c~1 %  (%full_filespec: err_han
 #include "err_handle.h"
 #include <assert.h>
 
+#ifdef NOVELL
 krb5_errcode_2_string_func old_error_2_string = NULL;
+#endif
 
 typedef struct {
     char krb5_err_str[KRB5_MAX_ERR_STR + 1];
@@ -40,8 +42,10 @@ static pthread_key_t krb5_err_key;
 static void init_err_handling( void )
 {
     assert(!pthread_key_create(&krb5_err_key, tsd_key_destructor));
+#ifdef NOVELL
     old_error_2_string = error_message;
     error_message = krb5_get_err_string;
+#endif
 }
 
 static pthread_once_t krb5_key_create = PTHREAD_ONCE_INIT;
@@ -94,8 +98,11 @@ const char * KRB5_CALLCONV krb5_get_err_string(long err_code)
     }
 
     /* Error strings are not generated here. the remaining two cases are handled by the default error string convertor */
+#ifdef NOVELL
     return old_error_2_string(err_code);
-    
+#else
+    return error_message(err_code);
+#endif
 }
 
 void krb5_clr_error()
@@ -116,8 +123,10 @@ static void init_err_handling( void )
 {
     if( krb5_init_once )
     {
+#ifdef NOVELL
 	old_error_2_string = error_message;
 	error_message = krb5_get_err_string;
+#endif
 	krb5_init_once = FALSE;
     }
 }
@@ -156,8 +165,11 @@ const char * KRB5_CALLCONV krb5_get_err_string(long err_code)
     }
 
     /* it is not generated here. the remaining two cases are handled by the default error string convertor */
+#ifdef NOVELL
     return old_error_2_string(err_code);
-    
+#else
+    return error_message(err_code);
+#endif
 }
 
 void krb5_clr_error()
