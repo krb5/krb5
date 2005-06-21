@@ -3,6 +3,8 @@
 	* aclocal.m4 (WITH_CC): Don't use -pedantic on Linux.
 	(KRB5_AC_FIND_DLOPEN): New macro.  Set DL_LIB.
 	(CONFIG_RULES, AC_KRB5_TCL_TRYOLD): Use it.
+	(KRB5_AC_ENABLE_THREADS): Override guessed PTHREAD_CFLAGS with
+	correct value for solaris+gcc.
 
 	Novell merge.
 	* aclocal.m4:
