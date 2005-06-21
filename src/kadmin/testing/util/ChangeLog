@@ -1,5 +1,8 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (KDB_DEP_LIB): Use THREAD_LINKOPTS instead of
+	explicitly using -lpthread.
+
 	Novell merge.
 	* Makefile.in:
 	* tcl_kadm5.c:

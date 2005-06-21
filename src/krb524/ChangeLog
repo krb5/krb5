@@ -1,5 +1,8 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
 	Novell merge.
 	* Makefile.in:
 	* krb524d.c:

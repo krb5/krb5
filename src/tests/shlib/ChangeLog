@@ -1,3 +1,7 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_loader): Use DL_LIB instead of -ldl.
+
 2005-02-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_loader.c (verbose): New variable.

@@ -6,7 +6,7 @@ LOCALINCLUDES = $(TCL_INCLUDES) -I$(BUILDTOP)/lib/kdb/
 # Force Tcl headers to use stdarg.h, because krb5 does too, and if
 # Tcl uses varargs.h it'll just mess things up.
 DEFINES= -DHAS_STDARG
-KRB5_PTHREAD_LIB=-lpthread 
+KRB5_PTHREAD_LIB=$(THREAD_LINKOPTS) 
 
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)

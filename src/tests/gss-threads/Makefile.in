@@ -19,10 +19,10 @@ all-unix-0::
 all-windows:: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
 
 gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(PTHREAD_LIBS)
+	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
 
 gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(PTHREAD_LIBS)
+	$(CC_LINK) $(PTHREAD_CFLAGS) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
 
 $(OUTPRE)gss-server.exe: $(OUTPRE)gss-server.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib

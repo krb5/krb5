@@ -1,3 +1,8 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_rcache, prof1): Use THREAD_LINKOPTS instead of
+	-lpthread.
+
 2004-12-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof1.c: New file.

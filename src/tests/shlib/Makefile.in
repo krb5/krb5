@@ -21,7 +21,7 @@ valgrind-t_loader: t_loader
 	$(RUN_SETUP) $(VALGRIND) $(VALGRINDFLAGS) ./t_loader
 
 t_loader: t_loader.o
-	$(CC_LINK) -o t_loader t_loader.o -ldl
+	$(CC_LINK) -o t_loader t_loader.o $(DL_LIB)
 
 check-unix::
 

@@ -5,7 +5,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES = -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-KDB_DEP_LIB=-ldl -lpthread
+KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 
 all:: init-test destroy-test client-handle-test client-iter-test
 all:: randkey-test server-handle-test lock-test server-iter-test 

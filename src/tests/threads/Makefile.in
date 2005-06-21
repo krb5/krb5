@@ -16,7 +16,7 @@ run-t_rcache: t_rcache
 	$(RUN_SETUP) ./t_rcache -n $(N)
 
 t_rcache: t_rcache.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_rcache t_rcache.o $(KRB5_BASE_LIBS) -lpthread
+	$(CC_LINK) -o t_rcache t_rcache.o $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
 
 syms: syms.o
 	$(CC_LINK) -o syms syms.o
@@ -25,7 +25,7 @@ run-syms: syms
 	$(RUN_SETUP) ./syms
 
 prof1: prof1.o $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o prof1 prof1.o $(KRB5_BASE_LIBS) -lpthread
+	$(CC_LINK) -o prof1 prof1.o $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
 
 prof1.o: prof1.c
 

@@ -1,3 +1,8 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (gss-client, gss-server): Use THREAD_LINKOPTS
+	instead of PTHREAD_LIBS.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-unix): Use @THREAD_SUPPORT@ and helper targets
