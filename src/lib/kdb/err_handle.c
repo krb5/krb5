@@ -16,7 +16,7 @@ static char *_csrc =
    safety requirement stops me from putting there.  if I do, then all
    the applications have to link to pthread.  */
 
-#ifdef HAVE_PTHREAD_H
+#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
 #endif
 #include "err_handle.h"
@@ -34,7 +34,7 @@ typedef struct
     krb5_context kcontext;
 } krb5_err_struct_t;
 
-#ifdef HAVE_PTHREAD_H
+#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 static void
 tsd_key_destructor(void *data)
 {
@@ -138,8 +138,10 @@ static void
 init_err_handling(void)
 {
     if (krb5_init_once) {
+#ifdef NOVELL
 	old_error_2_string = error_message;
 	error_message = krb5_get_err_string;
+#endif
 	krb5_init_once = FALSE;
     }
 }
@@ -189,8 +191,11 @@ krb5_get_err_string(long err_code)
 
     /* It is not generated here. the remaining two cases are handled
        by the default error string convertor.  */
+#ifdef NOVELL
     return old_error_2_string(err_code);
-
+#else
+    return error_message(err_code);
+#endif
 }
 
 void

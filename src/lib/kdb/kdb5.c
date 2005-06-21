@@ -2,7 +2,7 @@
  * Include files
  */
 
-#ifdef HAVE_PTHREAD_H
+#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 #include <pthread.h>
 #endif
 
@@ -27,7 +27,7 @@
  * internal static variable
  */
 
-#ifdef HAVE_PTHREAD_H
+#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 /* static pthread_once_t db_inited = PTHREAD_ONCE_INIT; */
 static pthread_mutex_t db_lock = PTHREAD_MUTEX_INITIALIZER;
 #else
@@ -47,7 +47,7 @@ static db_library lib_list;
 /*
  * Helper Functions
  */
-#ifdef HAVE_PTHREAD_H
+#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 
 /* 
  * KNOWN ISSUES with locking: This code does not handle a scenario
