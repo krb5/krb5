@@ -79,6 +79,7 @@ KRB5_AC_PRAGMA_WEAK_REF
 KRB5_LIB_PARAMS
 KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
+KRB5_AC_FIND_DLOPEN
 ])dnl
 
 dnl Maintainer mode, akin to what automake provides, 'cept we don't
@@ -128,6 +129,14 @@ if test "$use_linker_fini_option" = yes; then
   AC_DEFINE(USE_LINKER_FINI_OPTION,1,[Define if link-time options for library finalization will be used])
 fi
 ])
+
+dnl find dlopen
+AC_DEFUN([KRB5_AC_FIND_DLOPEN],[
+AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
+AC_CHECK_LIB(ld, main, DL_LIB=-lld)
+AC_SUBST(DL_LIB)
+])
+
 
 dnl Hack for now.
 AC_DEFUN([KRB5_AC_ENABLE_THREADS],[
@@ -980,6 +989,7 @@ dnl AC_KRB5_TCL_TRYOLD
 dnl attempt to use old search algorithm for locating tcl
 dnl
 AC_DEFUN(AC_KRB5_TCL_TRYOLD, [
+AC_REQUIRE([KRB5_AC_FIND_DLOPEN])
 AC_MSG_WARN([trying old tcl search code])
 if test "$with_tcl" != yes -a "$with_tcl" != no; then
 	TCL_INCLUDES=-I$with_tcl/include
@@ -987,8 +997,6 @@ if test "$with_tcl" != yes -a "$with_tcl" != no; then
 	TCL_RPATH=:$with_tcl/lib
 fi
 if test "$with_tcl" != no ; then
-	AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
-	AC_CHECK_LIB(ld, main, DL_LIB=-lld)
 	krb5_save_CPPFLAGS="$CPPFLAGS"
 	krb5_save_LDFLAGS="$LDFLAGS"
 	CPPFLAGS="$CPPFLAGS $TCL_INCLUDES"

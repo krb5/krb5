@@ -1,9 +1,11 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (WITH_CC): Don't use -pedantic on Linux.
+	(KRB5_AC_FIND_DLOPEN): New macro.  Set DL_LIB.
+	(CONFIG_RULES, AC_KRB5_TCL_TRYOLD): Use it.
+
 	Novell merge.
 	* aclocal.m4:
-
-	* aclocal.m4 (WITH_CC): Don't use -pedantic on Linux.
 
 2005-06-14  Ken Raeburn  <raeburn@mit.edu>
 
