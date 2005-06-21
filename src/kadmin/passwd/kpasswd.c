@@ -183,6 +183,7 @@ kpasswd(context, argc, argv)
 			             /* someday */,
 			 OVSEC_KADM_STRUCT_VERSION,
 			 OVSEC_KADM_API_VERSION_1,
+			 NULL,
 			 &server_handle);
   if (code != 0) {
     if (code == OVSEC_KADM_BAD_PASSWORD)

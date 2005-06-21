@@ -1,3 +1,11 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* misc.c:
+	* ovsec_kadmd.c:
+	* server_stubs.c:
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* schpw.c (NEED_SOCKETS): Don't define.

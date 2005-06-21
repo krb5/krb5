@@ -33,15 +33,70 @@ static int check_handle(void *handle)
      return 0;
 }
 
+static int dup_db_args( kadm5_server_handle_t handle, char **db_args )
+{
+    int count  = 0;
+    int ret = 0;
+
+    for( count=0; db_args && db_args[count]; count++ );
+    if( count == 0 )
+    {
+	handle->db_args = NULL;
+	goto clean_n_exit;
+    }
+
+    handle->db_args = calloc(sizeof(char*), count+1);
+    if( handle->db_args == NULL )
+    {
+	ret=ENOMEM;
+	goto clean_n_exit;
+    }
+
+    for(count=0; db_args[count]; count++)
+    {
+	handle->db_args[count] = strdup(db_args[count]);
+	if( handle->db_args[count] == NULL )
+	{
+	    ret = ENOMEM;
+	    goto clean_n_exit;
+	}
+    }
+
+ clean_n_exit:
+    if( ret && handle->db_args )
+    {
+	for(count=0; handle->db_args[count]; count++ )
+	    free( handle->db_args[count] );
+
+	free(handle->db_args), handle->db_args = NULL;
+    }
+
+    return ret;
+}
+
+static void free_db_args(kadm5_server_handle_t handle)
+{
+    int count;
+
+    if( handle->db_args )
+    {
+	for(count=0; handle->db_args[count]; count++ )
+	    free( handle->db_args[count] );
+	
+	free(handle->db_args), handle->db_args = NULL;
+    }
+}
+
 kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
 				     char *service_name,
 				     kadm5_config_params *params,
 				     krb5_ui_4 struct_version,
 				     krb5_ui_4 api_version,
+				     char **db_args,
 				     void **server_handle)
 {
      return kadm5_init(client_name, pass, service_name, params,
-		       struct_version, api_version,
+		       struct_version, api_version, db_args,
 		       server_handle);
 }
 
@@ -51,6 +106,7 @@ kadm5_ret_t kadm5_init_with_creds(char *client_name,
 				  kadm5_config_params *params,
 				  krb5_ui_4 struct_version,
 				  krb5_ui_4 api_version,
+				  char **db_args,
 				  void **server_handle)
 {
      /*
@@ -64,7 +120,7 @@ kadm5_ret_t kadm5_init_with_creds(char *client_name,
 	 params->mkey_from_kbd)
 	  return KADM5_BAD_SERVER_PARAMS;
      return kadm5_init(client_name, NULL, service_name, params,
-		       struct_version, api_version,
+		       struct_version, api_version, db_args,
 		       server_handle);
 }
 
@@ -74,6 +130,7 @@ kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
 				 kadm5_config_params *params,
 				 krb5_ui_4 struct_version,
 				 krb5_ui_4 api_version,
+				 char **db_args,
 				 void **server_handle)
 {
      /*
@@ -87,7 +144,7 @@ kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
 	 params->mkey_from_kbd)
 	  return KADM5_BAD_SERVER_PARAMS;
      return kadm5_init(client_name, NULL, service_name, params,
-		       struct_version, api_version,
+		       struct_version, api_version, db_args,
 		       server_handle);
 }
 
@@ -96,6 +153,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 		       kadm5_config_params *params_in,
 		       krb5_ui_4 struct_version,
 		       krb5_ui_4 api_version,
+		       char **db_args,
 		       void **server_handle)
 {
      int ret;
@@ -112,14 +170,22 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 	 return ENOMEM;
     memset(handle, 0, sizeof(*handle));
 
+    ret = dup_db_args( handle, db_args );
+    if( ret )
+    {
+	free(handle);
+	return ret;
+    }
+
     ret = (int) krb5_init_context(&(handle->context));
     if (ret) {
+	 free_db_args(handle);
 	 free(handle);
 	 return(ret);
     }
 
     initialize_ovk_error_table();
-    initialize_adb_error_table();
+/*     initialize_adb_error_table(); */
     initialize_ovku_error_table();
 
     handle->magic_number = KADM5_SERVER_HANDLE_MAGIC;
@@ -153,6 +219,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 #define ILLEGAL_PARAMS (KADM5_CONFIG_ADMIN_SERVER)
      if (params_in && (params_in->mask & ILLEGAL_PARAMS)) {
 	  krb5_free_context(handle->context);
+	  free_db_args(handle);
 	  free(handle);
 	  return KADM5_BAD_SERVER_PARAMS;
      }
@@ -162,6 +229,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 				       &handle->params);
      if (ret) {
 	  krb5_free_context(handle->context);
+	  free_db_args(handle);
 	  free(handle);
 	  return(ret);
      }
@@ -176,24 +244,24 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
+	  free_db_args(handle);
 	  free(handle);
 	  return KADM5_MISSING_CONF_PARAMS;
      }
 
-     /*
-      * Set the db_name based on configuration before calling
-      * krb5_db_init, so it will get used.
-      */
+     ret = krb5_set_default_realm(handle->context, handle->params.realm);
+     if( ret )
+     {
+	  krb5_free_context(handle->context);
+	  free_db_args(handle);
+	  free(handle);
+	  return ret;
+     }
 
-    ret = krb5_db_set_name(handle->context, handle->params.dbname);
-    if (ret) {
-	 free(handle);
-	 return(ret);
-    }
-
-    ret = krb5_db_init(handle->context);
+    ret = krb5_db_open(handle->context, db_args, KRB5_KDB_OPEN_RW);
     if (ret) {
 	 krb5_free_context(handle->context);
+	 free_db_args(handle);
 	 free(handle);
 	 return(ret);
     }
@@ -202,6 +270,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 			       &handle->current_caller))) {
 	 krb5_db_fini(handle->context);
 	 krb5_free_context(handle->context);
+	 free_db_args(handle);
 	 free(handle);
 	 return ret;
     }
@@ -209,6 +278,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
     if (! (handle->lhandle = malloc(sizeof(*handle)))) {
 	 krb5_db_fini(handle->context);
 	 krb5_free_context(handle->context);
+	 free_db_args(handle);
 	 free(handle);
 	 return ENOMEM;
     }
@@ -220,6 +290,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
     /* can't check the handle until current_caller is set */
     ret = check_handle((void *) handle);
     if (ret) {
+	free_db_args(handle);
         free(handle);
 	return ret;
     }
@@ -250,6 +321,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
     if (ret) {
         krb5_db_fini(handle->context);
 	krb5_free_context(handle->context);
+	free_db_args(handle);
 	free(handle);
 	return ret;
     }
@@ -258,6 +330,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
     if (ret) {
 	 krb5_db_fini(handle->context);
 	 krb5_free_context(handle->context);
+	 free_db_args(handle);
 	 free(handle);
 	 return ret;
     }
@@ -267,20 +340,11 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
          krb5_db_fini(handle->context);
 	 krb5_free_principal(handle->context, handle->current_caller);
 	 krb5_free_context(handle->context);
+	 free_db_args(handle);
 	 free(handle);
 	 return ret;
     }
     
-    ret = adb_policy_init(handle);
-    if (ret) {
-	 krb5_db_fini(handle->context);
-	 krb5_free_principal(handle->context, handle->current_caller);
-	 krb5_free_context(handle->context);
-	 free(handle);
-	 return ret;
-    }
-    handle->lhandle->policy_db = handle->policy_db;
-
     *server_handle = (void *) handle;
     
     return KADM5_OK;
@@ -301,6 +365,7 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     krb5_free_context(handle->context);
     handle->magic_number = 0;
     free(handle->lhandle);
+    free_db_args(handle);
     free(handle);
  
     return KADM5_OK;
@@ -312,10 +377,7 @@ kadm5_ret_t kadm5_lock(void *server_handle)
     kadm5_ret_t ret;
 
     CHECK_HANDLE(server_handle);
-    ret = osa_adb_open_and_lock(handle->policy_db, OSA_ADB_EXCLUSIVE);
-    if (ret)
-	return ret;
-    ret = krb5_db_lock(handle->context, KRB5_LOCKMODE_EXCLUSIVE);
+    ret = krb5_db_lock(handle->context, KRB5_DB_LOCKMODE_EXCLUSIVE);
     if (ret)
 	return ret;
 
@@ -328,9 +390,6 @@ kadm5_ret_t kadm5_unlock(void *server_handle)
     kadm5_ret_t ret;
 
     CHECK_HANDLE(server_handle);
-    ret = osa_adb_close_and_unlock(handle->policy_db);
-    if (ret)
-	return ret;
     ret = krb5_db_unlock(handle->context);
     if (ret)
 	return ret;
@@ -346,13 +405,7 @@ kadm5_ret_t kadm5_flush(void *server_handle)
      CHECK_HANDLE(server_handle);
 
      if ((ret = krb5_db_fini(handle->context)) ||
-	 /*
-	  * Set the db_name based on configuration before calling
-	  * krb5_db_init, so it will get used.
-	  */
-	 (ret = krb5_db_set_name(handle->context,
-				     handle->params.dbname)) ||
-	 (ret = krb5_db_init(handle->context)) ||
+	 (ret = krb5_db_open(handle->context, handle->db_args, KRB5_KDB_OPEN_RW)) ||
 	 (ret = adb_policy_close(handle)) ||
 	 (ret = adb_policy_init(handle))) {
 	  (void) kadm5_destroy(server_handle);

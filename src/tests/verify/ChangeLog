@@ -1,3 +1,9 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* kdb5_verify.c:
+
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.

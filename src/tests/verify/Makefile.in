@@ -4,13 +4,14 @@ mydir=verify
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+KDB5_DEP_LIB=-lpthread -ldl
 
 SRCS=$(srcdir)/kdb5_verify.c
 
 all:: kdb5_verify
 
 kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KDB5_DEP_LIB) $(KRB5_BASE_LIBS)
 
 install::
 

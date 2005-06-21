@@ -11,7 +11,6 @@ static char *rcsid = "$Header$";
 #include    "k5-int.h"
 #include    <krb5/kdb.h>
 #include    <ctype.h>
-#include    "adb.h"
 #include    <pwd.h>
 
 /* for strcasecmp */
@@ -22,22 +21,17 @@ static char *rcsid = "$Header$";
 kadm5_ret_t
 adb_policy_init(kadm5_server_handle_t handle)
 {
-    osa_adb_ret_t   ret;
-    if(handle->policy_db == (osa_adb_policy_t) NULL)
-	if((ret = osa_adb_open_policy(&handle->policy_db,
-				      &handle->params)) != OSA_ADB_OK)
-	     return ret;
-    return KADM5_OK;
+    /* now policy is initialized as part of database. No seperate call needed */
+    if( krb5_db_inited( handle->context ) )
+	return KADM5_OK;
+
+    return krb5_db_open( handle->context, NULL, KRB5_KDB_OPEN_RW );
 }
 
 kadm5_ret_t
 adb_policy_close(kadm5_server_handle_t handle)
 {
-    osa_adb_ret_t   ret;
-    if(handle->policy_db != (osa_adb_policy_t) NULL)
-	if((ret = osa_adb_close_policy(handle->policy_db)) != OSA_ADB_OK)
-	    return ret;
-    handle->policy_db = NULL;
+    /* will be taken care by database close */
     return KADM5_OK;
 }
 
@@ -185,3 +179,4 @@ passwd_check(kadm5_server_handle_t handle,
     }
     return KADM5_OK;    
 }
+

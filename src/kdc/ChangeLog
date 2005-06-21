@@ -1,3 +1,9 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* main.c:
+
 2005-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos_v4.c: Include autoconf.h before testing

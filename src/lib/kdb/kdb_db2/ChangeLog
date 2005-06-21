@@ -1,0 +1,17 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* adb_openclose.c:
+	* adb_policy.c:
+	* configure.in:
+	* db2_exp.c:
+	* kdb_compat.h:
+	* kdb_db2.c:
+	* kdb_db2.h:
+	* kdb_xdr.c:
+	* kdb_xdr.h:
+	* libkdb_db2.exports:
+	* pol_xdr.c:
+	* policy_db.h:
+

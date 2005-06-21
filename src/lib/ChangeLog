@@ -1,3 +1,10 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	(LOCAL_SUBDIRS): Build kdb after rpc.
+	* krb5.saber.source: Deleted.
+
 2005-04-22  Jeffrey Altman <jaltman@mit.edu>
 
         * win_glue.c:  Remove calls to WSAStartup/WSACleanup because

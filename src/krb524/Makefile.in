@@ -2,6 +2,8 @@ thisconfigdir=..
 myfulldir=krb524
 mydir=krb524
 BUILDTOP=$(REL)..
+KDB_DEP_LIB=-ldl -lpthread
+
 # Copyright 1994 by OpenVision Technologies, Inc.
 # 
 # Permission to use, copy, modify, distribute, and sell this software
@@ -78,7 +80,7 @@ SERVER_OBJS= krb524d.o cnv_tkt_skey.o conv_princ.o
 CLIENT_OBJS= $(OUTPRE)k524init.$(OBJEXT)
 
 krb524d: $(SERVER_OBJS) $(KADMSRV_DEPLIBS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
-	$(CC_LINK) -o krb524d $(SERVER_OBJS) $(KADMSRV_LIBS) $(KRB5_LIB) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
+	$(CC_LINK) -o krb524d $(SERVER_OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_LIB) $(KRB4COMPAT_LIBS) $(APPUTILS_LIB)
 
 k524init: $(CLIENT_OBJS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init $(CLIENT_OBJS) $(KRB5_LIB) $(KRB4COMPAT_LIBS)
@@ -146,8 +148,8 @@ $(OUTPRE)krb524d.$(OBJEXT): krb524d.c $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(SRCTOP)/include/krb5/adm_proto.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h krb524d.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/kerberosIV/krb.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(SRCTOP)/include/krb5/adm_proto.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/profile.h krb524d.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/kerberosIV/krb.h

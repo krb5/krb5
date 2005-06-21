@@ -30,7 +30,8 @@
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
+#include <kadm5/server_internal.h>
+#include <krb5/kdb.h>
 #include <com_err.h>
 #include "kdb5_util.h"
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)
@@ -91,15 +92,15 @@ typedef krb5_error_code (*dump_func)(krb5_pointer,
 				     krb5_db_entry *);
 
 static int process_k5beta_record (char *, krb5_context,
-				  FILE *, int, int *, void *);
+				  FILE *, int, int *);
 static int process_k5beta6_record (char *, krb5_context,
-				   FILE *, int, int *, void *);
+				   FILE *, int, int *);
 static int process_k5beta7_record (char *, krb5_context,
-				   FILE *, int, int *, void *);
+				   FILE *, int, int *);
 static int process_ov_record (char *, krb5_context,
-			      FILE *, int, int *, void *);
+			      FILE *, int, int *);
 typedef krb5_error_code (*load_func)(char *, krb5_context,
-				     FILE *, int, int *, void *);
+				     FILE *, int, int *);
 
 typedef struct _dump_version {
      char *name;
@@ -145,7 +146,7 @@ dump_version ov_version = {
      1,
      dump_ov_princ,
      dump_k5beta7_policy,
-     process_ov_record,
+     process_ov_record
 };
 
 dump_version r1_3_version = {
@@ -960,7 +961,7 @@ static krb5_error_code dump_ov_princ(krb5_pointer ptr, krb5_db_entry *kdb)
 		  tl_data.tl_data_length, XDR_DECODE);
     if (! xdr_osa_princ_ent_rec(&xdrs, &adb)) {
 	 xdr_destroy(&xdrs);
-	 return(OSA_ADB_XDR_FAILURE);
+	 return(KADM5_XDR_FAILURE);
     }
     xdr_destroy(&xdrs);
     
@@ -1021,7 +1022,6 @@ dump_db(argc, argv)
     dump_version	*dump;
     int			aindex;
     krb5_boolean	locked;
-    extern osa_adb_policy_t policy_db;
     char		*new_mkey_file = 0;
 	
     /*
@@ -1080,7 +1080,7 @@ dump_db(argc, argv)
      * Make sure the database is open.  The policy database only has
      * to be opened if we try a dump that uses it.
      */
-    if (!dbactive || (dump->dump_policy != NULL && policy_db == NULL)) {
+    if (!dbactive) {
 	com_err(argv[0], 0, Err_no_database);
 	exit_status++;
 	return;
@@ -1174,17 +1174,17 @@ dump_db(argc, argv)
 	if (dump->header[strlen(dump->header)-1] != '\n')
 	     fputc('\n', arglist.ofile);
 	
-	if ((kret = krb5_db_iterate_ext(util_context,
-					dump->dump_princ,
-					(krb5_pointer) &arglist,
-					backwards, recursive))) {
+	if ((kret = krb5_db_iterate(util_context,
+				    NULL,
+				    dump->dump_princ,
+				    (krb5_pointer) &arglist))) { /* TBD: backwards and recursive not supported */
 	     fprintf(stderr, dumprec_err,
 		     programname, dump->name, error_message(kret));
 	     exit_status++;
 	}
 	if (dump->dump_policy &&
-	    (kret = osa_adb_iter_policy(policy_db, dump->dump_policy,
-					&arglist))) { 
+	    (kret = krb5_db_iter_policy( util_context, "*", dump->dump_policy,
+					 &arglist))) { 
 	     fprintf(stderr, dumprec_err, programname, dump->name,
 		     error_message(kret));
 	     exit_status++;
@@ -1363,13 +1363,12 @@ update_tl_data(kcontext, dbentp, mod_name, mod_date, last_pwd_change)
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */
 static int
-process_k5beta_record(fname, kcontext, filep, verbose, linenop, pol_db)
+process_k5beta_record(fname, kcontext, filep, verbose, linenop)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;
     int			verbose;
     int			*linenop;
-   void *pol_db;
 {
     int			nmatched;
     int			retval;
@@ -1664,13 +1663,12 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop, pol_db)
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */
 static int
-process_k5beta6_record(fname, kcontext, filep, verbose, linenop, pol_db)
+process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;
     int			verbose;
     int			*linenop;
-   void *pol_db;
 {
     int			retval;
     krb5_db_entry	dbentry;
@@ -1948,9 +1946,9 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
 	 return 1;
     }
 
-    if ((ret = osa_adb_create_policy(pol_db, &rec))) {
-	 if (ret == OSA_ADB_DUP &&
-	     ((ret = osa_adb_put_policy(pol_db, &rec)))) {
+    if ((ret = krb5_db_create_policy(kcontext, &rec))) {
+	 if (ret &&
+	     ((ret = krb5_db_put_policy(kcontext, &rec)))) {
 	      fprintf(stderr, "cannot create policy on line %d: %s\n",
 		      *linenop, error_message(ret));
 	      return 1;
@@ -1968,13 +1966,12 @@ process_k5beta7_policy(fname, kcontext, filep, verbose, linenop, pol_db)
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */
 static int
-process_k5beta7_record(fname, kcontext, filep, verbose, linenop, pol_db)
+process_k5beta7_record(fname, kcontext, filep, verbose, linenop)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;
     int			verbose;
     int			*linenop;
-   void *pol_db;
 {
      int nread;
      char rectype[100];
@@ -1986,10 +1983,10 @@ process_k5beta7_record(fname, kcontext, filep, verbose, linenop, pol_db)
 	  return 1;
      if (strcmp(rectype, "princ") == 0)
 	  process_k5beta6_record(fname, kcontext, filep, verbose,
-				 linenop, pol_db);
+				 linenop);
      else if (strcmp(rectype, "policy") == 0)
 	  process_k5beta7_policy(fname, kcontext, filep, verbose,
-				 linenop, pol_db);
+				 linenop);
      else {
 	  fprintf(stderr, "unknown record type \"%s\" on line %d\n",
 		  rectype, *linenop);
@@ -2005,13 +2002,12 @@ process_k5beta7_record(fname, kcontext, filep, verbose, linenop, pol_db)
  * Returns -1 for end of file, 0 for success and 1 for failure.
  */
 static int
-process_ov_record(fname, kcontext, filep, verbose, linenop, pol_db)
+process_ov_record(fname, kcontext, filep, verbose, linenop)
     char		*fname;
     krb5_context	kcontext;
     FILE		*filep;
     int			verbose;
     int			*linenop;
-   void *pol_db;
 {
      int nread;
      char rectype[100];
@@ -2023,10 +2019,10 @@ process_ov_record(fname, kcontext, filep, verbose, linenop, pol_db)
 	  return 1;
      if (strcmp(rectype, "princ") == 0)
 	  process_ov_principal(fname, kcontext, filep, verbose,
-			       linenop, pol_db);
+			       linenop);
      else if (strcmp(rectype, "policy") == 0)
 	  process_k5beta7_policy(fname, kcontext, filep, verbose,
-				 linenop, pol_db);
+				 linenop);
      else if (strcmp(rectype, "End") == 0)
 	  return -1;
      else {
@@ -2042,14 +2038,13 @@ process_ov_record(fname, kcontext, filep, verbose, linenop, pol_db)
  * restore_dump()	- Restore the database from any version dump file.
  */
 static int
-restore_dump(programname, kcontext, dumpfile, f, verbose, dump, pol_db)
+restore_dump(programname, kcontext, dumpfile, f, verbose, dump)
     char		*programname;
     krb5_context	kcontext;
     char		*dumpfile;
     FILE		*f;
     int			verbose;
     dump_version	*dump;
-    osa_adb_policy_t	pol_db;
 {
     int		error;	
     int		lineno;
@@ -2064,8 +2059,7 @@ restore_dump(programname, kcontext, dumpfile, f, verbose, dump, pol_db)
 					  kcontext, 
 					  f,
 					  verbose,
-					  &lineno,
-					  pol_db)))
+					  &lineno)))
 	 ;
     if (error != -1)
 	 fprintf(stderr, err_line_fmt, programname, lineno, dumpfile);
@@ -2085,7 +2079,6 @@ load_db(argc, argv)
     char	**argv;
 {
     kadm5_config_params newparams;
-    osa_adb_policy_t	tmppol_db;
     krb5_error_code	kret;
     krb5_context	kcontext;
     FILE		*f;
@@ -2115,7 +2108,6 @@ load_db(argc, argv)
     crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
     dbname_tmp = (char *) NULL;
-    tmppol_db = NULL;
     for (aindex = 1; aindex < argc; aindex++) {
 	if (!strcmp(argv[aindex], oldoption))
 	     load = &old_version;
@@ -2130,7 +2122,21 @@ load_db(argc, argv)
 	else if (!strcmp(argv[aindex], updateoption))
 	    update = 1;
 	else if (!strcmp(argv[aindex], hashoption))
-	    crflags = KRB5_KDB_CREATE_HASH;
+	{
+	    db5util_db_args_size++;
+	    {
+		char **temp = realloc( db5util_db_args, sizeof(char*) * (db5util_db_args_size+1)); /* one for NULL */
+		if( temp == NULL )
+		{
+		    com_err(progname, ENOMEM, "while parsing command arguments\n");
+		    exit(1);
+		}
+
+		db5util_db_args = temp;
+	    }
+	    db5util_db_args[db5util_db_args_size-1] = "hash=true";
+	    db5util_db_args[db5util_db_args_size]   = NULL;
+	}
 	else
 	    break;
     }
@@ -2154,6 +2160,14 @@ load_db(argc, argv)
      */
     if ((kret = krb5_init_context(&kcontext))) {
 	fprintf(stderr, ctx_err_fmt, programname);
+	free(dbname_tmp);
+	exit_status++;
+	return;
+    }
+
+    if( (kret = krb5_set_default_realm(kcontext, util_context->default_realm)) )
+    {
+	fprintf(stderr, "%s: Unable to set the default realm\n", programname);
 	free(dbname_tmp);
 	exit_status++;
 	return;
@@ -2221,7 +2235,7 @@ load_db(argc, argv)
 
     /*
      * Cons up params for the new databases.  If we are not in update
-     * mode use a temp name that we'll rename later.
+     * mode, we dont create tmp file and then move it to final place. As it is dependent on DB type, this is not done
      */
     newparams = global_params;
     if (! update) {
@@ -2238,96 +2252,45 @@ load_db(argc, argv)
     }
     
     /*
-     * If not an update restoration, create the temp database.  Always
-     * create a temp policy db, even if we are not loading a dump file
-     * with policy info, because they may be loading an old dump
-     * intending to use it with the new kadm5 system.
+     * If not an update restoration, create the database. otherwise open
      */
-    if (!update && ((kret = krb5_db_create(kcontext, dbname_tmp, crflags)))) {
-	 fprintf(stderr, dbcreaterr_fmt,
-		 programname, dbname_tmp, error_message(kret));
-	 exit_status++;
-	 kadm5_free_config_params(kcontext, &newparams);
-	 if (dumpfile) fclose(f);
-	 return;
+    if (!update) {
+	if((kret = krb5_db_create(kcontext, db5util_db_args))) {
+	    fprintf(stderr, dbcreaterr_fmt,
+		    programname, dbname, error_message(kret));
+	    exit_status++;
+	    kadm5_free_config_params(kcontext, &newparams);
+	    if (dumpfile) fclose(f);
+	    return;
+	}
     }
-    if (!update && (kret = osa_adb_create_policy_db(&newparams))) {
-	 fprintf(stderr, "%s: %s while creating policy database\n",
-		 programname, error_message(kret));
-	 exit_status++;
-	 kadm5_free_config_params(kcontext, &newparams);
-	 if (dumpfile) fclose(f);
-	 return;
+    else
+    /*
+     * Initialize the database.
+     */
+    if ((kret = krb5_db_open(kcontext, db5util_db_args, KRB5_KDB_OPEN_RW))) {
+	fprintf(stderr, dbinit_err_fmt,
+		programname, error_message(kret));
+	exit_status++;
+	goto error;
     }
 
-    /*
-     * Point ourselves at the new databases.
-     */
-    if ((kret = krb5_db_set_name(kcontext,
-				(update) ? dbname : dbname_tmp))) {
-	 fprintf(stderr, dbname_err_fmt,
-		 programname, 
-		 (update) ? dbname : dbname_tmp, error_message(kret));
-	 exit_status++;
-	 goto error;
-    }
-    if ((kret = osa_adb_open_policy(&tmppol_db, &newparams))) {
-	 fprintf(stderr, "%s: %s while opening policy database\n",
-		 programname, error_message(kret));
-	 exit_status++;
-	 goto error;
-    }
+
     /*
      * If an update restoration, make sure the db is left unusable if
      * the update fails.
      */
-    if (update) {
-	 if ((kret = osa_adb_get_lock(tmppol_db, OSA_ADB_PERMANENT))) {
-	      fprintf(stderr, "%s: %s while permanently locking database\n",
-		      programname, error_message(kret));
-	      exit_status++;
-	      goto error;
-	 }
-    }
-		      
-    /*
-     * Initialize the database.
-     */
-    if ((kret = krb5_db_init(kcontext))) {
-	 fprintf(stderr, dbinit_err_fmt,
-		 programname, error_message(kret));
-	 exit_status++;
-	 goto error;
-    }
-    /* 
-     * grab an extra lock, since there are no other users
-     */
-    if (!update) {
-	 kret = krb5_db_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
-	 if (kret) {
-		 fprintf(stderr, dblock_err_fmt,
-			 programname, error_message(kret));
-		 exit_status++;
-		 goto error;
-	 }
+    if ((kret = krb5_db_lock(kcontext, update?KRB5_DB_LOCKMODE_PERMANENT: KRB5_DB_LOCKMODE_EXCLUSIVE))) {
+	fprintf(stderr, "%s: %s while permanently locking database\n",
+		programname, error_message(kret));
+	exit_status++;
+	goto error;
     }
     
     if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
-		     f, verbose, load, tmppol_db)) {
+		     f, verbose, load)) {
 	 fprintf(stderr, restfail_fmt,
 		 programname, load->name);
-	 exit_status++;
-    }
-
-    if (!update && (kret = krb5_db_unlock(kcontext))) {
-	 /* change this error? */
-	 fprintf(stderr, dbunlockerr_fmt,
-		 programname, dbname_tmp, error_message(kret));
-	 exit_status++;
-    }
-    if ((kret = krb5_db_fini(kcontext))) {
-	 fprintf(stderr, close_err_fmt,
-		 programname, error_message(kret));
 	 exit_status++;
     }
 
@@ -2337,6 +2300,19 @@ load_db(argc, argv)
 	 exit_status++;
     }
     
+    if ((kret = krb5_db_unlock(kcontext))) {
+	 /* change this error? */
+	 fprintf(stderr, dbunlockerr_fmt,
+		 programname, dbname, error_message(kret));
+	 exit_status++;
+    }
+
+    if ((kret = krb5_db_fini(kcontext))) {
+	 fprintf(stderr, close_err_fmt,
+		 programname, error_message(kret));
+	 exit_status++;
+    }
+
     /* close policy db below */
 
 error:
@@ -2348,54 +2324,11 @@ error:
      */
     if (!update) {
 	 if (exit_status) {
-	      if ((kret = krb5_db_destroy(kcontext, dbname_tmp))) {
+	      if ((kret = krb5_db_destroy(kcontext, db5util_db_args))) {
 		   fprintf(stderr, dbdelerr_fmt,
-			   programname, dbname_tmp, error_message(kret));
+			   programname, dbname, error_message(kret));
 		   exit_status++;
 	      }
-	      if ((kret = osa_adb_destroy_policy_db(&newparams))) {
-		   fprintf(stderr, "%s: %s while destroying policy database\n",
-			   programname, error_message(kret));
-		   exit_status++;
-	      }
-	 }
-	 else {
-	      if ((kret = krb5_db_rename(kcontext,
-					 dbname_tmp,
-					 dbname))) {
-		   fprintf(stderr, dbrenerr_fmt,
-			   programname, dbname_tmp, dbname,
-			   error_message(kret));
-		   exit_status++;
-	      } 
-
-	      if ((kret = osa_adb_close_policy(tmppol_db))) {
-		   fprintf(stderr, close_err_fmt,
-			   programname, error_message(kret));
-		   exit_status++;
-	      }
-
-	      if ((kret = osa_adb_rename_policy_db(&newparams,
-						   &global_params))) {
-		   fprintf(stderr,
-			   "%s: %s while renaming policy db %s to %s\n",
-			   programname, error_message(kret),
-			   newparams.admin_dbname,
-			   global_params.admin_dbname);
-		   exit_status++;
-	      }
-	 }
-    } else /* update */ {
-	 if (! exit_status && ((kret = osa_adb_release_lock(tmppol_db)))) {
-	      fprintf(stderr, "%s: %s while releasing permanent lock\n",
-		      programname, error_message(kret));
-	      exit_status++;
-	 }
-
-	 if (tmppol_db && ((kret = osa_adb_close_policy(tmppol_db)))) {
-	      fprintf(stderr, close_err_fmt,
-		      programname, error_message(kret));
-	      exit_status++;
 	 }
     }
 

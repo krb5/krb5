@@ -35,7 +35,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <kadm5/adb.h>
+#include <k5-int.h>
+#include <krb5/kdb.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
 
@@ -85,11 +86,6 @@ int kadm5_create(kadm5_config_params *params)
 	  return 1;
      }
 
-     if ((retval = osa_adb_create_policy_db(&lparams))) {
-	  com_err(progname, retval, str_CREATING_POLICY_DB);
-	  return 1;
-     }
-
      retval = kadm5_create_magic_princs(&lparams, context);
 
      kadm5_free_config_params(context, &lparams);
@@ -110,6 +106,7 @@ int kadm5_create_magic_princs(kadm5_config_params *params,
      if ((retval = kadm5_init(progname, NULL, NULL, params,
 			      KADM5_STRUCT_VERSION,
 			      KADM5_API_VERSION_2,
+			      db5util_db_args,
 			      &handle))) {
 	  com_err(progname, retval, "while initializing the Kerberos admin interface");
 	  return retval;

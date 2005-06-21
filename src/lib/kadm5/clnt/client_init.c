@@ -65,6 +65,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 				   kadm5_config_params *params,
 				   krb5_ui_4 struct_version,
 				   krb5_ui_4 api_version,
+				   char **db_args,
 				   void **server_handle);
 
 static kadm5_ret_t
@@ -99,11 +100,12 @@ kadm5_ret_t kadm5_init_with_creds(char *client_name,
 				  kadm5_config_params *params,
 				  krb5_ui_4 struct_version,
 				  krb5_ui_4 api_version,
+				  char **db_args,
 				  void **server_handle)
 {
      return _kadm5_init_any(client_name, INIT_CREDS, NULL, ccache,
 			    service_name, params,
-			    struct_version, api_version,
+			    struct_version, api_version, db_args,
 			    server_handle);
 }
 
@@ -113,11 +115,12 @@ kadm5_ret_t kadm5_init_with_password(char *client_name, char *pass,
 				     kadm5_config_params *params,
 				     krb5_ui_4 struct_version,
 				     krb5_ui_4 api_version,
+				     char **db_args,
 				     void **server_handle)
 {
      return _kadm5_init_any(client_name, INIT_PASS, pass, NULL,
 			    service_name, params, struct_version,
-			    api_version, server_handle);
+			    api_version, db_args, server_handle);
 }
 
 kadm5_ret_t kadm5_init(char *client_name, char *pass,
@@ -125,11 +128,12 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 		       kadm5_config_params *params,
 		       krb5_ui_4 struct_version,
 		       krb5_ui_4 api_version,
+		       char **db_args,
 		       void **server_handle)
 {
      return _kadm5_init_any(client_name, INIT_PASS, pass, NULL,
 			    service_name, params, struct_version,
-			    api_version, server_handle);
+			    api_version, db_args, server_handle);
 }
 
 kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
@@ -137,11 +141,12 @@ kadm5_ret_t kadm5_init_with_skey(char *client_name, char *keytab,
 				 kadm5_config_params *params,
 				 krb5_ui_4 struct_version,
 				 krb5_ui_4 api_version,
+				 char **db_args,
 				 void **server_handle)
 {
      return _kadm5_init_any(client_name, INIT_SKEY, keytab, NULL,
 			    service_name, params, struct_version,
-			    api_version, server_handle);
+			    api_version, db_args, server_handle);
 }
 
 static kadm5_ret_t _kadm5_init_any(char *client_name,
@@ -152,6 +157,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 				   kadm5_config_params *params_in,
 				   krb5_ui_4 struct_version,
 				   krb5_ui_4 api_version,
+				   char **db_args,
 				   void **server_handle)
 {
      struct sockaddr_in addr;
@@ -168,7 +174,7 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      generic_ret *r;
 
      initialize_ovk_error_table();
-     initialize_adb_error_table();
+/*      initialize_adb_error_table(); */
      initialize_ovku_error_table();
      
      if (! server_handle) {

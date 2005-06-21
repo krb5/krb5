@@ -1,3 +1,9 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* krb524d.c:
+
 2004-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-unix): Install krb524d manpage.

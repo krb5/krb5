@@ -1,3 +1,9 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* kdb5_mkdums.c:
+
 2004-05-24  Ezra Peisach  <epeisach@mit.edu>
 
 	* kdb5_mkdums.c (main): Fix memory leak of master principal at exit. 

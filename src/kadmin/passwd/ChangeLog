@@ -1,3 +1,8 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* kpasswd.c:
+
 2003-01-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.ov: Deleted.

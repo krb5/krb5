@@ -1,3 +1,15 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* destroy-test.c:
+	* handle-test.c:
+	* init-test.c:
+	* iter-test.c:
+	* lock-test.c:
+	* randkey-test.c:
+	* setkey-test.c:
+
 2005-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* api.2/init-v2.exp: Handle improved error codes from

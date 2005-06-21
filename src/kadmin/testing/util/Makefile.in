@@ -2,10 +2,11 @@ thisconfigdir=./../..
 myfulldir=kadmin/testing/util
 mydir=testing/util
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = $(TCL_INCLUDES)
+LOCALINCLUDES = $(TCL_INCLUDES) -I$(BUILDTOP)/lib/kdb/
 # Force Tcl headers to use stdarg.h, because krb5 does too, and if
 # Tcl uses varargs.h it'll just mess things up.
 DEFINES= -DHAS_STDARG
+KRB5_PTHREAD_LIB=-lpthread 
 
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
@@ -29,11 +30,11 @@ all-tcl:: $(CLNTPROG) $(SRVPROG)
 
 $(SRVPROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(SRVPROG) $(OBJS) $(TCL_MAYBE_RPATH) \
-		$(KADMSRV_LIBS) $(KRB5_BASE_LIBS) $(TCL_LIBS)
+		$(KADMSRV_LIBS) $(KRB5_PTHREAD_LIB) $(KRB5_BASE_LIBS) $(TCL_LIBS)
 
 $(CLNTPROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(CLNTPROG) $(OBJS) $(TCL_MAYBE_RPATH) \
-		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS) $(TCL_LIBS)
+		$(KRB5_PTHREAD_LIB) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS) $(TCL_LIBS)
 
 bsddb_dump: bsddb_dump.o
 	$(CC_LINK) -o bsddb_dump bsddb_dump.o $(KADMSRV_LIBS)
@@ -59,8 +60,8 @@ $(OUTPRE)tcl_ovsec_kadm.$(OBJEXT): tcl_ovsec_kadm.c \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
-  $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  tcl_kadm5.h
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h tcl_kadm5.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h
 $(OUTPRE)tcl_kadm5.$(OBJEXT): tcl_kadm5.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
@@ -74,6 +75,6 @@ $(OUTPRE)tcl_kadm5.$(OBJEXT): tcl_kadm5.c $(BUILDTOP)/include/kadm5/admin.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h tcl_kadm5.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h tcl_kadm5.h
 $(OUTPRE)test.$(OBJEXT): test.c tcl_kadm5.h

@@ -1,3 +1,30 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* adb_err.et:
+	* configure.in:
+	* decrypt_key.c:
+	* encrypt_key.c:
+	* err_handle.c:
+	* err_handle.h:
+	* fetch_mkey.c:
+	* kdb5.c:
+	* kdb5.h:
+	* kdb_compat.h:
+	* kdb_cpw.c:
+	* kdb_db2.c:
+	* kdb_db2.h:
+	* kdb_default.c:
+	* kdb_xdr.c:
+	* keytab.c:
+	* libkrb5.exports:
+	* setup_mkey.c:
+	* store_mkey.c:
+	* t_kdb.c:
+	* t_krb5.conf:
+	* verify_mky.c:
+
 2005-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb_dbm.c: Unused file deleted.

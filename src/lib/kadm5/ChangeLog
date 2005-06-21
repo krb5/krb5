@@ -1,3 +1,16 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* adb_err.et:
+	* admin.h:
+	* admin_xdr.h:
+	* kadm_err.et:
+	* kadm_rpc.h:
+	* kadm_rpc_xdr.c:
+	* ovsec_glue.c:
+	* server_internal.h:
+
 2005-04-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't invoke AC_CANONICAL_HOST explicitly,

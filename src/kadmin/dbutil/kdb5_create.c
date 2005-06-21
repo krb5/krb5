@@ -55,8 +55,9 @@
 
 #include <stdio.h>
 #include <k5-int.h>
+#include <krb5/kdb.h>
+#include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
 #include <krb5/adm_proto.h>
 #include "kdb5_util.h"
 
@@ -145,7 +146,6 @@ extern char *mkey_password;
 
 extern char *progname;
 extern int exit_status;
-extern osa_adb_policy_t policy_db;
 extern kadm5_config_params global_params;
 extern krb5_context util_context;
 
@@ -160,7 +160,6 @@ void kdb5_create(argc, argv)
     char *pw_str = 0;
     unsigned int pw_size = 0;
     int do_stash = 0;
-    krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
     krb5_data pwd, seed;
 	   
     if (strrchr(argv[0], '/'))
@@ -172,7 +171,19 @@ void kdb5_create(argc, argv)
 	    do_stash++;
 	    break;
 	case 'h':
-	    crflags = KRB5_KDB_CREATE_HASH;
+	    db5util_db_args_size++;
+	    {
+		char **temp = realloc( db5util_db_args, sizeof(char*) * (db5util_db_args_size+1)); /* one for NULL */
+		if( temp == NULL )
+		{
+		    com_err(progname, ENOMEM, "while parsing command arguments\n");
+		    exit(1);
+		}
+
+		db5util_db_args = temp;
+	    }
+	    db5util_db_args[db5util_db_args_size-1] = "hash=true";
+	    db5util_db_args[db5util_db_args_size]   = NULL;
 	case '?':
 	default:
 	    usage();
@@ -186,16 +197,6 @@ void kdb5_create(argc, argv)
     rblock.flags = global_params.flags;
     rblock.nkslist = global_params.num_keysalts;
     rblock.kslist = global_params.keysalts;
-
-    retval = krb5_db_set_name(util_context, global_params.dbname);
-    if (!retval) retval = EEXIST;
-
-    if (retval == EEXIST || retval == EACCES || retval == EPERM) {
-	/* it exists ! */
-	com_err(argv[0], 0, "The database '%s' appears to already exist",
-		global_params.dbname);
-	exit_status++; return;
-    }
 
     printf ("Loading random data\n");
     retval = krb5_c_random_os_entropy (util_context, 1, NULL);
@@ -267,26 +268,20 @@ master key name '%s'\n",
 	exit_status++; return;
     }
     if ((retval = krb5_db_create(util_context,
-				 global_params.dbname, crflags))) {
+				 db5util_db_args))) {
 	com_err(argv[0], retval, "while creating database '%s'",
 		global_params.dbname);
 	exit_status++; return;
     }
-    if ((retval = krb5_db_fini(util_context))) {
-        com_err(argv[0], retval, "while closing current database");
-        exit_status++; return;
-    }
-    if ((retval = krb5_db_set_name(util_context, global_params.dbname))) {
-        com_err(argv[0], retval, "while setting active database to '%s'",
-                global_params.dbname);
-        exit_status++; return;
-    }
-    if ((retval = krb5_db_init(util_context))) {
-	com_err(argv[0], retval, "while initializing the database '%s'",
-		global_params.dbname);
-	exit_status++; return;
-    }
-
+/*     if ((retval = krb5_db_fini(util_context))) { */
+/*         com_err(argv[0], retval, "while closing current database"); */
+/*         exit_status++; return; */
+/*     } */
+/*     if ((retval = krb5_db_open(util_context, db5util_db_args, KRB5_KDB_OPEN_RW))) { */
+/* 	com_err(argv[0], retval, "while initializing the database '%s'", */
+/* 		global_params.dbname); */
+/* 	exit_status++; return; */
+/*     } */
     if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock)) ||
 	(retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
 	(void) krb5_db_fini(util_context);
@@ -298,10 +293,11 @@ master key name '%s'\n",
      * it; delete the file below if it was not requested.  DO NOT EXIT
      * BEFORE DELETING THE KEYFILE if do_stash is not set.
      */
-    retval = krb5_db_store_mkey(util_context,
-			    global_params.stash_file,
-			    master_princ,
-			    &master_keyblock);
+    retval = krb5_db_store_master_key(util_context,
+				      global_params.stash_file,
+				      master_princ,
+				      &master_keyblock,
+				      mkey_password);
     if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	printf("Warning: couldn't stash master key.\n");
@@ -440,6 +436,6 @@ add_principal(context, princ, op, pblock)
     retval = krb5_db_put_principal(context, &entry, &nentries);
 
 error_out:;
-    krb5_dbe_free_contents(context, &entry);
+    krb5_db_free_principal(context, &entry, 1);
     return retval;
 }

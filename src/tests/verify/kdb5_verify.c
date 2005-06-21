@@ -361,11 +361,14 @@ set_dbname_help(context, pname, dbname)
     krb5_boolean more;
     krb5_data pwd, scratch;
 
+#if 0
     if ((retval = krb5_db_set_name(context, dbname))) {
 	com_err(pname, retval, "while setting active database to '%s'",
 		dbname);
 	return(1);
     }
+#endif
+
     /* assemble & parse the master key name */
 
     if ((retval = krb5_db_setup_mkey_name(context, mkey_name, cur_realm, 0,
@@ -397,7 +400,7 @@ set_dbname_help(context, pname, dbname)
 	    return(1);
 	}
     }
-    if ((retval = krb5_db_init(context ))) {
+    if ((retval = krb5_db_open(context, NULL, KRB5_KDB_OPEN_RO))) {
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }

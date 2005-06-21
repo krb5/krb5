@@ -11,8 +11,10 @@ static char *rcsid = "$Header$";
 #include	<sys/file.h>
 #include	<fcntl.h>
 #include	<unistd.h>
-#include	"adb.h"
+#include        <k5-int.h>
+#include	"policy_db.h"
 #include	<stdlib.h>
+#include        <db.h>
 
 #define MAX_LOCK_TRIES 5
 
@@ -21,8 +23,8 @@ struct _locklist {
      struct _locklist *next;
 };
 
-osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
-				int magic)
+krb5_error_code osa_adb_create_db(char *filename, char *lockfilename,
+				  int magic)
 {
      int lf;
      DB *db;
@@ -51,7 +53,7 @@ osa_adb_ret_t osa_adb_create_db(char *filename, char *lockfilename,
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_destroy_db(char *filename, char *lockfilename,
+krb5_error_code osa_adb_destroy_db(char *filename, char *lockfilename,
 				 int magic)
 {
      /* the admin databases do not contain security-critical data */
@@ -61,11 +63,11 @@ osa_adb_ret_t osa_adb_destroy_db(char *filename, char *lockfilename,
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
+krb5_error_code osa_adb_rename_db(char *filefrom, char *lockfrom,
 				char *fileto, char *lockto, int magic)
 {
      osa_adb_db_t fromdb, todb;
-     osa_adb_ret_t ret;
+     krb5_error_code ret;
 
      /* make sure todb exists */
      if ((ret = osa_adb_create_db(fileto, lockto, magic)) &&
@@ -78,12 +80,12 @@ osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
 	  (void) osa_adb_fini_db(fromdb, magic);
 	  return ret;
      }
-     if ((ret = osa_adb_get_lock(fromdb, OSA_ADB_PERMANENT))) {
+     if ((ret = osa_adb_get_lock(fromdb, KRB5_DB_LOCKMODE_PERMANENT))) {
 	  (void) osa_adb_fini_db(fromdb, magic);
 	  (void) osa_adb_fini_db(todb, magic);
 	  return ret;
      }
-     if ((ret = osa_adb_get_lock(todb, OSA_ADB_PERMANENT))) {
+     if ((ret = osa_adb_get_lock(todb, KRB5_DB_LOCKMODE_PERMANENT))) {
 	  (void) osa_adb_fini_db(fromdb, magic);
 	  (void) osa_adb_fini_db(todb, magic);
 	  return ret;
@@ -108,7 +110,7 @@ osa_adb_ret_t osa_adb_rename_db(char *filefrom, char *lockfrom,
      return 0;
 }
 
-osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
+krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
 			      char *lockfilename, int magic)
 {
      osa_adb_db_t db;
@@ -188,7 +190,7 @@ osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      if (lockp->lockinfo.lockfile == NULL) {
 	  if ((code = krb5_init_context(&lockp->lockinfo.context))) {
 	       free(db);
-	       return((osa_adb_ret_t) code);
+	       return((krb5_error_code) code);
 	  }
 
 	  /*
@@ -223,7 +225,7 @@ osa_adb_ret_t osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_fini_db(osa_adb_db_t db, int magic)
+krb5_error_code osa_adb_fini_db(osa_adb_db_t db, int magic)
 {
      if (db->magic != magic)
 	  return EINVAL;
@@ -242,7 +244,7 @@ osa_adb_ret_t osa_adb_fini_db(osa_adb_db_t db, int magic)
 	   * after trashing it.  This has to be allowed, so don't
 	   * generate an error.
 	   */
-	  if (db->lock->lockmode != OSA_ADB_PERMANENT)
+	  if (db->lock->lockmode != KRB5_DB_LOCKMODE_PERMANENT)
 	       (void) fclose(db->lock->lockfile);
 	  db->lock->lockfile = NULL;
 	  krb5_free_context(db->lock->context);
@@ -254,9 +256,9 @@ osa_adb_ret_t osa_adb_fini_db(osa_adb_db_t db, int magic)
      return OSA_ADB_OK;
 }     
      
-osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
+krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 {
-     int tries, gotlock, perm, krb5_mode, ret;
+     int tries, gotlock, perm, krb5_mode, ret = 0;
 
      if (db->lock->lockmode >= mode) {
 	  /* No need to upgrade lock, just incr refcnt and return */
@@ -266,12 +268,12 @@ osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
 
      perm = 0;
      switch (mode) {
-	case OSA_ADB_PERMANENT:
+	case KRB5_DB_LOCKMODE_PERMANENT:
 	  perm = 1;
-	case OSA_ADB_EXCLUSIVE:
+	case KRB5_DB_LOCKMODE_EXCLUSIVE:
 	  krb5_mode = KRB5_LOCKMODE_EXCLUSIVE;
 	  break;
-	case OSA_ADB_SHARED:
+	case KRB5_DB_LOCKMODE_SHARED:
 	  krb5_mode = KRB5_LOCKMODE_SHARED;
 	  break;
 	default:
@@ -284,7 +286,7 @@ osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
 				    krb5_mode|KRB5_LOCKMODE_DONTBLOCK)) == 0) {
 	       gotlock++;
 	       break;
-	  } else if (ret == EBADF && mode == OSA_ADB_EXCLUSIVE)
+	  } else if (ret == EBADF && mode == KRB5_DB_LOCKMODE_EXCLUSIVE)
 	       /* tried to exclusive-lock something we don't have */
 	       /* write access to */
 	       return OSA_ADB_NOEXCL_PERM;
@@ -339,7 +341,7 @@ osa_adb_ret_t osa_adb_get_lock(osa_adb_db_t db, int mode)
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
+krb5_error_code osa_adb_release_lock(osa_adb_db_t db)
 {
      int ret, fd;
      
@@ -347,7 +349,7 @@ osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
 	  return OSA_ADB_NOTLOCKED;
 
      if (--db->lock->lockcnt == 0) {
-	  if (db->lock->lockmode == OSA_ADB_PERMANENT) {
+	  if (db->lock->lockmode == KRB5_DB_LOCKMODE_PERMANENT) {
 	       /* now we need to create the file since it does not exist */
                fd = THREEPARAMOPEN(db->lock->filename,O_RDWR | O_CREAT | O_EXCL,
                                    0600);
@@ -363,7 +365,7 @@ osa_adb_ret_t osa_adb_release_lock(osa_adb_db_t db)
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
+krb5_error_code osa_adb_open_and_lock(osa_adb_princ_t db, int locktype)
 {
      int ret;
 
@@ -395,7 +397,7 @@ open_ok:
      return OSA_ADB_OK;
 }
 
-osa_adb_ret_t osa_adb_close_and_unlock(osa_adb_princ_t db)
+krb5_error_code osa_adb_close_and_unlock(osa_adb_princ_t db)
 {
      if (--db->opencnt)
 	  return osa_adb_release_lock(db);

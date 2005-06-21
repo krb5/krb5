@@ -10,7 +10,6 @@ static char *rcsid = "$Header$";
 
 #include	<sys/types.h>
 #include	<kadm5/admin.h>
-#include	"adb.h"
 #include	"server_internal.h"
 #include	<stdlib.h>
 
@@ -46,6 +45,8 @@ kadm5_create_policy(void *server_handle,
 			 kadm5_policy_ent_t entry, long mask)
 {
     CHECK_HANDLE(server_handle);
+
+    krb5_db_clr_error();
 
     if (mask & KADM5_REF_COUNT)
 	return KADM5_BAD_MASK;
@@ -139,10 +140,10 @@ kadm5_create_policy_internal(void *server_handle,
 	pent.policy_refcnt = 0;
     else
 	pent.policy_refcnt = entry->policy_refcnt;
-    if ((ret = osa_adb_create_policy(handle->policy_db, &pent)) == OSA_ADB_OK)
-	return KADM5_OK;
-    else
+    if ((ret = krb5_db_create_policy(handle->context, &pent)))
 	return ret;
+    else
+	return KADM5_OK;
 }
 	  
 kadm5_ret_t
@@ -151,24 +152,30 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
     kadm5_server_handle_t handle = server_handle;
     osa_policy_ent_t		entry;
     int				ret;
+    int                         cnt=1;
 
     CHECK_HANDLE(server_handle);
+
+    krb5_db_clr_error();
 
     if(name == (kadm5_policy_t) NULL)
 	return EINVAL;
     if(strlen(name) == 0)
 	return KADM5_BAD_POLICY;
-    if ((ret = osa_adb_get_policy(handle->policy_db, name, &entry)) != OSA_ADB_OK)
+    if((ret = krb5_db_get_policy(handle->context, name, &entry,&cnt)))
 	return ret;
+    if( cnt != 1 )
+	return KADM5_UNK_POLICY;
+
     if(entry->policy_refcnt != 0) {
-	osa_free_policy_ent(entry);
+	krb5_db_free_policy(handle->context, entry);
 	return KADM5_POLICY_REF;
     }
-    osa_free_policy_ent(entry);
-    if ((ret = osa_adb_destroy_policy(handle->policy_db, name)) == OSA_ADB_OK)
-	return KADM5_OK;
-    else
+    krb5_db_free_policy(handle->context, entry);
+    if ((ret = krb5_db_delete_policy(handle->context, name)))
 	return ret;
+    else
+	return KADM5_OK;
 }
 
 kadm5_ret_t
@@ -176,6 +183,8 @@ kadm5_modify_policy(void *server_handle,
 			 kadm5_policy_ent_t entry, long mask)
 {
     CHECK_HANDLE(server_handle);
+
+    krb5_db_clr_error();
 
     if (mask & KADM5_REF_COUNT)
 	return KADM5_BAD_MASK;
@@ -190,6 +199,7 @@ kadm5_modify_policy_internal(void *server_handle,
     kadm5_server_handle_t handle = server_handle;
     osa_policy_ent_t	p;
     int			ret;
+    int                 cnt=1;
 
     CHECK_HANDLE(server_handle);
 
@@ -200,26 +210,22 @@ kadm5_modify_policy_internal(void *server_handle,
     if((mask & KADM5_POLICY))
 	return KADM5_BAD_MASK;
 		
-    switch ((ret = osa_adb_get_policy(handle->policy_db, entry->policy, &p))) {
-    case OSA_ADB_OK:
-	break;
-    case OSA_ADB_NOENT:
+    ret = krb5_db_get_policy(handle->context, entry->policy, &p, &cnt);
+    if( ret && (cnt==0) )
 	return KADM5_UNK_POLICY;
-    default:
-	break;
-    }
+
     if ((mask & KADM5_PW_MAX_LIFE))
 	p->pw_max_life = entry->pw_max_life;
     if ((mask & KADM5_PW_MIN_LIFE)) {
 	if(entry->pw_min_life > p->pw_max_life && p->pw_max_life != 0)	{
-	     osa_free_policy_ent(p);
+	     krb5_db_free_policy(handle->context, p);
 	     return KADM5_BAD_MIN_PASS_LIFE;
 	}
 	p->pw_min_life = entry->pw_min_life;
     }
     if ((mask & KADM5_PW_MIN_LENGTH)) {
 	if(entry->pw_min_length < MIN_PW_LENGTH) {
-	      osa_free_policy_ent(p);
+	      krb5_db_free_policy(handle->context, p);
 	      return KADM5_BAD_LENGTH;
 	 }
 	p->pw_min_length = entry->pw_min_length;
@@ -227,7 +233,7 @@ kadm5_modify_policy_internal(void *server_handle,
     if ((mask & KADM5_PW_MIN_CLASSES)) {
 	if(entry->pw_min_classes > MAX_PW_CLASSES ||
 	   entry->pw_min_classes < MIN_PW_CLASSES) {
-	     osa_free_policy_ent(p);
+	     krb5_db_free_policy(handle->context, p);
 	     return KADM5_BAD_CLASS;
 	}
 	p->pw_min_classes = entry->pw_min_classes;
@@ -235,22 +241,15 @@ kadm5_modify_policy_internal(void *server_handle,
     if ((mask & KADM5_PW_HISTORY_NUM)) {
 	if(entry->pw_history_num < MIN_PW_HISTORY ||
 	   entry->pw_history_num > MAX_PW_HISTORY) {
-	     osa_free_policy_ent(p);
+	     krb5_db_free_policy(handle->context, p);
 	     return KADM5_BAD_HISTORY;
 	}
 	p->pw_history_num = entry->pw_history_num;
     }
     if ((mask & KADM5_REF_COUNT))
 	p->policy_refcnt = entry->policy_refcnt;
-    switch ((ret = osa_adb_put_policy(handle->policy_db, p))) {
-    case OSA_ADB_OK:
-	ret = KADM5_OK;
-	break;
-    case OSA_ADB_NOENT:	/* this should not happen here ... */
-	ret = KADM5_UNK_POLICY;
-	break;
-    }
-    osa_free_policy_ent(p);
+    ret = krb5_db_put_policy(handle->context, p);
+    krb5_db_free_policy(handle->context, p);
     return ret;
 }
 
@@ -262,8 +261,11 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     kadm5_policy_ent_rec	entry_local, **entry_orig, *new;
     int				ret;
     kadm5_server_handle_t handle = server_handle;
+    int                         cnt=1;
 
     CHECK_HANDLE(server_handle);
+
+    krb5_db_clr_error();
 
     /*
      * In version 1, entry is a pointer to a kadm5_policy_ent_t that
@@ -279,16 +281,14 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
 	return EINVAL;
     if(strlen(name) == 0)
 	return KADM5_BAD_POLICY;
-    switch((ret = osa_adb_get_policy(handle->policy_db, name, &t))) {
-    case OSA_ADB_OK:
-	break;
-    case OSA_ADB_NOENT:
-	return KADM5_UNK_POLICY;
-    default:
+    if((ret = krb5_db_get_policy(handle->context, name, &t, &cnt)))
 	return ret;
-    }
+
+    if( cnt != 1 )
+	return KADM5_UNK_POLICY;
+
     if ((entry->policy = (char *) malloc(strlen(t->name) + 1)) == NULL) {
-	 osa_free_policy_ent(t);
+	 krb5_db_free_policy(handle->context, t);
 	 return ENOMEM;
     }
     strcpy(entry->policy, t->name);
@@ -298,13 +298,13 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     entry->pw_min_classes = t->pw_min_classes;
     entry->pw_history_num = t->pw_history_num;
     entry->policy_refcnt = t->policy_refcnt;
-    osa_free_policy_ent(t);
+    krb5_db_free_policy(handle->context, t);
 
     if (handle->api_version == KADM5_API_VERSION_1) {
 	 new = (kadm5_policy_ent_t) malloc(sizeof(kadm5_policy_ent_rec));
 	 if (new == NULL) {
 	      free(entry->policy);
-	      osa_free_policy_ent(t);
+	      krb5_db_free_policy(handle->context, t);
 	      return ENOMEM;
 	 }
 	 *new = *entry;

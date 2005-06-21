@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include "com_err.h"
 #include <kadm5/admin.h>
-#include <kadm5/adb.h>
+#include <krb5/kdb.h>
 #include "kdb5_util.h"
 
 extern int exit_status;
@@ -53,12 +53,23 @@ kdb5_destroy(argc, argv)
     int optchar;
     char *dbname;
     char buf[5];
-    krb5_error_code retval, retval1, retval2;
+    krb5_error_code retval1;
     krb5_context context;
     int force = 0;
 
-    krb5_init_context(&context);
+    retval1 = krb5_init_context(&context);
+    if( retval1 )
+    {
+	com_err(argv[0], retval1, "while initializing krb5_context");
+	exit(1);
+    }
 
+    if ((retval1 = krb5_set_default_realm(context,
+					  util_context->default_realm))) {
+	com_err(argv[0], retval1, "while setting default realm name");
+	exit(1);
+    }
+    
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
@@ -89,20 +100,10 @@ kdb5_destroy(argc, argv)
 	printf("OK, deleting database '%s'...\n", dbname);
     }
 
-    retval = krb5_db_set_name(context, dbname);
-    if (retval) {
-	com_err(argv[0], retval, "'%s'",dbname);
-	exit_status++; return;
-    }
-    retval1 = krb5_db_destroy(context, dbname);
-    retval2 = osa_adb_destroy_policy_db(&global_params);
+    retval1 = krb5_db_destroy(context, db5util_db_args);
     if (retval1) {
 	com_err(argv[0], retval1, "deleting database '%s'",dbname);
 	exit_status++; return;
-    }
-    if (retval2) {
-	 com_err(argv[0], retval2, "destroying policy database");
-	 exit_status++; return;
     }
 
     dbactive = FALSE;

@@ -1,3 +1,10 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* tcl_kadm5.c:
+	* tcl_ovsec_kadm.c:
+
 2005-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* tcl_kadm5.c (unparse_err): Add entries for KRB5_CC_NOTFOUND and

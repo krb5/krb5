@@ -27,6 +27,7 @@ SRCS =	$(srcdir)/clnt_policy.c \
 	$(srcdir)/client_principal.c \
 	$(srcdir)/client_init.c \
 	$(srcdir)/clnt_privs.c \
+	$(srcdir)/err_handle.c \
 	$(srcdir)/clnt_chpass_util.c
 
 OBJS =	\
@@ -35,6 +36,7 @@ OBJS =	\
 	client_principal.$(OBJEXT) \
 	client_init.$(OBJEXT) \
 	clnt_privs.$(OBJEXT) \
+	err_handle.$(OBJEXT) \
 	clnt_chpass_util.$(OBJEXT)
 
 STLIBOBJS = \
@@ -43,7 +45,10 @@ STLIBOBJS = \
 	client_principal.o \
 	client_init.o \
 	clnt_privs.o \
+	err_handle.o \
 	clnt_chpass_util.o
+
+err_handle.o : err_handle.h err_handle.c
 
 all-unix:: includes
 all-unix:: all-liblinks
@@ -91,9 +96,9 @@ clnt_policy.so clnt_policy.po $(OUTPRE)clnt_policy.$(OBJEXT): \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
-  $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
-  $(BUILDTOP)/include/kadm5/admin_internal.h
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
+  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  err_handle.h
 client_rpc.so client_rpc.po $(OUTPRE)client_rpc.$(OBJEXT): \
   client_rpc.c $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
@@ -108,8 +113,7 @@ client_rpc.so client_rpc.po $(OUTPRE)client_rpc.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h
 client_principal.so client_principal.po $(OUTPRE)client_principal.$(OBJEXT): \
   client_principal.c $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
@@ -124,9 +128,9 @@ client_principal.so client_principal.po $(OUTPRE)client_principal.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
-  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
+  $(BUILDTOP)/include/kadm5/admin_internal.h err_handle.h
 client_init.so client_init.po $(OUTPRE)client_init.$(OBJEXT): \
   client_init.c $(COM_ERR_DEPS) $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
@@ -141,10 +145,10 @@ client_init.so client_init.po $(OUTPRE)client_init.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
-  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
-  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
+  $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  $(BUILDTOP)/include/gssrpc/auth_gssapi.h
 clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): \
   clnt_privs.c $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
@@ -159,9 +163,17 @@ clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
-  $(BUILDTOP)/include/kadm5/adb_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
-  $(BUILDTOP)/include/kadm5/admin_internal.h
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
+  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  err_handle.h
+err_handle.so err_handle.po $(OUTPRE)err_handle.$(OBJEXT): \
+  err_handle.c err_handle.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h
 clnt_chpass_util.so clnt_chpass_util.po $(OUTPRE)clnt_chpass_util.$(OBJEXT): \
   clnt_chpass_util.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
@@ -176,6 +188,5 @@ clnt_chpass_util.so clnt_chpass_util.po $(OUTPRE)clnt_chpass_util.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
-  $(BUILDTOP)/include/kadm5/chpass_util_strings.h client_internal.h \
-  $(BUILDTOP)/include/kadm5/admin_internal.h
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h

@@ -4,6 +4,7 @@ mydir=cli
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+KDB_DEP_LIB=-ldl -lpthread
 
 PROG = kadmin
 OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o keytab.o
@@ -13,7 +14,7 @@ LOCALINCLUDES=-I$(srcdir)
 all:: $(PROG).local $(PROG)
 
 $(PROG).local: $(OBJS) $(SS_DEPLIB) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o $(PROG).local $(OBJS) $(SS_LIB) $(KADMSRV_LIBS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o $(PROG).local $(OBJS) $(SS_LIB) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
 
 $(PROG): $(OBJS) $(SS_DEPLIB) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $(PROG) $(OBJS) $(SS_LIB) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)

@@ -1,3 +1,16 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* dump.c:
+	* kadm5_create.c:
+	* kdb5_create.c:
+	* kdb5_destroy.c:
+	* kdb5_stash.c:
+	* kdb5_util.c:
+	* kdb5_util.h:
+	* ovload.c:
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* loadv4.c (enter_in_v5_db): Terminate argument list of

@@ -1,3 +1,7 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4: Novell merge.
+
 2005-06-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for endian.h.

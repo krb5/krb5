@@ -85,10 +85,18 @@ kdb5_stash(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    /* Tell upwards to close the policy db cause we don't */
-    close_policy_db = 1; 
+    retval = krb5_init_context(&context);
+    if( retval )
+    {
+	com_err(argv[0], retval, "while initializing krb5_context");
+	exit(1);
+    }
 
-    krb5_init_context(&context);
+    if ((retval = krb5_set_default_realm(context,
+					  util_context->default_realm))) {
+	com_err(argv[0], retval, "while setting default realm name");
+	exit(1);
+    }
 
     dbname = global_params.dbname;
     realm = global_params.realm;
@@ -118,13 +126,6 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }
 
-    retval = krb5_db_set_name(context, dbname);
-    if (retval) {
-	com_err(argv[0], retval, "while setting active database to '%s'",
-		dbname);
-	exit_status++; return; 
-    }
-
     /* assemble & parse the master key name */
     retval = krb5_db_setup_mkey_name(context, mkey_name, realm, 
 				     &mkey_fullname, &master_princ);
@@ -133,7 +134,7 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }
 
-    retval = krb5_db_init(context);
+    retval = krb5_db_open(context, db5util_db_args, KRB5_KDB_OPEN_RW);
     if (retval) {
 	com_err(argv[0], retval, "while initializing the database '%s'",
 		dbname);
@@ -159,8 +160,8 @@ kdb5_stash(argc, argv)
 	exit_status++; return; 
     }	
 
-    retval = krb5_db_store_mkey(context, keyfile, master_princ, 
-				&master_keyblock);
+    retval = krb5_db_store_master_key(context, keyfile, master_princ, 
+				      &master_keyblock, NULL);
     if (retval) {
 	com_err(argv[0], errno, "while storing key");
 	memset((char *)master_keyblock.contents, 0, master_keyblock.length);

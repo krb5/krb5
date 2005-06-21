@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include "kdb_xdr.h"
 
 #define safe_realloc(p,n) ((p)?(realloc(p,n)):(malloc(n)))
 
@@ -768,6 +769,7 @@ krb5_dbe_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 	    if ((ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
 					      dbentp->key_data[i].key_data_type[0],
 					      &similar)))
+
 		return(ret);
 	}
 

@@ -1,3 +1,14 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* client_init.c:
+	* client_principal.c:
+	* clnt_policy.c:
+	* clnt_privs.c:
+	* err_handle.c:
+	* err_handle.h:
+
 2005-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* client_init.c (kadm5_get_init_creds, kadm5_gic_iter) 

@@ -1,3 +1,18 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* adb_free.c:
+	* adb_openclose.c:
+	* adb_policy.c:
+	* adb_xdr.c:
+	* server_init.c:
+	* server_kdb.c:
+	* server_misc.c:
+	* svr_iters.c:
+	* svr_policy.c:
+	* svr_principal.c:
+
 2004-12-20  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (add_to_history): Rewrite somewhat, using

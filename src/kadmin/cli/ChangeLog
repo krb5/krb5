@@ -1,3 +1,9 @@
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in:
+	* kadmin.c:
+
 2005-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* kadmin.c (kadmin_startup): New flag "-N" to prevent fallback to

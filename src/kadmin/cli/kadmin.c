@@ -26,6 +26,7 @@
  */
 
 #include <krb5.h>
+#include <k5-int.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
 #include <stdio.h>
@@ -96,9 +97,12 @@ int locked = 0;
 static void usage()
 {
     fprintf(stderr,
-	 "Usage: %s [-r realm] [-p principal] [-q query] [clnt|local args]\n"
-    "\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]\n"
-	 "\tlocal args: [-d dbname] [-e \"enc:salt ...\"] [-m]\n", whoami);
+	    "Usage: %s [-r realm] [-p principal] [-q query] [clnt|local args]\n"
+	    "\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]\n"
+	    "\tlocal args: [-x db_args]* [-d dbname] [-e \"enc:salt ...\"] [-m]\n"
+	    "where,\n\t[-x db_args]* - any number of database specific arguments.\n"
+	    "\t\t\tLook at each database documentation for supported arguments\n",
+	    whoami);
     exit(1);
 }
 
@@ -183,6 +187,9 @@ char *kadmin_startup(argc, argv)
     krb5_ccache cc;
     krb5_principal princ;
     kadm5_config_params params;
+    char **db_args = NULL;
+    int db_args_size = 0;
+    char *db_name = NULL;
     char *svcname;
 
     memset((char *) &params, 0, sizeof(params));
@@ -193,8 +200,25 @@ char *kadmin_startup(argc, argv)
 	 exit(1);
     }
 		     
-    while ((optchar = getopt(argc, argv, "r:p:kq:w:d:s:mc:t:e:ON")) != EOF) {
+    while ((optchar = getopt(argc, argv, "x:r:p:kq:w:d:s:mc:t:e:ON")) != EOF) {
 	switch (optchar) {
+	case 'x':
+	  db_args_size++;
+	  {
+	    char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
+	    if( temp == NULL )
+	      {
+		fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
+			argv[0]);
+		exit(1);
+	      }
+
+	    db_args = temp;
+	  }
+	  db_args[db_args_size-1] = optarg;
+	  db_args[db_args_size]   = NULL;
+	  break;
+	  
 	case 'r':
 	    def_realm = optarg;
 	    break;
@@ -217,8 +241,33 @@ char *kadmin_startup(argc, argv)
 	    query = optarg;
 	    break;
         case 'd':
-	    params.dbname = optarg;
-	    params.mask |= KADM5_CONFIG_DBNAME;
+	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
+	    if( !db_name )
+	    {
+		db_name = malloc( strlen(optarg) + sizeof("dbname="));
+	    } 
+	    else
+	    {
+		db_name = realloc( db_name, strlen(optarg) + sizeof("dbname="));
+	    }
+
+	    strcpy( db_name, "dbname=");
+	    strcat( db_name, optarg );
+
+	    db_args_size++;
+	    {
+		char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
+		if( temp == NULL )
+		{
+		    fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
+			    argv[0]);
+		    exit(1);
+		}
+
+		db_args = temp;
+	    }
+	    db_args[db_args_size-1] = db_name;
+	    db_args[db_args_size]   = NULL;
 	    break;
         case 's':
 	    params.admin_server = optarg;
@@ -417,6 +466,7 @@ char *kadmin_startup(argc, argv)
 					&params,
 					KADM5_STRUCT_VERSION,
 					KADM5_API_VERSION_2,
+					db_args,
 					&handle);
     } else if (use_keytab) {
 	 if (keytab_name)
@@ -430,6 +480,7 @@ char *kadmin_startup(argc, argv)
 				       &params,
 				       KADM5_STRUCT_VERSION,
 				       KADM5_API_VERSION_2,
+				       db_args,
 				       &handle);
     } else {
 	 printf("Authenticating as principal %s with password.\n",
@@ -439,6 +490,7 @@ char *kadmin_startup(argc, argv)
 					   &params,
 					   KADM5_STRUCT_VERSION,
 					   KADM5_API_VERSION_2,
+					   db_args,
 					   &handle);
     }
     if (retval) {
@@ -450,6 +502,12 @@ char *kadmin_startup(argc, argv)
     }
     if (freeprinc)
 	free(princstr);
+
+    if( db_name )
+	free(db_name), db_name=NULL;
+
+    if( db_args )
+	free(db_args), db_args=NULL;
 
     if ((retval = krb5_cc_close(context, cc))) {
 	 com_err(whoami, retval, "while closing ccache %s",
@@ -588,11 +646,36 @@ void kadmin_cpw(argc, argv)
     krb5_boolean keepold = FALSE;
     krb5_key_salt_tuple *ks_tuple = NULL;
     krb5_principal princ;
+    char **db_args = NULL;
+    int db_args_size = 0;
+
     
     if (argc < 2) {
 	 goto usage;
     }
     for (argv++, argc--; argc > 1; argc--, argv++) {
+	if (!strcmp("-x", *argv)) {
+	    argc--;
+	    if( argc < 1 ) {
+		fprintf( stderr, "change_password: missing db argument\n");
+		goto usage;
+	    }
+	    db_args_size++;
+	    {
+		char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
+		if( temp == NULL )
+		{
+		    fprintf(stderr,"change_password: Not enough memory\n");
+		    free( db_args ), db_args = NULL;
+		    exit(1);
+		}
+
+		db_args = temp;
+	    }
+	    db_args[db_args_size-1] = *++argv;
+	    db_args[db_args_size]   = NULL;
+	    continue;
+	}
 	if (!strcmp("-pw", *argv)) {
 	    argc--;
 	    if (argc < 1) {
@@ -633,6 +716,7 @@ void kadmin_cpw(argc, argv)
 	com_err("change_password", retval, "while parsing principal name");
 	if (ks_tuple != NULL)
 	    free(ks_tuple);
+	if( db_args ) free(db_args);
 	return;
     }
     retval = krb5_unparse_name(context, princ, &canon);
@@ -641,6 +725,7 @@ void kadmin_cpw(argc, argv)
 	krb5_free_principal(context, princ);
 	if (ks_tuple != NULL)
 	    free(ks_tuple);
+	if( db_args ) free(db_args);
 	return;
     }
     if (pwarg != NULL) {
@@ -657,10 +742,12 @@ void kadmin_cpw(argc, argv)
 	    com_err("change_password", retval,
 		    "while changing password for \"%s\".", canon);
 	    free(canon);
+	    if( db_args ) free(db_args);
 	    return;
 	}
 	printf("Password for \"%s\" changed.\n", canon);
 	free(canon);
+	if( db_args ) free(db_args);
 	return;
     } else if (randkey) {
 	if (keepold || ks_tuple != NULL) {
@@ -677,10 +764,12 @@ void kadmin_cpw(argc, argv)
 	    com_err("change_password", retval,
 		    "while randomizing key for \"%s\".", canon);
 	    free(canon);
+	    if( db_args ) free(db_args);
 	    return;
 	}
 	printf("Key for \"%s\" randomized.\n", canon);
 	free(canon);
+	if( db_args ) free(db_args);
 	return;
     } else if (argc == 1) {
 	unsigned int i = sizeof (newpw) - 1;
@@ -699,6 +788,7 @@ void kadmin_cpw(argc, argv)
 	    if (ks_tuple != NULL)
 		free(ks_tuple);
 	    krb5_free_principal(context, princ);
+	    if( db_args ) free(db_args);
 	    return;
 	}
 	if (keepold || ks_tuple != NULL) {
@@ -716,15 +806,18 @@ void kadmin_cpw(argc, argv)
 	    com_err("change_password", retval,
 		    "while changing password for \"%s\".", canon);
 	    free(canon);
+	    if( db_args ) free(db_args);
 	    return;
 	}
 	printf("Password for \"%s\" changed.\n", canon);
 	free(canon);
+	if( db_args ) free(db_args);
 	return;
    } else {
 	free(canon);
 	krb5_free_principal(context, princ);
    usage:
+	if( db_args ) free(db_args);
 	if (ks_tuple != NULL)
 	    free(ks_tuple);
 	fprintf(stderr,
@@ -735,6 +828,27 @@ void kadmin_cpw(argc, argv)
    }
 }
 
+static void
+kadmin_free_tl_data( kadm5_principal_ent_t princ )
+{
+    krb5_tl_data *tl_data = princ->tl_data;
+    int n_tl_data         = princ->n_tl_data;
+    int i;
+
+    princ->n_tl_data = 0;
+    princ->tl_data   = NULL;
+
+    for( i = 0; tl_data && (i < n_tl_data); i++ )
+    {
+	krb5_tl_data *next = tl_data->tl_data_next;
+	if( tl_data->tl_data_contents )
+	    free( tl_data->tl_data_contents );
+	free( tl_data );
+	tl_data = next;
+    }
+}
+
+#define KRB5_TL_DB_ARGS 0x7fff
 static int 
 kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
 			ks_tuple, n_ks_tuple, caller)
@@ -752,6 +866,7 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     time_t date;
     time_t now;
     krb5_error_code retval;
+    krb5_tl_data *tl_data, *tail = NULL;
     
     *mask = 0;
     *pass = NULL;
@@ -761,6 +876,42 @@ kadmin_parse_princ_args(argc, argv, oprinc, mask, pass, randkey,
     *randkey = 0;
     for (i = 1; i < argc - 1; i++) {
 	attrib_set = 0;
+	if (strlen(argv[i]) == 2 &&
+	    !strcmp("-x",argv[i])) {
+	    if (++i > argc - 2)
+		return -1;
+
+	    tl_data = malloc( sizeof(krb5_tl_data) );
+	    if( tl_data == NULL )
+	    {
+		fprintf(stderr, "Not enough memory\n");
+		return ENOMEM;
+	    }
+
+	    memset( tl_data, 0, sizeof(krb5_tl_data));
+	    tl_data->tl_data_type = KRB5_TL_DB_ARGS;
+	    tl_data->tl_data_length  = strlen(argv[i])+1;
+	    tl_data->tl_data_contents = strdup(argv[i]);
+
+	    if( tail )
+	    {
+		tail->tl_data_next = tl_data;
+	    }
+	    else
+	    {
+		oprinc->tl_data = tl_data;
+	    }
+	    tail = tl_data;
+	    oprinc->n_tl_data++;
+	    
+	    if( tl_data->tl_data_contents == NULL )
+	    {
+		fprintf(stderr, "Not enough memory\n");
+		return ENOMEM;
+	    }
+	    *mask |= KADM5_TL_DATA;
+	    continue;
+	}
 	if (strlen(argv[i]) == 7 &&
 	    !strcmp("-expire", argv[i])) {
 	    if (++i > argc - 2)
@@ -920,12 +1071,14 @@ kadmin_addprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "%s%s%s",
 	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	     "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
-	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n");
+	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
+	     "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
+	     "\t\t\tLook at each database documentation for supported arguments\n");
 }
 
 static void 
@@ -934,12 +1087,15 @@ kadmin_modprinc_usage(func)
 {
      fprintf(stderr, "usage: %s [options] principal\n", func);
      fprintf(stderr, "\toptions are:\n");
-     fprintf(stderr, "\t\t[-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
+     fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy]\n\t\t[-maxrenewlife maxrenewlife] [{+|-}attribute]\n");
      fprintf(stderr, "\tattributes are:\n");
      fprintf(stderr, "%s%s%s",
 	     "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
 	     "\t\tallow_proxiable allow_dup_skey allow_tix requires_preauth\n",
-	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n");
+	     "\t\trequires_hwauth needchange allow_svr password_changing_service\n"
+	     "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
+	     "\t\t\tLook at each database documentation for supported arguments\n"
+	     );
 }
 
 void kadmin_addprinc(argc, argv)
@@ -970,7 +1126,8 @@ void kadmin_addprinc(argc, argv)
 				&princ, &mask, &pass, &randkey,
 				&ks_tuple, &n_ks_tuple,
 				"add_principal")) {
-	 kadmin_addprinc_usage("add_principal");
+	 kadmin_addprinc_usage("add_principal"); 
+	 kadmin_free_tl_data( &princ ); /* need to free ks_tuple also??? */
 	 return;
     }
 
@@ -981,6 +1138,7 @@ void kadmin_addprinc(argc, argv)
 	krb5_free_principal(context, princ.principal);
 	if (ks_tuple != NULL)
 	    free(ks_tuple);
+	kadmin_free_tl_data( &princ );
 	return;
     }
 
@@ -1025,6 +1183,7 @@ void kadmin_addprinc(argc, argv)
 		    "while reading password for \"%s\".", canon);
 	    free(canon);
 	    krb5_free_principal(context, princ.principal);
+	    kadmin_free_tl_data( &princ );
 	    return;
 	}
 	pass = newpw;
@@ -1043,6 +1202,7 @@ void kadmin_addprinc(argc, argv)
 	free(canon);
 	if (ks_tuple != NULL)
 	    free(ks_tuple);
+	kadmin_free_tl_data( &princ );
 	return;
     }
     if (randkey) {		/* more special stuff for -randkey */
@@ -1062,6 +1222,7 @@ void kadmin_addprinc(argc, argv)
 	    free(canon);
 	    if (ks_tuple != NULL)
 		free(ks_tuple);
+	    kadmin_free_tl_data( &princ );
 	    return;
 	}
 	princ.attributes &= ~KRB5_KDB_DISALLOW_ALL_TIX;	/* clear notix */
@@ -1074,6 +1235,7 @@ void kadmin_addprinc(argc, argv)
 	    free(canon);
 	    if (ks_tuple != NULL)
 		free(ks_tuple);
+	    kadmin_free_tl_data( &princ );
 	    return;
 	}
     }
@@ -1082,6 +1244,8 @@ void kadmin_addprinc(argc, argv)
     if (ks_tuple != NULL)
 	free(ks_tuple);
     free(canon);
+    kadmin_free_tl_data( &princ );
+
 }
 
 void kadmin_modprinc(argc, argv)
@@ -1137,17 +1301,20 @@ void kadmin_modprinc(argc, argv)
 	free(ks_tuple);
 	kadmin_modprinc_usage("modify_principal");
 	free(canon);
+	kadmin_free_tl_data(&princ);
 	return;
     }
     if (retval) {
 	kadmin_modprinc_usage("modify_principal");
 	free(canon);
+	kadmin_free_tl_data(&princ);
 	return;
     }
     if (randkey) {
 	fprintf(stderr, "modify_principal: -randkey not allowed\n");
 	krb5_free_principal(context, princ.principal);
 	free(canon);
+	kadmin_free_tl_data(&princ);
 	return;
     }
     if (pass) {
@@ -1155,6 +1322,7 @@ void kadmin_modprinc(argc, argv)
 		"modify_principal: -pw not allowed; use change_password\n");
 	krb5_free_principal(context, princ.principal);
 	free(canon);
+	kadmin_free_tl_data(&princ);
 	return;
     }
     retval = kadm5_modify_principal(handle, &princ, mask);
@@ -1163,9 +1331,11 @@ void kadmin_modprinc(argc, argv)
 	com_err("modify_principal", retval,
 		"while modifying \"%s\".", canon);
 	free(canon);
+	kadmin_free_tl_data(&princ);
 	return;
     }
     printf("Principal \"%s\" modified.\n", canon);
+    kadmin_free_tl_data(&princ);
     free(canon);
 }
 
