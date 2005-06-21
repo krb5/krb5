@@ -1,6 +1,7 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
-	* aclocal.m4: Novell merge.
+	Novell merge.
+	* aclocal.m4:
 
 	* aclocal.m4 (WITH_CC): Don't use -pedantic on Linux.
 
