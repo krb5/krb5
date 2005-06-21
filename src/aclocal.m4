@@ -572,6 +572,8 @@ if test "$GCC" = yes ; then
     CFLAGS="$CFLAGS $extra_gcc_warn_opts"
     if test "`uname -s`" = Darwin ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Darwin)
+    elif test "`uname -s`" = Linux ; then
+      AC_MSG_NOTICE(skipping pedantic warnings on Linux)
     else
       CFLAGS="$CFLAGS -pedantic"
     fi
