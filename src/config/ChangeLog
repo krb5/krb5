@@ -1,6 +1,6 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
-	* pre.in (PTHREAD_LIBS, DL_LIB): New variables.
+	* pre.in (PTHREAD_LIBS, DL_LIB, THREAD_LINKOPTS): New variables.
 
 2005-04-21  Ken Raeburn  <raeburn@mit.edu>
 
