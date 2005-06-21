@@ -1,5 +1,7 @@
 2005-06-21  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (SHLIB_EXPLIBS): Add $(DL_LIB).
+
 	* err_handle.c, kdb5.c: Test ENABLE_THREADS, not just
 	HAVE_PTHREAD_H.
 
