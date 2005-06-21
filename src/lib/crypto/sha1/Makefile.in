@@ -57,7 +57,8 @@ t_shs3: t_shs3.o shs.o
 #
 shs.so shs.po $(OUTPRE)shs.$(OBJEXT): shs.c shs.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h

@@ -187,7 +187,8 @@ parse.so parse.po $(OUTPRE)parse.$(OBJEXT): parse.c \
   ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
   $(COM_ERR_DEPS) copyright.h
 error.so error.po $(OUTPRE)error.$(OBJEXT): error.c \
-  copyright.h $(COM_ERR_DEPS) ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h
+  copyright.h $(COM_ERR_DEPS) ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS)
 prompt.so prompt.po $(OUTPRE)prompt.$(OBJEXT): prompt.c \
   copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
   $(COM_ERR_DEPS)

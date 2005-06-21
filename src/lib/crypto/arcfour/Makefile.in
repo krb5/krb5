@@ -45,14 +45,16 @@ clean-unix:: clean-libobjs
 arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): arcfour.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   arcfour-int.h arcfour.h
 string_to_key.so string_to_key.po $(OUTPRE)string_to_key.$(OBJEXT): \
   string_to_key.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   $(srcdir)/../md4/rsa-md4.h arcfour-int.h arcfour.h
