@@ -412,7 +412,7 @@ krb5_db2_db_fini(context)
     return retval;
 }
 
-#if 0 // pradx
+#if 0 /* pradx */
 
 krb5_error_code
 krb5_db2_db_open_database(context)
@@ -919,7 +919,7 @@ krb5_db2_db_destroy(context, dbname)
     return retval1;
 }
 
-#if 0 // -pradx
+#if 0 /* -pradx */
 
 /*
  * "Atomically" rename the database in a way that locks out read
@@ -1047,7 +1047,7 @@ krb5_db2_db_get_principal(context, searchfor, entries, nentries, more)
     DB *db;
     DBT key, contents;
     krb5_data keydata, contdata;
-    int try, dbret;
+    int trynum, dbret;
     kdb5_dal_handle *dal_handle;
 
     *more = FALSE;
@@ -1059,16 +1059,16 @@ krb5_db2_db_get_principal(context, searchfor, entries, nentries, more)
     dal_handle = (kdb5_dal_handle*) context->db_context;
     db_ctx = (krb5_db2_context *) dal_handle->db_context;
 
-    for (try = 0; try < KRB5_DB2_MAX_RETRY; try++) {
+    for (trynum = 0; trynum < KRB5_DB2_MAX_RETRY; trynum++) {
 	if ((retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_SHARED))) {
-	    if (db_ctx->db_nb_locks) 
+	    if (db_ctx->db_nb_locks)
 	    	return(retval);
 	    sleep(1);
 	    continue;
 	}
 	break;
     }
-    if (try == KRB5_DB2_MAX_RETRY) 
+    if (trynum == KRB5_DB2_MAX_RETRY)
 	return KRB5_KDB_DB_INUSE;
 
     /* XXX deal with wildcard lookups */
@@ -1397,7 +1397,7 @@ krb5_db2_db_set_lockmode(context, mode)
     return old;
 }
 
-#if 0 // -pradx
+#if 0 /* -pradx */
 /*
  * Context serialization operations.
  *
