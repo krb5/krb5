@@ -1,6 +1,10 @@
 2005-06-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* libnover.in: New file.
+	(Makefile): Depend on correct makefile fragment.
+	(SHLIBVEXT): Fix definition.
+	(LIBLIST, LIBINSTLIST): Override configured definitions.
+	(all-liblinks, clean-liblinks): Targets deleted.
 
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 

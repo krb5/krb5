@@ -31,7 +31,9 @@ dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=
 # Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
 PARSE_OBJLISTS= set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
-SHLIBVEXT=SHLIBEXT
+SHLIBVEXT=$(SHLIBEXT)
+LIBLIST=lib$(LIBBASE)$(SHLIBEXT)
+LIBINSTLIST=install-shared
 
 lib$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
@@ -77,21 +79,17 @@ $(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBEXT)
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBEXT) .)
 
 all-libs: $(LIBLIST)
-all-liblinks: $(LIBLINKS)
 
 clean-libs:
 	$(RM) lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) binutils.versions osf1.exports
-
-clean-liblinks:
-	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT)
 
 install-libs: $(LIBINSTLIST)
 install-shared:
 	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBEXT)
 	$(INSTALL_SHLIB) lib$(LIBBASE)$(SHLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
 
-Makefile: $(SRCTOP)/config/lib.in
+Makefile: $(SRCTOP)/config/libnover.in
 $(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
 
 # Use the following if links need to be made to $(TOPLIBD):
