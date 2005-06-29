@@ -10,17 +10,17 @@ PROG_RPATH=$(KRB5_LIBDIR)
 LOCALINCLUDES = -I..
 
 LIBBASE=kdb_db2
-LIB=$(LIBBASE)
 LIBMAJOR=4
 LIBMINOR=0
 RELDIR=kdb/kdb_db2
 SO_EXT=.so
 # Depends on libk5crypto and libkrb5
-
+# Also on gssrpc, for xdr stuff.
 SHLIB_EXPDEPS = \
+	$(GSSRPC_DEPLIBS) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(LIBS)
+SHLIB_EXPLIBS=$(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
@@ -31,7 +31,7 @@ DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
 	$(DBDIR)/db/OBJS.ST $(DBDIR)/mpool/OBJS.ST $(DBDIR)/recno/OBJS.ST \
 	$(DBDIR)/clib/OBJS.ST
 
-all:: lib$(LIB)$(SO_EXT)
+all:: lib$(LIBBASE)$(SO_EXT)
 
 SRCS= \
 	$(srcdir)/kdb_xdr.c \
@@ -54,11 +54,11 @@ all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-lib$(LIB)$(SO_EXT):  db2_exp.o # lib$(LIB)$(STLIBEXT)
-	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -lgssrpc -ldb $(SHLIB_EXPLIBS) 
+lib$(LIBBASE)$(SO_EXT): db2_exp.o
+	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
 
 clean::
-	$(RM) lib$(LIB)$(SO_EXT) db2_exp.o
+	$(RM) lib$(LIBBASE)$(SO_EXT) db2_exp.o
 
 
 t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
