@@ -1,3 +1,8 @@
+2005-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* osconf.h (DEFAULT_KDB_LIB_PATH): Use @MODULEDIR.  Don't use a
+	fixed global directory.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
