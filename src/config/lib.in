@@ -1,10 +1,11 @@
 ### config/lib.in
+# *** keep this in sync with libnover.in
 #
 # Makefile fragment that creates static, shared, and profiled libraries.
 #
 # The following variables must be set in the Makefile.in:
 #
-# LIB		library name without "lib" or extension
+# LIBBASE	library name without "lib" or extension
 # LIBMAJOR	library major version
 # LIBMINOR	library minor version
 # STOBJLISTS	list of files, each of which is an OBJS.ST created by
