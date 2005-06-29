@@ -74,6 +74,8 @@ lib_frag=$srcdir/$ac_config_fragdir/lib.in
 AC_SUBST_FILE(lib_frag)
 libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
+libnover_frag=$srcdir/$ac_config_fragdir/libnover.in
+AC_SUBST_FILE(libnover_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
 KRB5_LIB_PARAMS
