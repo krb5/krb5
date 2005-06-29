@@ -1,3 +1,9 @@
+2005-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (osconf.h): Depend on Makefile.  Always display
+	commands executed for replace-if-newer sequence.
+	(PROCESS_REPLACE): Replace @MODULEDIR with $(KRB5_DB_MODULE_DIR).
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
