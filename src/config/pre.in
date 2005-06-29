@@ -205,6 +205,7 @@ FILE_MANDIR = $(KRB5MANROOT)/man5
 KRB5_LIBDIR = @libdir@
 KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = @includedir@
+KRB5_DB_MODULE_DIR = @libdir@/db-modules
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/gssapi \
 	$(KRB5_INCDIR)/kerberosIV \
