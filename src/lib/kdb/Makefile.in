@@ -59,18 +59,6 @@ all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_kdb t_kdb.o $(OBJS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
-
-check::	t_kdb
-	$(RM) test_db
-	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcv
-	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcvr
-
-clean::
-	$(RM) t_kdb t_kdb.o
-
-
 # @lib_frag@
 # @libobj_frag@
 
