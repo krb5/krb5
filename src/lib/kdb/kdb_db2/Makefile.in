@@ -50,32 +50,19 @@ STLIBOBJS= \
 	pol_xdr.o \
 	db2_exp.o
 
-all-unix:: all-liblinks
+all-unix::
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-lib$(LIBBASE)$(SO_EXT): db2_exp.o
-	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
+#lib$(LIBBASE)$(SO_EXT): db2_exp.o
+#	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
 
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT) db2_exp.o
 
-
-t_kdb:	t_kdb.o $(OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_kdb t_kdb.o $(OBJS) $(KDB5_LIBS) $(KRB5_BASE_LIBS)
-
-check::	t_kdb
-	$(RM) test_db
-	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcv
-	$(KRB5_CONFIG_SETUP) $(KRB5_RUN_ENV) ./t_kdb -tcvr
-
-clean::
-	$(RM) t_kdb t_kdb.o
-
-
 adb_openclose.c adb_policy.c : ../adb_err.h
 
-# @lib_frag@
+# @libnover_frag@
 # @libobj_frag@
 
 # +++ Dependency line eater +++

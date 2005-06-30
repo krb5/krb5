@@ -1,11 +1,12 @@
 2005-06-29  Ken Raeburn  <raeburn@mit.edu>
 
-	* Makefile.in (LIB): Variable deleted, uses replaced with
-	LIBBASE.
+	* Makefile.in: Use libnover_frag.
+	(LIB): Variable deleted, uses replaced with LIBBASE.
 	(SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add gssrpc library and
 	depedencies.
-	(lib$(LIBBASE)$(SO_EXT)): Don't explicitly link in the gssrpc
-	library.
+	(all-unix): Don't depend on all-liblinks.
+	(lib$(LIBBASE)$(SO_EXT)): Rule deleted.
+	(t_kdb, check, clean): Delete t_kdb references.
 
 2005-06-27  Ken Raeburn  <raeburn@mit.edu>
 
