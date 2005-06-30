@@ -1,3 +1,9 @@
+2005-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_ser.c (ser_data): Don't initialize db serialization code that
+	doesn't exist any more.
+	(ser_kcontext_test): Don't create and destroy databases.
+
 2005-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* kfree.c (krb5_free_keyblock_contents krb5_free_keyblock):   Make

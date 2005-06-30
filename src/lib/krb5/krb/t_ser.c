@@ -90,7 +90,6 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 	    exit(1);
     }
     krb5_ser_context_init(ser_ctx);
-    krb5_ser_db_context_init(ser_ctx);
     krb5_ser_auth_context_init(ser_ctx);
     krb5_ser_ccache_init(ser_ctx);
     krb5_ser_rcache_init(ser_ctx);
@@ -203,6 +202,7 @@ ser_kcontext_test(krb5_context kcontext, int verbose)
     krb5_error_code	kret;
     profile_t		sprofile;
     char		dbname[128];
+    char		*argv[] = { dbname, NULL };
 
     sprintf(dbname, "temp_%d", (int) getpid());
     sprofile = kcontext->profile;
@@ -217,19 +217,7 @@ ser_kcontext_test(krb5_context kcontext, int verbose)
 	    !(kret = krb5_set_default_realm(kcontext, "this.is.a.test"))) {
 	    if (!(kret = ser_data(verbose, "> Context with default realm",
 				  (krb5_pointer) kcontext,
-				  KV5M_CONTEXT)) &&
-		!(kret = krb5_db_create(kcontext, dbname,
-					KRB5_KDB_CREATE_BTREE)) &&
-		!(kret = krb5_db_set_name(kcontext, dbname)) &&
-		!(kret = krb5_db_init(kcontext)) &&
-		!(kret = ser_data(verbose, "> Context with open database",
-				  (krb5_pointer) kcontext,
-				  KV5M_CONTEXT)) &&
-		!(kret = krb5_db_fini(kcontext)) &&
-		!(kret = ser_data(verbose, "> Context with closed database",
-				  (krb5_pointer) kcontext, 
 				  KV5M_CONTEXT))) {
-		krb5_db_destroy(kcontext, dbname);
 		if (verbose)
 		    printf("* krb5_context test succeeded\n");
 	    }
