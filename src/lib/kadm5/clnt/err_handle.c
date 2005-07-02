@@ -41,12 +41,10 @@ tsd_key_destructor(void *data)
     free(data);
 }
 
-static pthread_key_t krb5_err_key;
-
 static void
 init_err_handling(void)
 {
-    assert(!pthread_key_create(&krb5_err_key, tsd_key_destructor));
+    assert(!k5_key_register(K5_KEY_KADM_CLNT_ERR_HANDLER, tsd_key_destructor));
 #ifdef NOVELL
     old_error_2_string = error_message;
     error_message = krb5_get_err_string;
@@ -63,13 +61,13 @@ krb5_set_err(krb5_context kcontext, krb5_err_subsystem subsystem,
     krb5_err_struct_t *err_struct;
     pthread_once(&krb5_key_create, init_err_handling);
 
-    err_struct = (krb5_err_struct_t *) pthread_getspecific(krb5_err_key);
+    err_struct = (krb5_err_struct_t *) k5_getspecific(K5_KEY_KADM_CLNT_ERR_HANDLER);
     if (err_struct == NULL) {
 	err_struct = calloc(sizeof(krb5_err_struct_t), 1);
 	if (err_struct == NULL)
 	    return ENOMEM;
 
-	if ((ret = pthread_setspecific(krb5_err_key, err_struct))) {
+	if ((ret = k5_setspecific(K5_KEY_KADM_CLNT_ERR_HANDLER, err_struct))) {
 	    free(err_struct);
 	    return ret;
 	}
@@ -93,7 +91,7 @@ krb5_get_err_string(long err_code)
     krb5_err_struct_t *err_struct;
     pthread_once(&krb5_key_create, init_err_handling);
 
-    err_struct = (krb5_err_struct_t *) pthread_getspecific(krb5_err_key);
+    err_struct = (krb5_err_struct_t *) k5_getspecific(K5_KEY_KADM_CLNT_ERR_HANDLER);
     if (err_struct && (err_struct->subsystem == krb5_err_have_str)
 	&& (err_code == err_struct->err_code)) {
 	/* checking error code is for safety.
@@ -119,7 +117,7 @@ krb5_clr_error()
     krb5_err_struct_t *err_struct;
     pthread_once(&krb5_key_create, init_err_handling);
 
-    err_struct = (krb5_err_struct_t *) pthread_getspecific(krb5_err_key);
+    err_struct = (krb5_err_struct_t *) k5_getspecific(K5_KEY_KADM_CLNT_ERR_HANDLER);
     if (err_struct)
 	err_struct->subsystem = krb5_err_unknown;
 }
