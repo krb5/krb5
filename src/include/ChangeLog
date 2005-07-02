@@ -1,3 +1,8 @@
+2005-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_key_t): Add K5_KEY_KDB_ERR_HANDLER and
+	K5_KEY_KADM_CLNT_ERR_HANDLER.
+
 2005-06-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h: Include endian.h if it's available, or
