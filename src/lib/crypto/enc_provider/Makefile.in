@@ -13,19 +13,19 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
-STLIBOBJS= des.o des3.o arcfour.o aes.o
+STLIBOBJS= des.o des3.o rc4.o aes.o
 
 OBJS= \
 	$(OUTPRE)des.$(OBJEXT) \
 	$(OUTPRE)des3.$(OBJEXT) \
 	$(OUTPRE)aes.$(OBJEXT) \
-	$(OUTPRE)arcfour.$(OBJEXT)
+	$(OUTPRE)rc4.$(OBJEXT)
 
 SRCS= \
 	$(srcdir)/des.c \
 	$(srcdir)/des3.c \
 	$(srcdir)/aes.c \
-	$(srcdir)/arcfour.c
+	$(srcdir)/rc4.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -69,12 +69,11 @@ aes.so aes.po $(OUTPRE)aes.$(OBJEXT): aes.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h enc_provider.h $(srcdir)/../aes/aes.h \
   $(srcdir)/../aes/uitypes.h
-arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): arcfour.c \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(srcdir)/../arcfour/arcfour-int.h $(srcdir)/../arcfour/arcfour.h \
-  enc_provider.h
+rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): rc4.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(srcdir)/../arcfour/arcfour-int.h \
+  $(srcdir)/../arcfour/arcfour.h enc_provider.h

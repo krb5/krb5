@@ -1,3 +1,8 @@
+2005-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc4.c: Renamed from arcfour.c.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated accordingly.
+
 2004-05-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* aes.c (krb5int_aes_encrypt): Signed/unsigned warning fix. 
