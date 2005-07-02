@@ -1,3 +1,8 @@
+2005-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour_s2k.c: Renamed from string_to_key.c.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated accordingly.
+
 2004-09-21  Sam Hartman  <hartmans@mit.edu>
 
 	* string_to_key.c (krb5int_arcfour_string_to_key): Free the copy

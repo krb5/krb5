@@ -15,15 +15,15 @@ RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
 
 STLIBOBJS=\
 	arcfour.o	\
-	string_to_key.o
+	arcfour_s2k.o
 
 OBJS=\
 	$(OUTPRE)arcfour.$(OBJEXT)	\
-	$(OUTPRE)string_to_key.$(OBJEXT)
+	$(OUTPRE)arcfour_s2k.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/arcfour.c	\
-	$(srcdir)/string_to_key.c
+	$(srcdir)/arcfour_s2k.c
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -50,8 +50,8 @@ arcfour.so arcfour.po $(OUTPRE)arcfour.$(OBJEXT): arcfour.c \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   arcfour-int.h arcfour.h
-string_to_key.so string_to_key.po $(OUTPRE)string_to_key.$(OBJEXT): \
-  string_to_key.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+arcfour_s2k.so arcfour_s2k.po $(OUTPRE)arcfour_s2k.$(OBJEXT): \
+  arcfour_s2k.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
