@@ -234,7 +234,7 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 clean-windows::
 
 # stuff picked up from old "dyn" library
-check-unix:: run-dyntest
+#check-unix:: run-dyntest
 run-dyntest: dyntest
 	./dyntest
 dyntest: dyntest.o dyn.o

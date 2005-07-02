@@ -1,3 +1,7 @@
+2005-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (check-unix): Don't run dyntest automatically.
+
 2005-01-14  Tom Yu  <tlyu@mit.edu>
 
 	* xdr.c (xdr_bytes): Revert previous; the problem was actually in
