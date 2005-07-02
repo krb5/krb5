@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,19 +22,19 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -45,7 +45,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -91,14 +91,14 @@ krb5_set_err_func_t krb5_db2_dal_err_funcp = NULL;
 
 /*
  * Locking:
- * 
+ *
  * There are two distinct locking protocols used.  One is designed to
  * lock against processes (the admin_server, for one) which make
  * incremental changes to the database; the other is designed to lock
  * against utilities (kdb5_edit, kpropd, kdb5_convert) which replace the
  * entire database in one fell swoop.
  *
- * The first locking protocol is implemented using flock() in the 
+ * The first locking protocol is implemented using flock() in the
  * krb_dbl_lock() and krb_dbl_unlock routines.
  *
  * The second locking protocol is necessary because DBM "files" are
@@ -115,12 +115,12 @@ krb5_set_err_func_t krb5_db2_dal_err_funcp = NULL;
  * either time, the reader sleeps for a second to let things
  * stabilize, and then tries again; if it does not succeed after
  * KRB5_DBM_MAX_RETRY attempts, it gives up.
- * 
+ *
  * On update, the semaphore file is deleted (if it exists) before any
  * update takes place; at the end of the update, it is replaced, with
  * a version number strictly greater than the version number which
  * existed at the start of the update.
- * 
+ *
  * If the system crashes in the middle of an update, the semaphore
  * file is not automatically created on reboot; this is a feature, not
  * a bug, since the database may be inconsistant.  Note that the
@@ -345,7 +345,7 @@ krb5_db2_db_init(krb5_context context)
 
 /*
  * gracefully shut down database--must be called by ANY program that does
- * a krb5_db2_db_init 
+ * a krb5_db2_db_init
  */
 krb5_error_code
 krb5_db2_db_fini(krb5_context context)
@@ -971,7 +971,7 @@ krb5_db2_db_rename(krb5_context context, char *from, char *to)
 /*
  * look up a principal in the data base.
  * returns number of entries found, and whether there were
- * more than requested. 
+ * more than requested.
  */
 
 krb5_error_code
