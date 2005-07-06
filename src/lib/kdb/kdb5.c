@@ -220,7 +220,7 @@ kdb_get_library_name(krb5_context kcontext)
     status = profile_get_string(kcontext->profile, KDB_MODULE_SECTION, value,
 				KDB_LIB_POINTER,
 				/* default to db2 */
-				"kdb_db2",
+				"db2",
 				&lib);
 
     if (status) {
@@ -237,11 +237,6 @@ kdb_get_library_name(krb5_context kcontext)
     if (lib) {
 	/* free profile string */
 	profile_release_string(lib);
-    }
-
-    if (status) {
-	/* any error default to db2 */
-	result = strdup("kdb_db2");
     }
     return result;
 }
@@ -364,7 +359,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     void   *vftabl_addr;
     char   *err_str = NULL;
 
-    if (!strcmp("kdb_db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
+    if (!strcmp("db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
 	initialize_adb_error_table();
 	kdb_db2_pol_err_loaded = 1;
     }
@@ -383,7 +378,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     strcpy((*lib)->name, lib_name);
 
     for (ndx = 0; db_dl_location[ndx]; ndx++) {
-	sprintf(dl_name, "%s/lib%s.so", db_dl_location[ndx], lib_name);
+	sprintf(dl_name, "%s/%s.so", db_dl_location[ndx], lib_name);
 	(*lib)->dl_handle = dlopen(dl_name, RTLD_NOW);
 	if ((*lib)->dl_handle) {
 	    /* found the module */
