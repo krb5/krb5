@@ -23,6 +23,8 @@
 #			form dir1:dir2 ...
 # RELDIR	path to this directory relative to $(TOPLIBD)
 
+LIBPREFIX=
+
 # STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
 SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
 
@@ -32,10 +34,10 @@ dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=
 PARSE_OBJLISTS= set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
 SHLIBVEXT=$(SHLIBEXT)
-LIBLIST=lib$(LIBBASE)$(SHLIBEXT)
+LIBLIST=$(LIBBASE)$(SHLIBEXT)
 LIBINSTLIST=install-shared
 
-lib$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
+$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
 	@echo "building shared $(LIBBASE) library"
 	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
@@ -74,20 +76,20 @@ hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
 	echo "+e errno" >> hpux10.tmp
 	mv -f hpux10.tmp hpux10.exports
 
-$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBEXT)
+$(TOPLIBD)/$(LIBBASE)$(SHLIBEXT): $(LIBBASE)$(SHLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBEXT) .)
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/$(LIBBASE)$(SHLIBEXT) .)
 
 all-libs: $(LIBLIST)
 
 clean-libs:
-	$(RM) lib$(LIBBASE)$(SHLIBEXT)
+	$(RM) $(LIBBASE)$(SHLIBEXT)
 	$(RM) binutils.versions osf1.exports
 
 install-libs: $(LIBINSTLIST)
 install-shared:
-	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(SHLIBEXT)
-	$(INSTALL_SHLIB) lib$(LIBBASE)$(SHLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
+	$(RM) $(DESTDIR)$(KRB5_DB_MODULE_DIR)/$(LIBBASE)$(SHLIBEXT)
+	$(INSTALL_SHLIB) $(LIBBASE)$(SHLIBEXT) $(DESTDIR)$(KRB5_DB_MODULE_DIR)
 
 Makefile: $(SRCTOP)/config/libnover.in
 $(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf

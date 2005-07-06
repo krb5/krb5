@@ -501,7 +501,7 @@ PFLIBEXT=@PFLIBEXT@
 
 # File with symbol names to be exported, both functions and data,
 # currently not distinguished.
-SHLIB_EXPORT_FILE=$(srcdir)/lib$(LIBBASE).exports
+SHLIB_EXPORT_FILE=$(srcdir)/$(LIBPREFIX)$(LIBBASE).exports
 
 # File that needs to be current for building the shared library,
 # usually SHLIB_EXPORT_FILE, but not always, if we have to convert

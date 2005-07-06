@@ -24,6 +24,8 @@
 #			form dir1:dir2 ...
 # RELDIR	path to this directory relative to $(TOPLIBD)
 
+LIBPREFIX=lib
+
 # STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
 SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
 PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
