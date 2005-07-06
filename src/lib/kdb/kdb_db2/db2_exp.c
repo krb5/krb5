@@ -29,7 +29,7 @@ static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~
  *      Exposed API
  */
 
-kdb_vftabl krb5_db_vftabl_kdb_db2 = {
+kdb_vftabl krb5_db_vftabl_db2 = {
   1,                                      /* major version number 1 */
   0,                                      /* minor version number 0 */
   0,                                      /* TBD. Not sure whether thread safe. For now, its not */

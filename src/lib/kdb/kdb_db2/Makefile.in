@@ -9,8 +9,8 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 LOCALINCLUDES = -I..
 
-LIBBASE=kdb_db2
-LIBMAJOR=4
+LIBBASE=db2
+LIBMAJOR=0
 LIBMINOR=0
 RELDIR=kdb/kdb_db2
 SO_EXT=.so
@@ -31,8 +31,6 @@ DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
 	$(DBDIR)/db/OBJS.ST $(DBDIR)/mpool/OBJS.ST $(DBDIR)/recno/OBJS.ST \
 	$(DBDIR)/clib/OBJS.ST
 
-all:: lib$(LIBBASE)$(SO_EXT)
-
 SRCS= \
 	$(srcdir)/kdb_xdr.c \
 	$(srcdir)/adb_openclose.c \
@@ -50,9 +48,9 @@ STLIBOBJS= \
 	pol_xdr.o \
 	db2_exp.o
 
-all-unix::
+all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
-clean-unix:: clean-liblinks clean-libs clean-libobjs
+clean-unix:: clean-libs clean-libobjs
 
 #lib$(LIBBASE)$(SO_EXT): db2_exp.o
 #	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)

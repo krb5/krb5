@@ -1,3 +1,14 @@
+2005-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Change to db2.
+	(LIBMAJOR): Change to 0.
+	(all): Deleted explicit dependency.
+	(all-unix): Added here, without "lib" prefix.
+	(clean-unix): Drop clean-liblinks.
+	* db2_exp.c: (krb5_db_vftabl_db2): Renamed from ..._kdb_db2.
+	* db2.exports: Rename from libkdb_db2.exports, update for symbol
+	name change.
+
 2005-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb_db2.c: Reindent.  Use ISO C function decl style.  Delete
