@@ -1,3 +1,8 @@
+2005-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Add a bunch of db module info that should be in
+	kdc.conf.proto, but is sought here for now.
+
 2000-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdc.conf.proto: Use des3 master key.

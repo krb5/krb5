@@ -7,6 +7,8 @@
 	__REALM__ = {
 		kdc = __KDCHOST__:1750
 		admin_server = __KDCHOST__:1751
+# THIS SHOULD BE IN KDC.CONF INSTEAD!
+		database_module = kdbdb2
 	}
 
 [domain_realm]
@@ -17,3 +19,11 @@
 	admin_server = FILE:__K5ROOT__/syslog
 	kdc = FILE:__K5ROOT__/syslog
 	default = FILE:__K5ROOT__/syslog
+
+
+# THIS SHOULD BE IN KDC.CONF INSTEAD!
+[db_modules]
+	kdbdb2 = {
+		db_library = db2
+		database_name = __K5ROOT__/kdb5
+	}
