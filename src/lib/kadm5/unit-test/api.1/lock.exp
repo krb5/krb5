@@ -110,6 +110,8 @@ proc lock_test_continue {test my_spawn_id test_failed fail_output cont cmds} {
 	if {$test_failed == 1} { break }
     }
 
+    # In timeout cases, the process may not be dead yet.
+    catch { exec kill -9 [exp_pid -i $spawn_id] } x
     set ret [wait -i $spawn_id]
     verbose "% Exit $ret" 2
 

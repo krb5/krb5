@@ -1,3 +1,8 @@
+2005-07-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.1/lock.exp (lock_test_continue): After exiting the loop,
+	send the process a signal before waiting for it to die.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
