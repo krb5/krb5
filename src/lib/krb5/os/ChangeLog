@@ -1,3 +1,11 @@
+2005-04-22  Jeffrey Altman <jaltman@mit.edu>
+
+        * init_os_ctx.c:  use krb5_init_ctx and krb5_free_ctx
+        to initialize and cleanup the winsock stack.  WSAStartup/
+        WSACleanup are only supposed to increment/decrement a 
+        reference counter if they have been previously called
+        within the application.
+
 2005-03-22  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.h: Define ns_rr_class to ns_rr_cl if ns_rr_class doesn't

@@ -36,6 +36,7 @@
 #endif
 
 #if defined(_WIN32)
+#include <winsock.h>
 
 static krb5_error_code
 get_from_windows_dir(
@@ -342,6 +343,10 @@ krb5_os_init_context(krb5_context ctx)
 {
 	krb5_os_context os_ctx;
 	krb5_error_code	retval = 0;
+#ifdef _WIN32
+    WORD wVersionRequested;
+    WSADATA wsaData;
+#endif /* _WIN32 */
 
 	os_ctx = ctx->os_context;
 	os_ctx->magic = KV5M_OS_CONTEXT;
@@ -350,15 +355,23 @@ krb5_os_init_context(krb5_context ctx)
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
 
-	krb5_cc_set_default_name(ctx, NULL);
-
 	retval = os_init_paths(ctx);
-
 	/*
 	 * If there's an error in the profile, return an error.  Just
 	 * ignoring the error is a Bad Thing (tm).
 	 */
+     
+        if (!retval) {
+                krb5_cc_set_default_name(ctx, NULL);
 
+#ifdef _WIN32
+                /* We initialize winsock to version 1.1 but 
+                 * we do not care if we succeed or fail.
+                 */
+                wVersionRequested = 0x0101;
+                WSAStartup (wVersionRequested, &wsaData);
+#endif /* _WIN32 */
+        }
 	return retval;
 }
 
@@ -464,4 +477,8 @@ krb5_os_free_context(krb5_context ctx)
 		profile_release(ctx->profile);
 	    ctx->profile = 0;
 	}
+
+#ifdef _WIN32
+        WSACleanup();
+#endif /* _WIN32 */
 }
