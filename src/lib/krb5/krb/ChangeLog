@@ -1,5 +1,9 @@
 2005-07-12  Tom Yu  <tlyu@mit.edu>
 
+	* recvauth.c (recvauth_common): Avoid double-free on invalid
+	version string.  Thanks to Magnus Hagander.  Fix for
+	MITKRB5-SA-2005-003 [CAN-2005-1689, VU#623332].
+
 	* unparse.c (krb5_unparse_name_ext): Account for zero-component
 	principal, to avoid single-byte overflow.  Thanks to Daniel
 	Wachdorf.  Part of fix for MITKRB5-SA-2005-002 [CAN-2005-1175,
