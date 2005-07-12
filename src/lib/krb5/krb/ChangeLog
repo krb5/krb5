@@ -1,3 +1,10 @@
+2005-07-12  Tom Yu  <tlyu@mit.edu>
+
+	* unparse.c (krb5_unparse_name_ext): Account for zero-component
+	principal, to avoid single-byte overflow.  Thanks to Daniel
+	Wachdorf.  Part of fix for MITKRB5-SA-2005-002 [CAN-2005-1175,
+	VU#885830].
+
 2005-06-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_ser.c (ser_data): Don't initialize db serialization code that

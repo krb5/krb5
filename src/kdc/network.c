@@ -721,6 +721,7 @@ static void process_packet(struct connection *conn, const char *prog,
     char pktbuf[MAX_DGRAM_SIZE];
     int port_fd = conn->fd;
 
+    response = NULL;
     saddr_len = sizeof(saddr);
     cc = recvfrom(port_fd, pktbuf, sizeof(pktbuf), 0,
 		  (struct sockaddr *)&saddr, &saddr_len);

@@ -91,6 +91,8 @@ krb5_unparse_name_ext(krb5_context context, krb5_const_principal principal, regi
 				totalsize++;
 		totalsize++;	/* This is for the separator */
 	}
+	if (nelem == 0)
+		totalsize++;
 
 	/*
 	 * Allocate space for the ascii string; if space has been
