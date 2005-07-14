@@ -15,7 +15,8 @@
 	correct value for solaris+gcc.
 
 	Novell merge.
-	* aclocal.m4:
+	* aclocal.m4 (KRB5_LIB_AUX): Define _KDB5_STATIC_LINK if static
+	libraries are enabled.
 
 2005-06-14  Ken Raeburn  <raeburn@mit.edu>
 

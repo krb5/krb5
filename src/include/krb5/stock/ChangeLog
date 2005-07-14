@@ -6,7 +6,7 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
-	* osconf.h:
+	* osconf.h (DEFAULT_KDB_LIB_PATH): Define.
 
 2004-07-09  Jeffrey Altman <jaltman@mit.edu>
 
