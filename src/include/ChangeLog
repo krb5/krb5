@@ -5,6 +5,13 @@
 
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Don't check for getpwnam_r and getpwuid_r with
+	AC_CHECK_FUNCS; use AC_CHECK_FUNC, and only set shell variables.
+	Run stricter tests on return types and numbers of arguments, and
+	only define the C macros if these parameters can actually be
+	determined.
+	* k5-platform.h (k5_getpwnam_r, k5_getpwuid_r): New macros.
+
 	* k5-platform.h: Expand on init/fini comments some more.
 	(MAKE_FINI_FUNCTION): Add an HP-UX specific variant that defines
 	an auxiliary function fitting the signature of HP-UX 10 library

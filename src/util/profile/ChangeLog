@@ -1,3 +1,8 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for getpwuid_r here.
+	* prof_file.c (profile_open_file): Use k5_getpwuid_r.
+
 2005-03-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_tree.c (profile_node_iterator): After checking skip_num

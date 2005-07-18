@@ -3,6 +3,10 @@
 	* Makefile.in (gssapi_krb5.h): Use awk hack to work around quoting
 	problem.
 
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* import_name.c (krb5_gss_import_name): Use k5_getpwuid_r.
+
 2005-01-13 Jeffrey Altman <jaltman@mit.edu>
 
         * init_sec_context.c, acquire_cred.c: fix calls to 

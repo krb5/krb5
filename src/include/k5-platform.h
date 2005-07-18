@@ -32,6 +32,7 @@
  * + 64-bit types and load/store code
  * + SIZE_MAX
  * + shared library init/fini hooks
+ * + consistent getpwnam/getpwuid interfaces
  */
 
 #ifndef K5_PLATFORM_H
@@ -491,5 +492,61 @@ load_64_le (unsigned char *p)
 {
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
 }
+
+
+/* Make the interfaces to getpwnam and getpwuid consistent.
+   Model the wrappers on the POSIX thread-safe versions, but
+   use the unsafe system versions if the safe ones don't exist
+   or we can't figure out their interfaces.  */
+
+/* int k5_getpwnam_r(const char *, blah blah) */
+#ifdef HAVE_GETPWNAM_R
+# ifndef GETPWNAM_R_4_ARGS
+/* POSIX */
+#  define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT) \
+	getpwnam_r(NAME,REC,BUF,BUFSIZE,OUT)
+# else
+/* POSIX drafts? */
+#  ifdef GETPWNAM_R_RETURNS_INT
+#   define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT)	\
+	(getpwnam_r(NAME,REC,BUF,BUFSIZE) == 0		\
+	 ? (*(OUT) = REC, 0)				\
+	 : (*(OUT) = NULL, -1))
+#  else
+#   define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT)  \
+	(*(OUT) = getpwnam_r(NAME,REC,BUF,BUFSIZE), *(OUT) == NULL ? -1 : 0)
+#  endif
+# endif
+#else /* no getpwnam_r, or can't figure out #args or return type */
+/* Will get warnings about unused variables.  */
+# define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT) \
+	(*(OUT) = getpwnam(NAME), *(OUT) == NULL ? -1 : 0)
+#endif
+
+/* int k5_getpwuid_r(uid_t, blah blah) */
+#ifdef HAVE_GETPWUID_R
+# ifndef GETPWUID_R_4_ARGS
+/* POSIX */
+#  define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT) \
+	getpwuid_r(UID,REC,BUF,BUFSIZE,OUT)
+# else
+/* POSIX drafts?  Yes, I mean to test GETPWNAM... here.  Less junk to
+   do at configure time.  */
+#  ifdef GETPWNAM_R_RETURNS_INT
+#   define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT)	\
+	(getpwuid_r(UID,REC,BUF,BUFSIZE) == 0		\
+	 ? (*(OUT) = REC, 0)				\
+	 : (*(OUT) = NULL, -1))
+#  else
+#   define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT)  \
+	(*(OUT) = getpwuid_r(UID,REC,BUF,BUFSIZE), *(OUT) == NULL ? -1 : 0)
+#  endif
+# endif
+#else /* no getpwuid_r, or can't figure out #args or return type */
+/* Will get warnings about unused variables.  */
+# define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT) \
+	(*(OUT) = getpwuid(UID), *(OUT) == NULL ? -1 : 0)
+#endif
+
 
 #endif /* K5_PLATFORM_H */
