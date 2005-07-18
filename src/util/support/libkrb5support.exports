@@ -5,3 +5,4 @@ krb5int_setspecific
 krb5int_fac
 krb5int_lock_fac
 krb5int_unlock_fac
+krb5int_pthread_loaded

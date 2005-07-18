@@ -1,7 +1,7 @@
 /*
  * util/support/threads.c
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -106,6 +106,61 @@ struct tsd_block {
 # pragma weak pthread_setspecific
 # pragma weak pthread_key_create
 # pragma weak pthread_key_delete
+# pragma weak pthread_create
+# pragma weak pthread_join
+static volatile int flag_pthread_loaded = -1;
+static void loaded_test_aux(void)
+{
+    if (flag_pthread_loaded == -1)
+	flag_pthread_loaded = 1;
+    else
+	/* Could we have been called twice?  */
+	flag_pthread_loaded = 0;
+}
+static pthread_once_t loaded_test_once = PTHREAD_ONCE_INIT;
+int krb5int_pthread_loaded (void)
+{
+    int x = flag_pthread_loaded;
+    if (x != -1)
+	return x;
+    if (&pthread_getspecific == 0
+	|| &pthread_setspecific == 0
+	|| &pthread_key_create == 0
+	|| &pthread_key_delete == 0
+	|| &pthread_once == 0
+	|| &pthread_mutex_lock == 0
+	|| &pthread_mutex_unlock == 0
+	|| &pthread_mutex_destroy == 0
+	|| &pthread_mutex_init == 0
+	|| &pthread_self == 0
+	|| &pthread_equal == 0
+	/* This catches Solaris 9.  May be redundant with the above
+	   tests now.  */
+# ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
+	|| &pthread_mutexattr_setrobust_np == 0
+# endif
+	/* Any program that's really multithreaded will have to be
+	   able to create threads.  */
+	|| &pthread_create == 0
+	|| &pthread_join == 0
+	/* Okay, all the interesting functions -- or stubs for them --
+	   seem to be present.  If we call pthread_once, does it
+	   actually seem to cause the indicated function to get called
+	   exactly one time?  */
+	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
+	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
+	/* This catches cases where pthread_once does nothing, and
+	   never causes the function to get called.  That's a pretty
+	   clear violation of the POSIX spec, but hey, it happens.  */
+	|| flag_pthread_loaded < 0) {
+	flag_pthread_loaded = 0;
+	return 0;
+    }
+    /* If we wanted to be super-paranoid, we could try testing whether
+       pthread_get/setspecific work, too.  I don't know -- so far --
+       of any system with non-functional stubs for those.  */
+    return flag_pthread_loaded;
+}
 static struct tsd_block tsd_if_single;
 # define GET_NO_PTHREAD_TSD()	(&tsd_if_single)
 #else

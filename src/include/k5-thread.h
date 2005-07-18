@@ -372,14 +372,8 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
 #  pragma weak pthread_mutexattr_setrobust_np
 # endif
-# if !defined HAVE_PTHREAD_ONCE
-#  define K5_PTHREADS_LOADED	(&pthread_once != 0)
-# elif !defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP \
-	&& defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
-#  define K5_PTHREADS_LOADED	(&pthread_mutexattr_setrobust_np != 0)
-# else
-#  define K5_PTHREADS_LOADED	(1)
-# endif
+extern int krb5int_pthread_loaded(void);
+# define K5_PTHREADS_LOADED	(krb5int_pthread_loaded())
 #else
 /* no pragma weak support */
 # define K5_PTHREADS_LOADED	(1)
@@ -404,6 +398,8 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 #endif
 
 #if !defined(HAVE_PTHREAD_MUTEX_LOCK) && !defined(USE_PTHREAD_LOCK_ONLY_IF_LOADED)
+/* If we find a system with a broken stub for pthread_mutex_lock,
+   we may have to change this.  */
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 #endif
 
