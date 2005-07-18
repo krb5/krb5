@@ -9,6 +9,15 @@
 	Wachdorf.  Part of fix for MITKRB5-SA-2005-002 [CAN-2005-1175,
 	VU#885830].
 
+2005-04024  Jeffrey Altman <jaltman@mit.edu>
+
+        * get_creds.c: 
+        the purpose of the krb5_get_credentials call is to 
+        obtain a set of credentials for the caller.  the 
+        krb5_cc_store_cred() call is to optimize performance
+        for future calls.  Ignore any errors, since the credentials
+        are still valid even if we fail to store them in the cache.
+        
 2005-03-22  Tom Yu  <tlyu@mit.edu>
 
 	* x-deltat.y (wsnum): Add missing semicolon following YYERROR,
