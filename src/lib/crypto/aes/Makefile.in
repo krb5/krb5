@@ -45,7 +45,7 @@ includes:: depend
 depend:: $(SRCS)
 
 aes-gen: aes-gen.o $(GEN_OBJS)
-	$(CC) -o aes-gen aes-gen.o $(GEN_OBJS)
+	$(CC_LINK) -o aes-gen aes-gen.o $(GEN_OBJS)
 
 run-aes-gen: aes-gen
 	./aes-gen > kresults.out
