@@ -1461,10 +1461,11 @@ static krb5_error_code dereference(krb5_context context, krb5_fcc_data *data)
     kerr = k5_mutex_lock(&krb5int_cc_file_mutex);
     if (kerr)
 	return kerr;
-    for (fccsp = &fccs; *fccsp == NULL; fccsp = &(*fccsp)->next)
+    for (fccsp = &fccs; *fccsp != NULL; fccsp = &(*fccsp)->next)
 	if ((*fccsp)->data == data)
 	    break;
     assert(*fccsp != NULL);
+    assert((*fccsp)->data == data);
     (*fccsp)->refcount--;
     if ((*fccsp)->refcount == 0) {
         struct fcc_set *temp;

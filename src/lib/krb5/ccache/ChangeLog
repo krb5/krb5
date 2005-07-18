@@ -1,3 +1,7 @@
+2005-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* cc_file.c (dereference): Fix test is list-walking loop.
+
 2005-01-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (struct _krb5_fcc_data): Fields disk_file_lock,
