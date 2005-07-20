@@ -1,3 +1,11 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (service_fds): Don't create a select_state on the
+	stack; take an additional argument pointing to it.
+	(krb5int_sendto): Don't create a select_state on the stack;
+	instead, allocate two on the heap, passing the second as the new
+	argument to service_fds.
+
 2005-04-22  Jeffrey Altman <jaltman@mit.edu>
 
         * init_os_ctx.c:  use krb5_init_ctx and krb5_free_ctx
