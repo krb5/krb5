@@ -6,11 +6,59 @@
 
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (clean-unix): Don't remove autoconf.h.
+
 	Novell merge.
-	* Makefile.in:
-	* adm.h:
-	* adm_proto.h:
-	* kdb.h:
+	* Makefile.in (LIBDIR): New variable.
+	(PROCESS_REPLACE): Replace @LIBDIR.
+	* adm_proto.h (krb5_key_salt_tuple): Conditionalize incomplete
+	typedef on KRB5_KDB5__ instead of KRB5_ADM_H__ and
+	__KADM5_ADMIN_H__.
+	* adm.h (krb5_key_salt_tuple): Move type definition...
+	* kdb.h (krb5_key_salt_tuple): ...to here.
+	(krb5_dbe_apw, krb5_dbe_ark, krb5_dbe_cpw, krb5_dbe_crk): Use
+	krb5_key_salt_tuple instead of struct __krb5_key_salt_tuple in
+	prototype declarations.
+	(osa_policy_ent_t): Move type definition here from kadm5/adb.h.
+	Change element types from uint32_t to krb5_ui_4.
+	(osa_adb_iter_policy_func): Move type definition here from
+	kadm5/adb.h.
+	(KRB5_TL_DB_ARGS): New macro, defined only if SECURID is defined.
+	(KRB5_KDB_OPEN_RW, KRB5_KDB_OPEN_RO, KRB5_KDB_OPT_SET_DB_NAME,
+	KRB5_KDB_OPT_SET_LOCK_MODE): New macros.
+	(KRB5_DB_LOCKMODE_SHARED, KRB5_DB_LOCKMODE_EXCLUSIVE,
+	KRB5_DB_LOCKMODE_DONTBLOCK, KRB5_DB_LOCKMODE_PERMANENT): New
+	macros.
+	(kdb5_db_create, kdb_def_get_mkey, kdb_def_set_mkey,
+	krb5_db_alloc, krb5_db_clr_error, krb5_db_create_policy,
+	krb5_db_def_fetch_mkey, krb5_db_delete_policy,
+	krb5_db_errcode2string, krb5_db_free, krb5_db_free_master_key,
+	krb5_db_free_policy, krb5_db_get_policy, krb5_db_inited,
+	krb5_db_iter_policy, krb5_db_open, krb5_db_put_policy,
+	krb5_db_set_master_key_ext, krb5_db_set_option,
+	krb5_db_store_master_key, krb5_dbe_def_cpw,
+	krb5_dbe_def_search_enctype, krb5_dbe_update_last_pwd_change,
+	krb5_def_store_mkey, krb5_def_verify_master_key,
+	krb5_free_supported_realms, krb5_key_salt_tuple,
+	krb5_supported_realms, osa_adb_iter_policy_func,
+	osa_policy_ent_rec, osa_policy_ent_t): New (or moved)
+	declarations.
+	(krb5_db_close_database, krb5_db_iterate_ext,
+	krb5_db_open_database, krb5_db_rename, krb5_db_set_lockmode,
+	krb5_db_set_name, krb5_db_set_nonblocking, krb5_db_store_mkey,
+	krb5_dbe_free_contents, krb5_decode_princ_contents,
+	krb5_encode_princ_contents, krb5_encode_princ_dbkey,
+	krb5_free_princ_contents, krb5_free_princ_dbkey,
+	krb5_ser_db_context_init): Declarations deleted (or moved).
+	(krb5_db_create): Changed signature, just one char** arg in
+	addition to context.
+	(krb5_db_delete_principal): Changed argument 1 to non-const
+	principal.
+	(krb5_db_destroy): Changed argument 1 to char**.
+	(krb5_db_free_principal): Changed return type from void to
+	krb5_error_code.
+	(krb5_db_iterate): Changed signature, new char* argument,
+	pointed-to function returns int instead of krb5_error_code.
 
 2005-05-13  Ken Raeburn  <raeburn@mit.edu>
 
