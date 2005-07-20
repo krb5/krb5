@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.4.1
+		  Kerberos Version 5, Release 1.4.2
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,14 +7,14 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a tarfile,
-krb5-1.4.1-signed.tar.  The tarfile contains a gzipped tarfile,
-krb5-1.4.1.tar.gz, and its corresponding PGP signature,
-krb5-1.4.1.tar.gz.asc.
+krb5-1.4.2-signed.tar.  The tarfile contains a gzipped tarfile,
+krb5-1.4.2.tar.gz, and its corresponding PGP signature,
+krb5-1.4.2.tar.gz.asc.
 
 You will need the GNU gzip program, and preferably, the GNU tar
 program, to extract the source distribution.
 
-The distribution will extract into a subdirectory "krb5-1.4.1" of the
+The distribution will extract into a subdirectory "krb5-1.4.2" of the
 current directory.
 
 Building and Installing Kerberos 5
@@ -69,8 +69,9 @@ life.  DES is the only encryption algorithm supported by Kerberos 4,
 and the increasingly obvious inadequacy of DES motivates the
 retirement of the Kerberos 4 protocol.  The National Institute of
 Standards and Technology (NIST), which had previously certified DES as
-a US government encryption standard, has officially announced[1] its
-intention to withdraw the specification of DES.
+a US government encryption standard, has officially announced[1] the
+withdrawal of the Federal Information Processing Standards (FIPS) for
+DES.
 
 NIST's action reflects the long-held opinion of the cryptographic
 community that DES has too small a key space to be secure.  Breaking
@@ -92,12 +93,13 @@ Kerberos Team to remove support for Kerberos version 4 from the MIT
 implementation of Kerberos.
 
 The process of ending Kerberos 4 support began with release 1.3 of MIT
-Kerberos 5.  In release 1.3, the KDC support for version 4 of the
-Kerberos protocol is disabled by default.  Release 1.4 of MIT Kerberos
-continues to include Kerberos 4 support (also disabled by default in
-the KDC), but we intend to completely remove Kerberos 4 support from
-some future release of MIT Kerberos, possibly as early as the 1.5
-release of MIT Kerberos.
+Kerberos 5.  In release 1.3, the default run-time configuration of the
+KDC disables support for version 4 of the Kerberos protocol.  Release
+1.4 of MIT Kerberos continues to include Kerberos 4 support (also
+disabled in the KDC with the default run-time configuration), but we
+intend to completely remove Kerberos 4 support from some future
+release of MIT Kerberos, possibly as early as the 1.5 release of MIT
+Kerberos.
 
 The MIT Kerberos Team has ended active development of Kerberos 4,
 except for the eventual removal of all Kerberos 4 functionality.  We
@@ -116,10 +118,11 @@ recommend discussing them on the kerberos@mit.edu mailing list.
                               References
 
 [1] National Institute of Standards and Technology.  Announcing
-    Proposed Withdrawal of Federal Information Processing Standard
-    (FIPS) for the Data Encryption Standard (DES) and Request for
-    Comments.  Federal Register 04-16894, 69 FR 44509-44510, 26 July
-    2004.  DOCID:fr26jy04-31.
+    Approval of the Withdrawal of Federal Information Processing
+    Standard (FIPS) 43-3, Data Encryption Standard (DES); FIPS 74,
+    Guidelines for Implementing and Using the NBS Data Encryption
+    Standard; and FIPS 81, DES Modes of Operation.  Federal Register
+    05-9945, 70 FR 28907-28908, 19 May 2005.  DOCID:fr19my05-45
 
 [2] Tom Yu, Sam Hartman, and Ken Raeburn. The Perils of
     Unauthenticated Encryption: Kerberos Version 4. In Proceedings of
@@ -128,6 +131,38 @@ recommend discussing them on the kerberos@mit.edu mailing list.
     http://web.mit.edu/tlyu/papers/krb4peril-ndss04.pdf
 
 ----------------------------------------------------------------------
+
+Major changes in 1.4.2
+----------------------
+
+* [3120] Fix [MITKRB-SA-2005-002] KDC double-free and heap overflow.
+  Thanks to Daniel Wachdorf for reporting these vulnerabilities.
+
+* [3121] Fix [MITKRB5-SA-2005-003] krb5_recvauth() double-free.
+  Thanks to Magnus Hagander for reporting this vulnerability.
+
+Minor changes in 1.4.2
+----------------------
+
+* [2902] Work around broken res_ninit() in AIX 5.
+
+* [2980] Fix a Windows deadlock condition when unloading krb5_32.dll.
+
+* [2982] Provide some support for pre-POSIX versions of getpwnam_r()
+  and getpwuid_r().
+
+* [3029] krb5_get_credentials() avoids passing errors from
+  krb5_cc_store_cred().
+
+* [3042] Fix build failure on 64-bit Solaris/SPARC.
+
+* [3083] Avoid using "faked" telnet service when calling
+  getaddrinfo().
+
+* [3084] Provide better support for conditional pthread support.
+
+* [3098] The file-based ccache code no longer spuriously retains a
+  lock.
 
 Major changes in 1.4.1
 ----------------------
@@ -147,7 +182,8 @@ Please see
 http://krbdev.mit.edu/rt/NoAuth/krb5-1.4/fixed-1.4.1.html
 
 for a complete list.
-* [2888] On Windows, restore library state to uninialized when library
+
+* [2888] On Windows, restore library state to uninitialized when library
   is unloaded.
 
 * [2906] Map ns_rr_class to ns_rr_cl for some versions of BIND.
