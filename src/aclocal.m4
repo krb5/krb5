@@ -1378,6 +1378,15 @@ AC_DEFUN(AC_LIBRARY_NET, [
     # We assume that if libresolv exists we can link against it.
     # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
+
+    case $krb5_cv_host in
+    *-*-aix5*)
+	# AIX 5 has broken res_ninit due to resolv.h not having the correct
+	# size of struct __res_state; since we switch off of res_nsearch()
+	# rather than res_ninit(), pretend res_nsearch() is not available.
+	krb5_cv_func_res_nsearch=no
+	;;
+    esac
 _KRB5_AC_CHECK_RES_FUNCS(res_nsearch res_search ns_initparse dnl
 ns_name_uncompress dn_skipname res_ndestroy)
     if test $krb5_cv_func_res_nsearch = no \

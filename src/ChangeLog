@@ -1,3 +1,9 @@
+2005-07-19  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_LIBRARY_NET): Special-case AIX 5.x due to broken
+	res_ninit(), or more precisely, incorrect size of struct
+	__res_state.
+
 2005-03-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Don't check for getpwnam_r and getpwuid_r in the
