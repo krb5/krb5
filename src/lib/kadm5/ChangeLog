@@ -1,15 +1,37 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
-	* Makefile.in:
-	* adb_err.et:
-	* admin.h:
-	* admin_xdr.h:
-	* kadm_err.et:
-	* kadm_rpc.h:
-	* kadm_rpc_xdr.c:
-	* ovsec_glue.c:
-	* server_internal.h:
+	* Makefile.in (adb_err.*): Targets deleted.
+	(SRCS, OBJS, clean, STLIBOBJS, BUILD_HDRS): Delete references to
+	adb_err.*.
+	(HDRS, SRC_HDRS): Delete references to adb.h.
+	* adb_err.et: Moved to lib/kdb.
+	* admin.h: Don't include kadm5/adb_err.h.
+	(krb5_key_salt_tuple): Delete typedef and struct definition.
+	(kadm5_init, kadm5_init_with_password, kadm5_init_with_skey,
+	kadm5_init_with_creds, ovsec_kadm_init,
+	ovsec_kadm_init_with_password, ovsec_kadm_init_with_skey): Add new
+	char** argument for arbitrary db args.
+	* admin_xdr.h: Include server_internal.h.
+	(xdr_krb5_key_data, xdr_osa_pw_hist_ent): Declare.
+	* kadm_err.et (KADM5_XDR_FAILURE): New error code.
+	* kadm_rpc.h (struct generic_ret, struct gprincs_ret, struct
+	chrand_ret, struct gprinc_ret, struct gpol_ret, struct gpols_ret,
+	struct getprivs_ret): Add new field for error-string return.
+	* kadm_rpc_xdr.c (xdr_generic_ret, xdr_gprincs_ret,
+	xdr_chrand_ret, xdr_gprinc_ret, xdr_gpol_ret, xdr_gpols_ret,
+	xdr_getprivs_ret): Encode/decode new field.
+	* ovsec_glue.c (ovsec_kadm_init_with_password,
+	ovsec_kadm_init_with_skey, ovsec_kadm_init): Pass through new
+	argument to kadm5_init_* routines.
+	* server_internal.h: Don't include adb.h.
+	(kadm5_server_handle_rec): Delete policy_db field, add db_args
+	field.
+	(OSA_ADB_PRINC_VERSION_1, osa_pw_hist_ent, osa_pw_hist_t,
+	osa_princ_ent_rec, osa_princ_ent_t, xdr_osa_princ_ent_rec,
+	osa_free_princ_ent): Duplicate definitions and declarations from
+	adb.h.
+	(kdb_iter_entry): Add match_entry argument.
 
 2005-04-19  Ken Raeburn  <raeburn@mit.edu>
 
