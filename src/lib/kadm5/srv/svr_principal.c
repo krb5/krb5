@@ -1660,25 +1660,22 @@ kadm5_setv4key_principal(void *server_handle,
 	goto done;
     }
 
-    for( k = 0; k < tmp_key_data.key_data_ver; k++ )
-    {
+    for (k = 0; k < tmp_key_data.key_data_ver; k++) {
 	kdb.key_data->key_data_type[k] = tmp_key_data.key_data_type[k];
 	kdb.key_data->key_data_length[k] = tmp_key_data.key_data_length[k];
-	if( tmp_key_data.key_data_contents[k] )
-	{
+	if (tmp_key_data.key_data_contents[k]) {
 	    kdb.key_data->key_data_contents[k] = krb5_db_alloc(handle->context, NULL, tmp_key_data.key_data_length[k]);
-	    if( kdb.key_data->key_data_contents[k] == NULL )
-	    {
+	    if (kdb.key_data->key_data_contents[k] == NULL) {
 		cleanup_key_data(handle->context, kdb.n_key_data, kdb.key_data);
 		kdb.key_data = NULL;
 		kdb.n_key_data = 0;
 		ret = ENOMEM;
 		goto done;
 	    }
-	    memcpy( kdb.key_data->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
+	    memcpy (kdb.key_data->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
 
-	    memset( tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
-	    free( tmp_key_data.key_data_contents[k] );
+	    memset (tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
+	    free (tmp_key_data.key_data_contents[k]);
 	    tmp_key_data.key_data_contents[k] = NULL;
 	}
     }
@@ -1748,12 +1745,10 @@ kadm5_setv4key_principal(void *server_handle,
 
     ret = KADM5_OK;
 done:
-    for( i = 0; i < tmp_key_data.key_data_ver; i++ )
-    {
-	if( tmp_key_data.key_data_contents[i] )
-	{
-	    memset( tmp_key_data.key_data_contents[i], 0, tmp_key_data.key_data_length[i]);
-	    free( tmp_key_data.key_data_contents[i] );
+    for (i = 0; i < tmp_key_data.key_data_ver; i++) {
+	if (tmp_key_data.key_data_contents[i]) {
+	    memset (tmp_key_data.key_data_contents[i], 0, tmp_key_data.key_data_length[i]);
+	    free (tmp_key_data.key_data_contents[i]);
 	}
     }
 
@@ -1850,9 +1845,8 @@ kadm5_setkey_principal_3(void *server_handle,
     
     kdb.key_data = (krb5_key_data*)krb5_db_alloc(handle->context, NULL, (n_keys+n_old_keys)
 						 *sizeof(krb5_key_data));
-    if (kdb.key_data == NULL)
-    {
-	ret= ENOMEM;
+    if (kdb.key_data == NULL) {
+	ret = ENOMEM;
 	goto done;
     }
 
@@ -1865,11 +1859,11 @@ kadm5_setkey_principal_3(void *server_handle,
 	    keysalt.data.length = 0;
 	    keysalt.data.data = NULL;
 	    if (ks_tuple[i].ks_enctype != keyblocks[i].enctype) {
-		ret= KADM5_SETKEY3_ETYPE_MISMATCH;
+		ret = KADM5_SETKEY3_ETYPE_MISMATCH;
 		goto done;
 	    }
 	}
-	memset( &tmp_key_data, 0, sizeof(tmp_key_data));
+	memset (&tmp_key_data, 0, sizeof(tmp_key_data));
 
 	ret = krb5_dbekd_encrypt_key_data(handle->context,
 					  &master_keyblock,
@@ -1881,32 +1875,27 @@ kadm5_setkey_principal_3(void *server_handle,
 	    goto done;
 	}
 	tptr = &kdb.key_data[i];
-	for( k = 0; k < tmp_key_data.key_data_ver; k++ )
-	{
+	for (k = 0; k < tmp_key_data.key_data_ver; k++) {
 	    tptr->key_data_type[k] = tmp_key_data.key_data_type[k];
 	    tptr->key_data_length[k] = tmp_key_data.key_data_length[k];
-	    if( tmp_key_data.key_data_contents[k] )
-	    {
+	    if (tmp_key_data.key_data_contents[k]) {
 		tptr->key_data_contents[k] = krb5_db_alloc(handle->context, NULL, tmp_key_data.key_data_length[k]);
-		if( tptr->key_data_contents[k] == NULL )
-		{
+		if (tptr->key_data_contents[k] == NULL) {
 		    int i1;
-		    for( i1 = k; i1 < tmp_key_data.key_data_ver; i1++ )
-		    {
-			if( tmp_key_data.key_data_contents[i1] )
-			{
-			    memset( tmp_key_data.key_data_contents[i1], 0, tmp_key_data.key_data_length[i1]);
-			    free( tmp_key_data.key_data_contents[i1] );
+		    for (i1 = k; i1 < tmp_key_data.key_data_ver; i1++) {
+			if (tmp_key_data.key_data_contents[i1]) {
+			    memset (tmp_key_data.key_data_contents[i1], 0, tmp_key_data.key_data_length[i1]);
+			    free (tmp_key_data.key_data_contents[i1]);
 			}
 		    }
 
 		    ret =  ENOMEM;
 		    goto done;
 		}
-		memcpy( tptr->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
+		memcpy (tptr->key_data_contents[k], tmp_key_data.key_data_contents[k], tmp_key_data.key_data_length[k]);
 
-		memset( tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
-		free( tmp_key_data.key_data_contents[k] );
+		memset (tmp_key_data.key_data_contents[k], 0, tmp_key_data.key_data_length[k]);
+		free (tmp_key_data.key_data_contents[k]);
 		tmp_key_data.key_data_contents[k] = NULL;
 	    }
 	}
@@ -1920,7 +1909,7 @@ kadm5_setkey_principal_3(void *server_handle,
 	kdb.n_key_data++;
     }
 
-    if( old_key_data )
+    if (old_key_data)
 	krb5_db_free(handle->context, old_key_data);
 
     /* assert(kdb.n_key_data == n_keys + n_old_keys) */
@@ -1955,7 +1944,7 @@ kadm5_setkey_principal_3(void *server_handle,
 	/*
 	 * Should we be checking/updating pw history here?
 	 */
-	if(pol.pw_history_num > 1) {
+	if (pol.pw_history_num > 1) {
 	    if(adb.admin_history_kvno != hist_kvno) {
 		ret = KADM5_BAD_HIST_KEY;
 		goto done;
@@ -2015,14 +2004,12 @@ static int decrypt_key_data(krb5_context context,
 					    &key_data[i], 
 					    &keys[i], NULL);
 	  if (ret) {
-	      for(; i >= 0; i-- )
-	      {
-		  if( keys[i].contents )
-		  {
-		      memset( keys[i].contents, 0, keys[i].length );
-		      free( keys[i].contents );
-		  }
-	      }
+	       for (; i >= 0; i--) {
+		   if (keys[i].contents) {
+		       memset (keys[i].contents, 0, keys[i].length);
+		       free( keys[i].contents );
+		   }
+	       }
 
 	       memset((char *) keys, 0, n_key_data*sizeof(krb5_keyblock));
 	       free(keys);
