@@ -1,17 +1,78 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
-	* Makefile.in:
-	* adb_free.c:
-	* adb_openclose.c:
-	* adb_policy.c:
-	* adb_xdr.c:
-	* server_init.c:
-	* server_kdb.c:
-	* server_misc.c:
-	* svr_iters.c:
-	* svr_policy.c:
-	* svr_principal.c:
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Remove adb_policy,
+	adb_free, and adb_openclose.
+	* adb_free.c: Deleted.
+	* adb_openclose.c, adb_policy.c: Moved to lib/kdb/kdb_db2.
+	* adb_xdr.c: Include server_internal.h; don't include adb.h.
+	(xdr_osa_policy_ent_rec): Function deleted.
+	(osa_free_princ_ent): Moved here from old adb_free.c.
+	* server_init.c (dup_db_args, free_db_args): New functions.
+	(kadm5_init_with_password, kadm5_init_with_creds,
+	kadm5_init_with_skey): Accept new db_args argument, and pass it to
+	kadm5_init.
+	(kadm5_init): Accept new db_args argument.  Don't set the database
+	name; instead, set the default realm for the context.  Call
+	krb5_db_open instead of krb5_db_init, requesting write access and
+	passing in the database arguments.  Don't call adb_policy_init,
+	and don't set deleted field handle->lhandle->policy_db.
+	(kadm5_lock): Don't lock the policy database.  Use
+	KRB5_DB_LOCKMODE_EXCLUSIVE flags instead of
+	KRB5_LOCKMODE_EXCLUSIVE.
+	(kadm5_unlock): Don't unlock the policy database.
+	(kadm5_flush): In the error case, use krb5_db_open instead of
+	krb5_db_set_name and krb5_db_init.
+	* server_kdb.c (kdb_init_master): Don't call krb5_db_init.  Use
+	KADM5_XDR_FAILURE instead of OSA_ADB_XDR_FAILURE.
+	(kdb_iter_entry): Accept new string argument match_entry; pass it
+	to krb5_db_iterate.
+	* server_misc.c: Don't include adb.h.
+	(adb_policy_init): Don't call osa_adb_open_policy.  If
+	krb5_db_inited is falso on the context, call krb5_db_open.
+	(adb_policy_close): Don't call osa_adb_close_policy; do nothing.
+	* svr_iters.c: Don't include adb.h.
+	(kadm5_get_either): Pass glob pattern ("*" if not specified) to
+	kdb_iter_entry.
+	* svr_policy.c: Don't include adb.h.
+	(kadm5_create_policy, kadm5_delete_policy, kadm5_modify_policy,
+	kadm5_get_policy): Call krb5_db_clr_error.  Call
+	krb5_db_create_policy etc instead of osa_adb_* versions, passing
+	the krb5 context instead of the policy database handle.  For
+	krb5_db_get_policy, treat a returned count of zero as a not-found
+	indication.
+	(kadm5_modify_policy_internal): Don't translate the returned error
+	code from krb5_db_put_policy.
+	* svr_principal.c: Don't include adb.h.
+	(kadm5_copy_principal, kadm5_free_principal): New functions, using
+	krb5_db_alloc and krb5_db_free for storage.
+	(cleanup_key_data): Use krb5_db_free.
+	(kadm5_create_principal_3, kadm5_delete_principal,
+	kadm5_modify_principal, kadm5_rename_principal,
+	kadm5_get_principal, kadm5_chpass_principal_3,
+	kadm5_randkey_principal_3, kadm5_setv4key_principal,
+	kadm5_setkey_principal_3, 
+
+	): Call krb5_db_clr_error.
+	(kadm5_create_principal_3): Use kadm5_copy_principal instead of
+	krb5_copy_principal.  If the KADM5_TL_DATA flag is set, call
+	krb5_dbe_update_tl_data on each element supplied, to augment
+	and/or replace the existing tl data with a copy of the supplied
+	data, instead of splicing the supplied list and the existing list
+	together.  Use krb5_db_free_principal instead of
+	krb5_dbe_free_contents.
+	(kadm5_modify_principal): Use krb5_dbe_update_tl_data to merge tl
+	data records.
+	(kadm5_rename_principal): Use kadm5_{copy,free}_principal.
+	(kadm5_chpass_principal_3): Use krb5_db_free_principal instead of
+	krb5_dbe_free_contents.
+	(kadm5_setv4key_principal): Use krb5_db_alloc, not malloc, for key
+	data to be returned.  Use an automatic variable for the key data,
+	before copying out to the object so allocated.
+	(kadm5_setkey_principal_3): Likewise.
+	(decrypt_key_data): On error, clear and free any key storage that
+	might've been returned from previous calls
+	krb5_dbekd_decrypt_key_data.
 
 2004-12-20  Tom Yu  <tlyu@mit.edu>
 

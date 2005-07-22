@@ -8,13 +8,27 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
-	* Makefile.in:
-	* client_init.c:
-	* client_principal.c:
-	* clnt_policy.c:
-	* clnt_privs.c:
-	* err_handle.c:
-	* err_handle.h:
+	* err_handle.c: New file.
+	* err_handle.h: New file.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS, err_handle.o): Build
+	err_handle.c.
+	* client_init.c (_kadm5_init_any): Accept new db_args argument,
+	but ignore it.  Don't call initialize_adb_error_table.
+	(kadm5_init_with_creds, kadm5_init_with_password, kadm5_init,
+	kadm5_init_with_skey): Accept new db_args argument and pass it
+	through to _kadm5_init_any.
+	* client_principal.c: Include err_handle.h.
+	(kadm5_get_principal, kadm5_get_principals,
+	kadm5_randkey_principal_3, kadm5_randkey_principal): If an error
+	was returned from the server, pass it and the error string to
+	krb5_set_err.
+	* clnt_policy.c: Include err_handle.h.
+	(kadm5_create_policy, kadm5_delete_policy, kadm5_modify_policy,
+	kadm5_get_policy, kadm5_get_policies): If an error was returned
+	from the server, pass it and the error string to krb5_set_err.
+	* clnt_privs.c: Include err_handle.h.
+	(kadm5_get_privs): If an error was returned from the server, pass
+	it and the error string to krb5_set_err.
 
 2005-02-11  Tom Yu  <tlyu@mit.edu>
 

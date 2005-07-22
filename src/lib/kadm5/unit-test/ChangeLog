@@ -9,14 +9,20 @@
 	instead of explicitly using -ldl and -lpthread.
 
 	Novell merge.
-	* Makefile.in:
-	* destroy-test.c:
-	* handle-test.c:
-	* init-test.c:
-	* iter-test.c:
-	* lock-test.c:
-	* randkey-test.c:
-	* setkey-test.c:
+	* Makefile.in (randkey-test, server-handle-test, lock-test,
+	server-iter-test, server-setkey-test): Link in pthread and dl
+	libraries.
+	* destroy-test.c (main): Pass NULL db_args argument to
+	ovsec_kadm_init.
+	* handle-test.c (main): Likewise.
+	* init-test.c (main): Likewise.
+	* iter-test.c (main): Likewise.
+	* randkey-test.c (main): Likewise.
+	* setkey-test.c (main): Likewise.
+	* lock-test.c: Include krb5/kdb.h, not kadm5/adb.h.
+	(main): Don't call initialize_adb_error_table.  Call krb5_db_open,
+	not osa_adb_open_policy, krb5_db_ lock functions instead of
+	osa_adb_ ones, etc.
 
 2005-02-10  Tom Yu  <tlyu@mit.edu>
 
