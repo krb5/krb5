@@ -135,7 +135,7 @@ recommend discussing them on the kerberos@mit.edu mailing list.
 Major changes in 1.4.2
 ----------------------
 
-* [3120] Fix [MITKRB-SA-2005-002] KDC double-free and heap overflow.
+* [3120] Fix [MITKRB5-SA-2005-002] KDC double-free and heap overflow.
   Thanks to Daniel Wachdorf for reporting these vulnerabilities.
 
 * [3121] Fix [MITKRB5-SA-2005-003] krb5_recvauth() double-free.
@@ -155,6 +155,9 @@ Minor changes in 1.4.2
   krb5_cc_store_cred().
 
 * [3042] Fix build failure on 64-bit Solaris/SPARC.
+
+* [3060] Work around excess stack consumption caused by large default
+  FD_SETSIZE in AIX.
 
 * [3083] Avoid using "faked" telnet service when calling
   getaddrinfo().
