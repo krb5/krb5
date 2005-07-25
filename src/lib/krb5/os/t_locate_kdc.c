@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
+#include "port-sockets.h"
 #include <com_err.h>
 
 #define TEST

@@ -301,7 +301,7 @@ static inline int k5_os_nothread_mutex_unlock(k5_os_nothread_mutex *m) {
     return 0;
 }
 # define k5_os_nothread_mutex_assert_locked(M)		((void)0)
-# define k5_os_nothread_mutex_assert_unlocked(M)	((void(0)
+# define k5_os_nothread_mutex_assert_unlocked(M)	((void)0)
 
 #endif
 
@@ -367,17 +367,13 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # pragma weak pthread_mutex_unlock
 # pragma weak pthread_mutex_destroy
 # pragma weak pthread_mutex_init
+# pragma weak pthread_self
+# pragma weak pthread_equal
 # ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
 #  pragma weak pthread_mutexattr_setrobust_np
 # endif
-# if !defined HAVE_PTHREAD_ONCE
-#  define K5_PTHREADS_LOADED	(&pthread_once != 0)
-# elif !defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP \
-	&& defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
-#  define K5_PTHREADS_LOADED	(&pthread_mutexattr_setrobust_np != 0)
-# else
-#  define K5_PTHREADS_LOADED	(1)
-# endif
+extern int krb5int_pthread_loaded(void);
+# define K5_PTHREADS_LOADED	(krb5int_pthread_loaded())
 #else
 /* no pragma weak support */
 # define K5_PTHREADS_LOADED	(1)
@@ -402,6 +398,8 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 #endif
 
 #if !defined(HAVE_PTHREAD_MUTEX_LOCK) && !defined(USE_PTHREAD_LOCK_ONLY_IF_LOADED)
+/* If we find a system with a broken stub for pthread_mutex_lock,
+   we may have to change this.  */
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 #endif
 
@@ -423,17 +421,53 @@ typedef pthread_once_t k5_once_t;
 
 typedef struct {
     pthread_mutex_t p;
+#ifdef DEBUG_THREADS
+    pthread_t owner;
+#endif
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
     k5_os_nothread_mutex n;
 #endif
 } k5_os_mutex;
+
+#ifdef DEBUG_THREADS
+# ifdef __GNUC__
+#  define k5_pthread_mutex_lock(M)			\
+	({						\
+	    k5_os_mutex *_m2 = (M);			\
+	    int _r2 = pthread_mutex_lock(&_m2->p);	\
+	    if (_r2 == 0) _m2->owner = pthread_self();	\
+	    _r2;					\
+	})
+# else
+static inline int
+k5_pthread_mutex_lock(k5_os_mutex *m)
+{
+    int r = pthread_mutex_lock(&m->p);
+    if (r)
+	return r;
+    m->owner = pthread_self();
+    return 0;
+}
+# endif
+# define k5_pthread_assert_locked(M)				\
+	(K5_PTHREADS_LOADED					\
+	 ? assert(pthread_equal((M)->owner, pthread_self()))	\
+	 : (void)0)
+# define k5_pthread_mutex_unlock(M)	\
+	(k5_pthread_assert_locked(M),	\
+	 (M)->owner = (pthread_t) 0,	\
+	 pthread_mutex_unlock(&(M)->p))
+#else
+# define k5_pthread_mutex_lock(M) pthread_mutex_lock(&(M)->p)
+static inline void k5_pthread_assert_locked(k5_os_mutex *m) { }
+# define k5_pthread_mutex_unlock(M) pthread_mutex_unlock(&(M)->p)
+#endif
 
 /* Define as functions to:
    (1) eliminate "statement with no effect" warnings for "0"
    (2) encourage type-checking in calling code  */
 
 static inline void k5_pthread_assert_unlocked(pthread_mutex_t *m) { }
-static inline void k5_pthread_assert_locked(pthread_mutex_t *m) { }
 
 #if defined(DEBUG_THREADS_SLOW) && HAVE_SCHED_H && (HAVE_SCHED_YIELD || HAVE_PRAGMA_WEAK_REF)
 # include <sched.h>
@@ -481,8 +515,18 @@ static inline int return_after_yield(int r)
 
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
-# define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+# if defined(PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP) && defined(DEBUG_THREADS)
+#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+	{ PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP, (pthread_t) 0, \
+	  K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
+# elif defined(DEBUG_THREADS)
+#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+	{ PTHREAD_MUTEX_INITIALIZER, (pthread_t) 0, \
+	  K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
+# else
+#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
 	{ PTHREAD_MUTEX_INITIALIZER, K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
+# endif
 
 # define k5_os_mutex_finish_init(M)		\
 	k5_os_nothread_mutex_finish_init(&(M)->n)
@@ -499,12 +543,12 @@ static inline int return_after_yield(int r)
 
 # define k5_os_mutex_lock(M)						\
 	return_after_yield(K5_PTHREADS_LOADED				\
-			   ? pthread_mutex_lock(&(M)->p)		\
+			   ? k5_pthread_mutex_lock(M)			\
 			   : k5_os_nothread_mutex_lock(&(M)->n))
 # define k5_os_mutex_unlock(M)				\
 	(MAYBE_SCHED_YIELD(),				\
 	 (K5_PTHREADS_LOADED				\
-	  ? pthread_mutex_unlock(&(M)->p)		\
+	  ? k5_pthread_mutex_unlock(M)			\
 	  : k5_os_nothread_mutex_unlock(&(M)->n)))
 
 # define k5_os_mutex_assert_unlocked(M)			\
@@ -513,22 +557,32 @@ static inline int return_after_yield(int r)
 	 : k5_os_nothread_mutex_assert_unlocked(&(M)->n))
 # define k5_os_mutex_assert_locked(M)			\
 	(K5_PTHREADS_LOADED				\
-	 ? k5_pthread_assert_locked(&(M)->p)		\
+	 ? k5_pthread_assert_locked(M)			\
 	 : k5_os_nothread_mutex_assert_locked(&(M)->n))
 
 #else
 
-# define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+# ifdef DEBUG_THREADS
+#  ifdef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+#   define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+	{ PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP, (pthread_t) 0 }
+#  else
+#   define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+	{ PTHREAD_MUTEX_INITIALIZER, (pthread_t) 0 }
+#  endif
+# else
+#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
 	{ PTHREAD_MUTEX_INITIALIZER }
+# endif
 
 static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
 # define k5_os_mutex_init(M)		pthread_mutex_init(&(M)->p, 0)
 # define k5_os_mutex_destroy(M)		pthread_mutex_destroy(&(M)->p)
-# define k5_os_mutex_lock(M)	return_after_yield(pthread_mutex_lock(&(M)->p))
-# define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),pthread_mutex_unlock(&(M)->p))
+# define k5_os_mutex_lock(M)	return_after_yield(k5_pthread_mutex_lock(M))
+# define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),k5_pthread_mutex_unlock(M))
 
 # define k5_os_mutex_assert_unlocked(M)	k5_pthread_assert_unlocked(&(M)->p)
-# define k5_os_mutex_assert_locked(M)	k5_pthread_assert_locked(&(M)->p)
+# define k5_os_mutex_assert_locked(M)	k5_pthread_assert_locked(M)
 
 #endif /* is pthreads always available? */
 
@@ -614,7 +668,7 @@ static inline int k5_mutex_finish_init_1(k5_mutex_t *m, k5_debug_loc l)
 #define k5_mutex_finish_init(M)	k5_mutex_finish_init_1((M), K5_DEBUG_LOC)
 #define k5_mutex_destroy(M)			\
 	(k5_os_mutex_assert_unlocked(&(M)->os),	\
-	 (M)->loc_last = K5_DEBUG_LOC,		\
+	 k5_mutex_lock(M), (M)->loc_last = K5_DEBUG_LOC, k5_mutex_unlock(M), \
 	 k5_os_mutex_destroy(&(M)->os))
 #ifdef __GNUC__
 #define k5_mutex_lock(M)				\
@@ -637,16 +691,10 @@ static inline int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 }
 #define k5_mutex_lock(M)	k5_mutex_lock_1(M, K5_DEBUG_LOC)
 #endif
-static inline int k5_mutex_unlock_1(k5_mutex_t *m, k5_debug_loc l)
-{
-    int err = 0;
-    err = k5_os_mutex_unlock(&m->os);
-    if (err)
-	return err;
-    m->loc_last = l;
-    return err;
-}
-#define k5_mutex_unlock(M)	k5_mutex_unlock_1(M, K5_DEBUG_LOC)
+#define k5_mutex_unlock(M)				\
+	(k5_mutex_assert_locked(M),			\
+	 (M)->loc_last = K5_DEBUG_LOC,			\
+	 k5_os_mutex_unlock(&(M)->os))
 
 #define k5_mutex_assert_locked(M)	k5_os_mutex_assert_locked(&(M)->os)
 #define k5_mutex_assert_unlocked(M)	k5_os_mutex_assert_unlocked(&(M)->os)

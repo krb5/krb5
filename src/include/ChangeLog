@@ -1,3 +1,95 @@
+2005-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (krb5int_pthread_loaded) [HAVE_PRAGMA_WEAK_REF]:
+	Declare.
+	(K5_PTHREADS_LOADED) [HAVE_PRAGMA_WEAK_REF]: Use it.
+
+2005-05-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.c (fai_add_hosts_by_name): Pass null pointer
+	instead of telnet as service name.
+
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for getpwnam_r and getpwuid_r with
+	AC_CHECK_FUNCS; use AC_CHECK_FUNC, and only set shell variables.
+	Run stricter tests on return types and numbers of arguments, and
+	only define the C macros if these parameters can actually be
+	determined.
+	* k5-platform.h (k5_getpwnam_r, k5_getpwuid_r): New macros.
+
+	* k5-platform.h: Expand on init/fini comments some more.
+	(MAKE_FINI_FUNCTION): Add an HP-UX specific variant that defines
+	an auxiliary function fitting the signature of HP-UX 10 library
+	combined initializer/finalizer functions.
+
+2005-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check return type of gmtime_r, and define
+	GMTIME_R_RETURNS_INT if it returns int.  If the return type can't
+	be determined, pretend the function isn't there.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-platform.h (PROGRAM_EXITING) [__GNUC__ && !_WIN32 &&
+	CONSTRUCTOR_ATTR_WORKS]: Define as zero.
+
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-mac.h: define NEED_INSIXADDR_ANY for ipv6 symbol
+
+2005-01-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* k5-thread.h (k5_os_mutex_lock): Under Irix, invoke
+	k5_pthread_mutex_lock() with the k5_os_mutex, not the
+	pthread_mutex_t.
+	(k5_pthread_assert_locked,unlocked): If DEBUG_THREADS not use, provide
+	correct prototype. Add missing close paren.
+
+2005-01-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h [HAVE_PTHREAD && HAVE_PRAGMA_WEAK_REF]: Mark
+	pthread_self and pthread_equal as weak references.
+
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_os_mutex) [pthread case]: Add new field "owner"
+	if DEBUG_THREADS.
+	(k5_pthread_mutex_lock, k5_pthread_mutex_unlock,
+	k5_pthread_assert_locked): New macros/functions; if DEBUG_THREADS,
+	and thread support loaded, set or check the owner field.
+	(K5_OS_MUTEX_PARTIAL_INITIALIZER) [pthread case && DEBUG_THREADS]:
+	Set the owner field.  If PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+	is defined, use it.
+	(k5_os_mutex_lock, k5_os_mutex_unlock, k5_os_mutex_assert_locked)
+	[pthread case]: Use k5_pthread_ versions.
+	(k5_mutex_destroy): Update the location data with the mutex
+	locked, before destroying it.
+	(k5_mutex_unlock): Update the location data while the mutex is
+	still locked, and check the assertion that the mutex really is
+	locked.  Convert inline function to macro.
+
+	* k5-thread.h (krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats)
+	[!DEBUG_THREADS_STATS]: Declare KRB5_CALLCONV.
+
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5.hin: add prototype for krb5_is_thread_safe
+
+2004-12-21  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.hin: Flag krb5_principal2salt as KRB5_CALLCONV_WRONG.
+
+2004-12-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-int.h (KRB5INT_ACCESS_STRUCT_VERSION): Bump to 9.
+	(struct _krb5int_access): Add function pointer field use_dns_kdc.
+
+2004-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo.h: Include errno.h earlier.
+
 2004-10-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (return_after_yield, k5_mutex_lock) [__GNUC__]: Add

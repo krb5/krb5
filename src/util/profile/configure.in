@@ -5,7 +5,7 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_HEADERS(unistd.h stdlib.h pwd.h)
-AC_CHECK_FUNCS(stat access strdup getpwuid_r)
+AC_CHECK_FUNCS(stat access strdup)
 AC_PROG_AWK
 AC_KRB5_TCL
 DO_TCL=

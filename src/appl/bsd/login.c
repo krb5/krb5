@@ -1861,7 +1861,7 @@ int main(argc, argv)
     (void) strncpy(tbuf+1, p?(p+1):pwd->pw_shell, sizeof(tbuf) - 1);
     tbuf[sizeof(tbuf) - 1] = '\0';
 
-    execlp(pwd->pw_shell, tbuf, 0);
+    execlp(pwd->pw_shell, tbuf, (char *)NULL);
     fprintf(stderr, "login: no shell: ");
     perror(pwd->pw_shell);
     exit(0);

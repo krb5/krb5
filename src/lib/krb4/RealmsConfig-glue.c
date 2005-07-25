@@ -536,21 +536,24 @@ krb_get_krbhst(
 	if (err)
 	    break;
 
-	realmdat.data = realm;
-	realmdat.length = strlen(realm);
-	err = k5.make_srv_query_realm(&realmdat, "_kerberos-iv", "_udp", &srv);
-	if (err)
-	    break;
+	if (k5.use_dns_kdc(krb5__krb4_context)) {
+	    realmdat.data = realm;
+	    realmdat.length = strlen(realm);
+	    err = k5.make_srv_query_realm(&realmdat, "_kerberos-iv", "_udp",
+					  &srv);
+	    if (err)
+		break;
 
-	if (srv == 0)
-	    break;
+	    if (srv == 0)
+		break;
 
-	if (dnscache.srv)
-	    k5.free_srv_dns_data(dnscache.srv);
-	dnscache.srv = srv;
-	strncpy(dnscache.realm, realm, REALM_SZ);
-	dnscache.when = now;
-	goto get_from_dnscache;
+	    if (dnscache.srv)
+		k5.free_srv_dns_data(dnscache.srv);
+	    dnscache.srv = srv;
+	    strncpy(dnscache.realm, realm, REALM_SZ);
+	    dnscache.when = now;
+	    goto get_from_dnscache;
+	}
     } while (0);
 #endif
     return KFAILURE;

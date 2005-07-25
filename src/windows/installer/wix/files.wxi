@@ -102,6 +102,16 @@
 	                    <Registry Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kdestroy_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Name="Flags" Type="integer" Value="1032" />
                     </Component>
+                    <Component Id="cmf_kcpytkt_exe" Guid="6B20E57C-0033-4dcf-B3C9-74ED0B2CF46E" DiskId="1">
+	                    <File Id="fil_kcpytkt_exe" LongName="kcpytkt.exe" Name="kcpytkt.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kcpytkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kcpytkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+                    <Component Id="cmf_kdeltkt_exe" Guid="C7528C87-9B61-439a-8EA8-AD4BE3D758F9" DiskId="1">
+	                    <File Id="fil_kdeltkt_exe" LongName="kdeltkt.exe" Name="kdeltkt.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_kdeltkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_kdeltkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
                     <Component Id="cmf_kinit_exe" Guid="80643A09-EF28-4714-BC62-B64FC5B17CAA" DiskId="1">
 	                    <File Id="fil_kinit_exe" LongName="kinit.exe" Name="kinit.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kinit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -125,6 +135,9 @@
                     <Component Id="cmf_krb5_32_dll" Guid="31E40356-CBAC-4FC6-9A34-C6F6C72A27CA" DiskId="1">
 	                    <File Id="fil_krb5_32_dll" LongName="krb5_32.dll" Name="krb5_32.dll" KeyPath="yes" />
 	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
+                    </Component>
+                    <Component Id="cmf_k5sprt32_dll" Guid="F2381331-9201-4c02-866F-2038676771D4" DiskId="1">
+	                    <File Id="fil_k5sprt32_dll" LongName="k5sprt32.dll" Name="k5sprt32.dll" />
                     </Component>
                     <Component Id="cmf_krb524_dll" Guid="98685874-A9AA-4BC5-9830-271D9CF52C17" DiskId="1">
 	                    <File Id="fil_krb524_dll" LongName="krb524.dll" Name="krb524.dll" KeyPath="yes" />
@@ -268,6 +281,11 @@
 	                    <Registry Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_ms2mit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Name="Flags" Type="integer" Value="1032" />
                     </Component>
+                    <Component Id="cmf_mit2ms_exe" Guid="4F487781-5B55-48c1-A3FA-8BC6ECA4FEA1" DiskId="1">
+	                    <File Id="fil_mit2ms_exe" LongName="mit2ms.exe" Name="mit2ms.exe" KeyPath="yes" />
+	                    <Registry Id="reg_ts_mit2ms_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Action="createKeyAndRemoveKeyOnUninstall" />
+	                    <Registry Id="reg_ts_mit2ms_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
                     <Component Id="cmf_wshelp32_dll" Guid="B9D9F5F1-CA93-4F56-B6F8-343F21484CDE" DiskId="1">
 	                    <File Id="fil_wshelp32_dll" LongName="wshelp32.dll" Name="wshelp32.dll" KeyPath="yes" />
                     </Component>
@@ -287,11 +305,14 @@
 	                    <File Id="fil_k524init_pdb" LongName="k524init.pdb" Name="k524init.pdb" />
 	                    <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
 	                    <File Id="fil_kdestroy_pdb" LongName="kdestroy.pdb" Name="kdestroy.pdb" />
+	                    <File Id="fil_kcpytkt_pdb" LongName="kcpytkt.pdb" Name="kcpytkt.pdb" />
+	                    <File Id="fil_kdeltkt_pdb" LongName="kdeltkt.pdb" Name="kdeltkt.pdb" />
 	                    <File Id="fil_kinit_pdb" LongName="kinit.pdb" Name="kinit.pdb" />
 	                    <File Id="fil_klist_pdb" LongName="klist.pdb" Name="klist.pdb" />
 	                    <File Id="fil_kpasswd_pdb" LongName="kpasswd.pdb" Name="kpasswd.pdb" />
 	                    <File Id="fil_kvno_pdb" LongName="kvno.pdb" Name="kvno.pdb" />
 	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
+	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" />
 	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
 	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
 	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
@@ -299,6 +320,7 @@
 	                    <File Id="fil_leash32_pdb" LongName="leash32.pdb" Name="leash32.pdb" />
 	                    <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
 	                    <File Id="fil_ms2mit_pdb" LongName="ms2mit.pdb" Name="ms2mit.pdb" />
+	                    <File Id="fil_mit2ms_pdb" LongName="mit2ms.pdb" Name="mit2ms.pdb" />
 	                    <File Id="fil_wshelp32_pdb" LongName="wshelp32.pdb" Name="wshelp32.pdb" />
 	                    <File Id="fil_xpprof32_pdb" LongName="xpprof32.pdb" Name="xpprof32.pdb" />
                     </Component>
@@ -696,7 +718,7 @@
     </Directory>
     
     <Directory Id="ProgramMenuFolder">
-        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="$(loc.ProductNameShort)">
+        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="KFW">
         </Directory>
     </Directory>
     <Directory Id="StartupFolder">

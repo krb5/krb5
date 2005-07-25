@@ -65,7 +65,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     struct __res_state statbuf;
 #endif
     struct krb5int_dns_state *ds;
-    int len;
+    int len, ret;
     size_t nextincr, maxincr;
     unsigned char *p;
 
@@ -73,6 +73,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
     if (ds == NULL)
 	return -1;
 
+    ret = -1;
     ds->nclass = nclass;
     ds->ntype = ntype;
     ds->ansp = NULL;
@@ -86,8 +87,8 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
 #endif
 
 #if HAVE_RES_NSEARCH
-    len = res_ninit(&statbuf);
-    if (len < 0)
+    ret = res_ninit(&statbuf);
+    if (ret < 0)
 	return -1;
 #endif
 
@@ -96,8 +97,8 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
 	    ? malloc(nextincr) : realloc(ds->ansp, nextincr);
 
 	if (p == NULL && ds->ansp != NULL) {
-	    free(ds->ansp);
-	    return -1;
+	    ret = -1;
+	    goto errout;
 	}
 	ds->ansp = p;
 	ds->ansmax = nextincr;
@@ -109,28 +110,45 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
 	len = res_search(host, ds->nclass, ds->ntype,
 			 ds->ansp, ds->ansmax);
 #endif
-	if (len > maxincr)
-	    return -1;
+	if (len > maxincr) {
+	    ret = -1;
+	    goto errout;
+	}
 	while (nextincr < len)
 	    nextincr *= 2;
 	if (len < 0 || nextincr > maxincr) {
-	    free(ds->ansp);
-	    return -1;
+	    ret = -1;
+	    goto errout;
 	}
     } while (len > ds->ansmax);
 
     ds->anslen = len;
 #if HAVE_NS_INITPARSE
-    len = ns_initparse(ds->ansp, ds->anslen, &ds->msg);
+    ret = ns_initparse(ds->ansp, ds->anslen, &ds->msg);
 #else
-    len = initparse(ds);
+    ret = initparse(ds);
 #endif
-    if (len < 0) {
-	free(ds->ansp);
-	return -1;
+    if (ret < 0)
+	goto errout;
+
+    ret = 0;
+
+errout:
+#if HAVE_RES_NSEARCH
+#if HAVE_RES_NDESTROY
+    res_ndestroy(&statbuf);
+#else
+    res_nclose(&statbuf);
+#endif
+#endif
+    if (ret < 0) {
+	if (ds->ansp != NULL) {
+	    free(ds->ansp);
+	    ds->ansp = NULL;
+	}
     }
 
-    return 0;
+    return ret;
 }
 
 #if HAVE_NS_INITPARSE
@@ -190,10 +208,11 @@ int krb5int_dns_expand(struct krb5int_dns_state *ds,
 void
 krb5int_dns_fini(struct krb5int_dns_state *ds)
 {
+    if (ds == NULL)
+	return;
     if (ds->ansp != NULL)
 	free(ds->ansp);
-    if (ds != NULL)
-	free(ds);
+    free(ds);
 }
 
 /*

@@ -104,7 +104,7 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
 
    pw0.data = pw0array;
 
-   if (password) {
+   if (password && password[0]) {
       if ((pw0.length = strlen(password)) > sizeof(pw0array)) {
 	 ret = EINVAL;
 	 goto cleanup;

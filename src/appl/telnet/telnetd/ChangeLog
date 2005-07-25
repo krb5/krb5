@@ -1,3 +1,15 @@
+2004-11-15  Tom Yu  <tlyu@mit.edu>
+
+	* ext.h: New variable "must_encrypt".
+
+	* telnetd.8: Update for changed command-line options.
+
+	* telnetd.c (getterminaltype): Merge Athena changes to require
+	encrypted connections.
+
+	* utility.c (ttsuck): Merge Athena changes to work around some
+	client timing bugs.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (telnetd): Use UTIL_LIB.

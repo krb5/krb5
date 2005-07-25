@@ -1,3 +1,6 @@
+# To do: Should run all tests and return a useful exit status, not
+# punt on the first failure.
+
 set wd [pwd]
 set verbose 0
 
@@ -107,7 +110,45 @@ proc test2 {} {
     puts "OK: test2: Modifications don't corrupt existing open handles"
 }
 
+proc test3 {} {
+    # lxs said: Start with a relation in the file.  Open, delete
+    # relation, add relation back, list relations.  In 1.4 release
+    # code, got two back.
+
+    global wd verbose
+
+    exec cp $wd/test2.ini $wd/test1c.ini
+    set p [profile_init_path $wd/test1c.ini]
+    set sect {{test section 1} quux}
+
+    set v [profile_get_values $p $sect]
+    set v1 [lindex $v 0]
+    if $verbose { puts "Old values: $v" }
+    profile_clear_relation $p $sect
+    if $verbose { puts "Cleared." }
+    # profile_get_values raises an exception if no data is there; so if
+    # it succeeds, the test fails.
+    catch {
+	set v [profile_get_values $p $sect]
+	if $verbose { puts "New values: $v" }
+	puts stderr "Error: test3: Clearing relation didn't get rid of all values."
+	exit 1
+    }
+    if $verbose { puts "Adding back $v1 ..." }
+    profile_add_relation $p $sect $v1
+    set v [profile_get_values $p $sect]
+    if $verbose { puts "New values: $v" }
+    if [llength $v]!=1 {
+	puts stderr "Error: test3: Adding one entry after clearing relation leaves [llength $v] entries."
+	exit 1
+    }
+    profile_abandon $p
+    file delete $wd/test1c.ini
+    puts "OK: test3: Clearing relation and adding one entry yields correct count."
+}
+
 test1
 test2
+test3
 
 exit 0

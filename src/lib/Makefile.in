@@ -28,7 +28,7 @@ clean-windows::
 ##MIT##MITLIBS=$(VS_LIB)
 ##MIT##MITFLAGS=-I$(VS_INC) /DVERSERV=1
 
-SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)krb5support_32.lib
+SLIBS = $(BUILDTOP)\util\support\$(OUTPRE)k5sprt32.lib
 CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
 KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
@@ -37,7 +37,7 @@ KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
 GLIBS = gssapi\$(OUTPRE)gssapi.lib
 K4LIBS = krb4\$(OUTPRE)krb4.lib
 
-SDEF = krb5support32.def
+SDEF = k5sprt32.def
 CDEF = comerr32.def
 PDEF = xpprof32.def
 KDEF = krb5_32.def

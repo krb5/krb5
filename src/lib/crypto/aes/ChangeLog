@@ -1,3 +1,7 @@
+2005-05-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (aes-gen): Use CC_LINK.  Reported by Mike Friedman.
+
 2004-09-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* vbaxam.doc: File deleted.

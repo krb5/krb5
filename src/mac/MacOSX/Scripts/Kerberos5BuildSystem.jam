@@ -28,21 +28,10 @@ CONFIGURE_LDFLAGS = "LDFLAGS=$(CONFIGURE_LDFLAGS:)" ;
 # script doesn't need to know how the reconf and configure scripts work.
 #
 
-# Reconf <configure> : <configure.in>
-rule Reconf
-{
-    DEPENDS "$(1)" : "$(1).in" "$(Reconf)" ;
-}
-actions Reconf
-{
-    cd "$(Sources)" && /bin/sh "$(Reconf)" -f
-}
-
 # Configure <makefile> : <configure>
 rule Configure
 {
     DEPENDS "$(1)" : "$(2)" ;
-    Reconf "$(2)" : "$(2).in" ;
     Clean.Remove clean "$(1:D)" ;
 }
 actions Configure

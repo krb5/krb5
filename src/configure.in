@@ -133,7 +133,11 @@ dnl
 dnl
 dnl Check for thread safety issues.
 dnl (Is there a better place for this?)
-tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
+dnl tsfuncs="getpwnam_r getpwuid_r gethostbyname_r getservbyname_r gmtime_r localtime_r"
+dnl Removed getpwnam_r and getpwuid_r because include/configure.in has some
+dnl more careful checks, and may decide to pretend that they're not found if
+dnl the function signatures can't be figured out.
+tsfuncs="gethostbyname_r getservbyname_r gmtime_r localtime_r"
 AC_CHECK_FUNCS($tsfuncs)
 if test "$enable_thread_support" = yes; then
   tsmissing=""

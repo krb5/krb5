@@ -69,9 +69,11 @@ void krb5int_lib_fini(void)
     if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING())
 	return;
 
-    krb5int_rc_terminate();
-    krb5int_kt_finalize();
+    k5_mutex_destroy(&krb5int_us_time_mutex);
+
     krb5int_cc_finalize();
+    krb5int_kt_finalize();
+    krb5int_rc_terminate();
 
 #if defined(_WIN32) || defined(USE_CCAPI)
     krb5_stdcc_shutdown();

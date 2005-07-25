@@ -1,3 +1,46 @@
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (hpux10.exports): New target, constructed similar to
+	osf1.exports but with HP-UX 10.x linker options, no initializers,
+	and "errno" explicitly added to the export list.
+	* shlib.conf (*-*-hpux*): Combine PICFLAGS setting with
+	SHLIB_EXPFLAGS and LDCOMBINE setting.  Add linker option "-c
+	hpux10.exports" to LDCOMBINE.  Set SHLIB_EXPORT_FILE_DEP to
+	hpux10.exports.  Set use_linker_fini_option.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (config.status): Change target to be in $thisconfigdir
+	rather than local.
+	(osf1.exports): Create a temporary file then rename into place.
+	Add options for library init/fini symbols, handling multiple
+	values.
+
+	* shlib.conf (case alpha*-dec-osf*): Don't handle init/fini
+	symbols here.
+	(case mips-sgi-irix*): Handle multiple init/fini symbols.  Always
+	set $initfini before it gets used.
+	(case *-*-solaris*, not gcc): Handle multiple init/fini symbols.
+	(case *-*-aix*): Handle multiple fini symbols.
+
+2004-12-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-pre.in: add -debug switch to LOPTS if DEBUG_SYMBOLS 
+
+2004-12-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-netbsd*): Use -fPIC instead of -fpic, which
+	won't work on sparc64 at least.
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-pre.in; optionally build debug symbols for release builds
+                      and rename krb5support_32.dll to k5sprt32.dll
+
+2004-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KRB5_INCSUBDIRS): Add KRB5_INCDIR/gssrpc.
+
 2004-10-06  Tom Yu  <tlyu@mit.edu>
 
 	* pre.in (datadir, EXAMPLEDIR): Add directory for examples.
