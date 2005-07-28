@@ -1,3 +1,8 @@
+2005-07-28  Jeffrey Altman <jaltman@mit.edu>
+
+        * threads.c: Stub krb5int_pthread_loaded added for Windows
+        to prevent export errors.
+
 2005-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* threads.c [HAVE_PRAGMA_WEAK_REF]: Declare
