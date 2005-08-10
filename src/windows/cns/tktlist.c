@@ -56,7 +56,7 @@ typedef struct {
  * Returns: A pointer to the adjusted time value.
  */
 static char *
-short_date (long t)
+short_date (time_t t)
 {
   static char buf[26 - 4];
   char *p;

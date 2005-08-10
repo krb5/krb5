@@ -238,6 +238,7 @@ asn1_error_code asn1_decode_generaltime(asn1buf *buf, time_t *val)
   }
   if(s[0] == '1' && !memcmp("19700101000000Z", s, 15)) {
       t = 0;
+      free(s);
       goto done;
   }
 #define c2i(c) ((c)-'0')

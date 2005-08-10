@@ -80,6 +80,15 @@
 
 #endif
 
+#if HAVE_NS_INITPARSE
+/*
+ * Solaris 7 has ns_rr_cl rather than ns_rr_class.
+ */
+#if !defined(ns_rr_class) && defined(ns_rr_cl)
+#define ns_rr_class ns_rr_cl
+#endif
+#endif
+
 #if HAVE_RES_NSEARCH
 /*
  * Some BIND 8 / BIND 9 implementations disable the BIND 4 style

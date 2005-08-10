@@ -49,6 +49,7 @@ STLIBOBJS= \
 	send524.o	\
 	sendto_kdc.o	\
 	sn2princ.o	\
+        thread_safe.o   \
 	timeofday.o	\
 	toffset.o	\
 	unlck_file.o	\
@@ -94,6 +95,7 @@ OBJS= \
 	$(OUTPRE)send524.$(OBJEXT)	\
 	$(OUTPRE)sendto_kdc.$(OBJEXT)	\
 	$(OUTPRE)sn2princ.$(OBJEXT)	\
+        $(OUTPRE)thread_safe.$(OBJEXT)  \
 	$(OUTPRE)timeofday.$(OBJEXT)	\
 	$(OUTPRE)toffset.$(OBJEXT)	\
 	$(OUTPRE)unlck_file.$(OBJEXT)	\
@@ -139,6 +141,7 @@ SRCS= \
 	$(srcdir)/send524.c	\
 	$(srcdir)/sendto_kdc.c	\
 	$(srcdir)/sn2princ.c	\
+        $(srcdir)/thread_safe.c \
 	$(srcdir)/timeofday.c	\
 	$(srcdir)/toffset.c	\
 	$(srcdir)/unlck_file.c	\
@@ -185,6 +188,10 @@ t_locate_kdc: t_locate_kdc.o
 	$(CC_LINK) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \
 		$(KRB5_BASE_LIBS)
 t_locate_kdc.o: t_locate_kdc.c locate_kdc.c
+$(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
+		$(OUTPRE)dnssrv.obj $(OUTPRE)dnsglue.obj \
+		$(KLIB) $(PLIB) $(CLIB) $(SLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(DNSLIBS)
 
 LCLINT=lclint
 LCLINTOPTS= -warnposix \
@@ -477,6 +484,12 @@ sn2princ.so sn2princ.po $(OUTPRE)sn2princ.$(OBJEXT): sn2princ.c $(SRCTOP)/includ
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/fake-addrinfo.h
+thread_safe.so thread_safe.po $(OUTPRE)thread_safe.$(OBJEXT): thread_safe.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h
 timeofday.so timeofday.po $(OUTPRE)timeofday.$(OBJEXT): timeofday.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -510,9 +523,9 @@ write_msg.so write_msg.po $(OUTPRE)write_msg.$(OBJEXT): write_msg.c $(SRCTOP)/in
 t_an_to_ln.so t_an_to_ln.po $(OUTPRE)t_an_to_ln.$(OBJEXT): t_an_to_ln.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS)
 t_gifconf.so t_gifconf.po $(OUTPRE)t_gifconf.$(OBJEXT): t_gifconf.c
-t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): t_locate_kdc.c $(COM_ERR_DEPS) \
-  locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): t_locate_kdc.c $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(COM_ERR_DEPS) \
+  locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \

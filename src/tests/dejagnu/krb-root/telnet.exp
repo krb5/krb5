@@ -50,7 +50,7 @@ if {![get_hostname] \
 
 # A procedure to start up the telnet daemon.
 
-proc start_telnet_daemon { } {
+proc start_telnet_daemon { args } {
     global REALMNAME
     global TELNETD
     global LOGINKRB5
@@ -70,7 +70,7 @@ proc start_telnet_daemon { } {
     # we don't need to use inetd.  The portbase+8 is the port to listen at.
     # Note that tmppwd here is a shell variable, which is set in
     # setup_root_shell, not a TCL variable.
-    send -i $rlogin_spawn_id "sh -c \"$TELNETD -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap -X KERBEROS_V4 [expr 8 + $portbase]\" &\r"
+    send -i $rlogin_spawn_id "sh -c \"$TELNETD $args -debug -t \$tmppwd/srvtab -R $REALMNAME -L $tmppwd/login.wrap -X KERBEROS_V4 [expr 8 + $portbase]\" &\r"
     expect {
 	-i $rlogin_spawn_id 
 	-re "$ROOT_PROMPT" { }
@@ -174,7 +174,7 @@ proc telnet_test { } {
 
     set testname "simple telnet"
     expect {
-	"ogin:" {
+	"ogin: " {
 	    pass $testname
 	}
     }
@@ -184,7 +184,7 @@ proc telnet_test { } {
     set testname "telnet command mode"
     send "\035"
     expect {
-	"telnet>" {
+	"telnet> " {
 	    pass $testname
 	}
     }
@@ -200,9 +200,16 @@ proc telnet_test { } {
     }
 
     set testname "back to command mode"
+
+    # For some reason, the telnet client doesn't necessarily reset the
+    # terminal mode back to raw after exiting command mode.
+    # Kick it somewhat by sending a CR.
+    send "\r"
+    expect "ogin: "
+
     send "\035"
     expect {
-	"telnet>" {
+	"telnet> " {
 	    pass $testname
 	}
     }
@@ -299,6 +306,7 @@ proc telnet_test { } {
     }
 
     expect_after
+    catch "expect eof"
 
     # We can't use check_exit_status, because we expect an exit status
     # of 1.
@@ -355,7 +363,7 @@ proc telnet_test { } {
     # Move back to telnet command mode and check the encryption status.
     set testname "encryption status"
     send "\035"
-    expect "telnet>"
+    expect "telnet> "
     send "status\r"
     expect {
 	-re "Currently encrypting output with DES_CFB64.*Currently decrypting input with DES_CFB64" {
@@ -368,6 +376,7 @@ proc telnet_test { } {
     expect "Connection closed by foreign host.\r"
 
     expect_after
+    catch "expect eof"
 
     # We can't use check_exit_status, because we expect an exit status
     # of 1.
@@ -380,6 +389,38 @@ proc telnet_test { } {
     } else {
 	pass "exit status"
     }
+
+    # The telnet daemon should have stopped, but we have no easy way
+    # of checking whether it actually did.  Kill it just in case.
+    stop_telnet_daemon
+
+    set testname "reject unencrypted telnet"
+    # Check rejection of unencrypted client when encryption is required
+    start_telnet_daemon -e
+
+    # unencrypted, unauthenticated
+    spawn $TELNET -- $hostname -[expr 8 + $portbase]
+    expect_after {
+	timeout {
+	    fail $testname
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail $testname
+	    catch "expect_after"
+	    return
+	}
+    }
+
+    expect {
+	-re "Unencrypted connection refused.*\n" {
+	    pass $testname
+	}
+    }
+    catch "expect_after"
+    catch "expect eof"
+    catch wait
 
     # The telnet daemon should have stopped, but we have no easy way
     # of checking whether it actually did.  Kill it just in case.

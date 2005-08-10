@@ -1,3 +1,68 @@
+2005-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendto_kdc.c (service_fds): Don't create a select_state on the
+	stack; take an additional argument pointing to it.
+	(krb5int_sendto): Don't create a select_state on the stack;
+	instead, allocate two on the heap, passing the second as the new
+	argument to service_fds.
+
+2005-04-22  Jeffrey Altman <jaltman@mit.edu>
+
+        * init_os_ctx.c:  use krb5_init_ctx and krb5_free_ctx
+        to initialize and cleanup the winsock stack.  WSAStartup/
+        WSACleanup are only supposed to increment/decrement a 
+        reference counter if they have been previously called
+        within the application.
+
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* kuserok.c (krb5_kuserok): Use k5_getpwnam_r.
+
+2005-03-22  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.h: Define ns_rr_class to ns_rr_cl if ns_rr_class doesn't
+	exist.
+
+2005-03-05  Jeffrey Altman <jaltman@mit.edu>
+
+        * sn2princ.c (krb5_sname_to_principal):
+          conditionalize the use of reverse dns lookups.  The default
+          is to use the existing behavior.  rdns can be disabled by
+          specifying [libdefaults] rdns=false
+
+2005-01-12  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c (krb5int_dns_fini): Reorder to make more correct.
+	(krb5int_dns_init): Rework error handling.  Call res_ndestroy() or
+	res_nclose() as appropriate to avoid leaking resources allocated
+	by res_ninit().
+
+2005-01-03  Jeffrey Altman <jaltman@mit.edu>
+
+        * thread_safe.c: (new file) krb5_is_thread_safe()
+
+2004-12-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* accessor.c (krb5int_accessor): Set new field use_dns_kdc.
+
+2004-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* locate_kdc.c (krb5_locate_srv_dns_1): Don't compile if
+	KRB5_DNS_LOOKUP is not defined.
+
+2004-11-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (krb5int_add_host_to_list): If debugging, log the
+	requested family and socket type.  If AI_NUMERICSERV is defined,
+	set it in ai_flags.  If getaddrinfo returns an error with
+	debugging enabled, log the error.
+	(krb5_locate_srv_conf_1): When logging an error from
+	add_host_to_list, include the corresponding error string.
+
+	* t_locate_kdc.c: Include port-sockets.h, instead of sys/socket.h,
+	netdb.h, netinet/in.h, and arpa/inet.h.
+	* Makefile.in ($(OUTPRE)t_locate_kdc.exe): New target.
+
 2004-10-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c: Include stdarg.h.

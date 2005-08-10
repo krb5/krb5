@@ -242,8 +242,13 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
        * and some bogus implementations might overrun on the sprintf.
        */
 #ifdef HAVE_GMTIME_R
+# ifdef GMTIME_R_RETURNS_INT
+      if (gmtime_r(&gmt_time, &gtimebuf) != 0)
+	  return ASN1_BAD_GMTIME;
+# else
       if (gmtime_r(&gmt_time, &gtimebuf) == NULL)
 	  return ASN1_BAD_GMTIME;
+# endif
 #else
       gtime = gmtime(&gmt_time);
       if (gtime == NULL)

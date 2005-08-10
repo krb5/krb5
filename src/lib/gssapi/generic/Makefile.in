@@ -37,14 +37,15 @@ $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
+include_xom=@include_xom@
+##DOS##include_xom=
 gssapi.h: gssapi.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi.h prologue. */"; \
 	echo "/* It contains some choice pieces of autoconf.h */"; \
-	grep SIZEOF $(BUILDTOP)/include/krb5/autoconf.h; \
-	grep 'HAVE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h; \
-	grep 'USE_.*_H' $(BUILDTOP)/include/krb5/autoconf.h; \
+	sed -n "/SIZEOF/s//GSS_&/p" < $(BUILDTOP)/include/krb5/autoconf.h; \
+	$(include_xom); \
 	echo "/* End of gssapi.h prologue. */"; \
 	cat $(srcdir)/gssapi.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e

@@ -722,7 +722,11 @@ prepare_error_tgs (krb5_kdc_req *request, krb5_ticket *ticket, int error,
 
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
-    *response = scratch;
+    if (retval)
+	free(scratch);
+    else
+	*response = scratch;
+
     return retval;
 }
 

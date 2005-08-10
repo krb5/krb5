@@ -16,6 +16,16 @@ object while other threads may still be using it.  (Any internal data
 modification in those objects will be protected by mutexes or other
 means, within the krb5 library.)
 
+The simple, exposed data structures in krb5.h like krb5_principal are
+not protected; they should not be used in one thread while another
+thread might be modifying them.  (TO DO: Build a list of which calls
+keep references to supplied data or return references to
+otherwise-referenced data, as opposed to everything making copies.)
+
+
+
+[ This part is a little outdated already. ]
+
    // Between these two, we should be able to do pure compile-time
    // and pure run-time initialization.
    //   POSIX: partial initializer is PTHREAD_MUTEX_INITIALIZER,
@@ -57,6 +67,7 @@ means, within the krb5 library.)
    int k5_setspecific(k5_key_t, const void *);
    ... stuff to signal library termination ...
 
+This is **NOT** an exported interface, and is subject to change.
 
 On many platforms with weak reference support, we can declare certain
 symbols to be weak, and test the addresses before calling them.  The
@@ -70,12 +81,21 @@ AIX 4.3.3 doesn't support weak references.  However, it looks like
 calling dlsym(NULL) causes the pthread library to get loaded, so we're
 going to just go ahead and link against it anyways.
 
+On Tru64 we also link against the thread library always.
+
 
 For now, the basic model is:
 
   If weak references supported, use them.
-  Else, assume support is present.
+  Else, assume support is present; if that means explicitly pulling in
+  the thread library, so be it.
 
+
+
+The locking described above may not be sufficient, at least for good
+performance.  At some point we may want to switch to read/write locks,
+so multiple threads can grovel over a data structure at once as long
+as they don't change it.
 
 
 See also notes in src/include/k5-thread.h.

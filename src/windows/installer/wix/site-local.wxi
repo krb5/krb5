@@ -6,13 +6,13 @@
     <!-- TargetDir should point to build target directory and must end with 
          a backslash.  If not specified, assume we are in TargetDir\install -->
 
-    <?define TargetDir="d:\work\kfwbins\"?>
+    <?define TargetDir="c:\temp\kfw\kfw-2.6.6-alpha\"?>
 
     <!-- ConfigDir should point to directory containing configuration files 
          (krb5.ini, krb.con, krbrealm.con) to be bundled with the installer.
          The directory name should end with a backslash. -->
 
-    <?define ConfigDir="$(env.SystemRoot)\"?>
+    <?define ConfigDir="c:\temp\kfw\kfw-2.5-extra\sample-config\"?>
     
     <!-- VersionMajor, VersionMinor and VersionPatch must all be specified, or 
          none should be specified (in which case, the defaults will be
@@ -44,11 +44,14 @@
 
     <!-- At most one of the following could be defined and must correspond
          to the type of build performed. -->
-    <!-- <?define Debug?> -->
-    <?define Release?>
-    
+    <?define Debug?>
+    <!-- <?define Release?> -->
+
+    <!-- We are including debug symbols anyway.  Undefine this for a leaner installer without debug syms. -->
+    <?define DebugSyms?>
+
     <!-- Optional defines -->
-    <!-- <?define Beta=""?> --> <!-- Numeric Beta identifier -->
+    <?define Beta="1"?> <!-- Numeric Beta identifier -->
     <!-- <?define OldHelp?> --> <!-- Specifies the use of the old leash32.hlp file 
                            instead of the new leash32.chm file -->
 
@@ -69,7 +72,7 @@
     <?ifndef VersionMajor?>
         <?define VersionMajor="2"?>
         <?define VersionMinor="6"?>
-        <?define VersionPatch="0001"?>
+        <?define VersionPatch="6"?>
     <?else?>
         <?if Not ($(var.VersionMinor) And $(var.VersionPatch))?>
             <?error VersionMajor, VersionMinor and VersionPatch should be specified together?>

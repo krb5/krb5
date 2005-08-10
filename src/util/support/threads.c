@@ -1,7 +1,7 @@
 /*
  * util/support/threads.c
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -106,6 +106,61 @@ struct tsd_block {
 # pragma weak pthread_setspecific
 # pragma weak pthread_key_create
 # pragma weak pthread_key_delete
+# pragma weak pthread_create
+# pragma weak pthread_join
+static volatile int flag_pthread_loaded = -1;
+static void loaded_test_aux(void)
+{
+    if (flag_pthread_loaded == -1)
+	flag_pthread_loaded = 1;
+    else
+	/* Could we have been called twice?  */
+	flag_pthread_loaded = 0;
+}
+static pthread_once_t loaded_test_once = PTHREAD_ONCE_INIT;
+int krb5int_pthread_loaded (void)
+{
+    int x = flag_pthread_loaded;
+    if (x != -1)
+	return x;
+    if (&pthread_getspecific == 0
+	|| &pthread_setspecific == 0
+	|| &pthread_key_create == 0
+	|| &pthread_key_delete == 0
+	|| &pthread_once == 0
+	|| &pthread_mutex_lock == 0
+	|| &pthread_mutex_unlock == 0
+	|| &pthread_mutex_destroy == 0
+	|| &pthread_mutex_init == 0
+	|| &pthread_self == 0
+	|| &pthread_equal == 0
+	/* This catches Solaris 9.  May be redundant with the above
+	   tests now.  */
+# ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
+	|| &pthread_mutexattr_setrobust_np == 0
+# endif
+	/* Any program that's really multithreaded will have to be
+	   able to create threads.  */
+	|| &pthread_create == 0
+	|| &pthread_join == 0
+	/* Okay, all the interesting functions -- or stubs for them --
+	   seem to be present.  If we call pthread_once, does it
+	   actually seem to cause the indicated function to get called
+	   exactly one time?  */
+	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
+	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
+	/* This catches cases where pthread_once does nothing, and
+	   never causes the function to get called.  That's a pretty
+	   clear violation of the POSIX spec, but hey, it happens.  */
+	|| flag_pthread_loaded < 0) {
+	flag_pthread_loaded = 0;
+	return 0;
+    }
+    /* If we wanted to be super-paranoid, we could try testing whether
+       pthread_get/setspecific work, too.  I don't know -- so far --
+       of any system with non-functional stubs for those.  */
+    return flag_pthread_loaded;
+}
 static struct tsd_block tsd_if_single;
 # define GET_NO_PTHREAD_TSD()	(&tsd_if_single)
 #else
@@ -117,30 +172,36 @@ static void thread_termination(void *);
 
 static void thread_termination (void *tptr)
 {
-    int i, pass, none_found;
-    struct tsd_block *t = tptr;
-
-    /* Make multiple passes in case, for example, a libkrb5 cleanup
-       function wants to print out an error message, which causes
-       com_err to allocate a thread-specific buffer, after we just
-       freed up the old one.
-
-       Shouldn't actually happen, if we're careful, but check just in
-       case.  */
-
-    pass = 0;
-    none_found = 0;
-    while (pass < 4 && !none_found) {
-	none_found = 1;
-	for (i = 0; i < K5_KEY_MAX; i++) {
-	    if (destructors_set[i] && destructors[i] && t->values[i]) {
-		void *v = t->values[i];
-		t->values[i] = 0;
-		(*destructors[i])(v);
-		none_found = 0;
-	    }
-	}
-    }
+    int err = k5_mutex_lock(&key_lock);
+    if (err == 0) {
+        int i, pass, none_found;
+        struct tsd_block *t = tptr;
+        
+        /* Make multiple passes in case, for example, a libkrb5 cleanup
+            function wants to print out an error message, which causes
+            com_err to allocate a thread-specific buffer, after we just
+            freed up the old one.
+            
+            Shouldn't actually happen, if we're careful, but check just in
+            case.  */
+        
+        pass = 0;
+        none_found = 0;
+        while (pass < 4 && !none_found) {
+            none_found = 1;
+            for (i = 0; i < K5_KEY_MAX; i++) {
+                if (destructors_set[i] && destructors[i] && t->values[i]) {
+                    void *v = t->values[i];
+                    t->values[i] = 0;
+                    (*destructors[i])(v);
+                    none_found = 0;
+                }
+            }
+        }
+        free (t);
+        err = k5_mutex_unlock(&key_lock);
+   }
+    
     /* remove thread from global linked list */
 }
 
@@ -305,12 +366,28 @@ int k5_key_delete (k5_key_t keynum)
     /* XXX Memory leak here!
        Need to destroy the associated data for all threads.
        But watch for race conditions in case threads are going away too.  */
+    assert(destructors_set[keynum] == 1);
+    destructors_set[keynum] = 0;
+    destructors[keynum] = 0;
     LeaveCriticalSection(&key_lock);
 
 #else /* POSIX */
 
-    /* Not written yet.  */
-    abort();
+    {
+	int err;
+
+	/* XXX RESOURCE LEAK:
+
+	   Need to destroy the allocated objects first!  */
+
+	err = k5_mutex_lock(&key_lock);
+	if (err == 0) {
+	    assert(destructors_set[keynum] == 1);
+	    destructors_set[keynum] = 0;
+	    destructors[keynum] = NULL;
+	    k5_mutex_unlock(&key_lock);
+	}
+    }
 
 #endif
 
@@ -328,6 +405,10 @@ extern void krb5int_fini_fac(void);
 int krb5int_thread_support_init (void)
 {
     int err;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_init\n");
+#endif
 
 #ifndef ENABLE_THREADS
 
@@ -363,6 +444,10 @@ void krb5int_thread_support_fini (void)
 {
     if (! INITIALIZER_RAN (krb5int_thread_support_init))
 	return;
+
+#ifdef SHOW_INITFINI_FUNCS
+    printf("krb5int_thread_support_fini\n");
+#endif
 
 #ifndef ENABLE_THREADS
 

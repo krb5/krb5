@@ -395,6 +395,25 @@ is, both of which are wrong.
 No known bugs here, but as of IRIX 6.5.7, the version we're using at
 MIT, these functions had not been implemented.
 
+@item Mac OS X
+Two problems have been found with @code{getaddrinfo} on Mac OS X, at
+least under version 10.3.  First, while @code{gethostbyname} data is
+cached to make multiple lookups of the same name (@i{e.g.}, by
+different parts of the code that need to know about the same server
+host), @code{getaddrinfo} results are not cached, so multiple queries
+mean multiple DNS requests, which means more delays if the DNS servers
+are not close by and fast to respond.  We've implemented a cache of
+our own to work around this, though it only applies to multiple
+lookups in a short period of time within the same application process,
+and it's only implemented for the Mac at the moment.
+
+Second, the Mac libraries will generate a DNS SRV RR query; as far as
+I [Ken] can tell this is a bug, but Apple seems to consider it a
+feature.  (Call @code{getaddrinfo("example.com", "telnet", ...)} and
+you get a SRV record query, but the spec on SRV records says you must
+not use them unless the specification for the service in question says
+to.)  Yet more network traffic for each name to look up.
+
 @item NetBSD
 As of NetBSD 1.5, this function is not thread-safe.  In 1.5X
 (intermediate code snapshot between 1.5 and 1.6 releases), the

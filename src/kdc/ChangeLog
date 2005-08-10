@@ -1,3 +1,13 @@
+2005-07-12  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (prepare_error_as):
+	* do_tgs_req.c (prepare_error_tgs): Free scratch only if no error,
+	to avoid double-free.  Thanks to Daniel Wachdorf for discovering
+	these.  Part of fix for MITKRB5-SA-2005-002 [CAN-2005-1174,
+	VU#259798].
+
+	* network.c (process_packet): Initialize response to NULL.
+
 2004-09-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (closedown_network): Free each connection data

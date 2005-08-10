@@ -1,3 +1,20 @@
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Use awk to work around Makefile quoting problems.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): Define.
+
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for xom.h.  Set include_xom to a C include
+	directive or comment, and substitute it in the Makefiles.
+
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * gss_libinit.c: implement cleanup of mutexes, static vars, etc for Windows
+
 2004-07-29  Sam Hartman  <hartmans@mit.edu>
 
 	* libgssapi_krb5.exports: Add lucid context routines and gss_krb5_set_allowable_enctypes

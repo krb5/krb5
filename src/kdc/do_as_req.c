@@ -524,6 +524,10 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
-    *response = scratch;
+    if (retval)
+	free(scratch);
+    else 
+	*response = scratch;
+
     return retval;
 }

@@ -1,3 +1,15 @@
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): Define.
+
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * krb5_libinit.c: implement library cleanup of mutexes, static vars, etc
+
+2005-01-04  Jeffrey Altman <jaltman@mit.edu>
+      
+        * libkrb5.exports: add krb5_is_thread_safe
+
 2004-08-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkrb5.exports: Remove memory ccache symbols except ops table.
