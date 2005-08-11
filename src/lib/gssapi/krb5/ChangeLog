@@ -1,3 +1,9 @@
+2005-08-11  Tom Yu  <tlyu@mit.edu>
+
+	* import_name.c: Include stdio.h regardless of presence of
+	getpwuid_r(), to ensure definition of BUFSIZ.  Reported by
+	Vladimir Terziev.
+
 2005-04-07  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (gssapi_krb5.h): Use awk hack to work around quoting

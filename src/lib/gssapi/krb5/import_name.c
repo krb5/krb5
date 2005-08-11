@@ -28,9 +28,7 @@
 
 #ifndef NO_PASSWORD
 #include <pwd.h>
-#ifdef HAVE_GETPWUID_R
 #include <stdio.h>
-#endif
 #endif
 
 #ifdef HAVE_STRING_H
