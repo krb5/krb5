@@ -76,6 +76,11 @@ void krb5int_thread_detach_hook (void)
     }
 }
 
+/* Stub function not used on Windows. */ 
+int krb5int_pthread_loaded (void)
+{
+    return 0;
+}
 #else /* POSIX threads */
 
 /* Must support register/delete/register sequence, e.g., if krb5 is
