@@ -841,8 +841,9 @@ krb5_get_init_creds(krb5_context context,
     } else if ((ret = krb5_libdefault_string(context, &client->realm,
 					     "ticket_lifetime", &tempstr))
 	       == 0) {
-	if ((ret = krb5_string_to_deltat(tempstr, &tkt_life))) {
-	    free(tempstr);
+	ret = krb5_string_to_deltat(tempstr, &tkt_life);
+	free(tempstr);
+	if (ret) {
 	    goto cleanup;
 	}
     } else {
@@ -858,8 +859,9 @@ krb5_get_init_creds(krb5_context context,
     } else if ((ret = krb5_libdefault_string(context, &client->realm,
 					     "renew_lifetime", &tempstr))
 	       == 0) {
-	if ((ret = krb5_string_to_deltat(tempstr, &renew_life))) {
-	    free(tempstr);
+	ret = krb5_string_to_deltat(tempstr, &renew_life);
+	free(tempstr);
+	if (ret) {
 	    goto cleanup;
 	}
     } else {
