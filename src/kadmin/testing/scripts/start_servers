@@ -41,6 +41,7 @@ if [ $local = 0 ]; then
 	sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 		-e "s/__KDCHOST__/$hostname/g" \
 		-e "s/__LOCALHOST__/$localname/g" \
+		-e "s#__MODDIR__#$TOP/../util/fakedest$libdir/db-modules#g"\
 		< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
 
 # Using /usr/ucb/rsh and getting rid of "-k $REALM" until we get

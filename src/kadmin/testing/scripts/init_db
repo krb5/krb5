@@ -18,12 +18,27 @@ if [ "$STOP" = "" ]; then
 	exit 1
 fi
 
+if [ "$libdir" = "" ]; then
+	echo "init_db: Environment variable \$libdir must point to library install directory" 1>&2
+	exit 1
+fi
+
 IROOT=$TOP/..
 ADMIN=$TOP/dbutil
 BIN=$IROOT/bin
 ETC=$IROOT/etc
+MODDIR=$TOP/../util/fakedest$libdir/db-modules
 SBIN=$TOP/keytab:$TOP/server
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
+
+if [ ! -d $MODDIR ]; then
+	echo "+++" 1>&2
+	echo "+++ Error!  $MODDIR does not exist!" 1>&2
+	echo "+++ The MODDIR variable should point to the directory in which" 1>&2
+	echo "+++ database modules have been installed for testing." 1>&2
+	echo "+++" 1>&2
+	exit 1
+fi
 
 DUMMY=${TESTDIR=$TOP/testing}; export TESTDIR
 DUMMY=${STESTDIR=$STOP/testing}
@@ -67,6 +82,7 @@ qualname=`$QUALNAME`
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	-e "s/__KDCHOST__/$qualname/g" \
 	-e "s/__LOCALHOST__/$qualname/g" \
+	-e "s#__MODDIR__#$MODDIR#g" \
 	< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	< $STESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf

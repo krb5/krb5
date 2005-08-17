@@ -1,3 +1,10 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* env-setup.shin: Export $libdir.
+	* init_db: Substitue __MODDIR__ with the fakedest module
+	directory.
+	* start_servers: Likewise.
+
 2004-09-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* start_servers_local: If one of the servers failed to start, log
