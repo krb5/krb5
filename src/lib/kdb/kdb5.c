@@ -349,6 +349,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 #else
 
 static char *db_dl_location[] = DEFAULT_KDB_LIB_PATH;
+#define db_dl_n_locations (sizeof(db_dl_location) / sizeof(db_dl_location[0]))
 
 static krb5_error_code
 kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
@@ -358,6 +359,11 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     int     ndx;
     void   *vftabl_addr;
     char   *err_str = NULL;
+    const char *const dbpath_names[] = {
+	KDB_MODULE_SECTION, "db_module_dir", NULL,
+    };
+    char **profpath = NULL;
+    char **path = NULL;
 
     if (!strcmp("db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
 	initialize_adb_error_table();
@@ -377,8 +383,28 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     strcpy((*lib)->name, lib_name);
 
-    for (ndx = 0; db_dl_location[ndx]; ndx++) {
-	sprintf(dl_name, "%s/%s.so", db_dl_location[ndx], lib_name);
+    /* Fetch the list of directories specified in the config
+       file(s) first.  */
+    status = profile_get_values(kcontext->profile, dbpath_names, &profpath);
+    if (status != 0 && status != PROF_NO_RELATION)
+	goto clean_n_exit;
+    ndx = 0;
+    if (profpath)
+	while (profpath[ndx] != NULL)
+	    ndx++;
+
+    path = calloc(ndx + db_dl_n_locations, sizeof (char *));
+    if (path == NULL) {
+	status = errno;
+	goto clean_n_exit;
+    }
+    if (ndx)
+	memcpy(path, profpath, ndx * sizeof(profpath[0]));
+    memcpy(path + ndx, db_dl_location, db_dl_n_locations * sizeof(char *));
+    status = 0;
+
+    for (ndx = 0; path[ndx]; ndx++) {
+	sprintf(dl_name, "%s/%s.so", path[ndx], lib_name);
 	(*lib)->dl_handle = dlopen(dl_name, RTLD_NOW);
 	if ((*lib)->dl_handle) {
 	    /* found the module */
@@ -417,6 +443,9 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     }
 
   clean_n_exit:
+    /* Both of these DTRT with NULL.  */
+    profile_free_list(profpath);
+    free(path);
     if (status) {
 	if (*lib) {
 	    kdb_destroy_lib_lock(*lib);
