@@ -1,3 +1,8 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Change db module name to be more obviously not
+	magic.  Point db_module_dir to the fakedest installed version.
+
 2005-07-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.conf.proto: Add a bunch of db module info that should be in
