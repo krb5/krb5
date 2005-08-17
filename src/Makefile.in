@@ -87,6 +87,14 @@ install-headers-prerecurse: install-headers-mkdirs
 # install::
 #	$(MAKE) $(MFLAGS) install.man
 
+fake-install:
+	$(RM) -r $(FAKEPREFIX)
+	@for i in $(INSTALLMKDIRS); do \
+		$(srcdir)/config/mkinstalldirs util/fakedest$$i; \
+	done
+	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
+	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
+
 TAGS: $(SRCS)
 	etags $(SRCS)
 
@@ -569,3 +577,4 @@ krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
 check-unix:: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
+check-prerecurse: fake-install
