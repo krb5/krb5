@@ -1,3 +1,8 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(FAKEPREFIX)/lib): Target deleted.
+	(all-unix): Don't build it.
+
 2005-04-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* depgen.sed: Deleted.

@@ -27,10 +27,6 @@ DL_COMPILE=@DL_COMPILE@
 DL_COMPILE_TAIL=@DL_COMPILE_TAIL@
 
 all-recurse:
-all-unix:: $(FAKEPREFIX)/lib
-
-$(FAKEPREFIX)/lib:
-	$(SRCTOP)/config/mkinstalldirs $(FAKEPREFIX) && ln -s `pwd`/../lib $(FAKEPREFIX)
 
 clean-unix::
 	$(RM) -r $(FAKEPREFIX)
