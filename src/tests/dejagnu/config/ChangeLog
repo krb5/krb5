@@ -3,7 +3,7 @@
 	* default.exp (setup_kerberos_files): Don't write database_name
 	entry into KDC config file.
 	(setup_krb5_conf): Write new config lines for the realm into the
-	krb5.conf file for the KDC.
+	krb5.conf files.
 
 2005-03-14  Ken Raeburn  <raeburn@mit.edu>
 

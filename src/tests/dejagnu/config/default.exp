@@ -920,9 +920,7 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "		kpasswd_server = $hostname:[expr 5 + $portbase]"
 	puts $conffile "		default_domain = $domain"
 	puts $conffile "                krb524_server = $hostname:[expr 7 + $portbase]"
-	if { $type == "kdc" } {
-	    puts $conffile "		database_module = foo_db2"
-	}
+	puts $conffile "		database_module = foo_db2"
 	puts $conffile "	\}"
 	puts $conffile ""
 	puts $conffile "\[domain_realm\]"
@@ -934,14 +932,12 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "	kdc = FILE:$tmppwd/kdc.log"
 	puts $conffile "	default = FILE:$tmppwd/others.log"
 	puts $conffile ""
-	if { $type == "kdc" } {
-	    puts $conffile "\[db_modules\]"
-	    puts $conffile "	db_module_dir = $tmppwd/../../../util/fakedest$KRB5_DB_MODULE_DIR"
-	    puts $conffile "	foo_db2 = {"
-	    puts $conffile "		db_library = db2"
-	    puts $conffile "		database_name = $tmppwd/db"
-	    puts $conffile "	}"
-	}
+	puts $conffile "\[db_modules\]"
+	puts $conffile "	db_module_dir = $tmppwd/../../../util/fakedest$KRB5_DB_MODULE_DIR"
+	puts $conffile "	foo_db2 = {"
+	puts $conffile "		db_library = db2"
+	puts $conffile "		database_name = $tmppwd/db"
+	puts $conffile "	}"
 	close $conffile
     }
 }
