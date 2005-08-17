@@ -1,3 +1,8 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (site.exp): Write KRB5_DB_MODULE_DIR setting into
+	site.exp.  Depend on Makefile.
+
 2004-02-12  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (check-runtest-yes): Add PRIOCNTL_HACK.

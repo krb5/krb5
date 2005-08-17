@@ -41,9 +41,10 @@ runenv.vals: runenv.vars
 	$(KRB5_RUN_ENV) for i in `cat runenv.vars`; do \
 		eval echo "{$$i=\$$$$i}"; done > runenv.vals
 
-site.exp: runenv.vals
+site.exp: runenv.vals Makefile
 	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
+	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
 
 # +++ Dependency line eater +++
 # 
