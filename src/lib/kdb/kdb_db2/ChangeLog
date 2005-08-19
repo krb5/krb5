@@ -33,8 +33,31 @@
 
 	Novell merge.
 	* Makefile.in:
-	* adb_openclose.c:
-	* adb_policy.c:
+	* adb_openclose.c: Moved from lib/kadm5/srv.  Include k5-int.h,
+	policy_db.h, db.h; don't include adb.h.
+	(osa_adb_create_db, osa_adb_destroy_db, osa_adb_rename_db,
+	osa_adb_init_db, osa_adb_fini_db, osa_adb_get_lock,
+	osa_adb_release_lock, osa_adb_open_and_lock,
+	osa_adb_close_and_unlock): Return krb5_error_code instead of
+	osa_adb_ret_t.
+	(osa_adb_rename_db, osa_adb_fini_db, osa_adb_get_lock,
+	osa_adb_release_lock): Change OSA_ADB_* lock flags to
+	KRB5_DB_LOCKMODE_* flags.
+	(osa_adb_get_lock): Initialize return variable.
+	* adb_policy.c: Moved from lib/kadm5/srv.  Include policy_db.h;
+	don't include adb.h.
+	(osa_adb_create_policy_db, osa_adb_rename_policy_db,
+	osa_adb_destroy_policy_db, osa_adb_open_policy,
+	osa_adb_close_policy): Functions deleted.
+	(osa_adb_create_policy, osa_adb_destroy_policy,
+	osa_adb_get_policy, osa_adb_put_policy, osa_adb_iter_policy):
+	Return krb5_error_code instead of osa_adb_ret_t.  Change OSA_ADB_*
+	lock flags to KRB5_DB_LOCKMODE_* flags.
+	(osa_adb_get_policy): Change policy name argument from
+	kadm5_policy_t to char*.  Add int* argument for returning count of
+	entries.  If no entries found, return success and zero count.
+	(osa_free_policy_ent): Moved here from old
+	lib/kadm5/srv/adb_free.c.
 	* configure.in:
 	* db2_exp.c:
 	* kdb_compat.h:
@@ -42,7 +65,8 @@
 	* kdb_db2.h:
 	* kdb_xdr.c:
 	* kdb_xdr.h:
-	* libkdb_db2.exports:
+	* libkdb_db2.exports: New file.  Export only the virtual function
+	table.
 	* pol_xdr.c:
 	* policy_db.h:
 
