@@ -1,3 +1,9 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc.h: Remove krb5_ui_4 casts on RPC defined numbers.
+	Remove argument names from RPC proc declarations.  Reorder
+	declarations, change whitespace.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
