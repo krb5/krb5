@@ -324,11 +324,11 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
      if (code)
 	  goto error;
 
-     r = init_1(&handle->api_version, handle->clnt);
+     r = init_2(&handle->api_version, handle->clnt);
      if (r == NULL) {
 	  code = KADM5_RPC_ERROR;
 #ifdef DEBUG
-	  clnt_perror(handle->clnt, "init_1 null resp");
+	  clnt_perror(handle->clnt, "init_2 null resp");
 #endif
 	  goto error;
      }

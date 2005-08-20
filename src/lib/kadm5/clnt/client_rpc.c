@@ -10,7 +10,7 @@
 static struct timeval TIMEOUT = { 25, 0 };
 
 generic_ret *
-create_principal_1(argp, clnt)
+create_principal_2(argp, clnt)
 	cprinc_arg *argp;
 	CLIENT *clnt;
 {
@@ -24,7 +24,7 @@ create_principal_1(argp, clnt)
 }
 
 generic_ret *
-create_principal3_1(argp, clnt)
+create_principal3_2(argp, clnt)
 	cprinc3_arg *argp;
 	CLIENT *clnt;
 {
@@ -38,7 +38,7 @@ create_principal3_1(argp, clnt)
 }
 
 generic_ret *
-delete_principal_1(argp, clnt)
+delete_principal_2(argp, clnt)
 	dprinc_arg *argp;
 	CLIENT *clnt;
 {
@@ -52,7 +52,7 @@ delete_principal_1(argp, clnt)
 }
 
 generic_ret *
-modify_principal_1(argp, clnt)
+modify_principal_2(argp, clnt)
 	mprinc_arg *argp;
 	CLIENT *clnt;
 {
@@ -66,7 +66,7 @@ modify_principal_1(argp, clnt)
 }
 
 generic_ret *
-rename_principal_1(argp, clnt)
+rename_principal_2(argp, clnt)
 	rprinc_arg *argp;
 	CLIENT *clnt;
 {
@@ -80,7 +80,7 @@ rename_principal_1(argp, clnt)
 }
 
 gprinc_ret *
-get_principal_1(argp, clnt)
+get_principal_2(argp, clnt)
 	gprinc_arg *argp;
 	CLIENT *clnt;
 {
@@ -94,7 +94,7 @@ get_principal_1(argp, clnt)
 }
 
 gprincs_ret *
-get_princs_1(argp, clnt)
+get_princs_2(argp, clnt)
 	gprincs_arg *argp;
 	CLIENT *clnt;
 {
@@ -109,7 +109,7 @@ get_princs_1(argp, clnt)
 }
 
 generic_ret *
-chpass_principal_1(argp, clnt)
+chpass_principal_2(argp, clnt)
 	chpass_arg *argp;
 	CLIENT *clnt;
 {
@@ -123,7 +123,7 @@ chpass_principal_1(argp, clnt)
 }
 
 generic_ret *
-chpass_principal3_1(argp, clnt)
+chpass_principal3_2(argp, clnt)
 	chpass3_arg *argp;
 	CLIENT *clnt;
 {
@@ -137,7 +137,7 @@ chpass_principal3_1(argp, clnt)
 }
 
 generic_ret *
-setv4key_principal_1(argp, clnt)
+setv4key_principal_2(argp, clnt)
 	setv4key_arg *argp;
 	CLIENT *clnt;
 {
@@ -151,7 +151,7 @@ setv4key_principal_1(argp, clnt)
 }
 
 generic_ret *
-setkey_principal_1(argp, clnt)
+setkey_principal_2(argp, clnt)
 	setkey_arg *argp;
 	CLIENT *clnt;
 {
@@ -165,7 +165,7 @@ setkey_principal_1(argp, clnt)
 }
 
 generic_ret *
-setkey_principal3_1(argp, clnt)
+setkey_principal3_2(argp, clnt)
 	setkey3_arg *argp;
 	CLIENT *clnt;
 {
@@ -179,7 +179,7 @@ setkey_principal3_1(argp, clnt)
 }
 
 chrand_ret *
-chrand_principal_1(argp, clnt)
+chrand_principal_2(argp, clnt)
 	chrand_arg *argp;
 	CLIENT *clnt;
 {
@@ -193,7 +193,7 @@ chrand_principal_1(argp, clnt)
 }
 
 chrand_ret *
-chrand_principal3_1(argp, clnt)
+chrand_principal3_2(argp, clnt)
 	chrand3_arg *argp;
 	CLIENT *clnt;
 {
@@ -207,7 +207,7 @@ chrand_principal3_1(argp, clnt)
 }
 
 generic_ret *
-create_policy_1(argp, clnt)
+create_policy_2(argp, clnt)
 	cpol_arg *argp;
 	CLIENT *clnt;
 {
@@ -221,7 +221,7 @@ create_policy_1(argp, clnt)
 }
 
 generic_ret *
-delete_policy_1(argp, clnt)
+delete_policy_2(argp, clnt)
 	dpol_arg *argp;
 	CLIENT *clnt;
 {
@@ -235,7 +235,7 @@ delete_policy_1(argp, clnt)
 }
 
 generic_ret *
-modify_policy_1(argp, clnt)
+modify_policy_2(argp, clnt)
 	mpol_arg *argp;
 	CLIENT *clnt;
 {
@@ -249,7 +249,7 @@ modify_policy_1(argp, clnt)
 }
 
 gpol_ret *
-get_policy_1(argp, clnt)
+get_policy_2(argp, clnt)
 	gpol_arg *argp;
 	CLIENT *clnt;
 {
@@ -263,7 +263,7 @@ get_policy_1(argp, clnt)
 }
 
 gpols_ret *
-get_pols_1(argp, clnt)
+get_pols_2(argp, clnt)
 	gpols_arg *argp;
 	CLIENT *clnt;
 {
@@ -277,7 +277,7 @@ get_pols_1(argp, clnt)
 	return (&res);
 }
 
-getprivs_ret *get_privs_1(argp, clnt)
+getprivs_ret *get_privs_2(argp, clnt)
    void *argp;
    CLIENT *clnt;
 {
@@ -292,7 +292,7 @@ getprivs_ret *get_privs_1(argp, clnt)
 }
 
 generic_ret *
-init_1(argp, clnt)
+init_2(argp, clnt)
    void *argp;
    CLIENT *clnt;
 {

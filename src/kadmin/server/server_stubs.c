@@ -238,7 +238,7 @@ gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str)
 }
 
 generic_ret *
-create_principal_1_svc(cprinc_arg *arg, struct svc_req *rqstp)
+create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg;
@@ -316,7 +316,7 @@ create_principal_1_svc(cprinc_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-create_principal3_1_svc(cprinc3_arg *arg, struct svc_req *rqstp)
+create_principal3_2_svc(cprinc3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg;
@@ -395,7 +395,7 @@ exit_func:
 }
 
 generic_ret *
-delete_principal_1_svc(dprinc_arg *arg, struct svc_req *rqstp)
+delete_principal_2_svc(dprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -469,7 +469,7 @@ delete_principal_1_svc(dprinc_arg *arg, struct svc_req *rqstp)
 }
 
 generic_ret *
-modify_principal_1_svc(mprinc_arg *arg, struct svc_req *rqstp)
+modify_principal_2_svc(mprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -544,7 +544,7 @@ exit_func:
 }
 
 generic_ret *
-rename_principal_1_svc(rprinc_arg *arg, struct svc_req *rqstp)
+rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		ret;
     char			*prime_arg1,
@@ -634,7 +634,7 @@ exit_func:
 }
 
 gprinc_ret *
-get_principal_1_svc(gprinc_arg *arg, struct svc_req *rqstp)
+get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 {
     static gprinc_ret		    ret;
     kadm5_principal_ent_t_v1	    e;
@@ -727,7 +727,7 @@ exit_func:
 }
 
 gprincs_ret *
-get_princs_1_svc(gprincs_arg *arg, struct svc_req *rqstp)
+get_princs_2_svc(gprincs_arg *arg, struct svc_req *rqstp)
 {
     static gprincs_ret		    ret;
     char			    *prime_arg;
@@ -803,7 +803,7 @@ exit_func:
 }
 
 generic_ret *
-chpass_principal_1_svc(chpass_arg *arg, struct svc_req *rqstp)
+chpass_principal_2_svc(chpass_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -884,7 +884,7 @@ exit_func:
 }
 
 generic_ret *
-chpass_principal3_1_svc(chpass3_arg *arg, struct svc_req *rqstp)
+chpass_principal3_2_svc(chpass3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -971,7 +971,7 @@ exit_func:
 }
 
 generic_ret *
-setv4key_principal_1_svc(setv4key_arg *arg, struct svc_req *rqstp)
+setv4key_principal_2_svc(setv4key_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1049,7 +1049,7 @@ exit_func:
 }
 
 generic_ret *
-setkey_principal_1_svc(setkey_arg *arg, struct svc_req *rqstp)
+setkey_principal_2_svc(setkey_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1127,7 +1127,7 @@ exit_func:
 }
 
 generic_ret *
-setkey_principal3_1_svc(setkey3_arg *arg, struct svc_req *rqstp)
+setkey_principal3_2_svc(setkey3_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1208,7 +1208,7 @@ exit_func:
 }
 
 chrand_ret *
-chrand_principal_1_svc(chrand_arg *arg, struct svc_req *rqstp)
+chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
 {
     static chrand_ret		ret;
     krb5_keyblock		*k;
@@ -1305,7 +1305,7 @@ exit_func:
 }
 
 chrand_ret *
-chrand_principal3_1_svc(chrand3_arg *arg, struct svc_req *rqstp)
+chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
 {
     static chrand_ret		ret;
     krb5_keyblock		*k;
@@ -1407,7 +1407,7 @@ exit_func:
 }
 
 generic_ret *
-create_policy_1_svc(cpol_arg *arg, struct svc_req *rqstp)
+create_policy_2_svc(cpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1479,7 +1479,7 @@ exit_func:
 }
 
 generic_ret *
-delete_policy_1_svc(dpol_arg *arg, struct svc_req *rqstp)
+delete_policy_2_svc(dpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1549,7 +1549,7 @@ exit_func:
 }
 
 generic_ret *
-modify_policy_1_svc(mpol_arg *arg, struct svc_req *rqstp)
+modify_policy_2_svc(mpol_arg *arg, struct svc_req *rqstp)
 {
     static generic_ret		    ret;
     char			    *prime_arg;
@@ -1620,7 +1620,7 @@ exit_func:
 }
 
 gpol_ret * 
-get_policy_1_svc(gpol_arg *arg, struct svc_req *rqstp)
+get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
 {
     static gpol_ret		ret;
     kadm5_ret_t		ret2;
@@ -1725,7 +1725,7 @@ exit_func:
 }
 
 gpols_ret *
-get_pols_1_svc(gpols_arg *arg, struct svc_req *rqstp)
+get_pols_2_svc(gpols_arg *arg, struct svc_req *rqstp)
 {
     static gpols_ret		    ret;
     char			    *prime_arg;
@@ -1798,7 +1798,7 @@ exit_func:
     return &ret;
 }
 
-getprivs_ret * get_privs_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
+getprivs_ret * get_privs_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 {
      static getprivs_ret	    ret;
      gss_buffer_desc		    client_name, service_name;
@@ -1856,7 +1856,7 @@ exit_func:
      return &ret;
 }
 
-generic_ret *init_1_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
+generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 {
      static generic_ret		ret;
      gss_buffer_desc		client_name,

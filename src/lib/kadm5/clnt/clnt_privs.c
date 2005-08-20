@@ -5,6 +5,11 @@
  * $Source$
  * 
  * $Log$
+ * Revision 1.4  2005/08/20 09:14:59  raeburn
+ * Rename all RPC functions from _1 to _2 to match current program version number;
+ * likewise _1_svc to _2_svc in the kadmin server.  Delete the RPC functions from
+ * the libkadm5clnt export list.
+ *
  * Revision 1.3  2005/06/21 01:35:56  raeburn
  * Novell Database Abstraction Layer merge.
  * Will probably break things.
@@ -81,7 +86,7 @@ kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
      getprivs_ret *r;
      kadm5_server_handle_t handle = server_handle;
 
-     r = get_privs_1(&handle->api_version, handle->clnt);
+     r = get_privs_2(&handle->api_version, handle->clnt);
      if (r == NULL)
 	  return KADM5_RPC_ERROR;
      else if (r->code == KADM5_OK)

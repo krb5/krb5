@@ -70,7 +70,7 @@ kadm5_create_principal(void *server_handle,
 	 arg.rec.tl_data = NULL;
     }
 	 
-    r = create_principal_1(&arg, handle->clnt);
+    r = create_principal_2(&arg, handle->clnt);
 
     if (handle->api_version == KADM5_API_VERSION_1)
 	 krb5_free_principal(handle->context, arg.rec.mod_name);
@@ -131,7 +131,7 @@ kadm5_create_principal_3(void *server_handle,
 	 arg.rec.tl_data = NULL;
     }
 	 
-    r = create_principal3_1(&arg, handle->clnt);
+    r = create_principal3_2(&arg, handle->clnt);
 
     if (handle->api_version == KADM5_API_VERSION_1)
 	 krb5_free_principal(handle->context, arg.rec.mod_name);
@@ -154,7 +154,7 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
 	return EINVAL;
     arg.princ = principal;
     arg.api_version = handle->api_version;
-    r = delete_principal_1(&arg, handle->clnt);
+    r = delete_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();    
     return r->code;
@@ -203,7 +203,7 @@ kadm5_modify_principal(void *server_handle,
     } else
 	 arg.rec.mod_name = NULL;
     
-    r = modify_principal_1(&arg, handle->clnt);
+    r = modify_principal_2(&arg, handle->clnt);
 
     if (handle->api_version == KADM5_API_VERSION_1)
 	 krb5_free_principal(handle->context, arg.rec.mod_name);    
@@ -232,7 +232,7 @@ kadm5_get_principal(void *server_handle,
     else
        arg.mask = mask;
     arg.api_version = handle->api_version;
-    r = get_principal_1(&arg, handle->clnt);
+    r = get_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
     if (handle->api_version == KADM5_API_VERSION_1) {
@@ -277,7 +277,7 @@ kadm5_get_principals(void *server_handle,
 	return EINVAL;
     arg.exp = exp;
     arg.api_version = handle->api_version;
-    r = get_princs_1(&arg, handle->clnt);
+    r = get_princs_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
     if(r->code == 0) {
@@ -310,7 +310,7 @@ kadm5_rename_principal(void *server_handle,
     arg.api_version = handle->api_version;
     if (source == NULL || dest == NULL)
 	return EINVAL;
-    r = rename_principal_1(&arg, handle->clnt);
+    r = rename_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -332,7 +332,7 @@ kadm5_chpass_principal(void *server_handle,
 
     if(princ == NULL)
 	return EINVAL;
-    r = chpass_principal_1(&arg, handle->clnt);
+    r = chpass_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -359,7 +359,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
     if(princ == NULL)
 	return EINVAL;
-    r = chpass_principal3_1(&arg, handle->clnt);
+    r = chpass_principal3_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -382,7 +382,7 @@ kadm5_setv4key_principal(void *server_handle,
 
     if(princ == NULL || keyblock == NULL)
 	return EINVAL;
-    r = setv4key_principal_1(&arg, handle->clnt);
+    r = setv4key_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -407,7 +407,7 @@ kadm5_setkey_principal(void *server_handle,
 
     if(princ == NULL || keyblocks == NULL)
 	return EINVAL;
-    r = setkey_principal_1(&arg, handle->clnt);
+    r = setkey_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -437,7 +437,7 @@ kadm5_setkey_principal_3(void *server_handle,
 
     if(princ == NULL || keyblocks == NULL)
 	return EINVAL;
-    r = setkey_principal3_1(&arg, handle->clnt);
+    r = setkey_principal3_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();        
     return r->code;
@@ -465,7 +465,7 @@ kadm5_randkey_principal_3(void *server_handle,
 
     if(princ == NULL)
 	return EINVAL;
-    r = chrand_principal3_1(&arg, handle->clnt);
+    r = chrand_principal3_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
     if (handle->api_version == KADM5_API_VERSION_1) {
@@ -518,7 +518,7 @@ kadm5_randkey_principal(void *server_handle,
 
     if(princ == NULL)
 	return EINVAL;
-    r = chrand_principal_1(&arg, handle->clnt);
+    r = chrand_principal_2(&arg, handle->clnt);
     if(r == NULL)
 	eret();
     if (handle->api_version == KADM5_API_VERSION_1) {

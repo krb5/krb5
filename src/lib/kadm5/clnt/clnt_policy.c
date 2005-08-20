@@ -32,7 +32,7 @@ kadm5_create_policy(void *server_handle,
     arg.mask = mask;
     arg.api_version = handle->api_version;
     memcpy(&arg.rec, policy, sizeof(kadm5_policy_ent_rec));
-    r = create_policy_1(&arg, handle->clnt);
+    r = create_policy_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
@@ -58,7 +58,7 @@ kadm5_delete_policy(void *server_handle, char *name)
     arg.name = name;
     arg.api_version = handle->api_version;
 
-    r = delete_policy_1(&arg, handle->clnt);
+    r = delete_policy_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
@@ -86,7 +86,7 @@ kadm5_modify_policy(void *server_handle,
     arg.api_version = handle->api_version;
 
     memcpy(&arg.rec, policy, sizeof(kadm5_policy_ent_rec));
-    r = modify_policy_1(&arg, handle->clnt);
+    r = modify_policy_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
@@ -112,7 +112,7 @@ kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
     if(name == NULL)
 	return EINVAL;
 	
-    r = get_policy_1(&arg, handle->clnt);
+    r = get_policy_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;
     if (handle->api_version == KADM5_API_VERSION_1) {
@@ -153,7 +153,7 @@ kadm5_get_policies(void *server_handle,
 	return EINVAL;
     arg.exp = exp;
     arg.api_version = handle->api_version;
-    r = get_pols_1(&arg, handle->clnt);
+    r = get_pols_2(&arg, handle->clnt);
     if(r == NULL)
 	return KADM5_RPC_ERROR;
     if(r->code == 0) {

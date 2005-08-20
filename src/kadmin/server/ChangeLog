@@ -1,3 +1,8 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_svc.c, server_stubs.c: Rename all RPC functions from
+	_1_svc to _2_svc to match current program version number.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS

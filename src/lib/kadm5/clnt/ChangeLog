@@ -1,3 +1,11 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: Delete RPC functions, and references to
+	adb error table.
+	* client_init.c, client_principal.c, client_rpc.c, clnt_policy.c,
+	clnt_privs.c: Renamed all RPC functions from _1 to _2 to match
+	current program version number.
+
 2005-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* err_handle.c (krb5_err_key): Variable deleted.

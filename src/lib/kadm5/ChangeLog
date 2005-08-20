@@ -4,7 +4,8 @@
 
 	* kadm_rpc.h: Remove krb5_ui_4 casts on RPC defined numbers.
 	Remove argument names from RPC proc declarations.  Reorder
-	declarations, change whitespace.
+	declarations, change whitespace.  Renamed all RPC functions from
+	_1 to _2 to match current program version number.
 
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
