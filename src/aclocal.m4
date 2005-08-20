@@ -40,6 +40,13 @@ else
 fi
 ])dnl
 dnl
+dnl Version info.
+dnl
+define([K5_VERSION],CVS) dnl fix up later
+define([K5_BUGADDR],krb5-bugs@mit.edu)
+define([K5_AC_INIT],[AC_INIT(Kerberos 5, K5_VERSION, K5_BUGADDR, krb5)
+AC_CONFIG_SRCDIR($1)])
+dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl
 AC_DEFUN(CONFIG_RULES,[dnl
