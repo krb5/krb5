@@ -531,6 +531,8 @@ krb5_db2_db_end_update(krb5_context context)
     return (retval);
 }
 
+#define MAX_LOCK_TRIES 5
+
 krb5_error_code
 krb5_db2_db_lock(krb5_context context, int in_mode)
 {
@@ -540,7 +542,7 @@ krb5_db2_db_lock(krb5_context context, int in_mode)
     krb5_error_code retval;
     time_t  mod_time;
     kdb5_dal_handle *dal_handle;
-    int     mode = in_mode & ~KRB5_DB_LOCKMODE_PERMANENT;	/* permanent is not available for principal db */
+    int     mode, gotlock, tries;
 
     switch (in_mode) {
     case KRB5_DB_LOCKMODE_PERMANENT:
@@ -571,20 +573,24 @@ krb5_db2_db_lock(krb5_context context, int in_mode)
     if ((mode != KRB5_LOCKMODE_SHARED) && (mode != KRB5_LOCKMODE_EXCLUSIVE))
 	return KRB5_KDB_BADLOCKMODE;
 
-    if (db_ctx->db_nb_locks)
-	krb5_lock_mode = mode | KRB5_LOCKMODE_DONTBLOCK;
-    else
-	krb5_lock_mode = mode;
-    retval = krb5_lock_file(context, db_ctx->db_lf_file, krb5_lock_mode);
-    switch (retval) {
-    case EBADF:
-	if (mode == KRB5_LOCKMODE_EXCLUSIVE)
+    krb5_lock_mode = mode | KRB5_LOCKMODE_DONTBLOCK;
+    for (gotlock = tries = 0; tries < MAX_LOCK_TRIES; tries++) {
+	retval = krb5_lock_file(context, db_ctx->db_lf_file, krb5_lock_mode);
+	if (retval == 0) {
+	    gotlock++;
+	    break;
+	} else if (retval == EBADF && mode == KRB5_DB_LOCKMODE_EXCLUSIVE)
+	    /* tried to exclusive-lock something we don't have */
+	    /* write access to */
 	    return KRB5_KDB_CANTLOCK_DB;
-    default:
-	return retval;
-    case 0:
-	break;
+	sleep(1);
     }
+    if (retval == EACCES)
+	return KRB5_KDB_CANTLOCK_DB;
+    else if (retval == EAGAIN || retval == EWOULDBLOCK)
+	return OSA_ADB_CANTLOCK_DB;
+    else if (retval != 0)
+	return retval;
 
     if ((retval = krb5_db2_db_get_age(context, NULL, &mod_time)))
 	goto lock_error;

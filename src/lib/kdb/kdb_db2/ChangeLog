@@ -1,3 +1,9 @@
+2005-08-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_db2.c (MAX_LOCK_TRIES): New macro.
+	(krb5_db2_db_lock): Always make non-blocking attempts to acquire
+	the lock.  Retry up to MAX_LOCK_TRIES times on failure.
+
 2005-07-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LIBBASE): Change to db2.
