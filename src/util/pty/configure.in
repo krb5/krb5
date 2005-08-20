@@ -1,4 +1,4 @@
-AC_INIT(getpty.c)
+K5_AC_INIT(getpty.c)
 CONFIG_RULES
 AC_PROG_AWK
 AC_CHECK_FUNCS(fchmod fchown revoke vhangup killpg _getpty)

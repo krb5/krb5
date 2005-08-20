@@ -1,4 +1,4 @@
-AC_INIT(auth_gssapi.c)
+K5_AC_INIT(auth_gssapi.c)
 CONFIG_RULES
 AC_CONFIG_SUBDIRS(unit-test)
 AC_CHECK_HEADERS(sys/uio.h sys/param.h)

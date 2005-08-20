@@ -1,5 +1,4 @@
-AC_INIT(Kerberos 5, CVS, krb5-bugs@mit.edu, krb5)
-AC_CONFIG_SRCDIR([aclocal.m4])
+K5_AC_INIT([aclocal.m4])
 dnl
 dnl autoconf 2.49 defaults to a /dev/null cache file, which is what we
 dnl do not want for performance reasons. 

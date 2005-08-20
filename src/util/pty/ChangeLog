@@ -1,3 +1,7 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
 2004-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* pty-int.h: Include util.h if present.

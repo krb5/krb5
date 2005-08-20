@@ -1,4 +1,4 @@
-AC_INIT(configure.in)
+K5_AC_INIT(configure.in)
 CONFIG_RULES
 KRB5_RUN_FLAGS
 KRB5_BUILD_PROGRAM

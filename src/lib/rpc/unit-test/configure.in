@@ -1,4 +1,4 @@
-AC_INIT(client.c)
+K5_AC_INIT(client.c)
 CONFIG_RULES
 dnl sets $(krb5_cv_host)
 KRB5_BUILD_PROGRAM

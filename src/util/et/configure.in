@@ -1,4 +1,4 @@
-AC_INIT(error_table.y)
+K5_AC_INIT(error_table.y)
 CONFIG_RULES
 AC_C_CONST
 AC_PROG_LEX

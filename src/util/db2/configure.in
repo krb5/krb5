@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(db/db.c)
+K5_AC_INIT(db/db.c)
 AC_CONFIG_HEADER(include/config.h include/db-config.h)
 CONFIG_RULES
 

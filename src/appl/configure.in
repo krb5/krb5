@@ -1,4 +1,4 @@
-AC_INIT(configure.in)
+K5_AC_INIT(configure.in)
 CONFIG_RULES
 KRB5_AC_INET6
 AC_PROG_INSTALL

@@ -1,4 +1,4 @@
-AC_INIT(prof_parse.c)
+K5_AC_INIT(prof_parse.c)
 CONFIG_RULES
 AC_C_CONST
 AC_CHECK_SIZEOF(short)
