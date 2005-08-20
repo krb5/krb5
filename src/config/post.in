@@ -142,7 +142,9 @@ $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 # autom4te.cache supposedly improves performance with multiple runs, but
 # it breaks across versions, and around MIT we've got plenty of version
 # mixing.  So nuke it.
-$(srcdir)/$(thisconfigdir)/configure: @MAINT@ $(srcdir)/$(thisconfigdir)/configure.in \
+$(srcdir)/$(thisconfigdir)/configure: @MAINT@ \
+		$(srcdir)/$(thisconfigdir)/configure.in \
+		$(SRCTOP)/patchlevel.h \
 		$(SRCTOP)/aclocal.m4
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 	cd $(srcdir)/$(thisconfigdir) && \
