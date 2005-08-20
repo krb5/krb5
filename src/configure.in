@@ -8,17 +8,9 @@ if test "x$cache_file" = "x/dev/null"; then
 fi
 dnl
 CONFIG_RULES
-dnl
-dnl Determine version from patchlevel.h
-eval `sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p' < $srcdir/patchlevel.h`
-KRB5_VERSION="$KRB5_MAJOR_RELEASE.$KRB5_MINOR_RELEASE"
-if test "$KRB5_PATCHLEVEL" = 0; then :; else
-  KRB5_VERSION="$KRB5_VERSION.$KRB5_PATCHLEVEL"
-fi
-if test -n "$KRB5_RELTAIL"; then
-  KRB5_VERSION="$KRB5_VERSION-$KRB5_RELTAIL"
-fi
+KRB5_VERSION=K5_VERSION
 AC_SUBST(KRB5_VERSION)
+dnl
 dnl
 AC_REQUIRE_CPP
 dnl
