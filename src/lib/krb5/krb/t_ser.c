@@ -202,7 +202,6 @@ ser_kcontext_test(krb5_context kcontext, int verbose)
     krb5_error_code	kret;
     profile_t		sprofile;
     char		dbname[128];
-    char		*argv[] = { dbname, NULL };
 
     sprintf(dbname, "temp_%d", (int) getpid());
     sprofile = kcontext->profile;
