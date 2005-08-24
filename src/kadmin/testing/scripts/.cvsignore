@@ -1,8 +1,0 @@
-env-setup.sh
-env-setup.stamp
-fixup-conf-files.pl
-compare_dump.pl
-verify_xrunner_report.pl
-make-host-keytab.pl
-simple_dump.pl
-qualname.pl
