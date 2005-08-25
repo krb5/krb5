@@ -1,7 +1,9 @@
 2005-08-25  Ken Raeburn  <raeburn@mit.edu>
 
-	* kadm5/api-unit-test.tex (ovsec_kadm_create_principal): Fix
-	missing closing brace that prevent latex from finishing.
+	* kadm5/adb-unit-test.tex: Use RCS Id keyword instead of Header.
+	* kadm5/api-unit-test.tex: Likewise.
+	(ovsec_kadm_create_principal): Fix missing closing brace that
+	prevent latex from finishing.
 
 2005-04-21  Ken Raeburn  <raeburn@mit.edu>
 
