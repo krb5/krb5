@@ -1,3 +1,7 @@
+2005-08-29  Sam Hartman  <hartmans@mit.edu>
+
+	* kadm5/api-server-design.tex kadm5/api-funcspec.tex:  Avoid using  changebar.sty
+
 2005-08-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadm5/adb-unit-test.tex: Use RCS Id keyword instead of Header.

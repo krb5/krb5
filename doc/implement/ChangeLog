@@ -1,3 +1,7 @@
+2005-08-29  Sam Hartman  <hartmans@mit.edu>
+
+	* implement.tex: Avoid use of changebar.sty
+
 2001-11-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile (clean): Delete *.ilg.

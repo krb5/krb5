@@ -1,6 +1,6 @@
 .SUFFIXES: .tex .dvi .ps
 
-STYLES=changebar.sty fixunder.sty functions.sty
+STYLES= fixunder.sty functions.sty
 LIBTEX= implement.tex ccache-i.tex rcache-i.tex keytab-i.tex libos-i.tex \
 	kdb-i.tex encrypt-i.tex cksum-i.tex crc-32-i.tex implement.ind
 
