@@ -1,3 +1,7 @@
+2005-08-29  Sam Hartman  <hartmans@mit.edu>
+
+	* kadm5/api-server-design.tex kadm5/api-funcspec.tex:  Avoid using  changebar.sty
+
 2005-02-11  Tom Yu  <tlyu@mit.edu>
 
 	* kadm5/api-unit-test.tex (ovsec_kadm_init): Update to reflect

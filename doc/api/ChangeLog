@@ -1,3 +1,7 @@
+2005-08-29  Sam Hartman  <hartmans@mit.edu>
+
+	* library.tex: Don't use changebar.sty
+
 2003-05-09  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.tex: Update subkey-related information to match code.
