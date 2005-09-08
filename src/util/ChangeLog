@@ -1,3 +1,7 @@
+2005-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Update for svn.
+
 2005-08-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in ($(FAKEPREFIX)/lib): Target deleted.

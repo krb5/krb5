@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-repository=:gserver:cvs.mit.edu:/cvs/krbdev
+repository=svn+ssh://svn.mit.edu/krb5
 dodoc=t
 dosrc=t
 checkout=t
@@ -22,6 +22,7 @@ while test $# -gt 2; do
 done
 if test $# -lt 2; then
 	echo "usage: $0 [opts] release-tag release-dir"
+	echo "	release-tag is relative to $repository/"
 	exit 1
 fi
 
@@ -97,7 +98,7 @@ echo "major=$relmajor minor=$relminor patch=$relpatch"
 # so, we don't edit it here.
 #
 if test $checkout = t; then
-	if cvs -q -d $repository checkout -p -r$reltag krb5/src/patchlevel.h | grep KRB5_RELDATE > /dev/null 2>&1; then
+	if svn cat $repository/$reltag/src/patchlevel.h | grep KRB5_RELDATE > /dev/null 2>&1; then
 		newstyle=t
 	else
 		newstyle=nil;
@@ -113,11 +114,12 @@ fi
 if test $newstyle = t; then
 	echo "parsing new style patchlevel.h..."
 	if test $checkout = t; then
-		eval `cvs -q -d $repository checkout -p -r$reltag krb5/src/patchlevel.h | sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p'`
+		eval `svn cat $repository/$reltag/src/patchlevel.h | sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p'`
 	else
 		eval `sed -n 's/#define \([A-Z0-9_]*\)[ \t]*\(.*\)/\1=\2/p' < $reldir/src/patchlevel.h`
 	fi
-	if test "$KRB5_RELTAG" != $reltag; then
+	if test "$KRB5_RELTAG" != $reltag && \
+		test "$KRB5_RELTAG" != `echo $reltag|sed 's%[^/]*/%%'` ; then
 		echo "WARNING: patchlevel.h '$KRB5_RELTAG' != $reltag"
 	fi
 	if test "$KRB5_MAJOR_RELEASE" != "$relmajor" || \
@@ -134,7 +136,7 @@ fi
 
 if test $checkout = t; then
 	echo "Checking out krb5 with tag $reltag into directory $reldir..."
-	cvs -q -d $repository export -r$reltag -d $reldir krb5
+	svn export $repository/$reltag $reldir
 fi
 
 if test $dosrc = t; then
