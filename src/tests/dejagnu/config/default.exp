@@ -2307,6 +2307,8 @@ proc v4klist_none { testname } {
 # Kerberos must already be installed on this machine.  It's a pain,
 # but I can't think of a better approach.
 
+if ![info exists can_get_root] { set can_get_root yes }
+
 proc setup_root_shell { testname } {
     global BINSH
     global ROOT_PROMPT
@@ -2319,8 +2321,15 @@ proc setup_root_shell { testname } {
     global tmppwd
     global env
     global krb5_init_vars
+    global can_get_root
 
     global timeout
+
+    if [string match $can_get_root no] {
+	note "$testname test requires ability to log in as root"
+	unsupported $testname
+	return 0
+    }
 
     # Make sure we are using the original values of the environment
     # variables.  This means that the caller must call
@@ -2337,6 +2346,7 @@ proc setup_root_shell { testname } {
     }
 
     if ![get_hostname] {
+	set can_get_root no
 	return 0
     }
 
@@ -2369,6 +2379,7 @@ proc setup_root_shell { testname } {
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell
+	    set can_get_root no
 	    return 0
 	}
 	"Cannot assign requested address" {
@@ -2376,6 +2387,7 @@ proc setup_root_shell { testname } {
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell
+	    set can_get_root no
 	    return 0
 	}
 	-re "usage: rlogin|illegal option -- x|invalid option -- x" {
@@ -2383,6 +2395,7 @@ proc setup_root_shell { testname } {
 	    unsupported "$testname"
 	    set timeout $old_timeout
 	    stop_root_shell
+	    set can_get_root no
 	    return 0
 	}
 	-re "$ROOT_PROMPT" { }
@@ -2392,6 +2405,7 @@ proc setup_root_shell { testname } {
 	    perror "try running with ROOT_PROMPT=\"regexp\""
 	    set timeout $old_timeout
 	    stop_root_shell
+	    set can_get_root no
 	    return 0
 	}
 	eof {
@@ -2409,6 +2423,7 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
+	    set can_get_root no
 	    return 0
 	}
     }
@@ -2419,6 +2434,7 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
+	    set can_get_root no
 	    return 0
 	}
 	eof {
@@ -2426,6 +2442,7 @@ proc setup_root_shell { testname } {
 	    stop_root_shell
 	    set timeout $old_timeout
 	    catch "expect_after"
+	    set can_get_root no
 	    return 0
 	}
     }
@@ -2478,6 +2495,7 @@ proc setup_root_shell { testname } {
 	    perror "root shell can not cd to $dir"
 	    set timeout $old_timeout
 	    stop_root_shell
+	    set can_get_root no
 	    return 0
 	}
     }

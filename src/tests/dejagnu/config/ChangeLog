@@ -1,3 +1,10 @@
+2005-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Initialize can_get_root to yes.
+	(setup_root_shell): If can_get_root is "no", log a message and
+	return, without making another attempt.  On failing attempts, set
+	can_get_root to "no".
+
 2005-08-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp (setup_kerberos_files): Don't write database_name
