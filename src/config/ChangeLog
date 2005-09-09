@@ -1,3 +1,10 @@
+2005-09-01  Marc Aurele La France  <tsi@ualberta.ca>
+
+	* shlib.conf (case *-*-aix5.3*):  Generate proper shared libraries
+	acceptable to dlopen(3) (as in mechglue, for example).  Allows for
+	building both shared and static libraries in one run.  Only done for
+	AIX 5.3, but probably should be done for earlier versions.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in (configure): Depend on patchlevel.h.
