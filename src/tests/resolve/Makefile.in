@@ -6,21 +6,30 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-OBJS=resolve.o
-SRCS=$(srcdir)/resolve.c
+OBJS=resolve.o addrinfo-test.o fake-addrinfo-test.o
+SRCS=$(srcdir)/resolve.c $(srcdir)/addrinfo-test.c \
+	$(srcdir)/fake-addrinfo-test.c
 
-all:: resolve
+all:: resolve addrinfo-test fake-addrinfo-test
 
-resolve: $(OBJS)
-	$(CC_LINK) -o resolve $(OBJS) $(LIBS)
+resolve: resolve.o
+	$(CC_LINK) -o $@ $< $(LIBS)
 
-check:: resolve
+addrinfo-test: addrinfo-test.o
+	$(CC_LINK) -o $@ $< $(LIBS)
+
+fake-addrinfo-test: fake-addrinfo-test.o
+	$(CC_LINK) -o $@ $< $(SUPPORT_LIB) $(LIBS)
+
+check:: resolve addrinfo-test
 	$(RUN_SETUP) ./resolve
+	$(RUN_SETUP) ./addrinfo-test -p telnet
+	$(RUN_SETUP) ./fake-addrinfo-test -p telnet
 
 install::
 
 clean::
-	$(RM) resolve
+	$(RM) resolve addrinfo-test
 
 # +++ Dependency line eater +++
 # 
@@ -28,3 +37,9 @@ clean::
 # the Makefile.in file
 #
 $(OUTPRE)resolve.$(OBJEXT): resolve.c
+$(OUTPRE)addrinfo-test.$(OBJEXT): addrinfo-test.c
+$(OUTPRE)fake-addrinfo-test.$(OBJEXT): fake-addrinfo-test.c \
+  addrinfo-test.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h

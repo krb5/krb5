@@ -37,6 +37,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -84,7 +85,7 @@ static const char *socktypename (int t) {
 
 static char *whoami;
 
-void usage () {
+static void usage () {
     fprintf(stderr,
 	    "usage:\n"
 	    "\t%s [ options ] [host]\n"
@@ -103,6 +104,7 @@ void usage () {
 	    "\n"
 	    "\t-p P\tspecify port P (service name or port number)\n"
 	    "\t-N\thostname is numeric, skip DNS query\n"
+	    "\t-n\tservice/port is numeric (sets AI_NUMERICSERV)\n"
 	    "\t-P\tset AI_PASSIVE\n"
 	    "\n"
 	    "default: protocol 0, socket type 0, address family 0, null port\n"
@@ -128,7 +130,7 @@ static const char *familyname (int f) {
 int main (int argc, char *argv[])
 {
     struct addrinfo *ap, *ap2;
-    int err, numeric = 0;
+    int err, numerichost = 0, numericserv = 0;
     char *hname, *port = 0, *sep;
     struct addrinfo hints;
 
@@ -144,6 +146,9 @@ int main (int argc, char *argv[])
 
     hname = 0;
     hints.ai_family = 0;
+
+    if (argc == 1)
+	usage ();
 
     while (++argv, --argc > 0) {
 	char *arg;
@@ -189,7 +194,10 @@ int main (int argc, char *argv[])
 		hints.ai_family = AF_INET6;
 		break;
 	    case 'N':
-		numeric = 1;
+		numerichost = 1;
+		break;
+	    case 'n':
+		numericserv = 1;
 		break;
 	    case 'P':
 		hints.ai_flags |= AI_PASSIVE;
@@ -199,13 +207,21 @@ int main (int argc, char *argv[])
 	    }
     }
 
-    if (hname && !numeric)
+    if (hname && !numerichost)
 	hints.ai_flags |= AI_CANONNAME;
-    if (numeric) {
+    if (numerichost) {
 #ifdef AI_NUMERICHOST
 	hints.ai_flags |= AI_NUMERICHOST;
 #else
 	fprintf(stderr, "AI_NUMERICHOST not defined on this platform\n");
+	exit(1);
+#endif
+    }
+    if (numericserv) {
+#ifdef AI_NUMERICSERV
+	hints.ai_flags |= AI_NUMERICSERV;
+#else
+	fprintf(stderr, "AI_NUMERICSERV not defined on this platform\n");
 	exit(1);
 #endif
     }
@@ -219,6 +235,9 @@ int main (int argc, char *argv[])
     Z(PASSIVE);
 #ifdef AI_NUMERICHOST
     Z(NUMERICHOST);
+#endif
+#ifdef AI_NUMERICSERV
+    Z(NUMERICSERV);
 #endif
     if (sep[0] == 0)
 	printf ("no-flags");
@@ -273,11 +292,11 @@ int main (int argc, char *argv[])
 	printf("\taddr = %-28s\tport = %s\n", hbuf, pbuf);
 
 	err = getnameinfo(ap2->ai_addr, ap2->ai_addrlen, hbuf, sizeof (hbuf),
-			  0, 0, NI_NAMEREQD);
+			  pbuf, sizeof(pbuf), NI_NAMEREQD);
 	if (err)
 	    printf("\tgetnameinfo(NI_NAMEREQD): %s\n", eaistr(err));
 	else
-	    printf("\tgetnameinfo => %s\n", hbuf);
+	    printf("\tgetnameinfo => %s, %s\n", hbuf, pbuf);
     }
     return 0;
 }

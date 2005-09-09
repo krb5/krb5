@@ -1,3 +1,20 @@
+2005-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake-addrinfo-test.c: New file.
+	* Makefile.in (check): Do pass arguments to addrinfo-test
+	invocation added by Marc's patch.
+	(fake-addrinfo-test): New target.
+	(all): Depend on it.
+	(SRCS): Fix typo in last change.  Add fake-addrinfo-test.c.
+	(OBJS): Add fake-addrinfo-test.o.
+
+2005-09-01  Marc Aurele La France  <tsi@ualberta.ca>
+
+	* Makefile.in:  Build addrinfo-test.
+	* addrinfo-test.c (main):  'numeric' -> 'numerichost';  Add -n option
+	to set AI_NUMERICSERV (if available);  print usage message when no
+	arguments are given.
+
 2004-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* addrinfo-test.c: New file.
