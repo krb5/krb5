@@ -1,3 +1,12 @@
+2005-09-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* fake_addrinfo.c (getaddrinfo): Conditionalize last change on
+	AI_NUMERICSERV being defined.
+
+2005-09-01  Marc Aurele La France  <tsi@ualberta.ca>
+
+	* fake_addrinfo.c (getaddrinfo):  AI_NUMERICSERV fix for AIX.
+
 2005-07-28  Jeffrey Altman <jaltman@mit.edu>
 
         * threads.c: Stub krb5int_pthread_loaded added for Windows

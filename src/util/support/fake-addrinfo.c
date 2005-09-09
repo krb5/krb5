@@ -1109,7 +1109,12 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 		return EAI_SOCKTYPE;
 	    service_is_numeric = 1;
 	    service_port = htons(lport);
-	    serv = "discard";	/* defined for both udp and tcp */
+#ifdef AI_NUMERICSERV
+	    if (hint && hint->ai_flags & AI_NUMERICSERV)
+		serv = "9";
+	    else
+#endif
+		serv = "discard";	/* defined for both udp and tcp */
 	    if (hint)
 		socket_type = hint->ai_socktype;
 	}
