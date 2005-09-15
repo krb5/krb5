@@ -1,3 +1,12 @@
+2005-09-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm_proto.h (krb5_adm_connect, krb5_adm_disconnect,
+	krb5_adm_dbent_to_proto, krb5_adm_proto_to_dbent,
+	krb5_adm_proto_to_ktent, krb5_adm_ktent_to_proto,
+	krb5_free_adm_data, krb5_send_adm_cmd, krb5_send_adm_reply,
+	krb5_read_adm_cmd, krb5_read_adm_reply): Delete declarations,
+	since none of these functions exist.
+
 2005-06-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (osconf.h): Depend on Makefile.  Always display
