@@ -1,3 +1,8 @@
+2005-09-16  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c (USE_RES_NINIT): Fix braino: define to 1, not empty
+	string.
+
 2005-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.c: Implement better logic for choosing whether to use

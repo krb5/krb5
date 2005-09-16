@@ -37,7 +37,7 @@
  * res_ninit() will have thread safety hacks for res_init() and _res.
  */
 #if HAVE_RES_NINIT && HAVE_RES_NDESTROY && HAVE_RES_NSEARCH
-#define USE_RES_NINIT
+#define USE_RES_NINIT 1
 #endif
 
 /*
