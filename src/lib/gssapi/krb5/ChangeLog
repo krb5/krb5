@@ -1,3 +1,10 @@
+2005-09-21  Tom Yu  <tlyu@mit.edu>
+
+	* inq_cred.c (krb5_gss_inquire_cred): Initialize ret_name to
+	NULL.  Only call kg_save_name() if ret_name is actually non-NULL.
+	Return GSS_C_NO_NAME for now if no principal name in the cred.
+	Reported by Christoph Weizen.
+
 2005-08-11  Tom Yu  <tlyu@mit.edu>
 
 	* import_name.c: Include stdio.h regardless of presence of
