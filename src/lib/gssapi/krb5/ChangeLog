@@ -1,5 +1,9 @@
 2005-09-21  Tom Yu  <tlyu@mit.edu>
 
+	* duplicate_name.c (krb5_gss_duplicate_name):
+	* export_name.c (krb5_gss_export_name): Fix gsstest nit by
+	clearing minor_status if no errors.
+
 	* inq_cred.c (krb5_gss_inquire_cred): Initialize ret_name to
 	NULL.  Only call kg_save_name() if ret_name is actually non-NULL.
 	Return GSS_C_NO_NAME for now if no principal name in the cred.

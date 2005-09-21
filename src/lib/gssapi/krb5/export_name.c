@@ -36,9 +36,13 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	size_t length;
 	char *str, *cp;
 
+	if (minor_status)
+		*minor_status = 0;
+
 	code = krb5_init_context(&context);
 	if (code) {
-	    *minor_status = code;
+	    if (minor_status)
+		*minor_status = code;
 	    return GSS_S_FAILURE;
 	}
 
@@ -54,7 +58,8 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 
 	if ((code = krb5_unparse_name(context, (krb5_principal) input_name, 
 				      &str))) {
-		*minor_status = code;
+		if (minor_status)
+			*minor_status = code;
 		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	}
@@ -65,7 +70,8 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	exported_name->value = malloc(exported_name->length);
 	if (!exported_name->value) {
 		free(str);
-		*minor_status = ENOMEM;
+		if (minor_status)
+			*minor_status = ENOMEM;
 		return(GSS_S_FAILURE);
 	}
 	cp = exported_name->value;
