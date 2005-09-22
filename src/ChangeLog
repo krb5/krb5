@@ -1,3 +1,8 @@
+2005-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* aclocal.m4 (AC_LIBRARY_NET): Check for a few more libresolv
+	functions.
+
 2005-07-19  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_LIBRARY_NET): Special-case AIX 5.x due to broken

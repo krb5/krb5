@@ -1,3 +1,16 @@
+2005-09-16  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c (USE_RES_NINIT): Fix braino: define to 1, not empty
+	string.
+
+2005-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* dnsglue.c: Implement better logic for choosing whether to use
+	res_ninit().  If res_ndestroy() doesn't exist, assume that
+	res_ninit() is broken and use res_init(), res_search(),
+	etc. instead, on the theory that the OS vendor has made the older
+	interfaces thread-safe.
+
 2005-06-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* sendto_kdc.c (service_fds): Don't create a select_state on the

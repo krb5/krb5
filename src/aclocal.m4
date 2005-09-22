@@ -1379,16 +1379,8 @@ AC_DEFUN(AC_LIBRARY_NET, [
     # This may get us a gethostby* that doesn't respect nsswitch.
     AC_CHECK_LIB(resolv, main)
 
-    case $krb5_cv_host in
-    *-*-aix5*)
-	# AIX 5 has broken res_ninit due to resolv.h not having the correct
-	# size of struct __res_state; since we switch off of res_nsearch()
-	# rather than res_ninit(), pretend res_nsearch() is not available.
-	krb5_cv_func_res_nsearch=no
-	;;
-    esac
-_KRB5_AC_CHECK_RES_FUNCS(res_nsearch res_search ns_initparse dnl
-ns_name_uncompress dn_skipname res_ndestroy)
+_KRB5_AC_CHECK_RES_FUNCS(res_ninit res_nclose res_ndestroy res_nsearch dnl
+ns_initparse ns_name_uncompress dn_skipname res_search)
     if test $krb5_cv_func_res_nsearch = no \
       && test $krb5_cv_func_res_search = no; then
 	# Attempt to link with res_search(), in case it's not prototyped.
