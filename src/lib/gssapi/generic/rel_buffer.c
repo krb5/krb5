@@ -47,8 +47,7 @@ generic_gss_release_buffer (minor_status,
     if (buffer == GSS_C_NO_BUFFER)
 	return(GSS_S_COMPLETE);
 
-    if ((buffer->length) &&
-	(buffer->value)) {
+    if (buffer->value) {
 	free(buffer->value);
 	buffer->length = 0;
 	buffer->value = NULL;
