@@ -1,3 +1,8 @@
+2005-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* rel_buffer.c (generic_gss_release_buffer): Free buffer even if
+	length is zero.  This avoids memory leaks in some cases.
+
 2005-04-07  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (gssapi.h): Use awk hack to work around quoting
