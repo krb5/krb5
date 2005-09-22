@@ -1,3 +1,9 @@
+2005-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* mk_req_ext.c (krb5int_generate_and_save_subkey): Check for and
+	free pre-existing subkeys before clobbering the pointers.  This
+	fixes some memory leaks.
+
 2005-08-23  Ezra Peisach  <epeisach@mit.edu>
 
 	* t_ser.c (ser_kcontext_test): Remove statement declaring an
