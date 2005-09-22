@@ -35,9 +35,13 @@ OM_uint32 krb5_gss_duplicate_name(OM_uint32  *minor_status,
 	krb5_error_code code;
 	krb5_principal princ, outprinc;
 
+	if (minor_status)
+	    *minor_status = 0;
+
 	code = krb5_init_context(&context);
 	if (code) {
-	    *minor_status = code;
+	    if (minor_status)
+		*minor_status = code;
 	    return GSS_S_FAILURE;
 	}
 
