@@ -187,6 +187,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 	 
 	 stringrep = tmp2;
      } else {
+	 xfree(tmp);
 	 krb5_free_context(context);
 	 return(GSS_S_BAD_NAMETYPE);
       }

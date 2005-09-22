@@ -1,5 +1,12 @@
 2005-09-21  Tom Yu  <tlyu@mit.edu>
 
+	* import_name.c (krb5_gss_import_name): Add missing free of tmp in
+	an error case to fix a memory leak.
+
+	* inq_cred.c (krb5_gss_inquire_cred): Memory leak fixes: call
+	krb5_gss_release_cred() with address of cred, not cred; add
+	missing call to krb5_gss_release_cred() in an error case.
+
 	* duplicate_name.c (krb5_gss_duplicate_name):
 	* export_name.c (krb5_gss_export_name): Fix gsstest nit by
 	clearing minor_status if no errors.
