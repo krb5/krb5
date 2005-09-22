@@ -1,3 +1,9 @@
+2005-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* mk_req_ext.c (krb5int_generate_and_save_subkey): Check for and
+	free pre-existing subkeys before clobbering the pointers.  This
+	fixes some memory leaks.
+
 2005-08-15  Tom Yu  <tlyu@mit.edu>
 
 	* get_in_tkt.c (krb5_get_init_creds): Free tempstr on non-error
