@@ -92,6 +92,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    OM_uint32 ret;
 
    ret = GSS_S_FAILURE;
+   ret_name = NULL;
 
    code = krb5_init_context(&context);
    if (code) {
@@ -164,14 +165,15 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 							   (gss_OID) gss_mech_krb5,
 							   &mechs)))) {
 	   k5_mutex_unlock(&cred->lock);
-	   krb5_free_principal(context, ret_name);
+	   if (ret_name)
+	       krb5_free_principal(context, ret_name);
 	   /* *minor_status set above */
 	   goto fail;
        }
    }
 
    if (name) {
-      if (! kg_save_name((gss_name_t) ret_name)) {
+      if (ret_name != NULL && ! kg_save_name((gss_name_t) ret_name)) {
 	 k5_mutex_unlock(&cred->lock);
 	 (void) gss_release_oid_set(minor_status, &mechs);
 	 krb5_free_principal(context, ret_name);
@@ -179,7 +181,10 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
-      *name = (gss_name_t) ret_name;
+      if (ret_name != NULL)
+	  *name = (gss_name_t) ret_name;
+      else
+	  *name = GSS_C_NO_NAME;
    }
 
    if (lifetime_ret)
