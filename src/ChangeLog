@@ -1,3 +1,10 @@
+2005-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* modules, modules/kdb: New directories.
+	* modules/kdb/db2: Moved from lib/kdb/kdb_db2.
+	* Makefile.in (SUBDIRS): Add modules/kdb/db2.
+	* configure.in: Configure in that directory.
+
 2005-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_LIBRARY_NET): Check for a few more libresolv

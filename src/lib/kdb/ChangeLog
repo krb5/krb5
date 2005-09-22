@@ -1,3 +1,8 @@
+2005-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_db2: Directory moved to modules/kdb/db2.
+	* configure.in: Don't configure it.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

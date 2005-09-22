@@ -20,7 +20,7 @@ static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~
 #include <stdio.h>
 #include <errno.h>
 #include <utime.h>
-#include "../kdb5.h"
+#include "kdb5.h"
 #include "kdb_db2.h"
 #include "kdb_xdr.h"
 #include "policy_db.h"

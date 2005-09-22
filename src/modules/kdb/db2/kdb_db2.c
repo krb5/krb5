@@ -60,7 +60,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <utime.h>
-#include "../kdb5.h"
+#include "kdb5.h"
 #include "kdb_db2.h"
 #include "kdb_xdr.h"
 #include "policy_db.h"

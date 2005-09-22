@@ -1,5 +1,5 @@
 thisconfigdir=.
-myfulldir=lib/kdb/kdb_db2
+myfulldir=modules/kdb/db2
 mydir=.
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
@@ -7,13 +7,13 @@ KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_C
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-LOCALINCLUDES = -I..
+LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
 
 LIBBASE=db2
 LIBMAJOR=0
 LIBMINOR=0
-RELDIR=kdb/kdb_db2
 SO_EXT=.so
+RELDIR=../modules/kdb/db2
 # Depends on libk5crypto and libkrb5
 # Also on gssrpc, for xdr stuff.
 SHLIB_EXPDEPS = \
@@ -58,7 +58,7 @@ clean-unix:: clean-libs clean-libobjs
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT) db2_exp.o
 
-adb_openclose.c adb_policy.c : ../adb_err.h
+#adb_openclose.c adb_policy.c : ../adb_err.h
 
 # @libnover_frag@
 # @libobj_frag@
@@ -85,7 +85,7 @@ adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
   policy_db.h $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h ../adb_err.h
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/lib/kdb/adb_err.h
 adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): \
   adb_policy.c policy_db.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
@@ -95,7 +95,7 @@ adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/krb5/kdb.h \
   $(DB_DEPS) $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h ../adb_err.h
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/lib/kdb/adb_err.h
 kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): kdb_db2.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
@@ -103,11 +103,11 @@ kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): kdb_db2.c \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(DB_DEPS) $(srcdir)/../kdb5.h $(SRCTOP)/include/k5-int.h \
-  $(srcdir)/../err_handle.h kdb_db2.h policy_db.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h ../adb_err.h kdb_xdr.h \
-  kdb_compat.h
+  $(DB_DEPS) $(SRCTOP)/lib/kdb/kdb5.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/lib/kdb/err_handle.h kdb_db2.h policy_db.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h kdb_xdr.h kdb_compat.h
 pol_xdr.so pol_xdr.po $(OUTPRE)pol_xdr.$(OBJEXT): pol_xdr.c \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
@@ -121,7 +121,7 @@ pol_xdr.so pol_xdr.po $(OUTPRE)pol_xdr.$(OBJEXT): pol_xdr.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) ../adb_err.h
+  $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) $(BUILDTOP)/lib/kdb/adb_err.h
 db2_exp.so db2_exp.po $(OUTPRE)db2_exp.$(OBJEXT): db2_exp.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
@@ -129,7 +129,8 @@ db2_exp.so db2_exp.po $(OUTPRE)db2_exp.$(OBJEXT): db2_exp.c \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(DB_DEPS) $(srcdir)/../kdb5.h $(SRCTOP)/include/k5-int.h \
-  $(srcdir)/../err_handle.h kdb_db2.h policy_db.h $(SRCTOP)/include/krb5/kdb.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h ../adb_err.h kdb_xdr.h
+  $(DB_DEPS) $(SRCTOP)/lib/kdb/kdb5.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/lib/kdb/err_handle.h kdb_db2.h policy_db.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h kdb_xdr.h

@@ -3,7 +3,9 @@ datadir=@datadir@
 thisconfigdir=.
 myfulldir=.
 mydir=.
-SUBDIRS=util include lib @krb524@ kdc kadmin slave clients appl tests \
+SUBDIRS=util include lib @krb524@ kdc kadmin slave clients \
+	modules/kdb/db2 \
+	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 

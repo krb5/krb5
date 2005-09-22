@@ -1,3 +1,9 @@
+2005-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Directory moved from lib/kdb/kdb_db2 to modules/kdb/db2.
+	* Makefile.in (myfulldir, LOCALINCLUDES, RELDIR): Updated.
+	* db2_exp.c, kdb_db2.c: Include kdb5.h instead of ../kdb5.h.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.
