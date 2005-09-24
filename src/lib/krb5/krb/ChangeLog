@@ -66,6 +66,13 @@
           prevent null pointer dereferencing if either 'name' or 'size'    
           are NULL.
 
+2005-01-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): More memory leaks
+	fixed as introduced in ticket #2541. Do not rely on knowledge that
+	upon failure from krb5_cc_retrieve_cred, returned credential data
+	is untouched.
+
 2005-01-15  Jeffrey Altman <jaltman@mit.edu>
 
         * cp_key_cnt.c, copy_princ.c:

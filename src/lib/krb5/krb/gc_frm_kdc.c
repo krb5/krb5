@@ -80,7 +80,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     unsigned int    nservers = 0;
     krb5_boolean	  old_use_conf_ktypes = context->use_conf_ktypes;
     int		    retr_flags = KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES;
-    int		    free_tgt = 0;
+    int		    free_tgt = 0, free_otgt = 0;
 
     /* in case we never get a TGT, zero the return */
 
@@ -122,9 +122,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
 
     context->use_conf_ktypes = 1;
-    if ((retval = krb5_cc_retrieve_cred(context, ccache, retr_flags,
-					&tgtq, &tgt))) {
-
+    retval = krb5_cc_retrieve_cred(context, ccache, retr_flags, &tgtq, &tgt);
+    if (retval == 0) {
+        free_tgt = 1;
+	/* Falls through to the got/finally have tgt */
+    } else {
 	if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 	    goto cleanup;
 	}
@@ -229,17 +231,27 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		goto cleanup;
 
 	    otgt = tgt;
-	    if ((retval = krb5_cc_retrieve_cred(context, ccache,
-						retr_flags,
-						&tgtq, &tgt))) {
-    
+	    free_otgt = 1;
+	    free_tgt = 0;
+
+	    retval = krb5_cc_retrieve_cred(context, ccache, retr_flags,
+					   &tgtq, &tgt);
+	    if (retval == 0) {
+	        krb5_free_cred_contents(context, &otgt);
+		free_otgt = 0;
+	        free_tgt = 1;
+		/* We are now done - proceed to got/finally have tgt */
+	    } else {
 		if (retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE) {
 		    goto cleanup;
 		}
   
 		/* didn't find it in the cache so try and get one */
 		/* with current tgt.                              */
-    
+		/* Copy back in case invalided */
+		tgt = otgt;
+		free_otgt = 0;
+		free_tgt = 1;
 		if (!krb5_c_valid_enctype(tgt.keyblock.enctype)) {
 		    retval = KRB5_PROG_ETYPE_NOSUPP;
 		    goto cleanup;
@@ -259,8 +271,10 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		retval = krb5_get_cred_via_tkt(context, &tgt,
 					       FLAGS2OPTS(tgtq.ticket_flags),
 					       tgt.addresses, &tgtq, &tgtr);
-		if (retval) {
-	      
+		if (retval == 0) {
+		    /* Falls through to 'Got a tgt. If it is for the target' */
+		    ;
+		} else {
 		    /*
 		     * Couldn't get one so now loop backwards through
 		     * the realms list and try and get a tgt for a
@@ -268,7 +282,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		     * kdc should give us a tgt for the closest one it
 		     * knows about, but not all kdc's do this yet.
 		     */
-  
 		    for (next_server = tgs_list + nservers - 1;
 			 next_server > top_server;
 			 next_server--) {
@@ -292,15 +305,27 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			    goto cleanup;
 
 			otgt = tgt;
-			if ((retval = krb5_cc_retrieve_cred(context, ccache,
+			free_otgt = 1;
+			free_tgt = 0;
+			retval = krb5_cc_retrieve_cred(context, ccache,
 							    retr_flags,
-							    &tgtq, &tgt))) {
+							    &tgtq, &tgt);
+			if (retval == 0) {
+			    if (free_otgt)
+			      krb5_free_cred_contents(context, &otgt);
+			    free_otgt = 0;
+			    free_tgt = 1;
+			    /* Continues with 'got one as close as possible' */
+			} else {
 			    if (retval != KRB5_CC_NOTFOUND) {
 				goto cleanup;
 			    }
   
 			    /* not in the cache so try and get one with our current tgt. */
   
+			    tgt = otgt;
+			    free_otgt = 0;
+			    free_tgt = 1;
 			    if (!krb5_c_valid_enctype(tgt.keyblock.enctype)) {
 				retval = KRB5_PROG_ETYPE_NOSUPP;
 				goto cleanup;
@@ -334,18 +359,13 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			    krb5_free_creds(context, tgtr);
 			    tgtr = NULL;
 
-			    if (free_tgt) {
-				krb5_free_cred_contents(context, &tgt);
-				free_tgt = 0;
+			    if (free_otgt) {
+				krb5_free_cred_contents(context, &otgt);
+				free_otgt = 0;
 			    }
 	      
 			    tgt = *ret_tgts[ntgts++];
-			} else {
-			    if (free_tgt)
-				krb5_free_cred_contents(context, &otgt);
-			    else
-				free_tgt = 0;
-			}
+			} 
           
 			/* got one as close as possible, now start all over */
   
@@ -403,11 +423,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		/* we're done if it is the target */
 
 		if (!*next_server++) break;
-	    } else {
-		if (free_tgt)
-		    krb5_free_cred_contents(context, &otgt);
-		else
-		    free_tgt = 1;
 	    }
 	}
     }
@@ -438,9 +453,11 @@ cleanup:
     if (ntgts == 0) {
 	*tgts = NULL;
 	if (ret_tgts)  free(ret_tgts);
-	free_tgt = 1;
-    } else if (free_tgt)
+    } 
+    if (free_otgt)
 	krb5_free_cred_contents(context, &otgt);
+    if (free_tgt)
+	krb5_free_cred_contents(context, &tgt);
     context->use_conf_ktypes = old_use_conf_ktypes;
     return(retval);
 }
