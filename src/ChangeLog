@@ -1,3 +1,8 @@
+2005-09-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (fake-install): Do install in modules/kdb/db2.
+	Caught by Michael Calmer.
+
 2005-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* modules, modules/kdb: New directories.

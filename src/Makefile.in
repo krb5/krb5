@@ -96,6 +96,7 @@ fake-install:
 	done
 	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
+	(w=`pwd`; cd modules/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
 TAGS: $(SRCS)
 	etags $(SRCS)
