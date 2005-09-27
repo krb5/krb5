@@ -108,7 +108,7 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
 	       break;
 	  case '\\':
 	       *p++ = '\\';
-	       *p++ = ++*glob;
+	       *p++ = *++glob;
 	       break;
 	  default:
 	       *p++ = *glob;

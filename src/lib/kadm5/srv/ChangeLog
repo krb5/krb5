@@ -1,3 +1,8 @@
+2005-09-27  Tom Yu  <tlyu@mit.edu>
+
+	* svr_iters.c (glob_to_regexp): Increment pointer, not character,
+	when handling backslash quoting.  Patch from K.G. Gokulavasan.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
