@@ -1,3 +1,7 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't configure util/db2.
+
 2005-09-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (fake-install): Do install in modules/kdb/db2.

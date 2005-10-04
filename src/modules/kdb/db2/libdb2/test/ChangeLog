@@ -1,3 +1,7 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (BUILDTOP, myfulldir): Updated for directory move.
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* run.test (getnwords): Run data through "cat -v", because at

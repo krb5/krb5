@@ -1,7 +1,7 @@
 thisconfigdir=./..
-myfulldir=util/db2/test
+myfulldir=modules/kdb/db2/libdb2/test
 mydir=test
-BUILDTOP=$(REL)..$(S)..$(S)..
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 
 FCTSH = @FCTSH@
 TMPDIR=.

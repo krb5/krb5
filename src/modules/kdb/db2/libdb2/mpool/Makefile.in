@@ -1,7 +1,7 @@
 thisconfigdir=./..
-myfulldir=util/db2/mpool
+myfulldir=modules/kdb/db2/libdb2/mpool
 mydir=mpool
-BUILDTOP=$(REL)..$(S)..$(S)..
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=mpool.o
 
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../db

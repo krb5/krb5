@@ -25,7 +25,7 @@ SHLIB_EXPLIBS= -lgssrpc # $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_L
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-DBDIR = $(BUILDTOP)/util/db2
+DBDIR = libdb2
 DBOBJLISTS = $(DBOBJLISTS-@DB_VERSION@)
 DBOBJLISTS-sys =
 DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
@@ -53,13 +53,13 @@ all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 
+$(DB_DEPS): all-recurse
+
 #lib$(LIBBASE)$(SO_EXT): db2_exp.o
 #	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
 
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT) db2_exp.o
-
-#adb_openclose.c adb_policy.c : ../adb_err.h
 
 # @libnover_frag@
 # @libobj_frag@

@@ -1,3 +1,9 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* db2: Directory moved to modules/kdb/db2/libdb2.
+	* Makefile.in (LOCAL_SUBDIRS): Don't reference it.
+	(MAYBE_DB_k5, MAYBE_DB_sys): Variables deleted.
+
 2005-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Update for svn.

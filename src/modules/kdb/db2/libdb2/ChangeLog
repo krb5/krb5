@@ -1,3 +1,15 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Directory moved from util/db2 to modules/kdb/db2/libdb2.
+	* Makefile.in (myfulldir, RELTOP, BUILDTOP): Updated for directory
+	move.
+	* btree/Makefile.in (myfulldir, BUILDTOP): Likewise.
+	* hash/Makefile.in (myfulldir, BUILDTOP): Likewise.
+	* db/Makefile.in (myfulldir, BUILDTOP): Likewise.
+	* mpool/Makefile.in (myfulldir, BUILDTOP): Likewise.
+	* recno/Makefile.in (myfulldir, BUILDTOP): Likewise.
+	* clib/Makefile.in (myfulldir, BUILDTOP): Likewise.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

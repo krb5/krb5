@@ -1,5 +1,11 @@
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* libdb2: Directory moved from util/db2.
+	* configure.in: Configure it, unless a system version is to be
+	used.
+	* Makefile.in (DBDIR): Updated.
+	($(DB_DEPS)): Depend on all-recurse.
+
 	* Makefile.in (SHLIB_EXPLIBS): Only use gssrpc.
 	* configure.in: Set enable_shared=yes.
 
