@@ -1,3 +1,15 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Only use gssrpc.
+	* configure.in: Set enable_shared=yes.
+
+	* kdb_xdr.c (krb5_dbe_create_key_data, krb5_dbe_update_tl_data,
+	krb5_dbe_lookup_tl_data, krb5_dbe_update_last_pwd_change,
+	krb5_dbe_lookup_last_pwd_change, krb5_dbe_update_mod_princ_data,
+	krb5_dbe_lookup_mod_princ_data, krb5_dbe_search_enctype,
+	krb5_dbe_find_enctype): Unused functions deleted.
+	(safe_realloc): Unused macro deleted.
+
 2005-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* Directory moved from lib/kdb/kdb_db2 to modules/kdb/db2.

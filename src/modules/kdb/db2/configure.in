@@ -1,4 +1,5 @@
 K5_AC_INIT(configure.in)
+enable_shared=yes
 CONFIG_RULES
 AC_CHECK_HEADERS(unistd.h)
 AC_TYPE_MODE_T
