@@ -1,3 +1,9 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_verify.c (set_dbname_help): Set default realm and construct
+	argument vector describing database location, before calling
+	krb5_db_open.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB5_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS

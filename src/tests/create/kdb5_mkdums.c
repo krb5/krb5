@@ -339,14 +339,8 @@ char *dbname;
     int nentries;
     krb5_boolean more;
     krb5_data pwd, scratch;
+    char *args[2];
 
-#if 0
-    if ((retval = krb5_db_set_name(test_context, dbname))) {
-	com_err(pname, retval, "while setting active database to '%s'",
-		dbname);
-	return(1);
-    }
-#endif
     /* assemble & parse the master key name */
 
     if ((retval = krb5_db_setup_mkey_name(test_context, mkey_name, cur_realm, 
@@ -380,10 +374,23 @@ char *dbname;
 	    return(1);
 	}
     }
-#if 0
-    if ((retval = krb5_db_init(test_context))) {
-#endif
-    if ((retval = krb5_db_open(test_context, NULL, KRB5_KDB_OPEN_RO))) {
+
+    /* Ick!  Current DAL interface requires that the default_realm
+       field be set in the krb5_context.  */
+    if ((retval = krb5_set_default_realm(test_context, cur_realm))) {
+	com_err(pname, retval, "setting default realm");
+	return 1;
+    }
+    /* Pathname is passed to db2 via 'args' parameter.  */
+    args[1] = NULL;
+    args[0] = malloc(sizeof("dbname=") + strlen(dbname));
+    if (args[0] == NULL) {
+	com_err(pname, errno, "while setting up db parameters");
+	return 1;
+    }
+    sprintf(args[0], "dbname=%s", dbname);
+
+    if ((retval = krb5_db_open(test_context, args, KRB5_KDB_OPEN_RO))) {
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }
