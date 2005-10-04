@@ -1,3 +1,10 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5.c (kdb_get_conf_section): If the default realm is null,
+	return null.
+	(krb5_db_open): Don't pass null pointer to sprintf if
+	default_realm is null.
+
 2005-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb_db2: Directory moved to modules/kdb/db2.

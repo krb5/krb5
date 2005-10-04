@@ -171,7 +171,10 @@ kdb_get_conf_section(krb5_context kcontext)
     char   *result = NULL;
     char   *value = NULL;
 
-    /* profile has to be initialized. If profile is not initialized, expect nothing less than a crash */
+    if (kcontext->default_realm == NULL)
+	return NULL;
+    /* The profile has to have been initialized.  If the profile was
+       not initialized, expect nothing less than a crash.  */
     status = profile_get_string(kcontext->profile,
 				/* realms */
 				KDB_REALM_SECTION,
@@ -638,7 +641,7 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
     if (section == NULL) {
 	sprintf(buf,
 		"unable to determine configuration section for realm %s\n",
-		kcontext->default_realm);
+		kcontext->default_realm ? kcontext->default_realm : "[UNSET]");
 	status = -1;
 	krb5_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
