@@ -1,5 +1,9 @@
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (DBDIR, DBOBJLISTS, DBOBJLISTS-sys, DBOBJLISTS-k5):
+	Variables deleted.
+	(STOBJLISTS): Don't include DBOBJLISTS.
+
 	* kdb5.c (kdb_get_conf_section): If the default realm is null,
 	return null.
 	(krb5_db_open): Don't pass null pointer to sprintf if

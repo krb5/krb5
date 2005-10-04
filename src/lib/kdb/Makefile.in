@@ -22,13 +22,6 @@ SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(DL_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-DBDIR = $(BUILDTOP)/util/db2
-DBOBJLISTS = $(DBOBJLISTS-@DB_VERSION@)
-DBOBJLISTS-sys =
-DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
-	$(DBDIR)/db/OBJS.ST $(DBDIR)/mpool/OBJS.ST $(DBDIR)/recno/OBJS.ST \
-	$(DBDIR)/clib/OBJS.ST
-
 all:: 
 
 adb_err.$(OBJEXT): adb_err.c
@@ -44,7 +37,7 @@ SRCS= \
 	$(srcdir)/err_handle.c \
 	$(srcdir)/keytab.c
 
-STOBJLISTS=OBJS.ST $(DBOBJLISTS)
+STOBJLISTS=OBJS.ST
 STLIBOBJS= \
 	kdb5.o \
 	encrypt_key.o \
