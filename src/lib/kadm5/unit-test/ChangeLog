@@ -3,6 +3,9 @@
 	* api.1/lock.exp: Temporarily disabled tests.  See RT ticket
 	3201.
 
+	* api.2/init-v2.exp: Temporarily disabled test103.  See RT ticket
+	3202.
+
 2005-07-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* api.1/lock.exp (lock_test_continue): After exiting the loop,
