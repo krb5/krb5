@@ -1,3 +1,8 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.1/lock.exp: Temporarily disabled tests.  See RT ticket
+	3201.
+
 2005-07-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* api.1/lock.exp (lock_test_continue): After exiting the loop,
