@@ -76,6 +76,16 @@ clean::
 # @libnover_frag@
 # @libobj_frag@
 
+.depend-verify-db: depend-verify-db-$(DB_VERSION)
+depend-verify-db-k5:
+	@if test -r .depend-verify-db; then :; \
+		else (set -x; touch .depend-verify-db); fi
+depend-verify-db-sys:
+	@echo 1>&2 error: cannot build dependencies using system db package
+	@exit 1
+
+.d: .depend-verify-db
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

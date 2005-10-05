@@ -8,6 +8,9 @@
 	(DB_VERSION, DB_DEPS, DB_DEPS-sys, DB_DEPS-k5, DB_DEPS-redirect,
 	DB_LIB, KDB5_DB_LIB, DB_DEPLIB, DB_DEPLIB-k5, DB_DEPLIB-sys):
 	Variable definitions moved here from config/pre.in.
+	(.depend-verify-db, depend-verify-db-k5, depend-verify-db-sys):
+	New targets, moved from config/post.in.
+	(.d): Depend on .depend-verify-db.
 
 	* Makefile.in (SHLIB_EXPLIBS): Only use gssrpc and KDB5_DB_LIB.
 	* configure.in: Set enable_shared=yes.

@@ -1,5 +1,9 @@
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* post.in ($(BUILDTOP)/.depend-verify-db, depend-verify-db-k5,
+	depend-verify-db-sys): Targets deleted.
+	(DEP_CFG_VERIFY): Don't depend on $(BUILDTOP)/.depend-verify-db.
+
 	* libnover.in (darwin.exports): New target.
 	($(LIBBASE)$(DYNOBJEXT)): New target, instead of
 	$(LIBBASE)$(SHLIBVEXT).

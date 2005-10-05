@@ -47,13 +47,6 @@ depend-verify-ss-k5:
 depend-verify-ss-sys:
 	@echo 1>&2 error: cannot build dependencies using system ss package
 	@exit 1
-$(BUILDTOP)/.depend-verify-db: depend-verify-db-$(DB_VERSION)
-depend-verify-db-k5:
-	@if test -r $(BUILDTOP)/.depend-verify-db; then :; \
-		else (set -x; touch $(BUILDTOP)/.depend-verify-db); fi
-depend-verify-db-sys:
-	@echo 1>&2 error: cannot build dependencies using system db package
-	@exit 1
 $(BUILDTOP)/.depend-verify-gcc: depend-verify-gcc-@HAVE_GCC@
 depend-verify-gcc-yes:
 	@if test -r $(BUILDTOP)/.depend-verify-gcc; then :; \
@@ -64,8 +57,7 @@ depend-verify-gcc-no:
 	@exit 1
 
 DEP_CFG_VERIFY = $(BUILDTOP)/.depend-verify-srcdir \
-	$(BUILDTOP)/.depend-verify-et $(BUILDTOP)/.depend-verify-ss \
-	$(BUILDTOP)/.depend-verify-db
+	$(BUILDTOP)/.depend-verify-et $(BUILDTOP)/.depend-verify-ss
 DEP_VERIFY = $(DEP_CFG_VERIFY) $(BUILDTOP)/.depend-verify-gcc
 
 .d: $(ALL_DEP_SRCS) $(DEP_CFG_VERIFY) depend-dependencies
