@@ -1,6 +1,7 @@
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (BUILDTOP, myfulldir): Updated for directory move.
+	(DB_LIB, DB_DEPLIB): Define here now.
 
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 

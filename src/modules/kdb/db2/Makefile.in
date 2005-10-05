@@ -9,6 +9,17 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
 
+DB_VERSION	= @DB_VERSION@
+DB_DEPS		= $(DB_DEPS-@DB_HEADER_VERSION@)
+DB_DEPS-sys	=
+DB_DEPS-k5	= $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
+DB_DEPS-redirect = $(BUILDTOP)/include/db.h
+DB_LIB		= @DB_LIB@
+KDB5_DB_LIB	= @KDB5_DB_LIB@
+DB_DEPLIB	= $(DB_DEPLIB-@DB_VERSION@)
+DB_DEPLIB-k5	= $(TOPLIBD)/libdb$(DEPLIBEXT)
+DB_DEPLIB-sys	=
+
 LIBBASE=db2
 LIBMAJOR=0
 LIBMINOR=0
@@ -20,8 +31,9 @@ SHLIB_EXPDEPS = \
 	$(GSSRPC_DEPLIBS) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS= -lgssrpc # $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) \
-	$(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPLIBS= -lgssrpc $(KDB5_DB_LIB)
+# $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(SUPPORT_LIB) $(LIBS)
+
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 

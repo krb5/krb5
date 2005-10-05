@@ -1,3 +1,21 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* libnover.in (darwin.exports): New target.
+	($(LIBBASE)$(DYNOBJEXT)): New target, instead of
+	$(LIBBASE)$(SHLIBVEXT).
+	(all-libs): Build $(LIBBASE)$(DYNOBJEXT).
+	(install-shared): Use DYNOBJEXT.
+
+	* pre.in (DYNOBJEXT, MAKE_DYNOBJ_COMMAND): New variables.
+	* shlib.conf: Set DYNOBJEXT, MAKE_DYNOBJ_COMMAND to the SHLIB
+	versions.  For Darwin, set them to create a .so bundle, and set
+	SHLIB_EXPORT_FILE_DEP to darwin.exports.
+
+	* pre.in (DB_DEPLIB, DB_DEPLIB-k5, DB_DEPLIB-sys, DB_VERSION,
+	DB_DEPS, DB_DEPS-sys, DB_DEPS-k5, DB_DEPS-redirect, DB_LIB,
+	KDB5_DB_LIB): Variables deleted.
+	(KDB5_LIBS): Set to just $(KDB5_LIB).
+
 2005-09-01  Marc Aurele La France  <tsi@ualberta.ca>
 
 	* shlib.conf (case *-*-aix5.3*):  Generate proper shared libraries

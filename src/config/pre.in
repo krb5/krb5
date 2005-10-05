@@ -304,9 +304,6 @@ DEPLIBEXT=@DEPLIBEXT@
 KADMCLNT_DEPLIB	= $(TOPLIBD)/libkadm5clnt$(DEPLIBEXT)
 KADMSRV_DEPLIB	= $(TOPLIBD)/libkadm5srv$(DEPLIBEXT)
 KDB5_DEPLIB	= $(TOPLIBD)/libkdb5$(DEPLIBEXT)
-DB_DEPLIB	= $(DB_DEPLIB-@DB_VERSION@)
-DB_DEPLIB-k5	= $(TOPLIBD)/libdb$(DEPLIBEXT)
-DB_DEPLIB-sys	=
 GSSRPC_DEPLIB	= $(TOPLIBD)/libgssrpc$(DEPLIBEXT)
 GSS_DEPLIB	= $(TOPLIBD)/libgssapi_krb5$(DEPLIBEXT)
 KRB4_DEPLIB	= @KRB4_DEPLIB@		# $(TOPLIBD)/libkrb4$(DEPLIBEXT)
@@ -348,11 +345,6 @@ SS_VERSION	= @SS_VERSION@
 SS_DEPS		= $(SS_DEPS-@SS_VERSION@)
 SS_DEPS-sys	=
 SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
-DB_VERSION	= @DB_VERSION@
-DB_DEPS		= $(DB_DEPS-@DB_HEADER_VERSION@)
-DB_DEPS-sys	=
-DB_DEPS-k5	= $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-DB_DEPS-redirect = $(BUILDTOP)/include/db.h
 
 # Header file dependencies that might depend on whether krb4 support
 # is compiled.
@@ -368,8 +360,6 @@ SS_LIB		= $(SS_LIB-@SS_VERSION@)
 SS_LIB-sys	= @SS_LIB@
 SS_LIB-k5	= $(TOPLIBD)/libss.a
 KDB5_LIB	= -lkdb5
-DB_LIB		= @DB_LIB@
-KDB5_DB_LIB	= @KDB5_DB_LIB@
 
 DL_LIB		= @DL_LIB@
 
@@ -392,7 +382,7 @@ HESIOD_LIBS	= @HESIOD_LIBS@
 
 KRB5_BASE_LIBS	= $(KRB5_LIB) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(GEN_LIB) $(LIBS)
 KRB4COMPAT_LIBS	= $(KRB4_LIB) $(DES425_LIB) $(KRB5_BASE_LIBS)
-KDB5_LIBS	= $(KDB5_LIB) $(KDB5_DB_LIB)
+KDB5_LIBS	= $(KDB5_LIB)
 GSS_LIBS	= $(GSS_KRB5_LIB)
 # needs fixing if ever used on Mac OS X!
 GSSRPC_LIBS	= -lgssrpc $(GSS_LIBS)
@@ -498,6 +488,10 @@ SHLIBEXT=@SHLIBEXT@
 
 # usually _p.a
 PFLIBEXT=@PFLIBEXT@
+
+#
+DYNOBJEXT=@DYNOBJEXT@
+MAKE_DYNOBJ_COMMAND=@MAKE_DYNOBJ_COMMAND@
 
 # File with symbol names to be exported, both functions and data,
 # currently not distinguished.

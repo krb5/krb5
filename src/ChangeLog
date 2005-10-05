@@ -1,5 +1,9 @@
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Substitute DYNOBJEXT
+	and MAKE_DYNOBJ_COMMAND.
+	(KRB5_LIB_AUX): Don't define _KDB5_STATIC_LINK.
+
 	* configure.in: Don't configure util/db2.
 
 2005-09-26  Ken Raeburn  <raeburn@mit.edu>

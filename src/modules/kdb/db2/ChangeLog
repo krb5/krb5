@@ -5,8 +5,11 @@
 	used.
 	* Makefile.in (DBDIR): Updated.
 	($(DB_DEPS)): Depend on all-recurse.
+	(DB_VERSION, DB_DEPS, DB_DEPS-sys, DB_DEPS-k5, DB_DEPS-redirect,
+	DB_LIB, KDB5_DB_LIB, DB_DEPLIB, DB_DEPLIB-k5, DB_DEPLIB-sys):
+	Variable definitions moved here from config/pre.in.
 
-	* Makefile.in (SHLIB_EXPLIBS): Only use gssrpc.
+	* Makefile.in (SHLIB_EXPLIBS): Only use gssrpc and KDB5_DB_LIB.
 	* configure.in: Set enable_shared=yes.
 
 	* kdb_xdr.c (krb5_dbe_create_key_data, krb5_dbe_update_tl_data,

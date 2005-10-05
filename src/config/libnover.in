@@ -37,10 +37,10 @@ SHLIBVEXT=$(SHLIBEXT)
 LIBLIST=$(LIBBASE)$(SHLIBEXT)
 LIBINSTLIST=install-shared
 
-$(LIBBASE)$(SHLIBVEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
+$(LIBBASE)$(DYNOBJEXT): $(SHOBJLISTS) $(SHLIB_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
 	$(RM) $@
-	@echo "building shared $(LIBBASE) library"
-	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_SHLIB_COMMAND)
+	@echo "building dynamic $(LIBBASE) object"
+	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_DYNOBJ_COMMAND)
 
 binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
 	echo >  binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
@@ -76,11 +76,15 @@ hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
 	echo "+e errno" >> hpux10.tmp
 	mv -f hpux10.tmp hpux10.exports
 
+darwin.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) darwin.exports
+	sed "s/^/_/" < $(SHLIB_EXPORT_FILE) > darwin.exports
+
 $(TOPLIBD)/$(LIBBASE)$(SHLIBEXT): $(LIBBASE)$(SHLIBEXT)
 	$(RM) $@
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/$(LIBBASE)$(SHLIBEXT) .)
 
-all-libs: $(LIBLIST)
+all-libs: $(LIBBASE)$(DYNOBJEXT) # $(LIBLIST)
 
 clean-libs:
 	$(RM) $(LIBBASE)$(SHLIBEXT)
@@ -88,8 +92,8 @@ clean-libs:
 
 install-libs: $(LIBINSTLIST)
 install-shared:
-	$(RM) $(DESTDIR)$(KRB5_DB_MODULE_DIR)/$(LIBBASE)$(SHLIBEXT)
-	$(INSTALL_SHLIB) $(LIBBASE)$(SHLIBEXT) $(DESTDIR)$(KRB5_DB_MODULE_DIR)
+	$(RM) $(DESTDIR)$(KRB5_DB_MODULE_DIR)/$(LIBBASE)$(DYNOBJEXT)
+	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(KRB5_DB_MODULE_DIR)
 
 Makefile: $(SRCTOP)/config/libnover.in
 $(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
