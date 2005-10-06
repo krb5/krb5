@@ -1,3 +1,8 @@
+2005-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DBSHOBJLISTS): New variable.
+	($(DBOBJLISTS-k5), $(DBSHOBJLISTS)): Depend on recursion step.
+
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* libdb2: Directory moved from util/db2.

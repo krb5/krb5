@@ -43,6 +43,7 @@ DBOBJLISTS-sys =
 DBOBJLISTS-k5 = $(DBDIR)/hash/OBJS.ST $(DBDIR)/btree/OBJS.ST \
 	$(DBDIR)/db/OBJS.ST $(DBDIR)/mpool/OBJS.ST $(DBDIR)/recno/OBJS.ST \
 	$(DBDIR)/clib/OBJS.ST
+DBSHOBJLISTS = $(DBOBJLISTS:.ST=.SH)
 
 SRCS= \
 	$(srcdir)/kdb_xdr.c \
@@ -65,7 +66,7 @@ all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 
-$(DB_DEPS): all-recurse
+$(DB_DEPS) $(DBOBJLISTS-k5) $(DBSHOBJLISTS): all-recurse
 
 #lib$(LIBBASE)$(SO_EXT): db2_exp.o
 #	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
