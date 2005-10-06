@@ -30,11 +30,9 @@ all-windows:: autoconf.h $(BUILT_HEADERS)
 
 ###############################################################################
 ##DOS##!if 0
-# Should only rebuild autoconf.h here (use CONFIG_FILES=), but the weird krb5
-# makefile post-processing is unconditional and would trash the makefile.
 autoconf.h: autoconf.stamp
 autoconf.stamp: $(srcdir)/autoconf.h.in $(thisconfigdir)/config.status
-	(cd $(thisconfigdir) && $(SHELL) config.status)
+	(cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/autoconf.h)
 	touch autoconf.stamp
 
 SYSCONFDIR = @sysconfdir@

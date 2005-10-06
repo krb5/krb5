@@ -1,3 +1,8 @@
+2005-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (autoconf.stamp): When running config.status, only
+	rebuild autoconf.h.
+
 2005-09-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm_proto.h (krb5_adm_connect, krb5_adm_disconnect,
