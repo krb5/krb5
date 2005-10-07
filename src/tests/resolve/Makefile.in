@@ -13,13 +13,13 @@ SRCS=$(srcdir)/resolve.c $(srcdir)/addrinfo-test.c \
 all:: resolve addrinfo-test fake-addrinfo-test
 
 resolve: resolve.o
-	$(CC_LINK) -o $@ $< $(LIBS)
+	$(CC_LINK) -o $@ resolve.o $(LIBS)
 
 addrinfo-test: addrinfo-test.o
-	$(CC_LINK) -o $@ $< $(LIBS)
+	$(CC_LINK) -o $@ addrinfo-test.o $(LIBS)
 
 fake-addrinfo-test: fake-addrinfo-test.o
-	$(CC_LINK) -o $@ $< $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o $@ fake-addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
 
 check:: resolve addrinfo-test
 	$(RUN_SETUP) ./resolve
