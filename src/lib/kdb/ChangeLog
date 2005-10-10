@@ -1,3 +1,7 @@
+2005-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't pull in libdb on AIX any more.
+
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DBDIR, DBOBJLISTS, DBOBJLISTS-sys, DBOBJLISTS-k5):
