@@ -1,5 +1,8 @@
 2005-10-11  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (SHLIB_EXPLIBS): Include support library.  Don't
+	include system db library (if in use).
+
 	* libkdb5.exports: Delete __kdb2_*, kdb2_*, and a bunch of other
 	symbols that no longer exist in this library.
 
