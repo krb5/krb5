@@ -57,29 +57,35 @@
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	Novell merge.
-	* Makefile.in:
-	* adb_err.et:
-	* configure.in:
-	* decrypt_key.c:
-	* encrypt_key.c:
-	* err_handle.c:
-	* err_handle.h:
-	* fetch_mkey.c:
-	* kdb5.c:
-	* kdb5.h:
-	* kdb_compat.h:
-	* kdb_cpw.c:
-	* kdb_db2.c:
-	* kdb_db2.h:
+	* Makefile.in (CFLAGS): Define KDB5_USE_LIB_KDB_DB2.
+	(LOCALINCLUDES): Add local directory.
+	(adb_err.c, adb_err.h, adb_err.$(OBJEXT)): New targets.
+	(SRCS, STLIBOBJS): Add adb_err, err_handle, kdb_default, kdb5;
+	delete kdb_db2, kdb_xdr, verify_mky, fetch_mkey, setup_mkey,
+	store_mkey.
+	* adb_err.et: Moved here from lib/kadm5.
+	* configure.in: Check for pthread.h.  Configure new kdb_db2
+	subdirectory.
+	* decrypt_key.c (krb5_dbekd_decrypt_key_data): Change definition
+	to prototype-style.
+	* encrypt_key.c: Likewise.
+	* err_handle.c, err_handle.h: New file.
+	* kdb5.c, kdb5.h: New file.
+	* fetch_mkey.c, setup_mkey.c, store_mkey.c, verify_mky.c:
+	Deleted.
+	* kdb_compat.h: Moved to kdb_db2 subdirectory.
+	* kdb_cpw.c: Don't include krb5/adm.h.
+	(cleanup_key_data): Use krb5_db_free.
+	(add_key_rnd): Use krb5_db_alloc for key storage.
+	(krb5_dbe_crk): Use krb5_db_free for key storage.
+	(add_key_pwd):
+	* kdb_db2.c, kdb_db2.h: Moved to kdb_db2 subdirectory.
 	* kdb_default.c:
 	* kdb_xdr.c:
 	* keytab.c:
 	* libkrb5.exports:
-	* setup_mkey.c:
-	* store_mkey.c:
 	* t_kdb.c:
 	* t_krb5.conf:
-	* verify_mky.c:
 
 2005-06-09  Ken Raeburn  <raeburn@mit.edu>
 
