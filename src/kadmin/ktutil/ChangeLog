@@ -1,3 +1,8 @@
+2005-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Fix malloc size botches reported by
+	Will Fiveash.
+
 2003-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* ktutil.c (main): Don't register writable keytab ops as they are
