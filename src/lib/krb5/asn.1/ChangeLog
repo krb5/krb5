@@ -1,3 +1,8 @@
+2005-10-03  Tom Yu  <tlyu@mit.edu>
+
+	* asn1_get.c (asn1_get_tag_2): Patch from Zhihong Zhang to properly
+	handle tag numbers >= 30.
+
 2005-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* asn1_encode.c (asn1_encode_generaltime): If gmtime_r returns int
