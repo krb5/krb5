@@ -771,7 +771,8 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
     }
     entry[0] = NULL;
     entry[1] = NULL;
-    retval = _make_etype_info_entry(context, request, client_key, client_key->key_data_type[0],
+    retval = _make_etype_info_entry(context, request,
+				    client_key, encrypting_key->enctype,
 				    entry, 1);
     if (retval)
 	goto cleanup;
