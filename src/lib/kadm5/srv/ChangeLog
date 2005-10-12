@@ -1,3 +1,8 @@
+2005-09-27  Tom Yu  <tlyu@mit.edu>
+
+	* svr_iters.c (glob_to_regexp): Increment pointer, not character,
+	when handling backslash quoting.  Patch from K.G. Gokulavasan.
+
 2004-12-20  Tom Yu  <tlyu@mit.edu>
 
 	* svr_principal.c (add_to_history): Rewrite somewhat, using
