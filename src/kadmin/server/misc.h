@@ -20,11 +20,12 @@ randkey_principal_wrapper_3(void *server_handle,
 			    krb5_keyblock **keys, int *n_keys);
 
 kadm5_ret_t
-chpass_util_wrapper(void *server_handle, krb5_principal princ,
-		    char *new_pw, char **ret_pw,
-		    char *msg_ret, unsigned int msg_len);
+schpw_util_wrapper(void *server_handle, krb5_principal princ,
+		   char *new_pw, char **ret_pw,
+		   char *msg_ret, unsigned int msg_len);
 
-kadm5_ret_t check_min_life(void *server_handle, krb5_principal principal);
+kadm5_ret_t check_min_life(void *server_handle, krb5_principal principal,
+			   char *msg_ret, unsigned int msg_len);
 
 kadm5_ret_t kadm5_get_principal_v1(void *server_handle,
 				   krb5_principal principal, 
