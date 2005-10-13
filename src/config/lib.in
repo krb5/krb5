@@ -33,7 +33,7 @@ PFOBJLISTS=$(STOBJLISTS:.ST=.PF)
 dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=.PF): all-recurse
 
 # Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
-PARSE_OBJLISTS= set -x && $(PERL) -p -e '$$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
+PARSE_OBJLISTS= set -x && $(PERL) -p -e 'BEGIN { $$SIG{__WARN__} = sub {die @_} }; $$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
 lib$(LIBBASE)$(STLIBEXT): $(STOBJLISTS)
 	$(RM) $@
