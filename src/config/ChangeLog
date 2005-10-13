@@ -4,6 +4,9 @@
 	file not found).
 	* lib.in (PARSE_OBJLISTS): Likewise.
 
+	* shlib.conf: Change aix5.3 section to aix5.*.  Change aix*
+	section to aix4.*, and set DYNOBJEXT and MAKE_DYNOBJ_COMMAND.
+
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* post.in ($(BUILDTOP)/.depend-verify-db, depend-verify-db-k5,
