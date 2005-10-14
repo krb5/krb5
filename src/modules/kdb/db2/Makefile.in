@@ -31,8 +31,8 @@ SHLIB_EXPDEPS = \
 	$(GSSRPC_DEPLIBS) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS= -lgssrpc $(KDB5_DB_LIB)
-# $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(SUPPORT_LIB) $(LIBS)
+# -lgssrpc $(KDB5_DB_LIB)
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)

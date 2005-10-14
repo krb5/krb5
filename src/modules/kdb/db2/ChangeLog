@@ -1,3 +1,8 @@
+2005-10-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Revert 10-04 change; add support
+	library.
+
 2005-10-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DBSHOBJLISTS): New variable.
