@@ -1,9 +1,5 @@
 _kadm5_check_handle
 _kadm5_chpass_principal_util
-et_ovk_error_table
-et_ovku_error_table
-initialize_ovk_error_table
-initialize_ovku_error_table
 kadm5_chpass_principal
 kadm5_chpass_principal_3
 kadm5_chpass_principal_util
