@@ -34,10 +34,6 @@ int main(int argc, char **argv)
 	 exit(1);
      }
 
-     initialize_ovk_error_table();
-/*      initialize_adb_error_table(); */
-     initialize_ovku_error_table();
-
      params.mask = 0;
      ret = kadm5_get_config_params(context, NULL, NULL, &params,
 				   &params);
