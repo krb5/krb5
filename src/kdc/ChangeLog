@@ -1,3 +1,12 @@
+2005-10-13  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (etype_info_as_rep_helper): New function; shared
+	code for handling ETYPE-INFO and ETYPE-INFO2.  Checks request for
+	"newer" enctypes and does not return an ETYPE-INFO if any "newer"
+	enctypes are present in the request.  Reported by Will Fiveash.
+	(return_etype_info2, return_etype_info): Implement in terms of
+	etype_info_as_rep_helper.
+
 2005-10-12  Tom Yu  <tlyu@mit.edu>
 
 	* kdc_preauth.c (return_etype_info2): Apply patch from Will

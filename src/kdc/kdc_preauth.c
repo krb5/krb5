@@ -111,6 +111,23 @@ get_etype_info2(krb5_context context, krb5_kdc_req *request,
 	       krb5_db_entry *client, krb5_db_entry *server,
 		  krb5_pa_data *pa_data);
 static krb5_error_code
+etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata, 
+			 krb5_db_entry *client,
+			 krb5_kdc_req *request, krb5_kdc_rep *reply,
+			 krb5_key_data *client_key,
+			 krb5_keyblock *encrypting_key,
+			 krb5_pa_data **send_pa,
+			 int etype_info2);
+
+static krb5_error_code
+return_etype_info(krb5_context, krb5_pa_data * padata, 
+		  krb5_db_entry *client,
+		  krb5_kdc_req *request, krb5_kdc_rep *reply,
+		  krb5_key_data *client_key,
+		  krb5_keyblock *encrypting_key,
+		  krb5_pa_data **send_pa);
+
+static krb5_error_code
 return_etype_info2(krb5_context, krb5_pa_data * padata, 
 		   krb5_db_entry *client,
 		   krb5_kdc_req *request, krb5_kdc_rep *reply,
@@ -167,7 +184,7 @@ static krb5_preauth_systems preauth_systems[] = {
 	0,
 	get_etype_info,
 	0,
-	0
+	return_etype_info
     },
     {
 	"etype-info2",
@@ -749,21 +766,41 @@ get_etype_info2(krb5_context context, krb5_kdc_req *request,
 }
 
 static krb5_error_code
-return_etype_info2(krb5_context context, krb5_pa_data * padata, 
-		   krb5_db_entry *client,
-		   krb5_kdc_req *request, krb5_kdc_rep *reply,
-		   krb5_key_data *client_key,
-		   krb5_keyblock *encrypting_key,
-		   krb5_pa_data **send_pa)
+etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata, 
+			 krb5_db_entry *client,
+			 krb5_kdc_req *request, krb5_kdc_rep *reply,
+			 krb5_key_data *client_key,
+			 krb5_keyblock *encrypting_key,
+			 krb5_pa_data **send_pa,
+			 int etype_info2)
 {
+    int i;
     krb5_error_code retval;
     krb5_pa_data *tmp_padata;
     krb5_etype_info_entry **entry = NULL;
     krb5_data *scratch = NULL;
+
+    /*
+     * Skip PA-ETYPE-INFO completely if AS-REQ lists any "newer"
+     * enctypes.
+     */
+    if (!etype_info2) {
+	for (i = 0; i < request->nktypes; i++) {
+	    if (enctype_requires_etype_info_2(request->ktype[i])) {
+		*send_pa = NULL;
+		return 0;
+	    }
+	}
+    }
+
     tmp_padata = malloc( sizeof(krb5_pa_data));
     if (tmp_padata == NULL)
 	return ENOMEM;
-    tmp_padata->pa_type = KRB5_PADATA_ETYPE_INFO2;
+    if (etype_info2)
+	tmp_padata->pa_type = KRB5_PADATA_ETYPE_INFO2;
+    else
+	tmp_padata->pa_type = KRB5_PADATA_ETYPE_INFO;
+
     entry = malloc(2 * sizeof(krb5_etype_info_entry *));
     if (entry == NULL) {
 	retval = ENOMEM;
@@ -773,10 +810,15 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
     entry[1] = NULL;
     retval = _make_etype_info_entry(context, request,
 				    client_key, encrypting_key->enctype,
-				    entry, 1);
+				    entry, etype_info2);
     if (retval)
 	goto cleanup;
-    retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry, &scratch);
+
+    if (etype_info2)
+	retval = encode_krb5_etype_info2((const krb5_etype_info_entry **) entry, &scratch);
+    else
+	retval = encode_krb5_etype_info((const krb5_etype_info_entry **) entry, &scratch);
+
     if (retval)
 	goto cleanup;
     tmp_padata->contents = scratch->data;
@@ -800,6 +842,30 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
     return retval;
 }
 
+static krb5_error_code
+return_etype_info2(krb5_context context, krb5_pa_data * padata, 
+		   krb5_db_entry *client,
+		   krb5_kdc_req *request, krb5_kdc_rep *reply,
+		   krb5_key_data *client_key,
+		   krb5_keyblock *encrypting_key,
+		   krb5_pa_data **send_pa)
+{
+    return etype_info_as_rep_helper(context, padata, client, request, reply,
+				    client_key, encrypting_key, send_pa, 1);
+}
+
+
+static krb5_error_code
+return_etype_info(krb5_context context, krb5_pa_data * padata, 
+		  krb5_db_entry *client,
+		  krb5_kdc_req *request, krb5_kdc_rep *reply,
+		  krb5_key_data *client_key,
+		  krb5_keyblock *encrypting_key,
+		  krb5_pa_data **send_pa)
+{
+    return etype_info_as_rep_helper(context, padata, client, request, reply,
+				    client_key, encrypting_key, send_pa, 0);
+}
 
 static krb5_error_code
 return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
