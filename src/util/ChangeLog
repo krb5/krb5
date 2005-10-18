@@ -1,3 +1,8 @@
+2005-10-18  Tom Yu  <tlyu@mit.edu>
+
+	* ac_check_krb5.m4: Example autoconf macro to use krb5-config for
+	setting build flags for applications.
+
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* db2: Directory moved to modules/kdb/db2/libdb2.
