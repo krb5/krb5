@@ -1,3 +1,8 @@
+2005-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_krb5_conf): Don't include a non-listening KDC
+	port in the client's config file.
+
 2005-09-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* default.exp: Initialize can_get_root to yes.
