@@ -1,3 +1,8 @@
+2005-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_ser): Add dl library and thread link options,
+	since kdb5 library is linked in and needs them.
+
 2005-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* mk_req_ext.c (krb5int_generate_and_save_subkey): Check for and
