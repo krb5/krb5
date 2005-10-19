@@ -4,7 +4,7 @@
 
 static void asctouni(unsigned char *unicode, unsigned char *ascii, size_t len)
 {
-	int counter;
+	size_t counter;
 	for (counter=0;counter<len;counter++) {
 		unicode[2*counter]=ascii[counter];
 		unicode[2*counter + 1]=0x00;
