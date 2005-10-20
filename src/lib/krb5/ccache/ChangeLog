@@ -1,3 +1,10 @@
+2005-10-20  Jeffrey Altman <jaltman@mit.edu>
+
+	* cc_mslsa.c: 
+          - provide defaults for client and server names in purge 
+            ticket routines
+          - properly size the buffers used to store the names.
+
 2005-06-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* cc_file.c (dereference): Fix test is list-walking loop.
