@@ -70,16 +70,16 @@ GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
  * generic(1) string_uid_name(3)}.  The recommended symbolic name for
  * this type is "GSS_KRB5_NT_STRING_UID_NAME". */ 
 
-extern const gss_OID_desc * const gss_mech_krb5;
-extern const gss_OID_desc * const gss_mech_krb5_old;
-extern const gss_OID_set_desc * const gss_mech_set_krb5;
-extern const gss_OID_set_desc * const gss_mech_set_krb5_old;
-extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
+GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5;
+GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5_old;
+GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5;
+GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_old;
+GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
 
-extern const gss_OID_desc * const gss_nt_krb5_name;
-extern const gss_OID_desc * const gss_nt_krb5_principal;
+GSS_DLLIMP extern const gss_OID_desc * const gss_nt_krb5_name;
+GSS_DLLIMP extern const gss_OID_desc * const gss_nt_krb5_principal;
 
-extern const gss_OID_desc krb5_gss_oid_array[];
+GSS_DLLIMP extern const gss_OID_desc krb5_gss_oid_array[];
 
 #define gss_krb5_nt_general_name	gss_nt_krb5_name
 #define gss_krb5_nt_principal		gss_nt_krb5_principal
