@@ -1,3 +1,7 @@
+2005-10-20  Jeffrey Altman <jaltman@mit.edu>
+
+	* win-mac.h: Add definitions for int32_t and uint32_t
+
 2005-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_key_t): Add K5_KEY_KDB_ERR_HANDLER and

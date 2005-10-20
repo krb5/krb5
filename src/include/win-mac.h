@@ -57,6 +57,8 @@ typedef unsigned long	u_long;      /* Not part of sys/types.h on the pc */
 typedef unsigned int	u_int;
 typedef unsigned short	u_short;
 typedef unsigned char	u_char;
+typedef unsigned int    uint32_t;
+typedef int             int32_t;
 #endif /* KRB5_SYSTYPES__ */
 
 #define MAXHOSTNAMELEN  512
