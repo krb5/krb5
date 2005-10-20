@@ -737,7 +737,7 @@ PurgeTicket2000( HANDLE LogonHandle, ULONG  PackageId,
     NTSTATUS SubStatus = 0;
     KERB_PURGE_TKT_CACHE_REQUEST * pPurgeRequest;
     DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_REQUEST) + 1024;
-    char * sname, * srealm = NULL;
+    char * sname = NULL, * srealm = NULL;
 
     if (krb5_unparse_name(context, cred->server, &sname))
         return FALSE;
@@ -755,12 +755,12 @@ PurgeTicket2000( HANDLE LogonHandle, ULONG  PackageId,
     pPurgeRequest->LogonId.LowPart = 0;
     pPurgeRequest->LogonId.HighPart = 0;
     pPurgeRequest->ServerName.Buffer = (PWSTR)(((CHAR *)pPurgeRequest)+sizeof(KERB_PURGE_TKT_CACHE_REQUEST));
-    pPurgeRequest->ServerName.Length = strlen(sname);
+    pPurgeRequest->ServerName.Length = strlen(sname)*sizeof(WCHAR);
     pPurgeRequest->ServerName.MaximumLength = 256;
     ANSIToUnicode(sname, pPurgeRequest->ServerName.Buffer,
                   pPurgeRequest->ServerName.MaximumLength);
     pPurgeRequest->RealmName.Buffer = (PWSTR)(((CHAR *)pPurgeRequest)+sizeof(KERB_PURGE_TKT_CACHE_REQUEST)+512);
-    pPurgeRequest->RealmName.Length = strlen(srealm);
+    pPurgeRequest->RealmName.Length = strlen(srealm)*sizeof(WCHAR);
     pPurgeRequest->RealmName.MaximumLength = 256;
     ANSIToUnicode(srealm, pPurgeRequest->RealmName.Buffer,
                   pPurgeRequest->RealmName.MaximumLength);
@@ -791,8 +791,8 @@ PurgeTicketXP( HANDLE LogonHandle, ULONG  PackageId,
     NTSTATUS SubStatus = 0;
     KERB_PURGE_TKT_CACHE_EX_REQUEST * pPurgeRequest;
     DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 2048;
-    char * cname, * crealm = NULL;
-    char * sname, * srealm = NULL;
+    char * cname = NULL, * crealm = NULL;
+    char * sname = NULL, * srealm = NULL;
 
     if (krb5_unparse_name(context, cred->client, &cname))
         return FALSE;
@@ -820,25 +820,25 @@ PurgeTicketXP( HANDLE LogonHandle, ULONG  PackageId,
     pPurgeRequest->LogonId.HighPart = 0;
     pPurgeRequest->Flags = 0;
     pPurgeRequest->TicketTemplate.ClientName.Buffer = (PWSTR)((CHAR *)pPurgeRequest + sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST));
-    pPurgeRequest->TicketTemplate.ClientName.Length = strlen(cname);
+    pPurgeRequest->TicketTemplate.ClientName.Length = strlen(cname)*sizeof(WCHAR);
     pPurgeRequest->TicketTemplate.ClientName.MaximumLength = 256;
     ANSIToUnicode(cname, pPurgeRequest->TicketTemplate.ClientName.Buffer,
                   pPurgeRequest->TicketTemplate.ClientName.MaximumLength);
 
     pPurgeRequest->TicketTemplate.ClientRealm.Buffer = (PWSTR)(((CHAR *)pPurgeRequest)+sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 512);
-    pPurgeRequest->TicketTemplate.ClientRealm.Length = strlen(crealm);
+    pPurgeRequest->TicketTemplate.ClientRealm.Length = strlen(crealm)*sizeof(WCHAR);
     pPurgeRequest->TicketTemplate.ClientRealm.MaximumLength = 256;
     ANSIToUnicode(crealm, pPurgeRequest->TicketTemplate.ClientRealm.Buffer,
                   pPurgeRequest->TicketTemplate.ClientRealm.MaximumLength);
 
     pPurgeRequest->TicketTemplate.ServerName.Buffer = (PWSTR)(((CHAR *)pPurgeRequest)+sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 1024);
-    pPurgeRequest->TicketTemplate.ServerName.Length = strlen(sname);
+    pPurgeRequest->TicketTemplate.ServerName.Length = strlen(sname)*sizeof(WCHAR);
     pPurgeRequest->TicketTemplate.ServerName.MaximumLength = 256;
     ANSIToUnicode(sname, pPurgeRequest->TicketTemplate.ServerName.Buffer,
                   pPurgeRequest->TicketTemplate.ServerName.MaximumLength);
 
     pPurgeRequest->TicketTemplate.ServerRealm.Buffer = (PWSTR)(((CHAR *)pPurgeRequest)+sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 1536);
-    pPurgeRequest->TicketTemplate.ServerRealm.Length = strlen(srealm);
+    pPurgeRequest->TicketTemplate.ServerRealm.Length = strlen(srealm)*sizeof(WCHAR);
     pPurgeRequest->TicketTemplate.ServerRealm.MaximumLength = 256;
     ANSIToUnicode(srealm, pPurgeRequest->TicketTemplate.ServerRealm.Buffer,
                   pPurgeRequest->TicketTemplate.ServerRealm.MaximumLength);
