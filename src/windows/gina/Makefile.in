@@ -7,7 +7,7 @@ OBJS=	$(OUTPRE)ginastub.$(OBJEXT)
 LOCALINCLUDES = -I$(BUILDTOP)\include
 
 WINLIBS = advapi32.lib comctl32.lib \
-	libc.lib kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib
+	libcmt.lib kernel32.lib ws2_32.lib user32.lib shell32.lib oldnames.lib
 
 WINDLLFLAGS = /nodefaultlib /incremental:no /release \
 	/nologo /base:0x1c000000 /dll $(LOPTS)
