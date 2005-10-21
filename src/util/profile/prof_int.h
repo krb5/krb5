@@ -15,8 +15,6 @@
 #include "com_err.h"
 #include "profile.h"
 
-#define STAT_ONCE_PER_SECOND
-
 #if defined(_WIN32)
 #define SIZEOF_INT      4
 #define SIZEOF_SHORT    2
@@ -38,9 +36,7 @@ struct _prf_data_t {
 	prf_magic_t	magic;
 	k5_mutex_t	lock;
 	struct profile_node *root;
-#ifdef STAT_ONCE_PER_SECOND
 	time_t		last_stat;
-#endif
 	time_t		timestamp; /* time tree was last updated from file */
 	unsigned long	frac_ts;   /* fractional part of timestamp, if any */
 	int		flags;	/* r/w, dirty */

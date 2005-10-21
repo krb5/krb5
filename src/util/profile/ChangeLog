@@ -1,3 +1,10 @@
+2005-10-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_update_file_data): Drop test of
+	STAT_ONCE_PER_SECOND, just do it always.
+	* prof_int.h (stuct _prf_data_t): Likewise.
+	(STAT_ONCE_PER_SECOND): Don't define.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

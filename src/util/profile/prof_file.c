@@ -304,9 +304,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 #ifdef HAVE_STAT
 	struct stat st;
 	unsigned long frac;
-#ifdef STAT_ONCE_PER_SECOND
 	time_t now;
-#endif
 #endif
 	FILE *f;
 
@@ -315,21 +313,17 @@ errcode_t profile_update_file_data(prf_data_t data)
 	    return retval;
 
 #ifdef HAVE_STAT
-#ifdef STAT_ONCE_PER_SECOND
 	now = time(0);
 	if (now == data->last_stat && data->root != NULL) {
 	    k5_mutex_unlock(&data->lock);
 	    return 0;
 	}
-#endif
 	if (stat(data->filespec, &st)) {
 	    retval = errno;
 	    k5_mutex_unlock(&data->lock);
 	    return retval;
 	}
-#ifdef STAT_ONCE_PER_SECOND
 	data->last_stat = now;
-#endif
 #if defined HAVE_STRUCT_STAT_ST_MTIMENSEC
 	frac = st.st_mtimensec;
 #elif defined HAVE_STRUCT_STAT_ST_MTIMESPEC_TV_NSEC
