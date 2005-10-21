@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 /*
- * Copyright (C) 2003, 2004 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2003, 2004, 2005 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -50,6 +50,7 @@
 #include <windows.h>
 #include <winsock.h>
 #else
+#include <assert.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -69,7 +70,11 @@ static int verbose = 1;
 static void usage()
 {
      fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
-     fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]\n");
+     fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]");
+#ifdef _WIN32
+     fprintf(stderr, " [-threads num]");
+#endif  
+     fprintf(stderr, "\n");
      fprintf(stderr, "       [-f] [-q] [-ccount count] [-mcount count]\n");
      fprintf(stderr, "       [-v1] [-na] [-nw] [-nx] [-nm] host service msg\n");
      exit(1);
@@ -595,20 +600,94 @@ static void parse_oid(char *mechanism, gss_OID *oid)
 	free(mechstr);
 }
 
+static int max_threads = 1;
+
+#ifdef _WIN32
+static thread_count = 0;
+static HANDLE hMutex = NULL;
+static HANDLE hEvent = NULL;
+
+void
+InitHandles(void)
+{
+    hMutex = CreateMutex(NULL, FALSE, NULL);
+    hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+void
+CleanupHandles(void)
+{
+    CloseHandle(hMutex);
+    CloseHandle(hEvent);
+}
+
+BOOL
+WaitAndIncrementThreadCounter(void)
+{
+    for (;;) {
+        if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
+            if ( thread_count < max_threads ) {
+                thread_count++;
+                ReleaseMutex(hMutex);
+                return TRUE;
+            } else {
+                ReleaseMutex(hMutex);
+
+                if (WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0) {
+                    continue;
+                } else {
+                    return FALSE;
+                }
+            }
+        } else {
+            return FALSE;
+        }
+    }
+}
+
+BOOL
+DecrementAndSignalThreadCounter(void)
+{
+    if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
+        if ( thread_count == max_threads )
+            ResetEvent(hEvent);
+        thread_count--;
+        ReleaseMutex(hMutex);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+#endif
+
+static char *service_name, *server_host, *msg;
+static char *mechanism = 0;
+static u_short port = 4444;
+static int use_file = 0;
+static OM_uint32 gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
+static OM_uint32 min_stat;
+static gss_OID oid = GSS_C_NULL_OID;
+static int mcount = 1, ccount = 1;
+static int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
+
+void worker_bee(void * unused)
+{
+    if (call_server(server_host, port, oid, service_name,
+                    gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
+                    v1_format, msg, use_file, mcount) < 0)
+        exit(1);
+
+#ifdef _WIN32
+    if ( max_threads > 1 )
+        DecrementAndSignalThreadCounter();
+#endif
+}
+
 int main(argc, argv)
      int argc;
      char **argv;
 {
-     char *service_name, *server_host, *msg;
-     char *mechanism = 0;
-     u_short port = 4444;
-     int use_file = 0;
-     OM_uint32 gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG;
-     OM_uint32 min_stat;
-     gss_OID oid = GSS_C_NULL_OID;
-     int mcount = 1, ccount = 1;
      int i;
-     int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
 
      display_file = stdout;
      auth_flag = wrap_flag = encrypt_flag = mic_flag = 1;
@@ -625,7 +704,15 @@ int main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       mechanism = *argv;
-	   } else if (strcmp(*argv, "-d") == 0) {
+	   } 
+#ifdef _WIN32
+           else if (strcmp(*argv, "-threads") == 0) {
+               argc--; argv++;
+               if (!argc) usage();
+               max_threads = atoi(*argv);
+           } 
+#endif
+           else if (strcmp(*argv, "-d") == 0) {
 	       gss_flags |= GSS_C_DELEG_FLAG;
 	   } else if (strcmp(*argv, "-seq") == 0) {
 	       gss_flags |= GSS_C_SEQUENCE_FLAG;
@@ -664,6 +751,13 @@ int main(argc, argv)
      if (argc != 3)
 	  usage();
 
+#ifdef _WIN32
+     if (max_threads < 1) {
+	  fprintf(stderr, "warning: there must be at least one thread\n");
+	  max_threads = 1;
+     }
+#endif
+
      server_host = *argv++;
      service_name = *argv++;
      msg = *argv++;
@@ -671,15 +765,34 @@ int main(argc, argv)
      if (mechanism)
 	 parse_oid(mechanism, &oid);
 
-     for (i = 0; i < ccount; i++) {
-       if (call_server(server_host, port, oid, service_name,
-		       gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
-		       v1_format, 		       msg, use_file, mcount) < 0)
-	 exit(1);
+     if (max_threads == 1) {
+	  for (i = 0; i < ccount; i++) {
+	       worker_bee(0);
+	  }
+     } else {
+#ifdef _WIN32
+	  for (i = 0; i < ccount; i++) {
+	       if ( WaitAndIncrementThreadCounter() ) {
+		    uintptr_t handle = _beginthread(worker_bee, 0, (void *)0);
+		    if (handle == (uintptr_t)-1) {
+			 exit(1);
+		    }
+	       } else {
+		    exit(1);
+	       }
+	  }
+#else
+	  /* boom */
+	  assert(max_threads == 1);
+#endif
      }
 
      if (oid != GSS_C_NULL_OID)
 	 (void) gss_release_oid(&min_stat, &oid);
 	 
+#ifdef _WIN32
+     CleanupHandles();
+#endif
+
      return 0;
 }

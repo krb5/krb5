@@ -160,7 +160,7 @@ int send_token(s, flags, tok)
      int flags;
      gss_buffer_t tok;
 {
-     int len, ret;
+     int ret;
      unsigned char char_flags = (unsigned char) flags;
      unsigned char lenbuf[4];
 
