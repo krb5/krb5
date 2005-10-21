@@ -540,7 +540,7 @@ in the gnu locker does not currently handle -psl correctly though.
 -d0
 -di8
 -i4
--ip
+-ip4
 -l79
 -nbc
 -ncdb

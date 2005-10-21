@@ -1,3 +1,7 @@
+2005-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* coding-style: Modern (gnu) indent requires a number with -ip.
+
 2005-08-29  Sam Hartman  <hartmans@mit.edu>
 
 	* kadm5/api-server-design.tex kadm5/api-funcspec.tex:  Avoid using  changebar.sty
