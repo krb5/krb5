@@ -1,4 +1,10 @@
 2005-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-client.c, gss-misc.c, gss-server.c: Reindented.
+
+	* gss-server.c (logfile): Renamed from "log", and made static.
+
+2005-10-20  Ken Raeburn  <raeburn@mit.edu>
 	    Jeffrey Altman  <jaltman@mit.edu>
 
 	* gss-server.c [!_WIN32]: Include port-sockets.h instead of the
