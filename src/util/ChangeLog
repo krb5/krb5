@@ -1,3 +1,7 @@
+2005-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* ac_check_krb5.m4: Set LIBS rather than LDFLAGS.
+
 2005-10-18  Tom Yu  <tlyu@mit.edu>
 
 	* ac_check_krb5.m4: Example autoconf macro to use krb5-config for

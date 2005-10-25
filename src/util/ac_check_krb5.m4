@@ -48,8 +48,8 @@ AC_DEFUN([AC_CHECK_KRB5],
 			K5CFLAGS=`"$KRB5CONF" --cflags $k5confopts`
 			CPPFLAGS="$CPPFLAGS $K5CFLAGS"
 
-			K5LDFLAGS=`"$KRB5CONF" --libs $k5confopts`
-			LDFLAGS="$LDFLAGS $K5LDFLAGS"
+			K5LIBS=`"$KRB5CONF" --libs $k5confopts`
+			LIBS="$LIBS $K5LIBS"
 		else
 			AC_MSG_RESULT([no])
 			AC_MSG_WARN([--with-kerberos5 specified but krb5-config not found])
