@@ -1,3 +1,36 @@
+2005-10-20  Ken Raeburn  <raeburn@mit.edu>
+	    Jeffrey Altman  <jaltman@mit.edu>
+
+	* gss-server.c [!_WIN32]: Include port-sockets.h instead of the
+	various network-related UNIX header files.
+	(worker_bee): New function.
+	(main): Use it.
+	(max_threads): New variable.
+	(thread_count, hMutex, hEvent) [_WIN32]: New variables.
+	(InitHandles, CleanupHandles, WaitAndIncrementThreadCounter,
+	DecrementAndSignalThreadCounter) [_WIN32]: New functions.
+	(main) [_WIN32]: Accept new option -threads, and keep that many
+	threads going.
+	(usage) [_WIN32]: Document new option.
+
+	* gss-client.c [!_WIN32]: Include assert.h.
+	(max_threads): New variable.
+	(service_name, server_host, msg, mechanism, port, use_file,
+	gss_flags, min_stat, oid, mcount, ccount, auth_flag, wrap_flag,
+	encrypt_flag, mic_flag, v1_format): Moved variables to top level
+	from inside main.
+	(worker_bee): New function, with call_server call moved from
+	main.
+	(main): Call it.
+	(thread_count, hMutex, hEvent) [_WIN32]: New variables.
+	(InitHandles, CleanupHandles, WaitAndIncrementThreadCounter,
+	DecrementAndSignalThreadCounter) [_WIN32]: New functions.
+	(main) [_WIN32]: Accept new option -threads, and keep that many
+	threads going.
+	(usage) [_WIN32]: Document new option.
+
+	* gss-misc.c (send_token): Delete unused variable "len".
+
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MY_SUBDIRS): Deleted.

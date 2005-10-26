@@ -20,7 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 /*
- * Copyright (C) 2004 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2004,2005 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -48,10 +48,7 @@
 #include <windows.h>
 #include <winsock.h>
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netinet/in.h>
+#include "port-sockets.h"
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -70,7 +67,11 @@
 
 static void usage()
 {
-     fprintf(stderr, "Usage: gss-server [-port port] [-verbose] [-once]\n");
+     fprintf(stderr, "Usage: gss-server [-port port] [-verbose] [-once]");
+#ifdef _WIN32
+     fprintf(stderr, " [-threads num]");
+#endif
+     fprintf(stderr, "\n");
      fprintf(stderr, "       [-inetd] [-export] [-logfile file] service_name\n");
      exit(1);
 }
@@ -554,6 +555,90 @@ static int sign_server(s, server_creds, export)
     return(0);
 }
 
+static int max_threads = 1;
+
+#ifdef _WIN32
+static thread_count = 0;
+static HANDLE hMutex = NULL;
+static HANDLE hEvent = NULL;
+
+void
+InitHandles(void)
+{
+    hMutex = CreateMutex(NULL, FALSE, NULL);
+    hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+}
+
+void
+CleanupHandles(void)
+{
+    CloseHandle(hMutex);
+    CloseHandle(hEvent);
+}
+
+BOOL
+WaitAndIncrementThreadCounter(void)
+{
+    for (;;) {
+        if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
+            if ( thread_count < max_threads ) {
+                thread_count++;
+                ReleaseMutex(hMutex);
+                return TRUE;
+            } else {
+                ReleaseMutex(hMutex);
+
+                if (WaitForSingleObject(hEvent, INFINITE) == WAIT_OBJECT_0) {
+                    continue;
+                } else {
+                    return FALSE;
+                }
+            }
+        } else {
+            return FALSE;
+        }
+    }
+}
+
+BOOL
+DecrementAndSignalThreadCounter(void)
+{
+    if (WaitForSingleObject(hMutex, INFINITE) == WAIT_OBJECT_0) {
+        if ( thread_count == max_threads )
+            ResetEvent(hEvent);
+        thread_count--;
+        ReleaseMutex(hMutex);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+#endif
+
+struct _work_plan {
+    int             s;
+    gss_cred_id_t   server_creds;
+    int             export;
+};
+
+void 
+worker_bee(void * param)
+{
+    struct _work_plan *work = (struct _work_plan *) param;
+
+    /* this return value is not checked, because there's
+     * not really anything to do if it fails 
+     */
+    sign_server(work->s, work->server_creds, work->export);
+    closesocket(work->s);
+    free(work);
+
+#ifdef _WIN32
+    if ( max_threads > 1 )
+        DecrementAndSignalThreadCounter();
+#endif
+}
+
 int
 main(argc, argv)
      int argc;
@@ -563,7 +648,6 @@ main(argc, argv)
      gss_cred_id_t server_creds;
      OM_uint32 min_stat;
      u_short port = 4444;
-     int s;
      int once = 0;
      int do_inetd = 0;
      int export = 0;
@@ -576,7 +660,15 @@ main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       port = atoi(*argv);
-	  } else if (strcmp(*argv, "-verbose") == 0) {
+	  } 
+#ifdef _WIN32
+          else if (strcmp(*argv, "-threads") == 0) {
+              argc--; argv++;
+              if (!argc) usage();
+              max_threads = atoi(*argv);
+          } 
+#endif
+          else if (strcmp(*argv, "-verbose") == 0) {
 	      verbose = 1;
 	  } else if (strcmp(*argv, "-once") == 0) {
 	      once = 1;
@@ -612,6 +704,18 @@ main(argc, argv)
      if ((*argv)[0] == '-')
 	  usage();
 
+#ifdef _WIN32
+    if (max_threads < 1) {
+        fprintf(stderr, "warning: there must be at least one thread\n");
+        max_threads = 1;
+    }
+
+    if (max_threads > 1 && do_inetd)
+        fprintf(stderr, "warning: one thread may be used in conjunction with inetd\n");
+
+    InitHandles();
+#endif
+
      service_name = *argv;
 
      if (server_acquire_creds(service_name, &server_creds) < 0)
@@ -627,23 +731,56 @@ main(argc, argv)
 	 int stmp;
 
  	 if ((stmp = create_socket(port)) >= 0) {
+             if (listen(stmp, max_threads == 1 ? 0 : max_threads) < 0)
+                 perror("listening on socket");
+
  	     do {
+                 struct _work_plan * work = malloc(sizeof(struct _work_plan));
+
+                 if ( work == NULL ) {
+                     fprintf(stderr, "fatal error: out of memory");
+                     break;
+                 }
+
  		 /* Accept a TCP connection */
- 		 if ((s = accept(stmp, NULL, 0)) < 0) {
+                 if ((work->s = accept(stmp, NULL, 0)) < 0) {
  		     perror("accepting connection");
  		     continue;
  		 }
- 		 /* this return value is not checked, because there's
- 		    not really anything to do if it fails */
- 		 sign_server(s, server_creds, export);
- 		 close(s);
+                  
+                 work->server_creds = server_creds;
+                 work->export = export;
+
+                 if (max_threads == 1) {
+                     worker_bee((void *)work);
+                 } 
+#ifdef _WIN32
+                 else {
+                     if ( WaitAndIncrementThreadCounter() ) {
+                         uintptr_t handle = _beginthread(worker_bee, 0, (void *)work);
+                         if (handle == (uintptr_t)-1) {
+                             closesocket(work->s);
+                             free(work);
+                         }
+                     } else {
+                         fprintf(stderr, "fatal error incrementing thread counter");
+                         closesocket(work->s);
+                         free(work);
+                         break;
+                     }
+                 }
+#endif
  	     } while (!once);
  
- 	     close(stmp);
+ 	     closesocket(stmp);
  	 }
      }
 
      (void) gss_release_cred(&min_stat, &server_creds);
+
+#ifdef _WIN32
+    CleanupHandles();
+#endif
 
      return 0;
 }
