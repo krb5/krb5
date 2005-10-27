@@ -1,6 +1,7 @@
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
-	* post.in (.depend): Don't run sed, just use perl.
+	* post.in (.depend): Don't run sed, just use perl.  Use new name
+	of perl script.
 
 	* shlib.conf: Set DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
 	(*-*-darwin*): Change MAKE_DYNOBJ_COMMAND definition to use
