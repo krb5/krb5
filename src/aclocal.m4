@@ -393,18 +393,8 @@ if test $ac_cv_func_getaddrinfo = yes; then
 fi
 dnl
 AC_REQUIRE([KRB5_SOCKADDR_SA_LEN])dnl
-AC_ARG_ENABLE([ipv6],
-AC_HELP_STRING([--enable-ipv6],[turn on IPv6 support])
-AC_HELP_STRING([--disable-ipv6],[turn off IPv6 support @<:@enabled if available@:>@]), ,enableval=try)dnl
-case "$enableval" in
-  yes | try)
-	KRB5_AC_CHECK_INET6
-	if test "$enableval/$krb5_cv_inet6" = yes/no ; then
-	  AC_MSG_ERROR(IPv6 support does not appear to be available)
-	fi ;;
-  no)	;;
-  *)	AC_MSG_ERROR(bad value "$enableval" for enable-ipv6 option) ;;
-esac
+AC_ARG_ENABLE([ipv6], , AC_MSG_WARN(enable/disable-ipv6 option is deprecated))dnl
+KRB5_AC_CHECK_INET6
 ])dnl
 dnl
 AC_DEFUN(KRB5_AC_CHECK_TYPE_WITH_HEADERS,[
