@@ -40,5 +40,6 @@ $(OUTPRE)gss-client.$(OBJEXT): gss-client.c $(BUILDTOP)/include/gssapi/gssapi_ge
   $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
 $(OUTPRE)gss-misc.$(OBJEXT): gss-misc.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
-$(OUTPRE)gss-server.$(OBJEXT): gss-server.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+$(OUTPRE)gss-server.$(OBJEXT): gss-server.c $(SRCTOP)/include/port-sockets.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
