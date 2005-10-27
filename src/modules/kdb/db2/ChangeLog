@@ -1,3 +1,8 @@
+2005-10-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DYNOBJ_LOADER_PROG, DYNOBJ_EXPFLAGS_WITH_LOADER,
+	DYNOBJ_EXPDEPS_WITH_LOADER): New variables.
+
 2005-10-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPLIBS): Revert 10-04 change; add support

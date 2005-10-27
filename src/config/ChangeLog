@@ -1,3 +1,13 @@
+2005-10-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf: Set DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
+	(*-*-darwin*): Change MAKE_DYNOBJ_COMMAND definition to use
+	DYNOBJ_EXPFLAGS and DYNOBJ_LOADER_PROG instead of SHLIB_EXPFLAGS
+	and a hardcoded pathname to the KDC binary, respectively.
+	* pre.in (DYNOBJ_EXPDEPS, DYNOBJ_EXPFLAGS): New variables.
+	* libnover.in ($(LIBBASE)$(DYNOBJEXT)): Use DYNOBJ_EXPDEPS instead
+	of SHLIB_EXPDEPS in dependencies.
+
 2005-10-12  Ken Raeburn  <raeburn@mit.edu>
 
 	* libnover.in (PARSE_OBJLISTS): Die on warnings (including input

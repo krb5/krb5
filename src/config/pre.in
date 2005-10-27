@@ -492,6 +492,8 @@ PFLIBEXT=@PFLIBEXT@
 #
 DYNOBJEXT=@DYNOBJEXT@
 MAKE_DYNOBJ_COMMAND=@MAKE_DYNOBJ_COMMAND@
+DYNOBJ_EXPDEPS=@DYNOBJ_EXPDEPS@
+DYNOBJ_EXPFLAGS=@DYNOBJ_EXPFLAGS@
 
 # File with symbol names to be exported, both functions and data,
 # currently not distinguished.

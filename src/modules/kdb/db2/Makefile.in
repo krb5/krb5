@@ -62,6 +62,10 @@ STLIBOBJS= \
 	pol_xdr.o \
 	db2_exp.o
 
+DYNOBJ_LOADER_PROG = $(BUILDTOP)/kdc/krb5kdc
+DYNOBJ_EXPFLAGS_WITH_LOADER = -lgssrpc $(KDB5_DB_LIB)
+DYNOBJ_EXPDEPS_WITH_LOADER = $(GSSRPC_DEPLIBS)
+
 all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
