@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.4.2
+		  Kerberos Version 5, Release 1.4.3
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,14 +7,14 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a tarfile,
-krb5-1.4.2-signed.tar.  The tarfile contains a gzipped tarfile,
-krb5-1.4.2.tar.gz, and its corresponding PGP signature,
-krb5-1.4.2.tar.gz.asc.
+krb5-1.4.3-signed.tar.  The tarfile contains a gzipped tarfile,
+krb5-1.4.3.tar.gz, and its corresponding PGP signature,
+krb5-1.4.3.tar.gz.asc.
 
 You will need the GNU gzip program, and preferably, the GNU tar
 program, to extract the source distribution.
 
-The distribution will extract into a subdirectory "krb5-1.4.2" of the
+The distribution will extract into a subdirectory "krb5-1.4.3" of the
 current directory.
 
 Building and Installing Kerberos 5
@@ -131,6 +131,89 @@ recommend discussing them on the kerberos@mit.edu mailing list.
     http://web.mit.edu/tlyu/papers/krb4peril-ndss04.pdf
 
 ----------------------------------------------------------------------
+
+Minor changes in 1.4.3
+----------------------
+
+* [2541] Fix memory leak in gc_frm_kdc.c, reported by Fumihiko Kakuma.
+
+* [2542] Fix incorrect handling of high ASN.1 tag numbers, reported by
+  Zhihong Zhang.
+
+* [2885] Additional memory leak fixes in gc_frm_kdc.c.
+
+* [2923] Example autoconf macro for using krb5-config to build applications.
+
+* [3002] Fix malloc bug in ktutil_add(), reported by Will Fiveash.
+
+* [3092] Alter server-side changepw implementation to correctly return
+  the result string when the minlife has not been reached.  Reported
+  by Shawn Emery.
+
+* [3130] Add stub for krb5int_pthread_loaded() to fix a Windows build
+  problem.
+
+* [3146] Consistently include stdio.h in import_name.c to ensure that
+  BUFSIZ gets defined properly.  Reported by Vladimir Terziev.
+
+* [3147] Fix memory leak in get_init_creds(), reported by multiple
+  people.
+
+* [3158] Fix up execute permissions on scripts after svn migration.
+
+* [3159] Fix ignores after svn migration.
+
+* [3160] More execute permission svn post-migration cleanup.
+
+* [3162] More execute permission svn post-migration cleanup.
+
+* [3169] Remove non-standard changebar.sty from doc directory.
+
+* [3172] Only use res_ninit() if res_ndestroy() is present and
+  usable.  Based on an AIX build problem reported by Donn Cave.
+
+* [3173] Move KfM-specific build system components to the KfM
+  repository.
+
+* [3178] Update mkrel for svn.
+
+* [3182] Prevent gss_inquire_cred() from copying out an uninitialized
+  pointer.  Reported by Christoph Weizen.
+
+* [3183] Fix some gss name-related functions to clear minor_status if
+  there is no error.  (gsstest nit)
+
+* [3184] Fix memory leaks in krb5_gss_import_name() and
+  krb5_gss_inquire_cred().
+
+* [3185] Fix krb5_mk_rep() leaks of subkeys.
+
+* [3186] Allow gss_release_buffer() to free zero-length buffers.
+
+* [3189] Add DLLIMP statements to exported data symbols from
+  gssapi_krb5.h.
+
+* [3190] Fix kadm5 glob_to_regexp() handling of backslashes.  Reported
+  by K. G. Gokulavasan.
+
+* [3205] Cause AS_REP's PA-ETYPE-INFO2 to contain the correct enctype
+  if it differs from the long-term key's enctype due to single-DES
+  enctype similarity.  Reported by Will Fiveash.
+
+* [3207] Ensure that KDC returns PA-ETYPE-INFO for "old" enctypes.
+
+* [3210] Link Windows GINA with thread-safe libc.
+
+* [3211] Fix cc_mslsa based on interop results.
+
+* [3212] Add missing types to win-mac.h.
+
+* [3214] Update gss-sample applications on Windows to run multiple
+  threads.
+
+* [3220] Delete svn:mime-type properties on some files, as their
+  contents cause some files to be erroneously treated as binary by
+  svn.
 
 Major changes in 1.4.2
 ----------------------
