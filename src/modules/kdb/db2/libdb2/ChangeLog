@@ -1,3 +1,9 @@
+2005-10-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Set build_dynobj=yes.
+
+	* Makefile.in (all-unix, clean-unix): Drop liblinks dependencies.
+
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* Directory moved from util/db2 to modules/kdb/db2/libdb2.

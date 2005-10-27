@@ -2,6 +2,8 @@
 
 	* aclocal.m4 (KRB5_BUILD_LIBRARY_WITH_DEPS): Substitute
 	DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
+	(KRB5_LIB_AUX): If build_dynobj is set to yes, ensure that OBJS.SH
+	is in OBJLISTS and that OBJS.ST is not.
 
 2005-10-26  Ken Raeburn  <raeburn@mit.edu>
 

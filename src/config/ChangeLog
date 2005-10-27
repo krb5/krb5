@@ -1,5 +1,10 @@
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* libnover.in (LIBLIST): Use DYNOBJEXT instead of SHLIBEXT.
+	* shlib.conf (*-*-darwin*): Include SHLIB_DIRS, and
+	DYNOBJ_EXPLIBS_WITH_LOADER instead of
+	DYNOBJ_EXPFLAGS_WITH_LOADER.
+
 	* post.in (.depend): Don't run sed, just use perl.  Use new name
 	of perl script.
 

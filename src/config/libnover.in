@@ -34,7 +34,7 @@ dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=
 PARSE_OBJLISTS= set -x && $(PERL) -p -e 'BEGIN { $$SIG{__WARN__} = sub {die @_} }; $$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
 
 SHLIBVEXT=$(SHLIBEXT)
-LIBLIST=$(LIBBASE)$(SHLIBEXT)
+LIBLIST=$(LIBBASE)$(DYNOBJEXT)
 LIBINSTLIST=install-shared
 
 $(LIBBASE)$(DYNOBJEXT): $(SHOBJLISTS) $(DYNOBJ_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)

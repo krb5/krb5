@@ -1327,6 +1327,11 @@ else
 	SHLIBSEXT=.so.s-nobuild
 fi
 
+if test "$build_dynobj" = yes; then
+	OBJLISTS=`echo $OBJLISTS | sed -e s/OBJS.ST//g -e s/OBJS.SH//g`
+	OBJLISTS="$OBJLISTS OBJS.SH"
+fi
+
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
 fi
