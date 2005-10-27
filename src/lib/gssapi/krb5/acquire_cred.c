@@ -79,6 +79,10 @@
 #include <strings.h>
 #endif
 
+#ifdef USE_LOGIN_LIBRARY
+#include <Kerberos/KerberosLoginPrivate.h>
+#endif
+
 k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
@@ -223,12 +227,44 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
        return(GSS_S_FAILURE);
 
+#ifdef USE_LOGIN_LIBRARY
+   if (desired_name != NULL) {
+       char *ccache_name = NULL;
+       KLPrincipal kl_desired_princ = NULL;
+       
+       if ((code = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
+                                                              &kl_desired_princ))) {
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
+       
+       if ((code = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name))) {
+           KLDisposePrincipal (kl_desired_princ);
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
+       
+       if ((code = krb5_cc_resolve (context, ccache_name, &ccache))) {
+           KLDisposeString (ccache_name);
+           KLDisposePrincipal (kl_desired_princ);
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
+   
+       if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
+       if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
+       
+   } else {
+#endif
     /* open the default credential cache */
    
    if ((code = krb5int_cc_default(context, &ccache))) {
       *minor_status = code;
       return(GSS_S_CRED_UNAVAIL);
    }
+#ifdef USE_LOGIN_LIBRARY
+   }
+#endif
 
    /* turn off OPENCLOSE mode while extensive frobbing is going on */
 
