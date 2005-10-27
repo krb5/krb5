@@ -82,7 +82,7 @@ depend-dependencies:
 # NOTE: This will also generate spurious $(OUTPRE) and $(OBJEXT)
 # references in rules for non-library objects in a directory where
 # library objects happen to be built.  It's mostly harmless.
-.depend: .d $(SRCTOP)/util/depfix.sed $(SRCTOP)/util/depfix.pl
+.depend: .d $(SRCTOP)/util/depfix.pl
 	x=`$(CC) -print-libgcc-file-name` ; \
 	perl $(SRCTOP)/util/depfix.pl \
 		'$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' \
