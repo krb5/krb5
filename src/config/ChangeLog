@@ -1,5 +1,7 @@
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* post.in (.depend): Don't run sed, just use perl.
+
 	* shlib.conf: Set DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
 	(*-*-darwin*): Change MAKE_DYNOBJ_COMMAND definition to use
 	DYNOBJ_EXPFLAGS and DYNOBJ_LOADER_PROG instead of SHLIB_EXPFLAGS

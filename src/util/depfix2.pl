@@ -101,8 +101,68 @@ sub do_subs {
     return $_;
 }
 
+sub do_subs_2 {
+    local($_) = @_;
+    # Add a trailing space.
+    s/$/ /;
+    # Remove excess spaces.
+    s/  */ /g;
+    # Delete Tcl-specific headers.
+    s;/[^ ]*/tcl\.h ;;g;
+    s;/[^ ]*/tclDecls\.h ;;g;
+    s;/[^ ]*/tclPlatDecls\.h ;;g;
+    # Delete system-specific or compiler-specific files.
+    s;/os/usr/include/[^ ]* ;;g;
+    s;/usr/include/[^ ]* ;;g;
+    s;/usr/lib/[^ ]* ;;g;
+    # Remove foo/../ sequences.
+    while (m/\/[a-z][a-z0-9_.\-]*\/\.\.\//) {
+	s//\//g;
+    }
+    # Use VPATH.
+    s;\$\(srcdir\)/([^ /]* );$1;g;
+
+    # Allow override of some util dependencies in case local tools are used.
+    s;\$\(BUILDTOP\)/include/com_err.h ;\$(COM_ERR_DEPS) ;g;
+    s;\$\(BUILDTOP\)/include/ss/ss.h \$\(BUILDTOP\)/include/ss/ss_err.h ;\$(SS_DEPS) ;g;
+    s;\$\(BUILDTOP\)/include/db.h \$\(BUILDTOP\)/include/db-config.h ;\$(DB_DEPS) ;g;
+
+    # Some krb4 dependencies should only be present if building with krb4
+    # enabled.
+    s;\$\(BUILDTOP\)/include/kerberosIV/krb_err.h ;\$(KRB_ERR_H_DEP) ;g;
+
+    # Delete trailing whitespace.
+    s; *$;;g;
+
+    return $_;
+}
+
+sub split_lines {
+    local($_) = @_;
+    s/(.{50}[^ ]*) /$1 \\\n  /g;
+    return $_ . "\n";
+}
+
+print <<EOH ;
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+EOH
+my $buf = '';
 while (<STDIN>) {
+    # Strip newline.
     chop;
-    print &do_subs($_), "\n";
+    # Do directory-specific path substitutions on each filename read.
+    $_ = &do_subs($_);
+    if (m/\\$/) {
+	chop;
+	$buf .= $_;
+    } else {
+	$buf = &do_subs_2($buf . $_);
+	print &split_lines($buf);
+	$buf = '';
+    }
 }
 exit 0;

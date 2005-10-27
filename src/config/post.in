@@ -86,8 +86,7 @@ depend-dependencies:
 	x=`$(CC) -print-libgcc-file-name` ; \
 	perl $(SRCTOP)/util/depfix2.pl \
 		'$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' \
-		< .d | sed -f $(SRCTOP)/util/depfix.sed | \
-	sed -e '/^$$/d' > .depend
+		< .d > .depend
 
 depend-update-makefile: .depend depend-recurse
 	if test -n "$(SRCS)" ; then \

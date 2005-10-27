@@ -1,3 +1,8 @@
+2005-10-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix2.pl: Incorporate all substitutions from depfix.sed.
+	* depfix.sed: Deleted.
+
 2005-10-25  Tom Yu  <tlyu@mit.edu>
 
 	* ac_check_krb5.m4: Set LIBS rather than LDFLAGS.
