@@ -62,7 +62,8 @@ popdef([x])
 define([K5_VERSION],PL_KRB5_MAJOR_RELEASE.PL_KRB5_MINOR_RELEASE[]ifelse(PL_KRB5_PATCHLEVEL,0,,.PL_KRB5_PATCHLEVEL)ifelse(PL_KRB5_RELTAIL,,,-PL_KRB5_RELTAIL))
 define([K5_BUGADDR],krb5-bugs@mit.edu)
 define([K5_AC_INIT],[AC_INIT(Kerberos 5, K5_VERSION, K5_BUGADDR, krb5)
-AC_CONFIG_SRCDIR($1)])
+AC_CONFIG_SRCDIR($1)
+build_dynobj=no])
 dnl
 dnl drop in standard rules for all configure files -- CONFIG_RULES
 dnl

@@ -4,6 +4,7 @@
 	DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
 	(KRB5_LIB_AUX): If build_dynobj is set to yes, ensure that OBJS.SH
 	is in OBJLISTS and that OBJS.ST is not.
+	(K5_AC_INIT): Initialize build_dynobj to no.
 
 2005-10-26  Ken Raeburn  <raeburn@mit.edu>
 
