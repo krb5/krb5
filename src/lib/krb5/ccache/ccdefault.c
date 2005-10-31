@@ -29,20 +29,17 @@
 
 #include "k5-int.h"
 
-#ifdef USE_LOGIN_LIBRARY
+#if defined(USE_LOGIN_LIBRARY)
 #include "KerberosLoginPrivate.h"
-#else
-#ifdef USE_LEASH
-static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal) = NULL;
+#elif defined(USE_LEASH)
+static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
-#endif
 #endif
 
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context context, krb5_ccache *ccache)
 {
-	krb5_error_code retval;
 	krb5_os_context	os_ctx;
 
 	if (!context || context->magic != KV5M_CONTEXT)
@@ -88,7 +85,6 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
     }
 #else
 #ifdef USE_LEASH
-
     if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
         hLeashDLL = LoadLibrary("leashw32.dll");
         if ( hLeashDLL != INVALID_HANDLE_VALUE ) {
@@ -98,7 +94,13 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
     }
     
     if ( pLeash_AcquireInitialTicketsIfNeeded ) {
-        pLeash_AcquireInitialTicketsIfNeeded(context, NULL);
+	char ccname[256]="";
+        pLeash_AcquireInitialTicketsIfNeeded(context, NULL, ccname, sizeof(ccname));
+	if (ccname[0]) {
+            if (strcmp (krb5_cc_default_name (context),ccname) != 0) {
+                krb5_cc_set_default_name (context, ccname);
+            }
+	}
     }
 #endif
 #endif

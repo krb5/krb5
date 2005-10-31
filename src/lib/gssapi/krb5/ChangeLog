@@ -1,3 +1,10 @@
+2005-10-20  Alexandra Ellwood <lxs@mit.edu>, Jeffrey Altman <jaltman@mit.edu>
+	
+	* acquire_cred.c (acquire_init_cred):
+	  If a specific principal has been requested, attempt to acquire
+          tickets and set the ccache name in the context to the ccache
+          containing the tickets if obtained. (KFM/KFW)  
+
 2005-10-20  Jeffrey Altman <jaltman@mit.edu>
 
 	* gssapi_krb5.hin: add missing GSS_DLLIMP to exported symbols

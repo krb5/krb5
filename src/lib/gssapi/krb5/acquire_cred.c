@@ -79,6 +79,13 @@
 #include <strings.h>
 #endif
 
+#if defined(USE_LOGIN_LIBRARY)
+#include <Kerberos/KerberosLoginPrivate.h>
+#elif defined(USE_LEASH)
+static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
+static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
+#endif
+
 k5_mutex_t gssint_krb5_keytab_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static char *krb5_gss_keytab = NULL;
 
@@ -223,11 +230,65 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
        return(GSS_S_FAILURE);
 
-    /* open the default credential cache */
+#if defined(USE_LOGIN_LIBRARY) || defined(USE_LEASH)
+   if (desired_name != NULL) {
+#if defined(USE_LOGIN_LIBRARY)
+       char *ccache_name = NULL;
+       KLPrincipal kl_desired_princ = NULL;
+       
+       if ((code = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
+                                                              &kl_desired_princ))) {
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
+       
+       if ((code = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name))) {
+           KLDisposePrincipal (kl_desired_princ);
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
+       
+       if ((code = krb5_cc_resolve (context, ccache_name, &ccache))) {
+           KLDisposeString (ccache_name);
+           KLDisposePrincipal (kl_desired_princ);
+           *minor_status = code;
+           return(GSS_S_CRED_UNAVAIL);
+       }
    
-   if ((code = krb5int_cc_default(context, &ccache))) {
-      *minor_status = code;
-      return(GSS_S_CRED_UNAVAIL);
+       if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
+       if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
+#elif defined(USE_LEASH)
+       if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
+	   hLeashDLL = LoadLibrary("leashw32.dll");
+	   if ( hLeashDLL != INVALID_HANDLE_VALUE ) {
+	       (FARPROC) pLeash_AcquireInitialTicketsIfNeeded =
+		   GetProcAddress(hLeashDLL, "not_an_API_Leash_AcquireInitialTicketsIfNeeded");
+	   }
+       }
+    
+       if ( pLeash_AcquireInitialTicketsIfNeeded ) {
+	   char ccname[256]="";
+	   pLeash_AcquireInitialTicketsIfNeeded(context, (krb5_principal) desired_name, ccname, sizeof(ccname));
+	   if (!ccname[0]) {
+	       *minor_status = KRB5_CC_NOTFOUND;
+	       return(GSS_S_CRED_UNAVAIL);
+	   }
+
+	   if ((code = krb5_cc_resolve (context, ccname, &ccache))) {
+	       *minor_status = code;
+	       return(GSS_S_CRED_UNAVAIL);
+	   }
+       }
+#endif /* USE_LEASH */
+   } else
+#endif /* USE_LOGIN_LIBRARY || USE_LEASH */
+   {
+       /* open the default credential cache */
+   
+       if ((code = krb5int_cc_default(context, &ccache))) {
+	   *minor_status = code;
+	   return(GSS_S_CRED_UNAVAIL);
+       }
    }
 
    /* turn off OPENCLOSE mode while extensive frobbing is going on */
