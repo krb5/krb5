@@ -1,3 +1,10 @@
+2005-10-31  Jeffrey Altman <jaltman@mit.edu>
+
+	* gssapi32.def:  export missing functions
+        	gss_krb5_set_allowable_enctypes
+	        gss_krb5_export_lucid_sec_context
+	        gss_krb5_free_lucid_sec_context
+
 2005-04-22  Jeffrey Altman <jaltman@mit.edu>
 
         * win_glue.c:  Remove calls to WSAStartup/WSACleanup because
