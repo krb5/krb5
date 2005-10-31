@@ -31,6 +31,12 @@
 #define K5_THREAD_H
 
 #include "autoconf.h"
+#ifndef KRB5_CALLCONV
+# define KRB5_CALLCONV
+#endif
+#ifndef KRB5_CALLCONV_C
+# define KRB5_CALLCONV_C
+#endif
 
 /* Interface (tentative):
 
@@ -148,13 +154,13 @@
 #ifdef DEBUG_THREADS_LOC
 typedef struct {
     const char *filename;
-    short lineno;
+    int lineno;
 } k5_debug_loc;
 #define K5_DEBUG_LOC_INIT	{ __FILE__, __LINE__ }
 #if __GNUC__ >= 2
 #define K5_DEBUG_LOC		(__extension__ (k5_debug_loc)K5_DEBUG_LOC_INIT)
 #else
-static inline k5_debug_loc k5_debug_make_loc(const char *file, short line)
+static inline k5_debug_loc k5_debug_make_loc(const char *file, int line)
 {
     k5_debug_loc l;
     l.filename = file;

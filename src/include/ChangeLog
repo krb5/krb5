@@ -38,6 +38,13 @@
 	* k5-platform.h (PROGRAM_EXITING) [__GNUC__ && !_WIN32 &&
 	CONSTRUCTOR_ATTR_WORKS]: Define as zero.
 
+2005-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (KRB5_CALLCONV, KRB5_CALLCONV_C): Define if not
+	defined.
+	(k5_debug_make_loc): Change "lineno" to type int.
+	(k5_debug_make_loc): Likewise for argument "line".
+
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
 
         * win-mac.h: define NEED_INSIXADDR_ANY for ipv6 symbol
