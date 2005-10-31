@@ -1,3 +1,7 @@
+2005-10-27  Jeffrey Altman <jaltman@mit.edu>
+	* ccdefault.c: 
+          (krb5int_cc_default) - add KFW support for multiple ccaches
+
 2005-10-20  Jeffrey Altman <jaltman@mit.edu>
 
 	* cc_mslsa.c: 
