@@ -1,3 +1,9 @@
+2005-11-01  Jeffrey Altman <jaltman@mit.edu>
+
+        Add support for Network Identity Manager Framework
+
+        Move leash32.exe to component that is disabled by default
+
 2004-12-18  Jeffrey Altman <jaltman@mit.edu>
 
         Add Debug Symbols as an optional install feature for

@@ -6,7 +6,7 @@
     <!-- TargetDir should point to build target directory and must end with 
          a backslash.  If not specified, assume we are in TargetDir\install -->
 
-    <?define TargetDir="c:\temp\kfw\kfw-2.6.6-alpha\"?>
+    <?define TargetDir="c:\temp\kfw\kfw-3.0.0-beta-1\"?>
 
     <!-- ConfigDir should point to directory containing configuration files 
          (krb5.ini, krb.con, krbrealm.con) to be bundled with the installer.
@@ -26,10 +26,11 @@
         <?define BuildLang="1033"?>
     <?endif?>
 
-    <!-- ProductCode is an uppercase GUID.  Each major release should have a
-         new product code.  Different language versions should have different
-         product codes -->
-    <?define ProductCode="FD5B1F41-81BB-4BBC-9F7E-4B971660AE1A"?>    
+    <!-- ProductCode is an uppercase GUID.  Each release should have its
+         own ProductCode.  If one is not defined, we generate a random one. -->
+    <?ifndef ProductCode?>
+	    <?define ProductCode="????????-????-????-????-????????????"?>    
+    <?endif?>
     
     <!-- DefaultRealm, is your default realm.  Must be uppercase -->
     <?define DefaultRealm="ATHENA.MIT.EDU"?>
@@ -47,7 +48,8 @@
     <?define Debug?>
     <!-- <?define Release?> -->
 
-    <!-- We are including debug symbols anyway.  Undefine this for a leaner installer without debug syms. -->
+    <!-- We are including debug symbols anyway.  Undefine this for a leaner 
+         installer without debug syms. -->
     <?define DebugSyms?>
 
     <!-- Optional defines -->
@@ -70,9 +72,9 @@
     <?endif?>
 
     <?ifndef VersionMajor?>
-        <?define VersionMajor="2"?>
-        <?define VersionMinor="6"?>
-        <?define VersionPatch="6"?>
+        <?define VersionMajor="3"?>
+        <?define VersionMinor="0"?>
+        <?define VersionPatch="0"?>
     <?else?>
         <?if Not ($(var.VersionMinor) And $(var.VersionPatch))?>
             <?error VersionMajor, VersionMinor and VersionPatch should be specified together?>
