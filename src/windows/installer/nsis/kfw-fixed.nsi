@@ -32,7 +32,7 @@ VIAddVersionKey "CompanyName" "Massachusetts Institute of Technology"
 VIAddVersionKey "ProductVersion" ${VIProductVersion}
 VIAddVersionKey "FileVersion" ${VIProductVersion}
 VIAddVersionKey "FileDescription" "MIT Kerberos for Windows Installer"
-VIAddVersionKey "LegalCopyright" "(C)2004"
+VIAddVersionKey "LegalCopyright" "(C)2004,2005"
 !ifdef DEBUG
 VIAddVersionKey "PrivateBuild" "Checked/Debug"
 !endif               ; End DEBUG
@@ -173,6 +173,7 @@ Section "KfW Client" secClient
   ; Stop the running processes
   GetTempFileName $R0
   File /oname=$R0 "Killer.exe"
+  nsExec::Exec '$R0 netidmgr.exe'
   nsExec::Exec '$R0 leash32.exe'
   nsExec::Exec '$R0 krbcc32s.exe'
   nsExec::Exec '$R0 k95.exe'
@@ -185,7 +186,9 @@ Section "KfW Client" secClient
 
    ; Do client components
   SetOutPath "$INSTDIR\bin"
+!ifdef AKLOG
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\aklog.exe"           "$INSTDIR\bin\aklog.exe"         "$INSTDIR"
+!endif
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\comerr32.dll"        "$INSTDIR\bin\comerr32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss.exe"             "$INSTDIR\bin\gss.exe"           "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-client.exe"      "$INSTDIR\bin\gss-client.exe"    "$INSTDIR"
@@ -204,12 +207,13 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbv4w32.dll"        "$INSTDIR\bin\krbv4w32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.exe"         "$INSTDIR\bin\leash32.exe"       "$INSTDIR"
-!ifdef OLDHELP                                                                 
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.hlp"         "$INSTDIR\bin\leash32.hlp"       "$INSTDIR"
-!else                                                                          
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leash32.chm"         "$INSTDIR\bin\leash32.chm"       "$INSTDIR"
-!endif                                                                         
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe"         "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"         "$INSTDIR\bin\netidmgr.chm"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr32.dll"         "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred.dll"         "$INSTDIR\bin\krb4cred.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred.dll"         "$INSTDIR\bin\krb5cred.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred_en_us.dll"   "$INSTDIR\bin\krb4cred_en_us.dll"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred_en_us.dll"   "$INSTDIR\bin\krb5cred_en_us.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\leashw32.dll"        "$INSTDIR\bin\leashw32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\ms2mit.exe"          "$INSTDIR\bin\ms2mit.exe"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\mit2ms.exe"          "$INSTDIR\bin\mit2ms.exe"        "$INSTDIR"
@@ -365,22 +369,22 @@ Section "KfW Client" secClient
   ReadINIStr $R1 $1 "Field 3" "State"  ; autoinit
 
   StrCmp $R1 "0" noauto
-  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Leash Kerberos Ticket Manager.lnk" "$INSTDIR\bin\leash32.exe" "-autoinit" "$INSTDIR\bin\leash32.exe" 
+  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "--autoinit" "$INSTDIR\bin\netidmgr.exe" 
   goto startshort
 noauto:
-  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Leash Kerberos Ticket Manager.lnk" "$INSTDIR\bin\leash32.exe" "" "$INSTDIR\bin\leash32.exe" 
+  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "" "$INSTDIR\bin\netidmgr.exe" 
 
 startshort:
   StrCmp $R0 "0" nostart
   StrCmp $R1 "0" nostartauto
-  CreateShortCut  "$SMSTARTUP\Leash Kerberos Ticket Manager.lnk" "$INSTDIR\bin\leash32.exe" "-autoinit" "$INSTDIR\bin\leash32.exe" 0 SW_SHOWMINIMIZED
+  CreateShortCut  "$SMSTARTUP\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "--autoinit" "$INSTDIR\bin\netidmgr.exe" 0 SW_SHOWMINIMIZED
   goto checkconflicts
 nostartauto:  
-  CreateShortCut  "$SMSTARTUP\Leash Kerberos Ticket Manager.lnk" "$INSTDIR\bin\leash32.exe" "" "$INSTDIR\bin\leash32.exe" 0 SW_SHOWMINIMIZED
+  CreateShortCut  "$SMSTARTUP\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "" "$INSTDIR\bin\netidmgr.exe" 0 SW_SHOWMINIMIZED
   goto checkconflicts
 
 nostart:
-  Delete  "$SMSTARTUP\Leash Kerberos Ticket Manager.lnk"
+  Delete  "$SMSTARTUP\Network Identity Manager.lnk"
 
 checkconflicts:
   Call GetSystemPath
@@ -418,11 +422,13 @@ skipAllowTgtKey:
 
   ; The following are keys added for Terminal Server compatibility
   ; http://support.microsoft.com/default.aspx?scid=kb;EN-US;186499
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" "Flags" 0x408
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" "Flags" 0x408
+!ifdef AKLOG
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" "Flags" 0x408
+!endif
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" "Flags" 0x408
@@ -442,7 +448,9 @@ SectionEnd
 Section "Debug Symbols" secDebug
 
   SetOutPath "$INSTDIR\bin"
+!ifdef AKLOG
   File "${KFW_BIN_DIR}\aklog.pdb"
+!endif
   File "${KFW_BIN_DIR}\comerr32.pdb"
   File "${KFW_BIN_DIR}\gss.pdb"
   File "${KFW_BIN_DIR}\gss-client.pdb"
@@ -462,7 +470,10 @@ Section "Debug Symbols" secDebug
   File "${KFW_BIN_DIR}\krbcc32s.pdb"
   File "${KFW_BIN_DIR}\krbv4w32.pdb"
   File "${KFW_BIN_DIR}\leashw32.pdb"
-  File "${KFW_BIN_DIR}\leash32.pdb"
+  File "${KFW_BIN_DIR}\netidmgr.pdb"
+  File "${KFW_BIN_DIR}\nidmgr32.pdb"
+  File "${KFW_BIN_DIR}\krb4cred.pdb"
+  File "${KFW_BIN_DIR}\krb5cred.pdb"
   File "${KFW_BIN_DIR}\ms2mit.pdb"
   File "${KFW_BIN_DIR}\mit2ms.pdb"
   File "${KFW_BIN_DIR}\kcpytkt.pdb"
@@ -522,6 +533,9 @@ Section "KfW SDK" secSDK
   SetOutPath "$INSTDIR\inc\loadfuncs"
   File /r "${KFW_INC_DIR}\loadfuncs\*"  
 
+  SetOutPath "$INSTDIR\inc\netidmgr"
+  File /r "${KFW_INC_DIR}\netidmgr\*"  
+
   SetOutPath "$INSTDIR\inc\wshelper"
   File /r "${KFW_INC_DIR}\wshelper\*"  
 
@@ -565,7 +579,7 @@ Section "KfW Documentation" secDocs
 
   SetOutPath "$INSTDIR\doc"
   File "${KFW_DOC_DIR}\relnotes.html"
-  File "${KFW_DOC_DIR}\leash_userdoc.pdf"
+;  File "${KFW_DOC_DIR}\leash_userdoc.pdf"
    
   Call KFWCommon.Install
   
@@ -595,7 +609,7 @@ Section "KfW Documentation" secDocs
   CreateDirectory "$SMPROGRAMS\${PROGRAM_NAME}"
   SetOutPath "$INSTDIR\doc"
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Release Notes.lnk" "$INSTDIR\doc\relnotes.html" 
-  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Leash User Documentation.lnk" "$INSTDIR\doc\leash_userdoc.pdf" 
+;  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk" "$INSTDIR\doc\netidmgr_userdoc.pdf" 
 
 SectionEnd
 
@@ -1076,7 +1090,7 @@ StartRemove:
   ; Stop the running processes
   GetTempFileName $R0
   File /oname=$R0 "Killer.exe"
-  nsExec::Exec '$R0 leash32.exe'
+  nsExec::Exec '$R0 netidmgr.exe'
   nsExec::Exec '$R0 krbcc32s.exe'
 
   Push "$INSTDIR\bin"
@@ -1084,9 +1098,11 @@ StartRemove:
   
   ; Delete documentation
   Delete "$INSTDIR\doc\relnotes.html"
-  Delete "$INSTDIR\doc\leash_userdoc.pdf"
+;  Delete "$INSTDIR\doc\leash_userdoc.pdf"
 
+!ifdef AKLOG
    Delete /REBOOTOK "$INSTDIR\bin\aklog.exe"
+!endif
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\gss.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.exe"
@@ -1105,12 +1121,13 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.dll" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.exe"
    Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.dll"
-   Delete /REBOOTOK "$INSTDIR\bin\leash32.exe"
-!ifdef OLDHELP
-   Delete /REBOOTOK "$INSTDIR\bin\leash32.hlp"
-!else
-   Delete /REBOOTOK "$INSTDIR\bin\leash32.chm" 
-!endif
+   Delete /REBOOTOK "$INSTDIR\bin\netidmgr.exe"      
+   Delete /REBOOTOK "$INSTDIR\bin\netidmgr.chm"      
+   Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.dll"      
+   Delete /REBOOTOK "$INSTDIR\bin\krb4cred.dll"      
+   Delete /REBOOTOK "$INSTDIR\bin\krb5cred.dll"      
+   Delete /REBOOTOK "$INSTDIR\bin\krb4cred_en_us.dll"
+   Delete /REBOOTOK "$INSTDIR\bin\krb5cred_en_us.dll"
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\mit2ms.exe"  
@@ -1119,7 +1136,9 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.dll"
 
+!ifdef AKLOG
    Delete /REBOOTOK "$INSTDIR\bin\aklog.pdb"
+!endif
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.pdb"
@@ -1138,6 +1157,10 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32.pdb" 
    Delete /REBOOTOK "$INSTDIR\bin\krbcc32s.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\krbv4w32.pdb"
+   Delete /REBOOTOK "$INSTDIR\bin\netidmgr.pdb"      
+   Delete /REBOOTOK "$INSTDIR\bin\nidmgr32.pdb"      
+   Delete /REBOOTOK "$INSTDIR\bin\krb4cred.pdb"      
+   Delete /REBOOTOK "$INSTDIR\bin\krb5cred.pdb"      
    Delete /REBOOTOK "$INSTDIR\bin\leashw32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\ms2mit.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\mit2ms.pdb"  
@@ -1240,11 +1263,11 @@ StartRemove:
   RMDir  "$INSTDIR"
   
   Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Uninstall ${PROGRAM_NAME}.lnk"
-  Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Leash Kerberos Ticket Manager.lnk"
+  Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk"
   Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Release Notes.lnk"
-  Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Leash User Documentation.lnk"
+  Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk"
   RmDir   "$SMPROGRAMS\${PROGRAM_NAME}"
-  Delete  "$SMSTARTUP\Leash Kerberos Ticket Manager.lnk"
+  Delete  "$SMSTARTUP\Network Identity Manager.lnk"
 
    IfSilent SkipAsk
 ;  IfFileExists "$WINDIR\krb5.ini" CellExists SkipDelAsk
@@ -1265,11 +1288,13 @@ StartRemove:
   WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Control\Lsa\Kerberos" "AllowTGTSessionKey" $R0
 
   ; The following are keys added for Terminal Server compatibility
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32"
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy"
+!ifdef AKLOG
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog"
+!endif
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server"
@@ -1436,7 +1461,7 @@ Function KFWPageGetStartupConfig
   
   ; Set the install options here
   
-  !insertmacro MUI_HEADER_TEXT "Leash Ticket Manager Setup" "Please select Leash ticket manager setup options:" 
+  !insertmacro MUI_HEADER_TEXT "Network Identity Manager Setup" "Please select Network Identity ticket manager setup options:" 
   InstallOptions::dialog $1
   Pop $R1
   StrCmp $R1 "cancel" exit
