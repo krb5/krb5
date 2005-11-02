@@ -42,6 +42,9 @@
     <String Id="StrKerberosClientDebugTitle">Debug symbols</String>
     <String Id="StrKerberosClientDebugDesc">Debugging symbols for Kerberos for Windows components.</String>
 
+    <String Id="StrLeashExeTitle">Leash Credentials Manager</String>
+    <String Id="StrLeashExeDesc">Leash credentials manager</String>
+    
     <String Id="KerberosSDKTitle">SDK</String>
     <String Id="KerberosSDKDesc">Libraries and header files for developing software with Kerberos</String>
     

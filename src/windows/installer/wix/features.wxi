@@ -47,12 +47,23 @@
                     AllowAdvertise="no" 
                     Description="$(loc.StrKerberosClientDebugDesc)" 
                     Display="expand"
-		    InstallDefault="$(var.DebugSymInstallDefault)" 
+					InstallDefault="$(var.DebugSymInstallDefault)" 
                     Level="$(var.DebugSymLowLevel)" 
                     Title="$(loc.StrKerberosClientDebugTitle)">
                         <ComponentRef Id="cmf_bin_debug"/>
 	        </Feature>
 	    <?endif?>
+
+			<Feature
+				Id="feaKfwLeashExe"
+				AllowAdvertise="no"
+				Description="$(loc.StrLeashExeDesc)"
+				Display="expand"
+				InstallDefault="local"
+				Level="130"
+				Title="$(loc.StrLeashExeTitle)">
+	            <ComponentRef Id="cmf_leash32_exe" />
+	        </Feature>
 
             <ComponentRef Id="cmf_aklog_exe" />
             <ComponentRef Id="cmf_comerr32_dll" />
@@ -75,14 +86,13 @@
             <ComponentRef Id="cmf_krbcc32_dll" />
             <ComponentRef Id="cmf_krbcc32s_exe" />
             <ComponentRef Id="cmf_krbv4w32_dll" />
-            <ComponentRef Id="cmf_leash32_exe" />
             
-            <!-- Leash config options -->
-            <ComponentRef Id="rcm_leash_1" />
-            <ComponentRef Id="rcm_leash_2" />
-            <ComponentRef Id="rcm_leash_3" />
-            <ComponentRef Id="rcm_leash_5" />
-            <ComponentRef Id="rcm_leash_6" />
+            <ComponentRef Id="cmf_nidmgr32_dll" />
+            <ComponentRef Id="cmf_krb5cred_dll" />
+            <ComponentRef Id="cmf_krb5cred_en_us_dll" />
+            <ComponentRef Id="cmf_krb4cred_dll" />
+            <ComponentRef Id="cmf_krb4cred_en_us_dll" />
+            <ComponentRef Id="cmf_netidmgr_exe" />
             
             <!-- Kerberos IV options -->
             <ComponentRef Id="rcm_krb4_1" />
@@ -94,6 +104,14 @@
             <ComponentRef Id="rcm_krb5_1" />
             <ComponentRef Id="rcm_krb5_2" />
             <ComponentRef Id="rcm_krb5_3" />
+
+            
+            <!-- Leash config options -->
+            <ComponentRef Id="rcm_leash_1" />
+            <ComponentRef Id="rcm_leash_2" />
+            <ComponentRef Id="rcm_leash_3" />
+            <ComponentRef Id="rcm_leash_5" />
+            <ComponentRef Id="rcm_leash_6" />
             
         <?ifdef OldHelp?>
             <ComponentRef Id="cmf_leash32_hlp" />
@@ -231,6 +249,7 @@
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
             <ComponentRef Id="cmp_dirinc_wshelper" />
             <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
+			<ComponentRef Id="cmp_dirinc_netidmgr" />
             <ComponentRef Id="cmp_dirlib_i386" />
             <ComponentRef Id="cmp_dirinstall_nsis" />
             <ComponentRef Id="cmp_dirinstall_wix" />
