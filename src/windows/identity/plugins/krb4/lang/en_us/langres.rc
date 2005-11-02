@@ -1,0 +1,141 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\..\langres.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\..\\langres.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NC_KRB4 DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "kRB4",IDC_STATIC,38,43,71,24
+END
+
+IDD_CFG_KRB4 DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Ticket cache location",IDC_CFG_LBL_CACHE,7,10,67,8
+    EDITTEXT        IDC_CFG_CACHE,83,7,165,14,ES_AUTOHSCROLL
+    LTEXT           "Config file path",IDC_CFG_LBL_CFGFILE,7,30,50,8
+    EDITTEXT        IDC_CFG_CFGPATH,83,27,113,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_CFG_CFGBROW,200,27,48,14
+    LTEXT           "Realm file path",IDC_CFG_LBL_RLMPATH,7,50,48,8
+    EDITTEXT        IDC_CFG_RLMPATH,83,47,113,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_CFG_RLMBROW,200,47,48,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_NC_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_CFG_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 83
+        VERTGUIDE, 196
+        VERTGUIDE, 200
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_PLUGIN_DESC         "Kerberos 4 Credentials Provider"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_KRB4_SHORT_DESC     "Kerberos 4 tickets"
+    IDS_KRB4_LONG_DESC      "Kerberos 4 tickets"
+    IDS_CFG_KRB4_LONG       "Kerberos 4 Configuration"
+    IDS_CFG_KRB4_SHORT      "Kerberos 4"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

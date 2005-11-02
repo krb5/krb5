@@ -1,0 +1,13 @@
+BODY { 	font-family:helvetica,sans-serif;
+	font-size:8pt; 
+	font-style:normal; 
+	background-color:white; }
+
+H1 {	font-size: 10pt;
+	border:solid 1px black;
+	padding:5px;
+	background-color:lightgrey	
+	}
+
+H2 { }
+

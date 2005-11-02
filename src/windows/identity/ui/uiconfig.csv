@@ -1,0 +1,111 @@
+Name,Type,Value,Description
+CredWindow,KC_SPACE,0,Options for the credentials window
+  AutoInit,KC_INT32,0,Prompt for creds if there arent any
+  AutoStart,KC_INT32,0,Start Khimaira when Windows starts
+  AutoImport,KC_INT32,0,Import Windows creds when Khimaira starts
+  AutoDetectNet,KC_INT32,1,Automatically detect network connectivity changes
+  KeepRunning,KC_INT32,1,Keep running after closing Khimaira
+  DefaultView,KC_STRING,ByIdentity,
+  ViewList,KC_STRING,"ByIdentity,ByLocation",
+  PaddingHorizontal,KC_INT32,4,
+  PaddingVertical,KC_INT32,2,
+  PaddingHeader,KC_INT32,16,
+  Monitor,KC_INT32,1,Monitor credentials
+  RefreshTimeout,KC_INT32,60,In seconds
+  WarnThreshold,KC_INT32,900,In seconds
+  AllowWarn,KC_INT32,1,Boolean. Enables warning.
+  CriticalThreshold,KC_INT32,300,In seconds
+  AllowCritical,KC_INT32,1,Boolean. Enables critical.
+  AutoRenewThreshold,KC_INT32,600,In seconds
+  AllowAutoRenew,KC_INT32,1,Boolean.
+  MaxThreshold,KC_INT32,86400,Max value for a threshold (1 day)
+  MinThreshold,KC_INT32,10,Min value for a threshold (0)
+  Windows,KC_SPACE,0,Window parameters
+    _Schema,KC_SPACE,0,Schema
+      Width,KC_INT32,0,
+      Height,KC_INT32,0,
+      XPos,KC_INT32,0,
+      YPos,KC_INT32,0,
+    _Schema,KC_ENDSPACE,0,
+    Main,KC_SPACE,0,Main window
+    Main,KC_ENDSPACE,0,
+  Windows,KC_ENDSPACE,0,
+  Views,KC_SPACE,0,Preconfigured views for credentials
+   Custom_0,KC_SPACE,0,First custom view.  Additional views have names of the form Custom_N
+   Custom_0,KC_ENDSPACE,0,
+   ByIdentity,KC_SPACE,0,The default view
+    Description,KC_STRING,View grouped by identity and credential type,
+    ColumnList,KC_STRING,"_CWFlags,_CWTypeIcon,IdentityName,TypeName,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+	Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      _CWTypeIcon,KC_SPACE,0,
+        Width,KC_INT32,20,
+	Flags,KC_INT32,112,
+      _CWTypeIcon,KC_ENDSPACE,0,
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,0,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,1
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   ByIdentity,KC_ENDSPACE,0
+   ByLocation,KC_SPACE,0,View by location
+    Description,KC_STRING,View grouped by location,
+    ColumnList,KC_STRING,"_CWFlags,_CWTypeIcon,Location,IdentityName,TypeName,Name,TimeLeft",
+    Columns,KC_SPACE,0,Columns
+      _CWFlags,KC_SPACE,0,
+        Width,KC_INT32,20,
+	Flags,KC_INT32,112,
+      _CWFlags,KC_ENDSPACE,0,
+      _CWTypeIcon,KC_SPACE,0,
+        Width,KC_INT32,20,
+	Flags,KC_INT32,112,
+      _CWTypeIcon,KC_ENDSPACE,0,
+      Location,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,0,
+        Flags,KC_INT32,11,
+      Location,KC_ENDSPACE,0,
+      IdentityName,KC_SPACE,0,
+        Width,KC_INT32,100,
+        SortIndex,KC_INT32,1,
+        Flags,KC_INT32,11,
+      IdentityName,KC_ENDSPACE,0
+      TypeName,KC_SPACE,0
+        Width,KC_INT32,100
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,11
+      TypeName,KC_ENDSPACE,0
+      Name,KC_SPACE,0
+        Width,KC_INT32,200
+        SortIndex,KC_INT32,3
+        Flags,KC_INT32,3
+      Name,KC_ENDSPACE,0
+      TimeLeft,KC_SPACE,0
+        Width,KC_INT32,200
+        Flags,KC_INT32,1
+      TimeLeft,KC_ENDSPACE,0
+    Columns,KC_ENDSPACE,0
+   ByLocation,KC_ENDSPACE,0
+  Views,KC_ENDSPACE,0
+  Notices,KC_SPACE,0,Notices and alerts
+    MinimizeWarning,KC_INT32,1,Show the minimize warning?
+  Notices,KC_ENDSPACE,0
+CredWindow,KC_ENDSPACE,0

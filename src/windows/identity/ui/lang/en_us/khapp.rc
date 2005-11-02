@@ -1,0 +1,728 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\..\resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+#include <khimaira_version.h>
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\..\\resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "#include <khimaira_version.h>\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MAIN_APP            ICON                    "..\\..\\images\\main_app.ico"
+IDI_WGT_COLLAPSE        ICON                    "..\\..\\images\\wgt_arrow_collapse.ico"
+IDI_WGT_EXPAND          ICON                    "..\\..\\images\\wgt_arrow_expand.ico"
+IDI_ENABLED             ICON                    "..\\..\\images\\enabled.ico"
+IDI_DISABLED            ICON                    "..\\..\\images\\disabled.ico"
+IDI_NOTIFY_NONE         ICON                    "..\\..\\images\\app_notify_none.ico"
+IDI_NOTIFY_INFO         ICON                    "..\\..\\images\\app_notify_info.ico"
+IDI_NOTIFY_WARN         ICON                    "..\\..\\images\\app_notify_warn.ico"
+IDI_NOTIFY_ERROR        ICON                    "..\\..\\images\\app_notify_error.ico"
+IDI_CFG_DEFAULT         ICON                    "..\\..\\images\\cfg_default.ico"
+IDI_CFG_MODIFIED        ICON                    "..\\..\\images\\cfg_mod.ico"
+IDI_CFG_APPLIED         ICON                    "..\\..\\images\\cfg_applied.ico"
+IDI_CFG_DELETED         ICON                    "..\\..\\images\\cfg_deleted.ico"
+IDI_ID                  ICON                    "..\\..\\images\\id.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,1,1,0
+ PRODUCTVERSION 0,1,1,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x0L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Massachusetts Institute of Technology"
+            VALUE "FileDescription", "Network Identity Manager"
+            VALUE "FileVersion", "0.1.1.0"
+            VALUE "InternalName", "NetIDMgr"
+            VALUE "LegalCopyright", "Copyright (C) 2005 Massachusetts Institute of Technology"
+            VALUE "OriginalFilename", "netidmgr.exe"
+            VALUE "ProductName", "NetIDMgr"
+            VALUE "ProductVersion", "0.1.1.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_TK_REFRESH          BITMAP                  "..\\..\\images\\tk-refresh.bmp"
+IDB_ID                  BITMAP                  "..\\..\\images\\id.bmp"
+IDB_ID_DELETE           BITMAP                  "..\\..\\images\\id-delete.bmp"
+IDB_ID_NEW              BITMAP                  "..\\..\\images\\id-new.bmp"
+IDB_ID_REFRESH          BITMAP                  "..\\..\\images\\id-refresh.bmp"
+IDB_TK                  BITMAP                  "..\\..\\images\\tk.bmp"
+IDB_TK_DELETE           BITMAP                  "..\\..\\images\\tk-delete.bmp"
+IDB_TK_NEW              BITMAP                  "..\\..\\images\\tk-new.bmp"
+IDB_VW_REFRESH_SM       BITMAP                  "..\\..\\images\\vw-refresh-sm.bmp"
+IDB_TB_BLANK            BITMAP                  "..\\..\\images\\tb-blank.bmp"
+IDB_TB_BLANK_SM         BITMAP                  "..\\..\\images\\tb-blank-small.bmp"
+IDB_VW_REFRESH          BITMAP                  "..\\..\\images\\vw-refresh.bmp"
+IDB_ID_DELETE_DIS       BITMAP                  "..\\..\\images\\id-delete-dis.bmp"
+IDB_ID_DELETE_DIS_SM    BITMAP                  "..\\..\\images\\id-delete-dis-sm.bmp"
+IDB_ID_DELETE_SM        BITMAP                  "..\\..\\images\\id-delete-sm.bmp"
+IDB_ID_DIS              BITMAP                  "..\\..\\images\\id-dis.bmp"
+IDB_ID_DIS_SM           BITMAP                  "..\\..\\images\\id-dis-sm.bmp"
+IDB_ID_NEW_DIS          BITMAP                  "..\\..\\images\\id-new-dis.bmp"
+IDB_ID_NEW_DIS_SM       BITMAP                  "..\\..\\images\\id-new-dis-sm.bmp"
+IDB_ID_NEW_SM           BITMAP                  "..\\..\\images\\id-new-sm.bmp"
+IDB_ID_REFRESH_DIS      BITMAP                  "..\\..\\images\\id-refresh-dis.bmp"
+IDB_ID_REFRESH_SM       BITMAP                  "..\\..\\images\\id-refresh-sm.bmp"
+IDB_ID_REFRESH_DIS_SM   BITMAP                  "..\\..\\images\\id-refresh-sm-dis.bmp"
+IDB_TK_DELETE_DIS       BITMAP                  "..\\..\\images\\tk-delete-dis.bmp"
+IDB_TK_DELETE_DIS_SM    BITMAP                  "..\\..\\images\\tk-delete-dis-sm.bmp"
+IDB_TK_DELETE_SM        BITMAP                  "..\\..\\images\\tk-delete-sm.bmp"
+IDB_TK_DIS_SM           BITMAP                  "..\\..\\images\\tk-dis-sm.bmp"
+IDB_TK_NEW_DIS          BITMAP                  "..\\..\\images\\tk-new-dis.bmp"
+IDB_TK_NEW_DIS_SM       BITMAP                  "..\\..\\images\\tk-new-dis-sm.bmp"
+IDB_TK_NEW_SM           BITMAP                  "..\\..\\images\\tk-new-sm.bmp"
+IDB_TK_REFRESH_DIS      BITMAP                  "..\\..\\images\\tk-refresh-dis.bmp"
+IDB_TK_REFRESH_DIS_SM   BITMAP                  "..\\..\\images\\tk-refresh-dis-sm.bmp"
+IDB_TK_REFRESH_SM       BITMAP                  "..\\..\\images\\tk-refresh-sm.bmp"
+IDB_TK_SM               BITMAP                  "..\\..\\images\\tk-sm.bmp"
+IDB_HELP_SM             BITMAP                  "..\\..\\images\\help-sm.bmp"
+IDB_HELP                BITMAP                  "..\\..\\images\\help.bmp"
+IDB_LOGO_SHADE          BITMAP                  "..\\..\\images\\logo_shade.bmp"
+IDB_WDG_EXPAND          BITMAP                  "..\\..\\images\\wdg_expanded.bmp"
+IDB_WDG_COLLAPSE        BITMAP                  "..\\..\\images\\wdg_collapsed.bmp"
+IDB_ID_SM               BITMAP                  "..\\..\\images\\id-sm.bmp"
+IDB_WDG_EXPAND_HI       BITMAP                  "..\\..\\images\\wdg_expanded_hi.bmp"
+IDB_WDG_COLLAPSE_HI     BITMAP                  "..\\..\\images\\wdg_collapsed_hi.bmp"
+IDB_WDG_CREDTYPE        BITMAP                  "..\\..\\images\\wdg_credtype.bmp"
+IDB_WDG_FLAG            BITMAP                  "..\\..\\images\\wdg_flag.bmp"
+IDB_FLAG_WARN           BITMAP                  "..\\..\\images\\flag-warning.bmp"
+IDB_FLAG_EXPIRED        BITMAP                  "..\\..\\images\\flag_expired.bmp"
+IDB_FLAG_CRITICAL       BITMAP                  "..\\..\\images\\flag-critical.bmp"
+IDB_LOGO_OPAQUE         BITMAP                  "..\\..\\images\\khimaira-cfg.bmp"
+IDB_IMPORT_SM_DIS       BITMAP                  "..\\..\\images\\import-sm-dis.bmp"
+IDB_IMPORT              BITMAP                  "..\\..\\images\\import.bmp"
+IDB_IMPORT_DIS          BITMAP                  "..\\..\\images\\import-dis.bmp"
+IDB_IMPORT_SM           BITMAP                  "..\\..\\images\\import-sm.bmp"
+IDB_CHPW_SM             BITMAP                  "..\\..\\images\\chpw-sm.bmp"
+IDB_CHPW                BITMAP                  "..\\..\\images\\chpw.bmp"
+IDB_CHPW_DIS            BITMAP                  "..\\..\\images\\chpw-dis.bmp"
+IDB_CHPW_DIS_SM         BITMAP                  "..\\..\\images\\chpw-dis-sm.bmp"
+IDB_TB_SPACE            BITMAP                  "..\\..\\images\\tb-space.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MENU_BAR ACCELERATORS 
+BEGIN
+    VK_F10,         IDA_ACTIVATE_MENU,      VIRTKEY, NOINVERT
+    VK_UP,          IDA_UP,                 VIRTKEY, NOINVERT
+    VK_DOWN,        IDA_DOWN,               VIRTKEY, NOINVERT
+    VK_LEFT,        IDA_LEFT,               VIRTKEY, NOINVERT
+    VK_RIGHT,       IDA_RIGHT,              VIRTKEY, NOINVERT
+    VK_ESCAPE,      IDA_ESC,                VIRTKEY, NOINVERT
+    VK_EXECUTE,     IDA_ENTER,              VIRTKEY, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NC_NEWCRED DIALOGEX 0, 0, 301, 167
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "UI Row2",IDC_NC_TPL_ROW_LG,7,31,287,18,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "TplPanel",IDC_NC_TPL_PANEL,7,7,287,153,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "UI Row",IDC_NC_TPL_ROW,7,7,287,18,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "TplLabel",IDC_NC_TPL_LABEL,7,8,45,10,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "TplInput",IDC_NC_TPL_INPUT,54,7,240,13,NOT WS_VISIBLE | 
+                    WS_BORDER
+    LTEXT           "TplLabelLg",IDC_NC_TPL_LABEL_LG,7,33,146,10,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "TplInputLg",IDC_NC_TPL_INPUT_LG,155,31,139,13,NOT 
+                    WS_VISIBLE | WS_BORDER
+    LTEXT           "&Credentials",IDC_NC_CREDTEXT_LABEL,7,66,41,10,NOT 
+                    WS_GROUP
+    CONTROL         "",IDC_NC_CREDTEXT,"KhmHtWnd",WS_TABSTOP,54,65,240,73,
+                    WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Ok",IDOK,57,142,89,18,WS_DISABLED
+    PUSHBUTTON      "&Cancel",IDCANCEL,158,142,54,18
+    PUSHBUTTON      "&Options >>",IDC_NC_OPTIONS,223,142,71,18
+END
+
+IDD_NC_BBAR DIALOGEX 0, 0, 60, 181
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Ok",IDOK,0,7,53,41,WS_DISABLED
+    PUSHBUTTON      "&Cancel",IDCANCEL,0,58,53,19
+    PUSHBUTTON      "&Help",IDC_NC_HELP,0,155,53,19
+END
+
+IDD_NC_TS DIALOGEX 0, 0, 300, 15
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_PP_IDENT DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+EXSTYLE WS_EX_CONTROLPARENT
+CAPTION "Identity"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Name",IDC_STATIC,7,8,19,12
+    LTEXT           "IdentityName",IDC_PP_IDNAME,34,7,194,12,NOT WS_GROUP,
+                    WS_EX_CLIENTEDGE
+    CONTROL         "Default identity",IDC_PP_IDDEF,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,34,25,71,12
+    CONTROL         "Searchable",IDC_PP_IDSEARCH,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,34,43,74,12
+    CONTROL         "Custom1",IDC_PP_PROPLIST,"NetIDMgrPropertyWnd",
+                    WS_TABSTOP,7,61,221,88
+    CONTROL         "Always visible (sticky)",IDC_PP_STICKY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,117,25,85,10
+END
+
+IDD_PP_CRED DIALOGEX 0, 0, 236, 158
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_CAPTION
+CAPTION "Credential"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    CONTROL         "Check1",IDC_PP_DUMMY,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_TABSTOP,0,1,39,10
+    CONTROL         "Custom1",IDC_PP_CPROPLIST,"NetIDMgrPropertyWnd",
+                    WS_TABSTOP,7,7,222,144
+END
+
+IDD_CFG_MAIN DIALOGEX 0, 0, 357, 222
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+EXSTYLE WS_EX_CONTEXTHELP
+CAPTION "Khimaira Configuration"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Title",IDC_CFG_TITLE,0,0,357,20,SS_CENTERIMAGE
+    CONTROL         "",IDC_CFG_NODELIST,"SysTreeView32",TVS_HASBUTTONS | 
+                    TVS_HASLINES | TVS_LINESATROOT | WS_TABSTOP,0,20,100,182
+    LTEXT           "Static",IDC_CFG_PANE,102,20,255,182,NOT WS_VISIBLE | 
+                    WS_BORDER
+    PUSHBUTTON      "&Ok",IDOK,162,205,78,16
+    PUSHBUTTON      "&Cancel",IDCANCEL,246,205,51,16
+    PUSHBUTTON      "&Apply",IDAPPLY,303,205,51,16,WS_DISABLED
+    PUSHBUTTON      "C&hange Summary ...",IDC_CFG_SUMMARY,3,205,76,16,
+                    WS_DISABLED
+END
+
+IDD_CFG_GENERIC DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CTEXT           "Please select one of the configuration categories on the left.",
+                    IDC_STATIC,21,17,212,18,SS_CENTERIMAGE,WS_EX_TRANSPARENT
+END
+
+IDD_CFG_GENERAL DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Startup",IDC_CFG_STARTUP_GROUP,7,7,241,50
+    CONTROL         "&Prompt for new credentials if there aren't any at startup",
+                    IDC_CFG_AUTOINIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    16,22,196,10
+    CONTROL         "&Start NetIDMgr when Windows starts",IDC_CFG_AUTOSTART,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,16,
+                    38,135,10
+    GROUPBOX        "Other",IDC_CFG_OTHER,7,63,241,70
+    CONTROL         "&Keep NetIDMgr running after closing window",
+                    IDC_CFG_KEEPRUNNING,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,16,78,158,10
+    CONTROL         "Detect network connectivity",IDC_CFG_NETDETECT,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,16,96,106,10
+    CONTROL         "A&utomatically import credentials from Windows",
+                    IDC_CFG_AUTOIMPORT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    16,113,165,10
+END
+
+IDD_CFG_IDENTITIES DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_TAB,"SysTabControl32",WS_TABSTOP,7,7,241,168
+    LTEXT           "Static",IDC_CFG_TARGET,10,21,235,151,NOT WS_VISIBLE | 
+                    WS_BORDER
+END
+
+IDD_CFG_NOTIF DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "&Monitor credentials expiration",IDC_NOTIF_MONITOR,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,139,10
+    CONTROL         "&Renew automatically",IDC_NOTIF_RENEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,22,32,82,10
+    EDITTEXT        IDC_NOTIF_RENEW_THR,122,30,126,14,ES_AUTOHSCROLL
+    CONTROL         "Warn",IDC_NOTIF_WARN1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,22,57,33,10
+    EDITTEXT        IDC_NOTIF_WARN1_THR,122,55,126,14,ES_AUTOHSCROLL
+    CONTROL         "Warn again",IDC_NOTIF_WARN2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,22,82,67,10
+    EDITTEXT        IDC_NOTIF_WARN2_THR,122,80,126,14,ES_AUTOHSCROLL
+END
+
+IDD_CFG_PLUGINS DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_PLUGINS,"SysListView32",LVS_ALIGNLEFT | 
+                    WS_BORDER | WS_TABSTOP,7,7,75,168
+    GROUPBOX        "Plugin",IDC_CFG_PLUGINGRP,86,7,162,103
+    LTEXT           "Description",IDC_CFG_LBL_DESC,90,20,36,8
+    EDITTEXT        IDC_CFG_DESC,134,17,109,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Status",IDC_CFG_LBL_STATE,90,38,22,8
+    EDITTEXT        IDC_CFG_STATE,134,35,109,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Depends on",IDC_CFG_LBL_DEPS,90,52,39,8
+    LISTBOX         IDC_CFG_DEPS,134,52,109,34,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Enable",IDC_CFG_ENABLE,134,90,50,14
+    PUSHBUTTON      "Disable",IDC_CFG_DISABLE,193,90,50,14
+    GROUPBOX        "Provided by",IDC_CFG_PROVGRP,86,111,162,47
+    LTEXT           "Module",IDC_CFG_LBL_MOD,90,124,24,8
+    EDITTEXT        IDC_CFG_MODULE,134,121,109,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Vendor",IDC_CFG_LBL_VEN,90,142,24,8
+    EDITTEXT        IDC_CFG_VENDOR,133,139,110,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    PUSHBUTTON      "Register new plugin ...",IDC_CFG_REGISTER,163,161,85,14,
+                    WS_DISABLED
+END
+
+IDD_CFG_IDENTITY DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_TAB,"SysTabControl32",WS_TABSTOP,7,7,241,168
+    LTEXT           "Static",IDC_CFG_TARGET,10,21,235,151,NOT WS_VISIBLE | 
+                    WS_BORDER
+END
+
+IDD_CFG_IDS_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_IDENTS,"SysListView32",LVS_SHAREIMAGELISTS | 
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,221,72
+    GROUPBOX        "Selected identity",IDC_CFG_IDENTITY,7,81,221,63
+    CONTROL         "Monitor credential expiration",IDC_CFG_MONITOR,"Button",
+                    BS_3STATE | WS_TABSTOP,13,92,107,10
+    CONTROL         "Automatically renew",IDC_CFG_RENEW,"Button",BS_3STATE | 
+                    WS_TABSTOP,13,106,81,10
+    CONTROL         "Always show in the credentials list (Sticky)",
+                    IDC_CFG_STICKY,"Button",BS_3STATE | WS_TABSTOP,13,120,
+                    151,10
+    PUSHBUTTON      "&Remove",IDC_CFG_REMOVE,174,126,50,14,WS_DISABLED
+END
+
+IDD_CFG_ID_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Always show in the credentials list (Sticky)",
+                    IDC_CFG_STICKY,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,
+                    34,151,10
+    CONTROL         "Monitor credential expiration",IDC_CFG_MONITOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,7,107,10
+    CONTROL         "Automatically renew",IDC_CFG_RENEW,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,20,81,10
+END
+
+IDD_ABOUT DIALOGEX 0, 0, 268, 170
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "About Network Identity Manager"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,211,7,50,14
+    LTEXT           "Productname",IDC_PRODUCT,41,7,163,13,NOT WS_GROUP
+    LTEXT           "© 2005 Massachusetts Institute of Technology",
+                    IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
+    LTEXT           "BuildInfo",IDC_BUILDINFO,41,41,220,17,NOT WS_GROUP
+    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,21,20
+    CONTROL         "",IDC_MODULES,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,41,72,220,91
+    LTEXT           "Loaded modules",IDC_STATIC,41,60,52,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_NC_NEWCRED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 294
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 160
+    END
+
+    IDD_NC_BBAR, DIALOG
+    BEGIN
+        RIGHTMARGIN, 53
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 174
+    END
+
+    IDD_PP_IDENT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 34
+        VERTGUIDE, 117
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_PP_CRED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 229
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 151
+    END
+
+    IDD_CFG_GENERIC, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_GENERAL, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 16
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_IDENTITIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 10
+        VERTGUIDE, 244
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+        HORZGUIDE, 22
+        HORZGUIDE, 171
+    END
+
+    IDD_CFG_NOTIF, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 22
+        VERTGUIDE, 122
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_PLUGINS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 86
+        VERTGUIDE, 90
+        VERTGUIDE, 134
+        VERTGUIDE, 243
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_IDENTITY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_IDS_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_CFG_ID_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_ABOUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 261
+        VERTGUIDE, 41
+        VERTGUIDE, 204
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 163
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_MAIN_WINDOW_TITLE   "Network Identity Manager"
+    IDS_MENU_FILE           "&File"
+    IDS_MENU_CRED           "&Credential"
+    IDS_MENU_VIEW           "&View"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_MENU_OPTIONS        "&Options"
+    IDS_MENU_HELP           "&Help"
+    IDS_ACTION_PROPERTIES   "&Properties ..."
+    IDS_ACTION_EXIT         "E&xit"
+    IDS_CFG_ROOT_NAME       "NetIDMgr"
+    IDS_ACTION_SET_DEF_ID   "Set as &default"
+    IDS_ACTION_SET_SRCH_ID  "Allow applications to &search"
+    IDS_CFG_ROOT_TITLE      "NetIDMgr Configuration"
+    IDS_CFG_GENERAL_SHORT   "General"
+    IDS_ACTION_NEW_CRED     "&New credentials ..."
+    IDS_ACTION_PASSWD_ID    "Change &password ..."
+    IDS_ACTION_CHOOSE_COLS  "Choose columns ..."
+    IDS_ACTION_DEBUG_WINDOW "Debug window ..."
+    IDS_ACTION_VIEW_REFRESH "Refresh"
+    IDS_MENU_LAYOUT         "Layout"
+    IDS_MENU_TOOLBARS       "Toolbars"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ACTION_LAYOUT_ID    "By identity"
+    IDS_ACTION_LAYOUT_TYPE  "By type"
+    IDS_ACTION_LAYOUT_LOC   "By location"
+    IDS_ACTION_TB_STANDARD  "Standard"
+    IDS_ACTION_OPT_KHIM     "General ..."
+    IDS_ACTION_OPT_IDENTS   "Identities ..."
+    IDS_ACTION_OPT_NOTIF    "Notifications ..."
+    IDS_ACTION_HELP_CTX     "Context"
+    IDS_ACTION_HELP_CONTENTS "Contents ..."
+    IDS_ACTION_HELP_INDEX   "Index ..."
+    IDS_ACTION_HELP_ABOUT   "About NetIDMgr ..."
+    IDS_CFG_GENERAL_LONG    "General options for NetIDMgr"
+    IDS_SAMPLE_STRING       "Wxy"
+    IDS_NO_CREDS            "<large><center>You currently have no credentials.Click <a id=""NewCreds"">here</a> to obtain new credentials.</center></large>"
+    IDS_WT_INIT_CREDS       "Obtain initial credentials"
+    IDS_WT_NEW_CREDS        "Obtain new credentials"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NC_IDENTITY         "&Identity"
+    IDS_NC_IDENTS           "&Identities"
+    IDS_NC_CREDTEXT_ID_NONE "<p><b>(No identities specified)</b></p>"
+    IDS_NC_CREDTEXT_ID_ONE  "<p>Selected identity: <b>%s</b></p>"
+    IDS_NC_CREDTEXT_ID_MANY "<p>Primary identity: <b>%s</b></p><p>Additional identities: <b>%s</b></p>"
+    IDS_NC_CREDTEXT_ID_INVALID "<font color=""red"">%s (invalid)</font>"
+    IDS_WTPOST_INIT_CREDS   " - Initial credentials"
+    IDS_WTPOST_NEW_CREDS    " - New credentials"
+    IDS_ACTION_RENEW_CRED   "R&enew credentials"
+    IDS_ACTION_DESTROY_CRED "De&stroy credentials ..."
+    IDS_DEFAULT_FONT        "MS Shell Dlg"
+    IDS_NC_CREDTEXT_TABS    "<settab pos=""15""><settab pos=""30""><settab pos=""45"">"
+    IDS_NOTIFY_PREFIX       "NetIDMgr - "
+    IDS_NOTIFY_READY        "Ready"
+    IDS_NOTIFY_ATTENTION    "Attention"
+    IDS_ALERT_DEFAULT       "Alert"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PACTION_OK          "&Ok"
+    IDS_PACTION_CANCEL      "&Cancel"
+    IDS_PACTION_CLOSE       "&Close"
+    IDS_ALERT_NOSEL_TITLE   "No credentials selected"
+    IDS_ALERT_NOSEL         "Please select a credential, a credential type or an identity."
+    IDS_NC_CREDTEXT_ID_VALID "<font color=""blue"">%s</font>"
+    IDS_NC_CREDTEXT_ID_UNCHECKED "<font color=""grey"">%s (Unverified)</font>"
+    IDS_PROP_COL_PROPERTY   "Property"
+    IDS_PROP_COL_VALUE      "Value"
+    IDS_NC_NEW_IDENT        "( New identity ... )"
+    IDS_NC_CREDTEXT_ID_CHECKING "<font color=""grey"">%s (Checking...)</font>"
+    IDS_ACTION_OPEN_APP     "Open NetIDMgr ..."
+    IDS_CTX_NEW_IDENT       "Obaining new identity"
+    IDS_CTX_NEW_CREDS       "Obtaining new credentials"
+    IDS_CTX_RENEW_CREDS     "Renewing credentials"
+    IDS_CTX_PROC_NEW_IDENT  "Obtaining initial credentials for %1!s!"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CTX_PROC_NEW_CREDS  "Obtaining new credentials for %1!s!"
+    IDS_CTX_PROC_RENEW_CREDS "Renewing credentials for %1!s!"
+    IDS_ACTION_CLOSE_APP    "Close NetIDMgr window"
+    IDS_NC_FAILED_TITLE     "Failed to acquire credentials"
+    IDS_CFG_IDENTITIES_SHORT "Identities"
+    IDS_CFG_IDENTITIES_LONG "Options for all identities"
+    IDS_CFG_NOTIF_SHORT     "Notifications"
+    IDS_CFG_NOTIF_LONG      "Notifications"
+    IDS_CFG_PLUGINS_SHORT   "Plugins"
+    IDS_CFG_PLUGINS_LONG    "Plugins and Modules"
+    IDS_CFG_IDENTITY_SHORT  "%s"
+    IDS_CFG_IDENTITY_LONG   "Options for %s"
+    IDS_CTX_DESTROY_CREDS   "Destroying credentials"
+    IDS_WARN_EXPIRE         "Some of your credentials will expire in %s"
+    IDS_WARN_TITLE          "Credentials expiration warning"
+    IDS_ALERT_MOREINFO      "...\nClick here for more..."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_WARN_EXPIRED        "Some of your credentials have expired."
+    IDS_WARN_EXPIRE_ID      "Credentials for %.180s will expire in %s"
+    IDS_WARN_EXPIRED_ID     "Credentials for %.220s have expired"
+    IDS_WARN_WM_TITLE       "NetIDMgr is still running"
+    IDS_WARN_WM_MSG         "Click the NetIDMgr icon below to open the application.\n\nOr right click the icon to access the NetIDMgr menu."
+    IDS_CFG_ID_TAB_SHORT    "General"
+    IDS_CFG_ID_TAB_LONG     "General options for this identity"
+    IDS_CFG_IDS_TAB_SHORT   "General"
+    IDS_CFG_IDS_TAB_LONG    "General options for all identities"
+    IDS_CFG_IDS_IDENTITY    "Identity"
+    IDS_ACTION_IMPORT       "Import Credentials"
+    IDS_CTX_IMPORT          "Importing credentials from Windows"
+    IDS_CFG_PI_COL_PLUGINS  "Plugins"
+    IDS_PISTATE_FAILUNK     "Unknown failure"
+    IDS_PISTATE_FAILMAX     "Maximum failure count reached"
+    IDS_PISTATE_FAILREG     "Not properly registered"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_PISTATE_FAILDIS     "Disabled"
+    IDS_PISTATE_FAILLOD     "Failed to initialize"
+    IDS_PISTATE_PLACEHOLD   "Not loaded"
+    IDS_PISTATE_REG         "Not initialized"
+    IDS_PISTATE_HOLD        "Waiting for dependencies"
+    IDS_PISTATE_INIT        "Initializing"
+    IDS_PISTATE_RUN         "Running"
+    IDS_PISTATE_EXIT        "Stopped"
+    IDS_CTX_PASSWORD        "Changing password"
+    IDS_WT_PASSWORD         "Changing password"
+    IDS_WTPOST_PASSWORD     "  - Changing password"
+    IDS_CTX_PROC_PASSWORD   "Changing password for %1!s!"
+    IDS_NC_PWD_FAILED_TITLE "Failed to change password"
+    IDS_CMDLINE_HELP        "Command line options for NetIDMgr are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

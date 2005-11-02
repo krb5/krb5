@@ -1,0 +1,406 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\..\langres.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\..\\langres.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NC_KRB5 DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS | 
+    WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Realm",IDC_STATIC,7,25,52,13
+    COMBOBOX        IDC_NCK5_REALM,60,25,233,17,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Specify &additional realms ...",IDC_NCK5_ADD_REALMS,181,
+                    43,112,16,BS_NOTIFY | WS_DISABLED
+    LTEXT           "&Lifetime",IDC_STATIC,7,67,61,12
+    EDITTEXT        IDC_NCK5_LIFETIME_EDIT,85,67,107,12,ES_AUTOHSCROLL
+    CONTROL         "&Renewable for",IDC_NCK5_RENEWABLE,"Button",
+                    BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,87,64,12
+    EDITTEXT        IDC_NCK5_RENEW_EDIT,85,87,108,12,ES_AUTOHSCROLL
+    CONTROL         "Can be &forwarded to other machines",
+                    IDC_NCK5_FORWARDABLE,"Button",BS_AUTOCHECKBOX | 
+                    BS_NOTIFY | WS_TABSTOP,7,107,132,12
+    CONTROL         "Kerberos 5 Ticket Options",IDC_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+END
+
+IDD_PP_KRB5C DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Kerberos 5"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Name",IDC_STATIC,7,7,19,8
+    LTEXT           "Valid till",IDC_STATIC,7,39,24,8
+    LTEXT           "Renewable till",IDC_STATIC,7,55,45,12
+    CONTROL         "Renewable",IDC_PPK5_CRENEW,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,31,125,51,10
+    CONTROL         "Forwardable",IDC_PPK5_CFORWARD,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,91,125,56,10
+    CONTROL         "Proxiable",IDC_PPK5_CPROXY,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,156,125,45,10
+    LTEXT           "Issued on",IDC_STATIC,7,23,32,8
+    GROUPBOX        "Ticket flags",IDC_STATIC,7,108,221,41
+    LTEXT           "Static",IDC_PPK5_NAME,72,7,156,12,NOT WS_GROUP,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Static",IDC_PPK5_ISSUE,72,23,156,12,NOT WS_GROUP,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Static",IDC_PPK5_VALID,72,39,156,12,NOT WS_GROUP,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Static",IDC_PPK5_RENEW,72,55,156,12,NOT WS_GROUP,
+                    WS_EX_CLIENTEDGE
+END
+
+IDD_PP_KRB5 DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Kerberos 5"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Default realm",IDC_STATIC,7,7,44,8
+    LTEXT           "Default lifetime",IDC_STATIC,7,22,49,8
+    LTEXT           "Minimum lifetime",IDC_STATIC,7,37,52,8
+    LTEXT           "Maximum lifetime",IDC_STATIC,7,52,55,8
+    LTEXT           "Renewable lifetime",IDC_STATIC,7,67,61,8
+    LTEXT           "Min. Renewable lifetime",IDC_STATIC,7,82,76,8
+    LTEXT           "Max. Renewable lifetime",IDC_STATIC,7,97,79,8
+    GROUPBOX        "Default ticket flags",IDC_STATIC,7,113,221,36
+    CONTROL         "Proxiable",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,160,129,45,10
+    CONTROL         "Renewable",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,23,129,51,10
+    CONTROL         "Forwardable",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,89,129,56,10
+    LTEXT           "ATHENA.MIT.EDU",IDC_STATIC,95,7,133,11,0,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "10 hours",IDC_STATIC,95,22,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "1 minute",IDC_STATIC,95,37,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "7 days",IDC_STATIC,95,52,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "7 days",IDC_STATIC,95,67,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "1 minute",IDC_STATIC,95,82,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "21 days",IDC_STATIC,95,97,133,11,0,WS_EX_CLIENTEDGE
+END
+
+IDD_CONFIG DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Default Realm",IDC_CFG_LBL_REALM,13,9,46,8
+    COMBOBOX        IDC_CFG_DEFREALM,76,7,166,30,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,25,84,14
+    GROUPBOX        "Keberos Configuration File",IDC_CFG_CFGFILEGRP,7,57,241,
+                    48
+    LTEXT           "Location",IDC_CFG_LBL_CFGFILE,13,71,28,8
+    EDITTEXT        IDC_CFG_CFGFILE,76,68,119,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_CFG_BROWSE,198,68,44,14
+    CONTROL         "Create file if missing",IDC_CFG_CREATECONFIG,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,76,89,80,10
+    GROUPBOX        "Windows® Options",IDC_CFG_WINGRP,7,110,241,65
+    LTEXT           "Hostname",IDC_CFG_LBL_HOSTNAME,13,123,33,8
+    EDITTEXT        IDC_CFG_HOSTNAME,76,120,166,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Domain",IDC_CFG_LBL_DOMAIN,13,141,24,8
+    EDITTEXT        IDC_CFG_DOMAIN,76,138,166,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Import tickets",IDC_LBL_IMPORT,13,158,45,8
+    COMBOBOX        IDC_CFG_IMPORT,76,156,166,30,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_CFG_REALMS DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_REALMS,"SysListView32",LVS_ALIGNLEFT | 
+                    WS_BORDER | WS_TABSTOP,7,19,81,148
+    GROUPBOX        "Servers",IDC_CFG_SERVERSGRP,93,7,155,91
+    GROUPBOX        "Domain/Hostname mappings",IDC_CFG_DOMAINGRP,93,101,155,
+                    74
+    CONTROL         "",IDC_LIST3,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,99,19,143,72
+    CONTROL         "",IDC_LIST4,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,99,111,143,56
+END
+
+IDD_CFG_IDS_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Ticket lifetime",IDC_CFG_LBL_DEFLIFE,7,10,44,8
+    EDITTEXT        IDC_CFG_DEFLIFE,91,7,137,14,ES_AUTOHSCROLL
+    LTEXT           "Ticket renewable lifetime",IDC_CFG_LBL_DEFRLIFE,7,29,80,
+                    8
+    EDITTEXT        IDC_CFG_DEFRLIFE,91,26,137,14,ES_AUTOHSCROLL
+    GROUPBOX        "Ticket lifetime range",IDC_CFG_LIFEGRP,7,43,221,49
+    LTEXT           "Minimum",IDC_STATIC,13,56,28,8
+    EDITTEXT        IDC_CFG_LRNG_MIN,91,53,131,14,ES_AUTOHSCROLL
+    LTEXT           "Maximum",IDC_STATIC,13,75,30,8
+    EDITTEXT        IDC_CFG_LRNG_MAX,91,72,131,14,ES_AUTOHSCROLL
+    GROUPBOX        "Ticket renewable lifetime range",IDC_STATIC,7,95,221,49
+    LTEXT           "Minimum",IDC_STATIC,13,108,28,8
+    EDITTEXT        IDC_CFG_RLRNG_MIN,91,105,131,14,ES_AUTOHSCROLL
+    LTEXT           "Maximum",IDC_STATIC,13,128,30,8
+    EDITTEXT        IDC_CFG_RLRNG_MAX,91,125,131,14,ES_AUTOHSCROLL
+END
+
+IDD_CFG_ID_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Ticket lifetime",IDC_CFG_LBL_DEFLIFE,7,10,44,8
+    EDITTEXT        IDC_CFG_DEFLIFE,91,7,137,14,ES_AUTOHSCROLL
+    LTEXT           "Ticket renewable lifetime",IDC_CFG_LBL_DEFRLIFE,7,29,80,
+                    8
+    EDITTEXT        IDC_CFG_DEFRLIFE,91,26,137,14,ES_AUTOHSCROLL
+    LTEXT           "Credentials cache",IDC_STATIC,7,63,58,8
+    EDITTEXT        IDC_CFG_CCACHE,91,60,137,14,ES_AUTOHSCROLL
+END
+
+IDD_NC_KRB5_PASSWORD DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Kerberos 5 Change Password Options",IDC_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    LTEXT           "Realm",IDC_STATIC,7,25,52,13
+    COMBOBOX        IDC_NCK5_REALM,60,25,233,17,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Specify &additional realms ...",IDC_NCK5_ADD_REALMS,181,
+                    43,112,16,BS_NOTIFY | WS_DISABLED
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_NC_KRB5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_PP_KRB5C, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_PP_KRB5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 13
+        VERTGUIDE, 76
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_REALMS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 93
+        VERTGUIDE, 99
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+        HORZGUIDE, 19
+        HORZGUIDE, 167
+    END
+
+    IDD_CFG_IDS_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 13
+        VERTGUIDE, 91
+        VERTGUIDE, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_CFG_ID_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 91
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_NC_KRB5_PASSWORD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_UNK_ADDR_FMT        "Unknown address type %d"
+    IDS_KRB5_CREDTEXT_0     "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Creds for realm %s</p>"
+    IDS_KRB5_CCNAME_SHORT_DESC "Krb5 CCache"
+    IDS_KEY_ENCTYPE_SHORT_DESC "Key EncType"
+    IDS_TKT_ENCTYPE_SHORT_DESC "Ticket EncType"
+    IDS_KEY_ENCTYPE_LONG_DESC "Session Key Encryption Type"
+    IDS_TKT_ENCTYPE_LONG_DESC "Ticket Encryption Type"
+    IDS_ADDR_LIST_SHORT_DESC "Addresses"
+    IDS_ADDR_LIST_LONG_DESC "Address List"
+    IDS_ETYPE_NULL          "NULL"
+    IDS_ETYPE_DES_CBC_CRC   "DES-CBC-CRC"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ETYPE_DES_CBC_MD4   "DES-CBC-MD4"
+    IDS_ETYPE_DES_CBC_MD5   "DES-CBC-MD5"
+    IDS_ETYPE_DES_CBC_RAW   "DES-CBC-RAW"
+    IDS_ETYPE_DES3_CBC_SHA  "DES3-CBC-SHA"
+    IDS_ETYPE_DES3_CBC_RAW  "DES3-CBC-RAW"
+    IDS_ETYPE_DES_HMAC_SHA1 "DES-HMAC-SHA1"
+    IDS_ETYPE_DES3_CBC_SHA1 "DES3-CBC-SHA1"
+    IDS_ETYPE_AES128_CTS_HMAC_SHA1_96 "AES128_CTS-HMAC-SHA1_96"
+    IDS_ETYPE_AES256_CTS_HMAC_SHA1_96 "AES256_CTS-HMAC-SHA1_96"
+    IDS_ETYPE_ARCFOUR_HMAC  "RC4-HMAC-NT"
+    IDS_ETYPE_ARCFOUR_HMAC_EXP "RC4-HMAC-NT-EXP"
+    IDS_ETYPE_UNKNOWN       "(Unknown)"
+    IDS_ETYPE_LOCAL_DES3_HMAC_SHA1 "LOCAL-DES3-HMAC-SHA1"
+    IDS_ETYPE_LOCAL_RC4_MD4 "LOCAL-RC4-MD4"
+    IDS_KRB5_SHORT_DESC     "Kerberos 5"
+    IDS_KRB5_LONG_DESC      "Kerberos 5 tickets"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_KRB4_SHORT_DESC     "Kerberos 4"
+    IDS_KRB4_LONG_DESC      "Kerberos 4 tickets"
+    IDS_KRB5_FLAGS_SHORT_DESC "Flags"
+    IDS_RENEW_TILL_SHORT_DESC "Renew Till"
+    IDS_RENEW_TILL_LONG_DESC "Renewable Till"
+    IDS_RENEW_FOR_SHORT_DESC "Renew for"
+    IDS_RENEW_FOR_LONG_DESC "Renewable for"
+    IDS_KRB5_CCNAME_LONG_DESC "Krb5 Primary Credentials Cache"
+    IDS_NC_USERNAME         "Username"
+    IDS_NC_REALM            "Realm"
+    IDS_KRB5_WARNING        "Kerberos 5 Warning"
+    IDS_K5ERR_NAME_EXPIRED  "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The selected principal name has expired.</p><p><tab>  Please contact your system administrator.</p>"
+    IDS_K5ERR_KEY_EXPIRED   "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The password for the selected identity has expired.</p><p><tab>  Click <a id=""Krb5Cred:Passwd"">here</a> to change the password</p>"
+    IDS_KRB5_WARN_FMT       "Kerberos 5: %s\n\n%s"
+    IDS_K5ERR_FMT           "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tag>: %s</p>"
+    IDS_K5CFG_SHORT_DESC    "Kerberos 5"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_K5CFG_LONG_DESC     "Kerberos 5 Configuration"
+    IDS_K5RLM_SHORT_DESC    "Realms"
+    IDS_K5RLM_LONG_DESC     "Kerberos Realm Configuration"
+    IDS_K5CFG_IDS_SHORT_DESC "Kerberos 5"
+    IDS_K5CFG_IDS_LONG_DESC "Kerberos 5 options for all identities"
+    IDS_K5CFG_ID_SHORT_DESC "Kerberos 5"
+    IDS_K5CFG_ID_LONG_DESC  "Kerberos 5 options for this identity"
+    IDS_PLUGIN_DESC         "Kerberos 5 Credentials Provider"
+    IDS_NC_PWD_BANNER       "Changing Kerberos 5 Password"
+    IDS_NC_PWD_PWD          "Current Password"
+    IDS_NC_PWD_NPWD         "New Password"
+    IDS_NC_PWD_NPWD_AGAIN   "New Password again"
+    IDS_KRB5_CREDTEXT_P0    "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Changing password for %s</p>"
+    IDS_K5CFG_IMPORT_OPTIONS 
+                            "Never\000Always\000Only when the principal name matches\000 \000"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

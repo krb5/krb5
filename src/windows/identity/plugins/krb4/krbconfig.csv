@@ -1,0 +1,23 @@
+Name,Type,Value,Description
+Krb4Cred,KC_SPACE,0,"Kerberos IV Credentials Provider"
+  Module,KC_STRING,"MITKrb4",
+  Description,KC_STRING,"Kerberos IV Credentials Provider",
+  Dependencies,KC_STRING,Krb5Cred,
+  Type,KC_INT32,1,
+  Flags,KC_INT32,0,
+  Parameters,KC_SPACE,0,Parameters for KrbCred
+    CreateMissingConfig,KC_INT32,0,Create missing configuration files
+    MsLsaImport,KC_INT32,2,Automatically import MSLSA credentials
+    AutoRenewTickets,KC_INT32,1,Automatically renew expiring tickets
+    DefaultLifetime,KC_INT32,36000,Default ticket lifetime
+    MaxLifetime,KC_INT32,86400,Maximum lifetime
+    MinLifetime,KC_INT32,60,Minimum lifetime
+    Forwardable,KC_INT32,1,Obtain forwardable tickets (boolean)
+    Proxiable,KC_INT32,0,Obtain proxiable tickets (boolean)
+    Addressless,KC_INT32,1,Obtain addressless tickets (boolean)
+    Renewable,KC_INT32,1,Obtain renewable tickets (boolean)
+    DefaultRenewLifetime,KC_INT32,604800,Default renewable lifetime
+    MaxRenewLifetime,KC_INT32,2592000,Maximum renewable lifetime
+    MinRenewLifetime,KC_INT32,60,Maximum renewable lifetime
+  Parameters,KC_ENDSPACE,0,
+Krb4Cred,KC_ENDSPACE,0,

@@ -1,0 +1,127 @@
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by D:\work\khimaira\src\plugins\krb5\lang\en_us\langres.rc
+//
+#define IDS_UNK_ADDR_FMT                101
+#define IDD_NC_KRB5                     102
+#define IDS_KRB5_CREDTEXT_0             102
+#define IDS_KRB5_CCNAME_SHORT_DESC      103
+#define IDS_KEY_ENCTYPE_SHORT_DESC      104
+#define IDD_CONFIG                      104
+#define IDS_TKT_ENCTYPE_SHORT_DESC      105
+#define IDD_CFG_REALMS                  105
+#define IDS_KEY_ENCTYPE_LONG_DESC       106
+#define IDD_CFG_IDS_TAB                 106
+#define IDS_TKT_ENCTYPE_LONG_DESC       107
+#define IDD_PP_KRB5C                    107
+#define IDS_ADDR_LIST_SHORT_DESC        108
+#define IDD_PP_KRB5                     108
+#define IDS_ADDR_LIST_LONG_DESC         109
+#define IDD_CFG_ID_TAB                  109
+#define IDS_ETYPE_NULL                  110
+#define IDD_NC_KRB5_PASSWORD            110
+#define IDS_ETYPE_DES_CBC_CRC           111
+#define IDS_ETYPE_DES_CBC_MD4           112
+#define IDS_ETYPE_DES_CBC_MD5           113
+#define IDS_ETYPE_DES_CBC_RAW           114
+#define IDS_ETYPE_DES3_CBC_SHA          115
+#define IDS_ETYPE_DES3_CBC_RAW          116
+#define IDS_ETYPE_DES_HMAC_SHA1         117
+#define IDS_ETYPE_DES3_CBC_SHA1         118
+#define IDS_ETYPE_AES128_CTS_HMAC_SHA1_96 119
+#define IDS_ETYPE_AES256_CTS_HMAC_SHA1_96 120
+#define IDS_ETYPE_ARCFOUR_HMAC          121
+#define IDS_ETYPE_ARCFOUR_HMAC_EXP      122
+#define IDS_ETYPE_UNKNOWN               123
+#define IDS_ETYPE_LOCAL_DES3_HMAC_SHA1  124
+#define IDS_ETYPE_LOCAL_RC4_MD4         125
+#define IDS_KRB5_SHORT_DESC             126
+#define IDS_KRB5_LONG_DESC              127
+#define IDS_KRB4_SHORT_DESC             128
+#define IDS_KRB4_LONG_DESC              129
+#define IDS_KRB5_FLAGS_SHORT_DESC       130
+#define IDS_RENEW_TILL_SHORT_DESC       131
+#define IDS_RENEW_TILL_LONG_DESC        132
+#define IDS_RENEW_FOR_SHORT_DESC        133
+#define IDS_RENEW_FOR_LONG_DESC         134
+#define IDS_KRB5_CCNAME_LONG_DESC       135
+#define IDS_NC_USERNAME                 136
+#define IDS_NC_REALM                    137
+#define IDS_KRB5_WARNING                138
+#define IDS_K5ERR_NAME_EXPIRED          139
+#define IDS_K5ERR_KEY_EXPIRED           140
+#define IDS_KRB5_WARN_FMT               141
+#define IDS_K5ERR_FMT                   142
+#define IDS_K5CFG_SHORT_DESC            143
+#define IDS_K5CFG_LONG_DESC             144
+#define IDS_K5RLM_SHORT_DESC            145
+#define IDS_K5RLM_LONG_DESC             146
+#define IDS_K5CFG_IDS_SHORT_DESC        147
+#define IDS_K5CFG_IDS_LONG_DESC         148
+#define IDS_K5CFG_ID_SHORT_DESC         149
+#define IDS_K5CFG_ID_LONG_DESC          150
+#define IDS_PLUGIN_DESC                 151
+#define IDS_NC_PWD_BANNER               152
+#define IDS_NC_PWD_PWD                  153
+#define IDS_NC_PWD_NPWD                 154
+#define IDS_NC_PWD_NPWD_AGAIN           155
+#define IDS_KRB5_CREDTEXT_P0            156
+#define IDS_K5CFG_IMPORT_OPTIONS        157
+#define IDC_NCK5_RENEWABLE              1002
+#define IDC_NCK5_FORWARDABLE            1004
+#define IDC_NCK5_REALM                  1005
+#define IDC_NCK5_ADD_REALMS             1006
+#define IDC_NCK5_LIFETIME_EDIT          1008
+#define IDC_NCK5_RENEW_EDIT             1009
+#define IDC_PPK5_CRENEW                 1014
+#define IDC_PPK5_CFORWARD               1015
+#define IDC_PPK5_CPROXY                 1016
+#define IDC_PPK5_NAME                   1017
+#define IDC_PPK5_ISSUE                  1018
+#define IDC_PPK5_VALID                  1019
+#define IDC_PPK5_RENEW                  1020
+#define IDC_CHECK2                      1022
+#define IDC_CHECK4                      1024
+#define IDC_PPK5_LIFETIME               1024
+#define IDC_CHECK5                      1025
+#define IDC_CFG_LBL_REALM               1025
+#define IDC_CFG_DEFREALM                1026
+#define IDC_CFG_LBL_CFGFILE             1029
+#define IDC_CFG_CFGFILE                 1030
+#define IDC_CFG_WINGRP                  1031
+#define IDC_LBL_IMPORT                  1032
+#define IDC_CFG_IMPORT                  1033
+#define IDC_CFG_LBL_HOSTNAME            1034
+#define IDC_CFG_HOSTNAME                1035
+#define IDC_CFG_LBL_DOMAIN              1036
+#define IDC_CFG_DOMAIN                  1037
+#define IDC_CFG_CREATECONFIG            1038
+#define IDC_CFG_BROWSE                  1039
+#define IDC_CFG_CFGFILEGRP              1040
+#define IDC_CFG_CFGREALMS               1041
+#define IDC_CFG_REALMS                  1044
+#define IDC_CFG_DOMAINGRP               1045
+#define IDC_CFG_SERVERSGRP              1046
+#define IDC_LIST3                       1047
+#define IDC_LIST4                       1048
+#define IDC_CFG_LBL_DEFLIFE             1049
+#define IDC_CFG_DEFLIFE                 1050
+#define IDC_CFG_LBL_DEFRLIFE            1051
+#define IDC_CFG_DEFRLIFE                1052
+#define IDC_CFG_LIFEGRP                 1053
+#define IDC_CFG_LRNG_MIN                1054
+#define IDC_CFG_LRNG_MAX                1055
+#define IDC_CFG_RLRNG_MIN               1056
+#define IDC_CFG_RLRNG_MAX               1057
+#define IDC_CFG_CCACHE                  1058
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NEXT_RESOURCE_VALUE        111
+#define _APS_NEXT_COMMAND_VALUE         40001
+#define _APS_NEXT_CONTROL_VALUE         1059
+#define _APS_NEXT_SYMED_VALUE           101
+#endif
+#endif

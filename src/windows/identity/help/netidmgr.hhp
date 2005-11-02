@@ -1,0 +1,21 @@
+[OPTIONS]
+Auto Index=Yes
+Compatibility=1.1 or later
+Compiled file=netidmgr.chm
+Contents file=toc.hhc
+Default topic=html/welcome.htm
+Display compile progress=No
+Index file=Index.hhk
+Language=0x409 English (United States)
+Title=NetIDMgr
+
+
+[MAP]
+#include khhelp.h
+
+[INFOTYPES]
+Category:Concepts
+CategoryDesc:Authentication, authorization and related concepts.
+Category:Usage
+CategoryDesc:Usage instructions for NetIDMgr
+
