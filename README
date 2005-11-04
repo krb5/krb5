@@ -211,9 +211,25 @@ Minor changes in 1.4.3
 * [3214] Update gss-sample applications on Windows to run multiple
   threads.
 
+* [3219] export gss_export_lucid_sec_context, et al., on Windows.
+
 * [3220] Delete svn:mime-type properties on some files, as their
   contents cause some files to be erroneously treated as binary by
   svn.
+
+* [3223] gss_acquire_cred() should search in multiple ccaches for
+  desired client principal if possible (KfM/KfW).
+
+* [3227] Change k5_debug_loc.lineno from short to int in k5-thread.h
+  to prevent Purify thrashing and Windows compilation warnings.
+
+* [3228] Wix installer updated for KfW.
+
+* [3229] NSIS installer updated for KfW.
+
+* [3232] Network Identity Manager for Windows.  (preliminary)
+
+* [3234] mkrel deletes .svn directories to avoid path length bloat.
 
 Major changes in 1.4.2
 ----------------------
