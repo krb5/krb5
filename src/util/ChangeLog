@@ -1,3 +1,7 @@
+2005-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* mkrel: Delete .svn directories to avoid pathname length bloat.
+
 2005-10-25  Tom Yu  <tlyu@mit.edu>
 
 	* ac_check_krb5.m4: Set LIBS rather than LDFLAGS.
