@@ -36,7 +36,7 @@
  * routine
  */
 krb5_error_code KRB5_CALLCONV
-krb5_set_real_time(krb5_context context, krb5_int32 seconds, krb5_int32 microseconds)
+krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = context->os_context;
     krb5_int32 sec, usec;
@@ -58,7 +58,7 @@ krb5_set_real_time(krb5_context context, krb5_int32 seconds, krb5_int32 microsec
  * is useful for running the krb5 routines through test suites
  */
 krb5_error_code 
-krb5_set_debugging_time(krb5_context context, krb5_int32 seconds, krb5_int32 microseconds)
+krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = context->os_context;
 
@@ -87,7 +87,7 @@ krb5_use_natural_time(krb5_context context)
  * This routine returns the current time offsets in use.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_time_offsets(krb5_context context, krb5_int32 *seconds, krb5_int32 *microseconds)
+krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 *microseconds)
 {
     krb5_os_context os_ctx = context->os_context;
 
@@ -103,7 +103,7 @@ krb5_get_time_offsets(krb5_context context, krb5_int32 *seconds, krb5_int32 *mic
  * This routine sets the time offsets directly.
  */
 krb5_error_code 
-krb5_set_time_offsets(krb5_context context, krb5_int32 seconds, krb5_int32 microseconds)
+krb5_set_time_offsets(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = context->os_context;
 
