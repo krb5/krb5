@@ -1,3 +1,7 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* winccld.c, stdcc.c: include k5-int.h before stdcc.h
+
 2004-11-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* stdcc.c (krb5_stdcc_get_flags): New function.

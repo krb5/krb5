@@ -1,3 +1,7 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* krb5_decode.c, krb5_encode.c: include k5-int.h instead of krb5.h
+
 2005-10-03  Tom Yu  <tlyu@mit.edu>
 
 	* asn1_get.c (asn1_get_tag_2): Patch from Zhihong Zhang to properly

@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include "krb5.h"
+#include "k5-int.h"
 #include "krbasn1.h"
 #include "asn1_k_decode.h"
 #include "asn1_decode.h"

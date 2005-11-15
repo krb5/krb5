@@ -19,7 +19,7 @@
 
 #define KRB5_RC_VNO	0x0501		/* krb5, rcache v 1 */
 
-#include "krb5.h"
+#include "k5-int.h"
 #include <stdio.h> /* for P_tmpdir */
 #include "rc_base.h"
 #include "rc_dfl.h"

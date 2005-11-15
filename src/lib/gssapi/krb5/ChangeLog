@@ -1,3 +1,7 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* gssapi_krb5.hin: include k5-int.h instead of krb5.h
+
 2005-10-20  Alexandra Ellwood <lxs@mit.edu>, Jeffrey Altman <jaltman@mit.edu>
 	
 	* acquire_cred.c (acquire_init_cred):
