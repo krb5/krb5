@@ -34,6 +34,7 @@
 #include <string.h>
 #include <syslog.h>
 #include <ctype.h>
+#include <errno.h>
 #include <netdb.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
