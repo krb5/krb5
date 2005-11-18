@@ -1,6 +1,9 @@
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* fakeka.c: Include errno.h.
+	(main): Pass extra null-pointer argument to
+	kadm5_init_with_password for new db_args argument added by DAL
+	changes.
 
 2005-10-13  Tom Yu  <tlyu@mit.edu>
 

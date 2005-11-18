@@ -1254,7 +1254,9 @@ char **argv;
 
     if ((code = kadm5_init_with_password(progname, NULL, KADM5_ADMIN_SERVICE,
 					 NULL, KADM5_STRUCT_VERSION,
-					 KADM5_API_VERSION_2, &handle))) {
+					 KADM5_API_VERSION_2,
+					 (char **) NULL, /* db_args */
+					 &handle))) {
 	com_err(argv[0], code, "while initializing Kadm5");
 	exit(1);
     }
