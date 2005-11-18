@@ -33,7 +33,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <krb5.h>
 #include "hash_provider.h"
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))

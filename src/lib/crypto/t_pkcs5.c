@@ -31,7 +31,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <krb5.h>
 
 #include "k5-int.h"
 

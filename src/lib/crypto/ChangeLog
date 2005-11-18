@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_hmac.c, t_pkcs5.c: Don't include krb5.h.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.
