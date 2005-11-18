@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c: Include k5-int.h instead of krb5.h.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS

@@ -1,7 +1,6 @@
 #ifndef __UTILITY_H__
 #define __UTILITY_H__
 
-#include "krb5.h"
 #include "krbasn1.h"
 #include "asn1buf.h"
 

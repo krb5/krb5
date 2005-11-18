@@ -40,7 +40,7 @@
 #include	<sys/types.h>
 #include	<gssrpc/rpc.h>
 #include	<krb5.h>
-#include	<k5-int.h>
+#include	<kdb.h>
 #include	<com_err.h>
 #include	<kadm5/kadm_err.h>
 #include	<kadm5/chpass_util_strings.h>

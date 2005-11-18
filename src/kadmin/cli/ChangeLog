@@ -1,3 +1,8 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.c: Include errno.h instead of k5-int.h.
+	* keytab.c: Include errno.h.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS

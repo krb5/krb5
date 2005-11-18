@@ -9,7 +9,8 @@
 **********************************************************************/
 #ifndef _idc_sec_1_err_handle_h_H
 #define _idc_sec_1_err_handle_h_H
-#include <k5-int.h>
+#include <com_err.h>
+#include <krb5.h>
 
 /* Everything else goes here */
 

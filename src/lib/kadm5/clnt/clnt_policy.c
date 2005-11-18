@@ -14,6 +14,7 @@ static char *rcsid = "$Header$";
 #include    "client_internal.h"
 #include	<stdlib.h>
 #include	<string.h>
+#include	<errno.h>
 #include    "err_handle.h"
 
 kadm5_ret_t

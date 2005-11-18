@@ -1,3 +1,9 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_principal.c, clnt_policy.c: Include errno.h.
+	* client_init.c: Include k5-int.h before krb5.h.
+	* err_handle.h: Include com_err.h and krb5.h instead of k5-int.h.
+
 2005-10-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* libkadm5clnt.exports: Don't export internal error-table

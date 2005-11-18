@@ -17,7 +17,7 @@
 #include    <memory.h>
 #endif
 #include    <stdlib.h>
-#include    "k5-int.h"
+#include    <errno.h>
 #include    <krb5/kdb.h>
 #include    <kadm5/admin.h>
 #include    "admin_internal.h"
@@ -39,7 +39,8 @@ typedef struct _osa_pw_hist_t {
   int n_key_data;
   krb5_key_data *key_data;
 } osa_pw_hist_ent, *osa_pw_hist_t;
-                                                                                                                     typedef struct _osa_princ_ent_t {
+
+typedef struct _osa_princ_ent_t {
   int                         version;
   char                        *policy;
   long                        aux_attributes;

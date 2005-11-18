@@ -14,6 +14,7 @@ static char *rcsid = "$Header$";
 #ifdef HAVE_MEMORY_H
 #include    <memory.h>
 #endif
+#include    <errno.h>
 #include    "client_internal.h"
 #include    "err_handle.h"
 

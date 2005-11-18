@@ -1,3 +1,8 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* utility.h: Don't include krb5.h.
+	* utility.c: Include utility.h before krb5.h.
+
 2005-06-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* trval.c (convert_nibble): Declare the argument with a type.

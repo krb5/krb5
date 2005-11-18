@@ -12,6 +12,7 @@ static char *rcsid = "$Header$";
 #include	<kadm5/admin.h>
 #include	"server_internal.h"
 #include	<stdlib.h>
+#include	<errno.h>
 
 #define MAX_PW_HISTORY	10
 #define MIN_PW_HISTORY	1

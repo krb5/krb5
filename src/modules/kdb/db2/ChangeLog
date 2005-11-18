@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* policy_db.h: Include errno.h and krb5.h instead of k5-int.h.
+
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Set build_dynobj=yes.
