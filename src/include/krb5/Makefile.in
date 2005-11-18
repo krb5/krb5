@@ -56,7 +56,8 @@ OSCONFSRC = $(srcdir)/stock/osconf.h
 osconf.h: $(OSCONFSRC) Makefile
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
 	@set -x ; if cmp -s osconf.new osconf.h ; then : osconf.h is current ; \
-	else ($(RM) osconf.h ; $(CP) osconf.new osconf.h; $(RM) osconf.new) fi
+	else ($(RM) osconf.h ; $(CP) osconf.new osconf.h) fi
+	$(RM) osconf.new
 ##DOS##!endif
 ###############################################################################
 
