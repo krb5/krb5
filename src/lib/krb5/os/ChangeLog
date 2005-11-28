@@ -1,3 +1,15 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* toffset.c:  (krb5_set_real_time, krb5_set_debugging_time, 
+                       krb5_get_time_offsets, krb5_set_time_offsets)
+        * timeofday.c:(krb5_timeofday)
+        * ustime.c:   (krb5_us_timeofday)
+
+        Change type of "seconds" parameter from krb5_int32 to krb5_timestamp
+        This does not alter the ABI on existing platforms but will provide
+        consistency when we need to consider changing krb5_timestamp to a
+        64-bit value.
+
 2005-09-16  Tom Yu  <tlyu@mit.edu>
 
 	* dnsglue.c (USE_RES_NINIT): Fix braino: define to 1, not empty

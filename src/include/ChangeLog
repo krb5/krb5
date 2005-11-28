@@ -1,5 +1,24 @@
 2005-10-20  Jeffrey Altman <jaltman@mit.edu>
 
+	* win-mac.h: 
+          - Add definitions for int64_t and uint64_t
+	  - Force the use of 32-bit time_t on 32-bit Windows
+          - Correct the definition of MAX_SIZE to use the value
+            of SIZE_MAX which is defined in limits.h
+          - Add check to ensure that 32-bit time_t is forced
+            only when k5-int.h has been loaded.
+        * k5-int.h:
+          - Add check to ensure that k5-int.h is loaded before
+            krb5.h
+        * krb5.hin:
+          - Modify prototypes of functions that take krb5_int32
+            when they are really passing krb5_timestamp values
+            krb5_us_timeofday, krb5_timeofday, krb5_set_real_time,
+            krb5_set_debugging_time, krb5_get_time_offsets,
+            krb5_set_time_offsets
+
+2005-10-20  Jeffrey Altman <jaltman@mit.edu>
+
 	* win-mac.h: Add definitions for int32_t and uint32_t
 
 2005-05-31  Ken Raeburn  <raeburn@mit.edu>

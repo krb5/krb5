@@ -1792,11 +1792,11 @@ void KRB5_CALLCONV krb5_free_cksumtypes
 /* From krb5/os but needed but by the outside world */
 krb5_error_code KRB5_CALLCONV krb5_us_timeofday
 	(krb5_context,
-		krb5_int32 *,
+		krb5_timestamp *,
 		krb5_int32 * );
 krb5_error_code KRB5_CALLCONV krb5_timeofday
 	(krb5_context,
-		krb5_int32 * );
+		krb5_timestamp * );
 		 /* get all the addresses of this host */
 krb5_error_code KRB5_CALLCONV krb5_os_localaddr
 	(krb5_context,
@@ -2265,19 +2265,19 @@ krb5_error_code krb5_make_fulladdr
 #endif
 
 krb5_error_code KRB5_CALLCONV krb5_set_real_time
-	(krb5_context, krb5_int32, krb5_int32);
+	(krb5_context, krb5_timestamp, krb5_int32);
 
 #if KRB5_PRIVATE
 krb5_error_code krb5_set_debugging_time
-	(krb5_context, krb5_int32, krb5_int32);
+	(krb5_context, krb5_timestamp, krb5_int32);
 krb5_error_code krb5_use_natural_time
 	(krb5_context);
 #endif
 krb5_error_code KRB5_CALLCONV krb5_get_time_offsets
-	(krb5_context, krb5_int32 *, krb5_int32 *);
+	(krb5_context, krb5_timestamp *, krb5_int32 *);
 #if KRB5_PRIVATE
 krb5_error_code krb5_set_time_offsets
-	(krb5_context, krb5_int32, krb5_int32);
+	(krb5_context, krb5_timestamp, krb5_int32);
 #endif
 
 /* str_conv.c */

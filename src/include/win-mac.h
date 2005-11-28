@@ -33,7 +33,26 @@
 #include <limits.h>
 
 #ifndef SIZE_MAX    /* in case Microsoft defines max size of size_t */
+#ifdef  MAX_SIZE    /* Microsoft defines MAX_SIZE as max size of size_t */
+#define SIZE_MAX MAX_SIZE
+#else
 #define SIZE_MAX UINT_MAX
+#endif
+#endif
+
+/* To ensure backward compatibility of the ABI use 32-bit time_t on 
+ * 32-bit Windows. 
+ */
+#ifdef _KRB5_INT_H
+#ifdef KRB5_GENERAL__
+#error krb5.h included before k5-int.h
+#endif /* KRB5_GENERAL__ */
+#if _INTEGRAL_MAX_BITS >= 64 && _MSC_VER >= 1400 && !defined(_WIN64) && !defined(_USE_32BIT_TIME_T)
+#if defined(_TIME_T_DEFINED) || defined(_INC_IO) || defined(_INC_TIME) || defined(_INC_WCHAR)
+#error time_t has been defined as a 64-bit integer which is incompatible with Kerberos on this platform.
+#endif /* _TIME_T_DEFINED */
+#define _USE_32BIT_TIME_T
+#endif 
 #endif
 
 #ifndef KRB5_CALLCONV
@@ -53,12 +72,16 @@
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
 #include <sys/types.h>
-typedef unsigned long	u_long;      /* Not part of sys/types.h on the pc */
-typedef unsigned int	u_int;
-typedef unsigned short	u_short;
-typedef unsigned char	u_char;
-typedef unsigned int    uint32_t;
-typedef int             int32_t;
+typedef unsigned long	 u_long;      /* Not part of sys/types.h on the pc */
+typedef unsigned int	 u_int;
+typedef unsigned short	 u_short;
+typedef unsigned char	 u_char;
+typedef unsigned int     uint32_t;
+typedef int              int32_t;
+#if _INTEGRAL_MAX_BITS >= 64
+typedef unsigned __int64 uint64_t;
+typedef __int64          int64_t;
+#endif
 #endif /* KRB5_SYSTYPES__ */
 
 #define MAXHOSTNAMELEN  512

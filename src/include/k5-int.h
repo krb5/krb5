@@ -77,6 +77,10 @@
 #ifndef _KRB5_INT_H
 #define _KRB5_INT_H
 
+#ifdef KRB5_GENERAL__
+#error krb5.h included before k5-int.h
+#endif /* KRB5_GENERAL__ */
+
 #include "osconf.h"
 
 /*
