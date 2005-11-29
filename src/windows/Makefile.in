@@ -24,6 +24,9 @@ all-windows::
 	cd ..\ms2mit
 	$(MAKE) -$(MFLAGS)
 !if "$(KRB5_KFW_COMPILE)"=="1" 
+        @echo Making in windows\kfwlogon
+        cd ..\kfwlogon
+        $(MAKE) -$(MFLAGS) 
         @echo Making in windows\identity 
         cd ..\identity 
         $(MAKE) -$(MFLAGS) 
@@ -50,6 +53,9 @@ clean-windows::
 	cd ..\ms2mit
 	$(MAKE) -$(MFLAGS) clean
 !if "$(KRB5_KFW_COMPILE)"=="1" 
+        @echo Making clean in windows\kfwlogon
+        cd ..\kfwlogon
+        $(MAKE) -$(MFLAGS) clean 
         @echo Making clean in windows\identity 
         cd ..\identity 
         $(MAKE) -$(MFLAGS) clean 

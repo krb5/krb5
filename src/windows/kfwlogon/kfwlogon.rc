@@ -1,0 +1,10 @@
+#include <windows.h>
+#include <winver.h>
+#include "patchlevel.h"
+
+#define K5_DESCRIPTION "Kerberos for Windows Logon Network Provider\0"
+#define K5_FILETYPE	VFT_DLL
+#define K5_INTERNAL_NAME "KFWLOGON\0"
+#define K5_ORIGINAL_NAME "kfwlogon.dll\0"
+
+#include "..\version.rc"
