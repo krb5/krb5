@@ -1,3 +1,9 @@
+2005-11-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-solaris*): Include $(CFLAGS) in LDCOMBINE.
+	Don't use compiler command-line options for initializers for
+	Solaris 7 and earlier native compilers.
+
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* libnover.in (LIBLIST): Use DYNOBJEXT instead of SHLIBEXT.
