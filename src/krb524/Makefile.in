@@ -129,18 +129,18 @@ $(OUTPRE)k524init.$(OBJEXT): k524init.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h
-$(OUTPRE)krb524d.$(OBJEXT): krb524d.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/gssrpc/rpc.h \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
-  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
-  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
-  $(BUILDTOP)/include/gssrpc/svc.h $(SRCTOP)/include/k5-int.h \
+$(OUTPRE)krb524d.$(OBJEXT): krb524d.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
+  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
+  $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/adb_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(SRCTOP)/include/krb5/adm_proto.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \

@@ -61,13 +61,12 @@ rc_dfl.so rc_dfl.po $(OUTPRE)rc_dfl.$(OBJEXT): rc_dfl.c rc_base.h $(SRCTOP)/incl
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/krb5/kdb.h rc_dfl.h rc_io.h rc-int.h
-rc_io.so rc_io.po $(OUTPRE)rc_io.$(OBJEXT): rc_io.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) rc_base.h $(SRCTOP)/include/k5-int.h \
+rc_io.so rc_io.po $(OUTPRE)rc_io.$(OBJEXT): rc_io.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  rc_dfl.h rc_io.h
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h rc_base.h rc_dfl.h rc_io.h
 rcdef.so rcdef.po $(OUTPRE)rcdef.$(OBJEXT): rcdef.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
