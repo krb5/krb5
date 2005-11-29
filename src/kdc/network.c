@@ -1017,7 +1017,10 @@ krb5_error_code
 listen_and_process(const char *prog)
 {
     int			nfound;
-    struct select_state sout;
+    /* This struct contains 3 fd_set objects; on some platforms, they
+       can be rather large.  Making this static avoids putting all
+       that junk on the stack.  */
+    static struct select_state sout;
     int			i, sret;
     krb5_error_code	err;
 
