@@ -1,5 +1,9 @@
 2005-11-28  Ken Raeburn  <raeburn@mit.edu>
 
+	* Makefile.in (test_getpw.$(OBJEXT)): New intermediate target.
+	(test_getpw): Don't build directly from source.
+	(test_getsockname): New target.
+
 	* test_getsockname.c: Include autoconf.h.
 	(main): Fix type of variable 'i' used for size of socket address.
 

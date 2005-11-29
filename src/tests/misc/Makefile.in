@@ -14,8 +14,12 @@ all:: test_getpw
 check:: test_getpw
 	$(RUN_SETUP) ./test_getpw
 
-test_getpw: $(srcdir)/../misc/test_getpw.c ../../include/krb5/autoconf.h $(SUPPORT_DEPLIB)
-	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(srcdir)/../misc/test_getpw.c $(SUPPORT_LIB)
+test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)
+test_getpw.$(OBJEXT): $(srcdir)/../misc/test_getpw.c ../../include/krb5/autoconf.h
+
+test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getsockname $(OUTPRE)test_getsockname.$(OBJEXT) $(LIBS)
 
 install::
 
