@@ -4,7 +4,7 @@
 
 #include <gssrpc/rpc.h>
 #include <krb5.h>
-#include <k5-int.h>
+#include <errno.h>
 #include <kadm5/admin.h>
 #include <kadm5/kadm_rpc.h>
 #include <kadm5/admin_xdr.h>

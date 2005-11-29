@@ -38,8 +38,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <krb5.h>
 #include <k5-int.h> /* for KRB5_ADM_DEFAULT_PORT */
+#include <krb5.h>
 #ifdef __STDC__
 #include <stdlib.h>
 #endif

@@ -1,3 +1,7 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* rc_io.c: include k5-int.h instead of krb5.h
+
 2005-01-15  Jeffrey Altman <jaltman@mit.edu>
 
         * rc_dfl.c: Move the extraction of the struct dfl_data

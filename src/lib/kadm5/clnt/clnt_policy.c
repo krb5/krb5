@@ -14,6 +14,7 @@ static char *rcsid = "$Header$";
 #include    "client_internal.h"
 #include	<stdlib.h>
 #include	<string.h>
+#include	<errno.h>
 
 kadm5_ret_t
 kadm5_create_policy(void *server_handle,

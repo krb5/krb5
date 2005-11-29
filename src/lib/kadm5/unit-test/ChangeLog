@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* setkey-test.c: Include k5-int.h instead of krb5.h.
+
 2005-02-10  Tom Yu  <tlyu@mit.edu>
 
 	* api.2/init-v2.exp: Handle improved error codes from

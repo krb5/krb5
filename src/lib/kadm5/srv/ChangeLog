@@ -1,3 +1,11 @@
+2005-11-28  Tom Yu  <tlyu@mit.edu>
+
+	* adb_openclose.c: Include k5-int.h.
+
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* server_init.c, svr_policy.c: Include errno.h.
+
 2005-09-27  Tom Yu  <tlyu@mit.edu>
 
 	* svr_iters.c (glob_to_regexp): Increment pointer, not character,

@@ -2,7 +2,7 @@
 
 #include "autoconf.h"
 #include "com_err.h"
-#include "krb5.h"
+#include "k5-int.h"
 #include "krb5_err.h"
 #include "kv5m_err.h"
 #include "asn1_err.h"

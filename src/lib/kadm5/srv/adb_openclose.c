@@ -11,6 +11,7 @@ static char *rcsid = "$Header$";
 #include	<sys/file.h>
 #include	<fcntl.h>
 #include	<unistd.h>
+#include	"k5-int.h"
 #include	"adb.h"
 #include	<stdlib.h>
 

@@ -38,6 +38,7 @@ static char *rcsid = "$Header$";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <krb5.h>
 #include <kadm5/admin.h>

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <krb5.h>
+#include <k5-int.h>
 #include <kadm5/admin.h>
 
 #if	HAVE_SRAND48

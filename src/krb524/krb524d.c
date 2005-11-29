@@ -41,7 +41,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <krb5.h>
+#include <k5-int.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
 #include <com_err.h>

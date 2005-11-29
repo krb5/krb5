@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c: Include k5-int.h instead of krb5.h.
+
 2004-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in (install-unix): Install krb524d manpage.

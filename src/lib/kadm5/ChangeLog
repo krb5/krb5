@@ -1,3 +1,13 @@
+2005-11-28  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h: Include errno.h and krb5.h instead of k5-int.h.
+
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h: Include kdb.h instead of k5-int.h.
+	* kadm_rpc_xdr.c, server_internal.h: Include errno.h instead of
+	k5-int.h.
+
 2004-08-20  Tom Yu  <tlyu@mit.edu>
 
 	* admin.h (KADM5_CONFIG_NO_AUTH): New flag.

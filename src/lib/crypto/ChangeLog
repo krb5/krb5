@@ -1,3 +1,7 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* t_hmac.c, t_pkcs5.c: Don't include krb5.h.
+
 2005-03-15  Jeffrey Altman <jaltman@mit.edu>
 
         * keyed_cksum.c: (krb5_c_is_keyed_cksum): this is a boolean 

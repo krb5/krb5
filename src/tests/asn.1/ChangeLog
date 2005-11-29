@@ -1,3 +1,8 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* utility.h: Don't include krb5.h.
+	* utility.c: Include utility.h before krb5.h.
+
 2004-04-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* debug.h (test): Macro renamed from "assert".

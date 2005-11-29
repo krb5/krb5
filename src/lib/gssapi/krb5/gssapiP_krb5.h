@@ -47,7 +47,7 @@
 #ifndef _GSSAPIP_KRB5_H_
 #define _GSSAPIP_KRB5_H_
 
-#include <krb5.h>
+#include <k5-int.h>
 
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

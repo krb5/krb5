@@ -1,3 +1,7 @@
+2005-11-14  Jeffrey Altman <jaltman@mit.edu>
+
+	* winccld.c, stdcc.c: include k5-int.h before stdcc.h
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* stdcc_util.c (dupK5toCC): Don't test macintosh.

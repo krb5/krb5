@@ -1,5 +1,5 @@
-#include "krb5.h"
 #include "utility.h"
+#include "krb5.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
