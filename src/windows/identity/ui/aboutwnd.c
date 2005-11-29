@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,7 +25,7 @@
 /* $Id$ */
 
 #include<khmapp.h>
-#include<khimaira_version.h>
+#include<netidmgr_intver.h>
 #include<tlhelp32.h>
 
 #if DEBUG
@@ -108,7 +108,11 @@ about_dlg_proc(HWND hwnd,
                     mod.dwSize = sizeof(mod);
                 } while(Module32Next(hsnap, &mod));
 
+#if (_WIN32_WINNT >= 0x501)
+                /* we are also setting the report style when creating
+                   the control.  this is actually optional. */
                 ListView_SetView(hw, LV_VIEW_DETAILS);
+#endif
 
             _done_with_modules:
                 CloseHandle(hsnap);

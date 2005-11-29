@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -63,8 +63,8 @@ typedef struct kcdb_credset_t {
 
 #define kcdb_credset_is_sealed(c) ((c)->seal_count != 0)
 
-#define KCDB_CREDSET_INITIAL_SIZE 1024
-#define KCDB_CREDSET_GROWTH_FACTOR 1024
+#define KCDB_CREDSET_INITIAL_SIZE 256
+#define KCDB_CREDSET_GROWTH_FACTOR 256
 
 void kcdb_credset_init(void);
 void kcdb_credset_exit(void);

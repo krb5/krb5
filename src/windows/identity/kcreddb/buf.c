@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,7 +29,7 @@
 
 void kcdb_buf_new(kcdb_buf * buf, khm_size n_fields)
 {
-    buf->buffer = malloc(KCDB_BUF_CBBUF_INITIAL);
+    buf->buffer = PMALLOC(KCDB_BUF_CBBUF_INITIAL);
     buf->cb_buffer = KCDB_BUF_CBBUF_INITIAL;
     buf->cb_used = 0;
 
@@ -40,7 +40,7 @@ void kcdb_buf_new(kcdb_buf * buf, khm_size n_fields)
 
     buf->n_fields = n_fields;
     buf->nc_fields = UBOUNDSS(n_fields, KCDB_BUF_FIELDS_INITIAL, KCDB_BUF_FIELDS_GROWTH);
-    buf->fields = malloc(sizeof(buf->fields[0]) * buf->n_fields);
+    buf->fields = PMALLOC(sizeof(buf->fields[0]) * buf->n_fields);
     ZeroMemory(buf->fields, sizeof(buf->fields[0]) * buf->n_fields);
 }
 
@@ -49,13 +49,13 @@ void kcdb_buf_delete(kcdb_buf * buf)
     buf->cb_buffer = 0;
     buf->cb_used = 0;
     if(buf->buffer)
-        free(buf->buffer);
+        PFREE(buf->buffer);
     buf->buffer = NULL;
 
     buf->n_fields = 0;
     buf->nc_fields = 0;
     if(buf->fields)
-        free(buf->fields);
+        PFREE(buf->fields);
     buf->fields = NULL;
 }
 
@@ -73,11 +73,11 @@ static void kcdb_buf_assert_size(kcdb_buf * buf, khm_size cbsize)
 
     assert(new_size > buf->cb_buffer && new_size > 0);
 
-    new_buf = malloc(new_size);
+    new_buf = PMALLOC(new_size);
     assert(new_buf != NULL);
 
     memcpy(new_buf, buf->buffer, buf->cb_used);
-    free(buf->buffer);
+    PFREE(buf->buffer);
     buf->buffer = new_buf;
 }
 
@@ -106,13 +106,13 @@ void kcdb_buf_alloc(kcdb_buf * buf, khm_size slot, khm_ui_2 id, khm_size cbsize)
 
         ns = UBOUNDSS((slot + 1), KCDB_BUF_FIELDS_INITIAL, KCDB_BUF_FIELDS_GROWTH);
 
-        nf = malloc(sizeof(buf->fields[0]) * ns);
+        nf = PMALLOC(sizeof(buf->fields[0]) * ns);
         memcpy(nf, buf->fields, sizeof(buf->fields[0]) * buf->n_fields);
 
         if(ns > buf->n_fields)
             memset(&(nf[buf->n_fields]), 0, sizeof(buf->fields[0]) * (ns - buf->n_fields));
 
-        free(buf->fields);
+        PFREE(buf->fields);
         buf->fields = nf;
         buf->nc_fields = ns;
     }
@@ -191,13 +191,13 @@ void kcdb_buf_dup(kcdb_buf * dest, const kcdb_buf * src)
 
     dest->cb_buffer = cb_buf;
     dest->cb_used = src->cb_used;
-    dest->buffer = malloc(cb_buf);
+    dest->buffer = PMALLOC(cb_buf);
     memcpy(dest->buffer, src->buffer, src->cb_used);
 
     nc_fields = UBOUNDSS(src->n_fields, KCDB_BUF_FIELDS_INITIAL, KCDB_BUF_FIELDS_GROWTH);
     dest->nc_fields = nc_fields;
     dest->n_fields = src->n_fields;
-    dest->fields = malloc(nc_fields * sizeof(dest->fields[0]));
+    dest->fields = PMALLOC(nc_fields * sizeof(dest->fields[0]));
     memcpy(dest->fields, src->fields, src->n_fields * sizeof(dest->fields[0]));
     if(dest->n_fields < dest->nc_fields)
         memset(&(dest->fields[dest->n_fields]), 0, (src->nc_fields - src->n_fields) * sizeof(dest->fields[0]));
@@ -293,7 +293,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_get_attr(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_get_attr(record, attr_id, attr_type, buffer, pcb_buf);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_get_attrib(
@@ -308,7 +308,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_get_attrib(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_get_attrib(record, attr_name, attr_type, buffer, pcb_buf);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_get_attr_string(
@@ -323,7 +323,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_get_attr_string(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_get_attr_string(record, attr_id, buffer, pcbbuf, flags);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_get_attrib_string(
@@ -338,7 +338,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_get_attrib_string(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_get_attrib_string(record, attr_name, buffer, pcbbuf, flags);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_set_attr(
@@ -352,7 +352,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_set_attr(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_set_attr(record, attr_id, buffer, cbbuf);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_set_attrib(
@@ -366,7 +366,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_set_attrib(
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_set_attrib(record, attr_name, buffer, cbbuf);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_hold(khm_handle  record)
@@ -376,7 +376,7 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_hold(khm_handle  record)
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_hold(record);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_release(khm_handle record)
@@ -386,6 +386,6 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_release(khm_handle record)
     else if(kcdb_is_active_identity(record))
         return kcdb_identity_release(record);
     else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 

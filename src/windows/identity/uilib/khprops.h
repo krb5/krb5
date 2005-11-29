@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -141,7 +141,12 @@ khui_ps_create_sheet(khui_property_sheet ** sheet);
         used to order the pages in a property sheet.  The pages are
         ordered based on ordinal first and then alphabetically by
         credentials type name.  If the type is unavailable, then the
-        ordering is undefined.
+        ordering is undefined.  Ordinals for credential type property
+        pages can be in the range from 0 to 127.  Ordinals 128 and
+        above are reserved.  Passing in 0 will work for credentials
+        providers unless they provide more than one property page per
+        credential, in which case the ordinal should be used to
+        enforce an order.
 
     \param[in] ppage Pointer to structure that will be passed to
         CreatePropertySheetPage() to create the property page.  The

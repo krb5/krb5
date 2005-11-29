@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,14 +28,17 @@
 
 extern void alert_init(void);
 extern void alert_exit(void);
+extern void ps_init(void);
+extern void ps_exit(void);
 
 void
 uilib_process_attach(void) {
     alert_init();
+    ps_init();
 }
 
 void
 uilib_process_detach(void) {
+    ps_exit();
     alert_exit();
 }
-

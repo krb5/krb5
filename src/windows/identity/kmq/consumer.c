@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -44,7 +44,7 @@ kmq_message_ref * kmqint_get_message_ref(void) {
 
     LPOP(&kmq_msg_ref_free, &r);
     if(!r) {
-        r = malloc(sizeof(kmq_message_ref));
+        r = PMALLOC(sizeof(kmq_message_ref));
     }
     ZeroMemory(r, sizeof(kmq_message_ref));
 
@@ -134,11 +134,20 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
 
         if(try_send && q->thread == GetCurrentThreadId()) {
             khm_int32 rv;
-            /* we are sending a message from this thread to this thread.
-               just call the recipient directly, bypassing the message queue. */
+            /* we are sending a message from this thread to this
+               thread.  just call the recipient directly, bypassing
+               the message queue. */
             m->refcount++;
             m->nSent++;
-            rv = s->recipient.cb(m->type, m->subtype, m->uparam, m->vparam);
+            if (IsBadCodePtr(s->recipient.cb)) {
+                rv = KHM_ERROR_INVALID_OPERATION;
+            } else {
+                if (IsBadCodePtr(s->recipient.cb))
+                    rv = KHM_ERROR_INVALID_OPERATION;
+                else
+                    rv = s->recipient.cb(m->type, m->subtype, 
+                                         m->uparam, m->vparam);
+            }
             m->refcount--;
             if(KHM_SUCCEEDED(rv))
                 m->nCompleted++;
@@ -166,26 +175,31 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
     else if(s->rcpt_type == KMQ_RCPTTYPE_HWND) {
         m->refcount++;
 
-        if(try_send && GetCurrentThreadId() == GetWindowThreadProcessId(s->recipient.hwnd, NULL)) {
-            /* kmqint_post does not know whether there are any other messages
-               waiting to be posted at this point.  Hence, simply sending the
-               message is not the right thing to do as the recipient may
-               incorrectly assume that the message has completed when
-               (m->nCompleted + m->nFailed == m->nSent).  Therefore, we only
-               increment nSent after the message is sent. */
-            SendMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, m->type, (LPARAM) m);
+        if(try_send && 
+           GetCurrentThreadId() == GetWindowThreadProcessId(s->recipient.hwnd, 
+                                                            NULL)) {
+            /* kmqint_post does not know whether there are any other
+               messages waiting to be posted at this point.  Hence,
+               simply sending the message is not the right thing to do
+               as the recipient may incorrectly assume that the
+               message has completed when (m->nCompleted + m->nFailed
+               == m->nSent).  Therefore, we only increment nSent after
+               the message is sent. */
+            SendMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, 
+                        m->type, (LPARAM) m);
             m->nSent++;
         } else {
             m->nSent++;
-            PostMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, m->type, (LPARAM) m);
+            PostMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, 
+                        m->type, (LPARAM) m);
         }
-    } 
+    }
 #endif
 
     else {
-        /* This could either be because we were passed in an invalid subscription
-           or because we lost a race to a thread that deleted an ad-hoc
-           subscription. */
+        /* This could either be because we were passed in an invalid
+           subscription or because we lost a race to a thread that
+           deleted an ad-hoc subscription. */
 #ifdef DEBUG
         assert(FALSE);
 #else
@@ -201,7 +215,7 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
 KHMEXP khm_int32 KHMAPI kmq_subscribe_hwnd(khm_int32 type, HWND hwnd) {
     kmq_msg_subscription * s;
 
-    s = malloc(sizeof(kmq_msg_subscription));
+    s = PMALLOC(sizeof(kmq_msg_subscription));
     LINIT(s);
     s->queue = NULL;
     s->rcpt_type = KMQ_RCPTTYPE_HWND;
@@ -217,7 +231,7 @@ KHMEXP khm_int32 KHMAPI kmq_subscribe_hwnd(khm_int32 type, HWND hwnd) {
 KHMEXP khm_int32 KHMAPI kmq_subscribe(khm_int32 type, kmq_callback_t cb) {
     kmq_msg_subscription * s;
 
-    s = malloc(sizeof(kmq_msg_subscription));
+    s = PMALLOC(sizeof(kmq_msg_subscription));
     LINIT(s);
     s->queue = kmqint_get_thread_queue();
     s->rcpt_type = KMQ_RCPTTYPE_CB;
@@ -230,11 +244,12 @@ KHMEXP khm_int32 KHMAPI kmq_subscribe(khm_int32 type, kmq_callback_t cb) {
 /*! \internal
     \note Obtains ::cs_kmq_global
 */
-KHMEXP khm_int32 KHMAPI kmq_create_subscription(kmq_callback_t cb, khm_handle * result)
+KHMEXP khm_int32 KHMAPI kmq_create_subscription(kmq_callback_t cb, 
+                                                khm_handle * result)
 {
     kmq_msg_subscription * s;
 
-    s = malloc(sizeof(kmq_msg_subscription));
+    s = PMALLOC(sizeof(kmq_msg_subscription));
     LINIT(s);
     s->queue = kmqint_get_thread_queue();
     s->rcpt_type = KMQ_RCPTTYPE_CB;
@@ -261,7 +276,7 @@ KHMEXP khm_int32 KHMAPI kmq_delete_subscription(khm_handle sub)
     LDELETE(&kmq_adhoc_subs, s);
     LeaveCriticalSection(&cs_kmq_global);
 
-    free(s);
+    PFREE(s);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -275,7 +290,7 @@ KHMEXP khm_int32 KHMAPI kmq_unsubscribe_hwnd(khm_int32 type, HWND hwnd) {
 
     s = kmqint_msg_type_del_sub_hwnd(type, hwnd);
     if(s)
-        free(s);
+        PFREE(s);
     return (s)?KHM_ERROR_SUCCESS:KHM_ERROR_NOT_FOUND;
 }
 
@@ -288,7 +303,7 @@ KHMEXP khm_int32 KHMAPI kmq_unsubscribe(khm_int32 type, kmq_callback_t cb) {
 
     s = kmqint_msg_type_del_sub_cb(type,cb);
     if(s)
-        free(s);
+        PFREE(s);
 
     return (s)?KHM_ERROR_SUCCESS:KHM_ERROR_NOT_FOUND;
 }
@@ -357,6 +372,7 @@ KHMEXP LRESULT KHMAPI kmq_wm_dispatch(LPARAM lparm, kmq_callback_t cb) {
 }
 
 /*! \internal
+
     \note Obtains ::cs_kmq_global, kmq_queue::cs, ::cs_kmq_msg_ref, ::cs_kmq_msg, 
 */
 KHMEXP khm_int32 KHMAPI kmq_dispatch(kmq_timer timeout) {
@@ -366,6 +382,8 @@ KHMEXP khm_int32 KHMAPI kmq_dispatch(kmq_timer timeout) {
     DWORD hr;
 
     q = kmqint_get_thread_queue();
+
+    assert(q->wait_o);
 
     hr = WaitForSingleObject(q->wait_o, timeout);
     if(hr == WAIT_OBJECT_0) {

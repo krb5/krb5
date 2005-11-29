@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -214,7 +214,10 @@ kmsg_cred_completion(kmq_message *m)
                 khui_alert * alert;
                 kherr_event * evt;
                 kherr_context * ctx;
-                wchar_t ws_title[1024];
+                wchar_t ws_tfmt[512];
+                wchar_t w_idname[KCDB_IDENT_MAXCCH_NAME];
+                wchar_t ws_title[ARRAYLENGTH(ws_tfmt) + KCDB_IDENT_MAXCCH_NAME];
+                khm_size cb;
 
                 ctx = kherr_peek_context();
                 evt = kherr_get_err_event(ctx);
@@ -224,10 +227,24 @@ kmsg_cred_completion(kmq_message *m)
 
                 if (nc->subtype == KMSG_CRED_PASSWORD)
                     LoadString(khm_hInstance, IDS_NC_PWD_FAILED_TITLE,
-                               ws_title, ARRAYLENGTH(ws_title));
+                               ws_tfmt, ARRAYLENGTH(ws_tfmt));
+                else if (nc->subtype == KMSG_CRED_RENEW_CREDS)
+                    LoadString(khm_hInstance, IDS_NC_REN_FAILED_TITLE,
+                               ws_tfmt, ARRAYLENGTH(ws_tfmt));
                 else
                     LoadString(khm_hInstance, IDS_NC_FAILED_TITLE,
-                               ws_title, ARRAYLENGTH(ws_title));
+                               ws_tfmt, ARRAYLENGTH(ws_tfmt));
+
+                if (nc->n_identities > 0) {
+                    cb = sizeof(w_idname);
+                    if (KHM_FAILED(kcdb_identity_get_name(nc->identities[0], 
+                                                          w_idname, &cb)))
+                        StringCbCopy(w_idname, sizeof(w_idname), L"(?)");
+                } else {
+                    StringCbCopy(w_idname, sizeof(w_idname), L"(?)");
+                }
+
+                StringCbPrintf(ws_title, sizeof(ws_title), ws_tfmt, w_idname);
 
                 khui_alert_set_title(alert, ws_title);
                 khui_alert_set_severity(alert, evt->severity);
@@ -267,8 +284,10 @@ kmsg_cred_completion(kmq_message *m)
             if (nc->subtype == KMSG_CRED_NEW_CREDS ||
                 nc->subtype == KMSG_CRED_PASSWORD) {
 
+                /*
                 if (nc->subtype == KMSG_CRED_NEW_CREDS)
                     khui_context_reset();
+                */
 
                 khm_cred_end_dialog(nc->result);
             }
@@ -300,7 +319,7 @@ kmsg_cred_completion(kmq_message *m)
         assert(m->vparam != NULL);
 #endif
         khui_context_release((khui_action_context *) m->vparam);
-        free(m->vparam);
+        PFREE(m->vparam);
 
         kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
 
@@ -309,6 +328,10 @@ kmsg_cred_completion(kmq_message *m)
 
     case KMSG_CRED_IMPORT:
         khm_cred_process_commandline();
+        break;
+
+    case KMSG_CRED_REFRESH:
+        kcdb_identity_refresh_all();
         break;
     }
 }
@@ -342,7 +365,7 @@ void khm_cred_destroy_creds(void)
 {
     khui_action_context * pctx;
 
-    pctx = malloc(sizeof(*pctx));
+    pctx = PMALLOC(sizeof(*pctx));
 #ifdef DEBUG
     assert(pctx);
 #endif
@@ -370,7 +393,7 @@ void khm_cred_destroy_creds(void)
                                KHERR_WARNING);
 
         khui_context_release(pctx);
-        free(pctx);
+        PFREE(pctx);
     } else {
         _begin_task(KHERR_CF_TRANSITIVE);
         _report_sr0(KHERR_NONE, IDS_CTX_RENEW_CREDS);
@@ -472,7 +495,7 @@ void khm_cred_change_password(wchar_t * title)
         if (SUCCEEDED(StringCbLength(title, KHUI_MAXCB_TITLE, &cb))) {
             cb += sizeof(wchar_t);
 
-            nc->window_title = malloc(cb);
+            nc->window_title = PMALLOC(cb);
 #ifdef DEBUG
             assert(nc->window_title);
 #endif
@@ -487,7 +510,7 @@ void khm_cred_change_password(wchar_t * title)
                                          &cb))) {
 
         cb = (cb + 1) * sizeof(wchar_t);
-        nc->window_title = malloc(cb);
+        nc->window_title = PMALLOC(cb);
 #ifdef DEBUG
         assert(nc->window_title);
 #endif
@@ -526,13 +549,40 @@ void khm_cred_obtain_new_creds(wchar_t * title)
 
     kcdb_identpro_get_ui_cb((void *) &nc->ident_cb);
 
-    assert(nc->ident_cb);
+    if (nc->ident_cb == NULL) {
+        wchar_t title[256];
+        wchar_t msg[512];
+        wchar_t suggestion[512];
+        khui_alert * a;
+
+        LoadString(khm_hInstance, IDS_ERR_TITLE_NO_IDENTPRO,
+                   title, ARRAYLENGTH(title));
+        LoadString(khm_hInstance, IDS_ERR_MSG_NO_IDENTPRO,
+                   msg, ARRAYLENGTH(msg));
+        LoadString(khm_hInstance, IDS_ERR_SUGG_NO_IDENTPRO,
+                   suggestion, ARRAYLENGTH(suggestion));
+
+        khui_alert_create_simple(title,
+                                 msg,
+                                 KHERR_ERROR,
+                                 &a);
+        khui_alert_set_suggestion(a, suggestion);
+
+        khui_alert_show(a);
+
+        khui_alert_release(a);
+
+        khui_context_release(&nc->ctx);
+        khui_cw_destroy_cred_blob(nc);
+        khm_cred_end_dialog(KHUI_NC_RESULT_CANCEL);
+        return;
+    }
 
     if (title) {
         if (SUCCEEDED(StringCbLength(title, KHUI_MAXCB_TITLE, &cb))) {
             cb += sizeof(wchar_t);
 
-            nc->window_title = malloc(cb);
+            nc->window_title = PMALLOC(cb);
 #ifdef DEBUG
             assert(nc->window_title);
 #endif
@@ -547,7 +597,7 @@ void khm_cred_obtain_new_creds(wchar_t * title)
                                          &cb))) {
 
         cb = (cb + 1) * sizeof(wchar_t);
-        nc->window_title = malloc(cb);
+        nc->window_title = PMALLOC(cb);
 #ifdef DEBUG
         assert(nc->window_title);
 #endif
@@ -566,7 +616,9 @@ void khm_cred_obtain_new_creds(wchar_t * title)
 
         _end_task();
     } else {
+        khui_context_release(&nc->ctx);
         khui_cw_destroy_cred_blob(nc);
+        khm_cred_end_dialog(KHUI_NC_RESULT_CANCEL);
     }
 }
 
@@ -824,4 +876,95 @@ khm_cred_begin_commandline(void) {
     khm_startup.processing = TRUE;
 
     khm_cred_process_commandline();
+}
+
+void
+khm_cred_refresh(void) {
+    kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, NULL);
+}
+
+void
+khm_cred_addr_change(void) {
+    khm_handle csp_cw = NULL;
+    khm_int32 check_net = 0;
+
+    wchar_t * ids = NULL;
+    wchar_t * t;
+    khm_size cb;
+    khm_size n_idents;
+
+    __int64 ft_now;
+    __int64 ft_exp;
+    __int64 ft_issue;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
+                                     0, &csp_cw))) {
+        khc_read_int32(csp_cw, L"AutoDetectNet", &check_net);
+
+        khc_close_space(csp_cw);
+    }
+
+    if (!check_net)
+        return;
+
+    while(TRUE) {
+        if (ids)
+            PFREE(ids);
+        ids = NULL;
+
+        if (kcdb_identity_enum(KCDB_IDENT_FLAG_VALID |
+                               KCDB_IDENT_FLAG_RENEWABLE,
+                               KCDB_IDENT_FLAG_VALID |
+                               KCDB_IDENT_FLAG_RENEWABLE,
+                               NULL,
+                               &cb,
+                               &n_idents) != KHM_ERROR_TOO_LONG)
+            break;
+
+        ids = PMALLOC(cb);
+
+        if (KHM_SUCCEEDED
+            (kcdb_identity_enum(KCDB_IDENT_FLAG_VALID |
+                                KCDB_IDENT_FLAG_RENEWABLE,
+                                KCDB_IDENT_FLAG_VALID |
+                                KCDB_IDENT_FLAG_RENEWABLE,
+                                ids,
+                                &cb,
+                                &n_idents)))
+            break;
+    }
+
+    if (!ids)
+        return;
+
+    GetSystemTimeAsFileTime((LPFILETIME) &ft_now);
+
+    for (t=ids; t && *t; t = multi_string_next(t)) {
+        khm_handle ident;
+
+
+        if (KHM_FAILED
+            (kcdb_identity_create(t, 0, &ident)))
+            continue;
+
+        cb = sizeof(ft_issue);
+
+        if (KHM_SUCCEEDED
+            (kcdb_identity_get_attr(ident, KCDB_ATTR_ISSUE, NULL,
+                                    &ft_issue, &cb)) &&
+
+            (cb = sizeof(ft_exp)) &&
+            KHM_SUCCEEDED
+            (kcdb_identity_get_attr(ident, KCDB_ATTR_EXPIRE, NULL,
+                                    &ft_exp, &cb)) &&
+
+            ft_now > (ft_issue + ft_exp)/2 &&
+            ft_now < ft_exp) {
+
+            khm_cred_renew_identity(ident);
+
+        }
+
+        kcdb_identity_release(ident);
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -97,7 +97,7 @@ void kmqint_msg_type_create(int t) {
     EnterCriticalSection(&cs_kmq_types);
     if(!msg_types[t]) {
         kmq_msg_type * mt;
-        mt = malloc(sizeof(kmq_msg_type));
+        mt = PMALLOC(sizeof(kmq_msg_type));
         ZeroMemory(mt, sizeof(kmq_msg_type));
         mt->id = t;
         LINIT(mt);
@@ -119,8 +119,8 @@ KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name,
     size_t sz;
 
     if(FAILED(StringCbLength(name, KMQ_MAXCB_TYPE_NAME, &sz)) ||
-        sz == 0)
-        return KHM_ERROR_INVALID_PARM;
+       sz == 0)
+        return KHM_ERROR_INVALID_PARAM;
     sz += sizeof(wchar_t);
 
     EnterCriticalSection(&cs_kmq_types);
@@ -128,10 +128,17 @@ KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name,
         if(msg_types[i] == NULL) {
             if(first_free == 0)
                 first_free = i;
+            /* continue searching since we might find that this type
+               is already registered. */
         } else {
             if(msg_types[i]->name != NULL && 
-               !wcscmp(msg_types[i]->name, name))
+               !wcscmp(msg_types[i]->name, name)) {
+
                 registered = TRUE;
+                if (new_id)
+                    *new_id = i;
+                break;
+            }
         }
     }
 
@@ -141,7 +148,7 @@ KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name,
         rv = KHM_ERROR_NO_RESOURCES;
     } else {
         kmqint_msg_type_create(first_free);
-        msg_types[first_free]->name = malloc(sz);
+        msg_types[first_free]->name = PMALLOC(sz);
         StringCbCopy(msg_types[first_free]->name, sz, name);
 
         if(new_id != NULL)
@@ -172,7 +179,6 @@ KHMEXP khm_int32 KHMAPI kmq_find_type(wchar_t * name, khm_int32 * id)
     }
 
     return KHM_ERROR_NOT_FOUND;
-
 }
 
 KHMEXP khm_int32 KHMAPI kmq_unregister_type(khm_int32 id)
@@ -180,7 +186,7 @@ KHMEXP khm_int32 KHMAPI kmq_unregister_type(khm_int32 id)
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
     if(id < KMSGBASE_USER || id > KMQ_MSG_TYPE_MAX)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_kmq_types);
     if(msg_types[id] != NULL) {
@@ -240,6 +246,7 @@ void kmqint_msg_type_del_sub(kmq_msg_subscription *s) {
     LeaveCriticalSection(&cs_kmq_types);
 }
 
+
 /*! \internal
     \brief Deletes a window subscription from a message type
     \note Obtains ::cs_kmq_types
@@ -288,7 +295,9 @@ kmq_msg_subscription * kmqint_msg_type_del_sub_cb(khm_int32 t, kmq_callback_t cb
     s = msg_types[t]->subs;
     while(s) {
         kmq_msg_subscription * n = LNEXT(s);
-        if(s->rcpt_type == KMQ_RCPTTYPE_CB && s->recipient.cb == cb && s->queue == q) {
+        if(s->rcpt_type == KMQ_RCPTTYPE_CB && 
+           s->recipient.cb == cb && 
+           s->queue == q) {
             /*TODO: do more here? */
             LDELETE(&msg_types[t]->subs, s);
             break;
@@ -306,6 +315,7 @@ kmq_msg_subscription * kmqint_msg_type_del_sub_cb(khm_int32 t, kmq_callback_t cb
     */
 khm_int32 kmqint_msg_publish(kmq_message * m, khm_boolean try_send) {
     khm_int32 rv = KHM_ERROR_SUCCESS;
+
     if(msg_types[m->type]) {
         kmq_msg_type *t;
         kmq_msg_subscription * s;
@@ -341,7 +351,7 @@ khm_int32 kmqint_msg_publish(kmq_message * m, khm_boolean try_send) {
 khm_int32 kmqint_msg_type_set_handler(khm_int32 type, kmq_msg_completion_handler handler) {
 
     if (type == KMSG_SYSTEM)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(!msg_types[type])
         kmqint_msg_type_create(type);

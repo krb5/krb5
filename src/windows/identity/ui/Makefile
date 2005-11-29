@@ -47,24 +47,32 @@ OBJFILES= 			\
 	$(OBJ)\configwnd.obj	\
 	$(OBJ)\aboutwnd.obj	\
 	$(OBJ)\reqdaemon.obj	\
+	$(OBJ)\addrchange.obj	\
 	$(OBJ)\cfg_general_wnd.obj \
 	$(OBJ)\cfg_identities_wnd.obj \
 	$(OBJ)\cfg_notif_wnd.obj \
 	$(OBJ)\cfg_plugins_wnd.obj
 
-RESFILE=$(OBJ)\khapp.res
+RESFILES= \
+	$(OBJ)\khapp.res	\
+	$(OBJ)\appver.res
 
 LIBFILES=			\
 	$(LIBDIR)\nidmgr32.lib
 
 SDKLIBFILES= 			\
 	comctl32.lib 		\
-	shell32.lib
+	shell32.lib		\
+	htmlhelp.lib		\
+	iphlpapi.lib
 
 $(OBJ)\uiconfig.c: uiconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
-$(RESFILE): lang\en_us\khapp.rc
+$(OBJ)\khapp.res: lang\en_us\khapp.rc
+	$(RC2RES)
+
+$(OBJ)\appver.res: appver.rc
 	$(RC2RES)
 
 !if "$(KH_BUILD)"=="RETAIL"
@@ -74,7 +82,7 @@ $(MANIFESTFILE): netidmgr.manifest.$(CPU).$(KH_CLVER).debug
 !endif
 	$(CP) $** $@
 
-$(EXEFILE): $(OBJFILES) $(RESFILE) $(LIBFILES)
+$(EXEFILE): $(OBJFILES) $(RESFILES) $(LIBFILES)
 	$(EXEGUILINK) $(SDKLIBFILES)
 
 all: mkdirs $(EXEFILE) $(MANIFESTFILE)

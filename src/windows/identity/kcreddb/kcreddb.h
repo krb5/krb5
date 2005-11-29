@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -110,12 +110,6 @@ Functions, macros etc. for manipulating identities.
     \note  Only to be used with kcdb_identity_create() */
 #define KCDB_IDENT_FLAG_CREATE      0x10000000L
 
-/*! \brief Inverts the accompanying flags.
-
-    \note Only to be used with kcdb_identity_set_flags()
-    \see kcdb_identity_set_flags() */
-#define KCDB_IDENT_FLAG_INVERT      0x40000000L
-
 /*! \brief Has configuration information
 
     Indicates that the identity has persistent configuration
@@ -132,12 +126,6 @@ Functions, macros etc. for manipulating identities.
         no longer have this flag. */
 #define KCDB_IDENT_FLAG_ACTIVE      0x02000000L
 
-/*! \brief Sticky identity
-
-    Sticky identities are identities that are always visible in the
-    credentials display even if no credentials are associated with it.
- */
-#define KCDB_IDENT_FLAG_STICKY      0x04000000L
 
 /*! \brief The identity has custom attributes assigned
  */
@@ -237,17 +225,18 @@ Functions, macros etc. for manipulating identities.
  */
 #define KCDB_IDENT_FLAG_CRED_RENEW  0x00000400L
 
-/*! \brief Bit mask for local flags
+/*! \brief Sticky identity
 
-    Local flags are those local to the KCDB.
+    Sticky identities are identities that are always visible in the
+    credentials display even if no credentials are associated with it.
  */
-#define KCDB_IDENT_FLAGMASK_LOCAL  0x0000ffffL
+#define KCDB_IDENT_FLAG_STICKY      0x00000800L
 
 /*! \brief Read/write flags mask.
 
     A bitmask that correspond to all the read/write flags in the mask.
 */
-#define KCDB_IDENT_FLAGMASK_RDWR   0x000007ffL
+#define KCDB_IDENT_FLAGMASK_RDWR   0x00000fffL
 
 /*@}*/
 
@@ -434,15 +423,10 @@ kcdb_identity_delete(khm_handle id);
 
 /*! \brief Set or unset the specified flags in the specified identity.
 
-    Only flags that are in KCDB_IDENT_FLAGMASK_RDWR can be specifed
-    in the flags parameter.  The only exception is the
-    KCDB_IDENT_FLAG_INVERT flag which controls whether the flags are
-    to be set or reset.
-
-    If the ::KCDB_IDENT_FLAG_INVERT flag is not specified in \a flags,
-    then any flags set in \a flags will also be set in the identity.
-    If the ::KCDB_IDENT_FLAG_INVERT is specified, then any flag set in
-    \a flags will be reset in the identity.
+    Only flags that are in KCDB_IDENT_FLAGMASK_RDWR can be specifed in
+    the \a flags parameter or the \a mask parameter.  The flags set in
+    the \a mask parameter of the identity will be set to the
+    corresponding values in the \a flags parameter.
 
     If ::KCDB_IDENT_FLAG_INVALID is set using this function, then the
     ::KCDB_IDENT_FLAG_VALID will be automatically reset, and vice
@@ -459,9 +443,8 @@ kcdb_identity_delete(khm_handle id);
     - ::KCDB_IDENT_FLAG_SEARCHABLE : Setting this will result in the
       identity provider getting notified of the change. If the
       identity provider indicates that searchable flag should not be
-      set or reset (according to KCDB_IDENT_FLAG_INVERT setting) on
-      the identity, then kcdb_identity_set_flags() will return an
-      error.
+      set or reset on the identity, then kcdb_identity_set_flags()
+      will return an error.
 
     \note kcdb_identity_set_flags() is not atomic.  Even if the
     function returns a failure code, some flags in the identity may
@@ -471,7 +454,8 @@ kcdb_identity_delete(khm_handle id);
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_set_flags(khm_handle id, 
-                        khm_int32 flags);
+                        khm_int32 flags,
+                        khm_int32 mask);
 
 /*! \brief Return all the flags for the identity
 
@@ -612,6 +596,14 @@ kcdb_identity_get_provider(khm_handle * sub);
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_get_type(khm_int32 * ptype);
 
+/*! \brief Returns TRUE if the two identities are equal
+
+    Also returns TRUE if both identities are NULL.
+ */
+KHMEXP khm_boolean KHMAPI
+kcdb_identity_is_equal(khm_handle identity1,
+                       khm_handle identity2);
+
 /*! \brief Set an attribute in an identity by attribute id
 
     \param[in] buffer A pointer to a buffer containing the data to
@@ -716,7 +708,7 @@ kcdb_identity_get_attrib(khm_handle identity,
     \retval KHM_ERROR_SUCCESS Success
     \retval KHM_ERROR_NOT_FOUND The given attribute was either invalid
         or was not defined for this identity
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TOO_LONG Either \a buffer was NULL or the
         supplied buffer was insufficient
 */
@@ -799,7 +791,7 @@ kcdb_identity_get_attrib_string(khm_handle identity,
         buffer was insufficient.  If \a pn_idents was valid, it
         contains the number of identities.
 
-    \retval KHM_ERROR_INVALID_PARM None of the parameters \a name_buf,
+    \retval KHM_ERROR_INVALID_PARAM None of the parameters \a name_buf,
         \a pcb_buf and \a pn_idents were supplied, or \a pcb_buf was
         NULL when \a name_buf was not.
 
@@ -898,6 +890,7 @@ typedef khm_int32
     - zero if \a cred1 == \a cred2
     - a postive value if \a cred1 > \a cred2
     \see kcdb_credset_sort()
+    \see ::kcdb_credtype
 */
 typedef khm_int32 
 (KHMAPI *kcdb_cred_comp_func)(khm_handle cred1, 
@@ -1353,7 +1346,7 @@ kcdb_credset_purge(khm_handle credset);
     \retval KHM_ERROR_EXIT The supplied function signalled the
         processing to be aborted.
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid.
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_credset_apply(khm_handle credset, 
@@ -1524,6 +1517,13 @@ kcdb_cred_comp_generic(khm_handle cred1,
 /*! \brief Bitmask indicating all known credential flags
  */
 #define KCDB_CRED_FLAGMASK_ALL     0x0000ffff
+
+/*! \brief External flags
+
+    These are flags that are provided by the credentials providers.
+    The other flags are internal to KCDB and should not be modified.
+ */
+#define KCDB_CRED_FLAGMASK_EXT     (KCDB_CRED_FLAG_INITIAL | KCDB_CRED_FLAG_EXPIRED | KCDB_CRED_FLAG_INVALID | KCDB_CRED_FLAG_RENEWABLE)
 
 /*! \brief Bitmask indicating dditive flags 
 
@@ -1748,7 +1748,7 @@ kcdb_cred_get_name(khm_handle cred,
     \retval KHM_ERROR_SUCCESS Success
     \retval KHM_ERROR_NOT_FOUND The given attribute was either invalid
         or was not defined for this credential
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TOO_LONG Either \a buffer was NULL or the
         supplied buffer was insufficient
 */
@@ -1972,7 +1972,7 @@ kcdb_creds_is_equal(khm_handle cred1,
         field was successfully copied to \a s_buf and the size of the
         buffer used was copied to \a pcb_s_buf.
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
 
     \retval KHM_ERROR_TOO_LONG Either \a s_buf was \a NULL or the size
         indicated by \a pcb_s_buf was too small to contain the string
@@ -2088,7 +2088,7 @@ typedef khm_int32
     \retval KHM_ERROR_SUCCESS The data was successfully copied.  The
         number of bytes copied is in \a pcb_data_dst
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters is incorrect.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters is incorrect.
 
     \retval KHM_ERROR_TOO_LONG Either \a data_dst was NULL or the size
         of the buffer was insufficient.  The required size is in \a
@@ -2317,7 +2317,7 @@ FtIntervalToString(LPFILETIME data,
     order in which the \a number \a unit specifications are given and
     the same unit may be repeated multiple times.
 
-    \retval KHM_ERROR_INVALID_PARM The given string was invalid or had
+    \retval KHM_ERROR_INVALID_PARAM The given string was invalid or had
         a token that could not be parsed.  It can also mean that \a
         pft was NULL or \a str was NULL.
 
@@ -2443,15 +2443,19 @@ typedef struct tag_kcdb_attrib {
     khm_int32 flags;            /*!< Flags. Combination of \ref
                                   kcdb_credattr_flags "attribute
                                   flags" */
+
     khm_int32 type;             /*!< Type of the attribute.  Must be valid. */
+
     wchar_t * short_desc;       /*!< Short description. (Localized,
                                   optional) */
+
     wchar_t * long_desc;        /*!< Long description. (Localized,
                                   optional) */
 
     kcdb_attrib_compute_cb compute_cb;
                                 /*!< Callback.  Required if \a flags
                                   specify ::KCDB_ATTR_FLAG_COMPUTED. */
+
     khm_size compute_min_cbsize;
                                 /*!< Minimum number of bytes required
                                   to store this attribute.  Required
@@ -2807,25 +2811,37 @@ typedef struct tag_kcdb_credtype {
     wchar_t * name;     /*!< name (less than KCDB_MAXCB_NAME bytes) */
     khm_int32 id;
     wchar_t * short_desc;       /*!< short localized description (less
-                                     than KCDB_MAXCB_SHORT_DESC
-                                     bytes) */
+                                  than KCDB_MAXCB_SHORT_DESC bytes) */
     wchar_t * long_desc;        /*!< long localized descriptionn (less
-                                     than KCDB_MAXCB_LONG_DESC
-                                     bytes) */
+                                  than KCDB_MAXCB_LONG_DESC bytes) */
     khm_handle sub;             /*!< Subscription for credentials type
-                                     hander.  This should be a valid
-                                     subscription constructed through
-                                     a call to
-                                     kmq_create_subscription() and
-                                     must handle KMSG_CRED messages
-                                     that are marked as being sent to
-                                     type specific subscriptions.
+                                  hander.  This should be a valid
+                                  subscription constructed through a
+                                  call to kmq_create_subscription()
+                                  and must handle KMSG_CRED messages
+                                  that are marked as being sent to
+                                  type specific subscriptions.
 
-                                     The subscription will be
-                                     automatically deleted with a call
-                                     to kmq_delete_subscription() when
-                                     the credentials type is
-                                     unregistered.*/
+                                  The subscription will be
+                                  automatically deleted with a call to
+                                  kmq_delete_subscription() when the
+                                  credentials type is unregistered.*/
+
+    kcdb_cred_comp_func is_equal; /*!< Used to as an additional clause
+                                  when comparing two credentials for
+                                  equality.  The function this is
+                                  actually a comparison function, it
+                                  should return zero if the two
+                                  credentials are equal and non-zero
+                                  if they are not.  The addtional \a
+                                  rock parameter is always zero.
+
+                                  It can be assumed that the identity,
+                                  name and credentials have already
+                                  been found to be equal among the
+                                  credentials and the credential type
+                                  is the type that is being
+                                  registered.*/
 
 #ifdef _WIN32
     HICON icon;
@@ -2895,7 +2911,7 @@ typedef struct tag_kcdb_credtype {
 
     \retval KHM_ERROR_SUCCESS The credential type was successfully registered.
 
-    \retval KHM_ERROR_INVALID_PARM One or more of the parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more of the parameters were invalid
 
     \retval KHM_ERROR_TOO_LONG One or more of the string fields in \a
         type exceeded the character limit for that field.
@@ -2976,7 +2992,7 @@ kcdb_credtype_unregister(khm_int32 id);
     \retval KHM_ERROR_TOO_LONG Either \a buf was NULL or the supplied
         buffer was not large enough.  The required size is in \a cbbuf.
 
-    \retval KHM_ERROR_INVALID_PARM Invalid parameter.
+    \retval KHM_ERROR_INVALID_PARAM Invalid parameter.
  */
 KHMEXP khm_int32 KHMAPI 
 kcdb_credtype_get_name(khm_int32 id,
@@ -3011,7 +3027,7 @@ kcdb_credtype_get_sub(khm_int32 id);
 
    \retval KHM_ERROR_SUCCESS The call succeeded
    \retval KHM_ERROR_TOO_LONG Either \a buf was NULL or the supplied buffer was insufficient.  The required size is specified in \a cbbuf.
-   \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid.
+   \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid.
  */
 KHMEXP khm_int32 KHMAPI 
 kcdb_credtype_describe(khm_int32 id,
@@ -3119,7 +3135,7 @@ kcdb_buf_get_attrib(khm_handle  record,
     \retval KHM_ERROR_SUCCESS Success
     \retval KHM_ERROR_NOT_FOUND The given attribute was either invalid
         or was not defined for this record
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TOO_LONG Either \a buffer was NULL or the
         supplied buffer was insufficient
 */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -261,13 +261,16 @@ enum kherr_event_flags {
                                   longer considered significant. */
 };
 
+/*! \brief Serial number for error contexts */
+typedef khm_ui_4 kherr_serial;
+
 /*! \brief An error context
 */
 typedef struct tag_kherr_context {
     khm_int32      magic;       /*!< Magic number. Always set to
                                   KHERR_CONTEXT_MAGIC */
 
-    khm_ui_4       serial;      /*!< Context instance serial number.
+    kherr_serial   serial;      /*!< Context instance serial number.
                                   Context objects themselves may be
                                   reused for different contexts as
                                   they are freed and reallocated.
@@ -383,7 +386,8 @@ enum kherr_ctx_event {
 
     \see kherr_add_ctx_handler()
  */
-typedef void (*kherr_ctx_handler)(enum kherr_ctx_event, kherr_context *);
+typedef void (KHMAPI * kherr_ctx_handler)(enum kherr_ctx_event, 
+                                         kherr_context *);
 
 /*! \brief Add a context event handler
 
@@ -430,9 +434,14 @@ typedef void (*kherr_ctx_handler)(enum kherr_ctx_event, kherr_context *);
         indication which notifications should be sent to the handler.
         If a \a filter value of zero is provided, all of the events
         will be sent to the handler.
+
+    \param[in] serial The serial number of the error context that
+        should be tracked.  If this is zero, all error contexts can
+        trigger the handler.
  */
 KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h, 
-                                         khm_int32 filter);
+                                         khm_int32 filter,
+                                         kherr_serial serial);
 
 /*! \brief Remove a context event handler
 
@@ -440,7 +449,8 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
 
     \see kherr_add_ctx_handler()
  */
-KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h);
+KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h,
+                                            kherr_serial serial);
 
 
 /*! \brief Report an error
@@ -961,5 +971,10 @@ KHMEXP void KHMAPI kherr_evaluate_last_event(void);
 /*@}*/
 
 /*@}*/
+
+/* In debug mode, outputs the formatted string to the debug console */
+#ifdef DEBUG
+KHMEXP void kherr_debug_printf(wchar_t * fmt, ...);
+#endif
 
 #endif

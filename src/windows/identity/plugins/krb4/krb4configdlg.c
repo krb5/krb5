@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,6 +28,165 @@
 #include<kherror.h>
 #include<khuidefs.h>
 #include<strsafe.h>
+#include<assert.h>
+
+typedef struct tag_k4_ids_data {
+    khui_config_init_data cfg;
+
+    khm_int32 get_tix;
+} k4_ids_data;
+
+static void
+k4_ids_read_params(k4_ids_data * d) {
+    khm_int32 t;
+#ifdef DEBUG
+    assert(csp_params);
+#endif
+
+    t = 1;
+    khc_read_int32(csp_params, L"Krb4NewCreds", &t);
+    d->get_tix = !!t;
+}
+
+static void
+k4_ids_write_params(HWND hw, k4_ids_data * d) {
+    khm_int32 nv;
+    khm_boolean applied = FALSE;
+
+    if (IsDlgButtonChecked(hw, IDC_CFG_GETTIX) == BST_CHECKED)
+        nv = TRUE;
+    else
+        nv = FALSE;
+
+    if (!!nv != !!d->get_tix) {
+        d->get_tix = !!nv;
+        khc_write_int32(csp_params, L"Krb4NewCreds", d->get_tix);
+        applied = TRUE;
+    }
+
+    khui_cfg_set_flags_inst(&d->cfg,
+                            (applied)?KHUI_CNFLAG_APPLIED:0,
+                            KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
+}
+
+static void
+k4_ids_check_mod(HWND hw, k4_ids_data * d) {
+    khm_int32 nv;
+
+    if (IsDlgButtonChecked(hw, IDC_CFG_GETTIX) == BST_CHECKED)
+        nv = TRUE;
+    else
+        nv = FALSE;
+
+    khui_cfg_set_flags_inst(&d->cfg,
+                            (!!nv != !!d->get_tix)? KHUI_CNFLAG_MODIFIED: 0,
+                            KHUI_CNFLAG_MODIFIED);
+}
+
+INT_PTR CALLBACK
+krb4_ids_config_proc(HWND hwnd,
+                     UINT uMsg,
+                     WPARAM wParam,
+                     LPARAM lParam) {
+    k4_ids_data * d;
+
+    switch(uMsg) {
+    case WM_INITDIALOG:
+        d = PMALLOC(sizeof(*d));
+        ZeroMemory(d, sizeof(*d));
+
+        d->cfg = *((khui_config_init_data *) lParam);
+
+#pragma warning(push)
+#pragma warning(disable: 4244)
+        SetWindowLongPtr(hwnd, DWLP_USER, (LONG_PTR) d);
+#pragma warning(pop)
+
+        k4_ids_read_params(d);
+
+        CheckDlgButton(hwnd, IDC_CFG_GETTIX,
+                       (d->get_tix)? BST_CHECKED: BST_UNCHECKED);
+
+        break;
+
+    case WM_COMMAND:
+        d = (k4_ids_data *) (LONG_PTR)
+            GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (HIWORD(wParam) == BN_CLICKED) {
+            k4_ids_check_mod(hwnd, d);
+        }
+        break;
+
+    case KHUI_WM_CFG_NOTIFY:
+        d = (k4_ids_data *) (LONG_PTR)
+            GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (HIWORD(wParam) == WMCFG_APPLY) {
+            k4_ids_write_params(hwnd, d);
+        }
+        break;
+
+    case WM_DESTROY:
+        d = (k4_ids_data *) (LONG_PTR)
+            GetWindowLongPtr(hwnd, DWLP_USER);
+
+        PFREE(d);
+        break;
+    }
+
+    return FALSE;
+}
+
+INT_PTR CALLBACK
+krb4_id_config_proc(HWND hwnd,
+                    UINT uMsg,
+                    WPARAM wParam,
+                    LPARAM lParam) {
+    switch(uMsg) {
+    case WM_INITDIALOG:
+        {
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_size cb;
+            khui_config_init_data * d;
+            khm_handle ident = NULL;
+            khm_int32 gettix = 0;
+            khm_int32 flags = 0;
+
+            d = (khui_config_init_data *) lParam;
+
+            khc_read_int32(csp_params, L"Krb4NewCreds", &gettix);
+            if (gettix == 0)
+                goto set_ui;
+
+            *idname = 0;
+            cb = sizeof(idname);
+            khui_cfg_get_name(d->ctx_node, idname, &cb);
+
+            kcdb_identity_create(idname, 0, &ident);
+
+            if (ident == NULL) {
+                gettix = 0;
+                goto set_ui;
+            }
+
+            kcdb_identity_get_flags(ident, &flags);
+
+            kcdb_identity_release(ident);
+
+            if (!(flags & KCDB_IDENT_FLAG_DEFAULT))
+                gettix = 0;
+
+        set_ui:
+            CheckDlgButton(hwnd, IDC_CFG_GETTIX,
+                           (gettix)?BST_CHECKED: BST_UNCHECKED);
+        }
+        break;
+    }
+
+    return FALSE;
+}
+
 
 INT_PTR CALLBACK
 krb4_confg_proc(HWND hwnd,

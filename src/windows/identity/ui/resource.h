@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by D:\work\khimaira\src\ui\lang\en_us\khapp.rc
+// Used by D:\work\pismere\athena\auth\krb5\src\windows\identity\ui\lang\en_us\khapp.rc
 //
 #define IDI_MAIN_APP                    104
 #define IDD_PROPPAGE_MEDIUM             106
@@ -94,9 +94,7 @@
 #define IDS_NC_CREDTEXT_ID_MANY         148
 #define IDB_LOGO_SHADE                  149
 #define IDS_NC_CREDTEXT_ID_INVALID      149
-#define IDI_WGT_COLLAPSE                150
 #define IDS_WTPOST_INIT_CREDS           150
-#define IDI_WGT_EXPAND                  151
 #define IDS_WTPOST_NEW_CREDS            151
 #define IDB_WDG_EXPAND                  152
 #define IDS_ACTION_RENEW_CRED           152
@@ -191,9 +189,13 @@
 #define IDS_CFG_ID_TAB_SHORT            197
 #define IDB_TB_SPACE                    197
 #define IDS_CFG_ID_TAB_LONG             198
+#define IDB_WDG_STUCK_HI                198
 #define IDS_CFG_IDS_TAB_SHORT           199
+#define IDB_WDG_STICK                   199
 #define IDS_CFG_IDS_TAB_LONG            200
+#define IDB_WDG_STICK_HI                200
 #define IDS_CFG_IDS_IDENTITY            201
+#define IDB_WDG_STUCK                   201
 #define IDS_ACTION_IMPORT               202
 #define IDS_CTX_IMPORT                  203
 #define IDS_CFG_PI_COL_PLUGINS          204
@@ -214,6 +216,12 @@
 #define IDS_CTX_PROC_PASSWORD           219
 #define IDS_NC_PWD_FAILED_TITLE         220
 #define IDS_CMDLINE_HELP                221
+#define IDS_PACTION_NEXT                222
+#define IDS_ERR_TITLE_NO_IDENTPRO       223
+#define IDS_ERR_MSG_NO_IDENTPRO         224
+#define IDS_ERR_SUGG_NO_IDENTPRO        225
+#define IDS_NC_REN_FAILED_TITLE         226
+#define IDS_CW_DEFAULT                  227
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -293,6 +301,7 @@
 #define IDC_BUILDINFO                   1102
 #define IDC_LIST1                       1103
 #define IDC_MODULES                     1103
+#define IDC_PP_CONFIG                   1104
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -305,9 +314,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        198
+#define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1104
+#define _APS_NEXT_CONTROL_VALUE         1105
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

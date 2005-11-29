@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -48,93 +48,21 @@
 
 #define KRB5_DEFAULT_LIFE            60*60*10 /* 10 hours */
 
-// Function Prototypes.
-BOOL khm_krb5_ms2mit(BOOL);
-
-int
-khm_krb5_kinit(krb5_context       alt_ctx,
-               char *             principal_name,
-               char *             password,
-               krb5_deltat        lifetime,
-               DWORD              forwardable,
-               DWORD              proxiable,
-               krb5_deltat        renew_life,
-               DWORD              addressless,
-               DWORD              publicIP,
-               krb5_prompter_fct  prompter,
-               void *             p_data
-               );
 
 long
-Leash_int_kinit_ex(
-    krb5_context ctx,
-    HWND hParent,
-    char * principal, 
-    char * password, 
-    int lifetime,
-    int forwardable,
-    int proxiable,
-    int renew_life,
-    int addressless,
-    unsigned long publicIP,
-    int displayErrors
-    );
+khm_convert524(khm_handle identity);
 
 long
-Leash_int_checkpwd(
-    char * principal,
-    char * password,
-    int    displayErrors
-    );
+khm_krb4_kinit(char * aname,
+               char * inst,
+               char * realm,
+               long lifetime,
+               char * password);    
 
-long
-Leash_int_changepwd(
-    char * principal, 
-    char * password, 
-    char * newpassword,
-    char** result_string,
-    int    displayErrors
-    );
+long 
+khm_krb4_list_tickets(void);
 
-int
-Leash_krb5_kdestroy(
-    void
-    );
-
-int
-Leash_krb5_kinit(
-    krb5_context,
-    HWND hParent,
-    char * principal_name, 
-    char * password,
-    krb5_deltat lifetime,
-    DWORD       forwardable,
-    DWORD       proxiable,
-    krb5_deltat renew_life,
-    DWORD       addressless,
-    DWORD       publicIP
-    );
-
-long
-khm_convert524(
-    krb5_context ctx
-    );
-    
-int
-Leash_afs_unlog(
-    void
-    );
-
-int
-Leash_afs_klog(
-    char *, 
-    char *, 
-    char *, 
-    int
-    );
-
-int 
-LeashKRB5_renew(void);
+int khm_krb4_kdestroy(void);
 
 LONG
 write_registry_setting(
@@ -180,11 +108,7 @@ config_boolean_to_int(
     const char *s
     );
 
-
 wchar_t * khm_krb5_get_default_realm(void);
 wchar_t * khm_krb5_get_realm_list(void);
-long khm_krb5_list_tickets(krb5_context *krbv5Context);
-long khm_krb4_list_tickets(void);
-
 
 #endif

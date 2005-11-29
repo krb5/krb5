@@ -1,10 +1,13 @@
+#define NIDM_HELPFILE              L"netidmgr.chm"
 
 #define IDH_WELCOME                1000
-#define IDH_MENU_FILE              1001
-#define IDH_MENU_CRED              1002
-#define IDH_MENU_VIEW              1003
-#define IDH_MENU_OPTIONS           1004
-#define IDH_MENU_HELP              1005
+#define IDH_WIN_MAIN               1001
+
+#define IDH_MENU_FILE              1501
+#define IDH_MENU_CRED              1502
+#define IDH_MENU_VIEW              1503
+#define IDH_MENU_OPTIONS           1504
+#define IDH_MENU_HELP              1505
 
 #define IDH_ACTION_PROPERTIES      2000
 #define IDH_ACTION_EXIT            2001

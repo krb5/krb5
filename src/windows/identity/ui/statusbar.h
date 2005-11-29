@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -27,11 +27,11 @@
 #ifndef __KHIMAIRA_STATUSBAR_H
 #define __KHIMAIRA_STATUSBAR_H
 
-typedef struct khui_statusbar_part_t {
+typedef struct khm_statusbar_part_t {
     int id;
     int width;
     int wtype; /* one of KHUI_SB_WTYPE_* */
-} khui_statusbar_part;
+} khm_statusbar_part;
 
 #define KHUI_SB_WTYPE_RELATIVE    1
 #define KHUI_SB_WTYPE_ABSOLUTE    2
@@ -42,12 +42,13 @@ typedef struct khui_statusbar_part_t {
 #define KHUI_SBPART_NOTICE  2
 #define KHUI_SBPART_LOC     3
 
-extern HWND khui_hwnd_statusbar;
-extern khui_statusbar_part khui_statusbar_parts[];
-extern int khui_n_statusbar_parts;
+extern HWND khm_hwnd_statusbar;
+extern khm_statusbar_part khm_statusbar_parts[];
+extern int khm_n_statusbar_parts;
 
-void khui_create_statusbar(HWND p);
-void khui_update_statusbar(HWND parent);
-void khui_statusbar_set_text(int id, wchar_t * text);
+void khm_create_statusbar(HWND p);
+void khm_update_statusbar(HWND parent);
+void khm_statusbar_set_part(int id, HICON icon, wchar_t * text);
+LRESULT khm_statusbar_notify(LPNMHDR nmhdr);
 
 #endif

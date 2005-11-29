@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -95,7 +95,7 @@ multi_string_prepend(wchar_t * ms,
     \retval KHM_ERROR_TOO_LONG The buffer pointed to by \a ms was
         insufficient.  The required size of the buffer is in \a pcb_ms
 
-    \retval KHM_ERROR_INVALID_PARM One of more of the parameters were invalid.
+    \retval KHM_ERROR_INVALID_PARAM One of more of the parameters were invalid.
  */
 KHMEXP khm_int32 KHMAPI 
 multi_string_append(wchar_t * ms,
@@ -127,7 +127,7 @@ multi_string_append(wchar_t * ms,
 
     \retval KHM_ERROR_NOT_FOUND No matches were found
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were incorrect.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were incorrect.
 
     \note The search for the existing string is done with
         multi_string_find()
@@ -209,7 +209,7 @@ multi_string_find(const wchar_t * ms,
         was NULL.  The required number of bytes in the buffer is in \a
         pcb_csvbuf.
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were ivnalid.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were ivnalid.
 
     \see csv_to_multi_string()
 */
@@ -240,7 +240,7 @@ multi_string_to_csv(wchar_t * csvbuf,
         ms was NULL. The required size of the buffer in bytes is in \a
         pcb_ms.
 
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid.
 
  */
 KHMEXP khm_int32 KHMAPI 
@@ -281,7 +281,7 @@ multi_string_next(const wchar_t * str);
         is successful.
 
     \retval KHM_ERROR_SUCCESS The length of the string is in \a len_cb
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TOO_LONG The multi string is longer than \a
         max_cb bytes.
  */
@@ -302,7 +302,7 @@ multi_string_length_cb(const wchar_t * str,
         is successful.
 
     \retval KHM_ERROR_SUCCESS The length of the string is in \a len_cch
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TOO_LONG The multi string is longer than \a
         max_cch characters.
  */
@@ -326,7 +326,7 @@ multi_string_length_n(const wchar_t * str);
     \param[in] src The source multi string
 
     \retval KHM_ERROR_SUCCESS The multi string was copied successfully
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were
         invalid.
     \retval KHM_ERROR_TOO_LONG The size of the destination buffer was
         insufficient.
@@ -346,7 +346,7 @@ multi_string_copy_cb(wchar_t * s_dest,
     \param[in] src The source multi string
 
     \retval KHM_ERROR_SUCCESS The multi string was copied successfully
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were
         invalid.
     \retval KHM_ERROR_TOO_LONG The size of the destination buffer was
         insufficient.

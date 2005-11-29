@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -60,7 +60,7 @@ khm_cfg_plugins_proc(HWND hwnd,
             wchar_t buf[256];
 
 
-            d = malloc(sizeof(*d));
+            d = PMALLOC(sizeof(*d));
 #ifdef DEBUG
             assert(d);
 #endif
@@ -83,13 +83,13 @@ khm_cfg_plugins_proc(HWND hwnd,
 #ifdef DEBUG
                 assert(d->info[i] == NULL);
 #endif
-                d->info[i] = malloc(sizeof(*(d->info[i])));
+                d->info[i] = PMALLOC(sizeof(*(d->info[i])));
 #ifdef DEBUG
                 assert(d->info[i]);
 #endif
 
                 if (KHM_FAILED(kmm_get_plugin_info_i(p, &d->info[i]->plugin))) {
-                    free(d->info[i]);
+                    PFREE(d->info[i]);
                     d->info[i] = NULL;
                     break;
                 }
@@ -120,8 +120,9 @@ khm_cfg_plugins_proc(HWND hwnd,
 #ifdef DEBUG
             assert(hw);
 #endif
+#if (_WIN32_WINNT >= 0x501)
             ListView_SetView(hw, LV_VIEW_DETAILS);
-
+#endif
             ZeroMemory(&lvc, sizeof(lvc));
 
             lvc.mask = LVCF_TEXT | LVCF_WIDTH;
@@ -305,10 +306,10 @@ khm_cfg_plugins_proc(HWND hwnd,
 #endif
                 kmm_release_plugin_info_i(&d->info[i]->plugin);
                 kmm_release_module_info_i(&d->info[i]->module);
-                free(d->info[i]);
+                PFREE(d->info[i]);
             }
 
-            free(d);
+            PFREE(d);
 
             khm_set_dialog_result(hwnd, 0);
         }

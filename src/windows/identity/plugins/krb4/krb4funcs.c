@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Massachusetts Institute of Technology
+* Copyright (c) 2005 Massachusetts Institute of Technology
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -78,11 +78,12 @@ int com_addr(void)
 long 
 khm_krb4_list_tickets(void) 
 {
+    char    ptktname[MAX_PATH + 5];
     char    pname[ANAME_SZ];
     char    pinst[INST_SZ];
     char    prealm[REALM_SZ];
     wchar_t wbuf[256];
-    int     k_errno;
+    int     k_errno = 0;
     CREDENTIALS c;
     int newtickets = 0;
     int open = 0;
@@ -91,6 +92,8 @@ khm_krb4_list_tickets(void)
     time_t tt;
     FILETIME ft;
 
+    kcdb_credset_flush(krb4_credset);
+
     // Since krb_get_tf_realm will return a ticket_file error,
     // we will call tf_init and tf_close first to filter out
     // things like no ticket file.  Otherwise, the error that
@@ -98,7 +101,7 @@ khm_krb4_list_tickets(void)
     // klist: can't find realm of ticket file: No ticket file (tf_util)
     // instead of klist: No ticket file (tf_util)
     if (ptf_init == NULL)
-        return(KSUCCESS);
+        goto collect;
 
     com_addr();
     
@@ -126,6 +129,8 @@ khm_krb4_list_tickets(void)
         goto cleanup;
     }
 
+    StringCchCopyA(ptktname, ARRAYLENGTH(ptktname), (*ptkt_string)());
+
     open = 1;
 
     // Get principal name and instance 
@@ -146,8 +151,6 @@ khm_krb4_list_tickets(void)
     {
         goto cleanup;
     }
-
-    kcdb_credset_flush(krb4_credset);
 
     // Get KRB4 tickets
     while ((k_errno = (*ptf_get_cred)(&c)) == KSUCCESS)
@@ -174,11 +177,12 @@ khm_krb4_list_tickets(void)
         TimetToFileTimeInterval(tt, &ft);
         kcdb_cred_set_attr(cred, KCDB_ATTR_LIFETIME, &ft, sizeof(ft));
 
+        AnsiStrToUnicode(wbuf, sizeof(wbuf), ptktname);
+        kcdb_cred_set_attr(cred, KCDB_ATTR_LOCATION, wbuf, KCDB_CBSIZE_AUTO);
+
         kcdb_credset_add_cred(krb4_credset, cred, -1);
 
     } // while
-
-    kcdb_credset_collect(NULL, krb4_credset, ident, credtype_id_krb4, NULL);
 
 cleanup:
     if (ptf_close == NULL)
@@ -219,6 +223,10 @@ cleanup:
                    MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND);
     }
 #endif
+
+ collect:
+    kcdb_credset_collect(NULL, krb4_credset, ident, credtype_id_krb4, NULL);
+
     return k_errno;
 }
 
@@ -227,7 +235,7 @@ cleanup:
 #define KRB5_FILE               "KRB5.INI"
 
 BOOL 
-khm_get_profile_file(LPSTR confname, UINT szConfname)
+khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
 {
     char **configFile = NULL;
     if (pkrb5_get_default_config_files(&configFile)) 
@@ -271,7 +279,7 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
             LPSTR pFind;
 
 	    //strcpy(krbConFile, CLeashApp::m_krbv5_profile->first_file->filename);
-            if (khm_get_profile_file(krbConFile, sizeof(krbConFile)))	
+            if (khm_krb5_get_profile_file(krbConFile, sizeof(krbConFile)))	
                 {
 		    GetWindowsDirectoryA(krbConFile,sizeof(krbConFile));
                     krbConFile[MAX_PATH-1] = '\0';
@@ -368,7 +376,7 @@ wchar_t * khm_krb5_get_realm_list(void)
 
         char krb5_conf[MAX_PATH+1];
 
-        if (!khm_get_profile_file(krb5_conf,sizeof(krb5_conf))) {
+        if (!khm_krb5_get_profile_file(krb5_conf,sizeof(krb5_conf))) {
             profile_t profile;
             long retval;
             const char *filenames[2];
@@ -392,7 +400,7 @@ wchar_t * khm_krb5_get_realm_list(void)
                     }
                     cbsize += sizeof(wchar_t); /* double null terminated */
 
-                    rlist = malloc(cbsize);
+                    rlist = PMALLOC(cbsize);
                     d = rlist;
                     for (cpp = sections; *cpp; cpp++)
                     {
@@ -430,7 +438,7 @@ wchar_t * khm_krb5_get_realm_list(void)
 
             /*TODO: compute the actual required buffer size instead of hardcoding */
             cbsize = 16384; // arbitrary
-            rlist = malloc(cbsize);
+            rlist = PMALLOC(cbsize);
             d = rlist;
 
             // Skip the default realm
@@ -493,7 +501,7 @@ wchar_t * khm_krb5_get_default_realm(void)
     
     if (def) {
         cch = strlen(def) + 1;
-        realm = malloc(sizeof(wchar_t) * cch);
+        realm = PMALLOC(sizeof(wchar_t) * cch);
         AnsiStrToUnicode(realm, sizeof(wchar_t) * cch, def);
         pkrb5_free_default_realm(ctx, def);
     } else
@@ -502,4 +510,292 @@ wchar_t * khm_krb5_get_default_realm(void)
     pkrb5_free_context(ctx);
 
     return realm;
+}
+
+static
+char *
+make_postfix(const char * base,
+             const char * postfix,
+             char ** rcopy)
+{
+    int base_size;
+    int ret_size;
+    char * copy = 0;
+    char * ret = 0;
+
+    base_size = (int) strlen(base) + 1;
+    ret_size = base_size + (int) strlen(postfix) + 1;
+    copy = malloc(base_size);
+    ret = malloc(ret_size);
+
+    if (!copy || !ret)
+        goto cleanup;
+
+    strncpy(copy, base, base_size);
+    copy[base_size - 1] = 0;
+
+    strncpy(ret, base, base_size);
+    strncpy(ret + (base_size - 1), postfix, ret_size - (base_size - 1));
+    ret[ret_size - 1] = 0;
+
+ cleanup:
+    if (!copy || !ret) {
+        if (copy)
+            free(copy);
+        if (ret)
+            free(ret);
+        copy = ret = 0;
+    }
+    // INVARIANT: (ret ==> copy) && (copy ==> ret)
+    *rcopy = copy;
+    return ret;
+}
+
+
+static
+long
+make_temp_cache_v4(const char * postfix)
+{
+    static char * old_cache = 0;
+
+    if (!pkrb_set_tkt_string || !ptkt_string || !pdest_tkt)
+        return 0; // XXX - is this appropriate?
+
+    if (old_cache) {
+        pdest_tkt();
+        pkrb_set_tkt_string(old_cache);
+        free(old_cache);
+        old_cache = 0;
+    }
+
+    if (postfix)
+    {
+        char * tmp_cache = make_postfix(ptkt_string(), postfix, &old_cache);
+
+        if (!tmp_cache)
+            return KFAILURE;
+
+        pkrb_set_tkt_string(tmp_cache);
+        free(tmp_cache);
+    }
+    return 0;
+}
+
+long
+khm_krb4_changepwd(char * principal,
+                   char * password,
+                   char * newpassword,
+                   char** error_str)
+{
+    long k_errno;
+
+    if (!pkrb_set_tkt_string || !ptkt_string || !pkadm_change_your_password ||
+        !pdest_tkt)
+        return KFAILURE;
+
+    k_errno = make_temp_cache_v4("_chgpwd");
+    if (k_errno) return k_errno;
+    k_errno = pkadm_change_your_password(principal, password, newpassword, 
+                                         error_str);
+    make_temp_cache_v4(0);
+    return k_errno;
+}
+
+long
+khm_convert524(khm_handle identity)
+{
+#ifdef NO_KRB5
+    return(0);
+#else
+    krb5_context ctx = 0;
+    krb5_error_code code = 0;
+    int icode = 0;
+    krb5_principal me = 0;
+    krb5_principal server = 0;
+    krb5_creds *v5creds = 0;
+    krb5_creds increds;
+    krb5_ccache cc = 0;
+    CREDENTIALS * v4creds = NULL;
+    static int init_ets = 1;
+
+    if (!pkrb5_init_context ||
+        !pkrb_in_tkt ||
+        !pkrb524_init_ets ||
+        !pkrb524_convert_creds_kdc)
+        return 0;
+
+    v4creds = (CREDENTIALS *) malloc(sizeof(CREDENTIALS));
+    memset((char *) v4creds, 0, sizeof(CREDENTIALS));
+
+    memset((char *) &increds, 0, sizeof(increds));
+    /*
+      From this point on, we can goto cleanup because increds is
+      initialized.
+    */
+
+    code = khm_krb5_initialize(identity, &ctx, &cc);
+    if (code)
+        goto cleanup;
+
+    if ( init_ets ) {
+        pkrb524_init_ets(ctx);
+        init_ets = 0;
+    }
+
+    if (code = pkrb5_cc_get_principal(ctx, cc, &me))
+        goto cleanup;
+
+    if ((code = pkrb5_build_principal(ctx,
+                                      &server,
+                                      krb5_princ_realm(ctx, me)->length,
+                                      krb5_princ_realm(ctx, me)->data,
+                                      "krbtgt",
+                                      krb5_princ_realm(ctx, me)->data,
+                                      NULL))) {
+        goto cleanup;
+    }
+    
+    increds.client = me;
+    increds.server = server;
+    increds.times.endtime = 0;
+    increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
+    if ((code = pkrb5_get_credentials(ctx, 0,
+                                      cc,
+                                      &increds,
+                                      &v5creds))) {
+        goto cleanup;
+    }
+
+    if ((icode = pkrb524_convert_creds_kdc(ctx,
+                                           v5creds,
+                                           v4creds))) {
+        goto cleanup;
+    }
+
+    /* initialize ticket cache */
+    if ((icode = pkrb_in_tkt(v4creds->pname, v4creds->pinst, v4creds->realm)
+         != KSUCCESS)) {
+        goto cleanup;
+    }
+    /* stash ticket, session key, etc. for future use */
+    if ((icode = pkrb_save_credentials(v4creds->service,
+                                       v4creds->instance,
+                                       v4creds->realm,
+                                       v4creds->session,
+                                       v4creds->lifetime,
+                                       v4creds->kvno,
+                                       &(v4creds->ticket_st),
+                                       v4creds->issue_date))) {
+        goto cleanup;
+    }
+
+ cleanup:
+    memset(v4creds, 0, sizeof(v4creds));
+    free(v4creds);
+
+    if (v5creds) {
+        pkrb5_free_creds(ctx, v5creds);
+    }
+    if (increds.client == me)
+        me = 0;
+    if (increds.server == server)
+        server = 0;
+
+    if (ctx)
+        pkrb5_free_cred_contents(ctx, &increds);
+
+    if (server) {
+        pkrb5_free_principal(ctx, server);
+    }
+
+    if (me) {
+        pkrb5_free_principal(ctx, me);
+    }
+
+    if (ctx && cc)
+        pkrb5_cc_close(ctx, cc);
+
+    if (ctx) {
+        pkrb5_free_context(ctx);
+    }
+
+    return (code || icode);
+#endif /* NO_KRB5 */    
+}
+
+long
+khm_krb4_kinit(char * aname,
+               char * inst,
+               char * realm,
+               long lifetime,
+               char * password) {
+
+    wchar_t * functionName = NULL;
+    wchar_t * err_context = NULL;
+    int rc4 = 0;
+    int msg = 0;
+
+    if (pkname_parse == NULL) {
+        goto cleanup;
+    }
+
+    err_context = L"getting realm";
+    if (!*realm && (rc4  = (int)(*pkrb_get_lrealm)(realm, 1))) {
+        functionName = L"krb_get_lrealm()";
+        msg = IDS_ERR_REALM;
+        goto cleanup;
+    }
+
+    err_context = L"checking principal";
+    if ((!*aname) || (!(rc4  = (int)(*pk_isname)(aname)))) {
+        functionName = L"krb_get_lrealm()";
+        msg = IDS_ERR_PRINCIPAL;
+        goto cleanup;
+    }
+
+    /* optional instance */
+    if (!(rc4 = (int)(*pk_isinst)(inst))) {
+        functionName = L"k_isinst()";
+        msg = IDS_ERR_INVINST;
+        goto cleanup;
+    }
+
+    if (!(rc4 = (int)(*pk_isrealm)(realm))) {
+        functionName = L"k_isrealm()";
+        msg = IDS_ERR_REALM;
+        goto cleanup;
+    }
+
+    err_context = L"fetching ticket";	
+    rc4 = (*pkrb_get_pw_in_tkt)(aname, inst, realm, "krbtgt", realm, 
+                                lifetime, password);
+
+    if (rc4) /* XXX: do we want: && (rc != NO_TKT_FIL) as well? */ { 
+        functionName = L"krb_get_pw_in_tkt()";
+        msg = IDS_ERR_PWINTKT;
+        goto cleanup;
+    }
+
+    return 0;
+
+ cleanup:
+    {
+        _report_sr0(KHERR_ERROR, msg);
+        _location(functionName);
+    }
+    return rc4;
+}
+
+
+int khm_krb4_kdestroy(void) {
+    int k_errno = 0;
+
+    if (pdest_tkt != NULL)
+    {
+        k_errno = (*pdest_tkt)();
+        if (k_errno && (k_errno != RET_TKFIL))
+            return KRBERR(k_errno);
+    }
+
+    return k_errno;
 }

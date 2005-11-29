@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by D:\work\khimaira\src\plugins\krb4\lang\en_us\langres.rc
+// Used by D:\work\pismere\athena\auth\krb5\src\windows\identity\plugins\krb4\lang\en_us\langres.rc
 //
 #define IDS_UNK_ADDR_FMT                101
 #define IDS_KRB5_CREDTEXT_0             102
@@ -8,16 +8,29 @@
 #define IDS_PLUGIN_DESC                 103
 #define IDS_KEY_ENCTYPE_SHORT_DESC      104
 #define IDD_CFG_KRB4                    104
+#define IDS_NC_K4_SHORT                 104
 #define IDS_TKT_ENCTYPE_SHORT_DESC      105
+#define IDS_ERR_REALM                   105
+#define IDD_CFG_IDS_KRB4                105
 #define IDS_KEY_ENCTYPE_LONG_DESC       106
+#define IDS_ERR_PRINCIPAL               106
+#define IDD_CFG_ID_KRB4                 106
 #define IDS_TKT_ENCTYPE_LONG_DESC       107
+#define IDS_ERR_INVINST                 107
 #define IDS_ADDR_LIST_SHORT_DESC        108
+#define IDS_ERR_PWINTKT                 108
 #define IDS_ADDR_LIST_LONG_DESC         109
+#define IDS_CT_DISABLED                 109
 #define IDS_ETYPE_NULL                  110
+#define IDS_CT_TGTFOR                   110
 #define IDS_ETYPE_DES_CBC_CRC           111
+#define IDS_METHOD_AUTO                 111
 #define IDS_ETYPE_DES_CBC_MD4           112
+#define IDS_METHOD_PWD                  112
 #define IDS_ETYPE_DES_CBC_MD5           113
+#define IDS_METHOD_K524                 113
 #define IDS_ETYPE_DES_CBC_RAW           114
+#define IDS_CFG_IDS_KRB4_SHORT          114
 #define IDS_ETYPE_DES3_CBC_SHA          115
 #define IDS_ETYPE_DES3_CBC_RAW          116
 #define IDS_ETYPE_DES_HMAC_SHA1         117
@@ -65,14 +78,20 @@
 #define IDC_CFG_RLMPATH                 1030
 #define IDC_CFG_CFGBROW                 1031
 #define IDC_CFG_RLMBROW                 1032
+#define IDC_NCK4_OBTAIN                 1033
+#define IDC_NCK4_PWD                    1034
+#define IDC_NCK4_K524                   1035
+#define IDC_NCK4_AUTO                   1036
+#define IDC_CFG_GETTIX                  1037
+#define IDC_CHECK1                      1038
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        105
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1033
+#define _APS_NEXT_CONTROL_VALUE         1039
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

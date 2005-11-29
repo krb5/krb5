@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -38,6 +38,15 @@ int khm_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName,
 
 
 int khm_krb5_initialize(khm_handle ident, krb5_context *, krb5_ccache *);
+
+khm_int32 KHMAPI
+khm_krb5_find_ccache_for_identity(khm_handle ident, krb5_context *pctx,
+                                  void * buffer, khm_size * pcbbuf);
+
+khm_int32 KHMAPI
+khm_get_identity_expiration_time(krb5_context ctx, krb5_ccache cc, 
+                                 khm_handle ident, 
+                                 krb5_timestamp * pexpiration);
 #endif /* NO_KRB5 */
 
 #endif

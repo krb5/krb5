@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -173,6 +173,7 @@ typedef struct khui_credwnd_tbl_t {
     HBRUSH hb_hdr_bg_warn;  /* header background color (warn) */
     HBRUSH hb_hdr_bg_crit;  /* header background color (critical) */
     HBRUSH hb_hdr_bg_sel;   /* header background color (selected) */
+    HBRUSH hb_hdr_bg_def;   /* header background color (default) */
     HCURSOR hc_hand;        /* the HAND cursor */
     khui_ilist * ilist;     /* image list */
 
@@ -205,10 +206,16 @@ typedef struct khui_credwnd_tbl_t {
 #define KHUI_CW_TBL_ACTIVE      0x00000100
 
 /* mouse_state constants */
-#define CW_MOUSE_NONE       0   /* nothing interesting */
-#define CW_MOUSE_OUTLINE    1   /* mouse is highlighting an outline widget */
-#define CW_MOUSE_LDOWN      2   /* left button is down */
-#define CW_MOUSE_ROW        4   /* mouse is acive over a valid row */
+#define CW_MOUSE_NONE       0x00000000 /* nothing interesting */
+#define CW_MOUSE_WIDGET     0x00000001 /* mouse is highlighting a
+                                          widget */
+#define CW_MOUSE_LDOWN      0x00000002 /* left button is down */
+#define CW_MOUSE_ROW        0x00000004 /* mouse is acive over a valid
+                                          row */
+#define CW_MOUSE_WOUTLINE   0x00000008 /* mouse is highlighting an
+                                          outline widget */
+#define CW_MOUSE_WSTICKY    0x00000010 /* mouse is highlighting a
+                                          sticky widget */
 
 void khm_unregister_credwnd_class(void);
 

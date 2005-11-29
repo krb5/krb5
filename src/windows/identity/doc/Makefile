@@ -25,8 +25,6 @@
 MODULE=doc
 !include <../config/Makefile.w32>
 
-CONFFILE=$(OBJ)\DoxyConf.cfg
-
 all: mkdirs docs
 
 docs:
@@ -43,10 +41,9 @@ INTERNAL_DOCS = NO
 
 WARN_LOGFILE = "$(OBJ)\doxywarnings.txt"
 
-INPUT = "$(SRC)\include"
+INPUT =  "$(SRC)\include"
 INPUT += "$(SRC)\kconfig"
 INPUT += "$(SRC)\kcreddb"
-INPUT += "$(SRC)\khlog"
 INPUT += "$(SRC)\kmq"
 INPUT += "$(SRC)\ui"
 INPUT += "$(SRC)\uilib"
@@ -54,6 +51,9 @@ INPUT += "$(SRC)\util"
 INPUT += "$(SRC)\doc"
 INPUT += "$(SRC)\kmm"
 INPUT += "$(SRC)\kherr"
+!ifndef NO_AFS
+INPUT += "$(SRC)\plugins\afs"
+!endif
 
 IMAGE_PATH = "$(SRC)\doc\images"
 

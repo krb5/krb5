@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -66,7 +66,7 @@
 #define KHM_ERROR_TOO_LONG          (KHM_ERROR_BASE + 2)
 
 /*! \brief One or more parameters supplied to a function were invalid */
-#define KHM_ERROR_INVALID_PARM      (KHM_ERROR_BASE + 3)
+#define KHM_ERROR_INVALID_PARAM      (KHM_ERROR_BASE + 3)
 
 /*! \brief A duplicate.
 
@@ -164,6 +164,9 @@
 /*! \brief The operation succeeded, but with errors
 */
 #define KHM_ERROR_PARTIAL           (KHM_ERROR_BASE + 20)
+
+/*! \brief An incompatibility was found */
+#define KHM_ERROR_INCOMPATIBLE      (KHM_ERROR_BASE + 21)
 
 /*@}*/ /*kherror_codes*/
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Massachusetts Institute of Technology
+* Copyright (c) 2005 Massachusetts Institute of Technology
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -384,7 +384,7 @@ static int htw_parse_tag(
             khui_htwnd_link * l;
 
             if(!d->links) {
-                d->links = malloc(sizeof(khui_htwnd_link *) * HTW_LINK_ALLOC);
+                d->links = PMALLOC(sizeof(khui_htwnd_link *) * HTW_LINK_ALLOC);
                 ZeroMemory(d->links, sizeof(khui_htwnd_link *) * HTW_LINK_ALLOC);
                 d->max_links = HTW_LINK_ALLOC;
                 d->n_links = 0;
@@ -396,17 +396,17 @@ static int htw_parse_tag(
 
                 n_new = UBOUNDSS(d->n_links + 1, HTW_LINK_ALLOC, HTW_LINK_ALLOC);
 
-                ll = malloc(sizeof(khui_htwnd_link *) * n_new);
+                ll = PMALLOC(sizeof(khui_htwnd_link *) * n_new);
                 ZeroMemory(ll, sizeof(khui_htwnd_link *) * n_new);
                 memcpy(ll, d->links, sizeof(khui_htwnd_link *) * d->max_links);
-                free(d->links);
+                PFREE(d->links);
                 d->links = ll;
                 d->max_links = n_new;
             }
 
             l = d->links[d->n_links];
             if(!l) {
-                l = malloc(sizeof(khui_htwnd_link));
+                l = PMALLOC(sizeof(khui_htwnd_link));
                 d->links[d->n_links] = l;
             }
 
@@ -807,7 +807,7 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
                 cs = (CREATESTRUCT *) lParam;
 
-                d = malloc(sizeof(*d));
+                d = PMALLOC(sizeof(*d));
                 ZeroMemory(d, sizeof(*d));
 
                 if(cs->dwExStyle & WS_EX_TRANSPARENT) {
@@ -824,7 +824,7 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
                 if(SUCCEEDED(StringCbLength(cs->lpszName, KHUI_HTWND_MAXCB_TEXT, &cbsize))) {
                     cbsize += sizeof(wchar_t);
-                    d->text = malloc(cbsize);
+                    d->text = PMALLOC(cbsize);
                     StringCbCopy(d->text, cbsize, cs->lpszName);
                 }
 
@@ -848,13 +848,13 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
                 newtext = (wchar_t *) lParam;
 
                 if(d->text) {
-                    free(d->text);
+                    PFREE(d->text);
                     d->text = NULL;
                 }
 
                 if(SUCCEEDED(StringCbLength(newtext, KHUI_HTWND_MAXCB_TEXT, &cbsize))) {
                     cbsize += sizeof(wchar_t);
-                    d->text = malloc(cbsize);
+                    d->text = PMALLOC(cbsize);
                     StringCbCopy(d->text, cbsize, newtext);
                     rv = TRUE;
                 } else
@@ -875,20 +875,20 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
                 d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
                 if(d->text)
-                    free(d->text);
+                    PFREE(d->text);
                 d->text = 0;
 
                 if(d->links) {
                     for(i=0;i<d->max_links;i++) {
                         if(d->links[i])
-                            free(d->links[i]);
+                            PFREE(d->links[i]);
                     }
-                    free(d->links);
+                    PFREE(d->links);
                 }
 
                 clear_styles(d);
 
-                free(d);
+                PFREE(d);
             }
             break;
 

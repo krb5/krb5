@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -59,7 +59,7 @@ khm_timer_init(void) {
 
     khui_nc_timers = KHUI_TIMER_ALLOC_INCR;
     khui_n_timers = 0;
-    khui_timers = malloc(sizeof(*khui_timers) * khui_nc_timers);
+    khui_timers = PMALLOC(sizeof(*khui_timers) * khui_nc_timers);
 
 #ifdef DEBUG
     assert(khui_timers != NULL);
@@ -68,12 +68,12 @@ khm_timer_init(void) {
     InitializeCriticalSection(&cs_timers);
 }
 
-void 
+void
 khm_timer_exit(void) {
     EnterCriticalSection(&cs_timers);
 
     if (khui_timers)
-        free(khui_timers);
+        PFREE(khui_timers);
     khui_timers = NULL;
     khui_n_timers = 0;
     khui_nc_timers = 0;
@@ -252,7 +252,7 @@ khm_timer_fire(HWND hwnd) {
 
 static int
 tmr_update(khm_handle key, khui_timer_type type, __int64 expire,
-           __int64 offset, void * data) {
+           __int64 offset, void * data, khm_boolean reinstate) {
     int i;
 
     for (i=0; i < (int) khui_n_timers; i++) {
@@ -271,13 +271,13 @@ tmr_update(khm_handle key, khui_timer_type type, __int64 expire,
 #endif
             khui_nc_timers = UBOUNDSS(i+1, KHUI_TIMER_ALLOC_INCR,
                                       KHUI_TIMER_ALLOC_INCR);
-            nt = malloc(sizeof(*nt) * khui_nc_timers);
+            nt = PMALLOC(sizeof(*nt) * khui_nc_timers);
 #ifdef DEBUG
             assert(nt);
 #endif
             memcpy(nt, khui_timers, sizeof(*nt) * khui_n_timers);
 
-            free(khui_timers);
+            PFREE(khui_timers);
             khui_timers = nt;
         }
 
@@ -292,6 +292,8 @@ tmr_update(khm_handle key, khui_timer_type type, __int64 expire,
     khui_timers[i].data = data;
 
     khui_timers[i].flags &= ~KHUI_TE_FLAG_STALE;
+    if (reinstate)
+        khui_timers[i].flags &= ~KHUI_TE_FLAG_EXPIRED;
 
     return i;
 }
@@ -328,6 +330,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     __int64 ft_cred_expiry;
     __int64 ft;
     __int64 fte;
+    __int64 ft_reinst;
     khm_size cb;
 
     kcdb_cred_get_identity(cred, &ident);
@@ -351,10 +354,12 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     /* and the current time */
     GetSystemTimeAsFileTime((LPFILETIME) &ft_current);
 
+    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, (LPFILETIME) &ft_reinst);
+
     mark_idx = tmr_find(ident, KHUI_TTYPE_ID_MARK, 0, 0);
 
     if (mark_idx < 0) {
-        mark_idx = tmr_update(ident, KHUI_TTYPE_ID_MARK, 0, 0, 0);
+        mark_idx = tmr_update(ident, KHUI_TTYPE_ID_MARK, 0, 0, 0, FALSE);
         kcdb_identity_hold(ident);
 #ifdef DEBUG
         assert(mark_idx >= 0);
@@ -426,12 +431,37 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         khc_close_space(csp_id);
 
         if (monitor && do_renew) {
+            int prev;
+
             TimetToFileTimeInterval(to_renew, (LPFILETIME) &ft);
             fte = ft_expiry - ft;
 
-            if (fte > ft_current) {
-                tmr_update(ident, KHUI_TTYPE_ID_RENEW, fte, ft, 0);
+            prev =
+                tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0);
+
+            /* we set off a renew notification immediately if the
+               renew threshold has passed but a renew was never sent.
+               This maybe because that NetIDMgr was started at the
+               last minute, or because for some reason the renew timer
+               could not be triggered earlier. */
+            if (fte > ft_current ||
+                prev == -1 ||
+                !(khui_timers[prev].flags & KHUI_TE_FLAG_EXPIRED)) {
+
+                if (fte <= ft_current)
+                    fte = ft_current;
+
+                tmr_update(ident, KHUI_TTYPE_ID_RENEW, 
+                           fte, ft, 0, fte > ft_current + ft_reinst);
                 renew_done = TRUE;
+            } else {
+                /* special case.  If the renew timer was in the past
+                   and it was expired, then we retain the record as
+                   long as the credentials are around.  If the renewal
+                   failed we don't want to automatically retry
+                   everytime we check the timers. */
+                tmr_update(ident, KHUI_TTYPE_ID_RENEW,
+                           fte, ft, 0, FALSE);
             }
         }
 
@@ -440,7 +470,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             fte = ft_expiry - ft;
 
             if (fte > ft_current)
-                tmr_update(ident, KHUI_TTYPE_ID_WARN, fte, ft, 0);
+                tmr_update(ident, KHUI_TTYPE_ID_WARN,
+                           fte, ft, 0, fte > ft_current + ft_reinst);
         }
 
         if (monitor && do_crit && !renew_done) {
@@ -448,12 +479,14 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             fte = ft_expiry - ft;
 
             if (fte > ft_current)
-                tmr_update(ident, KHUI_TTYPE_ID_CRIT, fte, ft, 0);
+                tmr_update(ident, KHUI_TTYPE_ID_CRIT,
+                           fte, ft, 0, fte > ft_current + ft_reinst);
         }
 
         if (monitor && !renew_done) {
             if (ft_expiry > ft_current)
-                tmr_update(ident, KHUI_TTYPE_ID_EXP, ft_expiry, 0, 0);
+                tmr_update(ident, KHUI_TTYPE_ID_EXP, 
+                           ft_expiry, 0, 0, fte > ft_current + ft_reinst);
         }
 
     _done_with_ident:
@@ -474,12 +507,13 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         goto _cleanup;
 
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_WARN, 0, 0)) >= 0 &&
-       !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
+        !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
         fte = ft_cred_expiry - khui_timers[idx].offset;
         if (fte > ft_current) {
             tmr_update(cred, KHUI_TTYPE_CRED_WARN, fte, 
-                       khui_timers[idx].offset, 0);
+                       khui_timers[idx].offset, 0,
+                       fte > ft_current + ft_reinst);
             kcdb_cred_hold(cred);
         }
     }
@@ -490,7 +524,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         fte = ft_cred_expiry - khui_timers[idx].offset;
         if (fte > ft_current) {
             tmr_update(cred, KHUI_TTYPE_CRED_CRIT, fte,
-                       khui_timers[idx].offset, 0);
+                       khui_timers[idx].offset, 0,
+                       fte > ft_current + ft_reinst);
             kcdb_cred_hold(cred);
         }
     }
@@ -501,7 +536,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         fte = ft_cred_expiry - khui_timers[idx].offset;
         if (fte > ft_current) {
             tmr_update(cred, KHUI_TTYPE_CRED_RENEW, fte,
-                       khui_timers[idx].offset, 0);
+                       khui_timers[idx].offset, 0,
+                       fte > ft_current + ft_reinst);
             kcdb_cred_hold(cred);
         }
     }
@@ -511,7 +547,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
 
         if (ft_cred_expiry > ft_current) {
             tmr_update(cred, KHUI_TTYPE_CRED_EXP, ft_cred_expiry,
-                       0, 0);
+                       0, 0,
+                       ft_cred_expiry > ft_current + ft_reinst);
         }
     }
 
@@ -577,6 +614,7 @@ tmr_purge(void) {
     khui_n_timers = j;
 }
 
+/* go through all the credentials and set timers as appropriate. */
 void 
 khm_timer_refresh(HWND hwnd) {
     int i;
@@ -608,10 +646,11 @@ khm_timer_refresh(HWND hwnd) {
 
     next_event = 0;
     for (i=0; i < (int) khui_n_timers; i++) {
-        if (next_event == 0 ||
-            (!(khui_timers[i].flags & KHUI_TE_FLAG_EXPIRED) &&
-             khui_timers[i].type != KHUI_TTYPE_ID_MARK &&
+        if (!(khui_timers[i].flags & KHUI_TE_FLAG_EXPIRED) &&
+            khui_timers[i].type != KHUI_TTYPE_ID_MARK &&
+            (next_event == 0 ||
              next_event > khui_timers[i].expire))
+
             next_event = khui_timers[i].expire;
     }
 

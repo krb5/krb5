@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,6 +28,7 @@
 #define __KHIMAIRA_KMMINTERNAL_H
 
 #include<windows.h>
+#include<shlwapi.h>
 #include<strsafe.h>
 
 #define KHERR_FACILITY kmm_facility
@@ -44,7 +45,6 @@
 #include<kcreddb.h>
 #include<kmm_msgs.h>
 
-
 struct kmm_plugin_i_t; /* forward dcl */
 
 typedef struct kmm_module_i_t {
@@ -52,8 +52,12 @@ typedef struct kmm_module_i_t {
 
     wchar_t * name;
     wchar_t * path;
-
+    wchar_t * description;
     wchar_t * vendor;
+    wchar_t * support;
+
+    khm_version file_version;
+    khm_version prod_version;
 
     HMODULE h_module;
 
@@ -80,21 +84,22 @@ typedef struct kmm_module_i_t {
 #define kmm_module_from_handle(m) ((kmm_module_i *) m)
 #define kmm_handle_from_module(m) ((kmm_module) m)
 
-/* the resources have been loaded */
-#define KMM_MODULE_FLAG_RES_LOADED  8
-
-/* the signature has been verified */
-#define KMM_MODULE_FLAG_SIG         16
-
 /* LoadLibrary succeeded for module */
 #define KMM_MODULE_FLAG_LOADED      1
 
 /* init_module entry called */
 #define KMM_MODULE_FLAG_INITP       2
 
+/* the resources have been loaded */
+#define KMM_MODULE_FLAG_RES_LOADED  8
+
+/* the signature has been verified */
+#define KMM_MODULE_FLAG_SIG         16
+
 /* the module is disabled by the user
    (option specifed in configuration) */
 #define KMM_MODULE_FLAG_DISABLED    1024
+
 
 typedef struct kmm_plugin_i_t {
     kmm_plugin_reg p;
@@ -182,18 +187,36 @@ void kmm_init_module(kmm_module_i * m);
 void kmm_exit_module(kmm_module_i * m);
 
 /* Modules */
-kmm_module_i * kmm_get_module_i(wchar_t * name);
-kmm_module_i * kmm_find_module_i(wchar_t * name);
-void kmm_free_module(kmm_module_i * m);
+kmm_module_i * 
+kmmint_get_module_i(wchar_t * name);
+
+kmm_module_i * 
+kmmint_find_module_i(wchar_t * name);
+
+void 
+kmmint_free_module(kmm_module_i * m);
+
+khm_int32
+kmmint_read_module_info(kmm_module_i * m);
 
 /* Plugins */
-kmm_plugin_i * kmm_get_plugin_i(wchar_t * name);
-kmm_plugin_i * kmm_find_plugin_i(wchar_t * name);
-void kmm_free_plugin(kmm_plugin_i * pi);
-void kmm_list_plugin(kmm_plugin_i * p);
-void kmm_delist_plugin(kmm_plugin_i * p);
+kmm_plugin_i * 
+kmmint_get_plugin_i(wchar_t * name);
 
-khm_boolean kmm_load_locale_lib(kmm_module_i * m, kmm_module_locale * l);
+kmm_plugin_i * 
+kmmint_find_plugin_i(wchar_t * name);
+
+void 
+kmmint_free_plugin(kmm_plugin_i * pi);
+
+void 
+kmmint_list_plugin(kmm_plugin_i * p);
+
+void 
+kmmint_delist_plugin(kmm_plugin_i * p);
+
+khm_boolean 
+kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l);
 
 #define KMM_CSNAME_ROOT L"PluginManager"
 #define KMM_CSNAME_PLUGINS L"Plugins"

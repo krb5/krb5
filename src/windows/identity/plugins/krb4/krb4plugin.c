@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,11 +28,14 @@
 #include<kherror.h>
 #include<khmsgtypes.h>
 #include<khuidefs.h>
+#include<utils.h>
 #include<commctrl.h>
 #include<strsafe.h>
 #include<krb5.h>
 
 khm_int32 credtype_id_krb4 = KCDB_CREDTYPE_INVALID;
+khm_int32 credtype_id_krb5 = KCDB_CREDTYPE_INVALID;
+
 khm_boolean krb4_initialized = FALSE;
 khm_handle krb4_credset = NULL;
 
@@ -64,7 +67,7 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                 {
                     StringCbLength(buf, KCDB_MAXCB_SHORT_DESC, &cbsize);
                     cbsize += sizeof(wchar_t);
-                    ct.short_desc = malloc(cbsize);
+                    ct.short_desc = PMALLOC(cbsize);
                     StringCbCopy(ct.short_desc, cbsize, buf);
                 }
 
@@ -76,7 +79,7 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                 {
                     StringCbLength(buf, KCDB_MAXCB_SHORT_DESC, &cbsize);
                     cbsize += sizeof(wchar_t);
-                    ct.long_desc = malloc(cbsize);
+                    ct.long_desc = PMALLOC(cbsize);
                     StringCbCopy(ct.long_desc, cbsize, buf);
                 }
 
@@ -88,34 +91,116 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
             if(KHM_SUCCEEDED(rv))
                 rv = kcdb_credset_create(&krb4_credset);
 
+            if (KHM_SUCCEEDED(rv))
+                rv = kcdb_credtype_get_id(KRB5_CREDTYPE_NAME, 
+                                          &credtype_id_krb5);
+
             if(ct.short_desc)
-                free(ct.short_desc);
+                PFREE(ct.short_desc);
 
             if(ct.long_desc)
-                free(ct.long_desc);
+                PFREE(ct.long_desc);
 
-            ZeroMemory(&reg, sizeof(reg));
+            if (KHM_SUCCEEDED(rv)) {
+                khui_config_node idents;
 
-            reg.name = KRB4_CONFIG_NODE_NAME;
-            reg.short_desc = wshort_desc;
-            reg.long_desc = wlong_desc;
-            reg.h_module = hResModule;
-            reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_KRB4);
-            reg.dlg_proc = krb4_confg_proc;
-            reg.flags = 0;
+                ZeroMemory(&reg, sizeof(reg));
 
-            LoadString(hResModule, IDS_CFG_KRB4_LONG,
-                       wlong_desc, ARRAYLENGTH(wlong_desc));
-            LoadString(hResModule, IDS_CFG_KRB4_SHORT,
-                       wshort_desc, ARRAYLENGTH(wshort_desc));
+                reg.name = KRB4_CONFIG_NODE_NAME;
+                reg.short_desc = wshort_desc;
+                reg.long_desc = wlong_desc;
+                reg.h_module = hResModule;
+                reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_KRB4);
+                reg.dlg_proc = krb4_confg_proc;
+                reg.flags = 0;
 
-            khui_cfg_register(NULL, &reg);
+                LoadString(hResModule, IDS_CFG_KRB4_LONG,
+                           wlong_desc, ARRAYLENGTH(wlong_desc));
+                LoadString(hResModule, IDS_CFG_KRB4_SHORT,
+                           wshort_desc, ARRAYLENGTH(wshort_desc));
 
-            if(KHM_SUCCEEDED(rv)) {
+                khui_cfg_register(NULL, &reg);
+
+                khui_cfg_open(NULL, L"KhmIdentities", &idents);
+
+                ZeroMemory(&reg, sizeof(reg));
+
+                reg.name = KRB4_IDS_CONFIG_NODE_NAME;
+                reg.short_desc = wshort_desc;
+                reg.long_desc = wlong_desc;
+                reg.h_module = hResModule;
+                reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_IDS_KRB4);
+                reg.dlg_proc = krb4_ids_config_proc;
+                reg.flags = KHUI_CNFLAG_SUBPANEL;
+
+                LoadString(hResModule, IDS_CFG_KRB4_SHORT,
+                           wlong_desc, ARRAYLENGTH(wlong_desc));
+                LoadString(hResModule, IDS_CFG_KRB4_SHORT,
+                           wshort_desc, ARRAYLENGTH(wshort_desc));
+
+                khui_cfg_register(idents, &reg);
+
+                ZeroMemory(&reg, sizeof(reg));
+
+                reg.name = KRB4_ID_CONFIG_NODE_NAME;
+                reg.short_desc = wshort_desc;
+                reg.long_desc = wlong_desc;
+                reg.h_module = hResModule;
+                reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_ID_KRB4);
+                reg.dlg_proc = krb4_id_config_proc;
+                reg.flags = KHUI_CNFLAG_SUBPANEL | KHUI_CNFLAG_PLURAL;
+
+                LoadString(hResModule, IDS_CFG_KRB4_SHORT,
+                           wlong_desc, ARRAYLENGTH(wlong_desc));
+                LoadString(hResModule, IDS_CFG_KRB4_SHORT,
+                           wshort_desc, ARRAYLENGTH(wshort_desc));
+
+                khui_cfg_register(idents, &reg);
+
+                khui_cfg_release(idents);
+
                 krb4_initialized = TRUE;
 
                 khm_krb4_list_tickets();
             }
+
+            /* Lookup common data types */
+            if(KHM_FAILED(kcdb_type_get_id(TYPENAME_ENCTYPE, 
+                                           &type_id_enctype))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            if(KHM_FAILED(kcdb_type_get_id(TYPENAME_ADDR_LIST, 
+                                           &type_id_addr_list))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            if(KHM_FAILED(kcdb_type_get_id(TYPENAME_KRB5_FLAGS, 
+                                           &type_id_krb5_flags))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            /* Lookup common attributes */
+            if(KHM_FAILED(kcdb_attrib_get_id(ATTRNAME_KEY_ENCTYPE, 
+                                             &attr_id_key_enctype))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            if(KHM_FAILED(kcdb_attrib_get_id(ATTRNAME_TKT_ENCTYPE, 
+                                             &attr_id_tkt_enctype))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            if(KHM_FAILED(kcdb_attrib_get_id(ATTRNAME_ADDR_LIST, 
+                                             &attr_id_addr_list))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
+            if(KHM_FAILED(kcdb_attrib_get_id(ATTRNAME_KRB5_FLAGS, 
+                                             &attr_id_krb5_flags))) {
+                rv = KHM_ERROR_UNKNOWN;
+            }
+
         }
         break;
 
@@ -140,11 +225,47 @@ krb4_msg_cred(khm_int32 msg_type, khm_int32 msg_subtype,
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
     switch(msg_subtype) {
-        case KMSG_CRED_REFRESH:
-            {
-                khm_krb4_list_tickets();
+    case KMSG_CRED_REFRESH:
+        {
+            khm_krb4_list_tickets();
+        }
+        break;
+
+    case KMSG_CRED_DESTROY_CREDS:
+        {
+            khui_action_context * ctx;
+            khm_handle credset;
+            khm_size nc_root = 0;
+            khm_size nc_sel = 0;
+
+            ctx = (khui_action_context *) vparam;
+
+            /* if all krb4 tickets are selected, then we destroy all
+               of them.  Otherwise, we do nothing. */
+
+            kcdb_credset_create(&credset);
+
+            kcdb_credset_extract(credset, ctx->credset,
+                                 NULL, credtype_id_krb4);
+            kcdb_credset_get_size(credset, &nc_sel);
+
+            kcdb_credset_flush(credset);
+
+            kcdb_credset_extract(credset, NULL,
+                                 NULL, credtype_id_krb4);
+            kcdb_credset_get_size(credset, &nc_root);
+
+            kcdb_credset_delete(credset);
+
+            if (nc_root == nc_sel) {
+                khm_krb4_kdestroy();
             }
-            break;
+        }
+        break;
+
+    default:
+        if (IS_CRED_ACQ_MSG(msg_subtype))
+            return krb4_msg_newcred(msg_type, msg_subtype, uparam, vparam);
     }
 
     return rv;

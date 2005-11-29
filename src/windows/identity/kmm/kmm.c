@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,13 +25,37 @@
 /* $Id$ */
 
 #include<kmminternal.h>
+#include<assert.h>
 
-khm_boolean kmm_load_locale_lib(kmm_module_i * m, kmm_module_locale * l)
+khm_boolean kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l)
 {
     HMODULE h;
 
     if(l->filename != NULL) {
-        h = LoadLibrary(l->filename);
+        wchar_t path[MAX_PATH];
+        DWORD dw;
+
+        /* construct the path name */
+        assert(m->h_module != NULL);
+
+        dw = PathIsFileSpec(l->filename);
+
+        assert(dw);
+        if (!dw)
+            return FALSE;
+
+        dw = GetModuleFileName(m->h_module, path, ARRAYLENGTH(path));
+        assert(dw != 0);
+        if (dw == 0)
+            return FALSE;
+
+        PathRemoveFileSpec(path);
+        dw = PathAppend(path, l->filename);
+        assert(dw);
+        if (!dw)
+            return FALSE;
+
+        h = LoadLibrary(path);
         if(!h)
             return FALSE;
 
@@ -41,6 +65,7 @@ khm_boolean kmm_load_locale_lib(kmm_module_i * m, kmm_module_locale * l)
         LeaveCriticalSection(&cs_kmm);
 
         return TRUE;
+
     } else {
         /*  in this case, the language resources are assumed to be in the
             main module library itself. */
@@ -69,9 +94,9 @@ KHMEXP khm_int32 KHMAPI kmm_set_locale_info(kmm_module module, kmm_module_locale
         return KHM_ERROR_INVALID_OPERATION;
 
     if(!locales || n_locales < 0)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
-    f = malloc(n_locales * sizeof(int));
+    f = PMALLOC(n_locales * sizeof(int));
     if(!f)
         return KHM_ERROR_UNKNOWN;
     ZeroMemory(f, sizeof(int) * n_locales);
@@ -82,7 +107,7 @@ KHMEXP khm_int32 KHMAPI kmm_set_locale_info(kmm_module module, kmm_module_locale
     for(i=0; i<n_locales; i++) {
         if(locales[i].language == lcid) {
             f[i] = TRUE;
-            if(kmm_load_locale_lib(m, &locales[i]))
+            if(kmmint_load_locale_lib(m, &locales[i]))
                 break;
         }
     }
@@ -94,7 +119,7 @@ KHMEXP khm_int32 KHMAPI kmm_set_locale_info(kmm_module module, kmm_module_locale
     for(i=0; i<n_locales; i++) {
         if(!f[i] && (PRIMARYLANGID(locales[i].language) == PRIMARYLANGID(lcid))) {
             f[i] = TRUE;
-            if(kmm_load_locale_lib(m,&locales[i]))
+            if(kmmint_load_locale_lib(m,&locales[i]))
                 break;
         }
     }
@@ -106,7 +131,7 @@ KHMEXP khm_int32 KHMAPI kmm_set_locale_info(kmm_module module, kmm_module_locale
     for(i=0; i<n_locales; i++) {
         if(!f[i] && (locales[i].flags & KMM_MLOC_FLAG_DEFAULT)) {
             f[i] = TRUE;
-            if(kmm_load_locale_lib(m,&locales[i]))
+            if(kmmint_load_locale_lib(m,&locales[i]))
                 break;
         }
     }
@@ -118,7 +143,7 @@ KHMEXP khm_int32 KHMAPI kmm_set_locale_info(kmm_module module, kmm_module_locale
     rv = KHM_ERROR_NOT_FOUND;
 
 _exit:
-    free(f);
+    PFREE(f);
     return rv;
 }
 

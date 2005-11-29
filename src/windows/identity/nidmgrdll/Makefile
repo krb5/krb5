@@ -48,6 +48,7 @@ OBJFILES= \
 	$(UTILDIR)\hashtable.obj	\
 	$(UTILDIR)\sync.obj		\
 	$(UTILDIR)\mstring.obj		\
+	$(UTILDIR)\perfstat.obj		\
 	$(KHERRDIR)\kherrmain.obj	\
 	$(KHERRDIR)\kherr.obj		\
 	$(KCONFIGDIR)\kconfigmain.obj	\
@@ -95,7 +96,9 @@ RESFILES= \
 SDKLIBFILES= \
 	advapi32.lib			\
 	strsafe.lib			\
-	comctl32.lib
+	comctl32.lib			\
+	shlwapi.lib			\
+	version.lib
 
 $(DLLFILE): $(OBJFILES) $(RESFILES)
 	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES)

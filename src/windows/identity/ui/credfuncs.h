@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -68,5 +68,11 @@ khm_cred_begin_commandline(void);
 
 void
 khm_cred_process_commandline(void);
+
+void
+khm_cred_refresh(void);
+
+void
+khm_cred_addr_change(void);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,6 +26,7 @@
 
 #define NOEXPORT
 #include<khuidefs.h>
+#include<utils.h>
 #include<assert.h>
 
 khui_action_ref khui_main_menu[] = {
@@ -212,12 +213,13 @@ KHMEXP khui_menu_def * KHMAPI
 khui_menu_create(int cmd)
 {
     khui_menu_def * d;
-    d = malloc(sizeof(*d));
+
+    d = PMALLOC(sizeof(*d));
     ZeroMemory(d, sizeof(*d));
 
     d->cmd = cmd;
     d->nc_items = MENU_NC_ITEMS;
-    d->items = malloc(sizeof(*(d->items)) *  d->nc_items);
+    d->items = PMALLOC(sizeof(*(d->items)) *  d->nc_items);
 
     d->state = KHUI_MENUSTATE_ALLOCD;
 
@@ -261,12 +263,12 @@ khui_menu_delete(khui_menu_def * d)
 
     for(i=0; i< (int) d->n_items; i++) {
         if(d->items[i].flags & KHUI_ACTIONREF_FREE_PACTION)
-            free(d->items[i].p_action);
+            PFREE(d->items[i].p_action);
     }
 
     if(d->items)
-        free(d->items);
-    free(d);
+        PFREE(d->items);
+    PFREE(d);
 }
 
 static void khui_menu_assert_size(khui_menu_def * d, size_t n)
@@ -275,9 +277,9 @@ static void khui_menu_assert_size(khui_menu_def * d, size_t n)
         khui_action_ref * ni;
 
         d->nc_items = UBOUNDSS(n, MENU_NC_ITEMS, MENU_NC_ITEMS);
-        ni = malloc(sizeof(*(d->items)) * d->nc_items);
+        ni = PMALLOC(sizeof(*(d->items)) * d->nc_items);
         memcpy(ni, d->items, sizeof(*(d->items)) * d->n_items);
-        free(d->items);
+        PFREE(d->items);
         d->items = ni;
     }
 }
@@ -420,7 +422,7 @@ KHMEXP void KHMAPI khui_enable_actions(khui_menu_def * d, khm_boolean enable)
     }
 
     if(delta) {
-        kmq_send_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
+        kmq_post_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
     }
 }
 
@@ -438,7 +440,7 @@ KHMEXP void KHMAPI khui_enable_action(int cmd, khm_boolean enable) {
     } else
         return;
 
-    kmq_send_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
+    kmq_post_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
 }
 
 KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void) {
@@ -446,7 +448,7 @@ KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void) {
     ACCEL * accels;
     HACCEL ha;
 
-    accels = malloc(sizeof(ACCEL) * khui_n_accel_global);
+    accels = PMALLOC(sizeof(ACCEL) * khui_n_accel_global);
     for(i=0;i<khui_n_accel_global;i++) {
         accels[i].cmd = khui_accel_global[i].cmd;
         accels[i].fVirt = khui_accel_global[i].mod;
@@ -455,7 +457,7 @@ KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void) {
 
     ha = CreateAcceleratorTable(accels, khui_n_accel_global);
 
-    free(accels);
+    PFREE(accels);
 
     return ha;
 }
@@ -623,10 +625,10 @@ khuiint_copy_context(khui_action_context * ctxdest,
         if (ctxdest->int_cb_buf < cb_total) {
 
             if (ctxdest->int_buf)
-                free(ctxdest->int_buf);
+                PFREE(ctxdest->int_buf);
 
             ctxdest->int_cb_buf = cb_total;
-            ctxdest->int_buf = malloc(cb_total);
+            ctxdest->int_buf = PMALLOC(cb_total);
         }
 
 #ifdef DEBUG
@@ -680,7 +682,7 @@ khuiint_copy_context(khui_action_context * ctxdest,
        khui_context_release() to free the allocated buffer */
 #if 0
     if (ctxsrc->vparam && ctxsrc->cb_vparam) {
-        ctxdest->vparam = malloc(ctxsrc->cb_vparam);
+        ctxdest->vparam = PMALLOC(ctxsrc->cb_vparam);
 #ifdef DEBUG
         assert(ctxdest->vparam);
 #endif
@@ -891,11 +893,11 @@ khui_context_release(khui_action_context * ctx)
     }
     ctx->credset = NULL;
     if (ctx->int_buf)
-        free(ctx->int_buf);
+        PFREE(ctx->int_buf);
     ctx->int_buf = NULL;
 #if 0
     if (ctx->vparam && ctx->cb_vparam > 0) {
-        free(ctx->vparam);
+        PFREE(ctx->vparam);
         ctx->vparam = NULL;
     }
     ctx->cb_vparam = 0;

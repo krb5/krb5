@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,15 +25,29 @@
 /* $Id$ */
 
 #include<khuidefs.h>
+#include<utils.h>
 #ifdef DEBUG
 #include<assert.h>
 #endif
 
-KHMEXP khm_int32 KHMAPI khui_ps_create_sheet(khui_property_sheet ** sheet)
+CRITICAL_SECTION cs_props;
+
+void
+ps_init(void) {
+    InitializeCriticalSection(&cs_props);
+}
+
+void
+ps_exit(void) {
+    DeleteCriticalSection(&cs_props);
+}
+
+KHMEXP khm_int32 KHMAPI 
+khui_ps_create_sheet(khui_property_sheet ** sheet)
 {
     khui_property_sheet * ps;
 
-    ps = malloc(sizeof(*ps));
+    ps = PMALLOC(sizeof(*ps));
     ZeroMemory(ps, sizeof(*ps));
 
     ps->header.dwSize = sizeof(ps->header);
@@ -45,24 +59,26 @@ KHMEXP khm_int32 KHMAPI khui_ps_create_sheet(khui_property_sheet ** sheet)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI khui_ps_add_page(
-    khui_property_sheet * sheet,
-    khm_int32 credtype,
-    khm_int32 ordinal,
-    LPPROPSHEETPAGE ppage,
-    khui_property_page ** page)
+KHMEXP khm_int32 KHMAPI 
+khui_ps_add_page(khui_property_sheet * sheet,
+                 khm_int32 credtype,
+                 khm_int32 ordinal,
+                 LPPROPSHEETPAGE ppage,
+                 khui_property_page ** page)
 {
     khui_property_page * p;
 
-    p = malloc(sizeof(*p));
+    p = PMALLOC(sizeof(*p));
     ZeroMemory(p, sizeof(*p));
 
     p->credtype = credtype;
     p->ordinal = ordinal;
     p->p_page = ppage;
-    
+
+    EnterCriticalSection(&cs_props);    
     QPUT(sheet, p);
     sheet->n_pages++;
+    LeaveCriticalSection(&cs_props);
 
     if(page)
         *page = p;
@@ -70,13 +86,14 @@ KHMEXP khm_int32 KHMAPI khui_ps_add_page(
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI khui_ps_find_page(
-    khui_property_sheet * sheet,
-    khm_int32 credtype,
-    khui_property_page ** page)
+KHMEXP khm_int32 KHMAPI 
+khui_ps_find_page(khui_property_sheet * sheet,
+                  khm_int32 credtype,
+                  khui_property_page ** page)
 {
     khui_property_page * p;
 
+    EnterCriticalSection(&cs_props);
     p = QTOP(sheet);
 
     while(p) {
@@ -84,6 +101,7 @@ KHMEXP khm_int32 KHMAPI khui_ps_find_page(
             break;
         p = QNEXT(p);
     }
+    LeaveCriticalSection(&cs_props);
 
     if(p) {
         *page = p;
@@ -94,12 +112,22 @@ KHMEXP khm_int32 KHMAPI khui_ps_find_page(
     }
 }
 
-int __cdecl ps_order_func(const void *l, const void * r) {
-  /* l is a ** */
-    return 0;
+int __cdecl 
+ps_order_func(const void *l, const void * r) {
+    khui_property_page * lp;
+    khui_property_page * rp;
+
+    lp = *(khui_property_page **)l;
+    rp = *(khui_property_page **)r;
+
+    if (lp->ordinal == rp->ordinal)
+        return lp->credtype - rp->credtype;
+    else
+        return lp->ordinal - rp->ordinal;
 }
 
-KHMEXP HWND KHMAPI khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
+KHMEXP HWND KHMAPI 
+khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
 {
     khui_property_page * p;
     HPROPSHEETPAGE phpsp[KHUI_PS_MAX_PSP];
@@ -107,6 +135,8 @@ KHMEXP HWND KHMAPI khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
     int i;
     INT_PTR prv;
     HWND hw;
+
+    EnterCriticalSection(&cs_props);
 
     s->header.hwndParent = parent;
     s->header.nPages = s->n_pages;
@@ -118,16 +148,26 @@ KHMEXP HWND KHMAPI khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
 #ifdef DEBUG
         assert(p->h_page);
 #endif
-        ppgs[i] = p;
-        phpsp[i++] = p->h_page;
+        ppgs[i++] = p;
         p = QNEXT(p);
     }
 
-    /*TODO: sort property sheets */
+#ifdef DEBUG
+    assert(i == s->n_pages);
+#endif
+
+    qsort(ppgs, s->n_pages, sizeof(ppgs[0]), ps_order_func);
+
+    for (i=0; i < s->n_pages; i++) {
+        phpsp[i] = ppgs[i]->h_page;
+    }
 
     s->header.phpage = phpsp;
 
     prv = PropertySheet(&s->header);
+
+    s->header.phpage = NULL;
+
     if(prv <= 0) {
 #ifdef DEBUG
         assert(FALSE);
@@ -135,22 +175,20 @@ KHMEXP HWND KHMAPI khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
         /*TODO: better handling for this */
         hw = NULL;
     } else {
-        DWORD dw;
-
-        dw = GetLastError();
         s->status = KHUI_PS_STATUS_RUNNING;
 
         hw = (HWND) prv;
         s->hwnd = hw;
         s->hwnd_page = PropSheet_GetCurrentPageHwnd(hw);
     }
+    LeaveCriticalSection(&cs_props);
 
     return hw;
 }
 
-KHMEXP LRESULT KHMAPI khui_ps_check_message(
-    khui_property_sheet * sheet, 
-    PMSG pmsg)
+KHMEXP LRESULT KHMAPI 
+khui_ps_check_message(khui_property_sheet * sheet, 
+                      PMSG pmsg)
 {
     LRESULT lr;
 
@@ -169,20 +207,24 @@ KHMEXP LRESULT KHMAPI khui_ps_check_message(
     return lr;
 }
 
-KHMEXP khm_int32 KHMAPI khui_ps_destroy_sheet(khui_property_sheet * sheet)
+KHMEXP khm_int32 KHMAPI 
+khui_ps_destroy_sheet(khui_property_sheet * sheet)
 {
     khui_property_page * p;
+
+    EnterCriticalSection(&cs_props);
 
     DestroyWindow(sheet->hwnd);
     sheet->hwnd = NULL;
 
     QGET(sheet, &p);
     while(p) {
-        free(p);
+        PFREE(p);
         QGET(sheet, &p);
     }
+    PFREE(sheet);
 
-    free(sheet);
+    LeaveCriticalSection(&cs_props);
 
     return KHM_ERROR_SUCCESS;
 }

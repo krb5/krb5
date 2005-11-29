@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -77,6 +77,7 @@ typedef struct tag_khui_tracker {
     int lbl_y;
     int lbl_lx;
     int lbl_rx;
+    DWORD act_time;
 
     time_t current;             /*!< Current selection */
     time_t min;                 /*!< Minimum (inclusive)  */

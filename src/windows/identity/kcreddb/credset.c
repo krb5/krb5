@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -52,8 +52,11 @@ void kcdb_credset_exit(void)
 /* called on an unreleased credset, or with credset::cs held */
 void kcdb_credset_buf_new(kcdb_credset * cs)
 {
-    cs->clist = malloc(KCDB_CREDSET_INITIAL_SIZE * sizeof(kcdb_credset_credref));
-    ZeroMemory(cs->clist, KCDB_CREDSET_INITIAL_SIZE * sizeof(kcdb_credset_credref));
+    cs->clist = PMALLOC(KCDB_CREDSET_INITIAL_SIZE * 
+                        sizeof(kcdb_credset_credref));
+    ZeroMemory(cs->clist, 
+               KCDB_CREDSET_INITIAL_SIZE * 
+               sizeof(kcdb_credset_credref));
     cs->nc_clist = KCDB_CREDSET_INITIAL_SIZE;
     cs->nclist = 0;
 }
@@ -61,7 +64,7 @@ void kcdb_credset_buf_new(kcdb_credset * cs)
 /* called on an unreleased credset, or with credset::cs held */
 void kcdb_credset_buf_delete(kcdb_credset * cs)
 {
-    free(cs->clist);
+    PFREE(cs->clist);
     cs->nc_clist = 0;
     cs->nclist = 0;
 }
@@ -80,7 +83,7 @@ void kcdb_credset_buf_assert_size(kcdb_credset * cs, khm_int32 nclist)
 
         memcpy(new_clist, cs->clist, cs->nclist * sizeof(kcdb_credset_credref));
 
-        free(cs->clist);
+        PFREE(cs->clist);
 
         cs->clist = new_clist;
     }
@@ -90,7 +93,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_create(khm_handle * result)
 {
     kcdb_credset * cs;
 
-    cs = malloc(sizeof(kcdb_credset));
+    cs = PMALLOC(sizeof(kcdb_credset));
     ZeroMemory(cs, sizeof(kcdb_credset));
 
     cs->magic = KCDB_CREDSET_MAGIC;
@@ -115,7 +118,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_delete(khm_handle vcredset)
     int i;
 
     if(!kcdb_credset_is_credset(vcredset)) {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     cs = (kcdb_credset *) vcredset;
@@ -137,7 +140,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_delete(khm_handle vcredset)
     LeaveCriticalSection(&(cs->cs));
     DeleteCriticalSection(&(cs->cs));
 
-    free(cs);
+    PFREE(cs);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -153,14 +156,14 @@ cl1 and cl2.
 
 cl1 and cl2 will be modified.
 */
-khm_int32 kcdb_credset_collect_core(
-    kcdb_credset * cs1,
-    kcdb_cred ** cl1,
-    khm_int32 ncl1,
-    kcdb_credset * cs2,
-    kcdb_cred ** cl2,
-    khm_int32 ncl2,
-    khm_int32 * delta)
+khm_int32 
+kcdb_credset_collect_core(kcdb_credset * cs1,
+                          kcdb_cred ** cl1,
+                          khm_int32 ncl1,
+                          kcdb_credset * cs2,
+                          kcdb_cred ** cl2,
+                          khm_int32 ncl2,
+                          khm_int32 * delta)
 {
     int i, j;
     int ldelta = 0;
@@ -243,10 +246,10 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect(
         (cs_dest && !kcdb_credset_is_credset(cs_dest)) ||
         (cs_src == cs_dest)) /* works because credsets use shared
                                 handles */
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(identity && !kcdb_is_active_identity(identity))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(cs_src)
         cs = (kcdb_credset *) cs_src;
@@ -268,9 +271,9 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect(
        the ones we want */
 
     if(rcs->nclist > 0)
-        r_sel = malloc(sizeof(kcdb_cred *) * rcs->nclist);
+        r_sel = PMALLOC(sizeof(kcdb_cred *) * rcs->nclist);
     if(cs->nclist > 0)
-        c_sel = malloc(sizeof(kcdb_cred *) * cs->nclist);
+        c_sel = PMALLOC(sizeof(kcdb_cred *) * cs->nclist);
     nr_sel = 0;
     nc_sel = 0;
 
@@ -307,9 +310,9 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect(
     LeaveCriticalSection(&(cs->cs));
 
     if(r_sel)
-        free(r_sel);
+        PFREE(r_sel);
     if(c_sel)
-        free(c_sel);
+        PFREE(c_sel);
 
     return code;
 }
@@ -335,7 +338,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect_filtered(
         (cs_dest && !kcdb_credset_is_credset(cs_dest)) ||
         (cs_src == cs_dest)) /* works because credsets use shared
                                 handles */
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(cs_src)
         cs = (kcdb_credset *) cs_src;
@@ -363,9 +366,9 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect_filtered(
 #endif
 
     if(rcs->nclist)
-        r_sel = malloc(sizeof(kcdb_cred *) * rcs->nclist);
+        r_sel = PMALLOC(sizeof(kcdb_cred *) * rcs->nclist);
     if(cs->nclist)
-        c_sel = malloc(sizeof(kcdb_cred *) * cs->nclist);
+        c_sel = PMALLOC(sizeof(kcdb_cred *) * cs->nclist);
     nr_sel = 0;
     nc_sel = 0;
 
@@ -408,9 +411,9 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_collect_filtered(
     LeaveCriticalSection(&(cs->cs));
 
     if(r_sel)
-        free(r_sel);
+        PFREE(r_sel);
     if(c_sel)
-        free(c_sel);
+        PFREE(c_sel);
 
     return code;
 }
@@ -421,7 +424,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_flush(khm_handle vcredset)
     kcdb_credset * cs;
 
     if(!kcdb_credset_is_credset(vcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) vcredset;
 
@@ -459,11 +462,11 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_extract(
     int i;
 
     if(!kcdb_credset_is_credset(destcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(sourcecredset) {
         if(!kcdb_credset_is_credset(sourcecredset))
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
     } else {
         sourcecredset = kcdb_root_credset;
     }
@@ -538,11 +541,11 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_extract_filtered(
     int i;
 
     if(!kcdb_credset_is_credset(destcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(sourcecredset) {
         if(!kcdb_credset_is_credset(sourcecredset))
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
     } else {
         sourcecredset = kcdb_root_credset;
         isRoot = 1;
@@ -611,7 +614,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_apply(khm_handle vcredset, kcdb_cred_apply_
     int i;
 
     if(vcredset != NULL && !kcdb_credset_is_credset(vcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(vcredset == NULL) {
         cs = kcdb_root_credset;
@@ -654,7 +657,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_get_cred(
     khm_int32 code = KHM_ERROR_SUCCESS;
 
     if(!kcdb_credset_is_credset(vcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) vcredset;
 
@@ -692,7 +695,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_find_filtered(
 
     if((credset && !kcdb_credset_is_credset(credset)) ||
         (!f || !cred))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(credset)
         cs = (kcdb_credset *) credset;
@@ -743,10 +746,10 @@ kcdb_credset_find_cred(khm_handle vcredset,
     int idx;
 
     if (!kcdb_credset_is_credset(vcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if (!kcdb_cred_is_active_cred(vcred_src))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) vcredset;
 
@@ -784,7 +787,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_del_cred(
     khm_int32 code = KHM_ERROR_SUCCESS;
 
     if(!kcdb_credset_is_credset(vcredset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) vcredset;
 
@@ -793,7 +796,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_del_cred(
 
     EnterCriticalSection(&(cs->cs));
     if(idx < 0 || idx >= cs->nclist) {
-        code = KHM_ERROR_INVALID_PARM;
+        code = KHM_ERROR_INVALID_PARAM;
         goto _exit;
     }
 
@@ -828,7 +831,7 @@ khm_int32 kcdb_credset_update_cred_ref(
     int i;
 
     if(!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -858,7 +861,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_del_cred_ref(
     int i;
 
     if(!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -892,7 +895,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_add_cred(
     khm_int32 code = KHM_ERROR_SUCCESS;
 
     if(!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -958,7 +961,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_purge(khm_handle credset)
     int i,j;
 
     if(!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -996,7 +999,7 @@ kcdb_credset_seal(khm_handle credset) {
     kcdb_credset * cs;
 
     if (!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -1013,7 +1016,7 @@ kcdb_credset_unseal(khm_handle credset) {
     khm_int32 rv;
 
     if (!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -1046,7 +1049,9 @@ int __cdecl kcdb_creds_comp_wrapper(const void * a, const void * b)
         return 0;
     }
 
-    return comp((khm_handle) ((kcdb_credset_credref *)a)->cred, (khm_handle) ((kcdb_credset_credref *)b)->cred, rock);
+    return comp((khm_handle) ((kcdb_credset_credref *)a)->cred, 
+                (khm_handle) ((kcdb_credset_credref *)b)->cred, 
+                rock);
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_credset_sort(
@@ -1058,7 +1063,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_sort(
     kcdb_credset * cs;
 
     if(!kcdb_credset_is_credset(credset))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cs = (kcdb_credset *) credset;
 
@@ -1089,31 +1094,42 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_comp_generic(
     int i;
     khm_int32 r = 0;
     khm_int32 f1, f2;
+    khm_int32 t1, t2;
     khm_int32 pt;
 
     for(i=0; i<o->nFields; i++) {
         if (o->fields[i].order & KCDB_CRED_COMP_INITIAL_FIRST) {
 
-            kcdb_cred_get_flags(cred1, &f1);
-            kcdb_cred_get_flags(cred2, &f2);
+            if (o->fields[i].attrib == KCDB_ATTR_TYPE_NAME ||
+                o->fields[i].attrib == KCDB_ATTR_TYPE) {
 
-            if (((f1 ^ f2) & KCDB_CRED_FLAG_INITIAL) == 0) {
-                kcdb_cred_get_type(cred1, &f1);
-                kcdb_cred_get_type(cred2, &f2);
+                kcdb_cred_get_type(cred1, &t1);
+                kcdb_cred_get_type(cred2, &t2);
                 kcdb_identity_get_type(&pt);
 
-                if (f1 == f2)
+                if (t1 == t2)
                     r = 0;
-                else if (f1 == pt)
+                else if (t1 == pt)
                     r = -1;
-                else if (f2 == pt)
+                else if (t2 == pt)
                     r = 1;
                 else
                     r = 0;
-            } else if (f1 & KCDB_CRED_FLAG_INITIAL)
-                r = -1;
-            else
-                r = 1;
+
+            } else {
+
+                kcdb_cred_get_flags(cred1, &f1);
+                kcdb_cred_get_flags(cred2, &f2);
+
+                if (((f1 ^ f2) & KCDB_CRED_FLAG_INITIAL) == 0)
+                    r = 0;
+                else if (f1 & KCDB_CRED_FLAG_INITIAL)
+                    r = -1;
+                else
+                    r = 1;
+
+            }
+
         } else {
             r = 0;
         }

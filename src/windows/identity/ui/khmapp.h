@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -31,6 +31,7 @@
 #include<windowsx.h>
 #include<strsafe.h>
 #include<commctrl.h>
+#include<htmlhelp.h>
 
 #define KHERR_HMODULE khm_hInstance
 #define KHERR_FACILITY khm_facility
@@ -46,6 +47,7 @@
 #include<kmm.h>
 #include<khhelp.h>
 #include<khuidefs.h>
+#include<utils.h>
 
 #include<resource.h>
 #include<credfuncs.h>
@@ -65,5 +67,6 @@
 #include<reqdaemon.h>
 #include<notifier.h>
 #include<timer.h>
+#include<addrchange.h>
 
 #endif

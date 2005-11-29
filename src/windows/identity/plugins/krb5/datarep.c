@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,7 +39,7 @@ khm_int32 KHMAPI enctype_toString(const void * data, khm_size cbdata, wchar_t *d
     size_t cblength;
 
     if(cbdata != sizeof(khm_int32))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     etype = *((khm_int32 *) data);
 

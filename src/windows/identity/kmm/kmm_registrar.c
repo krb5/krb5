@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -38,6 +38,9 @@ kmmint_check_completion(void) {
         InterlockedIncrement(&startup_signal) == 1) {
 
         load_done = TRUE;
+
+        /* TODO: check for orphaned plugins */
+
         kmq_post_message(KMSG_KMM, KMSG_KMM_I_DONE, 0, 0);
     }
 }
@@ -148,31 +151,35 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
 
     p->tid_thread = GetCurrentThreadId();
 
-    rv = (p->p.msg_proc(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 0, (void *) &(p->p)));
+    if (IsBadCodePtr(p->p.msg_proc)) {
+        rv = KHM_ERROR_INVALID_PARAM;
+    } else {
+        rv = (p->p.msg_proc(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
+                            0, (void *) &(p->p)));
+    }
 
     /* if it fails to initialize, we exit the plugin */
     if(KHM_FAILED(rv)) {
-	kmmint_remove_from_plugin_queue();
+        kmmint_remove_from_plugin_queue();
         rv = 1;
         goto _exit;
     }
 
     /* subscribe to default message classes by plugin type */
-    if(p->p.type & KHM_PITYPE_CRED) {
+    if(p->p.type == KHM_PITYPE_CRED) {
         kmq_subscribe(KMSG_SYSTEM, p->p.msg_proc);
         kmq_subscribe(KMSG_KCDB, p->p.msg_proc);
         kmq_subscribe(KMSG_CRED, p->p.msg_proc);
-    }
-
-    if(p->p.flags & KHM_PIFLAG_IDENTITY_PROVIDER) {
+    } else if(p->p.type == KHM_PITYPE_IDENT) {
         khm_handle h = NULL;
+
+        kmq_subscribe(KMSG_SYSTEM, p->p.msg_proc);
+        kmq_subscribe(KMSG_KCDB, p->p.msg_proc);
 
         kmq_create_subscription(p->p.msg_proc, &h);
         kcdb_identity_set_provider(h);
         /* kcdb deletes the subscription when it's done with it */
-    }
-
-    if(p->p.type == KHM_PITYPE_CONFIG) {
+    } else if(p->p.type == KHM_PITYPE_CONFIG) {
         /*TODO: subscribe to configuration provider messages here */
     }
 
@@ -204,17 +211,15 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
     while(KHM_SUCCEEDED(kmq_dispatch(INFINITE)));
 
     /* unsubscribe from default message classes by plugin type */
-    if(p->p.type & KHM_PITYPE_CRED) {
+    if(p->p.type == KHM_PITYPE_CRED) {
         kmq_unsubscribe(KMSG_SYSTEM, p->p.msg_proc);
         kmq_unsubscribe(KMSG_KCDB, p->p.msg_proc);
         kmq_unsubscribe(KMSG_CRED, p->p.msg_proc);
-    }
-
-    if(p->p.flags & KHM_PIFLAG_IDENTITY_PROVIDER) {
+    } else if (p->p.type == KHM_PITYPE_IDENT) {
+        kmq_unsubscribe(KMSG_KCDB, p->p.msg_proc);
+        kmq_unsubscribe(KMSG_SYSTEM, p->p.msg_proc);
         kcdb_identity_set_provider(NULL);
-    }
-
-    if(p->p.type == KHM_PITYPE_CONFIG) {
+    } else if(p->p.type == KHM_PITYPE_CONFIG) {
         /*TODO: unsubscribe from configuration provider messages here */
     }
 
@@ -224,7 +229,8 @@ _exit:
     p->state = KMM_PLUGIN_STATE_EXITED;
 
     /* the following call will automatically release the plugin */
-    kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, KMM_REG_EXIT_PLUGIN, (void *) p);
+    kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
+                     KMM_REG_EXIT_PLUGIN, (void *) p);
 
     TlsSetValue(tls_kmm, (LPVOID) 0);
 
@@ -282,8 +288,7 @@ void kmm_init_plugin(kmm_plugin_i * p) {
     }
 
     if(KHM_FAILED(kmm_get_plugin_config(p->p.name, 0, &csp_plugin)) ||
-        KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t)))
-    {
+        KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t))) {
         if(KHM_FAILED(kmm_register_plugin(&(p->p), 0))) {
             _report_mr0(KHERR_ERROR, MSG_IP_NOT_REGISTERED);
 
@@ -329,13 +334,15 @@ void kmm_init_plugin(kmm_plugin_i * p) {
         wchar_t * d;
         khm_size sz = 0;
 
-        if(khc_read_multi_string(csp_plugin, L"Dependencies", NULL, &sz) != KHM_ERROR_TOO_LONG)
+        if(khc_read_multi_string(csp_plugin, L"Dependencies", 
+                                 NULL, &sz) != KHM_ERROR_TOO_LONG)
             break;
 
-        deps = malloc(sz);
-        if(KHM_FAILED(khc_read_multi_string(csp_plugin, L"Dependencies", deps, &sz))) {
+        deps = PMALLOC(sz);
+        if(KHM_FAILED(khc_read_multi_string(csp_plugin, L"Dependencies", 
+                                            deps, &sz))) {
             if(deps)
-                free(deps);
+                PFREE(deps);
             break;
         }
 
@@ -343,14 +350,14 @@ void kmm_init_plugin(kmm_plugin_i * p) {
             kmm_plugin_i * pd;
             int i;
 
-            pd = kmm_get_plugin_i(d);
+            pd = kmmint_get_plugin_i(d);
 
             if(pd->state == KMM_PLUGIN_STATE_NONE) {
                 /* the dependant was not previously known */
                 pd->state = KMM_PLUGIN_STATE_PLACEHOLDER;
             }
 
-            for(i=0; i<pd->n_dependants; i++) {
+            for(i=0; i < pd->n_dependants; i++) {
                 if(pd->dependants[i] == p)
                     break;
             }
@@ -361,7 +368,7 @@ void kmm_init_plugin(kmm_plugin_i * p) {
                     RaiseException(1, EXCEPTION_NONCONTINUABLE, 0, NULL);
                 }
 
-                /* released in kmm_free_plugin() */
+                /* released in kmmint_free_plugin() */
                 kmm_hold_plugin(kmm_handle_from_plugin(p));
                 pd->dependants[pd->n_dependants] = p;
                 pd->n_dependants++;
@@ -378,15 +385,15 @@ void kmm_init_plugin(kmm_plugin_i * p) {
             p->state = KMM_PLUGIN_STATE_HOLD;
         }
 
-        free(deps);
+        PFREE(deps);
 
     } while(FALSE);
     LeaveCriticalSection(&cs_kmm);
 
     EnterCriticalSection(&cs_kmm);
     p->module->plugin_count++;
-    kmm_delist_plugin(p);
-    kmm_list_plugin(p);
+    kmmint_delist_plugin(p);
+    kmmint_list_plugin(p);
     LeaveCriticalSection(&cs_kmm);
 
     if(p->state == KMM_PLUGIN_STATE_HOLD) {
@@ -397,13 +404,12 @@ void kmm_init_plugin(kmm_plugin_i * p) {
 
     kmmint_add_to_plugin_queue();
 
-    p->ht_thread = CreateThread(
-        NULL,
-        0,
-        kmm_plugin_broker,
-        (LPVOID) p,
-        CREATE_SUSPENDED,
-        &dummy);
+    p->ht_thread = CreateThread(NULL,
+                                0,
+                                kmm_plugin_broker,
+                                (LPVOID) p,
+                                CREATE_SUSPENDED,
+                                &dummy);
 
     p->state = KMM_PLUGIN_STATE_INIT;
 
@@ -549,18 +555,19 @@ void kmm_init_module(kmm_module_i * m) {
         goto _exit;
     }
 
-    if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"Flags", &i))) {
-        if(i & KMM_MODULE_FLAG_DISABLED) {
-            _report_mr0(KHERR_ERROR, MSG_IM_DISABLED);
+    if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"Flags", &i)) &&
+       (i & KMM_MODULE_FLAG_DISABLED)) {
 
-            m->state = KMM_MODULE_STATE_FAIL_DISABLED;
-            goto _exit;
-        }
+        _report_mr0(KHERR_ERROR, MSG_IM_DISABLED);
+
+        m->state = KMM_MODULE_STATE_FAIL_DISABLED;
+        goto _exit;
     }
 
     if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"FailureCount", &i))) {
         khm_int64 tm;
         khm_int64 ct;
+        khm_int32 last_reason = 0;
 
         /* reset the failure count if the failure count reset time
            period has elapsed */
@@ -578,7 +585,13 @@ void kmm_init_module(kmm_module_i * m) {
 
         }
 
-        if(i > max_fail_count) {
+        khc_read_int32(csp_mod, L"FailureReason", &last_reason);
+
+        /* did we exceed the max failure count?  However, we ignore
+           the max failure count if the reason why it didn't load the
+           last time was because the module wasn't found. */
+        if(i > max_fail_count && 
+           last_reason != KMM_MODULE_STATE_FAIL_NOT_FOUND) {
             /* failed too many times */
             _report_mr0(KHERR_ERROR, MSG_IM_MAX_FAIL);
 
@@ -587,10 +600,11 @@ void kmm_init_module(kmm_module_i * m) {
         }
     }
 
-    if(khc_read_string(csp_mod, L"ImagePath", NULL, &sz) == KHM_ERROR_TOO_LONG) {
+    if(khc_read_string(csp_mod, L"ImagePath", NULL, &sz) == 
+       KHM_ERROR_TOO_LONG) {
         if(m->path)
-            free(m->path);
-        m->path = malloc(sz);
+            PFREE(m->path);
+        m->path = PMALLOC(sz);
         khc_read_string(csp_mod, L"ImagePath", m->path, &sz);
     } else {
         _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
@@ -599,11 +613,23 @@ void kmm_init_module(kmm_module_i * m) {
         goto _exit;
     }
 
-    if (khc_read_string(csp_mod, L"Vendor", NULL, &sz) == KHM_ERROR_TOO_LONG) {
-        if (m->vendor)
-            free(m->vendor);
-        m->vendor = malloc(sz);
-        khc_read_string(csp_mod, L"Vendor", m->vendor, &sz);
+    rv = kmmint_read_module_info(m);
+
+    if (KHM_FAILED(rv)) {
+        if (rv == KHM_ERROR_INCOMPATIBLE) {
+            _report_mr0(KHERR_ERROR, MSG_IM_INCOMPATIBLE);
+
+            m->state = KMM_MODULE_STATE_FAIL_INCOMPAT;
+        } else if (rv == KHM_ERROR_NOT_FOUND) {
+            _report_mr1(KHERR_ERROR, MSG_IM_NOT_FOUND, _dupstr(m->path));
+
+            m->state = KMM_MODULE_STATE_FAIL_NOT_FOUND;
+        } else {
+            _report_mr0(KHERR_ERROR, MSG_IM_INVALID_MODULE);
+
+            m->state = KMM_MODULE_STATE_FAIL_INV_MODULE;
+        }
+        goto _exit;
     }
 
     /* check again */
@@ -613,11 +639,13 @@ void kmm_init_module(kmm_module_i * m) {
         goto _exit;
     }
 
+    /* from this point on, we must record any failure codes */
+    record_failure = TRUE;
+
     hm = LoadLibrary(m->path);
     if(!hm) {
         m->h_module = NULL;
         m->state = KMM_MODULE_STATE_FAIL_NOT_FOUND;
-        record_failure = TRUE;
 
         _report_mr1(KHERR_ERROR, MSG_IM_NOT_FOUND, _dupstr(m->path));
 
@@ -628,12 +656,11 @@ void kmm_init_module(kmm_module_i * m) {
        exit_module */
     release_module = FALSE;
     exit_module = TRUE;
-    record_failure = TRUE;
 
     m->flags |= KMM_MODULE_FLAG_LOADED;
     m->h_module = hm;
 
-    /*TODO: check signatures */
+    /* TODO: check signatures */
 
     p_init_module = (init_module_t) GetProcAddress(hm, EXP_INIT_MODULE);
 
@@ -645,7 +672,6 @@ void kmm_init_module(kmm_module_i * m) {
     }
 
     m->state = KMM_MODULE_STATE_INIT;
-
 
     /* call init_module() */
     rv = (*p_init_module)(kmm_handle_from_module(m));
@@ -695,7 +721,7 @@ void kmm_init_module(kmm_module_i * m) {
 
     ResetEvent(evt_exit);
 
-_exit:
+ _exit:
     if(csp_mod) {
         if(record_failure) {
             khm_int64 ct;
@@ -709,17 +735,17 @@ _exit:
                 GetSystemTimeAsFileTime((LPFILETIME) &ct);
                 khc_write_int64(csp_mod, L"FailureTime", ct);
             }
+
+            khc_write_int32(csp_mod, L"FailureReason", m->state);
         }
         khc_close_space(csp_mod);
     }
+
     if(csp_mods)
         khc_close_space(csp_mods);
 
     _report_mr2(KHERR_INFO, MSG_IM_MOD_STATE, 
                 _dupstr(m->name), _int32(m->state));
-
-    if(release_module)
-        kmm_release_module(kmm_handle_from_module(m));
 
     kmmint_remove_from_module_queue();
 
@@ -727,6 +753,53 @@ _exit:
        module code, we need to call exit_module */
     if(exit_module)
         kmm_exit_module(m);
+
+    if(release_module)
+        kmm_release_module(kmm_handle_from_module(m));
+
+    if (kherr_is_error()) {
+        kherr_context * c;
+        kherr_event * err_e = NULL;
+        kherr_event * warn_e = NULL;
+        kherr_event * e;
+
+        c = kherr_peek_context();
+        err_e = kherr_get_err_event(c);
+        for(e = kherr_get_first_event(c);
+            e;
+            e = kherr_get_next_event(e)) {
+            if (e != err_e &&
+                e->severity == KHERR_WARNING) {
+                warn_e = e;
+                break;
+            }
+        }
+
+        kherr_evaluate_event(err_e);
+        if (warn_e)
+            kherr_evaluate_event(warn_e);
+
+        kherr_clear_error();
+
+        e = kherr_report(KHERR_ERROR,
+                         (wchar_t *) MSG_IMERR_TITLE,
+                         KHERR_FACILITY,
+                         NULL,
+                         err_e->long_desc,
+                         ((warn_e)? (wchar_t *)MSG_IMERR_SUGGEST: NULL),
+                         KHERR_FACILITY_ID,
+                         KHERR_SUGGEST_NONE,
+                         _cstr(m->name),
+                         ((warn_e)? _cstr(warn_e->long_desc):0),
+                         0,0,
+                         KHERR_RF_MSG_SHORT_DESC |
+                         ((warn_e)? KHERR_RF_MSG_SUGGEST: 0),
+                         KHERR_HMODULE);
+
+        kherr_evaluate_event(e);
+
+        kherr_release_context(c);
+    }
 
     _end_task();
 }
@@ -780,7 +853,8 @@ void kmm_exit_module(kmm_module_i * m) {
         while(p) {
             if(p->module == m) {
                 kmm_hold_plugin(kmm_handle_from_plugin(p));
-                kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, KMM_REG_EXIT_PLUGIN, (void *) p);
+                kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
+                                 KMM_REG_EXIT_PLUGIN, (void *) p);
                 np++;
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,7 +32,7 @@
 */
 
 kmm_plugin_i * 
-kmm_get_plugin_i(wchar_t * name)
+kmmint_get_plugin_i(wchar_t * name)
 {
     kmm_plugin_i * p;
     size_t cb;
@@ -45,15 +45,15 @@ kmm_get_plugin_i(wchar_t * name)
     p = (kmm_plugin_i *) hash_lookup(hash_plugins, (void *) name);
 
     if(p == NULL) {
-        p = malloc(sizeof(kmm_plugin_i));
+        p = PMALLOC(sizeof(kmm_plugin_i));
         ZeroMemory(p, sizeof(kmm_plugin_i));
         p->magic = KMM_PLUGIN_MAGIC;
-        p->p.name = malloc(cb);
+        p->p.name = PMALLOC(cb);
         StringCbCopy(p->p.name, cb, name);
         p->state = KMM_PLUGIN_STATE_NONE;
 
         hash_add(hash_plugins, (void *) p->p.name, (void *) p);
-        kmm_list_plugin(p);
+        kmmint_list_plugin(p);
     }
     LeaveCriticalSection(&cs_kmm);
 
@@ -61,7 +61,7 @@ kmm_get_plugin_i(wchar_t * name)
 }
 
 kmm_plugin_i * 
-kmm_find_plugin_i(wchar_t * name)
+kmmint_find_plugin_i(wchar_t * name)
 {
     kmm_plugin_i * p;
     size_t cb;
@@ -78,7 +78,7 @@ kmm_find_plugin_i(wchar_t * name)
 
 /* the plugin must be delisted before calling this */
 void 
-kmm_list_plugin(kmm_plugin_i * p)
+kmmint_list_plugin(kmm_plugin_i * p)
 {
     EnterCriticalSection(&cs_kmm);
     if((p->flags & KMM_PLUGIN_FLAG_IN_MODLIST) ||
@@ -92,7 +92,7 @@ kmm_list_plugin(kmm_plugin_i * p)
 }
 
 void 
-kmm_delist_plugin(kmm_plugin_i * p)
+kmmint_delist_plugin(kmm_plugin_i * p)
 {
     EnterCriticalSection(&cs_kmm);
     if(p->flags & KMM_PLUGIN_FLAG_IN_LIST) {
@@ -112,7 +112,7 @@ kmm_hold_plugin(kmm_plugin p)
     kmm_plugin_i * pi;
 
     if(!kmm_is_plugin(p))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_kmm);
     pi = kmm_plugin_from_handle(p);
@@ -124,14 +124,14 @@ kmm_hold_plugin(kmm_plugin p)
 
 /* called with cs_kmm held */
 void 
-kmm_free_plugin(kmm_plugin_i * pi)
+kmmint_free_plugin(kmm_plugin_i * pi)
 {
     int i;
     pi->magic = 0;
 
     hash_del(hash_plugins, (void *) pi->p.name);
 
-    kmm_delist_plugin(pi);
+    kmmint_delist_plugin(pi);
 
     for(i=0; i<pi->n_dependants; i++) {
         kmm_release_plugin(kmm_handle_from_plugin(pi->dependants[i]));
@@ -146,18 +146,18 @@ kmm_free_plugin(kmm_plugin_i * pi)
     pi->p.module = NULL;
 
     if(pi->p.name)
-        free(pi->p.name);
+        PFREE(pi->p.name);
     pi->p.name = NULL;
 
     if(pi->p.description)
-        free(pi->p.description);
+        PFREE(pi->p.description);
     pi->p.description = NULL;
 
     if(pi->p.dependencies)
-        free(pi->p.dependencies);
+        PFREE(pi->p.dependencies);
     pi->p.dependencies = NULL;
 
-    free(pi);
+    PFREE(pi);
 }
 
 KHMEXP khm_int32   KHMAPI
@@ -167,11 +167,11 @@ kmm_get_plugin_info_i(kmm_plugin p, kmm_plugin_info * info) {
     khm_handle csp_plugin;
 
     if (!info)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_kmm);
     if (!kmm_is_plugin(p)) {
-        rv = KHM_ERROR_INVALID_PARM;
+        rv = KHM_ERROR_INVALID_PARAM;
         goto _cleanup;
     }
 
@@ -217,7 +217,7 @@ kmm_release_plugin_info_i(kmm_plugin_info * info) {
     khm_int32 rv;
 
     if (!info || !info->h_plugin)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     rv = kmm_release_plugin(info->h_plugin);
 
@@ -285,13 +285,13 @@ kmm_release_plugin(kmm_plugin p)
     kmm_plugin_i * pi;
 
     if(!kmm_is_plugin(p))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_kmm);
     pi = kmm_plugin_from_handle(p);
     pi->refcount--;
     if(pi->refcount == 0) {
-        kmm_free_plugin(pi);
+        kmmint_free_plugin(pi);
     }
     LeaveCriticalSection(&cs_kmm);
 
@@ -314,20 +314,22 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
         return KHM_ERROR_INVALID_OPERATION;
 
     if(!plugin || 
-        FAILED(StringCbLength(plugin->name, KMM_MAXCB_NAME - sizeof(wchar_t), &cb_name)) ||
-          (plugin->description && 
-             FAILED(StringCbLength(plugin->description, KMM_MAXCB_DESC - sizeof(wchar_t), &cb_desc))) ||
-          (plugin->dependencies && 
-             KHM_FAILED(multi_string_length_cb(plugin->dependencies, KMM_MAXCB_DEPS, &cb_dep)))
-        )
-    {
-        return KHM_ERROR_INVALID_PARM;
+       FAILED(StringCbLength(plugin->name, KMM_MAXCB_NAME - sizeof(wchar_t), 
+                             &cb_name)) ||
+       (plugin->description && 
+        FAILED(StringCbLength(plugin->description, 
+                              KMM_MAXCB_DESC - sizeof(wchar_t), 
+                              &cb_desc))) ||
+       (plugin->dependencies && 
+        KHM_FAILED(multi_string_length_cb(plugin->dependencies, 
+                                          KMM_MAXCB_DEPS, &cb_dep)))) {
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     cb_name += sizeof(wchar_t);
     cb_desc += sizeof(wchar_t);
 
-    p = kmm_get_plugin_i(plugin->name);
+    p = kmmint_get_plugin_i(plugin->name);
 
     /* released below or in kmm_init_module() */
     kmm_hold_plugin(kmm_handle_from_plugin(p));
@@ -348,13 +350,13 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
     p->p.type = plugin->type;
 
     if(plugin->description) {
-        p->p.description = malloc(cb_desc);
+        p->p.description = PMALLOC(cb_desc);
         StringCbCopy(p->p.description, cb_desc, plugin->description);
     } else
         p->p.description = NULL;
 
     if(plugin->dependencies) {
-        p->p.dependencies = malloc(cb_dep);
+        p->p.dependencies = PMALLOC(cb_dep);
         multi_string_copy_cb(p->p.dependencies, cb_dep, plugin->dependencies);
     } else
         p->p.dependencies = NULL;
@@ -365,7 +367,7 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
 
     p->state = KMM_PLUGIN_STATE_REG;
 
-    kmm_delist_plugin(p);
+    kmmint_delist_plugin(p);
     EnterCriticalSection(&cs_kmm);
     LPUSH(&(m->plugins), p);
     p->flags |= KMM_PLUGIN_FLAG_IN_MODLIST;

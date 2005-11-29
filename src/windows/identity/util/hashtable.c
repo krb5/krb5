@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -24,6 +24,7 @@
 
 /* $Id$ */
 
+#include<perfstat.h>
 #include<hashtable.h>
 #include<stdlib.h>
 
@@ -35,7 +36,7 @@ KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n,
 {
     hashtable * h;
 
-    h = malloc(sizeof(hashtable));
+    h = PMALLOC(sizeof(hashtable));
 
     h->n = n;
     h->addr = addr;
@@ -57,12 +58,12 @@ KHMEXP void KHMAPI hash_del_hashtable(hashtable * h) {
         while(b) {
             if(h->delr)
                 h->delr(b->key, b->data);
-            free(b);
+            PFREE(b);
             LPOP(&h->bins[i], &b);
         }
     }
 
-    free(h);
+    PFREE(h);
 }
 
 KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data) {
@@ -86,7 +87,7 @@ KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data) {
     }
 
     if(!b) {
-        b = malloc(sizeof(hash_bin));
+        b = PMALLOC(sizeof(hash_bin));
         b->data = data;
         b->key = key;
         LINIT(b);
@@ -109,7 +110,7 @@ KHMEXP void KHMAPI hash_del(hashtable * h, void * key) {
             LDELETE(&h->bins[hv], b);
             if(h->delr)
                 h->delr(b->key, b->data);
-            free(b);
+            PFREE(b);
             break;
         }
         b = LNEXT(b);

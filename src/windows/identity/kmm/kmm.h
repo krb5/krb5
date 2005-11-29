@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -54,7 +54,19 @@ typedef khm_handle kmm_plugin;
 #define KMM_MAXCCH_DESC 512
 
 /*! \brief Maximum number of bytes in a description in KMM including the terminating NULL */
-#define KMM_MAXCB_DESC (sizeof(wchar_t) * KMM_MAXCB_NAME)
+#define KMM_MAXCB_DESC (sizeof(wchar_t) * KMM_MAXCCH_NAME)
+
+/*! \brief Maximum number of characters in a vendor string in KMM including the terminating NULL */
+#define KMM_MAXCCH_VENDOR 256
+
+/*! \brief Maximum number of bytes in a vendor string in KMM including the terminating NULL */
+#define KMM_MAXCB_VENDOR (sizeof(wchar_t) * KMM_MAXCCH_VENDOR)
+
+/*! \brief Maximum number of characters in a support URI in KMM including the terminating NULL */
+#define KMM_MAXCCH_SUPPORT 256
+
+/*! \brief Maximum number of bytes in a vendor string in KMM including the terminating NULL */
+#define KMM_MAXCB_SUPPORT (sizeof(wchar_t) * KMM_MAXCCH_SUPPORT)
 
 /*! \brief Maximum number of dependencies per plugin
 */
@@ -62,7 +74,7 @@ typedef khm_handle kmm_plugin;
 
 /*! \brief Maximum number of dependants per plugin
  */
-#define KMM_MAX_DEPENDANTS      16
+#define KMM_MAX_DEPENDANTS      32
 
 /*! \brief Maximum number of characters a dependency string including trailing double NULL */
 #define KMM_MAXCCH_DEPS (KMM_MAXCCH_NAME * KMM_MAX_DEPENDENCIES + 1)
@@ -141,23 +153,27 @@ typedef struct tag_kmm_plugin_info {
 /*! \brief A credentials provider
 
     \see \ref pi_pt_cred for more information.
-*/
+ */
 #define KHM_PITYPE_CRED     1
+
+/*! \brief A identity provider 
+
+    \see \ref pi_pt_cred for more information
+ */
+#define KHM_PITYPE_IDENT    2
 
 /*! \brief A configuration provider
 
     \see \ref pi_pt_conf for more information.
-*/
-#define KHM_PITYPE_CONFIG   2
+ */
+#define KHM_PITYPE_CONFIG   3
 
-/*@}*/
+/*! \brief Undefined plugin type
 
-/*! \name Plugin flags
-@{*/
+    The plugin doesn't provide any credential type.
+ */
+#define KHM_PITYPE_MISC     4
 
-/*! \brief The plugin is an identity provider
-*/
-#define KHM_PIFLAG_IDENTITY_PROVIDER 1
 /*@}*/
 
 /*! \brief Plugin states */
@@ -208,6 +224,8 @@ typedef struct tag_kmm_module_reg {
 
     wchar_t *   vendor;             /*!< Vendor/copyright string */
 
+    wchar_t *   support;            /*!< Support URL/contact */
+
     khm_int32   n_plugins;          /*!< Number of plugins that are
 				         active */
     kmm_plugin_reg * plugin_reg_info;  /*!< Array of kmm_plugin_reg
@@ -243,6 +261,12 @@ typedef struct tag_kmm_module_info {
 /*! \brief Module states
 */
 enum KMM_MODULE_STATES {
+    KMM_MODULE_STATE_FAIL_INCOMPAT=-12, /*!< The library containing
+                                          the module was not
+                                          compatible with this version
+                                          of NetIDMgr. */
+    KMM_MODULE_STATE_FAIL_INV_MODULE=-11, /*!< The library containing
+                                            the module was invalid. */
     KMM_MODULE_STATE_FAIL_UNKNOWN=-10,   /*!< Module could not be
                                           loaded due to unknown
                                           reasons. */
@@ -463,14 +487,14 @@ KHMEXP khm_boolean  KHMAPI
 kmm_load_pending(void);
 
 #ifdef _WIN32
-/*! \brief Returns the Windows module handle from a handle to a NetIDMgr module.
 
+/*! \brief Returns the Windows module handle from a handle to a NetIDMgr module.
     Although it is possible to obtain the Windows module handle and
     use it to call Windows API functions, it is not recommended to do
     so.  This is because that might cause the state of the module to
     change in ways which are inconsistent from the internal data
     structures that kmm maintains.
-*/
+ */
 KHMEXP HMODULE     KHMAPI 
 kmm_get_hmodule(kmm_module m);
 #endif
@@ -526,7 +550,7 @@ kmm_release_plugin(kmm_plugin p);
     \retval KHM_ERROR_SUCCESS Succeeded.
     \retval KHM_ERROR_INVALID_OPERATION The function was not called
         during init_module()
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_DUPLICATE The plugin was already provided
 
     \note This can only be called when handing init_module()
@@ -661,7 +685,7 @@ kmm_get_modules_config(khm_int32 flags, khm_handle * result);
         copied.
 
     \retval KHM_ERROR_SUCCESS The requested information was copied
-    \retval KHM_ERROR_INVALID_PARM One of the parameters was invalid
+    \retval KHM_ERROR_INVALID_PARAM One of the parameters was invalid
     \retval KHM_ERROR_TOO_LONG The buffer was not large enough or was
         NULL.  The number of bytes requied is in \a cb_buffer.
     \retval KHM_ERROR_NOT_FOUND The specified module is not a
@@ -720,7 +744,7 @@ kmm_release_module_info_i(kmm_module_info * info);
     \retval KHM_ERROR_TOO_LONG The buffer was either \a NULL or
         insufficient to hold the requested information.  The required
         size of the buffer was stored in \a cb_buffer
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were
         invlaid.
     \retval KHM_ERROR_NOT_FOUND The specified plugin was not found
         among the registered plugins.
@@ -821,9 +845,9 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags);
     zero, in which case \a plugin_info can be \a NULL.  Plugins can be
     registered separately using kmm_register_plugin().
 
-    \param[in] module Information about the module.  All members are
-        required, however \a plugin_info can be \a NULL if \a
-        n_plugins is zero.
+    \param[in] module Information about the module.  The name and path
+        fields are required. The \a plugin_info field can only be \a
+        NULL if \a n_plugins is zero.
 
     \param[in] config_flags Flags used to call khc_open_space().  This
         can be used to choose the configuration store in which the
@@ -910,6 +934,10 @@ typedef struct tag_kmm_module_locale {
     You can obtain a handle to the loaded library using
     kmm_get_resource_hmodule().  This function does not return until a
     matched library is loaded.
+
+    Note that the ::kmm_module_locale structure only specifies a
+    module name for the resource module.  This resource module must
+    exist in the same directory as the \a module.
 
     \param[in] module The module handle
     \param[in] locales An array of ::kmm_module_locale objects

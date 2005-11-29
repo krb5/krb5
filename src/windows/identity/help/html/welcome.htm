@@ -1,24 +1,70 @@
 <html>
 <head>
-  <title>Welcome to Khimaira</title>
+  <title>Welcome to the Network Identity Manager</title>
   <meta name="description" content="Welcome">
   <meta name="keywords" content="welcome">
-  <link rel="stylesheet" type="text/css" href="khm.css">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
 </head>
 
-<h1>Welcome to Khimaira</h1>
+<h1>Welcome to the Network Identity Manager</h1>
 
-<p>Khimaira is a credentials manager that lets you manage Kerberos,
-AFS and other types of credentials.
+<div class="inline">
+<img src="images/logo.jpg"/>
+</div>
+
+<p>
+The Network Identity Manager (or NetIDMgr for short) allows you to
+manage your credentials (Kerberos tickets, AFS tokens, etc.) on a per
+identity basis.
 </p>
 
-<p>The following web sites provide more information about Kerberos and
-AFS:</p>
+<p>
+NetIDMgr is extensible using plugins.  In fact, most of the features
+are implemented in plugins, some of which are themselves extensible.
+Support for additional protocols and credential types can be added by
+installing the appropriate plugins.
+</p>
+
+<p>
+This version is distributed as a part of the MIT Kerberos for Windows
+product along with the Kerberos 5 and Kerberos 4 plugins.  The OpenAFS
+plugin, which is required for supporting OpenAFS tokens, is
+distributed separately.
+</p>
 
 <ul>
-<li><a class="external" href="http://web.mit.edu/kerberos">http://web.mit.edu/kerbeors</a></li>
-<li><a class="external" href="http://openafs.org">http://openafs.org</a></li>
+<li><a href="copyright.htm">Legal information</a></li>
+<li><a href="bugs.htm">Reporting problems</a></li>
 </ul>
 
+<h3>Getting started</h3>
+
+<ul>
+<li><a href="concepts.htm">NetIDMgr concepts</a></li>
+<li><a href="using.htm">Using NetIDMgr</a></li>
+<li><a href="howdoi.htm">How do I ...</a></li>
+</ul>
+
+<h3>Information for developers</h3>
+
+<p>
+If you are interested in developing plugins or extending the features
+of NetIDMgr, your first stop should be the NetIDMgr SDK.  This is
+included in the Kerberos for Windows SDK, which itself is a part of
+the Kerberos for Windows distribution.
+</p>
+
+<h3>External links</h3>
+
+<ul>
+<li><a class="external" href="http://web.mit.edu/kerberos">http://web.mit.edu/kerbeors</a>:
+
+MIT Kerberos distribution
+</li>
+<li><a class="external" href="http://openafs.org">http://openafs.org</a>:
+
+OpenAFS
+</li>
+</ul>
 
 </html>

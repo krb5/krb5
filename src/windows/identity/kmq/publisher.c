@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,13 +33,14 @@ kmq_message * msg_active = NULL;
 /*! \internal
     \brief Get a message object
     \note called with ::cs_kmq_msg held */
-kmq_message * kmqint_get_message(void) {
+kmq_message * 
+kmqint_get_message(void) {
     kmq_message * m;
 
     LPOP(&msg_free,&m);
     if(!m) {
         /* allocate one */
-        m = malloc(sizeof(kmq_message));
+        m = PMALLOC(sizeof(kmq_message));
     }
     ZeroMemory((void*)m, sizeof(kmq_message));
 
@@ -52,7 +53,8 @@ kmq_message * kmqint_get_message(void) {
     \brief Frees a message object
     \note called with ::cs_kmq_msg held
     */
-void kmqint_put_message(kmq_message *m) {
+void 
+kmqint_put_message(kmq_message *m) {
     int queued;
     /* we can only free a message if the refcount is zero.
        Otherwise we have to wait until the call is freed. */
@@ -80,7 +82,9 @@ void kmqint_put_message(kmq_message *m) {
 /*! \internal
     \note Obtains ::cs_kmq_msg, ::cs_kmq_types, ::cs_kmq_msg_ref, kmq_queue::cs
     */
-KHMEXP khm_int32 KHMAPI kmq_send_message(khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * blob) {
+KHMEXP khm_int32 KHMAPI 
+kmq_send_message(khm_int32 type, khm_int32 subtype, 
+                 khm_ui_4 uparam, void * blob) {
     kmq_call c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -100,7 +104,9 @@ KHMEXP khm_int32 KHMAPI kmq_send_message(khm_int32 type, khm_int32 subtype, khm_
 /*! \internal
     \note Obtains ::cs_kmq_msg, ::cs_kmq_types, ::cs_kmq_msg_ref, kmq_queue::cs
     */
-KHMEXP khm_int32 KHMAPI kmq_post_message(khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * blob) {
+KHMEXP khm_int32 KHMAPI 
+kmq_post_message(khm_int32 type, khm_int32 subtype, 
+                 khm_ui_4 uparam, void * blob) {
     return kmqint_post_message_ex(type, subtype, uparam, blob, NULL, FALSE);
 }
 
@@ -108,7 +114,8 @@ KHMEXP khm_int32 KHMAPI kmq_post_message(khm_int32 type, khm_int32 subtype, khm_
     \brief Frees a call
     \note Obtains ::cs_kmq_msg
     */
-KHMEXP khm_int32 KHMAPI kmq_free_call(kmq_call call) {
+KHMEXP khm_int32 KHMAPI 
+kmq_free_call(kmq_call call) {
     kmq_message * m;
 
     m = call;
@@ -126,13 +133,10 @@ KHMEXP khm_int32 KHMAPI kmq_free_call(kmq_call call) {
 /*! \internal
     \note Obtains ::cs_kmq_msg, ::cs_kmq_types, ::cs_kmq_msg_ref, kmq_queue::cs 
     */
-khm_int32 kmqint_post_message_ex(
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * blob, 
-    kmq_call * call,
-    khm_boolean try_send) {
+khm_int32 
+kmqint_post_message_ex(khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, 
+    void * blob, kmq_call * call, khm_boolean try_send) 
+{
     kmq_message * m;
     kherr_context * ctx;
 
@@ -170,7 +174,9 @@ khm_int32 kmqint_post_message_ex(
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI kmq_post_message_ex(khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * blob, kmq_call * call)
+KHMEXP khm_int32 KHMAPI 
+kmq_post_message_ex(khm_int32 type, khm_int32 subtype, 
+                    khm_ui_4 uparam, void * blob, kmq_call * call)
 {
     return kmqint_post_message_ex(type, subtype, uparam, blob, call, FALSE);
 }
@@ -178,21 +184,19 @@ KHMEXP khm_int32 KHMAPI kmq_post_message_ex(khm_int32 type, khm_int32 subtype, k
 
 /*! \internal
 */
-KHMEXP khm_int32 KHMAPI kmq_post_sub_msg(khm_handle sub, khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * vparam)
+KHMEXP khm_int32 KHMAPI 
+kmq_post_sub_msg(khm_handle sub, khm_int32 type, khm_int32 subtype, 
+                 khm_ui_4 uparam, void * vparam)
 {
     return kmq_post_sub_msg_ex(sub, type, subtype, uparam, vparam, NULL);
 }
 
 /*! \internal
 */
-khm_int32 kmqint_post_sub_msg_ex(
-    khm_handle sub, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam, 
-    kmq_call * call,
-    khm_boolean try_send)
+khm_int32 
+kmqint_post_sub_msg_ex(khm_handle sub, khm_int32 type, khm_int32 subtype, 
+                       khm_ui_4 uparam, void * vparam, 
+                       kmq_call * call, khm_boolean try_send)
 {
     kmq_message * m;
     kherr_context * ctx;
@@ -237,20 +241,18 @@ khm_int32 kmqint_post_sub_msg_ex(
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI kmq_post_sub_msg_ex(khm_handle sub, khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * vparam, kmq_call * call)
+KHMEXP khm_int32 KHMAPI 
+kmq_post_sub_msg_ex(khm_handle sub, khm_int32 type, khm_int32 subtype, 
+                    khm_ui_4 uparam, void * vparam, kmq_call * call)
 {
-    return kmqint_post_sub_msg_ex(sub, type, subtype, uparam, vparam, call, FALSE);
+    return kmqint_post_sub_msg_ex(sub, type, subtype, 
+                                  uparam, vparam, call, FALSE);
 }
 
-khm_int32 kmqint_post_subs_msg_ex(
-    khm_handle * subs, 
-    khm_size   n_subs, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam, 
-    kmq_call * call,
-    khm_boolean try_send)
+khm_int32 
+kmqint_post_subs_msg_ex(khm_handle * subs, khm_size   n_subs, khm_int32 type, 
+                        khm_int32 subtype, khm_ui_4 uparam, void * vparam, 
+                        kmq_call * call, khm_boolean try_send)
 {
     kmq_message * m;
     kherr_context * ctx;
@@ -301,49 +303,50 @@ khm_int32 kmqint_post_subs_msg_ex(
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI kmq_post_subs_msg(
-    khm_handle * subs, 
-    khm_size   n_subs, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam)
+KHMEXP khm_int32 KHMAPI 
+kmq_post_subs_msg(khm_handle * subs, 
+                  khm_size   n_subs, 
+                  khm_int32 type, 
+                  khm_int32 subtype, 
+                  khm_ui_4 uparam, 
+                  void * vparam)
 {
-    return kmqint_post_subs_msg_ex(
-        subs,
-        n_subs,
-        type,
-        subtype,
-        uparam,
-        vparam,
-        NULL,
-        FALSE);
+    return kmqint_post_subs_msg_ex(subs,
+                                   n_subs,
+                                   type,
+                                   subtype,
+                                   uparam,
+                                   vparam,
+                                   NULL,
+                                   FALSE);
 }
 
-KHMEXP khm_int32 KHMAPI kmq_post_subs_msg_ex(
-    khm_handle * subs, 
-    khm_int32 n_subs, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam, 
-    kmq_call * call)
+KHMEXP khm_int32 KHMAPI 
+kmq_post_subs_msg_ex(khm_handle * subs, 
+                     khm_int32 n_subs, 
+                     khm_int32 type, 
+                     khm_int32 subtype, 
+                     khm_ui_4 uparam, 
+                     void * vparam, 
+                     kmq_call * call)
 {
-    return kmqint_post_subs_msg_ex(subs, n_subs, type, subtype, uparam, vparam, call, FALSE);
+    return kmqint_post_subs_msg_ex(subs, n_subs, type, subtype, 
+                                   uparam, vparam, call, FALSE);
 }
 
-KHMEXP khm_int32 KHMAPI kmq_send_subs_msg(
-    khm_handle *subs, 
-    khm_int32 n_subs,
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam)
+KHMEXP khm_int32 KHMAPI 
+kmq_send_subs_msg(khm_handle *subs, 
+                  khm_int32 n_subs,
+                  khm_int32 type, 
+                  khm_int32 subtype, 
+                  khm_ui_4 uparam, 
+                  void * vparam)
 {
     kmq_call c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
-    rv = kmqint_post_subs_msg_ex(subs, n_subs, type, subtype, uparam, vparam, &c, TRUE);
+    rv = kmqint_post_subs_msg_ex(subs, n_subs, type, subtype,
+                                 uparam, vparam, &c, TRUE);
     if(KHM_FAILED(rv))
         return rv;
 
@@ -358,7 +361,9 @@ KHMEXP khm_int32 KHMAPI kmq_send_subs_msg(
 
 /*! \internal
 */
-KHMEXP khm_int32 KHMAPI kmq_send_sub_msg(khm_handle sub, khm_int32 type, khm_int32 subtype, khm_ui_4 uparam, void * vparam)
+KHMEXP khm_int32 KHMAPI 
+kmq_send_sub_msg(khm_handle sub, khm_int32 type, khm_int32 subtype, 
+                 khm_ui_4 uparam, void * vparam)
 {
     kmq_call c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -379,7 +384,8 @@ KHMEXP khm_int32 KHMAPI kmq_send_sub_msg(khm_handle sub, khm_int32 type, khm_int
 /*! \internal
     \note Obtains ::cs_kmq_global, ::cs_kmq_msg, ::cs_kmq_msg_ref, kmq_queue::cs
     */
-KHMEXP khm_int32 KHMAPI kmq_send_thread_quit_message(kmq_thread_id thread, khm_ui_4 uparam) {
+KHMEXP khm_int32 KHMAPI 
+kmq_send_thread_quit_message(kmq_thread_id thread, khm_ui_4 uparam) {
     kmq_call c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -397,7 +403,9 @@ KHMEXP khm_int32 KHMAPI kmq_send_thread_quit_message(kmq_thread_id thread, khm_u
 /*! \internal
     \note Obtains ::cs_kmq_global, ::cs_kmq_msg, ::cs_kmq_msg_ref, kmq_queue::cs
     */ 
-KHMEXP khm_int32 KHMAPI kmq_post_thread_quit_message(kmq_thread_id thread, khm_ui_4 uparam, kmq_call * call) {
+KHMEXP khm_int32 KHMAPI 
+kmq_post_thread_quit_message(kmq_thread_id thread, 
+                             khm_ui_4 uparam, kmq_call * call) {
     kmq_message * m;
     kmq_queue * q;
 
@@ -438,15 +446,18 @@ KHMEXP khm_int32 KHMAPI kmq_post_thread_quit_message(kmq_thread_id thread, khm_u
 }
 
 /* TODO:Implement these */
-KHMEXP khm_int32 KHMAPI kmq_get_next_response(kmq_call call, void ** resp) {
+KHMEXP khm_int32 KHMAPI 
+kmq_get_next_response(kmq_call call, void ** resp) {
     return 0;
 }
 
-KHMEXP khm_boolean KHMAPI kmq_has_completed(kmq_call call) {
+KHMEXP khm_boolean KHMAPI 
+kmq_has_completed(kmq_call call) {
     return (call->nCompleted + call->nFailed == call->nSent);
 }
 
-KHMEXP khm_int32 KHMAPI kmq_wait(kmq_call call, kmq_timer timeout) {
+KHMEXP khm_int32 KHMAPI 
+kmq_wait(kmq_call call, kmq_timer timeout) {
     kmq_message * m = call;
     DWORD rv;
     /*TODO: check for call free */
@@ -458,13 +469,15 @@ KHMEXP khm_int32 KHMAPI kmq_wait(kmq_call call, kmq_timer timeout) {
         else
             return KHM_ERROR_TIMEOUT;
     } else
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 }
 
 /*! \internal
     \note Obtains ::cs_kmq_types
     */
-KHMEXP khm_int32 KHMAPI kmq_set_completion_handler(khm_int32 type, kmq_msg_completion_handler handler) {
+KHMEXP khm_int32 KHMAPI 
+kmq_set_completion_handler(khm_int32 type, 
+                           kmq_msg_completion_handler handler) {
     return kmqint_msg_type_set_handler(type, handler);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -178,8 +178,8 @@ make_postfix(
 
     base_size = strlen(base) + 1;
     ret_size = base_size + strlen(postfix) + 1;
-    copy = malloc(base_size);
-    ret = malloc(ret_size);
+    copy = PMALLOC(base_size);
+    ret = PMALLOC(ret_size);
 
     if (!copy || !ret)
         goto cleanup;
@@ -194,9 +194,9 @@ make_postfix(
  cleanup:
     if (!copy || !ret) {
         if (copy)
-            free(copy);
+            PFREE(copy);
         if (ret)
-            free(ret);
+            PFREE(ret);
         copy = ret = 0;
     }
     // INVARIANT: (ret ==> copy) && (copy ==> ret)
@@ -218,7 +218,7 @@ make_temp_cache_v4(
     if (old_cache) {
         pdest_tkt();
         pkrb_set_tkt_string(old_cache);
-        free(old_cache);
+        PFREE(old_cache);
         old_cache = 0;
     }
 
@@ -230,7 +230,7 @@ make_temp_cache_v4(
             return KFAILURE;
 
         pkrb_set_tkt_string(tmp_cache);
-        free(tmp_cache);
+        PFREE(tmp_cache);
     }
     return 0;
 }
@@ -259,7 +259,7 @@ make_temp_cache_v5(
         if (!pkrb5_cc_resolve(ctx, pkrb5_cc_default_name(ctx), &cc))
             pkrb5_cc_destroy(ctx, cc);
         pkrb5_cc_set_default_name(ctx, old_cache);
-        free(old_cache);
+        PFREE(old_cache);
         old_cache = 0;
     }
     if (ctx) {
@@ -291,7 +291,7 @@ make_temp_cache_v5(
             ctx = 0;
         }
         if (tmp_cache)
-            free(tmp_cache);
+            PFREE(tmp_cache);
         if (pctx)
             *pctx = ctx;
         return rc;
@@ -408,7 +408,7 @@ Leash_changepwd_v5(char * principal,
            (result_string.length ? (sizeof(": ") - 1) : 0) +
            result_string.length;
        if (len && error_str) {
-           *error_str = malloc(len + 1);
+           *error_str = PMALLOC(len + 1);
            if (*error_str)
                _snprintf(*error_str, len + 1,
                          "%.*s%s%.*s",
@@ -516,7 +516,7 @@ Leash_int_changepwd(
         if (v4_error_str)
             len += sizeof(sep) + sizeof(v4_prefix) + strlen(v4_error_str) + 
                 sizeof(sep);
-        error_str = malloc(len + 1);
+        error_str = PMALLOC(len + 1);
         if (error_str) {
             char* p = error_str;
             int size = len + 1;
@@ -1019,27 +1019,27 @@ not_an_API_LeashFreeTicketList(TicketList** ticketList)
         killList = tempList;
            
         tempList = (TicketList*)tempList->next;
-        free(killList->theTicket);
+        PFREE(killList->theTicket);
         if (killList->tktEncType)
-            free(killList->tktEncType);
+            PFREE(killList->tktEncType);
         if (killList->keyEncType)
-            free(killList->keyEncType);
+            PFREE(killList->keyEncType);
         if (killList->addrCount) {
             int n;
             for ( n=0; n<killList->addrCount; n++) {
                 if (killList->addrList[n])
-                    free(killList->addrList[n]);
+                    PFREE(killList->addrList[n]);
             }
         }
         if (killList->addrList)
-            free(killList->addrList);
+            PFREE(killList->addrList);
         if (killList->name)
-            free(killList->name);
+            PFREE(killList->name);
         if (killList->inst)
-            free(killList->inst);
+            PFREE(killList->inst);
         if (killList->realm)
-            free(killList->realm);
-        free(killList);
+            PFREE(killList->realm);
+        PFREE(killList);
     }
 
     *ticketList = NULL;

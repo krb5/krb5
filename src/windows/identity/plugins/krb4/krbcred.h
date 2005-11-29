@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,11 +29,11 @@
 
 #include<windows.h>
 
-#include<khdefs.h>
-#include<kcreddb.h>
-#include<kmm.h>
-#include<kconfig.h>
+#define KHERR_FACILITY L"Kerberos4"
+#define KHERR_FACILITY_ID 65
+#define KHERR_HMODULE hResModule
 
+#include<netidmgr.h>
 
 #include<krb4funcs.h>
 #include<krb5common.h>
@@ -41,7 +41,6 @@
 #include<dynimport.h>
 
 #include<langres.h>
-#include<datarep.h>
 
 #define TYPENAME_ENCTYPE        L"EncType"
 #define TYPENAME_ADDR_LIST      L"AddrList"
@@ -86,7 +85,12 @@ extern khm_int32 attr_id_renew_for;
 
 #define KRB4_CREDTYPE_NAME  L"Krb4Cred"
 
+#define KRB5_CREDTYPE_NAME  L"Krb5Cred"
+
 #define KRB4_CONFIG_NODE_NAME L"Krb4Config"
+
+#define KRB4_ID_CONFIG_NODE_NAME L"Krb4IdentConfig"
+#define KRB4_IDS_CONFIG_NODE_NAME L"Krb4IdentsConfig"
 
 extern khm_handle csp_plugins;
 extern khm_handle csp_krbcred;
@@ -96,6 +100,7 @@ extern kconf_schema schema_krbconfig[];
 
 /* other globals */
 extern khm_int32 credtype_id_krb4;
+extern khm_int32 credtype_id_krb5;
 
 extern khm_boolean krb4_initialized;
 
@@ -111,4 +116,20 @@ krb4_confg_proc(HWND hwnd,
                 UINT uMsg,
                 WPARAM wParam,
                 LPARAM lParam);
+
+INT_PTR CALLBACK
+krb4_ids_config_proc(HWND hwnd,
+                     UINT uMsg,
+                     WPARAM wParam,
+                     LPARAM lParam);
+
+INT_PTR CALLBACK
+krb4_id_config_proc(HWND hwnd,
+                    UINT uMsg,
+                    WPARAM wParam,
+                    LPARAM lParam);
+
+khm_int32
+krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
+                 khm_ui_4 uparam, void * vparam);
 #endif
