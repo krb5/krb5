@@ -37,8 +37,6 @@ $(OUTPRE)klist.$(OBJEXT): klist.c $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/socket-utils.h
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/fake-addrinfo.h

@@ -83,8 +83,7 @@ aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): aeskey.c \
 aes_s2k.so aes_s2k.po $(OUTPRE)aes_s2k.$(OBJEXT): aes_s2k.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  $(srcdir)/../dk/dk.h $(SRCTOP)/include/k5-int.h aes_s2k.h
+  $(srcdir)/../dk/dk.h aes_s2k.h

@@ -28,5 +28,4 @@ clean::
 # the Makefile.in file
 #
 $(OUTPRE)test_getpw.$(OBJEXT): test_getpw.c $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-thread.h
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h

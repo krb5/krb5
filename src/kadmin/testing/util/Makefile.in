@@ -54,12 +54,7 @@ $(OUTPRE)tcl_ovsec_kadm.$(OBJEXT): tcl_ovsec_kadm.c \
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/kadm5/kadm_err.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h tcl_kadm5.h \
   $(BUILDTOP)/lib/kdb/adb_err.h
 $(OUTPRE)tcl_kadm5.$(OBJEXT): tcl_kadm5.c $(BUILDTOP)/include/kadm5/admin.h \
@@ -69,12 +64,7 @@ $(OUTPRE)tcl_kadm5.$(OBJEXT): tcl_kadm5.c $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/lib/kdb/adb_err.h tcl_kadm5.h
 $(OUTPRE)test.$(OBJEXT): test.c tcl_kadm5.h
