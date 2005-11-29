@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <krb5.h>
+#include "hash_provider.h"
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 
@@ -168,8 +168,6 @@ static void test_cts()
 	}
     }
 }
-
-#include "hash_provider.h"
 
 int main (int argc, char **argv)
 {
