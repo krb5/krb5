@@ -14,9 +14,22 @@
 #include <errno.h>
 #include <krb5.h>
 #include <krb5/kdb.h>
-#include <db.h>
+/* Okay, this is a bit obscure.  The libdb2 configure script doesn't
+   detect it, but on Tru64 5.1, netinet/in.h causes sys/bittypes.h to
+   be included, and that has a typedef for u_int32_t.  Because the
+   configure script doesn't detect it, it causes db-config.h to have a
+   #define for u_int32_t, so including db.h and then netinet/in.h
+   causes compilation to fail.
+
+   Since gssrpc/types.h includes netinet/in.h, including that first
+   will cause the typedef to be seen before the macro definition,
+   which still isn't quite right, but is close enough for now.
+
+   A better fix might be for db.h to include netinet/in.h if that's
+   where we find u_int32_t.  */
 #include <gssrpc/types.h>
 #include <gssrpc/xdr.h>
+#include <db.h>
 #include "adb_err.h"
 #include <com_err.h>
 
