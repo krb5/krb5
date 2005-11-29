@@ -3,9 +3,7 @@ datadir=@datadir@
 thisconfigdir=.
 myfulldir=.
 mydir=.
-SUBDIRS=util include lib @krb524@ kdc kadmin slave clients \
-	modules/kdb/db2 \
-	appl tests \
+SUBDIRS=util include lib @krb524@ kdc kadmin slave clients appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 
@@ -24,11 +22,6 @@ all-unix:: krb5-config
 all-prerecurse: update-autoconf-h
 update-autoconf-h:
 	(cd include && $(MAKE) krb5/autoconf.h)
-
-##DOS##!if 0
-# This makefile doesn't use lib.in, but we still need shlib.conf here.
-config.status: $(SRCTOP)/config/shlib.conf
-##DOS##!endif
 
 all-windows:: maybe-awk Makefile-windows
 	@echo Making autoconf.h in include\krb5
@@ -66,7 +59,6 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
-		$(KRB5_DB_MODULE_DIR) \
 		$(KRB5_INCSUBDIRS) $(datadir) $(EXAMPLEDIR)
 
 install-strip:
@@ -88,15 +80,6 @@ install-headers-prerecurse: install-headers-mkdirs
 
 # install::
 #	$(MAKE) $(MFLAGS) install.man
-
-fake-install:
-	$(RM) -r $(FAKEPREFIX)
-	@for i in $(INSTALLMKDIRS); do \
-		$(srcdir)/config/mkinstalldirs util/fakedest$$i; \
-	done
-	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	(w=`pwd`; cd modules/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
 TAGS: $(SRCS)
 	etags $(SRCS)
@@ -193,7 +176,7 @@ WINMAKEFILES=Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
 	windows\gss\Makefile windows\ms2mit\Makefile \
-	windows\wintel\Makefile
+	windows\wintel\Makefile	windows\kfwlogon\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -312,6 +295,8 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\kfwlogon\Makefile: windows\kfwlogon\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
@@ -580,4 +565,3 @@ krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
 check-unix:: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
-check-prerecurse: fake-install
