@@ -172,7 +172,7 @@ HHC=hhc
 
 !ifdef KH_KFWPATH
 KFWINCDIR=$(KH_KFWPATH)\inc
-kfwincflags = -I$(KFWINCDIR)\krb5 -I$(KFWINCDIR)\krb5\KerberosIV -I$(KFWINCDIR)\loadfuncs -I$(KFWINCDIR)
+kfwincflags = -I$(KFWINCDIR)\krb5 -I$(KFWINCDIR)\krb5\KerberosIV -I$(KFWINCDIR)\krb4 -I$(KFWINCDIR)\loadfuncs -I$(KFWINCDIR)
 KFWLIBDIR=$(KH_KFWPATH)\lib\$(CPU)
 !else if defined(PISMERE)
 KFWINCDIR=$(PISMERE)\athena\auth\krb5\src\include
