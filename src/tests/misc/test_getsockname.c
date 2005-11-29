@@ -17,13 +17,15 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include "krb5/autoconf.h"
 
 int
 main(argc, argv)
     int argc;
     char *argv[];
 {
-    int sock, i;
+    int sock;
+    GETSOCKNAME_ARG3_TYPE i;
     struct hostent *host;
     struct sockaddr_in s_sock;		/* server address */
     struct sockaddr_in c_sock;		/* client address */

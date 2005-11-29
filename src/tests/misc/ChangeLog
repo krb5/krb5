@@ -1,3 +1,8 @@
+2005-11-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_getsockname.c: Include autoconf.h.
+	(main): Fix type of variable 'i' used for size of socket address.
+
 2005-05-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (test_getpw): Depend on, and link against, the
