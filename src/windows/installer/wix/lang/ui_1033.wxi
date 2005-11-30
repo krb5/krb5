@@ -728,11 +728,11 @@
       <Dialog Id="KerberosOptions" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
 
 		<Control Id="txtLeash" Type="Text" X="25" Y="55" Width="280" Height="30">
-			<Text>The Leash ticket manager maybe installed with the following optional functionality.  Please check those items that you wish to activate.</Text>
+			<Text>The Network Identity Manager may be installed with the following optional functionality.  Please check those items that you wish to activate.</Text>
 		</Control>
 
         <Control Id="koAutoStartText" Type="CheckBox" X="25" Y="95" Width="280" Height="30" CheckBoxValue="1" Property="LEASHAUTOSTART" >
-			<Text>Autostart the Leash ticket manager each time you login to Windows</Text>
+			<Text>Autostart the Network Identity Manager each time you login to Windows</Text>
         </Control>
         
         <Control Id="koAutoInitText" Type="CheckBox" X="25" Y="130" Width="280" Height="30" CheckBoxValue="-autoinit" Property="LEASHAUTOINIT" >
@@ -756,7 +756,7 @@
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="374" Height="0" />
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
         <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
-          <Text>Leash startup options</Text>
+          <Text>Network Identity Manager startup options</Text>
         </Control>
         <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
           <Text>[DlgTitleFont]Kerberos Options</Text>
@@ -879,8 +879,8 @@
         </Control>
       </Dialog>
       <RadioGroup Property="IAgree">
-        <RadioButton Text="{\DlgFont8}I &amp;accept the terms in the License Agreement" X="5" Y="0" Width="250" Height="15">Yes</RadioButton>
-        <RadioButton Text="{\DlgFont8}I &amp;do not accept the terms in the License Agreement" X="5" Y="20" Width="250" Height="15">No</RadioButton>
+        <RadioButton Text="{\DlgFont8}I &amp;accept the terms in the License Agreement" X="5" Y="0" Width="250" Height="15" Value="Yes"></RadioButton>
+        <RadioButton Text="{\DlgFont8}I &amp;do not accept the terms in the License Agreement" X="5" Y="20" Width="250" Height="15" Value="No"></RadioButton>
       </RadioGroup>
       <TextStyle Id="DlgFont8" FaceName="Tahoma" Size="8" />
       <TextStyle Id="DlgFontBold8" FaceName="Tahoma" Size="8" Bold="yes" />

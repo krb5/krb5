@@ -23,7 +23,9 @@ DLLEXPORTS =\
     -EXPORT:AbortMsiImmediate \
     -EXPORT:UninstallNsisInstallation \
     -EXPORT:KillRunningProcesses \
-    -EXPORT:ListRunningProcesses
+    -EXPORT:ListRunningProcesses \
+    -EXPORT:InstallNetProvider \
+    -EXPORT:UninstallNetProvider
 
 $(DLLFILE): $(OUTPATH)\custom.obj
     $(LINK) /OUT:$@ /DLL $** $(DLLEXPORTS)
@@ -42,7 +44,7 @@ clean:
 #else
 /*
 
-Copyright 2004 by the Massachusetts Institute of Technology
+Copyright 2004,2005 by the Massachusetts Institute of Technology
 
 All rights reserved.
 
@@ -621,6 +623,109 @@ _cleanup:
 	}
 	return rv;
 }
+
+/* Check and add or remove networkprovider key value
+        str : target string
+        str2: string to add/remove
+        bInst: == 1 if string should be added to target if not already there, 
+	otherwise remove string from target if present.
+*/
+int npi_CheckAndAddRemove( LPTSTR str, LPTSTR str2, int bInst ) {
+
+    LPTSTR target, charset, match;
+    int ret=0;
+
+    target = new TCHAR[lstrlen(str)+3];
+    lstrcpy(target,_T(","));
+    lstrcat(target,str);
+    lstrcat(target,_T(","));
+    charset = new TCHAR[lstrlen(str2)+3];
+    lstrcpy(charset,_T(","));
+    lstrcat(charset,str2);
+    lstrcat(charset,_T(","));
+
+    match = _tcsstr(target, charset);
+
+    if ((match) && (bInst)) {
+        ret = INP_ERR_PRESENT;
+        goto cleanup;
+    }
+
+    if ((!match) && (!bInst)) {
+        ret = INP_ERR_ABSENT;
+        goto cleanup;
+    }
+
+    if (bInst) // && !match
+    {
+       lstrcat(str, _T(","));
+       lstrcat(str, str2);
+       ret = INP_ERR_ADDED;
+       goto cleanup;
+    }
+
+    // if (!bInst) && (match)
+    {
+       lstrcpy(str+(match-target),match+lstrlen(str2)+2);
+       str[lstrlen(str)-1]=_T('\0');
+       ret = INP_ERR_REMOVED;
+       goto cleanup;
+    }
+
+cleanup:
+
+    delete target;
+    delete charset;
+    return ret;
+}
+
+/* Sets the registry keys required for the functioning of the network provider */
+
+DWORD InstNetProvider(MSIHANDLE hInstall, int bInst) {
+    LPTSTR strOrder;
+    HKEY hkOrder;
+    LONG rv;
+    DWORD dwSize;
+    HANDLE hProcHeap;
+
+    strOrder = (LPTSTR) 0;
+
+    CHECK(rv = RegOpenKeyEx( HKEY_LOCAL_MACHINE, STR_KEY_ORDER, 0, KEY_READ | KEY_WRITE, &hkOrder ));
+
+    dwSize = 0;
+    CHECK(rv = RegQueryValueEx( hkOrder, STR_VAL_ORDER, NULL, NULL, NULL, &dwSize ) );
+
+    strOrder = new TCHAR[ (dwSize + STR_SERVICE_LEN) * sizeof(TCHAR) ];
+
+    CHECK(rv = RegQueryValueEx( hkOrder, STR_VAL_ORDER, NULL, NULL, (LPBYTE) strOrder, &dwSize));
+
+    npi_CheckAndAddRemove( strOrder, STR_SERVICE , bInst);
+
+    dwSize = (lstrlen( strOrder ) + 1) * sizeof(TCHAR);
+
+    CHECK(rv = RegSetValueEx( hkOrder, STR_VAL_ORDER, NULL, REG_SZ, (LPBYTE) strOrder, dwSize ));
+
+    /* everything else should be set by the MSI tables */
+    rv = ERROR_SUCCESS;
+_cleanup:
+
+    if( rv != ERROR_SUCCESS ) {
+        ShowMsiError( hInstall, ERR_NPI_FAILED, rv );
+    }
+
+    if(strOrder) delete strOrder;
+
+    return rv;
+}
+
+MSIDLLEXPORT InstallNetProvider( MSIHANDLE hInstall ) {
+    return InstNetProvider( hInstall, 1 );
+}
+
+MSIDLLEXPORT UninstallNetProvider( MSIHANDLE hInstall) {
+    return InstNetProvider( hInstall, 0 );
+}
+
 #endif
 #ifdef __NMAKE__
 !ENDIF

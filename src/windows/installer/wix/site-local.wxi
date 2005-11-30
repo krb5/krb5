@@ -6,7 +6,7 @@
     <!-- TargetDir should point to build target directory and must end with 
          a backslash.  If not specified, assume we are in TargetDir\install -->
 
-    <?define TargetDir="c:\temp\kfw\kfw-3.0.0-beta-1\"?>
+    <?define TargetDir="c:\temp\kfw\kfw-3.0.0-beta-2\"?>
 
     <!-- ConfigDir should point to directory containing configuration files 
          (krb5.ini, krb.con, krbrealm.con) to be bundled with the installer.
@@ -53,7 +53,7 @@
     <?define DebugSyms?>
 
     <!-- Optional defines -->
-    <?define Beta="1"?> <!-- Numeric Beta identifier -->
+    <?define Beta="2"?> <!-- Numeric Beta identifier -->
     <!-- <?define OldHelp?> --> <!-- Specifies the use of the old leash32.hlp file 
                            instead of the new leash32.chm file -->
 

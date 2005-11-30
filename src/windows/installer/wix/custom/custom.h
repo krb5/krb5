@@ -47,6 +47,13 @@ SOFTWARE.
 
 #define CHECK2(x,y)  if((x)) { msiErr = (y); goto _cleanup; }
 
+#define STR_KEY_ORDER _T("SYSTEM\\CurrentControlSet\\Control\\NetworkProvider\\Order")
+#define STR_VAL_ORDER _T("ProviderOrder")
+
+#define STR_SERVICE _T("MIT Kerberos")
+#define STR_SERVICE_LEN 12
+
+
 void ShowMsiError(MSIHANDLE, DWORD, DWORD);
 UINT SetAllowTgtSessionKey( MSIHANDLE hInstall, BOOL pInstall );
 UINT KillRunningProcessesSlave( MSIHANDLE hInstall, BOOL bKill );
@@ -58,9 +65,17 @@ MSIDLLEXPORT RevertAllowTgtSessionKey( MSIHANDLE hInstall );
 MSIDLLEXPORT EnableAllowTgtSessionKey( MSIHANDLE hInstall );
 MSIDLLEXPORT KillRunningProcesses( MSIHANDLE hInstall ) ;
 MSIDLLEXPORT ListRunningProcesses( MSIHANDLE hInstall );
+MSIDLLEXPORT InstallNetProvider( MSIHANDLE );
+MSIDLLEXPORT UninstallNetProvider ( MSIHANDLE );
+
+#define INP_ERR_PRESENT 1
+#define INP_ERR_ADDED   2
+#define INP_ERR_ABSENT  3
+#define INP_ERR_REMOVED 4
 
 /* Custom errors */
 #define ERR_CUSTACTDATA 4001
 #define ERR_NSS_FAILED 4003
 #define ERR_ABORT 4004
 #define ERR_PROC_LIST 4006
+#define ERR_NPI_FAILED 4007
