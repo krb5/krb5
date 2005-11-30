@@ -89,7 +89,7 @@ extern LONG conf_status;
 
 #define khc_is_config_running() (conf_init && conf_status)
 
-#define CONFIG_REGPATHW L"Software\\MIT\\NetIDMgr"
+#define CONFIG_REGPATHW L"SOFTWARE\\MIT\\NetIDMgr"
 
 void init_kconf(void);
 void exit_kconf(void);
