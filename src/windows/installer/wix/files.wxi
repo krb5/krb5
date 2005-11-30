@@ -332,7 +332,7 @@
 						<File Id="fil_krb4cred_dll" LongName="krb4cred.dll" Name="krb4cred.dll" KeyPath="yes" />
                     </Component>
                     <Component Id="cmf_krb4cred_en_us_dll" Guid="3FF40A29-E2C3-40F3-B81C-2948494BE4B0" DiskId="1">
-						<File Id="fil_krb4cred_en_us_dll" LongName="krb5cred_en_us.dll" Name="krb4cenu.dll" KeyPath="yes" />
+						<File Id="fil_krb4cred_en_us_dll" LongName="krb4cred_en_us.dll" Name="krb4cenu.dll" KeyPath="yes" />
                     </Component>
                     <Component Id="cmf_netidmgr_exe" Guid="AEB06D67-B4F3-45B1-AC1E-5C1AFF747756" DiskId="1">
 			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
