@@ -1,3 +1,7 @@
+2005-11-29  Jeffrey Altman <jaltman@mit.edu>
+
+	* Makefile.in: add src/windows/kfwlogon tree
+
 2005-09-08  Tom Yu  <tlyu@mit.edu>
 
 	* aclocal.m4 (AC_LIBRARY_NET): Check for a few more libresolv

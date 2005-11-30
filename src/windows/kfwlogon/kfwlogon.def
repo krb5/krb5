@@ -1,0 +1,12 @@
+LIBRARY KFWLOGON
+
+EXPORTS
+
+    DllEntryPoint
+    NPGetCaps
+    NPLogonNotify
+    NPPasswordChangeNotify
+    KFW_Logon_Event
+
+
+

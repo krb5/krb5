@@ -176,7 +176,7 @@ WINMAKEFILES=Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
 	windows\gss\Makefile windows\ms2mit\Makefile \
-	windows\wintel\Makefile
+	windows\wintel\Makefile	windows\kfwlogon\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -295,6 +295,8 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\ms2mit\Makefile: windows\ms2mit\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\kfwlogon\Makefile: windows\kfwlogon\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
