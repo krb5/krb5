@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -37,6 +37,8 @@
 /* notifier message for notification icon */
 #define KHUI_WM_NOTIFIER            WM_COMMAND
 
+#define KHUI_ALERT_QUEUE_MAX        64
+
 /* window class registration atom for message only notifier window
    class */
 ATOM atom_notifier = 0;
@@ -51,6 +53,70 @@ BOOL notifier_ready = FALSE;
 
 khui_alert * current_alert = NULL;
 
+khui_alert * alert_queue[KHUI_ALERT_QUEUE_MAX];
+khm_int32    alert_queue_head = 0;
+khm_int32    alert_queue_tail = 0;
+
+#define is_alert_queue_empty() (alert_queue_head == alert_queue_tail)
+#define is_alert_queue_full()  (((alert_queue_tail + 1) % KHUI_ALERT_QUEUE_MAX) == alert_queue_head)
+
+static void 
+add_to_alert_queue(khui_alert * a) {
+    if (is_alert_queue_full()) return;
+    alert_queue[alert_queue_tail++] = a;
+    khui_alert_hold(a);
+    alert_queue_tail %= KHUI_ALERT_QUEUE_MAX;
+}
+
+static khui_alert * 
+del_from_alert_queue(void) {
+    khui_alert * a;
+
+    if (is_alert_queue_empty()) return NULL;
+    a = alert_queue[alert_queue_head++];
+    alert_queue_head %= KHUI_ALERT_QUEUE_MAX;
+
+    return a;                   /* held */
+}
+
+static khui_alert * 
+peek_alert_queue(void) {
+    if (is_alert_queue_empty()) return NULL;
+    return alert_queue[alert_queue_head];
+}
+
+static void
+check_for_queued_alerts(void) {
+    if (!is_alert_queue_empty()) {
+        khui_alert * a;
+
+        a = peek_alert_queue();
+
+        if (a->title) {
+            HICON hi;
+            int res;
+
+            if (a->severity == KHERR_ERROR)
+                res = OIC_ERROR;
+            else if (a->severity == KHERR_WARNING)
+                res = OIC_WARNING;
+            else
+                res = OIC_INFORMATION;
+
+            hi = LoadImage(0, MAKEINTRESOURCE(res),
+                           IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
+                           LR_SHARED);
+
+            khm_statusbar_set_part(KHUI_SBPART_NOTICE,
+                                   hi,
+                                   a->title);
+        }
+    } else {
+        khm_statusbar_set_part(KHUI_SBPART_NOTICE,
+                               NULL, NULL);
+    }
+}
+
 
 /* forward dcls */
 static khm_int32 
@@ -61,6 +127,9 @@ alert_show_minimized(khui_alert * a);
 
 static khm_int32
 alert_show_normal(khui_alert * a);
+
+static khm_int32
+alert_enqueue(khui_alert * a);
 
 /**********************************************************************
   Notifier
@@ -87,17 +156,41 @@ notifier_wnd_proc(HWND hwnd,
         if(m->type == KMSG_ALERT) {
             /* handle notifier messages */
             switch(m->subtype) {
-                case KMSG_ALERT_SHOW:
-                    rv = alert_show((khui_alert *) m->vparam);
-                    khui_alert_release((khui_alert *) m->vparam);
-                    break;
+            case KMSG_ALERT_SHOW:
+                rv = alert_show((khui_alert *) m->vparam);
+                khui_alert_release((khui_alert *) m->vparam);
+                break;
+
+            case KMSG_ALERT_QUEUE:
+                rv = alert_enqueue((khui_alert *) m->vparam);
+                khui_alert_release((khui_alert *) m->vparam);
+                break;
+
+            case KMSG_ALERT_CHECK_QUEUE:
+                check_for_queued_alerts();
+                break;
+
+            case KMSG_ALERT_SHOW_QUEUED:
+                if (current_alert == NULL) {
+                    khui_alert * a;
+
+                    a = del_from_alert_queue();
+                    if (a) {
+                        rv = alert_show(a);
+                        check_for_queued_alerts();
+                        khui_alert_release(a);
+                    }
+                }
+                break;
             }
         } else if (m->type == KMSG_CRED &&
                    m->subtype == KMSG_CRED_ROOTDELTA) {
+
             KillTimer(hwnd, KHUI_REFRESH_TIMER_ID);
             SetTimer(hwnd, KHUI_REFRESH_TIMER_ID,
                      KHUI_REFRESH_TIMEOUT,
                      NULL);
+
         }
 
         return kmq_wm_end(m, rv);
@@ -140,26 +233,30 @@ notifier_wnd_proc(HWND hwnd,
             khm_show_main_window();
             break;
 
+#if (_WIN32_IE >= 0x0501)
         case NIN_BALLOONUSERCLICK:
             if (current_alert) {
                 if ((current_alert->flags & KHUI_ALERT_FLAG_DEFACTION) &&
                     current_alert->n_alert_commands > 0) {
                     PostMessage(khm_hwnd_main, WM_COMMAND,
-                                MAKEWPARAM(current_alert->alert_commands[0], 0),
+                                MAKEWPARAM(current_alert->alert_commands[0], 
+                                           0),
                                 0);
-                } else if (current_alert->flags & KHUI_ALERT_FLAG_REQUEST_WINDOW) {
+                } else if (current_alert->flags & 
+                           KHUI_ALERT_FLAG_REQUEST_WINDOW) {
                     khm_show_main_window();
                     alert_show_normal(current_alert);
                 }
             }
             /* fallthrough */
         case NIN_BALLOONTIMEOUT:
-            khui_notify_icon_change(KHERR_NONE);
+            khm_notify_icon_change(KHERR_NONE);
             if (current_alert) {
                 khui_alert_release(current_alert);
                 current_alert = NULL;
             }
             break;
+#endif
         }
     } else if (uMsg == WM_TIMER) {
         if (wParam == KHUI_TRIGGER_TIMER_ID) {
@@ -175,7 +272,7 @@ notifier_wnd_proc(HWND hwnd,
 }
 
 ATOM 
-khui_register_notifier_wnd_class(void)
+khm_register_notifier_wnd_class(void)
 {
     WNDCLASSEX wcx;
 
@@ -315,10 +412,12 @@ alert_show_minimized(khui_alert * a) {
 
     a->flags |= KHUI_ALERT_FLAG_DISPLAY_BALLOON;
 
+#if (_WIN32_IE >= 0x0501)
     current_alert = a;
     khui_alert_hold(a);
+#endif
 
-    khui_notify_icon_balloon(a->severity,
+    khm_notify_icon_balloon(a->severity,
                              tbuf,
                              mbuf,
                              NTF_TIMEOUT);
@@ -340,8 +439,12 @@ alert_show_normal(khui_alert * a) {
         title = a->title;
 
     /* if we don't have any commands, we just add a "close" button */
-    if(a->n_alert_commands == 0) {
+    if (a->n_alert_commands == 0) {
         khui_alert_add_command(a, KHUI_PACTION_CLOSE);
+    }
+
+    if (!is_alert_queue_empty()) {
+        khui_alert_add_command(a, KHUI_PACTION_NEXT);
     }
 
     /* we don't need to keep track of the window handle
@@ -365,6 +468,12 @@ alert_show_normal(khui_alert * a) {
 
 static khm_int32 
 alert_show(khui_alert * a) {
+    /* is there an alert already?  If so, we just enqueue the message
+       and let it sit. */
+    if (current_alert) {
+        return alert_enqueue(a);
+    }
+
     /* the window has already been shown */
     if((a->flags & KHUI_ALERT_FLAG_DISPLAY_WINDOW) ||
         ((a->flags & KHUI_ALERT_FLAG_DISPLAY_BALLOON) &&
@@ -385,6 +494,17 @@ alert_show(khui_alert * a) {
         return alert_show_normal(a);
     else
         return alert_show_minimized(a);
+}
+
+static khm_int32
+alert_enqueue(khui_alert * a) {
+    if (is_alert_queue_full())
+        return KHM_ERROR_NO_RESOURCES;
+
+    add_to_alert_queue(a);
+    check_for_queued_alerts();
+
+    return KHM_ERROR_SUCCESS;
 }
 
 /* the alerter window is actually a dialog */
@@ -410,7 +530,7 @@ alerter_wnd_proc(HWND hwnd,
             a = (khui_alert *) lpcs->lpCreateParams;
             khui_alert_hold(a);
 
-            d = malloc(sizeof(*d));
+            d = PMALLOC(sizeof(*d));
             ZeroMemory(d, sizeof(*d));
 
             d->alert = a;
@@ -570,7 +690,7 @@ alerter_wnd_proc(HWND hwnd,
                 }
             }
 
-            khui_notify_icon_change(a->severity);
+            khm_notify_icon_change(a->severity);
 
             khui_alert_unlock(a);
 
@@ -603,9 +723,9 @@ alerter_wnd_proc(HWND hwnd,
 
             DeleteObject(d->hfont);
 
-            free(d);
+            PFREE(d);
 
-            khui_notify_icon_change(KHERR_NONE);
+            khm_notify_icon_change(KHERR_NONE);
 
             return TRUE;
         }
@@ -659,7 +779,7 @@ alerter_wnd_proc(HWND hwnd,
                 hicon = LoadImage(NULL, 
                                   MAKEINTRESOURCE(iid), 
                                   IMAGE_ICON,
-                                  SM_CXICON, SM_CYICON,
+                                  GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
                                   LR_SHARED);
 
                 DrawIcon(hdc, x, y, hicon);
@@ -718,7 +838,7 @@ alerter_wnd_proc(HWND hwnd,
                 CopyRect(&ro, &r);
 
                 // adjust for icon and padding
-                r.left += SM_CXICON + d->dx_suggest_pad * 2;
+                r.left += GetSystemMetrics(SM_CXSMICON) + d->dx_suggest_pad * 2;
                 r.top += d->dx_suggest_pad;
                 r.right -= d->dx_suggest_pad;
                 r.bottom -= d->dx_suggest_pad;
@@ -748,7 +868,7 @@ alerter_wnd_proc(HWND hwnd,
                         LoadImage(0,
                                   MAKEINTRESOURCE(OIC_INFORMATION),
                                   IMAGE_ICON,
-                                  SM_CXICON, SM_CYICON,
+                                  GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
                                   LR_SHARED);
 
                     assert(h_sug_ico != NULL);
@@ -757,7 +877,7 @@ alerter_wnd_proc(HWND hwnd,
                                ro.left + d->dx_suggest_pad, 
                                ro.top + d->dx_suggest_pad, 
                                h_sug_ico,
-                               SM_CXICON, SM_CYICON,
+                               GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
                                0, NULL,
                                DI_NORMAL);
 
@@ -847,6 +967,9 @@ alerter_wnd_proc(HWND hwnd,
                 khm_leave_modal();
 
                 DestroyWindow(hwnd);
+
+                if (LOWORD(wParam) == KHUI_PACTION_NEXT)
+                    kmq_post_message(KMSG_ALERT, KMSG_ALERT_SHOW_QUEUED, 0, 0);
                 return 0;
             }
         }
@@ -857,14 +980,18 @@ alerter_wnd_proc(HWND hwnd,
     //return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-ATOM khui_register_alerter_wnd_class(void)
+ATOM khm_register_alerter_wnd_class(void)
 {
     WNDCLASSEX wcx;
 
     ZeroMemory(&wcx, sizeof(wcx));
 
     wcx.cbSize = sizeof(wcx);
-    wcx.style = CS_DROPSHADOW | CS_OWNDC;
+    wcx.style =
+#if(_WIN32_WINNT >= 0x0501)
+        CS_DROPSHADOW |
+#endif
+        CS_OWNDC;
     wcx.lpfnWndProc = alerter_wnd_proc;
     wcx.cbClsExtra = 0;
     wcx.cbWndExtra = DLGWINDOWEXTRA + sizeof(LONG_PTR);
@@ -887,7 +1014,7 @@ ATOM khui_register_alerter_wnd_class(void)
 
 #define KHUI_NOTIFY_ICON_ID 0
 
-void khui_notify_icon_add(void) {
+void khm_notify_icon_add(void) {
     NOTIFYICONDATA ni;
     wchar_t buf[256];
 
@@ -914,7 +1041,7 @@ void khui_notify_icon_add(void) {
 }
 
 void 
-khui_notify_icon_balloon(khm_int32 severity,
+khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
                          wchar_t * msg,
                          khm_int32 timeout) {
@@ -970,7 +1097,7 @@ khui_notify_icon_balloon(khm_int32 severity,
     DestroyIcon(ni.hIcon);
 }
 
-void khui_notify_icon_change(khm_int32 severity) {
+void khm_notify_icon_change(khm_int32 severity) {
     NOTIFYICONDATA ni;
     wchar_t buf[256];
     int iid;
@@ -1004,7 +1131,7 @@ void khui_notify_icon_change(khm_int32 severity) {
     DestroyIcon(ni.hIcon);
 }
 
-void khui_notify_icon_remove(void) {
+void khm_notify_icon_remove(void) {
     NOTIFYICONDATA ni;
 
     ZeroMemory(&ni, sizeof(ni));
@@ -1020,12 +1147,12 @@ void khui_notify_icon_remove(void) {
   Initialization
 **********************************************************************/
 
-void khui_init_notifier(void)
+void khm_init_notifier(void)
 {
-    if(!khui_register_notifier_wnd_class())
+    if(!khm_register_notifier_wnd_class())
         return;
 
-    if(!khui_register_alerter_wnd_class())
+    if(!khm_register_alerter_wnd_class())
         return;
 
     hwnd_notifier = CreateWindowEx(0,
@@ -1043,7 +1170,7 @@ void khui_init_notifier(void)
         kmq_subscribe_hwnd(KMSG_CRED, hwnd_notifier);
         notifier_ready = TRUE;
 
-        khui_notify_icon_add();
+        khm_notify_icon_add();
     }
 #ifdef DEBUG
     else {
@@ -1051,14 +1178,18 @@ void khui_init_notifier(void)
     }
 #endif
     khm_timer_init();
+
+    khm_addr_change_notifier_init();
 }
 
-void khui_exit_notifier(void)
+void khm_exit_notifier(void)
 {
+    khm_addr_change_notifier_exit();
+
     khm_timer_exit();
 
     if(hwnd_notifier != NULL) {
-        khui_notify_icon_remove();
+        khm_notify_icon_remove();
         kmq_unsubscribe_hwnd(KMSG_ALERT, hwnd_notifier);
         kmq_unsubscribe_hwnd(KMSG_CRED, hwnd_notifier);
         DestroyWindow(hwnd_notifier);

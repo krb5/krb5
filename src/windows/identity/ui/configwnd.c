@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -145,12 +145,12 @@ cfgui_initialize_dialog(HWND hwnd) {
 
     /* create and fill the image list for the treeview */
 
-    d->hi_status = ImageList_Create(SM_CXICON, SM_CYICON, 
+    d->hi_status = ImageList_Create(GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 
                                     ILC_COLOR8 | ILC_MASK,
                                     4,4);
 
     hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_DEFAULT),
-                      IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                      IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
     /* note that we can't use index 0 because that is used to indicate
        that there is no state image for the node */
@@ -161,14 +161,14 @@ cfgui_initialize_dialog(HWND hwnd) {
     DestroyIcon(hicon);
 
     hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_MODIFIED),
-                      IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                      IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
     d->idx_modified = ImageList_AddIcon(d->hi_status, hicon);
 
     DestroyIcon(hicon);
 
     hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_APPLIED),
-                      IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                      IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
     d->idx_applied = ImageList_AddIcon(d->hi_status, hicon);
 
@@ -253,6 +253,42 @@ cfgui_uninitialize_dialog(HWND hwnd) {
         ImageList_Destroy(d->hi_status);
 }
 
+static HWND
+cfgui_create_config_node_window(HWND hwnd, khui_config_node node) {
+    khui_config_node_reg reg;
+    khm_int32 rv;
+    HWND hw_new;
+
+    khui_config_node parent;
+
+    if (KHM_SUCCEEDED(khui_cfg_get_parent(node, &parent))) {
+        HWND hwp;
+
+        hwp = khui_cfg_get_hwnd(parent);
+
+        if (hwp == NULL)
+            cfgui_create_config_node_window(hwnd, parent);
+
+        khui_cfg_release(parent);
+    }
+
+    rv = khui_cfg_get_reg(node, &reg);
+#ifdef DEBUG
+    assert(KHM_SUCCEEDED(rv));
+#endif
+    hw_new = CreateDialogParam(reg.h_module,
+                               reg.dlg_template,
+                               hwnd,
+                               reg.dlg_proc,
+                               (LPARAM) node);
+#ifdef DEBUG
+    assert(hw_new);
+#endif
+    khui_cfg_set_hwnd(node, hw_new);
+
+    return hw_new;
+}
+
 static void
 cfgui_activate_node(HWND hwnd, khui_config_node node) {
 
@@ -273,25 +309,11 @@ cfgui_activate_node(HWND hwnd, khui_config_node node) {
     if (node == NULL) {
         hw_new = d->hw_generic_pane;
     } else {
-        khui_config_node_reg reg;
-        khm_int32 rv;
 
         hw_new = khui_cfg_get_hwnd(node);
 
         if (hw_new == NULL) {
-            rv = khui_cfg_get_reg(node, &reg);
-#ifdef DEBUG
-            assert(KHM_SUCCEEDED(rv));
-#endif
-            hw_new = CreateDialogParam(reg.h_module,
-                                       reg.dlg_template,
-                                       hwnd,
-                                       reg.dlg_proc,
-                                       (LPARAM) node);
-#ifdef DEBUG
-            assert(hw_new);
-#endif
-            khui_cfg_set_hwnd(node, hw_new);
+            hw_new = cfgui_create_config_node_window(hwnd, node);
         }
     }
 
@@ -513,7 +535,7 @@ cfgui_dlgproc(HWND hwnd,
 
         khui_cfg_clear_params();
 
-        d = malloc(sizeof(*d));
+        d = PMALLOC(sizeof(*d));
         ZeroMemory(d, sizeof(*d));
 
         d->hbr_white = CreateSolidBrush(RGB(255,255,255));
@@ -682,8 +704,8 @@ void khm_refresh_config(void) {
             return;
 
         if (idents)
-            free(idents);
-        idents = malloc(cb);
+            PFREE(idents);
+        idents = PMALLOC(cb);
 #ifdef DEBUG
         assert(idents);
 #endif
@@ -749,7 +771,7 @@ void khm_refresh_config(void) {
         khui_cfg_release(cfg_ids);
 
     if (idents)
-        free(idents);
+        PFREE(idents);
 }
 
 void khm_init_config(void) {

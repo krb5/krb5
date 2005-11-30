@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -41,13 +41,13 @@ void khm_init_gui(void) {
     khui_init_rescache();
     khui_init_menu();
     khui_init_toolbar();
-    khui_init_notifier();
+    khm_init_notifier();
     khm_init_config();
 }
 
 void khm_exit_gui(void) {
     khm_exit_config();
-    khui_exit_notifier();
+    khm_exit_notifier();
     khui_exit_toolbar();
     khui_exit_menu();
     khui_exit_rescache();
@@ -67,31 +67,36 @@ void khm_parse_commandline(void) {
 
     for (i=1; i<wargc; i++) {
         if (!wcscmp(wargs[i], L"-i") ||
-            !wcscmp(wargs[i], L"--kinit")) {
+            !wcscmp(wargs[i], L"--kinit") ||
+            !wcscmp(wargs[i], L"-kinit")) {
             khm_startup.init = TRUE;
             khm_startup.exit = TRUE;
             khm_startup.no_main_window = TRUE;
         }
         else if (!wcscmp(wargs[i], L"-m") ||
-                 !wcscmp(wargs[i], L"--import")) {
+                 !wcscmp(wargs[i], L"--import") ||
+                 !wcscmp(wargs[i], L"-import")) {
             khm_startup.import = TRUE;
             khm_startup.exit = TRUE;
             khm_startup.no_main_window = TRUE;
         }
         else if (!wcscmp(wargs[i], L"-r") ||
-                 !wcscmp(wargs[i], L"--renew")) {
+                 !wcscmp(wargs[i], L"--renew") ||
+                 !wcscmp(wargs[i], L"-renew")) {
             khm_startup.renew = TRUE;
             khm_startup.exit = TRUE;
             khm_startup.no_main_window = TRUE;
         }
         else if (!wcscmp(wargs[i], L"-d") ||
-                 !wcscmp(wargs[i], L"--destroy")) {
+                 !wcscmp(wargs[i], L"--destroy") ||
+                 !wcscmp(wargs[i], L"-destroy")) {
             khm_startup.destroy = TRUE;
             khm_startup.exit = TRUE;
             khm_startup.no_main_window = TRUE;
         }
         else if (!wcscmp(wargs[i], L"-a") ||
-                 !wcscmp(wargs[i], L"--autoinit")) {
+                 !wcscmp(wargs[i], L"--autoinit") ||
+                 !wcscmp(wargs[i], L"-autoinit")) {
             khm_startup.autoinit = TRUE;
         }
         else {
@@ -118,9 +123,11 @@ void khm_register_window_classes(void) {
         ICC_BAR_CLASSES |
         ICC_DATE_CLASSES |
         ICC_HOTKEY_CLASS |
+#if (_WIN32_WINNT >= 0x501)
         ICC_LINK_CLASS |
-        ICC_LISTVIEW_CLASSES |
         ICC_STANDARD_CLASSES |
+#endif
+        ICC_LISTVIEW_CLASSES |
         ICC_TAB_CLASSES;
     InitCommonControlsEx(&ics);
 
@@ -184,7 +191,7 @@ void khm_enter_modal(HWND hwnd) {
         }
     }
 
-    khui_main_window_active = IsWindowEnabled(khm_hwnd_main);
+    khui_main_window_active = khm_is_main_window_active();
     EnableWindow(khm_hwnd_main, FALSE);
 
     khui_modal_dialog = hwnd;
@@ -200,7 +207,9 @@ void khm_leave_modal(void) {
         }
     }
 
-    EnableWindow(khm_hwnd_main, khui_main_window_active);
+    EnableWindow(khm_hwnd_main, TRUE);
+    if (khui_main_window_active)
+        SetForegroundWindow(khm_hwnd_main);
 
     khui_modal_dialog = NULL;
 }
@@ -225,15 +234,15 @@ void khm_del_dialog(HWND dlg) {
 
 BOOL khm_check_dlg_message(LPMSG pmsg) {
     int i;
+    BOOL found = FALSE;
     for(i=0;i<n_khui_dialogs;i++) {
-        if(IsDialogMessage(khui_dialogs[i].hwnd, pmsg))
+        if(IsDialogMessage(khui_dialogs[i].hwnd, pmsg)) {
+            found = TRUE;
             break;
+        }
     }
 
-    if(i<n_khui_dialogs)
-        return TRUE;
-    else
-        return FALSE;
+    return found;
 }
 
 BOOL khm_is_dialog_active(void) {
@@ -324,6 +333,57 @@ WPARAM khm_message_loop(void) {
     return msg.wParam;
 }
 
+void KHMAPI
+khm_module_load_ctx_handler(enum kherr_ctx_event evt,
+                            kherr_context * c) {
+    kherr_event * e;
+    khui_alert * a;
+
+    for(e = kherr_get_first_event(c);
+        e;
+        e = kherr_get_next_event(e)) {
+
+        kherr_evaluate_event(e);
+
+        if ((e->severity == KHERR_ERROR ||
+             e->severity == KHERR_WARNING) &&
+            e->short_desc &&
+            e->long_desc) {
+
+            khui_alert_create_empty(&a);
+
+            khui_alert_set_severity(a, e->severity);
+            khui_alert_set_title(a, e->short_desc);
+            khui_alert_set_message(a, e->long_desc);
+            if (e->suggestion)
+                khui_alert_set_suggestion(a, e->suggestion);
+
+            khui_alert_queue(a);
+
+            khui_alert_release(a);
+        }
+    }
+
+    kherr_remove_ctx_handler(khm_module_load_ctx_handler,
+                             c->serial);
+}
+
+void khm_load_default_modules(void) {
+    kherr_context * c;
+
+    _begin_task(KHERR_CF_TRANSITIVE);
+
+    kmm_load_default_modules();
+
+    c = kherr_peek_context();
+    kherr_add_ctx_handler(khm_module_load_ctx_handler,
+                          KHERR_CTX_END,
+                          c->serial);
+    kherr_release_context(c);
+
+    _end_task();
+}
+
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine,
@@ -350,6 +410,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
     khc_load_schema(NULL, schema_uiconfig);
 
     if(!slave) {
+
+        /* set this so that we don't accidently invoke an API that
+           inadvertently puts up the new creds dialog at an
+           inopportune moment, like, say, during the new creds dialog
+           is open.  This only affects this process, and any child
+           processes started by plugins. */
+        SetEnvironmentVariable(L"KERBEROSLOGIN_NEVER_PROMPT", L"1");
+
         /* we only open a main window if this is the only instance 
            of the application that is running. */
         kmq_init();
@@ -359,7 +427,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
         kmq_set_completion_handler(KMSG_CRED, kmsg_cred_completion);
 
         /* load the standard plugins */
-        kmm_load_default_modules();
+        khm_load_default_modules();
 
         khm_register_window_classes();
 
@@ -437,6 +505,12 @@ int WINAPI WinMain(HINSTANCE hInstance,
         if (hmap)
             CloseHandle(hmap);
     }
+
+#if 0
+    /* writes a report of memory leaks to the specified file.  Should
+       only be enabled on development versions. */
+    PDUMP("memleak.txt");
+#endif
 
     return rv;
 }

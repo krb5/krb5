@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -261,7 +261,10 @@ create_edit_sliders(HWND hwnd,
                        TRACKBAR_CLASS,
                        L"NetIDMgrTimeTickerTrackbar",
                        WS_POPUP | TBS_AUTOTICKS | TBS_BOTTOM |
-                       TBS_DOWNISLEFT | TBS_HORZ | WS_CLIPCHILDREN,
+#if (_WIN32_IE >= 0x0501)
+                       TBS_DOWNISLEFT | 
+#endif
+                       TBS_HORZ | WS_CLIPCHILDREN,
                        r.left,r.bottom,rs.right,rs.bottom,
                        hwnd,
                        NULL,
@@ -311,6 +314,8 @@ duration_edit_proc(HWND hwnd,
             }
             khui_tracker_reposition(tc);
             ShowWindow(tc->hw_slider, SW_SHOWNOACTIVATE);
+
+            tc->act_time = GetTickCount();
             //SetActiveWindow(p);
         }
         break;
@@ -347,6 +352,18 @@ duration_edit_proc(HWND hwnd,
             }
         return TRUE;
 
+    case WM_LBUTTONUP:
+        if (IsWindowVisible(tc->hw_slider)) {
+            DWORD tm;
+
+            tm = GetTickCount();
+            if (tm - tc->act_time > 500)
+                ShowWindow(tc->hw_slider, SW_HIDE);
+        } else {
+            ShowWindow(tc->hw_slider, SW_SHOWNOACTIVATE);
+        }
+        break;
+
         /*  these messages can potentially change the text in the edit
             control.  We intercept them and see what changed.  We may
             need to grab and handle them */
@@ -354,7 +371,9 @@ duration_edit_proc(HWND hwnd,
     case EM_UNDO:
     case WM_UNDO:
     case WM_CHAR:
+#if (_WIN32_WINNT >= 0x0501)
     case WM_UNICHAR:
+#endif
         {
             wchar_t buf[256];
             size_t nchars;

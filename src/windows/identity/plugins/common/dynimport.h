@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -247,6 +247,7 @@ extern DECL_FUNC_PTR(krb5_free_addresses);
 extern DECL_FUNC_PTR(krb5_get_default_config_files);
 extern DECL_FUNC_PTR(krb5_free_config_files);
 extern DECL_FUNC_PTR(krb5_get_default_realm);
+extern DECL_FUNC_PTR(krb5_set_default_realm);
 extern DECL_FUNC_PTR(krb5_free_ticket);
 extern DECL_FUNC_PTR(krb5_decode_ticket);
 extern DECL_FUNC_PTR(krb5_get_host_realm);
@@ -264,10 +265,16 @@ extern DECL_FUNC_PTR(error_message);
 
 // Profile functions
 extern DECL_FUNC_PTR(profile_init);
+extern DECL_FUNC_PTR(profile_flush);
 extern DECL_FUNC_PTR(profile_release);
 extern DECL_FUNC_PTR(profile_get_subsection_names);
 extern DECL_FUNC_PTR(profile_free_list);
 extern DECL_FUNC_PTR(profile_get_string);
+extern DECL_FUNC_PTR(profile_get_values);
+extern DECL_FUNC_PTR(profile_get_relation_names);
+extern DECL_FUNC_PTR(profile_clear_relation);
+extern DECL_FUNC_PTR(profile_add_relation);
+extern DECL_FUNC_PTR(profile_update_relation);
 extern DECL_FUNC_PTR(profile_release_string);
 
 // Service functions

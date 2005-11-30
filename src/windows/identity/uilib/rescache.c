@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,7 +25,7 @@
 /* $Id$ */
 
 #include<khuidefs.h>
-#include<hashtable.h>
+#include<utils.h>
 
 hashtable * h_bitmaps;
 
@@ -76,7 +76,7 @@ khui_create_ilist(int cx, int cy, int n, int ng, int opt) {
     BITMAPV5HEADER head;
     HDC hdc;
 
-    khui_ilist * il = malloc(sizeof(khui_ilist));
+    khui_ilist * il = PMALLOC(sizeof(khui_ilist));
     il->cx = cx;
     il->cy = cy;
     il->n = n;
@@ -102,7 +102,7 @@ khui_create_ilist(int cx, int cy, int n, int ng, int opt) {
     head.bV5Reserved = 0;
     il->img = CreateDIBitmap(hdc, (BITMAPINFOHEADER *) &head, 0, NULL, NULL, DIB_RGB_COLORS);
     il->mask = CreateBitmap(cx * n, cy, 1, 1, NULL);
-    il->idlist = malloc(sizeof(int) * n);
+    il->idlist = PMALLOC(sizeof(int) * n);
 
     return il;
 }
@@ -111,8 +111,8 @@ KHMEXP BOOL KHMAPI
 khui_delete_ilist(khui_ilist * il) {
     DeleteObject(il->img);
     DeleteObject(il->mask);
-    free(il->idlist);
-    free(il);
+    PFREE(il->idlist);
+    PFREE(il);
 
     return TRUE;
 }

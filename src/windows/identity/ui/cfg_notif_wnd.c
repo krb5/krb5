@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,6 +29,8 @@
 
 typedef struct tag_notif_data {
     khui_config_node node;
+
+    BOOL modified;
 
     BOOL monitor;
     BOOL renew;
@@ -90,6 +92,8 @@ read_params(notif_data * d) {
     d->tc_warn2.min = t;
 
     khc_close_space(csp_cw);
+
+    d->modified = FALSE;
 }
 
 static void
@@ -112,10 +116,14 @@ check_for_modification(notif_data * d) {
                            KHUI_CNFLAG_MODIFIED,
                            KHUI_CNFLAG_MODIFIED);
 
+        d->modified = TRUE;
+
     } else {
         khui_cfg_set_flags(d->node,
                            0,
                            KHUI_CNFLAG_MODIFIED);
+
+        d->modified = FALSE;
     }
 }
 
@@ -123,6 +131,9 @@ static void
 write_params(notif_data * d) {
     khm_handle csp_cw;
     khm_int32 rv;
+
+    if (!d->modified)
+        return;
 
     rv = khc_open_space(NULL, L"CredWindow", KHM_PERM_WRITE, &csp_cw);
     assert(KHM_SUCCEEDED(rv));
@@ -215,7 +226,7 @@ khm_cfg_notifications_proc(HWND hwnd,
     case WM_INITDIALOG: {
         HWND hw;
 
-        d = malloc(sizeof(*d));
+        d = PMALLOC(sizeof(*d));
 #ifdef DEBUG
         assert(d != NULL);
 #endif
@@ -286,7 +297,7 @@ khm_cfg_notifications_proc(HWND hwnd,
         khui_tracker_kill_controls(&d->tc_warn1);
         khui_tracker_kill_controls(&d->tc_warn2);
 
-        free(d);
+        PFREE(d);
 
         SetWindowLongPtr(hwnd, DWLP_USER, 0);
 

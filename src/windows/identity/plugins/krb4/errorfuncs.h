@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -43,32 +43,17 @@ typedef LPSTR (*err_func)(int, long);
 #endif
 
 #include <krberr.h>
-extern void Leash_initialize_krb_error_func(err_func func,struct et_list **);
-#undef init_krb_err_func
-#define init_krb_err_func(erf) Leash_initialize_krb_error_func(erf,&_et_list)
-
 #include <kadm_err.h>
 
-extern void Leash_initialize_kadm_error_table(struct et_list **);
-#undef init_kadm_err_tbl
-#define init_kadm_err_tbl() Leash_initialize_kadm_error_table(&_et_list)
 #define kadm_err_base ERROR_TABLE_BASE_kadm
 
-#define krb_err_func Leash_krb_err_func
-
 #include <stdarg.h>
-int lsh_com_err_proc (LPSTR whoami, long code,
-		      LPSTR fmt, va_list args);
-void FAR Leash_load_com_err_callback(FARPROC,FARPROC,FARPROC);
 
 #ifndef KRBERR
 #define KRBERR(code) (code + krb_err_base)
 #endif
 
-int lsh_com_err_proc (LPSTR whoami, long code, LPSTR fmt, va_list args);
-int DoNiftyErrorReport(long errnum, LPSTR what);
-
-LPSTR err_describe(LPSTR buf, long code);
+LPSTR err_describe(LPSTR buf, size_t len, long code);
 
 
 /* */

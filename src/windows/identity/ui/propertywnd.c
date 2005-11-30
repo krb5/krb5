@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -66,7 +66,7 @@ void pw_update_property_data(HWND hw, pw_data * d)
             &attr_count)))
             return;
 
-        attrs = malloc(sizeof(khm_int32) * attr_count);
+        attrs = PMALLOC(sizeof(khm_int32) * attr_count);
         assert(attrs != NULL);
 
         kcdb_attrib_get_ids(
@@ -77,7 +77,7 @@ void pw_update_property_data(HWND hw, pw_data * d)
             &attr_count);
 
         cb_buf = sizeof(wchar_t) * 2048;
-        buffer = malloc(cb_buf);
+        buffer = PMALLOC(cb_buf);
         assert(buffer != NULL);
 
         for(i=0; i<attr_count; i++) {
@@ -108,8 +108,8 @@ void pw_update_property_data(HWND hw, pw_data * d)
             ListView_SetItem(hwnd_lv, &lvi);
         }
 
-        free(attrs);
-        free(buffer);
+        PFREE(attrs);
+        PFREE(buffer);
     }
 }
 
@@ -131,7 +131,7 @@ LRESULT CALLBACK khui_property_wnd_proc(
 
                 cs = (CREATESTRUCT *) lParam;
 
-                child = malloc(sizeof(*child));
+                child = PMALLOC(sizeof(*child));
                 ZeroMemory(child, sizeof(*child));
 
 #pragma warning(push)
@@ -198,7 +198,7 @@ LRESULT CALLBACK khui_property_wnd_proc(
             {
                 child = (pw_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
                 kcdb_buf_release(child->record);
-                free(child);
+                PFREE(child);
             }
             break;
 

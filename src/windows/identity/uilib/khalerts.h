@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -305,6 +305,16 @@ khui_alert_add_command(khui_alert * alert,
  */
 KHMEXP khm_int32 KHMAPI 
 khui_alert_show(khui_alert * alert);
+
+/*! \brief Queue an alert
+
+    Instead of displaying the alert immediately, the alert is queued
+    and the status bar updated to notify the user that there is a
+    pending alert.  Once the user activates the pending alert, it will
+    be displayed as if khui_alert_show() was called.
+ */
+KHMEXP khm_int32 KHMAPI
+khui_alert_queue(khui_alert * alert);
 
 /*! \brief Display a simple alert
 

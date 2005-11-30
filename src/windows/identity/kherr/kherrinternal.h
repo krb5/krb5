@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,6 +29,7 @@
 
 #include<windows.h>
 #include<kherr.h>
+#include<utils.h>
 #include<strsafe.h>
 
 typedef struct tag_kherr_thread {
@@ -40,8 +41,9 @@ typedef struct tag_kherr_thread {
 #define THREAD_STACK_SIZE 8
 
 typedef struct tag_kherr_handler_node {
-    khm_int32 filter;
+    khm_int32         filter;
     kherr_ctx_handler h;
+    kherr_serial      serial;
 } kherr_handler_node;
 
 #define CTX_ALLOC_INCR 4

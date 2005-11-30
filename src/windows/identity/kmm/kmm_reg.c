@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -96,7 +96,7 @@ kmm_get_plugin_config(wchar_t * plugin, khm_int32 flags, khm_handle * result)
     khm_int32 rv;
 
     if(!plugin || wcschr(plugin, L'/') || wcschr(plugin, L'\\'))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(KHM_FAILED(kmm_get_plugins_config(flags, &csplugins)))
         return KHM_ERROR_UNKNOWN;
@@ -118,7 +118,7 @@ kmm_get_module_config(wchar_t * module, khm_int32 flags, khm_handle * result)
     khm_int32 rv;
 
     if(!module || wcschr(module, L'/') || wcschr(module, L'\\'))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(KHM_FAILED(kmm_get_modules_config(flags, &csmodules)))
         return KHM_ERROR_UNKNOWN;
@@ -143,14 +143,16 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
     config_flags &= ~KHM_FLAG_CREATE;
 
     if((plugin == NULL) ||
-        (plugin->dependencies && 
-         KHM_FAILED(multi_string_length_cch(plugin->dependencies, KMM_MAXCCH_DEPS, &cch))) ||
-       FAILED(StringCchLength(plugin->module, KMM_MAXCCH_NAME - 1, &cch)) ||
-       (plugin->description && 
-        FAILED(StringCchLength(plugin->description, KMM_MAXCCH_DESC - 1, &cch))) ||
-       FAILED(StringCchLength(plugin->name, KMM_MAXCCH_NAME - 1, &cch)))
+       (plugin->dependencies && 
+        KHM_FAILED(multi_string_length_cch(plugin->dependencies, 
+                                           KMM_MAXCCH_DEPS, &cch))) ||
+       FAILED(StringCchLength(plugin->module, KMM_MAXCCH_NAME, &cch)) ||
+       (plugin->description &&
+        FAILED(StringCchLength(plugin->description,
+                               KMM_MAXCCH_DESC, &cch))) ||
+       FAILED(StringCchLength(plugin->name, KMM_MAXCCH_NAME, &cch)))
     {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     /* note that we are retaining the length of the plugin name in
@@ -177,10 +179,13 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
         rv = khc_write_string(csp_plugin, L"Description", plugin->description);
         CKRV;
     }
+
     if(plugin->dependencies) {
-        rv = khc_write_multi_string(csp_plugin, L"Dependencies", plugin->dependencies);
+        rv = khc_write_multi_string(csp_plugin, L"Dependencies", 
+                                    plugin->dependencies);
         CKRV;
     }
+
     rv = khc_write_int32(csp_plugin, L"Type", plugin->type);
     CKRV;
     rv = khc_write_int32(csp_plugin, L"Flags", plugin->flags);
@@ -198,12 +203,12 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
         cb += cch * sizeof(wchar_t);
         scb = cb;
 
-        pl = malloc(cb);
+        pl = PMALLOC(cb);
 
-        rv = khc_read_multi_string(csp_module, L"PluginList", NULL, &cb);
+        rv = khc_read_multi_string(csp_module, L"PluginList", pl, &cb);
         if(KHM_FAILED(rv)) {
             if(pl)
-                free(pl);
+                PFREE(pl);
             goto _exit;
         }
 
@@ -212,7 +217,7 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
             rv = khc_write_multi_string(csp_module, L"PluginList", pl);
         }
 
-        free(pl);
+        PFREE(pl);
         CKRV;
     }
 
@@ -236,24 +241,21 @@ kmm_register_module(kmm_module_reg * module, khm_int32 config_flags)
     int i;
 
     if((module == NULL) ||
-        FAILED(StringCchLength(module->name, KMM_MAXCCH_NAME - 1, &cch)) ||
+        FAILED(StringCchLength(module->name, KMM_MAXCCH_NAME, &cch)) ||
         (module->description && 
-            FAILED(StringCchLength(module->description, KMM_MAXCCH_DESC - 1, &cch))) ||
+            FAILED(StringCchLength(module->description, 
+                                   KMM_MAXCCH_DESC, &cch))) ||
         FAILED(StringCchLength(module->path, MAX_PATH, &cch)) ||
-        (module->n_plugins > 0 && module->plugin_reg_info == NULL))
-    {
-        return KHM_ERROR_INVALID_PARM;
+        (module->n_plugins > 0 && module->plugin_reg_info == NULL)) {
+        return KHM_ERROR_INVALID_PARAM;
     }
 
 #define CKRV if(KHM_FAILED(rv)) goto _exit
 
-    rv = kmm_get_module_config(module->name, config_flags | KHM_FLAG_CREATE, &csp_module);
+    rv = kmm_get_module_config(module->name, config_flags | KHM_FLAG_CREATE, 
+                               &csp_module);
     CKRV;
 
-    if(module->description) {
-        rv = khc_write_string(csp_module, L"Description", module->description);
-        CKRV;
-    }
     rv = khc_write_string(csp_module, L"ImagePath", module->path);
     CKRV;
 
@@ -264,7 +266,7 @@ kmm_register_module(kmm_module_reg * module, khm_int32 config_flags)
        is loaded for the first time */
 
     for(i=0; i<module->n_plugins; i++) {
-        rv = kmm_register_plugin(module->plugin_reg_info + i, config_flags);
+        rv = kmm_register_plugin(&(module->plugin_reg_info[i]), config_flags);
         CKRV;
     }
 

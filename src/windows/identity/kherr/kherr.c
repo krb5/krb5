@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -41,10 +41,12 @@ kherr_handler_node * ctx_handlers = NULL;
 khm_size n_ctx_handlers;
 khm_size nc_ctx_handlers;
 
-khm_ui_4 ctx_serial = 0;
+kherr_serial ctx_serial = 0;
 
 #ifdef DEBUG
-static void DebugPrintf(wchar_t * fmt, ...) {
+#define DEBUG_CONTEXT
+
+KHMEXP void kherr_debug_printf(wchar_t * fmt, ...) {
     va_list vl;
     wchar_t buf[1024];
 
@@ -56,7 +58,8 @@ static void DebugPrintf(wchar_t * fmt, ...) {
 #endif
 
 KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
-                                         khm_int32 filter) {
+                                         khm_int32 filter,
+                                         kherr_serial serial) {
 
     assert(h);
 
@@ -64,17 +67,17 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
     if( ctx_handlers == NULL) {
         nc_ctx_handlers = CTX_ALLOC_INCR;
         n_ctx_handlers = 0;
-        ctx_handlers = malloc(sizeof(*ctx_handlers) * nc_ctx_handlers);
+        ctx_handlers = PMALLOC(sizeof(*ctx_handlers) * nc_ctx_handlers);
         /* No need to initialize */
     } else if (n_ctx_handlers == nc_ctx_handlers) {
         khm_size new_nc;
         kherr_handler_node * new_ctxs;
 
         new_nc = nc_ctx_handlers + CTX_ALLOC_INCR;
-        new_ctxs = malloc(sizeof(*new_ctxs) * new_nc);
-        memmove(new_ctxs, ctx_handlers, n_ctx_handlers);
+        new_ctxs = PMALLOC(sizeof(*new_ctxs) * new_nc);
+        memcpy(new_ctxs, ctx_handlers, n_ctx_handlers * sizeof(*new_ctxs));
 
-        free(ctx_handlers);
+        PFREE(ctx_handlers);
         ctx_handlers = new_ctxs;
         nc_ctx_handlers = new_nc;
     }
@@ -87,15 +90,21 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
 
     ctx_handlers[n_ctx_handlers].h = h;
     ctx_handlers[n_ctx_handlers].filter = filter;
+    ctx_handlers[n_ctx_handlers].serial = serial;
+
+    n_ctx_handlers++;
+
     LeaveCriticalSection(&cs_error);
 }
 
-KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h) {
+KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h,
+                                            kherr_serial serial) {
     khm_size i;
     EnterCriticalSection(&cs_error);
 
     for (i=0 ; i < n_ctx_handlers; i++) {
-        if (ctx_handlers[i].h == h) {
+        if (ctx_handlers[i].h == h &&
+            ctx_handlers[i].serial == serial) {
             break;
         }
     }
@@ -114,9 +123,25 @@ KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h) {
 void notify_ctx_event(enum kherr_ctx_event e, kherr_context * c) {
     khm_size i;
 
+    kherr_ctx_handler h;
+
     for (i=0; i<n_ctx_handlers; i++) {
-        if (ctx_handlers[i].filter & e)
-            ctx_handlers[i].h(e,c);
+        if (ctx_handlers[i].h && (ctx_handlers[i].filter & e) &&
+            (ctx_handlers[i].serial == 0 ||
+             ctx_handlers[i].serial == c->serial)) {
+            if (IsBadCodePtr((FARPROC) ctx_handlers[i].h)) {
+                ctx_handlers[i].h = NULL;
+            } else {
+                h = ctx_handlers[i].h;
+                (*h)(e,c);
+
+                /* a context handler is allowed to remove itself
+                   during a callback.  It is, however, not allowed to
+                   remove anything else. */
+                if (h != ctx_handlers[i].h)
+                    i--;
+            }
+        }
     }
 }
 
@@ -127,8 +152,8 @@ void attach_this_thread(void) {
     if (t)
         return;
 
-    t = malloc(sizeof(kherr_thread) + 
-               sizeof(kherr_context *) * THREAD_STACK_SIZE);
+    t = PMALLOC(sizeof(kherr_thread) + 
+                sizeof(kherr_context *) * THREAD_STACK_SIZE);
     t->nc_ctx = THREAD_STACK_SIZE;
     t->n_ctx = 0;
     t->ctx = (kherr_context **) &t[1];
@@ -145,7 +170,7 @@ void detach_this_thread(void) {
         for(i=0; i < t->n_ctx; i++) {
             kherr_release_context(t->ctx[i]);
         }
-        free(t);
+        PFREE(t);
         TlsSetValue(tls_error, 0);
     }
 }
@@ -182,13 +207,13 @@ void push_context(kherr_context * c) {
         cb_new = sizeof(kherr_thread) + 
             sizeof(kherr_context *) * nc_new;
 
-        nt = malloc(cb_new);
+        nt = PMALLOC(cb_new);
         memcpy(nt, t, sizeof(kherr_thread) +
                sizeof(kherr_context *) * t->n_ctx);
         nt->ctx = (kherr_context **) &nt[1];
         nt->nc_ctx = nc_new;
 
-        free(t);
+        PFREE(t);
         t = nt;
         TlsSetValue(tls_error, t);
     }
@@ -220,10 +245,11 @@ kherr_event * get_empty_event(void) {
     kherr_event * e;
 
     EnterCriticalSection(&cs_error);
-    if(evt_free_list)
+    if(evt_free_list) {
         LPOP(&evt_free_list, &e);
-    else
-        e = malloc(sizeof(*e));
+    } else {
+        e = PMALLOC(sizeof(*e));
+    }
     LeaveCriticalSection(&cs_error);
     ZeroMemory(e, sizeof(*e));
     e->severity = KHERR_NONE;
@@ -235,61 +261,63 @@ kherr_event * get_empty_event(void) {
 void free_event_params(kherr_event * e) {
     if(parm_type(e->p1) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p1));
-        free((void*) parm_data(e->p1));
+        PFREE((void*) parm_data(e->p1));
         e->p1 = (kherr_param) 0;
     }
     if(parm_type(e->p2) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p2));
-        free((void*) parm_data(e->p2));
+        PFREE((void*) parm_data(e->p2));
         e->p2 = (kherr_param) 0;
     }
     if(parm_type(e->p3) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p3));
-        free((void*) parm_data(e->p3));
+        PFREE((void*) parm_data(e->p3));
         e->p3 = (kherr_param) 0;
     }
     if(parm_type(e->p4) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p4));
-        free((void*) parm_data(e->p4));
+        PFREE((void*) parm_data(e->p4));
         e->p4 = (kherr_param) 0;
     }
 }
 
 void free_event(kherr_event * e) {
+
+    EnterCriticalSection(&cs_error);
+
     assert(e->magic == KHERR_EVENT_MAGIC);
 
-#ifdef DEBUG
-    DebugPrintf(L"Freeing event 0x%x\n", e);
+#ifdef DEBUG_CONTEXT
+    kherr_debug_printf(L"Freeing event 0x%x\n", e);
     if (!(e->flags & KHERR_RF_STR_RESOLVED))
         resolve_event_strings(e);
     if (e->short_desc)
-        DebugPrintf(L"  Desc(S):[%s]\n", e->short_desc);
+        kherr_debug_printf(L"  Desc(S):[%s]\n", e->short_desc);
     if (e->long_desc)
-        DebugPrintf(L"  Desc(L):[%s]\n", e->long_desc);
+        kherr_debug_printf(L"  Desc(L):[%s]\n", e->long_desc);
     if (e->suggestion)
-        DebugPrintf(L"  Suggest:[%s]\n", e->suggestion);
+        kherr_debug_printf(L"  Suggest:[%s]\n", e->suggestion);
     if (e->facility)
-        DebugPrintf(L"  Facility:[%s]\n", e->facility);
+        kherr_debug_printf(L"  Facility:[%s]\n", e->facility);
 #endif
 
     if(e->flags & KHERR_RF_FREE_SHORT_DESC) {
         assert(e->short_desc);
-        free((void *) e->short_desc);
+        PFREE((void *) e->short_desc);
     }
     if(e->flags & KHERR_RF_FREE_LONG_DESC) {
         assert(e->long_desc);
-        free((void *) e->long_desc);
+        PFREE((void *) e->long_desc);
     }
     if(e->flags & KHERR_RF_FREE_SUGGEST) {
         assert(e->suggestion);
-        free((void *) e->suggestion);
+        PFREE((void *) e->suggestion);
     }
 
     free_event_params(e);
 
     ZeroMemory(e, sizeof(e));
 
-    EnterCriticalSection(&cs_error);
     LPUSH(&evt_free_list, e);
     LeaveCriticalSection(&cs_error);
 }
@@ -301,7 +329,7 @@ kherr_context * get_empty_context(void) {
     if(ctx_free_list)
         LPOP(&ctx_free_list, &c);
     else {
-        c = malloc(sizeof(kherr_context));
+        c = PMALLOC(sizeof(kherr_context));
     }
  
     ZeroMemory(c,sizeof(*c));
@@ -325,8 +353,8 @@ void free_context(kherr_context * c) {
     kherr_event * e;
 
     assert(c->magic == KHERR_CONTEXT_MAGIC);
-#ifdef DEBUG
-    DebugPrintf(L"Freeing context 0x%x\n", c);
+#ifdef DEBUG_CONTEXT
+    kherr_debug_printf(L"Freeing context 0x%x\n", c);
 #endif
 
     EnterCriticalSection(&cs_error);
@@ -351,11 +379,10 @@ void free_context(kherr_context * c) {
     LPUSH(&ctx_free_list,c);
     LeaveCriticalSection(&cs_error);
 
-#ifdef DEBUG
-    DebugPrintf(L"Done with context 0x%x\n", c);
+#ifdef DEBUG_CONTEXT
+    kherr_debug_printf(L"Done with context 0x%x\n", c);
 #endif
 }
-
 
 void add_event(kherr_context * c, kherr_event * e)
 {
@@ -466,7 +493,7 @@ static void resolve_string_resource(kherr_event * e,
                 *str = NULL;
             } else {
                 bytes = (chars + 1) * sizeof(wchar_t);
-                s = malloc(bytes);
+                s = PMALLOC(bytes);
                 assert(s);
                 StringCbCopy(s, bytes, tbuf);
                 *str = s;
@@ -515,7 +542,7 @@ static void resolve_msg_resource(kherr_event * e,
                 tbuf[--chars] = L'\0';
 
             bytes = (chars + 1) * sizeof(wchar_t);
-            s = malloc(bytes);
+            s = PMALLOC(bytes);
             assert(s);
             StringCbCopy(s, bytes, tbuf);
             *str = s;
@@ -551,7 +578,7 @@ static void resolve_string(kherr_event * e,
                               (va_list *) args);
 
         if ((e->flags & mask) == free_if) {
-            free((void *) *str);
+            PFREE((void *) *str);
         }
 
         e->flags &= ~mask;
@@ -562,7 +589,7 @@ static void resolve_string(kherr_event * e,
             wchar_t * s;
 
             bytes = (chars + 1) * sizeof(wchar_t);
-            s = malloc(bytes);
+            s = PMALLOC(bytes);
             assert(s);
             StringCbCopy(s, bytes, tbuf);
             *str = s;
@@ -704,9 +731,7 @@ kherr_report(enum kherr_severity severity,
     if(!c) {
         /* the reason why we are doing it this way is because p1..p4,
            the descriptions and the suggestion may contain allocations
-           that has to be freed.  In terms of performance we are
-           assuming that this case doesn't happen that much. Har
-           har */
+           that has to be freed. */
         free_event(e);
         e = NULL;
     } else {
@@ -908,7 +933,7 @@ KHMEXP void KHMAPI kherr_push_new_context(khm_int32 flags)
 
 kherr_param dup_parm(kherr_param p) {
     if(parm_type(p) == KEPT_STRINGT) {
-        wchar_t * d = wcsdup((wchar_t *)parm_data(p));
+        wchar_t * d = PWCSDUP((wchar_t *)parm_data(p));
         return kherr_val(KEPT_STRINGT, d);
     } else
         return p;
@@ -1154,7 +1179,7 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s)
     else
         cb_s += sizeof(wchar_t);
 
-    dest = malloc(cb_s);
+    dest = PMALLOC(cb_s);
     assert(dest != NULL);
     dest[0] = L'\0';
 

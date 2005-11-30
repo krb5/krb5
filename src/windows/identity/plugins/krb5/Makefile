@@ -32,7 +32,7 @@ LIBFILE=$(LIBDIR)\krb5cred.lib
 OBJFILES= \
 	$(LIBDIR)\dynimport.obj 	\
 	$(LIBDIR)\krb5common.obj 	\
-	$(OBJ)\main.obj 		\
+	$(OBJ)\krb5main.obj 		\
 	$(OBJ)\datarep.obj 		\
 	$(OBJ)\errorfuncs.obj 		\
 	$(OBJ)\krb5plugin.obj 		\
@@ -41,21 +41,28 @@ OBJFILES= \
 	$(OBJ)\krb5funcs.obj 		\
 	$(OBJ)\krb5config.obj		\
 	$(OBJ)\krb5identpro.obj		\
-	$(OBJ)\krb5configdlg.obj
+	$(OBJ)\krb5configdlg.obj	\
+	$(OBJ)\krb5configcc.obj		\
+	$(OBJ)\krb5configid.obj		\
+	$(OBJ)\krb5configids.obj
 
 LIBFILES= \
 	$(LIBDIR)\nidmgr32.lib		\
 	$(KFWLIBDIR)\loadfuncs.lib
 
 SDKLIBFILES=	\
-	netapi32.lib
+	netapi32.lib	\
+	shlwapi.lib	\
+	comctl32.lib
 
 MSGRESFILE=$(OBJ)\krb5_msgs.res
+
+VERRESFILE=$(OBJ)\version.res
 
 $(OBJ)\krb5config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
-$(DLLFILE): $(MSGRESFILE) $(OBJFILES)
+$(DLLFILE): $(MSGRESFILE) $(VERRESFILE) $(OBJFILES)
 	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES)
 
 $(MSGRESFILE): $(OBJ)\krb5_msgs.rc

@@ -44,17 +44,26 @@ KHIMAIRA_WIN32_CONFIG=1
 #      SPECIAL    : Special build.  Typically one with non-mainline patches.
 
 # Version info
-KHIMAIRA_VERSION_MAJOR=0
-KHIMAIRA_VERSION_MINOR=1
-KHIMAIRA_VERSION_PATCH=1
-KHIMAIRA_VERSION_AUX=0
-KHIMAIRA_VERSION=$(KHIMAIRA_VERSION_MAJOR).$(KHIMAIRA_VERSION_MINOR).$(KHIMAIRA_VERSION_PATCH).$(KHIMAIRA_VERSION_AUX)
-KHIMAIRA_VERSIONC=$(KHIMAIRA_VERSION_MAJOR),$(KHIMAIRA_VERSION_MINOR),$(KHIMAIRA_VERSION_PATCH),$(KHIMAIRA_VERSION_AUX)
+NETIDMGR_VERSION_MAJOR=0
+NETIDMGR_VERSION_MINOR=1
+NETIDMGR_VERSION_PATCH=2
+NETIDMGR_VERSION_AUX=0
+
+# The API version.  This number must be incremented each time the API
+# changes.  Plugins specify the version of the API that they were
+# compiled against and the Module Manager uses the API numbers to
+# decide whether the plugin is safe to load or not.
+#
+# Changes to the API version numbers should be documented in
+# apiversion.txt at the root of the source tree.
+NETIDMGR_VERSION_API=3
+
+NETIDMGR_VERSION=$(NETIDMGR_VERSION_MAJOR).$(NETIDMGR_VERSION_MINOR).$(NETIDMGR_VERSION_PATCH).$(NETIDMGR_VERSION_AUX)
+NETIDMGR_VERSIONC=$(NETIDMGR_VERSION_MAJOR),$(NETIDMGR_VERSION_MINOR),$(NETIDMGR_VERSION_PATCH),$(NETIDMGR_VERSION_AUX)
 
 # Source information
-KHIMAIRA_SRC_COMPANY_1033=Massachusetts Institute of Technology
-
-KHIMAIRA_SRC_COPYRIGHT_1033=(C) 2005 Massachusetts Institute of Technology
+NETIDMGR_SRC_COMPANY_1033=Massachusetts Institute of Technology
+NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005 Massachusetts Institute of Technology
 
 # Choose the default build type if one is not set
 !if ("$(KH_BUILD)" != "DEBUG") && ("$(KH_BUILD)" != "RETAIL")
@@ -74,28 +83,7 @@ KH_BUILD=DEBUG
 KH_RELEASE=PRERELEASE
 !endif
 
-# Version and build strings
-
-!if "$(KH_RELEASE)" == "OFFICIAL"
-KHIMAIRA_VERSION_STR_1033=$(KHIMAIRA_VERSION)
-KHIMAIRA_COMMENT_STR_1033=Official build.
-!elseif "$(KH_RELEASE)" == "PRERELEASE"
-KHIMAIRA_VERSION_STR_1033=$(KHIMAIRA_VERSION) Alpha
-KHIMAIRA_COMMENT_STR_1033=Prerelease build.
-!elseif "$(KH_RELEASE)" == "PRIVATE"
-KHIMAIRA_VERSION_STR_1033=$(KHIMAIRA_VERSION).PRIVATE
-KHIMAIRA_PRIVATE_STR_1033=Private build.
-!elseif "$(KH_RELEASE)" == "SPECIAL"
-KHIMAIRA_VERSION_STR_1033=$(KHIMAIRA_VERSION).SPECIAL
-KHIMAIRA_SPECIAL_STR_1033=Special build.
-!endif
-
-!if "$(KH_BUILD)" == "DEBUG"
-KHIMAIRA_VERSION_STR_1033=$(KHIMAIRA_VERSION_STR_1033).DEBUG
-!else
-!endif
-
-KHIMAIRA_PRODUCT_1033=NetIDMgr $(KHIMAIRA_VERSION_STR_1033)
+# Actual build environment settings
 
 # See what compiler we are using
 # TODO: Update this to support other compilers
@@ -110,7 +98,11 @@ KH_CLVER=vc7
 !	error MODULE must be specified
 !endif
 !ifndef KH_ROOT
+! ifndef PISMERE
+!   error Either KH_ROOT or PISMERE must be defined
+! else
 KH_ROOT=$(PISMERE)\athena\auth\krb5\src\windows\identity
+! endif
 !endif
 
 !ifdef NODEBUG
@@ -126,7 +118,7 @@ OUTPRE=$(OUTPRE3)^\
 
 
 # Output directory structure
-DESTROOT=$(KH_ROOT)\dest
+DESTROOT=$(KH_ROOT)\obj
 OBJROOT=$(KH_ROOT)\obj
 SRC=$(KH_ROOT)
 
@@ -134,7 +126,7 @@ DESTDIR=$(DESTROOT)\$(CPU)\$(OUTPRE_DBG)
 OBJDIR=$(OBJROOT)\$(CPU)\$(OUTPRE_DBG)
 
 OBJ=$(OBJDIR)\$(MODULE)
-INCDIR=$(DESTDIR)\include
+INCDIR=$(DESTDIR)\inc
 #BINDIR=$(DESTDIR)\bin
 BINDIR=$(KH_ROOT)\$(OUTPRE)
 #LIBDIR=$(DESTDIR)\lib
@@ -180,9 +172,9 @@ HHC=hhc
 
 !ifdef KH_KFWPATH
 KFWINCDIR=$(KH_KFWPATH)\inc
-kfwincflags = -I$(KFWINCDIR)\krb5 -I$(KFWINCDIR)\krb5\KerberosIV -I$(KFWINCDIR)\loadfuncs -I$(KFWINCDIR)
+kfwincflags = -I$(KFWINCDIR)\krb5 -I$(KFWINCDIR)\krb5\KerberosIV -I$(KFWINCDIR)\krb4 -I$(KFWINCDIR)\loadfuncs -I$(KFWINCDIR)
 KFWLIBDIR=$(KH_KFWPATH)\lib\$(CPU)
-!else
+!else if defined(PISMERE)
 KFWINCDIR=$(PISMERE)\athena\auth\krb5\src\include
 kfwincflags = -I$(KFWINCDIR) -I$(PISMERE)\athena\util\loadfuncs -I$(PISMERE)\athena\auth\krb5\src\include\kerberosIV -I$(PISMERE)\athena\auth\krb4\include
 KFWLIBDIR=$(PISMERE)\target\lib\$(CPU)\$(OUTPRE_DBG)
@@ -274,5 +266,7 @@ etag::
 	etags -o $(TAGFILE) -a *.c *.h
 
 .SUFFIXES: .h
+
+.SILENT:
 
 !endif

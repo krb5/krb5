@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -46,6 +46,7 @@ static void
 add_subpanels(HWND hwnd, 
               khui_config_node ctx_node,
               khui_config_node ref_node) {
+
     HWND hw_tab;
     HWND hw_target;
     khui_config_node sub;
@@ -315,6 +316,7 @@ typedef struct tag_idents_data {
     int          idx_deleted;
 
     HWND         hwnd;
+    khui_config_init_data cfg;
 } idents_data;
 
 static idents_data cfg_idents = {FALSE, NULL, 0, 0, 0, NULL };
@@ -411,14 +413,9 @@ write_params_ident(ident_data * d) {
         khc_write_int32(csp_ident, L"AllowAutoRenew", !!d->work.auto_renew);
 
     if (d->saved.sticky != d->work.sticky) {
-        khc_write_int32(csp_ident, L"Sticky", !!d->work.sticky);
-        if (d->work.sticky) {
-            kcdb_identity_set_flags(d->ident, KCDB_IDENT_FLAG_STICKY);
-        } else {
-            kcdb_identity_set_flags(d->ident, 
-                                    KCDB_IDENT_FLAG_STICKY |
-                                    KCDB_IDENT_FLAG_INVERT);
-        }
+        kcdb_identity_set_flags(d->ident,
+                                (d->work.sticky)?KCDB_IDENT_FLAG_STICKY:0,
+                                KCDB_IDENT_FLAG_STICKY);
     }
 
     khc_close_space(csp_ident);
@@ -476,8 +473,8 @@ init_idents_data(void) {
             break;
 
         if (widnames)
-            free(widnames);
-        widnames = malloc(cb);
+            PFREE(widnames);
+        widnames = PMALLOC(cb);
 #ifdef DEBUG
         assert(widnames);
 #endif
@@ -497,7 +494,7 @@ init_idents_data(void) {
         goto _cleanup;
     }
 
-    cfg_idents.idents = malloc(sizeof(*cfg_idents.idents) * 
+    cfg_idents.idents = PMALLOC(sizeof(*cfg_idents.idents) * 
                                cfg_idents.n_idents);
 #ifdef DEBUG
     assert(cfg_idents.idents);
@@ -518,7 +515,7 @@ init_idents_data(void) {
         StringCbLength(t, KCDB_IDENT_MAXCB_NAME, &cb);
         cb += sizeof(wchar_t);
 
-        cfg_idents.idents[i].idname = malloc(cb);
+        cfg_idents.idents[i].idname = PMALLOC(cb);
 #ifdef DEBUG
         assert(cfg_idents.idents[i].idname);
 #endif
@@ -540,7 +537,7 @@ init_idents_data(void) {
     cfg_idents.valid = TRUE;
 
     if (widnames)
-        free(widnames);
+        PFREE(widnames);
 }
 
 static void
@@ -554,11 +551,11 @@ free_idents_data(void) {
         if (cfg_idents.idents[i].ident)
             kcdb_identity_release(cfg_idents.idents[i].ident);
         if (cfg_idents.idents[i].idname)
-            free(cfg_idents.idents[i].idname);
+            PFREE(cfg_idents.idents[i].idname);
     }
 
     if (cfg_idents.idents)
-        free(cfg_idents.idents);
+        PFREE(cfg_idents.idents);
 
     cfg_idents.idents = NULL;
     cfg_idents.n_idents = 0;
@@ -658,8 +655,14 @@ refresh_view_idents_sel(HWND hwnd) {
                     BST_INDETERMINATE));
 
     if (sel_count > 0) {
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_MONITOR), TRUE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_RENEW), TRUE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_STICKY), TRUE);
         EnableWindow(GetDlgItem(hwnd, IDC_CFG_REMOVE), TRUE);
     } else {
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_MONITOR), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_RENEW), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_CFG_STICKY), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_CFG_REMOVE), FALSE);
     }
 }
@@ -781,19 +784,14 @@ refresh_view_idents_state(HWND hwnd) {
 
     {
         khm_int32 flags = 0;
-        khui_config_node node = NULL;
 
         if (modified)
             flags |= KHUI_CNFLAG_MODIFIED;
         if (applied)
             flags |= KHUI_CNFLAG_APPLIED;
 
-        khui_cfg_open(NULL, L"KhmIdentities", &node);
-#ifdef DEBUG
-        assert(node);
-#endif
-        khui_cfg_set_flags(node, flags,
-                           KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
+        khui_cfg_set_flags_inst(&cfg_idents.cfg, flags,
+                                KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
     }
 }
 
@@ -853,6 +851,7 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             hold_idents_data();
 
             cfg_idents.hwnd = hwnd;
+            cfg_idents.cfg = *((khui_config_init_data *) lParam);
 
             /* first add the column */
             hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
@@ -875,12 +874,17 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             if (cfg_idents.hi_status)
                 goto _done_with_icons;
 
-            cfg_idents.hi_status = ImageList_Create(SM_CXICON, SM_CYICON, 
-                                                    ILC_COLOR8 | ILC_MASK,
-                                                    4,4);
+            cfg_idents.hi_status = 
+                ImageList_Create(GetSystemMetrics(SM_CXSMICON),
+                                 GetSystemMetrics(SM_CYSMICON), 
+                                 ILC_COLOR8 | ILC_MASK,
+                                 4,4);
 
-            hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_ID),
-                              IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+            hicon =
+                LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_ID),
+                          IMAGE_ICON,
+                          GetSystemMetrics(SM_CXSMICON),
+                          GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
             cfg_idents.idx_id = ImageList_AddIcon(cfg_idents.hi_status,
                                                   hicon);
@@ -888,7 +892,8 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_DEFAULT),
-                              IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
             cfg_idents.idx_default = ImageList_AddIcon(cfg_idents.hi_status, 
                                                        hicon) + 1;
@@ -896,7 +901,8 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_MODIFIED),
-                              IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
             cfg_idents.idx_modified = ImageList_AddIcon(cfg_idents.hi_status, 
                                                         hicon) + 1;
@@ -904,7 +910,8 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_APPLIED),
-                              IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
             cfg_idents.idx_applied = ImageList_AddIcon(cfg_idents.hi_status, 
                                                        hicon) + 1;
@@ -912,7 +919,8 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_DELETED),
-                              IMAGE_ICON, SM_CXICON, SM_CYICON, LR_DEFAULTCOLOR);
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
             cfg_idents.idx_deleted = ImageList_AddIcon(cfg_idents.hi_status, 
                                                        hicon) + 1;
@@ -938,7 +946,9 @@ khm_cfg_ids_tab_proc(HWND hwnd,
                 cfg_idents.idents[i].lv_idx = ListView_InsertItem(hw, &lvi);
             }
 
+#if (_WIN32_WINNT >= 0x501)
             ListView_SetView(hw, LV_VIEW_DETAILS);
+#endif
         }
         return FALSE;
 

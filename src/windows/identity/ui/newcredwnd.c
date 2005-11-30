@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -244,7 +244,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
     HWND hw = NULL;
     size_t cch = 0;
 
-    ctbuf = malloc(NC_MAXCB_CREDTEXT);
+    ctbuf = PMALLOC(NC_MAXCB_CREDTEXT);
 
     assert(ctbuf != NULL);
 
@@ -308,7 +308,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
            a comma separated string */
 
         /* d->nc->n_identities is at least 2 */
-        ids_string = malloc((KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) * 
+        ids_string = PMALLOC((KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) * 
                             (d->nc->n_identities - 1));
         cb_ids_string = 
             (KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) * 
@@ -365,7 +365,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
             StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t), 
                            main_fmt, id_string, ids_string);
 
-            free(ids_string);
+            PFREE(ids_string);
         }
     } else {
         LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_NONE, 
@@ -393,7 +393,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
 
     SetDlgItemText(d->dlg_main, IDC_NC_CREDTEXT, ctbuf);
 
-    free(ctbuf);
+    PFREE(ctbuf);
 
     /* so depending on whether the primary identity was found to be
        invalid, we need to disable the Ok button and set the title to
@@ -471,7 +471,7 @@ nc_handle_wm_create(HWND hwnd,
 
     lpc = (LPCREATESTRUCT) lParam;
 
-    ncd = malloc(sizeof(*ncd));
+    ncd = PMALLOC(sizeof(*ncd));
     ZeroMemory(ncd, sizeof(*ncd));
 
     c = (khui_new_creds *) lpc->lpCreateParams;
@@ -821,7 +821,7 @@ nc_handle_wm_destroy(HWND hwnd,
     d->dlg_main = NULL;
     d->dlg_ts = NULL;
 
-    free(d);
+    PFREE(d);
 
     return TRUE;
 }
@@ -1188,7 +1188,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                             &cbsize, 
                             KCDB_TS_SHORT) == KHM_ERROR_TOO_LONG) {
 
-                            name = malloc(cbsize);
+                            name = PMALLOC(cbsize);
                             kcdb_credtype_describe(d->nc->types[i]->type, 
                                                    name, 
                                                    &cbsize, 
@@ -1235,7 +1235,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                     x += width;
 
                     if(!(d->nc->types[i]->name))
-                        free(name);
+                        PFREE(name);
 
                     /* Now set the position of the type panel */
                     ShowWindow(d->nc->types[i]->hwnd_panel, SW_HIDE);

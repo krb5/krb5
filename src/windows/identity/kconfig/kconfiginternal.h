@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -62,7 +62,8 @@ typedef struct kconf_conf_space_t {
     TDCL(struct kconf_conf_space_t);
 } kconf_conf_space;
 
-#define KCONF_SPACE_FLAG_SCHEMA 32
+//#define KCONF_SPACE_FLAG_SCHEMA 0x00000020
+#define KCONF_SPACE_FLAG_DELETED 0x00000040
 
 typedef struct kconf_conf_handle_t {
     khm_int32   magic;
@@ -88,7 +89,7 @@ extern LONG conf_status;
 
 #define khc_is_config_running() (conf_init && conf_status)
 
-#define CONFIG_REGPATHW L"Software\\MIT\\NetIDMgr"
+#define CONFIG_REGPATHW L"SOFTWARE\\MIT\\NetIDMgr"
 
 void init_kconf(void);
 void exit_kconf(void);
@@ -100,15 +101,25 @@ void exit_kconf(void);
 #define khc_is_machine_handle(h)    (((kconf_handle *) h)->flags & KCONF_FLAG_MACHINE)
 #define khc_handle_flags(h)         (((kconf_handle *) h)->flags)
 
-kconf_handle * khc_handle_from_space(kconf_conf_space * s, khm_int32 flags);
-void khc_handle_free(kconf_handle * h);
+kconf_handle *
+khcint_handle_from_space(kconf_conf_space * s, khm_int32 flags);
 
-kconf_conf_space * khc_create_empty_space(void);
-void khc_free_space(kconf_conf_space * r);
+void
+khcint_handle_free(kconf_handle * h);
 
-void khc_space_hold(kconf_conf_space * s);
-void khc_space_release(kconf_conf_space * s);
+kconf_conf_space *
+khcint_create_empty_space(void);
 
-HKEY khc_space_open_key(kconf_conf_space * s, khm_int32 flags);
+void
+khcint_free_space(kconf_conf_space * r);
+
+void
+khcint_space_hold(kconf_conf_space * s);
+
+void
+khcint_space_release(kconf_conf_space * s);
+
+HKEY
+khcint_space_open_key(kconf_conf_space * s, khm_int32 flags);
 
 #endif

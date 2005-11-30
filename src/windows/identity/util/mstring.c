@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Massachusetts Institute of Technology
+* Copyright (c) 2005 Massachusetts Institute of Technology
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -34,9 +34,9 @@
 
 KHMEXP khm_int32 KHMAPI
 multi_string_init(wchar_t * ms,
-                      khm_size cb_ms) {
+                  khm_size cb_ms) {
     if (!ms || cb_ms < sizeof(wchar_t) * 2)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     memset(ms, 0, cb_ms);
 
@@ -44,10 +44,9 @@ multi_string_init(wchar_t * ms,
 }
 
 KHMEXP khm_int32 KHMAPI 
-multi_string_append(
-                        wchar_t * ms,
-                        khm_size * pcb_ms,
-                        const wchar_t * str)
+multi_string_append(wchar_t * ms,
+                    khm_size * pcb_ms,
+                    const wchar_t * str)
 {
     wchar_t * s;
     size_t cch_s;
@@ -55,22 +54,22 @@ multi_string_append(
     size_t cch_r;
 
     if(!ms || !pcb_ms || !str)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(FAILED(StringCchLength(str, KHM_MAXCCH_STRING, &cch_s)) || cch_s == 0)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     cch_s++;
 
     s = ms;
 
     while(*s && ((s - ms) < KHM_MAXCCH_STRING)) {
         if(FAILED(StringCchLength(s, KHM_MAXCB_STRING, &cch_t)))
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
         s += cch_t + 1;
     }
 
     if(*s || (s - ms) >= KHM_MAXCCH_STRING) {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     /* now s points to the second NULL of the terminating double NULL */
@@ -91,10 +90,9 @@ multi_string_append(
 }
 
 KHMEXP khm_int32 KHMAPI 
-multi_string_prepend(
-                        wchar_t * ms,
-                        khm_size * pcb_ms,
-                        const wchar_t * str)
+multi_string_prepend(wchar_t * ms,
+                     khm_size * pcb_ms,
+                     const wchar_t * str)
 {
     size_t cch_s;
     size_t cch_t;
@@ -102,16 +100,16 @@ multi_string_prepend(
     khm_size cb_r;
 
     if(!ms || !pcb_ms || !str)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(FAILED(StringCchLength(str, KHM_MAXCCH_STRING, &cch_s)) || cch_s == 0)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     cch_s++;
 
     if(KHM_FAILED(multi_string_length_cch(ms,
                                               KHM_MAXCCH_STRING,
                                               &cch_r)))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cch_t = cch_s + cch_r;
     cb_r = cch_t * sizeof(wchar_t);
@@ -130,10 +128,9 @@ multi_string_prepend(
 }
 
 KHMEXP khm_int32 KHMAPI 
-multi_string_delete(
-                        wchar_t * ms,
-                        const wchar_t * str,
-                        const khm_int32 flags)
+multi_string_delete(wchar_t * ms,
+                    const wchar_t * str,
+                    const khm_int32 flags)
 {
     wchar_t * s;
     wchar_t * n;
@@ -141,7 +138,7 @@ multi_string_delete(
     size_t cch;
 
     if(!ms || !str)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     s = multi_string_find(ms, str, flags);
     if(!s)
@@ -151,7 +148,7 @@ multi_string_delete(
     n = NULL;
     while(*e && (e - s) < KHM_MAXCCH_STRING) {
         if(FAILED(StringCchLength(e, KHM_MAXCCH_STRING, &cch)))
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
         e += cch + 1;
 
         if(!n)
@@ -159,7 +156,7 @@ multi_string_delete(
     }
 
     if(*e || (e - s) >= KHM_MAXCCH_STRING)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(e == s)
         return KHM_ERROR_SUCCESS;
@@ -170,10 +167,9 @@ multi_string_delete(
 }
 
 KHMEXP wchar_t * KHMAPI 
-multi_string_find(
-                      const wchar_t * ms,
-                      const wchar_t * str,
-                      const khm_int32 flags)
+multi_string_find(const wchar_t * ms,
+                  const wchar_t * str,
+                  const khm_int32 flags)
 {
     const wchar_t *s;
     size_t cch;
@@ -210,10 +206,9 @@ multi_string_find(
 }
 
 KHMEXP khm_int32 KHMAPI 
-multi_string_to_csv(
-                        wchar_t * csvbuf,
-                        khm_size * pcb_csvbuf,
-                        const wchar_t * ms)
+multi_string_to_csv(wchar_t * csvbuf,
+                    khm_size * pcb_csvbuf,
+                    const wchar_t * ms)
 {
     size_t cb;
     size_t cbt;
@@ -221,7 +216,7 @@ multi_string_to_csv(
     wchar_t * d;
 
     if(!pcb_csvbuf || !ms)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     /* dry run */
     cbt = 0;
@@ -230,7 +225,7 @@ multi_string_to_csv(
         khm_boolean quotes = FALSE;
 
         if(FAILED(StringCbLength(t, KHM_MAXCB_STRING, &cb)))
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
         cb += sizeof(wchar_t);
 
         cbt += cb;
@@ -252,7 +247,7 @@ multi_string_to_csv(
     }
 
     if(cbt > KHM_MAXCB_STRING)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     /* happens if the multi string contained no strings */
     if(cbt == 0)
@@ -302,10 +297,9 @@ multi_string_to_csv(
 }
 
 KHMEXP khm_int32 KHMAPI 
-csv_to_multi_string(
-                        wchar_t * ms,
-                        khm_size * pcb_ms,
-                        const wchar_t * csv)
+csv_to_multi_string(wchar_t * ms,
+                    khm_size * pcb_ms,
+                    const wchar_t * csv)
 {
     const wchar_t * t;
     wchar_t * p;
@@ -314,7 +308,7 @@ csv_to_multi_string(
 
 
     if(!pcb_ms || !csv)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cchr = 0;
 
@@ -346,7 +340,7 @@ csv_to_multi_string(
     }
 
     if((t - csv) >= KHM_MAXCCH_STRING)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cchr++; /* last string ends */
     cchr++; /* double NULL */
@@ -427,8 +421,8 @@ multi_string_length_n(const wchar_t * str)
 
 KHMEXP khm_int32 KHMAPI 
 multi_string_length_cb(const wchar_t * str, 
-                           khm_size max_cb, 
-                           khm_size * len_cb)
+                       khm_size max_cb, 
+                       khm_size * len_cb)
 {
     khm_size cch;
     khm_int32 rv;
@@ -446,15 +440,15 @@ multi_string_length_cb(const wchar_t * str,
 
 KHMEXP khm_int32 KHMAPI 
 multi_string_length_cch(const wchar_t * str, 
-                            khm_size max_cch, 
-                            khm_size * len_cch)
+                        khm_size max_cch, 
+                        khm_size * len_cch)
 {
     const wchar_t * s;
     khm_size cch;
     size_t tcch;
 
     if(!str)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     s = str;
     cch = 0;
@@ -484,7 +478,7 @@ multi_string_copy_cb(wchar_t * s_dest,
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
     if(!s_dest)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     rv = multi_string_length_cb(src, max_cb_dest, &cb_dest);
     if(KHM_FAILED(rv))
@@ -497,14 +491,14 @@ multi_string_copy_cb(wchar_t * s_dest,
 
 KHMEXP khm_int32 KHMAPI 
 multi_string_copy_cch(wchar_t * s_dest, 
-                          khm_size max_cch_dest, 
-                          const wchar_t * src)
+                      khm_size max_cch_dest, 
+                      const wchar_t * src)
 {
     khm_size cch_dest;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
     if(!s_dest)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     rv = multi_string_length_cch(src, max_cch_dest, &cch_dest);
     if(KHM_FAILED(rv))

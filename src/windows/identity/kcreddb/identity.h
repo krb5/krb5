@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -38,13 +38,11 @@ typedef struct kcdb_identity_t {
     khm_int32 refcount;
     kcdb_buf  buf;
     khm_ui_4  refresh_cycle;
-    struct kcdb_identity_t * next;
-    struct kcdb_identity_t * prev;
+    LDCL(struct kcdb_identity_t);
 } kcdb_identity;
 
 #define KCDB_IDENT_MAGIC 0x31938d4f
 
-extern CRITICAL_SECTION cs_ident;
 extern hashtable * kcdb_identities_namemap;
 extern khm_int32 kcdb_n_identities;
 extern kcdb_identity * kcdb_identities; /* all identities */

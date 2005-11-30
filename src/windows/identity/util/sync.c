@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -52,6 +52,8 @@ KHMEXP void KHMAPI DeleteRwLock(PRWLOCK pLock)
     DeleteCriticalSection(&(pLock->cs));
     CloseHandle(pLock->readwx);
     CloseHandle(pLock->writewx);
+    pLock->readwx = NULL;
+    pLock->writewx = NULL;
 }
 
 KHMEXP void KHMAPI LockObtainRead(PRWLOCK pLock)
@@ -91,6 +93,7 @@ KHMEXP void KHMAPI LockObtainWrite(PRWLOCK pLock)
        pLock->writer == GetCurrentThreadId()) {
         pLock->locks++;
         LeaveCriticalSection(&(pLock->cs));
+        assert(FALSE);
         return;
     }
     LeaveCriticalSection(&(pLock->cs));
@@ -103,6 +106,7 @@ KHMEXP void KHMAPI LockObtainWrite(PRWLOCK pLock)
     }
     pLock->status = LOCK_WRITING;
     pLock->locks++;
+    pLock->writer = GetCurrentThreadId();
     ResetEvent(pLock->readwx);
     LeaveCriticalSection(&(pLock->cs));
 }
@@ -114,6 +118,7 @@ KHMEXP void KHMAPI LockReleaseWrite(PRWLOCK pLock)
     pLock->locks--;
     if(!pLock->locks) {
         pLock->status = LOCK_OPEN;
+        pLock->writer = 0;
         SetEvent(pLock->readwx);
         SetEvent(pLock->writewx);
     }

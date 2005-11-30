@@ -83,22 +83,14 @@ BEGIN
     LTEXT           "Name",IDC_STATIC,7,7,19,8
     LTEXT           "Valid till",IDC_STATIC,7,39,24,8
     LTEXT           "Renewable till",IDC_STATIC,7,55,45,12
-    CONTROL         "Renewable",IDC_PPK5_CRENEW,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,31,125,51,10
-    CONTROL         "Forwardable",IDC_PPK5_CFORWARD,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,91,125,56,10
-    CONTROL         "Proxiable",IDC_PPK5_CPROXY,"Button",BS_AUTOCHECKBOX | 
-                    WS_DISABLED | WS_TABSTOP,156,125,45,10
     LTEXT           "Issued on",IDC_STATIC,7,23,32,8
-    GROUPBOX        "Ticket flags",IDC_STATIC,7,108,221,41
-    LTEXT           "Static",IDC_PPK5_NAME,72,7,156,12,NOT WS_GROUP,
-                    WS_EX_CLIENTEDGE
-    LTEXT           "Static",IDC_PPK5_ISSUE,72,23,156,12,NOT WS_GROUP,
-                    WS_EX_CLIENTEDGE
-    LTEXT           "Static",IDC_PPK5_VALID,72,39,156,12,NOT WS_GROUP,
-                    WS_EX_CLIENTEDGE
-    LTEXT           "Static",IDC_PPK5_RENEW,72,55,156,12,NOT WS_GROUP,
-                    WS_EX_CLIENTEDGE
+    LTEXT           "Ticket flags",IDC_STATIC,7,75,37,8
+    EDITTEXT        IDC_PPK5_NAME,72,7,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_ISSUE,72,23,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_VALID,72,39,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_RENEW,72,55,156,12,ES_AUTOHSCROLL | ES_READONLY
+    LISTBOX         IDC_PPK5_FLAGS,72,74,156,75,LBS_SORT | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_PP_KRB5 DIALOGEX 0, 0, 235, 156
@@ -137,14 +129,15 @@ BEGIN
     LTEXT           "Default Realm",IDC_CFG_LBL_REALM,13,9,46,8
     COMBOBOX        IDC_CFG_DEFREALM,76,7,166,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,25,84,14
+    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,25,84,14,
+                    WS_DISABLED
     GROUPBOX        "Keberos Configuration File",IDC_CFG_CFGFILEGRP,7,57,241,
                     48
     LTEXT           "Location",IDC_CFG_LBL_CFGFILE,13,71,28,8
     EDITTEXT        IDC_CFG_CFGFILE,76,68,119,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",IDC_CFG_BROWSE,198,68,44,14
     CONTROL         "Create file if missing",IDC_CFG_CREATECONFIG,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,76,89,80,10
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,76,89,80,10
     GROUPBOX        "Windows® Options",IDC_CFG_WINGRP,7,110,241,65
     LTEXT           "Hostname",IDC_CFG_LBL_HOSTNAME,13,123,33,8
     EDITTEXT        IDC_CFG_HOSTNAME,76,120,166,14,ES_AUTOHSCROLL | 
@@ -153,7 +146,7 @@ BEGIN
     EDITTEXT        IDC_CFG_DOMAIN,76,138,166,14,ES_AUTOHSCROLL | 
                     ES_READONLY
     LTEXT           "Import tickets",IDC_LBL_IMPORT,13,158,45,8
-    COMBOBOX        IDC_CFG_IMPORT,76,156,166,30,CBS_DROPDOWNLIST | CBS_SORT | 
+    COMBOBOX        IDC_CFG_IMPORT,76,156,166,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
 END
 
@@ -162,15 +155,17 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_CFG_REALMS,"SysListView32",LVS_ALIGNLEFT | 
-                    WS_BORDER | WS_TABSTOP,7,19,81,148
-    GROUPBOX        "Servers",IDC_CFG_SERVERSGRP,93,7,155,91
-    GROUPBOX        "Domain/Hostname mappings",IDC_CFG_DOMAINGRP,93,101,155,
-                    74
-    CONTROL         "",IDC_LIST3,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
-                    WS_TABSTOP,99,19,143,72
-    CONTROL         "",IDC_LIST4,"SysListView32",LVS_ALIGNLEFT | WS_BORDER | 
-                    WS_TABSTOP,99,111,143,56
+    CONTROL         "",IDC_CFG_REALMS,"SysListView32",LVS_REPORT | 
+                    LVS_SHOWSELALWAYS | LVS_SORTASCENDING | LVS_EDITLABELS | 
+                    LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_TABSTOP,7,19,81,
+                    148
+    GROUPBOX        "Kerberos Servers",IDC_CFG_SERVERSGRP,93,7,155,91
+    GROUPBOX        "Domain mappings",IDC_CFG_DOMAINGRP,93,101,155,74
+    CONTROL         "",IDC_CFG_KDC,"SysListView32",LVS_REPORT | 
+                    LVS_EDITLABELS | LVS_ALIGNLEFT | WS_TABSTOP,99,19,143,72
+    CONTROL         "",IDC_CFG_DMAP,"SysListView32",LVS_REPORT | 
+                    LVS_EDITLABELS | LVS_ALIGNLEFT | WS_TABSTOP,99,111,143,
+                    56
 END
 
 IDD_CFG_IDS_TAB DIALOGEX 0, 0, 235, 151
@@ -197,6 +192,7 @@ END
 
 IDD_CFG_ID_TAB DIALOGEX 0, 0, 235, 151
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Ticket lifetime",IDC_CFG_LBL_DEFLIFE,7,10,44,8
@@ -220,6 +216,25 @@ BEGIN
                     CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "Specify &additional realms ...",IDC_NCK5_ADD_REALMS,181,
                     43,112,16,BS_NOTIFY | WS_DISABLED
+END
+
+IDD_CFG_CACHES DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "File Caches",IDC_CFG_FCGRP,7,38,241,137
+    CONTROL         "",IDC_CFG_FCLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,13,48,229,86
+    EDITTEXT        IDC_CFG_FCNAME,13,139,173,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse ...",IDC_CFG_BROWSE,192,139,50,14
+    PUSHBUTTON      "Add",IDC_CFG_ADD,13,156,50,14
+    PUSHBUTTON      "Remove Selected",IDC_CFG_REMOVE,88,156,80,14
+    CHECKBOX        "Include all API: credentials caches",IDC_CFG_INCAPI,13,
+                    7,125,10
+    CONTROL         "Include Windows LSA cache (MSLSA:)",IDC_CFG_INCMSLSA,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,22,136,10
 END
 
 
@@ -306,9 +321,33 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 159
     END
+
+    IDD_CFG_CACHES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 7
+        VERTGUIDE, 13
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_PLUGIN              ICON                    "..\\..\\images\\krb5plugin.ico"
+IDI_DELETED             ICON                    "..\\..\\images\\deleted.ico"
+IDI_NEW                 ICON                    "..\\..\\images\\new.ico"
+IDI_NORMAL              ICON                    "..\\..\\images\\normal.ico"
+IDI_MODIFIED            ICON                    "..\\..\\images\\modified.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -386,7 +425,61 @@ BEGIN
     IDS_NC_PWD_NPWD_AGAIN   "New Password again"
     IDS_KRB5_CREDTEXT_P0    "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Changing password for %s</p>"
     IDS_K5CFG_IMPORT_OPTIONS 
-                            "Never\000Always\000Only when the principal name matches\000 \000"
+                            "Never\000Always\000Only when the principal name matches\000 "
+    IDS_IDENTPRO_DESC       "Kerberos 5 Identity Provider"
+    IDS_K5CCC_SHORT_DESC    "Credentials Caches"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_K5CCC_LONG_DESC     "Kerberos 5 Credentials Caches"
+    IDS_CFG_FCTITLE         "File based Credential Caches"
+    IDS_CFG_FCN_WARNING     "Warning:"
+    IDS_CFG_FCN_W_NOTFOUND  "The credentials cache you specified does not exist."
+    IDS_CFG_FCN_W_RELATIVE  "The path you specified not an absolute path."
+    IDS_CFG_FCOPENTITLE     "Select a credential cache to add"
+    IDS_UNAVAILABLE         "(Not available)"
+    IDS_FLG_FORWARDABLE     "Forwardable"
+    IDS_FLG_FORWARDED       "Forwarded"
+    IDS_FLG_PROXIABLE       "Proxiable"
+    IDS_FLG_PROXY           "Proxy"
+    IDS_FLG_MAY_POSTDATE    "May postdate"
+    IDS_FLG_POSTDATED       "Postdated"
+    IDS_FLG_INVALID         "Invalid"
+    IDS_FLG_RENEWABLE       "Renewable"
+    IDS_FLG_INITIAL         "Initial"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FLG_PRE_AUTH        "Pre-authenticated"
+    IDS_FLG_HW_AUTH         "Hardware authentication"
+    IDS_FLG_TRANSIT_POL     "Transit policy checked"
+    IDS_FLG_OK_DELEGATE     "Approved for delegation"
+    IDS_FLG_ANONYMOUS       "Anonymous"
+    IDS_K5ERR_CANTWRITEPROFILE 
+                            "The Kerberos 5 profile file could not be written"
+    IDS_K5ERR_PROFNOWRITE   "The file %s could not be opened as a profile file for writing."
+    IDS_K5ERR_PROFUSETEMP   "The file %s could not be opened for writing.  The current changes will be saved to %s temporarily."
+    IDS_K5ERR_PROFSUGGEST   "This may be due to not having privileges to modify the configuration file.  Please contact your system administrator to resolve the issue."
+    IDS_CFG_RE_REALMS       "Kerberos Realms"
+    IDS_CFG_RE_KDCS         "Kerberos Servers"
+    IDS_CFG_RE_DMAPS        "Domain mappings"
+    IDS_CFG_RE_KDCS_R       "Kerberos Servers for %s"
+    IDS_CFG_RE_DMAPS_R      "Domains that map to %s"
+    IDS_CFG_RE_HEAD_SVR     "Server"
+    IDS_CFG_RE_HEAD_ADMIN   "Admin"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CFG_RE_HEAD_MASTER  "Master"
+    IDS_CFG_RE_HEAD_DOMAIN  "Domain"
+    IDS_CFG_RE_NEWREALM     "<New realm...>"
+    IDS_YES                 "Yes"
+    IDS_NO                  "No"
+    IDS_CFG_RE_NEWSERVER    "<New server...>"
+    IDS_CFG_RE_NEWDMAP      "<New domain mapping...>"
 END
 
 #endif    // English (U.S.) resources

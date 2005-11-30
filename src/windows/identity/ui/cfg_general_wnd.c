@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -81,6 +81,7 @@ static void
 write_params(dlg_data * dd) {
     cfg_data * d, * s;
     khm_handle csp_cw;
+    BOOL applied = FALSE;
 
     d = &dd->work;
     s = &dd->saved;
@@ -93,25 +94,35 @@ write_params(dlg_data * dd) {
         return;
     }
 
-    if (!!d->auto_init != !!s->auto_init)
+    if (!!d->auto_init != !!s->auto_init) {
         khc_write_int32(csp_cw, L"AutoInit", d->auto_init);
+        applied = TRUE;
+    }
 
-    if (!!d->auto_start != !!s->auto_start)
+    if (!!d->auto_start != !!s->auto_start) {
         khc_write_int32(csp_cw, L"AutoStart", d->auto_start);
+        applied = TRUE;
+    }
 
-    if (!!d->auto_import != !!s->auto_import)
+    if (!!d->auto_import != !!s->auto_import) {
         khc_write_int32(csp_cw, L"AutoImport", d->auto_import);
+        applied = TRUE;
+    }
 
-    if (!!d->keep_running != !!s->keep_running)
+    if (!!d->keep_running != !!s->keep_running) {
         khc_write_int32(csp_cw, L"KeepRunning", d->keep_running);
+        applied = TRUE;
+    }
 
-    if (!!d->auto_detect_net != !!s->auto_detect_net)
+    if (!!d->auto_detect_net != !!s->auto_detect_net) {
         khc_write_int32(csp_cw, L"AutoDetectNet", d->auto_detect_net);
+        applied = TRUE;
+    }
 
     khc_close_space(csp_cw);
 
     khui_cfg_set_flags(dd->node,
-                       KHUI_CNFLAG_APPLIED,
+                       (applied) ? KHUI_CNFLAG_APPLIED : 0,
                        KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
 
     *s = *d;
@@ -179,7 +190,7 @@ khm_cfg_general_proc(HWND hwnd,
 
     switch(uMsg) {
     case WM_INITDIALOG:
-        d = malloc(sizeof(*d));
+        d = PMALLOC(sizeof(*d));
 #ifdef DEBUG
         assert(d != NULL);
 #endif

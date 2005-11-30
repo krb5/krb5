@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -89,6 +89,8 @@ context.
 #define KHUI_PACTION_DOWN_EXTEND (KHUI_PACTION_BASE + 13)
 #define KHUI_PACTION_DOWN_TOGGLE (KHUI_PACTION_BASE + 14)
 #define KHUI_PACTION_BLANK  (KHUI_PACTION_BASE + 15)
+#define KHUI_PACTION_NEXT   (KHUI_PACTION_BASE + 16)
+#define KHUI_PACTION_SELALL (KHUI_PACTION_BASE + 17)
 /*@}*/
 
 /*! \name Menus

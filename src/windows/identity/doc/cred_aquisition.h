@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -170,7 +170,7 @@
        khui_new_creds_by_type * t;
 
        c = (khui_new_creds *) vparam;
-       t = malloc(sizeof(*t));
+       t = PMALLOC(sizeof(*t));
        ZeroMemory(t, sizeof(*t));
 
        t->type = my_cred_type;

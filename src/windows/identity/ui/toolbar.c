@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -124,8 +124,7 @@ void khui_add_action_to_toolbar(HWND tb, khui_action *a, int opt, HIMAGELIST hiL
         bn.fsStyle = BTNS_SEP;
         bn.iBitmap = 3;
 
-        lr = SendMessage(
-                         tb,
+        lr = SendMessage(tb,
                          TB_ADDBUTTONS,
                          1,
                          (LPARAM) &bn);
@@ -158,7 +157,9 @@ void khui_add_action_to_toolbar(HWND tb, khui_action *a, int opt, HIMAGELIST hiL
                                             TB_ADDSTRING,
                                             (WPARAM) NULL,
                                             (LPARAM) buf);
+#if (_WIN32_IE >= 0x0501)
             bn.fsStyle |= BTNS_SHOWTEXT;
+#endif
             bn.iString = idx_caption;
         }
     }
@@ -170,8 +171,11 @@ void khui_add_action_to_toolbar(HWND tb, khui_action *a, int opt, HIMAGELIST hiL
     if((opt & KHUI_TOOLBAR_ADD_BITMAP) && a->ib_normal) {
         bn.fsStyle |= TBSTYLE_CUSTOMERASE;
         bn.iBitmap = khui_tb_blank;
-    } else
+    } else {
+#if (_WIN32_IE >= 0x0501)
         bn.iBitmap = I_IMAGENONE;
+#endif
+    }
 
     bn.idCommand = a->cmd;
 
@@ -242,21 +246,24 @@ void khm_create_standard_toolbar(HWND rebar) {
 
     def = khui_find_menu(KHUI_TOOLBAR_STANDARD);
 
-    hwtb = CreateWindowEx(
-        TBSTYLE_EX_MIXEDBUTTONS,
-        TOOLBARCLASSNAME,
-        (LPWSTR) NULL,
-        WS_CHILD |
-        TBSTYLE_FLAT |
-        TBSTYLE_AUTOSIZE | 
-        TBSTYLE_LIST |
-        CCS_NORESIZE | 
-        CCS_NOPARENTALIGN |
-        CCS_ADJUSTABLE |
-        CCS_NODIVIDER,
-        0, 0, 0, 0, rebar,
-        (HMENU) NULL, khm_hInstance,
-        NULL);
+    hwtb = CreateWindowEx(0
+#if (_WIN32_IE >= 0x0501)
+                          | TBSTYLE_EX_MIXEDBUTTONS
+#endif
+                          ,
+                          TOOLBARCLASSNAME,
+                          (LPWSTR) NULL,
+                          WS_CHILD |
+                          TBSTYLE_FLAT |
+                          TBSTYLE_AUTOSIZE | 
+                          TBSTYLE_LIST |
+                          CCS_NORESIZE | 
+                          CCS_NOPARENTALIGN |
+                          CCS_ADJUSTABLE |
+                          CCS_NODIVIDER,
+                          0, 0, 0, 0, rebar,
+                          (HMENU) NULL, khm_hInstance,
+                          NULL);
 
     if(!hwtb) {
 #ifdef DEBUG

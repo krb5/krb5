@@ -29,7 +29,8 @@ INCFILES= \
 	$(INCDIR)\khdefs.h	\
 	$(INCDIR)\kherror.h	\
 	$(INCDIR)\khlist.h	\
-	$(INCDIR)\khmsgtypes.h
+	$(INCDIR)\khmsgtypes.h	\
+	$(INCDIR)\netidmgr.h
 
 all: $(INCFILES)
 

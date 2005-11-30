@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -147,7 +147,8 @@ static HMENU mm_create_menu_from_def(khui_menu_def * def) {
     hm = CreatePopupMenu();
     act = def->items;
     i = 0;
-    while(act->action != KHUI_MENU_END) {
+    while((def->n_items == -1 && act->action != KHUI_MENU_END) ||
+          (def->n_items >= 0 && i < (int) def->n_items)) {
         add_action_to_menu(hm,khui_find_action(act->action),i,act->flags);
         act++; i++;
     }
@@ -223,7 +224,6 @@ LRESULT khm_menu_activate(int menu_id) {
         TB_SETHOTITEM,
         menu_id,
         0);
-    
 
     khm_menu_track_current();
 
@@ -321,7 +321,7 @@ LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam) {
     if((HIWORD(wParam) == 0xffff && lParam == 0) || 
        (HIWORD(wParam) & MF_POPUP)) {
         /* the menu was closed */
-        khui_statusbar_set_text(KHUI_SBPART_INFO, NULL);
+        khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, NULL);
     } else {
         khui_action * act;
         int id;
@@ -330,12 +330,12 @@ LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam) {
         id = LOWORD(wParam);
         act = khui_find_action(id);
         if(act == NULL || act->is_tooltip == 0)
-            khui_statusbar_set_text(KHUI_SBPART_INFO, NULL);
+            khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, NULL);
         else {
             LoadString(khm_hInstance, 
                        act->is_tooltip, 
                        buf, ARRAYLENGTH(buf));
-            khui_statusbar_set_text(KHUI_SBPART_INFO, buf);
+            khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, buf);
         }
     }
     return 0;
@@ -429,7 +429,7 @@ LRESULT khm_menu_notify_main(LPNMHDR notice) {
         ret = TBDDRET_DEFAULT;
         break;
 
-    case TBN_HOTITEMCHANGE: 
+    case TBN_HOTITEMCHANGE:
         {
             LPNMTBHOTITEM nmhi;
             int new_item = -1;
@@ -485,21 +485,24 @@ void khm_menu_create_main(HWND rebar) {
     mm = mmdef->items;
     nmm = (int) khui_action_list_length(mm);
 
-    hwtb = CreateWindowEx(
-        TBSTYLE_EX_MIXEDBUTTONS,
-        TOOLBARCLASSNAME,
-        (LPWSTR) NULL,
-        WS_CHILD | 
-        CCS_ADJUSTABLE | 
-        TBSTYLE_FLAT |
-        TBSTYLE_AUTOSIZE |
-        TBSTYLE_LIST |
-        CCS_NORESIZE |
-        CCS_NOPARENTALIGN |
-        CCS_NODIVIDER,
-        0, 0, 0, 0, rebar,
-        (HMENU) NULL, khm_hInstance,
-        NULL);
+    hwtb = CreateWindowEx(0
+#if (_WIN32_IE >= 0x0501)
+                          | TBSTYLE_EX_MIXEDBUTTONS
+#endif
+                          ,
+                          TOOLBARCLASSNAME,
+                          (LPWSTR) NULL,
+                          WS_CHILD | 
+                          CCS_ADJUSTABLE | 
+                          TBSTYLE_FLAT |
+                          TBSTYLE_AUTOSIZE |
+                          TBSTYLE_LIST |
+                          CCS_NORESIZE |
+                          CCS_NOPARENTALIGN |
+                          CCS_NODIVIDER,
+                          0, 0, 0, 0, rebar,
+                          (HMENU) NULL, khm_hInstance,
+                          NULL);
 
     if(!hwtb) {
 #ifdef DEBUG

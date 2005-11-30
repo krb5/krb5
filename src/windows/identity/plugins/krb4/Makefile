@@ -32,12 +32,13 @@ LIBFILE=$(LIBDIR)\krb4cred.lib
 OBJFILES= 				\
 	$(LIBDIR)\dynimport.obj 	\
 	$(LIBDIR)\krb5common.obj 	\
-	$(OBJ)\main.obj 		\
+	$(OBJ)\krb4main.obj 		\
 	$(OBJ)\krb4plugin.obj 		\
 	$(OBJ)\krb4funcs.obj 		\
 	$(OBJ)\errorfuncs.obj 		\
 	$(OBJ)\krb4config.obj 		\
-	$(OBJ)\krb4configdlg.obj
+	$(OBJ)\krb4configdlg.obj	\
+	$(OBJ)\krb4newcreds.obj
 
 LIBFILES= 				\
 	$(LIBDIR)\nidmgr32.lib		\
@@ -45,10 +46,12 @@ LIBFILES= 				\
 
 SDKLIBFILES=
 
+VERRESFILE=$(OBJ)\version.res
+
 $(OBJ)\krb4config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
-$(DLLFILE): $(OBJFILES)
+$(DLLFILE): $(OBJFILES) $(VERRESFILE)
 	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES)
 
 all: mkdirs $(DLLFILE) lang

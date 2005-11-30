@@ -73,6 +73,18 @@ Language=English
 Module has failed too many times
 .
 
+MessageId=
+SymbolicName=MSG_IM_INVALID_MODULE
+Language=English
+The DLL containing the module was not of the correct format.
+.
+
+MessageId=
+SymbolicName=MSG_IM_INCOMPATIBLE
+Language=English 
+The DLL containing the module was not compatible with this version of NetIDMgr.
+.
+
 Messageid=
 SymbolicName=MSG_IM_NOT_FOUND
 Language=English
@@ -101,6 +113,20 @@ MessageId=
 SymbolicName=MSG_IM_MOD_STATE
 Language=English
 Module [%1] is in state [%2!d!]
+.
+
+MessageId=
+SymbolicName=MSG_IMERR_TITLE
+Language=English
+Failed to load module %1!s!
+.
+
+MessageId=
+SymbolicName=MSG_IMERR_SUGGEST
+Language=English
+The following information may help resolve this issue:
+
+%2!s!
 .
 
 MessageId=
@@ -143,4 +169,46 @@ MessageId=
 SymbolicName=MSG_IP_EXITING
 Language=English
 The plugin [%1] is in error state [%2!d!].  Exiting plugin.
+.
+
+MessageId=
+SymbolicName=MSG_RMI_NOT_FOUND
+Language=English
+Can't get file version information for path [%1!s!]
+.
+
+MessageId=
+SymbolicName=MSG_RMI_NO_TRANS
+Language=English
+Can't get version resource tranlations list for path [%1!s!]
+.
+
+MessageId=
+SymbolicName=MSG_RMI_NO_LOCAL
+Language=English
+The list of version translations were empty or did not contain a resource for the current user or system locale.
+.
+
+MessageId=
+SymbolicName=MSG_RMI_RES_MISSING
+Language=English
+Required resource %1!s! missing
+.
+
+MessageId=
+SymbolicName=MSG_RMI_MOD_MISMATCH
+Language=English
+The module name specified in the resource is [%1!s!] while the module name as registered is [%2!s!]
+.
+
+MessageId=
+SymbolicName=MSG_RMI_RES_TOO_LONG
+Language=English
+The resource %1!s! is malformed or too long
+.
+
+MessageId=
+SymbolicName=MSG_RMI_API_MISMATCH
+Language=English
+The module was compile for API version %1!d!.  However the current API version is %2!d!.
 .

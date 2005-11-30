@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -63,7 +63,7 @@ k5_handle_wm_initdialog(HWND hwnd,
     k5_dlg_data * d;
     khui_new_creds_by_type * nct;
     
-    d = malloc(sizeof(*d));
+    d = PMALLOC(sizeof(*d));
     ZeroMemory(d, sizeof(*d));
     /* lParam is a pointer to a khui_new_creds structure */
     d->nc = (khui_new_creds *) lParam;
@@ -116,7 +116,7 @@ k5_handle_wm_destroy(HWND hwnd,
         khui_tracker_kill_controls(&d->tc_lifetime);
     }
 
-    free(d);
+    PFREE(d);
 
     return TRUE;
 }
@@ -200,7 +200,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                 break;
 
             if(nct->credtext)
-                free(nct->credtext);
+                PFREE(nct->credtext);
             nct->credtext = NULL;
 
             tbuf[0] = L'\0';
@@ -227,7 +227,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                 StringCbLength(sbuf, sizeof(sbuf), &cbsize);
                 cbsize += sizeof(wchar_t);
 
-                nct->credtext = malloc(cbsize);
+                nct->credtext = PMALLOC(cbsize);
 
                 StringCbCopy(nct->credtext, cbsize, sbuf);
             } else if (nc->n_identities > 0 &&
@@ -242,7 +242,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                 StringCbLength(sbuf, sizeof(sbuf), &cbsize);
                 cbsize += sizeof(wchar_t);
 
-                nct->credtext = malloc(cbsize);
+                nct->credtext = PMALLOC(cbsize);
 
                 StringCbCopy(nct->credtext, cbsize, sbuf);
             } else {
@@ -251,7 +251,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                                    &cbsize);
                     cbsize += sizeof(wchar_t);
 
-                    nct->credtext = malloc(cbsize);
+                    nct->credtext = PMALLOC(cbsize);
 
                     StringCbCopy(nct->credtext, cbsize, d->cred_message);
                 }
@@ -1131,7 +1131,7 @@ k5_prep_kinit_job(khui_new_creds * nc)
     g_fjob.nc = nc;
     g_fjob.nct = nct;
     g_fjob.dialog = nct->hwnd_panel;
-    g_fjob.principal = malloc(size);
+    g_fjob.principal = PMALLOC(size);
     UnicodeStrToAnsi(g_fjob.principal, size, idname);
     g_fjob.password = NULL;
     g_fjob.lifetime = (krb5_deltat) d->tc_lifetime.current;
@@ -1155,7 +1155,7 @@ k5_prep_kinit_job(khui_new_creds * nc)
             SUCCEEDED(StringCchLength(pdlginfo->in.ccache,
                                       NETID_CCACHE_NAME_SZ,
                                       &size))) {
-            g_fjob.ccache = malloc(sizeof(char) * (size + 1));
+            g_fjob.ccache = PMALLOC(sizeof(char) * (size + 1));
 #ifdef DEBUG
             assert(g_fjob.ccache);
 #endif
@@ -1210,16 +1210,16 @@ void
 k5_free_kinit_job(void)
 {
     if (g_fjob.principal)
-        free(g_fjob.principal);
+        PFREE(g_fjob.principal);
 
     if (g_fjob.password)
-        free(g_fjob.password);
+        PFREE(g_fjob.password);
 
     if (g_fjob.identity)
         kcdb_identity_release(g_fjob.identity);
 
     if (g_fjob.ccache)
-        free(g_fjob.ccache);
+        PFREE(g_fjob.ccache);
 
     ZeroMemory(&g_fjob, sizeof(g_fjob));
 }
@@ -1272,7 +1272,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             nc = (khui_new_creds *) vparam;
 
-            nct = malloc(sizeof(*nct));
+            nct = PMALLOC(sizeof(*nct));
             ZeroMemory(nct, sizeof(*nct));
 
             nct->type = credtype_id_krb5;
@@ -1283,7 +1283,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             StringCbLength(wbuf, sizeof(wbuf), &cbsize);
             cbsize += sizeof(wchar_t);
 
-            nct->name = malloc(cbsize);
+            nct->name = PMALLOC(cbsize);
             StringCbCopy(nct->name, cbsize, wbuf);
 
             nct->h_module = hResModule;
@@ -1304,7 +1304,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             nc = (khui_new_creds *) vparam;
 
-            nct = malloc(sizeof(*nct));
+            nct = PMALLOC(sizeof(*nct));
             ZeroMemory(nct, sizeof(*nct));
 
             nct->type = credtype_id_krb5;
@@ -1350,7 +1350,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                            0, (LPARAM) t);
                         t = multi_string_next(t);
                     }
-                    free(realms);
+                    PFREE(realms);
                 }
 
                 /* and set the default realm */
@@ -1364,7 +1364,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     SendDlgItemMessage(hwnd, IDC_NCK5_REALM, 
                                        WM_SETTEXT, 
                                        0, (LPARAM) defrealm);
-                    free(defrealm);
+                    PFREE(defrealm);
                 }
             } else {            /* if krb5 is the identity provider */
                 HWND hw_realms;
@@ -1526,14 +1526,15 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                        password */
                     if(g_fjob.code) {
                         if (is_k5_identpro)
-                            kcdb_identity_set_flags(ident, 
+                            kcdb_identity_set_flags(ident,
+                                                    KCDB_IDENT_FLAG_INVALID,
                                                     KCDB_IDENT_FLAG_INVALID);
 
                         khui_cw_clear_prompts(nc);
                     }
 
                     if (d->cred_message) {
-                        free(d->cred_message);
+                        PFREE(d->cred_message);
                         d->cred_message = NULL;
                     }
 
@@ -1576,7 +1577,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         StringCbLength(msg, sizeof(msg), &cb);
                         cb += sizeof(wchar_t);
 
-                        d->cred_message = malloc(cb);
+                        d->cred_message = PMALLOC(cb);
                         StringCbCopy(d->cred_message, cb, msg);
                     }
 
@@ -1587,6 +1588,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     if(is_k5_identpro)
                         kcdb_identity_set_flags(ident, 
+                                                KCDB_IDENT_FLAG_VALID,
                                                 KCDB_IDENT_FLAG_VALID);
                 } else {
                     /* huh?? */
@@ -1688,12 +1690,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     (nc->n_identities == 0 ||
                      nc->identities[0] == NULL ||
                      KHM_SUCCEEDED(kcdb_credset_find_filtered
-                                 (NULL,
-                                  -1,
-                                  k5_find_tgt_filter,
-                                  nc->identities[0],
-                                  NULL,
-                                  NULL))))
+                                   (NULL,
+                                    -1,
+                                    k5_find_tgt_filter,
+                                    nc->identities[0],
+                                    NULL,
+                                    NULL))))
                     g_fjob.code = 0;
 
 
@@ -1776,7 +1778,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                                 &cb);
                     assert(rv == KHM_ERROR_TOO_LONG);
 
-                    idname = malloc(cb);
+                    idname = PMALLOC(cb);
                     assert(idname);
 
                     rv = kcdb_identity_get_name(nc->identities[0],
@@ -1793,7 +1795,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     else
                         cb_ms += cb + sizeof(wchar_t);
 
-                    wbuf = malloc(cb_ms);
+                    wbuf = PMALLOC(cb_ms);
                     assert(wbuf);
 
                     cb = cb_ms;
@@ -1838,8 +1840,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                                &cb);
 
                     if (rv == KHM_ERROR_TOO_LONG) {
-                        free(wbuf);
-                        wbuf = malloc(cb);
+                        PFREE(wbuf);
+                        wbuf = PMALLOC(cb);
                         assert(wbuf);
 
                         cb_ms = cb;
@@ -1886,10 +1888,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         pkrb5_free_context(ctx);
 
                     if (idname)
-                        free(idname);
+                        PFREE(idname);
 
                     if (wbuf)
-                        free(wbuf);
+                        PFREE(wbuf);
                 } else if (g_fjob.state == FIBER_STATE_NONE) {
                     /* the user cancelled the operation */
                     r = KHUI_NC_RESPONSE_EXIT | 
@@ -1921,6 +1923,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 _end_task();
             } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
 
+                __int64 ftidexp = 0;
+                __int64 ftcurrent;
+                khm_size cb;
+
+                GetSystemTimeAsFileTime((LPFILETIME) &ftcurrent);
+
                 _begin_task(0);
                 _report_mr0(KHERR_NONE, MSG_CTX_RENEW_CREDS);
                 _describe();
@@ -1930,10 +1938,20 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                      nc->ctx.cred_type == credtype_id_krb5)) {
                     int code;
 
-                    if (nc->ctx.identity != 0)
+                    if (nc->ctx.identity != 0) {
+                        /* get the current identity expiration time */
+                        cb = sizeof(ftidexp);
+
+                        kcdb_identity_get_attr(nc->ctx.identity,
+                                               KCDB_ATTR_EXPIRE,
+                                               NULL,
+                                               &ftidexp,
+                                               &cb);
+
                         code = khm_krb5_renew(nc->ctx.identity);
-                    else
+                    } else {
                         code = 1; /* it just has to be non-zero */
+                    }
 
                     if (code == 0) {
                         khui_cw_set_response(nc, credtype_id_krb5, 
@@ -1946,6 +1964,29 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         khui_cw_set_response(nc, credtype_id_krb5, 
                                              KHUI_NC_RESPONSE_EXIT | 
                                              KHUI_NC_RESPONSE_FAILED);
+                    } else if (ftcurrent < ftidexp) {
+                        wchar_t tbuf[1024];
+                        DWORD suggestion;
+                        kherr_suggestion sug_id;
+
+                        /* if we failed to get new tickets, but the
+                           identity isstill valid, then we assume that
+                           the current tickets are still good enough
+                           for other credential types to obtain their
+                           credentials. */
+
+                        khm_err_describe(code, tbuf, sizeof(tbuf),
+                                         &suggestion, &sug_id);
+
+                        _report_cs0(KHERR_WARNING, tbuf);
+                        if (suggestion)
+                            _suggest_mr(suggestion, sug_id);
+
+                        _resolve();
+
+                        khui_cw_set_response(nc, credtype_id_krb5, 
+                                             KHUI_NC_RESPONSE_EXIT |
+                                             KHUI_NC_RESPONSE_SUCCESS);
                     } else {
                         wchar_t tbuf[1024];
                         DWORD suggestion;
@@ -2049,14 +2090,14 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     }
 
                     if (wcscmp(wnpwd, wnpwd2)) {
-                        rv = KHM_ERROR_INVALID_PARM;
+                        rv = KHM_ERROR_INVALID_PARAM;
                         _report_mr0(KHERR_ERROR, MSG_PWD_NOT_SAME);
                         _suggest_mr(MSG_PWD_S_NOT_SAME, KHERR_SUGGEST_INTERACT);
                         goto _pwd_exit;
                     }
 
                     if (!wcscmp(wpwd, wnpwd)) {
-                        rv = KHM_ERROR_INVALID_PARM;
+                        rv = KHM_ERROR_INVALID_PARAM;
                         _report_mr0(KHERR_ERROR, MSG_PWD_SAME);
                         _suggest_mr(MSG_PWD_S_SAME, KHERR_SUGGEST_INTERACT);
                         goto _pwd_exit;
@@ -2082,7 +2123,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                         StringCchLengthA(result, KHERR_MAXCCH_STRING,
                                          &len);
-                        wresult = malloc((len + 1) * sizeof(wchar_t));
+                        wresult = PMALLOC((len + 1) * sizeof(wchar_t));
 #ifdef DEBUG
                         assert(wresult);
 #endif
@@ -2092,8 +2133,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         _report_cs1(KHERR_ERROR, L"%1!s!", _cstr(wresult));
                         _resolve();
 
-                        free(result);
-                        free(wresult);
+                        PFREE(result);
+                        PFREE(wresult);
 
                         /* leave wresult.  It will get freed when the
                            reported event is freed. */
@@ -2149,10 +2190,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             khui_cw_del_type(nc, credtype_id_krb5);
     
-            if(nct->name)
-                free(nct->name);
+            if (nct->name)
+                PFREE(nct->name);
+            if (nct->credtext)
+                PFREE(nct->credtext);
 
-            free(nct);
+            PFREE(nct);
         }
         break;
 

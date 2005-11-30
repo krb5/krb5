@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -145,6 +145,12 @@ enum khui_wm_nc_notifications {
     /*!< Add a row of controls to a new cred dialog.  This is an
       internal message. */
 };
+
+/*! \brief Plugins can use WMNC_NOTIFY message codes from here on up
+
+    \see ::KHUI_WM_NC_NOTIFY
+ */
+#define WMNC_USER 2048
 
 /*! \brief Notifications to the identity provider
 

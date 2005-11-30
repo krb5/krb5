@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -228,7 +228,9 @@ typedef struct kconf_schema_t {
         and settings \a flags to the required flags.
 
 */
-KHMEXP khm_int32 KHMAPI khc_open_space(khm_handle parent, wchar_t * cspace, khm_int32 flags, khm_handle * result);
+KHMEXP khm_int32 KHMAPI 
+khc_open_space(khm_handle parent, wchar_t * cspace, khm_int32 flags, 
+               khm_handle * result);
 
 /*! \brief Set the shadow space for a configuration handle
 
@@ -250,11 +252,13 @@ KHMEXP khm_int32 KHMAPI khc_open_space(khm_handle parent, wchar_t * cspace, khm_
 
     Specify NULL for \a lower to remove any prior shadow.
  */
-KHMEXP khm_int32 KHMAPI khc_shadow_space(khm_handle upper, khm_handle lower);
+KHMEXP khm_int32 KHMAPI 
+khc_shadow_space(khm_handle upper, khm_handle lower);
 
 /*! \brief Close a handle opened with khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_close_space(khm_handle conf);
+KHMEXP khm_int32 KHMAPI 
+khc_close_space(khm_handle conf);
 
 /*! \brief Read a string value from a configuration space
 
@@ -295,18 +299,18 @@ KHMEXP khm_int32 KHMAPI khc_close_space(khm_handle conf);
         the required buffer if \a buf is NULL or insufficient.
 
     \retval KHM_ERROR_NOT_READY The configuration provider has not started
-    \retval KHM_ERROR_INVALID_PARM One or more of the supplied parameters are not valid
+    \retval KHM_ERROR_INVALID_PARAM One or more of the supplied parameters are not valid
     \retval KHM_ERROR_TYPE_MISMATCH The specified value is not a string
     \retval KHM_ERROR_TOO_LONG \a buf was NULL or the size of the buffer was insufficient.  The required size is in bufsize.
     \retval KHM_ERROR_SUCCESS Success.  The number of bytes copied is in bufsize.
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_read_string(
-    khm_handle conf, 
-    wchar_t * value, 
-    wchar_t * buf, 
-    khm_size * bufsize);
+KHMEXP khm_int32 KHMAPI 
+khc_read_string(khm_handle conf, 
+                wchar_t * value, 
+                wchar_t * buf, 
+                khm_size * bufsize);
 
 /*! \brief Read a multi-string value from a configuration space
 
@@ -355,18 +359,18 @@ KHMEXP khm_int32 KHMAPI khc_read_string(
         the required buffer if \a buf is NULL or insufficient.
 
     \retval KHM_ERROR_NOT_READY The configuration provider has not started
-    \retval KHM_ERROR_INVALID_PARM One or more of the supplied parameters are not valid
+    \retval KHM_ERROR_INVALID_PARAM One or more of the supplied parameters are not valid
     \retval KHM_ERROR_TYPE_MISMATCH The specified value is not a string
     \retval KHM_ERROR_TOO_LONG \a buf was NULL or the size of the buffer was insufficient.  The required size is in bufsize.
     \retval KHM_ERROR_SUCCESS Success.  The number of bytes copied is in bufsize.
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_read_multi_string(
-    khm_handle conf, 
-    wchar_t * value, 
-    wchar_t * buf, 
-    khm_size * bufsize);
+KHMEXP khm_int32 KHMAPI 
+khc_read_multi_string(khm_handle conf, 
+                      wchar_t * value, 
+                      wchar_t * buf, 
+                      khm_size * bufsize);
 
 /*! \brief Read a 32 bit integer value from a configuration space
 
@@ -405,14 +409,14 @@ KHMEXP khm_int32 KHMAPI khc_read_multi_string(
     \retval KHM_ERROR_NOT_READY The configuration provider has not started.
     \retval KHM_ERROR_SUCCESS Success.  The value that was read was placed in \a buf
     \retval KHM_ERROR_NOT_FOUND The specified value was not found
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TYPE_MISMATCH The specified value was found but was not of the correct type.
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_read_int32(
-    khm_handle conf, 
-    wchar_t * value, 
-    khm_int32 * buf);
+KHMEXP khm_int32 KHMAPI 
+khc_read_int32(khm_handle conf, 
+               wchar_t * value, 
+               khm_int32 * buf);
 
 /*! \brief Read a 64 bit integer value from a configuration space
 
@@ -451,15 +455,15 @@ KHMEXP khm_int32 KHMAPI khc_read_int32(
     \retval KHM_ERROR_NOT_READY The configuration provider has not started
     \retval KHM_ERROR_SUCCESS Success.  The value that was read was placed in \a buf
     \retval KHM_ERROR_NOT_FOUND The specified value was not found
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid
     \retval KHM_ERROR_TYPE_MISMATCH The specified value was found but was not the correct data type.
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_read_int64(
-    khm_handle conf, 
-    wchar_t * value, 
-    khm_int64 * buf);
+KHMEXP khm_int32 KHMAPI 
+khc_read_int64(khm_handle conf, 
+               wchar_t * value, 
+               khm_int64 * buf);
 
 /*! \brief Read a binary value from a configuration space
 
@@ -499,15 +503,15 @@ KHMEXP khm_int32 KHMAPI khc_read_int64(
 
     \retval KHM_ERROR_SUCCESS Success. The data was copied to \a buf.  The number of bytes copied is stored in \a bufsize
     \retval KHM_ERROR_NOT_FOUND The specified value was not found
-    \retval KHM_ERROR_INVALID_PARM One or more parameters were invalid.
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid.
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_read_binary(
-    khm_handle conf, 
-    wchar_t * value, 
-    void * buf, 
-    khm_size * bufsize);
+KHMEXP khm_int32 KHMAPI 
+khc_read_binary(khm_handle conf, 
+                wchar_t * value, 
+                void * buf, 
+                khm_size * bufsize);
 
 /*! \brief Write a string value to a configuration space
 
@@ -543,10 +547,10 @@ KHMEXP khm_int32 KHMAPI khc_read_binary(
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_write_string(
-    khm_handle conf, 
-    wchar_t * value, 
-    wchar_t * buf);
+KHMEXP khm_int32 KHMAPI 
+khc_write_string(khm_handle conf, 
+                 wchar_t * value, 
+                 wchar_t * buf);
 
 /*! \brief Write a multi-string value to a configuration space
 
@@ -584,10 +588,10 @@ KHMEXP khm_int32 KHMAPI khc_write_string(
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_write_multi_string(
-    khm_handle conf, 
-    wchar_t * value, 
-    wchar_t * buf);
+KHMEXP khm_int32 KHMAPI 
+khc_write_multi_string(khm_handle conf, 
+                       wchar_t * value, 
+                       wchar_t * buf);
 
 /*! \brief Write a 32 bit integer value to a configuration space
 
@@ -619,10 +623,10 @@ KHMEXP khm_int32 KHMAPI khc_write_multi_string(
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_write_int32(
-    khm_handle conf, 
-    wchar_t * value, 
-    khm_int32 buf);
+KHMEXP khm_int32 KHMAPI 
+khc_write_int32(khm_handle conf, 
+                wchar_t * value, 
+                khm_int32 buf);
 
 /*! \brief Write a 64 bit integer value to a configuration space
 
@@ -654,10 +658,10 @@ KHMEXP khm_int32 KHMAPI khc_write_int32(
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_write_int64(
-    khm_handle conf, 
-    wchar_t * value, 
-    khm_int64 buf);
+KHMEXP khm_int32 KHMAPI 
+khc_write_int64(khm_handle conf, 
+                wchar_t * value, 
+                khm_int64 buf);
 
 /*! \brief Write a binary value to a configuration space
 
@@ -689,18 +693,19 @@ KHMEXP khm_int32 KHMAPI khc_write_int64(
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI khc_write_binary(
-    khm_handle conf, 
-    wchar_t * value, 
-    void * buf, 
-    khm_size bufsize);
+KHMEXP khm_int32 KHMAPI 
+khc_write_binary(khm_handle conf, 
+                 wchar_t * value, 
+                 void * buf, 
+                 khm_size bufsize);
 
 /*! \brief Get the type of a value in a configuration space
 
     \return The return value is the type of the specified value, or
         KC_NONE if the value does not exist.
  */
-KHMEXP khm_int32 KHMAPI khc_get_type(khm_handle conf, wchar_t * value);
+KHMEXP khm_int32 KHMAPI 
+khc_get_type(khm_handle conf, wchar_t * value);
 
 /*! \brief Check which configuration stores contain a specific value.
 
@@ -716,7 +721,49 @@ KHMEXP khm_int32 KHMAPI khc_get_type(khm_handle conf, wchar_t * value);
         and ::KCONF_FLAG_SCHEMA indicating which stores contain the
         value.
  */
-KHMEXP khm_int32 KHMAPI khc_value_exists(khm_handle conf, wchar_t * value);
+KHMEXP khm_int32 KHMAPI 
+khc_value_exists(khm_handle conf, wchar_t * value);
+
+/*! \brief Remove a value from a configuration space
+
+    Removes a value from one or more configuration stores.
+
+    A value can exist in multiple configuration stores.  Only the
+    values that are stored in writable stores can be removed.  When
+    the function searches for values to remove, it will only look in
+    configuration stores that are specified in the handle.  In
+    addition, the configuration stores affected can be further
+    narrowed by specifying them in the \a flags parameter.  If \a
+    flags is zero, then all the stores visible to the handle are
+    searched.  If \a flags specifies ::KCONF_FLAG_USER or
+    ::KCONF_FLAG_MACHINE or both, then only the specified stores are
+    searched, provided that the stores are visible to the handle.
+
+    This function only operates on the topmost configuration space
+    visible to the handle.  If the configuration handle is shadowed,
+    the shadowed configuration spaces are unaffected by the removal.
+
+    \param[in] conf Handle to configuration space to remove value from
+
+    \param[in] value Value to remove
+
+    \param[in] flags Specifies which configuration stores will be
+        affected by the removal.  See above.
+
+    \retval KHM_ERROR_SUCCESS The value was removed from all the
+        specified configuration stores.
+
+    \retval KHM_ERROR_NOT_FOUND The value was not found.
+
+    \retval KHM_ERROR_UNKNOWN An unknown error occurred while trying
+        to remove the value.
+
+    \retval KHM_ERROR_PARTIAL The value was successfully removed from
+        one or more stores, but the operation failed on one or more
+        other stores.
+ */
+KHMEXP khm_int32 KHMAPI
+khc_remove_value(khm_handle conf, wchar_t * value, khm_int32 flags);
 
 /*! \brief Get the name of a configuration space
 
@@ -729,10 +776,10 @@ KHMEXP khm_int32 KHMAPI khc_value_exists(khm_handle conf, wchar_t * value);
         pointed to by \a buf.  On exit, holds the number of bytes
         copied into the buffer including the NULL terminator.
  */
-KHMEXP khm_int32 KHMAPI khc_get_config_space_name(
-    khm_handle conf, 
-    wchar_t * buf, 
-    khm_size * bufsize);
+KHMEXP khm_int32 KHMAPI 
+khc_get_config_space_name(khm_handle conf, 
+                          wchar_t * buf, 
+                          khm_size * bufsize);
 
 /*! \brief Get a handle to the parent space
 
@@ -742,9 +789,9 @@ KHMEXP khm_int32 KHMAPI khc_get_config_space_name(
         call succeeds.  Receives NULL otherwise.  The returned handle
         must be closed using khc_close_space()
  */
-KHMEXP khm_int32 KHMAPI khc_get_config_space_parent(
-    khm_handle conf, 
-    khm_handle * parent);
+KHMEXP khm_int32 KHMAPI 
+khc_get_config_space_parent(khm_handle conf, 
+                            khm_handle * parent);
 
 /*! \brief Load a configuration schema into the specified configuration space
 
@@ -756,15 +803,15 @@ KHMEXP khm_int32 KHMAPI khc_get_config_space_parent(
 
     \see khc_unload_schema()
  */
-KHMEXP khm_int32 KHMAPI khc_load_schema(
-    khm_handle conf, 
-    kconf_schema * schema);
+KHMEXP khm_int32 KHMAPI 
+khc_load_schema(khm_handle conf, 
+                kconf_schema * schema);
 
 /*! \brief Unload a schema from a configuration space
  */
-KHMEXP khm_int32 KHMAPI khc_unload_schema(
-    khm_handle conf, 
-    kconf_schema * schema);
+KHMEXP khm_int32 KHMAPI 
+khc_unload_schema(khm_handle conf, 
+                  kconf_schema * schema);
 
 /*! \brief Enumerate the subspaces of a configuration space
 
@@ -788,7 +835,7 @@ KHMEXP khm_int32 KHMAPI khc_unload_schema(
     \retval KHM_ERROR_SUCCESS The call succeeded.  There is a valid
         handle to a configuration space in \a first_subspace.
 
-    \retval KHM_ERROR_INVALID_PARM Either \a conf or \a prev was not a
+    \retval KHM_ERROR_INVALID_PARAM Either \a conf or \a prev was not a
         valid configuration space handle or \a first_subspace is NULL.
         Note that \a prev can be NULL.
 
@@ -813,10 +860,10 @@ KHMEXP khm_int32 KHMAPI khc_unload_schema(
 	However, the returned handle has the same domain restrictions
 	as \a conf.
  */
-KHMEXP khm_int32 KHMAPI khc_enum_subspaces(
-    khm_handle conf,
-    khm_handle prev,
-    khm_handle * next);
+KHMEXP khm_int32 KHMAPI 
+khc_enum_subspaces(khm_handle conf,
+                   khm_handle prev,
+                   khm_handle * next);
 
 /*@}*/
 

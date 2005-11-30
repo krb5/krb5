@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -96,9 +96,11 @@ KHMEXP void KHMAPI kmm_exit(void)
         kmm_plugin_i * pn;
 
         pn = LNEXT(p);
-        /* plugins that were never resolved should be kicked off
-           the list.  Flipping the refcount will do that if no
-           other references exist for the plugin */
+        /* plugins that were never resolved should be kicked off the
+           list.  Flipping the refcount will do that if no other
+           references exist for the plugin.  The plugins that were
+           waiting for unresolved dependencies will automatically get
+           freed when the placeholders and other plugins get freed. */
         if(p->state == KMM_PLUGIN_STATE_PLACEHOLDER) {
             kmm_hold_plugin(kmm_handle_from_plugin(p));
             kmm_release_plugin(kmm_handle_from_plugin(p));

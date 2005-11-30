@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Massachusetts Institute of Technology
+* Copyright (c) 2005 Massachusetts Institute of Technology
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -59,7 +59,7 @@ khm_convert524(krb5_context alt_ctx)
         !pkrb524_convert_creds_kdc)
         return 0;
 
-    v4creds = (CREDENTIALS *) malloc(sizeof(CREDENTIALS));
+    v4creds = (CREDENTIALS *) PMALLOC(sizeof(CREDENTIALS));
     memset((char *) v4creds, 0, sizeof(CREDENTIALS));
 
     memset((char *) &increds, 0, sizeof(increds));
@@ -140,7 +140,7 @@ khm_convert524(krb5_context alt_ctx)
 
 cleanup:
     memset(v4creds, 0, sizeof(v4creds));
-    free(v4creds);
+    PFREE(v4creds);
 
     if (v5creds) {
         pkrb5_free_creds(ctx, v5creds);
@@ -237,10 +237,10 @@ static long get_tickets_from_cache(krb5_context ctx,
         cc_name = (*pkrb5_cc_get_name)(ctx, cache);
         if(cc_name) {
             namelen = strlen(cc_name);
-            namelen = (namelen + 1 + 4) * sizeof(wchar_t);
-            /* the +4 is for the possible addtion of API: during the
-               cannonicalization process */
-            wcc_name = malloc(namelen);
+            namelen = (namelen + 1 + 5) * sizeof(wchar_t);
+            /* the +5 is for the possible addtion of API: or FILE:
+               during the cannonicalization process */
+            wcc_name = PMALLOC(namelen);
             AnsiStrToUnicode(wcc_name, namelen, cc_name);
             khm_krb5_canon_cc_name(wcc_name, namelen);
         }
@@ -311,6 +311,7 @@ static long get_tickets_from_cache(krb5_context ctx,
                                        &KRBv5Credentials))) 
     {
         khm_handle tident = NULL;
+        khm_int32 cred_flags = 0;
 
         if(ClientName != NULL)
             (*pkrb5_free_unparsed_name)(ctx, ClientName);
@@ -371,7 +372,7 @@ static long get_tickets_from_cache(krb5_context ctx,
         eft -= ft;
         kcdb_cred_set_attr(cred, KCDB_ATTR_LIFETIME, &eft, sizeof(eft));
 
-        if (KRBv5Credentials.times.renew_till >= 0) {
+        if (KRBv5Credentials.times.renew_till > 0) {
             tt = KRBv5Credentials.times.renew_till;
             TimetToFileTime(tt, (LPFILETIME) &eft);
             kcdb_cred_set_attr(cred, KCDB_ATTR_RENEW_EXPIRE, &eft, 
@@ -387,18 +388,29 @@ static long get_tickets_from_cache(krb5_context ctx,
 
         /* special flags understood by NetIDMgr */
         {
-            khm_int32 oflags, nflags;
-
-            kcdb_cred_get_flags(cred, &oflags);
-            nflags = oflags;
+            khm_int32 nflags = 0;
 
             if (ti & TKT_FLG_RENEWABLE)
                 nflags |= KCDB_CRED_FLAG_RENEWABLE;
             if (ti & TKT_FLG_INITIAL)
                 nflags |= KCDB_CRED_FLAG_INITIAL;
+	    else {
+		krb5_data * c0, *c1, *r;
 
-            if (oflags != nflags)
-                kcdb_cred_set_flags(cred, nflags, KCDB_CRED_FLAGMASK_ALL);
+		/* these are macros that do not allocate any memory */
+		c0 = krb5_princ_component(ctx,KRBv5Credentials.server,0);
+		c1 = krb5_princ_component(ctx,KRBv5Credentials.server,1);
+		r  = krb5_princ_realm(ctx,KRBv5Credentials.server);
+
+		if ( c0 && c1 && r && c1->length == r->length && 
+		     !strncmp(c1->data,r->data,r->length) &&
+		     !strncmp("krbtgt",c0->data,c0->length) )
+		    nflags |= KCDB_CRED_FLAG_INITIAL;
+	    }
+
+            kcdb_cred_set_flags(cred, nflags, KCDB_CRED_FLAGMASK_EXT);
+
+            cred_flags = nflags;
         }
 
         if ( !pkrb5_decode_ticket(&KRBv5Credentials.ticket, &tkt)) {
@@ -410,8 +422,8 @@ static long get_tickets_from_cache(krb5_context ctx,
 
         ti = KRBv5Credentials.keyblock.enctype;
         kcdb_cred_set_attr(cred, attr_id_key_enctype, &ti, sizeof(ti));
-
-        kcdb_cred_set_attr(cred, KCDB_ATTR_LOCATION, wcc_name, KCDB_CBSIZE_AUTO);
+        kcdb_cred_set_attr(cred, KCDB_ATTR_LOCATION, wcc_name, 
+                           KCDB_CBSIZE_AUTO);
 
         /*TODO: going here */
 #if 0
@@ -438,7 +450,8 @@ static long get_tickets_from_cache(krb5_context ctx,
         }
 #endif
 
-        if(KRBv5Credentials.ticket_flags & TKT_FLG_INITIAL) {
+        if(cred_flags & KCDB_CRED_FLAG_INITIAL) {
+            __int64 t_issue_new;
             __int64 t_expire_old;
             __int64 t_expire_new;
             khm_size cb;
@@ -450,6 +463,9 @@ static long get_tickets_from_cache(krb5_context ctx,
 
             tt = KRBv5Credentials.times.endtime;
             TimetToFileTime(tt, (LPFILETIME) &t_expire_new);
+
+            tt = KRBv5Credentials.times.starttime;
+            TimetToFileTime(tt, (LPFILETIME) &t_issue_new);
 
             cb = sizeof(t_expire_old);
             if(KHM_FAILED(kcdb_identity_get_attr(tident, 
@@ -463,8 +479,11 @@ static long get_tickets_from_cache(krb5_context ctx,
                 kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE, 
                                        &t_expire_new, 
                                        sizeof(t_expire_new));
+                kcdb_identity_set_attr(tident, KCDB_ATTR_ISSUE,
+                                       &t_issue_new,
+                                       sizeof(t_issue_new));
 
-                if (KRBv5Credentials.times.renew_till >= 0) {
+                if (KRBv5Credentials.times.renew_till > 0) {
                     tt = KRBv5Credentials.times.renew_till;
                     TimetToFileTime(tt, (LPFILETIME) &ft);
                     kcdb_identity_set_attr(tident, 
@@ -525,7 +544,7 @@ static long get_tickets_from_cache(krb5_context ctx,
 
 _exit:
     if(wcc_name)
-        free(wcc_name);
+        PFREE(wcc_name);
 
     return code;
 }
@@ -534,11 +553,14 @@ long
 khm_krb5_list_tickets(krb5_context *krbv5Context)
 {
     krb5_context	ctx;
-    krb5_ccache		cache;
+    krb5_ccache		cache = 0;
     krb5_error_code	code;
-    apiCB *         cc_ctx = 0;
-    struct _infoNC ** pNCi = NULL;
-    int             i;
+    apiCB *             cc_ctx = 0;
+    struct _infoNC **   pNCi = NULL;
+    int                 i;
+    khm_int32           t;
+    wchar_t *           ms = NULL;
+    khm_size            cb;
 
     ctx = NULL;
     cache = NULL;
@@ -576,6 +598,49 @@ khm_krb5_list_tickets(krb5_context *krbv5Context)
         cache = 0;
     }
 
+    if (KHM_SUCCEEDED(khc_read_int32(csp_params, L"MsLsaList", &t)) && t) {
+        code = (*pkrb5_cc_resolve)(ctx, "MSLSA:", &cache);
+
+        if (code == 0 && cache) {
+            code = get_tickets_from_cache(ctx, cache);
+        }
+
+        if (ctx != NULL && cache != NULL)
+            (*pkrb5_cc_close)(ctx, cache);
+        cache = 0;
+    }
+
+    if (khc_read_multi_string(csp_params, L"FileCCList", NULL, &cb)
+        == KHM_ERROR_TOO_LONG &&
+        cb > sizeof(wchar_t) * 2) {
+        wchar_t * t;
+        char ccname[MAX_PATH + 6];
+
+        ms = PMALLOC(cb);
+#ifdef DEBUG
+        assert(ms);
+#endif
+        khc_read_multi_string(csp_params, L"FileCCList", ms, &cb);
+
+        for(t = ms; t && *t; t = multi_string_next(t)) {
+            StringCchPrintfA(ccname, ARRAYLENGTH(ccname),
+                             "FILE:%S", t);
+
+            code = (*pkrb5_cc_resolve)(ctx, ccname, &cache);
+
+            if (code)
+                continue;
+
+            code = get_tickets_from_cache(ctx, cache);
+
+            if (ctx != NULL && cache != NULL)
+                (*pkrb5_cc_close)(ctx, cache);
+            cache = 0;
+        }
+
+        PFREE(ms);
+    }
+
 _exit:
     if (pNCi)
         (*pcc_free_NC_info)(cc_ctx, &pNCi);
@@ -585,7 +650,6 @@ _exit:
     kcdb_credset_collect(NULL, krb5_credset, NULL, credtype_id_krb5, NULL);
 
     return(code);
-
 }
 
 int
@@ -615,10 +679,10 @@ khm_krb5_renew(khm_handle identity)
     realm = krb5_princ_realm(ctx, me);
 
     code = pkrb5_build_principal_ext(ctx, &server,
-        realm->length,realm->data,
-        KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-        realm->length,realm->data,
-        0);
+                                     realm->length,realm->data,
+                                     KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                     realm->length,realm->data,
+                                     0);
 
     if (code) 
         goto cleanup;
@@ -744,7 +808,7 @@ khm_krb5_kinit(krb5_context       alt_ctx,
             while ( local_addrs[i++] );
             addr_count = i + 1;
 
-            addrs = (krb5_address **) malloc((addr_count+1) * sizeof(krb5_address *));
+            addrs = (krb5_address **) PMALLOC((addr_count+1) * sizeof(krb5_address *));
             if ( !addrs ) {
                 pkrb5_free_addresses(ctx, local_addrs);
                 assert(0);
@@ -752,7 +816,7 @@ khm_krb5_kinit(krb5_context       alt_ctx,
             memset(addrs, 0, sizeof(krb5_address *) * (addr_count+1));
             i = 0;
             while ( local_addrs[i] ) {
-                addrs[i] = (krb5_address *)malloc(sizeof(krb5_address));
+                addrs[i] = (krb5_address *)PMALLOC(sizeof(krb5_address));
                 if (addrs[i] == NULL) {
                     pkrb5_free_addresses(ctx, local_addrs);
                     assert(0);
@@ -761,7 +825,7 @@ khm_krb5_kinit(krb5_context       alt_ctx,
                 addrs[i]->magic = local_addrs[i]->magic;
                 addrs[i]->addrtype = local_addrs[i]->addrtype;
                 addrs[i]->length = local_addrs[i]->length;
-                addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);
+                addrs[i]->contents = (unsigned char *)PMALLOC(addrs[i]->length);
                 if (!addrs[i]->contents) {
                     pkrb5_free_addresses(ctx, local_addrs);
                     assert(0);
@@ -773,14 +837,14 @@ khm_krb5_kinit(krb5_context       alt_ctx,
             }
             pkrb5_free_addresses(ctx, local_addrs);
 
-            addrs[i] = (krb5_address *)malloc(sizeof(krb5_address));
+            addrs[i] = (krb5_address *)PMALLOC(sizeof(krb5_address));
             if (addrs[i] == NULL)
                 assert(0);
 
             addrs[i]->magic = KV5M_ADDRESS;
             addrs[i]->addrtype = AF_INET;
             addrs[i]->length = 4;
-            addrs[i]->contents = (unsigned char *)malloc(addrs[i]->length);
+            addrs[i]->contents = (unsigned char *)PMALLOC(addrs[i]->length);
             if (!addrs[i]->contents)
                 assert(0);
 
@@ -814,8 +878,8 @@ cleanup:
         for ( i=0;i<addr_count;i++ ) {
             if ( addrs[i] ) {
                 if ( addrs[i]->contents )
-                    free(addrs[i]->contents);
-                free(addrs[i]);
+                    PFREE(addrs[i]->contents);
+                PFREE(addrs[i]);
             }
         }
     }
@@ -921,8 +985,19 @@ khm_krb5_canon_cc_name(wchar_t * wcc_name,
 
     colon = wcschr(wcc_name, L':');
 
-    if (colon)
+    if (colon) {
+        /* if the colon is just 1 character away from the beginning,
+           it's a FILE: cc */
+        if (colon - wcc_name == 1) {
+            if (cb_len + 5 * sizeof(wchar_t) > cb_cc_name)
+                return KHM_ERROR_TOO_LONG;
+
+            memmove(&wcc_name[5], &wcc_name[0], cb_len);
+            memmove(&wcc_name[0], L"FILE:", sizeof(wchar_t) * 5);
+        }
+
         return 0;
+    }
 
     if (cb_len + 4 * sizeof(wchar_t) > cb_cc_name)
         return KHM_ERROR_TOO_LONG;
@@ -1495,18 +1570,29 @@ cleanup:
 #define KRB_FILE                "KRB.CON"
 #define KRBREALM_FILE           "KRBREALM.CON"
 #define KRB5_FILE               "KRB5.INI"
+#define KRB5_TMP_FILE           "KRB5.INI.TMP"
 
 BOOL 
-khm_get_profile_file(LPSTR confname, UINT szConfname)
+khm_krb5_get_temp_profile_file(LPSTR confname, UINT szConfname)
+{
+    GetTempPathA(szConfname, confname);
+    confname[szConfname-1] = '\0';
+    StringCchCatA(confname, szConfname, KRB5_TMP_FILE);
+    confname[szConfname-1] = '\0';
+    return FALSE;
+}
+
+BOOL 
+khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
 {
     char **configFile = NULL;
     if (pkrb5_get_default_config_files(&configFile)) 
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-		strncat(confname, "\\",sizeof(confname)-strlen(confname));
+        strncat(confname, "\\",sizeof(confname)-strlen(confname));
         confname[szConfname-1] = '\0';
-		strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
+        strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
         confname[szConfname-1] = '\0';
         return FALSE;
     }
@@ -1523,9 +1609,9 @@ khm_get_profile_file(LPSTR confname, UINT szConfname)
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-		strncat(confname, "\\",sizeof(confname)-strlen(confname));
+        strncat(confname, "\\",sizeof(confname)-strlen(confname));
         confname[szConfname-1] = '\0';
-		strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
+        strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
         confname[szConfname-1] = '\0';
     }
     
@@ -1540,7 +1626,7 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
         LPSTR pFind;
 
         //strcpy(krbConFile, CLeashApp::m_krbv5_profile->first_file->filename);
-        if (khm_get_profile_file(krbConFile, sizeof(krbConFile))) {
+        if (khm_krb5_get_profile_file(krbConFile, sizeof(krbConFile))) {
             GetWindowsDirectoryA(krbConFile,sizeof(krbConFile));
             krbConFile[MAX_PATH-1] = '\0';
             strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
@@ -1634,7 +1720,7 @@ wchar_t * khm_krb5_get_realm_list(void)
 
         char krb5_conf[MAX_PATH+1];
 
-        if (!khm_get_profile_file(krb5_conf,sizeof(krb5_conf))) {
+        if (!khm_krb5_get_profile_file(krb5_conf,sizeof(krb5_conf))) {
             profile_t profile;
             long retval;
             const char *filenames[2];
@@ -1659,7 +1745,7 @@ wchar_t * khm_krb5_get_realm_list(void)
                     }
                     cbsize += sizeof(wchar_t); /* double null terminated */
 
-                    rlist = malloc(cbsize);
+                    rlist = PMALLOC(cbsize);
                     d = rlist;
                     for (cpp = sections; *cpp; cpp++)
                     {
@@ -1697,7 +1783,7 @@ wchar_t * khm_krb5_get_realm_list(void)
 
             /*TODO: compute the actual required buffer size instead of hardcoding */
             cbsize = 16384; // arbitrary
-            rlist = malloc(cbsize);
+            rlist = PMALLOC(cbsize);
             d = rlist;
 
             // Skip the default realm
@@ -1760,7 +1846,7 @@ wchar_t * khm_krb5_get_default_realm(void)
     
     if (def) {
         cch = strlen(def) + 1;
-        realm = malloc(sizeof(wchar_t) * cch);
+        realm = PMALLOC(sizeof(wchar_t) * cch);
         AnsiStrToUnicode(realm, sizeof(wchar_t) * cch, def);
         pkrb5_free_default_realm(ctx, def);
     } else
@@ -1769,6 +1855,32 @@ wchar_t * khm_krb5_get_default_realm(void)
     pkrb5_free_context(ctx);
 
     return realm;
+}
+
+long
+khm_krb5_set_default_realm(wchar_t * realm) {
+    krb5_context ctx=0;
+    char * def = 0;
+    long rv = 0;
+    char astr[K5_MAXCCH_REALM];
+
+    UnicodeStrToAnsi(astr, sizeof(astr), realm);
+
+    pkrb5_init_context(&ctx);
+    pkrb5_get_default_realm(ctx,&def);
+
+    if ((def && strcmp(def, astr)) ||
+        !def) {
+        rv = pkrb5_set_default_realm(ctx, astr);
+    }
+
+    if (def) {
+        pkrb5_free_default_realm(ctx, def);
+    }
+
+    pkrb5_free_context(ctx);
+
+    return rv;
 }
 
 wchar_t * khm_get_realm_from_princ(wchar_t * princ) {
@@ -1858,7 +1970,7 @@ khm_krb5_changepwd(char * principal,
            (result_string.length ? (sizeof(": ") - 1) : 0) +
            result_string.length;
        if (len && error_str) {
-           *error_str = malloc(len + 1);
+           *error_str = PMALLOC(len + 1);
            if (*error_str)
                StringCchPrintfA(*error_str, len+1,
                                 "%.*s%s%.*s",
@@ -1886,4 +1998,14 @@ khm_krb5_changepwd(char * principal,
        pkrb5_free_context(context);
 
    return rc;
+}
+
+khm_int32 KHMAPI
+khm_krb5_creds_is_equal(khm_handle vcred1, khm_handle vcred2, void * dummy) {
+    if (kcdb_creds_comp_attr(vcred1, vcred2, KCDB_ATTR_LOCATION) ||
+        kcdb_creds_comp_attr(vcred1, vcred2, attr_id_key_enctype) ||
+        kcdb_creds_comp_attr(vcred1, vcred2, attr_id_tkt_enctype))
+        return 1;
+    else
+        return 0;
 }

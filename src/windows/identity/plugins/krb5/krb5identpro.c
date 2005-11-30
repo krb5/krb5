@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -49,6 +49,7 @@ typedef struct tag_k5_new_cred_data {
     HWND hw_realm;
 } k5_new_cred_data;
 
+/* Runs in the UI thread */
 int 
 k5_get_realm_from_nc(khui_new_creds * nc, 
                      wchar_t * buf, 
@@ -118,6 +119,7 @@ set_identity_from_ui(khui_new_creds * nc,
     return;
 }
 
+/* runs in the UI thread */
 static BOOL
 update_crossfeed(khui_new_creds * nc,
                  k5_new_cred_data * d,
@@ -127,6 +129,7 @@ update_crossfeed(khui_new_creds * nc,
     wchar_t realm[KCDB_IDENT_MAXCCH_NAME];
     khm_size cch;
     khm_size cch_left;
+    int idx;
 
     cch = (khm_size) GetWindowTextLength(d->hw_username);
 #ifdef DEBUG
@@ -145,6 +148,38 @@ update_crossfeed(khui_new_creds * nc,
         return FALSE;
 
     if (ctrl_id_src == K5_NCID_UN) {
+
+        idx = (int)SendMessage(d->hw_realm,
+                               CB_FINDSTRINGEXACT,
+                               (WPARAM) -1,
+                               (LPARAM) un_realm);
+
+        if (idx != CB_ERR) {
+            wchar_t srealm[KCDB_IDENT_MAXCCH_NAME];
+
+            cch = SendMessage(d->hw_realm,
+                              CB_GETLBTEXTLEN,
+                              (WPARAM) idx,
+                              0);
+
+#ifdef DEBUG
+            assert(cch < ARRAYLENGTH(srealm) - 1);
+#endif
+            SendMessage(d->hw_realm,
+                        CB_GETLBTEXT,
+                        (WPARAM) idx,
+                        (LPARAM) srealm);
+
+            if (!wcsicmp(srealm, un_realm) && wcscmp(srealm, un_realm)) {
+                /* differ only by case */
+
+                StringCchCopy(un_realm, ARRAYLENGTH(un) - (un_realm - un),
+                              srealm);
+
+                SetWindowText(d->hw_username, un);
+            }
+        }
+
         SendMessage(d->hw_realm,
                     CB_SELECTSTRING,
                     (WPARAM) -1,
@@ -169,6 +204,26 @@ update_crossfeed(khui_new_creds * nc,
 
     GetWindowText(d->hw_realm, realm,
                   ARRAYLENGTH(realm));
+
+    idx = (int)SendMessage(d->hw_realm,
+                           CB_FINDSTRINGEXACT,
+                           (WPARAM) -1,
+                           (LPARAM) realm);
+
+    if (idx != CB_ERR) {
+        wchar_t srealm[KCDB_IDENT_MAXCCH_NAME];
+
+        SendMessage(d->hw_realm,
+                    CB_GETLBTEXT,
+                    (WPARAM) idx,
+                    (LPARAM) srealm);
+
+        if (!wcsicmp(srealm, realm) && wcscmp(srealm, realm)) {
+            StringCbCopy(realm, sizeof(realm), srealm);
+
+            SetWindowText(d->hw_realm, srealm);
+        }
+    }
 
     StringCchCopy(un_realm, cch_left, realm);
 
@@ -258,6 +313,7 @@ ui_cb(khui_new_creds * nc,
       UINT uMsg,
       WPARAM wParam,
       LPARAM lParam) {
+
     k5_new_cred_data * d;
 
     d = (k5_new_cred_data *) nc->ident_aux;
@@ -285,7 +341,7 @@ ui_cb(khui_new_creds * nc,
             assert(hw_parent != NULL);
 #endif
 
-            d = malloc(sizeof(*d));
+            d = PMALLOC(sizeof(*d));
             assert(d);
             ZeroMemory(d, sizeof(*d));
 
@@ -385,7 +441,7 @@ ui_cb(khui_new_creds * nc,
             if (rv != KHM_ERROR_TOO_LONG)
                 goto _add_lru_realms;
 
-            ms = malloc(cb_ms);
+            ms = PMALLOC(cb_ms);
             assert(ms != NULL);
 
             cb = cb_ms;
@@ -430,13 +486,13 @@ ui_cb(khui_new_creds * nc,
 
             if (ms != NULL) {
                 if (cb_ms < cb) {
-                    free(ms);
-                    ms = malloc(cb);
+                    PFREE(ms);
+                    ms = PMALLOC(cb);
                     assert(ms);
                     cb_ms = cb;
                 }
             } else {
-                ms = malloc(cb);
+                ms = PMALLOC(cb);
                 cb_ms = cb;
             }
 
@@ -476,10 +532,10 @@ ui_cb(khui_new_creds * nc,
             }
 
             if (defrealm)
-                free(defrealm);
+                PFREE(defrealm);
 
             if (ms)
-                free(ms);
+                PFREE(ms);
 
             /* now see about that default identity */
             if (nc->ctx.identity) {
@@ -553,7 +609,7 @@ ui_cb(khui_new_creds * nc,
             /* since we created all the windows as child windows of
                the new creds window, they will be destroyed when that
                window is destroyed. */
-            free(d);
+            PFREE(d);
         }
         return TRUE;
     }
@@ -596,6 +652,20 @@ k5_ident_valiate_name(khm_int32 msg_type,
     nx->result = KHM_ERROR_SUCCESS;
 
     return KHM_ERROR_SUCCESS;
+}
+
+static void
+k5_update_last_default_identity(khm_handle ident) {
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    khm_size cb;
+
+    cb = sizeof(idname);
+    if (KHM_FAILED(kcdb_identity_get_name(ident, idname, &cb)))
+        return;
+
+    assert(csp_params);
+
+    khc_write_string(csp_params, L"LastDefaultIdent", idname);
 }
 
 static khm_int32
@@ -702,9 +772,10 @@ k5_ident_set_default(khm_int32 msg_type,
 
             RegCloseKey(hk_ccname);
 
-            if (l == ERROR_SUCCESS)
+            if (l == ERROR_SUCCESS) {
+                k5_update_last_default_identity(def_ident);
                 return KHM_ERROR_SUCCESS;
-            else
+            } else
                 return KHM_ERROR_UNKNOWN;
 
         } else if (dw > ARRAYLENGTH(env_ccname)) {
@@ -721,8 +792,10 @@ k5_ident_set_default(khm_int32 msg_type,
 
             /* if the %KRB5CCNAME is the same as the identity
                ccache, then it is already the default. */
-            if (!khm_krb5_cc_name_cmp(id_ccname, env_ccname))
+            if (!khm_krb5_cc_name_cmp(id_ccname, env_ccname)) {
+                k5_update_last_default_identity(def_ident);
                 return KHM_ERROR_SUCCESS;
+            }
 
             /* if not, we have to copy the contents of id_ccname
                to env_ccname */
@@ -734,8 +807,10 @@ k5_ident_set_default(khm_int32 msg_type,
                                                 env_ccname, 
                                                 id_ccname);
 
-            if (code == 0)
+            if (code == 0) {
+                k5_update_last_default_identity(def_ident);
                 khm_krb5_list_tickets(&ctx);
+            }
 
             if (ctx)
                 pkrb5_free_context(ctx);
@@ -784,6 +859,17 @@ k5_ident_notify_create(khm_int32 msg_type,
     khm_size cb;
     khm_handle ident;
 
+    /* if there is a default identity already, we assume we don't need
+       to check this one. */
+
+    khm_handle def_ident;
+
+    if (KHM_SUCCEEDED(kcdb_identity_get_default(&def_ident))) {
+        kcdb_identity_release(def_ident);
+
+        return KHM_ERROR_SUCCESS;
+    }
+
     ident = (khm_handle) vparam;
 
     assert(k5_identpro_ctx != NULL);
@@ -829,7 +915,6 @@ k5_ident_notify_create(khm_int32 msg_type,
     if (cc)
         pkrb5_cc_close(k5_identpro_ctx, cc);
 
-
     return KHM_ERROR_SUCCESS;
 }
 
@@ -842,6 +927,7 @@ k5_ident_update_apply_proc(khm_handle cred,
     khm_int32 t;
     khm_int32 flags;
     __int64 t_expire;
+	__int64 t_cexpire;
     __int64 t_rexpire;
     khm_size cb;
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -851,32 +937,34 @@ k5_ident_update_apply_proc(khm_handle cred,
         KHM_FAILED(kcdb_cred_get_identity(cred, &ident)))
         return KHM_ERROR_SUCCESS;
 
-    if (ident != tident)
+    if (!kcdb_identity_is_equal(ident,tident))
         goto _cleanup;
 
     if (KHM_FAILED(kcdb_cred_get_flags(cred, &flags)))
         flags = 0;
 
-    cb = sizeof(t_expire);
-    if (KHM_SUCCEEDED(kcdb_cred_get_attr(cred,
-                                         KCDB_ATTR_EXPIRE,
-                                         NULL,
-                                         &t_expire,
-                                         &cb))) {
-        __int64 t_cexpire;
-
+    if (flags & KCDB_CRED_FLAG_INITIAL) {
         cb = sizeof(t_cexpire);
-        if ((flags & KCDB_CRED_FLAG_INITIAL) ||
-            KHM_FAILED(kcdb_identity_get_attr(tident,
-                                              KCDB_ATTR_EXPIRE,
-                                              NULL,
-                                              &t_cexpire,
-                                              &cb)) ||
-            t_cexpire > t_expire)
-            kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE,
-                                   &t_expire, sizeof(t_expire));
-    } else if (flags & KCDB_CRED_FLAG_INITIAL) {
-        kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE, NULL, 0);
+        if (KHM_SUCCEEDED(kcdb_cred_get_attr(cred,
+                                             KCDB_ATTR_EXPIRE,
+                                             NULL,
+                                             &t_cexpire,
+                                             &cb))) {										 
+                t_expire = 0;
+                cb = sizeof(t_expire);
+                if (KHM_FAILED(kcdb_identity_get_attr(tident,
+                                                      KCDB_ATTR_EXPIRE,
+                                                      NULL,
+                                                      &t_expire,
+                                                      &cb)) ||
+                    (t_cexpire > t_expire))
+                    kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE,
+                                           &t_cexpire, sizeof(t_cexpire));
+        } else {
+            kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE, NULL, 0);
+        }
+    } else {
+        goto _cleanup;
     }
 
     cb = sizeof(ccname);
@@ -890,16 +978,14 @@ k5_ident_update_apply_proc(khm_handle cred,
         kcdb_identity_set_attr(tident, attr_id_krb5_ccname,
                                NULL, 0);
     }
-
-    if (!(flags & KCDB_CRED_FLAG_INITIAL))
-        goto _cleanup;
-
+                
     cb = sizeof(t);
     if (KHM_SUCCEEDED(kcdb_cred_get_attr(cred,
                                          attr_id_krb5_flags,
                                          NULL,
                                          &t,
                                          &cb))) {
+
         kcdb_identity_set_attr(tident, attr_id_krb5_flags, 
                                &t, sizeof(t));
 
@@ -939,6 +1025,13 @@ k5_ident_update(khm_int32 msg_type,
                 void * vparam) {
 
     khm_handle ident;
+    khm_handle tident;
+    krb5_ccache cc = NULL;
+    char * ccname;
+    krb5_error_code code;
+    khm_size cb;
+    wchar_t wid_ccname[MAX_PATH];
+    wchar_t w_ccname[MAX_PATH];
 
     ident = (khm_handle) vparam;
     if (ident == NULL)
@@ -947,6 +1040,42 @@ k5_ident_update(khm_int32 msg_type,
     kcdb_credset_apply(NULL,
                        k5_ident_update_apply_proc,
                        (void *) ident);
+
+    if (KHM_SUCCEEDED(kcdb_identity_get_default(&tident))) {
+        kcdb_identity_release(tident);
+        goto _iu_cleanup;
+    }
+
+    cb = sizeof(wid_ccname);
+    if (KHM_FAILED(kcdb_identity_get_attr(ident,
+                                          attr_id_krb5_ccname,
+                                          NULL,
+                                          wid_ccname,
+                                          &cb)))
+        goto _iu_cleanup;
+
+    if(k5_identpro_ctx == NULL)
+        goto _iu_cleanup;
+
+    code = pkrb5_cc_default(k5_identpro_ctx, &cc);
+    if (code)
+        goto _iu_cleanup;
+
+    ccname = pkrb5_cc_get_name(k5_identpro_ctx, cc);
+    if (ccname == NULL)
+        goto _iu_cleanup;
+
+    AnsiStrToUnicode(w_ccname, sizeof(w_ccname), ccname);
+
+    khm_krb5_canon_cc_name(w_ccname, sizeof(w_ccname));
+    khm_krb5_canon_cc_name(wid_ccname, sizeof(wid_ccname));
+
+    if (!wcsicmp(w_ccname, wid_ccname))
+        kcdb_identity_set_default_int(ident);
+
+ _iu_cleanup:
+    if (cc && k5_identpro_ctx)
+        pkrb5_cc_close(k5_identpro_ctx, cc);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -965,6 +1094,7 @@ k5_ident_init(khm_int32 msg_type,
     char * princ_nameA = NULL;
     wchar_t princ_nameW[KCDB_IDENT_MAXCCH_NAME];
     khm_handle ident = NULL;
+    khm_boolean found_default = FALSE;
 
     assert(k5_identpro_ctx != NULL);
 
@@ -995,6 +1125,8 @@ k5_ident_init(khm_int32 msg_type,
 
     kcdb_identity_set_default_int(ident);
 
+    found_default = TRUE;
+
  _nc_cleanup:
     if (princ_nameA)
         pkrb5_free_unparsed_name(k5_identpro_ctx,
@@ -1007,6 +1139,25 @@ k5_ident_init(khm_int32 msg_type,
 
     if (ident)
         kcdb_identity_release(ident);
+
+    if (!found_default) {
+        wchar_t widname[KCDB_IDENT_MAXCCH_NAME];
+        khm_size cb;
+
+        cb = sizeof(widname);
+
+        assert(csp_params);
+
+        if (KHM_SUCCEEDED(khc_read_string(csp_params, L"LastDefaultIdent",
+                                          widname, &cb))) {
+            ident = NULL;
+            kcdb_identity_create(widname, KCDB_IDENT_FLAG_CREATE, &ident);
+            if (ident) {
+                kcdb_identity_set_default_int(ident);
+                kcdb_identity_release(ident);
+            }
+        }
+    }
 
     return KHM_ERROR_SUCCESS;
 }
@@ -1102,6 +1253,124 @@ k5_msg_ident(khm_int32 msg_type,
                                       msg_subtype,
                                       uparam,
                                       vparam);
+    }
+
+    return KHM_ERROR_SUCCESS;
+}
+
+khm_int32 KHMAPI
+k5_ident_name_comp_func(const void * dl, khm_size cb_dl,
+                        const void * dr, khm_size cb_dr) {
+    wchar_t * idl = (wchar_t *) dl;
+    wchar_t * idr = (wchar_t *) dr;
+    wchar_t * rl;
+    wchar_t * rr;
+    khm_int32 r;
+
+    rl = khm_get_realm_from_princ(idl);
+    rr = khm_get_realm_from_princ(idr);
+
+    if (rl == NULL && rr == NULL)
+        return wcscmp(idl, idr);
+    else if (rl == NULL)
+        return 1;
+    else if (rr == NULL)
+        return -1;
+
+    r = wcscmp(rl, rr);
+    if (r == 0)
+        return wcscmp(idl, idr);
+    else
+        return r;
+}
+
+khm_int32
+k5_msg_system_idpro(khm_int32 msg_type, khm_int32 msg_subtype,
+                    khm_ui_4 uparam, void * vparam) {
+
+    switch(msg_subtype) {
+    case KMSG_SYSTEM_INIT:
+        {
+
+            pkrb5_init_context(&k5_identpro_ctx);
+            kcdb_identity_set_type(credtype_id_krb5);
+
+            if (KHM_FAILED(kcdb_type_get_id(TYPENAME_KRB5_PRINC, 
+                                            &type_id_krb5_princ))) {
+                kcdb_type dt;
+                kcdb_type * pstr;
+
+                kcdb_type_get_info(KCDB_TYPE_STRING, &pstr);
+
+                ZeroMemory(&dt, sizeof(dt));
+                dt.name = TYPENAME_KRB5_PRINC;
+                dt.id = KCDB_TYPE_INVALID;
+                dt.flags = KCDB_TYPE_FLAG_CB_AUTO;
+                dt.cb_min = pstr->cb_min;
+                dt.cb_max = pstr->cb_max;
+                dt.toString = pstr->toString;
+                dt.isValid = pstr->isValid;
+                dt.comp = k5_ident_name_comp_func;
+                dt.dup = pstr->dup;
+
+                kcdb_type_register(&dt, &type_id_krb5_princ);
+
+                type_regd_krb5_princ = TRUE;
+
+                kcdb_type_release_info(pstr);
+            }
+
+            if (type_id_krb5_princ != -1) {
+                kcdb_attrib * attr;
+
+                kcdb_attrib_get_info(KCDB_ATTR_ID_NAME, &attr);
+
+                attr->type = type_id_krb5_princ;
+
+                kcdb_attrib_release_info(attr);
+            }
+        }
+        break;
+
+    case KMSG_SYSTEM_EXIT:
+        {
+            if (k5_identpro_ctx) {
+                pkrb5_free_context(k5_identpro_ctx);
+                k5_identpro_ctx = NULL;
+            }
+
+            if (type_id_krb5_princ != -1) {
+                kcdb_attrib * attr;
+
+                kcdb_attrib_get_info(KCDB_ATTR_ID_NAME, &attr);
+
+                attr->type = KCDB_TYPE_STRING;
+
+                kcdb_attrib_release_info(attr);
+            }
+
+            /* allow a brief moment for any stale references to die */
+            Sleep(100);
+
+            if (type_regd_krb5_princ) {
+                kcdb_type_unregister(type_id_krb5_princ);
+            }
+        }
+        break;
+    }
+
+    return KHM_ERROR_SUCCESS;
+}
+
+khm_int32 KHMAPI
+k5_ident_callback(khm_int32 msg_type, khm_int32 msg_subtype,
+                  khm_ui_4 uparam, void * vparam) {
+    switch(msg_type) {
+    case KMSG_SYSTEM:
+        return k5_msg_system_idpro(msg_type, msg_subtype, uparam, vparam);
+
+    case KMSG_IDENT:
+        return k5_msg_ident(msg_type, msg_subtype, uparam, vparam);
     }
 
     return KHM_ERROR_SUCCESS;

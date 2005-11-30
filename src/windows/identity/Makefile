@@ -47,126 +47,137 @@ RMAKE=$(MAKECMD) /nologo clean
 start:
 
 config: start
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 include: config
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 util: include
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 kherr: util
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 kconfig: kherr
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 kmq: kconfig
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 kcreddb: kmq
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 kmm: kcreddb
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 help: kmm
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 uilib: help
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 nidmgrdll: uilib
-	$(ECHO) Entering $@
+	$(ECHO) -- Entering $@
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 ui: nidmgrdll
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 # Now build the plugins
 plugincommon: ui
-	$(ECHO) Entering $@
+	$(ECHO) -- Entering $@
 	$(CD) plugins\common
 	$(RMAKE)
 	$(CD) ..\..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 krb5plugin: plugincommon
-	$(ECHO) Entering $@
+	$(ECHO) -- Entering $@
 	$(CD) plugins\krb5
 	$(RMAKE)
 	$(CD) ..\..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 !ifndef NO_KRB4
 finale: krb4plugin
 
 krb4plugin: plugincommon
-	$(ECHO) Entering $@
+	$(ECHO) -- Entering $@
 	$(CD) plugins\krb4
 	$(RMAKE)
 	$(CD) ..\..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
+!endif
+
+!ifdef BUILD_AFS
+finale: afsplugin
+
+afsplugin: plugincommon
+	$(ECHO) -- Entering $@
+	$(CD) plugins\afs
+	$(RMAKE)
+	$(CD) ..\..
+	$(ECHO) -- Done with $@
 !endif
 
 finale: krb5plugin
-	$(ECHO) Done.
+	$(ECHO) -- Done.
 
 pdoc:
 
 doc: pdoc
-	$(ECHO) Entering $@:
+	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
 	$(CD) ..
-	$(ECHO) Done with $@
+	$(ECHO) -- Done with $@
 
 clean::
 	$(MAKECMD) /nologo CLEANRUN=1

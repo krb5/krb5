@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,17 +26,41 @@
 
 #include<khmapp.h>
 
-khui_statusbar_part khui_statusbar_parts[] = {
+khm_statusbar_part khm_statusbar_parts[] = {
     {KHUI_SBPART_INFO, 0, KHUI_SB_WTYPE_FILLER},
     {KHUI_SBPART_NOTICE, 40, KHUI_SB_WTYPE_RELATIVE},
     {KHUI_SBPART_LOC, 40, KHUI_SB_WTYPE_ABSOLUTE}
 };
 
-int khui_n_statusbar_parts = sizeof(khui_statusbar_parts) / sizeof(khui_statusbar_part);
+int khm_n_statusbar_parts = sizeof(khm_statusbar_parts) / sizeof(khm_statusbar_part);
 
-HWND khui_hwnd_statusbar = NULL;
+HWND khm_hwnd_statusbar = NULL;
 
-void khui_statusbar_set_parts(HWND parent) {
+LRESULT 
+khm_statusbar_notify(LPNMHDR nmhdr) {
+    LPNMMOUSE pnmm;
+
+    switch(nmhdr->code) {
+    case NM_CLICK:
+    case NM_DBLCLK:
+        pnmm = (LPNMMOUSE) nmhdr;
+
+        if (pnmm->dwItemSpec >= (DWORD) khm_n_statusbar_parts)
+            return TRUE;
+
+        if (khm_statusbar_parts[pnmm->dwItemSpec].id == KHUI_SBPART_NOTICE) {
+            /* means, show next notification */
+            kmq_post_message(KMSG_ALERT, KMSG_ALERT_SHOW_QUEUED, 0, 0);
+        }
+
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void 
+khui_statusbar_set_parts(HWND parent) {
     int i;
     int fillerwidth;
     int staticwidth;
@@ -50,28 +74,28 @@ void khui_statusbar_set_parts(HWND parent) {
 
     /* calculate fillerwidth and staticwidth */
     staticwidth = 0;
-    for(i=0;i<khui_n_statusbar_parts;i++) {
-        if(khui_statusbar_parts[i].wtype == KHUI_SB_WTYPE_ABSOLUTE) {
-            staticwidth += khui_statusbar_parts[i].width;
-        } else if(khui_statusbar_parts[i].wtype == KHUI_SB_WTYPE_RELATIVE) {
-            staticwidth += (khui_statusbar_parts[i].width * width) / 100;
+    for(i=0;i<khm_n_statusbar_parts;i++) {
+        if(khm_statusbar_parts[i].wtype == KHUI_SB_WTYPE_ABSOLUTE) {
+            staticwidth += khm_statusbar_parts[i].width;
+        } else if(khm_statusbar_parts[i].wtype == KHUI_SB_WTYPE_RELATIVE) {
+            staticwidth += (khm_statusbar_parts[i].width * width) / 100;
         }
     }
 
     fillerwidth = width - staticwidth;
 
-    parts = malloc(sizeof(INT) * khui_n_statusbar_parts);
+    parts = PMALLOC(sizeof(INT) * khm_n_statusbar_parts);
 
     lastx = 0;
-    for(i=0;i<khui_n_statusbar_parts;i++) {
+    for(i=0;i<khm_n_statusbar_parts;i++) {
         int w;
-        switch(khui_statusbar_parts[i].wtype) {
+        switch(khm_statusbar_parts[i].wtype) {
             case KHUI_SB_WTYPE_ABSOLUTE:
-                w = khui_statusbar_parts[i].width;
+                w = khm_statusbar_parts[i].width;
                 break;
 
             case KHUI_SB_WTYPE_RELATIVE:
-                w = (khui_statusbar_parts[i].width * width) / 100;
+                w = (khm_statusbar_parts[i].width * width) / 100;
                 break;
 
             case KHUI_SB_WTYPE_FILLER:
@@ -80,22 +104,22 @@ void khui_statusbar_set_parts(HWND parent) {
         }
         lastx += w;
 
-        if(i==khui_n_statusbar_parts - 1)
+        if(i==khm_n_statusbar_parts - 1)
             parts[i] = -1;
         else
             parts[i] = lastx;
     }
 
     SendMessage(
-        khui_hwnd_statusbar,
+        khm_hwnd_statusbar,
         SB_SETPARTS,
-        khui_n_statusbar_parts,
+        khm_n_statusbar_parts,
         (LPARAM) parts);
 
-    free(parts);
+    PFREE(parts);
 }
 
-void khui_create_statusbar(HWND parent) {
+void khm_create_statusbar(HWND parent) {
     HWND hwsb;
 
     hwsb = CreateWindowEx(
@@ -112,38 +136,47 @@ void khui_create_statusbar(HWND parent) {
     if(!hwsb)
         return;
 
-    khui_hwnd_statusbar = hwsb;
+    khm_hwnd_statusbar = hwsb;
 
     khui_statusbar_set_parts(parent);
+
+    kmq_post_message(KMSG_ALERT, KMSG_ALERT_CHECK_QUEUE, 0, 0);
 }
 
-void khui_update_statusbar(HWND parent) {
-    MoveWindow(khui_hwnd_statusbar, 0, 0, 0, 0, TRUE);
+void khm_update_statusbar(HWND parent) {
+    MoveWindow(khm_hwnd_statusbar, 0, 0, 0, 0, TRUE);
     khui_statusbar_set_parts(parent);
 }
 
 int sb_find_index(int id) {
     int i;
 
-    for(i=0;i<khui_n_statusbar_parts;i++) {
-        if(khui_statusbar_parts[i].id == id)
+    for(i=0;i<khm_n_statusbar_parts;i++) {
+        if(khm_statusbar_parts[i].id == id)
             return i;
     }
 
     return -1;
 }
 
-void khui_statusbar_set_text(int id, wchar_t * text) {
+void khm_statusbar_set_part(int id, HICON icon, wchar_t * text) {
     int idx;
+
+    if (!khm_hwnd_statusbar)
+        return;
 
     idx = sb_find_index(id);
     if(idx < 0)
         return;
 
-    SendMessage(
-        khui_hwnd_statusbar,
-        SB_SETTEXT,
-        idx,
-        (LPARAM) text);
+    SendMessage(khm_hwnd_statusbar,
+                SB_SETICON,
+                idx,
+                (LPARAM) icon);
+
+    SendMessage(khm_hwnd_statusbar,
+                SB_SETTEXT,
+                idx,
+                (LPARAM) text);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -81,7 +81,7 @@ void kmqint_attach_this_thread(void) {
     if(!q) {
         EnterCriticalSection(&cs_kmq_global);
 
-        q = malloc(sizeof(kmq_queue));
+        q = PMALLOC(sizeof(kmq_queue));
 
         InitializeCriticalSection(&q->cs);
         q->thread = GetCurrentThreadId();

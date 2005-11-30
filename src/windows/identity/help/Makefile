@@ -25,7 +25,7 @@
 MODULE=help
 !include <..\config\Makefile.w32>
 
-CHMFILE=$(DOCDIR)\netidmgr.chm
+CHMFILE=$(BINDIR)\netidmgr.chm
 
 INCFILES=$(INCDIR)\khhelp.h
 

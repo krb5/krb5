@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -258,7 +258,7 @@ KHMEXP khm_int32 KHMAPI kmq_exit(void);
 
     \see kmq_find_type() and kmq_unregister_type()
 
-    \retval KHM_ERROR_INVALID_PARM The \a name parameter was invalid.
+    \retval KHM_ERROR_INVALID_PARAM The \a name parameter was invalid.
     \retval KHM_ERROR_EXISTS A message type with that name already exists.
     \retval KHM_ERROR_NO_RESOURCES Can't register any more message types.
     \retval KHM_ERROR_SUCCESS The operation succeeded.
@@ -725,7 +725,7 @@ KHMEXP khm_boolean KHMAPI kmq_has_completed(kmq_call call);
 
     \retval KHM_ERROR_SUCCESS The call completed
     \retval KHM_ERROR_TIMEOUT The timeout period expired
-    \retval KHM_ERROR_INVALID_PARM One of the parameters were invalid.
+    \retval KHM_ERROR_INVALID_PARAM One of the parameters were invalid.
 */
 KHMEXP khm_int32 KHMAPI kmq_wait(kmq_call call, kmq_timer timeout);
 

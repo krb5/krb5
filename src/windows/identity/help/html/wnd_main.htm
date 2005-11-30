@@ -1,0 +1,89 @@
+<html>
+<head>
+  <title>Main Window</title>
+  <meta name="description" content="Main Window">
+  <meta name="keywords" content="main window">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Main Window</h1>
+
+<p>The main window of Network Identity Manager is structured as follows</p>
+
+<map id="main_wnd_map">
+  <area shape = "rect" coords = "7,34,243,56" href = "menu_all.htm" />
+  <area shape = "rect" coords = "6,56,364,90" href = "tb_standard.htm" />
+  <area shape = "rect" coords = "6,112,613,164" href = "#cred1" />
+  <area shape = "rect" coords = "246,162,288,197" href = "#cred2" />
+  <area shape = "rect" coords = "72,196,107,245" href = "#credtype1" />
+  <area shape = "rect" coords = "69,278,107,315" href = "#credtype2" />
+  <area shape = "rect" coords = "236,332,294,367" href = "#cred3" />
+</map>
+
+<img src="images/screen_main_wnd.bmp" usemap="#main_wnd_map"/>
+
+<ol>
+  <li>Menu bar</li>
+  <li>Tool bar</li>
+
+  <li><a name="cred1" /> An identity with a valid Kerberos 5 initial
+  ticket</li>
+
+  <li><a name="cred2" /> An identity with valid Kerberos 5 tickets and
+  AFS tokens</li> 
+
+  <li><a name="credtype1" /> A set of Kerberos 5 tickets</li>
+
+  <li><a name="credtype2" /> A set of AFS tokens</li>
+
+  <li>An identity with expired Kerberos 5 tickets</li>
+
+</ol>
+
+<h3>Identity views</h3>
+
+<p>
+The default credentials view organizes them grouped by identity name
+and then by credential type.  Each credential is then shown under each
+group heading sorted by the credential name.  The default headings for
+the credential view provides you with a minimal amount of information
+to reduce clutter.  If you wish you can add columns to the display
+using the <span class="pre">Choose columns...</span> action on the
+<span class="pre"><a href="html/menu_view.htm">View</a></span> menu.
+</p>
+
+<p>
+The header backgrounds and the credential rows change color if the
+credentials are about to expire or are expired.  
+
+<ul> 
+
+<li> <span style="background-color:#fbc74d">Headers</span> mean that
+credentials at that level will expire unless renewed.  Credentials
+will have a warning icon next to them.<br/>
+
+The threshold for this can be set as the <span class="pre">Warn</span>
+parameter in the <span class="pre">Notifications</span> configuration
+panel.</li>
+
+<li> <span style="background-color:#f08575">Headers</span> mean that
+credentials at that level will expire in a few minutes.  Credentials
+will have a critical icon next to them.<br/>
+
+The threshold for this can be set as the <span class="pre">Warn
+again</span> parameter in the <span class="pre">Notifications</span>
+configuration panel.  </li>
+
+<li> <span style="background-color:#ff9090">Headers</span> mean that
+the credentials at that level have expired.  Credentials will have an
+expired icon next to them.<br/>
+
+The threshold for this is always zero.
+</li>
+
+</ul> 
+</p> 
+
+</body>
+</html>

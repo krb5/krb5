@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,5 +32,6 @@
 #include<hashtable.h>
 #include<sync.h>
 #include<mstring.h>
+#include<perfstat.h>
 
 #endif

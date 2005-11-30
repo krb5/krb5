@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2004 Massachusetts Institute of Technology
+* Copyright (c) 2005 Massachusetts Institute of Technology
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -134,6 +134,7 @@ DECL_FUNC_PTR(krb5_get_renewed_creds);
 DECL_FUNC_PTR(krb5_get_default_config_files);
 DECL_FUNC_PTR(krb5_free_config_files);
 DECL_FUNC_PTR(krb5_get_default_realm);
+DECL_FUNC_PTR(krb5_set_default_realm);
 DECL_FUNC_PTR(krb5_free_ticket);
 DECL_FUNC_PTR(krb5_decode_ticket);
 DECL_FUNC_PTR(krb5_get_host_realm);
@@ -152,10 +153,16 @@ DECL_FUNC_PTR(error_message);
 
 // Profile functions
 DECL_FUNC_PTR(profile_init);    
+DECL_FUNC_PTR(profile_flush);
 DECL_FUNC_PTR(profile_release); 
 DECL_FUNC_PTR(profile_get_subsection_names);
 DECL_FUNC_PTR(profile_free_list);
 DECL_FUNC_PTR(profile_get_string);
+DECL_FUNC_PTR(profile_get_values);
+DECL_FUNC_PTR(profile_get_relation_names);
+DECL_FUNC_PTR(profile_clear_relation);
+DECL_FUNC_PTR(profile_add_relation);
+DECL_FUNC_PTR(profile_update_relation);
 DECL_FUNC_PTR(profile_release_string);
 
 // Service functions
@@ -217,67 +224,68 @@ FUNC_INFO k4_fi[] = {
 
 FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_change_password),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_init),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_tkt_life),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_renew_life),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_forwardable),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_proxiable),
-        MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_address_list),
-        MAKE_FUNC_INFO(krb5_get_init_creds_password),
-        MAKE_FUNC_INFO(krb5_get_prompt_types),
-        MAKE_FUNC_INFO(krb5_build_principal_ext),
-        MAKE_FUNC_INFO(krb5_cc_get_name),
-        MAKE_FUNC_INFO(krb5_cc_resolve),
-        MAKE_FUNC_INFO(krb5_cc_default),
-        MAKE_FUNC_INFO(krb5_cc_default_name),
-        MAKE_FUNC_INFO(krb5_cc_set_default_name),
-        MAKE_FUNC_INFO(krb5_cc_initialize),
-        MAKE_FUNC_INFO(krb5_cc_destroy),
-        MAKE_FUNC_INFO(krb5_cc_close),
-        MAKE_FUNC_INFO(krb5_cc_copy_creds),
-        MAKE_FUNC_INFO(krb5_cc_store_cred),
-        MAKE_FUNC_INFO(krb5_cc_retrieve_cred),
-        MAKE_FUNC_INFO(krb5_cc_get_principal),
-        MAKE_FUNC_INFO(krb5_cc_start_seq_get),
-        MAKE_FUNC_INFO(krb5_cc_next_cred),
-        MAKE_FUNC_INFO(krb5_cc_end_seq_get),
-        MAKE_FUNC_INFO(krb5_cc_remove_cred),
-        MAKE_FUNC_INFO(krb5_cc_set_flags),
-        // MAKE_FUNC_INFO(krb5_cc_get_type),
-        MAKE_FUNC_INFO(krb5_free_context),
-        MAKE_FUNC_INFO(krb5_free_cred_contents),
-        MAKE_FUNC_INFO(krb5_free_principal),
-        MAKE_FUNC_INFO(krb5_get_in_tkt_with_password),
-        MAKE_FUNC_INFO(krb5_init_context),
-        MAKE_FUNC_INFO(krb5_parse_name),
-        MAKE_FUNC_INFO(krb5_timeofday),
-        MAKE_FUNC_INFO(krb5_timestamp_to_sfstring),
-        MAKE_FUNC_INFO(krb5_unparse_name),
-        MAKE_FUNC_INFO(krb5_get_credentials),
-        MAKE_FUNC_INFO(krb5_mk_req),
-        MAKE_FUNC_INFO(krb5_sname_to_principal),
-        MAKE_FUNC_INFO(krb5_get_credentials_renew),
-        MAKE_FUNC_INFO(krb5_free_data),
-        MAKE_FUNC_INFO(krb5_free_data_contents),
-        //  MAKE_FUNC_INFO(krb5_get_realm_domain),
-        MAKE_FUNC_INFO(krb5_free_unparsed_name),
-        MAKE_FUNC_INFO(krb5_os_localaddr),
-        MAKE_FUNC_INFO(krb5_copy_keyblock_contents),
-        MAKE_FUNC_INFO(krb5_copy_data),
-        MAKE_FUNC_INFO(krb5_free_creds),
-        MAKE_FUNC_INFO(krb5_build_principal),
-        MAKE_FUNC_INFO(krb5_get_renewed_creds),
-        MAKE_FUNC_INFO(krb5_free_addresses),
-        MAKE_FUNC_INFO(krb5_get_default_config_files),
-        MAKE_FUNC_INFO(krb5_free_config_files),
-        MAKE_FUNC_INFO(krb5_get_default_realm),
-        MAKE_FUNC_INFO(krb5_free_ticket),
-        MAKE_FUNC_INFO(krb5_decode_ticket),
-        MAKE_FUNC_INFO(krb5_get_host_realm),
-        MAKE_FUNC_INFO(krb5_free_host_realm),
-        MAKE_FUNC_INFO(krb5_c_random_make_octets),
-        MAKE_FUNC_INFO(krb5_free_default_realm),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_init),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_tkt_life),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_renew_life),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_forwardable),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_proxiable),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_address_list),
+    MAKE_FUNC_INFO(krb5_get_init_creds_password),
+    MAKE_FUNC_INFO(krb5_get_prompt_types),
+    MAKE_FUNC_INFO(krb5_build_principal_ext),
+    MAKE_FUNC_INFO(krb5_cc_get_name),
+    MAKE_FUNC_INFO(krb5_cc_resolve),
+    MAKE_FUNC_INFO(krb5_cc_default),
+    MAKE_FUNC_INFO(krb5_cc_default_name),
+    MAKE_FUNC_INFO(krb5_cc_set_default_name),
+    MAKE_FUNC_INFO(krb5_cc_initialize),
+    MAKE_FUNC_INFO(krb5_cc_destroy),
+    MAKE_FUNC_INFO(krb5_cc_close),
+    MAKE_FUNC_INFO(krb5_cc_copy_creds),
+    MAKE_FUNC_INFO(krb5_cc_store_cred),
+    MAKE_FUNC_INFO(krb5_cc_retrieve_cred),
+    MAKE_FUNC_INFO(krb5_cc_get_principal),
+    MAKE_FUNC_INFO(krb5_cc_start_seq_get),
+    MAKE_FUNC_INFO(krb5_cc_next_cred),
+    MAKE_FUNC_INFO(krb5_cc_end_seq_get),
+    MAKE_FUNC_INFO(krb5_cc_remove_cred),
+    MAKE_FUNC_INFO(krb5_cc_set_flags),
+    // MAKE_FUNC_INFO(krb5_cc_get_type),
+    MAKE_FUNC_INFO(krb5_free_context),
+    MAKE_FUNC_INFO(krb5_free_cred_contents),
+    MAKE_FUNC_INFO(krb5_free_principal),
+    MAKE_FUNC_INFO(krb5_get_in_tkt_with_password),
+    MAKE_FUNC_INFO(krb5_init_context),
+    MAKE_FUNC_INFO(krb5_parse_name),
+    MAKE_FUNC_INFO(krb5_timeofday),
+    MAKE_FUNC_INFO(krb5_timestamp_to_sfstring),
+    MAKE_FUNC_INFO(krb5_unparse_name),
+    MAKE_FUNC_INFO(krb5_get_credentials),
+    MAKE_FUNC_INFO(krb5_mk_req),
+    MAKE_FUNC_INFO(krb5_sname_to_principal),
+    MAKE_FUNC_INFO(krb5_get_credentials_renew),
+    MAKE_FUNC_INFO(krb5_free_data),
+    MAKE_FUNC_INFO(krb5_free_data_contents),
+    //  MAKE_FUNC_INFO(krb5_get_realm_domain),
+    MAKE_FUNC_INFO(krb5_free_unparsed_name),
+    MAKE_FUNC_INFO(krb5_os_localaddr),
+    MAKE_FUNC_INFO(krb5_copy_keyblock_contents),
+    MAKE_FUNC_INFO(krb5_copy_data),
+    MAKE_FUNC_INFO(krb5_free_creds),
+    MAKE_FUNC_INFO(krb5_build_principal),
+    MAKE_FUNC_INFO(krb5_get_renewed_creds),
+    MAKE_FUNC_INFO(krb5_free_addresses),
+    MAKE_FUNC_INFO(krb5_get_default_config_files),
+    MAKE_FUNC_INFO(krb5_free_config_files),
+    MAKE_FUNC_INFO(krb5_get_default_realm),
+    MAKE_FUNC_INFO(krb5_set_default_realm),
+    MAKE_FUNC_INFO(krb5_free_ticket),
+    MAKE_FUNC_INFO(krb5_decode_ticket),
+    MAKE_FUNC_INFO(krb5_get_host_realm),
+    MAKE_FUNC_INFO(krb5_free_host_realm),
+    MAKE_FUNC_INFO(krb5_c_random_make_octets),
+    MAKE_FUNC_INFO(krb5_free_default_realm),
+    END_FUNC_INFO
 };
 
 FUNC_INFO k524_fi[] = {
@@ -288,12 +296,18 @@ FUNC_INFO k524_fi[] = {
 
 FUNC_INFO profile_fi[] = {
     MAKE_FUNC_INFO(profile_init),
-        MAKE_FUNC_INFO(profile_release), 
-        MAKE_FUNC_INFO(profile_get_subsection_names),
-        MAKE_FUNC_INFO(profile_free_list),
-        MAKE_FUNC_INFO(profile_get_string),
-        MAKE_FUNC_INFO(profile_release_string),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(profile_flush),
+    MAKE_FUNC_INFO(profile_release), 
+    MAKE_FUNC_INFO(profile_get_subsection_names),
+    MAKE_FUNC_INFO(profile_free_list),
+    MAKE_FUNC_INFO(profile_get_string),
+    MAKE_FUNC_INFO(profile_get_values),
+    MAKE_FUNC_INFO(profile_get_relation_names),
+    MAKE_FUNC_INFO(profile_clear_relation),
+    MAKE_FUNC_INFO(profile_add_relation),
+    MAKE_FUNC_INFO(profile_update_relation),
+    MAKE_FUNC_INFO(profile_release_string),
+    END_FUNC_INFO
 };
 
 FUNC_INFO ce_fi[] = {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -41,6 +41,7 @@
 #include<kconfig.h>
 #include<khuidefs.h>
 #include<kherr.h>
+#include<utils.h>
 
 #include<krb5funcs.h>
 #include<krb5common.h>
@@ -51,9 +52,16 @@
 #include<datarep.h>
 #include<krb5_msgs.h>
 
+typedef enum tag_k5_lsa_import {
+    K5_LSAIMPORT_NEVER = 0,
+    K5_LSAIMPORT_ALWAYS = 1,
+    K5_LSAIMPORT_MATCH = 2,     /* only when the principal name matches */
+} k5_lsa_import;
+
 #define TYPENAME_ENCTYPE        L"EncType"
 #define TYPENAME_ADDR_LIST      L"AddrList"
 #define TYPENAME_KRB5_FLAGS     L"Krb5Flags"
+#define TYPENAME_KRB5_PRINC     L"Krb5Principal"
 
 #define ATTRNAME_KEY_ENCTYPE    L"KeyEncType"
 #define ATTRNAME_TKT_ENCTYPE    L"TktEncType"
@@ -75,6 +83,9 @@ extern const wchar_t * k5_facility;
 extern khm_int32 type_id_enctype;
 extern khm_int32 type_id_addr_list;
 extern khm_int32 type_id_krb5_flags;
+extern khm_int32 type_id_krb5_princ;
+
+extern BOOL      type_regd_krb5_princ;
 
 extern khm_int32 attr_id_key_enctype;
 extern khm_int32 attr_id_tkt_enctype;
@@ -89,8 +100,22 @@ extern khm_int32 attr_id_krb5_ccname;
 
 /* plugin constants */
 #define KRB5_PLUGIN_NAME    L"Krb5Cred"
+#define KRB5_IDENTPRO_NAME  L"Krb5Ident"
 
 #define KRB5_CREDTYPE_NAME  L"Krb5Cred"
+
+/* limits */
+/* maximum number of characters in a realm name */
+#define K5_MAXCCH_REALM 256
+
+/* maximum number of characters in a host name */
+#define K5_MAXCCH_HOST  128
+
+/* maximum number of KDC's per realm */
+#define K5_MAX_KDC      64
+
+/* maximum number of domains that map to a realm */
+#define K5_MAX_DOMAIN_MAPPINGS 32
 
 extern khm_handle csp_plugins;
 extern khm_handle csp_krbcred;
@@ -113,6 +138,7 @@ extern BOOL is_k5_identpro;
 
 /* plugin callbacks */
 khm_int32 KHMAPI k5_msg_callback(khm_int32 msg_type, khm_int32 msg_subtype, khm_ui_4 uparam, void * vparam);
+khm_int32 KHMAPI k5_ident_callback(khm_int32 msg_type, khm_int32 msg_subtype, khm_ui_4 uparam, void * vparam);
 
 /* kinit fiber */
 typedef struct _fiber_job_t {
@@ -178,5 +204,23 @@ k5_register_config_panels(void);
 
 void
 k5_unregister_config_panels(void);
+
+INT_PTR CALLBACK 
+k5_ccconfig_dlgproc(HWND hwnd,
+                    UINT uMsg,
+                    WPARAM wParam,
+                    LPARAM lParam);
+
+INT_PTR CALLBACK 
+k5_id_tab_dlgproc(HWND hwndDlg,
+                  UINT uMsg,
+                  WPARAM wParam,
+                  LPARAM lParam);
+
+INT_PTR CALLBACK 
+k5_ids_tab_dlgproc(HWND hwnd,
+                   UINT uMsg,
+                   WPARAM wParam,
+                   LPARAM lParam);
 
 #endif

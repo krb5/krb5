@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -46,7 +46,7 @@ khm_int32 KHMAPI kcdb_type_void_toString(
     size_t cbsize;
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cbsize = sizeof(GENERIC_VOID_STR);
 
@@ -87,7 +87,7 @@ khm_int32 KHMAPI kcdb_type_void_dup(
     khm_size * cbd_dst)
 {
     if(!cbd_dst)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     *cbd_dst = 0;
 
@@ -108,12 +108,12 @@ khm_int32 KHMAPI kcdb_type_string_toString(
     wchar_t * sd;
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     sd = (wchar_t *) d;
 
     if(FAILED(StringCbLength(sd, KCDB_TYPE_MAXCB, &cbsize)))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cbsize += sizeof(wchar_t);
 
@@ -162,7 +162,7 @@ khm_int32 KHMAPI kcdb_type_string_dup(
     size_t cbsize;
 
     if(!cbd_dst)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if(cbd_src == KCDB_CBSIZE_AUTO) {
         cbd_src = KCDB_TYPE_MAXCB;
@@ -205,7 +205,7 @@ khm_int32 KHMAPI kcdb_type_date_toString(
     int today = 0;
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     ft = (FILETIME *) d;
 
@@ -355,7 +355,7 @@ KHMEXP khm_int32 KHMAPI FtIntervalToString(LPFILETIME data, wchar_t * buffer, kh
     wchar_t * t;
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     s = *((__int64 *) data) / 10000000i64;
 
     m = s / 60;
@@ -511,7 +511,7 @@ khm_int32 KHMAPI kcdb_type_int32_toString(
     wchar_t ibuf[12];
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     StringCbPrintf(ibuf, sizeof(ibuf), L"%d", *((khm_int32 *) d));
     StringCbLength(ibuf, sizeof(ibuf), &cbsize);
@@ -573,7 +573,7 @@ khm_int32 KHMAPI kcdb_type_int64_toString(
     wchar_t ibuf[22];
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     StringCbPrintf(ibuf, sizeof(ibuf), L"%I64d", *((__int64 *) d));
     StringCbLength(ibuf, sizeof(ibuf), &cbsize);
@@ -636,7 +636,7 @@ khm_int32 KHMAPI kcdb_type_data_toString(
     size_t cbsize;
 
     if(!cb_buf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     cbsize = sizeof(GENERIC_DATA_STR);
 
@@ -677,7 +677,7 @@ khm_int32 KHMAPI kcdb_type_data_dup(
     khm_size * cbd_dst)
 {
     if(!cbd_dst)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     *cbd_dst = cbd_src;
 
@@ -712,7 +712,7 @@ void kcdb_type_init(void)
         hash_string_comp,
         kcdb_type_add_ref,
         kcdb_type_del_ref);
-    kcdb_type_tbl = malloc(sizeof(kcdb_type_i *) * (KCDB_TYPE_MAX_ID + 1));
+    kcdb_type_tbl = PMALLOC(sizeof(kcdb_type_i *) * (KCDB_TYPE_MAX_ID + 1));
     ZeroMemory(kcdb_type_tbl, sizeof(kcdb_type_i *) * (KCDB_TYPE_MAX_ID + 1));
     kcdb_types = NULL;
 
@@ -815,7 +815,7 @@ void kcdb_type_del_ref(const void *key, void *vt)
 khm_int32 kcdb_type_hold(kcdb_type_i * t)
 {
     if(!t)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_type);
     t->refcount++;
@@ -827,7 +827,7 @@ khm_int32 kcdb_type_hold(kcdb_type_i * t)
 khm_int32 kcdb_type_release(kcdb_type_i * t)
 {
     if(!t)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_type);
     t->refcount--;
@@ -840,7 +840,7 @@ khm_int32 kcdb_type_release(kcdb_type_i * t)
 void kcdb_type_exit(void)
 {
     EnterCriticalSection(&cs_type);
-    free(kcdb_type_tbl);
+    PFREE(kcdb_type_tbl);
     /*TODO: free up the individual types */
     LeaveCriticalSection(&cs_type);
     DeleteCriticalSection(&cs_type);
@@ -860,8 +860,8 @@ void kcdb_type_check_and_delete(khm_int32 id)
         LDELETE(&kcdb_types, t);
         /* must already be out of the hash-table, otherwise refcount should not
             be zero */
-        free(t->type.name);
-        free(t);
+        PFREE(t->type.name);
+        PFREE(t);
     }
     LeaveCriticalSection(&cs_type);
 }
@@ -873,7 +873,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_id(wchar_t *name, khm_int32 * id)
 
     if(FAILED(StringCbLength(name, KCDB_MAXCB_NAME, &cbsize))) {
         /* also fails of name is NULL */
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     EnterCriticalSection(&cs_type);
@@ -894,7 +894,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_info(khm_int32 id, kcdb_type ** info)
     kcdb_type_i * t;
 
     if(id < 0 || id > KCDB_TYPE_MAX_ID)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_type);
     t = kcdb_type_tbl[id];
@@ -922,7 +922,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_name(khm_int32 id, wchar_t * buffer, khm_s
     kcdb_type_i * t;
 
     if(id < 0 || id > KCDB_TYPE_MAX_ID || !cbbuf)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     t = kcdb_type_tbl[id];
 
@@ -957,25 +957,25 @@ KHMEXP khm_int32 KHMAPI kcdb_type_register(kcdb_type * type, khm_int32 * new_id)
         !type->isValid || 
         !type->toString || 
         !type->name)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     if((type->flags & KCDB_TYPE_FLAG_CB_MIN) &&
         (type->cb_min < 0 || type->cb_min > KCDB_TYPE_MAXCB))
     {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     if((type->flags & KCDB_TYPE_FLAG_CB_MAX) &&
         (type->cb_max < 0 || type->cb_max > KCDB_TYPE_MAXCB))
     {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     if((type->flags & KCDB_TYPE_FLAG_CB_MIN) &&
         (type->flags & KCDB_TYPE_FLAG_CB_MAX) &&
         (type->cb_max < type->cb_min))
     {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 
     if(FAILED(StringCbLength(type->name, KCDB_MAXCB_NAME, &cbsize)))
@@ -988,7 +988,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_register(kcdb_type * type, khm_int32 * new_id)
         kcdb_type_get_next_free(&type_id);
     } else if(type->id < 0 || type->id > KCDB_TYPE_MAX_ID) {
         LeaveCriticalSection(&cs_type);
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     } else if(kcdb_type_tbl[type->id]) {
         LeaveCriticalSection(&cs_type);
         return KHM_ERROR_DUPLICATE;
@@ -1001,10 +1001,10 @@ KHMEXP khm_int32 KHMAPI kcdb_type_register(kcdb_type * type, khm_int32 * new_id)
         return KHM_ERROR_NO_RESOURCES;
     }
 
-    t = malloc(sizeof(kcdb_type_i));
+    t = PMALLOC(sizeof(kcdb_type_i));
     ZeroMemory(t, sizeof(kcdb_type_i));
 
-    t->type.name = malloc(cbsize);
+    t->type.name = PMALLOC(cbsize);
     StringCbCopy(t->type.name, cbsize, type->name);
 
     t->type.comp = type->comp;
@@ -1036,7 +1036,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_unregister(khm_int32 id)
     kcdb_type_i * t;
 
     if(id < 0 || id > KCDB_TYPE_MAX_ID)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_type);
     t = kcdb_type_tbl[id];
@@ -1065,7 +1065,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_next_free(khm_int32 * id)
     int i;
 
     if(!id)
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     /* do a linear search because this function only gets called a few times */
     EnterCriticalSection(&cs_type);
@@ -1246,7 +1246,7 @@ KHMEXP khm_int32 KHMAPI IntervalStringToFt(FILETIME * pft, wchar_t * str)
     }
 
     if(!str || FAILED(StringCbLength(str, MAX_IVL_SPECLIST_LEN, &cb)))
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
 
     b = str;
     t = 0;
@@ -1269,7 +1269,7 @@ KHMEXP khm_int32 KHMAPI IntervalStringToFt(FILETIME * pft, wchar_t * str)
             b++;
 
         if(!*b) /* no unit specified */
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
 
         e = b;
 
@@ -1282,7 +1282,7 @@ KHMEXP khm_int32 KHMAPI IntervalStringToFt(FILETIME * pft, wchar_t * str)
         }
 
         if(i==MAX_IVL_UNITS)
-            return KHM_ERROR_INVALID_PARM;
+            return KHM_ERROR_INVALID_PARAM;
 
         t += f * ivspecs[i].mul;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -246,7 +246,7 @@ typedef struct tag_khui_config_init_data {
         required.
 
     \retval KHM_ERROR_SUCCESS Success
-    \retval KHM_ERROR_INVALID_PARM One or more parameters, or fields
+    \retval KHM_ERROR_INVALID_PARAM One or more parameters, or fields
         of reg were invalid
     \retval KHM_ERROR_DUPLICATE A node with the same name exists as a
         child of the specified parent node.
@@ -292,6 +292,19 @@ khui_cfg_hold(khui_config_node node);
  */
 KHMEXP khm_int32 KHMAPI
 khui_cfg_release(khui_config_node node);
+
+/*! \brief Get the parent of a node
+
+    Returns a held handle to the parent of the node, or NULL if the
+    current node is a top level node.  The returned handle must be
+    released with khui_cfg_release().
+
+    \retval KHM_ERROR_SUCCESS The handle to the parent node is in \a result
+    \retval KHM_ERROR_NOT_FOUND The node is a top level node
+ */
+KHMEXP khm_int32 KHMAPI
+khui_cfg_get_parent(khui_config_node vnode,
+                    khui_config_node * result);
 
 /*! \brief Get a handle to the first child node
 
@@ -366,7 +379,7 @@ khui_cfg_get_next(khui_config_node node,
         the function is released.
 
     \retval KHM_ERROR_SUCCESS The next node is now in \a node
-    \retval KHM_ERROR_INVALID_PARM \a node was not a valid handle
+    \retval KHM_ERROR_INVALID_PARAM \a node was not a valid handle
     \retval KHM_ERROR_NOT_FOUND There are no more siblings.  \a node
         is set to NULL.
 

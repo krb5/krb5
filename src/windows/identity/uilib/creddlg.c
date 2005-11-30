@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,6 +25,7 @@
 /* $Id$ */
 
 #include<khuidefs.h>
+#include<utils.h>
 #include<assert.h>
 
 #define CW_ALLOC_INCR 8
@@ -46,7 +47,7 @@ khui_cw_create_cred_blob(khui_new_creds ** ppnc)
 {
     khui_new_creds * c;
 
-    c = malloc(sizeof(*c));
+    c = PMALLOC(sizeof(*c));
     ZeroMemory(c, sizeof(*c));
 
     c->magic = KHUI_NC_MAGIC;
@@ -73,22 +74,25 @@ khui_cw_destroy_cred_blob(khui_new_creds *c)
     LeaveCriticalSection(&c->cs);
     DeleteCriticalSection(&c->cs);
 
-    if(c->password) {
+    if (c->password) {
         len = wcslen(c->password);
         SecureZeroMemory(c->password, sizeof(wchar_t) * len);
-        free(c->password);
+        PFREE(c->password);
     }
 
-    if(c->identities)
-        free(c->identities);
+    if (c->identities)
+        PFREE(c->identities);
 
-    if(c->types)
-        free(c->types);
+    if (c->types)
+        PFREE(c->types);
+
+    if (c->type_subs)
+        PFREE(c->type_subs);
 
     if (c->window_title)
-        free(c->window_title);
+        PFREE(c->window_title);
 
-    free(c);
+    PFREE(c);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -121,7 +125,7 @@ khui_cw_add_identity(khui_new_creds * c,
 
     if(c->identities == NULL) {
         c->nc_identities = NC_N_IDENTITIES;
-        c->identities = malloc(sizeof(*(c->identities)) * 
+        c->identities = PMALLOC(sizeof(*(c->identities)) * 
                                c->nc_identities);
         c->n_identities = 0;
     } else if(c->n_identities + 1 > c->nc_identities) {
@@ -130,10 +134,10 @@ khui_cw_add_identity(khui_new_creds * c,
         c->nc_identities = UBOUNDSS(c->n_identities + 1, 
                                     NC_N_IDENTITIES, 
                                     NC_N_IDENTITIES);
-        ni = malloc(sizeof(*(c->identities)) * c->nc_identities);
+        ni = PMALLOC(sizeof(*(c->identities)) * c->nc_identities);
         memcpy(ni, c->identities, 
                sizeof(*(c->identities)) * c->n_identities);
-        free(c->identities);
+        PFREE(c->identities);
         c->identities = ni;
     }
 
@@ -187,8 +191,8 @@ khui_cw_add_type(khui_new_creds * c,
 
     if(c->types == NULL) {
         c->nc_types = CW_ALLOC_INCR;
-        c->types = malloc(sizeof(*(c->types)) * c->nc_types);
-        c->type_subs = malloc(sizeof(*(c->type_subs)) * c->nc_types);
+        c->types = PMALLOC(sizeof(*(c->types)) * c->nc_types);
+        c->type_subs = PMALLOC(sizeof(*(c->type_subs)) * c->nc_types);
         c->n_types = 0;
     }
 
@@ -198,14 +202,14 @@ khui_cw_add_type(khui_new_creds * c,
 
         n = UBOUNDSS(c->n_types + 1, CW_ALLOC_INCR, CW_ALLOC_INCR);
 
-        t = malloc(sizeof(*(c->types)) * n);
+        t = PMALLOC(sizeof(*(c->types)) * n);
         memcpy(t, (void *) c->types, sizeof(*(c->types)) * c->n_types);
-        free(c->types);
+        PFREE(c->types);
         c->types = t;
 
-        t = malloc(sizeof(*(c->type_subs)) * n);
+        t = PMALLOC(sizeof(*(c->type_subs)) * n);
         memcpy(t, (void *) c->type_subs, sizeof(*(c->type_subs)) * c->n_types);
-        free(c->type_subs);
+        PFREE(c->type_subs);
         c->type_subs = t;
 
         c->nc_types = n;
@@ -329,22 +333,22 @@ cw_create_prompt(khm_size idx,
     if(def && FAILED(StringCbLength(def, KHUI_MAXCB_PROMPT_VALUE, &cb_def)))
         return NULL;
 
-    p = malloc(sizeof(*p));
+    p = PMALLOC(sizeof(*p));
     ZeroMemory(p, sizeof(*p));
 
     if(prompt) {
         cb_prompt += sizeof(wchar_t);
-        p->prompt = malloc(cb_prompt);
+        p->prompt = PMALLOC(cb_prompt);
         StringCbCopy(p->prompt, cb_prompt, prompt);
     }
 
     if(def) {
         cb_def += sizeof(wchar_t);
-        p->def = malloc(cb_def);
+        p->def = PMALLOC(cb_def);
         StringCbCopy(p->def, cb_def, def);
     }
 
-    p->value = malloc(KHUI_MAXCB_PROMPT_VALUE);
+    p->value = PMALLOC(KHUI_MAXCB_PROMPT_VALUE);
     ZeroMemory(p->value, KHUI_MAXCB_PROMPT_VALUE);
 
     p->type = type;
@@ -361,22 +365,22 @@ cw_free_prompt(khui_new_creds_prompt * p) {
     if(p->prompt) {
         if(SUCCEEDED(StringCbLength(p->prompt, KHUI_MAXCB_PROMPT, &cb)))
             SecureZeroMemory(p->prompt, cb);
-        free(p->prompt);
+        PFREE(p->prompt);
     }
 
     if(p->def) {
         if(SUCCEEDED(StringCbLength(p->def, KHUI_MAXCB_PROMPT, &cb)))
             SecureZeroMemory(p->def, cb);
-        free(p->def);
+        PFREE(p->def);
     }
 
     if(p->value) {
         if(SUCCEEDED(StringCbLength(p->value, KHUI_MAXCB_PROMPT_VALUE, &cb)))
             SecureZeroMemory(p->value, cb);
-        free(p->value);
+        PFREE(p->value);
     }
 
-    free(p);
+    PFREE(p);
 }
 
 static void 
@@ -385,12 +389,12 @@ cw_free_prompts(khui_new_creds * c)
     khm_size i;
 
     if(c->banner != NULL) {
-        free(c->banner);
+        PFREE(c->banner);
         c->banner = NULL;
     }
 
     if(c->pname != NULL) {
-        free(c->pname);
+        PFREE(c->pname);
         c->pname = NULL;
     }
 
@@ -402,7 +406,7 @@ cw_free_prompts(khui_new_creds * c)
     }
 
     if(c->prompts != NULL) {
-        free(c->prompts);
+        PFREE(c->prompts);
         c->prompts = NULL;
     }
 
@@ -443,7 +447,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
     if(SUCCEEDED(StringCbLength(banner, KHUI_MAXCB_BANNER, &cb)) && 
        cb > 0) {
         cb += sizeof(wchar_t);
-        c->banner = malloc(cb);
+        c->banner = PMALLOC(cb);
         StringCbCopy(c->banner, cb, banner);
     } else {
         c->banner = NULL;
@@ -453,7 +457,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
        cb > 0) {
 
         cb += sizeof(wchar_t);
-        c->pname = malloc(cb);
+        c->pname = PMALLOC(cb);
         StringCbCopy(c->pname, cb, pname);
 
     } else {
@@ -463,8 +467,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
     }
 
     if(n_prompts > 0) {
-
-        c->prompts = malloc(sizeof(*(c->prompts)) * n_prompts);
+        c->prompts = PMALLOC(sizeof(*(c->prompts)) * n_prompts);
         ZeroMemory(c->prompts, sizeof(*(c->prompts)) * n_prompts);
         c->nc_prompts = n_prompts;
         c->n_prompts = 0;
@@ -505,7 +508,7 @@ khui_cw_add_prompt(khui_new_creds * c,
     p = cw_create_prompt(c->n_prompts, type, prompt, def, flags);
     if(p == NULL) {
         LeaveCriticalSection(&c->cs);
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
     c->prompts[c->n_prompts++] = p;
     LeaveCriticalSection(&c->cs);
@@ -637,6 +640,7 @@ khui_cw_set_response(khui_new_creds * c,
     if(t) {
         t->flags &= ~KHUI_NCMASK_RESULT;
         t->flags |= (response & KHUI_NCMASK_RESULT);
+
         if (!(response & KHUI_NC_RESPONSE_NOEXIT) &&
             !(response & KHUI_NC_RESPONSE_PENDING))
             t->flags |= KHUI_NC_RESPONSE_COMPLETED;
@@ -666,6 +670,6 @@ khui_cw_add_control_row(khui_new_creds * c,
 
         return KHM_ERROR_SUCCESS;
     } else {
-        return KHM_ERROR_INVALID_PARM;
+        return KHM_ERROR_INVALID_PARAM;
     }
 }

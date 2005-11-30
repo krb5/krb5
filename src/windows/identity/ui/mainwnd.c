@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -94,6 +94,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
     case WM_DESTROY:
         kmq_unsubscribe_hwnd(KMSG_ACT, hwnd);
         kmq_unsubscribe_hwnd(KMSG_CRED, hwnd);
+        HtmlHelp(NULL, NULL, HH_CLOSE_ALL, 0);
         PostQuitMessage(0);
         break;
 
@@ -105,15 +106,21 @@ LRESULT CALLBACK khm_main_wnd_proc(
             return khm_toolbar_notify(lpnm);
         } else if(lpnm->hwndFrom == khm_hwnd_rebar) {
             return khm_rebar_notify(lpnm);
+        } else if(lpnm->hwndFrom == khm_hwnd_statusbar) {
+            return khm_statusbar_notify(lpnm);
         }
+        break;
+
+    case WM_HELP:
+        MessageBox(khm_hwnd_main, L"WM_HELP", L"Notice", MB_OK);
         break;
 
     case WM_COMMAND:
         switch(LOWORD(wParam)) {
             /* general actions */
         case KHUI_ACTION_VIEW_REFRESH:
+            khm_cred_refresh();
             InvalidateRect(khm_hwnd_main_cred, NULL, FALSE);
-            kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, NULL);
             return 0;
 
         case KHUI_ACTION_PASSWD_ID:
@@ -166,6 +173,21 @@ LRESULT CALLBACK khm_main_wnd_proc(
             khui_cfg_open(NULL, L"KhmNotifications", &node);
             khm_show_config_pane(node);
         }
+            break;
+
+        case KHUI_ACTION_HELP_CTX:
+            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
+                     HH_HELP_CONTEXT, IDH_WELCOME);
+            break;
+
+        case KHUI_ACTION_HELP_CONTENTS:
+            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
+                     HH_DISPLAY_TOC, 0);
+            break;
+
+        case KHUI_ACTION_HELP_INDEX:
+            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
+                     HH_DISPLAY_INDEX, (DWORD_PTR) L"");
             break;
 
         case KHUI_ACTION_HELP_ABOUT:
@@ -223,6 +245,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
 
         case KHUI_PACTION_DELETE:
 
+        case KHUI_PACTION_SELALL:
         case KHUI_ACTION_LAYOUT_ID:
         case KHUI_ACTION_LAYOUT_TYPE:
         case KHUI_ACTION_LAYOUT_LOC:
@@ -301,10 +324,10 @@ LRESULT CALLBACK khm_main_wnd_proc(
             /* resize the rebar control */
             SendMessage(khm_hwnd_rebar, WM_SIZE, 0, 0);
 
-            khui_update_statusbar(hwnd);
+            khm_update_statusbar(hwnd);
             
             GetWindowRect(khm_hwnd_rebar, &r_rebar);
-            GetWindowRect(khui_hwnd_statusbar, &r_status);
+            GetWindowRect(khm_hwnd_statusbar, &r_status);
 
             /* the cred window fills the area between the rebar
                and the status bar */
@@ -383,6 +406,9 @@ LRESULT CALLBACK khm_main_wnd_proc(
             } else if (m->type == KMSG_CRED &&
                   m->subtype == KMSG_CRED_REFRESH) {
                 mw_restart_refresh_timer(hwnd);
+            } else if (m->type == KMSG_CRED &&
+                       m->subtype == KMSG_CRED_ADDR_CHANGE) {
+                khm_cred_addr_change();
             } else if (m->type == KMSG_KMM &&
                        m->subtype == KMSG_KMM_I_DONE) {
                 kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);
@@ -442,13 +468,14 @@ LRESULT CALLBACK khm_null_wnd_proc(
 
 LRESULT khm_rebar_notify(LPNMHDR lpnm) {
     switch(lpnm->code) {
+#if (_WIN32_WINNT >= 0x0501)
     case RBN_AUTOBREAK:
         {
             LPNMREBARAUTOBREAK lpra = (LPNMREBARAUTOBREAK) lpnm;
             lpra->fAutoBreak = TRUE;
         }
         break;
-
+#endif
     case RBN_BEGINDRAG:
         {
             LPNMREBAR lprb = (LPNMREBAR) lpnm;
@@ -505,7 +532,7 @@ void khm_create_main_window_controls(HWND hwnd_main) {
     /* self attach */
     khm_menu_create_main(hwRebar);
     khm_create_standard_toolbar(hwRebar);
-    khui_create_statusbar(hwnd_main);
+    khm_create_statusbar(hwnd_main);
 
     /* manual attach */
     khm_hwnd_main_cred = khm_create_credwnd(hwnd_main);
@@ -517,7 +544,8 @@ void khm_create_main_window(void) {
     khm_handle csp_mw = NULL;
     int x,y,width,height;
 
-    LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, buf, sizeof(buf)/sizeof(buf[0]));
+    LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, 
+               buf, ARRAYLENGTH(buf));
 
     khm_hwnd_null =
         CreateWindow(MAKEINTATOM(khm_null_window_class),
@@ -573,8 +601,6 @@ void khm_create_main_window(void) {
                        NULL,
                        NULL);
 
-    if (!khm_hwnd_main)
-        return;
 }
 
 void khm_show_main_window(void) {
@@ -587,8 +613,14 @@ void khm_show_main_window(void) {
             SetForegroundWindow(khm_hwnd_main);
     }
 
-    ShowWindow(khm_hwnd_main, khm_nCmdShow);
-    UpdateWindow(khm_hwnd_main);
+    if (khm_nCmdShow == SW_SHOWMINIMIZED ||
+        khm_nCmdShow == SW_SHOWMINNOACTIVE ||
+        khm_nCmdShow == SW_MINIMIZE) {
+        khm_hide_main_window();
+    } else {
+        ShowWindow(khm_hwnd_main, khm_nCmdShow);
+        UpdateWindow(khm_hwnd_main);
+    }
 
     khm_nCmdShow = SW_RESTORE;
 }
@@ -597,11 +629,13 @@ void khm_hide_main_window(void) {
     khm_handle csp_notices = NULL;
     khm_int32 show_warning = FALSE;
 
-    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow\\Notices",
+    if (khm_nCmdShow != SW_MINIMIZE &&
+        KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow\\Notices",
                                      KHM_PERM_WRITE, &csp_notices)) &&
         KHM_SUCCEEDED(khc_read_int32(csp_notices, L"MinimizeWarning",
                                      &show_warning)) &&
         show_warning != 0) {
+
         khui_alert * alert;
         wchar_t title[KHUI_MAXCCH_TITLE];
         wchar_t msg[KHUI_MAXCCH_MESSAGE];

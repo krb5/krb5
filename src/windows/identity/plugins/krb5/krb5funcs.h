@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -90,6 +90,9 @@ khm_krb5_renew(khm_handle identity);
 wchar_t * 
 khm_krb5_get_default_realm(void);
 
+long
+khm_krb5_set_default_realm(wchar_t * realm);
+
 wchar_t * 
 khm_krb5_get_realm_list(void);
 
@@ -116,6 +119,12 @@ khm_krb5_cc_name_cmp(const wchar_t * cc_name_1,
                      const wchar_t * cc_name_2);
 
 BOOL 
-khm_get_profile_file(LPSTR confname, UINT szConfname);
+khm_krb5_get_profile_file(LPSTR confname, UINT szConfname);
+
+BOOL 
+khm_krb5_get_temp_profile_file(LPSTR confname, UINT szConfname);
+
+khm_int32 KHMAPI
+khm_krb5_creds_is_equal(khm_handle vcred1, khm_handle vcred2, void * dummy);
 
 #endif

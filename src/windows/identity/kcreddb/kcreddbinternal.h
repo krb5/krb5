@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -56,5 +56,6 @@ kconf_schema schema_kcdbconfig[];
 void kcdb_init(void);
 void kcdb_exit(void);
 khm_handle kcdb_get_config(void);
+
 
 #endif

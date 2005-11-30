@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -78,6 +78,9 @@
 
     (Contributor list goes here)
 
+    At the moment, no contributers have come forward to accept
+    responsibility.
+
     <a href="http://web.mit.edu/is">Information Services and
     Technology</a> at <a href="http://web.mit.edu">Massachusetts
     Institute of Technology</a>
@@ -86,7 +89,7 @@
 /*! \page bugs Reporting bugs
 
     NetIDMgr bugs can be reported to 
-    <a href="mailto:khimaira@mit.edu">khimaira@mit.edu</a> for now.
+    <a href="mailto:kfw-bugs@mit.edu">kfw-bugs@mit.edu</a> for now.
 
     In the future, there will actually be a place to track NetIDMgr bugs.
 
@@ -99,10 +102,8 @@
 
 /*! \page releases Prior releases
 
-    - <b>0.1.1</b> (Charles Manson) <em>[soon]</em>\n
-      First alpha release.  As stable as Charles Manson, hence the
-      name.
+    - <b>0.1.1</b> First Alpha release <em>Nov 01, 2005</em>\n
+      Released along with Kerberos for Windows 3.0.0 beta.
 
     - <b>0.1.2</b> (tbd) <em>[tbd]</em>\n
-      First beta release.
 */

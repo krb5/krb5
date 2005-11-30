@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -442,6 +442,15 @@
  */
 #define KMSG_CRED_PP_DESTROY        131
 
+/*! \brief An IP address change occurred
+
+    There are no parameters for this message.  The NetIDMgr
+    application handles this message and depending on configuration,
+    posts message for the individual credentials providers to either
+    obtain new credentials or renew old ones.
+ */
+#define KMSG_CRED_ADDR_CHANGE        140
+
 /*! \brief Check if a KMSG_CRED subtype is a credentials acquisition message
 
     Dialog messages are those that deal with the new or initial
@@ -482,6 +491,28 @@
         of this message completes.
  */
 #define KMSG_ALERT_SHOW 1
+
+/*! \brief Add an alert to the alert queue
+
+    Message parameters:
+    - \b vparam : held pointer to a ::khui_alert object
+
+    \note the ::khui_alert object will be released when the queued
+        messages are displayed.
+ */
+#define KMSG_ALERT_QUEUE 2
+
+/*! \brief Show the next queued alert
+
+    There are no message parameters
+ */
+#define KMSG_ALERT_SHOW_QUEUED 3
+
+/*! \brief Check if there are any queued messages and, if so, update the statusbar
+
+    There are no message parameters
+ */
+#define KMSG_ALERT_CHECK_QUEUE 4
 
 /*@}*/
 

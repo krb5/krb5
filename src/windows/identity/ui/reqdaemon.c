@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -172,7 +172,7 @@ reqdaemonwnd_proc(HWND hwnd,
 #ifdef DEBUG
                     assert(FALSE);
 #endif
-                    rv = KHM_ERROR_INVALID_PARM;
+                    rv = KHM_ERROR_INVALID_PARAM;
                     goto _exit_tgt_with_lparam;
                 }
 
@@ -185,7 +185,7 @@ reqdaemonwnd_proc(HWND hwnd,
 #ifdef DEBUG
                     assert(FALSE);
 #endif
-                    rv = KHM_ERROR_INVALID_PARM;
+                    rv = KHM_ERROR_INVALID_PARAM;
                     goto _exit_tgt_with_lparam;
                 }
 
@@ -198,7 +198,7 @@ reqdaemonwnd_proc(HWND hwnd,
 #ifdef DEBUG
                     assert(FALSE);
 #endif
-                    rv = KHM_ERROR_INVALID_PARM;
+                    rv = KHM_ERROR_INVALID_PARAM;
                     goto _exit_tgt_with_lparam;
                 }
 
@@ -212,7 +212,7 @@ reqdaemonwnd_proc(HWND hwnd,
 
                 if (FAILED(StringCbPrintf(widname, sizeof(widname),
                                           L"%hs@%hs", username, realm))) {
-                    rv = KHM_ERROR_INVALID_PARM;
+                    rv = KHM_ERROR_INVALID_PARAM;
                     goto _exit_tgt_with_lparam;
                 }
 

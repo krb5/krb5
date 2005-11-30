@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004 Massachusetts Institute of Technology
+ * Copyright (c) 2005 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,16 +28,16 @@
 #define __KHIMAIRA_NOTIFIER_H
 
 void 
-khui_init_notifier(void);
+khm_init_notifier(void);
 
 void 
-khui_exit_notifier(void);
+khm_exit_notifier(void);
 
 void 
-khui_notify_icon_change(khm_int32 severity);
+khm_notify_icon_change(khm_int32 severity);
 
 void 
-khui_notify_icon_balloon(khm_int32 severity,
+khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
                          wchar_t * msg,
                          khm_int32 timeout);
