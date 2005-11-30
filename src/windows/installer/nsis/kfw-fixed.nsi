@@ -208,6 +208,7 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbv4w32.dll"        "$INSTDIR\bin\krbv4w32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe"         "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe.manifest" "$INSTDIR\bin\netidmgr.exe.manifest" "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"         "$INSTDIR\bin\netidmgr.chm"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr32.dll"         "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred.dll"         "$INSTDIR\bin\krb4cred.dll"       "$INSTDIR"
@@ -329,10 +330,10 @@ Section "KfW Client" secClient
 !endif
   
   ; Do Windows SYSDIR (Control panel)
-  ;SetOutPath "$SYSDIR"
-!ifdef DEBUG
-!endif
-  
+  SetOutPath "$SYSDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kfwlogon.dll" "$SYSDIR\kfwlogon.dll" "$INSTDIR"
+  File "${KFW_BIN_DIR}\kfwcpcc.exe"  
+
   ; Get Kerberos config files
   Call kfw.GetConfigFiles
 
@@ -358,8 +359,27 @@ Section "KfW Client" secClient
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "MajorVersion" ${KFW_MAJORVERSION}
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "MinorVersion" ${KFW_MINORVERSION}
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "PatchLevel" ${KFW_PATCHLEVEL}
-  WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\Client\${KFW_VERSION}" "PatchLevel" ${KFW_PATCHLEVEL}
+
+  ; Daemon entries
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos" "" ""
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" "ProviderPath" "$SYSDIR\kfwlogon.dll"
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" "AuthentProviderPath" "$SYSDIR\kfwlogon.dll"
+  WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" "Class" 2
+  WriteRegDWORD HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" "VerboseLogging" 10
+
+  ; Must also add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\NetworkProvider\HwOrder
+  ; and HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\NetworkProvider\Order
+  ; to also include the service name.
+  Call AddProvider
+  ReadINIStr $R0 $1 "Field 7" "State"
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" "Name" "MIT Kerberos"
   
+  ; WinLogon Event Notification
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "Asynchronous" 0
+  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "Impersonate"  0
+  WriteRegStr HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "DLLName" "kfwlogon.dll"
+  WriteRegStr HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "Logon" "KFW_Logon_Event"
+
   ;Write start menu entries
   CreateDirectory "$SMPROGRAMS\${PROGRAM_NAME}"
   SetOutPath "$INSTDIR\bin"
@@ -505,6 +525,10 @@ Section "Debug Symbols" secDebug
 !ENDIF
 !ENDIF
 
+  SetOutPath "$SYSDIR"
+  File "${KFW_BIN_DIR}\kfwlogon.pdb"
+  File "${KFW_BIN_DIR}\kfwcpcc.pdb"
+
 SectionEnd
 
 ;----------------------
@@ -610,7 +634,7 @@ Section "KfW Documentation" secDocs
   SetOutPath "$INSTDIR\doc"
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Release Notes.lnk" "$INSTDIR\doc\relnotes.html" 
 ;  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk" "$INSTDIR\doc\netidmgr_userdoc.pdf" 
-
+  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager Documentation.lnk" "$INSTDIR\bin\netidmgr.chm" 
 SectionEnd
 
 ;Display the Finish header
@@ -1135,6 +1159,8 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.exe"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.dll"
+   Delete /REBOOTOK "$SYSDIR\bin\kfwlogon.dll"
+   Delete /REBOOTOK "$SYSDIR\bin\kfwcpcc.exe"
 
 !ifdef AKLOG
    Delete /REBOOTOK "$INSTDIR\bin\aklog.pdb"
@@ -1168,6 +1194,8 @@ StartRemove:
    Delete /REBOOTOK "$INSTDIR\bin\kdeltkt.pdb"  
    Delete /REBOOTOK "$INSTDIR\bin\wshelp32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\xpprof32.pdb"
+   Delete /REBOOTOK "$SYSDIR\bin\kfwlogon.pdb"
+   Delete /REBOOTOK "$SYSDIR\bin\kfwcpcc.pdb"
 
 !IFDEF DEBUG
 !IFDEF CL_1400
@@ -1317,6 +1345,10 @@ StartRemove:
   DeleteRegKey /ifempty HKLM "${KFW_REGKEY_ROOT}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}"
  
+  ; WinLogon Event Notification
+  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Winlogon\Notify\MIT_KFW"
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\MIT Kerberos"
+
   RMDir  "$INSTDIR"
 
 SectionEnd
@@ -1747,3 +1779,87 @@ MakeClientSelected:
 end:
 FunctionEnd
 
+Function AddProvider
+   Push $R0
+   Push $R1
+   ReadRegStr $R0 HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\HWOrder" "ProviderOrder"
+   Push $R0
+   StrCpy $R0 "MIT Kerberos"
+   Push $R0
+   Call StrStr
+   Pop $R0
+   StrCmp $R0 "" DoOther +1
+   ReadRegStr $R1 HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\HWOrder" "ProviderOrder"
+   StrCpy $R0 "$R1,MIT Kerberos"
+   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\HWOrder" "ProviderOrder" $R0
+DoOther:
+   ReadRegStr $R0 HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\Order" "ProviderOrder"
+   Push $R0
+   StrCpy $R0 "MIT Kerberos"
+   Push $R0
+   Call StrStr
+   Pop $R0
+   StrCmp $R0 "" +1 End
+   ReadRegStr $R1 HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\Order" "ProviderOrder"
+   StrCpy $R0 "$R1,MIT Kerberos"
+   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\NetworkProvider\Order" "ProviderOrder" $R0
+End:
+   Pop $R1
+   Pop $R0
+FunctionEnd
+
+Function un.RemoveProvider
+   Push $R0
+   StrCpy $R0 "MIT Kerberos"
+   Push $R0
+   StrCpy $R0 "SYSTEM\CurrentControlSet\Control\NetworkProvider\HWOrder" 
+   Call un.RemoveFromProvider
+   StrCpy $R0 "MIT Kerberos"
+   Push $R0
+   StrCpy $R0 "SYSTEM\CurrentControlSet\Control\NetworkProvider\Order"
+   Call un.RemoveFromProvider
+   Pop $R0
+FunctionEnd
+
+Function un.RemoveFromProvider
+  Exch $0
+  Push $1
+  Push $2
+  Push $3
+  Push $4
+  Push $5
+  Push $6
+
+  ReadRegStr $1 HKLM "$R0" "ProviderOrder"
+    StrCpy $5 $1 1 -1 # copy last char
+    StrCmp $5 "," +2 # if last char != ,
+      StrCpy $1 "$1," # append ,
+    Push $1
+    Push "$0,"
+    Call un.StrStr ; Find `$0,` in $1
+    Pop $2 ; pos of our dir
+    StrCmp $2 "" unRemoveFromPath_done
+      ; else, it is in path
+      # $0 - path to add
+      # $1 - path var
+      StrLen $3 "$0,"
+      StrLen $4 $2
+      StrCpy $5 $1 -$4 # $5 is now the part before the path to remove
+      StrCpy $6 $2 "" $3 # $6 is now the part after the path to remove
+      StrCpy $3 $5$6
+
+      StrCpy $5 $3 1 -1 # copy last char
+      StrCmp $5 "," 0 +2 # if last char == ,
+        StrCpy $3 $3 -1 # remove last char
+
+      WriteRegStr HKLM "$R0" "ProviderOrder" $3
+
+  unRemoveFromPath_done:
+    Pop $6
+    Pop $5
+    Pop $4
+    Pop $3
+    Pop $2
+    Pop $1
+    Pop $0
+FunctionEnd
