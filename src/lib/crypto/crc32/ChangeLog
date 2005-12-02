@@ -1,3 +1,8 @@
+2005-12-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_crc): Build against support library.
+	(check-unix): Use $(RUN_SETUP).
+
 2005-05-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* t_crc.c (main): Don't run timing test for now.
