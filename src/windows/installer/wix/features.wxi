@@ -40,7 +40,7 @@
             InstallDefault="local"
             Title="$(loc.KerberosClientTitle)"
             Level="30">
-            
+
             <?ifdef DebugSyms?>
 	    	<Feature 
                     Id="feaKfwClientDebug" 
@@ -55,16 +55,8 @@
 	        </Feature>
 	    <?endif?>
 
-	    <Feature
-		Id="feaKfwLeashExe"
-		AllowAdvertise="no"
-		Description="$(loc.StrLeashExeDesc)"
-		Display="expand"
-		InstallDefault="local"
-		Level="130"
-		Title="$(loc.StrLeashExeTitle)">
-	            <ComponentRef Id="cmf_leash32_exe" />
-	    </Feature>
+            <ComponentRef Id="cmf_leash32_exe" />
+            <ComponentRef Id="csc_leash32_exe" />
 
             <ComponentRef Id="cmf_aklog_exe" />
             <ComponentRef Id="cmf_comerr32_dll" />
@@ -94,8 +86,9 @@
             <ComponentRef Id="cmf_krb4cred_dll" />
             <ComponentRef Id="cmf_krb4cred_en_us_dll" />
             <ComponentRef Id="cmf_netidmgr_exe" />
+
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />
-            
+            <ComponentRef Id="cmf_kfwcpcc_EXE" />
             <!-- Kerberos IV options -->
             <ComponentRef Id="rcm_krb4_1" />
             <ComponentRef Id="rcm_krb4_2" />
@@ -228,7 +221,8 @@
             
             <Feature Id="feaKfwLeashStartup" AllowAdvertise="no" Display="hidden" Level="130">
                 <Condition Level="30">LEASHAUTOSTART = 1</Condition>
-                <ComponentRef Id="csc_leashStartup"/>
+                <ComponentRef Id="csc_NetIDMgrStartup" />
+                <ComponentRef Id="csc_LeashStartup" />
             </Feature>
 
         </Feature> <!-- /feaKfwClient -->

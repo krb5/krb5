@@ -52,7 +52,10 @@
     <String Id="KerberosDocDesc">Documentation</String>
     
     <String Id="AdminRequired">You need administrative privileges to install Kerberos for Windows</String>
-    <String Id="OsVersionRequired">This product requires Windows 98/ME/2000/XP/2003.  The current operating system is not supported.</String>
+    <String Id="OsVersionRequired">This product requires Windows 2000/XP/2003.  The current operating system is not supported.</String>
+    <String Id="CMNotSelected">Neither Leash nor Network Identity Manager has been selected for this package.  Please contact your administrator or the provider of this installation package to resolve this issue.</String>
+    <String Id="CMDupSelected">Both Leash and Network Identity Manager has been selected for this package.  Only one of these can be selected at one time.  Please contact your administrator or the provider of this installation package to resolve this issue.</String>
+
     <String Id="CantRemoveNSIS">The NSIS based installation of Kerberos for Windows could not be uninstalled because the NSIS uninstaller must be run in Full UI mode.</String>
     <String Id="IE501Required">Kerberos for Windows requires Microsoft Internet Explorer version 5.01 or higher.  Please resolve this and run the installer again.</String>
 

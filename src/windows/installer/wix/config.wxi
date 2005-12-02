@@ -151,4 +151,11 @@
     <?ifndef Krb5PreserveIdentity?>
         <?define Krb5PreserveIdentity="1"?>
     <?endif?>
+
+    <!-- If neither NetIDMgr or Leash is specified, we default to NetIDMgr -->
+    <?ifndef UseNetIDMgr?>
+        <?ifndef UseLeash?>
+             <?define UseNetIDMgr="1"?>
+        <?endif?>
+    <?endif?>
 </Include>

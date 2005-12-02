@@ -29,8 +29,8 @@
     <!-- Important:  This product should only be installed in all-user mode -->
     <Property Id="ALLUSERS">1</Property>
 
-    <Property Id="LEASHAUTOINIT">-autoinit</Property>
-    <Property Id="LEASHAUTOSTART">1</Property>
+    <Property Id="LEASHAUTOINIT" Admin="yes" Secure="yes">-autoinit</Property>
+    <Property Id="LEASHAUTOSTART" Admin="yes" Secure="yes">1</Property>
     
     <Property Id="ARPCOMMENTS">$(var.ARPComments)</Property>
     <Property Id="ARPCONTACT">kerberos@mit.edu</Property>
@@ -52,35 +52,43 @@
     <!--  Additional properties relating to the UI are in the appropriate UI.wxi file -->
     
     <!-- Configuration properties.  If these properties are defined, then
-         the corresponding component will be enabled. -->
+         the corresponding component will be enabled. If the corresponding
+         variable value is the empty string (""), then the properties will
+         not be defined. -->
 <?ifdef UseDefaultProperties?>
-    <Property Id="LEASHAFSSTATUS">$(var.LeashAfsStatus)</Property>
-    <Property Id="LEASHCREATEMISSINGCONFIG">$(var.LeashCreateMissingConfig)</Property>
-    <Property Id="LEASHAUTORENEWTICKETS">$(var.LeashAutoRenewTickets)</Property>
-    <Property Id="LEASHLOCKFILELOCATIONS">$(var.LeashLockFileLocations)</Property>
-    <Property Id="LEASHMSLSAIMPORT">$(var.LeashMsLsaImport)</Property>
-    <Property Id="LEASHLIFETIME">$(var.LeashLifetime)</Property>
-    <Property Id="LEASHRENEWTILL">$(var.LeashRenewTill)</Property>
-    <Property Id="LEASHRENEWABLE">$(var.LeashRenewable)</Property>
-    <Property Id="LEASHFORWARDABLE">$(var.LeashForwardable)</Property>
-    <Property Id="LEASHNOADDRESSES">$(var.LeashNoAddresses)</Property>
-    <Property Id="LEASHPROXIABLE">$(var.LeashProxiable)</Property>
-    <Property Id="LEASHPUBLICIP">$(var.LeashPublicIp)</Property>
-    <Property Id="LEASHUSEKRB4">$(var.LeashUseKrb4)</Property>
-    <Property Id="LEASHHIDEKINITOPTIONS">$(var.LeashHideKinitOptions)</Property>
-    <Property Id="LEASHLIFEMIN">$(var.LeashLifeMin)</Property>
-    <Property Id="LEASHLIFEMAX">$(var.LeashLifeMax)</Property>
-    <Property Id="LEASHRENEWMIN">$(var.LeashRenewMin)</Property>
-    <Property Id="LEASHRENEWMAX">$(var.LeashRenewMax)</Property>
-    <Property Id="LEASHUPPERCASEREALM">$(var.LeashUppercaseRealm)</Property>
-    <Property Id="LEASHTIMEHOST">$(var.LeashTimeHost)</Property>
-    <Property Id="LEASHPRESERVEKINITOPTIONS">$(var.LeashPreserveKinitOptions)</Property>
-    <Property Id="KRB4KRBREALMS">$(var.Krb4KrbRealms)</Property>
-    <Property Id="KRB4KRBCONF">$(var.Krb4KrbConf)</Property>
-    <Property Id="KRB4CONFIGDIR">$(var.Krb4ConfigDir)</Property>
-    <Property Id="KRB4TICKETFILE">$(var.Krb4TicketFile)</Property>
-    <Property Id="KRB5CONFIG">$(var.Krb5Config)</Property>
-    <Property Id="KRB5CCNAME">$(var.Krb5CcName)</Property>
-    <Property Id="KRB5PRESERVEIDENTITY">$(var.Krb5PreserveIdentity)</Property>
+    <Property Id="LEASHAFSSTATUS" Admin="yes" Secure="yes">$(var.LeashAfsStatus)</Property>
+    <Property Id="LEASHCREATEMISSINGCONFIG" Admin="yes" Secure="yes">$(var.LeashCreateMissingConfig)</Property>
+    <Property Id="LEASHAUTORENEWTICKETS" Admin="yes" Secure="yes">$(var.LeashAutoRenewTickets)</Property>
+    <Property Id="LEASHLOCKFILELOCATIONS" Admin="yes" Secure="yes">$(var.LeashLockFileLocations)</Property>
+    <Property Id="LEASHMSLSAIMPORT" Admin="yes" Secure="yes">$(var.LeashMsLsaImport)</Property>
+    <Property Id="LEASHLIFETIME" Admin="yes" Secure="yes">$(var.LeashLifetime)</Property>
+    <Property Id="LEASHRENEWTILL" Admin="yes" Secure="yes">$(var.LeashRenewTill)</Property>
+    <Property Id="LEASHRENEWABLE" Admin="yes" Secure="yes">$(var.LeashRenewable)</Property>
+    <Property Id="LEASHFORWARDABLE" Admin="yes" Secure="yes">$(var.LeashForwardable)</Property>
+    <Property Id="LEASHNOADDRESSES" Admin="yes" Secure="yes">$(var.LeashNoAddresses)</Property>
+    <Property Id="LEASHPROXIABLE" Admin="yes" Secure="yes">$(var.LeashProxiable)</Property>
+    <Property Id="LEASHPUBLICIP" Admin="yes" Secure="yes">$(var.LeashPublicIp)</Property>
+    <Property Id="LEASHUSEKRB4" Admin="yes" Secure="yes">$(var.LeashUseKrb4)</Property>
+    <Property Id="LEASHHIDEKINITOPTIONS" Admin="yes" Secure="yes">$(var.LeashHideKinitOptions)</Property>
+    <Property Id="LEASHLIFEMIN" Admin="yes" Secure="yes">$(var.LeashLifeMin)</Property>
+    <Property Id="LEASHLIFEMAX" Admin="yes" Secure="yes">$(var.LeashLifeMax)</Property>
+    <Property Id="LEASHRENEWMIN" Admin="yes" Secure="yes">$(var.LeashRenewMin)</Property>
+    <Property Id="LEASHRENEWMAX" Admin="yes" Secure="yes">$(var.LeashRenewMax)</Property>
+    <Property Id="LEASHUPPERCASEREALM" Admin="yes" Secure="yes">$(var.LeashUppercaseRealm)</Property>
+    <Property Id="LEASHTIMEHOST" Admin="yes" Secure="yes">$(var.LeashTimeHost)</Property>
+    <Property Id="LEASHPRESERVEKINITOPTIONS" Admin="yes" Secure="yes">$(var.LeashPreserveKinitOptions)</Property>
+    <Property Id="KRB4KRBREALMS" Admin="yes" Secure="yes">$(var.Krb4KrbRealms)</Property>
+    <Property Id="KRB4KRBCONF" Admin="yes" Secure="yes">$(var.Krb4KrbConf)</Property>
+    <Property Id="KRB4CONFIGDIR" Admin="yes" Secure="yes">$(var.Krb4ConfigDir)</Property>
+    <Property Id="KRB4TICKETFILE" Admin="yes" Secure="yes">$(var.Krb4TicketFile)</Property>
+    <Property Id="KRB5CONFIG" Admin="yes" Secure="yes">$(var.Krb5Config)</Property>
+    <Property Id="KRB5CCNAME" Admin="yes" Secure="yes">$(var.Krb5CcName)</Property>
+    <Property Id="KRB5PRESERVEIDENTITY" Admin="yes" Secure="yes">$(var.Krb5PreserveIdentity)</Property>
+<?endif?>
+<?ifdef UseLeash?>
+    <Property Id="USELEASH" Admin="yes" Secure="yes">$(var.UseLeash)</Property>
+<?endif?>
+<?ifdef UseNetIDMgr?>
+    <Property Id="USENETIDMGR" Admin="yes" Secure="yes">$(var.UseNetIDMgr)</Property>
 <?endif?>
 </Include>
