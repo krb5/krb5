@@ -662,10 +662,13 @@ checkVer:
    Call GetWindowsVersion
    Pop $R0
    StrCmp $R0 "95" wrongVersion
+   StrCmp $R0 "98" wrongVersion
+   StrCmp $R0 "ME" wrongVersion
+   StrCmp $R0 "NT 4.0" wrongVersion
    goto checkIPHLPAPI
 
 wrongVersion:
-   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "MIT ${PROGRAM_NAME} requires Microsoft Windows 98 or higher."
+   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "MIT ${PROGRAM_NAME} requires Microsoft Windows 2000 or higher."
    Abort
 
 checkIPHLPAPI:
