@@ -176,22 +176,23 @@ LRESULT CALLBACK khm_main_wnd_proc(
             break;
 
         case KHUI_ACTION_HELP_CTX:
-            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
-                     HH_HELP_CONTEXT, IDH_WELCOME);
+            khm_html_help(khm_hwnd_main, HH_HELP_CONTEXT, IDH_WELCOME);
             break;
 
         case KHUI_ACTION_HELP_CONTENTS:
-            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
-                     HH_DISPLAY_TOC, 0);
+            khm_html_help(khm_hwnd_main, HH_DISPLAY_TOC, 0);
             break;
 
         case KHUI_ACTION_HELP_INDEX:
-            HtmlHelp(khm_hwnd_main, NIDM_HELPFILE,
-                     HH_DISPLAY_INDEX, (DWORD_PTR) L"");
+            khm_html_help(khm_hwnd_main, HH_DISPLAY_INDEX, (DWORD_PTR) L"");
             break;
 
         case KHUI_ACTION_HELP_ABOUT:
             khm_create_about_window();
+            break;
+
+        case KHUI_ACTION_IMPORT:
+            khm_cred_import();
             break;
 
         case KHUI_ACTION_PROPERTIES:

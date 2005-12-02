@@ -202,9 +202,37 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
     LONG rv = ERROR_SUCCESS;
 
     hkp = hkey;
+    t = sSubKey;
+
+    /* check for case insensitive prefix first */
+    if (!wcsnicmp(sSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
+        HKEY hkt;
+
+        t = sSubKey + (ARRAYLENGTH(CONFIG_REGPATHW) - 1);
+
+#ifdef DEBUG
+        assert(*t == L'\0' || *t == L'\\');
+#endif
+
+        rv = RegOpenKeyEx(hkp,
+                          CONFIG_REGPATHW,
+                          ulOptions,
+                          samDesired,
+                          &hkt);
+
+        if (rv != ERROR_SUCCESS)
+            return rv;
+
+        if (*t == L'\0') {
+            *phkResult = hkt;
+            return rv;
+        }
+
+        t++;
+        hkp = hkt;
+    }
 
     /* descend down the components of the subkey */
-    t = sSubKey;
     while(TRUE) {
         wchar_t * slash;
         HKEY hkt;
@@ -260,11 +288,7 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
             goto _cleanup;
         }
 
-	/* FIX ME - This is not what we intended to do.  We want
-	 * a case sensitive match but we are running into a problem 
-	 * because of "HKLM\SOFTWARE" and "HKCU\Software"
-	 */
-        if (!(wcsnicmp(sk_name, t, cch))) {
+        if (!(wcsncmp(sk_name, t, cch))) {
             /* bingo! ?? */
             if (cch < KCONF_MAXCCH_NAME &&
                 (sk_name[cch] == L'\0' ||
@@ -285,9 +309,9 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
 
 LONG
 khcint_RegCreateKeyEx(HKEY hKey,
-                      LPCTSTR lpSubKey,
+                      LPCWSTR lpSubKey,
                       DWORD Reserved,
-                      LPTSTR lpClass,
+                      LPWSTR lpClass,
                       DWORD dwOptions,
                       REGSAM samDesired,
                       LPSECURITY_ATTRIBUTES lpSecurityAttributes,
@@ -305,6 +329,39 @@ khcint_RegCreateKeyEx(HKEY hKey,
 
     hkp = hKey;
     t = lpSubKey;
+
+    /* check for case insensitive prefix first */
+    if (!wcsnicmp(lpSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
+        HKEY hkt;
+
+        t = lpSubKey + (ARRAYLENGTH(CONFIG_REGPATHW) - 1);
+
+#ifdef DEBUG
+        assert(*t == L'\0' || *t == L'\\');
+#endif
+
+        rv = RegCreateKeyEx(hkp,
+                            CONFIG_REGPATHW,
+                            Reserved,
+                            lpClass,
+                            dwOptions,
+                            samDesired,
+                            lpSecurityAttributes,
+                            &hkt,
+                            lpdwDisposition);
+
+        if (rv != ERROR_SUCCESS)
+            return rv;
+
+        if (*t == L'\0') {
+            *phkResult = hkt;
+            return rv;
+        }
+
+        t++;
+        hkp = hkt;
+    }
+
     while(TRUE) {
         wchar_t * slash;
         HKEY hkt;
@@ -328,7 +385,6 @@ khcint_RegCreateKeyEx(HKEY hKey,
             if (hkp != hKey)
                 RegCloseKey(hkp);
             hkp = hkt;
-
         } else {
 
             rv = RegCreateKeyEx(hKey,
@@ -341,7 +397,6 @@ khcint_RegCreateKeyEx(HKEY hKey,
                                 phkResult,
                                 lpdwDisposition);
             goto _cleanup;
-
         }
     }
 
@@ -360,11 +415,7 @@ khcint_RegCreateKeyEx(HKEY hKey,
         if (l != ERROR_SUCCESS)
             break;
 
-	/* FIX ME - This is not what we intended to do.  We want
-	 * a case sensitive match but we are running into a problem 
-	 * because of "HKLM\SOFTWARE" and "HKCU\Software"
-	 */
-        if (!(wcsnicmp(sk_name, t, cch))) {
+        if (!(wcsncmp(sk_name, t, cch))) {
             /* bingo! ?? */
             if (sk_name[cch] == L'\0' ||
                 sk_name[cch] == L'~') {
@@ -602,11 +653,7 @@ khcint_open_space_int(kconf_conf_space * parent,
     EnterCriticalSection(&cs_conf_global);
     c = TFIRSTCHILD(p);
     while(c) {
-	/* FIX ME - This is not what we intended to do.  We want
-	 * a case sensitive match but we are running into a problem 
-	 * because of "HKLM\SOFTWARE" and "HKCU\Software"
-	 */
-        if(c->name && !wcsicmp(c->name, buf))
+        if(c->name && !wcscmp(c->name, buf))
             break;
 
         c = LNEXT(c);
@@ -624,19 +671,21 @@ khcint_open_space_int(kconf_conf_space * parent,
         /* we are not creating the space, so it must exist in the form of a
         registry key in HKLM or HKCU.  If it existed as a schema, we
         would have already retured it above. */
-        if(flags & KCONF_FLAG_USER)
+        
+        if (flags & KCONF_FLAG_USER)
             pkey = khcint_space_open_key(p, KHM_PERM_READ | KCONF_FLAG_USER);
 
-        if((!pkey || 
-            (khcint_RegOpenKeyEx(pkey, buf, 0, KEY_READ, &ckey) != 
-             ERROR_SUCCESS)) 
+        if((!pkey ||
+            (khcint_RegOpenKeyEx(pkey, buf, 0, KEY_READ, &ckey) !=
+             ERROR_SUCCESS))
            && (flags & KCONF_FLAG_MACHINE)) {
 
             pkey = khcint_space_open_key(p, KHM_PERM_READ | KCONF_FLAG_MACHINE);
-            if(!pkey || 
-               (khcint_RegOpenKeyEx(pkey, buf, 0, KEY_READ, &ckey) != 
+            if(!pkey ||
+               (khcint_RegOpenKeyEx(pkey, buf, 0, KEY_READ, &ckey) !=
                 ERROR_SUCCESS)) {
                 *result = NULL;
+
                 return KHM_ERROR_NOT_FOUND;
             }
         }
@@ -899,11 +948,7 @@ khc_read_string(khm_handle pconf,
 
         if(c->schema && khc_is_schema_handle(conf)) {
             for(i=0;i<c->nSchema;i++) {
-		/* FIX ME - This is not what we intended to do.  We want
-		* a case sensitive match but we are running into a problem 
-		* because of "HKLM\SOFTWARE" and "HKCU\Software"
-		*/
-                if(c->schema[i].type == KC_STRING && !wcsicmp(value, c->schema[i].name)) {
+                if(c->schema[i].type == KC_STRING && !wcscmp(value, c->schema[i].name)) {
                     /* found it */
                     size_t cbsize = 0;
 
@@ -1048,11 +1093,7 @@ khc_read_int32(khm_handle pconf, wchar_t * pvalue, khm_int32 * buf) {
 
         if(c->schema && khc_is_schema_handle(conf)) {
             for(i=0;i<c->nSchema;i++) {
-		/* FIX ME - This is not what we intended to do.  We want
-		* a case sensitive match but we are running into a problem 
-		* because of "HKLM\SOFTWARE" and "HKCU\Software"
-		*/
-                if(c->schema[i].type == KC_INT32 && !wcsicmp(value, c->schema[i].name)) {
+                if(c->schema[i].type == KC_INT32 && !wcscmp(value, c->schema[i].name)) {
                     *buf = (khm_int32) c->schema[i].value;
                     rv = KHM_ERROR_SUCCESS;
                     goto _exit;
@@ -1171,11 +1212,7 @@ khc_read_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 * buf) {
 
         if(c->schema && khc_is_schema_handle(conf)) {
             for(i=0;i<c->nSchema;i++) {
-		/* FIX ME - This is not what we intended to do.  We want
-		* a case sensitive match but we are running into a problem 
-		* because of "HKLM\SOFTWARE" and "HKCU\Software"
-		*/
-                if(c->schema[i].type == KC_INT64 && !wcsicmp(value, c->schema[i].name)) {
+                if(c->schema[i].type == KC_INT64 && !wcscmp(value, c->schema[i].name)) {
                     *buf = (khm_int64) c->schema[i].value;
                     rv = KHM_ERROR_SUCCESS;
                     goto _exit;
@@ -1699,11 +1736,7 @@ khc_get_type(khm_handle conf, wchar_t * value) {
         int i;
 
         for(i=0; i<c->nSchema; i++) {
-	    /* FIX ME - This is not what we intended to do.  We want
-	    * a case sensitive match but we are running into a problem 
-	    * because of "HKLM\SOFTWARE" and "HKCU\Software"
-	    */
-            if(!wcsicmp(c->schema[i].name, value)) {
+            if(!wcscmp(c->schema[i].name, value)) {
                 return c->schema[i].type;
             }
         }
@@ -1760,11 +1793,7 @@ khc_value_exists(khm_handle conf, wchar_t * value) {
 
     if(c->schema) {
         for(i=0; i<c->nSchema; i++) {
-	    /* FIX ME - This is not what we intended to do.  We want
-	    * a case sensitive match but we are running into a problem 
-	    * because of "HKLM\SOFTWARE" and "HKCU\Software"
-	    */
-            if(!wcsicmp(c->schema[i].name, value)) {
+            if(!wcscmp(c->schema[i].name, value)) {
                 rv |= KCONF_FLAG_SCHEMA;
                 break;
             }

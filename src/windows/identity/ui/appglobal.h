@@ -27,11 +27,17 @@
 #ifndef __KHIMAIRA_APPGLOBAL_H
 #define __KHIMAIRA_APPGLOBAL_H
 
+/* Helpfile */
+#define NIDM_HELPFILE              L"netidmgr.chm"
+
 /* global data */
 extern HINSTANCE khm_hInstance;
 extern int khm_nCmdShow;
 extern const wchar_t * khm_facility;
 extern kconf_schema schema_uiconfig[];
+extern khm_ui_4 khm_commctl_version;
+
+#define IS_COMMCTL6() (khm_commctl_version >= 0x60000)
 
 typedef struct tag_khm_startup_options {
     BOOL seen;
@@ -66,6 +72,8 @@ void khm_exit_gui(void);
 
 void khm_parse_commandline();
 void khm_register_window_classes(void);
+
+HWND khm_html_help(HWND hwnd, UINT command, DWORD_PTR data);
 
 #define MAX_RES_STRING 1024
 

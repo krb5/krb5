@@ -438,7 +438,7 @@ ui_cb(khui_new_creds * nc,
                                        NULL,
                                        &cb_ms);
 
-            if (rv != KHM_ERROR_TOO_LONG)
+            if (rv != KHM_ERROR_TOO_LONG || cb_ms <= sizeof(wchar_t) * 2)
                 goto _add_lru_realms;
 
             ms = PMALLOC(cb_ms);

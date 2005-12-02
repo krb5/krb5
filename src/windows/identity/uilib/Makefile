@@ -36,7 +36,8 @@ UIDLLOBJFILES=			\
 	$(OBJ)\actiondef.obj 	\
 	$(OBJ)\acceldef.obj	\
 	$(OBJ)\configui.obj	\
-	$(OBJ)\trackerwnd.obj
+	$(OBJ)\trackerwnd.obj	\
+	$(OBJ)\version.obj
 
 INCFILES=			\
 	$(INCDIR)\khuidefs.h	\

@@ -1771,6 +1771,18 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     khm_krb5_list_tickets(&ctx);
 
+                    /* If there is no default identity, then make this the default */
+                    kcdb_identity_refresh(nc->identities[0]);
+                    {
+                        khm_handle tdefault = NULL;
+
+                        if (KHM_SUCCEEDED(kcdb_identity_get_default(&tdefault))) {
+                            kcdb_identity_release(tdefault);
+                        } else {
+                            kcdb_identity_set_default(nc->identities[0]);
+                        }
+                    }
+
                     /* also add the principal and the realm in to the
                        LRU lists */
                     rv = kcdb_identity_get_name(nc->identities[0],
@@ -1808,11 +1820,14 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         assert(KHM_SUCCEEDED(rv));
 
                         if (multi_string_find(wbuf,
-                                                  idname,
-                                                  KHM_CASE_SENSITIVE) 
-                            != NULL)
-                            /* it's already there */
-                            goto _add_realm_to_LRU;
+                                              idname,
+                                              KHM_CASE_SENSITIVE) 
+                            != NULL) {
+                            /* it's already there.  We remove it here
+                               and add it at the top of the LRU
+                               list. */
+                            multi_string_delete(wbuf, idname, KHM_CASE_SENSITIVE);
+                        }
                     } else {
                         multi_string_init(wbuf, cb_ms);
                     }
@@ -1825,13 +1840,14 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                                 L"LRUPrincipals",
                                                 wbuf);
 
-                _add_realm_to_LRU:
-
                     atsign = wcschr(idname, L'@');
-                    assert(atsign != NULL);
+                    if (atsign != NULL)
+                        goto _done_with_LRU;
 
                     atsign++;
-                    assert(*atsign != L'\0');
+
+                    if (*atsign == L'\0')
+                        goto _done_with_LRU;
 
                     cb = cb_ms;
                     rv = khc_read_multi_string(csp_params,
@@ -1854,25 +1870,28 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         assert(KHM_SUCCEEDED(rv));
                     } else if (rv == KHM_ERROR_SUCCESS) {
                         if (multi_string_find(wbuf,
-                                                  atsign,
-                                                  KHM_CASE_SENSITIVE)
-                            != NULL)
-                            goto _done_with_LRU;
+                                              atsign,
+                                              KHM_CASE_SENSITIVE)
+                            != NULL) {
+                            /* remove the realm and add it at the top
+                               later. */
+                            multi_string_delete(wbuf, atsign, KHM_CASE_SENSITIVE); 
+                        }
                     } else {
                         multi_string_init(wbuf, cb_ms);
                     }
 
                     cb = cb_ms;
                     rv = multi_string_prepend(wbuf,
-                                                  &cb,
-                                                  atsign);
+                                              &cb,
+                                              atsign);
 
                     if (rv == KHM_ERROR_TOO_LONG) {
-                        wbuf = realloc(wbuf, cb);
+                        wbuf = PREALLOC(wbuf, cb);
 
                         rv = multi_string_prepend(wbuf,
-                                                      &cb,
-                                                      atsign);
+                                                  &cb,
+                                                  atsign);
 
                         assert(KHM_SUCCEEDED(rv));
                     }
@@ -2201,7 +2220,15 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
     case KMSG_CRED_IMPORT:
         {
-            khm_krb5_ms2mit(TRUE);
+            khm_int32 t = 0;
+
+#ifdef DEBUG
+            assert(csp_params);
+#endif
+            khc_read_int32(csp_params, L"MsLsaImport", &t);
+
+            if (t == 1)
+                khm_krb5_ms2mit(TRUE);
         }
         break;
     }

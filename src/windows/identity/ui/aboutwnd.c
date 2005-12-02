@@ -108,12 +108,6 @@ about_dlg_proc(HWND hwnd,
                     mod.dwSize = sizeof(mod);
                 } while(Module32Next(hsnap, &mod));
 
-#if (_WIN32_WINNT >= 0x501)
-                /* we are also setting the report style when creating
-                   the control.  this is actually optional. */
-                ListView_SetView(hw, LV_VIEW_DETAILS);
-#endif
-
             _done_with_modules:
                 CloseHandle(hsnap);
             }

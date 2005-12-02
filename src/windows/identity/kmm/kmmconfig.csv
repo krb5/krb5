@@ -3,7 +3,6 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
   Plugins,KC_SPACE,0,Plugin Specific configuration
     PluginMaxFailureCount,KC_INT32,3,Maximum number of failure counts before plugin is disabled
     PluginFailureCountResetTime,KC_INT64,36000,Time after first failure at which the failure count is reset
-    LoadList,KC_STRING,AfsCred,List of plugins that are active
     _Schema,KC_SPACE,0,Plugin schema
       Module,KC_STRING,<module name>,The name of the module that registered this plugin
       Description,KC_STRING,<Description>,Description of the plugin
@@ -18,7 +17,6 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
     _Schema,KC_ENDSPACE,0,
   Plugins,KC_ENDSPACE,0,
   Modules,KC_SPACE,0,Module Specific configuration
-    LoadList,KC_STRING,"OpenAFS,MITKrb5,MITKrb4",List of modules to load at startup
     ModuleMaxFailureCount,KC_INT32,3,Maximum number of failure counts before module is disabled
     ModuleFailureCountResetTime,KC_INT64,72000,Time after first failure at which the failure count is reset
     _Schema,KC_SPACE,0,Module schema
@@ -29,10 +27,10 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
       FailureReason,KC_INT32,0,Reason for last failure.  One of the module status values.
       PluginList,KC_STRING,<plugins>,List of plugins implemented in the module
     _Schema,KC_ENDSPACE,0,
-    OpenAFS,KC_SPACE,0,OpenAFS Module
-      ImagePath,KC_STRING,afscred.dll,
-      PluginList,KC_STRING,AfsCred,
-    OpenAFS,KC_ENDSPACE,0,
+#    OpenAFS,KC_SPACE,0,OpenAFS Module
+#      ImagePath,KC_STRING,afscred.dll,
+#      PluginList,KC_STRING,AfsCred,
+#    OpenAFS,KC_ENDSPACE,0,
     MITKrb5,KC_SPACE,0,MIT Kerberos V
       ImagePath,KC_STRING,krb5cred.dll,
       PluginList,KC_STRING,Krb5Cred,

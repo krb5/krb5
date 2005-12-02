@@ -293,8 +293,9 @@ DWORD WINAPI
 khm_reqdaemon_thread_proc(LPVOID vparam) {
     BOOL rv;
     MSG msg;
+#ifdef DEBUG
     DWORD dw;
-
+#endif
     khm_register_reqdaemonwnd_class();
 
 #ifdef DEBUG

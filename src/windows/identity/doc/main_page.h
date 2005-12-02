@@ -105,5 +105,6 @@
     - <b>0.1.1</b> First Alpha release <em>Nov 01, 2005</em>\n
       Released along with Kerberos for Windows 3.0.0 beta.
 
-    - <b>0.1.2</b> (tbd) <em>[tbd]</em>\n
+    - <b>0.1.2</b> Second Alpha release <em>Nov 30, 2005</em>\n
+      Released along with Kerberos for Windows 3.0.0 beta 2.
 */

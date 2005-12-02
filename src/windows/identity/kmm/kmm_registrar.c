@@ -544,7 +544,7 @@ void kmm_init_module(kmm_module_i * m) {
     /* If the module is not in the pre-init state, we can't
        initialize it. */
     if(m->state != KMM_MODULE_STATE_PREINIT) {
-        _report_mr1(KHERR_WARNING, MSG_IM_NOT_PREINIT, _int32(m->state));
+        _report_mr1(KHERR_INFO, MSG_IM_NOT_PREINIT, _int32(m->state));
         goto _exit;
     }
 
@@ -558,7 +558,7 @@ void kmm_init_module(kmm_module_i * m) {
     if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"Flags", &i)) &&
        (i & KMM_MODULE_FLAG_DISABLED)) {
 
-        _report_mr0(KHERR_ERROR, MSG_IM_DISABLED);
+        _report_mr0(KHERR_INFO, MSG_IM_DISABLED);
 
         m->state = KMM_MODULE_STATE_FAIL_DISABLED;
         goto _exit;
@@ -578,11 +578,9 @@ void kmm_init_module(kmm_module_i * m) {
 
         if(tm > 0 && 
            FtIntervalToSeconds((LPFILETIME) &ct) > fail_reset_time) {
-
             i = 0;
             khc_write_int32(csp_mod, L"FailureCount", 0);
             khc_write_int64(csp_mod, L"FailureTime", 0);
-
         }
 
         khc_read_int32(csp_mod, L"FailureReason", &last_reason);
@@ -593,7 +591,7 @@ void kmm_init_module(kmm_module_i * m) {
         if(i > max_fail_count && 
            last_reason != KMM_MODULE_STATE_FAIL_NOT_FOUND) {
             /* failed too many times */
-            _report_mr0(KHERR_ERROR, MSG_IM_MAX_FAIL);
+            _report_mr0(KHERR_INFO, MSG_IM_MAX_FAIL);
 
             m->state = KMM_MODULE_STATE_FAIL_MAX_FAILURE;
             goto _exit;

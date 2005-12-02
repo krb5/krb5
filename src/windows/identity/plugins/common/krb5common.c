@@ -139,6 +139,9 @@ khm_krb5_initialize(khm_handle ident,
             } while(FALSE);
         }
 
+#ifndef FAILOVER_TO_DEFAULT_CCACHE
+	rc = 1;
+#endif
         if (*cache == 0
 #ifdef FAILOVER_TO_DEFAULT_CCACHE
             && (rc = (*pkrb5_cc_default)(*ctx, cache))
