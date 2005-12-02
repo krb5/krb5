@@ -362,7 +362,12 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     int     ndx;
     void   *vftabl_addr;
     char   *err_str = NULL;
-    const char *const dbpath_names[] = {
+    /* N.B.: If this is "const" but not "static", the Solaris 10
+       native compiler has trouble building the library because of
+       absolute relocations needed in read-only section ".rodata".
+       When it's static, it goes into ".picdata", which is
+       read-write.  */
+    static const char *const dbpath_names[] = {
 	KDB_MODULE_SECTION, "db_module_dir", NULL,
     };
     char **profpath = NULL;
