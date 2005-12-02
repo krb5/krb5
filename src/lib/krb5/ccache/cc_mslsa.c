@@ -736,7 +736,7 @@ PurgeTicket2000( HANDLE LogonHandle, ULONG  PackageId,
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
     KERB_PURGE_TKT_CACHE_REQUEST * pPurgeRequest;
-    DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_REQUEST) + 1024;
+    DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_REQUEST) + 2048;
     char * sname = NULL, * srealm = NULL;
 
     if (krb5_unparse_name(context, cred->server, &sname))
@@ -790,7 +790,7 @@ PurgeTicketXP( HANDLE LogonHandle, ULONG  PackageId,
     NTSTATUS Status = 0;
     NTSTATUS SubStatus = 0;
     KERB_PURGE_TKT_CACHE_EX_REQUEST * pPurgeRequest;
-    DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 2048;
+    DWORD dwRequestLen = sizeof(KERB_PURGE_TKT_CACHE_EX_REQUEST) + 4096;
     char * cname = NULL, * crealm = NULL;
     char * sname = NULL, * srealm = NULL;
 
