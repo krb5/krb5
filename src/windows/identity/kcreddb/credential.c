@@ -533,12 +533,12 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_get_attr_string(
 
     if(KHM_FAILED(kcdb_attrib_get_info(attr_id, &attrib))) {
         code = KHM_ERROR_INVALID_PARAM;
-        goto _exit;
+        goto _exit_nolock;
     }
 
     if(KHM_FAILED(kcdb_type_get_info(attrib->type, &type))) {
         code = KHM_ERROR_UNKNOWN;
-        goto _exit;
+        goto _exit_nolock;
     }
 
     kcdb_cred_lock_read();
@@ -603,6 +603,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_get_attr_string(
 
 _exit:
     kcdb_cred_unlock_read();
+_exit_nolock:
     if(type)
         kcdb_type_release_info(type);
     if(attrib)

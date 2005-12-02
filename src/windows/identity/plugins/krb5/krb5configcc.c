@@ -24,6 +24,11 @@
 
 /* $Id$ */
 
+#if _WIN32_WINNT < 0x501
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x501
+#endif
+
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>
@@ -381,42 +386,63 @@ k5_ccconfig_dlgproc(HWND hwnd,
                 /* not there.  we need to add.  but check a few things
                    first */
                 if (!PathFileExists(path)) {
-                    EDITBALLOONTIP bt;
                     wchar_t title[64];
                     wchar_t text[128];
 
-                    bt.cbStruct = sizeof(bt);
-                    bt.pszTitle = title;
                     LoadString(hResModule, IDS_CFG_FCN_WARNING,
                                title, ARRAYLENGTH(title));
-                    bt.pszText = text;
+
                     LoadString(hResModule, IDS_CFG_FCN_W_NOTFOUND,
                                text, ARRAYLENGTH(text));
-                    bt.ttiIcon = TTI_WARNING;
+#if _WIN32_WINNT >= 0x501
+                    if (IS_COMMCTL6())
+                    {
+                        EDITBALLOONTIP bt;
 
-                    SendDlgItemMessage(hwnd, IDC_CFG_FCNAME,
-                                       EM_SHOWBALLOONTIP,
-                                       0,
-                                       (LPARAM) &bt);
+                        bt.cbStruct = sizeof(bt);
+                        bt.pszTitle = title;
+                        bt.pszText = text;
+                        bt.ttiIcon = TTI_WARNING;
 
+                        SendDlgItemMessage(hwnd, IDC_CFG_FCNAME,
+                                           EM_SHOWBALLOONTIP,
+                                           0,
+                                           (LPARAM) &bt);
+                    } else {
+#endif
+                        MessageBox(hwnd, text, title, MB_OK | MB_ICONWARNING);
+#if _WIN32_WINNT >= 0x501
+                    }
+#endif
                 } else if (PathIsRelative(path)) {
-                    EDITBALLOONTIP bt;
                     wchar_t title[64];
                     wchar_t text[128];
 
-                    bt.cbStruct = sizeof(bt);
-                    bt.pszTitle = title;
                     LoadString(hResModule, IDS_CFG_FCN_WARNING,
                                title, ARRAYLENGTH(title));
-                    bt.pszText = text;
                     LoadString(hResModule, IDS_CFG_FCN_W_RELATIVE,
                                text, ARRAYLENGTH(text));
-                    bt.ttiIcon = TTI_WARNING;
 
-                    SendDlgItemMessage(hwnd, IDC_CFG_FCNAME,
-                                       EM_SHOWBALLOONTIP,
-                                       0,
-                                       (LPARAM) &bt);
+#if _WIN32_WINNT >= 0x501
+                    if (IS_COMMCTL6())
+                    {
+                        EDITBALLOONTIP bt;
+
+                        bt.cbStruct = sizeof(bt);
+                        bt.pszTitle = title;
+                        bt.pszText = text;
+                        bt.ttiIcon = TTI_WARNING;
+
+                        SendDlgItemMessage(hwnd, IDC_CFG_FCNAME,
+                                           EM_SHOWBALLOONTIP,
+                                           0,
+                                           (LPARAM) &bt);
+                    } else {
+#endif
+                        MessageBox(hwnd, text, title, MB_OK | MB_ICONWARNING);
+#if _WIN32_WINNT >= 0x501
+                    }
+#endif
                 }
 
                 k5_add_file_cc(&d->work, path);

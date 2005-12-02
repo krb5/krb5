@@ -24,6 +24,7 @@
 
 /* $Id$ */
 
+#include<shlwapi.h>
 #include<khmapp.h>
 
 #if DEBUG
@@ -33,6 +34,7 @@
 HINSTANCE khm_hInstance;
 const wchar_t * khm_facility = L"NetIDMgr";
 int khm_nCmdShow;
+khm_ui_4 khm_commctl_version = 0;
 
 khm_startup_options khm_startup;
 
@@ -123,12 +125,16 @@ void khm_register_window_classes(void) {
         ICC_BAR_CLASSES |
         ICC_DATE_CLASSES |
         ICC_HOTKEY_CLASS |
-#if (_WIN32_WINNT >= 0x501)
-        ICC_LINK_CLASS |
-        ICC_STANDARD_CLASSES |
-#endif
         ICC_LISTVIEW_CLASSES |
-        ICC_TAB_CLASSES;
+        ICC_TAB_CLASSES |
+#if (_WIN32_WINNT >= 0x501)
+        ((IS_COMMCTL6())?
+         ICC_LINK_CLASS |
+         ICC_STANDARD_CLASSES :
+         0) |
+#endif
+        0;
+
     InitCommonControlsEx(&ics);
 
     khm_register_main_wnd_class();
@@ -368,6 +374,27 @@ khm_module_load_ctx_handler(enum kherr_ctx_event evt,
                              c->serial);
 }
 
+static wchar_t helpfile[MAX_PATH] = L"";
+
+HWND khm_html_help(HWND hwnd, UINT command, DWORD_PTR data) {
+    if (!*helpfile) {
+        DWORD dw;
+        wchar_t ppath[MAX_PATH];
+
+        dw = GetModuleFileName(NULL, ppath, ARRAYLENGTH(ppath));
+
+        if (dw == 0) {
+            StringCbCopy(helpfile, sizeof(helpfile), NIDM_HELPFILE);
+        } else {
+            PathRemoveFileSpec(ppath);
+            PathAppend(ppath, NIDM_HELPFILE);
+            StringCbCopy(helpfile, sizeof(helpfile), ppath);
+        }
+    }
+
+    return HtmlHelp(hwnd, helpfile, command, data);
+}
+
 void khm_load_default_modules(void) {
     kherr_context * c;
 
@@ -417,6 +444,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
            is open.  This only affects this process, and any child
            processes started by plugins. */
         SetEnvironmentVariable(L"KERBEROSLOGIN_NEVER_PROMPT", L"1");
+
+        khm_version_init();
+
+        khm_commctl_version = khm_get_commctl_version(NULL);
 
         /* we only open a main window if this is the only instance 
            of the application that is running. */

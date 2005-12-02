@@ -946,9 +946,6 @@ khm_cfg_ids_tab_proc(HWND hwnd,
                 cfg_idents.idents[i].lv_idx = ListView_InsertItem(hw, &lvi);
             }
 
-#if (_WIN32_WINNT >= 0x501)
-            ListView_SetView(hw, LV_VIEW_DETAILS);
-#endif
         }
         return FALSE;
 

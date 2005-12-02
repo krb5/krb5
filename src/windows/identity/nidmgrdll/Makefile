@@ -86,7 +86,8 @@ OBJFILES= \
 	$(UIDIR)\actiondef.obj 		\
 	$(UIDIR)\acceldef.obj		\
 	$(UIDIR)\configui.obj		\
-	$(UIDIR)\trackerwnd.obj
+	$(UIDIR)\trackerwnd.obj		\
+	$(UIDIR)\version.obj
 
 RESFILES= \
 	$(OBJ)\nidmgrdll.res		\

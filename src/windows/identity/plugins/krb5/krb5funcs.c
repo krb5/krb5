@@ -206,17 +206,17 @@ int com_addr(void)
 static long get_tickets_from_cache(krb5_context ctx, 
                                    krb5_ccache cache)
 {
-    krb5_error_code	code;
-    krb5_principal	KRBv5Principal;
-    krb5_flags		flags = 0;
-    krb5_cc_cursor	KRBv5Cursor;
-    krb5_creds		KRBv5Credentials;
+    krb5_error_code code;
+    krb5_principal  KRBv5Principal;
+    krb5_flags	    flags = 0;
+    krb5_cc_cursor  KRBv5Cursor;
+    krb5_creds	    KRBv5Credentials;
     krb5_ticket    *tkt=NULL;
-    char			*ClientName;
-    char			*PrincipalName;
-    wchar_t         wbuf[256];      /* temporary conversion buffer */
-    wchar_t         *wcc_name = NULL;      /* credential cache name */
-    char			*sServerName;
+    char	   *ClientName;
+    char	   *PrincipalName;
+    wchar_t         wbuf[256];  /* temporary conversion buffer */
+    wchar_t         wcc_name[KRB5_MAXCCH_CCNAME]; /* credential cache name */
+    char	   *sServerName;
     khm_handle      ident = NULL;
     khm_handle      cred = NULL;
     time_t          tt;
@@ -231,18 +231,28 @@ static long get_tickets_from_cache(krb5_context ctx,
 #endif
 
     {
-        char * cc_name;
-        size_t namelen;
+        const char * cc_name;
+        const char * cc_type;
 
         cc_name = (*pkrb5_cc_get_name)(ctx, cache);
         if(cc_name) {
-            namelen = strlen(cc_name);
-            namelen = (namelen + 1 + 5) * sizeof(wchar_t);
-            /* the +5 is for the possible addtion of API: or FILE:
-               during the cannonicalization process */
-            wcc_name = PMALLOC(namelen);
-            AnsiStrToUnicode(wcc_name, namelen, cc_name);
-            khm_krb5_canon_cc_name(wcc_name, namelen);
+            cc_type = (*pkrb5_cc_get_type)(ctx, cache);
+            if (cc_type) {
+                StringCbPrintf(wcc_name, sizeof(wcc_name), L"%S:%S", cc_type, cc_name);
+            } else {
+                AnsiStrToUnicode(wcc_name, sizeof(wcc_name), cc_name);
+                khm_krb5_canon_cc_name(wcc_name, sizeof(wcc_name));
+            }
+        } else {
+            cc_type = (*pkrb5_cc_get_type)(ctx, cache);
+            if (cc_type) {
+                StringCbPrintf(wcc_name, sizeof(wcc_name), L"%S:", cc_type);
+            } else {
+#ifdef DEBUG
+                assert(FALSE);
+#endif
+                StringCbCopy(wcc_name, sizeof(wcc_name), L"");
+            }
         }
     }
 
@@ -543,8 +553,6 @@ static long get_tickets_from_cache(krb5_context ctx,
     }
 
 _exit:
-    if(wcc_name)
-        PFREE(wcc_name);
 
     return code;
 }
@@ -1507,30 +1515,60 @@ khm_krb5_ms2mit(BOOL save_creds)
     char *princ_name = NULL;
     BOOL rc = FALSE;
 
+#ifdef DEBUG
+    kherr_debug_printf(L"Begin : khm_krb5_ms2mit. save_cred=%d\n", (int) save_creds);
+#endif
     if ( !pkrb5_init_context )
         goto cleanup;
 
     if (code = pkrb5_init_context(&kcontext))
         goto cleanup;
 
+#ifdef DEBUG
+    kherr_debug_printf(L"Resolving MSLSA\n");
+#endif
     if (code = pkrb5_cc_resolve(kcontext, "MSLSA:", &mslsa_ccache))
         goto cleanup;
 
     if ( save_creds ) {
-        if (code = pkrb5_cc_get_principal(kcontext, mslsa_ccache, &princ))
+#ifdef DEBUG
+        kherr_debug_printf(L"Getting principal\n");
+#endif
+	if (code = pkrb5_cc_get_principal(kcontext, mslsa_ccache, &princ))
             goto cleanup;
 
-        if (code = pkrb5_unparse_name(kcontext, princ, &princ_name))
+#ifdef DEBUG
+	kherr_debug_printf(L"Unparsing name\n");
+#endif
+	if (code = pkrb5_unparse_name(kcontext, princ, &princ_name))
             goto cleanup;
 
+#ifdef DEBUG
+        kherr_debug_printf(L"Unparsed [%S].  Resolving target cache\n", princ_name);
+#endif
         /* TODO: actually look up the preferred ccache name */
-        if ((code = pkrb5_cc_resolve(kcontext, princ_name, &ccache)) ||
-            (code = pkrb5_cc_default(kcontext, &ccache)))
-            goto cleanup;
+        if (code = pkrb5_cc_resolve(kcontext, princ_name, &ccache)) {
+#ifdef DEBUG
+            kherr_debug_printf(L"Cannot resolve cache [%S] with code=%d.  Trying default.\n", princ_name, code);
+#endif
 
+            if (code = pkrb5_cc_default(kcontext, &ccache)) {
+#ifdef DEBUG
+                kherr_debug_printf(L"Failed to resolve default ccache. Code=%d", code);
+#endif
+                goto cleanup;
+            }
+        }
+
+#ifdef DEBUG
+        kherr_debug_printf(L"Initializing ccache\n");
+#endif
         if (code = pkrb5_cc_initialize(kcontext, ccache, princ))
             goto cleanup;
 
+#ifdef DEBUG
+        kherr_debug_printf(L"Copying credentials\n");
+#endif
         if (code = pkrb5_cc_copy_creds(kcontext, mslsa_ccache, ccache))
             goto cleanup;
 
@@ -1540,8 +1578,8 @@ khm_krb5_ms2mit(BOOL save_creds)
         if ((code = pkrb5_cc_start_seq_get(kcontext, mslsa_ccache, &cursor))) 
             goto cleanup;
 
-        while (!(code = pkrb5_cc_next_cred(kcontext, mslsa_ccache, &cursor, &creds))) 
-        {
+        while (!(code = pkrb5_cc_next_cred(kcontext, mslsa_ccache, 
+                                           &cursor, &creds))) {
             if ( creds.ticket_flags & TKT_FLG_INITIAL ) {
                 rc = TRUE;
                 pkrb5_free_cred_contents(kcontext, &creds);
@@ -1553,6 +1591,10 @@ khm_krb5_ms2mit(BOOL save_creds)
     }
 
 cleanup:
+#ifdef DEBUG
+    kherr_debug_printf(L"  Received code=%d", code);
+#endif
+
     if (princ_name)
         pkrb5_free_unparsed_name(kcontext, princ_name);
     if (princ)

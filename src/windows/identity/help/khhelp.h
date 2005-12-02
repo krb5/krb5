@@ -1,5 +1,3 @@
-#define NIDM_HELPFILE              L"netidmgr.chm"
-
 #define IDH_WELCOME                1000
 #define IDH_WIN_MAIN               1001
 

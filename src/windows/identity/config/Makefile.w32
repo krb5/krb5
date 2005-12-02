@@ -46,8 +46,9 @@ KHIMAIRA_WIN32_CONFIG=1
 # Version info
 NETIDMGR_VERSION_MAJOR=0
 NETIDMGR_VERSION_MINOR=1
-NETIDMGR_VERSION_PATCH=2
+NETIDMGR_VERSION_PATCH=3
 NETIDMGR_VERSION_AUX=0
+NETIDMGR_RELEASEDESC=Beta 3
 
 # The API version.  This number must be incremented each time the API
 # changes.  Plugins specify the version of the API that they were
@@ -196,6 +197,10 @@ khcwarn=/Wp64
 !ifndef KH_NO_WX
 khcwarn=$(khcwarn) /WX
 !endif
+
+#DEBUG_SYMBOLS
+ldebug=$(ldebug) /DEBUG
+cdebug=$(cdebug) -Os -Zi
 
 khcflags=$(cdebug) $(cflags) $(incflags) $(khdefines) $(khcwarn)
 khlguiflags=$(ldebug) $(guilflags)

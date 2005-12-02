@@ -31,6 +31,10 @@
 #include<strsafe.h>
 #include<krb5.h>
 
+#ifdef DEBUG
+#include<assert.h>
+#endif
+
 khm_int32 credtype_id_krb5 = KCDB_CREDTYPE_INVALID;
 khm_boolean krb5_initialized = FALSE;
 khm_handle krb5_credset = NULL;
@@ -141,10 +145,20 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
             }
 
         if(k5_main_fiber != NULL) {
-#if (_WIN32_WINNT >= 0x0501)
-            ConvertFiberToThread();
+
+            if (k5_kinit_fiber) {
+#ifdef DEBUG
+                assert(k5_kinit_fiber != GetCurrentFiber());
 #endif
+#if CLEANUP_FIBERS_ON_EXIT
+                DeleteFiber(k5_kinit_fiber);
+                CloseHandle(k5_kinit_fiber);
+#endif
+                k5_kinit_fiber = NULL;
+            }
+
             k5_main_fiber = NULL;
+
         }
 
         if(k5_sub != NULL) {

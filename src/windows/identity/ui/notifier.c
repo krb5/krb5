@@ -988,10 +988,11 @@ ATOM khm_register_alerter_wnd_class(void)
 
     wcx.cbSize = sizeof(wcx);
     wcx.style =
+        CS_OWNDC |
 #if(_WIN32_WINNT >= 0x0501)
-        CS_DROPSHADOW |
+        ((IS_COMMCTL6())? CS_DROPSHADOW: 0) |
 #endif
-        CS_OWNDC;
+        0;
     wcx.lpfnWndProc = alerter_wnd_proc;
     wcx.cbClsExtra = 0;
     wcx.cbWndExtra = DLGWINDOWEXTRA + sizeof(LONG_PTR);

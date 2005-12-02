@@ -91,6 +91,7 @@ DECL_FUNC_PTR(krb5_get_init_creds_password);
 DECL_FUNC_PTR(krb5_get_prompt_types);
 DECL_FUNC_PTR(krb5_build_principal_ext);
 DECL_FUNC_PTR(krb5_cc_get_name);
+DECL_FUNC_PTR(krb5_cc_get_type);
 DECL_FUNC_PTR(krb5_cc_resolve);
 DECL_FUNC_PTR(krb5_cc_default);
 DECL_FUNC_PTR(krb5_cc_default_name);
@@ -190,36 +191,36 @@ FUNC_INFO ccapi_fi[] = {
 
 FUNC_INFO k4_fi[] = {
     MAKE_FUNC_INFO(get_krb_err_txt_entry),
-        MAKE_FUNC_INFO(k_isinst),
-        MAKE_FUNC_INFO(k_isname),
-        MAKE_FUNC_INFO(k_isrealm),
-        MAKE_FUNC_INFO(kadm_change_your_password),
-        MAKE_FUNC_INFO(kname_parse),
-        MAKE_FUNC_INFO(krb_get_cred),
-        MAKE_FUNC_INFO(krb_get_krbhst),
-        MAKE_FUNC_INFO(krb_get_lrealm),
-        MAKE_FUNC_INFO(krb_get_pw_in_tkt),
-        MAKE_FUNC_INFO(krb_get_tf_realm),
-        MAKE_FUNC_INFO(krb_mk_req),
-        MAKE_FUNC_INFO(krb_realmofhost),
-        MAKE_FUNC_INFO(tf_init),
-        MAKE_FUNC_INFO(tf_close),
-        MAKE_FUNC_INFO(tf_get_cred),
-        MAKE_FUNC_INFO(tf_get_pname),
-        MAKE_FUNC_INFO(tf_get_pinst),
-        MAKE_FUNC_INFO(LocalHostAddr),
-        MAKE_FUNC_INFO(tkt_string),
-        MAKE_FUNC_INFO(krb_set_tkt_string),
-        MAKE_FUNC_INFO(initialize_krb_error_func),
-        MAKE_FUNC_INFO(initialize_kadm_error_table),
-        MAKE_FUNC_INFO(dest_tkt),
-        /*        MAKE_FUNC_INFO(lsh_LoadKrb4LeashErrorTables), */// XXX
-        MAKE_FUNC_INFO(krb_in_tkt),
-        MAKE_FUNC_INFO(krb_save_credentials),
-        MAKE_FUNC_INFO(krb_get_krbconf2),
-        MAKE_FUNC_INFO(krb_get_krbrealm2),
-        MAKE_FUNC_INFO(krb_life_to_time),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(k_isinst),
+    MAKE_FUNC_INFO(k_isname),
+    MAKE_FUNC_INFO(k_isrealm),
+    MAKE_FUNC_INFO(kadm_change_your_password),
+    MAKE_FUNC_INFO(kname_parse),
+    MAKE_FUNC_INFO(krb_get_cred),
+    MAKE_FUNC_INFO(krb_get_krbhst),
+    MAKE_FUNC_INFO(krb_get_lrealm),
+    MAKE_FUNC_INFO(krb_get_pw_in_tkt),
+    MAKE_FUNC_INFO(krb_get_tf_realm),
+    MAKE_FUNC_INFO(krb_mk_req),
+    MAKE_FUNC_INFO(krb_realmofhost),
+    MAKE_FUNC_INFO(tf_init),
+    MAKE_FUNC_INFO(tf_close),
+    MAKE_FUNC_INFO(tf_get_cred),
+    MAKE_FUNC_INFO(tf_get_pname),
+    MAKE_FUNC_INFO(tf_get_pinst),
+    MAKE_FUNC_INFO(LocalHostAddr),
+    MAKE_FUNC_INFO(tkt_string),
+    MAKE_FUNC_INFO(krb_set_tkt_string),
+    MAKE_FUNC_INFO(initialize_krb_error_func),
+    MAKE_FUNC_INFO(initialize_kadm_error_table),
+    MAKE_FUNC_INFO(dest_tkt),
+    /*        MAKE_FUNC_INFO(lsh_LoadKrb4LeashErrorTables), */// XXX
+    MAKE_FUNC_INFO(krb_in_tkt),
+    MAKE_FUNC_INFO(krb_save_credentials),
+    MAKE_FUNC_INFO(krb_get_krbconf2),
+    MAKE_FUNC_INFO(krb_get_krbrealm2),
+    MAKE_FUNC_INFO(krb_life_to_time),
+    END_FUNC_INFO
 };
 
 FUNC_INFO k5_fi[] = {
@@ -234,6 +235,7 @@ FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_get_prompt_types),
     MAKE_FUNC_INFO(krb5_build_principal_ext),
     MAKE_FUNC_INFO(krb5_cc_get_name),
+    MAKE_FUNC_INFO(krb5_cc_get_type),
     MAKE_FUNC_INFO(krb5_cc_resolve),
     MAKE_FUNC_INFO(krb5_cc_default),
     MAKE_FUNC_INFO(krb5_cc_default_name),
@@ -290,8 +292,8 @@ FUNC_INFO k5_fi[] = {
 
 FUNC_INFO k524_fi[] = {
     MAKE_FUNC_INFO(krb524_init_ets),
-        MAKE_FUNC_INFO(krb524_convert_creds_kdc),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(krb524_convert_creds_kdc),
+    END_FUNC_INFO
 };
 
 FUNC_INFO profile_fi[] = {
@@ -312,8 +314,8 @@ FUNC_INFO profile_fi[] = {
 
 FUNC_INFO ce_fi[] = {
     MAKE_FUNC_INFO(com_err),
-        MAKE_FUNC_INFO(error_message),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(error_message),
+    END_FUNC_INFO
 };
 
 FUNC_INFO service_fi[] = {
@@ -327,11 +329,11 @@ FUNC_INFO service_fi[] = {
 
 FUNC_INFO lsa_fi[] = {
     MAKE_FUNC_INFO(LsaConnectUntrusted),
-        MAKE_FUNC_INFO(LsaLookupAuthenticationPackage),
-        MAKE_FUNC_INFO(LsaCallAuthenticationPackage),
-        MAKE_FUNC_INFO(LsaFreeReturnBuffer),
-        MAKE_FUNC_INFO(LsaGetLogonSessionData),
-        END_FUNC_INFO
+    MAKE_FUNC_INFO(LsaLookupAuthenticationPackage),
+    MAKE_FUNC_INFO(LsaCallAuthenticationPackage),
+    MAKE_FUNC_INFO(LsaFreeReturnBuffer),
+    MAKE_FUNC_INFO(LsaGetLogonSessionData),
+    END_FUNC_INFO
 };
 
 // psapi functions

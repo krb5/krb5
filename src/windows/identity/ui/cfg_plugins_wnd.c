@@ -120,9 +120,6 @@ khm_cfg_plugins_proc(HWND hwnd,
 #ifdef DEBUG
             assert(hw);
 #endif
-#if (_WIN32_WINNT >= 0x501)
-            ListView_SetView(hw, LV_VIEW_DETAILS);
-#endif
             ZeroMemory(&lvc, sizeof(lvc));
 
             lvc.mask = LVCF_TEXT | LVCF_WIDTH;

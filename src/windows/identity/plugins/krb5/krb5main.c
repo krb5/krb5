@@ -60,6 +60,8 @@ khm_handle csp_params       = NULL;
 
 BOOL is_k5_identpro = TRUE;
 
+khm_ui_4  k5_commctl_version;
+
 kmm_module_locale locales[] = {
     LOCALE_DEF(MAKELANGID(LANG_ENGLISH,SUBLANG_ENGLISH_US), L"krb5cred_en_us.dll", KMM_MLOC_FLAG_DEFAULT)
 };
@@ -85,6 +87,8 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         hResModule = kmm_get_resource_hmodule(h_module);
     } else
         goto _exit;
+
+    k5_commctl_version = khm_get_commctl_version(NULL);
 
     /* register the plugin */
     ZeroMemory(&pi, sizeof(pi));

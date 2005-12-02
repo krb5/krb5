@@ -93,6 +93,10 @@ extern khm_int32 attr_id_addr_list;
 extern khm_int32 attr_id_krb5_flags;
 extern khm_int32 attr_id_krb5_ccname;
 
+extern khm_ui_4  k5_commctl_version;
+
+#define IS_COMMCTL6() (k5_commctl_version >= 0x60000)
+
 /* Configuration spaces */
 #define CSNAME_KRB5CRED      L"Krb5Cred"
 #define CSNAME_PARAMS        L"Parameters"

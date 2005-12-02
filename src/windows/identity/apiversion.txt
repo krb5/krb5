@@ -44,11 +44,11 @@ Date=NOTRELEASED
 Version=2
 AppVersion=0.1.1.0
 Date=Nov 01, 2005
-# Alpha release of NetIDMgr
+# Beta 1 release of NetIDMgr
 
 #----------------------------------------------------------------
 Version=3
 AppVersion=0.1.2.0
-Date=NOTRELEASED
-# Beta release
+Date=Nov 30, 2005
+# Beta 2 release
 
