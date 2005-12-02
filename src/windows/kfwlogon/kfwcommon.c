@@ -289,17 +289,20 @@ static HANDLE hDLL;
 
 void DebugEvent0(char *a) 
 {
+#ifdef DEBUG
     HANDLE h; char *ptbuf[1];
     
     h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
     ptbuf[0] = a;
     ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
     DeregisterEventSource(h);
+#endif
 }
 
 #define MAXBUF_ 512
 void DebugEvent(char *b,...) 
 {
+#ifdef DEBUG
     HANDLE h; char *ptbuf[1],buf[MAXBUF_+1];
     va_list marker;
 
@@ -311,6 +314,7 @@ void DebugEvent(char *b,...)
     ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
     DeregisterEventSource(h);
     va_end(marker);
+#endif
 }
 
 void
@@ -482,7 +486,8 @@ KFW_get_ccache(krb5_context alt_ctx, krb5_principal principal, krb5_ccache * cc)
 
 	ccname = (char *)malloc(strlen(pname) + 5);
 	sprintf(ccname,"API:%s",pname);
-        
+
+	DebugEvent0(ccname);
 	code = pkrb5_cc_resolve(ctx, ccname, cc);
     } else {
         code = pkrb5_cc_default(ctx, cc);
@@ -685,56 +690,47 @@ KFW_get_cred( char * username,
 {
     krb5_context ctx = 0;
     krb5_ccache cc = 0;
-    char * realm = 0, * userrealm = 0;
-    int free_realm = 0;
+    char * realm = 0;
     krb5_principal principal = 0;
     char * pname = 0;
     krb5_error_code code;
 
-    if (!pkrb5_init_context)
+    if (!pkrb5_init_context || !username || !password)
         return 0;
 
-    if ( IsDebuggerPresent() ) {
-        OutputDebugString("KFW_get_cred for token ");
-        OutputDebugString(username);
-        OutputDebugString("\n");
-    }
+    DebugEvent0(username);
 
     code = pkrb5_init_context(&ctx);
     if ( code ) goto cleanup;
 
     code = pkrb5_get_default_realm(ctx, &realm);
 
-    userrealm = strchr(username,'@');
     if (realm) {
-	free_realm = 1;
         pname = malloc(strlen(username) + strlen(realm) + 2);
-        userrealm = strchr(pname, '@');
-        userrealm++;
-	strcat(userrealm, realm);
+	if (!pname)
+	    goto cleanup;
+	strcpy(pname, username);
+	strcat(pname, "@");
+	strcat(pname, realm);
     } else {
-        pname = strdup(username);
-        userrealm = strchr(pname, '@');
-        userrealm++;
-	realm = userrealm;
+	goto cleanup;
     }
     
-    if ( IsDebuggerPresent() ) {
-        OutputDebugString("Realm: ");
-        OutputDebugString(realm);
-        OutputDebugString("\n");
-    }
+    DebugEvent0(realm);
+    DebugEvent0(pname);
 
     code = pkrb5_parse_name(ctx, pname, &principal);
     if ( code ) goto cleanup;
 
+    DebugEvent0("parsed name");
     code = KFW_get_ccache(ctx, principal, &cc);
     if ( code ) goto cleanup;
 
+    DebugEvent0("got ccache");
     if ( lifetime == 0 )
         lifetime = pLeash_get_default_lifetime();
 
-    if ( password && password[0] ) {
+    if ( password[0] ) {
         code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
                           pname, 
                           password,
@@ -744,17 +740,15 @@ KFW_get_cred( char * username,
                           pLeash_get_default_renewable() ? pLeash_get_default_renew_till() : 0,
                           pLeash_get_default_noaddresses(),
                           pLeash_get_default_publicip());
-        if ( IsDebuggerPresent() ) {
-            char message[256];
-            sprintf(message,"KFW_kinit() returns: %d\n",code);
-            OutputDebugString(message);
-        }
+	DebugEvent0("kinit returned");
         if ( code ) goto cleanup;
     }
 
   cleanup:
     if ( pname )
         free(pname);
+    if ( realm )
+	pkrb5_free_default_realm(ctx, realm);
     if ( cc )
         pkrb5_cc_close(ctx, cc);
 
@@ -784,8 +778,11 @@ KFW_copy_cache_to_system_file(char * user, char * szLogonId)
         GetWindowsDirectory(filename, sizeof(filename));
     }
 
-    if ( strlen(filename) + strlen(szLogonId) + 2 > sizeof(filename) )
+    DebugEvent0(filename);
+    if ( strlen(filename) + strlen(szLogonId) + 2 > sizeof(filename) ) {
+	DebugEvent0("filename buffer too small");
         return;
+    }
 
     strcat(filename, "\\");
     strcat(filename, szLogonId);    
@@ -795,7 +792,7 @@ KFW_copy_cache_to_system_file(char * user, char * szLogonId)
     DeleteFile(filename);
 
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) goto cleanup;
 
     code = pkrb5_parse_name(ctx, user, &princ);
     if (code) goto cleanup;
@@ -901,12 +898,6 @@ KFW_destroy_tickets_for_principal(char * user)
 
     if (!pkrb5_init_context)
         return 0;
-
-    if ( IsDebuggerPresent() ) {
-        OutputDebugString("KFW_destroy_tickets_for_user: ");
-        OutputDebugString(user);
-        OutputDebugString("\n");
-    }
 
     code = pkrb5_init_context(&ctx);
     if (code) ctx = 0;
