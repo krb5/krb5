@@ -436,16 +436,25 @@ UINT KillRunningProcessesSlave( MSIHANDLE hInstall, BOOL bKill )
                     // try to kill the process
                     HANDLE hProcess = NULL;
 
+                    // If we encounter an error, instead of bailing
+                    // out, we continue on to the next process.  We
+                    // may not have permission to kill all the
+                    // processes we want to kill anyway.  If there are
+                    // any files that we want to replace that is in
+                    // use, Windows Installer will schedule a reboot.
+                    // Also, it's not like we have an exhaustive list
+                    // of all the programs that use Kerberos anyway.
+
                     hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe.th32ProcessID);
                     if(hProcess == NULL) {
                         rv = GetLastError();
-                        goto _cleanup;
+                        break;
                     }
 
                     if(!TerminateProcess(hProcess, 0)) {
                         rv = GetLastError();
                         CloseHandle(hProcess);
-                        goto _cleanup;
+                        break;
                     }
 
                     CloseHandle(hProcess);

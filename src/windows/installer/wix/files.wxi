@@ -27,9 +27,8 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
 <Directory Id="TARGETDIR" Name="SourceDir">
     <Directory Id="SystemFolder" SourceName="System">
-        <Component Id="cmf_kfwlogon_DLL" Guid="F9094A4C-A0CF-4E24-940D-150ABC27F80F">
+        <Component Id="cmf_kfwlogon_DLL" Guid="2F104FEB-2D61-458A-BAE3-B153F151E728">
              <File Id="filekfwlogon_DLL" Name="kfwlogon.dll" LongName="kfwlogon.dll" KeyPath="yes" DiskId="1" src="$(var.BinDir)kfwlogon.dll" />
-             <File Id="filekfwcpcc_EXE"  Name="kfwcpcc.exe"  LongName="kfwcpcc.exe"  DiskId="1" src="$(var.BinDir)kfwcpcc.exe" />
              <Registry Id="reg_kfwlogon01" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Action="createKeyAndRemoveKeyOnUninstall" />
              <Registry Id="reg_kfwlogon02" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" />
              <Registry Id="reg_kfwlogon03" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Name="Asynchronous" Type="integer" Value="0" />
@@ -43,6 +42,9 @@
              <Registry Id="reg_kfwlogon11" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="ProviderPath" Type="expandable" Value="[SystemFolder]kfwlogon.dll"/>
              <Registry Id="reg_kfwlogon12" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Class" Type="integer" Value="2" />
              <Registry Id="reg_kfwlogon13" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Name" Type="string" Value="MIT Kerberos"/>
+         </Component>
+         <Component Id="cmf_kfwcpcc_EXE" Guid="C3284E7A-3665-45A6-B64E-C909B1D1BAA6">
+             <File Id="filekfwcpcc_EXE"  Name="kfwcpcc.exe"  LongName="kfwcpcc.exe"  DiskId="1" src="$(var.BinDir)kfwcpcc.exe" />
          </Component>
      <?ifdef DebugSyms?>
          <Component Id="cmp_ClientSystemDebug" Guid="2D13ED48-53C2-4878-B196-2AD7F4100998">
@@ -178,12 +180,16 @@
                     <Component Id="cmf_krbv4w32_dll" Guid="DFA23F6C-5297-4876-AF52-6F7CF2CB34AC" DiskId="1">
 	                    <File Id="fil_krbv4w32_dll" LongName="krbv4w32.dll" Name="krbv4w32.dll" KeyPath="yes" />
                     </Component>
+
                     <Component Id="cmf_leash32_exe" Guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7" DiskId="1">
-	                    <File Id="fil_leash32_exe" LongName="leash32.exe" Name="leash32.exe" KeyPath="yes">
-			        <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" />
-	                    </File>
+	                    <File Id="fil_leash32_exe" LongName="leash32.exe" Name="leash32.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
+                    </Component>
+
+                    <Component Id="csc_leash32_exe" Guid="8A096700-47B1-4A0B-B7B5-44F75086DEAE" DiskId="1">
+                        <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
+                        <Condition>USELEASH</Condition>
                     </Component>
 
                     <!-- Leash32 configuration -->
@@ -213,10 +219,18 @@
 	                    <Condition>LEASHMSLSAIMPORT</Condition>
                     </Component>
                     
-                    <Component Id="csc_leashStartup" Guid="3408C97D-68D6-4207-9142-BF82F7C62DC0" DiskId="1">
-                        <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_leash32_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
+                    <Component Id="csc_NetIDMgrStartup" Guid="669227E3-0ADC-4173-90C3-631FCFC8EBC3" DiskId="1">
+                        <Registry Id="reg_sc_nidmgr_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="NetIDMgrAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]netidmgr.exe" Show="minimized" />
+                        <Condition>USENETIDMGR</Condition>
                     </Component>
+
+                    <Component Id="csc_LeashStartup" Guid="0DF73BCD-F34E-4B01-AA71-0EE08EB62F70" DiskId="1">
+                        <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Credentials Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
+                        <Condition>USELEASH</Condition>
+                    </Component>
+
                 <?ifdef OldHelp?>
                     <Component Id="cmf_leash32_hlp" Guid="919616D6-1605-4A79-8E33-C18A0D0F25E3" DiskId="1">
 	                    <File Id="fil_leash32_hlp" LongName="leash32.hlp" Name="leash32.hlp" KeyPath="yes" />
@@ -655,35 +669,36 @@
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_netidmgr" Name="netidmgr" src="$(var.IncDir)netidmgr\">
-						<Component Id="cmp_dirinc_netidmgr" Guid="EBD8BA04-574A-4081-A994-BCEC8ACBC878" DiskId="1">
-							<File Id="fil_hashtable_h" LongName="hashtable.h" Name="HASHTA~1.H" />
-							<File Id="fil_kconfig_h" LongName="kconfig.h" Name="kconfig.h" /> 
-							<File Id="fil_kcreddb_h" LongName="kcreddb.h" Name="kcreddb.h" /> 
-							<File Id="fil_khaction_h" LongName="khaction.h" Name="khaction.h" /> 
-							<File Id="fil_khactiondef_h" LongName="khactiondef.h" Name="KHACTI~1.H" /> 
-							<File Id="fil_khalerts_h" LongName="khalerts.h" Name="khalerts.h" /> 
-							<File Id="fil_khconfigui_h" LongName="khconfigui.h" Name="KHCONF~1.H" /> 
-							<File Id="fil_khdefs_h" LongName="khdefs.h" Name="khdefs.h" /> 
-							<File Id="fil_kherr_h" LongName="kherr.h" Name="kherr.h" /> 
-							<File Id="fil_kherror_h" LongName="kherror.h" Name="kherror.h" /> 
-							<File Id="fil_khhelp_h" LongName="khhelp.h" Name="khhelp.h" /> 
-							<File Id="fil_khhtlink_h" LongName="khhtlink.h" Name="khhtlink.h" /> 
-							<File Id="fil_khlist_h" LongName="khlist.h" Name="khlist.h" /> 
-							<File Id="fil_khmsgtypes_h" LongName="khmsgtypes.h" Name="KHMSGT~1.H" /> 
-							<File Id="fil_khnewcred_h" LongName="khnewcred.h" Name="KHNEWC~1.H" /> 
-							<File Id="fil_khprops_h" LongName="khprops.h" Name="khprops.h" /> 
-							<File Id="fil_khremote_h" LongName="khremote.h" Name="khremote.h" /> 
-							<File Id="fil_khrescache_h" LongName="khrescache.h" Name="KHRESC~1.H" /> 
-							<File Id="fil_khtracker_h" LongName="khtracker.h" Name="KHTRAC~1.H" />
-							<File Id="fil_khuidefs_h" LongName="khuidefs.h" Name="khuidefs.h" KeyPath="yes" />
-							<File Id="fil_kmm_h" LongName="kmm.h" Name="kmm.h" /> 
-							<File Id="fil_kmq_h" LongName="kmq.h" Name="kmq.h" /> 
-							<File Id="fil_kplugin_h" LongName="kplugin.h" Name="kplugin.h" /> 
-							<File Id="fil_mstring_h" LongName="mstring.h" Name="mstring.h" /> 
-							<File Id="fil_sync_h" LongName="sync.h" Name="sync.h" /> 
-							<File Id="fil_utils_h" LongName="utils.h" Name="utils.h" /> 
-							<File Id="fil_netidmgr_h" LongName="netidmgr.h" Name="netidmgr.h" /> 
-						</Component>
+                        <Component Id="cmp_dirinc_netidmgr" Guid="EBD8BA04-574A-4081-A994-BCEC8ACBC878" DiskId="1">
+                            <File Id="fil_hashtable_h" LongName="hashtable.h" Name="HASHTA~1.H" />
+                            <File Id="fil_kconfig_h" LongName="kconfig.h" Name="kconfig.h" /> 
+                            <File Id="fil_kcreddb_h" LongName="kcreddb.h" Name="kcreddb.h" /> 
+                            <File Id="fil_khaction_h" LongName="khaction.h" Name="khaction.h" /> 
+                            <File Id="fil_khactiondef_h" LongName="khactiondef.h" Name="KHACTI~1.H" /> 
+                            <File Id="fil_khalerts_h" LongName="khalerts.h" Name="khalerts.h" /> 
+                            <File Id="fil_khconfigui_h" LongName="khconfigui.h" Name="KHCONF~1.H" /> 
+                            <File Id="fil_khdefs_h" LongName="khdefs.h" Name="khdefs.h" /> 
+                            <File Id="fil_kherr_h" LongName="kherr.h" Name="kherr.h" /> 
+                            <File Id="fil_kherror_h" LongName="kherror.h" Name="kherror.h" /> 
+                            <File Id="fil_khhtlink_h" LongName="khhtlink.h" Name="khhtlink.h" /> 
+                            <File Id="fil_khlist_h" LongName="khlist.h" Name="khlist.h" /> 
+                            <File Id="fil_khmsgtypes_h" LongName="khmsgtypes.h" Name="KHMSGT~1.H" /> 
+                            <File Id="fil_khnewcred_h" LongName="khnewcred.h" Name="KHNEWC~1.H" /> 
+                            <File Id="fil_khprops_h" LongName="khprops.h" Name="khprops.h" /> 
+                            <File Id="fil_khremote_h" LongName="khremote.h" Name="khremote.h" /> 
+                            <File Id="fil_khrescache_h" LongName="khrescache.h" Name="KHRESC~1.H" /> 
+                            <File Id="fil_khtracker_h" LongName="khtracker.h" Name="KHTRAC~1.H" />
+                            <File Id="fil_khuidefs_h" LongName="khuidefs.h" Name="khuidefs.h" KeyPath="yes" />
+                            <File Id="fil_kmm_h" LongName="kmm.h" Name="kmm.h" />
+                            <File Id="fil_kmq_h" LongName="kmq.h" Name="kmq.h" />
+                            <File Id="fil_kplugin_h" LongName="kplugin.h" Name="kplugin.h" />
+                            <File Id="fil_mstring_h" LongName="mstring.h" Name="mstring.h" />
+                            <File Id="fil_sync_h" LongName="sync.h" Name="sync.h" />
+                            <File Id="fil_utils_h" LongName="utils.h" Name="utils.h" />
+                            <File Id="fil_perfstat_h" LongName="perfstat.h" Name="perfstat.h" />
+                            <File Id="fil_netidmgr_h" LongName="netidmgr.h" Name="netidmgr.h" /> 
+                            <File Id="fil_netidmgr_version_h" LongName="netidmgr_version.h" Name="netidmvr.h" />
+                        </Component>
                     </Directory>
                     <Directory Id="dirinc_wshelper" Name="wshelper" src="$(var.IncDir)wshelper\">
                         <Component Id="cmp_dirinc_wshelper" Guid="5A4FCD76-6DC6-455c-B465-FD8123252EBD" DiskId="1">
@@ -716,6 +731,7 @@
                             <File Id="fil_loadfuncs_lib" LongName="loadfuncs.lib" Name="LOADFU~1.LIB" />
                             <File Id="fil_wshelp32_lib" LongName="wshelp32.lib" Name="wshelp32.lib" />
                             <File Id="fil_xpprof32_lib" LongName="xpprof32.lib" Name="xpprof32.lib" />
+                            <File Id="fil_nidmgr32_lib" LongName="nidmgr32.lib" Name="nidmgr32.lib" />
                         </Component>
                     </Directory>
                 </Directory>
@@ -775,12 +791,12 @@
                     </Directory>
                 </Directory>
                 
-                
                 <Directory Id="dirdoc" Name="doc" src="$(var.DocDir)">
                     <Component Id="efl_leash_userdoc_pdf" Guid="68FB24DD-5EC2-4db1-AD42-5B9DDEC247C5" DiskId="1">
                         <File Id="fil_leash_userdoc_pdf" LongName="leash_userdoc.pdf" Name="leash.pdf" KeyPath="yes">
 			    <Shortcut Id="sc_leash_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Leash User Documentation.lnk" Name="leashdoc.lnk" />
                         </File>
+                        <Condition>USELEASH</Condition>
                     </Component>
                     <Component Id="efl_relnotes_html" Guid="C65F920A-039D-4839-848F-0AD7B445F376" DiskId="1">
                         <File Id="fil_relnotes_html" LongName="relnotes.html" Name="RELNOT~1.HTM" KeyPath="yes">

@@ -58,8 +58,10 @@
         
         <!-- Launch conditions -->
         <Condition Message="$(loc.AdminRequired)">Privileged</Condition>
-        <Condition Message="$(loc.OsVersionRequired)">Version9X &gt;= 410 Or VersionNT &gt;= 400</Condition>
-        
+        <Condition Message="$(loc.OsVersionRequired)">VersionNT &gt;= 500</Condition>
+        <Condition Message="$(loc.CMNotSelected)">USELEASH Or USENETIDMGR</Condition>
+        <Condition Message="$(loc.CMDupSelected)">Not (USELEASH And USENETIDMGR)</Condition>
+
         <!-- Custom actions -->
         <Binary Id="binCustom" src="custom\custom.dll" />
         
@@ -165,7 +167,7 @@
         
         <!-- KfW MSI -->
         <Upgrade Id="61211594-AAA1-4A98-A299-757326763CC7">
-            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="no" MigrateFeatures="yes" Property="UPGRADEKFW" />
+            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW" />
         </Upgrade>
        
         <!-- NSIS installation -->
@@ -193,6 +195,11 @@
                 <Data Column="Desc">Leash Ticket Manager</Data>
             </Row>
             <Row>
+                <Data Column="Id">kpNetIDMgr</Data>
+                <Data Column="Image">netidmgr.exe</Data>
+                <Data Column="Desc">Network Identity Manager</Data>
+            </Row>
+            <Row>
                 <Data Column="Id">kpKrbcc</Data>
                 <Data Column="Image">krbcc32s.exe</Data>
                 <Data Column="Desc">Kerberos Credential Cache</Data>
@@ -200,12 +207,12 @@
             <Row>
                 <Data Column="Id">kpK95</Data>
                 <Data Column="Image">k95.exe</Data>
-                <Data Column="Desc"></Data>
+                <Data Column="Desc">Kermit 95</Data>
             </Row>
             <Row>
                 <Data Column="Id">kpK95g</Data>
                 <Data Column="Image">k95g.exe</Data>
-                <Data Column="Desc"></Data>
+                <Data Column="Desc">Kermit 95 GUI</Data>
             </Row>
             <Row>
                 <Data Column="Id">kpkrb5</Data>
