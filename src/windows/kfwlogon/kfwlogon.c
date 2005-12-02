@@ -147,8 +147,11 @@ DWORD APIENTRY NPLogonNotify(
     if ( wcscmp(lpAuthentInfoType,L"MSV1_0:Interactive") && 
          wcscmp(lpAuthentInfoType,L"Kerberos:Interactive") )
     {
-        DebugEvent("Unsupported Authentication Info Type: %S",
-                   lpAuthentInfoType);
+	char msg[64];
+	WideCharToMultiByte(CP_ACP, 0, lpAuthentInfoType, 0, 
+			    msg, sizeof(msg), NULL, NULL);
+	msg[sizeof(msg)-1]='\0';
+        DebugEvent("NPLogonNotify - Unsupported Authentication Info Type: %s", msg);
         return 0;
     }
 
@@ -164,7 +167,7 @@ DWORD APIENTRY NPLogonNotify(
     UnicodeStringToANSI(IL->Password, password, MAX_PASSWORD_LENGTH);
     UnicodeStringToANSI(IL->LogonDomainName, logonDomain, MAX_DOMAIN_LENGTH);
 
-    /* Make sure AD-DOMANS sent from login that is sent to us is stripped */
+    /* Make sure AD-DOMAINS sent from login that is sent to us is stripped */
     ctemp = strchr(uname, '@');
     if (ctemp) *ctemp = 0;
 
@@ -177,13 +180,15 @@ DWORD APIENTRY NPLogonNotify(
     }
 
     code = KFW_get_cred(uname, password, 0, &reason);
-    DebugEvent("KFW_get_cred  uname=[%s] code=[%d]",uname, code);
+    DebugEvent("NPLogonNotify - KFW_get_cred  uname=[%s] code=[%d]",uname, code);
     
     /* remove any kerberos 5 tickets currently held by the SYSTEM account
      * for this user 
      */
-    sprintf(szLogonId,"kfwlogon-%d.%d",lpLogonId->HighPart, lpLogonId->LowPart);
-    KFW_copy_cache_to_system_file(uname, szLogonId);
+    if (!code) {
+	sprintf(szLogonId,"kfwlogon-%d.%d",lpLogonId->HighPart, lpLogonId->LowPart);
+	KFW_copy_cache_to_system_file(uname, szLogonId);
+    }
 
     KFW_destroy_tickets_for_principal(uname);
 
@@ -201,6 +206,11 @@ DWORD APIENTRY NPLogonNotify(
         DeregisterEventSource(h);
         SetLastError(code);
     }
+
+    if (code)
+	DebugEvent0("NPLogonNotify failure");
+    else
+	DebugEvent0("NPLogonNotify success");
 
     return code;
 }       
