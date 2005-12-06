@@ -386,20 +386,11 @@ Section "KfW Client" secClient
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Uninstall ${PROGRAM_NAME}.lnk" "$INSTDIR\Uninstall.exe"
 
   ReadINIStr $R0 $1 "Field 2" "State"  ; startup
-  ReadINIStr $R1 $1 "Field 3" "State"  ; autoinit
 
-  StrCmp $R1 "0" noauto
-  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "--autoinit" "$INSTDIR\bin\netidmgr.exe" 
-  goto startshort
-noauto:
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "" "$INSTDIR\bin\netidmgr.exe" 
 
 startshort:
   StrCmp $R0 "0" nostart
-  StrCmp $R1 "0" nostartauto
-  CreateShortCut  "$SMSTARTUP\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "--autoinit" "$INSTDIR\bin\netidmgr.exe" 0 SW_SHOWMINIMIZED
-  goto checkconflicts
-nostartauto:  
   CreateShortCut  "$SMSTARTUP\Network Identity Manager.lnk" "$INSTDIR\bin\netidmgr.exe" "" "$INSTDIR\bin\netidmgr.exe" 0 SW_SHOWMINIMIZED
   goto checkconflicts
 
@@ -539,6 +530,9 @@ Section "KfW SDK" secSDK
   RMDir /r "$INSTDIR\lib"
   RMDir /r "$INSTDIR\install"
 
+  SetOutPath "$INSTDIR\doc"
+  File /r "${KFW_DOC_DIR}\netiddev.chm"
+
   SetOutPath "$INSTDIR\inc\kclient"
   File /r "${KFW_INC_DIR}\kclient\*"  
 
@@ -568,6 +562,8 @@ Section "KfW SDK" secSDK
 
   SetOutPath "$INSTDIR\install"
   File /r "${KFW_INSTALL_DIR}\*"
+
+  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Developer Documentation.lnk" "$INSTDIR\bin\netiddev.chm" 
 
   Call KFWCommon.Install
   
@@ -603,7 +599,7 @@ Section "KfW Documentation" secDocs
 
   SetOutPath "$INSTDIR\doc"
   File "${KFW_DOC_DIR}\relnotes.html"
-;  File "${KFW_DOC_DIR}\leash_userdoc.pdf"
+  File "${KFW_DOC_DIR}\netidmgr_userdoc.pdf"
    
   Call KFWCommon.Install
   
@@ -633,7 +629,7 @@ Section "KfW Documentation" secDocs
   CreateDirectory "$SMPROGRAMS\${PROGRAM_NAME}"
   SetOutPath "$INSTDIR\doc"
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Release Notes.lnk" "$INSTDIR\doc\relnotes.html" 
-;  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk" "$INSTDIR\doc\netidmgr_userdoc.pdf" 
+  CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk" "$INSTDIR\doc\netidmgr_userdoc.pdf" 
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager Documentation.lnk" "$INSTDIR\bin\netidmgr.chm" 
 SectionEnd
 
@@ -1125,8 +1121,9 @@ StartRemove:
   
   ; Delete documentation
   Delete "$INSTDIR\doc\relnotes.html"
-;  Delete "$INSTDIR\doc\leash_userdoc.pdf"
-
+  Delete "$INSTDIR\doc\netidmgr_userdoc.pdf"
+  Delete "$INSTDIR\doc\netiddev.chm"
+ 
 !ifdef AKLOG
    Delete /REBOOTOK "$INSTDIR\bin\aklog.exe"
 !endif
@@ -1297,6 +1294,7 @@ StartRemove:
   Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager.lnk"
   Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Release Notes.lnk"
   Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Manager User Documentation.lnk"
+  Delete  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Developer Documentation.lnk"
   RmDir   "$SMPROGRAMS\${PROGRAM_NAME}"
   Delete  "$SMSTARTUP\Network Identity Manager.lnk"
 
