@@ -188,7 +188,7 @@
                     </Component>
 
                     <Component Id="csc_leash32_exe" Guid="8A096700-47B1-4A0B-B7B5-44F75086DEAE" DiskId="1">
-                        <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
+                        <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash32.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
                         <Condition>USELEASH</Condition>
                     </Component>
 
@@ -221,13 +221,13 @@
                     
                     <Component Id="csc_NetIDMgrStartup" Guid="669227E3-0ADC-4173-90C3-631FCFC8EBC3" DiskId="1">
                         <Registry Id="reg_sc_nidmgr_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="NetIDMgrAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]netidmgr.exe" Show="minimized" />
+                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="" Target="[dirbin]netidmgr.exe" Show="minimized" />
                         <Condition>USENETIDMGR</Condition>
                     </Component>
 
                     <Component Id="csc_LeashStartup" Guid="0DF73BCD-F34E-4B01-AA71-0EE08EB62F70" DiskId="1">
                         <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Credentials Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
+                        <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Credentials Manager.lnk" Name="leash32.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
                         <Condition>USELEASH</Condition>
                     </Component>
 
@@ -354,13 +354,13 @@
 			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_ts_netidmgr_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
-                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
+                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
                         <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
                     </Component>
                     <!-- /NetIDMgr -->
                     
                     <!-- Debug symbols -->
-                <?ifdef Debug?>
+                <?ifdef DebugSyms?>
                     <Component Id="cmf_bin_debug" Guid="C8468854-8261-4781-8119-A612636841E3" DiskId="1">
 	                    <File Id="fil_aklog_pdb" LongName="aklog.pdb" Name="aklog.pdb" />
 	                    <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
@@ -797,6 +797,18 @@
 			    <Shortcut Id="sc_leash_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Leash User Documentation.lnk" Name="leashdoc.lnk" />
                         </File>
                         <Condition>USELEASH</Condition>
+                    </Component>
+                    <Component Id="efl_netidmgr_userdoc_pdf" Guid="7F5A91C1-C6D3-4F64-A6AC-C0AF337B4ED6" DiskId="1">
+                        <File Id="fil_netidmgr_userdoc_pdf" LongName="netidmgr_userdoc.pdf" Name="netidmgr.pdf" KeyPath="yes">
+			    <Shortcut Id="sc_netidmgr_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager User Documentation.lnk" Name="netiddoc.lnk" />
+                        </File>
+                        <Condition>USENETIDMGR</Condition>
+                    </Component>
+                    <Component Id="cmp_dirdoc_netid" Guid="D501BAF7-7E63-4864-AFED-1528D1C59B1B" DiskId="1">
+                        <File Id="fil_netidmgr_devdoc_chm" Name="netiddev.chm" KeyPath="yes">
+			    <Shortcut Id="sc_netidmgr_devdoc_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Developer Documentation.lnk" Name="netiddev.lnk" />
+                        </File>
+                        <Condition>USENETIDMGR</Condition>
                     </Component>
                     <Component Id="efl_relnotes_html" Guid="C65F920A-039D-4839-848F-0AD7B445F376" DiskId="1">
                         <File Id="fil_relnotes_html" LongName="relnotes.html" Name="RELNOT~1.HTM" KeyPath="yes">

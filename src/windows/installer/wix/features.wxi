@@ -235,6 +235,7 @@
             Level="130" 
             Title="$(loc.KerberosSDKTitle)">
             
+            <ComponentRef Id="cmp_dirdoc_netid" />
             <ComponentRef Id="cmp_dirinc_kclient" />
             <ComponentRef Id="cmp_dirinc_krb4" />
             <ComponentRef Id="cmp_dirinc_krb5_gssapi" />
@@ -265,6 +266,7 @@
             Title="$(loc.KerberosDocTitle)">
 
             <ComponentRef Id="efl_leash_userdoc_pdf" />
+            <ComponentRef Id="efl_netidmgr_userdoc_pdf" />
             <ComponentRef Id="efl_relnotes_html" />
             
             <ComponentRef Id="rcm_common" />
