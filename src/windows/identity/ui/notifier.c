@@ -57,6 +57,8 @@ khui_alert * alert_queue[KHUI_ALERT_QUEUE_MAX];
 khm_int32    alert_queue_head = 0;
 khm_int32    alert_queue_tail = 0;
 
+int  iid_normal = IDI_NOTIFY_NONE;
+
 #define is_alert_queue_empty() (alert_queue_head == alert_queue_tail)
 #define is_alert_queue_full()  (((alert_queue_tail + 1) % KHUI_ALERT_QUEUE_MAX) == alert_queue_head)
 
@@ -227,8 +229,8 @@ notifier_wnd_proc(HWND hwnd,
 
         case WM_LBUTTONUP:
             /* fall through */
-
         case NIN_SELECT:
+            /* fall through */
         case NIN_KEYSELECT:
             khm_show_main_window();
             break;
@@ -1025,7 +1027,7 @@ void khm_notify_icon_add(void) {
     ni.hWnd = hwnd_notifier;
     ni.uID = KHUI_NOTIFY_ICON_ID;
     ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-    ni.hIcon = LoadIcon(khm_hInstance, MAKEINTRESOURCE(IDI_NOTIFY_NONE));
+    ni.hIcon = LoadIcon(khm_hInstance, MAKEINTRESOURCE(iid_normal));
     ni.uCallbackMessage = KHUI_WM_NOTIFIER;
     LoadString(khm_hInstance, IDS_NOTIFY_PREFIX, buf, ARRAYLENGTH(buf));
     StringCbCopy(ni.szTip, sizeof(ni.szTip), buf);
@@ -1066,7 +1068,7 @@ khm_notify_icon_balloon(khm_int32 severity,
         iid = IDI_NOTIFY_ERROR;
     } else {
         ni.dwInfoFlags = NIIF_NONE;
-        iid = IDI_NOTIFY_NONE;
+        iid = iid_normal;
     }
 
     ni.hWnd = hwnd_notifier;
@@ -1098,6 +1100,27 @@ khm_notify_icon_balloon(khm_int32 severity,
     DestroyIcon(ni.hIcon);
 }
 
+void khm_notify_icon_expstate(enum khm_notif_expstate expseverity) {
+    int new_iid;
+
+    if (expseverity == KHM_NOTIF_OK)
+        new_iid = IDI_APPICON_OK;
+    else if (expseverity == KHM_NOTIF_WARN)
+        new_iid = IDI_APPICON_WARN;
+    else if (expseverity == KHM_NOTIF_EXP)
+        new_iid = IDI_APPICON_EXP;
+    else
+        new_iid = IDI_NOTIFY_NONE;
+
+    if (iid_normal == new_iid)
+        return;
+
+    iid_normal = new_iid;
+
+    if (current_alert == NULL)
+        khm_notify_icon_change(KHERR_NONE);
+}
+
 void khm_notify_icon_change(khm_int32 severity) {
     NOTIFYICONDATA ni;
     wchar_t buf[256];
@@ -1110,7 +1133,7 @@ void khm_notify_icon_change(khm_int32 severity) {
     else if (severity == KHERR_ERROR)
         iid = IDI_NOTIFY_ERROR;
     else
-        iid = IDI_NOTIFY_NONE;
+        iid = iid_normal;
 
     ZeroMemory(&ni, sizeof(ni));
 

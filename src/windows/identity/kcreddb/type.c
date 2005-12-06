@@ -318,14 +318,17 @@ khm_int32 KHMAPI kcdb_type_date_dup(
 /* returns the number of milliseconds that must elapse away from the
    interval specified in pft for the representation of pft to change
    from whatever it is right now */
-KHMEXP long KHMAPI FtIntervalMsToRepChange(LPFILETIME pft)
+KHMEXP long KHMAPI 
+FtIntervalMsToRepChange(LPFILETIME pft)
 {
     __int64 ms,s,m,h,d;
+    __int64 ift;
     long l;
 
-    ms = *((__int64 *) pft) / 10000i64;
+    ift = FtToInt(pft);
+    ms = ift / 10000i64;
     
-    if(ms < 0 || *((__int64 *) pft) == _I64_MAX)
+    if(ms < 0 || ift == _I64_MAX)
         return -1;
 
     s = ms / 1000i64;
@@ -333,36 +336,44 @@ KHMEXP long KHMAPI FtIntervalMsToRepChange(LPFILETIME pft)
     h = s / 3600;
     d = s / (3600*24);
 
-    if(d > 0) {
+    if (d > 0) {
         /* rep change at next hour change */
         l = (long) (ms % (3600*1000i64));
-    } else if(h > 0) {
+    } else if (h > 0) {
+        /* rep change at next minute change */
+        l = (long) (ms % (60*1000i64));
+    } else if (m > 5) {
         /* rep change at next minute change */
         l = (long) (ms % (60*1000i64));
     } else {
+        /* rep change at next second change */
         l = (long) (ms % 1000);
     }
 
     return l;
 }
 
-KHMEXP khm_int32 KHMAPI FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
+KHMEXP khm_int32 KHMAPI 
+FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
 {
     size_t cbsize;
     __int64 s,m,h,d;
+    __int64 ift;
     wchar_t ibuf[256];
     wchar_t fbuf[256];
     wchar_t * t;
 
     if(!cb_buf)
         return KHM_ERROR_INVALID_PARAM;
-    s = *((__int64 *) data) / 10000000i64;
+
+    ift = FtToInt(data);
+    s = ift / 10000000i64;
 
     m = s / 60;
     h = s / 3600;
     d = s / (3600*24);
 
-    if(*((__int64 *) data) == _I64_MAX) {
+    if(ift == _I64_MAX) {
         LoadString(hinst_kcreddb, IDS_IVL_UNKNOWN, ibuf, sizeof(ibuf)/sizeof(wchar_t));
     } else if(s < 0) {
         LoadString(hinst_kcreddb, IDS_IVL_EXPIRED, ibuf, sizeof(ibuf)/sizeof(wchar_t));
@@ -385,16 +396,21 @@ KHMEXP khm_int32 KHMAPI FtIntervalToString(LPFILETIME data, wchar_t * buffer, kh
                 StringCbPrintf(t, sizeof(ibuf) - wcslen(ibuf)*sizeof(wchar_t), fbuf, h);
             }
         }
-    } else if(h > 0) {
+    } else if(h > 0 || m > 5) {
         m = (s - (h * 3600)) / 60;
         if(h == 1) {
             LoadString(hinst_kcreddb, IDS_IVL_1H, ibuf, ARRAYLENGTH(ibuf));
-        } else {
+        } else if (h > 1) {
             LoadString(hinst_kcreddb, IDS_IVL_H, fbuf, ARRAYLENGTH(fbuf));
             StringCbPrintf(ibuf, sizeof(ibuf), fbuf, h);
+        } else {
+            *ibuf = L'\0';
         }
-        if(m > 0) {
-            StringCbCat(ibuf, sizeof(ibuf), L" ");
+
+        if(m > 0 || h == 0) {
+            if (h >= 1)
+                StringCbCat(ibuf, sizeof(ibuf), L" ");
+
             t = ibuf + wcslen(ibuf);
             if(m == 1)
             {
@@ -446,12 +462,12 @@ KHMEXP khm_int32 KHMAPI FtIntervalToString(LPFILETIME data, wchar_t * buffer, kh
     return KHM_ERROR_SUCCESS;
 }
 
-khm_int32 KHMAPI kcdb_type_interval_toString(
-    const void * data, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
-    khm_int32 flags)
+khm_int32 KHMAPI 
+kcdb_type_interval_toString(const void * data, 
+                            khm_size cbd, 
+                            wchar_t * buffer, 
+                            khm_size * cb_buf, 
+                            khm_int32 flags)
 {
     return FtIntervalToString((LPFILETIME) data, buffer, cb_buf);
 }
@@ -471,8 +487,8 @@ khm_int32 KHMAPI kcdb_type_interval_comp(
 {
     __int64 i1, i2;
 
-    i1 = *((__int64 *) d1);
-    i2 = *((__int64 *) d2);
+    i1 = FtToInt((FILETIME *) d1);
+    i2 = FtToInt((FILETIME *) d2);
 
     if(i1 < i2)
         return -1;
@@ -488,12 +504,12 @@ khm_int32 KHMAPI kcdb_type_interval_dup(
     void * d_dst,
     khm_size * cbd_dst)
 {
-    if(d_dst && *cbd_dst >= sizeof(__int64)) {
-        *cbd_dst = sizeof(__int64);
-        *((__int64 *) d_dst) = *((__int64 *) d_src);
+    if(d_dst && *cbd_dst >= sizeof(FILETIME)) {
+        *cbd_dst = sizeof(FILETIME);
+        *((FILETIME *) d_dst) = *((FILETIME *) d_src);
         return KHM_ERROR_SUCCESS;
     } else {
-        *cbd_dst = sizeof(__int64);
+        *cbd_dst = sizeof(FILETIME);
         return KHM_ERROR_TOO_LONG;
     }
 }
@@ -759,8 +775,8 @@ void kcdb_type_init(void)
     type.toString = kcdb_type_interval_toString;
     type.name = KCDB_TYPENAME_INTERVAL;
     type.id = KCDB_TYPE_INTERVAL;
-    type.cb_max = sizeof(__int64);
-    type.cb_min = sizeof(__int64);
+    type.cb_max = sizeof(FILETIME);
+    type.cb_min = sizeof(FILETIME);
     type.flags = KCDB_TYPE_FLAG_CB_FIXED;
 
     kcdb_type_register(&type, NULL);
@@ -1088,39 +1104,92 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_next_free(khm_int32 * id)
 
 KHMEXP void KHMAPI TimetToFileTime( time_t t, LPFILETIME pft )
 {
-    LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000i64;
+    LONGLONG ll;
+
+    if ( sizeof(time_t) == 4 )
+	ll = Int32x32To64(t, 10000000) + 116444736000000000i64;
+    else {
+	ll = t * 10000000i64 + 116444736000000000i64;
+    }
     pft->dwLowDateTime = (DWORD) ll;
     pft->dwHighDateTime = (DWORD) (ll >> 32);
 }
 
 KHMEXP void KHMAPI TimetToFileTimeInterval(time_t t, LPFILETIME pft)
 {
-    LONGLONG ll = Int32x32To64(t, 10000000);
+    LONGLONG ll;
+    
+    if ( sizeof(time_t) == 4 )
+	ll = Int32x32To64(t, 10000000);
+    else {
+	ll = t * 10000000i64;
+    }
     pft->dwLowDateTime = (DWORD) ll;
     pft->dwHighDateTime = (DWORD) (ll >> 32);
 }
 
 KHMEXP long KHMAPI FtIntervalToSeconds(LPFILETIME pft)
 {
-    __int64 i = *((__int64 *) pft);
+    __int64 i = FtToInt(pft);
     return (long) (i / 10000000i64);
 }
 
 KHMEXP long KHMAPI FtIntervalToMilliseconds(LPFILETIME pft)
 {
-    __int64 i = *((__int64 *) pft);
+    __int64 i = FtToInt(pft);
     return (long) (i / 10000i64);
 }
 
-KHMEXP long KHMAPI FtCompare(LPFILETIME pft1, LPFILETIME pft2) {
-    __int64 i1 = *((__int64 *) pft1);
-    __int64 i2 = *((__int64 *) pft2);
+KHMEXP khm_int64 KHMAPI FtToInt(LPFILETIME pft) {
+    LARGE_INTEGER ll;
+    ll.LowPart = pft->dwLowDateTime;
+    ll.HighPart = pft->dwHighDateTime;
+    return ll.QuadPart;
+}
 
-    if (i1 < i2)
-        return -1;
-    if (i1 == i2)
-        return 0;
-    return 1;
+KHMEXP FILETIME KHMAPI IntToFt(khm_int64 i) {
+    LARGE_INTEGER ll;
+    FILETIME ft;
+
+    ll.QuadPart = i;
+    ft.dwLowDateTime = ll.LowPart;
+    ft.dwHighDateTime = ll.HighPart;
+
+    return ft;
+}
+
+KHMEXP FILETIME KHMAPI FtSub(LPFILETIME ft1, LPFILETIME ft2) {
+    FILETIME d;
+    LARGE_INTEGER l1, l2;
+
+    l1.LowPart = ft1->dwLowDateTime;
+    l1.HighPart = ft1->dwHighDateTime;
+    l2.LowPart = ft2->dwLowDateTime;
+    l2.HighPart = ft2->dwHighDateTime;
+
+    l1.QuadPart -= l2.QuadPart;
+
+    d.dwLowDateTime = l1.LowPart;
+    d.dwHighDateTime = l1.HighPart;
+
+    return d;
+}
+
+KHMEXP FILETIME KHMAPI FtAdd(LPFILETIME ft1, LPFILETIME ft2) {
+    FILETIME d;
+    LARGE_INTEGER l1, l2;
+
+    l1.LowPart = ft1->dwLowDateTime;
+    l1.HighPart = ft1->dwHighDateTime;
+    l2.LowPart = ft2->dwLowDateTime;
+    l2.HighPart = ft2->dwHighDateTime;
+
+    l1.QuadPart += l2.QuadPart;
+
+    d.dwLowDateTime = l1.LowPart;
+    d.dwHighDateTime = l1.HighPart;
+
+    return d;
 }
 
 KHMEXP int KHMAPI AnsiStrToUnicode( wchar_t * wstr, size_t cbwstr, const char * astr)
@@ -1222,10 +1291,9 @@ KHMEXP khm_int32 KHMAPI IntervalStringToFt(FILETIME * pft, wchar_t * str)
 {
     size_t cb;
     wchar_t * b;
-    __int64 *pr, t;
+    __int64 t;
 
-    pr = (__int64 *) pft;
-    *pr = 0;
+    *pft = IntToFt(0);
 
     /* ideally we should synchronize this, but it doesn't hurt if two
        threads do this at the same time, because we only set the ivspecs_loaded
@@ -1289,7 +1357,7 @@ KHMEXP khm_int32 KHMAPI IntervalStringToFt(FILETIME * pft, wchar_t * str)
         b = e;
     }
 
-    *pr = t;
+    *pft = IntToFt(t);
 
     return KHM_ERROR_SUCCESS;
 }

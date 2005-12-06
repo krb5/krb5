@@ -78,6 +78,8 @@ typedef struct tag_k5_config_data {
 
     wchar_t       config_file[MAX_PATH]; /* path to configuration file */
     khm_boolean   create_config_file; /* create config_file if missing? */
+    khm_boolean   inc_realms;   /* include full realm list in new
+                                   credentials dialog? */
 
     /* [libdefaults] */
     khm_boolean   dns_lookup_kdc;
@@ -100,15 +102,16 @@ typedef struct tag_k5_config_data {
     khm_int32     flags;
 } k5_config_data;
 
-#define K5_CDFLAG_MOD_DEF_REALM      1
-#define K5_CDFLAG_MOD_CONF_FILE      2
-#define K5_CDFLAG_MOD_DNS_LOOKUP_KDC 4
-#define K5_CDFLAG_MOD_DNS_LOOKUP_RLM 8
-#define K5_CDFLAG_MOD_DNS_FALLBACK   0x10
-#define K5_CDFLAG_MOD_NOADDRESSES    0x20
-#define K5_CDFLAG_MOD_LSA_IMPORT     0x40
-#define K5_CDFLAG_MOD_CREATE_CONF    0x80
-#define K5_CDFLAG_MOD_REALMS         0x1000
+#define K5_CDFLAG_MOD_DEF_REALM      0x00000001
+#define K5_CDFLAG_MOD_CONF_FILE      0x00000002
+#define K5_CDFLAG_MOD_DNS_LOOKUP_KDC 0x00000004
+#define K5_CDFLAG_MOD_DNS_LOOKUP_RLM 0x00000008
+#define K5_CDFLAG_MOD_DNS_FALLBACK   0x00000010
+#define K5_CDFLAG_MOD_NOADDRESSES    0x00000020
+#define K5_CDFLAG_MOD_LSA_IMPORT     0x00000040
+#define K5_CDFLAG_MOD_CREATE_CONF    0x00000080
+#define K5_CDFLAG_MOD_INC_REALMS     0x00000100
+#define K5_CDFLAG_MOD_REALMS         0x00001000
 
 static const char *const conf_yes[] = {
     "y", "yes", "true", "t", "1", "on",
@@ -506,15 +509,22 @@ k5_read_config_data(k5_config_data * d) {
         pprofile_release(profile);
     }
 
-    /* last, read the MSLSA import setting */
     {
         khm_int32 t;
 
+        /* last, read the MSLSA import setting */
         if (KHM_SUCCEEDED(khc_read_int32(csp_params,
                                          L"MsLsaImport", &t))) {
             d->lsa_import = t;
         } else {
             d->lsa_import = K5_LSAIMPORT_ALWAYS;
+        }
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_params,
+                                         L"UseFullRealmList", &t))) {
+            d->inc_realms = !!t;
+        } else {
+            d->inc_realms = TRUE;
         }
     }
 
@@ -546,9 +556,11 @@ k5_write_config_data(k5_config_data * d) {
 
     /* write the MSLSA import setting */
     if (d->flags & K5_CDFLAG_MOD_LSA_IMPORT) {
-
         khc_write_int32(csp_params, L"MsLsaImport", d->lsa_import);
+    }
 
+    if (d->flags & K5_CDFLAG_MOD_INC_REALMS) {
+        khc_write_int32(csp_params, L"UseFullRealmList", d->inc_realms);
     }
 
     if (!(d->flags & 
@@ -912,6 +924,9 @@ k5_config_dlgproc(HWND hwnd,
 
             d->node_main = (khui_config_node) lParam;
 
+            CheckDlgButton(hwnd, IDC_CFG_INCREALMS,
+                           (d->inc_realms)? BST_CHECKED: BST_UNCHECKED);
+
             hw = GetDlgItem(hwnd, IDC_CFG_DEFREALM);
 #ifdef DEBUG
             assert(hw);
@@ -981,6 +996,21 @@ k5_config_dlgproc(HWND hwnd,
 
                 khui_cfg_set_flags(d->node_main,
                                    (modified)?KHUI_CNFLAG_MODIFIED:0,
+                                   KHUI_CNFLAG_MODIFIED);
+                return TRUE;
+            }
+
+            if (wParam == MAKEWPARAM(IDC_CFG_INCREALMS, BN_CLICKED)) {
+                if (IsDlgButtonChecked(hwnd, IDC_CFG_INCREALMS) ==
+                    BST_CHECKED) {
+                    d->inc_realms = TRUE;
+                } else {
+                    d->inc_realms = FALSE;
+                }
+                d->flags |= K5_CDFLAG_MOD_INC_REALMS;
+
+                khui_cfg_set_flags(d->node_main,
+                                   KHUI_CNFLAG_MODIFIED,
                                    KHUI_CNFLAG_MODIFIED);
                 return TRUE;
             }

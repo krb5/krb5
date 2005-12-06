@@ -32,6 +32,7 @@ static CRITICAL_SECTION cs_dialog;
 static HANDLE in_dialog_evt = NULL;
 static LONG init_dialog = 0;
 static khm_int32 dialog_result = 0;
+static wchar_t dialog_identity[KCDB_IDENT_MAXCCH_NAME];
 
 static void
 dialog_sync_init(void) {
@@ -76,7 +77,7 @@ khm_cred_begin_dialog(void) {
 }
 
 void 
-khm_cred_end_dialog(khm_int32 result) {
+khm_cred_end_dialog(khui_new_creds * nc) {
     dialog_sync_init();
 
     EnterCriticalSection(&cs_dialog);
@@ -84,7 +85,20 @@ khm_cred_end_dialog(khm_int32 result) {
         in_dialog = FALSE;
         SetEvent(in_dialog_evt);
     }
-    dialog_result = result;
+    dialog_result = nc->result;
+    if (nc->subtype == KMSG_CRED_NEW_CREDS &&
+        nc->n_identities > 0 &&
+        nc->identities[0]) {
+        khm_size cb;
+
+        cb = sizeof(dialog_identity);
+        if (KHM_FAILED(kcdb_identity_get_name(nc->identities[0],
+                                              dialog_identity,
+                                              &cb)))
+            dialog_identity[0] = 0;
+    } else {
+        dialog_identity[0] = 0;
+    }
     LeaveCriticalSection(&cs_dialog);
 }
 
@@ -102,7 +116,8 @@ khm_cred_is_in_dialog(void) {
 }
 
 khm_int32
-khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result) {
+khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
+                         wchar_t * ident, khm_size cb_ident) {
     khm_int32 rv;
 
     dialog_sync_init();
@@ -122,8 +137,12 @@ khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result) {
 
             if (!in_dialog) {
                 rv = KHM_ERROR_SUCCESS;
-                if (result)
+                if (result) {
                     *result = dialog_result;
+                }
+                if (ident) {
+                    StringCbCopy(ident, cb_ident, dialog_identity);
+                }
                 break;
             } else if(dw == WAIT_TIMEOUT) {
                 rv = KHM_ERROR_TIMEOUT;
@@ -289,14 +308,14 @@ kmsg_cred_completion(kmq_message *m)
                     khui_context_reset();
                 */
 
-                khm_cred_end_dialog(nc->result);
+                khm_cred_end_dialog(nc);
             }
 
             khui_cw_destroy_cred_blob(nc);
 
             kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
 
-            khm_cred_process_commandline();
+            kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
         }
         break;
 
@@ -323,11 +342,11 @@ kmsg_cred_completion(kmq_message *m)
 
         kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
 
-        khm_cred_process_commandline();
+        kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
         break;
 
     case KMSG_CRED_IMPORT:
-        khm_cred_process_commandline();
+        kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
         break;
 
     case KMSG_CRED_REFRESH:
@@ -573,8 +592,9 @@ void khm_cred_obtain_new_creds(wchar_t * title)
         khui_alert_release(a);
 
         khui_context_release(&nc->ctx);
+        nc->result = KHUI_NC_RESULT_CANCEL;
+        khm_cred_end_dialog(nc);
         khui_cw_destroy_cred_blob(nc);
-        khm_cred_end_dialog(KHUI_NC_RESULT_CANCEL);
         return;
     }
 
@@ -617,8 +637,9 @@ void khm_cred_obtain_new_creds(wchar_t * title)
         _end_task();
     } else {
         khui_context_release(&nc->ctx);
+        nc->result = KHUI_NC_RESULT_CANCEL;
+        khm_cred_end_dialog(nc);
         khui_cw_destroy_cred_blob(nc);
-        khm_cred_end_dialog(KHUI_NC_RESULT_CANCEL);
     }
 }
 
@@ -784,7 +805,8 @@ khm_cred_process_commandline(void) {
 
     if (khm_startup.init ||
         khm_startup.renew ||
-        khm_startup.destroy) {
+        khm_startup.destroy ||
+        khm_startup.autoinit) {
         kcdb_identity_get_default(&defident);
     }
 
@@ -846,6 +868,15 @@ khm_cred_process_commandline(void) {
             kcdb_credset_get_size(NULL, &count);
 
             if (count == 0) {
+                if (defident)
+                    khui_context_set(KHUI_SCOPE_IDENT,
+                                     defident,
+                                     KCDB_CREDTYPE_INVALID,
+                                     NULL, NULL, 0,
+                                     NULL);
+                else
+                    khui_context_reset();
+
                 khm_cred_obtain_new_creds(NULL);
             }
             khm_startup.autoinit = FALSE;
@@ -869,8 +900,26 @@ khm_cred_process_commandline(void) {
 
 void
 khm_cred_begin_commandline(void) {
+    khm_handle csp_cw;
+
     if (khm_startup.seen)
         return;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+        khm_int32 t = 0;
+
+        khc_read_int32(csp_cw, L"Autoinit", &t);
+        if (t)
+            khm_startup.autoinit = TRUE;
+
+        t = 0;
+        khc_read_int32(csp_cw, L"AutoImport", &t);
+        if (t)
+            khm_startup.import = TRUE;
+
+        khc_close_space(csp_cw);
+
+    }
 
     khm_startup.seen = TRUE;
     khm_startup.processing = TRUE;
@@ -893,9 +942,9 @@ khm_cred_addr_change(void) {
     khm_size cb;
     khm_size n_idents;
 
-    __int64 ft_now;
-    __int64 ft_exp;
-    __int64 ft_issue;
+    FILETIME ft_now;
+    FILETIME ft_exp;
+    FILETIME ft_issue;
 
     if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
                                      0, &csp_cw))) {
@@ -937,7 +986,7 @@ khm_cred_addr_change(void) {
     if (!ids)
         return;
 
-    GetSystemTimeAsFileTime((LPFILETIME) &ft_now);
+    GetSystemTimeAsFileTime(&ft_now);
 
     for (t=ids; t && *t; t = multi_string_next(t)) {
         khm_handle ident;
@@ -958,11 +1007,21 @@ khm_cred_addr_change(void) {
             (kcdb_identity_get_attr(ident, KCDB_ATTR_EXPIRE, NULL,
                                     &ft_exp, &cb)) &&
 
-            ft_now > (ft_issue + ft_exp)/2 &&
-            ft_now < ft_exp) {
+            CompareFileTime(&ft_now, &ft_exp) < 0) {
 
-            khm_cred_renew_identity(ident);
+            khm_int64 i_issue;
+            khm_int64 i_exp;
+            khm_int64 i_now;
 
+            i_issue = FtToInt(&ft_issue);
+            i_exp = FtToInt(&ft_exp);
+            i_now = FtToInt(&ft_now);
+
+            if (i_now > (i_issue + i_exp) / 2) {
+
+                khm_cred_renew_identity(ident);
+
+            }
         }
 
         kcdb_identity_release(ident);

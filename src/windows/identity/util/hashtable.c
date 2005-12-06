@@ -44,7 +44,7 @@ KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n,
     h->delr = delr;
     h->hash = hash;
 
-    h->bins = calloc(sizeof(hash_bin *), n);
+    h->bins = PCALLOC(sizeof(hash_bin *), n);
 
     return h;
 }

@@ -268,6 +268,7 @@ _skip_col:
         ADD_BITMAP(IDB_FLAG_WARN);
         ADD_BITMAP(IDB_FLAG_EXPIRED);
         ADD_BITMAP(IDB_FLAG_CRITICAL);
+        ADD_BITMAP(IDB_FLAG_RENEW);
         ADD_BITMAP(IDB_WDG_STUCK);
         ADD_BITMAP(IDB_WDG_STUCK_HI);
         ADD_BITMAP(IDB_WDG_STICK);
@@ -458,7 +459,7 @@ cw_get_cred_exp_flags(khui_credwnd_tbl * tbl, khm_handle cred)
     if(KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_TIMELEFT, NULL, &ft, &cbsize)))
         return 0;
 
-    s = FtIntervalToMilliseconds(&ft) / 1000;
+    s = FtIntervalToSeconds(&ft);
 
     flags = 0;
     if(s < 0)
@@ -622,6 +623,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
     khm_size cbbuf;
     khm_int32 flags;
     int selected;
+    khm_int32 expstate = 0;
 
     /*  this is called after calling cw_update_creds, so we assume
         that the credentials are all loaded and sorted according to
@@ -883,6 +885,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
 
         flags = cw_get_cred_exp_flags(tbl, thiscred);
+        expstate |= flags;
 
         if(visible) {
             khm_int32 c_flags;
@@ -1040,6 +1043,16 @@ cw_update_outline(khui_credwnd_tbl * tbl)
 _exit:
     if(grouping)
         PFREE(grouping);
+
+    if (tbl->n_rows == 0)
+        khm_notify_icon_expstate(KHM_NOTIF_EMPTY);
+    else if (expstate & CW_EXPSTATE_EXPIRED)
+        khm_notify_icon_expstate(KHM_NOTIF_EXP);
+    else if ((expstate & CW_EXPSTATE_WARN) ||
+             (expstate & CW_EXPSTATE_CRITICAL))
+        khm_notify_icon_expstate(KHM_NOTIF_WARN);
+    else
+        khm_notify_icon_expstate(KHM_NOTIF_OK);
 }
 
 void 
@@ -1125,10 +1138,12 @@ cw_hditem_from_tbl_col(khui_credwnd_col * col, HDITEM *phi)
     }
     phi->lParam = col->attr_id;
 #if (_WIN32_WINNT >= 0x501)
-    if(col->flags & KHUI_CW_COL_SORT_INC) {
-        phi->fmt |= HDF_SORTUP;
-    } else if(col->flags & KHUI_CW_COL_SORT_DEC) {
-        phi->fmt |= HDF_SORTDOWN;
+    if (IS_COMMCTL6()) {
+        if(col->flags & KHUI_CW_COL_SORT_INC) {
+            phi->fmt |= HDF_SORTUP;
+        } else if(col->flags & KHUI_CW_COL_SORT_DEC) {
+            phi->fmt |= HDF_SORTDOWN;
+        }
     }
 #endif
     if(col->width < 0) {
@@ -1365,7 +1380,7 @@ cw_draw_header(HDC hdc,
     int selected = 0;
     khm_int32 idf = 0;
 
-    /* each header consists of a 'expose' widget and some text */
+    /* each header consists of a couple of widgets and some text */
     /* we need to figure out the background color first */
     
     cr = &(tbl->rows[row]);
@@ -1455,7 +1470,7 @@ cw_draw_header(HDC hdc,
                            hdc, 
                            r->left, r->bottom - KHUI_SMICON_CY, 
                            0);
-        r->left += KHUI_SMICON_CX ;
+        r->left += KHUI_SMICON_CX * 3 / 2 ;
     }
 
     /* ok, now o->header contains the string representation of the
@@ -1576,7 +1591,7 @@ cw_wm_create(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         WS_CHILD | HDS_BUTTONS |
         HDS_FULLDRAG | HDS_HORZ | HDS_HOTTRACK
 #if (_WIN32_WINNT >= 0x501)
-        | HDS_FLAT
+        | ((IS_COMMCTL6())?HDS_FLAT:0)
 #endif
         ,
         0,0,0,0,hwnd, (HMENU) 0, khm_hInstance, NULL);
@@ -1760,14 +1775,17 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
                         if(j > tbl->rows[i].col) {
                             cbbuf = sizeof(buf);
-                            if(KHM_FAILED(kcdb_cred_get_attr_string((khm_handle) tbl->rows[i].data, tbl->cols[j].attr_id, buf, &cbbuf, KCDB_TS_SHORT)))
+                            if(KHM_FAILED(kcdb_cred_get_attr_string((khm_handle) tbl->rows[i].data,
+                                                                    tbl->cols[j].attr_id, buf,
+                                                                    &cbbuf, KCDB_TS_SHORT)))
                                 continue;
 
                             rh.left += tbl->hpad;
                             rh.right -= tbl->hpad;
 
                             SetTextAlign(hdc, 0);
-                            DrawText(hdc, buf, (int)((cbbuf / sizeof(wchar_t)) - 1), &rh, DT_LEFT | DT_VCENTER | DT_NOCLIP | DT_SINGLELINE | DT_END_ELLIPSIS);
+                            DrawText(hdc, buf, (int)((cbbuf / sizeof(wchar_t)) - 1), &rh,
+                                     DT_LEFT | DT_VCENTER | DT_NOCLIP | DT_SINGLELINE | DT_END_ELLIPSIS);
                             //TextOut(hdc, x, y + tbl->vpad, buf, (cbbuf / sizeof(wchar_t)) - 1);
                         }
                     }
@@ -1784,9 +1802,9 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                                 flag = o->flags;
                             else
                                 flag = 0;
-                        }
-                        else
+                        } else {
                             flag = tbl->rows[i].flags;
+                        }
 
                         flag &= CW_EXPSTATE_MASK;
 
@@ -1802,7 +1820,7 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                             if (KHM_SUCCEEDED(kcdb_cred_get_flags((khm_handle) tbl->rows[i].data, &flags)) &&
                                 (flags & KCDB_CRED_FLAG_RENEWABLE)) {
                                 khui_ilist_draw_id(tbl->ilist,
-                                                   IDB_TK_REFRESH_SM,
+                                                   IDB_FLAG_RENEW,
                                                    hdc,
                                                    x, y, 0);
                             }
@@ -2415,6 +2433,12 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                        x >= KHUI_SMICON_CX * 3 / 2 &&
                        x < KHUI_SMICON_CX * 5 / 2){
                 nm_state |= CW_MOUSE_WSTICKY | CW_MOUSE_WIDGET;
+            } else if (tbl->cols[tbl->rows[row].col].attr_id ==
+                       KCDB_ATTR_ID_NAME &&
+                       col == tbl->rows[row].col &&
+                       x >= KHUI_SMICON_CX * 3 &&
+                       x < KHUI_SMICON_CX * 4) {
+                nm_state |= CW_MOUSE_WICON | CW_MOUSE_WIDGET;
             }
         }
     }
@@ -2422,7 +2446,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     /* did the user drag the cursor off the current row? */
     if((tbl->mouse_state & CW_MOUSE_LDOWN) &&
        (nm_row != tbl->mouse_row)) {
-        nm_state &= ~(CW_MOUSE_WIDGET | CW_MOUSE_WOUTLINE | CW_MOUSE_WSTICKY);
+        nm_state &= ~CW_MOUSE_WMASK;
     }
     
     if(!(nm_state & CW_MOUSE_LDOWN) && 
@@ -2458,6 +2482,11 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             tbl->mouse_state = CW_MOUSE_WIDGET | CW_MOUSE_WSTICKY;
 
             return 0;
+        } else if ((nm_state & CW_MOUSE_WICON) &&
+                   (tbl->mouse_state & CW_MOUSE_WICON)) {
+            /* click on an row icon */
+            cw_select_row(tbl, nm_row, wParam);
+            cw_properties(hwnd);
         } else {
             /* click on a row */
             cw_select_row(tbl, nm_row, wParam);
@@ -2644,60 +2673,16 @@ cw_wm_hscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT 
-cw_wm_vscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    khui_credwnd_tbl * tbl;
-    SCROLLINFO si;
+static void
+cw_vscroll_to_pos(HWND hwnd, khui_credwnd_tbl * tbl, int newpos) {
     RECT cr;
     RECT sr;
     RECT lr;
     int dy;
-    int newpos;
 
-    tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
     GetClientRect(hwnd, &cr);
     cr.top += tbl->header_height;
     dy = tbl->scr_top;
-
-    switch(LOWORD(wParam)) {
-        case SB_LEFT:
-            newpos = 0;
-            break;
-
-        case SB_BOTTOM:
-            newpos = tbl->ext_height;
-            break;
-
-        case SB_LINEUP:
-            newpos = tbl->scr_top - (tbl->ext_height / 12);
-            break;
-
-        case SB_LINEDOWN:
-            newpos = tbl->scr_top + (tbl->ext_height / 12);
-            break;
-
-        case SB_PAGEUP:
-            newpos = tbl->scr_top - (cr.bottom - cr.top);
-            break;
-
-        case SB_PAGEDOWN:
-            newpos = tbl->scr_top + (cr.bottom - cr.top);
-            break;
-
-        case SB_THUMBTRACK:
-        case SB_THUMBPOSITION:
-            ZeroMemory(&si, sizeof(si));
-            si.cbSize = sizeof(si);
-            si.fMask = SIF_TRACKPOS;
-            GetScrollInfo(hwnd, SB_VERT, &si);
-
-            newpos = si.nTrackPos;
-            break;
-
-        default:
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
-    }
 
     tbl->scr_top = newpos;
     cw_update_extents(tbl, TRUE);
@@ -2745,8 +2730,87 @@ cw_wm_vscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(lr.top < lr.bottom && lr.left < lr.right) {
         InvalidateRect(hwnd, &lr, FALSE);
     }
+}
+
+LRESULT 
+cw_wm_vscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    khui_credwnd_tbl * tbl;
+    SCROLLINFO si;
+    int newpos;
+    RECT cr;
+
+    tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+
+    GetClientRect(hwnd, &cr);
+    cr.top += tbl->header_height;
+
+    switch(LOWORD(wParam)) {
+        case SB_LEFT:
+            newpos = 0;
+            break;
+
+        case SB_BOTTOM:
+            newpos = tbl->ext_height;
+            break;
+
+        case SB_LINEUP:
+            newpos = tbl->scr_top - (tbl->ext_height / 12);
+            break;
+
+        case SB_LINEDOWN:
+            newpos = tbl->scr_top + (tbl->ext_height / 12);
+            break;
+
+        case SB_PAGEUP:
+            newpos = tbl->scr_top - (cr.bottom - cr.top);
+            break;
+
+        case SB_PAGEDOWN:
+            newpos = tbl->scr_top + (cr.bottom - cr.top);
+            break;
+
+        case SB_THUMBTRACK:
+        case SB_THUMBPOSITION:
+            ZeroMemory(&si, sizeof(si));
+            si.cbSize = sizeof(si);
+            si.fMask = SIF_TRACKPOS;
+            GetScrollInfo(hwnd, SB_VERT, &si);
+
+            newpos = si.nTrackPos;
+            break;
+
+        default:
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    }
+
+    cw_vscroll_to_pos(hwnd, tbl, newpos);
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+static void
+cw_ensure_row_visible(HWND hwnd, khui_credwnd_tbl * tbl, int row) {
+    RECT r;
+    int newpos;
+
+    if (row < 0)
+        row = 0;
+    else if (row >= (int) tbl->n_rows)
+        row = (int) tbl->n_rows - 1;
+
+    GetClientRect(hwnd, &r);
+    r.top += tbl->header_height;
+
+    if (row * tbl->cell_height < tbl->scr_top) {
+        newpos = row * tbl->cell_height;
+    } else if ((row + 1) * tbl->cell_height
+             > tbl->scr_top + (r.bottom - r.top)) {
+        newpos = ((row + 1) * tbl->cell_height) - (r.bottom - r.top);
+    } else
+        return;
+
+    cw_vscroll_to_pos(hwnd, tbl, newpos);
 }
 
 static INT_PTR CALLBACK 
@@ -2819,7 +2883,10 @@ cw_pp_ident_proc(HWND hwnd,
 
         case MAKEWPARAM(IDC_PP_CONFIG, BN_CLICKED):
             {
+                khui_config_node cfg_id = NULL;
                 khui_config_node cfg_ids = NULL;
+                wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+                khm_size cb;
                 khm_int32 rv;
 
                 khm_refresh_config();
@@ -2831,10 +2898,24 @@ cw_pp_ident_proc(HWND hwnd,
                 if (KHM_FAILED(rv))
                     return TRUE;
 
-                khm_show_config_pane(cfg_ids);
+                cb = sizeof(idname);
+                if (KHM_SUCCEEDED(kcdb_identity_get_name(s->identity,
+                                                         idname,
+                                                         &cb))) {
+                    rv = khui_cfg_open(cfg_ids,
+                                       idname,
+                                       &cfg_id);
+                }
+
+                if (cfg_id)
+                    khm_show_config_pane(cfg_id);
+                else
+                    khm_show_config_pane(cfg_ids);
 
                 if (cfg_ids)
                     khui_cfg_release(cfg_ids);
+                if (cfg_id)
+                    khui_cfg_release(cfg_id);
             }
             return TRUE;
         }
@@ -3201,6 +3282,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
             khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT), KHUI_ACTION_LAYOUT_ID);
+            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 
@@ -3219,6 +3301,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT), 
                               KHUI_ACTION_LAYOUT_LOC);
+            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 
@@ -3236,7 +3319,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if(new_row < 0)
                 new_row = 0;
             if(new_row >= (int) tbl->n_rows)
-                new_row = (int) tbl->n_rows;
+                new_row = (int) tbl->n_rows - 1;
 
             if (LOWORD(wParam) == KHUI_PACTION_UP)
                 wp = 0;
@@ -3250,6 +3333,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif
 
             cw_select_row(tbl, new_row, wp);
+            cw_ensure_row_visible(hwnd, tbl, new_row);
         }
         break;
 
@@ -3267,7 +3351,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if(new_row < 0)
                 new_row = 0;
             if(new_row >= (int) tbl->n_rows)
-                new_row = (int) tbl->n_rows;
+                new_row = (int) tbl->n_rows - 1;
 
             if (LOWORD(wParam) == KHUI_PACTION_DOWN)
                 wp = 0;
@@ -3280,6 +3364,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 assert(FALSE);
 #endif
             cw_select_row(tbl, new_row, wp);
+            cw_ensure_row_visible(hwnd, tbl, new_row);
         }
         break;
 

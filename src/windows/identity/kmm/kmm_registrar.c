@@ -59,14 +59,25 @@ kmmint_remove_from_module_queue(void) {
 }
 
 void
-kmmint_add_to_plugin_queue(void) {
-    InterlockedIncrement(&pending_plugins);
+kmmint_add_to_plugin_queue(kmm_plugin_i * plugin) {
+    EnterCriticalSection(&cs_kmm);
+    if (!(plugin->flags & KMM_PLUGIN_FLAG_IN_QUEUE)) {
+        InterlockedIncrement(&pending_plugins);
+        plugin->flags |= KMM_PLUGIN_FLAG_IN_QUEUE;
+    }
+    LeaveCriticalSection(&cs_kmm);
 }
 
 void
-kmmint_remove_from_plugin_queue(void) {
-    InterlockedDecrement(&pending_plugins);
+kmmint_remove_from_plugin_queue(kmm_plugin_i * plugin) {
+    EnterCriticalSection(&cs_kmm);
 
+    if (plugin->flags & KMM_PLUGIN_FLAG_IN_QUEUE) {
+        InterlockedDecrement(&pending_plugins);
+        plugin->flags &= ~KMM_PLUGIN_FLAG_IN_QUEUE;
+    }
+
+    LeaveCriticalSection(&cs_kmm);
     kmmint_check_completion();
 }
 
@@ -160,7 +171,7 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
 
     /* if it fails to initialize, we exit the plugin */
     if(KHM_FAILED(rv)) {
-        kmmint_remove_from_plugin_queue();
+        kmmint_remove_from_plugin_queue(p);
         rv = 1;
         goto _exit;
     }
@@ -198,6 +209,7 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
             pd->n_unresolved--;
 
             if(pd->n_unresolved == 0) {
+                kmmint_add_to_plugin_queue(pd);
                 kmm_hold_plugin(kmm_handle_from_plugin(pd));
                 kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, KMM_REG_INIT_PLUGIN, (void *) pd);
             }
@@ -205,7 +217,7 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
     } while(FALSE);
     LeaveCriticalSection(&cs_kmm);
 
-    kmmint_remove_from_plugin_queue();
+    kmmint_remove_from_plugin_queue(p);
 
     /* main message loop */
     while(KHM_SUCCEEDED(kmq_dispatch(INFINITE)));
@@ -402,7 +414,7 @@ void kmm_init_plugin(kmm_plugin_i * p) {
         goto _exit_post;
     }
 
-    kmmint_add_to_plugin_queue();
+    kmmint_add_to_plugin_queue(p);
 
     p->ht_thread = CreateThread(NULL,
                                 0,
@@ -567,17 +579,19 @@ void kmm_init_module(kmm_module_i * m) {
     if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"FailureCount", &i))) {
         khm_int64 tm;
         khm_int64 ct;
+        FILETIME fct;
         khm_int32 last_reason = 0;
 
         /* reset the failure count if the failure count reset time
            period has elapsed */
         tm = 0;
         khc_read_int64(csp_mod, L"FailureTime", &tm);
-        GetSystemTimeAsFileTime((LPFILETIME) &ct);
-        ct -= tm;
+        GetSystemTimeAsFileTime(&fct);
+
+        ct = (FtToInt(&fct) - tm) / 10000000i64;
 
         if(tm > 0 && 
-           FtIntervalToSeconds((LPFILETIME) &ct) > fail_reset_time) {
+           ct > fail_reset_time) {
             i = 0;
             khc_write_int32(csp_mod, L"FailureCount", 0);
             khc_write_int64(csp_mod, L"FailureTime", 0);
@@ -722,7 +736,7 @@ void kmm_init_module(kmm_module_i * m) {
  _exit:
     if(csp_mod) {
         if(record_failure) {
-            khm_int64 ct;
+            FILETIME fct;
 
             i = 0;
             khc_read_int32(csp_mod, L"FailureCount", &i);
@@ -730,8 +744,8 @@ void kmm_init_module(kmm_module_i * m) {
             khc_write_int32(csp_mod, L"FailureCount", i);
 
             if(i==1) { /* first fault */
-                GetSystemTimeAsFileTime((LPFILETIME) &ct);
-                khc_write_int64(csp_mod, L"FailureTime", ct);
+                GetSystemTimeAsFileTime(&fct);
+                khc_write_int64(csp_mod, L"FailureTime", FtToInt(&fct));
             }
 
             khc_write_int32(csp_mod, L"FailureReason", m->state);

@@ -37,6 +37,7 @@ all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
 	$(RM) $(INCFILES)
+	$(RM) $(OBJFILES)
 
 {}.c{$(LIBDIR)}.obj:
 	$(C2OBJ)

@@ -44,11 +44,14 @@ Date=NOTRELEASED
 Version=2
 AppVersion=0.1.1.0
 Date=Nov 01, 2005
-# Beta 1 release of NetIDMgr
+# Alpha 1 release of NetIDMgr, along with KFW 3.0.0 beta
 
 #----------------------------------------------------------------
 Version=3
 AppVersion=0.1.2.0
 Date=Nov 30, 2005
-# Beta 2 release
+# Alpha 2 release of NetIDMgr, along with KFW 3.0.0 beta 2
 
+Version=4
+AppVersion=1.0.0.0
+Date=Dec 05, 2005

@@ -143,6 +143,8 @@ typedef struct kmm_plugin_i_t {
 /* the plugin is in the module's plugin list */
 #define KMM_PLUGIN_FLAG_IN_MODLIST  4
 
+#define KMM_PLUGIN_FLAG_IN_QUEUE    0x10
+
 enum kmm_registrar_uparam_t {
     KMM_REG_INIT_MODULE,
     KMM_REG_EXIT_MODULE,

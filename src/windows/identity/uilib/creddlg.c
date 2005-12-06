@@ -342,7 +342,7 @@ cw_create_prompt(khm_size idx,
         StringCbCopy(p->prompt, cb_prompt, prompt);
     }
 
-    if(def) {
+    if(def && cb_def > 0) {
         cb_def += sizeof(wchar_t);
         p->def = PMALLOC(cb_def);
         StringCbCopy(p->def, cb_def, def);

@@ -865,6 +865,15 @@ khc_enum_subspaces(khm_handle conf,
                    khm_handle prev,
                    khm_handle * next);
 
+/*! \brief Remove a configuration space
+
+    The configuration space will be marked for removal.  Once all the
+    handles for the space have been released, it will be deleted.  The
+    configuration stores that will be affected are the write enabled
+    configuration stores for the handle.
+ */
+KHMEXP khm_int32 KHMAPI
+khc_remove_space(khm_handle conf);
 /*@}*/
 
 #endif

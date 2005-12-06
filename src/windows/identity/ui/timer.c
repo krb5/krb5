@@ -86,19 +86,22 @@ khm_timer_exit(void) {
 static void
 tmr_fire_timer(void) {
     int i;
-    __int64 curtime;
-    __int64 err;
-    __int64 next_event;
+    unsigned __int64 curtime;
+    unsigned __int64 err;
+    unsigned __int64 next_event;
     int     tmr_count[KHUI_N_TTYPES];
-    __int64 tmr_offset[KHUI_N_TTYPES];
+    unsigned __int64 tmr_offset[KHUI_N_TTYPES];
     int t;
     khm_handle eff_ident = NULL;
     khui_timer_type eff_type = 0; /* meaningless */
     int fire_count = 0;
+    FILETIME ft;
 
-    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR_SMALL, 
-                            (LPFILETIME) &err);
-    GetSystemTimeAsFileTime((LPFILETIME) &curtime);
+    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR_SMALL, &ft);
+    err = FtToInt(&ft);
+    GetSystemTimeAsFileTime(&ft);
+    curtime = FtToInt(&ft);
+
     next_event = 0;
 
     ZeroMemory(tmr_count, sizeof(tmr_count));
@@ -175,7 +178,7 @@ tmr_fire_timer(void) {
         wchar_t wtime[128];
         wchar_t wmsg[256];
         wchar_t wtitle[64];
-        __int64 ft_second;
+        unsigned __int64 second;
         khui_alert * alert = NULL;
 
         khm_size cb;
@@ -187,12 +190,13 @@ tmr_fire_timer(void) {
            seconds' instead of '5 mins' and so on when converting to a
            string.  So we add half a second to make the message
            neater. */
-        TimetToFileTimeInterval(1, (LPFILETIME) &ft_second);
-        next_event += ft_second / 2;
+        TimetToFileTimeInterval(1, &ft);
+        second = FtToInt(&ft);
+        next_event += second / 2;
 
         cb = sizeof(wtime);
-
-        FtIntervalToString((LPFILETIME) &next_event,
+        ft = IntToFt(next_event);
+        FtIntervalToString(&ft,
                            wtime,
                            &cb);
 
@@ -207,7 +211,7 @@ tmr_fire_timer(void) {
             cb = sizeof(idname);
             kcdb_identity_get_name(eff_ident, idname, &cb);
 
-            if (next_event < ft_second) {
+            if (next_event < second) {
                 LoadString(khm_hInstance, IDS_WARN_EXPIRED_ID,
                            fmt, ARRAYLENGTH(fmt));
 
@@ -219,7 +223,7 @@ tmr_fire_timer(void) {
                 StringCbPrintf(wmsg, sizeof(wmsg), fmt, idname, wtime);
             }
         } else {
-            if (next_event < ft_second) {
+            if (next_event < second) {
                 LoadString(khm_hInstance, IDS_WARN_EXPIRED,
                            wmsg, ARRAYLENGTH(wmsg));
             } else {
@@ -325,12 +329,13 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     khm_handle ident = NULL;
     int mark_idx;
     int idx;
-    __int64 ft_expiry;
-    __int64 ft_current;
-    __int64 ft_cred_expiry;
-    __int64 ft;
-    __int64 fte;
-    __int64 ft_reinst;
+    FILETIME ft_expiry;
+    FILETIME ft_current;
+    FILETIME ft_creinst;
+    FILETIME ft_cred_expiry;
+    FILETIME ft;
+    FILETIME fte;
+    FILETIME ft_reinst;
     khm_size cb;
 
     kcdb_cred_get_identity(cred, &ident);
@@ -352,9 +357,11 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         }
 
     /* and the current time */
-    GetSystemTimeAsFileTime((LPFILETIME) &ft_current);
+    GetSystemTimeAsFileTime(&ft_current);
 
-    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, (LPFILETIME) &ft_reinst);
+    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, &ft_reinst);
+
+    ft_creinst = FtAdd(&ft_current, &ft_reinst);
 
     mark_idx = tmr_find(ident, KHUI_TTYPE_ID_MARK, 0, 0);
 
@@ -382,7 +389,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         khm_int32 to_crit = KHUI_DEF_TIMEOUT_CRIT;
         khm_int32 to_renew = KHUI_DEF_TIMEOUT_RENEW;
 
-        if (ft_expiry < ft_current)
+        if (CompareFileTime(&ft_expiry, &ft_current) < 0)
             /* already expired */
             goto _done_with_ident;
 
@@ -433,8 +440,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         if (monitor && do_renew) {
             int prev;
 
-            TimetToFileTimeInterval(to_renew, (LPFILETIME) &ft);
-            fte = ft_expiry - ft;
+            TimetToFileTimeInterval(to_renew, &ft);
+            fte = FtSub(&ft_expiry, &ft);
 
             prev =
                 tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0);
@@ -444,15 +451,16 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                This maybe because that NetIDMgr was started at the
                last minute, or because for some reason the renew timer
                could not be triggered earlier. */
-            if (fte > ft_current ||
+            if (CompareFileTime(&fte, &ft_current) > 0 ||
                 prev == -1 ||
                 !(khui_timers[prev].flags & KHUI_TE_FLAG_EXPIRED)) {
 
-                if (fte <= ft_current)
+                if (CompareFileTime(&fte, &ft_current) < 0)
                     fte = ft_current;
 
                 tmr_update(ident, KHUI_TTYPE_ID_RENEW, 
-                           fte, ft, 0, fte > ft_current + ft_reinst);
+                           FtToInt(&fte), FtToInt(&ft), 0,
+                           CompareFileTime(&fte,&ft_creinst) > 0);
                 renew_done = TRUE;
             } else {
                 /* special case.  If the renew timer was in the past
@@ -461,32 +469,36 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                    failed we don't want to automatically retry
                    everytime we check the timers. */
                 tmr_update(ident, KHUI_TTYPE_ID_RENEW,
-                           fte, ft, 0, FALSE);
+                           FtToInt(&fte), FtToInt(&ft), 0, FALSE);
             }
         }
 
         if (monitor && do_warn && !renew_done) {
-            TimetToFileTimeInterval(to_warn, (LPFILETIME) &ft);
-            fte = ft_expiry - ft;
 
-            if (fte > ft_current)
+            TimetToFileTimeInterval(to_warn, &ft);
+            fte = FtSub(&ft_expiry, &ft);
+
+            if (CompareFileTime(&fte, &ft_current) > 0)
                 tmr_update(ident, KHUI_TTYPE_ID_WARN,
-                           fte, ft, 0, fte > ft_current + ft_reinst);
+                           FtToInt(&fte), FtToInt(&ft), 0,
+                           CompareFileTime(&fte, &ft_creinst) > 0);
         }
 
         if (monitor && do_crit && !renew_done) {
-            TimetToFileTimeInterval(to_crit, (LPFILETIME) &ft);
-            fte = ft_expiry - ft;
+            TimetToFileTimeInterval(to_crit, &ft);
+            fte = FtSub(&ft_expiry, &ft);
 
-            if (fte > ft_current)
+            if (CompareFileTime(&fte, &ft_current) > 0)
                 tmr_update(ident, KHUI_TTYPE_ID_CRIT,
-                           fte, ft, 0, fte > ft_current + ft_reinst);
+                           FtToInt(&fte), FtToInt(&ft), 0,
+                           CompareFileTime(&fte, &ft_creinst) > 0);
         }
 
         if (monitor && !renew_done) {
-            if (ft_expiry > ft_current)
+            if (CompareFileTime(&ft_expiry, &ft_current) > 0)
                 tmr_update(ident, KHUI_TTYPE_ID_EXP, 
-                           ft_expiry, 0, 0, fte > ft_current + ft_reinst);
+                           FtToInt(&ft_expiry), 0, 0,
+                           CompareFileTime(&fte, &ft_creinst) > 0);
         }
 
     _done_with_ident:
@@ -500,20 +512,27 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                                       &cb)))
         goto _cleanup;
 
-    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, (LPFILETIME) &ft);
+    TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, &ft);
 
-    if (ft_cred_expiry >= ft_expiry ||
-        (ft_expiry - ft_cred_expiry) < ft)
-        goto _cleanup;
+    {
+        FILETIME ft_delta;
+
+        ft_delta = FtSub(&ft_expiry, &ft_cred_expiry);
+
+        if (CompareFileTime(&ft_cred_expiry, &ft_expiry) >= 0 ||
+            CompareFileTime(&ft_delta, &ft) < 0)
+            goto _cleanup;
+    }
 
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_WARN, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        fte = ft_cred_expiry - khui_timers[idx].offset;
-        if (fte > ft_current) {
-            tmr_update(cred, KHUI_TTYPE_CRED_WARN, fte, 
+        fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+        if (CompareFileTime(&fte, &ft_current) > 0) {
+            tmr_update(cred, KHUI_TTYPE_CRED_WARN,
+                       FtToInt(&fte), 
                        khui_timers[idx].offset, 0,
-                       fte > ft_current + ft_reinst);
+                       CompareFileTime(&fte, &ft_creinst) > 0);
             kcdb_cred_hold(cred);
         }
     }
@@ -521,11 +540,12 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_CRIT, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        fte = ft_cred_expiry - khui_timers[idx].offset;
-        if (fte > ft_current) {
-            tmr_update(cred, KHUI_TTYPE_CRED_CRIT, fte,
+        fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+        if (CompareFileTime(&fte, &ft_current) > 0) {
+            tmr_update(cred, KHUI_TTYPE_CRED_CRIT,
+                       FtToInt(&fte),
                        khui_timers[idx].offset, 0,
-                       fte > ft_current + ft_reinst);
+                       CompareFileTime(&fte, &ft_creinst) > 0);
             kcdb_cred_hold(cred);
         }
     }
@@ -533,11 +553,12 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        fte = ft_cred_expiry - khui_timers[idx].offset;
-        if (fte > ft_current) {
-            tmr_update(cred, KHUI_TTYPE_CRED_RENEW, fte,
+        fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+        if (CompareFileTime(&fte, &ft_current) > 0) {
+            tmr_update(cred, KHUI_TTYPE_CRED_RENEW,
+                       FtToInt(&fte),
                        khui_timers[idx].offset, 0,
-                       fte > ft_current + ft_reinst);
+                       CompareFileTime(&fte, &ft_creinst) > 0);
             kcdb_cred_hold(cred);
         }
     }
@@ -545,10 +566,11 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_EXP, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        if (ft_cred_expiry > ft_current) {
-            tmr_update(cred, KHUI_TTYPE_CRED_EXP, ft_cred_expiry,
+        if (CompareFileTime(&ft_cred_expiry, &ft_current) > 0) {
+            tmr_update(cred, KHUI_TTYPE_CRED_EXP,
+                       FtToInt(&ft_cred_expiry),
                        0, 0,
-                       ft_cred_expiry > ft_current + ft_reinst);
+                       CompareFileTime(&ft_cred_expiry, &ft_creinst) > 0);
         }
     }
 
@@ -618,9 +640,9 @@ tmr_purge(void) {
 void 
 khm_timer_refresh(HWND hwnd) {
     int i;
-    __int64 next_event = 0;
-    __int64 curtime;
-    __int64 diff;
+    unsigned __int64 next_event = 0;
+    unsigned __int64 curtime;
+    unsigned __int64 diff;
 
     EnterCriticalSection(&cs_timers);
 
@@ -655,19 +677,23 @@ khm_timer_refresh(HWND hwnd) {
     }
 
     if (next_event != 0) {
-        GetSystemTimeAsFileTime((LPFILETIME) &curtime);
+        FILETIME ft;
 
-        TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR_SMALL,
-                                (LPFILETIME) &diff);
+        GetSystemTimeAsFileTime(&ft);
+        curtime = FtToInt(&ft);
+
+        TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR_SMALL, &ft);
+        diff = FtToInt(&ft);
 
         if (curtime + diff > next_event) {
             tmr_fire_timer();
             goto _check_next_event;
         } else {
             diff = next_event - curtime;
+            ft = IntToFt(diff);
             SetTimer(hwnd,
                      KHUI_TRIGGER_TIMER_ID,
-                     FtIntervalToMilliseconds((LPFILETIME) &diff),
+                     FtIntervalToMilliseconds(&ft),
                      NULL);
         }
     }

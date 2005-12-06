@@ -216,6 +216,11 @@ typedef struct khui_credwnd_tbl_t {
                                           outline widget */
 #define CW_MOUSE_WSTICKY    0x00000010 /* mouse is highlighting a
                                           sticky widget */
+#define CW_MOUSE_WICON      0x00000020 /* an icon widget.  represents
+                                          the icon next to identities
+                                          and next to credentials. */
+
+#define CW_MOUSE_WMASK      0x00000039 /* all widget bits */
 
 void khm_unregister_credwnd_class(void);
 

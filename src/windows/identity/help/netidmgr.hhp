@@ -15,6 +15,8 @@ MainHelpWnd="NetIDMgr Help","toc.hhc","Index.hhk","html/welcome.htm","html/welco
 
 
 [ALIAS]
+IDH_ACTION_NEW_ID=html\act_new_creds.htm
+IDH_ACTION_PASSWD_ID=html\act_chpw.htm
 IDH_WELCOME=html\welcome.htm
 
 [MAP]
@@ -23,6 +25,7 @@ IDH_WELCOME=html\welcome.htm
 [TEXT POPUPS]
 khhelp.h
 popups_newcreds.txt
+popups_password.txt
 
 [INFOTYPES]
 Category:Concepts

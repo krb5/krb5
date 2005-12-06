@@ -31,6 +31,7 @@
 
 #ifdef DEBUG
 #define PMALLOC(s) perf_malloc(__FILE__,__LINE__,s)
+#define PCALLOC(n,s) perf_calloc(__FILE__,__LINE__,n,s)
 #define PREALLOC(d,s) perf_realloc(__FILE__,__LINE__,d,s)
 #define PFREE(p)   perf_free(p)
 #define PDUMP(f)   perf_dump(f)
@@ -38,6 +39,7 @@
 #define PSTRDUP(s) perf_strdup(__FILE__,__LINE__,s)
 #else
 #define PMALLOC(s) malloc(s)
+#define PCALLOC(n,s) calloc(n,s)
 #define PREALLOC(d,s) realloc(d,s)
 #define PFREE(p)   free(p)
 #define PDUMP(f)   ((void) 0)
@@ -62,5 +64,8 @@ perf_wcsdup(char * file, int line, const wchar_t * str);
 
 KHMEXP char *
 perf_strdup(char * file, int line, const char * str);
+
+KHMEXP void *
+perf_calloc(char * file, int line, size_t num, size_t size);
 
 #endif

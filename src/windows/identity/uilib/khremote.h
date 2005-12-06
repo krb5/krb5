@@ -33,7 +33,7 @@
   @{*/
 
 /* Leash compatibility */
-#define ID_OBTAIN_TGT_WITH_LPARAM       32809
+#define ID_OBTAIN_TGT_WITH_LPARAM       32810
 
 #define KHUI_REQDAEMONWND_CLASS L"IDMgrRequestDaemonCls"
 #define KHUI_REQDAEMONWND_NAME  L"IDMgrRequestDaemon"
@@ -43,7 +43,7 @@
 #define NETID_USERNAME_SZ       128
 #define NETID_REALM_SZ          192
 #define NETID_TITLE_SZ          256
-#define NETID_CCACHE_NAME_SZ  264
+#define NETID_CCACHE_NAME_SZ    264
   
 #define NETID_DLGTYPE_TGT      0
 #define NETID_DLGTYPE_CHPASSWD 1

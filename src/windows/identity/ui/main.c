@@ -376,7 +376,11 @@ khm_module_load_ctx_handler(enum kherr_ctx_event evt,
 
 static wchar_t helpfile[MAX_PATH] = L"";
 
-HWND khm_html_help(HWND hwnd, UINT command, DWORD_PTR data) {
+HWND khm_html_help(HWND hwnd, wchar_t * suffix,
+                   UINT command, DWORD_PTR data) {
+
+    wchar_t gpath[MAX_PATH + MAX_PATH];
+
     if (!*helpfile) {
         DWORD dw;
         wchar_t ppath[MAX_PATH];
@@ -392,7 +396,12 @@ HWND khm_html_help(HWND hwnd, UINT command, DWORD_PTR data) {
         }
     }
 
-    return HtmlHelp(hwnd, helpfile, command, data);
+    StringCbCopy(gpath, sizeof(gpath), helpfile);
+
+    if (suffix)
+        StringCbCat(gpath, sizeof(gpath), suffix);
+
+    return HtmlHelp(hwnd, gpath, command, data);
 }
 
 void khm_load_default_modules(void) {

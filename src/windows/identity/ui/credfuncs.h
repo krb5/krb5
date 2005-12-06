@@ -61,7 +61,8 @@ BOOL
 khm_cred_is_in_dialog(void);
 
 khm_int32
-khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result);
+khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
+                         wchar_t * ident, khm_size cb_ident);
 
 void
 khm_cred_begin_commandline(void);
@@ -74,5 +75,8 @@ khm_cred_refresh(void);
 
 void
 khm_cred_addr_change(void);
+
+void
+khm_cred_import(void);
 
 #endif

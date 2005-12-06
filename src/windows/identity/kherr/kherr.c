@@ -26,9 +26,7 @@
 
 #include<kherrinternal.h>
 #include<assert.h>
-#ifdef Debug
 #include<stdarg.h>
-#endif
 
 CRITICAL_SECTION cs_error;
 DWORD tls_error = 0;
@@ -677,6 +675,65 @@ KHMEXP void KHMAPI kherr_evaluate_last_event(void) {
 
 _exit:
     LeaveCriticalSection(&cs_error);
+}
+
+KHMEXP kherr_event * __cdecl
+kherr_reportf(const wchar_t * long_desc_fmt, ...) {
+    va_list vl;
+    wchar_t buf[1024];
+    kherr_event * e;
+
+    va_start(vl, long_desc_fmt);
+    StringCbVPrintf(buf, sizeof(buf), long_desc_fmt, vl);
+#ifdef DEBUG
+    OutputDebugString(buf);
+#endif
+    va_end(vl);
+
+    e = kherr_report(KHERR_DEBUG_1,
+                     NULL, NULL, NULL, buf, NULL, 0,
+                     KHERR_SUGGEST_NONE, 0, 0, 0, 0, KHERR_RF_CSTR_LONG_DESC
+#ifdef _WIN32
+                     ,NULL
+#endif
+                     );
+    if (e) {
+        kherr_evaluate_event(e);
+    }
+
+    return e;
+}
+
+KHMEXP kherr_event * __cdecl
+kherr_reportf_ex(enum kherr_severity severity,
+                 const wchar_t * facility,
+                 khm_int32 facility_id,
+#ifdef _WIN32
+                 HMODULE hModule,
+#endif
+                 const wchar_t * long_desc_fmt, ...) {
+    va_list vl;
+    wchar_t buf[1024];
+    kherr_event * e;
+
+    va_start(vl, long_desc_fmt);
+    StringCbVPrintf(buf, sizeof(buf), long_desc_fmt, vl);
+#ifdef DEBUG
+    OutputDebugString(buf);
+#endif
+    va_end(vl);
+
+    e = kherr_report(severity, NULL, facility, NULL, buf, NULL, facility_id,
+                     KHERR_SUGGEST_NONE, 0, 0, 0, 0, KHERR_RF_CSTR_LONG_DESC
+#ifdef _WIN32
+                     ,hModule
+#endif
+                     );
+    if (e) {
+        kherr_evaluate_event(e);
+    }
+
+    return e;
 }
 
 KHMEXP kherr_event * KHMAPI 

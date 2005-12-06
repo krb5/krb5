@@ -299,12 +299,23 @@ typedef struct tag_ident_data {
     HWND hwnd;
 } ident_data;
 
+typedef struct tag_global_props {
+    BOOL monitor;
+    BOOL auto_renew;
+    BOOL sticky;
+} global_props;
+
 typedef struct tag_idents_data {
     BOOL         valid;
 
     ident_data * idents;
     khm_size     n_idents;
     khm_size     nc_idents;
+
+    /* global options */
+    global_props saved;
+    global_props work;
+    BOOL         applied;
 
     int          refcount;
 
@@ -319,7 +330,12 @@ typedef struct tag_idents_data {
     khui_config_init_data cfg;
 } idents_data;
 
-static idents_data cfg_idents = {FALSE, NULL, 0, 0, 0, NULL };
+static idents_data cfg_idents = {FALSE, NULL, 0, 0,
+                                 {0, 0, 0},
+                                 {0, 0, 0},
+                                 FALSE,
+
+                                 0, NULL };
 
 static void
 read_params_ident(ident_data * d) {
@@ -406,16 +422,24 @@ write_params_ident(ident_data * d) {
         return;
     }
 
-    if (d->saved.monitor != d->work.monitor)
-        khc_write_int32(csp_ident, L"Monitor", !!d->work.monitor);
+    if (d->removed) {
 
-    if (d->saved.auto_renew != d->work.auto_renew)
-        khc_write_int32(csp_ident, L"AllowAutoRenew", !!d->work.auto_renew);
+        khc_remove_space(csp_ident);
 
-    if (d->saved.sticky != d->work.sticky) {
-        kcdb_identity_set_flags(d->ident,
-                                (d->work.sticky)?KCDB_IDENT_FLAG_STICKY:0,
-                                KCDB_IDENT_FLAG_STICKY);
+    } else {
+
+        if (d->saved.monitor != d->work.monitor)
+            khc_write_int32(csp_ident, L"Monitor", !!d->work.monitor);
+
+        if (d->saved.auto_renew != d->work.auto_renew)
+            khc_write_int32(csp_ident, L"AllowAutoRenew",
+                            !!d->work.auto_renew);
+
+        if (d->saved.sticky != d->work.sticky) {
+            kcdb_identity_set_flags(d->ident,
+                                    (d->work.sticky)?KCDB_IDENT_FLAG_STICKY:0,
+                                    KCDB_IDENT_FLAG_STICKY);
+        }
     }
 
     khc_close_space(csp_ident);
@@ -432,6 +456,30 @@ write_params_ident(ident_data * d) {
 static void
 write_params_idents(void) {
     int i;
+    khm_handle csp_cw;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
+                                     KHM_FLAG_CREATE, &csp_cw))) {
+        if (cfg_idents.work.monitor != cfg_idents.saved.monitor) {
+            khc_write_int32(csp_cw, L"DefaultMonitor",
+                            !!cfg_idents.work.monitor);
+            cfg_idents.work.monitor = cfg_idents.saved.monitor;
+            cfg_idents.applied = TRUE;
+        }
+        if (cfg_idents.work.auto_renew != cfg_idents.saved.auto_renew) {
+            khc_write_int32(csp_cw, L"DefaultAllowAutoRenew",
+                            !!cfg_idents.work.auto_renew);
+            cfg_idents.work.auto_renew = cfg_idents.saved.auto_renew;
+            cfg_idents.applied = TRUE;
+        }
+        if (cfg_idents.work.sticky != cfg_idents.saved.sticky) {
+            khc_write_int32(csp_cw, L"DefaultMonitor",
+                            !!cfg_idents.work.sticky);
+            cfg_idents.work.sticky = cfg_idents.saved.sticky;
+            cfg_idents.applied = TRUE;
+        }
+        khc_close_space(csp_cw);
+    }
 
     for (i=0; i < (int)cfg_idents.n_idents; i++) {
         write_params_ident(&cfg_idents.idents[i]);
@@ -450,6 +498,7 @@ init_idents_data(void) {
     khm_size cb;
     int n_tries = 0;
     int i;
+    khm_handle csp_cw;
 
     if (cfg_idents.valid)
         return;
@@ -459,6 +508,35 @@ init_idents_data(void) {
     assert(cfg_idents.n_idents == 0);
     assert(cfg_idents.nc_idents == 0);
 #endif
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+        khm_int32 t;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"DefaultMonitor", &t)))
+            cfg_idents.saved.monitor = !!t;
+        else
+            cfg_idents.saved.monitor = TRUE;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"DefaultAllowAutoRenew", &t)))
+            cfg_idents.saved.auto_renew = !!t;
+        else
+            cfg_idents.saved.auto_renew = TRUE;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"DefaultSticky", &t)))
+            cfg_idents.saved.sticky = !!t;
+        else
+            cfg_idents.saved.sticky = FALSE;
+
+    } else {
+
+        cfg_idents.saved.monitor = TRUE;
+        cfg_idents.saved.auto_renew = TRUE;
+        cfg_idents.saved.sticky = FALSE;
+
+    }
+
+    cfg_idents.work = cfg_idents.saved;
+    cfg_idents.applied = FALSE;
 
     do {
         rv = kcdb_identity_enum(KCDB_IDENT_FLAG_CONFIG,
@@ -584,251 +662,35 @@ release_idents_data(void) {
         free_idents_data();
 }
 
-#define BS_TRUE 1
-#define BS_FALSE 2
-
-static void
-refresh_view_idents_sel(HWND hwnd) {
-    HWND hw;
-    int sel_count;
-    int i;
-    int idx;
-    ident_data * d;
-    LVITEM lvi;
-
-    int monitor = 0;
-    int auto_renew = 0;
-    int sticky = 0;
-
-    hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
-
-    sel_count = ListView_GetSelectedCount(hw);
-
-    idx = -1;
-    for (i=0; i < sel_count; i++) {
-        idx = ListView_GetNextItem(hw, idx, LVNI_SELECTED);
-#ifdef DEBUG
-        assert(idx != -1);
-#endif
-        ZeroMemory(&lvi, sizeof(lvi));
-
-        lvi.iItem = idx;
-        lvi.iSubItem = 0;
-        lvi.mask = LVIF_PARAM;
-
-        ListView_GetItem(hw, &lvi);
-
-        d = (ident_data *) lvi.lParam;
-#ifdef DEBUG
-        assert(d != NULL);
-#endif
-
-        if (d->work.monitor)
-            monitor |= BS_TRUE;
-        else
-            monitor |= BS_FALSE;
-
-        if (d->work.auto_renew)
-            auto_renew |= BS_TRUE;
-        else
-            auto_renew |= BS_FALSE;
-
-        if (d->work.sticky)
-            sticky |= BS_TRUE;
-        else
-            sticky |= BS_FALSE;
-    }
-
-    CheckDlgButton(hwnd, IDC_CFG_MONITOR,
-                   (monitor == BS_TRUE)? BST_CHECKED:
-                   ((monitor == BS_FALSE)? BST_UNCHECKED:
-                    BST_INDETERMINATE));
-
-    CheckDlgButton(hwnd, IDC_CFG_RENEW,
-                   (auto_renew == BS_TRUE)? BST_CHECKED:
-                   ((auto_renew == BS_FALSE)? BST_UNCHECKED:
-                    BST_INDETERMINATE));
-
-    CheckDlgButton(hwnd, IDC_CFG_STICKY,
-                   (sticky == BS_TRUE)? BST_CHECKED:
-                   ((sticky == BS_FALSE)? BST_UNCHECKED:
-                    BST_INDETERMINATE));
-
-    if (sel_count > 0) {
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_MONITOR), TRUE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_RENEW), TRUE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_STICKY), TRUE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_REMOVE), TRUE);
-    } else {
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_MONITOR), FALSE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_RENEW), FALSE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_STICKY), FALSE);
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_REMOVE), FALSE);
-    }
-}
-
-#undef BS_TRUE
-#undef BS_FALSE
 
 static void
 refresh_data_idents(HWND hwnd) {
-    HWND hw;
-    int sel_count;
-    int i;
-    int idx;
-    ident_data * d;
-    LVITEM lvi;
-
-    UINT monitor = IsDlgButtonChecked(hwnd, IDC_CFG_MONITOR);
-    UINT auto_renew = IsDlgButtonChecked(hwnd, IDC_CFG_RENEW);
-    UINT sticky = IsDlgButtonChecked(hwnd, IDC_CFG_STICKY);
-
-    hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
-
-    sel_count = ListView_GetSelectedCount(hw);
-
-    idx = -1;
-    for (i=0; i < sel_count; i++) {
-        idx = ListView_GetNextItem(hw, idx, LVNI_SELECTED);
-#ifdef DEBUG
-        assert(idx != -1);
-#endif
-        ZeroMemory(&lvi, sizeof(lvi));
-
-        lvi.iItem = idx;
-        lvi.iSubItem = 0;
-        lvi.mask = LVIF_PARAM;
-
-        ListView_GetItem(hw, &lvi);
-
-        d = (ident_data *) lvi.lParam;
-#ifdef DEBUG
-        assert(d != NULL);
-#endif
-
-        if (monitor == BST_CHECKED)
-            d->work.monitor = TRUE;
-        else if (monitor == BST_UNCHECKED)
-            d->work.monitor = FALSE;
-
-        if (auto_renew == BST_CHECKED)
-            d->work.auto_renew = TRUE;
-        else if (auto_renew == BST_UNCHECKED)
-            d->work.auto_renew = FALSE;
-
-        if (sticky == BST_CHECKED)
-            d->work.sticky = TRUE;
-        else if (sticky == BST_UNCHECKED)
-            d->work.sticky = FALSE;
-
-        if (d->hwnd)
-            PostMessage(d->hwnd, KHUI_WM_CFG_NOTIFY,
-                        MAKEWPARAM(0, WMCFG_UPDATE_STATE), 0);
-    }
+    cfg_idents.work.monitor =
+        (IsDlgButtonChecked(hwnd, IDC_CFG_MONITOR) == BST_CHECKED);
+    cfg_idents.work.auto_renew =
+        (IsDlgButtonChecked(hwnd, IDC_CFG_RENEW) == BST_CHECKED);
+    cfg_idents.work.sticky =
+        (IsDlgButtonChecked(hwnd, IDC_CFG_STICKY) == BST_CHECKED);
 }
 
 static void
 refresh_view_idents_state(HWND hwnd) {
-    HWND hw;
-    int i;
-    LVITEM lvi;
-    ident_data * d;
+    BOOL modified;
+    BOOL applied;
+    khm_int32 flags = 0;
 
-    BOOL modified = FALSE;
-    BOOL applied = FALSE;
+    applied = cfg_idents.applied;
+    modified = (cfg_idents.work.monitor != cfg_idents.saved.monitor ||
+                cfg_idents.work.auto_renew != cfg_idents.saved.auto_renew ||
+                cfg_idents.work.sticky != cfg_idents.saved.sticky);
 
-    hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
+    if (modified)
+        flags |= KHUI_CNFLAG_MODIFIED;
+    if (applied)
+        flags |= KHUI_CNFLAG_APPLIED;
 
-    for (i = -1;;) {
-
-        i = ListView_GetNextItem(hw, i, LVNI_ALL);
-        if (i == -1)
-            break;
-
-        ZeroMemory(&lvi, sizeof(lvi));
-        lvi.iItem = i;
-        lvi.iSubItem = 0;
-        lvi.mask = LVIF_PARAM;
-
-        ListView_GetItem(hw, &lvi);
-
-        d = (ident_data *) lvi.lParam;
-#ifdef DEBUG
-        assert(d != NULL);
-#endif
-
-        ZeroMemory(&lvi, sizeof(lvi));
-
-        lvi.mask = LVIF_STATE;
-        lvi.stateMask = LVIS_STATEIMAGEMASK;
-        lvi.iItem = i;
-        lvi.iSubItem = 0;
-
-        if (d->removed) {
-            lvi.state = INDEXTOSTATEIMAGEMASK(cfg_idents.idx_deleted);
-            modified = TRUE;
-        } else if (d->saved.monitor != d->work.monitor ||
-                   d->saved.auto_renew != d->work.auto_renew ||
-                   d->saved.sticky != d->work.sticky) {
-            lvi.state = INDEXTOSTATEIMAGEMASK(cfg_idents.idx_modified);
-            modified = TRUE;
-        } else if (d->applied) {
-            lvi.state = INDEXTOSTATEIMAGEMASK(cfg_idents.idx_applied);
-            applied = TRUE;
-        } else {
-            lvi.state = INDEXTOSTATEIMAGEMASK(cfg_idents.idx_default);
-        }
-
-        ListView_SetItem(hw, &lvi);
-    }
-
-    {
-        khm_int32 flags = 0;
-
-        if (modified)
-            flags |= KHUI_CNFLAG_MODIFIED;
-        if (applied)
-            flags |= KHUI_CNFLAG_APPLIED;
-
-        khui_cfg_set_flags_inst(&cfg_idents.cfg, flags,
-                                KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
-    }
-}
-
-static void
-remove_idents(HWND hwnd) {
-    HWND hw;
-    int sel_count;
-    int i;
-    int idx;
-    ident_data * d;
-    LVITEM lvi;
-
-    hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
-
-    sel_count = ListView_GetSelectedCount(hw);
-
-    idx = -1;
-    for (i=0; i < sel_count; i++) {
-        idx = ListView_GetNextItem(hw, idx, LVNI_SELECTED);
-#ifdef DEBUG
-        assert(idx != -1);
-#endif
-        ZeroMemory(&lvi, sizeof(lvi));
-
-        lvi.iItem = idx;
-        lvi.iSubItem = 0;
-        lvi.mask = LVIF_PARAM;
-
-        ListView_GetItem(hw, &lvi);
-
-        d = (ident_data *) lvi.lParam;
-#ifdef DEBUG
-        assert(d != NULL);
-#endif
-
-        d->removed = TRUE;
-    }
+    khui_cfg_set_flags_inst(&cfg_idents.cfg, flags,
+                            KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
 }
 
 INT_PTR CALLBACK
@@ -840,37 +702,14 @@ khm_cfg_ids_tab_proc(HWND hwnd,
     switch(umsg) {
     case WM_INITDIALOG:
         {
-            HWND hw;
             HICON hicon;
-            LVCOLUMN lvcol;
-            LVITEM lvi;
-            wchar_t coltext[256];
-            RECT r;
-            int i;
 
             hold_idents_data();
 
             cfg_idents.hwnd = hwnd;
             cfg_idents.cfg = *((khui_config_init_data *) lParam);
 
-            /* first add the column */
-            hw = GetDlgItem(hwnd, IDC_CFG_IDENTS);
-
-            ZeroMemory(&lvcol, sizeof(lvcol));
-            lvcol.mask = LVCF_TEXT | LVCF_WIDTH | LVCF_FMT;
-
-            lvcol.fmt = LVCFMT_IMAGE | LVCFMT_LEFT;
-
-            GetWindowRect(hw, &r);
-            lvcol.cx = ((r.right - r.left) * 95) / 100;
-
-            LoadString(khm_hInstance, IDS_CFG_IDS_IDENTITY,
-                       coltext, ARRAYLENGTH(coltext));
-            lvcol.pszText = coltext;
-
-            ListView_InsertColumn(hw, 0, &lvcol);
-
-            /* and the status icons */
+            /* add the status icons */
             if (cfg_idents.hi_status)
                 goto _done_with_icons;
 
@@ -927,55 +766,28 @@ khm_cfg_ids_tab_proc(HWND hwnd,
 
             DestroyIcon(hicon);
 
-            ListView_SetImageList(hw, cfg_idents.hi_status, LVSIL_SMALL);
-            ListView_SetImageList(hw, cfg_idents.hi_status, LVSIL_STATE);
-
         _done_with_icons:
 
-            /* now add each identity */
-            for(i=0; i < (int)cfg_idents.n_idents; i++) {
-                ZeroMemory(&lvi, sizeof(lvi));
-
-                lvi.mask = LVIF_PARAM | LVIF_TEXT | LVIF_STATE | LVIF_IMAGE;
-                lvi.iImage = cfg_idents.idx_id;
-                lvi.lParam = (LPARAM) &cfg_idents.idents[i];
-                lvi.pszText = cfg_idents.idents[i].idname;
-                lvi.state = INDEXTOSTATEIMAGEMASK(cfg_idents.idx_default);
-                lvi.stateMask = LVIS_STATEIMAGEMASK;
-
-                cfg_idents.idents[i].lv_idx = ListView_InsertItem(hw, &lvi);
-            }
+            CheckDlgButton(hwnd, IDC_CFG_MONITOR,
+                           (cfg_idents.work.monitor)?BST_CHECKED:BST_UNCHECKED);
+            CheckDlgButton(hwnd, IDC_CFG_RENEW,
+                           (cfg_idents.work.auto_renew)?BST_CHECKED:BST_UNCHECKED);
+            CheckDlgButton(hwnd, IDC_CFG_STICKY,
+                           (cfg_idents.work.sticky)?BST_CHECKED:BST_UNCHECKED);
 
         }
         return FALSE;
-
-    case WM_NOTIFY:
-        {
-            LPNMHDR lpnm = (LPNMHDR) lParam;
-
-            if (lpnm->code == LVN_ITEMCHANGED) {
-                refresh_view_idents_sel(hwnd);
-            }
-        }
-        return TRUE;
 
     case WM_COMMAND:
 
         if (HIWORD(wParam) == BN_CLICKED) {
             UINT ctrl = LOWORD(wParam);
+
             switch(ctrl) {
             case IDC_CFG_MONITOR:
             case IDC_CFG_RENEW:
             case IDC_CFG_STICKY:
-                if (IsDlgButtonChecked(hwnd, ctrl) == BST_CHECKED)
-                    CheckDlgButton(hwnd, ctrl, BST_UNCHECKED);
-                else
-                    CheckDlgButton(hwnd, ctrl, BST_CHECKED);
                 refresh_data_idents(hwnd);
-                break;
-
-            case IDC_CFG_REMOVE:
-                remove_idents(hwnd);
                 break;
             }
 
@@ -994,7 +806,6 @@ khm_cfg_ids_tab_proc(HWND hwnd,
 
             case WMCFG_UPDATE_STATE:
                 refresh_view_idents_state(hwnd);
-                refresh_view_idents_sel(hwnd);
                 break;
             }
         }
@@ -1087,6 +898,26 @@ refresh_view_ident(HWND hwnd, khui_config_node node) {
 }
 
 static void
+mark_remove_ident(HWND hwnd, khui_config_init_data * idata) {
+    ident_data * d;
+
+    d = find_ident_by_node(idata->ctx_node);
+#ifdef DEBUG
+    assert(d);
+#endif
+
+    if (d->removed)
+        return;
+
+    d->removed = TRUE;
+
+    khui_cfg_set_flags_inst(idata, KHUI_CNFLAG_MODIFIED,
+                            KHUI_CNFLAG_MODIFIED);
+
+    EnableWindow(GetDlgItem(hwnd, IDC_CFG_REMOVE), FALSE);
+}
+
+static void
 refresh_data_ident(HWND hwnd, khui_config_init_data * idata) {
     ident_data * d;
 
@@ -1168,8 +999,16 @@ khm_cfg_id_tab_proc(HWND hwnd,
                     PostMessage(cfg_idents.hwnd, KHUI_WM_CFG_NOTIFY,
                                 MAKEWPARAM(1, WMCFG_UPDATE_STATE), 0);
                 break;
+
+            case IDC_CFG_REMOVE:
+                mark_remove_ident(hwnd, idata);
+                if (cfg_idents.hwnd)
+                    PostMessage(cfg_idents.hwnd, KHUI_WM_CFG_NOTIFY,
+                                MAKEWPARAM(1, WMCFG_UPDATE_STATE), 0);
+                break;
             }
         }
+
         khm_set_dialog_result(hwnd, 0);
         return TRUE;
 

@@ -168,6 +168,8 @@ write_params(notif_data * d) {
     khui_cfg_set_flags(d->node,
                        KHUI_CNFLAG_APPLIED,
                        KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
+
+    khm_timer_refresh(hwnd_notifier);
 }
 
 static void

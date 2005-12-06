@@ -43,12 +43,20 @@ nc_common_dlg_proc(HWND hwnd,
 {
     switch(uMsg) {
     case WM_INITDIALOG:
+        {
+            khui_nc_wnd_data * d;
+
+            d = (khui_nc_wnd_data *) lParam;
 
 #pragma warning(push)
 #pragma warning(disable: 4244)
-        SetWindowLongPtr(hwnd, DWLP_USER, lParam);
+            SetWindowLongPtr(hwnd, DWLP_USER, lParam);
 #pragma warning(pop)
-
+            if (d->nc->subtype == KMSG_CRED_PASSWORD) {
+                ShowWindow(GetDlgItem(hwnd, IDC_NC_OPTIONS),
+                           SW_HIDE);
+            }
+        }
         return TRUE;
 
     case WM_COMMAND:
@@ -271,6 +279,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
         kcdb_identity_get_name(d->nc->identities[0], id_name, &cbbuf);
 
         kcdb_identity_get_flags(d->nc->identities[0], &flags);
+
         if (flags & KCDB_IDENT_FLAG_INVALID) {
             LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID, 
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
@@ -289,6 +298,21 @@ nc_update_credtext(khui_nc_wnd_data * d)
 
         StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t), 
                        main_fmt, id_string);
+
+        if (flags & KCDB_IDENT_FLAG_VALID) {
+            if (flags & KCDB_IDENT_FLAG_DEFAULT)
+                LoadString(khm_hInstance, IDS_NC_ID_DEF,
+                           id_string, ARRAYLENGTH(id_string));
+            else if (d->nc->set_default)
+                LoadString(khm_hInstance, IDS_NC_ID_WDEF,
+                           id_string, ARRAYLENGTH(id_string));
+            else
+                LoadString(khm_hInstance, IDS_NC_ID_NDEF,
+                           id_string, ARRAYLENGTH(id_string));
+
+            StringCbCat(buf, NC_MAXCB_CREDTEXT - cch * sizeof(wchar_t),
+                        id_string);
+        }
 
     } else if(d->nc->n_identities > 1) {
         wchar_t *ids_string;
@@ -455,6 +479,12 @@ nc_update_credtext(khui_nc_wnd_data * d)
 }
 
 #define CW_PARAM DWLP_USER
+
+static void
+nc_add_control_row(khui_nc_wnd_data * d, 
+                   HWND label,
+                   HWND input,
+                   khui_control_size size);
 
 static LRESULT 
 nc_handle_wm_create(HWND hwnd,
@@ -691,6 +721,7 @@ nc_handle_wm_create(HWND hwnd,
         ShowWindow(ncd->dlg_ts, SW_HIDE);
 
         nc_position_credtext(ncd);
+
     } else {
         /* hide and show stuff */
         ShowWindow(ncd->dlg_main, SW_SHOW);
@@ -705,6 +736,28 @@ nc_handle_wm_create(HWND hwnd,
        selector controls */
     c->ident_cb(c, WMNC_IDENT_INIT, NULL, 0, 0, (LPARAM) ncd->dlg_main);
 
+#if 0
+    {
+        HWND hw;
+        wchar_t wcaption[64];
+
+        LoadString(khm_hInstance, IDS_NC_SETDEF, wcaption,
+                   ARRAYLENGTH(wcaption));
+
+        /* Now create the set as default button */
+        hw = CreateWindow
+            (L"BUTTON",
+             wcaption,
+             WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+             0, 0, 100, 100,
+             ncd->dlg_main,
+             (HMENU) NC_BN_SET_DEF_ID,
+             khm_hInstance,
+             NULL);
+
+        nc_add_control_row(ncd, NULL, hw, KHUI_CTRLSIZE_HALF);
+    }
+#endif
     /* we defer the creation of the tab buttons for later */
 
     /* add this to the dialog chain */
@@ -757,23 +810,27 @@ nc_add_control_row(khui_nc_wnd_data * d,
 #endif
     }
 
-    SetWindowPos(label,
-                 ((d->hwnd_last_idspec != NULL)?
-                  d->hwnd_last_idspec:
-                  HWND_TOP),
-                 r_label.left, r_label.top,
-                 r_label.right - r_label.left,
-                 r_label.bottom - r_label.top,
-                 SWP_DEFERERASE | SWP_NOACTIVATE |
-                 SWP_NOOWNERZORDER);
+    if (label)
+        SetWindowPos(label,
+                     ((d->hwnd_last_idspec != NULL)?
+                      d->hwnd_last_idspec:
+                      HWND_TOP),
+                     r_label.left, r_label.top,
+                     r_label.right - r_label.left,
+                     r_label.bottom - r_label.top,
+                     SWP_DEFERERASE | SWP_NOACTIVATE |
+                     SWP_NOOWNERZORDER);
 
-    SetWindowPos(input,
-                 label,
-                 r_input.left, r_input.top,
-                 r_input.right - r_input.left,
-                 r_input.bottom - r_input.top,
-                 SWP_DEFERERASE | SWP_NOACTIVATE |
-                 SWP_NOOWNERZORDER);
+    if (input)
+        SetWindowPos(input,
+                     (label ? label : ((d->hwnd_last_idspec != NULL)?
+                                       d->hwnd_last_idspec:
+                                       HWND_TOP)),
+                     r_input.left, r_input.top,
+                     r_input.right - r_input.left,
+                     r_input.bottom - r_input.top,
+                     SWP_DEFERERASE | SWP_NOACTIVATE |
+                     SWP_NOOWNERZORDER);
 
     d->hwnd_last_idspec = input;
 
@@ -877,6 +934,10 @@ nc_handle_wm_command(HWND hwnd,
             }
             return FALSE;
 
+        case IDC_NC_HELP:
+            khm_html_help(hwnd, NULL, HH_HELP_CONTEXT, IDH_ACTION_NEW_ID);
+            return FALSE;
+
         case IDC_NC_OPTIONS: 
             /* the Options button in the main window was clicked.  we
                respond by expanding the dialog. */
@@ -958,9 +1019,25 @@ nc_handle_wm_command(HWND hwnd,
                                                    WMNC_DIALOG_SWITCH_PANEL),
                                         0);
                     }
+                } else if (!wcsicmp(sid, L"NotDef")) {
+                    d->nc->set_default = FALSE;
+                    nc_update_credtext(d);
+                } else if (!wcsicmp(sid, L"MakeDef")) {
+                    d->nc->set_default = TRUE;
+                    nc_update_credtext(d);
                 }
             }
             return FALSE;
+
+#if 0
+        case NC_BN_SET_DEF_ID:
+            {
+                d->nc->set_default =
+                    (IsDlgButtonChecked(d->dlg_main, NC_BN_SET_DEF_ID)
+                     == BST_CHECKED);
+            }
+            return FALSE;
+#endif
 
         default:
             /* if one of the tab strip buttons were pressed, then
@@ -1271,7 +1348,21 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
             nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY,
                             MAKEWPARAM(0, WMNC_IDENTITY_CHANGE), 0);
+
+            if (d->nc->subtype == KMSG_CRED_NEW_CREDS &&
+                d->nc->n_identities > 0 &&
+                d->nc->identities[0]) {
+                khm_int32 f = 0;
+
+                kcdb_identity_get_flags(d->nc->identities[0], &f);
+
+                if (!(f & KCDB_IDENT_FLAG_DEFAULT)) {
+                    d->nc->set_default = FALSE;
+                }
+            }
+
             nc_update_credtext(d);
+
         }
         break;
 
@@ -1517,7 +1608,11 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                              SWP_NOACTIVATE | SWP_NOMOVE | 
                              SWP_NOOWNERZORDER | SWP_NOSIZE | 
                              SWP_SHOWWINDOW);
-                                
+
+                SendMessage(hw, EM_SETLIMITTEXT,
+                            KHUI_MAXCCH_PROMPT_VALUE -1,
+                            0);
+
                 d->nc->prompts[i]->hwnd_edit = hw;
 
                 hw_prev = hw;
@@ -1542,11 +1637,11 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
             nc = d->nc;
 
-            /* reset state */
-            nc->result = KHUI_NC_RESULT_CANCEL;
-
             if(nc->response & KHUI_NC_RESPONSE_NOEXIT) {
                 HWND hw;
+
+                /* reset state */
+                nc->result = KHUI_NC_RESULT_CANCEL;
 
                 hw = GetDlgItem(d->dlg_main, IDOK);
                 EnableWindow(hw, TRUE);
@@ -1586,6 +1681,72 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
     return TRUE;
 }
 
+static LRESULT nc_handle_wm_help(HWND hwnd,
+                                 UINT uMsg,
+                                 WPARAM wParam,
+                                 LPARAM lParam) {
+    static DWORD ctxids[] = {
+        NC_TS_CTRL_ID_MIN, IDH_NC_TABMAIN,
+        NC_TS_CTRL_ID_MIN + 1, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 2, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 3, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 4, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 5, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 6, IDH_NC_TABBUTTON,
+        NC_TS_CTRL_ID_MIN + 7, IDH_NC_TABBUTTON,
+        IDOK, IDH_NC_OK,
+        IDCANCEL, IDH_NC_CANCEL,
+        IDC_NC_HELP, IDH_NC_HELP,
+        IDC_NC_OPTIONS, IDH_NC_OPTIONS,
+        IDC_NC_CREDTEXT, IDH_NC_CREDWND,
+        0
+    };
+
+    HELPINFO * hlp;
+    HWND hw = NULL;
+    HWND hw_ctrl;
+    khui_nc_wnd_data * d;
+
+    d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+
+    hlp = (HELPINFO *) lParam;
+
+    if (d->nc->subtype != KMSG_CRED_NEW_CREDS &&
+        d->nc->subtype != KMSG_CRED_PASSWORD)
+        return TRUE;
+
+    if (hlp->iContextType != HELPINFO_WINDOW)
+        return TRUE;
+
+    if (hlp->hItemHandle != NULL &&
+        hlp->hItemHandle != hwnd) {
+        DWORD id;
+        int i;
+
+        hw_ctrl =hlp->hItemHandle;
+
+        id = GetWindowLong(hw_ctrl, GWL_ID);
+        for (i=0; ctxids[i] != 0; i += 2)
+            if (ctxids[i] == id)
+                break;
+
+        if (ctxids[i] != 0)
+            hw = khm_html_help(hw_ctrl,
+                               ((d->nc->subtype == KMSG_CRED_NEW_CREDS)?
+                                L"::popups_newcreds.txt":
+                                L"::popups_password.txt"),
+                               HH_TP_HELP_WM_HELP,
+                               (DWORD_PTR) ctxids);
+    }
+
+    if (hw == NULL) {
+        khm_html_help(hwnd, NULL, HH_HELP_CONTEXT,
+                      ((d->nc->subtype == KMSG_CRED_NEW_CREDS)?
+                       IDH_ACTION_NEW_ID: IDH_ACTION_PASSWD_ID));
+    }
+
+    return TRUE;
+}
 
 static LRESULT CALLBACK nc_window_proc(HWND hwnd,
                                        UINT uMsg,
@@ -1605,6 +1766,9 @@ static LRESULT CALLBACK nc_window_proc(HWND hwnd,
     case WM_MOVE:
     case WM_MOVING:
         return nc_handle_wm_moving(hwnd, uMsg, wParam, lParam);
+
+    case WM_HELP:
+        return nc_handle_wm_help(hwnd, uMsg, wParam, lParam);
 
     case KHUI_WM_NC_NOTIFY:
         return nc_handle_wm_nc_notify(hwnd, uMsg, wParam, lParam);

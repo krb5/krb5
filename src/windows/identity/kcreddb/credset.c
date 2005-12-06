@@ -79,7 +79,7 @@ void kcdb_credset_buf_assert_size(kcdb_credset * cs, khm_int32 nclist)
             (((nclist - (KCDB_CREDSET_INITIAL_SIZE + 1)) / KCDB_CREDSET_GROWTH_FACTOR) + 1) *
             KCDB_CREDSET_GROWTH_FACTOR;
 
-        new_clist = calloc(nclist, sizeof(kcdb_credset_credref));
+        new_clist = PCALLOC(nclist, sizeof(kcdb_credset_credref));
 
         memcpy(new_clist, cs->clist, cs->nclist * sizeof(kcdb_credset_credref));
 
@@ -693,8 +693,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_find_filtered(
     khm_int32 rv = KHM_ERROR_SUCCESS;
     int i;
 
-    if((credset && !kcdb_credset_is_credset(credset)) ||
-        (!f || !cred))
+    if((credset && !kcdb_credset_is_credset(credset)) || !f)
         return KHM_ERROR_INVALID_PARAM;
 
     if(credset)
@@ -724,10 +723,14 @@ KHMEXP khm_int32 KHMAPI kcdb_credset_find_filtered(
     cs->flags &= ~KCDB_CREDSET_FLAG_ENUM;
 
     if(i < cs->nclist) {
-        *cred = (khm_handle) cs->clist[i].cred;
-        kcdb_cred_hold(*cred);
-        if(idx)
+        if (cred) {
+            *cred = (khm_handle) cs->clist[i].cred;
+            kcdb_cred_hold(*cred);
+        }
+
+        if(idx) {
             *idx = i;
+        }
     } else {
         rv = KHM_ERROR_NOT_FOUND;
     }
