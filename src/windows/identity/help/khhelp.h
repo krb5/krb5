@@ -22,3 +22,12 @@
 #define IDH_ACTION_OPT_KHIM        2012
 #define IDH_ACTION_OPT_INIT        2013
 #define IDH_ACTION_OPT_NOTIF       2014
+
+#define IDH_NC_CREDWND             3000
+#define IDH_NC_OK                  3001
+#define IDH_NC_CANCEL              3002
+#define IDH_NC_HELP                3003
+#define IDH_NC_TABBUTTON           3004
+#define IDH_NC_OPTIONS             3005
+#define IDH_NC_TABMAIN             3006
+#define IDH_NC_SETDEF              3007

@@ -88,6 +88,8 @@ void khm_show_newcredwnd(HWND hwnd);
 /* Maximum control ID */
 #define NC_TS_CTRL_ID_MAX (NC_TS_CTRL_ID_MIN + NC_TS_MAX_CTRLS - 1)
 
+#define NC_BN_SET_DEF_ID 8012
+
 /* the first control ID that may be used by an identity provider */
 #define NC_IS_CTRL_ID_MIN 8016
 

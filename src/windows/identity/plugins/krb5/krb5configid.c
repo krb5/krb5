@@ -60,7 +60,10 @@ k5_id_read_params(k5_id_dlg_data * d) {
     khm_handle csp_idroot = NULL;
 
     cb = sizeof(idname);
-    khui_cfg_get_name(d->cfg.ctx_node, idname, &cb);
+    rv = khui_cfg_get_name(d->cfg.ctx_node, idname, &cb);
+#ifdef DEBUG
+    assert(KHM_SUCCEEDED(rv));
+#endif
 
     rv = kcdb_identity_create(idname, 0, &d->ident);
 #ifdef DEBUG
@@ -93,8 +96,12 @@ k5_id_read_params(k5_id_dlg_data * d) {
 
     cb = sizeof(d->ccache);
     rv = khc_read_string(csp_ident, L"DefaultCCName", d->ccache, &cb);
-    if (KHM_FAILED(rv))
-        ZeroMemory(d->ccache, sizeof(d->ccache));
+    if (KHM_FAILED(rv) || cb <= sizeof(wchar_t)) {
+        cb = sizeof(d->ccache);
+        if (KHM_FAILED(kcdb_identity_get_attr(d->ident, attr_id_krb5_ccname,
+                                              NULL, d->ccache, &cb)))
+            ZeroMemory(d->ccache, sizeof(d->ccache));
+    }
 
     khui_tracker_initialize(&d->tc_life);
     d->tc_life.current = d->life;

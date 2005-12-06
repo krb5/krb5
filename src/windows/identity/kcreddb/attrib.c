@@ -128,28 +128,30 @@ kcdb_attr_sys_cb(khm_handle vcred,
 
     case KCDB_ATTR_TIMELEFT:
         {
-            /* we are going to make liberal use of __int64 here.  It
-               is equivalent to FILETIME and also the MSDN docs say we
-               should use it if the compiler supports it */
             khm_int32 rv = KHM_ERROR_SUCCESS;
-            unsigned __int64 ftc;
-            SYSTEMTIME st;
 
-            if(!buf || *pcb_buf < sizeof(__int64)) {
-                *pcb_buf = sizeof(__int64);
+            if(!buf || *pcb_buf < sizeof(FILETIME)) {
+                *pcb_buf = sizeof(FILETIME);
                 rv = KHM_ERROR_TOO_LONG;
             } else if(!kcdb_cred_buf_exist(c,KCDB_ATTR_EXPIRE)) {
-                *pcb_buf = sizeof(__int64);
+                *pcb_buf = sizeof(FILETIME);
                 /* setting the timeleft to _I64_MAX has the
                    interpretation that this credential does not
                    expire, which is the default behavior if the
                    expiration time is not known */
-                *((__int64 *) buf) = _I64_MAX;
+                *((FILETIME *) buf) = IntToFt(_I64_MAX);
             } else {
-                GetSystemTime(&st);
-                SystemTimeToFileTime(&st, (LPFILETIME) &ftc);
-                *((__int64 *) buf) =
-                    *((__int64 *) kcdb_cred_buf_get(c,KCDB_ATTR_EXPIRE)) - ftc;
+                FILETIME ftc;
+                khm_int64 iftc;
+
+                GetSystemTimeAsFileTime(&ftc);
+                iftc = FtToInt(&ftc);
+
+                *((FILETIME *) buf) =
+                    IntToFt(FtToInt((FILETIME *) 
+                                    kcdb_cred_buf_get(c,KCDB_ATTR_EXPIRE))
+                            - iftc);
+                *pcb_buf = sizeof(FILETIME);
             }
 
             return rv;
@@ -157,28 +159,28 @@ kcdb_attr_sys_cb(khm_handle vcred,
 
     case KCDB_ATTR_RENEW_TIMELEFT:
         {
-            /* we are going to make liberal use of __int64 here.  It
-               is equivalent to FILETIME and also the MSDN docs say we
-               should use it if the compiler supports it */
             khm_int32 rv = KHM_ERROR_SUCCESS;
-            unsigned __int64 ftc;
-            SYSTEMTIME st;
 
-            if(!buf || *pcb_buf < sizeof(__int64)) {
-                *pcb_buf = sizeof(__int64);
+            if(!buf || *pcb_buf < sizeof(FILETIME)) {
+                *pcb_buf = sizeof(FILETIME);
                 rv = KHM_ERROR_TOO_LONG;
             } else if(!kcdb_cred_buf_exist(c,KCDB_ATTR_RENEW_EXPIRE)) {
-                *pcb_buf = sizeof(__int64);
+                *pcb_buf = sizeof(FILETIME);
                 /* setting the timeleft to _I64_MAX has the
                    interpretation that this credential does not
                    expire, which is the default behavior if the
                    expiration time is not known */
-                *((__int64 *) buf) = _I64_MAX;
+                *((FILETIME *) buf) = IntToFt(_I64_MAX);
             } else {
-                GetSystemTime(&st);
-                SystemTimeToFileTime(&st, (LPFILETIME) &ftc);
-                *((__int64 *) buf) =
-                    *((__int64 *) kcdb_cred_buf_get(c,KCDB_ATTR_RENEW_EXPIRE)) - ftc;
+                FILETIME ftc;
+
+                GetSystemTimeAsFileTime(&ftc);
+
+                *((FILETIME *) buf) =
+                    IntToFt(FtToInt(((FILETIME *)
+                                     kcdb_cred_buf_get(c,KCDB_ATTR_RENEW_EXPIRE))
+                                    - FtToInt(&ftc)));
+                *pcb_buf = sizeof(FILETIME);
             }
 
             return rv;
@@ -688,7 +690,7 @@ KHMEXP khm_int32 KHMAPI kcdb_attrib_describe(
 {
     kcdb_attrib_i * ai;
     size_t cb_size = 0;
-    khm_boolean prop;
+    khm_boolean prop = FALSE;
 
     if(!cbsize)
         return KHM_ERROR_INVALID_PARAM;
@@ -697,6 +699,8 @@ KHMEXP khm_int32 KHMAPI kcdb_attrib_describe(
         prop = FALSE;
     else if(id >= KCDB_ATTR_MIN_PROP_ID && id <= KCDB_ATTR_MAX_PROP_ID)
         prop = TRUE;
+    else 
+	return KHM_ERROR_INVALID_PARAM;
 
     if(prop)
         ai = kcdb_property_tbl[id - KCDB_ATTR_MIN_PROP_ID];

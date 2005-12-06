@@ -516,8 +516,39 @@ ui_cb(khui_new_creds * nc,
                             0,
                             (LPARAM) t);
             }
+	  _done_adding_lru:
 
-        _done_adding_lru:
+            {
+                khm_int32 inc_realms = 0;
+
+                if (KHM_FAILED(khc_read_int32(csp_params,
+                                              L"UseFullRealmList",
+                                              &inc_realms)) ||
+                    !inc_realms)
+                    goto _done_adding_all_realms;
+            }
+
+	    if(ms)
+		PFREE(ms);
+
+	    ms = khm_krb5_get_realm_list();
+	    if(ms) {
+		for (t = ms; t && *t; t = multi_string_next(t)) {
+		    lr = SendMessage(d->hw_realm,
+				      CB_FINDSTRINGEXACT,
+				      (WPARAM) -1,
+				      (LPARAM) t);
+		    if (lr != CB_ERR)
+			continue;
+
+		    SendMessage(d->hw_realm,
+				 CB_ADDSTRING,
+				 0,
+				 (LPARAM) t);
+		}
+	    }
+        _done_adding_all_realms:
+
             /* set the current selection of the realms list */
             if (defrealm) {
                 SendMessage(d->hw_realm,
@@ -1080,12 +1111,8 @@ k5_ident_update(khm_int32 msg_type,
     return KHM_ERROR_SUCCESS;
 }
 
-
-static khm_int32
-k5_ident_init(khm_int32 msg_type,
-              khm_int32 msg_subtype,
-              khm_ui_4 uparam,
-              void * vparam) {
+static khm_boolean
+k5_refresh_default_identity(krb5_context ctx) {
     /* just like notify_create, except now we set the default identity
        based on what we find in the configuration */
     krb5_ccache cc = NULL;
@@ -1096,31 +1123,23 @@ k5_ident_init(khm_int32 msg_type,
     khm_handle ident = NULL;
     khm_boolean found_default = FALSE;
 
-    assert(k5_identpro_ctx != NULL);
+    assert(ctx != NULL);
 
-    code = pkrb5_cc_default(k5_identpro_ctx, &cc);
+    code = pkrb5_cc_default(ctx, &cc);
+    if (code)
+        goto _nc_cleanup;
+    
+    code = pkrb5_cc_get_principal(ctx, cc, &princ);
     if (code)
         goto _nc_cleanup;
 
-    code = pkrb5_cc_get_principal(k5_identpro_ctx,
-                                  cc,
-                                  &princ);
+    code = pkrb5_unparse_name(ctx, princ, &princ_nameA);
     if (code)
         goto _nc_cleanup;
 
-    code = pkrb5_unparse_name(k5_identpro_ctx,
-                              princ,
-                              &princ_nameA);
-    if (code)
-        goto _nc_cleanup;
+    AnsiStrToUnicode(princ_nameW, sizeof(princ_nameW), princ_nameA);
 
-    AnsiStrToUnicode(princ_nameW,
-                     sizeof(princ_nameW),
-                     princ_nameA);
-
-    if (KHM_FAILED(kcdb_identity_create(princ_nameW,
-                                        0,
-                                        &ident)))
+    if (KHM_FAILED(kcdb_identity_create(princ_nameW, 0, &ident)))
         goto _nc_cleanup;
 
     kcdb_identity_set_default_int(ident);
@@ -1129,16 +1148,30 @@ k5_ident_init(khm_int32 msg_type,
 
  _nc_cleanup:
     if (princ_nameA)
-        pkrb5_free_unparsed_name(k5_identpro_ctx,
-                                 princ_nameA);
+        pkrb5_free_unparsed_name(ctx, princ_nameA);
+
     if (princ)
-        pkrb5_free_principal(k5_identpro_ctx,
-                             princ);
+        pkrb5_free_principal(ctx, princ);
+
     if (cc)
-        pkrb5_cc_close(k5_identpro_ctx, cc);
+        pkrb5_cc_close(ctx, cc);
 
     if (ident)
         kcdb_identity_release(ident);
+
+    return found_default;
+}
+
+static khm_int32
+k5_ident_init(khm_int32 msg_type,
+              khm_int32 msg_subtype,
+              khm_ui_4 uparam,
+              void * vparam) {
+
+    khm_boolean found_default;
+    khm_handle ident;
+
+    found_default = k5_refresh_default_identity(k5_identpro_ctx);
 
     if (!found_default) {
         wchar_t widname[KCDB_IDENT_MAXCCH_NAME];
@@ -1284,6 +1317,143 @@ k5_ident_name_comp_func(const void * dl, khm_size cb_dl,
         return r;
 }
 
+
+/* Identity change notification thread */
+
+HANDLE h_ccname_exit_event;
+HANDLE h_ccname_thread;
+
+DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
+    krb5_context ctx = 0;
+
+    HKEY hk_ccname;
+    HANDLE h_notify;
+    HANDLE h_waits[2];
+
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    DWORD dwType;
+    DWORD dwSize;
+    DWORD dwDisp;
+    wchar_t reg_ccname[KRB5_MAXCCH_CCNAME];
+    LONG l;
+
+    l = RegOpenKeyEx(HKEY_CURRENT_USER,
+                     L"Software\\MIT\\kerberos5",
+                     0,
+                     KEY_READ | KEY_WRITE,
+                     &hk_ccname);
+
+    if (l != ERROR_SUCCESS)
+        l = RegCreateKeyEx(HKEY_CURRENT_USER,
+                           L"Software\\MIT\\kerberos5",
+                           0,
+                           NULL,
+                           REG_OPTION_NON_VOLATILE,
+                           KEY_READ | KEY_WRITE,
+                           NULL,
+                           &hk_ccname,
+                           &dwDisp);
+
+    if (l != ERROR_SUCCESS) {
+        rv = KHM_ERROR_UNKNOWN;
+        goto _exit;
+    }
+
+    dwSize = sizeof(reg_ccname);
+    
+    l = RegQueryValueEx(hk_ccname,
+                        L"ccname",
+                        NULL,
+                        &dwType,
+                        (LPBYTE) reg_ccname,
+                        &dwSize);
+
+    if (l != ERROR_SUCCESS ||
+        dwType != REG_SZ) {
+
+        reg_ccname[0] = L'\0';
+    }
+
+    l = pkrb5_init_context(&ctx);
+
+    if (l)
+        goto _exit_0;
+
+    h_notify = CreateEvent(NULL, FALSE, FALSE, L"Local\\Krb5CCNameChangeNotifier");
+
+    if (h_notify == NULL)
+        goto _exit_0;
+
+    /* begin wait loop */
+
+    h_waits[0] = h_ccname_exit_event;
+    h_waits[1] = h_notify;
+
+    do {
+        DWORD dwrv;
+
+        l = RegNotifyChangeKeyValue(hk_ccname, FALSE,
+                                    REG_NOTIFY_CHANGE_LAST_SET,
+                                    h_notify, TRUE);
+
+        if (l != ERROR_SUCCESS) {
+            rv = KHM_ERROR_UNKNOWN;
+            break;
+        }
+
+        dwrv = WaitForMultipleObjects(2, h_waits, FALSE, INFINITE);
+
+        if (dwrv == WAIT_OBJECT_0) {
+            /* exit! */
+            break;
+
+        } else if (dwrv == WAIT_OBJECT_0 + 1) {
+            /* change notify! */
+            wchar_t new_ccname[KRB5_MAXCCH_CCNAME];
+
+            dwSize = sizeof(new_ccname);
+    
+            l = RegQueryValueEx(hk_ccname,
+                                L"ccname",
+                                NULL,
+                                &dwType,
+                                (LPBYTE) new_ccname,
+                                &dwSize);
+
+            if (l != ERROR_SUCCESS ||
+                dwType != REG_SZ) {
+                new_ccname[0] = L'\0';
+            }
+
+            if (wcsicmp(new_ccname, reg_ccname)) {
+                k5_refresh_default_identity(ctx);
+                StringCbCopy(reg_ccname, sizeof(reg_ccname), new_ccname);
+            }
+
+        } else {
+            /* something went wrong */
+            rv = KHM_ERROR_UNKNOWN;
+            break;
+        }
+
+    } while (TRUE);
+
+    CloseHandle(h_notify);
+
+ _exit_0:
+
+    RegCloseKey(hk_ccname);
+
+    if (ctx)
+        pkrb5_free_context(ctx);
+
+ _exit:
+    ExitThread(rv);
+
+    /* not reached */
+    return rv;
+}
+
 khm_int32
 k5_msg_system_idpro(khm_int32 msg_type, khm_int32 msg_subtype,
                     khm_ui_4 uparam, void * vparam) {
@@ -1329,11 +1499,34 @@ k5_msg_system_idpro(khm_int32 msg_type, khm_int32 msg_subtype,
 
                 kcdb_attrib_release_info(attr);
             }
+
+            h_ccname_exit_event = CreateEvent(NULL, FALSE, FALSE, NULL);
+            if (h_ccname_exit_event) {
+                h_ccname_thread = CreateThread(NULL,
+                                               200 * 1024,
+                                               k5_ccname_monitor_thread,
+                                               NULL,
+                                               0,
+                                               NULL);
+            } else {
+                h_ccname_thread = NULL;
+            }
         }
         break;
 
     case KMSG_SYSTEM_EXIT:
         {
+
+            if (h_ccname_thread) {
+                SetEvent(h_ccname_exit_event);
+                WaitForSingleObject(h_ccname_thread, INFINITE);
+                CloseHandle(h_ccname_thread);
+                CloseHandle(h_ccname_exit_event);
+
+                h_ccname_exit_event = NULL;
+                h_ccname_thread = NULL;
+            }
+
             if (k5_identpro_ctx) {
                 pkrb5_free_context(k5_identpro_ctx);
                 k5_identpro_ctx = NULL;

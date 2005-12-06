@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by D:\work\khimaira\src\kcreddb\lang\en_us\kcredres.rc
+// Used by D:\work\pismere\athena\auth\krb5\src\windows\identity\kcreddb\lang\en_us\kcredres.rc
 //
 #define IDS_CREDDB                      101
 #define IDS_NAME                        102
@@ -31,7 +31,6 @@
 #define IDS_IVL_D_SPEC                  127
 #define IDS_IVl_W_SPEC                  128
 #define IDS_IVL_W_SPEC                  128
-#define IDS_IVl_W_SPEC                  128
 #define IDS_FLAGS                       129
 #define IDS_RENEW_TIMELEFT              130
 #define IDS_RENEW_EXPIRES               131

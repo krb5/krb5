@@ -2,7 +2,7 @@ Name,Type,Value,Description
 CredWindow,KC_SPACE,0,Options for the credentials window
   AutoInit,KC_INT32,0,Prompt for creds if there arent any
   AutoStart,KC_INT32,0,Start Khimaira when Windows starts
-  AutoImport,KC_INT32,0,Import Windows creds when Khimaira starts
+  AutoImport,KC_INT32,1,Import Windows creds when Khimaira starts
   AutoDetectNet,KC_INT32,1,Automatically detect network connectivity changes
   KeepRunning,KC_INT32,1,Keep running after closing Khimaira
   DefaultView,KC_STRING,ByIdentity,
@@ -11,6 +11,7 @@ CredWindow,KC_SPACE,0,Options for the credentials window
   PaddingVertical,KC_INT32,2,
   PaddingHeader,KC_INT32,16,
   Monitor,KC_INT32,1,Monitor credentials
+  DefaultMonitor,KC_INT32,1,Default Monitor value for new identities
   RefreshTimeout,KC_INT32,60,In seconds
   WarnThreshold,KC_INT32,900,In seconds
   AllowWarn,KC_INT32,1,Boolean. Enables warning.
@@ -18,6 +19,8 @@ CredWindow,KC_SPACE,0,Options for the credentials window
   AllowCritical,KC_INT32,1,Boolean. Enables critical.
   AutoRenewThreshold,KC_INT32,600,In seconds
   AllowAutoRenew,KC_INT32,1,Boolean.
+  DefaultAllowAutoRenew,KC_INT32,1,Default AllowAutoRenew value for new identities
+  DefaultSticky,KC_INT32,0,Default Sticky value for new identities
   MaxThreshold,KC_INT32,86400,Max value for a threshold (1 day)
   MinThreshold,KC_INT32,10,Min value for a threshold (0)
   Windows,KC_SPACE,0,Window parameters
@@ -35,16 +38,16 @@ CredWindow,KC_SPACE,0,Options for the credentials window
    Custom_0,KC_ENDSPACE,0,
    ByIdentity,KC_SPACE,0,The default view
     Description,KC_STRING,View grouped by identity and credential type,
-    ColumnList,KC_STRING,"_CWFlags,_CWTypeIcon,IdentityName,TypeName,Name,TimeLeft",
+    ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Name,TimeLeft",
     Columns,KC_SPACE,0,Columns
       _CWFlags,KC_SPACE,0,
         Width,KC_INT32,20,
 	Flags,KC_INT32,112,
       _CWFlags,KC_ENDSPACE,0,
-      _CWTypeIcon,KC_SPACE,0,
-        Width,KC_INT32,20,
-	Flags,KC_INT32,112,
-      _CWTypeIcon,KC_ENDSPACE,0,
+#      _CWTypeIcon,KC_SPACE,0,
+#        Width,KC_INT32,20,
+#	Flags,KC_INT32,112,
+#      _CWTypeIcon,KC_ENDSPACE,0,
       IdentityName,KC_SPACE,0,
         Width,KC_INT32,100,
         SortIndex,KC_INT32,0,
@@ -68,16 +71,16 @@ CredWindow,KC_SPACE,0,Options for the credentials window
    ByIdentity,KC_ENDSPACE,0
    ByLocation,KC_SPACE,0,View by location
     Description,KC_STRING,View grouped by location,
-    ColumnList,KC_STRING,"_CWFlags,_CWTypeIcon,Location,IdentityName,TypeName,Name,TimeLeft",
+    ColumnList,KC_STRING,"_CWFlags,Location,IdentityName,TypeName,Name,TimeLeft",
     Columns,KC_SPACE,0,Columns
       _CWFlags,KC_SPACE,0,
         Width,KC_INT32,20,
 	Flags,KC_INT32,112,
       _CWFlags,KC_ENDSPACE,0,
-      _CWTypeIcon,KC_SPACE,0,
-        Width,KC_INT32,20,
-	Flags,KC_INT32,112,
-      _CWTypeIcon,KC_ENDSPACE,0,
+#      _CWTypeIcon,KC_SPACE,0,
+#        Width,KC_INT32,20,
+#	Flags,KC_INT32,112,
+#      _CWTypeIcon,KC_ENDSPACE,0,
       Location,KC_SPACE,0,
         Width,KC_INT32,100,
         SortIndex,KC_INT32,0,

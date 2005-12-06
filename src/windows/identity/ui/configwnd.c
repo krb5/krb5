@@ -535,6 +535,8 @@ cfgui_dlgproc(HWND hwnd,
 
         khui_cfg_clear_params();
 
+        khui_cfg_set_configui_handle(hwnd);
+
         d = PMALLOC(sizeof(*d));
         ZeroMemory(d, sizeof(*d));
 
@@ -564,8 +566,6 @@ cfgui_dlgproc(HWND hwnd,
 
         khm_add_dialog(hwnd);
         khm_enter_modal(hwnd);
-
-        khui_cfg_set_configui_handle(hwnd);
 
         return TRUE;
 

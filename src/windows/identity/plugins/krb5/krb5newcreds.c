@@ -459,6 +459,7 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                     goto _switch_to_main;
 
                 if (!k5_cp_check_continue()) {
+                    g_fjob.code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
                     goto _switch_to_main;
                 }
             }
@@ -1278,7 +1279,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             nct->type = credtype_id_krb5;
             nct->ordinal = 1;
 
-            LoadString(hResModule, IDS_KRB5_SHORT_DESC, 
+            LoadString(hResModule, IDS_KRB5_NC_NAME, 
                        wbuf, ARRAYLENGTH(wbuf));
             StringCbLength(wbuf, sizeof(wbuf), &cbsize);
             cbsize += sizeof(wchar_t);
@@ -1343,12 +1344,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 realms = khm_krb5_get_realm_list();
                 if(realms) {
-                    t = realms;
-                    while(t && *t) {
+                    for (t = realms; t && *t; t = multi_string_next(t)) {
                         SendDlgItemMessage(hwnd, IDC_NCK5_REALM, 
                                            CB_ADDSTRING,
                                            0, (LPARAM) t);
-                        t = multi_string_next(t);
                     }
                     PFREE(realms);
                 }
@@ -1698,7 +1697,6 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                     NULL))))
                     g_fjob.code = 0;
 
-
                 if(g_fjob.code != 0) {
                     wchar_t tbuf[1024];
                     DWORD suggestion;
@@ -1771,6 +1769,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     khm_krb5_list_tickets(&ctx);
 
+                    if (nc->set_default) {
+                        kcdb_identity_set_default(nc->identities[0]);
+                    }
+
                     /* If there is no default identity, then make this the default */
                     kcdb_identity_refresh(nc->identities[0]);
                     {
@@ -1841,7 +1843,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                                 wbuf);
 
                     atsign = wcschr(idname, L'@');
-                    if (atsign != NULL)
+                    if (atsign == NULL)
                         goto _done_with_LRU;
 
                     atsign++;
@@ -1911,6 +1913,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     if (wbuf)
                         PFREE(wbuf);
+
                 } else if (g_fjob.state == FIBER_STATE_NONE) {
                     /* the user cancelled the operation */
                     r = KHUI_NC_RESPONSE_EXIT | 
@@ -1942,11 +1945,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 _end_task();
             } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
 
-                __int64 ftidexp = 0;
-                __int64 ftcurrent;
+                FILETIME ftidexp = {0,0};
+                FILETIME ftcurrent;
                 khm_size cb;
 
-                GetSystemTimeAsFileTime((LPFILETIME) &ftcurrent);
+                GetSystemTimeAsFileTime(&ftcurrent);
 
                 _begin_task(0);
                 _report_mr0(KHERR_NONE, MSG_CTX_RENEW_CREDS);
@@ -1983,7 +1986,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         khui_cw_set_response(nc, credtype_id_krb5, 
                                              KHUI_NC_RESPONSE_EXIT | 
                                              KHUI_NC_RESPONSE_FAILED);
-                    } else if (ftcurrent < ftidexp) {
+                    } else if (CompareFileTime(&ftcurrent, &ftidexp) < 0) {
                         wchar_t tbuf[1024];
                         DWORD suggestion;
                         kherr_suggestion sug_id;

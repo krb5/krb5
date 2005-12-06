@@ -112,7 +112,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
         break;
 
     case WM_HELP:
-        MessageBox(khm_hwnd_main, L"WM_HELP", L"Notice", MB_OK);
+        khm_html_help(khm_hwnd_main, NULL, HH_HELP_CONTEXT, IDH_WELCOME);
         break;
 
     case WM_COMMAND:
@@ -175,16 +175,24 @@ LRESULT CALLBACK khm_main_wnd_proc(
         }
             break;
 
+        case KHUI_ACTION_OPT_PLUGINS: {
+            khui_config_node node;
+
+            khui_cfg_open(NULL, L"KhmPlugins", &node);
+            khm_show_config_pane(node);
+        }
+            break;
+
         case KHUI_ACTION_HELP_CTX:
-            khm_html_help(khm_hwnd_main, HH_HELP_CONTEXT, IDH_WELCOME);
+            khm_html_help(khm_hwnd_main, NULL, HH_HELP_CONTEXT, IDH_WELCOME);
             break;
 
         case KHUI_ACTION_HELP_CONTENTS:
-            khm_html_help(khm_hwnd_main, HH_DISPLAY_TOC, 0);
+            khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_TOC, 0);
             break;
 
         case KHUI_ACTION_HELP_INDEX:
-            khm_html_help(khm_hwnd_main, HH_DISPLAY_INDEX, (DWORD_PTR) L"");
+            khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_INDEX, (DWORD_PTR) L"");
             break;
 
         case KHUI_ACTION_HELP_ABOUT:
@@ -400,10 +408,14 @@ LRESULT CALLBACK khm_main_wnd_proc(
             kmq_wm_begin(lParam, &m);
             if (m->type == KMSG_ACT &&
                 m->subtype == KMSG_ACT_REFRESH) {
+                khm_menu_refresh_items();
                 khm_update_standard_toolbar();
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_BEGIN_CMDLINE) {
                 khm_cred_begin_commandline();
+            } else if (m->type == KMSG_ACT &&
+                       m->subtype == KMSG_ACT_CONTINUE_CMDLINE) {
+                khm_cred_process_commandline();
             } else if (m->type == KMSG_CRED &&
                   m->subtype == KMSG_CRED_REFRESH) {
                 mw_restart_refresh_timer(hwnd);
@@ -500,6 +512,8 @@ void khm_create_main_window_controls(HWND hwnd_main) {
     REBARINFO rbi;
     HWND hwRebar;
 
+    khm_menu_create_main(hwnd_main);
+
     hwRebar = 
         CreateWindowEx(WS_EX_TOOLWINDOW,
                        REBARCLASSNAME,
@@ -531,7 +545,6 @@ void khm_create_main_window_controls(HWND hwnd_main) {
         return;
 
     /* self attach */
-    khm_menu_create_main(hwRebar);
     khm_create_standard_toolbar(hwRebar);
     khm_create_statusbar(hwnd_main);
 

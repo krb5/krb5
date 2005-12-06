@@ -146,6 +146,13 @@ Please select an identity to change the password.
 .
 
 MessageId=
+SymbolicName=MSG_ERR_S_INTEGRITY
+Language=English
+This is commonly caused by an incorrect password.  Please verify that the password is correct and note that passwords are case sensitive.
+.
+
+
+MessageId=
 SymbolicName=MSG_
 Language=English
 .

@@ -183,6 +183,12 @@ khcint_space_release(kconf_conf_space * s) {
                 RegCloseKey(s->regkey_user);
             s->regkey_machine = NULL;
             s->regkey_user = NULL;
+
+            if (s->flags &
+                (KCONF_SPACE_FLAG_DELETE_M |
+                 KCONF_SPACE_FLAG_DELETE_U)) {
+                khcint_remove_space(s, s->flags);
+            }
         }
 
         LeaveCriticalSection(&cs_conf_global);
@@ -197,7 +203,7 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
     wchar_t sk_name[KCONF_MAXCCH_NAME];
     FILETIME ft;
     size_t cch;
-    HKEY hkp;
+    HKEY hkp = NULL;
     const wchar_t * t;
     LONG rv = ERROR_SUCCESS;
 
@@ -1375,7 +1381,7 @@ khc_write_string(khm_handle pconf,
     LONG hr;
     size_t cbsize;
     wchar_t * value = NULL;
-    int free_space;
+    int free_space = 0;
     khm_handle conf = NULL;
 
 
@@ -1453,7 +1459,7 @@ khc_write_int32(khm_handle pconf,
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
     wchar_t * value = NULL;
-    int free_space;
+    int free_space = 0;
     khm_handle conf = NULL;
 
 
@@ -1519,7 +1525,7 @@ khc_write_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 buf) {
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
     wchar_t * value = NULL;
-    int free_space;
+    int free_space = 0;
     khm_handle conf = NULL;
 
 
@@ -1587,7 +1593,7 @@ khc_write_binary(khm_handle pconf,
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
     wchar_t * value = NULL;
-    int free_space;
+    int free_space = 0;
     khm_handle conf = NULL;
 
 
@@ -1850,10 +1856,58 @@ khc_remove_value(khm_handle conf, wchar_t * value, khm_int32 flags) {
     return rv;
 }
 
+khm_int32
+khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
+    kconf_conf_space * cc;
+    kconf_conf_space * cn;
+
+    /* TODO: if this is the last child space and the parent is marked
+       for deletion, delete the parent as well. */
+
+    cc = TFIRSTCHILD(c);
+    while (cc) {
+        cn = LNEXT(cc);
+
+        khcint_remove_space(cc, flags);
+
+        cc = cn;
+    }
+
+    cc = TFIRSTCHILD(c);
+    if (!cc) {
+        kconf_conf_space * p;
+
+        if (c->refcount) {
+            c->flags |= (flags &
+                         (KCONF_SPACE_FLAG_DELETE_M |
+                          KCONF_SPACE_FLAG_DELETE_U));
+        } else {
+            p = TPARENT(c);
+            
+            TDELCHILD(p, c);
+
+            if (c->regpath) {
+                if (flags & KCONF_SPACE_FLAG_DELETE_U)
+                    RegDeleteKey(HKEY_CURRENT_USER,
+                                 c->regpath);
+                if (flags & KCONF_SPACE_FLAG_DELETE_M)
+                    RegDeleteKey(HKEY_LOCAL_MACHINE,
+                                 c->regpath);
+            }
+
+            khcint_free_space(c);
+        }
+    } else {
+        c->flags |= (flags &
+                     (KCONF_SPACE_FLAG_DELETE_M |
+                      KCONF_SPACE_FLAG_DELETE_U));
+    }
+
+    return KHM_ERROR_SUCCESS;
+}
+
 KHMEXP khm_int32 KHMAPI
 khc_remove_space(khm_handle conf) {
-    /* TODO: implement this */
-
     /*
        - mark this space as well as all child spaces as
          'delete-on-close' using flags.  Mark should indicate which
@@ -1867,9 +1921,32 @@ khc_remove_space(khm_handle conf) {
          space has any children left.  If there are none, check if the
          parent space is also marked for deletion.
     */
-    assert(FALSE);
+    HKEY hku = NULL;
+    HKEY hkm = NULL;
+    kconf_conf_space * c;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_int32 flags = 0;
 
-    return 0;
+    if(!khc_is_config_running())
+        return KHM_ERROR_NOT_READY;
+
+    if(!khc_is_handle(conf))
+        return KHM_ERROR_INVALID_PARAM;
+
+    c = khc_space_from_handle(conf);
+
+    EnterCriticalSection(&cs_conf_global);
+
+    if (khc_is_machine_handle(conf))
+        flags |= KCONF_SPACE_FLAG_DELETE_M;
+    if (khc_is_user_handle(conf))
+        flags |= KCONF_SPACE_FLAG_DELETE_U;
+
+    rv = khcint_remove_space(c, flags);
+
+    LeaveCriticalSection(&cs_conf_global);
+
+    return rv;
 }
 
 khm_boolean 

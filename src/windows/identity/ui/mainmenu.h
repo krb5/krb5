@@ -45,8 +45,9 @@ void khm_menu_show_panel(int id, LONG x, LONG y);
 void khm_menu_track_current(void);
 LRESULT khm_menu_measure_item(WPARAM wParam, LPARAM lparam);
 LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lparam);
+void khm_menu_refresh_items(void);
 
-static HMENU mm_create_menu_from_def(khui_menu_def * def);
+static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main);
 static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y);
 
 void khui_init_menu(void);

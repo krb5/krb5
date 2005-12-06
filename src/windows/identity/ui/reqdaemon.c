@@ -101,12 +101,13 @@ reqdaemonwnd_proc(HWND hwnd,
                 kcdb_identity_create(widname,
                                      KCDB_IDENT_FLAG_CREATE,
                                      &identity);
-
             }
+
+            widname[0] = 0;
 
             do {
                 if (khm_cred_is_in_dialog()) {
-                    khm_cred_wait_for_dialog(INFINITE, NULL);
+                    khm_cred_wait_for_dialog(INFINITE, NULL, NULL, 0);
                 }
 
                 if (identity)
@@ -122,7 +123,6 @@ reqdaemonwnd_proc(HWND hwnd,
                 else
                     khui_context_reset();
 
-
                 if (pdlginfo->dlgtype == NETID_DLGTYPE_TGT)
                     SendMessage(khm_hwnd_main, WM_COMMAND,
                                 MAKEWPARAM(KHUI_ACTION_NEW_CRED, 0), 0);
@@ -132,7 +132,9 @@ reqdaemonwnd_proc(HWND hwnd,
                 else
                     break;
 
-                if (KHM_FAILED(khm_cred_wait_for_dialog(INFINITE, &result)))
+                if (KHM_FAILED(khm_cred_wait_for_dialog(INFINITE, &result,
+                                                        widname,
+                                                        sizeof(widname))))
                     continue;
                 else {
                     lr = (result != KHUI_NC_RESULT_GET_CREDS);
@@ -140,15 +142,66 @@ reqdaemonwnd_proc(HWND hwnd,
                 }
             } while(TRUE);
 
+#ifdef DEBUG
+            assert(lr || pdlginfo->dlgtype != NETID_DLGTYPE_TGT ||
+                   widname[0]);
+#endif
+
+            if (!lr && pdlginfo->dlgtype == NETID_DLGTYPE_TGT &&
+                widname[0]) {
+                khm_handle out_ident;
+                wchar_t * atsign;
+
+                atsign = wcsrchr(widname, L'@');
+
+                if (atsign == NULL)
+                    goto _exit;
+
+                if (KHM_SUCCEEDED(kcdb_identity_create(widname,
+                                                       0,
+                                                       &out_ident))) {
+                    khm_size cb;
+
+                    pdlginfo->out.ccache[0] = 0;
+
+                    cb = sizeof(pdlginfo->out.ccache);
+                    kcdb_identity_get_attrib(out_ident,
+                                             L"Krb5CCName",
+                                             NULL,
+                                             pdlginfo->out.ccache,
+                                             &cb);
+                    kcdb_identity_release(out_ident);
+                }
+#ifdef DEBUG
+                else {
+                    assert(FALSE);
+                }
+#endif
+
+                *atsign++ = 0;
+
+                StringCbCopy(pdlginfo->out.username,
+                             sizeof(pdlginfo->out.username),
+                             widname);
+
+                StringCbCopy(pdlginfo->out.realm,
+                             sizeof(pdlginfo->out.realm),
+                             atsign);
+            }
+
+        _exit:
+
             if (pdlginfo)
                 UnmapViewOfFile(pdlginfo);
             if (hmap)
                 CloseHandle(hmap);
+            if (identity)
+                kcdb_identity_release(identity);
 
             return lr;
         }
 
-#if 0
+#ifdef DEPRECATED_REMOTE_CALL
         /* deprecated */
     case ID_OBTAIN_TGT_WITH_LPARAM:
         {
@@ -296,6 +349,7 @@ khm_reqdaemon_thread_proc(LPVOID vparam) {
 #ifdef DEBUG
     DWORD dw;
 #endif
+
     khm_register_reqdaemonwnd_class();
 
 #ifdef DEBUG

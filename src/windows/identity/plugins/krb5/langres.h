@@ -114,6 +114,7 @@
 #define IDS_NO                          196
 #define IDS_CFG_RE_NEWSERVER            197
 #define IDS_CFG_RE_NEWDMAP              198
+#define IDS_KRB5_NC_NAME                199
 #define IDC_NCK5_RENEWABLE              1002
 #define IDC_NCK5_FORWARDABLE            1004
 #define IDC_NCK5_REALM                  1005
@@ -171,6 +172,8 @@
 #define IDC_CFG_INCAPI                  1066
 #define IDC_CFG_INCMSLSA                1067
 #define IDC_PPK5_FLAGS                  1072
+#define IDC_CHECK1                      1073
+#define IDC_CFG_INCREALMS               1073
 
 // Next default values for new objects
 // 
@@ -178,7 +181,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        117
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1073
+#define _APS_NEXT_CONTROL_VALUE         1074
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

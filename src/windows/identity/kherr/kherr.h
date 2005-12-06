@@ -569,6 +569,34 @@ KHMEXP kherr_event * KHMAPI kherr_report(
 #endif
 );
 
+/*! \brief Report a formatted message
+
+    The format string \a long_desc_fmt should be a string constant and
+    the format specifiers follow that of \a sprintf.  This creates an
+    event with the long description set to the expansion of the format
+    string against the arguments.
+ */
+KHMEXP kherr_event * __cdecl
+kherr_reportf_ex(enum kherr_severity severity,
+                 const wchar_t * facility,
+                 khm_int32 facility_id,
+#ifdef _WIN32
+                 HMODULE hModule,
+#endif
+                 const wchar_t * long_desc_fmt,
+                 ...);
+
+/*! \brief Report a formatted message
+
+    The format string \a long_desc_fmt should be a string constant and
+    the format specifiers follow that of \a sprintf.  This creates an
+    event with the long description set to the expansion of the format
+    string against the arguments.
+ */
+KHMEXP kherr_event * __cdecl
+kherr_reportf(const wchar_t * long_desc_fmt,
+              ...);
+
 /*! \brief Create a parameter out of a transient string
 
     A parameter is created by duplicating the string that is passed

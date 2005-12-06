@@ -601,9 +601,9 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_get_attr_string(
             code = KHM_ERROR_NOT_FOUND;
     }
 
-_exit:
+ _exit:
     kcdb_cred_unlock_read();
-_exit_nolock:
+ _exit_nolock:
     if(type)
         kcdb_type_release_info(type);
     if(attrib)
@@ -990,11 +990,12 @@ kcdb_cred_get_flags(khm_handle vcred,
     if (!(f & KCDB_CRED_FLAG_EXPIRED) && 
         kcdb_cred_buf_exist(cred, KCDB_ATTR_EXPIRE)) {
 
-        khm_int64 ftc;
+        FILETIME ftc;
             
-        GetSystemTimeAsFileTime((LPFILETIME) &ftc);
-        if (ftc > *((khm_int64 *) 
-                    kcdb_cred_buf_get(cred, KCDB_ATTR_EXPIRE)))
+        GetSystemTimeAsFileTime(&ftc);
+        if (CompareFileTime(&ftc, ((FILETIME *) 
+                                   kcdb_cred_buf_get(cred, KCDB_ATTR_EXPIRE)))
+            >= 0)
             f |= KCDB_CRED_FLAG_EXPIRED;
     }
 
@@ -1004,10 +1005,11 @@ kcdb_cred_get_flags(khm_handle vcred,
     if (!(f & KCDB_CRED_FLAG_INVALID)) {
         if (f & KCDB_CRED_FLAG_RENEWABLE) {
             if (kcdb_cred_buf_exist(cred, KCDB_ATTR_RENEW_EXPIRE)) {
-                khm_int64 ftc;
+                FILETIME ftc;
 
-                GetSystemTimeAsFileTime((LPFILETIME) &ftc);
-                if (ftc > *((khm_int64 *) kcdb_cred_buf_get(cred, KCDB_ATTR_RENEW_EXPIRE)))
+                GetSystemTimeAsFileTime(&ftc);
+                if (CompareFileTime(&ftc, ((FILETIME *)
+                                           kcdb_cred_buf_get(cred, KCDB_ATTR_RENEW_EXPIRE))) >= 0)
                     f |= KCDB_CRED_FLAG_INVALID;
             }
         } else {

@@ -83,6 +83,9 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
     case kadm_err_base:
 	break;
     default:
+        if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+            *suggestion = MSG_ERR_S_INTEGRITY;
+        }
         *suggest_code = KHERR_SUGGEST_RETRY;
         AnsiStrToUnicode(buf, cbbuf, com_err_msg);
 	return;

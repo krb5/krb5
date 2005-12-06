@@ -229,6 +229,10 @@ typedef struct tag_khui_new_creds {
 
     CRITICAL_SECTION cs;
 
+    khm_boolean set_default;    /*!< After a successfull credentials
+                                  acquisition, set the primary
+                                  identity as the default. */
+
     khm_handle  *identities;    /*!< The list of identities associated
                                   with this request.  The first
                                   identity in this list (\a

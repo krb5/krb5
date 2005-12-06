@@ -1,11 +1,114 @@
 <html>
 <head>
-  <title>title</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+  <title>New Credentials</title>
+  <meta name="description" content="obtain new credentials">
+  <meta name="keywords" content="new creds">
   <link rel="stylesheet" type="text/css" href="nidmgr.css">
 </head>
 <body>
+
+<h1>New Credentials</h1>
+
+<p>The new credentials dialog can be invoked from the <a
+href="menu_credential.htm">Credentials</a> menu, by typing <span
+class="pre">Ctrl + N</span>, using the context menu in the credentials
+window or using the context menu in the NetIDMgr icon in the system
+notification area.
+</p>
+
+<p>Once invoked, you will be presented with a dialog similar to the
+following:
+</p>
+
+<p>
+<img src="images/screen_new_creds.bmp" alt="New credentials dialog"/>
+<p class="caption">New credentials dialog with a valid identity
+selected.</p> <p class="caption"><i>Note that the above screenshot is
+from an instance of NetIDMgr with Kerberos 5, Kerberos 4 and OpenAFS
+plugins with a Kerberos 5 identity manager.  Actual display may be
+different depending on the plugins that are active.</i></p>
+</p>
+
+<p>If the Kerberos 5 identity provider is used, the dialog will ask
+for a username and a realm to determine the identity for which new
+credentials will be obtained for.  Depending on the selected identity,
+you may be required to provide a password or other form of
+authentication for new credentials to be obtained.
+</p>
+
+<p>Below the prompts is the credentials summary window.  This window
+provides an overview of the credentals that will be obtained when the
+dialog is completed.
+</p>
+
+<h3>Expanded view</h3>
+
+<p>If you click any of the hyperlinks in the credentials summary
+window or select the <span class="pre">Options &gt;&gt;</span> button,
+the dialog will switch to the exanded view.  An example of this is
+shown below:
+</p>
+
+<p>
+<img src="images/screen_new_creds_exp.bmp"
+alt="Expanded new credentials window" />
+
+<p class="caption">Expanded view of the new credetials dialog</p>
+</p>
+
+<p>
+The expanded view provides access to additional options available for
+each credential provider.  For example, the Kerberos 5 credentials
+provider allows you to set the lifetime of the obtained Kerberos
+ticket as well as ticket flags such as <i>renewable</i> or
+<i>forwardable</i>.
+</p>
+
+<h3>Credentials summary window</h3>
+
+<p>
+The credentials summary window provides an overview of the credentials
+that will be obtained after the successful completion of the new
+credentials dialog.  The window contains hyperlinks that will take you
+to the corresponding credentials option panels where you will be able
+to set additional options for each type.
+</p>
+
+<p>
+If there is a problem with the selected identity, the credentials
+window will display a message describing the problem.  For example:
+</p>
+
+<p>
+<img src="images/screen_new_creds_err01.bmp" alt="Credentials summary window showing an invalid identity" />
+</p>
+
+<p>
+The above is an example of what you would see if the provided identity
+is invalid.  Once the identity provider (in this case, Kerberos 5)
+indicates that the identity is invalid, it will be displayed as above
+along with a brief description of why the identity was found to be
+invalid.  Here, the Kerberos 5 identity provider is reporting that the
+specified principal does not exist in the Kerberos database.
+</p>
+
+<h3>Additional notes</h3>
+
+<p>
+The new credentials dialog can be invoked from the command line using
+the <span class="pre"> -i </span> or <span class="pre"> --kinit
+</span> command line option.  Additionally, if you specify the <span
+class="pre"> -a </span> or <span class="pre"> --autoinit </span>
+command line option, the new credentials dialog will be displayed if
+there are no credentials available.
+</p>
+
+<p>
+Setting the <span class="pre">Prompt for new credentials if there
+aren't any at startup</span> option is set in the <span
+class="pre">General</span> configuration panel, then the behavior is
+similar to the <span class="pre">--autoinit</span> option.
+</p>
 
 </body>
 </html>

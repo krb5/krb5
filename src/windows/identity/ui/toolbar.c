@@ -368,6 +368,6 @@ void khm_create_standard_toolbar(HWND rebar) {
 
     SendMessage(rebar,
         RB_INSERTBAND,
-        1,
+        0,
         (LPARAM) &rbi);
 }

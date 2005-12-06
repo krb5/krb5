@@ -63,7 +63,8 @@ typedef struct kconf_conf_space_t {
 } kconf_conf_space;
 
 //#define KCONF_SPACE_FLAG_SCHEMA 0x00000020
-#define KCONF_SPACE_FLAG_DELETED 0x00000040
+#define KCONF_SPACE_FLAG_DELETE_U 0x00000040
+#define KCONF_SPACE_FLAG_DELETE_M 0x00000080
 
 typedef struct kconf_conf_handle_t {
     khm_int32   magic;
@@ -89,7 +90,7 @@ extern LONG conf_status;
 
 #define khc_is_config_running() (conf_init && conf_status)
 
-#define CONFIG_REGPATHW L"SOFTWARE\\MIT\\NetIDMgr"
+#define CONFIG_REGPATHW L"Software\\MIT\\NetIDMgr"
 
 void init_kconf(void);
 void exit_kconf(void);
@@ -121,5 +122,8 @@ khcint_space_release(kconf_conf_space * s);
 
 HKEY
 khcint_space_open_key(kconf_conf_space * s, khm_int32 flags);
+
+khm_int32
+khcint_remove_space(kconf_conf_space * c, khm_int32 flags);
 
 #endif

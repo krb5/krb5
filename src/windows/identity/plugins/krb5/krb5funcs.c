@@ -220,7 +220,7 @@ static long get_tickets_from_cache(krb5_context ctx,
     khm_handle      ident = NULL;
     khm_handle      cred = NULL;
     time_t          tt;
-    khm_int64       ft, eft;
+    FILETIME        ft, eft;
     khm_int32       ti;
 
 
@@ -372,25 +372,32 @@ static long get_tickets_from_cache(krb5_context ctx,
             KRBv5Credentials.times.starttime = KRBv5Credentials.times.authtime;
 
         tt = KRBv5Credentials.times.starttime;
-        TimetToFileTime(tt, (LPFILETIME) &ft);
+        TimetToFileTime(tt, &ft);
         kcdb_cred_set_attr(cred, KCDB_ATTR_ISSUE, &ft, sizeof(ft));
 
         tt = KRBv5Credentials.times.endtime;
-        TimetToFileTime(tt, (LPFILETIME) &eft);
+        TimetToFileTime(tt, &eft);
         kcdb_cred_set_attr(cred, KCDB_ATTR_EXPIRE, &eft, sizeof(eft));
 
-        eft -= ft;
-        kcdb_cred_set_attr(cred, KCDB_ATTR_LIFETIME, &eft, sizeof(eft));
+        {
+            FILETIME ftl;
+
+            ftl = FtSub(&eft, &ft);
+            kcdb_cred_set_attr(cred, KCDB_ATTR_LIFETIME, &ftl, sizeof(ftl));
+        }
 
         if (KRBv5Credentials.times.renew_till > 0) {
+            FILETIME ftl;
+
             tt = KRBv5Credentials.times.renew_till;
-            TimetToFileTime(tt, (LPFILETIME) &eft);
+            TimetToFileTime(tt, &eft);
             kcdb_cred_set_attr(cred, KCDB_ATTR_RENEW_EXPIRE, &eft, 
                                sizeof(eft));
 
-            eft -= ft;
-            kcdb_cred_set_attr(cred, KCDB_ATTR_RENEW_LIFETIME, &eft, 
-                               sizeof(eft));
+
+            ftl = FtSub(&eft, &ft);
+            kcdb_cred_set_attr(cred, KCDB_ATTR_RENEW_LIFETIME, &ftl, 
+                               sizeof(ftl));
         }
 
         ti = KRBv5Credentials.ticket_flags;
@@ -441,7 +448,7 @@ static long get_tickets_from_cache(krb5_context ctx,
             int n = 0;
             while ( KRBv5Credentials.addresses[n] )
                 n++;
-            list->addrList = calloc(1, n * sizeof(char *));
+            list->addrList = PCALLOC(1, n * sizeof(char *));
             if (!list->addrList) {
                 MessageBox(NULL, "Memory Error", "Error", MB_OK);
                 return ENOMEM;            
@@ -449,7 +456,7 @@ static long get_tickets_from_cache(krb5_context ctx,
             list->addrCount = n;
             for ( n=0; n<list->addrCount; n++ ) {
                 wsprintf(Buffer, "Address: %s", one_addr(KRBv5Credentials.addresses[n]));
-                list->addrList[n] = (char*) calloc(1, strlen(Buffer)+1);
+                list->addrList[n] = (char*) PCALLOC(1, strlen(Buffer)+1);
                 if (!list->addrList[n])
                 {
                     MessageBox(NULL, "Memory Error", "Error", MB_OK);
@@ -461,9 +468,9 @@ static long get_tickets_from_cache(krb5_context ctx,
 #endif
 
         if(cred_flags & KCDB_CRED_FLAG_INITIAL) {
-            __int64 t_issue_new;
-            __int64 t_expire_old;
-            __int64 t_expire_new;
+            FILETIME ft_issue_new;
+            FILETIME ft_expire_old;
+            FILETIME ft_expire_new;
             khm_size cb;
 
             /* an initial ticket!  If we find one, we generally set
@@ -472,30 +479,30 @@ static long get_tickets_from_cache(krb5_context ctx,
                the current primary credential. */
 
             tt = KRBv5Credentials.times.endtime;
-            TimetToFileTime(tt, (LPFILETIME) &t_expire_new);
+            TimetToFileTime(tt, &ft_expire_new);
 
             tt = KRBv5Credentials.times.starttime;
-            TimetToFileTime(tt, (LPFILETIME) &t_issue_new);
+            TimetToFileTime(tt, &ft_issue_new);
 
-            cb = sizeof(t_expire_old);
+            cb = sizeof(ft_expire_old);
             if(KHM_FAILED(kcdb_identity_get_attr(tident, 
                                                  KCDB_ATTR_EXPIRE, 
-                                                 NULL, &t_expire_old, 
+                                                 NULL, &ft_expire_old, 
                                                  &cb))
-                || t_expire_new > t_expire_old)
-            {
+               || CompareFileTime(&ft_expire_new, &ft_expire_old) > 0) {
+
                 kcdb_identity_set_attr(tident, attr_id_krb5_ccname, 
                                        wcc_name, KCDB_CBSIZE_AUTO);
                 kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE, 
-                                       &t_expire_new, 
-                                       sizeof(t_expire_new));
+                                       &ft_expire_new, 
+                                       sizeof(ft_expire_new));
                 kcdb_identity_set_attr(tident, KCDB_ATTR_ISSUE,
-                                       &t_issue_new,
-                                       sizeof(t_issue_new));
+                                       &ft_issue_new,
+                                       sizeof(ft_issue_new));
 
                 if (KRBv5Credentials.times.renew_till > 0) {
                     tt = KRBv5Credentials.times.renew_till;
-                    TimetToFileTime(tt, (LPFILETIME) &ft);
+                    TimetToFileTime(tt, &ft);
                     kcdb_identity_set_attr(tident, 
                                            KCDB_ATTR_RENEW_EXPIRE, 
                                            &ft, sizeof(ft));
@@ -1515,60 +1522,44 @@ khm_krb5_ms2mit(BOOL save_creds)
     char *princ_name = NULL;
     BOOL rc = FALSE;
 
-#ifdef DEBUG
-    kherr_debug_printf(L"Begin : khm_krb5_ms2mit. save_cred=%d\n", (int) save_creds);
-#endif
+    kherr_reportf(L"Begin : khm_krb5_ms2mit. save_cred=%d\n", (int) save_creds);
+
     if ( !pkrb5_init_context )
         goto cleanup;
 
     if (code = pkrb5_init_context(&kcontext))
         goto cleanup;
 
-#ifdef DEBUG
-    kherr_debug_printf(L"Resolving MSLSA\n");
-#endif
+    kherr_reportf(L"Resolving MSLSA\n");
+
     if (code = pkrb5_cc_resolve(kcontext, "MSLSA:", &mslsa_ccache))
         goto cleanup;
 
     if ( save_creds ) {
-#ifdef DEBUG
-        kherr_debug_printf(L"Getting principal\n");
-#endif
-	if (code = pkrb5_cc_get_principal(kcontext, mslsa_ccache, &princ))
+        kherr_reportf(L"Getting principal\n");
+        if (code = pkrb5_cc_get_principal(kcontext, mslsa_ccache, &princ))
             goto cleanup;
 
-#ifdef DEBUG
-	kherr_debug_printf(L"Unparsing name\n");
-#endif
-	if (code = pkrb5_unparse_name(kcontext, princ, &princ_name))
+        kherr_reportf(L"Unparsing name\n");
+        if (code = pkrb5_unparse_name(kcontext, princ, &princ_name))
             goto cleanup;
 
-#ifdef DEBUG
-        kherr_debug_printf(L"Unparsed [%S].  Resolving target cache\n", princ_name);
-#endif
+        kherr_reportf(L"Unparsed [%S].  Resolving target cache\n", princ_name);
         /* TODO: actually look up the preferred ccache name */
         if (code = pkrb5_cc_resolve(kcontext, princ_name, &ccache)) {
-#ifdef DEBUG
-            kherr_debug_printf(L"Cannot resolve cache [%S] with code=%d.  Trying default.\n", princ_name, code);
-#endif
+            kherr_reportf(L"Cannot resolve cache [%S] with code=%d.  Trying default.\n", princ_name, code);
 
             if (code = pkrb5_cc_default(kcontext, &ccache)) {
-#ifdef DEBUG
-                kherr_debug_printf(L"Failed to resolve default ccache. Code=%d", code);
-#endif
+                kherr_reportf(L"Failed to resolve default ccache. Code=%d", code);
                 goto cleanup;
             }
         }
 
-#ifdef DEBUG
-        kherr_debug_printf(L"Initializing ccache\n");
-#endif
+        kherr_reportf(L"Initializing ccache\n");
         if (code = pkrb5_cc_initialize(kcontext, ccache, princ))
             goto cleanup;
 
-#ifdef DEBUG
-        kherr_debug_printf(L"Copying credentials\n");
-#endif
+        kherr_reportf(L"Copying credentials\n");
         if (code = pkrb5_cc_copy_creds(kcontext, mslsa_ccache, ccache))
             goto cleanup;
 
@@ -1591,9 +1582,7 @@ khm_krb5_ms2mit(BOOL save_creds)
     }
 
 cleanup:
-#ifdef DEBUG
-    kherr_debug_printf(L"  Received code=%d", code);
-#endif
+    kherr_reportf(L"  Received code=%d", code);
 
     if (princ_name)
         pkrb5_free_unparsed_name(kcontext, princ_name);

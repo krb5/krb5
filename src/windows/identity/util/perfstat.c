@@ -125,6 +125,22 @@ perf_strdup(char * file, int line, const char * str) {
     return dest;
 }
 
+KHMEXP void *
+perf_calloc(char * file, int line, size_t num, size_t size) {
+    void * ptr;
+    size_t tsize;
+
+    tsize = num * size;
+
+    ptr = perf_malloc(file,line,tsize);
+
+    if (ptr) {
+        ZeroMemory(ptr, tsize);
+    }
+
+    return ptr;
+}
+
 KHMEXP void * 
 perf_malloc(char * file, int line, size_t s) {
     allocation * a;

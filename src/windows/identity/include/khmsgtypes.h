@@ -205,6 +205,8 @@
 
 #define KMSG_ACT_BEGIN_CMDLINE 128
 
+#define KMSG_ACT_CONTINUE_CMDLINE 129
+
 /*@}*/
 
 /*! \defgroup kmq_msg_cred KMSG_CRED subtypes

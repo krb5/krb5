@@ -27,6 +27,15 @@
 #ifndef __KHIMAIRA_NOTIFIER_H
 #define __KHIMAIRA_NOTIFIER_H
 
+extern HWND hwnd_notifier;
+
+enum khm_notif_expstate {
+    KHM_NOTIF_EMPTY,
+    KHM_NOTIF_OK,
+    KHM_NOTIF_WARN,
+    KHM_NOTIF_EXP
+};
+
 void 
 khm_init_notifier(void);
 
@@ -41,5 +50,8 @@ khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
                          wchar_t * msg,
                          khm_int32 timeout);
+
+void
+khm_notify_icon_expstate(enum khm_notif_expstate expseverity);
 
 #endif

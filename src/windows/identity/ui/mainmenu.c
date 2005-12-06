@@ -129,7 +129,7 @@ void add_action_to_menu(HMENU hm, khui_action * act,
         def = khui_find_menu(act->cmd);
         if(def) {
             mii.fMask |= MIIM_SUBMENU;
-            mii.hSubMenu = mm_create_menu_from_def(def);
+            mii.hSubMenu = mm_create_menu_from_def(def, FALSE);
         }
 
         if(flags & KHUI_ACTIONREF_DEFAULT)
@@ -139,12 +139,76 @@ void add_action_to_menu(HMENU hm, khui_action * act,
     InsertMenuItem(hm,idx,TRUE,&mii);
 }
 
-static HMENU mm_create_menu_from_def(khui_menu_def * def) {
+static void refresh_menu(HMENU hm, khui_menu_def * def);
+
+static void refresh_menu_item(HMENU hm, khui_action * act, 
+                              int idx, int flags) {
+    MENUITEMINFO mii;
+
+    mii.cbSize = sizeof(mii);
+    mii.fMask = 0;
+
+    if (act == NULL)
+        return;
+    else {
+        khui_menu_def * def;
+
+        if(act->state & KHUI_ACTIONSTATE_DISABLED) {
+            mii.fMask |= MIIM_STATE;
+            mii.fState = MFS_DISABLED;
+        } else {
+            mii.fMask |= MIIM_STATE;
+            mii.fState = MFS_ENABLED;
+        }
+
+        if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
+            mii.fMask |= MIIM_STATE;
+            if (act->state & KHUI_ACTIONSTATE_CHECKED) {
+                mii.fState |= MFS_CHECKED;
+            } else {
+                mii.fState |= MFS_UNCHECKED;
+            }
+        }
+
+        SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
+
+        def = khui_find_menu(act->cmd);
+        if(def) {
+            MENUITEMINFO mii2;
+
+            mii2.cbSize = sizeof(mii2);
+            mii2.fMask = MIIM_SUBMENU;
+
+            if (GetMenuItemInfo(hm, act->cmd, FALSE, &mii2)) {
+                refresh_menu(mii2.hSubMenu, def);
+            }
+        }
+    }
+}
+
+static void refresh_menu(HMENU hm, khui_menu_def * def) {
+    khui_action_ref * act;
+    int i;
+
+    act = def->items;
+    i = 0;
+    while ((def->n_items == -1 && act->action != KHUI_MENU_END) ||
+           (def->n_items >= 0 && i < (int) def->n_items)) {
+        refresh_menu_item(hm, khui_find_action(act->action), i, act->flags);
+        act++; i++;
+    }
+}
+
+static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main) {
     HMENU hm;
     khui_action_ref * act;
     int i;
 
-    hm = CreatePopupMenu();
+    if (main)
+        hm = CreateMenu();
+    else
+        hm = CreatePopupMenu();
+
     act = def->items;
     i = 0;
     while((def->n_items == -1 && act->action != KHUI_MENU_END) ||
@@ -163,7 +227,7 @@ static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y)
 {
     HMENU hm;
 
-    hm = mm_create_menu_from_def(def);
+    hm = mm_create_menu_from_def(def, FALSE);
 
     mm_hot_track = (mm_last_hot_item >= 0);
 
@@ -218,12 +282,11 @@ LRESULT khm_menu_activate(int menu_id) {
     } else if(menu_id == MENU_ACTIVATE_NONE) {
         menu_id = -1;
     }
-
     
     SendMessage(khui_main_menu_toolbar,
-        TB_SETHOTITEM,
-        menu_id,
-        0);
+                TB_SETHOTITEM,
+                menu_id,
+                0);
 
     khm_menu_track_current();
 
@@ -472,7 +535,36 @@ LRESULT khm_menu_notify_main(LPNMHDR notice) {
     return ret;
 }
 
-void khm_menu_create_main(HWND rebar) {
+HMENU khui_hmenu_main = NULL;
+
+void khm_menu_refresh_items(void) {
+    khui_menu_def * def;
+
+    if (!khui_hmenu_main)
+        return;
+
+    def = khui_find_menu(KHUI_MENU_MAIN);
+
+    refresh_menu(khui_hmenu_main, def);
+
+    DrawMenuBar(khm_hwnd_main);
+}
+
+void khm_menu_create_main(HWND parent) {
+    HMENU hmenu;
+    khui_menu_def * def;
+
+    def = khui_find_menu(KHUI_MENU_MAIN);
+
+    hmenu = mm_create_menu_from_def(def, TRUE);
+
+    SetMenu(parent, hmenu);
+
+    khui_hmenu_main = hmenu;
+
+    return;
+
+#ifdef USE_EXPLORER_STYLE_MENU_BAR
     HWND hwtb;
     REBARBANDINFO rbi;
     SIZE sz;
@@ -566,4 +658,5 @@ void khm_menu_create_main(HWND rebar) {
                 RB_INSERTBAND,
                 0,
                 (LPARAM) &rbi);
+#endif
 }

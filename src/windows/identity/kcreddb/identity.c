@@ -180,8 +180,8 @@ KHMEXP khm_int32 KHMAPI
 kcdb_identity_create(const wchar_t *name, 
                      khm_int32 flags, 
                      khm_handle * result) {
-    kcdb_identity * id;
-    kcdb_identity * id_tmp;
+    kcdb_identity * id = NULL;
+    kcdb_identity * id_tmp = NULL;
     size_t namesize;
 
     if(!result || !name)
@@ -823,9 +823,9 @@ kcdb_identity_set_attr(khm_handle vid,
                        void * buffer,
                        khm_size cbbuf)
 {
-    kcdb_identity * id;
-    kcdb_attrib * attrib;
-    kcdb_type * type;
+    kcdb_identity * id = NULL;
+    kcdb_attrib * attrib = NULL;
+    kcdb_type * type = NULL;
     khm_size slot;
     khm_size cbdest;
     khm_int32 code = KHM_ERROR_SUCCESS;

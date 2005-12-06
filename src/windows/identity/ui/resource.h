@@ -198,9 +198,14 @@
 #define IDB_WDG_STUCK                   201
 #define IDS_ACTION_IMPORT               202
 #define IDS_CTX_IMPORT                  203
+#define IDB_FLAG_RENEW                  203
 #define IDS_CFG_PI_COL_PLUGINS          204
+#define IDI_APPICON_WARN                204
 #define IDS_PISTATE_FAILUNK             205
+#define IDI_APPICON_EXP                 205
 #define IDS_PISTATE_FAILMAX             206
+#define IDI_ICON4                       206
+#define IDI_APPICON_OK                  206
 #define IDS_PISTATE_FAILREG             207
 #define IDS_PISTATE_FAILDIS             208
 #define IDS_PISTATE_FAILLOD             209
@@ -222,6 +227,11 @@
 #define IDS_ERR_SUGG_NO_IDENTPRO        225
 #define IDS_NC_REN_FAILED_TITLE         226
 #define IDS_CW_DEFAULT                  227
+#define IDS_ACTION_OPT_PLUGINS          228
+#define IDS_NC_SETDEF                   229
+#define IDS_NC_ID_DEF                   230
+#define IDS_NC_ID_WDEF                  231
+#define IDS_NC_ID_NDEF                  232
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -314,9 +324,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        202
+#define _APS_NEXT_RESOURCE_VALUE        207
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1105
+#define _APS_NEXT_CONTROL_VALUE         1107
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

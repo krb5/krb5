@@ -2287,6 +2287,26 @@ FtIntervalToMilliseconds(LPFILETIME pft);
 KHMEXP long KHMAPI 
 FtCompare(LPFILETIME pft1, LPFILETIME pft2);
 
+/*! \brief Convert a FILETIME to a 64 bit int
+*/
+KHMEXP khm_int64 KHMAPI FtToInt(LPFILETIME pft);
+
+/*! \brief Convert a 64 bit int to a FILETIME
+*/
+KHMEXP FILETIME KHMAPI IntToFt(khm_int64 i);
+
+/*! \brief Calculate the difference between two FILETIMEs
+
+    Returns the value of ft1 - ft2
+ */
+KHMEXP FILETIME KHMAPI FtSub(LPFILETIME ft1, LPFILETIME ft2);
+
+/*! \brief Calculate the sum of two FILETIMEs
+
+    Return the value of ft1 + ft2
+ */
+KHMEXP FILETIME KHMAPI FtAdd(LPFILETIME ft1, LPFILETIME ft2);
+
 /*! \brief Convert a FILETIME inverval to a string
 */
 KHMEXP khm_int32 KHMAPI 

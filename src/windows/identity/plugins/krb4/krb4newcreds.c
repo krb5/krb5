@@ -68,8 +68,10 @@ void k4_update_display(k4_dlg_data * d) {
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_K524), FALSE);
     }
 
-    CheckRadioButton(d->hwnd, IDC_NCK4_AUTO, IDC_NCK4_K524,
+    CheckRadioButton(d->hwnd, IDC_NCK4_AUTO, IDC_NCK4_PWD,
                      method_to_id[d->method]);
+
+    khui_cw_enable_type(d->nc, credtype_id_krb4, d->k4_enabled);
 }
 
 void k4_update_data(k4_dlg_data * d) {
@@ -97,6 +99,30 @@ void k4_update_data(k4_dlg_data * d) {
             break;
         }
     }
+}
+
+khm_boolean k4_should_identity_get_k4(khm_handle ident) {
+    khm_int32 idflags = 0;
+
+    if (KHM_FAILED(kcdb_identity_get_flags(ident, &idflags)))
+        return FALSE;
+
+    if (!(idflags & KCDB_IDENT_FLAG_DEFAULT)) {
+        /* we only support k4 for one identity, and that is the
+           default identity.  If we are trying to get tickets for
+           a non-default identity, then we start off as
+           disabled. */
+
+        khm_handle defident = NULL;
+
+        if (KHM_SUCCEEDED(kcdb_identity_get_default(&defident))) {
+            kcdb_identity_release(defident);
+
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }
 
 void k4_read_identity_data(k4_dlg_data * d) {
@@ -139,23 +165,10 @@ void k4_read_identity_data(k4_dlg_data * d) {
             }
 
             khc_close_space(csp_ident);
-
-            kcdb_identity_get_flags(d->nc->identities[0], &idflags);
         }
 
-        if (!(idflags & KCDB_IDENT_FLAG_DEFAULT)) {
-            /* we only support k4 for one identity, and that is the
-               default identity.  If we are trying to get tickets for
-               a non-default identity, then we start off as
-               disabled. */
-
-            khm_handle defident = NULL;
-
-            if (KHM_SUCCEEDED(kcdb_identity_get_default(&defident))) {
-                kcdb_identity_release(defident);
-
-                d->k4_enabled = FALSE;
-            }
+        if (d->k4_enabled) {
+            d->k4_enabled = k4_should_identity_get_k4(d->nc->identities[0]);
         }
     } else {
         d->k4_enabled = FALSE;
@@ -416,6 +429,12 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
             wchar_t wbuf[256];
 
             nc = (khui_new_creds *) vparam;
+
+            if (!nc->ctx.identity)
+                break;
+
+            if (!k4_should_identity_get_k4(nc->ctx.identity))
+                break;
 
             nct = PMALLOC(sizeof(*nct));
 #ifdef DEBUG

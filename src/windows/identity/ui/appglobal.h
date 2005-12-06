@@ -73,7 +73,7 @@ void khm_exit_gui(void);
 void khm_parse_commandline();
 void khm_register_window_classes(void);
 
-HWND khm_html_help(HWND hwnd, UINT command, DWORD_PTR data);
+HWND khm_html_help(HWND hwnd, wchar_t * suffix, UINT command, DWORD_PTR data);
 
 #define MAX_RES_STRING 1024
 
