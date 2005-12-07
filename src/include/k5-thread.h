@@ -247,7 +247,14 @@ typedef char k5_debug_mutex_stats;
 #define K5_MUTEX_STATS_INIT		's'
 typedef int k5_mutex_stats_tmp;
 #define k5_mutex_stats_start()		(0)
-#define k5_mutex_lock_update_stats(M,S)	(S)
+#ifdef __GNUC__
+static inline void
+k5_mutex_lock_update_stats(k5_debug_mutex_stats *m, k5_mutex_stats_tmp t)
+{
+}
+#else
+# define k5_mutex_lock_update_stats(M,S)	(S)
+#endif
 #define k5_mutex_unlock_update_stats(M)	(*(M) = 's')
 
 /* If statistics tracking isn't enabled, these functions don't actually

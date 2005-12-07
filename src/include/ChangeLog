@@ -1,3 +1,8 @@
+2005-12-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (k5_mutex_lock_update_stats) [__GNUC__]: Use an
+	inline function, to avoid "statement with no effect" warnings.
+
 2005-10-20  Jeffrey Altman <jaltman@mit.edu>
 
 	* win-mac.h: 
