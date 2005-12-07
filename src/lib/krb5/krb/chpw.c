@@ -249,9 +249,10 @@ krb5int_mk_setpw_req(
     krb5_data	*encoded_setpw;
 
     char *ptr;
+     int count = 2;
 
-    cipherpw.data = NULL;
-    cipherpw.length = 0;
+     cipherpw.data = NULL;
+     cipherpw.length = 0;
      
     if (ret = krb5_auth_con_setflags(context, auth_context,
 				     KRB5_AUTH_CONTEXT_DO_SEQUENCE))
@@ -317,6 +318,7 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
     krb5_error_code ret;
     krb5_data cipherresult;
     krb5_data clearresult;
+    krb5_replay_data replay;
     krb5_keyblock *tmpkey;
 /*
 ** validate the packet length -
