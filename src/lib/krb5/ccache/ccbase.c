@@ -27,13 +27,14 @@
  * Registration functions for ccache.
  */
 
+#include <ctype.h>
 #include "k5-int.h"
 
 #include "fcc.h"
 
 struct krb5_cc_typelist
  {
-  krb5_cc_ops *ops;
+  const krb5_cc_ops *ops;
   struct krb5_cc_typelist *next;
  };
 extern const krb5_cc_ops krb5_mcc_ops;
