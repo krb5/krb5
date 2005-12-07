@@ -1,3 +1,8 @@
+2005-12-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* asn1_k_decode.h (asn1_decode_etype_info_entry): Delete
+	prototype.
+
 2004-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* asn1buf.c: Fix denial-of-service bug.

@@ -42,6 +42,7 @@ static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context context, krb5_ccache *ccache)
 {
+	krb5_error_code retval;
 	krb5_os_context	os_ctx;
 
 	if (!context || context->magic != KV5M_CONTEXT)

@@ -27,6 +27,7 @@
  * Registration functions for keytab.
  */
 
+#include <ctype.h>
 #include "k5-int.h"
 
 extern const krb5_kt_ops krb5_ktf_ops;
