@@ -208,17 +208,41 @@ kmmint_read_module_info(kmm_module_i * m) {
     }
 
     n_languages = (int) (cb / sizeof(*languages));
+
+    /* Try searching for the user's default language first */
     lang = GetUserDefaultLangID();
     for (i = 0; i < n_languages; i++) {
         if(languages[i].language == lang)
             break;
     }
 
+    /* If not, try the system default */
     if (i >= n_languages) {
         lang = GetSystemDefaultLangID();
         for (i=0; i<n_languages; i++)
             if (languages[i].language == lang)
                 break;
+    }
+
+    /* Then try EN_US */
+    if (i >= n_languages) {
+        lang = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+        for (i=0; i<n_languages; i++)
+            if (languages[i].language == lang)
+                break;
+    }
+
+    /* Language neutral? */
+    if (i >= n_languages) {
+        lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
+        for (i=0; i<n_languages; i++)
+            if (languages[i].language == lang)
+                break;
+    }
+
+    /* Just use the first one? */
+    if (i >= n_languages) {
+        i = 0;
     }
 
     if (i >= n_languages) {
@@ -247,7 +271,6 @@ kmmint_read_module_info(kmm_module_i * m) {
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
                     _cstr(TEXT(NIMV_MODULE)));
         goto _cleanup;
-                    
     }
 
     if (wcscmp(r, m->name)) {
@@ -580,8 +603,8 @@ kmm_release_module_info_i(kmm_module_info * info) {
 
 
 KHMEXP khm_int32   KHMAPI 
-kmm_unload_module(kmm_module module)
-{
+kmm_unload_module(kmm_module module) {
+
     if(!kmm_is_module(module))
         return KHM_ERROR_INVALID_PARAM;
 
