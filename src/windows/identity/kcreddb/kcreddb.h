@@ -99,9 +99,6 @@ Functions, macros etc. for manipulating identities.
            name */
 #define KCDB_IDENT_MAXCB_NAME (sizeof(wchar_t) * KCDB_IDENT_MAXCCH_NAME)
 
-/*! \brief Valid characters in an identity name */
-#define KCDB_IDENT_VALID_CHARS L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._@-/"
-
 /*!
 \name Flags for identities */
 /*@{*/

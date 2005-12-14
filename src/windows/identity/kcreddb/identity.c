@@ -1146,8 +1146,6 @@ kcdb_identpro_validate_name(const wchar_t * name)
        before calling the identity provider */
     if(FAILED(StringCchLength(name, KCDB_IDENT_MAXCCH_NAME, &cch)))
         return KHM_ERROR_TOO_LONG;
-    if(wcsspn(name, KCDB_IDENT_VALID_CHARS) != cch)
-        return KHM_ERROR_INVALID_NAME;
     
     EnterCriticalSection(&cs_ident);
     if(kcdb_ident_sub != NULL) {
@@ -1218,8 +1216,7 @@ kcdb_identpro_canon_name(
     khm_size cch;
 
     if(cb_name_out == 0 ||
-       FAILED(StringCchLength(name_in, KCDB_IDENT_MAXCCH_NAME, &cch)) ||
-       wcsspn(name_in, KCDB_IDENT_VALID_CHARS) != cch)
+       FAILED(StringCchLength(name_in, KCDB_IDENT_MAXCCH_NAME, &cch)))
         return KHM_ERROR_INVALID_NAME;
 
     EnterCriticalSection(&cs_ident);
