@@ -552,7 +552,7 @@
         name to be validated will be in the \a name_src member.  The
         buffer will be NULL terminated with a maximum limit of
         KCDB_IDENT_MAXCCH_NAME characters including the terminating
-        NULL, consisting only of characters in KCDB_IDENT_VALID_CHARS
+        NULL.
         The \a result member should be set to one of the following
         depending on the result of the validation:
 
