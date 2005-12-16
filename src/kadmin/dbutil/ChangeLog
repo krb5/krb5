@@ -1,3 +1,8 @@
+2005-12-16  Tom Yu  <tlyu@mit.edu>
+
+	* kadm5_create.c: Patch to fix build on Tru64 among others.  Not
+	needed trunk due to DAL changes.
+
 2004-08-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* loadv4.c (enter_in_v5_db): Terminate argument list of
