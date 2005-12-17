@@ -439,12 +439,9 @@ extern int krb5int_pthread_loaded(void);
 #   error "Weak reference support is required"
 #  endif
 # endif
-# define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 #endif
 
-#if !defined(HAVE_PTHREAD_MUTEX_LOCK) && !defined(USE_PTHREAD_LOCK_ONLY_IF_LOADED)
-/* If we find a system with a broken stub for pthread_mutex_lock,
-   we may have to change this.  */
+#ifdef HAVE_PRAGMA_WEAK_REF
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
 #endif
 

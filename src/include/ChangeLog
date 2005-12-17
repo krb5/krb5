@@ -1,3 +1,8 @@
+2005-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (USE_PTHREAD_LOCK_ONLY_IF_LOADED): Define any time
+	HAVE_PRAGMA_WEAK_REF is defined.
+
 2005-12-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_mutex_lock_update_stats) [__GNUC__]: Use an
