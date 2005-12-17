@@ -1,3 +1,7 @@
+2005-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (myfulldir, RELDIR): Updated for directory rename.
+
 2005-11-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* policy_db.h: Include db.h after gssrpc/types.h, to fix

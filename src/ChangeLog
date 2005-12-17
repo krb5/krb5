@@ -1,3 +1,8 @@
+2005-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* plugins: Directory renamed from "modules".
+	* Makefile.in (SUBDIRS, fake-install), configure.in: Updated.
+
 2005-11-29  Jeffrey Altman <jaltman@mit.edu>
 
 	* Makefile.in: add src/windows/kfwlogon tree

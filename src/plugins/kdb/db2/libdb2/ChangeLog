@@ -1,6 +1,13 @@
 2005-12-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-unix): Do depend on all-libs.
+	(myfulldir, RELDIR): Updated for directory rename.
+	* hash/Makefile.in (myfulldir): Likewise.
+	* db/Makefile.in (myfulldir): Likewise.
+	* mpool/Makefile.in (myfulldir): Likewise.
+	* btree/Makefile.in (myfulldir): Likewise.
+	* recno/Makefile.in (myfulldir): Likewise.
+	* clib/Makefile.in (myfulldir): Likewise.
 
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 

@@ -545,6 +545,6 @@ dnl if test -n "$KRB4_LIB"; then
 dnl   AC_CONFIG_SUBDIRS(krb524)
 dnl fi
 
-AC_CONFIG_SUBDIRS(kadmin clients modules/kdb/db2 appl tests)
+AC_CONFIG_SUBDIRS(kadmin clients plugins/kdb/db2 appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(. util util/support util/send-pr lib kdc slave krb524 config-files gen-manpages include include/krb5 include/kerberosIV)

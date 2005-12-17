@@ -4,7 +4,7 @@ thisconfigdir=.
 myfulldir=.
 mydir=.
 SUBDIRS=util include lib @krb524@ kdc kadmin slave clients \
-	modules/kdb/db2 \
+	plugins/kdb/db2 \
 	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
@@ -96,7 +96,7 @@ fake-install:
 	done
 	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	(w=`pwd`; cd modules/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
+	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
 TAGS: $(SRCS)
 	etags $(SRCS)

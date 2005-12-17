@@ -1,5 +1,5 @@
 thisconfigdir=.
-myfulldir=modules/kdb/db2
+myfulldir=plugins/kdb/db2
 mydir=.
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
@@ -24,7 +24,7 @@ LIBBASE=db2
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
-RELDIR=../modules/kdb/db2
+RELDIR=../plugins/kdb/db2
 # Depends on libk5crypto and libkrb5
 # Also on gssrpc, for xdr stuff.
 SHLIB_EXPDEPS = \

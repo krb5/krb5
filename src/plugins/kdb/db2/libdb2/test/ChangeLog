@@ -2,6 +2,7 @@
 
 	* Makefile.in (PROG_LIBPATH, DB_DEPLIB): Look for library in
 	.. instead of $TOPLIBD.
+	(myfulldir): Updated for directory rename.
 
 2005-10-04  Ken Raeburn  <raeburn@mit.edu>
 

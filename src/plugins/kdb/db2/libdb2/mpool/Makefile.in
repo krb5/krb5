@@ -1,5 +1,5 @@
 thisconfigdir=./..
-myfulldir=modules/kdb/db2/libdb2/mpool
+myfulldir=plugins/kdb/db2/libdb2/mpool
 mydir=mpool
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=mpool.o
