@@ -1,3 +1,7 @@
+2005-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-unix): Do depend on all-libs.
+
 2005-10-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Set build_dynobj=yes.
