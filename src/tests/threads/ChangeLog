@@ -1,3 +1,7 @@
+2005-12-20  Sam Hartman  <hartmans@mit.edu>
+
+	* t_rcache.c: Include krb5.h after k5-int.h
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (t_rcache, prof1): Use THREAD_LINKOPTS instead of
