@@ -62,7 +62,7 @@ sub strrep {
 sub do_subs {
     local($_) = @_;
     s,\\$, \\,g; s, + \\$, \\,g;
-    s,//+,/,g; s, \\./, ,g;
+    s,//+,/,g; s, \./, ,g;
     if ($STLIBOBJS ne "") {
 	# Only care about the additional prefixes if we're building
 	# shared libraries.
@@ -127,6 +127,8 @@ sub do_subs_2 {
     s;\$\(BUILDTOP\)/include/ss/ss.h \$\(BUILDTOP\)/include/ss/ss_err.h ;\$(SS_DEPS) ;g;
     s;\$\(BUILDTOP\)/include/db.h \$\(BUILDTOP\)/include/db-config.h ;\$(DB_DEPS) ;g;
 
+    $_ = &uniquify($_);
+
     # Some krb4 dependencies should only be present if building with krb4
     # enabled.
     s;\$\(BUILDTOP\)/include/kerberosIV/krb_err.h ;\$(KRB_ERR_H_DEP) ;g;
@@ -135,6 +137,25 @@ sub do_subs_2 {
     s; *$;;g;
 
     return $_;
+}
+
+sub uniquify {
+    # Apparently some versions of gcc -- like
+    # "gcc version 3.4.4 20050721 (Red Hat 3.4.4-2)"
+    # -- will sometimes emit duplicate header file names.
+    local($_) = @_;
+    my(@words) = split " ", $_;
+    my($w);
+    my($result) = "";
+    my(%seen);
+    undef %seen;
+    foreach $w (@words) {
+	next if defined($seen{$w});
+	$seen{$w} = 1;
+	if ($result ne "") { $result .= " "; }
+	$result .= $w;
+    }
+    return $result . " ";
 }
 
 sub split_lines {

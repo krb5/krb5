@@ -1,3 +1,9 @@
+2005-12-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.pl (uniquify): New subroutine.
+	(do_subs_2): Use it.
+	(do_subs): Fix substitution pattern for " ./".
+
 2005-11-03  Tom Yu  <tlyu@mit.edu>
 
 	* mkrel: Delete .svn directories to avoid pathname length bloat.
