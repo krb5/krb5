@@ -109,14 +109,13 @@ adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
-  policy_db.h $(DB_DEPS) $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/lib/kdb/adb_err.h
+  policy_db.h $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(DB_DEPS) $(BUILDTOP)/lib/kdb/adb_err.h
 adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): \
   adb_policy.c policy_db.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h $(DB_DEPS) \
-  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/lib/kdb/adb_err.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
+  $(DB_DEPS) $(BUILDTOP)/lib/kdb/adb_err.h
 kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): kdb_db2.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
