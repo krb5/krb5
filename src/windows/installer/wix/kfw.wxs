@@ -124,14 +124,16 @@
           Id="InstallNetProvider"
           BinaryKey="binCustom"
           DllEntry="InstallNetProvider"
-          Execute="oncePerProcess" />
+          Impersonate="no"
+          Execute="deferred" />
 
         <CustomAction
           Id="RemoveNetProvider"
           BinaryKey="binCustom"
           DllEntry="UninstallNetProvider"
+          Impersonate="no"
           Return="ignore"
-          Execute="oncePerProcess" />
+          Execute="deferred" />
 
         <CustomAction
          Id="RollbackNetProvider"
