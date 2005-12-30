@@ -1,3 +1,13 @@
+2005-12-30  Tom Yu  <tlyu@mit.edu>
+
+	* gc_frm_kdc.c: Rewrite to modularize significantly.  (~400-line
+	functions do not deserve to live.)  The outer loop no longer
+	explicitly attempts the direct path to the target; that attempt
+	has been folded into the inner loop.  Remove some redundant
+	credential lookups present in the old code.  Treat unexpected
+	realm referrals as soft errors, in case some intermediate KDC
+	disagrees with client regarding a transit path.
+
 2005-12-28  Tom Yu  <tlyu@mit.edu>
 
 	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Cause free_tgt and
