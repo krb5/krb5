@@ -1,3 +1,7 @@
+2006-01-11  Sam Hartman  <hartmans@mit.edu>
+
+	* keyblocks.c (krb5int_c_free_keyblock): Remove krb5_callconv modifier
+
 2005-11-28  Tom Yu  <tlyu@mit.edu>
 
 	* t_cts.c, vectors.c: Don't include krb5.h.

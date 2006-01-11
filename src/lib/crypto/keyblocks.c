@@ -61,7 +61,7 @@ krb5_error_code   krb5int_c_init_keyblock
 }
 
 
-void KRB5_CALLCONV
+void 
 krb5int_c_free_keyblock(krb5_context context, register krb5_keyblock *val)
 {
     krb5int_c_free_keyblock_contents(context, val);
