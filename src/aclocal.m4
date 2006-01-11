@@ -103,6 +103,7 @@ libnover_frag=$srcdir/$ac_config_fragdir/libnover.in
 AC_SUBST_FILE(libnover_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
+WITH_LDAP
 KRB5_LIB_PARAMS
 KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
@@ -1793,3 +1794,32 @@ AC_DEFUN([KRB5_AC_LIBUTIL],
   UTIL_LIB=-lutil])dnl
 AC_SUBST(UTIL_LIB)
 ])
+dnl
+dnl
+dnl
+dnl --with-ldap=value
+dnl
+AC_DEFUN(WITH_LDAP,[
+AC_ARG_WITH([ldap],
+[  --with-ldap=OPENLDAP    compile openldap backend module
+  --with-ldap=EDIRECTORY  compile edir backend module
+  --without-ldap          don't compile openldap backend module (default)],
+,
+withval=no
+)dnl
+if test $withval = no; then
+        OPENLDAP_PLUGIN=""
+        AC_MSG_NOTICE(disabling ldap backend module support)
+else
+ if test $withval = OPENLDAP; then
+        AC_MSG_NOTICE(enabling openldap backend module support)
+        OPENLDAP_PLUGIN="yes"
+ fi
+ if test $withval = EDIRECTORY; then
+        AC_MSG_NOTICE(enabling edirectory backend module support)
+        OPENLDAP_PLUGIN="yes"
+        CFLAGS="$CFLAGS -DHAVE_EDIRECTORY"
+ fi
+fi
+AC_SUBST(OPENLDAP_PLUGIN)
+])dnl

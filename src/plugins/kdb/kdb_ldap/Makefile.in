@@ -1,0 +1,149 @@
+thisconfigdir=.
+myfulldir=plugins/kdb/kdb_ldap
+mydir=.
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS = @DEFS@ -DHAVE_LDAP_H @DEF_EDIR@
+
+#LOCALINCLUDES = -I.. -I$(SRCTOP)/include
+LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
+
+DB_VERSION      = @DB_VERSION@
+DB_DEPS         = $(DB_DEPS-@DB_HEADER_VERSION@)
+DB_DEPS-sys     =
+DB_DEPS-k5      = $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
+DB_DEPS-redirect = $(BUILDTOP)/include/db.h
+DB_LIB          = @DB_LIB@
+KDB5_DB_LIB     = @KDB5_DB_LIB@
+DB_DEPLIB       = $(DB_DEPLIB-@DB_VERSION@)
+DB_DEPLIB-k5    = $(TOPLIBD)/libdb$(DEPLIBEXT)
+DB_DEPLIB-sys   =
+
+LIBBASE=kldap
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+RELDIR=../plugins/kdb/kdb_ldap
+# Depends on libk5crypto and libkrb5
+# Also on gssrpc, for xdr stuff.
+SHLIB_EXPDEPS = \
+	$(GSSRPC_DEPLIBS) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS=$(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+SRCS= 	$(srcdir)/kdb_ldap.c \
+	$(srcdir)/kdb_ldap_conn.c \
+	$(srcdir)/ldap_realm.c \
+	$(srcdir)/ldap_krbcontainer.c \
+	$(srcdir)/ldap_principal.c \
+	$(srcdir)/ldap_principal2.c \
+	$(srcdir)/ldap_pwd_policy.c \
+	$(srcdir)/ldap_misc.c \
+	$(srcdir)/ldap_handle.c \
+	$(srcdir)/ldap_tkt_policy.c \
+	$(srcdir)/ldap_services.c \
+	$(srcdir)/ldap_service_rights.c \
+	$(srcdir)/princ_xdr.c \
+	$(srcdir)/ldap_fetch_mkey.c \
+	$(srcdir)/ldap_service_stash.c \
+	(srcdir)/kdb_xdr.c \
+	$(srcdir)/ldap_exp.c \
+	$(srcdir)/ldap_err.c
+
+STOBJLISTS=OBJS.ST
+STLIBOBJS= kdb_ldap.o \
+	kdb_ldap_conn.o \
+	ldap_realm.o \
+	ldap_krbcontainer.o \
+	ldap_principal.o \
+	ldap_principal2.o \
+	ldap_pwd_policy.o \
+	ldap_misc.o \
+	ldap_handle.o \
+	ldap_tkt_policy.o \
+	ldap_services.o \
+	ldap_service_rights.o \
+	princ_xdr.o \
+	ldap_fetch_mkey.o \
+	ldap_service_stash.o \
+	kdb_xdr.o \
+	ldap_exp.o \
+	ldap_err.o
+
+all-unix:: $(LIBBASE)$(SO_EXT) lib$(LIBBASE)$(SO_EXT)
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs
+
+lib$(LIBBASE)$(SO_EXT): $(LIBBASE)$(SO_EXT)
+	ln -sf $(LIBBASE)$(SO_EXT) lib$(LIBBASE)$(SO_EXT)
+#	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
+
+clean::
+	$(RM) lib$(LIBBASE)$(SO_EXT) ldap_exp.o
+
+# @libnover_frag@
+# @libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+
+kdb_ldap.so kdb_ldap.po $(OUTPRE)kdb_ldap.$(OBJEXT): kdb_ldap.c \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): kdb_ldap_conn.c ldap_service_stash.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_realm.so ldap_realm.po $(OUTPRE)ldap_realm.$(OBJEXT): ldap_realm.c ldap_principal.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_krbcontainer.so ldap_krbcontainer.po $(OUTPRE)ldap_krbcontainer.$(OBJEXT): ldap_krbcontainer.c \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_principal.so ldap_principal.po $(OUTPRE)ldap_principal.$(OBJEXT): ldap_principal.c ldap_principal.h princ_xdr.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_principal2.so ldap_principal2.po $(OUTPRE)ldap_principal2.$(OBJEXT) :ldap_principal2.c ldap_principal.h ldap_pwd_policy.h princ_xdr.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_pwd_policy.so ldap_pwd_policy.po $(OUTPRE)ldap_pwd_policy.$(OBJEXT): ldap_pwd_policy.c ldap_pwd_policy.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_misc.so ldap_misc.po $(OUTPRE)ldap_misc.$(OBJEXT):ldap_misc.c \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): ldap_handle.c \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT):ldap_tkt_policy.c ldap_tkt_policy.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_services.so ldap_services.po $(OUTPRE)ldap_services.$(OBJEXT): ldap_services.c ldap_services.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_service_rights.so ldap_service_rights.po $(OUTPRE)ldap_service_rights.$(OBJEXT):ldap_service_rights.c ldap_services.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+princ_xdr.so princ_xdr.po $(OUTPRE)princ_xdr.$(OBJEXT):princ_xdr.c princ_xdr.h ldap_principal.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT):ldap_fetch_mkey.c \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT):ldap_service_stash.c ldap_service_stash.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): kdb_xdr.c kdb_xdr.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+
+ldap_exp.so ldap_exp.po $(OUTPRE)ldap_exp.$(OBJEXT): ldap_exp.c ldap_principal.h ldap_pwd_policy.h \
+kdb_ldap.h ldap_realm.h ldap_krbcontainer.h ldap_misc.h ldap_handle.h
+

@@ -3,7 +3,7 @@ datadir=@datadir@
 thisconfigdir=.
 myfulldir=.
 mydir=.
-SUBDIRS=util include lib @krb524@ kdc kadmin slave clients \
+SUBDIRS=util include lib @krb524@ kdc @ldap_plugin_dir@ kadmin slave clients \
 	plugins/kdb/db2 \
 	appl tests \
 	config-files gen-manpages

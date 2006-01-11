@@ -1,0 +1,41 @@
+AC_INIT(configure.in)
+CONFIG_RULES
+AC_CHECK_HEADERS(unistd.h)
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+
+AC_CHECK_FUNCS(srand48 srand srandom umask)
+
+dnl AIX is unusual in that it wants all symbols resolved at link time
+dnl  Fortunately, it will allow us to link the kdb library now, even if
+dnl it is linked again later.
+case $krb5_cv_host in
+*-*-aix*)
+	LIBS="$LIBS -ldb"
+	;;
+esac
+
+OPENLDAP=1
+AC_CHECK_HEADERS([ldap.h], [], [OPENLDAP=0; AC_MSG_WARN([ldap.h not found])])
+AC_CHECK_HEADERS([lber.h], [], [OPENLDAP=0; AC_MSG_WARN([lber.h not found])])
+AC_CHECK_LIB(ldap, ldap_init, [], [OPENLDAP=0; AC_MSG_WARN([libldap not found])])
+AC_CHECK_LIB(lber, ber_init, [], [OPENLDAP=0; AC_MSG_WARN([libldap not found])])
+
+if test "$OPENLDAP" = "0"; then 
+    AC_ERROR("OPENLDAP libraries missing Skipping openldap database module")
+fi
+
+
+KRB5_RUN_FLAGS
+dnl The following is for check...
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+dnl
+DEF_EDIR=""
+if test "$OPENLDAP_PLUGIN" == "EDIRECTORY" ; then
+  DEF_EDIR="HAVE_EDIRECTORY"
+fi
+AC_SUBST(DEF_EDIR)
+dnl
+V5_AC_OUTPUT_MAKEFILE
