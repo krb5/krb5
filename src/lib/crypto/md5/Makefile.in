@@ -26,8 +26,8 @@ includes:: depend
 
 depend:: $(SRCS)
 
-t_mddriver: t_mddriver.o md5.o
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_mddriver t_mddriver.o md5.o
+t_mddriver: t_mddriver.o md5.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_mddriver t_mddriver.o md5.o $(SUPPORT_LIB)
 
 $(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md5.obj
 	link -out:$@ $**

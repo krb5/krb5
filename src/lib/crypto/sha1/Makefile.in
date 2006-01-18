@@ -26,8 +26,8 @@ includes:: depend
 
 depend:: $(SRCS)
 
-t_shs: t_shs.o shs.o
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_shs t_shs.o shs.o
+t_shs: t_shs.o shs.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_shs t_shs.o shs.o $(SUPPORT_LIB)
 
 $(OUTPRE)t_shs.exe: $(OUTPRE)t_shs.obj $(OUTPRE)shs.obj
 	link -out:$@ $**
@@ -45,8 +45,8 @@ clean::
 
 clean-unix:: clean-libobjs
 
-t_shs3: t_shs3.o shs.o
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o t_shs3 t_shs3.o shs.o
+t_shs3: t_shs3.o shs.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_shs3 t_shs3.o shs.o $(SUPPORT_LIB)
 
 # @libobj_frag@
 

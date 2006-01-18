@@ -310,8 +310,8 @@ t_ser: $(T_SER_OBJS) $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_ser $(T_SER_OBJS) \
 		$(KDB5_LIBS) $(KRB5_BASE_LIBS) $(DL_LIB) $(THREAD_LINKOPTS)
 
-t_deltat : $(T_DELTAT_OBJS)
-	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS)
+t_deltat : $(T_DELTAT_OBJS) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_deltat $(T_DELTAT_OBJS) $(SUPPORT_LIB)
 
 T_EXPAND_OBJS=t_expand.o
 t_expand.o : t_expand.c

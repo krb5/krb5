@@ -65,8 +65,8 @@ verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
 	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
 		-lcom_err $(SUPPORT_LIB)
 
-destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS)
-	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS)
+destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB)
 
 TAFSS2KOBJS =								\
 	t_afss2k.$(OBJEXT) $(TOBJS)					\

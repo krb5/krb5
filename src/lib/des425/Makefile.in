@@ -84,8 +84,8 @@ shared:
 verify: verify.o $(DES425_DEPLIB) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ verify.o $(DES425_LIB) $(KRB5_BASE_LIBS)
 
-t_quad: t_quad.o quad_cksum.o
-	$(CC_LINK) -o $@ t_quad.o quad_cksum.o
+t_quad: t_quad.o quad_cksum.o $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_quad.o quad_cksum.o $(SUPPORT_LIB)
 
 t_pcbc: t_pcbc.o pcbc_encrypt.o key_sched.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_pcbc.o pcbc_encrypt.o key_sched.o $(KRB5_BASE_LIBS)
