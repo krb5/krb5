@@ -1036,23 +1036,23 @@ if test "$with_tcl" != no ; then
 
 		if test $tcl_lib = no; then
 			AC_CHECK_LIB(tcl8.0, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl8.0 -lm $DL_LIB" 
+				TCL_LIBS="$TCL_LIBS -ltcl8.0 -lm $DL_LIB $LIBS"
 				tcl_lib=yes,,-lm $DL_LIB)
 		fi
 		if test $tcl_lib = no; then
 			AC_CHECK_LIB(tcl7.6, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl7.6 -lm $DL_LIB" 
+				TCL_LIBS="$TCL_LIBS -ltcl7.6 -lm $DL_LIB $LIBS"
 				tcl_lib=yes,,-lm $DL_LIB)
 		fi
 		if test $tcl_lib = no; then
 			AC_CHECK_LIB(tcl7.5, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB"
+				TCL_LIBS="$TCL_LIBS -ltcl7.5 -lm $DL_LIB $LIBS"
 				tcl_lib=yes,,-lm $DL_LIB)
 
 		fi
 		if test $tcl_lib = no ; then
 			AC_CHECK_LIB(tcl, Tcl_CreateCommand, 
-				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB"
+				TCL_LIBS="$TCL_LIBS -ltcl -lm $DL_LIB $LIBS"
 				tcl_lib=yes,,-lm $DL_LIB)
 
 		fi
