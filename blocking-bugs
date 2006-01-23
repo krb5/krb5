@@ -9,3 +9,6 @@ supports this and either change it or explicitly decide thread
 specific data is OK.
 
 
+
+* --with-ldap needs to be carefully considered; is OPENLDAP upper case really correct? Consider GCS and other  options we already use.
+
