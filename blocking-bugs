@@ -1,0 +1,11 @@
+This is a list of blocking bugs that must be addressed before these
+changes are committed to the trunk:
+
+* new_default_com_err_proc is not an acceptable name for a global symbol.
+
+* Thread specific data is not how we want to handle database errors.
+I think we want to handle them in krb5_contexts.  See if the API
+supports this and either change it or explicitly decide thread
+specific data is OK.
+
+
