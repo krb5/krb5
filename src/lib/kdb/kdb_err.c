@@ -77,14 +77,20 @@ void krb5_kdb_clear_err_str (){
     krb5_kdb_set_err_str ("");
 }
 
-void krb5_kdb_prepend_err_str (char *str) {
+void krb5_kdb_prepend_err_str (char *str, int error_code) {
     char err[KRB5_MAX_ERR_STR], new_err[KRB5_MAX_ERR_STR];
 
     CALL_INIT_FUNCTION (init_kdb_err);
 
     krb5_kdb_get_err_str (err, KRB5_MAX_ERR_STR);
 
-    snprintf (new_err, sizeof(new_err), "%s%s", str, err);
+    /* If the error string has not already been set ... */
+    if (err[0] == '\0')
+	snprintf (new_err, sizeof(new_err), "%s %s", str,
+		error_message (error_code));
+    else
+	snprintf (new_err, sizeof(new_err), "%s %s", str, err);
+
     new_err[sizeof (new_err)] = '\0';
 
     krb5_kdb_set_err_str (new_err);

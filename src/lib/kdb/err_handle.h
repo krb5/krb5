@@ -8,7 +8,7 @@
 void krb5_kdb_set_err_str (char *str);
 void krb5_kdb_get_err_str (char *str, int len);
 void krb5_kdb_clear_err_str ();
-void krb5_kdb_prepend_err_str (char *str);
+void krb5_kdb_prepend_err_str (char *str, int error_code);
 
 #define error_message_w(code,err,size)				\
 	{							\
