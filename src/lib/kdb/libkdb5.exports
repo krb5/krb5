@@ -48,3 +48,11 @@ krb5_db_put_policy
 krb5_db_iter_policy
 krb5_db_delete_policy
 krb5_db_free_policy
+krb5_db_vftabl_kdb_db2
+krb5_def_store_mkey
+krb5_set_err
+krb5_kdb_set_err_str
+krb5_kdb_get_err_str
+krb5_kdb_clear_err_str
+krb5_kdb_prepend_err_str
+new_default_com_err_proc

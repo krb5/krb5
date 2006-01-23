@@ -380,6 +380,9 @@ kadm5_create_principal_3(void *server_handle,
 	}
     }
 
+    /* In all cases key and the principal data is set, let the database provider know */
+    kdb.mask = mask | KADM5_KEY_DATA | KADM5_PRINCIPAL ;
+
     /* store the new db entry */
     ret = kdb_put_entry(handle, &kdb, &adb);
 
@@ -627,6 +630,9 @@ kadm5_modify_principal(void *server_handle,
 	     }
 	 }
     }
+
+    /* let the mask propagate to the database provider */
+    kdb.mask = mask;
 
     ret = kdb_put_entry(handle, &kdb, &adb);
     if (ret) goto done;
@@ -1433,6 +1439,9 @@ kadm5_chpass_principal_3(void *server_handle,
     if (ret)
 	goto done;
 
+    /* key data and attributes changed, let the database provider know */
+    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES | KADM5_CPW_FUNCTION;
+
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 
@@ -1580,6 +1589,9 @@ kadm5_randkey_principal_3(void *server_handle,
 	 }
     }	 
     
+    /* key data changed, let the database provider know */
+    kdb.mask = KADM5_KEY_DATA | KADM5_RANDKEY_USED;
+
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 

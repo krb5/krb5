@@ -34,6 +34,7 @@
 #include "k5-int.h"
 #include "adm_proto.h"
 #include "com_err.h"
+#include <err_handle.h>
 #include <stdio.h>
 #include <ctype.h>
 #ifdef	HAVE_SYSLOG_H
@@ -182,6 +183,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif	/* HAVE_SYSLOG */
     char	*cp;
     char	*syslogp;
+    char        errbuf[KRB5_MAX_ERR_STR + 1];
 
     /* Make the header */
     sprintf(outbuf, "%s: ", whoami);
@@ -194,7 +196,9 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     /* If reporting an error message, separate it. */
     if (code) {
         outbuf[sizeof(outbuf) - 1] = '\0';
-	strncat(outbuf, error_message(code), sizeof(outbuf) - 1 - strlen(outbuf));
+
+	error_message_w (code, errbuf, sizeof(errbuf));
+	strncat(outbuf, errbuf, sizeof(outbuf) - 1 - strlen(outbuf));
 	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
     }
     cp = &outbuf[strlen(outbuf)];

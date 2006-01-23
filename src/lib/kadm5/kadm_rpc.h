@@ -27,7 +27,6 @@ typedef struct cprinc3_arg cprinc3_arg;
 struct generic_ret {
 	krb5_ui_4 api_version;
 	kadm5_ret_t code;
-        char *err_str;
 };
 typedef struct generic_ret generic_ret;
 
@@ -62,7 +61,6 @@ struct gprincs_ret {
 	kadm5_ret_t code;
 	char **princs;
 	int count;
-        char *err_str;
 };
 typedef struct gprincs_ret gprincs_ret;
 
@@ -130,7 +128,6 @@ struct chrand_ret {
 	krb5_keyblock key;
 	krb5_keyblock *keys;
 	int n_keys;
-        char *err_str;
 };
 typedef struct chrand_ret chrand_ret;
 
@@ -145,7 +142,6 @@ struct gprinc_ret {
 	krb5_ui_4 api_version;
 	kadm5_ret_t code;
 	kadm5_principal_ent_rec rec;
-        char *err_str;
 };
 typedef struct gprinc_ret gprinc_ret;
 
@@ -179,7 +175,6 @@ struct gpol_ret {
 	krb5_ui_4 api_version;
 	kadm5_ret_t code;
 	kadm5_policy_ent_rec rec;
-        char *err_str;
 };
 typedef struct gpol_ret gpol_ret;
 
@@ -194,7 +189,6 @@ struct gpols_ret {
 	kadm5_ret_t code;
 	char **pols;
 	int count;
-        char *err_str;
 };
 typedef struct gpols_ret gpols_ret;
 
@@ -202,7 +196,6 @@ struct getprivs_ret {
 	krb5_ui_4 api_version;
 	kadm5_ret_t code;
 	long privs;
-        char *err_str;
 };
 typedef struct getprivs_ret getprivs_ret;
 

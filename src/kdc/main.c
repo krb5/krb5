@@ -34,6 +34,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include <err_handle.h>
 #include "adm.h"
 #include "adm_proto.h"
 #include "kdc_util.h"
@@ -240,9 +241,11 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 
     /* first open the database  before doing anything */
 #ifdef KRBCONF_KDC_MODIFIES_KDB    
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, KRB5_KDB_OPEN_RW))) {
+    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC))) {
 #else
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, KRB5_KDB_OPEN_RO))) {
+    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+			     KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC))) {
 #endif
 	com_err(progname, kret,
 		"while initializing database for realm %s", realm);
@@ -428,6 +431,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char                *v4mode = 0;
 #endif
     extern char *optarg;
+    char                errbuf[KRB5_MAX_ERR_STR + 1];
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
 	hierarchy[0] = "kdcdefaults";
@@ -587,10 +591,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     if (kdc_numrealms == 0) {
 	/* no realm specified, use default realm */
 	if ((retval = krb5_get_default_realm(kcontext, &lrealm))) {
+	    error_message_w (retval, errbuf, sizeof(errbuf));
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
-		     argv[0], error_message (retval));
+		     argv[0], errbuf);
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {

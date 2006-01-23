@@ -173,6 +173,9 @@ kadmin_parse_name(name, principal)
     return retval;
 }
 
+extern void new_default_com_err_proc (const char *whoami, errcode_t code,
+	const char *fmt, va_list ap);
+
 char *kadmin_startup(argc, argv)
     int argc;
     char *argv[];
@@ -195,6 +198,10 @@ char *kadmin_startup(argc, argv)
     memset((char *) &params, 0, sizeof(params));
     
     retval = krb5_init_context(&context);
+
+    if (strcmp (whoami, "kadmin.local") == 0)
+	set_com_err_hook(new_default_com_err_proc);
+
     if (retval) {
 	 com_err(whoami, retval, "while initializing krb5 library");
 	 exit(1);

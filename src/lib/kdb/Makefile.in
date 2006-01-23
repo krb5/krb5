@@ -22,7 +22,12 @@ SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-all:: 
+ERR_HANDLE_HDR=$(BUILDTOP)/include/err_handle.h
+
+all:: $(ERR_HANDLE_HDR)
+
+$(ERR_HANDLE_HDR): err_handle.h
+	#$(CP) err_handle.h $(ERR_HANDLE_HDR)
 
 adb_err.$(OBJEXT): adb_err.c
 adb_err.c adb_err.h: $(srcdir)/adb_err.et
@@ -34,8 +39,8 @@ SRCS= \
 	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
 	adb_err.c \
-	$(srcdir)/err_handle.c \
-	$(srcdir)/keytab.c
+	$(srcdir)/keytab.c \
+	$(srcdir)/kdb_err.c
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS= \
@@ -45,13 +50,13 @@ STLIBOBJS= \
 	kdb_default.o \
 	kdb_cpw.o \
 	adb_err.o \
-	err_handle.o \
-	keytab.o
+	keytab.o \
+	kdb_err.o
 
 all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-
+	$(RM) $(ERR_HANDLE_HDR)
 # @lib_frag@
 # @libobj_frag@
 
@@ -92,13 +97,6 @@ kdb_cpw.so kdb_cpw.po $(OUTPRE)kdb_cpw.$(OBJEXT): kdb_cpw.c \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
 adb_err.so adb_err.po $(OUTPRE)adb_err.$(OBJEXT): adb_err.c \
   $(COM_ERR_DEPS)
-err_handle.so err_handle.po $(OUTPRE)err_handle.$(OBJEXT): \
-  err_handle.c err_handle.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h
 keytab.so keytab.po $(OUTPRE)keytab.$(OBJEXT): keytab.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \

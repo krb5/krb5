@@ -134,7 +134,7 @@ krb5_db2_db_delete_principal(krb5_context context,
 			     krb5_const_principal searchfor,
 			     int *nentries);
 
-krb5_error_code krb5_db2_lib_init(krb5_set_err_func_t);
+krb5_error_code krb5_db2_lib_init();
 
 krb5_error_code krb5_db2_lib_cleanup(void);
 
@@ -208,9 +208,5 @@ krb5_error_code krb5_db2_delete_policy ( krb5_context kcontext,
 
 void krb5_db2_free_policy( krb5_context kcontext,
 			   osa_policy_ent_t entry );
-
-
-
-extern krb5_set_err_func_t krb5_db2_dal_err_funcp;
 
 #endif /* KRB5_KDB_DB2_H */

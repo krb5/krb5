@@ -2268,7 +2268,8 @@ load_db(argc, argv)
     /*
      * Initialize the database.
      */
-    if ((kret = krb5_db_open(kcontext, db5util_db_args, KRB5_KDB_OPEN_RW))) {
+    if ((kret = krb5_db_open(kcontext, db5util_db_args, 
+			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
 	fprintf(stderr, dbinit_err_fmt,
 		programname, error_message(kret));
 	exit_status++;

@@ -47,7 +47,7 @@ SUBDIROBJLISTS= \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
 OBJS=\
-	$(OUTPRE)krb5_libinit.$(OBJEXT)
+	$(OUTPRE)krb5_libinit.$(OBJEXT) ../kdb/kdb_err.o
 
 SRCS=\
 	$(srcdir)/krb5_libinit.c

@@ -4,6 +4,8 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = clnt srv unit-test
 
+LOCALINCLUDES = -I$(BUILDTOP)/lib/kdb
+
 ##DOSBUILDTOP = ..\..
 
 kadm_err.$(OBJEXT): kadm_err.c

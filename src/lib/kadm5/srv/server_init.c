@@ -259,7 +259,8 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 	  return ret;
      }
 
-    ret = krb5_db_open(handle->context, db_args, KRB5_KDB_OPEN_RW);
+    ret = krb5_db_open(handle->context, db_args, 
+		       KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
     if (ret) {
 	 krb5_free_context(handle->context);
 	 free_db_args(handle);
@@ -406,7 +407,8 @@ kadm5_ret_t kadm5_flush(void *server_handle)
      CHECK_HANDLE(server_handle);
 
      if ((ret = krb5_db_fini(handle->context)) ||
-	 (ret = krb5_db_open(handle->context, handle->db_args, KRB5_KDB_OPEN_RW)) ||
+	 (ret = krb5_db_open(handle->context, handle->db_args, 
+			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN)) ||
 	 (ret = adb_policy_close(handle)) ||
 	 (ret = adb_policy_init(handle))) {
 	  (void) kadm5_destroy(server_handle);

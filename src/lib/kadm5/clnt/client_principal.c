@@ -16,7 +16,6 @@ static char *rcsid = "$Header$";
 #endif
 #include    <errno.h>
 #include    "client_internal.h"
-#include    "err_handle.h"
 
 #ifdef DEBUG
 #define eret() do { clnt_perror(handle->clnt, "null ret"); return KADM5_RPC_ERROR; } while (0)
@@ -256,11 +255,6 @@ kadm5_get_principal(void *server_handle,
 	      memcpy(ent, &r->rec, sizeof(r->rec));
     }
     
-
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -289,10 +283,6 @@ kadm5_get_principals(void *server_handle,
 	 *princs = NULL;
     }
     
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -494,11 +484,6 @@ kadm5_randkey_principal_3(void *server_handle,
          }
     }
 
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
-
     return r->code;
 }
 
@@ -545,11 +530,6 @@ kadm5_randkey_principal(void *server_handle,
 		      }
 	      } else *key = NULL;
          }
-    }
-
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
     }
 
     return r->code;

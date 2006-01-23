@@ -88,6 +88,8 @@ typedef long		kadm5_ret_t;
 #define KADM5_FAIL_AUTH_COUNT	0x010000
 #define KADM5_KEY_DATA		0x020000
 #define KADM5_TL_DATA		0x040000
+#define KADM5_CPW_FUNCTION      0x080000
+#define KADM5_RANDKEY_USED      0x100000
 /* all but KEY_DATA and TL_DATA */
 #define KADM5_PRINCIPAL_NORMAL_MASK 0x01ffff
 
@@ -123,7 +125,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_OLD_AUTH_GSSAPI	0x100000
 #define KADM5_CONFIG_NO_AUTH		0x200000
 #define KADM5_CONFIG_AUTH_NOFALLBACK	0x400000
-
+#define KADM5_CONFIG_KPASSWD_SERVER     0x800000
 /*
  * permission bits
  */
@@ -214,6 +216,7 @@ typedef struct _kadm5_config_params {
      int		kpasswd_port;
 
      char *		admin_server;
+     char *		kpasswd_server;
 
      char *		dbname;
      char *		admin_dbname;

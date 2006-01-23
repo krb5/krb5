@@ -145,6 +145,9 @@ static struct _cmd_table *cmd_lookup(name)
 char **db5util_db_args = NULL;
 int    db5util_db_args_size = 0;
      
+extern void new_default_com_err_proc (const char *whoami, errcode_t code,
+	const char *fmt, va_list ap);
+
 int main(argc, argv)
     int argc;
     char *argv[];
@@ -156,6 +159,7 @@ int main(argc, argv)
     krb5_error_code retval;
 
     retval = krb5_init_context(&util_context);
+    set_com_err_hook(new_default_com_err_proc);
     if (retval) {
 	    com_err (progname, retval, "while initializing Kerberos code");
 	    exit(1);
@@ -365,7 +369,8 @@ static int open_db_and_mkey()
     dbactive = FALSE;
     valid_master_key = 0;
 
-    if ((retval = krb5_db_open(util_context, db5util_db_args, KRB5_KDB_OPEN_RW))) {
+    if ((retval = krb5_db_open(util_context, db5util_db_args, 
+			       KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
 	com_err(progname, retval, "while initializing database");
 	exit_status++;
 	return(1);

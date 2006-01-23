@@ -19,7 +19,7 @@ static char *_csrc =
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-#include "err_handle.h"
+#include <err_handle.h>
 #include <assert.h>
 
 #ifdef NOVELL
