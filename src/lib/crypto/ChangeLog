@@ -1,3 +1,7 @@
+2006-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (t_nfold$(EXEEXT)): Include support library.
+
 2006-01-11  Sam Hartman  <hartmans@mit.edu>
 
 	* keyblocks.c (krb5int_c_free_keyblock): Remove krb5_callconv modifier
