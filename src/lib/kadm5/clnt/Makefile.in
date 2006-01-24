@@ -2,7 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/kadm5/clnt
 mydir=clnt
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 -I$(BUILDTOP)/lib/kdb
+LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 -I$(srcdir)/../../kdb
 
 LIBBASE=kadm5clnt
 LIBMAJOR=5
