@@ -1,3 +1,55 @@
+2006-01-24  Sam Hartman  <hartmans@mit.edu>
+
+	* Novell LDAP plugin patch contributed under MIT licenses;
+	introduces  plugins/kdb/kdb_ldap and kadmin/ldap_util.  ALso
+	includes changes to link into configure and build system.
+	
+
+	* Apply Novell error handling patch, contributed under MIT
+	licenses; touches the following files: 
+	  src/include/k5-thread.h
+	  src/include/krb5/kdb.h
+	  src/kadmin/cli/kadmin.c
+	  src/kadmin/dbutil/dump.c
+	  src/kadmin/dbutil/kdb5_stash.c
+	  src/kadmin/dbutil/kdb5_util.c
+	  src/kadmin/server/Makefile.in
+	  src/kadmin/server/ovsec_kadmd.c
+	  src/kadmin/server/schpw.c
+	  src/kadmin/server/server_stubs.c
+	  src/kdc/Makefile.in
+	  src/kdc/do_as_req.c
+	  src/kdc/do_tgs_req.c
+	  src/kdc/kdc_preauth.c
+	  src/kdc/main.c
+	  src/lib/kadm5/Makefile.in
+	  src/lib/kadm5/admin.h
+	  src/lib/kadm5/clnt/Makefile.in
+	  src/lib/kadm5/clnt/client_principal.c
+	  src/lib/kadm5/clnt/clnt_policy.c
+	  src/lib/kadm5/clnt/clnt_privs.c
+	  src/lib/kadm5/clnt/err_handle.c
+	  src/lib/kadm5/clnt/err_handle.h
+	  src/lib/kadm5/clnt/libkadm5clnt.exports
+	  src/lib/kadm5/kadm_rpc.h
+	  src/lib/kadm5/kadm_rpc_xdr.c
+	  src/lib/kadm5/logger.c
+	  src/lib/kadm5/srv/server_init.c
+	  src/lib/kadm5/srv/server_misc.c
+	  src/lib/kadm5/srv/svr_principal.c
+	  src/lib/kdb/Makefile.in
+	  src/lib/kdb/err_handle.h
+	  src/lib/kdb/kdb5.c
+	  src/lib/kdb/kdb5.h
+	  src/lib/kdb/kdb_err.c
+	  src/lib/kdb/libkdb5.exports
+	  src/lib/krb5/Makefile.in
+	  src/lib/krb5/error_tables/kdb5_err.et
+	  src/plugins/kdb/db2/kdb_db2.c
+	  src/plugins/kdb/db2/kdb_db2.h
+
+	
+
 2006-01-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* aclocal.m4 (AC_KRB5_TCL_TRYOLD): Include $LIBS in $TCL_LIBS.
