@@ -13,6 +13,6 @@ specific data is OK.
 * --with-ldap needs to be carefully considered; is OPENLDAP upper case really correct? Consider GCS and other  options we already use.
 
 
-* lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
+* kdc, kadmin/ldap_util, lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
 wrong and should probably be fixed either by installing that header in
 buildtop/include or something.

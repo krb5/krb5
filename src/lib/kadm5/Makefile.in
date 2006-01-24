@@ -4,7 +4,7 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = clnt srv unit-test
 
-LOCALINCLUDES = -I$(BUILDTOP)/lib/kdb
+LOCALINCLUDES = -I$(srcdir)/../kdb
 
 ##DOSBUILDTOP = ..\..
 
