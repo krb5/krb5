@@ -196,11 +196,6 @@ typedef struct _kdb_vftabl{
 typedef struct _db_library {
     char name[KDB_MAX_DB_NAME];
     int reference_cnt;
-#ifdef HAVE_PTHREAD_H
-    pthread_mutex_t lib_lock;
-    int recursive_cnt;               /* this is used as lock to help recursive locking */
-    int excl;
-#endif
     void *dl_handle;
     kdb_vftabl vftabl;
     struct _db_library *next, *prev;
