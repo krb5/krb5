@@ -1,5 +1,8 @@
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf (*-*-linux*): Run export-check.pl after building a
+	shared library.
+
 	* lib.in (binutils.versions): Put hidden symbol list after
 	exported list, because libkrb4 has a symbol starting with "__" in
 	its export list.

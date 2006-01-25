@@ -1,3 +1,7 @@
+2006-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* export-check.pl: New file.
+
 2005-12-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.pl (uniquify): New subroutine.
