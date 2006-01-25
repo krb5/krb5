@@ -84,11 +84,10 @@ kdb_init_lib_lock(db_library lib)
 	return retval;
     }
 
-    lib->lock_holder = pthread_self();
     lib->excl = 0;
     lib->recursive_cnt = 0;
 
-    return pthread_cond_init(&lib->unlocked, NULL);
+    return 0;
 }
 
 static int
@@ -99,7 +98,7 @@ kdb_destroy_lib_lock(db_library lib)
 	return retval;
     }
 
-    return pthread_cond_destroy(&lib->unlocked);
+    return 0;
 }
 
 static int
@@ -108,19 +107,9 @@ kdb_lock_lib_lock(db_library lib, krb5_boolean exclusive)
     /* Since, handle locked by one thread should not allow another
        thread to continue.  */
     krb5_error_code retval = 0;
-    pthread_t myid = pthread_self();
 
     if ((retval = pthread_mutex_lock(&lib->lib_lock)))
 	return retval;
-
-    while ((exclusive && (lib->excl || lib->recursive_cnt)) ||
-	   (!pthread_equal(lib->lock_holder, myid)
-	    && !lib->vftabl.is_thread_safe && lib->recursive_cnt)) {
-	/* Exclusive lock held or some one using lock when exclusive
-	   is requested or library not-re-entrant.  */
-	if ((retval = pthread_cond_wait(&lib->unlocked, &lib->lib_lock)))
-	    return retval;
-    }
 
     /* exclusive lock and recursive_cnt allow a thread to lock even it
        already holds a lock */
@@ -128,8 +117,6 @@ kdb_lock_lib_lock(db_library lib, krb5_boolean exclusive)
 	lib->excl++;
 
     lib->recursive_cnt++;
-
-    lib->lock_holder = myid;
 
     return pthread_mutex_unlock(&lib->lib_lock);
 }
@@ -145,9 +132,6 @@ kdb_unlock_lib_lock(db_library lib, krb5_boolean exclusive)
     lib->recursive_cnt--;
     if (exclusive)
 	lib->excl--;
-
-    if ((retval = pthread_cond_broadcast(&lib->unlocked)))
-	return retval;
 
     return pthread_mutex_unlock(&lib->lib_lock);
 }

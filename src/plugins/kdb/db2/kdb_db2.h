@@ -190,11 +190,6 @@ krb5_error_code krb5_db2_get_policy ( krb5_context kcontext,
 				      osa_policy_ent_t *policy,
 				      int *cnt);
 
-krb5_error_code krb5_db2_get_policy ( krb5_context kcontext,
-				      char *name,
-				      osa_policy_ent_t *policy,
-				      int *cnt);
-
 krb5_error_code krb5_db2_put_policy ( krb5_context kcontext,
 				      osa_policy_ent_t policy );
 

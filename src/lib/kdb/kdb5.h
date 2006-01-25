@@ -49,8 +49,6 @@ typedef struct _kdb_vftabl{
     short int maj_ver;
     short int min_ver;
 
-    short int is_thread_safe;
-
     krb5_error_code (*init_library)(krb5_set_err_func_t);
     krb5_error_code (*fini_library)();
     krb5_error_code (*init_module) ( krb5_context kcontext,
@@ -200,9 +198,7 @@ typedef struct _db_library {
     int reference_cnt;
 #ifdef HAVE_PTHREAD_H
     pthread_mutex_t lib_lock;
-    pthread_cond_t unlocked; /*  To check whether some one has called db_unlock */
     int recursive_cnt;               /* this is used as lock to help recursive locking */
-    pthread_t lock_holder;
     int excl;
 #endif
     void *dl_handle;
