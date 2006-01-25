@@ -11,3 +11,7 @@ krb5int_gai_strerror
 krb5int_getnameinfo
 krb5int_in6addr_any
 krb5int_pthread_loaded
+krb5int_mutex_alloc
+krb5int_mutex_free
+krb5int_mutex_lock
+krb5int_mutex_unlock

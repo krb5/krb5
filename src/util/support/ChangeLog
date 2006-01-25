@@ -1,3 +1,12 @@
+2006-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* threads.c (krb5int_mutex_alloc, krb5int_mutex_free,
+	krb5int_mutex_lock, krb5int_mutex_unlock): New functions.
+	(krb5int_mutex_lock_update_stats,
+	krb5int_mutex_unlock_update_stats, krb5int_mutex_report_stats):
+	Always define, even if not doing anything.
+	* libkrb5support.exports: Export the new functions.
+
 2005-09-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake_addrinfo.c (getaddrinfo): Conditionalize last change on
