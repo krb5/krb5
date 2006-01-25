@@ -16,3 +16,13 @@ specific data is OK.
 * kdc, kadmin/ldap_util, lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
 wrong and should probably be fixed either by installing that header in
 buildtop/include or something.
+
+
+* libkadm5clnt pulls in a shared object from kdb5.
+
+* Separation between ldap_util and the ldap plugin needs to be
+considered.  Perhaps ldap_util should be built in the plugin if that
+doesn't mess things up too much.
+
+* I've told the kadmin client to link against -lkdb5 as a hack.
+That's clearly wrong but is because of brokenness in kadm5/clnt.
