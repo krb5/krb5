@@ -7,6 +7,8 @@
 	Always define, even if not doing anything.
 	* libkrb5support.exports: Export the new functions.
 
+	* fake-addrinfo.c (krb5int_in6addr_any): Always define.
+
 2005-09-09  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake_addrinfo.c (getaddrinfo): Conditionalize last change on
