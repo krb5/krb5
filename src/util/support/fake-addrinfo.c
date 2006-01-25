@@ -1309,12 +1309,8 @@ static int krb5int_unlock_fac (void)
     return k5_mutex_unlock(&krb5int_fac.lock);
 }
 
-#if defined(KRB5_USE_INET6) && defined(NEED_INSIXADDR_ANY) 
-/* If compiling with IPv6 support and C library does not define in6addr_any */
+/* Some systems don't define in6addr_any.  */
 const struct in6_addr krb5int_in6addr_any = IN6ADDR_ANY_INIT;
-#endif
-
-
 
 int krb5int_getaddrinfo (const char *node, const char *service,
 			 const struct addrinfo *hints,

@@ -775,4 +775,25 @@ extern void *k5_getspecific(k5_key_t);
 extern int k5_setspecific(k5_key_t, void *);
 extern int k5_key_delete(k5_key_t);
 
+extern int  KRB5_CALLCONV krb5int_mutex_alloc  (k5_mutex_t **);
+extern void KRB5_CALLCONV krb5int_mutex_free   (k5_mutex_t *);
+extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *);
+extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
+
+/* In time, many of the definitions above should move into the support
+   library, and this file should be greatly simplified.  For type
+   definitions, that'll take some work, since other data structures
+   incorporate mutexes directly, and our mutex type is dependent on
+   configuration options and system attributes.  For most functions,
+   though, it should be relatively easy.
+
+   For now, plugins should use the exported functions, and not the
+   above macros, and use krb5int_mutex_alloc for allocations.  */
+#ifdef PLUGIN
+#undef k5_mutex_lock
+#define k5_mutex_lock krb5int_mutex_lock
+#undef k5_mutex_unlock
+#define k5_mutex_unlock krb5int_mutex_unlock
+#endif
+
 #endif /* multiple inclusion? */

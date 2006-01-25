@@ -1,3 +1,16 @@
+2006-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5.h (struct _db_library): Delete all lock-related fields.
+	(struct _kdb_vftabl): Delete is_thread_safe field.
+	* kdb5.c (kdb_init_lib_lock, kdb_destroy_lib_lock,
+	kdb_lock_lib_lock, kdb_unlock_lib_lock): Make no-ops always.
+
+	* kdb5.c (db_lock, kdb_lock_list, kdb_unlock_list): Use the
+	k5_mutex interfaces.
+	(kdb_init_lock_list, kdb_fini_lock_list): New functions;
+	initialize and destroy the mutex.  Mark as init/fini functions.
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): New variables.
+
 2005-12-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb5.c (kdb_load_library): Make dbpath_names static, to keep

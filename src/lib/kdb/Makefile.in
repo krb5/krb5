@@ -12,6 +12,8 @@ LOCALINCLUDES= -I.
 LIBBASE=kdb5
 LIBMAJOR=4
 LIBMINOR=0
+LIBINITFUNC=kdb_init_lock_list
+LIBFINIFUNC=kdb_fini_lock_list
 RELDIR=kdb
 # Depends on libk5crypto and libkrb5
 

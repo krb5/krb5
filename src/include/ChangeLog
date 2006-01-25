@@ -1,3 +1,10 @@
+2006-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-thread.h (krb5int_mutex_alloc, krb5int_mutex_free,
+	krb5int_mutex_lock, krb5int_mutex_unlock): Declare.
+	(k5_mutex_lock, k5_mutex_unlock) [PLUGIN]: Redefine to call
+	krb5int_ function versions.
+
 2005-12-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (USE_PTHREAD_LOCK_ONLY_IF_LOADED): Define any time

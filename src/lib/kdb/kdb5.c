@@ -28,12 +28,7 @@
  * internal static variable
  */
 
-#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
-/* static pthread_once_t db_inited = PTHREAD_ONCE_INIT; */
-static pthread_mutex_t db_lock = PTHREAD_MUTEX_INITIALIZER;
-#else
-/* static int db_inited = 0; */
-#endif
+static k5_mutex_t db_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 #ifdef _KDB5_STATIC_LINK
 #undef _KDB5_DYNAMIC_LINK
@@ -48,122 +43,44 @@ static db_library lib_list;
 /*
  * Helper Functions
  */
-#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
 
-/* 
- * KNOWN ISSUES with locking: This code does not handle a scenario
- * where a library is thread-safe for different DB contexts, but not
- * with the same context. It locks the complete DB library. If this is
- * not the scenario, then lock has to be moved from db_library to
- * kdb5_dal_handle. For now doing a pessimistic locking.
- *
- * If any thread does a DB lock, all the other threads are barred from
- * accessing DB using this context (infact library because of the
- * previous defect).  This is with the assumption that, DB's lock code
- * will take care of excluding other processes/machines from using the
- * DB. But there could be a scenario where access by some other thread
- * using the same context might corrupt the database.
- */
+MAKE_INIT_FUNCTION(kdb_init_lock_list);
+MAKE_FINI_FUNCTION(kdb_fini_lock_list);
+
+int
+kdb_init_lock_list(void)
+{
+    return k5_mutex_finish_init(&db_lock);
+}
 
 static int
 kdb_lock_list()
 {
-    return pthread_mutex_lock(&db_lock);
+    int err;
+    err = CALL_INIT_FUNCTION (kdb_init_lock_list);
+    if (err)
+	return err;
+    return k5_mutex_lock(&db_lock);
+}
+
+void
+kdb_fini_lock_list(void)
+{
+    if (INITIALIZER_RAN(kdb_init_lock_list))
+	k5_mutex_destroy(&db_lock);
 }
 
 static int
 kdb_unlock_list()
 {
-    return pthread_mutex_unlock(&db_lock);
+    return k5_mutex_unlock(&db_lock);
 }
 
-static int
-kdb_init_lib_lock(db_library lib)
-{
-    krb5_error_code retval;
-    if ((retval = pthread_mutex_init(&lib->lib_lock, NULL))) {
-	return retval;
-    }
-
-    lib->lock_holder = pthread_self();
-    lib->excl = 0;
-    lib->recursive_cnt = 0;
-
-    return pthread_cond_init(&lib->unlocked, NULL);
-}
-
-static int
-kdb_destroy_lib_lock(db_library lib)
-{
-    krb5_error_code retval;
-    if ((retval = pthread_mutex_destroy(&lib->lib_lock))) {
-	return retval;
-    }
-
-    return pthread_cond_destroy(&lib->unlocked);
-}
-
-static int
-kdb_lock_lib_lock(db_library lib, krb5_boolean exclusive)
-{
-    /* Since, handle locked by one thread should not allow another
-       thread to continue.  */
-    krb5_error_code retval = 0;
-    pthread_t myid = pthread_self();
-
-    if ((retval = pthread_mutex_lock(&lib->lib_lock)))
-	return retval;
-
-    while ((exclusive && (lib->excl || lib->recursive_cnt)) ||
-	   (!pthread_equal(lib->lock_holder, myid)
-	    && !lib->vftabl.is_thread_safe && lib->recursive_cnt)) {
-	/* Exclusive lock held or some one using lock when exclusive
-	   is requested or library not-re-entrant.  */
-	if ((retval = pthread_cond_wait(&lib->unlocked, &lib->lib_lock)))
-	    return retval;
-    }
-
-    /* exclusive lock and recursive_cnt allow a thread to lock even it
-       already holds a lock */
-    if (exclusive)
-	lib->excl++;
-
-    lib->recursive_cnt++;
-
-    lib->lock_holder = myid;
-
-    return pthread_mutex_unlock(&lib->lib_lock);
-}
-
-static int
-kdb_unlock_lib_lock(db_library lib, krb5_boolean exclusive)
-{
-    krb5_error_code retval = 0;
-
-    if ((retval = pthread_mutex_lock(&lib->lib_lock)))
-	return retval;
-
-    lib->recursive_cnt--;
-    if (exclusive)
-	lib->excl--;
-
-    if ((retval = pthread_cond_broadcast(&lib->unlocked)))
-	return retval;
-
-    return pthread_mutex_unlock(&lib->lib_lock);
-}
-
-#else /* no PTHREAD */
-
-/* program is not using pthread. So, threads wont be there. No need to lock */
-#define kdb_lock_list() 0
-#define kdb_unlock_list() 0
 #define kdb_init_lib_lock(a) 0
 #define kdb_destroy_lib_lock(a) 0
 #define kdb_lock_lib_lock(a, b) 0
 #define kdb_unlock_lib_lock(a, b) 0
 
-#endif /* end of HAVE_PTHREAD_H */
 
 static char *
 kdb_get_conf_section(krb5_context kcontext)

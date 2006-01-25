@@ -1,3 +1,17 @@
+2006-01-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFINES): New variable; define macro PLUGIN.
+	* db2_exp.c (krb5_db2_mutex): New variable.
+	(wrap_*): Lots of new functions; lock the mutex, call the real
+	function, unlock the mutex.
+	(WRAP, WRAP_K, WRAP_VOID): Quick and dirty macros for implementing
+	the above.
+	(hack_init, hack_cleanup): New functions.  Call the regular init
+	or cleanup function, but also deal with the new mutex.
+	(krb5_db_vftabl_db2): Use the hack/wrap functions.
+
+	* kdb_db2.h (krb5_db2_get_policy): Delete duplicate declaration.
+
 2005-12-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (myfulldir, RELDIR): Updated for directory rename.
