@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_process_context.c 1.9     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_process_context.c	1.12	98/01/22 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -42,10 +42,15 @@ gss_buffer_t		token_buffer;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
     
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return GSS_S_NO_CONTEXT;
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    if (GSS_EMPTY_BUFFER(token_buffer))
+	return (GSS_S_CALL_INACCESSIBLE_READ);
 
     /*
      * select the approprate underlying mechanism routine and
@@ -64,10 +69,10 @@ gss_buffer_t		token_buffer;
 						    ctx->internal_ctx_id,
 						    token_buffer);
 	else
-	    status = GSS_S_BAD_BINDINGS;
+	    status = GSS_S_UNAVAILABLE;
 
 	return(status);
     }
     
-    return(GSS_S_NO_CONTEXT);
+    return (GSS_S_BAD_MECH);
 }

@@ -1,3 +1,4 @@
+/* #pragma ident	"@(#)oid_ops.c	1.19	04/02/23 SMI" */
 /*
  * lib/gssapi/generic/oid_ops.c
  *
@@ -45,7 +46,8 @@ generic_gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
     gss_OID	*oid;
 {
-    *minor_status = 0;
+    if (minor_status)
+	*minor_status = 0;
 
     if (*oid == GSS_C_NO_OID)
 	return(GSS_S_COMPLETE);
@@ -59,9 +61,20 @@ generic_gss_release_oid(minor_status, oid)
      * descriptor.  This allows applications to freely mix their own heap-
      * allocated OID values with OIDs returned by GSS-API.
      */
-    if ((*oid != gss_nt_user_name) &&
-	(*oid != gss_nt_machine_uid_name) &&
-	(*oid != gss_nt_string_uid_name) &&
+
+    /*
+     * We use the official OID definitions instead of the unofficial OID
+     * defintions. But we continue to support the unofficial OID
+     * gss_nt_service_name just in case if some gss applications use
+     * the old OID.
+     */
+
+    if ((*oid != GSS_C_NT_USER_NAME) &&
+	(*oid != GSS_C_NT_MACHINE_UID_NAME) &&
+	(*oid != GSS_C_NT_STRING_UID_NAME) &&
+	(*oid != GSS_C_NT_HOSTBASED_SERVICE) &&
+	(*oid != GSS_C_NT_ANONYMOUS) &&
+	(*oid != GSS_C_NT_EXPORT_NAME) &&
 	(*oid != gss_nt_service_name)) {
 	free((*oid)->elements);
 	free(*oid);
@@ -77,6 +90,8 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 {
 	gss_OID		p;
 
+	*minor_status = 0;
+
 	p = (gss_OID) malloc(sizeof(gss_OID_desc));
 	if (!p) {
 		*minor_status = ENOMEM;
@@ -86,7 +101,6 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 	p->elements = malloc(p->length);
 	if (!p->elements) {
 		free(p);
-		*minor_status = ENOMEM;
 		return GSS_S_FAILURE;
 	}
 	memcpy(p->elements, oid->elements, p->length);
@@ -100,9 +114,10 @@ generic_gss_create_empty_oid_set(minor_status, oid_set)
     OM_uint32	*minor_status;
     gss_OID_set	*oid_set;
 {
+    *minor_status = 0;
+
     if ((*oid_set = (gss_OID_set) malloc(sizeof(gss_OID_set_desc)))) {
 	memset(*oid_set, 0, sizeof(gss_OID_set_desc));
-	*minor_status = 0;
 	return(GSS_S_COMPLETE);
     }
     else {
@@ -119,6 +134,12 @@ generic_gss_add_oid_set_member(minor_status, member_oid, oid_set)
 {
     gss_OID	elist;
     gss_OID	lastel;
+
+    *minor_status = 0;
+
+    if (member_oid == NULL || member_oid->length == 0 ||
+	member_oid->elements == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
 
     elist = (*oid_set)->elements;
     /* Get an enlarged copy of the array */
@@ -163,8 +184,16 @@ generic_gss_test_oid_set_member(minor_status, member, set, present)
     gss_OID_set	set;
     int		*present;
 {
-    size_t	i;
+    OM_uint32	i;
     int		result;
+
+    *minor_status = 0;
+
+    if (member == NULL || set == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (present == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     result = 0;
     for (i=0; i<set->count; i++) {
@@ -177,7 +206,6 @@ generic_gss_test_oid_set_member(minor_status, member, set, present)
 	}
     }
     *present = result;
-    *minor_status = 0;
     return(GSS_S_COMPLETE);
 }
 
@@ -191,12 +219,20 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     gss_buffer_t	oid_str;
 {
     char		numstr[128];
-    unsigned long	number;
+    OM_uint32		number;
     int			numshift;
-    size_t		string_length;
-    size_t		i;
+    OM_uint32 string_length;
+    OM_uint32 i;
     unsigned char	*cp;
     char		*bp;
+
+    *minor_status = 0;
+
+    if (oid == NULL || oid->length == 0 || oid->elements == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (oid_str == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     /* Decoded according to krb5/gssapi_krb5.c */
 
@@ -211,12 +247,11 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     sprintf(numstr, "%ld ", number%40);
     string_length += strlen(numstr);
     for (i=1; i<oid->length; i++) {
-	if ( (size_t) (numshift+7) < (sizeof(unsigned long)*8)) {
+	if ((OM_uint32) (numshift+7) < (sizeof (OM_uint32)*8)) {/* XXX */
 	    number = (number << 7) | (cp[i] & 0x7f);
 	    numshift += 7;
 	}
 	else {
-	    *minor_status = EINVAL;
 	    return(GSS_S_FAILURE);
 	}
 	if ((cp[i] & 0x80) == 0) {
@@ -233,7 +268,7 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     string_length += 4;
     if ((bp = (char *) malloc(string_length))) {
 	strcpy(bp, "{ ");
-	number = (unsigned long) cp[0];
+	number = (OM_uint32) cp[0];
 	sprintf(numstr, "%ld ", number/40);
 	strcat(bp, numstr);
 	sprintf(numstr, "%ld ", number%40);
@@ -251,7 +286,6 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
 	strcat(bp, "}");
 	oid_str->length = strlen(bp)+1;
 	oid_str->value = (void *) bp;
-	*minor_status = 0;
 	return(GSS_S_COMPLETE);
     }
     *minor_status = ENOMEM;
@@ -271,6 +305,14 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     OM_uint32	nbytes;
     int		index;
     unsigned char *op;
+
+    *minor_status = 0;
+
+    if (GSS_EMPTY_BUFFER(oid_str))
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (oid == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     brace = 0;
     bp = (char *) oid_str->value;
@@ -304,12 +346,12 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     }
     while ((bp < &cp[oid_str->length]) && isdigit(*bp))
 	bp++;
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) &&
+	   (isspace(*bp) || *bp == '.'))
 	bp++;
     nbytes++;
     while (isdigit(*bp)) {
-	if (sscanf(bp, "%ld", &numbuf) != 1) {
-	    *minor_status = EINVAL;
+	if (sscanf(bp, "%d", &numbuf) != 1) {
 	    return(GSS_S_FAILURE);
 	}
 	while (numbuf) {
@@ -318,11 +360,11 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 	}
 	while ((bp < &cp[oid_str->length]) && isdigit(*bp))
 	    bp++;
-	while ((bp < &cp[oid_str->length]) && isspace(*bp))
+	while ((bp < &cp[oid_str->length]) &&
+	       (isspace(*bp) || *bp == '.'))
 	    bp++;
     }
     if (brace && (*bp != '}')) {
-	*minor_status = EINVAL;
 	return(GSS_S_FAILURE);
     }
 
@@ -330,26 +372,26 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
      * Phew!  We've come this far, so the syntax is good.
      */
     if ((*oid = (gss_OID) malloc(sizeof(gss_OID_desc)))) {
-	if (((*oid)->elements = (void *) malloc((size_t) nbytes))) {
+	if (((*oid)->elements = (void *) malloc(nbytes))) {
 	    (*oid)->length = nbytes;
 	    op = (unsigned char *) (*oid)->elements;
 	    bp = startp;
-	    sscanf(bp, "%ld", &numbuf);
+	    (void) sscanf(bp, "%d", &numbuf);
 	    while (isdigit(*bp))
 		bp++;
-	    while (isspace(*bp))
+	    while (isspace(*bp) || *bp == '.')
 		bp++;
 	    onumbuf = 40*numbuf;
-	    sscanf(bp, "%ld", &numbuf);
+	    (void) sscanf(bp, "%d", &numbuf);
 	    onumbuf += numbuf;
 	    *op = (unsigned char) onumbuf;
 	    op++;
 	    while (isdigit(*bp))
 		bp++;
-	    while (isspace(*bp))
+	    while (isspace(*bp) || *bp == '.')
 		bp++;
 	    while (isdigit(*bp)) {
-		sscanf(bp, "%ld", &numbuf);
+		(void) sscanf(bp, "%d", &numbuf);
 		nbytes = 0;
 		/* Have to fill in the bytes msb-first */
 		onumbuf = numbuf;
@@ -369,10 +411,9 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 		}
 		while (isdigit(*bp))
 		    bp++;
-		while (isspace(*bp))
+		while (isspace(*bp) || *bp == '.')
 		    bp++;
 	    }
-	    *minor_status = 0;
 	    return(GSS_S_COMPLETE);
 	}
 	else {
@@ -380,7 +421,82 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
 	    *oid = GSS_C_NO_OID;
 	}
     }
-    *minor_status = ENOMEM;
     return(GSS_S_FAILURE);
 }
 
+/*
+ * Copyright 1993 by OpenVision Technologies, Inc.
+ *
+ * Permission to use, copy, modify, distribute, and sell this software
+ * and its documentation for any purpose is hereby granted without fee,
+ * provided that the above copyright notice appears in all copies and
+ * that both that copyright notice and this permission notice appear in
+ * supporting documentation, and that the name of OpenVision not be used
+ * in advertising or publicity pertaining to distribution of the software
+ * without specific, written prior permission. OpenVision makes no
+ * representations about the suitability of this software for any
+ * purpose.  It is provided "as is" without express or implied warranty.
+ *
+ * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ * USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ * PERFORMANCE OF THIS SOFTWARE.
+ */
+OM_uint32
+gss_copy_oid_set(
+    OM_uint32 *minor_status,
+    const gss_OID_set_desc * const oidset,
+    gss_OID_set *new_oidset
+    )
+{
+    gss_OID_set_desc *copy;
+    OM_uint32 minor = 0;
+    OM_uint32 major = GSS_S_COMPLETE;
+    OM_uint32 index;
+
+    if (minor_status)
+	*minor_status = 0;
+
+    if (oidset == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (new_oidset == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    *new_oidset = NULL;
+
+    if ((copy = (gss_OID_set_desc *) calloc(1, sizeof (*copy))) == NULL) {
+	major = GSS_S_FAILURE;
+	goto done;
+    }
+
+    if ((copy->elements = (gss_OID_desc *)
+	 calloc(oidset->count, sizeof (*copy->elements))) == NULL) {
+	major = GSS_S_FAILURE;
+	goto done;
+    }
+    copy->count = oidset->count;
+
+    for (index = 0; index < copy->count; index++) {
+	gss_OID_desc *out = &copy->elements[index];
+	gss_OID_desc *in = &oidset->elements[index];
+
+	if ((out->elements = (void *) malloc(in->length)) == NULL) {
+	    major = GSS_S_FAILURE;
+	    goto done;
+	}
+	(void) memcpy(out->elements, in->elements, in->length);
+	out->length = in->length;
+    }
+
+    *new_oidset = copy;
+done:
+    if (major != GSS_S_COMPLETE) {
+	(void) gss_release_oid_set(&minor, &copy);
+    }
+
+    return (major);
+}

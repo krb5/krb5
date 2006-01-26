@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_verify.c 1.9     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_verify.c	1.13	98/04/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -46,10 +46,16 @@ int *			qop_state;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
 
-    gss_initialize();
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return GSS_S_NO_CONTEXT;
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    if ((message_buffer == NULL) || GSS_EMPTY_BUFFER(token_buffer))
+	return (GSS_S_CALL_INACCESSIBLE_READ);
 
     /*
      * select the approprate underlying mechanism routine and
@@ -69,12 +75,12 @@ int *			qop_state;
 				      token_buffer,
 				      qop_state);
 	else
-	    status = GSS_S_BAD_BINDINGS;
+	    status = GSS_S_UNAVAILABLE;
 
 	return(status);
     }
 
-    return(GSS_S_NO_CONTEXT);
+    return (GSS_S_BAD_MECH);
 }
 
 OM_uint32 KRB5_CALLCONV

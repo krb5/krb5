@@ -2,7 +2,7 @@ thisconfigdir=.
 myfulldir=lib/gssapi
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-LOCAL_SUBDIRS= generic krb5
+LOCAL_SUBDIRS= generic mechglue krb5
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
 ##DOSOBJFILELIST=@$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst @$(OUTPRE)gssapi.lst
@@ -13,7 +13,7 @@ LOCAL_SUBDIRS= generic krb5
 
 ##DOS##DLL_EXP_TYPE=GSS
 
-LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5
+LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5 -I$(srcdir)/mechglue
 STLIBOBJS=\
 	gss_libinit.o
 
@@ -28,8 +28,8 @@ LIBMAJOR=2
 LIBMINOR=2
 LIBINITFUNC=gssint_lib_init
 LIBFINIFUNC=gssint_lib_fini
-STOBJLISTS=OBJS.ST generic/OBJS.ST krb5/OBJS.ST
-SUBDIROBJLISTS=generic/OBJS.ST krb5/OBJS.ST
+STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST
+SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
 SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(LIBS)

@@ -1,119 +1,94 @@
-thisconfigdir=..
+thisconfigdir=./..
 myfulldir=lib/gssapi/mechglue
-mydir=.
+mydir=mechglue
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I. -I$(srcdir)
+LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)
 
 ##DOS##DLL_EXP_TYPE=GSS
 
-LIBDONE=DONE
-LIB_SUBDIRS=.
-DEPLIBS=
-SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@ \
-	$(LD_UNRESOLVED_PREFIX)krb5_gss_initialize
+SRCS = \
+	$(srcdir)/g_accept_sec_context.c \
+	$(srcdir)/g_acquire_cred.c \
+	$(srcdir)/g_canon_name.c \
+	$(srcdir)/g_compare_name.c \
+	$(srcdir)/g_context_time.c \
+	$(srcdir)/g_delete_sec_context.c \
+	$(srcdir)/g_dsp_name.c \
+	$(srcdir)/g_dsp_status.c \
+	$(srcdir)/g_dup_name.c \
+	$(srcdir)/g_exp_sec_context.c \
+	$(srcdir)/g_export_name.c \
+	$(srcdir)/g_glue.c \
+	$(srcdir)/g_imp_name.c \
+	$(srcdir)/g_imp_sec_context.c \
+	$(srcdir)/g_init_sec_context.c \
+	$(srcdir)/g_initialize.c \
+	$(srcdir)/g_inq_context.c \
+	$(srcdir)/g_inq_cred.c \
+	$(srcdir)/g_inq_names.c \
+	$(srcdir)/g_mechname.c \
+	$(srcdir)/g_oid_ops.c \
+	$(srcdir)/g_process_context.c \
+	$(srcdir)/g_rel_buffer.c \
+	$(srcdir)/g_rel_cred.c \
+	$(srcdir)/g_rel_name.c \
+	$(srcdir)/g_rel_oid_set.c \
+	$(srcdir)/g_seal.c \
+	$(srcdir)/g_sign.c \
+	$(srcdir)/g_store_cred.c \
+	$(srcdir)/g_unseal.c \
+	$(srcdir)/g_userok.c \
+	$(srcdir)/g_utils.c \
+	$(srcdir)/g_verify.c \
+	$(srcdir)/gssd_pname_to_uid.c \
+	$(srcdir)/oid_ops.c
 
-
-SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
-
-SRCS	= $(srcdir)/g_acquire_cred.c \
-	  $(srcdir)/g_rel_cred.c \
-	  $(srcdir)/g_init_sec_context.c \
-	  $(srcdir)/g_accept_sec_context.c \
-	  $(srcdir)/g_process_context.c \
-	  $(srcdir)/g_delete_sec_context.c \
-	  $(srcdir)/g_imp_sec_context.c \
-	  $(srcdir)/g_exp_sec_context.c \
-	  $(srcdir)/g_context_time.c \
-	  $(srcdir)/g_sign.c \
-	  $(srcdir)/g_verify.c \
-	  $(srcdir)/g_seal.c \
-	  $(srcdir)/g_unseal.c \
-	  $(srcdir)/g_dsp_status.c \
-	  $(srcdir)/g_indicate_mechs.c \
-	  $(srcdir)/g_compare_name.c \
-	  $(srcdir)/g_dsp_name.c \
-	  $(srcdir)/g_imp_name.c \
-	  $(srcdir)/g_rel_name.c \
-	  $(srcdir)/g_rel_buffer.c \
-	  $(srcdir)/g_rel_oid_set.c \
-	  $(srcdir)/g_oid_ops.c \
-	  $(srcdir)/g_inq_cred.c \
-	  $(srcdir)/g_inq_context.c \
-	  $(srcdir)/g_inq_names.c \
-	  $(srcdir)/g_initialize.c \
-	  $(srcdir)/g_glue.c \
-	  $(srcdir)/gssd_pname_to_uid.c \
-	  $(srcdir)/gen_oids.c \
-	  $(srcdir)/oid_ops.c \
-	  $(srcdir)/g_mechname.c 
-
-OBJS	= $(OUTPRE)g_acquire_cred.$(OBJEXT) \
-	  $(OUTPRE)g_rel_cred.$(OBJEXT) \
-	  $(OUTPRE)g_init_sec_context.$(OBJEXT) \
-	  $(OUTPRE)g_accept_sec_context.$(OBJEXT) \
-	  $(OUTPRE)g_process_context.$(OBJEXT) \
-	  $(OUTPRE)g_delete_sec_context.$(OBJEXT) \
-	  $(OUTPRE)g_imp_sec_context.$(OBJEXT) \
-	  $(OUTPRE)g_exp_sec_context.$(OBJEXT) \
-	  $(OUTPRE)g_context_time.$(OBJEXT) \
-	  $(OUTPRE)g_sign.$(OBJEXT) \
-	  $(OUTPRE)g_verify.$(OBJEXT) \
-	  $(OUTPRE)g_seal.$(OBJEXT) \
-	  $(OUTPRE)g_unseal.$(OBJEXT) \
-	  $(OUTPRE)g_dsp_status.$(OBJEXT) \
-	  $(OUTPRE)g_indicate_mechs.$(OBJEXT) \
-	  $(OUTPRE)g_compare_name.$(OBJEXT) \
-	  $(OUTPRE)g_dsp_name.$(OBJEXT) \
-	  $(OUTPRE)g_imp_name.$(OBJEXT) \
-	  $(OUTPRE)g_rel_name.$(OBJEXT) \
-	  $(OUTPRE)g_rel_buffer.$(OBJEXT) \
-	  $(OUTPRE)g_rel_oid_set.$(OBJEXT) \
-	  $(OUTPRE)g_oid_ops.$(OBJEXT) \
-	  $(OUTPRE)g_inq_cred.$(OBJEXT) \
-	  $(OUTPRE)g_inq_context.$(OBJEXT) \
-	  $(OUTPRE)g_inq_names.$(OBJEXT) \
-	  $(OUTPRE)g_initialize.$(OBJEXT) \
-	  $(OUTPRE)g_glue.$(OBJEXT) \
-	  $(OUTPRE)gssd_pname_to_uid.$(OBJEXT) \
-	  $(OUTPRE)gen_oids.$(OBJEXT) \
-	  $(OUTPRE)oid_ops.$(OBJEXT) \
-	  $(OUTPRE)g_mechname.$(OBJEXT)
+STLIBOBJS = \
+	g_accept_sec_context.o \
+	g_acquire_cred.o \
+	g_canon_name.o \
+	g_compare_name.o \
+	g_context_time.o \
+	g_delete_sec_context.o \
+	g_dsp_name.o \
+	g_dsp_status.o \
+	g_dup_name.o \
+	g_exp_sec_context.o \
+	g_export_name.o \
+	g_glue.o \
+	g_imp_name.o \
+	g_imp_sec_context.o \
+	g_init_sec_context.o \
+	g_initialize.o \
+	g_inq_context.o \
+	g_inq_cred.o \
+	g_inq_names.o \
+	g_mechname.o \
+	g_oid_ops.o \
+	g_process_context.o \
+	g_rel_buffer.o \
+	g_rel_cred.o \
+	g_rel_name.o \
+	g_rel_oid_set.o \
+	g_seal.o \
+	g_sign.o \
+	g_store_cred.o \
+	g_unseal.o \
+	g_userok.o \
+	g_utils.o \
+	g_verify.o \
+	gssd_pname_to_uid.o \
+	oid_ops.o
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
-all:: all-$(WHAT) 
+all-unix:: all-libobjs
 
-all-unix:: shared includes $(OBJS)
-
-all-windows:: includes $(OBJS)
-	if not exist $(EHDRDIR)\nul mkdir $(EHDRDIR)
-	copy mechglue.h $(EHDRDIR)
-
-shared:
-	mkdir shared
-
-libgssapi.$(STEXT): $(OBJS)
-	$(RM) $@
-	$(ARADD) $@ $(OBJS)
-	$(RANLIB) $@
-
-
-#libgssapi.$(LIBEXT): $(OBJS)
-#	$(ARCHIVE) $@ $(OBJS)
-#	$(RANLIB) $@
-
-clean:: clean-$(WHAT)
-
-clean-unix::
-	$(RM) shared/*
-
-clean-windows::
-	$(RM) $(EHDRDIR)\gssapi.h $(EHDRDIR)\gssapi_generic.h
-	if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
+clean-unix:: clean-libobjs
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install::
@@ -123,3 +98,5 @@ install::
 	done
 
 includes::
+
+# @libobj_frag@

@@ -62,7 +62,6 @@ SRCS = \
 	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/gssapi_generic.c \
-	$(srcdir)/oid_ops.c \
 	$(srcdir)/rel_buffer.c \
 	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
@@ -77,7 +76,6 @@ OBJS = \
 	$(OUTPRE)disp_com_err_status.$(OBJEXT) \
 	$(OUTPRE)disp_major_status.$(OBJEXT) \
 	$(OUTPRE)gssapi_generic.$(OBJEXT) \
-	$(OUTPRE)oid_ops.$(OBJEXT) \
 	$(OUTPRE)rel_buffer.$(OBJEXT) \
 	$(OUTPRE)rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)util_buffer.$(OBJEXT) \
@@ -92,7 +90,6 @@ STLIBOBJS = \
 	disp_com_err_status.o \
 	disp_major_status.o \
 	gssapi_generic.o \
-	oid_ops.o \
 	rel_buffer.o \
 	rel_oid_set.o \
 	util_buffer.o \

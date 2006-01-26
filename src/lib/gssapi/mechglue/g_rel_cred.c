@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_release_cred.c 1.15     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_rel_cred.c	1.14	04/02/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -45,15 +45,13 @@ gss_cred_id_t *		cred_handle;
     gss_union_cred_t	union_cred;
     gss_mechanism	mech;
     
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-    if (minor_status)
-	*minor_status = 0;
+    *minor_status = 0;
 
-    /* if the cred_handle is null, return a NO_CRED error */
-    
-    if (cred_handle == GSS_C_NO_CREDENTIAL)
-	return(GSS_S_NO_CRED);
+    if (cred_handle == NULL)
+	return (GSS_S_NO_CRED | GSS_S_CALL_INACCESSIBLE_READ);
     
     /*
      * Loop through the union_cred struct, selecting the approprate 
@@ -64,8 +62,8 @@ gss_cred_id_t *		cred_handle;
     union_cred = (gss_union_cred_t) *cred_handle;
     *cred_handle = NULL;
 
-    if (union_cred == NULL)
-	return GSS_S_NO_CRED;
+    if (union_cred == (gss_union_cred_t)GSS_C_NO_CREDENTIAL)
+	return (GSS_S_COMPLETE);
 
     status = GSS_S_COMPLETE;
     
@@ -86,9 +84,9 @@ gss_cred_id_t *		cred_handle;
 		status = GSS_S_NO_CRED;
 
 	    } else
-		status = GSS_S_NO_CRED;
+		status = GSS_S_UNAVAILABLE;
 	} else
-	    status = GSS_S_NO_CRED;
+	    status = GSS_S_DEFECTIVE_CREDENTIAL;
     }
 
     gss_release_buffer(minor_status, &union_cred->auxinfo.name);

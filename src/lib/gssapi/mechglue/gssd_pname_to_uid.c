@@ -1,4 +1,4 @@
-/* #ident  "@(#)gssd_pname_to_uid.c 1.5     95/08/02 SMI" */
+/* #pragma ident	"@(#)gssd_pname_to_uid.c	1.18	04/02/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -41,8 +41,6 @@ uid_t * uid;
 {
     int status;
     gss_mechanism	mech;
-
-    gss_initialize();
 
     /*
      * find the appropriate mechanism specific pname_to_uid procedure and

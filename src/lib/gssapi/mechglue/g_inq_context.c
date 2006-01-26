@@ -1,4 +1,4 @@
-/* #ident	"@(#)g_inquire_context.c 1.2     96/01/18 SMI" */
+/* #pragma ident	"@(#)g_inquire_context.c	1.15	04/02/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -59,13 +59,26 @@ int *		open;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
     OM_uint32		status, temp_minor;
+    gss_name_t localTargName = NULL, localSourceName = NULL;
     
-    gss_initialize();
+    if (!minor_status)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-    /* if the context_handle is Null, return NO_CONTEXT error */
+    *minor_status = 0;
     
-    if(context_handle == GSS_C_NO_CONTEXT)
-	return(GSS_S_NO_CONTEXT);
+    /* if the context_handle is Null, return NO_CONTEXT error */
+    if (context_handle == GSS_C_NO_CONTEXT)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    /* set all output value to NULL */
+    if (src_name)
+	*src_name = NULL;
+
+    if (targ_name)
+	*targ_name = NULL;
+
+    if (mech_type)
+	*mech_type = NULL;
     
     /*
      * select the approprate underlying mechanism routine and
@@ -75,19 +88,19 @@ int *		open;
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = __gss_get_mechanism (ctx->mech_type);
     
-    if (!mech || !mech->gss_inquire_context || !mech->gss_display_name) {
-	return(GSS_S_NO_CONTEXT);
-
+    if (!mech || !mech->gss_inquire_context || !mech->gss_display_name ||
+	!mech->gss_release_name) {
+	return (GSS_S_UNAVAILABLE);
     }
 
     status = mech->gss_inquire_context(
 			mech->context,
 			minor_status,
 			ctx->internal_ctx_id,
-			src_name,
-			targ_name,
+			(src_name ? &localSourceName : NULL),
+			(targ_name ? &localTargName : NULL),
 			lifetime_rec,
-			mech_type,
+			NULL,
 			ctx_flags,
 			locally_initiated,
 			open);
@@ -100,33 +113,32 @@ int *		open;
 
     if (src_name) {
 	    status = __gss_convert_name_to_union_name(minor_status, mech,
-						      *src_name, src_name);
+						      localSourceName, src_name);
 
 	    if (status != GSS_S_COMPLETE) {
-		(void) mech->gss_release_name(mech->context,
-						&temp_minor, src_name);
-		(void) mech->gss_release_name(mech->context,
-						&temp_minor, targ_name);
-		if (mech_type) {
-				gss_release_oid(&temp_minor, mech_type);
-		}
-		return (GSS_S_FAILURE);
+		if (localTargName)
+		    mech->gss_release_name(mech->context,
+					   &temp_minor, &localTargName);
+		return (status);
 	    }
 
     }
 
     if (targ_name) {
 	    status = __gss_convert_name_to_union_name(minor_status, mech,
-						      *targ_name, targ_name);
+						      localTargName, targ_name);
 
 	    if (status != GSS_S_COMPLETE) {
-		if (mech_type) {
-			gss_release_oid(&temp_minor, mech_type);
-		}
-		return (GSS_S_FAILURE);
+		if (src_name)
+		    (void) gss_release_name(&temp_minor, src_name);
+
+		return (status);
 	    }
     }
 
+    /* spec says mech type must point to static storage */
+    if (mech_type)
+	*mech_type = &mech->mech_type;
     return(GSS_S_COMPLETE);
 }
 

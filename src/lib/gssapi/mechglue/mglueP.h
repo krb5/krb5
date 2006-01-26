@@ -12,6 +12,19 @@
 
 #include "mechglue.h"
 
+#define	g_OID_equal(o1, o2) \
+	(((o1)->length == (o2)->length) && \
+	(memcmp((o1)->elements, (o2)->elements, (o1)->length) == 0))
+
+#define	g_OID_copy(o1, o2)					\
+do {								\
+	memcpy((o1)->elements, (o2)->elements, (o2)->length);	\
+	(o1)->length = (o2)->length;				\
+} while (0)
+
+#define	GSS_EMPTY_BUFFER(buf)	((buf) == NULL ||\
+	(buf)->value == NULL || (buf)->length == 0)
+
 /*
  * Array of context IDs typed by mechanism OID
  */
@@ -50,7 +63,7 @@ typedef struct gss_mech_spec_name_t {
 typedef struct gss_union_cred_auxinfo {
 	gss_buffer_desc		name;
 	gss_OID			name_type;
-	time_t			creation_time;
+	OM_uint32		creation_time;
 	OM_uint32		time_rec;
 	int			cred_usage;
 } gss_union_cred_auxinfo;
@@ -61,10 +74,23 @@ typedef struct gss_union_cred_auxinfo {
 typedef struct gss_union_cred_t {
 	int			count;
 	gss_OID			mechs_array;
-	gss_cred_id_t *		cred_array;
+	gss_cred_id_t		*cred_array;
 	gss_union_cred_auxinfo	auxinfo;
 } gss_union_cred_desc, *gss_union_cred_t;
  
+typedef	OM_uint32	    (*gss_acquire_cred_with_password_sfct)(
+		    void *,		/* context */
+		    OM_uint32 *,	/* minor_status */
+		    const gss_name_t,	/* desired_name */
+		    const gss_buffer_t, /* password */
+		    OM_uint32,		/* time_req */
+		    const gss_OID_set,	/* desired_mechs */
+		    int,		/* cred_usage */
+		    gss_cred_id_t *,	/* output_cred_handle */
+		    gss_OID_set *,	/* actual_mechs */
+		    OM_uint32 *		/* time_rec */
+	/* */);
+
 /********************************************************/
 /* The Mechanism Dispatch Table -- a mechanism needs to */
 /* define one of these and provide a function to return */
@@ -334,16 +360,74 @@ typedef struct gss_config {
 		    gss_OID,		/* mech type */
 		    uid_t *		/* uid */
 		    );
-
+	OM_uint32		(*__gss_userok)
+	(
+		    void *,		/* context */
+		    OM_uint32 *,	/* minor_status */
+		    const gss_name_t,	/* pname */
+		    const char *,	/* local user */
+		    int *		/* user ok? */
+	/* */);
+	OM_uint32		(*gss_export_name)
+	(
+		void *,			/* context */
+		OM_uint32 *,		/* minor_status */
+		const gss_name_t,	/* input_name */
+		gss_buffer_t		/* exported_name */
+	/* */);
+	OM_uint32	(*gss_store_cred)
+	(
+		void *,			/* context */
+		OM_uint32 *,		/* minor_status */
+		const gss_cred_id_t,	/* input_cred */
+		gss_cred_usage_t,	/* cred_usage */
+		const gss_OID,		/* desired_mech */
+		OM_uint32,		/* overwrite_cred */
+		OM_uint32,		/* default_cred */
+		gss_OID_set *,		/* elements_stored */
+		gss_cred_usage_t *	/* cred_usage_stored */
+	/* */);
 } *gss_mechanism;
+
+/* This structure MUST NOT be used by any code outside libgss */
+typedef struct gss_config_ext {
+	gss_acquire_cred_with_password_sfct	gss_acquire_cred_with_password;
+} *gss_mechanism_ext;
+
+/*
+ * In the user space we use a wrapper structure to encompass the
+ * mechanism entry points.  The wrapper contain the mechanism
+ * entry points and other data which is only relevant to the gss-api
+ * layer.  In the kernel we use only the gss_config strucutre because
+ * the kernal does not cantain any of the extra gss-api specific data.
+ */
+typedef struct gss_mech_config {
+	char *kmodName;			/* kernel module name */
+	char *uLibName;			/* user library name */
+	char *mechNameStr;		/* mechanism string name */
+	char *optionStr;		/* optional mech parameters */
+	void *dl_handle;		/* RTLD object handle for the mech */
+	gss_OID mech_type;		/* mechanism oid */
+	gss_mechanism mech;		/* mechanism initialization struct */
+	gss_mechanism_ext mech_ext;	/* extensions */
+	struct gss_mech_config *next;	/* next element in the list */
+} *gss_mech_info;
 
 /********************************************************/
 /* Internal mechglue routines */
 
+int gssint_mechglue_init(void);
+void gssint_mechglue_fini(void);
+
 gss_mechanism __gss_get_mechanism (gss_OID);
+gss_mechanism_ext __gss_get_mechanism_ext(const gss_OID);
 OM_uint32 __gss_get_mech_type (gss_OID, gss_buffer_t);
+char *__gss_get_kmodName(const gss_OID);
+char *__gss_get_modOptions(const gss_OID);
 OM_uint32 __gss_import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,
 				      gss_name_t *);
+OM_uint32 __gss_export_internal_name(OM_uint32 *, const gss_OID,
+	const gss_name_t, gss_buffer_t);
 OM_uint32 __gss_display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
 				       gss_buffer_t, gss_OID *);
 OM_uint32 __gss_release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
@@ -358,6 +442,12 @@ gss_cred_id_t __gss_get_mechanism_cred
 	  (gss_union_cred_t,	/* union_cred */
 	   gss_OID		/* mech_type */
 	   );
+
+OM_uint32 __gss_create_copy_buffer(
+	const gss_buffer_t,	/* src buffer */
+	gss_buffer_t *,		/* destination buffer */
+	int			/* NULL terminate buffer ? */
+);
 
 OM_uint32 generic_gss_release_oid
 	   (OM_uint32 *,	/* minor_status */
@@ -400,6 +490,11 @@ OM_uint32 generic_gss_str_to_oid
 	    gss_OID *		/* oid */
 	   );
 
+OM_uint32 gss_copy_oid_set(
+	OM_uint32 *,			/* minor_status */
+	const gss_OID_set_desc *,	/* oid set */
+	gss_OID_set *			/* new oid set */
+);
 
 gss_OID gss_find_mechanism_from_name_type (gss_OID); /* name_type */
 
@@ -408,5 +503,63 @@ OM_uint32 gss_add_mech_name_type
 	    gss_OID,		/* name_type */
 	    gss_OID		/* mech */
 	       );
+
+/*
+ * Sun extensions to GSS-API v2
+ */
+
+OM_uint32
+__gss_mech_to_oid(
+	const char *mech,		/* mechanism string name */
+	gss_OID *oid			/* mechanism oid */
+);
+
+const char *
+__gss_oid_to_mech(
+	const gss_OID oid		/* mechanism oid */
+);
+
+OM_uint32
+__gss_get_mechanisms(
+	char *mechArray[],		/* array to populate with mechs */
+	int arrayLen			/* length of passed in array */
+);
+
+OM_uint32
+__gss_userok(
+	OM_uint32 *,		/* minor */
+	const gss_name_t,	/* name */
+	const char *,		/* user */
+	int *			/* user_ok */
+);
+
+OM_uint32
+gss_store_cred(
+	OM_uint32 *,		/* minor_status */
+	const gss_cred_id_t,	/* input_cred_handle */
+	gss_cred_usage_t,	/* cred_usage */
+	const gss_OID,		/* desired_mech */
+	OM_uint32,		/* overwrite_cred */
+	OM_uint32,		/* default_cred */
+	gss_OID_set *,		/* elements_stored */
+	gss_cred_usage_t *	/* cred_usage_stored */
+);
+
+int
+get_der_length(
+	unsigned char **,	/* buf */
+	unsigned int,		/* buf_len */
+	unsigned int *		/* bytes */
+);
+
+unsigned int
+der_length_size(unsigned int /* len */);
+
+int
+put_der_length(
+	unsigned int,		/* length */
+	unsigned char **,	/* buf */
+	unsigned int		/* max_len */
+);
 
 #endif /* _GSS_MECHGLUEP_H */

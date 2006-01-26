@@ -74,6 +74,9 @@
 
 /** constants **/
 
+#define GSS_MECH_KRB5_OID_LENGTH 9
+#define GSS_MECH_KRB5_OID "\052\206\110\206\367\022\001\002\002"
+
 #define CKSUMTYPE_KG_CB		0x8003
 
 #define KG_TOK_CTX_AP_REQ	0x0100
@@ -630,5 +633,32 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 				      gss_buffer_t message_buffer,
 				      int *conf_state, int *qop_state, 
 				      int toktype);
+
+/*
+ * These take unglued krb5-mech-specific contexts.
+ */
+
+OM_uint32 KRB5_CALLCONV gss_krb5int_get_tkt_flags 
+	(OM_uint32 *minor_status,
+		   gss_ctx_id_t context_handle,
+		   krb5_flags *ticket_flags);
+
+OM_uint32 KRB5_CALLCONV gss_krb5int_copy_ccache
+	(OM_uint32 *minor_status,
+		   gss_cred_id_t cred_handle,
+		   krb5_ccache out_ccache);
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status, 
+				   gss_cred_id_t cred,
+				   OM_uint32 num_ktypes,
+				   krb5_enctype *ktypes);
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_export_lucid_sec_context(OM_uint32 *minor_status,
+				     gss_ctx_id_t *context_handle,
+				     OM_uint32 version,
+				     void **kctx);
+
 
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_inquire_cred.c 1.9     95/08/02 SMI" */
+/* #pragma ident	"@(#)g_inquire_cred.c	1.16	04/02/23 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -56,7 +56,16 @@ gss_OID_set *		mechanisms;
     gss_name_t		internal_name;
     int			i;
     
-    gss_initialize();
+    /* check parms and set to defaults */
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
+
+    if (name)
+	*name = NULL;
+
+    if (mechanisms)
+	*mechanisms = NULL;
 
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
 	/*
@@ -68,10 +77,10 @@ gss_OID_set *		mechanisms;
 	 */
 
 	if ((mech = __gss_get_mechanism(GSS_C_NULL_OID)) == NULL)
-	    return(GSS_S_NO_CRED);
+	    return (GSS_S_DEFECTIVE_CREDENTIAL);
 
 	if (!mech->gss_inquire_cred)
-		return (GSS_S_FAILURE);
+	    return (GSS_S_UNAVAILABLE);
 	
 	status = mech->gss_inquire_cred(mech->context, minor_status,
 					GSS_C_NO_CREDENTIAL,
@@ -89,10 +98,12 @@ gss_OID_set *		mechanisms;
 						      mech, internal_name,
 						      name);
 	    if (status != GSS_S_COMPLETE) {
-		if (minor_status)
-		    *minor_status = temp_minor_status;
-		__gss_release_internal_name(&temp_minor_status,
-					    &mech->mech_type, &internal_name);
+		*minor_status = temp_minor_status;
+		if (mechanisms && *mechanisms) {
+		    (void) gss_release_oid_set(
+			&temp_minor_status,
+			mechanisms);
+		}
 		return (status);
 	    }
 	}
@@ -124,39 +135,68 @@ gss_OID_set *		mechanisms;
      * caller. If this call fails, return failure to our caller.
      */
     
-    if(name != NULL)
-	if(gss_import_name(&temp_minor_status,
-			   &union_cred->auxinfo.name,
-			   union_cred->auxinfo.name_type,
-			   name) != GSS_S_COMPLETE)
-	    return(GSS_S_DEFECTIVE_CREDENTIAL);
-    
+    if(name != NULL) {
+	if ((gss_import_name(&temp_minor_status,
+			     &union_cred->auxinfo.name,
+			     union_cred->auxinfo.name_type,
+			     name) != GSS_S_COMPLETE) ||
+	    (gss_canonicalize_name(minor_status, *name,
+				   &union_cred->mechs_array[0],
+				   NULL) != GSS_S_COMPLETE)) {
+	    status = GSS_S_DEFECTIVE_CREDENTIAL;
+	    goto error;
+	}
+    }
+
     /*
      * copy the mechanism set in union_cred into an OID set and return in
      * the mechanisms parameter.
      */
     
     if(mechanisms != NULL) {
-
+	status = GSS_S_FAILURE;
 	*mechanisms = (gss_OID_set) malloc(sizeof(gss_OID_set_desc));
+	if (*mechanisms == NULL)
+	    goto error;
 
-	(*mechanisms)->count = union_cred->count;
+	(*mechanisms)->count = 0;
 	(*mechanisms)->elements =
 	    (gss_OID) malloc(sizeof(gss_OID_desc) *
 			     union_cred->count);
 
+	if ((*mechanisms)->elements == NULL) {
+	    free(*mechanisms);
+	    *mechanisms = NULL;
+	    goto error;
+	}
+
 	for(i=0; i < union_cred->count; i++) {
-	    (*mechanisms)->elements[i].length =
-		union_cred->mechs_array[i].length;
 	    (*mechanisms)->elements[i].elements = (void *)
 		malloc(union_cred->mechs_array[i].length);
-	    memcpy((*mechanisms)->elements[i].elements,
-		   union_cred->mechs_array[i].elements,
-		   union_cred->mechs_array[i].length);
+	    if ((*mechanisms)->elements[i].elements == NULL)
+		goto error;
+	    g_OID_copy(&(*mechanisms)->elements[i],
+		       &union_cred->mechs_array[i]);
+	    (*mechanisms)->count++;
 	}
     }
     
     return(GSS_S_COMPLETE);
+
+error:
+    /*
+     * cleanup any allocated memory - we can just call
+     * gss_release_oid_set, because the set is constructed so that
+     * count always references the currently copied number of
+     * elements.
+     */
+    if (mechanisms && *mechanisms != NULL)
+	(void) gss_release_oid_set(&temp_minor_status, mechanisms);
+
+    if (name && *name != NULL)
+	(void) gss_release_name(&temp_minor_status, name);
+
+    return (status);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -173,6 +213,9 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     gss_union_cred_t	union_cred;
     gss_cred_id_t	mech_cred;
     gss_mechanism	mech;
+    OM_uint32		status, temp_minor_status;
+    gss_name_t		internal_name;
+
 
     mech = __gss_get_mechanism (mech_type);
     if (!mech)
@@ -182,10 +225,31 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
      
     union_cred = (gss_union_cred_t) cred_handle;
     mech_cred = __gss_get_mechanism_cred(union_cred, mech_type);
+    if (mech_cred == NULL)
+	return (GSS_S_DEFECTIVE_CREDENTIAL);
 
-    return (mech->gss_inquire_cred_by_mech(mech->context, minor_status,
-					   mech_cred, mech_type,
-					   name, initiator_lifetime,
-					   acceptor_lifetime, cred_usage));
+    status = mech->gss_inquire_cred_by_mech(mech->context, minor_status,
+					    mech_cred, mech_type,
+					    name ? &internal_name : NULL,
+					    initiator_lifetime,
+					    acceptor_lifetime, cred_usage);
+	
+    if (status != GSS_S_COMPLETE)
+	return (status);
+
+    if (name) {
+	/*
+	 * Convert internal_name into a union_name equivalent.
+	 */
+	status = __gss_convert_name_to_union_name(
+	    &temp_minor_status, mech,
+	    internal_name, name);
+	if (status != GSS_S_COMPLETE) {
+	    *minor_status = temp_minor_status;
+	    return (status);
+	}
+    }
+
+    return (GSS_S_COMPLETE);
 }
 
