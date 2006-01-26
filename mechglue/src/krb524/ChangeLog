@@ -1,0 +1,1014 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c: Include k5-int.h instead of krb5.h.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
+	Novell merge.
+	* Makefile.in:
+	* krb524d.c:
+
+2004-09-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (install-unix): Install krb524d manpage.
+
+2004-09-07  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb524d.M: Added a man page for krb524d.
+
+2004-08-31  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Fix double-free vulnerabilities.
+
+2004-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c (do_connection): Use socklen_t for the size of the
+	address from recvfrom.
+
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Deleted.
+
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Removed.  Directory configured from top level
+	now.
+	* Makefile.in (thisconfigdir, mydir): Updated.
+	(MY_SUBDIRS): Define to just ".".
+
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't invoke macros for library build support.
+	Don't look for awk.
+
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SERVER_OBJS, krb524d): Link against apputils lib
+	instead of using LIBOBJS.
+
+2003-12-15  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Clean up more files now that STLIBOBS
+	is not used (introduced in 1491). Some files were missed.
+
+2003-09-02  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Apply patch from Cesar
+	Garcia to fix lifetime computation.
+
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+	* Makefile.in (SERVER_OBJS): Use @LIBOBJS@.
+
+2003-08-11  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Call krb_create_ticket
+	instead of local version.  Remove local version of
+	krb_create_ticket.  This file no longer gets included into a
+	krb524 library, so accessing internal functions isn't that big of
+	an issue anymore.
+
+2003-06-12  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.c (krb524_convert_creds_kdc, krb524_init_ets): Mark as
+	KRB5_CALLCONV_WRONG.
+	(krb524_init_ets): Takes a krb5_context.
+
+2003-06-09  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.c: Fix copyright notice.
+
+2003-06-05  Jeffrey Altman  <jaltman@mit.edu>
+
+	* Makefile.in: Build krb524.dll on Windows.
+
+	* krb524.c: New file; stub for Windows krb524.dll.
+
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (main): Remove debugging printf.
+
+2003-05-29  Alexandra Ellwood  <lxs@mit.edu>
+
+	* krb524d.h: removed invalid Mac pragmas
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (main): Call krb5_524_convert_creds instead of
+	krb524_convert_creds_kdc.
+
+	* Makefile.in ($(OUTPRE)k524init.exe): Don't depend on K524DEP.
+
+2003-05-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c, encode.c, globals.c, sendmsg.c: Deleted.  Contents
+	added to krb5 library.
+	* getcred.c, misc.c: Deleted.
+	* krb524.h: Library declarations moved to krb5.hin and k5-int.h.
+	Remainder renamed to krb524d.h.
+	* krb524_err.et: Moved to lib/krb5/error_tables.
+	* cnv_tkt_skey.c: Include krb524d.h, not krb524.h.
+	(krb524d_debug): Define new variable.  Replace all references to
+	krb524_debug.
+	* conv_princ.c: Don't include krb524.h.
+	* k524init.c: Don't include krb524.h.
+	(main): Don't call krb524_init_ets.
+	* krb524d.c: Include krb524d.h, not krb524.h.
+	(encode_v4tkt): New function pointer variable.
+	(main): Initialize it using krb5int_accessor.
+	* test.c: Don't include krb524.h.
+	(main): Don't set krb524_debug, and don't call krb524_init_ets.
+	* Makefile.in: Don't pull in library makefile fragments.
+	(LIB, LIBMAJOR, LIBMINOR, RELDIR): Deleted.
+	(KRB524_DEPLIB, KRB524_LIB, STOBJLISTS, STLIBOBJS): Deleted.
+	(GENS, KRB524_HDR, KRB524_ERR_HDR): Deleted.
+	(SRCS): Remove deleted/moved files.
+	(all-unix): Don't depend on $(GENS) on includes.
+	(includes, all-windows): Don't depend on headers.
+	($(KRB524_HDR), $(KRB524_ERR_HDR)): Delete rules.
+	(all-windows): Comment out dependency on $(K524LIB) for now.
+	(CLIENT_OBJS, SERVER_OBJS): New variables.
+	(krb524test, krb524d, k524init): Don't use KRB524_*LIB, just
+	KRB5_*LIB.  Use *_OBJS lists.
+	(install-unix, clean-unix, clean-windows): Don't install or clean
+	libs or headers.
+	(krb524_err.c): Target deleted.
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* krb524d.c (do_connection): Use krb5_princ_size rather than
+	direct structure field access.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* krb524d.c (handle_classic_v4): Do not support 3des enctypes as
+	they are insecure.  Also, by default do not allow krb4
+	cross-realm.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Don't support 3des tickets
+
+2003-03-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Extract source IP
+	address in its proper size, not as 'long'.
+
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+    * cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c, sendmsg.c: 
+      Removed Mac-specific includes.
+    
+    * conv_creds.c: If we are on the Mac and using the CCAPI, set
+      the string_to_key type to MIT.
+      
+    * krb524.h: Removed enumsalwaysint because there are no enums in this 
+      header.  Also include krb524_err with <> because on Mac OS X both
+      are public headers and should not be included with "".
+      
+    * Makefile.in: set KRB524_PRIVATE while building so that Darwin builds
+      see these prototypes.  Otherwise the Darwin build will fail.
+
+2003-01-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-windows): Remove $(GENS).
+	(krb524_err.c): Depend on krb524_err.et.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't explicitly invoke AC_PROG_INSTALL.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
+2002-12-06  Tom Yu  <tlyu@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Update calls to locate_server()
+	and locate_kdc() to restrict protocol family to IPv4.
+
+2002-09-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (EXTRADEPSRCS): New variable.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(KRB524_HDR), $(KRB524_ERR_HDR)): Quote target of
+	copy on Windows.
+
+2002-08-27  Sam Hartman  <hartmans@mit.edu>
+
+	* README: Document  new afs_krb5 configuration information
+
+	* krb524d.c (afs_return_v4): New function  to determine if we have
+	been configured to return v4 tickets for afs or use the afs
+	krb5-encpart proposal
+	(do_connection):  Call afs_return_v4 and use its result
+
+	2002-08-26  Sam Hartman  <hartmans@mit.edu>
+
+	* RELEASE_NOTES: Delete OV release notes now with 100% incorrect
+	content 
+
+2002-08-22  Sam Hartman  <hartmans@mit.edu>
+
+	* krb524d.c (do_connection): Add support for  AFS
+	krb5-encpart-only per discussion with jhutz and lha
+	(handle_classic_v4): Split out code for handling v4 tickets since
+	it needs to be called multiple times
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (kdc_get_server_key): Check for DISALLOW_ALL_TIX and
+	DISALLOW_SVR when looking up server key.
+
+2002-07-24  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb524.h: Need to include port-sockets.h before socket-utils.h
+	for windows for struct sockaddr_in.
+
+2002-07-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* krb524.h: Include socket-utils.h instead of port-sockets.h for
+	socklen_t definition.
+
+2002-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Accept new arguments for local
+	address; pass them through to sendto_udp.
+	* krb524.h: Include port-sockets.h.
+	(krb524_sendto_kdc): Update declaration.
+	* conv_creds.c: Include socket-utils.h.
+	(krb524_convert_creds_kdc): Get local-address info from
+	krb524_sendto_kdc.  On Mac, store the IPv4 address in the v4
+	credentials.
+
+2002-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Accept new args for local address
+	return, pass them through to sendto_udp.
+	* conv_creds.c: Include socket-utils.h.
+	(krb524_convert_creds_kdc): 
+
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c: Include port-sockets.h instead of winsock.h or
+	netinet/in.h.
+	* krb524.h: Forward-declare struct types sockaddr, sockaddr_in.
+
+2002-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524.h: Put # for cpp directives in first column.
+
+2002-07-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Update sendto_udp calling
+	sequence; pass 0 for now.
+
+2002-06-14  Tom Yu  <tlyu@mit.edu>
+
+	* krb524.h: Change multiple-inclusion test macro to not stomp on
+	implementation namespace.  Fix up BEGIN_DECLS.
+
+	* krb524.h: Back out erroneous merge of post-1.2.5 change
+	temporarily.
+
+2002-06-14  Alexandra Ellwood <lxs@mit.edu>
+
+	* krb524.h: Updated C++ protection to not interfere with emacs
+	auto indentation and added KRB524_PRIVATE macro for Mac OS X to
+	control visibility of function prototypes
+
+	* krb524.h: Added C++ protection and Mac pragmas
+
+	* krb524.h, cnv_tkt_skey.c, conv_creds.c, conv_princ.c, encode.c,
+	misc.c, sendmsg.c: Updated header paths on Mac OS X so that we
+	correctly include the autogenerated krb524.h
+
+	* conv_creds.c, cnv_tkt_skey.c: added cast to remove warning.
+
+	* krb524.h: Updated to new Mac OS header layout.
+
+	* sendmsg.c: k5-int.h should be included as a local header
+
+	[pullups from 1-2-2-branch]
+
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINLIBS): Use ws2_32.lib instead of wsock32.lib.
+
+2002-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c: Include fake-addrinfo.h.  Don't include
+	sys/select.h.
+	(krb524_sendto_kdc): Update for addrlist, locate_server,
+	locate_kdc changes.  Rip out network code and call
+	internals.sendto_udp instead.
+
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* encode.c, cnv_tkt_skey.c: Need port-sockets.h for Win32 (now
+	that using WIN32_LEAN_AND_MEAN).
+
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb524d.c (lookup_service_key): Copy key block and free up
+	keytab entry data.
+
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c (cleanup_and_exit): Call krb5_klog_close().
+
+	* encode.c (encode_bytes, decode_bytes): Make length field
+	unsigned to clean up unsigned/signed warnings.
+
+2001-10-10  Ken Raeburn  <raeburn@mit.edu>
+	    Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in (KRB524_ERR_HDR): New variable.
+	(includes): Depend on headers in include directory, not local
+	ones.  Don't define any commands to run here.
+	($(KRB524_HDR), $(KRB524_ERR_HDR)): Define UNIX and Windows
+	versions of commands to run for these targets.
+	(../include/krb524_err.h): Delete dependence on "includes".
+
+2001-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Put "##WIN32##" prefix on lines added in last
+	change, otherwise UNIX Make complains about STLIBOBJS referencing
+	itself.
+
+2001-09-28  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add KRB524_STATIC_HACK for Windows build so that we
+	can generate a k524init binary that has an static copy of the krb5
+	library and does not depend on krb5 nor krb524 DLLs.  This is so
+	that we can distribute a standalone k524init binary before 1.3
+	goes out.
+
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Use $(srcdir).
+	(../include/krb524_err.h): Force build of "includes".
+
+2001-08-08    <epeisach@mit.edu>
+
+	* cnv_tkt_skey.c (HOST_BYTE_ORDER): When casting const int * to
+	const char * instead of simply char *.
+
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* conv_creds.c: Nuke prototype in file.
+
+	* krb524.h: Replace profile for krb524_send_message() with
+ 	krb524_sendto_kdc(). (krb524_send_message no longer exists).
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Test need for daemon prototype.
+
+	* krb524d.c: Provide daemon prototype if needed.
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c: Include <krb5/adm_proto.h> for krb5_log_init()
+	prototype.
+	(cleanup_and_exit) Conditionalize krb5_kt_close on keytab being
+	non-null.
+
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* krb524d.c: Call krb5_klog_init before the first point where the
+	klog facility may be used, delete ifdef'd out code to make that
+	call from later in the file, conditionalize kadm5_destroy on the
+	handle being non-null, and correct an indentation error.
+
+2001-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Use new locate_server interface.
+
+2001-06-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* test.c (print_key): Pass in des_cblock* instead of char *.
+	(krb5_print_keyblock): Cast argument to C_Block_print to des_cblock *. 
+	(krb4_print_ticket): For printf formats expecting a long, cast
+	arguments as such.
+
+2001-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for unistd.h.
+	* k524init.c: Only include unistd.h if it's available.
+
+	* krb524d.c: Include stdarg.h.
+	(main): Accept new argument -p to indicate port number to use;
+	fall back to KRB524_SERVICE and then KRB524_PORT.  In error
+	messages, use only part of program name following last '/'.
+	(usage): Updated.
+	(krb5_free_keyblock_contents): Delete disabled function.
+
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* k524init.c: Inculde unistd.h for getopt() prototype.
+
+	* test.c (do_remote): Comment out unused variables. 
+
+	* sendmsg.c (krb524_sendto_kdc): Cleanup assignment in conditional.
+
+2001-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* sendmsg.c (krb524_sendto_kdc): Do fallback if KRB5_REALM_UNKNOWN
+	is returned, as might happen if the DNS support is not enabled.
+
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c (broken, krb524_convert_creds_plain): Unused code
+	deleted.
+
+	* sendmsg.c (krb524_sendto_kdc): Updated to use new
+	krb5int_locate_server function, via internals-accessor hook.
+
+2001-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c (prog): New variable.
+	(main): Set it, and use it when printing error messages.  When
+	reinitializing v4 ticket file, reject case where client and server
+	realms are different.  Print krb4 errors properly.
+
+	* conv_princ.c (krb524_convert_princs): Accept new arg SREALM,
+	passed through to krb5_524_conv_principal.
+	* krb524.h (krb524_convert_princs): Update prototype.
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Pass extra arg.
+	Reject tickets with transited realms for simplicity.
+	* conv_creds.c (krb524_convert_creds_plain): Pass extra arg.  Use
+	the server realm instead of the client realm.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Permit non-CRC DES
+	enctypes; patch from Assar Westerlund.
+
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* conv_creds.c, encode.c, krb524.h, test.c: Always use prototypes,
+	don't use macros PROTOTYPE and KRB5_PROTOTYPE.
+
+2001-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c: Provide prototypes for local functions.
+
+	* test.c: Declare local functions static.
+
+2001-02-05  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Avoid double-free;
+	caller should free v5tkt.
+
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* encode.c, krb524.h: encode_v4tkt() and decode_v4tkt() now take
+	unsigned int * lengths.
+
+	* krb524d.c (do_connection): Cast length fields in recvfrom() and
+	sendto() calls to int.
+
+	* sendmsg.c (krb524_sendto_kdc): Cast length fields in recv() and
+	send() calls to int.
+
+2000-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* conv_creds.c (krb524_convert_creds_plain): Use time_to_life()
+	and life_to_time() to do lifetime calculations, including the
+	adjustment of start time, to match server-side calculations.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Use time_to_life() and
+	life_to_time() to do lifetime calculations.  Adjust start time
+	backwards to deal with roundup so ticket expires at correct time.
+
+2000-10-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb524d.c (do_connection): Do not assume that sizeof(int) == 4. 
+
+	* encode.c (encode_int32, decode_int32): Do not assume 
+	sizeof(int) == 4.
+
+	* conv_creds.c (krb524_convert_creds_kdc): Do not assume
+	sizeof(int) == 4 in network packet. 
+
+	* cnv_tkt_skey.c (krb524int_krb_cr_tkt_int): Ensure that OTW flags
+	is one byte long. An error was introduced when prototypes were
+	widened.
+
+	* Makefile.in (includes): When testing to see if krb524_err.h
+	exists in the include directory, compare against the build trees
+	version.
+
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Install krb524.h and krb524_err.h header file so
+	applications can include for prototypes.
+
+2000-08-09  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c: Fix up static prototypes for
+	krb524int_krb_create_ticket(), krb524int_krb_cr_tkt_krb5(), and
+	krb524int_krb_cr_tkt_int(), as well as their definitions, so that
+	there aren't bare identifiers in the prototypes and so that there
+	aren't narrow types in the definitions.
+
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix build so we don't try to build an extra lib.
+	Fix up krb524 build so we default to krb5's krb4 but can use an
+	alternate.
+
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Make krb524 library and k524init program build on
+	Windows.
+
+	* krb524.def, libinit.c: Files needed to build on Windows.
+
+	* k524init.c: Use public krb_in_tkt() with realm paramter instead of
+	potentially private in_tkt() w/o realm parameter (which does not
+	even exist w/o the realm paramter in some krb4 libraries).  Use
+	krb_save_credentials() instead of tf_init() then
+	tf_save_credentials() then tf_close().
+
+	* cnv_tkt_skey.c: Put copy of krb_cr_tkt_krb5() and
+	krb_create_ticket() as static functions in this file, calling them
+	krb524int_*().  Call these functions instead of the ones in the
+	MIT krb4 library included in the krb5 tree.
+	
+	* conv_princ.c: Remove unused headers.
+
+	* k524init.c, cnv_tkt_skey.c, conv_creds.c, encode.c, misc.c,
+	sendmsg.c, test.c: Do not include Unix headers on Windows.
+
+	* sendmsg.c (krb524_sendto_kdc): Fix call to krb5_locate_kdc() to
+	use right number and types of parameters.  Use krb5int_accessor()
+	to get at internals: krb5_locate_kdc(), krb5_max_dgram_size,
+	krb5_skdc_timeout_1, and krb5_skdc_timeout_shift.  (The latter 3
+	should probably be #defines...)
+
+2000-07-19  Danilo Almeida  <dalmeida@mit.edu>
+
+	* getcred.c (main): Use correct parameters for krb5_cc_default()
+	in case someone actually wants to build this file.
+	
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (do_connection): Convert to using new symbol for
+	DES3.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Convert to using new
+	symbol for DES3.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+Tue Sep  1 19:35:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Add
+	ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list of enctypes to bash.
+
+	* krb524d.c (do_connection): Add ENCTYPE_LOCAL_DES3_HMAC_SHA1 to
+	the list of enctypes to search.
+
+Wed Aug 19 13:40:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Call krb_cr_tkt_krb5
+	if necessary, depending on th enctype.  Force enctype to be raw
+	DES3 if it's another DES3 type.
+
+	* krb524d.c (kdc_get_server_key): Add integer kvno argument,
+ 	rename previous kvno arg as kvnop, to distinguish returned (found)
+	kvno from the input kvno.
+	(lookup_service_key): Add kvnop argument to allow for returned
+	kvno.
+	(do_connection): Search for DES3 keys as well as DES.  Get the
+	found kvno as well, and use that instead of the kvno of the
+	incoming ticket.
+
+Fri Jul 24 19:38:58 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Fork into the background by default, also
+	add a -nofork command line option.
+
+Sat Jul 18 22:10:29 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Remove the variable use_other_realm.
+	It is not actually necessary for the new -r realm code.
+
+Fri Jul 17 04:11:47 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb524d.c (main): Accept a -r command line option to specify
+	a realm other than the default one.
+
+Wed Jun 17 16:35:37 1998  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Handle null address
+	fields; actually use saddr (the address from the UDP header) to
+	generate the ticket address rather than just checking against it.
+
+	* conv_creds.c (krb524_convert_creds_plain): Punt address checks.
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* k524init.c (main): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
+Wed Feb 18 16:04:44 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (thisconfigdir): Remove trailing slash.
+
+Thu Feb 12 21:58:56 1998  Tom Yu  <tlyu@mit.edu>
+
+	* sendmsg.c: Explicitly include k5-int.h in order to get proper
+	prototype of krb5_locate_kdc().
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Thu Dec 11 23:30:30 1997  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c:
+	* conv_creds.c:
+	* conv_princ.c:
+	* encode.c:
+	* k524init.c:
+	* krb524d.c:
+	* misc.c:
+	* test.c: Don't include netdb.h or sys/socket.h if krb.h is
+	included; this works around an Ultrix bug where those headers
+	aren't protected against multiple inclusion.
+
+Mon Aug 18 13:02:31 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_PROG_INSTALL as we do install here.
+
+Mon Aug 11 21:12:11 1997  Tom Yu  <tlyu@mit.edu>
+
+	* convt_tkt.c: Delete; it's not needed anymore.
+
+	* test.c: Remove reference to krb524_convert_creds_addr, as that
+	doesn't exist anymore.
+
+	* conv_creds.c: Clean up substantially to be less convoluted.
+
+	* sendmsg.c: Fix to not do a full series of timeouts on each
+	server; loop over the whole list before increasing the timeout.
+
+	* configure.in: Update to use the new library build system to
+	build libkrb524.
+
+	* Makefile.in: Update to reflect changes in the library.  Also,
+	use the new library build system to build libkrb524.
+
+Thu Aug  7 17:34:59 1997  Tom Yu  <tlyu@mit.edu>
+
+	* cnv_tkt_skey.c:
+	* krb524.h:
+	* krb524d.c: Add jik's patches for multihomed hosts.  Fixes
+	krb5-misc/275.
+
+Tue Feb 18 09:53:10 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* k524init.c, test.c, cnv_tkt_skey.c: Remove include of krb4-proto.h
+
+Tue Feb  4 20:13:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix up krb4 library handling properly (hopefully).
+
+Sun Feb  2 10:06:22 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in, Makefile.in: Update to new build system rules
+
+Thu Dec  5 23:27:00 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c (main): Ignore SIGHUP for now. [27]
+
+Thu Dec  5 23:12:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Change the issue time
+		of the V4 ticket to be the current time (since the
+		lifetime of the V4 ticket was calculated assuming that the
+		issue time would be the current time).  [PR#283,PR#22]
+
+Mon Nov 11 16:23:32 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (do_connection): only free v4/v5 keyblock contents and
+	v5 ticket *once*, in cleanup branch at the end.
+
+Thu Nov  7 15:45:16 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* test.c (main): 
+	* krb524d.c (main): 
+	* k524init.c (main): 
+	* getcred.c (main): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
+Wed Jul 24 02:18:02 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* test.c (krb4_print_ticket): s/KRB4_INT4/krb5_ui_4 so we work
+ 	with Athena Kerberos4.
+
+Wed Jul 24 01:14:27 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* encode.c: s/PROTOTYPE/KRB5_PROTOTYPE
+
+	* krb524.h (KRB5_PROTOTYPE): Use KRB5_PROTOTYPE not PROTOTYPE because the include file is installed and PROTOTYPE wasn't defined anyway. 
+
+Wed Jul 31 17:05:25 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Revert prior change due to shuffling of netdb.h
+
+Tue Jul 30 19:58:22 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb524d.c: Remove #include <netdb.h> (already gotten by
+		kadm5/admin.h)
+
+Fri Jul 19 20:22:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: added AC_PROG_AWK and USE_GSSAPI_LIBRARY
+
+Tue Jul  9 16:14:33 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb524d.c: use kadm5 instead of kdb
+
+Tue Jul  9 07:16:39 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* test.c (krb4_print_ticket): Change addr to unsigned KRB4_32 from
+		long. 
+
+	* conv_creds.c (krb524_convert_creds_plain): Change addr to a four
+		byte unsigned integer (from long).
+
+Thu Jun 13 22:10:30 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
+Mon May  6 12:09:44 1996  Richard Basch  <basch@lehman.com>
+
+	* conv_creds.c: Fallback to slave kdc's wasn't working; it was not
+		handling the error code KRB524_NOTRESP as an indicator that
+		the kdc is unreachable.
+
+Sun Mar 31 01:17:26 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): use context->clockskew
+	in all time bound checks.
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): for time periods that
+	would occupy greater than 128 ticks, use the CMU algorithm, based
+	on the table cmu_seconds. (In conjunction with the previous
+	changes, even non-CMU clients can be used for the full lifetime of
+	a V5 ticket by rerunning krb524init when their lower
+	interpretation of the end time is expired.)
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): rather than apply fit
+ 	an extended v5 lifetime into a v4 range, give out a v4 ticket with
+ 	as much of the v5 lifetime is available "now" instead.
+
+Tue Mar 19 17:07:44 1996  Richard Basch  <basch@lehman.com>
+
+	* conv_creds.c (krb524_convert_creds_plain):
+	if the v5 lifetime is greater than the max v4 lifetime, use the max
+	v4 lifetime (0xff), rather than masking it with 0xff.
+
+Fri Jan 12 04:37:23 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): rather than apply fit
+ 	an extended v5 lifetime into a v4 range, give out a v4 ticket with
+ 	as much of the v5 lifetime is available "now" instead.
+
+Sat Jan 27 01:31:12 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb524d.c (kdc_get_server_key): If an enctype is given, then use
+        iit even after falling back from trying a v4salt.  If we don't, we
+        have a good chance fo getting the DES3 TGT service key, and that
+        just doesn't do what we want.
+
+Thu Jan 25 02:07:46 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* cnv_tkt_skey.c (krb524_convert_tkt_skey): Take both a v5 and v4
+ 	service key.  Use the v5 service key to decrypt the v5 ticket, and
+ 	the v4 service key to encrypt the v4 ticket.
+
+	* krb524d.c (do_connection): Use a separate v5 and v4 service key
+ 	so that if the KDC chooses to encrypt the v5 ticket in something
+ 	besides ENCTYPE_DES_CBC_CRC, we don't lose.  Also, make sure we
+ 	free keyblock contents and tickets on error.
+	(lookup_service_key): Pass enctype to kdc_get_server_key
+
+	(kdc_get_server_key):  Only try for v4 salt if the enctype is
+	DES_CRC.  Take enctype as an argument.  This creates a problem
+	if the server key has a normal and v4 salt of ENCTYPE_DES_CBC_CRC
+	but I can't think of a good answer to this.
+
+
+	* k524init.c (main):  Use crc32 not md5.
+
+Wed Jan 24 20:05:47 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb524d.c (kdc_get_server_key): Try to find a v4 salt type key,
+ 	else try any des_crc32 key, else fail.
+	(do_connection): Lookup a crc32 key not an md5 key.
+	(init_master): Handle reading kdc profile.
+
+Sun Nov 12 04:29:08 1995  Mark W. Eichin  <eichin@cygnus.com>
+
+	* conv_creds.c (krb524_convert_creds_kdc): loop through all of the
+	addresses returned by krb5_locate_kdc, don't just try the first one.
+	* krb524d.c (do_connection): check for particular failures of
+	decode_krb5_ticket, as well as for messages that are one int long
+	(which will eliminate our own error replies.)
+
+Mon Oct  9 11:34:24 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: s/test/krb524test/ to handle screw case where test
+		is built and interferes with configure.
+
+Mon Sep 25 00:15:47 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (do_connection): if recvfrom failed, just return,
+	don't try to use the (likely invalid) sockaddr in a reply message.
+
+Thu Sep 14 17:36:11 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (usage): needs to get context to pass to
+	cleanup_and_exit so it does get freed, since it is allocated
+	before parsing arguments.
+	(main): change caller as well.
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+
+        * cnv_tkt_skey.c, conv_creds.c, get_cred.c k524init.c krb524d.c,
+	* test.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Wed Sep  6 00:11:53 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c (main): set timeout inside while loop to prevent spin.
+	(cleanup_and_exit): free master_princ or close keytab, and free
+	the global context, to eliminate spurious storage use in malloc
+	debugging.
+	(init_master): free realm.
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * cnv_tkt_skey.c, getcred.c, k524init.c, krb524d.c, test.c : 
+		Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+
+Thu Aug 24 18:40:22 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
+
+Mon Aug 07 11:25:53 1995  Chris Provenzano  (proven@mitedu)
+
+	* krb524d.c: Hacks to get it to compile with new kdb format.
+
+
+Thu Jul 27 15:14:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb524d.c - Use the etype which is supplied in the krb5_keytype_array
+		specified by the master key type.
+
+
+Mon Jul 17 15:15:01 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb524d.c - Add NULL stash file argument to krb5_db_fetch_mkey().
+
+
+
+Fri Jul 7 16:07:21 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+
+Thu Jul 13 17:22:17 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in :  Include sys/select.h if present.
+
+
+
+Fri Jun 30 14:38:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
+Wed Jun 28 20:14:35 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* test.c: use PROTOTYPE.
+
+Wed Jun 28 17:32:51 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* test.c, k524init.c, getcred.c: rewrote for old style definitiions.
+	* encode.c: use PROTOTYPE instead of KRB5_PROTOTYPE.
+
+Wed Jun 28 03:04:38 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb524d.c: changed main, krb5_free_keyblock_contents to use old
+	style definitions.
+
+Tue Jun 27 20:27:06 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* encode.c: make declarations use KRB5_PROTOTYPE, and use old
+	style definitions, per V5 coding style.
+
+Tue Jun 27 15:54:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* cnv_tkt_skey.c - Cast key contents argument to conform to prototype.
+	* encode.c - Cast argument to match argument list of encode_bytes().
+	* krb524d.c - Add signal name argument to conform to prototype.
+	* sendmsg.c - Cast second argument to connect(2).
+	* test.c - Cast arguments to print_key() and ctime(3).  Cast assignment
+		to key.contents.
+
+
+Thu Jun 22 11:55:23 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb524d.c - Change KRB_CONVERT_KEY_OUTOF_DB to decrypt_key calls.
+
+
+Fri Jun 16 17:09:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* k524init.c - Inline code from krb_save_credentials, it doesn't
+		exist for some K4 (e.g. /usr/athena).
+
+
+Thu Jun 15 17:56:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+	* configure.in - Add shared library usage check.
+
+Wed Jun 14 19:28:33 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: added install rules
+
+Fri Jun  9 19:16:49 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Tue Jun  6 20:59:56 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* test.c (do_remote): Case sockaddr_in * to sockaddr * in calling
+		krb524_convert_creds_addr. 
+		(krb4_print_ticket): issue_time should be a KRB4_32
+
+	* encode.c (encode_v4tkt): Cast a the unsigned long mbz field of
+		KTEXT to krb5_int32 for call to encode_int32.
+
+	* conv_creds.c (krb524_convert_creds_addr): Cast sockaddr * to
+		sockaddr_in *. 
+
+Tue Jun 6 17:25:20 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in : Change $(ARCHIVE) to $(ARADD) so that updates to the
+		library replace modules instead of appending them.
+	* cnv_tkt_skey.c, conv_creds.c : Concatenate the two strings which
+		comprise the print format.  Some compilers cannot deal with
+		<string><string> (e.g. Ultrix).
+
+Mon Jun  5 22:25:33 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, cnv_tkt_skey.c, conv_creds.c, conv_princ.c,
+		conv_tkt.c, encode.c, getcred.c, k524init.c, krb524.h,
+		krb524d.c, misc.c, sendmsg.c, test.c, configure.in:
+		Updated to use autoconf, and to use the new Kerberos
+		library API.  
+		
+Wed Mar 27 21:15:00 1995  Keith Vetter (keithv@fusion.com)
+
+	* renamed conv_tkt_skey.c to cnv_tkt_skey.c for DOS 8.3
+	   compatability.
+	* Makefile: reflected the above change
+
+Tue Feb 28 02:31:22 1995  John Gilmore  (gnu at toad.com)
+
+	* README, *.[ch]:  Avoid <...> includes for our include files.
+
+Thu Sep 15 10:47:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile, README, RELEASE_NOTES, conv_creds.c, conv_princ.c,
+	conv_tkt.c, conv_tkt.c, conv_tkt_skey.c, encode.c, getcred.c,
+	globals.c, k524init.c, krb524.h, krb524_err.et, krb524d.c, misc.c,
+	test.c: Applied new copyright notice (1993, Geer Zolat Associates
+		--> 1994, OpenVision Technologies, Inc.)
+
+
+	
+
+
+

@@ -1,0 +1,30 @@
+thisconfigdir=./..
+myfulldir=clients/kinit
+mydir=kinit
+BUILDTOP=$(REL)..$(S)..
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows
+##WIN32##DEFINES=-DGETOPT_LONG
+
+all-unix:: kinit
+all-windows:: $(OUTPRE)kinit.exe
+
+kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ kinit.o $(KRB4COMPAT_LIBS)
+
+$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
+
+clean-unix::
+	$(RM) kinit.o kinit
+
+install-unix::
+	for f in kinit; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done

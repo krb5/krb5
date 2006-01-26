@@ -1,0 +1,113 @@
+The format of the file is:
+
+@smallexample
+Kerberos_principal      permissions     [target_principal]	[restrictions]
+@end smallexample
+
+The Kerberos principal (and optional target principal) can include the
+``@b{*}'' wildcard, so if you want any principal with the instance
+``admin'' to have full permissions on the database, you could use the
+principal ``@code{*/admin@@REALM}'' where ``REALM'' is your Kerberos
+realm.  @code{target_principal} can also include backreferences to
+@code{Kerberos_principal}, in which "@b{*@i{number}}" matches the
+component @i{number} in the @code{Kerberos_principal}.
+
+Note:  a common use of an @i{admin} instance is so you can grant
+separate permissions (such as administrator access to the Kerberos
+database) to a separate Kerberos principal.  For example, the user
+@code{@value{ADMINUSER}} might have a principal for his administrative
+use, called @code{@value{ADMINUSER}/admin}.  This way,
+@code{@value{ADMINUSER}} would obtain @code{@value{ADMINUSER}/admin}
+tickets only when he actually needs to use those permissions.
+
+The permissions are represented by single letters; UPPER-CASE letters
+represent negative permissions.  The permissions are:
+
+@table @b
+@itemx a
+allows the addition of principals or policies in the database.
+@itemx A
+disallows the addition of principals or policies in the database.
+@itemx d
+allows the deletion of principals or policies in the database.
+@itemx D
+disallows the deletion of principals or policies in the database.
+@itemx m   
+allows the modification of principals or policies in the database.
+@itemx M
+disallows the modification of principals or policies in the database.
+@itemx c
+allows the changing of passwords for principals in the database.
+@itemx C
+disallows the changing of passwords for principals in the database.
+@itemx i
+allows inquiries to the database.
+@itemx I
+disallows inquiries to the database.
+@itemx l
+allows the listing of principals or policies in the database.
+@itemx L
+disallows the listing of principals or policies in the database.
+@itemx s
+allows the explicit setting of the key for a principal
+@itemx S
+disallows the explicit setting of the key for a principal
+@itemx *
+All privileges (admcil).
+@itemx x
+All privileges (admcil); identical to ``*''.
+@end table
+
+The restrictions are a string of flags.  Allowed restrictions are:
+
+@table @b
+@itemx [+ -]@i{flagname}
+flag is forced to indicated value.  The permissible flags are the same
+as the @code{+} and @code{-} flags for the @code{kadmin addprinc} and
+@code{modprinc} commands.
+@itemx -clearpolicy
+policy is forced to clear
+@itemx -policy @i{pol}
+policy is forced to be @i{pol}
+@itemx expire @i{time}
+@itemx pwexpire @i{time}
+@itemx maxlife @i{time}
+@itemx maxrenewlife @i{time}
+associated value will be forced to MIN(@i{time}, requested value)
+@end table
+
+The above flags act as restrictions on any add or modify operation
+which is allowed due to that ACL line.
+
+Here is an example of a @code{kadm5.acl} file.  Note that order is
+important; permissions are determined by the first matching entry.
+
+@smallexample
+@group
+*/admin@@@value{PRIMARYREALM}  *
+@value{ADMINUSER}@@@value{PRIMARYREALM}  ADMCIL
+@value{ADMINUSER}/*@@@value{PRIMARYREALM} il */root@@@value{PRIMARYREALM}
+*@@@value{PRIMARYREALM} cil *1/admin@@@value{PRIMARYREALM}
+*/*@@@value{PRIMARYREALM}  i
+*/admin@@@value{SECONDREALM} * -maxlife 9h -postdateable
+@end group
+@end smallexample
+
+@noindent In the above file, any principal in the
+@value{PRIMARYREALM} realm with an @code{admin} instance has all
+administrative privileges.  The user @code{@value{ADMINUSER}}
+has all permissions with his @code{admin} instance,
+@code{@value{ADMINUSER}/admin@@@value{PRIMARYREALM}} (matches the first
+line).  He has no permissions at all with his @code{null} instance,
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}} (matches the second line).
+His root instance has @i{inquire} and @i{list} permissions with any
+other principal that has the instance @code{root}.  Any principal
+in @value{PRIMARYREALM} can inquire, list, or change the password of
+their @code{admin} instance, but not any other @code{admin} instance.
+Any principal in the realm @code{@value{PRIMARYREALM}} (except for
+@code{@value{ADMINUSER}@@@value{PRIMARYREALM}}, as mentioned above) has
+@i{inquire} privileges.  Finally, any principal with an admin instance
+in @value{SECONDREALM} has all permissions, but any principal that they
+create or modify will not be able to get postdateable tickets or tickets
+with a life of longer than 9 hours.
+

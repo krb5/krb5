@@ -1,0 +1,196 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_verify.c (set_dbname_help): Set default realm and construct
+	argument vector describing database location, before calling
+	krb5_db_open.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KDB5_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
+	Novell merge.
+	* Makefile.in:
+	* kdb5_verify.c:
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_verify.c (main): Call krb5_c_valid_enctype instead of
+	valid_enctype.
+
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_verify.c (main): Use krb5_free_unparsed_name() to free up
+	memory.
+	(check_princ): Use krb5_free_data_contents() and
+	krb5_free_principal() to cleanup memory leak.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_verify.c: Make prototypes unconditional.
+
+2000-07-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_verify.c (check_princ): Compiler warning cleanup. Get rid
+	of unused function.
+
+2000-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_verify.c: Remove unused variable.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_verify.c (main): Make sure buffer "principal_string" is
+	properly terminated.
+
+2000-05-08  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_verify.c (main): Don't overflow buffer "tmp".
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* kdb5_verify.c: update to new crypto api
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb5_verify.c (argv): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
+Mon Mar 30 16:46:20 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdb5_verify.c: Declare main() as int instead of void.
+	Add parentheses around assignements in conditionals.
+
+Wed Feb 18 16:30:59 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Mon Feb  2 16:44:21 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Sun Aug 17 14:26:57 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(SRCS) line.
+
+Sun Feb  9 01:57:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Thu May  2 21:16:40 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_verify.c: fixed various abstraction violations where the
+		code "knew" the cryptosystem_entry structure
+
+Sat Dec 23 01:05:33 1995    <tytso@rsts-11.mit.edu>
+
+	* configure.in (withval): Add check for DBM/db libraries.
+
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * kdb5_verify.c : Remove mkvno for krb5_db_entry
+
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * kdb5_verify.c : Remove krb5_enctype from krb5_string_to_key() args.
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb5_verify.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb5_verify.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
+
+Thu Jul 27 15:31:18 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_verify.c - Restore old logic to find the etype now that crypto-
+		conf.c is correctly generated.
+
+Thu Jul 27 02:59:05 1995        Chris Provenzano (proven@mit.edu)
+        * kdb5_verify.c : Use new kdb format.
+
+Mon Jul 17 15:25:03 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_verify.c - Change setting of defaulted keytype to be DEFAULT_
+		KDC_ETYPE instead of using the keytype array to find the
+		etype.
+
+
+Wed Jul 12 12:33:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Remove V5_USE_SHARED_LIB.
+
+
+Fri Jul 7 16:40:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling and LDFLAGS.
+	* configure.in - Add USE_KDB5_LIBRARY and KRB5_LIBRARIES
+
+
+Thu Jun 15 18:12:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove DBMLIB.
+	* configure.in - Remove check for dbm libraries, use shared library
+		linking rules.
+
+Fri Jun  9 18:58:51 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Thu Mar  2 12:34:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
+Wed Mar  1 16:33:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
+Tue Feb 28 01:25:37 1995  John Gilmore  (gnu at toad.com)
+
+	* kdb5_verify.c:  Avoid <krb5/...> includes.
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+Sun Oct 23 00:50:42 1994    (tytso@rsx-11)
+
+	* kdb5_verify.c (check_princ): Check principals with the correct
+		realm name.
+
+	* configure.in: Look for ndbm or dbm libraries
+
+Thu Oct  6 12:42:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_verify.c (main, set_dbname_help): Allow master key password
+		to be passed in on the command line; to make testing
+		scripts simpler.
+
+	* kdb5_verify.c (check_princ): Check to make sure key version
+		number is 1, not 0.
+
+Thu Sep 29 23:00:05 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+ 	* Makefile.in: Relink executable when libraries change
+

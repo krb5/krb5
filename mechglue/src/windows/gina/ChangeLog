@@ -1,0 +1,20 @@
+2005-10-20  Jeffrey Altman <jaltman@mit.edu>
+
+	* Makefile.in (WINLIBS): Link to the multi-threaded library.
+
+2002-06-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (WINLIBS): Use ws2_32.lib instead of wsock32.lib.
+
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Windows fix for updated win-pre.in.
+
+Mon May 17 14:24:25 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Reflect that we only build this under win32.
+
+Mon May 10 15:28:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+

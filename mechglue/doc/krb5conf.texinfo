@@ -1,0 +1,83 @@
+The @code{krb5.conf} file contains Kerberos configuration information,
+including the locations of KDCs and admin servers for the Kerberos
+realms of interest, defaults for the current realm and for Kerberos
+applications, and mappings of hostnames onto Kerberos realms.  Normally,
+you should install your @code{krb5.conf} file in the directory
+@code{/etc}.  You can override the default location by setting the
+environment variable @samp{KRB5_CONFIG}.
+
+The @code{krb5.conf} file is set up in the style of a Windows INI file.
+Sections are headed by the section name, in square brackets.  Each
+section may contain zero or more relations, of the form:
+
+@smallexample
+foo = bar
+@end smallexample
+
+@noindent
+or
+
+@smallexample
+@group
+fubar = @{
+        foo = bar
+        baz = quux
+@}
+@end group
+@end smallexample
+
+Placing a `*' at the end of a line indicates that this is the
+@dfn{final} value for the tag.  This means that neither the remainder
+of this configuration file nor any other configuration file will be
+checked for any other values for this tag.
+
+For example, if you have the following lines:
+
+@smallexample
+foo = bar*
+foo = baz
+@end smallexample
+
+then the second value of foo (baz) would never be read.
+
+The @code{krb5.conf} file may contain any or all of the following 
+sections:
+
+@table @b
+@itemx libdefaults
+Contains default values used by the Kerberos V5 library.
+
+@itemx login
+Contains default values used by the Kerberos V5 login program.
+
+@itemx appdefaults
+Contains default values that can be used by Kerberos V5 applications.
+
+@itemx realms
+Contains subsections keyed by Kerberos realm names.  Each subsection
+describes realm-specific information, including where to find the
+Kerberos servers for that realm.
+
+@itemx domain_realm
+Contains relations which map domain names and subdomains onto Kerberos
+realm names.  This is used by programs to determine what realm a host
+should be in, given its fully qualified domain name.
+
+@itemx logging
+Contains relations which determine how Kerberos programs are to perform
+logging.
+
+@itemx capaths
+Contains the authentication paths used with direct (nonhierarchical)
+cross-realm authentication.  Entries in this section are used by the
+client to determine the intermediate realms which may be used in
+cross-realm authentication.  It is also used by the end-service when
+checking the transited field for trusted intermediate realms.
+
+@ignore
+this doesn't seem to be used
+@itemx kdc
+For a KDC, may contain the location of the kdc.conf file.
+@end ignore
+
+@end table

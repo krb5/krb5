@@ -1,0 +1,23 @@
+K5_AC_INIT(configure.in)
+CONFIG_RULES
+AC_TYPE_MODE_T
+AC_TYPE_UID_T
+case $krb5_cv_host in
+     *-apple-darwin*)
+     KRB_ERR_TXT=
+     KRB_ERR=
+     KRB_ERR_C=krb_err.c
+     ;;
+     *)
+     KRB_ERR='$(OUTPRE)krb_err.$(OBJEXT)'
+     KRB_ERR_TXT=krb_err_txt.c
+     KRB_ERR_C=
+     ;;
+esac
+AC_SUBST([KRB_ERR_TXT])
+AC_SUBST([KRB_ERR])
+AC_SUBST([KRB_ERR_C])
+AC_PROG_AWK
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+V5_AC_OUTPUT_MAKEFILE

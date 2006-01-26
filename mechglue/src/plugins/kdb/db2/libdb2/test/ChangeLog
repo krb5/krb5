@@ -1,0 +1,85 @@
+2005-12-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (PROG_LIBPATH, DB_DEPLIB): Look for library in
+	.. instead of $TOPLIBD.
+	(myfulldir): Updated for directory rename.
+
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (BUILDTOP, myfulldir): Updated for directory move.
+	(DB_LIB, DB_DEPLIB): Define here now.
+
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (getnwords): Run data through "cat -v", because at
+	least one version of Debian Linux has an English dictionary with
+	Latin-1 characters and a "rev" that seems to default to some sort
+	of Unicode.
+
+2004-08-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (getnwords): Rewrite to drop blank lines before
+	counting lines, not after.
+
+2004-08-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (getnwords): New function.  Uses sed to get N words
+	from $DICT as other functions did before, but discards blank
+	lines.
+	(test1, test2, test12, test13, test20): Call getnwords.
+
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* SEQ_TEST/t.c (main): Remove declaration of errno
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile: Deleted.
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-23  Tom Yu  <tlyu@mit.edu>
+
+	* dbtest.c: Include btree.h if we're compiled with -DSTATISTICS.
+
+	* Makefile.in: Add rules for bttest; also add a clean rule.
+
+2002-05-08  Ken Raeburn  <raeburn@mit.edu>
+	
+	* dbtest.c: Test for __STDC__ defined, not nonzero, to decide
+	whether to use stdarg.h or varargs.h.
+	(err): Similarly for function signature.
+
+2002-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test: Use "/bin/." instead of "/bin" in find commands in
+	case /bin itself is a symlink.
+	(test8): Check exit status of dbtest program.
+
+	* dbtest.c (compare): Exit with error indication if comparison of
+	contents indicates a difference.
+	(get): Exit with error indication after printing message if key
+	not found.
+
+2002-01-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* run.test (test8): If test reports an error, exit with error
+	indication.
+
+	* dbtest.c (compare): Exit with error indication if size
+	comparison fails.
+
+2000-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* dbtest.c (err): Add format attribute to decl, for typechecking
+	under GNU C.
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* dbtest.c (main): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+

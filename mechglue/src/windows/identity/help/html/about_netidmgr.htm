@@ -1,0 +1,68 @@
+<html>
+<head>
+  <title>About Network Identity Manager</title>
+  <meta name="description" content="About NetIDMgr">
+  <meta name="keywords" content="">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>About Network Identity Manager</h1>
+
+<p>
+This is strictly an informative page about the origins of Network
+Identity Manager.
+</p>
+
+<h3>In the beginning</h3>
+
+<p>
+Network Identity Manager was conceived as an identity management
+solution to make up for the shortcomings of Leash32 (distributed with
+MIT Kerberos for Windows) and AFSCreds (distributed with OpenAFS).
+</p>
+
+<p>
+The work started as Unified Credentials Manager, a final project for
+the MIT course 6.831 : User Interface Design and Implementation,
+taught by <a href="http://people.csail.mit.edu/rcm/">Professor Rob
+Miller</a>.  By the time actual code was written, it was named
+Khimaira (which was later changed to Network Identity Manager around
+October, 2005).  Traces of the name Khimaira might still exist in the
+source code.
+</p>
+
+<p>
+Khimaira was presented at the <a
+href="http://www.pmw.org/afsbpw05/">AFS and Kerberos Best Practices
+Workshop 2005</a>.  The slides can be found on the workshop website and <a
+href="http://web.mit.edu/asanka/www/misc.shtml">here</a>.
+</p>
+
+<p>
+The work on Network Identity Manager was supported by <a
+href="http://web.mit.edu">MIT</a> <a
+href="http://web.mit.edu/ist/">Information Services and
+Technology</a>, <a href="http://www.jpl.nasa.gov">NASA Jet Propulsion Laboratory</a>,
+and <a href="http://www.secure-endpoints.com">Secure Endpoints Inc.</a>.
+</p>
+
+<h3>Design</h3>
+
+<p>
+A plugin based architecture was chosen so that support for additional
+credential types and features could be added without making changes to
+the mainline code.  In addition to making the application easily
+extensible, this also allows the AFS plugin to be maintained within
+the OpenAFS code base and separates the code supporting Kerberos 5 and
+Kerberos 4.  Furthermore, it is anticipated that this would encourage
+third party developers to develop plugins for NetIDMgr.
+</p>
+
+<p>
+More information about the concepts used in the design of Network
+Identity Manager can be found <a href="concepts.htm">here</a>.
+</p>
+
+</body>
+</html>

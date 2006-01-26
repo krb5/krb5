@@ -1,0 +1,382 @@
+
+This document references, accompanies and extends the password changing
+protocol document, "A Proposal for a Standardized Kerberos Password
+Changing Protocol" by Theodore Ts'o.
+
+Administrative Command Extensions to the Password Changing Protocol
+===================================================================
+The following commands and their accompanying definitions are an
+extension to the password changing protocol which allow remote
+administrative clients to perform functions analogous to those which
+are performed using the local database editing utility. These
+commands are encoded in the "command request" PDU described in the
+password changing protocol, and the server's responses to these
+commands are encoded in the "command reply" PDU.
+
+These commands are (optional commands are marked with an asterisk, new
+or changed commands are marked with a plus sign):
+	ADD-PRINCIPAL
+	DELETE-PRINCIPAL
+	RENAME-PRINCIPAL
+	MODIFY-PRINCIPAL
+	OTHER-CHANGEPW
+	OTHER-RANDOM-CHANGEPW
+	INQUIRE-PRINCIPAL
+	EXTRACT-KEY		(*+)
+	ADD-KEY			(+)
+	DELETE-KEY		(+)
+
+In order to support these additional commands, the following additional
+status codes are also defined:
+
+Number	Symbolic Name		Meaning
+64	P_ALREADY_EXISTS	The specified principal already exists.
+65	P_DOES_NOT_EXIST	The specified principal does not exist.
+66	NOT_AUTHORIZED		The access control list on the server prevents
+				this operation.
+67	BAD_OPTION		Either: 1) A bad option was specified; 2) A
+				conflicting set of options would result from
+				this operation; or 3) Existing options prevent
+				this type of operation.
+68	VALUE_REQUIRED		The specified option requires a value.
+69	SYSTEM_ERROR		A system error occurred while processing a
+				request.
+70(+)	KEY_ALREADY_EXISTS	The specified key already exists.
+71(+)	KEY_DOES_NOT_EXIST	The specified key does not exist.
+
+The add principal operation
+---------------------------
+o Command String		"ADD-PRINCIPAL"
+o Arguments
+	<new-principal-string>	- name of new principal
+	<keyword-value-pair>	- either "KEYWORD=value" or "KEYWORD".
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_ALREADY_EXISTS	- new principal already exists
+	BAD_OPTION		- bad option supplied
+	VALUE_REQUIRED		- value required with keyword
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal does not exist, the arguments parse
+	correctly, and the arguments when combined with defaulted values
+	do not produce a conflicting set of options then add the specified
+	principal with the specified attributes.  See below for the list of
+	settable attributes.
+o Access Required
+	Client principal must have ADD_PRINCIPAL permission.
+
+The delete principal operation
+------------------------------
+o Command String		"DELETE-PRINCIPAL"
+o Argument
+	<principal-string>	- principal to delete
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- old principal does not exist
+o Supplemental returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, then delete it from the database.
+o Access Required
+	Client principal must have DELETE_PRINCIPAL permission.
+
+The rename principal operation
+------------------------------
+o Command String		"RENAME-PRINCIPAL"
+o Arguments
+	<orig-principal-string>	- original name
+	<new-principal-string>	- new name
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- old principal does not exist
+	P_ALREADY_EXISTS	- new principal already exists
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the original principal exists and the new principal name does not
+	exist, rename the original principal to the specified name.
+o Access Required
+	Client principal must have ADD_PRINCIPAL and DELETE_PRINCIPAL
+	permission.
+
+The modify principal operation
+------------------------------
+o Command String		"MODIFY-PRINCIPAL"
+o Arguments
+	<principal-string>	- name of principal
+	<keyword-value-pair>	- either KEYWORD=value or KEYWORD.
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- principal doesn't exist
+	BAD_OPTION		- bad option supplied
+	VALUE_REQUIRED		- value required with keyword
+o Supplemental returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, the arguments parse correctly, and
+	the arguments when combined with existing values do not produce a
+	conflicting set of options, then modify the specified principal with
+	the specified attributes.  See below for the list of settable
+	attributes.
+o Access Required
+	Client principal must have MODIFY_PRINCIPAL permission.
+
+The change password operation
+-----------------------------
+o Command String		"OTHER-CHANGEPW"
+o Arguments
+	<principal-string> 	- principal to change password for
+	<new-password>		- new password
+o Returns
+	SUCCESS			- operation successful
+	PW_UNACCEPT		- specified password is bad
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- old principal does not exist
+	BAD_OPTION		- principal has a random key
+o Supplemental returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, and does not have a random key,
+	then change the password to the specified password.  The original
+	password is NOT required.
+o Access Required
+	Client principal must have CHANGEPW permission.
+
+The change random password command
+----------------------------------
+o Command String		"OTHER-RANDOM-CHANGEPW"
+o Argument
+	<principal-string> 	- principal to change password for
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- old principal does not exist
+	BAD_OPTION		- principal does not have a random key
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, and has a random key, then
+	generate a new random password. The original password is NOT
+	required.
+o Access Required
+	Client principal must have CHANGEPW permission.
+
+The inquire principal command
+-----------------------------
+o Command String		"INQUIRE-PRINCIPAL"
+o Argument
+	<principal-string>	- name of principal or null argument
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- principal doesn't exist
+o Supplemental Returns
+    If the return is SUCCESS
+	<next-principal-string>	- name of next principal in database
+	<keyword-value-pair>	- KEYWORD=value list
+	.
+	.
+	.
+    Otherwise
+	error message text	- if failure
+o Description
+	If a principal is specified, then the database is searched for that
+	particular principal and its attributes are returned as keyword-value
+	pairs.  If no principal is specified, then the first database entry
+	is returned.  The name of the next principal in the database is always
+	returned to allow for scanning.  See below for the list of attributes
+	that can be returned.
+o Access Required
+	Client principal must have INQUIRE_PRINCIPAL permission.
+
+The OPTIONAL extract service key table entry command
+----------------------------------------------------
+o Command String		"EXTRACT-KEY"
+o Arguments
+	<instance-string>	- instance to extract for
+	<name-string>		- name to extract for
+o Returns
+	SUCCESS			- operation successful
+	CMD_UNKNOWN		- operation not supported by server
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not allowed to perform this
+	P_DOES_NOT_EXIST	- principal does not exist
+o Supplemental Returns
+	<keytab-entry>		- if successful
+	error message text	- if failure
+o Description
+	If the specified name/instance exists in the database, then
+	extract the service key entry and return it in <keytab-entry>.
+	The description of <keytab-entry> follows below.
+o Access Required
+	Client principal must have EXTRACT permission.
+
+The add key operation
+---------------------
+o Command String		"ADD-KEY"
+o Arguments
+	<principal-string>	- name of the principal
+	<password>		- current password value
+	<keyname>		- name of the key in the form
+				  <keytype>:<salttype>.
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not authorized to perform this
+	KEY_ALREADY_EXISTS	- one or more of the specified
+				  keytypes already exist.
+	BAD_OPTION		- bad keytype:saltype specified
+	BAD_PW			- supplied password is incorrect
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, the keyname(s) parse
+	correctly the specified password is successfully verified
+	against the existing key(s), and the specified keyname(s) do
+	not exist, then these keytype(s) are added to the principal.
+o Access Required
+	Client principal must have MODIFY_PRINCIPAL permission.
+
+The delete key operation
+------------------------
+o Command String		"DELETE-KEY"
+o Arguments
+	<principal-string>	- name of the principal
+	<password>		- current password value
+	<keyname>		- name of the key in the form
+				  <keytype>:<salttype>, or name of the
+				  key in the form <keytype>:<salttype>:
+				  <key-version>
+	.
+	.
+	.
+o Returns
+	SUCCESS			- operation successful
+	SYSTEM_ERROR		- system error
+	NOT_AUTHORIZED		- not authorized to perform this
+	KEY_DOES_NOT_EXIST	- one or more of the specified
+				  keytypes do not exist.
+	BAD_OPTION		- bad keytype:saltype specified
+	BAD_PW			- supplied password is incorrect
+o Supplemental Returns
+	NONE			- if successful
+	error message text	- if failure
+o Description
+	If the specified principal exists, the keyname(s) parse
+	correctly the specified password is successfully verified
+	against the existing key(s), and the specified keyname(s) 
+	exist, then they are deleted from the principal.
+o Access Required
+	Client principal must have MODIFY_PRINCIPAL permission.
+
+Keywords
+--------
+The following list of keywords are used for the ADD-PRINCIPAL and
+MODIFY-PRINCIPAL commands and are returned from the
+INQUIRE-PRINCIPAL command.
+
+Valid	Keyword		Value Type	Value
+-------	---------------	---------------	--------------------------------------
+  (S)	PASSWORD	<string> 	New password.
+  (SR)	MAXLIFE		<integer>	The maximum lifetime of tickets for
+					this principal in seconds.
+  (SR)	MAXRENEWLIFE	<integer>	The maximum renewable lifetime of
+					tickets for this principal in seconds.
+  (SR)	EXPIRATION	<general-time>	When the new principal expires.
+  (SR)	PWEXPIRATION	<general-time>	When the password expires for this
+					principal.
+  (SR)	RANDOMKEY	<integer>	Specifies that this is to have a
+					random key generated for it.
+  (SR)	FLAGS		<integer>	Specifies flag value for this
+					principal's attributes field in the
+					database.
+  (R)	LASTSUCCESS	<general-time>	Last successful password entry.
+  (R)	LASTFAILED	<general-time>	Last failed password attempt.
+  (R)	FAILCOUNT	<integer>	Number of failed password attempts.
+  (SR)	AUXDATA		<tagged-value>	Tagged auxiliary value (see below)
+  (R)	KEYDATA		<key-value>	Key value (see below)
+  (SR)	EXTRADATA	<unspecified>	Extra data (see below)
+
+The valid field indicates whether an attribute is Settable (e.g. appropriate
+for use with ADD-PRINCIPAL, et. al.; Returnable (e.g. returned by
+INQUIRE-PRINCIPAL); or both Settable and Returnable.
+
+o <tagged-value>
+The <tagged-value> type denotes data which is stored in the database as a
+tagged value.  The protocol representation consists of a 4-byte network order
+integer to denote the tag with the remaining data providing the value.  If
+encoded data is to be encapsulated, it must be in network order.  In summary:
+	AUXDATA=<tag><value>
+For example, to encode the value for tag 1 with a 4-byte value of 32 71 1e 30
+in network order, the encoding would be:
+	AUXDATA=00 00 00 01 32 71 1e 30
+
+o <key-value>
+The <key-value> type denotes data which is stored in the database on a per-key
+basis.  The protocol representation is consists of a 4-byte network order
+integer to denote a particular key.  This integer is implementation dependent
+and is only used to correlate different <key-value> entries.  This integer
+is followed by a 4-byte network order integer which denotes the attribute type.
+Currently, only three are supported: -1 denotes the key version; 1 denotes the
+key type and 2 denotes the salt type.  This attribute type integer is followed
+by the attribute value and an optional per-attribute value.  In summary:
+	KEYDATA=<key-tag><attribute><attribute-value>[<per-attribute-value>]
+For example, to encode the value of a key with keytype 3, salttype 5, with key
+version number 32, key data of 12 34 56 78 90 ab cd ef and salt data of f0 e1
+d2 c3 b4 a5 96 87, the encoding would be (using key-tag de ad be ef):
+	(key version number 32)
+	KEYDATA=de ad be ef ff ff ff ff 00 00 00 20
+	(key keytype 3, value 1234567890abcdef)
+	KEYDATA=de ad be ef 00 00 00 01 00 00 00 03 12 34 56 78 90 ab cd ef
+	(key salttype 5, value f0e1d2c3b4a59687)
+	KEYDATA=de ad be ef 00 00 00 02 00 00 00 05 f0 e1 d2 c3 b4 a5 96 87
+
+o <unspecified>
+The <unspecified> type is exactly that.  Unspecified.  Any data may be encoded
+here without restriction.
+
+Keytab Entry
+------------
+If the EXTRACT SERVICE KEY function is supported, then the successful
+response to this command is the key entry.  This is a series of 6
+reply components as follows:
+
+component	type		value
+---------	---------------	-----------------------------------------
+	1	<string>	Principal name
+	2	<integer>	Key entry timestamp
+	3	<integer>	Key's version number.
+	4	<integer>	Key's keytype.
+	5	<integer>	Key's encryption type.
+	6	<octet-string>	Key's key value.
+
+All of these components are mandatory.
+

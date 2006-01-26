@@ -1,0 +1,105 @@
+---rfc1510.eratta---as of Auguest 10, 1994---
+
+1. [19940312] The following lines describes corrections to pseudocode
+   in rfc1510 as of March 12, 1994.
+
+  A: Throughout the pseudocode (section A), flags.ALLOW-POSTDATE should be
+     replaced by flags.MAY-POSTDATE.  kdc-options.ALLOW-POSTDATE is
+     correct, however.
+
+A.2: In the processing for the kdc-options.POSTDATE (imperitive), both
+     the POSTDATED and the INVALID flag should be set. The setting of the
+     POSTDATE flag was inadvertantly omitted.
+
+     You should change:
+
+        if (req.kdc-options.POSTDATED is set) then
+           if (against_postdate_policy(req.from)) then
+                error_out(KDC_ERR_POLICY);
+           endif
+           set new_tkt.flags.INVALID;
+           new_tkt.starttime := req.from;
+        else
+           omit new_tkt.starttime; /* treated as authtime when
+
+     To:
+        if (req.kdc-options.POSTDATED is set) then
+           if (against_postdate_policy(req.from)) then
+                error_out(KDC_ERR_POLICY);
+           endif
+           set new_tkt.flags.POSTDATED;                         <****
+           set new_tkt.flags.INVALID;
+           new_tkt.starttime := req.from;
+        else
+           omit new_tkt.starttime; /* treated as authtime when
+
+A.6: In section A.6, all occursences of kdc-options.POSTDATE (imperitive)
+     should be replaced by kdc-options.ALLOW-POSTDATE and tgt.flags.POSTDATE
+     should be replaced by tgt.flags.MAY-POSTDATE.
+
+     Note that instances of POSTDATED (adjective) are correct.
+
+
+---
+2. [19940614] Processing of the etype filed, described in 3.1.3, and 5.4.1.
+
+If a there are multiple encryption keys registered for a client in the
+Kerberos database (or if the key registered supports multiple
+encryption types; e.g. DES-CBC-CRC and DES-CBC-MD5), then the etype
+field from the AS request is used by the KDC to select the encryption
+method to be used for encrypting the response to the client.  If there
+is more than one supported, strong encryption type in the etype list,
+the first valid etype for which an encryption key is available is
+used.  The encryption method used to respond to a TGS request is taken
+from the keytype of the session key found in the ticket granting
+ticket.
+
+When the etype field is present in a KDC request, whether an AS or TGS
+request, the KDC will attempt to assign the type of the random session
+key from the list of methods in the etype field.  The KDC will select
+the appropriate type using the list of methods provided together with
+information from the Kerberos database indicating acceptable
+encryption methods for the application server.  The KDC will not issue
+tickets with a weak session key encryption type.
+
+---
+3. [19940707] Case of realm names for DNS based realm names, 
+
+   The following should appear in section 7.1 before the description
+   of the four classed of realm names (before "There are presently...")
+
+     Kerberos realm names are case sensitive.  Realm names that differ
+     only in the case of the characters are not equivalent.
+
+   The domain example should be changes from:
+        domain:   host.subdomain.domain (example)
+
+   To:
+
+        domain:   ATHENA.MIT.EDU (example)
+
+   The following should be append to the domain name paragraph of
+   section 7.1 (following "nor slashes (/).")
+
+     Domain names must be converted to upper case when used as realm names.
+
+---
+4. [19940707] Official name of host is instance for NT-SRV-HST
+
+   Append to paragraph 7.2.1:
+
+   When a host has an official name and one or more aliases, the
+   official name of the host must be used when constructing the name
+   of the server principal.
+
+---
+
+5. [19940722] The protocol is standards track
+
+   In the 3rd paragraph of the overview delete:
+
+     ", and are not being submitted for consideration as
+     an Internet standard at this time"
+
+   as it contradicts the first sentence of the RFC. 
+

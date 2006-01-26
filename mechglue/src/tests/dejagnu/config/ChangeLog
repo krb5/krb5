@@ -1,0 +1,666 @@
+2005-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_krb5_conf): Don't include a non-listening KDC
+	port in the client's config file.
+
+2005-09-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Initialize can_get_root to yes.
+	(setup_root_shell): If can_get_root is "no", log a message and
+	return, without making another attempt.  On failing attempts, set
+	can_get_root to "no".
+
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Don't write database_name
+	entry into KDC config file.
+	(setup_krb5_conf): Write new config lines for the realm into the
+	krb5.conf files.
+
+2005-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_tail): Make 'standalone' an additional
+	argument.
+	(start_kerberos_daemons): Pass it.
+
+2005-01-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_tail): New proc.  Handles GNU tail race
+	condition with less delay than the old code that was in
+	start_kerberos_daemons.
+	(start_kerberos_daemons): Call start_tail for both log files.
+
+2005-01-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Format date internally
+	rather than running "date".
+
+2004-06-17  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (setup_krb5_conf): Default to not using SRV records
+	to look up KDCs, to avoid timeouts on KRBTEST.COM's DNS servers.
+
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Set new variable portbase from $PORTBASE or
+	default.
+	(setup_kerberos_files, setup_krb5_conf, setup_kerberos_env): Use
+	portbase to select all port numbers.
+
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (passes): Add "mode=udp" to existing pass
+	specifications.  Add a new pass which does AES and "mode=tcp".
+	(setup_kerberos_files, setup_krb5_conf): Check global var "mode"
+	and use it to force UDP or TCP communication between client and
+	KDC.  Also, have clients try another random port where we don't
+	expect anything to be listening.
+
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which is
+	not present in tcl-8.3.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl things
+	to work around Solaris 9 pty-close bug.
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (passes): Add an AES-only pass.
+	(start_kerberos_daemons): Check for error "No principal in keytab
+	matches desired name".
+	(dump_db): New proc, for debugging.
+	(spawn_xterm): Add GSSCLIENT to list of exported variables.
+
+2003-06-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): Check for "not authorized".  Map
+	eof to unsupported.
+
+2003-06-04  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (setup_root_shell): Don't try to use the procedure
+	"-" when handling error messages from rlogin.
+
+2003-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): Handle error messages indicating
+	"-x" isn't supported.
+	(start_kerberos_daemons): "cannont" => "cannot".
+
+2003-06-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Default RLOGIN_FLAGS to "-x".
+	(start_kerberos_daemons): Watch for "Cannot bind server socket"
+	and log it.  Watch for "no sockets set up" and report an error.
+	(setup_root_shell): Watch for "Cannot assign requested address",
+	log it and give up.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Be slightly more lenient about matching password
+	prompts.
+
+2003-05-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (spawn_xterm): Add KPASSWD and REALMNAME to the list
+	of exported variables.
+
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp: Add passes for testing AES.
+	(start_kerberos_daemons): Add a small delay between starting the
+	"tail -f" processes and appending the markers to their files.
+	(spawn_xterm): Add RLOGIN, RLOGIND, FTP, and FTPD to the list of
+	variables to export to the environment.  Check that variables are
+	defined before exporting them.
+
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): If we get a timeout
+	looking for the mark, log out the last 10 lines of the kdc
+	logfile.
+
+2003-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (v4kinit): Expect failure when kiniting to a des3
+	TGT, due to fix for MITKRB5-SA-2003-004.
+	(setup_kadmind_srvtab): Remove.  It's not needed anymore.
+
+2003-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_root_shell): If we get connection refused
+	messages, followed by no unrecognized errors and then eof, report
+	it as an unsupported test.
+
+2003-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Use correct argument to
+	"-4" flag.
+
+2003-02-04  Sam Hartman  <hartmans@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Enable  krb4 
+
+2003-01-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Record more information
+	when "tail -f" doesn't show the mark written to the log file.
+	Look for and discard non-matching lines.
+	(setup_root_shell): Ignore the message displayed by rlogin when
+	a connection is refused to one address but other addresses are
+	available.
+
+2002-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add (disabled) debugging code for catching leaking
+	ptys.  expect eof from the correct spawn_ids when killing kdc and
+	kadmind to avoid leaking ptys.
+	(do_klist, v4klist, v4klist_none): Check for eof to avoid leaking
+	ptys.
+
+2002-10-07  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (stop_kerberos_daemons): Kill, expect eof, wait, in
+	that order.  Avoids delivery of multiple signals (HUP+TERM) to KDC
+	daemons when shutting down.
+
+2002-09-29  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (start_kerberos_daemons): Fix to use "tail -f" to
+	check for setup messages from daemons; this avoids a few race
+	conditions.
+
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (modify_principal, kinit_kt, v4kinit_kt, do_klist,
+	do_klist_kt, do_klist_err, do_kdestroy, xst, v4klist, v4kdestroy,
+	v4klist_none): New procs.
+	(add_random_key): No need to call expect_after in 'body' since
+	both branches at invocation site will do it.
+	(setup_root_shell, setup_root_shell_remote): Set correct value for
+	KRB5_CONFIG.
+	(passes): Add des-crc and des-md5 krb4 passes.
+	(top level): Set KLIST and KDESTROY.
+	(spawn_xterm): New proc useful for debugging only.
+	(start_kerberos_daemons): Wait longer for "starting"
+	line in log file.
+
+2002-02-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp (start_kerberos_daemons): In starting the kadmin
+	daemon, the last line in the log file might read "Seeding random
+	number" for a second. If that is the case, wait three seconds and
+	refetch the last line of the log file to look for the "starting
+	kadmind message"
+
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (start_kerberos_daemons): When standalone, delete
+	KDC replay cache before starting it up.
+
+2001-10-31  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (check_k5login, check_klogin): Error out if there is
+	a nonexistent .k5login or .klogin for root.
+	(setup_{kadmind_,}srvtab, add_{random,kerberos}_key): Notice
+	unmatched output to avoid timing out on certain errors.  Look for
+	command echoes.  Clear the expect_after list in places to avoid
+	problems with lingering expect_after clauses against invalid
+	spawn_ids.  expect eof in places to avoid pty deadlock.
+
+2001-10-27  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Mark as unused the test passes that won't
+	accomplish anything due to disabling of SUPPORT_DESMD5 in the
+	code.
+
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add support for setting SUPPORT_DESMD5 flag on the
+	TGT principal.  Add test pass des.md5-tgt for exercising enctype
+	similarity inconsistency.  Add test pass des.no-kdc-md5 for
+	exercising failure to constrain session key issuance to
+	permitted_enctypes.  Pepper the code with null calls to
+	expect_after to prevent misfiring of expect_after clauses.
+	(setup_srvtab): Look for some possible error cases to avoid timing
+	out.
+	(setup_root_shell): Restore timeout so we don't wait 5 minutes in
+	other places.
+
+2001-08-06    <epeisach@mit.edu>
+
+	* default.exp (setup_root_shell): Also recognize "nection reset by
+	peer" as a failure to get a root shell. This happens if
+	tcp_wrappers are in use in inetd.conf, but rlogind is not prsent
+	on the machine.
+
+2001-06-22  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Use the interface variable $TMPDIR to allow the
+	specification of an alternative temporary directory.  Wrap a loop
+	around various testings and settings of interface variables that
+	specify the locations of programs to be tested, e.g. $KADMIND.
+	Add some support for having different sets of enctypes on client,
+	server, and kdc.  The envstack changes and multiple config file
+	support should get cleaned up somewhat later to possibly allow for
+	programs to execute on different hosts.
+	(check_k5login): Fix up to reflect actual (perhaps bogus) behavior
+	of krb5_kuserok(), which doesn't do quite what we expect, so there
+	really does need to be something like "luser@KRBTEST.COM" in the
+	.k5login file.
+	(check_klogin): New procedure; .klogin also needs to be checked
+	for the v4gssftp test.
+	(envstack_push, envstack_pop): New procedure; keep a stack of
+	environment variable state, which is useful for running different
+	programs with different config files.
+	(setup_runtime_flags, setup_kerberos_env): Rewrite somewhat so
+	they play nice with the envstack.
+	(setup_krb5_conf): New procedure; write a config file with the
+	contents parameterized based on the type of program that will use
+	it.
+	(setup_kerberos_files): Create different krb5.conf files for
+	client, server, and kdc.
+	(setup_kadmind_srvtab, setup_kerberos_db, start_kerberos_daemons):
+	Rewrite to play nice with envstack.
+	(setup_root_shell_noremote): New procedure from raeburn; handle
+	the case where we're already running as root.
+	(setup_root_shell): Call setup_root_shell_noremote as appropriate.
+	
+2001-06-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Add an entry for krb524_server for the localhost
+	with a non-standard port number.
+
+2001-04-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: For Kerberos 4 tests, use a different ticket file
+	name from the V5 tests.
+
+2000-11-08  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Use $KRBIV rather than $KRB4 since dejagnu-1.3
+	doesn't deal with digits in passed-in variables.
+
+Thu Oct 12 12:06:03 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Add dict_file entry (and create one) for kdc.conf
+
+Tue Aug 22 09:47:50 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Create a properly formatted krb.conf file.  Also
+ 	provide a krb4_srvtab stanza (even though we are falling back on
+ 	the keytab file) so the tests do not try to access an installed
+ 	systems /etc/srvtab file.
+
+2000-08-09  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add an eof clause to avoid breakage if rlogin exits
+	too quickly.
+
+2000-08-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Create krb.conf and krb.realms files for v4
+	compatibility. Set KRBTKFILE environment variable. Add
+	v4_compatible_enctype() proc to test if krb4 tests are being run
+	and if the current encryption type being tested is compatible with
+	V4.  Added v4kinit() proc. Quoting of lists in mutipass variable
+	assignments is unnecessary.
+
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp: Protect Quote quotation marks in multipass variable
+	assignments. Dejagnu (June 1999 release) fails overwise. 
+
+2000-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add code to handle setting of PASS to constrain
+	multipass testing to particular passes.  dejagnu-1.3 doesn't have
+	support for PASS, so we kludge it here, though some later versions
+	handle it by themselves.
+	(krb_exit): Add new proc to clean up on exit.
+	(kinit): Remove "expect \r" since "expect eof" will drain the pty
+	buffer properly anyway.
+
+2000-07-02  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add rudimentary support for multiple passes.  For
+	now, iterate over a few combinations of des_krbtgt and assorted
+	enctype lists.  Will eventually allow for separate krb5.conf files
+	for clients and servers.  Add varibles RLOGIN and RLOGIN_FLAGS to
+	permit run-time configuration of rlogin program if necessary.  Set
+	up an onexit handler that calls stop_kerberos_daemons.  Replace
+	many uses of doubled-up send_log and verbose with single calls to
+	verbose -log.  Replace instances of send_error with perror where
+	appropriate, since this will cause successor test to fail, which
+	is usually what we want.
+	(setup_root_shell): Replace calls to untested with calls to
+	unsupported; also use note for explanatory text previously printed
+	using untested.  Add match string for "connection refused" and
+	collapse common code into a single expect clause by using the -re
+	flag.
+	(start_kerberos_daemons): Conditionalize calls to fail based on
+	$standalone; in the !$standalone case, call perror instead.  Calls
+	to fail and pass for a given test should have consistent strings,
+	and extraneous calls to fail should not be made in order to keep
+	the total number of passed and failed tests constant regardless of
+	success of setup steps.  Much remains to be done in this area
+	though.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Include des3 in supported
+	enctypes.
+
+2000-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Remove default_tgs_enctypes for now as it was
+	causing tests to fail when the tgt is DES3.  Need to investigate
+	further.
+
+2000-02-06  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Use $KINIT -5 to deal with modified kinit
+	behavior.
+
+1999-08-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* default.exp (setup_kerberos_files): Set kdc_supported_enctypes
+	in kdc.conf, and include des3-cbc-sha1:normal.
+	(setup_kerberos_db): If setting up krbtgt to use des3, now use
+	only des3, not des3 and des-crc both.
+
+1999-08-30  Ken Raeburn  <raeburn@raeburn.org>
+
+	* default.exp (des3_krbtgt): New variable.
+	(setup_kerberos_files): Remove des3 from supported_enctypes in
+	kdc.conf.
+	(setup_kerberos_db): If des3_krbtgt is set, change krbtgt key, and
+	get a des3 key in addition to des.
+
+1999-08-27  Ken Raeburn  <raeburn@raeburn.org>
+
+	* default.exp: Set default principal expiration a bit further into
+	the future.
+
+1999-08-26  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (setup_kerberos_files): Tweak enctypes entered into
+	config files to exercise 3DES a little.
+
+Fri Jan 30 23:48:57 1998  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp: Add kpasswd_server to krb5.conf.
+
+Wed Jan 21 11:39:11 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Added kpasswd_port variable to kdc.conf creation.
+	(proven@cygnus.com)
+
+Mon Nov 25 14:23:06 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* defualt.exp: Ezra's fix so that the dejagnu tests don't bomb out
+ 		if KRB5_KTNAME is set for some reason.
+
+Tue Nov 19 15:13:30 1996  Tom Yu  <tlyu@mit.edu>
+
+	* default.exp (check_k5login): Check for principal
+ 	$env(USER)@$REALMNAME rather than simply $env(USER), so that
+ 	kuser_ok dtrt, hopefully.
+
+Mon Nov 11 20:52:27 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* dejagnu: set env(TERM) dumb, find ktutil
+
+	Tue Sep 17 20:58:43 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp: Set terminal type to "dumb" to avoid interference
+	from "resize".
+
+	Tue Sep  3 02:27:40 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* default.exp: find a path to ktutil, for the v4 tests.
+
+	Wed Jun 12 12:56:10 1996  Mark W. Eichin  <eichin@kitten.gen.ma.us>
+
+	* default.exp (setup_kerberos_files): set default_domain, so v4
+	tests work.
+
+Sun Nov 10 09:48:58 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* default.exp (setup_wrapper): Set KRB5_CONFIG in script.
+
+Mon Aug 12 22:58:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Rewrite to use kadmin.local instead of kdb5_edit.
+
+Thu Aug  8 23:08:13 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* default.exp: In add_kerberos_key and add_random_key only execute
+ 	the final expect_after if the spawn ID is still open; also soak up
+ 	all the kadmin responses.
+
+Thu Aug  8 22:13:27 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* default.exp: Sleep for two seconds while waiting for KDC to
+        start; sleep(1) doesn't always take up any time.
+
+Mon Aug  5 21:16:48 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Update to new kdb5_util convention.
+
+Mon Jul 29 11:19:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: (kinit): Wait for eof from kinit before waiting for
+		exit. 
+
+Sat Jul 27 02:20:54 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Rewrite to use kdb5_util instead of kdb5_create and
+		kdb5_stash. No longer add the kadmin/admin and changepw
+		keys to the database as this is handled automatically.
+
+Fri Jul 19 19:50:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* default.exp: changes to work with the new admin system.  This is
+ 	primarily creating the correct keytab for the new admin server,
+ 	and using the new admin client for principal creation.
+
+Mon May  6 11:54:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Add procedure setup_wrapper to first setup shared
+		library environment variables and the exec program
+
+Sat May  4 11:56:17 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* default.exp: For stty_init set to \^h as on some /bin/sh, ^ is
+		treated as a pipe.
+
+Fri May  3 20:48:16 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Tue Apr  2 22:22:47 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* default.exp : Do an stty to set kill and erase correctly. 
+		Things don't work if kill is set to '@'.
+
+	Fri Mar 29 15:02:32 1996  Chris Provenzano  <proven@cygnus.com>
+
+	* default.exp : Always use variable BINSH instead of sh.
+		Use -f flag with kinit to get forwardable tickets.
+		Setup kdc.conf to allow forwardable tickets.
+
+	Thu Mar 28 17:30:55 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp (touch, tail1): New proc.
+	(start_kerberos_daemons, stop_root_shell): Use them, and sleep
+	built-in command.
+
+	Wed Mar 27 22:43:08 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* default.exp (start_kerberos_daemons): Use ">>" to avoid updating
+	mod time on kadmind log file.
+
+	Wed Mar 27 21:35:57 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp: (start_kerberos_daemons): exec the kadmind
+		inside an sh to redirect stderr (this is a pending
+		bug), and keep the same pid, so that
+		stop_kerberos_daemons doesn't leave a kadmind running.
+
+	Wed Mar 27 21:24:35 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp: (start_kerberos_daemons): add a check for
+		"cannot initialize network" as a failure message to
+		the kadmind5 startup expect checks
+
+	Wed Mar 27 21:10:47 1996  Marc Horowitz <marc@mit.edu>
+
+	* default.exp (start_kerberos_daemons): use ezra's KDC tail
+		changes for kadmind5, too.
+	* rlogin.exp (start_rlogin_daemon): start klogind with sh -c
+		so that setsid() won't fail due to the process already
+		being the leader of a process group
+	
+Sun Apr  7 23:06:13 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Major changes to use run time environment variables as
+		passed in by configure. 
+
+Tue Mar 26 00:38:14 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp (start_kerberos_daemons): New methodology for
+		starting KDC so that the KDC will not hang on a full
+		output buffer which is being ignored.
+		(setup_kerberos_files): Enable des3 encryption types.
+
+Thu Mar 14 15:20:33 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* default.exp (add_kerberos_key): clarify "lost KDC" text.
+
+Mon Mar  4 20:45:30 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Log krb5kdc to stderr so that test can detect
+		properly when server has started. Change
+		start_kerberos_daemons to take advantage of this.
+
+Sat Oct  7 08:03:43 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Change kdc.conf ports definitions to current
+		methodology. 
+
+Thu Sep 28 18:54:43 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* default.exp: set timeout to 100 since the default of 10 is
+	ludicrous with NFS.
+
+Wed Sep 13 14:02:03 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* default.exp: Save the key used to generate the database files.
+		Also generate a set of environment setup scripts.
+		These are the convenience of someone who wishes to run some
+		of the tests by hand, when tests are bombing.
+
+Sun Sep 10 10:09:41 1995  Ezra Peisach  (epeisach@dcl)
+
+	* default.exp: Add des-cbc-crc to supported_enctypes as krb5_edit
+		requires it for random keys.
+
+Sat Sep  9 16:28:48 1995  Ezra Peisach  (epeisach@dcl)
+
+	* default.exp: supported_keytypes -> supported_enctypes
+
+Sat Aug 26 17:57:47 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* default.exp - Determine location of t_inetd.
+
+
+Thu Aug 3 11:56:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Generate kdc.conf with new symbolic values.
+
+
+Mon Jul 17 15:25:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Add handling of kdc.conf which has the KDC profile.
+		Remove parameters from command lines of admin utilities because
+		they're not needed anymore since we have the KDC profile.  Also
+		remove prompting for the master key since we have usage of the
+		stash file.
+
+
+Wed Jul 12 14:10:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Correctly set LD_LIBRARY_PATH.  Also set it before
+		using RESOLVE.
+
+Thu Jun 22 12:02:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Change argument ordering for KDC.  Realm must come last.
+
+
+Mon Jun 19 13:38:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Fix setup_root_shell() with LD_LIBRARY_PATH.
+
+Thu Jun 15 18:13:55 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Setup and use LD_LIBRARY_PATH, in case we were built
+		with shared libraries.
+
+Fri Jun  9 23:45:08 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* default.exp: Use the principal "krbtest/admin@KRBTEST.COM" for
+		kadmin 
+
+Thu Jun 8 14:58:15 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Add logging section to the profile.  Also, export
+		profile location to root shell.
+
+
+Mon Jun 5 16:09:25 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Reverse prompting order for kadmin5.
+
+
+Thu Jun 1 14:48:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - Change admin instance name to kadmin.
+
+
+Fri May 26 17:55:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp - fix typo for restoring setting of KRB5_CONFIG on exit.
+
+
+Fri May 12 16:15:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* default.exp: Change to use new kadmin/kadmind.  Add entries for
+		krbtest/kadmin5, changepw and extraction for changepw service
+		entry.
+
+Wed May 10 16:53:28 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: Added domain_realm stanza to krb5.conf.
+	               setup_srvtab: Takes optional service name to
+		       		       extract. 
+
+
+Fri May 05 09:21:21 1995  Chris Provenzano (proven@mit.edu)
+
+	* default.exp : Removed FILE: part of env(KRB5CCNAME).
+
+Wed May  3 22:00:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: (get_hostname): The FQDN returned by resolve needs
+		to be made lower case as the host name is entered directly
+		into the database.
+
+Mon May  1 21:32:57 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* default.exp: (get_hostname): Use tests/resolve/resolve to get
+		the fully qualified domain name of the local host.
+		Needed for systems where gethostname() doesn't return the
+		FQDN. 
+
+Thu Apr 27 00:22:30 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* default.exp: KRB5KDC: add -n to don't fork. Set up krb5.conf 
+		and set KRB5_CONFIG to point to it.
+
+Wed Apr 26 17:46:57 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* default.exp (KADMIND, KADMIN): use kadmind.old, since these test
+	the old server not the new (unfinished) one.
+

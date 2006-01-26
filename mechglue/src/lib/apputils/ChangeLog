@@ -1,0 +1,14 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
+2004-02-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* New directory.
+	* Makefile.in, configure.in, dummy.c, daemon.c: Moved here from
+	util/apputils.
+

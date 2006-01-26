@@ -1,0 +1,71 @@
+# Sanitize.in for Kerberos V5
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+.cvsignore
+.rconf
+ChangeLog
+FUNCTIONS
+Makefile.in
+afsstring2key.c
+cbc_cksum.c
+configure
+configure.in
+d3_cbc.c
+d3_ecb.c
+d3_kysched.c
+d3_procky.c
+d3_str2ky.c
+des.h
+des_int.h
+destest.c
+doc
+f_README
+f_cbc.c
+f_cksum.c
+f_ecb.c
+f_parity.c
+f_pcbc.c
+f_sched.c
+f_tables.c
+f_tables.h
+fin_rndkey.c
+finish_key.c
+init_rkey.c
+key_sched.c
+keytest.data
+process_ky.c
+random_key.c
+string2key.c
+t_random.c
+t_verify.c
+u_nfold.c
+u_rn_key.c
+weak_key.c
+
+Things-to-lose:
+
+Do-last:
+
+# End of file.

@@ -1,0 +1,94 @@
+Yarrow - Secure Pseudo-Random Number Generator
+==============================================
+
+This is an implementation of the cryptographic pseudo-random number
+generator Yarrow.  You are encouraged to use, modify, and incorporate
+this code.  Please see the accompanying LICENSE file for more details.
+
+
+Yarrow can be used with OpenSSL 0.9.5a (http://www.openssl.org) and
+other cryptographic libraries.
+
+The Yarrow design is described in "Yarrow-160: Notes on the Design and
+Analysis of the Yarrow Cryptographic Pseudorandom Number Generator" by
+John Kelsey, Bruce Schneier and Niels Ferguson of Counterpane Systems,
+available from http://www.counterpane.com/yarrow.html
+
+The Yarrow function calls are described in the yarrow(3) manpage.
+
+Installation
+============
+
+By default, Yarrow is built with OpenSSL. If the OpenSSL headers are
+not installed in the standard directory /usr/local/ssl/include,
+set the path in the Makefile.
+
+If it is possible that an application using Yarrow will fork(), Yarrow
+must be compiled with -DYARROW_DETECT_FORK (then the child process
+will have to seed Yarrow again), or the Yarrow_CTX must be allocated
+in shared memory.
+
+If compiled with -DYARROW_SAVE_STATE, Yarrow will use a seed file
+specified in the Yarrow_Init call.
+
+When the settings in the Makefile are correct, run "make".
+
+
+Yarrow with OpenSSL:
+-------------------
+
+The macros YARROW_CIPHER_3DES (default), YARROW_CIPHER_BLOWFISH and
+YARROW_CIPHER_IDEA for ciphers and YARROW_HASH_SHA1 (default) and
+YARROW_HASH_MD5 for hash functions are available to select algorithms
+from OpenSSL.
+
+CRYPTO_set_locking_callback() is required in multithreaded applications.
+
+
+Yarrow with other cryptographic libraries:
+-----------------------------------------
+
+The Yarrow implementation uses a symmetric cipher, a cryptographic
+hash function and a mutex. By default, Yarrow calls OpenSSL. For use
+with other cryptographic libraries, the following types and macros
+should be defined:
+
+Symmetric cipher - ycipher.h:
+
+  typedef struct { ... } CIPHER_CTX;
+
+  #define CIPHER_BLOCK_SIZE ...
+  #define CIPHER_KEY_SIZE ...
+
+  void CIPHER_Init(CIPHER_CTX *ctx, void *key);
+  void CIPHER_Encrypt_Block(CIPHER_CTX *ctx, void *in, void *out);
+
+Hash function - yhash.h:
+
+  typedef struct { ... } HASH_CTX;
+
+  #define HASH_DIGEST_SIZE ...
+  #define HASH_STATE_SIZE ...
+
+  void HASH_Init(HASH_CTX *ctx);
+  void HASH_Update(HASH_CTX *ctx, const void *data, unsigned long size);
+  void HASH_Final(HASH_CTX *ctx, unsigned char *md);
+
+Mutex - ylock.h:
+
+  int LOCK(void);
+  int UNLOCK(void);
+
+Learn More:
+----------
+
+It is Zero-Knowledge's hope that third party developers of yarrow will
+collaborate to derive test vectors for yarrow.  In an effort to further
+this discussion, we have created a mailing list for developers and
+interested parties.  To subscribe, send an email to
+"yarrow-request@zeroknowledge.com" with "subscribe" in the body of the
+message.
+
+For more information, or if you have questions or comments regarding open
+source at Zero-Knowledge Systems, please visit
+http://opensource.zeroknowledge.com

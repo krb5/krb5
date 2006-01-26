@@ -1,0 +1,70 @@
+# Sanitize.in for Kerberos V5
+
+# Each directory to survive it's way into a release will need a file
+# like this one called "./.Sanitize".  All keyword lines must exist,
+# and must exist in the order specified by this file.  Each directory
+# in the tree will be processed, top down, in the following order.
+
+# Hash started lines like this one are comments and will be deleted
+# before anything else is done.  Blank lines will also be squashed
+# out.
+
+# The lines between the "Do-first:" line and the "Things-to-keep:"
+# line are executed as a /bin/sh shell script before anything else is
+# done in this 
+
+Do-first:
+
+# All files listed between the "Things-to-keep:" line and the
+# "Files-to-sed:" line will be kept.  All other files will be removed.
+# Directories listed in this section will have their own Sanitize
+# called.  Directories not listed will be removed in their entirety
+# with rm -rf.
+
+Things-to-keep:
+
+.cvsignore
+ChangeLog
+Makefile.4.4
+Makefile.generic
+Makefile.in
+Makefile.orig
+auth-proto.h
+auth.c
+auth.h
+configure
+configure.in
+enc-proto.h
+enc_des.c
+encrypt.c
+encrypt.h
+forward.c
+genget.c
+getent.c
+getopt.c
+gettytab.c
+gettytab.h
+herror.c
+kerberos.c
+kerberos5.c
+key-proto.h
+mem.c
+misc-proto.h
+misc.c
+misc.h
+parsetos.c
+setenv.c
+setsid.c
+spx.c
+strcasecmp.c
+strchr.c
+strdup.c
+strerror.c
+strftime.c
+strrchr.c
+
+Things-to-lose:
+
+Do-last:
+
+# End of file.

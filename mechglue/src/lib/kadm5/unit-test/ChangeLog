@@ -1,0 +1,442 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* setkey-test.c: Include k5-int.h instead of krb5.h.
+
+2005-10-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* lock-test.c (main): Don't call error table initialization
+	routines; kadm5_init* routines will do that.
+
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.1/lock.exp: Temporarily disabled tests.  See RT ticket
+	3201.
+
+	* api.2/init-v2.exp: Temporarily disabled test103.  See RT ticket
+	3202.
+
+2005-07-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.1/lock.exp (lock_test_continue): After exiting the loop,
+	send the process a signal before waiting for it to die.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
+	Novell merge.
+	* Makefile.in (randkey-test, server-handle-test, lock-test,
+	server-iter-test, server-setkey-test): Link in pthread and dl
+	libraries.
+	* destroy-test.c (main): Pass NULL db_args argument to
+	ovsec_kadm_init.
+	* handle-test.c (main): Likewise.
+	* init-test.c (main): Likewise.
+	* iter-test.c (main): Likewise.
+	* randkey-test.c (main): Likewise.
+	* setkey-test.c (main): Likewise.
+	* lock-test.c: Include krb5/kdb.h, not kadm5/adb.h.
+	(main): Don't call initialize_adb_error_table.  Call krb5_db_open,
+	not osa_adb_open_policy, krb5_db_ lock functions instead of
+	osa_adb_ ones, etc.
+
+2005-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* api.2/init-v2.exp: Handle improved error codes from
+	client_init.c.
+	(test152): Expect KRB5_FCC_NOFILE.
+	(test153): Expect KRB5_CC_NOTFOUND.
+
+2004-08-20  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (init-test): Don't use local copy of client_init.o
+
+	* init-test.c (main): Use kadm5_init() instead of
+	ovsec_kadm_init().  Make error messages a little more
+	informative.  Use KADM5_CONFIG_NO_AUTH to test no-auth condition,
+	as the previous method was really gross.
+
+2004-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp (PRIOCNTL_HACK): Use "==" instead of "eq", which
+	is not present in tcl-8.3.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* config/unix.exp (PRIOCNTL_HACK): Wrap "spawn" to do priocntl
+	things to work around Solaris 9 pty-close bug.
+
+	* Makefile.in (unit-test-client-body, unit-test-server-body): Add
+	PRIOCNTL_HACK.
+
+2003-10-16  Tom Yu  <tlyu@mit.edu>
+
+	* api.1/lock.exp: Work around a race condition in the Solaris 9
+	pty implementation: output sent to a pty slave immediately before
+	last close/exit can get lost on the way to the master.  This is
+	Sun bug #4927647.  The workaround consists of changing the tests
+	to always make lock-test wait to read a character prior to
+	exiting, so any output prior to the "wait" directive will not get
+	lost.
+
+2003-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test117): Update lifetime expected for new
+	defaults.
+
+2003-05-21  Tom Yu  <tlyu@mit.edu>
+
+	* api.0/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
+	* api.2/init.exp (test6, test7): Be slightly more lenient about
+	matching password prompt.
+
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test150, test151, test153): Don't try to set
+	KRB5CCNAME; only the fact that it wasn't being done correctly
+	prevented it from causing test failures.
+
+	* lib/lib.t (kinit): If kinit reports a problem initializing the
+	credentials cache, raise an error.
+
+2002-10-18  Tom Yu  <tlyu@mit.edu>
+
+	* api.2/init-v2.exp (test106): Make regexp more forgiving of
+	variant password prompts.
+
+	* api.0/init.exp (test7, test22, test225): Make regexp more
+	forgiving of variant password prompts.
+
+2002-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* api.0/chpass-principal.exp:
+	* api.0/crte-policy.exp:
+	* api.0/crte-principal.exp:
+	* api.0/destroy.exp:
+	* api.0/dlte-policy.exp:
+	* api.0/dlte-principal.exp:
+	* api.0/get-policy.exp:
+	* api.0/get-principal.exp:
+	* api.0/init.exp:
+	* api.0/mod-policy.exp:
+	* api.0/mod-principal.exp:
+	* api.0/randkey-principal.exp:
+	* api.0/rename-principal.exp:
+	* api.1/lock.exp:
+	* api.2/chpass-principal-v2.exp:
+	* api.2/chpass-principal.exp:
+	* api.2/crte-policy.exp:
+	* api.2/crte-principal.exp:
+	* api.2/destroy.exp:
+	* api.2/dlte-policy.exp:
+	* api.2/dlte-principal.exp:
+	* api.2/get-policy.exp:
+	* api.2/get-principal-v2.exp:
+	* api.2/get-principal.exp:
+	* api.2/init-v2.exp:
+	* api.2/init.exp:
+	* api.2/mod-policy.exp:
+	* api.2/mod-principal-v2.exp:
+	* api.2/mod-principal.exp:
+	* api.2/randkey-principal-v2.exp:
+	* api.2/randkey-principal.exp:
+	* lib/lib.t: s/error/perror.
+
+	* config/unix.exp: Work around tcl 8.4's (incorrect?) output EOL
+	translation.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test100): Expect MISSING_KRB5_CONF_PARAMS
+	error now.
+
+2001-11-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* api.2/init-v2.exp: For test 101 failure, change port number 1 -
+	which is used by tcpmux under Irix, to 4 - which is unassigned by
+	IANA.
+
+2001-06-20  Mitchell Berger  <mitchb@mit.edu>
+
+	* api.0/init.exp: Silly typo fixed.
+
+	* api.2/init.exp: Same silly typo fixed.
+
+2000-10-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* lock-test.c (main): Cleanup assignments in conditionals. If
+	USE_KADM5_API_VERSION is 1, set to 2. This program uses the V2 api
+	(kadm5_get_config_params).
+	
+	* setkey-test.c: Declare main() as int. Enclose initialization of
+	elements of arrays in '{', '}'. Use krb5_enctype type instead of
+	unsigned int. Break out assignments in conditionals.
+
+	* destroy-test.c, handle-test.c, init-test.c, iter-test.c,
+	randkey-test.c: Declare main() as int.
+
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* iter-test.c (main): Code was using ovsec_kadm_ret_t in place of
+	an int for referencing array.
+
+2000-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/chpass-principal-v2.exp (test200): Expect an additional
+	key to be reported, since des3 has been added to the list.
+	* api.2/get-principal-v2.exp (test101_102): Likewise.
+	* api.2/randkey-principal-v2.exp (test100): Likewise.
+
+2000-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* api.1/lock.exp: Since a "wait" directive to the command list of
+	the lock_test procedures does not wait for any synchronization,
+	change lock9 to acquire and release a lock before the "wait"
+	directive in order to avoid a race condition where lock9 spawns
+	the ./lock-test but the program has not opened the database prior
+	to lock9_1 acquiring a permanent lock.  This was causing
+	difficult-to-reproduce failures.
+
+2000-02-07  Tom Yu  <tlyu@mit.edu>
+
+	* lib/lib.t: Call kinit and kdestroy with -5 flag to accomodate
+	new behavior.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (test109): Wait for prompt between commands.
+
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* api.2/init-v2.exp (RESOLVE): New variable.
+	(get_hostname): New proc, taken from tests/dejagnu.
+	(test101): Use get_hostname, set a variable in the target process
+	to hold the result, and use that variable in the other commands
+	passed, instead of "localhost".
+
+	* Makefile.in (unit-test-client-body): Pass $(RUNTESTFLAGS) to
+	runtest, so the user can run subsets of the test suite.
+	(unit-test-server-body): Likewise.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+Fri Feb 27 22:32:54 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the lib/kadm5
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel lib/kadm5 configure.in
+
+Wed Feb 18 16:15:53 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Nov 19 10:55:20 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean): Remove server-setkey-test
+	 	client-setkey-test setkey-test.o
+
+Fri Jul 25 15:38:35 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove test-randkey since it was breaking the
+	server-side tests; api.2/getprinc-v2.exp wants *two* keys, while
+	randkey results in only one.
+
+Mon May  5 17:11:44 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* setkey-test.c, configure.in: add rules to test for correct
+ 	random()-equivlant function
+
+Mon Mar 31 17:39:52 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in, setkey-test.c: add support for setkey
+
+Wed Mar 12 15:49:46 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in (unit-test-server-body): depend on test-randkey, not
+ 	randkey-test, so the test gets run
+
+Wed Feb  5 23:10:56 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Mon Dec  9 15:57:55 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.0/init.exp, api.2/init.exp: use spawn/expect instead of exec
+ 	so tests don't fail when kadmin.local produces output
+	
+Wed Nov 20 15:59:34 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.in (check-): warn more loudly about unrun tests
+
+Mon Nov 11 20:51:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add AC_CANONICAL_HOST to deal with new pre.in.
+
+Thu Nov  7 20:54:24 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove spurious WITH_CCOPTS and KRB_INCLUDE.
+
+Thu Nov  7 13:02:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/init-v2.exp: update tests for new init error codes and
+ 	get_config_params behavior when KDC_PROFILE does not exist
+
+	* api.2/mod-principal-v2.exp: provide finer-grained test numbers
+ 	in case of failure
+
+Wed Nov  6 17:48:49 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* lib/lib.t: global $test everywhere it is used
+
+	* api.2/mod-principal-v2.exp: init to kadmin/admin, not
+ 	kadmin/changepw; specify real principal, not null (obviously I
+ 	never ran these tests via the client library before)
+
+Fri Nov  1 13:15:37 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/get-principal-v2.exp, api.2/mod-principal-v2.exp: update
+ 	for new tl_data semantics [krb5-admin/140]
+
+Thu Oct 31 08:42:18 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (check): Only run tests is Perl, tcl, runtest.
+
+	* configure.in: Check for Perl before running tests.
+
+Fri Oct 25 16:43:52 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (init-test): Add -UUSE_KADM5_API_VERSION before the
+		-D of same.  
+
+Wed Oct 23 13:32:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* api.2/get-principal-v2.exp: Fix for test 100 where {} is not
+		equivalent to "{}" for empty tl_data field.
+
+Mon Oct 21 16:27:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/mod-principal-v2.exp: create this file, implement tests
+ 	100-104 [krb5-admin/20]
+
+Fri Oct 18 13:21:08 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/init-v2.exp: add test 117, for default max_life
+ 	[krb5-admin/18]
+
+Thu Oct 17 16:14:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* config/unix.exp, lib/lib.t: begin in process of making these
+ 	unit tests less horribly inefficient
+
+	* api.[02]/crte-principal.exp, api.[02].mod-principal: update unit
+ 	tests for new pw_expiration semantics [krb5-admin/87]
+
+	* Makefile.in: ditch the capi and sapi hack, just the api for
+ 	everything, and rename the log files after the tests complete so
+ 	they are both kept around for viewing [krb5-admin/82]
+
+Mon Oct 14 07:04:27 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Only try to run tests if both runtest and the tcl
+		libraries present.
+
+	* configure.in: Check for runtest and Tcl.
+
+Fri Oct  4 08:31:50 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* sizes-test.c: Removed program.
+
+	* Makefile.in: Remove sizes-test.
+
+Tue Oct  1 14:45:37 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* api.2/init-v2.exp: Remove tests 104 & 105 as lockfile and
+		policy database names are hard wired. [krb5-admin/46]
+
+Thu Sep 26 17:44:10 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.0/init.exp, api.1/lock.exp, api.2/init.exp: use $K5ROOT
+ 	instead of /krb5
+
+Wed Sep 25 17:45:44 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.1/lock.exp: lockfile is now kdb5.kadm5.lock
+
+Mon Sep 23 16:31:24 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* changes to use runtest --srcdir:
+	- Makefile.in: rewrote [csapi].* links to work in srcdir (boo,
+ 	hiss)
+	- move lib.t to lib/lib.t
+	- api.*/*.exp: s/source lib.t/load_lib lib.t/
+	
+Fri Sep 20 16:51:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* created Makefile.in and configure.in
+
+Wed Sep 11 17:03:22 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/init-v2.exp: make test100 only run on client
+
+Tue Aug 20 13:46:54 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.ov (unit-test-server-body): remove kdb5_edit
+
+	* api.0/init.exp, api.2/init.exp, config/unix.exp, Makefile.ov:
+ 	use kadmin.local instead of kdb5_edit
+
+Fri Aug 16 17:16:46 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* Makefile.ov: update for new lib/kadm5 layout
+
+	* api.1/lock.exp: jik's fix for lock test 13
+
+Thu Jul 18 20:18:30 1996  Marc Horowitz  <marc@mit.edu>
+
+	* api.2/init-v2.exp (test150, test151): -s flag is now -S
+
+Mon Jul  8 17:00:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* api.2/init-v2.exp: admin databases must now be created before
+ 	use (not created implicitly)
+
+	* api.1/lock.exp: lock-test 13 should be a warning, not a failure.
+
+	* api.0/rename-principal.exp: fix rename test to create principal
+ 	with correct salt first, and check explicitly for NO_RENAME_SALT
+ 	when appropriate
+
+	* lib.t: add create_principal_with_keysalts
+	
+

@@ -1,0 +1,174 @@
+2005-11-29  Jeffrey Altman <jaltman@mit.edu>
+
+	* Makefile.in: build src/windows/kfwlogon
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+   
+         * version.rc: rename krb5support.dll to k5sprt32.dll
+
+2004-09-30  Jeffrey Altman <jaltman@mit.edu>
+
+        * version.rc: Add pismere condition resource strings
+
+2004-09-24  Tom Yu  <tlyu@mit.edu>
+
+	* version.rc: Use patchlevel.h to generate version stamp info.
+
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* version.rc: Add info for support library.
+
+2004-02-02  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Document PreserveInitialTicketIdentity registry key
+
+2004-01-30  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update the text to include the details of the new 
+      Windows registry keys necessary to access the TGT session key.
+      Also, provide details on the incompatibility of the gss.exe
+      sample client and the versions distributed by Microsoft.
+
+2003-12-22  Jeffrey Altman <jaltman@mit.edu>
+
+    * README: Update to more clearly specify the build environment 
+      requirements.  Supported compilers include MSVC++ 6.0, MSVS.NET,
+      and MSVS.NET 2003.  Clarify requirements for building with DNS
+      support.  Also, add text describing MSLSA: credential cache 
+      and how to configure Windows so it can be used.
+
+2003-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* README: Revert previous change, as it was in error; socklen_t
+	was introduced in Aug 2001 Platform SDK, and the actual problem
+	reported was very probably a compilation environment
+	misconfiguration.
+
+2003-07-18  Tom Yu  <tlyu@mit.edu>
+
+	* README: Note requirement for Feb 2003 Platform SDK.  Thanks to
+	Doug Engert and Rodney Dyer.
+
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Build ms2mit.
+	* version.rc: 1.3 (TEST) beta.
+	* README: Note on building ms2mit.
+
+2000-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Update documentation with DNS information.  Fix up the
+	language a bit.
+
+2000-04-25  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version to 1.2 beta.
+
+2000-02-06  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Add documentation about debug vs. release builds.
+
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Bump version up to 1.1.1.
+
+1999-09-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Add documentation about configuration under windows and
+	krbcc32.dll.
+
+1999-09-09  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Explicitly say that we support only Win32 and not Win16.
+
+1999-09-08  Danilo Almeida  <dalmeida@mit.edu>
+
+	* README: Update with install target information and more.
+	* mkbin.bat: Remove mkbin.bat as it is no longer used.
+
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* readme, README: readme renamed to README.
+
+	* version.rc: Boost version to 1.1.  Include 1998 & 1999 in copyright
+	years.
+
+1999-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Boost version to 1.0.8.
+
+Wed May 19 13:14:38 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove unncessary LIBCMD definition from recursive
+		make invocations.
+
+Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove - from recursive Win32 make invocation.
+
+	* readme: Update with Unix-less build method.  Add notice saying
+		we build with MSVC++ 6.0 and do not know whether it works
+		with other compiler/make utilties.
+
+Mon May 17 19:53:28 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* version.rc: Boost version to 1.0.6.
+
+Mon May 17 14:19:08 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add NO_OUTPRE flag to prevent creation of output
+		directory under win32.  Add clean-windows target.  Reflect
+		that we only build this under win32 by removing wconfig
+		tags.
+
+Mon Feb  8 21:45:05 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* readme: Update readme file so that it doesn't have obviously
+		incorrect information in it.  (It's still not perfect!)
+
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* mkbin.bat: Added convenience batch file which copies all of the
+		appropriate files out of the build tree into a single kbin
+		directory
+
+	* Makefile.in: Add the windows/lib directory to the list of
+		directories to be built (and cleaned).
+
+Tue Aug  5 18:40:55 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* version.rc: New file containing the version resource information
+		for MIT releases of the Krb5 software.
+
+Fri Apr 28 11:21:01 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: added gss, new subdirectory for gss demo.
+
+Wed Apr 19 18:37:07 1995 Keith Vetter (keithv@fusion.com)
+
+	* readme: updated about how to make it, and about gssapi.
+
+Wed Apr 5 16:14:49 1995 Keith Vetter (keithv@fusion.com)
+
+	* readme: updated about realms, conf files and telnet port.
+
+Tue Mar 28 12:00:00  1995 Keith Vetter (keithv@fusion.com)
+
+	* ChangeLog renamed to changelo to avoid having to always rename it.
+
+Mon Mar 27 23:34:58 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: fixed typo on the cd command
+
+Mon Mar 27 20:34:58 1995 Keith Vetter (keithv@fusion.com)
+
+	* makefile: makes recursively in wintel directory
+        * readme: updated for wintel program.
+
+Thu Mar 23 14:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* readme: updated to reflect name change of zipping target.
+
+Wed Mar 22 15:01:33 1995 Keith Vetter (keithv@fusion.com)
+
+	* readme: how-to create Windows version of kerberos 5

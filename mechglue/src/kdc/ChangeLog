@@ -1,0 +1,2118 @@
+2005-11-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (listen_and_process): Make local variable 'sout'
+	static.
+
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* fakeka.c: Include errno.h.
+	(main): Pass extra null-pointer argument to
+	kadm5_init_with_password for new db_args argument added by DAL
+	changes.
+
+2005-10-13  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (etype_info_as_rep_helper): New function; shared
+	code for handling ETYPE-INFO and ETYPE-INFO2.  Checks request for
+	"newer" enctypes and does not return an ETYPE-INFO if any "newer"
+	enctypes are present in the request.  Reported by Will Fiveash.
+	(return_etype_info2, return_etype_info): Implement in terms of
+	etype_info_as_rep_helper.
+
+2005-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (return_etype_info2): Apply patch from Will
+	Fiveash to use reply key's enctype, not the long-term key's
+	enctype, to avoid some enctype similarity problems.
+
+2005-07-12  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (prepare_error_as):
+	* do_tgs_req.c (prepare_error_tgs): Free scratch only if no error,
+	to avoid double-free.  Thanks to Daniel Wachdorf for discovering
+	these.  Part of fix for MITKRB5-SA-2005-002 [CAN-2005-1174,
+	VU#259798].
+
+	* network.c (process_packet): Initialize response to NULL.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
+	Novell merge.
+	* Makefile.in:
+	* main.c:
+
+2005-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c: Include autoconf.h before testing
+	KRB5_KRB4_COMPAT.
+
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (NEED_SOCKETS): Don't define.
+	* do_as_req.c (NEED_SOCKETS): Don't define.
+	* do_tgs_req.c (NEED_SOCKETS): Don't define.
+	* network.c (NEED_SOCKETS): Don't define.
+
+2004-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (closedown_network): Free each connection data
+	structure while closing file descriptors.
+
+	* kdc_util.h (sockaddr2p): Don't declare.
+
+2004-07-23  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Duplicate backdating fix for
+	APPL_REQUEST as well.  Fix comments.
+
+2004-06-07  Ezra Peisach  <epeisach@mit.edu.edu>
+
+	* network.c (paddr): Use unsigned int for length.
+	(kdc_conn_type): Declare CONN_ enumerated types in connection as
+	distinct type.
+	(add_fd): Declare as taking enum type instead of simply
+	integer. Prevents assignment of interger to an enum.
+	(process_tcp_connection): Remove variable assigned to but never used.
+
+2004-05-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include foreachaddr.h, not foreachaddr.c.
+
+2004-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_a_tcp_listener): Try to turn the IPV6_V6ONLY
+	socket option on, not off, and do it before calling bind.
+	(setup_tcp_listener_ports): Don't do it here any more.
+	(setup_udp_port): Ignore AF_DLI addresses.
+
+2004-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (delete_fd): Free pointed-to data after removing it
+	from the connection set.
+	(kill_tcp_connection): Move delete_fd call to the end.
+	(accept_tcp_connection): Decrement connection counter again if we
+	drop the incoming connection for lack of buffer space.
+
+2004-03-15  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (verify_sam_response): Free unparsed names
+
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MY_SUBDIRS): Deleted.
+
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Removed.  Directory configured from top level
+	now.
+	* Makefile.in (thisconfigdir, mydir): Updated.
+	(MY_SUBDIRS): Define to just ".".
+
+2004-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for --enable-athena and don't define
+	ATHENA_DES3_KLUDGE.
+
+2004-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_a_tcp_listener): Call setreuseaddr before
+	calling bind.
+	(setup_tcp_listener_ports): Don't call setreuseaddr.  Log info
+	about socket option IPV6_V6ONLY in unsupported and success cases.
+
+2004-02-24  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): As below.
+
+	* kdc_preauth.c (enctype_requires_etype_info_2): As below.
+
+	* main.c (initialize_realms): Remove support for marc 3des with length
+
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJS, krb5kdc, fakeka): Link against apputils lib
+	instead of using LIBOBJ.
+
+2004-02-19  Ken Hornstein  <kenh@mit.edu>
+
+	* fakeka.c (main): Bug from David Thompson <thomas@cs.wisc.edu>.
+	Bug originally introduced during conversion from bcopy() to
+	memcpy().
+
+2004-02-12  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (validate_tgs_request): Fix logic error
+
+2004-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Apply patch from Will Fiveash to use
+	correct TCP listening ports.
+
+2004-02-06  Sam Hartman  <hartmans@avalanche-breakdown.mit.edu>
+
+	* kdc_util.c:  Ignore unknown TGS options
+
+2004-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Only backdate the rquest in the
+	issued ticket.  Client libraries tend to verify that the
+	backdating falls within clockskew.  a
+
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Call KRB5_AC_NEED_DAEMON instead of checking
+	whether daemon() prototype is needed.
+	* Makefile.in (OBJS, fakeka): Use @LIBOBJS@.
+
+2003-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* extern.h (master_princ): Remove realm_mkvno, realm_tgskey,
+	realm_tgskvno, realm_kstypes, realm_nkstypes.  They're not needed
+	anymore.
+
+	* main.c (finish_realm): Remove references to realm_kstypes,
+	realm_tgskey.
+	(init_realm): Don't bother with realm_kstypes.  Don't bother
+	looking up the master kvno.  Don't bother caching the TGS key.
+	None of these were being used.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (init_realm): Use KRB5_KDB_MAX_RLIFE, not
+	KRB5_KDB_MAX_LIFE, as default for realm's max renewable lifetime.
+
+2003-05-23  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (_make_etype_info_entry): Add flag to know if we
+	are producing etype_info2 so we know whether filling in s2kparams
+	is allowed.    In the etype_info2 case support afs3 salts.
+	(etype_info_helper): Pass in flag
+	(return_etype_info2): And here
+
+2003-05-23  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (return_etype_info2): After encoding the
+	etype_info2 and copying the pointers to the pa_data, free the
+	krb5_data pointer.
+
+2003-05-22  Sam Hartman  <hartmans@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): LOG transited check disabled as info not error
+
+	* kdc_util.c (validate_as_request): Only reject options we
+	understand and believe are inappropriate for AS requests. Per
+	spec, unknown options are ignored.
+
+2003-05-14  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (check_padata): Allow bad_integrity to be returned to a client
+
+2003-05-08  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (return_pw_salt): Don't return pw-salt if the
+	client's enctype list  mandates it supports enctype-info2
+
+2003-05-09  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): Rename getremotesubkey ->
+	getrecvsubkey.
+
+2003-05-07  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Patch from Sun to reorganize
+	code and make sure that even for md5 the database order is
+	preserved. 
+	(enctype_requires_etype_info_2): new function; determines wether a
+	particular enctype in a client request means that the client  is
+	required to support etype_info2 by Kerberos clarifications.
+	(etype_info_helper): Renamed from get_etype_info  to abstract out
+	code in common between etype_info and etype_info2
+	(get_enctype_info): Return etype info only if request contains no
+	enctypes that  require etype_info2
+	(return_etype_info2): New function.
+
+2003-04-02  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Avoid infinite loop if request
+	does not contain des-cbc-crc and database does 
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* do_tgs_req.c (process_tgs_req): Check that principal name
+	component 1 is present before examining it.
+	* kdc_util.c (krb5_is_tgs_principal, validate_tgs_request): Check
+	principal name length before examining components.
+
+2003-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (verify_enc_timestamp): Save decryption error, in
+	case we get NO_MATCHING_KEY later.  This allows us to log a more
+	sane error if an incorrect password is used for encrypting the
+	enc-timestamp preauth.
+
+2003-03-16  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (initialize_realms): Add support to call
+	enable_v4_crossrealm if the user wants insecure operation 
+
+	* kerberos_v4.c: Add enable_v4_crossrealm.  By default krb4
+	cross-realm is not allowed as it is insecure.  Also, remove
+	support for generating krb4 tickets encrypted in 3DES as they are
+	insecure. 
+
+	* kdc_util.h: Define enable_v4_crossrealm, new function to enable
+	secure krb4 cross-realm authentication 
+
+2003-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Update call to krb5_ktdb_resolve().
+
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Default to --disable-fakeka.
+
+2003-02-20  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): fix typo to that caused infinite
+	look in previous change 
+
+2003-02-14  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (request_contains_enctype): New function
+	(get_etype_info): Use it to filter out enctypes not requested by
+	the client 
+
+2003-02-08  Ken Hornstein  <kenh@cmf.nrl.navy.mil>
+
+	* Makefile.in, configure.in, fakeka.c: New file to implement
+	a basic kaserver using the KDC database.
+
+2003-02-04  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5kdc.M: Document default v4 mode of none
+
+	* kerberos_v4.c (KDC_V4_DEFAULT_MODE):  Default to no v4 support
+	instead of nopreauth  
+
+2003-01-21  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (check_padata): Permit returning KRB5KRB_AP_ERR_SKEW
+
+2003-01-12  Ezra Peisach  <epeisach@bu.edu>
+
+	* kdc_util.h, replay.c, main.c: Pass global krb5_context to
+	kdc_free_lookaside() instead of per realm one - which has been
+	freed by time invoked.
+
+2003-01-03  Ezra Peisach  <epeisach@bu.edu>
+
+	* main.c: On exit, free more allocated memory, including:
+	realm_tcp_ports data, kdc_realmlist, close the replay cache, and
+	free the lookaside cache.
+
+	* network.c (FREE_SET_DATA): Do not free a NULL pointer.
+
+	* replay.c, kdc_util.h: Add kdc_free_lookaside() to clear the lookaside
+	cache on shutdown - to search for memory leaks.
+
+	* rtest.c (main): Do not allocate or free a NULL pointer.
+
+2002-12-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c (process_v4): Use a temporary variable for the
+	current time instead of an incorrect pointer cast.
+
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Use krb_get_err_text() instead of
+	krb_err_txt array.
+
+2002-11-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Update dependencies.
+
+	* kerberos_v4.c: Inline some stuff formerly in krb_conf.h until we
+	get a chance to fix it properly.
+
+2002-11-03  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Fix previous patch; it caused an
+	uninitialized pointer to be dereferenced under certain error
+	conditions.
+
+2002-10-27  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_util.c (add_to_transited): Don't include trailing null in transited encoding length; doing so breaks using codee
+
+2002-10-05  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Apply fix from Kevin Coffman to
+	avoid leaking padata.
+
+2002-09-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (struct connection): New field start_time.
+	(tcp_data_counter, max_tcp_data_connections): New variables.
+	(kill_tcp_connection): New function.
+	(process_tcp_connection): Use it.  Log reason for rejecting
+	connection if the requested buffer size is too large.
+	(accept_tcp_connection): If there are too many TCP connections
+	already, shut down the oldest one.
+	(setup_network, listen_and_process, process_tcp_connection,
+	service_conn): Delete debugging code.
+	(process_packet): Use socklen_t where appropriate.
+
+2002-09-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include sys/filio.h if available.
+
+	* extern.h (struct __kdc_realm_data): New field realm_tcp_ports.
+	* main.c (init_realm): Fill it in.  New argument for default tcp
+	ports; rename old def_ports argument to def_udp_ports.
+	(initialize_realms): Get default tcp ports from "kdc_tcp_ports"
+	entry in config file, falling back to DEFAULT_KDC_TCP_PORTLIST.
+	Use DEFAULT_KDC_UDP_PORTLIST for UDP.
+	* network.c: Include port-sockets.h, socket-utils.h, cm.h.
+	(setup_tcp_listener_ports): New function, creates a TCP listener
+	socket for each port number previously specified.  Tries to do
+	both IPv6 and IPv4 if possible.
+	(setup_a_tcp_listener): New function, creates a TCP socket to
+	listen on at the supplied socket address.
+	(sstate): New variable.
+	(setup_network): Initialize sstate.  Parse TCP port number
+	specification string, and call setup_tcp_listener_ports.
+	(listen_and_process): Use krb5int_cm_call_select, and invoke the
+	service routine specified in the connection info, passing it flags
+	indicating which select fd sets listed the connection.
+	(accept_tcp_connection): New function, handles a TCP listener
+	socket and creates a TCP data connection.
+	(process_tcp_connection): New function, handles incoming or
+	outgoing data on a TCP data stream.
+	(udp_port_fds, udp_port_nums, n_udp_ports, max_udp_ports):
+	Deleted.
+	(n_sockets, max_udp_sockets, select_fds, select_nfds): Deleted.
+	(ipv6_enabled, setreuseaddr, setv6only, paddr, setnbio,
+	setnolinger): New helper functions.
+	(struct connection): New type, encapsulating all per-connection
+	data.
+	(SET, FOREACH_ELT, GROW_SET, ADD, DEL, FREE_SET_DATA): New
+	macros.
+	(connections, udp_port_data, tcp_port_data): New variables.
+	(n_sockets, conns): New macros.
+	(add_udp_port): Renamed from add_port, rewritten to use set macros
+	above.
+	(add_tcp_port): New function, parallel to udp version.
+	(add_fd): Rewritten to manage a set of connection info records
+	instead of just file descriptors.
+	(add_udp_fd, add_tcp_listener_fd, add_tcp_data_fd, delete_fd): New
+	helper functions.
+	(setup_udp_port): Renamed from setup_port.  Uses set macros.
+	(klog_handler): New function, not compiled currently.
+	(init_addr): New function, split out work of initializing a
+	krb5_fulladdr from a socket address from process_packet.
+	(process_packet): Now takes connection info pointer and select
+	flags as arguments.
+	(closedown_network): Use set macros in cleanup.
+
+2002-09-15  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (check_princ): Call strftime() with correct number
+	of arguments.
+
+2002-09-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c: Always include stdarg.h, not varargs.h.
+	(v4_klog): Always declare and define stdarg version.
+	(krb4_stime): Deleted.
+	(check_princ): Use strftime instead.
+
+2002-09-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (initialize_realms): Include replay cache name in error
+	if it can't be initialized.
+
+	* kerberos_v4.c (kerb_get_principal): Include kvno when logging
+	failure to find a key.
+	(v4_klog): Include explicit do-nothing default case in switch
+	statement.
+
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_preauth.c,
+	kdc_util.c, kerberos_v4.c, main.c, network.c, policy.c, replay.c,
+	rtest.c: Use prototype-style function definitions and
+	declarations.  Don't declare errno.
+
+	* do_as_req.c (prepare_error_as): New argument, the error message
+	text as determined *before* possibly replacing the error code with
+	"generic error".
+	(process_as_req): Fill it in based on 'status', or the error
+	message corresponding to the error code to be returned.
+	* do_tgs_req.c (prepare_error_tgs): New argument, the error
+	message text as determined *before* possibly replacing the error
+	code with "generic error".
+	(process_tgs_req): Fill it in based on 'status', or the error
+	message corresponding to the error code to be returned.
+
+	* network.c (process_packet): Call inet_ntop directly.
+	* sock2p.c: Deleted.
+	* Makefile.in (SRCS, OBJS): Drop it.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-15  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: For consistency, check for both DISALLOW_ALL_TIX
+	and DISALLOW_SVR when looking up services.
+
+2002-08-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (setup_port): Ignore AF_LINK addresses.  Log address
+	family number if unrecognized.
+
+2002-07-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.h (ADDRTYPE2FAMILY): New macro.
+	* do_as_req.c (process_as_req): Use inet_ntop instead of
+	inet_ntoa.
+	* do_tgs_req.c (process_tgs_req): Ditto.
+	* dispatch.c (dispatch): Fix inet_ntop code, and use it always.
+	* kerberos_v4.c (process_v4): Check address family before copying
+	out an IPv4 address.  Log if not IPv4, but continue.
+	* network.c (set_sa_port): New function.
+	(setup_port): Use it.  Combine IPv4 and IPv6 paths; IPv6 still
+	enabled now.  Modify supplied sockaddr instead of making a copy.
+	(process_packet): SADDR is now sockaddr_storage.  Use socket-utils
+	macros instead of casting.  Enable the IPv6 code.
+	* dispatch.c, do_as_req.c, do_tgs_req.c: Define NEED_SOCKETS
+	before including k5-int.h.
+	* network.c: Include fake-addrinfo.h.
+
+2002-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (process_packet): Now static.  Drop unused "portnum"
+	argument.  Change caller.
+	* kdc_util.h (process_packet): Delete declaration.
+
+	* sock2p.c (inet_ntop): Disable definition; it should be provided
+	by the socket support header files.
+	* kdc_util.h (inet_ntop): Delete declaration. 
+
+2002-06-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (dispatch): Remove arg "portnum"; update callers.
+	* do_as_req.c (process_as_req): Ditto.
+	* do_tgs_req.c (process_tgs_req): Ditto.
+	* kerberos_v4.c (process_v4): Remove arg "is_secondary"; update
+	callers.
+	* kdc_util.h (dispatch, process_as_req, process_tgs_req,
+	process_v4): Update prototypes.
+	* main.c (init_realm): Remove unused variable.
+
+2002-06-24  Sam Hartman  <hartmans@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): We get KRB5_KDB_NO_MATCHING_KEY
+	not ENOENT; per 5.27 of kdb_xdr.c.
+
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_as_req.c (process_as_req): Call krb5_c_valid_enctype instead
+	of valid_enctype.
+	* do_tgs_req.c (process_tgs_req): Likewise.
+	* kdc_util.c (select_session_keytype): Likewise.
+	(comp_cksum): Similarly for valid_cksumtype, is_coll_proof_cksum.
+
+2002-02-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include foreachaddr.c.
+	(printaddr, printifaddr, addr_eq, foreach_localaddr): Deleted.
+	* Makefile.in ($(OUTPRE)network.$(OBJEXT)): Updated dependencies.
+
+2002-01-08  Sam Hartman  <hartmans@mit.edu>
+
+	* dispatch.c (dispatch): Add timing data between requests to PRNG
+	(dispatch): Grab random data from OS every hour
+
+2001-12-14  Ezra Peisach  <epeisach@mit.edu>
+
+	* main.c (main, init_realm): Get rid of variables set but never used. 
+
+2001-12-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_util.c (subrealm, add_to_transited): Unsigned vs. signed int
+	fixes.
+
+2001-11-26  Sam Hartman  <hartmans@mit.edu>
+
+	* main.c (init_realm): Don't seed from current time;
+	krb5_init_context already does that.
+
+2001-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req: Treat SUPPORT_DESMD5 as if it were
+	always cleared.
+
+	* do_tgs_req.c (process_tgs_req): Treat SUPPORT_DESMD5 as if it
+	were always cleared.
+
+2001-10-24  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (select_session_keytype): Don't issue session key
+	enctype that is not in permitted_enctypes.
+	(dbentry_supports_enctype): For now, always treat SUPPORT_DESMD5
+	as if it were cleared.
+
+2001-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str, rep_etypes2str): Clean up somewhat.
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Fix logging of bad transit path
+	info.
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): If disable-transited-check
+	option isn't set, try to verify transit path.  If
+	reject_bad_transit flag is set and transit path isn't verified,
+	reject the request.  Use a temporary variable to simplify
+	references to the second ticket.
+	* extern.h (struct __kdc_realm_data): Add new field
+	realm_reject_bad_transit.
+	(find_realm_data): Declare.
+	(reject_bad_transit): New macro.
+	* main.c (find_realm_data): Delete declaration.
+	(init_realm): Copy reject-bad-transit value or use default.
+	* rtest.c (find_realm_data): Define dummy version.
+
+2001-09-24  Mitchell Berger  <mitchb@mit.edu>
+
+	* krb5kdc.M: Document the -n option.  Thanks to Dennis Davis
+	<D.H.Davis@bath.ac.uk>
+
+2001-07-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Include stdlib.h in test for swab declaration.
+
+2001-07-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* rtest.c: Provide a prototype for krb5_klog_syslog() dummy handler.
+
+2001-06-29  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add check for ifaddrs.h, which missing.
+
+2001-06-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* network.c (setup_port): Change sin to sin4 to prevent shadowing.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Test for daemon prototype.
+	
+	* main.c: Provide daemon prototype if needed.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use optional argument to KRB5_NEED_PROTO so test
+	for swab existance removed.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c: Include prototypes for mit_des_fixup_key_parity
+	and mit_des_is_weak_key here as no other "public" header file
+	defines it. Needed for return_sam_data() code. 
+
+	* configure.in: Test for unistd.h and existance of swab() prototype.
+
+	* kerberos_v4.c: If swab() prototype needed, provide. 
+
+2001-06-19  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (ktypes2str): New function; construct a string
+	containing a list of enctypes, given a number and list of
+	enctypes.
+	(rep_etypes2str): New function; construct a string indicating all
+	three enctypes associated with a KDC reply.
+
+	* kdc_util.h: Add prototypes for ktypes2str() and
+	rep_etypes2str().
+
+	* do_as_req.c (process_as_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+
+	* do_tgs_req.c (process_tgs_req): Call ktypes2str() and
+	rep_etypes2str() as appropriate.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* network.c (setup_network): Cast argument to isspace() to int.
+
+2001-06-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c: Include adm_proto.h for krb5_klog_syslog()
+	prototype.
+
+	* main.c: Include des.h for des_init_random_number_generator()
+	prototype.
+
+	* network.c: Include adm_proto.h for krb5_klog_syslog()
+	prototype. Pass kdc_context to krb5_klog_reopen().
+
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos_v4.c: Get rid of file wide static krb5_error_code. Cast
+	argument to sleep to unsigned int.
+
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_util.c (add_to_transited): Add braces to provide unambiguous
+	if - if - else statements. 
+
+	* kdc_preauth.c (verify_sam_response): Cleanup assignments in
+	conditionals.
+	* main.c (main): Likewise. 
+
+2001-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't use HAS_ANSI_VOLATILE.
+
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_preauth.c, kdc_util.h,
+	kerberos_v4.c, main.c, policy.h: Don't use macros PROTOTYPE or
+	KRB5_PROTOTYPE.
+	* kerberos_v4.c (req_act_vno): Delete variable definition.
+	(kerberos_v4): Don't set it.
+
+2001-03-08  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* do_as_req.c: If KRBCONF_KDC_MODIFIES_KDB defined, produce code
+	that compiles and works.
+
+	* kdc_util.h: Add prototype for process_v4_mode() for main.c to use.
+
+	* kerberos_v4.c: Do not shadow progname and more variables.
+
+	* rtest.c (make_princ): Declare static.
+
+	* sock2p.c: Include kdc_util.h for prototypes.
+
+2001-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Remove references to
+	KRB_NEVERDATE.
+
+2000-12-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Don't include net/if.h if ARPHRD_ETHER is defined.
+	Fix suggested by Kevin Coffman <kwc@citi.umich.edu> for OpenBSD,
+	which breaks on multiple inclusions of net/if.h.
+
+	* configure.in: Look for ifaddrs.h.
+	* network.c (printaddr, printifaddr, addr_eq, foreach_localaddr):
+	Update from lib/krb5/os/localaddr.c, including getifaddrs
+	support.
+
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Get rid of test for termios.h. The kdc does not use it.
+
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (get_etype_info): Initialize length of
+	etype_info_entry to KRB5_ETYPE_NO_SALT. Before copying salt into
+	etype_info_entry, test that salt length (from get_salt_from_key())
+	is not SALT_TYPE_NO_LENGTH.
+
+	* kdc_util.c (get_salt_from_key): Initialize salt type to
+	SALT_TYPE_NO_LENGTH (instead of -1).
+
+	* network.c (process_packet): Cast length in sendto() call to int. 
+
+2000-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerb_get_principal): Modify to take a pointer to
+	a krb5_deltat in order to return the life in seconds.  Also, use
+	time_to_life() to compute krb4 life.
+	(check_princ): Modify to pass a pointer to a krb5_deltat to
+	kerb_get_principal().
+	(set_tgtkey): Update for new kerb_get_principal() call signature.
+	(kerberos_v4): Update for new check_princ() call signature.
+	Modify lifetime computations to use lifetimes in seconds.
+	Back-date issue time if necessary.
+
+2000-09-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* dispatch.c (dispatch): inet_ntop() returns const char *.
+
+2000-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* main.c (initialize_realms): For "cannot initialize realm"
+	messages, tell the user to check the log file.  Print out an error
+	message as well as logging it if retrieving the default realm name
+	fails.
+
+	* kerberos_v4.c (kerberos_v4): Mask requested-life byte value with
+	0xff to avoid sign-extension problems.
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (rtest): Link in the kdb5 library.
+
+2000-05-17  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (process_v4): Zero out v4_pkt.mbz.
+	(kerberos_v4): Fix handling of APPL_REQUEST messages to deal with
+	ridiculously long realms, etc.  Fix up some calls to
+	kerb_err_reply() to be more useful.  Set req_*_ptr before any
+	possible calls to kerb_err_reply().
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+        data in buffers so as not to overrun "prev", "current", and "exp".
+	* kerberos_v4.c (process_v4): Don't assume that the realm is null-
+	terminated.
+	(set_tgtkey): Truncate realm name if it's too long.
+
+2000-04-28  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdc_util.c (add_to_transited): Use strncpy/strncat when building
+	data in buffers.  Fix some limit checks.
+	* kerberos_v4.c (kerb_err_reply): Use strncat so as not to overrun
+	error buffer.
+
+2000-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c: Include stddef.h.
+	(foreach_localaddr): Check each address against previously used
+	addresses, and skip duplicates, in case multiple interfaces have
+	the same address.
+
+2000-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* network.c (foreach_localaddr): If called functions fail, drop
+	out of loop and return nonzero.
+
+2000-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* sock2p.c: New file.
+	(inet_ntop): Define if system doesn't provide it.
+	(sockaddr2p): New function.
+	* Makefile.in (SRCS, OBJS): Add sock2p.
+	* kdc_util.h (inet_ntop, sockaddr2p): Declare them.
+
+	* network.c (add_fd): New function.  Reallocate udp_port_fds array
+	as needed here.
+	(setup_port): Use add_fd to record new sockets.  Use inet_ntop
+	unconditionally.  Disable ipv6 support until process_packet and
+	friends will support it.
+	(process_packet): Ignore ECONNREFUSED when reading UDP packets.
+	Fill in port field of faddr properly, dependent on address
+	family.  Use sockaddr2p when logging source address.
+
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* replay.c, kdb_util.h (kdc_check_lookaside, kdc_insert_lookaside): 
+	Make second argument const to keep handle compiler warnings.
+
+2000-03-01  Tom Yu  <tlyu@mit.edu>
+
+	* main.c: Move kdc_initialize_rcache() to kdc_util.c
+
+	* kdc_util.c (kdc_initialize_rcache): Move kdc_initialize_rcache()
+	back here since it's needed for rtest to work.  process_tgs_req()
+	which is called from rtest needs to call kdc_intiialize_rcache()
+	and we can't very well link rtest with main.o
+
+	* kdc_preauth.c (verify_sam_response): Ooops.  Get rc_lifetime
+	from kdc_util, since it's actually declared there.
+
+	* configure.in: Fix --enable-kdc-replay-cache to actually default
+	to "yes".
+
+	* kdc_preauth.c (verify_sam_response): Declare and set rc_lifetime
+	for real.
+
+2000-02-29  Tom Yu  <tlyu@mit.edu>
+
+	* dispatch.c: Include some more net-related headers.
+	(dispatch): Fix ifndef HAVE_INET_NTOP branch.
+
+2000-02-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: New enable-kdc-replay-cache arg.  Define
+	USE_RCACHE when enabled, NOCACHE when disabled.  Defaults to
+	enabled.
+	* Makefile.in (DEFINES): Don't define NOCACHE any more.
+
+2000-02-25  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Check for sys/sockio.h
+
+	* network.c: Conditionally include sys/sockio.h for SIOC* if
+	necessary.
+	(process_packet): Bracket AF_INET6 branch of a switch statement
+	with an ifdef.
+
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Invoke KRB5_AC_INET6.
+	* network.c (max_udp_sockets): New variable.
+	(setup_port): Add IPv6 support.  Reallocate udp_port_fds array as
+	needed here.
+	(add_port): Don't do buggy udp_port_fds allocation here.
+	(setup_network): On failure, exit.
+	(process_packet): Handle inet6 addresses when building
+	krb5_address structure.
+
+2000-02-25  Ken Raeburn  <raeburn@mit.edu>
+	    Alec H. Peterson  <ahp@hilander.com>
+
+	* configure.in: Invoke KRB5_SOCKADDR_SA_LEN.
+	* network.c: Include <sys/ioctl.h>, <syslog.h>, <net/if.h>.
+	(foreach_localaddr): New function, copied from
+	lib/krb5/os/localaddr.c.
+	(NEED_SOCKETS): Define before including k5-int.h.
+	(n_sockets): New variable.
+	(setup_port): New function; creates listening udp ports given an
+	address.
+	(setup_network): Call foreach_localaddr to set up listening
+	sockets on each local address, so we can always respond from the
+	receiving address.
+	(listen_and_process): Use n_sockets as upper bound of loop.
+
+2000-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c (v4_klog): Don't treat the formatted text as a
+	format string.  (Patch from Mike Friedman,
+	mikef@ack.Berkeley.EDU.)
+
+2000-02-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_preauth.c (get_preauth_hint_list): Log a message if preauth
+	is required but no preauth types are available.
+	(return_sam_data): Fix typo in figuring length of data to XOR when
+	merging keys.  Just return 0 if no input preauth data is
+	available.
+
+2000-02-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_preauth.c: Include <syslog.h>.
+	(struct _krb5_preauth_systems, preauth_systems): Add new NAME
+	field, for logging debug info.
+	(check_padata): Call krb5_klog_syslog instead of com_err.
+	(missing_required_preauth, check_padata): Added debugging
+	krb5_klog_syslog calls, currently disabled.
+	(sam_inst_map): Add {} around array element initializers to keep
+	gcc quiet.
+	(get_sam_edata): Delete unused variable I.
+
+	Patches from Frank Cusack for hw-preauth replay detection.
+	* main.c (rc_lifetime): New global variables.
+	(kdc_initialize_rcache): Initialize rc_lifetime from context
+	clockskew.
+	(setup_sam): New function; initializes psr_key.
+	(main): Call setup_sam.
+	* kdc_preauth.c (get_sam_edata): Fill in new fields of PSR.  Use
+	psr_key for encrypting instead of database master key.
+	(verify_sam_response): Use psr_key instead of database master
+	key.  Do replay detection if USE_RCACHE is defined.
+	(get_sam_edata): Clear SC and PSR structures before using them.
+	Set new FLAGS field of PSR.
+	(return_sam_data): New function.
+	(preauth_systems): Use return_sam_data in sam-response entry.
+	* extern.c (psr_key): Define.
+	* extern.h (psr_key): Declare.
+
+	* kdc_preauth.c (get_sam_edata, verify_sam_response): Add parens
+	around assignments in if statements, to keep "gcc -Wall" quiet.
+	(return_sam_data): Delete unused variable padata.
+
+	* main.c (kdc_current_rcname): Declare only if USE_RCACHE is
+	defined.
+
+2000-01-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (dispatch): Log address and port number of detected
+	retransmits.
+
+	* kdc_util.c (select_session_keytype): Revert 1999-09-01 changes;
+	now always use any requested type indicated as supported by the db
+	entry.
+
+1999-10-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* dispatch.c (dispatch): Make message in lookaside case less
+	suggestive of replay attacks, since it can result from normal
+	packet loss causing retransmissions.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-09-13  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Don't try to take the 2nd
+	component of a principal that doesn't have 2 components.
+
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_util.c (select_session_keytype): If none of the requested
+	ktypes are NULL or single-DES, force des-cbc-crc.
+
+1999-08-18  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): Align DES3 enctypes with
+	current names.
+	(kerb_get_principal): Align DES3 enctypes with current names.
+
+1999-06-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (CFLAGS): Define NOCACHE.
+	(DEFINES): Commented out, since it's unused.
+	* dispatch.c (dispatch): If NOCACHE is defined, don't call
+	lookaside buffer code.
+	* replay.c: Disable all code if NOCACHE is defined.
+
+1999-06-28  Tom Yu  <tlyu@mit.edu>
+
+	* replay.c (MATCH): Fix up to compare the correct components of
+	the input address.
+
+Fri Apr 30 00:05:07 1999  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (kerberos_v4): Fix bug where krb_create_ticket()
+	was getting called for an APPL_REQUEST even when there was no
+	single-DES key, resulting in random weirdness.
+
+Wed Feb 17 17:07:43 1999  Tom Yu  <tlyu@mit.edu>
+
+	* do_as_req.c (process_as_req): Fix to assign kvno to
+	reply.enc_part after encryption, since krb5_c_encrypt() now
+	explicitly initializes all fields of a krb5_enc_data.
+
+1998-12-17  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdc_preauth.c (check_padata): If preauth fails because the
+		preauth data from the client was of an unknown type, and
+		the principal does not require preauth, then the preauth
+		should be disregarded.  [krb5-kdc/652]
+
+Mon Jan  4 23:50:45 1999  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in (withval): Conditinalize ATHENA_DES3_KLUDGE on
+	--enable-athena.
+
+	* main.c (initialize_realms): Kludge to disable
+	des3-marc-hmac-sha1 from the command line.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, extern.h, kdc_preauth.c, kdc_util.c,
+	kerberos_v4.c, main.c: conver to new crypto api.
+
+Fri Sep 25 19:47:26 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (check_princ): Re-order if statements that check
+	for null keys to make Purify shut up.
+
+Thu Sep 17 18:21:51 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (kdc_get_server_key): Fix to not use cached tgs key
+	to prevent lossage when it might be out of date by always fetching
+	the correct kvno for the ticket out of the database.
+
+Tue Sep  1 19:34:30 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (compat_decrypt_key): Add
+ 	ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list of keytypes to bash.
+	(kerb_get_principal): Add ENCTYPE_LOCAL_DES3_HMAC_SHA1 to the list
+ 	of searched enctypes.
+
+Wed Aug 19 13:37:00 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c (set_tgtkey): Add kvno arg to fetch an explicit
+	kvno.  Also compare kvno as well as realm when caching the TGT
+	key.  Declare as static.
+	(kerb_get_principal): Add kvno argument to permit searching for
+	an explicit kvno.
+	(kerberos_v4): Extract the kvno directly out of the krb_req, since
+	we know what the format is.
+
+Wed Aug 12 18:40:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Add macro K4KDC_ENCTYPE_OK to determine whether a
+	given enctype is compatible with single-DES krb4.
+	(compat_decrypt_key): Declare as static.  Change call signature to
+	include an output krb5_keyblock as well as an input to determine
+	whether the principal should be treated as a service principal.
+	Bash the enctype of the keyblock to raw des3 if it's full-blown
+	des3.
+	(kerb_get_principal): Add k5key and issrv arguments as in
+	compat_decrypt_key, mostly to pass them on there.  Hardcode a
+	search order that includes des3 for looking up service keys.
+	(kerberos_v4): Call krb_create_ticket or krb_cr_tkt_krb5 as
+	appropriate to the key type.  While we're at it, s/ktbtgt/krbtgt/
+	just to avoid confusing people.
+	(check_princ): Add k5key and issrv args for as in
+	compat_decrypt_key.  Fix up null key detection to only operate if
+	it's a single-des key.
+	(set_tgtkey): Call krb_set_key_krb5 if appropriate.
+
+Tue Jul 21 20:29:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* replay.c (kdc_check_lookaside):
+	(kdc_insert_lookaside): Add code to originating address of packet,
+ 	as krb4 initial ticket requests don't contain an address.  This
+ 	would cause a subtle problem wherein two simultaneous krb4 initial
+ 	ticket requests for the same principal originating from different
+ 	addresses would result in both replies containing the same
+	address.
+
+	* kdc_util.h: Modify prototype for lookaside functions.
+
+	* dispatch.c (dispatch): Update to new calling conventions of the
+	lookaside functions.
+
+Wed Jul 15 18:32:07 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add CHECK_SIGNALS so that POSIX_SIGNALS gets
+	defined.
+
+	* main.c (request_hup): Remove call to signal, as this isn't
+	needed on BSD-ish systems and for sysV-ish systems we use
+	sigaction anyway.
+	(setup_signal_handlers): Fix typo.
+
+Sat Jul 11 01:38:05 1998  Geoffrey King  <gjking@mit.edu>
+
+	* main.c: Added a call to signal() in request_hup()
+	        so that the signal handler gets reset after
+	        each SIGHUP, since this does not happen
+	        automatically in System V's signal handling
+	        system.
+
+Wed Jul  8 04:36:28 1998  Geoffrey King  <gjking@mit.edu>
+
+	* extern.h: Added declaration for new variable
+	        signal_requests_hup, which is set when the KDC
+	        is sent a SIGHUP
+	
+	* extern.c: Added definition for signal_requests_hup
+
+	* main.c: Added new signal handling code for SIGHUP, including
+	        the new function request_hup()
+
+	* network.c: Check signal_requests_hup in the main KDC loop
+
+Fri May  8 18:46:59 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (krb4_stime): Print 4 digit years in Krb4 log
+	 	entries to avoid Y2K issues.
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* main.c (initialize_realms): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
+Fri Mar 20 17:13:46 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c (add_to_transited): Check lengths, fix up comma
+	quoting somewhat (though things are still way broken).
+
+Fri Feb 20 15:58:21 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_preauth.c (get_preauth_hint_list): Don't add the pseudo
+		preauth type KRB5_PADATA_PW_SALT to the hint list of
+		supported preauthentication systems, since it doesn't help
+		to send it.  (And it may screw up Cygnus KerbNet clients.)
+
+Wed Feb 18 16:04:22 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (thisconfigdir): Remove trailing slash.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Thu Feb  5 19:17:25 1998  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Move macro definition of klog earlier so that it
+	actually gets used inside process_v4().
+
+Wed Feb  4 14:15:20 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kerberos_v4.c (process_v4): Check the length of the incoming V4
+		packet before copying it into the KTEXT_ST variable.
+		(kerberos_v4): Make sure the strings in the V4 request
+		structures aren't no longer than they are allowed to be.
+
+Wed Jan 28 08:56:07 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5kdc.M: Document V4 mode handling [krb5-kdc/464].
+
+Wed Jan 21 15:15:58 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* rtest.c (main): returns int, not void. ANSI X3.159-1989
+	2.1.2.2.1 says so, and gcc now warns about it.
+
+Fri Jan 16 03:33:50 1998  Tom Yu  <tlyu@mit.edu>
+
+	* do_tgs_req.c: Add some explicit settings of errcode so that the
+ 	cleanup code doesn't try to construct a bogus error reply, which
+ 	was causing coredumps in the lookaside code.
+
+Thu Dec 11 23:29:41 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kerberos_v4.c: Don't include sys/socket.h or netdb.h, as krb.h
+	already gets those and Ultrix doesn't protect them against
+	multiple inclusion.
+
+Mon Nov 24 19:57:48 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Add check to make sure cname and
+		sname are non-NULL when syslogging an error because the
+		principals don't match.
+	
+	* kdc_util.c (limit_string): Check to make sure the input string
+		is non-NULL before operating on it.
+
+Thu Nov 13 20:40:01 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Only try to return a TGT for a
+		"closer" realm if the request was for a TGT in the first
+		place.  [krb5-kdc/459]
+
+Wed Nov 12 14:47:46 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* do_as_req.c (process_as_req): Reset master key after closing and
+ 	 	reopening DB when KDC_UPDATES_KDB compiled
+ 	 	in. [krb5-kdc/495 by Tony Mione]
+
+Mon Nov 10 20:03:14 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): If not using the reply cache,
+		properly handle a failure return from
+		krb5_rd_req_decode_anyflag().
+
+Wed Oct  8 12:20:35 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (main): Initialize kdc error table with
+	        initialize_kdc_error_table().
+
+Thu Sep 25 21:19:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* network.c: Replace KRB5_USE_IENT with something more sane.
+
+	* do_tgs_req.c: Replace KRB5_USE_INET with something more sane.
+
+	* main.c: Replace KRB5_USE_INET with something more sane.
+
+	* do_as_req.c: Replace KRB5_USE_INET with something more sane.
+
+Wed Sep 24 11:56:50 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.c (add_to_transited): Fix up memory leaks, clean out
+        new memory allocated, allocate buffers to max size
+        needed. [based on krb5-kdc/461 by Ken Hornstein].
+
+	* rtest.c: Rewrite code to use context and current krb5_principal
+	        structure.
+
+	* configure.in: Add KRB5_RUN_FLAGS
+
+	* Makefile.in (rtest): Compile rtest and run during make check.
+
+
+Tue Sep 23 13:25:35 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c (check_princ): Add checks for V5 kdc flags
+	        including REQUIRES_PWCHANGE, DISALLOW_ALL_TIX,
+	        REQUIRES_PREAUTH. Adds support for parsing the V4 options.
+		[krb5-kdc/464].
+
+	* main.c (main): Add option -4 to specify V4 handling mode.
+
+Mon Aug 18 12:29:08 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* do_tgs_req.c (process_tgs_req): Initialize authtime to 0 so it
+        is set before potentially used in case the packet has an error.
+
+	* kdc_preauth.c (get_sam_edata): Remove unused variables.
+
+	* kdc_util.h: Added prototype for setup_server_realm().
+
+	* main.c (get_realm_port): Removed unused function.
+	         (setup_server_realm): Moved prototype to kdc_util.h
+
+Wed Jul 30 18:29:19 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_util.c: 
+	* main.c: Don't use an rcache.
+
+Fri Jul 25 15:44:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* main.c (init_realm): Fix to use new ktkdb.
+
+Tue Jul 15 01:55:56 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Don't goto cleanup if SAM is not
+	used; this prevents freeing an unallocated keyblock.
+
+Thu May 29 21:08:24 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* do_as_req.c (process_as_req), do_tgs_req (process_tgs_req): Use
+		limit_string() to make sure the length of cname and sname
+		are reasonable.
+
+	* kdc_util.c (limit_string): New function which limits the strings
+		that will end up in log files to "reasonable" lengths.
+
+Tue Feb 18 09:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kerberos_v4.c: Remove include of krb4-proto.h
+
+Tue Feb 18 18:51:09 1997  Richard Basch  <basch@lehman.com>
+
+	* do_as_req.c do_tgs_req.c kdc_preauth.c kdc_util.c main.c
+	replay.c kerberos_v4.c:
+		Replace krb5_xfree with appropriate free routine.
+
+Thu Feb  6 00:09:46 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Remove logger.c target before copying over it.
+		This avoids permission problems if the source is read-only
+		and later changes.
+
+Wed Jan  1 22:56:16 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdc_preauth.c (get_sam_edata): Use proper interface to
+		krb5_db_get_principal. Also if SAM is not an option, do
+		not return as a possible type to client. [krb5-kdc/310]
+
+Fri Jan 31 21:39:04 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (LOCALINCLUDE): Change  KRB4_INCLUDE to KRB4_INCLUDES
+
+Fri Jan 31 19:45:13 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Sat Nov 23 17:26:22 1996  Mark Eichin  <eichin@kitten.gen.ma.us>
+
+	* [krb5-libs/149] only generate requests that you can actually
+	handle.
+	
+	Tue Sep  3 22:53:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdc_preauth.c (get_preauth_hint_list): detect ap->get_edata
+	return status and don't pass back hint if it failed.
+	(get_etype_info): malloc one more word in entry for end marker.
+
+Wed Nov 20 11:25:05 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* main.c (initialize_realms): krb5_aprof_init can succeed while
+ 	leaving aprof == NULL, but krb5_aprof_finish will fail.  This is
+ 	just more grossness that needs to be redone when the kdc.conf
+ 	interface is reworked.
+
+Thu Nov  7 12:27:21 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdc_preauth.c (check_padata): Fixed error handling; in order for
+		check_preauth to return successfully, there must be at
+		least one preauth which succeeded, and no REQUIRED preauth
+		system which failed.  If a preauth is marked SUFFICIENT,
+		then the rest of the preauth list aren't checked.  Fixed
+		bug where when none of the preauth types were recognized,
+		an error message corresponding to stack garbage was printed.
+
+Wed Nov  6 12:00:48 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* main.c (argv): Check the error return from krb5_init_context(),
+ 		and print an error message if necessary.
+
+Mon Nov  4 22:29:30 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* main.c (initialize_realms): Remove rather pointless use of
+ 		krb5.conf to find the kdc.conf used to get the default
+ 		port list.  It's not useful for anything else, and will
+		just confuse people.
+		(init_realm): Reformat function to be readable.  Add error
+		checking to call of krb5_read_realm_params
+
+Wed Sep 18 16:03:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* kdc_util.c: Added magic number to initializer of nolrentry.
+
+Tue Sep 10 14:18:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* krb5kdc.M: remove ".so man1/header.doc"
+
+Fri Aug 23 14:22:45 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* kerberos_v4.c (check_princ): Assume an expiration date of zero means never expire.
+
+Thu Aug  1 11:13:46 1996  Ezra Peisach  <epeisach@dumpster.rose.brandeis.edu>
+
+	* configure.in (withval): Link -ldyn as it is needed by the kadm5
+		shared library.  
+
+Wed Jul 24 02:29:19 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* kerberos_v4.c (set_tgtkey): s/KRB4_#@/krb5_ui_4 so we work with
+ 	athena Kerberos.
+
+
+
+Tue Jul 23 22:26:29 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Build logger.o from the libkadm5 directory.  This
+ 		is prepatory work towards eliminating the dependency on
+ 		libkadm5.  Ultimately we will probably need to rethink how
+		the library structure for krb5....
+
+	* configure.in: Add -lgssapi and -lgssrpc to libraries linked with
+ 		krb5kdc since they are needed for shared libraries.  This
+ 		is a horrible hack....
+
+
+Thu Jun 13 22:09:34 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
+Sun Jun  9 23:03:06 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (finish_realm): Do not invoke krb5_finish_key if
+		encryption block is not set.
+
+Sun May 12 01:17:05 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: USE_KADM_LIBRARY replaced by USE_KADMSRV_LIBRARY
+
+Tue May  7 18:19:59 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	Thu May  2 22:52:56 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* kdc_util.c (kdc_process_tgs_req): call
+	krb5_rd_req_decoded_anyflag instead of krb5_rd_req_decoded, so
+	that invalid tickets can be used to validate themselves. Add
+	explicit check that if the ticket is TKT_FLG_INVALID, then
+	KDC_OPT_VALIDATE was requested.
+
+Mon May  6 12:15:36 1996  Richard Basch  <basch@lehman.com>
+
+	* main.c: Fixed various abstraction violations where the code knew
+	the internals of eblock->crypto_entry.
+
+Wed Feb 28 13:07:28 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c: Move com_err.h after k5-int.h include.
+
+Tue Feb 27 17:33:44 1996  Richard Basch  <basch@lehman.com>
+
+	* main.c:
+	Do not repeat random number generator initializations, as memory
+	is allocated and never reclaimed.  Also fixed the V4 random number
+	generator initialization (a DES_CBC_CRC random number is generated
+	and used as a seed for the V4 routine, but the generation function
+	was being called with the wrong arguments).
+
+	* do_as_req.c:
+	Memory was occassionally being freed twice because the pointer was
+	not re-initialized to NULL after it was freed.
+
+Sun Feb 25 16:04:10 1996  Mark W. Eichin  <eichin@cygnus.com>
+
+	* main.c (initialize_realms): missing indirection for conf_val in
+	alternate profile code. (This should really be in a library...)
+
+Sat Feb  3 22:37:55 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* network.c (add_port): sunos realloc doesn't handle a NULL
+	pointer, so protect with a macro.
+
+Sat Feb 10 02:46:27 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* main.c (initialize_realms): look for [kdc] profile=path for
+	default alternate kdc profile (environment variable still
+	overrides it.)
+
+Wed Feb 21 23:28:33 1996  Richard Basch  <basch@lehman.com>
+
+	* kerberos_v4.c: Improve checking of DES keys
+
+	* main.c: Do not assume the master key is DES; instead initialize
+		the V4 random key generator from a random key after the
+		DES_CBC_CRC generator has been initialized.
+
+Tue Feb 20 16:50:59 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kerberos_v4.c (kerberos_v4): Use strong random number generator
+
+	* main.c (main): Initialize Kerberos V4's random number generator.
+
+Sat Jan 27 00:53:41 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* network.c (setup_network): strtol is good enough for port
+	number, and sunos doesn't have strtoul (and nothing else in the
+	tree uses it.)
+	(add_port): use proper old-style definition.
+	
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+        * kerberos_v4.c : Remove mkvno for krb5_db_entry
+
+Tue Dec 12 01:10:34 1995  Chris Provenzano (proven@mit.edu)
+
+	* extern.h: Added a krb5_keytab to the realm context. The keytab
+		should be associated with a krb5_db_context which will
+		make having a krb5_context unnecessary in the realm context.
+	* kdc_util.c kdc_process_tgs_req(): Use the realm keytab instead
+		of faking up a user-to-user key to pass to krb5_rd_req_decode().
+	* main.c: Added code to use the new database keytab routines.
+
+Mon Dec 11 16:58:31 1995  Chris Provenzano (proven@mit.edu)
+
+	* kdc_preauth.c return_padata(): Initialize local variable "size" 
+		to 0 before using it.
+
+Thu Nov 30 20:57:11 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* kdc_preauth.c: #@&^(!! Ultrix cc sucks.  Typedef to function
+		pointer rather than function prototype to avoid lossage.
+
+Wed Nov 29 13:31:39 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): Removed extra eblock argument
+		from call to krb5_encode_kdc_rep.
+
+Fri Nov 17 22:41:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_as_req.c (process_as_req): Removed extra eblock argument from
+		call to krb5_encode_kdc_rep.
+
+Mon Nov 13 19:40:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.h: Added new prototypes for return_padata() and
+	        check_padata().
+
+	* kdc_preauth.c (return_padata): New function which calls out to
+		each preauth type to see if it is necessary to return
+		preauth data or not.
+	(return_pw_salt): New function responsible for returning the
+		KRB5_PW_SALT preauth information.
+
+	* do_as_req.c (process_as_req):  Move creation of the PW_SALT
+		preauthentication step into kdc_preauth.c.  Call
+		return_pdata() which is responsible for all padata info
+		which is returned by the KDC in the KRB_AS_REP message.
+
+
+Thu Nov  9 00:05:55 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_preauth.c (get_etype_info): Added function to return the
+		etype_info preauth hint to the client.
+
+	* kdc_util.c (get_salt_from_key): Added new function which
+		determines the salting information from the krb5_key_data
+		structure.
+
+	* main.c (kdc_initialize_rcache): Replace use of krb5_clockskew
+		with context->clockskew.
+
+Wed Nov  8 02:57:15 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.c (): Added new helper functions
+		dbentry_has_key_for_enctype(), dbentry_supports_enctype(),
+		and select_session_keytype().
+
+	* kdc_preauth.c: Added support for the ENC_TIMESTAMP
+		preauthentication scheme.
+
+	* do_tgs_req.c (process_tgs_req): Fixed the keytype/enctype
+		selection criteria for the server key, and the ticket
+		session key.
+
+	* do_as_req.c (process_as_req): Added calls to the kdc
+		preauthentication verification routines.  Fixed the
+		keytype/enctype selection criteria for the client key, the
+		server key, and the ticket session key.
+
+	* main.c (finish_realm): Make sure all parts of the realm
+		structure are freed properly.
+		(main): Free the kcontext krb5_context.
+
+Fri Oct  6 00:07:49 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_preauth.c (get_preauth_hint_list): Fix missing indirection
+		in get_hint_list.
+
+	* kdc_util.c (validate_as_request): Remove preauthentication
+		check; this is handled in do_as_req.c
+
+	* do_tgs_req.c (process_tgs_req): Use a slightly more compressed
+		logging format.
+
+	* do_as_req.c (process_as_req): Unify the logging and error packet
+		production, to make sure that both logging and an error
+		packet is returned for each error condition.  Pass 
+		e_data to prepare_as_error so that the proper
+		preauthentication hint list can be passed back to the client.
+
+Thu Oct  5 21:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* network.c (setup_network):
+	* main.c (initialize_realms): Massive revamp of how the network
+		ports are setup.  The default port list for a realm is
+		read from [kdcdefaults]/kdc_ports from the kdc.conf file.
+		For each realm, a list of ports can be specified in 
+		[realms]/<realm>/kdc_ports.  
+
+	* extern.h (kdc_realm_t): Remove realm_pport and realm_sport, and
+		added realm_ports.
+
+	* do_tgs_req.c (process_tgs_req):
+	* do_as_req.c (process_as_req):
+	* dispatch.c (dispatch): Pass the portnumber of the incoming
+		request down to process_as_req and process_tgs_req,
+		instead of the boolean "is_secondary".
+
+	* kerberos_v4.c (kerb_get_principal, kerberos_v4): Fix gcc -Wall
+		flames, by fixing signed vs. unsigned types.
+
+Mon Sep 18 11:16:30 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* main.c (init_realm): strdup KRB5_KDB_M_NAME if we use it, to
+	avoid free'ing a constant later.
+
+Fri Sep 15 01:33:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* main.c (init_realm): Stop after finding the first TGS key which
+		matches an entry in the key/salt list.  (Typo; added
+		missing '!')
+
+Sun Sep 10 10:51:29 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* main.c (init_realm): When checking for master key in valid
+		enctypes, do not stop after checking only the first type.
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * do_as_req.c, do_tgs_req.c, kdc_util.c, kerberos_v4.c, main.c : 
+		s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * do_as_req.c, do_tgs_req.c, kerberos_v4.c, main.c: Remove krb5_enctype
+		references, and replace with krb5_keytype where appropriate.
+
+Mon Sep  4 14:10:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_util.c, kdc_util.h, policy.c: Add
+		const declarations to variables pointing to error strings
+		in order to make everything self consistant.
+
+Fri Sep  1 23:28:29 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_preauth.c: New file, to contain the server-side
+		preauthentication routines.
+
+	* do_as_req.c (process_as_req): Move preauthentication code to
+		kdc_preauth.c, for better modularity.
+
+	* do_as_req.c (prepare_error_as): Add new argument to this
+		function so that the e_data field may be passed in and
+		included in the KRB_ERROR messsage which is passed back to
+		the user.
+
+Mon Aug 21 17:03:53 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Interpret -k and -e arguments as strings instead of string
+		representations of integers (e.g. -e des-cbc-md5).
+	* krb5kdc.M - Remove "ascii representation of a decimal number".
+
+
+Thu Aug 17 13:49:14 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Close and re-open the database after performing a
+		database update.  This is the cleanest way to flush out the
+		update without reorganizing the code.
+
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * do_as_req.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
+	* do_as_req.c: Add a missing #ifdef KRBCONF_KDC_MODIFIES_KDB
+		for update_client and updating the database.
+
+Tue Aug 15 14:32:54 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* extern.h - Add key/salt list to per-realm data.
+	* main.c - Save or generate per-realm key/salt list.  Use this list
+		to determine which key to use from the list of server keys.
+		Fix gcc -Wall complaints.
+	* do_as_req.c - Batch KRBCONF_KDC_MODIFIES_KDB updates after the
+		response is issued.  Use krb5_dbe_find_keytype() to find the
+		appropriate key in the list of keys.  Find appropriate client
+		key instead of using the key in slot 0.  Fix gcc -Wall moans.
+	* kdc_util.c - Use per-realm key/salt list to determine which key to
+		use from the list of server keys.  Fix gcc -Wall complaints.
+	* kerberos_v4.c - Use krb5_dbe_find_keytype() to find appropriate key.
+		Fix gcc -Wall complaints.
+
+Thu Aug 10 14:52:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Add missing variable when KRBCONF_KDC_MODIFIES_KDB on.
+
+
+Thu Aug 03 12:22:34 1995 Chris Provenzano (proven@mit.edu)
+
+	* do_as_req.c : Fix bug from new kdb changes.
+	* kerberos_v4.c : Use new db format.
+
+Thu Aug 3 11:49:35 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* do_as_req.c - Ensure that padata is null with normal salt.
+	* kerberos_v4.c - Give the compiler something to compile when Kerberos
+		V4 is disabled.
+
+Thu Jul 27 15:10:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-vague-errors and --with-kdc-kdb-update
+		which define KRBCONF_VAGUE_ERRORS and KRBCONF_KDC_MODIFIES_KDB
+		which replace the definitions that used to be in k5-config.h.
+	* kdc_util.c - Cast argument to fetch_asn1_field which caused a
+		compiler moan.
+	* kerberos_v4.c - Use KRB5_PROTOTYPE for v4_klog which is set correctly
+		for the compiler.  Some compilers (e.g. OSF/1 native) understand
+		prototypes even when not in STDC mode.
+		Also use KRB5_MIT_DES_KEYSIZE instead of MIT_DES_KEYSIZE.
+
+
+Thu Jul 27 02:59:05 1995 Chris Provenzano (proven@mit.edu)
+
+        * do_as_req.c do_tgs_req.c kdc_util.c main.c : Use new kdb format.
+
+Mon Jul 17 15:13:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Gut KDC profile handling logic and move it to lib/kadm/
+		alt_prof.c because it's now used by admin and kadmin programs.
+		Remove explicit stash file handling logic and supply stash
+		file name to krb5_db_fetch_mkey() since it can now handle a
+		non-default stash file name.
+
+Thu Jul 13 19:51:33 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* main.c: Include netinet/in.h if we're using IP.
+
+Wed Jul 12 12:19:44 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Reorganize KDC profile handling so that the hierarchy for
+		locating per-realm data is [realms]->realm->tag.  Add
+		[kdcdefaults] section with primary_ports and secondary_ports
+		to list ports to listen on.  Consolidate all port location here
+		from network.c.  Add -s flag and change meaning of -p flag to
+		be the default if none specified in KDC or Kerberos profile.
+	* network.c - Open list of primary ports and then per-realm ports.
+		Handle secondary ports just like primary ports except that
+		bind failures are only warnings.  Support more than one
+		secondary port.
+	* extern,kdc_util.h - Add supporting definitions.
+	* krb5kdc.M - update description of -p and add description of -s.
+
+Tue Jul 11 07:35:12 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Add prototype for set_tgtkey
+
+Mon Jul 10 17:01:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Add prototypes for compat_decrypt_key,
+		kerb_get_principal, check_princ, v4_klog
+
+	* network.c (process_packet): Make prog a const char *. 
+
+	* main.c: Add prototypes for find_realm_data, setup_server_realm,
+		usage, request_exit, setup_signal_handlers, initialize_realms,
+			finish_realms. 
+
+	* kdc_util.h: Add prototypes for against_local_policy_as,
+		against_local_policy_tgs, validate_as_request,
+		validate_tgs_request, fetch_asn1_field,
+		kdc_initialize_rcache, process_packet.
+
+Sat Jul  8 17:40:10 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos_v4.c (v4_klog): Also log L_KRB_PERR error messages, so
+		we know when there are protocol problems.
+
+Fri Jul 7 16:05:57 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove all explicit library handling and LDFLAGS.
+	* configure.in - Add USE_<mumble> and KRB5_LIBRARIES.
+	* kdc_util.c(comp_cksum) - Use krb5_verify_checksum to verify cksum.
+
+
+Fri Jun 30 14:38:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add --with-dbm to select between Berkeley and DBM
+		KDC database format.
+
+Thu Jun 29 06:50:08 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* kerberos_v4.c (check_princ): delete master_key_version check,
+	since we never actually set it.
+	(main): elide original V4 server code to avoid confusion when
+	looking for variable references.
+	(type_2_v5err): reformat for 79 columns instead of 80 and
+	conditionalize out since it is unused (though still informative.)
+
+Tue Jun 27 15:59:48 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Change profile name hierarchy storage to const char *.  Add
+		signal name argument to signal handler to conform to prototype.
+	* kerberos_v4.c - Cast key to (char *) to conform to prototype.
+
+
+Thu Jun 22 15:24:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* main.c - Change option parsing logic to support multiple realms.
+		Use alternate profile routines from libkadm to support reading
+		values from it.
+	* dispatch.c - Setup global realm context before calling process_as_
+		req().
+	* do_as_req.c - Change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key call.
+	* do_tgs_req.c - Setup global realm context from our service principal
+		name.
+	* extern.c - Remove per-realm global data.  Replace this with list
+		of per-realm data with a pointer to the active request's realm.
+	* extern.h - Change per-realm global data names to #define's.  This
+		is to avoid having to rewrite everything to pass a pointer to
+		the active realm.
+	* kdc_util.c - Change "kdc_context" to "kcontext" because of #defines
+		in extern.h.  Also add logic after call to rd_req_decoded
+		to see if it failed because of a rcache error.  If so, then
+		reinitialize the replay cache and retry it.
+		Also change KDB_CONVERT_KEY_OUTOF_DB to decrypt_key.
+	* kerberos_v4.c - Remove extraneous definition of master_encblock.
+	* krb5kdc.M - Add definition of -p, add vague reference to kdc.conf
+		manpage and describe multiple realms briefly.
+	* network.c - Change udp_port_fd to a list of fds to support having
+		multiple ports to listen on.
+
+
+Thu Jun 15 17:55:21 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Change explicit library names to -l<lib> form, and
+		change target link line to use $(LD) and associated flags.
+		Also, remove DBMLIB, it was not used. Also, for K4, use
+		KRB4_LIB and KRB4_CRYPTO_LIB, these were
+                split out.
+	* configure.in - Remove dbm library checks, these are no longer needed
+		with the Berkeley database code.  Also, add shared library
+		usage check.
+
+Tue Jun 13 12:44:20 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* network.c: Base inclusion of sys/select.h on whether it exists
+        instead of a specific test for AIX.
+
+	* configure.in: Test for sys/select.h
+
+Mon Jun 12 20:01:23 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc_util.c (kdc_process_tgs_req): Set the auth_context rcache to
+		null before freeing auth_context. This keeps the rcache
+		valid. 
+
+Sat Jun 10 23:04:31 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* kdc_util.c: krb5_auth_context redefinitions
+
+Fri Jun  9 19:13:08 1995    <tytso@rsx-11.mit.edu>
+
+	* dispatch.c, kdc_util.h, kerberos_v4.c: Use KRB5_KRB4_COMPAT
+		instead of KRB4 for determining whether to compile in
+		Kerberos V4 backwards compatibility
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Thu Jun  8 23:35:27 1995    <tytso@rsx-11.mit.edu>
+
+	* do_as_req.c, do_tgs_req.c, kdc_util.c, kerberos_v4.c, main.c,
+		network.c: Fix -Wall nits.
+
+Thu Jun 8 14:52:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Add libkadm.
+	* dispatch.c, do_as_req.c, do_tgs_req.c, kdc_util.c, kerberos_v4.c
+		main.c - Include adm_proto.h and change syslog calls to
+		calls to krb5_klog_syslog.
+
+Fri May 26 17:50:39 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Define KDBDEPLIB.
+
+Sat May 20 22:28:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kerberos_v4.c: Port to OSF/1. (change longs to KRB4_32)
+
+Sat Apr 29 00:13:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* kdc_util.c (kdc_process_tgs_req): Make sure apreq->ticket gets
+		freed, since it isn't being passed back to the caller 
+		(anymore).
+
+Fri Apr 28 21:28:45 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): Free header_ticket when we're
+		done with it.  (Prevents massive memory leak).
+
+	* Makefile.in (depend): Use $(LD) instead of $(CC) so that we can
+		do purify checking.
+
+Fri Apr 28 18:05:52 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (KLIB): put KRB4_LIB inside KLIB.
+
+Thu Apr 27 13:52:22 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* Makefile.in (krb5kdc): use KRB4_LIB directly.
+	* configure.in: use WITH_KRB4 as-is.
+
+Wed Apr 26 11:23:11 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: need HAS_ANSI_VOLATILE for signal_requests_exit.
+
+Sat Apr 22 00:36:37 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* network.c (setup_network): Don't rely on krb5_kdc_portname and
+		krb5_kdc_sec_portname anymore.  Use the #define'd versions.
+
+Fri Mar 31 16:50:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* main.c (main): Make sure the context is initialized before it is
+	  	used.
+
+Mon Mar 27 07:56:26 1995 Chris Provenzano (proven@mit.edu)
+
+	* kdc_util.c Use new calling conventions for krb5_rd_req_decoded().
+
+Fri Mar 24 14:58:07 1995    <tytso@rsx-11.mit.edu>
+
+	* replay.c: The KDC replay cache needs to store the database
+		modification time, so that if the database is modified in
+		between when it receives a request and when it receives a
+		replay of the same request, it knows to throw away the
+		replay cache entry and generate a new response (since the
+		record in the database on which the response is based may
+		have been modified). 
+
+	* main.c (kdc_com_err_proc): Use syslog() instead of vsyslog().
+
+Sat Mar 18 18:59:45 1995  John Gilmore  (gnu at toad.com)
+
+	* kerberos_v4.c:  Replace STDARG_PROTOTYPES with HAVE_STDARG_H.
+
+Tue Mar 14 15:25:38 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in, Makefile.in: Use the libdes425 library so that the
+		DES code doesn't get dragged in twice.
+
+	* kdc_util.c (validate_as_request): Allow a client to obtain a
+		password changing ticket, even if the client's key is
+		expired.
+
+	* main.c (usage, process_args, main): The KDC will disassociate
+		itself from the terminal by default, unless the -n option
+		is given.
+
+Thu Mar  2 12:16:50 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
+Wed Mar  1 16:30:27 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE and ISODE_DEFS, replace check
+		for -lsocket and -lnsl with WITH_NETLIB check.
+
+Tue Feb 28 02:27:11 1995  John Gilmore  (gnu at toad.com)
+
+	* *.[ch]:  Avoid <krb5/...> and <com_err.h> includes.
+
+Fri Feb 10 14:35:42 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* do_tgs_req.c (process_tgs_req): krb5_use_keytype() was being
+		called when the argument was a encryption type.   Change
+		use to krb5_use_cstype().  Actually, any use of
+		krb5_use_keytype() is a bug by definition.
+
+Wed Feb 01 21:07:03 1995  Chris Provenzano (proven@mit.edu)
+
+	* kdc_util.c (kdc_rdreq_keyproc()) Add krb5_keytype() arg.
+
+Wed Jan 25 23:20:07 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* network.c (setup_network), main.c (process_args): Allow the
+		primary port that the KDC listens on be configurable on the
+		command line.  If the appropriate /etc/services entries
+		aren't found, use compiled in defaults.
+
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+Thu Dec  8 00:33:05 1994    <tytso@rsx-11.mit.edu>
+
+	* do_tgs_req.c (prepare_error_tgs): Don't free the passed in
+		ticket; it will be freed as part of other structures.
+
+	* do_tgs_req.c (process_tgs_req): Set the encryption type in the
+		reply structure, and set the eblock type accordingly.
+
+Wed Dec  7 13:36:34 1994    <tytso@rsx-11.mit.edu>
+
+	* do_as_req.c (process_as_req): Set the encryption type in the
+		reply_encpart structure.
+
+	* kdc_util.c (validate_as_request): 
+	* policy.c (against_local_policy_as): Move requirement that an AS
+		request must include the addresses field to the local
+		policy routine.  (Not required by RFC).
+
+	* main.c (setup_com_err): Initialize the kdc5 error table (the
+		kdb5 error table is already initialized)
+
+Wed Nov 30 16:37:26 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* confiugre.in: Add appropriate help text for --with-krb4
+		option.
+
+Mon Nov 21 17:23:50 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_tgs_req.c (process_tgs_req):
+	* do_as_req.c (process_as_req): Use the list of encryption types
+		passed as part of the KDC request to determine which
+		encryption to use for encrypting the ticket.  The
+		encryption must be one that is supported by the KDC, as
+		well as being one which is marked as being supported by
+		the server of the ticket.  In a AS request, also use this
+		encryption for encrypting the KDC response.  In a TGS
+		request, use the encryption type of the TGT authenticator
+		to determine how to encrypt the KDC response. 
+
+Tue Nov  8 17:51:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_tgs_req.c (process_tgs_req): Use published interface to call
+		krb5_random_key().
+
+Mon Nov  7 22:11:01 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kerberos_v4.c: Don't define functions manually, but pull in the
+	appropriate include files (com_err.h, krb5/ext-proto.h,
+	krb5/los-proto.h, etc.)
+
+	* kdc_util.c (kdc_process_tgs_req): Fix lineage check so that we
+		don't fail if we're cross-authenticating with a realm with
+		the same length as our own.  ('||' should have been '&&')
+
+Fri Nov  4 17:47:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_as_req.c (process_as_req): Use published interface to call
+		krb5_random_key().
+
+Fri Oct 14 00:31:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* main.c (process_args): Select the cryptosystem to be used using
+		krb5_use_cstype() instead of using a implementation
+		specific assignment.  Also, allow the encryption type to
+		be specified using a command line option.
+
+Tue Oct 11 22:11:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* do_as_req.c (process_as_req): Don't assume that the request
+		server's realm name is null terminated.  Compare the
+		request server against changepw/kerberos using
+		krb5_principal_compare.
+
+Tue Oct  4 16:42:16 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_util.c (kdc_rdreq_keyproc): Add widen.h and narrow.h around
+		keyproc call so that the argument types are widened.
+
+Mon Oct  3 13:13:48 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Use $(srcdir) to find manual page for make install.
+
+	* Makefile.in: Remove krb5kdc on make clean
+
+Fri Sep 30 22:13:13 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* extern.c: Add placeholder for magic number
+
+Thu Sep 29 00:03:59 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when library changes.
+
+Wed Sep 21 17:40:56 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdc_util.c, kdc_util.h (realm_compare): Change realm_compare so
+		that both arguments are principals.  This makes it less
+		confusing....
+
+	* kdc_util.c (add_to_transited): Folded in Tony Andrea's changes
+		so that add_to_transited doesn't assume that the contents
+		of a krb5_data->data are null terminated.
+
+	* do_tgs_req.c (process_tgs_req): Add the realm of the presented
+	  tgt if it is different from the local realm (cross-realm) and it
+	  is different than the realm of the client (since the realm of
+	  the client is already implicitly part of the transited list and
+	  should not be explicitly listed).
+
+Thu Aug 18 18:17:59 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* configure.in:
+	* Makefile.in: Move optional link with $(KRB4)/lib/libdes.a to
+	configure.in.
+
+Thu Aug  4 15:13:27 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in:
+	* kerberos_v4.c: don't include <sgtty.h> if POSIX_TERMIOS is
+	defined.
+
+Sat Jul 16 09:16:33 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: hopefully make dbm libs dtrt
+
+Sat Jul 16 01:59:02 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* do_as_req.c: Sanitie error return codes
+	* kdc_util.c (validate_tgs_request): Fix error handling for bogus
+	TGS renew/forward/etc. requests.  Sanitize error return codes.
+
+Fri Jul  8 00:33:45 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in:
+	* Makefile.in: back out changes because of possible breakage under
+	Ultrix, among other things
+
+Wed Jul  6 22:54:59 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in:
+	* Makefile.in: fixes to suck in -lndbm or -ldbm if needed
+
+Tue Jun 28 19:43:54 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* main.c: fix explicit calls to initialize_foo_error_table
+
+	* do_tgs_req.c:
+	* configure.in: folding in Harry's changes
+

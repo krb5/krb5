@@ -1,0 +1,277 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* env-setup.shin: Export $libdir.
+	* init_db: Substitue __MODDIR__ with the fakedest module
+	directory.
+	* start_servers: Likewise.
+
+2004-09-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: If one of the servers failed to start, log
+	info about which start file was not found.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Substitute FAKEDEST.  Substitue "$" for "$$".
+
+2003-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Allow BUILDTOP substitution.
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: Set KRB5RCACHEDIR.
+	* stop_servers_local: Set KRB5RCACHEDIR.  Use the correct filename
+	when deleting the replay cache file.
+
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
+2002-12-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_db (qualname): If "kdb5_util create" fails, exit.
+
+	* env-setup.shin: Set KRB5CCNAME to something under $K5ROOT.
+
+2002-10-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: If $USER isn't set, use $LOGNAME.  If
+	ovsec_kadm_srv_tcl invocation to do some initialization fails,
+	exit rather than continuing.
+
+2002-10-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: Set names of replay cache and log files to
+	be per-user, since they're in system-wide shared directories.
+
+2002-10-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* start_servers_local: Telnet to 127.0.0.1, not "localhost", to
+	probe for kadmind, since kadmind does IPv4 only.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2000-06-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* env-setup.shin: Do not override the EXPECT environment variable
+		if set.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+Sun Mar  1 21:13:06 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (env-setup.stmp): If env-setup.stamp needs to be
+ 		rebuilt, set CONFIG_FILES so that we only regenerate that
+ 		one file.
+
+	* env-setup.shin: Rename SRCTOPDIR to S_TOP, which has been
+		fixed to deal with absolute source paths.
+
+Sat Feb 28 18:54:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin (STOP): SRCTOP -> SRCTOPDIR.
+
+	* Makefile.in (env-setup.stamp): Fix up to use $(thisconfigdir).
+
+Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the kadmin
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel kadmin configure.in
+
+Wed Feb 18 15:59:31 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Thu Feb 12 16:16:22 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add commented out AC_OUTPUT to allow autoreconf to
+	rebuild the configure script.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Sun Feb  9 01:07:37 1997  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Fix to deal with multiple variables in
+	KRB5_RUN_ENV.
+
+Sat Feb  8 22:12:32 1997  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Hack to deal with new usage of KRB5_RUN_ENV.
+
+Tue Dec  3 15:28:53 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* init_db: be verbose when $SRVTCL doesn't exist, instead of just
+ 	failing [krb5-admin/245]
+
+Thu Dec  5 19:34:09 1996  Tom Yu  <tlyu@mit.edu>
+
+	* save_files.sh (files): Also save /etc/krb5.keytab. [PR 278]
+
+Thu Nov 14 15:28:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.shin, init_db, save_files.sh, start_servers,
+ 	start_servers_local, stop_servers, stop_servers_local: move
+ 	VERBOSE_TEST -> VERBOSE logic to env-setup.sh, make everything
+ 	else inherit from it, and fix the sense of the test (Tom got it
+ 	backwards); also fix init_db so that kdb5_util create is not
+ 	always verbose
+
+Wed Nov 13 17:12:51 1996  Tom Yu  <tlyu@mit.edu>
+
+	* env-setup.shin: Explicitly set KRB5CCNAME so the user's ccache
+	doesn't get blown away.
+
+Tue Nov 12 14:59:31 1996  Tom Yu  <tlyu@mit.edu>
+
+	* init_db, save_files.sh, start_servers, start_servers_local,
+ 	stop_servers, stop_servers_local: Fix test of $VERBOSE_TEST so
+ 	that $VERBOSE only gets set if $VERBOSE_TEST is not empty.
+
+Mon Nov 11 14:25:15 1996  Tom Yu  <tlyu@mit.edu>
+
+	* init_db, save_files.sh, start_servers_local, stop_servers,
+ 	stop_servers_local: Use temp files rather than a here document to
+ 	provide input to eval'ed commands; Ultrix sh is broken wrt here
+	documents redirected to eval commands.
+
+	* start_servers, start_servers_local, init_db: Use ${FOO+bar} and
+	${FOO=baz} rather than ${FOO:+bar} and ${FOO:=baz} because of
+	Ultrix /bin/sh lossage.
+
+Thu Nov  7 13:56:25 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* env-setup.shin (foo): Use single quotes around @KRB5_RUN_ENV@ so
+		that bash doesn't try to expand $(TOPLIBD) in the echo line.
+
+Tue Nov  5 08:07:06 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* start_servers_local: kadmin/tcl/util.t is in source tree.
+
+Tue Oct 29 12:19:45 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* init_db: put KRB5_RUN_ENV_CSH in setup.csh
+
+	* env-setup.shin: create KRB5_RUN_ENV_CSH for init_db
+	
+Fri Oct 18 16:15:45 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (env-setup.stamp): Add dependency upon Makefile.
+
+Thu Oct 17 18:28:36 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* qualname.plin: Downcase the FQDN for keytab use. [krb5-libs/116]
+
+Tue Oct 15 18:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin: Support for build tree shared library
+		environment setup. [krb5-admin/80]
+
+	* configure.in (RBUILD): Pass in proper top of build tree (not
+		.. path) as this is build tree independent.
+
+Tue Oct 15 16:22:52 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.shin: set $QUALNAME to the right path
+
+	* start_servers, init_db: use qualname of local host, not
+ 	localhost, in krb5.conf
+
+Tue Oct 15 06:39:58 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in: Added standard rules for .plin -> .pl 
+
+	* *.plin: Renamed from *.pl.in
+
+Thu Oct 10 17:32:22 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin (EXPECT): Subsititute path for expect from
+		autoconf. 
+
+	* configure.in: Check for expect.
+
+Thu Oct  3 13:16:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* env-setup.shin: Renamed env-setup.sh for autoconf use.
+
+	* init_db, start_servers, start_servers_local, stop_servers:
+		Invoke scripts from source directory or build tree as needed.
+
+	* configure.in, Makefile.in: generate env-setup.sh with proper
+		paths already.
+
+
+Wed Oct  2 13:41:04 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in, Makefile.in: Let autoconf determine path to perl.
+
+Fri Sep 27 14:12:59 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* start_servers, start_servers_local, stop_servers, init_db,
+ 	env-setup.sh: first pass at making TEST_SERVER remote server
+ 	testing work
+
+	* env-setup.sh: set K5ROOT to $TESTDIR/krb5-test-root by default,
+ 	but use an absolute path
+
+Thu Sep 26 17:48:32 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* env-setup.sh, init_db, start_servers_local: use K5ROOT instead
+ 	of /krb5
+
+Thu Sep 26 11:45:56 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* qualname.pl.in: Renamed old qualname to here as perl path needs
+		updating. 
+
+	* Makefile.in (GEN_SCRIPTS): Add qualname.pl
+
+	* start_servers_local, env-setup.sh (QUALNAME): Replace with
+		qualname.pl. 
+
+Tue Sep 24 13:28:54 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* create Makefile.in and configure.in
+
+Mon Sep 23 15:38:58 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* stop_servers_local: delete krb5kdc_rcache after stopping kdc
+
+	* Makefile.ov: create restore_files.sh as symlink to save_files.sh
+
+Wed Sep 11 17:01:06 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* make-host-keytab.pl.in: use kadmin instead of kadm5_keytab
+
+Mon Aug 12 11:36:57 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* init_db: use kdb5_util instead of kdb5_create
+
+Fri Jul 12 14:48:20 1996  Marc Horowitz  <marc@mit.edu>
+
+	* stop_servers_local (true, false): use the path to find these,
+ 	instead of looking in /bin explicitly.
+
+	* start_servers_local (/usr/tmp): /usr/tmp doesn't exist on some
+ 	systems.  Check for that and /var/tmp, and use the one which
+ 	exists.  (true, false): use the path to find these, instead of
+ 	looking in /bin explicitly.
+
+	* make-host-keytab.pl.in: perl5 requires that @ in strings be
+ 	backwhacked.  (EDIT_KEYTAB): ovsec_adm_keytab is now kadm5_keytab.
+	
+  	* init_db: kadmin_create should be kdb5_create
+

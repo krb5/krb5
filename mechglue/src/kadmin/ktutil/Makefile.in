@@ -1,0 +1,58 @@
+thisconfigdir=./..
+myfulldir=kadmin/ktutil
+mydir=ktutil
+BUILDTOP=$(REL)..$(S)..
+LOCALINCLUDES = $(KRB4_INCLUDES)
+PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+OBJS= 	ktutil.o \
+	ktutil_ct.o \
+	ktutil_funcs.o
+
+SRCS= 	$(srcdir)/ktutil.c \
+	ktutil_ct.c \
+	$(srcdir)/ktutil_funcs.c
+
+all:: ktutil
+
+ktutil: ktutil.o $(OBJS) $(SS_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o ktutil $(OBJS) $(SS_LIB) $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) ktutil ${DESTDIR}$(ADMIN_BINDIR)/ktutil
+	$(INSTALL_DATA) $(srcdir)/ktutil.M ${DESTDIR}$(ADMIN_MANDIR)/ktutil.8
+
+# needed until we run makedepend
+ktutil_ct.c: ktutil_ct.ct
+
+ktutil_ct.o: ktutil_ct.c
+
+clean::
+	$(RM) ktutil_ct.c
+
+depend:: ktutil_ct.c
+
+clean::
+	$(RM) ktutil
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)ktutil.$(OBJEXT): ktutil.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/krb5/adm_proto.h \
+  $(SS_DEPS)
+$(OUTPRE)ktutil_ct.$(OBJEXT): ktutil_ct.c $(SS_DEPS) \
+  $(COM_ERR_DEPS)
+$(OUTPRE)ktutil_funcs.$(OBJEXT): ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP)

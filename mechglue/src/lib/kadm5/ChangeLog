@@ -1,0 +1,734 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h: Include kdb.h instead of k5-int.h.
+	* kadm_rpc_xdr.c, server_internal.h: Include errno.h instead of
+	k5-int.h.
+
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
+	* kadm_rpc.h: Remove krb5_ui_4 casts on RPC defined numbers.
+	Remove argument names from RPC proc declarations.  Reorder
+	declarations, change whitespace.  Renamed all RPC functions from
+	_1 to _2 to match current program version number.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* Makefile.in (adb_err.*): Targets deleted.
+	(SRCS, OBJS, clean, STLIBOBJS, BUILD_HDRS): Delete references to
+	adb_err.*.
+	(HDRS, SRC_HDRS): Delete references to adb.h.
+	* adb_err.et: Moved to lib/kdb.
+	* admin.h: Don't include kadm5/adb_err.h.
+	(krb5_key_salt_tuple): Delete typedef and struct definition.
+	(kadm5_init, kadm5_init_with_password, kadm5_init_with_skey,
+	kadm5_init_with_creds, ovsec_kadm_init,
+	ovsec_kadm_init_with_password, ovsec_kadm_init_with_skey): Add new
+	char** argument for arbitrary db args.
+	* admin_xdr.h: Include server_internal.h.
+	(xdr_krb5_key_data, xdr_osa_pw_hist_ent): Declare.
+	* kadm_err.et (KADM5_XDR_FAILURE): New error code.
+	* kadm_rpc.h (struct generic_ret, struct gprincs_ret, struct
+	chrand_ret, struct gprinc_ret, struct gpol_ret, struct gpols_ret,
+	struct getprivs_ret): Add new field for error-string return.
+	* kadm_rpc_xdr.c (xdr_generic_ret, xdr_gprincs_ret,
+	xdr_chrand_ret, xdr_gprinc_ret, xdr_gpol_ret, xdr_gpols_ret,
+	xdr_getprivs_ret): Encode/decode new field.
+	* ovsec_glue.c (ovsec_kadm_init_with_password,
+	ovsec_kadm_init_with_skey, ovsec_kadm_init): Pass through new
+	argument to kadm5_init_* routines.
+	* server_internal.h: Don't include adb.h.
+	(kadm5_server_handle_rec): Delete policy_db field, add db_args
+	field.
+	(OSA_ADB_PRINC_VERSION_1, osa_pw_hist_ent, osa_pw_hist_t,
+	osa_princ_ent_rec, osa_princ_ent_t, xdr_osa_princ_ent_rec,
+	osa_free_princ_ent): Duplicate definitions and declarations from
+	adb.h.
+	(kdb_iter_entry): Add match_entry argument.
+
+2005-04-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't invoke AC_CANONICAL_HOST explicitly,
+	CONFIG_RULES already does it.
+
+2004-08-20  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h (KADM5_CONFIG_NO_AUTH): New flag.
+
+2004-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h:
+	* kadm_rpc_xdr.c: rpc_u_int32 -> uint32_t
+
+2004-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (kadm5_get_admin_service_name): Fix call to
+	kadm5_get_config_params().
+
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-mac): Target deleted.
+
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h (kadm5_get_admin_service_name): Prototype for new function.
+	(KADM5_CONFIG_OLD_AUTH_GSSAPI): New flag to force old AUTH_GSSAPI
+	flavor.
+
+	* alt_prof.c (kadm5_get_admin_service_name): New function.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Invoke PRIOCNTL_HACK.
+
+2003-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Don't bother reading in
+	realm_keysalts or realm_num_keysalts, as they're no longer used.
+
+2003-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Change default max_life to
+	one day.
+
+2003-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Remove aes256 from the
+	default supported enctypes list for now.
+
+2003-05-04  Sam Hartman  <hartmans@mit.edu>
+
+	* chpass_util_strings.et: Replace reference to ovpasswd with kpasswd
+
+2003-04-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Add aes256 to the default
+	supported enctypes list.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,
+	AC_PROG_ARCHIVE_ADD, AC_PROG_RANLIB, AC_PROG_INSTALL.
+
+	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
+	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.ov: Deleted.
+
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Change double colons to single
+	colons.
+
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* chpass_util_strings.et: Remove trailing colons, as new
+	implementation of krb5_read_password() appends it.
+
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h (struct _osa_adb_db_ent_t): Add opencnt, which keeps track
+	of how many times an open was attempted on the adb.
+
+	* admin.h: Add kadm5_lock and kadm5_unlock.
+
+2002-09-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h (struct __krb5_realm_params): New field
+	realm_kdc_tcp_ports.
+	* alt_prof.c (krb5_read_realm_params): Fill it in by looking up
+	"kdc_tcp_ports" in the config file.
+	(krb5_free_realm_params): Free the storage.
+
+	* logger.c (klog_com_err_proc, krb5_klog_init, krb5_klog_close,
+	severity2string, klog_vsyslog, krb5_klog_syslog,
+	krb5_klog_reopen): Always define functions in prototype style.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(HDRS)): Depend on "includes".
+
+2002-07-31  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_err.et: Add KADM5_MISSING_KRB5_CONF_PARAMS, indicating a
+	problem with krb5.conf.  This prevents confusing users who look
+	for kdc.conf trouble rather than krb5.conf trouble, which is what
+	they should be looking at on a kadm5 client.
+
+2002-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* get_admhst.c: Deleted.
+
+2001-11-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_aprof_get_boolean): Return krb5_boolean *
+	instead of int *.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (krb5_klog_init): Initialize savec to keep compiler
+	happy.
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c: Drop _MSDOS support.
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* admin.h (krb5_realm_params): Add fields realm_reject_bad_transit
+	and realm_reject_bad_transit_valid; delete field realm_filler.
+	* alt_prof.c (string_to_boolean, krb5_aprof_get_boolean): New
+	functions.
+	(krb5_read_realm_params): Parse "reject_bad_transit" value as
+	boolean and save it.
+
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* kadm_rpc_xdr.c: Add xdr_krb5_ui_2. 
+	(xdr_krb5_tl_data): Change local variable from int to unsigned int. 
+
+	* admin_xdr.h: Add prototype for xdr_krb5_ui_2. 
+
+2001-07-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c (severity2string): Declare as returning const char *.
+	(klog_com_err_proc): Do not discard const status of format string.
+
+2001-07-06  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_internal.h: Add prototype for krb5_copy_key_data_contents.
+
+2001-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* str_conv.c (krb5_string_to_keysalts): When parsing string, allow
+	for extra separator characters (like spaces) between keysalts.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin_internal.h (_KADM5_CHECK_HANDLE): Change code to ecode in
+	blocked statement to prevent shadowing.
+
+2001-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (krb5_klog_init) [HAVE_SYSLOG]: Loop over an array of
+	syslog facility names rather than open-coding each check.  Add
+	"authpriv" and "ftp" names.
+
+2001-06-20  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_internal.h: Add prototype for kdb_iter_entry().
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Cast argument to isspace()
+	to int.
+	* logger.c (krb5_klog_init): Likewise.
+
+2001-06-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c (klog_vsyslog): If krb5_klog_init() is not called, do
+	not pass a NULL pointer to vsprintf for a %s format. Also, if
+	syslog() exists on the system, fallback to using this so the
+	message is not dropped on the floor.
+
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c (krb5_klog_init): Cleanup assignments in
+	conditionals. Ensure that if hostname is MAXHOSTNAMELEN, buffer is
+	\0 terminated.
+
+	* str_conv.c (krb5_string_to_keysalts, krb5_keysalt_iterate):
+	Clean up assignments in conditionals.
+
+	* admin.h: Move kadm5_free_name_list() to version 1 api as it is
+ 	present in the ovsec_glue layer.
+
+2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* str_conv.c: Include adm_proto.h for missing prototypes.
+
+Sun Feb 18 16:26:33 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* server_internal.h: Add prototype for
+        krb5_free_key_data_contents() which really should be in libkdb.
+
+	* kadm_rpc_xdr.c: Include krb5/admin_xdr.h for prototypes.
+
+	* kadm_rpc.h: Add prototypes for client and server stub
+        functions. Server functions renamed to have _svc appended. 
+
+	* alt_prof.c: Clean up warnings. Do not shadow index() with local
+        variable.
+
+	* admin_xdr.h: Add prototypes for xdr_nulltype(), xdr_krb5_ui_4(),
+        xdr_krb5_int16(), xdr_krb5_key_data_nocontents(),
+        xdr_krb5_key_salt_tuple(), xdr_krb5_tl_data(),
+        xdr_kadm5_principal_ent_rec_v1(), xdr_cprinc3_arg(),
+        xdr_generic_ret(0, xdr_chpass3_arg(), xdr_setv4key_arg(),
+        xdr_setkey_arg(), xdr_setkey3_arg(), xdr_chrand3_arg(),
+        xdr_gprincs_arg(), xdr_grpincs_ret(), xdr_gpols_arg(),
+        xdr_gpols_ret(), xdr_getprivs_ret(), xdr_krb5_salttype().
+
+	* admin_internal.h: Add prototype for _kadm5_check_handle().
+
+	* admin.h: Add prototypes for kadm5_free_config_params(),
+        kadm5_decrypt_key(), ovsec_kadm_free_name_list().
+
+	* adb.h: Add prototypes for xdr_osa_pw_hist_ent(),
+        xdr_krb5_key_data(), osa_adb_rename_db(),
+        osa_adb_rename_policy_db().
+
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* str_conv.c (krb5_keysalt_iterate): Always use the prototype for
+	function-pointer argument ITERATOR.
+
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin.h (KADM5_PW_FIRST_PROMPT): Get rid of casts from
+	error_message to char * - leave them as const char *.
+	(kadm5_chpass_principal_util): Argument msg_len is unsigned int.
+
+	* admin_internal.h (_kadm5_chpass_principal_util): msg_len is
+	unsigned int.
+
+	* chpass_util.c (_kadm5_chpass_principal_util): Change msg_len to
+	unsigned int. Arhument to krb5_read_password is unsigned int. 
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* admin.h: Add kadm5_free_name_list prototype.
+
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* adb.h: Add btinfo.
+
+	* configure.in: Remove AIX_DB_LIB kludge as we're now building
+	libdb reasonably.
+
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_aprof_init): profile_init takes a
+	profile_filespec_t as argument instad of char **.
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Include des3 in supported
+	enctypes by default.
+
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Use 1024 for
+	hard-coded length, to match existing callers.
+
+2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* admin.h: Add a length parameter to kadm5_chpass_principal_util().
+	* admin_internal.h: Add a length parameter to
+	_kadm5_chpass_principal_util().
+	* chpass_util.c (_kadm5_chpass_principal_util): Add a length parameter,
+	and use it to avoid overflowing "msg_ret".
+	* ovsec_glue.c (ovsec_kadm_chpass_principal_util): Adjust for new
+	parameter in kadm5_chpass_principal_util().
+
+	* logger.c (klog_com_err_proc): Don't overflow buffer "outbuf".
+
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* configure.in, chpass_util.c, server_internal.h: Check for
+	existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
+2000-02-26  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_cprinc3_arg): Don't XDR the nonexistent
+	keepold flag.
+
+	* kadm_rpc.h: Remove keepold flag from cprinc3_arg.
+
+	* admin.h: Remove keepold flag from create_principal_3, which was
+	kinda ridiculous.
+
+2000-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (includes): Extract basename of header file to be
+	installed, since Digital UNIX 4.0 native make substitutes the
+	VPATH-derived pathname here.
+
+2000-02-21  Bear Giles  <bgiles@coyotesong.com>
+
+	* alt_prof.c (krb5_read_realm_params): Permit realm supported
+	enctypes to be unspecified, letting the KDC produce defaults.
+	Don't look up enctypes at all if an error is to be returned.
+
+2000-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_chpass3_arg): 
+	(xdr_chrand3_arg): Fix up calls to xdr_array.
+
+2000-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc_xdr.c: Add xdr functions for new kadm rpc functions.
+
+	* kadm_rpc.h: Add arg structs, prototypes, constants for new kadm
+	rpc functions.
+
+	* kadm_err.et: Add error code KADM5_SETKEY3_ETYPE_MISMATCH.
+
+	* admin.h: Add prototype for setkey_principal_3.
+
+1999-12-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (klog_vsyslog): Convert pid_t to long for printing.
+
+1999-11-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Fix bug in direction of
+	test while walking through whitespace.  Thanks to Matt Crawford.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (lspec_parse_err_1, lspec_parse_err_2, log_file_err,
+	log_device_err, log_ufo_string, log_emerg_string,
+	log_alert_string, log_crit_string, log_err_string,
+	log_warning_string, log_notice_string, log_info_string,
+	log_debug_string): Replace char arrays with macros.
+	(klog_com_err_proc, klog_vsyslog): When calling syslog, supply %s
+	format string.
+
+1999-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* logger.c (DEVICE_PRINT, klog_com_err_proc, klog_vsyslog): Use
+	proper format strings to fprintf, instead of net-supplied data.
+	Fold in writes of following end-of-line sequences when
+	appropriate.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+Fri Dec  4 23:12:43 1998  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h: Add prototypes for create_principal_3,
+	chpass_principal_3, and randkey_principal_3.
+
+Thu Aug 13 17:21:06 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Fix to check
+	"supported_enctypes" if "kdc_supported_enctypes" isn't there.
+
+Wed Aug 12 20:19:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (krb5_read_realm_params): Use
+	"kdc_supported_enctypes" instead of "supported_enctypes" so that
+	the KDC and the kadmind will use different enctype lists.
+
+Wed Jul  8 04:48:50 1998  Geoffrey J. King  <gjking@mit.edu>
+
+	* logger.c: Add the function krb5_klog_reopen() which closes
+	        and reopens the log files.
+
+Mon Apr  6 19:40:05 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (includes): Don't call mkdir unless the directory
+ 	exists.
+
+Fri Feb 27 22:30:41 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Move tests from all of kadm5's subdirectories into
+		this configure.in, and make it generate makefiles for all
+		of the subdirectories.
+
+	* Makefile.in: Add a LOCAL_SUBDIRS macro for all subdirectories in
+		the kadm5 library.
+
+Wed Feb 25 15:00:10 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (krb5_free_realm_params): Free realm_acl_file portion
+	of structure. 
+
+Wed Feb 18 16:13:56 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Fri Feb 13 21:33:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* admin.h:
+	* kadm_rpc.h:
+	* kadm_rpc_xdr.c: Update header locations.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Wed Jan 28 16:32:36 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove the CopySrcHeader and
+		CopyHeader macros from configure.in and substitute
+		equivalent functionality in Makefile.in
+
+Tue Jan 20 23:06:36 1998  Tom Yu  <tlyu@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): Add support for Cygnus chpw.
+
+	* admin.h: Add support for Cygnus chpw.
+
+Mon Oct 13 10:48:24 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): When KADM5_CONFIG_ENCTYPES
+           is set on the input parameters, allocate a new copy of the
+           key_salts for the output parameters.
+	(kadm5_free_config_params): Free the admin_server and admin_lockfile
+	   names. 
+
+Tue Oct  7 07:48:12 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* logger.c: Include ctype.h for isspace definition.
+
+Tue Jul  1 02:31:07 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_rpc.h, kadm_rpc_xdr.c: Add support for setv4key.
+
+Sun Jun 29 14:52:04 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kadm_err.et: Add support for kadm5_setv4key_principal.
+
+	* admin.h: Add prototype for kadm5_setv4key_principal.
+
+Wed May 28 13:34:17 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* admin.h: add prototype for kadm5_setkey_principal
+
+	* misc_free.c (kadm5_free_key_data): add kadm5_free_data
+	
+Mon Mar 31 17:41:11 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_err.et, kadm_rpc.h, kadm_rpc_xdr.c: add support for
+ 	setkey_principal
+
+Thu Jan 16 19:01:00 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-prerecurse): Update to use double-colon rules.
+
+Wed Jan 15 20:43:01 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new libarary build procedure.
+
+Mon Nov 11 17:01:40 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_rpc_xdr.c: fix memory leak handling key_data and tl_data
+
+Wed Nov  6 10:20:36 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kadm_err.et: New error codes for KADM5_MISSING_CONF_PARAMS and 
+		KADM5_BAD_SERVER_NAME.
+
+Mon Nov  4 21:16:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* alt_prof.c (krb5_aprof_init): If the user specifies the config
+		file using a configuration file, it must exist.
+		Otherwise, krb5_aprof_init will return an error.
+		(kadm5_get_config_params): If aprof_init returns an error,
+		it should return an error as well.
+
+Wed Nov  6 17:45:43 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_rpc_xdr.c (xdr_krb5_principal): handle a NULL principal
+ 	pointer (this can happen when get_principal is passed a mask
+ 	without KADM5_PRINCIPAL in it, and will cause a beta 7 kadmind to
+ 	coredump)
+
+Fri Nov  1 13:16:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_err.et: update for new tl_data semantics [krb5-admin/140]
+
+Fri Oct 25 23:47:26 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in, Makefile.in: Tweaks to prevent unecessary
+	rebuilding.
+
+Mon Oct 21 21:23:44 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fixes for new directory recursion method; also
+	fixes for inclusion sequencing.
+
+Mon Oct 21 16:29:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_internal.h (ALL_PRINC_MASK): add KADM5_TL_DATA and
+ 	KADM5_KEY_DATA to ALL_PRINC_MASK [krb5-admin/20]
+
+Fri Oct 18 15:44:14 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kadm_rpc_xdr.c, misc_free.c, server_internal.h: include stdlib.h
+ 	instead of malloc.h [krb5-admin/35]
+
+Tue Oct 15 18:01:51 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* logger.c (krb5_klog_init): remember to call openlog() when
+ 	defaulting to syslog because nothing else was specified
+	(klog_vsyslog): enable VERBOSE_LOGS so we get the process name and
+ 	pid [krb5-kdc/63]
+
+Thu Sep 26 17:45:18 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* alt_prof.c: don't allow admin_dbname or admin_lockfile to be
+ 	independetly configured
+
+Fri Sep 20 16:52:07 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* configure.in: add unit-test directory
+
+Wed Sep 18 12:35:16 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): set max_life default to 10
+ 	hours, instead of 0
+
+Tue Sep 17 15:09:28 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* server_internal.h (ALL_PRINC_MASK): Add MAX_RLIFE to
+ 	ALL_PRINC_MASK.
+
+Tue Sep 10 01:47:39 1996  Mark Eichin  <eichin@cygnus.com>
+
+	* alt_prof.c (krb5_aprof_init): use profile_init_path on fname,
+	not profile_init.
+
+Wed Aug 28 16:11:50 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* alt_prof.c (kadm5_get_config_params): fix default semantics to
+ 	agree with api-funcspec.tex
+
+Mon Aug 26 17:02:55 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* admin.h: KRB5_TL_KADM5_E_DATA moved to kdb.h
+
+Fri Aug  2 13:19:29 1996  Barry Jaspan  <bjaspan@DUN-DUN-NOODLES>
+
+	* alt_prof.c (kadm5_get_config_params): alloc enough bytes for
+        adbname
+
+	* kadm_rpc_xdr.c (xdr_krb5_kvno): assign tmp before xdr'ing it to
+        avoid a spurious purify error
+
+Thu Jul 25 12:04:32 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* admin_internal.h (_KADM5_CHECK_HANDLE): Add parenthesis around
+		assignment used as truth value to reduce gcc -Wall flames.
+
+	* misc_free.c (kadm5_free_name_list, krb5_free_key_data_contents: 
+		Add KADM5_OK return value upon success.
+
+
+Wed Jul 24 18:18:39 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in, configure.in: fix shared lib lossage by
+		rearrangement of subdirectories
+
+Tue Jul 23 16:49:56 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in: delete extraneous trailing backslash from GENSRCS
+		and GENOBJS
+
+Mon Jul 22 04:17:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (LIBS): add -lgen to LIBS whenever compile is
+ 	found.  Solaris requires it.
+
+	* chpass_util.c (_kadm5_chpass_principal_util): the calls to
+ 	kadm5_free_{princicpal,policy}_ent used server_handle instead of
+ 	lhandle, which caused problems in the api versioning code.
+
+Thu Jul 18 19:50:39 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: removed ET_RULES, replaced with AC_PROG_AWK
+
+Mon Jul 15 16:52:44 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_init.c (_kadm5_init_any): use krb5_get_in_tkt_keytab
+ 	instead of changing krb5_defkeyname
+
+Mon Jul 15 16:36:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in (CLNTOBJS), AC_REPLACE_FUNCS: check for setenv, and
+ 	link against setenv.o if it's needed.
+
+Fri Jul 12 15:06:48 1996  Marc Horowitz  <marc@mit.edu>
+
+	* svr_iters.c (glob_to_regexp:append_realm): the semantics and
+ 	code were somewhat confused.  they are now fixed.
+
+	* logger.c (HAVE_*): turn all the "#if HAVE_*" into
+	"#ifdef HAVE_*"
+
+	* configure.in (AC_CHECK_FUNCS): check for the functions which
+ 	logger.c checks for.
+
+	* svr_principal.c (kadm5_get_principal): due to the the api
+ 	versioning, it is possible for this function to be called with a
+ 	three argument prototype.  in this case, do not modify mask,
+ 	because this will clobber the stack on some platforms.
+
+	* client_principal.c (kadm5_create_principal): be more careful
+ 	about what sorts of things are referenced, passed down, and passed
+ 	back if the caller is api v1.
+
+Wed Jul 10 01:29:34 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in: added autoconf support
+
+Tue Jul  9 17:38:43 1996  Marc Horowitz  <marc@mit.edu>
+
+	* svr_iters.c (*_REGEXPS): rework the conditionals to operate
+ 	as functions of function symbols tested by configure.
+	* client_init.c (setenv, unsetenv declarations): make them the
+ 	same as the stdlib declarations, if they're going to be here at
+ 	all.
+	* Makefile.in: reworked to support building both libraries.  this
+ 	required a bunch of changes, including some coordinating ones in
+ 	aclocal.m4
+	
+Tue Jul  9 16:26:26 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_principal.c (kadm5_decrypt_key): add kadm5_decrypt_key
+
+Mon Jul  8 16:55:22 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* svr_iters.c (kadm5_get_either): append local ream to globs with
+ 	no realm
+
+	* alt_prof.c: fix dbname, admin_dbname, and admin_lockfile to
+ 	derive from each other as in spec
+
+	* adb_policy.c: add create_db/destroy_db
+
+	* adb_openclose.c: add create_db/destroy_db, fix handling of
+ 	permanent locks, handle multiple lock files via static linked list
+
+	* adb.h: update create_db/destroy_db to make params instead of
+ 	explicit values
+
+	* Makefile.ov (TOP): Use ../../kadmin, not kadmin.ov
+	
+

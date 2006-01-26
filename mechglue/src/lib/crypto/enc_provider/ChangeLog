@@ -1,0 +1,149 @@
+2005-07-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* rc4.c: Renamed from arcfour.c.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Updated accordingly.
+
+2004-05-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* aes.c (krb5int_aes_encrypt): Signed/unsigned warning fix. 
+
+2004-02-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (krb5int_aes_encrypt, krb5int_aes_decrypt): Copy out value
+	for new IV.
+
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c (arcfour_weakkey1, arcfour_weakkey2,
+	arcfour_weakkeys): Now const.
+
+	* des.c (mit_des_zeroblock): Don't define here.
+	* des3.c (mit_des_zeroblock): Don't define here.
+
+2003-07-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (aes_block_size, aes128_keysize, aes256_keysize):
+	Deleted.
+	(krb5int_enc_aes128, krb5int_enc_aes256): Updated.
+	* arcfour.c (k5_arcfour_blocksize, k5_arcfour_keysize): Deleted.
+	(krb5int_enc_arcfour): Updated.
+	* des.c (k5_des_block_size, k5_des_keysize): Deleted.
+	(krb5int_enc_des): Updated.
+	* des3.c (k5_des3_block_size, k5_des3_keysize): Deleted.
+	(krb5int_enc_des3): Updated.
+
+	* des3.c (validate_and_schedule): Split out from old
+	k5_des3_docrypt.
+	(k5_des3_encrypt, k5_des3_decrypt): Call it, and
+	krb5int_des3_cbc_encrypt or _decrypt, instead of
+	k5_des3_docrypt.  Zap key schedules before returning.
+
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
+2003-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (enc): Replaced function with a macro.
+	(dec): New macro.
+	(krb5int_aes_encrypt): Use enc and dec.  Delete unused variable
+	OFFSET.
+	(krb5int_aes_decrypt): Renamed from k5_aes_dencrypt, implemented
+	decryption, made non-static.
+	(krb5int_enc_aes128, krb5int_enc_aes256): Use new name for
+	krb5int_aes_decrypt.
+
+2003-03-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c (krb5int_aes_init_state): Implement.
+	* enc_provider.h (krb5int_enc_aes128, krb5int_enc_aes256):
+	Declare.
+
+2003-02-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* aes.c: New file.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Include it.
+	(LOCALINCLUDE): Add aes source dir.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* arcfour.c: Use const instead of krb5_const.
+
+2001-11-06  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour.c (k5_arcfour_docrypt): Treat state as an
+	ArcFourCipherState structure; manipulate and initialize as appropriate.
+	(k5_arcfour_init_state): new function
+
+	* arcfour.c des.c des3.c:  Add state functions
+
+2001-10-23  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour.c (endif /* gcc inlines*/): handle inlines in an ansi-compatible manner
+
+	* enc_provider.h: New encryption provider: rc4
+
+2001-10-19  Sam Hartman  <hartmans@mit.edu>
+
+	* arcfour.c: Move prototype for static functions here  rather than in a header file.
+
+2001-05-31  Ezra Peisach  <epeisach@mit.edu>
+
+	* des.c (k5_des_docrypt): Do not use a variable named "encrypt"
+	* des3.c (k5_des3_docrypt): Likewise.
+
+2001-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (k5_des_docrypt): Add casts when mixing pointer types with
+	different target signedness.
+	* des3.c (k5_des3_docrypt): Likewise.
+
+2001-03-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c, des3.c, enc_provider.h: Use krb5int_ prefix for internal
+	"provider" structures.
+
+2001-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c, des3.c: Use const instead of krb5_const.
+
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* des.c, des3.c: Remove unused variables.
+
+2000-01-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* des.c (mit_des_zeroblock): Now const, and using C default
+	initialization.
+	(krb5_enc_des): Now const.
+	* des3.c (mit_des_zeroblock, krb5_enc_des3): Similar.
+	* enc_provider.h (krb5_enc_des, krb5_enc_des3): Update decls.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+Mon May 10 15:16:54 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+

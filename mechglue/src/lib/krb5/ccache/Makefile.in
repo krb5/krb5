@@ -1,0 +1,159 @@
+thisconfigdir=./..
+myfulldir=lib/krb5/ccache
+mydir=ccache
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCAL_SUBDIRS =
+
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
+
+##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=ccache
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
+
+##WIN32##MSLSA_OBJ = $(OUTPRE)cc_mslsa.$(OBJEXT)
+##WIN32##MSLSA_SRC = $(srcdir)/cc_mslsa.c
+
+STLIBOBJS= \
+	ccbase.o \
+	cccopy.o \
+	ccdefault.o \
+	ccdefops.o \
+	cc_retr.o \
+	cc_file.o cc_memory.o \
+	ccfns.o \
+	ser_cc.o
+
+OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
+	$(OUTPRE)cccopy.$(OBJEXT) \
+	$(OUTPRE)ccdefault.$(OBJEXT) \
+	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)cc_retr.$(OBJEXT) \
+	$(OUTPRE)cc_file.$(OBJEXT) \
+	$(OUTPRE)cc_memory.$(OBJEXT) \
+	$(OUTPRE)ccfns.$(OBJEXT) \
+	$(OUTPRE)ser_cc.$(OBJEXT) $(MSLSA_OBJ)
+
+SRCS=	$(srcdir)/ccbase.c \
+	$(srcdir)/cccopy.c \
+	$(srcdir)/ccdefault.c \
+	$(srcdir)/ccdefops.c \
+	$(srcdir)/cc_retr.c \
+	$(srcdir)/cc_file.c \
+	$(srcdir)/cc_memory.c \
+	$(srcdir)/ccfns.c \
+	$(srcdir)/ser_cc.c $(MSLSA_SRC)
+
+##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
+
+all-unix:: all-libobjs
+
+all-windows:: subdirs $(OBJFILE) 
+
+##DOS##subdirs:: ccapi\$(OUTPRE)file.lst
+
+##DOS##ccapi\$(OUTPRE)file.lst::
+##DOS##	cd ccapi
+##DOS##	@echo Making in krb5\ccache\ccapi
+##DOS##	$(MAKE) -$(MFLAGS)
+##DOS##	cd ..
+
+##DOS##$(OBJFILE): $(OBJS) ccapi\$(OUTPRE)file.lst
+##DOS##	$(RM) $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj \
+##WIN32##		ccapi\$(OUTPRE)*.obj > $(OBJFILE)
+
+
+clean-unix:: clean-libobjs
+
+clean-windows::
+	cd ccapi
+	@echo Making clean in krb5\ccache\ccapi
+	$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean in krb5\ccache
+	$(RM) $(OBJFILE)
+
+T_CC_OBJS=t_cc.o
+
+t_cc: $(T_CC_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_cc $(T_CC_OBJS) $(KRB5_BASE_LIBS)
+
+check-unix:: t_cc
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) ./t_cc 
+
+clean-unix::
+	$(RM) t_cc t_cc.o
+
+##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
+
+# @libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+ccbase.so ccbase.po $(OUTPRE)ccbase.$(OBJEXT): ccbase.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  fcc.h cc-int.h
+cccopy.so cccopy.po $(OUTPRE)cccopy.$(OBJEXT): cccopy.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+ccdefault.so ccdefault.po $(OUTPRE)ccdefault.$(OBJEXT): \
+  ccdefault.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+ccdefops.so ccdefops.po $(OUTPRE)ccdefops.$(OBJEXT): \
+  ccdefops.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  fcc.h
+cc_retr.so cc_retr.po $(OUTPRE)cc_retr.$(OBJEXT): cc_retr.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  cc-int.h
+cc_file.so cc_file.po $(OUTPRE)cc_file.$(OBJEXT): cc_file.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+cc_memory.so cc_memory.po $(OUTPRE)cc_memory.$(OBJEXT): \
+  cc_memory.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+ccfns.so ccfns.po $(OUTPRE)ccfns.$(OBJEXT): ccfns.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+ser_cc.so ser_cc.po $(OUTPRE)ser_cc.$(OBJEXT): ser_cc.c \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h

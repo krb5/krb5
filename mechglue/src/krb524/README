@@ -1,0 +1,154 @@
+Copyright 1994 by OpenVision Technologies, Inc.
+
+Permission to use, copy, modify, distribute, and sell this software
+and its documentation for any purpose is hereby granted without fee,
+provided that the above copyright notice appears in all copies and
+that both that copyright notice and this permission notice appear in
+supporting documentation, and that the name of OpenVision not be used
+in advertising or publicity pertaining to distribution of the software
+without specific, written prior permission. OpenVision makes no
+representations about the suitability of this software for any
+purpose.  It is provided "as is" without express or implied warranty.
+
+OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+
+Kerberos V5 to Kerberos V4 Credentials Converting Service, ALPHA RELEASE
+========================================================================
+
+krb524 is a service that converts Kerberos V5 credentials into
+Kerberos V4 credentials suitable for use with applications that for
+whatever reason do not use V5 directly.  The service consists of a
+server that has access to the secret key of the Kerberos service for
+which credentials will be converted, and a library for use by client
+programs that wish to use the server.
+
+The protocol is simple.  Suppose that a client C wishes to obtain V4
+credentials for a V5 service S by using the krb524 server.  The
+notation {C,S}_n represents a Vn service ticket for S for use by C.
+
+(1) C obtains V5 credentials, including a ticket {C,S}_5, for S by the
+normal V5 means.
+
+(2) C transmits {C,S}_5 to KRB524.
+
+(3) KRB524 converts {C,S}_5 into {C,S}_4.
+
+(4) KRB524 transmits {C,S}_4 to C.
+
+(5) C creates a V4 credentials strucuture from the plaintext
+information in the V5 credential and {C,S}_4.
+
+Steps (2) through (4) are encapsulated in a single function call in
+the krb524 library.
+
+An alternate conversion is provided for AFS servers that support the
+encrypted part of a krb5 ticket as an AFS token.  If the krb524d is
+converting a principal whose first component is afs and if the
+encrypted part of the ticket fits in 344 bytes, then it will default
+to simply returning the encrypted part of the ticket as a token.  If
+it turns out that the AFS server does not support the ticket, then
+users will get an unknown key version error and the krb524d must be
+configured to use v4 tickets for this AFS service.
+
+
+Obviously, not all V5 credentials can be completely converted to V4
+credentials, since the former is a superset of the latter.  The
+precise semantics of the conversion function are still undecided.
+UTSL.
+
+Programs contained in this release
+======================================================================
+
+krb524d [-m[aster]] [-k[eytab]]
+
+The krb524 server.  It accepts UDP requests on the krb524 service
+port, specified in /etc/services, or on port 4444 by default.  (A
+request for an official port assignment is underway.)  The -m argument
+causes krb524d to access the KDC master database directly; the -k
+argument causes krb524d to use the default keytab (and therefore only
+be able to convert tickets for services in the keytab).  Only one of
+-m or -k can be specified.
+
+test -remote server client service
+
+A test program that obtains a V5 credential for {client,service},
+converts it to a V4 credential, and prints out the entire contents of
+both versions.  It prompts for service's secret key, which it needs to
+decrypt both tickets in order to print them out.  Enter it as an eight
+digit ASCII hex number.
+
+k524init [-n] [-p principal]
+
+Convert a V5 credential into a V4 credential and store it in a V4
+ticket file.  The client is 'principal', or krbtgt at the V5 ccache's
+default principal's realm if not specified.  The -n argument causes
+the new ticket to be added to the existing ticket file; otherwise, the
+ticket file is initialized.
+
+Configuring krb524d AFS Conversion
+======================================================================
+
+The krb524d looks in the appdefaults  section of krb5.conf for an
+application called afs_krb5 to determine whether  afs principals
+support encrypted ticket parts as tokens.  The following configuration
+fragment says that afs/sipb.mit.edu@ATHENA.MIT.EDU supports the new
+token format but afs@ATHENA.MIT.EDU and
+afs/athena.mit.edu@ATHENA.MIT.EDU do not.  Note that the default is to
+assume afs servers support the new format.
+
+[appdefaults]
+afs_krb5 = { 
+	ATHENA.MIT.EDU = {
+		# This stanza describes principals in the
+		#ATHENA.MIT.EDU realm
+		afs = false
+		afs/athena.mit.edu = false
+		afs/sipb.mit.edu = true
+	}
+}
+
+
+Using libkrb524.a
+======================================================================
+
+To use libkrb524.a, #include "krb524.h", link against libkrb524.a,
+call krb524_init_ets() at the beginning of your program, and call one
+of the following two functions:
+
+int krb524_convert_creds_addr(krb5_creds *v5creds, CREDENTIALS *v4creds,
+			 struct sockaddr *saddr)
+
+int krb524_convert_creds_kdc(krb5_creds *v5creds, CREDENTIALS *v4creds)
+
+Both convert the V5 credential in v5creds into a V4 credential in
+v4creds.  One assumes krb524d is running on the KDC, the other uses an
+explicit host.  You only need to specify the address for saddr; the
+port is filled in automatically.
+
+Unresolved issues / Bugs
+======================================================================
+
+o krb524d requires access to the secret key of any service to be
+converted.  Should krb524d run on the KDC or on individual server
+machines?  The latter is more paranoid, since it prevents bugs in
+krb524d from provided unauthorized access to the master database.
+However, it also requires the client to provide the address of the
+server to be used.  The client will usually have this information
+(since presumably it will be sending the converted V4 credentials to
+the same server) but it may not be in a convenient form.  It seems
+"cleaner" to have krb524d run on the KDC.
+
+o Even if krb524d uses keytabs on server machines, it needs to be more
+flexible.  You only want to run one krb524d per host, so it has to be
+able to scan multiple keytabs.  This might get logistically messy.
+
+o This code is of alpha quality.  Bugs, omissions, memory leaks, and
+perhaps security holes still remain.  Do not use it (yet) in a
+production environment.

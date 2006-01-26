@@ -1,0 +1,357 @@
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_principal.c, clnt_policy.c: Include errno.h.
+	* client_init.c: Include k5-int.h before krb5.h.
+	* err_handle.h: Include com_err.h and krb5.h instead of k5-int.h.
+
+2005-10-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: Don't export internal error-table
+	symbols.
+
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: Delete RPC functions, and references to
+	adb error table.
+	* client_init.c, client_principal.c, client_rpc.c, clnt_policy.c,
+	clnt_privs.c: Renamed all RPC functions from _1 to _2 to match
+	current program version number.
+
+2005-07-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* err_handle.c (krb5_err_key): Variable deleted.
+	(init_err_handling, krb5_set_err, krb5_get_err_string,
+	krb5_clr_error): Use k5_ macros for thread-specific data instead
+	of pthread versions.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	Novell merge.
+	* err_handle.c: New file.
+	* err_handle.h: New file.
+	* Makefile.in (SRCS, OBJS, STLIBOBJS, err_handle.o): Build
+	err_handle.c.
+	* client_init.c (_kadm5_init_any): Accept new db_args argument,
+	but ignore it.  Don't call initialize_adb_error_table.
+	(kadm5_init_with_creds, kadm5_init_with_password, kadm5_init,
+	kadm5_init_with_skey): Accept new db_args argument and pass it
+	through to _kadm5_init_any.
+	* client_principal.c: Include err_handle.h.
+	(kadm5_get_principal, kadm5_get_principals,
+	kadm5_randkey_principal_3, kadm5_randkey_principal): If an error
+	was returned from the server, pass it and the error string to
+	krb5_set_err.
+	* clnt_policy.c: Include err_handle.h.
+	(kadm5_create_policy, kadm5_delete_policy, kadm5_modify_policy,
+	kadm5_get_policy, kadm5_get_policies): If an error was returned
+	from the server, pass it and the error string to krb5_set_err.
+	* clnt_privs.c: Include err_handle.h.
+	(kadm5_get_privs): If an error was returned from the server, pass
+	it and the error string to krb5_set_err.
+
+2005-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (kadm5_get_init_creds, kadm5_gic_iter) 
+	(kadm5_setup_gss, kadm5_rpc_auth): New functions, containing parts
+	of _kadm5_init_any.
+	(_kadm5_init_any): Bits broken out into helper functions.
+	(kadm5_get_init_creds): Fall back from kadmin/fqdn to kadmin/admin
+	if NULL service name passed in.
+	(kadm5_rpc_auth): Fall back from RPCSEC_GSS to AUTH_GSSAPI.
+
+2004-10-25  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Pass req_flags and cred to
+	auth_gss_create().
+
+2004-08-20  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Remove INIT_TEST ifdefs.  Use
+	KADM5_CONFIG_NO_AUTH to request no auth (for testing).
+
+2004-06-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: Export kadm5_get_admin_service_name.
+
+2004-06-24  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any)[DEBUG]: Print error from
+	clnttcp_create().
+	(_kadm5_init_any): Use kadm5_get_admin_service_name() if null
+	pointer passed in for service_name.
+
+2004-06-15  Tom Yu  <tlyu@mit.edu>
+
+	* client_principal.c (eret): Add some debugging messages for some
+	RPC errors.
+
+	* client_init.c (_kadm5_init_any): Add support for RPCSEC_GSS.
+	Default to using AUTH_GSSAPI for ovsec.
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libkadm5clnt.exports: New file.
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (enctypes): Variable deleted.
+	(_kadm5_init_any): Pass a null pointer instead of enctypes.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
+2002-10-08  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump.
+
+	* client_init.c (kadm5_lock, kadm5_unlock): Add stubs that error
+	out, since these are not supported on the client side.
+
+2002-09-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (_kadm5_init_any): If creating a new ccache, put
+	it in memory instead of on disk.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-07-31  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Use
+	KADM5_MISSING_KRB5_CONF_PARAMS in order to be less confusing to
+	someone running kadmin rather than kadmin.local.
+
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Drop references to
+	libdyn.
+
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBMAJOR): Bump to avoid Heimdal conflict.
+
+2001-11-07  Sam Hartman  <hartmans@mit.edu>
+
+	* client_init.c: Allow arcfour-hmac-md5 to be used for  kadmin
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Add casts to (gss_OID) in calls
+	to gss library.
+
+Sun Feb 18 17:32:53 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_rpc.c: Insure pointer argument type is same as passed
+        onto xdr functions. (arguments specified to *3_1 functions were
+        for the *_1 functions).
+
+	* client_init.c, client_principal.c, clnt_policy.c: Cleanup unused
+        variables and assignments in conditionals.
+
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* clnt_chpass_util.c (kadm5_chpass_principal_util): Change msg_len
+	to unsigned int.
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: The client library does not depend on the database
+	library. Remove reference to it.
+
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): Add libdb.
+	(SHLIB_EXPLIBS): Add -ldb.
+
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_init.c (_kadm5_init_any): gss_krb5_ccache_name returns
+	const char *, but the code was treating it as a char *.
+
+2000-06-23  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* clnt_chpass_util.c (kadm5_chpass_principal_util): Adjust for new
+	length parameter in both kadm5_chpass_principal_util() and in
+	_kadm5_chpass_principal_util().
+
+	* client_init.c (_kadm5_init_any): Fix determination of client
+	name length for overflow checking.
+
+2000-06-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c (enctypes): Add des3 and des-md5 to the list of
+	permitted enctypes.
+
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* client_init.c, client_principal.c, client_rpc.c: Check for
+	existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
+2000-02-26  Tom Yu  <tlyu@mit.edu>
+
+	* client_principal.c (kadm5_create_principal_3): Remove keepold
+	argument.
+
+	* Makefile.in (LIBMAJOR): Bump major number due to call signature
+	changes.
+
+2000-02-13  Tom Yu  <tlyu@mit.edu>
+
+	* client_rpc.c: Add new client stubs.
+
+	* client_principal.c: Add new functions for client-side kadm rpc
+	calls.
+
+2000-01-27  Ken Raeburn  <raeburn@raeburn.org>
+
+	* client_init.c (enctypes): New array, listing only
+	ENCTYPE_DES_CBC_CRC.
+	(_kadm5_init_any): Pass it in krb5_get_in_tkt_with_* calls for
+	now, while GSSAPI/krb5 can only handle DES.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-08-27  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Remove support for krb5-mech2
+	for now.
+
+Thu May 13 17:24:44 1999  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c (_kadm5_init_any): Use gss_krb5_ccache_name() to
+	set the gssapi ccache name.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* client_init.c (_kadm5_init_any): try the krb5 v2 mechanism
+	first, and if that fails, try the krb5 v1 mech.
+
+Sun Jul 26 18:11:56 1998  Sam Hartman  <hartmans@utwig.mesas.com>
+
+	* Makefile.in (LIBMAJOR): bump libmajor
+
+Wed Apr 15 18:05:57 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
+Fri Feb 27 22:32:16 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the lib/kadm5
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel lib/kadm5 configure.in
+
+Wed Feb 18 16:14:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Fri Feb 13 21:30:34 1998  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c:
+	* client_principal.c:
+	* client_rpc.c:
+	* clnt_policy.c:
+	* clnt_privs.c: Update header locations.
+
+	* Makefile.in (LIBMAJOR): Bump major version to reflect change in
+	rpc library.
+
+Wed Jan 28 16:32:36 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove the CopySrcHeader macro
+		from configure.in and substitute equivalent
+		functionality in Makefile.in
+
+Mon Oct 13 10:55:02 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_init.c (kadm5_destroy): Free handle->lhandle field, call
+        kadm5_free_config_params and krb5_free_context.
+
+Tue Jul  1 02:34:46 1997  Tom Yu  <tlyu@mit.edu>
+
+	* client_principal.c, client_rpc.c: Add support for setv4key.
+
+Mon Mar 31 17:40:48 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_principal.c, client_rpc.c: add support for
+ 	setkey_principal
+
+Sat Feb 22 01:35:19 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): s/.so/$(SHLIBEXT)
+
+Wed Jan 15 20:49:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
+Wed Nov 13 19:20:11 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (clean-unix): Remove shared/*.
+
+Wed Nov  6 10:35:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* client_init.c (_kadm5_init_any): Use a more fined grained error
+ 		code, KADM5_MISSING_CONF_PARAMS instead of
+ 		KRB5_CONFIG_BADFORMAT
+	(_kadm5_init_any): Use a more fined grained error code,
+ 	 	KADM5_BAD_SERVER_NAME, instead of KRB5_CONFIG_BADFORMAT.
+
+Thu Nov  7 11:41:08 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* client_principal.c (kadm5_get_principal,
+		kadm5_modify_principal): For a V1 request, copy only the
+		memory that is allocated for the incomming principal.
+		
+Fri Oct  4 08:38:16 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* client_principal.c (kadm5_randkey_principal): Do not assume that
+		malloc(0) returns non-NULL. [krb5-admin/29]
+
+Mon Aug 26 16:33:31 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* client_init.c (_kadm5_init_any): use DEFAULT_PROFILE_PATH
+ 	instead of "/etc/krb5.conf"
+
+Wed Jul 31 17:01:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c: Revert prior change due to netdb.h shuffling.
+
+Tue Jul 30 19:47:53 1996  Tom Yu  <tlyu@mit.edu>
+
+	* client_init.c: Remove #include <netdb.h> because rpc/types.h
+		(included from kadm5/admin.h) gets it.
+
+Wed Jul 24 20:59:35 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Don't replace setenv
+
+	* client_init.c (_kadm5_init_any): Use krb5_setenv and krb5_unsetenv
+
+Wed Jul 24 18:20:47 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in, configure.in: break out client lib into a
+		subdirectory
+

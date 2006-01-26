@@ -1,0 +1,776 @@
+#	Copyright 1987,1988 Massachusetts Institute of Technology
+#
+#	For copying and distribution information, see the file
+#	"mit-copyright.h".
+# 
+#
+	error_table	krb
+
+	ec		KRBET_KSUCCESS,
+			"Kerberos successful"
+
+	ec		KRBET_KDC_NAME_EXP,
+			"Kerberos principal expired"
+
+	ec		KRBET_KDC_SERVICE_EXP,
+			"Kerberos service expired"
+
+	ec		KRBET_KDC_AUTH_EXP,
+			"Kerberos auth expired"
+
+	ec		KRBET_KDC_PKT_VER,
+			"Unknown kerberos protocol version"
+
+	ec		KRBET_KDC_P_MKEY_VER,
+			"Incorrect kerberos master key version for principal"
+
+	ec		KRBET_KDC_S_MKEY_VER,
+			"Incorrect kerberos master key version for service"
+
+	ec		KRBET_KDC_BYTE_ORDER,
+			"Bad byte order (kerberos)"
+
+	ec		KRBET_KDC_PR_UNKNOWN,
+			"Kerberos principal unknown"
+
+	ec		KRBET_KDC_PR_N_UNIQUE,
+			"Kerberos principal not unique"
+
+	ec		KRBET_KDC_NULL_KEY,
+			"Kerberos principal has null key"
+
+	ec		KRBET_KRB_RES11,
+		        "Reserved error message 11 (kerberos)"
+
+	ec		KRBET_KRB_RES12,
+		        "Reserved error message 12 (kerberos)"
+  
+	ec		KRBET_KRB_RES13,
+		        "Reserved error message 13 (kerberos)"
+
+	ec		KRBET_KRB_RES14,
+		        "Reserved error message 14 (kerberos)"
+
+	ec		KRBET_KRB_RES15,
+		        "Reserved error message 15 (kerberos)"
+
+	ec		KRBET_KRB_RES16,
+		        "Reserved error message 16 (kerberos)"
+
+	ec		KRBET_KRB_RES17,
+		        "Reserved error message 17 (kerberos)"
+
+	ec		KRBET_KRB_RES18,
+		        "Reserved error message 18 (kerberos)"
+
+	ec		KRBET_KRB_RES19,
+		        "Reserved error message 19 (kerberos)"
+
+	ec		KRBET_KDC_GEN_ERR,
+			"Generic error from Kerberos KDC"
+
+	ec		KRBET_GC_TKFIL,
+			"Can't read Kerberos ticket file"
+
+	ec		KRBET_GC_NOTKT,
+			"Can't find Kerberos ticket or TGT"
+
+	ec		KRBET_KRB_RES23,
+			"Reserved error message 23 (krb_get_cred)"
+
+	ec		KRBET_KRB_RES24,
+			"Reserved error message 24 (krb_get_cred)"
+
+	ec		KRBET_KRB_RES25,
+			"Reserved error message 25 (krb_get_cred)"
+
+	ec		KRBET_MK_AP_TGTEXP,
+			"Kerberos TGT Expired"
+
+	ec		KRBET_KRB_RES27,
+			"Reserved error message 27 (krb_mk_req)"
+
+	ec		KRBET_KRB_RES28,
+			"Reserved error message 28 (krb_mk_req)"
+
+	ec		KRBET_KRB_RES29,
+			"Reserved error message 29 (krb_mk_req)"
+
+	ec		KRBET_KRB_RES30,
+			"Reserved error message 30 (krb_mk_req)"
+
+	ec		KRBET_RD_AP_UNDEC,
+			"Can't decode authenticator (krb_rd_req)"
+
+	ec		KRBET_RD_AP_EXP,
+			"Kerberos ticket expired (krb_rd_req)"
+
+	ec		KRBET_RD_AP_NYV,
+			"Kerberos ticket not yet valid (krb_rd_req)"
+
+	ec		KRBET_RD_AP_REPEAT,
+			"Repeated request (krb_rd_req)"
+
+	ec		KRBET_RD_AP_NOT_US,
+			"Kerberos ticket is for wrong server (krb_rd_req)"
+
+	ec		KRBET_RD_AP_INCON,
+			"Kerberos request inconsistent"
+
+	ec		KRBET_RD_AP_TIME,
+			"Time is out of bounds (krb_rd_req)"
+
+	ec		KRBET_RD_AP_BADD,
+			"Incorrect net address (krb_rd_req)"
+
+	ec		KRBET_RD_AP_VERSION,
+			"Kerberos protocol version mismatch (krb_rd_req)"
+
+	ec		KRBET_RD_AP_MSG_TYPE,
+			"Invalid msg type (krb_rd_req)"
+
+	ec		KRBET_RD_AP_MODIFIED,
+			"Message integrity error (krb_rd_req)"
+
+	ec		KRBET_RD_AP_ORDER,
+			"Message out of order (krb_rd_req)"
+
+	ec		KRBET_RD_AP_UNAUTHOR,
+			"Unauthorized request (krb_rd_req)"
+
+	ec		KRBET_KRB_RES44,
+			"Reserved error message 44 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES45,
+			"Reserved error message 45 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES46,
+			"Reserved error message 46 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES47,
+			"Reserved error message 47 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES48,
+			"Reserved error message 48 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES49,
+			"Reserved error message 49 (krb_rd_req)"
+
+	ec		KRBET_KRB_RES50,
+			"Reserved error message 50 (krb_rd_req)"
+
+	ec		KRBET_GT_PW_NULL,
+			"Current password is null (get_pw_tkt)"
+
+	ec		KRBET_GT_PW_BADPW,
+			"Incorrect current password (get_pw_tkt)"
+
+	ec		KRBET_GT_PW_PROT,
+			"Protocol error (get_pw_tkt)"
+
+	ec		KRBET_GT_PW_KDCERR,
+			"Error returned by KDC (get_pw_tkt)"
+
+	ec		KRBET_GT_PW_NULLTKT,
+			"Null Kerberos ticket returned by KDC (get_pw_tkt)"
+
+	ec		KRBET_SKDC_RETRY,
+			"Retry count exceeded (send_to_kdc)"
+
+	ec		KRBET_SKDC_CANT,
+			"Can't send request (send_to_kdc)"
+
+	ec		KRBET_KRB_RES58,
+			"Reserved error message 58 (send_to_kdc)"
+
+	ec		KRBET_KRB_RES59,
+			"Reserved error message 59 (send_to_kdc)"
+
+	ec		KRBET_KRB_RES60,
+			"Reserved error message 60 (send_to_kdc)"
+
+	ec		KRBET_INTK_W_NOTALL,
+			"Kerberos error: not all tickets returned"
+
+	ec		KRBET_INTK_BADPW,
+			"Incorrect password (get_in_tkt)"
+
+	ec		KRBET_INTK_PROT,
+			"Protocol error (get_in_tkt)"
+
+	ec		KRBET_KRB_RES64,
+			"Reserved error message 64 (get_in_tkt)"
+
+	ec		KRBET_KRB_RES65,
+			"Reserved error message 65 (get_in_tkt)"
+
+	ec		KRBET_KRB_RES66,
+			"Reserved error message 66 (get_in_tkt)"
+
+	ec		KRBET_KRB_RES67,
+			"Reserved error message 67 (get_in_tkt)"
+
+	ec		KRBET_KRB_RES68,
+			"Reserved error message 68 (get_in_tkt)"
+
+	ec		KRBET_KRB_RES69,
+			"Reserved error message 69 (get_in_tkt)"
+
+	ec		KRBET_INTK_ERR,
+			"Other error (get_in_tkt)"
+
+	ec		KRBET_AD_NOTGT,
+			"Don't have Kerberos ticket-granting ticket (get_ad_tkt)"
+
+	ec		KRBET_KRB_RES72,
+			"Reserved error message 72 (get_ad_tkt)"
+
+	ec		KRBET_KRB_RES73,
+			"Reserved error message 73 (get_ad_tkt)"
+
+	ec		KRBET_KRB_RES74,
+			"Reserved error message 74 (get_ad_tkt)"
+
+	ec		KRBET_KRB_RES75,
+			"Reserved error message 75 (get_ad_tkt)"
+
+	ec		KRBET_NO_TKT_FIL,
+			"You have no tickets cached"
+
+	ec		KRBET_TKT_FIL_ACC,
+			"Couldn't access ticket file (tf_util)"
+
+	ec		KRBET_TKT_FIL_LCK,
+			"Couldn't lock ticket file (tf_util)"
+
+	ec		KRBET_TKT_FIL_FMT,
+			"Bad ticket file format (tf_util)"
+
+	ec		KRBET_TKT_FIL_INI,
+			"tf_init not called before reading from ticket file (tf_util)"
+
+	ec		KRBET_KNAME_FMT,
+			"Bad Kerberos name format (kname_parse)"
+
+	ec		KRBET_RES82,
+			"Reserved error message 82"
+
+	ec		KRBET_RES83,
+			"Reserved error message 83"
+
+	ec		KRBET_RES84,
+			"Reserved error message 84"
+
+	ec		KRBET_RES85,
+			"Reserved error message 85"
+
+	ec		KRBET_RES86,
+			"Reserved error message 86"
+
+	ec		KRBET_RES87,
+			"Reserved error message 87"
+
+	ec		KRBET_RES88,
+			"Reserved error message 88"
+
+	ec		KRBET_RES89,
+			"Reserved error message 89"
+
+	ec		KRBET_RES90,
+			"Reserved error message 90"
+
+	ec		KRBET_RES91,
+			"Reserved error message 91"
+
+	ec		KRBET_RES92,
+			"Reserved error message 92"
+
+	ec		KRBET_RES93,
+			"Reserved error message 93"
+
+	ec		KRBET_RES94,
+			"Reserved error message 94"
+
+	ec		KRBET_RES95,
+			"Reserved error message 95"
+
+	ec		KRBET_RES96,
+			"Reserved error message 96"
+
+	ec		KRBET_RES97,
+			"Reserved error message 97"
+
+	ec		KRBET_RES98,
+			"Reserved error message 98"
+
+	ec		KRBET_RES99,
+			"Reserved error message 99"
+
+	ec		KRBET_RES100,
+			"Reserved error message 100"
+
+	ec		KRBET_RES101,
+			"Reserved error message 101"
+
+	ec		KRBET_RES102,
+			"Reserved error message 102"
+
+	ec		KRBET_RES103,
+			"Reserved error message 103"
+
+	ec		KRBET_RES104,
+			"Reserved error message 104"
+
+	ec		KRBET_RES105,
+			"Reserved error message 105"
+
+	ec		KRBET_RES106,
+			"Reserved error message 106"
+
+	ec		KRBET_RES107,
+			"Reserved error message 107"
+
+	ec		KRBET_RES108,
+			"Reserved error message 108"
+
+	ec		KRBET_RES109,
+			"Reserved error message 109"
+
+	ec		KRBET_RES110,
+			"Reserved error message 110"
+
+	ec		KRBET_RES111,
+			"Reserved error message 111"
+
+	ec		KRBET_RES112,
+			"Reserved error message 112"
+
+	ec		KRBET_RES113,
+			"Reserved error message 113"
+
+	ec		KRBET_RES114,
+			"Reserved error message 114"
+
+	ec		KRBET_RES115,
+			"Reserved error message 115"
+
+	ec		KRBET_RES116,
+			"Reserved error message 116"
+
+	ec		KRBET_RES117,
+			"Reserved error message 117"
+
+	ec		KRBET_RES118,
+			"Reserved error message 118"
+
+	ec		KRBET_RES119,
+			"Reserved error message 119"
+
+	ec		KRBET_RES120,
+			"Reserved error message 120"
+
+	ec		KRBET_RES121,
+			"Reserved error message 121"
+
+	ec		KRBET_RES122,
+			"Reserved error message 122"
+
+	ec		KRBET_RES123,
+			"Reserved error message 123"
+
+	ec		KRBET_RES124,
+			"Reserved error message 124"
+
+	ec		KRBET_RES125,
+			"Reserved error message 125"
+
+	ec		KRBET_RES126,
+			"Reserved error message 126"
+
+	ec		KRBET_RES127,
+			"Reserved error message 127"
+
+	ec		KRBET_RES128,
+			"Reserved error message 128"
+
+	ec		KRBET_RES129,
+			"Reserved error message 129"
+
+	ec		KRBET_RES130,
+			"Reserved error message 130"
+
+	ec		KRBET_RES131,
+			"Reserved error message 131"
+
+	ec		KRBET_RES132,
+			"Reserved error message 132"
+
+	ec		KRBET_RES133,
+			"Reserved error message 133"
+
+	ec		KRBET_RES134,
+			"Reserved error message 134"
+
+	ec		KRBET_RES135,
+			"Reserved error message 135"
+
+	ec		KRBET_RES136,
+			"Reserved error message 136"
+
+	ec		KRBET_RES137,
+			"Reserved error message 137"
+
+	ec		KRBET_RES138,
+			"Reserved error message 138"
+
+	ec		KRBET_RES139,
+			"Reserved error message 139"
+
+	ec		KRBET_RES140,
+			"Reserved error message 140"
+
+	ec		KRBET_RES141,
+			"Reserved error message 141"
+
+	ec		KRBET_RES142,
+			"Reserved error message 142"
+
+	ec		KRBET_RES143,
+			"Reserved error message 143"
+
+	ec		KRBET_RES144,
+			"Reserved error message 144"
+
+	ec		KRBET_RES145,
+			"Reserved error message 145"
+
+	ec		KRBET_RES146,
+			"Reserved error message 146"
+
+	ec		KRBET_RES147,
+			"Reserved error message 147"
+
+	ec		KRBET_RES148,
+			"Reserved error message 148"
+
+	ec		KRBET_RES149,
+			"Reserved error message 149"
+
+	ec		KRBET_RES150,
+			"Reserved error message 150"
+
+	ec		KRBET_RES151,
+			"Reserved error message 151"
+
+	ec		KRBET_RES152,
+			"Reserved error message 152"
+
+	ec		KRBET_RES153,
+			"Reserved error message 153"
+
+	ec		KRBET_RES154,
+			"Reserved error message 154"
+
+	ec		KRBET_RES155,
+			"Reserved error message 155"
+
+	ec		KRBET_RES156,
+			"Reserved error message 156"
+
+	ec		KRBET_RES157,
+			"Reserved error message 157"
+
+	ec		KRBET_RES158,
+			"Reserved error message 158"
+
+	ec		KRBET_RES159,
+			"Reserved error message 159"
+
+	ec		KRBET_RES160,
+			"Reserved error message 160"
+
+	ec		KRBET_RES161,
+			"Reserved error message 161"
+
+	ec		KRBET_RES162,
+			"Reserved error message 162"
+
+	ec		KRBET_RES163,
+			"Reserved error message 163"
+
+	ec		KRBET_RES164,
+			"Reserved error message 164"
+
+	ec		KRBET_RES165,
+			"Reserved error message 165"
+
+	ec		KRBET_RES166,
+			"Reserved error message 166"
+
+	ec		KRBET_RES167,
+			"Reserved error message 167"
+
+	ec		KRBET_RES168,
+			"Reserved error message 168"
+
+	ec		KRBET_RES169,
+			"Reserved error message 169"
+
+	ec		KRBET_RES170,
+			"Reserved error message 170"
+
+	ec		KRBET_RES171,
+			"Reserved error message 171"
+
+	ec		KRBET_RES172,
+			"Reserved error message 172"
+
+	ec		KRBET_RES173,
+			"Reserved error message 173"
+
+	ec		KRBET_RES174,
+			"Reserved error message 174"
+
+	ec		KRBET_RES175,
+			"Reserved error message 175"
+
+	ec		KRBET_RES176,
+			"Reserved error message 176"
+
+	ec		KRBET_RES177,
+			"Reserved error message 177"
+
+	ec		KRBET_RES178,
+			"Reserved error message 178"
+
+	ec		KRBET_RES179,
+			"Reserved error message 179"
+
+	ec		KRBET_RES180,
+			"Reserved error message 180"
+
+	ec		KRBET_RES181,
+			"Reserved error message 181"
+
+	ec		KRBET_RES182,
+			"Reserved error message 182"
+
+	ec		KRBET_RES183,
+			"Reserved error message 183"
+
+	ec		KRBET_RES184,
+			"Reserved error message 184"
+
+	ec		KRBET_RES185,
+			"Reserved error message 185"
+
+	ec		KRBET_RES186,
+			"Reserved error message 186"
+
+	ec		KRBET_RES187,
+			"Reserved error message 187"
+
+	ec		KRBET_RES188,
+			"Reserved error message 188"
+
+	ec		KRBET_RES189,
+			"Reserved error message 189"
+
+	ec		KRBET_RES190,
+			"Reserved error message 190"
+
+	ec		KRBET_RES191,
+			"Reserved error message 191"
+
+	ec		KRBET_RES192,
+			"Reserved error message 192"
+
+	ec		KRBET_RES193,
+			"Reserved error message 193"
+
+	ec		KRBET_RES194,
+			"Reserved error message 194"
+
+	ec		KRBET_RES195,
+			"Reserved error message 195"
+
+	ec		KRBET_RES196,
+			"Reserved error message 196"
+
+	ec		KRBET_RES197,
+			"Reserved error message 197"
+
+	ec		KRBET_RES198,
+			"Reserved error message 198"
+
+	ec		KRBET_RES199,
+			"Reserved error message 199"
+
+	ec		KRBET_RES200,
+			"Reserved error message 200"
+
+	ec		KRBET_RES201,
+			"Reserved error message 201"
+
+	ec		KRBET_RES202,
+			"Reserved error message 202"
+
+	ec		KRBET_RES203,
+			"Reserved error message 203"
+
+	ec		KRBET_RES204,
+			"Reserved error message 204"
+
+	ec		KRBET_RES205,
+			"Reserved error message 205"
+
+	ec		KRBET_RES206,
+			"Reserved error message 206"
+
+	ec		KRBET_RES207,
+			"Reserved error message 207"
+
+	ec		KRBET_RES208,
+			"Reserved error message 208"
+
+	ec		KRBET_RES209,
+			"Reserved error message 209"
+
+	ec		KRBET_RES210,
+			"Reserved error message 210"
+
+	ec		KRBET_RES211,
+			"Reserved error message 211"
+
+	ec		KRBET_RES212,
+			"Reserved error message 212"
+
+	ec		KRBET_RES213,
+			"Reserved error message 213"
+
+	ec		KRBET_RES214,
+			"Reserved error message 214"
+
+	ec		KRBET_RES215,
+			"Reserved error message 215"
+
+	ec		KRBET_RES216,
+			"Reserved error message 216"
+
+	ec		KRBET_RES217,
+			"Reserved error message 217"
+
+	ec		KRBET_RES218,
+			"Reserved error message 218"
+
+	ec		KRBET_RES219,
+			"Reserved error message 219"
+
+	ec		KRBET_RES220,
+			"Reserved error message 220"
+
+	ec		KRBET_RES221,
+			"Reserved error message 221"
+
+	ec		KRBET_RES222,
+			"Reserved error message 222"
+
+	ec		KRBET_RES223,
+			"Reserved error message 223"
+
+	ec		KRBET_RES224,
+			"Reserved error message 224"
+
+	ec		KRBET_RES225,
+			"Reserved error message 225"
+
+	ec		KRBET_RES226,
+			"Reserved error message 226"
+
+	ec		KRBET_RES227,
+			"Reserved error message 227"
+
+	ec		KRBET_RES228,
+			"Reserved error message 228"
+
+	ec		KRBET_RES229,
+			"Reserved error message 229"
+
+	ec		KRBET_RES230,
+			"Reserved error message 230"
+
+	ec		KRBET_RES231,
+			"Reserved error message 231"
+
+	ec		KRBET_RES232,
+			"Reserved error message 232"
+
+	ec		KRBET_RES233,
+			"Reserved error message 233"
+
+	ec		KRBET_RES234,
+			"Reserved error message 234"
+
+	ec		KRBET_RES235,
+			"Reserved error message 235"
+
+	ec		KRBET_RES236,
+			"Reserved error message 236"
+
+	ec		KRBET_RES237,
+			"Reserved error message 237"
+
+	ec		KRBET_RES238,
+			"Reserved error message 238"
+
+	ec		KRBET_RES239,
+			"Reserved error message 239"
+
+	ec		KRBET_RES240,
+			"Reserved error message 240"
+
+	ec		KRBET_RES241,
+			"Reserved error message 241"
+
+	ec		KRBET_RES242,
+			"Reserved error message 242"
+
+	ec		KRBET_RES243,
+			"Reserved error message 243"
+
+	ec		KRBET_RES244,
+			"Reserved error message 244"
+
+	ec		KRBET_RES245,
+			"Reserved error message 245"
+
+	ec		KRBET_RES246,
+			"Reserved error message 246"
+
+	ec		KRBET_RES247,
+			"Reserved error message 247"
+
+	ec		KRBET_RES248,
+			"Reserved error message 248"
+
+	ec		KRBET_RES249,
+			"Reserved error message 249"
+
+	ec		KRBET_RES250,
+			"Reserved error message 250"
+
+	ec		KRBET_RES251,
+			"Reserved error message 251"
+
+	ec		KRBET_RES252,
+			"Reserved error message 252"
+
+	ec		KRBET_RES253,
+			"Reserved error message 253"
+
+	ec		KRBET_RES254,
+			"Reserved error message 254"
+
+	ec		KRBET_KFAILURE,
+			"Generic kerberos error (kfailure)"
+	end

@@ -1,0 +1,4 @@
+2004-10-27      Jeffrey Altman <jaltman@mit.edu>
+
+ * src/windows/ccapi directory created to store the CCAPI Windows 
+   executables

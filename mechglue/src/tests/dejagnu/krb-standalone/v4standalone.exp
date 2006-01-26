@@ -1,0 +1,95 @@
+# Standalone Kerberos test.
+# This is a DejaGnu test script.
+# This script tests that the Kerberos tools can talk to each other.
+
+# This mostly just calls procedures in testsuite/config/default.exp.
+
+# Set up the Kerberos files and environment.
+if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
+    return
+}
+
+# If we do not have what is for a V4 test - return
+if ![v4_compatible_enctype] {
+    return
+}
+
+# Initialize the Kerberos database.  The argument tells
+# setup_kerberos_db that it is being called from here.
+if ![setup_kerberos_db 1] {
+    return
+}
+
+# We are about to start up a couple of daemon processes.  We do all
+# the rest of the tests inside a proc, so that we can easily kill the
+# processes when the procedure ends.
+
+proc check_and_destroy_v4_tix { client server } {
+    global REALMNAME
+    global des3_krbtgt
+
+    # Skip this if we're using a des3 TGT, since that's supposed to fail.
+    if {$des3_krbtgt} {
+	return
+    }
+    # Make sure that klist can see the ticket.
+    if ![v4klist "$client" "$server" "v4klist"] {
+	return
+    }
+
+    # Destroy the ticket.
+    if ![v4kdestroy "v4kdestroy"] {
+	return
+    }
+
+    if ![v4klist_none "v4klist no tix 1"] {
+	return
+    }
+}
+
+proc doit { } {
+    global REALMNAME
+    global KLIST
+    global KDESTROY
+    global KEY
+    global hostname
+    global spawn_id
+    global tmppwd
+
+    # Start up the kerberos and kadmind daemons.
+    if ![start_kerberos_daemons 1] {
+	return
+    }
+
+    # Use kadmin to add an host key.
+    if ![add_random_key host/$hostname 1] {
+	return
+    }
+
+    # Use ksrvutil to create a srvtab entry.
+    if ![setup_srvtab 1] {
+	return
+    }
+
+    # Use kinit to get a ticket.
+    if [v4kinit krbtest.admin adminpass$KEY 1] {
+	check_and_destroy_v4_tix krbtest.admin@$REALMNAME krbtgt.$REALMNAME@$REALMNAME
+    }
+
+    # Use kinit with srvtab to get a ticket.
+    # XXX - Currently kinit doesn't support "-4 -k"!
+#    set shorthost [string range $hostname 0 [expr [string first . $hostname] - 1]]
+#    if [v4kinit_kt host.$shorthost SRVTAB:$tmppwd/srvtab 1] {
+#	check_and_destroy_v4_tix host.$shorthost@$REALMNAME krbtgt.$REALMNAME@$REALMNAME
+#    }
+}
+
+set status [catch doit msg]
+
+stop_kerberos_daemons
+
+if { $status != 0 } {
+    send_error "ERROR: error in v4standalone.exp\n"
+    send_error "$msg\n"
+    exit 1
+}

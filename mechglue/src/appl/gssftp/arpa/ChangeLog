@@ -1,0 +1,5 @@
+Sun Jan 14 01:51:18 1996  Bill Schoofs <wjs@cray.com>
+
+	* arpa/ftp.h: define PROT_E and add Confidential to levelnames,
+	so as to return more precise errors.
+

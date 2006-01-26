@@ -1,0 +1,21 @@
+2005-11-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (test_getpw.$(OBJEXT)): New intermediate target.
+	(test_getpw): Don't build directly from source.
+	(test_getsockname): New target.
+
+	* test_getsockname.c: Include autoconf.h.
+	(main): Fix type of variable 'i' used for size of socket address.
+
+2005-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (test_getpw): Depend on, and link against, the
+	support library.
+
+2005-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_getpw.c: New file.
+	* Makefile.in: New file, based on ../resolve/Makefile.in.
+	(test_getpw): New target.
+	(check): Build and run it.
+

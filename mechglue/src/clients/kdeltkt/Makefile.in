@@ -1,0 +1,28 @@
+thisconfigdir=./..
+myfulldir=clients/kdeltkt
+mydir=kvno
+BUILDTOP=$(REL)..$(S)..
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all-unix:: kdeltkt
+all-windows:: $(OUTPRE)kdeltkt.exe
+all-mac::
+
+kdeltkt: kdeltkt.o $(KRB4COMPAT_DEPLIBS)
+	$(CC_LINK) -o $@ kdeltkt.o $(KRB4COMPAT_LIBS)
+
+$(OUTPRE)kdeltkt.exe: $(OUTPRE)kdeltkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
+	link $(EXE_LINKOPTS) /out:$@ $**
+
+clean-unix::
+	$(RM) kdeltkt.o kdeltkt
+
+install-unix::
+	for f in kdeltkt; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done

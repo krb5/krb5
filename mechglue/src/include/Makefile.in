@@ -1,0 +1,76 @@
+thisconfigdir=..
+myfulldir=include
+mydir=include
+LOCAL_SUBDIRS=krb5 @maybe_kerberosIV@
+BUILDTOP=$(REL)..
+##DOSBUILDTOP = ..
+NO_OUTPRE=1
+
+all-unix:: krb5.h
+
+all-windows::
+	@echo Making in include\krb5
+	cd krb5
+	$(MAKE) -$(MFLAGS)
+	cd ..
+
+all-unix:: maybe-make-db.h-@DB_HEADER_VERSION@
+
+maybe-make-db.h-k5:
+	: db.h will be installed by util/db2
+maybe-make-db.h-sys:
+	: fall back to system db.h 
+maybe-make-db.h-redirect:
+	test -r db.h || echo '#include <@DB_HEADER@>' > db.h
+
+all-recurse: krb5/autoconf.h
+krb5/autoconf.h: $(srcdir)/krb5/autoconf.h.in
+	(cd krb5; $(MAKE) autoconf.h)
+$(srcdir)/krb5/autoconf.h.in: @MAINT@ $(srcdir)/krb5/autoconf.stmp
+$(srcdir)/krb5/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/aclocal.m4
+	$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+	cd $(srcdir)/$(thisconfigdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
+	touch $(srcdir)/krb5/autoconf.stmp
+	$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+
+krb5.h: krb5/autoconf.h $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
+		asn1_err.h
+	echo "/* This file is generated, please don't edit it directly.  */" > krb5.h
+	cat $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
+		asn1_err.h >> krb5.h
+
+#
+# Build the error table include files:
+# asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
+
+asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h: rebuild-error-tables
+	: $@
+rebuild-error-tables:
+	(cd ../lib/krb5/error_tables && $(MAKE) includes)
+
+.PHONY: force rebuild-error-tables
+force:
+
+asn1_err.h: $(SRCTOP)/lib/krb5/error_tables/asn1_err.et
+kdb5_err.h: $(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
+krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et	
+kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
+krb524_err.h: $(SRCTOP)/lib/krb5/error_tables/krb524_err.et
+
+clean-unix::
+	$(RM) krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
+		asn1_err.h
+
+clean-windows::
+	$(RM) com_err.h profile.h
+	$(RM) gssapi\gssapi.h gssapi\gssapi_generic.h gssapi\gssapi_krb5.h gssapi\timestamp
+	if exist gssapi\nul rmdir gssapi
+	cd krb5
+	@echo Making clean in include\krb5
+	$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean in include
+
+install-headers-unix install:: krb5.h profile.h
+	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
+	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h

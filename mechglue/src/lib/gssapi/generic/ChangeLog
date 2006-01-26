@@ -1,0 +1,907 @@
+2005-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* rel_buffer.c (generic_gss_release_buffer): Free buffer even if
+	length is zero.  This avoids memory leaks in some cases.
+
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi.h): Use awk hack to work around quoting
+	problem.
+
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (gssapi.h): Change SIZEOF symbols to start with GSS_
+	when extracting from autoconf.h.  Don't look for HAVE_ or USE_
+	symbols.  Add ${include_xom} to the prologue.
+	(include_xom): New variable.
+	* gssapi.hin: Always include stddef.h unconditionally.  Don't
+	conditionally include xom.h here.
+	(GSS_SIZEOF_INT, GSS_SIZEOF_LONG, GSS_SIZEOF_SHORT): Don't
+	define, except on Windows.
+
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin: Don't test macintosh or __MWERKS__.
+
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_validate.c (g_save): Call gssint_initialize_library.
+
+2004-06-08  Sam Hartman  <hartmans@mit.edu>
+
+	* util_validate.c utl_nohash_validate.c gssapiP_generic.h:
+	Support for lucid context validation 
+
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* disp_com_err_status.c (init_et): Variable deleted.
+	(g_display_com_err_status): Don't call initialize_ggss_error_table
+	conditionally; instead, always call gssint_initialize_library.
+
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (G_SET_INIT): Use the new mutex partial
+	initializer now.
+
+2004-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (struct _g_set_elt, g_set_elt): Renamed from
+	non-_elt versions.
+	* util_set.c, util_validate.c: Uses updated.
+
+	* gssapiP_generic.h (g_set): New struct type.
+	(G_SET_INIT): New macro.
+	* util_validate.c (g_save, g_validate, g_delete): Change first
+	argument to take a g_set * rather than void **; use the address of
+	the void pointer from the structure.
+	(g_save_name, g_save_cred_id, g_save_ctx_id, g_validate_name,
+	g_validate_cred_id, g_validate_ctx_id, g_delete_name,
+	g_delete_cred_id, g_delete_ctx_id): Updated first argument type.
+	* gssapiP_generic.h: Declarations updated.
+
+	* gssapiP_generic.h: Include k5-thread.h.
+	(g_set): Add a mutex.
+	(G_SET_INIT): Initialize it.
+	* util_validate.c (g_save, g_validate, g_delete): Lock the mutex
+	while working on the set.  (BDB version untested.)
+
+2004-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize):
+	Check for sufficient buffer space.
+
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi_generic.c (const_oids): Renamed from oids, and now const.
+	(oids): New macro, casts const_oids to non-const pointer for use
+	in initializers.
+
+2003-12-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h: Include k5-platform.h.
+	(gssint_uint64): New typedef.
+	(g_order_init, g_order_check): Update decls.
+	* util_ordering.c (struct _queue): Change sequence number fields
+	to gssint_uint64.  Add mask field.
+	(queue_insert): Change sequence number to gssint_uint64.
+	(g_order_init): Change sequence numbers to gssint_uint64.  Add
+	"wide_nums" argument; initialize the queue mask field based on
+	it; all callers changed.  Store a -1 as the first element.
+	(g_order_check): Store and check elements as offsets from
+	firstnum.  Mask to 32 bits if desired.
+	* util_token.c (g_verify_token_header): Add new argument
+	indicating whether the pseudo-ASN.1 wrapper is required; all
+	callers changed.
+
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
+2003-05-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(EHDRDIR)$(S)timestamp): New target, used for
+	ensuring $(EHDRDIR) exists.
+	(clean-unix): Delete the dummy file.
+	($(EHDRDIR)$(S)gssapi.h): Depend on it, instead of creating the
+	directory here.
+	($(EHDRDIR)$(S)gssapi_generic.h): Likewise.
+
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * disp_com_err_status.c, gssapi_generic.h:  
+    Removed Mac header goober.
+    
+    * gssapiP_generic.h, gssapi.hin: Removed macintosh check because 
+    we don't build on OS 9 anymore.
+    
+    * gssapi.hin: Removed enumsalwaysint because there are no typed
+    enums in this header.  Removed duplicate CFM-68K magic.  
+
+2003-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove stamp rules.  Explicitly creates header
+	directory if needed.
+	(gssapi.h): Tweak to avoid race conditions.
+
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi-include): New rules to avoid coding
+	dependence on relative pathnames in parent Makefile.in.
+
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Another attempt... turns our that the "copy"
+	command on Windows preserves modtimes, so spurious rebuilds were
+	happening even with the stamp file, since the target in $(EHDRDIR)
+	is always out of date with respect to the stamp file.
+
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix $(EHDRDIR) creation to avoid spurious
+	rebuilds.
+
+2003-02-09  Ezra Peisach  <epeisach@bu,edu>
+
+	* gssapiP_generic.h, util_token.c (g_token_size): Return unsigned
+	int instead of int.
+
+2003-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(EHDRDIR)$(S)gssapi.h): Depend on create-ehdrdir,
+	to make sure the directory is created before installation of the
+	file.
+	($(EHDRDIR)$(S)gssapi_generic.h): Likewise.
+	(create-ehdrdir): New target on UNIX.  Renamed from $(EHDRDIR) on
+	Windows and changed to check for an existing directory.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.original: Deleted.
+
+2002-12-05  Sam Hartman  <hartmans@mit.edu>
+
+	* util_token.c (g_verify_token_header g_make_token_header):
+	Accept -1 to mean  that no token type is expected; the token type
+	is purely an RFC 1964 artifact and is not used in other mechanisms
+	such as SPNEGO.
+
+2002-11-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gssapiP_generic.h, util_token.c: Change g_make_token_header and
+	g_verfy_token_header to take an unsigned length in.
+
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in : Add install-headers- support
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(EHDRDIR)/gssapi.h, $(EHDRDIR)/gssapi_generic.h):
+	Quote target of copies.  Reverted.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gssapiP_generic.h, util_token.c (g_verify_token_header): Make
+	length argument a pointer to an unsigned int.
+
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Don't build util_dup.c.
+	* util_set.c (g_set_destroy): Don't compile this unused function.
+
+2002-07-12  Alexandra Ellwood <lxs@mit.edu>
+
+	* gssapi_generic.h: allow inclusion by C++
+
+	* gssapi.hin: Conditionalized pragmas for Metrowerks
+
+	* gssapi.hin: Added check for CFM compiles.  Removed dependency on
+	PRAGMA_* macros.  Moved check struct alignment check before struct
+	declarations.
+
+	* disp_com_err_status.c, gssapi.hin, gssapi_generic.h: 
+	Updated Mac OS X headers to new framework layout
+
+	* gssapi_generic.h: Fixed check for Mac OS X includes.
+
+	[pullups from 1-2-2-branch]
+
+2002-07-12  Miro Jurisic  <meeroh@mit.edu>
+
+	* gssapiP_generic.h: use "" include for krb5.h
+	[pullup from 1-2-2-branch]
+
+2001-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h (g_*): For every g_ function declared here,
+	first define the name as a macro using a gssint_ prefix to avoid
+	conflicting with glib function names.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin, gssapiP_generic.h: Make prototypes unconditional.
+	* gssapi.hin (PROTOTYPE): Don't define.
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	Windows still requires DLL specs for variables.
+	* gssapi.hin (GSS_DLLIMP): Define, as before (from win-mac.h) for
+	Windows, empty otherwise.
+	(GSS_C_NT_USER_NAME, GSS_C_NT_MACHINE_UID_NAME,
+	GSS_C_NT_STRING_UID_NAME, GSS_C_NT_HOSTBASED_SERVICE_X,
+	GSS_C_NT_HOSTBASED_SERVICE, GSS_C_NT_ANONYMOUS,
+	GSS_C_NT_EXPORT_NAME): Use GSS_DLLIMP.
+	(KRB5_EXPORTVAR): Don't define.
+
+	* gssapi_generic.h (gss_nt_user_name, gss_nt_machine_uid_name,
+	gss_nt_string_uid_name, gss_nt_service_name): Use GSS_DLLIMP.
+	* gssapi_generic.c (gss_nt_user_name, gss_nt_machine_uid_name,
+	gss_nt_string_uid_name, gss_nt_service_name, GSS_C_NT_USER_NAME,
+	GSS_C_NT_MACHINE_UID_NAME, GSS_C_NT_STRING_UID_NAME,
+	GSS_C_NT_HOSTBASED_SERVICE_X, GSS_C_NT_HOSTBASED_SERVICE,
+	GSS_C_NT_ANONYMOUS, GSS_C_NT_EXPORT_NAME): Use GSS_DLLIMP.
+
+	* gssapi.hin: Drop FAR, NEAR, _MSDOS support.
+	* gssapiP_generic.h: Drop _MSDOS support.
+
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.hin, gssapi_generic.c, gssapi_generic.h: Don't use
+	GSS_DLLIMP.
+
+2001-06-25  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi.hin, gssapi_generic.h, gssapi_generic.c:
+	added oids from rfc 2744.  Kept old oids for compatibility.
+	[pullup of lxs's changes]
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_validate.c (g_save): Cleanup extraneous variable from last
+ 	change.
+
+2001-06-21  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_validate.c (g_validate, g_save, g_delete): If HAVE_BSD_TYPE
+	is not defined, declare static functions as taking a void *type for
+	passing to g_set_entry_add.
+
+2001-05-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* disp_major_status.c (display_unknown): Remove unused variable. 
+
+	* util_token.c (g_make_token_header): Remove incorrect cast of
+	length argument to memcpy.
+
+	* oid_ops.c (generic_gss_str_to_oid): Cast argument of isxxx()
+	functions to int - avoids gcc warning when these are implemented
+	as macros indexing an array.
+
+2001-05-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* disp_major_status.c (display_unknown): Declare as static. Remove
+	non-useful code.
+
+2001-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unixmac): Target deleted.
+
+2001-03-10  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* oid_ops.c: Avoid the use of a variable named index.
+
+2000-10-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* gssapiP_generic.h (g_OID_equal): Instead of casting argument to
+	memcmp as int, cast to unsigned int to match prototype.
+
+2000-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS, OBJS, STLIBOBJS): Remove util_canonhost.
+	* gssapiP_generic (g_canonicalize_host, g_local_host_name): Delete
+	declarations.
+
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* util_token.c: Check for existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+Wed May 19 13:23:16 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Improve rule to create gssapi include dir under
+		windows.
+
+Wed May 19 11:39:05 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix windows cleanup to ignore any errors while
+		removing gssapi include dir.
+
+Mon May 10 15:22:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
+Thu Mar 25 22:41:30 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* disp_major_status.c (display_unknown): Fix the length of the
+ 	 	buffer to be the size of the returned string, instead of
+ 	 	something bigger than the returned string.
+
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (DLL_FILE_DEF): Tell the Makefile template that we
+		are building object files for the GSSAPI DLL.
+
+	* gssapi.hin, gssapi_generic.c: Change use of KRB5_DLLIMP to be
+		GSS_DLLIMP.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* gssapi.hin: define GSS_S_DUPLICATE_ELEMENT, GSS_S_NAME_NOT_MN,
+	and GSS_S_GAP_TOKEN as per gss v2 c bindings
+
+1998-06-08  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* oid_ops.c (generic_gss_release_oid): Recognize our own "self"
+		oids so that we don't free static oid's.  (exported_name
+		and nt_service_name_v2).
+
+Sun May 24 22:01:29 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_buffer.c (g_make_string_buffer): Don't include the trailing
+		NULL of the string in the gss buffer's length.
+
+1998-05-18  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* util_ordering.c (g_order_free): 
+	* rel_oid_set.c (generic_gss_release_oid_set): 
+	* disp_major_status.c: General lint cleanup.
+
+	* util_oid.c (g_copy_OID_set): Copy the OID set with entirely
+		dynamic memory (don't alias the contents of the OID set).
+
+Wed Apr  1 16:33:27 1998  Tom Yu  <tlyu@mit.edu>
+
+	* disp_major_status.c (g_display_major_status): Fix a typo in
+	previous.
+
+1998-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* disp_major_status.c (display_unknown): Change to not return
+		GSS_S_CONTINUE_NEEDED, per the standard C bindings
+		specification.
+
+Wed Feb 18 16:11:15 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Fri Jun 27 08:44:54 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add definition of GSS_C_NO_NAME (per
+		draft-ietf-cbind-04.txt)
+
+Wed Nov 19 11:01:27 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Remove EXPORTED_BUILT_HEADERS as well.
+
+Sun Aug 17 14:31:26 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_token.c (g_verify_token_header): Change local char *
+	 	variable to unsigned char * to match usage.
+
+Tue Jul 29 22:54:40 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c: Add support for the new OID value for
+		host-based service name.
+
+Tue Jul  8 12:46:17 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* util_ordering.c: Include string.h for prototypes.
+
+Fri Mar 28 03:43:58 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi_generic.c, gssapi_generic.h: Added definition for the
+		generic gsspi OID type "gss_nt_exported_name".
+
+Thu Mar 27 15:36:32 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add the GSS_C_PROT_READY_FLAG and GSS_C_TRANS_FLAG
+		Add prototypes for the V2 functions gss_export_name(),
+		gss_duplicate_name(), and gss_canonicalize_name().
+
+Tue Mar 18 13:52:29 1997  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.hin: Add 'extern "C"' for C++ compatibility; also check
+		for __cplusplus since some C++ compilers don't set
+ 		__STDC__
+
+Mon Mar 17 14:42:33 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* gssapi.hin: Fix header file so that winmac.h is #included when
+		compiling on the Macintosh.
+
+Sat Feb 22 18:57:56 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
+Sun Feb  9 11:41:08 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Fix includes generation for unix after
+	libhack_branch merge.
+
+Thu Feb  6 11:11:17 1997  Ezra Peisach  (epeisach@mit.edu)
+
+	* configure.in: Remove the CopyHeader and CopySrcHeader rules as
+		they are handled in Makefile.in
+
+	* Makefile.in: Create include/gssapi on unix. Make clean removes
+		built gssapi.h
+
+Wed Feb  5 23:28:47 1997  Richard Basch  <basch@lehman.com>
+
+	* gssapi.hin: Make sure KRB5_EXPORTVAR is defined.
+
+Tue Feb  4 15:55:11 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Only override the object build of the error table
+		under Unix
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+	* gssapi.hin, gssapi_generic.c, gssapi_generic.h:
+	DLL export all public gssapi functions; move windows/mac stuff to
+	win-mac.h
+
+Tue Jan 14 20:16:46 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
+Wed Nov 20 13:59:58 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (install): Install gssapi.h from the build tree.
+
+Tue Nov 19 16:43:16 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (gssapi.h): grep USE_.*_H out from autoconf.h as
+	well (some stuff was depending on USE_STRING_H).
+
+Mon Nov 18 12:38:34 1996  Tom Yu  <tlyu@mit.edu>
+
+	*gssapi.h: Renamed to gssapi.hin.
+
+	* gssapi.hin: Remove #ifdef USE_AUTOCONF_H; we're grepping symbols
+	directly from autoconf.h now.
+
+	* configure.in: Change CopySrcHeader to CopyHeader, as gssapi.h is
+	now generated in the build tree.
+
+	* Makefile.in: Add rules to generate gssapi.h from gssapi.hin,
+	similar to how krb5.h is generated from krb5.hin.  Remove
+	-DUSE_AUTOCONF_H from $(CFLAGS)
+
+Tue Nov  5 18:47:44 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (HDRS): Changes so that $(OBJS) will not get
+	recompiled gratuitously if someone touches the include directory.
+
+	* configure.in: Revert previous change re: CopySrcHeader.
+
+Tue Oct 29 10:20:58 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in: Use $(S) instead of / for productions which could
+		be used on both DOS and Unix systems.
+
+Mon Oct 21 16:16:26 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_queue_internalize, g_queue_externalize):
+ 		Fixed typo so that the remaining length field is set
+ 		correctly.
+
+Sat Oct 19 00:39:25 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_queue_externalize, g_queue_internalize,
+	 	g_queue_size):  New routines which allow the serailizing
+	 	routines to access the seqstate structure.
+
+Thu Oct 10 15:03:38 1996  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Remove calls to CopySrcHeader.
+
+	* Makefile.in: More fixups; punt usage of CopySrcHeader and use
+ 	explicit dependencies instead, thus avoiding abuse of double-colon
+ 	rules.
+
+Wed Oct  9 14:12:27 1996  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (all-unix): Fix up last change; depending on a phony
+	target causes everything all of $(OBJS) to get remade always.
+
+	* Makefile.in (all-unix): Fix up various rules that have
+	"includes" as dependencies in order to allow for makes that don't
+	do left-to-right ordering of dependencies.
+
+Wed Aug 28 17:44:06 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* utl_nohash_validate.c: 
+	* util_canonhost.c:
+	* util_validate.c: Only include sys/types.h if present.
+
+	* configure.in: Add check for limits.h and sys/types.h
+
+Fri Aug  2 13:37:10 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapiP_generic.h: If not on a Mac or under Dos, and stdlib.h
+		exists, include it.
+
+	* configure.in: Check for stdlib.h
+
+Thu Jul 25 00:03:01 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_ordering.c (g_order_check): 
+	* util_ordering.c (g_order_init): Changed return code to be an int
+		32, since we return a com_err error code.  Change the type
+		of the sequence number to be an uint32.
+
+	* gssapi.h: Define gss_int32 -- needed for error code returns.
+
+	* Makefile.in (EHDRDIR): Use $(S) instead of /, so that EHDRDIR is
+		valid under windows.  Fix how the header file is copied in
+		under Windows.
+
+	* gssapiP_generic.h: Include gssapi_generic.h instead of gssapi.h,
+		so that we get the definitions of the nametype oids.
+
+Wed Jul 24 18:48:43 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* oid_ops.c (generic_gss_release_oid): Re-enable function.
+
+	* util_token.c (g_verify_token_header): Changed return code to be
+		an int 32, since we return a com_err error code.
+
+	* rel_buffer.c (generic_gss_release_buffer): 
+	* rel_oid_set.c (generic_gss_release_oid_set): Remove INTERFACE
+ 		keyworded; not needed (and causes problems) since we're
+ 		not exporting this function to the DLL.
+
+Tue Jul 23 16:44:50 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* util_validate.c: Only include <sys/file.h> if building with BSD_DB.
+
+	* gssapiP_generic.h: Must include k5-int.h on Windows and
+		Macintosh builds.
+
+	* Makefile.in (SRCS): Renamed release_buffer.c to rel_buffer.c,
+		and release_oid_set.c to rel_oid_set.c.  Marc broke the
+		DOS 8.3 renaming which Gilmore had done to conform with
+		DOS's filesystem constraints.
+
+Fri Jun 21 18:02:51 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.h: Fix Win-16 build #defines for KRB5_CALLCONV and
+	 	KRB5_DLLIMP.
+
+Thu Jun 13 22:11:08 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
+Wed Jun 12 00:48:32 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Update special rule for gssapi_err_generic.obj
+		so that it uses the right Win-32 library command.
+
+Wed Jun 12 00:46:41 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* gssapi.h: Change INTERFACE to be KRB5_CALLCONV, which is where
+		the calling convention is defined.  Add KRB5_DLLIMP
+		which is where the DLL import/export should be put for
+		Win32.  (Win16 is just different.)  The correct way to
+		declare a function which will be used in a DLL is now:
+		KRB5_DLLIMP func_return_t KRB5_CALLCONV func(long)
+
+		Change function delcarations to use the new
+		convention.  Actually, it doesn't hurt to use the old
+		convention as long as func_return_t doesn't contain a
+		'*'.  But in the long run we should be exterminating
+		all uses of INTERFACE in favor of KRB5_CALLCONV and
+		KRB5_DLLIMP.
+
+Sun Apr 21 03:07:02 1996  Marc Horowitz  <marc@mit.edu>
+
+	* gssapi_generic.c, release_buffer.c, release_oid_set.c: added
+ 	files which should have been added before, but either I or commit
+ 	was confused.
+
+Wed Apr 17 20:59:23 1996  Marc Horowitz  <marc@mit.edu>
+
+	* oid_ops.c: moved from mechglue
+	
+	* util_canonhost.c (g_canonicalize_host): cast the return value of
+ 	malloc()
+
+	* gssapiP_generic.h: Added prototypes for oid_ops.c
+
+	* gssapi.h: Make the types of OM_uint32 constants portable,
+	fix some minor compile-time nits
+
+	* Makefile.in: change the list of files which need to be built
+
+Tue Apr  2 15:31:25 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (SRCS): Inlined list of source files for SRCS and
+		OBJS (for Macintosh build).
+
+Thu Feb 29 19:39:23 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* util_token.c (der_length_size, der_write_size): Fix to work on
+		16-bit platforms (we don't allow greater than 64k tokens
+		on these platforms).
+
+Tue Feb 27 17:49:54 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h (size_t): Make sure size_t and uid_t are defined under
+	        MS-DOS.
+
+Sat Feb 24 21:30:53 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h (GSS_S_DUPLICATE_ELEMENT): New error code function.
+		XXX Need to square number assigment with official C-binds
+		draft once it is issued.
+
+Wed Jan 24 20:48:15 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* gssapi.h: Added definition of NPROTOTYPE to dtrt with Ultrix,
+		etc.  Also added special case for Ultrix (limited
+		prototype support).
+
+Tue Jan 23 03:28:41 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_generic.h: Removed prototypes of functions that have
+		been moved to the mechglue layer.
+
+	* Makefile.in: Removed gssapi_generic.c, oid_ops.c, rel_buffer.c,
+		and rel_oid_set.c --- these functions are now done in the
+		mechglue layer.  
+
+Wed Jan 10 21:31:42 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (gssapi_err_generic.$(OBJEXT)): Added ##DOS
+		statements after gssapi_err_generic.$(OBJECT) to get it
+		added to library on Windows.  (Patch from Doug Engert).
+
+	* gssapi.h: Remove #if statement that used sizeof(xxx), since that
+		won't work for most C compilers/C preprocessors!
+
+Thu Jan  4 21:33:38 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapiP_generic.h (TWRITE_INT16, TREAD_INT16): Added new macros
+		to read and write two byte integers from the wire.
+
+	* gssapiP_generic.h: Don't include <sys/types.h> since it's
+		already included by gssapi.h.
+
+	* gssapi.h: Add a #ifndef _MACINTOSH around include of <sys/types.h>
+
+Fri Nov 17 22:21:58 1995    <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, ChangeLog: Add support to compile shared libraries.
+
+	* gssapi.h: Include sys/types.h, since that's where POSIX says
+		size_t is defined.
+
+Fri Oct  6 22:01:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
+Fri Sep 29 02:02:35 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* gssapi.h: For MS-DOS, use the brute force method of defining the
+		size of variables; we should really get an autoconf file
+		for MS-DOS.
+
+Mon Sep 28 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
+	
+	* gssapi_generic.h: Modified to use build in compiler symbols rather
+		than relying on _MACINTOSH so the projects can include the file
+		without using our headers.
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Mon Sep 25 16:53:00 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Wed Sep 13 10:36:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* oid_ops.c: signed/unsigned mismatch, removed unused variables.
+	* util_oid.c: changed int to a size_t.
+
+Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
+	* gssapiP_generic.h:  changed a path bearing include for MACINTOSH
+	* gssapi_generic.h:  changed a path bearing include for MACINTOSH
+	* util_cannonhost.h:  changed a path bearing include for MACINTOSH
+	* utl_nohash_validate.h:  changed a path bearing include for MACINTOSH,
+		also we don't have limits.h
+
+
+Thu Aug 31 11:43:59 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapi.h - Update to V2 API.  Also use autoconf.h if USE_AUTOCONF_H
+		is defined, otherwise resort to brute force.  Remove const_
+		gss_OID, as it's not defined in the API.
+	* gssapiP_generic.h - Add new V2 dispatch prototypes.  Update
+		arguments to be compatible with V2 API.
+	* disp_major_status.c - Describe new failure codes.  Update argument.
+	* gssapi_generic.c - Replace const_gss_OID.
+	* rel_oid_set.c - Free individual OID data also.
+	* util_token.c - Replace const_gss_OID.
+	* oid_ops.c - New V2 OID set manipulation routines.
+	* Makefile.in, .Sanitize - Add oid_ops.c.
+
+
+Tue Aug 29 13:30:29 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapi.h - Add prototypes for gss_{im,ex}port_sec_context.
+
+
+Thu Jul 27 15:25:08 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* gssapiP_generic.h - Include k5-int.h instead of k5-config.h and
+		conditionally k5-sockets.h.
+
+
+Fri Jul 7 16:22:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove LDFLAGS, it's set by configure.
+
+Fri Jun  9 19:25:47 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Wed May 24 06:52:41 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapiP_generic.h: Include k5-sockets.h now that k5-config.h
+		does not include netdb.h.
+
+Mon May 22 10:08:13 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in	- Install EXPORTED_HEADERS in gssapi subdirectory of
+			  KRB5_INCDIR.
+	* configure.in	- Find KRB5ROOT and install program.
+
+Sat Apr 29 15:29:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* gssapi.h: Only define PROTOTYPE if it is not deined at all.
+
+Fri Apr 21 10:57:44 1995  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* gssapi.h: If !stdc and !windows, define PROTOTYPE properly.
+
+Thu Apr 20 14:23:14 1995 Keith Vetter (keithv@fusion.com)
+
+	* gssapi.h: fixed up the "windows specific hackery".
+
+Thu Apr 20 11:41:04 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Add checking for SIZEOF_SHORT, SIZEOF_INT, and
+		SIZEOF_LONG, so we don't need to depend on getting this
+		information from include/krb5/autoconf.h
+
+	* gssapi.h: Removed dependence on krb5 include files.
+
+	* gssapiP_generic.h: We need to include k5-config in order to get
+		Windows specific hackery.  Somewhat of a wart, but this is
+		a gssapi internal header file, so the rest of the world
+		doesn't have to see this.
+
+	* util_token.c: Define VALID_INT, instead of relying on this being
+		defined by krb5.h.
+
+Thu Apr 13 16:27:56 1995 Keith Vetter (keithv@fusion.com)
+
+	* gssapi_e.c: __STDC__ conditional also checks the _WINDOWS define.
+	* *.[ch]: removed unneeded INTERFACE from non-api functions.
+        * *.h added FAR to pointers visible at to the world.
+
+Tue Mar 28 18:28:03 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (unixmac):  Add to build header files.
+
+Fri Mar 24 18:02:15 1995  Theodore Y. Ts'o  (tytso@rt-11)
+
+	* util_canonhost.c: Don't include sys/socket.h and netdb.h, since
+		they are included by k5-config.h
+
+Tue Mar 21 19:09:34 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed the name of the library the PC
+           builds, and added xxx-mac targets to mimic xxx-unix.
+
+Tue Mar 7 20:14:53 1995 Keith Vetter (keithv@fusion.com)
+
+	* disp_maj.c: added casts on int->long assignments.
+        * util_can.c: made to work with PC winsockets.
+        * util_dup.c: added system include for prototype info.
+        * util_tok.c: int/long problems.
+        * gssapip_.h: added casts on int->char assignments.
+
+Tue Feb 28 00:25:58 1995  John Gilmore  (gnu at toad.com)
+
+	* gssapi.h:  Avoid <krb5/...> includes.
+	* disp_com_err_status.c:  Use "com_err.h" not <com_err.h>.
+
+Mon Feb 20 18:50:33 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+        * Added windows INTERFACE keyword
+          disp_com.c disp_maj.c rel_buff.c rel_oid_.c
+          util_buf.c util_can.c util_dup.c util_oid.c
+          util_tok.c util_val.c utl_noha.c
+        * gssapiP_generic.h: 
+          added INTERFACE keyword
+          removed inclusion
+        * util_tok.c: had to coerce long to int on TWRITE_STR.
+        * gssapi.h: made typedef for OM_uint32 machine independent and
+          added INTERFACE to prototypes.
+
+Mon Feb 20 12:00:00 1994  Keith Vetter (keithv@fusion.com)
+
+	More DOS 8.3 renames--for files created by make
+	* gssapi_generic_err.et   => gssapi_err_generic.et
+				  => gssapi_err_generic.h
+				  => gssapi_err_generic.c
+	* gssapiP_generic.h was changed to match
+	* Makefile.in was changed to match
+
+Fri Feb  3 00:18:11 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* display_com_err_status.c => disp_com_err_status.c
+	* display_major_status.c   => disp_major_status.c
+	* release_buffer.c         => rel_buffer.c
+	* release_oid_set.c        => rel_oid_set.c
+	* util_val_nohash.c        => utl_nohash_validate.c
+	* Makefile.in was changed to match.
+
+Sat Aug 20 01:34:46 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* gss_generic.c (gss_OID_desc): Fix OID's!
+
+Thu Jul 14 03:29:25 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: remove spurious mkdir
+
+Tue Jun 21 01:17:35 1994  Mark W. Eichin  (eichin at mit.edu)
+
+	* configure.in: add AC_SIZE_T.
+

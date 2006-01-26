@@ -1,0 +1,53 @@
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* cacheapi.h: Don't declare pointers FAR any more, nor functions
+	NEAR.
+
+2000-04-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* cacheapi.h: Update to v2.
+
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix of build flags with updated win-pre.in.
+
+Mon May 17 14:26:27 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Uncomment BUILDTOP since we always want it.
+
+Mon May 17 09:22:45 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* KrbCC32.lib: Remove KrbCC32.lib since we dynamically load the DLL.
+
+Mon May 10 15:28:40 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
+1999-04-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	*  gic.c (gic_prompter), vardlg.c (vardlg_build), gic.h, vardlg.h:
+		Update to use new prompter prototype which takes an extra
+		argument for the window titlebar name.  (From Frank
+		Cusack)  [krb5-kdc/662]
+	
+Fri Mar 12 15:54:17 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (clean-windows): Don't blow away Krbcc32.lib by
+		accident.
+
+Tue Mar 18 12:08:50 1997  Michael Graff  <explorer@flame.org>
+
+	* registry.h, registry.c: add.
+
+Thu Mar 13 20:17:12 1997  Michael Graff  <explorer@flame.org>
+
+	* gic.c, gic.h, vardlg.c, vardlg.h: Finish up the variable dialog box
+	code.
+
+Thu Mar  6 21:45:05 1997  Michael Graff  <explorer@flame.org>
+
+	* gic.c, gic.h:  Added to start using get_init_creds.
+
+	* vardlg.c, vardlg.h: on-the-fly variable dialog building functions.
+
+

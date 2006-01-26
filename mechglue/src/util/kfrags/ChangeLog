@@ -1,0 +1,37 @@
+Thu Oct 31 12:39:42 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* shared.conf: Add for compiling with shared libraries
+
+	* base.conf: Add "uname" for config.guess
+
+Tue Nov  1 20:19:17 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* base.conf: add "ls" and "touch" since libupdate uses them
+
+Fri Oct 28 19:18:40 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* ranlib.conf: new file. some svr4 need ranlib too.
+
+Fri Oct 28 19:06:12 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* gcc.conf (CC_OPTS): don't set CC_OPTS until we figure out
+	quoting again.
+
+Tue Oct 18 14:38:58 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* base.conf: add "sort" since "make check" needs it.
+
+Tue Oct 11 19:10:13 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* ucb.conf: add "ranlib" for ucb, it's a common element.
+	* sunpro.conf: New file. Points to Sun (not MIT) installation path
+	for their unbundled compiler ("SUNWspro").
+
+Thu Sep 29 19:55:43 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* base.conf: simplest path, lists all executables.
+	* ucb.conf: add /usr/ucb to the base path.
+	* svr4.conf: add /usr/ccs/bin instead.
+	* athena.conf: sets KRB4 to /usr/athena.
+	* cns.conf: sets KRB4 to /usr/kerberos.
+	* gcc.conf: overrids CC and CC_OPTS for gcc -g -O -Wall.

@@ -1,0 +1,226 @@
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_mkdums.c (set_dbname_help): Set default realm and construct
+	an argument vector describing the database pathname, before
+	calling krb5_db_open.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+ 	* Makefile.in (KDB5_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS
+	instead of explicitly using -ldl and -lpthread.
+
+	Novell merge.
+	* Makefile.in:
+	* kdb5_mkdums.c:
+
+2004-05-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c (main): Fix memory leak of master principal at exit. 
+
+2003-05-22  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c (main): When attempting to register writable
+	keytab, do not fail if error is KRB5_KT_TYPE_EXISTS.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-04-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_mkdums.c (main): Call krb5_c_valid_enctype instead of
+	valid_enctype.
+
+2001-11-19  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c (main): Invoke krb5_free_context when finished. 
+	(add_princ): Use krb5_free_principal to prevent memory leak.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5_mkdums.c: Make prototypes unconditional.
+
+2000-07-28  Ezra Peisach  <epeisach@engrailed.mit.edu>
+
+	* kdb5_mkdums.c: Remove unused quit().
+
+2000-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c: Remove unused variable.
+
+2000-05-11  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_mkdums.c (main): Make sure buffer 'principal' is terminated.
+
+2000-05-08  Ken Raeburn  <raeburn@mit.edu>
+	    Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kdb5_mkdums.c (main): Make sure buffer "tmp" is
+	null-terminated.  Don't overflow buffer "tmp" or "tmp2".
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* kdb5_mkdums.c: update to new crypto api
+
+1998-05-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* kdb5_mkdums.c (argv): POSIX states that getopt returns -1
+		when it is done parsing options, not EOF.
+
+Mon Mar 30 16:57:43 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* kdb5_mkdums.c: Add parenthesis about assignements in conditionals.
+
+
+Wed Feb 18 16:28:15 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Mon Feb  2 16:46:04 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Sun Aug 17 14:26:57 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(SRCS) line.
+
+Wed Jul 30 18:27:36 1997  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_mkdums.c: Update to match reality of libkdb, so that it
+	actually works.
+
+Tue Feb 18 18:20:14 1997  Richard Basch  <basch@lehman.com>
+
+	* kdb5_mkdums.c (add_princ): 
+		Replace krb5_xfree with krb5_free_data_contents
+
+Sun Feb  9 01:35:19 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Tue Sep 10 14:20:09 1996  Tom Yu  <tlyu@mit.edu>
+
+	* kdb5_mkdums.M: remove ".so man1/header.doc"
+
+Thu May  2 21:17:27 1996  Richard Basch  <basch@lehman.com>
+
+	* kdb5_mkdums.c: fixed various abstraction violations where the
+		code "knew" the cryptosystem_entry structure
+
+Sat Dec 23 01:04:40 1995    <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add check for DBM/db libraries
+
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+ 
+        * kdb5_mkdums.c : Remove mkvno from krb5_db_entry
+ 
+Thu Nov 09 17:05:57 1995  Chris Provenzano (proven@mit.edu)
+
+        * kdb5_mkdums.c : Remove krb5_enctype from krb5_string_to_key() args.
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb5_mkdums.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * kdb5_mkdums.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
+
+Thu Jul 27 15:30:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_mkdums.c - Restore old logic to find the etype now that crypto-
+		conf.c is correctly generated.
+
+Thu Jul 27 02:59:05 1995        Chris Provenzano (proven@mit.edu)
+        * kdb5_mkdums.c : Use new kdb format.
+
+Mon Jul 17 15:23:24 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* kdb5_mkdums.c - Change setting of defaulted keytype to be DEFAULT_
+		KDC_ETYPE instead of using the keytype array to find the
+		etype.
+
+
+Wed Jul 12 12:31:27 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Remove V5_USE_SHARED_LIB.
+
+
+Fri Jul 7 16:37:07 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit library handling and LDFLAGS.
+	* configure.in - Add USE_KDB5_LIBRARY and KRB5_LIBRARIES
+
+
+Thu Jun 15 18:10:55 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove DBMLIB.
+	* configure.in - Remove check for dbm libraries.  Use shared library
+		linking rules.
+
+Fri Jun  9 18:58:15 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Fri Mar 31 17:05:49 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_mkdums.c (add_princ): Zero out the entry before inserting it.
+
+Thu Mar  2 12:34:37 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (ISODELIB): Remove reference to $(ISODELIB).
+
+Wed Mar  1 16:32:20 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Remove ISODE_INCLUDE, replace check for -lsocket
+		and -lnsl with WITH_NETLIB check.
+
+Tue Feb 28 01:24:52 1995  John Gilmore  (gnu at toad.com)
+
+	* kdb5_mkdums.c:  Avoid <krb5/...> includes.
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+Sun Oct 23 00:50:07 1994    (tytso@rsx-11)
+
+	* kdb5_mkdums.c (add_princ): Create principals with correct realm
+		name. 
+
+	* configure.in: Look for ndbm or dbm libraries
+
+Thu Oct  6 12:41:28 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_mkdums.c (main, set_dbname_help): Allow master key password
+		to be passed in on the command line; to make testing
+		scripts simpler.
+
+	* kdb5_mkdums.c (add_princ): Initialize all the fields of the
+		principal. 
+
+Thu Sep 29 22:58:05 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Relink executable when libraries change
+
+Thu Sep 15 17:16:46 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* kdb5_mkdums.c (add_princ): Initialize key version number to be 1.
+
+

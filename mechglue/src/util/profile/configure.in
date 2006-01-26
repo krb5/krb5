@@ -1,0 +1,21 @@
+K5_AC_INIT(prof_parse.c)
+CONFIG_RULES
+AC_C_CONST
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_HEADERS(unistd.h stdlib.h pwd.h)
+AC_CHECK_FUNCS(stat access strdup)
+AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,struct stat.st_mtim.tv_nsec],,,[#include <sys/types.h>
+#include <sys/stat.h>])
+AC_PROG_AWK
+AC_KRB5_TCL
+DO_TCL=
+test "$TCL_LIBS" != "" && DO_TCL=ok
+AC_SUBST(DO_TCL)
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBRARY_WITH_DEPS
+KRB5_RUN_FLAGS
+AC_CONFIG_FILES(prtest, [chmod +x prtest])
+V5_AC_OUTPUT_MAKEFILE

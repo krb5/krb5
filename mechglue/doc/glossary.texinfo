@@ -1,0 +1,64 @@
+@table @b
+@item client
+an entity that can obtain a ticket.  This entity is usually either a
+user or a host.
+
+@item host
+a computer that can be accessed over a network.
+
+@item Kerberos
+in Greek mythology, the three-headed dog that guards the entrance to the
+underworld.  In the computing world, Kerberos is a network security
+package that was developed at MIT.
+
+@item KDC
+Key Distribution Center.  A machine that issues Kerberos tickets.
+
+@item keytab
+a @b{key tab}le file containing one or more keys.  A host or service
+uses a @dfn{keytab} file in much the same way as a user uses his/her
+password.
+
+@item principal
+a string that names a specific entity to which a set of credentials may
+be assigned.  It can have an arbitrary number of components, but
+generally has three:
+
+@table @b
+@item primary
+the first part of a Kerberos @i{principal}.  In the case of a user, it
+is the username.  In the case of a service, it is the name of the
+service.
+
+@item instance
+the second part of a Kerberos @i{principal}.  It gives information that
+qualifies the primary.  The instance may be null.  In the case of a
+user, the instance is often used to describe the intended use of the
+corresponding credentials.  In the case of a host, the instance is the
+fully qualified hostname.
+
+@item realm
+the logical network served by a single Kerberos database and a set of
+Key Distribution Centers.  By convention, realm names are generally all
+uppercase letters, to differentiate the realm from the internet domain.
+@end table
+
+@noindent
+The typical format of a typical Kerberos principal is
+primary/instance@@REALM.
+
+@item service
+any program or computer you access over a network.  Examples of services
+include ``host'' (a host, @i{e.g.}, when you use @code{telnet} and
+@code{rsh}), ``ftp'' (FTP), ``krbtgt'' (authentication;
+cf. @i{ticket-granting ticket}), and ``pop'' (email).
+
+@item ticket
+a temporary set of electronic credentials that verify the identity of a
+client for a particular service.
+
+@item TGT
+Ticket-Granting Ticket.  A special Kerberos ticket that permits the
+client to obtain additional Kerberos tickets within the same Kerberos
+realm.
+@end table

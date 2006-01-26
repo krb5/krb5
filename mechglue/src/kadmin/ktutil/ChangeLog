@@ -1,0 +1,183 @@
+2005-10-12  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Fix malloc size botches reported by
+	Will Fiveash.
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* ktutil.c (main): Don't register writable keytab ops as they are
+	registered by the library now  
+
+2002-11-05  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Remove trailing colon, as new
+	implementation of krb5_read_password() appends it.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil_ct.ct: Add final "end" statement.
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* ktutil.c (ktutil_list): Remove variable set but not used. Also,
+	do not assume that sizeof(time_t) is 32 bits.
+
+2003-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): When keeping only
+	highest-numbered kvno, with some heuristics to deal with
+	wrap-around at 256.
+
+2002-03-02  Sam Hartman  <hartmans@mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Set umask to 077 to avoid
+	public srvtabs.
+	
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil.h: Make prototypes unconditional.
+
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Find ktutil_ct.c in build directory.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Cast argument to isxdigit() to int.
+
+Mon Feb 26 14:27:24 2001  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktutil.c, ktutil_funcs.c: Do not shadow system "index" and
+ 	"stime" variables.
+
+	* ktutil.h: Add prototypes for SS callback functions.
+
+2000-12-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil.c (ktutil_list): Provide a real usage message.
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (ktutil): Do not link with the V4
+	libraries. Although the program can write out a v4 srvtab, the one
+	necessary function is here.
+
+	* ktutil_funcs.c (ktutil_read_keytab): Add explicit braces to
+	avoid ambiguous `else'.
+	(getstr): register count -> register int count
+
+	* ktutil.c (main): ss_listen() takes only one argument.
+
+2000-05-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktutil_funcs.c (ktutil_write_keytab): Reject a filename that's
+	too long.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-08-17  Geoffrey King  <gjking@mit.edu>
+
+	* ktutil_funcs.c (ktutil_add): Cleanup newly allocated keytab
+	entry and tail of linked list when an error occurs.
+
+1999-08-16  Geoffrey King  <gjking@mit.edu>
+
+	* ktutil.c (ktutil_add_entry):
+	* ktutil_funcs.c (ktutil_add): Implement addent command to allow
+	creation of new keytab entries by specifying a key or password.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+Fri Feb 27 23:32:38 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Changed thisconfigdir to point at the kadmin
+ 		directory, since we've moved all of the configure.in
+		tests to the toplevel kadmin configure.in
+
+Wed Feb 18 15:56:16 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Tue Sep 30 18:58:09 1997  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil.c: Replace HAS_STDLIB_H with something more sane.
+
+Tue Feb  4 21:11:33 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new program build procedure.
+
+Thu Nov  7 15:42:17 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* ktutil.c (main): Check the error return from
+ 		krb5_init_context(), and print an error message if
+ 		necessary.
+
+Tue Sep 10 14:17:17 1996  Tom Yu  <tlyu@mit.edu>
+
+	* ktutil.M: remove ".so man1/header.doc"
+
+Thu Aug 29 16:06:39 1996  Jeff Bigler  <jcb@mit.edu>
+
+	* Makefile.in (install): added man page
+
+Thu Jun 13 21:42:11 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to SS_RULES
+
+Fri Jul 12 14:37:47 1996  Marc Horowitz  <marc@mit.edu>
+
+	* configure.in (USE_KADM_LIBRARY): removed.  it wasn't needed.
+
+Tue Mar 19 19:41:31 1996  Richard Basch  <basch@lehman.com>
+
+	* ktutil_funcs.c (ktutil_write_srvtab): use any type of des key
+	in the keytab to create a v4 srvtab
+
+Fri Jan 26 00:06:50 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* ktutil.c (ktutil_list): Implement -e option to show enctypes.
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Write v4 version
+        properly. Previous code was endien dependent.
+
+Mon Dec 25 10:03:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ktutil.c (ktutil_write_v4): Call ktutil_write_srvtab not
+		ktutil_write_keytab.
+
+	* ktutil_funcs.c (ktutil_write_srvtab): Clear malloced memory.
+
+
+Thu Sep 07 15:06:57 1995  Chris Provenzano (proven@mit.edu)
+
+	* ktutil_funcs.c : Do appropriate magic for enctype/keytype cleanup.
+
+Thu Aug 24 19:20:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Added .Sanitize file.
+
+Mon Aug 21 17:01:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* ktutil.c - Remove English-specific date handling and let timestamp_
+		to_sfstring() handle the formatting of the timestamp string.
+

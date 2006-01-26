@@ -1,0 +1,1700 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@c guide
+@setfilename krb5-user.info
+@settitle Kerberos V5 UNIX User's Guide
+@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
+@c %**end of header
+
+@paragraphindent 0
+@iftex
+@parskip 6pt plus 6pt
+@end iftex
+
+@include definitions.texinfo
+@set EDITION 1.0
+
+@finalout                               @c don't print black warning boxes
+
+@titlepage
+@title @value{PRODUCT} UNIX User's Guide
+@subtitle Release:  @value{RELEASE}
+@subtitle Document Edition:  @value{EDITION}
+@subtitle Last updated:  @value{UPDATED}
+@author @value{COMPANY}
+
+@page
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@comment  node-name,  next,  previous,  up
+@node Top, Copyright, (dir), (dir)
+
+@ifinfo
+This file describes how to use the @value{PRODUCT} client programs.
+@end ifinfo
+
+@c The master menu is updated using emacs19's M-x texinfo-all-menus-update
+@c function.  Don't forget to run M-x texinfo-every-node-update after
+@c you add a new section or subsection, or after you've rearranged the
+@c comand before each @section or @subsection!  All you need to enter
+@c is:
+@c
+@c @section New Section Name
+@c
+@c M-x texinfo-every-node-update will take care of calculating the
+@c node's forward and back pointers.
+@c
+@c ---------------------------------------------------------------------
+
+@menu
+* Copyright::                   
+* Introduction::                
+* Kerberos V5 Tutorial::        
+* Kerberos V5 Reference::       
+* Kerberos Glossary::           
+@end menu
+
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+
+@include copyright.texinfo
+
+@node Introduction, Kerberos V5 Tutorial, Copyright, Top
+@chapter Introduction
+
+@ifset CYGNUS
+@value{PRODUCT} is based on the Kerberos V5 authentication system
+developed at MIT.
+@end ifset
+@ifset MIT
+Kerberos V5 is an authentication system developed at MIT.
+@end ifset
+Kerberos is named for the three-headed watchdog from Greek mythology,
+who guarded the entrance to the underworld.
+
+Under Kerberos, a client (generally either a user or a service) sends a
+request for a ticket to the @i{Key Distribution Center} (KDC).  The KDC
+creates a @dfn{ticket-granting ticket} (TGT) for the client, encrypts it
+using the client's password as the key, and sends the encrypted TGT back
+to the client.  The client then attempts to decrypt the TGT, using its
+password.  If the client successfully decrypts the TGT (@i{i.e.}, if the
+client gave the correct password), it keeps the decrypted TGT, which
+indicates proof of the client's identity.
+
+The TGT, which expires at a specified time, permits the client to obtain
+additional tickets, which give permission for specific services.  The
+requesting and granting of these additional tickets is user-transparent.
+
+Since Kerberos negotiates authenticated, and optionally encrypted,
+communications between two points anywhere on the internet, it provides
+a layer of security that is not dependent on which side of a firewall
+either client is on.  Since studies have shown that half of the computer
+security breaches in industry happen from @i{inside} firewalls,
+@value{COMPANY}'s @value{PRODUCT} plays a vital role in maintaining your
+network security.
+
+The @value{PRODUCT} package is designed to be easy to use.  Most of the
+commands are nearly identical to UNIX network programs you already
+use.  @value{PRODUCT} is a @dfn{single-sign-on} system, which means
+that you have to type your password only once per session, and Kerberos
+does the authenticating and encrypting transparently.
+
+@menu
+* What is a Ticket?::           
+* What is a Kerberos Principal?::  
+@end menu
+
+@node What is a Ticket?, What is a Kerberos Principal?, Introduction, Introduction
+@section What is a Ticket?
+
+Your Kerberos @dfn{credentials}, or ``@dfn{tickets}'', are a set of
+electronic information that can be used to verify your identity.  Your
+Kerberos tickets may be stored in a file, or they may exist only in
+memory.
+
+The first ticket you obtain is a @dfn{ticket-granting ticket}, which
+permits you to obtain additional tickets.  These additional tickets give
+you permission for specific services.  The requesting and granting of
+these additional tickets happens transparently.
+
+A good analogy for the ticket-granting ticket is a three-day ski pass
+that is good at four different resorts.  You show the pass at whichever
+resort you decide to go to (until it expires), and you receive a lift
+ticket for that resort.  Once you have the lift ticket, you can ski all
+you want at that resort.  If you go to another resort the next day, you
+once again show your pass, and you get an additional lift ticket for the
+new resort.  The difference is that the @value{PRODUCT} programs notice
+that you have the weekend ski pass, and get the lift ticket for you, so
+you don't have to perform the transactions yourself.
+
+@node What is a Kerberos Principal?,  , What is a Ticket?, Introduction
+@section What is a Kerberos Principal?
+
+A Kerberos @dfn{principal} is a unique identity to which Kerberos can
+assign tickets.  Principals can have an arbitrary number of
+components.  Each component is separated by a component separator,
+generally `/'.  The last component is the realm, separated from the
+rest of the principal by the realm separator, generally `@@'.  If there
+is no realm component in the principal, then it will be assumed that
+the principal is in the default realm for the context in which it is
+being used.
+
+Traditionally, a principal is divided into three parts:  the
+@dfn{primary}, the @dfn{instance}, and the @dfn{realm}.  The format of
+a typical Kerberos V5 principal is @code{primary/instance@@REALM}.
+
+@itemize @bullet
+@item The @dfn{primary} is the first part of the principal.  In the case
+of a user, it's the same as your username.  For a host, the primary is
+the word @code{host}.
+
+@item The @dfn{instance} is an optional string that qualifies the
+primary.  The instance is separated from the primary by a slash
+(@code{/}).  In the case of a user, the instance is usually null, but a
+user might also have an additional principal, with an instance called
+@samp{admin}, which he/she uses to administrate a database.  The
+principal @code{@value{RANDOMUSER1}@@@value{PRIMARYREALM}} is completely
+separate from the principal
+@code{@value{RANDOMUSER1}/admin@@@value{PRIMARYREALM}}, with a separate
+password, and separate permissions.  In the case of a host, the instance
+is the fully qualified hostname, e.g.,
+@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}.
+
+@item The @dfn{realm} is your Kerberos realm.  In most cases, your
+Kerberos realm is your domain name, in upper-case letters.  For example,
+the machine @code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} would be in
+the realm @code{@value{SECONDREALM}}.
+@end itemize
+
+@node Kerberos V5 Tutorial, Kerberos V5 Reference, Introduction, Top
+@chapter Kerberos V5 Tutorial
+
+This tutorial is intended to familiarize you with the @value{PRODUCT}
+client programs.  We will represent your prompt as ``@code{shell%}''.
+So an instruction to type the ``@kbd{ls}'' command would be represented as
+follows:
+
+@need 600
+@smallexample
+@group
+@b{shell%} ls
+@end group
+@end smallexample
+
+In these examples, we will use sample usernames, such as
+@code{@value{RANDOMUSER1}} and @code{@value{RANDOMUSER2}}, sample
+hostnames, such as @code{@value{RANDOMHOST1}} and
+@code{@value{RANDOMHOST2}}, and sample domain names, such as
+@code{@value{PRIMARYDOMAIN}} and @code{@value{SECONDDOMAIN}}.  When you
+see one of these, substitute your username, hostname, or domain name
+accordingly.
+
+@menu
+* Setting Up to Use Kerberos V5::  
+* Ticket Management::           
+* Password Management::         
+* Kerberos V5 Applications::    
+@end menu
+
+@node Setting Up to Use Kerberos V5, Ticket Management, Kerberos V5 Tutorial, Kerberos V5 Tutorial
+@section Setting Up to Use @value{PRODUCT}
+
+Your system administrator will have installed the @value{PRODUCT}
+programs in whichever directory makes the most sense for your system.
+We will use @code{@value{ROOTDIR}} throughout this guide to refer to the
+top-level directory @value{PRODUCT} directory.  We will therefor use
+@code{@value{BINDIR}} to denote the location of the @value{PRODUCT} user
+programs.  In your installation, the directory name may be different,
+but whatever the directory name is, you should make sure it is included
+in your path.  You will probably want to put it @i{ahead of} the
+directories @code{/bin} and @code{/usr/bin} so you will get the
+@value{PRODUCT} network programs, rather than the standard UNIX
+versions, when you type their command names.
+
+@node Ticket Management, Password Management, Setting Up to Use Kerberos V5, Kerberos V5 Tutorial
+@section Ticket Management
+
+On many systems, Kerberos is built into the login program, and you get
+tickets automatically when you log in.  Other programs, such as
+@code{rsh}, @code{rcp}, @code{telnet}, and @code{rlogin}, can forward
+copies of your tickets to the remote host.  Most of these programs also
+automatically destroy your tickets when they exit.  However,
+@value{COMPANY} recommends that you explicitly destroy your Kerberos
+tickets when you are through with them, just to be sure.  One way to
+help ensure that this happens is to add the @code{kdestroy} command to
+your @code{.logout} file.  Additionally, if you are going to be away
+from your machine and are concerned about an intruder using your
+permissions, it is safest to either destroy all copies of your tickets,
+or use a screensaver that locks the screen.
+
+@need 2000
+@menu
+* Kerberos Ticket Properties::  
+* Obtaining Tickets with kinit::  
+* Viewing Your Tickets with klist::  
+* Destroying Your Tickets with kdestroy::  
+@end menu
+
+@node Kerberos Ticket Properties, Obtaining Tickets with kinit, Ticket Management, Ticket Management
+@subsection Kerberos Ticket Properties
+
+@noindent
+There are various properties that Kerberos tickets can have:
+
+If a ticket is @dfn{forwardable}, then the KDC can issue a new ticket with
+a different network address based on the forwardable ticket.  This
+allows for authentication forwarding without requiring a password to be
+typed in again.  For example, if a user with a forwardable TGT logs
+into a remote system, the KDC could issue a new TGT for that user with
+the netword address of the remote system, allowing authentication on
+that host to work as though the user were logged in locally.
+
+When the KDC creates a new ticket based on a forwardable ticket, it
+sets the @dfn{forwarded} flag on that new ticket.  Any tickets that are
+created based on a ticket with the forwarded flag set will also have
+their forwarded flags set.
+
+A @dfn{proxiable} ticket is similar to a forwardable ticket in that it
+allows a service to take on the identity of the client.  Unlike a
+forwardable ticket, however, a proxiable ticket is only issued for
+specific services.  In other words, a ticket-granting ticket cannot be
+issued based on a ticket that is proxiable but not forwardable.
+
+A @dfn{proxy} ticket is one that was issued based on a proxiable ticket.
+
+A @dfn{postdated} ticket is issued with the @i{invalid} flag set.
+After the starting time listed on the ticket, it can be presented to
+the KDC to obtain valid tickets.  
+
+Tickets with the @dfn{postdateable} flag set can be used to issue postdated
+tickets.
+
+@dfn{Renewable} tickets can be used to obtain new session keys without
+the user entering their password again.  A renewable ticket has two
+expiration times.  The first is the time at which this particular
+ticket expires.  The second is the latest possible expiration time for
+any ticket issued based on this renewable ticket.
+
+A ticket with the @dfn{initial} flag set was issued based on the
+authentication protocol, and not on a ticket-granting ticket.   Clients
+that wish to ensure that the user's key has been recently presented for
+verification could specify that this flag must be set to accept the
+ticket.
+
+An @dfn{invalid} ticket must be rejected by application servers.  Postdated
+tickets are usually issued with this flag set, and must be validated by
+the KDC before they can be used.
+
+A @dfn{preauthenticated} ticket is one that was only issued after the
+client requesting the ticket had authenticated itself to the KDC.
+
+The @dfn{hardware authentication} flag is set on a ticket which
+required the use of hardware for authentication.  The hardware is
+expected to be possessed only by the client which requested the
+tickets.
+
+If a ticket has the @dfn{transit policy checked} flag set, then the KDC that
+issued this ticket implements the transited-realm check policy and
+checked the transited-realms list on the ticket.  The transited-realms
+list contains a list of all intermediate realms between the realm of the
+KDC that issued the first ticket and that of the one that issued the
+current ticket.  If this flag is not set, then the application server
+must check the transited realms itself or else reject the ticket.
+
+The @dfn{okay as delegate} flag indicates that the server specified in
+the ticket is suitable as a delegate as determined by the policy of
+that realm.  A server that is acting as a delegate has been granted a
+proxy or a forwarded TGT.  This flag is a new addition to the
+@value{PRODUCT} protocol and is not yet implemented on MIT servers.
+
+An @dfn{anonymous}  ticket is one in which the named principal is a generic
+principal for that realm; it does not actually specify the individual
+that will be using the ticket.  This ticket is meant only to securely
+distribute a session key.  This is a new addition to the @value{PRODUCT}
+protocol and is not yet implemented on MIT servers.
+
+@node Obtaining Tickets with kinit, Viewing Your Tickets with klist, Kerberos Ticket Properties, Ticket Management
+@subsection Obtaining Tickets with kinit
+
+If your site is using the @value{PRODUCT} login program, you will get
+Kerberos tickets automatically when you log in.  If your site uses a
+different login program, you may need to explicitly obtain your Kerberos
+tickets, using the @code{kinit} program.  Similarly, if your Kerberos
+tickets expire, use the @code{kinit} program to obtain new ones.
+
+@need 1500
+To use the @code{kinit} program, simply type @kbd{kinit} and then type
+your password at the prompt.  For example, Jennifer (whose username is
+@code{@value{RANDOMUSER1}}) works for Bleep, Inc. (a fictitious company
+with the domain name @code{@value{PRIMARYDOMAIN}} and the Kerberos realm
+@code{@value{PRIMARYREALM}}).  She would type:
+
+@smallexample
+@group
+@b{shell%} kinit
+@b{Password for @value{RANDOMUSER1}@@@value{PRIMARYREALM}:} @i{<-- [Type @value{RANDOMUSER1}'s password here.]}
+@b{shell%}
+@end group
+@end smallexample
+
+@need 1000
+If you type your password incorrectly, kinit will give you the following
+error message:
+
+@smallexample
+@group
+@b{shell%} kinit
+@b{Password for @value{RANDOMUSER1}@@@value{PRIMARYREALM}:} @i{<-- [Type the wrong password here.]}
+@b{kinit: Password incorrect}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent and you won't get Kerberos tickets.
+
+@noindent Notice that @code{kinit} assumes you want tickets for your own
+username in your default realm.  
+@need 1500
+Suppose Jennifer's friend David is visiting, and he wants to borrow a
+window to check his mail.  David needs to get tickets for himself in his
+own realm, @value{SECONDREALM}.@footnote{Note:  the realm
+@value{SECONDREALM} must be listed in your computer's Kerberos
+configuration file, @code{/etc/krb5.conf}.}  He would type:
+
+@smallexample
+@group
+@b{shell%} kinit @value{RANDOMUSER2}@@@value{SECONDREALM}
+@b{Password for @value{RANDOMUSER2}@@@value{SECONDREALM}:} @i{<-- [Type @value{RANDOMUSER2}'s password here.]}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent David would then have tickets which he could use to log onto
+his own machine.  Note that he typed his password locally on Jennifer's
+machine, but it never went over the network.  Kerberos on the local host
+performed the authentication to the KDC in the other realm.
+
+@need 1000
+If you want to be able to forward your tickets to another host, you need
+to request @dfn{forwardable} tickets.  You do this by specifying the
+@kbd{-f} option:
+
+@smallexample
+@group
+@b{shell%} kinit -f
+@b{Password for @value{RANDOMUSER1}@@@value{PRIMARYREALM}:} @i{<-- [Type your password here.]}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent
+Note that @code{kinit} does not tell you that it obtained forwardable
+tickets; you can verify this using the @code{klist} command
+(@pxref{Viewing Your Tickets with klist}).
+
+Normally, your tickets are good for your system's default ticket
+lifetime, which is ten hours on many systems.  You can specify a
+different ticket lifetime with the @samp{-l} option.  Add the letter
+@samp{s} to the value for seconds, @samp{m} for minutes, @samp{h} for
+hours, or @samp{d} for days.
+@need 1500
+For example, to obtain forwardable tickets for
+@code{@value{RANDOMUSER2}@@@value{SECONDREALM}} that would be good for
+three hours, you would type:
+
+@smallexample
+@group
+@b{shell%} kinit -f -l 3h @value{RANDOMUSER2}@@@value{SECONDREALM}
+@b{Password for @value{RANDOMUSER2}@@@value{SECONDREALM}:} @i{<-- [Type @value{RANDOMUSER2}'s password here.]}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent
+You cannot mix units; specifying a lifetime of @samp{3h30m} would result
+in an error.  Note also that most systems specify a maximum ticket
+lifetime.  If you request a longer ticket lifetime, it will be
+automatically truncated to the maximum lifetime.
+
+@node Viewing Your Tickets with klist, Destroying Your Tickets with kdestroy, Obtaining Tickets with kinit, Ticket Management
+@subsection Viewing Your Tickets with klist
+
+The @code{klist} command shows your tickets.  When you first obtain
+tickets, you will have only the ticket-granting ticket.  (@xref{What is
+a Ticket?}.)  The listing would look like this:
+
+@smallexample
+@group
+@b{shell%} klist
+Ticket cache: /tmp/krb5cc_ttypa
+Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+
+Valid starting     Expires            Service principal
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent
+The ticket cache is the location of your ticket file.  In the above
+example, this file is named @code{/tmp/krb5cc_ttypa}.  The default
+principal is your kerberos @dfn{principal}.  (@pxref{What is a Kerberos
+Principal?})
+
+The ``valid starting'' and ``expires'' fields describe the period of
+time during which the ticket is valid.  The @dfn{service principal}
+describes each ticket.  The ticket-granting ticket has the primary
+@code{krbtgt}, and the instance is the realm name.
+
+@need 2000
+Now, if @value{RANDOMUSER1} connected to the machine
+@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, and then typed
+@kbd{klist} again, she would have gotten the following result:
+
+@smallexample
+@group
+@b{shell%} klist
+Ticket cache: /tmp/krb5cc_ttypa
+Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+
+Valid starting     Expires            Service principal
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+06/07/04 20:22:30  06/08/04 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent
+Here's what happened:  when @value{RANDOMUSER1} used telnet to connect
+to the host @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, the telnet
+program presented her ticket-granting ticket to the KDC and requested a
+host ticket for the host
+@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}.  The KDC sent the host
+ticket, which telnet then presented to the host
+@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, and she was allowed to
+log in without typing her password.
+
+@need 3000
+Suppose your Kerberos tickets allow you to log into a host in another
+domain, such as @code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}}, which
+is also in another Kerberos realm, @code{@value{SECONDREALM}}.  If you
+telnet to this host, you will receive a ticket-granting ticket for the
+realm @code{@value{SECONDREALM}}, plus the new @code{host} ticket for
+@code{@value{RANDOMHOST2}.@value{SECONDDOMAIN}}.  @kbd{klist} will now
+show:
+
+@smallexample
+@group
+@b{shell%} klist
+Ticket cache: /tmp/krb5cc_ttypa
+Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+
+Valid starting     Expires            Service principal
+06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+06/07/04 20:22:30  06/08/04 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+06/07/04 20:24:18  06/08/04 05:49:19  krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
+06/07/04 20:24:18  06/08/04 05:49:19  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{PRIMARYREALM}
+@b{shell%}
+@end group
+@end smallexample
+
+You can use the @code{-f} option to view the @dfn{flags} that apply to
+your tickets.  The flags are:
+
+@table @b
+@itemx F
+@b{F}orwardable
+@itemx f
+@b{f}orwarded
+@itemx P
+@b{P}roxiable
+@itemx p
+@b{p}roxy
+@itemx D
+post@b{D}ateable
+@itemx d
+post@b{d}ated
+@itemx R
+@b{R}enewable
+@itemx I
+@b{I}nitial
+@itemx i
+@b{i}nvalid
+@itemx H
+@b{H}ardware authenticated
+@itemx A
+pre@b{A}uthenticated
+@itemx T
+@b{T}ransit policy checked
+@itemx O
+@b{O}kay as delegate
+@itemx a
+@b{a}nonymous
+@end table
+
+@need 1500
+Here is a sample listing.  In this example, the user @value{RANDOMUSER1}
+obtained her initial tickets (@samp{I}), which are forwardable
+(@samp{F}) and postdated (@samp{d}) but not yet validated (@samp{i}).
+(@xref{kinit Reference}, for more information about postdated tickets.)
+
+@smallexample
+@group
+@b{shell%} klist -f
+@b{Ticket cache: /tmp/krb5cc_320
+Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+
+Valid starting      Expires             Service principal
+31/07/05 19:06:25  31/07/05 19:16:25  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+        Flags: FdiI
+shell%}
+@end group
+@end smallexample
+
+@need 1500
+In the following example, the user @value{RANDOMUSER2}'s tickets were
+forwarded (@samp{f}) to this host from another host.  The tickets are
+reforwardable (@samp{F}).
+
+@smallexample
+@group
+@b{shell%} klist -f
+@b{Ticket cache: /tmp/krb5cc_p11795
+Default principal: @value{RANDOMUSER2}@@@value{SECONDREALM}
+
+Valid starting     Expires            Service principal
+07/31/05 11:52:29  07/31/05 21:11:23  krbtgt/@value{SECONDREALM}@@@value{SECONDREALM}
+        Flags: Ff
+07/31/05 12:03:48  07/31/05 21:11:23  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{SECONDREALM}
+        Flags: Ff
+shell%}
+@end group
+@end smallexample
+
+@node Destroying Your Tickets with kdestroy,  , Viewing Your Tickets with klist, Ticket Management
+@subsection Destroying Your Tickets with kdestroy
+
+Your Kerberos tickets are proof that you are indeed yourself, and
+tickets can be stolen.  If this happens, the person who has them can
+masquerade as you until they expire.  For this reason, you should
+destroy your Kerberos tickets when you are away from your computer.
+
+@need 1000
+Destroying your tickets is easy.  Simply type @kbd{kdestroy}.
+
+@smallexample
+@group
+@b{shell%} kdestroy
+@b{shell%}
+@end group
+@end smallexample
+
+@need 1500
+If @code{kdestroy} fails to destroy your tickets, it will beep and give
+an error message.  For example, if @code{kdestroy} can't find any
+tickets to destroy, it will give the following message:
+
+@smallexample
+@group
+@b{shell%} kdestroy
+@b{kdestroy: No credentials cache file found while destroying cache
+shell%}
+@end group
+@end smallexample
+
+@node Password Management, Kerberos V5 Applications, Ticket Management, Kerberos V5 Tutorial
+@section Password Management
+
+Your password is the only way Kerberos has of verifying your identity.
+If someone finds out your password, that person can masquerade as
+you---send email that comes from you, read, edit, or delete your files,
+or log into other hosts as you---and no one will be able to tell the
+difference.  For this reason, it is important that you choose a good
+password (@pxref{Password Advice}), and keep it secret.  If you need to
+give access to your account to someone else, you can do so through
+Kerberos.  (@xref{Granting Access to Your Account}.)  You should
+@i{never} tell your password to anyone, including your system
+administrator, for any reason.  You should change your password
+frequently, particularly any time you think someone may have found out
+what it is.
+
+@menu
+* Changing Your Password::      
+* Password Advice::             
+* Granting Access to Your Account::  
+@end menu
+
+@node Changing Your Password, Password Advice, Password Management, Password Management
+@subsection Changing Your Password
+
+@need 2500
+To change your Kerberos password, use the @code{kpasswd} command.  It
+will ask you for your old password (to prevent someone else from walking
+up to your computer when you're not there and changing your password),
+and then prompt you for the new one twice.  (The reason you have to type
+it twice is to make sure you have typed it correctly.)  For example,
+user @code{@value{RANDOMUSER2}} would do the following:
+
+@smallexample
+@group
+@b{shell%} kpasswd
+@b{Password for @value{RANDOMUSER2}:}    @i{<- Type your old password.}
+@b{Enter new password:}    @i{<- Type your new password.}
+@b{Enter it again:}  @i{<- Type the new password again.}
+@b{Password changed.}
+@b{shell%}
+@end group
+@end smallexample
+
+@need 1800
+If @value{RANDOMUSER2} typed the incorrect old password, he would get
+the following message:
+
+@smallexample
+@group
+@b{shell%} kpasswd
+@b{Password for @value{RANDOMUSER2}:}  @i{<- Type the incorrect old password.}
+@b{kpasswd: Password incorrect while getting initial ticket
+shell%}
+@end group
+@end smallexample
+
+@need 2500
+If you make a mistake and don't type the new password the same way
+twice, @code{kpasswd} will ask you to try again:
+
+@smallexample
+@group
+@b{shell%} kpasswd
+@b{Password for @value{RANDOMUSER2}:}  @i{<- Type the old password.}
+@b{Enter new password:}  @i{<- Type the new password.}
+@b{Enter it again:} @i{<- Type a different new password.}
+@b{kpasswd: Password mismatch while reading password
+shell%}
+@end group
+@end smallexample
+
+Once you change your password, it takes some time for the change to
+propagate through the system.  Depending on how your system is set up,
+this might be anywhere from a few minutes to an hour or more.  If you
+need to get new Kerberos tickets shortly after changing your password,
+try the new password.  If the new password doesn't work, try again using
+the old one.
+
+@node Password Advice, Granting Access to Your Account, Changing Your Password, Password Management
+@subsection Password Advice
+
+Your password can include almost any character you can type (except
+control keys and the ``enter'' key).  A good password is one you can
+remember, but that no one else can easily guess.  Examples of @i{bad}
+passwords are words that can be found in a dictionary, any common or
+popular name, especially a famous person (or cartoon character), your
+name or username in any form (@i{e.g.}, forward, backward, repeated
+twice, @i{etc.}), your spouse's, child's, or pet's name, your birth
+date, your social security number, and any sample password that appears
+in this (or any other) manual.
+
+@need 2200
+@value{COMPANY} recommends that your password be at least 6 characters
+long, and contain UPPER- and lower-case letters, numbers, and/or
+punctuation marks.  Some passwords that would be good if they weren't
+listed in this manual include:
+
+@itemize @bullet
+@item some initials, like ``GykoR-66.'' for ``Get your kicks on Route
+66.''
+
+@item an easy-to-pronounce nonsense word, like ``slaRooBey'' or
+``krang-its''
+
+@item a misspelled phrase, like ``2HotPeetzas!'' or ``ItzAGurl!!!''
+@end itemize
+
+@noindent Note:  don't actually use any of the above passwords.  They're
+only meant to show you how to make up a good password.  Passwords that
+appear in a manual are the first ones intruders will try.
+
+@need 3800 
+@value{PRODUCT} allows your system administrators to automatically
+reject bad passwords, based on certain criteria, such as a password
+dictionary or a minimum length.  For example, if the user
+@code{@value{RANDOMUSER1}}, who had a policy "strict" that required a
+minimum of 8 characaters, chose a password that was less than 8
+characters, Kerberos would give an error message like the following:
+
+@smallexample
+@group
+@b{shell%} kpasswd
+@b{Password for @value{RANDOMUSER1}:}  @i{<- Type your old password here.}
+
+@value{RANDOMUSER1}'s password is controlled by the policy strict, which
+requires a minimum of 8 characters from at least 3 classes (the five classes
+are lowercase, uppercase, numbers, punctuation, and all other characters).
+
+@b{Enter new password:}  @i{<- Type an insecure new password.}
+@b{Enter it again:}  @i{<- Type it again.}
+
+kpasswd: Password is too short while attempting to change password.
+Please choose another password.
+
+@b{Enter new password:}  @i{<- Type a good password here.}
+@b{Enter it again:}  @i{<- Type it again.}
+@b{Password changed.
+shell%}
+@end group
+@end smallexample
+
+@noindent Your system administrators can choose the message that is
+displayed if you choose a bad password, so the message you see may be
+different from the above example.
+
+@node Granting Access to Your Account,  , Password Advice, Password Management
+@subsection Granting Access to Your Account
+
+@need 1800
+If you need to give someone access to log into your account, you can do
+so through Kerberos, without telling the person your password.  Simply
+create a file called @code{.k5login} in your home directory.  This file
+should contain the Kerberos principal (@xref{What is a Kerberos
+Principal?}.) of each person to whom you wish to give access.  Each
+principal must be on a separate line.  Here is a sample @code{.k5login}
+file:
+
+@smallexample
+@group
+@value{RANDOMUSER1}@@@value{PRIMARYREALM}
+@value{RANDOMUSER2}@@@value{SECONDREALM}
+@end group
+@end smallexample
+
+@noindent This file would allow the users @code{@value{RANDOMUSER1}} and
+@code{@value{RANDOMUSER2}} to use your user ID, provided that they had
+Kerberos tickets in their respective realms.  If you will be logging
+into other hosts across a network, you will want to include your own
+Kerberos principal in your @code{.k5login} file on each of these hosts.
+
+@need 1000
+Using a @code{.k5login} file is much safer than giving out your
+password, because:
+
+@itemize @bullet
+@item You can take access away any time simply by removing the principal
+from your @code{.k5login} file.
+
+@item Although the user has full access to your account on one
+particular host (or set of hosts if your @code{.k5login} file is shared,
+@i{e.g.}, over NFS), that user does not inherit your network privileges.
+
+@item Kerberos keeps a log of who obtains tickets, so a system
+administrator could find out, if necessary, who was capable of using
+your user ID at a particular time.
+@end itemize
+
+One common application is to have a @code{.k5login} file in
+@code{root}'s home directory, giving root access to that machine to the
+Kerberos principals listed.  This allows system administrators to allow
+users to become root locally, or to log in remotely as @code{root},
+without their having to give out the root password, and without anyone
+having to type the root password over the network.
+
+@node Kerberos V5 Applications,  , Password Management, Kerberos V5 Tutorial
+@section Kerberos V5 Applications
+
+@value{PRODUCT} is a @dfn{single-sign-on} system.  This means that you
+only have to type your password once, and the @value{PRODUCT} programs
+do the authenticating (and optionally encrypting) for you.  The way this
+works is that Kerberos has been built into each of a suite of network
+programs.  For example, when you use a @value{PRODUCT} program to
+connect to a remote host, the program, the KDC, and the remote host
+perform a set of rapid negotiations.  When these negotiations are
+completed, your program has proven your identity on your behalf to the
+remote host, and the remote host has granted you access, all in the
+space of a few seconds.
+
+The @value{PRODUCT} applications are versions of existing UNIX network
+programs with the Kerberos features added.
+
+@menu
+* Overview of Additional Features::  
+* telnet::                      
+* rlogin::                      
+* FTP::                         
+* rsh::                         
+* rcp::                         
+* ksu::                         
+@end menu
+
+@node Overview of Additional Features, telnet, Kerberos V5 Applications, Kerberos V5 Applications
+@subsection Overview of Additional Features
+
+The @value{PRODUCT} @dfn{network programs} are those programs that
+connect to another host somewhere on the internet.  These programs
+include @code{rlogin}, @code{telnet}, @code{ftp}, @code{rsh},
+@code{rcp}, and @code{ksu}.  These programs have all of the original
+features of the corresponding non-Kerberos @code{rlogin}, @code{telnet},
+@code{ftp}, @code{rsh}, @code{rcp}, and @code{su} programs, plus
+additional features that transparently use your Kerberos tickets for
+negotiating authentication and optional encryption with the remote host.
+In most cases, all you'll notice is that you no longer have to type your
+password, because Kerberos has already proven your identity.
+
+The @value{PRODUCT} network programs allow you the options of forwarding
+your tickets to the remote host (if you obtained forwardable tickets
+with the @code{kinit} program; @pxref{Obtaining Tickets with kinit}), and
+encrypting data transmitted between you and the remote host.
+
+This section of the tutorial assumes you are familiar with the
+non-Kerberos versions of these programs, and highlights the Kerberos
+functions added in the @value{PRODUCT} package.
+
+@node telnet, rlogin, Overview of Additional Features, Kerberos V5 Applications
+@subsection telnet
+
+The @value{PRODUCT} @code{telnet} command works exactly like the
+standard UNIX telnet program, with the following Kerberos options added:
+
+@table @kbd
+@itemx -f
+forwards a copy of your tickets to the remote host.
+
+@itemx -F
+forwards a copy of your tickets to the remote host, and marks them
+re-forwardable from the remote host.
+
+@itemx -k @i{realm}
+requests tickets for the remote host in the specified realm, instead of
+determining the realm itself.
+
+@itemx -K
+uses your tickets to authenticate to the remote host, but does not log
+you in.
+
+@itemx -a
+attempt automatic login using your tickets.  @code{telnet} will assume
+the same username unless you explicitly specify another.
+
+@itemx -x
+turns on encryption.
+
+@end table
+
+@need 4000
+For example, if @code{@value{RANDOMUSER2}} wanted to use the standard
+UNIX telnet to connect to the machine
+@code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}, he would type:
+
+@smallexample
+@group
+@b{shell%} telnet @value{RANDOMHOST1}.@value{SECONDDOMAIN}
+@b{Trying 128.0.0.5 ...
+Connected to @value{RANDOMHOST1}.@value{SECONDDOMAIN}.
+Escape character is '^]'.
+
+NetBSD/i386 (daffodil) (ttyp3)
+
+login:} @value{RANDOMUSER2}
+@b{Password:}    @i{<- @value{RANDOMUSER2} types his password here}
+@b{Last login: Fri Jun 21 17:13:11 from @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}
+Copyright (c) 1980, 1983, 1986, 1988, 1990, 1991, 1993, 1994
+        The Regents of the University of California.   All rights reserved.
+
+NetBSD 1.1: Tue May 21 00:31:42 EDT 1996
+
+Welcome to NetBSD!
+shell%}
+@end group
+@end smallexample
+
+@noindent Note that the machine
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} asked for
+@code{@value{RANDOMUSER2}}'s password.  When he typed it, his password
+was sent over the network unencrypted.  If an intruder were watching
+network traffic at the time, that intruder would know
+@code{@value{RANDOMUSER2}}'s password.
+
+@need 4000
+If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use the
+@value{PRODUCT} telnet to connect to the machine
+@code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}}, she could forward a
+copy of her tickets, request an encrypted session, and log on as herself
+as follows:
+
+@smallexample
+@group
+@b{shell%} telnet -a -f -x @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}
+@b{Trying 128.0.0.5...
+Connected to @value{RANDOMHOST2}.@value{PRIMARYDOMAIN}.
+Escape character is '^]'.
+[ Kerberos V5 accepts you as ``@value{RANDOMUSER1}@@@value{PRIMARYDOMAIN}'' ]
+[ Kerberos V5 accepted forwarded credentials ]
+What you type is protected by encryption.
+Last login: Tue Jul 30 18:47:44 from @value{RANDOMHOST}.@value{SECONDDOMAIN}
+Athena Server (sun4) Version 9.1.11 Tue Jul 30 14:40:08 EDT 2002
+
+shell%}
+@end group
+@end smallexample
+
+@noindent Note that @code{@value{RANDOMUSER1}}'s machine used Kerberos
+to authenticate her to @code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}},
+and logged her in automatically as herself.  She had an encrypted
+session, a copy of her tickets already waiting for her, and she never
+typed her password.
+
+If you forwarded your Kerberos tickets, @code{telnet} automatically
+destroys them when it exits.  The full set of options to @value{PRODUCT}
+@code{telnet} are discussed in the Reference section of this manual.
+(@pxref{telnet Reference})
+
+@need 2000
+@node rlogin, FTP, telnet, Kerberos V5 Applications
+@subsection rlogin
+
+@need 1000
+The @value{PRODUCT} @code{rlogin} command works exactly like the
+standard UNIX rlogin program, with the following Kerberos options added:
+
+@table @kbd
+@itemx -f
+forwards a copy of your tickets to the remote host.
+
+@itemx -F
+forwards a copy of your tickets to the remote host, and marks them
+re-forwardable from the remote host.
+
+@itemx -k @i{realm}
+requests tickets for the remote host in the specified realm, instead of
+determining the realm itself.
+
+@itemx -x
+encrypts the input and output data streams (the username is sent unencrypted)
+
+@end table
+
+@need 3000
+For example, if @code{@value{RANDOMUSER2}} wanted to use the standard
+UNIX rlogin to connect to the machine
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}}, he would type:
+
+@smallexample
+@group
+@b{shell%} rlogin @value{RANDOMHOST1}.@value{SECONDDOMAIN} -l @value{RANDOMUSER2}
+@b{Password:}  @i{<- @value{RANDOMUSER2} types his password here}
+@b{Last login: Fri Jun 21 10:36:32 from :0.0
+Copyright (c) 1980, 1983, 1986, 1988, 1990, 1991, 1993, 1994
+        The Regents of the University of California.   All rights reserved.
+
+NetBSD 1.1: Tue May 21 00:31:42 EDT 1996
+
+Welcome to NetBSD!
+shell%}
+@end group
+@end smallexample
+
+@noindent Note that the machine
+@code{@value{RANDOMHOST1}.@value{SECONDDOMAIN}} asked for
+@code{@value{RANDOMUSER2}}'s password.  When he typed it, his password
+was sent over the network unencrypted.  If an intruder were watching
+network traffic at the time, that intruder would know
+@code{@value{RANDOMUSER2}}'s password.
+
+@need 4000
+If, on the other hand, @code{@value{RANDOMUSER1}} wanted to use
+@value{PRODUCT} rlogin to connect to the machine
+@code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}}, she could forward a
+copy of her tickets, mark them as not forwardable from the remote host,
+and request an encrypted session as follows:
+
+@smallexample
+@group
+@b{shell%} rlogin @value{RANDOMHOST2}.@value{PRIMARYDOMAIN} -f -x
+@b{This rlogin session is using DES encryption for all data transmissions.
+Last login: Thu Jun 20 16:20:50 from @value{RANDOMHOST1}
+Athena Server (sun4) Version 9.1.11 Tue Jul 30 14:40:08 EDT 2002
+shell%}
+@end group
+@end smallexample
+
+@noindent Note that @code{@value{RANDOMUSER1}}'s machine used Kerberos
+to authenticate her to @code{@value{RANDOMHOST2}.@value{PRIMARYDOMAIN}},
+and logged her in automatically as herself.  She had an encrypted
+session, a copy of her tickets were waiting for her, and she never typed
+her password.
+
+If you forwarded your Kerberos tickets, @code{rlogin} automatically
+destroys them when it exits.  The full set of options to @value{PRODUCT}
+@code{rlogin} are discussed in the Reference section of this manual.
+(@pxref{rlogin Reference})
+
+@node FTP, rsh, rlogin, Kerberos V5 Applications
+@subsection FTP
+
+@need 1000
+The @value{PRODUCT} @code{FTP} program works exactly like the standard
+UNIX FTP program, with the following Kerberos features added:
+
+@table @kbd
+@itemx -k @i{realm}
+requests tickets for the remote host in the specified realm, instead of
+determining the realm itself.
+
+@itemx -f
+requests that your tickets be forwarded to the remote host.  The
+@kbd{-f} argument must be the last argument on the command line.
+
+@itemx protect @i{level}
+(issued at the @code{ftp>} prompt) sets the protection level.  ``Clear''
+is no protection; ``safe'' ensures data integrity by verifying the
+checksum, and ``private'' encrypts the data.  Encryption also ensures
+data integrity.
+@end table
+
+@need 5000
+For example, suppose @code{@value{RANDOMUSER1}} wants to get her
+@code{RMAIL} file from the directory @code{~@value{RANDOMUSER1}/Mail},
+on the host @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}}.  She wants
+to encrypt the file transfer.  The exchange would look like the
+following:
+
+@smallexample
+@group
+@b{shell%} ftp @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}
+Connected to @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}.
+220 @value{RANDOMHOST1}.@value{PRIMARYDOMAIN} FTP server (Version 5.60) ready.
+334 Using authentication type GSSAPI; ADAT must follow
+GSSAPI accepted as authentication type
+GSSAPI authentication succeeded
+200 Data channel protection level set to private.
+Name (@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}:@value{RANDOMUSER1}): 
+232 GSSAPI user @value{RANDOMUSER1}@@@value{PRIMARYREALM} is authorized as @value{RANDOMUSER1}
+230 User @value{RANDOMUSER1} logged in.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> protect private
+200 Protection level set to Private.
+ftp> cd ~@value{RANDOMUSER1}/MAIL
+250 CWD command successful.
+ftp> get RMAIL
+227 Entering Passive Mode (128,0,0,5,16,49)
+150 Opening BINARY mode data connection for RMAIL (361662 bytes).
+226 Transfer complete.
+361662 bytes received in 2.5 seconds (1.4e+02 Kbytes/s)
+ftp> quit
+@b{shell%}
+@end group
+@end smallexample
+
+The full set of options to @value{PRODUCT} @code{FTP} are discussed
+in the Reference section of this manual.  (@pxref{FTP Reference})
+
+@node rsh, rcp, FTP, Kerberos V5 Applications
+@subsection rsh
+
+The @value{PRODUCT} @code{rsh} program works exactly like the standard
+UNIX rlogin program, with the following Kerberos features added:
+
+@table @kbd
+@itemx -f
+forwards a copy of your tickets to the remote host.
+
+@itemx -F
+forwards a copy of your tickets to the remote host, and marks them
+re-forwardable from the remote host.
+
+@itemx -k @i{realm}
+requests tickets for the remote host in the specified realm, instead of
+determining the realm itself.
+
+@itemx -x
+encrypts the input and output data streams (the command line is not encrypted)
+
+@end table
+
+@need 1800
+For example, if your Kerberos tickets allowed you to run programs on the
+host @* @code{@value{RANDOMHOST2}@@@value{SECONDDOMAIN}} as root, you could
+run the @samp{date} program as follows:
+
+@smallexample
+@group
+@b{shell%} rsh @value{RANDOMHOST2}.@value{SECONDDOMAIN} -l root -x date
+@b{This rsh session is using DES encryption for all data transmissions.
+Tue Jul 30 19:34:21 EDT 2002
+shell%}
+@end group
+@end smallexample
+
+If you forwarded your Kerberos tickets, @code{rsh} automatically
+destroys them when it exits.  The full set of options to @value{PRODUCT}
+@code{rsh} are discussed in the Reference section of this manual.
+(@pxref{rsh Reference})
+
+@node rcp, ksu, rsh, Kerberos V5 Applications
+@subsection rcp
+
+@need 1000
+The @value{PRODUCT} @code{rcp} program works exactly like the standard
+UNIX rcp program, with the following Kerberos features added:
+
+@table @kbd
+@itemx -k @i{realm}
+requests tickets for the remote host in the specified realm, instead of
+determining the realm itself.
+
+@itemx -x
+turns on encryption.
+@end table
+
+
+@need 1500
+For example, if you wanted to copy the file @code{/etc/motd} from the
+host @code{@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}} into the current
+directory, via an encrypted connection, you would simply type:
+
+@smallexample
+@b{shell%} rcp -x @value{RANDOMHOST1}.@value{PRIMARYDOMAIN}:/etc/motd .
+@end smallexample
+
+The @kbd{rcp} program negotiates authentication and encryption
+transparently.  The full set of options to @value{PRODUCT} @code{rcp}
+are discussed in the Reference section of this manual.  (@pxref{rcp
+Reference})
+
+@node ksu,  , rcp, Kerberos V5 Applications
+@subsection ksu
+
+The @value{PRODUCT} @code{ksu} program replaces the standard UNIX su
+program.  @code{ksu} first authenticates you to Kerberos.  Depending on
+the configuration of your system, @code{ksu} may ask for your Kerberos
+password if authentication fails.  @emph{Note that you should never type
+your password if you are remotely logged in using an unencrypted
+connection.}
+
+Once @code{ksu} has authenticated you, if your Kerberos principal
+appears in the target's @code{.k5login} file (@pxref{Granting Access to
+Your Account}) or in the target's @code{.k5users} file (see below), it
+switches your user ID to the target user ID.
+
+@need 2000
+For example, @code{@value{RANDOMUSER2}} has put
+@code{@value{RANDOMUSER1}}'s Kerberos principal in his @code{.k5login}
+file.  If @code{@value{RANDOMUSER1}} uses @code{ksu} to become
+@code{@value{RANDOMUSER2}}, the exchange would look like this.  (To
+differentiate between the two shells, @code{@value{RANDOMUSER1}}'s
+prompt is represented as @code{@value{RANDOMUSER1}%} and
+@code{@value{RANDOMUSER2}}'s prompt is represented as
+@code{@value{RANDOMUSER2}%}.)
+
+@smallexample
+@group
+@b{@value{RANDOMUSER1}%} ksu @value{RANDOMUSER2}
+@b{Account @value{RANDOMUSER2}: authorization for @value{RANDOMUSER1}@@@value{PRIMARYREALM} successful
+Changing uid to @value{RANDOMUSER2} (3382)
+@value{RANDOMUSER2}%}
+@end group
+@end smallexample
+
+@noindent
+Note that the new shell has a copy of @code{@value{RANDOMUSER1}}'s
+tickets.  The ticket filename contains @code{@value{RANDOMUSER2}}'s UID
+with @samp{.1} appended to it:
+
+@smallexample
+@group
+@b{@value{RANDOMUSER2}%} klist
+@b{Ticket cache: /tmp/krb5cc_3382.1
+Default principal: @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+
+Valid starting      Expires             Service principal
+07/31/04 21:53:01  08/01/04 07:52:53  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+07/31/04 21:53:39  08/01/04 07:52:53  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+@value{RANDOMUSER2}%}
+@end group
+@end smallexample
+
+@need 2500
+If @code{@value{RANDOMUSER1}} had not appeared in
+@code{@value{RANDOMUSER2}}'s @code{.k5login} file (and the system was
+configured to ask for a password), the exchange would have looked like
+this (assuming @code{@value{RANDOMUSER2}} has taken appropriate
+precautions in protecting his password):
+
+@smallexample
+@group
+@b{@value{RANDOMUSER1}%} ksu @value{RANDOMUSER2}
+@b{WARNING: Your password may be exposed if you enter it here and are logged 
+         in remotely using an unsecure (non-encrypted) channel. 
+Kerberos password for @value{RANDOMUSER2}@@@value{PRIMARYREALM}:}  @i{<-  @code{@value{RANDOMUSER1}} types the wrong password here.}
+@b{ksu: Password incorrect
+Authentication failed.
+@value{RANDOMUSER1}%}
+@end group
+@end smallexample
+
+Now, suppose @code{@value{RANDOMUSER2}} did not want to give
+@code{@value{RANDOMUSER1}} full access to his account, but wanted to
+give her permission to list his files and use the "more" command to view
+them.  He could create a @code{.k5users} file giving her permission to
+run only those specific commands.
+
+@need 3500
+The @code{.k5users} file is like the @code{.k5login} file, except that
+each principal is optionally followed by a list of commands.  @code{ksu}
+will let those principals execute only the commands listed, using the
+@kbd{-e} option.  @code{@value{RANDOMUSER2}}'s @code{.k5users} file
+might look like the following:
+
+@smallexample
+@group
+@value{RANDOMUSER1}@@@value{PRIMARYREALM}       /bin/ls /usr/bin/more
+@value{ADMINUSER}@@@value{PRIMARYREALM}         /bin/ls
+@value{ADMINUSER}/admin@@@value{PRIMARYREALM}   *
+@value{RANDOMUSER2}@@@value{SECONDREALM}
+@end group
+@end smallexample
+
+@noindent The above @code{.k5users} file would let
+@code{@value{RANDOMUSER1}} run only the commands @code{/bin/ls} and
+@code{/usr/bin/more}.  It would let @code{@value{ADMINUSER}} run only
+the command @code{/bin/ls} if he had regular tickets, but if he had
+tickets for his @code{admin} instance,
+@code{@value{ADMINUSER}/admin@@@value{PRIMARYREALM}}, he would be able
+to execute any command.  The last line gives @code{@value{RANDOMUSER2}}
+in the realm @value{SECONDREALM} permission to execute any command.
+(@i{I.e.}, having only a Kerberos principal on a line is equivalent to
+giving that principal permission to execute @code{*}.)  This is so that
+@value{RANDOMUSER2} can allow himself to execute commands when he logs
+in, using Kerberos, from a machine in the realm @value{SECONDREALM}.
+
+@need 2500
+Then, when @code{@value{RANDOMUSER1}} wanted to list his home directory,
+she would type:
+
+@smallexample
+@group
+@b{@value{RANDOMUSER1}%} ksu @value{RANDOMUSER2} -e ls ~@value{RANDOMUSER2}
+@b{Authenticated @value{RANDOMUSER1}@@@value{PRIMARYREALM}
+Account @value{RANDOMUSER2}: authorization for @value{RANDOMUSER1}@@@value{PRIMARYREALM} for execution of
+               /bin/ls successful
+Changing uid to @value{RANDOMUSER2} (3382)
+Mail            News            Personal        misc            bin
+@value{RANDOMUSER1}%}
+@end group
+@end smallexample
+
+@noindent If @code{@value{RANDOMUSER1}} had tried to give a different
+command to @code{ksu}, it would have prompted for a password as with the
+previous example.
+
+Note that unless the @code{.k5users} file gives the target permission to
+run any command, the user must use @code{ksu} with the @kbd{-e}
+@i{command} option.
+
+@need 1000
+The @code{ksu} options you are most likely to use are:
+
+@table @kbd
+@itemx -n @i{principal}
+specifies which Kerberos principal you want to use for @code{ksu}.
+(@i{e.g.}, the user @code{@value{ADMINUSER}} might want to use his
+@code{admin} instance.  @xref{What is a Ticket?}.)
+
+@itemx -c
+specifies the location of your Kerberos credentials cache (ticket file).
+
+@itemx -k
+tells @code{ksu} not to destroy your Kerberos tickets when @code{ksu} is
+finished.
+
+@itemx -f
+requests forwardable tickets.  (@xref{Obtaining Tickets with kinit}.)  This
+is only applicable if @code{ksu} needs to obtain tickets.
+
+@itemx -l @i{lifetime}
+sets the ticket lifetime.  (@xref{Obtaining Tickets with kinit}.)  This is
+only applicable if @code{ksu} needs to obtain tickets.
+
+@itemx -z
+tells @code{ksu} to copy your Kerberos tickets only if the UID you are
+switching is the same as the Kerberos primary (either yours or the one
+specified by the @kbd{-n} option).
+
+@itemx -Z
+tells @code{ksu} not to copy any Kerberos tickets to the new UID.
+
+@itemx -e @i{command}
+tells @code{ksu} to execute @i{command} and then exit.  See the
+description of the @code{.k5users} file above.
+
+@itemx -a @i{text}
+(at the end of the command line) tells @code{ksu} to pass everything
+after @samp{-a} to the target shell.
+@end table
+
+The full set of options to @value{PRODUCT} @code{ksu} are discussed
+in the Reference section of this manual.  (@pxref{ksu Reference})
+
+@node Kerberos V5 Reference, Kerberos Glossary, Kerberos V5 Tutorial, Top
+@chapter Kerberos V5 Reference
+
+This section will include copies of the manual pages for the
+@value{PRODUCT} client programs.  You can read the manual entry for any
+command by typing @code{man} @i{command}, where @i{command} is the name
+of the command for which you want to read the manual entry.  For
+example, to read the @code{kinit} manual entry, you would type:
+
+@smallexample
+@b{shell%} man kinit
+@end smallexample
+
+Note:  To be able to view the @value{PRODUCT} manual pages on line, you
+may need to add the directory @code{@value{ROOTDIR}/man} to your MANPATH
+environment variable.  (Remember to replace @code{@value{ROOTDIR}} with
+the top-level directory in which @value{PRODUCT} is installed.)  For
+example, if you had the the following line in your @code{.login}
+file@footnote{The MANPATH variable may be specified in a different
+initialization file, depending on your operating system.  Some of the
+files in which you might specify environment variables include
+@code{.login}, @code{.profile}, or @code{.cshrc}.}:
+
+@smallexample
+setenv MANPATH /usr/local/man:/usr/man
+@end smallexample
+
+@noindent
+and the @value{PRODUCT} man pages were in the directory
+@code{/usr/@value{LCPRODUCT}/man}, you would change the line to the following:
+
+@smallexample
+setenv MANPATH /usr/@value{LCPRODUCT}/man:/usr/local/man:/usr/man
+@end smallexample
+
+@ifinfo
+Note to info users:  the manual pages are not available within this info
+tree.  You can read them from emacs with the command:
+
+@smallexample
+M-x manual-entry @emph{command}
+@end smallexample
+@end ifinfo
+
+@page
+
+@menu
+* kinit Reference::             
+* klist Reference::             
+* ksu Reference::               
+* kdestroy Reference::          
+* kpasswd Reference::           
+* telnet Reference::            
+* FTP Reference::               
+* rlogin Reference::            
+* rsh Reference::               
+* rcp Reference::               
+@end menu
+
+@node kinit Reference, klist Reference, Kerberos V5 Reference, Kerberos V5 Reference
+@section kinit Reference
+
+@iftex
+@special{psfile=kinit1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{kinit}}
+@page
+
+@special{psfile=kinit2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{kinit}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry kinit} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="kinit.html"> kinit manpage</a>
+@end html
+@end ifhtml
+
+@node klist Reference, ksu Reference, kinit Reference, Kerberos V5 Reference
+@section klist Reference
+
+@iftex
+@special{psfile=klist1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{klist}}
+@page
+@end iftex
+
+@iftex
+@special{psfile=klist2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{klist}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry klist} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="klist.html"> klist manpage</a>
+@end html
+@end ifhtml
+
+@node ksu Reference, kdestroy Reference, klist Reference, Kerberos V5 Reference
+@section ksu Reference
+
+@iftex
+@special{psfile=ksu1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu3.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu4.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+
+@special{psfile=ksu5.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{ksu}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry ksu} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="ksu.html"> ksu manpage</a>
+@end html
+@end ifhtml
+
+@node kdestroy Reference, kpasswd Reference, ksu Reference, Kerberos V5 Reference
+@section kdestroy Reference
+
+@iftex
+@special{psfile=kdestroy1.ps voffset=-700 hoffset=-60}
+@centerline{Reference Manual for @code{kdestroy}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry kdestroy} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="kdestroy.html"> kdestroy manpage</a>
+@end html
+@end ifhtml
+
+@node kpasswd Reference, telnet Reference, kdestroy Reference, Kerberos V5 Reference
+@section kpasswd Reference
+
+@iftex
+@special{psfile=kpasswd1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{kpasswd}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry kpasswd} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="kpasswd.html"> kpasswd manpage</a>
+@end html
+@end ifhtml
+
+@node telnet Reference, FTP Reference, kpasswd Reference, Kerberos V5 Reference
+@section telnet Reference
+
+@iftex
+@special{psfile=telnet1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet3.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet4.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet5.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet6.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet7.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet8.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+
+@special{psfile=telnet9.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{telnet}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry telnet} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="telnet.html"> telnet manpage</a>
+@end html
+@end ifhtml
+
+@node FTP Reference, rlogin Reference, telnet Reference, Kerberos V5 Reference
+@section FTP Reference
+
+@iftex
+@special{psfile=ftp1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp3.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp4.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp5.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp6.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp7.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp8.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+
+@special{psfile=ftp9.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{FTP}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry FTP} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="ftp.html"> ftp manpage</a>
+@end html
+@end ifhtml
+
+@node rlogin Reference, rsh Reference, FTP Reference, Kerberos V5 Reference
+@section rlogin Reference
+
+@iftex
+@special{psfile=rlogin1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rlogin}}
+@page
+
+@special{psfile=rlogin2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rlogin}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry rlogin} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="rlogin.html"> rlogin manpage</a>
+@end html
+@end ifhtml
+
+@node rsh Reference, rcp Reference, rlogin Reference, Kerberos V5 Reference
+@section rsh Reference
+
+@iftex
+@special{psfile=rsh1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rsh}}
+@page
+
+@special{psfile=rsh2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rsh}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry rsh} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="rsh.html"> rsh manpage</a>
+@end html
+@end ifhtml
+
+@node rcp Reference, , rsh Reference, Kerberos V5 Reference
+@section rcp Reference
+
+@iftex
+@special{psfile=rcp1.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rcp}}
+@page
+@end iftex
+
+@iftex
+@special{psfile=rcp2.ps voffset=-700 hoffset=-40}
+@centerline{Reference Manual for @code{rcp}}
+@page
+@end iftex
+
+@ifinfo
+Type @kbd{M-x manual-entry rcp} to read this manual page.
+@end ifinfo
+
+@ifhtml
+@html
+<a href="rcp.html"> rcp manpage</a>
+@end html
+@end ifhtml
+
+@node Kerberos Glossary,  , Kerberos V5 Reference, Top
+@appendix Kerberos Glossary
+
+@include glossary.texinfo
+
+@contents
+@bye

@@ -1,0 +1,63 @@
+2005-08-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Change db module name to be more obviously not
+	magic.  Point db_module_dir to the fakedest installed version.
+
+2005-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Add a bunch of db module info that should be in
+	kdc.conf.proto, but is sought here for now.
+
+2000-05-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc.conf.proto: Use des3 master key.
+
+2000-05-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.conf.proto: Set dns_fallback=no.
+
+	* kdc.conf.proto: Add des3 to supported_enctypes.
+
+Wed Jan 21 12:44:25 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* kdc.conf.proto: Add kpasswd_port line so kadmind can start as
+        non-root for testing.
+
+Mon Mar 31 17:42:33 1997  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto: add support for setkey_principal (support more enctypes)
+
+Tue Oct 15 16:24:33 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto: s/localhost/__LOCALHOST__/
+
+Fri Sep 27 17:12:48 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto: parameterize kdc hostname for remote server
+ 	testing
+
+Thu Sep 26 17:47:23 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto, kdc.conf.proto: use K5ROOT instead of /krb5
+
+Wed Sep 25 16:20:29 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdc.conf.proto: remove admin_dbname and admin_lockfile
+
+Fri Sep 20 16:54:44 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5.conf.proto: change logging to /krb5/syslog
+
+Wed Sep 18 12:37:46 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* kdc.conf.proto: remove max_life spec, use default
+
+Mon Jul 15 17:11:35 1996  Marc Horowitz  <marc@mit.edu>
+
+	* krb5.conf.proto: specify a default_keytab_name in /krb5
+
+Fri Jul 12 14:46:17 1996  Marc Horowitz  <marc@mit.edu>
+
+	* kdc.conf.proto: put the stash file in /krb5, so that the root
+ 	dir does not need to be writeable.  also, the admin system
+ 	requires a reference in the conf file to admin_keytab

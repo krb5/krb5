@@ -1,0 +1,317 @@
+\input texinfo @c -*-texinfo-*-
+@c Note: the above texinfo file must include the "doubleleftarrow"
+@c definitions added by jcb.
+@c %**start of header
+@c guide
+@setfilename krb425.info
+@settitle Upgrading to Kerberos V5 from Kerberos V4
+@c @setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
+@c %**end of header
+
+@paragraphindent 0
+@iftex
+@parskip 6pt plus 6pt
+@end iftex
+
+@include definitions.texinfo
+@set EDITION 1.0
+@set UPDATED May 22, 2003
+
+@finalout                               @c don't print black warning boxes
+
+@titlepage
+@title Upgrading to @value{PRODUCT} from Kerberos V4
+@subtitle Release:  @value{RELEASE}
+@subtitle Document Edition:  @value{EDITION}
+@subtitle Last updated:  @value{UPDATED}
+@author @value{COMPANY}
+
+@page
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@node Top, Copyright, (dir), (dir)
+
+@ifinfo
+This document describes how to convert to @value{PRODUCT} from Kerberos V4.
+@end ifinfo
+
+@menu
+* Copyright::                   
+* Introduction::                
+* Configuration Files::         
+* Upgrading KDCs::              
+* Upgrading Application Servers::  
+* Upgrading Client machines::   
+* Firewall Considerations::     
+@end menu
+
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+@include copyright.texinfo
+
+@node Introduction, Configuration Files, Copyright, Top
+@chapter Introduction
+
+As with most software upgrades, @value{PRODUCT} is generally backward
+compatible but not necessarily forward compatible.  The @value{PRODUCT}
+daemons can interoperate with Kerberos V4 clients, but most of the
+Kerberos V4 daemons can not interoperate with Kerberos V5 clients.  This
+suggests the following strategy for performing the upgrade:
+
+@enumerate
+@item
+@strong{Upgrade your KDCs.}  This must be done first, so that
+interactions with the Kerberos database, whether by Kerberos V5 clients
+or by Kerberos V4 clients, will succeed.
+
+@item
+@strong{Upgrade your servers.}  This must be done before upgrading
+client machines, so that the servers are able to respond to both
+Kerberos V5 and Kerberos V4 queries.
+
+@item
+@strong{Upgrade your client machines.}  Do this only after your KDCs and
+application servers are upgraded, so that all of your Kerberos V5
+clients will be talking to Kerberos V5 daemons.
+@end enumerate
+
+@node Configuration Files, Upgrading KDCs, Introduction, Top
+@chapter Configuration Files
+
+The Kerberos @code{krb5.conf} and KDC @code{kdc.conf} configuration
+files allow additional tags for Kerberos V4 compatibility.
+
+@menu
+* krb5.conf::                   
+* kdc.conf::                    
+@end menu
+
+@node krb5.conf, kdc.conf, Configuration Files, Configuration Files
+@section krb5.conf
+
+If you used the defaults, both when you installed Kerberos V4 and when
+you installed @value{PRODUCT}, you should not need to include any of
+these tags.  However, some or all of them may be necessary for
+nonstandard installations.
+
+@menu
+* libdefaults::                 
+* realms (krb5.conf)::          
+* AFS and the Appdefaults Section::  
+@end menu
+
+@node libdefaults, realms (krb5.conf), krb5.conf, krb5.conf
+@subsection [libdefaults]
+
+In the [libdefaults] section, the following additional tags may be used:
+
+@table @b
+@item krb4_srvtab
+Specifies the location of the Kerberos V4 srvtab file.  Default is
+@value{DefaultKrb4Srvtab}.
+
+@item krb4_config
+Specifies the location of the Kerberos V4 configuration file.  Default
+is @value{DefaultKrb4Config}.
+
+@item krb4_realms
+Specifies the location of the Kerberos V4 domain/realm translation
+file.  Default is @value{DefaultKrb4Realms}.
+@end table
+
+@node realms (krb5.conf), AFS and the Appdefaults Section, libdefaults, krb5.conf
+@subsection [realms]
+
+In the [realms] section, the following Kerberos V4 tags may be used:
+@table @b
+@itemx default_domain
+Identifies the default domain for hosts in this realm.  This is needed
+for translating V4 principal names (which do not contain a domain name)
+to V5 principal names.  The default is your Kerberos realm name,
+converted to lower case.
+
+@itemx v4_instance_convert
+This subsection allows the administrator to configure exceptions to the
+default_domain mapping rule.  It contains V4 instances (tag name) which
+should be translated to some specific hostname (tag value) as the second
+component in a Kerberos V5 principal name.
+
+@itemx v4_realm
+This relation allows the administrator to configure a different
+realm name to be used when converting V5 principals to V4
+ones.  This should only be used when running separate V4 and V5
+realms, with some external means of password sychronization
+between the realms.
+
+@end table
+
+@node AFS and the Appdefaults Section,  , realms (krb5.conf), krb5.conf
+@subsection AFS and the Appdefaults Section
+
+Many Kerberos 4 sites also run the Andrew File System (AFS).
+
+Modern AFS servers (OpenAFS > 1.2.8) support the AFS 2b token format.
+This allows AFS to use Kerberos 5 tickets rather than version 4
+tickets, enabling cross-realm authentication.  By default, the
+@file{krb524d} service will issue the new AFS 2b tokens.  If you are
+using old AFS servers, you will need to disable these new tokens.
+Please see the documentation of the @code{appdefaults} section of
+@file{krb5.conf} in the Kerberos Administration guide.
+
+
+
+@node kdc.conf,  , krb5.conf, Configuration Files
+@section kdc.conf
+
+Because Kerberos V4 requires a different type of salt for the encryption
+type, you will need to change the @code{supported_enctypes} line in the
+[realms] section to:
+
+@smallexample
+supported_enctypes = des-cbc-crc:normal des-cbc-crc:v4
+@end smallexample
+
+This is the only change needed to the @code{kdc.conf} file.
+
+@node Upgrading KDCs, Upgrading Application Servers, Configuration Files, Top
+@chapter Upgrading KDCs
+
+To convert your KDCs from Kerberos V4 to @value{PRODUCT}, do the
+following:
+
+@enumerate
+@item
+Install @value{PRODUCT} on each KDC, according to the instructions in
+the @value{PRODUCT} Installation Guide, up to the point where it tells
+you to create the database.
+
+@item
+Find the @code{kadmind} (V4) daemon process on the master KDC and kill
+it.  This will prevent changes to the Kerberos database while you
+convert the database to the new Kerberos V5 format.
+
+@item
+Create a dump of the V4 database in the directory where your V5 database
+will reside by issuing the command:
+
+@smallexample
+% kdb_util dump @value{ROOTDIR}/var/krb5kdc/v4-dump
+@end smallexample
+
+@item
+Load the V4 dump into a Kerberos V5 database, by issuing the command:
+
+@smallexample
+% kdb5_util load_v4 v4-dump
+@end smallexample
+
+@item
+Create a Kerberos V5 stash file, if desired, by issuing the command:
+
+@smallexample
+% kdb5_util stash
+@end smallexample
+
+@item
+Proceed with the rest of the @value{PRODUCT} installation as described
+in the @value{PRODUCT} Installation Guide.  When you get to the section
+that tells you to start the @code{krb5kdc} and @code{kadmind} daemons,
+first find and kill the Kerberos V4 @code{kerberos} daemon on each of
+the KDCs.  Then start the @code{krb5kdc} and @code{kadmind} daemons as
+You will need to specify an argument to the @code{-4} command line option to enable Kerberos 4 compatibility.
+See the @code{krb5kdc} man page for details.
+directed.  Finally, start the Kerberos V5 to V4 ticket translator
+daemon, @code{krb524d}, by issuing the command:
+
+@smallexample
+% @value{ROOTDIR}/sbin/krb524d -m > /dev/null &
+@end smallexample
+
+If you have a stash file and you start the @code{krb5kdc} and
+@code{kadmind} daemons at boot time, you should add the above line to
+your @code{/etc/rc} (or @code{/etc/rc.local}) file on each KDC.
+@end enumerate
+
+@node Upgrading Application Servers, Upgrading Client machines, Upgrading KDCs, Top
+@chapter Upgrading Application Servers
+
+Install @value{PRODUCT} on each application server, according to the
+instructions in the @value{PRODUCT} Installation Guide, with the
+following exceptions:
+
+@itemize @bullet
+@item
+In the file @code{/etc/services}, add or edit the lines described in the
+@value{PRODUCT} Installation Guide, with the following exception:
+
+in place of:
+
+@smallexample
+@group
+kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
+@end group
+@end smallexample
+
+@noindent
+add instead:
+
+@smallexample
+@group
+kerberos-sec  @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos-sec  @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
+@end group
+@end smallexample
+
+@item
+Convert your Kerberos V4 srvtab file to Kerberos V5 keytab file as
+follows:
+
+@smallexample
+@group
+@b{#} @value{ROOTDIR}/sbin/ktutil
+@b{ktutil:}  rst /etc/krb-srvtab
+@b{ktutil:}  wkt /etc/krb5.keytab
+@b{ktutil:}  q
+@b{#}
+@end group
+@end smallexample
+@end itemize
+
+@node Upgrading Client machines, Firewall Considerations, Upgrading Application Servers, Top
+@chapter Upgrading Client machines
+
+Install @value{PRODUCT} on each client machine, according to the
+instructions in the @value{PRODUCT} Installation Guide.
+
+Tell your users to add the appropriate directory to their paths.  On
+UNIX machines, this will probably be @code{@value{BINDIR}}.
+
+Note that if you upgrade your client machines before all of your
+application servers are upgraded, your users will need to use the
+Kerberos V4 programs to connect to application servers that are still
+running Kerberos V4.  (The one exception is the UNIX version of
+@value{PRODUCT} telnet, which can connect to a Kerberos V4 and Kerberos
+V5 application servers.)  Users can use either the Kerberos V4 or
+@value{PRODUCT} programs to connect to Kerberos V5 servers.
+
+@node Firewall Considerations,  , Upgrading Client machines, Top
+@chapter Firewall Considerations
+
+@value{PRODUCT} uses port @value{DefaultPort}, which is the port
+assigned by the IETF, for KDC requests.  Kerberos V4 used port
+@value{DefaultSecondPort}.  If your users will need to get to any KDCs
+outside your firewall, you will need to allow TCP and UDP requests on
+port @value{DefaultPort} for your users to get to off-site Kerberos V5
+KDCs, and on port @value{DefaultSecondPort} for your users to get to
+off-site Kerberos V4 KDCs.
+
+@contents
+@c second page break makes sure right-left page alignment works right
+@c with a one-page toc, even though we don't have setchapternewpage odd.
+@c end of texinfo file
+@bye

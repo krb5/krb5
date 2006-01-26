@@ -1,0 +1,10 @@
+thisconfigdir=./..
+myfulldir=kadmin/testing
+mydir=testing
+BUILDTOP=$(REL)..$(S)..
+LOCAL_SUBDIRS = scripts util
+
+all::
+
+clean::
+	-$(RM) -r krb5-test-root

@@ -1,0 +1,430 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
+2005-03-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (EXTRADEPSRCS): Define.
+
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-mac): Target deleted.
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* error.c (ss_error): Always use ANSI C form.  Don't try to hide
+	the declaration in the header file.
+
+	* ss.h: Always use the prototype forms of declarations.
+
+2003-06-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (HDRS): Remove mit-sipb-copyright.h.
+	(includes): Depend on copied version of the headers, not local
+	versions.  Don't do any copying; instead, move the copying
+	commands to new targets for each header.
+	($(HDRDIR)/timestamp): New target; create the directory here if
+	needed.
+	(clean-unix): Remove the timestamp file.
+
+2003-04-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* ss.h: Don't declare errno.  Include errno.h.
+
+2003-02-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (std_rqs.c): Depend on ct_c.sed and ct_c.awk.
+
+2003-01-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* parse.c: Include errno.h for declaration of errno.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't explicitly invoke AC_PROG_INSTALL, and
+	certainly not twice.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
+2003-01-05  Sam Hartman  <hartmans@mit.edu>
+
+	* pager.c: Remove declaration of errno
+
+	* help.c: Remove declaration of errno
+
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (depend-dependencies): Was previously
+	depend-prerecurse.
+
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Drop references to .. and et
+	directories in source and build trees.
+	(depend-prerecurse): Depend on 'includes'.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(HDRS)): Depend on 'includes'.
+	(std_rqs.c): Depend on mk_cmds.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* mk_cmds.c, ss_internal.h: Make prototypes unconditional.
+	* ss_internal.h (PROTOTYPE, const, volatile): Delete.
+	(pointer): Always use void*.
+
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Don't include ss_err.h.
+	(depend-prerecurse): Depend on ss_err.h.
+
+2001-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* request_tbl.c (ss_add_request_table): Delete unnecessary cast in
+	size arg to realloc.
+
+	* invocation.c (ss_delete_invocation): Delete unnecessary cast in
+	arg to free.
+
+2001-06-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* request_tbl.c (ss_add_request_table): Do not cast argument to
+	realloc() to char *.
+
+2001-04-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (unixmac): Target deleted.
+
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Change AC_RETSIGTYPE to AC_TYPE_SIGNAL.
+
+2000-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* ss_internal.h: Only use fake sigmask, sigblock and sigsetmask if
+	USE_SIGPROCMASK is defined and not POSIX_SIGNALS.
+
+2000-08-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* listen.c (ss_quit): Now returns void.  Fix type of argument ARGV
+	to fit prototype.
+
+	* ss.h (ss_execute_line) [__STDC__]: Make prototype
+	unconditional.
+	(ss_quit): Use __SS_PROTO and return void, as with other
+	command functions.
+
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* requests.c (DECLARE): Fix prototype for dispatch functions to
+	properly match what is expected by ss library.
+
+	* pager.c (ss_pager_create): Cast return from fork to int for use
+	in switch statement.
+
+	* ss.h: Provide full prototype for ss_name(). Add prototypes for
+	ss_execute_line(), ss_delete_invocation(), ss_add_info_dir(),
+	ss_delete_info_dir(), ss_abort_subsystem(), ss_get_prompt(),
+	ss_set_prompt(), ss_add_request_table(),
+	ss_delete_request_table(), ss_quit().
+
+	* ss_internal.h: Made full prototypes for ss_parse(),
+	ss_page_stdin(), ss_pagre_create(). Add prototypes for
+	ss_self_identify(), ss_subsystem_name(), ss_subsystem_version(),
+	ss_unimplemented(). Moved ss_execute_line() to ss.h
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* test_ss.c (main): Change usage of ss_listen to agree with 
+	prototype.
+
+	* ss.h: Add prototype for ss_listen() and ss_create_invocation()
+
+2000-05-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* help.c (ss_help): Don't overflow buffers "buffer" or "buf".
+	* list_rqs.c (ss_list_requests): Don't overflow buffer "buffer".
+	* mk_cmds.c (main): Don't overflow buffer "c_file".
+	* utils.c (generate_rqte): Update lengths of constant strings in
+	computing buffer size.
+
+2000-02-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* listen.c (ss_listen): Local var END should be volatile.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-01-20  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* listen.c (print_prompt): Replace BSD-style ioctl with termios
+		interface.
+
+Mon Apr  6 19:45:25 1998  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* Makefile.in (includes): Don't mkdir unless the directory doesn't
+ 	exist yet.
+
+Mon Mar 30 11:30:00 1998  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ss_internal.h: Add ss_pager_create prototype.
+
+	* ss.h: Add ss_list_requests prototype.
+
+	* request_tbl.c (ss_add_request_table, ss_delete_request_table):
+        Declare function types as void.
+
+	* prompt.c (ss_set_prompt): Declare function as void.
+
+	* listen.c (ss_quit): Int function should return a value.
+
+	* list_rqs.c (ss_list_requests): Fix arguments to match proper
+        prototype for a ss type handler.
+
+	* execute_cmd.c (ss_execute_command): Declare as returning int
+
+Wed Feb 18 16:35:55 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Fri Feb 13 13:35:51 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in: Add AC_PROG_INSTALL since it's needed to install
+		the libraries and header files.
+
+Wed Jan 28 17:38:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove CopySrcHeader and CopyHeader 
+		from configure.in and move equivalent functionality to
+		Makefile.in 
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* cmd_tbl.lex.l, ct.y, requests.c, ss.h: Remove #include of
+		<mit-sipb-copyright.h>, since it's not needed.
+
+Tue Nov 18 19:22:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Update to new library build system.
+
+	* Makefile.in: Update to new library build system.
+
+Thu Sep 18 20:44:03 1997  Tom Yu  <tlyu@mit.edu>
+
+	* utils.c: Replace HAS_STRDUP with something more sane.
+
+	* configure.in: Replace HAS_STRDUP with something more sane.
+
+Sun Aug 17 14:39:56 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (SRCS): Add $(srcdir) as needed.
+
+Wed Feb  5 22:52:41 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Remove the target ct_c.awk before copying over it.
+		If ct_c.awk.in were read-only, ct_c.awk will become
+		read-only and cannot be updated again.
+
+Thu Jun 13 21:43:44 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to SS_RULES, ET_RULES	
+
+Tue Mar 12 22:32:56 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* configure.in: Use AC_HEADER_STDARG instead of calling
+	AC_CHECK_HEADER on stdarg.h.
+
+Mon Sep 25 16:42:57 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Thu Aug 24 18:19:54 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Updated to reflect ct_c.* to ct_c.*.in filename changes.
+
+Mon Aug  7 19:14:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (mk_cmds): Add $(SHELL) to invocation of
+		config_script, so that the tree can build even after
+		checked into a broken SCCS system.
+
+Fri Jul 7 16:42:42 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add symlink to $(TOPLIBD) for libss.
+
+Wed Jun 28 16:35:43 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, ct_c_sed.in, ct_c_awk.in: Rename ct_c.*.in to
+		ct_c_*.in, so that the sources will unpack cleanly under
+		DOS.  Argh.
+
+Wed Jun 28 11:24:20 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in, ct_c.sed.in, ct_c.awk.in, config_script: Rename
+		ct_c.* to ct_c.*.in.  ct_c.sed.in is now processed by sed
+		to remove comment lines beginning with '#', since some sed
+		programs can't handle that.  Change config_script so that
+		the directory where the ct_c.* files can be specified,
+		since those are in the build directory, instead of the
+		source directory.  (This is all for the sake of System V
+		sed's.  Sigh.)
+
+Tue Jun 27 15:46:06 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* listen.c(listen_int_handler) - Add argument to conform to signal
+		handler prototype.
+
+Tue Jun 13 01:48:33 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: don't install libss.a
+
+Fri Jun  9 19:00:11 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Fri Jun  9 06:20:37 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* error.c (ss_error): remove const declaration from local
+		variable. (it is used with free is called on the contents).
+
+	* ss_internal.h: Include stdlib.h if present on system. If is
+	present, don't redeclare malloc.
+
+	* configure.in: Check for stdlib.h before including blindly.
+
+Thu Jun  8 23:22:07 1995    <tytso@rsx-11.mit.edu>
+
+	* list_req.c, ss_internal.h: Clean up -Wall flames.
+
+	* configure.in: Don't install the internal ss include files.
+
+Thu Jun  8 22:54:16 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* mk_cmds.c (main): Change mk_cmds so that the output file is
+		always created in the current directory, instead of in the
+		directory where the source file is located.
+
+Thu Jun  8 11:27:47 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* Makefile.in (install): Don't install in this directory.
+
+Thu Apr 27 12:26:26 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pager.c: Use posix signals.
+
+	* listen.c: Use posix signals.
+
+	* list_rqs.c: Use posix signals.
+
+	* help.c: Call wait with proper casting (int * vs. union wait *)
+
+	* configure.in: Add AC_PROG_ARCHIVE_ADD and CHECK_SIGNALS.
+
+	* Makefile.in (all): Use ARADD for incremental changes to library
+
+Tue Mar 28 18:51:08 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (all):  Run all-$(WHAT).
+	(unixmac):  Build includes at this time.
+	(LDFLAGS):  Punt duplicated setting.
+
+Sat Mar 18 18:49:03 1995  John Gilmore  (gnu at toad.com)
+
+	* configure.in:  Use AC_CHECK_HEADERS(stdarg.h), not CHECK_STDARG.
+	* error.c:  Use HAVE_STDARG_H, not STDARG_PROTOTYPES.
+
+Mon Feb 27 22:40:18 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in:  Avoid recompilation of std_rqs.c every single time
+	`make' is run.
+	* error.c:  Use "com_err.h", not <com_err.h>.
+
+Thu Feb 23 14:24:31 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* mk_cmds.sh: use ${SED} not sed in backtick expressions.
+	Explicitly check for ${FILE} since sed doesn't give an error if it
+	is absent. Also set -e to catch other conditions.
+
+Sat Oct 22 09:54:50 1994    (tytso@rsx-11)
+
+	* list_rqs.c (ss_list_requests): 
+	* listen.c (ss_listen): 
+	* configure.in: Add AC_RETSIGTYPE to get proper return type for
+		signal hanlders.
+
+Fri Oct 21 21:07:16 1994    (tytso@rsx-11)
+
+	* Makefile.in (SED): Don't specify an explicit pathname for sed.
+
+Tue Oct 11 12:41:40 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Don't rm the awk and sed scripts during a make clean!
+
+Fri Oct  7 15:37:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ct_c.sed: Add extra check to make sure blank lines get squeezed
+		out.  Needed for AIX's sed, for some reason.
+
+Thu Oct  6 19:40:09 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* mk_cmds.sh -- replace basename with sed -- more portable
+
+Mon Oct  3 17:26:27 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in:
+	  configure.in:  Don't try to compile mk_cmds.  Use awk/sed shell
+	  	  script replacement instead.  It's more apt to be
+		  portable, since it doesn't use lex or yacc.  :-(
+
+Tue Aug 30 21:30:18 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* cmd_tbl.lex.l: Add declaration for strdup() if HAS_STRDUP is not
+	defined. 
+
+	* ct.y: Added #include of string.h; added declaration for
+	strdup() if HAS_STRDUP is not defined.
+
+Tue Jul 19 20:27:59 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: remove spurious includes rules
+
+Wed Jul 13 23:20:44 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: nuke libss.a.bak crud
+
+Sun Jul  3 07:48:43 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* Makefile.in: changing things to now spew ignored errors.
+
+Wed Jun 22 18:51:50 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* configure.in: ss_err.h is *not* a SrcHeader. Note that there is
+	duplication between the Copy*Header lines and the includes: rule
+	in the Makefile.in, which should later be fixed.
+
+Tue Jun 21 00:21:05 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: should be CopySrcHeader
+
+Mon Jun 20 21:58:40 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* configure.in: install headers during build
+

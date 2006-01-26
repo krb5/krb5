@@ -1,0 +1,39 @@
+thisconfigdir=./..
+myfulldir=tests/shlib
+mydir=shlib
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@
+
+VALGRIND=valgrind
+VALGRINDFLAGS=--tool=memcheck --leak-check=yes --show-reachable=yes
+
+SRCS=$(srcdir)/t_loader.c
+
+all::
+
+run-t_loader: t_loader
+	$(RUN_SETUP) ./t_loader
+
+valgrind-t_loader: t_loader
+	$(RUN_SETUP) $(VALGRIND) $(VALGRINDFLAGS) ./t_loader
+
+t_loader: t_loader.o
+	$(CC_LINK) -o t_loader t_loader.o $(DL_LIB)
+
+check-unix::
+
+install::
+
+clean::
+	$(RM) t_loader.o t_loader
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)t_loader.$(OBJEXT): t_loader.c $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/gssapi/gssapi.h

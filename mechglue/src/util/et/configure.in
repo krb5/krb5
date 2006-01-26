@@ -1,0 +1,27 @@
+K5_AC_INIT(error_table.y)
+CONFIG_RULES
+AC_C_CONST
+AC_PROG_LEX
+AC_PROG_YACC
+AC_PROG_AWK
+HAVE_YYLINENO
+DECLARE_SYS_ERRLIST
+dnl
+dnl Fancy caching of perror result...
+AC_MSG_CHECKING(for perror declaration)
+AC_CACHE_VAL(krb5_cv_decl_perror,
+[AC_EGREP_HEADER(perror, errno.h, 
+  krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])dnl
+AC_MSG_RESULT($krb5_cv_decl_perror)
+if test $krb5_cv_decl_perror = yes; then
+	AC_DEFINE(HDR_HAS_PERROR)
+fi
+dnl
+AC_CHECK_FUNCS(strerror)
+AC_HEADER_STDARG
+AC_CHECK_HEADERS(stdlib.h)
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+KRB5_BUILD_PROGRAM dnl for test programs
+KRB5_RUN_FLAGS dnl for test programs
+V5_AC_OUTPUT_MAKEFILE

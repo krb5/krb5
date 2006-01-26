@@ -1,0 +1,676 @@
+2005-04-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (NEED_SOCKETS): Don't define.
+	* kt_srvtab.c (NEED_SOCKETS): Don't define.
+
+2004-11-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktfile_wresolve): Initialize mutex here too.
+
+2004-11-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (struct _krb5_ktfile_data): Add mutex and buffer.
+	(KTFILEBUFP, KTLOCK, KTUNLOCK, KTCHECKLOCK): New macros.
+	(krb5_ktfile_resolve): Initialize mutex.
+	(krb5_ktfile_close): Zap data buffer before freeing.
+	(krb5_ktfile_get_entry, krb5_ktfile_start_seq_get,
+	krb5_ktfile_get_next, krb5_ktfile_end_get, krb5_ktfile_add,
+	krb5_ktfile_remove): Lock and unlock the mutex.
+	(krb5_ktfileint_open): Check that the mutex is locked.  Set the
+	stdio buffer to the new buffer in the ktfile data.
+	(krb5_ktfileint_write_entry, krb5_ktfileint_find_slot): Check that
+	the mutex is locked.  Don't call setbuf.  Flush the stdio buffer
+	after writing.
+
+2004-11-23  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfileint_open): Update previous change by
+	explicitly setting errno=0 prior to calling fopen().  Also, return
+	EMFILE, not ENFILE, for compatibility with Solaris 8, which does
+	set errno when out of file descriptors.
+
+2004-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfileint_open): Patch from Roland Dowdeswell to
+	return ENFILE when fopen() returns NULL but doesn't set errno.
+
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktf_keytab_externalize,
+	krb5_ktf_keytab_internalize): Don't test macintosh.
+
+2004-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_kt_default_vno): Replaced variable with macro.
+
+2004-05-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c: Include kt-int.h
+
+	* kt-int.h: Create file with prototypes for krb5int_kt_initialize and 
+	krb5int_kt_finalize(void);
+
+
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c: Include ctype.h.
+	(k5_typehead_lock): Use new partial initializer.
+	(krb5int_kt_initialize): New function; finish mutex
+	initialization.
+	(krb5int_kt_finalize): New function; destroy the mutex and free
+	storage associated with registered types.
+
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:
+      Since we have to reserve all the single letter
+      prefixes make them apply to all platforms
+
+2004-04-13  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, improve the treat drive letter
+      prefix string as a FILE: keytab change to work if the
+      default keytab type was changed to not be of type FILE:
+
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  Restore the thread safety fixes
+
+2004-04-08  Jeffrey Altman <jaltman@mit.edu>
+
+    * ktbase.c:  On Windows, if we see a colon do not assume it means
+      we found a prefix string unless the length of the prefix is 
+      not equal to one.  If it is one, it means we found a drive letter
+      and not a prefix.  
+
+2004-03-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c: Include k5-thread.h.
+	(k5_typehead_lock): New mutex variable.
+	(krb5_kt_register, krb5_kt_resolve): Lock it while accessing the
+	type list.
+	(krb5_kt_register): Ops table is now const.
+	(struct krb5_kt_typelist): "next" pointer now points to const.
+	(krb5_kt_typelist_wrfile, krb5_kt_typelist_file,
+	krb5_kt_typelist_srvtab): Now const.
+	(kt_typehead): Now points to const.
+
+2003-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBNAME) [##WIN16##]: Don't define.
+
+2003-05-22  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfile_get_entry): Check principal name prior to
+	checking enctype.  Suggested by Wyllys Ingersoll.
+
+2003-05-19  Sam Hartman  <hartmans@mit.edu>
+
+	* ktbase.c: Register writable keytab by default
+
+2003-04-01  Nalin Dahyabhai  <nalin@redhat.com>
+
+	* kt_file.c (krb5_ktfileint_internal_read_entry): Use
+	krb5_princ_size instead of direct field access.
+	(krb5_ktfileint_write_entry, krb5_ktfileint_size_entry):
+	Likewise.
+
+2003-02-08  Tom Yu  <tlyu@mit.edu>
+
+	* kt_file.c (krb5_ktfile_get_entry): Fix comment; not going to
+	redesign key storage architecture for 1.3.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Add AC_SUBST_FILE marker for libobj_frag.
+
+2002-10-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktf_ops, krb5_ktf_writable_ops): Now const.
+	Drop cast of serializer entry initializer.
+	(fopen_mode_rbplus, fopen_mode_rb): Now const.
+	* kt_srvtab.c (krb5_kts_ops): Now const.
+	* ktbase.c (krb5_ktf_ops, krb5_kts_ops): Update declarations.
+	(struct krb5_kt_typelist): Field ops now points to const.
+
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c, kt_srvtab.c, ktadd.c, ktbase.c, ktdefault.c,
+	ktfr_entry.c, ktremove.c, read_servi.c: Use prototype style
+	function definitions.
+
+	* kt_file.c (errno), kt_srvtab.c (errno): Don't declare.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-06-18  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ktfr_entry.c: Rename krb5_kt_free_entry_contents as
+	krb5_free_keytab_entry_contents to make it consistent with rest of
+	API.
+	[pullup from 1-2-2-branch]
+
+2002-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfr_entry.c (krb5_kt_free_entry_contents): Rename from
+	krb5_kt_free_entry, keep old name as wrapper.
+	[pullup from 1-2-2-branch]
+
+2002-06-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c: Undo non-logged part of last change that added
+	inclusion of netinet/in.h; k5-int.h should pull it in with
+	NEED_SOCKETS defined.
+
+2002-06-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_srvtab.c: New file, combines all srvtab functions.  All
+	functions now static, only the ops table is exported.
+	* srvtab/*: All files deleted.
+	* kt_file.c: New file, combines all file/wrfile functions.
+	* file/*: All files deleted.
+	* Makefile.in (LOCAL_SUBDIRS, MAC_SUBDIRS): Deleted.
+	(STLIBOBJS, OBJS, SRCS): Added new files.
+	(all-windows): Skip subdirs target.
+	(subdirs, file\$(OUTPRE)file.lst, srvtab\$(OUTPRE)file.lst)[DOS]:
+	Deleted targets.
+	($(OBJFILE))[DOS]: Skip subdir stuff.
+	(clean-windows): Don't go into subdirs.
+
+2002-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* srvtab/kts_g_ent.c (krb5_ktsrvtab_get_entry): If a specific DES
+	enctype was requested, set the key's enctype to it, instead of
+	always returning des-cbc-crc.
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): For non-zero kvno,
+	match only low 8 bits.  For zero kvno, if any kvno in the keytab
+	is over 240, assume we're dealing with numbers 128
+	through (127+256) instead.  This allows for wrapping at 256 while
+	retaining a small set of consecutively numbered prior keys in the
+	keytab.
+
+2002-02-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Use const instead of krb5_const.
+
+2001-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): Coerce enctype for now
+	to restore 1.0.x enctype similarity behavior.
+
+2001-10-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* ktfns.c (krb5_kt_get_type): KRB5_CALLCONV.
+
+2001-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktfns.c: New file.
+	* Makefile.in (STLIBOBJS, OBJS, SRCS): Build it.
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktbase.c: Make prototypes unconditional.
+	* srvtab/ktsrvtab.h: Make prototypes unconditional.
+	* file/ktfile.h, file/ser_ktf.c: Make prototypes unconditional.
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* file/ser_ktf.c: Drop _MSDOS support.
+
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* ktadd.c, ktbase.c, ktdefault.c, ktfr_entry.c, ktremove.c,
+	read_servi.c: Don't use KRB5_DLLIMP.  Don't explicitly declare
+	pointers FAR any more.
+
+2000-10-17  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Signed/unsigned int
+	cleanups. Maintain const char * attribute of incomming name.
+
+	* srvtab/kts_g_name.c, srvtab/ktsrvtab.h (krb5_ktsrvtab_get_name):
+	Uses unsigned int length now.
+
+	* file/ktf_util.c: Unsigned/signed int cleanups.
+
+	* file/ktf_g_name.c, file/ktfile.h (krb5_ktfile_get_name): Length
+	field now unsigned int.
+
+2000-09-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* file/ser_ktf.c (krb5_ktf_keytab_externalize): Do not violate
+	const char * declaration of ktfile_def_name.
+
+	* file/ktf_util.c (xfwrite): Cast length field to fwrite/fread as
+	unsigned.
+
+2000-06-28  Ezra Peisach  <epeisach@mit.edu>
+
+	* srvtab/kts_util.c (read_field): Cleanup unused variable.
+
+2000-03-12  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktbase.c (krb5_kt_resolve): Change prototype from const to
+	krb5_const to match krb5.hin
+
+Fri Jan 28 19:53:44 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* srvtab/kts_g_ent.c, srvtab/ktsrvtab.h (krb5_ktsrvtab_get_entry):
+	Change the third argument to krb5_const_principal (from
+	krb5_principal) to agree with krb5_kts_ops entries.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in, file/Makefile.in, srvtab/Makefile.in: Clean up
+	usage of CFLAGS, CPPFLAGS, DEFS, DEFINES, LOCAL_INCLUDES such that
+	one can override CFLAGS from the command line without losing CPP
+	search patchs and defines. Some associated Makefile cleanup.
+
+1999-06-15  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Fix windows build.
+
+	* srvtab/Makefile.in: Fix windows build.
+
+	* srvtab/ktsrvtab.h, srvtab/kts_resolv.c (krb5_ktsrvtab_resolve), 
+	srvtab/kts_g_name.c (krb5_ktsrvtab_get_name), 
+	srvtab/kts_close.c (krb5_ktsrvtab_close),
+	srvtab/kts_g_ent.c (krb5_ktsrvtab_get_entry), 
+	srvtab/kts_ssget.c (krb5_ktsrvtab_start_seq_get), 
+	srvtab/kts_next.c (krb5_ktsrvtab_get_next), 
+	srvtab/kts_endget.c (krb5_ktsrvtab_end_get): Fix calling
+	convention.
+
+1999-06-13  Geoffrey King  <gjking@mit.edu>
+
+	* Makefile.in: Add new subdirectory srvtab.
+
+	* srvtab: Initial checkin of ghudson's code to implement the
+	SRVTAB keytab type, which can read a krb4 srvtab.
+
+	* ktbase.c: Support FILE and SRVTAB types by default.  Use
+	krb5_ktf_ops instead of krb5_dfl_ops.
+	
+Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove - from recursive Win32 make invocation.
+
+Mon May 10 15:25:32 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in, file/Makefile.in: Do win32 build in subdir.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, file/Makefile.in: Set the myfulldir and mydir
+	variables (which are relative to buildtop and thisconfigdir,
+	respectively.)
+
+1998-10-27  Marc Horowitz  <marc@mit.edu>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): restructure the code
+	to use the compare_enctypes function and not leak memory
+
+Fri Feb 27 18:03:33 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, file/Makefile.in: Changed thisconfigdir to point at
+	the lib/krb5 directory, since we've moved the configure.in tests
+	in this directory to the toplevel lib/krb5 configure.in
+
+Wed Feb 18 16:22:33 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in, file/Makefile.in: Remove trailing slash from
+	thisconfigdir.  Fix up BUILDTOP for new conventions.
+
+Thu Feb 12 16:18:05 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add commented out AC_OUTPUT to force autoreconf to
+	rebuild the configure script.
+
+Mon Feb  2 16:47:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in, file/Makefile.in: Define BUILDTOP and thisconfigdir
+	in the Makefile
+
+	* configure.in: Create the makefiles for the file subdirectory
+		and move all of the configure.in tests from in the
+		subdirectory into this configure.in.
+	
+Tue Oct 28 10:53:10 1997  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* ktf_wreslv.c, ktf_resolv.c:Initialize version element of
+	        krb5_ktfile_data structure.
+
+Mon Sep 15 15:15:33 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* ktfile.h, ktf_g_ent.c (krb5_ktfile_get_entry): Incoming principal
+	        is krb5_const_principal.
+
+Sat Feb 22 22:27:53 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Use some of the new library list build rules in
+		win-post.in
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+	* Makefile.in: win32 build
+
+	* ktadd.c,ktbase.c,ktdefault.c,ktfr_entry.c,ktremove.c,read_servi.c:
+	DLL export the keytab dispatch functions
+
+	* file/Makefile.in: win32 build
+
+	* file/ktf_add.c, file/ktf_close.c, file/ktf_g_ent.c,
+	file/ktf_g_name.c, file/ktf_next.c, file/ktf_remove.c,
+	file/ktf_resolv.c, file/ktf_ssget.c, file/ktf_wreslv.c,
+	file/ktfile.h: Change the functions declarations to include FAR
+	pointers and KRB5_CALLCONV so that they can be utilized by a DLL.
+
+Thu Jan  2 17:11:59 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in, configure.in, file/Makefile.in, file/configure.in:
+	Update to new library build procedure.
+
+Tue Nov 19 17:06:59 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): return
+	KRB5_KT_KVNONOTFOUND when appropriate [krb5-libs/198]
+
+Wed Jul 24 17:10:11 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* file/ktf_g_name.c (krb5_ktfile_get_name): Use the error code
+ 		KRB5_KT_NAME_TOOLONG instead of ENAMETOOLONG, which isn't
+ 		portable.
+
+Fri Jul 12 21:16:50 1996  Marc Horowitz  <marc@mit.edu>
+
+	* file/ktf_g_name.c (krb5_ktfile_get_name): include the prefix in
+	the returned name.
+
+Wed Jun 12 01:09:01 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* file/ser_ktf.c: Add #ifdef _WIN32 in places where we had #ifdef
+	_MSDOS
+
+Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
+Thu May  9 03:05:51 1996  Richard Basch  <basch@lehman.com>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): don't skip over keytab
+		entries with kvno=0.
+
+Tue Mar 19 22:28:43 1996  Richard Basch  <basch@lehman.com>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): all des enctypes are
+	equivalent
+
+Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Folded in danw's changes to allow
+		building Makefiles for the Macintosh.  We now can build
+		MPW makefiles which are interpreted by CodeWarrior.
+
+Thu Jan 25 15:52:34 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): Match against enctype.
+
+Fri Jan  5 04:50:41 1996  Ezra Peisach  (epeisach@kangaroo.mit.edu)
+
+	* file/ser_ktf.c (krb5_ktf_keytab_internalize): Take care of gcc
+		warning under OSF/1.
+
+Wed Dec 13 07:09:30 1995  Chris Provenzano (proven@mit.edu)
+
+        * configure.in : Remove subdirectory db. 
+
+Tue Dec 12 01:26:30 1995  Chris Provenzano (proven@mit.edu)
+
+	* configure.in : Added subdirectory db.
+
+Fri Oct  6 22:04:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, file/Makefile.in: Remove ##DOS!include of
+		config/windows.in. config/windows.in is now included by
+		wconfig.
+
+Mon Sep 25 16:57:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in, file/Makefile.in: Removed "foo:: foo-$(WHAT)" lines
+		from the Makefile. 
+
+Wed Sep 13 10:57:08 1995 Keith Vetter (keithv@fusion.com)
+
+	* file/ser_ktf.c: Added MSDOS to wherever MACINTOSH was used.
+
+Mon Sep 11 21:22:44 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* file/ser_ktf.c (krb5_ktf_keytab_externalize): On Macintosh,
+		keytab file is not left open
+
+Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
+
+        * read_servi.c : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+	* file/ktf_g_ent.c, file/ktf_remove.c, file/ktf_util.c,
+		file/ktfile.h : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
+Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
+
+        * file/ktf_util.c : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate
+
+Tue Aug 29 13:37:56 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* ktbase.c - Add routines to deal with externalizing krb5_keytab.  These
+		search the registered keytab types for a match and dispatch
+		via the serializer handle.
+	* file/Makefile.in, file/.Sanitize, file/ser_ktf.c - Add new module to support
+		serialization of [WR]FILE keytabs.
+	* file/ktf_{defops,ops,wops}.c - Add serializer entry.
+	* file/ktf_{resolv,wreslv}.c - Set magic number in successfully resolved
+		keytab.
+
+Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
+
+        * file/ktf_util.c: Pass fds to krb5_lock_file() and krb5_unlock_file()
+
+Tue Aug 15 01:34:57 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* file/ktf_util.c: return KRB5_KEYTAB_BADVNO instead of -1
+
+Fri Aug  4 21:48:41 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* read_servi.c (krb5_kt_read_service_key): add more parens to shut
+		up gcc -Wall
+
+	* ktdefault.c (krb5_kt_default): add more parens to shut up gcc
+		-Wall
+
+	* file/ktf_util.c: shut up gcc -Wall
+
+	* file/ktf_remove.c: more stuff to shut up gcc -Wall
+
+	* file/ktf_next.c: Add more parens to shut up gcc -Wall
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): Add more parens to shut up
+		gcc -Wall
+
+	* file/ktf_add.c (krb5_ktfile_add): Add parens to shut up gcc -Wall
+
+Wed Jun 28 12:05:34 1995    <tytso@rsx-11.mit.edu>
+
+	* file/ktf_g_ent.c (krb5_ktfile_get_entry): If the key version number
+		is specified, check to make sure that the entry has the
+		correct key version number.
+
+Fri Jun  9 19:33:33 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
+		recurse down subdirectories.
+
+	* file/configure.in: Remove standardized set of autoconf macros,
+		which are now handled by CONFIG_RULES.
+
+Fri May 26 20:20:18 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in, file/configure.in, file/Makefile.in:
+	Add support for building shared libraries.
+
+Thu Apr 13 15:49:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* *.c, file/*.[ch]: removed unneeded INTERFACE from non-api
+	functions.
+
+Fri Mar 17 19:46:07 1995  John Gilmore  (gnu at toad.com)
+
+	* Makefile.in (LDFLAGS):  Zap duplicate defn.
+	(all-mac, clean-mac):  Add.
+	* file/Makefile.in (LDFLAGS):  Zap duplicate.
+
+Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: cleaned up for the PC
+
+Tue Mar 7 21:40:18 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in, file/Makefile.in: changed library name for the PC.
+
+Tue Mar  7 19:53:56 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in, file/configure.in: take out ISODE_DEFS.
+
+Wed Mar 3 16:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed LIB to LIBCMD for the PC
+
+Thu Mar 2 11:50:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* file/ktf_util.c: Changed NEED_WINSOCK_H to NEED_SOCKETS
+
+Wed Mar 1 16:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* file/ktf_util.c: fixed up some 16 vs 32 bit conversions.
+
+Tue Feb 28 00:59:22 1995  John Gilmore  (gnu at toad.com)
+
+	* *.c, file/*.c:  Avoid <krb5/...> includes.
+
+Wed Feb 22 01:38:54 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+        * *.c: added windows INTERFACE keyword
+
+        * file/Makefile.in: made to work on the PC
+        * file/*.c, file/ktfile.h: added windows INTERFACE keyword
+	* file/ktf_util.c: removed include of <netinet/in.h>
+           cast some 32bit ints to size_t ints
+
+Fri Feb  3 01:53:44 1995  John Gilmore  <gnu@cygnus.com>
+
+	Rename files for DOS 8.3 uniqueness:
+	* file/ktf_get_en.c => ktf_g_ent.c
+	* file/ktf_get_na.c => ktf_g_name.c
+	* file/Makefile.in:  changed to match.
+
+Fri Jan 27 12:54:54 1995  Chris Provenzano (proven@mit.edu)
+
+	* file/ktf_get_en.c, file/ktfile.h (krb5_ktfile_get_entry())
+		Added krb5_keytype arg.
+
+Wed Jan 25 16:54:40 1995  Chris Provenzano (proven@mit.edu)
+
+        * Removed all narrow types and references to wide.h and narrow.h
+	* file/ktf_util.c : Use a constant size for file data not subfield
+		size from krb5_keytab_entry
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+	* read_servi.c (krb5_kt_read_service_key) Add krb5_keytype arg.
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    	* Added krb5_context to all krb5_routines
+
+Fri Nov 18 15:34:35 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* file/ktf_util.c (krb5_ktfileint_internal_read_entry): Add magic
+		numbers for keytab, principal, and keyblock.
+
+Wed Oct 26 14:41:31 1994    (tytso@rsx-11)
+
+	* file/ktf_get_en.c (krb5_ktfile_get_entry): If the requested kvno
+		is IGNORE_KVNO, fix the error return so that 0 (no error)
+		is returned instead of KTF_NOT_FOUND.
+
+Fri Oct 14 23:09:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in: Add ISODE_DEFS rule.
+
+Thu Oct 13 17:26:12 1994  Theodore Y. Ts'o  (tytso@maytag)
+
+	* file/configure.in: Add ISODE_DEFS
+
+Tue Oct  4 22:06:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktfr_entry.c (krb5_kt_free_entry): Only try to free
+		entry->key.contents if it is non-NULL.  If entry is NULL,
+		return.
+
+	* file/ktf_get_en.c (krb5_ktfile_get_entry): Fix to compare using
+		new_entry instead of cur_entry.  (Bug made in modification
+		on Sep 28th).  Don't free cur_entry twice on errors.
+
+        * file/ktfile.h
+	* file/ktf_wreslv.c (krb5_ktfile_wresolve):
+	* file/ktf_resolv.c (krb5_ktf_resolv): Resolv's first argument is now a
+		const char *.
+
+Fri Sep 30 21:56:02 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* file/ktf_ops.c (krb5_ktf_ops): 
+	  file/ktf_wops.c (krb5_ktf_writable_ops):
+	  file/ktf_defops.c (krb5_kt_dfl_ops): Add placeholder for magic number.
+
+Thu Sep 29 23:19:06 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* ktbase.c (krb5_kt_resolve_name): If the prefix "FILE:" is not
+		given, assume the default operations list (whcih is
+		krb5_kt_dfl_ops).
+
+Wed Sep 28 21:14:49 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* file/ktf_get_en.c (krb5_ktfile_get_entry): Modified to return the
+		most recent key (with the greatest kvno), instead of the
+		first.
+
+Thu Sep 22 21:51:53 1994  Theodore Y. Ts'o  (tytso@dcl)
+    
+    	* file/ktf_get_en.c (krb5_ktfile_get_entry):
+	* file/ktf_next.c (krb5_ktfile_get_next):
+	* file/ktf_remove.c (krb5_ktfile_remove):
+	* file/ktf_util.c (krb5_ktfileint_read_entry,
+		krb5_ktfileint_internal_read_entry):
+	* file/ktfile.h: Change the interface of krb5_ktfile_read_entry and
+		krb5_ktfile_internal_read_entry so that they don't
+		allocate memory for the top-level structure.  All of their
+		callers didn't need it and were freeing it anyway.
+
+	* file/ktf_remove.c (krb5_ktfile_remove): Fix memory leak caused by not
+		freeing the top-level structure.
+
+Wed Sep 14 21:56:15 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* file/ktf_util.c (krb5_ktfileint_delete_entry):  Fixed bug reported by
+		Bill Sommerfeld where a missing byte-swap on a
+		little-endian machine causes the delete operation fail.
+

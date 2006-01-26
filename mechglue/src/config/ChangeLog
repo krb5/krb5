@@ -1,0 +1,1489 @@
+2005-11-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-solaris*): Include $(CFLAGS) in LDCOMBINE.
+	Don't use compiler command-line options for initializers for
+	Solaris 7 and earlier native compilers.
+
+2005-10-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* libnover.in (LIBLIST): Use DYNOBJEXT instead of SHLIBEXT.
+	* shlib.conf (*-*-darwin*): Include SHLIB_DIRS, and
+	DYNOBJ_EXPLIBS_WITH_LOADER instead of
+	DYNOBJ_EXPFLAGS_WITH_LOADER.
+
+	* post.in (.depend): Don't run sed, just use perl.  Use new name
+	of perl script.
+
+	* shlib.conf: Set DYNOBJ_EXPDEPS and DYNOBJ_EXPFLAGS.
+	(*-*-darwin*): Change MAKE_DYNOBJ_COMMAND definition to use
+	DYNOBJ_EXPFLAGS and DYNOBJ_LOADER_PROG instead of SHLIB_EXPFLAGS
+	and a hardcoded pathname to the KDC binary, respectively.
+	* pre.in (DYNOBJ_EXPDEPS, DYNOBJ_EXPFLAGS): New variables.
+	* libnover.in ($(LIBBASE)$(DYNOBJEXT)): Use DYNOBJ_EXPDEPS instead
+	of SHLIB_EXPDEPS in dependencies.
+
+2005-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* libnover.in (PARSE_OBJLISTS): Die on warnings (including input
+	file not found).
+	* lib.in (PARSE_OBJLISTS): Likewise.
+
+	* shlib.conf: Change aix5.3 section to aix5.*.  Change aix*
+	section to aix4.*, and set DYNOBJEXT and MAKE_DYNOBJ_COMMAND.
+
+2005-10-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in ($(BUILDTOP)/.depend-verify-db, depend-verify-db-k5,
+	depend-verify-db-sys): Targets deleted.
+	(DEP_CFG_VERIFY): Don't depend on $(BUILDTOP)/.depend-verify-db.
+
+	* libnover.in (darwin.exports): New target.
+	($(LIBBASE)$(DYNOBJEXT)): New target, instead of
+	$(LIBBASE)$(SHLIBVEXT).
+	(all-libs): Build $(LIBBASE)$(DYNOBJEXT).
+	(install-shared): Use DYNOBJEXT.
+
+	* pre.in (DYNOBJEXT, MAKE_DYNOBJ_COMMAND): New variables.
+	* shlib.conf: Set DYNOBJEXT, MAKE_DYNOBJ_COMMAND to the SHLIB
+	versions.  For Darwin, set them to create a .so bundle, and set
+	SHLIB_EXPORT_FILE_DEP to darwin.exports.
+
+	* pre.in (DB_DEPLIB, DB_DEPLIB-k5, DB_DEPLIB-sys, DB_VERSION,
+	DB_DEPS, DB_DEPS-sys, DB_DEPS-k5, DB_DEPS-redirect, DB_LIB,
+	KDB5_DB_LIB): Variables deleted.
+	(KDB5_LIBS): Set to just $(KDB5_LIB).
+
+2005-09-01  Marc Aurele La France  <tsi@ualberta.ca>
+
+	* shlib.conf (case *-*-aix5.3*):  Generate proper shared libraries
+	acceptable to dlopen(3) (as in mechglue, for example).  Allows for
+	building both shared and static libraries in one run.  Only done for
+	AIX 5.3, but probably should be done for earlier versions.
+
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (configure): Depend on patchlevel.h.
+
+2005-07-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (LIBPREFIX): New variable.
+	* libnover.in (LIBPREFIX): New variable.
+	(LIBLIST, $(LIBBASE)$(SHLIBVEXT),
+	$(TOPLIBD)/$(LIBBASE)$(SHLIBEXT), clean-libs, install-shared):
+	Drop "lib" from generated shared object name.
+	* pre.in (SHLIB_EXPORT_FILE): Use $(LIBPREFIX).
+	* shlib.conf: Use $(LIBPREFIX) in LDCOMBINE.
+
+2005-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KRB5_DB_MODULE_DIR): New variable.
+
+	* libnover.in: New file.
+	(Makefile): Depend on correct makefile fragment.
+	(SHLIBVEXT): Fix definition.
+	(LIBLIST, LIBINSTLIST): Override configured definitions.
+	(all-liblinks, clean-liblinks): Targets deleted.
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (PTHREAD_LIBS, DL_LIB, THREAD_LINKOPTS): New variables.
+
+2005-04-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (depend-dependencies): Use (and depend on) depfix2.pl
+	instead of .depfix2.sed.
+	(.depfix2.sed): Target deleted.
+	(DEPTARGETS): Delete .depfix2.sed and .depfix2.tmp.
+
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (hpux10.exports): New target, constructed similar to
+	osf1.exports but with HP-UX 10.x linker options, no initializers,
+	and "errno" explicitly added to the export list.
+	* shlib.conf (*-*-hpux*): Combine PICFLAGS setting with
+	SHLIB_EXPFLAGS and LDCOMBINE setting.  Add linker option "-c
+	hpux10.exports" to LDCOMBINE.  Set SHLIB_EXPORT_FILE_DEP to
+	hpux10.exports.  Set use_linker_fini_option.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (config.status): Change target to be in $thisconfigdir
+	rather than local.
+	(osf1.exports): Create a temporary file then rename into place.
+	Add options for library init/fini symbols, handling multiple
+	values.
+
+	* shlib.conf (case alpha*-dec-osf*): Don't handle init/fini
+	symbols here.
+	(case mips-sgi-irix*): Handle multiple init/fini symbols.  Always
+	set $initfini before it gets used.
+	(case *-*-solaris*, not gcc): Handle multiple init/fini symbols.
+	(case *-*-aix*): Handle multiple fini symbols.
+
+2005-01-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (Makefile): Nuke autom4te.cache before and after
+	autoconf runs.
+
+2004-12-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (.depend): Delete blank lines in generated file.  Don't
+	do target name munging here.
+	(DEP_CFG_VERIFY, DEP_VERIFY, depend-verify-*, .depend-verify-*,
+	.depfix2.sed): Move all the flag files to $(BUILDTOP) so there'll
+	be only one of each.
+	(.depfix2.sed): Pass extra value $(STLIBOBJS).
+
+2004-12-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-pre.in: add -debug switch to LOPTS if DEBUG_SYMBOLS 
+
+2004-12-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-netbsd*): Use -fPIC instead of -fpic, which
+	won't work on sparc64 at least.
+
+2004-12-15  Jeffrey Altman <jaltman@mit.edu>
+
+        * win-pre.in; optionally build debug symbols for release builds
+                      and rename krb5support_32.dll to k5sprt32.dll
+
+2004-11-19  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KRB5_INCSUBDIRS): Add KRB5_INCDIR/gssrpc.
+
+2004-10-06  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (datadir, EXAMPLEDIR): Add directory for examples.
+
+2004-09-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (binutils.versions, osf1.exports): New file targets.
+	(clean-libs): Delete them.
+	* pre.in (SHLIB_EXPORT_FILE_DEP): Use @SHLIB_EXPORT_FILE_DEP@.
+	* shlib.conf: Set it to $(SHLIB_EXPORT_FILE) by default.
+	(alpha*-dec-osf*): Use osf1.exports instead of adding commands to
+	generate a temporary file.
+	(*-*-linux*, *-*-gnu*, *-*-k*bsd*-gnu): Use binutils.versions.
+
+2004-09-22  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (UTIL_LIB): Set if we need libutil.
+
+	* shlib.conf (alpha*-dec-osf*): Only use -Wl,-oldstyle_liblookup
+	if using native linker, with check for native linker if gcc is
+	being used.
+
+2004-09-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*, *-*-gnu*, *-*-k*bsd*-gnu): Don't use the
+	linker option --retain-symbols-file, it doesn't work for shared
+	libraries.
+
+2004-09-17  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (INSTALL_SCRIPT): New variable; use to install scripts,
+	as we don't want to strip scripts.
+
+2004-08-19  Sam Hartman  <hartmans@mit.edu>
+
+	* shlib.conf: Add support for gnu hurd and for BSD kernels with
+	glibc; use the Linux shared library procedure 
+
+2004-07-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
+	CC_LINK_SHARED and CC_LINK_STATIC.
+
+2004-07-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Use $(PTHREAD_CFLAGS) in
+	LDCOMBINE.
+
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Don't set PICFLAGS or
+	LDFLAGS.  Force static libraries only always, instead of just as
+	the default.
+	(*-*-aix*): The initfini argument should be "-binitfini".  Use
+	-bernotok, not -berok.  Do use the INIT_FINI_PREP command in
+	constructing MAKE_SHLIB_COMMAND.
+
+	* pre.in (PTHREAD_CFLAGS): New variable.
+	(ALL_CFLAGS): Include it.
+
+	* win-pre.in (SLIB): New variable.
+
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* mac-config.README, mac-config.cache, mac-mf.sed, mac-post.in,
+	mac-pre.in: Files deleted.
+
+2004-06-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (AUTOCONF, AUTOHEADER): Always set to autoconf and
+	autoheader respectively.
+	(AUTOCONFFLAGS, AUTOHEADERFLAGS): Always set to empty.
+	* post.in (Makefile): Always run autoconf with --include, don't
+	bother with --localdir any more.  Don't delete autom4te.cache
+	here.
+	(clean-unix): Delete autom4te.cache.
+
+	* shlib.conf (*-*-darwin*, *-*-rhapsody*): Add
+	-Wl,-search_paths_first to linker flags.
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (lib*, clean-*, install-*): Use $(LIBBASE) instead of
+	$(LIB).
+	* pre.in (SHLIB_EXPORT_FILE): Likewise.
+	* shlib.conf: Likewise.
+
+2004-05-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-aix*): Use linker options for library
+	finalization.
+
+2004-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-pre.in (CP): Copy nul: plus the file, to avoid carrying over
+	the original modification time, since some of our makefiles depend
+	on $(CP) updating the timestamp.  Use binary mode for the copy,
+	because default/ASCII seems to cause a ^Z to be added to the
+	file.
+
+2004-05-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use GNU linker's --retain-symbols-file
+	option to implement export list.
+
+2004-05-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* libobj.in (OBJS.ST, OBJS.SH, OBJS.PF): Depend on Makefile.
+
+	* pre.in (SUPPORT_LIBNAME, SUPPORT_DEPLIB, SUPPORT_LIB): New
+	variables.
+	(KRB5_BASE_LIBS): Add $(SUPPORT_LIB).
+
+2004-05-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Do remember to set
+	use_linker_init_option and use_linker_fini_option.
+	(mips-sgi-irix*): Set LDCOMBINE_TAIL only if not using gcc.
+
+2004-04-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (alpha*-dec-osf*): Add support for export list, using
+	a temporary file, and init/fini functions.
+	(mips-sgi-irix*): Previous support should not be used with gcc.
+
+	* pre.in (EXTRA_FILES): New variable.
+	* post.in (clean-unix): Delete extra files.
+
+	* shlib.conf: Initialize use_linker_init_option and
+	use_linker_fini_option to no.
+	(mips-sgi-irix*): Add link-time support for library
+	initialization and finalization.
+	(*-*-solaris*): Likewise, for native compiler.  Change "pic" mode
+	to "PIC", libkrb5 seems to need it now.
+
+2004-04-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* libobj.in (.c.so): Add -DSHARED to compile options.
+
+2004-04-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (PARSE_OBJLISTS): New variable.
+	(lib$(LIB)$(STLIBEXT), lib$(LIB)$(SHLIBVEXT)): Use it.
+	(lib$(LIB)$(PFLIBEXT)): Use it.
+
+	* shlib.conf (INIT_FINI_PREP): New variable.  Default to a no-op,
+	but let each platform set setup routines to process
+	initialization and finalization options for the default
+	MAKE_SHLIB_COMMAND value.
+	(case mips-sgi-irix*): Define LDCOMBINE_TAIL to use the library's
+	export list.
+
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (PERL): New variable.
+	* lib.in (lib$(LIB)$(SHLIBVEXT)): Use one perl invocation rather
+	than n+1 sed invocations.
+
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (DO_MAKE_SHLIB, SHLIB_STATIC_TARGET, LDCOMBINE,
+	LDCOMBINE_TAIL): Delete unused variables.
+	(SHLIB_EXPORT_FILE, SHLIB_EXPORT_FILE_DEP, MAKE_SHLIB_COMMAND):
+	New variables.
+	* lib.in (lib$(LIB)$(SHLIBVEXT)): Depend on
+	SHLIB_EXPORT_FILE_DEP.  Set objlist to the list of object files
+	before invoking MAKE_SHLIB_COMMAND, instead of wrapping the list
+	with LDCOMBINE and LDCOMBINE_TAIL.
+	* shlib.conf: Set MAKE_SHLIB_COMMAND, using LDCOMBINE and
+	LDCOMBINE_TAIL in the common case.
+	(case *-*-aix*): Specify new commands, taken from makeshlib.sh,
+	but assume the export list is provided externally.
+
+2004-03-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (default_static, default_shared): New variables to
+	set.
+
+2004-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* ac-archive: New directory.
+	* ac-archive/README: New file.
+	* ac-archive/acx_pthread.m4: New file, data taken from autoconf
+	macro archive at sourceforge.
+
+2004-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (SUBDIRS): Use autoconf substitution trick to make
+	SUBDIRS contain @subdirs@ only for the directory containing the
+	configure script, and only LOCAL_SUBDIRS elsewhere.
+	(top_srcdir): Define, set by configure.
+
+	* post.in (RECURSE_TARGETS): Drop MY_SUBDIRS support.
+
+2004-02-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (APPUTILS_DEPLIB, APPUTILS_LIB): New vars.
+	* post.in (daemon.c): Delete rule for copying source file.
+
+2004-02-18  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf (alpha-*-dec-osf*, mips-sgi-irix*): Use $(CC) instead
+	of ld for building shared libraries.
+
+2004-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf (*-*-solaris-*): Remove exitsleep.
+
+	* pre.in (FAKEDEST, FAKEPREFIX, FAKELIBDIR): Support variables for
+	the _RLD_ROOT hack.
+
+	* shlib.conf: For alpha/Tru64 and Irix, construct _RLD_ROOT values
+	pointing to a fake destdir, as well as to the real root directory.
+	Previously, pointing _RLD_ROOT at a non-existent directory and
+	putting everything in LD_LIBRARY_PATH caused other installed
+	utilities with RPATHs which were run by the test suite to fail to
+	run.
+
+2004-02-09  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess: Update from autoconf-2.59.
+
+	* config.sub: Update from autoconf-2.59.
+
+	* install-sh: Update from autoconf-2.59.
+
+2003-11-26  Jeffrey Altman <jaltman@mit.edu>
+
+    * win-pre.in (KFWFLAGS): conditionally define USE_LEASH=1
+      to enable access to Leash apis for kinit dialogs within 
+      gssapi32.dll
+
+2003-12-05  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Add Solaris support for LD_PRELOAD.
+
+2003-09-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (configure): Make configure depend on configure.in and
+	aclocal.m4 only if maintainer mode is enabled.
+
+2003-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use $(CC) for linking shared libraries,
+	and -Wl to pass linker flags in, so it can supply the necessary
+	support libraries.
+
+2003-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (daemon.c): New rule for copying daemon.c locally from
+	master copy in lib/krb5/posix.
+
+2003-05-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* win-pre.in (CPPFLAGS): Define KRB5_DEPRECATED=1.
+
+2003-05-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KRB524_H_DEP, KRB524_ERR_H_DEP, KRB524_LIB,
+	KRB524_DEPLIB): Deleted.
+
+2003-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (configure): Try running autoconf with --include, and if
+	that doesn't work, try --localdir.  Don't use AUTOCONFINCFLAGS.
+
+2003-04-01  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (KDB5_DEPLIBS): Don't depend on $(DB_DEPLIB) anymore.
+	(KDB5_DB_LIB): New variable; is empty if not building with system
+	libdb.
+	(KDB5_LIBS): Use $(KDB5_DB_LIB) instead of $(DB_LIB).
+
+2003-03-03  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Change .c.so and .c.po rules to use ALL_CFLAGS.
+
+	* pre.in (ALL_CFLAGS): Add KRB_INCLUDES.
+	(KRB_INCLUDES): Move from aclocal.m4, where it had been added to
+	CPPFLAGS.  This move allows CPPFLAGS to be used by the builder.
+
+	* shlib.conf: Add CFLAGS to many places where only LDFLAGS had
+	been previously.
+
+2003-02-12  Tom Yu  <tlyu@mit.edu>
+
+	* post.in (.dtmp): Use -DDEPEND to allow source files to exclude
+	inclusions from dependencies.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (LN_S, AR, LIBLIST, LIBLINKS, LIBINSTLIST, STLIBEXT,
+	SHLIBVEXT, SHLIBSEXT, SHLIBEXT, PFLIBEXT, LDCOMBINE,
+	LDCOMBINE_TAIL, SHLIB_EXPFLAGS): Move these autoconf-substituted
+	variables...
+	* libobj.in (OBJLISTS, SHLIBOBJS, PFLIBOBJS, LDCOMBINE, SONAME,
+	PICFLAGS, PROFFLAGS): ...and these...
+	* pre.in: ...to here.
+
+2002-12-23  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add variables for krb524 and krb4 generated headers for
+	dependencies.
+
+2002-12-12  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Fix depend rules to keep state about whether
+	verification of various things succeeded.  Change some double
+	colons to single colons.  Add a new depend-dependencies target to
+	allow Makefile.in to specify things that must be built for depend
+	to work.
+
+	* pre.in: Fix recursion rules to use fewer double colons.
+
+2002-12-09  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: depfix2.sed -> .depfix2.sed to avoid a little clutter.
+
+2002-11-27  Tom Yu  <tlyu@mit.edu>
+
+	* post.in (clean-unix): Clean depfix2.sed as well.
+
+2002-11-13  Ezra Peisach  <epeisach@bu.edu>
+
+	* pre.in (AUTOCONFINCFLAGS): Define by configure.
+
+	* post.in (Makefile): Invoke autoconf with AUTOCONFINCFLAGS
+	instead of hardcoding --localdir.
+
+2002-11-12  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Fix AIX to explicitly include system libraries in
+	"-blibpath:" by adding a variable RPATH_TAIL.  Fix typo in non-gcc
+	case.
+
+2002-11-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (.et.h, .et.c): Drop "set -x".
+
+2002-11-04  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: New variables RPATH_FLAG (set regardless of whether
+	we're building shared), TCL_MAYBE_RPATH (empty unless we're
+	building static and are capable of shared libs, in case there's a
+	shared tcl lib).
+
+	* shlib.conf: New variable RPATH_FLAG. 
+
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* pre.in post.in (RECURSE_TARGETS): Add install-headers-recurse
+
+2002-09-24  Ezra Peisach  <epeisach@bu.edu>
+
+	* post.in (Makefile): Run config.status to generate only the
+	specific makefile that changed.
+
+2002-09-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (.et.c, .et.h): Change rules to only update the desired
+	target file, by using temporary files; this makes them safe for
+	use in parallel builds.
+
+2002-09-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* post.in (Makefile): Revert change until aclocal.m4 fixed.
+
+2002-09-19  Ezra Peisach  <epeisach@bu.edu>
+
+	* post.in (Makefile): Run config.status to generate only the
+	specific makefile that changed.
+
+2002-09-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in ($(srcdir)/$(thisconfigdir)/configure): Delete
+	autom4te.cache directory.
+
+2002-09-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KRB5_LIB_libopt, KRB5_LIB_frameworkopt,
+	K5CRYPTO_LIB_libopt, K5CRYPTO_LIB_frameworkopt,
+	GSS_KRB5_LIB_libopt, GSS_KRB5_LIB_frameworkopt): Variables
+	deleted.
+	(KRB5_LIB, K5CRYPTO_LIB, GSS_KRB5_LIB): Use old _libopt values.
+	* lib.in (EXTRA_CLEAN_TARGETS, EXTRA_CLEAN_LINKS): Variables
+	deleted.
+	(clean-libs, clean-liblinks): Don't depend on them.
+	(all-framework, link-framework, clean-framework,
+	clean-framework-link, install-framework): Placeholder targets
+	deleted.
+	* shlib.conf: Don't define LIB_LINK_OPT, EXTRA_LIB_TARGETS,
+	EXTRA_LIBLINK_TARGETS, EXTRA_LIBINST_TARGETS, EXTRA_CLEAN_TARGETS,
+	EXTRA_CLEAN_LINKS.
+
+	* post.in (depend-verify-et-sys, depend-verify-et-k5,
+	depend-verify-ss-sys, depend-verify-ss-k5, depend-verify-db-sys,
+	depend-verify-db-k5): New targets.  Report errors in the -sys
+	versions.
+	(depend-verify-et, depend-verify-ss, depend-verify-db): New
+	targets.  Depend on the above based on the _VERSION macro
+	corresponding.
+	(depend-verify-srcdir): New target, split out from .d rules.
+	(.d): Depend on depend-verify-{et,ss,db,srcdir}.
+	(depend-verify-gcc, depend-verify-gcc-yes, depend-verify-gcc-no):
+	Report an error if not using gcc.
+	(depfix2.sed): Depend on depend-verify-gcc.  Supply libgcc file
+	name as fifth input field to depgen.sed.
+
+	* pre.in (DB_DEPLIB-k5, DB_DEPLIB-sys, DB_DEPS-sys, DB_DEPS-k5,
+	DB_DEPS-redirect): New variables.
+	(DB_DEPLIB, DB_DEPS): Select from them.
+	(DB_LIB): Substitute from configure script.
+	(COM_ERR_VERSION, SS_VERSION, DB_VERSION): New variables.
+
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (depfix2.sed): Pass srcdir and BUILDTOP as additional
+	inputs to depgen.sed.  Don't emit any other text.
+
+2002-09-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* libobj.in (.c.so, .c.po): Put LOCALINCLUDES before CPPFLAGS.
+
+	* pre.in (ALL_CFLAGS): Put LOCALINCLUDES before CPPFLAGS.
+	(SS_LIB-sys): Use @SS_LIB@ substitution.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (COM_ERR_DEPLIB-sys, COM_ERR_DEPLIB-k5, SS_DEPLIB-k5,
+	SS_DEPLIB-sys, COM_ERR_DEPS-sys, COM_ERR_DEPS-k5, SS_DEPS-sys,
+	SS_DEPS-k5, SS_LIB-sys, SS_LIB-k5, COMPILE_ET-sys, COMPILE_ET-k5,
+	MAKE_COMMANDS-sys, MAKE_COMMANDS-k5): New variables.
+	(COM_ERR_DEPLIB, SS_DEPLIB, COM_ERR_DEPS, SS_DEPS, SS_LIB,
+	COMPILE_ET, MAKE_COMMANDS): Use them, selecting using new
+	configure substitutions.
+	(COM_ERR_LIB): Always define as -lcom_err.
+	(CFLAGS): Define using @CFLAGS@, not @CCOPTS@.
+
+	* win-pre.in (COM_ERR_DEPS): New variable.
+
+	* shlib.conf: Use $(LDFLAGS) in CC_LINK_SHARED and CC_LINK_STATIC,
+	after other options.
+
+	* pre.in (S): Variable restored.
+	(ABS): Variable deleted.
+	(SS_DEPS): New variable.
+
+2002-08-26  Ezra Peisach  <epeisach@bu.edu>
+
+	* pre.in: Set host to @krb5_cv_host@ instead of @host@. The way
+	aclocal.m4 is setup, AC_CANONICAL_HOST may only be evaluated as a
+	cached variable and autoconf 2.52 will only allow one inclusion of
+	the code.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (S, U): Variables deleted.
+
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in ($(SUBDIROBJLISTS) and .SH/.PF variants): Depend on
+	recursion.  Use extra dummy target in case the variable is
+	empty.
+	* post.in (ALL_DEP_SRCS): New variable, includes SRCS and
+	EXTRADEPSRCS.
+	(.d): Depend on and use $(ALL_DEP_SRCS).
+	* pre.in (all-unix, all-recurse, all-postrecurse): Make each stage
+	depend on the previous, rather than having all-unix depend on
+	each.
+
+2002-07-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (DYN_DEPLIB): Removed.
+	(GSSRPC_DEPLIBS, GSSRPC_LIBS): Drop libdyn references.
+
+2002-07-13  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (PTY_DEPLIB): Fix to reflect always being built static.
+
+2002-07-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KRB5_INCSUBDIRS): Don't create the asn.1 subdirectory.
+
+2002-06-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (UTIL_DEPLIB, UTIL_LIB): Variables deleted.
+
+2002-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (COM_ERR_DEPS): New variable.
+
+	* post.in (clean-unix): Delete .d and .depend files along with
+	$(OBJS) in one command, to avoid needing to test whether the
+	latter is empty.
+
+2002-04-10  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Define KRB5_PRIVATE=1 so that private definitions
+	are used.  Define WIN32_LEAN_AND_MEAN so there are no Winsock
+	vs. Winsock 2 header file issues.  (Winsock 2 is needed for IPv6
+	support.)
+
+2002-04-02  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add support for doing optional stripping of programs.
+
+2002-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* move-if-changed: New script.
+	* post.in (depend-postrecurse): Use it.
+
+2002-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf: For Linux, always add "-lc" at the end of the link
+	command.
+
+	* libobj.in (config.status): Depend on shlib.conf.
+
+2001-12-18  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Fix hpux to deal with building shared libs with gcc.
+	Patch from Doug Engert; fixes krb5-build/1021.
+
+2001-10-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (DEPLIBOBJNAMEFIX): New variable.
+	(.depend): If $(STLIBOBJS) is non-empty, filter dependency info
+	through $(DEPLIBOBJNAMEFIX).
+
+2001-10-11  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Minor tidying.  Make the target of the mondo recursion
+	rule commands be the variable $(RECURSE_TARGETS).
+
+2001-09-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (depfix2.sed): New target, generates a sed script
+	that'll do a better job of identifying possible $(SRCTOP) uses.
+	Collapse multiple slashes to one.  Uses new depgen.sed script.
+	(.depend): Use it.
+
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* post.in (.d): Run compiler as a separate target from sed
+	processing.  Refuse to do anything if srcdir is ".".
+	(.depend): Find a shortcut name for SRCTOP to eliminate "foo/.."
+	subsequences, in case the compiler does the same.  Run depfix.sed
+	after the directory-specific substitutions, not before.
+	(depend-postrecurse): Renamed from old "depend" target.
+	(depend, depend-prerecurse, depend-recurse): Make "depend"
+	processing recursive.
+
+2001-08-07  Ezra Peisach  <epeisach@mit.edu>
+
+	* post.in (all-recurse clean-recurse distclean-recurse
+	install-recurse check-recurse Makefiles-recurse): Do not pass down
+	CC and CCOPTS to subdirs. This causes automatic reconfiguration to
+	fail with autoconf 2.52 where config.status is invoked with
+	different environment variables.
+
+2001-07024  Jeffrey Altman <jaltman@columbia.edu>
+
+        * win-pre.in:  the proper #define is KRB5_DNS_LOOKUP_REALM
+          and not KRB5_DNS_LOOKUP_REALMS
+
+2001-07-23  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in, win-post.in: Move rule-printing code to win-post.in
+	so we get the correct build options displayed (i.e., the options
+	as they stand after parsing Makefile.in).
+
+2001-06-22  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Minimize printing of compiler command line during
+	build of a directory.
+
+2001-06-21  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in, win-post.in: Improve output directory creation and
+	cleanup.
+
+2001-06-18  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in (KADM_COMM_DEPLIBS): Depend on GSSRPC_DEPLIBS and not
+	UTIL_DEPLIB. (KADMSRC_DEPLIBS) add dependency on KDB5_DEPLIB.
+
+2001-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (AUTOHEADER, AUTOHEADERFLAGS): New variables.
+
+2001-05-10  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: Fix RUN_ENV for Irix. [pulled up from 1.2.2]
+
+2001-01-28  Tom Yu  <tlyu@mit.edu>
+
+	* shlib.conf: We don't need aix.bincmds anymore for AIX.  Use the
+	-blibpath flag instead.
+
+2001-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (COMPILE_ET): New variable.
+	(COMPILE_ET_H, COMPILE_ET_C): Deleted.
+	(.et.h, .et.c): Use $(COMPILE_ET) instead of invoking awk
+	explicitly.
+
+2000-10-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* post.in (Makefile): When running autoconf, use AUTOCONFFLAGS
+	instead of always specificying the trees macrodir.
+
+	* pre.in (AUTOCONFFLAGS): Add as flags to pass to autoconf.
+
+2000-08-30  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Fix some inconsistent spelling in the previous changes
+	for MacOS X lib framework support, especially in the *_LIB and
+	*_LIB_*opt variables.
+
+2000-08-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* lib.in (EXTRA_CLEAN_TARGETS, EXTRA_CLEAN_LINKS): New variables.
+	(clean-libs, clean-liblinks): Depend on targets specified in those
+	variables.
+	(config.status): Depend on shlib.conf.
+	(all-framework, link-framework, clean-framework,
+	clean-framework-link, install-framework): New targets, details to
+	be filled in later.
+
+	* pre.in (KRB5_LIB_libopt): Renamed from KDB5_LIB.
+	(KRB5_LIB_frameworkopt): Tentative framework version for Mac OS X,
+	details to be tuned later.
+	(KRB5_LIB): Select between them using @LIB_LINK_OPT@.
+	(KRB5CRYPTO_LIB*, COM_ERR_LIB*, GSS_KRB5_LIB*): Similarly.
+	(KRB5_BASE_LIBS, GSS_LIBS): Use them.
+	(KRB4COMPAT_LIBS): Use KRB5_BASE_LIBS.
+
+	* shlib.conf: Set LIB_LINK_OPT.  Set new EXTRA_* variables for
+	darwin target.
+
+2000-08-29  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Test for existing Makefile in directory before
+	recursing into it.
+
+2000-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* libobj.in (clean-libobjs): Combine "rm" commands into one.
+
+2000-07-20  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Add KRB4_INCLUDES definition.
+
+2000-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf: New file, taken from KRB5_LIB_PARAMS in
+	../aclocal.m4.
+
+2000-07-03  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in: Remove the kdb5 and db libraries from the
+	common application list but list them for server applications.
+
+2000-07-01  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Fix up lib build rules to deal properly (hopefuly) with
+	empty objlist files.
+
+2000-06-30  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Fix up DNS build flags to correspond to new DNS
+	build flags.  Add support for not using wshelper.
+
+2000-06-30  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Twiddle things around to support building libdb under
+	krb5 build system.
+
+2000-06-08  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess: Update to 2000-05-30 from FSF.
+
+	* config.sub: Update to 2000-05-30 from FSF.
+
+2000-05-03  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in, pre.in: Put $(LOCALINCLUDES) after $(CPPFLAGS) since
+	$(CPPFLAGS) should have its includes show up first.
+
+2000-03-01  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (INSTALL_SHLIB): New variable.
+
+	* lib.in (install-shared): Use $(INSTALL_SHLIB)
+
+2000-02-15  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Fix up .c.so and .c.po rules to include $(CFLAGS),
+	which were previously missing.
+
+2000-02-04  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add KRB524_DEPLIB and KRB524_LIB
+
+2000-01-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (KADM_COMM_LIBS): Drop krb5util library.
+
+1999-12-03  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in: Pull changes from krb5-1-1 branch: a) Make is so
+	that all C flags are the same and so that the only difference
+	between EXE and DLL builds are the DLL_LINKOPTS and EXE_LINKOPTS
+	linker options.  b) Fix DNS error messages to wshelper instead of
+	version server.  c) Fix DNS flags it does not try to depend on mit
+	dir.  Define NULL so we can do directory existence checks via the
+	shell under both NT and 9x.
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* config.guess: Recognize Rhapsody OS.
+	* config.sub: Recognize OS name "rhapsody*".
+
+	* post.in (*-recurse): If an error occurs when using -k, report an
+	error after finishing all the subdirectories.
+
+1999-08-13  Brad Thompson  <yak@mit.edu>
+
+	* config.sub: Now recognizes MacOS 10 as a valid OS.
+
+1999-07-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* config.guess: Add MacOS 10 support.  (Submitted to autoconf
+	maintainers.)
+
+1999-07-22  Tom Yu  <tlyu@mit.edu>
+
+	* mkinstalldirs: New file; from autoconf-2.13.
+
+	* config.guess, config.sub, install-sh: Update from autoconf-2.13.
+
+Tue May 18 20:06:01 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-pre.in, win-pre.in: Remove trailing backslash from output
+		dir target in rule so rule is not always invoked if it
+		already exists.  Add MIGNORE option if we really want make
+		to ignore errors from recursive invocations of make.  Move
+		definition of WCONFIG and WCONFIG_EXE into win-pre.in.
+		Add NO_OUTDIR as synonym for NO_OUTPRE.
+
+Mon May 17 20:45:05 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* win-post.in, win-pre.in, windows.in: Rename windows.in to
+		win-pre.in.
+
+Mon May 17 12:26:12 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* windows.in, win-post.in: Remove win16 stuff.  Add
+		Win9x-compatible output directory creation.  Add more
+		thorough cleanup of output files and directories.  Use
+		latest and greatest (MSVC 6.0) debug flag.
+
+Mon May 10 15:03:28 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* windows.in, win-post.in: Build win32 binaries in 
+		obj/$(CPU)/{dbg,rel}.
+
+1999-03-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* post.in (Makefile): Don't try to run autoconf with $(SHELL),
+		since this doesn't work if $(AUTOCONF) isn't a path to the
+		built-in autoconf, but just an unqualified pathname to the
+		system autoconf.  [krb5-build/707]
+
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (DLL_FILE_DEF): Add makefile controls to set either
+		KRB5_DLL_FILE or GSS_DLL_FILE, with the default being
+		KRB5_DLL_FILE.
+
+Mon Feb  8 22:13:23 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* winexclude.sed: Add .dll and .lib files to the list of functions
+ 		which shouldn't get included in the non-binary list of
+ 		files to be added to kerbsrc.zip for the Windows build.
+		(If .dll or .lib files need to be included in the zip
+ 		file, they must be added to the WINBINARYFILES macro in
+ 		the top-level Makefile.in)
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* post.in (*-recurse): If $(MY_SUBDIRS) is non-NULL use it instead
+		of $(SUBDIRS) to control which directories are iterated
+		over.  (This is needed so we can fold a directory's
+		configure.in scripts into the parent's configure.in
+		without having to move all of its siblings as well into
+		the parent directory's configure.in.  This is because if
+		the parent's configure.in file as a AC_CONFIG_DIRS macro,
+		it gets included into all the $(SUBDIRS) macro of *all*
+		of its generated makefiles, and this is wrong for all
+		but the Makefile.in of the parent directory.  For example,
+		if the configure.in in src/appl contains
+		AC_CONFIG_DIRS(bsd telnet gssftp), and that configure
+		script also generates the Makefile.in for src/appl/sample,
+		then SUBDIRS will contain "bsd telnet gssftp" plus
+		whatever LOCAL_SUBDIRS is defined to contain.  This
+		doesn't work.  So instead of defining LOCAL_SUBDIRS,
+		the Makefile.in in src/appl/sample defines MY_SUBDIRS,
+		which completely overrides the SUBDIRS macro.
+		Eventually, we should replace all of the LOCAL_SUBDIRS
+		definitions in the Makefile.in's with MY_SUBDIRS, and
+		add MY_SUBDIRS definitions into all Makefile.in's that
+		don't currently have then, and depend on
+		AC_CONFIG_SUBDIRS to insert the right magic value into
+		SUBDIRS.  At that point, we can get rid of the SUBDIR
+		definition in pre.in, and remove this test from
+		post.in which tests of MY_SUBDIRS and uses it in
+		preference to SUBDIRS, and simply always use MY_SUBDIRS.)
+
+1998-05-27  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in: Remove -DLEHMAN, which doesn't do anything.  (A grep
+		through the whole source tree shows no instances of #ifdef
+		LEHMAN)
+
+Sun May 24 21:39:49 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* windows.in (ABS,S,C): Use double backslashes for the path
+		separators to workaround Microsoft NMAKE brain damaging.
+		Sometimes backslashes are treated as a quoting characters,
+		and sometimes not, with no rhyme or reason that I can
+		determine.  Fortunatelly double backslashes in pathanmes
+		don't seem to hurt (for the times when the backslash isn't
+		treated as a quoating character).  Whoever decided Windows
+		should use backslash as a path separator should be shot.
+
+Wed Apr 15 18:01:39 1998  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (CRYPTO_DEPLIB):
+	(KRB5_BASE_LIBS):
+	(KRB4COMPAT_LIBS): Rename; libcrypto -> libk5crypto.
+
+Sun Mar  1 22:25:34 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pre.in: Define AUTOCONF and CONFIG_RELTOPDIR from the autoconf
+ 		substitution macros.
+
+	* post.in: Fix the call to autoconf to use $(AUTOCONF) and
+	 	$(CONFIG_RELTOPDIR), so that configure regeneration rule
+	 	works even in a subdirectory below the configure script.
+
+Wed Feb 18 17:31:52 1998  Tom Yu  <tlyu@mit.edu>
+
+	* windows.in: Rewrite some of the directory syntax.
+
+	* pre.in: Rewrite some of the directory syntax.
+
+	* mac-pre.in: Rewrite some of the directory syntax.
+
+Fri Feb 13 22:16:51 1998  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* config.guess, config.sub: Applied lxs's changes to add support
+ 		for Rhapsody DR1.
+
+Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* pre.in: SUBDIRS now also includes LOCAL_SUBDIRS, which is
+		defined in the Makefile.in to control the recursive
+		descent through the subdirectories.  This is used so
+		that the subdirectories can be defined in Makefile.in,
+		instead of in the individual configure.in files.
+
+Tue Nov 18 19:20:59 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Clean up up .ct.c rule.
+
+	* lib.in (clean-libs): Remove lib$(LIB)$(SHLIBSEXT) as well.
+
+Mon Oct 20 14:27:19 1997  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* pre.in (INSTALL_SETUID): Explicitly set the owner of the files
+		which are installed setuid root.
+
+Wed Aug  6 20:23:32 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add $(HESIOD_LIBS) to KADMSRV_LIBS.
+
+Sun Mar  9 22:28:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Add provisions for making shared libraries of the same
+	major version number compatible.
+
+Sun Mar  2 19:54:26 1997  Ezra Peisach  <epeisach@mit.edu>
+
+	* pre.in (KRB4COMPAT_DEPLIBS): Depends on KRB5_BASE_DEPLIBS (not
+	        KRB5_BASE_DEPLBS)
+
+Sat Mar  1 14:33:21 1997  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Change .c.so and .c.po rules to work better with
+	compilers that insist that $(CC) -fpic -c foo.c -o foo.so is
+	wrong; basically, cheat and do -o foo.so.o, etc.
+
+Thu Feb 27 17:40:51 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add recursion hooks for distclean.
+
+	* post.in: Change recursion rules to skip recursion if NORECURSE
+	is non-null; add distclean support; don't remove config.log,
+	etc. if not doing distclean.
+
+Sat Feb 22 18:42:32 1997  Richard Basch  <basch@lehman.com>
+
+	* win-post.in: Move library list file rule from various
+		Makefile.in files to win-post.in
+
+Mon Feb 17 19:29:27 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define K4LIB as the krb4 library
+
+Fri Feb 14 22:02:33 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define CLIB as the ComErr library (now separate lib)
+
+Mon Feb 10 08:39:10 1997  Tom Yu  <tlyu@mit.edu>
+
+	* post.in: Fix recursion rules to deal with Ultrix sh lossage.
+
+	* libobj.in: Remove instances of STAMP.*, since they aren't
+		actually necessary.
+
+Sun Feb  9 13:43:42 1997  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in (OBJS.*): Work around a gmake optimization where the
+		timestamps of OBJS.* would not get checked after STAMP.* get
+		updated, even though OBJS.* get updated as a side effect.
+
+Sat Feb  8 12:17:17 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Define WLIB (winsock library) for Win16.
+
+Fri Feb  7 08:44:32 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Compile win16 non-DLL objects with /GA to add the
+		appropriate Windows prolog code for protected-mode
+
+Tue Feb  4 15:56:41 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in: Do not bother to define INTERFACE or INTERFACE_C
+
+Sun Feb  2 23:30:17 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in:
+		Compile with /Ld to link dynamic libraries (win16)
+		Compile DLL objects with /DKRB5_DLL_FILE (win16)
+
+Thu Jan 30 22:08:42 1997  Richard Basch  <basch@lehman.com>
+
+	* windows.in:
+		Compile with /MD to link against the runtime library (win32)
+
+Thu Feb  6 15:32:46 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add definitions for KDB5_DEPLIBS, KDB5_LIBS for
+	convenience.
+
+Wed Feb  5 23:20:53 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Fix up TCL_* variables to work with changes to
+	aclocal.m4
+
+Tue Feb  4 20:23:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Fix typo in KADMCLNT_DEPLIBS.
+
+	* pre.in: Add more --with-krb4 support (KRB4_LIBPATH and
+	KRB4_INCLUDES).
+
+Mon Feb  3 23:29:02 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add GEN_LIB support (-lgen); also fix --with-krb4 stuff
+	(such as KRB4_LIB).
+
+Fri Jan 31 20:41:34 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Fix up GEN_LIB to DTRT
+
+	* pre.in: Add KDB5_LIB, and also fix typo (-lutil -> -lkrb5util)
+
+Mon Jan 27 17:13:15 1997  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add variable to support new program building procedure.
+
+Thu Jan 16 18:58:16 1997  Tom Yu  <tlyu@mit.edu>
+
+	* post.in (Makefiles-prerecurse): Change to use double-colon
+	rule.
+
+	* pre.in (recursion rules): Change *-prerecurse and *-postrecurse
+	targets to be double-colon rules, to allow for multiple targets to
+	be evaluated in sequence.
+
+Fri Jan  3 23:16:31 1997  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Change semantics of SHLIB_EXPFLAGS somewhat to sync with
+	new aclocal.m4 changes.
+
+Thu Jan  2 18:19:20 1997  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Add facilities for explicit dependencies in libraries.
+
+Mon Dec 30 12:54:23 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* lib.in: Remove object of symlink before creating.
+
+Sun Dec 29 22:40:14 1996  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Add missing Makefiles rules.
+
+Sun Dec 29 21:24:01 1996  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: fix typo in profiled lib build
+
+	* libobj.in: random bugfixes
+
+Sat Dec 28 21:46:33 1996  Tom Yu  <tlyu@mit.edu>
+
+	* libobj.in: Cause Makefile to depend on config/libobj.in
+	* lib.in: Cause Makefile to depend on config/lib.in
+
+Fri Dec 27 17:06:41 1996  Tom Yu  <tlyu@mit.edu>
+
+	* lib.in: Fix up loops to deal with an OBJS.ST that is in the
+	current directory; add a comment documenting possible make
+	incompatibility if OBJS.ST is specified as ./OBJS.ST.
+
+	* pre.in:
+	* post.in: Fix up recursion to be somewhat saner.
+	* lib.in:
+	* libobj.in: Add these frags for new library build system.
+
+Tue Dec 24 16:43:45 1996  Tom Yu  <tlyu@mit.edu>
+
+	* config.guess:
+	* config.sub: Update from autoconf-2.12.
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+	* rm.bat: Do the work first; the comments are at the end so as
+		to improve the speed of the script significantly (20%)
+	* windows.in: corrected typo (all-windows) and added win32 support
+	* win-post.in: win16/win32 support
+
+Mon Nov 11 20:53:01 1996  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in (DEJAFLAGS): Change gmake-dependent $(shell uname foo) to
+	use $(host), which will get set by AC_CANONICAL_HOST in
+	configure.in.
+
+Thu Oct 31 17:45:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* pre.in (FILE_MANDIR): Create $prefix/include/kerberosIV [36]
+
+Mon Oct 21 21:21:43 1996  Tom Yu  <tlyu@mit.edu>
+
+	* pre.in: Substitute for *_RECURSE variables.
+
+	* post.in: Add *-recurse targets for new recursion method.
+
+Fri Oct 18 11:03:24 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in (DEJAFLAGS): s/:=/=/ [PR #117]
+
+Tue Oct 15 16:26:19 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in: add TEST_PATH argument to START_SERVERS and STOP_SERVERS
+
+Thu Oct  3 13:08:40 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pre.in: Separate KADM5 unit test files to source dir and build
+		dir based on how generated.
+
+Mon Sep 23 15:40:04 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in (DEJAFLAGS): set --srcdir $(srcdir) so unit test files
+ 	don't have to be symlinked to build tree
+
+Fri Oct 18 01:13:19 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* pre.in :  Adjust directories to comply with autoconf standards [37]
+
+Fri Sep 20 16:58:08 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* pre.in: added support for KADM5 unit test system; could
+	stand some cleaning
+
+Tue Jul  9 15:02:00 1996  Marc Horowitz  <marc@mit.edu>
+
+	* pre.in (SRVLIBS, SRVDEPLIBS, CLNTLIBS, CLNTDEPLIBS): added for
+ 	support of new aclocal.m4 KRB5_LIBRARIES macro
+
+Thu Jun 13 23:02:23 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* post.in,pre.in: break some things out from aclocal.m4 and put
+		them here
+
+Wed Jun 12 20:19:49 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (PAGESIZE): New variable which is used to control the
+		/pagesize parameter for Windows 16.  (Obviously we're
+		suffering from library size bloat if we need to set this.)
+
+Wed Jun 12 15:31:19 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* config.guess: Updated to a more recent version (from autoconf 1.10).
+
+Mon Jun 10 17:18:34 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* windows.in (CCOPTS): Windows-32 CCOPTS
+	
+	* win-post.in: Use a Windows-32 specific LIB command line syntax
+
+Thu Jun  6 15:54:57 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* windows.in (LIBCMD): Add the option /PAGESIZE:128 to the library
+		command, since the krb5 library has gotten so big.
+
+Tue Mar 12 19:40:59 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* pre.in (SRCTOP, BUILDTOP): Don't define.
+
+Mon Oct 16 15:19:42 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* pre.in: KRB5_LIBDIR, ADMIN_BINDIR, KRB5_SHLIBDIR, KRB5_INCDIR
+		are all based on exec_prefix.
+
+Wed Oct 11 18:13:30 1995  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* pre.in (DO_MAKE_SHLIB):  substitute VEXT, for the version extension for shared libs
+
+Tue Oct 10 21:42:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* win-post.in: New file
+
+	* windows.in: Moved .c -> .obj rule to win-post.in, since we need
+		it after the LIBNAME makefile variable is defined in the
+		main body of the Makefile.
+
+Wed Sep 27 00:51:51 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* winexclude.sed: New file, used for generating DOS zip files.
+
+Mon Sep 25 13:09:17 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* windows.in:
+	* mac-pre.in:
+	* pre.in: Added lines of the form "all:: all-$(WHAT)" for all,
+		clean, install, and check.
+
+Wed Sep 13 10:20:02 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: added windows value for SRCTOP.
+
+Thu Aug 24 19:25:10 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* .Sanitize: Update file list
+
+Fri Jul 7 15:56:09 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* pre.in - Add DEPLIBS and LDFLAGS to be provided with each Makefile.
+
+Fri Jun 23 14:24:02 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* pre.in (SRCTOP): Change SRCTOP so that it's defined in configure
+		script, instead of being hardcoded as $(srcdir)/$(BUILDTOP).
+
+Thu Jun 22 13:27:00 1995  Sam Hartman  <hartmans@tardis.MIT.EDU>
+
+	* pre.in (STEXT): Add definitions for STEXT and STATIC_TARGET
+
+Thu Jun 15 17:47:49 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* pre.in - Add definitions for building and using shared libraries.
+		Add KRB5_SHLIBDIR which is the destination directory for
+		shared libraries.
+
+Wed Jun 14 19:34:12 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* pre.in: DO_SUBDIRS causes make {install,clean,check,etc.} to get
+		run in subdirectories where they haven't been before.
+		Added some blank dependencies to keep things from breaking
+		too badly.
+
+Fri Jun  9 18:39:55 1995    <tytso@rsx-11.mit.edu>
+
+	* pre.in: Remove KRB5ROOT
+
+Thu Jun  8 17:44:12 1995    <tytso@rsx-11.mit.edu>
+
+	* pre.in: Define ${prefix} since exec_prefix is sometimes to that.
+		Don't create the directories include/krb5 and
+		include/kerberosIV when installing.  (They're not needed).
+
+Wed Jun  7 16:08:35 1995    <tytso@rsx-11.mit.edu>
+
+	* pre.in: Use the GNU/configure standard method of prefix and
+		exec_prefix to determine where programs get installed.
+		The use of KRB5ROOT is obsolete.
+
+Thu May 25 21:36:40 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in(HOST_TYPE, SHEXT, DO_MAKE_SHLIB): Added variables filled
+		in by configure 
+
+Wed May 24 15:42:02 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* config.guess, config.sub: Added for shared library support.
+
+Mon May 22 09:45:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* pre.in	- Add gssapi to list of subdirectories.
+
+Thu Apr 27 13:50:59 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* pre.in (KRB4): remove, unused.
+
+Wed Apr 26 14:27:03 1995 Keith Vetter (keithv@fusion.com)
+
+	* post.in: added target check-windows.
+	* ren2long, ren2long.awk: scripts to rename DOS 8.3 names back
+	   to their proper longer names.
+
+Thu Apr 20 20:00:42 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* post.in: The .depend production rule now does even more
+		cannonicalization of the generated dependencies.
+
+	* post.in: cc should be $(CC)
+
+Tue Apr 18 09:36:00 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* post.in (.depend, depend): Add production for creating the
+		.depend file, and updating the Makefile.in with the
+		new dependencies.
+
+Thu Apr 13 16:20:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: compile with stdc extensions enabled versus
+           strict stdc adherence.
+
+Tue Mar 28 17:58:55 1995  John Gilmore  (gnu at toad.com)
+
+	* mac-config.cache:  Correct some entries.
+	* mac-mf.sed:  Improve conversion of pathnames, $(srcdir),
+	support linking MPW tools (for make check, kinit).
+	* mac-pre.in (.c.o):  Add -sym on for debugging.
+	(LDFLAGS):  Remove ToolLibs.o.
+	(RANLIB, ARCHIVE):  Make these work.
+	(MAKE):  Make recursive makes work, with BuildProgram.
+
+Thu Mar 16 20:55:18 1995  John Gilmore  (gnu at toad.com)
+
+	First cut at Macintosh configuration support.
+
+	* mac-config.cache:  New file, a hand-built autoconf `config.cache'
+	file with the right values for building under MPW.
+	* mac-config.README:  Documentation for mac-config.cache.
+	* mac-pre.in, mac-post.in:  Versions of pre.in and post.in for 
+	configuring on MPW.
+	* mac-mf.sed:  A `sed' script which will turn carefully constructed
+	Unix Makefiles into carefully constructed Macintosh MPW Makefiles.
+
+Wed Mar 3 16:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: changed included directories to reflect MAC changes
+
+Mon Feb 20 15:48:16 1995 Keith Vetter (keithv@fusion.com)
+
+	* windows.in: changed API to INTERFACE        
+
+Mon Feb 13 23:40:11 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in: Add line for $(LD)
+
+Mon Feb 6 19:33:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* pre.in: Added macros for directory syntax, filename extensions 
+	  and what system we're building on (defaults to Unix).
+	* post.in: split clean into unix and windows branches
+	* windows.in: new file--makefile macros and rules for windows
+	* rm.bat: new file--DOS batch file to mimic Unix's rm command
+
+Wed Nov  2 21:04:18 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* pre.in: Don't actually add the $(CPPOPTS) flags to CPPFLAGS;
+		CPPFLAGS has them defined already.  In fact, don't define
+		the CPPOPTS makefile variable at all; we don't need it.
+
+	* pre.in: Add support for a new --with-cppopts" value where you
+		can put -DXXXXX such that they are found by autoconf tests
+		that use run the preprocessor over header files.
+
+Tue Nov  1 14:11:57 1994    (tytso@rsx-11)
+
+	* post.in (clean): Also clean up config.log, pre.out, post.out and
+		Makefile.out 
+
+Thu Oct  6 19:41:52 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* post.in: add default "check" rule for Makefiles that don't do
+		anything else.
+
+	* pre.in: add default all:: rule at the end of pre.in
+
+Thu Aug  4 03:52:23 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* pre.in: strip installed programs by default
+
+Sun Jul  3 04:41:54 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* post.in: whoops, now making sure errors don't get returned if
+	something is empty
+
+	* post.in: fixing missing semicolon in make rules
+	* pre.in: MV=mv -f
+
+Sat Jul  2 00:03:24 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* pre.in: added KRB4 to the template to keep things like v4server
+	from losing
+

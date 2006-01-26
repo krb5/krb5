@@ -1,0 +1,30 @@
+K5_AC_INIT(configure.in)
+CONFIG_RULES
+KRB5_RUN_FLAGS
+KRB5_BUILD_PROGRAM
+dnl Set krb5_cv_host
+KRB5_LIB_PARAMS
+dnl
+AC_HEADER_STDC
+AC_CHECK_FUNCS(strchr sem_init sem_trywait)
+AC_CHECK_HEADERS(unistd.h stdlib.h sys/param.h sys/socket.h dlfcn.h semaphore.h)
+AC_C_CONST
+AC_PROG_INSTALL
+AC_CHECK_PROG(RUNTEST,runtest,runtest)
+if test x"$RUNTEST" != x; then
+	HAVE_RUNTEST=yes
+else
+	HAVE_RUNTEST=no
+fi
+AC_SUBST(HAVE_RUNTEST)
+AC_TYPE_SIGNAL
+CHECK_SIGNALS
+if test "$KRB4_LIB" = ''; then
+	KRB4_DEJAGNU_TEST="KRBIV=0"
+else
+	AC_MSG_RESULT(Kerberos 4 testing enabled)
+	KRB4_DEJAGNU_TEST="KRBIV=1"
+fi
+AC_SUBST(KRB4_DEJAGNU_TEST)
+KRB5_AC_PRIOCNTL_HACK
+V5_AC_OUTPUT_MAKEFILE(. resolve asn.1 create hammer verify gssapi dejagnu threads shlib gss-threads misc)

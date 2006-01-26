@@ -1,0 +1,1306 @@
+2005-10-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_update_file_data): Drop test of
+	STAT_ONCE_PER_SECOND, just do it always.
+	* prof_int.h (stuct _prf_data_t): Likewise.
+	(STAT_ONCE_PER_SECOND): Don't define.
+
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
+2005-06-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* profile.swg (errcode_t* tcl8 argout typemap): Cast return value
+	from error_message to char* to silence Sun compiler warning.
+	(errcode_t tcl8 out typemap): Likewise.
+	* profile_tcl.c: Regenerated.
+
+2005-03-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for getpwuid_r here.
+	* prof_file.c (profile_open_file): Use k5_getpwuid_r.
+
+2005-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check struct stat for fields st_mtimensec,
+	st_mtimespec.tv_nsec, and st_mtim.tv_nsec.
+	* prof_file.c (profile_update_file_data): If one of them is
+	found, use it as the fractional part of the timestamp.  Do
+	re-read the file if the fractional parts don't match.
+	* prof_int.h (struct _prf_data_t): Add new field frac_ts.
+
+2005-03-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): After checking skip_num
+	counter, also skip over deleted nodes.
+	* prof_test1 (test3): New proc.
+	(top level): Run it.
+
+2005-02-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Check that the root node
+	pointer is not null; raise assertion failure if it is.
+
+	* prof_int.h: Include k5-platform.h.
+	(struct _prf_data_t): Reorder fields, and insert some padding.
+
+	* prof_file.c (scan_shared_trees_locked): Check that the "root"
+	field isn't null.
+	(profile_open_file): Update the in-memory file contents after
+	updating the refcount instead of before.
+	(profile_update_file_data): If the root node in the file data is
+	null, always do the update.  Check that it's not null before
+	returning a success indication.
+	(profile_dereference_data_locked): Scan linked list of file data
+	objects for sanity check, before and after.
+	(profile_dereference_data_locked): Don't do it here.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_library_initializer,
+	profile_library_finalizer): If SHOW_INITFINI_FUNCS is defined,
+	print tracing messages.
+
+2005-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_free_file_data): Destroy mutex before
+	freeing containing structure.
+	(profile_open_file): If mutex creation fails, free storage
+	directly instead of calling profile_close_file.
+
+2004-12-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): When the iterator has a
+	current file, lock it, and unlock it before changing it or
+	returning.
+
+2004-11-04  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_init.c, profile.hin: added profile_is_modified
+	and profile_is_writable so that callers can check to see
+	if profile_release() will fail before calling it.
+
+2004-11-04  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_set.c: profile calls which set values should not fail 
+        if file is not writable.  You can now write to a different 
+        file with profile_flush_to_file() or buffer with 
+        profile_flush_to_buffer().
+
+2004-10-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (STAT_ONCE_PER_SECOND): Define.
+	(struct _prf_data_t) [STAT_ONCE_PER_SECOND]: New field LAST_STAT.
+	* prof_file.c (scan_shared_trees_locked,
+	scan_shared_trees_unlocked): Redefine to do nothing for now.
+	(profile_update_file_data) [STAT_ONCE_PER_SECOND]: If the current
+	time is the same time as the last stat of the file, just return;
+	otherwise, save away the current time.
+
+2004-10-26  Ken Raeburn  <raeburn@mit.edu>
+
+	Permit exporting profile file data into a buffer.
+	* prof_file.c (profile_flush_file_data_to_buffer): New function.
+	* profi_init.c (profile_flush_to_buffer, profile_free_buffer): New
+	functions.
+	* prof_parse.c (output_quoted_string): Use a callback instead of
+	stdio calls.
+	(dump_profile): Renamed from dump_profile_to_file.  Use a callback
+	instead of stdio calls.
+	(dump_profile_to_file_cb): New function.
+	(profile_write_tree_file): Updated to new internal interface.
+	(struct prof_buf): New type.
+	(add_data_to_buffer, dump_profile_to_buffer_cb,
+	profile_write_tree_to_buffer): New functions.
+	* prof_int.h (profile_write_tree_to_buffer,
+	profile_flush_file_data_to_buffer): Declare.
+	* profile.hin (profile_flush_to_buffer, profile_free_buffer):
+	Declare.
+	* libprofile.exports: Export profile_flush_to_buffer and
+	profile_free_buffer.
+	* profile.swg (profile_flush_to_buffer): Declare.
+	* profile_tcl.c: Regenerated.
+
+2004-10-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_update_file_data): When resetting flags,
+	preserve SHARED flag.
+	(scan_shared_trees_locked, scan_shared_trees_unlocked): Convert to
+	macros, so line numbers reported by assert will be useful.
+	* prof_test1 (test2): Run new test of modifications with other
+	existing open profile handles.
+
+2004-10-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* libprofile.exports: Add profile_flush_to_file.
+
+2004-10-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (write_data_to_file): New function, split out from
+	profile_flush_file_data.  Add argument can_create indicating
+	whether the old file should already exist or not.
+	(profile_flush_file_data): Call it.
+	(profile_flush_file_data_to_file): New function.
+	* prof_int.h (profile_flush_file_data_to_file): Declare it.
+	(profile_flush_file_to_file): New macro.
+	* prof_init.c (profile_flush_to_file): New function.
+	* profile.hin (profile_flush_to_file): Declare.
+	* profile.swg (profile_flush_to_file): Declare.
+	* profile_tcl.c: Regenerated.
+	* prof_test1: Use profile_flush_to_file instead of profile_flush,
+	and reload from the new filename.
+
+2004-10-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c, prof_int.h, prof_set.c: Remove support for
+	non-SHARE_TREE_DATA case.
+	* prof_int.h (struct _prf_data_t): Change filespec to a trailing
+	char array.  Add a length field for the filespec.
+	(profile_make_prf_data): Declare.
+	(profile_lock_global, profile_unlock_global): Prototypes need
+	argument lists.
+	* prof_file.c: Include stddef.h.
+	(scan_shared_trees_locked, scan_shared_trees_unlocked): New
+	functions.
+	(r_access, rw_access): Now take const_profile_filespec_t arg.
+	(profile_make_prf_data): New function.
+	(profile_open_file): Scan trees at beginning and end.  Use
+	profile_make_prf_data to allocate and initialize storage.
+	(profile_dereference_data, profile_free_file_data): Scan trees.
+	(profile_ser_size, profile_ser_externalize): Filespec is never
+	null.
+	* prof_set.c (rw_setup): Use profile_make_prf_data to allocate
+	and initialize storage.
+
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
+        * prof_file.c (profile_library_initializer, 
+        profile_library_finalizer): Added macros to avoid adding 
+        error tables on platforms that don't use them (ie: OSX).
+
+2004-10-13  Alexandra Ellwood  <lxs@mit.edu>
+
+	* prof_int.h Added prototypes for profile_lock_global()
+        and profile_unlock_global().
+
+2004-10-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_init.c (profile_init): Don't add error table here.
+	* prof_file.c (profile_library_initializer): Add it here.
+	(profile_library_finalizer): Remove it here.
+
+2004-09-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_dereference_data_locked): New function.
+	(profile_dereference_data): Call it.
+	* prof_set.c (rw_setup): Likewise.
+	* prof_int.h (profile_dereference_data_locked): Declare it.
+
+2004-09-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (check-unix-tcl-ok): Use KRB5_RUN_ENV.
+
+	* configure.in: Use KRB5_RUN_FLAGS.
+
+2004-09-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (struct profile_node): Add new bitfield DELETED.
+	(profile_add_node): Move variable CMP into inner block where it's
+	used.  Clear deleted flag.
+	(profile_find_node): Skip deleted nodes.
+	(profile_remove_node): Just set the deleted flag, don't modify the
+	tree.
+	* Makefile.in (profile_tcl.c): Target should be in srcdir.
+	(profile_tcl.o): Depend on profile.h.
+	(DO_TCL): New variable.
+	(check-unix-tcl-, check-unix-tcl-ok): New targets.
+	(check-unix): Depend on one of them, based on DO_TCL.
+	* configure.in: Set and substitute DO_TCL.
+	* prof_test1: New file.
+
+	* profile.swg: Only include tclsh.i if building for Tcl.
+	(Tcl_SetResult, my_tcl_setresult): Compile hack only if building
+	for Tcl.
+	(%typemap SWIGTYPE *OUTPUT): Initialization is not specific to the
+	scripting language.  Add Python code.
+	(%typemap errcode_t, errcode_t*): Add placeholders for Python
+	support.
+	* profile_tcl.c: Regenerated.
+
+2004-08-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_open_file): If an error occurs while
+	updating from the input file, destroy the mutex only if we're not
+	sharing file data.
+
+2004-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_parse.c (parse_std_line): Rewrite handling of whitespace in
+	and after tag, to strip trailing whitespace (per current locale,
+	not just ASCII space characters), and prohibit any internal space
+	characters in tag names.
+
+	* profile.swg: New file.
+	* configure.in: Look for Tcl.
+	* Makefile.in (profile_tcl, profile_tcl.c, profile_tcl.o): New
+	targets, not built by default.
+	(PROG_LIBPATH, PROG_RPATH, LOCALINCLUDES): Add Tcl options.
+	(DEFINES): Define.
+	(clean-unix): Delete profile_tcl.
+	* profile_tcl.c: New file, generated from profile.swg, but checked
+	in to avoid requiring swig in order to generate the test program.
+
+	* prof_int.h (struct _prf_data_t): Add a mutex.
+	* prof_file.c (profile_open_file): Initialize data mutex.
+	(profile_update_file_data, profile_flush_file_data): Lock it while
+	manipulating file data.
+	(profile_lock_global, profile_unlock_global): New functions.
+	* prof_set.c (rw_setup): Acquire global lock while checking flags
+	and adjusting ref count.
+	(profile_update_relation, profile_rename_section,
+	profile_add_relation): Lock data mutex while manipulating profile
+	data.
+	* prof_tree.c (profile_node_iterator): Do more magic number
+	tests.
+
+2004-07-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* libprofile.exports: Don't try to export
+	krb5int_profile_shared_data.
+
+	* Makefile.in (MLIBS): Add $(LIBS).
+
+2004-06-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h, prof_parse.c, profile.hin: Don't test macintosh or
+	__MWERKS__.
+
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Add $(LIBS).
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
+2004-06-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_open_file): Handle earlier (draft POSIX)
+	specifications of getpwuid_r.
+
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for getpwuid_r.
+	* prof_file.c (profile_open_file) [HAVE_PWD_H && HAVE_GETPWUID_R]:
+	Use getpwuid_r if available.
+
+2004-05-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: When generating prtest, use AC_CONFIG_FILES
+	instead of K5_GEN_FILE so that a chmod may be added to make the
+	script executable.
+
+2004-05-12  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEPLIBS, MLIBS, SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add
+	the new support library.
+
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c: Include k5-platform.h.
+	(krb5int_profile_shared_data): Now static.  Use new partial mutex
+	initializer.
+	(struct global_shared_profile_data, g_shared_trees,
+	g_shared_trees_mutex): Moved here from prof_int.h.
+	(profile_library_initializer, profile_library_finalizer): New
+	init/fini functions.  Deal with mutex.
+	(profile_open_file): Verify initializer ran successfully.
+
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libprofile.exports: New file.
+
+2004-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h: Include k5-thread.h.  Don't include sys/types.h and
+	pthread.h.
+	(SHARE_TREE_DATA): Always define.
+	(USE_PTHREADS): Don't define.
+	(prof_mutex_lock, prof_mutex_unlock): Deleted.
+	(struct global_shared_profile_data): Change mutex to use
+	k5_mutex_t instead of pthread_mutex_t.
+	(g_shared_trees_mutex): Don't conditionalize on USE_PTHREADS.
+	* prof_file.c (krb5int_profile_shared_data): Initialize mutex.
+	(profile_open_file, profile_dereference_data): Use new mutex
+	macros.  Check return status when locking.  Fix a potential memory
+	leak in an error case.
+
+2004-03-08  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_get.c (profile_parse_boolean): Declare first argument as
+	const char *.
+
+2004-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_init.c (prof_int32): If long is 4 bytes and int is not,
+	then use long, not int, for prof_int32.
+
+2004-02-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c, prof_get.c, prof_init.c, prof_parse.c, prof_set.c,
+	prof_tree.c: Use ANSI style function definitions.
+
+2004-01-30  Alexandra Ellwood  <lxs@mit.edu>
+
+    * prof-int.h: prof-int.h should include pthread.h when USE_PTHREADS 
+    is defined.
+
+2003-12-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (profile_iterator_create): NAMES argument points to
+	const pointers.
+	* profile.hin (profile_iterator_create): Declaration updated.
+
+2003-12-14 Jeffrey Altman <jaltman@mit.edu>
+
+   * all files: move prof-int.h to be the first include file
+     in order to obtain platform specific config preprocessor
+     variables which are used to selectively include stdlib.h
+
+2003-07-03 Alexandra Ellwood <lxs@mit.edu>
+
+    * profile.hin: Remove leading spaces in #define and #include 
+    in public headers to support K&R C compilers
+    
+2003-04-28  Ezra Peisach  <epeisach@bu.edu>
+
+	* prof_file.c (r_access): Static function. Only include if
+	SHARE_TREE_DATA defined.
+
+2003-03-06 Alexandra Ellwood <lxs@mit.edu>
+    * profile.hin, prof_file.c (profile_flush_file_data): Stop copying
+    the resource fork.  We stopped writing resources to the krb5
+    configuration in KfM 4.5.x.  In KfM 5.0 will no longer read
+    preferences from the resource fork so we can destroy it on copy.
+    
+    * prof-int.h: No longer include MoreFiles.  Removed framework style
+    includes for Kerberos headers.
+    
+    * prof_FSp_glue.c, prof_init.c, profile.hin: Moved Mac FSSpec-based 
+      functions into a separate file so they will only be built with KfM.
+      These functions will be exported but not in the headers because
+      they are deprecated.
+
+2003-01-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (profile_flush_file_data) [_WIN32]: Don't call
+	sync.
+
+2003-01-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (SHARE_TREE_DATA): Define only on Mac.
+
+	* profile.pbexp: New file.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for pwd.h.
+	* prof_file.c: Include pwd.h if available.
+	(profile_open_file) [HAVE_PWD_H]: If $HOME isn't set, look up the
+	home directory in the passwd file.  Expand the filename before
+	checking against the cache.
+	(profile_open_file) [SHARE_TREE_DATA]: Fix the sense of the test
+	for read access.
+
+	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
+	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
+2003-01-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (make_hard_link): New function.
+	(profile_flush_file_data): Use it to attempt a safe profile file
+	replacement.
+
+	* prof_parse.c (profile_parse_file)
+	[PROFILE_SUPPORTS_FOREIGN_NEWLINES]: Look for \r and treat it as a
+	line break.
+	* prof_int.h: Don't include prof_err.h.
+	(PROFILE_SUPPORTS_FOREIGN_NEWLINES) [macintosh]: Define new
+	macro.
+
+2002-12-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_file.c (r_access): New function.
+	(profile_open_file): Use it.
+
+	* profile.hin: Don't test MACINTOSH any more.  On Mac OS X,
+	include TargetConditionals.h, set some pragmas, define
+	COPY_RESOURCE_FORK, and error out if TARGET_RT_MAC_CFM is
+	defined; don't set the old m68k CFM pragmas.  Always use
+	PROFILE_USES_PATHS code, don't test or define it.
+	(FSp_profile_init, FSp_profile_init_path): Declare, on Mac OS X.
+	* prof_int.h (NO_SYS_TYPES_H, NO_SYS_STAT_H) [macintosh]: Don't
+	define these.
+	* prof_file.c: Always inclued sys/types.h and sys/stat.h.
+	(GetMacOSTempFilespec): Deleted.
+	(profile_flush_file_data) [COPY_RESOURCE_FORK]: Copy Mac resource
+	fork from old file to new before renaming.
+	(rw_access, profile_update_file_data, profile_flush_file_data,
+	profile_free_file_data): Assume PROFILE_USES_PATHS, don't test.
+	* prof_init.c (profile_ser_size, profile_ser_externalize,
+	profile_ser_internalize): Likewise.
+	(FSp_profile_init, FSp_profile_init_path): Define, on MacOS X.
+	* profile.exp: Add FSp_* functions.
+
+2002-12-23  Ezra Peisach  <epeisach@bu.edu>
+
+	* prof_file.c: Cast return from prof_mutex_lock and
+	prof_mutex_unlock to void to avoid warnings of code with no side
+	effects.
+
+2002-12-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h: Define USE_PTHREADS and include pthread.h if on
+	MacOS X.
+	(struct global_shared_profile_data) [USE_PTHREADS]: Add a mutex.
+	(g_shared_trees_mutex) [USE_PTHREADS]: New macro, references the
+	global mutex.
+	(prof_mutex_lock, prof_mutex_unlock) [SHARE_TREE_DATA]: Define to
+	use pthread functions or do nothing.
+	(profile_free_file_data): Delete declaration.
+	(profile_dereference_data): Declare.
+	* prof_file.c (profile_free_file_data): Now static.
+	(profile_open_file, profile_dereference_data) [SHARE_TREE_DATA]:
+	Grab lock while manipulating global data list or its contents.
+
+	* prof_int.h (SHARE_TREE_DATA): Define.
+	(struct _prf_file_t) [SHARE_TREE_DATA]: Make data field a pointer
+	rather than an array.
+	(struct global_shared_profile_data): New type, for profile library
+	global data.
+	(krb5int_profile_shared_data): Declare new variable.
+	(g_shared_trees): New macro, refers to a field in the global data.
+	(PROFILE_FILE_SHARED): New flag macro.
+	* prof_file.c (krb5int_profile_shared_data): Initialize here.
+	(profile_open_file) [SHARE_TREE_DATA]: Scan g_shared_trees for an
+	entry with the same filename.  If found, increment its reference
+	count, update it, and return it; otherwise, allocate a new one,
+	and add it to the list after filling it in.
+	(profile_dereference_data): New function.  Decrement reference
+	count if SHARE_TREE_DATA, and free the data if appropriate.
+	(profile_free_file): Call profile_dereference_data.
+	(profile_free_file_data) [SHARE_TREE_DATA]: If the SHARED flag is
+	set, remove it from the g_shared_trees list before freeing.  Free
+	up the allocated space.
+	* prof_set.c (rw_setup) [SHARE_TREE_DATA]: If the object's data is
+	shared, copy it into a new data structure not in the global shared
+	list, and dereference the old one.
+
+2002-12-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h: Include Mac OS X versions of header files if
+	appropriate.  Only include prof_err.h if profile.h doesn't define
+	ERROR_TABLE_BASE_prof.
+	(struct _prf_data_t): Move most of contents of _prf_file_t here.
+	Add reference count.
+	(prf_data_t): New typedef.
+	(struct _prf_file_t): Include an array of one _prf_data_t
+	structure.
+	* prof_file.c (profile_open_file): Fill in "data" field.  Drop
+	some old Mac specific code.
+	(profile_flush_file_data): Renamed from profile_flush_file, now
+	takes prf_data_t argument.
+	(profile_flush_file_data): Likewise.
+	(profile_free_file): Now calls profile_free_file_data.
+	(profile_free_file_data): New function, with most of old
+	profile_free_file code.
+	* prof_init.c (profile_init_path): Removed old Mac version.
+	(profile_ser_size, profile_ser_externalize): Get file data from
+	new "data" field.
+	* prof_set.c (rw_setup, profile_update_relation,
+	profile_clear_relation, profile_rename_section,
+	profile_add_relation): Likewise.
+	* prof_tree.c (profile_node_iterator): Likewise.
+	* test_profile.c (do_batchmode): Likewise.
+	* prof_int.h (profile_flush_file): Now a macro.
+	* prof_err.et (PROF_MAGIC_FILE_DATA): New error code value.
+
+	* prof_get.c (conf_yes, conf_no): Entries now point to const.
+	(profile_parse_boolean): Updated type of 'p' correspondingly.
+
+2002-10-07  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in: Support install-headers
+
+2002-10-03  Sam Hartman  <hartmans@mit.edu>
+
+	* Makefile.in :  Move test_* from all to check targets. so that
+	com_err is not needed on mac.
+
+2002-09-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Don't reference et directory.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(PROFILE_HDR)): Quote target of copy.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (EXTRADEPSRCS): New variable.
+	(.d): Depend on includes.
+
+2002-06-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_parse.c (strip_line): Simplify loop by preserving "p"
+	rather than recomputing it.
+
+	* configure.in: Look for strdup.
+	* prof_tree.c (profile_create_node): Use strdup.
+	(strdup, MYstrdup): Define it if the OS doesn't provide it.
+
+2002-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (profile_get_integer): Set errno to 0 before strtol
+	call, so we can distinguish error from LONG_MIN/MAX.  Break out
+	different error conditions and comment them.
+
+2002-05-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c (conf_yes, conf_no): Now const.
+	(profile_parse_boolean): Local variable P points to const.
+
+2002-02-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump, due to error table changes.
+	(Tom's change from 1.2.x branch.)
+
+2002-01-23	Alexandra Ellwood <lxs@mit.edu>
+
+	* prof_init.c, prof_tree.c: Fixed calls to
+	profile_update_file_data to handle the possibility that we have
+	lost permission to read one of the configuration files in the file
+	list.  We should only fail catastrophically (EACCES) if we can't
+	read all of the files in the profile.
+
+2001-12-05  Ezra Peisach  <epeisach@mit.edu>
+
+	* test_profile.c (main): Call profile_release() before exiting
+	in case of error return. (memory leak testing)
+
+2001-10-09  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h, profile.hin, test_parse.c: Make prototypes
+	unconditional.  Don't define PROTOTYPE.
+
+2001-10-05  Ken Raeburn  <raeburn@mit.edu>
+
+	* profile.hin (KRB5_EXPORTVAR): Don't define.
+
+	* prof_file.c, prof_int.h, prof_parse.c, profile.hin,
+	test_profile.c: Drop _MSDOS support.
+
+	* profile.hin (NEAR, FAR): Don't define.
+
+2001-10-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_get.c, prof_init.c, prof_set.c, profile.hin: Don't use
+	KRB5_DLLIMP.
+
+2001-07-19  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (struct profile_iterator): Member "names" now points
+	to const.
+	(profile_node_iterator_create): Argument "names" now points to
+	const.
+	(profile_node_iterator): Local variable "cpp" now points to
+	const.
+	* prof_int.h (profile_node_iterator_create): Decl updated.
+	* prof_get.c (profile_get_values): Argument "names" now points to
+	const.
+	* profile.hin (profile_get_values): Decl updated.
+
+2001-07-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_int.h: Provide prototypes for profile_ser_size,
+	profile_ser_externalize, profile_ser_internalize.
+
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* test_profile.c: Include <string.h> for strcmp() prototype.
+
+	* argv_parse.c (argv_parse): Cast argument to isspace() as int.
+	* prof_parse.c (skip_over_blanks, parse_std_line, need_double_quotes): 
+	Likewise.
+
+2001-06-11  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (MLIBS): Do not link against libgen.a for test
+	programs. (only needed for krb5 an_to_ln code).
+
+2001-02-02  Tom Yu  <tlyu@mit.edu>
+
+	* krb5.conf: Test with trailing whitespace on "default_realm"
+	line.
+
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_C_CONST instead of AC_CONST and
+	AC_CHECK_FUNCS instead of AC_HAVE_FUNCS.
+
+2000-08-02  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5.conf: Test with a space after ']' and '{'
+
+	* prof_parse.c (parse_std_line): Spaces after '{' or ']' should
+	not be a fatal error. This is a common lossage in krb5.conf files.
+
+2000-07-24  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_init.c: Cleanup internal type warnings in calls to profile_init.
+
+	* test_parse.c (main): Cast arguments to error_message. 
+
+	* prof_file.c (profile_open_file): Variable with argument to
+	malloc should be unsigned.
+
+	* profile.hin: Revert changes to const_profile_filespect_t and
+	profile_filespec_t to preserve interface.
+
+2000-06-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* prof_init.c (profile_init_path): Use profile_filespec_t instead
+	     of char *. (change  provided by Nathan Neulinger <nneul@umr.edu>)
+
+	* profile.hin: Make definition of const_profile_filespec_t to be
+		based on profile_filespec_t.
+
+2000-05-15	Alexandra Ellwood <lxs@mit.edu>
+
+	* prof_get.c:
+		prof_parse_boolean () was missing some curly brackets
+		and was failing to check all the values in the list of
+		possible strings.
+
+2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
+
+        * prof_get.c: 
+            profile_get_boolean() was calling prof_parse_boolean()
+            instead of profile_get_boolean()
+
+2000-04-03  Jeffrey Altman <jaltman@columbia.edu>
+
+        * prof_get.c: 
+          . Added #include <limits.h> for definitions of INT_MAX, etc.
+          . Changed 'ret_int' to 'ret_boolean' in prof_get_boolean
+
+2000-03-24  Miro Jurisic  <meeroh@mit.edu>
+
+	* prof_get.c: Added prof_get_boolean and changed prof_get_integer
+	to return errors for malformed input
+	* prof.hin: Added prof_get_boolean
+	* profile.exp: Added prof_get_boolean
+	* prof_err.et: Added PROF_BAD_BOOLEAN, PROF_BAD_INTEGER
+
+Fri Jan 28 16:27:01 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* argv_parse.c: Include string.h (for strlen prototype)
+
+1999-10-26  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* Makefile.in: Clean up usage of CFLAGS, CPPFLAGS, DEFS, DEFINES,
+	LOCAL_INCLUDES such that one can override CFLAGS from the command
+	line without losing CPP search patchs and defines. Some associated
+	Makefile cleanup.
+
+1999-09-01  Danilo Almeida  <dalmeida@mit.edu>
+
+	* profile.hin (profile_init, profile_init_path): Define and use
+	const_profile_filespec_t.
+
+	* prof_init.c (profile_init, profile_init_path):
+	* prof_file.c (profile_open_file):
+	* prof_int.h (profile_open_file): Use const_profile_filespec_t.
+
+	* prof_int.h (PROFILE_LAST_FILESPEC): Compare a char against a char,
+	not a void*.
+
+	* Makefile.in: Remove DOSDEFS to avoid warnings.  The thing it
+	defined is already set in win-mac.h.
+
+1999-08-18  Miro Jurisic  <meeroh@mit.edu>
+
+	* profile.exp: removed com_err functions (they are in a library
+	of their own now) from MacOS export file
+
+1999-08-05  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prof_get.c (profile_free_string): 
+	* profile.hin: Add profile_free_string to free strings allocated
+	by profile_get_string. -- And then remove them because
+	profile_release_string already exists for that purpose.	
+
+1999-08-03 Alexandra Ellwood <lxs@mit.edu>
+
+	* prof_file.c (profile_open_file)
+		Mac OS side now sets profile->magic to PROF_MAGIC_FILE 
+		so the rest of the functions think it's a real profile.
+		  
+1999-07-22 Jeffrey Altman <jaltman@columbia.edu>
+
+        * prof_init.c (prof_init)
+          Change behavior so that a NULL filespec means allocate
+          a profile without a backing store.
+
+1999-07-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (profile_t): Delete typedef, since Miro changed
+	prof_int.h to include profile.h, which also has the typedef.
+	* prof_file.c, prof_init.c: Fix typos and missed variable and type
+	name changes from Miro's patch.
+
+1999-07-21 Miro Jurisic   <meeroh@mit.edu>
+
+	* profile.hin, prof_file.c, prof_init.c, prof_int.h:
+		MacOS now uses file specifiers rather than file paths
+
+1999-07-14 Miro Jurisic   <meeroh@mit.edu>
+
+	* profile.hin: added #ifdef __cplusplus extern "C" 
+
+1999-06-23  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prof_init.c (profile_abandon, profile_release): Check whether
+		profile is valid before partying on it.
+
+1999-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Remove semicolon after
+	function body.
+
+1999-06-16  Danilo Almeida  <dalmeida@mit.edu>
+
+	* prof_init.c (profile_init_path): Fix memory leak.
+
+1999-06-09 Miro Jurisic   <meeroh@mit.edu>
+
+	* prof_file.c (profile_update_file): if fopen fails and errno is 0, set
+	errno to ENOENT so that we can try multiple names for settings file
+	(From Chas Williams)
+
+Wed May 19 11:46:02 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Add windows build rules for putting header files in
+		include dir.  Do cleanup of header for windows clean.
+
+Mon May 10 15:27:19 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
+1999-04-14    <tytso@rsts-11.mit.edu>
+
+	* prof_init.c (profile_abandon): New function which frees the
+		profile handle and throwing away any changes that might
+		have been made before they are flushed to disk.
+
+	* prof_file.c (profile_close_file): Move functionality of freeing
+		the profile file to the new function profile_free_file().
+
+Mon Mar 15 16:03:34 1999  Tom Yu  <tlyu@mit.edu>
+
+	* profile.hin: Fix GSS_DLLIMP.
+
+Mon Mar  8 19:10:06 1999  Tom Yu  <tlyu@mit.edu>
+
+	* profile.hin: Fix prototype of profile_flush() to use long rather
+	than errcode_t to avoid breaking other stuff that includes
+	profile.h.
+
+Mon Mar  8 14:38:24 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Fix bug where it will loop
+		endlessly when searching an empty section.
+
+	* test_profile.c: Add code so that the "add" code will interpret
+		"NULL" as calling profile_add_relation with a null pointer
+		for the value.
+
+Wed Mar  3 18:23:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_file.c (profile_flush_file): On the Macintosh, fopen()
+		doesn't set errno when fopen fails to open a file.  Work
+		around this by setting errno to PROF_FAIL_OPEN in this case.
+
+	* prof_err.et: Add new error code PROF_FAIL_OPEN.
+
+Tue Mar  2 18:55:50 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* test_profile.c: Added ability to test profile set functions, and
+		in a batch mode.
+	
+	* prof_init.c (profile_flush): Add new public function for
+		flushing changes made to the profile.
+
+	* prof_parse.c (profile_write_tree_file): Add official internal
+		function for flushing out a profile tree to a FILE *.
+	
+	* configure.in, prof_file.c (rw_access): Add new function which
+		checks to see whether we have read/write access, and
+		emulate this for losing non-POSIX OS's.
+
+	* prof_file.c (profile_flush_file): Add support for writing
+ 	 	modified profile file's.  Call profile_flush_file from
+ 	 	profile_close_file().
+
+	* prof_tree.c: Add new functions profile_get_node_name,
+ 		profile_get_node_value, profile_find_node,
+ 		profile_remove_node, profile_set_relation_value,
+ 		profile_rename_node.  Rewrite profile_find_node_relation
+ 		and profile_find_node_subsection in terms of
+ 		profile_find_node.
+	
+	* prof_set.c, Makefile.in: Add a new file which exports the public
+		interfaces for setting profile entries.
+
+	* prof_get.c, prof_init.c, prof_int.h: Add the KRB5_DLLIMP and
+ 		KRB5_CALLCONV to all of the various profile routines so
+ 		they can be properly exported via a Windows DLL.
+
+	* prof_int.h: Add definition for the flags in the profile
+		structure.
+	
+	* prof_err.et: Add new error codes PROF_SET_SECTION_VALUE,
+		PROF_EINVAL, PROF_READ_ONLY, and PROF_EXISTS.
+
+Fri Feb 19 00:49:10 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* test_parse.c (main): Add a call to profile_verify_node so we can
+		test the internal rep invariants.
+
+	* prof_tree.c (profile_verify_node): Fix bug in
+		profile_verify_node in the group_level test.  Also make
+		profile_verify_node check the return code when it is
+		recursively testing the child nodes.
+
+Mon Jan 25 18:44:26 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Added comments indicating
+		that profile_node_iterator, not being an exported
+		interface, returns pointers into the parse tree, and that
+		values should be strdup()'ed before returning them to a
+		calling application.
+
+	* prof_get.c (profile_iterator): Strdup the name and value strings
+		before returning them to the calling application.
+
+Thu Jan 21 15:21:18 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* profile.hin: Fix definition of PROTOYPE so that it works under
+	 	C++.
+
+1998-12-31  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_tree.c (profile_node_iterator): Make sure the pointer to
+		the iterator function is non-NULL before checking the
+		magic value.
+
+1998-12-15  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_file.c (profile_open_file): Add ability to parse filenames
+		that begin with "~/" and substitute it with "$HOME/".
+
+1998-12-04  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_get.c: Add new public profile_iterator functions for
+		iterating over values found in the profile file.
+
+1998-11-17  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_get.c (profile_get_values): If there are no relations
+		found, return PROF_NO_RELATION, instead of an empty list.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in: Build the test script prtest for doing regression
+		test suites of the profile library.
+
+	* prof_err.et (PROF_MAGIC_ITERATOR): Add a new error code for the
+		magic number for the iterator structure.
+
+	* prof_file.c (profile_update_file): Increment the update serial
+		number when the profile file is re-read.
+
+	* prof_tree.c (profile_make_node_final, profile_is_node_final):
+		Add a new attribute for a node, which is whether or not
+		the node is "final".  This controls whether or not the
+		next profile file should be searched when looking up a key
+		which matches the section named by the node.
+		(profile_node_iterator_create, profile_node_iterator_free,
+		profile_node_iterator): New functions which take a
+		profile_t and returns all of the names or values for a
+		particular search key.  This iterator follows the rules of
+		doing multiple profile file lookups using the "final node"
+		marker to stop searching subsequent profile files.
+	
+	* prof_parse.c (parse_std_line): Add support for marking top level
+		sections, subsections, and individual nodes as final,
+		using the '*' character.
+		(dump_profile_to_file): Print finalized sections with the '*'
+		character.
+
+	* prof_get.c: Update routines to use the iterators provided by
+		prof_tree.c.
+
+	* prof_int.c: Add upd_serial member to the prf_file_t structure.
+		Define the symbolic flags used by the profile node
+		iterator.  Add function declarations for
+		profile_make_node_final, profile_is_node_final,
+		profile_node_iterator_create, profile_node_iterator_free,
+		profile_node_iterator, and profile_get_value.
+
+	* test_profile.c: Add the query1 command which tests
+		profile_get_value. 
+
+1998-11-05  Geoffrey King  <gjking@mit.edu>
+
+	* prof_init.c (profile_init): Fix a problem whereby if the last
+		pathname in a list of pathnames was nonexistent, an
+		error would be returned that they were all nonexistent.
+
+1998-11-03  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Added prof_get.c to the list of files to be compiled.
+	
+	* profile.hin: Added declarations for profile_free_list(),
+		profile_get_relation_names(), and
+		profile_get_subsection_names().  (These are new public
+		interfaces to the profile library.)
+
+	* prof_int.h: Removed the profile_section_t structure, which was
+		used only by the now-defunct prof_section.c file.  Added
+		the internal interfaces for the new public interfaces.
+		Removed unused declarations which were never
+		implemented(profile_get, profile_update).
+
+	* prof_init.c: Moved all of the profile querying functions
+		(profile_get_values(), profile_get_value(), etc.) to
+		prof_get.c.  In the process, removed the really
+		bletcherous (and badly implemented)
+		profile_get_first_values(), which did nothing like what
+		the named implied.  Also added to prof_get.c new functions
+		profile_get_subsection_names() and
+		profile_get_relation_names(). 
+	  	(profile_ser_internalize): Rewrote error handling to be
+		clearer, and removed a bug where memory was not freed
+		correctly in an error case.  
+		(profile_init): If a list of pathnames is passed in,
+		profile_init will now try to open all of them, now that
+		we've defined query fallback semantics in prof_get.c
+
+	* prof_parse.c: Fix lint warning.
+
+	* prof_tree.c (profile_find_node_relation,
+		profile_find_node_subsection): Allow the returned value or
+		subsection field to be NULL (in case the caller isn't
+		interested in getting the returned value or subsection,
+		and only cares about getting the name).
+		(profile_delete_node_relation,
+		profile_delete_interior_node_relation): Removed these
+		functions and replaced it with profile_remove_node(),
+		which takes a boolean argument section_flag. 
+		(profile_find_node_name): Removed this function.  (This
+		was a Cygnus/Fusion special used by the now removed
+		profile_find_first_values() function.)
+
+	* test_profile.c: Added commands to test the new
+		profile_get_subsection_names() and
+		profile_get_relation_names() interfaces.
+
+1998-08-06  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_tree.c (profile_delete_node_relation): Fix bug where
+		deleting a node would corrupt the linked list.
+		(profile_add_node): Fix another linked list corruption
+		problem where an insertion into the middle of the linked
+		list didn't update a previous link.  [krb5-libs/615]
+
+1998-07-12  Sam Hartman  <hartmans@fundsxpress.com>
+
+	* Makefile.in: Add dependency on -lcom_err
+
+Mon Mar  2 16:19:58 1998  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in: Integrate in the krb5 build tree rules.
+	(use CC_LINK, etc).
+
+	* configure.in: Add AC_BUILD_PROGRAM for test programs.
+
+Wed Feb 18 16:33:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Wed Jan 28 17:58:10 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* configure.in, Makefile.in: Remove CopyHeader from
+		configure.in, and move functionality to Makefile.in
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+Fri Jan 23 20:55:06 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_parse.c (parse_std_line, parse_quoted_string,
+ 	 	need_double_quotes, output_quoted_string, dump_profile,
+ 	 	dump_profile_to_file): Vastly improved the profile
+	 	parsing; whitespace at the end of lines are now ignored.
+		Added quoted string parsing, complete with backquote
+	 	processing.  Strings which need to be quoted are properly
+	 	quoted on output.
+
+Sat Feb 22 18:33:17 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in: Move list file construction to win-post.in
+
+Tue Feb 18 00:14:13 1997  Richard Basch  <basch@lehman.com>
+
+	* profile.hin prof_int.h prof_init.c:
+		Export profile_get_values() [krb4 dll requires it]
+
+Sat Feb 15 01:58:19 1997  Richard Basch  <basch@lehman.com>
+
+	* Makefile.in (all-windows): Fixed win16/win32 build
+		after libhack merge broke it...
+
+Fri Feb  7 18:56:57 1997  Richard Basch  <basch@lehman.com>
+
+	* prof_int.h:
+		Include com_err.h rather than redefining errcode_t
+		Structure element "magic" should not be errcode_t
+
+Wed Feb  5 20:18:33 1997  Richard Basch  <basch@lehman.com>
+
+	* profile.hin: Do not process the contents of profile.h
+		(or the profile.hin subset) more than once.
+
+	* test_parse.c:
+		Do not include "com_err.h" (conflicting errcode_t definition)
+
+	* Makefile.in:
+		Fixed typo (all-max -> all-mac)
+		Inconsistent colon usage; all-windows needed :: not :
+
+Thu Jan  2 17:36:44 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
+Mon Nov  4 17:04:51 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* prof_parse.c (parse_std_line): Accept either ';' or '#' on the
+		first line of a string as a comment character.
+
+Fri Jul 12 20:28:49 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (CFLAGS): On Windows builds, add -DHAVE_STDLIB_H
+
+Mon Jun 24 09:37:26 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* prof_file.c, prof_init.c, prof_parse.c, prof_section.c,
+		prof_tree.c, test_parse.c, test_profile.c, configure.in:
+		Only include stdlib.h if it's available.
+
+Thu Jun 13 22:13:51 1996  Tom Yu  <tlyu@voltage-multiplier.mit.edu>
+
+	* configure.in: remove ref to ET_RULES
+
+Mon Jun 10 17:35:02 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* test_profile.c: Add usage message if not enough arguments.
+
+	* prof_parse.c (dump_profile_to_file, dump_profile): Dump the
+ 		profile using the correct line terminator for Windows,
+ 		Macintosh, etc.
+
+	* prof_parse.c:
+	* prof_file.c: Change _WINDOWS to _MSDOS, and add check for _WIN32.
+
+	* prof_int.h: Add size #defines for _WIN32.  Handle prototypes
+		correctly for _WIN32.
+
+Fri Feb 16 15:18:17 1996    <tytso@rsts-11.mit.edu>
+
+	* prof_int.h: Added comment to profile state structure
+
+Wed Feb 14 16:43:48 1996    <tytso@rsts-11.mit.edu>
+
+	* prof_parse.c (parse_std_line): Make parsing more flexible, so we
+		don't barf over lack of spaces around the equals sign.
+
+Tue Dec 12 19:18:14 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5.conf: use host:portnum in example files, not host,portnum.
+
+Fri Jan  5 09:04:20 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* profile.hin: Add profile_init_path prototype
+
+Thu Dec 21 18:20:46 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Check for the stat call, since profile_update_file
+		needs to know whether it exists.  (It doesn't on the Mac.)
+
+	* prof_file.c (profile_update_file): Change use of HAS_STAT to
+		HAVE_STAT, to confirm with autoconf test.  If the stat()
+		call does not exist, assume that our in-core memory image
+		is correct, and never re-read the profile file unless we
+		explicitly close it.
+
+Fri Oct  6 22:07:01 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
+Mon Oct  2 16:39:49 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_init.c (profile_init_path): Add const declarations.
+
+Tue Sep 26 20:00:28 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* prof_init.c (profile_init_path): takes a single string entry
+	that has pathnames seperated by colons, and splits it into
+	file names for profile_init. No provision for quoting colons in
+	pathnames, but shells don't solve that either.
+
+Tue Sep 26 19:23:59 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* prof_init.c (profile_init): handle multiple input files by
+	grabbing the first one that doesn't return ENOENT.
+
+Mon Sep 25 16:42:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Fri Sep 22 19:51:44 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* prof_int.h: added SIZEOF defines for the PC, and added missing
+		prototype for profile_find_node_name()
+
+	* prof_init.c (profile_get_first_values): Remove unused variables.
+
+Mon Sep 11 15:30:52 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_parse.c (dump_profile_to_file): Convert C+ comment to
+		standard C one.
+
+Tue Aug 29 14:23:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in - Add checks for size of short, int and long.
+	* prof_init.c - Add routines to serialize profile context.
+
+Tue Aug 15 17:17:40 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_parse.c (strip_line,parse_line): Declare as static.
+
+	* prof_int.h: Add missing prototypes
+
+Thu Jul  6 10:05:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* prof_file.c: prof_int.h must be included after stdio.h
+
+Wed July 5 15:52:31 1995  James Mattly  <mattly@fusion.com>
+	* prof_file.c added conditionals for sys/*.h include files
+	* prof_int.h added _MACINTOSH conditional
+	* test_parse.c added _MACINTOSH conditional
+
+Fri Jun  9 19:00:19 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
+Thu Jun  8 17:56:34 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (install): Add install target.
+
+Fri May 26 20:07:13 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* configure.in, Makefile.in: Add support for building shared libraries.
+
+Sat May  6 17:21:59 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* test_parse.c: Include prof_int.h - this program relies on
+		internal functions.
+
+Fri May  5 00:02:41 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* prof_init.c (profile_get_values): Return PROF_NO_PROFILE if the
+		passed-in profile variable is NULL (instead of core dumping).
+	
+	* prof_err.et (PROF_NO_PROFILE): Defined new error code.
+
+Thu May  4 23:57:56 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* prof_tree.c (profile_free_node): Copy child->next to a scratch
+		pointer before freeing the node; otherwise we have to
+		dereference a freed object.
+
+Fri Apr 28 15:54:40 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* prof_parse.c (strip_line): Don't try to strip an empty line.
+		This causes memory reference error.
+
+Thu Apr 27 20:26:48 1995    <tytso@rsx-11.mit.edu>
+
+	* Makefile.in (clean-unix): Remove profile.h and test_profile
+
+Thu Apr 27 15:36:27 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* test_parse.c (main): can't make function declarations local to
+	functions under SunOS cc. (dump_profile) Also needs to be protected.
+
+Thu Apr 27 10:43:24 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC.
+	* profile.hin, prof_int.h: use _MSDOS instead of _WINDOWS 
+	   so we can compile DOS test programs.
+	* *.c: Don't need to include file unistd.h.
+	* test_*.c: Made to work under DOS--used stubs for the com_err stuff.
+	* prof_parse.c: Turned a 2k automatic array into a malloc'ed block
+	   because windows dll's shouldn't use up a lot of stack space.
+
+Wed Apr 26 09:54:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* profile.hin: Only define PROTOTYPE if it is undefined.
+
+Tue Apr 25 17:28:48 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* configure.in: Add AC_CONST for platforms that do not support const.
+
+Mon Apr 24 17:05:27 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (all): Use ARADD to facilitate incremental
+	rebuilding of library.
+
+	* configure.in: Add AC_PROG_ARCHIVE_ADD
+
+	* prof_init.c (profile_get_values): If profile is null return
+	NULL.
+
+Sat Apr 22 01:25:58 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: Rename profile.h.in to profile.hin to, make things
+		easier for systems with an 8.3 filesystem.
+

@@ -1,0 +1,418 @@
+#! /bin/sh
+### Sanitize -- remove the unclean bits from a distribution or a file
+###		(perhaps this should be called an Exorcist?)
+###
+### See the file Sanitize.texi for whatever sort of documentation this
+### program has.
+###
+### Usage: Sanitize [keep-cvs] [keep-sanitize] [test] [recover] [verbose] [-n] ...
+###        Note that the highest level Sanitize command-line may have arbitrary
+###        other options, which have meaning only within some `Do-first' or
+###        `Do-last' script fragment.
+###
+### The -n option, like make's -n option, simply shows you what the
+### script *would have* done, given the other parameters you've passed
+### to it.  No actions are taken except traversal of the directory tree.
+###
+### written by K. Richard Pixley, hacked by david d `zoo' zuhn
+### -n option, lots of comments added by Bill Cox
+###
+
+SHELL=/bin/sh ; export SHELL
+
+## We have three cases:
+## 	The path given was absolute
+##      action: just keep it
+##      The name had a relative path
+##      action: make it absolute.
+##      The name had no directory components and was path searched
+##      action: just keep it, since the path search will *still* work
+
+case $0 in
+/*) sanprog=$0 ;;
+*/*)
+	sanprog=$0
+	sandir=`dirname $sanprog`
+	sandir=`(cd $sandir; pwd)`
+	sanprog=$sandir/`basename $sanprog`
+	;;
+*) sanprog=$0 ;;
+esac
+
+### "debugger"
+#set -x
+
+### Some variables and temp files; remove on any exit.
+
+workdir=/tmp
+cleaned=${workdir}/$$San.clean
+keepers=${workdir}/$$San.keep
+losers=${workdir}/$$San.lose
+sandd=${workdir}/$$San.temp
+
+sanStatus=1
+trap 'rm -f ${cleaned} ${keepers} ${sandd} ${losers} ; exit $sanStatus' 0
+
+### Make sure there is a .Sanitize
+
+if [ ! -f .Sanitize ] ; then
+    echo '***' No .Sanitize file in `pwd`! 1>&2
+    exit 1
+else
+    true
+fi
+
+### check for optional things-to-lose section first
+if ( egrep '^Things-to-lose:$' < .Sanitize > /dev/null ) ; then
+    losingthings=true
+else
+    losingthings=
+fi
+
+### Check that all trigger lines exist and are in order.
+if [ -n "${losingthings}" ] ; then
+    egrep '^Do-first:$|^Things-to-keep:$|^Things-to-lose:|^Do-last:$' < .Sanitize > ${sandd}
+
+    diff ${sandd} - <<EOF
+Do-first:
+Things-to-keep:
+Things-to-lose:
+Do-last:
+EOF
+
+else
+    egrep '^Do-first:$|^Things-to-keep:$|^Do-last:$' < .Sanitize > ${sandd}
+
+    diff ${sandd} - <<EOF
+Do-first:
+Things-to-keep:
+Do-last:
+EOF
+
+fi
+
+if [ "$?" != "0" ] ; then
+    echo '***' ${sanprog}: Some required trigger lines are missing 1>&2
+    echo '***' or out-of-order in `pwd`/.Sanitize 1>&2
+    exit 1
+else
+    true
+fi
+
+### die on errors
+set -e
+
+### set verbose
+if ( echo $* | egrep verbose > /dev/null ) ; then
+    verbose=true
+else
+    verbose=
+fi
+
+### set no_action flag if '-n' set
+### The echo ... egrep sequence didn't work
+### with the leading hyphen.
+no_action=
+for opt in $*
+do
+    case $opt in
+    -n)
+        no_action=true
+        ;;
+     *)
+        ;;
+    esac
+done
+
+### cache current directory name.
+THISDIR=`pwd`
+
+### Remove comments & blank lines.
+egrep -v "^#" < .Sanitize | sed -e '/^$/d' > ${cleaned}
+
+### Do-first stuff.
+### Note that the parameters to Sanitize are also passed 
+### to the fragment.  The fragment may optionally set the 
+### variables `keep_these_too' and `lose_these_too'.
+
+sed -e '/^Things\-to\-keep:$/,$d' -e '1d' ${cleaned} > ${sandd}
+
+if [ -s ${sandd} ] ; then
+    if [ -n "${no_action}" ] ; then
+        echo ". ${sandd} $*"
+    else
+        . ${sandd} $*
+    fi
+else
+    if [ -n "${verbose}" ] ; then
+        echo "No \`Do-first' fragment to execute."
+    else
+        true
+    fi
+fi
+
+### Things-to-keep:
+### Just build the list of keepers for now.
+sed -e '1,/^Things\-to\-keep:$/d' ${cleaned} > ${sandd}
+
+if [ -n "${losingthings}" ] ; then
+    sed -e '/^Things\-to\-lose:$/,$d' ${sandd} > ${keepers}
+else
+    sed -e '/^Do-last:$/,$d' ${sandd} > ${keepers}
+fi
+
+if [ -n "${keep_these_too}" ] ; then
+    for i in ${keep_these_too} ; do
+    	if [ -n "${verbose}" ] ; then
+            echo Keeping $i 
+        else
+            true
+        fi
+        echo $i >> ${keepers}
+    done
+else
+    true
+fi
+
+### Things-to-lose:
+### Just build the list of losers for now.
+if [ -n "${losingthings}" ] ; then
+    sed -e '1,/^Things\-to\-lose:$/d' \
+        -e '/^Do\-last:$/,$d' ${cleaned} \
+        > ${losers}
+else
+    cat /dev/null > ${losers}
+fi
+
+if [ -n "${lose_these_too}" ] ; then
+    for i in ${lose_these_too} ; do
+        if [ -n "${verbose}" ] ; then
+            echo Losing $i
+        else
+            true
+        fi
+        echo $i >> ${losers}
+    done
+else
+    true
+fi
+
+### catch and handle "recover"
+if ( echo $* | egrep recover > /dev/null ) ; then
+    if [ -d .Recover ] ; then
+        cd .Recover
+        replace=`ls -a | egrep -v '^\.$|^\.\.$'`
+        if [ -n "${no_action}" ] ; then
+            echo "cd .Recover"
+            echo "mv ${replace} .."
+            echo "cd .."
+            cd ..             # Must also do this for real..
+            echo "rmdir .Recover"
+        else
+            if [ -n "${verbose}" ] ; then
+                echo Replacing ${replace}
+            fi
+            mv ${replace} ..
+            cd ..
+            rmdir .Recover
+        fi
+    else
+        true
+    fi
+
+    for i in `egrep -v CVS ${keepers} | egrep -v \\.Recover` ; do
+        if [ -d "$i" ] ; then
+            if [ -n "${no_action}" ] ; then
+                echo "cd $i"
+            else
+                if [ -n "${verbose}" ] ; then
+                    echo Running ${sanprog} on ${THISDIR}/$i
+                else
+                    true
+                fi
+            fi
+            (cd $i ; ${sanprog} $*) | sed 's/^/    /'
+        else
+            true
+        fi    
+    done
+
+    sanStatus=0
+    exit 0
+else
+### catch and handle "test"
+    if ( echo $* | egrep test > /dev/null ) ; then
+        echo CVS >> ${keepers}
+        echo .Sanitize >> ${keepers}
+        echo .Recover >> ${keepers}
+#       echo .cvsignore >> ${keepers}
+        if [ -n "${no_action}" ] ; then
+            echo "mkdir .Recover"
+        else
+            if [ -n "${verbose}" ] ; then
+                echo Keeping CVS, .Sanitize, .cvsignore, and .Recover
+                echo Creating ${THISDIR}/.Recover to hold unclean files...
+            else
+                true
+            fi
+            mkdir .Recover
+        fi
+        safe=safe
+    else
+### if not testing, then lose .Sanitize.
+        if [ -n "${verbose}" ] ; then
+            echo Losing .Sanitize
+        else
+            true
+        fi
+        echo .Sanitize >> ${losers}
+
+### catch and handle "keep-cvs"
+        if ( echo $* | egrep keep-cvs > /dev/null ) ; then
+            if [ -n "${verbose}" ] ; then
+                echo Keeping CVS #, .cvsignore
+            else
+                true
+            fi
+            echo CVS >> ${keepers}
+#           echo .cvsignore >> ${keepers}
+        else
+            if [ -n "${verbose}" ] ; then
+                echo Losing CVS #, .cvsignore
+            else
+                true
+            fi
+            echo CVS >> ${losers}
+#           echo .cvsignore >> ${losers}
+        fi
+    fi
+fi
+
+### otherwise move files away
+
+### Issue errors for explicit losers which don't exist.
+tolose=`sed -e 's/[ ]*$//' ${losers}`
+if [ -n "${tolose}" ] ; then
+    for i in ${tolose} ; do
+        if [ -f $i -o -d $i ]; then
+            if [ -n "${safe}" ] ; then
+                if [ -n "${no_action}" ] ; then
+                    echo "mv $i .Recover"
+                else
+                    if [ -n "${verbose}" ] ; then
+                        echo Caching $i in .Recover...
+                    else
+                        true
+                    fi
+                    mv $i .Recover
+                fi
+            else
+                if [ -n "${no_action}" ] ; then
+                    echo "rm -rf $i"
+                else
+                    if [ -n "${verbose}" ] ; then
+                        echo Removing ${THISDIR}/$i
+                    else
+                        true
+                    fi
+                    rm -rf $i
+                fi
+            fi
+        else
+            echo '***' "Can't" remove expected file/directory ${THISDIR}/$i - not found. 1>&2
+        fi
+    done
+else
+    true
+fi
+
+### lose everything else in the directory, 
+### except the explicit keepers.
+
+tolose=`(ls -a | egrep -v '^\.$|^\.\.$' ; \
+         sed -e 's/[ ]*$//' ${keepers}) | sort | uniq -u`
+# $tolose is a list of files from ${keepers} or in directory but not both
+if [ -n "${tolose}" ] ; then
+    for i in ${tolose} ; do
+        if [ -f $i -o -d $i ]; then
+            # is in directory and not in ${keepers}
+            if [ -n "${safe}" ] ; then
+                if [ -n "${no_action}" ] ; then
+                    echo "mv $i .Recover"
+		else
+                    echo '***' Caching unexpected file ${THISDIR}/$i in .Recover... 1>&2
+                    mv $i .Recover
+                fi
+            else
+                if [ -n "${no_action}" ] ; then
+                    echo "rm -rf $i"
+                else
+                    echo '***' Removing unexpected file ${THISDIR}/$i 1>&2
+                    rm -rf $i
+                fi
+            fi
+        else
+            # is in ${keepers} but not in directory
+            echo '***' "Can't" keep expected file ${THISDIR}/$i - not found. 1>&2
+        fi
+    done
+else
+    true
+fi
+
+### Recurse into any subdirectories flagged as keepers.
+### Do the same good deeds down there.
+for i in `egrep -v CVS ${keepers} | egrep -v \\.Recover` ; do
+    if [ -d $i ] ; then
+        if [ -n "${no_action}" ] ; then
+            echo "cd $i"
+        else
+            if [ -n "${verbose}" ] ; then
+                echo Running ${sanprog} on ${THISDIR}/$i
+            else
+                true
+            fi
+        fi
+        (cd $i ; ${sanprog} $*) | sed 's/^/    /'
+    else
+        true
+    fi
+done
+
+### Do-last:
+
+sed -e '1,/^Do\-last:$/d' ${cleaned} > ${sandd}
+if [ -s ${sandd} ] ; then 
+    if [ -n "${no_action}" ] ; then
+        echo ". ${sandd} $*"
+    else
+        . ${sandd} $*
+    fi
+else
+    if [ -n "${verbose}" ] ; then
+        echo "No \`Do-last' fragment to execute."
+    else
+        true
+    fi
+fi
+
+### cleanup
+
+if ( echo $* | egrep test > /dev/null ) ; then
+    if [ -n "${safe}" -a "`cd .Recover ; (echo empty ; ls -a) | \
+            egrep -v '^\.$|^\.\.$'`" = "empty" ] ; then
+        if [ -n "${no_action}" ] ; then
+            echo "rmdir .Recover"
+        else
+            if [ -n "${verbose}" ] ; then
+                echo Removing .Recover.  It was not needed.
+            else
+                true
+            fi
+            rmdir .Recover
+        fi
+    fi
+fi
+
+sanStatus=0
+### eof.

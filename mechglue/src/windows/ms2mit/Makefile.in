@@ -1,0 +1,25 @@
+# Makefile for the Microsoft to MIT cache converter.
+# Works for k5 release only.
+#
+
+thisconfigdir=./..
+myfulldir=windows/ms2mit
+mydir=.
+BUILDTOP=$(REL)..$(S)..
+DEFINES = 
+PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
+
+all-windows:: $(OUTPRE)ms2mit.exe $(OUTPRE)mit2ms.exe
+
+$(OUTPRE)ms2mit.exe: $(OUTPRE)ms2mit.obj
+    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)ms2mit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj user32.lib advapi32.lib $(KLIB) $(CLIB)
+
+$(OUTPRE)mit2ms.exe: $(OUTPRE)mit2ms.obj
+    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)mit2ms.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj user32.lib advapi32.lib $(KLIB) $(CLIB)
+
+install::
+	copy $(OUTPRE)ms2mit.exe $(DESTDIR)
+	copy $(OUTPRE)mit2ms.exe $(DESTDIR)
+
+clean:: 
+	$(RM) $(OUTPRE)*.exe

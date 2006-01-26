@@ -1,0 +1,31 @@
+thisconfigdir=./..
+myfulldir=tests/verify
+mydir=verify
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+KDB5_DEP_LIB=$(THREAD_LINKOPTS) $(DL_LIB)
+
+SRCS=$(srcdir)/kdb5_verify.c
+
+all:: kdb5_verify
+
+kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KDB5_DEP_LIB) $(KRB5_BASE_LIBS)
+
+install::
+
+clean::
+	$(RM) kdb5_verify.o kdb5_verify
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)kdb5_verify.$(OBJEXT): kdb5_verify.c $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SS_DEPS)

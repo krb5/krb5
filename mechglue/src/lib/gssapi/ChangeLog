@@ -1,0 +1,416 @@
+2005-08-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Use K5_AC_INIT instead of AC_INIT.
+
+2005-04-07  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Use awk to work around Makefile quoting problems.
+
+2005-02-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBINITFUNC, LIBFINIFUNC): Define.
+
+	* gss_libinit.c (gssint_lib_init, gssint_lib_fini)
+	[SHOW_INITFINI_FUNCS]: Print tracing messages.
+
+2005-02-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for xom.h.  Set include_xom to a C include
+	directive or comment, and substitute it in the Makefiles.
+
+2005-01-17  Jeffrey Altman <jaltman@mit.edu>
+
+        * gss_libinit.c: implement cleanup of mutexes, static vars, etc for Windows
+
+2004-07-29  Sam Hartman  <hartmans@mit.edu>
+
+	* libgssapi_krb5.exports: Add lucid context routines and gss_krb5_set_allowable_enctypes
+
+2004-07-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): Use _DEPLIB variables.
+	(SHLIB_EXPLIBS): Add $(SUPPORT_LIB).
+
+	* gss_libinit.c (gssint_lib_init): Initialize new keytab-name
+	mutex, and register two new key values.
+
+2004-06-18  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (OBJFILELIST, OBJFILEDEP) [DOS]: Depend on locally
+	built objects too.
+	(OBJFILE, LIBOBJS) [DOS]: Define.
+	($(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h
+	krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h
+	krb5/gssapi_krb5.h) [DOS]: Disable dependencies on Windows.
+
+2004-06-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Don't set.
+
+2004-06-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS): Add $(LIBS).
+
+2004-06-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5/gssapi_krb5.h): Depend on recursion rule.
+
+2004-06-08  Sam Hartman  <hartmans@mit.edu>
+
+	* configure.in: If stdint.h exists, include in gssapi_krb5.h
+
+2004-06-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LIBBASE): Renamed from LIB.
+
+2004-06-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss_libinit.c (gssint_lib_init): Initialize error tables here.
+	(gssint_initialize_library): Don't do it directly here.  Make sure
+	gssint_lib_init has been called, and return the status.
+	(gssint_lib_fini): Remove error tables here.
+	(gssint_cleanup_library): Function deleted.
+	(initialized): Variable deleted.
+
+2004-05-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* libgssapi_krb5.exports: Remove et_*, generic_*, gssint_*,
+	initialize_*, kg_* symbols.
+
+2004-04-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss_libinit.c: Include k5-platform.h.
+	(gssint_lib_init, gssint_lib_fini): New init/fini functions.
+	Create and clean up the mutex in kg_vdb.
+	(gssint_initialize_library): Verify the library initializer has
+	run successfully.
+
+2004-04-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* libgssapi_krb5.exports: New file.
+
+2003-07-17  Tom Yu  <tlyu@mit.edu>
+
+	* gss_libinit.c (gssint_initialize_library): Don't call
+	kg_release_defcred(); it doesn't exist any more.
+
+2003-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,
+	generic/gssapi.h, generic/gssapi_err_generic.h,
+	krb5/gssapi_err_krb5.h): Comment out old rules and dependencies;
+	depend on all-recurse and supply a no-op rule.
+
+2003-03-07  Alexandra Ellwood  <lxs@mit.edu>
+
+    * gss_libinit.c: Changed USE_HARDCODED_FALLBACK_ERROR_TABLES macro 
+    to !USE_BUNDLE_ERROR_STRINGS so Darwin based builds get com_err
+    style error tables.
+
+2003-03-06  Alexandra Ellwood  <lxs@mit.edu>
+
+    * gss_libinit.c: Removed Mac header goober.
+    Fixed USE_HARDCODED_FALLBACK_ERROR_TABLES macro used by KfM.
+
+    * gss_libinit.h: do not use the same multiple include
+    protection macro as krb5_libinit.h.  Changed to GSSAPI_LIBINIT_H.
+
+2003-02-11  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h): Add
+	dependencies and cause to invoke a differently-named target in
+	subdirectory.
+	(generic/gssapi.h): Make separate rule.
+	(generic/gssapi_err_generic.h, krb5/gssapi_err_krb5.h): New rules
+	to generate these files in subdirectories as needed.
+
+2003-02-10  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h): 
+	Don't depend on all-recurse, as it causes spurious rebuilds of
+	these header files.
+
+2003-01-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't explicitly invoke AC_PROG_ARCHIVE,
+	AC_PROG_ARCHIVE_ADD, AC_PROG_INSTALL, AC_PROG_RANLIB.
+
+	* configure.in: Use V5_AC_OUTPUT_MAKEFILE instead of
+	K5_GEN_MAKEFILE and K5_AC_OUTPUT.
+
+	* Makefile.in: Add AC_SUBST_FILE marker for lib_frag and libobj_frag.
+
+2003-01-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.original: Deleted.
+
+2002-09-24  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(BUILDTOP)/include/gssapi/gssapi.h,
+	generic/gssapi.h): Depend on all-recurse.
+
+2002-08-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+
+2002-08-23  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+
+2002-08-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SUBDIROBJLISTS): New variable.
+
+2002-07-15  Ezra Peisach  <epeisach@bu.edu>
+
+	* gss_libinit.c (gssint_cleanup_library): Remove variable set but
+	not used.
+
+2002-07-14  Alexandra Ellwood <lxs@mit.edu>
+
+	* gss_libinit.c: Conditionalized error table loading for Mac OS X.
+	Error tables should always be loaded on other platforms.
+
+	* gss_libinit.c: updated for Mac OS X header paths and added
+	include of gssapiP_krb5.h to get function prototypes.
+
+	[pullups from 1-2-2-branch]
+
+2001-09-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SRCS): Use $(srcdir) not $(subdir).
+
+2001-06-04  Ezra Peisach  <epeisach@mit.edu>
+
+	* gss_libinit.c: Include gssapiP_krb5.h for kg_release_defcred()
+ 	prototype.
+
+2000-11-01  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Use AC_TYPE_SIZE_T instead of AC_SIZE_T.
+
+2000-06-03  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in(LIBMINOR): Bump library version.
+
+2000-05-31  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* configure.in: Check for existance of <memory.h>.
+	[from Nathan Neulinger <nneul@umr.edu>]
+
+Tue Feb 22 10:23:19 2000  Ezra Peisach  <epeisach@mit.edu>
+
+	* Makefile.in (clean-unix): Add clean-libobjs.
+
+2000-01-24  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (STLIBOBJS): Properly add gss_libinit.o to permit
+	compiling.
+
+	* configure.in: Add libobj to Makefile frags.
+
+	* gss_libinit.c: Add terminating newline.  Use 0 and 1 instead of
+	false and true.
+
+Fri Jan 21 22:47:00 2000  Miro Jurisic  <meeroh@mit.edu>
+
+	* Makefile.in: added gss_libinit.[co]
+	* gss_libinit.[ch]: new files, contain library initialization
+		and cleanup code
+
+Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Remove - from recursive Win32 make invocation.
+
+Mon May 10 15:21:50 1999  Danilo Almeida  <dalmeida@mit.edu>
+
+	* Makefile.in: Do win32 build in subdir.
+
+1999-02-19  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in (DLL_FILE_DEF): Tell the Makefile template that we
+		are building object files for the GSSAPI DLL.
+
+1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+
+	* configure.in: Use K5_AC_OUTPUT instead of K5_OUTPUT_FILES.
+
+Wed Apr 15 18:04:18 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): 
+	(SHLIB_EXPLIBS): Rename libcrypto -> libk5crypto.
+
+Wed Feb 18 16:10:38 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
+Thu Feb 12 16:17:28 1998  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add commented out AC_OUTPUT to force autoreconf to
+	rebuild the configure script.
+
+Mon Feb  2 16:47:05 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* configure.in: Create the makefiles for all of the subdirectories
+		and move all of the configure.in tests from the
+		subdirectories into this configure.in.
+	
+Wed Jan 21 19:12:42 1998  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (LIBMINOR): Bump minor version due to internal
+	structure change.
+
+Sat Feb 22 01:21:06 1997  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS): s/so/$(SHLIBEXT)
+
+Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
+
+        * Makefile.in: win32 build
+
+Tue Jan 14 20:07:50 1997  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in:
+	* configure.in: Update to new library build procedure.
+
+Mon Nov 18 20:39:41 1996  Ezra Peisach  <epeisach@mit.edu>
+
+	* configure.in: Set shared library version to 1.0. [krb5-libs/201]
+
+Tue Jul 23 22:50:22 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (MAC_SUBDIRS): Remove mechglue from the list of
+		Macintosh subdirectories.
+
+Thu Jun  6 00:04:38 1996  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* Makefile.in (all-windows): Don't pass $(LIBCMD) on the command
+		line.  It's set in the windows.in prologue for all Makefiles anyway.
+
+Mon May 20 11:00:45 1996  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
+
+	* Makefile.in (libgssapi.$(STEXT)): deal with new improved
+		libupdate
+
+Mon May  6 21:33:25 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (clean-unix): Remove libgssapi_krb5.stamp.
+
+Wed Apr 17 21:48:15 1996  Marc Horowitz  <marc@mit.edu>
+
+	* Makefile.in, configure.in: Nothing in mechglue is used anymore,
+ 	for now.
+
+Tue Feb 27 22:10:48 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in (all-windows, clean-windows): Add mechglue to the
+		list of directories which are recursively handled for
+		Windows.
+
+Wed Feb  7 00:23:18 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Folded in danw's changes to allow
+		building Makefiles for the Macintosh.  We now can build
+		MPW makefiles which are interpreted by CodeWarrior.
+
+Fri Jan 26 01:55:14 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Fix path to library from lib
+
+Wed Jan 24 21:28:04 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* configure.in: Remove LinkFileDir line for libgssapi as the
+        shared lib stuff does that.
+
+Tue Jan 23 12:12:49 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* Makefile.in (SHLIB_LIBS): Add lines for shared library building
+		depending on libkrb5, crypto, and com_err.
+
+Tue Jan 23 04:06:36 1996    <tytso@rsts-11.mit.edu>
+
+	* Makefile.in: Add support for building the gssapi library as a
+		shared library.
+
+Tue Jan 23 03:32:25 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* configure.in: Add the mechglue directory as a subdir
+
+	* Makefile.in (libgssapi_krb5.a): Include the object files in the
+		mechglue directory as well.
+
+Fri Oct  6 22:02:48 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
+Mon Sep 25 16:52:41 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+
+Wed Sep 13 11:11:38 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: Put back in all:: all-$(WHAT) rule--PC needs it.
+
+Thu Jun 15 18:02:16 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* Makefile.in - Remove explicit "all" rule at head of file, it causes
+		platform specific target to get done first.
+	* configure.in - Create symlinks for archive and shared library when
+		we build them.  Also, put explicit "all" rule at end of file
+		so that we do the subdirectory rules first.
+
+Fri Jun  9 18:55:01 1995    <tytso@rsx-11.mit.edu>
+
+	* configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
+		recurse down subdirectories.
+
+Mon May 22 10:04:26 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* configure.in	- Add SUBDIRS for install target.
+
+Tue May  2 21:42:32 1995  Tom Yu  (tlyu@dragons-lair)
+
+	* Makefile.in: nuke spurious whitespace in blank line
+
+Wed Apr 26 14:39:18 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: passed wrong macro on the recursive makes.
+
+Tue Mar 21 19:08:51 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: changed the name of the library the PC
+           builds, and added xxx-mac targets to mimic xxx-unix.
+
+Wed Mar 15 20:23:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: cleaned up for the PC
+
+Mon Feb 20 21:38:20 1995 Keith Vetter (keithv@fusion.com)
+
+	* Makefile.in: made to work on the PC
+
+Fri Nov 18 00:17:29 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* configure.in: move WITH_CCOPTS.
+
+Wed Oct 19 12:16:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: make install obey $(DESTDIR) completely
+
+Mon Oct  3 22:48:54 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* Makefile.in: make install obey $(DESTDIR)
+
+Thu Aug  4 03:41:21 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* configure.in: look for install program
+
+	* Makefile.in: make install fixes
+
