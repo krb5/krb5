@@ -2,6 +2,8 @@
 
 	* export-check.pl: New file.
 
+	* export-check.pl: Accept 'G' in nm output.
+
 2005-12-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* depfix.pl (uniquify): New subroutine.

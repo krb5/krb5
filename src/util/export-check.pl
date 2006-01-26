@@ -26,11 +26,11 @@ while (<NM>) {
     chop;
     s/^[0-9a-fA-F]+ +//;
     next if /^A /;
-    if (!/^[TDRB] /) {
+    if (!/^[TDRBG] /) {
 	unlink $libfile;
 	die "not sure what to do with '$_'";
     }
-    s/^[TDRB] +//;
+    s/^[TDRBG] +//;
     push @found, $_;
 }
 @found = sort @found;
