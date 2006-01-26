@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/locate_kdc.c
  *
- * Copyright 1990,2000,2001,2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2001,2002,2003,2004 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
