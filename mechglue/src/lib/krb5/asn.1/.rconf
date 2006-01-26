@@ -1,8 +1,0 @@
-ignore KRB5-types.c
-ignore KRB5-types.h
-ignore KRB5-types.py
-ignore TAGS
-ignore KRB5.ph
-ignore Makefile.jtk
-ignore glue2.c
-ignore process.perl
