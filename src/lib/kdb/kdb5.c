@@ -293,7 +293,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     return status;
 }
 
-#else
+#else /* KDB5_STATIC_LINK*/
 
 static char *db_dl_location[] = DEFAULT_KDB_LIB_PATH;
 #define db_dl_n_locations (sizeof(db_dl_location) / sizeof(db_dl_location[0]))
