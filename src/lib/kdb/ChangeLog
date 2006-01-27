@@ -1,6 +1,7 @@
 2006-01-27  Sam Hartman  <hartmans@mit.edu>
 
 	* kdb5.c (kdb_load_library): New error codes for library load errors
+	(kdb_get_conf_section): Note that caller must free result
 
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 

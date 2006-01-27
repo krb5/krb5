@@ -106,6 +106,7 @@ kdb_unlock_list()
 #define kdb_lock_lib_lock(a, b) 0
 #define kdb_unlock_lib_lock(a, b) 0
 
+/* Caller must free result*/
 
 static char *
 kdb_get_conf_section(krb5_context kcontext)
