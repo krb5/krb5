@@ -22,6 +22,8 @@
  * or implied warranty.
  */
 
+/*This code was based on code donated to MIT by Novell for distribution under the MIT license.*/
+
 /* 
  * Include files
  */
@@ -265,7 +267,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     {
 	sprintf(buf, "Program not built to support %s database type\n",
 		lib_name);
-	status = -1;
+	status = KRB5_KDB_DBTYPE_NOSUP;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
@@ -278,7 +280,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	/* ERROR. library not initialized cleanly */
 	sprintf(buf, "%s library initialization failed, error code %ld\n",
 		lib_name, status);
-	status = -1;
+	status = KRB5_KDB_DBTYPE_INIT;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
@@ -372,7 +374,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
 		}
 	    } else {
-		status = -1;
+		status = KRB5_KDB_DBTYPE_INIT;
 		krb5_set_err(kcontext, krb5_err_have_str, status, dlerror());
 		goto clean_n_exit;
 	    }
@@ -386,7 +388,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     if (!(*lib)->dl_handle) {
 	/* library not found in the given list. Error str is already set */
-	status = -1;
+      status = KRB5_KDB_DBTYPE_NOTFOUND;
 	krb5_set_err(kcontext, krb5_err_have_str, status, err_str);
 	goto clean_n_exit;
     }
@@ -522,7 +524,7 @@ kdb_setup_lib_handle(krb5_context kcontext)
 
     library = kdb_get_library_name(kcontext);
     if (library == NULL) {
-	status = -1;
+	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	goto clean_n_exit;
     }
 

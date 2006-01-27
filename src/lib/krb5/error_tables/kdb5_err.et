@@ -68,4 +68,8 @@ ec KRB5_KDB_BAD_ENCTYPE,	"Unsupported encryption type"
 ec KRB5_KDB_BAD_CREATEFLAGS,	"Bad database creation flags"
 ec KRB5_KDB_NO_PERMITTED_KEY,	"No matching key in entry having a permitted enctype"
 ec KRB5_KDB_NO_MATCHING_KEY,	"No matching key in entry"
+ec KRB5_KDB_DBTYPE_NOTFOUND,	"Unable to find requested database type"
+ec KRB5_KDB_DBTYPE_NOSUP,	"Database type not supported"
+ec KRB5_KDB_DBTYPE_INIT,	"Database library failed to initialize"
+
 end
