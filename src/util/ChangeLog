@@ -1,6 +1,12 @@
+2006-01-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* export-check.pl: Accept 'S' in nm output.
+
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* export-check.pl: New file.
+
+	* export-check.pl: Accept 'G' in nm output.
 
 2005-12-22  Ken Raeburn  <raeburn@mit.edu>
 

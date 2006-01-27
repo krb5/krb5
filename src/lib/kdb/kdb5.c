@@ -1,3 +1,29 @@
+/*
+ * Copyright 2006 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
+/*This code was based on code donated to MIT by Novell for distribution under the MIT license.*/
+
 /* 
  * Include files
  */
@@ -81,6 +107,7 @@ kdb_unlock_list()
 #define kdb_lock_lib_lock(a, b) 0
 #define kdb_unlock_lib_lock(a, b) 0
 
+/* Caller must free result*/
 
 static char *
 kdb_get_conf_section(krb5_context kcontext)
@@ -242,7 +269,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     {
 	sprintf(buf, "Program not built to support %s database type\n",
 		lib_name);
-	status = -1;
+	status = KRB5_KDB_DBTYPE_NOSUP;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
@@ -255,7 +282,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	/* ERROR. library not initialized cleanly */
 	sprintf(buf, "%s library initialization failed, error code %ld\n",
 		lib_name, status);
-	status = -1;
+	status = KRB5_KDB_DBTYPE_INIT;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
@@ -267,7 +294,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     return status;
 }
 
-#else
+#else /* KDB5_STATIC_LINK*/
 
 static char *db_dl_location[] = DEFAULT_KDB_LIB_PATH;
 #define db_dl_n_locations (sizeof(db_dl_location) / sizeof(db_dl_location[0]))
@@ -352,7 +379,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 		err_str = dlerror();
 		if(err_str == NULL)
 		    err_str = "";
-		status = KRB5_KDB_SERVER_INTERNAL_ERR;
+		status = KRB5_KDB_DBTYPE_INIT;
 		krb5_kdb_set_err_str (err_str);
 		goto clean_n_exit;
 	    }
@@ -366,7 +393,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     if (!(*lib)->dl_handle) {
 	/* library not found in the given list. Error str is already set */
-	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	krb5_kdb_set_err_str (err_str);
 	goto clean_n_exit;
     }
@@ -502,7 +529,7 @@ kdb_setup_lib_handle(krb5_context kcontext)
 
     library = kdb_get_library_name(kcontext);
     if (library == NULL) {
-	status = -1;
+	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	goto clean_n_exit;
     }
 
