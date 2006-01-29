@@ -1,0 +1,8 @@
+2006-01-29  Sam Hartman  <hartmans@mit.edu>
+
+	* ldap_exp.c (krb5_db_vftabl_kldap): Remove thread safe flag
+
+	* ldap_err.c: Ignore LDAP_X_ERROR if not supported by version of OpenLDAP in use
+
+	* ldap_principal2.c: Accept LDAP_OPT_ERROR_NUMBER as a less-preferred synonym for LDAP_OPT_RESULT_CODE
+

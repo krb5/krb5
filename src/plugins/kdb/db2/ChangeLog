@@ -1,3 +1,7 @@
+2006-01-29  Sam Hartman  <hartmans@mit.edu>
+
+	* db2_exp.c (hack_init): Update prototype to match krb5_db2_lib_init
+
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFINES): New variable; define macro PLUGIN.

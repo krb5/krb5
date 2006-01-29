@@ -13,7 +13,7 @@ specific data is OK.
 * --with-ldap needs to be carefully considered; is OPENLDAP upper case really correct? Consider GCS and other  options we already use.
 
 
-* kdc, kadmin/ldap_util, lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
+* kdc, kadmin/server kadmin/ldap_util, lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
 wrong and should probably be fixed either by installing that header in
 buildtop/include or something.
 
@@ -26,3 +26,7 @@ doesn't mess things up too much.
 
 * I've told the kadmin client to link against -lkdb5 as a hack.
 That's clearly wrong but is because of brokenness in kadm5/clnt.
+
+* The ldap plugin also serves as a library for its administrative
+interface.  Determine if this is OK; I expect it to create load
+problems as the plugin directory should not be on the search path.

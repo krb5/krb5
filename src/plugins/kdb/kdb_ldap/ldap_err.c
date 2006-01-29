@@ -2,6 +2,10 @@
 #include <errno.h>
 #include <kdb5_err.h>
 #include "ldap_err.h"
+#ifndef LDAP_X_ERROR
+#define LDAP_X_ERROR(x) (0)
+#endif
+
 
 /*
  * The possible KDB errors are

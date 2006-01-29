@@ -6,7 +6,7 @@ KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 
 LOCALINCLUDES = -I$(SRCTOP)/lib/gssapi/generic -I$(SRCTOP)/lib/gssapi/krb5 \
 	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5 \
-	-I$(BUILDTOP)/lib/kdb
+	-I$(SRCTOP)/lib/kdb
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

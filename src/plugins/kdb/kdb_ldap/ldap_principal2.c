@@ -40,6 +40,9 @@
 
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];
+#if !defined( LDAP_OPT_RESULT_CODE) && defined(LDAP_OPT_ERROR_NUMBER)
+#define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
+#endif
 
 static krb5_error_code
 krb5_decode_krbsecretkey(krb5_context, krb5_db_entry *, struct berval **, krb5_tl_data *);

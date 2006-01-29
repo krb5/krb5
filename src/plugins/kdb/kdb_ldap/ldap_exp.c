@@ -48,7 +48,6 @@
 kdb_vftabl krb5_db_vftabl_kldap = {
   1,                                      /* major version number 1 */
   0,                                      /* minor version number 0 */
-  0,                                      /* TBD. Not sure whether thread safe. For now, its not */
   /* init_library */			       krb5_ldap_lib_init,
   /* fini_library */			       krb5_ldap_lib_cleanup,
   /* init_module */			       krb5_ldap_open,
