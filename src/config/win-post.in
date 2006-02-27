@@ -34,6 +34,14 @@ Makefile: Makefile.in $(BUILDTOP)\config\win-pre.in $(BUILDTOP)\config\win-post.
 	$(WCONFIG) $(BUILDTOP)\config < Makefile.in > Makefile
 !endif
 
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+!if defined(WIN64LIBNAME)
+LIBNAME=$(WIN64LIBNAME)
+!endif
+!if defined(WIN64OBJFILE)
+OBJFILE=$(WIN64OBJFILE)
+!endif
+!endif
 
 !if defined(LIBNAME)
 

@@ -277,7 +277,7 @@ password_dlg_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
   case WM_SETCURSOR:
     if (isblocking) {
       SetCursor(LoadCursor(NULL, IDC_WAIT));
-      SetWindowLong(hwnd, DWL_MSGRESULT, TRUE);
+      SetWindowLongPtr(hwnd, DWLP_MSGRESULT, TRUE);
 
       return TRUE;
     }

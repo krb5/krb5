@@ -89,7 +89,7 @@ $(K524LIB): $(OUTPRE)krb524.$(OBJEXT) $(OUTPRE)libinit.$(OBJEXT) $(KLIB) $(CLIB)
 	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
 
 $(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(CLIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
-	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS)
+	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS) $(SCLIB)
 
 install-unix::
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
