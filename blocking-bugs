@@ -1,3 +1,5 @@
+-*- text -*-
+
 This is a list of blocking bugs that must be addressed before these
 changes are committed to the trunk:
 
@@ -7,8 +9,6 @@ changes are committed to the trunk:
 I think we want to handle them in krb5_contexts.  See if the API
 supports this and either change it or explicitly decide thread
 specific data is OK.
-
-
 
 * --with-ldap needs to be carefully considered; is OPENLDAP upper case really correct? Consider GCS and other  options we already use.
 
@@ -30,3 +30,19 @@ That's clearly wrong but is because of brokenness in kadm5/clnt.
 * The ldap plugin also serves as a library for its administrative
 interface.  Determine if this is OK; I expect it to create load
 problems as the plugin directory should not be on the search path.
+
+
+* ldap_util links against the plugin as if it were a normal shared
+  library.  Because libraries are built differently from shared
+  libraries on some platforms, this is a no-no.  And now, plugins
+  aren't installed in the same directory as the libraries, and they
+  don't get the "-l" prefix.  Two easy options: open the plugin as a
+  plugin, and indirect through function pointers; or, split much of
+  the plugin into a separate shared library, which the plugin and
+  ldap_util both link against.
+
+* The export list needs to match the provided symbols.  Problem is,
+  the openldap and edirectory cases provide two different sets of
+  symbols.  For now, I've set the list to that used in the openldap
+  case.  Longer term, perhaps stubs should be provided for the extra
+  names needed in the edirectory case.
