@@ -1,7 +1,6 @@
 krb5_db_vftabl_kldap
 tohex
 krb5_ldap_close
-krb5_ldap_set_service_passwd
 krb5_ldap_db_init
 krb5_ldap_lib_init
 krb5_ldap_read_server_params
@@ -14,12 +13,6 @@ krb5_ldap_modify_realm
 krb5_ldap_create_krbcontainer
 krb5_ldap_create_realm
 krb5_ldap_delete_realm
-krb5_ldap_list_services
-krb5_ldap_free_service
-krb5_ldap_read_service
-krb5_ldap_delete_service
-krb5_ldap_modify_service
-krb5_ldap_create_service
 krb5_ldap_list_policy
 krb5_ldap_free_policy
 krb5_ldap_read_policy
@@ -29,6 +22,4 @@ krb5_ldap_create_policy
 krb5_dbe_free_contents
 krb5_ldap_free_server_params
 krb5_ldap_free_krbcontainer_params
-krb5_ldap_add_service_rights
-krb5_ldap_delete_service_rights
 disjoint_members
