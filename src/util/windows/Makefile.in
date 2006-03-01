@@ -3,7 +3,7 @@ BUILDTOP = ..\..
 all-windows:: $(OUTPRE)libecho.exe $(OUTPRE)getopt.lib
 
 $(OUTPRE)libecho.exe: $(OUTPRE)libecho.obj
-	link -out:$@ $**
+	link -out:$@ $** $(SCLIB)
 
 $(OUTPRE)getopt.lib: $(OUTPRE)getopt.obj $(OUTPRE)getopt_long.obj
 	lib -out:$@ $**

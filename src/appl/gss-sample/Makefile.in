@@ -20,10 +20,10 @@ gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 $(OUTPRE)gss-server.exe: $(OUTPRE)gss-server.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
 
 $(OUTPRE)gss-client.exe: $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
 
 clean-unix::
 	$(RM) gss-server gss-client

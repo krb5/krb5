@@ -1,3 +1,8 @@
+2006-02-24  Jeffrey Altman <jaltman@mit.edu>
+
+ 	* gmt_mktime.c, read_pwd.c: changes to support 64-bit builds
+          on Windows
+
 2005-11-14  Jeffrey Altman <jaltman@mit.edu>
 
 	* toffset.c:  (krb5_set_real_time, krb5_set_debugging_time, 

@@ -31,8 +31,8 @@ CPU=i386
 CPU=i386
 !endif # CPU == X86
 
-!if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" )
-!error Must specify CPU environment variable ( CPU=i386, CPU=ALPHA)
+!if ( "$(CPU)" != "i386" ) && ( "$(CPU)" != "ALPHA" ) && ( "$(CPU)" != "ALPHA64" ) && ( "$(CPU)" != "IA64" ) && ( "$(CPU)" != "AMD64" )
+!error Must specify CPU environment variable ( CPU=i386, CPU=ALPHA, CPU=ALPHA64,CPU=IA64, CPU=AMD64)
 !endif
 #
 # End of figuring out CPU
@@ -116,6 +116,10 @@ DNSLIBS=
 DNSFLAGS=
 !endif
 
+!if ("$(CPU)" == "i386")
+TIME_T_FLAGS=-D_USE_32BIT_TIME_T
+!endif
+
 !if defined(KRB5_KFW_COMPILE)
 KFWFLAGS=-DUSE_LEASH=1
 !endif
@@ -126,9 +130,19 @@ KFWFLAGS=-DUSE_LEASH=1
 CC=cl
 
 PDB_OPTS=-Fd$(OUTPRE)\ -FD
-CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS) -DKRB5_PRIVATE=1 -DWIN32_LEAN_AND_MEAN -DKRB5_DEPRECATED=1 $(KFWFLAGS)
+CPPFLAGS=-I$(SRCTOP)\include -I$(SRCTOP)\include\krb5 $(DNSFLAGS) -DKRB5_PRIVATE=1 -DWIN32_LEAN_AND_MEAN -DKRB5_DEPRECATED=1 -D_CRT_SECURE_NO_DEPRECATE $(KFWFLAGS) $(TIME_T_FLAGS)
 CCOPTS=-nologo /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no
+
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+CCLINKOPTION=/link bufferoverflowu.lib
+SCLIB=bufferoverflowu.lib
+DEBUGOPT=/Zi
+!else
+CCLINKOPTION=
+SCLIB=
+DEBUGOPT=/ZI
+!endif
 
 # /ZI gives better debug info in each object file (MSVC 6.0 or higher).
 # /Zi gives debug info in each object file.
@@ -143,13 +157,13 @@ LOPTS=-nologo -incremental:no
 #
 !ifdef NODEBUG
 !ifdef DEBUG_SYMBOL
-CCOPTS=/ZI $(CCOPTS)
+CCOPTS=$(DEBUGOPT) $(CCOPTS)
 LOPTS=$(LOPTS) -debug
 !endif
 CCOPTS=/Os /MD $(CCOPTS)
 LOPTS=$(LOPTS)
 !else
-CCOPTS=/Od /ZI /MDd $(CCOPTS)
+CCOPTS=/Od $(DEBUGOPT) /MDd $(CCOPTS)
 LOPTS=$(LOPTS) -debug
 !endif
 
@@ -177,6 +191,17 @@ K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
 SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
 WLIB=
+
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+CLIB=$(BUILDTOP)\lib\$(OUTPRE)comerr64.lib
+PLIB=$(BUILDTOP)\lib\$(OUTPRE)xpprof64.lib
+KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_64.lib
+K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_64.lib
+SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt64.lib
+GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi64.lib
+WLIB=
+
+!endif
 
 KRB4_INCLUDES=-I$(BUILDTOP)/include/kerberosIV
 

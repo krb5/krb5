@@ -1,3 +1,7 @@
+2006-02-24  Jeffrey Altman <jaltman@mit.edu>
+
+ 	* Makefile.in: support for 64-bit Windows builds
+
 2003-12-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* ftp.c (do_auth): Handle a return code of 335, where the

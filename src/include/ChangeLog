@@ -1,3 +1,7 @@
+2006-02-24  Jeffrey Altman <jaltman@mit.edu>
+
+ 	* win-mac.h: support for 64-bit Windows builds
+
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (krb5int_mutex_alloc, krb5int_mutex_free,

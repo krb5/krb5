@@ -6,8 +6,10 @@ RELDIR=../util/support
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
+##DOS##WIN64LIBNAME=$(OUTPRE)k5sprt64.lib
 ##DOS##XTRA=
 ##DOS##OBJFILE=$(OUTPRE)k5sprt32.lst
+##DOS##WIN64OBJFILE=$(OUTPRE)k5sprt64.lst
 
 SED = sed
 

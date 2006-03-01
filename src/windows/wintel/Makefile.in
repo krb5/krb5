@@ -34,7 +34,7 @@ all:: Makefile $(OUTPRE)telnet.exe
 
 $(OUTPRE)telnet.exe: telnet.def $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
-	  $(LIBS) $(SYSLIBS)
+	  $(LIBS) $(SYSLIBS) $(SCLIB)
 
 install::
 	copy $(OUTPRE)telnet.exe $(DESTDIR)

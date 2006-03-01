@@ -26,4 +26,4 @@ install-all install-kdc install-server install-client install-unix::
 all-windows:: $(OUTPRE)kpasswd.exe
 
 $(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $**
+	link $(EXE_LINKOPTS) -out:$@ $** $(SCLIB)

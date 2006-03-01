@@ -1,3 +1,7 @@
+2006-02-24  Jeffrey Altman <jaltman@mit.edu>
+
+ 	* Makefile.in: support for 64-bit Windows builds
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb524d.c: Include k5-int.h instead of krb5.h.
