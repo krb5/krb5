@@ -104,6 +104,7 @@ TAGS: $(SRCS)
 clean-:: clean-windows
 clean-unix::
 	$(RM) *.o core krb5-config
+	$(RM) -r util/fakedest
 
 mostlyclean: clean
 
