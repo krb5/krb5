@@ -1,3 +1,8 @@
+2006-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* v4gssftp.exp (v4ftp_test): Update "Miscellaneous failure" regexp
+	for mechglue.
+
 2005-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* v4gssftp.exp: Identify file correctly for top-level error
