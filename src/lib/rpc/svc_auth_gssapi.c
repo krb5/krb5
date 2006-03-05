@@ -972,7 +972,6 @@ void svcauth_gssapi_unset_names(void)
 		    gss_release_cred(&minor_stat, &server_creds_list[i]);
 	  free(server_creds_list);
 	  server_creds_list = NULL;
-	  server_creds_count = 0;
      }
 
      if (server_name_list) {
@@ -981,8 +980,8 @@ void svcauth_gssapi_unset_names(void)
 		    gss_release_name(&minor_stat, &server_name_list[i]);
 	  free(server_name_list);
 	  server_name_list = NULL;
-	  server_creds_count = 0;
      }
+     server_creds_count = 0;
 }
 
 
