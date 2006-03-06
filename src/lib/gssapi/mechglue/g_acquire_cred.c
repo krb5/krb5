@@ -333,12 +333,15 @@ gss_add_cred(minor_status, input_cred_handle,
 	    internal_name = allocated_name;
 	}
 
-	if ((status = mech->gss_display_name(mech->context,
-					     &temp_minor_status, internal_name,
-					     &union_cred->auxinfo.name,
-					     &union_cred->auxinfo.name_type)) !=
-	    GSS_S_COMPLETE)
-	    goto errout;
+	if (internal_name != GSS_C_NO_NAME) {
+	    status = mech->gss_display_name(mech->context,
+					    &temp_minor_status, internal_name,
+					    &union_cred->auxinfo.name,
+					    &union_cred->auxinfo.name_type);
+	
+	    if (status != GSS_S_COMPLETE)
+		goto errout;
+	}
     }
 
     /* now add the new credential elements */

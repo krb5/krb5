@@ -1,3 +1,8 @@
+2006-03-06  Tom Yu  <tlyu@mit.edu>
+
+	* g_acquire_cred.c (gss_add_cred): Maintain old default-cred
+	behavior by not calling display_name on GSS_C_NO_NAME.
+
 2004-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Delete @SHARED_RULE@ line.
