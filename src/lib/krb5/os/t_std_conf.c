@@ -113,7 +113,7 @@ static void test_locate_kdc(krb5_context ctx, char *realm)
 	}
 	printf("krb_locate_kdc(%s) returned:", realm);
 	for (i=0; i < addrs.naddrs; i++) {
-	    struct addrinfo *ai = addrs.addrs[i];
+	    struct addrinfo *ai = addrs.addrs[i].ai;
 	    switch (ai->ai_family) {
 	    case AF_INET:
 	    {

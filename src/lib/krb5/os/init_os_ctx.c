@@ -355,6 +355,9 @@ krb5_os_init_context(krb5_context ctx)
 	os_ctx->os_flags = 0;
 	os_ctx->default_ccname = 0;
 
+	ctx->vtbl = 0;
+	PLUGIN_DIR_INIT(&ctx->libkrb5_plugins);
+
 	retval = os_init_paths(ctx);
 	/*
 	 * If there's an error in the profile, return an error.  Just
@@ -477,6 +480,8 @@ krb5_os_free_context(krb5_context ctx)
 		profile_release(ctx->profile);
 	    ctx->profile = 0;
 	}
+
+	krb5int_close_plugin_dir (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32
         WSACleanup();

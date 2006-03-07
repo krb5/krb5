@@ -92,8 +92,8 @@ clean-libs:
 
 install-libs: $(LIBINSTLIST)
 install-shared:
-	$(RM) $(DESTDIR)$(KRB5_DB_MODULE_DIR)/$(LIBBASE)$(DYNOBJEXT)
-	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(KRB5_DB_MODULE_DIR)
+	$(RM) $(DESTDIR)$(MODULE_INSTALL_DIR)/$(LIBBASE)$(DYNOBJEXT)
+	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(MODULE_INSTALL_DIR)
 
 Makefile: $(SRCTOP)/config/libnover.in
 $(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf

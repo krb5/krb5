@@ -1,3 +1,7 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_err.et (KRB5_PLUGIN_NO_HANDLE): New error code.
+
 2006-01-27  Sam Hartman  <hartmans@mit.edu>
 
 	* kdb5_err.et: New error codes  for plugin errors

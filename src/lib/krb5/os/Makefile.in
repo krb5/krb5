@@ -6,6 +6,8 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\"
+
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
@@ -163,7 +165,7 @@ shared:
 TEST_PROGS= t_std_conf t_an_to_ln t_locate_kdc
 
 T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
-		hst_realm.o init_os_ctx.o locate_kdc.o dnsglue.o 
+		hst_realm.o init_os_ctx.o locate_kdc.o dnsglue.o
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
@@ -187,9 +189,8 @@ t_localaddr: localaddr.c
 t_locate_kdc: t_locate_kdc.o
 	$(CC_LINK) $(ALL_CFLAGS) -o t_locate_kdc t_locate_kdc.o \
 		$(KRB5_BASE_LIBS)
-t_locate_kdc.o: t_locate_kdc.c locate_kdc.c
+t_locate_kdc.o: t_locate_kdc.c locate_kdc.c dnssrv.c dnsglue.c
 $(OUTPRE)t_locate_kdc.exe: $(OUTPRE)t_locate_kdc.obj \
-		$(OUTPRE)dnssrv.obj $(OUTPRE)dnsglue.obj \
 		$(KLIB) $(PLIB) $(CLIB) $(SLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(DNSLIBS)
 
@@ -415,7 +416,7 @@ locate_kdc.so locate_kdc.po $(OUTPRE)locate_kdc.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/krb5/kdb.h os-proto.h
+  $(SRCTOP)/include/krb5/kdb.h os-proto.h $(SRCTOP)/include/k5-plugin.h
 lock_file.so lock_file.po $(OUTPRE)lock_file.$(OBJEXT): \
   lock_file.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
@@ -540,12 +541,12 @@ t_gifconf.so t_gifconf.po $(OUTPRE)t_gifconf.$(OBJEXT): \
   t_gifconf.c
 t_locate_kdc.so t_locate_kdc.po $(OUTPRE)t_locate_kdc.$(OBJEXT): \
   t_locate_kdc.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(COM_ERR_DEPS) locate_kdc.c $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/krb5/kdb.h \
-  os-proto.h
+  $(COM_ERR_DEPS) dnsglue.c dnsglue.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/krb5/kdb.h os-proto.h dnssrv.c locate_kdc.c \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-plugin.h
 t_realm_iter.so t_realm_iter.po $(OUTPRE)t_realm_iter.$(OBJEXT): \
   t_realm_iter.c $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 t_std_conf.so t_std_conf.po $(OUTPRE)t_std_conf.$(OBJEXT): \

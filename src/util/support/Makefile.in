@@ -18,7 +18,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 LIBBASE=krb5support
-LIBMAJOR=0
+LIBMAJOR=1
 LIBMINOR=0
 
 LIBINITFUNC=krb5int_thread_support_init
@@ -27,11 +27,13 @@ LIBFINIFUNC=krb5int_thread_support_fini
 STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
+	plugins.o \
 	fake-addrinfo.o
 
 LIBOBJS= \
 	$(OUTPRE)threads.$(OBJEXT) \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
+	$(OUTPRE)plugins.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
@@ -46,7 +48,7 @@ SRCS=\
 	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
-SHLIB_EXPLIBS= $(LIBS)
+SHLIB_EXPLIBS= $(LIBS) $(DL_LIB)
 SHLIB_DIRS=
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 

@@ -93,7 +93,7 @@ void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = 0;
 #endif
 
 #define dprint krb5int_debug_fprint
-static void
+ void
 krb5int_debug_fprint (const char *fmt, ...)
 {
 #ifdef DEBUG
@@ -198,18 +198,22 @@ krb5int_debug_fprint (const char *fmt, ...)
 	case 'A':
 	    /* %A => addrinfo */
 	    ai = va_arg(args, struct addrinfo *);
+	    if (ai->ai_socktype == SOCK_DGRAM)
+		strcpy(tmpbuf, "dgram");
+	    else if (ai->ai_socktype == SOCK_STREAM)
+		strcpy(tmpbuf, "stream");
+	    else
+		sprintf(tmpbuf, "socktype%d", ai->ai_socktype);
 	    if (0 != getnameinfo (ai->ai_addr, ai->ai_addrlen,
 				  addrbuf, sizeof (addrbuf),
 				  portbuf, sizeof (portbuf),
-				  NI_NUMERICHOST | NI_NUMERICSERV))
-		strcpy (addrbuf, "??"), strcpy (portbuf, "??");
-	    sprintf(tmpbuf, "%s %s.%s",
-		    (ai->ai_socktype == SOCK_DGRAM
-		     ? "udp"
-		     : ai->ai_socktype == SOCK_STREAM
-		     ? "tcp"
-		     : "???"),
-		    addrbuf, portbuf);
+				  NI_NUMERICHOST | NI_NUMERICSERV)) {
+		if (ai->ai_addr->sa_family == AF_UNSPEC)
+		    strcpy(tmpbuf + strlen(tmpbuf), " AF_UNSPEC");
+		else
+		    sprintf(tmpbuf + strlen(tmpbuf), " af%d", ai->ai_addr->sa_family);
+	    } else
+		sprintf(tmpbuf + strlen(tmpbuf), " %s.%s", addrbuf, portbuf);
 	    putstr(tmpbuf);
 	    break;
 	case 'D':
@@ -224,17 +228,30 @@ krb5int_debug_fprint (const char *fmt, ...)
 #endif
 }
 
+#define print_addrlist krb5int_print_addrlist
+static void
+print_addrlist (const struct addrlist *a)
+{
+    int i;
+    dprint("%d{", a->naddrs);
+    for (i = 0; i < a->naddrs; i++)
+	dprint("%s%p=%A", i ? "," : "", (void*)a->addrs[i].ai, a->addrs[i].ai);
+    dprint("}");
+}
+
 static int
 merge_addrlists (struct addrlist *dest, struct addrlist *src)
 {
+    /* Wouldn't it be nice if we could filter out duplicates?  The
+       alloc/free handling makes that pretty difficult though.  */
     int err, i;
 
     dprint("merging addrlists:\n\tlist1: ");
     for (i = 0; i < dest->naddrs; i++)
-	dprint(" %A", dest->addrs[i]);
+	dprint(" %A", dest->addrs[i].ai);
     dprint("\n\tlist2: ");
     for (i = 0; i < src->naddrs; i++)
-	dprint(" %A", src->addrs[i]);
+	dprint(" %A", src->addrs[i].ai);
     dprint("\n");
 
     err = krb5int_grow_addrlist (dest, src->naddrs);
@@ -242,16 +259,30 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
 	return err;
     for (i = 0; i < src->naddrs; i++) {
 	dest->addrs[dest->naddrs + i] = src->addrs[i];
-	src->addrs[i] = 0;
+	src->addrs[i].ai = 0;
+	src->addrs[i].freefn = 0;
     }
     dest->naddrs += i;
     src->naddrs = 0;
 
     dprint("\tout:   ");
     for (i = 0; i < dest->naddrs; i++)
-	dprint(" %A", dest->addrs[i]);
+	dprint(" %A", dest->addrs[i].ai);
     dprint("\n");
 
+    return 0;
+}
+
+static int
+in_addrlist (struct addrinfo *thisaddr, struct addrlist *list)
+{
+    int i;
+    for (i = 0; i < list->naddrs; i++) {
+	if (thisaddr->ai_addrlen == list->addrs[i].ai->ai_addrlen
+	    && !memcmp(thisaddr->ai_addr, list->addrs[i].ai->ai_addr,
+		       thisaddr->ai_addrlen))
+	    return 1;
+    }
     return 0;
 }
 
@@ -271,7 +302,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 		 const krb5_data *realm, krb5_data *reply,
 		 int *use_master, int tcp_only)
 {
-    krb5_error_code retval;
+    krb5_error_code retval, retval2;
     struct addrlist addrs;
     int socktype1 = 0, socktype2 = 0, addr_used;
 
@@ -321,12 +352,23 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     if (socktype2) {
 	struct addrlist addrs2;
 
-	retval = krb5_locate_kdc(context, realm, &addrs2, *use_master,
-				 socktype2, 0);
+	retval2 = krb5_locate_kdc(context, realm, &addrs2, *use_master,
+				  socktype2, 0);
+#if 0
+	if (retval2 == 0) {
+	    (void) merge_addrlists(&addrs, &addrs2);
+	    krb5int_free_addrlist(&addrs2);
+	    retval = 0;
+	} else if (retval == KRB5_REALM_CANT_RESOLVE) {
+	    retval = retval2;
+	}
+#else
+	retval = retval2;
 	if (retval == 0) {
 	    (void) merge_addrlists(&addrs, &addrs2);
 	    krb5int_free_addrlist(&addrs2);
 	}
+#endif
     }
 
     if (addrs.naddrs > 0) {
@@ -340,20 +382,11 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
             if (*use_master == 0) {
                 struct addrlist addrs3;
                 retval = krb5_locate_kdc(context, realm, &addrs3, 1, 
-                                         addrs.addrs[addr_used]->ai_socktype,
-                                         addrs.addrs[addr_used]->ai_family);
+                                         addrs.addrs[addr_used].ai->ai_socktype,
+                                         addrs.addrs[addr_used].ai->ai_family);
                 if (retval == 0) {
-                    int i;
-                    for (i = 0; i < addrs3.naddrs; i++) {
-                        if (addrs.addrs[addr_used]->ai_addrlen ==
-                            addrs3.addrs[i]->ai_addrlen &&
-                            memcmp(addrs.addrs[addr_used]->ai_addr,
-                                   addrs3.addrs[i]->ai_addr,
-                                   addrs.addrs[addr_used]->ai_addrlen) == 0) {
-                            *use_master = 1;
-                            break;
-                        }
-                    }
+		    if (in_addrlist(addrs.addrs[addr_used].ai, &addrs3))
+			*use_master = 1;
                     krb5int_free_addrlist (&addrs3);
                 }
             }
@@ -1039,7 +1072,9 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     unsigned char message_len_buf[4];
     char *udpbuf = 0;
 
-    dprint("krb5int_sendto(message=%d@%p)\n", message->length, message->data);
+    dprint("krb5int_sendto(message=%d@%p, addrlist=", message->length, message->data);
+    print_addrlist(addrs);
+    dprint(")\n");
 
     reply->data = 0;
     reply->length = 0;
@@ -1075,7 +1110,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 
     /* Set up connections.  */
     for (host = 0; host < n_conns; host++) {
-	retval = setup_connection (&conns[host], addrs->addrs[host],
+	retval = setup_connection (&conns[host], addrs->addrs[host].ai,
 				   message, message_len_buf, &udpbuf);
 	if (retval)
 	    continue;

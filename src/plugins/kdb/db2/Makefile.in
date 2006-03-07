@@ -6,6 +6,7 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
 DEFINES = -DPLUGIN
@@ -62,10 +63,6 @@ STLIBOBJS= \
 	kdb_db2.o \
 	pol_xdr.o \
 	db2_exp.o
-
-DYNOBJ_LOADER_PROG = $(BUILDTOP)/kdc/krb5kdc
-DYNOBJ_EXPLIBS_WITH_LOADER = -lgssrpc $(KDB5_DB_LIB)
-DYNOBJ_EXPDEPS_WITH_LOADER = $(GSSRPC_DEPLIBS)
 
 all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs

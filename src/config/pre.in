@@ -205,7 +205,9 @@ FILE_MANDIR = $(KRB5MANROOT)/man5
 KRB5_LIBDIR = @libdir@
 KRB5_SHLIBDIR = @libdir@$(SHLIB_TAIL_COMP)
 KRB5_INCDIR = @includedir@
-KRB5_DB_MODULE_DIR = @libdir@/db-modules
+MODULE_DIR = @libdir@/krb5/plugins
+KRB5_DB_MODULE_DIR = $(MODULE_DIR)/kdb
+KRB5_LIBKRB5_MODULE_DIR = $(MODULE_DIR)/libkrb5
 KRB5_INCSUBDIRS = \
 	$(KRB5_INCDIR)/gssapi \
 	$(KRB5_INCDIR)/kerberosIV \
@@ -529,6 +531,7 @@ LDCOMBINE=@LDCOMBINE@
 
 # "-h $@", "-h lib$(LIBNAME).$(LIBMAJOR)", etc.
 SONAME=@SONAME@
+
 
 #
 # rules to make various types of object files

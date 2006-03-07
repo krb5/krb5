@@ -59,6 +59,10 @@ binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
 	echo >> binutils.versions "};"
 	echo >> binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
 
+darwin.exports: $(SHLIB_EXPORT_FILE) Makefile
+	sed > darwin-exports.tmp < $(SHLIB_EXPORT_FILE) "s/^/_/"
+	$(MV) darwin-exports.tmp darwin.exports
+
 osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
 	$(RM) osf1.tmp osf1.exports
 	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.tmp

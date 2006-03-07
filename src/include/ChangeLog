@@ -1,3 +1,24 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-plugin.h: New file.
+	* k5-int.h: Include k5-plugin.h.
+	(struct plugin_file_handle): Declare.
+	(struct plugin_dir_handle): Define.
+	(PLUGIN_DIR_INIT, PLUGIN_DIR_OPEN): New macros.
+	(krb5int_open_plugin, krb5int_close_plugin,
+	krb5int_get_plugin_data, krb5int_get_plugin_func,
+	krb5int_open_plugin_dir, krb5int_close_plugin_dir,
+	krb5int_get_plugin_dir_data, krb5int_get_plugin_dir_func,
+	krb5int_free_plugin_dir_data, krb5int_free_plugin_dir_func):
+	Declare.
+	(struct _krb5_context): Add fields for holding some plugin data.
+	(KRB5INT_ACCESS_STRUCT_VERSION): Bump.
+	(struct _krb5int_access): Remove locate_server field.
+	(struct addrlist): Use an undefined struct tag if fake-addrinfo.h
+	hasn't been included yet.  Add free-function and callback pointer
+	fields.
+	(krb5int_locate_server): Update prototype.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* win-mac.h: support for 64-bit Windows builds

@@ -1,0 +1,5 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in, configure.in, py-locate.c, python.exports,
+	locate-service.py: New files.
+

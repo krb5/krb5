@@ -1,3 +1,7 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (profile_tcl): Include $(LIBS).
+
 2005-10-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_update_file_data): Drop test of
