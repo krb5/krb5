@@ -278,6 +278,13 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 	       *minor_status = code;
 	       return(GSS_S_CRED_UNAVAIL);
 	   }
+       } else {
+	   /* leash dll not available, open the default credential cache */
+   
+	   if ((code = krb5int_cc_default(context, &ccache))) {
+	       *minor_status = code;
+	       return(GSS_S_CRED_UNAVAIL);
+	   }
        }
 #endif /* USE_LEASH */
    } else
