@@ -74,7 +74,8 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
     ZeroMemory(&pi, sizeof(pi));
     pi.name = KRB4_PLUGIN_NAME;
     pi.type = KHM_PITYPE_CRED;
-    pi.icon = NULL; /*TODO: Assign icon */
+    pi.icon = LoadImage(hResModule, MAKEINTRESOURCE(IDI_PLUGIN),
+                        IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
     pi.flags = 0;
     pi.msg_proc = krb4_cb;
     pi.dependencies = KRB4_PLUGIN_DEPS;
@@ -101,7 +102,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
     rv = khc_open_space(csp_krbcred, CSNAME_PARAMS, 0, &csp_params);
     if(KHM_FAILED(rv)) goto _exit;
 
-_exit:
+ _exit:
     return rv;
 }
 
@@ -114,17 +115,19 @@ KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module) {
         khc_close_space(csp_params);
         csp_params = NULL;
     }
+
     if(csp_krbcred) {
         khc_close_space(csp_krbcred);
         csp_krbcred = NULL;
     }
+
     if(csp_plugins) {
         khc_unload_schema(csp_plugins, schema_krbconfig);
         khc_close_space(csp_plugins);
         csp_plugins = NULL;
     }
 
-    return KHM_ERROR_SUCCESS; /* the return code is ignored */
+    return KHM_ERROR_SUCCESS;  /* the return code is ignored */
 }
 
 BOOL WINAPI DllMain(
@@ -138,11 +141,14 @@ BOOL WINAPI DllMain(
             hInstance = hinstDLL;
             init_krb();
             break;
+
         case DLL_PROCESS_DETACH:
             exit_krb();
             break;
+
         case DLL_THREAD_ATTACH:
             break;
+
         case DLL_THREAD_DETACH:
             break;
     }

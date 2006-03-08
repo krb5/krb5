@@ -27,11 +27,45 @@
 #ifndef __KHIMAIRA_KRB_DATAREP_H
 #define __KHIMAIRA_KRB_DATAREP_H
 
+typedef struct tag_k5_serial_address {
+    khm_int32     magic;        /* should be K5_SERIAL_ADDRESS_MAGIC */
+    khm_int32     addrtype;     /* Address type. We only know what to
+                                   do with ADDRTYPE_INET and
+                                   ADDRTYPE_INET6 */
+    khm_size      length;       /* number of bytes of data in [data].
+                                   This should always be greater than
+                                   sizeof(khm_int32) */
+    khm_int32     data;         /* actually, &data is the beginning of
+                                   the data buffer that is [length]
+                                   bytes long. */
+} k5_serial_address;
 
-khm_int32 KHMAPI enctype_toString(const void * data, khm_size cbdata, wchar_t *destbuf, khm_size *pcbdestbuf, khm_int32 flags);
-khm_int32 KHMAPI addr_list_toString(const void *, khm_size, wchar_t *, khm_size *, khm_int32);
-khm_int32 KHMAPI krb5flags_toString(const void *, khm_size, wchar_t *, khm_size *, khm_int32);
-khm_int32 KHMAPI renew_for_cb(khm_handle cred, khm_int32 id, void * buffer, khm_size * pcbsize);
+#define K5_SERIAL_ADDRESS_MAGIC 0x44ce832d
 
+khm_int32 KHMAPI
+enctype_toString(const void * data, khm_size cbdata,
+                 wchar_t *destbuf, khm_size *pcbdestbuf,
+                 khm_int32 flags);
 
+khm_int32 KHMAPI
+addr_list_comp(const void *d1, khm_size cb_d1,
+	       const void *d2, khm_size cb_d2);
+
+khm_int32 KHMAPI
+addr_list_toString(const void *, khm_size, wchar_t *,
+                   khm_size *, khm_int32);
+
+khm_int32 KHMAPI
+krb5flags_toString(const void *, khm_size, wchar_t *,
+                   khm_size *, khm_int32);
+
+khm_int32 KHMAPI
+renew_for_cb(khm_handle cred, khm_int32 id, void * buffer,
+             khm_size * pcbsize);
+
+khm_int32
+serialize_krb5_addresses(krb5_address ** a, void * buf, size_t * pcbbuf);
+
+void
+one_addr(k5_serial_address *a, wchar_t * buf, khm_size cbbuf);
 #endif

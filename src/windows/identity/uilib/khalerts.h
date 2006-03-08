@@ -179,6 +179,9 @@ enum khui_alert_flags {
     KHUI_ALERT_FLAG_REQUEST_BALLOON =0x08000000,
     /*!< The alert should be displayed in a balloon */
 
+    KHUI_ALERT_FLAG_MODAL           =0x10000000,
+    /*!< Modal alert.  Do not set direclty. */
+
     KHUI_ALERT_FLAGMASK_RDWR        =0x0C000010,
     /*!< Bit mask of flags that can be set by khui_alert_set_flags() */
 };
@@ -305,6 +308,19 @@ khui_alert_add_command(khui_alert * alert,
  */
 KHMEXP khm_int32 KHMAPI 
 khui_alert_show(khui_alert * alert);
+
+/*! \brief Display a modal alert
+
+    Similar to khui_alert_show(), but shows a modal alert dialog.  The
+    function does not return until the user has closed the alert.
+
+    This function always opens an alert window (never shows a
+    balloon).
+
+    \note Should only be called from the UI thread.
+ */
+KHMEXP khm_int32 KHMAPI
+khui_alert_show_modal(khui_alert * alert);
 
 /*! \brief Queue an alert
 

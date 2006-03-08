@@ -59,6 +59,8 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
                                          khm_int32 filter,
                                          kherr_serial serial) {
 
+    khm_size idx;
+
     assert(h);
 
     EnterCriticalSection(&cs_error);
@@ -86,9 +88,21 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
             KHERR_CTX_END |
             KHERR_CTX_ERROR;
 
-    ctx_handlers[n_ctx_handlers].h = h;
-    ctx_handlers[n_ctx_handlers].filter = filter;
-    ctx_handlers[n_ctx_handlers].serial = serial;
+    /* Since commit events are the most frequent, we put those
+       handlers at the top of the list.  When dispatching a commit
+       event, we stop looking at the list when we find a filter that
+       doesn't filter for commit events. */
+    if (filter & KHERR_CTX_EVTCOMMIT) {
+	idx = 0;
+	memmove(&ctx_handlers[1], &ctx_handlers[0],
+		n_ctx_handlers * sizeof(ctx_handlers[0]));
+    } else {
+	idx = n_ctx_handlers;
+    }
+
+    ctx_handlers[idx].h = h;
+    ctx_handlers[idx].filter = filter;
+    ctx_handlers[idx].serial = serial;
 
     n_ctx_handlers++;
 
@@ -139,7 +153,14 @@ void notify_ctx_event(enum kherr_ctx_event e, kherr_context * c) {
                 if (h != ctx_handlers[i].h)
                     i--;
             }
-        }
+        } else if (e == KHERR_CTX_EVTCOMMIT &&
+		   !(ctx_handlers[i].filter & KHERR_CTX_EVTCOMMIT)) {
+	    /* All handlers that filter for commit events are at the
+	       top of the list.  If this handler wasn't filtering for
+	       it, then there's no point in goint further down the
+	       list. */
+	    break;
+	}
     }
 }
 
@@ -384,7 +405,15 @@ void free_context(kherr_context * c) {
 
 void add_event(kherr_context * c, kherr_event * e)
 {
+    kherr_event * te;
+
     EnterCriticalSection(&cs_error);
+    te = QBOTTOM(c);
+    if (te && !(te->flags & KHERR_RF_COMMIT)) {
+	notify_ctx_event(KHERR_CTX_EVTCOMMIT, c);
+	te->flags |= KHERR_RF_COMMIT;
+    }
+
     QPUT(c,e);
     if(c->severity >= e->severity) {
         if (e->severity <= KHERR_ERROR)
@@ -436,7 +465,8 @@ static void arg_from_param(DWORD_PTR ** parm, kherr_param p) {
         if (t == KEPT_INT32 ||
             t == KEPT_UINT32 ||
             t == KEPT_STRINGC ||
-            t == KEPT_STRINGT) {
+            t == KEPT_STRINGT ||
+            t == KEPT_PTR) {
 
             *(*parm)++ = (DWORD_PTR) parm_data(p);
 
@@ -648,6 +678,9 @@ void resolve_event_strings(kherr_event * e)
 
 
 KHMEXP void KHMAPI kherr_evaluate_event(kherr_event * e) {
+    if (!e)
+        return;
+
     EnterCriticalSection(&cs_error);
     resolve_event_strings(e);
     LeaveCriticalSection(&cs_error);
@@ -673,7 +706,7 @@ KHMEXP void KHMAPI kherr_evaluate_last_event(void) {
 
     resolve_event_strings(e);
 
-_exit:
+ _exit:
     LeaveCriticalSection(&cs_error);
 }
 
@@ -1051,6 +1084,12 @@ KHMEXP void KHMAPI kherr_release_context(kherr_context * c) {
         kherr_event * e;
         kherr_context * p;
 
+	e = QBOTTOM(c);
+	if (e && !(e->flags & KHERR_RF_COMMIT)) {
+	    notify_ctx_event(KHERR_CTX_EVTCOMMIT, c);
+	    e->flags |= KHERR_RF_COMMIT;
+	}
+
         notify_ctx_event(KHERR_CTX_END, c);
 
         p = TPARENT(c);
@@ -1170,6 +1209,26 @@ KHMEXP kherr_event * KHMAPI kherr_get_next_event(kherr_event * e)
     ee = QNEXT(e);
     LeaveCriticalSection(&cs_error);
     return ee;
+}
+
+KHMEXP kherr_event * KHMAPI kherr_get_prev_event(kherr_event * e)
+{
+    kherr_event * ee;
+
+    EnterCriticalSection(&cs_error);
+    ee = QPREV(e);
+    LeaveCriticalSection(&cs_error);
+
+    return ee;
+}
+
+KHMEXP kherr_event * KHMAPI kherr_get_last_event(kherr_context * c)
+{
+    kherr_event * e;
+    EnterCriticalSection(&cs_error);
+    e = QBOTTOM(c);
+    LeaveCriticalSection(&cs_error);
+    return e;
 }
 
 KHMEXP kherr_context * KHMAPI kherr_get_first_context(kherr_context * c)

@@ -314,6 +314,47 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
 }
 
 LONG
+khcint_RegDeleteKey(HKEY hKey,
+                    LPCWSTR lpSubKey) {
+    int i;
+    wchar_t sk_name[KCONF_MAXCCH_NAME];
+    FILETIME ft;
+    size_t cch;
+    LONG rv = ERROR_SUCCESS;
+
+    /* go through and find the case sensitive match for the key */
+
+    if (FAILED(StringCchLength(lpSubKey, KCONF_MAXCCH_NAME, &cch)))
+        return ERROR_BADKEY;
+
+    for (i=0; ;i++) {
+        LONG l;
+        DWORD dw;
+
+        dw = ARRAYLENGTH(sk_name);
+        l = RegEnumKeyEx(hKey, i, sk_name, &dw,
+                         NULL, NULL, NULL, &ft);
+
+        if (l != ERROR_SUCCESS) {
+            rv = ERROR_BADKEY;
+            goto _cleanup;
+        }
+
+        if (!(wcsncmp(sk_name, lpSubKey, cch))) {
+            /* bingo! ?? */
+            if ((sk_name[cch] == L'\0' ||
+                 sk_name[cch] == L'~')) {
+                rv = RegDeleteKey(hKey, sk_name);
+                goto _cleanup;
+            }
+        }
+    }
+
+ _cleanup:
+    return rv;
+}
+
+LONG
 khcint_RegCreateKeyEx(HKEY hKey,
                       LPCWSTR lpSubKey,
                       DWORD Reserved,
@@ -533,14 +574,10 @@ khcint_space_open_key(kconf_conf_space * s, khm_int32 flags) {
         }
         if(!hk && (flags & KHM_FLAG_CREATE)) {
             khcint_RegCreateKeyEx(HKEY_CURRENT_USER, 
-                                  s->regpath, 
-                                  0,
-                                  NULL,
+                                  s->regpath, 0, NULL,
                                   REG_OPTION_NON_VOLATILE,
                                   KEY_READ | KEY_WRITE,
-                                  NULL,
-                                  &hk,
-                                  &disp);
+                                  NULL, &hk, &disp);
         }
         if(hk) {
             EnterCriticalSection(&cs_conf_global);
@@ -632,7 +669,7 @@ khcint_free_space(kconf_conf_space * r) {
 
 khm_int32 
 khcint_open_space_int(kconf_conf_space * parent, 
-                      wchar_t * sname, size_t n_sname, 
+                      const wchar_t * sname, size_t n_sname, 
                       khm_int32 flags, kconf_conf_space **result) {
     kconf_conf_space * p;
     kconf_conf_space * c;
@@ -735,13 +772,13 @@ khcint_open_space_int(kconf_conf_space * parent,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_open_space(khm_handle parent, wchar_t * cspace, khm_int32 flags, 
+khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags, 
                khm_handle * result) {
     kconf_handle * h;
     kconf_conf_space * p;
     kconf_conf_space * c = NULL;
     size_t cbsize;
-    wchar_t * str;
+    const wchar_t * str;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
     if(!khc_is_config_running()) {
@@ -781,7 +818,7 @@ khc_open_space(khm_handle parent, wchar_t * cspace, khm_int32 flags,
 
     str = cspace;
     while(TRUE) {
-        wchar_t * end = NULL;
+        const wchar_t * end = NULL;
 
         if (!(flags & KCONF_FLAG_NOPARSENAME)) {
 
@@ -1788,16 +1825,17 @@ khc_value_exists(khm_handle conf, wchar_t * value) {
 
     c = khc_space_from_handle(conf);
 
-    if(!khc_is_machine_handle(conf))
+    if (khc_is_user_handle(conf))
         hku = khcint_space_open_key(c, KHM_PERM_READ);
-    hkm = khcint_space_open_key(c, KHM_PERM_READ | KCONF_FLAG_MACHINE);
+    if (khc_is_machine_handle(conf))
+        hkm = khcint_space_open_key(c, KHM_PERM_READ | KCONF_FLAG_MACHINE);
 
     if(hku && (RegQueryValueEx(hku, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
         rv |= KCONF_FLAG_USER;
     if(hkm && (RegQueryValueEx(hkm, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
         rv |= KCONF_FLAG_MACHINE;
 
-    if(c->schema) {
+    if(c->schema && khc_is_schema_handle(conf)) {
         for(i=0; i<c->nSchema; i++) {
             if(!wcscmp(c->schema[i].name, value)) {
                 rv |= KCONF_FLAG_SCHEMA;
@@ -1856,14 +1894,26 @@ khc_remove_value(khm_handle conf, wchar_t * value, khm_int32 flags) {
     return rv;
 }
 
+/* called with cs_conf_global held */
 khm_int32
 khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
     kconf_conf_space * cc;
     kconf_conf_space * cn;
+    kconf_conf_space * p;
 
     /* TODO: if this is the last child space and the parent is marked
        for deletion, delete the parent as well. */
 
+    p = TPARENT(c);
+
+    /* We don't allow deleting top level keys.  They are
+       predefined. */
+#ifdef DEBUG
+    assert(p);
+#endif
+    if (!p)
+        return KHM_ERROR_INVALID_OPERATION;
+            
     cc = TFIRSTCHILD(c);
     while (cc) {
         cn = LNEXT(cc);
@@ -1874,33 +1924,30 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
     }
 
     cc = TFIRSTCHILD(c);
-    if (!cc) {
-        kconf_conf_space * p;
-
-        if (c->refcount) {
-            c->flags |= (flags &
-                         (KCONF_SPACE_FLAG_DELETE_M |
-                          KCONF_SPACE_FLAG_DELETE_U));
-        } else {
-            p = TPARENT(c);
-            
-            TDELCHILD(p, c);
-
-            if (c->regpath) {
-                if (flags & KCONF_SPACE_FLAG_DELETE_U)
-                    RegDeleteKey(HKEY_CURRENT_USER,
-                                 c->regpath);
-                if (flags & KCONF_SPACE_FLAG_DELETE_M)
-                    RegDeleteKey(HKEY_LOCAL_MACHINE,
-                                 c->regpath);
-            }
-
-            khcint_free_space(c);
-        }
+    if (!cc && c->refcount == 0) {
+        TDELCHILD(p, c);
+        khcint_free_space(c);
     } else {
         c->flags |= (flags &
                      (KCONF_SPACE_FLAG_DELETE_M |
                       KCONF_SPACE_FLAG_DELETE_U));
+    }
+
+    if (c->regpath && p->regpath) {
+        HKEY hk;
+
+        if (flags & KCONF_SPACE_FLAG_DELETE_U) {
+            hk = khcint_space_open_key(p, KCONF_FLAG_USER);
+
+            if (hk)
+                khcint_RegDeleteKey(hk, c->name);
+        }
+        if (flags & KCONF_SPACE_FLAG_DELETE_M) {
+            hk = khcint_space_open_key(p, KCONF_FLAG_MACHINE);
+
+            if (hk)
+                khcint_RegDeleteKey(hk, c->name);
+        }
     }
 
     return KHM_ERROR_SUCCESS;
@@ -1908,6 +1955,7 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
 
 KHMEXP khm_int32 KHMAPI
 khc_remove_space(khm_handle conf) {
+
     /*
        - mark this space as well as all child spaces as
          'delete-on-close' using flags.  Mark should indicate which

@@ -30,6 +30,8 @@
 #include<strsafe.h>
 #include<krb5.h>
 
+#include<commctrl.h>
+
 #include<assert.h>
 
 extern LPVOID k5_main_fiber;
@@ -41,8 +43,10 @@ typedef struct k5_dlg_data_t {
     khui_tracker tc_lifetime;
     khui_tracker tc_renew;
 
-    BOOL dirty;
-
+    BOOL dirty;                 /* is the data in sync with the
+                                   configuration store? */
+    BOOL sync;                  /* is the data in sync with the kinit
+                                   request? */
     DWORD   renewable;
     DWORD   forwardable;
     DWORD   proxiable;
@@ -99,9 +103,9 @@ k5_handle_wm_destroy(HWND hwnd,
 
     d = (k5_dlg_data *) (LONG_PTR)
         GetWindowLongPtr(hwnd, DWLP_USER);
-#ifdef DEBUG
-    assert(d);
-#endif
+
+    if (!d)
+        return TRUE;
 
     khui_cw_find_type(d->nc, credtype_id_krb5, &nct);
 
@@ -154,29 +158,31 @@ k5_handle_wmnc_notify(HWND hwnd,
                 return TRUE;
 
             /* need to update the controls with d->* */
-            if(d->renewable) {
-                SendDlgItemMessage(hwnd, IDC_NCK5_RENEWABLE, 
-                                   BM_SETCHECK, BST_CHECKED, 
-                                   0);
-                EnableWindow(GetDlgItem(hwnd, IDC_NCK5_RENEW_EDIT), 
-                             TRUE);
-            } else {
-                SendDlgItemMessage(hwnd, IDC_NCK5_RENEWABLE, 
-                                   BM_SETCHECK, BST_UNCHECKED, 0);
-                EnableWindow(GetDlgItem(hwnd, IDC_NCK5_RENEW_EDIT), 
-                             FALSE);
-            }
+            SendDlgItemMessage(hwnd, IDC_NCK5_RENEWABLE, 
+                               BM_SETCHECK,
+			       (d->renewable? BST_CHECKED : BST_UNCHECKED), 
+                               0);
+            EnableWindow(GetDlgItem(hwnd, IDC_NCK5_RENEW_EDIT), 
+                         !!d->renewable);
 
             khui_tracker_refresh(&d->tc_lifetime);
             khui_tracker_refresh(&d->tc_renew);
 
-            if(d->forwardable) {
-                SendDlgItemMessage(hwnd, IDC_NCK5_FORWARDABLE, 
-                                   BM_SETCHECK, BST_CHECKED, 0);
-            } else {
-                SendDlgItemMessage(hwnd, IDC_NCK5_FORWARDABLE, 
-                                   BM_SETCHECK, BST_UNCHECKED, 0);
-            }
+            SendDlgItemMessage(hwnd, IDC_NCK5_FORWARDABLE, 
+                               BM_SETCHECK,
+                               (d->forwardable ? BST_CHECKED : BST_UNCHECKED),
+                               0);
+
+            SendDlgItemMessage(hwnd, IDC_NCK5_ADDRESS,
+                               BM_SETCHECK,
+                               (d->addressless ? BST_CHECKED : BST_UNCHECKED),
+                               0);
+
+            SendDlgItemMessage(hwnd, IDC_NCK5_PUBLICIP,
+                               IPM_SETADDRESS,
+                               0, d->publicIP);
+
+            EnableWindow(GetDlgItem(hwnd, IDC_NCK5_PUBLICIP), !d->addressless);
         }
         break;
 
@@ -280,18 +286,74 @@ k5_handle_wmnc_notify(HWND hwnd,
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
-            if(d->dirty) {
+            if(!d->sync) {
                 kmq_post_sub_msg(k5_sub, KMSG_CRED, 
                                  KMSG_CRED_DIALOG_NEW_OPTIONS, 
                                  0, (void *) d->nc);
 
-                /* the above notification effectively takes
-                   all our changes into account.  The data we
-                   have is no longer dirty */
-                d->dirty = FALSE;
+                /* the above notification effectively takes all our
+                   changes into account.  The data we have is no
+                   longer out of sync */
+                d->sync = FALSE;
             }
         }
         break;
+
+    case K5_SET_CRED_MSG:
+        {
+            k5_dlg_data * d;
+            khm_size cb;
+            wchar_t * msg;
+
+            d = (k5_dlg_data *) (LONG_PTR)
+                GetWindowLongPtr(hwnd, DWLP_USER);
+
+            msg = (wchar_t *) lParam;
+
+            if (d->cred_message) {
+                PFREE(d->cred_message);
+                d->cred_message = NULL;
+            }
+
+            if (msg &&
+                SUCCEEDED(StringCbLength(msg,
+                                         KHUI_MAXCB_MESSAGE,
+                                         &cb))) {
+                cb += sizeof(wchar_t);
+                d->cred_message = PMALLOC(cb);
+#ifdef DEBUG
+                assert(d->cred_message);
+#endif
+                StringCbCopy(d->cred_message, cb, msg);
+            }
+        }
+        break;
+    }
+
+    return 0;
+}
+
+INT_PTR
+k5_handle_wm_notify(HWND hwnd,
+                    WPARAM wParam,
+                    LPARAM lParam) {
+    LPNMHDR pnmh;
+    k5_dlg_data * d;
+
+    pnmh = (LPNMHDR) lParam;
+    if (pnmh->idFrom == IDC_NCK5_PUBLICIP &&
+        pnmh->code == IPN_FIELDCHANGED) {
+
+        d = (k5_dlg_data *) (LONG_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+
+        SendDlgItemMessage(hwnd, IDC_NCK5_PUBLICIP,
+                           IPM_GETADDRESS,
+                           0, (LPARAM) &d->publicIP);
+
+        d->dirty = TRUE;
+        d->sync = FALSE;
+
+        return TRUE;
     }
 
     return 0;
@@ -323,9 +385,10 @@ k5_handle_wm_command(HWND hwnd,
             d->renewable = FALSE;
         }
         d->dirty = TRUE;
+        d->sync = FALSE;
     } else if(notif == BN_CLICKED && cid == IDC_NCK5_FORWARDABLE) {
         int c;
-        c = (int) SendDlgItemMessage(hwnd, IDC_NCK5_RENEWABLE, 
+        c = (int) SendDlgItemMessage(hwnd, IDC_NCK5_FORWARDABLE, 
                                      BM_GETCHECK, 0, 0);
         if(c==BST_CHECKED) {
             d->forwardable = TRUE;
@@ -333,6 +396,26 @@ k5_handle_wm_command(HWND hwnd,
             d->forwardable = FALSE;
         }
         d->dirty = TRUE;
+        d->sync = FALSE;
+    } else if (notif == BN_CLICKED && cid == IDC_NCK5_ADDRESS) {
+        int c;
+
+        c = (int) SendDlgItemMessage(hwnd, IDC_NCK5_ADDRESS,
+                                     BM_GETCHECK, 0, 0);
+
+        if (c==BST_CHECKED) {
+            d->addressless = TRUE;
+        } else {
+            d->addressless = FALSE;
+        }
+        d->dirty = TRUE;
+        d->sync = FALSE;
+
+        EnableWindow(GetDlgItem(hwnd, IDC_NCK5_PUBLICIP), !d->addressless);
+    } else if (notif == EN_CHANGE && (cid == IDC_NCK5_RENEW_EDIT ||
+                                      cid == IDC_NCK5_LIFETIME_EDIT)) {
+        d->dirty = TRUE;
+        d->sync = FALSE;
     } else if((notif == CBN_SELCHANGE || 
                notif == CBN_KILLFOCUS) && 
               cid == IDC_NCK5_REALM &&
@@ -414,6 +497,9 @@ k5_nc_dlg_proc(HWND hwnd,
     case KHUI_WM_NC_NOTIFY:
         return k5_handle_wmnc_notify(hwnd, wParam, lParam);
 
+    case WM_NOTIFY:
+        return k5_handle_wm_notify(hwnd, wParam, lParam);
+
     case WM_DESTROY:
         return k5_handle_wm_destroy(hwnd, wParam, lParam);
     }
@@ -464,19 +550,19 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                 }
             }
 
-            g_fjob.code = khm_krb5_kinit(
-                0,
-                g_fjob.principal,
-                g_fjob.password,
-                g_fjob.ccache,
-                g_fjob.lifetime,
-                g_fjob.forwardable,
-                g_fjob.proxiable,
-                (g_fjob.renewable ? g_fjob.renew_life : 0),
-                g_fjob.addressless,
-                g_fjob.publicIP,
-                k5_kinit_prompter,
-                &g_fjob);
+            g_fjob.code =
+                khm_krb5_kinit(0,
+                               g_fjob.principal,
+                               g_fjob.password,
+                               g_fjob.ccache,
+                               g_fjob.lifetime,
+                               g_fjob.forwardable,
+                               g_fjob.proxiable,
+                               (g_fjob.renewable ? g_fjob.renew_life : 0),
+                               g_fjob.addressless,
+                               g_fjob.publicIP,
+                               k5_kinit_prompter,
+                               &g_fjob);
         }
 
     _switch_to_main:
@@ -1027,6 +1113,7 @@ k5_read_dlg_params(khm_handle conf,
     khc_read_int32(conf, L"Forwardable", &d->forwardable);
     khc_read_int32(conf, L"Proxiable", &d->proxiable);
     khc_read_int32(conf, L"Addressless", &d->addressless);
+    khc_read_int32(conf, L"PublicIP", &d->publicIP);
 
     khc_read_int32(conf, L"DefaultLifetime", &i);
     d->tc_lifetime.current = i;
@@ -1079,6 +1166,7 @@ k5_write_dlg_params(khm_handle conf,
     khc_write_int32(conf, L"Forwardable", d->forwardable);
     khc_write_int32(conf, L"Proxiable", d->proxiable);
     khc_write_int32(conf, L"Addressless", d->addressless);
+    khc_write_int32(conf, L"PublicIP", d->publicIP);
 
     khc_write_int32(conf, L"DefaultLifetime", 
                     (khm_int32) d->tc_lifetime.current);
@@ -1117,6 +1205,9 @@ k5_prep_kinit_job(khui_new_creds * nc)
     d = (k5_dlg_data *)(LONG_PTR) 
         GetWindowLongPtr(nct->hwnd_panel, DWLP_USER);
 
+    if (!d)
+	return;
+
     khui_cw_lock_nc(nc);
     ident = nc->identities[0];
     kcdb_identity_hold(ident);
@@ -1141,7 +1232,7 @@ k5_prep_kinit_job(khui_new_creds * nc)
     g_fjob.renewable = d->renewable;
     g_fjob.renew_life = (krb5_deltat) d->tc_renew.current;
     g_fjob.addressless = d->addressless;
-    g_fjob.publicIP = 0;
+    g_fjob.publicIP = d->publicIP;
     g_fjob.code = 0;
     g_fjob.identity = ident;
     g_fjob.prompt_set = 0;
@@ -1238,7 +1329,8 @@ k5_find_tgt_filter(khm_handle cred,
                                            &cident)) &&
         cident == ident &&
         KHM_SUCCEEDED(kcdb_cred_get_flags(cred, &f)) &&
-        (f & KCDB_CRED_FLAG_INITIAL))
+        (f & KCDB_CRED_FLAG_INITIAL) &&
+        !(f & KCDB_CRED_FLAG_EXPIRED))
         rv = 1;
     else
         rv = 0;
@@ -1406,7 +1498,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                hasn't changed the options */
             khui_cw_lock_nc(nc);
 
-            if(!d->dirty && nc->n_identities > 0 &&
+	    /* ?: It might be better to not load identity defaults if
+	       the user has already changed options in the dialog. */
+            if(/* !d->dirty && */ nc->n_identities > 0 &&
                nc->subtype == KMSG_CRED_NEW_CREDS) {
 
                 khm_handle h_id = NULL;
@@ -1648,7 +1742,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         assert(g_fjob.state == FIBER_STATE_NONE);
 #endif
                         g_fjob.code = 0;
-                    } else if (nc->result == KHUI_NC_RESULT_GET_CREDS) {
+
+			_reportf(L"Cancelling");
+                    } else if (nc->result == KHUI_NC_RESULT_PROCESS) {
                         khui_cw_sync_prompt_values(nc);
                         g_fjob.command = FIBER_CMD_CONTINUE;
                         SwitchToFiber(k5_kinit_fiber);
@@ -1666,7 +1762,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     if (nc->result == KHUI_NC_RESULT_CANCEL) {
                         /* nothing to report */
                         g_fjob.code = 0;
-                    } else if (nc->result == KHUI_NC_RESULT_GET_CREDS) {
+                    } else if (nc->result == KHUI_NC_RESULT_PROCESS) {
                         /* g_fjob.code should have the result of the
                            last kinit attempt.  We should leave it
                            as-is */
@@ -1694,8 +1790,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                     k5_find_tgt_filter,
                                     nc->identities[0],
                                     NULL,
-                                    NULL))))
+                                    NULL)))) {
+		    _reportf(L"No password entered, but a valid TGT exists. Continuing");
                     g_fjob.code = 0;
+		}
 
                 if(g_fjob.code != 0) {
                     wchar_t tbuf[1024];
@@ -1722,7 +1820,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     assert(g_fjob.state == FIBER_STATE_NONE);
 #endif
 
-                } else if (nc->result == KHUI_NC_RESULT_GET_CREDS &&
+                } else if (nc->result == KHUI_NC_RESULT_PROCESS &&
                            g_fjob.state == FIBER_STATE_NONE) {
                     khm_handle sp = NULL;
                     khm_handle ep = NULL;
@@ -1733,6 +1831,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     khm_size cb;
                     khm_size cb_ms;
                     khm_int32 rv;
+
+		    _reportf(L"Tickets successfully acquired");
 
                     r = KHUI_NC_RESPONSE_SUCCESS |
                         KHUI_NC_RESPONSE_EXIT;
@@ -1770,6 +1870,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     khm_krb5_list_tickets(&ctx);
 
                     if (nc->set_default) {
+			_reportf(L"Setting default identity");
                         kcdb_identity_set_default(nc->identities[0]);
                     }
 
@@ -1781,6 +1882,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         if (KHM_SUCCEEDED(kcdb_identity_get_default(&tdefault))) {
                             kcdb_identity_release(tdefault);
                         } else {
+			    _reportf(L"There was no default identity.  Setting default");
                             kcdb_identity_set_default(nc->identities[0]);
                         }
                     }
@@ -1957,10 +2059,29 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 if (nc->ctx.scope == KHUI_SCOPE_IDENT ||
                     (nc->ctx.scope == KHUI_SCOPE_CREDTYPE &&
-                     nc->ctx.cred_type == credtype_id_krb5)) {
+                     nc->ctx.cred_type == credtype_id_krb5) ||
+		    (nc->ctx.scope == KHUI_SCOPE_CRED &&
+		     nc->ctx.cred_type == credtype_id_krb5)) {
                     int code;
 
-                    if (nc->ctx.identity != 0) {
+		    if (nc->ctx.scope == KHUI_SCOPE_CRED &&
+			nc->ctx.cred != NULL) {
+
+			/* get the expiration time for the identity first. */
+			cb = sizeof(ftidexp);
+#ifdef DEBUG
+			assert(nc->ctx.identity != NULL);
+#endif
+			kcdb_identity_get_attr(nc->ctx.identity,
+					       KCDB_ATTR_EXPIRE,
+					       NULL,
+					       &ftidexp,
+					       &cb);
+
+			code = khm_krb5_renew_cred(nc->ctx.cred);
+
+                    } else if (nc->ctx.scope == KHUI_SCOPE_IDENT &&
+			       nc->ctx.identity != 0) {
                         /* get the current identity expiration time */
                         cb = sizeof(ftidexp);
 
@@ -1970,12 +2091,17 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                                &ftidexp,
                                                &cb);
 
-                        code = khm_krb5_renew(nc->ctx.identity);
+                        code = khm_krb5_renew_ident(nc->ctx.identity);
                     } else {
+
+			_reportf(L"No identity specified.  Can't renew Kerberos tickets");
+
                         code = 1; /* it just has to be non-zero */
                     }
 
                     if (code == 0) {
+			_reportf(L"Tickets successfully renewed");
+
                         khui_cw_set_response(nc, credtype_id_krb5, 
                                              KHUI_NC_RESPONSE_EXIT | 
                                              KHUI_NC_RESPONSE_SUCCESS);
@@ -2035,7 +2161,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 _end_task();
             } else if (nc->subtype == KMSG_CRED_PASSWORD &&
-                       nc->result == KHUI_NC_RESULT_GET_CREDS) {
+                       nc->result == KHUI_NC_RESULT_PROCESS) {
 
                 _begin_task(0);
                 _report_mr0(KHERR_NONE, MSG_CTX_PASSWD);

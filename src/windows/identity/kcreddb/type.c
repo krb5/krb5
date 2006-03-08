@@ -212,7 +212,7 @@ khm_int32 KHMAPI kcdb_type_date_toString(
     GetLocalTime(&st_now);
     FileTimeToSystemTime(ft, &st_d);
     SystemTimeToTzSpecificLocalTime(NULL, &st_d, &st_dl);
-    if(st_now.wYear == st_dl.wYear &&
+    if (st_now.wYear == st_dl.wYear &&
         st_now.wMonth == st_dl.wMonth &&
         st_now.wDay == st_dl.wDay)
         today = 1;
@@ -227,7 +227,6 @@ khm_int32 KHMAPI kcdb_type_date_toString(
             NULL,
             NULL,
             0) * sizeof(wchar_t);
-        cbsize += sizeof(wchar_t);
     }
 
     cbsize += GetTimeFormat(
@@ -237,8 +236,6 @@ khm_int32 KHMAPI kcdb_type_date_toString(
         NULL,
         NULL,
         0) * sizeof(wchar_t);
-
-    cbsize += sizeof(wchar_t);
 
     if(!buffer || *cb_buf < cbsize) {
         *cb_buf = cbsize;
@@ -374,7 +371,11 @@ FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
     d = s / (3600*24);
 
     if(ift == _I64_MAX) {
+#ifdef INDICATE_UNKNOWN_EXPIRY_TIMES
         LoadString(hinst_kcreddb, IDS_IVL_UNKNOWN, ibuf, sizeof(ibuf)/sizeof(wchar_t));
+#else
+        StringCbCopy(ibuf, sizeof(ibuf), L"");
+#endif
     } else if(s < 0) {
         LoadString(hinst_kcreddb, IDS_IVL_EXPIRED, ibuf, sizeof(ibuf)/sizeof(wchar_t));
     } else if(d > 0) {

@@ -34,28 +34,74 @@
 
 /*! \brief An action */
 typedef struct tag_khui_action {
-    int cmd;            /*!< command id */
-    int type;           /*!< combination of KHUI_ACTIONTYPE_* */
-    wchar_t * name;     /*!< name for named actions.  NULL if not named. */
+    khm_int32 cmd;            /*!< action identifier */
+    khm_int32 type;           /*!< combination of KHUI_ACTIONTYPE_* */
+    wchar_t * name;           /*!< name for named actions.  NULL if
+                                not named. */
 
-    /* normal, hot and disabled are toolbar sized bitmaps */
-    int ib_normal;      /*!< normal bitmap (index) */
-    int ib_hot;         /*!< hot bitmap (index) */
-    int ib_disabled;    /*!< disabled bitmap (index) */
+    /* The following fields are only for use by NetIDMgr */
+    khm_int16 ib_normal;      /*!< (internal) normal bitmap (index) (toolbar sized icon) */
+    khm_int16 ib_hot;         /*!< (internal) hot bitmap (index) (toolbar sized icon) */
+    khm_int16 ib_disabled;    /*!< (internal) disabled bitmap (index) (toolbar sized icon) */
 
-    int ib_icon;        /*!< index of small (16x16) icon (for menu) */
-    int ib_icon_dis;    /*!< index of disabled (greyed) icon */
+    khm_int16 ib_icon;        /*!< (internal) index of small (16x16) icon (for menu) (small icon) */
+    khm_int16 ib_icon_dis;    /*!< (internal) index of disabled (greyed) icon (small icon) */
 
-    int is_caption;     /*!< index of string resource for caption */
-    int is_tooltip;     /*!< same for description / tooltip */
-    int ih_topic;       /*!< help topic */
-    int state;          /*!< current state. combination of KHUI_ACTIONSTATE_* */
+    khm_int16 is_caption;     /*!< (internal) index of string resource for caption */
+    khm_int16 is_tooltip;     /*!< (internal) same for description / tooltip */
+    khm_int16 ih_topic;       /*!< (internal) help topic */
+
+    /* The following fields are specified for custom actions */
+    wchar_t * caption;        /*!< Caption (localized) (limited by
+                                  KHUI_MAXCCH_SHORT_DESC).  The
+                                  caption is used for representing the
+                                  action in menus and toolbars. */
+    wchar_t * tooltip;        /*!< Tooltip (localized) (limited by
+                                  KHUI_MAXCCH_SHORT_DESC).  If this is
+                                  specified, whenever the user hovers
+                                  over the menu item or toolbar button
+                                  representing the action, the tooltip
+                                  will be displayed either on a
+                                  tooltip window or in the status
+                                  bar. */
+    khm_handle listener;      /*!< Listener of this action.  Should be
+                                  a handle to a message
+                                  subscription. When the action is
+                                  invoked, a message of type
+                                  ::KMSG_ACT and subtype
+                                  ::KMSG_ACT_ACTIVATE will be posted
+                                  to this subscriber. The \a uparam
+                                  parameter of the message will have
+                                  the identifier of the action. */
+    void *    data;           /*!< User data for custom action.  This
+                                  field is not used by the UI library.
+                                  It is reserved for plugins to store
+                                  data that is specific for this
+                                  action.  The data that's passed in
+                                  in the \a userdata parameter to
+                                  khui_action_create() will be stored
+                                  here and can be retrieved by calling
+                                  khui_action_get_data(). */
+    void *    reserved1;      /*!< Reserved. */
+    void *    reserved2;      /*!< Reserved. */
+    void *    reserved3;      /*!< Reserved. */
+
+    /* For all actions */
+    int state;                /*!< current state. combination of
+                                  KHUI_ACTIONSTATE_* */
 } khui_action;
 
-/*! \brief Unknown action type */
+/*! \brief Unknown action type
+
+    Unknown action type.
+ */
 #define KHUI_ACTIONTYPE_NONE    0
 
-/*! \brief A trigger type action */
+/*! \brief A trigger type action
+
+    A trigger action usually triggers some event, which is what pretty
+    much every action does.
+*/
 #define KHUI_ACTIONTYPE_TRIGGER 1
 
 /*! \brief A toggle type action
@@ -65,12 +111,19 @@ typedef struct tag_khui_action {
  */
 #define KHUI_ACTIONTYPE_TOGGLE  2
 
-/*! \brief The action is enabled */
+/*! \brief The action is enabled
+
+    This is the default if no other state is specified.  Just means
+    not-disabled.
+*/
 #define KHUI_ACTIONSTATE_ENABLED    0
+
 /*! \brief The action is diabled */
 #define KHUI_ACTIONSTATE_DISABLED   1
+
 /*! \brief For toggle type actions, the action is checked */
 #define KHUI_ACTIONSTATE_CHECKED    2
+
 /*! \brief The action is hot
 
     Typically this means that the user is hovering the pointing device
@@ -78,31 +131,97 @@ typedef struct tag_khui_action {
  */
 #define KHUI_ACTIONSTATE_HOT        4
 
+/*! \brief The action has been marked for deletion
+
+    For custom actions, this means that the custom action was deleted.
+    The contents of the custom action fields are no longer valid.
+ */
+#define KHUI_ACTIONSTATE_DELETED    8
+
 #ifdef NOEXPORT
 #define ACTION_SIMPLE(c,cap,des,top) \
-    {c,KHUI_ACTIONTYPE_TRIGGER,0,0,0,0,0,cap,des,top,0}
+    {c,KHUI_ACTIONTYPE_TRIGGER,NULL,0,0,0,0,0,cap,des,top,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0}
 
-#define ACTION_FULL(cmd,type,inormal,ihot,idis,isml,ismld,capt,toolt,topic,state) \
-    {cmd,type,inormal,ihot,idis,isml,ismld,capt,toolt,topic,state}
+#define ACTION_FULL(cmd,type,name,inormal,ihot,idis,isml,ismld,capt,toolt,topic,state) \
+    {cmd,type,name,inormal,ihot,idis,isml,ismld,capt,toolt,topic,NULL,NULL,NULL,NULL,NULL,NULL,NULL,state}
 
 #define ACTION_SIMPLE_IMAGE(c,inormal, ihot, idis, isml, ismld,cap, des, top) \
-    {c,KHUI_ACTIONTYPE_TRIGGER,inormal,ihot,idis,isml,ismld,cap,des,top,0}
+    {c,KHUI_ACTIONTYPE_TRIGGER,NULL,inormal,ihot,idis,isml,ismld,cap,des,top,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0}
 #endif
 
-/*! \brief A reference to an action */
+/*! \brief A reference to an action
+
+    If the \a flags member has the KHUI_ACTIONREF_PACTION bit set,
+    then the action is referenced by the \a p_action member of the
+    union.  Otherwise the identifier for the action is specified by \a
+    action member.
+*/
 typedef struct tag_khui_action_ref {
-    int flags;
+    int flags;                  /*!< A combination of KHUI_ACTIONREF_* */
     union {
-        int action;
-        khui_action * p_action;
+        khm_int32     action;   /*!< The action identifier for the
+                                  action that is being referrred to.
+                                  Only valid if
+                                  ::KHUI_ACTIONREF_PACTION is not set
+                                  in \a flags. */
+        khui_action * p_action; /*!< A pointer to the ::khui_action
+                                  structure that describes the action
+                                  that is being referred to.  Only
+                                  valid if ::KHUI_ACTIONREF_PACTION is
+                                  set. */
     };
 } khui_action_ref;
 
+/*! \brief A submenu
+
+    There should exist a menu associated with the action that is being
+    referred.  When displaying this action in a menu, the contents of
+    the associated menu will appear as a submenu.
+ */
 #define KHUI_ACTIONREF_SUBMENU      0x01
+
+/*! \brief Separator
+
+    This is not an actual action, but represents a separator between
+    actions.  When displaying this action in a menu or a toolbar, a
+    separating line will be drawn in place of this action.  The \a
+    action and \a p_action members of the structures are unused if
+    this flag is set.
+ */
 #define KHUI_ACTIONREF_SEP          0x02
+
+/*! \brief Action by reference
+
+    The \a p_action member of the structure points to the
+    ::khui_action structure that describes the action.
+ */
 #define KHUI_ACTIONREF_PACTION      0x04
+
+#ifdef NOEXPORT
+/*! \brief Action should be freed
+
+    \note This flag is reserved for internal use in the NetIDMgr
+    application.  Do not use.
+ */
 #define KHUI_ACTIONREF_FREE_PACTION 0x08
+
+/*! \brief Marks the end of an action sequence
+
+    \note THis flag is reserved for internal use in the NetIDMgr
+    application. Do not use.
+ */
 #define KHUI_ACTIONREF_END          0x10
+#endif
+
+/*! \brief The default action
+
+    When this bit is set in an action reference that describes a menu,
+    the menu item will be the default item and will be rendered
+    differently from other menu items.  Only useful when defining
+    context menus.  In general, it is good practice to place the
+    default item at the top of a menu, although the UI library does
+    not enforce this.  This is purely meant as a rendering hint.
+ */
 #define KHUI_ACTIONREF_DEFAULT      0x20
 
 #ifdef NOEXPORT
@@ -113,34 +232,93 @@ typedef struct tag_khui_action_ref {
 #define MENU_END() {KHUI_ACTIONREF_END,KHUI_MENU_END}
 #endif
 
-/*! \brief Menu definition */
+/*! \brief Menu definition
+
+    Use the khui_menu_create(), khui_menu_insert_action(),
+    khui_menu_insert_paction(), khui_menu_get_size(),
+    khui_menu_get_action() functions to create and manipulate custom
+    menus.  Do not manipulate this structure directly as doing so may
+    cause inconsistencies in the UI library.
+*/
 typedef struct tag_khui_menu_def {
-    int cmd;                /*!< Action associated with menu */
-    int state;              /*!< combination of KHUI_MENUSTATE_* */
-    size_t n_items;         /*!< total number of items or -1 if not
-			      set.  If this is -1, then the list of
-			      actions must be terminated with a
-			      ACTION_LIST_END entry. */
-    size_t nc_items;        /*!< max number of items in the buffer
+    khm_int32 cmd;          /*!< Action associated with menu */
+    khm_int32 state;        /*!< combination of KHUI_MENUSTATE_* */
+    khm_size  n_items;      /*!< The number of actions in the \a items
+                              list.  If this is a custom menu, the
+                              ::KHUI_MENUSTATE_ALLOCD bit will be set,
+                              and the contents of this field will be
+                              valid.  Otherwise, the contents of this
+                              field is ignored and the list of actions
+                              must be terminated with a
+                              ACTION_LIST_END action. */
+    khm_size  nc_items;     /*!< max number of items in the buffer
 			      alocated for items.  Ignored if
-			      KHUI_MENUSTATE_CONSTANT is set in \a
-			      state.*/
+			      ::KHUI_MENUSTATE_ALLOCD is not set in \a
+			      state. */
     khui_action_ref *items; /*!< Action list terminated by,
 			      ACTION_LIST_END.  If \a n_items is set
 			      to a value other than -1, the list
 			      doesn't necessarily have to end with a
-			      ACTION_LIST_END. */
+			      ACTION_LIST_END.  When constructing a
+			      menu using khui_menu_* functions, they
+			      will set the size of this list in the \a
+			      n_items member, and there will be no
+			      ACTION_LIST_END action to terminate the
+			      list. */
 } khui_menu_def;
 
 #ifdef NOEXPORT
 #define CONSTMENU(c,s,i) {c,s,-1,-1,i}
 #endif
 
+/*! \brief Unspecified menu
+
+    Used when there is no single command associated with the entire
+    menu, such as for ad-hoc context menus.
+ */
+#define KHUI_MENU_NONE -3
+
+/*! \brief Menu end indicator
+
+    For static or constant menus this indicates that this action marks
+    the end of the list of actions which defined the menu.  This is
+    invalid if used in a dynamic menu (a menu with the
+    ::KHUI_MENUSTATE_ALLOCD bit set).
+ */
 #define KHUI_MENU_END -2
+
+/*! \brief Menu separator
+
+    A separator for actions.  When displaying a menu or showing a
+    toolbar based on a menu definition, a separator is rendered as a
+    bar separating the user interface elements for the actions on
+    either side of this.
+*/
 #define KHUI_MENU_SEP -1
 
+/*! \brief Constant menu
+
+    The contents of the menu cannot be modified (individual actions in
+    the menu may be modified, but the order and the contents of the
+    menu itself cannot be modified.
+
+    This is the default if ::KHUI_MENUSTATE_ALLOCD is not specified.
+ */
 #define KHUI_MENUSTATE_CONSTANT 0
+
+/*! \brief Variable menu
+
+    The menu is dnamically allocated.  The list of actions contained
+    in the menu can be modified.
+*/
 #define KHUI_MENUSTATE_ALLOCD   1
+
+#ifdef NOEXPORT
+/* predefined system menu */
+#define KHUI_MENUSTATE_SYSTEM   2
+#endif
+
+#ifdef NOEXPORT
 
 /*! \brief Accelerator definition */
 typedef struct tag_khui_accel_def {
@@ -151,8 +329,6 @@ typedef struct tag_khui_accel_def {
 } khui_accel_def;
 
 #define KHUI_ACCEL_SCOPE_GLOBAL 0
-
-#ifdef NOEXPORT
 
 extern khui_accel_def khui_accel_global[];
 extern int khui_n_accel_global;
@@ -167,11 +343,154 @@ extern int khui_n_all_menus;
 
 /* functions */
 
-KHMEXP khui_menu_def * KHMAPI khui_menu_create(int cmd);
-KHMEXP khui_menu_def * KHMAPI khui_menu_dup(khui_menu_def * src);
-KHMEXP void KHMAPI khui_menu_delete(khui_menu_def * d);
-KHMEXP void KHMAPI khui_menu_add_action(khui_menu_def * d, int id);
-KHMEXP void KHMAPI khui_menu_add_paction(khui_menu_def * d, khui_action * act, int flags);
+/*! \brief Create a new menu
+
+    Creates a new menu.  The returned data structure must be freed by
+    a call to khui_menu_delete().  Custom menus that are created this
+    way are not reference counted or maintained by the UI library.
+    The caller is responsible for calling khui_menu_delete() when the
+    data is no longer needed.
+
+    Specifiying an action in the \a action parameter will associate
+    the menu with the specified action.  In this case, if the action
+    is added to another menu with the ::KHUI_ACTIONREF_SUBMENU flag,
+    this menu will appear as a submenu within that menu.  Only one
+    menu can be associated with any given action.  Custom menus can
+    not be associated with standard actions.
+ */
+KHMEXP khui_menu_def * KHMAPI
+khui_menu_create(khm_int32 action);
+
+/*! \brief Duplicate a menu
+
+    Creates a copy of the specified menu.  The returned data structure
+    must be freed by a call to khui_menu_delete().  Custom menus are
+    not reference counted or maintained by the UI library.  The caller
+    is responsible for calling khui_menu_delete() when the data is no
+    longer needed.
+
+    Note that even if the original menu was associated with an action,
+    the duplicate will not be.  Modifying the duplicate will not
+    modify the original menu.  Only one menu can be associated with an
+    action.
+ */
+KHMEXP khui_menu_def * KHMAPI
+khui_menu_dup(khui_menu_def * src);
+
+/*! \brief Delete a menu
+
+    Deletes a menu created by a call to khui_menu_create() or
+    khui_menu_dup().  This frees up the memory and associated
+    resources used by the menu definition.  The pointer that is passed
+    in will no longer be valid.
+ */
+KHMEXP void KHMAPI
+khui_menu_delete(khui_menu_def * d);
+
+/*! \brief Insert an action into a menu
+
+    The action specified by \a cmd will be inserted in to the menu \a
+    d at index \a idx.
+
+    \param[in] d The menu to insert the action into
+
+    \param[in] idx The index at which to insert the action.  The index
+        is zero based.  If \a idx is (-1) or larger than the largest
+        index in the menu, the item is appended to the menu.
+
+    \param[in] cmd The command representing the action to insert into
+        the menu.  This should be either a standard action, a user
+        action created with khui_action_create(), or certain pseudo
+        actions.  Not all pseudo actions can be placed on a menu.
+
+    \param[in] flags Flags for the action.  This is a combination of
+        KHUI_ACTIONREF_* constants.  Currently, the only constants
+        that are valid for this function are: ::KHUI_ACTIONREF_SEP,
+        ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.
+        ::KHUI_ACTIONREF_SEP will be automatically added if the
+        command is ::KHUI_MENU_SEP.
+
+    \note The ::khui_menu_def structure is not thread safe.  Multiple
+        threads modifying the same ::khui_menu_def structure may cause
+        thread safety issues.
+ */
+KHMEXP void KHMAPI
+khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 cmd, khm_int32 flags);
+
+#define khui_menu_add_action(d,c) khui_menu_insert_action((d),-1,(c),0)
+#pragma deprecated(khui_menu_add_action)
+
+#ifdef NOEXPORT
+
+/*! \brief Insert an action by reference into a menu
+
+    The action specified by \a act will be inserted into the menu \a d
+    at index \a idx.
+
+    \param[in] d The menu to inser the action into.
+
+    \param[in] idx The index at which to insert the action.  The index
+        is zero based.  If the index is (-1) or is larger than the
+        largest index in the menu, then the action is appended to the
+        menu.
+
+    \param[in] act The action to insert.  This is added by reference.
+        It is the callers reponsibility to ensure that the structure
+        pointed to by \a act is available throughout the lifetime of
+        the menu.
+
+    \param[in] flags Flags for the action.  This is a combination of
+        KHUI_ACTIONREF_* constants.  Currently, the only constants
+        that are valid for this function are: ::KHUI_ACTIONREF_SEP,
+        ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.  For this
+        function, ::KHUI_ACTIONREF_PACTION will automatically be aded
+        when adding the action.  ::KHUI_ACTIONREF_SEP will be
+        automatically added if the command is ::KHUI_MENU_SEP.
+
+    \note The ::khui_menu_def structure is not thread safe.  Multiple
+        threads modifying the same ::khui_menu_def structure may cause
+        thread safety issues.
+*/
+KHMEXP void KHMAPI
+khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * act, khm_int32 flags);
+
+#define khui_menu_add_paction(d,a,f) khui_menu_insert_paction((d),-1,(a),(f))
+#pragma deprecated(khui_menu_add_paction)
+
+#endif
+
+/*! \brief Remove an action from a menu
+
+    The action at the specified index will be removed from the menu.
+  */
+KHMEXP void KHMAPI
+khui_menu_remove_action(khui_menu_def * d, khm_size idx);
+
+/*! \brief Get the number of items in the menu
+
+    Note that the count includes menu separators.  The indices of the
+    menu items range from 0 to one less than the value returned by
+    this function.
+ */
+KHMEXP khm_size KHMAPI
+khui_menu_get_size(khui_menu_def * d);
+
+/*! \brief Get the menu item at a specified index
+
+    The returned reference is only valid while the ::khui_menu_def
+    structure is valid.  In addition, the reference becomes invalid if
+    the list of actions in the menu data structure is modified in any
+    way.
+
+    If the specified index is out of bounds, then the function returns
+    NULL.
+
+    \note The ::khui_menu_def structure is not thread safe.  Multiple
+        threads modifying the same ::khui_menu_def structure may cause
+        thread safety issues.
+ */
+KHMEXP khui_action_ref *
+khui_menu_get_action(khui_menu_def * d, khm_size idx);
 
 /*! \brief Action scope identifiers 
 
@@ -399,6 +718,16 @@ khui_context_set_ex(khui_scope scope,
                     void * vparam,
                     khm_size cb_vparam);
 
+/*! \brief Set the current UI context using an existing context
+
+    Copies the context specified in \a ctx into the active UI context.
+
+    \param[in] ctx A pointer to a ::khui_action_context structure that
+        specifies the new UI context.  Cannot be NULL.
+*/
+KHMEXP void KHMAPI
+khui_context_set_indirect(khui_action_context * ctx);
+
 /*! \brief Obtain the current UI context
 
     The parameter specified by \a ctx will receive the current UI
@@ -501,21 +830,125 @@ khui_context_cursor_filter(khm_handle cred,
 
     \return TRUE if the operation was successful. FALSE otherwise.
  */
-KHMEXP khm_boolean KHMAPI khui_get_cmd_accel_string(int cmd, wchar_t * buf, size_t bufsiz);
+KHMEXP khm_boolean KHMAPI khui_get_cmd_accel_string(khm_int32 cmd, wchar_t * buf, khm_size bufsiz);
 
+#ifdef NOEXPORT
+/*! \brief Initializes the global accelerator table
+ */
 KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void);
+#endif
 
-/*! \brief Find a menu by id */
-KHMEXP khui_menu_def * KHMAPI khui_find_menu(int id);
+/*! \brief Find a menu by id
 
-/*! \brief Find an action by id */
-KHMEXP khui_action * KHMAPI khui_find_action(int id);
+    Finds the menu that is associated with the specified action.
+ */
+KHMEXP khui_menu_def * KHMAPI khui_find_menu(khm_int32 action);
 
+#ifdef NOEXPORT
+
+/* internal */
+KHMEXP void KHMAPI
+khui_set_main_window(HWND hwnd);
+
+#endif
+
+/*! \brief Trigger an action
+
+    Triggers the specified action using the specified UI context.
+
+    This function does not return until the specified action has been
+    processed.  Many standard actions are asynchronous and they will
+    return before processing will complete.
+
+    Pseudo actions should not be triggered using khui_action_trigger()
+    as they only carry meaning when invoked from specific windows or
+    contexts.
+
+    \param[in] action Action.  Should be one of the standard actions
+        or an action created by khui_action_create()
+
+    \param[in] ctx The UI context to use for the action.  If this is
+        NULL, the action will be triggered under the current UI context.
+ */
+KHMEXP void KHMAPI
+khui_action_trigger(khm_int32 action, khui_action_context * ctx);
+
+/*! \brief Find an action by id
+
+    \note This function should not be used by plugins.  It is there
+        for use by the NetIDMgr application.
+*/
+KHMEXP khui_action * KHMAPI khui_find_action(khm_int32 action);
+
+#ifdef NOEXPORT
 /*! \brief Get the length of the action list */
 KHMEXP size_t KHMAPI khui_action_list_length(khui_action_ref * ref);
+#endif
+
+/*! \brief Create a new action
+
+    \param[in] name Name for a named action.  The name must be unique
+        among all registered actions. (limited by KHUI_MAXCCH_NAME)
+        (Optional. Set to NULL if the action is not a named action.)
+
+    \param[in] caption The localized caption for the action.  This
+        will be shown in menus, toolbars and buttons when the action
+        needs to be represented. (limited by KHUI_MAXCCH_SHORT_DESC)
+        (Required)
+
+    \param[in] tooltip The localized tooltip for the action. (limited
+        by KHUI_MAXCCH_SHORT_DESC) (Optional, set to NULL if there is
+        no tooltip associated with the action)
+
+    \param[in] hsub The subscription that is notified when the action
+        is triggered. (Optional) The subscription can be created with
+        kmq_create_subscription().  The handle will be released when
+        it is no longer needed.  Hence, the caller should not release
+        it.
+
+    \param[in] type The type of the action.  Currently it should be
+        set to either ::KHUI_ACTIONTYPE_TRIGGER or
+        ::KHUI_ACTIONTYPE_TOGGLE.  For ::KHUI_ACTIONTYPE_TOGGLE, the
+        initial state will be unchecked.  Use khui_check_action()
+        function to change the checked state of the action.
+
+    \param[in] userdata A custom value.
+
+    \return The identifier of the new action or zero if the action
+        could not be created.
+
+    \note For named custom actions, the name of the action can not be
+        the same as the name of a configuration node.  See
+        khui_cfg_register_node().
+ */
+KHMEXP khm_int32 KHMAPI
+khui_action_create(const wchar_t * name,
+                   const wchar_t * caption,
+                   const wchar_t * tooltip,
+                   void * userdata,
+                   khm_int32 type,
+                   khm_handle hsub);
+
+/* \brief Delete a custom action
+
+   Deletes a custom action created by a call to khui_action_create().
+   Custom actions should only be deleted when unloading a plugin.
+ */
+KHMEXP void KHMAPI
+khui_action_delete(khm_int32 action);
+
+/*! \brief Get the user data associated with a custom action
+
+    This function returns the user data that was specified when the
+    custom action was created usng khui_action_create().  If the
+    custom action identifier is invalid or if the custom action does
+    not contain any user data, this function will return NULL.
+ */
+KHMEXP void * KHMAPI
+khui_action_get_data(khm_int32 action);
 
 /*! \brief Find an action by name */
-KHMEXP khui_action * KHMAPI khui_find_named_action(wchar_t * name);
+KHMEXP khui_action * KHMAPI khui_find_named_action(const wchar_t * name);
 
 /*! \brief Enables or disables a group of actions
 
@@ -527,24 +960,32 @@ KHMEXP void KHMAPI khui_enable_actions(khui_menu_def * d, khm_boolean enable);
 
 /*! \brief Enables or disables an action
 
-    The action designated by the command \a cmd will either be enabled
+    The action designated by the command \a action will either be enabled
     or disabled depending on the \a enable parameter.  If \a enable is
     TRUE then the action is enabled.
  */
-KHMEXP void KHMAPI khui_enable_action(int cmd, khm_boolean enable);
+KHMEXP void KHMAPI khui_enable_action(khm_int32 action, khm_boolean enable);
 
 /*! \brief Check an action in an action group
 
-    Marks the action denoted by \a cmd as checked and resets the
+    Marks the action denoted by \a action as checked and resets the
     checked bit in all other actions.
 
     \param[in] d A menu definition.
-    \param[in] cmd A command identifier.  Setting this to -1 will
+
+    \param[in] action A command identifier.  Setting this to -1 will
         reset the checked bit in all the actions in the menu
         definition.
  */
-KHMEXP void KHMAPI khui_check_radio_action(khui_menu_def * d, khm_int32 cmd);
+KHMEXP void KHMAPI khui_check_radio_action(khui_menu_def * d, khm_int32 action);
 
+/*! \brief Check an action
+
+    For toggle typed actions, this sets or resets the check.
+ */
+KHMEXP void KHMAPI khui_check_action(khm_int32 cmd, khm_boolean check);
+
+#ifdef NOEXPORT
 /*!\cond INTERNAL */
 
 /*! \brief Initialize actions
@@ -560,6 +1001,7 @@ KHMEXP void KHMAPI khui_init_actions(void);
 KHMEXP void KHMAPI khui_exit_actions(void);
 
 /*! \endcond */
+#endif
 
 /*@}*/
 /*@}*/

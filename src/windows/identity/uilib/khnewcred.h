@@ -263,7 +263,7 @@ typedef struct tag_khui_new_creds {
     khm_size    nc_types;       /*!< Internal use */
 
     khm_int32   result;     /*!< One of ::KHUI_NC_RESULT_CANCEL or
-                                ::KHUI_NC_RESULT_GET_CREDS indicating
+                                ::KHUI_NC_RESULT_PROCESS indicating
                                 the result of the dialog with the
                                 user */
 
@@ -296,7 +296,7 @@ typedef struct tag_khui_new_creds {
 
 /*!\name Result values for khui_new_creds_t::result
   @{*/
-#define KHUI_NC_RESULT_GET_CREDS    0
+#define KHUI_NC_RESULT_PROCESS    0
 #define KHUI_NC_RESULT_CANCEL       1
 /*@}*/
 

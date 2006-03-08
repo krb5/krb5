@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by D:\work\pismere\athena\auth\krb5\src\windows\identity\plugins\krb5\lang\en_us\langres.rc
+// Used by C:\work\pismere\athena\auth\krb5\src\windows\identity\plugins\krb5\lang\en_us\langres.rc
 //
 #define IDS_UNK_ADDR_FMT                101
 #define IDD_NC_KRB5                     102
@@ -115,6 +115,23 @@
 #define IDS_CFG_RE_NEWSERVER            197
 #define IDS_CFG_RE_NEWDMAP              198
 #define IDS_KRB5_NC_NAME                199
+#define IDS_NCERR_IDENT_TOO_LONG        200
+#define IDS_NCERR_IDENT_INVALID         201
+#define IDS_NCERR_IDENT_UNKNOWN         202
+#define IDS_CFG_RE_ARNUT                203
+#define IDS_CFG_RE_ARNUM                204
+#define IDS_CFG_RE_ASNUT                205
+#define IDS_CFG_RE_ASNUM                206
+#define IDS_CFG_RE_DMNUT                207
+#define IDS_CFG_RE_DMNUM                208
+#define IDS_CFG_RE_MNR                  209
+#define IDS_CFG_RE_MDR                  210
+#define IDS_CFG_RE_MNK                  211
+#define IDS_CFG_RE_MDK                  212
+#define IDS_CFG_RE_MAK                  213
+#define IDS_CFG_RE_MMK                  214
+#define IDS_CFG_RE_MND                  215
+#define IDS_CFG_RE_MDD                  216
 #define IDC_NCK5_RENEWABLE              1002
 #define IDC_NCK5_FORWARDABLE            1004
 #define IDC_NCK5_REALM                  1005
@@ -172,16 +189,24 @@
 #define IDC_CFG_INCAPI                  1066
 #define IDC_CFG_INCMSLSA                1067
 #define IDC_PPK5_FLAGS                  1072
-#define IDC_CHECK1                      1073
 #define IDC_CFG_INCREALMS               1073
+#define IDC_NCK5_ADDRESS                1074
+#define IDC_IPADDRESS1                  1075
+#define IDC_NCK5_PUBLICIP               1075
+#define IDC_CFG_PUBLICIP                1075
+#define IDC_CFG_RENEW                   1076
+#define IDC_CHECK3                      1077
+#define IDC_CFG_ADDRESSLESS             1077
+#define IDC_CFG_FORWARD                 1078
+#define ID_FOO_BAR                      40001
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        117
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1074
+#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_COMMAND_VALUE         40002
+#define _APS_NEXT_CONTROL_VALUE         1079
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

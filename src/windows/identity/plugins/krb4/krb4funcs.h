@@ -64,6 +64,10 @@ khm_krb4_list_tickets(void);
 
 int khm_krb4_kdestroy(void);
 
+khm_handle
+khm_krb4_find_tgt(khm_handle credset, 
+                  khm_handle identity);
+
 LONG
 write_registry_setting(
     char* setting,

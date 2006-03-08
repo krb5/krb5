@@ -85,7 +85,8 @@
 
 /*! \brief Action list messages
 
-    Notifications of changes in action state.
+    Notifications of changes in action state and firing of custom
+    actions.
 
     \see \ref kmq_msg_act
  */
@@ -138,6 +139,7 @@
     \see \ref pi_pt_cred_init
  */
 #define KMSG_SYSTEM_INIT    1
+
 /*! \brief Generic uninitialization message
 
     Used by specific components to signal that the recipient should
@@ -187,7 +189,7 @@
     khui_enable_actions() or khui_enable_action() and indicates that
     one or more actions have changed their state.
  */
-#define KMSG_ACT_ENABLE 1
+#define KMSG_ACT_ENABLE     1
 
 /*! \brief One or more actions changed check state
 
@@ -195,17 +197,48 @@
     khui_check_action() and indicates that one or more actions have
     either been checked or unchecked.
  */
-#define KMSG_ACT_CHECK 2
+#define KMSG_ACT_CHECK      2
 
 /*! \brief Refresh action states
 
     Sent after a batch of modifications were made to action states.
  */
-#define KMSG_ACT_REFRESH 3
+#define KMSG_ACT_REFRESH    3
 
+/*! \brief A new action was created
+
+    Sent when a new custom action was created.  The \a uparam
+    parameter of the message contains the identifier of the newly
+    created action.
+*/
+#define KMSG_ACT_NEW        4
+
+/*! \brief A custom action was deleted
+
+    Sent after a custom action is deleted.  The \a uparam parameter of
+    the message contains the identifier of the deleted action.
+ */
+#define KMSG_ACT_DELETE     5
+
+/*! \brief A custom action has been activated
+
+    When a custom action is activated, then the listener of that
+    custom action receives this message.  Note that only the listener
+    for that custom action will receive this notification.
+
+    \a uparam of the message is set to the identifier of the custom
+    action.
+ */
+#define KMSG_ACT_ACTIVATE   6
+
+/*! \brief Internal */
 #define KMSG_ACT_BEGIN_CMDLINE 128
 
+/*! \brief Internal */
 #define KMSG_ACT_CONTINUE_CMDLINE 129
+
+/*! \brief Internal */
+#define KMSG_ACT_SYNC_CFG 130
 
 /*@}*/
 
@@ -228,7 +261,7 @@
     respective credentials.
 
     \note May be sent to individual credential subscriptions.
-*/
+ */
 #define KMSG_CRED_REFRESH   2
 
 /*! \brief Change the password
@@ -266,7 +299,7 @@
 
 /*! \brief Dialog setup
 
-    Once KMSG_CRED_NEW_CREDS has been responded to by all the
+    Once ::KMSG_CRED_NEW_CREDS has been responded to by all the
     credential types, the UI creates the dialog windows using the data
     supplied in the ::khui_new_creds_by_type structures and issues
     this message.  Each credentials provider is expected to respond by
@@ -282,7 +315,7 @@
 /*! \brief Dialog pre-start
 
     Sent after all the credentials providers have responded to
-    KMSG_CRED_DIALOG_SETUP and all the initialization has been
+    ::KMSG_CRED_DIALOG_SETUP and all the initialization has been
     completed.  Credentials providers are expected to respond to this
     message by loading any default data into the dialog controls for
     each credential type.
@@ -348,8 +381,8 @@
     processing.
 
     If the \a result field in the structure is set to
-    KHUI_NC_RESULT_GET_CREDS, then new credentials should be obtained
-    using the given data.
+    ::KHUI_NC_RESULT_PROCESS, then new credentials should be
+    obtained using the given data.
 
     Set the \a response field in the structure to indicate how the UI
     should proceed from here.
@@ -516,6 +549,16 @@
  */
 #define KMSG_ALERT_CHECK_QUEUE 4
 
+/*! \brief Show a modal alert
+
+    Message parameters:
+    - \b vparam : held pointer to a ::khui_alert object.
+
+    \note the ::khui_alert object will be released when the queued
+        messages are displayed.
+ */
+#define KMSG_ALERT_SHOW_MODAL 5
+
 /*@}*/
 
 /*! \defgroup kmq_msg_ident KMSG_IDENT Subtypes
@@ -552,7 +595,7 @@
         name to be validated will be in the \a name_src member.  The
         buffer will be NULL terminated with a maximum limit of
         KCDB_IDENT_MAXCCH_NAME characters including the terminating
-        NULL.
+        NULL, consisting only of characters in KCDB_IDENT_VALID_CHARS
         The \a result member should be set to one of the following
         depending on the result of the validation:
 

@@ -26,6 +26,28 @@
 
 #include<netidmgr_intver.h>
 
+#ifndef LANGVER
+
+#define STR_FILEDESC "Kerberos 4 Plugin for NetIDMgr"
+#define STR_INTNAME  "krb4cred"
+#define STR_ORIGNAME "krb4cred.dll"
+
+#else
+
+#ifdef LANG_en_us
+
+#define STR_FILEDESC "English(US) language resources for the Keberos 4 plugin"
+#define STR_INTNAME  "krb4cred_en_us"
+#define STR_ORIGNAME "krb4cred_en_us.dll"
+
+#else
+
+#error Unknown langugae
+
+#endif
+
+#endif
+
 1 VERSIONINFO 
         FILEVERSION     KH_VERSION_LIST
         PRODUCTVERSION  KH_VERSION_LIST
@@ -41,20 +63,22 @@
       BLOCK "040904b0"
       {
         VALUE "CompanyName",     KH_VERSTR_COMPANY_1033
-        VALUE "FileDescription", "Kerberos 4 plugin for NetIDMgr"
+        VALUE "FileDescription", STR_FILEDESC
         VALUE "FileVersion",     KH_VERSTR_VERSION_1033
-        VALUE "InternalName",    "krb4cred"
+        VALUE "InternalName",    STR_INTNAME
         VALUE "LegalCopyright",  KH_VERSTR_COPYRIGHT_1033
-        VALUE "OriginalFilename", "krb4cred.dll"
+        VALUE "OriginalFilename", STR_ORIGNAME
         VALUE "ProductName",     "NetIDMgr"
         VALUE "ProductVersion",  KH_VERSTR_PRODUCT_1033
 #ifdef KH_VERSTR_COMMENT_1033
         VALUE "Comment", KH_VERSTR_COMMENT_1033
 #endif
+#ifndef LANGVER
         VALUE NIMV_MODULE,       "MITKrb4"
         VALUE NIMV_PLUGINS,      "Krb4Cred"
         VALUE NIMV_APIVER,       KH_VERSION_STRINGAPI
         VALUE NIMV_SUPPORT,      "http://web.mit.edu/kerberos"
+#endif
       }
     }
 
@@ -62,5 +86,4 @@
     {
         VALUE "Translation", 0x409, 1200
     }
-
   }

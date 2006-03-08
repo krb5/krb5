@@ -155,7 +155,7 @@ apply_all(HWND hwnd,
         assert(hw);
 #endif
 
-        PostMessage(hw, KHUI_WM_CFG_NOTIFY,
+        SendMessage(hw, KHUI_WM_CFG_NOTIFY,
                     MAKEWPARAM(0, WMCFG_APPLY), 0);
     }
 }
@@ -169,6 +169,7 @@ show_tab_panel(HWND hwnd,
     TCITEM tci;
     HWND hw;
     HWND hw_target;
+    HWND hw_firstctl;
     RECT r;
     RECT rref;
     khui_config_node_reg reg;
@@ -213,6 +214,11 @@ show_tab_panel(HWND hwnd,
                  r.right - r.left, r.bottom - r.top,
                  SWP_NOACTIVATE | SWP_NOOWNERZORDER |
                  SWP_SHOWWINDOW);
+
+    hw_firstctl = GetNextDlgTabItem(hw, NULL, FALSE);
+    if (hw_firstctl) {
+        SetFocus(hw_firstctl);
+    }
 }
 
 static INT_PTR

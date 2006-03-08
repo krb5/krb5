@@ -360,15 +360,33 @@ FUNC_INFO toolhelp_fi[] = {
 
 khm_int32 init_imports(void) {
     OSVERSIONINFO osvi;
+    int imp_rv = 1;
 
-    LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
-    LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
-    LoadFuncs(COMERR_DLL, ce_fi, &hComErr, 0, 0, 1, 0);
-    LoadFuncs(SERVICE_DLL, service_fi, &hService, 0, 1, 0, 0);
-    LoadFuncs(SECUR32_DLL, lsa_fi, &hSecur32, 0, 1, 1, 1);
-    LoadFuncs(KRB524_DLL, k524_fi, &hKrb524, 0, 1, 1, 1);
-    LoadFuncs(PROFILE_DLL, profile_fi, &hProfile, 0, 1, 0, 0);
-    LoadFuncs(CCAPI_DLL, ccapi_fi, &hCCAPI, 0, 1, 0, 0);
+#define CKRV if(!imp_rv) goto _err_ret
+
+    imp_rv = LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
+    CKRV;
+
+    imp_rv = LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
+    CKRV;
+
+    imp_rv = LoadFuncs(COMERR_DLL, ce_fi, &hComErr, 0, 0, 1, 0);
+    CKRV;
+
+    imp_rv = LoadFuncs(SERVICE_DLL, service_fi, &hService, 0, 1, 0, 0);
+    CKRV;
+
+    imp_rv = LoadFuncs(SECUR32_DLL, lsa_fi, &hSecur32, 0, 1, 1, 1);
+    CKRV;
+
+    imp_rv = LoadFuncs(KRB524_DLL, k524_fi, &hKrb524, 0, 1, 1, 1);
+    CKRV;
+
+    imp_rv = LoadFuncs(PROFILE_DLL, profile_fi, &hProfile, 0, 1, 0, 0);
+    CKRV;
+
+    imp_rv = LoadFuncs(CCAPI_DLL, ccapi_fi, &hCCAPI, 0, 1, 0, 0);
+    CKRV;
 
     memset(&osvi, 0, sizeof(OSVERSIONINFO));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
@@ -382,19 +400,26 @@ khm_int32 init_imports(void) {
     if(osvi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
     {
         // Windows 9x
-        LoadFuncs(TOOLHELPDLL, toolhelp_fi, &hToolHelp32, 0, 1, 0, 0);
+        imp_rv = LoadFuncs(TOOLHELPDLL, toolhelp_fi, &hToolHelp32, 0, 1, 0, 0);
+        CKRV;
+
         hPsapi = 0;
     }             
     else if(osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
     {
         // Windows NT
-        LoadFuncs(PSAPIDLL, psapi_fi, &hPsapi, 0, 1, 0, 0);
+        imp_rv = LoadFuncs(PSAPIDLL, psapi_fi, &hPsapi, 0, 1, 0, 0);
+        CKRV;
+
         hToolHelp32 = 0;
     }
 
     AfsAvailable = TRUE; //afscompat_init();
 
     return KHM_ERROR_SUCCESS;
+
+ _err_ret:
+    return KHM_ERROR_NOT_FOUND;
 }
 
 khm_int32 exit_imports(void) {

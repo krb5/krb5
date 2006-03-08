@@ -72,7 +72,7 @@ KHMEXP void KHMAPI kmm_init(void)
     ht_registrar = CreateThread(
         NULL,
         0,
-        kmm_registrar,
+        kmmint_registrar,
         NULL,
         0,
         &dummy);

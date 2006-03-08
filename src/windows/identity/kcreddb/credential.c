@@ -156,10 +156,23 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_update(khm_handle vdest,
             kcdb_buf_set_value(&dest->buf, i, i, srcbuf, cbsrcbuf);
             rv = KHM_ERROR_SUCCESS;
 
-_skip_copy:
+	_skip_copy:
             kcdb_attrib_release_info(a);
             kcdb_type_release_info(t);
-        }
+        } else {
+	    if (KHM_FAILED(kcdb_attrib_get_info(i, &a)))
+		continue;
+
+	    if (!(a->flags & KCDB_ATTR_FLAG_COMPUTED) &&
+		(a->flags & KCDB_ATTR_FLAG_TRANSIENT) &&
+		kcdb_cred_val_exist(dest, i)) {
+		kcdb_buf_set_value(&dest->buf, i, i, NULL, 0);
+
+		rv = KHM_ERROR_SUCCESS;
+	    }
+
+	    kcdb_attrib_release_info(a);
+	}
     }
 
     if (dest->flags != src->flags) {
@@ -174,7 +187,7 @@ _skip_copy:
             rv = KHM_ERROR_SUCCESS;
     }
 
-_exit:
+ _exit:
     kcdb_cred_unlock_write();
     return rv;
 }

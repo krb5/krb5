@@ -380,7 +380,7 @@ void khm_cred_set_default(void)
     khui_context_release(&ctx);
 }
 
-void khm_cred_destroy_creds(void)
+void khm_cred_destroy_creds(khm_boolean sync, khm_boolean quiet)
 {
     khui_action_context * pctx;
 
@@ -391,7 +391,7 @@ void khm_cred_destroy_creds(void)
 
     khui_context_get(pctx);
 
-    if(pctx->scope == KHUI_SCOPE_NONE) {
+    if(pctx->scope == KHUI_SCOPE_NONE && !quiet) {
         /* this really shouldn't be necessary once we start enabling
            and disbling actions based on context */
         wchar_t title[256];
@@ -413,18 +413,26 @@ void khm_cred_destroy_creds(void)
 
         khui_context_release(pctx);
         PFREE(pctx);
-    } else {
-        _begin_task(KHERR_CF_TRANSITIVE);
-        _report_sr0(KHERR_NONE, IDS_CTX_RENEW_CREDS);
-        _describe();
 
+        return;
+    }
+
+    _begin_task(KHERR_CF_TRANSITIVE);
+    _report_sr0(KHERR_NONE, IDS_CTX_DESTROY_CREDS);
+    _describe();
+
+    if (sync)
+        kmq_send_message(KMSG_CRED,
+                         KMSG_CRED_DESTROY_CREDS,
+                         0,
+                         (void *) pctx);
+    else
         kmq_post_message(KMSG_CRED,
                          KMSG_CRED_DESTROY_CREDS,
                          0,
                          (void *) pctx);
 
-        _end_task();
-    }
+    _end_task();
 }
 
 void khm_cred_renew_identity(khm_handle identity)
@@ -434,7 +442,7 @@ void khm_cred_renew_identity(khm_handle identity)
     khui_cw_create_cred_blob(&c);
 
     c->subtype = KMSG_CRED_RENEW_CREDS;
-    c->result = KHUI_NC_RESULT_GET_CREDS;
+    c->result = KHUI_NC_RESULT_PROCESS;
     khui_context_create(&c->ctx,
                         KHUI_SCOPE_IDENT,
                         identity,
@@ -457,7 +465,7 @@ void khm_cred_renew_cred(khm_handle cred)
     khui_cw_create_cred_blob(&c);
 
     c->subtype = KMSG_CRED_RENEW_CREDS;
-    c->result = KHUI_NC_RESULT_GET_CREDS;
+    c->result = KHUI_NC_RESULT_PROCESS;
     khui_context_create(&c->ctx,
                         KHUI_SCOPE_CRED,
                         NULL,
@@ -479,7 +487,7 @@ void khm_cred_renew_creds(void)
 
     khui_cw_create_cred_blob(&c);
     c->subtype = KMSG_CRED_RENEW_CREDS;
-    c->result = KHUI_NC_RESULT_GET_CREDS;
+    c->result = KHUI_NC_RESULT_PROCESS;
     khui_context_get(&c->ctx);
 
     _begin_task(KHERR_CF_TRANSITIVE);
@@ -855,7 +863,7 @@ khm_cred_process_commandline(void) {
                                  NULL, NULL, 0,
                                  NULL);
 
-                khm_cred_destroy_creds();
+                khm_cred_destroy_creds(FALSE, FALSE);
             }
 
             khm_startup.destroy = FALSE;

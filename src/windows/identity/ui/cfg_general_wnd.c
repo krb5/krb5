@@ -33,6 +33,8 @@ typedef struct tag_cfg_data {
     BOOL auto_import;
     BOOL keep_running;
     BOOL auto_detect_net;
+    BOOL log_to_file;
+    BOOL destroy_creds;
 } cfg_data;
 
 typedef struct tag_dlg_data {
@@ -71,6 +73,12 @@ read_params(dlg_data * dd) {
 
     khc_read_int32(csp_cw, L"AutoDetectNet", &t);
     d->auto_detect_net = !!t;
+
+    khc_read_int32(csp_cw, L"LogToFile", &t);
+    d->log_to_file = !!t;
+
+    khc_read_int32(csp_cw, L"DestroyCredsOnExit", &t);
+    d->destroy_creds = !!t;
 
     khc_close_space(csp_cw);
 
@@ -119,6 +127,22 @@ write_params(dlg_data * dd) {
         applied = TRUE;
     }
 
+    if (!!d->log_to_file != !!s->log_to_file) {
+	khc_write_int32(csp_cw, L"LogToFile", d->log_to_file);
+	applied = TRUE;
+
+	if (d->log_to_file) {
+	    khm_start_file_log();
+	} else {
+	    khm_stop_file_log();
+	}
+    }
+
+    if (!!d->destroy_creds != !!s->destroy_creds) {
+        khc_write_int32(csp_cw, L"DestroyCredsOnExit", d->destroy_creds);
+        applied = TRUE;
+    }
+
     khc_close_space(csp_cw);
 
     khui_cfg_set_flags(dd->node,
@@ -138,7 +162,9 @@ check_for_modification(dlg_data * dd) {
         !!d->auto_start != !!s->auto_start ||
         !!d->auto_import != !!s->auto_import ||
         !!d->keep_running != !!s->keep_running ||
-        !!d->auto_detect_net != !!s->auto_detect_net) {
+        !!d->auto_detect_net != !!s->auto_detect_net ||
+	!!d->log_to_file != !!s->log_to_file ||
+        !!d->destroy_creds != !!s->destroy_creds) {
 
         khui_cfg_set_flags(dd->node,
                            KHUI_CNFLAG_MODIFIED,
@@ -155,6 +181,8 @@ check_for_modification(dlg_data * dd) {
 
 static void
 refresh_view(HWND hwnd, dlg_data * d) {
+    wchar_t buf[512];
+
     CheckDlgButton(hwnd, IDC_CFG_AUTOINIT,
                    (d->work.auto_init?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_CFG_AUTOSTART,
@@ -165,6 +193,20 @@ refresh_view(HWND hwnd, dlg_data * d) {
                    (d->work.keep_running?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_CFG_NETDETECT,
                    (d->work.auto_detect_net?BST_CHECKED:BST_UNCHECKED));
+    CheckDlgButton(hwnd, IDC_CFG_LOGTOFILE,
+		   (d->work.log_to_file?BST_CHECKED:BST_UNCHECKED));
+    CheckDlgButton(hwnd, IDC_CFG_DESTROYALL,
+                   (d->work.destroy_creds?BST_CHECKED:BST_UNCHECKED));
+
+    /* in addition, we correct the label on the trace log control to
+       reflect the actual path that is going to get used */
+    if (GetDlgItemText(hwnd, IDC_CFG_LOGPATH, buf,
+		       ARRAYLENGTH(buf)) == 0) {
+
+	khm_get_file_log_path(sizeof(buf), buf);
+
+	SetDlgItemText(hwnd, IDC_CFG_LOGPATH, buf);
+    }
 }
 
 static void
@@ -179,6 +221,10 @@ refresh_data(HWND hwnd, dlg_data * d) {
                             == BST_CHECKED);
     d->work.auto_detect_net = (IsDlgButtonChecked(hwnd, IDC_CFG_NETDETECT)
                                == BST_CHECKED);
+    d->work.log_to_file = (IsDlgButtonChecked(hwnd, IDC_CFG_LOGTOFILE)
+			   == BST_CHECKED);
+    d->work.destroy_creds = (IsDlgButtonChecked(hwnd, IDC_CFG_DESTROYALL)
+                             == BST_CHECKED);
 }
 
 INT_PTR CALLBACK

@@ -81,6 +81,8 @@ void add_action_to_menu(HMENU hm, khui_action * act,
     wchar_t buf[MAX_RES_STRING] = L"";
     wchar_t accel[MAX_RES_STRING] = L"";
 
+    assert(!act || act->cmd);
+
     mii.cbSize = sizeof(mii);
     mii.fMask = 0;
 
@@ -90,9 +92,13 @@ void add_action_to_menu(HMENU hm, khui_action * act,
     } else {
         khui_menu_def * def;
 
-        LoadString(khm_hInstance, 
-                   act->is_caption, 
-                   buf, ARRAYLENGTH(buf));
+        if (act->caption) {
+            StringCbCopy(buf, sizeof(buf), act->caption);
+        } else {
+            LoadString(khm_hInstance, 
+                       act->is_caption, 
+                       buf, ARRAYLENGTH(buf));
+        }
 
         if(khui_get_cmd_accel_string(act->cmd, accel, 
                                      ARRAYLENGTH(accel))) {
@@ -126,10 +132,12 @@ void add_action_to_menu(HMENU hm, khui_action * act,
             mii.hbmpItem = HBMMENU_CALLBACK;
         }
 
-        def = khui_find_menu(act->cmd);
-        if(def) {
-            mii.fMask |= MIIM_SUBMENU;
-            mii.hSubMenu = mm_create_menu_from_def(def, FALSE);
+        if (flags & KHUI_ACTIONREF_SUBMENU) {
+            def = khui_find_menu(act->cmd);
+            if(def) {
+                mii.fMask |= MIIM_SUBMENU;
+                mii.hSubMenu = mm_create_menu_from_def(def, FALSE);
+            }
         }
 
         if(flags & KHUI_ACTIONREF_DEFAULT)
@@ -152,6 +160,21 @@ static void refresh_menu_item(HMENU hm, khui_action * act,
         return;
     else {
         khui_menu_def * def;
+
+        /* first check if the menu item is there.  Otherwise we need
+           to add it. */
+        mii.fMask = MIIM_STATE;
+        if (!GetMenuItemInfo(hm, act->cmd, FALSE, &mii)) {
+            /* the 1000 is fairly arbitrary, but there should be much
+               less menu items on a menu anyway.  If there are that
+               many items, the system would be unusable to the extent
+               that the order of the items would be the least of our
+               worries. */
+            add_action_to_menu(hm, act, 1000, flags);
+            return;
+        }
+
+        mii.fMask = 0;
 
         if(act->state & KHUI_ACTIONSTATE_DISABLED) {
             mii.fMask |= MIIM_STATE;
@@ -211,8 +234,8 @@ static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main) {
 
     act = def->items;
     i = 0;
-    while((def->n_items == -1 && act->action != KHUI_MENU_END) ||
-          (def->n_items >= 0 && i < (int) def->n_items)) {
+    while((!(def->state & KHUI_MENUSTATE_ALLOCD) && act->action != KHUI_MENU_END) ||
+          ((def->state & KHUI_MENUSTATE_ALLOCD) && i < (int) def->n_items)) {
         add_action_to_menu(hm,khui_find_action(act->action),i,act->flags);
         act++; i++;
     }
@@ -392,12 +415,15 @@ LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam) {
 
         id = LOWORD(wParam);
         act = khui_find_action(id);
-        if(act == NULL || act->is_tooltip == 0)
+        if(act == NULL || (act->is_tooltip == 0 && act->tooltip == NULL))
             khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, NULL);
         else {
-            LoadString(khm_hInstance, 
-                       act->is_tooltip, 
-                       buf, ARRAYLENGTH(buf));
+            if (act->tooltip)
+                StringCbCopy(buf, sizeof(buf), act->tooltip);
+            else
+                LoadString(khm_hInstance, 
+                           act->is_tooltip, 
+                           buf, ARRAYLENGTH(buf));
             khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, buf);
         }
     }
@@ -607,9 +633,9 @@ void khm_menu_create_main(HWND parent) {
     khui_main_menu_toolbar = hwtb;
 
     SendMessage(hwtb,
-        TB_BUTTONSTRUCTSIZE,
-        (WPARAM) sizeof(TBBUTTON),
-        0);
+                TB_BUTTONSTRUCTSIZE,
+                (WPARAM) sizeof(TBBUTTON),
+                0);
 
     for(i=0; i<nmm; i++) {
         khui_add_action_to_toolbar(hwtb, 
@@ -623,7 +649,7 @@ void khm_menu_create_main(HWND parent) {
     SendMessage(hwtb,
                 TB_AUTOSIZE,
                 0,0);
-
+    
     SendMessage(hwtb,
                 TB_GETMAXSIZE,
                 0,

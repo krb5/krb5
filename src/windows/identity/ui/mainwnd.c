@@ -43,7 +43,7 @@ void
 khm_set_dialog_result(HWND hwnd, LRESULT lr) {
 #pragma warning(push)
 #pragma warning(disable: 4244)
-    SetWindowLongPtr(hwnd, DWL_MSGRESULT, lr);
+    SetWindowLongPtr(hwnd, DWLP_MSGRESULT, lr);
 #pragma warning(pop)
 }
 
@@ -70,12 +70,113 @@ mw_restart_refresh_timer(HWND hwnd) {
     SetTimer(hwnd, MW_REFRESH_TIMER, timeout, NULL);
 }
 
-LRESULT CALLBACK khm_main_wnd_proc(
-    HWND hwnd,
-    UINT uMsg,
-    WPARAM wParam,
-    LPARAM lParam
-    ) 
+khm_int32 KHMAPI
+mw_select_cred(khm_handle cred, void * rock) {
+    if (cred)
+        kcdb_cred_set_flags(cred,
+                            KCDB_CRED_FLAG_SELECTED,
+                            KCDB_CRED_FLAG_SELECTED);
+
+    return KHM_ERROR_SUCCESS;
+}
+
+/* perform shutdown operations */
+static void
+khm_pre_shutdown(void) {
+    khm_handle csp_cw = NULL;
+    khm_handle credset = NULL;
+    khm_int32 t;
+    khm_size s;
+
+    /* Check if we should destroy all credentials on exit... */
+
+    if (KHM_FAILED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw)))
+        return;
+
+    if (KHM_FAILED(khc_read_int32(csp_cw, L"DestroyCredsOnExit", &t)) ||
+        !t)
+        goto _cleanup;
+
+    if (KHM_FAILED(kcdb_credset_create(&credset)))
+        goto _cleanup;
+
+    if (KHM_FAILED(kcdb_credset_extract(credset, NULL, NULL,
+                                        KCDB_TYPE_INVALID)))
+        goto _cleanup;
+
+    if (KHM_FAILED(kcdb_credset_get_size(credset, &s)) ||
+        s == 0)
+        goto _cleanup;
+
+    kcdb_credset_apply(credset, mw_select_cred, NULL);
+
+    khui_context_set(KHUI_SCOPE_GROUP,
+                     NULL,
+                     KCDB_CREDTYPE_INVALID,
+                     NULL,
+                     NULL,
+                     0,
+                     credset);
+
+    khm_cred_destroy_creds(TRUE, TRUE);
+
+ _cleanup:
+
+    if (credset)
+        kcdb_credset_delete(credset);
+
+    if (csp_cw)
+        khc_close_space(csp_cw);
+}
+
+void
+khm_process_query_app_ver(khm_query_app_version * papp_ver) {
+
+    if (!papp_ver || papp_ver->magic != KHM_QUERY_APP_VER_MAGIC)
+        return;
+
+    papp_ver->ver_remote = app_version;
+
+    /* the remote instance has requested swapping in.  we check the
+       version numbers and if the remote instance is newer than us,
+       then we exit and let the remote instance take over. */
+    if (papp_ver->request_swap) {
+        khm_version ver_caller = papp_ver->ver_caller;
+
+        if (ver_caller.major >   app_version.major ||
+
+            (ver_caller.major == app_version.major &&
+             ver_caller.minor >  app_version.minor) ||
+
+            (ver_caller.major == app_version.major &&
+             ver_caller.minor == app_version.minor &&
+             ver_caller.aux >    app_version.aux) ||
+
+            (ver_caller.major == app_version.major &&
+             ver_caller.minor == app_version.minor &&
+             ver_caller.aux ==   app_version.aux &&
+             ver_caller.patch >  app_version.patch)) {
+
+            papp_ver->request_swap = TRUE;
+
+            if (khm_hwnd_main)
+                DestroyWindow(khm_hwnd_main);
+
+        } else {
+
+            papp_ver->request_swap = FALSE;
+
+        }
+    }
+
+    papp_ver->code = KHM_ERROR_SUCCESS;
+}
+
+LRESULT CALLBACK 
+khm_main_wnd_proc(HWND hwnd,
+                  UINT uMsg,
+                  WPARAM wParam,
+                  LPARAM lParam) 
 {
     LPNMHDR lpnm;
 
@@ -92,6 +193,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
         break;
 
     case WM_DESTROY:
+        khm_pre_shutdown();
         kmq_unsubscribe_hwnd(KMSG_ACT, hwnd);
         kmq_unsubscribe_hwnd(KMSG_CRED, hwnd);
         HtmlHelp(NULL, NULL, HH_CLOSE_ALL, 0);
@@ -136,7 +238,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
             return 0;
 
         case KHUI_ACTION_DESTROY_CRED:
-            khm_cred_destroy_creds();
+            khm_cred_destroy_creds(FALSE, FALSE);
             return 0;
 
         case KHUI_ACTION_SET_DEF_ID:
@@ -155,12 +257,16 @@ LRESULT CALLBACK khm_main_wnd_proc(
             khm_hide_main_window();
             break;
 
-        case KHUI_ACTION_OPT_KHIM:
-            khm_show_config_pane(NULL);
+        case KHUI_ACTION_OPT_KHIM: {
+            khui_config_node node = NULL;
+
+            khui_cfg_open(NULL, L"KhmGeneral", &node);
+            khm_show_config_pane(node);
+        }
             break;
 
         case KHUI_ACTION_OPT_IDENTS: {
-            khui_config_node node;
+            khui_config_node node = NULL;
 
             khui_cfg_open(NULL, L"KhmIdentities", &node);
             khm_show_config_pane(node);
@@ -168,7 +274,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
             break;
 
         case KHUI_ACTION_OPT_NOTIF: {
-            khui_config_node node;
+            khui_config_node node = NULL;
 
             khui_cfg_open(NULL, L"KhmNotifications", &node);
             khm_show_config_pane(node);
@@ -176,7 +282,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
             break;
 
         case KHUI_ACTION_OPT_PLUGINS: {
-            khui_config_node node;
+            khui_config_node node = NULL;
 
             khui_cfg_open(NULL, L"KhmPlugins", &node);
             khm_show_config_pane(node);
@@ -216,16 +322,27 @@ LRESULT CALLBACK khm_main_wnd_proc(
                 mm_last_hot_item = LOWORD(lParam);
             return khm_menu_activate(MENU_ACTIVATE_DEFAULT);
 
+        case KHUI_PACTION_ESC:
+            /* if esc is pressed while no menu is active, we close the
+               main window */
+            if (mm_last_hot_item == -1) {
+                khm_close_main_window();
+                return 0;
+            }
+
             /* generic, retargetting */
         case KHUI_PACTION_UP:
         case KHUI_PACTION_UP_TOGGLE:
         case KHUI_PACTION_UP_EXTEND:
+        case KHUI_PACTION_PGUP:
+        case KHUI_PACTION_PGUP_EXTEND:
         case KHUI_PACTION_DOWN:
         case KHUI_PACTION_DOWN_TOGGLE:
         case KHUI_PACTION_DOWN_EXTEND:
+        case KHUI_PACTION_PGDN:
+        case KHUI_PACTION_PGDN_EXTEND:
         case KHUI_PACTION_LEFT:
         case KHUI_PACTION_RIGHT:
-        case KHUI_PACTION_ESC:
         case KHUI_PACTION_ENTER:
             /* menu tracking */
             if(mm_last_hot_item != -1) {
@@ -251,16 +368,27 @@ LRESULT CALLBACK khm_main_wnd_proc(
             }
 
             /*FALLTHROUGH*/
-
         case KHUI_PACTION_DELETE:
 
         case KHUI_PACTION_SELALL:
         case KHUI_ACTION_LAYOUT_ID:
         case KHUI_ACTION_LAYOUT_TYPE:
         case KHUI_ACTION_LAYOUT_LOC:
+        case KHUI_ACTION_LAYOUT_CUST:
             /* otherwise fallthrough and bounce to the creds window */
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
+
+        default:
+            /* handle custom actions here */
+            {
+                khui_action * act;
+
+                act = khui_find_action(LOWORD(wParam));
+                if (act && act->listener) {
+                    kmq_post_sub_msg(act->listener, KMSG_ACT, KMSG_ACT_ACTIVATE, act->cmd, NULL);
+                }
+            }
         }
         break;              /* WM_COMMAND */
 
@@ -271,34 +399,7 @@ LRESULT CALLBACK khm_main_wnd_proc(
             return 0;
 
         case SC_CLOSE:
-            {
-                khm_handle csp_cw;
-                BOOL keep_running = FALSE;
-
-                if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
-                                                 KHM_PERM_READ, &csp_cw))) {
-                    khm_int32 t;
-
-                    if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"KeepRunning", 
-                                                     &t)))
-                        keep_running = t;
-#ifdef DEBUG
-                    else
-                        assert(FALSE);
-#endif
-
-                    khc_close_space(csp_cw);
-                }
-#ifdef DEBUG
-                else
-                    assert(FALSE);
-#endif
-
-                if (keep_running)
-                    khm_hide_main_window();
-                else
-                    DestroyWindow(hwnd);
-            }
+            khm_close_main_window();
             return 0;
         }
         break;
@@ -416,6 +517,27 @@ LRESULT CALLBACK khm_main_wnd_proc(
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_CONTINUE_CMDLINE) {
                 khm_cred_process_commandline();
+            } else if (m->type == KMSG_ACT &&
+                       m->subtype == KMSG_ACT_SYNC_CFG) {
+                khm_refresh_config();
+            } else if (m->type == KMSG_ACT &&
+                       m->subtype == KMSG_ACT_ACTIVATE) {
+                /* some custom action fired */
+
+                khm_int32 action;
+                khui_action * paction;
+
+                action = m->uparam;
+                paction = khui_find_action(action);
+                if (paction && paction->data == (void *) CFGACTION_MAGIC) {
+                    /* a custom configuration needs to be invoked */
+                    khui_config_node node;
+
+                    if (KHM_SUCCEEDED(khui_cfg_open(NULL, paction->name, &node))) {
+                        khm_show_config_pane(node);
+                        khui_cfg_release(node);
+                    }
+                }
             } else if (m->type == KMSG_CRED &&
                   m->subtype == KMSG_CRED_REFRESH) {
                 mw_restart_refresh_timer(hwnd);
@@ -466,20 +588,49 @@ LRESULT CALLBACK khm_main_wnd_proc(
             khm_cred_begin_commandline();
         }
         break;
+
+    case WM_KHUI_QUERY_APP_VERSION:
+        {
+            HANDLE hmap;
+            void * xfer;
+            wchar_t mapname[256];
+
+            StringCbPrintf(mapname, sizeof(mapname),
+                           QUERY_APP_VER_MAP_FMT, (DWORD) lParam);
+
+            hmap = OpenFileMapping(FILE_MAP_READ | FILE_MAP_WRITE,
+                                   FALSE, mapname);
+
+            if (hmap == NULL)
+                return 1;
+
+            xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
+                                 sizeof(khm_query_app_version));
+            
+            if (xfer) {
+                khm_process_query_app_ver((khm_query_app_version *) xfer);
+
+                UnmapViewOfFile(xfer);
+            }
+
+            CloseHandle(hmap);
+        }
+        break;
+
     }
     return DefWindowProc(hwnd,uMsg,wParam,lParam);
 }
 
-LRESULT CALLBACK khm_null_wnd_proc(
-    HWND hwnd,
-    UINT uMsg,
-    WPARAM wParam,
-    LPARAM lParam
-    ) {
+LRESULT CALLBACK 
+khm_null_wnd_proc(HWND hwnd,
+                  UINT uMsg,
+                  WPARAM wParam,
+                  LPARAM lParam) {
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT khm_rebar_notify(LPNMHDR lpnm) {
+LRESULT 
+khm_rebar_notify(LPNMHDR lpnm) {
     switch(lpnm->code) {
 #if (_WIN32_WINNT >= 0x0501)
     case RBN_AUTOBREAK:
@@ -508,7 +659,8 @@ LRESULT khm_rebar_notify(LPNMHDR lpnm) {
     return 1;
 }
 
-void khm_create_main_window_controls(HWND hwnd_main) {
+void 
+khm_create_main_window_controls(HWND hwnd_main) {
     REBARINFO rbi;
     HWND hwRebar;
 
@@ -552,7 +704,8 @@ void khm_create_main_window_controls(HWND hwnd_main) {
     khm_hwnd_main_cred = khm_create_credwnd(hwnd_main);
 }
 
-void khm_create_main_window(void) {
+void 
+khm_create_main_window(void) {
     wchar_t buf[1024];
     khm_handle csp_cw = NULL;
     khm_handle csp_mw = NULL;
@@ -615,9 +768,11 @@ void khm_create_main_window(void) {
                        NULL,
                        NULL);
 
+    khui_set_main_window(khm_hwnd_main);
 }
 
-void khm_show_main_window(void) {
+void 
+khm_show_main_window(void) {
 
     if (khm_nCmdShow == SW_RESTORE) {
         HWND hw;
@@ -639,7 +794,39 @@ void khm_show_main_window(void) {
     khm_nCmdShow = SW_RESTORE;
 }
 
-void khm_hide_main_window(void) {
+void 
+khm_close_main_window(void) {
+    khm_handle csp_cw;
+    BOOL keep_running = FALSE;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
+                                     KHM_PERM_READ, &csp_cw))) {
+        khm_int32 t;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"KeepRunning", 
+                                         &t))) {
+            keep_running = t;
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+        }
+
+        khc_close_space(csp_cw);
+    } else {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+    }
+
+    if (keep_running)
+        khm_hide_main_window();
+    else
+        DestroyWindow(khm_hwnd_main);
+}
+
+void 
+khm_hide_main_window(void) {
     khm_handle csp_notices = NULL;
     khm_int32 show_warning = FALSE;
 
@@ -674,11 +861,13 @@ void khm_hide_main_window(void) {
     ShowWindow(khm_hwnd_main, SW_HIDE);
 }
 
-BOOL khm_is_main_window_visible(void) {
+BOOL 
+khm_is_main_window_visible(void) {
     return IsWindowVisible(khm_hwnd_main);
 }
 
-BOOL khm_is_main_window_active(void) {
+BOOL 
+khm_is_main_window_active(void) {
     if (!IsWindowVisible(khm_hwnd_main))
         return FALSE;
     if (GetForegroundWindow() == khm_hwnd_main)
@@ -686,7 +875,8 @@ BOOL khm_is_main_window_active(void) {
     return khm_is_dialog_active();
 }
 
-void khm_register_main_wnd_class(void) {
+void 
+khm_register_main_wnd_class(void) {
     WNDCLASSEX wc;
 
     wc.cbSize = sizeof(WNDCLASSEX);
@@ -704,7 +894,6 @@ void khm_register_main_wnd_class(void) {
 
     khm_null_window_class = RegisterClassEx(&wc);
 
-
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc = khm_main_wnd_proc;
@@ -721,7 +910,8 @@ void khm_register_main_wnd_class(void) {
     khm_main_window_class = RegisterClassEx(&wc);
 }
 
-void khm_unregister_main_wnd_class(void) {
+void 
+khm_unregister_main_wnd_class(void) {
     UnregisterClass(MAKEINTATOM(khm_main_window_class),khm_hInstance);
     UnregisterClass(MAKEINTATOM(khm_null_window_class),khm_hInstance);
 }

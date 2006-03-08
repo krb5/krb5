@@ -216,6 +216,8 @@ KHMEXP khm_int32 KHMAPI kmq_subscribe_hwnd(khm_int32 type, HWND hwnd) {
     kmq_msg_subscription * s;
 
     s = PMALLOC(sizeof(kmq_msg_subscription));
+    ZeroMemory(s, sizeof(*s));
+    s->magic = KMQ_MSG_SUB_MAGIC;
     LINIT(s);
     s->queue = NULL;
     s->rcpt_type = KMQ_RCPTTYPE_HWND;
@@ -232,11 +234,35 @@ KHMEXP khm_int32 KHMAPI kmq_subscribe(khm_int32 type, kmq_callback_t cb) {
     kmq_msg_subscription * s;
 
     s = PMALLOC(sizeof(kmq_msg_subscription));
+    ZeroMemory(s, sizeof(*s));
+    s->magic = KMQ_MSG_SUB_MAGIC;
     LINIT(s);
     s->queue = kmqint_get_thread_queue();
     s->rcpt_type = KMQ_RCPTTYPE_CB;
     s->recipient.cb = cb;
     kmqint_msg_type_add_sub(type, s);
+
+    return KHM_ERROR_SUCCESS;
+}
+
+KHMEXP khm_int32 KHMAPI kmq_create_hwnd_subscription(HWND hw,
+                                                     khm_handle * result)
+{
+    kmq_msg_subscription * s;
+
+    s = PMALLOC(sizeof(kmq_msg_subscription));
+    ZeroMemory(s, sizeof(*s));
+    s->magic = KMQ_MSG_SUB_MAGIC;
+    LINIT(s);
+    s->queue = NULL;
+    s->rcpt_type = KMQ_RCPTTYPE_HWND;
+    s->recipient.hwnd = hw;
+
+    EnterCriticalSection(&cs_kmq_global);
+    LPUSH(&kmq_adhoc_subs, s);
+    LeaveCriticalSection(&cs_kmq_global);
+
+    *result = (khm_handle) s;
 
     return KHM_ERROR_SUCCESS;
 }
@@ -250,6 +276,8 @@ KHMEXP khm_int32 KHMAPI kmq_create_subscription(kmq_callback_t cb,
     kmq_msg_subscription * s;
 
     s = PMALLOC(sizeof(kmq_msg_subscription));
+    ZeroMemory(s, sizeof(*s));
+    s->magic = KMQ_MSG_SUB_MAGIC;
     LINIT(s);
     s->queue = kmqint_get_thread_queue();
     s->rcpt_type = KMQ_RCPTTYPE_CB;
@@ -269,6 +297,8 @@ KHMEXP khm_int32 KHMAPI kmq_delete_subscription(khm_handle sub)
     kmq_msg_subscription * s;
 
     s = (kmq_msg_subscription *) sub;
+
+    assert(s->magic == KMQ_MSG_SUB_MAGIC);
 
     s->type = 0;
 

@@ -32,5 +32,5 @@ INCFILES=$(INCDIR)\khhelp.h
 all: mkdirs $(CHMFILE) $(INCFILES)
 
 $(CHMFILE): netidmgr.hhp
-	-hhc netidmgr.hhp
+	-$(HHC) netidmgr.hhp
 	$(CP) netidmgr.chm $(CHMFILE)

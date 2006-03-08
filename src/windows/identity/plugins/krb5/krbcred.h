@@ -180,6 +180,8 @@ extern fiber_job g_fjob;   /* global fiber job object */
 #define FIBER_STATE_NONE    0
 #define FIBER_STATE_KINIT   1
 
+#define K5_SET_CRED_MSG     WMNC_USER
+
 void 
 k5_pp_begin(khui_property_sheet * s);
 
