@@ -212,3 +212,48 @@ SymbolicName=MSG_RMI_API_MISMATCH
 Language=English
 The module was compile for API version %1!d!.  However the current API version is %2!d!.
 .
+
+MessageId=
+SymbolicName=MSG_PB_START
+Language=English
+Starting plugin [%1!s!]
+.
+
+MessageId=
+SymbolicName=MSG_PB_INVALID_CODE_PTR
+Language=English
+The plugin is no longer valid.  This maybe because the module containing the plugin was unloaded.
+.
+
+MessageId=
+SymbolicName=MSG_PB_INIT_RV
+Language=English
+Initialization of the plugin returned code %1!d!.
+.
+
+MessageId=
+SymbolicName=MSG_PB_INIT_FAIL
+Language=English
+Initialization of the %1!s! plugin failed.  The plugin will be unloaded and any functionality provided will not be available.
+.
+
+MessageId=
+SymbolicName=MSG_PB_INIT_FAIL_S
+Language=English
+Plugin %1!s! failed to initialize
+.
+
+MessageId=
+SymbolicName=MSG_PB_INIT_FAIL_G
+Language=English
+Details for plugin:
+Description: %2!s!
+Module: %3!s!
+Support: %4!s!
+.
+
+MessageId=
+SymbolicName=MSG_PB_INIT_DONE
+Language=English
+Plugin running
+.

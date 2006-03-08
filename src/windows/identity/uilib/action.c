@@ -30,11 +30,11 @@
 #include<assert.h>
 
 khui_action_ref khui_main_menu[] = {
-    MENU_ACTION(KHUI_MENU_FILE),
-    MENU_ACTION(KHUI_MENU_CRED),
-    MENU_ACTION(KHUI_MENU_VIEW),
-    MENU_ACTION(KHUI_MENU_OPTIONS),
-    MENU_ACTION(KHUI_MENU_HELP),
+    MENU_SUBMENU(KHUI_MENU_FILE),
+    MENU_SUBMENU(KHUI_MENU_CRED),
+    MENU_SUBMENU(KHUI_MENU_VIEW),
+    MENU_SUBMENU(KHUI_MENU_OPTIONS),
+    MENU_SUBMENU(KHUI_MENU_HELP),
     MENU_END()
 };
 
@@ -53,7 +53,10 @@ khui_action_ref khui_menu_cred[] = {
     MENU_ACTION(KHUI_ACTION_DESTROY_CRED),
     MENU_SEP(),
     MENU_ACTION(KHUI_ACTION_SET_DEF_ID),
+#if 0
+    /* not implemented yet */
     MENU_ACTION(KHUI_ACTION_SET_SRCH_ID),
+#endif
     MENU_SEP(),
     MENU_ACTION(KHUI_ACTION_PASSWD_ID),
     MENU_END()
@@ -63,6 +66,7 @@ khui_action_ref khui_menu_layout[] = {
     MENU_ACTION(KHUI_ACTION_LAYOUT_ID),
     MENU_ACTION(KHUI_ACTION_LAYOUT_TYPE),
     MENU_ACTION(KHUI_ACTION_LAYOUT_LOC),
+    MENU_ACTION(KHUI_ACTION_LAYOUT_CUST),
     MENU_END()
 };
 
@@ -72,12 +76,18 @@ khui_action_ref khui_menu_toolbars[] = {
 };
 
 khui_action_ref khui_menu_view[] = {
-    MENU_ACTION(KHUI_ACTION_CHOOSE_COLS),
-    MENU_ACTION(KHUI_MENU_LAYOUT),
-    MENU_ACTION(KHUI_MENU_TOOLBARS),
+    MENU_SUBMENU(KHUI_MENU_COLUMNS),
+    MENU_SUBMENU(KHUI_MENU_LAYOUT),
+#if 0
+    /* not implemented yet */
+    MENU_SUBMENU(KHUI_MENU_TOOLBARS),
+#endif
     MENU_SEP(),
+#if 0
+    /* not implemented yet */
     MENU_ACTION(KHUI_ACTION_DEBUG_WINDOW),
     MENU_SEP(),
+#endif
     MENU_ACTION(KHUI_ACTION_VIEW_REFRESH),
     MENU_END()
 };
@@ -87,6 +97,7 @@ khui_action_ref khui_menu_options[] = {
     MENU_ACTION(KHUI_ACTION_OPT_IDENTS),
     MENU_ACTION(KHUI_ACTION_OPT_NOTIF),
     MENU_ACTION(KHUI_ACTION_OPT_PLUGINS),
+    MENU_SEP(),
     MENU_END()
 };
 
@@ -157,6 +168,16 @@ khui_action_ref khui_menu_ico_ctx_normal[] = {
     MENU_END()
 };
 
+khui_action_ref khui_menu_cwheader_ctx[] = {
+    MENU_SUBMENU(KHUI_MENU_COLUMNS),
+    MENU_SUBMENU(KHUI_MENU_LAYOUT),
+    MENU_END()
+};
+
+khui_action_ref khui_menu_columns[] = {
+    MENU_END()
+};
+
 khui_action_ref khui_pmenu_tok_sel[] = {
     MENU_ACTION(KHUI_ACTION_RENEW_CRED),
     MENU_ACTION(KHUI_ACTION_DESTROY_CRED),
@@ -171,23 +192,25 @@ khui_action_ref khui_pmenu_id_sel[] = {
 
 /* all stock menus and toolbars */
 khui_menu_def khui_all_menus[] = {
-    CONSTMENU(KHUI_MENU_MAIN, KHUI_MENUSTATE_CONSTANT, khui_main_menu),
-    CONSTMENU(KHUI_MENU_FILE, KHUI_MENUSTATE_CONSTANT, khui_menu_file),
-    CONSTMENU(KHUI_MENU_CRED, KHUI_MENUSTATE_CONSTANT, khui_menu_cred),
-    CONSTMENU(KHUI_MENU_VIEW, KHUI_MENUSTATE_CONSTANT, khui_menu_view),
-    CONSTMENU(KHUI_MENU_LAYOUT, KHUI_MENUSTATE_CONSTANT, khui_menu_layout),
-    CONSTMENU(KHUI_MENU_TOOLBARS, KHUI_MENUSTATE_CONSTANT, khui_menu_toolbars),
-    CONSTMENU(KHUI_MENU_OPTIONS, KHUI_MENUSTATE_CONSTANT, khui_menu_options),
-    CONSTMENU(KHUI_MENU_HELP, KHUI_MENUSTATE_CONSTANT, khui_menu_help),
+    CONSTMENU(KHUI_MENU_MAIN, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_main_menu),
+    CONSTMENU(KHUI_MENU_FILE, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_file),
+    CONSTMENU(KHUI_MENU_CRED, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_cred),
+    CONSTMENU(KHUI_MENU_VIEW, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_view),
+    CONSTMENU(KHUI_MENU_LAYOUT, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_layout),
+    CONSTMENU(KHUI_MENU_TOOLBARS, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_toolbars),
+    CONSTMENU(KHUI_MENU_OPTIONS, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_options),
+    CONSTMENU(KHUI_MENU_HELP, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_help),
+    CONSTMENU(KHUI_MENU_COLUMNS, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_columns),
 
     /* toolbars */
-    CONSTMENU(KHUI_TOOLBAR_STANDARD, KHUI_MENUSTATE_CONSTANT, khui_toolbar_standard),
+    CONSTMENU(KHUI_TOOLBAR_STANDARD, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_toolbar_standard),
 
     /* context menus */
     CONSTMENU(KHUI_MENU_IDENT_CTX, KHUI_MENUSTATE_CONSTANT, khui_menu_ident_ctx),
     CONSTMENU(KHUI_MENU_TOK_CTX, KHUI_MENUSTATE_CONSTANT, khui_menu_tok_ctx),
     CONSTMENU(KHUI_MENU_ICO_CTX_MIN, KHUI_MENUSTATE_CONSTANT, khui_menu_ico_ctx_min),
     CONSTMENU(KHUI_MENU_ICO_CTX_NORMAL, KHUI_MENUSTATE_CONSTANT, khui_menu_ico_ctx_normal),
+    CONSTMENU(KHUI_MENU_CWHEADER_CTX, KHUI_MENUSTATE_CONSTANT, khui_menu_cwheader_ctx),
 
     /* pseudo menus */
     CONSTMENU(KHUI_PMENU_TOK_SEL, KHUI_MENUSTATE_CONSTANT, khui_pmenu_tok_sel),
@@ -195,7 +218,21 @@ khui_menu_def khui_all_menus[] = {
 };
 
 int khui_n_all_menus = sizeof(khui_all_menus) / sizeof(khui_menu_def);
+khui_menu_def ** khui_cust_menus = NULL;
+int khui_nc_cust_menus = 0;
+int khui_n_cust_menus = 0;
 CRITICAL_SECTION cs_actions;
+
+#define CACT_NC_ALLOC 32
+
+khui_action ** khui_cust_actions = NULL;
+int khui_nc_cust_actions = 0;
+int khui_n_cust_actions = 0;
+
+HWND khui_hwnd_main;			/* main window, for notifying
+                                           action launches and
+                                           dispatching messages to the
+                                           application. */
 
 KHMEXP void KHMAPI 
 khui_init_actions(void) {
@@ -207,23 +244,206 @@ khui_exit_actions(void) {
     DeleteCriticalSection(&cs_actions);
 }
 
+KHMEXP khm_int32 KHMAPI
+khui_action_create(const wchar_t * name,
+                   const wchar_t * caption,
+                   const wchar_t * tooltip,
+                   void * userdata,
+                   khm_int32 type,
+                   khm_handle hsub) {
+    khui_action * act;
+    khm_int32 action = 0;
+    int i;
+    size_t s;
+
+    if (!caption ||
+        FAILED(StringCchLength(caption, KHUI_MAXCCH_SHORT_DESC, &s)) ||
+        (tooltip && FAILED(StringCchLength(tooltip, KHUI_MAXCCH_SHORT_DESC, &s))) ||
+        (type != KHUI_ACTIONTYPE_TRIGGER && type != KHUI_ACTIONTYPE_TOGGLE)) {
+        return 0;
+    }
+
+    EnterCriticalSection(&cs_actions);
+    if (name && (act = khui_find_named_action(name))) {
+        /* named action already exists */
+        action = act->cmd;
+        goto _done;
+    }
+
+    for (i=0; i < khui_n_cust_actions; i++) {
+        if (khui_cust_actions[i] == NULL ||
+            (khui_cust_actions[i]->state & KHUI_ACTIONSTATE_DELETED))
+            break;
+    }
+
+    if (i >= khui_n_cust_actions &&
+        (khui_cust_actions == NULL ||
+         khui_n_cust_actions + 1 > khui_nc_cust_actions)) {
+
+        khui_nc_cust_actions = UBOUNDSS(khui_n_cust_actions + 1,
+                                        CACT_NC_ALLOC,
+                                        CACT_NC_ALLOC);
+#ifdef DEBUG
+        assert(khui_nc_cust_actions > khui_n_cust_actions + 1);
+#endif
+        khui_cust_actions = PREALLOC(khui_cust_actions,
+                                     sizeof(*khui_cust_actions) * khui_nc_cust_actions);
+#ifdef DEBUG
+        assert(khui_cust_actions);
+#endif
+    }
+
+    if (i >= khui_n_cust_actions) {
+        i = khui_n_cust_actions ++;
+        act = PMALLOC(sizeof(khui_action));
+    } else {
+        act = khui_cust_actions[i];
+        if (act == NULL)
+            act = PMALLOC(sizeof(khui_action));
+    }
+
+#ifdef DEBUG
+    assert(act);
+#endif
+
+    khui_cust_actions[i] = act;
+
+    ZeroMemory(act, sizeof(*act));
+
+    act->cmd = KHUI_USERACTION_BASE + i;
+    act->type = type;
+    act->name = (name? PWCSDUP(name) : 0);
+    act->caption = PWCSDUP(caption);
+    act->tooltip = (tooltip? PWCSDUP(tooltip) : 0);
+    act->listener = hsub;
+    act->data = userdata;
+    act->state = 0;
+
+    action = act->cmd;
+
+ _done:
+    LeaveCriticalSection(&cs_actions);
+
+    if (action)
+        kmq_post_message(KMSG_ACT, KMSG_ACT_NEW, action, NULL);
+
+    return action;
+}
+
+KHMEXP void * KHMAPI
+khui_action_get_data(khm_int32 action) {
+    khui_action * act;
+
+    act = khui_find_action(action);
+
+    if (act == NULL)
+        return NULL;
+    else
+        return act->data;
+}
+
+KHMEXP void KHMAPI
+khui_action_delete(khm_int32 action) {
+    khui_action * act;
+
+    act = khui_find_action(action);
+
+    if (act == NULL)
+        return;
+
+    /* for the moment, even when the action is deleted, we don't free
+       up the block of memory used by the khui_action structure.  When
+       a new action is created, it will reuse deleted action
+       structures. */
+    EnterCriticalSection(&cs_actions);
+    act->state |= KHUI_ACTIONSTATE_DELETED;
+    if (act->name)
+        PFREE(act->name);
+    if (act->caption)
+        PFREE(act->caption);
+    if (act->tooltip)
+        PFREE(act->tooltip);
+    if (act->listener)
+        kmq_delete_subscription(act->listener);
+    act->name = NULL;
+    act->caption = NULL;
+    act->tooltip = NULL;
+    act->listener = NULL;
+    LeaveCriticalSection(&cs_actions);
+
+    kmq_post_message(KMSG_ACT, KMSG_ACT_DELETE, action, NULL);
+}
+
 #define MENU_NC_ITEMS 8
 
 KHMEXP khui_menu_def * KHMAPI 
-khui_menu_create(int cmd)
+khui_menu_create(khm_int32 action)
 {
     khui_menu_def * d;
 
     d = PMALLOC(sizeof(*d));
     ZeroMemory(d, sizeof(*d));
 
-    d->cmd = cmd;
+    d->cmd = action;
     d->nc_items = MENU_NC_ITEMS;
-    d->items = PMALLOC(sizeof(*(d->items)) *  d->nc_items);
+    d->items = PMALLOC(sizeof(*(d->items)) * d->nc_items);
 
     d->state = KHUI_MENUSTATE_ALLOCD;
 
+    if (action) {
+        int i;
+        EnterCriticalSection(&cs_actions);
+
+        for (i=0; i < khui_n_cust_menus; i++) {
+            if (khui_cust_menus[i] == NULL)
+                break;
+        }
+
+        if (i >= khui_n_cust_menus) {
+
+            if (khui_n_cust_menus + 1 >= khui_nc_cust_menus) {
+                khui_nc_cust_menus = UBOUNDSS(khui_n_cust_menus + 1,
+                                              CACT_NC_ALLOC, CACT_NC_ALLOC);
+                khui_cust_menus =
+                    PREALLOC(khui_cust_menus,
+                             sizeof(khui_cust_menus[0]) * khui_nc_cust_menus);
+            }
+
+            i = khui_n_cust_menus ++;
+        }
+
+        khui_cust_menus[i] = d;
+
+        LeaveCriticalSection(&cs_actions);
+    }
+
     return d;
+}
+
+KHMEXP void KHMAPI
+khui_set_main_window(HWND hwnd) {
+    khui_hwnd_main = hwnd;
+}
+
+KHMEXP void KHMAPI
+khui_action_trigger(khm_int32 action, khui_action_context * ctx) {
+    khui_action_context save;
+
+    if (!khui_hwnd_main)
+	return;
+
+    if (ctx) {
+	khui_context_get(&save);
+
+	khui_context_set_indirect(ctx);
+    }
+
+    SendMessage(khui_hwnd_main, WM_COMMAND,
+		MAKEWPARAM(action, 0), (LPARAM) 0);
+
+    if (ctx) {
+	khui_context_set_indirect(&save);
+    }
 }
 
 KHMEXP khui_menu_def * KHMAPI 
@@ -235,16 +455,16 @@ khui_menu_dup(khui_menu_def * src)
 
     d = khui_menu_create(src->cmd);
 
-    if(src->n_items == -1)
+    if (!(src->state & KHUI_MENUSTATE_ALLOCD))
         n = khui_action_list_length(src->items);
     else
         n = src->n_items;
 
-    for(i=0; i<n; i++) {
-        if(src->items[i].flags & KHUI_ACTIONREF_PACTION) {
-            khui_menu_add_paction(d, src->items[i].p_action, src->items[i].flags);
+    for (i=0; i<n; i++) {
+        if (src->items[i].flags & KHUI_ACTIONREF_PACTION) {
+            khui_menu_insert_paction(d, -1, src->items[i].p_action, src->items[i].flags);
         } else {
-            khui_menu_add_action(d, src->items[i].action);
+            khui_menu_insert_action(d, -1, src->items[i].action, 0);
         }
     }
 
@@ -258,8 +478,22 @@ khui_menu_delete(khui_menu_def * d)
 
     /* non-allocated menus are assumed to have no pointers to other
        allocated blocks */
-    if(!(d->state & KHUI_MENUSTATE_ALLOCD))
+    if(!(d->state & KHUI_MENUSTATE_ALLOCD)) {
+        /* we shouldn't have tried to delete a constant menu */
+#ifdef DEBUG
+        assert(FALSE);
+#endif
         return;
+    }
+
+    EnterCriticalSection(&cs_actions);
+    for (i=0; i < khui_n_cust_menus; i++) {
+        if (khui_cust_menus[i] == d) {
+            khui_cust_menus[i] = NULL;
+            break;
+        }
+    }
+    LeaveCriticalSection(&cs_actions);
 
     for(i=0; i< (int) d->n_items; i++) {
         if(d->items[i].flags & KHUI_ACTIONREF_FREE_PACTION)
@@ -271,8 +505,12 @@ khui_menu_delete(khui_menu_def * d)
     PFREE(d);
 }
 
-static void khui_menu_assert_size(khui_menu_def * d, size_t n)
+static void
+menu_assert_size(khui_menu_def * d, size_t n)
 {
+
+    assert(d->state & KHUI_MENUSTATE_ALLOCD);
+
     if(n > (int) d->nc_items) {
         khui_action_ref * ni;
 
@@ -284,34 +522,153 @@ static void khui_menu_assert_size(khui_menu_def * d, size_t n)
     }
 }
 
-KHMEXP void KHMAPI khui_menu_add_action(khui_menu_def * d, int id)
+static void
+menu_const_to_allocd(khui_menu_def * d)
 {
-    khui_menu_assert_size(d, d->n_items + 1);
-    d->items[d->n_items].flags = 0;
-    d->items[d->n_items ++].action = id;
+    khui_action_ref * olist;
+    khui_action_ref * nlist;
+    khm_size n;
+
+    assert(!(d->state & KHUI_MENUSTATE_ALLOCD));
+
+    olist = d->items;
+    n = khui_action_list_length(d->items);
+
+    d->nc_items = UBOUNDSS(n, MENU_NC_ITEMS, MENU_NC_ITEMS);
+    nlist = PMALLOC(sizeof(d->items[0]) * d->nc_items);
+    memcpy(nlist, olist, sizeof(d->items[0]) * n);
+
+    d->items = nlist;
+    d->n_items = n;
+    d->state |= KHUI_MENUSTATE_ALLOCD;
 }
 
-KHMEXP void KHMAPI khui_menu_add_paction(khui_menu_def * d, khui_action * act, int flags)
+KHMEXP void KHMAPI
+khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 action, khm_int32 flags)
 {
-    khui_menu_assert_size(d, d->n_items + 1);
-    d->items[d->n_items].flags = flags | KHUI_ACTIONREF_PACTION;
-    d->items[d->n_items ++].p_action = act;
+    if (!(d->state & KHUI_MENUSTATE_ALLOCD))
+        menu_const_to_allocd(d);
+
+    assert(d->state & KHUI_MENUSTATE_ALLOCD);
+    assert(action == KHUI_MENU_SEP || action > 0);
+
+    if (idx < 0 || idx > d->n_items)
+        idx = d->n_items;
+
+    menu_assert_size(d, d->n_items + 1);
+
+    if (idx < d->n_items) {
+        memmove(&d->items[idx + 1], &d->items[idx], (d->n_items - idx) * sizeof(d->items[0]));
+    }
+
+    d->items[idx].flags = flags;
+    d->items[idx].action = action;
+    if (action == KHUI_MENU_SEP)
+        d->items[idx].flags |= KHUI_ACTIONREF_SEP;
+
+    d->n_items++;
 }
 
-KHMEXP khui_menu_def * KHMAPI khui_find_menu(int id) {
+KHMEXP void KHMAPI
+khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction, int flags)
+{
+
+    if (paction == NULL)
+        return;
+
+    if (!(d->state & KHUI_MENUSTATE_ALLOCD))
+        menu_const_to_allocd(d);
+
+    assert(d->state & KHUI_MENUSTATE_ALLOCD);
+
+    if (idx < 0 || idx > d->n_items)
+        idx = d->n_items;
+
+    menu_assert_size(d, d->n_items + 1);
+
+    if (idx < d->n_items) {
+        memmove(&d->items[idx + 1], &d->items[idx], (d->n_items - idx) * sizeof(d->items[0]));
+    }
+
+    d->items[idx].flags = flags | KHUI_ACTIONREF_PACTION;
+    d->items[idx].p_action = paction;
+
+    d->n_items++;
+}
+
+KHMEXP void KHMAPI
+khui_menu_remove_action(khui_menu_def * d, khm_size idx) {
+
+    assert(d->state & KHUI_MENUSTATE_ALLOCD);
+
+    if (idx < 0 || idx >= d->n_items)
+        return;
+
+    if (idx < d->n_items - 1) {
+        memmove(&d->items[idx], &d->items[idx + 1],
+                ((d->n_items - 1) - idx) * sizeof(d->items[0]));
+    }
+
+    d->n_items--;
+}
+
+KHMEXP khm_size KHMAPI
+khui_menu_get_size(khui_menu_def * d) {
+
+    if (d->state & KHUI_MENUSTATE_ALLOCD)
+        return d->n_items;
+    else
+        return khui_action_list_length(d->items);
+}
+
+KHMEXP khui_action_ref *
+khui_menu_get_action(khui_menu_def * d, khm_size idx) {
+
+    khm_size n;
+
+    if (d->state & KHUI_MENUSTATE_ALLOCD)
+        n = d->n_items;
+    else
+        n = khui_action_list_length(d->items);
+
+    if (idx < 0 || idx >= n)
+        return NULL;
+
+    return &d->items[idx];
+}
+
+KHMEXP khui_menu_def * KHMAPI
+khui_find_menu(khm_int32 id) {
     khui_menu_def * d;
     int i;
 
-    d = khui_all_menus;
-    for(i=0;i<khui_n_all_menus;i++) {
-        if(id == d[i].cmd)
-            return &d[i];
-    }
+    if (id < KHUI_USERACTION_BASE) {
+        d = khui_all_menus;
+        for(i=0;i<khui_n_all_menus;i++) {
+            if(id == d[i].cmd)
+                return &d[i];
+        }
 
-    return NULL;
+        return NULL;
+    } else {
+        d = NULL;
+
+        EnterCriticalSection(&cs_actions);
+        for (i=0; i < khui_n_cust_menus; i++) {
+            if (khui_cust_menus[i] &&
+                khui_cust_menus[i]->cmd == id) {
+                d = khui_cust_menus[i];
+                break;
+            }
+        }
+        LeaveCriticalSection(&cs_actions);
+
+        return d;
+    }
 }
 
-KHMEXP khui_action * KHMAPI khui_find_action(int id) {
+KHMEXP khui_action * KHMAPI
+khui_find_action(khm_int32 id) {
     khui_action * act;
     int i;
 
@@ -321,12 +678,28 @@ KHMEXP khui_action * KHMAPI khui_find_action(int id) {
             return &act[i];
     }
 
-    return NULL;
+    act = NULL;
+
+    EnterCriticalSection(&cs_actions);
+    if (id >= KHUI_USERACTION_BASE &&
+        (id - KHUI_USERACTION_BASE) < khui_n_cust_actions) {
+        act = khui_cust_actions[id - KHUI_USERACTION_BASE];
+#ifdef DEBUG
+        assert(!act || act->cmd == id);
+#endif
+        if (act && act->state & KHUI_ACTIONSTATE_DELETED)
+            act = NULL;
+    }
+    LeaveCriticalSection(&cs_actions);
+
+    return act;
 }
 
-KHMEXP khui_action * KHMAPI khui_find_named_action(wchar_t * name) {
+KHMEXP khui_action * KHMAPI
+khui_find_named_action(const wchar_t * name) {
     int i;
     khui_action * act;
+    khui_action ** pact;
 
     if(!name)
         return NULL;
@@ -339,25 +712,42 @@ KHMEXP khui_action * KHMAPI khui_find_named_action(wchar_t * name) {
             return &act[i];
     }
 
+    pact = khui_cust_actions;
+    for(i=0;i<khui_n_cust_actions;i++) {
+        if(!pact[i] || !pact[i]->name)
+            continue;
+
+        if(!wcscmp(pact[i]->name, name)) {
+            if (pact[i]->state & KHUI_ACTIONSTATE_DELETED)
+                return NULL;
+            else
+                return pact[i];
+        }
+    }
+
     return NULL;
 }
 
-KHMEXP size_t KHMAPI khui_action_list_length(khui_action_ref * ref) {
+KHMEXP size_t KHMAPI
+khui_action_list_length(khui_action_ref * ref) {
     size_t c = 0;
-    while(ref && ref->action != KHUI_MENU_END) {
+    while(ref && ref->action != KHUI_MENU_END &&
+          !(ref->flags & KHUI_ACTIONREF_END)) {
         c++;
         ref++;
     }
     return c;
 }
 
-KHMEXP void KHMAPI khui_check_radio_action(khui_menu_def * d, khm_int32 cmd)
+KHMEXP void KHMAPI
+khui_check_radio_action(khui_menu_def * d, khm_int32 cmd)
 {
     khui_action_ref * r;
     khui_action * act;
 
     r = d->items;
-    while(r && r->action != KHUI_MENU_END) {
+    while(r && r->action != KHUI_MENU_END &&
+          (!(d->state & KHUI_MENUSTATE_ALLOCD) || (r - d->items) < (int) d->n_items)) {
         if(r->flags & KHUI_ACTIONREF_PACTION) {
             act = r->p_action;
         } else {
@@ -376,7 +766,8 @@ KHMEXP void KHMAPI khui_check_radio_action(khui_menu_def * d, khm_int32 cmd)
     kmq_post_message(KMSG_ACT, KMSG_ACT_CHECK, 0, 0);
 }
 
-KHMEXP void KHMAPI khui_check_action(int cmd, khm_boolean check) {
+KHMEXP void KHMAPI
+khui_check_action(khm_int32 cmd, khm_boolean check) {
     khui_action * act;
 
     act = khui_find_action(cmd);
@@ -393,14 +784,16 @@ KHMEXP void KHMAPI khui_check_action(int cmd, khm_boolean check) {
     kmq_post_message(KMSG_ACT, KMSG_ACT_CHECK, 0, 0);
 }
 
-KHMEXP void KHMAPI khui_enable_actions(khui_menu_def * d, khm_boolean enable)
+KHMEXP void KHMAPI
+khui_enable_actions(khui_menu_def * d, khm_boolean enable)
 {
     khui_action_ref * r;
     int delta = FALSE;
     khui_action * act;
 
     r = d->items;
-    while(r && r->action != KHUI_MENU_END) {
+    while(r && r->action != KHUI_MENU_END &&
+          (!(d->state & KHUI_MENUSTATE_ALLOCD) || (r - d->items) < (int) d->n_items)) {
         if(r->flags & KHUI_ACTIONREF_PACTION) {
             act = r->p_action;
         } else {
@@ -426,7 +819,8 @@ KHMEXP void KHMAPI khui_enable_actions(khui_menu_def * d, khm_boolean enable)
     }
 }
 
-KHMEXP void KHMAPI khui_enable_action(int cmd, khm_boolean enable) {
+KHMEXP void KHMAPI
+khui_enable_action(khm_int32 cmd, khm_boolean enable) {
     khui_action * act;
 
     act = khui_find_action(cmd);
@@ -443,7 +837,8 @@ KHMEXP void KHMAPI khui_enable_action(int cmd, khm_boolean enable) {
     kmq_post_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
 }
 
-KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void) {
+KHMEXP HACCEL KHMAPI
+khui_create_global_accel_table(void) {
     int i;
     ACCEL * accels;
     HACCEL ha;
@@ -463,9 +858,9 @@ KHMEXP HACCEL KHMAPI khui_create_global_accel_table(void) {
 }
 
 KHMEXP khm_boolean KHMAPI 
-khui_get_cmd_accel_string(int cmd, 
+khui_get_cmd_accel_string(khm_int32 cmd, 
                           wchar_t * buf, 
-                          size_t bufsiz) {
+                          khm_size bufsiz) {
     int i;
     khui_accel_def * def;
 
@@ -517,8 +912,44 @@ khui_get_cmd_accel_string(int cmd,
             ap = L"Enter";
             break;
 
+        case VK_F1:
+            ap = L"F1";
+            break;
+
+        case VK_F2:
+            ap = L"F2";
+            break;
+
+        case VK_F3:
+            ap = L"F3";
+            break;
+
+        case VK_F4:
+            ap = L"F4";
+            break;
+
         case VK_F5:
             ap = L"F5";
+            break;
+
+        case VK_F6:
+            ap = L"F6";
+            break;
+
+        case VK_F7:
+            ap = L"F7";
+            break;
+
+        case VK_F8:
+            ap = L"F8";
+            break;
+
+        case VK_F9:
+            ap = L"F9";
+            break;
+
+        case VK_F10:
+            ap = L"F10";
             break;
 
         case VK_DELETE:
@@ -818,6 +1249,20 @@ khui_context_set_ex(khui_scope scope,
     tctx.int_cb_used = 0;
 
     khuiint_copy_context(&khui_ctx, &tctx);
+
+    khui_context_refresh();
+
+    LeaveCriticalSection(&cs_actions);
+}
+
+KHMEXP void KHMAPI
+khui_context_set_indirect(khui_action_context * ctx)
+{
+    EnterCriticalSection(&cs_actions);
+
+    khuiint_context_release(&khui_ctx);
+
+    khuiint_copy_context(&khui_ctx, ctx);
 
     khui_context_refresh();
 

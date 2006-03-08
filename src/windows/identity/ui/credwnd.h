@@ -34,12 +34,12 @@
 extern khm_int32 khui_cw_flag_id;
 
 /* The expiration states */
-#define CW_EXPSTATE_NONE        0
-#define CW_EXPSTATE_WARN        1024
-#define CW_EXPSTATE_CRITICAL    2048
-#define CW_EXPSTATE_EXPIRED     3072
+#define CW_EXPSTATE_NONE        0x00000000
+#define CW_EXPSTATE_WARN        0x00000400
+#define CW_EXPSTATE_CRITICAL    0x00000800
+#define CW_EXPSTATE_EXPIRED     0x00000c00
 
-#define CW_EXPSTATE_MASK        3072
+#define CW_EXPSTATE_MASK        0x00000c00
 
 typedef struct khui_credwnd_outline_t {
     khm_int32   flags;      /* combination of KHUI_CW_O_* */
@@ -61,12 +61,12 @@ typedef struct khui_credwnd_outline_t {
     TDCL(struct khui_credwnd_outline_t);
 } khui_credwnd_outline;
 
-#define KHUI_CW_O_EXPAND     0x00000001
-#define KHUI_CW_O_STICKY     0x00000002
-#define KHUI_CW_O_VISIBLE    0x00000004
-#define KHUI_CW_O_SHOWFLAG   0x00000008
-#define KHUI_CW_O_SELECTED   0x00000010
-#define KHUI_CW_O_DATAALLOC  0x00000020
+#define KHUI_CW_O_EXPAND        0x00000001
+#define KHUI_CW_O_STICKY        0x00000002
+#define KHUI_CW_O_VISIBLE       0x00000004
+#define KHUI_CW_O_SHOWFLAG      0x00000008
+#define KHUI_CW_O_SELECTED      0x00000010
+#define KHUI_CW_O_DATAALLOC     0x00000020
 
 typedef struct khui_credwnd_row_t {
     khm_int32   flags;
@@ -76,10 +76,10 @@ typedef struct khui_credwnd_row_t {
     khm_size idx_end;
 } khui_credwnd_row;
 
-#define KHUI_CW_ROW_CRED        2
-#define KHUI_CW_ROW_HEADER      4
-#define KHUI_CW_ROW_TIMERSET    8
-#define KHUI_CW_ROW_SELECTED    16
+#define KHUI_CW_ROW_CRED        0x00000002
+#define KHUI_CW_ROW_HEADER      0x00000004
+#define KHUI_CW_ROW_TIMERSET    0x00000008
+#define KHUI_CW_ROW_SELECTED    0x00000010
 
 /* row allocation */
 /* initial number of rows to be allocated */
@@ -102,13 +102,13 @@ typedef struct khui_credwnd_col_t {
 /* allocation increment, if we run out of space */
 #define KHUI_CW_COL_INCREMENT   16
 
-#define KHUI_CW_COL_AUTOSIZE    1
-#define KHUI_CW_COL_SORT_INC    2
-#define KHUI_CW_COL_SORT_DEC    4
-#define KHUI_CW_COL_GROUP       8
-#define KHUI_CW_COL_FIXED_WIDTH 16
-#define KHUI_CW_COL_FIXED_POS   32
-#define KHUI_CW_COL_META        64
+#define KHUI_CW_COL_AUTOSIZE    0x00000001
+#define KHUI_CW_COL_SORT_INC    0x00000002
+#define KHUI_CW_COL_SORT_DEC    0x00000004
+#define KHUI_CW_COL_GROUP       0x00000008
+#define KHUI_CW_COL_FIXED_WIDTH 0x00000010
+#define KHUI_CW_COL_FIXED_POS   0x00000020
+#define KHUI_CW_COL_META        0x00000040
 
 /* Custom column attributes (are not kcdb attributes) */
 #define CW_CA_FLAGS -1
@@ -122,6 +122,9 @@ typedef struct khui_credwnd_col_t {
 typedef struct khui_credwnd_tbl_t {
     HWND hwnd;                  /* the window that this table belongs to */
 
+    khm_handle csp_view;        /* handle to the configuration space
+                                   that defined the view */
+
     khm_int32 scr_top;          /* screen units */
     khm_int32 scr_left;         /* screen units */
     khm_int32 ext_width;        /* screen units */
@@ -134,19 +137,19 @@ typedef struct khui_credwnd_tbl_t {
 
     khui_credwnd_col * cols;    /* n_cols elements */
     khui_credwnd_row * rows;    /* n_rows elements */
-    khm_size  n_cols;
-    khm_size  n_total_cols;     /* number of columns actually
+    int       n_cols;
+    int       n_total_cols;     /* number of columns actually
                                    allocated in cols */
-    khm_size  n_rows;
-    khm_size  n_total_rows;     /* number of rows actually allocated
+    int       n_rows;
+    int       n_total_rows;     /* number of rows actually allocated
                                    in rows */
 
     khui_credwnd_outline * outline;
 
     khm_int32 flags;            /* combo of KHUI_CW_TBL_* */
 
-    khm_int32 cursor_row;       /* cursor and selection */
-    khm_int32 anchor_row;       /* anchor, for range selections */
+    int       cursor_row;       /* cursor and selection */
+    int       anchor_row;       /* anchor, for range selections */
 
     /* view parameters */
     khm_int32 hpad;
@@ -204,6 +207,8 @@ typedef struct khui_credwnd_tbl_t {
 #define KHUI_CW_TBL_COL_DIRTY   0x00000002
 #define KHUI_CW_TBL_ROW_DIRTY   0x00000004
 #define KHUI_CW_TBL_ACTIVE      0x00000100
+#define KHUI_CW_TBL_CUSTVIEW    0x00000200
+#define KHUI_CW_TBL_COLSKIP     0x00000400
 
 /* mouse_state constants */
 #define CW_MOUSE_NONE       0x00000000 /* nothing interesting */

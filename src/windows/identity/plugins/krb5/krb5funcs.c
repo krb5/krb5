@@ -203,6 +203,8 @@ int com_addr(void)
 #define ENCTYPE_LOCAL_RC4_MD4    0xFFFFFF80
 #endif
 
+#define MAX_ADDRS 256
+
 static long get_tickets_from_cache(krb5_context ctx, 
                                    krb5_ccache cache)
 {
@@ -222,7 +224,6 @@ static long get_tickets_from_cache(krb5_context ctx,
     time_t          tt;
     FILETIME        ft, eft;
     khm_int32       ti;
-
 
 #ifdef KRB5_TC_NOTICKET
     flags = KRB5_TC_NOTICKET;
@@ -442,30 +443,33 @@ static long get_tickets_from_cache(krb5_context ctx,
         kcdb_cred_set_attr(cred, KCDB_ATTR_LOCATION, wcc_name, 
                            KCDB_CBSIZE_AUTO);
 
-        /*TODO: going here */
-#if 0
         if ( KRBv5Credentials.addresses && KRBv5Credentials.addresses[0] ) {
-            int n = 0;
-            while ( KRBv5Credentials.addresses[n] )
-                n++;
-            list->addrList = PCALLOC(1, n * sizeof(char *));
-            if (!list->addrList) {
-                MessageBox(NULL, "Memory Error", "Error", MB_OK);
-                return ENOMEM;            
-            }
-            list->addrCount = n;
-            for ( n=0; n<list->addrCount; n++ ) {
-                wsprintf(Buffer, "Address: %s", one_addr(KRBv5Credentials.addresses[n]));
-                list->addrList[n] = (char*) PCALLOC(1, strlen(Buffer)+1);
-                if (!list->addrList[n])
-                {
-                    MessageBox(NULL, "Memory Error", "Error", MB_OK);
-                    return ENOMEM;            
-                }       
-                strcpy(list->addrList[n], Buffer);
-            }   
+	    khm_int32 buffer[1024];
+	    void * bufp;
+	    khm_size cb;
+	    khm_int32 rv;
+
+	    bufp = (void *) buffer;
+	    cb = sizeof(buffer);
+
+	    rv = serialize_krb5_addresses(KRBv5Credentials.addresses,
+					  bufp,
+					  &cb);
+	    if (rv == KHM_ERROR_TOO_LONG) {
+		bufp = PMALLOC(cb);
+		rv = serialize_krb5_addresses(KRBv5Credentials.addresses,
+					      bufp,
+					      &cb);
+	    }
+
+	    if (KHM_SUCCEEDED(rv)) {
+		kcdb_cred_set_attr(cred, attr_id_addr_list,
+				   bufp, cb);
+	    }
+
+	    if (bufp != (void *) buffer)
+		PFREE(bufp);
         }
-#endif
 
         if(cred_flags & KCDB_CRED_FLAG_INITIAL) {
             FILETIME ft_issue_new;
@@ -597,10 +601,16 @@ khm_krb5_list_tickets(krb5_context *krbv5Context)
     ctx = (*krbv5Context);
 
     for(i=0; pNCi[i]; i++) {
+        char ccname[KRB5_MAXCCH_CCNAME];
+
         if (pNCi[i]->vers != CC_CRED_V5)
             continue;
 
-        code = (*pkrb5_cc_resolve)(ctx, pNCi[i]->name, &cache);
+        if (FAILED(StringCchPrintfA(ccname, sizeof(ccname), "API:%s",
+                                    pNCi[i]->name)))
+            continue;
+
+        code = (*pkrb5_cc_resolve)(ctx, ccname, &cache);
 
         if (code)
             continue;
@@ -668,7 +678,49 @@ _exit:
 }
 
 int
-khm_krb5_renew(khm_handle identity)
+khm_krb5_renew_cred(khm_handle cred)
+{
+    khm_handle          identity = NULL;
+    krb5_error_code     code = 0;
+    krb5_context        ctx = 0;
+    krb5_ccache         cc = 0;
+
+    if (cred == NULL) {
+#ifdef DEBUG
+	assert(FALSE);
+#endif
+	goto _cleanup;
+    }
+
+    if (KHM_FAILED(kcdb_cred_get_identity(cred, &identity))) {
+#ifdef DEBUG
+	assert(FALSE);
+#endif
+	goto _cleanup;
+    }
+
+    code = khm_krb5_initialize(identity, &ctx, &cc);
+    if (code)
+	goto _cleanup;
+
+    /* TODO: going here */
+
+ _cleanup:
+
+    if (identity)
+	kcdb_identity_release(identity);
+
+    if (cc && ctx)
+	pkrb5_cc_close(ctx, cc);
+
+    if (ctx)
+	pkrb5_free_context(ctx);
+
+    return code;
+}
+
+int
+khm_krb5_renew_ident(khm_handle identity)
 {
     krb5_error_code     code = 0;
     krb5_context        ctx = 0;
@@ -771,24 +823,67 @@ khm_krb5_kinit(krb5_context       alt_ctx,
     if (!pkrb5_init_context)
         return 0;
 
+    _reportf(L"In khm_krb5_kinit");
+
     pkrb5_get_init_creds_opt_init(&options);
     memset(&my_creds, 0, sizeof(my_creds));
 
-    if (alt_ctx)
-    {
+    if (alt_ctx) {
         ctx = alt_ctx;
-    }
-    else
-    {
+    } else {
         code = pkrb5_init_context(&ctx);
-        if (code) goto cleanup;
+        if (code)
+            goto cleanup;
     }
 
-//    code = pkrb5_cc_default(ctx, &cc);
-    if (ccache)
+    if (ccache) {
+        _reportf(L"Using supplied ccache name %S", ccache);
         code = pkrb5_cc_resolve(ctx, ccache, &cc);
-    else
-        code = pkrb5_cc_resolve(ctx, principal_name, &cc);
+    } else {
+	khm_handle identity = NULL;
+	khm_handle csp_ident = NULL;
+	khm_handle csp_k5 = NULL;
+	wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+	wchar_t wccname[MAX_PATH];
+	char ccname[MAX_PATH];
+	char * pccname = principal_name;
+	khm_size cb;
+
+	idname[0] = L'\0';
+	AnsiStrToUnicode(idname, sizeof(idname), principal_name);
+
+	cb = sizeof(wccname);
+
+	if (KHM_SUCCEEDED(kcdb_identity_create(idname, 0, &identity)) &&
+
+	    KHM_SUCCEEDED(kcdb_identity_get_config(identity, 0, &csp_ident)) &&
+
+	    KHM_SUCCEEDED(khc_open_space(csp_ident, CSNAME_KRB5CRED, 0,
+					 &csp_k5)) &&
+
+	    KHM_SUCCEEDED(khc_read_string(csp_k5, L"DefaultCCName",
+					  wccname, &cb)) &&
+
+	    cb > sizeof(wchar_t)) {
+
+            _reportf(L"Using DefaultCCName [%s] from identity", wccname);
+
+	    UnicodeStrToAnsi(ccname, sizeof(ccname), wccname);
+	    pccname = ccname;
+	}
+
+	if (csp_k5)
+	    khc_close_space(csp_k5);
+	if (csp_ident)
+	    khc_close_space(csp_ident);
+	if (identity)
+	    kcdb_identity_release(identity);
+
+        code = pkrb5_cc_resolve(ctx, pccname, &cc);
+    }
+
+    _reportf(L"krb5_cc_resolve returns code %d", code);
+
     if (code) goto cleanup;
 
     code = pkrb5_parse_name(ctx, principal_name, &me);
@@ -803,55 +898,57 @@ khm_krb5_kinit(krb5_context       alt_ctx,
 
     if (lifetime)
         pkrb5_get_init_creds_opt_set_tkt_life(&options, lifetime);
+
     pkrb5_get_init_creds_opt_set_forwardable(&options,
         forwardable ? 1 : 0);
     pkrb5_get_init_creds_opt_set_proxiable(&options,
         proxiable ? 1 : 0);
     pkrb5_get_init_creds_opt_set_renew_life(&options,
         renew_life);
+
     if (addressless)
         pkrb5_get_init_creds_opt_set_address_list(&options,NULL);
     else {
-        if (publicIP)
-        {
+	krb5_address ** local_addrs=NULL;
+	DWORD           netIPAddr;
+
+	pkrb5_os_localaddr(ctx, &local_addrs);
+	i = 0;
+	while ( local_addrs[i++] );
+	addr_count = i + 1;
+
+	addrs = (krb5_address **) PMALLOC((addr_count+1) * sizeof(krb5_address *));
+	if ( !addrs ) {
+	    pkrb5_free_addresses(ctx, local_addrs);
+	    assert(0);
+	}
+	memset(addrs, 0, sizeof(krb5_address *) * (addr_count+1));
+	i = 0;
+	while ( local_addrs[i] ) {
+	    addrs[i] = (krb5_address *)PMALLOC(sizeof(krb5_address));
+	    if (addrs[i] == NULL) {
+		pkrb5_free_addresses(ctx, local_addrs);
+		assert(0);
+	    }
+
+	    addrs[i]->magic = local_addrs[i]->magic;
+	    addrs[i]->addrtype = local_addrs[i]->addrtype;
+	    addrs[i]->length = local_addrs[i]->length;
+	    addrs[i]->contents = (unsigned char *)PMALLOC(addrs[i]->length);
+	    if (!addrs[i]->contents) {
+		pkrb5_free_addresses(ctx, local_addrs);
+		assert(0);
+	    }
+
+	    memcpy(addrs[i]->contents,local_addrs[i]->contents,
+		   local_addrs[i]->length);        /* safe */
+	    i++;
+	}
+	pkrb5_free_addresses(ctx, local_addrs);
+
+        if (publicIP) {
             // we are going to add the public IP address specified by the user
             // to the list provided by the operating system
-            krb5_address ** local_addrs=NULL;
-            DWORD           netIPAddr;
-
-            pkrb5_os_localaddr(ctx, &local_addrs);
-            while ( local_addrs[i++] );
-            addr_count = i + 1;
-
-            addrs = (krb5_address **) PMALLOC((addr_count+1) * sizeof(krb5_address *));
-            if ( !addrs ) {
-                pkrb5_free_addresses(ctx, local_addrs);
-                assert(0);
-            }
-            memset(addrs, 0, sizeof(krb5_address *) * (addr_count+1));
-            i = 0;
-            while ( local_addrs[i] ) {
-                addrs[i] = (krb5_address *)PMALLOC(sizeof(krb5_address));
-                if (addrs[i] == NULL) {
-                    pkrb5_free_addresses(ctx, local_addrs);
-                    assert(0);
-                }
-
-                addrs[i]->magic = local_addrs[i]->magic;
-                addrs[i]->addrtype = local_addrs[i]->addrtype;
-                addrs[i]->length = local_addrs[i]->length;
-                addrs[i]->contents = (unsigned char *)PMALLOC(addrs[i]->length);
-                if (!addrs[i]->contents) {
-                    pkrb5_free_addresses(ctx, local_addrs);
-                    assert(0);
-                }
-
-                memcpy(addrs[i]->contents,local_addrs[i]->contents,
-                    local_addrs[i]->length);        /* safe */
-                i++;
-            }
-            pkrb5_free_addresses(ctx, local_addrs);
-
             addrs[i] = (krb5_address *)PMALLOC(sizeof(krb5_address));
             if (addrs[i] == NULL)
                 assert(0);
@@ -865,27 +962,31 @@ khm_krb5_kinit(krb5_context       alt_ctx,
 
             netIPAddr = htonl(publicIP);
             memcpy(addrs[i]->contents,&netIPAddr,4);
-
-            pkrb5_get_init_creds_opt_set_address_list(&options,addrs);
-
         }
+
+	pkrb5_get_init_creds_opt_set_address_list(&options,addrs);
     }
 
-    code = pkrb5_get_init_creds_password(ctx,
-        &my_creds,
-        me,
-        password, // password
-        prompter, // prompter
-        p_data, // prompter data
-        0, // start time
-        0, // service name
-        &options);
+    code =
+        pkrb5_get_init_creds_password(ctx,
+                                      &my_creds,
+                                      me,
+                                      password, // password
+                                      prompter, // prompter
+                                      p_data, // prompter data
+                                      0, // start time
+                                      0, // service name
+                                      &options);
+    _reportf(L"krb5_get_init_creds_password returns code %d", code);
+
     if (code) goto cleanup;
 
     code = pkrb5_cc_initialize(ctx, cc, me);
+    _reportf(L"krb5_cc_initialize returns code %d", code);
     if (code) goto cleanup;
 
     code = pkrb5_cc_store_cred(ctx, cc, &my_creds);
+    _reportf(L"krb5_cc_store_cred returns code %d", code);
     if (code) goto cleanup;
 
 cleanup:
@@ -1157,7 +1258,8 @@ khm_krb5_destroy_by_credset(khm_handle p_cs)
     kcdb_credset_get_size(d_cs, &s);
 
     if (s == 0) {
-        /* nothing to do */
+        _reportf(L"No tickets to delete");
+
         kcdb_credset_delete(d_cs);
         return 0;
     }
@@ -1215,6 +1317,8 @@ khm_krb5_destroy_by_credset(khm_handle p_cs)
             char a_ccname[KRB5_MAXCCH_CCNAME];
             krb5_ccache cc = NULL;
 
+            _reportf(L"Destroying ccache [%s]", ccname);
+
             UnicodeStrToAnsi(a_ccname,
                              sizeof(a_ccname),
                              ccname);
@@ -1228,7 +1332,7 @@ khm_krb5_destroy_by_credset(khm_handle p_cs)
             code = pkrb5_cc_destroy(ctx, cc);
 
             if (code) {
-                /*TODO: report error */
+                _reportf(L"krb5_cc_destroy returns code %d", code);
             }
 
         _delete_this_set:
@@ -1280,6 +1384,8 @@ khm_krb5_destroy_by_credset(khm_handle p_cs)
                                           &cb)))
             goto _done_with_this_cred;
 
+        _reportf(L"Looking at ccache [%s]", ccname);
+
         UnicodeStrToAnsi(a_ccname,
                          sizeof(a_ccname),
                          ccname);
@@ -1314,6 +1420,8 @@ khm_krb5_destroy_by_credset(khm_handle p_cs)
                                           srvname,
                                           &cb)))
             goto _do_next_cred;
+
+        _reportf(L"Attempting to delete ticket %s", srvname);
 
         UnicodeStrToAnsi(a_srvname, sizeof(a_srvname), srvname);
 
@@ -1740,7 +1848,8 @@ readstring(FILE * file, char * buf, int len)
     \return The string with the list of realms or NULL if the
     operation fails.
 */
-wchar_t * khm_krb5_get_realm_list(void) 
+wchar_t * 
+khm_krb5_get_realm_list(void) 
 {
     wchar_t * rlist = NULL;
 
@@ -1865,7 +1974,8 @@ wchar_t * khm_krb5_get_realm_list(void)
 
     Returns NULL if the operation fails.
 */
-wchar_t * khm_krb5_get_default_realm(void)
+wchar_t * 
+khm_krb5_get_default_realm(void)
 {
     wchar_t * realm;
     size_t cch;
@@ -1914,7 +2024,8 @@ khm_krb5_set_default_realm(wchar_t * realm) {
     return rv;
 }
 
-wchar_t * khm_get_realm_from_princ(wchar_t * princ) {
+wchar_t * 
+khm_get_realm_from_princ(wchar_t * princ) {
     wchar_t * t;
 
     if(!princ)

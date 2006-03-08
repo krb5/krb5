@@ -182,15 +182,16 @@ khm_krb4_list_tickets(void)
 
         kcdb_credset_add_cred(krb4_credset, cred, -1);
 
+	kcdb_cred_release(cred);
     } // while
 
-cleanup:
+ cleanup:
     if (ptf_close == NULL)
         return(KSUCCESS);
 
     if (open)
         (*ptf_close)(); //close ticket file 
-    
+
     if (k_errno == EOF)
         k_errno = 0;
 
@@ -601,6 +602,76 @@ khm_krb4_changepwd(char * principal,
     return k_errno;
 }
 
+struct tgt_filter_data {
+    khm_handle identity;
+    wchar_t realm[KCDB_IDENT_MAXCCH_NAME];
+};
+
+khm_int32 KHMAPI
+krb4_tgt_filter(khm_handle cred, khm_int32 flags, void * rock) {
+    struct tgt_filter_data * pdata;
+    wchar_t credname[KCDB_MAXCCH_NAME];
+    wchar_t * t;
+    khm_size cb;
+    khm_int32 ctype;
+
+    pdata = (struct tgt_filter_data *) rock;
+    cb = sizeof(credname);
+
+    if (KHM_FAILED(kcdb_cred_get_type(cred, &ctype)) ||
+        ctype != credtype_id_krb4)
+        return 0;
+
+    if (KHM_FAILED(kcdb_cred_get_name(cred, credname, &cb)))
+        return 0;
+
+    if (wcsncmp(credname, L"krbtgt.", 7))
+        return 0;
+
+    t = wcsrchr(credname, L'@');
+    if (t == NULL)
+        return 0;
+
+    if (wcscmp(t+1, pdata->realm))
+        return 0;
+
+    return 1;
+}
+
+khm_handle
+khm_krb4_find_tgt(khm_handle credset, khm_handle identity) {
+    khm_handle result = NULL;
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    wchar_t * t;
+    khm_size cb;
+    struct tgt_filter_data filter_data;
+
+    cb = sizeof(idname);
+
+    if (KHM_FAILED(kcdb_identity_get_name(identity,
+                                          idname,
+                                          &cb)))
+        return NULL;
+    
+    t = wcsrchr(idname, L'@');
+    if (t == NULL)
+        return NULL;
+
+    StringCbCopy(filter_data.realm, sizeof(filter_data.realm),
+                 t + 1);
+    filter_data.identity = identity;
+
+    if (KHM_FAILED(kcdb_credset_find_filtered(credset,
+                                              -1,
+                                              krb4_tgt_filter,
+                                              &filter_data,
+                                              &result,
+                                              NULL)))
+        return NULL;
+    else
+        return result;
+}
+
 long
 khm_convert524(khm_handle identity)
 {
@@ -677,6 +748,7 @@ khm_convert524(khm_handle identity)
          != KSUCCESS)) {
         goto cleanup;
     }
+
     /* stash ticket, session key, etc. for future use */
     if ((icode = pkrb_save_credentials(v4creds->service,
                                        v4creds->instance,

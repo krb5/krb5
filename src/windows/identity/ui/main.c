@@ -26,6 +26,7 @@
 
 #include<shlwapi.h>
 #include<khmapp.h>
+#include<netidmgr_intver.h>
 
 #if DEBUG
 #include<assert.h>
@@ -38,6 +39,8 @@ khm_ui_4 khm_commctl_version = 0;
 
 khm_startup_options khm_startup;
 
+khm_version app_version = {KH_VERSION_LIST};
+
 void khm_init_gui(void) {
     khui_init_actions();
     khui_init_rescache();
@@ -45,9 +48,11 @@ void khm_init_gui(void) {
     khui_init_toolbar();
     khm_init_notifier();
     khm_init_config();
+    khm_init_debug();
 }
 
 void khm_exit_gui(void) {
+    khm_exit_debug();
     khm_exit_config();
     khm_exit_notifier();
     khui_exit_toolbar();
@@ -127,6 +132,7 @@ void khm_register_window_classes(void) {
         ICC_HOTKEY_CLASS |
         ICC_LISTVIEW_CLASSES |
         ICC_TAB_CLASSES |
+        ICC_INTERNET_CLASSES |
 #if (_WIN32_WINNT >= 0x501)
         ((IS_COMMCTL6())?
          ICC_LINK_CLASS |
@@ -319,42 +325,61 @@ BOOL khm_check_ps_message(LPMSG pmsg) {
     return FALSE;
 }
 
-WPARAM khm_message_loop(void) {
+static HACCEL ha_menu;
+
+WPARAM khm_message_loop_int(khm_boolean * p_exit) {
     int r;
     MSG msg;
-    HACCEL ha_menu;
 
-    ha_menu = khui_create_global_accel_table();
-    while(r = GetMessage(&msg, NULL, 0,0)) {
+    while((r = GetMessage(&msg, NULL, 0,0)) &&
+          (p_exit == NULL || *p_exit)) {
         if(r == -1)
             break;
         if(!khm_check_dlg_message(&msg) &&
-            !khm_check_ps_message(&msg) &&
-            !TranslateAccelerator(khm_hwnd_main, ha_menu, &msg)) {
+           !khm_check_ps_message(&msg) &&
+           !TranslateAccelerator(khm_hwnd_main, ha_menu, &msg)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
     }
-    DestroyAcceleratorTable(ha_menu);
+
     return msg.wParam;
 }
 
+WPARAM khm_message_loop(void) {
+    WPARAM w;
+    ha_menu = khui_create_global_accel_table();
+    w = khm_message_loop_int(NULL);
+    DestroyAcceleratorTable(ha_menu);
+    return w;
+}
+
+/* Handles all context closures which have a signalled error state.
+   If the context is a top level context, then the errors are
+   displayed. */
 void KHMAPI
-khm_module_load_ctx_handler(enum kherr_ctx_event evt,
-                            kherr_context * c) {
+khm_err_ctx_completion_handler(enum kherr_ctx_event evt,
+                               kherr_context * c) {
     kherr_event * e;
     khui_alert * a;
+
+    /* we only handle top level contexts here.  For others, we allow
+       the child contexts to fold upward silently. */
+    if (c->parent || !kherr_is_error_i(c))
+        return;
 
     for(e = kherr_get_first_event(c);
         e;
         e = kherr_get_next_event(e)) {
 
+        if (e->severity != KHERR_ERROR && e->severity != KHERR_WARNING)
+            continue;
+
         kherr_evaluate_event(e);
 
-        if ((e->severity == KHERR_ERROR ||
-             e->severity == KHERR_WARNING) &&
-            e->short_desc &&
-            e->long_desc) {
+        /* we only report errors if there is enough information to
+           present a message. */
+        if (e->short_desc && e->long_desc) {
 
             khui_alert_create_empty(&a);
 
@@ -369,9 +394,6 @@ khm_module_load_ctx_handler(enum kherr_ctx_event evt,
             khui_alert_release(a);
         }
     }
-
-    kherr_remove_ctx_handler(khm_module_load_ctx_handler,
-                             c->serial);
 }
 
 static wchar_t helpfile[MAX_PATH] = L"";
@@ -405,19 +427,7 @@ HWND khm_html_help(HWND hwnd, wchar_t * suffix,
 }
 
 void khm_load_default_modules(void) {
-    kherr_context * c;
-
-    _begin_task(KHERR_CF_TRANSITIVE);
-
     kmm_load_default_modules();
-
-    c = kherr_peek_context();
-    kherr_add_ctx_handler(khm_module_load_ctx_handler,
-                          KHERR_CTX_END,
-                          c->serial);
-    kherr_release_context(c);
-
-    _end_task();
 }
 
 int WINAPI WinMain(HINSTANCE hInstance,
@@ -445,6 +455,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     khc_load_schema(NULL, schema_uiconfig);
 
+ _start_app:
+
     if(!slave) {
 
         /* set this so that we don't accidently invoke an API that
@@ -466,6 +478,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         kmq_set_completion_handler(KMSG_CRED, kmsg_cred_completion);
 
+        kherr_add_ctx_handler(khm_err_ctx_completion_handler,
+                              KHERR_CTX_END,
+                              0);
+
         /* load the standard plugins */
         khm_load_default_modules();
 
@@ -477,6 +493,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         if (!khm_startup.no_main_window)
             khm_show_main_window();
+
+        khm_refresh_config();
 
         rv = (int) khm_message_loop();
 
@@ -497,6 +515,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
         wchar_t mapname[256];
         DWORD tid;
         void * xfer;
+        khm_query_app_version query_app_version;
 
         CloseHandle(h_appmutex);
 
@@ -512,6 +531,58 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         if (!hwnd)
             return 2;
+
+        /* first check if the remote instance supports a version
+           query */
+
+        StringCbPrintf(mapname, sizeof(mapname),
+                       QUERY_APP_VER_MAP_FMT,
+                       (tid = GetCurrentThreadId()));
+
+        hmap = CreateFileMapping(INVALID_HANDLE_VALUE,
+                                 NULL,
+                                 PAGE_READWRITE,
+                                 0,
+                                 4096,
+                                 mapname);
+
+        if (hmap == NULL)
+            return 3;
+
+        xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
+                             sizeof(query_app_version));
+
+        if (xfer) {
+            ZeroMemory(&query_app_version, sizeof(query_app_version));
+
+            query_app_version.magic = KHM_QUERY_APP_VER_MAGIC;
+            query_app_version.code = KHM_ERROR_NOT_IMPLEMENTED;
+            query_app_version.ver_caller = app_version;
+
+            query_app_version.request_swap = TRUE;
+
+            memcpy(xfer, &query_app_version, sizeof(query_app_version));
+
+            SendMessage(hwnd, WM_KHUI_QUERY_APP_VERSION,
+                        0, (LPARAM) tid);
+
+            memcpy(&query_app_version, xfer, sizeof(query_app_version));
+
+            UnmapViewOfFile(xfer);
+            xfer = NULL;
+        }
+
+        CloseHandle(hmap);
+        hmap = NULL;
+
+        if (query_app_version.code == KHM_ERROR_SUCCESS &&
+            query_app_version.request_swap) {
+            /* the request for swap was granted.  We can now
+               initialize our instance as the master instance. */
+
+            slave = FALSE;
+            goto _start_app;
+        }
 
         StringCbPrintf(mapname, sizeof(mapname),
                        COMMANDLINE_MAP_FMT,
@@ -546,7 +617,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
             CloseHandle(hmap);
     }
 
-#if 0
+#if defined(DEBUG) && ( defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL))
     /* writes a report of memory leaks to the specified file.  Should
        only be enabled on development versions. */
     PDUMP("memleak.txt");

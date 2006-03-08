@@ -307,16 +307,19 @@ duration_edit_proc(HWND hwnd,
 
             p = GetParent(hwnd);
 
-            /* we are being activated.  show the panel */
+            /* we are being activated. */
             if(tc->hw_slider == NULL) {
                 create_edit_sliders(hwnd, p, tc);
                 initialize_tracker(p, tc);
             }
+
             khui_tracker_reposition(tc);
+
+#ifdef SHOW_PANEL_ON_FIRST_ACTIVATE
             ShowWindow(tc->hw_slider, SW_SHOWNOACTIVATE);
+#endif
 
             tc->act_time = GetTickCount();
-            //SetActiveWindow(p);
         }
         break;
 
@@ -338,18 +341,17 @@ duration_edit_proc(HWND hwnd,
         break;
 
     case KHUI_WM_NC_NOTIFY:
-        if(HIWORD(wParam) == WMNC_DIALOG_SETUP)
-            {
-                HWND p;
+        if(HIWORD(wParam) == WMNC_DIALOG_SETUP) {
+            HWND p;
 
-                p = GetParent(hwnd);
+            p = GetParent(hwnd);
 
-                if(tc->hw_slider == NULL) {
-                    create_edit_sliders(hwnd,p,tc);
-                }
-
-                initialize_tracker(p, tc);
+            if(tc->hw_slider == NULL) {
+                create_edit_sliders(hwnd,p,tc);
             }
+
+            initialize_tracker(p, tc);
+        }
         return TRUE;
 
     case WM_LBUTTONUP:
@@ -357,7 +359,7 @@ duration_edit_proc(HWND hwnd,
             DWORD tm;
 
             tm = GetTickCount();
-            if (tm - tc->act_time > 500)
+            if (tm - tc->act_time > 000)
                 ShowWindow(tc->hw_slider, SW_HIDE);
         } else {
             ShowWindow(tc->hw_slider, SW_SHOWNOACTIVATE);

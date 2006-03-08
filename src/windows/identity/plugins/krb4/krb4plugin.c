@@ -200,7 +200,6 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                                              &attr_id_krb5_flags))) {
                 rv = KHM_ERROR_UNKNOWN;
             }
-
         }
         break;
 

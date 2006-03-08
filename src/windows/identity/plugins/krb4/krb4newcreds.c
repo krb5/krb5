@@ -55,6 +55,7 @@ typedef struct tag_k4_dlg_data {
 } k4_dlg_data;
 
 void k4_update_display(k4_dlg_data * d) {
+
     CheckDlgButton(d->hwnd, IDC_NCK4_OBTAIN,
                    (d->k4_enabled)?BST_CHECKED: BST_UNCHECKED);
 
@@ -68,8 +69,11 @@ void k4_update_display(k4_dlg_data * d) {
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_K524), FALSE);
     }
 
-    CheckRadioButton(d->hwnd, IDC_NCK4_AUTO, IDC_NCK4_PWD,
-                     method_to_id[d->method]);
+#ifdef DEBUG
+    assert(d->method >= 0 && d->method < ARRAYLENGTH(method_to_id));
+#endif
+
+    CheckDlgButton(d->hwnd, method_to_id[d->method], BST_CHECKED);
 
     khui_cw_enable_type(d->nc, credtype_id_krb4, d->k4_enabled);
 }
@@ -103,6 +107,9 @@ void k4_update_data(k4_dlg_data * d) {
 
 khm_boolean k4_should_identity_get_k4(khm_handle ident) {
     khm_int32 idflags = 0;
+    khm_handle csp_ident = NULL;
+    khm_handle csp_k4 = NULL;
+    khm_boolean get_k4 = TRUE;
 
     if (KHM_FAILED(kcdb_identity_get_flags(ident, &idflags)))
         return FALSE;
@@ -122,7 +129,20 @@ khm_boolean k4_should_identity_get_k4(khm_handle ident) {
         }
     }
 
-    return TRUE;
+    if (KHM_SUCCEEDED(kcdb_identity_get_config(ident, 0, &csp_ident))) {
+        if (KHM_SUCCEEDED(khc_open_space(csp_ident, CSNAME_KRB4CRED, 0,
+                                         &csp_k4))) {
+            khm_int32 t = 0;
+            if (KHM_SUCCEEDED(khc_read_int32(csp_k4, L"Krb4NewCreds", &t)) &&
+                !t)
+                get_k4 = FALSE;
+
+            khc_close_space(csp_k4);
+        }
+        khc_close_space(csp_ident);
+    }
+
+    return get_k4;
 }
 
 void k4_read_identity_data(k4_dlg_data * d) {
@@ -433,9 +453,6 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
             if (!nc->ctx.identity)
                 break;
 
-            if (!k4_should_identity_get_k4(nc->ctx.identity))
-                break;
-
             nct = PMALLOC(sizeof(*nct));
 #ifdef DEBUG
             assert(nct);
@@ -469,6 +486,8 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
             khm_handle ident = NULL;
             k4_dlg_data * d = NULL;
             long code = 0;
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_size cb;
 
             nc = (khui_new_creds *) vparam;
             if (KHM_FAILED(khui_cw_find_type(nc, credtype_id_krb4, &nct)))
@@ -484,16 +503,32 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                     if (!d ||
                         nc->n_identities == 0 ||
                         nc->identities[0] == NULL ||
-                        nc->result != KHUI_NC_RESULT_GET_CREDS)
+                        nc->result != KHUI_NC_RESULT_PROCESS) {
+                        khui_cw_set_response(nc, credtype_id_krb4,
+                                             KHUI_NC_RESPONSE_SUCCESS |
+                                             KHUI_NC_RESPONSE_EXIT);
                         break;
+                    }
 
                     if (!d->k4_enabled) {
                         k4_write_identity_data(d);
+                        khui_cw_set_response(nc, credtype_id_krb4,
+                                             KHUI_NC_RESPONSE_SUCCESS |
+                                             KHUI_NC_RESPONSE_EXIT);
                         break;
                     }
 
                     method = d->method;
                     ident = nc->identities[0];
+
+                    cb = sizeof(idname);
+                    kcdb_identity_get_name(ident, idname, &cb);
+                    _begin_task(0);
+                    _report_mr2(KHERR_NONE, MSG_K4_NEW_CREDS,
+                                _cstr(ident), _int32(method));
+                    _resolve();
+                    _describe();
+                                
 
                 } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
 
@@ -511,12 +546,30 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
 
                         ident = nc->ctx.identity;
 
+                        if (!k4_should_identity_get_k4(ident)) {
+                            khui_cw_set_response(nc, credtype_id_krb4,
+                                                 KHUI_NC_RESPONSE_FAILED |
+                                                 KHUI_NC_RESPONSE_EXIT);
+                            break;
+                        }
+
                     } else {
+                        khui_cw_set_response(nc, credtype_id_krb4,
+                                             KHUI_NC_RESPONSE_FAILED |
+                                             KHUI_NC_RESPONSE_EXIT);
                         break;
                     }
 
                     method = K4_METHOD_K524; /* only k524 is supported
                                                 for renewals */
+
+                    _begin_task(0);
+                    cb = sizeof(idname);
+                    kcdb_identity_get_name(ident, idname, &cb);
+                    _report_mr2(KHERR_NONE, MSG_K4_RENEW_CREDS,
+                                _cstr(ident), _int32(method));
+                    _resolve();
+                    _describe();
                 } else {
                     assert(FALSE);
                 }
@@ -525,7 +578,28 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                      method == K4_METHOD_K524) &&
                     khui_cw_type_succeeded(nc, credtype_id_krb5)) {
 
+                    khm_handle tgt;
+                    FILETIME ft_prev;
+                    FILETIME ft_new;
+                    khm_size cb;
+
+                    _report_mr0(KHERR_INFO, MSG_K4_TRY_K524);
+
+                    tgt = khm_krb4_find_tgt(NULL, ident);
+                    if (tgt) {
+                        cb = sizeof(ft_prev);
+                        if (KHM_FAILED(kcdb_cred_get_attr(tgt,
+                                                          KCDB_ATTR_EXPIRE,
+                                                          NULL,
+                                                          &ft_prev,
+                                                          &cb)))
+                            ZeroMemory(&ft_prev, sizeof(ft_prev));
+                        kcdb_cred_release(tgt);
+                    }
+
                     code = khm_convert524(ident);
+
+                    _reportf(L"khm_convert524 returns code %d", code);
 
                     if (code == 0) {
                         khui_cw_set_response(nc, credtype_id_krb4,
@@ -536,13 +610,92 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                             assert(d != NULL);
 
                             k4_write_identity_data(d);
+
+                        } else if (nc->subtype == KMSG_CRED_RENEW_CREDS &&
+                                   (nc->ctx.scope == KHUI_SCOPE_CREDTYPE ||
+                                    nc->ctx.scope == KHUI_SCOPE_CRED)) {
+
+                            khm_krb4_list_tickets();
+
+                            tgt = khm_krb4_find_tgt(NULL, ident);
+
+                            if (tgt) {
+                                cb = sizeof(ft_new);
+                                ZeroMemory(&ft_new, sizeof(ft_new));
+
+                                kcdb_cred_get_attr(tgt,
+                                                   KCDB_ATTR_EXPIRE,
+                                                   NULL,
+                                                   &ft_new,
+                                                   &cb);
+
+                                kcdb_cred_release(tgt);
+                            }
+
+                            if (!tgt ||
+                                CompareFileTime(&ft_new,
+                                                &ft_prev) <= 0) {
+                                /* The new TGT wasn't much of an
+                                   improvement over what we already
+                                   had.  We should go out and try to
+                                   renew the identity now. */
+
+                                khui_action_context ctx;
+
+                                _reportf(L"Renewal of Krb4 creds failed to get a longer TGT.  Triggering identity renewal");
+
+                                khui_context_create(&ctx,
+                                                    KHUI_SCOPE_IDENT,
+                                                    nc->ctx.identity,
+                                                    KCDB_CREDTYPE_INVALID,
+                                                    NULL);
+                                khui_action_trigger(KHUI_ACTION_RENEW_CRED,
+                                                    &ctx);
+
+                                khui_context_release(&ctx);
+                            }
                         }
+
+                        _end_task();
                         break;
+
                     } else if (method == K4_METHOD_K524) {
                         khui_cw_set_response(nc, credtype_id_krb4,
                                              KHUI_NC_RESPONSE_FAILED |
                                              KHUI_NC_RESPONSE_EXIT);
+
+			if (nc->subtype == KMSG_CRED_RENEW_CREDS &&
+			    (nc->ctx.scope == KHUI_SCOPE_CREDTYPE ||
+			     nc->ctx.scope == KHUI_SCOPE_CRED)) {
+			    /* We were trying to get a new Krb4 TGT
+			       for this identity.  Sometimes this
+			       fails because of restrictions placed on
+			       K524d regarding the lifetime of the
+			       issued K4 TGT.  In this case, we
+			       trigger a renewal of the identity in
+			       the hope that the new K5 TGT will allow
+			       us to successfully get a new K4 TGT
+			       next time over using the new K5 TGT. */
+
+			    khui_action_context ctx;
+
+                            _reportf(L"Renewal of Krb4 creds failed using k524.  Triggerring identity renewal.");
+
+			    khui_context_create(&ctx,
+						KHUI_SCOPE_IDENT,
+						nc->ctx.identity,
+						KCDB_CREDTYPE_INVALID,
+						NULL);
+
+			    khui_action_trigger(KHUI_ACTION_RENEW_CRED,
+						&ctx);
+
+			    khui_context_release(&ctx);
+			}
+
+                        _end_task();
                         break;
+
                     }
                 }
 
@@ -564,6 +717,8 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
 
                     assert(nc->subtype == KMSG_CRED_NEW_CREDS);
 
+                    _report_mr0(KHERR_INFO, MSG_K4_TRY_PASSWORD);
+
                     code = TRUE; /* just has to be non-zero */
 
                     khui_cw_get_prompt_count(nc, &n_prompts);
@@ -581,16 +736,20 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                             break;
                     }
 
-                    if (idx >= n_prompts)
+                    if (idx >= n_prompts) {
+                        _reportf(L"Password prompt not found");
                         goto _skip_pwd;
+                    }
 
                     khui_cw_sync_prompt_values(nc);
 
                     cb = sizeof(wpwd);
                     if (KHM_FAILED(khui_cw_get_prompt_value(nc, idx,
                                                             wpwd,
-                                                            &cb)))
+                                                            &cb))) {
+                        _reportf(L"Failed to obtain password value");
                         goto _skip_pwd;
+                    }
 
                     UnicodeStrToAnsi(pwd, sizeof(pwd), wpwd);
 
@@ -605,8 +764,10 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                         char * atsign;
 
                         atsign = strchr(idname, '@');
-                        if (atsign == NULL)
+                        if (atsign == NULL) {
+                            _reportf(L"Identity name does not contain an '@'");
                             goto _skip_pwd;
+                        }
 
                         *atsign++ = 0;
 
@@ -629,6 +790,9 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
 
                     code = khm_krb4_kinit(aname, inst, realm,
                                           (long) d->lifetime, pwd);
+
+                    _reportf(L"khm_krb4_kinit returns code %d", code);
+
                 _skip_pwd:
 
                     if (code) {
@@ -649,6 +813,8 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                         }
                     }
                 }
+
+                _end_task();
             }
         }
         break;

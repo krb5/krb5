@@ -33,7 +33,13 @@ MODULE=all
 !ifndef CLEANRUN
 !ifndef TESTRUN
 !ifndef ETAGRUN
+
+# Define KH_NO_WX if the build should not fail on warnings.  The
+# default is to treat warnings as errors.
+
+#RMAKE=$(MAKECMD) /nologo all KH_NO_WX=1
 RMAKE=$(MAKECMD) /nologo all
+
 !else
 RMAKE=$(MAKECMD) /nologo etag
 !endif

@@ -36,6 +36,7 @@
 #define KHERR_HMODULE khm_hInstance
 #define KHERR_FACILITY khm_facility
 #define KHERR_FACILITY_ID 3
+#define NOEXPORT
 
 #include<khdefs.h>
 #include<khlist.h>
@@ -63,6 +64,7 @@
 #include<propertywnd.h>
 #include<configwnd.h>
 #include<aboutwnd.h>
+#include<debugfuncs.h>
 
 #include<reqdaemon.h>
 #include<notifier.h>

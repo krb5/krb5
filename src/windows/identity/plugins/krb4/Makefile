@@ -40,21 +40,38 @@ OBJFILES= 				\
 	$(OBJ)\krb4configdlg.obj	\
 	$(OBJ)\krb4newcreds.obj
 
-LIBFILES= 				\
-	$(LIBDIR)\nidmgr32.lib		\
-	$(KFWLIBDIR)\loadfuncs.lib
+
 
 SDKLIBFILES=
 
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+SCLIB=bufferoverflowu.lib
+LIBFILES= 				\
+	$(LIBDIR)\nidmgr64.lib		\
+	$(KFWLIBDIR)\loadfuncs.lib
+!else
+SCLIB=
+LIBFILES= 				\
+	$(LIBDIR)\nidmgr32.lib		\
+	$(KFWLIBDIR)\loadfuncs.lib
+!endif
+
 VERRESFILE=$(OBJ)\version.res
+
+MSGRESFILE=$(OBJ)\krb4_msgs.res
+
+$(MSGRESFILE): $(OBJ)\krb4_msgs.rc
+
+$(OBJ)\krb4_msgs.rc: lang\krb4_msgs.mc
+	$(MC2RC)
 
 $(OBJ)\krb4config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
-$(DLLFILE): $(OBJFILES) $(VERRESFILE)
-	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES)
+$(DLLFILE): $(OBJFILES) $(VERRESFILE) $(MSGRESFILE)
+	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES) $(SCLIB)
 
-all: mkdirs $(DLLFILE) lang
+all: mkdirs $(MSGRESFILE) $(DLLFILE) lang
 
 lang::
 
@@ -68,11 +85,14 @@ LANGDLL=$(BINDIR)\krb4cred_$(LANG).dll
 
 lang:: $(LANGDLL)
 
-$(LANGDLL): $(OBJ)\langres_$(LANG).res
+$(LANGDLL): $(OBJ)\langres_$(LANG).res $(OBJ)\langres_ver_$(LANG).res
 	$(DLLRESLINK)
 
 $(OBJ)\langres_$(LANG).res: lang\$(LANG)\langres.rc
 	$(RC2RES)
+
+$(OBJ)\langres_ver_$(LANG).res: version.rc
+	$(RC) $(RFLAGS) $(rincflags) /d LANGVER /d LANG_$(LANG) /fo $@ $** 
 # End language block
 
 clean::

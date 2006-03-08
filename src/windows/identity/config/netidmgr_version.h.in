@@ -1,4 +1,4 @@
-$(VERSIONEXT): Makefile
+$(VERSIONEXT): Makefile Makefile.w32
 	$(CP) << $(VERSIONEXT)
 /* Copyright (c) 2004 Massachusetts Institute of Technology
  *
@@ -36,6 +36,7 @@ $(VERSIONEXT): Makefile
 #define KH_VERSION_AUX 		$(NETIDMGR_VERSION_AUX)
 
 #define KH_VERSION_API          $(NETIDMGR_VERSION_API)
+#define KH_VERSION_API_MINCOMPAT $(NETIDMGR_VERSION_API_MINCOMPAT)
 
 #define KH_VERSION_LIST 	$(NETIDMGR_VERSIONC)
 #define KH_VERSION_STRING 	"$(NETIDMGR_VERSION)"

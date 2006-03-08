@@ -899,7 +899,7 @@ nc_handle_wm_command(HWND hwnd,
         switch(LOWORD(wParam)) {
 
         case IDOK:
-            d->nc->result = KHUI_NC_RESULT_GET_CREDS;
+            d->nc->result = KHUI_NC_RESULT_PROCESS;
 
             /* fallthrough */
 
@@ -1178,7 +1178,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 if (d->nc->types[i]->dlg_proc == NULL) {
                     d->nc->types[i]->hwnd_panel = NULL;
                 } else {
-                    /* Create the dialog panel */ 
+                    /* Create the dialog panel */
                     d->nc->types[i]->hwnd_panel = 
                         CreateDialogParam(d->nc->types[i]->h_module,
                                           d->nc->types[i]->dlg_template,

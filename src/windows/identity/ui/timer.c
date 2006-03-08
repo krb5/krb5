@@ -27,6 +27,12 @@
 #include<khmapp.h>
 #include<assert.h>
 
+/* The minimum half time interval is 60 seconds*/
+#define TT_MIN_HALFLIFE_INTERVAL 60
+
+/* as above, in FILETIME units of 100ns */
+#define FT_MIN_HALFLIFE_INTERVAL (TT_MIN_HALFLIFE_INTERVAL * 10000000i64)
+
 /* in seconds */
 #if 0
 khm_int32 khui_timeout_warn = KHUI_DEF_TIMEOUT_WARN;
@@ -161,11 +167,11 @@ tmr_fire_timer(void) {
 
                     khui_timers[i].flags |= KHUI_TE_FLAG_EXPIRED;
                 }
-#ifdef DEBUG
                 else {
+#ifdef DEBUG
                     assert(FALSE);
-                }
 #endif
+                }
             }
         }
     }
@@ -323,6 +329,71 @@ tmr_find(khm_handle key, khui_timer_type type,
         return -1;
 }
 
+/* called with cs_timers held. */
+static FILETIME
+tmr_next_halflife_timeout(int idx, FILETIME * issue, FILETIME * expire) {
+    FILETIME lifetime;
+    FILETIME current;
+    FILETIME ret;
+
+    khm_int64 ilife;
+    khm_int64 icurrent;
+    khm_int64 iexpire;
+
+    khm_int64 iret;
+
+    GetSystemTimeAsFileTime(&current);
+
+    /* wha?? */
+    if (CompareFileTime(issue, expire) >= 0)
+        return current;
+
+    lifetime = FtSub(expire, issue);
+    icurrent = FtToInt(&current);
+    iexpire = FtToInt(expire);
+
+    ilife = FtToInt(&lifetime);
+
+    while(ilife / 2 > FT_MIN_HALFLIFE_INTERVAL) {
+        ilife /= 2;
+
+        /* is this the next renewal time? */
+        if (iexpire - ilife > icurrent) {
+            if (idx >= 0 &&
+                khui_timers[idx].expire == iexpire - ilife &&
+                (khui_timers[idx].flags & KHUI_TE_FLAG_EXPIRED)) {
+
+                /* if this renewal time has already been triggered
+                   (note that when the timer fires, it also fires all
+                   events that are within a few seconds of the current
+                   time) then we need to set the alarm for the next
+                   slot down the line. */
+
+                continue;
+
+            } else {
+                break;
+            }
+        }
+    }
+
+    iret = iexpire - ilife;
+
+    ret = IntToFt(iret);
+
+    /* if the previous renew timer had fired, we need to mark it as
+       not expired.  However, we leave it to the caller to update the
+       actual timer and mark it as not stale. */
+    if (idx >= 0 &&
+        khui_timers[idx].expire < (khm_ui_8) iret) {
+
+        khui_timers[idx].flags &= ~KHUI_TE_FLAG_EXPIRED;
+        khui_timers[idx].expire = iret;
+    }
+
+    return ret;
+}
+
 /* called with cs_timers held */
 static khm_int32 KHMAPI
 tmr_cred_apply_proc(khm_handle cred, void * rock) {
@@ -333,6 +404,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     FILETIME ft_current;
     FILETIME ft_creinst;
     FILETIME ft_cred_expiry;
+    FILETIME ft_cred_issue;
+    FILETIME ft_issue;
     FILETIME ft;
     FILETIME fte;
     FILETIME ft_reinst;
@@ -347,7 +420,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     cb = sizeof(ft_expiry);
     if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_EXPIRE,
                                           NULL,
-                                          &ft_expiry, &cb)))
+                                          &ft_expiry, &cb))) {
+        cb = sizeof(ft_expiry);
         if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_EXPIRE,
                                           NULL,
                                           &ft_expiry, &cb))) {
@@ -355,6 +429,22 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             kcdb_identity_release(ident);
             return KHM_ERROR_SUCCESS;
         }
+    }
+
+    cb = sizeof(ft_issue);
+    if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_ISSUE,
+                                          NULL,
+                                          &ft_issue, &cb))) {
+        cb = sizeof(ft_issue);
+        if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE,
+                                          NULL,
+                                          &ft_issue, &cb))) {
+            /* we don't really abandon the timer.  In this case, we
+               fall back to using the threshold value to set the
+               expiry timer. */
+            ZeroMemory(&ft_issue, sizeof(ft_issue));
+        }
+    }
 
     /* and the current time */
     GetSystemTimeAsFileTime(&ft_current);
@@ -383,6 +473,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         khm_boolean do_warn = TRUE;
         khm_boolean do_crit = TRUE;
         khm_boolean do_renew = TRUE;
+        khm_boolean do_halflife = TRUE;
         khm_boolean renew_done = FALSE;
         khm_boolean monitor = TRUE;
         khm_int32 to_warn = KHUI_DEF_TIMEOUT_WARN;
@@ -423,6 +514,10 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         if (KHM_SUCCEEDED(rv))
             do_renew = t;
 
+        rv = khc_read_int32(csp_id, L"RenewAtHalfLife", &t);
+        if (KHM_SUCCEEDED(rv))
+            do_halflife = t;
+
         rv = khc_read_int32(csp_id, L"WarnThreshold", &t);
         if (KHM_SUCCEEDED(rv))
             to_warn = t;
@@ -441,16 +536,21 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             int prev;
 
             TimetToFileTimeInterval(to_renew, &ft);
-            fte = FtSub(&ft_expiry, &ft);
 
             prev =
                 tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0);
+
+            if (do_halflife)
+                fte = tmr_next_halflife_timeout(prev, &ft_issue, &ft_expiry);
+            else
+                fte = FtSub(&ft_expiry, &ft);
 
             /* we set off a renew notification immediately if the
                renew threshold has passed but a renew was never sent.
                This maybe because that NetIDMgr was started at the
                last minute, or because for some reason the renew timer
                could not be triggered earlier. */
+
             if (CompareFileTime(&fte, &ft_current) > 0 ||
                 prev == -1 ||
                 !(khui_timers[prev].flags & KHUI_TE_FLAG_EXPIRED)) {
@@ -462,14 +562,18 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                            FtToInt(&fte), FtToInt(&ft), 0,
                            CompareFileTime(&fte,&ft_creinst) > 0);
                 renew_done = TRUE;
+
             } else {
+
                 /* special case.  If the renew timer was in the past
                    and it was expired, then we retain the record as
                    long as the credentials are around.  If the renewal
                    failed we don't want to automatically retry
                    everytime we check the timers. */
+
                 tmr_update(ident, KHUI_TTYPE_ID_RENEW,
                            FtToInt(&fte), FtToInt(&ft), 0, FALSE);
+
             }
         }
 
@@ -512,9 +616,21 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                                       &cb)))
         goto _cleanup;
 
+    cb = sizeof(ft_cred_issue);
+    if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE,
+                                      NULL,
+                                      &ft_cred_issue,
+                                      &cb)))
+        goto _cleanup;
+
     TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, &ft);
 
     {
+        /* if the credential has a longer lifetime than the identity,
+           or it expires within KHUI_TIMEEQ_ERROR seconds of the
+           identity, then we don't need to set any alerts for this
+           credential. */
+
         FILETIME ft_delta;
 
         ft_delta = FtSub(&ft_expiry, &ft_cred_expiry);
@@ -529,12 +645,12 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
 
         fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
         if (CompareFileTime(&fte, &ft_current) > 0) {
-            tmr_update(cred, KHUI_TTYPE_CRED_WARN,
-                       FtToInt(&fte), 
-                       khui_timers[idx].offset, 0,
-                       CompareFileTime(&fte, &ft_creinst) > 0);
-            kcdb_cred_hold(cred);
-        }
+	    tmr_update(cred, KHUI_TTYPE_CRED_WARN,
+		       FtToInt(&fte), 
+		       khui_timers[idx].offset, 0,
+		       CompareFileTime(&fte, &ft_creinst) > 0);
+	    kcdb_cred_hold(cred);
+	}
     }
 
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_CRIT, 0, 0)) >= 0 &&
@@ -553,7 +669,9 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+        //fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+        fte = tmr_next_halflife_timeout(idx, &ft_cred_issue, &ft_cred_expiry);
+
         if (CompareFileTime(&fte, &ft_current) > 0) {
             tmr_update(cred, KHUI_TTYPE_CRED_RENEW,
                        FtToInt(&fte),
@@ -648,14 +766,26 @@ khm_timer_refresh(HWND hwnd) {
 
     KillTimer(hwnd, KHUI_TRIGGER_TIMER_ID);
 
+    /* When refreshing timers, we go through all of them and mark them
+       as stale.  Then we go through the credentials in the root
+       credential set and add or refresh the timers associated with
+       each identity and credential.  Once this is done, we remove the
+       timers that are still stale, since they are no longer in
+       use. */
+
     for (i=0; i < (int) khui_n_timers; i++) {
 #ifdef NOT_IMPLEMENTED_YET
         if (khui_timers[i].type == KHUI_TTYPE_BMSG ||
             khui_timers[i].type == KHUI_TTYPE_SMSG) {
             khui_timers[i].flags &= ~KHUI_TE_FLAG_STALE;
-        } else
+        } else {
 #endif
+
             khui_timers[i].flags |= KHUI_TE_FLAG_STALE;
+
+#ifdef NOT_IMPLEMENTED_YET
+	}
+#endif
     }
 
     kcdb_credset_apply(NULL,
@@ -665,6 +795,10 @@ khm_timer_refresh(HWND hwnd) {
     tmr_purge();
 
  _check_next_event:
+
+    /* Before we return, we should check if any timers are set to
+       expire right now.  If there are, we should fire the timer
+       before returning. */
 
     next_event = 0;
     for (i=0; i < (int) khui_n_timers; i++) {

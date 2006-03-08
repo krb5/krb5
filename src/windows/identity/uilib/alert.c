@@ -207,10 +207,10 @@ khui_alert_set_message(khui_alert * alert, const wchar_t * message)
        (alert->flags & KHUI_ALERT_FLAG_FREE_MESSAGE)) {
 
         PFREE(alert->message);
-        alert->message = NULL;
         alert->flags &= ~KHUI_ALERT_FLAG_FREE_MESSAGE;
-
     }
+
+    alert->message = NULL;
 
     if(message) {
         alert->message = PMALLOC(cb);
@@ -261,6 +261,20 @@ khui_alert_show(khui_alert * alert)
     kmq_post_message(KMSG_ALERT, KMSG_ALERT_SHOW, 0, (void *) alert);
 
     return KHM_ERROR_SUCCESS;
+}
+
+KHMEXP khm_int32 KHMAPI
+khui_alert_show_modal(khui_alert * alert)
+{
+    khm_int32 rv;
+
+    assert(alert->magic == KHUI_ALERT_MAGIC);
+
+    khui_alert_hold(alert);
+    rv = kmq_send_message(KMSG_ALERT, KMSG_ALERT_SHOW_MODAL, 0,
+                          (void *) alert);
+
+    return rv;
 }
 
 KHMEXP khm_int32 KHMAPI

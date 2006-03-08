@@ -28,6 +28,9 @@
 #include<netidmgr_version.h>
 #include<assert.h>
 
+/* should only be accessed from the registrar thread */
+khm_size kmm_active_modules = 0;
+
 kmm_module_i * kmmint_get_module_i(wchar_t * name)
 {
     kmm_module_i * m;
@@ -95,9 +98,6 @@ void kmmint_free_module(kmm_module_i * m)
         PFREE(m->version_info);
 
     PFREE(m);
-
-    if (kmm_all_modules == NULL)
-        SetEvent(evt_exit);
 }
 
 KHMEXP khm_int32   KHMAPI kmm_hold_module(kmm_module module)
@@ -114,6 +114,7 @@ KHMEXP khm_int32   KHMAPI kmm_hold_module(kmm_module module)
 KHMEXP khm_int32   KHMAPI kmm_release_module(kmm_module vm)
 {
     kmm_module_i * m;
+
     if(!kmm_is_module(vm))
         return KHM_ERROR_INVALID_PARAM;
 
@@ -131,14 +132,16 @@ KHMEXP khm_int32   KHMAPI kmm_release_module(kmm_module vm)
 
 khm_int32
 kmmint_check_api_version(DWORD v) {
-    /* for now, we require an exact match.  In the future when we are
-       swamped with so much time that we don't know what to do with
-       it, we can actually parse the apiversion.txt file and create a
-       compatibility table which we can check against the functions
-       used by the module and decide whether or not it is
-       compatible. */
+    /* for now, we allow API versions in the range
+       KH_VERSION_API_MINCOMPAT through KH_VERSION_API, inclusive.  In
+       the future when we are swamped with so much time that we don't
+       know what to do with it, we can actually parse the
+       apiversion.txt file and create a compatibility table which we
+       can check against the functions used by the module and decide
+       whether or not it is compatible. */
 
-    if (v != KH_VERSION_API)
+    if (v < KH_VERSION_API_MINCOMPAT ||
+        v > KH_VERSION_API)
         return KHM_ERROR_INCOMPATIBLE;
     else
         return KHM_ERROR_SUCCESS;
@@ -582,6 +585,9 @@ kmm_get_module_info_i(kmm_module vm, kmm_module_info * info) {
         info->state = m->state;
 
         info->h_module = vm;
+
+        info->file_version = m->file_version;
+        info->product_version = m->prod_version;
         kmm_hold_module(vm);
 
         rv = KHM_ERROR_SUCCESS;
@@ -629,6 +635,7 @@ kmm_load_default_modules(void) {
     if(KHM_FAILED(rv))
         return rv;
 
+    _begin_task(KHERR_CF_TRANSITIVE);
     _report_mr0(KHERR_NONE, MSG_LOAD_DEFAULT);
     _describe();
 
@@ -651,6 +658,8 @@ kmm_load_default_modules(void) {
 
     if(csm)
         khc_close_space(csm);
+
+    _end_task();
 
     return rv;
 }
