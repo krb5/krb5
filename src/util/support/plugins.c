@@ -347,7 +347,6 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
     count = 0;
     for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
 	int32_t kerr;
-	sym = (void(*)()) dlsym(dirhandle->files[i].dlhandle, symname);
 	kerr = krb5int_get_plugin_func(&dirhandle->files[i], symname, &sym);
 	if (kerr)
 	    continue;
