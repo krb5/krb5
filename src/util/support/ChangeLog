@@ -1,3 +1,13 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* plugins.c: Don't include k5-int.h, it depends on krb5.h which
+	hasn't been built yet.  Instead, include k5-plugin.h and a bunch
+	of system headers.
+	(krb5int_open_plugin, krb5int_get_plugin_data,
+	krb5int_get_plugin_func, krb5int_open_plugin_dir,
+	krb5int_get_plugin_dir_data, krb5int_get_plugin_dir_func): Change
+	return types from krb5_error_code to int32_t.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* plugins.c: New file.

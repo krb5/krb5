@@ -1,3 +1,7 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c: Include k5-locate.h instead of k5-plugin.h.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFINES): New variable.

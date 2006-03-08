@@ -27,8 +27,22 @@
  * Plugin module support, and shims around dlopen/whatever.
  */
 
-#include "k5-int.h"
+#include "k5-plugin.h"
 #include <dlfcn.h>
+#include <stdio.h>
+#include <sys/types.h>
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <stdarg.h>
 static void Tprintf (const char *fmt, ...)
@@ -54,7 +68,7 @@ struct plugin_file_handle {
 #endif
 };
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
 {
     struct plugin_file_handle *htmp;
@@ -78,7 +92,7 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
 			 void **ptr)
 {
@@ -95,7 +109,7 @@ krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
 			 void (**ptr)())
 {
@@ -105,7 +119,7 @@ krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
        handling is the same for both data and functions.  (And the
        casting we do here works, etc.)  */
     void *dptr;
-    krb5_error_code err;
+    int32_t err;
 
     err = krb5int_get_plugin_data (h, csymname, &dptr);
     if (err == 0)
@@ -137,7 +151,7 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 #endif
 #endif
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_open_plugin_dir (const char *dirname,
 			 struct plugin_dir_handle *dirhandle)
 {
@@ -235,7 +249,7 @@ krb5int_free_plugin_dir_data (void **ptrs)
     free(ptrs);
 }
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
 			     void ***ptrs)
@@ -297,7 +311,7 @@ krb5int_free_plugin_dir_func (void (**ptrs)(void))
     free(ptrs);
 }
 
-krb5_error_code KRB5_CALLCONV
+int32_t KRB5_CALLCONV
 krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
 			     void (***ptrs)(void))

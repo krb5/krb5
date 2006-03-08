@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -535,7 +535,7 @@ extern int krb5int_grow_addrlist (struct addrlist *, int);
 extern int krb5int_add_host_to_list (struct addrlist *, const char *,
 				     int, int, int, int);
 
-#include "k5-plugin.h"
+#include "k5-locate.h"
 krb5_error_code
 krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
@@ -1009,38 +1009,7 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
-
-struct plugin_file_handle;	/* opaque */
-
-struct plugin_dir_handle {
-    /* This points to a list of plugin_file_handle structs, terminated
-       by one passing NULL_HANDLE.  */
-    struct plugin_file_handle *files;
-};
-#define PLUGIN_DIR_INIT(P) ((P)->files = NULL)
-#define PLUGIN_DIR_OPEN(P) ((P)->files != NULL)
-
-krb5_error_code KRB5_CALLCONV
-krb5int_open_plugin (const char *, struct plugin_file_handle **);
-
-krb5_error_code KRB5_CALLCONV
-krb5int_get_plugin_data (struct plugin_file_handle *, const char *, void **);
-
-krb5_error_code KRB5_CALLCONV
-krb5int_get_plugin_func (struct plugin_file_handle *, const char *,
-			 void (**)());
-
-void KRB5_CALLCONV
-krb5int_close_plugin (struct plugin_file_handle *);
-
-krb5_error_code KRB5_CALLCONV krb5int_open_plugin_dir (const char *, struct plugin_dir_handle *);
-void KRB5_CALLCONV krb5int_close_plugin_dir (struct plugin_dir_handle *);
-void KRB5_CALLCONV krb5int_free_plugin_dir_data (void **);
-krb5_error_code KRB5_CALLCONV krb5int_get_plugin_dir_data (struct plugin_dir_handle *,
-							   const char *, void ***);
-void KRB5_CALLCONV krb5int_free_plugin_dir_func (void (**)(void));
-krb5_error_code KRB5_CALLCONV krb5int_get_plugin_dir_func (struct plugin_dir_handle *,
-							   const char *, void (***)(void));
+#include "k5-plugin.h"
 
 struct _krb5_context {
 	krb5_magic	magic;

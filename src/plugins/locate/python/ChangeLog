@@ -1,3 +1,7 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* py-locate.c: Include k5-locate.h instead of k5-plugin.h.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in, configure.in, py-locate.c, python.exports,

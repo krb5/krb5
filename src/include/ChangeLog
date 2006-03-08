@@ -1,3 +1,11 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-locate.h: Renamed from k5-plugin.h.
+	* k5-plugin.h: New file, with plugin support function declarations
+	moved from k5-int.h.  Change return types from krb5_error_code to
+	int32_t.
+	* k5-int.h: Include both of them.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-plugin.h: New file.

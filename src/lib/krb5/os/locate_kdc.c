@@ -543,7 +543,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 }
 #endif
 
-#include "k5-plugin.h"
+#include "k5-locate.h"
 
 static const char objdir[] = LIBDIR "/krb5/plugins/libkrb5";
 
