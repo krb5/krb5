@@ -28,10 +28,6 @@
  * Include files
  */
 
-#if defined(ENABLE_THREADS) && defined(HAVE_PTHREAD_H)
-#include <pthread.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
