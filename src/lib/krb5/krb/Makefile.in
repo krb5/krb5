@@ -369,44 +369,51 @@ addr_comp.so addr_comp.po $(OUTPRE)addr_comp.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 addr_order.so addr_order.po $(OUTPRE)addr_order.$(OBJEXT): \
   addr_order.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 addr_srch.so addr_srch.po $(OUTPRE)addr_srch.$(OBJEXT): \
   addr_srch.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 appdefault.so appdefault.po $(OUTPRE)appdefault.$(OBJEXT): \
   appdefault.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 auth_con.so auth_con.po $(OUTPRE)auth_con.$(OBJEXT): \
   auth_con.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 bld_pr_ext.so bld_pr_ext.po $(OUTPRE)bld_pr_ext.$(OBJEXT): \
   bld_pr_ext.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 bld_princ.so bld_princ.po $(OUTPRE)bld_princ.$(OBJEXT): \
   bld_princ.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 brand.so brand.po $(OUTPRE)brand.$(OBJEXT): brand.c \
   $(SRCTOP)/patchlevel.h
 chk_trans.so chk_trans.po $(OUTPRE)chk_trans.$(OBJEXT): \
@@ -414,20 +421,23 @@ chk_trans.so chk_trans.po $(OUTPRE)chk_trans.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 chpw.so chpw.po $(OUTPRE)chpw.$(OBJEXT): chpw.c $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/krb5_err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h $(BUILDTOP)/include/krb5_err.h \
   auth_con.h
 conv_creds.so conv_creds.po $(OUTPRE)conv_creds.$(OBJEXT): \
   conv_creds.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP)
 conv_princ.so conv_princ.po $(OUTPRE)conv_princ.$(OBJEXT): \
@@ -435,479 +445,554 @@ conv_princ.so conv_princ.po $(OUTPRE)conv_princ.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_addrs.so copy_addrs.po $(OUTPRE)copy_addrs.$(OBJEXT): \
   copy_addrs.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_auth.so copy_auth.po $(OUTPRE)copy_auth.$(OBJEXT): \
   copy_auth.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_athctr.so copy_athctr.po $(OUTPRE)copy_athctr.$(OBJEXT): \
   copy_athctr.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_cksum.so copy_cksum.po $(OUTPRE)copy_cksum.$(OBJEXT): \
   copy_cksum.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_creds.so copy_creds.po $(OUTPRE)copy_creds.$(OBJEXT): \
   copy_creds.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_data.so copy_data.po $(OUTPRE)copy_data.$(OBJEXT): \
   copy_data.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_key.so copy_key.po $(OUTPRE)copy_key.$(OBJEXT): \
   copy_key.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_princ.so copy_princ.po $(OUTPRE)copy_princ.$(OBJEXT): \
   copy_princ.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 copy_tick.so copy_tick.po $(OUTPRE)copy_tick.$(OBJEXT): \
   copy_tick.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 cp_key_cnt.so cp_key_cnt.po $(OUTPRE)cp_key_cnt.$(OBJEXT): \
   cp_key_cnt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 decode_kdc.so decode_kdc.po $(OUTPRE)decode_kdc.$(OBJEXT): \
   decode_kdc.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 decrypt_tk.so decrypt_tk.po $(OUTPRE)decrypt_tk.$(OBJEXT): \
   decrypt_tk.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 deltat.so deltat.po $(OUTPRE)deltat.$(OBJEXT): deltat.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 enc_helper.so enc_helper.po $(OUTPRE)enc_helper.$(OBJEXT): \
   enc_helper.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 encode_kdc.so encode_kdc.po $(OUTPRE)encode_kdc.$(OBJEXT): \
   encode_kdc.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 encrypt_tk.so encrypt_tk.po $(OUTPRE)encrypt_tk.$(OBJEXT): \
   encrypt_tk.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 free_rtree.so free_rtree.po $(OUTPRE)free_rtree.$(OBJEXT): \
   free_rtree.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 fwd_tgt.so fwd_tgt.po $(OUTPRE)fwd_tgt.$(OBJEXT): fwd_tgt.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 gc_frm_kdc.so gc_frm_kdc.po $(OUTPRE)gc_frm_kdc.$(OBJEXT): \
   gc_frm_kdc.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 gc_via_tkt.so gc_via_tkt.po $(OUTPRE)gc_via_tkt.$(OBJEXT): \
   gc_via_tkt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 gen_seqnum.so gen_seqnum.po $(OUTPRE)gen_seqnum.$(OBJEXT): \
   gen_seqnum.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 gen_subkey.so gen_subkey.po $(OUTPRE)gen_subkey.$(OBJEXT): \
   gen_subkey.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 get_creds.so get_creds.po $(OUTPRE)get_creds.$(OBJEXT): \
   get_creds.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 get_in_tkt.so get_in_tkt.po $(OUTPRE)get_in_tkt.$(OBJEXT): \
   get_in_tkt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h $(srcdir)/../os/os-proto.h
 gic_keytab.so gic_keytab.po $(OUTPRE)gic_keytab.$(OBJEXT): \
   gic_keytab.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 gic_opt.so gic_opt.po $(OUTPRE)gic_opt.$(OBJEXT): gic_opt.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 gic_pwd.so gic_pwd.po $(OUTPRE)gic_pwd.$(OBJEXT): gic_pwd.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 in_tkt_sky.so in_tkt_sky.po $(OUTPRE)in_tkt_sky.$(OBJEXT): \
   in_tkt_sky.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 init_ctx.so init_ctx.po $(OUTPRE)init_ctx.$(OBJEXT): \
   init_ctx.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   brand.c $(SRCTOP)/patchlevel.h $(srcdir)/../krb5_libinit.h
 init_keyblock.so init_keyblock.po $(OUTPRE)init_keyblock.$(OBJEXT): \
   init_keyblock.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 kdc_rep_dc.so kdc_rep_dc.po $(OUTPRE)kdc_rep_dc.$(OBJEXT): \
   kdc_rep_dc.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 kfree.so kfree.po $(OUTPRE)kfree.$(OBJEXT): kfree.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 mk_cred.so mk_cred.po $(OUTPRE)mk_cred.$(OBJEXT): mk_cred.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 mk_error.so mk_error.po $(OUTPRE)mk_error.$(OBJEXT): \
   mk_error.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 mk_priv.so mk_priv.po $(OUTPRE)mk_priv.$(OBJEXT): mk_priv.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 mk_rep.so mk_rep.po $(OUTPRE)mk_rep.$(OBJEXT): mk_rep.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 mk_req.so mk_req.po $(OUTPRE)mk_req.$(OBJEXT): mk_req.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 mk_req_ext.so mk_req_ext.po $(OUTPRE)mk_req_ext.$(OBJEXT): \
   mk_req_ext.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 mk_safe.so mk_safe.po $(OUTPRE)mk_safe.$(OBJEXT): mk_safe.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 parse.so parse.po $(OUTPRE)parse.$(OBJEXT): parse.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 pr_to_salt.so pr_to_salt.po $(OUTPRE)pr_to_salt.$(OBJEXT): \
   pr_to_salt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 preauth.so preauth.po $(OUTPRE)preauth.$(OBJEXT): preauth.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 preauth2.so preauth2.po $(OUTPRE)preauth2.$(OBJEXT): \
   preauth2.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 princ_comp.so princ_comp.po $(OUTPRE)princ_comp.$(OBJEXT): \
   princ_comp.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 rd_cred.so rd_cred.po $(OUTPRE)rd_cred.$(OBJEXT): rd_cred.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 rd_error.so rd_error.po $(OUTPRE)rd_error.$(OBJEXT): \
   rd_error.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 rd_priv.so rd_priv.po $(OUTPRE)rd_priv.$(OBJEXT): rd_priv.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 rd_rep.so rd_rep.po $(OUTPRE)rd_rep.$(OBJEXT): rd_rep.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 rd_req.so rd_req.po $(OUTPRE)rd_req.$(OBJEXT): rd_req.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 rd_req_dec.so rd_req_dec.po $(OUTPRE)rd_req_dec.$(OBJEXT): \
   rd_req_dec.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 rd_safe.so rd_safe.po $(OUTPRE)rd_safe.$(OBJEXT): rd_safe.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   cleanup.h auth_con.h
 recvauth.so recvauth.po $(OUTPRE)recvauth.$(OBJEXT): \
   recvauth.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 sendauth.so sendauth.po $(OUTPRE)sendauth.$(OBJEXT): \
   sendauth.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 send_tgs.so send_tgs.po $(OUTPRE)send_tgs.$(OBJEXT): \
   send_tgs.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 ser_actx.so ser_actx.po $(OUTPRE)ser_actx.$(OBJEXT): \
   ser_actx.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h auth_con.h
 ser_adata.so ser_adata.po $(OUTPRE)ser_adata.$(OBJEXT): \
   ser_adata.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 ser_addr.so ser_addr.po $(OUTPRE)ser_addr.$(OBJEXT): \
   ser_addr.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 ser_auth.so ser_auth.po $(OUTPRE)ser_auth.$(OBJEXT): \
   ser_auth.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 ser_cksum.so ser_cksum.po $(OUTPRE)ser_cksum.$(OBJEXT): \
   ser_cksum.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 ser_ctx.so ser_ctx.po $(OUTPRE)ser_ctx.$(OBJEXT): ser_ctx.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 ser_key.so ser_key.po $(OUTPRE)ser_key.$(OBJEXT): ser_key.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 ser_princ.so ser_princ.po $(OUTPRE)ser_princ.$(OBJEXT): \
   ser_princ.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 serialize.so serialize.po $(OUTPRE)serialize.$(OBJEXT): \
   serialize.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 set_realm.so set_realm.po $(OUTPRE)set_realm.$(OBJEXT): \
   set_realm.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 srv_rcache.so srv_rcache.po $(OUTPRE)srv_rcache.$(OBJEXT): \
   srv_rcache.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 str_conv.so str_conv.po $(OUTPRE)str_conv.$(OBJEXT): \
   str_conv.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 tgtname.so tgtname.po $(OUTPRE)tgtname.$(OBJEXT): tgtname.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 unparse.so unparse.po $(OUTPRE)unparse.$(OBJEXT): unparse.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 v4lifetime.so v4lifetime.po $(OUTPRE)v4lifetime.$(OBJEXT): \
   v4lifetime.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 valid_times.so valid_times.po $(OUTPRE)valid_times.$(OBJEXT): \
   valid_times.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 vfy_increds.so vfy_increds.po $(OUTPRE)vfy_increds.$(OBJEXT): \
   vfy_increds.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 vic_opt.so vic_opt.po $(OUTPRE)vic_opt.$(OBJEXT): vic_opt.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 walk_rtree.so walk_rtree.po $(OUTPRE)walk_rtree.$(OBJEXT): \
   walk_rtree.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   int-proto.h
 t_walk_rtree.so t_walk_rtree.po $(OUTPRE)t_walk_rtree.$(OBJEXT): \
   t_walk_rtree.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 t_kerb.so t_kerb.po $(OUTPRE)t_kerb.$(OBJEXT): t_kerb.c \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
@@ -917,17 +1002,20 @@ t_ser.so t_ser.po $(OUTPRE)t_ser.$(OBJEXT): t_ser.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   auth_con.h
 t_deltat.so t_deltat.po $(OUTPRE)t_deltat.$(OBJEXT): \
   t_deltat.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h
 t_expand.so t_expand.po $(OUTPRE)t_expand.$(OBJEXT): \
   t_expand.c chk_trans.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h

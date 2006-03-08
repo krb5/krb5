@@ -45,7 +45,8 @@ $(OUTPRE)ktutil.$(OBJEXT): ktutil.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/krb5/adm_proto.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h ktutil.h $(SRCTOP)/include/krb5/adm_proto.h \
   $(SS_DEPS)
 $(OUTPRE)ktutil_ct.$(OBJEXT): ktutil_ct.c $(SS_DEPS) \
   $(COM_ERR_DEPS)
@@ -54,5 +55,6 @@ $(OUTPRE)ktutil_funcs.$(OBJEXT): ktutil_funcs.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h ktutil.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h ktutil.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP)

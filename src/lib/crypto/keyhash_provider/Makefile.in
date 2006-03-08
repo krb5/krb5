@@ -63,7 +63,8 @@ descbc.so descbc.po $(OUTPRE)descbc.$(OBJEXT): descbc.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(srcdir)/../des/des_int.h $(SRCTOP)/include/kerberosIV/des.h \
   keyhash_provider.h
 k5_md4des.so k5_md4des.po $(OUTPRE)k5_md4des.$(OBJEXT): \
@@ -71,7 +72,8 @@ k5_md4des.so k5_md4des.po $(OUTPRE)k5_md4des.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(srcdir)/../des/des_int.h $(SRCTOP)/include/kerberosIV/des.h \
   $(srcdir)/../md4/rsa-md4.h keyhash_provider.h
 k5_md5des.so k5_md5des.po $(OUTPRE)k5_md5des.$(OBJEXT): \
@@ -79,7 +81,8 @@ k5_md5des.so k5_md5des.po $(OUTPRE)k5_md5des.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(srcdir)/../des/des_int.h $(SRCTOP)/include/kerberosIV/des.h \
   $(srcdir)/../md5/rsa-md5.h keyhash_provider.h
 hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
@@ -87,7 +90,8 @@ hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   keyhash_provider.h $(srcdir)/../arcfour/arcfour-int.h \
   $(srcdir)/../arcfour/arcfour.h $(srcdir)/../md5/rsa-md5.h \
   $(srcdir)/../hash_provider/hash_provider.h

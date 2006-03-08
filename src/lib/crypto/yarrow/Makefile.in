@@ -46,7 +46,8 @@ yarrow.so yarrow.po $(OUTPRE)yarrow.$(OBJEXT): yarrow.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   yarrow.h ytypes.h yhash.h $(srcdir)/../sha1/shs.h ycipher.h \
   ylock.h ystate.h yexcep.h
 ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): ycipher.c \
@@ -54,6 +55,7 @@ ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): ycipher.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   yarrow.h ytypes.h yhash.h $(srcdir)/../sha1/shs.h ycipher.h \
   $(srcdir)/../enc_provider/enc_provider.h
