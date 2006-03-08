@@ -28,7 +28,9 @@
  */
 
 #include "k5-plugin.h"
+#if USE_DLOPEN
 #include <dlfcn.h>
+#endif
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef HAVE_SYS_STAT_H
@@ -56,7 +58,7 @@ static void Tprintf (const char *fmt, ...)
 }
 
 struct plugin_file_handle {
-#if 1
+#if USE_DLOPEN
     void *dlhandle;
 #define NULL_HANDLE(X) ((X)->dlhandle == NULL)
 #define MAKE_NULL_HANDLE(X) ((X)->dlhandle = NULL)
@@ -71,6 +73,7 @@ struct plugin_file_handle {
 int32_t KRB5_CALLCONV
 krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
 {
+#if USE_DLOPEN
     struct plugin_file_handle *htmp;
     void *handle;
 
@@ -90,12 +93,17 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
     *h = htmp;
     htmp->dlhandle = handle;
     return 0;
+/* #elif _WIN32 */
+#else
+    return ENOENT;
+#endif
 }
 
 int32_t KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
 			 void **ptr)
 {
+#if USE_DLOPEN
     void *sym;
     /* XXX Do we need to add a leading "_" to the symbol name on any
        modern platforms?  */
@@ -107,6 +115,10 @@ krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
     }
     *ptr = sym;
     return 0;
+/* #elif _WIN32 */
+#else
+    return ENOENT;
+#endif
 }
 
 int32_t KRB5_CALLCONV
@@ -130,9 +142,12 @@ krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
 void KRB5_CALLCONV
 krb5int_close_plugin (struct plugin_file_handle *h)
 {
+#if USE_DLOPEN
     dlclose(h->dlhandle);
     h->dlhandle = NULL;
     free (h);
+/* #elif _WIN32 */
+#endif
 }
 
 /* autoconf docs suggest using this preference order */
@@ -156,6 +171,10 @@ krb5int_open_plugin_dir (const char *dirname,
 			 struct plugin_dir_handle *dirhandle)
 {
     /* Q: Should names be sorted in some way first?  */
+    /* XXX This should be a portable directory-scanning routine which
+       calls on the above routines; shouldn't be calling dlopen
+       directly here.  */
+#if USE_DLOPEN
     DIR *dir;
     struct dirent *d;
     struct plugin_file_handle *h, *newh, handle;
@@ -227,11 +246,17 @@ krb5int_open_plugin_dir (const char *dirname,
     MAKE_NULL_HANDLE (&h[nh]);
     dirhandle->files = h;
     return 0;
+/* #elif _WIN32 */
+#else
+    dirhandle->files = NULL;
+    return 0;
+#endif
 }
 
 void KRB5_CALLCONV
 krb5int_close_plugin_dir (struct plugin_dir_handle *dirhandle)
 {
+#if USE_DLOPEN
     struct plugin_file_handle *h;
     if (dirhandle->files == NULL)
 	return;
@@ -240,6 +265,7 @@ krb5int_close_plugin_dir (struct plugin_dir_handle *dirhandle)
     }
     free(dirhandle->files);
     dirhandle->files = NULL;
+#endif
 }
 
 void KRB5_CALLCONV
@@ -269,15 +295,11 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
     p = 0;
     count = 0;
     for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
-	Tprintf("  -> dlsym(%p,%s)\n", dirhandle->files[i].dlhandle, symname);
-	sym = dlsym(dirhandle->files[i].dlhandle, symname);
-	if (sym == NULL) {
-	    const char *e = dlerror();
-	    Tprintf("    -> %s\n", e);
+	int32_t kerr;
+	sym = NULL;
+	kerr = krb5int_get_plugin_data(&dirhandle->files[i], symname, &sym);
+	if (kerr)
 	    continue;
-	} else {
-	    Tprintf("    -> %p\n", sym);
-	}
 	newp = realloc (p, (count+1) * sizeof(*p));
 	if (newp == NULL) {
 	realloc_failure:
@@ -295,12 +317,6 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
     p = newp;
     p[count] = NULL;
     *ptrs = p;
-    {
-	i = 0;
-	do {
-	    Tprintf("  p[%d] = %p\n", i, p[i]);
-	} while (p[i++]);
-    }
     return 0;
 }
 
@@ -316,7 +332,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
 			     void (***ptrs)(void))
 {
-    void (**p)(void), (**newp)(void), (*sym)(void);
+    void (**p)(), (**newp)(), (*sym)();
     int count, i, err;
 
     if (dirhandle == NULL) {
@@ -330,8 +346,10 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
     p = 0;
     count = 0;
     for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
-	sym = (void(*)(void)) dlsym(dirhandle->files[i].dlhandle, symname);
-	if (sym == NULL)
+	int32_t kerr;
+	sym = (void(*)()) dlsym(dirhandle->files[i].dlhandle, symname);
+	kerr = krb5int_get_plugin_func(&dirhandle->files[i], symname, &sym);
+	if (kerr)
 	    continue;
 	newp = realloc (p, (count+1) * sizeof(*p));
 	if (newp == NULL) {
