@@ -1,3 +1,11 @@
+2005-12-28  Tom Yu  <tlyu@mit.edu>
+
+	* gc_frm_kdc.c (krb5_get_cred_from_kdc_opt): Cause free_tgt and
+	free_otgt to track the states of tgt and otgt correctly, to avoid
+	a double-free condition which previously happened when this
+	function returned to krb5_get_credentials(), which proceeded to
+	free a previously freed TGT in the returned TGT list.
+
 2005-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* mk_req_ext.c (krb5int_generate_and_save_subkey): Check for and

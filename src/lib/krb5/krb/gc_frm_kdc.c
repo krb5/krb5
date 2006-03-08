@@ -230,15 +230,15 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 					      &tgtq.server)))
 		goto cleanup;
 
+	    if (free_otgt)
+		krb5_free_cred_contents(context, &otgt);
 	    otgt = tgt;
-	    free_otgt = 1;
+	    free_otgt = free_tgt;
 	    free_tgt = 0;
 
 	    retval = krb5_cc_retrieve_cred(context, ccache, retr_flags,
 					   &tgtq, &tgt);
 	    if (retval == 0) {
-	        krb5_free_cred_contents(context, &otgt);
-		free_otgt = 0;
 	        free_tgt = 1;
 		/* We are now done - proceed to got/finally have tgt */
 	    } else {
@@ -250,8 +250,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		/* with current tgt.                              */
 		/* Copy back in case invalided */
 		tgt = otgt;
+		free_tgt = free_otgt;
 		free_otgt = 0;
-		free_tgt = 1;
 		if (!krb5_c_valid_enctype(tgt.keyblock.enctype)) {
 		    retval = KRB5_PROG_ETYPE_NOSUPP;
 		    goto cleanup;
@@ -304,16 +304,15 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 							  &tgtq.server)))
 			    goto cleanup;
 
+			if (free_otgt)
+			    krb5_free_cred_contents(context, &otgt);
 			otgt = tgt;
-			free_otgt = 1;
+			free_otgt = free_tgt;
 			free_tgt = 0;
 			retval = krb5_cc_retrieve_cred(context, ccache,
 							    retr_flags,
 							    &tgtq, &tgt);
 			if (retval == 0) {
-			    if (free_otgt)
-			      krb5_free_cred_contents(context, &otgt);
-			    free_otgt = 0;
 			    free_tgt = 1;
 			    /* Continues with 'got one as close as possible' */
 			} else {
@@ -324,8 +323,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			    /* not in the cache so try and get one with our current tgt. */
   
 			    tgt = otgt;
+			    free_tgt = free_otgt;
 			    free_otgt = 0;
-			    free_tgt = 1;
 			    if (!krb5_c_valid_enctype(tgt.keyblock.enctype)) {
 				retval = KRB5_PROG_ETYPE_NOSUPP;
 				goto cleanup;
@@ -359,9 +358,9 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			    krb5_free_creds(context, tgtr);
 			    tgtr = NULL;
 
-			    if (free_otgt) {
-				krb5_free_cred_contents(context, &otgt);
-				free_otgt = 0;
+			    if (free_tgt) {
+				krb5_free_cred_contents(context, &tgt);
+				free_tgt = 0;
 			    }
 	      
 			    tgt = *ret_tgts[ntgts++];
