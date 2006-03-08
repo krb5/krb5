@@ -114,32 +114,10 @@ extern struct timeval timelimit;
                             goto cleanup; \
                         }
 
-#define  STORE16_INT(ptr, val)          {\
-                                          int temp=val; \
-                                          ptr[1] = temp & 0xff; \
-                                          temp>>=8; \
-                                          ptr[0] = temp & 0xff; \
-                                        }
-
-#define  STORE32_INT(ptr, val)          {\
-                                          int temp=val; \
-                                          ptr[3] = temp & 0xff; \
-                                          temp>>=8; \
-                                          ptr[2] = temp & 0xff; \
-                                          temp>>=8; \
-                                          ptr[1] = temp & 0xff; \
-                                          temp>>=8; \
-                                          ptr[0] = temp & 0xff; \
-                                        }
-
-#define UNSTORE16_INT(ptr, val)   val = (((krb5_int16)((unsigned char)ptr[0])<<8)| \
-                                        ((krb5_int16)((unsigned char) ptr[1])))
-
-#define UNSTORE32_INT(ptr, val)   val = ((((krb5_int32)(unsigned char)ptr[0])<<24)| \
-                                        (((krb5_int32)(unsigned char)ptr[1])<<16)| \
-                                        (((krb5_int32)(unsigned char)ptr[2])<<8) | \
-                                        ((krb5_int32)((unsigned char)ptr[3])))
-
+#define  STORE16_INT(ptr, val)	store_16_be(val, ptr)
+#define  STORE32_INT(ptr, val)  store_32_be(val, ptr)
+#define UNSTORE16_INT(ptr, val) (val = load_16_be(ptr))
+#define UNSTORE32_INT(ptr, val) (val = load_32_be(ptr))
 
 #define KRB5_CONF_KDC_BIND_DN "ldap_kdc_dn"
 #define KRB5_CONF_ADMIN_BIND_DN "ldap_kadmind_dn"
@@ -160,11 +138,8 @@ extern struct timeval timelimit;
 					  return KRB5_KDB_DBNOTINITED; \
 					}
      
-#define HNDL_LOCK(lcontext) k5_mutex_lock(&lcontext->hndl_lock);
-
-#define HNDL_UNLOCK(lcontext) k5_mutex_unlock(&lcontext->hndl_lock);
-
-extern long int timezone;
+#define HNDL_LOCK(lcontext) k5_mutex_lock(&lcontext->hndl_lock)
+#define HNDL_UNLOCK(lcontext) k5_mutex_unlock(&lcontext->hndl_lock)
 
 /* To be used later */
 typedef struct _krb5_ldap_certificates{

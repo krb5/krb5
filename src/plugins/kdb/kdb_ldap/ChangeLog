@@ -1,3 +1,11 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_ldap.h (HNDL_LOCK, HNDL_UNLOCK): Remove unneeded trailing
+	semicolon.
+	(timezone): Remove unused declaration.
+	(STORE16_INT, STORE32_INT, UNSTORE16_INT, UNSTORE32_INT): Use
+	inline functions already defined in k5-int.h.
+
 2006-01-29  Sam Hartman  <hartmans@mit.edu>
 
 	* ldap_exp.c (krb5_db_vftabl_kldap): Remove thread safe flag
