@@ -603,9 +603,10 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
     struct krb5plugin_service_locate_ftable *vtbl = NULL;
     void **ptrs;
     int i;
-    struct module_callback_data cbdata = { 0, addrlist };
+    struct module_callback_data cbdata = { 0, };
 
     Tprintf("in module_locate_server\n");
+    cbdata.lp = addrlist;
     if (!PLUGIN_DIR_OPEN (&ctx->libkrb5_plugins)) {
 	code = krb5int_open_plugin_dir (objdir, &ctx->libkrb5_plugins);
 	if (code)
