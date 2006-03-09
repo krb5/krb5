@@ -56,7 +56,7 @@ LIBUTIL=-lutil
 AC_SUBST(LIBUTIL)
 dnl for kdc
 AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
-AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf)
+AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
 KRB5_NEED_PROTO([#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -495,6 +495,30 @@ AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t,
 # include <inttypes.h>
 #endif
 ])
+dnl
+dnl Test for POSIX 2001 *printf support (X/Open System Interfaces extension
+dnl to ANSI/ISO C 1999 specification).  Specifically, positional
+dnl specifications; not checking for other features like %zx at present.
+AC_MSG_CHECKING(for POSIX printf positional specification support)
+AC_CACHE_VAL(ac_cv_printf_positional,[
+AC_TRY_RUN([
+#include <stdio.h>
+#include <string.h>
+const char expected[] = "200 100";
+int main () {
+    char buf[30];
+    sprintf(buf, "%2\$x %1\$d", 100, 512);
+    if (strcmp(expected, buf)) {
+	fprintf(stderr,"bad result: <%s> wanted: <%s>\n", buf, expected);
+	return 1;
+    }
+    return 0;
+}],
+  ac_cv_printf_positional=yes,
+  ac_cv_printf_positional=no,
+  AC_MSG_ERROR([Cannot test for printf positional argument support when cross compiling]))])
+dnl Nothing for autoconf.h for now.
+AC_MSG_RESULT($ac_cv_printf_positional)
 dnl
 dnl
 dnl Check for thread safety issues.
