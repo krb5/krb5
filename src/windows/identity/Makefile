@@ -173,7 +173,7 @@ afsplugin: plugincommon
 	$(ECHO) -- Done with $@
 !endif
 
-finale: krb5plugin
+finale: krb5plugin doc
 	$(ECHO) -- Done.
 
 pdoc:
