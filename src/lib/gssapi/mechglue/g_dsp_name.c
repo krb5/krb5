@@ -68,7 +68,7 @@ gss_OID *		output_name_type;
 	/*
 	 * OK, we have a mechanism-specific name; let's use it!
 	 */
-	return (__gss_display_internal_name(minor_status,
+	return (gssint_display_internal_name(minor_status,
 					    union_name->mech_type,
 					    union_name->mech_name,
 					    output_name_buffer,

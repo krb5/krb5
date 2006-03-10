@@ -54,7 +54,7 @@ gss_OID_set *	name_types;
      * call it.
      */
     
-    mech = __gss_get_mechanism (mechanism);
+    mech = gssint_get_mechanism (mechanism);
     
     if (mech) {
 
@@ -101,12 +101,12 @@ gss_inquire_mechs_for_name(minor_status, input_name, mech_set)
     if (status != GSS_S_COMPLETE)
 	return (status);
     *mech_list = NULL;
-    status = __gss_get_mechanisms(mech_list, MAX_MECH_OID_PAIRS+1);
+    status = gssint_get_mechanisms(mech_list, MAX_MECH_OID_PAIRS+1);
     if (status != GSS_S_COMPLETE)
 	return (status);
     for (i = 0; i < MAX_MECH_OID_PAIRS && mech_list[i] != NULL; i++) {
 	mechanism = mech_list[i];
-	if (__gss_mech_to_oid(mechanism, &mechOid) == GSS_S_COMPLETE) {
+	if (gssint_mech_to_oid(mechanism, &mechOid) == GSS_S_COMPLETE) {
 	    status = gss_inquire_names_for_mech(
 		minor_status,
 		mechOid,

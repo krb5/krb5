@@ -1,0 +1,4 @@
+2006-03-10  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_spnego.h, spnego_mech.c: Rename symbols for namespace
+	purity.

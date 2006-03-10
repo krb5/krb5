@@ -32,7 +32,7 @@
 
 #define	MSO_BIT (8*(sizeof (int) - 1))  /* Most significant octet bit */
 
-extern gss_mechanism *__gss_mechs_array;
+extern gss_mechanism *gssint_mechs_array;
 
 /*
  * This file contains the support routines for the glue layer.
@@ -46,7 +46,7 @@ extern gss_mechanism *__gss_mechs_array;
  * by the buffer. Note we return -1 on error.
  */
 int
-get_der_length(unsigned char **buf, unsigned int buf_len, unsigned int *bytes)
+gssint_get_der_length(unsigned char **buf, unsigned int buf_len, unsigned int *bytes)
 {
     /* p points to the beginning of the buffer */
     unsigned char *p = *buf;
@@ -100,7 +100,7 @@ get_der_length(unsigned char **buf, unsigned int buf_len, unsigned int *bytes)
  * der_length_size: Return the number of bytes to encode a given length.
  */
 unsigned int
-der_length_size(unsigned int len)
+gssint_der_length_size(unsigned int len)
 {
     int i;
 
@@ -122,7 +122,7 @@ der_length_size(unsigned int len)
  * be encoded in max_len characters.
  */
 int
-put_der_length(unsigned int length, unsigned char **buf, unsigned int max_len)
+gssint_put_der_length(unsigned int length, unsigned char **buf, unsigned int max_len)
 {
     unsigned char *s = *buf, *p;
     unsigned int buf_len = 0;
@@ -182,7 +182,7 @@ put_der_length(unsigned int length, unsigned char **buf, unsigned int max_len)
  *
  */
 
-OM_uint32 __gss_get_mech_type(OID, token)
+OM_uint32 gssint_get_mech_type(OID, token)
     gss_OID		OID;
     gss_buffer_t	token;
 {
@@ -251,7 +251,7 @@ OM_uint32 __gss_get_mech_type(OID, token)
 
 #include "mglueP.h"
 
-OM_uint32 __gss_import_internal_name (minor_status, mech_type, union_name, 
+OM_uint32 gssint_import_internal_name (minor_status, mech_type, union_name, 
 				internal_name)
 OM_uint32	*minor_status;
 gss_OID		mech_type;
@@ -261,7 +261,7 @@ gss_name_t	*internal_name;
     OM_uint32		status;
     gss_mechanism	mech;
 
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (mech) {
 	if (mech->gss_import_name)
 	    status = mech->gss_import_name (
@@ -279,7 +279,7 @@ gss_name_t	*internal_name;
     return (GSS_S_BAD_MECH);
 }
 
-OM_uint32 __gss_export_internal_name(minor_status, mech_type,
+OM_uint32 gssint_export_internal_name(minor_status, mech_type,
 				     internal_name, name_buf)
     OM_uint32		*minor_status;
     const gss_OID		mech_type;
@@ -297,7 +297,7 @@ OM_uint32 __gss_export_internal_name(minor_status, mech_type,
     int mechOidDERLen = 0;
     int mechOidLen = 0;
 
-    mech = __gss_get_mechanism(mech_type);
+    mech = gssint_get_mechanism(mech_type);
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
@@ -343,7 +343,7 @@ OM_uint32 __gss_export_internal_name(minor_status, mech_type,
 	return (status);
 
     /* determine the size of the buffer needed */
-    mechOidDERLen = der_length_size(mech_type->length);
+    mechOidDERLen = gssint_der_length_size(mech_type->length);
     name_buf->length = tokIdLen + mechOidLenLen +
 	mechOidTagLen + mechOidDERLen +
 	mech_type->length +
@@ -371,7 +371,7 @@ OM_uint32 __gss_export_internal_name(minor_status, mech_type,
      * mech OID value
      */
     *buf++ = 0x06;
-    if (put_der_length(mech_type->length, &buf,
+    if (gssint_put_der_length(mech_type->length, &buf,
 		       (name_buf->length - tokIdLen -2)) != 0) {
 	name_buf->length = 0;
 	free(name_buf->value);
@@ -394,9 +394,9 @@ OM_uint32 __gss_export_internal_name(minor_status, mech_type,
     /* release the buffer obtained from gss_display_name */
     (void) gss_release_buffer(minor_status, &dispName);
     return (GSS_S_COMPLETE);
-} /*  __gss_export_internal_name */
+} /*  gssint_export_internal_name */
 
-OM_uint32 __gss_display_internal_name (minor_status, mech_type, internal_name, 
+OM_uint32 gssint_display_internal_name (minor_status, mech_type, internal_name, 
 				 external_name, name_type)
 OM_uint32	*minor_status;
 gss_OID		mech_type;
@@ -407,7 +407,7 @@ gss_OID		*name_type;
     OM_uint32		status;
     gss_mechanism	mech;
 
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (mech) {
 	if (mech->gss_display_name)
 	    status = mech->gss_display_name (
@@ -425,7 +425,7 @@ gss_OID		*name_type;
     return (GSS_S_BAD_MECH);
 }
 
-OM_uint32 __gss_release_internal_name (minor_status, mech_type, internal_name)
+OM_uint32 gssint_release_internal_name (minor_status, mech_type, internal_name)
 OM_uint32	*minor_status;
 gss_OID		mech_type;
 gss_name_t	*internal_name;
@@ -433,7 +433,7 @@ gss_name_t	*internal_name;
     OM_uint32		status;
     gss_mechanism	mech;
 
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (mech) {
 	if (mech->gss_release_name)
 	    status = mech->gss_release_name (
@@ -455,7 +455,7 @@ gss_name_t	*internal_name;
  * name.  Note that internal_name should be considered "consumed" by
  * this call, whether or not we return an error.
  */
-OM_uint32 __gss_convert_name_to_union_name(minor_status, mech,
+OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 					   internal_name, external_name)
     OM_uint32 *minor_status;
     gss_mechanism	mech;
@@ -513,7 +513,7 @@ allocation_failure:
      * internal_name, we must clean it up
      */
     if (internal_name)
-	(void) __gss_release_internal_name(&tmp, &mech->mech_type,
+	(void) gssint_release_internal_name(&tmp, &mech->mech_type,
 					   &internal_name);
     return (major_status);
 }
@@ -523,7 +523,7 @@ allocation_failure:
  * external union credential.
  */
 gss_cred_id_t
-__gss_get_mechanism_cred(union_cred, mech_type)
+gssint_get_mechanism_cred(union_cred, mech_type)
     gss_union_cred_t	union_cred;
     gss_OID		mech_type;
 {
@@ -544,7 +544,7 @@ __gss_get_mechanism_cred(union_cred, mech_type)
  * Both space for the structure and the data is allocated.
  */
 OM_uint32
-__gss_create_copy_buffer(srcBuf, destBuf, addNullChar)
+gssint_create_copy_buffer(srcBuf, destBuf, addNullChar)
     const gss_buffer_t	srcBuf;
     gss_buffer_t 		*destBuf;
     int			addNullChar;
@@ -581,4 +581,4 @@ __gss_create_copy_buffer(srcBuf, destBuf, addNullChar)
 	((char *)aBuf->value)[aBuf->length] = '\0';
 
     return (GSS_S_COMPLETE);
-} /* ****** __gss_create_copy_buffer  ****** */
+} /* ****** gssint_create_copy_buffer  ****** */

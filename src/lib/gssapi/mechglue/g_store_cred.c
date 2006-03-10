@@ -55,14 +55,14 @@ gss_cred_usage_t	*cred_usage_stored;
 
 	/* desired_mech != GSS_C_NULL_OID -> store one element */
 	if (desired_mech != GSS_C_NULL_OID) {
-		mech = __gss_get_mechanism(desired_mech);
+		mech = gssint_get_mechanism(desired_mech);
 		if (mech == NULL)
 			return (GSS_S_BAD_MECH);
 
 		if (mech->gss_store_cred == NULL)
 			return (major_status);
 
-		mech_cred = __gss_get_mechanism_cred(union_cred, desired_mech);
+		mech_cred = gssint_get_mechanism_cred(union_cred, desired_mech);
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			return (GSS_S_NO_CRED);
 
@@ -84,14 +84,14 @@ gss_cred_usage_t	*cred_usage_stored;
 	for (i = 0; i < union_cred->count; i++) {
 		/* Get mech and cred element */
 		dmech = &union_cred->mechs_array[i];
-		mech = __gss_get_mechanism(dmech);
+		mech = gssint_get_mechanism(dmech);
 		if (mech == NULL)
 			continue;
 
 		if (mech->gss_store_cred == NULL)
 			continue;
 
-		mech_cred = __gss_get_mechanism_cred(union_cred, dmech);
+		mech_cred = gssint_get_mechanism_cred(union_cred, dmech);
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			continue; /* can't happen, but safe to ignore */
 

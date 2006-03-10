@@ -1,3 +1,7 @@
+2006-03-10  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_gss_glue.c: Rename symbols for namespace purity.
+
 2005-11-14  Jeffrey Altman <jaltman@mit.edu>
 
 	* gssapi_krb5.hin: include k5-int.h instead of krb5.h

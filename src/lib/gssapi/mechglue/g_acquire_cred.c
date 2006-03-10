@@ -125,7 +125,7 @@ OM_uint32 *		time_rec;
      * statics thus needs not be freed
      */
     if(desired_mechs == GSS_C_NULL_OID_SET) {
-	mech = __gss_get_mechanism(NULL);
+	mech = gssint_get_mechanism(NULL);
 	if (mech == NULL)
 	    return (GSS_S_BAD_MECH);
 	
@@ -257,7 +257,7 @@ gss_add_cred(minor_status, input_cred_handle,
     if (initiator_time_rec)
 	*initiator_time_rec = 0;
 
-    mech = __gss_get_mechanism(desired_mech);
+    mech = gssint_get_mechanism(desired_mech);
     if (!mech)
 	return GSS_S_BAD_MECH;
     else if (!mech->gss_acquire_cred)
@@ -274,7 +274,7 @@ gss_add_cred(minor_status, input_cred_handle,
 	internal_name = GSS_C_NO_NAME;
     } else {
 	union_cred = (gss_union_cred_t)input_cred_handle;
-	if (__gss_get_mechanism_cred(union_cred, desired_mech) !=
+	if (gssint_get_mechanism_cred(union_cred, desired_mech) !=
 	    GSS_C_NO_CREDENTIAL)
 	    return (GSS_S_DUPLICATE_ELEMENT);
 
@@ -286,7 +286,7 @@ gss_add_cred(minor_status, input_cred_handle,
 			    &mech->mech_type))
 		internal_name = union_name->mech_name;
 	    else {
-		if (__gss_import_internal_name(minor_status,
+		if (gssint_import_internal_name(minor_status,
 					       &mech->mech_type, union_name,
 					       &allocated_name) != GSS_S_COMPLETE)
 		    return (GSS_S_BAD_NAME);
@@ -409,7 +409,7 @@ gss_add_cred(minor_status, input_cred_handle,
     /* We're done with the internal name. Free it if we allocated it. */
 
     if (allocated_name)
-	(void) __gss_release_internal_name(&temp_minor_status,
+	(void) gssint_release_internal_name(&temp_minor_status,
 					   &mech->mech_type,
 					   &allocated_name);
 
@@ -426,7 +426,7 @@ errout:
 			       &temp_minor_status, &cred);
 
     if (allocated_name)
-	(void) __gss_release_internal_name(&temp_minor_status,
+	(void) gssint_release_internal_name(&temp_minor_status,
 					   &mech->mech_type,
 					   &allocated_name);
 

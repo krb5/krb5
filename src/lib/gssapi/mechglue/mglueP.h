@@ -360,7 +360,7 @@ typedef struct gss_config {
 		    gss_OID,		/* mech type */
 		    uid_t *		/* uid */
 		    );
-	OM_uint32		(*__gss_userok)
+	OM_uint32		(*gssint_userok)
 	(
 		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
@@ -419,31 +419,31 @@ typedef struct gss_mech_config {
 int gssint_mechglue_init(void);
 void gssint_mechglue_fini(void);
 
-gss_mechanism __gss_get_mechanism (gss_OID);
-gss_mechanism_ext __gss_get_mechanism_ext(const gss_OID);
-OM_uint32 __gss_get_mech_type (gss_OID, gss_buffer_t);
-char *__gss_get_kmodName(const gss_OID);
-char *__gss_get_modOptions(const gss_OID);
-OM_uint32 __gss_import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,
+gss_mechanism gssint_get_mechanism (gss_OID);
+gss_mechanism_ext gssint_get_mechanism_ext(const gss_OID);
+OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
+char *gssint_get_kmodName(const gss_OID);
+char *gssint_get_modOptions(const gss_OID);
+OM_uint32 gssint_import_internal_name (OM_uint32 *, gss_OID, gss_union_name_t,
 				      gss_name_t *);
-OM_uint32 __gss_export_internal_name(OM_uint32 *, const gss_OID,
+OM_uint32 gssint_export_internal_name(OM_uint32 *, const gss_OID,
 	const gss_name_t, gss_buffer_t);
-OM_uint32 __gss_display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
+OM_uint32 gssint_display_internal_name (OM_uint32 *, gss_OID, gss_name_t,
 				       gss_buffer_t, gss_OID *);
-OM_uint32 __gss_release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
+OM_uint32 gssint_release_internal_name (OM_uint32 *, gss_OID, gss_name_t *);
 
-OM_uint32 __gss_convert_name_to_union_name
+OM_uint32 gssint_convert_name_to_union_name
 	  (OM_uint32 *,		/* minor_status */
 	   gss_mechanism,	/* mech */
 	   gss_name_t,		/* internal_name */
 	   gss_name_t *		/* external_name */
 	   );
-gss_cred_id_t __gss_get_mechanism_cred
+gss_cred_id_t gssint_get_mechanism_cred
 	  (gss_union_cred_t,	/* union_cred */
 	   gss_OID		/* mech_type */
 	   );
 
-OM_uint32 __gss_create_copy_buffer(
+OM_uint32 gssint_create_copy_buffer(
 	const gss_buffer_t,	/* src buffer */
 	gss_buffer_t *,		/* destination buffer */
 	int			/* NULL terminate buffer ? */
@@ -509,24 +509,24 @@ OM_uint32 gss_add_mech_name_type
  */
 
 OM_uint32
-__gss_mech_to_oid(
+gssint_mech_to_oid(
 	const char *mech,		/* mechanism string name */
 	gss_OID *oid			/* mechanism oid */
 );
 
 const char *
-__gss_oid_to_mech(
+gssint_oid_to_mech(
 	const gss_OID oid		/* mechanism oid */
 );
 
 OM_uint32
-__gss_get_mechanisms(
+gssint_get_mechanisms(
 	char *mechArray[],		/* array to populate with mechs */
 	int arrayLen			/* length of passed in array */
 );
 
 OM_uint32
-__gss_userok(
+gssint_userok(
 	OM_uint32 *,		/* minor */
 	const gss_name_t,	/* name */
 	const char *,		/* user */
@@ -546,17 +546,17 @@ gss_store_cred(
 );
 
 int
-get_der_length(
+gssint_get_der_length(
 	unsigned char **,	/* buf */
 	unsigned int,		/* buf_len */
 	unsigned int *		/* bytes */
 );
 
 unsigned int
-der_length_size(unsigned int /* len */);
+gssint_der_length_size(unsigned int /* len */);
 
 int
-put_der_length(
+gssint_put_der_length(
 	unsigned int,		/* length */
 	unsigned char **,	/* buf */
 	unsigned int		/* max_len */

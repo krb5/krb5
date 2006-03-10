@@ -102,7 +102,7 @@ gss_cred_id_t *		d_cred;
 	    return (GSS_S_CALL_INACCESSIBLE_READ);
 
 	/* Get the token mech type */
-	status = __gss_get_mech_type(token_mech_type, input_token_buffer);
+	status = gssint_get_mech_type(token_mech_type, input_token_buffer);
 	if (status)
 	    return status;
 
@@ -134,14 +134,14 @@ gss_cred_id_t *		d_cred;
      * use the default credential.
      */
     union_cred = (gss_union_cred_t) verifier_cred_handle;
-    input_cred_handle = __gss_get_mechanism_cred(union_cred, token_mech_type);
+    input_cred_handle = gssint_get_mechanism_cred(union_cred, token_mech_type);
     
     /*
      * now select the approprate underlying mechanism routine and
      * call it.
      */
     
-    mech = __gss_get_mechanism (token_mech_type);
+    mech = gssint_get_mechanism (token_mech_type);
     if (mech && mech->gss_accept_sec_context) {
 
 	    status = mech->gss_accept_sec_context(
@@ -174,7 +174,7 @@ gss_cred_id_t *		d_cred;
 	     * the union name struct cast to src_name
 	     */
 	    if (internal_name != NULL) {
-		temp_status = __gss_convert_name_to_union_name(
+		temp_status = gssint_convert_name_to_union_name(
 		       &temp_minor_status, mech,
 		       internal_name, &tmp_src_name);
 		if (temp_status != GSS_S_COMPLETE) {
@@ -251,7 +251,7 @@ gss_cred_id_t *		d_cred;
 		}
 
 		if (internal_name != NULL) {
-		    temp_status = __gss_convert_name_to_union_name(
+		    temp_status = gssint_convert_name_to_union_name(
 			&temp_minor_status, mech,
 			internal_name, &tmp_src_name);
 		    if (temp_status != GSS_S_COMPLETE) {

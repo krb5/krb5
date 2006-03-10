@@ -70,7 +70,7 @@ gss_buffer_t		output_message_buffer;
      */
     
     ctx = (gss_union_ctx_id_t) context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {
 	if (mech->gss_seal)
@@ -149,7 +149,7 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
      */
     
     ctx = (gss_union_ctx_id_t) context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
 
     if (!mech)
 	return (GSS_S_BAD_MECH);

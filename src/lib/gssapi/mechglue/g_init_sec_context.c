@@ -105,7 +105,7 @@ OM_uint32 *		time_rec;
      * mechanism.  If mech_type is NULL, set it to the resultant
      * mechanism
      */
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (mech == NULL)
 	return (GSS_S_BAD_MECH);
 
@@ -124,7 +124,7 @@ OM_uint32 *		time_rec;
 	g_OID_equal(union_name->mech_type, mech_type)) {
 	internal_name = union_name->mech_name;
     } else {
-	if ((status = __gss_import_internal_name(minor_status, mech_type,
+	if ((status = gssint_import_internal_name(minor_status, mech_type,
 						 union_name,
 						 &internal_name)) != GSS_S_COMPLETE)
 	    return (status);
@@ -164,7 +164,7 @@ OM_uint32 *		time_rec;
      * use the default credential.
      */
     union_cred = (gss_union_cred_t) claimant_cred_handle;
-    input_cred_handle = __gss_get_mechanism_cred(union_cred, mech_type);
+    input_cred_handle = gssint_get_mechanism_cred(union_cred, mech_type);
     
     /*
      * now call the approprate underlying mechanism routine 
@@ -204,7 +204,7 @@ OM_uint32 *		time_rec;
 end:
     if (union_name->mech_name == NULL ||
 	union_name->mech_name != internal_name) {
-	(void) __gss_release_internal_name(&temp_minor_status,
+	(void) gssint_release_internal_name(&temp_minor_status,
 					   mech_type, &internal_name);
     }
 

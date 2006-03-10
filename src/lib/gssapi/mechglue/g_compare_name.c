@@ -76,7 +76,7 @@ int *			name_equal;
      * information.
      */
     if (union_name1->mech_type) {
-	mech = __gss_get_mechanism (union_name1->mech_type);
+	mech = gssint_get_mechanism (union_name1->mech_type);
 	if (!mech)
 	    return (GSS_S_BAD_MECH);
 	if (!mech->gss_compare_name)
@@ -160,7 +160,7 @@ int *			name_equal;
 	union_name1 = (gss_union_name_t) name2;
 	union_name2 = (gss_union_name_t) name1;
     }
-    major_status = __gss_import_internal_name(minor_status,
+    major_status = gssint_import_internal_name(minor_status,
 					      union_name1->mech_type,
 					      union_name2,
 					      &internal_name);
@@ -170,7 +170,7 @@ int *			name_equal;
     major_status = mech->gss_compare_name(mech->context, minor_status,
 					  union_name1->mech_name,
 					  internal_name, name_equal);
-    __gss_release_internal_name(&temp_minor, union_name1->mech_type,
+    gssint_release_internal_name(&temp_minor, union_name1->mech_type,
 				&internal_name);
     return (major_status);
     

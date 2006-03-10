@@ -1,3 +1,16 @@
+2006-03-10  Tom Yu  <tlyu@mit.edu>
+
+	* g_accept_sec_context.c, g_acquire_cred.c, g_compare_name.c,
+	* g_canon_name.c, g_context_time.c, g_delete_sec_context.c:
+	* g_dsp_name.c, g_dsp_status.c, g_dup_name.c, g_exp_sec_context.c:
+	* g_export_name.c, g_glue.c, g_imp_name.c, g_imp_sec_context.c:
+	* g_indicate_mechs.c, g_init_sec_context.c, g_initialize.c:
+	* g_inq_context.c, g_inq_cred.c, g_inq_names.c, g_oid_ops.c:
+	* g_process_context.c, g_rel_cred.c, g_rel_name.c, g_seal.c:
+	* g_sign.c, g_store_cred.c, g_unseal.c, g_userok.c, g_utils.c:
+	* g_verify.c, gssd_pname_to_uid.c, mglueP.h: Rename symbols for
+	namespace purity.
+
 2006-03-06  Tom Yu  <tlyu@mit.edu>
 
 	* g_acquire_cred.c (gss_add_cred): Maintain old default-cred

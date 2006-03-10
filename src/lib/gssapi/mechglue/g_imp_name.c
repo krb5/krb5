@@ -90,7 +90,7 @@ gss_name_t *		output_name;
      * rule is when the name of GSS_C_NT_EXPORT_NAME type.  If that is
      * the case, then we make it MN in this call.
      */
-    major_status = __gss_create_copy_buffer(input_name_buffer,
+    major_status = gssint_create_copy_buffer(input_name_buffer,
 					    &union_name->external_name, 0);
     if (major_status != GSS_S_COMPLETE) {
 	free(union_name);
@@ -134,7 +134,7 @@ allocation_failure:
 	if (union_name->name_type)
 	    generic_gss_release_oid(&tmp, &union_name->name_type);
 	if (union_name->mech_name)
-	    __gss_release_internal_name(minor_status, union_name->mech_type,
+	    gssint_release_internal_name(minor_status, union_name->mech_type,
 					&union_name->mech_name);
 	if (union_name->mech_type)
 	    generic_gss_release_oid(&tmp, &union_name->mech_type);
@@ -197,7 +197,7 @@ importExportName(minor, unionName)
      * We verify both lengths.
      */
 
-    mechOid.length = get_der_length(&buf,
+    mechOid.length = gssint_get_der_length(&buf,
 				    (expName.length - curLength), &bytes);
     mechOid.elements = (void *)buf;
 
@@ -209,7 +209,7 @@ importExportName(minor, unionName)
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     buf += mechOid.length;
-    if ((mech = __gss_get_mechanism(&mechOid)) == NULL)
+    if ((mech = gssint_get_mechanism(&mechOid)) == NULL)
 	return (GSS_S_BAD_MECH);
 
     if (mech->gss_import_name == NULL)
@@ -236,13 +236,13 @@ importExportName(minor, unionName)
      * we must have exported the name - so we now need to reconstruct it
      * and call the mechanism to create it
      *
-     * WARNING:	Older versions of __gss_export_internal_name() did
+     * WARNING:	Older versions of gssint_export_internal_name() did
      *		not export names correctly, but now it does.  In
      *		order to stay compatible with existing exported
      *		names we must support names exported the broken
      *		way.
      *
-     * Specifically, __gss_export_internal_name() used to include
+     * Specifically, gssint_export_internal_name() used to include
      * the name type OID in the encoding of the exported MN.
      * Additionally, the Kerberos V mech used to make display names
      * that included a null terminator which was counted in the

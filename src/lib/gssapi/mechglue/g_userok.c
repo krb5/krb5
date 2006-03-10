@@ -69,7 +69,7 @@ out:
 
 
 OM_uint32
-__gss_userok(OM_uint32 *minor,
+gssint_userok(OM_uint32 *minor,
 	    const gss_name_t name,
 	    const char *user,
 	    int *user_ok)
@@ -91,7 +91,7 @@ __gss_userok(OM_uint32 *minor,
 
 	intName = (gss_union_name_t)name;
 
-	mech = __gss_get_mechanism(intName->mech_type);
+	mech = gssint_get_mechanism(intName->mech_type);
 	if (mech == NULL)
 		return (GSS_S_UNAVAILABLE);
 
@@ -101,8 +101,8 @@ __gss_userok(OM_uint32 *minor,
 	} else
 		mechName = intName->mech_name;
 
-	if (mech->__gss_userok)
-		major = mech->__gss_userok(mech->context,  minor, mechName,
+	if (mech->gssint_userok)
+		major = mech->gssint_userok(mech->context,  minor, mechName,
 				user, user_ok);
 	else
 		major = compare_names(minor, intName->mech_type,

@@ -64,7 +64,7 @@ gss_buffer_t		output_token;
      */
     
     ctx = (gss_union_ctx_id_t) *context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {
 

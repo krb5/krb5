@@ -1014,7 +1014,7 @@ gss_krb5_copy_ccache(
     gss_cred_id_t mcred;
 
     ucred = (gss_union_cred_t)cred_handle;
-    mcred = __gss_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
+    mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
     if (mcred == NULL)
 	return GSS_S_DEFECTIVE_CREDENTIAL;
     return gss_krb5int_copy_ccache(minor_status, mcred, out_ccache);
@@ -1049,7 +1049,7 @@ gss_krb5_set_allowable_enctypes(
     gss_cred_id_t mcred;
 
     ucred = (gss_union_cred_t)cred;
-    mcred = __gss_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
+    mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
     if (mcred == NULL)
 	return GSS_S_DEFECTIVE_CREDENTIAL;
     return gss_krb5int_set_allowable_enctypes(minor_status, mcred,

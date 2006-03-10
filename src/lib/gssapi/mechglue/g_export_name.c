@@ -50,6 +50,6 @@ gss_buffer_t		exported_name;
 	if (!union_name->mech_type)
 		return (GSS_S_NAME_NOT_MN);
 
-	return __gss_export_internal_name(minor_status, union_name->mech_type,
+	return gssint_export_internal_name(minor_status, union_name->mech_type,
 					union_name->mech_name, exported_name);
 }

@@ -70,7 +70,7 @@ gss_name_t *		input_name;
     free(union_name->external_name);
 
     if (union_name->mech_type) {
-	    __gss_release_internal_name(minor_status, union_name->mech_type,
+	    gssint_release_internal_name(minor_status, union_name->mech_type,
 					&union_name->mech_name);
 	    gss_release_oid(minor_status, &union_name->mech_type);
     }

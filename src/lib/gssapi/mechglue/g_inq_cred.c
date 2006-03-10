@@ -76,7 +76,7 @@ gss_OID_set *		mechanisms;
 	 * array, which becomes the default mechanism.
 	 */
 
-	if ((mech = __gss_get_mechanism(GSS_C_NULL_OID)) == NULL)
+	if ((mech = gssint_get_mechanism(GSS_C_NULL_OID)) == NULL)
 	    return (GSS_S_DEFECTIVE_CREDENTIAL);
 
 	if (!mech->gss_inquire_cred)
@@ -94,7 +94,7 @@ gss_OID_set *		mechanisms;
 	    /*
 	     * Convert internal_name into a union_name equivalent.
 	     */
-	    status = __gss_convert_name_to_union_name(&temp_minor_status,
+	    status = gssint_convert_name_to_union_name(&temp_minor_status,
 						      mech, internal_name,
 						      name);
 	    if (status != GSS_S_COMPLETE) {
@@ -217,14 +217,14 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     gss_name_t		internal_name;
 
 
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (!mech)
 	return (GSS_S_BAD_MECH);
     if (!mech->gss_inquire_cred_by_mech)
 	return (GSS_S_BAD_BINDINGS);
      
     union_cred = (gss_union_cred_t) cred_handle;
-    mech_cred = __gss_get_mechanism_cred(union_cred, mech_type);
+    mech_cred = gssint_get_mechanism_cred(union_cred, mech_type);
     if (mech_cred == NULL)
 	return (GSS_S_DEFECTIVE_CREDENTIAL);
 
@@ -241,7 +241,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 	/*
 	 * Convert internal_name into a union_name equivalent.
 	 */
-	status = __gss_convert_name_to_union_name(
+	status = gssint_convert_name_to_union_name(
 	    &temp_minor_status, mech,
 	    internal_name, name);
 	if (status != GSS_S_COMPLETE) {

@@ -77,7 +77,7 @@ gss_buffer_t		status_string;
      * call it.
      */
 
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
 
     if (mech && mech->gss_display_status) {
 	if (mech_type == GSS_C_NULL_OID)

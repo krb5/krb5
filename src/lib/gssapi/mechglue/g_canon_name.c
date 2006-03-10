@@ -72,7 +72,7 @@ gss_name_t *output_name;
 		out_union->external_name = 0;
 
 		/* Allocate the buffer for the user specified representation */
-		if (__gss_create_copy_buffer(in_union->external_name,
+		if (gssint_create_copy_buffer(in_union->external_name,
 				&out_union->external_name, 1))
 			goto allocation_failure;
 
@@ -90,7 +90,7 @@ gss_name_t *output_name;
 	 */
 	if (!output_name) {
 		if (in_union->mech_type) {
-			(void) __gss_release_internal_name(minor_status,
+			(void) gssint_release_internal_name(minor_status,
 							in_union->mech_type,
 							&in_union->mech_name);
 			(void) gss_release_oid(minor_status,
@@ -107,7 +107,7 @@ gss_name_t *output_name;
 		goto allocation_failure;
 
 	if (major_status =
-		__gss_import_internal_name(minor_status, mech_type,
+		gssint_import_internal_name(minor_status, mech_type,
 						dest_union,
 						&dest_union->mech_name))
 		goto allocation_failure;
@@ -139,7 +139,7 @@ allocation_failure:
 	 */
 
 	if (dest_union->mech_name) {
-		(void) __gss_release_internal_name(minor_status,
+		(void) gssint_release_internal_name(minor_status,
 						dest_union->mech_type,
 						&dest_union->mech_name);
 	}

@@ -104,7 +104,7 @@ gss_ctx_id_t *		context_handle;
      * call it.
      */
     
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     if (!mech) {
 	status = GSS_S_BAD_MECH;
 	goto error_out;

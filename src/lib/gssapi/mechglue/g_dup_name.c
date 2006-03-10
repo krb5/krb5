@@ -61,7 +61,7 @@ gss_name_t *dest_name;
 	dest_union->external_name = 0;
 
 	/* Now copy the external representaion */
-	if (__gss_create_copy_buffer(src_union->external_name,
+	if (gssint_create_copy_buffer(src_union->external_name,
 				&dest_union->external_name, 0))
 		goto allocation_failure;
 
@@ -83,7 +83,7 @@ gss_name_t *dest_name;
 		if (major_status != GSS_S_COMPLETE)
 			goto allocation_failure;
 
-		major_status = __gss_import_internal_name(minor_status,
+		major_status = gssint_import_internal_name(minor_status,
 							dest_union->mech_type,
 							dest_union,
 							&dest_union->mech_name);
@@ -106,7 +106,7 @@ allocation_failure:
 			(void) generic_gss_release_oid(minor_status,
 							&dest_union->name_type);
 		if (dest_union->mech_name)
-			(void) __gss_release_internal_name(minor_status,
+			(void) gssint_release_internal_name(minor_status,
 						dest_union->mech_type,
 						&dest_union->mech_name);
 		if (dest_union->mech_type)

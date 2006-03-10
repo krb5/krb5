@@ -63,7 +63,7 @@ static int _gss_initialized = 0;
 static struct gss_config null_mech = {
   {0,NULL}};
 
-gss_mechanism *__gss_mechs_array = NULL;
+gss_mechanism *gssint_mechs_array = NULL;
 
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
@@ -198,7 +198,7 @@ gss_OID_set *mechSet;
 		 * this checks for the case when we need to re-construct the
 		 * g_mechSet structure, but the mechanism list is upto date
 		 * (because it has been read by someone calling
-		 * __gss_get_mechanism)
+		 * gssint_get_mechanism)
 		 */
 		if (fileInfo.st_mtime > g_confFileModTime)
 		{
@@ -343,7 +343,7 @@ gss_OID_set *mechSet;
  * caller is responsible for freeing the memory
  */
 char *
-__gss_get_modOptions(oid)
+gssint_get_modOptions(oid)
 const gss_OID oid;
 {
 	gss_mech_info aMech;
@@ -370,13 +370,13 @@ const gss_OID oid;
 	(void) k5_mutex_unlock(&g_mechListLock);
 
 	return (modOptions);
-} /* __gss_get_modOptions */
+} /* gssint_get_modOptions */
 
 /*
  * given a mechanism string return the mechanism oid
  */
 OM_uint32
-__gss_mech_to_oid(const char *mechStr, gss_OID* oid)
+gssint_mech_to_oid(const char *mechStr, gss_OID* oid)
 {
 	gss_mech_info aMech;
 
@@ -406,7 +406,7 @@ __gss_mech_to_oid(const char *mechStr, gss_OID* oid)
 		aMech = aMech->next;
 	}
 	return (GSS_S_FAILURE);
-} /* __gss_mech_to_oid */
+} /* gssint_mech_to_oid */
 
 
 /*
@@ -415,7 +415,7 @@ __gss_mech_to_oid(const char *mechStr, gss_OID* oid)
  * (/etc/gss/mech).
  */
 const char *
-__gss_oid_to_mech(const gss_OID oid)
+gssint_oid_to_mech(const gss_OID oid)
 {
 	gss_mech_info aMech;
 
@@ -431,7 +431,7 @@ __gss_oid_to_mech(const gss_OID oid)
 		return (NULL);
 
 	return (aMech->mechNameStr);
-} /* __gss_oid_to_mech */
+} /* gssint_oid_to_mech */
 
 
 /*
@@ -439,7 +439,7 @@ __gss_oid_to_mech(const gss_OID oid)
  * upon return the array is terminated with a NULL entry
  */
 OM_uint32
-__gss_get_mechanisms(char *mechArray[], int arrayLen)
+gssint_get_mechanisms(char *mechArray[], int arrayLen)
 {
 	gss_mech_info aMech;
 	int i;
@@ -522,7 +522,7 @@ init_hardcoded(void)
  * module if it has not been already loaded.
  */
 gss_mechanism
-__gss_get_mechanism(oid)
+gssint_get_mechanism(oid)
 const gss_OID oid;
 {
 	gss_mech_info aMech;
@@ -596,10 +596,10 @@ const gss_OID oid;
 
 	(void) k5_mutex_unlock(&g_mechListLock);
 	return (aMech->mech);
-} /* __gss_get_mechanism */
+} /* gssint_get_mechanism */
 
 gss_mechanism_ext
-__gss_get_mechanism_ext(oid)
+gssint_get_mechanism_ext(oid)
 const gss_OID oid;
 {
 	gss_mech_info aMech;
@@ -609,7 +609,7 @@ const gss_OID oid;
 	if ((aMech = searchMechList(oid)) != NULL && aMech->mech_ext != NULL)
 		return (aMech->mech_ext);
 
-	if (__gss_get_mechanism(oid) == NULL)
+	if (gssint_get_mechanism(oid) == NULL)
 		return (NULL);
 
 	if (aMech->dl_handle == NULL)
@@ -648,7 +648,7 @@ const gss_OID oid;
 
 	return (aMech->mech_ext);
 
-} /* __gss_get_mechanism_ext */
+} /* gssint_get_mechanism_ext */
 
 
 /*

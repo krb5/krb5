@@ -69,7 +69,7 @@ gss_cred_id_t *		cred_handle;
     
     for(j=0; j < union_cred->count; j++) {
 
-	mech = __gss_get_mechanism (&union_cred->mechs_array[j]);
+	mech = gssint_get_mechanism (&union_cred->mechs_array[j]);
 
 	if (union_cred->mechs_array[j].elements)
 		free(union_cred->mechs_array[j].elements);

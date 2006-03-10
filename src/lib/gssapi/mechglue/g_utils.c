@@ -24,7 +24,7 @@ static const char    QOP_NUM_FILE[] = "/etc/gss/qop";
 static qop_num	qop_num_pairs[MAX_QOP_NUM_PAIRS+1];
 static mutex_t qopfile_lock = DEFAULTMUTEX;
 
-static OM_uint32 __gss_read_qop_file(void);
+static OM_uint32 gssint_read_qop_file(void);
 
 /*
  * This routine fetches qop and num from "/etc/gss/qop".
@@ -35,7 +35,7 @@ static OM_uint32 __gss_read_qop_file(void);
  * we don't expect the qop file to be changed and reread often.
  */
 static OM_uint32
-__gss_read_qop_file(void)
+gssint_read_qop_file(void)
 {
 	char 	buf[BUFLEN];	/* one line from the file */
 	char	*name, *next;
@@ -141,7 +141,7 @@ done:
 }
 
 OM_uint32
-__gss_qop_to_num(
+gssint_qop_to_num(
 	char		*qop,
 	char		*mech,
 	OM_uint32	*num
@@ -159,7 +159,7 @@ __gss_qop_to_num(
 		return (GSS_S_COMPLETE);
 	}
 
-	if ((major = __gss_read_qop_file()) != GSS_S_COMPLETE)
+	if ((major = gssint_read_qop_file()) != GSS_S_COMPLETE)
 		return (major);
 
 	for (i = 0; i < qop_num_pair_cnt; i++) {
@@ -174,7 +174,7 @@ __gss_qop_to_num(
 }
 
 OM_uint32
-__gss_num_to_qop(
+gssint_num_to_qop(
 	char		*mech,
 	OM_uint32	num,
 	char		**qop
@@ -195,7 +195,7 @@ __gss_num_to_qop(
 	if (mech == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
-	if ((major = __gss_read_qop_file()) != GSS_S_COMPLETE)
+	if ((major = gssint_read_qop_file()) != GSS_S_COMPLETE)
 		return (major);
 
 	for (i = 0; i < qop_num_pair_cnt; i++) {
@@ -213,7 +213,7 @@ __gss_num_to_qop(
  * of size MAX_QOPS_PER_MECH+1.
  */
 OM_uint32
-__gss_get_mech_info(
+gssint_get_mech_info(
 	char		*mech,
 	char		**qops
 )
@@ -228,7 +228,7 @@ __gss_get_mech_info(
 	if (!mech)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
-	if ((major = __gss_read_qop_file()) != GSS_S_COMPLETE)
+	if ((major = gssint_read_qop_file()) != GSS_S_COMPLETE)
 		return (major);
 
 	for (i = 0; i < qop_num_pair_cnt; i++) {
@@ -248,7 +248,7 @@ __gss_get_mech_info(
  * buffer of size MAX_QOPS_PER_MECH provided by the caller.
  */
 OM_uint32
-__gss_mech_qops(
+gssint_mech_qops(
 	char *mech,
 	qop_num *mechqops,
 	int *numqop
@@ -265,7 +265,7 @@ __gss_mech_qops(
 	if (!mech)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
-	if ((major = __gss_read_qop_file()) != GSS_S_COMPLETE)
+	if ((major = gssint_read_qop_file()) != GSS_S_COMPLETE)
 		return (major);
 
 	for (i = 0; i < qop_num_pair_cnt; i++) {

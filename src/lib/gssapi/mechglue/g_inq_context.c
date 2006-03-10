@@ -86,7 +86,7 @@ int *		open;
      */
     
     ctx = (gss_union_ctx_id_t) context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     
     if (!mech || !mech->gss_inquire_context || !mech->gss_display_name ||
 	!mech->gss_release_name) {
@@ -112,7 +112,7 @@ int *		open;
     /* need to convert names */
 
     if (src_name) {
-	    status = __gss_convert_name_to_union_name(minor_status, mech,
+	    status = gssint_convert_name_to_union_name(minor_status, mech,
 						      localSourceName, src_name);
 
 	    if (status != GSS_S_COMPLETE) {
@@ -125,7 +125,7 @@ int *		open;
     }
 
     if (targ_name) {
-	    status = __gss_convert_name_to_union_name(minor_status, mech,
+	    status = gssint_convert_name_to_union_name(minor_status, mech,
 						      localTargName, targ_name);
 
 	    if (status != GSS_S_COMPLETE) {
