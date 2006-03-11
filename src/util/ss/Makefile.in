@@ -95,7 +95,9 @@ HDRS =	$(HDRDIR)/ss.h \
 
 BUILD_HDRS = ss_err.h
 SRC_HDRS = ss.h 
-SRC_HDRS_DEP = $(srcdir)/ss.h 
+SRC_HDRS_DEP = $(srcdir)/ss.h
+
+generate-files-mac: ct_c.awk ct_c.sed std_rqs.c ss_err.h
 
 includes:: $(HDRS)
 $(HDRDIR)/timestamp:

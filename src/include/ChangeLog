@@ -1,3 +1,7 @@
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (generate-files-mac): Depend on krb5.h.
+
 2006-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-platform.h ({load,store}_{16,32,64}_le): Enable little-endian

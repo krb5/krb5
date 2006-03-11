@@ -61,6 +61,8 @@ all-windows:: $(PROFILE_HDR)
 
 install-headers-unix:: includes
 
+generate-files-mac: profile.h
+
 $(PROFILE_HDR):: profile.h
 	$(CP) profile.h "$@"
 

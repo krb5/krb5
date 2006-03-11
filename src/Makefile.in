@@ -22,7 +22,7 @@ all-unix:: krb5-config
 # needs autoconf.h, but building "all" in include requires that util/et
 # have been built first.  Until we can untangle this, let's just check
 # that autoconf.h is up to date before going into any of the subdirectories.
-all-prerecurse: update-autoconf-h
+all-prerecurse generate-files-mac-prerecurse: update-autoconf-h
 update-autoconf-h:
 	(cd include/krb5 && $(MAKE) all)
 

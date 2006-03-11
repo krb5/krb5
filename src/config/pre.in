@@ -118,6 +118,11 @@ Makefiles-recurse: Makefiles-prerecurse
 Makefiles-prerecurse:
 Makefiles-postrecurse:
 
+generate-files-mac: generate-files-mac-postrecurse
+generate-files-mac-postrecurse: generate-files-mac-recurse
+generate-files-mac-recurse: generate-files-mac-prerecurse
+generate-files-mac-prerecurse:
+
 #
 # end recursion rule support
 ##############################

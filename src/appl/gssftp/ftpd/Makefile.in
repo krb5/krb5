@@ -32,6 +32,8 @@ all::	ftpd
 ftpd:	$(OBJS) $(PTY_DEPLIB) $(GSS_DEPLIBS) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ $(OBJS) $(FTPD_LIBS) $(PTY_LIB) $(UTIL_LIB) $(GSS_LIBS) $(KRB4COMPAT_LIBS)
 
+generate-files-mac: ftpcmd.c
+
 clean::
 	$(RM) ftpd ftpcmd.c
 

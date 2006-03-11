@@ -16,6 +16,8 @@ all-windows::
 
 all-unix:: maybe-make-db.h-@DB_HEADER_VERSION@
 
+generate-files-mac: krb5.h
+
 maybe-make-db.h-k5:
 	: db.h will be installed by util/db2
 maybe-make-db.h-sys:
