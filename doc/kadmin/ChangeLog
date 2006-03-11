@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* README: Update for include/krb5 merge.
+
 2001-06-22  Ezra Peisach  <epeisach@mit.edu>
 
 	* draft-ietf-cat-kerb-chg-password-02.txt: Describes protocol in

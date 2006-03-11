@@ -17,7 +17,7 @@ the code is used in the source tree.
 
 - kpasswd.protocol: Describes the password changing protocol in
 			src/kadmin/v5passwdd. 
-			include/krb5/adm.h has some defintions.
+			include/adm.h has some defintions.
 
 		    Client and server provided
 
