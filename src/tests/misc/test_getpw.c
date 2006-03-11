@@ -1,4 +1,4 @@
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #include "k5-platform.h"
 #include <stdio.h>
 #include <stdlib.h>

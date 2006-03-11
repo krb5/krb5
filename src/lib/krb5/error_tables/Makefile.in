@@ -8,7 +8,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 ##DOS##OBJFILE=..\$(OUTPRE)err_tbls.lst
 
 THDRDIR=$(BUILDTOP)$(S)include
-EHDRDIR=$(BUILDTOP)$(S)include$(S)krb5
+EHDRDIR=$(BUILDTOP)$(S)include
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
       kv5m_err.o krb524_err.o

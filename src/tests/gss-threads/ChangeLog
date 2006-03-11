@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* gss-misc.c: Don't get autoconf.h from krb5/.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (gss-client, gss-server): Use THREAD_LINKOPTS

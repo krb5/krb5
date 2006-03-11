@@ -1,3 +1,10 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* send_to_kdc.c, mk_preauth.c, memcache.c, recvauth.c, netread.c,
+	tkt_string.c, put_svc_key.c, klog.c, netwrite.c, gethostname.c,
+	log.c, kadm_net.c, kuserok.c, kparse.c, getst.c: Don't look for
+	autoconf.h in krb5/.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

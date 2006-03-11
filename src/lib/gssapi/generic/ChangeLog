@@ -1,3 +1,8 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapi.h: Use autoconf.h from include rather than include/krb5.
+	If sed fails, error out.
+
 2006-03-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (generate-files-mac): Depend on gssapi.h.

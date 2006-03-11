@@ -43,7 +43,7 @@
 
 #include <k5-int.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 #include <com_err.h>
 #include <stdarg.h>
 

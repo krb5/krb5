@@ -1,3 +1,12 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* adm.h, adm_defs.h, adm_proto.h, copyright.h, kdb.h, kdb_dbc.h,
+	kdb_kt.h, stock: Moved from krb5/ subdirectory.
+	* k5-util.h, port-sockets.h, socket-utils.h: Updated for
+	autoconf.h move from krb5/.
+	* Makefile.in: Merge all targets from krb5/Makefile.in; don't go
+	into krb5/ subdir while building.
+
 2006-03-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (generate-files-mac): Depend on krb5.h.

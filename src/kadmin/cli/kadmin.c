@@ -27,7 +27,7 @@
 
 #include <krb5.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>

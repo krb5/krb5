@@ -61,9 +61,9 @@ clean-unix:: clean-libobjs
 # the Makefile.in file
 #
 md4.so md4.po $(OUTPRE)md4.$(OBJEXT): md4.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h rsa-md4.h

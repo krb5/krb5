@@ -4,7 +4,7 @@
  */
 
 #include    <k5-int.h>
-#include    <krb5/kdb.h>
+#include    <kdb.h>
 #include    <kadm5/server_internal.h>
 #include    "misc.h"
 

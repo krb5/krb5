@@ -24,7 +24,7 @@ all-unix:: krb5-config
 # that autoconf.h is up to date before going into any of the subdirectories.
 all-prerecurse generate-files-mac-prerecurse: update-autoconf-h
 update-autoconf-h:
-	(cd include/krb5 && $(MAKE) all)
+	(cd include && $(MAKE) autoconf.h osconf.h)
 
 ##DOS##!if 0
 # This makefile doesn't use lib.in, but we still need shlib.conf here.
@@ -413,7 +413,7 @@ ETOUT =	\
 HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
-	include/profile.h include/krb5/osconf.h \
+	include/profile.h include/osconf.h \
 	winfile.list
 
 

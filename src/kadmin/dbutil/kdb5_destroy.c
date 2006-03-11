@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include "com_err.h"
 #include <kadm5/admin.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include "kdb5_util.h"
 
 extern int exit_status;

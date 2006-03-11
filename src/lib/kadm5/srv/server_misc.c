@@ -9,7 +9,7 @@ static char *rcsid = "$Header$";
 #endif
 
 #include    "k5-int.h"
-#include    <krb5/kdb.h>
+#include    <kdb.h>
 #include    <ctype.h>
 #include    <pwd.h>
 

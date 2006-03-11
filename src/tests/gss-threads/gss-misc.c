@@ -57,7 +57,7 @@ static char *rcsid = "$Header$";
 #include <sys/socket.h>
 #endif
 #include <errno.h>
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

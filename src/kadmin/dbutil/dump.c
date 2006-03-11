@@ -31,7 +31,7 @@
 #include <k5-int.h>
 #include <kadm5/admin.h>
 #include <kadm5/server_internal.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include <com_err.h>
 #include "kdb5_util.h"
 #if defined(HAVE_REGEX_H) && defined(HAVE_REGCOMP)

@@ -12,7 +12,7 @@ static char *rcsid = "$Header$";
 #include	<sys/time.h>
 #include	<errno.h>
 #include	<kadm5/admin.h>
-#include	<krb5/kdb.h>
+#include	<kdb.h>
 #include	<stdio.h>
 #include	<string.h>
 #include	"server_internal.h"

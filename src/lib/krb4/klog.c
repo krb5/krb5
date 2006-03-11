@@ -25,7 +25,7 @@
  */
 
 #include "krb.h"
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif

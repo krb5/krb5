@@ -45,34 +45,34 @@ clean-unix:: clean-libobjs
 # the Makefile.in file
 #
 des.so des.po $(OUTPRE)des.$(OBJEXT): des.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h $(srcdir)/../des/des_int.h \
   $(SRCTOP)/include/kerberosIV/des.h enc_provider.h
 des3.so des3.po $(OUTPRE)des3.$(OBJEXT): des3.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h $(srcdir)/../des/des_int.h \
   $(SRCTOP)/include/kerberosIV/des.h
 aes.so aes.po $(OUTPRE)aes.$(OBJEXT): aes.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h enc_provider.h $(srcdir)/../aes/aes.h \
   $(srcdir)/../aes/uitypes.h
 rc4.so rc4.po $(OUTPRE)rc4.$(OBJEXT): rc4.c $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h $(srcdir)/../arcfour/arcfour-int.h \
   $(srcdir)/../arcfour/arcfour.h enc_provider.h

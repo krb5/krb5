@@ -36,13 +36,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <k5-int.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 
 
 #include <krb5.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include "kdb5_util.h"
 
 static int add_admin_princ(void *handle, krb5_context context,

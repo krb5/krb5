@@ -12,7 +12,7 @@
 #include <kadm5/server_acl.h>
 #include <syslog.h>
 #include <arpa/inet.h>  /* inet_ntoa */
-#include <krb5/adm_proto.h>  /* krb5_klog_syslog */
+#include <adm_proto.h>  /* krb5_klog_syslog */
 #include "misc.h"
 
 #define LOG_UNAUTH  "Unauthorized request: %s, %s, client=%s, service=%s, addr=%s"

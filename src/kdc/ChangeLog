@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* kerberos_v4.c: Don't get autoconf.h from krb5/.
+
 2005-11-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* network.c (listen_and_process): Make local variable 'sout'

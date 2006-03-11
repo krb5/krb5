@@ -42,7 +42,7 @@ static char *rcsid = "$Header$";
 
 #include <krb5.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 #include "kadmin.h"
 
 static int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,

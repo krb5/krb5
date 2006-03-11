@@ -1,5 +1,0 @@
-ignore README.encryption
-copy error_tables
-link stock
-ignore config.h
-ignore osconf.h

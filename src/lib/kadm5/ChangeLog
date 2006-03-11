@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* server_internal.h, adb.h: Don't look for kdb.h in krb5/.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* admin.h: Include kdb.h instead of k5-int.h.

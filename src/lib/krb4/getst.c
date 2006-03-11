@@ -10,7 +10,7 @@
 #include "mit-copyright.h"
 #include "krb.h"
 #include "krb4int.h"
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

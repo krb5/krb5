@@ -44,7 +44,7 @@
  * They live in libkrb5util.
  */
 
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* lock-test.c: Don't look for kdb.h in krb5/.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* setkey-test.c: Include k5-int.h instead of krb5.h.

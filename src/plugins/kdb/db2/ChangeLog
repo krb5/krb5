@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* pol_xdr.c, policy_db.h: Don't get headers from krb5/.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (MODULE_INSTALL_DIR): New variable.

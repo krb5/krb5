@@ -81,10 +81,10 @@ aestab.so aestab.po $(OUTPRE)aestab.$(OBJEXT): aestab.c \
 aeskey.so aeskey.po $(OUTPRE)aeskey.$(OBJEXT): aeskey.c \
   aesopt.h aes.h uitypes.h
 aes_s2k.so aes_s2k.po $(OUTPRE)aes_s2k.$(OBJEXT): aes_s2k.c \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(srcdir)/../dk/dk.h aes_s2k.h

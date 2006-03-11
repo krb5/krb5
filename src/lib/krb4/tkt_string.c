@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #include "port-sockets.h" /* XXX this gets us MAXPATHLEN but we should find
 			     a better way */
 

@@ -1,3 +1,10 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_getsockname.c, test_getpw.c: Don't get autoconf.h from
+	krb5/.
+	* Makefile.in (test_getpw.$(OBJEXT)): Drop explicit dependencies
+	outside of "make depend" section.
+
 2005-11-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (test_getpw.$(OBJEXT)): New intermediate target.

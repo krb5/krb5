@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif

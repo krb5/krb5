@@ -17,7 +17,7 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 
 int
 main(argc, argv)
