@@ -22,6 +22,12 @@
 	int32_t.
 	* k5-int.h: Include both of them.
 
+	* krb5/kdb.h: Include k5-platform.h.
+	(krb5_kdb_decode_int16, krb5_kdb_decode_int32): Use load_*_le
+	helper functions.
+	(krb5_kdb_encode_int16, krb5_kdb_encode_int32): Use store_*_le
+	helper functions.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-plugin.h: New file.
@@ -43,6 +49,9 @@
 	fields.
 	(krb5int_locate_server): Update prototype.
 
+	* krb5/Makefile.in (PROCESS_REPLACE): Use MODULE_DIR instead of
+	KRB5_DB_MODULE_DIR.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* win-mac.h: support for 64-bit Windows builds
@@ -63,6 +72,10 @@
 
 	* k5-thread.h (k5_mutex_lock_update_stats) [__GNUC__]: Use an
 	inline function, to avoid "statement with no effect" warnings.
+
+2005-11-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/Makefile.in (osconf.h): Always remove osconf.new.
 
 2005-10-20  Jeffrey Altman <jaltman@mit.edu>
 
@@ -87,10 +100,86 @@
 
 	* win-mac.h: Add definitions for int32_t and uint32_t
 
+2005-10-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/Makefile.in (autoconf.stamp): When running config.status, only
+	rebuild autoconf.h.
+
+2005-09-14  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/adm_proto.h (krb5_adm_connect, krb5_adm_disconnect,
+	krb5_adm_dbent_to_proto, krb5_adm_proto_to_dbent,
+	krb5_adm_proto_to_ktent, krb5_adm_ktent_to_proto,
+	krb5_free_adm_data, krb5_send_adm_cmd, krb5_send_adm_reply,
+	krb5_read_adm_cmd, krb5_read_adm_reply): Delete declarations,
+	since none of these functions exist.
+
 2005-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-thread.h (k5_key_t): Add K5_KEY_KDB_ERR_HANDLER and
 	K5_KEY_KADM_CLNT_ERR_HANDLER.
+
+2005-06-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/Makefile.in (osconf.h): Depend on Makefile.  Always display
+	commands executed for replace-if-newer sequence.
+	(PROCESS_REPLACE): Replace @MODULEDIR with $(KRB5_DB_MODULE_DIR).
+
+2005-06-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/Makefile.in (clean-unix): Don't remove autoconf.h.
+
+	Novell merge.
+	* krb5/Makefile.in (LIBDIR): New variable.
+	(PROCESS_REPLACE): Replace @LIBDIR.
+	* krb5/adm_proto.h (krb5_key_salt_tuple): Conditionalize incomplete
+	typedef on KRB5_KDB5__ instead of KRB5_ADM_H__ and
+	__KADM5_ADMIN_H__.
+	* krb5/adm.h (krb5_key_salt_tuple): Move type definition...
+	* krb5/kdb.h (krb5_key_salt_tuple): ...to here.
+	(krb5_dbe_apw, krb5_dbe_ark, krb5_dbe_cpw, krb5_dbe_crk): Use
+	krb5_key_salt_tuple instead of struct __krb5_key_salt_tuple in
+	prototype declarations.
+	(osa_policy_ent_t): Move type definition here from kadm5/adb.h.
+	Change element types from uint32_t to krb5_ui_4.
+	(osa_adb_iter_policy_func): Move type definition here from
+	kadm5/adb.h.
+	(KRB5_TL_DB_ARGS): New macro, defined only if SECURID is defined.
+	(KRB5_KDB_OPEN_RW, KRB5_KDB_OPEN_RO, KRB5_KDB_OPT_SET_DB_NAME,
+	KRB5_KDB_OPT_SET_LOCK_MODE): New macros.
+	(KRB5_DB_LOCKMODE_SHARED, KRB5_DB_LOCKMODE_EXCLUSIVE,
+	KRB5_DB_LOCKMODE_DONTBLOCK, KRB5_DB_LOCKMODE_PERMANENT): New
+	macros.
+	(kdb5_db_create, kdb_def_get_mkey, kdb_def_set_mkey,
+	krb5_db_alloc, krb5_db_clr_error, krb5_db_create_policy,
+	krb5_db_def_fetch_mkey, krb5_db_delete_policy,
+	krb5_db_errcode2string, krb5_db_free, krb5_db_free_master_key,
+	krb5_db_free_policy, krb5_db_get_policy, krb5_db_inited,
+	krb5_db_iter_policy, krb5_db_open, krb5_db_put_policy,
+	krb5_db_set_master_key_ext, krb5_db_set_option,
+	krb5_db_store_master_key, krb5_dbe_def_cpw,
+	krb5_dbe_def_search_enctype, krb5_dbe_update_last_pwd_change,
+	krb5_def_store_mkey, krb5_def_verify_master_key,
+	krb5_free_supported_realms, krb5_key_salt_tuple,
+	krb5_supported_realms, osa_adb_iter_policy_func,
+	osa_policy_ent_rec, osa_policy_ent_t): New (or moved)
+	declarations.
+	(krb5_db_close_database, krb5_db_iterate_ext,
+	krb5_db_open_database, krb5_db_rename, krb5_db_set_lockmode,
+	krb5_db_set_name, krb5_db_set_nonblocking, krb5_db_store_mkey,
+	krb5_dbe_free_contents, krb5_decode_princ_contents,
+	krb5_encode_princ_contents, krb5_encode_princ_dbkey,
+	krb5_free_princ_contents, krb5_free_princ_dbkey,
+	krb5_ser_db_context_init): Declarations deleted (or moved).
+	(krb5_db_create): Changed signature, just one char** arg in
+	addition to context.
+	(krb5_db_delete_principal): Changed argument 1 to non-const
+	principal.
+	(krb5_db_destroy): Changed argument 1 to char**.
+	(krb5_db_free_principal): Changed return type from void to
+	krb5_error_code.
+	(krb5_db_iterate): Changed signature, new char* argument,
+	pointed-to function returns int instead of krb5_error_code.
 
 2005-06-14  Ken Raeburn  <raeburn@mit.edu>
 
@@ -152,11 +241,12 @@
 	($(srcdir)/krb5/autoconf.stmp): Use $(thisconfigdir) when
 	locating configure.in and autom4te.cache.
 
+	* krb5/Makefile.in (thisconfigdir, mydir): Updated for configure
+	change.
+
 2005-05-06  Sam Hartman  <hartmans@mit.edu>
 
-	
 	* krb5.hin: Add krb5_c_prf_length
-
 
 2005-04-28  Ken Raeburn  <raeburn@mit.edu>
 
@@ -593,6 +683,8 @@
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h: Don't test macintosh, __MWERKS__, applec, or THINK_C.
+	* krb5/adm_proto.h, krb5/kdb.h, krb5/kdb_dbc.h, krb5/kdb_kt.h:
+	Don't test macintosh.
 
 2004-06-18  Ken Raeburn  <raeburn@mit.edu>
 
@@ -606,6 +698,7 @@
 2004-06-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-mac, clean-mac): Targets deleted.
+	* krb5/Makefile.in (all-mac, clean-mac): Targets deleted.
 
 2004-06-08  Ken Raeburn  <raeburn@mit.edu>
 
@@ -740,6 +833,7 @@
 2004-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (LOCAL_SUBDIRS): Renamed from MY_SUBDIRS.
+	* krb5/Makefile.in (MY_SUBDIRS): Deleted.
 
 2004-03-05  Ken Raeburn  <raeburn@mit.edu>
 
@@ -863,6 +957,8 @@
 	* foreachaddr.c (foreach_localaddr) [HAVE_IFADDRS_H]: Skip over
 	any returned data structure with a NULL ifa_addr field.
 
+	* krb5/k5-config.h: Unused file deleted.
+
 2003-08-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h (getnameinfo): Define to my_fake_getnameinfo
@@ -980,6 +1076,8 @@
 2003-05-25  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Sequence number of krb5_replay_data should be unsigned.
+
+	* krb5/kdb.h: Add prototype for krb5_db_iterate_ext.
 
 2003-05-23  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1122,6 +1220,15 @@
     defined (the reason I put it where I did was there is another 
     config file function next to it).
 
+2003-03-05  Tom Yu  <tlyu@mit.edu>
+
+	* krb5/kdb_kt.h: Add krb5_ktkdb_set_context.  Update prototype of
+	krb5_ktdb_resolve.  Add krb5_kt_kdb_ops.
+
+2003-03-05  Sam Hartman  <hartmans@mit.edu>
+
+	* Remove krb5/kdb_dbm.h
+
 2003-03-04  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.h (ENCTYPE_AES128_CTS_HMAC_SHA1_96,
@@ -1262,6 +1369,9 @@
 	trailing colon, as new implementation of krb5_read_password()
 	appends it.
 
+	* krb5/kdb.h (KRB5_KDC_MKEY_1, KRB5_KDC_MKEY_2): Remove trailing colon,
+	as new implementation of krb5_read_password() appends it.
+
 2002-10-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5_ser_handle): Now points to const.
@@ -1304,6 +1414,9 @@
 
 	* cm.h: New file.
 
+	* krb5/adm.h (struct __krb5_realm_params): New field
+	realm_kdc_tcp_ports.
+
 2002-09-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (maybe-make-db.h-sys, maybe-make-db.h-k5): New
@@ -1331,10 +1444,12 @@
 2002-08-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Revert $(S)=>/ change, for Windows support.
+	* krb5/Makefile.in: Revert $(S)=>/ change, for Windows support.
 
 2002-08-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
+	* krb5/Makefile.in: Change $(S)=>/ and $(U)=>.. globally.
 
 2002-08-21  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1526,6 +1641,8 @@
 
 	* sys/syslog.h: Deleted.
 
+	* krb5/kwinsock.h, krb5/macsock.h: Deleted.
+
 2002-06-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (KRB_AP_PATH_NOT_ACCEPTED, KRB_ERR_RESPONSE_TOO_BIG):
@@ -1568,6 +1685,10 @@
 	argument.
 	(getaddrinfo) [COPY_FIRST_CANONNAME]: Always do the copying if the
 	ai_canonname is non-null, regardless of the supplied flags.
+
+2002-05-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/MacTCP.h, krb5/AddressXlation.h: Deleted.
 
 2002-05-24  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1826,6 +1947,7 @@
 	(P): Don't define.
 	* krb5.hin (KRB5_PROTOTYPE): Don't define.
 	* krb54proto.h: Make prototypes unconditional.
+	* krb5/macsock.h (PROTOTYPE): Don't define.
 
 2001-10-05  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1833,12 +1955,17 @@
 	* krb5.hin (KRB5_EXPORTVAR): Don't define.
 	* win-mac.h (KRB5_EXPORTVAR): Don't define.
 
+	* krb5/adm_defs.h, krb5/kdb.h, krb5/kdb_dbc.h, krb5/kdb_dbm.h,
+	krb5/kdb_kt.h, krb5/kwinsock.h: Don't explicitly declare pointers
+	or functions FAR any more.  Drop _MSDOS support.
+
 2001-10-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h, krb5.hin, win-mac.h: Don't use or define KRB5_DLLIMP,
 	GSS_DLLIMP.  Drop MSDOS, NEAR, FAR support.
 	* krb54proto.h: Don't explicitly declare pointers FAR any more.
 	* port-sockets.h: Delete _MSDOS support.
+	* krb5/adm_proto.h: Don't use KRB5_DLLIMP.
 
 2001-09-28  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1846,6 +1973,12 @@
 	instead of on krb_err.h.
 	(krb_err.h): Target and rule deleted.
 	(clean-unix): Don't delete krb_err.h.
+
+2001-09-25  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/adm.h (struct __krb5_realm_params): Added fields
+	realm_reject_bad_transit, realm_reject_bad_transit_valid; deleted
+	field realm_filler.
 
 2001-09-06  Ken Raeburn  <raeburn@mit.edu>
 
@@ -1921,6 +2054,14 @@
 	* krb5.hin (krb5_check_transited_list): Pointer args now point to
 	const.
 
+2001-07-25  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5/kdb.h: For structs krb5_tl_data (tl_data_length), krb5_key_data
+	(key-data_length), krb5_db_entry (len, e_length) change the
+	storage types from krb5_int16 to krb5_ui_2. This does not require
+	a database version change as the field sizes are the same. Remove
+	the code ifdefed under KRB5_OLD_AND_KRUFTY.
+
 2001-07-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* fake-addrinfo.h: Include port-sockets.h instead of system header
@@ -1991,6 +2132,10 @@
 	* Makefile.in ($(srcdir)/krb5/autoconf.h.in): New target; rebuild
 	using autoheader.
 
+2001-04-27  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5/.cvsignore: Add stamp-h.in
+
 2001-04-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* k5-int.h (krb5int_locate_server): New prototype.
@@ -2042,6 +2187,10 @@
 	* krb5.hin: Add prototypes for krb5_auth_con_setpermetypes() and
  	krb5_auth_con_getpermetypes().
 
+2001-02-26  Ezra Peisach  <epeisach@mit.edu>
+
+	* krb5/adm_proto.h (krb5_adm_connect): Declare prompt string const char *. 
+
 2001-01-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (KRB5_NPROTOTYPE): Delete.
@@ -2061,6 +2210,11 @@
 	krb5_rc_close, krb5_rc_close, krb5_rc_store, krb5_rc_expunge,
 	krb5_rc_get_lifespan, krb5_rc_get_name, krb5_rc_resolve): Replace
 	macros with function decls.
+
+2001-01-16  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5/adm_proto.h, krb5/kdb.h, krb5/kdb_dbc.h, krb5/kdb_dbm.h,
+	krb5/kdb_kt.h: Make all prototypes unconditional.
 
 2000-11-01  Ezra Peisach  <epeisach@mit.edu>
 
@@ -2153,6 +2307,11 @@ Tue Sep 26 18:10:22 2000  Ezra Peisach  <epeisach@mit.edu>
         * krb5-int.h: Fix the prototype for krb5int_cc_default so that it builds
           on Windows.
 
+2000-05-30  Wilfredo Sanchez  <tritan@mit.edu>
+
+	* krb5/Makefile.in, krb5/osconf.h: Use bindir and sbindir from configure
+	rather than building them up from EXEC_PREFIX.
+
 2000-5-19	Alexandra Ellwood <lxs@mit.edu>
 
 	* krb5-int.h: Added krb5int_cc_default.  This function supports the 
@@ -2162,6 +2321,11 @@ Tue Sep 26 18:10:22 2000  Ezra Peisach  <epeisach@mit.edu>
 	because callers don't expect krb5_cc_default to pop up a dialog!
 	(We found this out the hard way :-)
 
+2000-5-18	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5/macsock.h: local_addr_fallback_kludge defined to 0
+ 	again... fixed gethostname
+
 2000-05-15      Jeffrey Altman          <jaltman@columbia.edu>
 
         * krb5.hin
@@ -2169,6 +2333,12 @@ Tue Sep 26 18:10:22 2000  Ezra Peisach  <epeisach@mit.edu>
 
                krb5_appdefault_string
                krb5_appdefault_boolean
+
+2000-5-9	Alexandra Ellwood <lxs@mit.edu>
+
+	* krb5/macsock.h: local_addr_fallback_kludge now defined to magic gethostaddr function
+	in the Sockets Library, which does exactly what we want if the search domain is not
+	specified.
 
 2000-4-13	Alexandra Ellwood <lxs@mit.edu>
 
@@ -2217,6 +2387,11 @@ Tue Sep 26 18:10:22 2000  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin (krb5_secure_config_files): Delete declaration.
 	(krb5_init_secure_context): Declare.
+
+1998-11-22  Miro Jurisic  <meeroh@.mit.edu>
+
+	* krb5/macsock.h: MacOS: only #define MACHOSTNAMELEN when not
+	already defined
 
 1999-11-02  Ken Raeburn  <raeburn@raeburn.org>
 
@@ -2335,6 +2510,12 @@ Wed May 19 11:33:15 1999  Danilo Almeida  <dalmeida@mit.edu>
 		responsible for the header files (gssapi, et, and
 		profile).
 
+	* krb5/Makefile.in: Create build rules for windows instead of blindly
+		copying files.  Wrap Unix build rules with !if 0/!endif
+		that get used only in windows build.  People need to
+		remember to keep this !if/!endif in the proper place when
+		they modify this file.
+
 Tue May 18 19:52:56 1999  Danilo Almeida  <dalmeida@mit.edu>
 
 	* Makefile.in: Remove - from recursive Win32 make invocation.
@@ -2344,14 +2525,33 @@ Mon May 17 12:30:58 1999  Danilo Almeida  <dalmeida@mit.edu>
 	* Makefile.in: Add NO_OUTPRE flag to prevent creation of output
 		directory under win32.
 
+	* krb5/Makefile.in: Add NO_OUTPRE flag to prevent creation of output
+		directory under win32.
+
 Tue May 11 15:19:12 1999  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Remove unused priv_size from krb5_encrypt_block
+
+Fri May  7 15:26:44 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5/adm_proto.h: Fix the existing kludge to deal with the fact that
+		krb5_realm_params is defined in two, count them two,
+		header files.  There's real ugliness here that needs
+		cleaning up eventually, but I don't have the time now to
+		deal with it.
+
+Fri Apr 16 17:07:47 1999  Theodore Y. Ts'o  <tytso@mit.edu>
+
+	* krb5/Makefile.in (all-windows): Don't constantly recreate autoconf.h
+		with #include "win-mac.h"
 
 1999-04-09  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Add new prototypes and #define's provided by Frank
 		Cusack's preauth patch (PR# [krb5-kdc/662])
+
+	* krb5/kdb.h: Add new TL types provided by Frank Cusack's preauth patch
+		(PR# [krb5-kdc/662])
 
 1999-04-01  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
@@ -2421,6 +2621,14 @@ Sat Dec  5 01:08:57 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 		functions.  Also add some krb4 function prototypes to make
 		catching prototype errors easier.
 
+Tue Nov 17 15:39:32 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb5/kdb.h: Update dbe_crk and dbe_cpw to take a boolean to indicate
+	whether old keys should be retained.
+
+	* krb5/Makefile.in (autoconf.stamp): Fix up to deal with config.status
+	not being in the current directory anymore.
+
 1998-11-13  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* Makefile.in: Set the myfulldir and mydir variables (which are
@@ -2430,6 +2638,13 @@ Sat Dec  5 01:08:57 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* configure.in: Folded tests from krb5 and kerberosIV directories
 		into this configure.in file.
+
+	* krb5/Makefile.in: Set the myfulldir and mydir variables (which are
+		relative to buildtop and thisconfigdir, respectively.)
+		Add a MY_SUBDIRS macro set to '.' to indicate that there
+		are no subdirectories to be processed by the Makefile.
+
+	* krb5/configure.in: Removed and tests moved to parent directory.
 
 1998-10-26  Marc Horowitz  <marc@mit.edu>
 
@@ -2443,11 +2658,18 @@ Sat Dec  5 01:08:57 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 	* k5-int.h: make changes related to new crypto API and key
 	derivation/key usage
 
+	* krb5/kdb_dbc.h, krb5/kdb.h: update kdb api to be compatible with
+	the new crypto api.
+
 Tue Sep  1 19:32:33 1998  Tom Yu  <tlyu@mit.edu>
 
 	* krb5.hin: Add ENCTYPE_LOCAL_DES3_HMAC_SHA1, in order to deal
 	with marc's current des3 cryptosystem until we figure out what
 	we're actually going to use for a standardized cryptosystem.
+
+Wed Jul  8 04:30:22 1998  Geoffrey King  <gjking@mit.edu>
+
+	* krb5/adm_proto.h: Added prototype for new function krb5_klog_reopen()
 
 Wed Jul  1 19:14:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
@@ -2458,6 +2680,11 @@ Wed Jul  1 19:14:25 1998  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin: Declare krb5_auth_con_setrcache and
 		krb5_get_server_rcache to be exported by the DLL.
+
+Thu Apr 16 23:50:08 1998  Tom Yu  <tlyu@mit.edu>
+
+	* krb5/configure.in: Search for /var/tmp first when determining rcache
+	directory. [krb5-libs/548]
 
 Sun Feb 22 19:20:31 1998  Tom Yu  <tlyu@mit.edu>
 
@@ -2472,12 +2699,17 @@ Wed Feb 18 15:50:40 1998  Tom Yu  <tlyu@mit.edu>
 	BUILDTOP for new conventions.  Fix up use of $(C) for new
 	conventions.
 
+	* krb5/Makefile.in: Remove trailing slash from thisconfigdir.  Fix up
+	BUILDTOP for new conventions.
+
 Mon Feb  2 17:02:29 1998  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* configure.in: Use AC_CONFIG_DIRS instead of CONFIG_DIRS, and
 		remove use of DO_SUBDIRS.
 
 	* Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
+
+	* krb5/Makefile.in: Define BUILDTOP and thisconfigdir in the Makefile
 
 Thu Jan 29 20:15:30 1998  Dan Winship  <danw@mit.edu>
 
@@ -2502,11 +2734,18 @@ Tue Sep 30 18:56:05 1997  Tom Yu  <tlyu@mit.edu>
 	* k5-int.h: Replace HAS_STDLIB_H, NO_STDLIB_H with something more
  	sane.
 
+	* krb5/configure.in: Remove references to dbm and ndbm.  Replace
+	HAS_STDLIB_H and NO_STDLIB_H with something more sane.  Replace
+	AC_TIME_WITH_SYS_TIME with more a recent form.  Use AC_CHECK_TYPE
+	to check for time_t instead of erroneously named POSIX_TYPES.
+
 Thu Sep 25 21:10:37 1997  Tom Yu  <tlyu@mit.edu>
 
 	* win-mac.h: Replace KRB5_USE_INET with something more sane.
 
 	* k5-int.h: Replace HAS_UNISTD_H with something more sane.
+
+	* krb5/configure.in: Replace KRB5_USE_INET, HAS_UNISTD_H, HAS_SETVBUF.
 
 Thu Sep 18 17:52:59 1997  Tom Yu  <tlyu@mit.edu>
 
@@ -2515,11 +2754,20 @@ Thu Sep 18 17:52:59 1997  Tom Yu  <tlyu@mit.edu>
 	* k5-int.h: Replace USE_STRING_H, HAS_STRDUP, HAS_LABS with
  	something more sane.
 
+	* krb5/configure.in: Replace USE_STRING_H, HAS_STRDUP, HAS_LABS
+
 Mon Sep 15 14:54:55 1997  Ezra Peisach  <epeisach@mit.edu>
 
 	* krb5.hin: Add const to prototypes for krb5_cc_resolve,
 	        krb5_cc_default_name, credential cache resolve and keytab
 	        get functions.
+
+	* krb5/kdb_dbm.h: Add const to argument of krb5_dbm_db_get_principal.
+	    Add prototype for krb5_dbm_db_delete_principal.
+
+	* krb5/kdb.h: Prototypes for krb5_db_get_principal,
+            krb5_db_delete_principal, krb5_dbe_update_mod_princ_data,
+            krb5_encode_princ_dbkey modified to use const krb5_principals.
 
 Tue Jul 29 23:14:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
@@ -2528,6 +2776,14 @@ Tue Jul 29 23:14:27 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 Fri Jul 25 15:21:26 1997  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h: Don't include anything related to dbm.
+
+	* krb5/kdb_kt.h: Move support for "kdb" keytab here.
+
+	* krb5/kdb.h: Add support for modified kdb API; remove extra arguments
+	for db_set_mkey and db_get_mkey.  Remove all (hopefully) mentions
+	of any particular backend database implementation.  Add flags
+	argument for db_create, allowing caller to specify whether btree
+	or hash methods are to be used in the backend.
 
 Tue Jul 15 12:35:41 1997  Theodore Y. Ts'o  <tytso@mit.edu>
 
@@ -2613,6 +2869,10 @@ Thu Nov 21 11:55:16 EST 1996    Richard Basch   <basch@lehman.com>
 	* k5-int.h: Re-structured accordingly to accomodate win-mac.h
 	* win-mac.h: New file containing the Windows/Mac definitions
 
+        * krb5/Makefile.in:
+		all-windows needed :: not :
+		clean up various generated files on all platforms, not just unix
+
 Wed Nov 13 14:28:08 1996  Tom Yu  <tlyu@mit.edu>
 
 	* k5-int.h, krb5.hin: Revert kt_default_name changes.
@@ -2628,6 +2888,20 @@ Mon Nov  4 14:50:42 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* k5-int.h: Removed unusued prototype for krb5_verify_padata();
 		this is old code that has since been removed. [PR#21]
+
+Wed Oct 30 18:55:21 1996  Sam Hartman  <hartmans@mit.edu>
+
+	* krb5/Makefile.in (LOCALSTATEDIR): Add localstatedir a and sysconfidr
+	to substitutions for osconf.h
+
+Mon Aug 26 17:01:11 1996  Barry Jaspan  <bjaspan@mit.edu>
+
+	* krb5/kdb.h: add KRB5_TL_KADM5_E_DATA
+
+Fri Aug 23 16:20:54 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5/kdb.h: Remove dbm_error and dbm_clearerr from the dispatch table
+		(which eventually should be completely removed.)
 
 Thu Aug 15 16:31:20 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
@@ -2654,6 +2928,9 @@ Wed Jun 12 01:32:33 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* sys/syslog.h: Add #ifdef _WIN32 in places where we had #ifdef _MSDOS
 
+	* krb5/adm_proto.h: Change usage of INTERFACE to use KRB5_CALLCONV and
+	 	KRB5_DLLIMP.
+
 Mon Jun 10 16:52:35 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 
 	* krb5.hin		
@@ -2673,6 +2950,17 @@ Mon Jun 10 16:52:35 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
 		all uses of INTERFACE in favor of KRB5_CALLCONV and
 		KRB5_DLLIMP.
 
+	* krb5/winsock.h: Rename to kwinsock.h.  Recent versions of Microsoft
+		compilers include winsock.h, and the one we have collides
+		with NT errno definitions.  Using the one provided by the
+		compiler is preferable.  If you are using an old version
+		of MSVC that doesn't include winsock.h, then rename
+		kwinsock.h to winsock.h
+
+	* krb5/kdb_dbm.h: Don't include kdb_dbm.h for Win-32.
+
+	* krb5/kdb.h: Don't include most of kdb.h for Win-32.
+
 Fri Jun  7 18:13:33 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin: 
@@ -2682,10 +2970,18 @@ Thu Jun  6 14:14:28 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* krb5.hin (krb5_cc_get_type): Remove extraneous '*' from definition.
 
+Mon May 20 17:57:15 1996  Theodore Ts'o  <tytso@rsts-11.mit.edu>
+
+	* krb5/configure.in: Remove support for ODBM.
+
 Mon May 20 02:51:06 1996  Sam Hartman  <hartmans@mit.edu>
 
 	* k5-int.h: Ultrix CC wants krb5_seteuid to take uid_t so that the
  	type can be promoted from a short.
+
+Sun May 19 14:32:19 1996  Sam Hartman  <hartmans@tertius.mit.edu>
+
+	* krb5/configure.in: Check for uid_t.
 
 Sat May 18 16:53:06 1996  Sam Hartman  <hartmans@tertius.mit.edu>
 
@@ -2695,6 +2991,12 @@ Tue May 14 20:29:09 1996  Richard Basch  <basch@lehman.com>
 
 	* krb5.hin: replaced CKSUMTYPE_SHA_DES3 with CKSUMTYPE_HMAC_SHA
 
+Sun May 12 00:46:05 1996  Marc Horowitz  <marc@mit.edu>
+
+	* krb5/kdb.h: convert to use new krb5_dbe_* tl_data functions.
+
+	* krb5/adm.h (struct __krb5_realm_params): add realm_acl_file
+	
 Thu May  9 19:28:48 1996  Theodore Y. Ts'o  <tytso@mit.edu>
 
 	* k5-int.h: Added new field values for ap_req_sumtype and
@@ -2729,12 +3031,23 @@ Thu May  2 22:52:14 1996  Mark Eichin  <eichin@cygnus.com>
 	* krb5.hin (krb5_rd_req_decoded_anyflag): declaration for new
 	function, see rd_req_dec.c for details.
 
+Tue Apr 30 17:15:57 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* krb5/configure.in: Invoke AC_C_CROSS before AC_TRY_RUN to pretty up
+	output format.
+
+	* krb5/Makefile.in (autoconf.h): Use timestamp file to prevent repeated
+	rebuilding if file timestamp is out of date but contents wouldn't
+	change.
+
 Tue Apr 30 14:51:55 1996    <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Fix Windows definition of PROVIDE_DES_CBC_RAW so that
 		the raw DES cryptosystem is properly included.  Removed
 		Macintosh definitions of PROVIDE_* since that is done in
 		mac/libaries/KerberosHeaders.h.
+
+	* krb5/macsock.h: Added prototype for getpeername().
 
 Wed Apr 17 20:56:51 1996  Marc Horowitz  <marc@mit.edu>
 
@@ -2766,6 +3079,16 @@ Thu Mar 28 19:55:04 1996  Richard Basch  <basch@lehman.com>
 
 	* krb5.hin: Added ENCTYPE_DES3_CBC_RAW
 
+Thu Mar 28 17:57:04 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/AddressXlation.h: Updated to use latest versions from the Apple's
+		MacTCP Universal Interface.  (For PowerPC port).
+
+	* krb5/MacTCP.h: New header file from Apple's Universal Interface
+
+	* krb5/GetMyIPAddr.h, krb5/MacTCPCommonTypes.h, krb5/TCPPB.h,
+		krb5/UDPPB.h: Removed old MacTCP header files.
+
 Wed Mar 20 22:55:50 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin (krb5_pa_data): Change type of pa_type field in
@@ -2773,6 +3096,10 @@ Wed Mar 20 22:55:50 1996  Theodore Y. Ts'o  <tytso@dcl>
 		sake.  Added prototype for krb5_copy_addr().  Change type
 		of etype in krb5_etype_info_entry to be krb5_enctype, for
 		consistency's sake.
+
+Wed Mar 13 17:43:35 1996  Ken Raeburn  <raeburn@cygnus.com>
+
+	* krb5/configure.in: Use AC_HEADER_STDARG.
 
 Sat Feb 24 21:46:13 1996  Theodore Y. Ts'o  <tytso@dcl>
 
@@ -2791,6 +3118,17 @@ Wed Feb 21 23:33:18 1996  Richard Basch  <basch@lehman.com>
 
 	* Makefile.in: Do not install k5-int.h
 
+Wed Jan 24 14:23:07 1996  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/adm.h: Added lines to adm.h which Chris had removed while
+		working on the kadmin revisions.  This allows the existing
+		code to compile.
+
+Mon Jan 22 17:36:00 1996  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/configure.in: Use KRB5_CHECK_PROTOS instead of inlining
+		prototype checking.
+
 Wed Jan 10 22:46:51 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* k5-int.h: Add fields for fcc_default_format and
@@ -2805,6 +3143,29 @@ Thu Jan  4 22:49:13 1996  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin: Added support for KRB5_INT16_MAX, which tells us the
 		limitations of using 16 bit ints.
+
+Wed Dec 13 03:51:53 1995  Chris Provenzano (proven@mit.edu)
+
+	* krb5/kdb.h : Remove mkvno for krb5_db_entry
+
+Tue Dec 12 00:59:17 1995  Chris Provenzano (proven@mit.edu)
+
+	* krb5/adm.h: Added principal flag keywords KRB5_ADM_KW_SETFLAGS and
+		KRB5_ADM_KW_UNSETFLAGS because relative flag modification 
+		is just a good idea.
+	* krb5/kdb.h: typedef kdb5_dispatch_table so prototypes that need it
+		compile even if KDB5_DISPATCH isn't defined.
+	* krb5/kdb_dbc.h: The start of the database context, which should be
+		removed from the krb5_context.
+
+Sun Dec 10 11:02:35 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/adm_proto.h: Add prototype for krb5_input_flag_to_string.
+
+Fri Dec  1 17:16:05 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/adm.h: Added temporary definition of KRB5_ADM_M_EXTRADATA so
+		that we have a tree which compiles.
 
 Sun Nov 26 19:23:35 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
@@ -2854,11 +3215,25 @@ Wed Nov  8 02:53:48 1995  Theodore Y. Ts'o  <tytso@dcl>
 		new ones.  Changed function prototype of
 		krb5_encrypt_tkt_part.
 
+Tue Nov  7 16:41:14 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/kdb.h: Added prototype for krb5_dbe_search_enctype().  Changed
+		prototype of krb5_dbe_find_enctype() so that ktype is of
+		type krb5_int32.  (krb5_enctype is unsigned, so -1 doesn't
+		work!) 
+
 Tue Nov 7 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* k5-int.h: Place stat declation inside #ifndef __MWERKS__ so
 		as not to conflict with the definition in the 
 		MetroWerks compiler.
+
+Fri Nov 03 04:37:56 1995   Chris Provenzano (proven@mit.edu)
+
+        * krb5/adm.h : Constant changes for the new kadmin code.
+	* krb5/kdb.h : Added attribute bit KRB5_KDB_NEW_PRINC. This will 
+		allow kadmin administrators with add acls to modify a
+		principal until this bit is cleared. 
 
 Tue Oct 24 17:31:36 1995  Theodore Y. Ts'o  <tytso@dcl>
 
@@ -2872,11 +3247,18 @@ Fri Oct  6 21:59:02 1995  Theodore Y. Ts'o  <tytso@dcl>
 	* Makefile.in: Remove ##DOS!include of config/windows.in.
 		config/windows.in is now included by wconfig.
 
+	* krb5/Makefile.in: Remove ##DOS!include of config/windows.in.
+		config/windows.in is now included by wconfig.
+
 Thu Oct  5 21:31:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* krb5.hin: Change types of krb5_max_enctype and
 		krb5_max_cksumtype to be krb5_enctype and krb5_cksumtype,
 		to fix some gcc -Wall flames.
+
+	* krb5/adm.h: Remove pport and sport from the krb5_realm_params file,
+		and replace it with ports, which is a char * list of all
+		of the ports which should be listed to for this realm.
 
 Thu Oct  5 07:34:51 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
@@ -2896,6 +3278,8 @@ Fri Sep 29 15:17:30 1995  Theodore Y. Ts'o  <tytso@dcl>
 		way, they don't get executed under DOS, since krb5.h
 		already exists under DOS.
 
+	* krb5/Makefile.in (clean-unix): Remove autoconf.h on make clean
+
 Fri Sep 29 13:35:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove krb5-pro.h
@@ -2908,6 +3292,11 @@ Fri Sep 29 01:35:50 1995  Theodore Y. Ts'o  <tytso@dcl>
 	* k5-int.h: #include "osconf.h" all the time, at the beginning of
 		the file.
 
+Wed Sep 27 16:00:00 1995  John Rivlin <jrivlin@fusion.com>
+
+	* krb5/adm_proto.h: Removed use of prototypes using krb5_db_entry
+		on the Macintosh. 
+
 Tue Sep 26 15:18:26 1995    <tytso@rsts-11.mit.edu>
 
 	* k5-int.h: Don't predefine symbols to stop kdb.h and kdb_dbm.h
@@ -2916,9 +3305,15 @@ Tue Sep 26 15:18:26 1995    <tytso@rsts-11.mit.edu>
 	* krb5.hin, k5-int.h: Move some src/lib/krb5/os prototypes to
 		krb5.hin.
 
+	* krb5/kdb.h, krb5/kdb_dbm.h: Add #if !defined(_MSDOS) &&
+		!defined(_MACINTOSH) to prevent these #includes from being
+		used by Mac and PC machines.
+
 Mon Sep 25 16:39:21 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
+		Makefile. 
+	* krb5/Makefile.in: Removed "foo:: foo-$(WHAT)" lines from the
 		Makefile. 
 
 Sat Sep 23 01:37:19 1995  Theodore Y. Ts'o  <tytso@dcl>
@@ -2942,6 +3337,10 @@ Fri Sep 22 19:42:47 1995  Theodore Y. Ts'o  <tytso@dcl>
 		THREEPARAMOPEN and prototype for sscanf.  Also add #define
 		for strncasecmp() to the microsoft's strnicmp() function.
 
+Thu Sep 20 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* krb5/macsock.h:  Changes to support TCP streams and change password.
+
 Tue Sep 12 12:00:00 1995  John Rivlin <jrivlin@fusion.com>
 
 	* k5-int.h: Removed KRB5_REALM_CANT RESOLVE,
@@ -2954,6 +3353,21 @@ Sun Sep 10 12:00:00 1995  James Mattly  <mattly@fusion.com>
 
 	* krb5.hin:  Conditionalized inclusion of <sts/types.h> for _MACINTOSH
 
+Thu Sep  8 12:00:00 1995  James Mattly  <mattly@fusion.com>
+
+	* krb5/k5-config.h:  defined MPW fake stat.h out for metrowerks compiler
+	* krb5/macsock.h:  changed SOCKET definition for MACINTOSH to start support for
+		TCP streams
+	* krb5/TCPBP.h:  fixed up some prototype problems with out customized tcp sockets
+		for macintosh
+
+Thu Sep  7 15:53:28 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/adm.h (KRB5_ADM_SERVICE_NAME): Use official IANA assigned name
+		for the port, which is kpasswd, not changepw.  Add new
+		define, KRB5_ADM_SERVICE_INSTANCE, which defines the
+		instance name used for the kadmin name.
+
 Wed Sep  6 12:00:00 1995  James Mattly  <mattly@fusion.com>
 
 	* k5-int.h:  Added requisite defines, fake struct definitions for compilation
@@ -2963,9 +3377,13 @@ Wed Sep 06 14:20:57 1995   Chris Provenzano (proven@mit.edu)
 
         * k5-int.h krb5.hin : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
 
+        * krb5/adm.h, krb5/adm_proto.h krb5/kdb.h : s/keytype/enctype/g, s/KEYTYPE/ENCTYPE/g
+
 Tue Sep 05 22:10:34 1995   Chris Provenzano (proven@mit.edu)
 
         * k5-int.h, krb5.hin : Remove krb5_enctype references, and replace with
+                krb5_keytype where appropriate.
+        * krb5/adm_proto.h : Remove krb5_enctype references, and replace with
                 krb5_keytype where appropriate.
 
 Fri Sep  1 00:44:59 1995  Theodore Y. Ts'o  <tytso@dcl>
@@ -2987,6 +3405,10 @@ Fri Sep  1 00:44:59 1995  Theodore Y. Ts'o  <tytso@dcl>
 		krb5_set_debugging_time(), krb5_use_natural_time(),
 		krb5_get_time_offsets(), and krb5_set_time_offsets().
 
+Thu Aug 31 11:38:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/configure.in - Add checks for stddef.h and xom.h for use by GSSAPI-V2
+
+
 Tue Aug 29 13:26:22 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Add ser_ctx[_count] to krb5_context.  This keeps track
 		of registered serializers.  Add serializer definitions and
@@ -2994,6 +3416,7 @@ Tue Aug 29 13:26:22 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5.hin - Add priv_size to krb5_encrypt_block.  This indicates the
 		size of the private data.  Add pointer to keytab ops for
 		serializer handle.
+	* krb5/kdb.h - Add prototype for krb5_ser_db_context_init().
 
 Mon Aug 28 15:58:14 1995    <tytso@rsts-11.mit.edu>
 
@@ -3012,15 +3435,47 @@ Thu Aug 24 19:23:10 1995  Theodore Y. Ts'o  <tytso@dcl>
 
 	* .Sanitize: Update file list
 
+Mon Aug 21 17:00:58 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* krb5/adm_proto.h - Add krb5_timestamp_to_sfstring() prototype.
+
 Wed Aug 16 02:45:19 1995  Chris Provenzano <proven@mit.edu>
 
 	*  k5-int.h (krb5_lock_file(), krb5_unlock_file()):
 		Use fds instead of FILE *s and don't pass the filename.
 
+Tue Aug 15 14:27:02 EDT 1995	Paul Park	(pjpark@mit.edu)
+
+	* krb5/kdb.h - Add prototype for krb5_dbe_find_keytype().
+
+Mon Aug 07 11:22:57 1995   Chris Provenzano (proven@mit.edu)
+
+	* krb5/kdb.h : Add prototypes for krb5_dbe_{en,de}code_last_pwd_change(),
+		krb5_dbe_{apw,cpw,ark,crk}(),
+
 Fri Aug  4 23:04:06 1995  Tom Yu  <tlyu@dragons-lair.MIT.EDU>
 
 	* k5-int.h: Add prototypes for krb5_crypto_os_localaddr and
 		krb5_crypto_us_timeofday
+
+Fri Aug 4 16:10:34 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm_proto.h - Add prototype definitions for new libkadm functions in
+		keysalt.c dealing with key/salt tuples.
+	* krb5/kdb.h - Add encode/decode macros for integers for use between kdb
+		modules.
+
+Thu Aug 03 12:19:52 1995   Chris Provenzano (proven@mit.edu)
+
+	* krb5/kdb.h : Added prototype for krb5_dbe_cpw() the new dd entry
+		change password routine.
+
+Mon Jul 31 15:50:25 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm.h - Add new protocol definitions.  Also, add krb5_key_salt_tuple
+		and add it to the krb5_read_realm_params structure so that
+		we have a list of supported key/salt pairs.  Convert keytype
+		and enctype to be the correct datatype.
+	* krb5/adm_proto.h - Add string conversion prototypes.
+
 
 Thu Jul 27 15:04:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Inline or delete header files included here.  These were:
@@ -3029,9 +3484,23 @@ Thu Jul 27 15:04:37 EDT 1995	Paul Park	(pjpark@mit.edu)
 		Also remove #defines which controlled the KDC, move these
 		definitions to kdc/configure.in.
 
+	* krb5/{asn1,dbm,ext-proto,k5-{config,errors,sockets},libos,los-proto,
+	   mit-des,preauth,rsa-md5,sysincl}.h - Deleted.
+	* krb5/Makefile.in - Remove these headers from KRB5_HEADERS.
+	* krb5/configure.in - Change AC_INIT to look for kdb.h.
+
 Thu Jul 27 04:27:45 1995  Chris Provenzano <proven@mit.edu)
 
 	* krb5.hin : Added #define KEYTYPE_UNKNOWN
+
+        * krb5/kdb.h - Define new kdb format.
+
+Mon Jul 17 15:03:43 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm.h - Add per-realm parameter block data structure
+		(krb5_realm_params).
+	* krb5/adm_proto.h - Add dummy declaration for krb5_realm_params if adm.h
+		not included.  Add prototypes for realm parameter functions.
+	* krb5/kdb.h - Add stash file parameter to krb5_db_fetch_mkey().
 
 Tue Jul 11 13:12:14 1995    <tytso@rsx-11.mit.edu>
 
@@ -3043,10 +3512,15 @@ Sun Jul  9 21:37:50 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.hin: Add krb5_rd_cred prototype.
 
+	* krb5/los-proto.h: Add krb5_auth_con_genaddrs prototype
+
 Fri Jul 7 15:56:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* krb5.hin - Add checksum verifier dispatch in the checksum entry.
 		This is now the supported method for verifying checksums.  Also
 		add krb5_verify_checksum which uses this dispatch.
+
+	* krb5/rsa-md5.h - Add RSA_MD5_DES_CONFOUND_LENGTH - the length of the
+		confounder for RSA_MD5_DES per RFC1510.
 
 Thu Jul  6 17:19:26 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 
@@ -3056,6 +3530,13 @@ Thu Jul  6 17:19:26 1995  Tom Yu  <tlyu@lothlorien.MIT.EDU>
 Wed July  5 15:52:31 1995  James Mattly  <mattly@fusion.com>
 	* k5-int.h disable inclusion of profile.h for macintosh build
 	* krb5.h   enable inclusion of sys/types.h on HAS_SYS_TYPES
+
+	* krb5/k5-config.h Added _MACINTOSH for macintosh build conditions
+	* krb5/macsock.h made definition of PROTOTYPE conditional
+
+Fri Jun 30 16:13:41 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/kdb.h - Add kdb dispatch table and set routine under KDB5_DISPATCH.
+
 
 Thu Jun 29 22:54:30 1995  Tom Yu  (tlyu@dragons-lair)
 
@@ -3068,6 +3549,12 @@ Tue Jun 27 16:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
 		compilers which recognize prototypes but don't set __STDC__
 		or _WINDOWS.
 
+	* krb5/adm_proto.h - Change second argument of aprof_get... routines to be
+		const char *.
+	* krb5/configure.in, krb5/k5-config.h - Reinstate KRB5_PROVIDE_PROTOTYPES.  This
+		is needed for compilers which recognize prototypes but don't
+		set __STDC__ or _WINDOWS.
+
 Thu Jun 22 16:03:07 1995  Tom Yu  (tlyu@dragons-lair)
 
 	* syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
@@ -3078,8 +3565,24 @@ Thu Jun 22 16:03:07 1995  Tom Yu  (tlyu@dragons-lair)
 		and KRB5_PROVIDE_PROTOTYPES symbols into krb5.h
 	* sys/syslog.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
 
+	* krb5/k5-config.h: remove definition for KRB5_PROVIDE_PROTOTYPES
+		because we've reversed the sense
+
+	* krb5/configure.in: KBR5_PROVIDE_PROTOTYPES -> KRB5_NO_PROTOTYPES;
+		NO_NESTED_PROTOTYPES -> KRB5_NO_NESTED_PROTOTYPES
+
+	* krb5/rsa-md5.h: reverse sense of KRB5_PROVIDE_PROTOTYPES
+
 Thu Jun 22 11:51:10 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* k5-int.h - Add pointer in krb5_context for database context.
+	* krb5/adm_proto.h - Add prototypes for kadm library profile handling
+		routines.  These are wrappers for profile routines.
+	* krb5/kdb.h - Remove KDB_CONVERT_KEY_{TO,OUTOF}_DB.
+
+Wed Jun 21 17:39:25 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/configure.in: Replace krb5_sigtype tests with KRB5_SIGTYPE which
+		has been moved to aclocal.m4
 
 Wed Jun 21 10:54:58 1995    <tytso@rsx-11.mit.edu>
 
@@ -3089,6 +3592,13 @@ Wed Jun 21 10:54:58 1995    <tytso@rsx-11.mit.edu>
 
 	* krb5.hin: Change PROTOTYPE -> KRB5_PROTOTYPE and 
 		NPROTOTYPE -> KRB5_NPROTOTYPE.
+
+	* krb5/Makefile.in: Don't remove autoconf.h when doing a make clean;
+		it's an autoconf generated file.
+
+	* krb5/adm_proto.h, krb5/asn1.h, krb5/ext-proto.h, krb5/kdb.h,
+		krb5/kdb_dbm.h, krb5/los-proto.h,
+		krb5/preauth.c: Change PROTOTYPE -> KRB5_PROTOTYPE
 
 Fri Jun 16 11:39:36 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in - Fix install logic for krb5.h and k5-int.h.
@@ -3102,6 +3612,8 @@ Sat Jun 10 22:10:46 1995  Tom Yu  (tlyu@dragons-lair)
 	* krb5.hin: declare krb5_auth_context as
 		struct _krb5_auth_context FAR *
 
+	* krb5/adm_proto.h: update krb5_auth_context stuff
+
 Fri Jun  9 18:43:20 1995    <tytso@rsx-11.mit.edu>
 
 	* krb5.hin: Remove definition of the krb5_fulladdr structure, and
@@ -3111,18 +3623,70 @@ Fri Jun  9 18:43:20 1995    <tytso@rsx-11.mit.edu>
 		are now handled by CONFIG_RULES.  Use DO_SUBDIRS to
 		recurse down subdirectories.
 
+	* krb5/configure.in: Remove standardized set of autoconf macros, which
+		are now handled by CONFIG_RULES.
+
 Fri Jun 9 12:02:02 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in(all-unix) : Add adm_err.h build target since it's not 
 		built in lib/krb5/error_tables any more.  kadmin.old needs it.
+
+Thu Jun 8 14:41:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm_proto.h - Add prototypes for logging routines.  Also, if
+		kdb.h has not been included, add null structure for entry
+		data structure so that we don't strictly require kdb.h.
+
+Thu Jun  8 11:11:24 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
+
+	* krb5/Makefile.in (install): Don't install the install/krb5 header files.
+
+Wed Jun  7 16:23:51 1995    <tytso@rsx-11.mit.edu>
+
+	* krb5/Makefile.in: Process osconf.h using PREFIX and EXEC_PREFIX
+		instead of KRB5ROOT.
+
+	* krb5/k5-config.h: Remove old defines for krb.conf and krb.realms,
+		which are now obsolete.
 
 Tue Jun  6 12:25:38 1995  Theodore Y. Ts'o  (tytso@dcl)
 
 	* krb5.hin: Add prototype for krb5_524_conv_principal()
 
+Mon Jun 5 13:47:30 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm_proto.h - Add new arguments to krb5_adm_connect() for support
+		of specifiable credentials caches and ticket lifetimes.
+
+
+Thu Jun 1 14:28:40 EDT 1995	Paul Park	(pjpark@mit.edu)
+	* krb5/adm.h: Change the default admin port to 464.
+
+Tue May 30 17:33:09 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/adm_proto.h: removed INTERFACE from 2 non-exported functions.
+
 Tue May 30 10:59:13 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* Makefile.in (clean-unix): Remove built header files krb5.h
 		krb5_err.h kdb5_err.h kv5m_err.h asn1_err.h 
+
+Tue May 30 10:22:57 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/adm_proto.h: conditionally removed for Windows two prototypes
+	   that use the database.
+	* krb5/k5-config.h: bumped MAXPATHLEN and removed need for the kdb.h file.
+
+Fri May 26 10:17:12 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/adm_proto.h: added more missing INTERFACE.
+	* krb5/los-proto.h: moved in prototype for gmt_mktime().
+
+Thu May 25 19:27:45 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/adm_proto.h: two function's prototype were missing INTERFACE.
+	* krb5/k5-config.h: kadm needs the kdb.h file.
+
+Thu May 25 15:39:31 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/los-proto.h: moved in the prototype for krb5_make_fulladdr.
 
 Wed May 24 10:54:34 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- Change $< to explicit target names when generating
@@ -3150,10 +3714,44 @@ Tue May 23 15:08:54 1995  Theodore Y. Ts'o  (tytso@dcl)
 		  debugging information in executables linked with a
 		  debugging library.
 
+	* krb5/k5-config.h, krb5/k5-sockets.h: Move the sockets specific setup out
+		  of k5-config.h to k5-sockets.h, and modify k5-int to
+		  include k5-sockets.h (if it is requested by
+		  NEED_SOCKETS) after including krb5.h.  This keeps the
+		  gdb type numbers the same across .o files, so that
+		  recent binuntils can compress the debugging information
+		  in executables linked with a debugging library.
+
 Mon May 22 10:24:49 EDT 1995	Paul Park	(pjpark@mit.edu)
 	* Makefile.in	- (install) Always perform install actions using
 			  $(INSTALL_DATA).
 	* configure.in	- locate install program.
+	* krb5/Makefile.in - (install) Always perform install actions using
+			  $(INSTALL_DATA).
+	* krb5/configure.in - Locate install program.
+
+Sun May 21 15:25:45 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/Makefile.in (PROCESS_REPLACE): Replace the RCTMPDIR in stock.h
+		with a configuration determined directory
+
+	* krb5/configure.in: Determine which directory to use for the replay
+		cache. (/usr/tmp does not exist on netbsd).
+
+Wed May 10 13:20:47 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/Makefile.in (install): Install ET_HEADERS...
+
+Tue May 9 15:17:00 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Add definitions and prototypes for new administrative protocol.
+
+Mon May  8 22:13:15 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/los-proto.h: krb5_read_password - prompt strings should be const
+		char *. 
+		Remove krb5_init_os_context and krb5_free_os_context. (The
+		proper prototypes are already in place i.e.
+		krb5_os_init_context). 
 
 Wed May  3 10:32:18 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
@@ -3172,6 +3770,13 @@ Sat Apr 29 07:10:02 1995  Theodore Y. Ts'o  <tytso@lurch.mit.edu>
 
 	* krb5.h (krb5_set_config_files): Added new function prototype.
 
+Fri Apr 28 15:14:38 EDT 1995	Paul Park	(pjpark@mit.edu)
+	Remove INTERFACE from prototype definitions in krb5/adm_proto.h
+
+Fri Apr 28 11:11:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5/configure.in: correct use of --with-krb4 to match top level.
+
 Fri Apr 28 01:44:51 1995  Chris Provenzano  (proven@mit.edu)
 
 	* krb5.h (krb5_send_tgs()) : Removed krb5_cksumtype argument.
@@ -3187,6 +3792,12 @@ Thu Apr 27 18:27:36 1995 Keith Vetter (keithv@fusion.com)
 Thu Apr 27 17:57:36 1995 Keith Vetter (keithv@fusion.com)
 
 	* krb5.h: krb5_mk_req somehow got INTERFACE added to it--removed it.
+
+	* krb5/k5-config.h: Changed over to the new single config file on the PC.
+
+Wed Apr 26 10:41:08 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
+
+	* krb5/Makefile.in: Reflect current list of headers to be installed.
 
 Tue Apr 25 21:58:23 1995  Chris Provenzano  (proven@mit.edu)
 
@@ -3224,9 +3835,17 @@ Thu Apr 20 11:32:09 1995    <tytso@rsx-11.mit.edu>
 		Also moved the #include of k5-config.h and k5-errors.h to
 		k5-int.h.
 
+	* krb5/k5-config.h, krb5/configure.in: Remove support for HAS_ANSI_CONST
+		(that was needed only for compatibility with the old imake
+		build; autoconf uses -Dconst=), and HAS_ANSI_VOLATILE,
+		which isn't used at all.
+
 Wed Apr 19 13:23:39 1995  Ezra Peisach  <epeisach@kangaroo.mit.edu>
 
 	* krb5.h: Added default_realm pointer to krb5_context
+
+	* krb5/func-proto.h: Remove global_context hack. Added prototype for
+		krb5_set_default_realm.
 
 Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
 
@@ -3236,11 +3855,96 @@ Thu Apr 13 16:05:08 1995 Keith Vetter (keithv@fusion.com)
 	* sys/syslog.h:  __STDC__ conditionals also check for the _WINDOWS
 	   define.
 
+        * krb5/asn1.h, krb5/ccache.h, krb5/encryption.h, krb5/func-pro.h,
+	  krb5/hostaddr.h, krb5/keytab.h, krb5/los-prot.h, krb5/preauth.h,
+	  krb5/rcache.h: removed unneeded INTERFACE from non-api functions.
+        * krb5/adm_defs.h, krb5/ccache.h, krb5/encryption.h,
+	  krb5/hostaddr.h, krb5/k5-free.h, krb5/keytab.h, krb5/macros.h,
+	  krb5/rcache.h: Added FAR to pointers visible to the world.
+        * krb5/base-def.h, krb5/ext-prot.h, krb5/rsa-md5.h: __STDC__ condition also 
+           checks for the _WINDOWS define.
+
+Wed Apr 5 16:41:41 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/los-proto.h, krb5/func-proto.h: moved krb5_us_timeofday and 
+           krb5_sname_to_principal from the former to the latter.
+        * krb5/base-def.h: added FAR to pointer types for the PC.
+        * krb5/func-proto.h: added FAR to pointer types in prototypes but
+           only for functions which are exported.
+
+Fri Mar 31 19:34:47 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: defined dup to _dup for STDC stuff on Windows
+
+Fri Mar 31 16:12:28 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/configure.in (CONFIG_RULES): Replaced.
+
+Thu Mar 30 15:57:22 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/func-proto.h: added 2 missing prototypes dealing with auth_con.
+
+Tue Mar 28 19:53:09 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/Makefile.in: changed to reflect deletion of stock/osconf.win.
+        * krb5/k5-config.h: added constants for reading default values
+            out of Windows ini files.
+        * krb5/los-proto.h: added new prototype for Windows ini stuff.
+
 Tue Mar 28 18:12:32 1995  John Gilmore  (gnu at toad.com)
 
 	* Makefile.in (KRB5_HEADERS, install):  `Make install' now works.
 	* configure.in (WITH_KRB5ROOT):  For `make install'.
 	* krb5.h:  Include "k5-errors.h" rather than "errors.h".
+
+	* krb5/Makefile.in (KRB5_HEADERS, install):  Account for file renames.
+	(all-mac):  Add.
+	* krb5/configure.in (CONFIG_RULES):  Remove.
+	(krb5_sigtype):  Define as either void or int.
+	* krb5/encryption.h:  Insert parentheses in macros to avoid mis-expansion.
+	* krb5/k5-config.h:  Further parameterize socket support.
+	* krb5/macsock.h:  Support connect(), recv(), send(), getmyipaddr().
+	(WSAGetLastError):  Fix typo -- there's no argument to this macro.
+
+	* krb5/k5-errors.h:  Rename errors.h (which duplicated a standard Mac
+	header name, causing a problem).
+	* krb5/AddressXlation.h, krb5/GetMyIPAddr.h,
+	krb5/MacTCPCommonTypes.h, krb5/TCPPB.h, krb5/UDPPB.h:  Add MacTCP
+	header files.
+
+Mon Mar 27 09:33:10 1995  Chris Provenzano (proven@mit.edu)
+
+        * krb5/func-proto.h (krb5_rd_req(), krb5_rd_req_decode(), krb5_mk_rep(),
+                krb5_recvauth(), and krb5_compat_recvauth(). Added a 
+		krb5_auth_context argument and eliminated many of the 
+		other arguments because they are included in the 
+		krb5_auth_context structure.
+
+Fri Mar 24 14:15:51 1995    <tytso@rsx-11.mit.edu>
+
+	* krb5/adm_defs.h (ADM5_DEFAULT_PORT): Add definition of default
+		administration port.
+
+	* krb5/Makefile.in (install): Delete the destination header files
+		before copying in the new ones.  Also install autoconf.h.
+		Only install header files if the header file has changed.
+
+Wed Mar 22 11:37:24 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: added HAVE_SYS_TYPES_H. Cleaned up the loading
+           of sys/types.h which john added earlier. Specifically, we always
+           have it and it's missing some typedefs used by this code.
+
+Tue Mar 21 18:42:23 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: PC: NO_PASSWORD defined and files opened in binary mode.
+	* krb5/func-proto.h: added new prototype for notify programs when the 
+           ccache changes, and moved krb5_get_default_realm from los-proto.h.
+        * krb5/los-proto.h: moved krb5_get_default_realm into func-proto.h.
+
+Sun Mar 19 12:51:59 1995  John Gilmore  (gnu at toad.com)
+
+	* krb5/base-defs.h:  Fix comment that referred to STDARG_PROTOTYPES.
 
 Fri Mar 17 19:10:41 1995  John Gilmore  (gnu at toad.com)
 
@@ -3248,15 +3952,91 @@ Fri Mar 17 19:10:41 1995  John Gilmore  (gnu at toad.com)
 	It is needed there when NEED_SOCKETS is defined.
 	* Makefile.in (all-mac, clean-mac):  Add.
 
+	* krb5/k5-config.h:  Move <sys/types.h> handling from ../krb5.h to
+	here, because we need <sys/types.h> or the u_* types to be defined
+	before we include the Unix socket include files a little later in
+	k5-config.h.  We actually add this code twice, once in the MSDOS
+	section and once in the Unix/Mac section.
+	(NEED_SOCKETS):  Also include <net/if.h>, for localaddr.c.
+	* krb5/Makefile.in (clean-mac):  Add.
+
 Wed Mar 15 20:27:57 1995 Keith Vetter (keithv@fusion.com)
 
 	* Makefile.in: added recursion into krb5 for the PC.
+
+Tue Mar 14 16:50:54 1995    <tytso@rsx-11.mit.edu>
+
+	* krb5/Makefile.in: Delete definition for KRB5ROOT and KRB5_INCDIR,
+		since those are defined in pre/config.in.
+
+Thu Mar 16 20:58:22 1995  John Gilmore  (gnu at toad.com)
+
+	* krb5/configure.in:  Replace nonstandard CHECK_STDARG with
+	AC_CHECK_HEADERS.  Also check for header file macsock.h, which
+	is a dummy test -- it's false on Unix and PC's, but on the Mac
+	we hand-configure it to be true, to indicate that we want Mac
+	socket support rather than Unix socket support.
+	* krb5/base-defs.h, krb5/k5-config.h:  Use HAVE_STDARG_H, not
+	STDARG_PROTOTYPES.
+	* krb5/k5-config.h (NEED_SOCKETS):  Add new section which brings in
+	socket include files for the appropriate compilation environment
+	(Mac or Unix; Windows already did this).
+	* krb5/macsock.h:  New include file, derived from Cygnus Network Security
+	Mac K4 release, for simulating sockets under MacTCP.
+
+Thu Mar 16 12:12:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: PC change, getting sys_nerr and sys_errlist to work.
+
+Tue Mar 14 17:38:28 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: more PC changes, mostly dealing with chmod not 
+	   working as it should on the PC.
+	* krb5/func-proto.h, krb5/los-proto.h: moved prototypes for
+	   krb5_timeofday and krb5_os_localaddr from los-proto to
+	   func-proto. They are needed by the outside world, specifically kinit.c
+
+Fri Mar 10 14:23:12 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/sysincl.h: Removed definition of FD_SETSIZE, FD_SET, FD_CLR,
+		FD_ISSET, and FD_ZERO.  Defining them in favor of using
+		the system include files is almost always wrong.
 
 Fri Mar 10 10:18:50 1995  Chris Provenzano (proven@mit.edu)
 
 	* krb5.h Added empty structure declaration of krb5_auth_context.
 
 	* k5-int.h Moved #include "adm_defs.h" to krb5.h
+
+	* krb5/func-proto.h (krb5_mk_req(), krb5_mk_req_extended(), krb5_rd_rep(),
+		krb5_sendauth(), krb5_mk_priv(), krb5_rd_priv(), krb5_mk_safe(),
+		and krb5_rd_safe()). Added a krb5_auth_context argument and
+		eliminated many of the other arguments because they are 
+		included in the krb5_auth_context structure.
+
+	* krb5/fieldbits.h Added #define AP_OPTS_USE_SUBKEY 0x00000001 for a
+		new option to an ap req message. This is mainly a clean way
+		to inform krb5_mk_req() and krb5_mk_req_extended() to 
+		create the subkey without adding an extra argument.
+
+	* krb5/safepriv.h Replace safe/priv flags with flags for krb5_auth_context
+		and add krb5_replay_data structure for when the appilication
+		want to do it's own replay detection for safe and priv calls.
+
+Thu Mar  9 18:29:24 1995  Mark Eichin  <eichin@cygnus.com>
+
+       * krb5/Makefile.in (all-windows): tabs, not spaces.
+
+Tue Mar 7 14:54:02 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/ccache.h: added windows INTERFACE keyword to all functions.
+        * krb5/encryption.h: more segment games for the PC--added NEAR to three
+           external data objects.
+        * krb5/wordsize.h: added constants VALID_INT_BTIS and VALID_UINT_BITS for
+           detecting overflow when casting a long to an int.
+        * krb5/k5-config.h: numerous PC changes such as adding NEED_LOWLEVEL_IO
+           which enables the read/write level of I/O.
+        * krb5/Makefile.in: osconf.h now pulled in from stock/osconf.win.
 
 Thu Mar  2 23:24:00 1995  John Gilmore  (gnu at toad.com)
 
@@ -3267,6 +4047,67 @@ Thu Mar  2 23:24:00 1995  John Gilmore  (gnu at toad.com)
 	* krb5.h:  Include k5-config.h first, so its #define's can
 	control the rest of the file.  If <sys/types.h> is not present,
 	define u_long, etc, manually.
+	* krb5/configure.in:  Add checks for sys/types.h and sys/stat.h.
+	* krb5/k5-config.h:  Remove krb5/ from #include.
+	* krb5/sysincl.h:  Avoid <sys/types.h>.  Conditional-include
+	<sys/stat.h>.
+
+Thu Mar 2 13:30:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/k5-config.h: changed NEED_WINSOCK_H to NEED_SOCKETS
+
+Wed Mar 1 20:00:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/func-proto.h: fixed up a const attribute to krb5_send_tgs.
+
+Wed Mar 1 17:40:00 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/func-proto.h: added missing prototype for krb5_mk_cred.
+	* krb5/los-proto.h: added windows INTERFACE keyword to all functions,
+	   plus added 2 missing prototypes: krb5_os_init_context and
+	   krb5_os_free_context.
+
+Wed Mar 1 12:48:20 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/config.h: added defines to pull in winsock.h as needed
+        * krb5/rcache.h: added windows INTERFACE keyword to all functions
+        * krb5/winsock.h: new file--for windows socket stuff
+
+Wed Mar  1 17:45:13 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/configure.in, krb5/k5-config.h: Only define labs(x) -> abs(x) if
+		labs() is not defined elsewhere.  (This really shouldn't
+		be here at all, but is the expedient way to deal with lack
+		of labs().)
+
+	* krb5/Makefile.in: Change config.h -> k5-config.h and free.h ->
+		k5-free.h to reflect renamed header files for Mac/PC port.
+
+Mon Feb 27 23:47:58 1995  John Gilmore  (gnu at toad.com)
+
+	* krb5/Makefile.in (osconf.h):  Remove temp file osconf.new.
+
+	* krb5/krb5.h:  Rename to krb5.h so it can be #included by end users
+	without the use of slashes or extra -I options.  First step in
+	making it stand alone without a train of a dozen other include
+	files tagging along behind.
+
+	* krb5/base-defs.h, krb5/dbm.h, krb5/error_def.h, krb5/sysincl.h:
+	Avoid #include <krb5/...> form; use "..." form.
+
+	* krb5/config.h:  Rename to k5-config.h.  This is too common a
+	name, now that we use -I..../include/krb5.
+	* krb5/free.h:  Rename to k5-free.h.
+
+	* krb5/configure.in (AC_INIT):  Use another file (not krb5.h) as src test.
+
+Mon Feb 27 11:35:49 1995 Keith Vetter (keithv@fusion.com)
+
+        * krb5/config.h: added windows interface keyword for varargs functions,
+           added defines to allows <windows.h> to be stdc compliant.
+	* krb5/func-proto.h: added windows INTERFACE_C keyword for functions
+           with varargs, and fixed const in prototype for krb5_send_tgs.
+        * krb5/preauth.h: added windows INTERFACE keyword to prototypes
 
 Wed Feb 22 18:31:12 1995  John Gilmore  (gnu at toad.com)
 
@@ -3274,6 +4115,131 @@ Wed Feb 22 18:31:12 1995  John Gilmore  (gnu at toad.com)
 	* krb5.h: Same as old krb5/krb5.h, as a start.  Gradually things
 	that don't need to be exported will be moved from krb5.h into
 	k5-int.h (and vice verse for e.g. function prototypes).
+
+Wed Feb 22 17:39:46 1995 Chris Provenzano (proven@mit.edu)
+
+	* krb5/func-proto.h (krb5_get_credentials(), krb5_get_cred_from_kdc(),
+		and krb5_sendauth()) replaced krb5_cred * IN/OUT arg with
+		a krb5_cred * IN and a krb5_cred ** OUT arg.
+	* krb5/func-proto.h (krb5_mk_req_extended()) Remove kdc_options flag arg
+		and krb5_ccache arg. They are no longer necessary.
+	
+Wed Feb 22 01:45:17 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/keytab.h: added windows INTERFACE keyword to prototypes
+
+Tue Feb 21 17:31:06 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/config.h: added HAVE_ERRNO for the windows section
+           changed windows manifest constant from __windows__ 
+           to _MSDOS so that DOS test programs will compile.
+
+Tue Feb 21 12:00:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/asn1.h: added windows INTERFACE keyword to all functions.
+
+Tue Feb 21 17:49:41 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* krb5/config.h: get krb5/autoconf.h.
+	* krb5/Makefile.in (KRB5_HEADERS): add config.h, remove rsa-md4.h and
+	crc-32.h which aren't here anymore.
+
+Tue Feb 21 0:0:32 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/func-proto.h: added windows INTERFACE keyword to all functions.
+        * krb5/krb5.h: moved two typedefs before inclusion of func-proto.h
+
+Mon Feb 20 16:54:51 1995 Keith Vetter (keithv@fusion.com)
+
+	* krb5/encryption.h, krb5/los-proto.h, krb5/rsa-md5.h: added windows 
+          INTERFACE keyword.
+        * krb5/Makefile.in: removed isode cruft ala Feb 10 changes but for windows
+
+Mon Feb 20 12:32:34 1995  John Gilmore  (gnu at toad.com)
+
+	* krb5/configure.in:  Flip again.  Use AC_CHECK_HEADERS, but default the
+	symbol-setting.  This is Modern Autoconf Style.
+
+	* krb5/config.h:  Create from stock/config.h and stock/config.win.
+	* krb5/Makefile.in (BUILT_HEADERS):  Remove config.h.
+	(CONF_REPLACE, CONFSRC, config.h rule):  Remove.  Config.h is
+	a static header file, ever since imake died.  Now it really is.
+	(clean):  Don't remove config.new any more.
+
+Thu Feb 16 20:12:23 1995  John Gilmore  (gnu at toad.com)
+
+	* krb5/configure.in:  Use AC_HAVE_HEADER rather than AC_HEADER_CHECK.
+	(Fixes resulting #define names to HAVE_XXX rather than HAS_XXX,
+	which is not only consistent but also matches what's in sysincl.h.)
+
+Mon Feb 6 19:42:7 1995 Keith Vetter (keithv@fusion.com)
+
+        * krb5/configure.in: added header checks for sys/param.h and sys/file.h.
+        * krb5/encryption.h: added typedef prototype for sum_func function 
+            with the windows api to make microsoft compiler happy.
+        * krb5/sysincl.h: conditionally include sys/file.h and sys/param.h since
+            windows doesn't have them.
+        * krb5/Makefile.in: 
+           - changed macros with ${...} to $(...) since nmake barfs on {}.
+           - added windows only make preamble 
+           - split the all target into unix and windows branches
+
+Fri Feb 10 14:54:26 1995  Theodore Y. Ts'o  <tytso@dcl>
+
+	* krb5/asn1.h: Removed ISODE cruft -- moved included .h files into
+		asn1.h, to simplify the krb5 header file structure.
+
+	* krb5/Makefile.in (ET_HEADERS): Remove isode cruft.
+
+Mon Feb 06 17:19:04 1995 Chris Provenzano  (proven@mit.edu)
+
+	* krb5/func-proto.h (krb5_get_in_tkt()) Changed key_proc args to be the
+		following (krb5_context, const krb5_keytype, krb5_data *,
+                krb5_const_pointer, krb5_keyblock **)
+
+	* krb5/func-proto.h (krb5_get_in_tkt_*()) Removed krb5_keytype, changed
+		krb5_enctype to krb5_enctype *, changed krb5_preauthtype to
+		krb5_preauthtype *.
+
+	* krb5/func-proto.h Added new routine krb5_get_in_tkt_with_keytab().
+
+Fri Feb  3 07:57:31 1995  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/configure.in: Use politically correct name of AC_CHECK_SIZEOF
+		instead of AC_SIZEOF_TYPE.
+
+        * krb5/configure.in:
+        * krb5/wordsize.h: Don't use BITS16, BITS32, etc. anymore.  Use
+                autoconf's SIZEOF_INT and SIZEOF_LONG definitions to make
+                things work.
+
+Mon Jan 30 15:43:19 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krb5/func-proto.h Added krb5_keytype arg to rb5_rdreq_key_proc.
+
+	* krb5/func-proto.h (krb5_send_tgs()) Changed krb5_enctype arg to
+		krb5_enctype *, a NULL terminated array of encryption types.
+
+	* krb5/func-proto.h Added prototypes for krb5_get_for_creds(),
+		krb5_set_default_in_tkt_etypes(), and
+		krb5_get_default_in_tkt_etypes().
+	
+	* krb5/krb5.h Added fields to krb5_context to support default etypes.
+
+Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krb5/func-proto.h (krb5_kt_read_service_key()) Added krb5_keytype arg.
+	* krb5/keytab.h (krb5_kt_get_entry()) Add krb5_keytype arg.
+
+Fri Jan 27 00:56:12 1995  Chris Provenzano  (proven@mit.edu)
+
+	* krb5/base-defs.h Typedef krb5_boolean, krb5_msgtype, krb5_kvno,
+                krb5_addrtype, krb5_keytyp, krb5_enctype, krb5_cksumtype,
+                and krb5_authdatatype as unsigned int.
+	* krb5/kdb_dbm.h krb5_dbm_db_set_lockmode(), krb5_dbm_db_set_nonblocking()
+		Fix prototypes to use krb5_boolean and not int.
+	* krb5/kdb.h krb5_db_set_lockmode(), krb5_db_set_nonblocking()
+		Fix prototypes to use krb5_boolean and not int.
 
 Wed Jan 25 19:19:38 1995  John Gilmore  (gnu at toad.com)
 
@@ -3286,7 +4252,222 @@ Wed Jan 25 19:19:38 1995  John Gilmore  (gnu at toad.com)
 	needed by source files that are part of the Kerberos V5 library
 	itself.  Currently the same whole kitchen sink, to bootstrap.
 
+	* krb5/crc-32.h:  Move to lib/crypto/crc32; only gets local use.
+	* krb5/rsa-md4.h:  Move to lib/crypto/md4; only gets local use.
+
+Wed Jan 25 20:01:36 1995  Mark Eichin  (eichin@cygnus.com)
+
+	* krb5/configure.in: rewrote remaining tests to use AC_TRY_COMPILE and
+	caching. Added cross-compile case for ANSI stdio test.
+
+Wed Jan 25 17:50:35 1995  Chris Provenzano  (proven@mit.edu)
+
+	* Removed krb5/narrow.h and krb5/widen.h
+
+Wed Jan 25 17:07:17 1995  Chris Provenzano  (proven@mit.edu)
+
+	* Removed all narrow types and references to wide.h and narrow.h
+	* krb5/base-defs.h Typedef krb5_boolean, krb5_msgtype, krb5_kvno,
+		krb5_addrtype, krb5_keytyp, krb5_enctype, krb5_cksumtype,
+		and krb5_authdatatype as int.
+	* krb5/kdb.h Made keytype in krb5_encrypted_keyblock explicitly short
+		for backwards compatibility. 
+
+Sun Jan 22 18:17:06 1995  John Gilmore  (gnu@cygnus.com)
+
+	* krb5/preauth.h, krb5/rsa-md5.h:  Protect against multiple inclusion.
+
+Fri Jan 13 15:23:47 1995  Chris Provenzano (proven@mit.edu)
+
+    * Added krb5_context to all krb5_routines
+
+	* Removed DECLARG and OLDDECLARG from krb5/base-defs.h (and any file that
+	  was using it.) The next thing to do is make all narrow types
+	  wide types and remove narrow.h and wide.h.
+
+Thu Jan 12 01:55:54 1995  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5/Makefile.in (install): constructed headers come from the build
+	tree, not the source tree.
+
+Fri Dec 23 22:29:43 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/krb5.h (krb5_cred): Add enc_part2 member which may point to the
+		unecrypted version, if it's available.
+
+Mon Dec 19 21:53:33 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/krb5.h (krb5_context): Add new typdef for krb5_context.
+
+	* krb5/libos.h (krb5_os_context): Add new typedef for krb5_os_context.
+
+	* krb5/func-proto.h (krb5_init_context, krb5_free_context): Add new
+	  declarations.
+
+	* krb5/los-proto.h (krb5_init_os_context, krb5_free_os_context): Add new
+	  declarations.
+
+Wed Nov 30 16:16:54 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/configure.in: Add support for --enable-athena and --with-krb4
+		(to set KRB5_KRB4_COMPAT).
+
+	* krb5/Makefile.in: Remove remnants of unifdef support for building
+		osconf.h and config.h, left over from the imake build system.
+
+Mon Nov 21 14:43:14 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/func-proto.h (krb5_encode_kdc_rep, krb5_encrypt_tkt_part):
+		Change to use new function prototypes.
+
+	* krb5/encryption.h (krb5_eblock_keytype, krb5_eblock_enctype): Define
+		new macros for finding the key type and encryption type of
+		an encrypion block.
+
+Fri Nov 18 17:53:38 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/kdb.h (KRB5_KDB_SUPPORT_DESMD5): Add new attribute which defines
+		whether or not a server supports DES/MD5.
+
+Fri Nov 18 01:28:47 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5/Makefile.in (install): elide dependency so $(srcdir) works; use
+	$(INSTALL_DATA).
+	(ET_HEADERS): new variable for the names of the headers that
+	lib/krb5/error_tables builds and installs here (so that they get
+	pushed out to the installed include directory.)
+	(BUILT_HEADERS): locally built headers, for all, install, and
+	clean.
+	(clean): delete built and et headers.
+
+Fri Nov 18 01:15:00 1994  Mark Eichin  <eichin@cygnus.com>
+
+	* krb5/configure.in: use KRB5_POSIX_LOCKS, AC_EGREP_HEADER. (from
+	epeisach).
+
 Fri Nov 18 00:16:31 1994  Mark Eichin  <eichin@cygnus.com>
 
 	* configure.in: use WITH_CCOPTS.
+
+Thu Nov 10 22:04:19 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/hostaddr.h (krb5_address): Add magic number field.
+
+Tue Nov  8 17:55:47 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/encryption.h (krb5_string_to_key, krb5_random_key): Change
+		internal calling signature to pass in the encryption
+		block, so that the encryption type in the keyblock
+		structure can be properly initialized.
+
+Thu Nov  3 16:38:44 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/encryption.h (krb5_keyblock): Added a field to hold an
+		encryption type in the keyblock field --- so routines have
+		a hint of which encryption type they should use.
+
+	* krb5/error_def.h: Add support for the kv5m error table.  (For magic
+		numbers.) 
+
+Mon Oct 31 14:43:07 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/configure.in: Move WITH_CCOPTS and WITH_KRB5ROOT to the
+		beginning of the file.  Otherwise the other tests won't
+		get the CCOPTS flags correct while doing the feature
+		tests. 
+
+Tue Oct 25 23:54:25 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/ext-proto.h (strdup): If the header files have strdup, don't try
+		to redefine it.
+
+Fri Oct 14 00:40:01 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/mit-des.h: Add declaration for krb5_des_md5_cst_entry.
+
+	* krb5/mit-des.h: Change name of the des_crc cryptosystem from
+		krb5_des_cst_entry to krb5_des_crc_cst_entry.
+
+Tue Oct  4 14:51:32 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/encryption.h: Cast various potential shorts to ints.  This is
+		not quite right either, but the whole encryption interface
+		needs to be fixed.
+
+	* krb5/keytab.h (krb5_kt_ops.resolv): Resolve's first argument is a const.
+
+	* krb5/encryption.h: Add magic number to encryption structures.
+
+Mon Oct  3 18:45:55 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/kdb.h: Add magic number to _krb5_db_entry.  (This among other
+	things will cause a backwards incompatible change to the database
+	format.)  The previous magic number changes also force a database
+	format change; we will eventually need to completely redo how we
+	encode the database format, so that it isn't structure layout
+	dependent!
+
+	* krb5/Makefile.in: Fix install to obey ${DESTDIR}, copy conf.h and
+		osconf.h from build tree.
+
+	* krb5/Makefile.in: Fix "make install" to use $(srcdir) for header files.
+
+Thu Sep 29 15:07:30 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/func_proto.h (krb5_realm_compare): Added prototype for functin
+		donated by OpenVision.  (Compares two realms).
+
+Wed Sep 21 18:10:55 1994  Theodore Y. Ts'o  (tytso@dcl)
+
+	* krb5/func_proto.h (krb5_check_transited_list): Added prototype for
+		function donated by Cybersafe.
+
+Wed Aug 17 16:33:22 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* krb5/krb5.h (krb5_enc_kdc_rep_part): Added msg_type field.  Needed
+	for the ASN.1 routines.
+
+Tue Aug 16 22:01:56 1994  Mark Eichin  (eichin@cygnus.com)
+
+	* krb5/configure.in: change test for USE_SYS_TIME_H to consistent
+	(autoconf style) check for HAVE_SYS_TIME_H with
+	TIME_WITH_SYS_TIME, and use them everywhere.
+	* krb5/stock/osauto.h: get rid of USE_TIME_H.
+	* krb5/stock/osconf.h: get rid of USE_TIME_H, rename USE_SYS_TIME_H.
+
+Tue Aug  9 02:17:40 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* krb5/preauth.h: fix preauth function names as well (timestamp ->
+	unixtime)
+
+Mon Aug  8 22:36:24 1994  Theodore Y. Ts'o  (tytso at tsx-11)
+
+	* krb5/proto.h: Change preauthentication names to match official names
+	which bcn and I agreed upon.
+
+Tue Aug  2 03:39:14 1994  Tom Yu  (tlyu@dragons-lair)
+
+	* krb5/acconfig.h: add HAVE_SETVBUF
+
+	* krb5/configure.in: changes to make things saner when checking for
+	ANSI_STDIO
+
+Thu Jul 14 03:31:06 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* krb5/Makefile.in: some cleanup to not echo cruft
+
+Tue Jun 28 19:09:21 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* krb5/error_def.h: folding in Harry's changes
+	* krb5/asn1.h: ditto
+	* krb5/configure.in: adding ISODE_DEFS, fixing ISODE_INCLUDE to dtrt
+
+Tue Jun 21 23:54:40 1994  Tom Yu  (tlyu at dragons-lair)
+
+	* pulling SEEK_SET, etc. out to avoid redef'ing in unistd.h
+
+Tue Jun 21 00:50:46 1994  Mark W. Eichin  (eichin at mit.edu)
+
+	* krb5/sysincl.h: SEEK_SET et. al. defined in terms of L_SET et. al. if
+	they don't already exist.
 
