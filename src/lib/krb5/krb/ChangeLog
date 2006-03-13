@@ -1,3 +1,7 @@
+2006-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (check-unix): Use RUN_SETUP for t_deltat.
+
 2006-01-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (t_deltat): Include support library.
