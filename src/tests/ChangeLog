@@ -1,3 +1,10 @@
+2006-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (krb5.conf): New target.  Use
+	config-files/krb5.conf, but add db_module_dir tag.
+	(kdb_check): Depend on it.
+	(RUN_SETUP): Use it for KRB5_CONFIG.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.
