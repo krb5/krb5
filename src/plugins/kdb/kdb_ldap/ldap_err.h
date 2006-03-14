@@ -1,10 +1,3 @@
-#define LDAP_ERR_BASE 0x?
-
-/* The smallest negative error code is -17. Using -32 ... just to be safe */
-#define MAX_NEG 32
-
-#define LDAP_TO_KDB_ERR(x) (LDAP_ERR_BASE + MAX_NEG + x)
-
 #define OP_INIT 1
 #define OP_BIND 2
 #define OP_UNBIND 3
