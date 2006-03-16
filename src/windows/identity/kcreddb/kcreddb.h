@@ -99,6 +99,9 @@ Functions, macros etc. for manipulating identities.
            name */
 #define KCDB_IDENT_MAXCB_NAME (sizeof(wchar_t) * KCDB_IDENT_MAXCCH_NAME)
 
+/*! \brief Valid characters in an identity name */
+#define KCDB_IDENT_VALID_CHARS L"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._@-/"
+
 /*!
 \name Flags for identities */
 /*@{*/
@@ -1104,7 +1107,7 @@ kcdb_credset_flush(khm_handle credset);
         set.  If set to NULL, matches all identities.
 
     \param[in] type The credential type to match in the source credential set.
-        If set to KCDB_TYPE_INVALID, matches all types.
+        If set to KCDB_CREDTYPE_INVALID, matches all types.
 
     \note This function does not check for duplicate credentials.
 
@@ -1926,8 +1929,9 @@ kcdb_creds_is_equal(khm_handle cred1,
 
 /********************************************************************/
 
-/*! \defgroup kcdb_type Credential attribute types */
-/*@{*/
+/*! \defgroup kcdb_type Credential attribute types
+
+@{*/
 
 /*! \brief Convert a field to a string
 
@@ -2217,13 +2221,24 @@ kcdb_type_get_id(wchar_t *name, khm_int32 * id);
         info parameter is NULL, the function returns KHM_ERROR_SUCCESS
         if \a id is a valid type id, and returns KHM_ERROR_NOT_FOUND
         otherwise.
+
+    \see kcdb_type_release_info()
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_type_get_info(khm_int32 id, kcdb_type ** info);
 
+/*! \brief Release a reference to a type info structure
+
+    Releases the reference to the type information obtained with a
+    prior call to kcdb_type_get_info().
+ */
 KHMEXP khm_int32 KHMAPI 
 kcdb_type_release_info(kcdb_type * info);
 
+/*! \brief Get the name of a type
+
+    Retrieves the non-localized name of the specified type.
+ */
 KHMEXP khm_int32 KHMAPI 
 kcdb_type_get_name(khm_int32 id, 
                    wchar_t * buffer, 
@@ -2659,6 +2674,16 @@ kcdb_attrib_get_ids(khm_int32 and_flags,
     required.
  */
 #define KCDB_ATTR_FLAG_ALTVIEW  0x00000200
+
+/*! \brief Transient attribute
+
+    A transient attribute is one whose absence is meaningful.  When
+    updating one record using another, if a transient attribute is
+    absent in the source but present in the destination, then the
+    attribute is removed from the destination.
+*/
+#define KCDB_ATTR_FLAG_TRANSIENT 0x00000400
+
 /*@}*/
 
 /*! \defgroup kcdb_credattr_idnames Standard attribute IDs and names */
@@ -2803,7 +2828,7 @@ kcdb_attrib_get_ids(khm_int32 and_flags,
 #define KCDB_ATTRNAME_FLAGS         L"Flags"
 
 #define KCDB_ATTRNAME_PARENT_NAME   L"Parent"
-#define KCDB_ATTRNAME_ISSUE         L"Issed"
+#define KCDB_ATTRNAME_ISSUE         L"Issued"
 #define KCDB_ATTRNAME_EXPIRE        L"Expires"
 #define KCDB_ATTRNAME_RENEW_EXPIRE  L"RenewExpires"
 #define KCDB_ATTRNAME_TIMELEFT      L"TimeLeft"

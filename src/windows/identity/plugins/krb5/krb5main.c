@@ -94,10 +94,12 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
     ZeroMemory(&pi, sizeof(pi));
     pi.name = KRB5_PLUGIN_NAME;
     pi.type = KHM_PITYPE_CRED;
-    pi.icon = NULL; /*TODO: Assign icon */
+    pi.icon = LoadImage(hResModule, MAKEINTRESOURCE(IDI_PLUGIN),
+                        IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
     pi.flags = 0;
     pi.msg_proc = k5_msg_callback;
     pi.description = buf;
+    pi.dependencies = NULL;
     LoadString(hResModule, IDS_PLUGIN_DESC,
                buf, ARRAYLENGTH(buf));
     kmm_provide_plugin(h_module, &pi);
@@ -105,7 +107,8 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
     ZeroMemory(&pi, sizeof(pi));
     pi.name = KRB5_IDENTPRO_NAME;
     pi.type = KHM_PITYPE_IDENT;
-    pi.icon = NULL;             /* ignored */
+    pi.icon = LoadImage(hResModule, MAKEINTRESOURCE(IDI_PLUGIN),
+                        IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR | LR_DEFAULTSIZE);
     pi.flags = 0;
     pi.msg_proc = k5_ident_callback;
     pi.description = buf;
@@ -157,7 +160,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         type.cb_min = 0;
         type.cb_max = 0;
         type.isValid = tdata->isValid;
-        type.comp = tdata->comp;
+        type.comp = addr_list_comp;
         type.dup = tdata->dup;
         type.toString = addr_list_toString;
 
@@ -206,7 +209,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attrib.name = ATTRNAME_KEY_ENCTYPE;
         attrib.id = KCDB_ATTR_INVALID;
         attrib.type = type_id_enctype;
-        attrib.flags = 0;
+        attrib.flags = KCDB_ATTR_FLAG_TRANSIENT;
         LoadString(hResModule, IDS_KEY_ENCTYPE_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         LoadString(hResModule, IDS_KEY_ENCTYPE_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
@@ -232,7 +235,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attrib.name = ATTRNAME_TKT_ENCTYPE;
         attrib.id = KCDB_ATTR_INVALID;
         attrib.type = type_id_enctype;
-        attrib.flags = 0;
+        attrib.flags = KCDB_ATTR_FLAG_TRANSIENT;
         LoadString(hResModule, IDS_TKT_ENCTYPE_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         LoadString(hResModule, IDS_TKT_ENCTYPE_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
@@ -258,7 +261,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attrib.name = ATTRNAME_ADDR_LIST;
         attrib.id = KCDB_ATTR_INVALID;
         attrib.type = type_id_addr_list;
-        attrib.flags = 0;
+        attrib.flags = KCDB_ATTR_FLAG_TRANSIENT;
         LoadString(hResModule, IDS_ADDR_LIST_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         LoadString(hResModule, IDS_ADDR_LIST_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
@@ -284,7 +287,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attrib.name = ATTRNAME_KRB5_FLAGS;
         attrib.id = KCDB_ATTR_INVALID;
         attrib.type = type_id_krb5_flags;
-        attrib.flags = 0;
+        attrib.flags = KCDB_ATTR_FLAG_TRANSIENT;
         LoadString(hResModule, IDS_KRB5_FLAGS_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = NULL;
@@ -309,7 +312,9 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attrib.name = ATTRNAME_KRB5_CCNAME;
         attrib.id = KCDB_ATTR_INVALID;
         attrib.type = KCDB_TYPE_STRING;
-        attrib.flags = KCDB_ATTR_FLAG_PROPERTY;
+        attrib.flags =
+	  KCDB_ATTR_FLAG_PROPERTY |
+	  KCDB_ATTR_FLAG_TRANSIENT;
         LoadString(hResModule, IDS_KRB5_CCNAME_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         LoadString(hResModule, IDS_KRB5_CCNAME_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;

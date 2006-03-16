@@ -46,14 +46,24 @@ OBJFILES= \
 	$(OBJ)\krb5configid.obj		\
 	$(OBJ)\krb5configids.obj
 
-LIBFILES= \
-	$(LIBDIR)\nidmgr32.lib		\
-	$(KFWLIBDIR)\loadfuncs.lib
+
 
 SDKLIBFILES=	\
 	netapi32.lib	\
 	shlwapi.lib	\
 	comctl32.lib
+
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+SCLIB=bufferoverflowu.lib
+LIBFILES= \
+	$(LIBDIR)\nidmgr64.lib		\
+	$(KFWLIBDIR)\loadfuncs.lib
+!else
+SCLIB=
+LIBFILES= \
+	$(LIBDIR)\nidmgr32.lib		\
+	$(KFWLIBDIR)\loadfuncs.lib
+!endif
 
 MSGRESFILE=$(OBJ)\krb5_msgs.res
 
@@ -62,15 +72,15 @@ VERRESFILE=$(OBJ)\version.res
 $(OBJ)\krb5config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
-$(DLLFILE): $(MSGRESFILE) $(VERRESFILE) $(OBJFILES)
-	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES)
+$(DLLFILE):  $(OBJFILES) $(VERRESFILE) 
+	$(DLLGUILINK) $(MSGRESFILE) $(LIBFILES) $(SDKLIBFILES) $(SCLIB)
 
 $(MSGRESFILE): $(OBJ)\krb5_msgs.rc
 
 $(OBJ)\krb5_msgs.rc: lang\krb5_msgs.mc
 	$(MC2RC)
 
-all: mkdirs $(DLLFILE) lang
+all: mkdirs $(MSGRESFILE) $(DLLFILE) lang
 
 lang::
 
@@ -84,12 +94,14 @@ LANGDLL=$(BINDIR)\krb5cred_$(LANG).dll
 
 lang:: $(LANGDLL)
 
-$(LANGDLL): $(OBJ)\langres_$(LANG).res
+$(LANGDLL): $(OBJ)\langres_$(LANG).res $(OBJ)\langres_ver_$(LANG).res
 	$(DLLRESLINK)
 
 $(OBJ)\langres_$(LANG).res: lang\$(LANG)\langres.rc
 	$(RC2RES)
 
+$(OBJ)\langres_ver_$(LANG).res: version.rc
+	$(RC) $(RFLAGS) $(rincflags) /d LANGVER /d LANG_$(LANG) /fo $@ $** 
 # End language block
 
 clean::

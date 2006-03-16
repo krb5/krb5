@@ -25,6 +25,9 @@
 /* $Id$ */
 
 #include<kmminternal.h>
+#ifdef DEBUG
+#include<assert.h>
+#endif
 
 static LONG pending_modules = 0;
 static LONG pending_plugins = 0;
@@ -88,11 +91,10 @@ kmm_load_pending(void) {
 
 /*! \internal
   \brief Message handler for the registrar thread. */
-khm_boolean KHMAPI kmm_reg_cb(
-    khm_int32 msg_type, 
-    khm_int32 msg_sub_type, 
-    khm_ui_4 uparam,
-    void *vparam)
+khm_boolean KHMAPI kmmint_reg_cb(khm_int32 msg_type, 
+                                 khm_int32 msg_sub_type, 
+                                 khm_ui_4 uparam,
+                                 void *vparam)
 {
     /* we should only be getting <KMSG_KMM,KMSG_KMM_I_REG> anyway */
     if(msg_type != KMSG_KMM || msg_sub_type != KMSG_KMM_I_REG)
@@ -100,22 +102,22 @@ khm_boolean KHMAPI kmm_reg_cb(
 
     switch(uparam) {
         case KMM_REG_INIT_MODULE:
-            kmm_init_module((kmm_module_i *) vparam);
+            kmmint_init_module((kmm_module_i *) vparam);
             kmm_release_module(kmm_handle_from_module((kmm_module_i *) vparam));
             break;
 
         case KMM_REG_EXIT_MODULE:
-            kmm_exit_module((kmm_module_i *) vparam);
+            kmmint_exit_module((kmm_module_i *) vparam);
             kmm_release_module(kmm_handle_from_module((kmm_module_i *) vparam));
             break;
 
         case KMM_REG_INIT_PLUGIN:
-            kmm_init_plugin((kmm_plugin_i *) vparam);
+            kmmint_init_plugin((kmm_plugin_i *) vparam);
             kmm_release_plugin(kmm_handle_from_plugin((kmm_plugin_i *) vparam));
             break;
 
         case KMM_REG_EXIT_PLUGIN:
-            kmm_exit_plugin((kmm_plugin_i *) vparam);
+            kmmint_exit_plugin((kmm_plugin_i *) vparam);
             kmm_release_plugin(kmm_handle_from_plugin((kmm_plugin_i *) vparam));
             break;
     }
@@ -126,15 +128,13 @@ khm_boolean KHMAPI kmm_reg_cb(
   \brief The registrar thread.
 
   The only thing this function does is to dispatch messages to the
-  callback routine ( kmm_reg_cb() ) */
-DWORD WINAPI kmm_registrar(
-  LPVOID lpParameter
-)
+  callback routine ( kmmint_reg_cb() ) */
+DWORD WINAPI kmmint_registrar(LPVOID lpParameter)
 {
     tid_registrar = GetCurrentThreadId();
 
-    kmq_subscribe(KMSG_KMM, kmm_reg_cb);
-    kmq_subscribe(KMSG_SYSTEM, kmm_reg_cb);
+    kmq_subscribe(KMSG_KMM, kmmint_reg_cb);
+    kmq_subscribe(KMSG_SYSTEM, kmmint_reg_cb);
 
     SetEvent(evt_startup);
 
@@ -151,10 +151,14 @@ DWORD WINAPI kmm_registrar(
   Each plugin gets its own plugin thread which is used to dispatch
   messages to the plugin.  This acts as the thread function for the
   plugin thread.*/
-DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
+DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
 {
     DWORD rv = 0;
     kmm_plugin_i * p = (kmm_plugin_i *) lpParameter;
+
+    _begin_task(0);
+    _report_mr1(KHERR_NONE, MSG_PB_START, _cstr(p->p.name));
+    _describe();
 
     TlsSetValue(tls_kmm, (LPVOID) p);
 
@@ -163,16 +167,46 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
     p->tid_thread = GetCurrentThreadId();
 
     if (IsBadCodePtr(p->p.msg_proc)) {
+        _report_mr0(KHERR_WARNING, MSG_PB_INVALID_CODE_PTR);
         rv = KHM_ERROR_INVALID_PARAM;
     } else {
-        rv = (p->p.msg_proc(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
-                            0, (void *) &(p->p)));
+        rv = (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
+                              0, (void *) &(p->p));
+        _report_mr1(KHERR_INFO, MSG_PB_INIT_RV, _int32(rv));
     }
 
     /* if it fails to initialize, we exit the plugin */
     if(KHM_FAILED(rv)) {
+
+        kherr_report(KHERR_ERROR,
+                     (wchar_t *) MSG_PB_INIT_FAIL_S,
+                     (wchar_t *) KHERR_FACILITY,
+                     NULL,
+                     (wchar_t *) MSG_PB_INIT_FAIL,
+                     (wchar_t *) MSG_PB_INIT_FAIL_G,
+                     KHERR_FACILITY_ID,
+                     KHERR_SUGGEST_NONE,
+                     _cstr(p->p.name),
+                     _cstr(p->p.description),
+                     _cstr(p->module->path),
+                     _cstr(p->module->support),
+                     KHERR_RF_MSG_SHORT_DESC |
+                     KHERR_RF_MSG_LONG_DESC |
+                     KHERR_RF_MSG_SUGGEST
+#ifdef _WIN32
+                     ,KHERR_HMODULE
+#endif
+                     );
+        _resolve();
+
+        /* exit the plugin first.  Otherwise it may not uninitialize correctly */
+        (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_EXIT, 0, (void *) &(p->p));
+
         kmmint_remove_from_plugin_queue(p);
         rv = 1;
+        _end_task();
+
+        p->state = KMM_PLUGIN_STATE_FAIL_INIT;
         goto _exit;
     }
 
@@ -195,6 +229,10 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
     }
 
     p->state = KMM_PLUGIN_STATE_RUNNING;
+
+    _report_mr0(KHERR_INFO, MSG_PB_INIT_DONE);
+
+    _end_task();
 
     /* if there were any plugins that were waiting for this one to
        start, we should start them too */
@@ -237,8 +275,9 @@ DWORD WINAPI kmm_plugin_broker(LPVOID lpParameter)
 
     p->p.msg_proc(KMSG_SYSTEM, KMSG_SYSTEM_EXIT, 0, (void *) &(p->p));
 
-_exit:
-    p->state = KMM_PLUGIN_STATE_EXITED;
+ _exit:
+    if (p->state >= 0)
+        p->state = KMM_PLUGIN_STATE_EXITED;
 
     /* the following call will automatically release the plugin */
     kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
@@ -255,17 +294,17 @@ _exit:
 /*! \internal
   \brief Initialize a plugin
 
-  \note If kmm_init_plugin() is called on a plugin, then kmm_exit_plugin()
+  \note If kmmint_init_plugin() is called on a plugin, then kmmint_exit_plugin()
       \b must be called for the plugin.
 
   \note Should only be called from the context of the registrar thread */
-void kmm_init_plugin(kmm_plugin_i * p) {
+void kmmint_init_plugin(kmm_plugin_i * p) {
     DWORD dummy;
     khm_handle csp_plugin   = NULL;
     khm_handle csp_plugins  = NULL;
     khm_int32 t;
 
-    /* the following will be undone in kmm_exit_plugin() */
+    /* the following will be undone in kmmint_exit_plugin() */
     kmm_hold_plugin(kmm_handle_from_plugin(p));
 
     EnterCriticalSection(&cs_kmm);
@@ -290,6 +329,10 @@ void kmm_init_plugin(kmm_plugin_i * p) {
     }
 
     p->state = KMM_PLUGIN_STATE_PREINIT;
+
+    kmmint_delist_plugin(p);
+    kmmint_list_plugin(p);
+
     LeaveCriticalSection(&cs_kmm);
 
     if(KHM_FAILED(kmm_get_plugins_config(0, &csp_plugins))) {
@@ -300,7 +343,7 @@ void kmm_init_plugin(kmm_plugin_i * p) {
     }
 
     if(KHM_FAILED(kmm_get_plugin_config(p->p.name, 0, &csp_plugin)) ||
-        KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t))) {
+       KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t))) {
         if(KHM_FAILED(kmm_register_plugin(&(p->p), 0))) {
             _report_mr0(KHERR_ERROR, MSG_IP_NOT_REGISTERED);
 
@@ -321,11 +364,11 @@ void kmm_init_plugin(kmm_plugin_i * p) {
             p->state = KMM_PLUGIN_STATE_FAIL_NOT_REGISTERED;
             goto _exit;
         }
+
     }
 
     if(t & KMM_PLUGIN_FLAG_DISABLED) {
-        _report_mr0(KHERR_ERROR, MSG_IP_DISABLED);
-
+        p->flags |= KMM_PLUGIN_FLAG_DISABLED;
         p->state = KMM_PLUGIN_STATE_FAIL_DISABLED;
         goto _exit;
     }
@@ -400,12 +443,9 @@ void kmm_init_plugin(kmm_plugin_i * p) {
         PFREE(deps);
 
     } while(FALSE);
-    LeaveCriticalSection(&cs_kmm);
 
-    EnterCriticalSection(&cs_kmm);
     p->module->plugin_count++;
-    kmmint_delist_plugin(p);
-    kmmint_list_plugin(p);
+
     LeaveCriticalSection(&cs_kmm);
 
     if(p->state == KMM_PLUGIN_STATE_HOLD) {
@@ -418,7 +458,7 @@ void kmm_init_plugin(kmm_plugin_i * p) {
 
     p->ht_thread = CreateThread(NULL,
                                 0,
-                                kmm_plugin_broker,
+                                kmmint_plugin_broker,
                                 (LPVOID) p,
                                 CREATE_SUSPENDED,
                                 &dummy);
@@ -466,18 +506,20 @@ _exit:
   linked list and hashtable, it also frees up p.
    
   \note Should only be called from the context of the registrar thread. */
-void kmm_exit_plugin(kmm_plugin_i * p) {
+void kmmint_exit_plugin(kmm_plugin_i * p) {
     int np;
+    khm_boolean release_plugin = TRUE;
 
     if(p->state == KMM_PLUGIN_STATE_RUNNING ||
-        p->state == KMM_PLUGIN_STATE_INIT)
-    {
+       p->state == KMM_PLUGIN_STATE_INIT) {
+
         kmq_post_thread_quit_message(p->tid_thread, 0, NULL);
         /* when we post the quit message to the plugin thread, the plugin
            broker terminates the plugin and posts a EXIT_PLUGIN message,
            which calls this function again.  We just exit here because
            the EXIT_PLUGIN message will end up calling us again momentarily */
         return;
+
     }
 
     if(p->ht_thread) {
@@ -488,16 +530,25 @@ void kmm_exit_plugin(kmm_plugin_i * p) {
 
     EnterCriticalSection(&cs_kmm);
 
-    /* undo reference count done in kmm_init_plugin() */
+    /* undo reference count done in kmmint_init_plugin() */
     if(p->state == KMM_PLUGIN_STATE_EXITED ||
-        p->state == KMM_PLUGIN_STATE_HOLD) 
-    {
+       p->state == KMM_PLUGIN_STATE_HOLD) {
+
         np = --(p->module->plugin_count);
+
     } else {
         /* the plugin was never active.  We can't base a module unload
            decision on np */
         np = TRUE;
     }
+
+    /* The plugin is in an error state.  We need to keep the plugin
+       record in tact so that the failure information is kept
+       around. */
+    if (p->state < KMM_PLUGIN_STATE_NONE) {
+        release_plugin = FALSE;
+    }
+
     LeaveCriticalSection(&cs_kmm);
 
     if(!np) {
@@ -507,8 +558,9 @@ void kmm_exit_plugin(kmm_plugin_i * p) {
         kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, KMM_REG_EXIT_MODULE, (void *) p->module);
     }
 
-    /* release the hold obtained in kmm_init_plugin() */
-    kmm_release_plugin(kmm_handle_from_plugin(p));
+    /* release the hold obtained in kmmint_init_plugin() */
+    if (release_plugin)
+        kmm_release_plugin(kmm_handle_from_plugin(p));
 }
 
 /*! \internal
@@ -517,7 +569,7 @@ void kmm_exit_plugin(kmm_plugin_i * p) {
   \a m is not in the linked list yet.
 
   \note Should only be called from the context of the registrar thread. */
-void kmm_init_module(kmm_module_i * m) {
+void kmmint_init_module(kmm_module_i * m) {
     HMODULE hm;
     init_module_t p_init_module;
     kmm_plugin_i * pi;
@@ -666,6 +718,10 @@ void kmm_init_module(kmm_module_i * m) {
 
     /* from this point on, we need to discard the module through
        exit_module */
+    ResetEvent(evt_exit);
+
+    kmm_active_modules++;
+
     release_module = FALSE;
     exit_module = TRUE;
 
@@ -711,7 +767,7 @@ void kmm_init_module(kmm_module_i * m) {
         LPOP(&(m->plugins), &pi);
         if(pi) {
             pi->flags &= ~KMM_PLUGIN_FLAG_IN_MODLIST;
-            kmm_init_plugin(pi);
+            kmmint_init_plugin(pi);
 
             /* release the hold obtained in kmm_provide_plugin() */
             kmm_release_plugin(kmm_handle_from_plugin(pi));
@@ -719,9 +775,14 @@ void kmm_init_module(kmm_module_i * m) {
     } while(pi);
 
     if(!m->plugin_count) {
+        /* We don't want to report this case.  This usually means that
+           the plugins that were provided by the module were
+           disabled. */
+#ifdef REPORT_EMPTY_MODULES
         _report_mr0(KHERR_ERROR, MSG_IM_NO_PLUGINS);
 
         m->state = KMM_MODULE_STATE_FAIL_NO_PLUGINS;
+#endif
         record_failure = FALSE;
         goto _exit;
     }
@@ -730,8 +791,6 @@ void kmm_init_module(kmm_module_i * m) {
 
     exit_module = FALSE;
     record_failure = FALSE;
-
-    ResetEvent(evt_exit);
 
  _exit:
     if(csp_mod) {
@@ -764,7 +823,7 @@ void kmm_init_module(kmm_module_i * m) {
     /* if something went wrong after init_module was called on the
        module code, we need to call exit_module */
     if(exit_module)
-        kmm_exit_module(m);
+        kmmint_exit_module(m);
 
     if(release_module)
         kmm_release_module(kmm_handle_from_module(m));
@@ -822,21 +881,21 @@ void kmm_init_module(kmm_module_i * m) {
 
   \note Should only be called from the context of the registrar
   thread */
-void kmm_exit_module(kmm_module_i * m) {
+void kmmint_exit_module(kmm_module_i * m) {
     kmm_plugin_i * p;
 
-    /*  exiting a module happens in two stages.  
-    
+    /*  Exiting a module happens in two stages.  
+
         If the module state is running (there are active plugins) then
         those plugins must be exited.  This has to be done from the
         plugin threads.  The signal for the plugins to exit must be
         issued from the registrar.  Therefore, we post messages to the
         registrar for each plugin we want to remove and exit
-        kmm_exit_module().
+        kmmint_exit_module().
 
         When the last plugin is exited, the plugin management code
         automatically signalls the registrar to remove the module.
-        kmm_exit_module() gets called again.  This is the second
+        kmmint_exit_module() gets called again.  This is the second
         stage, where we call exit_module() for the module and start
         unloading everything.
     */
@@ -847,7 +906,7 @@ void kmm_exit_module(kmm_module_i * m) {
     LPOP(&(m->plugins), &p);
     while(p) {
         p->flags &= ~KMM_PLUGIN_FLAG_IN_MODLIST;
-        kmm_exit_plugin(p);
+        kmmint_exit_plugin(p);
 
         /* release hold from kmm_provide_plugin() */
         kmm_release_plugin(kmm_handle_from_plugin(p));
@@ -883,8 +942,7 @@ void kmm_exit_module(kmm_module_i * m) {
         }
     }
 
-    if(m->flags & KMM_MODULE_FLAG_INITP)
-    {
+    if(m->flags & KMM_MODULE_FLAG_INITP) {
         exit_module_t p_exit_module;
 
         if(m->state > 0)
@@ -895,15 +953,15 @@ void kmm_exit_module(kmm_module_i * m) {
                                            EXP_EXIT_MODULE);
         if(p_exit_module) {
             LeaveCriticalSection(&cs_kmm);
-            p_exit_module(kmm_handle_from_module(m));
+            (*p_exit_module)(kmm_handle_from_module(m));
             EnterCriticalSection(&cs_kmm);
         }
     }
 
-    LeaveCriticalSection(&cs_kmm);
-
     if(m->state > 0)
         m->state = KMM_MODULE_STATE_EXITED;
+
+    LeaveCriticalSection(&cs_kmm);
 
     if(m->h_module) {
         FreeLibrary(m->h_module);
@@ -917,6 +975,19 @@ void kmm_exit_module(kmm_module_i * m) {
     m->h_resource = NULL;
     m->flags = 0;
 
-    /* release the hold obtained in kmm_init_module() */
+    /* release the hold obtained in kmmint_init_module() */
     kmm_release_module(kmm_handle_from_module(m));
+
+    /* Last but not least, now see if there are any modules left that
+       are running. If not, we can safely signal an exit. */
+
+#ifdef DEBUG
+    assert(kmm_active_modules > 0);
+#endif
+
+    kmm_active_modules--;
+
+    if (kmm_active_modules == 0) {
+        SetEvent(evt_exit);
+    }
 }

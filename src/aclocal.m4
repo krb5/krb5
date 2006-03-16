@@ -160,8 +160,9 @@ fi
 
 dnl find dlopen
 AC_DEFUN([KRB5_AC_FIND_DLOPEN],[
-AC_CHECK_LIB(dl, dlopen, DL_LIB=-ldl)
-AC_CHECK_LIB(ld, main, DL_LIB=-lld)
+AC_CHECK_LIB(dl, dlopen,[DL_LIB=-ldl
+AC_DEFINE(USE_DLOPEN,1,[Define if dlopen should be used])])
+dnl AC_CHECK_LIB(ld, main, DL_LIB=-lld)
 AC_SUBST(DL_LIB)
 ])
 

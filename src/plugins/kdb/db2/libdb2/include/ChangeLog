@@ -1,3 +1,7 @@
+2006-03-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* db.h: Check UINT_MAX, not SIZEOF_INT.
+
 2004-05-23  Ken Raeburn  <raeburn@mit.edu>
 
 	* db-int.h: Include sys/param.h if available.

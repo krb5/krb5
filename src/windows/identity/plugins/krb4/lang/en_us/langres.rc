@@ -61,14 +61,14 @@ BEGIN
                     SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
     CONTROL         "Obtain Kerberos 4 tickets",IDC_NCK4_OBTAIN,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,26,97,10
+    GROUPBOX        "Obtain Kerberos 4 tickets using",IDC_STATIC,7,43,286,72,
+                    WS_GROUP
     CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,23,58,119,10
     CONTROL         "Kerberos 5 to 4 translation",IDC_NCK4_K524,"Button",
-                    BS_AUTORADIOBUTTON | WS_TABSTOP,23,76,101,10
-    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON | 
-                    WS_TABSTOP,23,94,47,10
-    GROUPBOX        "Obtain Kerberos 4 tickets using",IDC_STATIC,7,43,286,72,
-                    WS_GROUP
+                    BS_AUTORADIOBUTTON,23,76,101,10
+    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,23,
+                    94,47,10
 END
 
 IDD_CFG_KRB4 DIALOGEX 0, 0, 255, 182
@@ -153,6 +153,15 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_PLUGIN              ICON                    "..\\..\\images\\plugin.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

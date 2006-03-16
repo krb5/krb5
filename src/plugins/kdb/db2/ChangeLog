@@ -2,6 +2,12 @@
 
 	* db2_exp.c (hack_init): Update prototype to match krb5_db2_lib_init
 
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (MODULE_INSTALL_DIR): New variable.
+	(DYNOBJ_LOADER_PROG, DYNOBJ_EXPLIBS_WITH_LOADER,
+	DYNOBJ_EXPDEPS_WITH_LOADER): Deleted.
+
 2006-01-25  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFINES): New variable; define macro PLUGIN.

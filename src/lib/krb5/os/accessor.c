@@ -38,7 +38,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
     internals_temp.krb5_hmac = krb5_hmac;
     internals_temp.md5_hash_provider = &krb5int_hash_md5;
     internals_temp.arcfour_enc_provider = &krb5int_enc_arcfour;
-    internals_temp.locate_server = &krb5int_locate_server;
     internals_temp.sendto_udp = &krb5int_sendto;
     internals_temp.add_host_to_list = krb5int_add_host_to_list;
 #ifdef KRB5_DNS_LOOKUP

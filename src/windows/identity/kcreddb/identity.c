@@ -1146,6 +1146,13 @@ kcdb_identpro_validate_name(const wchar_t * name)
        before calling the identity provider */
     if(FAILED(StringCchLength(name, KCDB_IDENT_MAXCCH_NAME, &cch)))
         return KHM_ERROR_TOO_LONG;
+
+    /* We can't really make an assumption about the valid characters
+       in an identity.  So we let the identity provider decide */
+#ifdef VALIDATE_IDENTIY_CHARACTERS
+    if(wcsspn(name, KCDB_IDENT_VALID_CHARS) != cch)
+        return KHM_ERROR_INVALID_NAME;
+#endif
     
     EnterCriticalSection(&cs_ident);
     if(kcdb_ident_sub != NULL) {
@@ -1204,8 +1211,7 @@ kcdb_identpro_validate_identity(khm_handle identity)
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_identpro_canon_name(
-                         const wchar_t * name_in, 
+kcdb_identpro_canon_name(const wchar_t * name_in, 
                          wchar_t * name_out, 
                          khm_size * cb_name_out)
 {
@@ -1237,8 +1243,7 @@ kcdb_identpro_canon_name(
         namex.cb_name_dest = sizeof(name_tmp);
         namex.result = KHM_ERROR_NOT_IMPLEMENTED;
 
-        rv = kmq_send_sub_msg(
-                              sub,
+        rv = kmq_send_sub_msg(sub,
                               KMSG_IDENT,
                               KMSG_IDENT_CANON_NAME,
                               0,
@@ -1273,8 +1278,7 @@ kcdb_identpro_canon_name(
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_identpro_compare_name(
-                           const wchar_t * name1,
+kcdb_identpro_compare_name(const wchar_t * name1,
                            const wchar_t * name2)
 {
     khm_handle sub;

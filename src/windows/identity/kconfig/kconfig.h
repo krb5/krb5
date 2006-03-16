@@ -42,7 +42,7 @@
 
     \see kconf_load_schema()
 */
-typedef struct kconf_schema_t {
+typedef struct tag_kconf_schema {
     wchar_t *   name;       /*!< name of the object being described.
                                 Optional for KC_ENDSPACE type object,
                                 but required for everything else.
@@ -63,7 +63,7 @@ typedef struct kconf_schema_t {
                                 not support defining a default value
                                 here. */
     wchar_t *   description;/*!< a friendly description of the value
-                                or configuration space */
+                                or configuration space. */
 } kconf_schema;
 
 /*! \name Configuration data types
@@ -153,12 +153,12 @@ typedef struct kconf_schema_t {
     By default, the configuration space name,
 
     \code
-    L"foo/bar"
+    L"foo\\bar"
     \endcode
 
     is taken to mean the configuration space \a bar which is a
     subspace of \a foo.  If ::KCONF_FLAG_NOPARSENAME is set, then this
-    is taken to mean configuration space \a foo/bar.
+    is taken to mean configuration space \a foo\\bar.
  */
 #define KCONF_FLAG_NOPARSENAME   0x00000040
 
@@ -229,7 +229,7 @@ typedef struct kconf_schema_t {
 
 */
 KHMEXP khm_int32 KHMAPI 
-khc_open_space(khm_handle parent, wchar_t * cspace, khm_int32 flags, 
+khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags, 
                khm_handle * result);
 
 /*! \brief Set the shadow space for a configuration handle

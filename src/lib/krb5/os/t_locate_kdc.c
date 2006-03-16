@@ -5,6 +5,8 @@
 #include <com_err.h>
 
 #define TEST
+#include "dnsglue.c"
+#include "dnssrv.c"
 #include "locate_kdc.c"
 
 enum {
@@ -43,14 +45,14 @@ void print_addrs (void)
 {
     int i;
 
-    struct addrinfo **addrs = al.addrs;
     int naddrs = al.naddrs;
 
     printf ("%d addresses:\n", naddrs);
     for (i = 0; i < naddrs; i++) {
 	int err;
+	struct addrinfo *ai = al.addrs[i].ai;
 	char hostbuf[NI_MAXHOST], srvbuf[NI_MAXSERV];
-	err = getnameinfo (addrs[i]->ai_addr, addrs[i]->ai_addrlen,
+	err = getnameinfo (ai->ai_addr, ai->ai_addrlen,
 			   hostbuf, sizeof (hostbuf),
 			   srvbuf, sizeof (srvbuf),
 			   NI_NUMERICHOST | NI_NUMERICSERV);
@@ -59,7 +61,7 @@ void print_addrs (void)
 		    i, err, gai_strerror (err));
 	else
 	    printf ("%2d: address %s\t%s\tport %s\n", i, hostbuf,
-		    stypename (addrs[i]->ai_socktype), srvbuf);
+		    stypename (ai->ai_socktype), srvbuf);
     }
 }
 

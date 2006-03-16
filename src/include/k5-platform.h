@@ -577,7 +577,6 @@ load_64_be (const unsigned char *p)
     return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
 #endif
 }
-#if 0 /* don't need little-endian so far */
 static inline void
 store_16_le (unsigned int val, unsigned char *p)
 {
@@ -655,7 +654,6 @@ load_64_le (const unsigned char *p)
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
 #endif
 }
-#endif
 
 /* Make the interfaces to getpwnam and getpwuid consistent.
    Model the wrappers on the POSIX thread-safe versions, but

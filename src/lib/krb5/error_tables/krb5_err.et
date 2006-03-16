@@ -342,4 +342,6 @@ error_code KRB5_CC_READONLY,    "Ccache function not supported: read-only ccache
 error_code KRB5_CC_NOSUPP,      "Ccache function not supported: not implemented"
 
 error_code KRB5_DELTAT_BADFORMAT,	"Invalid format of Kerberos lifetime or clock skew string"
+
+error_code KRB5_PLUGIN_NO_HANDLE,	"Supplied data not handled by this plugin"
 end

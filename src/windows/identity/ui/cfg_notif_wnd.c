@@ -34,6 +34,7 @@ typedef struct tag_notif_data {
 
     BOOL monitor;
     BOOL renew;
+    BOOL halflife;
     BOOL warn1;
     BOOL warn2;
 
@@ -58,6 +59,10 @@ read_params(notif_data * d) {
     rv = khc_read_int32(csp_cw, L"AllowAutoRenew", &t);
     assert(KHM_SUCCEEDED(rv));
     d->renew = !!t;
+
+    rv = khc_read_int32(csp_cw, L"RenewAtHalfLife", &t);
+    assert(KHM_SUCCEEDED(rv));
+    d->halflife = !!t;
 
     rv = khc_read_int32(csp_cw, L"AllowWarn", &t);
     assert(KHM_SUCCEEDED(rv));
@@ -106,6 +111,7 @@ check_for_modification(notif_data * d) {
 
     if ((!!d->monitor) != (!!t.monitor) ||
         (!!d->renew) != (!!t.renew) ||
+        (!!d->halflife) != (!!t.halflife) ||
         (!!d->warn1) != (!!t.warn1) ||
         (!!d->warn2) != (!!t.warn2) ||
         d->tc_renew.current != t.tc_renew.current ||
@@ -144,6 +150,9 @@ write_params(notif_data * d) {
     rv = khc_write_int32(csp_cw, L"AllowAutoRenew", d->renew);
     assert(KHM_SUCCEEDED(rv));
 
+    rv = khc_write_int32(csp_cw, L"RenewAtHalfLife", d->halflife);
+    assert(KHM_SUCCEEDED(rv));
+
     rv = khc_write_int32(csp_cw, L"AllowWarn", d->warn1);
     assert(KHM_SUCCEEDED(rv));
 
@@ -178,6 +187,8 @@ refresh_view(HWND hwnd, notif_data * d) {
                    (d->monitor?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_NOTIF_RENEW, 
                    (d->renew?BST_CHECKED:BST_UNCHECKED));
+    CheckDlgButton(hwnd, IDC_NOTIF_HALFLIFE,
+                   (d->halflife?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_NOTIF_WARN1, 
                    (d->warn1?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_NOTIF_WARN2, 
@@ -187,6 +198,7 @@ refresh_view(HWND hwnd, notif_data * d) {
     khui_tracker_refresh(&d->tc_warn2);
     if (!d->monitor) {
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_RENEW), FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_HALFLIFE), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_WARN1), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_WARN2), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_RENEW_THR), FALSE);
@@ -194,6 +206,7 @@ refresh_view(HWND hwnd, notif_data * d) {
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_WARN2_THR), FALSE);
     } else {
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_RENEW), TRUE);
+        EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_HALFLIFE), TRUE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_WARN1), TRUE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_WARN2), TRUE);
         EnableWindow(GetDlgItem(hwnd, IDC_NOTIF_RENEW_THR), !!(d->renew));
@@ -208,6 +221,8 @@ refresh_data(HWND hwnd, notif_data * d) {
                   == BST_CHECKED);
     d->renew   = (IsDlgButtonChecked(hwnd, IDC_NOTIF_RENEW)
                   == BST_CHECKED);
+    d->halflife = (IsDlgButtonChecked(hwnd, IDC_NOTIF_HALFLIFE)
+                   == BST_CHECKED);
     d->warn1   = (IsDlgButtonChecked(hwnd, IDC_NOTIF_WARN1)
                   == BST_CHECKED);
     d->warn2   = (IsDlgButtonChecked(hwnd, IDC_NOTIF_WARN2)

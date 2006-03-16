@@ -100,6 +100,11 @@ typedef struct tag_k5_config_data {
     khui_config_node node_realm;
 
     khm_int32     flags;
+
+    /* used by the realm editor */
+    HMENU         hm_realms_ctx;
+    HMENU         hm_kdc_ctx;
+    HMENU         hm_dmap_ctx;
 } k5_config_data;
 
 #define K5_CDFLAG_MOD_DEF_REALM      0x00000001
@@ -552,15 +557,18 @@ k5_write_config_data(k5_config_data * d) {
             s > 0) {
             khm_krb5_set_default_realm(d->def_realm);
         }
+        d->flags &= ~K5_CDFLAG_MOD_DEF_REALM;
     }
 
     /* write the MSLSA import setting */
     if (d->flags & K5_CDFLAG_MOD_LSA_IMPORT) {
         khc_write_int32(csp_params, L"MsLsaImport", d->lsa_import);
+        d->flags &= ~K5_CDFLAG_MOD_LSA_IMPORT;
     }
 
     if (d->flags & K5_CDFLAG_MOD_INC_REALMS) {
         khc_write_int32(csp_params, L"UseFullRealmList", d->inc_realms);
+        d->flags &= ~K5_CDFLAG_MOD_INC_REALMS;
     }
 
     if (!(d->flags & 
@@ -574,7 +582,6 @@ k5_write_config_data(k5_config_data * d) {
 
         d->flags = 0;
         return;
-
     }
 
     khm_krb5_get_profile_file(config_file, ARRAYLENGTH(config_file));
@@ -605,7 +612,6 @@ k5_write_config_data(k5_config_data * d) {
     }
 #endif
 
-
     if (!rv) {
         const char * sec_realms[] = { "realms", NULL };
         const char * sec_domain_realm[] = { "domain_realm", NULL };
@@ -622,6 +628,7 @@ k5_write_config_data(k5_config_data * d) {
                                        (d->dns_lookup_kdc)?
                                        conf_yes[0]:
                                        conf_no[0]);
+            d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_KDC;
         }
 
 
@@ -636,6 +643,7 @@ k5_write_config_data(k5_config_data * d) {
                                        conf_yes[0]:
                                        conf_no[0]);
 
+            d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_RLM;
         }
 
         if (d->flags & K5_CDFLAG_MOD_DNS_FALLBACK) {
@@ -648,6 +656,8 @@ k5_write_config_data(k5_config_data * d) {
                                        (d->dns_fallback)?
                                        conf_yes[0]:
                                        conf_no[0]);
+
+            d->flags &= ~K5_CDFLAG_MOD_DNS_FALLBACK;
         }
 
         if (d->flags & K5_CDFLAG_MOD_NOADDRESSES) {
@@ -660,6 +670,8 @@ k5_write_config_data(k5_config_data * d) {
                                        (d->noaddresses)?
                                        conf_yes[0]:
                                        conf_no[0]);
+
+            d->flags &= ~K5_CDFLAG_MOD_NOADDRESSES;
         }
 
         /* now we look at the [realms] section */
@@ -708,6 +720,8 @@ k5_write_config_data(k5_config_data * d) {
                         if (d->realms[r].kdcs[k].admin)
                             pprofile_add_relation(profile, sec_admin,
                                                   host);
+
+                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_NEW;
                     }
                 }
 
@@ -719,15 +733,26 @@ k5_write_config_data(k5_config_data * d) {
                     if ((d->realms[r].domain_maps[m].flags &
                          K5_DMFLAG_DELETED) &&
                         !(d->realms[r].domain_maps[m].flags &
-                          K5_DMFLAG_NEW))
+                          K5_DMFLAG_NEW)) {
                         pprofile_clear_relation(profile, sec_domain_map);
-                    else if (!(d->realms[r].domain_maps[m].flags &
+
+                        /* setting this flag indicates that the item
+                           is deleted and not in the profile file
+                           anymore. */
+                        d->realms[r].domain_maps[m].flags |= K5_DMFLAG_NEW;
+                    } else if (!(d->realms[r].domain_maps[m].flags &
                                K5_DMFLAG_DELETED) &&
                              (d->realms[r].domain_maps[m].flags &
-                              K5_DMFLAG_NEW))
+                              K5_DMFLAG_NEW)) {
                         pprofile_add_relation(profile, sec_domain_map,
                                               realm);
+
+                        d->realms[r].domain_maps[m].flags &= ~K5_DMFLAG_NEW;
+                    }
                 }
+
+                d->realms[r].flags &= ~K5_RDFLAG_NEW;
+
             } else if ((d->realms[r].flags & K5_RDFLAG_DELETED) &&
                        !(d->realms[r].flags & K5_RDFLAG_NEW)) {
 
@@ -771,6 +796,11 @@ k5_write_config_data(k5_config_data * d) {
 
                     pprofile_free_list(values);
                 }
+
+                /* setting this flag indicate that the realm is
+                   deleted and is not in the profile file. */
+                d->realms[r].flags |= K5_RDFLAG_NEW;
+
             } else if (!(d->realms[r].flags & K5_RDFLAG_DELETED)) {
                 khm_size k;
                 khm_size m;
@@ -779,8 +809,14 @@ k5_write_config_data(k5_config_data * d) {
                    list or the domain_realm mappings */
 
                 for (k=0; k < d->realms[r].n_kdcs; k++) {
+
+                    if ((d->realms[r].kdcs[k].flags & K5_RKFLAG_NEW) &&
+                        (d->realms[r].kdcs[k].flags & K5_RKFLAG_DELETED))
+                        continue;
+
                     UnicodeStrToAnsi(host, sizeof(host),
                                      d->realms[r].kdcs[k].name);
+
                     if (d->realms[r].kdcs[k].flags & K5_RKFLAG_DELETED) {
                         pprofile_update_relation(profile, sec_kdcs,
                                                  host, NULL);
@@ -789,6 +825,10 @@ k5_write_config_data(k5_config_data * d) {
                         pprofile_update_relation(profile, sec_master,
                                                  host, NULL);
 
+                        /* as above, setting 'new' flag to indicate
+                           that the item does not exist in the profile
+                           file. */
+                        d->realms[r].kdcs[k].flags |= K5_RKFLAG_NEW;
                         continue;
                     }
 
@@ -803,30 +843,43 @@ k5_write_config_data(k5_config_data * d) {
                         if (d->realms[r].kdcs[k].admin)
                             pprofile_add_relation(profile, sec_admin,
                                                   host);
+
+                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_NEW;
                         continue;
                     }
 
                     if (d->realms[r].kdcs[k].flags & K5_RKFLAG_MOD_MASTER) {
                         if (!d->realms[r].kdcs[k].master) {
+                            pprofile_update_relation(profile, sec_kdcs,
+                                                     host, NULL);
                             pprofile_add_relation(profile, sec_kdcs,
                                                   host);
                             pprofile_update_relation(profile, sec_master,
                                                      host, NULL);
                         } else {
+                            pprofile_update_relation(profile, sec_master,
+                                                     host, NULL);
                             pprofile_add_relation(profile, sec_master,
                                                   host);
                             pprofile_update_relation(profile, sec_kdcs,
                                                      host, NULL);
                         }
+
+                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_MOD_MASTER;
                     }
 
                     if (d->realms[r].kdcs[k].flags & K5_RKFLAG_MOD_ADMIN) {
-                        if (d->realms[r].kdcs[k].admin)
-                            pprofile_add_relation(profile, sec_admin,
-                                                  host);
-                        else
+                        if (d->realms[r].kdcs[k].admin) {
                             pprofile_update_relation(profile, sec_admin,
                                                      host, NULL);
+                            pprofile_add_relation(profile, sec_admin,
+                                                  host);
+                        } else {
+                            pprofile_update_relation(profile, sec_admin,
+                                                     host, NULL);
+                        }
+
+                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_MOD_ADMIN;
                     }
                 }
 
@@ -837,16 +890,26 @@ k5_write_config_data(k5_config_data * d) {
 
                     if ((d->realms[r].domain_maps[m].flags &
                          K5_DMFLAG_DELETED) &&
+
                         !(d->realms[r].domain_maps[m].flags &
-                          K5_DMFLAG_NEW))
+                          K5_DMFLAG_NEW)) {
+
                         pprofile_clear_relation(profile, sec_domain_map);
-                    else if (!(d->realms[r].domain_maps[m].flags &
+                        d->realms[r].domain_maps[m].flags |= K5_DMFLAG_NEW;
+
+                    } else if (!(d->realms[r].domain_maps[m].flags &
                                K5_DMFLAG_DELETED) &&
+
                              (d->realms[r].domain_maps[m].flags &
-                              K5_DMFLAG_NEW))
+                              K5_DMFLAG_NEW)) {
+
                         pprofile_add_relation(profile, sec_domain_map,
                                               realm);
+                        d->realms[r].domain_maps[m].flags &= ~K5_DMFLAG_NEW;
+                    }
                 }
+
+                d->realms[r].flags &= ~K5_RDFLAG_MODIFED;
             }
         }
 
@@ -1166,6 +1229,9 @@ k5_update_realms_display(HWND hw_list, k5_config_data * d) {
     }
 }
 
+#define K5_KDCSI_ADMIN 1
+#define K5_KDCSI_MASTER 2
+
 static void
 k5_update_kdcs_display(HWND hw_kdc, k5_config_data * d, khm_size idx_rlm) {
     khm_size k;
@@ -1216,14 +1282,14 @@ k5_update_kdcs_display(HWND hw_kdc, k5_config_data * d, khm_size idx_rlm) {
 
         lvi.mask = LVIF_TEXT;
         lvi.iItem = idx_item;
-        lvi.iSubItem = 1;
+        lvi.iSubItem = K5_KDCSI_ADMIN;
         if (pkdc->admin)
             lvi.pszText = wyes;
         else
             lvi.pszText = wno;
         ListView_SetItem(hw_kdc, &lvi);
 
-        lvi.iSubItem = 2;
+        lvi.iSubItem = K5_KDCSI_MASTER;
         if (pkdc->master)
             lvi.pszText = wyes;
         else
@@ -1301,6 +1367,201 @@ k5_update_dmap_display(HWND hw_dm, k5_config_data * d, khm_size idx_rlm) {
                wbuf, ARRAYLENGTH(wbuf));
 
     ListView_InsertItem(hw_dm, &lvi);
+}
+
+#define CMD_BASE 3000
+#define CMD_NEW_REALM    (CMD_BASE + 1)
+#define CMD_DEL_REALM    (CMD_BASE + 2)
+#define CMD_NEW_SERVER   (CMD_BASE + 3)
+#define CMD_DEL_SERVER   (CMD_BASE + 4)
+#define CMD_MAKE_ADMIN   (CMD_BASE + 5)
+#define CMD_MAKE_MASTER  (CMD_BASE + 6)
+#define CMD_NEW_DMAP     (CMD_BASE + 7)
+#define CMD_DEL_DMAP     (CMD_BASE + 8)
+
+struct k5_menu_def {
+    UINT string;
+    UINT id;
+    UINT type;
+    UINT state;
+};
+
+struct k5_menu_def k5_menu_realms[] = {
+    {IDS_CFG_RE_MNR, CMD_NEW_REALM, MFT_STRING, 0},
+    {IDS_CFG_RE_MDR, CMD_DEL_REALM, MFT_STRING, 0}
+};
+
+struct k5_menu_def k5_menu_kdc[] = {
+    {IDS_CFG_RE_MNK, CMD_NEW_SERVER, MFT_STRING, 0},
+    {IDS_CFG_RE_MDK, CMD_DEL_SERVER, MFT_STRING, 0},
+    {IDS_CFG_RE_MAK, CMD_MAKE_ADMIN, MFT_STRING, 0},
+    {IDS_CFG_RE_MMK, CMD_MAKE_MASTER, MFT_STRING, 0}
+};
+
+struct k5_menu_def k5_menu_dmap[] = {
+    {IDS_CFG_RE_MND, CMD_NEW_DMAP, MFT_STRING, 0},
+    {IDS_CFG_RE_MDD, CMD_DEL_DMAP, MFT_STRING, 0}
+};
+
+HMENU
+k5_menu_from_def(struct k5_menu_def * def, khm_size n) {
+    HMENU menu;
+    MENUITEMINFO mii;
+    khm_size i;
+    khm_size cch;
+    wchar_t buf[1024];
+
+    menu = CreatePopupMenu();
+
+    for (i=0; i < n; i++) {
+        ZeroMemory(&mii, sizeof(mii));
+
+        mii.cbSize = sizeof(mii);
+
+        if (def[i].type == MFT_STRING) {
+            LoadString(hResModule, def[i].string,
+                       buf, ARRAYLENGTH(buf));
+            StringCchLength(buf, ARRAYLENGTH(buf), &cch);
+
+            mii.fMask = MIIM_STRING | MIIM_ID;
+            mii.fType = MFT_STRING;
+
+            mii.fState = def[i].state;
+            mii.wID = def[i].id;
+            mii.cch = (UINT) cch;
+            mii.dwTypeData = buf;
+
+            InsertMenuItem(menu, (UINT) i, TRUE, &mii);
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+        }
+    }
+
+    return menu;
+}
+
+void
+k5_delete_realms(HWND hwnd, k5_config_data * d) {
+    LVITEM lvi;
+    int idx;
+    HWND hw_rlm;
+    BOOL modified = FALSE;
+    khm_size r;
+
+    hw_rlm = GetDlgItem(hwnd, IDC_CFG_REALMS);
+
+    idx = -1;
+    while((idx = ListView_GetNextItem(hw_rlm, idx,
+                                      LVNI_SELECTED))
+          != -1) {
+        ZeroMemory(&lvi, sizeof(lvi));
+        lvi.iItem = idx;
+        lvi.iSubItem = 0;
+        lvi.mask = LVIF_PARAM;
+        
+        ListView_GetItem(hw_rlm, &lvi);
+
+        if (lvi.lParam != -1 &&
+            (r = lvi.lParam) < d->n_realms) {
+            d->realms[r].flags ^= K5_RDFLAG_DELETED;
+            modified = TRUE;
+        }
+    }
+
+    if (modified) {
+        d->flags |= K5_CDFLAG_MOD_REALMS;
+        
+        k5_purge_config_data(d, TRUE, TRUE, TRUE);
+        k5_update_realms_display(hw_rlm, d);
+        k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
+        k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), NULL, 0);
+    }
+}
+
+void
+k5_delete_servers(HWND hwnd, k5_config_data * d) {
+    HWND hw_kdc;
+    LVITEM lvi;
+    khm_size r;
+    khm_size k;
+    int idx;
+    BOOL modified = FALSE;
+
+    hw_kdc = GetDlgItem(hwnd, IDC_CFG_KDC);
+    r = d->c_realm;
+    
+    idx = -1;
+    while((idx = ListView_GetNextItem(hw_kdc, idx,
+                                      LVNI_SELECTED))
+          != -1) {
+        ZeroMemory(&lvi, sizeof(lvi));
+        lvi.iItem = idx;
+        lvi.iSubItem = 0;
+        lvi.mask = LVIF_PARAM;
+
+        ListView_GetItem(hw_kdc, &lvi);
+
+        if (lvi.lParam != -1 &&
+            (k = lvi.lParam) < d->n_realms) {
+            d->realms[r].kdcs[k].flags ^= K5_RKFLAG_DELETED;
+            modified = TRUE;
+        }
+    }
+
+    if (modified) {
+        d->flags |= K5_CDFLAG_MOD_REALMS;
+        d->realms[r].flags |= K5_RDFLAG_MODIFED;
+        
+        k5_purge_config_data(d, TRUE, TRUE, TRUE);
+        k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+        k5_update_kdcs_display(hw_kdc, d, r);
+    }
+}
+
+void
+k5_delete_dmap(HWND hwnd, k5_config_data * d) {
+    HWND hw_dmp;
+    LVITEM lvi;
+    khm_size r;
+    khm_size m;
+    int idx;
+    BOOL modified = FALSE;
+
+    hw_dmp = GetDlgItem(hwnd, IDC_CFG_DMAP);
+    r = d->c_realm;
+
+    idx = -1;
+    while((idx = ListView_GetNextItem(hw_dmp, idx,
+                                      LVNI_SELECTED))
+          != -1) {
+        ZeroMemory(&lvi, sizeof(lvi));
+        lvi.iItem = idx;
+        lvi.iSubItem = 0;
+        lvi.mask = LVIF_PARAM;
+        
+        ListView_GetItem(hw_dmp, &lvi);
+
+        if (lvi.lParam != -1 &&
+            (m = lvi.lParam) < d->n_realms) {
+            d->realms[r].domain_maps[m].flags ^= K5_DMFLAG_DELETED;
+            modified = TRUE;
+        }
+    }
+
+    if (modified) {
+        d->flags |= K5_CDFLAG_MOD_REALMS;
+        k5_purge_config_data(d, FALSE, FALSE, TRUE);
+        
+        if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+            d->realms[r].flags |= K5_RDFLAG_MODIFED;
+
+            k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+        }
+
+        k5_update_dmap_display(hw_dmp, d, r);
+    }
 }
 
 INT_PTR CALLBACK 
@@ -1395,6 +1656,146 @@ k5_realms_dlgproc(HWND hwnd,
             ListView_SetImageList(hw,
                                   k5_get_state_image_list(),
                                   LVSIL_STATE);
+
+            /* Now set up the context menus */
+            d->hm_realms_ctx = k5_menu_from_def(k5_menu_realms, ARRAYLENGTH(k5_menu_realms));
+            d->hm_kdc_ctx = k5_menu_from_def(k5_menu_kdc, ARRAYLENGTH(k5_menu_kdc));
+            d->hm_dmap_ctx = k5_menu_from_def(k5_menu_dmap, ARRAYLENGTH(k5_menu_dmap));
+        }
+        break;
+
+    case WM_CONTEXTMENU:
+        {
+            UINT id;
+            HMENU hm = NULL;
+            int x,y;
+
+            id = GetDlgCtrlID((HWND) wParam);
+
+            if (id == IDC_CFG_REALMS) {
+                HWND hw_realms;
+                int n;
+                MENUITEMINFO mii;
+
+                hm = d->hm_realms_ctx;
+
+                hw_realms = GetDlgItem(hwnd, IDC_CFG_REALMS);
+#ifdef DEBUG
+                assert(hw_realms);
+#endif
+                n = ListView_GetSelectedCount(hw_realms);
+                ZeroMemory(&mii, sizeof(mii));
+                mii.cbSize = sizeof(mii);
+
+                if (n == 0) {
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_DISABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_REALM, FALSE, &mii);
+                } else {
+
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_ENABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_REALM, FALSE, &mii);
+                }
+                
+            } else if (id == IDC_CFG_KDC) {
+                HWND hw_kdc;
+                int n;
+                MENUITEMINFO mii;
+
+                hm = d->hm_kdc_ctx;
+
+                hw_kdc = GetDlgItem(hwnd, IDC_CFG_KDC);
+#ifdef DEBUG
+                assert(hw_kdc);
+#endif
+                n = ListView_GetSelectedCount(hw_kdc);
+                ZeroMemory(&mii, sizeof(mii));
+                mii.cbSize = sizeof(mii);
+
+                if (n == 1) {
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_ENABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_SERVER, FALSE, &mii);
+                    SetMenuItemInfo(hm, CMD_MAKE_ADMIN, FALSE, &mii);
+                    SetMenuItemInfo(hm, CMD_MAKE_MASTER, FALSE, &mii);
+                } else if (n == 0) {
+
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_DISABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_SERVER, FALSE, &mii);
+                    SetMenuItemInfo(hm, CMD_MAKE_ADMIN, FALSE, &mii);
+                    SetMenuItemInfo(hm, CMD_MAKE_MASTER,FALSE, &mii);
+                } else {
+
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_ENABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_SERVER, FALSE, &mii);
+                    
+                    mii.fState = MFS_DISABLED;
+
+                    SetMenuItemInfo(hm, CMD_MAKE_ADMIN, FALSE, &mii);
+                    SetMenuItemInfo(hm, CMD_MAKE_MASTER,FALSE, &mii);
+                }
+
+            } else if (id == IDC_CFG_DMAP) {
+                HWND hw_dmap;
+                MENUITEMINFO mii;
+                int n;
+
+                hm = d->hm_dmap_ctx;
+
+                hw_dmap = GetDlgItem(hwnd, IDC_CFG_DMAP);
+#ifdef DEBUG
+                assert(hw_dmap);
+#endif
+
+                n = ListView_GetSelectedCount(hw_dmap);
+                ZeroMemory(&mii, sizeof(mii));
+                mii.cbSize = sizeof(mii);
+
+                if (n == 0) {
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_DISABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_DMAP, FALSE, &mii);
+                } else {
+                    mii.fMask = MIIM_STATE;
+                    mii.fState = MFS_ENABLED;
+
+                    SetMenuItemInfo(hm, CMD_DEL_DMAP, FALSE, &mii);
+                }
+            }
+
+            if (hm) {
+                if (LOWORD(lParam) == 0xffff) {
+                    HWND hw;
+                    RECT r;
+
+                    hw = GetDlgItem(hwnd, id);
+#ifdef DEBUG
+                    assert(hw);
+#endif
+                    GetWindowRect(hw, &r);
+                    x = r.left;
+                    y = r.top;
+                } else {
+                    x = LOWORD(lParam);
+                    y = HIWORD(lParam);
+                }
+
+                TrackPopupMenu(hm,
+                               TPM_LEFTALIGN | TPM_TOPALIGN,
+                               x, y,
+                               0, hwnd, NULL);
+            }
+
+            return TRUE;
         }
         break;
 
@@ -1408,6 +1809,45 @@ k5_realms_dlgproc(HWND hwnd,
 
             pnmh = (LPNMHDR) lParam;
 
+            /* catchalls for all three list views */
+            switch (pnmh->code) {
+            case NM_DBLCLK:
+                {
+                    HWND hw_ctl;
+                    LVITEM lvi;
+                    LVHITTESTINFO hti;
+                    LPNMITEMACTIVATE pnmi;
+
+                    if (pnmh->idFrom != IDC_CFG_REALMS &&
+                        pnmh->idFrom != IDC_CFG_KDC &&
+                        pnmh->idFrom != IDC_CFG_DMAP)
+                        break;
+
+                    /* if the user double clicks on the 'new
+                       [something]' item, we start editing it. */
+                    hw_ctl = pnmh->hwndFrom;
+                    pnmi = (LPNMITEMACTIVATE) lParam;
+
+                    ZeroMemory(&hti, sizeof(hti));
+                    hti.pt = pnmi->ptAction;
+
+                    ListView_SubItemHitTest(hw_ctl, &hti);
+                    if (hti.flags & LVHT_ONITEM) {
+                        ZeroMemory(&lvi, sizeof(lvi));
+                        lvi.mask = LVIF_PARAM;
+                        lvi.iItem = hti.iItem;
+
+                        ListView_GetItem(hw_ctl, &lvi);
+
+                        if (lvi.lParam == -1)
+                            ListView_EditLabel(hw_ctl, hti.iItem);
+                    }
+
+                    return TRUE;
+                }
+                break;
+            }
+
             if (pnmh->idFrom == IDC_CFG_REALMS) {
 
                 hw_rlm = pnmh->hwndFrom;
@@ -1419,9 +1859,11 @@ k5_realms_dlgproc(HWND hwnd,
                     hw_dmp = GetDlgItem(hwnd, IDC_CFG_DMAP);
 
                     d->c_realm = (khm_size) -1;
-                    
+
                     if (i == 1) {
                         LVITEM lvi;
+                        wchar_t fmt[256];
+                        wchar_t buf[K5_MAXCCH_REALM + 256];
 
                         i = ListView_GetNextItem(hw_rlm, -1,
                                                  LVNI_SELECTED);
@@ -1443,12 +1885,38 @@ k5_realms_dlgproc(HWND hwnd,
 
                         k5_update_kdcs_display(hw_kdc, d, lvi.lParam);
                         k5_update_dmap_display(hw_dmp, d, lvi.lParam);
+
+                        LoadString(hResModule, IDS_CFG_RE_KDCS_R,
+                                   fmt, ARRAYLENGTH(fmt));
+                        StringCbPrintf(buf, sizeof(buf), fmt,
+                                       d->realms[d->c_realm].realm);
+
+                        SetDlgItemText(hwnd, IDC_CFG_SERVERSGRP, buf);
+
+                        LoadString(hResModule, IDS_CFG_RE_DMAPS_R,
+                                   fmt, ARRAYLENGTH(fmt));
+                        StringCbPrintf(buf, sizeof(buf), fmt,
+                                       d->realms[d->c_realm].realm);
+
+                        SetDlgItemText(hwnd, IDC_CFG_DOMAINGRP, buf);
                         return TRUE;
                     }
 
                 _no_selection:
-                    ListView_DeleteAllItems(hw_kdc);
-                    ListView_DeleteAllItems(hw_dmp);
+                    {
+                        wchar_t buf[256];
+
+                        k5_update_kdcs_display(hw_kdc, NULL, 0);
+                        k5_update_dmap_display(hw_dmp, NULL, 0);
+
+                        LoadString(hResModule, IDS_CFG_RE_KDCS,
+                                   buf, ARRAYLENGTH(buf));
+                        SetDlgItemText(hwnd, IDC_CFG_SERVERSGRP, buf);
+
+                        LoadString(hResModule, IDS_CFG_RE_DMAPS,
+                                   buf, ARRAYLENGTH(buf));
+                        SetDlgItemText(hwnd, IDC_CFG_DOMAINGRP, buf);
+                    }
                     break;
 
                 case LVN_BEGINLABELEDIT:
@@ -1466,7 +1934,7 @@ k5_realms_dlgproc(HWND hwnd,
 
                         if (pdisp->item.iItem == -1 ||
                             lvi.lParam != -1) {
-                            SetWindowLongPtr(hwnd, DWL_MSGRESULT, TRUE);
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, TRUE);
                         } else {
                             /* allow editing */
                             HWND hw_edit;
@@ -1478,7 +1946,7 @@ k5_realms_dlgproc(HWND hwnd,
                                             K5_MAXCCH_REALM - 1,
                                             0);
                             }
-                            SetWindowLongPtr(hwnd, DWL_MSGRESULT, FALSE);
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
                         }
 
                         return TRUE;
@@ -1492,7 +1960,49 @@ k5_realms_dlgproc(HWND hwnd,
 
                         pdisp = (NMLVDISPINFO *) lParam;
 
-                        if (pdisp->item.pszText) {
+                        if (pdisp->item.pszText && pdisp->item.pszText[0]) {
+                            khm_size i;
+
+                            /* first find out whether this is actually
+                               a new realm */
+
+                            for (i=0; i < d->n_realms; i++) {
+                                if ((d->realms[i].flags & K5_RDFLAG_NEW) &&
+                                    (d->realms[i].flags & K5_RDFLAG_DELETED))
+                                    continue;
+
+                                if (!wcsicmp(d->realms[i].realm, pdisp->item.pszText))
+                                    break;
+                            }
+
+                            if (i < d->n_realms) {
+                                khui_alert * alert = NULL;
+                                wchar_t buf[KHUI_MAXCCH_MESSAGE];
+                                wchar_t fmt[KHUI_MAXCCH_MESSAGE];
+
+                                khui_alert_create_empty(&alert);
+
+                                LoadString(hResModule, IDS_CFG_RE_ARNUT,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText);
+                                khui_alert_set_title(alert, buf);
+
+                                LoadString(hResModule, IDS_CFG_RE_ARNUM,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText);
+                                khui_alert_set_message(alert, buf);
+
+                                khui_alert_add_command(alert, KHUI_PACTION_CLOSE);
+                                khui_alert_set_severity(alert, KHERR_INFO);
+
+                                khui_alert_show_modal(alert);
+                                khui_alert_release(alert);
+
+                                return TRUE;
+                            }
+
                             n = d->n_realms;
                             k5_assert_n_realms(d, n+1);
                             StringCbCopy(d->realms[n].realm,
@@ -1513,40 +2023,11 @@ k5_realms_dlgproc(HWND hwnd,
                 case LVN_KEYDOWN:
                     {
                         NMLVKEYDOWN * pnmk;
-                        LVITEM lvi;
-                        khm_size r;
-                        int idx;
-                        BOOL modified = FALSE;
 
                         pnmk = (NMLVKEYDOWN *) lParam;
 
                         if (pnmk->wVKey == VK_DELETE) {
-                            idx = -1;
-                            while((idx = ListView_GetNextItem(hw_rlm, idx,
-                                                              LVNI_SELECTED))
-                                  != -1) {
-                                ZeroMemory(&lvi, sizeof(lvi));
-                                lvi.iItem = idx;
-                                lvi.iSubItem = 0;
-                                lvi.mask = LVIF_PARAM;
-
-                                ListView_GetItem(hw_rlm, &lvi);
-
-                                if (lvi.lParam != -1 &&
-                                    (r = lvi.lParam) < d->n_realms) {
-                                    d->realms[r].flags ^= K5_RDFLAG_DELETED;
-                                    modified = TRUE;
-                                }
-                            }
-
-                            if (modified) {
-                                d->flags |= K5_CDFLAG_MOD_REALMS;
-
-                                k5_purge_config_data(d, TRUE, TRUE, TRUE);
-                                k5_update_realms_display(hw_rlm, d);
-                                k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
-                                k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), NULL, 0);
-                            }
+                            k5_delete_realms(hwnd, d);
                             return TRUE;
                         }
                     }
@@ -1569,11 +2050,12 @@ k5_realms_dlgproc(HWND hwnd,
 
                         ListView_GetItem(hw_kdc, &lvi);
 
+                        /* Only allow editing if the user is trying to
+                           edit the <New server> entry. */
                         if (pdisp->item.iItem == -1 ||
                             lvi.lParam != -1) {
-                            SetWindowLongPtr(hwnd, DWL_MSGRESULT, TRUE);
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, TRUE);
                         } else {
-                            /* allow editing */
                             HWND hw_edit;
 
                             hw_edit = ListView_GetEditControl(hw_kdc);
@@ -1583,7 +2065,7 @@ k5_realms_dlgproc(HWND hwnd,
                                             K5_MAXCCH_HOST - 1,
                                             0);
                             }
-                            SetWindowLongPtr(hwnd, DWL_MSGRESULT, FALSE);
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
                         }
                         return TRUE;
                     }
@@ -1599,11 +2081,52 @@ k5_realms_dlgproc(HWND hwnd,
 
                         pdisp = (NMLVDISPINFO *) lParam;
 
-                        if (pdisp->item.pszText) {
-                            k = d->realms[r].n_kdcs;
+                        if (pdisp->item.pszText && pdisp->item.pszText[0]) {
+
+                            /* first of all, check if we already have
+                               a KDC by this name... */
+                            for (k=0; k < d->realms[r].n_kdcs; k++) {
+                                if ((d->realms[r].kdcs[k].flags & K5_RKFLAG_NEW) &&
+                                    (d->realms[r].kdcs[k].flags & K5_RKFLAG_DELETED))
+                                    continue;
+
+                                if (!wcsicmp(d->realms[r].kdcs[k].name,
+                                             pdisp->item.pszText))
+                                    break;
+                            }
+
+                            if (k < d->realms[r].n_kdcs) {
+                                khui_alert * alert = NULL;
+                                wchar_t buf[K5_MAXCCH_HOST + 256];
+                                wchar_t fmt[256];
+
+                                khui_alert_create_empty(&alert);
+
+                                LoadString(hResModule, IDS_CFG_RE_ASNUT,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText,
+                                               d->realms[r].realm);
+                                khui_alert_set_title(alert, buf);
+
+                                LoadString(hResModule, IDS_CFG_RE_ASNUM,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText,
+                                               d->realms[r].realm);
+                                khui_alert_set_message(alert, buf);
+
+                                khui_alert_set_severity(alert, KHERR_INFO);
+                                khui_alert_show_modal(alert);
+
+                                khui_alert_release(alert);
+
+                                SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
+                                return TRUE;
+                            }
 
                             if (k >= K5_MAX_KDC) {
-                                SetWindowLongPtr(hwnd, DWL_MSGRESULT, FALSE);
+                                SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
                                 /* TODO: show a message box saying
                                    there are too many KDC's
                                    already. */
@@ -1616,9 +2139,13 @@ k5_realms_dlgproc(HWND hwnd,
                             d->realms[r].kdcs[k].flags = K5_RKFLAG_NEW;
                             d->realms[r].n_kdcs++;
 
-                            d->realms[r].flags |= K5_RDFLAG_MODIFED;
-
                             k5_update_kdcs_display(hw_kdc, d, d->c_realm);
+
+                            if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+                                d->flags |= K5_CDFLAG_MOD_REALMS;
+                                d->realms[r].flags |= K5_RDFLAG_MODIFED;
+                                k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+                            }
                         }
                         return TRUE;
                     }
@@ -1626,53 +2153,422 @@ k5_realms_dlgproc(HWND hwnd,
 
                 case LVN_KEYDOWN:
                     {
-#if 0
                         NMLVKEYDOWN * pnmk;
-                        LVITEM lvi;
-                        khm_size r;
-                        int idx;
-                        BOOL modified = FALSE;
 
                         pnmk = (NMLVKEYDOWN *) lParam;
 
                         if (pnmk->wVKey == VK_DELETE) {
-                            idx = -1;
-                            while((idx = ListView_GetNextItem(hw_rlm, idx,
-                                                              LVNI_SELECTED))
-                                  != -1) {
-                                ZeroMemory(&lvi, sizeof(lvi));
-                                lvi.iItem = idx;
-                                lvi.iSubItem = 0;
-                                lvi.mask = LVIF_PARAM;
-
-                                ListView_GetItem(hw_rlm, &lvi);
-
-                                if (lvi.lParam != -1 &&
-                                    (r = lvi.lParam) < d->n_realms) {
-                                    d->realms[r].flags ^= K5_RDFLAG_DELETED;
-                                    modified = TRUE;
-                                }
-                            }
-
-                            if (modified) {
-                                d->flags |= K5_CDFLAG_MOD_REALMS;
-
-                                k5_purge_config_data(d, TRUE, TRUE, TRUE);
-                                k5_update_realms_display(hw_rlm, d);
-                                k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
-                                k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), NULL, 0);
-                            }
-                            return TRUE;
+                            k5_delete_servers(hwnd, d);
                         }
+                        return TRUE;
+                    }
+                    break;
+
+                case NM_CLICK:
+                    {
+                        LPNMITEMACTIVATE lpnmi;
+                        LVHITTESTINFO hti;
+                        LVITEM lvi;
+                        khm_size r;
+                        khm_size k;
+
+                        r = d->c_realm;
+
+                        lpnmi = (LPNMITEMACTIVATE) lParam;
+
+                        ZeroMemory(&hti, sizeof(hti));
+                        hti.pt = lpnmi->ptAction;
+                        ListView_SubItemHitTest(hw_kdc, &hti);
+
+                        if (hti.iSubItem != 0) {
+
+                            ZeroMemory(&lvi, sizeof(lvi));
+
+                            lvi.mask = LVIF_PARAM;
+                            lvi.iItem = hti.iItem;
+                            ListView_GetItem(hw_kdc, &lvi);
+
+                            if (lvi.lParam < 0 || lvi.lParam >= (int) d->realms[r].n_kdcs)
+                                return TRUE;
+
+                            k = lvi.lParam;
+
+                            if (hti.iSubItem == K5_KDCSI_ADMIN) {
+                                d->realms[r].kdcs[k].admin = !d->realms[r].kdcs[k].admin;
+                                d->realms[r].kdcs[k].flags |= K5_RKFLAG_MOD_ADMIN;
+                            } else if (hti.iSubItem == K5_KDCSI_MASTER) {
+                                if (d->realms[r].kdcs[k].master) {
+                                    d->realms[r].kdcs[k].master = FALSE;
+                                    d->realms[r].kdcs[k].flags |= K5_RKFLAG_MOD_MASTER;
+                                } else {
+                                    khm_size i;
+
+                                    for (i=0; i < d->realms[r].n_kdcs; i++) {
+                                        if ((d->realms[r].kdcs[i].flags & K5_RKFLAG_DELETED) &&
+                                            (d->realms[r].kdcs[i].flags & K5_RKFLAG_NEW))
+                                            continue;
+                                        if (d->realms[r].kdcs[i].master) {
+                                            d->realms[r].kdcs[i].master = FALSE;
+                                            d->realms[r].kdcs[i].flags |= K5_RKFLAG_MOD_MASTER;
+                                        }
+                                    }
+
+                                    d->realms[r].kdcs[k].master = TRUE;
+                                    d->realms[r].kdcs[k].flags |= K5_RKFLAG_MOD_MASTER;
+                                }
+                            } else {
+#ifdef DEBUG
+                                assert(FALSE);
 #endif
+                            }
+
+                            if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+                                d->realms[r].flags |= K5_RDFLAG_MODIFED;
+                                d->flags |= K5_CDFLAG_MOD_REALMS;
+                                k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+                            }
+
+                            k5_update_kdcs_display(hw_kdc, d, r);
+                        }
                     }
                     break;
                 }
+            } else if (pnmh->idFrom == IDC_CFG_DMAP) {
+                hw_dmp = pnmh->hwndFrom;
+
+                switch (pnmh->code) {
+                case LVN_BEGINLABELEDIT:
+                    {
+                        NMLVDISPINFO * pdisp;
+                        LVITEM lvi;
+
+                        pdisp = (NMLVDISPINFO *) lParam;
+
+                        ZeroMemory(&lvi, sizeof(lvi));
+                        lvi.iItem = pdisp->item.iItem;
+                        lvi.mask = LVIF_PARAM;
+
+                        ListView_GetItem(hw_dmp, &lvi);
+
+                        /* Only allow editing if the user is trying to
+                           edit the <New domain mapping> entry. */
+                        if (pdisp->item.iItem == -1 ||
+                            lvi.lParam != -1) {
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, TRUE);
+                        } else {
+                            HWND hw_edit;
+
+                            hw_edit = ListView_GetEditControl(hw_dmp);
+                            if (hw_edit != NULL) {
+                                SendMessage(hw_edit,
+                                            EM_SETLIMITTEXT,
+                                            K5_MAXCCH_HOST - 1,
+                                            0);
+                            }
+                            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
+                        }
+                        return TRUE;
+                    }
+                    break;
+
+                case LVN_ENDLABELEDIT:
+                    {
+                        NMLVDISPINFO * pdisp;
+                        khm_size r;
+                        khm_size m;
+
+                        r = d->c_realm;
+
+                        pdisp = (NMLVDISPINFO *) lParam;
+
+                        if (pdisp->item.pszText && pdisp->item.pszText[0]) {
+
+                            /* first check if this is unique */
+                            for (m=0; m < d->realms[r].n_domain_maps; m++) {
+                                if ((d->realms[r].domain_maps[m].flags & K5_DMFLAG_NEW) &&
+                                    (d->realms[r].domain_maps[m].flags & K5_DMFLAG_DELETED))
+                                    continue;
+
+                                if (!wcsicmp(d->realms[r].domain_maps[m].name,
+                                             pdisp->item.pszText))
+                                    break;
+                            }
+
+                            if (m < d->realms[r].n_domain_maps) {
+                                khui_alert * alert;
+                                wchar_t buf[K5_MAXCCH_HOST + 256];
+                                wchar_t fmt[256];
+
+                                khui_alert_create_empty(&alert);
+
+                                LoadString(hResModule, IDS_CFG_RE_DMNUT,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText,
+                                               d->realms[r].realm);
+                                khui_alert_set_title(alert, buf);
+
+                                LoadString(hResModule, IDS_CFG_RE_DMNUM,
+                                           fmt, ARRAYLENGTH(fmt));
+                                StringCbPrintf(buf, sizeof(buf), fmt,
+                                               pdisp->item.pszText,
+                                               d->realms[r].realm);
+                                khui_alert_set_message(alert, buf);
+
+                                khui_alert_set_severity(alert, KHERR_INFO);
+                                khui_alert_show_modal(alert);
+
+                                khui_alert_release(alert);
+
+                                SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
+                                return TRUE;
+                            }
+
+                            if (m >= K5_MAX_DOMAIN_MAPPINGS) {
+                                SetWindowLongPtr(hwnd, DWLP_MSGRESULT, FALSE);
+                                /* TODO: show a message box saying
+                                   there are too many domain mappings
+                                   already. */
+                                return TRUE;
+                            }
+
+                            StringCbCopy(d->realms[r].domain_maps[m].name,
+                                         sizeof(d->realms[0].domain_maps[0].name),
+                                         pdisp->item.pszText);
+                            d->realms[r].domain_maps[m].flags = K5_DMFLAG_NEW;
+                            d->realms[r].n_domain_maps++;
+
+                            k5_update_dmap_display(hw_dmp, d, d->c_realm);
+
+                            if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+                                d->flags |= K5_CDFLAG_MOD_REALMS;
+                                d->realms[r].flags |= K5_RDFLAG_MODIFED;
+                                k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+                            }
+                        }
+                        return TRUE;
+                    }
+                    break;
+
+                case LVN_KEYDOWN:
+                    {
+                        NMLVKEYDOWN * pnmk;
+
+                        pnmk = (NMLVKEYDOWN *) lParam;
+
+                        if (pnmk->wVKey == VK_DELETE) {
+                            k5_delete_dmap(hwnd, d);
+                            return TRUE;
+                        }
+                    }
+                    break;
+                }
+            } /* end of handling DMAP notifications */
+        }
+        break;
+
+    case WM_COMMAND:
+        switch(LOWORD(wParam)) {
+        case CMD_NEW_REALM:
+            {
+                ListView_EditLabel(GetDlgItem(hwnd, IDC_CFG_REALMS), 0);
+
+                return TRUE;
             }
+            break;
+
+        case CMD_DEL_REALM:
+            {
+                k5_delete_realms(hwnd, d);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_NEW_SERVER:
+            {
+                ListView_EditLabel(GetDlgItem(hwnd, IDC_CFG_KDC), 0);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_DEL_SERVER:
+            {
+                k5_delete_servers(hwnd, d);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_MAKE_ADMIN:
+            {
+                HWND hw_kdc;
+                int idx;
+                khm_size r;
+                khm_size k;
+                BOOL modified = FALSE;
+
+                r = d->c_realm;
+
+                hw_kdc = GetDlgItem(hwnd, IDC_CFG_KDC);
+
+                if (ListView_GetSelectedCount(hw_kdc) != 1)
+                    return TRUE;
+                
+                idx = -1;
+                while ((idx = ListView_GetNextItem(hw_kdc, idx,
+                                                   LVNI_SELECTED)) != -1) {
+                    LVITEM lvi;
+
+                    ZeroMemory(&lvi, sizeof(lvi));
+
+                    lvi.mask = LVIF_PARAM;
+                    lvi.iItem = idx;
+                    ListView_GetItem(hw_kdc, &lvi);
+
+                    k = lvi.lParam;
+
+                    if (lvi.lParam >= 0 && lvi.lParam < (int) d->realms[r].n_kdcs) {
+                        d->realms[r].kdcs[k].admin = !d->realms[r].kdcs[k].admin;
+                        d->realms[r].kdcs[k].flags |= K5_RKFLAG_MOD_ADMIN;
+                        modified = TRUE;
+
+                        break;
+                    }
+                }
+
+                if (modified) {
+                    if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+                        d->flags |= K5_CDFLAG_MOD_REALMS;
+                        d->realms[r].flags |= K5_RDFLAG_MODIFED;
+                        k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+                    }
+                }
+
+                k5_update_kdcs_display(hw_kdc, d, r);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_MAKE_MASTER:
+            {
+                HWND hw_kdc;
+                int idx;
+                khm_size r;
+                khm_size k;
+                BOOL modified = FALSE;
+
+                r = d->c_realm;
+
+                hw_kdc = GetDlgItem(hwnd, IDC_CFG_KDC);
+
+                if (ListView_GetSelectedCount(hw_kdc) != 1)
+                    return TRUE;
+                
+                idx = -1;
+                while ((idx = ListView_GetNextItem(hw_kdc, idx,
+                                                   LVNI_SELECTED)) != -1) {
+                    LVITEM lvi;
+
+                    ZeroMemory(&lvi, sizeof(lvi));
+
+                    lvi.mask = LVIF_PARAM;
+                    lvi.iItem = idx;
+                    ListView_GetItem(hw_kdc, &lvi);
+
+                    k = lvi.lParam;
+
+                    if (lvi.lParam >= 0 && lvi.lParam < (int) d->realms[r].n_kdcs) {
+                        if (d->realms[r].kdcs[k].master) {
+                            d->realms[r].kdcs[k].master = FALSE;
+                        } else {
+                            khm_size i;
+
+                            for (i=0; i < d->realms[r].n_kdcs; i++) {
+                                if ((d->realms[r].kdcs[i].flags & K5_RKFLAG_NEW) &&
+                                    (d->realms[r].kdcs[i].flags & K5_RKFLAG_DELETED))
+                                    continue;
+
+                                if (d->realms[r].kdcs[i].master) {
+                                    d->realms[r].kdcs[i].master = FALSE;
+                                    d->realms[r].kdcs[i].flags |= K5_RKFLAG_MOD_MASTER;
+                                }
+                            }
+
+                            d->realms[r].kdcs[k].master = TRUE;
+                        }
+                        d->realms[r].kdcs[k].flags |= K5_RKFLAG_MOD_MASTER;
+                        modified = TRUE;
+
+                        break;
+                    }
+                }
+
+                if (modified) {
+                    if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
+                        d->flags |= K5_CDFLAG_MOD_REALMS;
+                        d->realms[r].flags |= K5_RDFLAG_MODIFED;
+                        k5_update_realms_display(hwnd, d);
+                    }
+                }
+
+                k5_update_kdcs_display(hw_kdc, d, r);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_NEW_DMAP:
+            {
+                ListView_EditLabel(GetDlgItem(hwnd, IDC_CFG_DMAP), 0);
+
+                return TRUE;
+            }
+            break;
+
+        case CMD_DEL_DMAP:
+            {
+                k5_delete_dmap(hwnd, d);
+
+                return TRUE;
+            }
+            break;
         }
         break;
 
     case WM_DESTROY:
+        if (d->hm_realms_ctx)
+            DestroyMenu(d->hm_realms_ctx);
+        if (d->hm_kdc_ctx)
+            DestroyMenu(d->hm_kdc_ctx);
+        if (d->hm_dmap_ctx)
+            DestroyMenu(d->hm_dmap_ctx);
+
+        d->hm_realms_ctx = NULL;
+        d->hm_kdc_ctx = NULL;
+        d->hm_dmap_ctx = NULL;
+        break;
+
+    case KHUI_WM_CFG_NOTIFY:
+        /* the realms dialog receives this notification after the top
+           level krb5 configuration panel has received it.  Therefore,
+           we assume that any changes have already been applied.  When
+           applying changes, we switch the mod bits off to indicate
+           that the changes have been written.  We just have to
+           repaint the screen at this point. */
+        if (HIWORD(wParam) == WMCFG_APPLY) {
+            k5_purge_config_data(d, TRUE, TRUE, TRUE);
+            k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
+            if (d->c_realm != -1) {
+                k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), d, d->c_realm);
+                k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), d, d->c_realm);
+            } else {
+                k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), NULL, 0);
+                k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
+            }
+        }
         break;
     }
     return FALSE;
@@ -1709,7 +2605,6 @@ k5_register_config_panels(void) {
 #endif
     }
 
-#ifdef REALM_EDITOR
     ZeroMemory(&reg, sizeof(reg));
 
     LoadString(hResModule, IDS_K5RLM_SHORT_DESC,
@@ -1726,7 +2621,6 @@ k5_register_config_panels(void) {
     reg.flags = 0;
 
     khui_cfg_register(node, &reg);
-#endif
 
     ZeroMemory(&reg, sizeof(reg));
 
@@ -1794,9 +2688,7 @@ k5_register_config_panels(void) {
 void
 k5_unregister_config_panels(void) {
     khui_config_node node_main;
-#ifdef REALM_EDITOR
     khui_config_node node_realms;
-#endif
     khui_config_node node_ids;
     khui_config_node node_tab;
     khui_config_node node_ccaches;
@@ -1808,17 +2700,15 @@ k5_unregister_config_panels(void) {
 #endif
     }
 
-#ifdef REALM_EDITOR
     if (KHM_SUCCEEDED(khui_cfg_open(node_main, L"KerberosRealms", 
                                     &node_realms))) {
         khui_cfg_remove(node_realms);
         khui_cfg_release(node_realms);
-    }
+    } else {
 #ifdef DEBUG
-    else
         assert(FALSE);
 #endif
-#endif
+    }
 
     if (KHM_SUCCEEDED(khui_cfg_open(node_main, L"KerberosCCaches",
                                     &node_ccaches))) {

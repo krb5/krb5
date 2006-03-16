@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/locate_kdc.c
  *
- * Copyright 1990,2000,2001,2002,2003,2004 Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2001,2002,2003,2004,2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -100,52 +100,23 @@ _krb5_use_dns_realm(krb5_context context)
 
 #endif /* KRB5_DNS_LOOKUP */
 
-static int get_port (const char *service, int stream, int defalt)
-{
-#if 0 /* Only used for "kerberos" and "kerberos-sec", and we want the
-	 right port numbers even on the OSes that botch the entries in
-	 /etc/services.  So don't bother with the lookup, except maybe
-	 to produce a warning.  */
-    struct addrinfo hints = { 0 };
-    struct addrinfo *ai;
-    int err;
-
-    hints.ai_family = PF_INET;
-    hints.ai_socktype = stream ? SOCK_STREAM : SOCK_DGRAM;
-    err = getaddrinfo (NULL, service, &hints, &ai);
-    if (err == 0 && ai != 0) {
-	if (ai->ai_addr->sa_family == AF_INET) {
-	    int port = ((struct sockaddr_in *)ai->ai_addr)->sin_port;
-	    freeaddrinfo (ai);
-	    return port;
-	}
-	freeaddrinfo (ai);
-    }
-#endif
-    /* Any error - don't complain, just use default.  */
-    return htons (defalt);
-}
-
 int
 krb5int_grow_addrlist (struct addrlist *lp, int nmore)
 {
     int i;
     int newspace = lp->space + nmore;
-    size_t newsize = newspace * sizeof (struct addrlist);
-    struct addrinfo **newaddrs;
+    size_t newsize = newspace * sizeof (*lp->addrs);
+    void *newaddrs;
 
-    /* NULL check a concession to SunOS4 compatibility for now; not
-       required for pure ANSI support.  */
-    if (lp->addrs)
-	newaddrs = realloc (lp->addrs, newsize);
-    else
-	newaddrs = malloc (newsize);
-
+    newaddrs = realloc (lp->addrs, newsize);
     if (newaddrs == NULL)
 	return errno;
-    for (i = lp->space; i < newspace; i++)
-	newaddrs[i] = NULL;
     lp->addrs = newaddrs;
+    for (i = lp->space; i < newspace; i++) {
+	lp->addrs[i].ai = NULL;
+	lp->addrs[i].freefn = NULL;
+	lp->addrs[i].data = NULL;
+    }
     lp->space = newspace;
     return 0;
 }
@@ -158,7 +129,8 @@ krb5int_free_addrlist (struct addrlist *lp)
 {
     int i;
     for (i = 0; i < lp->naddrs; i++)
-	freeaddrinfo (lp->addrs[i]);
+	if (lp->addrs[i].freefn)
+	    (lp->addrs[i].freefn)(lp->addrs[i].data);
     free (lp->addrs);
     lp->addrs = NULL;
     lp->naddrs = lp->space = 0;
@@ -214,26 +186,23 @@ static inline void Tprintf(const char *fmt, ...)
 #endif
 }
 
-static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
+#if 0
+extern void krb5int_debug_fprint(const char *, ...);
+#define dprint krb5int_debug_fprint
+#define print_addrlist krb5int_print_addrlist
+extern void print_addrlist (const struct addrlist *a);
+#else
+static inline void dprint(const char *fmt, ...) { }
+static inline void print_addrlist(const struct addrlist *a) { }
+#endif
+
+static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a,
+				 void (*freefn)(void *), void *data)
 {
     int err;
 
-    switch (a->ai_socktype) {
-    case SOCK_DGRAM:
-	Tprintf("\tdgram\n");
-	break;
-    case SOCK_STREAM:
-	Tprintf("\tstream\n");
-	break;
-    case SOCK_RAW:
-	Tprintf("\traw\n");
-	break;
-    case 0:
-	break;
-    default:
-	Tprintf("\tsocket type %d\n", a->ai_socktype);
-	break;
-    }
+    dprint("\tadding %p=%A to %p (naddrs=%d space=%d)\n", a, a, lp,
+	   lp->naddrs, lp->space);
 
     if (lp->naddrs == lp->space) {
 	err = grow_list (lp, 1);
@@ -242,13 +211,26 @@ static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a)
 	    return err;
 	}
     }
-    lp->addrs[lp->naddrs++] = a;
-    a->ai_next = 0;
-    Tprintf ("count is now %d\n", lp->naddrs);
+    Tprintf("setting element %d\n", lp->naddrs);
+    lp->addrs[lp->naddrs].ai = a;
+    lp->addrs[lp->naddrs].freefn = freefn;
+    lp->addrs[lp->naddrs].data = data;
+    lp->naddrs++;
+    Tprintf ("\tcount is now %d: ", lp->naddrs);
+    print_addrlist(lp);
+    Tprintf("\n");
     return 0;
 }
 
 #define add_host_to_list krb5int_add_host_to_list
+
+static void call_freeaddrinfo(void *data)
+{
+    /* Strict interpretation of the C standard says we can't assume
+       that the ABI for f(void*) and f(struct foo *) will be
+       compatible.  Use this stub just to be paranoid.  */
+    freeaddrinfo(data);
+}
 
 int
 krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
@@ -258,6 +240,7 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
     struct addrinfo *addrs, *a, *anext, hint;
     int err;
     char portbuf[10], secportbuf[10];
+    void (*freefn)(void *);
 
     Tprintf ("adding hostname %s, ports %d,%d, family %d, socktype %d\n",
 	     hostname, ntohs (port), ntohs (secport),
@@ -277,10 +260,11 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
 		 hostname, portbuf, err, gai_strerror (err));
 	return translate_ai_error (err);
     }
+    freefn = call_freeaddrinfo;
     anext = 0;
-    for (a = addrs; a != 0 && err == 0; a = anext) {
+    for (a = addrs; a != 0 && err == 0; a = anext, freefn = 0) {
 	anext = a->ai_next;
-	err = add_addrinfo_to_list (lp, a);
+	err = add_addrinfo_to_list (lp, a, freefn, a);
     }
     if (err || secport == 0)
 	goto egress;
@@ -294,13 +278,13 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
 	err = translate_ai_error (err);
 	goto egress;
     }
-    for (a = addrs; a != 0 && err == 0; a = anext) {
+    freefn = call_freeaddrinfo;
+    for (a = addrs; a != 0 && err == 0; a = anext, freefn = 0) {
 	anext = a->ai_next;
-	err = add_addrinfo_to_list (lp, a);
+	err = add_addrinfo_to_list (lp, a, freefn, a);
     }
 egress:
-    if (anext)
-	freeaddrinfo (anext);
+    /* XXX Memory leaks possible here if add_addrinfo_to_list fails.  */
     return err;
 }
 
@@ -559,58 +543,261 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 }
 #endif
 
+#include "k5-locate.h"
+
+static const char objdir[] = LIBDIR "/krb5/plugins/libkrb5";
+
+struct module_callback_data {
+    int out_of_mem;
+    struct addrlist *lp;
+};
+
+static int
+module_callback (void *cbdata, int socktype, struct sockaddr *sa)
+{
+    struct module_callback_data *d = cbdata;
+    struct {
+	struct addrinfo ai;
+	union {
+	    struct sockaddr_in sin;
+	    struct sockaddr_in6 sin6;
+	} u;
+    } *x;
+
+    if (socktype != SOCK_STREAM && socktype != SOCK_DGRAM)
+	return 0;
+    if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
+	return 0;
+    x = malloc (sizeof (*x));
+    if (x == 0) {
+	d->out_of_mem = 1;
+	return 1;
+    }
+    memset(x, 0, sizeof (*x));
+    x->ai.ai_addr = (struct sockaddr *) &x->u;
+    x->ai.ai_socktype = socktype;
+    x->ai.ai_family = sa->sa_family;
+    if (sa->sa_family == AF_INET) {
+	x->u.sin = *(struct sockaddr_in *)sa;
+	x->ai.ai_addrlen = sizeof(struct sockaddr_in);
+    }
+    if (sa->sa_family == AF_INET6) {
+	x->u.sin6 = *(struct sockaddr_in6 *)sa;
+	x->ai.ai_addrlen = sizeof(struct sockaddr_in6);
+    }
+    if (add_addrinfo_to_list (d->lp, &x->ai, free, x) != 0) {
+	/* Assumes only error is ENOMEM.  */
+	d->out_of_mem = 1;
+	return 1;
+    }
+    return 0;
+}
+
+static krb5_error_code
+module_locate_server (krb5_context ctx, const krb5_data *realm,
+		      struct addrlist *addrlist,
+		      enum locate_service_type svc, int socktype, int family)
+{
+    struct krb5plugin_service_locate_result *res = NULL;
+    krb5_error_code code;
+    struct krb5plugin_service_locate_ftable *vtbl = NULL;
+    void **ptrs;
+    int i;
+    struct module_callback_data cbdata = { 0, };
+
+    Tprintf("in module_locate_server\n");
+    cbdata.lp = addrlist;
+    if (!PLUGIN_DIR_OPEN (&ctx->libkrb5_plugins)) {
+	code = krb5int_open_plugin_dir (objdir, &ctx->libkrb5_plugins);
+	if (code)
+	    return KRB5_PLUGIN_NO_HANDLE;
+    }
+
+    code = krb5int_get_plugin_dir_data (&ctx->libkrb5_plugins, "service_locator", &ptrs);
+    if (code) {
+	Tprintf("error looking up plugin symbols: %s\n", error_message(code));
+	return KRB5_PLUGIN_NO_HANDLE;
+    }
+
+    for (i = 0; ptrs[i]; i++) {
+	void *blob;
+
+	vtbl = ptrs[i];
+	Tprintf("element %d is %p\n", i, ptrs[i]);
+
+	/* For now, don't keep the plugin data alive.  For long-lived
+	   contexts, it may be desirable to change that later.  */
+	code = vtbl->init(ctx, &blob);
+	if (code)
+	    continue;
+
+	code = vtbl->lookup(blob, svc, realm->data, socktype, family,
+			    module_callback, &cbdata);
+	vtbl->fini(blob);
+	if (code == KRB5_PLUGIN_NO_HANDLE) {
+	    /* Module passes, keep going.  */
+	    /* XXX */
+	    Tprintf("plugin doesn't handle this realm (KRB5_PLUGIN_NO_HANDLE)\n");
+	    continue;
+	}
+	if (code != 0) {
+	    /* Module encountered an actual error.  */
+	    Tprintf("plugin lookup routine returned error %d: %s\n",
+		    code, error_message(code));
+	    krb5int_free_plugin_dir_data (ptrs);
+	    return code;
+	}
+	break;
+    }
+    if (ptrs[i] == NULL) {
+	Tprintf("ran off end of plugin list\n");
+	krb5int_free_plugin_dir_data (ptrs);
+	return KRB5_PLUGIN_NO_HANDLE;
+    }
+    Tprintf("stopped with plugin #%d, res=%p\n", i, res);
+
+    /* Got something back, yippee.  */
+    Tprintf("now have %d addrs in list %p\n", addrlist->naddrs, addrlist);
+    print_addrlist(addrlist);
+    krb5int_free_plugin_dir_data (ptrs);
+    return 0;
+}
+
+static krb5_error_code
+prof_locate_server (krb5_context context, const krb5_data *realm,
+		    struct addrlist *addrlist,
+		    enum locate_service_type svc, int socktype, int family)
+{
+    const char *profname;
+    int dflport1, dflport2 = 0;
+    struct servent *serv;
+
+    switch (svc) {
+    case locate_service_kdc:
+	profname = "kdc";
+	/* We used to use /etc/services for these, but enough systems
+	   have old, crufty, wrong settings that this is probably
+	   better.  */
+    kdc_ports:
+	dflport1 = htons(KRB5_DEFAULT_PORT);
+	dflport2 = htons(KRB5_DEFAULT_SEC_PORT);
+	break;
+    case locate_service_master_kdc:
+	profname = "master_kdc";
+	goto kdc_ports;
+    case locate_service_kadmin:
+	profname = "admin_server";
+	dflport1 = htons(DEFAULT_KADM5_PORT);
+	break;
+    case locate_service_krb524:
+	profname = "krb524_server";
+	serv = getservbyname(KRB524_SERVICE, "udp");
+	dflport1 = serv ? serv->s_port : htons (KRB524_PORT);
+	break;
+    case locate_service_kpasswd:
+	profname = "kpasswd_server";
+	dflport1 = htons(DEFAULT_KPASSWD_PORT);
+	break;
+    default:
+	return EBUSY;		/* XXX */
+    }
+
+    return krb5_locate_srv_conf_1 (context, realm, profname, addrlist,
+				   0, socktype,
+				   dflport1, dflport2, family);
+}
+
+static krb5_error_code
+dns_locate_server (krb5_context context, const krb5_data *realm,
+		   struct addrlist *addrlist,
+		   enum locate_service_type svc, int socktype, int family)
+{
+    const char *dnsname;
+    int use_dns = _krb5_use_dns_kdc(context);
+    krb5_error_code code;
+
+    if (!use_dns)
+	return KRB5_PLUGIN_NO_HANDLE;
+
+    switch (svc) {
+    case locate_service_kdc:
+	dnsname = "_kerberos";
+	break;
+    case locate_service_master_kdc:
+	dnsname = "_kerberos-master";
+	break;
+    case locate_service_kadmin:
+	dnsname = "_kerberos-adm";
+	break;
+    case locate_service_krb524:
+	dnsname = "_krb524";
+	break;
+    case locate_service_kpasswd:
+	dnsname = "_kpasswd";
+	break;
+    default:
+	return KRB5_PLUGIN_NO_HANDLE;
+    }
+
+    code = 0;
+    if (socktype == SOCK_DGRAM || socktype == 0) {
+	code = krb5_locate_srv_dns_1(realm, dnsname, "_udp", addrlist, family);
+	if (code)
+	    Tprintf("dns udp lookup returned error %d\n", code);
+    }
+    if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
+	code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp", addrlist, family);
+	if (code)
+	    Tprintf("dns tcp lookup returned error %d\n", code);
+    }
+    return code;
+}
+
 /*
- * Wrapper function for the two backends
+ * Wrapper function for the various backends
  */
 
 krb5_error_code
 krb5int_locate_server (krb5_context context, const krb5_data *realm,
 		       struct addrlist *addrlist,
-		       int get_masters,
-		       const char *profname, const char *dnsname,
-		       int socktype,
-		       /* network order port numbers! */
-		       int dflport1, int dflport2,
-		       int family)
+		       enum locate_service_type svc,
+		       int socktype, int family)
 {
     krb5_error_code code;
     struct addrlist al = ADDRLIST_INIT;
 
     *addrlist = al;
 
+    code = module_locate_server(context, realm, &al, svc, socktype, family);
+    Tprintf("module_locate_server returns %d\n", code);
+    if (code != KRB5_PLUGIN_NO_HANDLE) {
+	*addrlist = al;
+	return code;
+    }
+
     /*
-     * We always try the local file first
+     * We always try the local file before DNS
      */
 
-    code = krb5_locate_srv_conf_1(context, realm, profname, &al, get_masters,
-				  socktype, dflport1, dflport2, family);
+    code = prof_locate_server(context, realm, &al, svc, socktype, family);
+
+    /* We could put more heuristics here, like looking up a hostname
+       of "kerberos."+REALM, etc.  */
 
 #ifdef KRB5_DNS_LOOKUP
-    if (code && dnsname != 0) {
-	int use_dns = _krb5_use_dns_kdc(context);
-	if (use_dns) {
-	    code = 0;
-	    if (socktype == SOCK_DGRAM || socktype == 0) {
-		code = krb5_locate_srv_dns_1(realm, dnsname, "_udp",
-					     &al, family);
-		if (code)
-		    Tprintf("dns udp lookup returned error %d\n", code);
-	    }
-	    if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
-		code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp",
-					     &al, family);
-		if (code)
-		    Tprintf("dns tcp lookup returned error %d\n", code);
-	    }
-	}
+    if (code) {
+	krb5_error_code code2;
+	code2 = dns_locate_server(context, realm, &al, svc, socktype, family);
+	if (code2 != KRB5_PLUGIN_NO_HANDLE)
+	    code = code2;
     }
 #endif /* KRB5_DNS_LOOKUP */
     if (code == 0)
 	Tprintf ("krb5int_locate_server found %d addresses\n",
 		 al.naddrs);
     else
-	Tprintf ("krb5int_locate_server returning error code %d\n",
-		 code);
+	Tprintf ("krb5int_locate_server returning error code %d/%s\n",
+		 code, error_message(code));
     if (code != 0) {
 	if (al.space)
 	    free_list (&al);
@@ -630,24 +817,9 @@ krb5_locate_kdc(krb5_context context, const krb5_data *realm,
 		struct addrlist *addrlist,
 		int get_masters, int socktype, int family)
 {
-    int udpport, sec_udpport;
-
-    udpport = get_port (KDC_PORTNAME, 0, KRB5_DEFAULT_PORT);
-    if (socktype == SOCK_STREAM)
-	sec_udpport = 0;
-    else {
-	sec_udpport = get_port (KDC_SECONDARY_PORTNAME, 0,
-				(udpport == htons (KRB5_DEFAULT_PORT)
-				 ? KRB5_DEFAULT_SEC_PORT
-				 : KRB5_DEFAULT_PORT));
-	if (sec_udpport == udpport)
-	    sec_udpport = 0;
-    }
-
-    return krb5int_locate_server(context, realm, addrlist, 0,
-				 get_masters ? "master_kdc" : "kdc",
+    return krb5int_locate_server(context, realm, addrlist,
 				 (get_masters
-				  ? "_kerberos-master"
-				  : "_kerberos"),
-				 socktype, udpport, sec_udpport, family);
+				  ? locate_service_master_kdc
+				  : locate_service_kdc),
+				 socktype, family);
 }

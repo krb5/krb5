@@ -137,7 +137,7 @@ reqdaemonwnd_proc(HWND hwnd,
                                                         sizeof(widname))))
                     continue;
                 else {
-                    lr = (result != KHUI_NC_RESULT_GET_CREDS);
+                    lr = (result != KHUI_NC_RESULT_PROCESS);
                     break;
                 }
             } while(TRUE);

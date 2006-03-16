@@ -48,6 +48,7 @@ OBJFILES= 			\
 	$(OBJ)\aboutwnd.obj	\
 	$(OBJ)\reqdaemon.obj	\
 	$(OBJ)\addrchange.obj	\
+	$(OBJ)\debugfuncs.obj	\
 	$(OBJ)\cfg_general_wnd.obj \
 	$(OBJ)\cfg_identities_wnd.obj \
 	$(OBJ)\cfg_notif_wnd.obj \
@@ -57,8 +58,11 @@ RESFILES= \
 	$(OBJ)\khapp.res	\
 	$(OBJ)\appver.res
 
-LIBFILES=			\
-	$(LIBDIR)\nidmgr32.lib
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+LIBFILES=$(LIBDIR)\nidmgr64.lib
+!else
+LIBFILES=$(LIBDIR)\nidmgr32.lib
+!endif
 
 SDKLIBFILES= 			\
 	comctl32.lib 		\
@@ -83,8 +87,15 @@ $(MANIFESTFILE): netidmgr.manifest.$(CPU).$(KH_CLVER).debug
 !endif
 	$(CP) $** $@
 
+
+!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+SCLIB=bufferoverflowu.lib
+!else
+SCLIB=
+!endif
+
 $(EXEFILE): $(OBJFILES) $(RESFILES) $(LIBFILES)
-	$(EXEGUILINK) $(SDKLIBFILES)
+	$(EXEGUILINK) $(SDKLIBFILES) $(SCLIB)
 
 all: mkdirs $(EXEFILE) $(MANIFESTFILE)
 

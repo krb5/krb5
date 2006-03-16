@@ -129,7 +129,8 @@ gss_libinit.so gss_libinit.po $(OUTPRE)gss_libinit.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(srcdir)/generic/gssapiP_generic.h $(srcdir)/generic/gssapi_generic.h \
   $(BUILDTOP)/include/gssapi/gssapi.h krb5/gssapi_krb5.h \
   gss_libinit.h generic/gssapi.h

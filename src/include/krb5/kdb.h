@@ -194,26 +194,13 @@ extern char *krb5_mkey_pwd_prompt2;
  *
  * Data encoding is little-endian.
  */
+#include "k5-platform.h"
 #define	krb5_kdb_decode_int16(cp, i16)	\
-	*((krb5_int16 *) &(i16)) = (((krb5_int16) ((unsigned char) (cp)[0]))| \
-			      ((krb5_int16) ((unsigned char) (cp)[1]) << 8))
+	*((krb5_int16 *) &(i16)) = load_16_le(cp)
 #define	krb5_kdb_decode_int32(cp, i32)	\
-	*((krb5_int32 *) &(i32)) = (((krb5_int32) ((unsigned char) (cp)[0]))| \
-			      ((krb5_int32) ((unsigned char) (cp)[1]) << 8) | \
-			      ((krb5_int32) ((unsigned char) (cp)[2]) << 16)| \
-			      ((krb5_int32) ((unsigned char) (cp)[3]) << 24))
-#define	krb5_kdb_encode_int16(i16, cp)	\
-	{							\
-	    (cp)[0] = (unsigned char) ((i16) & 0xff);		\
-	    (cp)[1] = (unsigned char) (((i16) >> 8) & 0xff);	\
-	}
-#define	krb5_kdb_encode_int32(i32, cp)	\
-	{							\
-	    (cp)[0] = (unsigned char) ((i32) & 0xff);		\
-	    (cp)[1] = (unsigned char) (((i32) >> 8) & 0xff);	\
-	    (cp)[2] = (unsigned char) (((i32) >> 16) & 0xff);	\
-	    (cp)[3] = (unsigned char) (((i32) >> 24) & 0xff);	\
-	}
+	*((krb5_int32 *) &(i32)) = load_32_le(cp)
+#define krb5_kdb_encode_int16(i16, cp)	store_16_le(i16, cp)
+#define	krb5_kdb_encode_int32(i32, cp)	store_32_le(i32, cp)
 
 #define KRB5_KDB_OPEN_RW                0
 #define KRB5_KDB_OPEN_RO                1

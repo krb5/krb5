@@ -26,12 +26,17 @@
 
 /* Data representation and related functions */
 
+#include<winsock2.h>
 #include<krbcred.h>
 #include<krb5.h>
 #include<kherror.h>
 #include<strsafe.h>
+#include<assert.h>
 
-khm_int32 KHMAPI enctype_toString(const void * data, khm_size cbdata, wchar_t *destbuf, khm_size *pcbdestbuf, khm_int32 flags)
+khm_int32 KHMAPI 
+enctype_toString(const void * data, khm_size cbdata,
+		 wchar_t *destbuf, khm_size *pcbdestbuf,
+		 khm_int32 flags)
 {
     int resid = 0;
     int etype;
@@ -130,17 +135,90 @@ khm_int32 KHMAPI enctype_toString(const void * data, khm_size cbdata, wchar_t *d
     }
 }
 
-khm_int32 KHMAPI addr_list_toString(const void *d, khm_size cb_d, wchar_t *buf, khm_size *pcb_buf, khm_int32 flags)
+khm_int32 KHMAPI
+addr_list_comp(const void *d1, khm_size cb_d1,
+	       const void *d2, khm_size cb_d2)
 {
-    /*TODO: implement this */
-    return KHM_ERROR_NOT_IMPLEMENTED;
+    if (cb_d1 < cb_d2)
+	return -1;
+    if (cb_d1 > cb_d2)
+	return 1;
+    return memcmp(d1, d2, cb_d1);
 }
 
-khm_int32 KHMAPI krb5flags_toString(const void *d, 
-                                    khm_size cb_d, 
-                                    wchar_t *buf, 
-                                    khm_size *pcb_buf, 
-                                    khm_int32 f)
+khm_int32 KHMAPI
+addr_list_toString(const void *d, khm_size cb_d,
+		   wchar_t *buf, khm_size *pcb_buf,
+		   khm_int32 flags)
+{
+    wchar_t tbuf[2048];
+    wchar_t * strpos;
+    khm_size cbleft;
+    size_t t;
+    k5_serial_address * addrs;
+
+    if (cb_d == 0 || d == NULL) {
+        tbuf[0] = L'\0';
+    } else {
+        addrs = (k5_serial_address *) d;
+
+        strpos = tbuf;
+        cbleft = sizeof(tbuf);
+        tbuf[0] = L'\0';
+
+        while (TRUE) {
+            if (cb_d < sizeof(*addrs) ||
+                addrs->magic != K5_SERIAL_ADDRESS_MAGIC ||
+                cb_d < sizeof(*addrs) + addrs->length - sizeof(khm_int32))
+                break;
+
+            if (strpos != tbuf) {
+                if (FAILED(StringCbCatEx(strpos, cbleft, L"  ",
+                                         &strpos, &cbleft,
+                                         0)))
+                    break;
+            }
+
+#ifdef DEBUG
+            assert(*strpos == L'\0');
+#endif
+
+            one_addr(addrs, strpos, cbleft);
+
+	    t = 0;
+	    if (FAILED(StringCchLength(strpos,
+				       cbleft / sizeof(wchar_t),
+				       &t)))
+		break;
+
+	    strpos += t;
+	    cbleft -= t * sizeof(wchar_t);
+
+            t = sizeof(*addrs) + addrs->length - sizeof(khm_int32);
+            addrs = (k5_serial_address *) BYTEOFFSET(addrs, t);
+            cb_d -= t;
+        }
+    }
+
+    StringCbLength(tbuf, sizeof(tbuf), &t);
+
+    if (!buf || *pcb_buf < t) {
+        *pcb_buf = t;
+        return KHM_ERROR_TOO_LONG;
+    }
+
+    StringCbCopy(buf, *pcb_buf, tbuf);
+    *pcb_buf = t;
+
+    return KHM_ERROR_SUCCESS;
+}
+
+khm_int32 KHMAPI
+krb5flags_toString(const void *d, 
+		   khm_size cb_d, 
+		   wchar_t *buf, 
+		   khm_size *pcb_buf, 
+		   khm_int32 f)
 {
     wchar_t sbuf[32];
     int i = 0;
@@ -196,19 +274,42 @@ khm_int32 KHMAPI krb5flags_toString(const void *d,
     }
 }
 
-khm_int32 serialize_krb5_addresses(krb5_address ** a, void ** buf, size_t * pcbbuf)
+khm_int32
+serialize_krb5_addresses(krb5_address ** a, void * buf, size_t * pcbbuf)
 {
-    /*TODO: implement this */
-    return KHM_ERROR_NOT_IMPLEMENTED;
+    k5_serial_address * addr;
+    khm_size cb_req;
+    khm_size t;
+    khm_boolean overflow = FALSE;
+
+    addr = (k5_serial_address *) buf;
+    cb_req = 0;
+
+    for(; *a; a++) {
+        t = sizeof(k5_serial_address) + (*a)->length - sizeof(khm_int32);
+        cb_req += t;
+        if (cb_req < *pcbbuf) {
+            addr->magic = K5_SERIAL_ADDRESS_MAGIC;
+            addr->addrtype = (*a)->addrtype;
+            addr->length = (*a)->length;
+            memcpy(&addr->data, (*a)->contents, (*a)->length);
+
+            addr = (k5_serial_address *) BYTEOFFSET(addr, t);
+        } else {
+            overflow = TRUE;
+        }
+    }
+
+    *pcbbuf = cb_req;
+
+    return (overflow)?KHM_ERROR_TOO_LONG: KHM_ERROR_SUCCESS;
 }
 
-#if 0
-
-wchar_t * 
-one_addr(krb5_address *a)
+void
+one_addr(k5_serial_address *a, wchar_t * buf, khm_size cbbuf)
 {
-    static wchar_t retstr[256];
-    struct hostent *h;
+    wchar_t retstr[256];
+    struct hostent *h = NULL;
     int no_resolve = 1;
 
     retstr[0] = L'\0';
@@ -227,43 +328,50 @@ one_addr(krb5_address *a)
         if (!no_resolve) {
 #ifdef HAVE_GETIPNODEBYADDR
             int err;
-            h = getipnodebyaddr(a->contents, a->length, af, &err);
+            h = getipnodebyaddr(&a->data, a->length, af, &err);
             if (h) {
                 StringCbPrintf(retstr, sizeof(retstr), L"%S", h->h_name);
                 freehostent(h);
             }
-#else
-            h = gethostbyaddr(a->contents, a->length, af);
+            else
+                h = gethostbyaddr(&a->data, a->length, af);
             if (h) {
                 StringCbPrintf(retstr, sizeof(retstr), L"%S", h->h_name);
             }
 #endif
             if (h)
-                return(retstr);
+                goto _copy_string;
         }
         if (no_resolve || !h) {
 #ifdef HAVE_INET_NTOP
             char buf[46];
-            const char *name = inet_ntop(a->addrtype, a->contents, buf, sizeof(buf));
+            const char *name = inet_ntop(a->addrtype, &a->data, buf, sizeof(buf));
             if (name) {
                 StringCbPrintf(retstr, sizeof(retstr), L"%S", name);
-                return;
+                goto _copy_string;
             }
 #else
             if (a->addrtype == ADDRTYPE_INET) {
+                khm_ui_4 addr = a->data;
                 StringCbPrintf(retstr, sizeof(retstr),
-                    L"%d.%d.%d.%d", a->contents[0], a->contents[1],
-                    a->contents[2], a->contents[3]);
-                return(retstr);
+                               L"%d.%d.%d.%d",
+                               (int) (addr & 0xff),
+                               (int) ((addr >> 8) & 0xff),
+                               (int) ((addr >> 16)& 0xff),
+                               (int) ((addr >> 24)& 0xff));
+                goto _copy_string;
             }
 #endif
         }
     }
+
     {
         wchar_t tmpfmt[128];
         LoadString(hResModule, IDS_UNK_ADDR_FMT, tmpfmt, sizeof(tmpfmt)/sizeof(wchar_t));
         StringCbPrintf(retstr, sizeof(retstr), tmpfmt, a->addrtype);
     }
-    return(retstr);
+
+ _copy_string:
+    StringCbCopy(buf, cbbuf, retstr);
 }
-#endif
+

@@ -50,19 +50,17 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 {
     krb5_error_code code;
 
-    code = krb5int_locate_server (context, realm, addrlist, 0,
-				  "kpasswd_server", "_kpasswd", 0,
-				  htons(DEFAULT_KPASSWD_PORT), 0, 0);
+    code = krb5int_locate_server (context, realm, addrlist,
+				  locate_service_kpasswd, 0, 0);
     if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
-	code = krb5int_locate_server (context, realm, addrlist, 0,
-				      "admin_server", "_kerberos-adm", 1,
-				      DEFAULT_KPASSWD_PORT, 0, 0);
+	code = krb5int_locate_server (context, realm, addrlist,
+				      locate_service_kadmin, 1, 0);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
 	       port number to use DEFAULT_KPASSWD_PORT.  */
 	    int i;
 	    for ( i=0;i<addrlist->naddrs;i++ ) {
-		struct addrinfo *a = addrlist->addrs[i];
+		struct addrinfo *a = addrlist->addrs[i].ai;
 		if (a->ai_family == AF_INET)
 		    sa2sin (a->ai_addr)->sin_port = htons(DEFAULT_KPASSWD_PORT);
 	    }
@@ -157,11 +155,11 @@ krb5_change_set_password(
 	struct timeval timeout;
 
 	/* XXX Now the locate_ functions can return IPv6 addresses.  */
-	if (al.addrs[i]->ai_family != AF_INET)
+	if (al.addrs[i].ai->ai_family != AF_INET)
 	    continue;
 
 	tried_one = 1;
-	if (connect(s2, al.addrs[i]->ai_addr, al.addrs[i]->ai_addrlen) == SOCKET_ERROR) {
+	if (connect(s2, al.addrs[i].ai->ai_addr, al.addrs[i].ai->ai_addrlen) == SOCKET_ERROR) {
 	    if (SOCKET_ERRNO == ECONNREFUSED || SOCKET_ERRNO == EHOSTUNREACH)
 		continue; /* try the next addr */
 
@@ -243,7 +241,8 @@ krb5_change_set_password(
 
 	if ((cc = sendto(s1, chpw_req.data, 
 			 (GETSOCKNAME_ARG3_TYPE) chpw_req.length, 0,
-			 al.addrs[i]->ai_addr, al.addrs[i]->ai_addrlen)) != chpw_req.length)
+			 al.addrs[i].ai->ai_addr, al.addrs[i].ai->ai_addrlen))
+	    != chpw_req.length)
 	{
 	    if ((cc < 0) && ((SOCKET_ERRNO == ECONNREFUSED) ||
 			     (SOCKET_ERRNO == EHOSTUNREACH)))

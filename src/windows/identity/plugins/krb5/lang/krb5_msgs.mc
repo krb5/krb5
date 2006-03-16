@@ -151,6 +151,11 @@ Language=English
 This is commonly caused by an incorrect password.  Please verify that the password is correct and note that passwords are case sensitive.
 .
 
+MessageId=
+SymbolicName=MSG_ERR_CTX_DESTROY_CREDS
+Language=English
+Destroying Krb5 tickets
+.
 
 MessageId=
 SymbolicName=MSG_

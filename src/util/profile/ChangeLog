@@ -1,3 +1,11 @@
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (generate-files-mac): Depend on profile.h.
+
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (profile_tcl): Include $(LIBS).
+
 2005-10-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_file.c (profile_update_file_data): Drop test of

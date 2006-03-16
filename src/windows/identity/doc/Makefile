@@ -51,7 +51,7 @@ INPUT += "$(SRC)\util"
 INPUT += "$(SRC)\doc"
 INPUT += "$(SRC)\kmm"
 INPUT += "$(SRC)\kherr"
-!ifndef NO_AFS
+!ifdef BUILD_AFS
 INPUT += "$(SRC)\plugins\afs"
 !endif
 
@@ -59,7 +59,7 @@ IMAGE_PATH = "$(SRC)\doc\images"
 
 INCLUDE_PATH = "$(INCDIR)" "$(SRC)\include"
 
-CHM_FILE = "$(DOCDIR)\devdocs.chm"
+CHM_FILE = "$(DOCDIR)\netiddev.chm"
 <<
 	-$(HHC) $(DOCDIR)\html\index.hhp
 

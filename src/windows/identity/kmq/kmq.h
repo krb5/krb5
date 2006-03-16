@@ -149,12 +149,16 @@ typedef struct tag_kmq_queue {
     kmq_timer last_post;        /*!< Time the last message was
                                   received */
 
+    khm_int32 flags;            /*!< Flags.  Currently, it's just KMQ_QUEUE_FLAG_DELETED */
+
     /*Q*/
     QDCL(kmq_message_ref);      /*!< Queue of message references  */
 
     /*Lnode*/
     LDCL(struct tag_kmq_queue);
 } kmq_queue;
+
+#define KMQ_QUEUE_FLAG_DELETED 0x0008
 
 /*! \brief Message subscription
 
@@ -163,6 +167,8 @@ typedef struct tag_kmq_queue {
     thread will not receive messages in the context of another thread.
 */
 typedef struct tag_kmq_msg_subscription {
+    khm_int32 magic;            /*!< Magic number.  Should always be
+                                  ::KMQ_MSG_SUB_MAGIC */
     khm_int32 type;             /*!< Type of message */
     khm_int32 rcpt_type;        /*!< Type of recipient.  One of
                                   ::KMQ_RCPTTYPE_CB or
@@ -179,6 +185,8 @@ typedef struct tag_kmq_msg_subscription {
     /*lnode*/
     LDCL(struct tag_kmq_msg_subscription);
 } kmq_msg_subscription;
+
+#define KMQ_MSG_SUB_MAGIC 0x3821b58e
 
 /*! \brief Callback recipient type
 
@@ -481,6 +489,19 @@ KHMEXP khm_int32 KHMAPI kmq_unsubscribe_hwnd(khm_int32 type, HWND hwnd);
 KHMEXP khm_int32 KHMAPI kmq_create_subscription(
     kmq_callback_t cb, 
     khm_handle * result);
+
+/*! \brief Create an ad-hoc subscription for a window
+
+    An ad-hoc subscription describes a window that will be dispatched
+    messages individually without broadcasting.
+
+    \see kmq_post_sub_msg(), kmq_post_sub_msg_ex(),
+        kmq_send_sub_msg(), kmq_post_subs_msg(),
+        kmq_post_subs_msg_ex(), kmq_send_subs_msg(),
+        kmq_delete_subscription()
+ */
+KHMEXP khm_int32 KHMAPI kmq_create_hwnd_subscription(HWND hw,
+                                                     khm_handle * result);
 
 /*! \brief Delete an ad-hoc subscription
 

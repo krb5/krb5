@@ -146,7 +146,22 @@ typedef struct tag_kmm_plugin_info {
 				     failure */
 
     kmm_plugin  h_plugin;       /*!< Handle to plugin */
+
+    khm_int32   flags;          /*!< Flags for the plugin. Currently
+                                  this can only specify
+                                  ::KMM_PLUGIN_FLAG_DISABLED. */
 } kmm_plugin_info;
+
+/*! \brief The plugin is disabled
+
+    This flag will be set in the \a flags field of the
+    ::kmm_plugin_info structure for a plugin that has been marked as
+    disabled.  If the plugin is currently running, but marked as
+    disabled for future sessions, then this bit will be set in \a
+    flags , but the \a state of the plugin will indicate that the
+    plugin is running.
+ */
+#define KMM_PLUGIN_FLAG_DISABLED    0x0400
 
 /*! \name Plugin types
 @{*/
@@ -178,6 +193,7 @@ typedef struct tag_kmm_plugin_info {
 
 /*! \brief Plugin states */
 enum _kmm_plugin_states {
+    KMM_PLUGIN_STATE_FAIL_INIT = -6,    /*!< Failed to initialize */
     KMM_PLUGIN_STATE_FAIL_UNKNOWN = -5, /*!< Failed due to unknown
                                           reasons */
     KMM_PLUGIN_STATE_FAIL_MAX_FAILURE = -4, /*!< The plugin has
@@ -795,6 +811,20 @@ kmm_release_plugin_info_i(kmm_plugin_info * info);
  */
 KHMEXP khm_int32   KHMAPI
 kmm_get_next_plugin(kmm_plugin p, kmm_plugin * p_next);
+
+/*! \brief Enables or disables a plugin
+
+    This function currently does not take effect immediately.  However
+    it marks the plugin as enabled or disabled so that the next time
+    NetIDMgr starts, the module manager will act accordingly.
+
+    \param[in] p Handle to the plugin
+
+    \param[in] enable If non-zero, the plugin will be marked as
+        enabled.  Otherwise the plugin will be marked as disabled.
+ */
+KHMEXP khm_int32   KHMAPI
+kmm_enable_plugin(kmm_plugin p, khm_boolean enable);
 
 /*! \brief Register a plugin
 

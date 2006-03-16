@@ -281,13 +281,40 @@ _exit:
 KHMEXP khm_int32   KHMAPI 
 kmm_unregister_plugin(wchar_t * plugin, khm_int32 config_flags)
 {
-    /*TODO: implement this */
-    return KHM_ERROR_NOT_IMPLEMENTED;
+    khm_handle csp_plugin = NULL;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    rv = kmm_get_plugin_config(plugin, config_flags, &csp_plugin);
+
+    if (KHM_FAILED(rv))
+        goto _cleanup;
+
+    rv = khc_remove_space(csp_plugin);
+
+ _cleanup:
+
+    if (csp_plugin)
+        khc_close_space(csp_plugin);
+
+    return rv;
 }
 
 KHMEXP khm_int32   KHMAPI 
 kmm_unregister_module(wchar_t * module, khm_int32 config_flags)
 {
-    /*TODO: implement this */
-    return KHM_ERROR_NOT_IMPLEMENTED;
+    khm_handle csp_module = NULL;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    rv = kmm_get_module_config(module, config_flags, &csp_module);
+
+    if (KHM_FAILED(rv))
+        goto _cleanup;
+
+    rv = khc_remove_space(csp_module);
+
+ _cleanup:
+    if (csp_module)
+        khc_close_space(csp_module);
+
+    return rv;
 }

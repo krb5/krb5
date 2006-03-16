@@ -161,6 +161,52 @@ kmmint_free_plugin(kmm_plugin_i * pi)
 }
 
 KHMEXP khm_int32   KHMAPI
+kmm_enable_plugin(kmm_plugin p, khm_boolean enable) {
+    kmm_plugin_i * pi;
+    khm_int32 rv = KHM_ERROR_NOT_FOUND; /* default to error */
+    khm_handle csp_plugin = NULL;
+    khm_int32 flags;
+
+    EnterCriticalSection(&cs_kmm);
+    if (!kmm_is_plugin(p)) {
+        rv = KHM_ERROR_INVALID_PARAM;
+        goto _cleanup;
+    }
+
+    pi = kmm_plugin_from_handle(p);
+
+    if (KHM_FAILED(rv = kmm_get_plugin_config(pi->p.name, 0, &csp_plugin))) {
+        goto _cleanup;
+    }
+
+    if (KHM_FAILED(rv = khc_read_int32(csp_plugin, L"Flags", &flags))) {
+        goto _cleanup;
+    }
+
+    if (enable) {
+        flags &= ~KMM_PLUGIN_FLAG_DISABLED;
+        pi->flags &= ~KMM_PLUGIN_FLAG_DISABLED;
+    } else {
+        flags |= KMM_PLUGIN_FLAG_DISABLED;
+        pi->flags |= KMM_PLUGIN_FLAG_DISABLED;
+    }
+
+    if (KHM_FAILED(rv = khc_write_int32(csp_plugin, L"Flags", flags))) {
+        goto _cleanup;
+    }
+
+    rv = KHM_ERROR_SUCCESS;
+
+ _cleanup:
+    LeaveCriticalSection(&cs_kmm);
+
+    if (csp_plugin)
+        khc_close_space(csp_plugin);
+
+    return rv;
+}
+
+KHMEXP khm_int32   KHMAPI
 kmm_get_plugin_info_i(kmm_plugin p, kmm_plugin_info * info) {
     khm_int32 rv = KHM_ERROR_SUCCESS;
     kmm_plugin_i * pi;
@@ -203,8 +249,10 @@ kmm_get_plugin_info_i(kmm_plugin p, kmm_plugin_info * info) {
 
     info->state = pi->state;
 
-    info->h_plugin = p;
     kmm_hold_plugin(p);
+    info->h_plugin = p;
+
+    info->flags = (pi->flags & KMM_PLUGIN_FLAG_DISABLED);
 
  _cleanup:
     LeaveCriticalSection(&cs_kmm);
@@ -331,7 +379,7 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
 
     p = kmmint_get_plugin_i(plugin->name);
 
-    /* released below or in kmm_init_module() */
+    /* released below or in kmmint_init_module() */
     kmm_hold_plugin(kmm_handle_from_plugin(p));
 
     if(p->state != KMM_PLUGIN_STATE_NONE &&

@@ -247,8 +247,7 @@ khui_cw_del_type(khui_new_creds * c,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khui_cw_find_type(
-                  khui_new_creds * c, 
+khui_cw_find_type(khui_new_creds * c, 
                   khm_int32 type, 
                   khui_new_creds_by_type **t)
 {
@@ -271,8 +270,7 @@ khui_cw_find_type(
 
 
 KHMEXP khm_int32 KHMAPI 
-khui_cw_enable_type(
-                    khui_new_creds * c,
+khui_cw_enable_type(khui_new_creds * c,
                     khm_int32 type,
                     khm_boolean enable)
 {
@@ -299,8 +297,7 @@ khui_cw_enable_type(
 }
 
 KHMEXP khm_boolean KHMAPI 
-khui_cw_type_succeeded(
-                       khui_new_creds * c,
+khui_cw_type_succeeded(khui_new_creds * c,
                        khm_int32 type)
 {
     khui_new_creds_by_type * t;
@@ -543,8 +540,7 @@ khui_cw_get_prompt_count(khui_new_creds * c,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khui_cw_get_prompt(
-                   khui_new_creds * c, 
+khui_cw_get_prompt(khui_new_creds * c, 
                    khm_size idx, 
                    khui_new_creds_prompt ** prompt)
 {
@@ -570,19 +566,29 @@ KHMEXP khm_int32 KHMAPI
 khui_cw_sync_prompt_values(khui_new_creds * c)
 {
     khm_size i;
+    khm_size n;
+    HWND hw;
+    wchar_t tmpbuf[KHUI_MAXCCH_PROMPT_VALUE];
 
     EnterCriticalSection(&c->cs);
-    for(i=0;i<c->n_prompts;i++) {
+ redo_loop:
+    n = c->n_prompts;
+    for(i=0; i<n; i++) {
         khui_new_creds_prompt * p;
+
         p = c->prompts[i];
         if(p->hwnd_edit) {
-            /* Ideally, we would retrieve the text to a temporary
-            buffer with the c->cs released, obtain c->cs and copy the
-            text to p->value.  However, I'm not going to bother as the
-            code paths we are touching here do not need c->cs while
-            setting p->value does */
-            GetWindowText(p->hwnd_edit, p->value, 
-                          KHUI_MAXCCH_PROMPT_VALUE);
+            hw = p->hwnd_edit;
+            LeaveCriticalSection(&c->cs);
+
+            GetWindowText(hw, tmpbuf, ARRAYLENGTH(tmpbuf));
+
+            EnterCriticalSection(&c->cs);
+            if (n != c->n_prompts)
+                goto redo_loop;
+            SecureZeroMemory(p->value, KHUI_MAXCB_PROMPT_VALUE);
+            StringCchCopy(p->value, KHUI_MAXCCH_PROMPT_VALUE,
+                          tmpbuf);
         }
     }
     LeaveCriticalSection(&c->cs);

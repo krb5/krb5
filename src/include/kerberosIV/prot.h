@@ -88,33 +88,27 @@
  *
  * Should also go away soon though.
  */
+#include "k5-platform.h"
+
+#ifdef SWAP16
+#define krb4_swab16(val)	SWAP16(val)
+#else
 #define krb4_swab16(val)	((((val) >> 8)&0xFF) | ((val) << 8))
+#endif
+#ifdef SWAP32
+#define krb4_swap32(val)	SWAP32(val)
+#else
 #define krb4_swab32(val)	((((val)>>24)&0xFF) | (((val)>>8)&0xFF00) | \
 				  (((val)<<8)&0xFF0000) | ((val)<<24))
+#endif
 
 /*
  * Macros to encode integers into buffers.  These take a parameter
  * that is a moving pointer of type (unsigned char *) into the buffer,
  * and assume that the caller has already bounds-checked.
  */
-#define KRB4_PUT32BE(p, val)			\
-do {						\
-    (p)[0] = ((KRB_UINT32)(val) >> 24) & 0xff;	\
-    (p)[1] = ((KRB_UINT32)(val) >> 16) & 0xff;	\
-    (p)[2] = ((KRB_UINT32)(val) >> 8)  & 0xff;	\
-    (p)[3] =  (KRB_UINT32)(val)        & 0xff;	\
-    (p) += 4;					\
-} while (0)
-
-#define KRB4_PUT32LE(p, val)			\
-do {						\
-    (p)[0] =  (KRB_UINT32)(val)        & 0xff;	\
-    (p)[1] = ((KRB_UINT32)(val) >> 8)  & 0xff;	\
-    (p)[2] = ((KRB_UINT32)(val) >> 16) & 0xff;	\
-    (p)[3] = ((KRB_UINT32)(val) >> 24) & 0xff;	\
-    (p) += 4;					\
-} while (0)
-
+#define KRB4_PUT32BE(p, val)	(store_32_be(val, p), (p) += 4)
+#define KRB4_PUT32LE(p, val)	(store_32_le(val, p), (p) += 4)
 #define KRB4_PUT32(p, val, le)			\
 do {						\
     if (le)					\
@@ -123,20 +117,8 @@ do {						\
 	KRB4_PUT32BE((p), (val));		\
 } while (0)
 
-#define KRB4_PUT16BE(p, val)			\
-do {						\
-    (p)[0] = ((KRB_UINT32)(val) >> 8) & 0xff;	\
-    (p)[1] =  (KRB_UINT32)(val)       & 0xff;	\
-    (p) += 2;					\
-} while (0)
-
-#define KRB4_PUT16LE(p, val)			\
-do {						\
-    (p)[0] =  (KRB_UINT32)(val)       & 0xff;	\
-    (p)[1] = ((KRB_UINT32)(val) >> 8) & 0xff;	\
-    (p) += 2;					\
-} while (0)
-
+#define KRB4_PUT16BE(p, val)	(store_16_be(val, p), (p) += 2)
+#define KRB4_PUT16LE(p, val)	(store_16_le(val, p), (p) += 2)
 #define KRB4_PUT16(p, val, le)			\
 do {						\
     if (le)					\
@@ -153,24 +135,8 @@ do {						\
  * of unsigned -> signed conversion as implementation-defined, so it's
  * unwise to depend on such.
  */
-#define KRB4_GET32BE(val, p)			\
-do {						\
-    (val)  = (KRB_UINT32)(p)[0] << 24;		\
-    (val) |= (KRB_UINT32)(p)[1] << 16;		\
-    (val) |= (KRB_UINT32)(p)[2] << 8;		\
-    (val) |= (KRB_UINT32)(p)[3];		\
-    (p) += 4;					\
-} while (0)
-
-#define KRB4_GET32LE(val, p)			\
-do {						\
-    (val)  = (KRB_UINT32)(p)[0];		\
-    (val) |= (KRB_UINT32)(p)[1] << 8;		\
-    (val) |= (KRB_UINT32)(p)[2] << 16;		\
-    (val) |= (KRB_UINT32)(p)[3] << 24;		\
-    (p) += 4;					\
-} while(0)
-
+#define KRB4_GET32BE(val, p)	((val) = load_32_be(p), (p) += 4)
+#define KRB4_GET32LE(val, p)	((val) = load_32_le(p), (p) += 4)
 #define KRB4_GET32(val, p, le)			\
 do {						\
     if (le)					\
@@ -179,20 +145,8 @@ do {						\
 	KRB4_GET32BE((val), (p));		\
 } while (0)
 
-#define KRB4_GET16BE(val, p)			\
-do {						\
-    (val)  = (KRB_UINT32)(p)[0] << 8;		\
-    (val) |= (KRB_UINT32)(p)[1];		\
-    (p) += 2;					\
-} while (0)
-
-#define KRB4_GET16LE(val, p)			\
-do {						\
-    (val)  = (KRB_UINT32)(p)[0];		\
-    (val) |= (KRB_UINT32)(p)[1] << 8;		\
-    (p) += 2;					\
-} while (0)
-
+#define KRB4_GET16BE(val, p)	((val) = load_16_be(p), (p) += 2)
+#define KRB4_GET16LE(val, p)	((val) = load_16_le(p), (p) += 2)
 #define KRB4_GET16(val, p, le)			\
 do {						\
     if (le)					\

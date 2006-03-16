@@ -36,10 +36,11 @@ extern int khm_nCmdShow;
 extern const wchar_t * khm_facility;
 extern kconf_schema schema_uiconfig[];
 extern khm_ui_4 khm_commctl_version;
+extern khm_version app_version;
 
 #define IS_COMMCTL6() (khm_commctl_version >= 0x60000)
 
-typedef struct tag_khm_startup_options {
+typedef struct tag_khm_startup_options_v1 {
     BOOL seen;
     BOOL processing;
 
@@ -56,6 +57,19 @@ typedef struct tag_khm_startup_options {
 } khm_startup_options;
 
 extern khm_startup_options khm_startup;
+
+typedef struct tag_khm_query_app_version_v1 {
+    khm_int32 magic;
+
+    khm_int32 code;
+
+    khm_version ver_caller;
+    khm_version ver_remote;
+
+    khm_boolean request_swap;
+} khm_query_app_version;
+
+#define KHM_QUERY_APP_VER_MAGIC 0x38f8c2eb
 
 void khm_add_dialog(HWND dlg);
 void khm_del_dialog(HWND dlg);
@@ -74,6 +88,8 @@ void khm_parse_commandline();
 void khm_register_window_classes(void);
 
 HWND khm_html_help(HWND hwnd, wchar_t * suffix, UINT command, DWORD_PTR data);
+
+WPARAM khm_message_loop_int(khm_boolean * p_exit);
 
 #define MAX_RES_STRING 1024
 

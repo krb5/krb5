@@ -450,10 +450,8 @@ cfgui_update_state(HWND hwnd,
     TreeView_SetItem(hwtv, &itx);
 
     if(cfgui_check_mod_state(NULL)) {
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_SUMMARY), TRUE);
         EnableWindow(GetDlgItem(hwnd, IDAPPLY), TRUE);
     } else {
-        EnableWindow(GetDlgItem(hwnd, IDC_CFG_SUMMARY), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDAPPLY), FALSE);
     }
 }
@@ -512,7 +510,7 @@ cfgui_dlgproc_generic(HWND hwnd,
             r_fill.bottom = r_logo.top;
             FillRect(hdc, &r_fill, d->hbr_white);
 
-            SetWindowLong(hwnd, DWL_MSGRESULT, (LONG) TRUE);
+            SetWindowLongPtr(hwnd, DWLP_MSGRESULT, (LONG) TRUE);
         }
         return TRUE;
     }
@@ -591,6 +589,8 @@ cfgui_dlgproc(HWND hwnd,
         {
             LPNMHDR lpnm;
             LPNMTREEVIEW lptv;
+            LPNMTVGETINFOTIP lpgi;
+            khui_config_node node;
 
             lpnm = (LPNMHDR) lParam;
 
@@ -600,6 +600,31 @@ cfgui_dlgproc(HWND hwnd,
                 cfgui_activate_node(hwnd,
                                     (khui_config_node) 
                                     lptv->itemNew.lParam);
+                return TRUE;
+
+            case TVN_GETINFOTIP:
+                lpgi = (LPNMTVGETINFOTIP) lParam;
+                node = (khui_config_node) lpgi->lParam;
+
+                if (node) {
+                    khm_int32 flags = 0;
+
+                    flags = khui_cfg_get_flags(node);
+
+                    if (flags & KHUI_CNFLAG_MODIFIED) {
+                        LoadString(khm_hInstance, IDS_CFG_IT_MOD,
+                                   lpgi->pszText, lpgi->cchTextMax);
+                    } else if (flags & KHUI_CNFLAG_APPLIED) {
+                        LoadString(khm_hInstance, IDS_CFG_IT_APP,
+                                   lpgi->pszText, lpgi->cchTextMax);
+                    } else {
+                        LoadString(khm_hInstance, IDS_CFG_IT_NONE,
+                                   lpgi->pszText, lpgi->cchTextMax);
+                    }
+                } else {
+                    StringCchCopy(lpgi->pszText, lpgi->cchTextMax, L"");
+                }
+
                 return TRUE;
             }
         }
@@ -691,6 +716,9 @@ void khm_refresh_config(void) {
     khm_int32 rv;
     int n_tries = 0;
     khui_config_node cfg_ids = NULL;
+    khui_config_node cfg_r = NULL;
+    khui_menu_def * omenu;
+    khm_boolean refresh_menu = FALSE;
 
     do {
         rv = kcdb_identity_enum(KCDB_IDENT_FLAG_CONFIG,
@@ -766,9 +794,80 @@ void khm_refresh_config(void) {
         }
     }
 
+    /* Now iterate through the root level configuration nodes and make
+       sure we have a menu item for each of them. */
+    if (KHM_FAILED(khui_cfg_get_first_child(NULL, &cfg_r)))
+        goto _cleanup;
+
+    omenu = khui_find_menu(KHUI_MENU_OPTIONS);
+    if (omenu == NULL)
+        goto _cleanup;
+
+    do {
+        khm_int32 action;
+        khm_int32 flags;
+        khui_action * paction;
+        wchar_t cname[KHUI_MAXCCH_NAME];
+        wchar_t wshort[KHUI_MAXCCH_SHORT_DESC];
+        khm_size cb;
+        khm_handle sub;
+        khui_config_node_reg reg;
+
+        flags = khui_cfg_get_flags(cfg_r);
+        if (flags & KHUI_CNFLAG_SYSTEM)
+            goto _next_cfg;
+
+        cb = sizeof(cname);
+        if (KHM_FAILED(khui_cfg_get_name(cfg_r, cname, &cb))) {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+            goto _next_cfg;
+        }
+
+        paction = khui_find_named_action(cname);
+
+        if (!paction) {
+            khui_cfg_get_reg(cfg_r, &reg);
+
+            kmq_create_hwnd_subscription(khm_hwnd_main, &sub);
+
+            StringCbCopy(wshort, sizeof(wshort), reg.short_desc);
+            StringCbCat(wshort, sizeof(wshort), L" ...");
+
+            action = khui_action_create(cname,
+                                        wshort,
+                                        reg.long_desc,
+                                        (void *) CFGACTION_MAGIC,
+                                        KHUI_ACTIONTYPE_TRIGGER,
+                                        sub);
+
+            if (action == 0) {
+#ifdef DEBUG
+                assert(FALSE);
+#endif
+                goto _next_cfg;
+            }
+
+            khui_menu_insert_action(omenu, -1, action, 0);
+
+            refresh_menu = TRUE;
+        }
+
+    _next_cfg:
+        if (KHM_FAILED(khui_cfg_get_next_release(&cfg_r)))
+            break;
+    } while(cfg_r);
+
+    if (refresh_menu)
+        khm_menu_refresh_items();
+
  _cleanup:
     if (cfg_ids)
         khui_cfg_release(cfg_ids);
+
+    if (cfg_r)
+        khui_cfg_release(cfg_r);
 
     if (idents)
         PFREE(idents);
@@ -783,7 +882,7 @@ void khm_init_config(void) {
     reg.short_desc = wshort;
     reg.long_desc = wlong;
     reg.h_module = khm_hInstance;
-    reg.flags = 0;
+    reg.flags = KHUI_CNFLAG_SYSTEM;
 
     reg.name = L"KhmGeneral";
     reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_GENERAL);
@@ -818,7 +917,7 @@ void khm_init_config(void) {
                wshort, ARRAYLENGTH(wshort));
     LoadString(khm_hInstance, IDS_CFG_IDS_TAB_LONG,
                wlong, ARRAYLENGTH(wlong));
-    reg.flags = KHUI_CNFLAG_SUBPANEL;
+    reg.flags = KHUI_CNFLAG_SUBPANEL | KHUI_CNFLAG_SYSTEM;
 
     khui_cfg_register(node, &reg);
 
@@ -829,11 +928,11 @@ void khm_init_config(void) {
                wshort, ARRAYLENGTH(wshort));
     LoadString(khm_hInstance, IDS_CFG_ID_TAB_LONG,
                wlong, ARRAYLENGTH(wlong));
-    reg.flags = KHUI_CNFLAG_PLURAL | KHUI_CNFLAG_SUBPANEL;
+    reg.flags = KHUI_CNFLAG_PLURAL | KHUI_CNFLAG_SUBPANEL | KHUI_CNFLAG_SYSTEM;
 
     khui_cfg_register(node, &reg);
 
-    reg.flags = 0;
+    reg.flags = KHUI_CNFLAG_SYSTEM;
     khui_cfg_release(node);
 
     reg.name = L"KhmNotifications";

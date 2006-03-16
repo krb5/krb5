@@ -1,3 +1,7 @@
+2006-03-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check size of "int".
+
 2005-12-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-unix): Do depend on all-libs.

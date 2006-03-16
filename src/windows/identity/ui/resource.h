@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by D:\work\pismere\athena\auth\krb5\src\windows\identity\ui\lang\en_us\khapp.rc
+// Used by C:\work\pismere\athena\auth\krb5\src\windows\identity\ui\lang\en_us\khapp.rc
 //
 #define IDI_MAIN_APP                    104
 #define IDD_PROPPAGE_MEDIUM             106
@@ -207,8 +207,11 @@
 #define IDI_ICON4                       206
 #define IDI_APPICON_OK                  206
 #define IDS_PISTATE_FAILREG             207
+#define IDI_CFG_PLUGIN                  207
 #define IDS_PISTATE_FAILDIS             208
+#define IDI_CFG_PLUGIN_ERR              208
 #define IDS_PISTATE_FAILLOD             209
+#define IDI_CFG_PLUGIN_DIS              209
 #define IDS_PISTATE_PLACEHOLD           210
 #define IDS_PISTATE_REG                 211
 #define IDS_PISTATE_HOLD                212
@@ -232,6 +235,28 @@
 #define IDS_NC_ID_DEF                   230
 #define IDS_NC_ID_WDEF                  231
 #define IDS_NC_ID_NDEF                  232
+#define IDS_PACTION_YES                 233
+#define IDS_PACTION_NO                  234
+#define IDS_PACTION_YESALL              235
+#define IDS_PACTION_NOALL               236
+#define IDS_PACTION_KEEP                237
+#define IDS_PACTION_REMOVE              238
+#define IDS_PACTION_DISCARD             239
+#define IDS_CFG_IT_MOD                  240
+#define IDS_CFG_IT_APP                  241
+#define IDS_CFG_IT_NONE                 242
+#define IDS_CFG_NODESC                  243
+#define IDS_CFG_P_DELCNFT               244
+#define IDS_CFG_P_DELCNFM               245
+#define IDS_CFG_P_DELCNFS               246
+#define IDS_CFG_P_DELNDEP               247
+#define IDS_CFG_P_ENBCNFT               248
+#define IDS_CFG_P_ENBCNFM               249
+#define IDS_PISTATE_FAILINIT            250
+#define IDS_CFG_P_UNRCNFT               251
+#define IDS_CFG_P_UNRCNFM               252
+#define IDS_CFG_P_UNRCNFS               253
+#define IDS_ACTION_LAYOUT_CUST          254
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -312,6 +337,13 @@
 #define IDC_LIST1                       1103
 #define IDC_MODULES                     1103
 #define IDC_PP_CONFIG                   1104
+#define IDC_CFG_UNREGISTER              1107
+#define IDC_CFG_VERSION                 1108
+#define IDC_CFG_ICON                    1109
+#define IDC_CFG_LOGTOFILE               1110
+#define IDC_CFG_LOGPATH                 1111
+#define IDC_NOTIF_HALFLIFE              1112
+#define IDC_CFG_DESTROYALL              1113
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -324,9 +356,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        207
+#define _APS_NEXT_RESOURCE_VALUE        210
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1107
+#define _APS_NEXT_CONTROL_VALUE         1114
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -58,6 +58,8 @@ STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS |
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
+    CONTROL         "Kerberos 5 Ticket Options",IDC_STATIC,"Static",
+                    SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
     LTEXT           "Realm",IDC_STATIC,7,25,52,13
     COMBOBOX        IDC_NCK5_REALM,60,25,233,17,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -71,8 +73,12 @@ BEGIN
     CONTROL         "Can be &forwarded to other machines",
                     IDC_NCK5_FORWARDABLE,"Button",BS_AUTOCHECKBOX | 
                     BS_NOTIFY | WS_TABSTOP,7,107,132,12
-    CONTROL         "Kerberos 5 Ticket Options",IDC_STATIC,"Static",
-                    SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    CONTROL         "Addressless",IDC_NCK5_ADDRESS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,128,54,10
+    LTEXT           "Additional IP address",IDC_STATIC,118,129,68,8,NOT 
+                    WS_VISIBLE
+    CONTROL         "",IDC_NCK5_PUBLICIP,"SysIPAddress32",NOT WS_VISIBLE | 
+                    WS_TABSTOP,193,125,100,15
 END
 
 IDD_PP_KRB5C DIALOGEX 0, 0, 235, 156
@@ -129,18 +135,19 @@ BEGIN
     LTEXT           "Default Realm",IDC_CFG_LBL_REALM,13,9,46,8
     COMBOBOX        IDC_CFG_DEFREALM,76,7,166,30,CBS_DROPDOWN | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,25,84,14,
-                    WS_DISABLED
+    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,25,84,14,NOT 
+                    WS_VISIBLE | WS_DISABLED
     GROUPBOX        "Keberos Configuration File",IDC_CFG_CFGFILEGRP,7,45,241,
                     61
     LTEXT           "Location",IDC_CFG_LBL_CFGFILE,13,61,28,8
     EDITTEXT        IDC_CFG_CFGFILE,76,58,119,14,ES_AUTOHSCROLL
     PUSHBUTTON      "Browse...",IDC_CFG_BROWSE,198,58,44,14
     CONTROL         "Create file if missing",IDC_CFG_CREATECONFIG,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,76,76,80,10
+                    BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | 
+                    WS_TABSTOP,76,90,80,10
     CONTROL         "Include realms in New Credentials realm list",
                     IDC_CFG_INCREALMS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    76,91,153,10
+                    76,78,153,10
     GROUPBOX        "Windows® Options",IDC_CFG_WINGRP,7,110,241,65
     LTEXT           "Hostname",IDC_CFG_LBL_HOSTNAME,13,123,33,8
     EDITTEXT        IDC_CFG_HOSTNAME,76,120,166,14,ES_AUTOHSCROLL | 
@@ -200,11 +207,19 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Ticket lifetime",IDC_CFG_LBL_DEFLIFE,7,10,44,8
     EDITTEXT        IDC_CFG_DEFLIFE,91,7,137,14,ES_AUTOHSCROLL
-    LTEXT           "Ticket renewable lifetime",IDC_CFG_LBL_DEFRLIFE,7,29,80,
-                    8
-    EDITTEXT        IDC_CFG_DEFRLIFE,91,26,137,14,ES_AUTOHSCROLL
-    LTEXT           "Credentials cache",IDC_STATIC,7,63,58,8
-    EDITTEXT        IDC_CFG_CCACHE,91,60,137,14,ES_AUTOHSCROLL
+    CONTROL         "Renewable for",IDC_CFG_RENEW,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,41,63,10
+    EDITTEXT        IDC_CFG_DEFRLIFE,91,39,137,14,ES_AUTOHSCROLL
+    CONTROL         "Can be forwarded to other machines",IDC_CFG_FORWARD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,59,133,10
+    CONTROL         "Addressless",IDC_CFG_ADDRESSLESS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,77,54,10
+    LTEXT           "Additional IP address",IDC_STATIC,91,78,68,8,NOT 
+                    WS_VISIBLE
+    CONTROL         "",IDC_CFG_PUBLICIP,"SysIPAddress32",NOT WS_VISIBLE | 
+                    WS_TABSTOP,128,89,100,15
+    LTEXT           "Credentials cache",IDC_STATIC,7,132,58,8
+    EDITTEXT        IDC_CFG_CCACHE,91,130,137,14,ES_AUTOHSCROLL
 END
 
 IDD_NC_KRB5_PASSWORD DIALOGEX 0, 0, 300, 166
@@ -226,18 +241,19 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "File Caches",IDC_CFG_FCGRP,7,38,241,137
+    GROUPBOX        "File Caches",IDC_CFG_FCGRP,7,26,241,149
     CONTROL         "",IDC_CFG_FCLIST,"SysListView32",LVS_REPORT | 
                     LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | 
-                    WS_TABSTOP,13,48,229,86
+                    WS_TABSTOP,13,37,229,97
     EDITTEXT        IDC_CFG_FCNAME,13,139,173,14,ES_AUTOHSCROLL
     PUSHBUTTON      "&Browse ...",IDC_CFG_BROWSE,192,139,50,14
     PUSHBUTTON      "Add",IDC_CFG_ADD,13,156,50,14
     PUSHBUTTON      "Remove Selected",IDC_CFG_REMOVE,88,156,80,14
-    CHECKBOX        "Include all API: credentials caches",IDC_CFG_INCAPI,13,
-                    7,125,10
+    CONTROL         "Include all API: credentials caches",IDC_CFG_INCAPI,
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,
+                    123,7,125,10
     CONTROL         "Include Windows LSA cache (MSLSA:)",IDC_CFG_INCMSLSA,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,22,136,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,7,136,10
 END
 
 
@@ -396,7 +412,7 @@ STRINGTABLE
 BEGIN
     IDS_KRB4_SHORT_DESC     "Kerberos 4"
     IDS_KRB4_LONG_DESC      "Kerberos 4 tickets"
-    IDS_KRB5_FLAGS_SHORT_DESC "Flags"
+    IDS_KRB5_FLAGS_SHORT_DESC "Krb5 Flags"
     IDS_RENEW_TILL_SHORT_DESC "Renew Till"
     IDS_RENEW_TILL_LONG_DESC "Renewable Till"
     IDS_RENEW_FOR_SHORT_DESC "Renew for"
@@ -484,6 +500,27 @@ BEGIN
     IDS_CFG_RE_NEWSERVER    "<New server...>"
     IDS_CFG_RE_NEWDMAP      "<New domain mapping...>"
     IDS_KRB5_NC_NAME        "Kerberos 5"
+    IDS_NCERR_IDENT_TOO_LONG "The identity name is too long."
+    IDS_NCERR_IDENT_INVALID "The identity name is invalid."
+    IDS_NCERR_IDENT_UNKNOWN "An unknown error occurred while validating the identity name."
+    IDS_CFG_RE_ARNUT        "Can't add new realm %s"
+    IDS_CFG_RE_ARNUM        "The new realm name %s can't be added because there is already a realm with the same name listed.  Please type another name."
+    IDS_CFG_RE_ASNUT        "Can't add new server %s for realm %s"
+    IDS_CFG_RE_ASNUM        "There already is a server named %s for realm %s. The new server can not be added."
+    IDS_CFG_RE_DMNUT        "Can't add new domain map %s for realm %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CFG_RE_DMNUM        "There already is a domain named %s mapping to realm %s.  The new domain map could not be added."
+    IDS_CFG_RE_MNR          "&Add new realm"
+    IDS_CFG_RE_MDR          "&Remove realm"
+    IDS_CFG_RE_MNK          "&Add new server"
+    IDS_CFG_RE_MDK          "&Remove server"
+    IDS_CFG_RE_MAK          "Toggle a&dmin server"
+    IDS_CFG_RE_MMK          "Toggle &master KDC"
+    IDS_CFG_RE_MND          "&Add new domain mapping"
+    IDS_CFG_RE_MDD          "&Remove domain mapping"
 END
 
 #endif    // English (U.S.) resources

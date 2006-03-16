@@ -1,3 +1,13 @@
+2006-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* prot.h: Include k5-platform.h.
+	(krb4_swab16, krb4_swap32): Define in terms of SWAP16 and SWAP32,
+	if they're defined.
+	(KRB4_PUT32BE, KRB4_PUT32LE, KRB4_PUT16BE, KRB4_PUT16LE): Define
+	to use store_{16,32}_{be,le}.
+	(KRB4_GET32BE, KRB4_GET32LE, KRB4_GET16BE, KRB4_GET16LE): Define
+	to use load_{16,32}_{be,le}.
+
 2005-05-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (thisconfigdir, mydir): Updated for configure

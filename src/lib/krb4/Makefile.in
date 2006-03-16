@@ -276,39 +276,46 @@ change_password.so change_password.po $(OUTPRE)change_password.$(OBJEXT): \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h krb4int.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/kerberosIV/kadm.h $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/kadm.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h
 cr_auth_repl.so cr_auth_repl.po $(OUTPRE)cr_auth_repl.$(OBJEXT): \
   cr_auth_repl.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 cr_ciph.so cr_ciph.po $(OUTPRE)cr_ciph.$(OBJEXT): cr_ciph.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 cr_tkt.so cr_tkt.po $(OUTPRE)cr_tkt.$(OBJEXT): cr_tkt.c \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h $(SRCTOP)/include/kerberosIV/prot.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h
 debug.so debug.po $(OUTPRE)debug.$(OBJEXT): debug.c \
   $(SRCTOP)/include/kerberosIV/mit-copyright.h
 decomp_tkt.so decomp_tkt.po $(OUTPRE)decomp_tkt.$(OBJEXT): \
   decomp_tkt.c $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(BUILDTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb54proto.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb54proto.h \
+  $(SRCTOP)/include/port-sockets.h
 g_ad_tkt.so g_ad_tkt.po $(OUTPRE)g_ad_tkt.$(OBJEXT): \
   g_ad_tkt.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   krb4int.h $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h
 g_pw_in_tkt.so g_pw_in_tkt.po $(OUTPRE)g_pw_in_tkt.$(OBJEXT): \
   g_pw_in_tkt.c $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h krb4int.h \
   $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h
 g_phost.so g_phost.po $(OUTPRE)g_phost.$(OBJEXT): g_phost.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -338,13 +345,15 @@ kadm_net.so kadm_net.po $(OUTPRE)kadm_net.$(OBJEXT): \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/kerberosIV/krbports.h $(SRCTOP)/include/kerberosIV/kadm.h \
-  $(BUILDTOP)/include/kerberosIV/kadm_err.h $(SRCTOP)/include/kerberosIV/prot.h
+  $(BUILDTOP)/include/kerberosIV/kadm_err.h $(SRCTOP)/include/kerberosIV/prot.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h
 kadm_stream.so kadm_stream.po $(OUTPRE)kadm_stream.$(OBJEXT): \
   kadm_stream.c $(SRCTOP)/include/kerberosIV/kadm.h $(SRCTOP)/include/port-sockets.h \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/kerberosIV/kadm_err.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h
 kname_parse.so kname_parse.po $(OUTPRE)kname_parse.$(OBJEXT): \
   kname_parse.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
@@ -359,37 +368,44 @@ lifetime.so lifetime.po $(OUTPRE)lifetime.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h
 g_in_tkt.so g_in_tkt.po $(OUTPRE)g_in_tkt.$(OBJEXT): \
   g_in_tkt.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   krb4int.h $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h
 mk_auth.so mk_auth.po $(OUTPRE)mk_auth.$(OBJEXT): mk_auth.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 mk_err.so mk_err.po $(OUTPRE)mk_err.$(OBJEXT): mk_err.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 mk_priv.so mk_priv.po $(OUTPRE)mk_priv.$(OBJEXT): mk_priv.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h \
-  $(SRCTOP)/include/kerberosIV/mit-copyright.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/port-sockets.h
 mk_req.so mk_req.po $(OUTPRE)mk_req.$(OBJEXT): mk_req.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h krb4int.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  krb4int.h $(SRCTOP)/include/port-sockets.h
 mk_safe.so mk_safe.po $(OUTPRE)mk_safe.$(OBJEXT): mk_safe.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h \
-  $(SRCTOP)/include/kerberosIV/mit-copyright.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/port-sockets.h
 month_sname.so month_sname.po $(OUTPRE)month_sname.$(OBJEXT): \
   month_sname.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -403,50 +419,59 @@ pkt_cipher.so pkt_cipher.po $(OUTPRE)pkt_cipher.$(OBJEXT): \
   pkt_cipher.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 pkt_clen.so pkt_clen.po $(OUTPRE)pkt_clen.$(OBJEXT): \
   pkt_clen.c $(SRCTOP)/include/kerberosIV/mit-copyright.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 prot_client.so prot_client.po $(OUTPRE)prot_client.$(OBJEXT): \
   prot_client.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 prot_common.so prot_common.po $(OUTPRE)prot_common.$(OBJEXT): \
   prot_common.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 prot_kdc.so prot_kdc.po $(OUTPRE)prot_kdc.$(OBJEXT): \
   prot_kdc.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h
 rd_err.so rd_err.po $(OUTPRE)rd_err.$(OBJEXT): rd_err.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 rd_priv.so rd_priv.po $(OUTPRE)rd_priv.$(OBJEXT): rd_priv.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h \
-  $(SRCTOP)/include/kerberosIV/mit-copyright.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/port-sockets.h
 rd_safe.so rd_safe.po $(OUTPRE)rd_safe.$(OBJEXT): rd_safe.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h \
-  $(SRCTOP)/include/kerberosIV/mit-copyright.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/lsb_addr_cmp.h $(SRCTOP)/include/kerberosIV/mit-copyright.h \
+  $(SRCTOP)/include/port-sockets.h
 send_to_kdc.so send_to_kdc.po $(OUTPRE)send_to_kdc.$(OBJEXT): \
   send_to_kdc.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/kerberosIV/krbports.h $(SRCTOP)/include/kerberosIV/prot.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
-  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb5/kdb.h \
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h \
   krb4int.h
 stime.so stime.po $(OUTPRE)stime.$(OBJEXT): stime.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
@@ -455,12 +480,14 @@ stime.so stime.po $(OUTPRE)stime.$(OBJEXT): stime.c \
 strnlen.so strnlen.po $(OUTPRE)strnlen.$(OBJEXT): strnlen.c \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 rd_preauth.so rd_preauth.po $(OUTPRE)rd_preauth.$(OBJEXT): \
   rd_preauth.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/prot.h \
-  krb4int.h $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/k5-platform.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h krb4int.h $(SRCTOP)/include/port-sockets.h
 mk_preauth.so mk_preauth.po $(OUTPRE)mk_preauth.$(OBJEXT): \
   mk_preauth.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -475,7 +502,8 @@ tf_util.so tf_util.po $(OUTPRE)tf_util.$(OBJEXT): tf_util.c \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h krb4int.h
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h krb4int.h
 dest_tkt.so dest_tkt.po $(OUTPRE)dest_tkt.$(OBJEXT): \
   dest_tkt.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -536,22 +564,26 @@ rd_svc_key.so rd_svc_key.po $(OUTPRE)rd_svc_key.$(OBJEXT): \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/krb54proto.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/krb54proto.h \
   $(SRCTOP)/include/kerberosIV/prot.h
 cr_err_repl.so cr_err_repl.po $(OUTPRE)cr_err_repl.$(OBJEXT): \
   cr_err_repl.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 rd_req.so rd_req.po $(OUTPRE)rd_req.$(OBJEXT): rd_req.c \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h $(BUILDTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb54proto.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5.h $(SRCTOP)/include/krb54proto.h
 g_svc_in_tkt.so g_svc_in_tkt.po $(OUTPRE)g_svc_in_tkt.$(OBJEXT): \
   g_svc_in_tkt.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h krb4int.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h \
+  krb4int.h $(SRCTOP)/include/port-sockets.h
 recvauth.so recvauth.po $(OUTPRE)recvauth.$(OBJEXT): \
   recvauth.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
@@ -563,7 +595,8 @@ ad_print.so ad_print.po $(OUTPRE)ad_print.$(OBJEXT): \
 cr_death_pkt.so cr_death_pkt.po $(OUTPRE)cr_death_pkt.$(OBJEXT): \
   cr_death_pkt.c $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(SRCTOP)/include/kerberosIV/prot.h
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/k5-platform.h \
+  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-thread.h
 kparse.so kparse.po $(OUTPRE)kparse.$(OBJEXT): kparse.c \
   $(SRCTOP)/include/kerberosIV/mit-copyright.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
@@ -593,7 +626,8 @@ g_cnffile.so g_cnffile.po $(OUTPRE)g_cnffile.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h krb4int.h
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h krb4int.h
 RealmsConfig-glue.so RealmsConfig-glue.po $(OUTPRE)RealmsConfig-glue.$(OBJEXT): \
   RealmsConfig-glue.c $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
@@ -601,4 +635,5 @@ RealmsConfig-glue.so RealmsConfig-glue.po $(OUTPRE)RealmsConfig-glue.$(OBJEXT): 
   $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-int.h \
   $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/krb5/kdb.h $(SRCTOP)/include/k5-plugin.h

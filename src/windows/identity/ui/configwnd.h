@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_CONFIGWND_H
 #define __KHIMAIRA_CONFIGWND_H
 
+#define CFGACTION_MAGIC 0x38f8
+
 void 
 khm_show_config_pane(khui_config_node node);
 

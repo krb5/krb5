@@ -50,6 +50,32 @@
 
 	
 
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (generate-files-mac-prerecurse): Depend on
+	update-autoconf-h.
+
+2006-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for vsnprintf and vasprintf, and for
+	positional specification support in printf format strings.
+
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't check for dlopen here.  Call
+	AC_HEADER_DIRENT.  Remove one of the checks for unistd.h.
+
+	* Makefile.in (update-autoconf-h): Build everything in include/krb5.
+	(INSTALLMKDIRS): Add KRB5_LIBKRB5_MODULE_DIR.
+
+	* aclocal.m4 (KRB5_AC_FIND_DLOPEN): Define USE_DLOPEN if found.
+
+	* plugins/locate/python: New directory.
+
+2006-03-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (clean-unix): Delete util/fakedest.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* Makefile.in: support for 64-bit Windows builds

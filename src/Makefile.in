@@ -3,6 +3,7 @@ datadir=@datadir@
 thisconfigdir=.
 myfulldir=.
 mydir=.
+# Don't build sample by default: plugins/locate/python 
 SUBDIRS=util include lib @krb524@ kdc @ldap_plugin_dir@ kadmin slave clients \
 	plugins/kdb/db2 \
 	appl tests \
@@ -21,9 +22,9 @@ all-unix:: krb5-config
 # needs autoconf.h, but building "all" in include requires that util/et
 # have been built first.  Until we can untangle this, let's just check
 # that autoconf.h is up to date before going into any of the subdirectories.
-all-prerecurse: update-autoconf-h
+all-prerecurse generate-files-mac-prerecurse: update-autoconf-h
 update-autoconf-h:
-	(cd include && $(MAKE) krb5/autoconf.h)
+	(cd include/krb5 && $(MAKE) all)
 
 ##DOS##!if 0
 # This makefile doesn't use lib.in, but we still need shlib.conf here.
@@ -67,6 +68,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
 		$(KRB5_DB_MODULE_DIR) \
+		$(KRB5_LIBKRB5_MODULE_DIR) \
 		$(KRB5_INCSUBDIRS) $(datadir) $(EXAMPLEDIR)
 
 install-strip:
@@ -98,12 +100,15 @@ fake-install:
 	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
+#	(w=`pwd`; cd plugins/locate/python && $(MAKE) install DESTDIR="$$w/util/fakedest")
+
 TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean-:: clean-windows
 clean-unix::
 	$(RM) *.o core krb5-config
+	$(RM) -r util/fakedest
 
 mostlyclean: clean
 

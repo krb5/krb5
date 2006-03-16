@@ -1,3 +1,14 @@
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (generate-files-mac): Depend on gssapi_krb5.h.
+
+2006-03-07  Jeffrey Altman <jaltman@mit.edu>
+
+	* acquire_cred.c: (acquire_init_cred)
+          If the leash32.dll is not available, fallback to opening the
+          default credential cache even when the desired_name is 
+          provided.
+
 2005-11-14  Jeffrey Altman <jaltman@mit.edu>
 
 	* gssapi_krb5.hin: include k5-int.h instead of krb5.h

@@ -1,3 +1,25 @@
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (generate-files-mac): New target.
+	(generate-files-mac-prerecurse, generate-files-mac-recurse,
+	generate-files-mac-postrecurse): New helper targets.
+	* post.in (RECURSE_TARGETS): Add generate-files-mac-recurse.
+
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-darwin*): Update MAKE_DYNOBJ_COMMAND, LDCOMBINE,
+	and LDCOMBINE_TAIL to create dynamically loadable bundles.  Don't
+	set DYNOBJ_EXPDEPS or DYNOBJ_EXPFLAGS.  Don't force static-only
+	builds.
+
+	* libnover.in (install-shared): Use MODULE_INSTALL_DIR instead of
+	KRB5_DB_MODULE_DIR.
+
+	* pre.in (MODULE_DIR, KRB5_LIBKRB5_MODULE_DIR): New variables.
+	(KRB5_DB_MODULE_DIR): Define in terms of MODULE_DIR.
+
+	* lib.in (darwin.exports): New target.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* win-pre.in, win-post.in: support for 64-bit Windows builds

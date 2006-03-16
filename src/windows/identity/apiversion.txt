@@ -52,6 +52,83 @@ AppVersion=0.1.2.0
 Date=Nov 30, 2005
 # Alpha 2 release of NetIDMgr, along with KFW 3.0.0 beta 2
 
+#----------------------------------------------------------------
 Version=4
 AppVersion=1.0.0.0
 Date=Dec 05, 2005
+# Released with KfW 3.0.0
+
+#----------------------------------------------------------------
+Version=5
+AppVersion=1.1.0.0
+Date=(TBD)
+# Released with KFW 3.1.0
+
++khui_alert_show_modal(),KMSG_ALERT_SHOW_MODAL, KHUI_ALERT_FLAG_MODAL
+# Support for modal alert boxes
+
++KHUI_PACTION_YES, KHUI_PACTION_NO, KHUI_PACTION_YESALL, KHUI_PACTION_NOALL, KHUI_PACTION_KEEP, KHUI_PACTION_REMOVE, KHUI_PACTION_DISCARD
+# Additional pseudo actions
+
+!tag_khui_action, khui_action
+# Membership extension for supporting custom actions.  Type changes
+# from 'int' to khm_int32.
+
++khui_action_create(), khui_action_get_data(), khui_action_delete()
+# Support for creating custom actions
+
+!kmq_msg_subscription, tag_kmq_msg_subscription
+# Add 'magic' field.
+
++KHUI_MENU_NONE
+# New identifier for unspecified menu commands.
+
++khui_menu_insert_action(), khui_menu_get_action(), khui_menu_get_size(), khui_menu_remove_action()
+# Functions for manipulating custom menus
+
++khui_menu_insert_paction()
+# Exported, but not exposed as an API.  For inserting actions by
+# reference in to menus.
+
+-khui_menu_add_action(), khui_menu_add_paction()
+# Removed deprecated functions.  Temporarily provided as macros. The
+# replacements are khui_menu_insert_action() and
+# khui_menu_insert_paction() respectively.
+
++kmq_create_hwnd_subscription()
+# Ad-hoc subscriptions can now be obtained for Win32 windows.
+
+-khui_create_gloabl_accel_table()
+# Exported but no longer exposed.
+
+-khui_action_list_length()
+# Exported but no longer exposed.
+
++kmm_enable_plugin()
+# New API for enabling or disabling plugins
+
+!kmm_plugin_info
+# Added 'flags' field.
+
++KCDB_ATTR_FLAG_TRANSIENT
+# New flag for transient attributes.
+
++kherr_get_prev_event(), kherr_get_last_event()
+# For more efficient traversal of the event lists for use by error context handlers.
+
++KHERR_RF_COMMIT
+# Flag for error events to signal that the error event has been committed.
+
++khui_action_trigger()
+
++khui_action_set_hwnd()
+
++KEPT_PTR
+
++_cptr
+
+!khc_open_space
+# name parameter is now a const string
+
+!KCDB_ATTRNAME_ISSUE
+# Fixed typo

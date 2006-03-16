@@ -68,6 +68,9 @@ IDI_ID                  ICON                    "..\\..\\images\\id.ico"
 IDI_APPICON_WARN        ICON                    "..\\..\\images\\app_state_warn.ico"
 IDI_APPICON_EXP         ICON                    "..\\..\\images\\app_state_exp.ico"
 IDI_APPICON_OK          ICON                    "..\\..\\images\\app_state_ok.ico"
+IDI_CFG_PLUGIN          ICON                    "..\\..\\images\\cfg_plugin.ico"
+IDI_CFG_PLUGIN_ERR      ICON                    "..\\..\\images\\cfg_plugin_err.ico"
+IDI_CFG_PLUGIN_DIS      ICON                    "..\\..\\images\\cfg_plugin_dis.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -245,14 +248,13 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Title",IDC_CFG_TITLE,0,0,357,20,SS_CENTERIMAGE
     CONTROL         "",IDC_CFG_NODELIST,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_LINESATROOT | WS_TABSTOP,0,20,100,182
+                    TVS_HASLINES | TVS_LINESATROOT | TVS_TRACKSELECT | 
+                    WS_TABSTOP | 0x800,0,20,100,182
     LTEXT           "Static",IDC_CFG_PANE,102,20,255,182,NOT WS_VISIBLE | 
                     WS_BORDER
     PUSHBUTTON      "&Ok",IDOK,162,205,78,16
     PUSHBUTTON      "&Cancel",IDCANCEL,246,205,51,16
     PUSHBUTTON      "&Apply",IDAPPLY,303,205,51,16,WS_DISABLED
-    PUSHBUTTON      "C&hange Summary ...",IDC_CFG_SUMMARY,3,205,76,16,
-                    WS_DISABLED
 END
 
 IDD_CFG_GENERIC DIALOGEX 0, 0, 255, 182
@@ -267,22 +269,29 @@ IDD_CFG_GENERAL DIALOGEX 0, 0, 255, 182
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Startup",IDC_CFG_STARTUP_GROUP,7,7,241,50
+    GROUPBOX        "Startup / Shutdown",IDC_CFG_STARTUP_GROUP,7,7,241,50
     CONTROL         "&Obtain new credentials at startup (if none are present)",
                     IDC_CFG_AUTOINIT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     16,22,196,10
+    CONTROL         "&Destroy all credentials on exit",IDC_CFG_DESTROYALL,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,39,111,10
     CONTROL         "&Start NetIDMgr during Windows logon",IDC_CFG_AUTOSTART,
-                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,16,
-                    38,135,10
-    GROUPBOX        "Other",IDC_CFG_OTHER,7,63,241,54
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | 
+                    WS_TABSTOP,16,48,135,10
+    GROUPBOX        "Other",IDC_CFG_OTHER,7,63,241,85
     CONTROL         "&Run NetIDMgr in system tray after window close",
                     IDC_CFG_KEEPRUNNING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,16,78,170,10
     CONTROL         "Monitor network connectivity",IDC_CFG_NETDETECT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,16,96,106,10
+    CONTROL         "Log trace events to trace log at the following location:",
+                    IDC_CFG_LOGTOFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    16,113,225,10
+    EDITTEXT        IDC_CFG_LOGPATH,16,127,225,14,ES_AUTOHSCROLL | 
+                    ES_READONLY
     CONTROL         "A&utomatically import Windows logon identity",
                     IDC_CFG_AUTOIMPORT,"Button",BS_AUTOCHECKBOX | NOT 
-                    WS_VISIBLE | WS_TABSTOP,16,147,165,10
+                    WS_VISIBLE | WS_TABSTOP,16,158,165,10
 END
 
 IDD_CFG_IDENTITIES DIALOGEX 0, 0, 255, 182
@@ -300,45 +309,55 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "&Monitor credential expiration",IDC_NOTIF_MONITOR,
-                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,7,
-                    111,139,10
     CONTROL         "&Renew automatically at",IDC_NOTIF_RENEW,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,9,100,10
     EDITTEXT        IDC_NOTIF_RENEW_THR,122,7,126,14,ES_AUTOHSCROLL
+    CONTROL         "Renew at &half life intervals when possible",
+                    IDC_NOTIF_HALFLIFE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    48,27,148,10
     CONTROL         "Initial warning at",IDC_NOTIF_WARN1,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,31,100,10
-    EDITTEXT        IDC_NOTIF_WARN1_THR,122,29,126,14,ES_AUTOHSCROLL
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,46,100,10
+    EDITTEXT        IDC_NOTIF_WARN1_THR,122,44,126,14,ES_AUTOHSCROLL
     CONTROL         "Final warning at",IDC_NOTIF_WARN2,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,53,100,10
-    EDITTEXT        IDC_NOTIF_WARN2_THR,122,51,126,14,ES_AUTOHSCROLL
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,68,100,10
+    EDITTEXT        IDC_NOTIF_WARN2_THR,122,66,126,14,ES_AUTOHSCROLL
+    CONTROL         "&Monitor credential expiration",IDC_NOTIF_MONITOR,
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,7,
+                    103,139,10
 END
 
 IDD_CFG_PLUGINS DIALOGEX 0, 0, 255, 182
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_CFG_PLUGINS,"SysListView32",LVS_REPORT | 
-                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,75,168
-    GROUPBOX        "Plugin",IDC_CFG_PLUGINGRP,86,7,162,103
-    LTEXT           "Description",IDC_CFG_LBL_DESC,90,20,36,8
-    EDITTEXT        IDC_CFG_DESC,134,17,109,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Status",IDC_CFG_LBL_STATE,90,38,22,8
-    EDITTEXT        IDC_CFG_STATE,134,35,109,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Depends on",IDC_CFG_LBL_DEPS,90,52,39,8
-    LISTBOX         IDC_CFG_DEPS,134,52,109,34,LBS_SORT | 
+                    LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | WS_BORDER | 
+                    WS_TABSTOP,7,7,75,168
+    ICON            IDI_CFG_PLUGIN,IDC_CFG_ICON,87,11,20,20
+    EDITTEXT        IDC_CFG_DESC,128,7,120,30,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_READONLY
+    LTEXT           "&Module",IDC_CFG_LBL_MOD,87,43,24,8
+    EDITTEXT        IDC_CFG_MODULE,128,43,120,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "&Version",IDC_STATIC,87,59,24,8
+    EDITTEXT        IDC_CFG_VERSION,128,59,120,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "Ve&ndor",IDC_CFG_LBL_VEN,87,75,24,8
+    EDITTEXT        IDC_CFG_VENDOR,128,75,120,12,ES_AUTOHSCROLL | 
+                    ES_READONLY
+    LTEXT           "De&pends on",IDC_CFG_LBL_DEPS,87,93,39,8
+    LISTBOX         IDC_CFG_DEPS,128,93,120,34,LBS_SORT | 
                     LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "Enable",IDC_CFG_ENABLE,134,90,50,14
-    PUSHBUTTON      "Disable",IDC_CFG_DISABLE,193,90,50,14
-    GROUPBOX        "Provided by",IDC_CFG_PROVGRP,86,111,162,47
-    LTEXT           "Module",IDC_CFG_LBL_MOD,90,124,24,8
-    EDITTEXT        IDC_CFG_MODULE,134,121,109,14,ES_AUTOHSCROLL | 
+    LTEXT           "&Status",IDC_CFG_LBL_STATE,87,129,22,8
+    EDITTEXT        IDC_CFG_STATE,128,129,120,12,ES_AUTOHSCROLL | 
                     ES_READONLY
-    LTEXT           "Vendor",IDC_CFG_LBL_VEN,90,142,24,8
-    EDITTEXT        IDC_CFG_VENDOR,133,139,110,14,ES_AUTOHSCROLL | 
-                    ES_READONLY
-    PUSHBUTTON      "Register new plugin ...",IDC_CFG_REGISTER,163,161,85,14,
+    PUSHBUTTON      "&Enable ...",IDC_CFG_ENABLE,128,144,50,14,WS_DISABLED
+    PUSHBUTTON      "&Disable ...",IDC_CFG_DISABLE,198,144,50,14,WS_DISABLED
+    PUSHBUTTON      "&Unregister plugin ...",IDC_CFG_UNREGISTER,87,161,72,14,
                     WS_DISABLED
+    PUSHBUTTON      "&Register new plugin ...",IDC_CFG_REGISTER,169,161,79,
+                    14,NOT WS_VISIBLE | WS_DISABLED
 END
 
 IDD_CFG_IDENTITY DIALOGEX 0, 0, 255, 182
@@ -483,10 +502,8 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 248
-        VERTGUIDE, 86
-        VERTGUIDE, 90
-        VERTGUIDE, 134
-        VERTGUIDE, 243
+        VERTGUIDE, 87
+        VERTGUIDE, 128
         TOPMARGIN, 7
         BOTTOMMARGIN, 175
     END
@@ -554,7 +571,7 @@ BEGIN
     IDS_CFG_GENERAL_SHORT   "General"
     IDS_ACTION_NEW_CRED     "&New credentials ..."
     IDS_ACTION_PASSWD_ID    "Change &password ..."
-    IDS_ACTION_CHOOSE_COLS  "Choose columns ..."
+    IDS_ACTION_CHOOSE_COLS  "View columns"
     IDS_ACTION_DEBUG_WINDOW "Debug window ..."
     IDS_ACTION_VIEW_REFRESH "Refresh"
     IDS_MENU_LAYOUT         "Layout"
@@ -693,6 +710,32 @@ BEGIN
     IDS_NC_ID_DEF           "<p>This identity is the default</p>"
     IDS_NC_ID_WDEF          "<p>Will be the default. (<a id=""NotDef"">Don't make default</a>)</p>"
     IDS_NC_ID_NDEF          "<p>Not default identity.  (<a id=""MakeDef"">make default</a>)</p>"
+    IDS_PACTION_YES         "&Yes"
+    IDS_PACTION_NO          "&No"
+    IDS_PACTION_YESALL      "Y&es to all"
+    IDS_PACTION_NOALL       "N&o to all"
+    IDS_PACTION_KEEP        "&Keep"
+    IDS_PACTION_REMOVE      "&Remove"
+    IDS_PACTION_DISCARD     "&Discard"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CFG_IT_MOD          "Changes need to be applied"
+    IDS_CFG_IT_APP          "Changes have been applied"
+    IDS_CFG_IT_NONE         "No changes"
+    IDS_CFG_NODESC          "(Description for plugin %s is not available)"
+    IDS_CFG_P_DELCNFT       "About to disable plugin %s"
+    IDS_CFG_P_DELCNFM       "Are you sure you want to disable plugin %s ?\n\nOnce disabled, the services provided by the plugin will no longer be available. In addition, any other plugins that depend on this plugin will also become non functional.\n\nNetIDMgr will need to be restarted for the plugin to be deactivated."
+    IDS_CFG_P_DELCNFS       "The following plugins depend on this plugin : %s"
+    IDS_CFG_P_DELNDEP       "No other plugins depend on this plugin."
+    IDS_CFG_P_ENBCNFT       "About to enable plugin %s"
+    IDS_CFG_P_ENBCNFM       "The plugin %s will be marked as enabled.  The plugin will be come active the next time NetIDMgr is started."
+    IDS_PISTATE_FAILINIT    "Failed to initialize"
+    IDS_CFG_P_UNRCNFT       "Unregistering plugin %s"
+    IDS_CFG_P_UNRCNFM       "Are you sure you want to unregister plugin %s? In addition to this plugin, any other plugins that are provided by the same module will also be unregistered.\n\nThe plugin will no longer be loaded for subsequent sessions of NetIDMgr."
+    IDS_CFG_P_UNRCNFS       "Note that if the plugin was registered by a seprate installer, it should be unregistered by the same installer and not through NetIDMgr.\n\nThe following plugins will be unregistered: %s"
+    IDS_ACTION_LAYOUT_CUST  "Custom"
 END
 
 #endif    // English (U.S.) resources

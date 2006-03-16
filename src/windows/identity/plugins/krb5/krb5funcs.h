@@ -84,8 +84,11 @@ khm_krb5_destroy_identity(khm_handle identity);
 long
 khm_convert524(krb5_context ctx);
 
+int
+khm_krb5_renew_cred(khm_handle cred);
+
 int 
-khm_krb5_renew(khm_handle identity);
+khm_krb5_renew_ident(khm_handle identity);
 
 wchar_t * 
 khm_krb5_get_default_realm(void);

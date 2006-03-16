@@ -29,6 +29,8 @@ install::
 	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).8
 	$(INSTALL_DATA) $(srcdir)/$(PROG).local.M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).local.8
 
+generate-files-mac: kadmin_ct.c getdate.c
+
 clean::
 	$(RM) $(PROG).local $(PROG) $(OBJS)
 clean-unix::

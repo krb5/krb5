@@ -45,6 +45,13 @@ typedef struct tag_k5_id_dlg_data {
 
     wchar_t ccache[KRB5_MAXCCH_CCNAME];
 
+    khm_boolean renewable;
+    khm_boolean forwardable;
+    khm_boolean proxiable;
+    khm_boolean addressless;
+
+    DWORD public_ip;
+
     time_t life;
     time_t renew_life;
 } k5_id_dlg_data;
@@ -94,6 +101,36 @@ k5_id_read_params(k5_id_dlg_data * d) {
     else
         d->renew_life = 604800;
 
+    rv = khc_read_int32(csp_ident, L"Renewable", &t);
+    if (KHM_SUCCEEDED(rv))
+        d->renewable = !!t;
+    else
+        d->renewable = TRUE;
+
+    rv = khc_read_int32(csp_ident, L"Forwardable", &t);
+    if (KHM_SUCCEEDED(rv))
+        d->forwardable = !!t;
+    else
+        d->forwardable = FALSE;
+
+    rv = khc_read_int32(csp_ident, L"Proxiable", &t);
+    if (KHM_SUCCEEDED(rv))
+        d->proxiable = !!t;
+    else
+        d->proxiable = FALSE;
+
+    rv = khc_read_int32(csp_ident, L"Addressless", &t);
+    if (KHM_SUCCEEDED(rv))
+        d->addressless = !!t;
+    else
+        d->addressless = TRUE;
+
+    rv = khc_read_int32(csp_ident, L"PublicIP", &t);
+    if (KHM_SUCCEEDED(rv))
+        d->public_ip = (khm_ui_4) t;
+    else
+        d->public_ip = 0;
+
     cb = sizeof(d->ccache);
     rv = khc_read_string(csp_ident, L"DefaultCCName", d->ccache, &cb);
     if (KHM_FAILED(rv) || cb <= sizeof(wchar_t)) {
@@ -120,13 +157,30 @@ k5_id_read_params(k5_id_dlg_data * d) {
 static khm_boolean
 k5_id_is_mod(HWND hw, k5_id_dlg_data * d) {
     wchar_t ccache[KRB5_MAXCCH_CCNAME];
+    DWORD dwaddress = 0;
 
     GetDlgItemText(hw, IDC_CFG_CCACHE, ccache, ARRAYLENGTH(ccache));
 
+    SendDlgItemMessage(hw, IDC_CFG_PUBLICIP, IPM_GETADDRESS,
+                       0, (LPARAM) &dwaddress);
+
     if (wcsicmp(ccache, d->ccache) ||
+
         d->tc_renew.current != d->renew_life ||
-        d->tc_life.current != d->life)
+
+        d->tc_life.current != d->life ||
+
+        (IsDlgButtonChecked(hw, IDC_CFG_RENEW) == BST_CHECKED) != d->renewable ||
+
+        (IsDlgButtonChecked(hw, IDC_CFG_FORWARD) == BST_CHECKED) != d->forwardable ||
+
+        (IsDlgButtonChecked(hw, IDC_CFG_ADDRESSLESS) == BST_CHECKED)
+        != d->addressless ||
+
+        dwaddress != d->public_ip)
+
         return TRUE;
+
     return FALSE;
 }
 
@@ -147,6 +201,8 @@ k5_id_write_params(HWND hw, k5_id_dlg_data * d) {
     wchar_t ccache[KRB5_MAXCCH_CCNAME];
     khm_size cb;
     khm_int32 rv;
+    khm_boolean b;
+    DWORD dwaddress = 0;
 
     if (!k5_id_is_mod(hw, d))
         return;
@@ -172,6 +228,32 @@ k5_id_write_params(HWND hw, k5_id_dlg_data * d) {
     if (d->renew_life != d->tc_renew.current) {
         d->renew_life = d->tc_renew.current;
         khc_write_int32(csp_ident, L"DefaultRenewLifetime", (khm_int32) d->renew_life);
+    }
+
+    b = (IsDlgButtonChecked(hw, IDC_CFG_RENEW) == BST_CHECKED);
+    if (b != d->renewable) {
+        d->renewable = b;
+        khc_write_int32(csp_ident, L"Renewable", (khm_int32) b);
+    }
+
+    b = (IsDlgButtonChecked(hw, IDC_CFG_FORWARD) == BST_CHECKED);
+    if (b != d->forwardable) {
+        d->forwardable = b;
+        khc_write_int32(csp_ident, L"Forwardable", (khm_int32) b);
+    }
+
+    b = (IsDlgButtonChecked(hw, IDC_CFG_ADDRESSLESS) == BST_CHECKED);
+    if (b != d->addressless) {
+        d->addressless = b;
+        khc_write_int32(csp_ident, L"Addressless", (khm_int32) b);
+    }
+
+    SendDlgItemMessage(hw, IDC_CFG_PUBLICIP, IPM_GETADDRESS,
+                       0, (LPARAM) &dwaddress);
+
+    if (dwaddress != d->public_ip) {
+        d->public_ip = dwaddress;
+        khc_write_int32(csp_ident, L"PublicIP", (khm_int32) dwaddress);
     }
 
     GetDlgItemText(hw, IDC_CFG_CCACHE, ccache, ARRAYLENGTH(ccache));
@@ -225,6 +307,19 @@ k5_id_tab_dlgproc(HWND hwnd,
         khui_tracker_refresh(&d->tc_renew);
 
         SetDlgItemText(hwnd, IDC_CFG_CCACHE, d->ccache);
+
+        CheckDlgButton(hwnd, IDC_CFG_RENEW,
+                       (d->renewable? BST_CHECKED: BST_UNCHECKED));
+
+        CheckDlgButton(hwnd, IDC_CFG_FORWARD,
+                       (d->forwardable? BST_CHECKED: BST_UNCHECKED));
+
+        CheckDlgButton(hwnd, IDC_CFG_ADDRESSLESS,
+                       (d->addressless? BST_CHECKED: BST_UNCHECKED));
+
+        SendDlgItemMessage(hwnd, IDC_CFG_PUBLICIP,
+                           IPM_SETADDRESS,
+                           0, (LPARAM) d->public_ip);
         break;
 
     case WM_COMMAND:

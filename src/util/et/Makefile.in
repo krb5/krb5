@@ -76,6 +76,8 @@ all-windows:: $(COM_ERR_HDR)
 $(COM_ERR_HDR): com_err.h
 	$(CP) com_err.h "$@"
 
+generate-files-mac: compile_et
+
 error_table.c: et_lex.lex.c 
 error_table.c: $(srcdir)/error_table.y
 

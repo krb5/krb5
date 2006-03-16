@@ -1,3 +1,16 @@
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb.h: Include k5-platform.h.
+	(krb5_kdb_decode_int16, krb5_kdb_decode_int32): Use load_*_le
+	helper functions.
+	(krb5_kdb_encode_int16, krb5_kdb_encode_int32): Use store_*_le
+	helper functions.
+
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (PROCESS_REPLACE): Use MODULE_DIR instead of
+	KRB5_DB_MODULE_DIR.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (osconf.h): Always remove osconf.new.

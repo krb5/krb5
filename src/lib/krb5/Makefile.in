@@ -140,7 +140,8 @@ krb5_libinit.so krb5_libinit.po $(OUTPRE)krb5_libinit.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/krb5/kdb.h $(BUILDTOP)/include/krb5_err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h $(BUILDTOP)/include/krb5_err.h \
   $(BUILDTOP)/include/kv5m_err.h $(BUILDTOP)/include/asn1_err.h \
   $(BUILDTOP)/include/kdb5_err.h krb5_libinit.h $(srcdir)/ccache/cc-int.h \
   $(srcdir)/keytab/kt-int.h $(srcdir)/rcache/rc-int.h \

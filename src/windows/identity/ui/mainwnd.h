@@ -39,6 +39,7 @@ void khm_unregister_main_wnd_class(void);
 void khm_create_main_window_controls(HWND);
 void khm_create_main_window(void);
 void khm_show_main_window(void);
+void khm_close_main_window(void);
 void khm_hide_main_window(void);
 BOOL khm_is_main_window_visible(void);
 BOOL khm_is_main_window_active(void);
@@ -54,7 +55,9 @@ khm_main_wnd_proc(HWND hwnd,
                   LPARAM lParam);
 
 #define WM_KHUI_ASSIGN_COMMANDLINE       32808
+#define WM_KHUI_QUERY_APP_VERSION        32809
 
 #define COMMANDLINE_MAP_FMT              L"Local\\NetIDMgr_Cmdline_%lu"
+#define QUERY_APP_VER_MAP_FMT            L"Local\\NetIDMgr_QueryVer_%lu"
 
 #endif

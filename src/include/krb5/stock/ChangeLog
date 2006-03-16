@@ -1,3 +1,9 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* osconf.h (DEFAULT_KDB_LIB_PATH): Add "/kdb" on end of
+	MODULEDIR.
+	(MODULE_PATH): New macro.
+
 2005-06-29  Ken Raeburn  <raeburn@mit.edu>
 
 	* osconf.h (DEFAULT_KDB_LIB_PATH): Use @MODULEDIR.  Don't use a

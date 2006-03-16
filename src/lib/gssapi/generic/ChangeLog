@@ -1,3 +1,7 @@
+2006-03-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (generate-files-mac): Depend on gssapi.h.
+
 2005-09-22  Tom Yu  <tlyu@mit.edu>
 
 	* rel_buffer.c (generic_gss_release_buffer): Free buffer even if

@@ -1,3 +1,61 @@
+2006-03-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c (module_locate_server): Don't set cbdata.lp at
+	initialization time.
+
+2006-03-07  Ken Raeburn  <raeburn@mit.edu>
+
+	* locate_kdc.c: Include k5-locate.h instead of k5-plugin.h.
+
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFINES): New variable.
+	(t_locate_kdc.o): Depend on dnssrv.c and dnsglue.c too.
+
+	* init_os_ctx.c (krb5_os_init_context): Initialize new fields.
+	(krb5_os_free_context): Close opened plugin files.
+
+	* locate_kdc.c: Include k5-plugin.h.
+	(get_port): Deleted.
+	(grow_addrlist): Update for new fields in structure.
+	(krb5int_free_addrlist): Call the free function in the structure,
+	if the function pointer is non-null.
+	(add_addrinfo_to_list): Update for new fields.  Shorten up debug
+	output.
+	(call_freeaddrinfo): New function.
+	(krb5int_add_host_to_list): Update for new fields.
+	(prof_locate_server, dns_locate_server): New functions, broken out
+	from krb5int_locate_server; use the new enum type for service
+	choice.
+	(objdir): New variable.
+	(struct module_callback_data): New struct.
+	(module_callback, module_locate_server): New functions.
+	(krb5int_locate_server): Use the above method-specific locator
+	functions.  Change argument list to take enum and not multiple
+	strings and numbers.
+	(krb5_locate_kdc): Updated for new interface.
+
+	* send524.c (krb5int_524_sendto_kdc): Update for new locate_server
+	interface.
+	* changepw.c (krb5_locate_kpasswd): Likewise.
+	(krb5_change_set_password): Update for new fields.
+
+	* accessor.c (krb5int_accessor): Don't fill in locate_server
+	field.
+
+	* t_locate_kdc.c: Include dnsglue.c and dnssrv.c.
+	(print_addrs): Update for new fields.
+	* t_std_conf.c (test_locate_kdc): Update for new fields.
+
+	* sendto_kdc.c (krb5int_debug_fprint): No longer static.  Print
+	more info.
+	(krb5int_print_addrlist): New function.
+	(merge_addrlists): Update for new fields.
+	(in_addrlist): New function.
+	(krb5_sendto_kdc): Use it.  Update for new fields.
+	(krb5int_sendto): Update for new fields.  Print more info when
+	debugging.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* gmt_mktime.c, read_pwd.c: changes to support 64-bit builds

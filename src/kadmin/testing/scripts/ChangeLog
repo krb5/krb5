@@ -1,3 +1,7 @@
+2006-03-06  Ken Raeburn  <raeburn@mit.edu>
+
+	* init_db: Change MODDIR setting to match new installation path.
+
 2005-08-16  Ken Raeburn  <raeburn@mit.edu>
 
 	* env-setup.shin: Export $libdir.
