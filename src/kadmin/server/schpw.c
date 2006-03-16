@@ -1,7 +1,7 @@
 #include "k5-int.h"
 #include <kadm5/admin.h>
 #include <syslog.h>
-#include <krb5/adm_proto.h>	/* krb5_klog_syslog */
+#include <adm_proto.h>	/* krb5_klog_syslog */
 #include <stdio.h>
 #include <errno.h>
 

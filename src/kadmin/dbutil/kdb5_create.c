@@ -55,10 +55,10 @@
 
 #include <stdio.h>
 #include <k5-int.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include <kadm5/server_internal.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 #include "kdb5_util.h"
 
 enum ap_op {

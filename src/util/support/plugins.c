@@ -283,17 +283,14 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
     void **p, **newp, *sym;
     int count, i, err;
 
-    if (dirhandle == NULL) {
-	*ptrs = 0;
-	return 0;
-    }
-
     /* XXX Do we need to add a leading "_" to the symbol name on any
        modern platforms?  */
 
     Tprintf("get_plugin_data_sym(%s)\n", symname);
     p = 0;
     count = 0;
+    if (dirhandle == NULL || dirhandle->files == NULL)
+	goto skip_loop;
     for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
 	int32_t kerr;
 	sym = NULL;
@@ -311,6 +308,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 	p[count] = sym;
 	count++;
     }
+skip_loop:
     newp = realloc(p, (count+1) * sizeof(*p));
     if (newp == NULL)
 	goto realloc_failure;

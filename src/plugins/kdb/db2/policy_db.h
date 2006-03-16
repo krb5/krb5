@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <krb5.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 /* Okay, this is a bit obscure.  The libdb2 configure script doesn't
    detect it, but on Tru64 5.1, netinet/in.h causes sys/bittypes.h to
    be included, and that has a typedef for u_int32_t.  Because the

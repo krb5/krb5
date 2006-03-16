@@ -51,7 +51,7 @@
    Do NOT install this file.  */
 
 /* for HAVE_SOCKLEN_T, KRB5_USE_INET6, etc */
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 /* for sockaddr_storage */
 #include "port-sockets.h"
 /* for "inline" if needed */

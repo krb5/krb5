@@ -70,13 +70,13 @@ typedef WSABUF sg_buf;
 /* If this source file requires it, define struct sockaddr_in
    (and possibly other things related to network I/O).  */
 
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #include <netdb.h>
 typedef int socklen_t;
 
 #else /* UNIX variants */
 
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 
 #include <sys/types.h>
 #include <netinet/in.h>		/* For struct sockaddr_in and in_addr */

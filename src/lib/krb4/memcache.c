@@ -14,7 +14,7 @@
 
 #include "krb.h"
 #include "krb4int.h"
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 
 #ifdef _WIN32
 #include <errno.h>

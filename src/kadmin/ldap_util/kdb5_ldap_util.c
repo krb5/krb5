@@ -85,7 +85,7 @@
 
 #include <k5-int.h>
 #include <kadm5/admin.h>
-#include <krb5/adm_proto.h>
+#include <adm_proto.h>
 #include "kdb5_ldap_util.h"
 
 typedef void (*cmd_func)(int, char **);

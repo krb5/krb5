@@ -66,7 +66,7 @@ krb5/src/lib/krb5/krb/init_ctx.c
 
 @ignore
 the following defaults should be consistent with default variables set
-in krb5/src/include/krb5/stock/osconf.h
+in krb5/src/include/stock/osconf.h
 @end ignore
 @set DefaultMasterKeyType des3-cbc-sha1
 @comment DEFAULT_KDC_ENCTYPE
@@ -113,14 +113,14 @@ krb5/src/lib/kadm5/alt_prof.c
 
 @ignore
 the following defaults should be consistent with the values set in
-krb5/src/include/krb5/kdb.h
+krb5/src/include/kdb.h
 @end ignore
 @set DefaultDefaultPrincipalFlags postdateable, forwardable, tgt-based, renewable, proxiable, dup-skey, allow-tickets, and service enabled.
 @comment KRB_KDC_DEFAULT_FLAGS set to 0
 
 @ignore
 the following defaults should be consistent with the values set in
-include/krb5/kdb.h
+include/kdb.h
 @end ignore
 @set DefaultMasterKeyName K/M
 @comment KRB5_KDB_M_NAME

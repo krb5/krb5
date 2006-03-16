@@ -1118,7 +1118,7 @@ failure indications to be given at compile/link time.  (This probably
 wouldn't work well for VxWorks, for example, where symbol resolution
 is done when the object code is loaded into the OS.)
 
-The configure script generates include/krb5/autoconf.h to influence
+The configure script generates include/autoconf.h to influence
 whether certain calls are made or certain headers are included, and
 Makefile in each directory to indicate compilation options.  Each
 source directory has a Makefile.in, and config/pre.in and

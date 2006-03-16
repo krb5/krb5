@@ -1,3 +1,13 @@
+2006-03-13  Ken Raeburn  <raeburn@mit.edu>
+
+	* plugins.c (krb5int_get_plugin_dir_data): If dirhandle is null or
+	the file pointer is null, return a one-element list containing
+	just NULL.
+
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (autoconf.h): Note location change.
+
 2006-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* plugins.c: Only include dlfcn.h if USE_DLOPEN.

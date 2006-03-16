@@ -258,32 +258,3 @@ void log_badauth_display_status_1(OM_uint32 code, int type, int rec)
 	       break;
      }
 }
-
-
-#if 0
-
-/* this hack is no longer necessary, since the library supports it
-   internally */
-
-/* This is a hack to change the default keytab name */
-
-#include <krb5/krb5.h>
-extern char *krb5_defkeyname;
-
-krb5_error_code
-krb5_kt_default_name(char *name, int namesize)
-{
-   char *ktname;
-
-   if ((ktname = getenv("KRB5KTNAME")) == NULL)
-      ktname = krb5_defkeyname;
-
-   if (namesize < strlen(ktname)+1)
-      return(KRB5_CONFIG_NOTENUFSPACE);
-
-   strcpy(name, ktname);
-
-   return(0);
-}
-
-#endif

@@ -4,7 +4,7 @@ BUILDTOP=$(REL)..
 LOCAL_SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc
 
-RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -28,8 +28,13 @@ kdc.conf: Makefile
 	@echo "  key_stash_file = `pwd`/stash_file" >> kdc.conf
 	@echo "}" >> kdc.conf
 
+krb5.conf: Makefile
+	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	echo "[db_modules]" >> krb5.new
+	echo " db_module_dir = `pwd`/../util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
+	mv krb5.new krb5.conf
 
-kdb_check: kdc.conf
+kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)*
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
 	$(RUN_SETUP) ../tests/create/kdb5_mkdums $(KTEST_OPTS) 

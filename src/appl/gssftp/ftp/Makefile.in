@@ -75,13 +75,13 @@ secure.o: $(srcdir)/secure.c
 # the Makefile.in file
 #
 $(OUTPRE)cmds.$(OBJEXT): cmds.c $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(srcdir)/../arpa/ftp.h \
+  $(BUILDTOP)/include/autoconf.h $(srcdir)/../arpa/ftp.h \
   ftp_var.h pathnames.h
 $(OUTPRE)cmdtab.$(OBJEXT): cmdtab.c ftp_var.h
 $(OUTPRE)domacro.$(OBJEXT): domacro.c ftp_var.h
 $(OUTPRE)ftp.$(OBJEXT): ftp.c $(srcdir)/../arpa/ftp.h \
   $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
@@ -89,7 +89,7 @@ $(OUTPRE)ftp.$(OBJEXT): ftp.c $(srcdir)/../arpa/ftp.h \
 $(OUTPRE)getpass.$(OBJEXT): getpass.c ftp_var.h
 $(OUTPRE)glob.$(OBJEXT): glob.c ftp_var.h
 $(OUTPRE)main.$(OBJEXT): main.c ftp_var.h $(srcdir)/../arpa/ftp.h \
-  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
   $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h
 $(OUTPRE)radix.$(OBJEXT): radix.c ftp_var.h

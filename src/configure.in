@@ -125,7 +125,7 @@ dnl from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
 [Define if "struct sockaddr_storage" is available.])
 dnl
-AC_CONFIG_HEADER(include/krb5/autoconf.h)
+AC_CONFIG_HEADER(include/autoconf.h)
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
@@ -579,4 +579,4 @@ AC_SUBST(ldap_plugin_dir)
 
 AC_CONFIG_SUBDIRS(kadmin clients plugins/kdb/db2 appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
-V5_AC_OUTPUT_MAKEFILE(. util util/support util/send-pr lib kdc slave krb524 config-files gen-manpages include include/krb5 include/kerberosIV)
+V5_AC_OUTPUT_MAKEFILE(. util util/support util/send-pr lib kdc slave krb524 config-files gen-manpages include include/kerberosIV)

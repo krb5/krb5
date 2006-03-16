@@ -49,8 +49,8 @@
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    <kadm5/server_acl.h>
-#include    <krb5/adm_proto.h>
-#include    "krb5/kdb_kt.h"	/* for krb5_ktkdb_set_context */
+#include    <adm_proto.h>
+#include    "kdb_kt.h"	/* for krb5_ktkdb_set_context */
 #include    <string.h>
 #include    "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
 

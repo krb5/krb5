@@ -1,3 +1,8 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* ovsec_kadmd.c, schpw.c, server_stubs.c, misc.c: Don't look for
+	headers in krb5/.
+
 2005-10-12  Tom Yu  <tlyu@mit.edu>
 
 	* misc.h, misc.c (schpw_util_wrapper): Rename from

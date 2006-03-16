@@ -786,7 +786,7 @@ script with the following options:
 
 There is one configuration file which you may wish to edit to control
 various compile-time parameters in the Kerberos distribution:
-@file{include/krb5/stock/osconf.h}. The list that follows is by no means
+@file{include/stock/osconf.h}. The list that follows is by no means
 complete, just some of the more interesting variables.
 
 Please note: The former configuration file @file{config.h} no longer

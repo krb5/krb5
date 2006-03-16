@@ -3,7 +3,7 @@
 
 #include <sys/types.h>
 #include <krb5.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include <gssrpc/rpc.h>
 
 #ifdef HAVE_MEMORY_H

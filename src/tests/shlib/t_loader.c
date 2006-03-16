@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #include "krb5.h"
 #include "gssapi/gssapi.h"
 #define HAVE_DLOPEN 1

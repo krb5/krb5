@@ -18,7 +18,7 @@
 #endif
 #include    <stdlib.h>
 #include    <errno.h>
-#include    <krb5/kdb.h>
+#include    <kdb.h>
 #include    <kadm5/admin.h>
 #include    "admin_internal.h"
 

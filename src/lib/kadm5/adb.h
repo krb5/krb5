@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <gssrpc/types.h>
 #include "k5-int.h"
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include <db.h>
 #include <kadm5/admin.h>
 #include <kadm5/adb_err.h>

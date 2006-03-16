@@ -1,3 +1,7 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (EHDRDIR): Don't use krb5 subdirectory.
+
 2006-03-06  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5_err.et (KRB5_PLUGIN_NO_HANDLE): New error code.

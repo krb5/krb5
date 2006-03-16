@@ -99,8 +99,8 @@ if $verbose ; then
 fi
 $autoreconf $autoreconfoptions  $localdirarg $localdir --verbose $force || exit 1
 if test $? = 0 ; then
-    if test ! -d include/krb5/autoconf.stmp ; then
-	cp /dev/null include/krb5/autoconf.stmp
+    if test ! -d include/autoconf.stmp ; then
+	cp /dev/null include/autoconf.stmp
     fi
 fi
 find . -name autom4te.cache -print | xargs rm -rf

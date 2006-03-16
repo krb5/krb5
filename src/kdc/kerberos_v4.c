@@ -26,7 +26,7 @@
  * 
  */
 
-#include "krb5/autoconf.h"
+#include "autoconf.h"
 #ifdef KRB5_KRB4_COMPAT
 #define BACKWARD_COMPAT
 

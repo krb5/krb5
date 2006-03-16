@@ -1,3 +1,8 @@
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* dump.c, kdb5_create.c, kdb5_destroy.c, kdb5_util.c, ovload.c,
+	kadm5_create.c: Don't look for headers in krb5/.
+
 2005-06-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (KDB_DEP_LIB): Use DL_LIB and THREAD_LINKOPTS

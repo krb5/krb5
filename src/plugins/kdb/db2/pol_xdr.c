@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <krb5.h>
 #include <gssrpc/rpc.h>
-#include <krb5/kdb.h>
+#include <kdb.h>
 #include "policy_db.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

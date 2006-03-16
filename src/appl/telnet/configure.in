@@ -55,6 +55,7 @@ LIBS="$LIBS -ltermcap")
 AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
   AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
 )
+AC_CHECK_FUNC(tgetent, , [AC_MSG_ERROR([Could not find tgetent; are you missing a curses/ncurses library?])])
 KRB5_AC_INET6
 AC_CHECK_FUNCS(setupterm)
 AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)

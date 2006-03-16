@@ -50,6 +50,14 @@
 
 	
 
+2006-03-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (update-autoconf-h): Don't go into krb5
+	subdirectory; make specific files.
+	(CLEANUP): osconf.h has moved.
+	* configure.in: Build include/autoconf.h now.  Don't create a
+	makefile in include/krb5.
+
 2006-03-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (generate-files-mac-prerecurse): Depend on

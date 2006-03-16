@@ -62,8 +62,8 @@ install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 ##DOS##!if 0
-$(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
-	(cd $(BUILDTOP)/include; $(MAKE) krb5/autoconf.h)
+$(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
+	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
 ##DOS##!endif
 
 # @lib_frag@
@@ -75,16 +75,16 @@ $(BUILDTOP)/include/krb5/autoconf.h: $(SRCTOP)/include/krb5/autoconf.h.in
 # the Makefile.in file
 #
 threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5/autoconf.h \
+  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h cache-addrinfo.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/fake-addrinfo.h
 init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
-  init-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  init-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
   cache-addrinfo.h
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
-  fake-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/krb5/autoconf.h \
+  fake-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
   cache-addrinfo.h
