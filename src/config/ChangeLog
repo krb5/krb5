@@ -1,3 +1,8 @@
+2006-03-15  Ken Raeburn  <raeburn@mit.edu>
+
+	* pre.in (MAYBE_VALGRIND): New variable.
+	* shlib.conf (*-*-linux*): Use it in RUN_ENV.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (KRB_INCLUDES): Drop include/krb5 directories.
