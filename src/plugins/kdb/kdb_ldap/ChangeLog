@@ -2,6 +2,10 @@
 
 	* ldap_exp.c: Wrap all functions with mutex protection.
 
+	* configure.in: Don't link against db library on AIX.  If the
+	"lber" library is not found, then warn about that, not about the
+	ldap library.
+
 2006-03-14  Ken Raeburn  <raeburn@mit.edu>
 
 	* ldap_err.h (LDAP_ERR_BASE, MAX_NEG, LDAP_TO_KDB_ERR): Unused
