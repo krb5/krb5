@@ -1686,6 +1686,14 @@ krb5_add_ber_mem_ldap_mod(mods, attribute, op, ber_values)
     return 0;
 }
 
+static inline char *
+format_d (int val)
+{
+    char tmpbuf[2+3*sizeof(val)];
+    sprintf(tmpbuf, "%d", val);
+    return strdup(tmpbuf);
+}
+
 krb5_error_code
 krb5_add_int_arr_mem_ldap_mod(mods, attribute, op, value) 
      LDAPMod  ***mods;
@@ -1711,17 +1719,8 @@ krb5_add_int_arr_mem_ldap_mod(mods, attribute, op, value)
     (*mods)[i]->mod_values = malloc(sizeof(char *) * (j+1));  
     
     for (j=0; value[j] != -1; ++j) {
-      if (asprintf((*mods)[i]->mod_values+j, "%d", value[j]) == -1) {
-	(*mods)[i]->mod_values[j] = NULL;
-	return ENOMEM;
-      }
-#if 0      
-	(*mods)[i]->mod_values[j] =  calloc(1, MAXINTLEN);
-	if ((*mods)[i]->mod_values[j] == NULL)
+	if (((*mods)[i]->mod_values[j] = format_d(value[j])) == NULL)
 	    return ENOMEM;
-
-	sprintf((*mods)[i]->mod_values[j], "%d", value[j]);
-#endif
     }
     (*mods)[i]->mod_values[j] = NULL;
     return 0;
@@ -1746,12 +1745,8 @@ krb5_add_int_mem_ldap_mod(mods, attribute, op, value)
       return ENOMEM;
 
     (*mods)[i]->mod_op = op;
-    (*mods)[i]->mod_values = calloc (2, sizeof(char *));  
-    if (asprintf((*mods)[i]->mod_values, "%d", value) == -1) {
-      (*mods)[i]->mod_values[0] = NULL;
-      return ENOMEM;
-    }
+    (*mods)[i]->mod_values = calloc (2, sizeof(char *));
+    if (((*mods)[i]->mod_values[0] = format_d(value)) == NULL)
+	return ENOMEM;
     return 0;
 }
-
-
