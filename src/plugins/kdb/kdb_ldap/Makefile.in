@@ -7,20 +7,10 @@ KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_C
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS = @DEFS@ -DHAVE_LDAP_H @DEF_EDIR@
+MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
 
 #LOCALINCLUDES = -I.. -I$(SRCTOP)/include
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
-
-DB_VERSION      = @DB_VERSION@
-DB_DEPS         = $(DB_DEPS-@DB_HEADER_VERSION@)
-DB_DEPS-sys     =
-DB_DEPS-k5      = $(BUILDTOP)/include/db.h $(BUILDTOP)/include/db-config.h
-DB_DEPS-redirect = $(BUILDTOP)/include/db.h
-DB_LIB          = @DB_LIB@
-KDB5_DB_LIB     = @KDB5_DB_LIB@
-DB_DEPLIB       = $(DB_DEPLIB-@DB_VERSION@)
-DB_DEPLIB-k5    = $(TOPLIBD)/libdb$(DEPLIBEXT)
-DB_DEPLIB-sys   =
 
 LIBBASE=kldap
 LIBMAJOR=0
@@ -33,7 +23,7 @@ SHLIB_EXPDEPS = \
 	$(GSSRPC_DEPLIBS) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS=$(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(KDB5_DB_LIB) $(LIBS)
+SHLIB_EXPLIBS=$(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
