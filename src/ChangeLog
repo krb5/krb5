@@ -1,3 +1,9 @@
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Set and substitute ldap_lib.  Configure
+	lib/kdb_ldap instead of plugins/kdb/kdb_ldap; create a makefile in
+	the latter directory directly.
+
 2006-01-24  Sam Hartman  <hartmans@mit.edu>
 
 	* Novell LDAP plugin patch contributed under MIT licenses;

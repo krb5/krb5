@@ -1,3 +1,9 @@
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCAL_SUBDIRS): Add @ldap_lib@.
+
+	* kdb_ldap: New directory.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* Makefile.in: support for 64-bit Windows builds

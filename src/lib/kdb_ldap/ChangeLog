@@ -1,0 +1,15 @@
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in, kdb_ldap.c, kdb_ldap_conn.c, kdb_xdr.c, kdb_xdr.h,
+	kerberos.ldif, kerberos.schema, ldap_err.c, ldap_err.h,
+	ldap_fetch_mkey.c, ldap_handle.c, ldap_handle.h,
+	ldap_krbcontainer.c, ldap_krbcontainer.h, ldap_main.h,
+	ldap_misc.c, ldap_misc.h, ldap_principal2.c, ldap_principal.c,
+	ldap_principal.h, ldap_pwd_policy.c, ldap_pwd_policy.h,
+	ldap_realm.c, ldap_realm.h, ldap_service_rights.c,
+	ldap_services.c, ldap_services.h, ldap_service_stash.c,
+	ldap_service_stash.h, ldap_tkt_policy.c, ldap_tkt_policy.h,
+	princ_xdr.c, princ_xdr.h: Moved from plugins/kdb/kdb_ldap.
+	* libkdb_ldap.exports: Copied and updated.
+	* Makefile.in: Copied and updated to build a shared library.
+

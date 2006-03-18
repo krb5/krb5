@@ -571,11 +571,15 @@ dnl   AC_CONFIG_SUBDIRS(krb524)
 dnl fi
 
 ldap_plugin_dir=""
+ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
-  AC_CONFIG_SUBDIRS(plugins/kdb/kdb_ldap)
+  AC_CONFIG_SUBDIRS(lib/kdb_ldap)
+  K5_GEN_MAKEFILE(plugins/kdb/kdb_ldap)
   ldap_plugin_dir=plugins/kdb/kdb_ldap
+  ldap_lib=kdb_ldap
 fi
 AC_SUBST(ldap_plugin_dir)
+AC_SUBST(ldap_lib)
 
 AC_CONFIG_SUBDIRS(kadmin clients plugins/kdb/db2 appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])

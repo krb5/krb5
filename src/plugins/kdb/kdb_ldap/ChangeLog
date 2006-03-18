@@ -1,5 +1,9 @@
 2006-03-17  Ken Raeburn  <raeburn@mit.edu>
 
+	* Most files moved to lib/kdb_ldap.
+	* Makefile.in: Updated.
+	* kldap.exports: Only export the one symbol now defined.
+
 	* ldap_misc.c (format_d): New function.
 	(krb5_add_int_arr_mem_ldap_mod, krb5_add_int_mem_ldap_mod): Use it
 	instead of asprintf.

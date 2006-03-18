@@ -1,0 +1,6 @@
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Look for kdb ldap headers in new
+	location.
+	(KDB_DEP_LIB): Refer to kdb ldap library under new name.
+
