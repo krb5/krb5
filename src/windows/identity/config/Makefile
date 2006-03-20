@@ -73,6 +73,15 @@ mkalldirs:
 !	if !exist($(DOCDIR))
 	-$(MKDIR) $(DOCDIR)
 !	endif
+!	if !exist($(OBJDIR)\W2K)
+	-$(MKDIR) $(OBJDIR)\W2K
+!	endif
+!	if !exist($(BINDIR)\W2K)
+	-$(MKDIR) $(BINDIR)\W2K
+!	endif
+!	if !exist($(LIBDIR)\W2K)
+	-$(MKDIR) $(LIBDIR)\W2K
+!	endif
 	$(ECHO) Done creating directories.
 
 VERSIONINT=$(INCDIR)\netidmgr_intver.h

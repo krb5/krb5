@@ -79,4 +79,10 @@ khm_cfg_plugins_proc(HWND hwnd,
                      UINT uMsg,
                      WPARAM wParam,
                      LPARAM lParam);
+
+INT_PTR CALLBACK
+khm_cfg_appearance_proc(HWND hwnd,
+                        UINT uMsg,
+                        WPARAM wParam,
+                        LPARAM lParam);
 #endif

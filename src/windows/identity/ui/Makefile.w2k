@@ -23,11 +23,9 @@
 
 
 MODULE=ui
-!include <../config/Makefile.w32>
+!include <../config/Makefile.w2k>
 
 EXEFILE=$(BINDIR)\netidmgr.exe
-
-MANIFESTFILE=$(BINDIR)\netidmgr.exe.manifest
 
 OBJFILES= 			\
 	$(OBJ)\main.obj 	\
@@ -81,14 +79,6 @@ $(OBJ)\khapp.res: lang\en_us\khapp.rc
 $(OBJ)\appver.res: appver.rc
 	$(RC2RES)
 
-!if "$(KH_BUILD)"=="RETAIL"
-$(MANIFESTFILE): netidmgr.manifest.$(CPU).$(KH_CLVER)
-!else
-$(MANIFESTFILE): netidmgr.manifest.$(CPU).$(KH_CLVER).debug
-!endif
-	$(CP) $** $@
-
-
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
 SCLIB=bufferoverflowu.lib
 !else
@@ -98,5 +88,4 @@ SCLIB=
 $(EXEFILE): $(OBJFILES) $(RESFILES) $(LIBFILES)
 	$(EXEGUILINK) $(SDKLIBFILES) $(SCLIB)
 
-all: mkdirs $(EXEFILE) $(MANIFESTFILE)
-
+all: mkdirs $(EXEFILE)

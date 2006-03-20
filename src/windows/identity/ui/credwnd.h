@@ -251,4 +251,9 @@ int     cw_update_extents(khui_credwnd_tbl * tbl, khm_boolean update_scroll);
 
 void    cw_insert_header_cols(khui_credwnd_tbl * tbl);
 
+void    khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default,
+                                LOGFONT * pfont);
+
+void    khm_set_cw_element_font(wchar_t * name, LOGFONT * pfont);
+
 #endif

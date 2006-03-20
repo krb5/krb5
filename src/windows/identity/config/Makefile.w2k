@@ -134,29 +134,13 @@ OBJDIR=$(OBJROOT)\$(CPU)\$(OUTPRE_DBG)
 OBJ=$(OBJDIR)\$(MODULE)
 INCDIR=$(DESTDIR)\inc
 #BINDIR=$(DESTDIR)\bin
-BINDIR=$(KH_ROOT)\$(OUTPRE)
+BINDIR=$(KH_ROOT)\$(OUTPRE)\W2K
 #LIBDIR=$(DESTDIR)\lib
-LIBDIR=$(KH_ROOT)\$(OUTPRE)
+LIBDIR=$(KH_ROOT)\$(OUTPRE)\W2K
 DOCDIR=$(DESTDIR)\doc
 
 # Source directories
 CONFDIR=$(SRC)\config
-
-# If we are forcing a Win2K build, we need to adjust the build
-# directories and environment.
-
-!ifdef KHBUILD_W2K
-
-OBJ=$(OBJ)\W2K
-BINDIR=$(BINDIR)\W2K
-LIBDIR=$(LIBDIR)\W2K
-
-APPVER=5.0
-TARGETOS=WINNT
-_WIN32_IE=0x0500
-_WIN32_WINNT=0x0500
-
-!endif
 
 # Setup environment for win32.mak
 
@@ -165,7 +149,10 @@ NODEBUG=1
 !endif
 
 # Win32.mak
-
+APPVER=5.0
+TARGETOS=WINNT
+_WIN32_IE=0x0500
+_WIN32_WINNT=0x0500
 !include <Win32.Mak>
 
 # Program macros
@@ -283,6 +270,12 @@ clean::
 test::
 
 mkdirs::
+!if !exist($(LIBDIR))
+	$(MKDIR) $(LIBDIR)
+!endif
+!if !exist($(BINDIR))
+	$(MKDIR) $(BINDIR)
+!endif
 !if !exist($(OBJ))
 	$(MKDIR) $(OBJ)
 !endif

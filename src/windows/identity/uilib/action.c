@@ -94,6 +94,7 @@ khui_action_ref khui_menu_view[] = {
 
 khui_action_ref khui_menu_options[] = {
     MENU_ACTION(KHUI_ACTION_OPT_KHIM),
+    MENU_ACTION(KHUI_ACTION_OPT_APPEAR),
     MENU_ACTION(KHUI_ACTION_OPT_IDENTS),
     MENU_ACTION(KHUI_ACTION_OPT_NOTIF),
     MENU_ACTION(KHUI_ACTION_OPT_PLUGINS),
@@ -881,18 +882,18 @@ khui_get_cmd_accel_string(khm_int32 cmd,
     def = &khui_accel_global[i];
 
     if(def->mod & FALT) {
-        if(FAILED(StringCbCat(buf, bufsiz, L"ALT+")))
+        if(FAILED(StringCbCat(buf, bufsiz, L"Alt+")))
             return FALSE;
     }
 
 
     if(def->mod & FCONTROL) {
-        if(FAILED(StringCbCat(buf, bufsiz, L"CTRL+")))
+        if(FAILED(StringCbCat(buf, bufsiz, L"Ctrl+")))
             return FALSE;
     }
 
     if(def->mod & FSHIFT) {
-        if(FAILED(StringCbCat(buf, bufsiz, L"SHIFT+")))
+        if(FAILED(StringCbCat(buf, bufsiz, L"Shift+")))
             return FALSE;
     }
 

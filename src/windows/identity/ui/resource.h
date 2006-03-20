@@ -213,6 +213,7 @@
 #define IDS_PISTATE_FAILLOD             209
 #define IDI_CFG_PLUGIN_DIS              209
 #define IDS_PISTATE_PLACEHOLD           210
+#define IDD_CFG_APPEAR                  210
 #define IDS_PISTATE_REG                 211
 #define IDS_PISTATE_HOLD                212
 #define IDS_PISTATE_INIT                213
@@ -257,6 +258,15 @@
 #define IDS_CFG_P_UNRCNFM               252
 #define IDS_CFG_P_UNRCNFS               253
 #define IDS_ACTION_LAYOUT_CUST          254
+#define IDS_APR_HEADER_TEXT             255
+#define IDS_APR_HEADER_TEXT_BOLD        256
+#define IDS_APR_TEXT                    257
+#define IDS_APR_TEXT_BOLD               258
+#define IDS_APR_SAMPLE_TEXT_NORMAL      259
+#define IDS_CFG_APPEAR_SHORT            260
+#define IDS_CFG_APPEAR_LONG             261
+#define IDS_ACTION_OPT_APPEAR           262
+#define IDS_APR_SAMPLE_TEXT_SEL         263
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -344,6 +354,13 @@
 #define IDC_CFG_LOGPATH                 1111
 #define IDC_NOTIF_HALFLIFE              1112
 #define IDC_CFG_DESTROYALL              1113
+#define IDC_CFG_SAMPLE_NORMAL           1123
+#define IDC_CFG_REVERT                  1127
+#define IDC_CFG_FONTS                   1128
+#define IDC_CFG_SAMPLE_BOLD             1129
+#define IDC_CFG_SIZE                    1130
+#define IDC_CFG_BOLD                    1131
+#define IDC_CFG_ITALICS                 1132
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -356,9 +373,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        210
+#define _APS_NEXT_RESOURCE_VALUE        211
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1114
+#define _APS_NEXT_CONTROL_VALUE         1133
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

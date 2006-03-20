@@ -34,6 +34,7 @@
 #include<krb5.h>
 #include<assert.h>
 
+/* method identifiers should be contiguous */
 #define K4_METHOD_AUTO     0
 #define K4_METHOD_PASSWORD 1
 #define K4_METHOD_K524     2
@@ -55,6 +56,7 @@ typedef struct tag_k4_dlg_data {
 } k4_dlg_data;
 
 void k4_update_display(k4_dlg_data * d) {
+    int i;
 
     CheckDlgButton(d->hwnd, IDC_NCK4_OBTAIN,
                    (d->k4_enabled)?BST_CHECKED: BST_UNCHECKED);
@@ -74,6 +76,12 @@ void k4_update_display(k4_dlg_data * d) {
 #endif
 
     CheckDlgButton(d->hwnd, method_to_id[d->method], BST_CHECKED);
+
+    for (i=0; i < ARRAYLENGTH(method_to_id); i++) {
+        if (i != d->method && method_to_id[i] != 0)
+            CheckDlgButton(d->hwnd, method_to_id[d->method],
+                           BST_UNCHECKED);
+    }
 
     khui_cw_enable_type(d->nc, credtype_id_krb4, d->k4_enabled);
 }
@@ -528,7 +536,6 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                                 _cstr(ident), _int32(method));
                     _resolve();
                     _describe();
-                                
 
                 } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
 
@@ -547,6 +554,9 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                         ident = nc->ctx.identity;
 
                         if (!k4_should_identity_get_k4(ident)) {
+
+                            _reportf(L"Kerberos 4 is not enabled for this identity.  Skipping");
+
                             khui_cw_set_response(nc, credtype_id_krb4,
                                                  KHUI_NC_RESPONSE_FAILED |
                                                  KHUI_NC_RESPONSE_EXIT);
@@ -554,6 +564,9 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                         }
 
                     } else {
+
+                        _reportf(L"Kerberos 4 is not within renewal scope. Skipping");
+
                         khui_cw_set_response(nc, credtype_id_krb4,
                                              KHUI_NC_RESPONSE_FAILED |
                                              KHUI_NC_RESPONSE_EXIT);
@@ -572,6 +585,7 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                     _describe();
                 } else {
                     assert(FALSE);
+                    break;
                 }
 
                 if ((method == K4_METHOD_AUTO ||

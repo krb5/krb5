@@ -61,9 +61,18 @@
 			<param name="Name" value="Starting">
 			<param name="Local" value="html\use_start.htm">
 			</OBJECT>
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Notification icon">
+                        <param name="Local" value="html\use_icon.htm">
+                        </OBJECT>
+
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Managing the credentials view layout">
+                        <param name="Local" value="html\use_layout.htm">
+                        </OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Menus">
+		<param name="Name" value="Menus and Toolbars">
 		<param name="Local" value="html\menu_all.htm">
 		</OBJECT>
 	<UL>

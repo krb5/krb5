@@ -39,15 +39,19 @@ MODULE=all
 
 #RMAKE=$(MAKECMD) /nologo all KH_NO_WX=1
 RMAKE=$(MAKECMD) /nologo all
+RMAKE_W2K=$(MAKECMD) /nologo all KHBUILD_W2K=1
 
 !else
 RMAKE=$(MAKECMD) /nologo etag
+RMAKE_W2K=$(MAKECMD) /nologo etag KHBUILD_W2K=1
 !endif
 !else
 RMAKE=$(MAKECMD) /nologo test
+RMAKE_W2K=$(MAKECMD) /nologo test KHBUILD_W2K=1
 !endif
 !else
 RMAKE=$(MAKECMD) /nologo clean
+RMAKE_W2K=$(MAKECMD) /nologo clean KHBUILD_W2K=1
 !endif
 
 start:
@@ -119,6 +123,7 @@ uilib: help
 	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
+	$(RMAKE_W2K)
 	$(CD) ..
 	$(ECHO) -- Done with $@
 
@@ -126,6 +131,7 @@ nidmgrdll: uilib
 	$(ECHO) -- Entering $@
 	$(CD) $@
 	$(RMAKE)
+	$(RMAKE_W2K)
 	$(CD) ..
 	$(ECHO) -- Done with $@
 
@@ -133,6 +139,7 @@ ui: nidmgrdll
 	$(ECHO) -- Entering $@:
 	$(CD) $@
 	$(RMAKE)
+	$(RMAKE_W2K)
 	$(CD) ..
 	$(ECHO) -- Done with $@
 
@@ -173,7 +180,7 @@ afsplugin: plugincommon
 	$(ECHO) -- Done with $@
 !endif
 
-finale: krb5plugin doc
+finale: krb5plugin
 	$(ECHO) -- Done.
 
 pdoc:

@@ -135,6 +135,27 @@ alert_show_normal(khui_alert * a);
 static khm_int32
 alert_enqueue(khui_alert * a);
 
+/* These are defined for APPVER >= 0x501.  We are defining them here
+   so that we can build with APPVER = 0x500 and use the same binaries
+   with Win XP. */
+
+#ifndef NIN_BALLOONSHOW
+#define NIN_BALLOONSHOW (WM_USER + 2)
+#endif
+
+#ifndef NIN_BALLOONHIDE
+#define NIN_BALLOONHIDE (WM_USER + 3)
+#endif
+
+#ifndef NIN_BALLOONTIMEOUT
+#define NIN_BALLOONTIMEOUT (WM_USER + 4)
+#endif
+
+#ifndef NIN_BALLOONUSERCLICK
+#define NIN_BALLOONUSERCLICK (WM_USER + 5)
+#endif
+
+
 /**********************************************************************
   Notifier
 ***********************************************************************
@@ -254,7 +275,6 @@ notifier_wnd_proc(HWND hwnd,
             khm_show_main_window();
             break;
 
-#if (_WIN32_IE >= 0x0501)
         case NIN_BALLOONUSERCLICK:
             if (current_alert) {
                 if ((current_alert->flags & KHUI_ALERT_FLAG_DEFACTION) &&
@@ -278,8 +298,6 @@ notifier_wnd_proc(HWND hwnd,
                 current_alert = NULL;
             }
             break;
-#endif
-
         }
     } else if (uMsg == WM_TIMER) {
         if (wParam == KHUI_TRIGGER_TIMER_ID) {

@@ -22,18 +22,41 @@
 # SOFTWARE.
 
 
-MODULE=help
-!include <..\config\Makefile.w32>
+MODULE=uilib.w2k
+!include <../config/Makefile.w2k>
 
-CHMFILE=$(BINDIR)\netidmgr.chm
+UIDLLOBJFILES=			\
+	$(OBJ)\rescache.obj 	\
+	$(OBJ)\action.obj 	\
+	$(OBJ)\creddlg.obj	\
+	$(OBJ)\alert.obj 	\
+	$(OBJ)\propsheet.obj 	\
+	$(OBJ)\propwnd.obj 	\
+	$(OBJ)\uilibmain.obj 	\
+	$(OBJ)\actiondef.obj 	\
+	$(OBJ)\acceldef.obj	\
+	$(OBJ)\configui.obj	\
+	$(OBJ)\trackerwnd.obj	\
+	$(OBJ)\version.obj
 
-INCFILES=$(INCDIR)\khhelp.h
+INCFILES=			\
+	$(INCDIR)\khuidefs.h	\
+	$(INCDIR)\khrescache.h 	\
+	$(INCDIR)\khaction.h 	\
+	$(INCDIR)\khactiondef.h	\
+	$(INCDIR)\khalerts.h	\
+	$(INCDIR)\khhtlink.h	\
+	$(INCDIR)\khnewcred.h	\
+	$(INCDIR)\khprops.h	\
+	$(INCDIR)\khconfigui.h	\
+	$(INCDIR)\khtracker.h	\
+	$(INCDIR)\khremote.h
 
-all: mkdirs $(CHMFILE) $(INCFILES)
+$(OBJ)\actiondef.c: actions.csv actiondef.cfg
+	$(CCSV) $** $@
 
-$(CHMFILE): netidmgr.hhp
-	-$(HHC) netidmgr.hhp
-	$(CP) netidmgr.chm $(CHMFILE)
+$(OBJ)\acceldef.c: accel.csv acceldef.cfg
+	$(CCSV) $** $@
 
-clean::
-	$(RM) $(CHMFILE)
+all: mkdirs $(INCFILES) $(UIDLLOBJFILES)
+
