@@ -251,10 +251,6 @@ krb5_error_code
 krb5_ldap_close( krb5_context );
 
 krb5_error_code
-krb5_ldap_get_keysalt_tuples( krb5_context , krb5_key_salt_tuple **, int *,
-			      krb5_key_salt_tuple *, int, krb5_db_entry *);
-
-krb5_error_code
 krb5_ldap_read_startup_information(krb5_context );
 
 int

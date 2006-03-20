@@ -1,3 +1,10 @@
+2006-03-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* ldap_misc.c (krb5_ldap_get_keysalt_tuples): Unused function
+	deleted.
+	(LDAP_DEFAULT_ENCTYPE, LDAP_DEFAULT_SALTTYPE): Macros deleted.
+	* kdb_ldap.h (krb5_ldap_get_keysalt_tuples): Don't declare it.
+
 2006-03-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in, kdb_ldap.c, kdb_ldap_conn.c, kdb_xdr.c, kdb_xdr.h,
