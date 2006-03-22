@@ -1819,7 +1819,7 @@ else
  if test $withval = EDIRECTORY; then
         AC_MSG_NOTICE(enabling edirectory backend module support)
         OPENLDAP_PLUGIN="yes"
-        CFLAGS="$CFLAGS -DHAVE_EDIRECTORY"
+	AC_DEFINE(HAVE_EDIRECTORY,1,[Define if LDAP KDB interface should assume eDirectory.])
  fi
 fi
 AC_SUBST(OPENLDAP_PLUGIN)
