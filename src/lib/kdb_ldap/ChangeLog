@@ -1,3 +1,8 @@
+2006-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Define a bunch of macros for local renaming
+	of symbol names duplicated in libkdb5 and exported from there.
+
 2006-03-21  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add kdb5 library.

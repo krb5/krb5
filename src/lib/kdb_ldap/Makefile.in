@@ -6,7 +6,16 @@ KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-DEFS = @DEFS@ -DHAVE_LDAP_H @DEF_EDIR@
+# Lots of ugliness here because of duplicated symbol names.
+# Can I just punt the duplicates and import from libkdb5, or
+# is keeping them separate important?
+DEFS = @DEFS@ -DHAVE_LDAP_H @DEF_EDIR@ \
+	-Dkrb5_dbe_lookup_last_pwd_change=kdb_ldap_dbe_lookup_last_pwd_change \
+	-Dkrb5_dbe_lookup_mod_princ_data=kdb_ldap_dbe_lookup_mod_princ_data \
+	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
+	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
+	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
+	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
 
 #LOCALINCLUDES = -I.. -I$(SRCTOP)/include
 LOCALINCLUDES = -I../kdb -I$(srcdir)/../kdb
