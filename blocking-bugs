@@ -50,3 +50,6 @@ That's clearly wrong but is because of brokenness in kadm5/clnt.
   Or are we stuck building executables that will do the right thing
   with a non-eDirectory realm or with an eDirectory realm but not
   both?
+
+* On this branch, "make check" fails even when configured without LDAP
+  support.
