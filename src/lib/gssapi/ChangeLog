@@ -1,3 +1,8 @@
+2006-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* Makefile.in (STOBJLISTS): Add spnego directory. (forgot to set
+	this variable)
+
 2006-03-05  Tom Yu  <tlyu@mit.edu>
 
 	* Makefile.in, configure.in: Add spnego directory.

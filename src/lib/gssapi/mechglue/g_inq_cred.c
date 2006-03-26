@@ -225,8 +225,11 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
      
     union_cred = (gss_union_cred_t) cred_handle;
     mech_cred = gssint_get_mechanism_cred(union_cred, mech_type);
+
+#if 0
     if (mech_cred == NULL)
 	return (GSS_S_DEFECTIVE_CREDENTIAL);
+#endif
 
     status = mech->gss_inquire_cred_by_mech(mech->context, minor_status,
 					    mech_cred, mech_type,

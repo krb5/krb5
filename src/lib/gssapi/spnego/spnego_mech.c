@@ -8,10 +8,11 @@
  *
  */
 
-#pragma ident	"@(#)spnego_mech.c	1.7	04/09/28 SMI"
+/* #pragma ident	"@(#)spnego_mech.c	1.7	04/09/28 SMI" */
 
 #include	<stdio.h>
 #include	<stdlib.h>
+#include	<string.h>
 #include	<krb5.h>
 #include	"gssapiP_spnego.h"
 #include	<mglueP.h>
@@ -66,19 +67,20 @@ make_spnego_tokenTarg_msg(OM_uint32, gss_OID, gss_buffer_t,
  * { iso(1) org(3) dod(6) internet(1) security(5)
  *  mechanism(5) spnego(2) }
  */
-static struct gss_config spnego_mechanism =
+struct gss_config spnego_mechanism =
 {{SPNEGO_OID_LENGTH, SPNEGO_OID},
 	NULL,
 	spnego_gss_acquire_cred,
 	spnego_gss_release_cred,
 	spnego_gss_init_sec_context,
 	spnego_gss_accept_sec_context,
-/* EXPORT DELETE START */ /* CRYPT DELETE START */
-	spnego_gss_unseal,		/* gss_unseal */
-/* EXPORT DELETE END */ /* CRYPT DELETE END */
 	NULL,				/* gss_process_context_token */
 	spnego_gss_delete_sec_context,	/* gss_delete_sec_context */
 	spnego_gss_context_time,	/* gss_context_time */
+	spnego_gss_sign,		/* gss_sign */
+	spnego_gss_verify,		/* gss_verify */
+	spnego_gss_seal,		/* gss_seal */
+	spnego_gss_unseal,		/* gss_unseal */
 	spnego_gss_display_status,
 	NULL,				/* gss_indicate_mechs */
 	NULL,				/* gss_compare_name */
@@ -87,9 +89,6 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_release_name,
 	NULL,				/* gss_inquire_cred */
 	NULL,				/* gss_add_cred */
-/* EXPORT DELETE START */ /* CRYPT DELETE START */
-	spnego_gss_seal,		/* gss_seal */
-/* EXPORT DELETE END */ /* CRYPT DELETE END */
 	spnego_gss_export_sec_context,	/* gss_export_sec_context */
 	spnego_gss_import_sec_context,	/* gss_import_sec_context */
 	NULL, 				/* gss_inquire_cred_by_mech */
@@ -100,21 +99,10 @@ static struct gss_config spnego_mechanism =
 	NULL,				/* gss_pname_to_uid */
 	NULL,				/* gssint_userok */
 	NULL,				/* gss_export_name */
-/* EXPORT DELETE START */
-/* CRYPT DELETE START */
-#if 0
-/* CRYPT DELETE END */
-	spnego_gss_seal,
-	spnego_gss_unseal,
-/* CRYPT DELETE START */
-#endif
-/* CRYPT DELETE END */
-/* EXPORT DELETE END */
-	spnego_gss_sign,		/* gss_sign */
-	spnego_gss_verify,		/* gss_verify */
 	NULL,				/* gss_store_cred */
 };
 
+#if 0
 gss_mechanism
 gss_mech_initialize(const gss_OID oid)
 {
@@ -129,6 +117,7 @@ gss_mech_initialize(const gss_OID oid)
 	dsyslog("Leaving gss_mech_initialize\n");
 	return (&spnego_mechanism);
 }
+#endif
 
 /*ARGSUSED*/
 OM_uint32

@@ -59,15 +59,15 @@ gss_name_t *		output_name;
 
     *minor_status = 0;
 
-    if (GSS_EMPTY_BUFFER(input_name_buffer))
-	return (GSS_S_CALL_INACCESSIBLE_READ);
-
     if (output_name == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     *output_name = 0;
 
     if (input_name_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_BAD_NAME);
+
+    if (GSS_EMPTY_BUFFER(input_name_buffer))
 	return (GSS_S_BAD_NAME);
 
     /*

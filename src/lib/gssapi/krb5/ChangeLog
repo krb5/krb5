@@ -1,3 +1,20 @@
+2006-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_krb5.h (GSS_MECH_KRB5_OLD_OID):
+	(GSS_MECH_KRB5_OLD_OID_LENGTH): 
+	* gssapi_krb5.c, krb5_gss_glue.c: Use definition of pre-RFC krb5
+	mech OID in gssapiP_krb5.h.
+
+	* krb5_gss_glue.c (KRB5_GSS_CONFIG_INIT): Partial initializer for
+	gss_config structures, due to multiple OIDs recognized by the krb5
+	mech.
+	(gss_mech_initialize, gss_krb5_get_tkt_flags) 
+	(gss_krb5_copy_ccache, gss_krb5_export_lucid_sec_context) 
+	(gss_krb5_set_allowable_enctypes): Recognize both mech OIDs.
+
+	* rel_oid.c (krb5_gss_internal_release_oid): Make external.
+	(krb5_gss_release_oid): Disable.
+
 2006-03-10  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_gss_glue.c: Rename symbols for namespace purity.

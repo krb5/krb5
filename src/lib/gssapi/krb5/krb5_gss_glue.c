@@ -292,7 +292,7 @@ static OM_uint32 k5glue_import_sec_context
 
 krb5_error_code k5glue_ser_init(krb5_context);
 
-static OM_uint32 k5glue_release_oid
+static OM_uint32 k5glue_internal_release_oid
 (void *, OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
 	   );
@@ -333,50 +333,68 @@ static OM_uint32 k5glue_validate_cred
          );
 #endif
 
+/*
+ * The krb5 mechanism provides two mech OIDs; use this initializer to
+ * ensure that both dispatch tables contain identical function
+ * pointers.
+ */
+#define KRB5_GSS_CONFIG_INIT				\
+    NULL,						\
+    k5glue_acquire_cred,				\
+    k5glue_release_cred,				\
+    k5glue_init_sec_context,				\
+    k5glue_accept_sec_context,				\
+    k5glue_process_context_token,			\
+    k5glue_delete_sec_context,				\
+    k5glue_context_time,				\
+    k5glue_sign,					\
+    k5glue_verify,					\
+    k5glue_seal,					\
+    k5glue_unseal,					\
+    k5glue_display_status,				\
+    k5glue_indicate_mechs,				\
+    k5glue_compare_name,				\
+    k5glue_display_name,				\
+    k5glue_import_name,					\
+    k5glue_release_name,				\
+    k5glue_inquire_cred,				\
+    k5glue_add_cred,					\
+    k5glue_export_sec_context,				\
+    k5glue_import_sec_context,				\
+    k5glue_inquire_cred_by_mech,			\
+    k5glue_inquire_names_for_mech,			\
+    k5glue_inquire_context,				\
+    k5glue_internal_release_oid,			\
+    k5glue_wrap_size_limit,				\
+    NULL,			/* pname_to_uid */	\
+    NULL,			/* userok */		\
+    k5glue_export_name,					\
+    NULL			/* store_cred */
+
 struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
-    NULL,
-    k5glue_acquire_cred,
-    k5glue_release_cred,
-    k5glue_init_sec_context,
-    k5glue_accept_sec_context,
-    k5glue_process_context_token,
-    k5glue_delete_sec_context,
-    k5glue_context_time,
-    k5glue_sign,
-    k5glue_verify,
-    k5glue_seal,
-    k5glue_unseal,
-    k5glue_display_status,
-    k5glue_indicate_mechs,
-    k5glue_compare_name,
-    k5glue_display_name,
-    k5glue_import_name,
-    k5glue_release_name,
-    k5glue_inquire_cred,
-    k5glue_add_cred,
-    k5glue_export_sec_context,
-    k5glue_import_sec_context,
-    k5glue_inquire_cred_by_mech,
-    k5glue_inquire_names_for_mech,
-    k5glue_inquire_context,
-    k5glue_release_oid,
-    k5glue_wrap_size_limit,
-    NULL,			/* pname_to_uid */
-    NULL,			/* userok */
-    k5glue_export_name,
-    NULL			/* store_cred */
+    KRB5_GSS_CONFIG_INIT
+};
+
+struct gss_config krb5_mechanism_old = {
+    { GSS_MECH_KRB5_OLD_OID_LENGTH, GSS_MECH_KRB5_OLD_OID },
+    KRB5_GSS_CONFIG_INIT
 };
 
 #ifdef KRB5_MECH_MODULE
 gss_mechanism
 gss_mech_initialize(const gss_OID oid)
 {
-    if (oid == NULL ||
-	!g_OID_equal(oid, &krb5_mechanism.mech_type)) {
+    if (oid == NULL)
 	return NULL;
-    }
-    return &krb5_mechanism;
+
+    if (g_OID_equal(oid, &krb5_mechanism.mech_type))
+	return &krb5_mechanism;
+
+    if (g_OID_equal(oid, &krb5_mechanism_old.mech_type))
+	return &krb5_mechanism_old;
+
+    return NULL;
 }
 #endif
 
@@ -769,12 +787,12 @@ k5glue_release_buffer(ctx, minor_status, buffer)
 
 /* V2 */
 static OM_uint32
-k5glue_release_oid(ctx, minor_status, oid)
+k5glue_internal_release_oid(ctx, minor_status, oid)
     void *ctx;
      OM_uint32	 *minor_status;
      gss_OID	 *oid;
 {
-    return(krb5_gss_release_oid(minor_status, oid));
+    return(krb5_gss_internal_release_oid(minor_status, oid));
 }
 
 #if 0
@@ -998,7 +1016,8 @@ gss_krb5_get_tkt_flags(
     gss_union_ctx_id_t uctx;
 
     uctx = (gss_union_ctx_id_t)context_handle;
-    if (!g_OID_equal(uctx->mech_type, &krb5_mechanism.mech_type))
+    if (!g_OID_equal(uctx->mech_type, &krb5_mechanism.mech_type) &&
+	!g_OID_equal(uctx->mech_type, &krb5_mechanism_old.mech_type))
 	return GSS_S_BAD_MECH;
     return gss_krb5int_get_tkt_flags(minor_status, uctx->internal_ctx_id,
 				     ticket_flags);
@@ -1014,10 +1033,16 @@ gss_krb5_copy_ccache(
     gss_cred_id_t mcred;
 
     ucred = (gss_union_cred_t)cred_handle;
+
     mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
-    if (mcred == NULL)
-	return GSS_S_DEFECTIVE_CREDENTIAL;
-    return gss_krb5int_copy_ccache(minor_status, mcred, out_ccache);
+    if (mcred != GSS_C_NO_CREDENTIAL)
+	return gss_krb5int_copy_ccache(minor_status, mcred, out_ccache);
+
+    mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism_old.mech_type);
+    if (mcred != GSS_C_NO_CREDENTIAL)
+	return gss_krb5int_copy_ccache(minor_status, mcred, out_ccache);
+
+    return GSS_S_DEFECTIVE_CREDENTIAL;
 }
 
 /* XXX need to delete mechglue ctx too */
@@ -1031,7 +1056,8 @@ gss_krb5_export_lucid_sec_context(
     gss_union_ctx_id_t uctx;
 
     uctx = (gss_union_ctx_id_t)*context_handle;
-    if (!g_OID_equal(uctx->mech_type, &krb5_mechanism.mech_type))
+    if (!g_OID_equal(uctx->mech_type, &krb5_mechanism.mech_type) &&
+	!g_OID_equal(uctx->mech_type, &krb5_mechanism_old.mech_type))
 	return GSS_S_BAD_MECH;
     return gss_krb5int_export_lucid_sec_context(minor_status,
 						&uctx->internal_ctx_id,
@@ -1050,8 +1076,14 @@ gss_krb5_set_allowable_enctypes(
 
     ucred = (gss_union_cred_t)cred;
     mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism.mech_type);
-    if (mcred == NULL)
-	return GSS_S_DEFECTIVE_CREDENTIAL;
-    return gss_krb5int_set_allowable_enctypes(minor_status, mcred,
-					      num_ktypes, ktypes);
+    if (mcred != GSS_C_NO_CREDENTIAL)
+	return gss_krb5int_set_allowable_enctypes(minor_status, mcred,
+						  num_ktypes, ktypes);
+
+    mcred = gssint_get_mechanism_cred(ucred, &krb5_mechanism_old.mech_type);
+    if (mcred != GSS_C_NO_CREDENTIAL)
+	return gss_krb5int_set_allowable_enctypes(minor_status, mcred,
+						  num_ktypes, ktypes);
+
+    return GSS_S_DEFECTIVE_CREDENTIAL;
 }

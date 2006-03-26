@@ -77,6 +77,9 @@
 #define GSS_MECH_KRB5_OID_LENGTH 9
 #define GSS_MECH_KRB5_OID "\052\206\110\206\367\022\001\002\002"
 
+#define GSS_MECH_KRB5_OLD_OID_LENGTH 5
+#define GSS_MECH_KRB5_OLD_OID "\053\005\001\005\002"
+
 #define CKSUMTYPE_KG_CB		0x8003
 
 #define KG_TOK_CTX_AP_REQ	0x0100
@@ -578,7 +581,7 @@ OM_uint32 krb5_gss_import_sec_context
 
 krb5_error_code krb5_gss_ser_init(krb5_context);
 
-OM_uint32 krb5_gss_release_oid
+OM_uint32 krb5_gss_internal_release_oid
 (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
 	   );

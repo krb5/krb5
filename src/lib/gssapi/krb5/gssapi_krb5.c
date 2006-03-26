@@ -89,7 +89,7 @@ const gss_OID_desc krb5_gss_oid_array[] = {
    /* this is the official, rfc-specified OID */
    {GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID},
    /* this is the unofficial, wrong OID */
-   {5, "\053\005\001\005\002"},
+   {GSS_MECH_KRB5_OLD_OID_LENGTH, GSS_MECH_KRB5_OLD_OID},
    /* this is the v2 assigned OID */
    {9, "\052\206\110\206\367\022\001\002\003"},
    /* these two are name type OID's */

@@ -1,3 +1,16 @@
+2006-03-26  Tom Yu  <tlyu@mit.edu>
+
+	* g_initialize.c: Rework locking somewhat; still needs more work.
+	Original Sun code assumes pointer writes are atomic.  Make
+	gss_indicate_mechs work.
+
+	* g_inq_cred.c (gss_inquire_cred_by_mech): Allow mech_cred to be
+	NULL.
+
+	* g_imp_name.c (gss_import_name): Check GSS_C_NO_BUFFER before
+	GSS_EMPTY_BUFFER, and return appropriate error code for
+	GSS_EMPTY_BUFFER.
+
 2006-03-10  Tom Yu  <tlyu@mit.edu>
 
 	* g_accept_sec_context.c, g_acquire_cred.c, g_compare_name.c,

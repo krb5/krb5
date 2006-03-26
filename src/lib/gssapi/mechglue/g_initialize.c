@@ -56,20 +56,12 @@
 
 #include "k5-thread.h"
 
-extern gss_mechanism krb5_gss_initialize();
-
-static int _gss_initialized = 0;
-
-static struct gss_config null_mech = {
-  {0,NULL}};
-
-gss_mechanism *gssint_mechs_array = NULL;
-
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
 static void loadConfigFile(const char *);
 static void updateMechList(void);
 
+static OM_uint32 build_mechSet(void);
 static void init_hardcoded(void);
 
 /*
@@ -104,13 +96,15 @@ OM_uint32 *minor_status;
 gss_OID *oid;
 {
 	OM_uint32 major;
-	gss_mech_info aMech = g_mechList;
+	gss_mech_info aMech;
 
 	if (minor_status == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	*minor_status = 0;
 
+	k5_mutex_lock(&g_mechListLock);
+	aMech = g_mechList;
 	while (aMech != NULL) {
 
 		/*
@@ -120,22 +114,18 @@ gss_OID *oid;
 		 * the OID was recognized as an internal mechanism OID. if no
 		 * mechanisms recognize the OID, then call the generic version.
 		 */
-
-		/*
-		 * we can walk the mechanism list without a mutex, because we
-		 * are only looking at fields which once read will never change.
-		 * Mechanism entries are always added to the end, and as
-		 * complete entries.
-		 */
 		if (aMech->mech && aMech->mech->gss_internal_release_oid) {
 			major = aMech->mech->gss_internal_release_oid(
 					aMech->mech->context,
 					minor_status, oid);
-			if (major == GSS_S_COMPLETE)
+			if (major == GSS_S_COMPLETE) {
+				k5_mutex_unlock(&g_mechListLock);
 				return (GSS_S_COMPLETE);
+			}
 		}
 		aMech = aMech->next;
 	} /* while */
+	k5_mutex_unlock(&g_mechListLock);
 
 	return (generic_gss_release_oid(minor_status, oid));
 } /* gss_release_oid */
@@ -160,14 +150,15 @@ gss_indicate_mechs(minorStatus, mechSet)
 OM_uint32 *minorStatus;
 gss_OID_set *mechSet;
 {
-	gss_mech_info mList;
 	char *fileName;
 	struct stat fileInfo;
-	int count, i, j;
+	int i, j;
 	gss_OID curItem;
 
 	if (!minorStatus)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+	if (gssint_initialize_library())
+		return GSS_S_FAILURE;
 
 	*minorStatus = 0;
 
@@ -178,6 +169,7 @@ gss_OID_set *mechSet;
 
 	fileName = MECH_CONF;
 
+#if 0
 	/*
 	 * If we have already computed the mechanisms supported and if it
 	 * is still valid; make a copy and return to caller,
@@ -185,97 +177,10 @@ gss_OID_set *mechSet;
 	 */
 	if ((stat(fileName, &fileInfo) == 0 &&
 		fileInfo.st_mtime > g_mechSetTime)) {
-		/*
-		 * lock the mutex since we will be updating
-		 * the mechList structure
-		 * we need to keep the lock while we build the mechanism list
-		 * since we are accessing parts of the mechList which could be
-		 * modified.
-		 */
-		(void) k5_mutex_lock(&g_mechListLock);
-
-		/*
-		 * this checks for the case when we need to re-construct the
-		 * g_mechSet structure, but the mechanism list is upto date
-		 * (because it has been read by someone calling
-		 * gssint_get_mechanism)
-		 */
-		if (fileInfo.st_mtime > g_confFileModTime)
-		{
-			g_confFileModTime = fileInfo.st_mtime;
-			loadConfigFile(fileName);
-		}
-
-		/*
-		 * we need to lock the mech set so that no one else will
-		 * try to read it as we are re-creating it
-		 */
-		(void) k5_mutex_lock(&g_mechSetLock);
-
-		/* if the oid list already exists we must free it first */
-		if (g_mechSet.count != 0) {
-			for (i = 0; i < g_mechSet.count; i++)
-				free(g_mechSet.elements[i].elements);
-			free(g_mechSet.elements);
-			g_mechSet.elements = NULL;
-			g_mechSet.count = 0;
-		}
-
-		/* determine how many elements to have in the list */
-		mList = g_mechList;
-		count = 0;
-		while (mList != NULL) {
-			count++;
-			mList = mList->next;
-		}
-
-		/* this should always be true, but.... */
-		if (count > 0) {
-			g_mechSet.elements =
-				(gss_OID) calloc(count, sizeof (gss_OID_desc));
-			if (g_mechSet.elements == NULL) {
-				(void) k5_mutex_unlock(&g_mechSetLock);
-				(void) k5_mutex_unlock(&g_mechListLock);
-				return (GSS_S_FAILURE);
-			}
-
-			(void) memset(g_mechSet.elements, 0,
-				count * sizeof (gss_OID_desc));
-
-			/* now copy each oid element */
-			g_mechSet.count = count;
-			count = 0;
-			mList = g_mechList;
-			while (mList != NULL) {
-				curItem = &(g_mechSet.elements[count]);
-				curItem->elements = (void*)
-					malloc(mList->mech_type->length);
-				if (curItem->elements == NULL) {
-					/*
-					 * this is nasty - we must delete the
-					 * part of the array already copied
-					 */
-					for (i = 0; i < count; i++) {
-						free(g_mechSet.elements[i].
-							elements);
-					}
-					free(g_mechSet.elements);
-					g_mechSet.count = 0;
-					g_mechSet.elements = NULL;
-					(void) k5_mutex_unlock(&g_mechSetLock);
-					(void) k5_mutex_unlock(&g_mechListLock);
-					return (GSS_S_FAILURE);
-				}
-				g_OID_copy(curItem, mList->mech_type);
-				count++;
-				mList = mList->next;
-			}
-		}
-
-		g_mechSetTime = fileInfo.st_mtime;
-		(void) k5_mutex_unlock(&g_mechSetLock);
-		(void) k5_mutex_unlock(&g_mechListLock);
 	} /* if g_mechSet is out of date or not initialized */
+#endif
+	if (build_mechSet())
+		return GSS_S_FAILURE;
 
 	/*
 	 * the mech set is created and it is up to date
@@ -335,6 +240,113 @@ gss_OID_set *mechSet;
 	return (GSS_S_COMPLETE);
 } /* gss_indicate_mechs */
 
+
+static OM_uint32
+build_mechSet(void)
+{
+	gss_mech_info mList;
+	int i, count;
+	gss_OID curItem;
+
+	/*
+	 * lock the mutex since we will be updating
+	 * the mechList structure
+	 * we need to keep the lock while we build the mechanism list
+	 * since we are accessing parts of the mechList which could be
+	 * modified.
+	 */
+	(void) k5_mutex_lock(&g_mechListLock);
+
+#if 0
+	/*
+	 * this checks for the case when we need to re-construct the
+	 * g_mechSet structure, but the mechanism list is upto date
+	 * (because it has been read by someone calling
+	 * gssint_get_mechanism)
+	 */
+	if (fileInfo.st_mtime > g_confFileModTime)
+	{
+		g_confFileModTime = fileInfo.st_mtime;
+		loadConfigFile(fileName);
+	}
+#endif
+
+	updateMechList();
+
+	/*
+	 * we need to lock the mech set so that no one else will
+	 * try to read it as we are re-creating it
+	 */
+	(void) k5_mutex_lock(&g_mechSetLock);
+
+	/* if the oid list already exists we must free it first */
+	if (g_mechSet.count != 0) {
+		for (i = 0; i < g_mechSet.count; i++)
+			free(g_mechSet.elements[i].elements);
+		free(g_mechSet.elements);
+		g_mechSet.elements = NULL;
+		g_mechSet.count = 0;
+	}
+
+	/* determine how many elements to have in the list */
+	mList = g_mechList;
+	count = 0;
+	while (mList != NULL) {
+		count++;
+		mList = mList->next;
+	}
+
+	/* this should always be true, but.... */
+	if (count > 0) {
+		g_mechSet.elements =
+			(gss_OID) calloc(count, sizeof (gss_OID_desc));
+		if (g_mechSet.elements == NULL) {
+			(void) k5_mutex_unlock(&g_mechSetLock);
+			(void) k5_mutex_unlock(&g_mechListLock);
+			return (GSS_S_FAILURE);
+		}
+
+		(void) memset(g_mechSet.elements, 0,
+			      count * sizeof (gss_OID_desc));
+
+		/* now copy each oid element */
+		g_mechSet.count = count;
+		count = 0;
+		mList = g_mechList;
+		while (mList != NULL) {
+			curItem = &(g_mechSet.elements[count]);
+			curItem->elements = (void*)
+				malloc(mList->mech_type->length);
+			if (curItem->elements == NULL) {
+				/*
+				 * this is nasty - we must delete the
+				 * part of the array already copied
+				 */
+				for (i = 0; i < count; i++) {
+					free(g_mechSet.elements[i].
+					     elements);
+				}
+				free(g_mechSet.elements);
+				g_mechSet.count = 0;
+				g_mechSet.elements = NULL;
+				(void) k5_mutex_unlock(&g_mechSetLock);
+				(void) k5_mutex_unlock(&g_mechListLock);
+				return (GSS_S_FAILURE);
+			}
+			g_OID_copy(curItem, mList->mech_type);
+			count++;
+			mList = mList->next;
+		}
+	}
+
+#if 0
+	g_mechSetTime = fileInfo.st_mtime;
+#endif
+	(void) k5_mutex_unlock(&g_mechSetLock);
+	(void) k5_mutex_unlock(&g_mechListLock);
+}
+
+
 /*
  * this function has been added for use by modules that need to
  * know what (if any) optional parameters are supplied in the
@@ -352,19 +364,13 @@ const gss_OID oid;
 	/* make sure we have fresh data */
 	(void) k5_mutex_lock(&g_mechListLock);
 	updateMechList();
-	(void) k5_mutex_unlock(&g_mechListLock);
 
-	/* searching the list does not require a lock */
 	if ((aMech = searchMechList(oid)) == NULL ||
 		aMech->optionStr == NULL) {
+		(void) k5_mutex_unlock(&g_mechListLock);
 		return (NULL);
 	}
 
-	/*
-	 * need to obtain a lock on this structure in case someone else
-	 * will try to update it during the copy
-	 */
-	(void) k5_mutex_lock(&g_mechListLock);
 	if (aMech->optionStr)
 		modOptions = strdup(aMech->optionStr);
 	(void) k5_mutex_unlock(&g_mechListLock);
@@ -425,9 +431,10 @@ gssint_oid_to_mech(const gss_OID oid)
 	/* ensure we have fresh data */
 	(void) k5_mutex_lock(&g_mechListLock);
 	updateMechList();
+	aMech = searchMechList(oid);
 	(void) k5_mutex_unlock(&g_mechListLock);
 
-	if ((aMech = searchMechList(oid)) == NULL)
+	if (aMech == NULL)
 		return (NULL);
 
 	return (aMech->mechNameStr);
@@ -484,23 +491,32 @@ updateMechList(void)
 	init_hardcoded();
 	fileName = MECH_CONF;
 
+#if 0
 	/* check if mechList needs updating */
 	if (stat(fileName, &fileInfo) == 0 &&
 		(fileInfo.st_mtime > g_confFileModTime)) {
 		loadConfigFile(fileName);
 		g_confFileModTime = fileInfo.st_mtime;
 	}
+#endif
 } /* updateMechList */
 
-
+/*
+ * Initialize the hardcoded mechanisms.  This function is called with
+ * g_mechListLock held.
+ */
 static void
 init_hardcoded(void)
 {
 	extern struct gss_config krb5_mechanism;
+	extern struct gss_config krb5_mechanism_old;
+	extern struct gss_config spnego_mechanism;
+	static int inited;
 	gss_mech_info cf;
 
-	if (g_mechList != NULL)
+	if (inited)
 		return;
+
 	cf = malloc(sizeof(*cf));
 	if (cf == NULL)
 		return;
@@ -511,6 +527,30 @@ init_hardcoded(void)
 	cf->mech = &krb5_mechanism;
 	cf->next = NULL;
 	g_mechList = cf;
+
+	cf = malloc(sizeof(*cf));
+	if (cf == NULL)
+		return;
+	memset(cf, 0, sizeof(*cf));
+	cf->uLibName = strdup("<hardcoded internal>");
+	cf->mechNameStr = "kerberos_v5 (old)";
+	cf->mech_type = &krb5_mechanism_old.mech_type;
+	cf->mech = &krb5_mechanism_old;
+	cf->next = NULL;
+	g_mechList->next = cf;
+
+	cf = malloc(sizeof(*cf));
+	if (cf == NULL)
+		return;
+	memset(cf, 0, sizeof(*cf));
+	cf->uLibName = strdup("<hardcoded internal>");
+	cf->mechNameStr = "spnego";
+	cf->mech_type = &spnego_mechanism.mech_type;
+	cf->mech = &spnego_mechanism;
+	cf->next = NULL;
+	g_mechList->next->next = cf;
+
+	inited = 1;
 }
 
 
@@ -530,10 +570,12 @@ const gss_OID oid;
 	void *dl;
 
 	if (gssint_initialize_library())
-		return GSS_S_FAILURE;
+		return NULL;
 
+	(void) k5_mutex_lock(&g_mechListLock);
 	/* check if the mechanism is already loaded */
 	if ((aMech = searchMechList(oid)) != NULL && aMech->mech) {
+		(void) k5_mutex_unlock(&g_mechListLock);
 		return (aMech->mech);
 	}
 
@@ -541,7 +583,6 @@ const gss_OID oid;
 	 * might need to re-read the configuration file before loading
 	 * the mechanism to ensure we have the latest info.
 	 */
-	(void) k5_mutex_lock(&g_mechListLock);
 	updateMechList();
 
 	aMech = searchMechList(oid);
@@ -653,8 +694,8 @@ const gss_OID oid;
 
 /*
  * this routine is used for searching the list of mechanism data.
- * it needs not be mutex protected because we only add new structures
- * from the end and they are fully initialized before being added.
+ *
+ * this needs to be called with g_mechListLock held.
  */
 static gss_mech_info searchMechList(oid)
 const gss_OID oid;
@@ -751,12 +792,15 @@ const char *fileName;
 			continue;
 		}
 
+		k5_mutex_lock(&g_mechListLock);
 		aMech = searchMechList(mechOid);
 		if (aMech && aMech->mech) {
 			free(mechOid->elements);
 			free(mechOid);
+			k5_mutex_unlock(&g_mechListLock);
 			continue;
 		}
+		k5_mutex_unlock(&g_mechListLock);
 
 		/* Find the start of the shared lib name */
 		for (sharedLib = endp+1; *sharedLib && isspace(*sharedLib);
@@ -912,74 +956,3 @@ const char *fileName;
 	} /* while */
 	(void) fclose(confFile);
 } /* loadConfigFile */
-
-
-#ifdef USE_SOLARIS_SHARED_LIBRARIES
-/* 
- * read the configuration file to find out what mechanisms to
- * load, load them, and then load the mechanism defitions in
- * and add the mechanisms
- */
-static void solaris_initialize ()
-{
-    char buffer[BUFSIZ], *filename, *symname, *endp;
-    FILE *conffile;
-    void *dl;
-    gss_mechanism (*sym)(void), mech;
-
-    if ((filename = getenv("GSSAPI_MECH_CONF")) == NULL)
-	filename = MECH_CONF;
-
-    if ((conffile = fopen(filename, "r")) == NULL)
-	return;
-
-    while (fgets (buffer, BUFSIZ, conffile) != NULL) {
-	/* ignore lines beginning with # */
-	if (*buffer == '#')
-	    continue;
-
-	/* find the first white-space character after the filename */
-	for (symname = buffer; *symname && !isspace(*symname); symname++);
-
-	/* Now find the first non-white-space character */
-	if (*symname) {
-	    *symname = '\0';
-	    symname++;
-	    while (*symname && isspace(*symname))
-		symname++;
-	}
-
-	if (! *symname)
-	    symname = MECH_SYM;
-	else {
-	  /* Find the end of the symname and make sure it is NULL-terminated */
-	  for (endp = symname; *endp && !isspace(*endp); endp++);
-	  if (*endp)
-	    *endp = '\0';
-	}
-
-	if ((dl = dlopen(buffer, RTLD_NOW)) == NULL) {
-		/* for debugging only */
-		fprintf(stderr,"can't open %s: %s\n",buffer, dlerror());
-		continue;
-	}
-
-	if ((sym = (gss_mechanism (*)(void))dlsym(dl, symname)) == NULL) {
-	    dlclose(dl);
-	    continue;
-	}
-
-	/* Call the symbol to get the mechanism table */
-	mech = sym();
-
-	/* And add the mechanism (or close the shared library) */
-	if (mech)
-	    add_mechanism (mech, 1);
-	else
-	    dlclose(dl);
-
-    } /* while */
-
-    return;
-}
-#endif /* USE_SOLARIS_SHARED_LIBRARIES */
