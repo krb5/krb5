@@ -55,6 +55,7 @@ STLIBOBJS= \
 	init_ctx.o	\
 	init_keyblock.o \
 	kdc_rep_dc.o	\
+	kerrs.o		\
 	kfree.o		\
 	mk_cred.o	\
 	mk_error.o	\
@@ -140,7 +141,8 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)init_ctx.$(OBJEXT)	\
 	$(OUTPRE)init_keyblock.$(OBJEXT) \
 	$(OUTPRE)kdc_rep_dc.$(OBJEXT)	\
-	$(OUTPRE)kfree.$(OBJEXT)		\
+	$(OUTPRE)kerrs.$(OBJEXT)		\
+	$(OUTPRE)kfree.$(OBJEXT)	\
 	$(OUTPRE)mk_cred.$(OBJEXT)	\
 	$(OUTPRE)mk_error.$(OBJEXT)	\
 	$(OUTPRE)mk_priv.$(OBJEXT)	\
@@ -226,6 +228,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/init_ctx.c	\
 	$(srcdir)/init_keyblock.c \
 	$(srcdir)/kdc_rep_dc.c	\
+	$(srcdir)/kerrs.c	\
 	$(srcdir)/kfree.c	\
 	$(srcdir)/mk_cred.c	\
 	$(srcdir)/mk_error.c	\

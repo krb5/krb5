@@ -1,3 +1,11 @@
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPLIBS, SHLIB_EXPDEPS): Add krb5 lib.
+	* py-locate.c (sctx): New variable.
+	(my_init, lookup): Call krb5_set_error_message instead of fprintf
+	in most cases.  Use sctx to pass context (not thread safe!), and
+	store it as "blob" value.
+
 2006-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* py-locate.c: Include k5-locate.h instead of k5-plugin.h.

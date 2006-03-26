@@ -1,3 +1,10 @@
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_libinit.c (krb5int_lib_init): Register callback function
+	for lower-level error-info support routines.
+	(krb5int_lib_fini): Clear the callback function.
+	* libkrb5.exports: Export new error-message functions.
+
 2005-11-14  Jeffrey Altman <jaltman@mit.edu>
 
 	* krb5_libinit.c: include k5-int.h instead of krb5.h

@@ -169,6 +169,9 @@ typedef INT64_TYPE krb5_int64;
 /* Get mutex support; currently used only for the replay cache.  */
 #include "k5-thread.h"
 
+/* Get error info support.  */
+#include "k5-err.h"
+
 /* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
    The ones that it doesn't include, we include below.  */
 
@@ -1067,6 +1070,9 @@ struct _krb5_context {
     struct plugin_dir_handle libkrb5_plugins;
     struct krb5plugin_service_locate_ftable *vtbl;
     void (**locate_fptrs)(void);
+
+    /* error detail info */
+    struct errinfo err;
 };
 
 /* could be used in a table to find an etype and initialize a block */

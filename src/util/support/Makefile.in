@@ -28,12 +28,14 @@ STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
 	plugins.o \
+	errors.o \
 	fake-addrinfo.o
 
 LIBOBJS= \
 	$(OUTPRE)threads.$(OBJEXT) \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
 	$(OUTPRE)plugins.$(OBJEXT) \
+	$(OUTPRE)errors.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
@@ -45,6 +47,7 @@ LOCALINCLUDES=-I. -I$(srcdir)
 SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
+	$(srcdir)/errors.c \
 	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.

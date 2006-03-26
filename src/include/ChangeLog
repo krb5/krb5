@@ -1,3 +1,12 @@
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5.hin (krb5_set_error_message, krb5_vset_error_message,
+	krb5_get_error_message, krb5_free_error_message,
+	krb5_clear_error_message): Declare.
+	* k5-err.h: New file.
+	* k5-int.h: Include it.
+	(struct _krb5_context): Add new field ERR.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* adm.h, adm_defs.h, adm_proto.h, copyright.h, kdb.h, kdb_dbc.h,

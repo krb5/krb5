@@ -10,8 +10,8 @@ SO_EXT=.so
 RELDIR=../plugins/locate/python
 MODULE_INSTALL_DIR = $(KRB5_LIBKRB5_MODULE_DIR)
 
-SHLIB_EXPDEPS=
-SHLIB_EXPLIBS= -lpython2.3
+SHLIB_EXPDEPS= $(KRB5_DEPLIB)
+SHLIB_EXPLIBS= -lpython2.3 $(KRB5_LIB)
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
@@ -34,9 +34,10 @@ clean-unix:: clean-libs clean-libobjs
 # the Makefile.in file
 #
 py-locate.so py-locate.po $(OUTPRE)py-locate.$(OBJEXT): \
-  py-locate.c $(BUILDTOP)/include/krb5/autoconf.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/krb5/osconf.h $(SRCTOP)/include/k5-platform.h \
+  py-locate.c $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-int.h \
+  $(BUILDTOP)/include/osconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/krb5/kdb.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/k5-plugin.h

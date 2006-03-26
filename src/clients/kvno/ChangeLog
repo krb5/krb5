@@ -1,3 +1,11 @@
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* kvno.c: Include com_err.h.
+	(extended_com_err_fn): New function.
+	(context): New variable.
+	(main): Call set_com_err_hook.
+	(do_v5_kvno): Call com_err instead of fprintf+error_message.
+
 2004-08-31  Tom Yu  <tlyu@mit.edu>
 
 	* kvno.M: Update usage.
