@@ -1,3 +1,8 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* k5-err.h: Include win-mac.h.
+	(KRB5_CALLCONV): Don't define.
+
 2006-03-26  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb5.hin (krb5_set_error_message, krb5_vset_error_message,

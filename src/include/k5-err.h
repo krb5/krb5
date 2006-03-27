@@ -1,5 +1,5 @@
 #define _(X) (X)
-#define KRB5_CALLCONV
+#include "win-mac.h"
 struct errinfo {
     long code;
     const char *msg;
