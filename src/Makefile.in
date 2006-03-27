@@ -32,11 +32,11 @@ config.status: $(SRCTOP)/config/shlib.conf
 ##DOS##!endif
 
 all-windows:: maybe-awk Makefile-windows
-	@echo Making autoconf.h in include\krb5
-	cd include\krb5
+	@echo Making autoconf.h in include
+	cd include
 	$(MAKE) -$(MFLAGS) autoconf.h
 	@echo Making in util
-	cd ..\..\util
+	cd ..\util
 	$(MAKE) -$(MFLAGS)
 	@echo Making in include
 	cd ..\include
@@ -169,7 +169,7 @@ WINMAKEFILES=Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
-	include\Makefile include\krb5\Makefile \
+	include\Makefile \
 	krb524\Makefile \
 	lib\Makefile lib\crypto\Makefile \
 	lib\crypto\crc32\Makefile lib\crypto\des\Makefile \
@@ -225,8 +225,6 @@ WINMAKEFILES=Makefile \
 ##DOS##clients\kdeltkt\Makefile: clients\kdeltkt\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##include\Makefile: include\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##include\krb5\Makefile: include\krb5\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##krb524\Makefile: krb524\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@

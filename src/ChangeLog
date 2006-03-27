@@ -1,3 +1,9 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-windows): Don't go into include\krb5.
+	(WINMAKEFILES): Remove include\krb5\Makefile.
+	(include\krb5\Makefile): Target deleted.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (update-autoconf-h): Don't go into krb5
