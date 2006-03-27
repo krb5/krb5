@@ -1,3 +1,7 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* wconfig.pl: New file.
+
 2006-03-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (MAYBE_VALGRIND): New variable.
