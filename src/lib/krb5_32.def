@@ -282,4 +282,9 @@ krb5_c_string_to_key_with_params
 	krb5_rc_close				; PRIVATE GSSAPI krb5.hin
 	krb5_free_enc_tkt_part			; PRIVATE GSSAPI krb5.hin
 	krb5_decrypt_tkt_part			; PRIVATE GSSAPI krb5.hin
-    
+
+	krb5_set_error_message
+	krb5_vset_error_message
+	krb5_get_error_message
+	krb5_free_error_message
+	krb5_clear_error_message
