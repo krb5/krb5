@@ -38,7 +38,7 @@ gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
 include_xom=@include_xom@
-##DOS##include_xom=
+##DOS##include_xom=rem
 gssapi.h: gssapi.hin $(BUILDTOP)/include/autoconf.h
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \

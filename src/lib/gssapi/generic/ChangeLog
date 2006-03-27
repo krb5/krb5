@@ -1,3 +1,8 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (include_xom): Define as "rem" instead of empty on
+	Windows.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.h: Use autoconf.h from include rather than include/krb5.
