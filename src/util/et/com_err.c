@@ -132,7 +132,6 @@ void KRB5_CALLCONV_C com_err(const char *whoami,
 	va_end(ap);
 }
 
-#if !(defined(_WIN32))
 /* Make a separate function because the assert invocations below
    use the macro expansion on some platforms, which may be insanely
    long and incomprehensible.  */
@@ -166,4 +165,3 @@ et_old_error_hook_func reset_com_err_hook ()
 	k5_mutex_unlock(&com_err_hook_lock);
 	return x;
 }
-#endif
