@@ -1,3 +1,10 @@
+2006-03-27  Tom Yu  <tlyu@mit.edu>
+
+	* g_initialize.c (init_hardcoded): Re-order to put SPNEGO first
+	for testing purposes.
+	(gssint_mechglue_init, gssint_mechglue_fini): Initialize and
+	destroy g_mechSetLock.
+
 2006-03-26  Tom Yu  <tlyu@mit.edu>
 
 	* g_userok.c: Don't include synch.h or gssapi_ext.h.

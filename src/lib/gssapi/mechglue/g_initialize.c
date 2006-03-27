@@ -73,15 +73,23 @@ static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
 static time_t g_confFileModTime = (time_t)0;
 
+static time_t g_mechSetTime = (time_t)0;
+static gss_OID_set_desc g_mechSet = { 0, NULL };
+static k5_mutex_t g_mechSetLock = K5_MUTEX_PARTIAL_INITIALIZER;
+
 int
 gssint_mechglue_init(void)
 {
+	int err;
+
+	err = k5_mutex_finish_init(&g_mechSetLock);
 	return k5_mutex_finish_init(&g_mechListLock);
 }
 
 void
 gssint_mechglue_fini(void)
 {
+	k5_mutex_destroy(&g_mechSetLock);
 	k5_mutex_destroy(&g_mechListLock);
 }
 
@@ -140,11 +148,6 @@ gss_OID *oid;
  * To avoid reading the configuration file each call, we will save a
  * a mech oid set, and only update it once the file has changed.
  */
-static time_t g_mechSetTime = (time_t)0;
-static gss_OID_set_desc g_mechSet = { 0, NULL };
-static k5_mutex_t g_mechSetLock;
-
-
 OM_uint32
 gss_indicate_mechs(minorStatus, mechSet)
 OM_uint32 *minorStatus;
@@ -522,11 +525,24 @@ init_hardcoded(void)
 		return;
 	memset(cf, 0, sizeof(*cf));
 	cf->uLibName = strdup("<hardcoded internal>");
+	cf->mechNameStr = "spnego";
+	cf->mech_type = &spnego_mechanism.mech_type;
+	cf->mech = &spnego_mechanism;
+	cf->next = NULL;
+	g_mechList = cf;
+	g_mechListTail = cf;
+
+	cf = malloc(sizeof(*cf));
+	if (cf == NULL)
+		return;
+	memset(cf, 0, sizeof(*cf));
+	cf->uLibName = strdup("<hardcoded internal>");
 	cf->mechNameStr = "kerberos_v5";
 	cf->mech_type = &krb5_mechanism.mech_type;
 	cf->mech = &krb5_mechanism;
 	cf->next = NULL;
-	g_mechList = cf;
+	g_mechListTail->next = cf;
+	g_mechListTail = cf;
 
 	cf = malloc(sizeof(*cf));
 	if (cf == NULL)
@@ -537,18 +553,8 @@ init_hardcoded(void)
 	cf->mech_type = &krb5_mechanism_old.mech_type;
 	cf->mech = &krb5_mechanism_old;
 	cf->next = NULL;
-	g_mechList->next = cf;
-
-	cf = malloc(sizeof(*cf));
-	if (cf == NULL)
-		return;
-	memset(cf, 0, sizeof(*cf));
-	cf->uLibName = strdup("<hardcoded internal>");
-	cf->mechNameStr = "spnego";
-	cf->mech_type = &spnego_mechanism.mech_type;
-	cf->mech = &spnego_mechanism;
-	cf->next = NULL;
-	g_mechList->next->next = cf;
+	g_mechListTail->next = cf;
+	g_mechListTail = cf;
 
 	inited = 1;
 }
