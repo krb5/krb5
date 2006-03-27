@@ -46,16 +46,17 @@ yarrow.so yarrow.po $(OUTPRE)yarrow.$(OBJEXT): yarrow.c \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  yarrow.h ytypes.h yhash.h $(srcdir)/../sha1/shs.h ycipher.h \
-  ylock.h ystate.h yexcep.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h yarrow.h ytypes.h yhash.h \
+  $(srcdir)/../sha1/shs.h ycipher.h ylock.h ystate.h \
+  yexcep.h
 ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): ycipher.c \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  yarrow.h ytypes.h yhash.h $(srcdir)/../sha1/shs.h ycipher.h \
-  $(srcdir)/../enc_provider/enc_provider.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h yarrow.h ytypes.h yhash.h \
+  $(srcdir)/../sha1/shs.h ycipher.h $(srcdir)/../enc_provider/enc_provider.h

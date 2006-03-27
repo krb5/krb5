@@ -42,22 +42,23 @@ des_stringtokey.so des_stringtokey.po $(OUTPRE)des_stringtokey.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  old.h $(srcdir)/../des/des_int.h $(SRCTOP)/include/kerberosIV/des.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h old.h $(srcdir)/../des/des_int.h \
+  $(SRCTOP)/include/kerberosIV/des.h
 old_decrypt.so old_decrypt.po $(OUTPRE)old_decrypt.$(OBJEXT): \
   old_decrypt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  old.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h old.h
 old_encrypt.so old_encrypt.po $(OUTPRE)old_encrypt.$(OBJEXT): \
   old_encrypt.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  old.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h old.h

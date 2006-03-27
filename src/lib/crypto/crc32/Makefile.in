@@ -48,6 +48,6 @@ crc32.so crc32.po $(OUTPRE)crc32.$(OBJEXT): crc32.c \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
   $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
-  crc-32.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-plugin.h crc-32.h

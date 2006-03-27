@@ -127,18 +127,18 @@ client_init.so client_init.po $(OUTPRE)client_init.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/k5-plugin.h $(BUILDTOP)/include/kadm5/admin.h \
-  $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/clnt.h \
-  $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
-  $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/svc.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_rpc.h client_internal.h \
-  $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
-  $(BUILDTOP)/include/gssrpc/auth_gssapi.h
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/gssrpc/rpc.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/rename.h \
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/gssrpc/auth.h \
+  $(BUILDTOP)/include/gssrpc/clnt.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
+  $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
+  $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
+  client_internal.h $(BUILDTOP)/include/kadm5/admin_internal.h \
+  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h
 clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): \
   clnt_privs.c $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/xdr.h \
