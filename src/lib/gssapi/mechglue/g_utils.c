@@ -13,12 +13,11 @@
 #include <ctype.h>
 #include <errno.h>
 #include <gssapi/gssapi.h>
-#include <gssapi/gssapi_ext.h>
-#include <synch.h>
 
 #define	Q_DEFAULT		"default"
 #define	BUFLEN			256
 
+#if 0
 static int qop_num_pair_cnt;
 static const char    QOP_NUM_FILE[] = "/etc/gss/qop";
 static qop_num	qop_num_pairs[MAX_QOP_NUM_PAIRS+1];
@@ -279,3 +278,4 @@ gssint_mech_qops(
 	*numqop = cnt;
 	return (GSS_S_COMPLETE);
 }
+#endif

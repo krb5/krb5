@@ -1,5 +1,9 @@
 2006-03-26  Tom Yu  <tlyu@mit.edu>
 
+	* g_userok.c: Don't include synch.h or gssapi_ext.h.
+
+	* g_utils.c: Disable a bunch of stuff.
+
 	* g_initialize.c: Rework locking somewhat; still needs more work.
 	Original Sun code assumes pointer writes are atomic.  Make
 	gss_indicate_mechs work.

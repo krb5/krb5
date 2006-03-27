@@ -1,5 +1,10 @@
 2006-03-26  Tom Yu  <tlyu@mit.edu>
 
+	* spnego_mech.c: s/uchar_t/unsigned char/g.  Bash cast to
+	uint32_t, but that should get looked at again in detail.
+
+	* gssapiP_spnego.h: Don't include synch.h.
+
 	* spnego_mech.c (spnego_mechanism): Tweak for correct ordering of
 	pointers.
 	(gss_mech_initialize): Disable for now.

@@ -20,38 +20,38 @@
 
 /* der routines defined in libgss */
 extern unsigned int gssint_der_length_size(OM_uint32);
-extern int gssint_get_der_length(uchar_t **, OM_uint32, OM_uint32*);
-extern int gssint_put_der_length(OM_uint32, uchar_t **, OM_uint32);
+extern int gssint_get_der_length(unsigned char **, OM_uint32, OM_uint32*);
+extern int gssint_put_der_length(OM_uint32, unsigned char **, OM_uint32);
 
 
 /* private routines for spnego_mechanism */
 static spnego_token_t make_spnego_token(char *);
 static gss_buffer_desc make_err_msg(char *);
 static int g_token_size(gss_OID, OM_uint32);
-static int g_make_token_header(gss_OID, int, uchar_t **, int);
-static int g_verify_token_header(gss_OID, int *, uchar_t **, int, int);
-static int g_verify_neg_token_init(uchar_t **, int);
+static int g_make_token_header(gss_OID, int, unsigned char **, int);
+static int g_verify_token_header(gss_OID, int *, unsigned char **, int, int);
+static int g_verify_neg_token_init(unsigned char **, int);
 static OM_uint32 get_negResult(unsigned char **, int);
-static gss_OID get_mech_oid(OM_uint32 *, uchar_t **, size_t);
+static gss_OID get_mech_oid(OM_uint32 *, unsigned char **, size_t);
 static gss_buffer_t get_input_token(unsigned char **, int);
 static gss_OID_set get_mech_set(OM_uint32 *, unsigned char **, int);
-static OM_uint32 get_req_flags(uchar_t **, int *, OM_uint32 *);
+static OM_uint32 get_req_flags(unsigned char **, int *, OM_uint32 *);
 static OM_uint32 get_available_mechs(OM_uint32 *, gss_name_t,
 	gss_cred_usage_t, gss_cred_id_t *, gss_OID_set *);
 static void release_spnego_ctx(spnego_gss_ctx_id_t *);
 static void check_spnego_options(spnego_gss_ctx_id_t);
 static spnego_gss_ctx_id_t create_spnego_ctx(void);
-static int put_req_flags(uchar_t **, OM_uint32, int);
-static int put_mech_set(uchar_t **, gss_OID_set, int);
-static int put_input_token(uchar_t **, gss_buffer_t, int);
-static int put_mech_oid(uchar_t **, gss_OID_desc *, int);
-static int put_negResult(uchar_t **, OM_uint32, int);
+static int put_req_flags(unsigned char **, OM_uint32, int);
+static int put_mech_set(unsigned char **, gss_OID_set, int);
+static int put_input_token(unsigned char **, gss_buffer_t, int);
+static int put_mech_oid(unsigned char **, gss_OID_desc *, int);
+static int put_negResult(unsigned char **, OM_uint32, int);
 
 static gss_OID
 negotiate_mech_type(OM_uint32 *, gss_OID_set, gss_OID_set,
 		OM_uint32 *, krb5_boolean *);
 static int
-g_get_tag_and_length(unsigned char **, uchar_t, int, int *);
+g_get_tag_and_length(unsigned char **, unsigned char, int, int *);
 
 static int
 make_spnego_tokenInit_msg(spnego_gss_ctx_id_t, gss_OID_set,
@@ -363,7 +363,7 @@ spnego_gss_init_sec_context(void *ct,
 			gss_OID internal_mech =
 				get_mech_oid(minor_status, &ptr,
 				input_token->length -
-				(ptr - (uchar_t *)input_token->value));
+				(ptr - (unsigned char *)input_token->value));
 
 			/*
 			 * check if first mech in neg set, if it isn't,
@@ -411,7 +411,7 @@ spnego_gss_init_sec_context(void *ct,
 				    if (g_get_tag_and_length(&ptr,
 					(CONTEXT | 0x02),
 					input_token->length -
-					(ptr - (uchar_t *)input_token->value),
+					(ptr - (unsigned char *)input_token->value),
 					&len) < 0) {
 					ret = GSS_S_DEFECTIVE_TOKEN;
 				    } else {
@@ -438,7 +438,7 @@ spnego_gss_init_sec_context(void *ct,
 			spnego_ctx->internal_mech =
 				get_mech_oid(minor_status, &ptr,
 				input_token->length -
-				(ptr - (uchar_t *)input_token->value));
+				(ptr - (unsigned char *)input_token->value));
 
 			if (spnego_ctx->internal_mech == NULL) {
 				/* CSTYLED */
@@ -449,7 +449,7 @@ spnego_gss_init_sec_context(void *ct,
 			if (ret != GSS_S_FAILURE && *ptr == (CONTEXT | 0x02)) {
 			    if (g_get_tag_and_length(&ptr, (CONTEXT | 0x02),
 				input_token->length -
-				(ptr - (uchar_t *)input_token->value),
+				(ptr - (unsigned char *)input_token->value),
 				&len) < 0) {
 				ret = GSS_S_DEFECTIVE_TOKEN;
 			    } else {
@@ -568,7 +568,7 @@ spnego_gss_init_sec_context(void *ct,
 			    g_get_tag_and_length(&ptr,
 					(CONTEXT | 0x03),
 					input_token->length -
-					(ptr - (uchar_t *)input_token->value),
+					(ptr - (unsigned char *)input_token->value),
 					&len) < 0) {
 			    ret = GSS_S_DEFECTIVE_TOKEN;
 			} else {
@@ -691,7 +691,7 @@ spnego_gss_accept_sec_context(void *ct,
 	krb5_boolean firstMech;
 	krb5_boolean Need_Cred = FALSE;
 	OM_uint32 local_ret_flags = 0;
-	uchar_t *buf, *tmp;
+	unsigned char *buf, *tmp;
 
 	dsyslog("Entering accept_sec_context\n");
 
@@ -784,7 +784,7 @@ spnego_gss_accept_sec_context(void *ct,
 		 * because we need it later.
 		 */
 		mechsetlen = input_token->length - (ptr - bufstart);
-		buf = (uchar_t *)malloc(mechsetlen);
+		buf = (unsigned char *)malloc(mechsetlen);
 		if (buf == NULL) {
 			ret = GSS_S_FAILURE;
 			goto cleanup;
@@ -874,7 +874,7 @@ spnego_gss_accept_sec_context(void *ct,
 		 */
 		i_input_token = get_input_token(&ptr,
 					input_token->length -
-					(ptr - (uchar_t *)input_token->value));
+					(ptr - (unsigned char *)input_token->value));
 		if (i_input_token == NULL) {
 			negResult = REJECT;
 			return_token = ERROR_TOKEN_SEND;
@@ -1424,7 +1424,7 @@ spnego_gss_verify(void *context,
 			    context_handle,
 			    msg_buffer,
 			    token_buffer,
-			    (uint32_t *)qop_state);
+			    (gss_qop_t *)qop_state); /* XXX */
 	return (ret);
 }
 
@@ -1552,7 +1552,7 @@ get_mech_oid(OM_uint32 *minor_status, unsigned char **buff_in, size_t length)
 	OM_uint32	status;
 	gss_OID_desc 	toid;
 	gss_OID		mech_out = NULL;
-	uchar_t		*start, *end;
+	unsigned char		*start, *end;
 
 	if (length < 1 || **buff_in != MECH_OID)
 		return (NULL);
@@ -1673,7 +1673,7 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in, int buff_length)
 	OM_uint32 length;
 	OM_uint32 bytes;
 	OM_uint32 set_length;
-	uchar_t		*start;
+	unsigned char		*start;
 	int i;
 
 	if (**buff_in != SEQUENCE_OF)
@@ -1710,11 +1710,11 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in, int buff_length)
  * advancing the buffer pointer.
  */
 static int
-put_mech_set(uchar_t **buf_out, gss_OID_set mechSet, int buflen)
+put_mech_set(unsigned char **buf_out, gss_OID_set mechSet, int buflen)
 {
 	int i, ret;
 	OM_uint32 length = 0;
-	uchar_t *start;
+	unsigned char *start;
 
 	if (buf_out == NULL || *buf_out == NULL)
 		return (-1);
@@ -1755,7 +1755,7 @@ static OM_uint32
 get_req_flags(unsigned char **buff_in, int *bodysize, OM_uint32 *req_flags)
 {
 	int len;
-	uchar_t *start = *buff_in;
+	unsigned char *start = *buff_in;
 
 	if (**buff_in != (CONTEXT | 0x01))
 		return (0);
@@ -1870,7 +1870,7 @@ get_negResult(unsigned char **buff_in, int bodysize)
  */
 
 static int
-put_negResult(uchar_t **buf_out, OM_uint32 negResult, int buflen)
+put_negResult(unsigned char **buf_out, OM_uint32 negResult, int buflen)
 {
 	if (buflen < 3)
 		return (-1);
@@ -2020,8 +2020,8 @@ make_spnego_tokenInit_msg(spnego_gss_ctx_id_t spnego_ctx,
 		MechSetLen += 1 + gssint_der_length_size(MechSetLen);
 		dataLen += 1 + gssint_der_length_size(MechSetLen) + MechSetLen;
 
-		MechListPtr = (uchar_t *)malloc(dataLen);
-		ptr = (uchar_t *)MechListPtr;
+		MechListPtr = (unsigned char *)malloc(dataLen);
+		ptr = (unsigned char *)MechListPtr;
 
 		if (MechListPtr != NULL) {
 			if ((ret = put_mech_set(&ptr, mechSet, dataLen))) {
@@ -2489,7 +2489,7 @@ g_make_token_header(gss_OID mech,
 }
 
 static int
-g_get_tag_and_length(unsigned char **buf, uchar_t tag, int buflen, int *outlen)
+g_get_tag_and_length(unsigned char **buf, unsigned char tag, int buflen, int *outlen)
 {
 	unsigned char *ptr = *buf;
 	int ret = -1; /* pessimists, assume failure ! */

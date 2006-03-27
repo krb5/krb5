@@ -8,10 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <deflt.h>
 #include <mglueP.h>
 #include <gssapi/gssapi.h>
-#include <gssapi/gssapi_ext.h>
 
 
 static OM_uint32

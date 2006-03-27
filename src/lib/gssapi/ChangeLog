@@ -2,6 +2,7 @@
 
 	* Makefile.in (STOBJLISTS): Add spnego directory. (forgot to set
 	this variable)
+	(SHLIB_EXPLIBS): Add DL_LIB.
 
 2006-03-05  Tom Yu  <tlyu@mit.edu>
 
