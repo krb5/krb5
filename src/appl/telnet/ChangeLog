@@ -1,3 +1,7 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Supply comment template in AC_DEFINE calls.
+
 2006-03-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: If tgetent can't be found, error out.

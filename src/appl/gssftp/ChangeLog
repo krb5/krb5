@@ -1,3 +1,7 @@
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Supply comment template in AC_DEFINE calls.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

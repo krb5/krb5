@@ -13,7 +13,7 @@ AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_HEADER_STDARG
-AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define if POSIX termios interface found]))])
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)
 CHECK_UTMP
 DECLARE_SYS_ERRLIST
@@ -35,7 +35,7 @@ SETENVSRC='$(srcdir)/../../bsd/setenv.c'
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])
-AC_DEFINE([NEED_SETENV])
+AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
 fi
 dnl
 dnl
@@ -50,12 +50,12 @@ AC_CACHE_VAL(krb5_cv_shadow_pwd,
 krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
 AC_MSG_RESULT($krb5_cv_shadow_pwd)
 if test $krb5_cv_shadow_pwd = yes; then
-AC_DEFINE(HAVE_SHADOW)
+AC_DEFINE(HAVE_SHADOW,1,[Define if shadow password interface found])
 fi
 case $krb5_cv_host in
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
-		AC_DEFINE(HAVE_SETLUID)
+		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid provided in OSF/1 security library])
 		FTPD_LIBS="$FTPD_LIBS -lsecurity"
 	)
 	;;

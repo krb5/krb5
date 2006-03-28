@@ -13,7 +13,7 @@ if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
   SETENVOBJ=setenv.o
   AC_SUBST([SETENVSRC])
   AC_SUBST([SETENVOBJ])
-  AC_DEFINE([NEED_SETENV])
+  AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
 fi
 dnl
 KRB5_NEED_PROTO([#include <stdlib.h>],setenv)
@@ -22,7 +22,7 @@ if test "$KRB4_LIB" = ''; then
 	AC_MSG_RESULT(No Kerberos 4 authentication)
 else
 	AC_MSG_RESULT(Kerberos 4 authentication enabled)
-	AC_DEFINE(KRB4)
+	AC_DEFINE(KRB4,1,[Define if krb4 authentication is enabled])
 fi
 KRB5_BUILD_LIBRARY_STATIC
 KRB5_BUILD_LIBOBJS
@@ -50,7 +50,7 @@ AC_CHECK_HEADERS(term.h,,,dnl
 #endif
 ])
 dnl
-AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
+AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP,1,[Define if termcap library is available])
 LIBS="$LIBS -ltermcap")
 AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
   AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
@@ -58,9 +58,9 @@ AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
 AC_CHECK_FUNC(tgetent, , [AC_MSG_ERROR([Could not find tgetent; are you missing a curses/ncurses library?])])
 KRB5_AC_INET6
 AC_CHECK_FUNCS(setupterm)
-AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO) ac_termio=1)
+AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO,1,[Define if termio should be used]) ac_termio=1)
 if test -z "$ac_termio"; then
-AC_CHECK_HEADER(termio.h,AC_DEFINE(SYSV_TERMIO),ac_sysv_termio=1)
+AC_CHECK_HEADER(termio.h,AC_DEFINE(SYSV_TERMIO,1,[Define if SysV termio interface is found]),ac_sysv_termio=1)
 if test -z "$ac_sysv_termio"; then
   AC_MSG_CHECKING([for cc_t in termio.h])
   AC_CACHE_VAL(krb_cv_type_cc_t,
@@ -68,7 +68,7 @@ if test -z "$ac_sysv_termio"; then
   [cc_t foo;],krb_cv_type_cc_t=yes,krb_cv_type_cc_t=no)])
   AC_MSG_RESULT($krb_cv_type_cc_t)
   if test $krb_cv_type_cc_t = no; then
-    AC_DEFINE(NO_CC_T)
+    AC_DEFINE(NO_CC_T,1,[Define if termio.h does not define type cc_t])
   fi
 fi
 fi
@@ -125,7 +125,7 @@ AC_CACHE_CHECK([if speed_t is defined], krb5_cv_type_speed_t,
 #endif
 ],[speed_t termspeed],krb5_cv_type_speed_t=yes, krb5_cv_type_speed_t=no)])
 if test $krb5_cv_type_speed_t = no; then
-   AC_DEFINE(speed_t, int)
+   AC_DEFINE(speed_t, int, [Define if system termios interface doesn't define speed_t])
 fi;
 dnl
 dnl
@@ -151,7 +151,7 @@ case $krb5_cv_host in
      ;;
 esac
 if test -z "$broken_streams" -a "$ac_cv_header_sys_stream_h" = yes; then
-    AC_CHECK_FUNC(grantpt,AC_DEFINE(STREAMSPTY))
+    AC_CHECK_FUNC(grantpt,AC_DEFINE(STREAMSPTY,1,[Define if streams pty interface should be used]))
 fi
 AC_MSG_CHECKING([if setpgrp takes two arguments])
 dnl
@@ -161,7 +161,7 @@ AC_CACHE_VAL(krb5_cv_sys_setpgrp_two,
 krb5_cv_sys_setpgrp_two=yes,krb5_cv_sys_setpgrp_two=no)])
 AC_MSG_RESULT($krb5_cv_sys_setpgrp_two)
 if test $krb5_cv_sys_setpgrp_two = yes; then
-  AC_DEFINE(SETPGRP_TWOARG)
+  AC_DEFINE(SETPGRP_TWOARG,1,[Define if setpgrp takes two arguments])
 fi
 dnl
 KRB5_NEED_PROTO([#include <stdlib.h>],unsetenv,1)
