@@ -1,5 +1,8 @@
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Supply all three arguments when calling
+	AC_DEFINE.
+
 	* com_err.c (set_com_err_hook, reset_com_err_hook): Enable
 	compilation on Windows.
 
