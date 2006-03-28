@@ -1,3 +1,10 @@
+2006-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CHECK_UTMP): Call AC_CHECK_FUNCS once instead of
+	AC_CHECK_FUNC for each function.
+	(CHECK_SIGPROCMASK, CHECK_SETJMP, CHECK_UTMP, AC_KRB5_TCL_TRYOLD,
+	KRB5_AC_LIBUTIL): Supply all three arguments in AC_DEFINE calls.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (all-windows): Don't go into include\krb5.
