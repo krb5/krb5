@@ -31,6 +31,7 @@
 #include <com_err.h>
 #include <string.h>
 #include <stdio.h>
+#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

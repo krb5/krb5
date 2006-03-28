@@ -28,6 +28,7 @@
  */
 
 #include <krb5.h>
+#include "autoconf.h"
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
 #define HAVE_KRB524
