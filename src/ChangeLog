@@ -1,5 +1,8 @@
 2006-03-28  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for getusershell, lstat, pwd.h,
+	arpa/inet.h.  On OSF/1, check for setluid in security library.
+
 	* aclocal.m4 (CHECK_UTMP): Call AC_CHECK_FUNCS once instead of
 	AC_CHECK_FUNC for each function.
 	(CHECK_SIGPROCMASK, CHECK_SETJMP, CHECK_UTMP, AC_KRB5_TCL_TRYOLD,
