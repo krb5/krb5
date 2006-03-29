@@ -347,6 +347,8 @@ build_mechSet(void)
 #endif
 	(void) k5_mutex_unlock(&g_mechSetLock);
 	(void) k5_mutex_unlock(&g_mechListLock);
+
+	return GSS_S_COMPLETE;
 }
 
 
@@ -513,6 +515,7 @@ init_hardcoded(void)
 {
 	extern struct gss_config krb5_mechanism;
 	extern struct gss_config krb5_mechanism_old;
+	extern struct gss_config krb5_mechanism_wrong;
 	extern struct gss_config spnego_mechanism;
 	static int inited;
 	gss_mech_info cf;
@@ -549,9 +552,21 @@ init_hardcoded(void)
 		return;
 	memset(cf, 0, sizeof(*cf));
 	cf->uLibName = strdup("<hardcoded internal>");
-	cf->mechNameStr = "kerberos_v5 (old)";
+	cf->mechNameStr = "kerberos_v5 (pre-RFC OID)";
 	cf->mech_type = &krb5_mechanism_old.mech_type;
 	cf->mech = &krb5_mechanism_old;
+	cf->next = NULL;
+	g_mechListTail->next = cf;
+	g_mechListTail = cf;
+
+	cf = malloc(sizeof(*cf));
+	if (cf == NULL)
+		return;
+	memset(cf, 0, sizeof(*cf));
+	cf->uLibName = strdup("<hardcoded internal>");
+	cf->mechNameStr = "kerberos_v5 (wrong OID)";
+	cf->mech_type = &krb5_mechanism_wrong.mech_type;
+	cf->mech = &krb5_mechanism_wrong;
 	cf->next = NULL;
 	g_mechListTail->next = cf;
 	g_mechListTail = cf;

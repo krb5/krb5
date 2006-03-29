@@ -1,3 +1,8 @@
+2006-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* g_initialize.c (build_mechSet): Actually return a value on success.
+	(init_hardcoded): Add krb5_mechanism_wrong.
+
 2006-03-27  Tom Yu  <tlyu@mit.edu>
 
 	* g_initialize.c (init_hardcoded): Re-order to put SPNEGO first

@@ -381,6 +381,11 @@ struct gss_config krb5_mechanism_old = {
     KRB5_GSS_CONFIG_INIT
 };
 
+struct gss_config krb5_mechanism_wrong = {
+    { GSS_MECH_KRB5_WRONG_OID_LENGTH, GSS_MECH_KRB5_WRONG_OID },
+    KRB5_GSS_CONFIG_INIT
+};
+
 #ifdef KRB5_MECH_MODULE
 gss_mechanism
 gss_mech_initialize(const gss_OID oid)

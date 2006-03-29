@@ -206,7 +206,7 @@ check_spnego_options(spnego_gss_ctx_id_t spnego_ctx)
 		strstr(spnego_ctx->optionStr, "msinterop")) {
 			spnego_ctx->MS_Interop = 1;
 	} else {
-		spnego_ctx->MS_Interop = 0;
+		spnego_ctx->MS_Interop = 1;
 	}
 }
 
@@ -226,7 +226,7 @@ create_spnego_ctx(void)
 	spnego_ctx->internal_mech = NULL;
 	spnego_ctx->optionStr = NULL;
 	spnego_ctx->optimistic = 0;
-	spnego_ctx->MS_Interop = 0;
+	spnego_ctx->MS_Interop = 1;
 	spnego_ctx->DER_mechTypes.length = NULL;
 	spnego_ctx->DER_mechTypes.value = GSS_C_NO_BUFFER;
 
@@ -561,15 +561,17 @@ spnego_gss_init_sec_context(void *ct,
 		}
 
 		/* create mic/check mic */
-		if ((i_output_token->length == 0) &&
-		    (status == GSS_S_COMPLETE) &&
-		    (local_ret_flags & GSS_C_INTEG_FLAG)) {
-			if (*ptr == (CONTEXT | 0x03) &&
+		if (status == GSS_S_COMPLETE) {
+		    if ((i_output_token->length == 0) &&
+			(local_ret_flags & GSS_C_INTEG_FLAG) &&
+			!spnego_ctx->MS_Interop) {
+			if ((ptr - (unsigned char *)input_token->value) < input_token->length &&
+			    *ptr == (CONTEXT | 0x03) &&
 			    g_get_tag_and_length(&ptr,
-					(CONTEXT | 0x03),
-					input_token->length -
-					(ptr - (unsigned char *)input_token->value),
-					&len) < 0) {
+						 (CONTEXT | 0x03),
+						 input_token->length -
+						 (ptr - (unsigned char *)input_token->value),
+						 &len) < 0) {
 			    ret = GSS_S_DEFECTIVE_TOKEN;
 			} else {
 			    ret = GSS_S_COMPLETE;
@@ -577,14 +579,17 @@ spnego_gss_init_sec_context(void *ct,
 			    if (mechListMIC == NULL)
 				ret = GSS_S_DEFECTIVE_TOKEN;
 			    else if (!spnego_ctx->MS_Interop &&
-				spnego_ctx->DER_mechTypes.length > 0) {
+				     spnego_ctx->DER_mechTypes.length > 0) {
 				status = gss_verify_mic(minor_status,
-					    spnego_ctx->ctx_handle,
-					    &spnego_ctx->DER_mechTypes,
-					    mechListMIC,
-					    qop_state);
+							spnego_ctx->ctx_handle,
+							&spnego_ctx->DER_mechTypes,
+							mechListMIC,
+							qop_state);
 			    }
 			}
+		    } else {
+			ret = GSS_S_COMPLETE;
+		    }
 		}
 	}
 
@@ -2291,11 +2296,13 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 
 		/* Length of the outer token */
 		dataLen += 1 + gssint_der_length_size(micTokenSize);
-	} else if (data != NULL && data->length > 0 && MS_Flag) {
+	}
+#if 0
+	else if (data != NULL && data->length > 0 && MS_Flag) {
 		dataLen += rspTokenSize;
 		dataLen += 1 + gssint_der_length_size(rspTokenSize);
 	}
-
+#endif
 	/*
 	 * Add size of DER encoded:
 	 * NegTokenTarg [ SEQUENCE ] of
@@ -2409,7 +2416,9 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 			ret = GSS_S_DEFECTIVE_TOKEN;
 			goto errout;
 		}
-	} else if (data != NULL && data->length > 0 && MS_Flag) {
+	}
+#if 0
+	else if (data != NULL && data->length > 0 && MS_Flag) {
 		*ptr++ = CONTEXT | 0x03;
 		if ((ret = gssint_put_der_length(rspTokenSize, &ptr,
 			    tlen - (int)(ptr - t)))) {
@@ -2421,6 +2430,7 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 			ret = GSS_S_DEFECTIVE_TOKEN;
 		}
 	}
+#endif
 errout:
 	if (ret != 0) {
 		if (t)

@@ -1,3 +1,14 @@
+2006-03-28  Tom Yu  <tlyu@mit.edu>
+
+	* krb5_gss_glue.c: Add krb5_mechanism_wrong.
+
+	* gssapi_krb5.c: Add GSS_MECH_KRB5_WRONG_OID; update pointers and
+	oidsets.
+
+	* gssapiP_krb5.h (GSS_MECH_KRB5_WRONG_OID) 
+	(GSS_MECH_KRB5_WRONG_OID_LENGTH): New OID; incorrect krb5 mech OID
+	emitted by MS.
+
 2006-03-26  Tom Yu  <tlyu@mit.edu>
 
 	* gssapiP_krb5.h (GSS_MECH_KRB5_OLD_OID):

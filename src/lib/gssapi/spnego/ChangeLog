@@ -1,3 +1,12 @@
+2006-03-28  Tom Yu  <tlyu@.mit.edu>
+
+	* spnego_mech.c (check_spnego_options, create_spnego_ctx): Force
+	to 1 for testing purposes.
+	(spnego_gss_init_sec_context): Don't check for mechListMIC if
+	MS_Interop is true.
+	(make_spnego_tokenTarg_msg): Never send duplicate AP-REP as
+	mechListMIC; omit mechListMIC instead.
+
 2006-03-26  Tom Yu  <tlyu@mit.edu>
 
 	* spnego_mech.c: s/uchar_t/unsigned char/g.  Bash cast to
