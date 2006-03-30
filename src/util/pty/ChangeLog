@@ -1,3 +1,7 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* pty-int.h: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (autoconf.h): Note location change.
