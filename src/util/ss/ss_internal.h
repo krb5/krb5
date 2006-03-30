@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include "autoconf.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
