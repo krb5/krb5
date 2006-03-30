@@ -20,8 +20,6 @@
 
 #include "dynP.h"
 
-#define HAVE_MEMMOVE 1
-
 
 /* old dyn_append.c */
 /*
@@ -192,15 +190,9 @@ int DynDelete(obj, idx)
 		       obj->el_size*(obj->num_el - idx), obj->array,
 		       (idx+1)*obj->el_size, idx*obj->el_size);
 	  
-#ifdef HAVE_MEMMOVE
 	  memmove(obj->array + idx*obj->el_size,
 		  obj->array + (idx+1)*obj->el_size,
 		  (size_t) obj->el_size*(obj->num_el - idx));
-#else
-	  bcopy(obj->array + (idx+1)*obj->el_size,
-		  obj->array + idx*obj->el_size,
-		  obj->el_size*(obj->num_el - idx));
-#endif
 	  if (obj->paranoid) {
 	       if (obj->debug)
 		    fprintf(stderr,
@@ -274,25 +266,15 @@ int DynInsert(obj, idx, els_in, num)
 
      if ((ret = _DynResize(obj, obj->num_el + num)) != DYN_OK)
 	  return ret;
-#ifdef HAVE_MEMMOVE
      memmove(obj->array + obj->el_size*(idx + num),
 	     obj->array + obj->el_size*idx,
 	     (size_t) ((obj->num_el-idx)*obj->el_size));
-#else
-     bcopy(obj->array + obj->el_size*idx,
-	   obj->array + obj->el_size*(idx + num), 
-	   (obj->num_el-idx)*obj->el_size);
-#endif	     
 
      if (obj->debug)
 	  fprintf(stderr, "dyn: insert: Copying %d bytes from %p to %p + %d\n",
 		  obj->el_size*num, els, obj->array, obj->el_size*idx);
 
-#ifdef HAVE_MEMMOVE
      memmove(obj->array + obj->el_size*idx, els, (size_t) (obj->el_size*num));
-#else
-     bcopy(els, obj->array + obj->el_size*idx, obj->el_size*num);
-#endif     
      obj->num_el += num;
 
      if (obj->debug)
@@ -397,11 +379,7 @@ int DynPut(obj, el_in, idx)
      if ((ret = _DynResize(obj, idx)) != DYN_OK)
 	  return ret;
 
-#ifdef HAVE_MEMMOVE
      memmove(obj->array + idx*obj->el_size, el, (size_t) obj->el_size);
-#else
-     bcopy(el, obj->array + idx*obj->el_size, obj->el_size);
-#endif     
 
      if (obj->debug)
 	  fprintf(stderr, "dyn: put: done.\n");
