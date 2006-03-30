@@ -26,7 +26,6 @@ SRCS= \
 	$(srcdir)/do_tgs_req.c \
 	$(srcdir)/kdc_util.c \
 	$(srcdir)/kdc_preauth.c \
-	$(SRCTOP)/lib/kadm5/logger.c \
 	$(srcdir)/main.c \
 	$(srcdir)/network.c \
 	$(srcdir)/policy.c \
@@ -41,7 +40,6 @@ OBJS= \
 	do_tgs_req.o \
 	kdc_util.o \
 	kdc_preauth.o \
-	logger.o \
 	main.o \
 	network.o \
 	policy.o \
@@ -55,12 +53,6 @@ RT_OBJS= rtest.o \
 	extern.o
 
 depend:: kdc5_err.c
-
-logger.c: $(SRCTOP)/lib/kadm5/logger.c
-	$(RM) $@
-	$(CP) $(SRCTOP)/lib/kadm5/logger.c $@
-
-logger.o: logger.c
 
 kdc5_err.c: kdc5_err.et
 
@@ -92,7 +84,7 @@ install::
 	fi
 
 clean::
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc logger.c rtest.o rtest
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest
 
 # +++ Dependency line eater +++
 # 
@@ -143,15 +135,6 @@ $(OUTPRE)kdc_preauth.$(OBJEXT): kdc_preauth.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-locate.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
   kdc_util.h extern.h $(SRCTOP)/include/adm_proto.h $(SRCTOP)/include/syslog.h
-$(OUTPRE)logger.$(OBJEXT): $(SRCTOP)/lib/kadm5/logger.c \
-  $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/adm_proto.h \
-  $(SRCTOP)/include/syslog.h
 $(OUTPRE)main.$(OBJEXT): main.c $(SRCTOP)/include/syslog.h \
   $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
