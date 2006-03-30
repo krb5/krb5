@@ -1,3 +1,8 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Put definition of KRB5_AUTOCONF_H at top of header
+	file, not bottom.  Disable the #undefs for the PACKAGE_ macros.
+
 2006-03-28  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for getusershell, lstat, pwd.h,

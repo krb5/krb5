@@ -475,6 +475,8 @@ dnl
 AC_C_INLINE
 AH_TOP([
 #ifndef KRB5_AUTOCONF_H
+#define KRB5_AUTOCONF_H
+#if 0
 /* Leading comment stops autoconf/config.status from turning these
    into #define statements.  But the preprocessor will still pay
    attention to them.  (Comment removal is in translation phase 3;
@@ -484,15 +486,14 @@ AH_TOP([
 /*x*/#undef PACKAGE_BUGREPORT
 /*x*/#undef PACKAGE_STRING
 /*x*/#undef PACKAGE_TARNAME
+#endif
 ])
 AH_BOTTOM([
 #if defined(__GNUC__) && !defined(inline)
 /* Silence gcc pedantic warnings about ANSI C.  */
 # define inline __inline__
 #endif
-
-#define KRB5_AUTOCONF_H
-#endif
+#endif /* KRB5_AUTOCONF_H */
 ])
 dnl
 dnl Not used yet, but let's find out what we've got on the platforms
