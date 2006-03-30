@@ -1,8 +1,8 @@
+#include "shs.h"
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #include <string.h>
-#include "shs.h"
 
 /* The SHS f()-functions.  The f1 and f3 functions can be optimized to
    save one boolean operation each - thanks to Rich Schroeppel,
