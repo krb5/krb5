@@ -149,11 +149,11 @@
 
     USE OF DEFINES
   
-    Later in this section there are a number of defines that control the 
-    operation of the code.  In each section, the purpose of each define is 
-    explained so that the relevant form can be included or excluded by 
-    setting either 1's or 0's respectively on the branches of the related 
-    #if clauses.
+    Later in this section there are a number of defines that control
+    the operation of the code.  In each section, the purpose of each
+    define is explained so that the relevant form can be included or
+    excluded by setting either 1's or 0's respectively on the branches
+    of the related #if clauses.
 */
 
 /*  1. PLATFORM SPECIFIC INCLUDES */
