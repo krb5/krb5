@@ -1,3 +1,7 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* klist.c: Include autoconf.h first.
+
 2005-01-04  Jeffrey Altman <jaltman@mit.edu>
    
         * Makefile.in: add support library to klist dependencies

@@ -27,6 +27,7 @@
  * List out the contents of your credential cache or keytab.
  */
 
+#include "autoconf.h"
 #include <krb5.h>
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
@@ -40,7 +41,6 @@
 #include <stdio.h>
 #include <time.h>
 /* Need definition of INET6 before network headers, for IRIX.  */
-#include "autoconf.h"
 #if defined(HAVE_ARPA_INET_H)
 #include <arpa/inet.h>
 #endif
