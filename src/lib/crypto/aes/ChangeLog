@@ -1,3 +1,7 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* aesopt.h: Include autoconf.h.
+
 2005-05-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (aes-gen): Use CC_LINK.  Reported by Mike Friedman.

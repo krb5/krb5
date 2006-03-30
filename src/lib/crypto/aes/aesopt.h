@@ -156,6 +156,8 @@
     of the related #if clauses.
 */
 
+#include "autoconf.h"
+
 /*  1. PLATFORM SPECIFIC INCLUDES */
 
 #if /* defined(__GNUC__) || */ defined(__GNU_LIBRARY__)
