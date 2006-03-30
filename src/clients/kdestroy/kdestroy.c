@@ -27,11 +27,11 @@
  * Destroy the contents of your credential cache.
  */
 
+#include "autoconf.h"
 #include <krb5.h>
 #include <com_err.h>
 #include <string.h>
 #include <stdio.h>
-#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
