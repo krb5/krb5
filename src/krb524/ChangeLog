@@ -1,3 +1,7 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* k524init.c: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* krb524d.c: Don't look for adm_proto.h in krb5/.

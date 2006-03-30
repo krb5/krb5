@@ -130,8 +130,8 @@ $(OUTPRE)test.$(OBJEXT): test.c $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(KRB_ERR_H_DEP)
-$(OUTPRE)k524init.$(OBJEXT): k524init.c $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
+$(OUTPRE)k524init.$(OBJEXT): k524init.c $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
   $(BUILDTOP)/include/profile.h
 $(OUTPRE)krb524d.$(OBJEXT): krb524d.c $(SRCTOP)/include/k5-int.h \
