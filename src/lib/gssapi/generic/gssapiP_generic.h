@@ -30,6 +30,7 @@
 #if defined(_WIN32)
 #include "k5-int.h"
 #else
+#include "autoconf.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

@@ -37,15 +37,19 @@ $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
+include_stdint=@include_stdint@
+include_inttypes=@include_inttypes@
 include_xom=@include_xom@
+##DOS##include_stdint=rem
+##DOS##include_inttypes=rem
 ##DOS##include_xom=rem
 gssapi.h: gssapi.hin $(BUILDTOP)/include/autoconf.h
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi.h prologue. */"; \
-	echo "/* It contains some choice pieces of autoconf.h */"; \
-	sed -n "/SIZEOF/s//GSS_&/p" < $(BUILDTOP)/include/autoconf.h && \
-	$(include_xom)&& \
+	$(include_stdint) && \
+	$(include_inttypes) && \
+	$(include_xom) && \
 	echo "/* End of gssapi.h prologue. */"&& \
 	cat $(srcdir)/gssapi.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
