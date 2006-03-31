@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't test word sizes.
+
 2006-03-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Put definition of KRB5_AUTOCONF_H at top of header

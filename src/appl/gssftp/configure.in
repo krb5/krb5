@@ -9,9 +9,6 @@ CHECK_SIGPROCMASK
 CHECK_SETJMP
 CHECK_WAIT_TYPE
 DECLARE_SYS_ERRLIST
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
 AC_HEADER_STDARG
 AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define if POSIX termios interface found]))])
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)

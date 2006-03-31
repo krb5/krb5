@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't test word sizes.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Supply comment template in AC_DEFINE calls.

@@ -382,11 +382,6 @@ if test $krb5_cv_has_ansi_stdio = yes; then
 AC_DEFINE(ANSI_STDIO,1,[Define if ANSI stdio is present (in particular "b" option to fopen)])
 fi
 dnl
-dnl Word sizes...
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
-dnl
 dnl then from osconf.h, we have
 dnl
 AC_HEADER_TIME
