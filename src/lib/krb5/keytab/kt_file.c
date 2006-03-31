@@ -577,7 +577,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
     size_t		remain;
     krb5_ktfile_data	*ktdata;
     krb5_int32		file_is_open;
-    krb5_int32		file_pos[2];
+    krb5_int64		file_pos;
     char		*ktname;
     size_t		namelen;
     const char		*fnamep;
@@ -595,8 +595,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
 
 	    ktdata = (krb5_ktfile_data *) keytab->data;
 	    file_is_open = 0;
-	    file_pos[0] = 0;
-	    file_pos[1] = 0;
+	    file_pos = 0;
 
 	    /* Calculate the length of the name */
 	    namelen = (keytab->ops && keytab->ops->prefix) ?
@@ -630,12 +629,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
 			file_is_open = 0;
 #endif
 			fpos = ftell(ktdata->openf);
-#if	SIZEOF_LONG == 4
-			file_pos[0] = fpos;
-#else	/* SIZEOF_LONG == 4 */
-			file_pos[0] = fpos & 0xffffffff;
-			file_pos[1] = (fpos >> 32) & 0xffffffff;
-#endif	/* SIZEOF_LONG == 4 */
+			file_pos = fpos; /* XX range check? */
 		    }
 		}
 
@@ -652,8 +646,7 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
 		(void) krb5_ser_pack_int32(file_is_open, &bp, &remain);
 
 		/* Put the file position */
-		(void) krb5_ser_pack_int32(file_pos[0], &bp, &remain);
-		(void) krb5_ser_pack_int32(file_pos[1], &bp, &remain);
+		(void) krb5_ser_pack_int64(file_pos, &bp, &remain);
 
 		/* Put the version */
 		(void) krb5_ser_pack_int32((krb5_int32) ((ktdata) ?
@@ -686,7 +679,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
     char		*ktname;
     krb5_ktfile_data	*ktdata;
     krb5_int32		file_is_open;
-    krb5_int32		foffbuf[2];
+    krb5_int64		foff;
 
     bp = *buffer;
     remain = *lenremain;
@@ -724,10 +717,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
 		    if (remain >= (sizeof(krb5_int32)*5)) {
 			(void) krb5_ser_unpack_int32(&file_is_open,
 						     &bp, &remain);
-			(void) krb5_ser_unpack_int32(&foffbuf[0],
-						     &bp, &remain);
-			(void) krb5_ser_unpack_int32(&foffbuf[1],
-						     &bp, &remain);
+			(void) krb5_ser_unpack_int64(&foff, &bp, &remain);
 			(void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
 			ktdata->version = (int) ibuf;
 
@@ -749,11 +739,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
 				    kret = krb5_ktfileint_openr(kcontext,
 								keytab);
 				if (!kret) {
-#if	SIZEOF_LONG == 4
-				    fpos = foffbuf[0];
-#else	/* SIZEOF_LONG == 4 */
-				    fpos = foffbuf[0] | ((long) foffbuf[1] << 32);
-#endif	/* SIZEOF_LONG == 4 */
+				    fpos = foff; /* XX range check? */
 				    fseek(KTFILEP(keytab), fpos, SEEK_SET);
 				}
 			    }

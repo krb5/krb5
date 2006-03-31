@@ -1,3 +1,9 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kt_file.c (krb5_ktf_keytab_externalize,
+	krb5_ktf_keytab_internalize): Read and write file position as 64
+	bits rather than trying to figure out size of long.
+
 2005-04-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c (NEED_SOCKETS): Don't define.
