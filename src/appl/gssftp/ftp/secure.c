@@ -3,6 +3,8 @@
  * secure read(), write(), getc(), and putc().
  * Only one security context, thus only work on one fd at a time!
  */
+#include "autoconf.h"
+
 #ifdef GSSAPI
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_generic.h>
@@ -49,16 +51,14 @@ extern char *sys_errlist[];
 #endif
 #endif
 
-#if (SIZEOF_SHORT == 4)
-typedef unsigned short ftp_uint32;
-typedef short ftp_int32;
-#elif (SIZEOF_INT == 4)
-typedef unsigned int ftp_uint32;
-typedef int ftp_int32;
-#elif (SIZEOF_LONG == 4)
-typedef unsigned long ftp_uint32;
-typedef long ftp_int32;
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
 #endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+typedef uint32_t ftp_uint32;
+typedef int32_t ftp_int32;
 
 static int secure_putbuf (int, unsigned char *, unsigned int);
 

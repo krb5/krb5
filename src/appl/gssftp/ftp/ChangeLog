@@ -1,3 +1,10 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* secure.c: Include autoconf.h.  Include stdint.h and inttypes.h
+	if available.
+	(ftp_uint32, ftp_int32): Always define as [u]int32_t instead of
+	testing configure-time type size macros.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* Makefile.in: support for 64-bit Windows builds
