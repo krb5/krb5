@@ -81,29 +81,32 @@ vers.o: $(srcdir)/vers.c
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)ftpd.$(OBJEXT): ftpd.c $(srcdir)/../arpa/ftp.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/syslog.h \
-  pathnames.h $(BUILDTOP)/include/libpty.h $(SRCTOP)/include/k5-util.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
-  ftpd_var.h secure.h
-$(OUTPRE)ftpcmd.$(OBJEXT): ftpcmd.c $(srcdir)/../arpa/ftp.h \
-  $(SRCTOP)/include/syslog.h ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(KRB_ERR_H_DEP) \
-  $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h $(srcdir)/../arpa/telnet.h
-$(OUTPRE)popen.$(OBJEXT): popen.c ftpd_var.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h
-$(OUTPRE)vers.$(OBJEXT): vers.c
-$(OUTPRE)glob.$(OBJEXT): $(srcdir)/../ftp/glob.c $(srcdir)/../ftp/ftp_var.h
-$(OUTPRE)radix.$(OBJEXT): $(srcdir)/../ftp/radix.c \
-  $(srcdir)/../ftp/ftp_var.h
-$(OUTPRE)secure.$(OBJEXT): $(srcdir)/../ftp/secure.c \
+$(OUTPRE)ftpd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  secure.h $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(KRB_ERR_H_DEP) $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
-  $(srcdir)/../arpa/ftp.h
+  $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/libpty.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-util.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+  ftpd.c ftpd_var.h pathnames.h secure.h
+$(OUTPRE)ftpcmd.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../arpa/telnet.h \
+  ftpcmd.c ftpd_var.h
+$(OUTPRE)popen.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h ftpd_var.h \
+  popen.c
+$(OUTPRE)vers.$(OBJEXT): vers.c
+$(OUTPRE)glob.$(OBJEXT): $(srcdir)/../ftp/ftp_var.h \
+  $(srcdir)/../ftp/glob.c
+$(OUTPRE)radix.$(OBJEXT): $(srcdir)/../ftp/ftp_var.h \
+  $(srcdir)/../ftp/radix.c
+$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(KRB_ERR_H_DEP) \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(srcdir)/../arpa/ftp.h \
+  $(srcdir)/../ftp/secure.c secure.h
 $(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c

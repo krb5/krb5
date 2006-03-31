@@ -87,60 +87,60 @@ utility.o: telnetd.h defs.h ext.h $(ARPA_TELNET)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)telnetd.$(OBJEXT): telnetd.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h pathnames.h $(BUILDTOP)/include/libpty.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h $(BUILDTOP)/include/krb5.h \
-  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/auth-proto.h \
-  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
-  $(srcdir)/../libtelnet/misc-proto.h
+$(OUTPRE)telnetd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/libpty.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../arpa/telnet.h $(srcdir)/../libtelnet/auth-proto.h \
+  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/enc-proto.h \
+  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/misc-proto.h \
+  defs.h ext.h pathnames.h telnetd.c telnetd.h
 $(OUTPRE)termio-tn.$(OBJEXT): termio-tn.c
 $(OUTPRE)termios-tn.$(OBJEXT): termios-tn.c
-$(OUTPRE)state.$(OBJEXT): state.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
+$(OUTPRE)state.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h
-$(OUTPRE)termstat.$(OBJEXT): termstat.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  defs.h ext.h state.c telnetd.h
+$(OUTPRE)termstat.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h
-$(OUTPRE)slc.$(OBJEXT): slc.c telnetd.h defs.h $(srcdir)/../arpa/telnet.h \
-  $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/syslog.h \
-  ext.h
-$(OUTPRE)sys_term.$(OBJEXT): sys_term.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  defs.h ext.h telnetd.h termstat.c
+$(OUTPRE)slc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h pathnames.h $(COM_ERR_DEPS) \
-  $(BUILDTOP)/include/libpty.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/profile.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/k5-plugin.h
-$(OUTPRE)utility.$(OBJEXT): utility.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  defs.h ext.h slc.c telnetd.h
+$(OUTPRE)sys_term.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/libpty.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../arpa/telnet.h $(srcdir)/../libtelnet/auth-proto.h \
+  $(srcdir)/../libtelnet/auth.h defs.h ext.h pathnames.h \
+  sys_term.c telnetd.h
+$(OUTPRE)utility.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h
-$(OUTPRE)global.$(OBJEXT): global.c defs.h $(srcdir)/../arpa/telnet.h \
-  $(SRCTOP)/include/socket-utils.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/syslog.h \
-  ext.h
-$(OUTPRE)authenc.$(OBJEXT): authenc.c telnetd.h defs.h \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/socket-utils.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  defs.h ext.h telnetd.h utility.c
+$(OUTPRE)global.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/syslog.h ext.h $(srcdir)/../libtelnet/misc.h \
-  $(srcdir)/../libtelnet/misc-proto.h
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  defs.h ext.h global.c
+$(OUTPRE)authenc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/misc-proto.h $(srcdir)/../libtelnet/misc.h \
+  authenc.c defs.h ext.h telnetd.h

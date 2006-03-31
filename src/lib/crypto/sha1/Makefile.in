@@ -55,10 +55,11 @@ t_shs3: t_shs3.o shs.o $(SUPPORT_DEPLIB)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-shs.so shs.po $(OUTPRE)shs.$(OBJEXT): shs.c shs.h $(SRCTOP)/include/k5-int.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(BUILDTOP)/include/profile.h \
+shs.so shs.po $(OUTPRE)shs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-locate.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/k5-plugin.h
+  shs.c shs.h

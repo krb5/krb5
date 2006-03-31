@@ -77,20 +77,20 @@ $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h cache-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/fake-addrinfo.h
+threads.so threads.po $(OUTPRE)threads.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h threads.c
 init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
-  init-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
-errors.so errors.po $(OUTPRE)errors.$(OBJEXT): errors.c \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-thread.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h init-addrinfo.c
+errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h errors.c
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
-  fake-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h fake-addrinfo.c

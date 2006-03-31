@@ -36,10 +36,12 @@ install-unix::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)gss-client.$(OBJEXT): gss-client.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
-$(OUTPRE)gss-misc.$(OBJEXT): gss-misc.c $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
-$(OUTPRE)gss-server.$(OBJEXT): gss-server.c $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h gss-misc.h
+$(OUTPRE)gss-client.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h gss-client.c \
+  gss-misc.h
+$(OUTPRE)gss-misc.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h gss-misc.c \
+  gss-misc.h
+$(OUTPRE)gss-server.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(SRCTOP)/include/port-sockets.h gss-misc.h gss-server.c

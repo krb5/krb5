@@ -77,34 +77,36 @@ utilities.o: defines.h externs.h fdset.h general.h ring.h $(ARPA_TELNET)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)authenc.$(OBJEXT): authenc.c $(srcdir)/../arpa/telnet.h \
-  $(srcdir)/../libtelnet/encrypt.h $(srcdir)/../libtelnet/enc-proto.h \
-  $(srcdir)/../libtelnet/misc.h $(srcdir)/../libtelnet/misc-proto.h \
-  general.h ring.h externs.h defines.h types.h
-$(OUTPRE)commands.$(OBJEXT): commands.c $(srcdir)/../arpa/telnet.h \
-  general.h ring.h externs.h defines.h types.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h \
-  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h
-$(OUTPRE)main.$(OBJEXT): main.c $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h ring.h externs.h \
-  defines.h
-$(OUTPRE)network.$(OBJEXT): network.c $(srcdir)/../arpa/telnet.h \
-  ring.h defines.h externs.h fdset.h
-$(OUTPRE)ring.$(OBJEXT): ring.c ring.h general.h
-$(OUTPRE)sys_bsd.$(OBJEXT): sys_bsd.c $(srcdir)/../arpa/telnet.h \
-  ring.h fdset.h defines.h externs.h types.h
-$(OUTPRE)telnet.$(OBJEXT): telnet.c $(srcdir)/../arpa/telnet.h \
-  ring.h defines.h externs.h types.h general.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/misc-proto.h
-$(OUTPRE)terminal.$(OBJEXT): terminal.c $(srcdir)/../arpa/telnet.h \
-  ring.h externs.h types.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h
-$(OUTPRE)utilities.$(OBJEXT): utilities.c $(srcdir)/../arpa/telnet.h \
-  general.h fdset.h ring.h defines.h externs.h $(srcdir)/../libtelnet/auth.h \
-  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/encrypt.h \
-  $(srcdir)/../libtelnet/enc-proto.h
+$(OUTPRE)authenc.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h $(srcdir)/../libtelnet/misc.h \
+  authenc.c defines.h externs.h general.h ring.h types.h
+$(OUTPRE)commands.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h commands.c defines.h \
+  externs.h general.h ring.h types.h
+$(OUTPRE)main.$(OBJEXT): $(srcdir)/../libtelnet/auth-proto.h \
+  $(srcdir)/../libtelnet/auth.h $(srcdir)/../libtelnet/enc-proto.h \
+  $(srcdir)/../libtelnet/encrypt.h defines.h externs.h \
+  main.c ring.h
+$(OUTPRE)network.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  defines.h externs.h fdset.h network.c ring.h
+$(OUTPRE)ring.$(OBJEXT): general.h ring.c ring.h
+$(OUTPRE)sys_bsd.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  defines.h externs.h fdset.h ring.h sys_bsd.c types.h
+$(OUTPRE)telnet.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  $(srcdir)/../libtelnet/misc-proto.h defines.h externs.h \
+  general.h ring.h telnet.c types.h
+$(OUTPRE)terminal.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  externs.h ring.h terminal.c types.h
+$(OUTPRE)utilities.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  $(srcdir)/../libtelnet/auth-proto.h $(srcdir)/../libtelnet/auth.h \
+  $(srcdir)/../libtelnet/enc-proto.h $(srcdir)/../libtelnet/encrypt.h \
+  defines.h externs.h fdset.h general.h ring.h utilities.c

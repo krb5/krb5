@@ -97,38 +97,37 @@ install::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-auth.so auth.po $(OUTPRE)auth.$(OBJEXT): auth.c $(srcdir)/../arpa/telnet.h \
-  encrypt.h enc-proto.h auth.h auth-proto.h misc-proto.h
-encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): encrypt.c \
-  $(srcdir)/../arpa/telnet.h encrypt.h enc-proto.h misc.h \
-  misc-proto.h
+auth.so auth.po $(OUTPRE)auth.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  auth-proto.h auth.c auth.h enc-proto.h encrypt.h misc-proto.h
+encrypt.so encrypt.po $(OUTPRE)encrypt.$(OBJEXT): $(srcdir)/../arpa/telnet.h \
+  enc-proto.h encrypt.c encrypt.h misc-proto.h misc.h
 genget.so genget.po $(OUTPRE)genget.$(OBJEXT): genget.c \
-  misc.h misc-proto.h
-misc.so misc.po $(OUTPRE)misc.$(OBJEXT): misc.c misc.h \
-  misc-proto.h auth.h auth-proto.h encrypt.h enc-proto.h
+  misc-proto.h misc.h
+misc.so misc.po $(OUTPRE)misc.$(OBJEXT): auth-proto.h \
+  auth.h enc-proto.h encrypt.h misc-proto.h misc.c misc.h
 kerberos.so kerberos.po $(OUTPRE)kerberos.$(OBJEXT): \
-  kerberos.c $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) \
-  $(srcdir)/../arpa/telnet.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h encrypt.h enc-proto.h \
-  auth.h auth-proto.h misc.h misc-proto.h
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(srcdir)/../arpa/telnet.h \
+  auth-proto.h auth.h enc-proto.h encrypt.h kerberos.c \
+  misc-proto.h misc.h
 kerberos5.so kerberos5.po $(OUTPRE)kerberos5.$(OBJEXT): \
-  kerberos5.c $(srcdir)/../arpa/telnet.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/syslog.h encrypt.h \
-  enc-proto.h auth.h auth-proto.h misc.h misc-proto.h \
-  krb5forw.h
-forward.so forward.po $(OUTPRE)forward.$(OBJEXT): forward.c \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) krb5forw.h
-spx.so spx.po $(OUTPRE)spx.$(OBJEXT): spx.c misc-proto.h
-enc_des.so enc_des.po $(OUTPRE)enc_des.$(OBJEXT): enc_des.c \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(srcdir)/../arpa/telnet.h \
-  encrypt.h enc-proto.h key-proto.h misc-proto.h
-setenv.so setenv.po $(OUTPRE)setenv.$(OBJEXT): setenv.c \
-  misc-proto.h
+  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../arpa/telnet.h auth-proto.h auth.h enc-proto.h \
+  encrypt.h kerberos5.c krb5forw.h misc-proto.h misc.h
+forward.so forward.po $(OUTPRE)forward.$(OBJEXT): $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) forward.c krb5forw.h
+spx.so spx.po $(OUTPRE)spx.$(OBJEXT): misc-proto.h \
+  spx.c
+enc_des.so enc_des.po $(OUTPRE)enc_des.$(OBJEXT): $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) $(srcdir)/../arpa/telnet.h enc-proto.h \
+  enc_des.c encrypt.h key-proto.h misc-proto.h
+setenv.so setenv.po $(OUTPRE)setenv.$(OBJEXT): misc-proto.h \
+  setenv.c
 getent.so getent.po $(OUTPRE)getent.$(OBJEXT): getent.c \
   gettytab.h
 parsetos.so parsetos.po $(OUTPRE)parsetos.$(OBJEXT): \
-  parsetos.c misc-proto.h
+  misc-proto.h parsetos.c
 strdup.so strdup.po $(OUTPRE)strdup.$(OBJEXT): strdup.c
 strcasecmp.so strcasecmp.po $(OUTPRE)strcasecmp.$(OBJEXT): \
   strcasecmp.c
