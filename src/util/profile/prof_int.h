@@ -15,12 +15,6 @@
 #include "com_err.h"
 #include "profile.h"
 
-#if defined(_WIN32)
-#define SIZEOF_INT      4
-#define SIZEOF_SHORT    2
-#define SIZEOF_LONG     4
-#endif
-
 typedef long prf_magic_t;
 
 /*
