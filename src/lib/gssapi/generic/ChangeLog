@@ -1,3 +1,10 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* util_token.c: Include limits.h.
+	(der_length_size, der_write_length): Test INT_MAX instead of
+	SIZEOF_INT.
+	(der_read_length): Test sizeof(int) instead of SIZEOF_INT.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (include_xom): Define as "rem" instead of empty on

@@ -24,6 +24,7 @@
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
+#include <limits.h>
 
 /*
  * $Id$
@@ -65,7 +66,7 @@ static unsigned int der_length_size(length)
       return(1);
    else if (length < (1<<8))
       return(2);
-#if (SIZEOF_INT == 2)
+#if INT_MAX == 0x7fff
    else
        return(3);
 #else
@@ -86,7 +87,7 @@ static void der_write_length(buf, length)
       *(*buf)++ = (unsigned char) length;
    } else {
       *(*buf)++ = (unsigned char) (der_length_size(length)+127);
-#if (SIZEOF_INT > 2)
+#if INT_MAX > 0x7fff
       if (length >= (1<<24))
 	 *(*buf)++ = (unsigned char) (length>>24);
       if (length >= (1<<16))
@@ -115,7 +116,7 @@ static int der_read_length(buf, bufsize)
    if (sf & 0x80) {
       if ((sf &= 0x7f) > ((*bufsize)-1))
 	 return(-1);
-      if (sf > SIZEOF_INT)
+      if (sf > sizeof(int))
 	  return (-1);
       ret = 0;
       for (; sf; sf--) {
