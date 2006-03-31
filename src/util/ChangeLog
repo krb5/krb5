@@ -1,3 +1,8 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* depfix.pl (uniquify): Sort dependencies, so little tweaks to
+	include orders don't change lots of makefiles.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* reconf: Put autoconf.stmp into include directory.
