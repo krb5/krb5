@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Always provide three arguments to AC_DEFINE.
+
 2006-03-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* pty-int.h: Include autoconf.h.
