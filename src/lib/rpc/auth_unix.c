@@ -52,9 +52,7 @@ static char sccsid[] = "@(#)auth_unix.c 1.19 87/08/11 Copyr 1984 Sun Micro";
 #include <gssrpc/auth.h>
 #include <gssrpc/auth_unix.h>
 
-#ifndef GETGROUPS_T
-#define GETGROUPS_T int
-#endif
+#include "autoconf.h"
 
 /*
  * Unix authenticator operations vector

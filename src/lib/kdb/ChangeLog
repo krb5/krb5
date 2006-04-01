@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* err_handle.c: Include autoconf.h.
+
 2006-03-07  Ken Raeburn  <raeburn@mit.edu>
 
 	* kdb5.c: Don't include pthread.h.

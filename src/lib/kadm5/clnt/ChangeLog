@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c: Include autoconf.h.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* client_principal.c, clnt_policy.c: Include errno.h.

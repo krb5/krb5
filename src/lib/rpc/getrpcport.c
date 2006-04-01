@@ -41,6 +41,7 @@ static  char sccsid[] = "@(#)getrpcport.c 1.3 87/08/11 SMI";
 #include <gssrpc/pmap_clnt.h>
 #include <netdb.h>
 #include <sys/socket.h>
+#include "autoconf.h"
 
 int
 gssrpc_getrpcport(

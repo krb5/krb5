@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* svr_iters.c: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* svr_principal.c, server_misc.c: Don't look for kdb.h in krb5/.

@@ -1,3 +1,10 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* clnt_perror.c, svc.c, svc_udp.c, clnt_simple.c, svc_tcp.c,
+	auth_unix.c, clnt_generic.c, getrpcport.c: Include autoconf.h.
+
+	* auth_unix.c (GETGROUPS_T): Don't define.
+
 2006-03-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* dyn.c (DynDelete, DynInsert, DynPut): Delete bcopy branches.

@@ -45,6 +45,8 @@ static char sccsid[] = "@(#)clnt_perror.c 1.15 87/10/07 Copyr 1984 Sun Micro";
 #include <gssrpc/auth.h>
 #include <gssrpc/clnt.h>
 
+#include "autoconf.h"
+
 #ifndef HAVE_STRERROR
 #ifdef NEED_SYS_ERRLIST
 extern char *sys_errlist[];

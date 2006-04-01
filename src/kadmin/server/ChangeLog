@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadm_rpc_svc.c: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* ovsec_kadmd.c, schpw.c, server_stubs.c, misc.c: Don't look for

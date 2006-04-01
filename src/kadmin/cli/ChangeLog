@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* kadmin.h: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* kadmin.c: Don't look for headers in krb5/.

@@ -50,6 +50,8 @@ extern void kadmin_getprivs(int argc, char *argv[]);
 extern void kadmin_keytab_add(int argc, char *argv[]);
 extern void kadmin_keytab_remove(int argc, char *argv[]);
 
+#include "autoconf.h"
+
 #ifdef TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>

@@ -41,6 +41,7 @@ static char sccsid[] = "@(#)svc.c 1.41 87/10/13 Copyr 1984 Sun Micro";
  * Copyright (C) 1984, Sun Microsystems, Inc.
  */
 
+#include "autoconf.h"
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif

@@ -30,6 +30,7 @@
 #include "krb.h"
 #include <fcntl.h>
 #include <sys/stat.h>
+#include "autoconf.h"
 #ifdef TKT_SHMEM
 #include <sys/param.h>
 #endif
