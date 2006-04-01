@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* db2_exp.c, kdb_db2.c: Include k5-int.h earlier.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* pol_xdr.c, policy_db.h: Don't get headers from krb5/.

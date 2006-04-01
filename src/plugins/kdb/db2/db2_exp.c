@@ -35,11 +35,12 @@
 static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~5:csrc:idc_sec#2 %)";
 #endif
 
+#include "k5-int.h"
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#include "k5-int.h"
 #include <db.h>
 #include <stdio.h>
 #include <errno.h>
