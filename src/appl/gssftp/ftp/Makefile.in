@@ -96,8 +96,8 @@ $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   ftp_var.h main.c
 $(OUTPRE)radix.$(OBJEXT): ftp_var.h radix.c
 $(OUTPRE)ruserpass.$(OBJEXT): ftp_var.h ruserpass.c
-$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(srcdir)/../arpa/ftp.h \
-  secure.c secure.h
+$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(srcdir)/../arpa/ftp.h secure.c secure.h

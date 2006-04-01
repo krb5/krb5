@@ -70,4 +70,5 @@ $(OUTPRE)tcl_kadm5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/lib/kdb/adb_err.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   tcl_kadm5.c tcl_kadm5.h
-$(OUTPRE)test.$(OBJEXT): tcl_kadm5.h test.c
+$(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  tcl_kadm5.h test.c

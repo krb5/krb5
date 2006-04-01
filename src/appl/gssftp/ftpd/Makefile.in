@@ -104,9 +104,9 @@ $(OUTPRE)glob.$(OBJEXT): $(srcdir)/../ftp/ftp_var.h \
   $(srcdir)/../ftp/glob.c
 $(OUTPRE)radix.$(OBJEXT): $(srcdir)/../ftp/ftp_var.h \
   $(srcdir)/../ftp/radix.c
-$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(srcdir)/../arpa/ftp.h \
-  $(srcdir)/../ftp/secure.c secure.h
+$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(srcdir)/../arpa/ftp.h $(srcdir)/../ftp/secure.c secure.h
 $(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c
