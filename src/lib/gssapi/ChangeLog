@@ -1,3 +1,7 @@
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Never define size_t.
+
 2006-03-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Check for inttypes.h and handle it like xom.h and

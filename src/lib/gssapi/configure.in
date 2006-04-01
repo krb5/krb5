@@ -2,7 +2,6 @@ K5_AC_INIT(configure.in)
 CONFIG_RULES
 AC_PROG_AWK
 AC_CHECK_HEADERS(stdlib.h sys/types.h limits.h memory.h)
-AC_TYPE_SIZE_T
 AC_CHECK_HEADER(stdint.h,[
 	include_stdint='awk '\''END{printf("%cinclude <stdint.h>\n", 35);}'\'' < /dev/null'],
 	include_stdint='echo "/* no stdint.h */"')
