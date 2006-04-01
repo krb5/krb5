@@ -727,68 +727,33 @@ dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
 dnl
 AC_DEFUN([KRB5_SOCKADDR_SA_LEN],[ dnl
-AC_MSG_CHECKING(whether struct sockaddr contains sa_len)
-AC_CACHE_VAL(krb5_cv_sockaddr_sa_len,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/socket.h>
-],
-[struct sockaddr sa;
-sa.sa_len;],
-krb5_cv_sockaddr_sa_len=yes,krb5_cv_sockaddr_sa_len=no)])
-AC_MSG_RESULT([$]krb5_cv_sockaddr_sa_len)
-if test $krb5_cv_sockaddr_sa_len = yes; then
-   AC_DEFINE_UNQUOTED(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
-   fi
-])
+AC_CHECK_MEMBER(struct sockaddr.sa_len,
+  AC_DEFINE(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
+,,[#include <sys/types.h>
+#include <sys/socket.h>])])
 dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl
 AC_DEFUN(CHECK_UTMP,[
-AC_MSG_CHECKING([ut_pid in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_pid,
-[AC_TRY_COMPILE(
+AC_CHECK_MEMBERS([struct utmp.ut_pid, struct utmp.ut_type, struct utmp.ut_host, struct utmp.ut_exit],,,
 [#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_pid;],
-krb5_cv_struct_ut_pid=yes, krb5_cv_struct_ut_pid=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_pid)
-if test $krb5_cv_struct_ut_pid = no; then
+#include <utmp.h>])
+
+# Define the names actually used in the krb5 code currently:
+if test $ac_cv_member_struct_utmp_ut_pid = no; then
   AC_DEFINE(NO_UT_PID,1,[Define if ut_pid field not found])
 fi
-AC_MSG_CHECKING([ut_type in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_type,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_type;],
-krb5_cv_struct_ut_type=yes, krb5_cv_struct_ut_type=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_type)
-if test $krb5_cv_struct_ut_type = no; then
+if test $ac_cv_member_struct_utmp_ut_type = no; then
   AC_DEFINE(NO_UT_TYPE,1,[Define if ut_type field not found])
 fi
-AC_MSG_CHECKING([ut_host in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_host,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_host;],
-krb5_cv_struct_ut_host=yes, krb5_cv_struct_ut_host=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_host)
-if test $krb5_cv_struct_ut_host = no; then
+if test $ac_cv_member_struct_utmp_ut_host = no; then
   AC_DEFINE(NO_UT_HOST,1,[Define if ut_host field not found])
 fi
-AC_MSG_CHECKING([ut_exit in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_exit,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_exit;],
-krb5_cv_struct_ut_exit=yes, krb5_cv_struct_ut_exit=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_exit)
-if test $krb5_cv_struct_ut_exit = no; then
+if test $ac_cv_member_struct_utmp_ut_exit = no; then
   AC_DEFINE(NO_UT_EXIT,1,[Define if ut_exit field not found])
 fi
+
 AC_CHECK_FUNCS(setutent setutxent updwtmp updwtmpx)
 ])dnl
 dnl

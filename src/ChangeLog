@@ -1,5 +1,8 @@
 2006-03-31  Ken Raeburn  <raeburn@mit.edu>
 
+	* aclocal.m4 (KRB5_SOCKADDR_SA_LEN): Use AC_CHECK_MEMBER.
+	(CHECK_UTMP): Use AC_CHECK_MEMBERS.
+
 	* configure.in: Don't test word sizes.  Remove the #undef lines
 	for the PACKAGE_ macros.
 
