@@ -1,5 +1,17 @@
 2006-03-31  Ken Raeburn  <raeburn@mit.edu>
 
+	* configure.in: Check for access, ftime, getcwd, srand48, srand,
+	srandom, stat, strchr, strerror, strstr, timezone, umask, waitpid,
+	sem_init, sem_trywait, daemon, alloca.h, dlfcn.h, limits.h,
+	pthread.h, semaphore.h, krb_db.h, kdc.h, sockaddr.sa_len,
+	sockaddr_in.sin_len, stat.st_mtimensec, stat.st_mtimespec.tv_nsec,
+	and stat.st_mtim.tv_nsec.  Invoke KRB5_AC_REGEX_FUNCS,
+	AC_TYPE_OFF_T, CHECK_WAIT_TYPE, CHECK_SIGPROCMASK,
+	AC_TYPE_GETGROUPS, CHECK_SETJMP, and DECLARE_SYS_ERRLIST.  Add
+	checks for perror declaration, strptime prototype, setrpcent and
+	endrpcent return types from configure.in scripts in
+	subdirectories.
+
 	* aclocal.m4 (KRB5_SOCKADDR_SA_LEN): Use AC_CHECK_MEMBER.
 	(CHECK_UTMP): Use AC_CHECK_MEMBERS.
 

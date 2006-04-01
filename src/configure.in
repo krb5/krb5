@@ -131,9 +131,59 @@ AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield bswap16 bswap64 mkstemp getusershell lstat)
+AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield bswap16 bswap64 mkstemp getusershell lstat access ftime getcwd srand48 srand srandom stat strchr strerror strstr timezone umask waitpid sem_init sem_trywait daemon)
 AC_HEADER_STDARG
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h)
+DECLARE_SYS_ERRLIST
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexp.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h krb_db.h kdc.h)
+AC_CHECK_MEMBERS([struct sockaddr_in.sin_len, struct sockaddr.sa_len], , ,
+  [#include <sys/types.h>
+#include <netinet/in.h>])
+AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,struct stat.st_mtim.tv_nsec],,,[#include <sys/types.h>
+#include <sys/stat.h>])
+KRB5_AC_REGEX_FUNCS
+AC_TYPE_OFF_T
+dnl
+dnl Fancy caching of perror result...
+AC_MSG_CHECKING(for perror declaration)
+AC_CACHE_VAL(krb5_cv_decl_perror,
+[AC_EGREP_HEADER(perror, errno.h, 
+  krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])dnl
+AC_MSG_RESULT($krb5_cv_decl_perror)
+if test $krb5_cv_decl_perror = yes; then
+	AC_DEFINE(HDR_HAS_PERROR,1,[Define if errno.h declares perror])
+fi
+dnl
+KRB5_NEED_PROTO([#include <time.h>],strptime)
+CHECK_WAIT_TYPE
+CHECK_SIGPROCMASK
+AC_TYPE_GETGROUPS
+CHECK_SETJMP
+dnl
+dnl *rpcent return types needed for lib/rpc
+dnl
+AC_MSG_CHECKING([return type of setrpcent])
+AC_CACHE_VAL(k5_cv_type_setrpcent,
+[AC_TRY_COMPILE([#include <netdb.h>
+#ifdef __cplusplus
+extern "C"
+#endif
+extern void setrpcent();],
+[int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])dnl
+AC_MSG_RESULT($k5_cv_type_setrpcent)
+AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
+dnl
+AC_MSG_CHECKING([return type of endrpcent])
+AC_CACHE_VAL(k5_cv_type_endrpcent,
+[AC_TRY_COMPILE([#include <netdb.h>
+#ifdef __cplusplus
+extern "C"
+#endif
+extern void endrpcent();],
+[int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
+AC_MSG_RESULT($k5_cv_type_endrpcent)
+AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
+dnl
+dnl
 dnl bswap_16 is a macro in byteswap.h under GNU libc
 AC_MSG_CHECKING(for bswap_16)
 AC_CACHE_VAL(krb5_cv_bswap_16,[
