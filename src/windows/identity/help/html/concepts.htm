@@ -13,7 +13,21 @@
 based on how they identify you to external services which use those
 credentials for authentication.  To this end, it is assumed that each
 credential will uniquely identify the user to a service as a single
-principal or identity.  
+principal or <a href="concept_identity.htm">identity</a>.  For
+Kerberos, the identity is conceptually the same as the principal.
+</p>
+
+<p>At it's core, NetIDMgr does not possess any knowlege about specific
+credentials that might be available for the user or how to manage
+them.  It relies on several types of plugins to provide the
+information it needs, and to carry out credentials management tasks.
+One primary task is to identify and manage identities.  These services
+are provided by a plugin called the <a
+href="concept_ident_pro.htm">identity provider</a>.  Information about
+individual credentials are provided by <a
+href="concept_cred_pro.htm">credentials providers</a>.  Other plugins
+may extend the functionaility of these plugins or provide additional
+functionality for NetIDMgr.
 </p>
 
 <p>
