@@ -1248,6 +1248,28 @@ k5_ident_exit(khm_int32 msg_type,
     return KHM_ERROR_SUCCESS;
 }
 
+/* forward dcl */
+khm_int32 KHMAPI
+k5_ident_name_comp_func(const void * dl, khm_size cb_dl,
+                        const void * dr, khm_size cb_dr);
+
+static khm_int32
+k5_ident_compare_name(khm_int32 msg_type,
+                      khm_int32 msg_subtype,
+                      khm_ui_4 uparam,
+                      void * vparam) {
+    kcdb_ident_name_xfer *px;
+
+    px = (kcdb_ident_name_xfer *) vparam;
+
+    /* note that k5_ident_name_comp_func() ignores the size
+       specifiers.  So we can just pass in 0's. */
+    px->result = k5_ident_name_comp_func(px->name_src, 0,
+                                         px->name_alt, 0);
+
+    return KHM_ERROR_SUCCESS;
+}
+
 #if 0
 /* copy and paste template for ident provider messages */
 static khm_int32
@@ -1292,8 +1314,10 @@ k5_msg_ident(khm_int32 msg_type,
         break;
 
     case KMSG_IDENT_COMPARE_NAME:
-        /* TODO: handle KMSG_IDENT_COMPARE_NAME */
-        break;
+        return k5_ident_compare_name(msg_type,
+                                     msg_subtype,
+                                     uparam,
+                                     vparam);
 
     case KMSG_IDENT_SET_DEFAULT:
         return k5_ident_set_default(msg_type,
@@ -1335,6 +1359,12 @@ k5_msg_ident(khm_int32 msg_type,
     return KHM_ERROR_SUCCESS;
 }
 
+/* note that we are ignoring the size specifiers.  We can do that
+   because we are guaranteed that dl and dr point to NULL terminated
+   unicode strings when used with credential data buffers.  We also
+   use the fact that we are ignoring the size specifiers when we call
+   this function from k5_ident_compare_name() to avoid calculating the
+   length of the string. */
 khm_int32 KHMAPI
 k5_ident_name_comp_func(const void * dl, khm_size cb_dl,
                         const void * dr, khm_size cb_dr) {

@@ -1109,11 +1109,16 @@ k5_read_dlg_params(khm_handle conf,
 {
     khm_int32 i;
 
-    khc_read_int32(conf, L"Renewable", &d->renewable);
-    khc_read_int32(conf, L"Forwardable", &d->forwardable);
-    khc_read_int32(conf, L"Proxiable", &d->proxiable);
-    khc_read_int32(conf, L"Addressless", &d->addressless);
-    khc_read_int32(conf, L"PublicIP", &d->publicIP);
+    khc_read_int32(conf, L"Renewable", &i);
+    d->renewable = i;
+    khc_read_int32(conf, L"Forwardable", &i);
+    d->forwardable = i;
+    khc_read_int32(conf, L"Proxiable", &i);
+    d->proxiable = i;
+    khc_read_int32(conf, L"Addressless", &i);
+    d->addressless = i;
+    khc_read_int32(conf, L"PublicIP", &i);
+    d->publicIP = i;
 
     khc_read_int32(conf, L"DefaultLifetime", &i);
     d->tc_lifetime.current = i;
@@ -1712,7 +1717,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             khui_new_creds_by_type * nct;
             k5_dlg_data * d;
 
-            khm_int32 r;
+            khm_int32 r = 0;
 
             nc = (khui_new_creds *) vparam;
 

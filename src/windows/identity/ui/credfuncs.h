@@ -66,10 +66,10 @@ khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
                          wchar_t * ident, khm_size cb_ident);
 
 void
-khm_cred_begin_commandline(void);
+khm_cred_begin_startup_actions(void);
 
 void
-khm_cred_process_commandline(void);
+khm_cred_process_startup_actions(void);
 
 void
 khm_cred_refresh(void);

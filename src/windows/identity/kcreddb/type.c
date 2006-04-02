@@ -1275,7 +1275,7 @@ int _iv_is_in_spec(wchar_t *s, int n, wchar_t * spec)
         if(!e)
             e = b + wcslen(b);
     
-        if((e - b) == n  && !wcsnicmp(b, s, n)) {
+        if((e - b) == n  && !_wcsnicmp(b, s, n)) {
             return TRUE;
         }
 

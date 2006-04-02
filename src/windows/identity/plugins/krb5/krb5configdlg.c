@@ -713,9 +713,9 @@ k5_write_config_data(k5_config_data * d) {
                         if (d->realms[r].kdcs[k].master)
                             pprofile_add_relation(profile, sec_master,
                                                   host);
-                        else
-                            pprofile_add_relation(profile, sec_kdcs,
-                                                  host);
+
+                        pprofile_add_relation(profile, sec_kdcs,
+                                              host);
 
                         if (d->realms[r].kdcs[k].admin)
                             pprofile_add_relation(profile, sec_admin,
@@ -836,9 +836,9 @@ k5_write_config_data(k5_config_data * d) {
                         if (d->realms[r].kdcs[k].master)
                             pprofile_add_relation(profile, sec_master,
                                                   host);
-                        else
-                            pprofile_add_relation(profile, sec_kdcs,
-                                                  host);
+
+                        pprofile_add_relation(profile, sec_kdcs,
+                                              host);
 
                         if (d->realms[r].kdcs[k].admin)
                             pprofile_add_relation(profile, sec_admin,
@@ -850,10 +850,6 @@ k5_write_config_data(k5_config_data * d) {
 
                     if (d->realms[r].kdcs[k].flags & K5_RKFLAG_MOD_MASTER) {
                         if (!d->realms[r].kdcs[k].master) {
-                            pprofile_update_relation(profile, sec_kdcs,
-                                                     host, NULL);
-                            pprofile_add_relation(profile, sec_kdcs,
-                                                  host);
                             pprofile_update_relation(profile, sec_master,
                                                      host, NULL);
                         } else {
@@ -861,8 +857,6 @@ k5_write_config_data(k5_config_data * d) {
                                                      host, NULL);
                             pprofile_add_relation(profile, sec_master,
                                                   host);
-                            pprofile_update_relation(profile, sec_kdcs,
-                                                     host, NULL);
                         }
 
                         d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_MOD_MASTER;

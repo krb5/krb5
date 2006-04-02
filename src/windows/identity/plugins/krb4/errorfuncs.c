@@ -62,7 +62,7 @@ extern LPSTR (*Lerror_table_name)(long);
 
 HWND GetRootParent (HWND Child)
 {
-    HWND Last;
+    HWND Last = NULL;
     while (Child)
     {
         Last = Child;

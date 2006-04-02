@@ -402,13 +402,16 @@ static void
 cfgui_apply_settings(khui_config_node node) {
     HWND hwnd;
     khui_config_node c;
+    khm_int32 flags;
 
     hwnd = khui_cfg_get_hwnd(node);
+    flags = khui_cfg_get_flags(node);
 
-    if (hwnd)
+    if (hwnd && (flags & KHUI_CNFLAG_MODIFIED)) {
         SendMessage(hwnd, KHUI_WM_CFG_NOTIFY,
                     MAKEWPARAM(0, WMCFG_APPLY),
                     (LPARAM) node);
+    }
 
     if (KHM_FAILED(khui_cfg_get_first_child(node, &c)))
         return;
@@ -664,7 +667,12 @@ cfgui_dlgproc(HWND hwnd,
             cfgui_update_state(hwnd, LOWORD(wParam), 
                                (khui_config_node) lParam);
             break;
+
+        case WMCFG_SYNC_NODE_LIST:
+            /*TODO: synchronize the node lists here */
+            break;
         }
+
         return TRUE;
     }
 
@@ -717,6 +725,7 @@ void khm_refresh_config(void) {
     int n_tries = 0;
     khui_config_node cfg_ids = NULL;
     khui_config_node cfg_r = NULL;
+    khui_config_node cfg_iter = NULL;
     khui_menu_def * omenu;
     khm_boolean refresh_menu = FALSE;
 
@@ -791,6 +800,29 @@ void khm_refresh_config(void) {
                               &reg);
         } else {
             khui_cfg_release(cfg_id);
+        }
+    }
+
+    for (khui_cfg_get_first_child(cfg_ids, &cfg_iter);
+         cfg_iter;
+         khui_cfg_get_next_release(&cfg_iter)) {
+
+        wchar_t cfgname[KCDB_IDENT_MAXCCH_NAME];
+        khm_size cb;
+        khm_handle tident = NULL;
+        khm_int32 tflags = 0;
+
+        cb = sizeof(cfgname);
+        khui_cfg_get_name(cfg_iter, cfgname, &cb);
+
+        if (KHM_FAILED(kcdb_identity_create(cfgname, 0, &tident)) ||
+            KHM_FAILED(kcdb_identity_get_flags(tident, &tflags)) ||
+            !(tflags & KCDB_IDENT_FLAG_ACTIVE) ||
+            !(tflags & KCDB_IDENT_FLAG_CONFIG)) {
+
+            /* this configuration node needs to be removed */
+
+            khui_cfg_remove(cfg_iter);
         }
     }
 

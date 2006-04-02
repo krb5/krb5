@@ -215,6 +215,7 @@
 #define IDS_PISTATE_PLACEHOLD           210
 #define IDD_CFG_APPEAR                  210
 #define IDS_PISTATE_REG                 211
+#define IDD_CFG_ADDIDENT                211
 #define IDS_PISTATE_HOLD                212
 #define IDS_PISTATE_INIT                213
 #define IDS_PISTATE_RUN                 214
@@ -267,6 +268,13 @@
 #define IDS_CFG_APPEAR_LONG             261
 #define IDS_ACTION_OPT_APPEAR           262
 #define IDS_APR_SAMPLE_TEXT_SEL         263
+#define IDS_CFG_IDNAME_INV              264
+#define IDS_CFG_IDNAME_PRB              265
+#define IDS_CFG_IDNAME_EXT              266
+#define IDS_CFG_IDNAME_CCR              267
+#define IDS_CFG_IDNAME_CCC              268
+#define IDS_CFG_LOGF_CS                 269
+#define IDS_CFG_LOGF_CSR                270
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -361,6 +369,9 @@
 #define IDC_CFG_SIZE                    1130
 #define IDC_CFG_BOLD                    1131
 #define IDC_CFG_ITALICS                 1132
+#define IDC_CFG_ADDIDENT                1133
+#define IDC_CFG_IDNAME                  1134
+#define IDC_CFG_SHOWLOG                 1135
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -373,9 +384,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        211
+#define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1133
+#define _APS_NEXT_CONTROL_VALUE         1136
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
