@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/krb5/rcache
 mydir=rcache
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=rcache

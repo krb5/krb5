@@ -1,3 +1,7 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2005-11-14  Jeffrey Altman <jaltman@mit.edu>
 
 	* krb5_decode.c, krb5_encode.c: include k5-int.h instead of krb5.h

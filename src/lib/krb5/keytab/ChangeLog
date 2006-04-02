@@ -1,3 +1,7 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2006-03-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* kt_file.c (krb5_ktf_keytab_externalize,

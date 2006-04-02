@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/krb5/keytab
 mydir=keytab
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keytab

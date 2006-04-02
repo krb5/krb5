@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/krb5/error_tables
 mydir=error_tables
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=error_tables

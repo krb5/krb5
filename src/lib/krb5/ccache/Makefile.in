@@ -3,6 +3,7 @@ myfulldir=lib/krb5/ccache
 mydir=ccache
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCAL_SUBDIRS =
+DEFS=
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
