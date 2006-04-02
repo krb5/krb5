@@ -3,6 +3,7 @@ myfulldir=lib/crypto/aes
 mydir=aes
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../dk
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=aes

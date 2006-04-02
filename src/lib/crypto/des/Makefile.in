@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/des
 mydir=des
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=des

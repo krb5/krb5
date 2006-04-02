@@ -1,3 +1,7 @@
+2006-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2005-10-19  Ken Raeburn  <raeburn@mit.edu>
 
 	* arcfour_s2k.c (asctouni): Counter should be size_t, like len.

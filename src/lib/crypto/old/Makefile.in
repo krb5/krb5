@@ -3,6 +3,7 @@ myfulldir=lib/crypto/old
 mydir=old
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=old

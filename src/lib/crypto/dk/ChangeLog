@@ -1,3 +1,7 @@
+2006-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2005-05-19  Sam Hartman  <hartmans@mit.edu>
 
 	* dk_prf.c (krb5int_dk_prf):  Use k5crypto versions of keyblock memory management

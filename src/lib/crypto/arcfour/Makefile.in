@@ -3,6 +3,7 @@ myfulldir=lib/crypto/arcfour
 mydir=arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=arcfour

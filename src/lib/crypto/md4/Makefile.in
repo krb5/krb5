@@ -3,6 +3,7 @@ myfulldir=lib/crypto/md4
 mydir=md4
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md4

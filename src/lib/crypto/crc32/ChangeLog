@@ -1,3 +1,7 @@
+2006-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2005-12-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (t_crc): Build against support library.

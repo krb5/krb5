@@ -4,6 +4,7 @@ mydir=hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../crc32 -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5 -I$(srcdir)/../sha1
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=hash_provider

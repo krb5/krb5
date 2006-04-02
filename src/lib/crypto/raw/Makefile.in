@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/raw
 mydir=raw
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=raw

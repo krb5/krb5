@@ -12,6 +12,7 @@ LOCALINCLUDES = -I$(srcdir)/enc_provider \
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\

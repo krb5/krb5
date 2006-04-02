@@ -1,3 +1,7 @@
+2006-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2005-07-02  Ken Raeburn  <raeburn@mit.edu>
 
 	* rc4.c: Renamed from arcfour.c.

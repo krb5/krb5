@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/crypto/md5
 mydir=md5
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=md5

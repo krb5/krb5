@@ -5,6 +5,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5 -I$(srcdir)/../arcfour \
 	-I$(srcdir)/../hash_provider
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=keyhash_provider

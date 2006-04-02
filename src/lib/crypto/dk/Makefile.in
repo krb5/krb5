@@ -3,6 +3,7 @@ myfulldir=lib/crypto/dk
 mydir=dk
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=dk
