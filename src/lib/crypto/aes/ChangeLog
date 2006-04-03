@@ -1,3 +1,7 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* uitypes.h: Include autoconf.h.
+
 2006-04-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.

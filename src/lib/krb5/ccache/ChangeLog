@@ -1,5 +1,7 @@
 2006-04-02  Ken Raeburn  <raeburn@mit.edu>
 
+	* t_cc.c: Include autoconf.h.
+
 	* Makefile.in (DEFS): Make empty.
 
 2005-12-02  Jeffrey Altman <jaltman@mit.edu>

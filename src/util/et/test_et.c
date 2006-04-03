@@ -3,6 +3,7 @@
 #include "com_err.h"
 #include "test1.h"
 #include "test2.h"
+#include "autoconf.h"
 
 #ifdef _WIN32
 # define EXPORT_LIST

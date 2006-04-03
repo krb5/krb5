@@ -1,3 +1,7 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_et.c: Include autoconf.h.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Supply all three arguments when calling
