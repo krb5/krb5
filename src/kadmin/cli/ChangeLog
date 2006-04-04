@@ -1,3 +1,7 @@
+2006-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* getdate.y: Include autoconf.h always.  Don't include config.h.
+
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.
