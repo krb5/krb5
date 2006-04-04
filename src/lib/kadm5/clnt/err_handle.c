@@ -16,11 +16,16 @@ static char *_csrc =
    safety requirement stops me from putting there.  If I do, then all
    the applications have to link to pthread.  */
 
+#include "autoconf.h"
+/* XXX This file doesn't build multithreaded at the moment.  */
+#undef HAVE_PTHREAD_H
+
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
 #include "err_handle.h"
 #include <assert.h>
+#include <string.h>
 
 #ifdef NOVELL
 krb5_errcode_2_string_func old_error_2_string = NULL;
