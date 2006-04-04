@@ -3,6 +3,8 @@
  * Frank Dabek, July 1998
  */
 
+#include "autoconf.h"
+
 #if USE_CCAPI
 #include <CredentialsCache2.h>
 #endif
