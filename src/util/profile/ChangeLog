@@ -1,3 +1,8 @@
+2006-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(srcdir)/profile_tcl.c): Don't invoke swig
+	automatically.
+
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.
