@@ -7,6 +7,7 @@ KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_C
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
+DEFS=
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
 DEFINES = -DPLUGIN

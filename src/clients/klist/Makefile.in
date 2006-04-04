@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=clients/klist
 mydir=klist
 BUILDTOP=$(REL)..$(S)..
+DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

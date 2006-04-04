@@ -3,6 +3,7 @@ myfulldir=lib/des425
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
+DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)des425.lib

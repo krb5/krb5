@@ -3,6 +3,7 @@ myfulldir=util/support
 mydir=util/support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
+DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib

@@ -3,6 +3,7 @@ myfulldir=kadmin/server
 mydir=server
 BUILDTOP=$(REL)..$(S)..
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
+DEFS=
 
 LOCALINCLUDES = -I$(SRCTOP)/lib/gssapi/generic -I$(SRCTOP)/lib/gssapi/krb5 \
 	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5
