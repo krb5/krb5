@@ -1061,8 +1061,8 @@ t_walk_rtree.so t_walk_rtree.po $(OUTPRE)t_walk_rtree.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h t_walk_rtree.c
-t_kerb.so t_kerb.po $(OUTPRE)t_kerb.$(OBJEXT): $(KRB_ERR_H_DEP) \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
+t_kerb.so t_kerb.po $(OUTPRE)t_kerb.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/kerberosIV/krb.h t_kerb.c
 t_ser.so t_ser.po $(OUTPRE)t_ser.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

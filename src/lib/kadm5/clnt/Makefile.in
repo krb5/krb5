@@ -153,8 +153,8 @@ clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   client_internal.h clnt_privs.c err_handle.h
 err_handle.so err_handle.po $(OUTPRE)err_handle.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) err_handle.c \
-  err_handle.h
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
+  $(COM_ERR_DEPS) err_handle.c err_handle.h
 clnt_chpass_util.so clnt_chpass_util.po $(OUTPRE)clnt_chpass_util.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
