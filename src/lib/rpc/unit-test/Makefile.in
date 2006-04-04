@@ -5,6 +5,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I.
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
 
 OBJS= client.o rpc_test_clnt.o rpc_test_svc.o server.o
 

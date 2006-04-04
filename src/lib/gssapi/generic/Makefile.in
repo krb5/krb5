@@ -3,6 +3,7 @@ myfulldir=lib/gssapi/generic
 mydir=generic
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir)
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=generic

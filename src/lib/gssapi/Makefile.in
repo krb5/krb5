@@ -3,6 +3,7 @@ myfulldir=lib/gssapi
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS= generic krb5
+DEFS=
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
 ##DOSOBJFILELIST=@$(OUTPRE)generic.lst @$(OUTPRE)krb5.lst @$(OUTPRE)gssapi.lst

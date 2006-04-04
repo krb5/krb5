@@ -8,6 +8,7 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/et
 SED = sed
+DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)comerr.lib

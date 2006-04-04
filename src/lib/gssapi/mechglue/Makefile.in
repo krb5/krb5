@@ -3,6 +3,7 @@ myfulldir=lib/gssapi/mechglue
 mydir=.
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir)
+DEFS=
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)

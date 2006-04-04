@@ -1,3 +1,7 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* lock-test.c: Don't look for kdb.h in krb5/.

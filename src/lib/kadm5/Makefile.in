@@ -3,6 +3,7 @@ myfulldir=lib/kadm5
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = clnt srv unit-test
+DEFS=
 
 ##DOSBUILDTOP = ..\..
 

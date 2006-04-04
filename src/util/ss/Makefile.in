@@ -3,6 +3,7 @@ myfulldir=util/ss
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 SED = sed
+DEFS=
 
 INSTALLLIB=cp
 INSTALLFILE=cp

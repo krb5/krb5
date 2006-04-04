@@ -8,6 +8,7 @@ mydir=.
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../lib/apputils
 SED = sed
+DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)apputils.lib

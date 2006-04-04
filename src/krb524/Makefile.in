@@ -3,6 +3,7 @@ myfulldir=krb524
 mydir=krb524
 BUILDTOP=$(REL)..
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
+DEFS=
 
 # Copyright 1994 by OpenVision Technologies, Inc.
 # 

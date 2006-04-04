@@ -1,3 +1,7 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2006-03-30  Ken Raeburn  <raeburn@mit.edu>
 
 	* prof_int.h (SIZEOF_INT, SIZEOF_SHORT, SIZEOF_LONG)[_WIN32]:

@@ -4,6 +4,7 @@ mydir=slave
 BUILDTOP=$(REL)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
 
 all::	kprop kpropd
 

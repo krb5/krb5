@@ -4,6 +4,7 @@ mydir=srv
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
 DEFINES = @HESIOD_DEFS@
+DEFS=
 
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME = libkadm5srv.lib

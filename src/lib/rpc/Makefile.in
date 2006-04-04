@@ -3,6 +3,7 @@ myfulldir=lib/rpc
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
+DEFS=
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libgssrpc.lib
