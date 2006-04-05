@@ -149,8 +149,8 @@ if test -n "$OPENLDAP_PLUGIN"; then
 dnl Don't change $LIBS!
 dnl  AC_CHECK_LIB(ldap, ldap_init, [], [AC_MSG_ERROR([libldap not found])])
 dnl  AC_CHECK_LIB(lber, ber_init, [], [AC_MSG_ERROR([liblber not found])])
-else
-AC_MSG_NOTICE(skipping ldap header checks)
+dnl else
+dnl  AC_MSG_NOTICE(skipping ldap header checks)
 fi
 dnl
 dnl
