@@ -428,21 +428,17 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
 errout:
     if (status) {
-	char *errmsg = 0;
-	if (errcode != 0)
-	    errmsg = krb5_get_error_message (kdc_context, errcode);
         krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
 			 ktypestr,
 	       fromstring, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",
-	       errcode ? errmsg : "");
+	       errcode ? krb5_get_error_message (kdc_context, errcode) : "");
     }
     if (errcode) {
-	if (status == 0) {
+	if (status == 0)
 	    status = krb5_get_error_message (kdc_context, errcode);
-	}
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;

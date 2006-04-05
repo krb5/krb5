@@ -183,7 +183,6 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif	/* HAVE_SYSLOG */
     char	*cp;
     char	*syslogp;
-    char	*errmsg = 0;
 
     /* Make the header */
     sprintf(outbuf, "%s: ", whoami);
@@ -197,9 +196,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     if (code) {
         outbuf[sizeof(outbuf) - 1] = '\0';
 
-	errmsg = krb5_get_error_message (err_context, code);
-	strncat(outbuf, errmsg, sizeof(outbuf) - 1 - strlen(outbuf));
-/*	krb5_free_error_message (err_context, errmsg); */
+	strncat(outbuf, krb5_get_error_message (err_context, code), sizeof(outbuf) - 1 - strlen(outbuf));
 	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
     }
     cp = &outbuf[strlen(outbuf)];

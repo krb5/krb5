@@ -502,16 +502,14 @@ tgt_again:
 			      sname ? sname : "<unknown server>",
 			      enc_tkt_reply.transited.tr_contents.length,
 			      enc_tkt_reply.transited.tr_contents.data);
-	else {
-	    char *errmsg = krb5_get_error_message(kdc_context, errcode);
+	else
 	    krb5_klog_syslog (LOG_ERR,
 			      "unexpected error checking transit from '%s' to '%s' via '%.*s': %s",
 			      cname ? cname : "<unknown client>",
 			      sname ? sname : "<unknown server>",
 			      enc_tkt_reply.transited.tr_contents.length,
 			      enc_tkt_reply.transited.tr_contents.data,
-			      errmsg);
-	}
+			      krb5_get_error_message(kdc_context, errcode));
     } else
 	krb5_klog_syslog (LOG_INFO, "not checking transit path");
     if (reject_bad_transit
@@ -645,11 +643,8 @@ tgt_again:
     
 cleanup:
     if (status) {
-	char *errmsg = 0;
 	if (!errcode)
 	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
-	else
-	    errmsg = krb5_get_error_message (kdc_context, errcode);
         krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ (%s) %s: %s: authtime %d, "
 			 "%s%s %s for %s%s%s",
@@ -660,13 +655,12 @@ cleanup:
 			 cname ? cname : "<unknown client>",
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
-			 errcode ? errmsg : "");
+			 errcode ? krb5_get_error_message (kdc_context, errcode) : "");
     }
     
     if (errcode) {
-	if (status == 0) {
+	if (status == 0)
 	    status = krb5_get_error_message (kdc_context, errcode);
-	}
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;

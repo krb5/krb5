@@ -40,7 +40,6 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     int numresult;
     char strresult[1024];
     char *clientstr;
-    char *errmsg;
 
     ret = 0;
     rep->length = 0;
@@ -259,10 +258,9 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     free(ptr);
     clear.length = 0;
 
-    errmsg = ret ? krb5_get_error_message (context, ret) : "success";
     krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %s: %s",
 		     inet_ntoa(((struct sockaddr_in *)&remote_addr)->sin_addr),
-		     clientstr, errmsg);
+		     clientstr, ret ? krb5_get_error_message (context, ret) : "success");
     krb5_free_unparsed_name(context, clientstr);
 
     if (ret) {

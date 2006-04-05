@@ -589,11 +589,10 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     if (kdc_numrealms == 0) {
 	/* no realm specified, use default realm */
 	if ((retval = krb5_get_default_realm(kcontext, &lrealm))) {
-	    char *errmsg = krb5_get_error_message(kcontext, retval);
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
-		     argv[0], errmsg);
+		     argv[0], krb5_get_error_message(kcontext, retval));
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {

@@ -19,7 +19,7 @@ all:: krb5kdc rtest $(FAKEKA)
 
 # DEFINES = -DBACKWARD_COMPAT $(KRB4DEF)
 
-LOCALINCLUDES = @KRB4_INCLUDES@ -I. -I$(srcdir)/../lib/kdb
+LOCALINCLUDES = @KRB4_INCLUDES@ -I.
 SRCS= \
 	kdc5_err.c \
 	$(srcdir)/dispatch.c \

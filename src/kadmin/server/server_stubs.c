@@ -14,7 +14,6 @@
 #include <arpa/inet.h>  /* inet_ntoa */
 #include <adm_proto.h>  /* krb5_klog_syslog */
 #include "misc.h"
-/*#include <err_handle.h>*/
 
 #define KRB5_MAX_ERR_STR 2048
 #define error_message_w(CODE, BUF, BUF_SIZE) \
