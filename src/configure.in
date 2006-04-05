@@ -143,6 +143,17 @@ AC_CHECK_MEMBERS([struct stat.st_mtimensec,struct stat.st_mtimespec.tv_nsec,stru
 KRB5_AC_REGEX_FUNCS
 AC_TYPE_OFF_T
 dnl
+if test -n "$OPENLDAP_PLUGIN"; then
+  AC_CHECK_HEADERS([ldap.h], [], [AC_MSG_ERROR([ldap.h not found])])
+  AC_CHECK_HEADERS([lber.h], [], [AC_MSG_ERROR([lber.h not found])])
+dnl Don't change $LIBS!
+dnl  AC_CHECK_LIB(ldap, ldap_init, [], [AC_MSG_ERROR([libldap not found])])
+dnl  AC_CHECK_LIB(lber, ber_init, [], [AC_MSG_ERROR([liblber not found])])
+else
+AC_MSG_NOTICE(skipping ldap header checks)
+fi
+dnl
+dnl
 dnl Fancy caching of perror result...
 AC_MSG_CHECKING(for perror declaration)
 AC_CACHE_VAL(krb5_cv_decl_perror,
