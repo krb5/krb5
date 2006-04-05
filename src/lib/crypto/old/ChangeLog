@@ -1,3 +1,7 @@
+2006-04-01  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2004-02-18  Ken Raeburn  <raeburn@mit.edu>
 
 	* des_stringtokey.c: Use ANSI C style function definitions.

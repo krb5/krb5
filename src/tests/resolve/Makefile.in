@@ -38,7 +38,7 @@ clean::
 #
 $(OUTPRE)resolve.$(OBJEXT): resolve.c
 $(OUTPRE)addrinfo-test.$(OBJEXT): addrinfo-test.c
-$(OUTPRE)fake-addrinfo-test.$(OBJEXT): fake-addrinfo-test.c \
-  addrinfo-test.c $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h
+$(OUTPRE)fake-addrinfo-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h addrinfo-test.c fake-addrinfo-test.c

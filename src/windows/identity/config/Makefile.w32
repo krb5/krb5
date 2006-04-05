@@ -47,7 +47,7 @@ KHIMAIRA_WIN32_CONFIG=1
 NETIDMGR_VERSION_MAJOR=1
 NETIDMGR_VERSION_MINOR=1
 NETIDMGR_VERSION_PATCH=0
-NETIDMGR_VERSION_AUX=0
+NETIDMGR_VERSION_AUX=1
 NETIDMGR_RELEASEDESC=
 
 # The API version.  This number must be incremented each time the API
@@ -142,6 +142,22 @@ DOCDIR=$(DESTDIR)\doc
 # Source directories
 CONFDIR=$(SRC)\config
 
+# If we are forcing a Win2K build, we need to adjust the build
+# directories and environment.
+
+!ifdef KHBUILD_W2K
+
+OBJ=$(OBJ)\W2K
+BINDIR=$(BINDIR)\W2K
+LIBDIR=$(LIBDIR)\W2K
+
+APPVER=5.0
+TARGETOS=WINNT
+_WIN32_IE=0x0500
+_WIN32_WINNT=0x0500
+
+!endif
+
 # Setup environment for win32.mak
 
 !if "$(KH_BUILD)" == "RETAIL"
@@ -149,6 +165,7 @@ NODEBUG=1
 !endif
 
 # Win32.mak
+
 !include <Win32.Mak>
 
 # Program macros

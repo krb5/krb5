@@ -3,6 +3,7 @@ myfulldir=util/ss
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 SED = sed
+DEFS=
 
 INSTALLLIB=cp
 INSTALLFILE=cp
@@ -174,52 +175,53 @@ clean::
 # the Makefile.in file
 #
 invocation.so invocation.po $(OUTPRE)invocation.$(OBJEXT): \
-  invocation.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS) copyright.h
-help.so help.po $(OUTPRE)help.$(OBJEXT): help.c ss_internal.h \
-  ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) \
-  copyright.h
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) copyright.h invocation.c ss.h ss_internal.h
+help.so help.po $(OUTPRE)help.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  help.c ss.h ss_internal.h
 execute_cmd.so execute_cmd.po $(OUTPRE)execute_cmd.$(OBJEXT): \
-  execute_cmd.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS) copyright.h
-listen.so listen.po $(OUTPRE)listen.$(OBJEXT): listen.c \
-  copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-parse.so parse.po $(OUTPRE)parse.$(OBJEXT): parse.c \
-  ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS) copyright.h
-error.so error.po $(OUTPRE)error.$(OBJEXT): error.c \
-  copyright.h $(COM_ERR_DEPS) ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h
-prompt.so prompt.po $(OUTPRE)prompt.$(OBJEXT): prompt.c \
-  copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) copyright.h execute_cmd.c ss.h ss_internal.h
+listen.so listen.po $(OUTPRE)listen.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  listen.c ss.h ss_internal.h
+parse.so parse.po $(OUTPRE)parse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  parse.c ss.h ss_internal.h
+error.so error.po $(OUTPRE)error.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  error.c ss.h ss_internal.h
+prompt.so prompt.po $(OUTPRE)prompt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  prompt.c ss.h ss_internal.h
 request_tbl.so request_tbl.po $(OUTPRE)request_tbl.$(OBJEXT): \
-  request_tbl.c copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) copyright.h request_tbl.c ss.h ss_internal.h
 list_rqs.so list_rqs.po $(OUTPRE)list_rqs.$(OBJEXT): \
-  list_rqs.c copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-pager.so pager.po $(OUTPRE)pager.$(OBJEXT): pager.c \
-  ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS) copyright.h
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) copyright.h list_rqs.c ss.h ss_internal.h
+pager.so pager.po $(OUTPRE)pager.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  pager.c ss.h ss_internal.h
 requests.so requests.po $(OUTPRE)requests.$(OBJEXT): \
-  requests.c ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-data.so data.po $(OUTPRE)data.$(OBJEXT): data.c ss_internal.h \
-  ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) \
-  copyright.h
-mk_cmds.so mk_cmds.po $(OUTPRE)mk_cmds.$(OBJEXT): mk_cmds.c \
-  copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-utils.so utils.po $(OUTPRE)utils.$(OBJEXT): utils.c \
-  copyright.h ss_internal.h ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-options.so options.po $(OUTPRE)options.$(OBJEXT): options.c \
-  copyright.h ss.h $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS)
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) requests.c ss.h ss_internal.h
+data.so data.po $(OUTPRE)data.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  data.c ss.h ss_internal.h
+mk_cmds.so mk_cmds.po $(OUTPRE)mk_cmds.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  mk_cmds.c ss.h ss_internal.h
+utils.so utils.po $(OUTPRE)utils.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) copyright.h \
+  ss.h ss_internal.h utils.c
+options.so options.po $(OUTPRE)options.$(OBJEXT): $(BUILDTOP)/include/ss/ss_err.h \
+  $(COM_ERR_DEPS) copyright.h options.c ss.h
 cmd_tbl.lex.o: cmd_tbl.lex.c ct.tab.h
-ct.tab.o: ct.tab.c ss.h $(BUILDTOP)/include/ss/ss_err.h \
-  $(COM_ERR_DEPS)
-ss_err.so ss_err.po $(OUTPRE)ss_err.$(OBJEXT): ss_err.c \
-  $(COM_ERR_DEPS)
-std_rqs.so std_rqs.po $(OUTPRE)std_rqs.$(OBJEXT): std_rqs.c \
-  $(SS_DEPS) $(COM_ERR_DEPS)
+ct.tab.o: $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) \
+  ct.tab.c ss.h
+ss_err.so ss_err.po $(OUTPRE)ss_err.$(OBJEXT): $(COM_ERR_DEPS) \
+  ss_err.c
+std_rqs.so std_rqs.po $(OUTPRE)std_rqs.$(OBJEXT): $(COM_ERR_DEPS) \
+  $(SS_DEPS) std_rqs.c

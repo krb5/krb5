@@ -25,6 +25,9 @@
 /* $Id$ */
 
 #include<khmapp.h>
+#ifdef DEBUG
+#include<assert.h>
+#endif
 
 khm_statusbar_part khm_statusbar_parts[] = {
     {KHUI_SBPART_INFO, 0, KHUI_SB_WTYPE_FILLER},
@@ -88,19 +91,25 @@ khui_statusbar_set_parts(HWND parent) {
 
     lastx = 0;
     for(i=0;i<khm_n_statusbar_parts;i++) {
-        int w;
+        int w = 0;
         switch(khm_statusbar_parts[i].wtype) {
-            case KHUI_SB_WTYPE_ABSOLUTE:
-                w = khm_statusbar_parts[i].width;
-                break;
+        case KHUI_SB_WTYPE_ABSOLUTE:
+            w = khm_statusbar_parts[i].width;
+            break;
 
-            case KHUI_SB_WTYPE_RELATIVE:
-                w = (khm_statusbar_parts[i].width * width) / 100;
-                break;
+        case KHUI_SB_WTYPE_RELATIVE:
+            w = (khm_statusbar_parts[i].width * width) / 100;
+            break;
 
-            case KHUI_SB_WTYPE_FILLER:
-                w = fillerwidth;
-                break;
+        case KHUI_SB_WTYPE_FILLER:
+            w = fillerwidth;
+            break;
+
+        default:
+            w = 0;
+#ifdef DEBUG
+            assert(FALSE);
+#endif
         }
         lastx += w;
 

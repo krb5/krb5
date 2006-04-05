@@ -156,7 +156,7 @@ extern "C"
 extern void setrpcent();],
 [int i;], k5_cv_type_setrpcent=void, k5_cv_type_setrpcent=int)])dnl
 AC_MSG_RESULT($k5_cv_type_setrpcent)
-AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent)
+AC_DEFINE_UNQUOTED(SETRPCENT_TYPE, $k5_cv_type_setrpcent, [Define as return type of setrpcent])
 dnl
 AC_MSG_CHECKING([return type of endrpcent])
 AC_CACHE_VAL(k5_cv_type_endrpcent,
@@ -167,7 +167,7 @@ extern "C"
 extern void endrpcent();],
 [int i;], k5_cv_type_endrpcent=void, k5_cv_type_endrpcent=int)])dnl
 AC_MSG_RESULT($k5_cv_type_endrpcent)
-AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent)
+AC_DEFINE_UNQUOTED(ENDRPCENT_TYPE, $k5_cv_type_endrpcent, [Define as return type of endrpcent])
 DECLARE_SYS_ERRLIST
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY_WITH_DEPS

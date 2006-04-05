@@ -1,3 +1,7 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2004-09-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in: Delete @SHARED_RULE@ line.

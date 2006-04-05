@@ -27,6 +27,7 @@
  * Initialize a credentials cache.
  */
 
+#include "autoconf.h"
 #include <krb5.h>
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
@@ -268,6 +269,18 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1)
     exit(2);
 }
 
+static krb5_context errctx;
+static void extended_com_err_fn (const char *myprog, errcode_t code,
+				 const char *fmt, va_list args)
+{
+    const char *emsg;
+    emsg = krb5_get_error_message (errctx, code);
+    fprintf (stderr, "%s: %s ", myprog, emsg);
+    krb5_free_error_message (errctx, emsg);
+    vfprintf (stderr, fmt, args);
+    fprintf (stderr, "\n");
+}
+
 static char *
 parse_options(argc, argv, opts, progname)
     int argc;
@@ -494,6 +507,7 @@ struct k4_data* k4;
 	com_err(progname, code, "while initializing Kerberos 5 library");
 	return 0;
     }
+    errctx = k5->ctx;
     if (opts->k5_cache_name)
     {
 	code = krb5_cc_resolve(k5->ctx, opts->k5_cache_name, &k5->cc);
@@ -591,6 +605,7 @@ k5_end(k5)
 	krb5_cc_close(k5->ctx, k5->cc);
     if (k5->ctx)
 	krb5_free_context(k5->ctx);
+    errctx = NULL;
     memset(k5, 0, sizeof(*k5));
 }
 
@@ -1097,6 +1112,8 @@ main(argc, argv)
 
     memset(&k5, 0, sizeof(k5));
     memset(&k4, 0, sizeof(k4));
+
+    set_com_err_hook (extended_com_err_fn);
 
     parse_options(argc, argv, &opts, progname);
 

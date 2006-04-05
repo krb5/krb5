@@ -166,33 +166,34 @@ khcint_handle_dup(kconf_handle * o)
 
 void 
 khcint_space_hold(kconf_conf_space * s) {
-    InterlockedIncrement(&(s->refcount));
+    EnterCriticalSection(&cs_conf_global);
+    s->refcount ++;
+    LeaveCriticalSection(&cs_conf_global);
 }
 
 void 
 khcint_space_release(kconf_conf_space * s) {
-    LONG l = InterlockedDecrement(&(s->refcount));
-    if(!l) {
-        EnterCriticalSection(&cs_conf_global);
+    khm_int32 l;
 
-        /* check again */
-        if (!l) {
-            if(s->regkey_machine)
-                RegCloseKey(s->regkey_machine);
-            if(s->regkey_user)
-                RegCloseKey(s->regkey_user);
-            s->regkey_machine = NULL;
-            s->regkey_user = NULL;
+    EnterCriticalSection(&cs_conf_global);
 
-            if (s->flags &
-                (KCONF_SPACE_FLAG_DELETE_M |
-                 KCONF_SPACE_FLAG_DELETE_U)) {
-                khcint_remove_space(s, s->flags);
-            }
+    l = -- s->refcount;
+    if (l == 0) {
+        if(s->regkey_machine)
+            RegCloseKey(s->regkey_machine);
+        if(s->regkey_user)
+            RegCloseKey(s->regkey_user);
+        s->regkey_machine = NULL;
+        s->regkey_user = NULL;
+
+        if (s->flags &
+            (KCONF_SPACE_FLAG_DELETE_M |
+             KCONF_SPACE_FLAG_DELETE_U)) {
+            khcint_remove_space(s, s->flags);
         }
-
-        LeaveCriticalSection(&cs_conf_global);
     }
+
+    LeaveCriticalSection(&cs_conf_global);
 }
 
 /* case sensitive replacement for RegOpenKeyEx */
@@ -211,7 +212,7 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
     t = sSubKey;
 
     /* check for case insensitive prefix first */
-    if (!wcsnicmp(sSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
+    if (!_wcsnicmp(sSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
         HKEY hkt;
 
         t = sSubKey + (ARRAYLENGTH(CONFIG_REGPATHW) - 1);
@@ -378,7 +379,7 @@ khcint_RegCreateKeyEx(HKEY hKey,
     t = lpSubKey;
 
     /* check for case insensitive prefix first */
-    if (!wcsnicmp(lpSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
+    if (!_wcsnicmp(lpSubKey, CONFIG_REGPATHW, ARRAYLENGTH(CONFIG_REGPATHW) - 1)) {
         HKEY hkt;
 
         t = lpSubKey + (ARRAYLENGTH(CONFIG_REGPATHW) - 1);
@@ -475,7 +476,7 @@ khcint_RegCreateKeyEx(HKEY hKey,
             }
         }
 
-        if (!wcsnicmp(sk_name, t, cch) &&
+        if (!_wcsnicmp(sk_name, t, cch) &&
             (sk_name[cch] == L'\0' ||
              sk_name[cch] == L'~')) {
             long new_idx;
@@ -668,9 +669,9 @@ khcint_free_space(kconf_conf_space * r) {
 }
 
 khm_int32 
-khcint_open_space_int(kconf_conf_space * parent, 
-                      const wchar_t * sname, size_t n_sname, 
-                      khm_int32 flags, kconf_conf_space **result) {
+khcint_open_space(kconf_conf_space * parent, 
+                  const wchar_t * sname, size_t n_sname, 
+                  khm_int32 flags, kconf_conf_space **result) {
     kconf_conf_space * p;
     kconf_conf_space * c;
     HKEY pkey = NULL;
@@ -685,14 +686,14 @@ khcint_open_space_int(kconf_conf_space * parent,
     if(n_sname >= KCONF_MAXCCH_NAME || n_sname <= 0)
         return KHM_ERROR_INVALID_PARAM;
 
-    /*SAFE: buf: buffer size == KCONF_MAXCCH_NAME * wchar_t >
-      n_sname * wchar_t */
+    /* SAFE: buf: buffer size == KCONF_MAXCCH_NAME * wchar_t >
+       n_sname * wchar_t */
     wcsncpy(buf, sname, n_sname);
     buf[n_sname] = L'\0';
 
     /* see if there is already a config space by this name. if so,
-    return it.  Note that if the configuration space is specified in a
-    schema, we would find it here. */
+       return it.  Note that if the configuration space is specified
+       in a schema, we would find it here. */
     EnterCriticalSection(&cs_conf_global);
     c = TFIRSTCHILD(p);
     while(c) {
@@ -704,6 +705,18 @@ khcint_open_space_int(kconf_conf_space * parent,
     LeaveCriticalSection(&cs_conf_global);
 
     if(c) {
+
+        if (c->flags & KCONF_SPACE_FLAG_DELETED) {
+            if (flags & KHM_FLAG_CREATE) {
+                c->flags &= ~(KCONF_SPACE_FLAG_DELETED |
+                              KCONF_SPACE_FLAG_DELETE_M |
+                              KCONF_SPACE_FLAG_DELETE_U);
+            } else {
+                *result = NULL;
+                return KHM_ERROR_NOT_FOUND;
+            }
+        }
+
         khcint_space_hold(c);
         *result = c;
         return KHM_ERROR_SUCCESS;
@@ -842,7 +855,7 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
                                              validated above */
         }
 
-        rv = khcint_open_space_int(p, str, end - str, flags, &c);
+        rv = khcint_open_space(p, str, end - str, flags, &c);
 
         if(KHM_SUCCEEDED(rv) && (*end == L'\\'
 #if 0
@@ -1756,7 +1769,7 @@ khc_get_type(khm_handle conf, wchar_t * value) {
     HKEY hku = NULL;
     kconf_conf_space * c;
     khm_int32 rv;
-    LONG hr;
+    LONG hr = ERROR_SUCCESS;
     DWORD type = 0;
 
     if(!khc_is_config_running())
@@ -1913,7 +1926,7 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
 #endif
     if (!p)
         return KHM_ERROR_INVALID_OPERATION;
-            
+
     cc = TFIRSTCHILD(c);
     while (cc) {
         cn = LNEXT(cc);
@@ -1931,6 +1944,21 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
         c->flags |= (flags &
                      (KCONF_SPACE_FLAG_DELETE_M |
                       KCONF_SPACE_FLAG_DELETE_U));
+
+        /* if all the registry spaces have been marked as deleted and
+           there is no schema, we should mark the space as deleted as
+           well.  Note that ideally we only need to check for stores
+           which have data corresponding to this configuration space,
+           but this is a bit problematic since we don't monitor the
+           registry for changes. */
+        if ((c->flags &
+             (KCONF_SPACE_FLAG_DELETE_M |
+              KCONF_SPACE_FLAG_DELETE_U)) ==
+            (KCONF_SPACE_FLAG_DELETE_M |
+             KCONF_SPACE_FLAG_DELETE_U) &&
+            (!c->schema || c->nSchema == 0))
+
+            c->flags |= KCONF_SPACE_FLAG_DELETED;
     }
 
     if (c->regpath && p->regpath) {
@@ -1969,8 +1997,6 @@ khc_remove_space(khm_handle conf) {
          space has any children left.  If there are none, check if the
          parent space is also marked for deletion.
     */
-    HKEY hku = NULL;
-    HKEY hkm = NULL;
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
     khm_int32 flags = 0;
@@ -2076,7 +2102,7 @@ khcint_load_schema_i(khm_handle parent, kconf_schema * schema,
     int state = 0;
     int end_found = 0;
     kconf_conf_space * thisconf = NULL;
-    khm_handle h;
+    khm_handle h = NULL;
 
     i=begin;
     while(!end_found) {
@@ -2158,7 +2184,7 @@ khcint_unload_schema_i(khm_handle parent, kconf_schema * schema,
     int state = 0;
     int end_found = 0;
     kconf_conf_space * thisconf = NULL;
-    khm_handle h;
+    khm_handle h = NULL;
 
     i=begin;
     while(!end_found) {

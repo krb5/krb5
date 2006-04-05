@@ -1,3 +1,22 @@
+2006-04-04  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in ($(srcdir)/profile_tcl.c): Don't invoke swig
+	automatically.
+
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* prof_int.h (SIZEOF_INT, SIZEOF_SHORT, SIZEOF_LONG)[_WIN32]:
+	Don't define.
+
+	* configure.in: Don't test sizes of types.
+
+	* prof_init.c: Include stdint.h and inttypes.h if available.
+	(prof_int32): Always define as int32_t.
+
 2006-03-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (generate-files-mac): Depend on profile.h.

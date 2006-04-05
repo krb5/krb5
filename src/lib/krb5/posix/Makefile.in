@@ -2,6 +2,7 @@ thisconfigdir=./..
 myfulldir=lib/krb5/posix
 mydir=posix
 BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=posix

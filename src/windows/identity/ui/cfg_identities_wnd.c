@@ -429,8 +429,21 @@ write_params_ident(ident_data * d) {
     }
 
     if (d->removed) {
+        khm_handle h = NULL;
 
         khc_remove_space(csp_ident);
+
+        /* calling kcdb_identity_get_config() will update the
+           KCDB_IDENT_FLAG_CONFIG flag for the identity to reflect the
+           fact that it nolonger has a configuration. */
+        kcdb_identity_get_config(d->ident, 0, &h);
+        if (h) {
+            /* what the ? */
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+            khc_close_space(h);
+        }
 
     } else {
 
@@ -699,6 +712,136 @@ refresh_view_idents_state(HWND hwnd) {
                             KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
 }
 
+/* dialog box procedure for the "Add new identity" dialog */
+INT_PTR CALLBACK
+khm_cfg_add_ident_proc(HWND hwnd,
+                       UINT umsg,
+                       WPARAM wParam,
+                       LPARAM lparam) {
+    switch(umsg) {
+    case WM_INITDIALOG:
+        /* set the max length of the edit control first */
+        SendDlgItemMessage(hwnd, IDC_CFG_IDNAME,
+                           EM_SETLIMITTEXT,
+                           KCDB_IDENT_MAXCCH_NAME - 1,
+                           0);
+        break;
+
+    case WM_DESTROY:
+        /* nor do we have to do anything here */
+        break;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK) {
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_int32 rv = KHM_ERROR_SUCCESS;
+            khm_handle ident = NULL;
+            khm_handle csp_ident = NULL;
+            khm_size i;
+            wchar_t err_msg[512] = L"";
+
+            GetDlgItemText(hwnd, IDC_CFG_IDNAME, idname,
+                           ARRAYLENGTH(idname));
+
+            idname[ARRAYLENGTH(idname) - 1] = L'\0';
+            if (KHM_FAILED(rv = kcdb_identpro_validate_name(idname)) &&
+                rv != KHM_ERROR_NO_PROVIDER &&
+                rv != KHM_ERROR_NOT_IMPLEMENTED) {
+                /* the supplied name was invalid or something */
+
+                wchar_t fmt[256];
+
+                LoadString(khm_hInstance, IDS_CFG_IDNAME_INV,
+                           fmt, ARRAYLENGTH(fmt));
+                StringCbPrintf(err_msg, sizeof(err_msg), fmt, idname);
+
+                goto show_failure;
+            }
+
+            /* now check if this is actually a new identity */
+            for (i=0; i < cfg_idents.n_idents; i++) {
+                if (!kcdb_identpro_compare_name(cfg_idents.idents[i].idname,
+                                                idname))
+                    break;
+            }
+
+            if (i < cfg_idents.n_idents) {
+                wchar_t fmt[256];
+
+                LoadString(khm_hInstance, IDS_CFG_IDNAME_EXT,
+                           fmt, ARRAYLENGTH(fmt));
+                StringCbPrintf(err_msg, sizeof(err_msg), fmt, idname);
+
+                goto show_failure;
+            }
+
+            /* ok.  now we are all set to add the new identity */
+            if (KHM_FAILED(rv = kcdb_identity_create(idname,
+                                                     KCDB_IDENT_FLAG_CREATE,
+                                                     &ident))) {
+                /* oops */
+                wchar_t fmt[256];
+
+                LoadString(khm_hInstance, IDS_CFG_IDNAME_CCR,
+                           fmt, ARRAYLENGTH(fmt));
+                StringCbPrintf(err_msg, sizeof(err_msg), fmt, rv);
+
+                goto show_failure;
+            }
+
+            /* now we have to create the identity configuration. */
+            if (KHM_FAILED(rv = kcdb_identity_get_config(ident,
+                                                         KHM_FLAG_CREATE,
+                                                         &csp_ident))) {
+                wchar_t fmt[256];
+
+                LoadString(khm_hInstance, IDS_CFG_IDNAME_CCC,
+                           fmt, ARRAYLENGTH(fmt));
+                StringCbPrintf(err_msg, sizeof(err_msg), fmt, rv);
+
+                kcdb_identity_release(ident);
+
+                goto show_failure;
+            }
+
+            khm_refresh_config();
+
+            kcdb_identity_release(ident);
+            khc_close_space(csp_ident);
+
+            EndDialog(hwnd, 0);
+            break;
+
+        show_failure:
+            {
+                wchar_t title[512];
+                wchar_t fmt[256];
+
+                if (!err_msg[0])
+                    break;
+
+                LoadString(khm_hInstance, IDS_CFG_IDNAME_PRB,
+                           fmt, ARRAYLENGTH(fmt));
+                StringCbPrintf(title, sizeof(title), fmt, idname);
+
+                MessageBox(hwnd, err_msg, title, MB_OK | MB_ICONSTOP);
+
+                /* don't end the dialog yet */
+                break;
+            }
+            break;
+            
+        } else if (LOWORD(wParam) == IDCANCEL) {
+            EndDialog(hwnd, 1);
+        }
+        break;
+    }
+
+    return FALSE;
+}
+
+/* dialog procedure for the "general" pane of the "identities"
+   configuration node. */
 INT_PTR CALLBACK
 khm_cfg_ids_tab_proc(HWND hwnd,
                     UINT umsg,
@@ -795,6 +938,14 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             case IDC_CFG_STICKY:
                 refresh_data_idents(hwnd);
                 break;
+
+            case IDC_CFG_ADDIDENT:
+                DialogBoxParam(khm_hInstance,
+                               MAKEINTRESOURCE(IDD_CFG_ADDIDENT),
+                               hwnd,
+                               khm_cfg_add_ident_proc,
+                               (LPARAM) hwnd);
+                break;
             }
 
             refresh_view_idents_state(hwnd);
@@ -834,6 +985,7 @@ khm_cfg_ids_tab_proc(HWND hwnd,
     return FALSE;
 }
 
+/* dialog procedure for the "Identities" configuration node */
 INT_PTR CALLBACK
 khm_cfg_identities_proc(HWND hwnd,
                         UINT uMsg,
@@ -960,6 +1112,8 @@ refresh_data_ident(HWND hwnd, khui_config_init_data * idata) {
     }
 }
 
+/* dialog procedure for the "general" pane of individual identity
+   configuration nodes. */
 INT_PTR CALLBACK
 khm_cfg_id_tab_proc(HWND hwnd,
                     UINT umsg,
@@ -1061,6 +1215,7 @@ khm_cfg_id_tab_proc(HWND hwnd,
     return FALSE;
 }
 
+/* dialog procedure for individual identity configuration nodes */
 INT_PTR CALLBACK
 khm_cfg_identity_proc(HWND hwnd,
                       UINT uMsg,

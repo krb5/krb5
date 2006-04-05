@@ -4,6 +4,7 @@
 
 
 #include <stdio.h>
+#include "autoconf.h"
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif

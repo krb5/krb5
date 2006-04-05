@@ -1,3 +1,4 @@
+#include "autoconf.h"
 #include <stdio.h>
 #include <string.h>
 #if HAVE_TCL_H

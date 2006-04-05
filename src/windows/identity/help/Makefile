@@ -34,3 +34,6 @@ all: mkdirs $(CHMFILE) $(INCFILES)
 $(CHMFILE): netidmgr.hhp
 	-$(HHC) netidmgr.hhp
 	$(CP) netidmgr.chm $(CHMFILE)
+
+clean::
+	$(RM) $(CHMFILE)

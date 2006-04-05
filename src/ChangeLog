@@ -14,7 +14,6 @@
 	* Novell LDAP plugin patch contributed under MIT licenses;
 	introduces  plugins/kdb/kdb_ldap and kadmin/ldap_util.  ALso
 	includes changes to link into configure and build system.
-	
 
 	* Apply Novell error handling patch, contributed under MIT
 	licenses; touches the following files: 
@@ -60,6 +59,47 @@
 	  src/plugins/kdb/db2/kdb_db2.h
 
 	
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for access, ftime, getcwd, srand48, srand,
+	srandom, stat, strchr, strerror, strstr, timezone, umask, waitpid,
+	sem_init, sem_trywait, daemon, alloca.h, dlfcn.h, limits.h,
+	pthread.h, semaphore.h, krb_db.h, kdc.h, sockaddr.sa_len,
+	sockaddr_in.sin_len, stat.st_mtimensec, stat.st_mtimespec.tv_nsec,
+	and stat.st_mtim.tv_nsec.  Invoke KRB5_AC_REGEX_FUNCS,
+	AC_TYPE_OFF_T, CHECK_WAIT_TYPE, CHECK_SIGPROCMASK,
+	AC_TYPE_GETGROUPS, CHECK_SETJMP, and DECLARE_SYS_ERRLIST.  Add
+	checks for perror declaration, strptime prototype, setrpcent and
+	endrpcent return types from configure.in scripts in
+	subdirectories.
+
+	* aclocal.m4 (KRB5_SOCKADDR_SA_LEN): Use AC_CHECK_MEMBER.
+	(CHECK_UTMP): Use AC_CHECK_MEMBERS.
+
+	* configure.in: Don't test word sizes.  Remove the #undef lines
+	for the PACKAGE_ macros.
+
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Put definition of KRB5_AUTOCONF_H at top of header
+	file, not bottom.  Disable the #undefs for the PACKAGE_ macros.
+
+2006-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Check for getusershell, lstat, pwd.h,
+	arpa/inet.h.  On OSF/1, check for setluid in security library.
+
+	* aclocal.m4 (CHECK_UTMP): Call AC_CHECK_FUNCS once instead of
+	AC_CHECK_FUNC for each function.
+	(CHECK_SIGPROCMASK, CHECK_SETJMP, CHECK_UTMP, AC_KRB5_TCL_TRYOLD,
+	KRB5_AC_LIBUTIL): Supply all three arguments in AC_DEFINE calls.
+
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (all-windows): Don't go into include\krb5.
+	(WINMAKEFILES): Remove include\krb5\Makefile.
+	(include\krb5\Makefile): Target deleted.
 
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 

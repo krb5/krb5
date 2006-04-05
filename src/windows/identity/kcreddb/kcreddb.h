@@ -524,6 +524,13 @@ kcdb_identity_get_default(khm_handle * pvid);
 
 /*! \brief Get the configuration space for the identity. 
 
+    If the configuration space for the identity does not exist and the
+    flags parameter does not specify ::KHM_FLAG_CREATE, then the
+    function will return a failure code as specified in
+    ::khc_open_space().  Depending on whether or not a configuration
+    space was found, the ::KCDB_IDENT_FLAG_CONFIG flag will be set or
+    reset for the identity.
+
     \param[in] id Identity for which the configuraiton space is requested
 
     \param[in] flags Flags used when calling khc_open_space().  If \a

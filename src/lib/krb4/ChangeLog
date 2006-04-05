@@ -1,3 +1,11 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* in_tkt.c: Include autoconf.h.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* send_to_kdc.c, mk_preauth.c, memcache.c, recvauth.c, netread.c,

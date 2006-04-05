@@ -1,3 +1,11 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* test.c, tcl_kadm5.c, tcl_ovsec_kadm.c: Include autoconf.h.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* tcl_kadm5.c, tcl_ovsec_kadm.c: Don't include k5-int.h.

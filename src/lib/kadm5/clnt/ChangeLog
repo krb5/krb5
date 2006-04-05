@@ -3,6 +3,18 @@
 	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add support
 	library.
 
+
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* err_handle.c: Include autoconf.h and string.h.
+	(HAVE_PTHREAD_H): Undefine.
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* client_init.c: Include autoconf.h.
+
 2005-11-17  Ken Raeburn  <raeburn@mit.edu>
 
 	* client_principal.c, clnt_policy.c: Include errno.h.

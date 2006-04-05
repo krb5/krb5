@@ -6,6 +6,15 @@
 
 	* db2_exp.c (hack_init): Update prototype to match krb5_db2_lib_init
 
+
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* db2_exp.c, kdb_db2.c: Include k5-int.h earlier.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* pol_xdr.c, policy_db.h: Don't get headers from krb5/.

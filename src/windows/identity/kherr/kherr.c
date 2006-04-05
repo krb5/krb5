@@ -281,22 +281,22 @@ void free_event_params(kherr_event * e) {
     if(parm_type(e->p1) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p1));
         PFREE((void*) parm_data(e->p1));
-        e->p1 = (kherr_param) 0;
+        ZeroMemory(&e->p1, sizeof(e->p1));
     }
     if(parm_type(e->p2) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p2));
         PFREE((void*) parm_data(e->p2));
-        e->p2 = (kherr_param) 0;
+        ZeroMemory(&e->p2, sizeof(e->p2));
     }
     if(parm_type(e->p3) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p3));
         PFREE((void*) parm_data(e->p3));
-        e->p3 = (kherr_param) 0;
+        ZeroMemory(&e->p3, sizeof(e->p3));
     }
     if(parm_type(e->p4) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p4));
         PFREE((void*) parm_data(e->p4));
-        e->p4 = (kherr_param) 0;
+        ZeroMemory(&e->p4, sizeof(e->p4));
     }
 }
 
@@ -460,7 +460,7 @@ void pick_err_event(kherr_context * c)
 static void arg_from_param(DWORD_PTR ** parm, kherr_param p) {
     int t;
 
-    if (p != 0) {
+    if (p.type != KEPT_NONE) {
         t = parm_type(p);
         if (t == KEPT_INT32 ||
             t == KEPT_UINT32 ||
@@ -493,8 +493,8 @@ static void resolve_string_resource(kherr_event * e,
                                     khm_int32 or_flag) {
     wchar_t tfmt[KHERR_MAXCCH_STRING];
     wchar_t tbuf[KHERR_MAXCCH_STRING];
-    size_t chars;
-    size_t bytes;
+    size_t chars = 0;
+    size_t bytes = 0;
 
     if(e->flags & if_flag) {
         if(e->h_module != NULL)
@@ -537,8 +537,8 @@ static void resolve_msg_resource(kherr_event * e,
                                 khm_int32 if_flag,
                                 khm_int32 or_flag) {
     wchar_t tbuf[KHERR_MAXCCH_STRING];
-    size_t chars;
-    size_t bytes;
+    size_t chars = 0;
+    size_t bytes = 0;
     DWORD_PTR args[8];
 
     if(e->flags & if_flag) {
@@ -725,7 +725,8 @@ kherr_reportf(const wchar_t * long_desc_fmt, ...) {
 
     e = kherr_report(KHERR_DEBUG_1,
                      NULL, NULL, NULL, buf, NULL, 0,
-                     KHERR_SUGGEST_NONE, 0, 0, 0, 0, KHERR_RF_CSTR_LONG_DESC
+                     KHERR_SUGGEST_NONE, _vnull(), _vnull(), _vnull(), _vnull(),
+                     KHERR_RF_CSTR_LONG_DESC
 #ifdef _WIN32
                      ,NULL
 #endif
@@ -757,7 +758,11 @@ kherr_reportf_ex(enum kherr_severity severity,
     va_end(vl);
 
     e = kherr_report(severity, NULL, facility, NULL, buf, NULL, facility_id,
-                     KHERR_SUGGEST_NONE, 0, 0, 0, 0, KHERR_RF_CSTR_LONG_DESC
+                     KHERR_SUGGEST_NONE,
+                     _vnull(),
+                     _vnull(),
+                     _vnull(),
+                     _vnull(), KHERR_RF_CSTR_LONG_DESC
 #ifdef _WIN32
                      ,hModule
 #endif
@@ -1024,7 +1029,7 @@ KHMEXP void KHMAPI kherr_push_new_context(khm_int32 flags)
 kherr_param dup_parm(kherr_param p) {
     if(parm_type(p) == KEPT_STRINGT) {
         wchar_t * d = PWCSDUP((wchar_t *)parm_data(p));
-        return kherr_val(KEPT_STRINGT, d);
+        return kherr_val(KEPT_STRINGT, (khm_ui_8) d);
     } else
         return p;
 }
@@ -1288,7 +1293,7 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s)
     size_t cb_s;
 
     if (s == NULL)
-        return (kherr_param) 0;
+        return _vnull();
 
     if (FAILED(StringCbLength(s, KHERR_MAXCB_STRING, &cb_s)))
         cb_s = KHERR_MAXCB_STRING;
@@ -1303,3 +1308,14 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s)
 
     return _tstr(dest);
 }
+
+
+#if 0
+KHMEXP kherr_param kherr_val(khm_octet ptype, khm_ui_8 pvalue) {
+    kherr_param p;
+    p.type = ptype;
+    p.data = pvalue;
+
+    return p;
+}
+#endif

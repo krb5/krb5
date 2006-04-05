@@ -168,18 +168,24 @@ sub uniquify {
     # "gcc version 3.4.4 20050721 (Red Hat 3.4.4-2)"
     # -- will sometimes emit duplicate header file names.
     local($_) = @_;
+    my(@sides) = split ": ", $_;
+    my($lhs) = "";
+    if ($#sides == 1) {
+	$lhs = $sides[0] . ": ";
+	$_ = $sides[1];
+    }
     my(@words) = split " ", $_;
     my($w);
     my($result) = "";
     my(%seen);
     undef %seen;
-    foreach $w (@words) {
+    foreach $w (sort { $a cmp $b; } @words) {
 	next if defined($seen{$w});
 	$seen{$w} = 1;
 	if ($result ne "") { $result .= " "; }
 	$result .= $w;
     }
-    return $result . " ";
+    return $lhs . $result . " ";
 }
 
 sub split_lines {

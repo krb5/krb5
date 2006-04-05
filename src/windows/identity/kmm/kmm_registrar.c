@@ -861,8 +861,8 @@ void kmmint_init_module(kmm_module_i * m) {
                          KHERR_FACILITY_ID,
                          KHERR_SUGGEST_NONE,
                          _cstr(m->name),
-                         ((warn_e)? _cstr(warn_e->long_desc):0),
-                         0,0,
+                         ((warn_e)? _cstr(warn_e->long_desc):_vnull()),
+                         _vnull(),_vnull(),
                          KHERR_RF_MSG_SHORT_DESC |
                          ((warn_e)? KHERR_RF_MSG_SUGGEST: 0),
                          KHERR_HMODULE);

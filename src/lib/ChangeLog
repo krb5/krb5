@@ -4,6 +4,11 @@
 
 	* kdb_ldap: New directory.
 
+
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* krb5_32.def: Add the new error-message functions.
+
 2006-02-24  Jeffrey Altman <jaltman@mit.edu>
 
  	* Makefile.in: support for 64-bit Windows builds

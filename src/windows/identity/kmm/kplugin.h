@@ -90,7 +90,7 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module);
 typedef khm_int32 (KHMAPI *init_module_t)(kmm_module);
 
 #if defined(_WIN64)
-#define EXP_INIT_MODULE "_init_module@8"
+#define EXP_INIT_MODULE "init_module"
 #elif defined(_WIN32)
 #define EXP_INIT_MODULE "_init_module@4"
 #else
@@ -133,7 +133,7 @@ KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module);
 typedef khm_int32 (KHMAPI *exit_module_t)(kmm_module);
 
 #if defined(_WIN64)
-#define EXP_EXIT_MODULE "_exit_module@8"
+#define EXP_EXIT_MODULE "exit_module"
 #elif defined(_WIN32)
 #define EXP_EXIT_MODULE "_exit_module@4"
 #else

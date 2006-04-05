@@ -190,6 +190,12 @@ khui_cfg_register(khui_config_node vparent,
 
     EnterCriticalSection(&cs_cfgui);
     TADDCHILD(parent, node);
+
+    if (hwnd_cfgui) {
+        SendMessage(hwnd_cfgui, KHUI_WM_CFG_NOTIFY,
+                    MAKEWPARAM(0, WMCFG_SYNC_NODE_LIST), 0);
+    }
+
     LeaveCriticalSection(&cs_cfgui);
 
     /* when the root config list changes, we need to notify the UI.
@@ -254,6 +260,12 @@ khui_cfg_remove(khui_config_node vnode) {
     EnterCriticalSection(&cs_cfgui);
     node = cfgui_node_i_from_handle(vnode);
     node->flags |= KHUI_CN_FLAG_DELETED;
+
+    if (hwnd_cfgui) {
+        SendMessage(hwnd_cfgui, KHUI_WM_CFG_NOTIFY,
+                    MAKEWPARAM(0, WMCFG_SYNC_NODE_LIST), 0);
+    }
+
     LeaveCriticalSection(&cs_cfgui);
 
     return KHM_ERROR_SUCCESS;

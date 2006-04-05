@@ -1,3 +1,24 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* clnt_perror.c, svc.c, svc_udp.c, clnt_simple.c, svc_tcp.c,
+	auth_unix.c, clnt_generic.c, getrpcport.c: Include autoconf.h.
+
+	* auth_unix.c (GETGROUPS_T): Don't define.
+
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* dyn.c (DynDelete, DynInsert, DynPut): Delete bcopy branches.
+	(HAVE_MEMMOVE): Don't define.
+
+2006-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Always supply three arguments to
+	AC_DEFINE_UNQUOTED.
+
 2005-08-20  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Use K5_AC_INIT instead of AC_INIT.

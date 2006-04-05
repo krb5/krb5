@@ -4,6 +4,7 @@ mydir=kpasswd
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
 
 kpasswd: kpasswd.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o kpasswd kpasswd.o $(KRB5_BASE_LIBS)

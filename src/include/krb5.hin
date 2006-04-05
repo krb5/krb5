@@ -2536,6 +2536,21 @@ typedef krb5_int32 krb5_prompt_type;
 krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
+/* Error reporting */
+void
+krb5_set_error_message (krb5_context, krb5_error_code, const char *, ...);
+#ifdef va_start
+void
+krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list);
+#endif
+char *
+krb5_get_error_message (krb5_context, krb5_error_code);
+void
+krb5_free_error_message (krb5_context, char *);
+void
+krb5_clear_error_message (krb5_context);
+
+
 #if TARGET_OS_MAC
 #    pragma options align=reset
 #endif

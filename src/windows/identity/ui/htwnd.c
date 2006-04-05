@@ -143,7 +143,7 @@ static LONG table_lookup(struct tx_tbl_t * tbl, int n, wchar_t * v, int len)
     int i;
 
     for(i=0; i<n; i++) {
-        if(!wcsnicmp(tbl[i].string, v, len))
+        if(!_wcsnicmp(tbl[i].string, v, len))
             return tbl[i].value;
     }
 
@@ -344,7 +344,7 @@ static int htw_parse_tag(
     /* start initially points to the starting '<' */
     c = token_end(++start);
 
-    if(!wcsnicmp(start,L"a",c-start)) {
+    if(!_wcsnicmp(start,L"a",c-start)) {
         /* start of an 'a' tag */
         wchar_t * id_start = NULL;
         int id_len = 0;
@@ -368,9 +368,9 @@ static int htw_parse_tag(
             if(c==e)
                 break;
 
-            if(!wcsnicmp(c,L"id",e-c)) {
+            if(!_wcsnicmp(c,L"id",e-c)) {
                 c = read_attr(e, &id_start, &id_len);
-            } else if(!wcsnicmp(c,L"param",e-c)) {
+            } else if(!_wcsnicmp(c,L"param",e-c)) {
                 c = read_attr(e, &param_start, &param_len);
             }
         }
@@ -421,7 +421,7 @@ static int htw_parse_tag(
             d->n_links++;
         }
 
-    } else if(!wcsnicmp(start, L"/a", c - start)) {
+    } else if(!_wcsnicmp(start, L"/a", c - start)) {
         khui_htwnd_link * l;
 
         c = wcschr(c,L'>');
@@ -435,15 +435,15 @@ static int htw_parse_tag(
             l->r.right = p_abs->x;
             l->r.bottom = p_abs->y + lh;
         }
-    } else if(!wcsnicmp(start, L"p", c - start)) {
+    } else if(!_wcsnicmp(start, L"p", c - start)) {
         wchar_t * e;
         wchar_t * align_s = NULL;
-        int align_len;
+        int align_len = 0;
 
         c = skip_ws(c);
         e = token_end(c);
 
-        if(c != e && !wcsnicmp(c,L"align",e-c)) {
+        if(c != e && !_wcsnicmp(c,L"align",e-c)) {
             c = read_attr(e, &align_s, &align_len);
         }
 
@@ -458,57 +458,56 @@ static int htw_parse_tag(
             *align = ALIGN_LEFT;
 
         n = 1;
-    } else if(!wcsnicmp(start, L"b", c - start)) {
+    } else if(!_wcsnicmp(start, L"b", c - start)) {
         format_push(s,d, HTW_DEFAULT, FV_BOLD, HTW_DEFAULT);
-    } else if(!wcsnicmp(start, L"/b", c - start)) {
+    } else if(!_wcsnicmp(start, L"/b", c - start)) {
         format_pop(s);
-    } else if(!wcsnicmp(start, L"u", c - start)) {
+    } else if(!_wcsnicmp(start, L"u", c - start)) {
         format_push(s,d, HTW_DEFAULT, FV_UNDERLINE, HTW_DEFAULT);
-    } else if(!wcsnicmp(start, L"/u", c - start)) {
+    } else if(!_wcsnicmp(start, L"/u", c - start)) {
         format_pop(s);
-    } else if(!wcsnicmp(start, L"large", c - start)) {
+    } else if(!_wcsnicmp(start, L"large", c - start)) {
         format_push(s,d,-MulDiv(HTW_LARGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, HTW_DEFAULT);
-    } else if(!wcsnicmp(start, L"/large", c - start)) {
+    } else if(!_wcsnicmp(start, L"/large", c - start)) {
         format_pop(s);
-    } else if(!wcsnicmp(start, L"huge", c - start)) {
+    } else if(!_wcsnicmp(start, L"huge", c - start)) {
         format_push(s,d,-MulDiv(HTW_HUGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, HTW_DEFAULT);
-    } else if(!wcsnicmp(start, L"/huge", c - start)) {
+    } else if(!_wcsnicmp(start, L"/huge", c - start)) {
         format_pop(s);
-    } else if(!wcsnicmp(start, L"center", c - start)) {
+    } else if(!_wcsnicmp(start, L"center", c - start)) {
         c = wcschr(c, L'>');
         if(!c)
             c = c + wcslen(c);
         *align = ALIGN_CENTER;
         n = 1;
-    } else if(!wcsnicmp(start, L"left", c - start) ||
-        !wcsnicmp(start, L"p", c - start)) 
+    } else if(!_wcsnicmp(start, L"left", c - start) ||
+        !_wcsnicmp(start, L"p", c - start)) 
     {
         c = wcschr(c, L'>');
         if(!c)
             c = c + wcslen(c);
         *align = ALIGN_LEFT;
         n = 1;
-    } else if(!wcsnicmp(start, L"right", c - start)) {
+    } else if(!_wcsnicmp(start, L"right", c - start)) {
         c = wcschr(c, L'>');
         if(!c)
             c = c + wcslen(c);
         *align = ALIGN_RIGHT;
         n = 1;
-    } else if(!wcsnicmp(start, L"/center", c - start) ||
-        !wcsnicmp(start, L"/left", c - start) ||
-        !wcsnicmp(start, L"/right", c - start) ||
-        !wcsnicmp(start, L"/p", c - start))
-    {
+    } else if(!_wcsnicmp(start, L"/center", c - start) ||
+              !_wcsnicmp(start, L"/left", c - start) ||
+              !_wcsnicmp(start, L"/right", c - start) ||
+              !_wcsnicmp(start, L"/p", c - start)) {
         c = wcschr(c, L'>');
         if(!c)
             c = c + wcslen(c);
         *align = ALIGN_LEFT;
         n = 1;
-    } else if(!wcsnicmp(start, L"font", c - start)) {
+    } else if(!_wcsnicmp(start, L"font", c - start)) {
         wchar_t * color_s = NULL;
-        int color_len;
+        int color_len = 0;
         wchar_t * size_s = NULL;
-        int size_len;
+        int size_len = 0;
         LONG color = HTW_DEFAULT;
         LONG h = HTW_DEFAULT;
 
@@ -521,9 +520,9 @@ static int htw_parse_tag(
             if(c==e)
                 break;
 
-            if(!wcsnicmp(c,L"color",e-c)) {
+            if(!_wcsnicmp(c,L"color",e-c)) {
                 c = read_attr(e, &color_s, &color_len);
-            } else if(!wcsnicmp(c,L"size",e-c)) {
+            } else if(!_wcsnicmp(c,L"size",e-c)) {
                 c = read_attr(e, &size_s, &size_len);
             }
         }
@@ -539,9 +538,9 @@ static int htw_parse_tag(
         }
 
         format_push(s,d,h,HTW_DEFAULT,color);
-    } else if(!wcsnicmp(start, L"/font", c - start)) {
+    } else if(!_wcsnicmp(start, L"/font", c - start)) {
         format_pop(s);
-    } else if(!wcsnicmp(start, L"settab", c - start)) {
+    } else if(!_wcsnicmp(start, L"settab", c - start)) {
         wchar_t * e;
         wchar_t * pos_s = NULL;
         int pos_len;
@@ -549,7 +548,7 @@ static int htw_parse_tag(
         c = skip_ws(c);
         e = token_end(c);
 
-        if(c != e && !wcsnicmp(c,L"pos",e-c)) {
+        if(c != e && !_wcsnicmp(c,L"pos",e-c)) {
             c = read_attr(e, &pos_s, &pos_len);
         }
 
@@ -570,7 +569,7 @@ static int htw_parse_tag(
 
             d->tabs[d->n_tabs++] = MulDiv(dx, bx, 4);
         }
-    } else if(!wcsnicmp(start, L"tab", c - start)) {
+    } else if(!_wcsnicmp(start, L"tab", c - start)) {
         int i;
 
         if(!dry_run) {
@@ -1051,7 +1050,7 @@ void khm_register_htwnd_class(void)
 
 void khm_unregister_htwnd_class(void)
 {
-    UnregisterClass((LPWSTR) khui_htwnd_cls, khm_hInstance);
+    UnregisterClass(MAKEINTATOM(khui_htwnd_cls), khm_hInstance);
 }
 
 HWND khm_create_htwnd(HWND parent, LPWSTR text, int x, int y, int width, int height, DWORD ex_style, DWORD style)
@@ -1059,7 +1058,7 @@ HWND khm_create_htwnd(HWND parent, LPWSTR text, int x, int y, int width, int hei
 
     return CreateWindowEx(
         ex_style,
-        (LPWSTR) khui_htwnd_cls,
+        MAKEINTATOM(khui_htwnd_cls),
         text,
         style | WS_CHILD,
         x,y,width,height,

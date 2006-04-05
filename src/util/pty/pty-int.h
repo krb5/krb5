@@ -17,6 +17,8 @@
 # undef _THREAD_SAFE
 #endif
 
+#include "autoconf.h"
+
 #ifdef HAVE_UTMP_H
 #include <utmp.h>
 #endif

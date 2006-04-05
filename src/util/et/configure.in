@@ -14,7 +14,7 @@ AC_CACHE_VAL(krb5_cv_decl_perror,
   krb5_cv_decl_perror=yes, krb5_cv_decl_perror=no)])dnl
 AC_MSG_RESULT($krb5_cv_decl_perror)
 if test $krb5_cv_decl_perror = yes; then
-	AC_DEFINE(HDR_HAS_PERROR)
+	AC_DEFINE(HDR_HAS_PERROR,1,[Define if errno.h declares perror])
 fi
 dnl
 AC_CHECK_FUNCS(strerror)

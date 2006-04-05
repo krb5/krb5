@@ -10,7 +10,7 @@ dnl
 dnl Kludge for simple server --- FIXME is this the best way to do this?
 dnl
 if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
-	AC_DEFINE(BROKEN_STREAMS_SOCKETS)
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS,1,[Define if socket can't be bound to 0.0.0.0])
 fi
 dnl
 dnl

@@ -1,3 +1,15 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* errors.c: New file.
+	* Makefile.in (SRCS, LIBOBJS, STLIBOBJS): Add it.
+	* threads.c (krb5int_thread_support_init): Call krb5int_err_init
+	to initialize the new file.
+	* libkrb5support.exports: Add the new symbols.
+
 2006-03-13  Ken Raeburn  <raeburn@mit.edu>
 
 	* plugins.c (krb5int_get_plugin_dir_data): If dirhandle is null or

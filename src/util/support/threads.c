@@ -453,6 +453,10 @@ int krb5int_thread_support_init (void)
     if (err)
 	return err;
 
+    err = krb5int_err_init();
+    if (err)
+	return err;
+
     return 0;
 }
 

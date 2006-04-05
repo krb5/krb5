@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/types.h>
+#include "autoconf.h"
 
 #ifndef _WIN32
 #include <unistd.h>

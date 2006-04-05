@@ -726,3 +726,8 @@ profile_update_file_data
 profile_update_relation
 profile_verify_node
 profile_write_tree_file
+krb5_set_error_message
+krb5_vset_error_message
+krb5_get_error_message
+krb5_free_error_message
+krb5_clear_error_message

@@ -51,11 +51,12 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include "k5-int.h"
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#include "k5-int.h"
 #include <db.h>
 #include <stdio.h>
 #include <errno.h>

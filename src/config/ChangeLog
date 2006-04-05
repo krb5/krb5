@@ -3,6 +3,11 @@
 	* shlib.conf (*-*-darwin*): Add dylib_file options for krb5support
 	and kdb5 to MAKE_DYNOBJ_COMMAND.
 
+
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* wconfig.pl: New file.
+
 2006-03-15  Ken Raeburn  <raeburn@mit.edu>
 
 	* pre.in (MAYBE_VALGRIND): New variable.

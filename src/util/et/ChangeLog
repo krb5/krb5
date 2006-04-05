@@ -1,3 +1,19 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* test_et.c: Include autoconf.h.
+
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Supply all three arguments when calling
+	AC_DEFINE.
+
+	* com_err.c (set_com_err_hook, reset_com_err_hook): Enable
+	compilation on Windows.
+
 2006-03-10  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (generate-files-mac): Depend on compile_et.

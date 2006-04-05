@@ -1,3 +1,13 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-29  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (logger.c, logger.o, $(OUTPRE)logger.$(OBJEXT)):
+	Targets deleted.
+	(SRCS, OBJS, clean): Drop references to them.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* kerberos_v4.c: Don't get autoconf.h from krb5/.

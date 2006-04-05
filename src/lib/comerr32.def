@@ -8,3 +8,5 @@ EXPORTS
 	error_message
 	add_error_table
 	remove_error_table
+	set_com_err_hook
+	reset_com_err_hook

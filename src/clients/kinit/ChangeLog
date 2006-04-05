@@ -1,3 +1,20 @@
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c: Must include autoconf.h before krb5.h.
+
+2006-03-28  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+	* kinit.c: Include autoconf.h.
+
+2006-03-26  Ken Raeburn  <raeburn@mit.edu>
+
+	* kinit.c (extended_com_err_fn): New function.
+	(errctx): New variable.
+	(k5_begin): Set errctx.
+	(k5_end): Clear it.
+	(main): Call set_com_err_hook.
+
 2004-07-01  Ken Raeburn  <raeburn@mit.edu>
 
 	* kinit.c (k5_kinit): Don't free addresses after calling

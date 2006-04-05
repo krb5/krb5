@@ -1,3 +1,11 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-31  Ken Raeburn  <raeburn@mit.edu>
+
+	* dnsglue.c, dnsglue.h, dnssrv.c: Include autoconf.h.
+
 2006-03-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* locate_kdc.c (module_locate_server): Don't set cbdata.lp at

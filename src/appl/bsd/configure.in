@@ -7,7 +7,7 @@ AC_ARG_WITH([afs],
   --with-afs=AFSDIR    use preinstalled AFS library tree],
 ,with_afs=no)dnl
 if test $with_afs != no; then
-	AC_DEFINE(SETPAG)
+	AC_DEFINE(SETPAG,1,[Define if setpag should be used])
 	LOGINLIBS="$LOGINLIBS -L$with_afs/lib -L$with_afs/lib/afs -lauth -lsys -lrx -llwp"
 fi
 AC_PROG_INSTALL
@@ -36,7 +36,7 @@ case $krb5_cv_host in
 	;;
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
-		AC_DEFINE(HAVE_SETLUID)
+		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid is supplied by the OSF/1 security library])
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)
 	;;
@@ -87,7 +87,7 @@ CHECK_SIGNALS
 CHECK_SETJMP
 CHECK_DIRENT
 CHECK_WAIT_TYPE
-AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define if POSIX-compatible termios interface is found]))])
 CHECK_UTMP
 KRB5_GETSOCKNAME_ARGS
 dnl
@@ -116,7 +116,7 @@ AC_CACHE_VAL(krb5_cv_has_streams,
 krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
 AC_MSG_RESULT($krb5_cv_has_streams)
 if test $krb5_cv_has_streams = yes; then
-AC_DEFINE(HAVE_STREAMS)
+AC_DEFINE(HAVE_STREAMS,1,[Define if the OS uses streams])
 fi
 dnl
 dnl
@@ -128,7 +128,7 @@ AC_CACHE_VAL(krb5_cv_f_setown,
 krb5_cv_f_setown=yes,krb5_cv_f_setown=no)])
 AC_MSG_RESULT($krb5_cv_f_setown)
 if test $krb5_cv_f_setown = yes; then
-AC_DEFINE(HAVE_SETOWN)
+AC_DEFINE(HAVE_SETOWN,1,[Define if F_SETOWN is available])
 fi
 dnl
 dnl
@@ -143,7 +143,7 @@ SETENVSRC=setenv.c
 SETENVOBJ=setenv.o
 AC_SUBST([SETENVSRC])
 AC_SUBST([SETENVOBJ])
-AC_DEFINE([NEED_SETENV])
+AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
 fi
 dnl
 dnl
@@ -157,7 +157,7 @@ AC_CACHE_VAL(krb5_cv_setpgrp_args,
 krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_setpgrp_args)
 if test $krb5_cv_setpgrp_args = two; then
-AC_DEFINE(SETPGRP_TWOARG)
+AC_DEFINE(SETPGRP_TWOARG,1,[Define if setpgrp takes two arguments])
 fi
 dnl
 dnl
@@ -171,7 +171,7 @@ AC_CACHE_VAL(krb5_cv_shadow_pwd,
 krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
 AC_MSG_RESULT($krb5_cv_shadow_pwd)
 if test $krb5_cv_shadow_pwd = yes; then
-AC_DEFINE(HAVE_SHADOW)
+AC_DEFINE(HAVE_SHADOW,1,[Define if shadow password interface is available])
 fi
 dnl
 dnl

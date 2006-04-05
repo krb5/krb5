@@ -13,13 +13,7 @@
 /* SUPPRESS 287 on yaccpar_sccsid *//* Unusd static variable */
 /* SUPPRESS 288 on yyerrlab *//* Label unused */
 
-#ifdef HAVE_CONFIG_H
-#if defined (emacs) || defined (CONFIG_BROKETS)
-#include <config.h>
-#else
-#include "config.h"
-#endif
-#endif
+#include "autoconf.h"
 #include <string.h>
 
 /* Since the code of getdate.y is not included in the Emacs executable

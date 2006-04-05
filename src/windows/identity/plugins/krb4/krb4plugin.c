@@ -49,6 +49,9 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
     switch(msg_subtype) {
     case KMSG_SYSTEM_INIT:
         {
+#ifdef _WIN64
+            return KHM_ERROR_NOT_IMPLEMENTED;
+#else
             kcdb_credtype ct;
             wchar_t buf[KCDB_MAXCCH_SHORT_DESC];
             size_t cbsize;
@@ -200,10 +203,14 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                                              &attr_id_krb5_flags))) {
                 rv = KHM_ERROR_UNKNOWN;
             }
+#endif
         }
         break;
 
     case KMSG_SYSTEM_EXIT:
+#ifdef _WIN64
+        return 0;
+#else
         if(credtype_id_krb4 >= 0)
             {
                 /* basically just unregister the credential type */
@@ -212,6 +219,7 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                 kcdb_credset_delete(krb4_credset);
             }
         break;
+#endif
     }
 
     return rv;

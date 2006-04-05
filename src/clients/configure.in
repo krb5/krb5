@@ -15,7 +15,7 @@ AC_CHECK_HEADERS(unistd.h pwd.h arpa/inet.h)
 case $krb5_cv_host in
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
-		AC_DEFINE(HAVE_SETLUID)
+		AC_DEFINE(HAVE_SETLUID,1,[Define if OSF/1 security lib provides setluid])
 		KSU_LIBS="$KSU_LIBS -lsecurity"
 	)
 	;;

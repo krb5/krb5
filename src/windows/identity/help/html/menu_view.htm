@@ -23,11 +23,9 @@ without invoking the <span class="pre">View</span> menu.
 </p>
 
 <map id="menumap">
-<area shape = "rect" coords = "4,23,146,40" href = "#choosecol">
-<area shape = "rect" coords = "11,40,152,56" href = "#layout">
-<area shape = "rect" coords = "10,56,150,74" href = "#toolbars">
-<area shape = "rect" coords = "15,80,142,103" href = "#debugwnd">
-<area shape = "rect" coords = "8,104,151,128" href = "#refresh">
+<area shape = "rect" coords = "11,24,159,45" href = "#choosecol">
+<area shape = "rect" coords = "11,47,160,70" href = "#layout">
+<area shape = "rect" coords = "11,74,159,100" href = "#refresh">
 </map>
 
 <p>
@@ -36,12 +34,14 @@ without invoking the <span class="pre">View</span> menu.
 
 <ul>
 
-<li><a name="choosecol" /> <span class="title">Choose Columns
-...</span>: <b>Not implemented in this release.</b>
-Invokes a dialog where you can choose which columns are
-displayed in the view window.  If you change the columns, or their
-order, a new custom layout will be created for you which you can later
-use using the <span class="pre">Layout</span> submenu later.</li>
+<li><a name="choosecol" /> <span class="title">View columns</span>:
+
+Invokes a submenu from which you can choose the columns that are
+displayed in the credentials window.  If you change the columns, or
+their order, a new custom layout will be created for you which you can
+later use using the <span class="pre">Layout</span> submenu later. For
+more information about managing layouts, see the <a
+href="use_layout.htm">Layout</a> topic.</li>
 
 <li><a name="layout" /> <span class="title">Layout</span>: Opens a
 submenu where you can select the layout for the credentials
@@ -64,16 +64,14 @@ display.
       href="concept_cred_pro.htm">credential providers</a> choose the
       interpretation of the <span class="pre">location</span> property
       as the concept of location changes from type to type.</li>
-   </ul>
+
+      <li><span class="title">Custom</span>: If you customize any of
+      the above layouts by adding, removing, reordering or changing
+      the sort or outline columns, then NetIDMgr will store your new
+      layout settings under this layout.  Invoking this menu item
+      restores your customizations.</ul>
+
 </li>
-
-<li><a name="toolbars" />
-<span class="title">Toolbars</span>: Enable or disable toolbars.</li>
-
-<li><a name="debugwnd" /> <span class="title">Debug window...</span>:
-Displays a debug window which contains a history of actions and any
-debug information for each action that was supplied by each <a
-href="concept_cred_pro.htm">credentials provider</a><li>
 
 <li><a name="refresh" /> <span class="title">Refresh</span>: Refresh
 the credentials view.  This queries each <a

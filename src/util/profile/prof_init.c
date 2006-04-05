@@ -12,16 +12,13 @@
 #endif
 #include <errno.h>
 
-/* Find a 4-byte integer type */
-#if	(SIZEOF_SHORT == 4)
-typedef short	prof_int32;
-#elif	(SIZEOF_INT == 4)
-typedef int	prof_int32;
-#elif	(SIZEOF_LONG == 4)
-typedef long	prof_int32;
-#else	/* SIZEOF_LONG == 4 */
-error(do not have a 4-byte integer type)
-#endif	/* SIZEOF_LONG == 4 */
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+typedef int32_t prof_int32;
 
 errcode_t KRB5_CALLCONV
 profile_init(const_profile_filespec_t *files, profile_t *ret_profile)

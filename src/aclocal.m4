@@ -279,7 +279,7 @@ AC_TRY_LINK([#include <signal.h>], [sigmask(1);],
  krb5_cv_func_sigprocmask_use=no, krb5_cv_func_sigprocmask_use=yes))])
 AC_MSG_RESULT($krb5_cv_func_sigprocmask_use)
 if test $krb5_cv_func_sigprocmask_use = yes; then
- AC_DEFINE(USE_SIGPROCMASK)
+ AC_DEFINE(USE_SIGPROCMASK,1,[Define if sigprocmask should be used])
 fi
 ])dnl
 dnl
@@ -370,7 +370,7 @@ AC_CACHE_VAL(krb5_cv_struct_sigjmp_buf,
 krb5_cv_struct_sigjmp_buf=yes,krb5_cv_struct_sigjmp_buf=no)])
 AC_MSG_RESULT($krb5_cv_struct_sigjmp_buf)
 if test $krb5_cv_struct_sigjmp_buf = yes; then
-  AC_DEFINE(POSIX_SETJMP)
+  AC_DEFINE(POSIX_SETJMP,1,[Define if setjmp indicates POSIX interface])
 fi
 )])dnl
 dnl
@@ -728,72 +728,34 @@ dnl KRB5_SOCKADDR_SA_LEN: define HAVE_SA_LEN if sockaddr contains the sa_len
 dnl component
 dnl
 AC_DEFUN([KRB5_SOCKADDR_SA_LEN],[ dnl
-AC_MSG_CHECKING(whether struct sockaddr contains sa_len)
-AC_CACHE_VAL(krb5_cv_sockaddr_sa_len,
-[AC_TRY_COMPILE([#include <sys/types.h>
-#include <sys/socket.h>
-],
-[struct sockaddr sa;
-sa.sa_len;],
-krb5_cv_sockaddr_sa_len=yes,krb5_cv_sockaddr_sa_len=no)])
-AC_MSG_RESULT([$]krb5_cv_sockaddr_sa_len)
-if test $krb5_cv_sockaddr_sa_len = yes; then
-   AC_DEFINE_UNQUOTED(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
-   fi
-])
+AC_CHECK_MEMBER(struct sockaddr.sa_len,
+  AC_DEFINE(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
+,,[#include <sys/types.h>
+#include <sys/socket.h>])])
 dnl
 dnl
 dnl CHECK_UTMP: check utmp structure and functions
 dnl
 AC_DEFUN(CHECK_UTMP,[
-AC_MSG_CHECKING([ut_pid in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_pid,
-[AC_TRY_COMPILE(
+AC_CHECK_MEMBERS([struct utmp.ut_pid, struct utmp.ut_type, struct utmp.ut_host, struct utmp.ut_exit],,,
 [#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_pid;],
-krb5_cv_struct_ut_pid=yes, krb5_cv_struct_ut_pid=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_pid)
-if test $krb5_cv_struct_ut_pid = no; then
-  AC_DEFINE(NO_UT_PID)
+#include <utmp.h>])
+
+# Define the names actually used in the krb5 code currently:
+if test $ac_cv_member_struct_utmp_ut_pid = no; then
+  AC_DEFINE(NO_UT_PID,1,[Define if ut_pid field not found])
 fi
-AC_MSG_CHECKING([ut_type in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_type,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_type;],
-krb5_cv_struct_ut_type=yes, krb5_cv_struct_ut_type=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_type)
-if test $krb5_cv_struct_ut_type = no; then
-  AC_DEFINE(NO_UT_TYPE)
+if test $ac_cv_member_struct_utmp_ut_type = no; then
+  AC_DEFINE(NO_UT_TYPE,1,[Define if ut_type field not found])
 fi
-AC_MSG_CHECKING([ut_host in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_host,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_host;],
-krb5_cv_struct_ut_host=yes, krb5_cv_struct_ut_host=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_host)
-if test $krb5_cv_struct_ut_host = no; then
-  AC_DEFINE(NO_UT_HOST)
+if test $ac_cv_member_struct_utmp_ut_host = no; then
+  AC_DEFINE(NO_UT_HOST,1,[Define if ut_host field not found])
 fi
-AC_MSG_CHECKING([ut_exit in struct utmp])
-AC_CACHE_VAL(krb5_cv_struct_ut_exit,
-[AC_TRY_COMPILE(
-[#include <sys/types.h>
-#include <utmp.h>],
-[struct utmp ut; ut.ut_exit;],
-krb5_cv_struct_ut_exit=yes, krb5_cv_struct_ut_exit=no)])
-AC_MSG_RESULT($krb5_cv_struct_ut_exit)
-if test $krb5_cv_struct_ut_exit = no; then
-  AC_DEFINE(NO_UT_EXIT)
+if test $ac_cv_member_struct_utmp_ut_exit = no; then
+  AC_DEFINE(NO_UT_EXIT,1,[Define if ut_exit field not found])
 fi
-AC_CHECK_FUNC(setutent,AC_DEFINE(HAVE_SETUTENT))
-AC_CHECK_FUNC(setutxent,AC_DEFINE(HAVE_SETUTXENT))
-AC_CHECK_FUNC(updwtmp,AC_DEFINE(HAVE_UPDWTMP))
-AC_CHECK_FUNC(updwtmpx,AC_DEFINE(HAVE_UPDWTMPX))
+
+AC_CHECK_FUNCS(setutent setutxent updwtmp updwtmpx)
 ])dnl
 dnl
 dnl WITH_NETLIB
@@ -1028,9 +990,9 @@ if test "$with_tcl" != no ; then
 	CPPFLAGS="$CPPFLAGS $TCL_INCLUDES"
 	LDFLAGS="$LDFLAGS $TCL_LIBPATH"
 	tcl_header=no
-	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H) tcl_header=yes)
+	AC_CHECK_HEADER(tcl.h,AC_DEFINE(HAVE_TCL_H,1,[Define if tcl.h found]) tcl_header=yes)
 	if test $tcl_header=no; then
-	   AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H) tcl_header=yes)
+	   AC_CHECK_HEADER(tcl/tcl.h,AC_DEFINE(HAVE_TCL_TCL_H,1,[Define if tcl/tcl.h found]) tcl_header=yes)
 	fi
 
 	if test $tcl_header = yes ; then
@@ -1791,7 +1753,7 @@ m4_include(config/ac-archive/acx_pthread.m4)
 #
 AC_DEFUN([KRB5_AC_LIBUTIL],
 	[AC_CHECK_LIB(util, main,
-		[AC_DEFINE(HAVE_LIBUTIL)
+		[AC_DEFINE(HAVE_LIBUTIL,1,[Define if util library is available with openpty, logwtmp, etc])
   UTIL_LIB=-lutil])dnl
 AC_SUBST(UTIL_LIB)
 ])

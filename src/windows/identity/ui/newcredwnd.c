@@ -803,6 +803,8 @@ nc_add_control_row(khui_nc_wnd_data * d,
         r_row.bottom += r_input.bottom;
         OffsetRect(&r_label, r_row.left, r_row.top);
     } else {
+        SetRectEmpty(&r_label);
+        SetRectEmpty(&r_input);
 #ifdef DEBUG
         assert(FALSE);
 #else
@@ -1250,7 +1252,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                       nc_tab_sort_func);
 
                 for(i=0; i < d->nc->n_types;i++) {
-                    wchar_t * name;
+                    wchar_t * name = NULL;
 
                     d->nc->types[i]->ordinal = i + 1;
 

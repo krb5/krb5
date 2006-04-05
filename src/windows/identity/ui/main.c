@@ -118,6 +118,12 @@ void khm_parse_commandline(void) {
             break;
         }
     }
+
+    /* special: always enable renew when other options aren't specified */
+    if (!khm_startup.exit &&
+        !khm_startup.destroy &&
+        !khm_startup.init)
+        khm_startup.renew = TRUE;
 }
 
 void khm_register_window_classes(void) {
@@ -552,9 +558,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
         xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
                              sizeof(query_app_version));
 
-        if (xfer) {
-            ZeroMemory(&query_app_version, sizeof(query_app_version));
+        ZeroMemory(&query_app_version, sizeof(query_app_version));
 
+        if (xfer) {
             query_app_version.magic = KHM_QUERY_APP_VER_MAGIC;
             query_app_version.code = KHM_ERROR_NOT_IMPLEMENTED;
             query_app_version.ver_caller = app_version;

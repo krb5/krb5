@@ -8,6 +8,7 @@
 static char *rcsid = "$Header$";
 #endif
 
+#include "autoconf.h"
 #if defined(HAVE_COMPILE) && defined(HAVE_STEP)
 #define SOLARIS_REGEXPS
 #elif defined(HAVE_REGCOMP) && defined(HAVE_REGEXEC)

@@ -92,21 +92,22 @@
 /*! \brief Parameter types
  */
 enum kherr_parm_types {
-  KEPT_INT32 = 1,
-  KEPT_UINT32,
-  KEPT_INT64,
-  KEPT_UINT64,
-  KEPT_STRINGC,                 /*!< String constant */
-  KEPT_STRINGT,                 /*!< String.  Will be freed using
-                                     free() when the event is freed */
-  KEPT_PTR                      /*!< Pointer type. */
+    KEPT_NONE = 0,
+    KEPT_INT32 = 1,
+    KEPT_UINT32,
+    KEPT_INT64,
+    KEPT_UINT64,
+    KEPT_STRINGC,               /*!< String constant */
+    KEPT_STRINGT,               /*!< String.  Will be freed using
+                                  free() when the event is freed */
+    KEPT_PTR                    /*!< Pointer type. */
 };
 
-#ifdef _WIN32
-typedef khm_ui_8 kherr_param;
-#else
-#error kherr_param undefined
-#endif
+
+typedef struct tag_kherr_param {
+    khm_octet type;
+    khm_ui_8  data;
+} kherr_param;
 
 /*! \brief Severity levels
 
@@ -637,33 +638,40 @@ kherr_reportf(const wchar_t * long_desc_fmt,
  */
 KHMEXP kherr_param kherr_dup_string(const wchar_t * s);
 
-/* convenience macros for specifying parameters for kherr_report */
-#define kherr_val(type,val) \
-    ((((kherr_param)(type)) << ((sizeof(kherr_param)-1)*8)) | (kherr_param) (val))
+__inline KHMEXP kherr_param
+kherr_val(khm_octet ptype, khm_ui_8 pvalue) {
+    kherr_param p;
 
-#define _int32(i)   kherr_val(KEPT_INT32, i)
-#define _uint32(ui) kherr_val(KEPT_UINT32, ui)
-#define _int64(i)   kherr_val(KEPT_INT64, i)
-#define _uint64(ui) kherr_val(KEPT_UINT64, ui)
-#define _cstr(cs)   kherr_val(KEPT_STRINGC, cs)
-#define _tstr(ts)   kherr_val(KEPT_STRINGT, ts)
-#define _cptr(p)    kherr_val(KEPT_PTR, p)
+    p.type = ptype;
+    p.data = pvalue;
+
+    return p;
+}
+
+#define _int32(i)   kherr_val(KEPT_INT32, (khm_ui_8) i)
+#define _uint32(ui) kherr_val(KEPT_UINT32, (khm_ui_8) ui)
+#define _int64(i)   kherr_val(KEPT_INT64, (khm_ui_8) i)
+#define _uint64(ui) kherr_val(KEPT_UINT64, (khm_ui_8) ui)
+#define _cstr(cs)   kherr_val(KEPT_STRINGC, (khm_ui_8) cs)
+#define _tstr(ts)   kherr_val(KEPT_STRINGT, (khm_ui_8) ts)
+#define _cptr(p)    kherr_val(KEPT_PTR, (khm_ui_8) p)
+#define _vnull()    kherr_val(KEPT_NONE, 0)
 #define _dupstr(s)  kherr_dup_string(s)
 
 /* convenience macros for calling kherr_report */
 #ifdef KHERR_HMODULE
 
 #define _report_cs0(severity, long_description)                 \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, 0, 0, 0, 0, 0, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, _vnull(), _vnull(), _vnull(), _vnull(), 0, KHERR_HMODULE)
 
 #define _report_cs1(severity, long_description, p1)             \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, 0, 0, 0, 0, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, _vnull(), _vnull(), _vnull(), 0, KHERR_HMODULE)
 
 #define _report_cs2(severity, long_description, p1, p2)         \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, 0, 0, 0, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, _vnull(), _vnull(), 0, KHERR_HMODULE)
 
 #define _report_cs3(severity, long_description, p1, p2, p3)     \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, 0, 0, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, _vnull(), 0, KHERR_HMODULE)
 
 #define _report_cs4(severity, long_description, p1, p2, p3, p4) \
     kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, p4, 0, KHERR_HMODULE)
@@ -671,16 +679,16 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s);
 #else
 
 #define _report_cs0(severity, long_description)                 \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, 0, 0, 0, 0, 0, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, _vnull(), _vnull(), _vnull(), _vnull(), 0, NULL)
 
 #define _report_cs1(severity, long_description, p1)             \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, 0, 0, 0, 0, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, _vnull(), _vnull(), _vnull(), 0, NULL)
 
 #define _report_cs2(severity, long_description, p1, p2)         \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, 0, 0, 0, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, _vnull(), _vnull(), 0, NULL)
 
 #define _report_cs3(severity, long_description, p1, p2, p3)     \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, 0, 0, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, _vnull(), 0, NULL)
 
 #define _report_cs4(severity, long_description, p1, p2, p3, p4) \
     kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_description), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, p4, 0, NULL)
@@ -688,16 +696,16 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s);
 
 #ifdef _WIN32
 #define _report_sr0(severity, long_desc_id)                     \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, 0, 0, 0, 0, KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, _vnull(), _vnull(), _vnull(), _vnull(), KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
 
 #define _report_sr1(severity, long_desc_id, p1)                 \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, 0, 0, 0, KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, _vnull(), _vnull(), _vnull(), KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
 
 #define _report_sr2(severity, long_desc_id, p1, p2)             \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, 0, 0, KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, _vnull(), _vnull(), KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
 
 #define _report_sr3(severity, long_desc_id, p1, p2, p3)         \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, 0, KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, _vnull(), KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
 
 #define _report_sr4(severity, long_desc_id, p1, p2, p3, p4)     \
     kherr_report((severity), NULL, KHERR_FACILITY, NULL, MAKEINTRESOURCE(long_desc_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, p4, KHERR_RF_RES_LONG_DESC, KHERR_HMODULE)
@@ -705,32 +713,32 @@ KHMEXP kherr_param kherr_dup_string(const wchar_t * s);
 
 #ifdef _WIN32
 #define _report_mr0(severity, long_desc_msg_id)                     \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, 0, 0, 0, 0, KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, _vnull(), _vnull(), _vnull(), _vnull(), KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
 
 #define _report_mr1(severity, long_desc_msg_id, p1)                 \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, 0, 0, 0, KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, _vnull(), _vnull(), _vnull(), KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
 
 #define _report_mr2(severity, long_desc_msg_id, p1, p2)             \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, 0, 0, KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, _vnull(), _vnull(), KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
 
 #define _report_mr3(severity, long_desc_msg_id, p1, p2, p3)         \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, 0, KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, _vnull(), KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
 
 #define _report_mr4(severity, long_desc_msg_id, p1, p2, p3, p4)     \
     kherr_report((severity), NULL, KHERR_FACILITY, NULL, (wchar_t *)(long_desc_msg_id), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, p4, KHERR_RF_MSG_LONG_DESC, KHERR_HMODULE)
 #endif
 
 #define _report_ts0(severity, long_desc_ptr)                     \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, 0, 0, 0, 0, KHERR_RF_FREE_LONG_DESC, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, _vnull(), _vnull(), _vnull(), _vnull(), KHERR_RF_FREE_LONG_DESC, NULL)
 
 #define _report_ts1(severity, long_desc_ptr, p1)                 \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, 0, 0, 0, KHERR_RF_FREE_LONG_DESC, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, _vnull(), _vnull(), _vnull(), KHERR_RF_FREE_LONG_DESC, NULL)
 
 #define _report_ts2(severity, long_desc_ptr, p1, p2)             \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, p2, 0, 0, KHERR_RF_FREE_LONG_DESC, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, p2, _vnull(), _vnull(), KHERR_RF_FREE_LONG_DESC, NULL)
 
 #define _report_ts3(severity, long_desc_ptr, p1, p2, p3)         \
-    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, 0, KHERR_RF_FREE_LONG_DESC, NULL)
+    kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, _vnull(), KHERR_RF_FREE_LONG_DESC, NULL)
 
 #define _report_ts4(severity, long_desc_ptr, p1, p2, p3, p4)     \
     kherr_report((severity), NULL, KHERR_FACILITY, NULL, (long_desc_ptr), NULL, KHERR_FACILITY_ID, 0, p1, p2, p3, p4, KHERR_RF_FREE_LONG_DESC, NULL)

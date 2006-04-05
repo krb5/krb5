@@ -252,7 +252,7 @@ void kmqint_msg_type_del_sub(kmq_msg_subscription *s) {
     \note Obtains ::cs_kmq_types
 */
 kmq_msg_subscription * kmqint_msg_type_del_sub_hwnd(khm_int32 t, HWND hwnd) {
-    kmq_msg_subscription *s;
+    kmq_msg_subscription *s = NULL;
 
     if(t < 0 || t > KMQ_MSG_TYPE_MAX)
         return NULL;

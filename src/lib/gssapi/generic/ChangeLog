@@ -1,3 +1,28 @@
+2006-04-03  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
+2006-03-30  Ken Raeburn  <raeburn@mit.edu>
+
+	* gssapiP_generic.h [!_WIN32]: Include autoconf.h.
+
+	* Makefile.in (include_stdint, include_inttypes): New make
+	macros.
+	(gssapi.h): Use them.  Don't pull SIZEOF_ macros from autoconf.h.
+
+	* gssapi.hin (gss_uint32, gss_int32): Define as uint32_t and
+	int32_t, respectively.
+
+	* util_token.c: Include limits.h.
+	(der_length_size, der_write_length): Test INT_MAX instead of
+	SIZEOF_INT.
+	(der_read_length): Test sizeof(int) instead of SIZEOF_INT.
+
+2006-03-27  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (include_xom): Define as "rem" instead of empty on
+	Windows.
+
 2006-03-11  Ken Raeburn  <raeburn@mit.edu>
 
 	* gssapi.h: Use autoconf.h from include rather than include/krb5.

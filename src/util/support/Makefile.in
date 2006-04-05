@@ -3,6 +3,7 @@ myfulldir=util/support
 mydir=util/support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
+DEFS=
 
 ##DOS##BUILDTOP = ..\..
 ##DOS##LIBNAME=$(OUTPRE)k5sprt32.lib
@@ -28,12 +29,14 @@ STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
 	plugins.o \
+	errors.o \
 	fake-addrinfo.o
 
 LIBOBJS= \
 	$(OUTPRE)threads.$(OBJEXT) \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
 	$(OUTPRE)plugins.$(OBJEXT) \
+	$(OUTPRE)errors.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
@@ -45,6 +48,7 @@ LOCALINCLUDES=-I. -I$(srcdir)
 SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
+	$(srcdir)/errors.c \
 	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -74,17 +78,20 @@ $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-threads.so threads.po $(OUTPRE)threads.$(OBJEXT): threads.c \
-  $(SRCTOP)/include/k5-thread.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/k5-platform.h cache-addrinfo.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/fake-addrinfo.h
+threads.so threads.po $(OUTPRE)threads.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h threads.c
 init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
-  init-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h init-addrinfo.c
+errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h errors.c
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
-  fake-addrinfo.c $(SRCTOP)/include/port-sockets.h $(BUILDTOP)/include/autoconf.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/fake-addrinfo.h \
-  cache-addrinfo.h
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h fake-addrinfo.c

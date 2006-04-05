@@ -20,6 +20,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "autoconf.h"
 #include <krb5.h>
 #include "com_err.h"
 

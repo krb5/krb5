@@ -1,3 +1,7 @@
+2006-04-02  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Make empty.
+
 2004-06-22  Ken Raeburn  <raeburn@mit.edu>
 
 	* getuid.c: Don't test __MWERKS__.

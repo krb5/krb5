@@ -24,6 +24,7 @@
  * or implied warranty.
  * 
  */
+#include "autoconf.h"
 #ifdef KRB5_DNS_LOOKUP
 
 #include "dnsglue.h"

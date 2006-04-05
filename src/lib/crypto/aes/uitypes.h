@@ -33,6 +33,8 @@
 #ifndef _UITYPES_H
 #define _UITYPES_H
 
+#include "autoconf.h"
+
 #if defined(__GNU_LIBRARY__)
 #define HAS_INTTYPES_H
 #elif !defined(_MSC_VER)

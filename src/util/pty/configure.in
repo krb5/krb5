@@ -18,7 +18,7 @@ dnl
 case $krb5_cv_host in
 *-*-ultrix*)
 echo "Disabling initial vhangup and setsid because they break under Ultrix..."
-AC_DEFINE([OPEN_CTTY_ONLY_ONCE],[1])
+AC_DEFINE([OPEN_CTTY_ONLY_ONCE],[1],[Define on Ultrix where an initial vhangup breaks])
 ac_cv_func_setsid=no # setsid doesn't do the right thing under Ultrix even though present
 ;;
 
@@ -28,16 +28,16 @@ krb5_cv_has_streams=no
 ;;
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,main,
-		AC_DEFINE(HAVE_SETLUID)
+		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid is provided by the security library])
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)
 	AC_MSG_RESULT(will open ctty prior to revoke due to OSF/1 lossage)
-	AC_DEFINE(REVOKE_NEEDS_OPEN)
+	AC_DEFINE(REVOKE_NEEDS_OPEN,1,[Define if ctty needs to be opened before revoke as on OSF/1])
 	;;
 *-*-solaris*)
-     AC_DEFINE(PUSH_PTEM)
-     AC_DEFINE(PUSH_LDTERM)
-     AC_DEFINE(PUSH_TTCOMPAT)
+     AC_DEFINE(PUSH_PTEM,1,[push ptem?])
+     AC_DEFINE(PUSH_LDTERM,1,[push ldterm?])
+     AC_DEFINE(PUSH_TTCOMPAT,1,[push ttcompat?])
      ;;
 *-*-hpux*)
      krb5_cv_has_streams=no
@@ -46,14 +46,14 @@ esac
 dnl
 AC_SUBST(LOGINLIBS)
 dnl
-AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY) LIBS="$LIBS -lutil"])
+AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY,1,[Define if openpty is provided in util library]) LIBS="$LIBS -lutil"])
 AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
 AC_CHECK_FUNCS(setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty)
 AC_CHECK_HEADERS(unistd.h stdlib.h string.h libutil.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h sys/wait.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h util.h)
 AC_CHECK_FUNCS(waitpid)
 CHECK_SIGNALS
-AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS))])
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define for POSIX termios interface]))])
 
 ######################################################################
 #
@@ -73,7 +73,7 @@ eval "krb5_cv_struct_$1_$2=yes", eval "krb5_cv_struct_$1_$2=no")])
 if eval "test \"`echo '$krb5_cv_struct_'$1'_'$2`\" = yes"; then
   AC_MSG_RESULT(yes)
   krb5_tr_ut=HAVE_STRUCT_`echo $1'_'$2 | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
-  AC_DEFINE_UNQUOTED($krb5_tr_ut)
+  AC_DEFINE_UNQUOTED($krb5_tr_ut,1,[Define if $2 field present in $1])
 else
   AC_MSG_RESULT(no)
 fi])
@@ -116,8 +116,8 @@ krb5_utmp_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
   done
   if test "${krb5_utmp_e_exit+set}" = set; then
     AC_MSG_RESULT([working ut_exit.e_exit in utmp is $krb5_utmp_e_exit])
-    AC_DEFINE_UNQUOTED(PTY_UTMP_E_EXIT, $krb5_utmp_e_exit)
-    AC_DEFINE_UNQUOTED(PTY_UTMP_E_TERMINATION, $krb5_utmp_e_termination)
+    AC_DEFINE_UNQUOTED(PTY_UTMP_E_EXIT, $krb5_utmp_e_exit,[Define to utmp exit field name])
+    AC_DEFINE_UNQUOTED(PTY_UTMP_E_TERMINATION, $krb5_utmp_e_termination,[Define to utmp termination field name])
   else
     AC_MSG_RESULT([cannot find working ut_exit.e_exit in utmp])
   fi
@@ -132,8 +132,8 @@ krb5_utmpx_e_termination=`echo $krb5_mem|sed -e 's%_exit$%_termination%'`], )
   done
   if test "${krb5_utmpx_e_exit+set}" = set; then
     AC_MSG_RESULT([working ut_exit.e_exit in utmpx is $krb5_utmpx_e_exit])
-    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_EXIT, $krb5_utmpx_e_exit)
-    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_TERMINATION, $krb5_utmpx_e_termination)
+    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_EXIT, $krb5_utmpx_e_exit,[Define to utmpx exit field name])
+    AC_DEFINE_UNQUOTED(PTY_UTMPX_E_TERMINATION, $krb5_utmpx_e_termination,[Define to utmpx termination field name])
   else
     AC_MSG_RESULT([cannot find working ut_exit.e_exit in utmpx])
   fi
@@ -218,7 +218,7 @@ AC_CACHE_VAL(krb5_cv_has_streams,
 krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
 AC_MSG_RESULT($krb5_cv_has_streams)
 if test $krb5_cv_has_streams = yes; then
-AC_DEFINE(HAVE_STREAMS)
+AC_DEFINE(HAVE_STREAMS,1,[Define if have streams])
 fi
 dnl
 dnl
@@ -234,7 +234,7 @@ AC_CACHE_VAL(krb5_cv_getpgrp_args,
 krb5_cv_getpgrp_args=pid, krb5_cv_getpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_getpgrp_args)
 if test $krb5_cv_getpgrp_args = pid; then
-AC_DEFINE(GETPGRP_ONEARG)
+AC_DEFINE(GETPGRP_ONEARG,1,[Define if getpgrp takes one arg])
 fi
 dnl
 dnl
@@ -248,7 +248,7 @@ AC_CACHE_VAL(krb5_cv_setpgrp_args,
 krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
 AC_MSG_RESULT($krb5_cv_setpgrp_args)
 if test $krb5_cv_setpgrp_args = two; then
-AC_DEFINE(SETPGRP_TWOARG)
+AC_DEFINE(SETPGRP_TWOARG,1,[Define if setpgrp takes two args])
 fi
 dnl
 KRB5_AC_INET6

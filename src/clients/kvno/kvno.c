@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "autoconf.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -55,11 +56,17 @@ static void do_v4_kvno (int argc, char *argv[]);
 static void do_v5_kvno (int argc, char *argv[], 
                         char *ccachestr, char *etypestr);
 
+#include <com_err.h>
+static void extended_com_err_fn (const char *, errcode_t, const char *,
+				 va_list);
+
 int main(int argc, char *argv[])
 {
     int option;
     char *etypestr = 0, *ccachestr = 0;
     int v4 = 0;
+
+    set_com_err_hook (extended_com_err_fn);
 
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
@@ -149,10 +156,21 @@ static void do_v4_kvno (int count, char *names[])
 }
 
 #include <krb5.h>
+static krb5_context context;
+static void extended_com_err_fn (const char *myprog, errcode_t code,
+				 const char *fmt, va_list args)
+{
+    const char *emsg;
+    emsg = krb5_get_error_message (context, code);
+    fprintf (stderr, "%s: %s ", myprog, emsg);
+    krb5_free_error_message (context, emsg);
+    vfprintf (stderr, fmt, args);
+    fprintf (stderr, "\n");
+}
+
 static void do_v5_kvno (int count, char *names[], 
                         char * ccachestr, char *etypestr)
 {
-    krb5_context context;
     krb5_error_code ret;
     int i, errors;
     krb5_enctype etype;
@@ -203,16 +221,16 @@ static void do_v5_kvno (int count, char *names[],
 	ret = krb5_parse_name(context, names[i], &in_creds.server);
 	if (ret) {
 	    if (!quiet)
-		fprintf(stderr, "%s: %s while parsing principal name\n",
-			names[i], error_message(ret));
+		com_err(prog, ret, "while parsing principal name %s", names[i]);
 	    errors++;
 	    continue;
 	}
 
 	ret = krb5_unparse_name(context, in_creds.server, &princ);
 	if (ret) {
-	    fprintf(stderr, "%s: %s while printing principal name\n",
-		    names[i], error_message(ret));
+	    com_err(prog, ret,
+		    "while formatting parsed principal name for '%s'",
+		    names[i]);
 	    errors++;
 	    continue;
 	}
@@ -224,8 +242,7 @@ static void do_v5_kvno (int count, char *names[],
 	krb5_free_principal(context, in_creds.server);
 
 	if (ret) {
-	    fprintf(stderr, "%s: %s while getting credentials\n",
-		    princ, error_message(ret));
+	    com_err(prog, ret, "while getting credentials for %s", princ);
 
 	    krb5_free_unparsed_name(context, princ);
 
@@ -236,9 +253,7 @@ static void do_v5_kvno (int count, char *names[],
 	/* we need a native ticket */
 	ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
 	if (ret) {
-	    fprintf(stderr, "%s: %s while decoding ticket\n",
-		    princ, error_message(ret));
-
+	    com_err(prog, ret, "while decoding ticket for %s", princ);
 	    krb5_free_creds(context, out_creds);
 	    krb5_free_unparsed_name(context, princ);
 

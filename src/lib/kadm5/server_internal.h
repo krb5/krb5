@@ -13,6 +13,7 @@
 #ifndef __KADM5_SERVER_INTERNAL_H__
 #define __KADM5_SERVER_INTERNAL_H__
 
+#include    "autoconf.h"
 #ifdef HAVE_MEMORY_H
 #include    <memory.h>
 #endif
