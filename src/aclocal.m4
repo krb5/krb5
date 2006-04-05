@@ -1770,19 +1770,23 @@ AC_ARG_WITH([ldap],
 ,
 withval=no
 )dnl
-if test $withval = no; then
-        OPENLDAP_PLUGIN=""
-        AC_MSG_NOTICE(disabling ldap backend module support)
-else
- if test $withval = OPENLDAP; then
+case "$withval" in
+    no)
+	OPENLDAP_PLUGIN=""
+dnl	AC_MSG_NOTICE(disabling ldap backend module support)
+	;;
+    openldap | OPENLDAP | yes)
         AC_MSG_NOTICE(enabling openldap backend module support)
         OPENLDAP_PLUGIN="yes"
- fi
- if test $withval = EDIRECTORY; then
+	;;
+    edirectory | EDIRECTORY)
         AC_MSG_NOTICE(enabling edirectory backend module support)
         OPENLDAP_PLUGIN="yes"
 	AC_DEFINE(HAVE_EDIRECTORY,1,[Define if LDAP KDB interface should assume eDirectory.])
- fi
-fi
+	;;
+    *)
+	AC_MSG_ERROR(Invalid option --with-ldap="$withval")
+	;;
+esac
 AC_SUBST(OPENLDAP_PLUGIN)
 ])dnl
