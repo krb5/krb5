@@ -62,7 +62,6 @@
 #include <errno.h>
 #include <utime.h>
 #include "kdb5.h"
-#include "err_handle.h"
 #include "kdb_db2.h"
 #include "kdb_xdr.h"
 #include "policy_db.h"
@@ -958,12 +957,12 @@ krb5_db2_db_put_principal(krb5_context context,
     krb5_db2_context *db_ctx;
     kdb5_dal_handle *dal_handle;
 
-    krb5_kdb_clear_err_str ();
+    krb5_clear_error_message (context);
     if (db_args) {
 	/* DB2 does not support db_args DB arguments for principal */
-	char    buf[KRB5_MAX_ERR_STR];
-	sprintf(buf, "Unsupported argument \"%s\" for db2", db_args[0]);
-	krb5_kdb_set_err_str (buf);
+	krb5_set_error_message(context, EINVAL,
+			       "Unsupported argument \"%s\" for db2",
+			       db_args[0]);
 	return EINVAL;
     }
 
@@ -1230,7 +1229,7 @@ krb5_db2_open(krb5_context kcontext,
     char  **t_ptr = db_args;
     char    db_name_set = 0;
 
-    krb5_kdb_clear_err_str ();
+    krb5_clear_error_message (kcontext);
 
     if (k5db2_inited(kcontext))
 	return 0;
@@ -1250,10 +1249,9 @@ krb5_db2_open(krb5_context kcontext,
 	}
 	/* ignore hash argument. Might have been passed from create */
 	else if (!opt || strcmp(opt, "hash")) {
-	    char    buf[KRB5_MAX_ERR_STR];
-	    sprintf(buf, "Unsupported argument \"%s\" for db2",
-		    opt ? opt : val);
-	    krb5_kdb_set_err_str (buf);
+	    krb5_set_error_message(kcontext, EINVAL,
+				   "Unsupported argument \"%s\" for db2",
+				   opt ? opt : val);
 	    free(opt);
 	    free(val);
 	    return EINVAL;
@@ -1301,7 +1299,7 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
     krb5_int32 flags = KRB5_KDB_CREATE_BTREE;
     char   *db_name = NULL;
 
-    krb5_kdb_clear_err_str ();
+    krb5_clear_error_message (kcontext);
 
     if (k5db2_inited(kcontext))
 	return 0;
@@ -1325,10 +1323,9 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
 	else if (opt && !strcmp(opt, "hash")) {
 	    flags = KRB5_KDB_CREATE_HASH;
 	} else {
-	    char    buf[KRB5_MAX_ERR_STR];
-	    sprintf(buf, "Unsupported argument \"%s\" for db2",
-		    opt ? opt : val);
-	    krb5_kdb_set_err_str (buf);
+	    krb5_set_error_message(kcontext, EINVAL,
+				   "Unsupported argument \"%s\" for db2",
+				   opt ? opt : val);
 	    free(opt);
 	    free(val);
 	    return EINVAL;

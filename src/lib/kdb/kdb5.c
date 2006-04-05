@@ -34,7 +34,6 @@
 #include <k5-int.h>
 #include <osconf.h>
 #include "kdb5.h"
-#include "err_handle.h"
 #include <assert.h>
 
 /* Currently DB2 policy related errors are exported from DAL.  But
@@ -376,7 +375,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 		if(err_str == NULL)
 		    err_str = "";
 		status = KRB5_KDB_DBTYPE_INIT;
-		krb5_kdb_set_err_str (err_str);
+		krb5_set_error_message (kcontext, status, "%s", err_str);
 		goto clean_n_exit;
 	    }
 	    break;
@@ -390,7 +389,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     if (!(*lib)->dl_handle) {
 	/* library not found in the given list. Error str is already set */
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
-	krb5_kdb_set_err_str (err_str);
+	krb5_set_error_message (kcontext, status, "%s", err_str);
 	goto clean_n_exit;
     }
 
@@ -572,27 +571,19 @@ kdb_free_lib_handle(krb5_context kcontext)
 /*
  *      External functions... DAL API
  */
-void
-krb5_db_clr_error()
-{
-    krb5_kdb_clear_err_str ();
-}
-
 krb5_error_code
 krb5_db_open(krb5_context kcontext, char **db_args, int mode)
 {
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm ? kcontext->default_realm : "[UNSET]");
-	status = KRB5_KDB_SERVER_INTERNAL_ERR;
-	krb5_kdb_set_err_str (buf);
 	goto clean_n_exit;
     }
 
@@ -662,15 +653,13 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm);
-	status = KRB5_KDB_SERVER_INTERNAL_ERR;
-	krb5_kdb_set_err_str (buf);
 	goto clean_n_exit;
     }
 
@@ -735,15 +724,13 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm);
-	status = KRB5_KDB_SERVER_INTERNAL_ERR;
-	krb5_kdb_set_err_str (buf);
 	goto clean_n_exit;
     }
 

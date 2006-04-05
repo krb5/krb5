@@ -53,7 +53,6 @@
  */
 
 #include "k5-int.h"
-#include <err_handle.h>
 #include "kdc_util.h"
 #include "extern.h"
 #include <stdio.h>
@@ -349,7 +348,6 @@ check_padata (krb5_context context, krb5_db_entry *client,
     krb5_pa_data **padata;
     krb5_preauth_systems *pa_sys;
     int			pa_ok = 0, pa_found = 0;
-    char errbuf[KRB5_MAX_ERR_STR + 1];
 
     if (request->padata == 0)
 	return 0;
@@ -372,9 +370,9 @@ check_padata (krb5_context context, krb5_db_entry *client,
 	retval = pa_sys->verify_padata(context, client, request,
 				       enc_tkt_reply, *padata);
 	if (retval) {
-	    error_message_w (retval, errbuf, sizeof(errbuf));
+	    char *errmsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
-			      pa_sys->name, errbuf);
+			      pa_sys->name, errmsg);
 	    if (pa_sys->flags & PA_REQUIRED) {
 		pa_ok = 0;
 		break;
@@ -398,8 +396,8 @@ check_padata (krb5_context context, krb5_db_entry *client,
        return 0;
 
     if (!pa_found) {
-	error_message_w (retval, errbuf, sizeof(errbuf));
-	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", errbuf);
+	char *errmsg = krb5_get_error_message(context, retval);
+	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", errmsg);
     }
 /* The following switch statement allows us
  * to return some preauth system errors back to the client.

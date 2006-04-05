@@ -492,8 +492,6 @@ void
 krb5_db_free_policy( krb5_context kcontext, 
 		     osa_policy_ent_t policy);
 
-void krb5_db_clr_error(void);
-
 #define KRB5_KDB_DEF_FLAGS	0
 
 #endif /* !defined(_WIN32) */

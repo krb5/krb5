@@ -34,7 +34,6 @@
 #include "k5-int.h"
 #include "adm_proto.h"
 #include "com_err.h"
-#include <err_handle.h>
 #include <stdio.h>
 #include <ctype.h>
 #ifdef	HAVE_SYSLOG_H
@@ -172,6 +171,7 @@ static struct log_entry	def_log_entry;
  * klog_com_err_proc()	- Handle com_err(3) messages as specified by the
  *			  profile.
  */
+static krb5_context err_context;
 static void
 klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
 {
@@ -183,7 +183,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif	/* HAVE_SYSLOG */
     char	*cp;
     char	*syslogp;
-    char        errbuf[KRB5_MAX_ERR_STR + 1];
+    char	*errmsg = 0;
 
     /* Make the header */
     sprintf(outbuf, "%s: ", whoami);
@@ -197,8 +197,9 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     if (code) {
         outbuf[sizeof(outbuf) - 1] = '\0';
 
-	error_message_w (code, errbuf, sizeof(errbuf));
-	strncat(outbuf, errbuf, sizeof(outbuf) - 1 - strlen(outbuf));
+	errmsg = krb5_get_error_message (err_context, code);
+	strncat(outbuf, errmsg, sizeof(outbuf) - 1 - strlen(outbuf));
+/*	krb5_free_error_message (err_context, errmsg); */
 	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
     }
     cp = &outbuf[strlen(outbuf)];
@@ -363,6 +364,8 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     /* Initialize */
     do_openlog = 0;
     log_facility = 0;
+
+    err_context = kcontext;
 
     /*
      * Look up [logging]-><ename> in the profile.  If that doesn't

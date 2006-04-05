@@ -34,7 +34,6 @@
 
 #include "k5-int.h"
 #include "com_err.h"
-#include <err_handle.h>
 #include "adm.h"
 #include "adm_proto.h"
 #include "kdc_util.h"
@@ -431,7 +430,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char                *v4mode = 0;
 #endif
     extern char *optarg;
-    char                errbuf[KRB5_MAX_ERR_STR + 1];
 
     if (!krb5_aprof_init(DEFAULT_KDC_PROFILE, KDC_PROFILE_ENV, &aprof)) {
 	hierarchy[0] = "kdcdefaults";
@@ -591,11 +589,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     if (kdc_numrealms == 0) {
 	/* no realm specified, use default realm */
 	if ((retval = krb5_get_default_realm(kcontext, &lrealm))) {
-	    error_message_w (retval, errbuf, sizeof(errbuf));
+	    char *errmsg = krb5_get_error_message(kcontext, retval);
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
-		     argv[0], errbuf);
+		     argv[0], errmsg);
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {

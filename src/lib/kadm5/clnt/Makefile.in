@@ -16,7 +16,7 @@ SHLIB_EXPDEPS=\
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(COM_ERR_DEPLIB) \
 	$(SUPPORT_DEPLIB)
-SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err ../../kdb/kdb_err.so -lkrb5support
+SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -lkrb5support
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=kadm5/clnt
@@ -37,8 +37,7 @@ OBJS =	\
 	client_principal.$(OBJEXT) \
 	client_init.$(OBJEXT) \
 	clnt_privs.$(OBJEXT) \
-	clnt_chpass_util.$(OBJEXT) \
-	kdb_err.$(OBJEXT)
+	clnt_chpass_util.$(OBJEXT)
 
 STLIBOBJS = \
 	clnt_policy.o \

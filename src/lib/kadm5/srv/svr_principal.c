@@ -199,7 +199,7 @@ kadm5_create_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     /*
      * Argument sanity checking, and opening up the DB
@@ -424,7 +424,7 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL)
 	return EINVAL;
@@ -472,7 +472,7 @@ kadm5_modify_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if((mask & KADM5_PRINCIPAL) || (mask & KADM5_LAST_PWD_CHANGE) ||
        (mask & KADM5_MOD_TIME) || (mask & KADM5_MOD_NAME) ||
@@ -662,7 +662,7 @@ kadm5_rename_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (source == NULL || target == NULL)
 	return EINVAL;
@@ -717,7 +717,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     /*
      * In version 1, all the defined fields are always returned.
@@ -1295,7 +1295,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     hist_added = 0;
     memset(&hist, 0, sizeof(hist));
@@ -1487,7 +1487,7 @@ kadm5_randkey_principal_3(void *server_handle,
     int				ret, last_pwd, have_pol = 0;
     kadm5_server_handle_t	handle = server_handle;
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (keyblocks)
 	 *keyblocks = NULL;
@@ -1628,7 +1628,7 @@ kadm5_setv4key_principal(void *server_handle,
     kadm5_server_handle_t	handle = server_handle;
     krb5_key_data               tmp_key_data;
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     memset( &tmp_key_data, 0, sizeof(tmp_key_data));
 
@@ -1809,7 +1809,7 @@ kadm5_setkey_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL || keyblocks == NULL)
 	return EINVAL;

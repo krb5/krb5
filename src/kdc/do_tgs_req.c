@@ -29,7 +29,6 @@
 
 #include "k5-int.h"
 #include "com_err.h"
-#include <err_handle.h>
 
 #include <syslog.h>
 #ifdef HAVE_NETINET_IN_H
@@ -88,7 +87,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     char ktypestr[128];
     char rep_etypestr[128];
     char fromstringbuf[70];
-    char errbuf[KRB5_MAX_ERR_STR + 1];
 
     session_key.contents = 0;
     
@@ -505,14 +503,14 @@ tgt_again:
 			      enc_tkt_reply.transited.tr_contents.length,
 			      enc_tkt_reply.transited.tr_contents.data);
 	else {
-	    error_message_w (errcode, errbuf, sizeof(errbuf));
+	    char *errmsg = krb5_get_error_message(kdc_context, errcode);
 	    krb5_klog_syslog (LOG_ERR,
 			      "unexpected error checking transit from '%s' to '%s' via '%.*s': %s",
 			      cname ? cname : "<unknown client>",
 			      sname ? sname : "<unknown server>",
 			      enc_tkt_reply.transited.tr_contents.length,
 			      enc_tkt_reply.transited.tr_contents.data,
-			      errbuf);
+			      errmsg);
 	}
     } else
 	krb5_klog_syslog (LOG_INFO, "not checking transit path");
@@ -647,10 +645,11 @@ tgt_again:
     
 cleanup:
     if (status) {
+	char *errmsg = 0;
 	if (!errcode)
 	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
 	else
-	    error_message_w (errcode, errbuf, sizeof(errbuf));
+	    errmsg = krb5_get_error_message (kdc_context, errcode);
         krb5_klog_syslog(LOG_INFO,
 			 "TGS_REQ (%s) %s: %s: authtime %d, "
 			 "%s%s %s for %s%s%s",
@@ -661,13 +660,12 @@ cleanup:
 			 cname ? cname : "<unknown client>",
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
-			 errcode ? errbuf : "");
+			 errcode ? errmsg : "");
     }
     
     if (errcode) {
 	if (status == 0) {
-	    error_message_w (errcode, errbuf, sizeof(errbuf));
-	    status = errbuf;
+	    status = krb5_get_error_message (kdc_context, errcode);
 	}
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)

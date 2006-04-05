@@ -321,8 +321,16 @@ int cmd_index(name)
     return -1;
 }
 
-extern void new_default_com_err_proc (const char *whoami, errcode_t code,
-		const char *fmt, va_list ap);
+static void extended_com_err_fn (const char *myprog, errcode_t code,
+				 const char *fmt, va_list args)
+{
+    const char *emsg;
+    emsg = krb5_get_error_message (util_context, code);
+    fprintf (stderr, "%s: %s ", myprog, emsg);
+    krb5_free_error_message (util_context, emsg);
+    vfprintf (stderr, fmt, args);
+    fprintf (stderr, "\n");
+}
 
 int main(argc, argv)
     int argc;
@@ -352,7 +360,7 @@ int main(argc, argv)
 #endif
 
     retval = krb5_init_context(&util_context);
-    set_com_err_hook(new_default_com_err_proc);
+    set_com_err_hook(extended_com_err_fn);
     if (retval) {
         com_err (progname, retval, "while initializing Kerberos code");
 	exit_status++;

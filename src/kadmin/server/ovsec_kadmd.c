@@ -55,7 +55,10 @@
 #include    "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
 
 #include    "misc.h"
-#include <err_handle.h>
+#define KRB5_MAX_ERR_STR 2048
+#define error_message_w(CODE, BUF, BUF_SIZE) \
+	strncpy(BUF, krb5_get_error_message(context, CODE), BUF_SIZE)
+/*#include <err_handle.h>*/
 
 #ifdef PURIFY
 #include    "purify.h"
@@ -295,9 +298,8 @@ int main(int argc, char *argv[])
 	  usage();
 
      if ((ret = krb5_init_context(&context))) {
-	 error_message_w (ret, errbuf, sizeof(errbuf));
 	  fprintf(stderr, "%s: %s while initializing context, aborting\n",
-		  whoami, errbuf);
+		  whoami, error_message(ret));
 	  exit(1);
      }
 

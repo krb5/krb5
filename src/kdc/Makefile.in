@@ -110,8 +110,8 @@ $(OUTPRE)do_as_req.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/syslog.h $(SRCTOP)/lib/kdb/err_handle.h \
-  do_as_req.c extern.h kdc_util.h policy.h
+  $(SRCTOP)/include/syslog.h do_as_req.c extern.h kdc_util.h \
+  policy.h
 $(OUTPRE)do_tgs_req.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
@@ -120,8 +120,7 @@ $(OUTPRE)do_tgs_req.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/lib/kdb/err_handle.h do_tgs_req.c extern.h \
-  kdc_util.h policy.h
+  do_tgs_req.c extern.h kdc_util.h policy.h
 $(OUTPRE)kdc_util.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm.h \
@@ -139,8 +138,7 @@ $(OUTPRE)kdc_preauth.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/lib/kdb/err_handle.h extern.h kdc_preauth.c \
-  kdc_util.h
+  extern.h kdc_preauth.c kdc_util.h
 $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm.h \
@@ -150,8 +148,8 @@ $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/kdb_kt.h $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/syslog.h $(SRCTOP)/lib/kdb/err_handle.h \
-  extern.h kdc5_err.h kdc_util.h main.c
+  $(SRCTOP)/include/syslog.h extern.h kdc5_err.h kdc_util.h \
+  main.c
 $(OUTPRE)network.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
