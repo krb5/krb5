@@ -1487,12 +1487,12 @@ kadm5_randkey_principal_3(void *server_handle,
     int				ret, last_pwd, have_pol = 0;
     kadm5_server_handle_t	handle = server_handle;
 
-    krb5_clear_error_message(handle->context);
-
     if (keyblocks)
 	 *keyblocks = NULL;
 
     CHECK_HANDLE(server_handle);
+
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL)
 	return EINVAL;
@@ -1628,11 +1628,11 @@ kadm5_setv4key_principal(void *server_handle,
     kadm5_server_handle_t	handle = server_handle;
     krb5_key_data               tmp_key_data;
 
-    krb5_clear_error_message(handle->context);
-
     memset( &tmp_key_data, 0, sizeof(tmp_key_data));
 
     CHECK_HANDLE(server_handle);
+
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL || keyblock == NULL)
 	return EINVAL;
