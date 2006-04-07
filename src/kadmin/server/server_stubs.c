@@ -17,7 +17,7 @@
 
 #define KRB5_MAX_ERR_STR 2048
 #define error_message_w(CODE, BUF, BUF_SIZE) \
-	strncpy(BUF, krb5_get_error_message(handle->context, CODE), BUF_SIZE)
+	strncpy(BUF, krb5_get_error_message(handle ? handle->context : NULL, CODE), BUF_SIZE)
 
 #define LOG_UNAUTH  "Unauthorized request: %s, %s, client=%s, service=%s, addr=%s"
 #define	LOG_DONE    "Request: %s, %s, %s, client=%s, service=%s, addr=%s"
