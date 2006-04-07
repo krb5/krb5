@@ -22,7 +22,7 @@
 
 
 # THIS SHOULD BE IN KDC.CONF INSTEAD!
-[db_modules]
+[dbmodules]
 	db_module_dir = __MODDIR__
 	foobar_db2_module_blah = {
 		db_library = db2
