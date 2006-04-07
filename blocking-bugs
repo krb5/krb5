@@ -3,25 +3,11 @@
 This is a list of blocking bugs that must be addressed before these
 changes are committed to the trunk:
 
-* new_default_com_err_proc is not an acceptable name for a global symbol.
-
-* Thread specific data is not how we want to handle database errors.
-I think we want to handle them in krb5_contexts.  See if the API
-supports this and either change it or explicitly decide thread
-specific data is OK.
-
-* --with-ldap needs to be carefully considered; is OPENLDAP upper case really correct? Consider GCS and other  options we already use.
-
-
-* kdc, kadmin/server kadmin/ldap_util, lib/kadm5/clnt/ wants err_handle.h from lib/kdb.  This seems
-wrong and should probably be fixed either by installing that header in
-buildtop/include or something.
-
-
-* libkadm5clnt pulls in a shared object from kdb5.
+* (non-blocking) Do we want --with-ldap or --enable-ldap?  Should
+  eDirectory be a separate option?
 
 * I've told the kadmin client to link against -lkdb5 as a hack.
-That's clearly wrong but is because of brokenness in kadm5/clnt.
+  That's clearly wrong but is because of brokenness in kadm5/clnt.
 
 
 * The export list needs to match the provided symbols.  Problem is,
@@ -44,7 +30,8 @@ That's clearly wrong but is because of brokenness in kadm5/clnt.
   krb5_dbe_{lookup,update}_{last_pwd_change,mod_princ_data,tl_data}.
   For now, I hacked around it with a bunch of -D compilation options,
   since declarations for some of these functions don't exist in the
-  kdb_ldap code.
+  kdb_ldap code.  They can probably be removed, but wait to hear from
+  Novell on that.
 
 * (non-blocking) Can the eDirectory support be inferred at run time?
   Or are we stuck building executables that will do the right thing
