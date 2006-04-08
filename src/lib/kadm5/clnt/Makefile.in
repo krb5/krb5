@@ -14,9 +14,8 @@ SHLIB_EXPDEPS=\
 	$(TOPLIBD)/libgssapi_krb5$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
-	$(COM_ERR_DEPLIB) \
-	$(SUPPORT_DEPLIB)
-SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err -lkrb5support
+	$(COM_ERR_DEPLIB)
+SHLIB_EXPLIBS=-lgssrpc -lgssapi_krb5 -lkrb5 -lk5crypto -lcom_err
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=kadm5/clnt
@@ -45,7 +44,7 @@ STLIBOBJS = \
 	client_principal.o \
 	client_init.o \
 	clnt_privs.o \
-	clnt_chpass_util.o \
+	clnt_chpass_util.o
 
 all-unix:: includes
 all-unix:: all-liblinks
