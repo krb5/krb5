@@ -1,5 +1,8 @@
 2006-04-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* shlib.conf (*-*-linux*): Use linker flag --as-needed when
+	building shared libraries.
+
 	* pre.in (ALL_CFLAGS): Always define KRB5_DEPRECATED and
 	KRB5_PRIVATE.
 
