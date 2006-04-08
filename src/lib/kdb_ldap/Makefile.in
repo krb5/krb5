@@ -92,8 +92,8 @@ kdb_ldap.so kdb_ldap.po $(OUTPRE)kdb_ldap.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
-  kdb_ldap.c kdb_ldap.h ldap_krbcontainer.h ldap_misc.h \
-  ldap_realm.h ldap_services.h
+  kdb_ldap.c kdb_ldap.h ldap_err.h ldap_krbcontainer.h \
+  ldap_misc.h ldap_realm.h ldap_services.h
 kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
