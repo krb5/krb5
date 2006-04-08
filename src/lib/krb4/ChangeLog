@@ -1,3 +1,7 @@
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* fakeenv.c: Unused file deleted.
+
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.
