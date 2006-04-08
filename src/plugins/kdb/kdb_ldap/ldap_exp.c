@@ -28,11 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "k5-int.h"
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include "k5-int.h"
 #include <stdio.h>
 #include <errno.h>
 #include <utime.h>
