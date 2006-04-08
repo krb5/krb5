@@ -409,7 +409,7 @@ AC_TRY_COMPILE([$2],[ $1 foo; ], eval krb5_cv_$varname=yes, eval krb5_cv_$varnam
 eval x="\$krb5_cv_$varname"
 AC_MSG_RESULT($x)
 if eval test "$x" = yes ; then
-  AC_DEFINE_UNQUOTED(HAVE_`echo $varname | tr [[[a-z]]] [[[A-Z]]]`)
+  AC_DEFINE_UNQUOTED(HAVE_`echo $varname | tr '[[[a-z]]]' '[[[A-Z]]]'`)
 fi])
 dnl
 dnl
