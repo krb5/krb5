@@ -158,6 +158,7 @@ FAKELIBDIR=$(FAKEPREFIX)/lib
 # PTHREAD_CFLAGS set by configure, not included in CFLAGS so that we
 #		don't pull the pthreads library into shared libraries
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
+	-DKRB5_DEPRECATED=1 -DKRB5_PRIVATE=1 \
 	$(CPPFLAGS) $(CFLAGS) $(PTHREAD_CFLAGS)
 
 CFLAGS = @CFLAGS@

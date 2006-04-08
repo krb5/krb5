@@ -1,3 +1,8 @@
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Don't define KRB5_PRIVATE or
+	KRB5_DEPRECATED.
+
 2006-04-05  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add prerequisites (application-defined macros) for

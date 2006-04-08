@@ -81,8 +81,8 @@ KRB5_AC_CHOOSE_ET dnl
 KRB5_AC_CHOOSE_SS dnl
 KRB5_AC_CHOOSE_DB dnl
 dnl allow stuff in tree to access deprecated/private stuff for now
-AC_DEFINE([KRB5_PRIVATE], 1, [Define only if building in-tree])
-AC_DEFINE([KRB5_DEPRECATED], 1, [Define only if building in-tree])
+dnl AC_DEFINE([KRB5_PRIVATE], 1, [Define only if building in-tree])
+dnl AC_DEFINE([KRB5_DEPRECATED], 1, [Define only if building in-tree])
 AC_C_CONST dnl
 WITH_NETLIB dnl
 WITH_HESIOD dnl
