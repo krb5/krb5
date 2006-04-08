@@ -68,15 +68,19 @@ extern struct timeval timelimit;
 #define GET_HANDLE()  ld = NULL; \
     st = krb5_ldap_request_handle_from_pool(ldap_context, &ldap_server_handle); \
     if (st != 0) { \
-        krb5_kdb_prepend_err_str("LDAP handle unavailable: ", st); \
+        prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
         st = KRB5_KDB_ACCESS_ERROR; \
         goto cleanup; \
     } \
     ld = ldap_server_handle->ldap_handle;
 
+extern int set_ldap_error (krb5_context ctx, int st, int op);
+extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code err, krb5_error_code oerr);
+
 #define LDAP_SEARCH(base, scope, filter, attrs)   LDAP_SEARCH_1(base, scope, filter, attrs, CHECK_STATUS)
 
-#define LDAP_SEARCH_1(base, scope, filter, attrs, status_check)        do { \
+#define LDAP_SEARCH_1(base, scope, filter, attrs, status_check)        \
+      do { \
 	  st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0, NULL, NULL, &timelimit, LDAP_NO_LIMIT, &result); \
 	  if (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR) { \
               tempst = krb5_ldap_rebind(ldap_context, &ldap_server_handle); \
@@ -87,27 +91,25 @@ extern struct timeval timelimit;
       \
       if (status_check != IGNORE_STATUS) { \
         if (tempst != 0) { \
-            krb5_kdb_prepend_err_str("LDAP handle unavailable: ", st); \
+            prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
             st = KRB5_KDB_ACCESS_ERROR; \
             goto cleanup; \
         } \
         if (st != LDAP_SUCCESS) { \
-             krb5_kdb_set_err_str(ldap_err2string(st)); \
-             st = translate_ldap_error(st, OP_SEARCH); \
+	     st = set_ldap_error(context, st, OP_SEARCH); \
 	     goto cleanup; \
         } \
       }
 
 
-#define CHECK_CLASS_VALIDITY(st, mask, str) if (st != 0 || mask == 0) { \
-                                                if (st == 0 && mask == 0) { \
-                                                   st = LDAP_OBJECT_CLASS_VIOLATION; \
-                                                   krb5_kdb_set_err_str(ldap_err2string(st)); \
-                                                   st = translate_ldap_error(st, OP_SEARCH); \
-                                                } \
-                                                krb5_kdb_prepend_err_str(str, st); \
-                                                goto cleanup; \
-                                             }
+#define CHECK_CLASS_VALIDITY(st, mask, str) \
+	if (st != 0 || mask == 0) { \
+	    if (st == 0 && mask == 0) { \
+	       st = set_ldap_error(context, LDAP_OBJECT_CLASS_VIOLATION, OP_SEARCH); \
+	    } \
+	    prepend_err_str(context, str, st, st); \
+	    goto cleanup; \
+	 }
 
 #define CHECK_NULL(ptr) if (ptr == NULL) { \
                             st = ENOMEM; \

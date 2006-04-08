@@ -32,7 +32,6 @@
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 /*
  * This function reads the parameters from the krb5.conf file. The parameters read here are
@@ -83,7 +82,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section, 
 				    "ldap_conns_per_server", 0, 
 				    (int *) &ldap_context->max_server_conns)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_conns_per_server' "
+            krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' "
                     "attribute");
 	    goto cleanup;
 	}
@@ -94,7 +93,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section, 
 				    "ldap_ssl_port", 0, 
 				    (int *) &ldap_context->port)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_ssl_port' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
 	    goto cleanup;
 	}
     }
@@ -108,21 +107,21 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				       "ldap_kdc_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kdc_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
 		goto cleanup;
 	    }
 	}
 	else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				       "ldap_kadmind_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kadmind_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
 		goto cleanup;
 	    }
 	}
 	else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				       "ldap_kpasswdd_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kpasswdd_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
 		goto cleanup;
 	    }
 	}
@@ -135,7 +134,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				   "ldap_service_password_file", NULL, 
 				   &ldap_context->service_password_file)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_service_password_file' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_service_password_file' attribute");
 	    goto cleanup;
 	}
     }
@@ -147,7 +146,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				   "ldap_root_certificate_file", NULL, 
 				   &ldap_context->root_certificate_file)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_root_certificate_file' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
 	    goto cleanup;
 	}
     }
@@ -170,7 +169,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	
 	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
 				   "ldap_servers", NULL, &tempval)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_servers' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_servers' attribute");
 	    goto cleanup;
 	}
 	
@@ -222,21 +221,21 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, 
 				    "ldap_conns_per_server", NULL, DEFAULT_CONNS_PER_SERVER, 
 				    (int *) &ldap_context->max_server_conns)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_conns_per_server' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' attribute");
 	    goto cleanup;
 	}
     }
 
     if (ldap_context->max_server_conns < 2) {
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Minimum connections required per server is 2");
+	krb5_set_error_message (context, st, "Minimum connections required per server is 2");
 	goto cleanup;
     }
     
     if (ldap_context->port == 0) {
 	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, "ldap_ssl_port", 
 				    NULL, LDAPS_PORT, &ldap_context->port)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_ssl_port' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
 	    goto cleanup;
 	}
     }
@@ -245,7 +244,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, "ldap_kdc_dn", 
 				       NULL, NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kdc_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
 		goto cleanup;
 	    }
 	}
@@ -253,7 +252,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
 				       "ldap_kadmind_dn", NULL, NULL, 
 				       &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kadmind_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
 		goto cleanup;
 	    }
 	}
@@ -261,7 +260,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
 				       "ldap_kpasswdd_dn", NULL, NULL, 
 				       &ldap_context->bind_dn)) != 0) {
-                krb5_kdb_set_err_str ("Error reading 'ldap_kpasswdd_dn' attribute");
+                krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
 		goto cleanup;
 	    }
 	}
@@ -272,7 +271,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
 				   "ldap_service_password_file", NULL, NULL, 
 				   &ldap_context->service_password_file)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_service_passwd_file' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_service_passwd_file' attribute");
 	    goto cleanup;
 	}
     }
@@ -282,7 +281,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
 				   "ldap_root_certificate_file", NULL, NULL, 
 				   &ldap_context->root_certificate_file)) != 0) {
-            krb5_kdb_set_err_str ("Error reading 'ldap_root_certificate_file' attribute");
+            krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
 	    goto cleanup;
 	}
     }
@@ -927,8 +926,7 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
 				&timelimit,
 				LDAP_NO_LIMIT,
 				&result)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str (ldap_err2string (st));
-        st = translate_ldap_error(st, OP_SEARCH);
+        st = set_ldap_error(0, st, OP_SEARCH);
 	return st;
     }
   
@@ -1004,8 +1002,7 @@ updateAttribute (ld, dn, attribute, value)
 	st = 0;
 
     if (st != 0) {
-        krb5_kdb_set_err_str (ldap_err2string (st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (0, st, OP_MOD);
     }
     
     return st;
@@ -1044,9 +1041,8 @@ deleteAttribute (ld, dn, attribute, value)
     if (st == LDAP_NO_SUCH_ATTRIBUTE || st == LDAP_UNDEFINED_TYPE)
 	st = 0;
    
-    if (st != 0) { 
-        krb5_kdb_set_err_str (ldap_err2string (st));
-        st = translate_ldap_error (st, OP_MOD);
+    if (st != 0) {
+	st = set_ldap_error (0, st, OP_MOD);
     }
     
     return st;

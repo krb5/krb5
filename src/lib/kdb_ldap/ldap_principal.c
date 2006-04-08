@@ -33,7 +33,6 @@
 #include "ldap_principal.h"
 #include "princ_xdr.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 struct timeval timelimit = {300, 0};  /* 5 minutes */
 char     *principal_attributes[] = { "krbprincipalname",
@@ -139,7 +138,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     krb5_ldap_server_handle  *ldap_server_handle=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     memset(&entry, 0, sizeof(krb5_db_entry));
     SETUP_CONTEXT();
@@ -149,7 +148,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 	realm = context->default_realm;
 	if (realm == NULL) {
             st = EINVAL;
-	    krb5_kdb_set_err_str("Default realm not set");
+	    krb5_set_error_message(context, st, "Default realm not set");
 	    goto cleanup;
 	}
     }
@@ -225,7 +224,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     krb5_boolean              more=0;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     SETUP_CONTEXT();
     /* get the principal info */
@@ -241,7 +240,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     
     if (DN == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str("DN information missing");
+	krb5_set_error_message(context, st, "DN information missing");
 	goto cleanup;
     }
 
@@ -307,16 +306,14 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 	}
 	st=ldap_modify_s(ld, DN, mods);
         if (st != LDAP_SUCCESS) {
-	    krb5_kdb_set_err_str(ldap_err2string(st));
-            st = translate_ldap_error (st, OP_MOD);
+	    st = set_ldap_error(context, st, OP_MOD);
 	    goto cleanup;
         }
     }
     else if (ptype == KDB_SERVICE_PRINCIPAL) {
 	st = ldap_delete_s(ld, DN);
 	if (st != LDAP_SUCCESS) {
-	    krb5_kdb_set_err_str(ldap_err2string(st));
-            st = translate_ldap_error (st, OP_DEL);
+	    st = set_ldap_error (context, st, OP_DEL);
 	    goto cleanup;
         }
     }

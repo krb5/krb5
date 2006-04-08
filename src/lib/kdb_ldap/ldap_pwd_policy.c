@@ -32,7 +32,6 @@
 #include "kdb_ldap.h"
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 static char *password_policy_attributes[] = { "krbmaxpwdlife", "krbminpwdlife", "krbpwdmindiffchars",
 					      "krbpwdminlength", "krbpwdhistorylength", "krbpwdpolicyrefcount", 
@@ -56,7 +55,7 @@ krb5_ldap_create_password_policy (context, policy)
     char                        **rdns=NULL, *strval[2]={NULL};
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     /* validate the input parameters */
     if (policy == NULL || policy->name == NULL) 
@@ -69,7 +68,7 @@ krb5_ldap_create_password_policy (context, policy)
     rdns = ldap_explode_dn(policy->name, 1);
     if (rdns == NULL) {
         st = EINVAL;
-        krb5_kdb_set_err_str("Invalid password policy DN syntax");
+        krb5_set_error_message(context, st, "Invalid password policy DN syntax");
 	goto cleanup;
     }
     
@@ -97,8 +96,7 @@ krb5_ldap_create_password_policy (context, policy)
 
     /* password policy object creation */
     if ((st=ldap_add_s(ld, policy->name, mods)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str(ldap_err2string(st));
-        st = translate_ldap_error (st, OP_ADD);
+        st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
     
@@ -128,7 +126,7 @@ krb5_ldap_put_password_policy (context, policy)
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     /* validate the input parameters */
     if (policy == NULL || policy->name == NULL) 
@@ -153,8 +151,7 @@ krb5_ldap_put_password_policy (context, policy)
     
     /* modify the password policy object. */
     if ((st=ldap_modify_s(ld, policy->name, mods)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str(ldap_err2string(st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
     
@@ -179,7 +176,7 @@ krb5_ldap_get_password_policy (context, name, policy, cnt)
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     /* validate the input parameters */
     if(name == NULL)
@@ -235,7 +232,7 @@ krb5_ldap_delete_password_policy (context, policy)
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     /* validate the input parameters */
     if(policy == NULL)
@@ -245,8 +242,7 @@ krb5_ldap_delete_password_policy (context, policy)
     GET_HANDLE();
 
     if((st=ldap_delete_s(ld, policy)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_DEL);
+        st = set_ldap_error (context, st, OP_DEL);
         goto cleanup;
     }
 
@@ -273,7 +269,7 @@ krb5_ldap_iterate_password_policy(context, match_expr, func, func_arg)
     char 		        *policy_dn=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     SETUP_CONTEXT();
     GET_HANDLE();

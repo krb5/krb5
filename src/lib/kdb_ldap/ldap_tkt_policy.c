@@ -32,7 +32,6 @@
 #include "kdb_ldap.h"
 #include "ldap_tkt_policy.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 /* Ticket policy object management */
 
@@ -57,7 +56,7 @@ krb5_ldap_create_policy(context, policy, mask)
     /* validate the input parameters */
     if (policy == NULL || policy->policydn==NULL) {
         st = EINVAL;
-	krb5_kdb_set_err_str ("Ticket Policy Object DN missing");
+	krb5_set_error_message (context, st, "Ticket Policy Object DN missing");
 	goto cleanup;
     }
 
@@ -101,8 +100,7 @@ krb5_ldap_create_policy(context, policy, mask)
 
     /* ldap add operation */
     if ((st=ldap_add_s(ld, policy->policydn, mods)) != LDAP_SUCCESS) {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_ADD);
+        st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
   
@@ -138,7 +136,7 @@ krb5_ldap_modify_policy(context,  policy, mask)
     /* validate the input parameters */
     if (policy == NULL || policy->policydn==NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Ticket Policy Object DN missing");
+	krb5_set_error_message (context, st, "Ticket Policy Object DN missing");
         goto cleanup;
     }
 
@@ -175,8 +173,7 @@ krb5_ldap_modify_policy(context,  policy, mask)
     }
 
     if ((st=ldap_modify_s(ld, policy->policydn, mods)) != LDAP_SUCCESS) {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
   
@@ -213,7 +210,7 @@ krb5_ldap_read_policy(context, policydn, policy, omask)
     /* validate the input parameters */
     if (policydn == NULL  || policy == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str("Ticket Policy Object information missing");
+	krb5_set_error_message(context, st, "Ticket Policy Object information missing");
         goto cleanup;
     }
 
@@ -294,8 +291,7 @@ krb5_ldap_delete_policy(context, policydn)
   
     if ((st=ldap_delete_s(ld, policydn)) != 0)
     {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_DEL);
+        st = set_ldap_error (context, st, OP_DEL);
 	goto cleanup;
     }
     
@@ -379,7 +375,7 @@ krb5_ldap_list(context, list, objectclass, containerdn)
     /* check if the containerdn exists */
     if (containerdn) {
 	if ((st=checkattributevalue(ld, containerdn, NULL, NULL, NULL)) != 0) {
-	    krb5_kdb_prepend_err_str ("Error reading container object: ", st);
+	    prepend_err_str (context, "Error reading container object: ", st, st);
 	    goto cleanup;
 	}
     }
@@ -398,8 +394,7 @@ krb5_ldap_list(context, list, objectclass, containerdn)
     count = ldap_count_entries(ld, result);
     if (count == -1) {
 	ldap_get_option(ld, LDAP_OPT_ERROR_NUMBER, &st);
-	krb5_kdb_set_err_str(ldap_err2string(st));
-	st = translate_ldap_error(st, OP_SEARCH);
+	st = set_ldap_error(context, st, OP_SEARCH);
 	goto cleanup;
     }
     *list = (char **) calloc ((unsigned) count+1, sizeof(char *));

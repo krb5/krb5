@@ -30,7 +30,6 @@
 
 #include "ldap_main.h"
 #include "ldap_services.h"
-#include "err_handle.h"
 #include "ldap_err.h"
 
 /* NOTE: add appropriate rights for krbpasswordexpiration attribute */
@@ -356,8 +355,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 			       NULL);
 	if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 	    free(seccontacls[0]);
-	    krb5_kdb_set_err_str (ldap_err2string(st));
-            st = translate_ldap_error (st, OP_MOD);
+            st = set_ldap_error (context, st, OP_MOD);
 	    goto cleanup;
 	}
 	free(seccontacls[0]);
@@ -384,8 +382,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 			       NULL);
 	if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 	    free(krbcontacls[0]);
-	    krb5_kdb_set_err_str (ldap_err2string(st));
-            st = translate_ldap_error (st, OP_MOD);
+            st = set_ldap_error (context, st, OP_MOD);
 	    goto cleanup;
 	}
 	free(krbcontacls[0]);
@@ -420,8 +417,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -444,8 +440,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);		    
@@ -469,8 +464,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -503,8 +497,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -527,8 +520,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st !=LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -551,8 +543,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -657,8 +648,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -681,8 +671,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+                    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -705,8 +694,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(realmacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -741,8 +729,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -765,8 +752,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if ( st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -790,8 +776,7 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(subtreeacls[0]);
-		    krb5_kdb_set_err_str (ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);

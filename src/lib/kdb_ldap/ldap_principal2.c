@@ -36,7 +36,6 @@
 #include "ldap_tkt_policy.h"
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];
@@ -81,7 +80,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
     krb5_boolean                attr_present=FALSE;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     /* set initial values */
     *nentries = 0;
@@ -98,7 +97,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
 
     if (is_principal_in_realm(ldap_context, searchfor) != 0) {
 	*more = 0;
-	krb5_kdb_set_err_str ("Principal does not belong to realm");
+	krb5_set_error_message (context, st, "Principal does not belong to realm");
 	goto cleanup;
     }    
     
@@ -146,8 +145,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
 
 		if ((DN = ldap_get_dn(ld, ent)) == NULL) {
                     ldap_get_option (ld, LDAP_OPT_RESULT_CODE, &st);
-                    krb5_kdb_set_err_str(ldap_err2string(st));
-                    st = translate_ldap_error (st, 0);
+		    st = set_ldap_error (context, st, 0);
 		    goto cleanup;
 		}
 		
@@ -384,7 +382,7 @@ process_db_args(context, db_args, xargs)
 {
     int                   i=0;
     krb5_error_code       st=0;
-    char                  errbuf[KRB5_MAX_ERR_STR];
+    char                  errbuf[1024];
     char *arg=NULL,       *arg_val=NULL;
     unsigned int          arg_val_len=0;
     krb5_boolean          uflag=FALSE, cflag=FALSE;
@@ -397,20 +395,20 @@ process_db_args(context, db_args, xargs)
 	    if(strcmp(arg, USERDN_ARG) == 0) {
 		if (cflag == TRUE) {
 		    st = EINVAL;
-                    krb5_kdb_set_err_str("'containerdn' and 'userdn' can not both "
+                    krb5_set_error_message(context, st, "'containerdn' and 'userdn' can not both "
                             "be specified");
 		    goto cleanup;
 		}
 		if (xargs->dn != NULL || xargs->containerdn != NULL) {
 		    st = EINVAL;
-                    snprintf(errbuf, KRB5_MAX_ERR_STR, "%s option not supported", arg);
-                    krb5_kdb_set_err_str(errbuf);
+                    snprintf(errbuf, sizeof(errbuf), "%s option not supported", arg);
+                    krb5_set_error_message(context, st, "%s", errbuf);
 		    goto cleanup;
 		}
 		if (strcmp(arg_val, "") == 0 || arg_val == NULL) {
 		    st = EINVAL;
-		    snprintf(errbuf, KRB5_MAX_ERR_STR, "%s option value missing", arg);
-		    krb5_kdb_set_err_str(errbuf);
+		    snprintf(errbuf, sizeof(errbuf), "%s option value missing", arg);
+		    krb5_set_error_message(context, st, "%s", errbuf);
 		    goto cleanup;
 		}
 		arg_val_len = strlen(arg_val) + 1;
@@ -426,20 +424,20 @@ process_db_args(context, db_args, xargs)
 	    } else if (strcmp(arg, CONTAINERDN_ARG) == 0) {
 		if (uflag == TRUE) {
 		    st = EINVAL;
-                    krb5_kdb_set_err_str("'containerdn' and 'userdn' can not both "
+                    krb5_set_error_message(context, st, "'containerdn' and 'userdn' can not both "
                             "be specified");
 		    goto cleanup;
 		}
 		if (xargs->dn != NULL || xargs->containerdn != NULL) {
 		    st = EINVAL;
-                    snprintf(errbuf, KRB5_MAX_ERR_STR, "%s option not supported", arg);
-                    krb5_kdb_set_err_str(errbuf);
+                    snprintf(errbuf, sizeof(errbuf), "%s option not supported", arg);
+                    krb5_set_error_message(context, st, "%s", errbuf);
 		    goto cleanup;
 		}
 		if (strcmp(arg_val, "") == 0 || arg_val == NULL) {
 		    st = EINVAL;
-		    snprintf(errbuf, KRB5_MAX_ERR_STR, "%s option value missing", arg);
-		    krb5_kdb_set_err_str(errbuf);
+		    snprintf(errbuf, sizeof(errbuf), "%s option value missing", arg);
+		    krb5_set_error_message(context, st, "%s", errbuf);
 		    goto cleanup;
 		}
 		arg_val_len = strlen(arg_val) + 1;
@@ -455,8 +453,8 @@ process_db_args(context, db_args, xargs)
 	    } else if (strcmp(arg, TKTPOLICYDN_ARG) == 0) {
 		if (arg_val == NULL) {
 		    st = EINVAL;
-		    snprintf(errbuf, KRB5_MAX_ERR_STR, "%s option value missing", arg);
-		    krb5_kdb_set_err_str(errbuf);
+		    snprintf(errbuf, sizeof(errbuf), "%s option value missing", arg);
+		    krb5_set_error_message(context, st, "%s", errbuf);
 		    goto cleanup;
 		}
 		arg_val_len = strlen(arg_val) + 1;
@@ -469,8 +467,8 @@ process_db_args(context, db_args, xargs)
 		
 	    } else {
 		st = EINVAL;
-		snprintf(errbuf, KRB5_MAX_ERR_STR, "unknown option: %s", arg);
-		krb5_kdb_set_err_str(errbuf);
+		snprintf(errbuf, sizeof(errbuf), "unknown option: %s", arg);
+		krb5_set_error_message(context, st, "%s", errbuf);
 		goto cleanup;
 	    }
 	}
@@ -491,7 +489,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     LDAP  		        *ld=NULL;
     LDAPMessage                 *result=NULL, *ent=NULL;
     char                        *user=NULL, *subtree=NULL;
-    char                        **values=NULL, *strval[10]={NULL}, errbuf[KRB5_MAX_ERR_STR];
+    char                        **values=NULL, *strval[10]={NULL}, errbuf[1024];
     struct berval	        **bersecretkey=NULL;
     LDAPMod 		        **mods=NULL;
     krb5_boolean                dnfound=TRUE, tktpolicy_set=FALSE;
@@ -505,7 +503,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     xargs_t                     xargs={0};
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     SETUP_CONTEXT();
     if (ldap_context->lrparams == NULL || ldap_context->krbcontainer == NULL)
@@ -517,7 +515,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     for (i=0; i < *nentries; ++i, ++entries) {
 	if (is_principal_in_realm(ldap_context, entries->princ) != 0) {
             st = EINVAL;
-            krb5_kdb_set_err_str("Principal does not belong to the default realm");
+            krb5_set_error_message(context, st, "Principal does not belong to the default realm");
 	    goto cleanup;
 	}
     
@@ -540,7 +538,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	if (xargs.dn == NULL) { /* creation of service principal */
 	    if (xargs.ptype == KDB_USER_PRINCIPAL) {
 		st = EINVAL;
-		krb5_kdb_set_err_str("User DN is missing");
+		krb5_set_error_message(context, st, "User DN is missing");
 		goto cleanup;
 	    }
 	
@@ -552,9 +550,10 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    } else if (xargs.containerdn) {
 		if ((st=checkattributevalue(ld, xargs.containerdn, NULL, NULL, NULL)) != 0) {
                     if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
+			int ost = st;
                         st = EINVAL;
                         sprintf(errbuf, "'%s' not found: ", xargs.containerdn);
-                        krb5_kdb_prepend_err_str(errbuf, st);
+                        prepend_err_str(context, errbuf, st, ost);
                     }
 		    goto cleanup;
 		}
@@ -603,7 +602,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		
 	    if( outofsubtree == TRUE ) {
 		st = EINVAL;
-		krb5_kdb_set_err_str("DN is out of the realm subtree");
+		krb5_set_error_message(context, st, "DN is out of the realm subtree");
 		goto cleanup;
 	    }
 	}
@@ -626,8 +625,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		}
 		ldap_msgfree(result);
 	    } else {
-		krb5_kdb_set_err_str(ldap_err2string(st));
-		st = translate_ldap_error(st, OP_SEARCH);
+		st = set_ldap_error(context, st, OP_SEARCH);
 		goto cleanup;
 	    }
 	}
@@ -645,7 +643,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		values = ldap_explode_dn(xargs.dn, 1);
 		if (values == NULL) {
                     st = EINVAL;
-                    krb5_kdb_set_err_str("Invalid DN");
+                    krb5_set_error_message(context, st, "Invalid DN");
 		    goto cleanup;
 		}
 		memset(strval, 0, sizeof(strval));
@@ -764,7 +762,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    goto cleanup;
 	    } else {
 		st = EINVAL;
-		krb5_kdb_set_err_str("Password policy value null");
+		krb5_set_error_message(context, st, "Password policy value null");
 		goto cleanup;
 	    }
 	}
@@ -866,8 +864,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		}
                 if (plen > rlen) {
                     st = EINVAL;
-                    snprintf(errbuf, KRB5_MAX_ERR_STR, "Insufficient buffer while storing the key of principal %s", user);
-                    krb5_kdb_set_err_str(errbuf);
+                    snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
+                    krb5_set_error_message(context, st, "%s", errbuf);
                     goto cleanup;
                 }
 		memcpy(currpos, user, (unsigned int)plen);   /* principal name */
@@ -880,8 +878,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 			if (keys[l]->key_data_length[0]) {
                             if (keys[l]->key_data_length[0] > rlen) {
                                 st = EINVAL;
-                                snprintf(errbuf, KRB5_MAX_ERR_STR, "Insufficient buffer while storing the key of principal %s", user);
-                                krb5_kdb_set_err_str(errbuf);
+                                snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
+                                krb5_set_error_message(context, st, "%s", errbuf);
                                 goto cleanup;
                             }
 			    memcpy(currpos, keys[l]->key_data_contents[0], keys[l]->key_data_length[0]);
@@ -894,8 +892,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 							      || salttype==KRB5_KDB_SALTTYPE_ONLYREALM))) {
                             if (keys[l]->key_data_length[1] > rlen) {
                                 st = EINVAL;
-                                snprintf(errbuf, KRB5_MAX_ERR_STR, "Insufficient buffer while storing the key of principal %s", user);
-                                krb5_kdb_set_err_str(errbuf);
+                                snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
+                                krb5_set_error_message(context, st, "%s", errbuf);
                                 goto cleanup;
                             }
 			    memcpy(currpos, keys[l]->key_data_contents[1], keys[l]->key_data_length[1]);
@@ -931,7 +929,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		/* if xargs.tktpolicydn is a empty string, then delete already existing krbpolicyreference attr */
 		if (tktpolicy_set == FALSE) {      /* if the attribute is not present then abort */
 		    st = EINVAL;
-                    krb5_kdb_set_err_str("'ticketpolicydn' empty");
+                    krb5_set_error_message(context, st, "'ticketpolicydn' empty");
 		    goto cleanup;
 		} else { 
 		    memset(strval, 0, sizeof(strval));
@@ -945,8 +943,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    st=ldap_modify_s(ld, xargs.dn, mods);
             if (st != LDAP_SUCCESS) {
                 sprintf(errbuf, "User modification failed: %s", ldap_err2string(st));
-                krb5_kdb_set_err_str(errbuf);
                 st = translate_ldap_error (st, OP_MOD);
+                krb5_set_error_message(context, st, "%s", errbuf);
                 goto cleanup;
             }
         }
@@ -954,8 +952,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    st=ldap_add_s(ld, xargs.dn, mods);	
 	    if (st != LDAP_SUCCESS) {
 	        sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
-                krb5_kdb_set_err_str(errbuf);
                 st = translate_ldap_error (st, OP_ADD);
+                krb5_set_error_message(context, st, "%s", errbuf);
 	        goto cleanup;
 	    }
         }
@@ -1016,7 +1014,7 @@ krb5_read_tkt_policyreference(context, ldap_context, entries, policydn)
 	if (policydn != NULL) {
 	    st = krb5_ldap_read_policy(context, policydn, &tktpoldnparam, &omask);
 	    if (st && st != KRB5_KDB_NOENTRY) {
-                krb5_kdb_prepend_err_str("Error reading ticket policy. ", st);
+                prepend_err_str(context, "Error reading ticket policy. ", st, st);
 		goto cleanup;
             }
 	    

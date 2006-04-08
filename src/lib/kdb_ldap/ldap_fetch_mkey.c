@@ -30,7 +30,6 @@
 
 #include "ldap_main.h"
 #include "kdb_ldap.h"
-#include "err_handle.h"
 
 /*
  * get the master key from the database specific context
@@ -46,7 +45,7 @@ krb5_ldap_get_mkey (context, key)
     krb5_ldap_context           *ldap_context=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     dal_handle = (kdb5_dal_handle *) context->db_context;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
@@ -74,7 +73,7 @@ krb5_ldap_set_mkey (context, pwd, key)
     krb5_ldap_realm_params      *r_params = NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     dal_handle = (kdb5_dal_handle *) context->db_context;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;

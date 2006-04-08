@@ -32,7 +32,6 @@
 #include "kdb_ldap.h"
 #include "ldap_services.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 #if defined(HAVE_EDIRECTORY)
 
@@ -61,7 +60,7 @@ krb5_ldap_create_service(context, service, mask)
     /* validate the input parameter */
     if (service == NULL || service->servicedn == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Service DN NULL");
+	krb5_set_error_message (context, st, "Service DN NULL");
 	goto cleanup;
     }
 
@@ -110,7 +109,7 @@ krb5_ldap_create_service(context, service, mask)
 		goto cleanup;
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("'krbhostserver' argument invalid");
+	    krb5_set_error_message (context, st, "'krbhostserver' argument invalid");
             goto cleanup;
 	}
     }
@@ -130,15 +129,14 @@ krb5_ldap_create_service(context, service, mask)
 		goto cleanup;
 	} else {
             st = EINVAL;
-	    krb5_kdb_set_err_str ("Server has no 'krbrealmreferences'");
+	    krb5_set_error_message (context, st, "Server has no 'krbrealmreferences'");
             goto cleanup;
 	}
     }
   
     /* ldap add operation */
     if ((st=ldap_add_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_ADD);
+        st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
   
@@ -152,7 +150,7 @@ krb5_ldap_create_service(context, service, mask)
 				   service->servicedn)) != 0) {
 		sprintf (errbuf, "Error adding 'krbRealmReferences' to %s: ",
 			 service->krbrealmreferences[i]);
-                krb5_kdb_prepend_err_str (errbuf, st);
+                prepend_err_str (context, errbuf, st, st);
 		/* delete service object, status ignored intentionally */
 		ldap_delete_s(ld, service->servicedn);
 		goto cleanup;
@@ -196,7 +194,7 @@ krb5_ldap_modify_service(context, service, mask)
     /* validate the input parameter */
     if (service == NULL || service->servicedn == NULL) {
         st = EINVAL;
-	krb5_kdb_set_err_str ("Service DN is NULL");
+	krb5_set_error_message (context, st, "Service DN is NULL");
         goto cleanup;
     }
 
@@ -216,7 +214,7 @@ krb5_ldap_modify_service(context, service, mask)
                 goto cleanup;
 	} else {
             st = EINVAL;
-	    krb5_kdb_set_err_str ("'krbhostserver' value invalid");
+	    krb5_set_error_message (context, st, "'krbhostserver' value invalid");
             goto cleanup;
 	}
     }
@@ -254,8 +252,7 @@ krb5_ldap_modify_service(context, service, mask)
 				     attr,
 				     0,
 				     &result)) != LDAP_SUCCESS) {
-		krb5_kdb_set_err_str (ldap_err2string(st));
-                st = translate_ldap_error (st, OP_SEARCH);
+                st = set_ldap_error (context, st, OP_SEARCH);
 		goto cleanup;
 	    }
 	    
@@ -271,15 +268,14 @@ krb5_ldap_modify_service(context, service, mask)
 	    ldap_msgfree(result);
 	} else {
             st = EINVAL;
-	    krb5_kdb_set_err_str ("'krbRealmReferences' value invalid");
+	    krb5_set_error_message (context, st, "'krbRealmReferences' value invalid");
             goto cleanup;
 	}
     }
 	    
     /* ldap modify operation */
     if ((st=ldap_modify_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
     
@@ -308,7 +304,7 @@ krb5_ldap_modify_service(context, service, mask)
 	    for (i=0; oldrealmrefs[i]; ++i) 
 		if((st=deleteAttribute(ld, oldrealmrefs[i], realmattr, service->servicedn)) != 0)
 		{
-		    krb5_kdb_prepend_err_str ("Error deleting realm attribute:", st);
+		    prepend_err_str (context, "Error deleting realm attribute:", st, st);
                     goto cleanup;
 		}
 	}
@@ -317,7 +313,7 @@ krb5_ldap_modify_service(context, service, mask)
 	for (i=0; newrealmrefs[i]; ++i) 
 	    if((st=updateAttribute(ld, newrealmrefs[i], realmattr, service->servicedn)) != 0)
 	    {
-		krb5_kdb_prepend_err_str ("Error updating realm attribute: ", st);
+		prepend_err_str (context, "Error updating realm attribute: ", st, st);
 		goto cleanup;
 	    }
     }
@@ -359,8 +355,7 @@ krb5_ldap_delete_service(context, service, servicedn)
     
     st = ldap_delete_s(ld, servicedn);
     if (st != 0) {
-	krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_DEL);
+        st = set_ldap_error (context, st, OP_DEL);
     }
 
     /* NOTE: This should be removed now as the backlinks are going off in OpenLDAP */
@@ -433,7 +428,7 @@ krb5_ldap_read_service(context, servicedn, service, omask)
     /* validate the input parameter */
     if (servicedn == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Service DN NULL");
+	krb5_set_error_message (context, st, "Service DN NULL");
 	goto cleanup;
     }
     
@@ -589,8 +584,7 @@ krb5_ldap_set_service_passwd(context, service, passwd)
     
     st = ldap_modify_s(ld, service, mods);
     if (st) {
-        krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (context, st, OP_MOD);
     }
 
  cleanup:

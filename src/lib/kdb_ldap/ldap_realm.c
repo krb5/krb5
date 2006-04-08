@@ -32,7 +32,6 @@
 #include "ldap_realm.h"
 #include "ldap_principal.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 #define END_OF_LIST -1
 char  *realm_attributes[] = {"krbSearchScope","krbSubTree",
@@ -224,8 +223,7 @@ krb5_ldap_list_realm(context, realms)
     count = ldap_count_entries (ld, result);
     if(count == -1){
 	ldap_get_option(ld, LDAP_OPT_ERROR_NUMBER, &st);
-	krb5_kdb_set_err_str (ldap_err2string(st));
-	st = translate_ldap_error (st, OP_SEARCH);
+	st = set_ldap_error (context, st, OP_SEARCH);
 	goto cleanup;
     }
 
@@ -285,13 +283,12 @@ krb5_ldap_delete_realm (context, lrealm)
     krb5_ldap_context           *ldap_context = NULL;
     krb5_ldap_server_handle     *ldap_server_handle = NULL;
     krb5_ldap_realm_params      *rparam=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
 
     SETUP_CONTEXT ();
 
     if (lrealm == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Realm information not available");
+	krb5_set_error_message (context, st, "Realm information not available");
 	goto cleanup;
     }
 
@@ -353,9 +350,10 @@ krb5_ldap_delete_realm (context, lrealm)
 
     /* Delete the realm object */
     if ((st=ldap_delete_s(ld, ldap_context->lrparams->realmdn)) != LDAP_SUCCESS) {
-	sprintf(errbuf, "Realm Delete FAILED: %s", ldap_err2string(st));
-        krb5_kdb_set_err_str (errbuf);
+	int ost = st;
         st = translate_ldap_error (st, OP_DEL);
+        krb5_set_error_message (context, st, "Realm Delete FAILED: %s",
+				ldap_err2string(ost));
     }
 
  cleanup:
@@ -397,13 +395,13 @@ krb5_ldap_modify_realm(context, rparams, mask)
     char                  **oldkdcservers=NULL, **oldadminservers=NULL, **oldpasswdservers=NULL;
     LDAPMessage           *result=NULL, *ent=NULL;
     int                   count=0;
+    char errbuf[1024];
 #endif
     LDAPMod               **mods = NULL;
     int                   i=0, oldmask=0, objectmask=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    char                  errbuf[KRB5_MAX_ERR_STR];
 
     if (mask == 0)
 	return 0;
@@ -446,7 +444,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    free (voidptr);
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("tl_data not available");
+	    krb5_set_error_message (context, st, "tl_data not available");
 	    return st;
 	}
     }
@@ -525,7 +523,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    /* touching the end of list means defenctype is missing */
 	    if (rparams->suppenctypes[i] == END_OF_LIST) {
 		st = EINVAL;
-		krb5_kdb_set_err_str ("Default enctype not in the supported list");
+		krb5_set_error_message (context, st, "Default enctype not in the supported list");
 		goto cleanup;
 	    }
 
@@ -534,7 +532,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		goto cleanup;
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("Invalid default enctype");
+	    krb5_set_error_message (context, st, "Invalid default enctype");
 	    goto cleanup;
 	}
     }
@@ -552,7 +550,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    /* touching the end of the list means defsalttype is missing */
 	    if (rparams->suppsalttypes[i] == END_OF_LIST) {
 		st = EINVAL;
-		krb5_kdb_set_err_str ("Default salttype not in the supported list");
+		krb5_set_error_message (context, st, "Default salttype not in the supported list");
 		goto cleanup;
 	    }
 
@@ -562,7 +560,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("Invalid default salttype");
+	    krb5_set_error_message (context, st, "Invalid default salttype");
 	    goto cleanup;
 	}
     }
@@ -575,8 +573,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    /* check if the salttypes entered is valid */
 	    if (!(rparams->suppsalttypes[i]>=0 && rparams->suppsalttypes[i]<6)) {
 		st = EINVAL;
-		sprintf(errbuf, "salttype %d not valid", rparams->suppsalttypes[i]);
-                krb5_kdb_set_err_str (errbuf);
+                krb5_set_error_message (context, st, "salttype %d not valid", rparams->suppsalttypes[i]);
 		goto cleanup;
 	    }
 
@@ -589,7 +586,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 
 	if (flag == FALSE) { /* Default salt type is not supported */
 	    st = EINVAL;
-            krb5_kdb_set_err_str ("Default salttype not in the supported list");
+            krb5_set_error_message (context, st, "Default salttype not in the supported list");
 	    goto cleanup;
 	}
 	ignore_duplicates(rparams->suppsalttypes);
@@ -608,8 +605,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    /* check if the enctypes entered is valid */
 	    if (krb5_c_valid_enctype(rparams->suppenctypes[i]) == 0) {
 		st = EINVAL;
-                sprintf(errbuf, "Enctype %d not valid", rparams->suppenctypes[i]);
-                krb5_kdb_set_err_str (errbuf);
+                krb5_set_error_message (context, st, "Enctype %d not valid", rparams->suppenctypes[i]);
 		goto cleanup;
 	    }
 
@@ -622,7 +618,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 
 	if (flag == FALSE) { /* Default encryption type is not supported */
 	    st = EINVAL;
-	    krb5_kdb_set_err_str("Default enctype not in the supported list");
+	    krb5_set_error_message(context, st, "Default enctype not in the supported list");
 	    goto cleanup;
 	}
 	ignore_duplicates(rparams->suppenctypes);
@@ -639,7 +635,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	for (i=0; rparams->ldapservers[i] != NULL; ++i) {
 	    st = checkattributevalue(ld, rparams->ldapservers[i], NULL, NULL, NULL);
 	    if (st != 0) {
-		krb5_kdb_prepend_err_str ("Error reading LDAP servers: ", st);
+		prepend_err_str (context, "Error reading LDAP servers: ", st, st);
 		goto cleanup;
 	    }
 	}
@@ -707,8 +703,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 			       servers,
 			       0,
 			       &result)) != LDAP_SUCCESS) {
-	    krb5_kdb_set_err_str (ldap_err2string(st));
-            st = translate_ldap_error (st, OP_SEARCH);
+            st = set_ldap_error (context, st, OP_SEARCH);
 	    goto cleanup;
 	}
     
@@ -741,8 +736,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 
     /* Realm modify opearation */
     if ((st=ldap_modify_s(ld, rparams->realmdn, mods)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str (ldap_err2string (st));
-        st = translate_ldap_error (st, OP_MOD);
+        st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
 
@@ -769,7 +763,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf (errbuf, "Error removing 'krbRealmReferences' from %s: ",
 			     oldkdcservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
     
@@ -781,7 +775,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf (errbuf, "Error adding 'krbRealmReferences' to %s: ",
 			     newkdcservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
 
@@ -808,7 +802,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf(errbuf, "Error removing 'krbRealmReferences' from "
                             "%s: ", oldadminservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
 
@@ -820,7 +814,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
                             newadminservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
 	if (newadminservers)
@@ -846,7 +840,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf(errbuf, "Error removing 'krbRealmReferences' from "
                             "%s: ", oldpasswdservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
 
@@ -858,7 +852,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 		{
 		    sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
                             newpasswdservers[i]);
-                    krb5_kdb_prepend_err_str (errbuf, st);
+                    prepend_err_str (context, errbuf, st, st);
 		    goto cleanup;
 		}
 	if (newpasswdservers)
@@ -912,7 +906,6 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
 #ifdef HAVE_EDIRECTORY
     int                         crmask=0;
 #endif
@@ -930,7 +923,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
         kerberoscontdn = KERBEROS_CONTAINER;
 #else
 	st = EINVAL;
-	krb5_kdb_set_err_str ("Kerberos Container information is missing");
+	krb5_set_error_message (context, st, "Kerberos Container information is missing");
         goto cleanup;
 #endif
     }
@@ -943,7 +936,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
     rdns = ldap_explode_dn(kerberoscontdn, 1);
     if (rdns == NULL) {
 	st = EINVAL;
-        krb5_kdb_set_err_str("Invalid Kerberos container DN");
+        krb5_set_error_message(context, st, "Invalid Kerberos container DN");
 	goto cleanup;
     }
 
@@ -967,9 +960,9 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
 
     /* create the kerberos container */
     if ((st = ldap_add_s(ld, kerberoscontdn, mods)) != LDAP_SUCCESS) {
-	sprintf(errbuf, "Kerberos Container create FAILED: %s", ldap_err2string(st));
-        krb5_kdb_set_err_str (errbuf);
+	int ost = st;
         st = translate_ldap_error (st, OP_ADD);
+        krb5_set_error_message (context, st, "Kerberos Container create FAILED: %s", ldap_err2string(ost));
 	goto cleanup;
     } 
 
@@ -983,7 +976,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
     if ((st=checkattributevalue(ld, SECURITY_CONTAINER, "objectClass", 
 				krbContainerRefclass, &crmask)) != 0)
     {
-	krb5_kdb_prepend_err_str ("Security Container read FAILED: ", st);
+	prepend_err_str (context, "Security Container read FAILED: ", st, st);
 	/* delete Kerberos Container, status ignored intentionally */
 	ldap_delete_s(ld, kerberoscontdn); 
 	goto cleanup;
@@ -1003,9 +996,9 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
 
     /* update the security container with krbContainerReference attribute */
     if ((st=ldap_modify_s(ld, SECURITY_CONTAINER, mods)) != LDAP_SUCCESS) {
-	sprintf(errbuf, "Security Container update FAILED: %s", ldap_err2string(st));
-	krb5_kdb_set_err_str (errbuf);
+	int ost = st;
         st = translate_ldap_error (st, OP_MOD);
+	krb5_set_error_message (context, st, "Security Container update FAILED: %s", ldap_err2string(ost));
 	/* delete Kerberos Container, status ignored intentionally */
 	ldap_delete_s(ld, kerberoscontdn); 
 	goto cleanup;
@@ -1042,7 +1035,9 @@ krb5_ldap_create_realm(context, rparams, mask)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
+#ifdef HAVE_EDIRECTORY
+    char errbuf[1024];
+#endif
     char                        *realm_name;
 
     SETUP_CONTEXT ();
@@ -1143,7 +1138,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 		
 		if (rparams->suppenctypes[i] == END_OF_LIST) {
 		    st = EINVAL;
-		    krb5_kdb_set_err_str ("Default enctype not in the "
+		    krb5_set_error_message (context, st, "Default enctype not in the "
 					  "supported list");
 		    goto cleanup;
 		}
@@ -1153,7 +1148,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 		goto cleanup;
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("Default enctype not valid");
+	    krb5_set_error_message (context, st, "Default enctype not valid");
 	    goto cleanup;
 	}
     }
@@ -1171,8 +1166,8 @@ krb5_ldap_create_realm(context, rparams, mask)
 		
 		if (rparams->suppsalttypes[i] == END_OF_LIST) {
 		    st = EINVAL;
-		    krb5_kdb_set_err_str ("Default salttype not in the "
-					  "supported list");
+		    krb5_set_error_message (context, st,
+			    "Default salttype not in the supported list");
 		    goto cleanup;
 		}
 	    }
@@ -1182,7 +1177,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 		goto cleanup;
 	} else {
 	    st = EINVAL;
-	    krb5_kdb_set_err_str ("Default salttype not valid");
+	    krb5_set_error_message (context, st, "Default salttype not valid");
 	    goto cleanup;
 	}
     }
@@ -1193,9 +1188,8 @@ krb5_ldap_create_realm(context, rparams, mask)
 	    /* check if the salttypes entered is valid */
 	    if (!(rparams->suppsalttypes[i]>=0 && rparams->suppsalttypes[i]<6)) {
 		st = EINVAL;
-		sprintf(errbuf, "Salttype %d not valid",
-                        rparams->suppsalttypes[i]);
-                krb5_kdb_set_err_str (errbuf);
+                krb5_set_error_message (context, st, "Salttype %d not valid",
+					rparams->suppsalttypes[i]);
 		goto cleanup;
 	    }
 	}
@@ -1218,9 +1212,8 @@ krb5_ldap_create_realm(context, rparams, mask)
             /* check if the enctypes entered is valid */
 	    if (krb5_c_valid_enctype(rparams->suppenctypes[i]) == 0) {
 		st = EINVAL;
-		sprintf(errbuf, "Enctype %d not valid",
-                        rparams->suppenctypes[i]);
-                krb5_kdb_set_err_str (errbuf);
+                krb5_set_error_message (context, st, "Enctype %d not valid",
+					rparams->suppenctypes[i]);
 		goto cleanup;
 	    }
 	}
@@ -1243,8 +1236,8 @@ krb5_ldap_create_realm(context, rparams, mask)
 	for (i=0; rparams->ldapservers[i] != NULL; ++i) {
 	    st = checkattributevalue(ld, rparams->ldapservers[i], NULL, NULL, NULL);
 	    if (st != 0) {
-		krb5_kdb_prepend_err_str ("Error reading LDAP server "
-		    "object: ", st);
+		prepend_err_str (context, "Error reading LDAP server object: ",
+				 st, st);
 		goto cleanup;
 	    }
 	}
@@ -1302,8 +1295,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 
     /* realm creation operation */
     if ((st=ldap_add_s(ld, dn, mods)) != LDAP_SUCCESS) {
-        krb5_kdb_set_err_str (ldap_err2string(st));
-        st = translate_ldap_error (st, OP_ADD);
+        st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
 
@@ -1314,7 +1306,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 	    {
 		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
                         rparams->kdcservers[i]);
-                krb5_kdb_prepend_err_str (errbuf, st);
+                prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_s(ld, dn);
 		goto cleanup;
@@ -1326,7 +1318,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 	    {
 		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
                         rparams->adminservers[i]);
-		krb5_kdb_prepend_err_str (errbuf, st);
+		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_s(ld, dn);
 		goto cleanup;
@@ -1338,7 +1330,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 	    {
 		sprintf(errbuf, "Error adding 'krbRealmReferences' to %s: ",
                         rparams->passwdservers[i]);
-                krb5_kdb_prepend_err_str (errbuf, st);
+                prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
 		ldap_delete_s(ld, dn);
 		goto cleanup;
@@ -1375,9 +1367,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context      *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    char                    errbuf[KRB5_MAX_ERR_STR];
 
-    
     SETUP_CONTEXT ();
 
     /* validate the input parameter */
@@ -1582,9 +1572,9 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 
 	LDAP_SEARCH_1(rlparams->policyreference, LDAP_SCOPE_BASE, NULL, policy_attributes, IGNORE_STATUS);
 	if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_OBJECT) {
-		sprintf(errbuf, "Policy object read failed: %s", ldap_err2string(st));
-		krb5_kdb_set_err_str (errbuf);
+		int ost = st;
 		st = translate_ldap_error (st, OP_SEARCH);
+		krb5_set_error_message (context, st, "Policy object read failed: %s", ldap_err2string(ost));
 	    goto cleanup;
 	}
 	ent = ldap_first_entry (ld, result);

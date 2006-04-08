@@ -31,7 +31,6 @@
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 #include "ldap_err.h"
-#include <err_handle.h>
 
 char    *policyrefattribute[] = {"krbPolicyReference",NULL};
 char    *krbcontainerrefattr[] = {"krbContainerReference", NULL};
@@ -94,7 +93,7 @@ krb5_ldap_read_krbcontainer_params( krb5_context	context,
 	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, ldap_context->conf_section,
 				   "ldap_kerberos_container_dn", NULL, 
 				   &cparams->DN)) != 0) {
-            krb5_kdb_set_err_str("Error reading kerberos container location "
+            krb5_set_error_message(context, st, "Error reading kerberos container location "
                     "from krb5.conf");
 	    goto cleanup;
 	}
@@ -105,7 +104,7 @@ krb5_ldap_read_krbcontainer_params( krb5_context	context,
 	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
 				   "ldap_kerberos_container_dn", NULL, 
 				   NULL, &cparams->DN)) != 0) {
-            krb5_kdb_set_err_str("Error reading kerberos container location "
+            krb5_set_error_message(context, st, "Error reading kerberos container location "
                     "from krb5.conf");
 	    goto cleanup;
 	}
@@ -118,7 +117,7 @@ krb5_ldap_read_krbcontainer_params( krb5_context	context,
  */
     if (cparams->DN == NULL) {
         st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_kdb_set_err_str("Kerberos container location not specified");
+        krb5_set_error_message(context, st, "Kerberos container location not specified");
         goto cleanup;
     }
 #endif
@@ -129,8 +128,7 @@ krb5_ldap_read_krbcontainer_params( krb5_context	context,
 	 */
 	LDAP_SEARCH_1(cparams->DN, LDAP_SCOPE_BASE, "(objectclass=krbContainer)", policyrefattribute, IGNORE_STATUS);
 	if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_OBJECT) {
-	    krb5_kdb_set_err_str(ldap_err2string(st));
-            st = translate_ldap_error(st, OP_SEARCH);
+            st = set_ldap_error(context, st, OP_SEARCH);
 	    goto cleanup;
 	}
 	
@@ -180,8 +178,7 @@ krb5_ldap_read_krbcontainer_params( krb5_context	context,
     if (cparams->policyreference != NULL) {
 	LDAP_SEARCH_1(cparams->policyreference, LDAP_SCOPE_BASE, NULL, policy_attributes, IGNORE_STATUS);
 	if (st != LDAP_SUCCESS && st!= LDAP_NO_SUCH_OBJECT) {
-	    krb5_kdb_set_err_str(ldap_err2string(st));
-            st = translate_ldap_error(st, OP_SEARCH);
+	    st = set_ldap_error(context, st, OP_SEARCH);
 	    goto cleanup;
 	}
 	st = LDAP_SUCCESS; /* reset the return status in case it is LDAP_NO_SUCH_OBJECT */

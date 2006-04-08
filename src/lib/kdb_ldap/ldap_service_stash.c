@@ -32,7 +32,6 @@
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 #include "ldap_service_stash.h"
-#include <err_handle.h>
 
 krb5_error_code
 krb5_ldap_readpassword(context, ldap_context, password)
@@ -43,7 +42,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
     int                         entryfound=0;
     krb5_error_code             st=0;
     char                        line[RECORDLEN]="0", *start=NULL, *file=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
+    char                        errbuf[1024];
     FILE                        *fptr=NULL;
 
     *password = NULL;
@@ -55,7 +54,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
     if (access(file, F_OK) < 0) {
         st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_kdb_set_err_str (errbuf);
+        krb5_set_error_message (context, st, "%s", errbuf);
         goto rp_exit;
     }
 
@@ -63,14 +62,14 @@ krb5_ldap_readpassword(context, ldap_context, password)
     if (access(file, R_OK) < 0) {
         st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_kdb_set_err_str (errbuf);
+        krb5_set_error_message (context, st, "%s", errbuf);
         goto rp_exit;
     }
 
     if((fptr=fopen(file, "r")) == NULL) {
         st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_kdb_set_err_str (errbuf);
+        krb5_set_error_message (context, st, "%s", errbuf);
         goto rp_exit;
     }
     
@@ -97,7 +96,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
 
     if (entryfound == 0)  {
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
-	krb5_kdb_set_err_str ("Bind DN entry missing in stash file");
+	krb5_set_error_message (context, st, "Bind DN entry missing in stash file");
         goto rp_exit;
     }
     /* replace the \n with \0 */
@@ -109,7 +108,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
     if (start == NULL ) {
         /* password field missing */
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_kdb_set_err_str ("Stash file entry corrupt");
+        krb5_set_error_message (context, st, "Stash file entry corrupt");
         goto rp_exit;
     }
     ++ start;
@@ -199,7 +198,7 @@ int dec_password(struct data pwd, struct data *ret){
     
     if (pwd.len == 0) {
 	err = EINVAL;
-        krb5_kdb_set_err_str ("Password has zero length");
+        krb5_set_error_message (0, err, "Password has zero length");
         ret->len = 0;
         goto cleanup;
     }
@@ -211,7 +210,7 @@ int dec_password(struct data pwd, struct data *ret){
 	if((pwd.len - strlen("{HEX}")) % 2 != 0){
 	    /* A hexadecimal encoded password should have even length */
 	    err = EINVAL;
-	    krb5_kdb_set_err_str ("Password corrupted");
+	    krb5_set_error_message (0, err, "Password corrupted");
 	    ret->len = 0;
 	    goto cleanup;
 	}
@@ -228,7 +227,7 @@ int dec_password(struct data pwd, struct data *ret){
 	    /* Check if it is a hexadecimal number */
 	    if (isxdigit(pwd.value[i]) == 0 || isxdigit(pwd.value[i + 1]) == 0) {
 		err = EINVAL;
-                krb5_kdb_set_err_str ("Not a hexadecimal password");
+                krb5_set_error_message (0, err, "Not a hexadecimal password");
                 ret->len = 0;
                 goto cleanup;
 	    }

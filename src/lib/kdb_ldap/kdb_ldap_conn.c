@@ -35,7 +35,6 @@
 #include "ldap_main.h"
 #include "ldap_service_stash.h"
 #include <kdb5.h>
-#include <err_handle.h>
 
 static krb5_error_code
 krb5_validate_ldap_context(krb5_context context, krb5_ldap_context *ldap_context)
@@ -45,20 +44,20 @@ krb5_validate_ldap_context(krb5_context context, krb5_ldap_context *ldap_context
     
     if (ldap_context->bind_dn == NULL) {
 	st = EINVAL;	
-	krb5_kdb_set_err_str("LDAP bind dn value missing ");
+	krb5_set_error_message(context, st, "LDAP bind dn value missing ");
 	goto err_out;
     }
     
     if (ldap_context->bind_pwd == NULL && ldap_context->service_password_file == NULL) {
 	st = EINVAL;
-	krb5_kdb_set_err_str("LDAP bind password value missing ");
+	krb5_set_error_message(context, st, "LDAP bind password value missing ");
 	goto err_out;
     }
 
     if (ldap_context->bind_pwd == NULL && ldap_context->service_password_file !=
 	    NULL && ldap_context->service_cert_path == NULL) {
 	if ((st=krb5_ldap_readpassword(context, ldap_context, &password)) != 0) {
-            krb5_kdb_prepend_err_str("Error reading password from stash: ", st);
+            prepend_err_str(context, "Error reading password from stash: ", st, st);
 	    goto err_out;
         }
       
@@ -76,7 +75,7 @@ krb5_validate_ldap_context(krb5_context context, krb5_ldap_context *ldap_context
 	    ldap_context->bind_pwd = (char *)password;
 	    if (ldap_context->bind_pwd == NULL) {
 		st = EINVAL;
-                krb5_kdb_set_err_str("Error reading password from stash");
+                krb5_set_error_message(context, st, "Error reading password from stash");
 		goto err_out;
 	    }
 	}
@@ -85,7 +84,7 @@ krb5_validate_ldap_context(krb5_context context, krb5_ldap_context *ldap_context
     /* NULL password not allowed */
     if (ldap_context->bind_pwd != NULL && strlen(ldap_context->bind_pwd) == 0) {
 	st = EINVAL;
-        krb5_kdb_set_err_str("Service password length is zero");
+        krb5_set_error_message(context, st, "Service password length is zero");
 	goto err_out;
     }
 
@@ -142,7 +141,6 @@ krb5_ldap_initialize(ldap_context, server_info)
     int                         port=0;
     krb5_error_code             st=0;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
 
     if (server_info->port)
 	port = server_info->port;
@@ -161,9 +159,8 @@ krb5_ldap_initialize(ldap_context, server_info)
     /* ldap init */
     if((ldap_server_handle->ldap_handle=ldap_init(server_info->server_name, 
 						  port)) == NULL) {
-        strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_kdb_set_err_str (errbuf);
         st = KRB5_KDB_ACCESS_ERROR;
+        krb5_set_error_message (0, st, "%s", strerror(errno));
 	goto err_out;
     }
     
@@ -172,7 +169,8 @@ krb5_ldap_initialize(ldap_context, server_info)
 	server_info->server_status = ON;
 	krb5_update_ldap_handle(ldap_server_handle, server_info);
     } else {
-        krb5_kdb_set_err_str (ldap_err2string(st));
+        krb5_set_error_message (0, KRB5_KDB_ACCESS_ERROR, "%s",
+				ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
 	server_info->server_status = OFF;
 	time(&server_info->downtime);
@@ -225,7 +223,7 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
 		sasl_mech_supported = TRUE;
 	    }
 	   
-            krb5_kdb_clear_err_str();
+            krb5_clear_error_message(context);
  
 	    for (conns=0; conns < ldap_context->max_server_conns; ++conns) {
 	      if ((st=krb5_ldap_initialize(ldap_context, server_info)) != 0)
@@ -241,9 +239,9 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
 
  err_out:
     if (sasl_mech_supported == FALSE) {
-        krb5_kdb_set_err_str ("Certificate based authentication requested but "
-                "not supported by LDAP servers");
         st = KRB5_KDB_ACCESS_ERROR;
+        krb5_set_error_message (context, st, "Certificate based authentication requested but "
+                "not supported by LDAP servers");
     }
     return (st);
 }

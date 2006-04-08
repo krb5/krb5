@@ -36,7 +36,6 @@
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
 #include <kdb5.h>
-#include <err_handle.h>
 
 static krb5_error_code
 krb5_ldap_get_db_opt( char *input, char **opt, char **val )
@@ -109,12 +108,12 @@ krb5_ldap_read_startup_information(krb5_context context)
 	
     SETUP_CONTEXT();
     if ((retval=krb5_ldap_read_krbcontainer_params(context, &(ldap_context->krbcontainer)))) {
-        krb5_kdb_prepend_err_str ("Unable to read Kerberos container", retval);
+        prepend_err_str (context, "Unable to read Kerberos container", retval, retval);
 	goto cleanup;
     }
 
     if ((retval=krb5_ldap_read_realm_params(context, context->default_realm, &(ldap_context->lrparams), &mask))) {
-        krb5_kdb_prepend_err_str ("Unable to read Realm", retval);
+        prepend_err_str (context, "Unable to read Realm", retval, retval);
 	goto cleanup;
     }
     
@@ -144,7 +143,7 @@ has_sasl_external_mech(context, ldap_server)
 
     ld = ldap_open(ldap_server, 389); /*  Should the port number be configurable ? */
     if(ld == NULL){
-	krb5_kdb_set_err_str(ERR_MSG1);
+	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
@@ -152,28 +151,28 @@ has_sasl_external_mech(context, ldap_server)
     /* Anonymous bind */
     retval = ldap_simple_bind_s(ld, NULL, NULL);
     if(retval != LDAP_SUCCESS){
-	krb5_kdb_set_err_str(ERR_MSG1);
+	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
     retval = ldap_search_s(ld, "", LDAP_SCOPE_BASE, NULL, attrs, 0, &res);
     if(retval != LDAP_SUCCESS){
-	krb5_kdb_set_err_str(ERR_MSG1);
+	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
     msg = ldap_first_message(ld, res);
     if(msg == NULL){
-	krb5_kdb_set_err_str(ERR_MSG1);
+	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
     values = ldap_get_values(ld, msg, "supportedSASLMechanisms");
     if(values == NULL){
-	krb5_kdb_set_err_str(ERR_MSG2);
+	krb5_set_error_message(context, 1, "%s", ERR_MSG2);
 	ret = 1; /* Not supported */
 	goto cleanup;
     }
@@ -185,7 +184,7 @@ has_sasl_external_mech(context, ldap_server)
     }
 
     if(flag != 1){
-	krb5_kdb_set_err_str(ERR_MSG2);
+	krb5_set_error_message(context, 1, "%s", ERR_MSG2);
 	ret = 1; /* Not supported */
 	goto cleanup;
     }
@@ -222,13 +221,12 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 {
     krb5_error_code status  = 0;
     char **t_ptr = db_args;
-    char buf[KRB5_MAX_ERR_STR];
     krb5_ldap_context *ldap_context=NULL;
     int srv_cnt = 0;
     kdb5_dal_handle *dal_handle=NULL;
 
     /* Clear the global error string */
-    krb5_kdb_clear_err_str();
+    krb5_clear_error_message(context);
 
     ldap_context = calloc(1, sizeof(krb5_ldap_context));
     if (ldap_context == NULL) 
@@ -253,13 +251,13 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 		free (opt);
 		free (val);
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'binddn' missing");
+                krb5_set_error_message (context, status, "'binddn' missing");
 		goto clean_n_exit;
 	    }
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'binddn' value missing");
+                krb5_set_error_message (context, status, "'binddn' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -278,13 +276,13 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 		free (opt);
 		free (val);
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'nconns' missing");
+                krb5_set_error_message (context, status, "'nconns' missing");
 		goto clean_n_exit;
 	    }
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'nconns' value missing");
+                krb5_set_error_message (context, status, "'nconns' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -297,13 +295,13 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 		free (opt);
 		free (val);
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'bindpwd' missing");
+                krb5_set_error_message (context, status, "'bindpwd' missing");
 		goto clean_n_exit;
 	    }
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'bindpwd' value missing");
+                krb5_set_error_message (context, status, "'bindpwd' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -322,7 +320,7 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'host' value missing");
+                krb5_set_error_message (context, status, "'host' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -367,13 +365,13 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 		free (opt);
 		free (val);
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'port' missing");
+                krb5_set_error_message (context, status, "'port' missing");
 		goto clean_n_exit;
 	    }
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'port' value missing");
+                krb5_set_error_message (context, status, "'port' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -384,7 +382,7 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 	    if( val == NULL )
 	    {
 		status = EINVAL;
-                krb5_kdb_set_err_str ("'cert' value missing");
+                krb5_set_error_message (context, status, "'cert' value missing");
 		free(opt);
 		goto clean_n_exit;
 	    }
@@ -434,8 +432,8 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 	else
 	{
 	    status = EINVAL;
-	    sprintf(buf,"unknown option \'%s\'", opt?opt:val);
-            krb5_kdb_set_err_str (buf);
+            krb5_set_error_message (context, status, "unknown option \'%s\'",
+				    opt?opt:val);
 	    free(opt);
 	    free(val);
 	    goto clean_n_exit;
@@ -452,7 +450,7 @@ krb5_error_code krb5_ldap_open( krb5_context context,
     if (status) {
 	ldap_context = NULL;
 	dal_handle->db_context = NULL;
-        krb5_kdb_prepend_err_str ("Error reading LDAP server params: ", status);
+        prepend_err_str (context, "Error reading LDAP server params: ", status, status);
 	goto clean_n_exit;
     }
     if ((status=krb5_ldap_db_init( context, ldap_context)) != 0) {
@@ -471,4 +469,21 @@ krb5_error_code krb5_ldap_open( krb5_context context,
     return status;
 }
 
+#include "ldap_err.h"
+int
+set_ldap_error (krb5_context ctx, int st, int op)
+{
+    int translated_st = translate_ldap_error(st, op);
+    krb5_set_error_message(ctx, translated_st, "%s", ldap_err2string(st));
+    return translated_st;
+}
 
+void
+prepend_err_str (krb5_context ctx, const char *str, krb5_error_code err,
+		 krb5_error_code oerr)
+{
+    const char *omsg;
+    if (oerr == 0) oerr = err;
+    omsg = krb5_get_error_message (ctx, err);
+    krb5_set_error_message (ctx, err, "%s %s", str, omsg);
+}
