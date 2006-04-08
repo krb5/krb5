@@ -16,8 +16,6 @@
 #include "misc.h"
 
 #define KRB5_MAX_ERR_STR 2048
-#define error_message_w(CODE, BUF, BUF_SIZE) \
-	strncpy(BUF, krb5_get_error_message(handle ? handle->context : NULL, CODE), BUF_SIZE)
 
 #define LOG_UNAUTH  "Unauthorized request: %s, %s, client=%s, service=%s, addr=%s"
 #define	LOG_DONE    "Request: %s, %s, %s, client=%s, service=%s, addr=%s"
@@ -288,8 +286,10 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
 						arg->passwd);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_create_principal",
 		prime_arg, errbuf,
@@ -356,8 +356,10 @@ create_principal3_2_svc(cprinc3_arg *arg, struct svc_req *rqstp)
 					     arg->passwd);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_create_principal",
 		prime_arg, errbuf, 
@@ -417,8 +419,10 @@ delete_principal_2_svc(dprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = kadm5_delete_principal((void *)handle, arg->princ);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_delete_principal", prime_arg, 
                 errbuf,
@@ -481,8 +485,10 @@ modify_principal_2_svc(mprinc_arg *arg, struct svc_req *rqstp)
 						arg->mask);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_modify_principal",
  	        prime_arg, errbuf,
@@ -558,8 +564,10 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 						arg->dest);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_rename_principal",
 		prime_arg, errbuf,
@@ -637,8 +645,10 @@ get_principal_2_svc(gprinc_arg *arg, struct svc_req *rqstp)
 	 
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, funcname,
 		prime_arg,  
@@ -701,8 +711,10 @@ get_princs_2_svc(gprincs_arg *arg, struct svc_req *rqstp)
 					       &ret.count);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_get_principals",
 		prime_arg,  
@@ -768,8 +780,10 @@ chpass_principal_2_svc(chpass_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_CHANGEPW) {
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_chpass_principal", 
 	       prime_arg, errbuf,
@@ -841,8 +855,10 @@ chpass_principal3_2_svc(chpass3_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_CHANGEPW) {
 	if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_chpass_principal", 
 	       prime_arg, errbuf, 
@@ -905,8 +921,10 @@ setv4key_principal_2_svc(setv4key_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_SETKEY) {
 	if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_setv4key_principal", 
 	       prime_arg, errbuf, 
@@ -969,8 +987,10 @@ setkey_principal_2_svc(setkey_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_SETKEY) {
 	if( ret.code == 0 )
 	    strcpy (errbuf, "success");
-	else
-	    error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	    strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	    errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_setkey_principal", 
 	       prime_arg, errbuf, 
@@ -1036,8 +1056,10 @@ setkey_principal3_2_svc(setkey3_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_SETKEY) {
 	if( ret.code == 0 )
 	    strcpy (errbuf, "success");
-	else
-	    error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	    strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	    errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_setkey_principal", 
 	       prime_arg, errbuf, 
@@ -1120,8 +1142,10 @@ chrand_principal_2_svc(chrand_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_CHANGEPW) {
 	if( ret.code == 0 )
 	    strcpy (errbuf, "success");
-	else
-	    error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	    strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	    errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, funcname,
 	       prime_arg, errbuf, 
@@ -1208,8 +1232,10 @@ chrand_principal3_2_svc(chrand3_arg *arg, struct svc_req *rqstp)
     if(ret.code != KADM5_AUTH_CHANGEPW) {
 	if( ret.code == 0 )
 	    strcpy (errbuf, "success");
-	else
-	    error_message_w (ret.code, errbuf, sizeof(errbuf));
+	else {
+	    strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	    errbuf[sizeof(errbuf)-1] = 0;
+	}
 
 	krb5_klog_syslog(LOG_NOTICE, LOG_DONE, funcname,
 	       prime_arg, errbuf, 
@@ -1266,8 +1292,10 @@ create_policy_2_svc(cpol_arg *arg, struct svc_req *rqstp)
 					     arg->mask);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_create_policy",
 		((prime_arg == NULL) ? "(null)" : prime_arg),
@@ -1322,8 +1350,10 @@ delete_policy_2_svc(dpol_arg *arg, struct svc_req *rqstp)
 	 ret.code = kadm5_delete_policy((void *)handle, arg->name);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_delete_policy",
 		((prime_arg == NULL) ? "(null)" : prime_arg),
@@ -1379,8 +1409,10 @@ modify_policy_2_svc(mpol_arg *arg, struct svc_req *rqstp)
 					     arg->mask);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_modify_policy",
 		((prime_arg == NULL) ? "(null)" : prime_arg),	    
@@ -1465,8 +1497,10 @@ get_policy_2_svc(gpol_arg *arg, struct svc_req *rqstp)
 	 
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, funcname,
 		((prime_arg == NULL) ? "(null)" : prime_arg),
@@ -1530,8 +1564,10 @@ get_pols_2_svc(gpols_arg *arg, struct svc_req *rqstp)
 					       &ret.count);
 	 if( ret.code == 0 )
 	     strcpy (errbuf, "success");
-	 else
-	     error_message_w (ret.code, errbuf, sizeof(errbuf));
+	 else {
+	     strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	     errbuf[sizeof(errbuf)-1] = 0;
+	 }
 
 	 krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_get_policies",
 		prime_arg,  
@@ -1574,8 +1610,10 @@ getprivs_ret * get_privs_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
      ret.code = kadm5_get_privs((void *)handle, &ret.privs);
      if( ret.code == 0 )
 	 strcpy (errbuf, "success");
-     else
-	 error_message_w (ret.code, errbuf, sizeof(errbuf));
+     else {
+	 strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	 errbuf[sizeof(errbuf)-1] = 0;
+     }
 
      krb5_klog_syslog(LOG_NOTICE, LOG_DONE, "kadm5_get_privs",
 	    client_name.value, 
@@ -1614,8 +1652,10 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 	  goto exit_func;
      }
 
-     if (ret.code != 0)
-	 error_message_w (ret.code, errbuf, sizeof(errbuf));
+     if (ret.code != 0) {
+	 strncpy (errbuf, krb5_get_error_message(handle ? handle->context : NULL, ret.code), sizeof(errbuf));
+	 errbuf[sizeof(errbuf)-1] = 0;
+     }
      krb5_klog_syslog(LOG_NOTICE, LOG_DONE ", flavor=%d",
 	    (ret.api_version == KADM5_API_VERSION_1 ?
 	     "kadm5_init (V1)" : "kadm5_init"),
