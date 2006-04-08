@@ -1,12 +1,3 @@
-2006-03-21  Ken Raeburn  <raeburn@mit.edu>
-
-	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add kdb5 library.
-
-2006-01-29  Sam Hartman  <hartmans@mit.edu>
-
-	* db2_exp.c (hack_init): Update prototype to match krb5_db2_lib_init
-
-
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.
