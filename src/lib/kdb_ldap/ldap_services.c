@@ -55,7 +55,7 @@ krb5_ldap_create_service(context, service, mask)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    char                        errbuf[KRB5_MAX_ERR_STR];
+    char                        errbuf[1024];
 
     /* validate the input parameter */
     if (service == NULL || service->servicedn == NULL) {
