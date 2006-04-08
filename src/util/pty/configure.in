@@ -50,10 +50,18 @@ AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY,1,[Define if openpty is provi
 AC_TYPE_MODE_T
 AC_CHECK_TYPE(time_t, long)
 AC_CHECK_FUNCS(setreuid gettosbyname setsid ttyname line_push ptsname grantpt openpty)
-AC_CHECK_HEADERS(unistd.h stdlib.h string.h libutil.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h sys/wait.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h util.h)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h libutil.h pty.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h sys/wait.h ttyent.h lastlog.h sys/select.h util.h sys/stream.h)
 AC_CHECK_FUNCS(waitpid)
 CHECK_SIGNALS
 AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define for POSIX termios interface]))])
+
+AC_CHECK_HEADER(sys/ptyvar.h, [], [],
+[#if HAVE_SYS_STREAM_H
+#include <sys/stream.h>
+#endif
+#if HAVE_SYS_TTY_H
+#include <sys/tty.h>
+#endif])
 
 ######################################################################
 #

@@ -1,3 +1,7 @@
+2006-04-05  Tom Yu  <tlyu@mit.edu>
+
+	* configure.in: Add prerequisites for sys/ptyvar.h.
+
 2006-03-31  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Always provide three arguments to AC_DEFINE.
