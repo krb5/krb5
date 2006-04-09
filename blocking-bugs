@@ -37,3 +37,15 @@ Probably-non-blocking issues with this code:
   Or are we stuck building executables that will do the right thing
   with a non-eDirectory realm or with an eDirectory realm but not
   both?
+
+To be investigated:
+
+* Does lib/kdb_ldap need to duplicate the supported-enctype list?  I
+  think we can retrieve this from the krb5 library, if the database
+  doesn't have the information.
+
+* How about supported salt types?  I don't think we have a separate
+  list for those, so it's probably okay for now.
+
+* Are all the new error codes needed?  Is "can't access Kerberos
+  database" just a special case of "server internal error"?
