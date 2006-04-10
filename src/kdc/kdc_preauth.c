@@ -516,7 +516,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     krb5_key_data *		client_key;
     krb5_int32			start;
     krb5_timestamp		timenow;
-    krb5_error_code		decrypt_err;
+    krb5_error_code		decrypt_err = 0;
 
     scratch.data = pa->contents;
     scratch.length = pa->length;

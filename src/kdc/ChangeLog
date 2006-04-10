@@ -1,3 +1,7 @@
+2006-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdc_preauth.c (verify_enc_timestamp): Initialize decrypt_err.
+
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.
