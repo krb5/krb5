@@ -1,8 +1,8 @@
 thisconfigdir=.
-myfulldir=util/pty
+myfulldir=appl/libpty
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-RELDIR=../util/pty
+RELDIR=../appl/libpty
 
 SED = sed
 

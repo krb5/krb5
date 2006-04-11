@@ -17,5 +17,5 @@ dnl
 KRB5_GETSOCKNAME_ARGS
 KRB5_GETPEERNAME_ARGS
 KRB5_BUILD_PROGRAM
-AC_CONFIG_SUBDIRS(bsd gssftp telnet)
+AC_CONFIG_SUBDIRS(libpty bsd gssftp telnet)
 V5_AC_OUTPUT_MAKEFILE(. sample sample/sclient sample/sserver simple simple/client simple/server gss-sample user_user)
