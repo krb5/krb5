@@ -1,3 +1,8 @@
+2006-04-10  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb5.c (kdb_unlock_lib_lock, kdb_destroy_lib_lock): Cast 0 to
+	void to silence compiler warning.
+
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>
 
 	* Makefile.in (DEFS): Make empty.

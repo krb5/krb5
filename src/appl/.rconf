@@ -1,4 +1,0 @@
-ignore telnet.90.09.14
-ignore *.TXT
-link arpa
-ignore old-telnet

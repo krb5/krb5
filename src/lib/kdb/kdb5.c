@@ -98,9 +98,9 @@ kdb_unlock_list()
 }
 
 #define kdb_init_lib_lock(a) 0
-#define kdb_destroy_lib_lock(a) 0
+#define kdb_destroy_lib_lock(a) (void)0
 #define kdb_lock_lib_lock(a, b) 0
-#define kdb_unlock_lib_lock(a, b) 0
+#define kdb_unlock_lib_lock(a, b) (void)0
 
 /* Caller must free result*/
 

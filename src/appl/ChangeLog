@@ -1,3 +1,8 @@
+2006-04-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* libpty: Directory moved from util/pty.
+	* configure.in: Configure libpty.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* configure.in: Supply comment template in AC_DEFINE calls.

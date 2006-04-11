@@ -1,5 +1,8 @@
 2006-04-08  Ken Raeburn  <raeburn@mit.edu>
 
+	* kadm_net.c (kadm_cli_send): Use 0, not NULL, when checking
+	numeric error codes.
+
 	* fakeenv.c: Unused file deleted.
 
 2006-04-03  Ken Raeburn  <raeburn@mit.edu>

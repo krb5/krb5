@@ -60,6 +60,18 @@
 
 	
 
+2006-04-11  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in: Don't configure pty library.  Use one invocation
+	of AC_CONFIG_SUBDIRS instead of two in a row.
+
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* aclocal.m4 (CONFIG_RULES): Don't define KRB5_PRIVATE or
+	KRB5_DEPRECATED.
+	(KRB5_AC_CHECK_TYPE_WITH_HEADERS): Use quotes around tr
+	arguments to prevent shell substitutions.
+
 2006-04-05  Tom Yu  <tlyu@mit.edu>
 
 	* configure.in: Add prerequisites (application-defined macros) for

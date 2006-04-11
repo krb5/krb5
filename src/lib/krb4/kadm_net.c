@@ -191,7 +191,7 @@ kadm_cli_send(Kadm_Client *client_parm,
     cksum = quad_cksum(priv_pak, NULL, priv_len, 0, &sess_key);
 #endif
     /* XXX cast unsigned->signed */
-    if ((retdat = krb_mk_req_creds(&authent, &client_parm->creds, (long)cksum)) != NULL) {
+    if ((retdat = krb_mk_req_creds(&authent, &client_parm->creds, (long)cksum)) != 0) {
 	/* authenticator? */
 	RET_N_FREE(retdat);
     }
@@ -228,7 +228,7 @@ kadm_cli_send(Kadm_Client *client_parm,
     /* need to decode the ret_dat */
     if ((retdat = krb_rd_priv(*ret_dat, (u_long)*ret_siz, sess_sched,
 			      (C_Block *)sess_key, &client_parm->admin_addr,
-			      &client_parm->my_addr, &mdat)) != NULL)
+			      &client_parm->my_addr, &mdat)) != 0)
 	RET_N_FREE2(retdat);
     if (mdat.app_length < KADM_VERSIZE + 4)
 	/* too short! */

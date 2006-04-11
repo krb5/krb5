@@ -7,7 +7,7 @@ mydir=util
 ##WIN32### below in the 'all-windows' target anyways, so just hide this.
 ##WIN32##!if 0
 LOCAL_SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
-	profile pty send-pr
+	profile send-pr
 ##WIN32##!endif
 BUILDTOP=$(REL)..
 

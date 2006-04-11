@@ -4,6 +4,14 @@
 	and kdb5 to MAKE_DYNOBJ_COMMAND.
 
 
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* shlib.conf (*-*-linux*): Use linker flag --as-needed when
+	building shared libraries.
+
+	* pre.in (ALL_CFLAGS): Always define KRB5_DEPRECATED and
+	KRB5_PRIVATE.
+
 2006-03-27  Ken Raeburn  <raeburn@mit.edu>
 
 	* wconfig.pl: New file.
