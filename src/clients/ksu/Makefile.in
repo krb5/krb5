@@ -100,4 +100,5 @@ $(OUTPRE)xmalloc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   ksu.h xmalloc.c
-$(OUTPRE)setenv.$(OBJEXT): setenv.c
+$(OUTPRE)setenv.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  setenv.c
