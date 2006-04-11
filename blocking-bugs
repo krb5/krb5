@@ -3,23 +3,29 @@
 This is a list of blocking bugs that must be addressed before these
 changes are committed to the trunk:
 
-* ?
+* Per discussion with Sam: Merge the not-actually-LDAP bits to the
+  trunk, keep working a bit on the LDAP bits.
+
+* Move LDAP bits (library, ldap-util) into plugin tree, to collect
+  them all in one place.
+
+* Re-evaluate split between plugin and library; if anything is used
+  only by the plugin, move it there.
+
+* Remove mutex hacks and assume that the LDAP code either is already
+  thread-safe, or will be made so when we also get patches to make the
+  KDC multi-threaded.
 
 Probably-non-blocking issues with this code:
 
-* (non-blocking) Do we want --with-ldap or --enable-ldap?  Should
-  eDirectory be a separate option?
+* (non-blocking) Do we want --with-ldap or --enable-ldap?  Likewise
+  for edirectory.  Leaning towards --with.
 
 * The export list needs to match the provided symbols.  Problem is,
   the openldap and edirectory cases provide two different sets of
   symbols.  For now, I've set the list to that used in the openldap
   case.  Longer term, perhaps stubs should be provided for the extra
   names needed in the edirectory case.
-
-* (non-blocking) It appears that the eDirectory code as submitted --
-  well, as Ken got it from Sam -- may not have been tested.  Case in
-  point: It looks like it'll add "HAVE_EDIRECTORY" (*without* "-D" in
-  front) to the compilation flags in a couple of directories.
 
 * Various symbols in the kdb_ldap code duplicate symbols in the kdb5
   library.  The kdb_ldap library needs to link against the kdb5
