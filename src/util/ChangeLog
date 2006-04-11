@@ -1,5 +1,7 @@
 2006-04-11  Ken Raeburn  <raeburn@mit.edu>
 
+	* Sanitize: Removed.
+
 	* pty: Directory moved to appl/libpty.
 	* Makefile.in (LOCAL_SUBDIRS): Remove pty.
 
