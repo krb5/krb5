@@ -1,9 +1,3 @@
-2006-03-21  Ken Raeburn  <raeburn@mit.edu>
-
-	* shlib.conf (*-*-darwin*): Add dylib_file options for krb5support
-	and kdb5 to MAKE_DYNOBJ_COMMAND.
-
-
 2006-04-08  Ken Raeburn  <raeburn@mit.edu>
 
 	* shlib.conf (*-*-linux*): Use linker flag --as-needed when
