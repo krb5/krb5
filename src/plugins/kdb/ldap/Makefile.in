@@ -1,6 +1,6 @@
 thisconfigdir=../../..
-myfulldir=plugins/kdb/kdb_ldap
-mydir=plugins/kdb/kdb_ldap
+myfulldir=plugins/kdb/ldap
+mydir=plugins/kdb/ldap
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -16,7 +16,7 @@ LIBBASE=kldap
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
-RELDIR=../plugins/kdb/kdb_ldap
+RELDIR=../plugins/kdb/ldap
 # Depends on libk5crypto and libkrb5
 # Also on gssrpc, for xdr stuff.
 SHLIB_EXPDEPS = \
