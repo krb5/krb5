@@ -55,18 +55,5 @@ AC_SUBST(DO_ALL)
 KRB5_BUILD_PROGRAM
 KRB5_AC_PRIOCNTL_HACK
 dnl
-if test -n "$OPENLDAP_PLUGIN"; then
-  ldap_util_dir=ldap_util
-else
-  ldap_util_dir=""
-fi
-AC_SUBST(ldap_util_dir)
-dnl
-DEF_EDIR=""
-if test "$OPENLDAP_PLUGIN" == "EDIRECTORY" ; then
-  DEF_EDIR="HAVE_EDIRECTORY"
-fi
-AC_SUBST(DEF_EDIR) 
-dnl
 K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
 V5_AC_OUTPUT_MAKEFILE(. cli dbutil ldap_util passwd passwd/unit-test ktutil server  testing testing/scripts testing/util)

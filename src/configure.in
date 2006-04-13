@@ -634,6 +634,7 @@ ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
   AC_CONFIG_SUBDIRS(lib/kdb_ldap)
   K5_GEN_MAKEFILE(plugins/kdb/ldap)
+  K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
   ldap_plugin_dir=plugins/kdb/ldap
   ldap_lib=kdb_ldap
 fi
