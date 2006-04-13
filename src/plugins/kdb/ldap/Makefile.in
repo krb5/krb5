@@ -36,16 +36,9 @@ SRCS= 	$(srcdir)/ldap_exp.c
 STOBJLISTS=OBJS.ST
 STLIBOBJS= ldap_exp.o
 
-all-unix:: $(LIBBASE)$(SO_EXT) lib$(LIBBASE)$(SO_EXT)
+all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
-
-lib$(LIBBASE)$(SO_EXT): $(LIBBASE)$(SO_EXT)
-	ln -sf $(LIBBASE)$(SO_EXT) lib$(LIBBASE)$(SO_EXT)
-#	$(CC) -shared -o $@ -L$(TOPLIBD) $^ -ldb $(SHLIB_EXPLIBS)
-
-clean::
-	$(RM) lib$(LIBBASE)$(SO_EXT) ldap_exp.o
 
 # @libnover_frag@
 # @libobj_frag@
