@@ -1,7 +1,7 @@
 thisconfigdir=./..
 myfulldir=lib
 mydir=lib
-LOCAL_SUBDIRS=crypto krb5 des425 @KRB4@ gssapi rpc kdb kadm5 apputils @ldap_lib@
+LOCAL_SUBDIRS=crypto krb5 des425 @KRB4@ gssapi rpc kdb kadm5 apputils
 BUILDTOP=$(REL)..
 
 all-unix::

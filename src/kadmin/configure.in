@@ -56,4 +56,4 @@ KRB5_BUILD_PROGRAM
 KRB5_AC_PRIOCNTL_HACK
 dnl
 K5_GEN_FILE(testing/scripts/env-setup.sh:testing/scripts/env-setup.shin)
-V5_AC_OUTPUT_MAKEFILE(. cli dbutil ldap_util passwd passwd/unit-test ktutil server  testing testing/scripts testing/util)
+V5_AC_OUTPUT_MAKEFILE(. cli dbutil passwd passwd/unit-test ktutil server  testing testing/scripts testing/util)

@@ -9,10 +9,10 @@ PROG_RPATH=$(KRB5_LIBDIR)
 DEFS = @DEFS@
 MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
 
-LOCAL_SUBDIRS= ldap_util
+LOCAL_SUBDIRS= libkdb_ldap ldap_util
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb \
-	-I$(srcdir)/../../../lib/kdb_ldap
+	-I$(srcdir)/libkdb_ldap
 
 LIBBASE=kldap
 LIBMAJOR=0
@@ -63,7 +63,7 @@ ldap_exp.so ldap_exp.po $(OUTPRE)ldap_exp.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  $(SRCTOP)/lib/kdb_ldap/kdb_ldap.h $(SRCTOP)/lib/kdb_ldap/ldap_krbcontainer.h \
-  $(SRCTOP)/lib/kdb_ldap/ldap_principal.h $(SRCTOP)/lib/kdb_ldap/ldap_pwd_policy.h \
-  $(SRCTOP)/lib/kdb_ldap/ldap_realm.h $(SRCTOP)/lib/kdb_ldap/ldap_tkt_policy.h \
+  $(srcdir)/libkdb_ldap/kdb_ldap.h $(srcdir)/libkdb_ldap/ldap_krbcontainer.h \
+  $(srcdir)/libkdb_ldap/ldap_principal.h $(srcdir)/libkdb_ldap/ldap_pwd_policy.h \
+  $(srcdir)/libkdb_ldap/ldap_realm.h $(srcdir)/libkdb_ldap/ldap_tkt_policy.h \
   ldap_exp.c

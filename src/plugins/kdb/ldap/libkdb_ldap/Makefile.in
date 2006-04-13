@@ -1,7 +1,7 @@
 thisconfigdir=.
-myfulldir=lib/kdb_ldap
+myfulldir=plugins/kdb/ldap/libkdb_ldap
 mydir=.
-BUILDTOP=$(REL)..$(S)..
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -17,13 +17,12 @@ DEFS = @DEFS@ -DHAVE_LDAP_H \
 	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
 
-#LOCALINCLUDES = -I.. -I$(SRCTOP)/include
-LOCALINCLUDES = -I$(srcdir)/../kdb
+LOCALINCLUDES = -I$(SRCTOP)/lib/kdb
 
 LIBBASE=kdb_ldap
 LIBMAJOR=1
 LIBMINOR=0
-RELDIR=../lib/kdb_ldap
+RELDIR=../plugins/kdb/ldap/libkdb_ldap
 # Depends on libk5crypto and libkrb5
 # Also on gssrpc, for xdr stuff.
 SHLIB_EXPDEPS = \
@@ -90,7 +89,7 @@ kdb_ldap.so kdb_ldap.po $(OUTPRE)kdb_ldap.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.c kdb_ldap.h ldap_err.h ldap_krbcontainer.h \
   ldap_misc.h ldap_realm.h ldap_services.h
 kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
@@ -100,7 +99,7 @@ kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h kdb_ldap_conn.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_service_stash.h \
   ldap_services.h
@@ -111,7 +110,7 @@ ldap_realm.so ldap_realm.po $(OUTPRE)ldap_realm.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.h ldap_realm.c \
   ldap_realm.h ldap_services.h ldap_tkt_policy.h
@@ -122,7 +121,7 @@ ldap_krbcontainer.so ldap_krbcontainer.po $(OUTPRE)ldap_krbcontainer.$(OBJEXT): 
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.c \
   ldap_krbcontainer.h ldap_main.h ldap_misc.h ldap_realm.h \
   ldap_services.h
@@ -139,7 +138,7 @@ ldap_principal.so ldap_principal.po $(OUTPRE)ldap_principal.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.c ldap_principal.h \
   ldap_realm.h ldap_services.h ldap_tkt_policy.h princ_xdr.h
@@ -156,7 +155,7 @@ ldap_principal2.so ldap_principal2.po $(OUTPRE)ldap_principal2.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.h ldap_principal2.c \
   ldap_pwd_policy.h ldap_realm.h ldap_services.h ldap_tkt_policy.h \
@@ -168,7 +167,7 @@ ldap_pwd_policy.so ldap_pwd_policy.po $(OUTPRE)ldap_pwd_policy.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_pwd_policy.c ldap_pwd_policy.h \
   ldap_realm.h ldap_services.h
@@ -179,7 +178,7 @@ ldap_misc.so ldap_misc.po $(OUTPRE)ldap_misc.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_krbcontainer.h ldap_misc.c \
   ldap_misc.h ldap_realm.h ldap_services.h
 ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): \
@@ -189,7 +188,7 @@ ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_handle.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
 ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT): \
@@ -199,7 +198,7 @@ ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h \
   ldap_tkt_policy.c ldap_tkt_policy.h
@@ -210,7 +209,7 @@ ldap_services.so ldap_services.po $(OUTPRE)ldap_services.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.c \
   ldap_services.h
@@ -221,7 +220,7 @@ ldap_service_rights.so ldap_service_rights.po $(OUTPRE)ldap_service_rights.$(OBJ
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_service_rights.c \
   ldap_services.h
@@ -238,7 +237,7 @@ princ_xdr.so princ_xdr.po $(OUTPRE)princ_xdr.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_krbcontainer.h ldap_principal.h ldap_realm.h \
   ldap_tkt_policy.h princ_xdr.c princ_xdr.h
 ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT): \
@@ -248,7 +247,7 @@ ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT): \
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_fetch_mkey.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
 ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT): \
@@ -258,7 +257,7 @@ ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT
   $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(srcdir)/../kdb/kdb5.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
   kdb_ldap.h ldap_handle.h ldap_krbcontainer.h ldap_main.h \
   ldap_misc.h ldap_realm.h ldap_service_stash.c ldap_service_stash.h \
   ldap_services.h
