@@ -54,6 +54,7 @@
  */
 
 #include "k5-int.h"
+#include "kdb.h"
 
 /*
  * Encrypt a key for storage in the database.  "eblock" is used

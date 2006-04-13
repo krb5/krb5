@@ -52,6 +52,7 @@
  */
 
 #include "k5-int.h"
+#include "kdb.h"
 #include <stdio.h>
 #include <errno.h>
 

@@ -186,6 +186,9 @@
 #define	KRB5_ADM_KT_KEY_KEY	4
 #define	KRB5_ADM_KT_NCOMPS	5
 
+/* for krb5_key_salt_tuple */
+#include "kdb.h"
+
 /*
  * Data structure returned by krb5_read_realm_params()
  */

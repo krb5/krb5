@@ -9,6 +9,7 @@
 #include <utime.h>
 #include <utime.h>
 #include <k5-int.h>
+#include "kdb.h"
 #include "err_handle.h"
 
 #define KDB_MAX_DB_NAME 128
