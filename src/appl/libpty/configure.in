@@ -27,10 +27,6 @@ ac_cv_func_setsid=no # setsid doesn't do the right thing under Ultrix even thoug
 krb5_cv_has_streams=no
 ;;
 alpha*-dec-osf*)
-	AC_CHECK_LIB(security,main,
-		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid is provided by the security library])
-		LOGINLIBS="$LOGINLIBS -lsecurity"
-	)
 	AC_MSG_RESULT(will open ctty prior to revoke due to OSF/1 lossage)
 	AC_DEFINE(REVOKE_NEEDS_OPEN,1,[Define if ctty needs to be opened before revoke as on OSF/1])
 	;;
@@ -43,8 +39,6 @@ alpha*-dec-osf*)
      krb5_cv_has_streams=no
      ;;
 esac
-dnl
-AC_SUBST(LOGINLIBS)
 dnl
 AC_CHECK_LIB(util,openpty, [AC_DEFINE(HAVE_OPENPTY,1,[Define if openpty is provided in util library]) LIBS="$LIBS -lutil"])
 AC_TYPE_MODE_T
