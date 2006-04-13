@@ -64,6 +64,7 @@ struct salttype_lookup_entry {
  * Lookup tables.
  */
 
+#include "kdb.h"
 static const struct salttype_lookup_entry salttype_table[] = {
 /* salt type			input specifier	output string  */
 /*-----------------------------	--------------- ---------------*/

@@ -1,6 +1,8 @@
 #ifndef _KDB2_XDR_H
 #define _KDB2_XDR_H
 
+#include "kdb.h"
+
 krb5_error_code
 krb5_encode_princ_dbkey( krb5_context context,
 			 krb5_data  *key,

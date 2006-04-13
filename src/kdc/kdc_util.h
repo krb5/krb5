@@ -29,6 +29,8 @@
 #ifndef __KRB5_KDC_UTIL__
 #define __KRB5_KDC_UTIL__
 
+#include "kdb.h"
+
 typedef struct _krb5_fulladdr {
     krb5_address *	address;
     krb5_ui_4		port;

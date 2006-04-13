@@ -1,5 +1,0 @@
-Wed Mar 29 08:58:37 1995  John Gilmore  (gnu at toad.com)
-
-	* def.h:  Replace STDARG_PROTOTYPES with HAVE_STDARG_H.
-
-

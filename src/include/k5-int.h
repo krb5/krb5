@@ -765,11 +765,6 @@ krb5_error_code krb5_encrypt_helper
  */
 
 /*
- * Include the KDB definitions.
- */
-#include "kdb.h"
-
-/*
  * Begin "libos.h"
  */
 #ifndef KRB5_LIBOS__

@@ -1,8 +1,0 @@
-2004-12-15  Jeffrey Altman <jaltman@mit.edu>
-
-        * Makefile.in: correct the makefile to build kdeltkt, not kvno
-
-2004-08-19  Jeffrey Altman <jaltman@mit.edu>
-
-	* kdeltkt.c, kdeltkt.M: Create a new application.
-

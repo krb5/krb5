@@ -9,6 +9,7 @@
 #include <utime.h>
 #include <utime.h>
 #include <k5-int.h>
+#include "kdb.h"
 
 #define KDB_MAX_DB_NAME 128
 #define KDB_REALM_SECTION  "realms"

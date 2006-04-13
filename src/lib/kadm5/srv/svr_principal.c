@@ -1440,7 +1440,7 @@ kadm5_chpass_principal_3(void *server_handle,
 	goto done;
 
     /* key data and attributes changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES | KADM5_CPW_FUNCTION;
+    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES /* | KADM5_CPW_FUNCTION */;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
@@ -1590,7 +1590,7 @@ kadm5_randkey_principal_3(void *server_handle,
     }	 
     
     /* key data changed, let the database provider know */
-    kdb.mask = KADM5_KEY_DATA | KADM5_RANDKEY_USED;
+    kdb.mask = KADM5_KEY_DATA /* | KADM5_RANDKEY_USED */;
 
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;

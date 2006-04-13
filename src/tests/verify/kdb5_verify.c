@@ -28,6 +28,7 @@
  */
 
 #include "k5-int.h"
+#include "kdb.h"
 #include "com_err.h"
 #include <ss/ss.h>
 #include <stdio.h>
