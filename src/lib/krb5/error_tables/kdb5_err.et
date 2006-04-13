@@ -71,5 +71,6 @@ ec KRB5_KDB_NO_MATCHING_KEY,	"No matching key in entry"
 ec KRB5_KDB_DBTYPE_NOTFOUND,	"Unable to find requested database type"
 ec KRB5_KDB_DBTYPE_NOSUP,	"Database type not supported"
 ec KRB5_KDB_DBTYPE_INIT,	"Database library failed to initialize"
+ec KRB5_KDB_SERVER_INTERNAL_ERR,   "Server error"
 
 end

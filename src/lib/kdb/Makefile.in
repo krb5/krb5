@@ -25,8 +25,6 @@ SHLIB_EXPLIBS=-lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-all:: 
-
 adb_err.$(OBJEXT): adb_err.c
 adb_err.c adb_err.h: $(srcdir)/adb_err.et
 
@@ -37,7 +35,6 @@ SRCS= \
 	$(srcdir)/kdb_default.c \
 	$(srcdir)/kdb_cpw.c \
 	adb_err.c \
-	$(srcdir)/err_handle.c \
 	$(srcdir)/keytab.c
 
 STOBJLISTS=OBJS.ST
@@ -48,7 +45,6 @@ STLIBOBJS= \
 	kdb_default.o \
 	kdb_cpw.o \
 	adb_err.o \
-	err_handle.o \
 	keytab.o
 
 all-unix:: all-liblinks
@@ -70,7 +66,7 @@ kdb5.so kdb5.po $(OUTPRE)kdb5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  adb_err.h err_handle.h kdb5.c kdb5.h
+  adb_err.h kdb5.c kdb5.h
 encrypt_key.so encrypt_key.po $(OUTPRE)encrypt_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -105,14 +101,6 @@ kdb_cpw.so kdb_cpw.po $(OUTPRE)kdb_cpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   kdb_cpw.c
 adb_err.so adb_err.po $(OUTPRE)adb_err.$(OBJEXT): $(COM_ERR_DEPS) \
   adb_err.c
-err_handle.so err_handle.po $(OUTPRE)err_handle.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  err_handle.c err_handle.h
 keytab.so keytab.po $(OUTPRE)keytab.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \

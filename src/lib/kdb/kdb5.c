@@ -273,7 +273,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     kdb_setup_opt_functions(*lib);
 
-    if ((status = (*lib)->vftabl.init_library(krb5_set_err))) {
+    if ((status = (*lib)->vftabl.init_library())) {
 	/* ERROR. library not initialized cleanly */
 	sprintf(buf, "%s library initialization failed, error code %ld\n",
 		lib_name, status);
@@ -365,14 +365,17 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
 		kdb_setup_opt_functions(*lib);
 
-		if ((status = (*lib)->vftabl.init_library(krb5_set_err))) {
+		if ((status = (*lib)->vftabl.init_library())) {
 		    /* ERROR. library not initialized cleanly */
 		    goto clean_n_exit;
 
 		}
 	    } else {
+		err_str = dlerror();
+		if(err_str == NULL)
+		    err_str = "";
 		status = KRB5_KDB_DBTYPE_INIT;
-		krb5_set_err(kcontext, krb5_err_have_str, status, dlerror());
+		krb5_set_error_message (kcontext, status, "%s", err_str);
 		goto clean_n_exit;
 	    }
 	    break;
@@ -385,8 +388,8 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     if (!(*lib)->dl_handle) {
 	/* library not found in the given list. Error str is already set */
-      status = KRB5_KDB_DBTYPE_NOTFOUND;
-	krb5_set_err(kcontext, krb5_err_have_str, status, err_str);
+	status = KRB5_KDB_DBTYPE_NOTFOUND;
+	krb5_set_error_message (kcontext, status, "%s", err_str);
 	goto clean_n_exit;
     }
 
@@ -568,27 +571,19 @@ kdb_free_lib_handle(krb5_context kcontext)
 /*
  *      External functions... DAL API
  */
-void
-krb5_db_clr_error()
-{
-    krb5_clr_error();
-}
-
 krb5_error_code
 krb5_db_open(krb5_context kcontext, char **db_args, int mode)
 {
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm ? kcontext->default_realm : "[UNSET]");
-	status = -1;
-	krb5_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
 
@@ -658,15 +653,13 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm);
-	status = -1;
-	krb5_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
 
@@ -731,15 +724,13 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     krb5_error_code status = 0;
     char   *section = NULL;
     kdb5_dal_handle *dal_handle;
-    char    buf[KRB5_MAX_ERR_STR];
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
-	sprintf(buf,
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
 		"unable to determine configuration section for realm %s\n",
 		kcontext->default_realm);
-	status = -1;
-	krb5_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
     }
 

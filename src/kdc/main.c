@@ -240,9 +240,11 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
 
     /* first open the database  before doing anything */
 #ifdef KRBCONF_KDC_MODIFIES_KDB    
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, KRB5_KDB_OPEN_RW))) {
+    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC))) {
 #else
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, KRB5_KDB_OPEN_RO))) {
+    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+			     KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC))) {
 #endif
 	com_err(progname, kret,
 		"while initializing database for realm %s", realm);
@@ -590,7 +592,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    com_err(argv[0], retval,
 		    "while attempting to retrieve default realm");
 	    fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
-		     argv[0], error_message (retval));
+		     argv[0], krb5_get_error_message(kcontext, retval));
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {

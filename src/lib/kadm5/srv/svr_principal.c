@@ -199,7 +199,7 @@ kadm5_create_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     /*
      * Argument sanity checking, and opening up the DB
@@ -380,6 +380,9 @@ kadm5_create_principal_3(void *server_handle,
 	}
     }
 
+    /* In all cases key and the principal data is set, let the database provider know */
+    kdb.mask = mask | KADM5_KEY_DATA | KADM5_PRINCIPAL ;
+
     /* store the new db entry */
     ret = kdb_put_entry(handle, &kdb, &adb);
 
@@ -421,7 +424,7 @@ kadm5_delete_principal(void *server_handle, krb5_principal principal)
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL)
 	return EINVAL;
@@ -469,7 +472,7 @@ kadm5_modify_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if((mask & KADM5_PRINCIPAL) || (mask & KADM5_LAST_PWD_CHANGE) ||
        (mask & KADM5_MOD_TIME) || (mask & KADM5_MOD_NAME) ||
@@ -628,6 +631,9 @@ kadm5_modify_principal(void *server_handle,
 	 }
     }
 
+    /* let the mask propagate to the database provider */
+    kdb.mask = mask;
+
     ret = kdb_put_entry(handle, &kdb, &adb);
     if (ret) goto done;
 
@@ -656,7 +662,7 @@ kadm5_rename_principal(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (source == NULL || target == NULL)
 	return EINVAL;
@@ -711,7 +717,7 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     /*
      * In version 1, all the defined fields are always returned.
@@ -1289,7 +1295,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     hist_added = 0;
     memset(&hist, 0, sizeof(hist));
@@ -1433,6 +1439,9 @@ kadm5_chpass_principal_3(void *server_handle,
     if (ret)
 	goto done;
 
+    /* key data and attributes changed, let the database provider know */
+    kdb.mask = KADM5_KEY_DATA | KADM5_ATTRIBUTES /* | KADM5_CPW_FUNCTION */;
+
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 
@@ -1478,12 +1487,12 @@ kadm5_randkey_principal_3(void *server_handle,
     int				ret, last_pwd, have_pol = 0;
     kadm5_server_handle_t	handle = server_handle;
 
-    krb5_db_clr_error();
-
     if (keyblocks)
 	 *keyblocks = NULL;
 
     CHECK_HANDLE(server_handle);
+
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL)
 	return EINVAL;
@@ -1580,6 +1589,9 @@ kadm5_randkey_principal_3(void *server_handle,
 	 }
     }	 
     
+    /* key data changed, let the database provider know */
+    kdb.mask = KADM5_KEY_DATA /* | KADM5_RANDKEY_USED */;
+
     if ((ret = kdb_put_entry(handle, &kdb, &adb)))
 	goto done;
 
@@ -1616,11 +1628,11 @@ kadm5_setv4key_principal(void *server_handle,
     kadm5_server_handle_t	handle = server_handle;
     krb5_key_data               tmp_key_data;
 
-    krb5_db_clr_error();
-
     memset( &tmp_key_data, 0, sizeof(tmp_key_data));
 
     CHECK_HANDLE(server_handle);
+
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL || keyblock == NULL)
 	return EINVAL;
@@ -1797,7 +1809,7 @@ kadm5_setkey_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if (principal == NULL || keyblocks == NULL)
 	return EINVAL;

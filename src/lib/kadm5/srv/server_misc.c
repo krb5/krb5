@@ -25,7 +25,8 @@ adb_policy_init(kadm5_server_handle_t handle)
     if( krb5_db_inited( handle->context ) )
 	return KADM5_OK;
 
-    return krb5_db_open( handle->context, NULL, KRB5_KDB_OPEN_RW );
+    return krb5_db_open( handle->context, NULL, 
+			 KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN );
 }
 
 kadm5_ret_t

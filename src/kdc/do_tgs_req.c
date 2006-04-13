@@ -509,7 +509,7 @@ tgt_again:
 			      sname ? sname : "<unknown server>",
 			      enc_tkt_reply.transited.tr_contents.length,
 			      enc_tkt_reply.transited.tr_contents.data,
-			      error_message (errcode));
+			      krb5_get_error_message(kdc_context, errcode));
     } else
 	krb5_klog_syslog (LOG_INFO, "not checking transit path");
     if (reject_bad_transit
@@ -655,12 +655,12 @@ cleanup:
 			 cname ? cname : "<unknown client>",
 			 sname ? sname : "<unknown server>",
 			 errcode ? ", " : "",
-			 errcode ? error_message(errcode) : "");
+			 errcode ? krb5_get_error_message (kdc_context, errcode) : "");
     }
     
     if (errcode) {
 	if (status == 0)
-	    status = error_message (errcode);
+	    status = krb5_get_error_message (kdc_context, errcode);
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;

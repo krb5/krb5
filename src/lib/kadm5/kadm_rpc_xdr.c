@@ -545,18 +545,6 @@ xdr_generic_ret(XDR *xdrs, generic_ret *objp)
 		return (FALSE);
 	}
 
-	if( xdrs->x_op == XDR_ENCODE )
-	{
-	    char *tmp_str = "Unknown error code";
-	    if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	} else {
-	    if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	}
-
 	return(TRUE);
 }
 
@@ -638,18 +626,6 @@ xdr_gprincs_ret(XDR *xdrs, gprincs_ret *objp)
 			 sizeof(char *), xdr_nullstring)) {
 	       return (FALSE);
 	  }
-     }
-
-     if( xdrs->x_op == XDR_ENCODE )
-     {
-	 char *tmp_str = "Unknown error code";
-	 if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
-     } else {
-	 if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
      }
 
      return (TRUE);
@@ -812,18 +788,6 @@ xdr_chrand_ret(XDR *xdrs, chrand_ret *objp)
 	     }
 	}
 
-	if( xdrs->x_op == XDR_ENCODE )
-	{
-	    char *tmp_str = "Unknown error code";
-	    if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	} else {
-	    if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	}
-
 	return (TRUE);
 }
 
@@ -863,18 +827,6 @@ xdr_gprinc_ret(XDR *xdrs, gprinc_ret *objp)
 		       return (FALSE);
 		  }
 	     }
-	}
-
-	if( xdrs->x_op == XDR_ENCODE )
-	{
-	    char *tmp_str = "Unknown error code";
-	    if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	} else {
-	    if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
 	}
 
 	return (TRUE);
@@ -948,18 +900,6 @@ xdr_gpol_ret(XDR *xdrs, gpol_ret *objp)
 		return (FALSE);
 	}
 
-	if( xdrs->x_op == XDR_ENCODE )
-	{
-	    char *tmp_str = "Unknown error code";
-	    if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	} else {
-	    if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-		return (FALSE);
-	    }
-	}
-
 	return (TRUE);
 }
 
@@ -995,18 +935,6 @@ xdr_gpols_ret(XDR *xdrs, gpols_ret *objp)
 	  }
      }
 
-     if( xdrs->x_op == XDR_ENCODE )
-     {
-	 char *tmp_str = "Unknown error code";
-	 if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
-     } else {
-	 if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
-     }
-
      return (TRUE);
 }
 
@@ -1018,18 +946,6 @@ bool_t xdr_getprivs_ret(XDR *xdrs, getprivs_ret *objp)
      if (! xdr_kadm5_ret_t(xdrs, &objp->code) ||
 	 ! xdr_long(xdrs, &objp->privs))
 	  return FALSE;
-
-     if( xdrs->x_op == XDR_ENCODE )
-     {
-	 char *tmp_str = "Unknown error code";
-	 if(!xdr_string(xdrs, objp->err_str?&objp->err_str:&tmp_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
-     } else {
-	 if(!xdr_string(xdrs, &objp->err_str, (unsigned int)-1 )) {
-	     return (FALSE);
-	 }
-     }
 
      return TRUE;
 }

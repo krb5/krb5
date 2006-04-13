@@ -15,7 +15,6 @@ static char *rcsid = "$Header$";
 #include	<stdlib.h>
 #include	<string.h>
 #include	<errno.h>
-#include    "err_handle.h"
 
 kadm5_ret_t
 kadm5_create_policy(void *server_handle,
@@ -37,10 +36,6 @@ kadm5_create_policy(void *server_handle,
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -63,10 +58,6 @@ kadm5_delete_policy(void *server_handle, char *name)
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -91,10 +82,6 @@ kadm5_modify_policy(void *server_handle,
     if(r == NULL)
 	return KADM5_RPC_ERROR;    
 
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -133,10 +120,6 @@ kadm5_get_policy(void *server_handle, char *name, kadm5_policy_ent_t ent)
 	      memcpy(ent, &r->rec, sizeof(r->rec));
     }
 	 
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }
 
@@ -165,9 +148,5 @@ kadm5_get_policies(void *server_handle,
 	 *pols = NULL;
     }
     
-    if(r->code)
-    {
-	krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-    }
     return r->code;
 }

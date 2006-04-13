@@ -194,13 +194,13 @@ WRAP_K (krb5_db2_db_get_mkey,
 	(context, key));
 
 static krb5_error_code
-hack_init (krb5_set_err_func_t f)
+hack_init ()
 {
     krb5_error_code c;
     c = krb5int_mutex_alloc (&krb5_db2_mutex);
     if (c)
 	return c;
-    return krb5_db2_lib_init (f);
+    return krb5_db2_lib_init ();
 }
 
 static krb5_error_code

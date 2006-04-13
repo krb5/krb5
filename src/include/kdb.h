@@ -122,6 +122,7 @@ typedef struct _krb5_keysalt {
 typedef struct _krb5_db_entry_new {
     krb5_magic 		  magic;		/* NOT saved */
     krb5_ui_2		  len;			
+    krb5_ui_4             mask;                 /* members currently changed/set */	
     krb5_flags 		  attributes;
     krb5_deltat		  max_life;
     krb5_deltat		  max_renewable_life;
@@ -157,7 +158,6 @@ typedef struct __krb5_key_salt_tuple {
     krb5_enctype	ks_enctype;
     krb5_int32		ks_salttype;
 } krb5_key_salt_tuple;
-
 
 #define	KRB5_KDB_MAGIC_NUMBER		0xdbdbdbdb
 #define KRB5_KDB_V1_BASE_LENGTH		38
@@ -204,6 +204,22 @@ extern char *krb5_mkey_pwd_prompt2;
 
 #define KRB5_KDB_OPEN_RW                0
 #define KRB5_KDB_OPEN_RO                1
+
+#ifndef KRB5_KDB_SRV_TYPE_KDC
+#define KRB5_KDB_SRV_TYPE_KDC           0x0100        
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_ADMIN
+#define KRB5_KDB_SRV_TYPE_ADMIN         0x0200  
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_PASSWD
+#define KRB5_KDB_SRV_TYPE_PASSWD        0x0300
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_OTHER
+#define KRB5_KDB_SRV_TYPE_OTHER         0x0400  
+#endif
 
 #define KRB5_KDB_OPT_SET_DB_NAME        0
 #define KRB5_KDB_OPT_SET_LOCK_MODE      1
@@ -373,6 +389,7 @@ krb5_dbe_cpw( krb5_context	  kcontext,
 	      krb5_boolean	  keepold,
 	      krb5_db_entry	* db_entry);
 
+
 krb5_error_code
 krb5_dbe_ark( krb5_context	  context,
 	      krb5_keyblock       * master_key,
@@ -395,7 +412,6 @@ krb5_dbe_apw( krb5_context	  context,
 	      int			  ks_tuple_count,
 	      char 		* passwd,
 	      krb5_db_entry	* db_entry);
-
 
 /* default functions. Should not be directly called */
 /*
@@ -448,7 +464,6 @@ krb5_dbe_def_cpw( krb5_context	  context,
 		  krb5_boolean	  keepold,
 		  krb5_db_entry	* db_entry);
 
-
 krb5_error_code 
 krb5_db_create_policy( krb5_context kcontext, 
 		       osa_policy_ent_t policy);
@@ -477,9 +492,8 @@ void
 krb5_db_free_policy( krb5_context kcontext, 
 		     osa_policy_ent_t policy);
 
-void krb5_db_clr_error(void);
-
 #define KRB5_KDB_DEF_FLAGS	0
 
 #endif /* !defined(_WIN32) */
+
 #endif /* KRB5_KDB5__ */

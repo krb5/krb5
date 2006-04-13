@@ -10,18 +10,34 @@
 #include <utime.h>
 #include <k5-int.h>
 #include "kdb.h"
-#include "err_handle.h"
 
 #define KDB_MAX_DB_NAME 128
 #define KDB_REALM_SECTION  "realms"
 #define KDB_MODULE_POINTER "database_module"
-#define KDB_MODULE_SECTION "db_modules"
+#define KDB_MODULE_DEF_SECTION "dbdefaults"
+#define KDB_MODULE_SECTION "dbmodules"
 #define KDB_LIB_POINTER    "db_library"
 #define KDB_DATABASE_CONF_FILE  DEFAULT_SECURE_PROFILE_PATH
 #define KDB_DATABASE_ENV_PROF KDC_PROFILE_ENV
 
 #define KRB5_KDB_OPEN_RW                0
 #define KRB5_KDB_OPEN_RO                1
+
+#ifndef KRB5_KDB_SRV_TYPE_KDC
+#define KRB5_KDB_SRV_TYPE_KDC           0x0100        
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_ADMIN
+#define KRB5_KDB_SRV_TYPE_ADMIN         0x0200  
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_PASSWD
+#define KRB5_KDB_SRV_TYPE_PASSWD        0x0300
+#endif
+
+#ifndef KRB5_KDB_SRV_TYPE_OTHER
+#define KRB5_KDB_SRV_TYPE_OTHER         0x0400  
+#endif
 
 #define KRB5_KDB_OPT_SET_DB_NAME        0
 #define KRB5_KDB_OPT_SET_LOCK_MODE      1
@@ -50,7 +66,7 @@ typedef struct _kdb_vftabl{
     short int maj_ver;
     short int min_ver;
 
-    krb5_error_code (*init_library)(krb5_set_err_func_t);
+    krb5_error_code (*init_library)();
     krb5_error_code (*fini_library)();
     krb5_error_code (*init_module) ( krb5_context kcontext,
 				     char * conf_section,

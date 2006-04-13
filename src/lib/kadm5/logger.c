@@ -171,6 +171,7 @@ static struct log_entry	def_log_entry;
  * klog_com_err_proc()	- Handle com_err(3) messages as specified by the
  *			  profile.
  */
+static krb5_context err_context;
 static void
 klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
 {
@@ -194,7 +195,8 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     /* If reporting an error message, separate it. */
     if (code) {
         outbuf[sizeof(outbuf) - 1] = '\0';
-	strncat(outbuf, error_message(code), sizeof(outbuf) - 1 - strlen(outbuf));
+
+	strncat(outbuf, krb5_get_error_message (err_context, code), sizeof(outbuf) - 1 - strlen(outbuf));
 	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
     }
     cp = &outbuf[strlen(outbuf)];
@@ -359,6 +361,8 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
     /* Initialize */
     do_openlog = 0;
     log_facility = 0;
+
+    err_context = kcontext;
 
     /*
      * Look up [logging]-><ename> in the profile.  If that doesn't

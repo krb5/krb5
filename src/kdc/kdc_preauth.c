@@ -371,7 +371,8 @@ check_padata (krb5_context context, krb5_db_entry *client,
 				       enc_tkt_reply, *padata);
 	if (retval) {
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
-			      pa_sys->name, error_message (retval));
+			      pa_sys->name,
+			      krb5_get_error_message (context, retval));
 	    if (pa_sys->flags & PA_REQUIRED) {
 		pa_ok = 0;
 		break;
@@ -394,9 +395,10 @@ check_padata (krb5_context context, krb5_db_entry *client,
         !isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH))
        return 0;
 
-    if (!pa_found)
+    if (!pa_found) {
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s",
-			  error_message (retval));
+			  krb5_get_error_message(context, retval));
+    }
 /* The following switch statement allows us
  * to return some preauth system errors back to the client.
  */

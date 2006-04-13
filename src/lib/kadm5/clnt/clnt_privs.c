@@ -79,7 +79,6 @@ static char *rcsid = "$Header$";
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>
 #include    "client_internal.h"
-#include    "err_handle.h"
 
 kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
 {
@@ -92,9 +91,5 @@ kadm5_ret_t kadm5_get_privs(void *server_handle, long *privs)
      else if (r->code == KADM5_OK)
 	  *privs = r->privs;
 
-     if(r->code)
-     {
-	 krb5_set_err( handle->context, krb5_err_have_str, r->code, r->err_str );
-     }
      return r->code;
 }

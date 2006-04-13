@@ -427,17 +427,18 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
 
 errout:
-    if (status)
+    if (status) {
         krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
 			 ktypestr,
 	       fromstring, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",
-	       errcode ? error_message(errcode) : "");
+	       errcode ? krb5_get_error_message (kdc_context, errcode) : "");
+    }
     if (errcode) {
 	if (status == 0)
-	    status = error_message (errcode);
+	    status = krb5_get_error_message (kdc_context, errcode);
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;

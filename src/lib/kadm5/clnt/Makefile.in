@@ -28,7 +28,6 @@ SRCS =	$(srcdir)/clnt_policy.c \
 	$(srcdir)/client_principal.c \
 	$(srcdir)/client_init.c \
 	$(srcdir)/clnt_privs.c \
-	$(srcdir)/err_handle.c \
 	$(srcdir)/clnt_chpass_util.c
 
 OBJS =	\
@@ -37,7 +36,6 @@ OBJS =	\
 	client_principal.$(OBJEXT) \
 	client_init.$(OBJEXT) \
 	clnt_privs.$(OBJEXT) \
-	err_handle.$(OBJEXT) \
 	clnt_chpass_util.$(OBJEXT)
 
 STLIBOBJS = \
@@ -46,10 +44,7 @@ STLIBOBJS = \
 	client_principal.o \
 	client_init.o \
 	clnt_privs.o \
-	err_handle.o \
 	clnt_chpass_util.o
-
-err_handle.o : err_handle.h err_handle.c
 
 all-unix:: includes
 all-unix:: all-liblinks
@@ -95,7 +90,7 @@ clnt_policy.so clnt_policy.po $(OUTPRE)clnt_policy.$(OBJEXT): \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  client_internal.h clnt_policy.c err_handle.h
+  client_internal.h clnt_policy.c
 client_rpc.so client_rpc.po $(OUTPRE)client_rpc.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
@@ -120,7 +115,7 @@ client_principal.so client_principal.po $(OUTPRE)client_principal.$(OBJEXT): \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  client_internal.h client_principal.c err_handle.h
+  client_internal.h client_principal.c
 client_init.so client_init.po $(OUTPRE)client_init.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_krb5.h $(BUILDTOP)/include/gssrpc/auth.h \
@@ -151,10 +146,7 @@ clnt_privs.so clnt_privs.po $(OUTPRE)clnt_privs.$(OBJEXT): \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  client_internal.h clnt_privs.c err_handle.h
-err_handle.so err_handle.po $(OUTPRE)err_handle.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) err_handle.c err_handle.h
+  client_internal.h clnt_privs.c
 clnt_chpass_util.so clnt_chpass_util.po $(OUTPRE)clnt_chpass_util.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \

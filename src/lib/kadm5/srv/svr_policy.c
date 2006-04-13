@@ -47,7 +47,7 @@ kadm5_create_policy(void *server_handle,
 {
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(((kadm5_server_handle_t)server_handle)->context);
 
     if (mask & KADM5_REF_COUNT)
 	return KADM5_BAD_MASK;
@@ -157,7 +157,7 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     if(name == (kadm5_policy_t) NULL)
 	return EINVAL;
@@ -185,7 +185,7 @@ kadm5_modify_policy(void *server_handle,
 {
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(((kadm5_server_handle_t)server_handle)->context);
 
     if (mask & KADM5_REF_COUNT)
 	return KADM5_BAD_MASK;
@@ -266,7 +266,7 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
 
     CHECK_HANDLE(server_handle);
 
-    krb5_db_clr_error();
+    krb5_clear_error_message(handle->context);
 
     /*
      * In version 1, entry is a pointer to a kadm5_policy_ent_t that
