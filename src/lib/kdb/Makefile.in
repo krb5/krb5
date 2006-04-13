@@ -50,7 +50,7 @@ STLIBOBJS= \
 all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-	$(RM) $(ERR_HANDLE_HDR)
+
 # @lib_frag@
 # @libobj_frag@
 
