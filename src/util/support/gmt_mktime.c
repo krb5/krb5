@@ -1,7 +1,7 @@
 /* This code placed in the public domain by Mark W. Eichin */
 
 #include <stdio.h>
-#include "k5-int.h"
+#include "autoconf.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -36,7 +36,7 @@ static const int days_in_month[12] = {
 
 #define hasleapday(year) (year%400?(year%100?(year%4?0:1):0):1)
 
-time_t gmt_mktime(struct tm *t)
+time_t krb5int_gmt_mktime(struct tm *t)
 {
   time_t accum;
 

@@ -31,3 +31,4 @@ krb5int_get_error
 krb5int_free_error
 krb5int_clear_error
 krb5int_set_error_info_callout_fn
+krb5int_gmt_mktime
