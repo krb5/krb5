@@ -55,7 +55,7 @@ if(asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-time_t gmt_mktime (struct tm *);
+extern time_t krb5int_gmt_mktime (struct tm *);
 
 asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
 {
@@ -250,7 +250,7 @@ asn1_error_code asn1_decode_generaltime(asn1buf *buf, time_t *val)
   ts.tm_min = 10*c2i(s[10]) + c2i(s[11]);
   ts.tm_sec = 10*c2i(s[12]) + c2i(s[13]);
   ts.tm_isdst = -1;
-  t = gmt_mktime(&ts);
+  t = krb5int_gmt_mktime(&ts);
   free(s);
 
   if(t == -1) return ASN1_BAD_TIMEFORMAT;

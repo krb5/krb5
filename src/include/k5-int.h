@@ -749,7 +749,7 @@ krb5_error_code krb5_crypto_us_timeofday
 	(krb5_int32 *,
 		krb5_int32 *);
 
-time_t gmt_mktime (struct tm *);
+time_t krb5int_gmt_mktime (struct tm *);
 
 #endif /* KRB5_OLD_CRYPTO */
 

@@ -239,7 +239,6 @@ et_kdb5_error_table
 et_krb5_error_table
 et_kv5m_error_table
 et_prof_error_table
-gmt_mktime
 initialize_asn1_error_table
 initialize_k524_error_table
 initialize_kdb5_error_table

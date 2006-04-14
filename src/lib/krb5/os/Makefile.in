@@ -28,7 +28,6 @@ STLIBOBJS= \
 	gen_port.o	\
 	genaddrs.o	\
 	gen_rname.o	\
-	gmt_mktime.o	\
 	hostaddr.o	\
 	hst_realm.o	\
 	init_os_ctx.o	\
@@ -74,7 +73,6 @@ OBJS= \
 	$(OUTPRE)gen_port.$(OBJEXT)	\
 	$(OUTPRE)genaddrs.$(OBJEXT)	\
 	$(OUTPRE)gen_rname.$(OBJEXT)	\
-	$(OUTPRE)gmt_mktime.$(OBJEXT)	\
 	$(OUTPRE)hostaddr.$(OBJEXT)	\
 	$(OUTPRE)hst_realm.$(OBJEXT)	\
 	$(OUTPRE)init_os_ctx.$(OBJEXT)	\
@@ -120,7 +118,6 @@ SRCS= \
 	$(srcdir)/gen_port.c	\
 	$(srcdir)/genaddrs.c	\
 	$(srcdir)/gen_rname.c	\
-	$(srcdir)/gmt_mktime.c	\
 	$(srcdir)/hostaddr.c	\
 	$(srcdir)/hst_realm.c	\
 	$(srcdir)/init_os_ctx.c	\
@@ -179,9 +176,6 @@ t_an_to_ln: $(T_AN_TO_LN_OBJS) $(KRB5_BASE_DEPLIBS)
 
 t_realm_iter: $(T_REALM_ITER_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_realm_iter $(T_REALM_ITER_OBJS) $(KRB5_BASE_LIBS)
-
-t_mktime: gmt_mktime.c
-	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
 
 t_localaddr: localaddr.c
 	$(CC_LINK) $(ALL_CFLAGS) -DTEST -o t_localaddr $(srcdir)/localaddr.c $(KRB5_BASE_LIBS) $(LIBS)
@@ -372,14 +366,6 @@ gen_rname.so gen_rname.po $(OUTPRE)gen_rname.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   gen_rname.c os-proto.h
-gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  gmt_mktime.c
 hostaddr.so hostaddr.po $(OUTPRE)hostaddr.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

@@ -30,6 +30,7 @@ STLIBOBJS= \
 	init-addrinfo.o \
 	plugins.o \
 	errors.o \
+	gmt_mktime.o \
 	fake-addrinfo.o
 
 LIBOBJS= \
@@ -37,6 +38,7 @@ LIBOBJS= \
 	$(OUTPRE)init-addrinfo.$(OBJEXT) \
 	$(OUTPRE)plugins.$(OBJEXT) \
 	$(OUTPRE)errors.$(OBJEXT) \
+	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT)
 
 STOBJLISTS=OBJS.ST
@@ -49,6 +51,7 @@ SRCS=\
 	$(srcdir)/threads.c \
 	$(srcdir)/init-addrinfo.c \
 	$(srcdir)/errors.c \
+	$(srcdir)/gmt_mktime.c \
 	$(srcdir)/fake-addrinfo.c
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
@@ -70,6 +73,9 @@ $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
 ##DOS##!endif
 
+t_mktime: gmt_mktime.c
+	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
+
 # @lib_frag@
 # @libobj_frag@
 
@@ -90,6 +96,8 @@ init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
 errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h errors.c
+gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h gmt_mktime.c
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
