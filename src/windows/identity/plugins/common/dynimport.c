@@ -388,7 +388,7 @@ khm_int32 init_imports(void) {
     CKRV;
 
     imp_rv = LoadFuncs(CCAPI_DLL, ccapi_fi, &hCCAPI, 0, 1, 0, 0);
-    CKRV;
+    /* CCAPI_DLL is optional.  No error check. */
 
     memset(&osvi, 0, sizeof(OSVERSIONINFO));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
