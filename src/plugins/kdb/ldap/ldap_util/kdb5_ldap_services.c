@@ -2580,7 +2580,7 @@ cleanup:
 
     if (print_usage)
         usage();
-//	db_usage(STASH_SRV_PW);
+/*	db_usage(STASH_SRV_PW); */
 
     return ret;
 }

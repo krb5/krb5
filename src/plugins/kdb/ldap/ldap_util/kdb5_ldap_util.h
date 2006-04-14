@@ -69,7 +69,6 @@ extern int exit_status;
 extern krb5_context util_context;
 
 extern void usage();
-//extern void usage(int);
 extern void db_usage(int);
 
 #define ARG_VAL (--argc > 0 ? (koptarg = *(++argv)) : (char *)(usage(MAIN_HELP), NULL))
