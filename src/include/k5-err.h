@@ -37,6 +37,8 @@
 #define KRB5_CALLCONV_C
 #endif
 
+#include <stdarg.h>
+
 struct errinfo {
     long code;
     const char *msg;
