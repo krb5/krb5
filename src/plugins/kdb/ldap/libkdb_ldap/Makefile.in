@@ -9,7 +9,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 # Lots of ugliness here because of duplicated symbol names.
 # Can I just punt the duplicates and import from libkdb5, or
 # is keeping them separate important?
-DEFS = @DEFS@ -DHAVE_LDAP_H \
+DEFINES = \
 	-Dkrb5_dbe_lookup_last_pwd_change=kdb_ldap_dbe_lookup_last_pwd_change \
 	-Dkrb5_dbe_lookup_mod_princ_data=kdb_ldap_dbe_lookup_mod_princ_data \
 	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
