@@ -28,8 +28,9 @@ RELDIR=../plugins/kdb/ldap/libkdb_ldap
 SHLIB_EXPDEPS = \
 	$(GSSRPC_DEPLIBS) \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(SUPPORT_DEPLIB) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
-SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto $(LIBS)
+SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lk5crypto $(SUPPORT_LIB) -lldap -llber $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
