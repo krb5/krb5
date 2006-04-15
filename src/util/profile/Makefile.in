@@ -122,7 +122,7 @@ profile_tcl.o: $(srcdir)/profile_tcl.c profile.h
 profile_tcl: profile_tcl.o libprofile.a
 	$(CC_LINK) -o profile_tcl profile_tcl.o \
 		$(TCL_MAYBE_RPATH) \
-		-L../et -L../.. libprofile.a $(DEPLIBS) $(TCL_LIBS) $(LIBS)
+		-L../et -L../.. libprofile.a $(TCL_LIBS) $(MLIBS)
 
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
