@@ -1197,7 +1197,7 @@ getepochtime(strtime, epochtime)
 	*epochtime = 0;
 	return EINVAL;
     }
-    *epochtime = timegm(&tme);
+    *epochtime = krb5int_gmt_mktime(&tme);
     return 0;
 }
 
