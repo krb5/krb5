@@ -16,6 +16,7 @@ DEFINES = \
 	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
 	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
+DEFS=
 
 LOCALINCLUDES = -I$(SRCTOP)/lib/kdb
 
