@@ -7,10 +7,10 @@ AC_TYPE_OFF_T
 AC_CHECK_FUNCS(srand48 srand srandom umask)
 
 OPENLDAP=1
-AC_CHECK_HEADERS([ldap.h], [], [OPENLDAP=0; AC_MSG_WARN([ldap.h not found])])
-AC_CHECK_HEADERS([lber.h], [], [OPENLDAP=0; AC_MSG_WARN([lber.h not found])])
-AC_CHECK_LIB(ldap, ldap_init, [:], [OPENLDAP=0; AC_MSG_WARN([libldap not found])])
-AC_CHECK_LIB(lber, ber_init, [:], [OPENLDAP=0; AC_MSG_WARN([liblber not found])])
+AC_CHECK_HEADERS([ldap.h], :, [OPENLDAP=0; AC_MSG_WARN([ldap.h not found])])
+AC_CHECK_HEADERS([lber.h], :, [OPENLDAP=0; AC_MSG_WARN([lber.h not found])])
+AC_CHECK_LIB(ldap, ldap_init, :, [OPENLDAP=0; AC_MSG_WARN([libldap not found])])
+AC_CHECK_LIB(lber, ber_init, :, [OPENLDAP=0; AC_MSG_WARN([liblber not found])])
 
 if test "$OPENLDAP" = "0"; then 
     AC_ERROR("OPENLDAP libraries missing Skipping openldap database module")
