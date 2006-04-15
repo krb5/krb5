@@ -39,7 +39,8 @@ SRCS = $(srcdir)/prof_tree.c \
 	prof_err.c \
 	$(srcdir)/prof_init.c
 
-EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c
+EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c \
+	$(srcdir)/profile_tcl.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
@@ -192,3 +193,5 @@ test_profile.so test_profile.po $(OUTPRE)test_profile.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   argv_parse.h prof_int.h test_profile.c
+profile_tcl.so profile_tcl.po $(OUTPRE)profile_tcl.$(OBJEXT): \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) profile_tcl.c
