@@ -3,7 +3,7 @@ myfulldir=lib/krb5
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os
-LOCAL_SUBDIRS= error_tables asn.1 ccache keytab krb os rcache posix
+LOCAL_SUBDIRS= error_tables asn.1 ccache keytab krb os rcache
 DEFS=
 
 ##DOSBUILDTOP = ..\..
@@ -33,7 +33,6 @@ STOBJLISTS= \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
 	os/OBJS.ST \
-	posix/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
 SUBDIROBJLISTS= \
@@ -44,7 +43,6 @@ SUBDIROBJLISTS= \
 	krb/OBJS.ST \
 	rcache/OBJS.ST \
 	os/OBJS.ST \
-	posix/OBJS.ST \
 	$(BUILDTOP)/util/profile/OBJS.ST
 
 OBJS=\
