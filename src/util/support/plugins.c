@@ -166,6 +166,15 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 #endif
 #endif
 
+
+#ifdef HAVE_STRERROR_R
+#define ERRSTR(ERR, BUF) \
+    (strerror_r (ERR, BUF, sizeof(BUF)) == 0 ? BUF : strerror (ERR))
+#else
+#define ERRSTR(ERR, BUF) \
+    (strerror (ERR))
+#endif
+
 int32_t KRB5_CALLCONV
 krb5int_open_plugin_dir (const char *dirname,
 			 struct plugin_dir_handle *dirhandle)
@@ -181,6 +190,7 @@ krb5int_open_plugin_dir (const char *dirname,
     int nh;
     int error = 0;
     char path[MAXPATHLEN];
+    char errbuf[1024];
 
     h = NULL;
     nh = 0;
@@ -188,7 +198,7 @@ krb5int_open_plugin_dir (const char *dirname,
     dir = opendir(dirname);
     if (dir == NULL) {
 	error = errno;
-	Tprintf("-> error %d/%s\n", error, strerror(error));
+	Tprintf("-> error %d/%s\n", error, ERRSTR(error, errbuf));
 	if (error == ENOENT)
 	    return 0;
 	return error;
@@ -207,7 +217,7 @@ krb5int_open_plugin_dir (const char *dirname,
 	/* Optimization: Linux includes a file type field in the
 	   directory structure.  */
 	if (stat(path, &statbuf) < 0) {
-	    Tprintf("stat(%s): %s\n", path, strerror(errno));
+	    Tprintf("stat(%s): %s\n", path, ERRSTR(errno, errbuf));
 	    continue;
 	}
 	if ((statbuf.st_mode & S_IFMT) != S_IFREG) {
