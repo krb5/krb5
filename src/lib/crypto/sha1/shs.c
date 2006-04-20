@@ -240,7 +240,7 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
 
 /* Update SHS for a block of data */
 
-void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, int count)
+void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 {
     SHS_LONG tmp;
     int dataCount, canfill;

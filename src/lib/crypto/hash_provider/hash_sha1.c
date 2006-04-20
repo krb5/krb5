@@ -40,7 +40,7 @@ k5_sha1_hash(unsigned int icount, const krb5_data *input,
 
     shsInit(&ctx);
     for (i=0; i<icount; i++)
-	shsUpdate(&ctx, (unsigned char *) input[i].data, (int) input[i].length);
+	shsUpdate(&ctx, (unsigned char *) input[i].data, input[i].length);
     shsFinal(&ctx);
 
     for (i=0; i<(sizeof(ctx.digest)/sizeof(ctx.digest[0])); i++) {

@@ -191,7 +191,7 @@ krb5int_aes_encrypt_length(const struct krb5_enc_provider *enc,
 
 static krb5_error_code
 trunc_hmac (const struct krb5_hash_provider *hash,
-	    const krb5_keyblock *ki, int num,
+	    const krb5_keyblock *ki, unsigned int num,
 	    const krb5_data *input, const krb5_data *output)
 {
     size_t hashsize;
