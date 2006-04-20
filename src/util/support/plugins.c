@@ -242,6 +242,7 @@ krb5int_open_plugin_dir (const char *dirname,
 	    for (i = 0; i < nh; i++)
 		dlclose(h[i].dlhandle);
 	    free(h);
+	    closedir(dir);
 	    return error;
 	}
 	h = newh;
@@ -255,6 +256,7 @@ krb5int_open_plugin_dir (const char *dirname,
     h = newh;
     MAKE_NULL_HANDLE (&h[nh]);
     dirhandle->files = h;
+    closedir(dir);
     return 0;
 /* #elif _WIN32 */
 #else
