@@ -1013,9 +1013,9 @@ void KRB5_CALLCONV krb5_free_pa_enc_ts
 struct _krb5_context {
 	krb5_magic	magic;
 	krb5_enctype	*in_tkt_ktypes;
-	int		in_tkt_ktype_count;
+	unsigned int	in_tkt_ktype_count;
 	krb5_enctype	*tgs_ktypes;
-	int		tgs_ktype_count;
+	unsigned int	tgs_ktype_count;
 	/* This used to be a void*, but since we always allocate them
 	   together (though in different source files), and the types
 	   are declared in the same header, might as well just combine
@@ -1054,7 +1054,7 @@ struct _krb5_context {
 	   requested ticket (the session key of which may be
 	   constrained by tgs_ktypes above).  */
 	krb5_enctype	*conf_tgs_ktypes;
-	int		conf_tgs_ktypes_count;
+	unsigned int	conf_tgs_ktypes_count;
 	/* Use the _configured version?  */
 	krb5_boolean	use_conf_ktypes;
 
