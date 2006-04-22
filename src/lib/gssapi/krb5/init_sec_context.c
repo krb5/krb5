@@ -155,7 +155,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     unsigned char *ptr;
     struct gss_checksum_data *data = cksum_data;
     krb5_data credmsg;
-    int junk;
+    unsigned int junk;
 
     data->checksum_data.data = 0;
     credmsg.data = 0;
