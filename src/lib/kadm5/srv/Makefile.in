@@ -65,6 +65,8 @@ all-unix:: includes
 all-unix:: all-liblinks
 all-windows:: $(OBJS)
 
+generate-files-mac: includes
+
 includes:: server_acl.h
 	if cmp $(srcdir)/server_acl.h \
 	$(BUILDTOP)/include/kadm5/server_acl.h >/dev/null 2>&1; then :; \
