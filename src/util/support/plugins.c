@@ -27,9 +27,14 @@
  * Plugin module support, and shims around dlopen/whatever.
  */
 
+#define DEBUG 1
+
 #include "k5-plugin.h"
 #if USE_DLOPEN
 #include <dlfcn.h>
+#endif
+#if USE_CFBUNDLE
+#include <CoreFoundation/CoreFoundation.h>
 #endif
 #include <stdio.h>
 #include <sys/types.h>
@@ -60,82 +65,185 @@ static void Tprintf (const char *fmt, ...)
 struct plugin_file_handle {
 #if USE_DLOPEN
     void *dlhandle;
-#define NULL_HANDLE(X) ((X)->dlhandle == NULL)
-#define MAKE_NULL_HANDLE(X) ((X)->dlhandle = NULL)
-/* #elif _WIN32 ... */
-#else
+#endif
+#if USE_CFBUNDLE
+    CFBundleRef bundle;
+#endif
+#if !defined (USE_DLOPEN) && !defined (USE_CFBUNDLE)
     char dummy;
-#define NULL_HANDLE(X) (1)
-#define MAKE_NULL_HANDLE(X) (0)
 #endif
 };
 
 int32_t KRB5_CALLCONV
 krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
 {
-#if USE_DLOPEN
-    struct plugin_file_handle *htmp;
-    void *handle;
+    int32_t err = 0;
+    struct stat statbuf;
+    struct plugin_file_handle *htmp = NULL;
+    int got_plugin = 0;
+    
+    if (!err) {
+        if (stat (filename, &statbuf) < 0) {
+            Tprintf ("stat(%s): %s\n", filename, strerror (errno));
+            err = errno;
+        }
+    }
+    
+    if (!err) {
+        htmp = calloc (1, sizeof (*htmp)); /* calloc initializes ptrs to NULL */
+        if (htmp == NULL) { err = errno; }
+    }
 
-    handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
-    if (handle == NULL) {
-	const char *e;
-	e = dlerror();
-	/* XXX copy and save away */
-	return ENOENT;		/* XXX */
+#if USE_DLOPEN
+    if (!err && (statbuf.st_mode & S_IFMT) == S_IFREG) {
+        void *handle = NULL;
+        
+        if (!err) {
+            handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
+            if (handle == NULL) {
+                const char *e = dlerror(); /* XXX copy and save away */
+                Tprintf ("dlopen(%s): %s\n", filename, e);
+                err = ENOENT; /* XXX */
+            }
+        }
+        
+        if (!err) {
+            got_plugin = 1;
+            htmp->dlhandle = handle;
+            handle = NULL;
+        }
+
+        if (handle != NULL) { dlclose (handle); }
     }
-    htmp = malloc (sizeof (*htmp));
-    if (htmp == NULL) {
-	int err = errno;
-	dlclose(handle);
-	return err;
-    }
-    *h = htmp;
-    htmp->dlhandle = handle;
-    return 0;
-/* #elif _WIN32 */
-#else
-    return ENOENT;
 #endif
+    
+#if USE_CFBUNDLE
+    if (!err && (statbuf.st_mode & S_IFMT) == S_IFDIR) {
+        CFStringRef pluginPath = NULL;
+        CFURLRef pluginURL = NULL;
+        CFBundleRef pluginBundle = NULL;
+        
+        if (!err) {
+            pluginPath = CFStringCreateWithCString (kCFAllocatorDefault, filename, 
+                                                    kCFStringEncodingASCII);
+            if (pluginPath == NULL) { err = ENOMEM; }
+        }
+        
+        if (!err) {
+            pluginURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, pluginPath, 
+                                                       kCFURLPOSIXPathStyle, true);
+            if (pluginURL == NULL) { err = ENOMEM; }
+        }
+        
+        if (!err) {
+            pluginBundle = CFBundleCreate (kCFAllocatorDefault, pluginURL);
+            if (pluginBundle == NULL) { err = ENOENT; } /* XXX need better error */
+        }
+        
+        if (!err) {
+            if (!CFBundleIsExecutableLoaded (pluginBundle)) {
+                int loaded = CFBundleLoadExecutable (pluginBundle);
+                if (!loaded) { err = ENOENT; }  /* XXX need better error */
+            }
+        }
+        
+        if (!err) {
+            got_plugin = 1;
+            htmp->bundle = pluginBundle;
+            pluginBundle = NULL;  /* htmp->bundle takes ownership */
+        }
+
+        if (pluginBundle != NULL) { CFRelease (pluginBundle); }
+        if (pluginURL    != NULL) { CFRelease (pluginURL); }
+        if (pluginPath   != NULL) { CFRelease (pluginPath); }
+    }
+#endif
+        
+    if (!err && !got_plugin) {
+        err = ENOENT;  /* no plugin or no way to load plugins */
+    }
+    
+    if (!err) {
+        *h = htmp;
+        htmp = NULL;  /* h takes ownership */
+    }
+    
+    if (htmp != NULL) { free (htmp); }
+    
+    return err;
+}
+
+static int32_t
+krb5int_get_plugin_sym (struct plugin_file_handle *h, 
+                        const char *csymname, int isfunc, void **ptr)
+{
+    int32_t err = 0;
+    void *sym = NULL;
+    
+#if USE_DLOPEN
+    if (!err && !sym && (h->dlhandle != NULL)) {
+        /* XXX Do we need to add a leading "_" to the symbol name on any
+        modern platforms?  */
+        sym = dlsym (h->dlhandle, csymname);
+        if (sym == NULL) {
+            const char *e = dlerror (); /* XXX copy and save away */
+            Tprintf ("dlsym(%s): %s\n", csymname, e);
+            err = ENOENT; /* XXX */
+        }
+    }
+#endif
+    
+#if USE_CFBUNDLE
+    if (!err && !sym && (h->bundle != NULL)) {
+        CFStringRef cfsymname = NULL;
+        
+        if (!err) {
+            cfsymname = CFStringCreateWithCString (kCFAllocatorDefault, csymname, 
+                                                   kCFStringEncodingASCII);
+            if (cfsymname == NULL) { err = ENOMEM; }
+        }
+        
+        if (!err) {
+            if (isfunc) {
+                sym = CFBundleGetFunctionPointerForName (h->bundle, cfsymname);
+            } else {
+                sym = CFBundleGetDataPointerForName (h->bundle, cfsymname);
+            }
+            if (sym == NULL) { err = ENOENT; }  /* XXX */       
+        }
+        
+        if (cfsymname != NULL) { CFRelease (cfsymname); }
+    }
+#endif
+    
+    if (!err && (sym == NULL)) {
+        err = ENOENT;  /* unimplemented */
+    }
+    
+    if (!err) {
+        *ptr = sym;
+    }
+    
+    return err;
 }
 
 int32_t KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
 			 void **ptr)
 {
-#if USE_DLOPEN
-    void *sym;
-    /* XXX Do we need to add a leading "_" to the symbol name on any
-       modern platforms?  */
-    sym = dlsym(h->dlhandle, csymname);
-    if (sym == NULL) {
-	const char *e;
-	e = dlerror();
-	return ENOENT;
-    }
-    *ptr = sym;
-    return 0;
-/* #elif _WIN32 */
-#else
-    return ENOENT;
-#endif
+    return krb5int_get_plugin_sym (h, csymname, 0, ptr);
 }
 
 int32_t KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
 			 void (**ptr)())
 {
-    /* This code should do for any systems where function and data
-       symbols are handled the same.  Note that this means there's no
-       function version of (say) dlsym, *and* the symbol-prefix
-       handling is the same for both data and functions.  (And the
-       casting we do here works, etc.)  */
-    void *dptr;
-    int32_t err;
-
-    err = krb5int_get_plugin_data (h, csymname, &dptr);
-    if (err == 0)
-	*ptr = (void (*)()) dptr;
+    void *dptr = NULL;    
+    int32_t err = krb5int_get_plugin_sym (h, csymname, 1, &dptr);
+    if (!err) {
+        /* Cast function pointers to avoid code duplication */
+        *ptr = (void (*)()) dptr;
+    }
     return err;
 }
 
@@ -143,11 +251,13 @@ void KRB5_CALLCONV
 krb5int_close_plugin (struct plugin_file_handle *h)
 {
 #if USE_DLOPEN
-    dlclose(h->dlhandle);
-    h->dlhandle = NULL;
-    free (h);
-/* #elif _WIN32 */
+    if (h->dlhandle != NULL) { dlclose(h->dlhandle); }
 #endif
+#if USE_CFBUNDLE
+    /* Do not unload.  CFBundleUnloadExecutable is not ref counted. */
+    if (h->bundle != NULL) { CFRelease (h->bundle); }
+#endif
+    free (h);
 }
 
 /* autoconf docs suggest using this preference order */
@@ -179,105 +289,102 @@ int32_t KRB5_CALLCONV
 krb5int_open_plugin_dir (const char *dirname,
 			 struct plugin_dir_handle *dirhandle)
 {
-    /* Q: Should names be sorted in some way first?  */
-    /* XXX This should be a portable directory-scanning routine which
-       calls on the above routines; shouldn't be calling dlopen
-       directly here.  */
-#if USE_DLOPEN
-    DIR *dir;
-    struct dirent *d;
-    struct plugin_file_handle *h, *newh, handle;
-    int nh;
-    int error = 0;
-    char path[MAXPATHLEN];
+    int32_t err = 0;
+    DIR *dir = NULL;
+    struct dirent *d = NULL;
+    struct plugin_file_handle **h = NULL;
+    int count = 0;
     char errbuf[1024];
 
-    h = NULL;
-    nh = 0;
-    Tprintf("opening plugin directory '%s' to scan...\n", dirname);
-    dir = opendir(dirname);
-    if (dir == NULL) {
-	error = errno;
-	Tprintf("-> error %d/%s\n", error, ERRSTR(error, errbuf));
-	if (error == ENOENT)
-	    return 0;
-	return error;
+    if (!err) {
+        h = calloc (1, sizeof (*h)); /* calloc initializes to NULL */
+        if (h == NULL) { err = errno; }
     }
-    do {
-	size_t len;
-	struct stat statbuf;
+    
+    if (!err) {
+        dir = opendir(dirname);
+        if (dir == NULL) {
+            err = errno;
+            Tprintf ("-> error %d/%s\n", err, strerror (err));
+        }
+    }
+    
+    while (!err) {
+        size_t len = 0;
+        char *path = NULL;
+        struct plugin_file_handle *handle = NULL;
+        
+        d = readdir (dir);
+	if (d == NULL) { break; }
+        
+        if ((strcmp (d->d_name, ".") == 0) || 
+            (strcmp (d->d_name, "..") == 0)) {
+            continue;
+        }
+        
+        if (!err) {
+            len = NAMELEN (d);
+            path = malloc (strlen (dirname) + len + 2); /* '/' and NULL */
+            if (path == NULL) { 
+                err = errno; 
+            } else {
+                sprintf (path, "%s/%*s", dirname, (int) len, d->d_name);
+            }
+        }
+        
+        if (!err) {            
+            if (krb5int_open_plugin (path, &handle) == 0) {
+                struct plugin_file_handle **newh = NULL;
 
-	d = readdir (dir);
-	if (d == NULL)
-	    break;
-	len = NAMELEN(d);
-	if (strlen(dirname) + len + 2 > sizeof(path))
-	    continue;
-	sprintf(path, "%s/%*s", dirname, (int) len, d->d_name);
-	/* Optimization: Linux includes a file type field in the
-	   directory structure.  */
-	if (stat(path, &statbuf) < 0) {
-	    Tprintf("stat(%s): %s\n", path, ERRSTR(errno, errbuf));
-	    continue;
-	}
-	if ((statbuf.st_mode & S_IFMT) != S_IFREG) {
-	    Tprintf("stat(%s): not a regular file\n", path);
-	    continue;
-	}
-	Tprintf("trying to dlopen '%s'\n", path);
-	handle.dlhandle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
-	if (handle.dlhandle == NULL) {
-	    const char *e = dlerror();
-	    Tprintf("dlopen error: %s\n", e);
-	    /* dlerror(); */
-	    continue;
-	} else {
-	    Tprintf("dlopen succeeds: %p\n", handle.dlhandle);
-	}
-	newh = realloc (h, (nh+1) * sizeof(*h));
-	if (newh == NULL) {
-	    int i;
-	close_and_return_errno:
-	    error = errno;
-	    for (i = 0; i < nh; i++)
-		dlclose(h[i].dlhandle);
-	    free(h);
-	    closedir(dir);
-	    return error;
-	}
-	h = newh;
-	h[nh] = handle;
-	nh++;
-    } while (1);
-    Tprintf("done scanning plugin directory\n");
-    newh = realloc (h, (nh+1) * sizeof(*h));
-    if (newh == NULL)
-	goto close_and_return_errno;
-    h = newh;
-    MAKE_NULL_HANDLE (&h[nh]);
-    dirhandle->files = h;
-    closedir(dir);
-    return 0;
-/* #elif _WIN32 */
-#else
-    dirhandle->files = NULL;
-    return 0;
-#endif
+                count++;
+                newh = realloc (h, ((count + 1) + sizeof (*h))); /* +1 for NULL */
+                if (newh == NULL) { 
+                    err = errno; 
+                } else {
+                    h = newh;
+                    h[count - 1] = handle;
+                    h[count] = NULL;
+                    handle = NULL;  /* h takes ownership */
+                }
+            }
+        }
+        
+        if (path   != NULL) { free (path); }
+        if (handle != NULL) { krb5int_close_plugin (handle); }
+    }
+    
+    if (err == ENOENT) {
+        err = 0;  /* ran out of plugins -- do nothing */
+    }
+     
+    if (!err) {
+        dirhandle->files = h;
+        h = NULL;  /* dirhandle->files takes ownership */
+    }
+    
+    if (h != NULL) {
+        int i;
+        for (i = 0; h[i] != NULL; i++) {
+            krb5int_close_plugin (h[i]);
+        }
+        free (h);
+    }
+    if (dir != NULL) { closedir (dir); }
+    
+    return err;
 }
 
 void KRB5_CALLCONV
 krb5int_close_plugin_dir (struct plugin_dir_handle *dirhandle)
 {
-#if USE_DLOPEN
-    struct plugin_file_handle *h;
-    if (dirhandle->files == NULL)
-	return;
-    for (h = dirhandle->files; !NULL_HANDLE (h); h++) {
-	dlclose (h->dlhandle);
+    if (dirhandle->files != NULL) {
+        int i;
+        for (i = 0; dirhandle->files[i] != NULL; i++) {
+            krb5int_close_plugin (dirhandle->files[i]);
+        }
+        free (dirhandle->files);
+        dirhandle->files = NULL;
     }
-    free(dirhandle->files);
-    dirhandle->files = NULL;
-#endif
 }
 
 void KRB5_CALLCONV
@@ -292,42 +399,50 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
 			     void ***ptrs)
 {
-    void **p, **newp, *sym;
-    int count, i, err;
+    int32_t err = 0;
+    void **p = NULL;
+    int count = 0;
 
     /* XXX Do we need to add a leading "_" to the symbol name on any
        modern platforms?  */
-
+    
     Tprintf("get_plugin_data_sym(%s)\n", symname);
-    p = 0;
-    count = 0;
-    if (dirhandle == NULL || dirhandle->files == NULL)
-	goto skip_loop;
-    for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
-	int32_t kerr;
-	sym = NULL;
-	kerr = krb5int_get_plugin_data(&dirhandle->files[i], symname, &sym);
-	if (kerr)
-	    continue;
-	newp = realloc (p, (count+1) * sizeof(*p));
-	if (newp == NULL) {
-	realloc_failure:
-	    err = errno;
-	    free(p);
-	    return err;
-	}
-	p = newp;
-	p[count] = sym;
-	count++;
+
+    if (!err) {
+        p = calloc (1, sizeof (*p)); /* calloc initializes to NULL */
+        if (p == NULL) { err = errno; }
     }
-skip_loop:
-    newp = realloc(p, (count+1) * sizeof(*p));
-    if (newp == NULL)
-	goto realloc_failure;
-    p = newp;
-    p[count] = NULL;
-    *ptrs = p;
-    return 0;
+    
+    if (!err && (dirhandle != NULL) && (dirhandle->files != NULL)) {
+        int i = 0;
+
+        for (i = 0; !err && (dirhandle->files[i] != NULL); i++) {
+            void *sym = NULL;
+
+            if (krb5int_get_plugin_data (dirhandle->files[i], symname, &sym) == 0) {
+                void **newp = NULL;
+
+                count++;
+                newp = realloc (p, ((count + 1) + sizeof (*p))); /* +1 for NULL */
+                if (newp == NULL) { 
+                    err = errno; 
+                } else {
+                    p = newp;
+                    p[count - 1] = sym;
+                    p[count] = NULL;
+                }
+            }
+        }
+    }
+    
+    if (!err) {
+        *ptrs = p;
+        p = NULL; /* ptrs takes ownership */
+    }
+    
+    if (p != NULL) { free (p); }
+    
+    return err;
 }
 
 void KRB5_CALLCONV
@@ -342,39 +457,48 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
 			     void (***ptrs)(void))
 {
-    void (**p)(), (**newp)(), (*sym)();
-    int count, i, err;
-
-    if (dirhandle == NULL) {
-	*ptrs = 0;
-	return 0;
-    }
-
+    int32_t err = 0;
+    void (**p)() = NULL;
+    int count = 0;
+    
     /* XXX Do we need to add a leading "_" to the symbol name on any
-       modern platforms?  */
-
-    p = 0;
-    count = 0;
-    for (i = 0; !NULL_HANDLE (&dirhandle->files[i]); i++) {
-	int32_t kerr;
-	kerr = krb5int_get_plugin_func(&dirhandle->files[i], symname, &sym);
-	if (kerr)
-	    continue;
-	newp = realloc (p, (count+1) * sizeof(*p));
-	if (newp == NULL) {
-	realloc_failure:
-	    err = errno;
-	    free(p);
-	    return err;
-	}
-	p = newp;
-	p[count] = sym;
-	count++;
+        modern platforms?  */
+    
+    Tprintf("get_plugin_data_sym(%s)\n", symname);
+    
+    if (!err) {
+        p = calloc (1, sizeof (*p)); /* calloc initializes to NULL */
+        if (p == NULL) { err = errno; }
     }
-    newp = realloc(p, (count+1) * sizeof(*p));
-    if (newp == NULL)
-	goto realloc_failure;
-    p[count] = NULL;
-    *ptrs = p;
-    return 0;
+    
+    if (!err && (dirhandle != NULL) && (dirhandle->files != NULL)) {
+        int i = 0;
+        
+        for (i = 0; !err && (dirhandle->files[i] != NULL); i++) {
+            void (*sym)() = NULL;
+            
+            if (krb5int_get_plugin_func (dirhandle->files[i], symname, &sym) == 0) {
+                void (**newp)() = NULL;
+
+                count++;
+                newp = realloc (p, ((count + 1) + sizeof (*p))); /* +1 for NULL */
+                if (newp == NULL) { 
+                    err = errno; 
+                } else {
+                    p = newp;
+                    p[count - 1] = sym;
+                    p[count] = NULL;
+                }
+            }
+        }
+    }
+    
+    if (!err) {
+        *ptrs = p;
+        p = NULL; /* ptrs takes ownership */
+    }
+    
+    if (p != NULL) { free (p); }
+    
+    return err;
 }

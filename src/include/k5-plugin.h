@@ -63,9 +63,8 @@
 struct plugin_file_handle;	/* opaque */
 
 struct plugin_dir_handle {
-    /* This points to a list of plugin_file_handle structs, terminated
-       by one passing NULL_HANDLE.  */
-    struct plugin_file_handle *files;
+    /* This points to a NULL-terminated list of pointers to plugin_file_handle structs */
+    struct plugin_file_handle **files;
 };
 #define PLUGIN_DIR_INIT(P) ((P)->files = NULL)
 #define PLUGIN_DIR_OPEN(P) ((P)->files != NULL)

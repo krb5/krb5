@@ -545,7 +545,11 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 
 #include "k5-locate.h"
 
+#ifdef KFM_FRAMEWORK_PLUGIN_DIR
+static const char objdir[] = KFM_FRAMEWORK_PLUGIN_DIR ;
+#else
 static const char objdir[] = LIBDIR "/krb5/plugins/libkrb5";
+#endif
 
 struct module_callback_data {
     int out_of_mem;
