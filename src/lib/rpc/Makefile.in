@@ -188,6 +188,8 @@ all-prerecurse: all-liblinks
 
 all-windows:: $(OBJS)
 
+generate-files-mac: includes
+
 install-unix:: install-libs
 
 install-unix::
