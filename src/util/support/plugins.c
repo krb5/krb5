@@ -27,8 +27,6 @@
  * Plugin module support, and shims around dlopen/whatever.
  */
 
-#define DEBUG 1
-
 #include "k5-plugin.h"
 #if USE_DLOPEN
 #include <dlfcn.h>
