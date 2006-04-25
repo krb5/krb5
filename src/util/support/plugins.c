@@ -256,7 +256,8 @@ krb5int_close_plugin (struct plugin_file_handle *h)
     if (h->dlhandle != NULL) { dlclose(h->dlhandle); }
 #endif
 #if USE_CFBUNDLE
-    /* Do not unload.  CFBundleUnloadExecutable is not ref counted. */
+    /* Do not call CFBundleUnloadExecutable because it's not ref counted. 
+     * CFRelease will unload the bundle if the internal refcount goes to zero. */
     if (h->bundle != NULL) { CFRelease (h->bundle); }
 #endif
     free (h);
