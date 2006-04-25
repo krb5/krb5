@@ -149,10 +149,10 @@ $(thisconfigdir)/.acsyms_okay: @MAINT@ \
 		$(SRCTOP)/aclocal.m4
 	case "$(myfulldir)" in \
 	"" ) echo myfulldir not set in makefile ; exit 1 ;; \
-	appl* | tests* ) echo skipping ac syms check here ;; \
-	*) $(SRCTOP)/util/check-ac-syms $(srcdir) $(BUILDTOP) $(AUTOCONF_HEADER) ;; \
+	. | appl* | tests* ) echo skipping ac syms check here ;; \
+	*) $(SRCTOP)/util/check-ac-syms $(top_srcdir) $(mydir)/$(BUILDTOP) $(AUTOCONF_HEADER) ;; \
 	esac
-	touch .acsyms_okay
+	touch $(thisconfigdir)/.acsyms_okay
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	generate-files-mac-recurse \
