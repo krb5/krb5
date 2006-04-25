@@ -72,21 +72,22 @@ struct plugin_file_handle {
 #endif
 };
 
-int32_t KRB5_CALLCONV
-krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
+long KRB5_CALLCONV
+krb5int_open_plugin (const char *filename, struct plugin_file_handle **h,
+		     struct errinfo *ep)
 {
-    int32_t err = 0;
+    long err = 0;
     struct stat statbuf;
     struct plugin_file_handle *htmp = NULL;
     int got_plugin = 0;
-    
+
     if (!err) {
         if (stat (filename, &statbuf) < 0) {
             Tprintf ("stat(%s): %s\n", filename, strerror (errno));
             err = errno;
         }
     }
-    
+
     if (!err) {
         htmp = calloc (1, sizeof (*htmp)); /* calloc initializes ptrs to NULL */
         if (htmp == NULL) { err = errno; }
@@ -95,16 +96,17 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
 #if USE_DLOPEN
     if (!err && (statbuf.st_mode & S_IFMT) == S_IFREG) {
         void *handle = NULL;
-        
+
         if (!err) {
             handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
             if (handle == NULL) {
-                const char *e = dlerror(); /* XXX copy and save away */
+                const char *e = dlerror();
                 Tprintf ("dlopen(%s): %s\n", filename, e);
                 err = ENOENT; /* XXX */
+		krb5int_set_error (ep, err, "%s", e);
             }
         }
-        
+
         if (!err) {
             got_plugin = 1;
             htmp->dlhandle = handle;
@@ -114,13 +116,13 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
         if (handle != NULL) { dlclose (handle); }
     }
 #endif
-    
+
 #if USE_CFBUNDLE
     if (!err && (statbuf.st_mode & S_IFMT) == S_IFDIR) {
         CFStringRef pluginPath = NULL;
         CFURLRef pluginURL = NULL;
         CFBundleRef pluginBundle = NULL;
-        
+
         if (!err) {
             pluginPath = CFStringCreateWithCString (kCFAllocatorDefault, filename, 
                                                     kCFStringEncodingASCII);
@@ -171,11 +173,12 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h)
     return err;
 }
 
-static int32_t
+static long
 krb5int_get_plugin_sym (struct plugin_file_handle *h, 
-                        const char *csymname, int isfunc, void **ptr)
+                        const char *csymname, int isfunc, void **ptr,
+			struct errinfo *ep)
 {
-    int32_t err = 0;
+    long err = 0;
     void *sym = NULL;
     
 #if USE_DLOPEN
@@ -187,6 +190,7 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
             const char *e = dlerror (); /* XXX copy and save away */
             Tprintf ("dlsym(%s): %s\n", csymname, e);
             err = ENOENT; /* XXX */
+	    krb5int_set_error(ep, err, "%s", e);
         }
     }
 #endif
@@ -225,19 +229,19 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
     return err;
 }
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
-			 void **ptr)
+			 void **ptr, struct errinfo *ep)
 {
-    return krb5int_get_plugin_sym (h, csymname, 0, ptr);
+    return krb5int_get_plugin_sym (h, csymname, 0, ptr, ep);
 }
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
-			 void (**ptr)())
+			 void (**ptr)(), struct errinfo *ep)
 {
     void *dptr = NULL;    
-    int32_t err = krb5int_get_plugin_sym (h, csymname, 1, &dptr);
+    long err = krb5int_get_plugin_sym (h, csymname, 1, &dptr, ep);
     if (!err) {
         /* Cast function pointers to avoid code duplication */
         *ptr = (void (*)()) dptr;
@@ -283,16 +287,16 @@ krb5int_close_plugin (struct plugin_file_handle *h)
     (strerror (ERR))
 #endif
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_open_plugin_dir (const char *dirname,
-			 struct plugin_dir_handle *dirhandle)
+			 struct plugin_dir_handle *dirhandle,
+			 struct errinfo *ep)
 {
-    int32_t err = 0;
+    long err = 0;
     DIR *dir = NULL;
     struct dirent *d = NULL;
     struct plugin_file_handle **h = NULL;
     int count = 0;
-    char errbuf[1024];
 
     if (!err) {
         h = calloc (1, sizeof (*h)); /* calloc initializes to NULL */
@@ -331,7 +335,7 @@ krb5int_open_plugin_dir (const char *dirname,
         }
         
         if (!err) {            
-            if (krb5int_open_plugin (path, &handle) == 0) {
+            if (krb5int_open_plugin (path, &handle, ep) == 0) {
                 struct plugin_file_handle **newh = NULL;
 
                 count++;
@@ -392,12 +396,13 @@ krb5int_free_plugin_dir_data (void **ptrs)
     free(ptrs);
 }
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
-			     void ***ptrs)
+			     void ***ptrs,
+			     struct errinfo *ep)
 {
-    int32_t err = 0;
+    long err = 0;
     void **p = NULL;
     int count = 0;
 
@@ -417,7 +422,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
         for (i = 0; !err && (dirhandle->files[i] != NULL); i++) {
             void *sym = NULL;
 
-            if (krb5int_get_plugin_data (dirhandle->files[i], symname, &sym) == 0) {
+            if (krb5int_get_plugin_data (dirhandle->files[i], symname, &sym, ep) == 0) {
                 void **newp = NULL;
 
                 count++;
@@ -450,12 +455,13 @@ krb5int_free_plugin_dir_func (void (**ptrs)(void))
     free(ptrs);
 }
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
 			     const char *symname,
-			     void (***ptrs)(void))
+			     void (***ptrs)(void),
+			     struct errinfo *ep)
 {
-    int32_t err = 0;
+    long err = 0;
     void (**p)() = NULL;
     int count = 0;
     
@@ -475,7 +481,7 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
         for (i = 0; !err && (dirhandle->files[i] != NULL); i++) {
             void (*sym)() = NULL;
             
-            if (krb5int_get_plugin_func (dirhandle->files[i], symname, &sym) == 0) {
+            if (krb5int_get_plugin_func (dirhandle->files[i], symname, &sym, ep) == 0) {
                 void (**newp)() = NULL;
 
                 count++;

@@ -612,14 +612,17 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
     Tprintf("in module_locate_server\n");
     cbdata.lp = addrlist;
     if (!PLUGIN_DIR_OPEN (&ctx->libkrb5_plugins)) {
-	code = krb5int_open_plugin_dir (objdir, &ctx->libkrb5_plugins);
+	code = krb5int_open_plugin_dir (objdir, &ctx->libkrb5_plugins,
+					&ctx->err);
 	if (code)
 	    return KRB5_PLUGIN_NO_HANDLE;
     }
 
-    code = krb5int_get_plugin_dir_data (&ctx->libkrb5_plugins, "service_locator", &ptrs);
+    code = krb5int_get_plugin_dir_data (&ctx->libkrb5_plugins,
+					"service_locator", &ptrs, &ctx->err);
     if (code) {
-	Tprintf("error looking up plugin symbols: %s\n", error_message(code));
+	Tprintf("error looking up plugin symbols: %s\n",
+		krb5_get_error_message(ctx, code));
 	return KRB5_PLUGIN_NO_HANDLE;
     }
 
