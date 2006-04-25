@@ -551,6 +551,9 @@ EXTRA_FILES=@EXTRA_FILES@
 # variable settings with "@RUN_ENV@ KRB5_CONFIG=foo ..."
 MAYBE_VALGRIND= # valgrind --tool=memcheck --log-file=$(BUILDTOP)/valgrind.out --trace-children=yes -v --leak-check=yes env
 
+#
+AUTOCONF_HEADER=$(SRCTOP)/include/autoconf.h.in
+
 ##
 ## end of pre.in
 ############################################################

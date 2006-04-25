@@ -135,12 +135,24 @@ $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 # mixing.  So nuke it.
 $(srcdir)/$(thisconfigdir)/configure: @MAINT@ \
 		$(srcdir)/$(thisconfigdir)/configure.in \
+		$(thisconfigdir)/.acsyms_okay \
 		$(SRCTOP)/patchlevel.h \
 		$(SRCTOP)/aclocal.m4
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 	cd $(srcdir)/$(thisconfigdir) && \
 		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+
+$(thisconfigdir)/.acsyms_okay: @MAINT@ \
+		$(srcdir)/$(thisconfigdir)/configure.in \
+		$(SRCTOP)/patchlevel.h \
+		$(SRCTOP)/aclocal.m4
+	case "$(myfulldir)" in \
+	"" ) echo myfulldir not set in makefile ; exit 1 ;; \
+	appl* | tests* ) echo skipping ac syms check here ;; \
+	*) $(SRCTOP)/util/check-ac-syms $(srcdir) $(BUILDTOP) $(AUTOCONF_HEADER) ;; \
+	esac
+	touch .acsyms_okay
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	generate-files-mac-recurse \
