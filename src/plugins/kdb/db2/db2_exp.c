@@ -216,7 +216,7 @@ hack_cleanup (void)
  *      Exposed API
  */
 
-kdb_vftabl krb5_db_vftabl_db2 = {
+kdb_vftabl kdb_function_table = {
   1,                                      /* major version number 1 */
   0,                                      /* minor version number 0 */
   /* init_library */			       hack_init,

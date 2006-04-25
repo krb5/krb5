@@ -356,10 +356,8 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	(*lib)->dl_handle = dlopen(dl_name, RTLD_NOW);
 	if ((*lib)->dl_handle) {
 	    /* found the module */
-	    sprintf(dl_name, "krb5_db_vftabl_%s", lib_name);
-
 	    dlerror();
-	    vftabl_addr = dlsym((*lib)->dl_handle, dl_name);
+	    vftabl_addr = dlsym((*lib)->dl_handle, "kdb_function_table");
 	    if (vftabl_addr) {
 		memcpy(&(*lib)->vftabl, vftabl_addr, sizeof(kdb_vftabl));
 
