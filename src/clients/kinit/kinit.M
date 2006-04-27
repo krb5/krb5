@@ -45,7 +45,8 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 .SH DESCRIPTION
 .I kinit
 obtains and caches an initial ticket-granting ticket for
-.IR principal .  The typical default behavior is to acquire only
+.IR principal .  
+The typical default behavior is to acquire only
 Kerberos 5 tickets.  However, if kinit was built with both 
 Kerberos 4 support and with the default behavior of acquiring both
 types of tickets, it will try to acquire both Kerberos 5 and Kerberos 4
