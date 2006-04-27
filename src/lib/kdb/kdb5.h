@@ -23,44 +23,12 @@
 #define KRB5_KDB_OPEN_RW                0
 #define KRB5_KDB_OPEN_RO                1
 
-#ifndef KRB5_KDB_SRV_TYPE_KDC
-#define KRB5_KDB_SRV_TYPE_KDC           0x0100        
-#endif
-
-#ifndef KRB5_KDB_SRV_TYPE_ADMIN
-#define KRB5_KDB_SRV_TYPE_ADMIN         0x0200  
-#endif
-
-#ifndef KRB5_KDB_SRV_TYPE_PASSWD
-#define KRB5_KDB_SRV_TYPE_PASSWD        0x0300
-#endif
-
-#ifndef KRB5_KDB_SRV_TYPE_OTHER
-#define KRB5_KDB_SRV_TYPE_OTHER         0x0400  
-#endif
-
 #define KRB5_KDB_OPT_SET_DB_NAME        0
 #define KRB5_KDB_OPT_SET_LOCK_MODE      1
 
 #define KRB5_DB_GET_DB_CONTEXT(kcontext)   ( ((kdb5_dal_handle*) (kcontext)->db_context)->db_context )
 #define KRB5_DB_GET_PROFILE(kcontext)  ( (kcontext)->profile )
 #define KRB5_DB_GET_REALM(kcontext)    ( (kcontext)->default_realm )
-
-#ifndef KRB5_DB_LOCKMODE_SHARED
-#define KRB5_DB_LOCKMODE_SHARED       0x0001
-#endif
-
-#ifndef KRB5_DB_LOCKMODE_EXCLUSIVE
-#define KRB5_DB_LOCKMODE_EXCLUSIVE    0x0002
-#endif
-
-#ifndef KRB5_DB_LOCKMODE_DONTBLOCK
-#define KRB5_DB_LOCKMODE_DONTBLOCK    0x0004
-#endif
-
-#ifndef KRB5_DB_LOCKMODE_PERMANENT
-#define KRB5_DB_LOCKMODE_PERMANENT    0x0008
-#endif
 
 typedef struct _kdb_vftabl{
     short int maj_ver;
@@ -213,7 +181,7 @@ typedef struct _kdb_vftabl{
 typedef struct _db_library {
     char name[KDB_MAX_DB_NAME];
     int reference_cnt;
-    void *dl_handle;
+    struct plugin_file_handle *dl_handle;
     kdb_vftabl vftabl;
     struct _db_library *next, *prev;
 } *db_library;

@@ -1562,7 +1562,7 @@ EOF
     AC_MSG_ERROR(execution failed)
   fi
   AC_TRY_COMPILE([#include "conf$$e.h"
-      		 ],[ et_foo_error_table; ],:,
+      		 ],[ &et_foo_error_table; ],:,
 		 [AC_MSG_ERROR(cannot use et_foo_error_table)])
   # Anything else we need to test for?
   rm -f conf$$e.et conf$$e.c conf$$e.h

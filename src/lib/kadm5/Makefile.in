@@ -90,6 +90,8 @@ all-prerecurse: all-libobjs
 
 all-windows:: $(OBJS)
 
+generate-files-mac-prerecurse: includes
+
 check-windows::
 
 clean-unix:: clean-libobjs

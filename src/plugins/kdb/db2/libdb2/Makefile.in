@@ -15,6 +15,8 @@ RELDIR=../plugins/kdb/db2/libdb2
 HDRDIR=$(BUILDTOP)/include
 HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h $(HDRDIR)/db-ndbm.h
 
+AUTOCONF_HEADER=$(SRCTOP)/plugins/kdb/db2/libdb2/include/config.h.in
+
 all-unix:: includes all-libs
 all-prerecurse: include/config.h include/db-config.h
 clean-unix:: clean-libs clean-includes

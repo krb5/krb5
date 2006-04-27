@@ -357,7 +357,7 @@ static void test6(void)
 	} sdata;
 	unsigned char digest[SHS_DIGESTSIZE];
 	int failed;
-	int i, j;
+	unsigned int i, j;
 
 	printf("Running SHS test 6 ...\n");
 	sdata.pad1 = 0x12345678;
@@ -470,12 +470,12 @@ unsigned char results7[SHS_DIGESTSIZE] = {
 0x89,0x41,0x65,0xce,0x76,0xc1,0xd1,0xd1,0xc3,0x6f,
 0xab,0x92,0x79,0x30,0x01,0x71,0x63,0x1f,0x74,0xfe};
 
-int jfsize[] = {0,1,31,32,
+unsigned int jfsize[] = {0,1,31,32,
 	33,55,56,63,
 	64,65,71,72,
 	73,95,96,97,
 	119,120,123,127};
-int kfsize[] = {0,1,31,32,33,55,56,63};
+unsigned int kfsize[] = {0,1,31,32,33,55,56,63};
 
 static void test7(void)
 {
@@ -488,7 +488,7 @@ static void test7(void)
 	} sdata;
 	unsigned char digest[SHS_DIGESTSIZE];
 	int failed;
-	int i, j, k, l;
+	unsigned int i, j, k, l;
 
 	printf("Running SHS test 7 ...\n");
 	sdata.pad1 = 0x12345678;

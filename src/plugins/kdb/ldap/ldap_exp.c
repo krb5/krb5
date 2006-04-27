@@ -44,7 +44,7 @@
  *      Exposed API
  */
 
-kdb_vftabl krb5_db_vftabl_kldap = {
+kdb_vftabl kdb_function_table = {
   1,                                      /* major version number 1 */
   0,                                      /* minor version number 0 */
   /* init_library */			       krb5_ldap_lib_init,

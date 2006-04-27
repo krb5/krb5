@@ -81,6 +81,23 @@ krb5int_get_error (struct errinfo *ep, long code)
     lock();
     if (fptr == NULL) {
 	unlock();
+#ifdef HAVE_STRERROR_R
+	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0)
+	    return ep->scratch_buf;
+	/* If strerror_r didn't work with the 1K buffer, we can try a
+	   really big one.  This seems kind of gratuitous though.  */
+#define BIG_ERR_BUFSIZ 8192
+	r = malloc(BIG_ERR_BUFSIZ);
+	if (r) {
+	    if (strerror_r (code, r, BIG_ERR_BUFSIZ) == 0) {
+		r2 = realloc (r, 1 + strlen(r));
+		if (r2)
+		    return r2;
+		return r;
+	    }
+	    free (r);
+	}
+#endif
 	r = strerror (code);
 	if (r) {
 	    if (strlen (r) < sizeof (ep->scratch_buf)

@@ -50,6 +50,8 @@ all-unix:: includes
 all-unix:: all-liblinks
 all-windows:: $(OBJS)
 
+generate-files-mac: includes
+
 includes:: client_internal.h
 	if cmp $(srcdir)/client_internal.h \
 	$(BUILDTOP)/include/kadm5/client_internal.h >/dev/null 2>&1; then :; \

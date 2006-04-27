@@ -110,7 +110,10 @@ krb5int_debug_fprint (const char *fmt, ...)
     const krb5_data *d;
     char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV];
     const char *p;
-    char tmpbuf[NI_MAXHOST + NI_MAXSERV + 30];
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+    char tmpbuf[max(NI_MAXHOST + NI_MAXSERV + 30, 200)];
 
     if (!krb5int_debug_sendto_kdc)
 	return;
@@ -146,7 +149,13 @@ krb5int_debug_fprint (const char *fmt, ...)
 	       rather than the current value.  */
 	    err = va_arg(args, int);
 	    putf("%d/", err);
-	    p = strerror(err);
+	    p = NULL;
+#ifdef HAVE_STRERROR_R
+	    if (strerror_r(err, tmpbuf, sizeof(tmpbuf)) == 0)
+		p = tmpbuf;
+#endif
+	    if (p == NULL)
+		p = strerror(err);
 	    putstr(p);
 	    break;
 	case 'F':
@@ -397,16 +406,6 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     }
     return retval;
 }
-
-#if defined(_WIN32) && defined(DEBUG)
-static char *bogus_strerror (int xerr)
-{
-    static char buf[30];
-    sprintf(buf, "[err%d]", xerr);
-    return buf;
-}
-#define strerror(S) bogus_strerror(S)
-#endif
 
 #ifdef DEBUG
 

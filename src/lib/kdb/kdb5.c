@@ -22,7 +22,10 @@
  * or implied warranty.
  */
 
-/*This code was based on code donated to MIT by Novell for distribution under the MIT license.*/
+/*
+ * This code was based on code donated to MIT by Novell for
+ * distribution under the MIT license.
+ */
 
 /* 
  * Include files
@@ -30,7 +33,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <dlfcn.h>
 #include <k5-int.h>
 #include <osconf.h>
 #include "kdb5.h"
@@ -352,15 +354,15 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     status = 0;
 
     for (ndx = 0; path[ndx]; ndx++) {
-	sprintf(dl_name, "%s/%s.so", path[ndx], lib_name);
-	(*lib)->dl_handle = dlopen(dl_name, RTLD_NOW);
-	if ((*lib)->dl_handle) {
+	sprintf(dl_name, "%s/%s", path[ndx], lib_name);
+	status = krb5int_open_plugin (dl_name, &(*lib)->dl_handle,
+				      &kcontext->err);
+	if (status == 0) {
 	    /* found the module */
-	    sprintf(dl_name, "krb5_db_vftabl_%s", lib_name);
-
-	    dlerror();
-	    vftabl_addr = dlsym((*lib)->dl_handle, dl_name);
-	    if (vftabl_addr) {
+	    status = krb5int_get_plugin_data((*lib)->dl_handle,
+					     "kdb_function_table",
+					     &vftabl_addr, &kcontext->err);
+	    if (status == 0) {
 		memcpy(&(*lib)->vftabl, vftabl_addr, sizeof(kdb_vftabl));
 
 		kdb_setup_opt_functions(*lib);
@@ -368,28 +370,29 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 		if ((status = (*lib)->vftabl.init_library())) {
 		    /* ERROR. library not initialized cleanly */
 		    goto clean_n_exit;
-
 		}
 	    } else {
-		err_str = dlerror();
-		if(err_str == NULL)
-		    err_str = "";
+		const char *emsg = krb5_get_error_message (kcontext, status);
 		status = KRB5_KDB_DBTYPE_INIT;
-		krb5_set_error_message (kcontext, status, "%s", err_str);
+		krb5_set_error_message (kcontext, status,
+					"plugin symbol 'kdb_function_table' lookup failed: %s",
+					dl_name, emsg);
+		krb5_free_error_message (kcontext, emsg);
 		goto clean_n_exit;
 	    }
 	    break;
 	} else {
-	    /* set the error. Later if we find everything fine.. we will reset this */
-	    err_str = dlerror();
-/* 	    fprintf(stderr, "Error loading library %s\n", t); */
+	    err_str = krb5_get_error_message(kcontext, status);
 	}
     }
 
     if (!(*lib)->dl_handle) {
 	/* library not found in the given list. Error str is already set */
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
-	krb5_set_error_message (kcontext, status, "%s", err_str);
+	krb5_set_error_message (kcontext, status,
+				_("Unable to find requested database type: %s"),
+				err_str);
+	krb5_free_error_message (kcontext, err_str);
 	goto clean_n_exit;
     }
 
@@ -401,7 +404,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	if (*lib) {
 	    kdb_destroy_lib_lock(*lib);
 	    if ((*lib)->dl_handle) {
-		dlclose((*lib)->dl_handle);
+		krb5int_close_plugin((*lib)->dl_handle);
 	    }
 	    free(*lib);
 	    *lib = NULL;
@@ -482,7 +485,7 @@ kdb_free_library(db_library lib)
 
 	/* close the library */
 	if (lib->dl_handle) {
-	    dlclose(lib->dl_handle);
+	    krb5int_close_plugin(lib->dl_handle);
 	}
 
 	kdb_destroy_lib_lock(lib);

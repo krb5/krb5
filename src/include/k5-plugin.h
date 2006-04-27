@@ -60,34 +60,41 @@
 # include <inttypes.h>
 #endif
 
+#include "k5-err.h"
+
 struct plugin_file_handle;	/* opaque */
 
 struct plugin_dir_handle {
-    /* This points to a list of plugin_file_handle structs, terminated
-       by one passing NULL_HANDLE.  */
-    struct plugin_file_handle *files;
+    /* This points to a NULL-terminated list of pointers to plugin_file_handle structs */
+    struct plugin_file_handle **files;
 };
 #define PLUGIN_DIR_INIT(P) ((P)->files = NULL)
 #define PLUGIN_DIR_OPEN(P) ((P)->files != NULL)
 
-int32_t KRB5_CALLCONV
-krb5int_open_plugin (const char *, struct plugin_file_handle **);
+long KRB5_CALLCONV
+krb5int_open_plugin (const char *, struct plugin_file_handle **,
+		     struct errinfo *);
 
-int32_t KRB5_CALLCONV
-krb5int_get_plugin_data (struct plugin_file_handle *, const char *, void **);
+long KRB5_CALLCONV
+krb5int_get_plugin_data (struct plugin_file_handle *, const char *, void **,
+			 struct errinfo *);
 
-int32_t KRB5_CALLCONV
+long KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *, const char *,
-			 void (**)());
+			 void (**)(), struct errinfo *);
 
 void KRB5_CALLCONV
 krb5int_close_plugin (struct plugin_file_handle *);
 
-int32_t KRB5_CALLCONV krb5int_open_plugin_dir (const char *, struct plugin_dir_handle *);
+long KRB5_CALLCONV krb5int_open_plugin_dir (const char *,
+					    struct plugin_dir_handle *,
+					    struct errinfo *);
 void KRB5_CALLCONV krb5int_close_plugin_dir (struct plugin_dir_handle *);
 void KRB5_CALLCONV krb5int_free_plugin_dir_data (void **);
-int32_t KRB5_CALLCONV krb5int_get_plugin_dir_data (struct plugin_dir_handle *,
-						   const char *, void ***);
+long KRB5_CALLCONV krb5int_get_plugin_dir_data (struct plugin_dir_handle *,
+						const char *, void ***,
+						struct errinfo *);
 void KRB5_CALLCONV krb5int_free_plugin_dir_func (void (**)(void));
-int32_t KRB5_CALLCONV krb5int_get_plugin_dir_func (struct plugin_dir_handle *,
-						   const char *, void (***)(void));
+long KRB5_CALLCONV krb5int_get_plugin_dir_func (struct plugin_dir_handle *,
+						const char *, void (***)(void),
+						struct errinfo *);

@@ -9,7 +9,7 @@
 
 #include <errno.h>
 
-#define ET_EBUFSIZ 64
+#define ET_EBUFSIZ 1024
 
 struct et_list {
     /*@dependent@*//*@null@*/ struct et_list *next;

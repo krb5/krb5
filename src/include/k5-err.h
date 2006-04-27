@@ -27,7 +27,12 @@
  * Error-message handling
  */
 
+#ifndef K5_ERR_H
+#define K5_ERR_H
+
+#ifndef _
 #define _(X) (X)
+#endif
 
 #if defined(_MSDOS) || defined(_WIN32)
 #include <win-mac.h>
@@ -36,6 +41,8 @@
 #define KRB5_CALLCONV
 #define KRB5_CALLCONV_C
 #endif
+
+#include <stdarg.h>
 
 struct errinfo {
     long code;
@@ -58,3 +65,5 @@ void
 krb5int_clear_error (struct errinfo *ep);
 void
 krb5int_set_error_info_callout_fn (const char *(KRB5_CALLCONV *f)(long));
+
+#endif /* K5_ERR_H */

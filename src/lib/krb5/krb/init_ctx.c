@@ -317,7 +317,7 @@ krb5_set_default_in_tkt_ktypes(krb5_context context, const krb5_enctype *ktypes)
 
 static krb5_error_code
 get_profile_etype_list(krb5_context context, krb5_enctype **ktypes, char *profstr,
-		       int ctx_count, krb5_enctype *ctx_list)
+		       unsigned int ctx_count, krb5_enctype *ctx_list)
 {
     krb5_enctype *old_ktypes;
 

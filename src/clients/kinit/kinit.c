@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <com_err.h>
 
 #ifdef GETOPT_LONG
 #include <getopt.h>

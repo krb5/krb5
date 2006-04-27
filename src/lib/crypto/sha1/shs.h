@@ -27,7 +27,7 @@ typedef struct {
 
 /* Message digest functions (shs.c) */
 void shsInit(SHS_INFO *shsInfo);
-void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, int count);
+void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count);
 void shsFinal(SHS_INFO *shsInfo);
 
 

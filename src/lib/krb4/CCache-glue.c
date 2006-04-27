@@ -219,7 +219,7 @@ krb_get_tf_realm (
     int				kerr = KSUCCESS;
 	cc_int32		cc_err = ccNoError;
 	cc_context_t	cc_context = NULL;
-    cc_int32		cc_version = NULL;
+    cc_int32		cc_version = 0;
     cc_ccache_t		ccache = NULL;
 	
 	cc_err = cc_initialize (&cc_context, ccapi_version_3, &cc_version, NULL);
