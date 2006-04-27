@@ -161,11 +161,12 @@ kdb_get_library_name(krb5_context kcontext)
 	goto clean_n_exit;
     }
 
+#define DB2_NAME "db2.so"
     /* we got the module section. Get the library name from the module */
     status = profile_get_string(kcontext->profile, KDB_MODULE_SECTION, value,
 				KDB_LIB_POINTER,
 				/* default to db2 */
-				"db2",
+				DB2_NAME,
 				&lib);
 
     if (status) {
@@ -315,7 +316,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     char **profpath = NULL;
     char **path = NULL;
 
-    if (!strcmp("db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
+    if (!strcmp(DB2_NAME, lib_name) && (kdb_db2_pol_err_loaded == 0)) {
 	initialize_adb_error_table();
 	kdb_db2_pol_err_loaded = 1;
     }
