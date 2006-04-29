@@ -156,10 +156,8 @@ krb5_error_code return_padata
 	       krb5_key_data *client_key, krb5_keyblock *encrypting_key);
     
 /* replay.c */
-krb5_boolean kdc_check_lookaside (krb5_data *, const krb5_fulladdr *,
-					    krb5_data **);
-void kdc_insert_lookaside (krb5_data *, const krb5_fulladdr *,
-				     krb5_data *);
+krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);
+void kdc_insert_lookaside (krb5_data *, krb5_data *);
 void kdc_free_lookaside(krb5_context);
 
 /* which way to convert key? */
