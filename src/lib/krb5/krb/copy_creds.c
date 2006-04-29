@@ -43,11 +43,7 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
     if (!(tempcred = (krb5_creds *)malloc(sizeof(*tempcred))))
 	return ENOMEM;
 
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
-    *tempcred = *incred;		/* copy everything quickly */
-#else
-    memcpy(tempcred, incred, sizeof(krb5_creds));
-#endif
+    *tempcred = *incred;
     retval = krb5_copy_principal(context, incred->client, &tempcred->client);
     if (retval)
 	goto cleanlast;

@@ -233,11 +233,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
 
     if ((retval = encode_krb5_ap_req(&request, &toutbuf)))
 	goto cleanup_cksum;
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *outbuf = *toutbuf;
-#else
-    memcpy(outbuf, toutbuf, sizeof(krb5_data));
-#endif
 
     krb5_xfree(toutbuf);
 
