@@ -1170,8 +1170,6 @@ static kadm5_ret_t add_to_history(krb5_context context,
      return(0);
 }
 
-#ifdef USE_PASSWORD_SERVER
-
 /* FIXME: don't use global variable for this */
 krb5_boolean use_password_server = 0;
 
@@ -1186,6 +1184,8 @@ kadm5_set_use_password_server (void)
 {
     use_password_server = 1;
 }
+
+#ifdef USE_PASSWORD_SERVER
 
 /*
  * kadm5_launch_task () runs a program (task_path) to synchronize the 
