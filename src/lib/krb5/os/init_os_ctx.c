@@ -481,7 +481,7 @@ krb5_os_free_context(krb5_context ctx)
 	    ctx->profile = 0;
 	}
 
-	krb5int_close_plugin_dir (&ctx->libkrb5_plugins);
+	krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32
         WSACleanup();

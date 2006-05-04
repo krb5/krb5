@@ -181,7 +181,7 @@ typedef struct _kdb_vftabl{
 typedef struct _db_library {
     char name[KDB_MAX_DB_NAME];
     int reference_cnt;
-    struct plugin_file_handle *dl_handle;
+    struct plugin_dir_handle dl_dir_handle;
     kdb_vftabl vftabl;
     struct _db_library *next, *prev;
 } *db_library;

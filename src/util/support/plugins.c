@@ -73,8 +73,7 @@ struct plugin_file_handle {
 };
 
 long KRB5_CALLCONV
-krb5int_open_plugin (const char *filename, struct plugin_file_handle **h,
-		     struct errinfo *ep)
+krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct errinfo *ep)
 {
     long err = 0;
     struct stat statbuf;
@@ -82,8 +81,8 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h,
     int got_plugin = 0;
 
     if (!err) {
-        if (stat (filename, &statbuf) < 0) {
-            Tprintf ("stat(%s): %s\n", filename, strerror (errno));
+        if (stat (filepath, &statbuf) < 0) {
+            Tprintf ("stat(%s): %s\n", filepath, strerror (errno));
             err = errno;
         }
     }
@@ -98,10 +97,10 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h,
         void *handle = NULL;
 
         if (!err) {
-            handle = dlopen(filename, RTLD_NOW | RTLD_GLOBAL);
+            handle = dlopen(filepath, RTLD_NOW | RTLD_GLOBAL);
             if (handle == NULL) {
                 const char *e = dlerror();
-                Tprintf ("dlopen(%s): %s\n", filename, e);
+                Tprintf ("dlopen(%s): %s\n", filepath, e);
                 err = ENOENT; /* XXX */
 		krb5int_set_error (ep, err, "%s", e);
             }
@@ -124,7 +123,7 @@ krb5int_open_plugin (const char *filename, struct plugin_file_handle **h,
         CFBundleRef pluginBundle = NULL;
 
         if (!err) {
-            pluginPath = CFStringCreateWithCString (kCFAllocatorDefault, filename, 
+            pluginPath = CFStringCreateWithCString (kCFAllocatorDefault, filepath, 
                                                     kCFStringEncodingASCII);
             if (pluginPath == NULL) { err = ENOMEM; }
         }
@@ -288,74 +287,216 @@ krb5int_close_plugin (struct plugin_file_handle *h)
     (strerror (ERR))
 #endif
 
-long KRB5_CALLCONV
-krb5int_open_plugin_dir (const char *dirname,
-			 struct plugin_dir_handle *dirhandle,
-			 struct errinfo *ep)
+static long
+krb5int_plugin_file_handle_array_init (struct plugin_file_handle ***harray)
 {
     long err = 0;
-    DIR *dir = NULL;
-    struct dirent *d = NULL;
-    struct plugin_file_handle **h = NULL;
-    int count = 0;
 
+    *harray = calloc (1, sizeof (**harray)); /* calloc initializes to NULL */
+    if (*harray == NULL) { err = errno; }
+
+    return err;
+}
+
+static long
+krb5int_plugin_file_handle_array_add (struct plugin_file_handle ***harray, int *count, 
+                                      struct plugin_file_handle *p)
+{
+    long err = 0;
+    struct plugin_file_handle **newharray = NULL;
+    int newcount = *count + 1;
+    
+    newharray = realloc (*harray, ((newcount + 1) * sizeof (**harray))); /* +1 for NULL */
+    if (newharray == NULL) { 
+        err = errno; 
+    } else {
+        newharray[newcount - 1] = p;
+        newharray[newcount] = NULL;
+	*count = newcount;
+        *harray = newharray;
+    }
+
+    return err;    
+}
+
+static void
+krb5int_plugin_file_handle_array_free (struct plugin_file_handle **harray)
+{
+    if (harray != NULL) {
+        int i;
+        for (i = 0; harray[i] != NULL; i++) {
+            krb5int_close_plugin (harray[i]);
+        }
+        free (harray);
+    }
+}
+
+#if TARGET_OS_MAC
+#define FILEEXTS { "", ".bundle", ".so", NULL }
+#elif defined(_WIN32)
+#define FILEEXTS  { "", ".dll", NULL };
+#else
+#define FILEEXTS  { "", ".so", NULL };
+#endif
+
+
+static void 
+krb5int_free_plugin_filenames (char **filenames)
+{
+    if (filenames != NULL) { 
+        int i;
+        for (i = 0; filenames[i] != NULL; i++) {
+            free (filenames[i]);
+        }
+        free (filenames); 
+    }    
+}
+
+
+static long 
+krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
+{
+    long err = 0;
+    const char *fileexts[] = FILEEXTS;
+    char **tempnames = NULL;
+    int i;
+    
     if (!err) {
-        h = calloc (1, sizeof (*h)); /* calloc initializes to NULL */
-        if (h == NULL) { err = errno; }
+        size_t count = 0;
+        for (i = 0; filebases[i] != NULL; i++, count++);
+        for (i = 0; fileexts[i] != NULL; i++, count++);
+        tempnames = calloc (count, sizeof (char *));
+        if (tempnames == NULL) { err = errno; }
     }
     
     if (!err) {
-        dir = opendir(dirname);
-        if (dir == NULL) {
-            err = errno;
-            Tprintf ("-> error %d/%s\n", err, strerror (err));
-        }
-    }
-    
-    while (!err) {
-        size_t len = 0;
-        char *path = NULL;
-        struct plugin_file_handle *handle = NULL;
-        
-        d = readdir (dir);
-	if (d == NULL) { break; }
-        
-        if ((strcmp (d->d_name, ".") == 0) || 
-            (strcmp (d->d_name, "..") == 0)) {
-            continue;
-        }
-        
-        if (!err) {
-            len = NAMELEN (d);
-            path = malloc (strlen (dirname) + len + 2); /* '/' and NULL */
-            if (path == NULL) { 
-                err = errno; 
-            } else {
-                sprintf (path, "%s/%*s", dirname, (int) len, d->d_name);
-            }
-        }
-        
-        if (!err) {            
-            if (krb5int_open_plugin (path, &handle, ep) == 0) {
-                struct plugin_file_handle **newh = NULL;
-
-                count++;
-                newh = realloc (h, ((count + 1) + sizeof (*h))); /* +1 for NULL */
-                if (newh == NULL) { 
+        int i,j;
+        for (i = 0; !err && (filebases[i] != NULL); i++) {
+            size_t baselen = strlen (filebases[i]);
+            for (j = 0; !err && (fileexts[j] != NULL); j++) {
+                size_t len = baselen + strlen (fileexts[j]) + 2; /* '.' + NULL */
+                tempnames[i+j] = malloc (len * sizeof (char));
+                if (tempnames[i+j] == NULL) { 
                     err = errno; 
                 } else {
-                    h = newh;
-                    h[count - 1] = handle;
-                    h[count] = NULL;
-                    handle = NULL;  /* h takes ownership */
+                    sprintf (tempnames[i+j], "%s%s", filebases[i], fileexts[j]);
                 }
             }
         }
-        
-        if (path   != NULL) { free (path); }
-        if (handle != NULL) { krb5int_close_plugin (handle); }
     }
     
+    if (!err) {
+        *filenames = tempnames;
+        tempnames = NULL;
+    }
+    
+    if (tempnames != NULL) { krb5int_free_plugin_filenames (tempnames); }
+    
+    return err;
+}
+
+
+/* Takes a NULL-terminated list of directories.  If filebases is NULL, filebases is ignored
+ * all plugins in the directories are loaded.  If filebases is a NULL-terminated array of names, 
+ * only plugins in the directories with those name (plus any platform extension) are loaded. */
+
+long KRB5_CALLCONV
+krb5int_open_plugin_dirs (const char * const *dirnames,
+                          const char * const *filebases,
+			  struct plugin_dir_handle *dirhandle,
+                          struct errinfo *ep)
+{
+    long err = 0;
+    struct plugin_file_handle **h = NULL;
+    int count = 0;
+    char **filenames = NULL;
+    int i;
+
+    if (!err) {
+        err = krb5int_plugin_file_handle_array_init (&h);
+    }
+    
+    if (!err && (filebases != NULL)) {
+	err = krb5int_get_plugin_filenames (filebases, &filenames);
+    }
+    
+    for (i = 0; !err && dirnames[i] != NULL; i++) {
+	size_t dirnamelen = strlen (dirnames[i]) + 1; /* '/' */
+        if (filenames != NULL) {
+            /* load plugins with names from filenames from each directory */
+            int j;
+            
+            for (j = 0; !err && filenames[j] != NULL; j++) {
+                struct plugin_file_handle *handle = NULL;
+		char *filepath = NULL;
+		
+		if (!err) {
+		    filepath = malloc (dirnamelen + strlen (filenames[j]) + 1); /* NULL */
+		    if (filepath == NULL) { 
+			err = errno; 
+		    } else {
+			sprintf (filepath, "%s/%s", dirnames[i], filenames[j]);
+		    }
+		}
+		
+                if (krb5int_open_plugin (filepath, &handle, ep) == 0) {
+                    err = krb5int_plugin_file_handle_array_add (&h, &count, handle);
+                    if (!err) { handle = NULL; }  /* h takes ownership */
+                }
+                
+		if (filepath != NULL) { free (filepath); }
+		if (handle   != NULL) { krb5int_close_plugin (handle); }
+            }
+        } else {
+            /* load all plugins in each directory */
+            DIR *dir = NULL;
+            
+            if (!err) {
+                dir = opendir(dirnames[i]);
+                if (dir == NULL) {
+                    err = errno;
+                    Tprintf ("-> error %d/%s\n", err, strerror (err));
+                }
+            }
+            
+            while (!err) {
+                struct dirent *d = NULL;
+                char *filepath = NULL;
+                struct plugin_file_handle *handle = NULL;
+                
+                d = readdir (dir);
+                if (d == NULL) { break; }
+                
+                if ((strcmp (d->d_name, ".") == 0) || 
+                    (strcmp (d->d_name, "..") == 0)) {
+                    continue;
+                }
+                
+		if (!err) {
+                    int len = NAMELEN (d);
+		    filepath = malloc (dirnamelen + len + 1); /* NULL */
+		    if (filepath == NULL) { 
+			err = errno; 
+		    } else {
+			sprintf (filepath, "%s/%*s", dirnames[i], len, d->d_name);
+		    }
+		}
+                
+                if (!err) {            
+                    if (krb5int_open_plugin (filepath, &handle, ep) == 0) {
+                        err = krb5int_plugin_file_handle_array_add (&h, &count, handle);
+                        if (!err) { handle = NULL; }  /* h takes ownership */
+                    }
+                }
+                
+                if (filepath  != NULL) { free (filepath); }
+                if (handle    != NULL) { krb5int_close_plugin (handle); }
+            }
+            
+            if (dir != NULL) { closedir (dir); }
+        }
+    }
+        
     if (err == ENOENT) {
         err = 0;  /* ran out of plugins -- do nothing */
     }
@@ -365,20 +506,14 @@ krb5int_open_plugin_dir (const char *dirname,
         h = NULL;  /* dirhandle->files takes ownership */
     }
     
-    if (h != NULL) {
-        int i;
-        for (i = 0; h[i] != NULL; i++) {
-            krb5int_close_plugin (h[i]);
-        }
-        free (h);
-    }
-    if (dir != NULL) { closedir (dir); }
+    if (filenames != NULL) { krb5int_free_plugin_filenames (filenames); }
+    if (h         != NULL) { krb5int_plugin_file_handle_array_free (h); }
     
     return err;
 }
 
 void KRB5_CALLCONV
-krb5int_close_plugin_dir (struct plugin_dir_handle *dirhandle)
+krb5int_close_plugin_dirs (struct plugin_dir_handle *dirhandle)
 {
     if (dirhandle->files != NULL) {
         int i;
