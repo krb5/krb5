@@ -1,3 +1,20 @@
+2006-05-04  Tom Yu  <tlyu@mit.edu>
+
+	* gssapiP_spnego.h: Add REQUEST_MIC.  Add many state variables to
+	spnego_gss_ctx_id_rec.
+
+	* spnego_mech.c: New functions acc_ctx_new, acc_ctx_cont,
+	acc_ctx_vfymic, get_negTokenInit, get_negTokenResp.
+	(spnego_gss_accept_sec_context): Split into smaller pieces.
+	Implement RFC 4178 handling of MIC optionality.
+	(g_get_tag_and_length): Tighten up some length checks.  Take an
+	int rather than unsigned char for tag.
+	(make_spnego_tokenTarg_msg): Tweak error handling.  Remove MS_flag
+	argument.
+	(negotiate_mech_type): Remove firstMech argument.  Use negResult
+	to indicate what firstMech used to.
+	(get_req_flags): Tweak error handling.
+
 2006-03-28  Tom Yu  <tlyu@.mit.edu>
 
 	* spnego_mech.c (check_spnego_options, create_spnego_ctx): Force

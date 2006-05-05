@@ -6,7 +6,7 @@
 #ifndef	_GSSAPIP_SPNEGO_H_
 #define	_GSSAPIP_SPNEGO_H_
 
-#pragma ident	"@(#)gssapiP_spnego.h	1.3	03/09/18 SMI"
+/* #pragma ident	"@(#)gssapiP_spnego.h	1.3	03/09/18 SMI" */
 
 #ifdef	__cplusplus
 extern "C" {
@@ -21,7 +21,9 @@ extern "C" {
 #define	ACCEPT_COMPLETE 0
 #define	ACCEPT_INCOMPLETE 1
 #define	REJECT 2
-#define	ACCEPT_DEFECTIVE_TOKEN 3
+#define REQUEST_MIC 3
+#define	ACCEPT_MISSING_NEGSTATE 0x7e
+#define	ACCEPT_DEFECTIVE_TOKEN 0x7f
 
 /*
  * constants for der encoding/decoding routines.
@@ -90,6 +92,15 @@ typedef struct {
 	int MS_Interop;
 	int optimistic;
 	OM_uint32 last_status;
+	gss_cred_id_t default_cred;
+	int mic_reqd;
+	int mic_sent;
+	int mic_rcvd;
+	int mechtok_reqd;
+	int firstpass;
+	int acc_complete;
+	OM_uint32 ctx_flags;
+	gss_name_t internal_name;
 } spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
 
 /*
