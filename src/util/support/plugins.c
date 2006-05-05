@@ -360,7 +360,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
     const char *fileexts[] = FILEEXTS;
     char **tempnames = NULL;
     int i;
-    
+
     if (!err) {
         size_t count = 0;
         for (i = 0; filebases[i] != NULL; i++, count++);
@@ -368,9 +368,9 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
         tempnames = calloc (count, sizeof (char *));
         if (tempnames == NULL) { err = errno; }
     }
-    
+
     if (!err) {
-        int i,j;
+        int j;
         for (i = 0; !err && (filebases[i] != NULL); i++) {
             size_t baselen = strlen (filebases[i]);
             for (j = 0; !err && (fileexts[j] != NULL); j++) {
