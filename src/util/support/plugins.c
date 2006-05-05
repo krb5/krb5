@@ -357,7 +357,7 @@ static long
 krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
 {
     long err = 0;
-    const char *fileexts[] = FILEEXTS;
+    static const char *const fileexts[] = FILEEXTS;
     char **tempnames = NULL;
     int i;
 
