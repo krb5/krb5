@@ -334,9 +334,9 @@ krb5int_plugin_file_handle_array_free (struct plugin_file_handle **harray)
 #if TARGET_OS_MAC
 #define FILEEXTS { "", ".bundle", ".so", NULL }
 #elif defined(_WIN32)
-#define FILEEXTS  { "", ".dll", NULL };
+#define FILEEXTS  { "", ".dll", NULL }
 #else
-#define FILEEXTS  { "", ".so", NULL };
+#define FILEEXTS  { "", ".so", NULL }
 #endif
 
 
