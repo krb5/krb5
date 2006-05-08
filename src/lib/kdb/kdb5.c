@@ -311,9 +311,12 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     static const char *const dbpath_names[] = {
 	KDB_MODULE_SECTION, "db_module_dir", NULL,
     };
-    const char *filebases[] = { lib_name, NULL };
+    const char *filebases[2];
     char **profpath = NULL;
     char **path = NULL;
+
+    filebases[0] = lib_name;
+    filebases[1] = NULL;
 
     if (!strcmp(DB2_NAME, lib_name) && (kdb_db2_pol_err_loaded == 0)) {
 	initialize_adb_error_table();
