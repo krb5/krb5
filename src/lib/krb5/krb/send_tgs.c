@@ -228,7 +228,7 @@ krb5_send_tgs(krb5_context context, krb5_flags kdcoptions,
 	krb5_pa_data * const * counter;
 	register unsigned int i = 0;
 	for (counter = padata; *counter; counter++, i++);
-	combined_padata = (krb5_pa_data **)malloc(i+2);
+	combined_padata = malloc((i+2) * sizeof(*combined_padata));
 	if (!combined_padata) {
 	    krb5_xfree(ap_req_padata.contents);
 	    retval = ENOMEM;
