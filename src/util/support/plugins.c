@@ -449,7 +449,8 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
             }
         } else {
             /* load all plugins in each directory */
-            DIR *dir = NULL;
+#ifndef _WIN32
+	    DIR *dir = NULL;
             
             if (!err) {
                 dir = opendir(dirnames[i]);
@@ -495,6 +496,10 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
             
             if (dir != NULL) { closedir (dir); }
         }
+#else
+	/* Until a Windows implementation of this code is implemented */
+	err = ENOENT;
+#endif /* _WIN32 */
     }
         
     if (err == ENOENT) {
