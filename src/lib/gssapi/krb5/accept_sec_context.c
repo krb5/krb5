@@ -336,13 +336,13 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    ptr = (unsigned char *) input_token->value;
 
-   if (!(code = g_verify_token_header((gss_OID) gss_mech_krb5,
+   if (!(code = g_verify_token_header(gss_mech_krb5,
 				      &(ap_req.length),
 				      &ptr, KG_TOK_CTX_AP_REQ,
 				      input_token->length, 1))) {
        mech_used = gss_mech_krb5;
    } else if ((code == G_WRONG_MECH) &&
-	      !(code = g_verify_token_header((gss_OID) gss_mech_krb5_old,
+	      !(code = g_verify_token_header(gss_mech_krb5_old,
 					     &(ap_req.length), 
 					     &ptr, KG_TOK_CTX_AP_REQ,
 					     input_token->length, 1))) {
@@ -814,7 +814,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
        ctx->established = 1;
 
-       token.length = g_token_size((gss_OID) mech_used, ap_rep.length);
+       token.length = g_token_size(mech_used, ap_rep.length);
 
        if ((token.value = (unsigned char *) xmalloc(token.length))
 	   == NULL) {
@@ -823,7 +823,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 	   goto fail;
        }
        ptr3 = token.value;
-       g_make_token_header((gss_OID) mech_used, ap_rep.length,
+       g_make_token_header(mech_used, ap_rep.length,
 			   &ptr3, KG_TOK_CTX_AP_REP);
 
        TWRITE_STR(ptr3, ap_rep.data, ap_rep.length);
@@ -972,7 +972,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        tmsglen = scratch.length;
        toktype = KG_TOK_CTX_ERROR;
 
-       token.length = g_token_size((gss_OID) mech_used, tmsglen);
+       token.length = g_token_size(mech_used, tmsglen);
        token.value = (unsigned char *) xmalloc(token.length);
        if (!token.value) {
 	   krb5_free_context(context);
@@ -980,7 +980,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        }
 
        ptr = token.value;
-       g_make_token_header((gss_OID) mech_used, tmsglen, &ptr, toktype);
+       g_make_token_header(mech_used, tmsglen, &ptr, toktype);
 
        TWRITE_STR(ptr, scratch.data, scratch.length);
        krb5_free_data_contents(context, &scratch);
