@@ -390,8 +390,8 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	/* library not found in the given list. Error str is already set */
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	krb5_set_error_message (kcontext, status,
-				_("Unable to find requested database type: %s"),
-				err_str);
+				_("Unable to find requested database module '%s': %s"),
+				lib_name, err_str);
 	krb5_free_error_message (kcontext, err_str);
 	goto clean_n_exit;
     }
