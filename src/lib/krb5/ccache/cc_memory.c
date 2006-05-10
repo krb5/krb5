@@ -440,6 +440,8 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     return 0;
 }
 
+static krb5_error_code random_string (krb5_context, char *, krb5_int32);
+ 
 /*
  * Effects:
  * Creates a new file cred cache whose name is guaranteed to be
@@ -454,13 +456,15 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
  *              krb5_ccache.  id is undefined.
  * system errors (from open)
  */
+
 krb5_error_code KRB5_CALLCONV
 krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 {
     krb5_ccache lid;
-    char scratch[6+1]; /* 6 for the scratch part, +1 for NUL */
+    char uniquename[8];
     krb5_error_code err;
     krb5_mcc_data *d;
+    krb5_mcc_list_node *ptr;
 
     /* Allocate memory */
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -469,23 +473,76 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 
     lid->ops = &krb5_mcc_ops;
 
-    (void) strcpy(scratch, "XXXXXX");
-    mktemp(scratch);
+    random_string (context, uniquename, sizeof (uniquename));
 
     err = k5_mutex_lock(&krb5int_mcc_mutex);
     if (err) {
 	free(lid);
 	return err;
     }
-    err = new_mcc_data(scratch, &d);
+    
+    /* Check for uniqueness with mutex locked to avoid race conditions */
+    while (1) {
+	for (ptr = mcc_head; ptr; ptr=ptr->next) {
+            if (!strcmp(ptr->cache->name, uniquename)) {
+		/* name already exists.  Pick a new one and start over. */
+		random_string (context, uniquename, sizeof (uniquename));               
+		ptr = mcc_head;
+		continue;  
+            }
+	}
+	break;  /* got a unique name.  Stop. */
+    }
+    
+    err = new_mcc_data(uniquename, &d);
+
     k5_mutex_unlock(&krb5int_mcc_mutex);
     if (err) {
 	krb5_xfree(lid);
 	return err;
     }
     lid->data = d;
+    *id = lid;
     krb5_change_cache ();
     return KRB5_OK;
+}
+
+/* Utility routine: Creates a random memory ccache name. 
+ * This algorithm was selected because it creates readable 
+ * random ccache names in a fixed size buffer.  */
+
+static krb5_error_code
+random_string (krb5_context context, char *string, krb5_int32 length)
+{
+    static const unsigned char charlist[] =
+        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    krb5_error_code err = 0;
+    u_int8_t *bytes = NULL;
+    size_t bytecount = length - 1;
+    
+    if (!err) {
+        bytes = malloc (bytecount);
+        if (bytes == NULL) { err = ENOMEM; }
+    }
+    
+    if (!err) {
+        krb5_data data;
+        data.length = bytecount;
+        data.data = (char *) bytes;
+        err = krb5_c_random_make_octets (context, &data);
+    }
+    
+    if (!err) {
+        krb5_int32 i;
+        for (i = 0; i < bytecount; i++) {
+            string [i] = charlist[bytes[i] % (sizeof (charlist) - 1)];
+        }
+        string[length - 1] = '\0';
+    }
+    
+    if (bytes != NULL) { free (bytes); }
+    
+    return err;
 }
 
 /*
