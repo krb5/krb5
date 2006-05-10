@@ -62,11 +62,7 @@ krb5_get_credentials_core(krb5_context context, krb5_flags options,
 	retval = krb5_timeofday(context, &mcreds->times.endtime);
 	if (retval != 0) return retval;
     }
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     mcreds->keyblock = in_creds->keyblock;
-#else
-    memcpy(&mcreds->keyblock, &in_creds->keyblock, sizeof(krb5_keyblock));
-#endif
     mcreds->authdata = in_creds->authdata;
     mcreds->server = in_creds->server;
     mcreds->client = in_creds->client;

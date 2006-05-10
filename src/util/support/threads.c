@@ -43,6 +43,11 @@ struct tsd_block { void *values[K5_KEY_MAX]; };
 static struct tsd_block tsd_no_threads;
 static unsigned char destructors_set[K5_KEY_MAX];
 
+int krb5int_pthread_loaded (void)
+{
+    return 0;
+}
+
 #elif defined(_WIN32)
 
 static DWORD tls_idx;

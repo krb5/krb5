@@ -72,8 +72,9 @@ struct plugin_dir_handle {
 #define PLUGIN_DIR_OPEN(P) ((P)->files != NULL)
 
 long KRB5_CALLCONV
-krb5int_open_plugin (const char *, struct plugin_file_handle **,
-		     struct errinfo *);
+krb5int_open_plugin (const char *, struct plugin_file_handle **, struct errinfo *);
+void KRB5_CALLCONV
+krb5int_close_plugin (struct plugin_file_handle *);
 
 long KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *, const char *, void **,
@@ -83,18 +84,21 @@ long KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *, const char *,
 			 void (**)(), struct errinfo *);
 
-void KRB5_CALLCONV
-krb5int_close_plugin (struct plugin_file_handle *);
 
-long KRB5_CALLCONV krb5int_open_plugin_dir (const char *,
-					    struct plugin_dir_handle *,
-					    struct errinfo *);
-void KRB5_CALLCONV krb5int_close_plugin_dir (struct plugin_dir_handle *);
-void KRB5_CALLCONV krb5int_free_plugin_dir_data (void **);
-long KRB5_CALLCONV krb5int_get_plugin_dir_data (struct plugin_dir_handle *,
-						const char *, void ***,
-						struct errinfo *);
-void KRB5_CALLCONV krb5int_free_plugin_dir_func (void (**)(void));
-long KRB5_CALLCONV krb5int_get_plugin_dir_func (struct plugin_dir_handle *,
-						const char *, void (***)(void),
-						struct errinfo *);
+long KRB5_CALLCONV
+krb5int_open_plugin_dirs (const char * const *, const char * const *,
+			  struct plugin_dir_handle *, struct errinfo *);
+void KRB5_CALLCONV 
+krb5int_close_plugin_dirs (struct plugin_dir_handle *);
+
+long KRB5_CALLCONV 
+krb5int_get_plugin_dir_data (struct plugin_dir_handle *, const char *, 
+			     void ***, struct errinfo *);
+void KRB5_CALLCONV 
+krb5int_free_plugin_dir_data (void **);
+
+long KRB5_CALLCONV 
+krb5int_get_plugin_dir_func (struct plugin_dir_handle *, const char *, 
+			     void (***)(void), struct errinfo *);
+void KRB5_CALLCONV 
+krb5int_free_plugin_dir_func (void (**)(void));

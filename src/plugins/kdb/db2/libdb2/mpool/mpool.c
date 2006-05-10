@@ -451,8 +451,7 @@ mpool_look(mp, pgno)
 
 	head = &mp->hqh[HASHKEY(pgno)];
 	for (bp = head->cqh_first; bp != (void *)head; bp = bp->hq.cqe_next)
-		if ((bp->pgno == pgno) &&
-			(bp->flags & MPOOL_INUSE == MPOOL_INUSE)) {
+		if ((bp->pgno == pgno) && (bp->flags & MPOOL_INUSE)) {
 #ifdef STATISTICS
 			++mp->cachehit;
 #endif

@@ -15,8 +15,8 @@ krb5int_open_plugin
 krb5int_close_plugin
 krb5int_get_plugin_data
 krb5int_get_plugin_func
-krb5int_open_plugin_dir
-krb5int_close_plugin_dir
+krb5int_open_plugin_dirs
+krb5int_close_plugin_dirs
 krb5int_get_plugin_dir_data
 krb5int_get_plugin_dir_func
 krb5int_free_plugin_dir_data

@@ -545,10 +545,10 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 
 #include "k5-locate.h"
 
-#ifdef KFM_FRAMEWORK_PLUGIN_DIR
-static const char objdir[] = KFM_FRAMEWORK_PLUGIN_DIR ;
+#if TARGET_OS_MAC
+static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/libkrb5", NULL }; /* should be a list */
 #else
-static const char objdir[] = LIBDIR "/krb5/plugins/libkrb5";
+static const char *objdirs[] = { LIBDIR "/krb5/plugins/libkrb5", NULL };
 #endif
 
 struct module_callback_data {
@@ -612,8 +612,9 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
     Tprintf("in module_locate_server\n");
     cbdata.lp = addrlist;
     if (!PLUGIN_DIR_OPEN (&ctx->libkrb5_plugins)) {
-	code = krb5int_open_plugin_dir (objdir, &ctx->libkrb5_plugins,
-					&ctx->err);
+        
+	code = krb5int_open_plugin_dirs (objdirs, NULL, &ctx->libkrb5_plugins,
+					 &ctx->err);
 	if (code)
 	    return KRB5_PLUGIN_NO_HANDLE;
     }

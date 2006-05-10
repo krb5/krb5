@@ -158,11 +158,11 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 							    &mechs)) ||
 	   (cred->prerfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   (gss_OID) gss_mech_krb5_old,
+							   gss_mech_krb5_old,
 							   &mechs))) ||
 	   (cred->rfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   (gss_OID) gss_mech_krb5,
+							   gss_mech_krb5,
 							   &mechs)))) {
 	   k5_mutex_unlock(&cred->lock);
 	   if (ret_name)

@@ -10,11 +10,7 @@ actx_copy_addr(krb5_context context, const krb5_address *inad, krb5_address **ou
 
     if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
 	return ENOMEM;
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tmpad = *inad;
-#else
-    memcpy(tmpad, inad, sizeof(krb5_address));
-#endif
     if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
 	krb5_xfree(tmpad);
 	return ENOMEM;

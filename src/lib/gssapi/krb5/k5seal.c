@@ -117,7 +117,7 @@ make_seal_token_v1 (krb5_context context,
     /*** fill in the token */
 
     ptr = t;
-    g_make_token_header((gss_OID) oid, 14+cksum_size+tmsglen, &ptr, toktype);
+    g_make_token_header(oid, 14+cksum_size+tmsglen, &ptr, toktype);
 
     /* 0..1 SIGN_ALG */
     ptr[0] = signalg & 0xff;

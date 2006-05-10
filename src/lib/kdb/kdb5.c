@@ -161,11 +161,12 @@ kdb_get_library_name(krb5_context kcontext)
 	goto clean_n_exit;
     }
 
+#define DB2_NAME "db2"
     /* we got the module section. Get the library name from the module */
     status = profile_get_string(kcontext->profile, KDB_MODULE_SECTION, value,
 				KDB_LIB_POINTER,
 				/* default to db2 */
-				"db2",
+				DB2_NAME,
 				&lib);
 
     if (status) {
@@ -300,10 +301,8 @@ static krb5_error_code
 kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 {
     krb5_error_code status = 0;
-    char    dl_name[1024];
     int     ndx;
-    void   *vftabl_addr;
-    char   *err_str = NULL;
+    void  **vftabl_addrs = NULL;
     /* N.B.: If this is "const" but not "static", the Solaris 10
        native compiler has trouble building the library because of
        absolute relocations needed in read-only section ".rodata".
@@ -312,10 +311,14 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     static const char *const dbpath_names[] = {
 	KDB_MODULE_SECTION, "db_module_dir", NULL,
     };
+    const char *filebases[2];
     char **profpath = NULL;
     char **path = NULL;
 
-    if (!strcmp("db2", lib_name) && (kdb_db2_pol_err_loaded == 0)) {
+    filebases[0] = lib_name;
+    filebases[1] = NULL;
+
+    if (!strcmp(DB2_NAME, lib_name) && (kdb_db2_pol_err_loaded == 0)) {
 	initialize_adb_error_table();
 	kdb_db2_pol_err_loaded = 1;
     }
@@ -352,60 +355,56 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 	memcpy(path, profpath, ndx * sizeof(profpath[0]));
     memcpy(path + ndx, db_dl_location, db_dl_n_locations * sizeof(char *));
     status = 0;
-
-    for (ndx = 0; path[ndx]; ndx++) {
-	sprintf(dl_name, "%s/%s", path[ndx], lib_name);
-	status = krb5int_open_plugin (dl_name, &(*lib)->dl_handle,
-				      &kcontext->err);
-	if (status == 0) {
-	    /* found the module */
-	    status = krb5int_get_plugin_data((*lib)->dl_handle,
-					     "kdb_function_table",
-					     &vftabl_addr, &kcontext->err);
-	    if (status == 0) {
-		memcpy(&(*lib)->vftabl, vftabl_addr, sizeof(kdb_vftabl));
-
-		kdb_setup_opt_functions(*lib);
-
-		if ((status = (*lib)->vftabl.init_library())) {
-		    /* ERROR. library not initialized cleanly */
-		    goto clean_n_exit;
-		}
-	    } else {
-		const char *emsg = krb5_get_error_message (kcontext, status);
-		status = KRB5_KDB_DBTYPE_INIT;
-		krb5_set_error_message (kcontext, status,
-					"plugin symbol 'kdb_function_table' lookup failed: %s",
-					dl_name, emsg);
-		krb5_free_error_message (kcontext, emsg);
-		goto clean_n_exit;
-	    }
-	    break;
-	} else {
-	    err_str = krb5_get_error_message(kcontext, status);
-	}
-    }
-
-    if (!(*lib)->dl_handle) {
-	/* library not found in the given list. Error str is already set */
+    
+    if ((status = krb5int_open_plugin_dirs ((const char **) path, 
+                                            filebases, 
+                                            &(*lib)->dl_dir_handle, &kcontext->err))) {
+        char *err_str = krb5_get_error_message(kcontext, status);
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
 	krb5_set_error_message (kcontext, status,
-				_("Unable to find requested database module '%s': %s"),
-				lib_name, err_str);
+				"Unable to find requested database type: %s", err_str);
 	krb5_free_error_message (kcontext, err_str);
 	goto clean_n_exit;
     }
 
-  clean_n_exit:
+    if ((status = krb5int_get_plugin_dir_data (&(*lib)->dl_dir_handle, "kdb_function_table",
+                                               &vftabl_addrs, &kcontext->err))) {
+        char *err_str = krb5_get_error_message(kcontext, status);
+        status = KRB5_KDB_DBTYPE_INIT;
+        krb5_set_error_message (kcontext, status,
+                                "plugin symbol 'kdb_function_table' lookup failed: %s", err_str);
+        krb5_free_error_message (kcontext, err_str);
+	goto clean_n_exit;
+    }
+
+    if (vftabl_addrs[0] == NULL) {
+	/* No plugins! */
+	status = KRB5_KDB_DBTYPE_NOTFOUND;
+	krb5_set_error_message (kcontext, status,
+				_("Unable to find requested database module '%s': plugin symbol 'kdb_function_table' not found"),
+				lib_name);
+	goto clean_n_exit;
+    }
+
+    memcpy(&(*lib)->vftabl, vftabl_addrs[0], sizeof(kdb_vftabl));
+    kdb_setup_opt_functions(*lib);
+    
+    if ((status = (*lib)->vftabl.init_library())) {
+        /* ERROR. library not initialized cleanly */
+        goto clean_n_exit;
+    }    
+    
+clean_n_exit:
+    if (vftabl_addrs != NULL) { krb5int_free_plugin_dir_data (vftabl_addrs); }
     /* Both of these DTRT with NULL.  */
     profile_free_list(profpath);
     free(path);
     if (status) {
-	if (*lib) {
+        if (*lib) {
 	    kdb_destroy_lib_lock(*lib);
-	    if ((*lib)->dl_handle) {
-		krb5int_close_plugin((*lib)->dl_handle);
-	    }
+            if (PLUGIN_DIR_OPEN((&(*lib)->dl_dir_handle))) {
+                krb5int_close_plugin_dirs (&(*lib)->dl_dir_handle);
+            }
 	    free(*lib);
 	    *lib = NULL;
 	}
@@ -484,10 +483,10 @@ kdb_free_library(db_library lib)
 	}
 
 	/* close the library */
-	if (lib->dl_handle) {
-	    krb5int_close_plugin(lib->dl_handle);
-	}
-
+        if (PLUGIN_DIR_OPEN((&lib->dl_dir_handle))) {
+            krb5int_close_plugin_dirs (&lib->dl_dir_handle);
+        }
+        
 	kdb_destroy_lib_lock(lib);
 
 	if (lib->prev == NULL) {

@@ -36,11 +36,7 @@ krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom, krb5_check
 
     if (!(tempto = (krb5_checksum *)malloc(sizeof(*tempto))))
 	return ENOMEM;
-#ifdef HAVE_C_STRUCTURE_ASSIGNMENT
     *tempto = *ckfrom;
-#else
-    memcpy(tempto, ckfrom, sizeof(krb5_checksum));
-#endif
 
     if (!(tempto->contents =
 	  (krb5_octet *)malloc(tempto->length))) {

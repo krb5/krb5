@@ -609,11 +609,11 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 							    &ret_mechs)) ||
 	   (cred->prerfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   (gss_OID) gss_mech_krb5_old,
+							   gss_mech_krb5_old,
 							   &ret_mechs))) ||
 	   (cred->rfc_mech &&
 	    GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-							   (gss_OID) gss_mech_krb5,
+							   gss_mech_krb5,
 							   &ret_mechs)))) {
 	   if (cred->ccache)
 	       (void)krb5_cc_close(context, cred->ccache);

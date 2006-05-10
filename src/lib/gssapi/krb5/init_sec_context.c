@@ -325,7 +325,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, chan_bindings, mech_type, token)
 
    ptr = t;
 
-   g_make_token_header((gss_OID) mech_type, ap_req.length,
+   g_make_token_header(mech_type, ap_req.length,
 		       &ptr, KG_TOK_CTX_AP_REQ);
 
    TWRITE_STR(ptr, (unsigned char *) ap_req.data, ap_req.length);
@@ -720,7 +720,7 @@ mutual_auth(
 
    ptr = (unsigned char *) input_token->value;
 
-   if (g_verify_token_header((gss_OID) ctx->mech_used,
+   if (g_verify_token_header(ctx->mech_used,
 			     &(ap_rep.length),
 			     &ptr, KG_TOK_CTX_AP_REP,
 			     input_token->length, 1)) {
