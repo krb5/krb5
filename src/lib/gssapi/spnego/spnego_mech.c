@@ -885,7 +885,7 @@ acc_ctx_cont(OM_uint32 *minstat,
 	if (*ptr != (CONTEXT | 0x01)) {
 		return GSS_S_DEFECTIVE_TOKEN;
 	}
-	ret = get_negTokenResp(minstat, &ptr, REMAIN,
+	ret = get_negTokenResp(minstat, ptr, REMAIN,
 			       negState, &supportedMech,
 			       responseToken, mechListMIC);
 	if (supportedMech != GSS_C_NO_OID) {
@@ -986,6 +986,9 @@ acc_ctx_vfymic(OM_uint32 *minor_status, gss_buffer_t *mechListMIC,
 		if  (spnego_ctx->mic_sent && spnego_ctx->mic_rcvd) {
 			ret = GSS_S_COMPLETE;
 			*negState = ACCEPT_COMPLETE;
+			if (*mechListMIC == GSS_C_NO_BUFFER) {
+				*return_token = NO_TOKEN_SEND;
+			}
 		} else if (spnego_ctx->mic_reqd) {
 			ret = GSS_S_CONTINUE_NEEDED;
 		}
@@ -1061,7 +1064,7 @@ spnego_gss_accept_sec_context(void *ct,
 				   &mechListMIC, &negState, &return_token);
 		if (ret != GSS_S_COMPLETE)
 			goto cleanup;
-		ret = GSS_S_DEFECTIVE_TOKEN;
+		ret = GSS_S_CONTINUE_NEEDED;
 	}
 	spnego_ctx = (spnego_gss_ctx_id_t)*context_handle;
 	/*
@@ -1072,7 +1075,7 @@ spnego_gss_accept_sec_context(void *ct,
 	 * first round-trip.
 	 */
 	mechstat = GSS_S_FAILURE;
-	if (mechtok_in != GSS_C_NO_BUFFER) {
+	if (negState != REQUEST_MIC && mechtok_in != GSS_C_NO_BUFFER) {
 		mechstat = gss_accept_sec_context(minor_status,
 						  &spnego_ctx->ctx_handle,
 						  verifier_cred_handle,
@@ -1099,6 +1102,8 @@ spnego_gss_accept_sec_context(void *ct,
 			return_token = ERROR_TOKEN_SEND;
 			goto cleanup;
 		}
+	} else if (negState == REQUEST_MIC) {
+		mechstat = GSS_S_CONTINUE_NEEDED;
 	}
 	if ((ret == GSS_S_COMPLETE || ret == GSS_S_CONTINUE_NEEDED) &&
 	    spnego_ctx->acc_complete &&
@@ -1110,7 +1115,7 @@ spnego_gss_accept_sec_context(void *ct,
 				     &return_token);
 	}
 cleanup:
-	if (return_token != NO_TOKEN_SEND || return_token != CHECK_MIC) {
+	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
 		tmpret = make_spnego_tokenTarg_msg(negState, mech_wanted,
 						   &mechtok_out, mechListMIC,
 						   return_token,
@@ -2387,7 +2392,7 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 	 *  ENUMERATED TAG, Length, Value,
 	 * Plus 2 bytes for the CONTEXT id and length.
 	 */
-	negresultTokenSize = 5;
+	dataLen = 5;
 
 	/*
 	 * calculate data length
@@ -2395,28 +2400,18 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 	 * If this is the initial token, include length of
 	 * mech_type and the negotiation result fields.
 	 */
-	if (sendtoken == INIT_TOKEN_SEND) {
-
-		if (mech_wanted != NULL) {
-			int mechlistTokenSize;
-			/*
-			 * 1 byte for the CONTEXT ID(0xa0),
-			 * 1 byte for the OID ID(0x06)
-			 * 1 byte for OID Length field
-			 * Plus the rest... (OID Length, OID value)
-			 */
-			mechlistTokenSize = 3 + mech_wanted->length +
-				gssint_der_length_size(mech_wanted->length);
-
-			dataLen = negresultTokenSize + mechlistTokenSize;
-		}
-	} else {
+	if (mech_wanted != NULL) {
+		int mechlistTokenSize;
 		/*
-		 * If this is a response from a server, count
-		 * the space needed for the negResult field.
-		 * LENGTH(2) + ENUM(2) + result
+		 * 1 byte for the CONTEXT ID(0xa0),
+		 * 1 byte for the OID ID(0x06)
+		 * 1 byte for OID Length field
+		 * Plus the rest... (OID Length, OID value)
 		 */
-		dataLen = negresultTokenSize;
+		mechlistTokenSize = 3 + mech_wanted->length +
+			gssint_der_length_size(mech_wanted->length);
+
+		dataLen += mechlistTokenSize;
 	}
 	if (data != NULL && data->length > 0) {
 		/* Length of the inner token */
@@ -2474,59 +2469,53 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 
 	ptr = t;
 
-	if (sendtoken == INIT_TOKEN_SEND ||
-	    sendtoken == ERROR_TOKEN_SEND) {
-		/*
-		 * Indicate that we are sending CHOICE 1
-		 * (NegTokenTarg)
-		 */
-		*ptr++ = CONTEXT | 0x01;
-		if (gssint_put_der_length(NegTokenSize, &ptr, dataLen) < 0) {
-			ret = GSS_S_DEFECTIVE_TOKEN;
-			goto errout;
-		}
-
-		*ptr++ = SEQUENCE;
-		if (gssint_put_der_length(NegTokenTargSize, &ptr,
-					  tlen - (int)(ptr-t)) < 0) {
-			ret = GSS_S_DEFECTIVE_TOKEN;
-			goto errout;
-		}
-
-		/*
-		 * First field of the NegTokenTarg SEQUENCE
-		 * is the ENUMERATED NegResult.
-		 */
-		*ptr++ = CONTEXT;
-		if (gssint_put_der_length(3, &ptr,
-					  tlen - (int)(ptr-t)) < 0) {
-			ret = GSS_S_DEFECTIVE_TOKEN;
-			goto errout;
-		}
-		if (put_negResult(&ptr, status, tlen - (int)(ptr - t)) < 0) {
-			ret = GSS_S_DEFECTIVE_TOKEN;
-			goto errout;
-		}
-
-		if (sendtoken != ERROR_TOKEN_SEND && mech_wanted != NULL) {
-			/*
-			 * Next, is the Supported MechType
-			 */
-			*ptr++ = CONTEXT | 0x01;
-			if (gssint_put_der_length(mech_wanted->length + 2,
-						  &ptr,
-						  tlen - (int)(ptr - t)) < 0) {
-				ret = GSS_S_DEFECTIVE_TOKEN;
-				goto errout;
-			}
-			if (put_mech_oid(&ptr, mech_wanted,
-				tlen - (int)(ptr - t)) < 0) {
-				ret = GSS_S_DEFECTIVE_TOKEN;
-				goto errout;
-			}
-		}
+	/*
+	 * Indicate that we are sending CHOICE 1
+	 * (NegTokenTarg)
+	 */
+	*ptr++ = CONTEXT | 0x01;
+	if (gssint_put_der_length(NegTokenSize, &ptr, dataLen) < 0) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto errout;
+	}
+	*ptr++ = SEQUENCE;
+	if (gssint_put_der_length(NegTokenTargSize, &ptr,
+				  tlen - (int)(ptr-t)) < 0) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto errout;
 	}
 
+	/*
+	 * First field of the NegTokenTarg SEQUENCE
+	 * is the ENUMERATED NegResult.
+	 */
+	*ptr++ = CONTEXT;
+	if (gssint_put_der_length(3, &ptr,
+				  tlen - (int)(ptr-t)) < 0) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto errout;
+	}
+	if (put_negResult(&ptr, status, tlen - (int)(ptr - t)) < 0) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto errout;
+	}
+	if (sendtoken != ERROR_TOKEN_SEND && mech_wanted != NULL) {
+		/*
+		 * Next, is the Supported MechType
+		 */
+		*ptr++ = CONTEXT | 0x01;
+		if (gssint_put_der_length(mech_wanted->length + 2,
+					  &ptr,
+					  tlen - (int)(ptr - t)) < 0) {
+			ret = GSS_S_DEFECTIVE_TOKEN;
+			goto errout;
+		}
+		if (put_mech_oid(&ptr, mech_wanted,
+				 tlen - (int)(ptr - t)) < 0) {
+			ret = GSS_S_DEFECTIVE_TOKEN;
+			goto errout;
+		}
+	}
 	if (data != NULL && data->length > 0) {
 		*ptr++ = CONTEXT | 0x02;
 		if (gssint_put_der_length(rspTokenSize, &ptr,

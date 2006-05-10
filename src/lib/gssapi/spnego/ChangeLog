@@ -1,3 +1,17 @@
+2006-05-10  Tom Yu  <tlyu@mit.edu>
+
+	* spnego_mech.c (acc_ctx_cont): Fix typo in call to
+	get_negTokenResp.
+	(acc_ctx_vfymic): Set NO_TOKEN_SEND if we're done and aren't
+	sending a MIC this round, so we don't send a useless negotiation
+	token.
+	(spnego_gss_accept_sec_context): Default to GSS_S_CONTINUE_NEEDED
+	when acc_ctx_cont succeeds.  Don't try to process the mechanism
+	token if we're requesting a MIC.  Fix typo in conditional
+	controlling whether to call make_spnego_tokenTarg_msg.
+	(make_spnego_tokenTarg_msg): Fix to actually work when sendtoken
+	is CONT_TOKEN_SEND.
+
 2006-05-04  Tom Yu  <tlyu@mit.edu>
 
 	* gssapiP_spnego.h: Add REQUEST_MIC.  Add many state variables to
