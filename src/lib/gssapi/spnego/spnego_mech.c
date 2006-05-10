@@ -726,7 +726,7 @@ get_negTokenInit(OM_uint32 *minor_status,
 	der_mechSet->value = malloc(tmpbuf.length);
 	if (der_mechSet->value == NULL)
 		return GSS_S_FAILURE;
-	memcpy(der_mechSet->value, &tmpbuf.value, tmpbuf.length);
+	memcpy(der_mechSet->value, tmpbuf.value, tmpbuf.length);
 	der_mechSet->length = tmpbuf.length;
 
 	err = get_req_flags(&ptr, REMAIN, req_flags);
