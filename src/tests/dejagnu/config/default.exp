@@ -941,7 +941,7 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "\[dbmodules\]"
 	puts $conffile "	db_module_dir = $tmppwd/../../../util/fakedest$KRB5_DB_MODULE_DIR"
 	puts $conffile "	foo_db2 = {"
-	puts $conffile "		db_library = db2.so"
+	puts $conffile "		db_library = db2"
 	puts $conffile "		database_name = $tmppwd/db"
 	puts $conffile "	}"
 	close $conffile
