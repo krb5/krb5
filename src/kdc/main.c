@@ -503,7 +503,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
 	    if( db_name == NULL )
 	    {
-		db_name = malloc(1025);
+		db_name = malloc(sizeof("dbname=") + strlen(optarg));
 		if( db_name == NULL )
 		{
 			fprintf(stderr,"%s: KDC cannot initialize. Not enough memory\n",
