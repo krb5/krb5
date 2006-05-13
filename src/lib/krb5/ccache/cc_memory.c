@@ -517,7 +517,7 @@ random_string (krb5_context context, char *string, krb5_int32 length)
     static const unsigned char charlist[] =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     krb5_error_code err = 0;
-    u_int8_t *bytes = NULL;
+    unsigned char *bytes = NULL;
     size_t bytecount = length - 1;
     
     if (!err) {
