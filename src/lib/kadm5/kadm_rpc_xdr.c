@@ -962,7 +962,7 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
        ok, and the other solutions are even uglier */
 
     if (!context &&
-	krb5_init_context(&context))
+	kadm5_init_krb5_context(&context))
        return(FALSE);
 
     switch(xdrs->x_op) {

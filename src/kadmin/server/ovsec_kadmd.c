@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 	     display_status("str_to_oid", major_status, minor_status);
 	     exit(1);
      }
-     
+
      names[0].name = names[1].name = names[2].name = names[3].name = NULL;
      names[0].type = names[1].type = names[2].type = names[3].type =
 	     nt_krb5_name_oid;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
      if (argc != 0)
 	  usage();
 
-     if ((ret = krb5_init_context(&context))) {
+     if ((ret = kadm5_init_krb5_context(&context))) {
 	  fprintf(stderr, "%s: %s while initializing context, aborting\n",
 		  whoami, error_message(ret));
 	  exit(1);
@@ -301,11 +301,11 @@ int main(int argc, char *argv[])
 
      krb5_klog_init(context, "admin_server", whoami, 1);
 
-
      krb5_klog_syslog(LOG_INFO, "Seeding random number generator");
           ret = krb5_c_random_os_entropy(context, 1, NULL);
 	  if(ret) {
-	    krb5_klog_syslog(LOG_ERR, "Error getting random seed: %s, aborting",
+	    krb5_klog_syslog(LOG_ERR,
+			     "Error getting random seed: %s, aborting",
 			     krb5_get_error_message (context, ret));
 	    exit(1);
 	  }
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 	 free(db_args), db_args=NULL;
      }
      
-     if ((ret = kadm5_get_config_params(context, NULL, NULL, &params,
+     if ((ret = kadm5_get_config_params(context, 1, &params,
 					&params))) {
 	  const char *e_txt = krb5_get_error_message (context, ret);
 	  krb5_klog_syslog(LOG_ERR, "%s: %s while initializing, aborting",

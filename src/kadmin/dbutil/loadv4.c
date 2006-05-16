@@ -180,7 +180,7 @@ load_v4db(argc, argv)
     krb5_int32 crflags = KRB5_KDB_CREATE_BTREE;
     krb5_data seed;
 
-    retval = krb5_init_context(&context);
+    retval = kadm5_init_krb5_context(&context);
     if (retval) {
 	fprintf(stderr, "%s: Could not initialize krb5 context.\n", PROGNAME);
 	return;

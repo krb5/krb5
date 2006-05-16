@@ -106,3 +106,4 @@ krb5_gss_verify
 krb5_gss_verify_mic
 krb5_gss_wrap
 krb5_gss_wrap_size_limit
+krb5_gss_use_kdc_context

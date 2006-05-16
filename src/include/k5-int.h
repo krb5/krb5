@@ -503,7 +503,7 @@ krb5_error_code krb5_sync_disk_file (krb5_context, FILE *fp);
 
 krb5_error_code krb5int_get_fq_local_hostname (char *, size_t);
 
-krb5_error_code krb5_os_init_context (krb5_context);
+krb5_error_code krb5_os_init_context (krb5_context, krb5_boolean);
 
 void krb5_os_free_context (krb5_context);
 

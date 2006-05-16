@@ -7,7 +7,6 @@
 	__REALM__ = {
 		kdc = __KDCHOST__:1750
 		admin_server = __KDCHOST__:1751
-# THIS SHOULD BE IN KDC.CONF INSTEAD!
 		database_module = foobar_db2_module_blah
 	}
 

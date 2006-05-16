@@ -1239,7 +1239,7 @@ char **argv;
      * Initialize kerberos stuff and kadm5 stuff.
      */
 
-    if ((code = krb5_init_context(&context))) {
+    if ((code = krb5int_init_context_kdc(&context))) {
 	com_err(argv[0], code, "while initializing Kerberos");
 	exit(1);
     }
@@ -1261,7 +1261,7 @@ char **argv;
 	exit(1);
     }
 
-    if ((code = kadm5_get_config_params(context, NULL, NULL, NULL,
+    if ((code = kadm5_get_config_params(context, 1, NULL,
 					&realm_params))) {
 	com_err(argv[0], code, "while getting realm parameters");
 	exit(1);

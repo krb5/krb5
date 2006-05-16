@@ -730,3 +730,4 @@ krb5_vset_error_message
 krb5_get_error_message
 krb5_free_error_message
 krb5_clear_error_message
+krb5int_init_context_kdc

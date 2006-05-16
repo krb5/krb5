@@ -631,4 +631,10 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 				      int *conf_state, int *qop_state, 
 				      int toktype);
 
+extern k5_mutex_t kg_kdc_flag_mutex;
+krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
+#define krb5_init_context(C) krb5_gss_init_context(C)
+
+krb5_error_code krb5_gss_use_kdc_context(void);
+
 #endif /* _GSSAPIP_KRB5_H_ */

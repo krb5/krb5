@@ -3,22 +3,6 @@ load_lib lib.t
 api_exit
 api_start
 
-test "init 100"
-proc test100 {} {
-    global test
-
-    # We used to check for ENOENT, but kadm5_get_config_params no
-    # longer fails if it cannot find the file---it just provides
-    # defaults instead.... XXX will fail on srv test!
-    one_line_fail_test {
-	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_PROFILE} /does-not-exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
-		server_handle
-    } "MISSING_KRB5_CONF_PARAMS"
-}
-if {$RPC} test100
-
 if ![info exists RESOLVE] {
     set RESOLVE [findfile $objdir/../../../tests/resolve/resolve]
 }
@@ -309,19 +293,6 @@ proc test109 {} {
     }
 }
 if {! $RPC} test109
-
-test "init 114"
-proc test114 {} {
-    global test
-
-    one_line_fail_test {
-	kadm5_init admin admin $KADM5_ADMIN_SERVICE \
-		[config_params {KADM5_CONFIG_ADMIN_SERVER} does.not.exist] \
-		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
-		server_handle
-    } "BAD_SERVER_PARAMS"
-}
-if {! $RPC} test114
 
 test "init 115"
 proc test115 {} {
@@ -643,6 +614,6 @@ proc test154 {} {
 
     api_exit; lib_start_api
 }
-if {! $RPC} test154
+if {0 && ! $RPC} test154
 
 return ""

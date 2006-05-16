@@ -73,7 +73,7 @@ main(int argc, char **argv)
 
 
 	/* Get a context */
-	kret = krb5_init_context(&kdc_realm.realm_context);
+	kret = krb5int_init_context_kdc(&kdc_realm.realm_context);
 	if (kret) {
 	  com_err(argv[0], kret, "while getting krb5 context");
 	  exit(2);

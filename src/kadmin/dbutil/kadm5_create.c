@@ -73,14 +73,14 @@ int kadm5_create(kadm5_config_params *params)
 
      kadm5_config_params lparams;
 
-     if ((retval = krb5_init_context(&context)))
+     if ((retval = kadm5_init_krb5_context(&context)))
 	  exit(ERR);
 
      /*
       * The lock file has to exist before calling kadm5_init, but
       * params->admin_lockfile may not be set yet...
       */
-     if ((retval = kadm5_get_config_params(context, NULL, NULL,
+     if ((retval = kadm5_get_config_params(context, 1,
 					   params, &lparams))) {
 	  com_err(progname, retval, "while looking up the Kerberos configuration");
 	  return 1;

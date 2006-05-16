@@ -85,7 +85,7 @@ main(int argc, char **argv)
    */
 
   memset((char *) &context, 0, sizeof(context));
-  krb5_init_context(&context);
+  kadm5_init_krb5_context(&context);
 
   ret = krb5_parse_name(context, principal, &princ);
   if (ret) {

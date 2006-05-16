@@ -2,7 +2,9 @@ thisconfigdir=./..
 myfulldir=lib/kadm5/srv
 mydir=srv
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
+LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 \
+	-I$(SRCTOP)/lib/gssapi/krb5 -I$(SRCTOP)/lib/gssapi/generic \
+	-I$(BUILDTOP)/lib/gssapi/krb5 -I$(BUILDTOP)/lib/gssapi/generic
 DEFINES = @HESIOD_DEFS@
 DEFS=
 

@@ -256,11 +256,8 @@ static kadm5_ret_t _kadm5_init_any(char *client_name,
 	  return KADM5_BAD_CLIENT_PARAMS;
      }
 			
-     if ((code = kadm5_get_config_params(handle->context,
-					DEFAULT_PROFILE_PATH,
-					"KRB5_CONFIG",
-					params_in,
-					&handle->params))) {
+     if ((code = kadm5_get_config_params(handle->context, 0,
+					 params_in, &handle->params))) {
 	  krb5_free_context(handle->context);
 	  free(handle);
 	  return(code);
@@ -747,4 +744,9 @@ int _kadm5_check_handle(void *handle)
 {
      CHECK_HANDLE(handle);
      return 0;
+}
+
+krb5_error_code kadm5_init_krb5_context (krb5_context *ctx)
+{
+    return krb5_init_context(ctx);
 }
