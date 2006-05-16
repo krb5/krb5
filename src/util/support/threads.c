@@ -144,11 +144,6 @@ int krb5int_pthread_loaded (void)
 	|| &pthread_mutex_init == 0
 	|| &pthread_self == 0
 	|| &pthread_equal == 0
-	/* This catches Solaris 9.  May be redundant with the above
-	   tests now.  */
-# ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
-	|| &pthread_mutexattr_setrobust_np == 0
-# endif
 	/* Any program that's really multithreaded will have to be
 	   able to create threads.  */
 	|| &pthread_create == 0
