@@ -113,7 +113,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	return(GSS_S_DUPLICATE_ELEMENT);
     }
 
-    code = krb5_init_context(&context);
+    code = krb5_gss_init_context(&context);
     if (code) {
 	*minor_status = code;
 	return GSS_S_FAILURE;

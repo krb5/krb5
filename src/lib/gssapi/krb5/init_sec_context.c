@@ -847,7 +847,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    OM_uint32 tmp_min_stat;
 
    if (*context_handle == GSS_C_NO_CONTEXT) {
-       kerr = krb5_init_context(&context);
+       kerr = krb5_gss_init_context(&context);
        if (kerr) {
 	   *minor_status = kerr;
 	   return GSS_S_FAILURE;
@@ -987,7 +987,6 @@ krb5_gss_init_context (krb5_context *ctxp)
     if (is_kdc)
 	return krb5int_init_context_kdc(ctxp);
     else
-#undef krb5_init_context
 	return krb5_init_context(ctxp);
 }
 

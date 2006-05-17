@@ -271,7 +271,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
        return(GSS_S_FAILURE);
    }
 
-   code = krb5_init_context(&context);
+   code = krb5_gss_init_context(&context);
    if (code) {
        *minor_status = code;
        return GSS_S_FAILURE;

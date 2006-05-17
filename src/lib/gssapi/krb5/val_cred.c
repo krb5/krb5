@@ -77,7 +77,7 @@ krb5_gss_validate_cred(minor_status, cred_handle)
     krb5_error_code code;
     OM_uint32 maj;
 
-    code = krb5_init_context(&context);
+    code = krb5_gss_init_context(&context);
     if (code) {
 	*minor_status = code;
 	return GSS_S_FAILURE;

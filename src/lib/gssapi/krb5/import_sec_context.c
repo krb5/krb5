@@ -84,7 +84,7 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
        one when calling the serialization code.  However, one of the
        objects we're unpacking is a krb5 context, so when we finish,
        we can throw this one away.  */
-    kret = krb5_init_context(&context);
+    kret = krb5_gss_init_context(&context);
     if (kret) {
 	*minor_status = kret;
 	return GSS_S_FAILURE;

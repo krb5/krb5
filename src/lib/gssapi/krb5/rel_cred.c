@@ -31,7 +31,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
    krb5_gss_cred_id_t cred;
    krb5_error_code code1, code2, code3;
 
-   code1 = krb5_init_context(&context);
+   code1 = krb5_gss_init_context(&context);
    if (code1) {
        *minor_status = code1;
        return GSS_S_FAILURE;
