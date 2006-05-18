@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=clients/kinit
-mydir=kinit
+mydir=clients/kinit
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

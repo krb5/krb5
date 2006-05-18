@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=clients/kpasswd
-mydir=kpasswd
+mydir=clients/kpasswd
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

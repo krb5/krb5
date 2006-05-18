@@ -218,9 +218,19 @@ case $krb5_cv_host in
 alpha*-dec-osf*)
 	AC_CHECK_LIB(security,setluid,
 		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid provided in OSF/1 security library])
+		KSU_LIBS="-lsecurity"
 	)
 	;;
 esac
+AC_SUBST(KSU_LIBS)
+dnl
+if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
+  || test $ac_cv_func_getenv = no; then
+  SETENVOBJ=setenv.o
+else
+  SETENVOBJ=
+fi
+AC_SUBST(SETENVOBJ)
 dnl
 dnl Check what the return types for gethostbyname_r and getservbyname_r are.
 dnl
@@ -549,6 +559,13 @@ AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t,
 #endif
 ])
 dnl
+dnl stuff for util/profile
+dnl
+dnl AC_KRB5_TCL already done
+DO_TCL=
+test "$TCL_LIBS" != "" && DO_TCL=ok
+AC_SUBST(DO_TCL)
+dnl
 dnl Test for POSIX 2001 *printf support (X/Open System Interfaces extension
 dnl to ANSI/ISO C 1999 specification).  Specifically, positional
 dnl specifications; not checking for other features like %zx at present.
@@ -608,7 +625,8 @@ AC_SUBST(HOST_TYPE)
 dnl
 dnl
 if test "$COM_ERR_VERSION" = k5 ; then
-  AC_CONFIG_SUBDIRS(util/et)
+dnl  AC_CONFIG_SUBDIRS(util/et)
+  K5_GEN_MAKEFILE(util/et)
 fi
 if test "$SS_VERSION" = k5 ; then
   AC_CONFIG_SUBDIRS(util/ss)
@@ -617,7 +635,7 @@ AC_CONFIG_SUBDIRS(util/profile lib/crypto lib/krb5 lib/des425 lib/apputils)
 if test -n "$KRB4_LIB"; then
   AC_CONFIG_SUBDIRS(lib/krb4)
 fi
-AC_CONFIG_SUBDIRS(lib/kdb lib/gssapi lib/rpc lib/kadm5)
-AC_CONFIG_SUBDIRS(kadmin clients plugins/kdb/db2 appl tests)
+AC_CONFIG_SUBDIRS(lib/gssapi lib/rpc lib/kadm5)
+AC_CONFIG_SUBDIRS(kadmin plugins/kdb/db2 appl tests)
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
-V5_AC_OUTPUT_MAKEFILE(. util util/support util/send-pr lib kdc slave krb524 config-files gen-manpages include include/kerberosIV)
+V5_AC_OUTPUT_MAKEFILE(. util util/support util/profile util/send-pr lib lib/kdb kdc slave krb524 config-files gen-manpages include include/kerberosIV clients clients/klist clients/kinit clients/kvno clients/kdestroy clients/kpasswd clients/ksu)

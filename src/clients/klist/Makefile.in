@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=clients/klist
-mydir=klist
+mydir=clients/klist
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

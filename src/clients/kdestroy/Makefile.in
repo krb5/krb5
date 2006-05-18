@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=clients/kdestroy
-mydir=kdestroy
+mydir=clients/kdestroy
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

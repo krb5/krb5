@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=clients
-mydir=.
+mydir=clients
 BUILDTOP=$(REL)..
 
 LOCAL_SUBDIRS= klist kinit kdestroy kpasswd ksu kvno kcpytkt kdeltkt
