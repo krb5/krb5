@@ -546,8 +546,8 @@ int main(argc, argv)
     }
 
     if (realm_name_required) {
-        retval = kadm5_get_config_params(util_context, NULL, NULL,
-				     &global_params, &global_params);
+        retval = kadm5_get_config_params(util_context, 1,
+					 &global_params, &global_params);
         if (retval) {
             com_err(argv[0], retval, "while retreiving configuration parameters");
             exit_status++;

@@ -79,13 +79,13 @@ extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 
-static krb5_error_code init_common (krb5_context *, krb5_boolean);
+static krb5_error_code init_common (krb5_context *, krb5_boolean, krb5_boolean);
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context)
 {
 
-	return init_common (context, FALSE);
+	return init_common (context, FALSE, FALSE);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -94,11 +94,17 @@ krb5_init_secure_context(krb5_context *context)
 
         /* This is to make gcc -Wall happy */
         if(0) krb5_brand[0] = krb5_brand[0];
-	return init_common (context, TRUE);
+	return init_common (context, TRUE, FALSE);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5int_init_context_kdc(krb5_context *context)
+{
+    return init_common (context, FALSE, TRUE);
 }
 
 static krb5_error_code
-init_common (krb5_context *context, krb5_boolean secure)
+init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 {
 	krb5_context ctx = 0;
 	krb5_error_code retval;
@@ -170,7 +176,7 @@ init_common (krb5_context *context, krb5_boolean secure)
 	       sizeof(krb5_enctype) * ctx->tgs_ktype_count);
 	ctx->conf_tgs_ktypes_count = ctx->tgs_ktype_count;
 
-	if ((retval = krb5_os_init_context(ctx)))
+	if ((retval = krb5_os_init_context(ctx, kdc)))
 		goto cleanup;
 
 	/* initialize the prng (not well, but passable) */

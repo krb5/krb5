@@ -39,7 +39,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 	if (minor_status)
 		*minor_status = 0;
 
-	code = krb5_init_context(&context);
+	code = krb5_gss_init_context(&context);
 	if (code) {
 	    if (minor_status)
 		*minor_status = code;

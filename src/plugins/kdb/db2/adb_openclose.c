@@ -188,7 +188,7 @@ krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
 
      /* now initialize lockp->lockinfo if necessary */
      if (lockp->lockinfo.lockfile == NULL) {
-	  if ((code = krb5_init_context(&lockp->lockinfo.context))) {
+	  if ((code = krb5int_init_context_kdc(&lockp->lockinfo.context))) {
 	       free(db);
 	       return((krb5_error_code) code);
 	  }

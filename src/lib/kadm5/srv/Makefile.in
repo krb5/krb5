@@ -2,7 +2,9 @@ thisconfigdir=./..
 myfulldir=lib/kadm5/srv
 mydir=srv
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
+LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 \
+	-I$(SRCTOP)/lib/gssapi/krb5 -I$(SRCTOP)/lib/gssapi/generic \
+	-I$(BUILDTOP)/lib/gssapi/krb5 -I$(BUILDTOP)/lib/gssapi/generic
 DEFINES = @HESIOD_DEFS@
 DEFS=
 
@@ -183,8 +185,15 @@ server_init.so server_init.po $(OUTPRE)server_init.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/server_internal.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(BUILDTOP)/lib/gssapi/generic/gssapi_err_generic.h \
+  $(BUILDTOP)/lib/gssapi/krb5/gssapi_err_krb5.h $(BUILDTOP)/lib/gssapi/krb5/gssapi_krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/../../gssapi/generic/gssapiP_generic.h \
+  $(srcdir)/../../gssapi/generic/gssapi_generic.h $(srcdir)/../../gssapi/krb5/gssapiP_krb5.h \
   server_init.c
 server_dict.so server_dict.po $(OUTPRE)server_dict.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \

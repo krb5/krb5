@@ -30,7 +30,7 @@ gss_krb5_copy_ccache(minor_status, cred_handle, out_ccache)
        return(GSS_S_FAILURE);
    }
 
-   code = krb5_init_context(&context);
+   code = krb5_gss_init_context(&context);
    if (code) {
        k5_mutex_unlock(&k5creds->lock);
        *minor_status = code;

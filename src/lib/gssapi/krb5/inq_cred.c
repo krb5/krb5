@@ -94,7 +94,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
    ret = GSS_S_FAILURE;
    ret_name = NULL;
 
-   code = krb5_init_context(&context);
+   code = krb5_gss_init_context(&context);
    if (code) {
        *minor_status = code;
        return GSS_S_FAILURE;

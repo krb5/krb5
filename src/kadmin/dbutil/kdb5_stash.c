@@ -85,7 +85,7 @@ kdb5_stash(argc, argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    retval = krb5_init_context(&context);
+    retval = kadm5_init_krb5_context(&context);
     if( retval )
     {
 	com_err(argv[0], retval, "while initializing krb5_context");

@@ -162,7 +162,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     }
 	
     rdp->realm_name = realm;
-    kret = krb5_init_context(&rdp->realm_context);
+    kret = krb5int_init_context_kdc(&rdp->realm_context);
     if (kret) {
 	com_err(progname, kret, "while getting context for realm %s",
 		realm);
@@ -170,7 +170,7 @@ init_realm(char *progname, kdc_realm_t *rdp, char *realm,
     }
 
     kret = krb5_read_realm_params(rdp->realm_context, rdp->realm_name,
-				  (char *) NULL, (char *) NULL, &rparams);
+				  &rparams);
     if (kret) {
 	com_err(progname, kret, "while reading realm parameters");
 	goto whoops;
@@ -503,7 +503,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
 	    if( db_name == NULL )
 	    {
-		db_name = malloc(1025);
+		db_name = malloc(sizeof("dbname=") + strlen(optarg));
 		if( db_name == NULL )
 		{
 			fprintf(stderr,"%s: KDC cannot initialize. Not enough memory\n",
@@ -693,7 +693,7 @@ int main(int argc, char **argv)
      * reporting.  The per-realm operations use the "realm_context"
      * associated with each realm.
      */
-    retval = krb5_init_context(&kcontext);
+    retval = krb5int_init_context_kdc(&kcontext);
     if (retval) {
 	    com_err(argv[0], retval, "while initializing krb5");
 	    exit(1);

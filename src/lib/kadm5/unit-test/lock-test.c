@@ -28,15 +28,14 @@ int main(int argc, char **argv)
 
      whoami = argv[0];
 
-     kret = krb5_init_context(&context);
+     kret = kadm5_init_krb5_context(&context);
      if (kret) {
 	 com_err(whoami, kret, "while initializing krb5");
 	 exit(1);
      }
 
      params.mask = 0;
-     ret = kadm5_get_config_params(context, NULL, NULL, &params,
-				   &params);
+     ret = kadm5_get_config_params(context, 1, &params, &params);
      if (ret) {
 	  com_err(whoami, ret, "while retrieving configuration parameters");
 	  exit(1);

@@ -7,7 +7,6 @@
 	__REALM__ = {
 		kdc = __KDCHOST__:1750
 		admin_server = __KDCHOST__:1751
-# THIS SHOULD BE IN KDC.CONF INSTEAD!
 		database_module = foobar_db2_module_blah
 	}
 
@@ -25,6 +24,6 @@
 [dbmodules]
 	db_module_dir = __MODDIR__
 	foobar_db2_module_blah = {
-		db_library = db2.so
+		db_library = db2
 		database_name = __K5ROOT__/kdb5
 	}

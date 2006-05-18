@@ -205,16 +205,15 @@ char *kadmin_startup(argc, argv)
 
     memset((char *) &params, 0, sizeof(params));
     
-    retval = krb5_init_context(&context);
-
     if (strcmp (whoami, "kadmin.local") == 0)
 	set_com_err_hook(extended_com_err_fn);
 
+    retval = kadm5_init_krb5_context(&context);
     if (retval) {
 	 com_err(whoami, retval, "while initializing krb5 library");
 	 exit(1);
     }
-		     
+
     while ((optchar = getopt(argc, argv, "x:r:p:kq:w:d:s:mc:t:e:ON")) != EOF) {
 	switch (optchar) {
 	case 'x':

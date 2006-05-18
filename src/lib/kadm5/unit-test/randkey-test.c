@@ -18,7 +18,7 @@ int main()
 
      int    x, i;
 
-     krb5_init_context(&context);
+     kadm5_init_krb5_context(&context);
 
      krb5_parse_name(context, "testuser", &tprinc);
      ret = ovsec_kadm_init("admin", "admin", "ovsec_adm/admin", 0,

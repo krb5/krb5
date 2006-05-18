@@ -166,10 +166,11 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
     if (!(kf = fopen(keyfile, "w")))
 #endif
     {
+	int e = errno;
 #if HAVE_UMASK
 	(void) umask(oumask);
 #endif
-	return errno;
+	return e;
     }
     enctype = key->enctype;
     if ((fwrite((krb5_pointer) &enctype,

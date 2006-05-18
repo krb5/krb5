@@ -190,7 +190,7 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 
 	/* Reset the context default ccache (see text above), and then
 	   retrieve it.  */
-	err = krb5_init_context(&context);
+	err = krb5_gss_init_context(&context);
 	if (!err)
 	    err = krb5_cc_set_default_name (context, NULL);
 	if (!err) {

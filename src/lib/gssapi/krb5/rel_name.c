@@ -30,7 +30,7 @@ krb5_gss_release_name(minor_status, input_name)
    krb5_context context;
    krb5_error_code code;
 
-   code = krb5_init_context(&context);
+   code = krb5_gss_init_context(&context);
    if (code) {
        *minor_status = code;
        return GSS_S_FAILURE;

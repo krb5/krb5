@@ -93,14 +93,20 @@ hostname=`hostname`
 QUALNAME=`$TOP/testing/scripts/qualname.pl $hostname`; export QUALNAME
 
 cat - > /tmp/start_servers_local$$ <<\EOF
-source $env(STOP)/testing/tcl/util.t
-set r $env(REALM)
-set q $env(QUALNAME)
-puts stdout [ovsec_kadm_init $env(SRVTCL) mrroot null $r \
-	$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle]
-puts stdout [ovsec_kadm_create_principal $server_handle \
-	[simple_principal host/$q@$r] {OVSEC_KADM_PRINCIPAL} notathena]
-puts stdout [ovsec_kadm_destroy $server_handle]
+if { [catch {
+	source $env(STOP)/testing/tcl/util.t
+	set r $env(REALM)
+	set q $env(QUALNAME)
+	puts stdout [ovsec_kadm_init $env(SRVTCL) mrroot null $r \
+		$OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 server_handle]
+	puts stdout [ovsec_kadm_create_principal $server_handle \
+		[simple_principal host/$q@$r] {OVSEC_KADM_PRINCIPAL} notathena]
+	puts stdout [ovsec_kadm_destroy $server_handle]
+} err]} {
+	puts stderr "initialization error: $err"
+	exit 1
+}
+exit 0
 EOF
 eval "$SRVTCL < /tmp/start_servers_local$$ $REDIRECT"
 x=$?

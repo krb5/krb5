@@ -34,7 +34,7 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
    krb5_error_code code;
    char *str;
 
-   code = krb5_init_context(&context);
+   code = krb5_gss_init_context(&context);
    if (code) {
        *minor_status = code;
        return GSS_S_FAILURE;

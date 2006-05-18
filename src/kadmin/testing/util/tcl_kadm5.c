@@ -87,7 +87,6 @@ static struct flagval config_mask_flags[] = {
      {"KADM5_CONFIG_ENCTYPE", KADM5_CONFIG_ENCTYPE},
      {"KADM5_CONFIG_ADBNAME", KADM5_CONFIG_ADBNAME},
      {"KADM5_CONFIG_ADB_LOCKFILE", KADM5_CONFIG_ADB_LOCKFILE},
-     {"KADM5_CONFIG_PROFILE", KADM5_CONFIG_PROFILE},
      {"KADM5_CONFIG_ACL_FILE", KADM5_CONFIG_ACL_FILE},
      {"KADM5_CONFIG_KADMIND_PORT", KADM5_CONFIG_KADMIND_PORT},
      {"KADM5_CONFIG_ENCTYPES", KADM5_CONFIG_ENCTYPES},
@@ -994,9 +993,9 @@ static int parse_config_params(Tcl_Interp *interp, char *list,
 	  return retcode;
      }
 
-     if (argc != 21) {
+     if (argc != 20) {
 	  sprintf(interp->result,
-		  "wrong # args in config params structure (%d should be 21)", 
+		  "wrong # args in config params structure (%d should be 20)", 
 		  argc);
 	  retcode = TCL_ERROR;
 	  goto finished;
@@ -1015,114 +1014,109 @@ static int parse_config_params(Tcl_Interp *interp, char *list,
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[2], &params->profile)) != TCL_OK) {
-	  Tcl_AppendElement(interp, "while parsing profile name");
-	  retcode = TCL_ERROR;
-	  goto finished;
-     }
-     if ((retcode = Tcl_GetInt(interp, argv[3], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[2], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing kadmind_port");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->kadmind_port = tmp;
-     if ((retcode = parse_str(interp, argv[4], &params->admin_server))
+     if ((retcode = parse_str(interp, argv[3], &params->admin_server))
 	 != TCL_OK) { 
 	  Tcl_AppendElement(interp, "while parsing profile name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[5], &params->dbname)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[4], &params->dbname)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing profile name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[6], &params->admin_dbname)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[5], &params->admin_dbname)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing admin_dbname name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[7], &params->admin_lockfile)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[6], &params->admin_lockfile)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing admin_lockfile name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[8], &params->admin_keytab)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[7], &params->admin_keytab)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing admin_keytab name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[9], &params->acl_file)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[8], &params->acl_file)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing acl_file name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[10], &params->dict_file)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[9], &params->dict_file)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing dict_file name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = Tcl_GetInt(interp, argv[11], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[10], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing mkey_from_kbd");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->mkey_from_kbd = tmp;
-     if ((retcode = parse_str(interp, argv[12], &params->stash_file)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[11], &params->stash_file)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing stash_file name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = parse_str(interp, argv[13], &params->mkey_name)) != TCL_OK) {
+     if ((retcode = parse_str(interp, argv[12], &params->mkey_name)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing mkey_name name");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
-     if ((retcode = Tcl_GetInt(interp, argv[14], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[13], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing enctype");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->enctype = tmp;
-     if ((retcode = Tcl_GetInt(interp, argv[15], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[14], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing max_life");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->max_life = tmp;
-     if ((retcode = Tcl_GetInt(interp, argv[16], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[15], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing max_rlife");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->max_rlife = tmp;
-     if ((retcode = Tcl_GetInt(interp, argv[17], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[16], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing expiration");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->expiration = tmp;
-     if ((retcode = parse_krb5_flags(interp, argv[18], &tmp))
+     if ((retcode = parse_krb5_flags(interp, argv[17], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing flags");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->flags = tmp;
-     if ((retcode = Tcl_GetInt(interp, argv[19], &tmp))
+     if ((retcode = Tcl_GetInt(interp, argv[18], &tmp))
 	 != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing num_keysalts");
 	  retcode = TCL_ERROR;
 	  goto finished;
      }
      params->num_keysalts = tmp;
-     if ((retcode = parse_keysalts(interp, argv[20], &params->keysalts,
+     if ((retcode = parse_keysalts(interp, argv[19], &params->keysalts,
 				   params->num_keysalts)) != TCL_OK) {
 	  Tcl_AppendElement(interp, "while parsing keysalts");
 	  retcode = TCL_ERROR;
@@ -1578,7 +1572,7 @@ static int _tcl_kadm5_init_any(enum init_type init_type, ClientData clientData,
 
      argv++, argc--;
 
-     krb5_init_context(&context);
+     kadm5_init_krb5_context(&context);
 
      if (argc != 7) {
 	  Tcl_AppendResult(interp, whoami, ": ", arg_error, 0);

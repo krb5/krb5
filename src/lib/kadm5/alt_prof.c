@@ -66,30 +66,50 @@ krb5_aprof_init(fname, envname, acontextp)
     krb5_pointer	*acontextp;
 {
     krb5_error_code	kret;
-    const_profile_filespec_t 	namelist[2];
     profile_t		profile;
-    
-    namelist[1] = (profile_filespec_t) NULL;
-    profile = (profile_t) NULL;
-    if (envname) {
-	if ((namelist[0] = getenv(envname))) {
-	    kret = profile_init(namelist, &profile);
-	    if (kret)
-		return kret;
-	    *acontextp = (krb5_pointer) profile;
-	    return 0;
+    const char *kdc_config;
+    size_t krb5_config_len, kdc_config_len;
+    char *profile_path;
+    char **filenames;
+    int i;
+
+    kret = krb5_get_default_config_files (&filenames);
+    if (kret)
+	return kret;
+    krb5_config_len = 0;
+    for (i = 0; filenames[i] != NULL; i++)
+	krb5_config_len += strlen(filenames[i]) + 1;
+    if (i > 0)
+	krb5_config_len--;
+    if (envname == NULL
+	|| (kdc_config = getenv(envname)) == NULL)
+	kdc_config = fname;
+    if (kdc_config == NULL)
+	kdc_config_len = 0;
+    else
+	kdc_config_len = strlen(kdc_config);
+    profile_path = malloc(2 + krb5_config_len + kdc_config_len);
+    if (profile_path == NULL) {
+	krb5_free_config_files(filenames);
+	return errno;
+    }
+    if (kdc_config_len)
+	strcpy(profile_path, kdc_config);
+    else
+	profile_path[0] = 0;
+    if (krb5_config_len)
+	for (i = 0; filenames[i] != NULL; i++) {
+	    if (kdc_config_len || i)
+		strcat(profile_path, ":");
+	    strcat(profile_path, filenames[i]);
 	}
-    }
+    krb5_free_config_files(filenames);
     profile = (profile_t) NULL;
-    if (fname) {
-	kret = profile_init_path(fname, &profile);
-	if (kret == ENOENT) {
-	    profile = 0;
-	} else if (kret)
-	    return kret;
-	*acontextp = (krb5_pointer) profile;
-	return 0;
-    }
+    kret = profile_init_path(profile_path, &profile);
+    free(profile_path);
+    if (kret)
+	return kret;
+    *acontextp = profile;
     return 0;
 }
 
@@ -349,11 +369,10 @@ krb5_aprof_finish(acontext)
  * in params_in for which the mask is set will be re-assigned to newly copied
  * versions, overwriting the old pointer value.
  */
-krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
+krb5_error_code kadm5_get_config_params(context, use_kdc_config,
 					params_in, params_out)
    krb5_context		context;
-   char			*kdcprofile;
-   char			*kdcenv;
+   int			use_kdc_config;
    kadm5_config_params	*params_in, *params_out;
 {
     char		*filename;
@@ -384,22 +403,20 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 params.realm = lrealm;
 	 params.mask |= KADM5_CONFIG_REALM;
     }
-    if (params_in->mask & KADM5_CONFIG_PROFILE) {
-	 filename = params.profile = strdup(params_in->profile);
-	 if (params.profile)
-	      params.mask |= KADM5_CONFIG_PROFILE;
-	 envname = NULL;
+    /*
+     * XXX These defaults should to work on both client and
+     * server.  kadm5_get_config_params can be implemented as a
+     * wrapper function in each library that provides correct
+     * defaults for NULL values.
+     */
+    if (use_kdc_config) {
+	filename = DEFAULT_KDC_PROFILE;
+	envname = KDC_PROFILE_ENV;
     } else {
-	 /*
-	  * XXX These defaults should to work on both client and
-	  * server.  kadm5_get_config_params can be implemented as a
-	  * wrapper function in each library that provides correct
-	  * defaults for NULL values.
-	  */
-	 filename = (kdcprofile) ? kdcprofile : DEFAULT_KDC_PROFILE;
-	 envname = (kdcenv) ? kdcenv : KDC_PROFILE_ENV;
-	 if (context->profile_secure == TRUE) envname = 0;
+	filename = DEFAULT_PROFILE_PATH;
+	envname = "KRB5_CONFIG";
     }
+    if (context->profile_secure == TRUE) envname = 0;
 
     kret = krb5_aprof_init(filename, envname, &aprofile);
     if (kret)
@@ -594,7 +611,7 @@ krb5_error_code kadm5_get_config_params(context, kdcprofile, kdcenv,
 	 params.mask |= KADM5_CONFIG_STASH_FILE;
 	 params.stash_file = svalue;
     }
-    
+
     /* Get the value for maximum ticket lifetime. */
     hierarchy[2] = "max_life";
     if (params_in->mask & KADM5_CONFIG_MAX_LIFE) {
@@ -739,8 +756,6 @@ kadm5_free_config_params(context, params)
     kadm5_config_params	*params;
 {
     if (params) {
-	if (params->profile)
-	    krb5_xfree(params->profile);
 	if (params->dbname)
 	    krb5_xfree(params->dbname);
 	if (params->mkey_name)
@@ -783,8 +798,7 @@ kadm5_get_admin_service_name(krb5_context ctx,
 
     params_in.mask |= KADM5_CONFIG_REALM;
     params_in.realm = realm_in;
-    ret = kadm5_get_config_params(ctx, DEFAULT_PROFILE_PATH,
-				  "KRB5_CONFIG", &params_in, &params_out);
+    ret = kadm5_get_config_params(ctx, 0, &params_in, &params_out);
     if (ret)
 	return ret;
 
@@ -820,11 +834,9 @@ err_params:
  *				  alternate profile.
  */
 krb5_error_code
-krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
+krb5_read_realm_params(kcontext, realm, rparamp)
     krb5_context	kcontext;
     char		*realm;
-    char		*kdcprofile;
-    char		*kdcenv;
     krb5_realm_params	**rparamp;
 {
     char		*filename;
@@ -837,6 +849,9 @@ krb5_read_realm_params(kcontext, realm, kdcprofile, kdcenv, rparamp)
     krb5_int32		ivalue;
     krb5_boolean	bvalue;
     krb5_deltat		dtvalue;
+
+    char		*kdcprofile = 0;
+    char		*kdcenv = 0;
 
     krb5_error_code	kret;
 

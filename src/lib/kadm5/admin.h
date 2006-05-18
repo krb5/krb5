@@ -114,7 +114,7 @@ typedef long		kadm5_ret_t;
 #define KADM5_CONFIG_ENCTYPE		0x000200
 #define KADM5_CONFIG_ADBNAME		0x000400
 #define KADM5_CONFIG_ADB_LOCKFILE	0x000800
-#define KADM5_CONFIG_PROFILE		0x001000
+/*#define KADM5_CONFIG_PROFILE		0x001000*/
 #define KADM5_CONFIG_ACL_FILE		0x002000
 #define KADM5_CONFIG_KADMIND_PORT	0x004000
 #define KADM5_CONFIG_ENCTYPES		0x008000
@@ -211,7 +211,6 @@ typedef struct _kadm5_policy_ent_t {
 typedef struct _kadm5_config_params {
      long		mask;
      char *		realm;
-     char *		profile;
      int		kadmind_port;
      int		kpasswd_port;
 
@@ -278,7 +277,7 @@ typedef struct __krb5_realm_params {
 
 #if USE_KADM5_API_VERSION > 1
 krb5_error_code kadm5_get_config_params(krb5_context context,
-					char *kdcprofile, char *kdcenv,
+					int use_kdc_config,
 					kadm5_config_params *params_in,
 					kadm5_config_params *params_out);
 
@@ -483,6 +482,8 @@ kadm5_ret_t    kadm5_free_key_data(void *server_handle,
 
 kadm5_ret_t    kadm5_free_name_list(void *server_handle, char **names, 
 				    int count);
+
+krb5_error_code kadm5_init_krb5_context (krb5_context *);
 
 #if USE_KADM5_API_VERSION == 1
 /*

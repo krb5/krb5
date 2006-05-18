@@ -86,8 +86,6 @@ krb5_error_code krb5_aprof_finish (krb5_pointer);
 
 krb5_error_code krb5_read_realm_params (krb5_context,
 					char *,
-					char *,
-					char *,
 					krb5_realm_params **);
 krb5_error_code krb5_free_realm_params (krb5_context,
 					krb5_realm_params *);

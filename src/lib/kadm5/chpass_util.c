@@ -80,7 +80,7 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
   } else { /* read the password */
     krb5_context context;
 
-    if ((code = (int) krb5_init_context(&context)) == 0) {
+    if ((code = (int) kadm5_init_krb5_context(&context)) == 0) {
       pwsize = sizeof(buffer);
       code = krb5_read_password(context, KADM5_PW_FIRST_PROMPT,
 				KADM5_PW_SECOND_PROMPT,

@@ -2158,7 +2158,7 @@ load_db(argc, argv)
     /*
      * Initialize the Kerberos context and error tables.
      */
-    if ((kret = krb5_init_context(&kcontext))) {
+    if ((kret = kadm5_init_krb5_context(&kcontext))) {
 	fprintf(stderr, ctx_err_fmt, programname);
 	free(dbname_tmp);
 	exit_status++;
@@ -2242,7 +2242,7 @@ load_db(argc, argv)
 	 newparams.mask |= KADM5_CONFIG_DBNAME;
 	 newparams.dbname = dbname_tmp;
 
-	 if ((kret = kadm5_get_config_params(kcontext, NULL, NULL,
+	 if ((kret = kadm5_get_config_params(kcontext, 1,
 					     &newparams, &newparams))) {
 	      com_err(argv[0], kret,
 		      "while retreiving new configuration parameters");

@@ -166,8 +166,9 @@ int main(argc, argv)
     int cmd_argc;
     krb5_error_code retval;
 
-    retval = krb5_init_context(&util_context);
     set_com_err_hook(extended_com_err_fn);
+
+    retval = kadm5_init_krb5_context(&util_context);
     if (retval) {
 	    com_err (progname, retval, "while initializing Kerberos code");
 	    exit(1);
@@ -284,7 +285,7 @@ int main(argc, argv)
 	util_context->default_realm = temp;
     }
 
-    retval = kadm5_get_config_params(util_context, NULL, NULL,
+    retval = kadm5_get_config_params(util_context, 1,
 				     &global_params, &global_params);
     if (retval) {
 	 com_err(argv[0], retval, "while retreiving configuration parameters");
