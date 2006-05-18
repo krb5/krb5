@@ -31,6 +31,8 @@ SHLIB_EXPLIBS= -lkdb_ldap $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto -lkrb5suppo
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
+$(TOPLIBD)/libkdb_ldap$(SHLIBEXT): all-recurse
+
 SRCS= 	$(srcdir)/ldap_exp.c
 
 STOBJLISTS=OBJS.ST
