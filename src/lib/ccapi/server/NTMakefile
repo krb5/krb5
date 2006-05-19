@@ -4,23 +4,11 @@
 
 CFLAGS = -I../include
 
-CCAPI_LIB = ../lib/ccapi.lib
+CCAPI_LIB = ../client/ccapi.lib
 WINLIBS = user32.lib advapi32.lib
-CCSOBJS = context.obj ccache.obj lists.obj rpc_auth.obj serv_ops.obj
+CCSOBJS = ccs_context.obj ccs_ccache.obj ccs_lists.obj rpc_auth.obj serv_ops.obj
 
-all: t_lists.exe t_msg.exe t_ccache.exe t_context.exe ccapi_server.exe
-
-t_lists.exe: t_lists.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_lists.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
-
-t_msg.exe: t_msg.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_msg.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
-
-t_ccache.exe: t_ccache.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_ccache.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
-
-t_context.exe: t_context.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_context.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+all: ccapi_server.exe
 
 ccapi_server.exe: main.obj $(CCSOBJS) $(CCAPI_LIB)
         link -out:$@ main.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)

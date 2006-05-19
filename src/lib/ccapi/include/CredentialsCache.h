@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 1998-2004 by the Massachusetts Institute of Technology.
+ * Copyright 1998-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -46,12 +46,12 @@
 /*
  * Declarations for Credentials Cache API Library
  *
- * API specification: <http://web.mit.edu/pismere/kerberos/ccache-api-v2.html>
+ * API specification: <http://web.mit.edu/pismere/kerberos/ccache-api-v3.html>
  *
  *	Revision 1: Frank Dabek, 6/4/1998
  *	Revision 2: meeroh, 2/24/1999
  *      Revision 3: meeroh, 11/12/1999
- *      Revision 4: jaltman, 10/27/2004
+ *      Revision 6: jaltman, 10/27/2004
  *
  */
  
@@ -81,6 +81,17 @@ extern "C" {
     #pragma options align=mac68k
 #endif
 
+#if defined(_WIN32)
+#define CCACHE_API 	__declspec(dllexport)
+
+#if _INTEGRAL_MAX_BITS >= 64 && _MSC_VER >= 1400 && !defined(_WIN64) && !defined(_USE_32BIT_TIME_T)
+#if defined(_TIME_T_DEFINED) || defined(_INC_IO) || defined(_INC_TIME) || defined(_INC_WCHAR)
+#error time_t has been defined as a 64-bit integer which is incompatible with Kerberos on this platform.
+#endif /* _TIME_T_DEFINED */
+#define _USE_32BIT_TIME_T
+#endif 
+#endif
+
 #include <time.h>
 
 /*
@@ -92,14 +103,16 @@ enum {
     ccapi_version_2 = 2,
     ccapi_version_3 = 3,
     ccapi_version_4 = 4,
-    ccapi_version_5 = 5
+    ccapi_version_5 = 5,
+    ccapi_version_6 = 6,
+    ccapi_version_max = ccapi_version_6
 };
  
 /* Errors */
 enum {
-    ccNoError							= 0,
+    ccNoError						= 0,
 
-    ccIteratorEnd						= 201,
+    ccIteratorEnd					= 201,
     ccErrBadParam,
     ccErrNoMem,
     ccErrInvalidContext,
@@ -111,7 +124,7 @@ enum {
     ccErrInvalidCredentialsIterator,
     ccErrInvalidLock,
 
-    ccErrBadName,						/* 211 */
+    ccErrBadName,					/* 211 */
     ccErrBadCredentialsVersion,
     ccErrBadAPIVersion,
     ccErrContextLocked,
@@ -123,7 +136,7 @@ enum {
     ccErrNeverDefault,
     ccErrCredentialsNotFound,
 
-    ccErrCCacheNotFound,					/* 221 */
+    ccErrCCacheNotFound,				/* 221 */
     ccErrContextNotFound,
     ccErrServerUnavailable,
     ccErrServerInsecure,
@@ -135,20 +148,22 @@ enum {
 };
 
 /* Credentials versions */
-enum {
+enum cc_credential_versions {
     cc_credentials_v4 = 1,
     cc_credentials_v5 = 2,
     cc_credentials_v4_v5 = 3
 };
 
 /* Lock types */
-enum {
-    cc_lock_read = 1,
-    cc_lock_write = 2
+enum cc_lock_types {
+    cc_lock_read = 0,
+    cc_lock_write = 1,
+    cc_lock_upgrade = 2,
+    cc_lock_downgrade = 3
 };
 
 /* Locking Modes */
-enum {
+enum cc_lock_modes {
     cc_lock_noblock = 0,
     cc_lock_block = 1
 };
@@ -157,12 +172,20 @@ enum {
  * Basic types
  */
  
-typedef char           cc_int8;
-typedef unsigned char  cc_uint8;
-typedef int            cc_int32;
-typedef unsigned int   cc_uint32;
-typedef time_t         cc_time_t;
-typedef void *         cc_handle;
+typedef char           		cc_int8;
+typedef unsigned char  		cc_uint8;
+typedef int            		cc_int32;
+typedef unsigned int   		cc_uint32;
+#if defined (WIN32)
+typedef __int64	       		cc_int64;
+typedef unsigned __int64 	cc_uint64;
+#else
+typedef long long 		cc_int64;
+typedef unsigned long long 	cc_uint64;
+#endif
+typedef time_t         		cc_time;
+typedef cc_int64		cc_time64;
+typedef cc_uint64      		cc_handle;
 
 /*
  * API types
@@ -190,10 +213,11 @@ typedef struct cc_credentials_f cc_credentials_f;
 /* Credentials types */
 
 enum {	/* Make sure all of these are multiples of four (for alignment sanity) */
-    cc_v4_name_size		= 40,
+    cc_v4_name_size	= 40,
     cc_v4_instance_size	= 40,
     cc_v4_realm_size	= 40,
-    cc_v4_ticket_size	= 1254
+    cc_v4_ticket_size	= 1254,
+    cc_v4_key_size 	= 8
 };
 
 enum cc_string_to_key_type {
@@ -211,10 +235,10 @@ struct cc_credentials_v4_t {
     char			service [cc_v4_name_size];
     char			service_instance [cc_v4_instance_size];
     char			realm [cc_v4_realm_size];
-    unsigned char		session_key [8];
+    unsigned char		session_key [cc_v4_key_size];
     cc_int32			kvno;
     cc_int32			string_to_key_type;
-    cc_time_t			issue_date;
+    cc_time			issue_date;
     cc_int32			lifetime;
     cc_uint32			address;
     cc_int32			ticket_size;
@@ -233,10 +257,10 @@ struct cc_credentials_v5_t {
     char*			client;
     char*			server;
     cc_data			keyblock;
-    cc_time_t			authtime;
-    cc_time_t			starttime;
-    cc_time_t			endtime;
-    cc_time_t			renew_till;
+    cc_time			authtime;
+    cc_time			starttime;
+    cc_time			endtime;
+    cc_time			renew_till;
     cc_uint32			is_skey;
     cc_uint32			ticket_flags;
     cc_data**			addresses;
@@ -320,7 +344,7 @@ struct  cc_context_f {
                                 cc_context_t context);
     cc_int32    (*get_change_time) (
                                 cc_context_t context,
-                                cc_time_t* time);
+                                cc_time* time);
     cc_int32    (*get_default_ccache_name) (
                                 cc_context_t context,
                                 cc_string_t* name);
@@ -397,16 +421,16 @@ struct cc_ccache_f {
                                  cc_ccache_t destination);
     cc_int32    (*lock) (
                                  cc_ccache_t ccache,
-                                 cc_uint32 block,
-                                 cc_uint32 lock_type);
+                                 cc_uint32 lock_type,
+                                 cc_uint32 block);
     cc_int32    (*unlock) (
                                  cc_ccache_t ccache);
     cc_int32    (*get_last_default_time) (
                                  cc_ccache_t ccache,
-                                 cc_time_t* time);
+                                 cc_time* time);
     cc_int32    (*get_change_time) (
                                  cc_ccache_t ccache,
-                                 cc_time_t* time);
+                                 cc_time* time);
     cc_int32    (*compare) (
                                 cc_ccache_t ccache,
                                 cc_ccache_t compare_to,
@@ -414,11 +438,11 @@ struct cc_ccache_f {
     cc_int32	(*get_kdc_time_offset) (
                                 cc_ccache_t ccache,
                                 cc_int32	credentials_version,
-                                cc_time_t*	time_offset);
+                                cc_time*	time_offset);
     cc_int32	(*set_kdc_time_offset) (
                                 cc_ccache_t ccache,
                                 cc_int32	credentials_version,
-                                cc_time_t	time_offset);
+                                cc_time	time_offset);
                                 
     cc_int32	(*clear_kdc_time_offset) (
                                 cc_ccache_t	ccache,
@@ -446,6 +470,9 @@ struct cc_ccache_iterator_f {
     cc_int32    (*next) (
                                  cc_ccache_iterator_t iter,
                                  cc_ccache_t* ccache);
+
+    cc_int32 	(*clone) (	 cc_ccache_iterator_t iter,
+				 cc_ccache_iterator_t* new_iter);
 };
 
 struct cc_credentials_iterator_f {
@@ -454,16 +481,19 @@ struct cc_credentials_iterator_f {
     cc_int32    (*next) (
                                  cc_credentials_iterator_t iter,
                                  cc_credentials_t* ccache);
+
+    cc_int32 	(*clone) (	 cc_credentials_iterator_t iter,
+				 cc_credentials_iterator_t* new_iter);
 };
 
 /*
  * API functions
  */
  
-cc_int32 cc_initialize (
+CCACHE_API cc_int32 cc_initialize (
 	cc_context_t*		outContext,
-	cc_int32			inVersion,
-	cc_int32*			outSupportedVersion,
+	cc_int32		inVersion,
+	cc_int32*		outSupportedVersion,
 	char const**		outVendor);
 	
 /*
@@ -488,8 +518,8 @@ cc_int32 cc_initialize (
 			((context) -> functions -> create_new_ccache (context, version, principal, ccache))
 #define		cc_context_new_ccache_iterator(context, iterator)						\
 			((context) -> functions -> new_ccache_iterator (context, iterator))
-#define		cc_context_lock(context, type, lock)									\
-			((context) -> functions -> lock (context, type, lock))
+#define		cc_context_lock(context, type, block)									\
+			((context) -> functions -> lock (context, type, block))
 #define		cc_context_unlock(context)												\
 			((context) -> functions -> unlock (context))
 #define		cc_context_compare(context, compare_to, equal)							\
@@ -515,8 +545,8 @@ cc_int32 cc_initialize (
 			((ccache) -> functions -> remove_credentials (ccache, credentials))
 #define		cc_ccache_new_credentials_iterator(ccache, iterator)					\
 			((ccache) -> functions -> new_credentials_iterator (ccache, iterator))
-#define		cc_ccache_lock(ccache, lock)											\
-			((ccache) -> functions -> lock (ccache, lock))
+#define		cc_ccache_lock(ccache, type, block)											\
+			((ccache) -> functions -> lock (ccache, type, block))
 #define		cc_ccache_unlock(ccache, unlock)										\
 			((ccache) -> functions -> unlock (ccache, unlock))
 #define		cc_ccache_get_last_default_time(ccache, time)							\
@@ -528,11 +558,11 @@ cc_int32 cc_initialize (
 #define		cc_ccache_compare(ccache, compare_to, equal)							\
 			((ccache) -> functions -> compare (ccache, compare_to, equal))
 #define		cc_ccache_get_kdc_time_offset(ccache, version, time)					\
-            ((ccache) -> functions -> get_kdc_time_offset (version, time))
+                        ((ccache) -> functions -> get_kdc_time_offset (version, time))
 #define		cc_ccache_set_kdc_time_offset(ccache, version, time)					\
-            ((ccache) -> functions -> set_kdc_time_offset (version, time))
+                        ((ccache) -> functions -> set_kdc_time_offset (version, time))
 #define		cc_ccache_clear_kdc_time_offset(ccache, version)						\
-            ((ccache) -> functions -> clear_kdc_time_offset (version))
+                        ((ccache) -> functions -> clear_kdc_time_offset (version))
 
 #define		cc_string_release(string)												\
 			((string) -> functions -> release (string))
@@ -546,11 +576,15 @@ cc_int32 cc_initialize (
 			((iterator) -> functions -> release (iterator))
 #define		cc_ccache_iterator_next(iterator, ccache)								\
 			((iterator) -> functions -> next (iterator, ccache))
+#define		cc_ccache_iterator_clone(iterator, new_iter)								\
+			((iterator) -> functions -> clone (iterator, new_iter))
 	
 #define		cc_credentials_iterator_release(iterator)								\
 			((iterator) -> functions -> release (iterator))
 #define		cc_credentials_iterator_next(iterator, credentials)						\
 			((iterator) -> functions -> next (iterator, credentials))
+#define		cc_credentials_iterator_clone(iterator, new_iter)								\
+			((iterator) -> functions -> clone (iterator, new_iter))
 			
 #if TARGET_OS_MAC
     #if defined(__MWERKS__)

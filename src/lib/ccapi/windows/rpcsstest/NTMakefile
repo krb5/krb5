@@ -1,0 +1,24 @@
+
+!include <win32.mak>
+
+{}.c{}.obj:
+	$(CC) $(cdebug) $(cflags) /Fo"$@" /c $**
+
+EXECONLINK=link /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $**
+
+CLIENTEXE=csclient.exe
+
+SERVEREXE=csserver.exe
+
+SDKLIBS=rpcrt4.lib
+
+cstest_c.c cstest_s.c cstest.h: cstest.idl cstest.acf
+	midl cstest.idl /acf cstest.acf
+
+$(CLIENTEXE): client.obj cstest_c.obj
+	$(EXECONLINK) $(SDKLIBS)
+
+$(SERVEREXE): server.obj cstest_s.obj
+	$(EXECONLINK) $(SDKLIBS)
+
+all: $(SERVEREXE) $(CLIENTEXE)

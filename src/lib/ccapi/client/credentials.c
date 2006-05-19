@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -159,23 +159,23 @@ cc_int_credentials_release( cc_credentials_t creds )
 
 cc_int32
 cc_int_credentials_compare( cc_credentials_t credentials,
-                        cc_credentials_t compare_to,
-                        cc_uint32* equal )
+			    cc_credentials_t compare_to,
+			    cc_uint32* equal )
 {
     cc_int_credentials_t int_credentials;
     cc_int_credentials_t int_compare_to;
 
     if ( credentials == NULL || compare_to == NULL || equal == NULL )
         return ccErrBadParam;
-
     
+    int_credentials = (cc_int_credentials_t)credentials;
+    int_compare_to  = (cc_int_credentials_t)compare_to;
+
     if ( int_credentials->magic != CC_CREDS_MAGIC ||
          int_compare_to->magic != CC_CREDS_MAGIC )
         return ccErrInvalidCredentials;
 
-    int_credentials = (cc_int_credentials_t)credentials;
-    int_compare_to  = (cc_int_credentials_t)compare_to;
-
     *equal = (int_credentials->handle == int_compare_to->handle);
+   
     return ccNoError;
 }

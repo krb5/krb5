@@ -12,11 +12,11 @@ $(CCAPI_LIB): $(CCAPI_OBJS)
 
 CCAPI_DLLFILE = krbcc32.dll
 
-
-
 $(CCAPI_DLLFILE): $(CCAPI_LIB)
         $(DLLGUILINK) -def:windows\krbcc32.def
         $(DLLPREP)
+
+all: $(CCAPI_DLLFILE)
 
 clean:
         del *.obj *.lib

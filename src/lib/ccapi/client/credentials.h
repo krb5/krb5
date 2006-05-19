@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -84,8 +84,8 @@ cci_creds_v5_marshall( cc_credentials_v5_t * creds,
 
 cc_int32
 cci_creds_v4_unmarshall( char * flat, 
-                             cc_uint32 len,
-                             cc_credentials_union * creds);
+                         cc_uint32 len,
+                         cc_credentials_union * creds);
 
 cc_int32
 cci_creds_v5_unmarshall( char * flat, 

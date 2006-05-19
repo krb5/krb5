@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -47,10 +47,17 @@
 #include "ccache.h"
 #include "ccache_iterator.h"
 #include "context.h"
+#include "cc_rpc.h"
 #include "msg.h"
 #include "msg_headers.h"
 
-cc_int32 
+/*! \fn cc_initialize
+ *  \brief A function that initializes a ccapi context for the caller.
+ *  \param[out] outContext a cc_context_t pointer to which is assigned the newly created context upon success.
+ *  \param[in]  inVersion  a cc_int32 that specifies the 
+ */
+
+CCACHE_API cc_int32 
 cc_initialize (	cc_context_t*		outContext,
                 cc_int32		inVersion,
                 cc_int32*		outSupportedVersion,
@@ -60,16 +67,18 @@ cc_initialize (	cc_context_t*		outContext,
     cc_msg_t     *request;
     ccmsg_init_t *request_header;
     cc_msg_t     *response;
+    cc_uint32 type;
     ccmsg_init_resp_t *response_header;
     cc_int32 code;
 
     if ((inVersion != ccapi_version_2) &&
          (inVersion != ccapi_version_3) &&
          (inVersion != ccapi_version_4) &&
-         (inVersion != ccapi_version_5)) {
+         (inVersion != ccapi_version_5) &&
+	 (inVersion != ccapi_version_6)) {
 
         if (outSupportedVersion != NULL) {
-            *outSupportedVersion = ccapi_version_5;
+            *outSupportedVersion = ccapi_version_6;
         }
         return ccErrBadAPIVersion;
     }   
@@ -78,7 +87,17 @@ cc_initialize (	cc_context_t*		outContext,
     if (request_header == NULL)
         return ccErrNoMem;
 
-    request_header->in_version = inVersion;
+    /* If the version number is 2, the caller will be passing
+     * the structure into the v2 compatibility functions which
+     * in turn will call the v6 functions.  Set the version to
+     * ccapi_version_max since that is what the compatibility 
+     * functions will be expecting.
+     */
+    if (inVersion == ccapi_version_2)
+	inVersion = ccapi_version_max;
+
+    /* Construct the request */
+    request_header->in_version = htonl(inVersion);
 
     code = cci_msg_new(ccmsg_INIT, &request);
     if (code != ccNoError) {
@@ -90,17 +109,18 @@ cc_initialize (	cc_context_t*		outContext,
 
     code = cci_perform_rpc(request, &response);
 
-    if (response->type == ccmsg_NACK) {
+    type = ntohl(response->type);
+    if (type == ccmsg_NACK) {
         ccmsg_nack_t * nack_header = (ccmsg_nack_t *)response->header;
-        code = nack_header->err_code;
-    } else if (response->type == ccmsg_ACK) {
+        code = ntohl(nack_header->err_code);
+    } else if (type == ccmsg_ACK) {
         response_header = (ccmsg_init_resp_t *)response->header;
-        *outSupportedVersion = response_header->out_version;
-        code = cc_context_int_new(outContext, response_header->out_ctx, response_header->out_version);
+        *outSupportedVersion = ntohl(response_header->out_version);
+        code = cc_int_context_new(outContext, ntohl(response_header->out_ctx), ntohl(response_header->out_version));
 
         if (!vendor[0]) {
             char * string;
-            code = cci_msg_retrieve_blob(response, response_header->vendor_offset, response_header->vendor_length, &string);
+            code = cci_msg_retrieve_blob(response, ntohl(response_header->vendor_offset), ntohl(response_header->vendor_length), &string);
             strncpy(vendor, string, sizeof(vendor)-1);
             vendor[sizeof(vendor)-1] = '\0';
             free(string);

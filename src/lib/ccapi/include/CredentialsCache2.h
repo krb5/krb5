@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 1998-2004 by the Massachusetts Institute of Technology.
+ * Copyright 1998-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -48,7 +48,7 @@
 #ifndef __CREDENTIALSCACHE2__
 #define __CREDENTIALSCACHE2__
  
-#include <Kerberos/CredentialsCache.h>
+#include "CredentialsCache.h"
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
 	#include <TargetConditionals.h>
     #if TARGET_RT_MAC_CFM
@@ -185,25 +185,25 @@ enum {
     CC_CRED_MAX
 };
 
-cc_int32 cc_shutdown (
+CCACHE_API cc_int32 cc_shutdown (
         apiCB**				ioContext);
 	
-cc_int32 cc_get_NC_info (
+CCACHE_API cc_int32 cc_get_NC_info (
 	apiCB*				inContext,
 	infoNC***			outInfo);
 	
-cc_int32 cc_get_change_time (
+CCACHE_API cc_int32 cc_get_change_time (
 	apiCB*				inContext,
 	cc_time_t*			outTime);
 	
-cc_int32 cc_open (
+CCACHE_API cc_int32 cc_open (
 	apiCB*				inContext,
 	const char*			inName,
 	cc_int32			inVersion,
 	cc_uint32			inFlags,
 	ccache_p**			outCCache);
 	
-cc_int32 cc_create (
+CCACHE_API cc_int32 cc_create (
 	apiCB*				inContext,
 	const char*			inName,
 	const char*			inPrincipal,
@@ -211,85 +211,85 @@ cc_int32 cc_create (
 	cc_uint32			inFlags,
 	ccache_p**			outCCache);
 	
-cc_int32 cc_close (
+CCACHE_API cc_int32 cc_close (
 	apiCB*				inContext,
 	ccache_p**			ioCCache);
 	
-cc_int32 cc_destroy (
+CCACHE_API cc_int32 cc_destroy (
 	apiCB*				inContext,
 	ccache_p**			ioCCache);
 	
-cc_int32 cc_seq_fetch_NCs_begin (
+CCACHE_API cc_int32 cc_seq_fetch_NCs_begin (
 	apiCB*				inContext,
-	ccache_cit**		outIterator);
+	ccache_cit**			outIterator);
 
-cc_int32 cc_seq_fetch_NCs_next (
+CCACHE_API cc_int32 cc_seq_fetch_NCs_next (
 	apiCB*				inContext,
 	ccache_p**			outCCache,
 	ccache_cit*			inIterator);
 
-cc_int32 cc_seq_fetch_NCs_end (
+CCACHE_API cc_int32 cc_seq_fetch_NCs_end (
 	apiCB*				inContext,
-	ccache_cit**		ioIterator);
+	ccache_cit**			ioIterator);
 
-cc_int32 cc_get_name (
+CCACHE_API cc_int32 cc_get_name (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	char**				outName);
 	
-cc_int32 cc_get_cred_version (
+CCACHE_API cc_int32 cc_get_cred_version (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	cc_int32*			outVersion);
 	
-cc_int32 cc_set_principal (
+CCACHE_API cc_int32 cc_set_principal (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	cc_int32			inVersion,
 	char*				inPrincipal);
 	
-cc_int32 cc_get_principal (
+CCACHE_API cc_int32 cc_get_principal (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	char**				outPrincipal);
 	
-cc_int32 cc_store (
+CCACHE_API cc_int32 cc_store (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	cred_union			inCredentials);
 
-cc_int32 cc_remove_cred (
+CCACHE_API cc_int32 cc_remove_cred (
 	apiCB*				inContext,
 	ccache_p*			inCCache,
 	cred_union			inCredentials);
 
-cc_int32 cc_seq_fetch_creds_begin (
+CCACHE_API cc_int32 cc_seq_fetch_creds_begin (
 	apiCB*				inContext,
-	const ccache_p*		inCCache,
-	ccache_cit**		outIterator);
+	const ccache_p*			inCCache,
+	ccache_cit**			outIterator);
 
-cc_int32 cc_seq_fetch_creds_next (
+CCACHE_API cc_int32 cc_seq_fetch_creds_next (
 	apiCB*				inContext,
-	cred_union**		outCreds,
+	cred_union**			outCreds,
 	ccache_cit*			inIterator);
 	
-cc_int32 cc_seq_fetch_creds_end (
+CCACHE_API cc_int32 cc_seq_fetch_creds_end (
 	apiCB*				inContext,
-	ccache_cit**		ioIterator);
+	ccache_cit**			ioIterator);
 	
-cc_int32 cc_free_principal (
+CCACHE_API cc_int32 cc_free_principal (
 	apiCB*				inContext,
 	char**				ioPrincipal);
 
-cc_int32 cc_free_name (
+CCACHE_API cc_int32 cc_free_name (
 	apiCB*				inContext,
 	char**				ioName);
 
-cc_int32 cc_free_creds (
+CCACHE_API cc_int32 cc_free_creds (
 	apiCB*				inContext,
-	cred_union**		creds);
+	cred_union**			creds);
 
-cc_int32 cc_free_NC_info (
+CCACHE_API cc_int32 cc_free_NC_info (
 	apiCB*				inContext,
 	infoNC***			ioInfo);
 	
