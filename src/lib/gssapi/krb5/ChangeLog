@@ -1,3 +1,12 @@
+2006-05-19  Tom Yu  <tlyu@mit.edu>
+
+	* gssapi_krb5.hin: Add gss_mech_krb5_wrong.
+
+	* accept_sec_context.c (krb5_gss_accept_sec_context): 
+	* init_sec_context.c (krb5_gss_init_sec_context):
+	* rel_oid.c (krb5_gss_internal_release_oid): Recognize
+	gss_mech_krb5_wrong.
+
 2006-03-28  Tom Yu  <tlyu@mit.edu>
 
 	* krb5_gss_glue.c: Add krb5_mechanism_wrong.

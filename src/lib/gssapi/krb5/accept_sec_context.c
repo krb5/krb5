@@ -341,6 +341,12 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 				      &ptr, KG_TOK_CTX_AP_REQ,
 				      input_token->length, 1))) {
        mech_used = gss_mech_krb5;
+   } else if ((code == G_WRONG_MECH)
+	      &&!(code = g_verify_token_header((gss_OID) gss_mech_krb5_wrong,
+					     &(ap_req.length), 
+					     &ptr, KG_TOK_CTX_AP_REQ,
+					     input_token->length, 1))) {
+       mech_used = gss_mech_krb5_wrong;
    } else if ((code == G_WRONG_MECH) &&
 	      !(code = g_verify_token_header((gss_OID) gss_mech_krb5_old,
 					     &(ap_req.length), 

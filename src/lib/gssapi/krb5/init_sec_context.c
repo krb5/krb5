@@ -918,6 +918,9 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    } else if (g_OID_equal(mech_type, gss_mech_krb5_old)) {
        if (!cred->prerfc_mech)
 	   err = 1;
+   } else if (g_OID_equal(mech_type, gss_mech_krb5_wrong)) {
+       if (!cred->rfc_mech)
+	   err = 1;
    } else {
        err = 1;
    }
