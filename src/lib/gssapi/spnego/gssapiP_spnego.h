@@ -22,8 +22,7 @@ extern "C" {
 #define	ACCEPT_INCOMPLETE 1
 #define	REJECT 2
 #define REQUEST_MIC 3
-#define	ACCEPT_MISSING_NEGSTATE 0x7e
-#define	ACCEPT_DEFECTIVE_TOKEN 0x7f
+#define	ACCEPT_DEFECTIVE_TOKEN 0xffffffffUL
 
 /*
  * constants for der encoding/decoding routines.
@@ -89,18 +88,16 @@ typedef struct {
 	gss_OID internal_mech;
 	gss_ctx_id_t ctx_handle;
 	char  *optionStr;
-	int MS_Interop;
-	int optimistic;
-	OM_uint32 last_status;
 	gss_cred_id_t default_cred;
 	int mic_reqd;
 	int mic_sent;
 	int mic_rcvd;
-	int mechtok_reqd;
 	int firstpass;
-	int acc_complete;
+	int mech_complete;
+	int nego_done;
 	OM_uint32 ctx_flags;
 	gss_name_t internal_name;
+	gss_OID actual_mech;
 } spnego_gss_ctx_id_rec, *spnego_gss_ctx_id_t;
 
 /*

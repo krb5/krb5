@@ -1,3 +1,20 @@
+2006-05-19  Tom Yu  <tlyu@mit.edu>
+
+	* spnego_mech.c: General misc. minor cleanup.
+	(spnego_gss_init_sec_context): Implement RFC 4178 handling of
+	MICs.  Split into new functions init_ctx_new, init_ctx_cont,
+	init_ctx_nego, init_ctx_reselect, and init_ctx_call_init.
+	(acc_ctx_vfymic): Delete.
+	(handle_mic, process_mic): New functions to handle verification
+	and generation of MICs for both initiator and acceptor.
+	(acc_ctx_cont): Explicitly set negState on success.
+	(put_mech_set): Encode into a gss_buffer_t instead.
+	(make_spnego_tokenInit_msg): Fix some ASN.1 encoding bugs.
+
+	* gssapiP_spnego.h: Change ACCEPT_DEFECTIVE_TOKEN value.  Add some
+	additional state variables to spnego_gss_ctx_id_rec, and delete
+	some unused ones.
+
 2006-05-10  Tom Yu  <tlyu@mit.edu>
 
 	* spnego_mech.c (acc_ctx_cont): Fix typo in call to
