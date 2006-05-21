@@ -49,10 +49,13 @@
 #include "rpc_auth.h"
 
 cc_int32 
-cci_rpc_is_authorized( cc_auth_info_t* msg_auth, cc_session_info_t* msg_session, cc_auth_info_t* stored_auth, 
+ccs_rpc_is_authorized( cc_auth_info_t* msg_auth, cc_session_info_t* msg_session, cc_auth_info_t* stored_auth, 
                        cc_session_info_t* stored_session, cc_uint32 * authorizedp) 
 {
-    if (msg_auth == stored_auth && msg_session == stored_session)
+    if (msg_auth->len == stored_auth->len && 
+	!memcmp(msg_auth->info, stored_auth->info, msg_auth->len) && 
+	msg_session->len == stored_session->len && 
+	!memcmp(msg_session->info, stored_session->info, msg_session->len))
         *authorizedp = 1;
     else
         *authorizedp = 0;

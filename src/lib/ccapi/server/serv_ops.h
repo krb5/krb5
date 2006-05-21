@@ -64,6 +64,7 @@ struct type_to_op_mapping_t {
 typedef struct type_to_op_mapping_t type_to_op_mapping_t;
 
 cc_int32 ccs_serv_initialize(void);
+cc_int32 ccs_serv_cleanup(void);
 cc_int32 ccs_serv_process_msg(cc_msg_t * msg, cc_auth_info_t* auth_info, cc_session_info_t* session_info, cc_msg_t** resp_msg);
 cc_int32 ccs_serv_find_ctx(cc_auth_info_t* auth_info, cc_session_info_t* session_info, cc_server_context_t** contextp);
 cc_int32 ccs_serv_find_ctx_by_handle(cc_handle ctx_handle, cc_auth_info_t *auth, cc_session_info_t* session, cc_server_context_t** contextp);

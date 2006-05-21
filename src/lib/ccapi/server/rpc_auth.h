@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -66,6 +66,6 @@ struct cc_session_info_t {
 };
 typedef struct cc_session_info_t cc_session_info_t;
 
-cc_int32 cci_rpc_is_authorized(cc_auth_info_t* msg_auth, cc_session_info_t* msg_session, cc_auth_info_t* stored_auth, cc_session_info_t* stored_session, cc_uint32 *authorizedp);
+cc_int32 ccs_rpc_is_authorized(cc_auth_info_t* msg_auth, cc_session_info_t* msg_session, cc_auth_info_t* stored_auth, cc_session_info_t* stored_session, cc_uint32 *authorizedp);
 
 #endif /*__RPC_AUTH_H__*/
