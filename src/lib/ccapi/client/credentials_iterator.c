@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <CredentialsCache.h>
+#include "credentials.h"
 #include "credentials_iterator.h"
 #include "cc_rpc.h"
 #include "msg.h"

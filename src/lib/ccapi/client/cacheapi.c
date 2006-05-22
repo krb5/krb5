@@ -116,7 +116,7 @@ cc_initialize (	cc_context_t*		outContext,
     } else if (type == ccmsg_ACK) {
         response_header = (ccmsg_init_resp_t *)response->header;
         *outSupportedVersion = ntohl(response_header->out_version);
-        code = cc_int_context_new(outContext, ntohl(response_header->out_ctx), ntohl(response_header->out_version));
+        code = cc_int_context_new(outContext, ntohll(response_header->out_ctx), ntohl(response_header->out_version));
 
         if (!vendor[0]) {
             char * string;

@@ -48,10 +48,12 @@
 #include <stdio.h>
 #include <CredentialsCache.h>
 #include "credentials.h"
+#include "credentials_iterator.h"
 #include "ccache.h"
 #include "cc_rpc.h"
 #include "msg.h"
 #include "msg_headers.h"
+#include "ccstring.h"
 
 /* 
  * cc_int_ccache_new
@@ -345,7 +347,7 @@ cc_int_ccache_get_name( cc_ccache_t ccache, cc_string_t* name )
         code = cci_msg_retrieve_blob(response, response_header->name_offset, 
                                       response_header->name_len, &string);
         if (code == ccNoError) {
-            code = cc_string_new(&name, string);
+            code = cci_string_new(name, string);
             free(string);
         }
     } else {
@@ -403,7 +405,7 @@ cc_int_ccache_get_principal( cc_ccache_t ccache,
         code = cci_msg_retrieve_blob(response, response_header->principal_offset, 
                                       response_header->principal_len, &string);
         if (code == ccNoError) {
-            code = cc_string_new(&principal, string);
+            code = cci_string_new(principal, string);
             free(string);
         }
     } else {
@@ -1035,7 +1037,7 @@ cc_int_ccache_get_kdc_time_offset( cc_ccache_t ccache,
         code = ntohl(nack_header->err_code);
     } else if (response->type == ccmsg_ACK) {
         ccmsg_ccache_get_kdc_time_offset_resp_t * response_header = (ccmsg_ccache_get_kdc_time_offset_resp_t*)response->header;
-        *time_offset = ntohll(response_header->offset);
+        *time_offset = (cc_time64)ntohll(response_header->offset);
         code = ccNoError;
     } else {
         code = ccErrBadInternalMessage;

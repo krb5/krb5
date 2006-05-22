@@ -88,10 +88,10 @@ cc_int_credentials_new( cc_credentials_t *pcredentials, cc_uint32 version,
 
     switch ( version ) {
     case cc_credentials_v4:
-        code = cci_cred_v4_unmarshall(data, len, credentials->data);
+        code = cci_creds_v4_unmarshall(data, len, credentials->data);
         break;
     case cc_credentials_v5:
-        code = cci_cred_v5_unmarshall(data, len, credentials->data);
+        code = cci_creds_v5_unmarshall(data, len, credentials->data);
         break;
     default:
         free(credentials);

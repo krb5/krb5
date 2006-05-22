@@ -69,7 +69,7 @@ CCACHE_API cc_int32 cc_get_NC_info (
 	
 CCACHE_API cc_int32 cc_get_change_time (
 	apiCB*				inContext,
-	cc_time_t*			outTime)
+	cc_time*			outTime)
 {
 	
     /* replace this return value when the function is implemented */
@@ -275,6 +275,15 @@ CCACHE_API cc_int32 cc_free_NC_info (
 	infoNC***			ioInfo)
 {
 	
+    /* replace this return value when the function is implemented */
+    return CC_NOT_SUPP;
+}
+
+CCACHE_API cc_int32 cc_lock_request(
+        apiCB* 				inContext,
+        const ccache_p* 		inCCache,
+        const cc_int32 			lock_type)
+{
     /* replace this return value when the function is implemented */
     return CC_NOT_SUPP;
 }
