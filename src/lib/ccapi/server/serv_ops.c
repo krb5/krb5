@@ -549,7 +549,7 @@ ccop_CTX_COMPARE(cc_server_context_t* ctx,
 {
     cc_server_context_t *ctx2;
     ccmsg_ctx_compare_resp_t* resp_header;
-    ccmsg_ctx_compare_t* header = (ccmsg_ctx_compare_t *)(ntohll(msg->header));
+    ccmsg_ctx_compare_t* header = (ccmsg_ctx_compare_t *)msg->header;
     cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
