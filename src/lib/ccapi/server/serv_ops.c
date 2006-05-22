@@ -135,6 +135,9 @@ ccs_serv_process_msg(cc_msg_t * msg, cc_auth_info_t* auth_info, cc_session_info_
 {
     cc_server_context_t* ctx;
     ccmsg_ctx_only_t* header = (ccmsg_ctx_only_t *)msg->header;
+    cc_uint32 type;
+    cc_uint32 header_len;
+    cc_handle handle; 
     cc_int32 code;
 
     if (msg == NULL || msg->header == NULL || auth_info == NULL || session_info == NULL)
@@ -146,19 +149,22 @@ ccs_serv_process_msg(cc_msg_t * msg, cc_auth_info_t* auth_info, cc_session_info_
             return code;
     }
 	
-    if (msg->type == ccmsg_INIT) {
-        return TypeToOpMapping->operations[msg->type] (NULL, auth_info, session_info, msg, resp_msg);
+    type = ntohl(msg->type);
+    if (type == ccmsg_INIT) {
+        return TypeToOpMapping->operations[type] (NULL, auth_info, session_info, msg, resp_msg);
     } else {
-        if (msg->header_len < sizeof(ccmsg_ctx_only_t)) {
+	header_len = ntohl(msg->header_len);
+        if (header_len < sizeof(ccmsg_ctx_only_t)) {
             return ccErrBadParam;
         }
 
-        code = ccs_serv_find_ctx_by_handle(header->ctx, auth_info, session_info, &ctx);
+	handle = ntohll(header->ctx);
+        code = ccs_serv_find_ctx_by_handle(handle, auth_info, session_info, &ctx);
         if (code != ccNoError) {
             ccs_serv_make_nack(ccErrContextNotFound, auth_info, session_info, resp_msg);
             return code;
         }
-        return TypeToOpMapping->operations[msg->type] (ctx, auth_info, session_info, msg, resp_msg);
+        return TypeToOpMapping->operations[type] (ctx, auth_info, session_info, msg, resp_msg);
     }
 }
 
@@ -349,7 +355,7 @@ ccs_serv_make_nack(cc_int32 err_code, cc_auth_info_t* auth_info, cc_session_info
         return ccErrNoMem;
     }
 
-    nack_header->err_code = err_code;;
+    nack_header->err_code = htonl(err_code);
     code = cci_msg_add_header(*resp_msg, nack_header, sizeof(ccmsg_nack_t));
     if (code != ccNoError) {
         cci_msg_destroy(*resp_msg);
@@ -391,15 +397,19 @@ ccop_INIT( cc_server_context_t* ctx,            /* not used */
     ccmsg_init_resp_t *resp_header;
     ccmsg_init_t *header = (ccmsg_init_t *)msg->header;
     cc_context_list_node_t* ctx_node;
+    cc_uint32 header_len, in_version;
+
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_init_t)) {
+    header_len = ntohl(msg->header_len);
+    if (header_len != sizeof(ccmsg_init_t)) {
         return ccErrBadParam;
     }
 
-    code = ccs_context_new(header->in_version, auth_info, session_info, &new_ctx);
+    in_version = ntohl(header->in_version);
+    code = ccs_context_new(in_version, auth_info, session_info, &new_ctx);
     if (code != ccNoError) {
         return code;
     }
@@ -431,10 +441,10 @@ ccop_INIT( cc_server_context_t* ctx,            /* not used */
         return code;
     }
 
-    resp_header->out_ctx = (cc_handle) new_ctx;
-    resp_header->out_version = cc_myversion;
-    resp_header->vendor_offset = blob_pos;
-    resp_header->vendor_length = strlen(cc_vendor) + 1;
+    resp_header->out_ctx = htonll((cc_handle) new_ctx);
+    resp_header->out_version = htonl(cc_myversion);
+    resp_header->vendor_offset = htonl(blob_pos);
+    resp_header->vendor_length = htonl(strlen(cc_vendor) + 1);
     code = cci_msg_add_header(*resp_msg, resp_header, sizeof(ccmsg_init_resp_t));
     if (code != ccNoError) {
         free(resp_header);
@@ -454,15 +464,17 @@ ccop_CTX_RELEASE( cc_server_context_t* ctx,
                   cc_msg_t *msg, cc_msg_t **resp_msg) 
 {
     ccmsg_ctx_release_t* header = (ccmsg_ctx_release_t *)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_handle handle = ntohll(header->ctx);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ctx_release_t)) {
+    if (header_len != sizeof(ccmsg_ctx_release_t)) {
         return ccErrBadParam;
     }
 
-    code = ccs_context_destroy((cc_server_context_t *)header->ctx);
+    code = ccs_context_destroy((cc_server_context_t *)handle);
     return ccs_serv_make_ack(NULL, 0, auth_info, session_info, resp_msg);
 }       
 
@@ -474,10 +486,11 @@ ccop_CTX_GET_CHANGE_TIME( cc_server_context_t* ctx,
 {
     ccmsg_ctx_get_change_time_resp_t* resp_header;
     ccmsg_ctx_get_change_time_t *header = (ccmsg_ctx_get_change_time_t *)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
 
     *resp_msg = 0;
 	
-    if (msg->header_len != sizeof(ccmsg_ctx_get_change_time_t)) {
+    if (header_len != sizeof(ccmsg_ctx_get_change_time_t)) {
         return ccErrBadParam;
     }
 
@@ -486,7 +499,7 @@ ccop_CTX_GET_CHANGE_TIME( cc_server_context_t* ctx,
         return ccErrNoMem;
     }
 
-    resp_header->time = ctx->changed;
+    resp_header->time = htonll(ctx->changed);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ctx_get_change_time_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -499,11 +512,12 @@ ccop_CTX_GET_DEFAULT_CCACHE_NAME( cc_server_context_t* ctx,
     char * name;
     ccmsg_ctx_get_default_ccache_name_resp_t* resp_header;
     ccmsg_ctx_get_default_ccache_name_t* header = (ccmsg_ctx_get_default_ccache_name_t *)msg->header;
+    cc_uint32 header_len = htonl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ctx_get_default_ccache_name_t)) {
+    if (header_len != sizeof(ccmsg_ctx_get_default_ccache_name_t)) {
         return ccErrBadParam;
     }
 	
@@ -523,7 +537,7 @@ ccop_CTX_GET_DEFAULT_CCACHE_NAME( cc_server_context_t* ctx,
     }
 
     code = cci_msg_add_data_blob(*resp_msg, name, strlen(name) + 1, &resp_header->name_offset);
-    resp_header->name_len = strlen(name) + 1;
+    resp_header->name_len = htonl(strlen(name) + 1);
     return ccNoError;
 }
 
@@ -535,12 +549,13 @@ ccop_CTX_COMPARE(cc_server_context_t* ctx,
 {
     cc_server_context_t *ctx2;
     ccmsg_ctx_compare_resp_t* resp_header;
-    ccmsg_ctx_compare_t* header = (ccmsg_ctx_compare_t *)msg->header;
+    ccmsg_ctx_compare_t* header = (ccmsg_ctx_compare_t *)(ntohll(msg->header));
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ctx_compare_t))
+    if (header_len != sizeof(ccmsg_ctx_compare_t))
         return ccErrBadParam;
 
     code = ccs_serv_find_ctx_by_handle(header->ctx2, auth_info, session_info, &ctx2);
@@ -549,7 +564,7 @@ ccop_CTX_COMPARE(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->is_equal = ccs_context_compare(ctx, ctx2);
+    resp_header->is_equal = htonl(ccs_context_compare(ctx, ctx2));
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ctx_compare_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -562,20 +577,21 @@ ccop_CTX_NEW_CCACHE_ITERATOR(cc_server_context_t* ctx,
     cc_ccache_iterate_t* ccache_iterator;
     ccmsg_ctx_new_ccache_iterator_resp_t* resp_header;
     ccmsg_ctx_new_ccache_iterator_t* header = (ccmsg_ctx_new_ccache_iterator_t*)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ctx_new_ccache_iterator_t))
+    if (header_len != sizeof(ccmsg_ctx_new_ccache_iterator_t))
         return ccErrBadParam;
 
-    code = ccs_context_ccache_iterator(ctx,&ccache_iterator);
+    code = ccs_context_ccache_iterator(ctx, &ccache_iterator);
 
     resp_header = (ccmsg_ctx_new_ccache_iterator_resp_t*)malloc(sizeof(ccmsg_ctx_new_ccache_iterator_resp_t));
     if (resp_header == NULL) 
         return ccErrNoMem;
 
-    resp_header->iterator = (cc_handle) ccache_iterator;
+    resp_header->iterator = htonll((cc_handle) ccache_iterator);
 
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ctx_new_ccache_iterator_resp_t), auth_info, session_info, resp_msg);
 }       
@@ -620,14 +636,15 @@ ccop_CTX_CCACHE_OPEN(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     ccmsg_ccache_open_resp_t* resp_header;
     ccmsg_ccache_open_t* header = (ccmsg_ccache_open_t*)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_open_t))
+    if (header_len != sizeof(ccmsg_ccache_open_t))
         return ccErrBadParam;
 
-    code = cci_msg_retrieve_blob(msg, header->name_offset, header->name_len, &name);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->name_offset), ntohl(header->name_len), &name);
     code = ccs_context_find_ccache(ctx, name, &ccache);
 
     free(name);
@@ -639,7 +656,7 @@ ccop_CTX_CCACHE_OPEN(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->ccache = (cc_handle) ccache;
+    resp_header->ccache = htonll((cc_handle) ccache);
     ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_open_resp_t), auth_info, session_info, resp_msg);
     return ccNoError;
 }       
@@ -653,10 +670,11 @@ ccop_CTX_CCACHE_OPEN_DEFAULT(cc_server_context_t* ctx,
     ccmsg_ccache_open_default_t* header = (ccmsg_ccache_open_default_t*)msg->header;
     ccmsg_ccache_open_resp_t* resp_header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_open_default_t)) 
+    if (header_len != sizeof(ccmsg_ccache_open_default_t)) 
         return ccErrBadParam;
 
     if (ctx->ccaches->head->data == NULL)
@@ -668,7 +686,7 @@ ccop_CTX_CCACHE_OPEN_DEFAULT(cc_server_context_t* ctx,
     if (resp_header == NULL) 
         return ccErrNoMem;
 
-    resp_header->ccache = (cc_handle) ccache;
+    resp_header->ccache = htonll((cc_handle) ccache);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_open_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -683,24 +701,25 @@ ccop_CTX_CCACHE_CREATE(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_create_t)) 
+    if (header_len != sizeof(ccmsg_ccache_create_t)) 
         return ccErrBadParam;
 
-    code = cci_msg_retrieve_blob(msg, header->principal_offset, header->principal_len, &principal);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->principal_offset), ntohl(header->principal_len), &principal);
     if (code != ccNoError) 
         return code;
-    principal[header->principal_len] = '\0'; /*Ensure null termination*/
+    principal[ntohl(header->principal_len)] = '\0'; /*Ensure null termination*/
 
-    code = cci_msg_retrieve_blob(msg, header->name_offset, header->name_len, &name);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->name_offset), ntohl(header->name_len), &name);
     if (code != ccNoError) 
         return code;
-    name[header->name_len] = '\0'; /*Ensure null termination*/
+    name[ntohl(header->name_len)] = '\0'; /*Ensure null termination*/
 
-    code = ccs_context_create_ccache(ctx, name, header->version, principal, &ccache);
+    code = ccs_context_create_ccache(ctx, name, ntohl(header->version), principal, &ccache);
     if (code != ccNoError)
         return code;
 
@@ -708,7 +727,7 @@ ccop_CTX_CCACHE_CREATE(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->ccache = (cc_handle) ccache;
+    resp_header->ccache = htonll((cc_handle) ccache);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_create_resp_t), auth_info, session_info, resp_msg);
 }
 
@@ -723,23 +742,24 @@ ccop_CTX_CCACHE_CREATE_DEFAULT( cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_create_t)) 
+    if (header_len != sizeof(ccmsg_ccache_create_t)) 
         return ccErrBadParam;
 
-    code = cci_msg_retrieve_blob(msg, header->principal_offset, header->principal_len, &principal);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->principal_offset), ntohl(header->principal_len), &principal);
     if (code != ccNoError) 
         return code;
-    principal[header->principal_len] = '\0'; /*Ensure null termination*/
+    principal[ntohl(header->principal_len)] = '\0'; /*Ensure null termination*/
 
     code = ccs_context_get_default_ccache_name(ctx, &name);
     if (code != ccNoError)
         return code;
 
-    code = ccs_context_create_ccache(ctx, name, header->version, principal, &ccache);
+    code = ccs_context_create_ccache(ctx, name, ntohl(header->version), principal, &ccache);
     if (code != ccNoError)
         return code;
 
@@ -747,7 +767,7 @@ ccop_CTX_CCACHE_CREATE_DEFAULT( cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->ccache = (cc_handle) ccache;
+    resp_header->ccache = htonll((cc_handle) ccache);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_create_resp_t), auth_info, session_info, resp_msg);
 }
 
@@ -762,22 +782,23 @@ ccop_CTX_CCACHE_CREATE_UNIQUE( cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_create_t)) 
+    if (header_len != sizeof(ccmsg_ccache_create_t)) 
         return ccErrBadParam;
 
-    code = cci_msg_retrieve_blob(msg, header->principal_offset, header->principal_len, &principal);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->principal_offset), htonl(header->principal_len), &principal);
     if (code != ccNoError) 
         return code;
-    principal[header->principal_len] = '\0'; /*Ensure null termination*/
+    principal[ntohl(header->principal_len)] = '\0'; /*Ensure null termination*/
 
     // TODO: Generate a unique ccache name
     name = "unique";
 
-    code = ccs_context_create_ccache(ctx, name, header->version, principal, &ccache);
+    code = ccs_context_create_ccache(ctx, name, ntohl(header->version), principal, &ccache);
     if (code != ccNoError)
         return code;
 
@@ -785,7 +806,7 @@ ccop_CTX_CCACHE_CREATE_UNIQUE( cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->ccache = (cc_handle) ccache;
+    resp_header->ccache = htonll((cc_handle) ccache);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_create_resp_t), auth_info, session_info, resp_msg);
 }
 
@@ -807,14 +828,15 @@ ccop_CCACHE_DESTROY( cc_server_context_t* ctx,
 {
     ccmsg_ccache_release_t* header = (ccmsg_ccache_release_t*)msg->header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_release_t)) 
+    if (header_len != sizeof(ccmsg_ccache_release_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -833,14 +855,15 @@ ccop_CCACHE_SET_DEFAULT(cc_server_context_t* ctx,
     ccmsg_ccache_set_default_t* header = (ccmsg_ccache_set_default_t*)msg->header;
     cc_ccache_iterate_t* ccache_iterator;
     cc_ccache_list_node_t* ccache_node;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_set_default_t))
+    if (header_len != sizeof(ccmsg_ccache_set_default_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -877,14 +900,15 @@ ccop_CCACHE_GET_CREDS_VERSION(cc_server_context_t* ctx,
     ccmsg_ccache_get_creds_version_t* header = (ccmsg_ccache_get_creds_version_t*)msg->header;
     ccmsg_ccache_get_creds_version_resp_t* resp_header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_get_creds_version_t))
+    if (header_len != sizeof(ccmsg_ccache_get_creds_version_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -892,7 +916,7 @@ ccop_CCACHE_GET_CREDS_VERSION(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->version = ccache->versions;
+    resp_header->version = htonl(ccache->versions);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_get_creds_version_resp_t), auth_info, session_info, resp_msg);
 }
 
@@ -905,14 +929,16 @@ ccop_CCACHE_GET_NAME(cc_server_context_t* ctx,
     ccmsg_ccache_get_name_t* header = (ccmsg_ccache_get_name_t*)msg->header;
     ccmsg_ccache_get_name_resp_t* resp_header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 name_offset;
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_get_name_resp_t)) 
+    if (header_len != sizeof(ccmsg_ccache_get_name_resp_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (ccache == NULL)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -924,8 +950,11 @@ ccop_CCACHE_GET_NAME(cc_server_context_t* ctx,
     if (code != ccNoError)
         return code;
 
-    code = cci_msg_add_data_blob(*resp_msg, ccache->name, strlen(ccache->name) + 1, &resp_header->name_offset);
-    resp_header->name_len = strlen(ccache->name) + 1;
+    code = cci_msg_add_data_blob(*resp_msg, ccache->name, strlen(ccache->name) + 1, &name_offset);
+    if (code == 0) {
+	resp_header->name_len = htonl(strlen(ccache->name) + 1);
+	resp_header->name_offset = htonl(name_offset);
+    }
     cci_msg_add_header(*resp_msg, resp_header, sizeof(ccmsg_ccache_get_name_resp_t));
 
     return ccNoError;
@@ -941,18 +970,20 @@ ccop_CCACHE_GET_PRINCIPAL(cc_server_context_t* ctx,
     ccmsg_ccache_get_principal_resp_t* resp_header;
     cc_server_ccache_t* ccache;
     char * principal;
+    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 principal_offset;
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_get_principal_t)) 
+    if (header_len != sizeof(ccmsg_ccache_get_principal_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = ccs_ccache_get_principal(ccache, header->version, &principal);
+    code = ccs_ccache_get_principal(ccache, ntohl(header->version), &principal);
     if (code != ccNoError)
         return ccs_serv_make_nack(code, auth_info, session_info, resp_msg);
 
@@ -964,7 +995,11 @@ ccop_CCACHE_GET_PRINCIPAL(cc_server_context_t* ctx,
     if (resp_header == NULL) 
         return ccErrNoMem;
 
-    code = cci_msg_add_data_blob(*resp_msg, principal, strlen(principal) + 1, &resp_header->principal_offset);
+    code = cci_msg_add_data_blob(*resp_msg, principal, strlen(principal) + 1, &principal_offset);
+    if (code == 0) {
+	resp_header->principal_len = htonl(strlen(principal) + 1);
+	resp_header->principal_offset = htonl(principal_offset);
+    }
     cci_msg_add_header(*resp_msg, resp_header, sizeof(ccmsg_ccache_get_principal_resp_t));
 
     return ccNoError;
@@ -979,22 +1014,23 @@ ccop_CCACHE_SET_PRINCIPAL(cc_server_context_t* ctx,
     ccmsg_ccache_set_principal_t* header = (ccmsg_ccache_set_principal_t*)msg->header;
     cc_server_ccache_t* ccache;
     char *principal;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_set_principal_t))
+    if (header_len != sizeof(ccmsg_ccache_set_principal_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = cci_msg_retrieve_blob(msg, header->principal_offset, header->principal_len, &principal);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->principal_offset), ntohl(header->principal_len), &principal);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrBadParam, auth_info, session_info, resp_msg);
 
-    code = ccs_ccache_set_principal(ccache, header->version, principal);
+    code = ccs_ccache_set_principal(ccache, ntohl(header->version), principal);
     if (code != ccNoError)
         return ccs_serv_make_nack(code, auth_info, session_info, resp_msg);
 
@@ -1011,14 +1047,15 @@ ccop_CCACHE_NEW_CREDS_ITERATOR( cc_server_context_t* ctx,
     cc_credentials_iterate_t* creds_iterator;
     ccmsg_ccache_creds_iterator_t* header = (ccmsg_ccache_creds_iterator_t*)msg->header;
     ccmsg_ccache_creds_iterator_resp_t* resp_header;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_creds_iterator_t)) 
+    if (header_len != sizeof(ccmsg_ccache_creds_iterator_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -1030,7 +1067,7 @@ ccop_CCACHE_NEW_CREDS_ITERATOR( cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->iterator = (cc_handle) creds_iterator;
+    resp_header->iterator = htonll((cc_handle) creds_iterator);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_creds_iterator_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -1086,22 +1123,19 @@ ccop_CCACHE_STORE_CREDS(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char                 *flat_creds;
     cc_credentials_union *creds;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_store_creds_t))
+    if (header_len != sizeof(ccmsg_ccache_store_creds_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    // TODO: This code is too simplistic.  cc_credential_unions are not flat
-    // structures and must be flattened.  That means that although we can 
-    // store a flat blob in the message we will need to decode the blob
-    // into the actual object.  
-    code = cci_msg_retrieve_blob(msg, header->creds_offset, header->creds_len, &flat_creds);
+    code = cci_msg_retrieve_blob(msg, ntohl(header->creds_offset), ntohl(header->creds_len), &flat_creds);
     if (code != ccNoError) 
         return ccs_serv_make_nack(code, auth_info, session_info, resp_msg);
 
@@ -1111,10 +1145,10 @@ ccop_CCACHE_STORE_CREDS(cc_server_context_t* ctx,
 
     switch ( creds->version ) {        
     case cc_credentials_v4:
-        code = cci_creds_v4_unmarshall(flat_creds, header->creds_len, creds);
+        code = cci_creds_v4_unmarshall(flat_creds, ntohl(header->creds_len), creds);
         break;                                 
     case cc_credentials_v5:
-        code = cci_creds_v5_unmarshall(flat_creds, header->creds_len, creds);
+        code = cci_creds_v5_unmarshall(flat_creds, ntohl(header->creds_len), creds);
         break;
     default:
         return ccs_serv_make_nack(ccErrBadCredentialsVersion, auth_info, session_info, resp_msg);
@@ -1140,17 +1174,18 @@ ccop_CCACHE_REM_CREDS(cc_server_context_t* ctx,
     ccmsg_ccache_rem_creds_t* header = (ccmsg_ccache_rem_creds_t*)msg->header;
     cc_server_ccache_t* ccache;
     cc_credentials_union *creds;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
-    if (msg->header_len != sizeof(ccmsg_ccache_rem_creds_t))
+    if (header_len != sizeof(ccmsg_ccache_rem_creds_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = ccs_ccache_rem_creds(ccache, (const cc_credentials_union *)header->creds);
+    code = ccs_ccache_rem_creds(ccache, (const cc_credentials_union *)(ntohll(header->creds)));
     if (code != ccNoError)
         return ccs_serv_make_nack(code, auth_info, session_info, resp_msg);
 
@@ -1197,14 +1232,15 @@ ccop_CCACHE_GET_LAST_DEFAULT_TIME(cc_server_context_t* ctx,
     ccmsg_ccache_get_last_default_time_t* header = (ccmsg_ccache_get_last_default_time_t*)msg->header;
     ccmsg_ccache_get_last_default_time_resp_t* resp_header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_get_last_default_time_t))
+    if (header_len != sizeof(ccmsg_ccache_get_last_default_time_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -1212,7 +1248,7 @@ ccop_CCACHE_GET_LAST_DEFAULT_TIME(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->last_default_time = ccache->last_default;
+    resp_header->last_default_time = htonll(ccache->last_default);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_get_last_default_time_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -1225,10 +1261,11 @@ ccop_CCACHE_GET_CHANGE_TIME( cc_server_context_t* ctx,
     ccmsg_ccache_get_change_time_resp_t* resp_header;
     ccmsg_ccache_get_change_time_t *header = (ccmsg_ccache_get_change_time_t *)msg->header;
     cc_server_ccache_t* ccache = (cc_server_ccache_t *)header->ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
 
     *resp_msg = 0;
 	
-    if (msg->header_len != sizeof(ccmsg_ccache_get_change_time_t)) {
+    if (header_len != sizeof(ccmsg_ccache_get_change_time_t)) {
         return ccErrBadParam;
     }
 
@@ -1237,7 +1274,7 @@ ccop_CCACHE_GET_CHANGE_TIME( cc_server_context_t* ctx,
         return ccErrNoMem;
     }
 
-    resp_header->time = ccache->changed;
+    resp_header->time = htonll(ccache->changed);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_get_change_time_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -1250,18 +1287,20 @@ ccop_CCACHE_COMPARE(cc_server_context_t* ctx,
     ccmsg_ccache_compare_t* header = (ccmsg_ccache_compare_t*)msg->header;
     ccmsg_ccache_compare_resp_t* resp_header;
     cc_server_ccache_t* ccache1, *ccache2;
+    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 is_equal;
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_compare_t))
+    if (header_len != sizeof(ccmsg_ccache_compare_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache1, &ccache1);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache1), &ccache1);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache2, &ccache2);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache2), &ccache2);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -1269,7 +1308,8 @@ ccop_CCACHE_COMPARE(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    ccs_ccache_compare(ccache1, ccache2, &resp_header->is_equal);
+    ccs_ccache_compare(ccache1, ccache2, &is_equal);
+    resp_header->is_equal = htonl(is_equal);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_compare_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -1283,14 +1323,15 @@ ccop_CCACHE_GET_KDC_TIME_OFFSET(cc_server_context_t* ctx,
     ccmsg_ccache_get_kdc_time_offset_resp_t* resp_header;
     cc_server_ccache_t* ccache;
     cc_time64 offset;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_get_kdc_time_offset_t))
+    if (header_len != sizeof(ccmsg_ccache_get_kdc_time_offset_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -1304,7 +1345,7 @@ ccop_CCACHE_GET_KDC_TIME_OFFSET(cc_server_context_t* ctx,
     if (resp_header == NULL)
         return ccErrNoMem;
 
-    resp_header->offset = offset;
+    resp_header->offset = htonll(offset);
     return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_get_kdc_time_offset_resp_t), auth_info, session_info, resp_msg);
 }       
 
@@ -1316,20 +1357,21 @@ ccop_CCACHE_SET_KDC_TIME_OFFSET(cc_server_context_t* ctx,
 {
     ccmsg_ccache_set_kdc_time_offset_t* header = (ccmsg_ccache_set_kdc_time_offset_t*)msg->header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_set_kdc_time_offset_t))
+    if (header_len != sizeof(ccmsg_ccache_set_kdc_time_offset_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
     // TODO How is the header->creds_version supposed to be used?
 
-    ccs_ccache_set_kdc_time_offset(ccache, header->offset);
+    ccs_ccache_set_kdc_time_offset(ccache, htonll(header->offset));
     return ccs_serv_make_ack(NULL, 0, auth_info, session_info, resp_msg);
 }       
 
@@ -1341,14 +1383,15 @@ ccop_CCACHE_CLEAR_KDC_TIME_OFFSET(cc_server_context_t* ctx,
 {
     ccmsg_ccache_clear_kdc_time_offset_t* header = (ccmsg_ccache_clear_kdc_time_offset_t*)msg->header;
     cc_server_ccache_t* ccache;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_clear_kdc_time_offset_t))
+    if (header_len != sizeof(ccmsg_ccache_clear_kdc_time_offset_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
@@ -1366,14 +1409,15 @@ ccop_CCACHE_ITERATOR_RELEASE(cc_server_context_t* ctx,
 {
     cc_generic_list_node_t* gen_node;
     ccmsg_ccache_iterator_release_t* header = (ccmsg_ccache_iterator_release_t*)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_iterator_release_t)) 
+    if (header_len != sizeof(ccmsg_ccache_iterator_release_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_iterator_by_handle(ctx, header->iterator, &gen_node);
+    code = ccs_serv_find_ccache_iterator_by_handle(ctx, ntohll(header->iterator), &gen_node);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrBadParam, auth_info, session_info, resp_msg);
 
@@ -1404,15 +1448,16 @@ ccop_CCACHE_ITERATOR_NEXT(cc_server_context_t* ctx,
     ccmsg_ccache_iterator_next_resp_t* resp_header;
     cc_generic_list_node_t* gen_node;
     cc_ccache_iterate_t* ccache_iterator;
-	cc_ccache_list_node_t *ccache_node;
+    cc_ccache_list_node_t *ccache_node;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_ccache_iterator_next_t)) 
+    if (header_len != sizeof(ccmsg_ccache_iterator_next_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_iterator_by_handle(ctx, header->iterator, &gen_node);
+    code = ccs_serv_find_ccache_iterator_by_handle(ctx, ntohll(header->iterator), &gen_node);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrBadParam, auth_info, session_info, resp_msg);
 
@@ -1426,7 +1471,7 @@ ccop_CCACHE_ITERATOR_NEXT(cc_server_context_t* ctx,
         if (code != ccNoError) 
             return ccs_serv_make_nack(code, auth_info, session_info, resp_msg);
 
-	resp_header->ccache = (cc_handle) ccache_node;
+	resp_header->ccache = htonll((cc_handle) ccache_node);
         return ccs_serv_make_ack(resp_header, sizeof(ccmsg_ccache_iterator_next_resp_t), auth_info, session_info, resp_msg);
     } else {
         return ccs_serv_make_nack(ccIteratorEnd, auth_info, session_info, resp_msg);
@@ -1442,18 +1487,19 @@ ccop_CREDS_ITERATOR_RELEASE(cc_server_context_t* ctx,
     cc_generic_list_node_t* gen_node;
     cc_server_ccache_t* ccache;
     ccmsg_creds_iterator_release_t* header = (ccmsg_creds_iterator_release_t*)msg->header;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_creds_iterator_release_t)) 
+    if (header_len != sizeof(ccmsg_creds_iterator_release_t)) 
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = ccs_serv_find_creds_iterator_by_handle(ccache, header->iterator, &gen_node);
+    code = ccs_serv_find_creds_iterator_by_handle(ccache, ntohll(header->iterator), &gen_node);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrBadParam, auth_info, session_info, resp_msg);
 
@@ -1489,18 +1535,19 @@ ccop_CREDS_ITERATOR_NEXT(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     cc_server_credentials_t* stored_creds;
     cc_credentials_union *creds_union;
+    cc_uint32 header_len = ntohl(msg->header_len);
     cc_int32 code;
 
     *resp_msg = 0;
 
-    if (msg->header_len != sizeof(ccmsg_creds_iterator_next_t))
+    if (header_len != sizeof(ccmsg_creds_iterator_next_t))
         return ccErrBadParam;
 
-    code = ccs_serv_find_ccache_by_handle(ctx, header->ccache, &ccache);
+    code = ccs_serv_find_ccache_by_handle(ctx, ntohll(header->ccache), &ccache);
     if (code != ccNoError)
         return ccs_serv_make_nack(ccErrCCacheNotFound, auth_info, session_info, resp_msg);
 
-    code = ccs_serv_find_creds_iterator_by_handle(ccache, header->iterator, &gen_node);
+    code = ccs_serv_find_creds_iterator_by_handle(ccache, ntohll(header->iterator), &gen_node);
     if (code != ccNoError) 
         return ccs_serv_make_nack(ccErrBadParam, auth_info, session_info, resp_msg);
 
