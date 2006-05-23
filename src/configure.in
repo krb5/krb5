@@ -637,5 +637,10 @@ if test -n "$KRB4_LIB"; then
 fi
 AC_CONFIG_SUBDIRS(lib/gssapi lib/rpc lib/kadm5)
 AC_CONFIG_SUBDIRS(kadmin plugins/kdb/db2 appl tests)
+dnl
+if false; then
+  AC_CHECK_HEADERS(Python.h python2.3/Python.h)
+  AC_CONFIG_SUBDIRS(plugins/locate/python)
+fi
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(. util util/support util/profile util/send-pr lib lib/kdb kdc slave krb524 config-files gen-manpages include include/kerberosIV clients clients/klist clients/kinit clients/kvno clients/kdestroy clients/kpasswd clients/ksu)
