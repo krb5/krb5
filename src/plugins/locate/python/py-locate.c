@@ -64,7 +64,8 @@
 #endif
 #include <autoconf.h>
 #include <errno.h>
-#include "k5-int.h"
+#include "k5-platform.h"	/* for init/fini macros */
+#include "fake-addrinfo.h"
 
 #include <krb5/locate.h>
 
