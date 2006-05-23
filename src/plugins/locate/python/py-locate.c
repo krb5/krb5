@@ -66,7 +66,7 @@
 #include <errno.h>
 #include "k5-int.h"
 
-#include "k5-locate.h"
+#include <krb5/locate.h>
 
 #define LIBDIR			"/tmp" /* should be imported from configure */
 #define SCRIPT_PATH		LIBDIR "/krb5/locate-service.py"

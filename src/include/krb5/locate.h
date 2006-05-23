@@ -1,6 +1,6 @@
 #ifndef K5_PLUGIN_H_INCLUDED
 #define K5_PLUGIN_H_INCLUDED
-#include "krb5.h"
+#include <krb5/krb5.h>
 
 enum locate_service_type {
     locate_service_kdc = 1,

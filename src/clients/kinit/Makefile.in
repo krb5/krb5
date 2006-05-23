@@ -7,6 +7,8 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+SRCS=kinit.c
+
 ##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows
 ##WIN32##DEFINES=-DGETOPT_LONG
 
@@ -29,3 +31,13 @@ install-unix::
 	  $(INSTALL_DATA) $(srcdir)/$$f.M \
 		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
 	done
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)kinit.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
+  kinit.c

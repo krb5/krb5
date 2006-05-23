@@ -505,10 +505,10 @@ lib/krb4/krb_err_txt.c: lib/krb4/krb_err.et
 	$(AWK) -f lib/krb4/et_errtxt.awk outfile=$@ \
 		lib/krb4/krb_err.et
 
-KRBHDEP = $(INC)krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
+KRBHDEP = $(INC)krb5\krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
 	$(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
 
-$(INC)krb5.h: $(KRBHDEP)
+$(INC)krb5\krb5.h: $(KRBHDEP)
 	rm -f $@
 	cat $(KRBHDEP) > $@
 $(PR)profile.h: $(PR)profile.hin $(PR)prof_err.h

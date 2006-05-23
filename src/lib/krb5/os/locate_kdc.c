@@ -543,7 +543,7 @@ krb5_locate_srv_dns_1 (const krb5_data *realm,
 }
 #endif
 
-#include "k5-locate.h"
+#include <krb5/locate.h>
 
 #if TARGET_OS_MAC
 static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/libkrb5", NULL }; /* should be a list */
