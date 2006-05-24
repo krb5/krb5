@@ -31,8 +31,6 @@ if test ! -r "$srcdir/K5_TOPDIR/aclocal.m4"; then
 fi
 ac_topdir=$srcdir/$ac_reltopdir
 ac_config_fragdir=$ac_reltopdir/config
-krb5_pre_in=$ac_config_fragdir/pre.in
-krb5_post_in=$ac_config_fragdir/post.in
 # echo "Looking for $srcdir/$ac_config_fragdir"
 if test -d "$srcdir/$ac_config_fragdir"; then
   AC_CONFIG_AUX_DIR(K5_TOPDIR/config)
@@ -692,7 +690,7 @@ dnl  Note: Be careful in quoting.
 dnl        The ac_foreach generates the list of fragments to include
 dnl        or "" if $2 is empty
 AC_DEFUN(_K5_GEN_MAKEFILE,[dnl
-AC_CONFIG_FILES([$1/Makefile:$krb5_pre_in:$1/Makefile.in:$krb5_post_in])
+AC_CONFIG_FILES([$1/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:$1/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])
 ])
 dnl
 dnl K5_GEN_FILE( <ac_output arguments> )
@@ -701,13 +699,8 @@ AC_DEFUN(K5_GEN_FILE,[AC_CONFIG_FILES($1)])dnl
 dnl
 dnl K5_AC_OUTPUT
 dnl    Note: Adds the variables to config.status for individual 
-dnl          Makefile generation from config.statsu
-AC_DEFUN(K5_AC_OUTPUT,[dnl
-AC_CONFIG_COMMANDS([krb5_config_prefix], [], dnl
- [krb5_pre_in=$krb5_pre_in
- ac_config_fragdir=$ac_config_fragdir
- krb5_post_in=$krb5_post_in])
-AC_OUTPUT])dnl
+dnl          Makefile generation from config.status
+AC_DEFUN(K5_AC_OUTPUT,[AC_OUTPUT])dnl
 dnl
 dnl V5_AC_OUTPUT_MAKEFILE
 dnl
@@ -717,7 +710,7 @@ dnl
 define(_V5_AC_OUTPUT_MAKEFILE,
 [ifelse($2, , ,AC_CONFIG_FILES($2))
 AC_FOREACH([DIR], [$1],dnl
- [AC_CONFIG_FILES(DIR[/Makefile:$krb5_pre_in:]DIR[/Makefile.in:$krb5_post_in])])
+ [AC_CONFIG_FILES(DIR[/Makefile:$srcdir/]K5_TOPDIR[/config/pre.in:]DIR[/Makefile.in:$srcdir/]K5_TOPDIR[/config/post.in])])
 K5_AC_OUTPUT])dnl
 dnl
 dnl
