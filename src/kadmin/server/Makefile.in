@@ -41,10 +41,11 @@ $(OUTPRE)kadm_rpc_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/kadm5/admin.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
-  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/syslog.h kadm_rpc_svc.c misc.h
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/syslog.h \
+  kadm_rpc_svc.c misc.h
 $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
@@ -56,9 +57,9 @@ $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/kadm5/server_acl.h $(BUILDTOP)/include/kadm5/server_internal.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/syslog.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/syslog.h \
   misc.h server_stubs.c
 $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth.h \
@@ -71,17 +72,18 @@ $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/kadm5/admin_internal.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
   $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/kadm5/kadm_rpc.h \
   $(BUILDTOP)/include/kadm5/server_acl.h $(BUILDTOP)/include/kadm5/server_internal.h \
-  $(BUILDTOP)/include/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(BUILDTOP)/lib/gssapi/generic/gssapi_err_generic.h \
   $(BUILDTOP)/lib/gssapi/krb5/gssapi_err_krb5.h $(BUILDTOP)/lib/gssapi/krb5/gssapi_krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/kdb_kt.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
-  $(SRCTOP)/lib/gssapi/generic/gssapiP_generic.h $(SRCTOP)/lib/gssapi/generic/gssapi_generic.h \
-  $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h misc.h ovsec_kadmd.c
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/kdb_kt.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/include/syslog.h $(SRCTOP)/lib/gssapi/generic/gssapiP_generic.h \
+  $(SRCTOP)/lib/gssapi/generic/gssapi_generic.h $(SRCTOP)/lib/gssapi/krb5/gssapiP_krb5.h \
+  misc.h ovsec_kadmd.c
 $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -90,12 +92,12 @@ $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/adm_proto.h $(SRCTOP)/include/k5-err.h \
-  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-locate.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/syslog.h misc.h schpw.c
 $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -107,13 +109,14 @@ $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
   $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
-  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/kadm5/server_internal.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-locate.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h misc.c misc.h
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  misc.c misc.h
 $(OUTPRE)server_glue_v1.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
@@ -122,6 +125,7 @@ $(OUTPRE)server_glue_v1.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
-  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h misc.h server_glue_v1.c
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h misc.h \
+  server_glue_v1.c

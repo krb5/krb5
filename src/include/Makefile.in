@@ -7,11 +7,11 @@ KRB5RCTMPDIR= @KRB5_RCTMPDIR@
 ##DOSBUILDTOP = ..
 NO_OUTPRE=1
 
-all-unix:: krb5.h
+all-unix:: krb5/krb5.h
 
 all-unix:: maybe-make-db.h-@DB_HEADER_VERSION@
 
-generate-files-mac: krb5.h
+generate-files-mac: krb5/krb5.h
 
 maybe-make-db.h-k5:
 	: db.h will be installed by util/db2
@@ -71,10 +71,14 @@ osconf.h: $(OSCONFSRC) Makefile
 ##DOS##!endif
 ###############################################################################
 
-krb5.h: $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h asn1_err.h
-	echo "/* This file is generated, please don't edit it directly.  */" > krb5.h
-	cat $(srcdir)/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h >> krb5.h
+krb5/krb5.h: $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h asn1_err.h
+	test -d krb5 || mkdir krb5
+	if test -r krb5.h; then \
+	  if cmp -s krb5.h $(srcdir)/krb5.h; then :; else rm -f krb5.h; fi; \
+	else :; fi
+	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.h
+	cat $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
+		asn1_err.h >> krb5/krb5.h
 
 #
 # Build the error table include files:
@@ -95,7 +99,7 @@ kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
 krb524_err.h: $(SRCTOP)/lib/krb5/error_tables/krb524_err.et
 
 clean-unix::
-	$(RM) krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
+	$(RM) krb5/krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
 		asn1_err.h
 	$(RM) $(ET_HEADERS) autoconf.stamp
 
@@ -109,6 +113,8 @@ clean-windows::
 clean::
 	$(RM) osconf.new $(BUILT_HEADERS)
 
-install-headers-unix install:: krb5.h profile.h
-	$(INSTALL_DATA) krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
+install-headers-unix install:: krb5/krb5.h profile.h
+	$(INSTALL_DATA) $(srcdir)/krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5.h
+	$(INSTALL_DATA) krb5/krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)krb5.h
+	$(INSTALL_DATA) $(srcdir)/krb5/locate_plugin.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)locate_plugin.h
 	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h

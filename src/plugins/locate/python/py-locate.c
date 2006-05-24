@@ -64,9 +64,10 @@
 #endif
 #include <autoconf.h>
 #include <errno.h>
-#include "k5-int.h"
+#include "k5-platform.h"	/* for init/fini macros */
+#include "fake-addrinfo.h"
 
-#include "k5-locate.h"
+#include <krb5/locate_plugin.h>
 
 #define LIBDIR			"/tmp" /* should be imported from configure */
 #define SCRIPT_PATH		LIBDIR "/krb5/locate-service.py"
@@ -304,9 +305,9 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
     return 0;
 }
 
-const struct krb5plugin_service_locate_ftable service_locator = {
+const krb5plugin_service_locate_ftable service_locator = {
     /* version */
-    1, 0,
+    0,
     /* functions */
     ctxinit, ctxfini, lookup,
 };

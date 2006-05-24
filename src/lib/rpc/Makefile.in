@@ -323,8 +323,8 @@ auth_gssapi.so auth_gssapi.po $(OUTPRE)auth_gssapi.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) auth_gssapi.c
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h auth_gssapi.c
 auth_gssapi_misc.so auth_gssapi_misc.po $(OUTPRE)auth_gssapi_misc.$(OBJEXT): \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssrpc/auth_gssapi.h \
@@ -402,8 +402,8 @@ get_myaddress.so get_myaddress.po $(OUTPRE)get_myaddress.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/rename.h $(BUILDTOP)/include/gssrpc/rpc.h \
   $(BUILDTOP)/include/gssrpc/rpc_msg.h $(BUILDTOP)/include/gssrpc/svc.h \
   $(BUILDTOP)/include/gssrpc/svc_auth.h $(BUILDTOP)/include/gssrpc/types.h \
-  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) get_myaddress.c
+  $(BUILDTOP)/include/gssrpc/xdr.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h get_myaddress.c
 getrpcport.so getrpcport.po $(OUTPRE)getrpcport.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
@@ -530,7 +530,8 @@ svc_auth_gssapi.so svc_auth_gssapi.po $(OUTPRE)svc_auth_gssapi.$(OBJEXT): \
   $(BUILDTOP)/include/gssrpc/rpc.h $(BUILDTOP)/include/gssrpc/rpc_msg.h \
   $(BUILDTOP)/include/gssrpc/svc.h $(BUILDTOP)/include/gssrpc/svc_auth.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/gssrpc/xdr.h \
-  $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS) svc_auth_gssapi.c
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  svc_auth_gssapi.c
 svc_raw.so svc_raw.po $(OUTPRE)svc_raw.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/auth.h $(BUILDTOP)/include/gssrpc/auth_gss.h \
   $(BUILDTOP)/include/gssrpc/auth_unix.h $(BUILDTOP)/include/gssrpc/clnt.h \

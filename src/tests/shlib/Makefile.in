@@ -36,5 +36,5 @@ clean::
 # the Makefile.in file
 #
 $(OUTPRE)t_loader.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5.h \
-  $(COM_ERR_DEPS) t_loader.c
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h t_loader.c

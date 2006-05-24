@@ -538,7 +538,7 @@ extern int krb5int_grow_addrlist (struct addrlist *, int);
 extern int krb5int_add_host_to_list (struct addrlist *, const char *,
 				     int, int, int, int);
 
-#include "k5-locate.h"
+#include <krb5/locate_plugin.h>
 krb5_error_code
 krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
