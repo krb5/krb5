@@ -305,9 +305,9 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
     return 0;
 }
 
-const struct krb5plugin_service_locate_ftable service_locator = {
+const krb5plugin_service_locate_ftable service_locator = {
     /* version */
-    1, 0,
+    0,
     /* functions */
     ctxinit, ctxfini, lookup,
 };

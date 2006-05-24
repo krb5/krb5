@@ -1,5 +1,5 @@
-#ifndef K5_PLUGIN_H_INCLUDED
-#define K5_PLUGIN_H_INCLUDED
+#ifndef KRB5_LOCATE_PLUGIN_H_INCLUDED
+#define KRB5_LOCATE_PLUGIN_H_INCLUDED
 #include <krb5/krb5.h>
 
 enum locate_service_type {
@@ -10,8 +10,8 @@ enum locate_service_type {
     locate_service_kpasswd
 };
 
-struct krb5plugin_service_locate_ftable {
-    int vmajor, vminor;
+typedef struct krb5plugin_service_locate_ftable {
+    int minor_version;		/* currently 0 */
     /* Per-context setup and teardown.  Returned void* blob is
        private to the plugin.  */
     krb5_error_code (*init)(krb5_context, void **);
@@ -26,5 +26,6 @@ struct krb5plugin_service_locate_ftable {
 			      int socktype, int family,
 			      int (*cbfunc)(void *,int,struct sockaddr *),
 			      void *cbdata);
-};
+} krb5plugin_service_locate_ftable;
+/* extern krb5plugin_service_locate_ftable service_locator; */
 #endif
