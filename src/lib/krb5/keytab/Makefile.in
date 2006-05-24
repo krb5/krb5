@@ -67,7 +67,7 @@ ktadd.so ktadd.po $(OUTPRE)ktadd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   ktadd.c
 ktbase.so ktbase.po $(OUTPRE)ktbase.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -75,7 +75,7 @@ ktbase.so ktbase.po $(OUTPRE)ktbase.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   kt-int.h ktbase.c
 ktdefault.so ktdefault.po $(OUTPRE)ktdefault.$(OBJEXT): \
@@ -84,7 +84,7 @@ ktdefault.so ktdefault.po $(OUTPRE)ktdefault.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h ktdefault.c
 ktfr_entry.so ktfr_entry.po $(OUTPRE)ktfr_entry.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -92,7 +92,7 @@ ktfr_entry.so ktfr_entry.po $(OUTPRE)ktfr_entry.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h ktfr_entry.c
 ktremove.so ktremove.po $(OUTPRE)ktremove.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -100,14 +100,14 @@ ktremove.so ktremove.po $(OUTPRE)ktremove.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h ktremove.c
 ktfns.so ktfns.po $(OUTPRE)ktfns.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   ktfns.c
 kt_file.so kt_file.po $(OUTPRE)kt_file.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -115,7 +115,7 @@ kt_file.so kt_file.po $(OUTPRE)kt_file.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   kt_file.c
 kt_srvtab.so kt_srvtab.po $(OUTPRE)kt_srvtab.$(OBJEXT): \
@@ -124,7 +124,7 @@ kt_srvtab.so kt_srvtab.po $(OUTPRE)kt_srvtab.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h kt_srvtab.c
 read_servi.so read_servi.po $(OUTPRE)read_servi.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
@@ -132,5 +132,5 @@ read_servi.so read_servi.po $(OUTPRE)read_servi.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h read_servi.c

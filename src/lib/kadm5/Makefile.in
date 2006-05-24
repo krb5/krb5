@@ -174,7 +174,7 @@ alt_prof.so alt_prof.po $(OUTPRE)alt_prof.$(OBJEXT): \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   alt_prof.c
 str_conv.so str_conv.po $(OUTPRE)str_conv.$(OBJEXT): \
@@ -191,7 +191,7 @@ str_conv.so str_conv.po $(OUTPRE)str_conv.$(OBJEXT): \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   admin_internal.h str_conv.c
 logger.so logger.po $(OUTPRE)logger.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -200,6 +200,6 @@ logger.so logger.po $(OUTPRE)logger.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   logger.c

@@ -122,7 +122,7 @@ $(OUTPRE)sys_term.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   $(srcdir)/../arpa/telnet.h $(srcdir)/../libtelnet/auth-proto.h \
   $(srcdir)/../libtelnet/auth.h defs.h ext.h pathnames.h \

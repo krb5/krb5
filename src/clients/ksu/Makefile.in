@@ -52,7 +52,7 @@ $(OUTPRE)krb_auth_su.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   krb_auth_su.c ksu.h
 $(OUTPRE)ccache.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -61,7 +61,7 @@ $(OUTPRE)ccache.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-util.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/syslog.h ccache.c ksu.h
 $(OUTPRE)authorization.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -70,7 +70,7 @@ $(OUTPRE)authorization.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   authorization.c ksu.h
 $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -79,7 +79,7 @@ $(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-util.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/include/syslog.h ksu.h main.c
 $(OUTPRE)heuristic.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -88,7 +88,7 @@ $(OUTPRE)heuristic.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   heuristic.c ksu.h
 $(OUTPRE)xmalloc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -97,7 +97,7 @@ $(OUTPRE)xmalloc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/k5-util.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
   ksu.h xmalloc.c
 $(OUTPRE)setenv.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

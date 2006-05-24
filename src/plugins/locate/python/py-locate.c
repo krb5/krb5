@@ -67,7 +67,7 @@
 #include "k5-platform.h"	/* for init/fini macros */
 #include "fake-addrinfo.h"
 
-#include <krb5/locate.h>
+#include <krb5/locate_plugin.h>
 
 #define LIBDIR			"/tmp" /* should be imported from configure */
 #define SCRIPT_PATH		LIBDIR "/krb5/locate-service.py"

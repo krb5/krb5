@@ -638,7 +638,7 @@ fi
 AC_CONFIG_SUBDIRS(lib/gssapi lib/rpc lib/kadm5)
 AC_CONFIG_SUBDIRS(kadmin plugins/kdb/db2 appl tests)
 dnl
-if false; then
+if true; then
   AC_CHECK_HEADERS(Python.h python2.3/Python.h)
   AC_CONFIG_SUBDIRS(plugins/locate/python)
 fi

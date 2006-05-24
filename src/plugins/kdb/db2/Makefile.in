@@ -99,7 +99,7 @@ kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   kdb_xdr.c kdb_xdr.h
 adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
@@ -110,7 +110,7 @@ adb_openclose.so adb_openclose.po $(OUTPRE)adb_openclose.$(OBJEXT): \
   $(COM_ERR_DEPS) $(DB_DEPS) $(SRCTOP)/include/k5-err.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   adb_openclose.c policy_db.h
 adb_policy.so adb_policy.po $(OUTPRE)adb_policy.$(OBJEXT): \
@@ -128,7 +128,7 @@ kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/lib/kdb/kdb5.h kdb_compat.h kdb_db2.c kdb_db2.h \
   kdb_xdr.h policy_db.h
@@ -151,7 +151,7 @@ db2_exp.so db2_exp.po $(OUTPRE)db2_exp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(SRCTOP)/lib/kdb/kdb5.h db2_exp.c kdb_db2.h kdb_xdr.h \
   policy_db.h

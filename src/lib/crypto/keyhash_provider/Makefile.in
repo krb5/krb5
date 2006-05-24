@@ -65,7 +65,7 @@ descbc.so descbc.po $(OUTPRE)descbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../des/des_int.h \
   descbc.c keyhash_provider.h
 k5_md4des.so k5_md4des.po $(OUTPRE)k5_md4des.$(OBJEXT): \
@@ -74,7 +74,7 @@ k5_md4des.so k5_md4des.po $(OUTPRE)k5_md4des.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../des/des_int.h $(srcdir)/../md4/rsa-md4.h \
   k5_md4des.c keyhash_provider.h
@@ -84,7 +84,7 @@ k5_md5des.so k5_md5des.po $(OUTPRE)k5_md5des.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../des/des_int.h $(srcdir)/../md5/rsa-md5.h \
   k5_md5des.c keyhash_provider.h
@@ -94,7 +94,7 @@ hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../arcfour/arcfour-int.h \
   $(srcdir)/../arcfour/arcfour.h $(srcdir)/../hash_provider/hash_provider.h \
   $(srcdir)/../md5/rsa-md5.h hmac_md5.c keyhash_provider.h

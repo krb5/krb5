@@ -123,7 +123,7 @@ cksum.so cksum.po $(OUTPRE)cksum.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../crypto/des/des_int.h \
   cksum.c
 des.so des.po $(OUTPRE)des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -132,7 +132,7 @@ des.so des.po $(OUTPRE)des.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../crypto/des/des_int.h \
   des.c
 enc_dec.so enc_dec.po $(OUTPRE)enc_dec.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -141,7 +141,7 @@ enc_dec.so enc_dec.po $(OUTPRE)enc_dec.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../crypto/des/des_int.h \
   enc_dec.c
 key_parity.so key_parity.po $(OUTPRE)key_parity.$(OBJEXT): \
@@ -150,7 +150,7 @@ key_parity.so key_parity.po $(OUTPRE)key_parity.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h key_parity.c
 key_sched.so key_sched.po $(OUTPRE)key_sched.$(OBJEXT): \
@@ -159,7 +159,7 @@ key_sched.so key_sched.po $(OUTPRE)key_sched.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h key_sched.c
 new_rnd_key.so new_rnd_key.po $(OUTPRE)new_rnd_key.$(OBJEXT): \
@@ -168,7 +168,7 @@ new_rnd_key.so new_rnd_key.po $(OUTPRE)new_rnd_key.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h new_rnd_key.c
 pcbc_encrypt.so pcbc_encrypt.po $(OUTPRE)pcbc_encrypt.$(OBJEXT): \
@@ -177,7 +177,7 @@ pcbc_encrypt.so pcbc_encrypt.po $(OUTPRE)pcbc_encrypt.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h $(srcdir)/../crypto/des/f_tables.h \
   pcbc_encrypt.c
@@ -187,7 +187,7 @@ quad_cksum.so quad_cksum.po $(OUTPRE)quad_cksum.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h quad_cksum.c
 random_key.so random_key.po $(OUTPRE)random_key.$(OBJEXT): \
@@ -196,7 +196,7 @@ random_key.so random_key.po $(OUTPRE)random_key.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h random_key.c
 read_passwd.so read_passwd.po $(OUTPRE)read_passwd.$(OBJEXT): \
@@ -205,7 +205,7 @@ read_passwd.so read_passwd.po $(OUTPRE)read_passwd.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h read_passwd.c
 str_to_key.so str_to_key.po $(OUTPRE)str_to_key.$(OBJEXT): \
@@ -214,7 +214,7 @@ str_to_key.so str_to_key.po $(OUTPRE)str_to_key.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h str_to_key.c
 unix_time.so unix_time.po $(OUTPRE)unix_time.$(OBJEXT): \
@@ -223,7 +223,7 @@ unix_time.so unix_time.po $(OUTPRE)unix_time.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h unix_time.c
 util.so util.po $(OUTPRE)util.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
@@ -231,7 +231,7 @@ util.so util.po $(OUTPRE)util.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../crypto/des/des_int.h \
   util.c
 weak_key.so weak_key.po $(OUTPRE)weak_key.$(OBJEXT): \
@@ -240,6 +240,6 @@ weak_key.so weak_key.po $(OUTPRE)weak_key.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../crypto/des/des_int.h weak_key.c
