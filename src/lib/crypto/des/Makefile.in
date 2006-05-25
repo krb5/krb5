@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/crypto/des
-mydir=des
+mydir=lib/crypto/des
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
 

@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=lib/des425
-mydir=.
+mydir=lib/des425
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../crypto/des -I$(srcdir)/../../include/kerberosIV
 DEFS=

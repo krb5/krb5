@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/crypto/yarrow
-mydir=yarrow
+mydir=lib/crypto/yarrow
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../sha1 -I$(srcdir)/../enc_provider
 DEFS=

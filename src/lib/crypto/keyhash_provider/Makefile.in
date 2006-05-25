@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/crypto/keyhash_provider
-mydir=keyhash_provider
+mydir=lib/crypto/keyhash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5 -I$(srcdir)/../arcfour \

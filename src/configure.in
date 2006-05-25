@@ -631,7 +631,7 @@ fi
 if test "$SS_VERSION" = k5 ; then
   AC_CONFIG_SUBDIRS(util/ss)
 fi
-AC_CONFIG_SUBDIRS(lib/crypto lib/krb5 lib/des425 lib/apputils)
+AC_CONFIG_SUBDIRS(lib/krb5 lib/apputils)
 if test -n "$KRB4_LIB"; then
   AC_CONFIG_SUBDIRS(lib/krb4)
 fi
@@ -643,4 +643,4 @@ if true; then
   AC_CONFIG_SUBDIRS(plugins/locate/python)
 fi
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
-V5_AC_OUTPUT_MAKEFILE(. util util/support util/profile util/send-pr lib lib/kdb kdc slave krb524 config-files gen-manpages include include/kerberosIV clients clients/klist clients/kinit clients/kvno clients/kdestroy clients/kpasswd clients/ksu)
+V5_AC_OUTPUT_MAKEFILE(. util util/support util/profile util/send-pr lib lib/crypto lib/crypto/crc32 lib/crypto/des lib/crypto/dk lib/crypto/enc_provider lib/crypto/hash_provider lib/crypto/keyhash_provider lib/crypto/md4 lib/crypto/md5 lib/crypto/old lib/crypto/raw lib/crypto/sha1 lib/crypto/arcfour lib/crypto/yarrow lib/crypto/aes lib/des425 lib/kdb kdc slave krb524 config-files gen-manpages include include/kerberosIV clients clients/klist clients/kinit clients/kvno clients/kdestroy clients/kpasswd clients/ksu)

@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/crypto/enc_provider
-mydir=enc_provider
+mydir=lib/crypto/enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../arcfour -I$(srcdir)/../aes
 DEFS=
