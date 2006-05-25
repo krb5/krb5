@@ -1,3 +1,8 @@
+2006-05-25  Tom Yu  <tlyu@mit.edu>
+
+	* g_initialize.c (init_hardcoded): Env var option to disable the
+	MS "wrong" krb5 OID for testing.
+
 2006-03-28  Tom Yu  <tlyu@mit.edu>
 
 	* g_initialize.c (build_mechSet): Actually return a value on success.

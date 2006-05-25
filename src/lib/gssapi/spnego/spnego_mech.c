@@ -1092,6 +1092,20 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 				     time_rec,
 				     delegated_cred_handle);
 	if (ret == GSS_S_COMPLETE) {
+#ifdef MS_BUG_TEST
+		/*
+		 * Force MIC to be not required even if we previously
+		 * requested a MIC.
+		 */
+		char *envstr = getenv("MS_FORCE_NO_MIC");
+
+		if (envstr != NULL && strcmp(envstr, "1") == 0 &&
+		    !(sc->ctx_flags & GSS_C_MUTUAL_FLAG) &&
+		    sc->mic_reqd) {
+
+			sc->mic_reqd = 0;
+		}
+#endif
 		sc->mech_complete = 1;
 		if (ret_flags != NULL)
 			*ret_flags = sc->ctx_flags;

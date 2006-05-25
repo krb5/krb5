@@ -1,5 +1,11 @@
 2006-05-25  Tom Yu  <tlyu@mit.edu>
 
+	* spnego_mech.c (acc_ctx_call_acc): Env var option to force
+	disabling of MIC checks when mutual auth not requested, for
+	testing purposes.
+
+2006-05-25  Tom Yu  <tlyu@mit.edu>
+
 	* spnego_mech.c (acc_ctx_call_acc): Wrap call to
 	gss_accept_sec_context().
 	(acc_ctx_vfy_oid): New function to verify that mech OID is sane.

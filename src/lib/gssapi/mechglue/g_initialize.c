@@ -559,6 +559,16 @@ init_hardcoded(void)
 	g_mechListTail->next = cf;
 	g_mechListTail = cf;
 
+#ifdef MS_BUG_TEST
+	{
+		char *envstr = getenv("MS_FORCE_NO_MSOID");
+
+		if (envstr != NULL && strcmp(envstr, "1") == 0) {
+			inited = 1;
+			return;
+		}
+	}
+#endif
 	cf = malloc(sizeof(*cf));
 	if (cf == NULL)
 		return;
