@@ -75,7 +75,6 @@
 #else
 #define DEFAULT_KDB_LIB_PATH	{ "@MODULEDIR/kdb", NULL }
 #endif
-#define MODULE_PATH		"@MODULEDIR"
 
 #define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES3_CBC_SHA1
 #define KDCRCACHE		"dfl:krb5kdc_rcache"
