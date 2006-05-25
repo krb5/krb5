@@ -1,3 +1,19 @@
+2006-05-25  Tom Yu  <tlyu@mit.edu>
+
+	* spnego_mech.c (acc_ctx_call_acc): Wrap call to
+	gss_accept_sec_context().
+	(acc_ctx_vfy_oid): New function to verify that mech OID is sane.
+	(handle_mic): Delete no-op conditional.
+	(init_ctx_cont): Check for "empty" reply token.  Add minor status
+	return.
+	(init_ctx_nego): Add minor status returns.
+	(acc_ctx_new): Stash mech_wanted into sc->internal_mech.
+	(acc_ctx_cont): Improve error handling.  Reject "empty" token.
+	(spnego_gss_accept_sec_context): Break pieces out into
+	acc_ctx_call_acc().
+	(make_spnego_tokenTarg_msg): Don't send supportedMech on
+	non-initial reply from acceptor.
+
 2006-05-19  Tom Yu  <tlyu@mit.edu>
 
 	* spnego_mech.c: General misc. minor cleanup.

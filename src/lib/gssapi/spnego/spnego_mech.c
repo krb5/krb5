@@ -81,12 +81,20 @@ init_ctx_call_init(OM_uint32 *, spnego_gss_ctx_id_t, gss_cred_id_t,
 
 static OM_uint32
 acc_ctx_new(OM_uint32 *, gss_buffer_t, gss_ctx_id_t *,
-	    gss_cred_id_t, gss_OID *, gss_buffer_t *,
+	    gss_cred_id_t, gss_buffer_t *,
 	    gss_buffer_t *, OM_uint32 *, send_token_flag *);
 static OM_uint32
 acc_ctx_cont(OM_uint32 *, gss_buffer_t, gss_ctx_id_t *,
 	     gss_buffer_t *, gss_buffer_t *,
 	     OM_uint32 *, send_token_flag *);
+static OM_uint32
+acc_ctx_vfy_oid(OM_uint32 *, spnego_gss_ctx_id_t, gss_OID,
+		OM_uint32 *, send_token_flag *);
+static OM_uint32
+acc_ctx_call_acc(OM_uint32 *, spnego_gss_ctx_id_t, gss_cred_id_t,
+		 gss_buffer_t, gss_OID *, gss_buffer_t,
+		 OM_uint32 *, OM_uint32 *, gss_cred_id_t *,
+		 OM_uint32 *, send_token_flag *);
 
 static gss_OID
 negotiate_mech_type(OM_uint32 *, gss_OID_set, gss_OID_set,
@@ -298,9 +306,6 @@ handle_mic(OM_uint32 *minor_status, gss_buffer_t mic_in,
 
 	ret = GSS_S_FAILURE;
 	*mic_out = GSS_C_NO_BUFFER;
-	if ((mic_in != GSS_C_NO_BUFFER && sc->mic_rcvd) ||
-	    (mic_in == GSS_C_NO_BUFFER && sc->mic_reqd && !send_mechtok)) {
-	}
 	if (mic_in != GSS_C_NO_BUFFER) {
 		if (sc->mic_rcvd) {
 			/* Reject MIC if we've already received a MIC. */
@@ -484,7 +489,15 @@ init_ctx_cont(OM_uint32 *minor_status, gss_ctx_id_t *ctx, gss_buffer_t buf,
 			       responseToken, mechListMIC);
 	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
+	if (acc_negState == ACCEPT_DEFECTIVE_TOKEN &&
+	    supportedMech == GSS_C_NO_OID &&
+	    responseToken == GSS_C_NO_BUFFER &&
+	    mechListMIC == GSS_C_NO_BUFFER) {
+		/* Reject "empty" token. */
+		ret = GSS_S_DEFECTIVE_TOKEN;
+	}
 	if (acc_negState == REJECT) {
+		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
 		*tokflag = NO_TOKEN_SEND;
 		ret = GSS_S_FAILURE;
 		goto cleanup;
@@ -517,8 +530,8 @@ cleanup:
 
 /*
  * Consistency checking and mechanism negotiation handling for second
- * call of spnego_gss_init_sec_context().  Update internal state if
- * acceptor has counter-proposed.
+ * call of spnego_gss_init_sec_context().  Call init_ctx_reselect() to
+ * update internal state if acceptor has counter-proposed.
  */
 static OM_uint32
 init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
@@ -535,10 +548,14 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	 * Both supportedMech and negState must be present in first
 	 * acceptor token.
 	 */
-	if (supportedMech == GSS_C_NO_OID ||
-	    acc_negState == ACCEPT_DEFECTIVE_TOKEN)
+	if (supportedMech == GSS_C_NO_OID) {
+		*minor_status = ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR;
 		return GSS_S_DEFECTIVE_TOKEN;
-
+	}
+	if (acc_negState == ACCEPT_DEFECTIVE_TOKEN) {
+		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		return GSS_S_DEFECTIVE_TOKEN;
+	}
 	if (!g_OID_equal(supportedMech, sc->internal_mech)) {
 		ret = init_ctx_reselect(minor_status, sc,
 					acc_negState, supportedMech,
@@ -560,6 +577,7 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 			 * Reject missing mech token when optimistic
 			 * mech selected.
 			 */
+			*minor_status = ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR;
 			ret = GSS_S_DEFECTIVE_TOKEN;
 		}
 	} else if (sc->mech_complete) {
@@ -834,7 +852,6 @@ acc_ctx_new(OM_uint32 *minor_status,
 	    gss_buffer_t buf,
 	    gss_ctx_id_t *ctx,
 	    gss_cred_id_t cred,
-	    gss_OID *mech_wanted,
 	    gss_buffer_t *mechToken,
 	    gss_buffer_t *mechListMIC,
 	    OM_uint32 *negState,
@@ -843,7 +860,8 @@ acc_ctx_new(OM_uint32 *minor_status,
 	OM_uint32 tmpmin, ret, req_flags;
 	gss_OID_set supported_mechSet, mechTypes;
 	gss_buffer_desc der_mechTypes;
-	spnego_gss_ctx_id_t spnego_ctx = NULL;
+	gss_OID mech_wanted;
+	spnego_gss_ctx_id_t sc = NULL;
 
 	*ctx = GSS_C_NO_CONTEXT;
 	ret = GSS_S_DEFECTIVE_TOKEN;
@@ -882,30 +900,32 @@ acc_ctx_new(OM_uint32 *minor_status,
 	 * that the initiator requested and the list that
 	 * the acceptor will support.
 	 */
-	*mech_wanted = negotiate_mech_type(minor_status,
-					   supported_mechSet,
-					   mechTypes,
-					   negState);
+	mech_wanted = negotiate_mech_type(minor_status,
+					  supported_mechSet,
+					  mechTypes,
+					  negState);
 	if (*negState == REJECT) {
-		ret = GSS_S_DEFECTIVE_TOKEN;
+		ret = GSS_S_BAD_MECH;
 		goto cleanup;
 	}
-	spnego_ctx = create_spnego_ctx();
-	if (spnego_ctx == NULL) {
+	sc = create_spnego_ctx();
+	if (sc == NULL) {
 		ret = GSS_S_FAILURE;
 		*return_token = NO_TOKEN_SEND;
+		generic_gss_release_oid(&tmpmin, &mech_wanted);
 		goto cleanup;
 	}
-	spnego_ctx->DER_mechTypes = der_mechTypes;
+	sc->internal_mech = mech_wanted;
+	sc->DER_mechTypes = der_mechTypes;
 	der_mechTypes.length = 0;
 	der_mechTypes.value = NULL;
 
 	if (*negState == REQUEST_MIC)
-		spnego_ctx->mic_reqd = 1;
+		sc->mic_reqd = 1;
 
 	*return_token = INIT_TOKEN_SEND;
-	spnego_ctx->firstpass = 1;
-	*ctx = (gss_ctx_id_t)spnego_ctx;
+	sc->firstpass = 1;
+	*ctx = (gss_ctx_id_t)sc;
 	ret = GSS_S_COMPLETE;
 cleanup:
 	gss_release_oid_set(&tmpmin, &mechTypes);
@@ -915,7 +935,6 @@ cleanup:
 
 	return ret;
 }
-
 
 static OM_uint32
 acc_ctx_cont(OM_uint32 *minstat,
@@ -928,11 +947,11 @@ acc_ctx_cont(OM_uint32 *minstat,
 {
 	OM_uint32 ret, tmpmin;
 	gss_OID supportedMech;
-	spnego_gss_ctx_id_t spnego_ctx;
+	spnego_gss_ctx_id_t sc;
 	int len;
 	unsigned char *ptr, *bufstart;
 
-	spnego_ctx = *ctx;
+	sc = (spnego_gss_ctx_id_t)*ctx;
 	ret = GSS_S_DEFECTIVE_TOKEN;
 	*negState = REJECT;
 	*minstat = 0;
@@ -962,16 +981,132 @@ acc_ctx_cont(OM_uint32 *minstat,
 	ret = get_negTokenResp(minstat, ptr, REMAIN,
 			       negState, &supportedMech,
 			       responseToken, mechListMIC);
+	if (ret != GSS_S_COMPLETE)
+		goto cleanup;
+
+	if (*responseToken == GSS_C_NO_BUFFER &&
+	    *mechListMIC == GSS_C_NO_BUFFER) {
+
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto cleanup;
+	}
+	if (supportedMech != GSS_C_NO_OID) {
+		ret = GSS_S_DEFECTIVE_TOKEN;
+		goto cleanup;
+	}
+	sc->firstpass = 0;
+	*negState = ACCEPT_INCOMPLETE;
+	*return_token = CONT_TOKEN_SEND;
+cleanup:
 	if (supportedMech != GSS_C_NO_OID) {
 		generic_gss_release_oid(&tmpmin, &supportedMech);
 	}
-	if (!ret) {
-		spnego_ctx->firstpass = 0;
-		*negState = ACCEPT_INCOMPLETE;
-		*return_token = CONT_TOKEN_SEND;
-	}
 	return ret;
 #undef REMAIN
+}
+
+/*
+ * Verify that mech OID is either exactly the same as the negotiated
+ * mech OID, or is a mech OID supported by the negotiated mech.  MS
+ * implementations can list a most preferred mech using an incorrect
+ * krb5 OID while emitting a krb5 initiator mech token having the
+ * correct krb5 mech OID.
+ */
+static OM_uint32
+acc_ctx_vfy_oid(OM_uint32 *minor_status,
+		spnego_gss_ctx_id_t sc, gss_OID mechoid,
+		OM_uint32 *negState, send_token_flag *tokflag)
+{
+	OM_uint32 ret, tmpmin;
+	gss_mechanism mech = NULL;
+	gss_OID_set mech_set = GSS_C_NO_OID_SET;
+	int present = 0;
+
+	if (g_OID_equal(sc->internal_mech, mechoid))
+		return GSS_S_COMPLETE;
+
+	mech = gssint_get_mechanism(sc->internal_mech);
+	if (mech == NULL || mech->gss_indicate_mechs == NULL) {
+		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		*negState = REJECT;
+		*tokflag = ERROR_TOKEN_SEND;
+		return GSS_S_BAD_MECH;
+	}
+	ret = mech->gss_indicate_mechs(NULL, minor_status, &mech_set);
+	if (ret != GSS_S_COMPLETE) {
+		*tokflag = NO_TOKEN_SEND;
+		goto cleanup;
+	}
+	ret = gss_test_oid_set_member(minor_status, mechoid,
+				      mech_set, &present);
+	if (ret != GSS_S_COMPLETE)
+		goto cleanup;
+	if (!present) {
+		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		*negState = REJECT;
+		*tokflag = ERROR_TOKEN_SEND;
+		ret = GSS_S_BAD_MECH;
+	}
+cleanup:
+	gss_release_oid_set(&tmpmin, &mech_set);
+	return ret;
+}
+
+/*
+ * Wrap call to gss_accept_sec_context() and update state
+ * accordingly.
+ */
+static OM_uint32
+acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
+		 gss_cred_id_t cred, gss_buffer_t mechtok_in,
+		 gss_OID *mech_type, gss_buffer_t mechtok_out,
+		 OM_uint32 *ret_flags, OM_uint32 *time_rec,
+		 gss_cred_id_t *delegated_cred_handle,
+		 OM_uint32 *negState, send_token_flag *tokflag)
+{
+	OM_uint32 ret;
+	gss_OID_desc mechoid;
+
+	/*
+	 * mechoid is an alias; don't free it.
+	 */
+	ret = gssint_get_mech_type(&mechoid, mechtok_in);
+	if (ret != GSS_S_COMPLETE) {
+		*tokflag = NO_TOKEN_SEND;
+		return ret;
+	}
+	ret = acc_ctx_vfy_oid(minor_status, sc, &mechoid,
+			      negState, tokflag);
+	if (ret != GSS_S_COMPLETE)
+		return ret;
+
+	ret = gss_accept_sec_context(minor_status,
+				     &sc->ctx_handle,
+				     cred,
+				     mechtok_in,
+				     GSS_C_NO_CHANNEL_BINDINGS,
+				     &sc->internal_name,
+				     mech_type,
+				     mechtok_out,
+				     &sc->ctx_flags,
+				     time_rec,
+				     delegated_cred_handle);
+	if (ret == GSS_S_COMPLETE) {
+		sc->mech_complete = 1;
+		if (ret_flags != NULL)
+			*ret_flags = sc->ctx_flags;
+
+		if (!sc->mic_reqd) {
+			*negState = ACCEPT_COMPLETE;
+			ret = GSS_S_COMPLETE;
+		} else {
+			ret = GSS_S_CONTINUE_NEEDED;
+		}
+	} else if (ret != GSS_S_CONTINUE_NEEDED) {
+		*negState = REJECT;
+		*tokflag = ERROR_TOKEN_SEND;
+	}
+	return ret;
 }
 
 /*ARGSUSED*/
@@ -993,8 +1128,7 @@ spnego_gss_accept_sec_context(void *ct,
 	send_token_flag return_token;
 	gss_buffer_t mechtok_in, mic_in, mic_out;
 	gss_buffer_desc mechtok_out = GSS_C_EMPTY_BUFFER;
-	gss_OID mech_wanted = GSS_C_NO_OID;
-	spnego_gss_ctx_id_t spnego_ctx = NULL;
+	spnego_gss_ctx_id_t sc = NULL;
 	OM_uint32 mechstat = GSS_S_FAILURE;
 
 	mechtok_in = mic_in = mic_out = GSS_C_NO_BUFFER;
@@ -1028,8 +1162,8 @@ spnego_gss_accept_sec_context(void *ct,
 		/* Can set negState to REQUEST_MIC */
 		ret = acc_ctx_new(minor_status, input_token,
 				  context_handle, verifier_cred_handle,
-				  &mech_wanted, &mechtok_in,
-				  &mic_in, &negState, &return_token);
+				  &mechtok_in, &mic_in,
+				  &negState, &return_token);
 		if (ret != GSS_S_COMPLETE)
 			goto cleanup;
 		ret = GSS_S_CONTINUE_NEEDED;
@@ -1042,7 +1176,7 @@ spnego_gss_accept_sec_context(void *ct,
 			goto cleanup;
 		ret = GSS_S_CONTINUE_NEEDED;
 	}
-	spnego_ctx = (spnego_gss_ctx_id_t)*context_handle;
+	sc = (spnego_gss_ctx_id_t)*context_handle;
 	/*
 	 * Handle mechtok_in and mic_in only if they are
 	 * present in input_token.  If neither is present, whether
@@ -1052,46 +1186,26 @@ spnego_gss_accept_sec_context(void *ct,
 	 */
 	mechstat = GSS_S_FAILURE;
 	if (negState != REQUEST_MIC && mechtok_in != GSS_C_NO_BUFFER) {
-		mechstat = gss_accept_sec_context(minor_status,
-						  &spnego_ctx->ctx_handle,
-						  verifier_cred_handle,
-						  mechtok_in,
-						  GSS_C_NO_CHANNEL_BINDINGS,
-						  &spnego_ctx->internal_name,
-						  mech_type,
-						  &mechtok_out,
-						  &spnego_ctx->ctx_flags,
-						  time_rec,
-						  delegated_cred_handle);
-		if (mechstat == GSS_S_COMPLETE) {
-			*ret_flags = spnego_ctx->ctx_flags;
-			spnego_ctx->mech_complete = 1;
-			if (!spnego_ctx->mic_reqd) {
-				negState = ACCEPT_COMPLETE;
-				ret = GSS_S_COMPLETE;
-			} else {
-				ret = GSS_S_CONTINUE_NEEDED;
-			}
-		} else if (mechstat != GSS_S_CONTINUE_NEEDED) {
-			negState = REJECT;
-			ret = mechstat;
-			return_token = ERROR_TOKEN_SEND;
-			goto cleanup;
-		}
+		ret = acc_ctx_call_acc(minor_status, sc,
+				       verifier_cred_handle, mechtok_in,
+				       mech_type, &mechtok_out,
+				       ret_flags, time_rec,
+				       delegated_cred_handle,
+				       &negState, &return_token);
 	} else if (negState == REQUEST_MIC) {
 		mechstat = GSS_S_CONTINUE_NEEDED;
 	}
-	if (!HARD_ERROR(ret) && spnego_ctx->mech_complete &&
-	    (spnego_ctx->ctx_flags & GSS_C_INTEG_FLAG)) {
+	if (!HARD_ERROR(ret) && sc->mech_complete &&
+	    (sc->ctx_flags & GSS_C_INTEG_FLAG)) {
 
 		ret = handle_mic(minor_status, mic_in,
 				 (mechtok_out.length != 0),
-				 spnego_ctx, &mic_out,
+				 sc, &mic_out,
 				 &negState, &return_token);
 	}
 cleanup:
 	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
-		tmpret = make_spnego_tokenTarg_msg(negState, mech_wanted,
+		tmpret = make_spnego_tokenTarg_msg(negState, sc->internal_mech,
 						   &mechtok_out, mic_out,
 						   return_token,
 						   output_token);
@@ -1100,15 +1214,14 @@ cleanup:
 		}
 	}
 	if (ret == GSS_S_COMPLETE) {
-		*context_handle = (gss_ctx_id_t)spnego_ctx->ctx_handle;
-		if (spnego_ctx->internal_name != GSS_C_NO_NAME &&
+		*context_handle = (gss_ctx_id_t)sc->ctx_handle;
+		if (sc->internal_name != GSS_C_NO_NAME &&
 		    src_name != NULL) {
-			*src_name = spnego_ctx->internal_name;
+			*src_name = sc->internal_name;
 		}
-		release_spnego_ctx(&spnego_ctx);
+		release_spnego_ctx(&sc);
 	}
 	gss_release_buffer(&tmpmin, &mechtok_out);
-	generic_gss_release_oid(&tmpmin, &mech_wanted);
 	if (mechtok_in != GSS_C_NO_BUFFER) {
 		gss_release_buffer(&tmpmin, mechtok_in);
 		free(mechtok_in);
@@ -1517,7 +1630,7 @@ get_available_mechs(OM_uint32 *minor_status,
 {
 	int		i;
 	int		found = 0;
-	OM_uint32 stat = GSS_S_COMPLETE;
+	OM_uint32 stat = GSS_S_COMPLETE, tmpmin;
 	gss_OID_set mechs, goodmechs;
 
 	stat = gss_indicate_mechs(minor_status, &mechs);
@@ -1562,15 +1675,15 @@ get_available_mechs(OM_uint32 *minor_status,
 		 * Drop the old list in favor of the new
 		 * "trimmed" list.
 		 */
-		(void) gss_release_oid_set(minor_status, rmechs);
+		(void) gss_release_oid_set(&tmpmin, rmechs);
 		if (stat == GSS_S_COMPLETE) {
-			(void) gss_copy_oid_set(minor_status,
+			(void) gss_copy_oid_set(&tmpmin,
 					goodmechs, rmechs);
-			(void) gss_release_oid_set(minor_status, &goodmechs);
+			(void) gss_release_oid_set(&tmpmin, &goodmechs);
 		}
 	}
 
-	(void) gss_release_oid_set(minor_status, &mechs);
+	(void) gss_release_oid_set(&tmpmin, &mechs);
 	if (found == 0 || stat != GSS_S_COMPLETE) {
 		*minor_status = ERR_SPNEGO_NO_MECHS_AVAILABLE;
 		if (stat == GSS_S_COMPLETE)
@@ -2324,7 +2437,7 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 	 * If this is the initial token, include length of
 	 * mech_type and the negotiation result fields.
 	 */
-	if (sendtoken != ERROR_TOKEN_SEND && mech_wanted != NULL) {
+	if (sendtoken == INIT_TOKEN_SEND) {
 		int mechlistTokenSize;
 		/*
 		 * 1 byte for the CONTEXT ID(0xa0),
@@ -2423,7 +2536,7 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 		ret = GSS_S_DEFECTIVE_TOKEN;
 		goto errout;
 	}
-	if (sendtoken != ERROR_TOKEN_SEND && mech_wanted != NULL) {
+	if (sendtoken == INIT_TOKEN_SEND) {
 		/*
 		 * Next, is the Supported MechType
 		 */
