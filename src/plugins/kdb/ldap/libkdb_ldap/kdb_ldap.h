@@ -133,6 +133,7 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 #define KDB_TL_KEYINFO            0x04
 #define KDB_TL_MASK               0x05
 #define KDB_TL_CONTAINERDN        0x06
+#define KDB_TL_TKTPOLICYDN           0x07
 
 
 #define CHECK_LDAP_HANDLE(lcontext)     if (!(ldap_context \

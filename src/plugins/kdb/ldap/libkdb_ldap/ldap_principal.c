@@ -46,6 +46,10 @@ char     *principal_attributes[] = { "krbprincipalname",
 				     "krbUpEnabled",
 				     "krbpwdpolicyreference",
 				     "krbpasswordexpiration",
+#ifdef HAVE_EDIRECTORY
+				     "loginexpirationtime",
+				     "logindisabled",
+#endif
 				     "loginexpirationtime",	
 				     "logindisabled",
 				     "modifiersname",
@@ -222,6 +226,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     krb5_ldap_server_handle   *ldap_server_handle=NULL;
     krb5_db_entry             entries;
     krb5_boolean              more=0;
+    char * policydn = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -235,6 +240,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 	((st=krb5_get_attributes_mask(context, &entries, &(attrsetmask))) != 0) ||
 	((st=krb5_get_princ_count(context, &entries, &(pcount))) != 0) ||
 	((st=krb5_get_userdn(context, &entries, &(DN))) != 0) ||
+	((st=krb5_get_policydn(context, &entries, &policydn)) != 0) ||
 	((st=krb5_get_secretkeys(context, &entries, &secretkey)) != 0)) 
 	goto cleanup;
     
@@ -284,7 +290,13 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 		attrsetmask >>= 1;
 		++j;
 	    }
-	    
+	    if(policydn != NULL)
+	    {
+		    if ((st = krb5_ldap_change_count(context, policydn,2 )))
+			    goto cleanup;
+
+	    }
+
 	    /* the same should be done with the objectclass attributes */
 	    {
 		char *attrvalues[] = {"krbpwdpolicyrefaux", "krbpolicyaux", "krbprincipalaux", NULL};

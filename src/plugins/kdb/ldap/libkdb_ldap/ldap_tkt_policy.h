@@ -36,7 +36,7 @@
 #define LDAP_POLICY_MAXTKTLIFE        0x0001
 #define LDAP_POLICY_MAXRENEWLIFE      0x0002
 #define LDAP_POLICY_TKTFLAGS          0x0004
-
+#define LDAP_POLICY_COUNT             0x0008
 /* policy object structure */
 
 typedef struct _krb5_ldap_policy_params {
@@ -45,6 +45,7 @@ typedef struct _krb5_ldap_policy_params {
   long                  maxtktlife;
   long                  maxrenewlife;
   long                  tktflags;
+  long                  polrefcount;
   krb5_tl_data          *tl_data;
 }krb5_ldap_policy_params;
 
@@ -58,7 +59,7 @@ krb5_error_code
 krb5_ldap_read_policy(krb5_context, char *, krb5_ldap_policy_params **, int *);
 
 krb5_error_code
-krb5_ldap_delete_policy(krb5_context, char *);
+krb5_ldap_delete_policy(krb5_context, char *, krb5_ldap_policy_params *, int);
 
 krb5_error_code
 krb5_ldap_clear_policy(krb5_context, char *);
@@ -68,5 +69,8 @@ krb5_ldap_list_policy(krb5_context, char *, char ***);
 
 krb5_error_code
 krb5_ldap_free_policy(krb5_context, krb5_ldap_policy_params *);
+
+krb5_error_code
+krb5_ldap_change_count(krb5_context ,char * , int);
 
 #endif

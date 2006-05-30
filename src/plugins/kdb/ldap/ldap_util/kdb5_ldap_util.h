@@ -58,13 +58,6 @@
 #define DESTROY_POLICY        14
 #define LIST_POLICY           15
 
-#ifdef NOVELL_KDC
-# define SET_SRV_CERT          18
-# define IMPORT_CERT           19
-# define ADD_LDAP_EXTN         20
-# define RESET_MASTER_KEY      21
-#endif
-
 extern int exit_status;
 extern krb5_context util_context;
 
@@ -80,9 +73,6 @@ extern void db_usage(int);
 #define CMD_LDAP_W	0x2     /* set if -w option is specified */
 #define CMD_LDAP_H	0x4     /* set if -h option is specified */
 #define CMD_LDAP_P	0x8     /* set if -p option is specified */
-#ifdef HAVE_EDIRECTORY
-#define CMD_LDAP_T	0x10    /* set if -t option is specified */
-#endif
 
 #define MAX_PASSWD_LEN          1024
 #define MAX_PASSWD_PROMPT_LEN   276     /* max_dn_size(=256) + strlen("Password for \" \"")=20 */

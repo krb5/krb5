@@ -515,6 +515,14 @@ attributetype (
                 SINGLE-VALUE
               )
 
+##### Ticket Policy Reference Count
+
+attributetype ( 2.16.840.1.113719.1.301.4.38
+                NAME 'krbPolicyRefCount'
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+                SINGLE-VALUE
+              )
 
 ########################################################################
 # 		        Object Class Definitions                       #
@@ -593,10 +601,11 @@ objectClass (
 ##### The krbPolicy object is an effective policy that is associated with a realm or a principal
 
 objectClass ( 
-                2.16.840.1.113719.1.301.6.7
-                NAME 'krbPolicy'
-                SUP top
-                MUST ( cn )
+		2.16.840.1.113719.1.301.6.7
+		NAME 'krbPolicy'
+		SUP top
+		MUST ( cn )
+		MAY ( krbPolicyRefCount )
             )
 
 ###### The principal data auxiliary class. Holds principal information

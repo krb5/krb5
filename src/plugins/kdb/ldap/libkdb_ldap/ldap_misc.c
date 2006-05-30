@@ -547,10 +547,11 @@ store_tl_data(tl_data, tl_type, value)
 	/* store the content */
     	STORE16_INT(curr, ivalue);	
     	curr += 2;
-    	break;
+	break;
     }
 
     case KDB_TL_USERDN:
+    case KDB_TL_TKTPOLICYDN:
     {
     	char *cptr = (char *)value;
     	
@@ -684,6 +685,7 @@ decode_tl_data(tl_data, tl_type, data)
 
 	    case KDB_TL_CONTAINERDN:
 	    case KDB_TL_USERDN:
+	    case KDB_TL_TKTPOLICYDN:
 		/* get the length of the content */
 		UNSTORE16_INT(curr, sublen);
 		/* forward by 2 bytes */
@@ -847,7 +849,7 @@ krb5_get_str_from_tl_data(context, entries, type, strval)
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
     
-    if (type != KDB_TL_USERDN && type != KDB_TL_CONTAINERDN) {
+    if (type != KDB_TL_USERDN && type != KDB_TL_CONTAINERDN && type != KDB_TL_TKTPOLICYDN) {
 	st = EINVAL;
 	goto cleanup;
     }
@@ -884,6 +886,15 @@ krb5_get_containerdn(context, entries, containerdn)
     return krb5_get_str_from_tl_data(context, entries, KDB_TL_CONTAINERDN, containerdn);
 }
 
+krb5_error_code
+krb5_get_policydn(context, entries, policydn)
+    krb5_context                context;
+    krb5_db_entry               *entries;
+    char                        **policydn;
+{
+    *policydn = NULL;
+    return krb5_get_str_from_tl_data(context, entries, KDB_TL_TKTPOLICYDN, policydn);
+}
 /*
  * This function reads the attribute values (if the attribute is non-null) from the dn. 
  * The read attribute values is compared aganist the attrvalues passed to the function

@@ -27,6 +27,9 @@ krb5kdc \- Kerberos V5 KDC
 .SH SYNOPSIS
 .B krb5kdc
 [
+.B \-x
+.I db_args
+] [
 .B \-d
 .I dbname
 ] [
@@ -56,6 +59,36 @@ is the Kerberos version 5 Authentication Service and Key Distribution
 Center (AS/KDC).
 .PP
 The
+.B \-x
+.I db_args
+option specifies the database specific arguments.
+
+Options supported for LDAP database are:
+.sp 
+.nf 
+.RS 8
+\-x nconns=<number_of_connections>
+specifies the number of connections to be maintained per LDAP server.
+
+\-x port=<port_number>
+specifies the secure port number where the LDAP server is listening.
+
+\-x host=<hostname>
+specifies the host on which the LDAP server is running.
+The <hostname> should be the same as the host name set in the LDAP server certificate.
+
+\-x binddn=<binddn>
+specifies the DN of the object used by the KDC server to bind to the LDAP server.
+This object should have the rights to read the realm container and the subtree that is referenced
+by the realm.
+
+\-x bindpwd=<bind_password>
+specifies the password for the above mentioned binddn. It is recommended not to use this option.
+Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
+.RE
+.fi
+.PP
+The
 .B \-r
 .I realm
 option specifies the realm for which the server should provide service;
@@ -68,6 +101,7 @@ The
 .I dbname
 option specifies the name under which the principal database can be found; by
 default the database is in DEFAULT_DBM_FILE.
+This option does not apply to the LDAP database.
 .PP
 The
 .B \-k
@@ -147,7 +181,7 @@ options specified on the command line.  See the
 .I kdc.conf(5)
 description for further details.
 .SH SEE ALSO
-krb5(3), kdb5_util(8), kdc.conf(5)
+krb5(3), kdb5_util(8), kdc.conf(5), kdb5_ldap_util(8)
 .SH BUGS
 
 It should fork and go into the background when it finishes reading the

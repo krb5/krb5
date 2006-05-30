@@ -198,10 +198,18 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
 		mask |= KDB_PWD_EXPIRE_TIME_ATTR;
 
 	    /* KRBPOLICYREFERENCE */
+
 	    if ((st=krb5_ldap_get_string(ld, ent, "krbpolicyreference", &policydn, &attr_present)) != 0)
-		goto cleanup;
-	    if (attr_present == TRUE)
-		mask |= KDB_POL_REF_ATTR;
+		    goto cleanup;
+
+	    if(attr_present == TRUE){
+		    if ((st=store_tl_data(&userinfo_tl_data, KDB_TL_TKTPOLICYDN, policydn)) != 0)
+			    goto cleanup;
+	    }
+	    if(!(mask & KDB_MAX_LIFE_ATTR) && !(mask & KDB_MAX_RLIFE_ATTR) && !(mask & KDB_TKT_FLAGS_ATTR)){
+		    if (attr_present == TRUE)
+			    mask |= KDB_POL_REF_ATTR;
+	    }
 
 	    /* KRBPWDPOLICYREFERENCE */
 	    if ((st=krb5_ldap_get_string(ld, ent, "krbpwdpolicyreference", &pwdpolicydn, &attr_present)) != 0)
@@ -387,7 +395,6 @@ process_db_args(context, db_args, xargs)
     unsigned int          arg_val_len=0;
     krb5_boolean          uflag=FALSE, cflag=FALSE;
     
-    xargs->ptype = KDB_SERVICE_PRINCIPAL;
     if (db_args)
     {
 	for (i=0; db_args[i]; ++i) {
@@ -501,6 +508,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     krb5_ldap_server_handle     *ldap_server_handle=NULL;    
     osa_princ_ent_rec 	        princ_ent;
     xargs_t                     xargs={0};
+    char                        *oldpolicydn = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -526,7 +534,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		goto cleanup;
 	    plen = strlen(user);
 	}
-
+	xargs.ptype = KDB_SERVICE_PRINCIPAL;
 	if (((st=krb5_get_princ_type(context, entries, &(xargs.ptype))) != 0) ||
 	    ((st=krb5_get_userdn(context, entries, &(xargs.dn))) != 0) ||
 	    ((st=krb5_get_secretkeys(context, entries, &oldkeys)) != 0)) 
@@ -589,7 +597,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		} else {
 		    dnlen = strlen (xargs.dn);
 		    subtreelen = strlen(subtreelist[tre]);
-		    if (strcasecmp((xargs.dn + dnlen - subtreelen), subtreelist[tre]) == 0) {
+		    if ((dnlen > subtreelen) && (strcasecmp((xargs.dn + dnlen - subtreelen), subtreelist[tre]) == 0)) {
 			outofsubtree = FALSE;
 			break;
 		    }
@@ -722,22 +730,12 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	}
     
 	if (entries->mask & KDB_PW_EXPIRATION) {
-#ifdef HAVE_EDIRECTORY 	/* applies only to the kerberos user principal */ 
-	    if (xargs.ptype == KDB_SERVICE_PRINCIPAL) {
-		st = EINVAL;
-		goto cleanup;
-	    }
-#endif
 	    memset(strval, 0, sizeof(strval));
 	    if ((strval[0]=getstringtime(entries->pw_expiration)) == NULL)
 		goto cleanup;
-	    if ((st=krb5_add_str_mem_ldap_mod(&mods, 
-#ifdef HAVE_EDIRECTORY
-					      "passwordexpirationtime",
-#else
-					      "krbpasswordexpiration",
-#endif
-					      LDAP_MOD_REPLACE, strval)) != 0) {
+	    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpasswordexpiration",
+					      LDAP_MOD_REPLACE, 
+					      strval)) != 0) {
 		free (strval[0]);
 		goto cleanup;
 	    }
@@ -912,34 +910,93 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbsecretkey", 
 					      LDAP_MOD_ADD | LDAP_MOD_BVALUES, bersecretkey)) != 0)
 		goto cleanup;
+
+                if (!(entries->mask & KDB_PRINCIPAL)){
+			memset(strval, 0, sizeof(strval));
+			if ((strval[0]=getstringtime(entries->pw_expiration)) == NULL)
+				goto cleanup;
+			if ((st=krb5_add_str_mem_ldap_mod(&mods,
+                                                  "krbpasswordexpiration",
+                                                  LDAP_MOD_REPLACE, strval)) != 0) {
+                    free (strval[0]);
+                    goto cleanup;
+                }
+		free (strval[0]);
+	    }
 	} /* Modify Key data ends here */
-	
+
 	/* Directory specific attribute */
 	if (xargs.tktpolicydn != NULL) {
-	    int tmask=0;
-	    if (strlen(xargs.tktpolicydn) != 0) {
-		st = checkattributevalue(ld, xargs.tktpolicydn, "objectclass", policyclass, &tmask);
-		CHECK_CLASS_VALIDITY(st, tmask, "ticket policy object value: ");
+		int tmask=0, tkttree = 0, subtreednlen = 0, ntre = 0, tktdnlen = 0;
 
-		memset(strval, 0, sizeof(strval));
-		strval[0] = xargs.tktpolicydn;
-		if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
-		    goto cleanup;
-	    } else {
-		/* if xargs.tktpolicydn is a empty string, then delete already existing krbpolicyreference attr */
-		if (tktpolicy_set == FALSE) {      /* if the attribute is not present then abort */
-		    st = EINVAL;
-                    krb5_set_error_message(context, st, "'ticketpolicydn' empty");
-		    goto cleanup;
-		} else { 
-		    memset(strval, 0, sizeof(strval));
-		    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_DELETE, strval)) != 0)
+		char *subtreednlist[2]={NULL};
+		krb5_boolean dnoutofsubtree=TRUE;
+
+		if(st=krb5_get_policydn(context, entries, &oldpolicydn) != 0)
 			goto cleanup;
-		}
-	    }
-	}
+		
+		if (strlen(xargs.tktpolicydn) != 0) {
+			st = checkattributevalue(ld, xargs.tktpolicydn, "objectclass", policyclass, &tmask);
+			CHECK_CLASS_VALIDITY(st, tmask, "ticket policy object value: ");
 
+			memset(strval, 0, sizeof(strval));
+			strval[0] = xargs.tktpolicydn;
+			if ((st = krb5_get_subtree_info(ldap_context, subtreednlist, &ntre)) != 0)
+				goto cleanup;
+
+			for( tkttree=0; tkttree<ntre; ++tkttree ) {
+				if( subtreednlist[tkttree] == NULL || strlen(subtreednlist[tkttree]) == 0 ) {
+					dnoutofsubtree = FALSE;
+					break;
+				} else {
+					tktdnlen = strlen (xargs.tktpolicydn);
+					subtreednlen = strlen(subtreednlist[tkttree]);
+					
+					if ((tktdnlen > subtreednlen) && (strcasecmp((xargs.tktpolicydn + tktdnlen - subtreednlen), subtreednlist[tkttree]) == 0)) {
+						dnoutofsubtree = FALSE;
+						break;
+					}
+				}
+			}
+			for( tkttree=0; tkttree < ntre; ++tkttree ) {
+				free( subtreednlist[tkttree] );
+			}
+			if( dnoutofsubtree == TRUE ) {
+				st = EINVAL;
+				prepend_err_str(context,"Ticket Policy DN is out of the realm subtree",st,st);
+				goto cleanup;
+			}
+
+			if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
+				goto cleanup;
+			if(oldpolicydn != NULL){	
+				if(strncmp(xargs.tktpolicydn,oldpolicydn,strlen(xargs.tktpolicydn)) != 0)
+				{
+					if ((st = krb5_ldap_change_count(context, oldpolicydn,2 )))
+						goto cleanup;
+				}
+			}
+
+			if ((st = krb5_ldap_change_count(context, xargs.tktpolicydn,1 )))
+				goto cleanup;
+		} else {
+			/* if xargs.tktpolicydn is a empty string, then delete already existing krbpolicyreference attr */
+			if (tktpolicy_set == FALSE) {      /* if the attribute is not present then abort */
+				st = EINVAL;
+				prepend_err_str(context,"'ticketpolicydn' empty",st,st);
+				goto cleanup;
+			} else {
+				memset(strval, 0, sizeof(strval));
+				if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_DELETE, strval)) != 0)
+					goto cleanup;
+			}
+		}
+              
+	}
 	if (dnfound == TRUE) {
+            if (mods == NULL) {
+                goto cleanup;
+            }
 	    st=ldap_modify_s(ld, xargs.dn, mods);
             if (st != LDAP_SUCCESS) {
                 sprintf(errbuf, "User modification failed: %s", ldap_err2string(st));
@@ -951,12 +1008,13 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	else {
 	    st=ldap_add_s(ld, xargs.dn, mods);	
 	    if (st != LDAP_SUCCESS) {
-	        sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
-                st = translate_ldap_error (st, OP_ADD);
-                krb5_set_error_message(context, st, "%s", errbuf);
-	        goto cleanup;
+		    sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
+		    st = translate_ldap_error (st, OP_ADD);
+		    krb5_set_error_message(context, st, "%s", errbuf);
+		    goto cleanup;
 	    }
-        }
+	}
+
     }
     
  cleanup:

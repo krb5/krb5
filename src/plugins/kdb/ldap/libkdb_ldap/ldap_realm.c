@@ -422,7 +422,6 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	((mask & LDAP_REALM_DEFENCTYPE) && rparams->suppenctypes == NULL) ||
 	((mask & LDAP_REALM_DEFSALTTYPE) && rparams->suppsalttypes == NULL) ||
 #ifdef HAVE_EDIRECTORY
-	((mask & LDAP_REALM_LDAPSERVERS) && rparams->ldapservers == NULL) ||
 	((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
 	((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
 	((mask & LDAP_REALM_PASSWDSERVERS) && rparams->passwdservers == NULL) ||
@@ -489,26 +488,31 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    goto cleanup;
     }
  
-    /* POLICYREFERENCE ATTRIBUTE */
-    if (mask & LDAP_REALM_POLICYREFERENCE) {
-	if (rparams->policyreference) {
-	    st = checkattributevalue(ld, rparams->policyreference, "ObjectClass", policyclass, 
-				     &objectmask);
-	    CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object value: ");
+    if (mask & LDAP_REALM_MAXRENEWLIFE) {
 
-	    strval[0] = rparams->policyreference;
-	    strval[1] = NULL;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_REPLACE,
-                                              strval)) != 0)
-		goto cleanup;
-	    
-	} else if (oldmask & LDAP_REALM_POLICYREFERENCE) {
-	    /* rparams->policyreference is NULL, when the attribute is to be deleted */
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_DELETE,
-                                              NULL)) != 0)
-		goto cleanup;
-	} 
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbMaxRenewableAge", LDAP_MOD_REPLACE,
+					    rparams->max_renewable_life)) != 0)
+		    goto cleanup;
     }
+
+    /* krbMaxTicketLife ATTRIBUTE */
+
+    if (mask & LDAP_REALM_MAXTICKETLIFE) {
+
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbMaxTicketLife", LDAP_MOD_REPLACE,
+					    rparams->max_life)) != 0)
+		    goto cleanup;
+    }
+
+    /* krbTicketFlags ATTRIBUTE */
+
+    if (mask & LDAP_REALM_KRBTICKETFLAGS) {
+
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbTicketFlags", LDAP_MOD_REPLACE,
+					    rparams->tktflags)) != 0)
+		    goto cleanup;
+    }
+
  
     /* DEFENCTYPE ATTRIBUTE */
     if (mask & LDAP_REALM_DEFENCTYPE) {
@@ -629,21 +633,6 @@ krb5_ldap_modify_realm(context, rparams, mask)
     }
 
 #ifdef HAVE_EDIRECTORY
-    /* LDAPSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_LDAPSERVERS) {
-	/* validate the server list */
-	for (i=0; rparams->ldapservers[i] != NULL; ++i) {
-	    st = checkattributevalue(ld, rparams->ldapservers[i], NULL, NULL, NULL);
-	    if (st != 0) {
-		prepend_err_str (context, "Error reading LDAP servers: ", st, st);
-		goto cleanup;
-	    }
-	}
-
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbldapservers", LDAP_MOD_REPLACE,
-					  rparams->ldapservers)) != 0)
-	    goto cleanup;	    
-    }
 
     /* KDCSERVERS ATTRIBUTE */
     if (mask & LDAP_REALM_KDCSERVERS) {
@@ -1029,7 +1018,7 @@ krb5_ldap_create_realm(context, rparams, mask)
     LDAP                        *ld=NULL;
     krb5_error_code             st=0;
     char                        *dn=NULL;
-    char                        *strval[3]={NULL};
+    char                        *strval[4]={NULL};
     LDAPMod                     **mods = NULL;
     int                         i=0, objectmask=0;
     kdb5_dal_handle             *dal_handle=NULL;
@@ -1052,7 +1041,6 @@ krb5_ldap_create_realm(context, rparams, mask)
 	((mask & LDAP_REALM_SUPPSALTTYPE) && rparams->suppsalttypes == NULL) ||
 	((mask & LDAP_REALM_SUPPENCTYPE) && rparams->suppenctypes == NULL) ||
 #ifdef HAVE_EDIRECTORY
-	((mask & LDAP_REALM_LDAPSERVERS) && rparams->ldapservers == NULL) ||
 	((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
 	((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
 	((mask & LDAP_REALM_PASSWDSERVERS) && rparams->passwdservers == NULL) ||
@@ -1084,7 +1072,9 @@ krb5_ldap_create_realm(context, rparams, mask)
     
     strval[0] = "top";
     strval[1] = "krbrealmcontainer";
-    strval[2] = NULL;
+    strval[2] = "krbpolicyaux";
+    strval[3] = NULL;
+
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
 	goto cleanup;
   
@@ -1111,19 +1101,31 @@ krb5_ldap_create_realm(context, rparams, mask)
 					 rparams->search_scope : LDAP_SCOPE_SUBTREE)) != 0)
             goto cleanup;
     }
+    if (mask & LDAP_REALM_MAXRENEWLIFE) {
 
-    /* POLICYREFERENCE ATTRIBUTE */
-    if (mask & LDAP_REALM_POLICYREFERENCE) {
-	st = checkattributevalue(ld, rparams->policyreference, "ObjectClass", policyclass, 
-				 &objectmask);
-	CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object value: ");
-
-	strval[0] = rparams->policyreference;
-	strval[1] = NULL;
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_ADD,
-					  strval)) != 0)
-	    goto cleanup;
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbMaxRenewableAge", LDAP_MOD_ADD,
+					    rparams->max_renewable_life)) != 0)
+		    goto cleanup;
     }
+
+    /* krbMaxTicketLife ATTRIBUTE */
+
+    if (mask & LDAP_REALM_MAXTICKETLIFE) {
+
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbMaxTicketLife", LDAP_MOD_ADD,
+					    rparams->max_life)) != 0)
+		    goto cleanup;
+    }
+
+    /* krbTicketFlags ATTRIBUTE */
+
+    if (mask & LDAP_REALM_KRBTICKETFLAGS) {
+
+	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbTicketFlags", LDAP_MOD_ADD,
+					    rparams->tktflags)) != 0)
+		    goto cleanup;
+    }
+
 
     /* DEFAULTENCTYPE ATTRIBUTE */
     if (mask & LDAP_REALM_DEFENCTYPE) {
@@ -1230,22 +1232,6 @@ krb5_ldap_create_realm(context, rparams, mask)
     }
 
 #ifdef HAVE_EDIRECTORY
-    /* LDAPSERVERS ATTRIBUTE */
-    if (mask & LDAP_REALM_LDAPSERVERS) {
-	/* validate the server list */
-	for (i=0; rparams->ldapservers[i] != NULL; ++i) {
-	    st = checkattributevalue(ld, rparams->ldapservers[i], NULL, NULL, NULL);
-	    if (st != 0) {
-		prepend_err_str (context, "Error reading LDAP server object: ",
-				 st, st);
-		goto cleanup;
-	    }
-	}
-
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbldapservers", LDAP_MOD_ADD,
-					  rparams->ldapservers)) != 0)
-	    goto cleanup;	    
-    }
 
     /* KDCSERVERS ATTRIBUTE */
     if (mask & LDAP_REALM_KDCSERVERS) {
@@ -1486,17 +1472,6 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 	    *mask |= LDAP_REALM_DEFSALTTYPE;
 	    ldap_value_free(values);
 	}
-
-	if((values=ldap_get_values(ld, ent, "krbPolicyReference")) != NULL) {
-	    rlparams->policyreference = strdup(values[0]);
-	    if (rlparams->policyreference == NULL) {
-		st = ENOMEM;
-		goto cleanup;
-	    }
-	    *mask |= LDAP_REALM_POLICYREFERENCE;
-	    ldap_value_free(values);
-	}
-
 	if((values=ldap_get_values(ld, ent, "krbSupportedEncTypes")) != NULL) {
 	    count = ldap_count_values(values);
 	    rlparams->suppenctypes = malloc (sizeof(krb5_int32) * (count + 1)); 
@@ -1526,13 +1501,6 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 	}
 
 #ifdef HAVE_EDIRECTORY
-	if((values=ldap_get_values(ld, ent, "krbLdapServers")) != NULL) {
-	    count = ldap_count_values(values);
-	    if ((st=copy_arrays(values, &(rlparams->ldapservers), (int) count)) != 0)
-		goto cleanup;
-	    *mask |= LDAP_REALM_LDAPSERVERS;
-	    ldap_value_free(values);
-	}
 
 	if((values=ldap_get_values(ld, ent, "krbKdcServers")) != NULL) {
 	    count = ldap_count_values(values);
@@ -1605,6 +1573,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 	}
 	ldap_msgfree(result);
     }
+	
     rlparams->mask = *mask;
     *rlparamp = rlparams;
     st = store_tl_data(rlparams->tl_data, KDB_TL_MASK, mask);
@@ -1639,21 +1608,12 @@ krb5_ldap_free_realm_params(rparams)
 
 	if (rparams->subtree)
 	    krb5_xfree(rparams->subtree);
-
-	if (rparams->policyreference)
-	    free(rparams->policyreference);
-
+	
 	if (rparams->suppenctypes)
-	    krb5_xfree(rparams->suppenctypes);
+		krb5_xfree(rparams->suppenctypes);
 
 	if (rparams->suppsalttypes)
 	    krb5_xfree(rparams->suppsalttypes);
-
-	if (rparams->ldapservers){
-	    for (i=0; rparams->ldapservers[i]; ++i)
-		krb5_xfree(rparams->ldapservers[i]);
-	    krb5_xfree(rparams->ldapservers);
-	}
 
 	if (rparams->kdcservers){
 	    for (i=0; rparams->kdcservers[i]; ++i)

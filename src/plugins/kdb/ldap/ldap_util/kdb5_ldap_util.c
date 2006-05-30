@@ -107,69 +107,41 @@ krb5_boolean manual_mkey = FALSE;
 void usage()
 {
      fprintf(stderr, "Usage: "
-#ifdef NOVELL_KDC
-"kdb5_util [-D user_dn [-w passwd]] [-h ldap_server] [-p ldap_port]\n"
-"\t[-t trusted_cert] cmd [cmd_options]\n"
-#else
 "kdb5_util [-D user_dn [-w passwd]] [-h ldap_server] [-p ldap_port]\n"
 "\tcmd [cmd_options]\n"
-#endif
 
 /* Create realm */
-# ifdef NOVELL_KDC
-"create	[-subtree subtree_dn] [-sscope search_scope]\n"
-"\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
-"\t[-pwddn passwd_service_list]\n"
-"\t[-enctypes supported_enc_types] [-defenctype default_enc_type]\n"
-"\t[-salttypes supported_salt_types] [-defsalttype default_salt_type]\n"
-"\t[-policy policy_dn] [-up]\n"
-"\t[-k mkeytype] [-m|-P password|-sf stashfilename] [-r realm]\n"
-# else
-"create	[-subtree subtree_dn] [-sscope search_scope]\n"
+"create          [-subtree subtree_dn] [-sscope search_scope]\n"
 #ifdef HAVE_EDIRECTORY
-"\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
-"\t[-pwddn passwd_service_list]\n"
+"\t\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
+"\t\t[-pwddn passwd_service_list]\n"
 #endif
-"\t[-enctypes supported_enc_types] [-defenctype default_enc_type]\n"
-"\t[-salttypes supported_salt_types] [-defsalttype default_salt_type]\n"
-"\t[-policy policy_dn]\n"
-"\t[-k mkeytype] [-m|-P password|-sf stashfilename] [-r realm]\n"
-# endif
+"\t\t[-enctypes supported_enc_types] [-defenctype default_enc_type]\n"
+"\t\t[-salttypes supported_salt_types] [-defsalttype default_salt_type]\n"
+"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype]\n"
+"\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
+"\t\t[ticket_flags] [-r realm]\n"
 
 /* modify realm */
-# ifdef NOVELL_KDC
-"modify	[-subtree subtree_dn] [-sscope search_scope]\n"
-"\t[-kdcdn kdc_service_list |\n"
-"\t[-clearkdcdn kdc_service_list] [-addkdcdn kdc_service_list]]\n"
-"\t[-admindn admin_service_list | [-clearadmindn admin_service_list]\n"
-"\t[-addadmindn admin_service_list]] [-pwddn passwd_service_list |\n"
-"\t[-clearpwddn passwd_service_list] [-addpwddn passwd_service_list]]\n"
-"\t[-enctypes supported_enc_types | [-clearenctypes enc_type_list]\n"
-"\t[-addenctypes enc_type_list]] [-defenctype default_enc_type]\n"
-"\t[-salttypes supported_salt_types | [-clearsalttypes salt_type_list]\n"
-"\t[-addsalttypes salt_type_list]] [-defsalttype default_salt_type]\n"
-"\t[-policy policy_dn|-clearpolicy] [-up|-clearup] [-r realm]\n"
-# else
-"modify	[-subtree subtree_dn] [-sscope search_scope]\n"
+"modify          [-subtree subtree_dn] [-sscope search_scope]\n"
 #ifdef HAVE_EDIRECTORY
-"\t[-kdcdn kdc_service_list |\n"
-"\t[-clearkdcdn kdc_service_list] [-addkdcdn kdc_service_list]]\n"
-"\t[-admindn admin_service_list | [-clearadmindn admin_service_list]\n"
-"\t[-addadmindn admin_service_list]] [-pwddn passwd_service_list |\n"
-"\t[-clearpwddn passwd_service_list] [-addpwddn passwd_service_list]]\n"
+"\t\t[-kdcdn kdc_service_list |\n"
+"\t\t[-clearkdcdn kdc_service_list] [-addkdcdn kdc_service_list]]\n"
+"\t\t[-admindn admin_service_list | [-clearadmindn admin_service_list]\n"
+"\t\t[-addadmindn admin_service_list]] [-pwddn passwd_service_list |\n"
+"\t\t[-clearpwddn passwd_service_list] [-addpwddn passwd_service_list]]\n"
 #endif
-"\t[-enctypes supported_enc_types | [-clearenctypes enc_type_list]\n"
-"\t[-addenctypes enc_type_list]] [-defenctype default_enc_type]\n"
-"\t[-salttypes supported_salt_types | [-clearsalttypes salt_type_list]\n"
-"\t[-addsalttypes salt_type_list]] [-defsalttype default_salt_type]\n"
-"\t[-policy policy_dn|-clearpolicy] [-r realm]\n"
-# endif
-
+"\t\t[-enctypes supported_enc_types | [-clearenctypes enc_type_list]\n"
+"\t\t[-addenctypes enc_type_list]] [-defenctype default_enc_type]\n"
+"\t\t[-salttypes supported_salt_types | [-clearsalttypes salt_type_list]\n"
+"\t\t[-addsalttypes salt_type_list]] [-defsalttype default_salt_type]\n"
+"\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
+"\t\t[ticket_flags] [-r realm]\n"
 /* View realm */
-"view    [-r realm]\n"
+"view            [-r realm]\n"
 
 /* Destroy realm */
-"destroy	[-f] [-r realm]\n"
+"destroy	        [-f] [-r realm]\n"
 
 /* List realms */
 "list\n"
@@ -202,7 +174,7 @@ void usage()
 #else
 
 /* Stash the service password */
-"stashsrvpw      [-f filename] servicedn\n"
+"stashsrvpw      [-f filename] service_dn\n"
 
 #endif
 
@@ -223,19 +195,6 @@ void usage()
 /* List policies */
 "list_policy     [-basedn base_dn]\n"
 
-#ifdef HAVE_EDIRECTORY
-#endif
-
-#ifdef NOVELL_KDC
-/* Set service cert */
-"setsrvcert      [-nopass] [-f filename] -cert certFilename service_dn\n"
-
-/* Add ldap extensions info. */
-"ldapxtn_info    -add|-clear\n"
-    
-/* Reset master key */
-"setmasterkey    [-k mkeytype] [-m|-P password] [-r realm]\n"
-#endif  /* endof NOVELL_KDC */
 );
 }
 
@@ -275,11 +234,6 @@ static struct _cmd_table {
      {"view_policy", kdb5_ldap_view_policy, 1},
      {"destroy_policy", kdb5_ldap_destroy_policy, 1},
      {"list_policy", kdb5_ldap_list_policies, 1},
-#ifdef NOVELL_KDC
-     {"setsrvcert", kdb5_ldap_set_service_certificate, 0},
-     {"ldapxtn_info", kdb5_ldap_modify_ldap_xtn_info, 0},
-     {"setmasterkey", kdb5_ldap_set_mkey, 1},
-#endif
      {NULL, NULL, 0},
 };
 
@@ -355,9 +309,6 @@ int main(argc, argv)
     char *value = NULL, *conf_section = NULL;
     krb5_boolean realm_name_required = FALSE;
     krb5_boolean print_help_message = FALSE;
-#ifdef NOVELL_KDC
-    char *trusted_root_file = NULL;
-#endif
 
     retval = krb5_init_context(&util_context);
     set_com_err_hook(extended_com_err_fn);
@@ -445,16 +396,6 @@ int main(argc, argv)
                 goto cleanup;
             }
             ldapmask |= CMD_LDAP_P;
-#ifdef NOVELL_KDC
-        } else if (strcmp(*argv, "-t") == 0 && ARG_VAL) {
-            trusted_root_file = koptarg;
-            if (trusted_root_file == NULL) {
-                com_err(progname, ENOMEM, "while reading ldap parameters");
-                exit_status++;
-                goto cleanup;
-            }
-            ldapmask |= CMD_LDAP_T;
-#endif
         } else if (cmd_lookup(*argv) != NULL) {
 	    if (cmd_argv[0] == NULL)
 		cmd_argv[0] = *argv;
@@ -495,9 +436,6 @@ int main(argc, argv)
         (strcmp(cmd_argv[0], "destroy") == 0) ||
         (strcmp(cmd_argv[0], "modify") == 0) ||
         (strcmp(cmd_argv[0], "view") == 0)
-#ifdef NOVELL_KDC
-        || (strcmp(cmd_argv[0], "setmasterkey") == 0)
-#endif
        ) {
         realm_name_required = TRUE;
     }
@@ -636,30 +574,6 @@ int main(argc, argv)
     if (ldapmask & CMD_LDAP_P) {
 	ldap_context->port = atoi(ldap_port);
     }
-#ifdef NOVELL_KDC
-    /* If trustedcert is specified, release entry filled by configuration & use this*/
-    if (ldapmask & CMD_LDAP_T) {
-        if (ldap_context->root_certificate_file != NULL) {
-            if (strcmp(ldap_context->root_certificate_file, trusted_root_file) != 0) {
-                profile_release_string(ldap_context->root_certificate_file);
-                ldap_context->root_certificate_file = strdup(trusted_root_file);
-		if (ldap_context->root_certificate_file == NULL) {
-                    com_err(argv[0], ENOMEM, "while retrieving ldap configuration");
-                    exit_status++;
-                    goto cleanup;
-                }
-            }
-        }
-        else {
-	    ldap_context->root_certificate_file = strdup(trusted_root_file);
-	    if (ldap_context->root_certificate_file == NULL) {
-                com_err(argv[0], ENOMEM, "while retrieving ldap configuration");
-                exit_status++;
-                goto cleanup;
-            }
-	}
-    }
-#endif
     if (bind_dn) {
         ldap_context->bind_dn = strdup(bind_dn);
 	if (ldap_context->bind_dn == NULL) {

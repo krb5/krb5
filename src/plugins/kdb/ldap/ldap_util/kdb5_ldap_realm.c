@@ -126,6 +126,183 @@ static int kdb_ldap_create_principal (krb5_context context, krb5_principal
 		princ, enum ap_op op, struct realm_info *pblock);
 
 
+static char *strdur(time_t duration);
+static int get_ticket_policy(krb5_ldap_realm_params *rparams, int *i, char *argv[],int argc);
+
+
+static int get_ticket_policy(rparams,i,argv,argc)
+	krb5_ldap_realm_params *rparams;
+	int *i;
+	char *argv[];
+	int argc;
+{
+	time_t date;
+	time_t now;
+	time(&now);
+	int mask = 0;
+	krb5_error_code retval = 0;
+	krb5_boolean no_msg = FALSE;
+
+	krb5_boolean print_usage = FALSE;
+	char *me = argv[0];
+	if (!strcmp(argv[*i], "-maxtktlife")) {
+		if (++(*i) > argc-1)
+			goto err_usage;
+		date = get_date(argv[*i], NULL);
+		if (date == (time_t)(-1)) {
+			retval = EINVAL;
+			com_err (me, retval, "while providing time specification");
+			goto err_nomsg;
+		}
+		rparams->max_life = date-now;
+		mask |= LDAP_REALM_MAXTICKETLIFE;
+	}
+
+
+	else if (!strcmp(argv[*i], "-maxrenewlife")) {
+		if (++(*i) > argc-1)
+			goto err_usage;
+
+		date = get_date(argv[*i], NULL);
+		if (date == (time_t)(-1)) {
+			retval = EINVAL;
+			com_err (me, retval, "while providing time specification");
+			goto err_nomsg;
+		}
+		rparams->max_renewable_life = date-now;
+		mask |= LDAP_REALM_MAXRENEWLIFE;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_postdated")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_POSTDATED);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_POSTDATED;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_forwardable")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_FORWARDABLE);
+
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_FORWARDABLE;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_renewable")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_RENEWABLE);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_RENEWABLE;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_proxiable")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_PROXIABLE);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_PROXIABLE;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_dup_skey")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_DUP_SKEY);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_DUP_SKEY;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+
+	else if (!strcmp((argv[*i] + 1), "requires_preauth")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags |= KRB5_KDB_REQUIRES_PRE_AUTH;
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags &= (int)(~KRB5_KDB_REQUIRES_PRE_AUTH);
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "requires_hwauth")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags |= KRB5_KDB_REQUIRES_HW_AUTH;
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags &= (int)(~KRB5_KDB_REQUIRES_HW_AUTH);
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_svr")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_SVR);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_SVR;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_tgs_req")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_TGT_BASED);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_TGT_BASED;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "allow_tix")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags &= (int)(~KRB5_KDB_DISALLOW_ALL_TIX);
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags |= KRB5_KDB_DISALLOW_ALL_TIX;
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "needchange")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags |= KRB5_KDB_REQUIRES_PWCHANGE;
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags &= (int)(~KRB5_KDB_REQUIRES_PWCHANGE);
+		else
+			goto err_usage;
+
+		mask |= LDAP_REALM_KRBTICKETFLAGS;
+	}
+	else if (!strcmp((argv[*i] + 1), "password_changing_service")) {
+		if (*(argv[*i]) == '+')
+			rparams->tktflags |= KRB5_KDB_PWCHANGE_SERVICE;
+		else if (*(argv[*i]) == '-')
+			rparams->tktflags &= (int)(~KRB5_KDB_PWCHANGE_SERVICE);
+		else
+			goto err_usage;
+
+		mask |=LDAP_REALM_KRBTICKETFLAGS;
+	}
+err_usage:
+	print_usage = TRUE;
+
+err_nomsg:
+	no_msg = TRUE;
+
+	return mask;
+}
+
 /*
  * This function will create a realm on the LDAP Server, with 
  * the specified attributes.
@@ -148,7 +325,8 @@ void kdb5_ldap_create(argc, argv)
     char pw_str[1024];
     int do_stash = 0;
     int i = 0, j = 0;
-    int mask = 0;
+    int mask = 0, ret_mask = 0;
+    char *me = argv[0];
 #ifdef HAVE_EDIRECTORY
     int rightsmask = 0;
 #endif
@@ -334,25 +512,14 @@ void kdb5_ldap_create(argc, argv)
             }
             mask |= LDAP_REALM_DEFSALTTYPE;
         }
-        else if (!strcmp(argv[i], "-policy")) {
-            if (++i > argc-1)
-                goto err_usage;
-            rparams->policyreference = strdup(argv[i]);
-            if (rparams->policyreference == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            mask |= LDAP_REALM_POLICYREFERENCE;
-        }
-#ifdef NOVELL_KDC
-        else if (!strcmp(argv[i], "-up")) {
-            rparams->upenabled = 1;
-            mask |= LDAP_REALM_UPENABLED;
-        }
-#endif
         else if (!strcmp(argv[i], "-s")) {
             do_stash = 1;
         }
+         else if ((ret_mask= get_ticket_policy(rparams,&i,argv,argc)) !=0)
+        {
+                mask|=ret_mask;
+        }
+
         else {
             printf("'%s' is an invalid option\n", argv[i]);
             goto err_usage;
@@ -832,7 +999,7 @@ void kdb5_ldap_modify(argc, argv)
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
     int i = 0, j = 0;
-    int mask = 0, rmask = 0;
+    int mask = 0, rmask = 0, ret_mask = 0;
     char *list[MAX_LIST_ENTRIES];
     int tlist[MAX_LIST_ENTRIES] = {0};
     int newenctypes = 0, newsalttypes = 0;
@@ -850,6 +1017,7 @@ void kdb5_ldap_modify(argc, argv)
     int rightsmask = 0;
     int subtree_changed = 0;
 #endif
+    char *me = argv[0];
 
     dal_handle = (kdb5_dal_handle *) util_context->db_context;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
@@ -1518,36 +1686,10 @@ void kdb5_ldap_modify(argc, argv)
             }
             mask |= LDAP_REALM_DEFSALTTYPE;
         }
-        else if (!strcmp(argv[i], "-policy")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if (rmask & LDAP_REALM_POLICYREFERENCE)
-                free(rparams->policyreference);
-            rparams->policyreference = strdup(argv[i]);
-            if (rparams->policyreference == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            mask |= LDAP_REALM_POLICYREFERENCE;
-        }
-        else if (!strcmp(argv[i], "-clearpolicy")) {
-            if (rmask & LDAP_REALM_POLICYREFERENCE) {
-                if (rparams->policyreference)
-                    free(rparams->policyreference);
-                rparams->policyreference = NULL;
-                mask |= LDAP_REALM_POLICYREFERENCE;
-            }
-        }
-#ifdef NOVELL_KDC
-        else if (!strcmp(argv[i], "-up")) {
-            rparams->upenabled = 1;
-            mask |= LDAP_REALM_UPENABLED;
-        }
-        else if (!strcmp(argv[i], "-clearup")) {
-            rparams->upenabled = 0;
-            mask |= LDAP_REALM_UPENABLED;
-        }
-#endif
+	else if ((ret_mask= get_ticket_policy(rparams,&i,argv,argc)) !=0)
+	{
+		mask|=ret_mask;
+	}
         else {
             printf("'%s' is an invalid option\n", argv[i]);
             goto err_usage;
@@ -1932,6 +2074,29 @@ void kdb5_ldap_view(argc, argv)
     return;
 }
 
+static char *strdur(duration)
+	time_t duration;
+{
+	static char out[50];
+	int neg, days, hours, minutes, seconds;
+
+	if (duration < 0) {
+		duration *= -1;
+		neg = 1;
+	} else
+		neg = 0;
+	days = duration / (24 * 3600);
+	duration %= 24 * 3600;
+	hours = duration / 3600;
+	duration %= 3600;
+	minutes = duration / 60;
+	duration %= 60;
+	seconds = duration;
+	sprintf(out, "%s%d %s %02d:%02d:%02d", neg ? "-" : "",
+			days, days == 1 ? "day" : "days",
+			hours, minutes, seconds);
+	return out;
+}
 
 /*
  * This function prints the attributes of a given realm to the
@@ -2048,20 +2213,65 @@ static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
         if (num_entry_printed == 0)
             printf("\n");
     }
-    if (mask & LDAP_REALM_DEFSALTTYPE) {
-        retval = krb5_salttype_to_string(rparams->defsalttype, buff, BUFF_LEN);
-        if (retval == 0) {
-            printf("%25s: %-50s\n", "Default Salt Type", buff);
-        }
+    if (mask & LDAP_REALM_MAXTICKETLIFE) {
+	    printf("%25s:", "Maximum Ticket Life");
+	    printf(" %s \n", strdur(rparams->max_life));
     }
-    if (mask & LDAP_REALM_POLICYREFERENCE)
-        printf("%25s: %-50s\n", "Policy Reference", rparams->policyreference);
 
-#ifdef NOVELL_KDC
-    if (mask & LDAP_REALM_UPENABLED)
-        printf("%25s: %-50s\n", "Universal Passwd", 
-            (rparams->upenabled) ? "ENABLED" : "DISABLED");
-#endif
+    if (mask & LDAP_REALM_MAXRENEWLIFE) {
+	    printf("%25s:", "Maximum Renewable Life");
+	    printf(" %s \n", strdur(rparams->max_renewable_life));
+    }
+    printf("%25s: ", "Ticket flags");
+    if (mask & LDAP_POLICY_TKTFLAGS) {
+        int ticketflags = rparams->tktflags;
+
+        if (ticketflags & KRB5_KDB_DISALLOW_POSTDATED)
+            printf("%s ","DISALLOW_POSTDATED");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_FORWARDABLE)
+            printf("%s ","DISALLOW_FORWARDABLE");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_RENEWABLE)
+            printf("%s ","DISALLOW_RENEWABLE");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_PROXIABLE)
+            printf("%s ","DISALLOW_PROXIABLE");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_DUP_SKEY)
+            printf("%s ","DISALLOW_DUP_SKEY");
+
+        if (ticketflags & KRB5_KDB_REQUIRES_PRE_AUTH)
+            printf("%s ","REQUIRES_PRE_AUTH");
+
+        if (ticketflags & KRB5_KDB_REQUIRES_HW_AUTH)
+            printf("%s ","REQUIRES_HW_AUTH");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_SVR)
+            printf("%s ","DISALLOW_SVR");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_TGT_BASED)
+            printf("%s ","DISALLOW_TGT_BASED");
+
+        if (ticketflags & KRB5_KDB_DISALLOW_ALL_TIX)
+            printf("%s ","DISALLOW_ALL_TIX");
+
+        if (ticketflags & KRB5_KDB_REQUIRES_PWCHANGE)
+            printf("%s ","REQUIRES_PWCHANGE");
+
+        if (ticketflags & KRB5_KDB_PWCHANGE_SERVICE)
+            printf("%s ","PWCHANGE_SERVICE");
+    }
+
+    if (mask & LDAP_REALM_DEFSALTTYPE) {
+	    retval = krb5_salttype_to_string(rparams->defsalttype, buff, BUFF_LEN);
+	    if (retval == 0) {
+		    printf("\n%25s: %-50s\n", "Default Salt Type", buff);
+	    }
+    }
+    /* if (mask & LDAP_REALM_POLICYREFERENCE)
+        printf("%25s: %-50s\n", "Policy Reference", rparams->policyreference);*/
+
 
     return;
 }
@@ -2272,7 +2482,7 @@ kdb5_ldap_destroy(argc, argv)
     int mask = 0;
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context = NULL;
-#ifdef NOVELL_KDC    
+#ifdef HAVE_EDIRECTORY    
     int i = 0, rightsmask = 0;
     krb5_ldap_realm_params *rparams = NULL;
 #endif
@@ -2329,7 +2539,7 @@ kdb5_ldap_destroy(argc, argv)
         return;
     }
 
-#ifdef NOVELL_KDC
+#ifdef HAVE_EDIRECTORY
     if( (mask & LDAP_REALM_KDCSERVERS) || (mask & LDAP_REALM_ADMINSERVERS) ||
 	(mask & LDAP_REALM_PASSWDSERVERS) ) {
 	

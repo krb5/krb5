@@ -235,6 +235,11 @@ int dec_password(struct data pwd, struct data *ret){
 	    ret->value[j] = k;
 	}
 	goto cleanup;
+    } else {
+	err = EINVAL;
+        krb5_set_error_message (0, err, "Not a hexadecimal password");
+        ret->len = 0;
+        goto cleanup;
     }
     
  cleanup:
