@@ -1,9 +1,11 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=lib/rpc
-mydir=.
+mydir=lib/rpc
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
 DEFS=
+
+SUBDIRS=unit-test
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=libgssrpc.lib
@@ -267,7 +269,7 @@ do-dyn-lclint::
 # makefile post-processing is unconditional and would trash the makefile.
 types.h: types.stamp
 types.stamp: $(srcdir)/types.hin config.status
-	$(SHELL) config.status
+	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/types.h
 	touch types.stamp
 
 clean-unix::

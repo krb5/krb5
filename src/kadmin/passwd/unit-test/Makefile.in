@@ -1,6 +1,6 @@
-thisconfigdir=./../..
+thisconfigdir=../../..
 myfulldir=kadmin/passwd/unit-test
-mydir=passwd/unit-test
+mydir=kadmin/passwd/unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 check unit-test:: unit-test-@DO_TEST@
 

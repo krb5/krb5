@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=kadmin/dbutil
-mydir=dbutil
+mydir=kadmin/dbutil
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DKDB4_DISABLE
 DEFS=

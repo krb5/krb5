@@ -1,6 +1,6 @@
-thisconfigdir=./../..
+thisconfigdir=../../..
 myfulldir=kadmin/testing/util
-mydir=testing/util
+mydir=kadmin/testing/util
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = $(TCL_INCLUDES) -I$(BUILDTOP)/lib/kdb/
 # Force Tcl headers to use stdarg.h, because krb5 does too, and if

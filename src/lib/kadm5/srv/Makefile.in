@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/kadm5/srv
-mydir=srv
+mydir=lib/kadm5/srv
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 \
 	-I$(SRCTOP)/lib/gssapi/krb5 -I$(SRCTOP)/lib/gssapi/generic \

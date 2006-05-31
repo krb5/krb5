@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=kadmin/testing
-mydir=testing
+mydir=kadmin/testing
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS = scripts util
 

@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=kadmin/server
-mydir=server
+mydir=kadmin/server
 BUILDTOP=$(REL)..$(S)..
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 DEFS=

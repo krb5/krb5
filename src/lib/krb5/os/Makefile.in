@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/krb5/os
-mydir=os
+mydir=lib/krb5/os
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
