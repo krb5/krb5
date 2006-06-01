@@ -194,10 +194,13 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 
     /* If reporting an error message, separate it. */
     if (code) {
+        char *emsg;
         outbuf[sizeof(outbuf) - 1] = '\0';
 
-	strncat(outbuf, krb5_get_error_message (err_context, code), sizeof(outbuf) - 1 - strlen(outbuf));
+	emsg = krb5_get_error_message (err_context, code);
+	strncat(outbuf, emsg, sizeof(outbuf) - 1 - strlen(outbuf));
 	strncat(outbuf, " - ", sizeof(outbuf) - 1 - strlen(outbuf));
+	krb5_free_error_message(err_context, emsg);
     }
     cp = &outbuf[strlen(outbuf)];
     
