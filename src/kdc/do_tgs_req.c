@@ -646,9 +646,9 @@ tgt_again:
     
 cleanup:
     if (status) {
+	char * emsg = NULL;
 	if (!errcode)
 	    rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), &reply);
-	char * emsg = NULL;
 	if(errcode) 
 	  emsg = krb5_get_error_message (kdc_context, errcode);
         krb5_klog_syslog(LOG_INFO,
