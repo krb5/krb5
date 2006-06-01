@@ -567,7 +567,7 @@ krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
                 void **newp = NULL;
 
                 count++;
-                newp = realloc (p, ((count + 1) + sizeof (*p))); /* +1 for NULL */
+                newp = realloc (p, ((count + 1) * sizeof (*p))); /* +1 for NULL */
                 if (newp == NULL) { 
                     err = errno; 
                 } else {
