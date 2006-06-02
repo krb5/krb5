@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=lib/gssapi
-mydir=.
+mydir=lib/gssapi
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS= generic krb5
 DEFS=

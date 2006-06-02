@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/krb5/rcache
-mydir=rcache
+mydir=lib/krb5/rcache
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
 

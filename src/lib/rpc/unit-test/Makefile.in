@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../..
 myfulldir=lib/rpc/unit-test
-mydir=.
+mydir=lib/rpc/unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I.
 PROG_LIBPATH=-L$(TOPLIBD)

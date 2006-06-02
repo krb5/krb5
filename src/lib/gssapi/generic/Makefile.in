@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/gssapi/generic
-mydir=generic
+mydir=lib/gssapi/generic
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir)
 DEFS=

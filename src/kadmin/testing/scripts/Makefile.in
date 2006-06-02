@@ -1,8 +1,8 @@
-thisconfigdir=./../..
+thisconfigdir=../../..
 myfulldir=kadmin/testing/scripts
-mydir=testing/scripts
+mydir=kadmin/testing/scripts
 BUILDTOP=$(REL)..$(S)..$(S)..
-PERL=@PERL@
+PERL_PATH=@PERL_PATH@
 
 .SUFFIXES: .plin .pl
 
@@ -17,7 +17,7 @@ env-setup.sh: env-setup.stamp
 env-setup.stamp: $(srcdir)/env-setup.shin $(thisconfigdir)/config.status \
 		Makefile 
 	cd $(thisconfigdir) && \
-		CONFIG_FILES=./testing/scripts/env-setup.sh:./testing/scripts/env-setup.shin $(SHELL) \
+		CONFIG_FILES=$(mydir)/env-setup.sh:$(mydir)/env-setup.shin $(SHELL) \
 		config.status
 	chmod +x env-setup.sh
 	touch env-setup.stamp
@@ -28,7 +28,7 @@ restore_files.sh:
 
 .plin.pl: 
 	-rm -f $@.tmp
-	echo "#!$(PERL)" > $@.tmp
+	echo "#!$(PERL_PATH)" > $@.tmp
 	sed 1d $< >> $@.tmp
 	chmod +x $@.tmp
 	mv $@.tmp $@

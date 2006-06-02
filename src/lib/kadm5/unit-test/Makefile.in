@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/kadm5/unit-test
-mydir=unit-test
+mydir=lib/kadm5/unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES = -DUSE_KADM5_API_VERSION=1
 PROG_LIBPATH=-L$(TOPLIBD)

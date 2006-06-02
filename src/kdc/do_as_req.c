@@ -428,23 +428,36 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
 errout:
     if (status) {
+        char * emsg = 0;
+	if (errcode) 
+	    emsg = krb5_get_error_message (kdc_context, errcode);
+
         krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
 			 ktypestr,
 	       fromstring, status, 
 	       cname ? cname : "<unknown client>",
 	       sname ? sname : "<unknown server>",
 	       errcode ? ", " : "",
-	       errcode ? krb5_get_error_message (kdc_context, errcode) : "");
+	       errcode ? emsg : "");
+	if (errcode)
+	    krb5_free_error_message (kdc_context, emsg);
     }
     if (errcode) {
-	if (status == 0)
+        int got_err = 0;
+	if (status == 0) {
 	    status = krb5_get_error_message (kdc_context, errcode);
+	    got_err = 1;
+	}
 	errcode -= ERROR_TABLE_BASE_krb5;
 	if (errcode < 0 || errcode > 128)
 	    errcode = KRB_ERR_GENERIC;
 	    
 	errcode = prepare_error_as(request, errcode, &e_data, response,
 				   status);
+	if (got_err) {
+	    krb5_free_error_message (kdc_context, status);
+	    status = 0;
+	}
     }
 
     if (encrypting_key.contents)

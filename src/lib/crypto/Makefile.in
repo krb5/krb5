@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=lib/crypto
-mydir=.
+mydir=lib/crypto
 BUILDTOP=$(REL)..$(S)..
 LOCAL_SUBDIRS=crc32 des dk enc_provider hash_provider keyhash_provider \
 	md4 md5 old raw sha1 arcfour yarrow aes

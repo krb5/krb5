@@ -38,6 +38,10 @@
 #endif
 #endif
 
+#if defined(__MACH__) && defined(__APPLE__)
+# include <TargetConditionals.h>
+#endif
+
 #if defined(_WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
 #define	DEFAULT_LNAME_FILENAME	"/aname"
@@ -46,6 +50,8 @@
 #if TARGET_OS_MAC
 #define DEFAULT_SECURE_PROFILE_PATH "/Library/Preferences/edu.mit.Kerberos:/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define DEFAULT_PROFILE_PATH        ("~/Library/Preferences/edu.mit.Kerberos" ":" DEFAULT_SECURE_PROFILE_PATH)
+#define KRB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosFrameworkPlugins"
+#define KDB5_PLUGIN_BUNDLE_DIR       "/System/Library/KerberosPlugins/KerberosDatabasePlugins"
 #else
 #define DEFAULT_SECURE_PROFILE_PATH	"/etc/krb5.conf:@SYSCONFDIR/krb5.conf"
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH
@@ -69,7 +75,6 @@
 #else
 #define DEFAULT_KDB_LIB_PATH	{ "@MODULEDIR/kdb", NULL }
 #endif
-#define MODULE_PATH		"@MODULEDIR"
 
 #define	DEFAULT_KDC_ENCTYPE	ENCTYPE_DES3_CBC_SHA1
 #define KDCRCACHE		"dfl:krb5kdc_rcache"

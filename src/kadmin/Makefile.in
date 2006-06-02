@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=kadmin
-mydir=.
+mydir=kadmin
 BUILDTOP=$(REL)..
 LOCAL_SUBDIRS = cli dbutil passwd ktutil server testing
 

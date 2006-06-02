@@ -54,7 +54,7 @@ krb4int_save_credentials_addr(service, instance, realm, session, lifetime, kvno,
     int lifetime;		/* Lifetime */
     int kvno;			/* Key version number */
     KTEXT ticket;		/* The ticket itself */
-    long issue_date;		/* The issue time */
+    KRB4_32 issue_date;		/* The issue time */
     KRB_UINT32 local_addr;
 {
     int tf_status;   /* return values of the tf_util calls */
@@ -83,5 +83,5 @@ krb_save_credentials(
 {
     return krb4int_save_credentials_addr(service, instance, realm,
 					 session, lifetime, kvno,
-					 ticket, issue_date, 0);
+					 ticket, (KRB4_32)issue_date, 0);
 }

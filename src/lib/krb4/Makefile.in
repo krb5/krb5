@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=lib/krb4
-mydir=.
+mydir=lib/krb4
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kerberosIV -I$(srcdir)/../../include/kerberosIV -I.
 DEFINES= -DKRB4_USE_KEYTAB

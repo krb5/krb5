@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/krb5/keytab
-mydir=keytab
+mydir=lib/krb5/keytab
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
 

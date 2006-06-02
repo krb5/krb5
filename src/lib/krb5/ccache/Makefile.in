@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../..
 myfulldir=lib/krb5/ccache
-mydir=ccache
+mydir=lib/krb5/ccache
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCAL_SUBDIRS =
 DEFS=
