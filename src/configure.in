@@ -891,7 +891,7 @@ if test -n "$KRB4_LIB"; then
 fi
 AC_CONFIG_SUBDIRS(lib/apputils plugins/kdb/db2 appl tests)
 dnl
-if true; then
+if false; then
   AC_CHECK_HEADERS(Python.h python2.3/Python.h)
   AC_CONFIG_SUBDIRS(plugins/locate/python)
 fi
