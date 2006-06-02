@@ -470,7 +470,7 @@ krb4int_save_credentials_addr(sname, sinst, srealm, session,
 	int lifetime;		/* Lifetime */
 	int kvno;		/* Key version number */
     	KTEXT ticket; 		/* The ticket itself */
-	long issue_date;	/* The issue time */
+	KRB4_32 issue_date;	/* The issue time */
 	KRB_UINT32 laddr;
 {
 	CREDENTIALS	cr;
@@ -500,7 +500,7 @@ krb_save_credentials(
     int		lifetime,
     int		kvno,
     KTEXT	ticket,
-    long	issue_date)
+    KRB4_32	issue_date)
 {
     return krb4int_save_credentials_addr(name, inst, realm, session,
 					 lifetime, kvno, ticket,

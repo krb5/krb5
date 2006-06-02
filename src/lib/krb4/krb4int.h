@@ -90,7 +90,8 @@ int krb_net_rd_sendauth(int, KTEXT, KRB4_32 *);
 char *krb_stime(long *);
 
 /* tf_util.c */
-int tf_save_cred(char *, char *, char *, C_Block, int , int, KTEXT, long);
+int tf_save_cred(char *, char *, char *, C_Block, int , int, KTEXT, KRB4_32);
+
 
 /* unix_glue.c */
 int krb_start_session(char *);
@@ -112,7 +113,7 @@ void krb4int_et_init(void);
 void krb4int_et_fini(void);
 
 int krb4int_save_credentials_addr(
-    char *, char *, char *, C_Block, int, int, KTEXT, long, KRB_UINT32);
+    char *, char *, char *, C_Block, int, int, KTEXT, KRB4_32, KRB_UINT32);
 
 int krb4int_send_to_kdc_addr(KTEXT, KTEXT, char *,
 			     struct sockaddr *, socklen_t *);

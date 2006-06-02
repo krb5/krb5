@@ -28,6 +28,7 @@
 #include "k5-int.h"
 #include "krb4int.h"
 
+
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -42,6 +43,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #endif /* TKT_SHMEM */
+
+
 
 #define TOO_BIG -1
 #define TF_LCK_RETRY ((unsigned)2)	/* seconds to sleep before
@@ -93,6 +96,165 @@ int utimes(path, times)
 #endif
 #endif
 
+
+#ifdef K5_LE
+/* This was taken from jhutz's patch for heimdal krb4. It only
+ * applies to little endian systems. Big endian systems have a
+ * less elegant solution documented below.
+ *
+ * This record is written after every real ticket, to ensure that
+ * both 32- and 64-bit readers will perceive the next real ticket
+ * as starting in the same place.  This record looks like a ticket
+ * with the following properties:
+ *   Field         32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         "."                "."
+ *   sinst         ""                 ""
+ *   srealm        ".."               ".."
+ *   session key   002E2E00 xxxxxxxx  xxxxxxxx 00000000
+ *   lifetime      0                  0
+ *   kvno          0                  12
+ *   ticket        12 nulls           4 nulls
+ *   issue         0                  0
+ *
+ * Our code always reads and writes the 32-bit format, but knows
+ * to skip 00000000 at the front of a record, and to completely
+ * ignore tickets for the special alignment principal.
+ */
+static unsigned char align_rec[] = {
+    0x2e, 0x00, 0x00, 0x2e, 0x2e, 0x00, 0x00, 0x2e,
+    0x2e, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00,
+    0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00
+};
+
+#else /* Big Endian */
+
+/* These alignment records are for big endian systems. We need more
+ * of them because the portion of the 64-bit issue_date that overlaps
+ * with the start of a ticket on 32-bit systems contains an unpredictable
+ * number of NULL bytes. Preceeding these records is a second copy of the
+ * 32-bit issue_date. The srealm for the alignment records is always one of
+ * ".." or "?.."
+ */
+
+/* No NULL bytes
+ * This is actually two alignment records since both 32- and 64-bit
+ * readers will agree on everything in the first record up through the
+ * issue_date size, except where sname starts.
+ *   Field (1)     32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         "????."            "."
+ *   sinst         ""                 ""
+ *   srealm        ".."               ".."
+ *   session key   00000000 xxxxxxxx  00000000 xxxxxxxx
+ *   lifetime      0                  0
+ *   kvno          0                  0
+ *   ticket        4 nulls           4 nulls
+ *   issue         0                  0
+ *
+ *   Field (2)     32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         "."                "."
+ *   sinst         ""                 ""
+ *   srealm        ".."               ".."
+ *   session key   002E2E00 xxxxxxxx  xxxxxxxx 00000000
+ *   lifetime      0                  0
+ *   kvno          0                  12
+ *   ticket        12 nulls           4 nulls
+ *   issue         0                  0
+ *
+ */
+static unsigned char align_rec_0[] = {
+    0x2e, 0x00, 0x00, 0x2e, 0x2e, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x2e, 0x00, 0x00, 0x2e, 0x2e, 0x00,
+    0x00, 0x2e, 0x2e, 0x00, 0xff, 0xff, 0xff, 0xff,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x04,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00
+};
+
+/* One NULL byte
+ *   Field         32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         "x"  |"xx"|"xxx"   "."
+ *   sinst         "xx."|"x."|"."     ".."
+ *   srealm        ".."               "..."
+ *   session key   2E2E2E00 xxxxxxxx  xxxxxxxx 00000000
+ *   lifetime      0                  0
+ *   kvno          0                  12
+ *   ticket        12 nulls           4 nulls
+ *   issue         0                  0
+ */
+static unsigned char align_rec_1[] = {
+    0x2e, 0x00, 0x2e, 0x2e, 0x00, 0x2e, 0x2e, 0x2e,
+    0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x0c, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00
+};
+
+/* Two NULL bytes
+ *   Field         32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         "x"  |"x" |"xx"    ".."
+ *   sinst         ""   |"x" |""      ""
+ *   srealm        "x.."|".."|".."    ".."
+ *   session key   002E2E00 xxxxxxxx  xxxxxxxx 00000000
+ *   lifetime      0                  0
+ *   kvno          0                  12
+ *   ticket        12 nulls           4 nulls
+ *   issue         0                  0
+ */
+ static unsigned char align_rec_2[] = {
+    0x2e, 0x2e, 0x00, 0x00, 0x2e, 0x2e, 0x00, 0xff,
+    0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0c, 0x00,
+    0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+/* Three NULL bytes
+ * Things break here for 32-bit krb4 libraries that don't
+ * understand this alignment record. We can't really do
+ * anything about the fact that the three strings ended
+ * in the duplicate timestamp. The good news is that this
+ * only happens once every 0x1000000 seconds, once roughly
+ * every six and a half months. We'll live.
+ *
+ * Discussion on the krbdev list has suggested the
+ * issue_date be incremented by one in this case to avoid
+ * the problem. I'm leaving this here just in case.
+ *
+ *   Field         32-bit             64-bit
+ *   ============  =================  =================
+ *   sname         ""                 "."
+ *   sinst         ""                 ""
+ *   srealm        ""                 ".."
+ *   session key   2E00002E 2E00FFFF  xxxx0000 0000xxxx
+ *   lifetime      0                  0
+ *   kvno          4294901760         917504
+ *   ticket        14 nulls           4 nulls
+ *   issue         0                  0
+ */
+/*
+static unsigned char align_rec_3[] = {
+    0x2e, 0x00, 0x00, 0x2e, 0x2e, 0x00, 0xff, 0xff,
+    0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+*/
+#endif /* K5_LE*/
+
 /*
  * fd must be initialized to something that won't ever occur as a real
  * file descriptor. Since open(2) returns only non-negative numbers as
@@ -136,7 +298,7 @@ static int tf_gets (char *, int), tf_read (char *, int);
  *              int             lifetime
  *              int             kvno
  *              KTEXT_ST        ticket_st
- *              long            issue_date
+ *              KRB4_32         issue_date
  *
  * Strings are stored NUL-terminated, and read back until a NUL is
  * found or the indicated number of bytes have been read.  (So if you
@@ -519,19 +681,43 @@ int KRB5_CALLCONV tf_get_pinst(inst)
  * EOF          - end of file encountered
  */
 
-int KRB5_CALLCONV tf_get_cred(c)
+static int  real_tf_get_cred(c)
     CREDENTIALS *c;
 {
     KTEXT   ticket = &c->ticket_st;	/* pointer to ticket */
     int     k_errno;
-    long issue_date;
+    unsigned char nullbuf[3];  /* used for 64-bit issue_date tf compatibility */
 
     if (fd < 0) {
 	if (krb_debug)
 	    fprintf(stderr, "tf_get_cred called before tf_init.\n");
 	return TKT_FIL_INI;
     }
-    if ((k_errno = tf_gets(c->service, SNAME_SZ)) < 2)
+    if ((k_errno = tf_gets(c->service, SNAME_SZ)) < 2) {
+
+#ifdef K5_BE
+	/* If we're big endian then we can have a null service name as part of
+	 * an alignment record. */
+	if (k_errno < 2)
+	    switch (k_errno) {
+	    case TOO_BIG:
+		tf_close();
+		return TKT_FIL_FMT;
+	    case 0:
+		return EOF;
+	    }
+#else /* Little Endian */
+	/* If we read an empty service name, it's possible that's because
+	 * the file was written by someone who thinks issue_date should be
+	 * 64 bits.  If that is the case, there will be three more zeros,
+	 * followed by the real record.*/
+
+	if (k_errno == 1 && 
+	    tf_read(nullbuf, 3) == 3 &&
+	    !nullbuf[0] && !nullbuf[1] && !nullbuf[2])
+	    k_errno = tf_gets(c->service, SNAME_SZ);
+
+	if (k_errno < 2)
 	switch (k_errno) {
 	case TOO_BIG:
 	case 1:		/* can't be just a null */
@@ -540,6 +726,9 @@ int KRB5_CALLCONV tf_get_cred(c)
 	case 0:
 	    return EOF;
 	}
+#endif/*K5_BE*/
+
+    }
     if ((k_errno = tf_gets(c->instance, INST_SZ)) < 1)
 	switch (k_errno) {
 	case TOO_BIG:
@@ -547,7 +736,7 @@ int KRB5_CALLCONV tf_get_cred(c)
 	case 0:
 	    return EOF;
 	}
-    if ((k_errno = tf_gets(c->realm, REALM_SZ)) < 2)
+    if ((k_errno = tf_gets(c->realm, REALM_SZ)) < 2) {
 	switch (k_errno) {
 	case TOO_BIG:
 	case 1:		/* can't be just a null */
@@ -556,6 +745,8 @@ int KRB5_CALLCONV tf_get_cred(c)
 	case 0:
 	    return EOF;
 	}
+    }
+    
     if (
 	tf_read((char *) (c->session), KEY_SZ) < 1 ||
 	tf_read((char *) &(c->lifetime), sizeof(c->lifetime)) < 1 ||
@@ -565,12 +756,74 @@ int KRB5_CALLCONV tf_get_cred(c)
     /* don't try to read a silly amount into ticket->dat */
 	ticket->length > MAX_KTXT_LEN ||
 	tf_read((char *) (ticket->dat), ticket->length) < 1 ||
-	tf_read((char *) &(issue_date), sizeof(issue_date)) < 1
+	tf_read((char *) &(c->issue_date), sizeof(c->issue_date)) < 1
 	) {
 	tf_close();
 	return TKT_FIL_FMT;
     }
-    c->issue_date = issue_date;
+
+#ifdef K5_BE
+    /* If the issue_date is 0 and we're not dealing with an alignment
+       record, then it's likely we've run into an issue_date written by
+       a 64-bit library that is using long instead of KRB4_32. Let's get
+       the next four bytes instead.
+     */
+    if (0 == c->issue_date) {
+	int len = strlen(c->realm);
+	if (!(2 == len && 0 == strcmp(c->realm, "..")) &&
+	    !(3 == len && 0 == strcmp(c->realm + 1, ".."))) {
+	    if (tf_read((char *) &(c->issue_date), sizeof(c->issue_date)) < 1) {
+		tf_close();
+		return TKT_FIL_FMT;
+	    }
+	}
+    }
+
+#endif
+    
+    return KSUCCESS;
+}
+
+int KRB5_CALLCONV tf_get_cred(c)
+    CREDENTIALS *c;
+{
+    int     k_errno;
+    int     fake;
+    
+    do {
+	fake = 0;
+	k_errno = real_tf_get_cred(c);
+	if (k_errno)
+	    return k_errno;
+	
+#ifdef K5_BE
+	/* Here we're checking to see if the realm is one of the 
+	 * alignment record realms, ".." or "?..", so we can skip it.
+	 * If it's not, then we need to verify that the service name
+	 * was not null as this should be a valid ticket.
+	 */
+	{
+	    int len = strlen(c->realm);
+	    if (2 == len && 0 == strcmp(c->realm, ".."))
+		fake = 1;
+	    if (3 == len && 0 == strcmp(c->realm + 1, ".."))
+		fake = 1;
+	    if (!fake && 0 == strlen(c->service)) {
+		tf_close();
+		return TKT_FIL_FMT;
+	    }
+	}
+#else /* Little Endian */
+	/* Here we're checking to see if the service principal is the
+	 * special alignment record principal ".@..", so we can skip it.
+	 */
+	if (strcmp(c->service, ".") == 0 &&
+	    strcmp(c->instance, "") == 0 &&
+	    strcmp(c->realm, "..") == 0)
+	    fake = 1;
+#endif/*K5_BE*/
+    } while (fake);
+    
 #ifdef TKT_SHMEM
     memcpy(c->session, tmp_shm_addr, KEY_SZ);
     tmp_shm_addr += KEY_SZ;
@@ -711,7 +964,7 @@ int tf_save_cred(service, instance, realm, session, lifetime, kvno,
     int     lifetime;		/* Lifetime */
     int     kvno;		/* Key version number */
     KTEXT   ticket;		/* The ticket itself */
-    long    issue_date;		/* The issue time */
+    KRB4_32 issue_date;		/* The issue time */
 {
 
     off_t   lseek();
@@ -777,9 +1030,65 @@ int tf_save_cred(service, instance, realm, session, lifetime, kvno,
     if (write(fd, (char *) (ticket->dat), count) != count)
 	goto bad;
     /* Issue date */
-    if (write(fd, (char *) &issue_date, sizeof(long))
-	!= sizeof(long))
+    if (write(fd, (char *) &issue_date, sizeof(KRB4_32))
+	!= sizeof(KRB4_32))
 	goto bad;
+    /* Alignment Record */
+#ifdef K5_BE
+    {
+	int null_bytes = 0;
+	if (0 == (issue_date & 0xff000000))
+	    ++null_bytes;
+	if (0 == (issue_date & 0x00ff0000))
+	    ++null_bytes;
+	if (0 == (issue_date & 0x0000ff00))
+	    ++null_bytes;
+	if (0 == (issue_date & 0x000000ff))
+	    ++null_bytes;
+	
+	switch(null_bytes) {
+	case 0:
+	    /* Issue date */
+	    if (write(fd, (char *) &issue_date, sizeof(KRB4_32))
+		!= sizeof(KRB4_32))
+	goto bad;
+	    if (write(fd, align_rec_0, sizeof(align_rec_0))
+		!= sizeof(align_rec_0))
+		goto bad;
+	    break;
+	    
+	case 1:
+	    if (write(fd, (char *) &issue_date, sizeof(KRB4_32))
+		!= sizeof(KRB4_32))
+		goto bad;
+	    if (write(fd, align_rec_1, sizeof(align_rec_1))
+		!= sizeof(align_rec_1))
+		goto bad;
+	    break;
+	    
+	case 3:
+	    /* Three NULLS are troublesome but rare. We'll just pretend 
+	     * they don't exist by decrementing the issue_date.
+	     */
+	    --issue_date;
+	case 2:
+	    if (write(fd, (char *) &issue_date, sizeof(KRB4_32))
+		!= sizeof(KRB4_32))
+		goto bad;
+	    if (write(fd, align_rec_2, sizeof(align_rec_2))
+		!= sizeof(align_rec_2))
+		goto bad;
+	    break;
+	    
+	default:
+	    goto bad;
+	}
+	
+    }    
+#else
+    if (write(fd, align_rec, sizeof(align_rec)) != sizeof(align_rec))
+	goto bad;
+#endif 
 
     /* Actually, we should check each write for success */
     return (KSUCCESS);
