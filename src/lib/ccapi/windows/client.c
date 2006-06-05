@@ -78,11 +78,13 @@ int cc_rpc_cleanup(void) {
 }
 
 cc_int32 cci_set_thread_session_id(unsigned char * client_name, LUID luid) {
-
+    return 0;
 }
 
 void cci_get_thread_session_id(unsigned char * client_name, int len, LUID *pluid) {
-
+    client_name[0] = '\0';
+    pluid->HighPart = 0;
+    pluid->LowPart = 0;
 }
 
 
@@ -97,14 +99,14 @@ void cci_get_thread_session_id(unsigned char * client_name, int len, LUID *pluid
 
 cc_int32 cci_perform_rpc(cc_msg_t *request, cc_msg_t **response)
 {
-    __int32 rpc_code;
+    cc_int32 code;
     unsigned char client_name[256];
     LUID luid;
     struct __LUID __luid;
     unsigned char out_buf[MAXMSGLEN];
     __int32  out_len = MAXMSGLEN;
 
-    if (!cc_rpc_init())
+    if (cc_rpc_init())
 	return -1;
 
     cci_get_thread_session_id(client_name, sizeof(client_name), &luid);
@@ -112,9 +114,28 @@ cc_int32 cci_perform_rpc(cc_msg_t *request, cc_msg_t **response)
     __luid.HighPart = luid.HighPart;
     __luid.LowPart  = luid.LowPart;
 
-    rpc_code = ccapi_Message(hRpcBinding, client_name, __luid, 
+    /* flatten response */
+    code = cci_msg_flatten(request, NULL);
+    if (code)
+	goto cleanup;
+
+    RpcTryExcept {
+	code = ccapi_Message(hRpcBinding, client_name, __luid, 
  			     request->flat, request->flat_len, 
 			     out_buf, &out_len);
+    } 
+    RpcExcept(1) {
+	code = RpcExceptionCode();
+    }
+    RpcEndExcept;
+    if (code)
+	goto cleanup;
 
-    return rpc_code;
+    /* unflatten message */
+    code = cci_msg_unflatten(out_buf, out_len, response);
+    if (code)
+	goto cleanup;
+
+  cleanup:
+    return code;
 }

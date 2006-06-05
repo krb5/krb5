@@ -90,9 +90,9 @@ cc_int32
 cc_int_credentials_iterator_release( cc_credentials_iterator_t iter )
 {
     cc_int_credentials_iterator_t int_iter;
-    cc_msg_t        		*request;
-    ccmsg_creds_iterator_release_t *request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_creds_iterator_release_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -112,14 +112,17 @@ cc_int_credentials_iterator_release( cc_credentials_iterator_t iter )
     request_header->iterator = htonll(int_iter->handle);
 
     code = cci_msg_new(ccmsg_CREDS_ITERATOR_RELEASE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_creds_iterator_release_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = htonl(response->type);
     if (type == ccmsg_NACK) {
@@ -130,8 +133,14 @@ cc_int_credentials_iterator_release( cc_credentials_iterator_t iter )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
 
     free(int_iter->functions);
     free(int_iter);
@@ -143,9 +152,9 @@ cc_int_credentials_iterator_next( cc_credentials_iterator_t iter,
                                   cc_credentials_t * credentials )
 {
     cc_int_credentials_iterator_t int_iter;
-    cc_msg_t        		*request;
-    ccmsg_creds_iterator_next_t *request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_creds_iterator_next_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -165,14 +174,17 @@ cc_int_credentials_iterator_next( cc_credentials_iterator_t iter,
     request_header->iterator = htonll(int_iter->handle);
 
     code = cci_msg_new(ccmsg_CREDS_ITERATOR_NEXT, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_creds_iterator_next_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -189,8 +201,14 @@ cc_int_credentials_iterator_next( cc_credentials_iterator_t iter,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -199,9 +217,9 @@ cc_int_credentials_iterator_clone( cc_credentials_iterator_t iter,
 				   cc_credentials_iterator_t* new_iter)
 {
     cc_int_credentials_iterator_t 	int_iter;
-    cc_msg_t        			*request;
-    ccmsg_creds_iterator_clone_t 	*request_header;
-    cc_msg_t        			*response;
+    cc_msg_t        			*request = NULL;
+    ccmsg_creds_iterator_clone_t 	*request_header = NULL;
+    cc_msg_t        			*response = NULL;
     cc_uint32				type;
     cc_int32 				code;
 
@@ -220,14 +238,17 @@ cc_int_credentials_iterator_clone( cc_credentials_iterator_t iter,
     request_header->iterator = htonll(int_iter->handle);
 
     code = cci_msg_new(ccmsg_CREDS_ITERATOR_CLONE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_creds_iterator_clone_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -239,8 +260,14 @@ cc_int_credentials_iterator_clone( cc_credentials_iterator_t iter,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 

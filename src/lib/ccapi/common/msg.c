@@ -289,7 +289,7 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
     cc_uint32 u32;
     cc_int32 code;
 
-    if (msg == NULL || flatpp == NULL)
+    if (msg == NULL)
         return ccErrBadParam;
 
     code = cci_msg_calc_size(msg,&msg->flat_len);
@@ -305,18 +305,15 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
     
     cur_pos = msg->flat;
 
-    u32 = msg->header_len;
-    htonl(u32);
+    u32 = htonl(msg->header_len);
     memcpy(cur_pos,&u32,sizeof(cc_uint32));
     cur_pos+=sizeof(cc_uint32);
 
-    u32 = msg->flat_len;
-    htonl(u32);
+    u32 = htonl(msg->flat_len);
     memcpy(cur_pos,&u32,sizeof(cc_uint32));
     cur_pos+=sizeof(cc_uint32);
 
-    u32 = msg->type;
-    htonl(u32);
+    u32 = htonl(msg->type);
     memcpy(cur_pos,&u32,sizeof(cc_uint32));
     cur_pos+=sizeof(cc_uint32);
 
@@ -324,8 +321,7 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
     memcpy(cur_pos, msg->header, msg->header_len);
     cur_pos += msg->header_len;
 
-    u32 = zero;
-    htonl(zero);
+    u32 = htonl(zero);
     memcpy(cur_pos, &u32, sizeof(cc_uint32)); /*will be magic number later*/
     cur_pos += sizeof(cc_uint32);
 
@@ -342,9 +338,8 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
             free(msg->flat);
             return code;
         }
-	u32 = gen_node->len;
-	htonl(u32);
-        memcpy(cur_pos, &u32, sizeof(cc_uint32));
+	u32 = htonl(gen_node->len);
+	    memcpy(cur_pos, &u32, sizeof(cc_uint32));
         cur_pos+=sizeof(cc_uint32);
 		
 	/* data already in network order */
@@ -353,8 +348,7 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
     }
     free(gen_iterator);
 
-    u32 = zero;
-    htonl(zero);
+    u32 = htonl(zero);
     memcpy(cur_pos, &u32, sizeof(cc_uint32)); /*magic number will go here later*/
     cur_pos += sizeof(cc_uint32);
 
@@ -620,7 +614,7 @@ cci_msg_destroy(cc_msg_t* msg)
     if (msg->flat != NULL) 
         free(msg->flat);
     if (msg->header != NULL)
-        free(msg->flat);
+        free(msg->header);
     cci_generic_list_destroy(msg->data_blobs);
     free(msg);
     return ccNoError;

@@ -107,9 +107,9 @@ cc_int32
 cc_int_ccache_release( cc_ccache_t ccache )
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_release_t 	*request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_release_t 	*request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -128,14 +128,17 @@ cc_int_ccache_release( cc_ccache_t ccache )
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_RELEASE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+        goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_release_t));
+    if (code != ccNoError)
+        goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+        goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -146,9 +149,16 @@ cc_int_ccache_release( cc_ccache_t ccache )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
-    free(int_ccache->functions);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
+    if (int_ccache->functions)
+	free(int_ccache->functions);
     free(int_ccache);
     return code;
 }
@@ -158,9 +168,9 @@ cc_int32
 cc_int_ccache_destroy( cc_ccache_t ccache )
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_destroy_t 	*request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_destroy_t 	*request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -179,14 +189,17 @@ cc_int_ccache_destroy( cc_ccache_t ccache )
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_DESTROY, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_destroy_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -197,8 +210,14 @@ cc_int_ccache_destroy( cc_ccache_t ccache )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     free(ccache);
     return code;
 }
@@ -208,9 +227,9 @@ cc_int32
 cc_int_ccache_set_default( cc_ccache_t ccache )
 {
     cc_int_ccache_t 			int_ccache;
-    cc_msg_t        			*request;
-    ccmsg_ccache_set_default_t 		*request_header;
-    cc_msg_t        			*response;
+    cc_msg_t        			*request = NULL;
+    ccmsg_ccache_set_default_t 		*request_header = NULL;
+    cc_msg_t        			*response = NULL;
     cc_uint32				type;
     cc_int32 				code;
 
@@ -229,14 +248,17 @@ cc_int_ccache_set_default( cc_ccache_t ccache )
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_SET_DEFAULT, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_set_default_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -247,8 +269,14 @@ cc_int_ccache_set_default( cc_ccache_t ccache )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -257,9 +285,9 @@ cc_int_ccache_get_credentials_version( cc_ccache_t ccache,
                                    cc_uint32* credentials_version)
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_get_creds_version_t *request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_get_creds_version_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32 			type;
     cc_int32 			code;
 
@@ -278,14 +306,17 @@ cc_int_ccache_get_credentials_version( cc_ccache_t ccache,
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_CREDS_VERSION, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_creds_version_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -298,8 +329,14 @@ cc_int_ccache_get_credentials_version( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -307,9 +344,9 @@ cc_int32
 cc_int_ccache_get_name( cc_ccache_t ccache, cc_string_t* name )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_get_name_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_get_name_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -328,14 +365,17 @@ cc_int_ccache_get_name( cc_ccache_t ccache, cc_string_t* name )
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_NAME, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_name_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -353,8 +393,14 @@ cc_int_ccache_get_name( cc_ccache_t ccache, cc_string_t* name )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -364,9 +410,9 @@ cc_int_ccache_get_principal( cc_ccache_t ccache,
                         cc_string_t* principal )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_get_principal_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_get_principal_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -386,14 +432,17 @@ cc_int_ccache_get_principal( cc_ccache_t ccache,
     request_header->version = htonl(credentials_version);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_PRINCIPAL, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_principal_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -411,8 +460,14 @@ cc_int_ccache_get_principal( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -423,9 +478,9 @@ cc_int_ccache_set_principal( cc_ccache_t ccache,
 {
     cc_uint32   	blob_pos;
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_set_principal_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_set_principal_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -445,24 +500,24 @@ cc_int_ccache_set_principal( cc_ccache_t ccache,
     request_header->version = htonl(credentials_version);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_PRINCIPAL, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_data_blob(request, (void*)principal, strlen(principal) + 1, &blob_pos);
-    if (code != ccNoError) {
-        cci_msg_destroy(request);
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
     
     request_header->principal_offset = htonl(blob_pos);
     request_header->principal_len = htonl(strlen(principal) + 1);
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_set_principal_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -473,8 +528,14 @@ cc_int_ccache_set_principal( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -483,9 +544,9 @@ cc_int_ccache_new_credentials_iterator( cc_ccache_t ccache,
                                         cc_credentials_iterator_t* iterator )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_creds_iterator_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_creds_iterator_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -504,14 +565,17 @@ cc_int_ccache_new_credentials_iterator( cc_ccache_t ccache,
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_NEW_CREDS_ITERATOR, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_creds_iterator_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -524,8 +588,14 @@ cc_int_ccache_new_credentials_iterator( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -534,9 +604,9 @@ cc_int_ccache_store_credentials( cc_ccache_t ccache,
                              const cc_credentials_union* credentials )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_store_creds_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_store_creds_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     char            	*flat_cred = 0;
     cc_uint32       	flat_cred_len = 0;
     cc_uint32       	blob_pos;
@@ -558,10 +628,8 @@ cc_int_ccache_store_credentials( cc_ccache_t ccache,
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_STORE_CREDS, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     switch ( credentials->version ) {
     case cc_credentials_v4:
@@ -571,30 +639,27 @@ cc_int_ccache_store_credentials( cc_ccache_t ccache,
         code = cci_creds_v5_marshall(credentials->credentials.credentials_v5, &flat_cred, &flat_cred_len);
         break;
     default:
-        cci_msg_destroy(request);
-        free(request_header);
-        return ccErrBadCredentialsVersion;
+        code = ccErrBadCredentialsVersion;
     }
-    if (code != ccNoError) {
-        cci_msg_destroy(request);
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_data_blob(request, (void*)flat_cred, flat_cred_len, &blob_pos);
-    if (code != ccNoError) {
-        cci_msg_destroy(request);
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
     
     request_header->creds_version = htonl(credentials->version);
     request_header->creds_offset = htonl(blob_pos);
     request_header->creds_len = htonl(flat_cred_len);
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_store_creds_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -605,9 +670,16 @@ cc_int_ccache_store_credentials( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    free(flat_cred);
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (flat_cred)
+	free(flat_cred);
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -617,9 +689,9 @@ cc_int_ccache_remove_credentials( cc_ccache_t ccache,
 {
     cc_int_ccache_t 		int_ccache;
     cc_int_credentials_t  	int_creds;
-    cc_msg_t        		*request;
-    ccmsg_ccache_rem_creds_t 	*request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_rem_creds_t 	*request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32 			type;
     cc_int32 			code;
 
@@ -644,14 +716,17 @@ cc_int_ccache_remove_credentials( cc_ccache_t ccache,
     request_header->creds  = htonll(int_creds->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_REM_CREDS, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_rem_creds_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -662,8 +737,14 @@ cc_int_ccache_remove_credentials( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -674,9 +755,9 @@ cc_int_ccache_move( cc_ccache_t source,
 {
     cc_int_ccache_t 	int_ccache_source;
     cc_int_ccache_t 	int_ccache_dest;
-    cc_msg_t        	*request;
-    ccmsg_ccache_move_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_move_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -698,18 +779,21 @@ cc_int_ccache_move( cc_ccache_t source,
         return ccErrNoMem;
 
     code = cci_msg_new(ccmsg_CCACHE_MOVE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     request_header->ctx = htonll(int_ccache_source->ctx);
     request_header->ccache_source = htonll(int_ccache_source->handle);
     request_header->ccache_dest = htonll(int_ccache_dest->handle);
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_move_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -720,8 +804,14 @@ cc_int_ccache_move( cc_ccache_t source,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }       
 
@@ -730,9 +820,9 @@ cc_int_ccache_lock( cc_ccache_t ccache,
                 cc_uint32 block )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_lock_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_lock_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -752,18 +842,21 @@ cc_int_ccache_lock( cc_ccache_t ccache,
         return ccErrNoMem;
 
     code = cci_msg_new(ccmsg_CCACHE_LOCK, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     request_header->ctx = htonll(int_ccache->ctx);
     request_header->ccache = htonll(int_ccache->handle);
     request_header->lock_type = htonl(lock_type);
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_lock_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -776,8 +869,14 @@ cc_int_ccache_lock( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -785,9 +884,9 @@ cc_int32
 cc_int_ccache_unlock( cc_ccache_t ccache )
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_unlock_t 	*request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_unlock_t 	*request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32 			type;
     cc_int32 			code;
 
@@ -804,17 +903,20 @@ cc_int_ccache_unlock( cc_ccache_t ccache )
         return ccErrNoMem;
 
     code = cci_msg_new(ccmsg_CCACHE_UNLOCK, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     request_header->ctx = htonll(int_ccache->ctx);
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_unlock_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = htonl(response->type);
     if (type == ccmsg_NACK) {
@@ -825,8 +927,14 @@ cc_int_ccache_unlock( cc_ccache_t ccache )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -836,9 +944,9 @@ cc_int_ccache_get_last_default_time( cc_ccache_t ccache,
                                      cc_time* time_offset )
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_get_last_default_time_t *request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_get_last_default_time_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_time64			t64;
     cc_int32 			code;
@@ -858,14 +966,17 @@ cc_int_ccache_get_last_default_time( cc_ccache_t ccache,
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_LAST_DEFAULT_TIME, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_last_default_time_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -880,8 +991,14 @@ cc_int_ccache_get_last_default_time( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -889,9 +1006,9 @@ cc_int32
 cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* time )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_get_change_time_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_get_change_time_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_time64		t64;
     cc_uint32		type;
     cc_int32 		code;
@@ -911,14 +1028,17 @@ cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* time )
     request_header->ccache = htonll(int_ccache->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_CHANGE_TIME, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_change_time_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -933,8 +1053,14 @@ cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* time )
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -945,9 +1071,9 @@ cc_int_ccache_compare( cc_ccache_t ccache,
 {
     cc_int_ccache_t 		int_ccache;
     cc_int_ccache_t 		int_compare_to;
-    cc_msg_t        		*request;
-    ccmsg_ccache_compare_t 	*request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_compare_t 	*request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -969,14 +1095,17 @@ cc_int_ccache_compare( cc_ccache_t ccache,
     request_header->ccache2 = htonll(int_compare_to->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_COMPARE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_compare_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -989,8 +1118,14 @@ cc_int_ccache_compare( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -1000,9 +1135,9 @@ cc_int_ccache_get_kdc_time_offset( cc_ccache_t ccache,
                                cc_time*	time_offset )
 {
     cc_int_ccache_t 		int_ccache;
-    cc_msg_t        		*request;
-    ccmsg_ccache_get_kdc_time_offset_t *request_header;
-    cc_msg_t        		*response;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_get_kdc_time_offset_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
     cc_uint32			type;
     cc_int32 			code;
 
@@ -1022,14 +1157,17 @@ cc_int_ccache_get_kdc_time_offset( cc_ccache_t ccache,
     request_header->creds_version = htonl(credentials_version);
 
     code = cci_msg_new(ccmsg_CCACHE_GET_KDC_TIME_OFFSET, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_get_kdc_time_offset_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -1042,8 +1180,14 @@ cc_int_ccache_get_kdc_time_offset( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 
@@ -1053,9 +1197,9 @@ cc_int_ccache_set_kdc_time_offset( cc_ccache_t ccache,
                                cc_time	time_offset )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_set_kdc_time_offset_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_set_kdc_time_offset_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_int64		t64;
     cc_uint32 		type;
     cc_int32 		code;
@@ -1078,14 +1222,17 @@ cc_int_ccache_set_kdc_time_offset( cc_ccache_t ccache,
     request_header->offset = htonll(t64);
 
     code = cci_msg_new(ccmsg_CCACHE_SET_KDC_TIME_OFFSET, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_set_kdc_time_offset_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -1096,8 +1243,14 @@ cc_int_ccache_set_kdc_time_offset( cc_ccache_t ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
                                 
@@ -1106,9 +1259,9 @@ cc_int_ccache_clear_kdc_time_offset( cc_ccache_t	ccache,
                                  cc_int32	credentials_version )
 {
     cc_int_ccache_t 	int_ccache;
-    cc_msg_t        	*request;
-    ccmsg_ccache_clear_kdc_time_offset_t *request_header;
-    cc_msg_t        	*response;
+    cc_msg_t        	*request = NULL;
+    ccmsg_ccache_clear_kdc_time_offset_t *request_header = NULL;
+    cc_msg_t        	*response = NULL;
     cc_uint32		type;
     cc_int32 		code;
 
@@ -1128,14 +1281,17 @@ cc_int_ccache_clear_kdc_time_offset( cc_ccache_t	ccache,
     request_header->creds_version = htonl(credentials_version);
 
     code = cci_msg_new(ccmsg_CCACHE_CLEAR_KDC_TIME_OFFSET, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_clear_kdc_time_offset_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -1146,7 +1302,13 @@ cc_int_ccache_clear_kdc_time_offset( cc_ccache_t	ccache,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }

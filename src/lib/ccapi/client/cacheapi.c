@@ -64,9 +64,9 @@ cc_initialize (	cc_context_t*		outContext,
                 char const**		outVendor)
 {
     static char vendor[128] = "";
-    cc_msg_t     *request;
+    cc_msg_t     *request = NULL;
     ccmsg_init_t *request_header;
-    cc_msg_t     *response;
+    cc_msg_t     *response = NULL;
     cc_uint32 type;
     ccmsg_init_resp_t *response_header;
     cc_int32 code;
@@ -100,14 +100,17 @@ cc_initialize (	cc_context_t*		outContext,
     request_header->in_version = htonl(inVersion);
 
     code = cci_msg_new(ccmsg_INIT, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+		goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_init_t));
+	if (code != ccNoError) 
+		goto cleanup;
+	request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+	if (code != ccNoError)
+		goto cleanup;
 
     type = ntohl(response->type);
     if (type == ccmsg_NACK) {
@@ -131,8 +134,15 @@ cc_initialize (	cc_context_t*		outContext,
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+
+  cleanup:
+    if (request_header)
+	free(request_header);
+
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }
 

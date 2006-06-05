@@ -1,5 +1,4 @@
 
-
 #include <windows.h>
 #include "msg.h"
 #include "marshall.h"
@@ -14,6 +13,9 @@
 #include <strsafe.h>
 
 #define SVCNAME "MIT_CCAPI_NT_Service"
+
+HANDLE hMainThread = 0;
+HANDLE WaitToTerminate = 0;
 
 SERVICE_STATUS_HANDLE h_service_status = NULL;
 SERVICE_STATUS service_status;
@@ -72,7 +74,8 @@ void service_start(DWORD argc, LPTSTR * argv) {
                                  NULL);
 
     if (status != RPC_S_OK) {
-        return;
+	if (logfile) fprintf(logfile, "service_start RpcServerUseProtseq = 0x%x\n", status);
+        goto cleanup;
     }
 
     report_status(SERVICE_START_PENDING, NO_ERROR, 3000);
@@ -80,21 +83,27 @@ void service_start(DWORD argc, LPTSTR * argv) {
     status = RpcServerRegisterIf(portable_ccapi_v1_0_s_ifspec,
                                  0, 0);
 
-    if (status != RPC_S_OK)
-        return;
+    if (status != RPC_S_OK) {
+	if (logfile) fprintf(logfile, "service_start RpcServerRegisterIf = 0x%x\n", status);
+        goto cleanup;
+    }
 
     report_status(SERVICE_START_PENDING, NO_ERROR, 3000);
 
     status = RpcServerInqBindings(&bv);
 
-    if (status != RPC_S_OK)
-        return;
+    if (status != RPC_S_OK) {
+	if (logfile) fprintf(logfile, "service_start RpcServerInqBindings = 0x%x\n", status);
+        goto cleanup;
+    }
 
     status = RpcEpRegister(portable_ccapi_v1_0_s_ifspec,
                            bv, 0, 0);
 
-    if (status != RPC_S_OK)
-        return;
+    if (status != RPC_S_OK) {
+	if (logfile) fprintf(logfile, "service_start RpcEpRegister = 0x%x\n", status);
+        goto cleanup;
+    }
 
     report_status(SERVICE_START_PENDING, NO_ERROR, 3000);
 
@@ -102,32 +111,37 @@ void service_start(DWORD argc, LPTSTR * argv) {
                                        RPC_C_AUTHN_WINNT,
                                        0, 0);
 
-    if (status != RPC_S_OK)
-        return;
+    if (status != RPC_S_OK) {
+	if (logfile) fprintf(logfile, "service_start RpcServerRegisterAuthInfo = 0x%x\n", status);
+        goto cleanup;
+    }
 
     report_status(SERVICE_START_PENDING, NO_ERROR, 3000);
 
-    status = RpcServerListen(1,
+    status = RpcServerListen(2,
                              RPC_C_LISTEN_MAX_CALLS_DEFAULT,
                              TRUE);
 
-    if (status != RPC_S_OK)
-        return;
+    if (status != RPC_S_OK) {
+	if (logfile) fprintf(logfile, "service_start RpcServerListen = 0x%x\n", status);
+        goto cleanup;
+    }
 
     report_status(SERVICE_RUNNING, NO_ERROR, 0);
 
-    begin_log();
 
+    if (logfile) fprintf(logfile, "service_start calling RpcMgmtWaitServerListen\n");
     status = RpcMgmtWaitServerListen();
+    if (logfile) fprintf(logfile, "service_start RpcMgmtWaitServerListen = 0x%x\n", status);
 
-    end_log();
-
+  cleanup:
     RpcEpUnregister(portable_ccapi_v1_0_s_ifspec, bv, 0);
 
     RpcBindingVectorFree(&bv);
 }
 
 void service_stop(void) {
+    if (logfile) fprintf(logfile, "service_stop\n");
     RpcMgmtStopServerListening(0);
 }
 
@@ -292,6 +306,8 @@ __int32 ccapi_Message(
     cc_session_info_t * session_info;
     cc_int32            code;
 
+    if (logfile) fprintf(logfile, "ccapi_Message\n");
+
     if ( ccs_serv_initialize() != ccNoError ) {
 	code = ccErrServerUnavailable;
 	goto done;
@@ -390,6 +406,8 @@ void WINAPI service_control(DWORD ctrl_code) {
 
 void WINAPI service_main(DWORD argc, LPTSTR * argv) {
 
+    begin_log();
+
     h_service_status = RegisterServiceCtrlHandler( _T(SVCNAME), service_control);
 
     if (!h_service_status)
@@ -412,6 +430,8 @@ void WINAPI service_main(DWORD argc, LPTSTR * argv) {
     if (h_service_status) {
         report_status(SERVICE_STOPPED, NO_ERROR, 0);
     }
+
+    end_log();
 }
 
 
@@ -620,8 +640,16 @@ ParseStandardArgs(int argc, char* argv[])
     return FALSE;
 }
 
-int main(int argc, char ** argv) {
+DWORD __stdcall Main_thread(void* notUsed)
+{
+    char * argv[2] = {SVCNAME, NULL};
+    begin_log();
+    service_start(1, (LPTSTR*)argv);
+    end_log();
+    return(0);
+}
 
+int main(int argc, char ** argv) {
     SERVICE_TABLE_ENTRY dispatch_table[] = {
         { _T(SVCNAME), (LPSERVICE_MAIN_FUNCTION) service_main },
         { NULL, NULL }
@@ -631,8 +659,21 @@ int main(int argc, char ** argv) {
 	return 0;
 
     if (!StartServiceCtrlDispatcher(dispatch_table)) {
-        fprintf(stderr, "Can't start service control dispatcher\n");
+        LONG status = GetLastError();
+        if (status == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT)
+        {
+            DWORD tid;
+            hMainThread = CreateThread(NULL, 0, Main_thread, 0, 0, &tid);
+
+            printf("Hit <Enter> to terminate MIT CCAPI Server\n");
+            getchar();
+	    service_stop();
+	}
     }
 
+    if ( hMainThread ) {
+	WaitForSingleObject( hMainThread, INFINITE );
+	CloseHandle( hMainThread );
+    }
     return 0;
 }
