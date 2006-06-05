@@ -1,30 +1,48 @@
-# Makefile for the CCAPI Generic Server
+!include <win32.mak>
 
-!INCLUDE <WIN32.MAK>
+CFLAGS = -I../include $(cdebug) $(cflags) $(cvarsmt)
 
-CFLAGS = -I../include
+WINLIBS = ws2_32.lib rpcrt4.lib $(guilibsdll)
 
-CCAPI_LIB = ../lib/ccapi.lib
-WINLIBS = user32.lib advapi32.lib
-CCSOBJS = context.obj ccache.obj lists.obj rpc_auth.obj serv_ops.obj
+T_CCACHE = t_ccache.exe
 
-all: t_lists.exe t_msg.exe t_ccache.exe t_context.exe ccapi_server.exe
+T_CONTEXT = t_context.exe
 
-t_lists.exe: t_lists.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_lists.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+T_LISTS = t_lists.exe
 
-t_msg.exe: t_msg.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_msg.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+T_MSG = t_msg.exe
 
-t_ccache.exe: t_ccache.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_ccache.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+T_SERVER = t_server.exe
 
-t_context.exe: t_context.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_context.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+all:  $(T_CCACHE) $(T_CONTEXT) $(T_LISTS) $(T_MSG) $(T_SERVER)
 
-ccapi_server.exe: main.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ main.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+ntccrpc_c.c ntccrpc_s.c ntccrpc.h: ntccrpc.idl ntccrpc.acf
+	midl ntccrpc.idl /acf ntccrpc.acf
 
-clean: 
-	del *.obj *.exe
+CC_CLIENT_LIB = ..\client\cc_client.lib
+
+CC_COMMON_LIB = ..\common\cc_common.lib
+
+CC_SERVER_LIB = ..\server\cc_server.lib
+
+CC_API_LIB = ..\windows\krbcc32.lib
+
+$(T_CCACHE): t_ccache.obj $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+$(T_CONTEXT): t_context.obj $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+$(T_LISTS): t_lists.obj $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+$(T_MSG): t_msg.obj $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+$(T_SERVER): t_server.obj $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+clean:
+	del *.exe *.dll *.lib *.exp *.obj ntccrpc_c.c ntccrpc_s.c ntccrpc.h
+
 

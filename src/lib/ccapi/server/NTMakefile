@@ -1,18 +1,21 @@
-# Makefile for the CCAPI Generic Server
+# Makefile for the CCAPI Server Library
 
 !INCLUDE <WIN32.MAK>
 
-CFLAGS = -I../include
+CFLAGS = -I../include $(cdebug) $(cflags) $(cvarsmt)
 
-CCAPI_LIB = ../client/ccapi.lib
-WINLIBS = user32.lib advapi32.lib
-CCSOBJS = ccs_context.obj ccs_ccache.obj ccs_lists.obj rpc_auth.obj serv_ops.obj
+CC_SERVER_OBJS = ccs_context.obj ccs_ccache.obj ccs_lists.obj rpc_auth.obj serv_ops.obj
 
-all: ccapi_server.exe
+CC_SERVER_LIB = cc_server.lib
 
-ccapi_server.exe: main.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ main.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+CC_COMMON_LIB = ../common/cc_common.lib
+
+$(CC_SERVER_LIB): $(CC_SERVER_OBJS)
+        $(implib) /NOLOGO /OUT:$@ $**
+
+all: $(CC_SERVER_LIB)
 
 clean: 
-	del *.obj *.exe
+	del *.obj *.lib
 
+ 

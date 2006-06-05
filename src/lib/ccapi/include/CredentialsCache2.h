@@ -87,10 +87,10 @@ typedef struct cc_credentials_v5_compat {
     char*			client;
     char*			server;
     cc_data_compat		keyblock;
-    cc_time_t			authtime;
-    cc_time_t			starttime;
-    cc_time_t			endtime;
-    cc_time_t			renew_till;
+    cc_time			authtime;
+    cc_time			starttime;
+    cc_time			endtime;
+    cc_time			renew_till;
     cc_uint32			is_skey;
     cc_uint32			ticket_flags;
     cc_data_compat**	        addresses;
@@ -185,6 +185,13 @@ enum {
     CC_CRED_MAX
 };
 
+enum {
+    CC_LOCK_UNLOCK = 1,
+    CC_LOCK_READER = 2,
+    CC_LOCK_WRITER = 3,
+    CC_LOCK_NOBLOCK = 16
+};
+
 CCACHE_API cc_int32 cc_shutdown (
         apiCB**				ioContext);
 	
@@ -194,7 +201,7 @@ CCACHE_API cc_int32 cc_get_NC_info (
 	
 CCACHE_API cc_int32 cc_get_change_time (
 	apiCB*				inContext,
-	cc_time_t*			outTime);
+	cc_time*			outTime);
 	
 CCACHE_API cc_int32 cc_open (
 	apiCB*				inContext,
@@ -293,6 +300,11 @@ CCACHE_API cc_int32 cc_free_NC_info (
 	apiCB*				inContext,
 	infoNC***			ioInfo);
 	
+CCACHE_API cc_int32 cc_lock_request(
+        apiCB* 				inContext,
+        const ccache_p* 		inCCache,
+        const cc_int32 			lock_type);
+
 #if TARGET_OS_MAC
     #if defined(__MWERKS__)
         #pragma enumsalwaysint reset

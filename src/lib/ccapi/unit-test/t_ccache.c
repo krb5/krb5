@@ -59,8 +59,8 @@ int main() {
     int i;
     cc_int32 code;
 
-    code = cci_ccache_new("The first", p1, cc_credentials_v4_v5, &c1);
-    code = cci_ccache_new("The 2nd", p2, cc_credentials_v4_v5, &c2);
+    code = ccs_ccache_new("The first", p1, cc_credentials_v4_v5, &c1);
+    code = ccs_ccache_new("The 2nd", p2, cc_credentials_v4_v5, &c2);
 
     cred1 = (cc_server_credentials_t*)malloc(sizeof(cc_server_credentials_t));
     memset(cred1,0,sizeof(cc_server_credentials_t));
@@ -83,30 +83,30 @@ int main() {
     strncpy(cred2->creds.credentials.credentials_v4->principal, p1, strlen(p1));
     cred3->creds.credentials.credentials_v5->client = p1;
 
-    code = cci_ccache_store_creds(c1, &cred1->creds);
+    code = ccs_ccache_store_creds(c1, &cred1->creds);
     printf("(c1, cred1) -> %d\n",code);
 
-    code = cci_ccache_store_creds(c1, &cred2->creds);
+    code = ccs_ccache_store_creds(c1, &cred2->creds);
     printf("(c1, cred2) -> %d\n",code);
 
-    code = cci_ccache_store_creds(c2, &cred3->creds);
+    code = ccs_ccache_store_creds(c2, &cred3->creds);
     printf("(c2, cred3) -> %d\n",code);
 
-    code = cci_ccache_store_creds(c1, &cred3->creds);
+    code = ccs_ccache_store_creds(c1, &cred3->creds);
     printf("(c1, cred3) -> %d\n",code);
 
     i = 0;
-    code = cci_ccache_move(c1, c2);
-    code = cci_ccache_destroy(c1);
-    code = cci_ccache_new_iterator(c2, &iterator);
-    while (cci_credentials_iterate_has_next(iterator)) {
+    code = ccs_ccache_move(c1, c2);
+    code = ccs_ccache_destroy(c1);
+    code = ccs_ccache_new_iterator(c2, &iterator);
+    while (ccs_credentials_iterate_has_next(iterator)) {
         i++;
-        code = cci_credentials_iterate_next(iterator, &node);
+        code = ccs_credentials_iterate_next(iterator, &node);
         stored_cred = (cc_server_credentials_t *)node->data;
         printf("%d %d %s\n", stored_cred->is_default, stored_cred->creds.version, stored_cred->creds.credentials.credentials_v4->principal);
 
         if (i == 1) {
-            code = cci_ccache_rem_creds(c2,&cred2->creds);
+            code = ccs_ccache_rem_creds(c2,&cred2->creds);
             printf("(c2 rem cred2) -> %d\n",code);
         }
     }
