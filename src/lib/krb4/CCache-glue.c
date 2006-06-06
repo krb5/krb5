@@ -140,7 +140,7 @@ krb4int_save_credentials_addr(
 	int				lifetime,
 	int				kvno,
 	KTEXT			ticket,
-	long			issue_date,
+	KRB4_32			issue_date,
 	KRB_UINT32		local_address)
 {
 	cc_int32				cc_err = ccNoError;
