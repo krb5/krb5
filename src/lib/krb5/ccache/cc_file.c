@@ -2285,6 +2285,9 @@ krb5_fcc_interpret(krb5_context context, int errnum)
     case ENXIO:
     default:
 	retval = KRB5_CC_IO;		/* XXX */
+	krb5_set_error_message(context, retval,
+			       "Credentials cache I/O operation failed (%s)",
+			       strerror(errnum));
     }
     return retval;
 }
