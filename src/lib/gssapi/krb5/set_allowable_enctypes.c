@@ -115,8 +115,10 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
 	goto error_out;
     }
     kerr = k5_mutex_lock(&cred->lock);
-    if (kerr)
+    if (kerr) {
+	free(new_ktypes);
 	goto error_out;
+    }
     if (cred->req_enctypes)
 	free(cred->req_enctypes);
     cred->req_enctypes = new_ktypes;
