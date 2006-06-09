@@ -59,14 +59,7 @@
 #define __CREDENTIALSCACHE__
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <TargetConditionals.h>
-    #if TARGET_RT_MAC_CFM
-        #error "Use KfM 4.0 SDK headers for CFM compilation."
-    #endif
-#endif
-
-#if TARGET_OS_MAC
-    #include <sys/types.h>
+#include <TargetConditionals.h>
 #endif
 
 #if defined(_WIN32)
@@ -78,13 +71,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
+#pragma options align=mac68k
 #endif
-
+    
 #if defined(_WIN32)
 #define CCACHE_API 	__declspec(dllexport)
 
@@ -94,6 +83,8 @@ extern "C" {
 #endif /* _TIME_T_DEFINED */
 #define _USE_32BIT_TIME_T
 #endif 
+#else
+#define CCACHE_API
 #endif
 
 #include <time.h>
@@ -591,11 +582,7 @@ CCACHE_API cc_int32 cc_initialize (
 			((iterator) -> functions -> clone (iterator, new_iter))
 			
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#pragma options align=reset
 #endif
 
 #ifdef __cplusplus

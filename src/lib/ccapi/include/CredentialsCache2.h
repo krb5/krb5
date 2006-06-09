@@ -49,11 +49,9 @@
 #define __CREDENTIALSCACHE2__
  
 #include "CredentialsCache.h"
+
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
-	#include <TargetConditionals.h>
-    #if TARGET_RT_MAC_CFM
-        #error "Use KfM 4.0 SDK headers for CFM compilation."
-    #endif
+#include <TargetConditionals.h>
 #endif
 
 #ifdef __cplusplus
@@ -61,13 +59,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma import on
-        #pragma enumsalwaysint on
-    #endif
-    #pragma options align=mac68k
+#pragma options align=mac68k
 #endif
-
+    
 /* Some old types get directly mapped to new types */
 
 typedef cc_context_d apiCB;
@@ -306,11 +300,7 @@ CCACHE_API cc_int32 cc_lock_request(
         const cc_int32 			lock_type);
 
 #if TARGET_OS_MAC
-    #if defined(__MWERKS__)
-        #pragma enumsalwaysint reset
-        #pragma import reset
-    #endif
-	#pragma options align=reset
+#pragma options align=reset
 #endif
 
 #ifdef __cplusplus
