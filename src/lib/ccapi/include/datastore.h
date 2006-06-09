@@ -53,13 +53,6 @@
 #include "rpc_auth.h"
 #include "generic_lists.h"
 
-enum cc_list_type {
-    generic = 0,
-    context,
-    cache,
-    credentials
-};
-
 struct cc_context_iterate_t {
     cc_context_list_node_t*	next;
 };

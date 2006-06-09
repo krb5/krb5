@@ -54,11 +54,6 @@
 #include "CredentialsCache.h"
 #include "generic_lists.h"
 
-/* this is an incomplete enumeration just including the generic type */
-enum cc_list_type {
-    generic = 0
-};
-
 /**
  * cci_generic_iterate_has_next()
  *

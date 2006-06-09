@@ -49,6 +49,13 @@
 #ifndef __CC_GENERIC_LISTS_H_
 #define __CC_GENERIC_LISTS_H_
 
+enum cc_list_type {
+    generic = 0,
+    context,
+    cache,
+    credentials
+};
+
 struct cc_generic_list_node_t {
     cc_uint8* 				data;
     cc_uint32 	        		len;
