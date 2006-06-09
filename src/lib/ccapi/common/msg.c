@@ -567,7 +567,7 @@ cci_msg_unflatten(void *flat, int flat_len, cc_msg_t** msgpp)
 }
 
 cc_int32
-cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, void **blobp) 
+cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, char **blobp) 
 {
     cc_generic_iterate_t*	gen_iterator;
     cc_generic_list_node_t*	gen_node;

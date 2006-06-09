@@ -139,7 +139,7 @@ cc_int32 cci_msg_flatten(cc_msg_t* msg, void **);
 cc_int32 cci_msg_calc_magic(void *flat, int flat_len, cc_uint32 * sizep);
 cc_int32 cci_msg_verify(void* flat, int flat_len, cc_uint32 * sizep);
 cc_int32 cci_msg_unflatten(void *flat, int flat_len, cc_msg_t** msgpp);
-cc_int32 cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, void **);
+cc_int32 cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, char **);
 cc_int32 cci_msg_destroy(cc_msg_t* msg);
 
 /* Add missing byte swapping macros for 64-bit values */
