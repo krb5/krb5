@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <CredentialsCache.h>
 #include "context.h"
 #include "ccache.h"

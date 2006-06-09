@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <CredentialsCache.h>
 #include "msg.h"
 #include "msg_headers.h"

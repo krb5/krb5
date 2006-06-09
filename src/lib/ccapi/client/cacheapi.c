@@ -43,6 +43,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <CredentialsCache.h>
 #include "ccache.h"
 #include "ccache_iterator.h"
