@@ -1,7 +1,6 @@
 [
-    uuid(c8b4a635-e9e4-4650-a073-b25610324950),
+    uuid(0012a1de-f7ad-44b0-b597-8ba53159c6fa),
     version(1.0),
-    endpoint("ncalrpc:[mit_nt_ccapi]"),
     pointer_default(unique)
 ]
 

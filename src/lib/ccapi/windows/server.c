@@ -300,10 +300,10 @@ __int32 ccapi_Message(
     /* [out] */ __int32 *out_len)
 {
     client_info_t client_info;
-    cc_msg_t *          msg;
-    cc_msg_t *          resp;
-    cc_auth_info_t    * auth_info;
-    cc_session_info_t * session_info;
+    cc_msg_t *          msg = NULL;
+    cc_msg_t *          resp = NULL;
+    cc_auth_info_t    * auth_info = NULL;
+    cc_session_info_t * session_info = NULL;
     cc_int32            code;
 
     if (logfile) fprintf(logfile, "ccapi_Message\n");

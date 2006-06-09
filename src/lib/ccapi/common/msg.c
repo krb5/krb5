@@ -97,7 +97,7 @@ cci_msg_new(cc_uint32 type, cc_msg_t** msgpp)
     if (msg == NULL)
         return ccErrNoMem;
 
-    msg->type = htonl(type);
+    msg->type = type;
     msg->flat = NULL;
     msg->header = NULL;
     msg->flat_len = 0;

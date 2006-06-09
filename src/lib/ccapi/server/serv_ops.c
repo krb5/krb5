@@ -149,11 +149,11 @@ ccs_serv_process_msg(cc_msg_t * msg, cc_auth_info_t* auth_info, cc_session_info_
             return code;
     }
 	
-    type = ntohl(msg->type);
+    type = msg->type;
     if (type == ccmsg_INIT) {
         return TypeToOpMapping->operations[type] (NULL, auth_info, session_info, msg, resp_msg);
     } else {
-	header_len = ntohl(msg->header_len);
+	header_len = msg->header_len;
         if (header_len < sizeof(ccmsg_ctx_only_t)) {
             return ccErrBadParam;
         }
@@ -403,8 +403,8 @@ ccop_INIT( cc_server_context_t* ctx,            /* not used */
 
     *resp_msg = 0;
 
-    header_len = ntohl(msg->header_len);
-    if (header_len != sizeof(ccmsg_init_t)) {
+    header_len = msg->header_len;
+    if (ctx != NULL || header_len != sizeof(ccmsg_init_t)) {
         return ccErrBadParam;
     }
 
@@ -414,7 +414,7 @@ ccop_INIT( cc_server_context_t* ctx,            /* not used */
         return code;
     }
 
-    code = ccs_context_list_append(AllContexts, ctx, &ctx_node);
+    code = ccs_context_list_append(AllContexts, new_ctx, &ctx_node);
     if (code != ccNoError) {
         ccs_context_destroy(new_ctx);
         return code;
@@ -464,7 +464,7 @@ ccop_CTX_RELEASE( cc_server_context_t* ctx,
                   cc_msg_t *msg, cc_msg_t **resp_msg) 
 {
     ccmsg_ctx_release_t* header = (ccmsg_ctx_release_t *)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_handle handle = ntohll(header->ctx);
     cc_int32 code;
 
@@ -486,7 +486,7 @@ ccop_CTX_GET_CHANGE_TIME( cc_server_context_t* ctx,
 {
     ccmsg_ctx_get_change_time_resp_t* resp_header;
     ccmsg_ctx_get_change_time_t *header = (ccmsg_ctx_get_change_time_t *)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
 
     *resp_msg = 0;
 	
@@ -550,7 +550,7 @@ ccop_CTX_COMPARE(cc_server_context_t* ctx,
     cc_server_context_t *ctx2;
     ccmsg_ctx_compare_resp_t* resp_header;
     ccmsg_ctx_compare_t* header = (ccmsg_ctx_compare_t *)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -577,7 +577,7 @@ ccop_CTX_NEW_CCACHE_ITERATOR(cc_server_context_t* ctx,
     cc_ccache_iterate_t* ccache_iterator;
     ccmsg_ctx_new_ccache_iterator_resp_t* resp_header;
     ccmsg_ctx_new_ccache_iterator_t* header = (ccmsg_ctx_new_ccache_iterator_t*)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -636,7 +636,7 @@ ccop_CTX_CCACHE_OPEN(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     ccmsg_ccache_open_resp_t* resp_header;
     ccmsg_ccache_open_t* header = (ccmsg_ccache_open_t*)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -670,7 +670,7 @@ ccop_CTX_CCACHE_OPEN_DEFAULT(cc_server_context_t* ctx,
     ccmsg_ccache_open_default_t* header = (ccmsg_ccache_open_default_t*)msg->header;
     ccmsg_ccache_open_resp_t* resp_header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
 
     *resp_msg = 0;
 
@@ -701,7 +701,7 @@ ccop_CTX_CCACHE_CREATE(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -742,7 +742,7 @@ ccop_CTX_CCACHE_CREATE_DEFAULT( cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -782,7 +782,7 @@ ccop_CTX_CCACHE_CREATE_UNIQUE( cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char* principal;
     char* name;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -828,7 +828,7 @@ ccop_CCACHE_DESTROY( cc_server_context_t* ctx,
 {
     ccmsg_ccache_release_t* header = (ccmsg_ccache_release_t*)msg->header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -855,7 +855,7 @@ ccop_CCACHE_SET_DEFAULT(cc_server_context_t* ctx,
     ccmsg_ccache_set_default_t* header = (ccmsg_ccache_set_default_t*)msg->header;
     cc_ccache_iterate_t* ccache_iterator;
     cc_ccache_list_node_t* ccache_node;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -900,7 +900,7 @@ ccop_CCACHE_GET_CREDS_VERSION(cc_server_context_t* ctx,
     ccmsg_ccache_get_creds_version_t* header = (ccmsg_ccache_get_creds_version_t*)msg->header;
     ccmsg_ccache_get_creds_version_resp_t* resp_header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -929,7 +929,7 @@ ccop_CCACHE_GET_NAME(cc_server_context_t* ctx,
     ccmsg_ccache_get_name_t* header = (ccmsg_ccache_get_name_t*)msg->header;
     ccmsg_ccache_get_name_resp_t* resp_header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_uint32 name_offset;
     cc_int32 code;
 
@@ -970,7 +970,7 @@ ccop_CCACHE_GET_PRINCIPAL(cc_server_context_t* ctx,
     ccmsg_ccache_get_principal_resp_t* resp_header;
     cc_server_ccache_t* ccache;
     char * principal;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_uint32 principal_offset;
     cc_int32 code;
 
@@ -1014,7 +1014,7 @@ ccop_CCACHE_SET_PRINCIPAL(cc_server_context_t* ctx,
     ccmsg_ccache_set_principal_t* header = (ccmsg_ccache_set_principal_t*)msg->header;
     cc_server_ccache_t* ccache;
     char *principal;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1047,7 +1047,7 @@ ccop_CCACHE_NEW_CREDS_ITERATOR( cc_server_context_t* ctx,
     cc_credentials_iterate_t* creds_iterator;
     ccmsg_ccache_creds_iterator_t* header = (ccmsg_ccache_creds_iterator_t*)msg->header;
     ccmsg_ccache_creds_iterator_resp_t* resp_header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1123,7 +1123,7 @@ ccop_CCACHE_STORE_CREDS(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     char                 *flat_creds;
     cc_credentials_union *creds;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1174,7 +1174,7 @@ ccop_CCACHE_REM_CREDS(cc_server_context_t* ctx,
     ccmsg_ccache_rem_creds_t* header = (ccmsg_ccache_rem_creds_t*)msg->header;
     cc_server_ccache_t* ccache;
     cc_credentials_union *creds;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1232,7 +1232,7 @@ ccop_CCACHE_GET_LAST_DEFAULT_TIME(cc_server_context_t* ctx,
     ccmsg_ccache_get_last_default_time_t* header = (ccmsg_ccache_get_last_default_time_t*)msg->header;
     ccmsg_ccache_get_last_default_time_resp_t* resp_header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1261,7 +1261,7 @@ ccop_CCACHE_GET_CHANGE_TIME( cc_server_context_t* ctx,
     ccmsg_ccache_get_change_time_resp_t* resp_header;
     ccmsg_ccache_get_change_time_t *header = (ccmsg_ccache_get_change_time_t *)msg->header;
     cc_server_ccache_t* ccache = (cc_server_ccache_t *)header->ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
 
     *resp_msg = 0;
 	
@@ -1287,7 +1287,7 @@ ccop_CCACHE_COMPARE(cc_server_context_t* ctx,
     ccmsg_ccache_compare_t* header = (ccmsg_ccache_compare_t*)msg->header;
     ccmsg_ccache_compare_resp_t* resp_header;
     cc_server_ccache_t* ccache1, *ccache2;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_uint32 is_equal;
     cc_int32 code;
 
@@ -1323,7 +1323,7 @@ ccop_CCACHE_GET_KDC_TIME_OFFSET(cc_server_context_t* ctx,
     ccmsg_ccache_get_kdc_time_offset_resp_t* resp_header;
     cc_server_ccache_t* ccache;
     cc_time64 offset;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1357,7 +1357,7 @@ ccop_CCACHE_SET_KDC_TIME_OFFSET(cc_server_context_t* ctx,
 {
     ccmsg_ccache_set_kdc_time_offset_t* header = (ccmsg_ccache_set_kdc_time_offset_t*)msg->header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1383,7 +1383,7 @@ ccop_CCACHE_CLEAR_KDC_TIME_OFFSET(cc_server_context_t* ctx,
 {
     ccmsg_ccache_clear_kdc_time_offset_t* header = (ccmsg_ccache_clear_kdc_time_offset_t*)msg->header;
     cc_server_ccache_t* ccache;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1409,7 +1409,7 @@ ccop_CCACHE_ITERATOR_RELEASE(cc_server_context_t* ctx,
 {
     cc_generic_list_node_t* gen_node;
     ccmsg_ccache_iterator_release_t* header = (ccmsg_ccache_iterator_release_t*)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1449,7 +1449,7 @@ ccop_CCACHE_ITERATOR_NEXT(cc_server_context_t* ctx,
     cc_generic_list_node_t* gen_node;
     cc_ccache_iterate_t* ccache_iterator;
     cc_ccache_list_node_t *ccache_node;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1487,7 +1487,7 @@ ccop_CREDS_ITERATOR_RELEASE(cc_server_context_t* ctx,
     cc_generic_list_node_t* gen_node;
     cc_server_ccache_t* ccache;
     ccmsg_creds_iterator_release_t* header = (ccmsg_creds_iterator_release_t*)msg->header;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
@@ -1535,7 +1535,7 @@ ccop_CREDS_ITERATOR_NEXT(cc_server_context_t* ctx,
     cc_server_ccache_t* ccache;
     cc_server_credentials_t* stored_creds;
     cc_credentials_union *creds_union;
-    cc_uint32 header_len = ntohl(msg->header_len);
+    cc_uint32 header_len = msg->header_len;
     cc_int32 code;
 
     *resp_msg = 0;
