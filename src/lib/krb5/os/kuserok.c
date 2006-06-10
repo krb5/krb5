@@ -119,7 +119,7 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
 	free(princname);
 	return(FALSE);
     }
-    if (sbuf.st_uid != pwd->pw_uid || !FILE_OWNER_OK(sbuf.st_uid)) {
+    if (sbuf.st_uid != pwd->pw_uid && !FILE_OWNER_OK(sbuf.st_uid)) {
 	fclose(fp);
 	free(princname);
 	return(FALSE);
