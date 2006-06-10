@@ -169,13 +169,6 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 	if ((retval = krb5_set_default_tgs_ktypes(ctx, NULL)))
 		goto cleanup;
 
-	ctx->conf_tgs_ktypes = calloc(ctx->tgs_ktype_count, sizeof(krb5_enctype));
-	if (ctx->conf_tgs_ktypes == NULL && ctx->tgs_ktype_count != 0)
-	    goto cleanup;
-	memcpy(ctx->conf_tgs_ktypes, ctx->tgs_ktypes,
-	       sizeof(krb5_enctype) * ctx->tgs_ktype_count);
-	ctx->conf_tgs_ktypes_count = ctx->tgs_ktype_count;
-
 	if ((retval = krb5_os_init_context(ctx, kdc)))
 		goto cleanup;
 
@@ -267,11 +260,6 @@ krb5_free_context(krb5_context ctx)
      if (ctx->tgs_ktypes) {
           free(ctx->tgs_ktypes);
 	  ctx->tgs_ktypes = 0;
-     }
-
-     if (ctx->conf_tgs_ktypes) {
-	 free(ctx->conf_tgs_ktypes);
-	 ctx->conf_tgs_ktypes = 0;
      }
 
      if (ctx->default_realm) {
@@ -462,8 +450,7 @@ krb5_get_tgs_ktypes(krb5_context context, krb5_const_principal princ, krb5_encty
 	/* This one is set *only* by reading the config file; it's not
 	   set by the application.  */
 	return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
-				      context->conf_tgs_ktypes_count,
-				      context->conf_tgs_ktypes));
+				      0, NULL));
     else
 	return(get_profile_etype_list(context, ktypes, "default_tgs_enctypes",
 				      context->tgs_ktype_count,

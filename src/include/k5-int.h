@@ -1047,15 +1047,7 @@ struct _krb5_context {
 	   absolute limit on the UDP packet size.  */
 	int		udp_pref_limit;
 
-	/* This is the tgs_ktypes list as read from the profile, or
-	   set to compiled-in defaults.  The application code cannot
-	   override it.  This is used for session keys for
-	   intermediate ticket-granting tickets used to acquire the
-	   requested ticket (the session key of which may be
-	   constrained by tgs_ktypes above).  */
-	krb5_enctype	*conf_tgs_ktypes;
-	unsigned int	conf_tgs_ktypes_count;
-	/* Use the _configured version?  */
+	/* Use the config-file ktypes instead of app-specified?  */
 	krb5_boolean	use_conf_ktypes;
 
 #ifdef KRB5_DNS_LOOKUP
