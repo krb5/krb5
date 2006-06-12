@@ -14,6 +14,11 @@
 @parskip 6pt plus 6pt
 @end iftex
 
+@dircategory Kerberos
+@direntry
+* krb5-admin: (krb5-admin).             Kerberos V5 Administrator's Guide
+@end direntry
+
 @include definitions.texinfo
 @set EDITION 1.0
 @set UPDATED June 16, 2000
@@ -2443,7 +2448,7 @@ across the realms, they would run the following commands on the KDCs in
 @b{Re-enter password for principal krbtgt/@value{PRIMARYREALM}@@@value{SECONDREALM}:}
 @b{kadmin:} add_princ -requires_preauth krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
 @b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}:}
-@b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALML}:}
+@b{Enter password for principal krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}:}
 @b{kadmin:}
 @end group
 @end smallexample

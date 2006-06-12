@@ -15,6 +15,11 @@
 @parskip 6pt plus 6pt
 @end iftex
 
+@dircategory Kerberos
+@direntry
+* krb425: (krb425).                     Upgrading to Kerberos V5 from V4
+@end direntry
+
 @include definitions.texinfo
 @set EDITION 1.0
 @set UPDATED May 22, 2003

@@ -13,6 +13,11 @@
 @parskip 6pt plus 6pt
 @end iftex
 
+@dircategory Kerberos
+@direntry
+* krb5-user: (krb5-user).               Kerberos V5 UNIX User's Guide
+@end direntry
+
 @include definitions.texinfo
 @set EDITION 1.0
 
@@ -932,7 +937,7 @@ Escape character is '^]'.
 [ Kerberos V5 accepts you as ``@value{RANDOMUSER1}@@@value{PRIMARYDOMAIN}'' ]
 [ Kerberos V5 accepted forwarded credentials ]
 What you type is protected by encryption.
-Last login: Tue Jul 30 18:47:44 from @value{RANDOMHOST}.@value{SECONDDOMAIN}
+Last login: Tue Jul 30 18:47:44 from @value{RANDOMHOST1}.@value{SECONDDOMAIN}
 Athena Server (sun4) Version 9.1.11 Tue Jul 30 14:40:08 EDT 2002
 
 shell%}
