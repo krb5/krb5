@@ -53,6 +53,7 @@
 #include <ctype.h>
 #include <syslog.h>
 #include <string.h>
+#include <errno.h>
 
 /* v4 include files:
  */
