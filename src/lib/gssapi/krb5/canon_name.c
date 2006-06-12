@@ -34,7 +34,8 @@ OM_uint32 krb5_gss_canonicalize_name(OM_uint32  *minor_status,
 				     const gss_OID mech_type,
 				     gss_name_t *output_name)
 {
-    if (!g_OID_equal(gss_mech_krb5, mech_type) &&
+    if ((mech_type != GSS_C_NULL_OID) &&
+	!g_OID_equal(gss_mech_krb5, mech_type) &&
 	!g_OID_equal(gss_mech_krb5_old, mech_type)) {
 	*minor_status = 0;
 	return(GSS_S_BAD_MECH);
