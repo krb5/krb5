@@ -34,22 +34,26 @@ When a service request is received, the following protocol is initiated:
 .IP 1)
 Check authentication.
 .IP 2)
-Check authorization via the access-control files \fI.k5login\fP, \fI.klogin\fP 
-and \fI.rhosts\fP in the user's home directory.
+Check authorization via the access-control files \fI.k5login\fP and
+\fI.klogin\fP in the user's home directory.
 .IP 3)
 Prompt for password if any checks fail and the \fI-p\fP option was supplied.
 .PP
 If the authentication succeeds, login the user by calling the accompanying 
 login.krb5 or /bin/login, according to the definition of 
-DO_NOT_USE_K_LOGIN.  
+DO_NOT_USE_K_LOGIN.
 .PP 
 The configuration of \fIklogind\fP is done
 by command line arguments passed by inetd.  The options are:
 .IP \fB\-5\fP 10
 Allow Kerberos V5 authentication with the \fI.k5login\fP access control
 file to be trusted.  If this authentication system is used by the client
-and the authorization check is passed, then the user is allowed to log
-in.
+and the authorization check is passed, then the user is allowed to log in.
+If the user has no \fI.k5login\fP file, the login will be authorized if
+the results of krb5_aname_to_localname conversion matches the account
+name.  Unless special rules are configured, this will be true if and only
+if the Kerberos principal of the connecting user is in the default local
+realm and the principal portion matches the account name.
 
 .IP \fB\-4\fP 
 Allow Kerberos V4 authentication with the \fI.klogin\fP access control
@@ -106,12 +110,6 @@ to protect initial connection information; it is the opposite of
 clients--particularly clients predating the release of Kerberos V5
 Beta5 (May 1995)--present bogus checksums that prevent Kerberos
 authentication from succeeding in the default mode.
-
-
-.PP
-If the
-~/.rhosts check is to be used, then the program verifies that the
-client is connecting from a privileged port, before allowing login.
 
 .PP
 The parent of the login process manipulates the master side of the
