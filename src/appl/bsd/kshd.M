@@ -126,7 +126,7 @@ Don't allocate a reserved port for the stderr connection.
 Use the argument to find the Kerberos binaries.  Normally a compiled
 in argument is used.
 
-.IP \fB\-D\ port \fP
+.IP \fB\-D\ port\fP
 Run in standalone mode, listening on \fBport\fP.  The daemon will exit
 after one connection and will not background itself.
 
