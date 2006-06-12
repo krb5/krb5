@@ -89,9 +89,8 @@
 # endif
 #endif
 
-#ifndef	HAVE_SYS_FILIO_H
 #include <sys/ioctl.h>
-#else
+#ifdef	HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif
 
