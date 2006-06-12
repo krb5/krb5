@@ -77,6 +77,8 @@ OM_uint32 *		time_rec;
     gss_cred_id_t	input_cred_handle;
 
     gss_initialize();
+    output_token->length = 0;
+    output_token->value = NULL;
 
     if (context_handle == NULL)
 	return GSS_S_NO_CONTEXT;
