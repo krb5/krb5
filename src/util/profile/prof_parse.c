@@ -84,10 +84,10 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
 	
 	if (*line == 0)
 		return 0;
-	if (line[0] == ';' || line[0] == '#')
-		return 0;
-	strip_line(line);
 	cp = skip_over_blanks(line);
+	if (cp[0] == ';' || cp[0] == '#')
+		return 0;
+	strip_line(cp);
 	ch = *cp;
 	if (ch == 0)
 		return 0;
