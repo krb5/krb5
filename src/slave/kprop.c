@@ -346,13 +346,10 @@ open_connection(host, fd, Errmsg, ErrmsgSz)
 	if(!port) {
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == 0) {
-			(void) strncpy(Errmsg, KPROP_SERVICE, ErrmsgSz - 1);
-			Errmsg[ErrmsgSz - 1] = '\0';
-			(void) strncat(Errmsg, "/tcp: unknown service", ErrmsgSz - 1 - strlen(Errmsg));
-			*fd = -1;
-			return(0);
+		    my_sin.sin_port = htons(KPROP_PORT);
+		} else {
+		    my_sin.sin_port = sp->s_port;
 		}
-		my_sin.sin_port = sp->s_port;
 	} else
 		my_sin.sin_port = port;
 	s = socket(AF_INET, SOCK_STREAM, 0);

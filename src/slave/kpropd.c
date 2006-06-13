@@ -193,9 +193,9 @@ void do_standalone()
 		sp = getservbyname(KPROP_SERVICE, "tcp");
 		if (sp == NULL) {
 			com_err(progname, 0, "%s/tcp: unknown service", KPROP_SERVICE);
-			exit(1);
+			my_sin.sin_port = htons(KPROP_PORT);
 		}
-		my_sin.sin_port = sp->s_port;
+		else my_sin.sin_port = sp->s_port;
 	} else {
 		my_sin.sin_port = port;
 	}

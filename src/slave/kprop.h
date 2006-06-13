@@ -29,6 +29,7 @@
 #define KPROP_SERVICE_NAME "host"
 #define TGT_SERVICE_NAME "krbtgt"
 #define KPROP_SERVICE "krb5_prop"
+#define KPROP_PORT 754
 
 #define KPROP_PROT_VERSION "kprop5_01"
 
