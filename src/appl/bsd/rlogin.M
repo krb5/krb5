@@ -149,7 +149,7 @@ simple heuristics are used to guess which to try.
 \fB\-4\fP
 Use Kerberos V4 authentication only; don't try Kerberos V5.
 .SH SEE ALSO
-rsh(1), kerberos(3), krb_sendauth(3), krb_realmofhost(3), rlogin(1) [UCB
+rsh(1), kerberos(1), krb_sendauth(3), krb_realmofhost(3), rlogin(1) [UCB
 version], klogind(8)
 .SH FILES
 .TP "\w'~/\&.k5login\ \ 'u"
