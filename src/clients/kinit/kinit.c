@@ -211,7 +211,7 @@ usage(progname)
 	    USAGE_BREAK_LONG
 	    "[-p | -P" USAGE_LONG_PROXIABLE "] "
 	    USAGE_BREAK_LONG
-	    "[-A" USAGE_LONG_ADDRESSES "] "
+	    "[-a | -A" USAGE_LONG_ADDRESSES "] "
 	    USAGE_BREAK
 	    "[-v] [-R] "
 	    "[-k [-t keytab_file]] "
@@ -258,6 +258,7 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1)
     ULINE("\t", "-F not forwardable",           OPTTYPE_KRB5);
     ULINE("\t", "-p proxiable",                 OPTTYPE_KRB5);
     ULINE("\t", "-P not proxiable",             OPTTYPE_KRB5);
+    ULINE("\t", "-a include addresses",         OPTTYPE_KRB5);
     ULINE("\t", "-A do not include addresses",  OPTTYPE_KRB5);
     ULINE("\t", "-v validate",                  OPTTYPE_KRB5);
     ULINE("\t", "-R renew",                     OPTTYPE_BOTH);
@@ -295,7 +296,7 @@ parse_options(argc, argv, opts, progname)
     int use_k5 = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54AVl:s:c:kt:RS:v"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:v"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -330,7 +331,6 @@ parse_options(argc, argv, opts, progname)
 	    opts->not_proxiable = 1;
 	    break;
 	case 'a':
-	    /* Note: This is supported only with GETOPT_LONG */
 	    opts->addresses = 1;
 	    break;
 	case 'A':
