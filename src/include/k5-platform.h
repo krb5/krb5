@@ -664,8 +664,9 @@ load_64_le (const unsigned char *p)
 #ifdef HAVE_GETPWNAM_R
 # ifndef GETPWNAM_R_4_ARGS
 /* POSIX */
-#  define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT) \
-	getpwnam_r(NAME,REC,BUF,BUFSIZE,OUT)
+#  define k5_getpwnam_r(NAME, REC, BUF, BUFSIZE, OUT)	\
+	(getpwnam_r(NAME,REC,BUF,BUFSIZE,OUT) == 0	\
+	 ? (*(OUT) == NULL ? -1 : 0) : -1)
 # else
 /* POSIX drafts? */
 #  ifdef GETPWNAM_R_RETURNS_INT
@@ -688,8 +689,9 @@ load_64_le (const unsigned char *p)
 #ifdef HAVE_GETPWUID_R
 # ifndef GETPWUID_R_4_ARGS
 /* POSIX */
-#  define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT) \
-	getpwuid_r(UID,REC,BUF,BUFSIZE,OUT)
+#  define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT)	\
+	(getpwuid_r(UID,REC,BUF,BUFSIZE,OUT) == 0	\
+	 ? (*(OUT) == NULL ? -1 : 0) : -1)
 # else
 /* POSIX drafts?  Yes, I mean to test GETPWNAM... here.  Less junk to
    do at configure time.  */
