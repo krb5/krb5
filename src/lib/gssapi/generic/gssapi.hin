@@ -691,6 +691,13 @@ OM_uint32 KRB5_CALLCONV gss_inquire_names_for_mech
 	    gss_OID_set *		/* name_types */
 	   );
 
+/* New for V2 */
+OM_uint32 KRB5_CALLCONV gss_inquire_mechs_for_name(
+    OM_uint32 *,		/* minor_status */
+    const gss_name_t,		/* input_name */
+    gss_OID_set *		/* mech_types */
+);
+
 /*
  * The following routines are obsolete variants of gss_get_mic, gss_wrap,
  * gss_verify_mic and gss_unwrap.  They should be provided by GSSAPI V2

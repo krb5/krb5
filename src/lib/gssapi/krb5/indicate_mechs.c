@@ -25,6 +25,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "mglueP.h"
 
 OM_uint32
 krb5_gss_indicate_mechs(minor_status, mech_set)
@@ -33,7 +34,7 @@ krb5_gss_indicate_mechs(minor_status, mech_set)
 {
    *minor_status = 0;
 
-   if (! g_copy_OID_set(gss_mech_set_krb5_both, mech_set)) {
+   if (! gssint_copy_oid_set(minor_status, gss_mech_set_krb5_both, mech_set)) {
          *mech_set     = GSS_C_NO_OID_SET;
          *minor_status = ENOMEM;
          return(GSS_S_FAILURE);

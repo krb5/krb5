@@ -1,3 +1,4 @@
+/* #pragma ident	"@(#)g_oid_ops.c	1.11	98/01/22 SMI" */
 /*
  * lib/gssapi/mechglue/g_oid_ops.c
  *
@@ -32,36 +33,13 @@
 #include "mglueP.h"
 /* should include to get protos #include "../generic/gssapiP_generic.h" */
 
-extern gss_mechanism *__gss_mechs_array;
+extern gss_mechanism *gssint_mechs_array;
 
-OM_uint32 KRB5_CALLCONV
-gss_release_oid(minor_status, oid)
-    OM_uint32	*minor_status;
-    gss_OID	*oid;
-{
-    int i;
-    OM_uint32   major_status;
-
-    /* first call the gss_internal_release_oid for each mechanism
-     * until one returns success. gss_internal_release_oid will only return
-     * success when the OID was recognized as an internal mechanism OID.
-     * if no mechanisms recognize the OID, then call the generic version.
-     */
-
-    for(i=0; __gss_mechs_array[i]->mech_type.length !=0; i++) {
-        if (__gss_mechs_array[i]->gss_internal_release_oid) {
-	    major_status = __gss_mechs_array[i]->gss_internal_release_oid(
-					    __gss_mechs_array[i]->context,
-					    minor_status,
-					    oid);
-	    if (major_status == GSS_S_COMPLETE) {
-	        return (GSS_S_COMPLETE);
-	    }
-	}
-    }
-
-    return generic_gss_release_oid(minor_status, oid);
-}
+/*
+ * gss_release_oid has been moved to g_initialize, becasue it requires access
+ * to the mechanism list.  All functions requiring direct access to the
+ * mechanism list are now in g_initialize.c
+ */
 
 OM_uint32 KRB5_CALLCONV
 gss_create_empty_oid_set(minor_status, oid_set)

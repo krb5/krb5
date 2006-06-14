@@ -59,10 +59,10 @@
 #include "gssapi_krb5.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status, 
-                                gss_cred_id_t cred_handle,
-				OM_uint32 num_ktypes,
-				krb5_enctype *ktypes)
+gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status, 
+				   gss_cred_id_t cred_handle,
+				   OM_uint32 num_ktypes,
+				   krb5_enctype *ktypes)
 {
     int i;
     krb5_enctype * new_ktypes;

@@ -87,9 +87,11 @@
 
 const gss_OID_desc krb5_gss_oid_array[] = {
    /* this is the official, rfc-specified OID */
-   {9, "\052\206\110\206\367\022\001\002\002"},
-   /* this is the unofficial, wrong OID */
-   {5, "\053\005\001\005\002"},
+   {GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID},
+   /* this pre-RFC mech OID */
+   {GSS_MECH_KRB5_OLD_OID_LENGTH, GSS_MECH_KRB5_OLD_OID},
+   /* this is the unofficial, incorrect mech OID emitted by MS */
+   {GSS_MECH_KRB5_WRONG_OID_LENGTH, GSS_MECH_KRB5_WRONG_OID},
    /* this is the v2 assigned OID */
    {9, "\052\206\110\206\367\022\001\002\003"},
    /* these two are name type OID's */
@@ -108,14 +110,15 @@ const gss_OID_desc krb5_gss_oid_array[] = {
 
 const gss_OID_desc * const gss_mech_krb5              = krb5_gss_oid_array+0;
 const gss_OID_desc * const gss_mech_krb5_old          = krb5_gss_oid_array+1;
-const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+3;
-const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+4;
-const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+3;
+const gss_OID_desc * const gss_mech_krb5_wrong        = krb5_gss_oid_array+2;
+const gss_OID_desc * const gss_nt_krb5_name           = krb5_gss_oid_array+4;
+const gss_OID_desc * const gss_nt_krb5_principal      = krb5_gss_oid_array+5;
+const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME = krb5_gss_oid_array+4;
 
 static const gss_OID_set_desc oidsets[] = {
    {1, (gss_OID) krb5_gss_oid_array+0},
    {1, (gss_OID) krb5_gss_oid_array+1},
-   {2, (gss_OID) krb5_gss_oid_array+0},
+   {3, (gss_OID) krb5_gss_oid_array+0},
    {1, (gss_OID) krb5_gss_oid_array+2},
    {3, (gss_OID) krb5_gss_oid_array+0},
 };

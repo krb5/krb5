@@ -48,9 +48,9 @@ typedef UINT64_TYPE gssint_uint64;
 
 /** helper macros **/
 
-#define g_OID_equal(o1,o2) \
-   (((o1)->length == (o2)->length) && \
-    (memcmp((o1)->elements,(o2)->elements,(unsigned int) (o1)->length) == 0))
+#define	g_OID_equal(o1, o2) \
+	(((o1)->length == (o2)->length) && \
+	(memcmp((o1)->elements, (o2)->elements, (o1)->length) == 0))
 
 /* this code knows that an int on the wire is 32 bits.  The type of
    num should be at least this big, or the extra shifts may do weird
@@ -122,7 +122,6 @@ typedef UINT64_TYPE gssint_uint64;
 #define	g_delete_ctx_id		gssint_g_delete_ctx_id
 #define	g_delete_lucidctx_id	gssint_g_delete_lucidctx_id
 #define	g_make_string_buffer	gssint_g_make_string_buffer
-#define	g_copy_OID_set		gssint_g_copy_OID_set
 #define	g_token_size		gssint_g_token_size
 #define	g_make_token_header	gssint_g_make_token_header
 #define	g_verify_token_header	gssint_g_verify_token_header
@@ -167,8 +166,6 @@ int g_delete_ctx_id (g_set *vdb, gss_ctx_id_t *ctx);
 int g_delete_lucidctx_id (g_set *vdb, void *lctx);
 
 int g_make_string_buffer (const char *str, gss_buffer_t buffer);
-
-int g_copy_OID_set (const gss_OID_set_desc * const in, gss_OID_set *out);
 
 unsigned int g_token_size (const gss_OID_desc * mech, unsigned int body_size);
 

@@ -33,7 +33,7 @@
 #endif
 #include <string.h>
 
-extern gss_mechanism *__gss_mechs_array;
+extern gss_mechanism *gssint_mechs_array;
 
 static gss_OID_set_desc	supported_mechs_desc; 
 static gss_OID_set supported_mechs = NULL;
@@ -65,7 +65,7 @@ gss_OID_set *		mech_set;
 
 	/* Build the mech_set from the OIDs in mechs_array. */
 
-	for(i=0; __gss_mechs_array[i]->mech_type.length != 0; i++) 
+	for(i=0; gssint_mechs_array[i]->mech_type.length != 0; i++) 
 	    supported_mechs->count++;
 
 	supported_mechs->elements =
@@ -74,12 +74,12 @@ gss_OID_set *		mech_set;
 
 	for(i=0; i < supported_mechs->count; i++) {
 	    supported_mechs->elements[i].length =
-		__gss_mechs_array[i]->mech_type.length;
+		gssint_mechs_array[i]->mech_type.length;
 	    supported_mechs->elements[i].elements = (void *)
-		malloc(__gss_mechs_array[i]->mech_type.length);
+		malloc(gssint_mechs_array[i]->mech_type.length);
 	    memcpy(supported_mechs->elements[i].elements,
-		   __gss_mechs_array[i]->mech_type.elements,
-		   __gss_mechs_array[i]->mech_type.length);
+		   gssint_mechs_array[i]->mech_type.elements,
+		   gssint_mechs_array[i]->mech_type.length);
 	}
     }
     
