@@ -117,3 +117,9 @@ int krb4int_save_credentials_addr(
 
 int krb4int_send_to_kdc_addr(KTEXT, KTEXT, char *,
 			     struct sockaddr *, socklen_t *);
+
+/* 
+ * Exported by libdes425 and called by krb_get_in_pw_tkt, but not part of
+ * the standard DES interface and therefore not prototyped in des.h.
+ */
+int KRB5_CALLCONV des_read_pw_string(char *, int, char *, int);
