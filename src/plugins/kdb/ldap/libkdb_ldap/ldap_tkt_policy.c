@@ -46,18 +46,13 @@ krb5_ldap_change_count(context ,policydn ,flag)
 	int                         flag;
 {
 
-	krb5_error_code             st=0, tempst=0;
+	krb5_error_code             st=0;
 	int                         objectmask=0;
 	LDAP                        *ld=NULL;
-	LDAPMessage                 *result=NULL,*ent=NULL;
-	char                        *attributes[] = { "krbPolicyRefCount", NULL};
 	char                        *attrvalues[] = { "krbPolicy", NULL};
-	krb5_ldap_policy_params     *lpolicy=NULL;
 	kdb5_dal_handle             *dal_handle=NULL;
 	krb5_ldap_context           *ldap_context=NULL;
 	krb5_ldap_server_handle     *ldap_server_handle=NULL;
-	long                        ref_count = 0;
-	LDAPMod                     *mods=NULL;
 	krb5_ldap_policy_params     *policyparams=NULL;
 	int mask = 0;
 
@@ -364,10 +359,6 @@ krb5_ldap_delete_policy(context, policydn, policy, mask)
 	kdb5_dal_handle             *dal_handle=NULL;
 	krb5_ldap_context           *ldap_context=NULL;
 	krb5_ldap_server_handle     *ldap_server_handle=NULL;
-	LDAPMessage                 *result=NULL,*ent=NULL;
-	char                        *attributes[] = { "krbPolicyRefCount", NULL};
-	char                        *attrvalues[] = { "krbPolicy", NULL};
-	int 		            polref_count = 0;
 
 	if (policy == NULL || policydn==NULL) {
 		st = EINVAL;
