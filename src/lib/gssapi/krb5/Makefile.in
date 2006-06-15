@@ -438,6 +438,7 @@ indicate_mechs.so indicate_mechs.po $(OUTPRE)indicate_mechs.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
   ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
   gssapi_krb5.h indicate_mechs.c
 init_sec_context.so init_sec_context.po $(OUTPRE)init_sec_context.$(OBJEXT): \
@@ -525,6 +526,7 @@ krb5_gss_glue.so krb5_gss_glue.po $(OUTPRE)krb5_gss_glue.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
   ../generic/gssapi_err_generic.h gssapiP_krb5.h gssapi_err_krb5.h \
   gssapi_krb5.h krb5_gss_glue.c
 lucid_context.so lucid_context.po $(OUTPRE)lucid_context.$(OBJEXT): \
