@@ -34,7 +34,6 @@ OM_uint32 krb5_gss_internal_release_oid (OM_uint32 *, /* minor_status */
 					 gss_OID * /* oid */
     );
 
-#if 0
 OM_uint32
 krb5_gss_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
@@ -59,7 +58,6 @@ krb5_gss_release_oid(minor_status, oid)
 	return(GSS_S_COMPLETE);
     }
 }
-#endif
 
 OM_uint32
 krb5_gss_internal_release_oid(minor_status, oid)

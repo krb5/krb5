@@ -586,6 +586,11 @@ OM_uint32 krb5_gss_import_sec_context
 
 krb5_error_code krb5_gss_ser_init(krb5_context);
 
+OM_uint32 krb5_gss_release_oid
+(OM_uint32 *,		/* minor_status */
+	    gss_OID *			/* oid */
+	   );
+
 OM_uint32 krb5_gss_internal_release_oid
 (OM_uint32 *,		/* minor_status */
 	    gss_OID *			/* oid */
