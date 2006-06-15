@@ -1637,12 +1637,14 @@ struct srv_dns_entry {
     unsigned short port;
     char *host;
 };
+#ifdef KRB5_DNS_LOOKUP
 krb5_error_code
 krb5int_make_srv_query_realm(const krb5_data *realm,
 			     const char *service,
 			     const char *protocol,
 			     struct srv_dns_entry **answers);
 void krb5int_free_srv_dns_data(struct srv_dns_entry *);
+#endif
 
 /*
  * Convenience function for structure magic number
