@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=lib/gssapi
 mydir=lib/gssapi
 BUILDTOP=$(REL)..$(S)..
-LOCAL_SUBDIRS= generic krb5
+LOCAL_SUBDIRS= generic mechglue krb5 spnego
 DEFS=
 
 ##DOSLIBNAME=$(OUTPRE)gssapi.lib
@@ -14,7 +14,7 @@ DEFS=
 
 ##DOS##DLL_EXP_TYPE=GSS
 
-LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5
+LOCALINCLUDES = -Igeneric -I$(srcdir)/generic -Ikrb5 -I$(srcdir)/krb5 -I$(srcdir)/mechglue
 STLIBOBJS=\
 	gss_libinit.o
 
@@ -29,11 +29,11 @@ LIBMAJOR=2
 LIBMINOR=2
 LIBINITFUNC=gssint_lib_init
 LIBFINIFUNC=gssint_lib_fini
-STOBJLISTS=OBJS.ST generic/OBJS.ST krb5/OBJS.ST
-SUBDIROBJLISTS=generic/OBJS.ST krb5/OBJS.ST
+STOBJLISTS=OBJS.ST generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST spnego/OBJS.ST
+SUBDIROBJLISTS=generic/OBJS.ST mechglue/OBJS.ST krb5/OBJS.ST
 SHLIB_EXPDEPS=\
 	$(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB) $(COM_ERR_DEPLIB)
-SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPLIBS=-lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(DL_LIB) $(LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=gssapi
@@ -132,6 +132,7 @@ gss_libinit.so gss_libinit.po $(OUTPRE)gss_libinit.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/generic/gssapiP_generic.h $(srcdir)/generic/gssapi_generic.h \
-  $(srcdir)/krb5/gssapiP_krb5.h generic/gssapi.h generic/gssapi_err_generic.h \
+  $(srcdir)/krb5/gssapiP_krb5.h $(srcdir)/mechglue/mechglue.h \
+  $(srcdir)/mechglue/mglueP.h generic/gssapi.h generic/gssapi_err_generic.h \
   gss_libinit.c gss_libinit.h krb5/gssapi_err_krb5.h \
   krb5/gssapi_krb5.h

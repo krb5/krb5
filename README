@@ -222,8 +222,75 @@ src/lib/crypto/aes has the following copyright:
  in respect of any properties, including, but not limited to, correctness 
  and fitness for purpose.
 
+--- The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
+    src/lib/gssapi, including the following files:
+
+lib/gssapi/generic/gssapi_err_generic.et
+lib/gssapi/mechglue/g_accept_sec_context.c
+lib/gssapi/mechglue/g_acquire_cred.c
+lib/gssapi/mechglue/g_canon_name.c
+lib/gssapi/mechglue/g_compare_name.c
+lib/gssapi/mechglue/g_context_time.c
+lib/gssapi/mechglue/g_delete_sec_context.c
+lib/gssapi/mechglue/g_dsp_name.c
+lib/gssapi/mechglue/g_dsp_status.c
+lib/gssapi/mechglue/g_dup_name.c
+lib/gssapi/mechglue/g_exp_sec_context.c
+lib/gssapi/mechglue/g_export_name.c
+lib/gssapi/mechglue/g_glue.c
+lib/gssapi/mechglue/g_imp_name.c
+lib/gssapi/mechglue/g_imp_sec_context.c
+lib/gssapi/mechglue/g_init_sec_context.c
+lib/gssapi/mechglue/g_initialize.c
+lib/gssapi/mechglue/g_inquire_context.c
+lib/gssapi/mechglue/g_inquire_cred.c
+lib/gssapi/mechglue/g_inquire_names.c
+lib/gssapi/mechglue/g_process_context.c
+lib/gssapi/mechglue/g_rel_buffer.c
+lib/gssapi/mechglue/g_rel_cred.c
+lib/gssapi/mechglue/g_rel_name.c
+lib/gssapi/mechglue/g_rel_oid_set.c
+lib/gssapi/mechglue/g_seal.c
+lib/gssapi/mechglue/g_sign.c
+lib/gssapi/mechglue/g_store_cred.c
+lib/gssapi/mechglue/g_unseal.c
+lib/gssapi/mechglue/g_userok.c
+lib/gssapi/mechglue/g_utils.c
+lib/gssapi/mechglue/g_verify.c
+lib/gssapi/mechglue/gssd_pname_to_uid.c
+lib/gssapi/mechglue/mglueP.h
+lib/gssapi/mechglue/oid_ops.c
+lib/gssapi/spnego/gssapiP_spnego.h
+lib/gssapi/spnego/spnego_mech.c
+
+are subject to the following license:
+
+Copyright (c) 2004 Sun Microsystems, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 Acknowledgements
 ----------------
+
+Thanks to Sun Microsystems for donating their implementations of
+mechglue and SPNEGO.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jeffrey Altman, Richard Basch, Jay

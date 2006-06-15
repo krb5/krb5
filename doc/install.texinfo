@@ -15,6 +15,11 @@
 @parskip 6pt plus 6pt
 @end iftex
 
+@dircategory Kerberos
+@direntry
+* krb5-install: (krb5-install).         Kerberos V5 Installation Guide
+@end direntry
+
 @include definitions.texinfo
 @set EDITION 1.1
 

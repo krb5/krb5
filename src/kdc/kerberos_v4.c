@@ -53,6 +53,7 @@
 #include <ctype.h>
 #include <syslog.h>
 #include <string.h>
+#include <errno.h>
 
 /* v4 include files:
  */
@@ -516,8 +517,8 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 	    return(0);
 	}
 	compat_decrypt_key(pkey, k, k5key, issrv);
-    memset (k, 0, sizeof k);
-	}
+	memset (k, 0, sizeof k);
+    }
 
 
     /*

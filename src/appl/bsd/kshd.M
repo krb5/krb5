@@ -37,8 +37,8 @@ When a service request is received, the following protocol is initiated:
 .IP 1) 
 Authentication is checked
 .IP 2)
-Check authorization via the access-control files \fI.k5login\fP, \fI.klogin\fP 
-and \fI.rhosts\fP in the user's home directory.
+Check authorization via the access-control files \fI.k5login\fP and
+\fI.klogin\fP in the user's home directory.
 .IP 3)
 A null byte is returned on the initial socket
 and the command line is passed to the normal login
@@ -53,8 +53,13 @@ by \fIinetd(8)\fP.
 
 .IP \fB\-5\fP 10
 Allow Kerberos5 authentication with the \fI.k5login\fP access control file
-to be trusted.  If this authentication system is used by the client and the
-authorization check is passed, then the user is allowed to log in.
+to be trusted.  If this authentication system is used by the client and
+the authorization check is passed, then the user is allowed to log in.  If
+the user has no \fI.k5login\fP file, the login will be authorized if the
+results of krb5_aname_to_localname conversion matches the account name.
+Unless special rules are configured, this will be true if and only if the
+Kerberos principal of the connecting user is in the default local realm
+and the principal portion matches the account name.
 
 .IP \fB\-4\fP 
 Allow Kerberos4 authentication with the \fI.klogin\fP access control file
@@ -108,9 +113,6 @@ authentication from succeeding in the default mode.
 
 
 .PP
-If the \fB\-r\fP or \fB\-R\fP options are used, the client must
-connect from a privileged port.
-.PP
 \fIKrshd\fP supports six options which may be used for testing:
 
 .IP \fB\-S\ keytab\fP 10
@@ -126,7 +128,7 @@ Don't allocate a reserved port for the stderr connection.
 Use the argument to find the Kerberos binaries.  Normally a compiled
 in argument is used.
 
-.IP \fB\-D\ port \fP
+.IP \fB\-D\ port\fP
 Run in standalone mode, listening on \fBport\fP.  The daemon will exit
 after one connection and will not background itself.
 

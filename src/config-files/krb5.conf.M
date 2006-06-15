@@ -202,8 +202,8 @@ be in a comma-separated list.
 
 .IP udp_preference_limit
 When sending a message to the KDC, the library will try using TCP
-before UDP if the size of the message is above "udp_preference_list".
-If the message is smaller than "udp_preference_list", then UDP will be
+before UDP if the size of the message is above "udp_preference_limit".
+If the message is smaller than "udp_preference_limit", then UDP will be
 tried before TCP.  Regardless of the size, both protocols will be
 tried if the first attempt fails.
 

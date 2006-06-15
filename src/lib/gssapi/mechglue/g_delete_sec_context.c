@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_delete_sec_context.c 1.10     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_delete_sec_context.c	1.11	97/11/09 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -46,20 +46,25 @@ gss_buffer_t		output_token;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
     
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (output_token != GSS_C_NO_BUFFER) {
+	output_token->length = 0;
+	output_token->value = NULL;
+    }
 
     /* if the context_handle is Null, return NO_CONTEXT error */
-    
     if(context_handle == NULL || *context_handle == GSS_C_NO_CONTEXT)
-	return(GSS_S_NO_CONTEXT);
-    
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
     /*
      * select the approprate underlying mechanism routine and
      * call it.
      */
     
     ctx = (gss_union_ctx_id_t) *context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {
 
@@ -70,10 +75,9 @@ gss_buffer_t		output_token;
 						  &ctx->internal_ctx_id,
 						  output_token);
 	else
-	    status = GSS_S_BAD_BINDINGS;
+	    status = GSS_S_UNAVAILABLE;
 
 	/* now free up the space for the union context structure */
-	
 	free(ctx->mech_type->elements);
 	free(ctx->mech_type);
 	free(*context_handle);
@@ -81,6 +85,6 @@ gss_buffer_t		output_token;
 
 	return(status);
     }
-    
-    return(GSS_S_NO_CONTEXT);
+
+    return (GSS_S_BAD_MECH);
 }

@@ -16,14 +16,16 @@ an associated RT ticket.  This ticket should have its "target_version"
 keyword set to the release that the change is targeted at, and should
 have the "pullup" tag set.  This ticket should clearly document the
 changes that are to be pulled up to the release branch; the
-recommended way to do this is to ensure the the CVS commit operations
+recommended way to do this is to ensure the the subversion  commit operations
 corresponding to the changes have automatically updated the ticket --
 see the following section.  The release engineer will pull up the
 change to the release branch and set the "version_fixed" keyword on
 the ticket.
 
-USING CVS COMMITS TO CREATE/UPDATE RT TICKETS
+USING Subversion COMMITS TO CREATE/UPDATE RT TICKETS
 =============================================
+
+The following instructions were written for cvs but also work for Subversion.
 
 To: krbdev@mit.edu
 Subject: Important: handling commit interactions with bug database
@@ -57,8 +59,8 @@ Return errno not retval when getpeername fails.
 
 By default when you update a ticket:
 
-* the ticket it assigned to you
-* The ticket it closed
+* the ticket is assigned to you
+* The ticket is closed
 
 If these defaults are not appropriate for your action you can override
 them; see below.
@@ -76,7 +78,7 @@ subject: Add AES support
 Add an implementation of AES to libk5crypto.
 
 In addition to closing the ticket and marking you as the owner of a
-ticket, creating a new ticket makes you the requestor of the ticket.
+ticket, creating a new ticket makes you the requester of the ticket.
 
 OTher Things to Change
 ======================
@@ -91,7 +93,7 @@ The following additional commands are supported:
 * Component: change component of ticket [krb5-libs etc]
 * Version_Reported: 
 * Target_Version:
-* Tags: [enhancement|nochange|noresource]
+* Tags: [enhancement|nochange|noresource|pullup]
 
 You could set version_fixed, but it is wrong to do so.
 
@@ -132,16 +134,16 @@ specified target version.  If we notice a lot of issues we don't have
 time to deal with, we will drop the target versions as the release
 approaches.
 
-Therer are several tags that can be set on a ticket as well.
+There are several tags that can be set on a ticket as well.
 
 The first tag is the enhancement tag; this roughly corresponds to the
 Gnats classification as change-request, distinguished from sw-bug.
 
 
 The next tag is the nochange tag.  This indicates that the ticket has
-been (or will be) closed bwith no code change and thus should not be
+been (or will be) closed with no code change and thus should not be
 processed by the next round of release scripts.  This is appropriate
-for tickets where the requestor is mistaken or where no bug/change
+for tickets where the requester is mistaken or where no bug/change
 exists.
 
 The final tag is the noresource tag; this indicates that MIT does not

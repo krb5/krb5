@@ -119,7 +119,6 @@ krb5_rc_default(krb5_context context, krb5_rcache *id)
 
     if ((retval = krb5_rc_resolve_type(context, id, 
 				       krb5_rc_default_type(context)))) {
-	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
 	return retval;
     }
@@ -157,7 +156,6 @@ krb5_error_code krb5_rc_resolve_full(krb5_context context, krb5_rcache *id, char
 
     if ((retval = krb5_rc_resolve_type(context, id,type))) {
 	FREE(type);
-	k5_mutex_destroy(&(*id)->lock);
 	FREE(*id);
 	return retval;
     }

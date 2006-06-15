@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_unseal.c 1.10     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_unseal.c	1.13	98/01/22 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -44,14 +44,26 @@ int *			conf_state;
 int *			qop_state;
 
 {
+/* EXPORT DELETE START */
     OM_uint32		status;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
 
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return GSS_S_NO_CONTEXT;
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    if (GSS_EMPTY_BUFFER(input_message_buffer))
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (output_message_buffer == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    output_message_buffer->length = 0;
+    output_message_buffer->value = NULL;
 
     /*
      * select the approprate underlying mechanism routine and
@@ -59,7 +71,7 @@ int *			qop_state;
      */
 
     ctx = (gss_union_ctx_id_t) context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech) {
 	if (mech->gss_unseal) 
@@ -72,12 +84,14 @@ int *			qop_state;
 				      conf_state,
 				      qop_state);
 	else
-	    status = GSS_S_BAD_BINDINGS;
+	    status = GSS_S_UNAVAILABLE;
 
 	return(status);
     }
 
-    return(GSS_S_NO_CONTEXT);
+/* EXPORT DELETE END */
+
+    return (GSS_S_BAD_MECH);
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -89,15 +103,14 @@ gss_unwrap (minor_status,
             qop_state)
 
 OM_uint32 *		minor_status;
-gss_ctx_id_t		context_handle;
-gss_buffer_t		input_message_buffer;
+const gss_ctx_id_t	context_handle;
+const gss_buffer_t	input_message_buffer;
 gss_buffer_t		output_message_buffer;
 int *			conf_state;
 gss_qop_t *		qop_state;
 
 {
-	return (gss_unseal(minor_status, context_handle,
-			   input_message_buffer,
-			   output_message_buffer,
-			   conf_state, (int *) qop_state));
+    return (gss_unseal(minor_status, (gss_ctx_id_t)context_handle,
+		       (gss_buffer_t)input_message_buffer,
+		       output_message_buffer, conf_state, (int *) qop_state));
 }

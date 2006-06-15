@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_context_time.c 1.8     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_context_time.c	1.12	98/01/22 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -42,18 +42,23 @@ OM_uint32 *		time_rec;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
 
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
+
+    if (time_rec == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return GSS_S_NO_CONTEXT;
-    
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
     /*
      * select the approprate underlying mechanism routine and
      * call it.
      */
     
     ctx = (gss_union_ctx_id_t) context_handle;
-    mech = __gss_get_mechanism (ctx->mech_type);
+    mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {
 
@@ -64,10 +69,10 @@ OM_uint32 *		time_rec;
 					    ctx->internal_ctx_id,
 					    time_rec);
 	else
-	    status = GSS_S_BAD_BINDINGS;
+	    status = GSS_S_UNAVAILABLE;
 
 	return(status);
     }
     
-    return(GSS_S_NO_CONTEXT);
+    return (GSS_S_BAD_MECH);
 }

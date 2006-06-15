@@ -1092,7 +1092,10 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
     } else {
 	/* gotta verify it instead... */
 	if (!xfread(&kt_vno, sizeof(kt_vno), 1, KTFILEP(id))) {
-	    kerror = errno;
+	    if (feof(KTFILEP(id)))
+		kerror = KRB5_KEYTAB_BADVNO;
+	    else
+		kerror = errno;
 	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
 	    return kerror;

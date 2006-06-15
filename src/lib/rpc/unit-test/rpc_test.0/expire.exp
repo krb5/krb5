@@ -12,7 +12,7 @@ proc expired {} {
 
     expect {
 	-i $server_id
-	-re "rpc_test server: Authen.*failed: .* referenced credentials have expired" { pass "expired" }
+	-re "rpc_test server: Authen.*failed:.*credential.*expired" { pass "expired" }
 	timeout { fail "expired: timeout waiting for expired creds error" }
     }
 

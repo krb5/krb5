@@ -30,8 +30,8 @@
  */
 #include "gssapiP_krb5.h"
 
-static OM_uint32 krb5_gss_internal_release_oid (OM_uint32 *, /* minor_status */
-						gss_OID * /* oid */
+OM_uint32 krb5_gss_internal_release_oid (OM_uint32 *, /* minor_status */
+					 gss_OID * /* oid */
     );
 
 OM_uint32
@@ -59,7 +59,7 @@ krb5_gss_release_oid(minor_status, oid)
     }
 }
 
-static OM_uint32
+OM_uint32
 krb5_gss_internal_release_oid(minor_status, oid)
     OM_uint32	*minor_status;
     gss_OID	*oid;
@@ -71,6 +71,7 @@ krb5_gss_internal_release_oid(minor_status, oid)
    
     if ((*oid != gss_mech_krb5) &&
 	(*oid != gss_mech_krb5_old) &&
+	(*oid != gss_mech_krb5_wrong) &&
 	(*oid != gss_nt_krb5_name) &&
 	(*oid != gss_nt_krb5_principal)) {
 	/* We don't know about this OID */

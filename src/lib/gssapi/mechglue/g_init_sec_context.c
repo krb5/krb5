@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_init_sec_context.c 1.20     95/08/07 SMI" */
+/* #pragma ident	"@(#)g_init_sec_context.c	1.20	03/10/24 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -33,10 +33,6 @@
 #endif
 #include <string.h>
 
-#define g_OID_equal(o1,o2) \
-   (((o1)->length == (o2)->length) && \
-    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
-
 OM_uint32 KRB5_CALLCONV
 gss_init_sec_context (minor_status,
                       claimant_cred_handle,
@@ -67,7 +63,7 @@ OM_uint32 *		ret_flags;
 OM_uint32 *		time_rec;
 
 {
-    OM_uint32		status, temp_status, temp_minor_status;
+    OM_uint32		status, temp_minor_status;
     gss_union_name_t	union_name;
     gss_union_cred_t	union_cred;
     gss_name_t		internal_name;
@@ -76,29 +72,47 @@ OM_uint32 *		time_rec;
     gss_mechanism	mech;
     gss_cred_id_t	input_cred_handle;
 
-    gss_initialize();
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    *minor_status = 0;
+    output_token->length = 0;
+    output_token->value = NULL;
+
+    /* clear output values */
+    if (actual_mech_type)
+	*actual_mech_type = NULL;
 
     if (context_handle == NULL)
-	return GSS_S_NO_CONTEXT;
+	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CONTEXT);
 
     union_name = (gss_union_name_t) target_name;
 
-    /*
-     * If mech_type is NULL, and the target_name is
-     * mechanism-specific, then set it to the mech_type of
-     * target_name.
-     */
-    if ((mech_type == GSS_C_NULL_OID) && union_name->mech_type)
-	mech_type = union_name->mech_type;
+    if (target_name == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+    if (output_token == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    output_token->value = NULL;
+    output_token->length = 0;
+
+
+    if (req_mech_type)
+	mech_type = (gss_OID)req_mech_type;
+
+    union_name = (gss_union_name_t)target_name;
     
     /*
      * obtain the gss mechanism information for the requested
      * mechanism.  If mech_type is NULL, set it to the resultant
      * mechanism
      */
-    mech = __gss_get_mechanism (mech_type);
+    mech = gssint_get_mechanism (mech_type);
     if (mech == NULL)
 	return (GSS_S_BAD_MECH);
+
+    if (mech->gss_init_sec_context == NULL)
+	return (GSS_S_UNAVAILABLE);
 
     if (mech_type == GSS_C_NULL_OID)
 	mech_type = &mech->mech_type;
@@ -108,15 +122,14 @@ OM_uint32 *		time_rec;
      * mech_type that we're about to use.  Otherwise, do an import on
      * the external_name form of the target name.
      */
-    if (union_name->mech_type) {
-	if (!g_OID_equal(union_name->mech_type, mech_type))
-	    return (GSS_S_BAD_MECH);
+    if (union_name->mech_type &&
+	g_OID_equal(union_name->mech_type, mech_type)) {
 	internal_name = union_name->mech_name;
     } else {
-	if ((temp_status = __gss_import_internal_name(minor_status, mech_type,
-						      union_name,
-						      &internal_name)))
-	    return (GSS_S_BAD_NAME);
+	if ((status = gssint_import_internal_name(minor_status, mech_type,
+						 union_name,
+						 &internal_name)) != GSS_S_COMPLETE)
+	    return (status);
     }
 
     /*
@@ -127,23 +140,22 @@ OM_uint32 *		time_rec;
      */
     
     if(*context_handle == GSS_C_NO_CONTEXT) {
+	status = GSS_S_FAILURE;
 	union_ctx_id = (gss_union_ctx_id_t)
 	    malloc(sizeof(gss_union_ctx_id_desc));
+	if (union_ctx_id == NULL)
+	    goto end;
 
 	union_ctx_id->mech_type = (gss_OID)
 	    malloc(sizeof(gss_OID_desc));
 
-	/* copy in the mech type information */
-
-	union_ctx_id->mech_type->elements = (void *)
-	    malloc(mech_type->length);
-
-	union_ctx_id->mech_type->length = mech_type->length;
-	memcpy(union_ctx_id->mech_type->elements, mech_type->elements,
-	       mech_type->length);
+	if (generic_gss_copy_oid(&temp_minor_status, mech_type,
+				 &union_ctx_id->mech_type) != GSS_S_COMPLETE) {
+	    free(union_ctx_id);
+	    goto end;
+	}
 
 	/* copy the supplied context handle */
-
 	union_ctx_id->internal_ctx_id = *context_handle;
     } else
 	union_ctx_id = *context_handle;
@@ -154,37 +166,47 @@ OM_uint32 *		time_rec;
      * use the default credential.
      */
     union_cred = (gss_union_cred_t) claimant_cred_handle;
-    input_cred_handle = __gss_get_mechanism_cred(union_cred, mech_type);
+    input_cred_handle = gssint_get_mechanism_cred(union_cred, mech_type);
     
     /*
      * now call the approprate underlying mechanism routine 
      */
     
-    if (mech->gss_init_sec_context) {
-	status = mech->gss_init_sec_context(
-					    mech->context,
-					    minor_status,
-					    input_cred_handle,
-					    &union_ctx_id->internal_ctx_id,
-					    internal_name,
-					    mech_type,
-					    req_flags,
-					    time_req,
-					    input_chan_bindings,
-					    input_token,
-					    actual_mech_type,
-					    output_token,
-					    ret_flags,
-					    time_rec);
+    status = mech->gss_init_sec_context(
+	mech->context,
+	minor_status,
+	input_cred_handle,
+	&union_ctx_id->internal_ctx_id,
+	internal_name,
+	mech_type,
+	req_flags,
+	time_req,
+	input_chan_bindings,
+	input_token,
+	actual_mech_type,
+	output_token,
+	ret_flags,
+	time_rec);
 
-	if (*context_handle == GSS_C_NO_CONTEXT)
-	    *context_handle = (gss_ctx_id_t) union_ctx_id;
+    if (status != GSS_S_COMPLETE && status != GSS_S_CONTINUE_NEEDED) {
+	/*
+	 * the spec says (the preferred) method is to delete all
+	 * context info on the first call to init, and on all
+	 * subsequent calls make the caller responsible for
+	 * calling gss_delete_sec_context
+	 */
+	if (*context_handle == GSS_C_NO_CONTEXT) {
+	    free(union_ctx_id->mech_type->elements);
+	    free(union_ctx_id->mech_type);
+	    free(union_ctx_id);
+	}
+    } else if (*context_handle == GSS_C_NO_CONTEXT)
+	*context_handle = (gss_ctx_id_t)union_ctx_id;
 
-    } else
-	status = GSS_S_BAD_BINDINGS;
-
-    if (!union_name->mech_type) {
-	(void) __gss_release_internal_name(&temp_minor_status,
+end:
+    if (union_name->mech_name == NULL ||
+	union_name->mech_name != internal_name) {
+	(void) gssint_release_internal_name(&temp_minor_status,
 					   mech_type, &internal_name);
     }
 

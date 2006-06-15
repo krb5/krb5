@@ -40,6 +40,13 @@
 
 #define MAX_USERNAME 65
 
+#if defined(__APPLE__) && defined(__MACH__)
+#include <hfs/hfs_mount.h>	/* XXX */
+#define FILE_OWNER_OK(UID)  ((UID) == 0 || (UID) == UNKNOWNUID)
+#else
+#define FILE_OWNER_OK(UID)  ((UID) == 0)
+#endif
+
 /*
  * Given a Kerberos principal "principal", and a local username "luser",
  * determine whether user is authorized to login according to the
@@ -112,7 +119,7 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
 	free(princname);
 	return(FALSE);
     }
-    if ((sbuf.st_uid != pwd->pw_uid) && sbuf.st_uid) {
+    if (sbuf.st_uid != pwd->pw_uid && !FILE_OWNER_OK(sbuf.st_uid)) {
 	fclose(fp);
 	free(princname);
 	return(FALSE);

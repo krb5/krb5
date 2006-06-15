@@ -406,6 +406,8 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     CREDENTIALS *creds;
     KRB_UINT32 *laddrp;
 {
+    int ok;
+    char key_string[BUFSIZ];
     KTEXT_ST cip_st;
     KTEXT cip = &cip_st;	/* Returned Ciphertext */
     int kerror;
@@ -420,6 +422,23 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
 				   cip, &byteorder, &local_addr);
     if (kerror)
 	return kerror;
+
+    /* If arg is null, we have to prompt for the password.  decrypt_tkt, by
+       way of the *_passwd_to_key functions, will prompt if the password is
+       NULL, but that means that each separate encryption type will prompt
+       separately.  Obtain the password first so that we can try multiple
+       encryption types without re-prompting.
+
+       Don't, however, prompt on a Windows or Macintosh environment, since
+       that's harder.  Rely on our caller to do it. */
+#if !(defined(_WIN32) || defined(USE_LOGIN_LIBRARY))
+    if (arg == NULL) {
+        ok = des_read_pw_string(key_string, sizeof(key_string), "Password", 0);
+        if (ok != 0)
+            return ok;
+        arg = key_string;
+    }
+#endif
     
     /* Attempt to decrypt the reply.  Loop trying password_to_key algorithms 
        until we succeed or we get an error other than "bad password" */
@@ -443,6 +462,7 @@ krb_get_in_tkt_preauth_creds(user, instance, realm, service, sinstance, life,
     }
 
     /* stomp stomp stomp */
+    memset(key_string, 0, sizeof(key_string));
     memset(cip->dat, 0, (size_t)cip->length);
     return kerror;
 }

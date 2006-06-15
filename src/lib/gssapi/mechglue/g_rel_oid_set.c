@@ -1,4 +1,4 @@
-/* #ident  "@(#)gss_release_oid_set.c 1.12     95/08/23 SMI" */
+/* #pragma ident	"@(#)g_rel_oid_set.c	1.12	97/11/11 SMI" */
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -39,8 +39,8 @@ gss_release_oid_set (minor_status,
 OM_uint32 *		minor_status;
 gss_OID_set *		set;
 {
-   size_t index;
-   gss_OID oid;
+    OM_uint32 index;
+    gss_OID oid;
     if (minor_status)
 	*minor_status = 0;
 

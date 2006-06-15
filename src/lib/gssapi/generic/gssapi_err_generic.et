@@ -43,4 +43,7 @@ error_code G_BAD_DIRECTION, "Packet was replayed in wrong direction"
 error_code G_TOK_TRUNC, "Token is missing data"
 error_code G_REFLECT, "Token was reflected"
 error_code G_WRONG_TOKID, "Received token ID does not match expected token ID"
+error_code G_CRED_USAGE_MISMATCH, "The given credential's usage does not match the requested usage"
+error_code G_STORE_ACCEPTOR_CRED_NOSUPP, "Storing of acceptor credentials is not supported by the mechanism"
+error_code G_STORE_NON_DEFAULT_CRED_NOSUPP, "Storing of non-default credentials is not supported by the mechanism"
 end

@@ -166,7 +166,11 @@ if test -n "$do_exec_prefix"; then
 fi
 
 if test -n "$do_cflags"; then
-    echo "-I${includedir}"
+    if test x"$includedir" != x"/usr/include" ; then
+        echo "-I${includedir}"
+    else
+        echo ''
+    fi
 fi
 
 

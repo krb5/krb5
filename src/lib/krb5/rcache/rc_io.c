@@ -139,11 +139,17 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	case EROFS:
 	case EEXIST:
 	    retval = KRB5_RC_IO_PERM;
+	    krb5_set_error_message(context, retval,
+				   "Cannot create replay cache: %s",
+				   strerror(errno));
 	    do_not_unlink = 1;
 	    goto cleanup;
 
 	default:
 	    retval = KRB5_RC_IO_UNKNOWN;
+	    krb5_set_error_message(context, retval,
+				   "Cannot create replay cache: %s",
+				   strerror(errno));
 	    goto cleanup;
 	}
     }
@@ -228,10 +234,16 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 	case EACCES:
 	case EROFS:
 	    retval = KRB5_RC_IO_PERM;
+	    krb5_set_error_message (context, retval,
+				    "Cannot open replay cache %s: %s",
+				    d->fn, strerror(errno));
 	    goto cleanup;
 
 	default:
 	    retval = KRB5_RC_IO_UNKNOWN;
+	    krb5_set_error_message (context, retval,
+				    "Cannot open replay cache %s: %s",
+				    d->fn, strerror(errno));
 	    goto cleanup;
 	}
     }
@@ -269,7 +281,7 @@ krb5_error_code
 krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
 		krb5_rc_iostuff *old)
 {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__CYGWIN__)
     char *new_fn = NULL;
     char *old_fn = NULL;
     off_t offset = 0;
@@ -348,14 +360,26 @@ krb5_rc_io_write(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
     if (write(d->fd, (char *) buf, num) == -1)
 	switch(errno)
 	{
-	case EBADF: return KRB5_RC_IO_UNKNOWN;
-	case EFBIG: return KRB5_RC_IO_SPACE;
 #ifdef EDQUOT
-	case EDQUOT: return KRB5_RC_IO_SPACE;
+	case EDQUOT:
 #endif
-	case ENOSPC: return KRB5_RC_IO_SPACE;
-	case EIO: return KRB5_RC_IO_IO;
-	default: return KRB5_RC_IO_UNKNOWN;
+	case EFBIG:
+	case ENOSPC:
+	    krb5_set_error_message (context, KRB5_RC_IO_SPACE,
+				    "Can't write to replay cache: %s",
+				    strerror(errno));
+	    return KRB5_RC_IO_SPACE;
+	case EIO:
+	    krb5_set_error_message (context, KRB5_RC_IO_IO,
+				    "Can't write to replay cache: %s",
+				    strerror(errno));
+	    return KRB5_RC_IO_IO;
+	case EBADF:
+	default:
+	    krb5_set_error_message (context, KRB5_RC_IO_UNKNOWN,
+				    "Can't write to replay cache: %s",
+				    strerror(errno));
+	    return KRB5_RC_IO_UNKNOWN;
 	}
     return 0;
 }
@@ -373,7 +397,11 @@ krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
 	{
 	case EBADF: return KRB5_RC_IO_UNKNOWN;
 	case EIO: return KRB5_RC_IO_IO;
-	default: return KRB5_RC_IO_UNKNOWN;
+	default:
+	    krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
+				   "Cannot sync replay cache file: %s",
+				   strerror(errno));
+	    return KRB5_RC_IO_UNKNOWN;
 	}
     }
     return 0;
@@ -387,9 +415,13 @@ krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
     if ((count = read(d->fd, (char *) buf, num)) == -1)
 	switch(errno)
 	{
-	case EBADF: return KRB5_RC_IO_UNKNOWN;
 	case EIO: return KRB5_RC_IO_IO;
-	default: return KRB5_RC_IO_UNKNOWN;
+	case EBADF:
+	default:
+	    krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
+				   "Can't read from replay cache: %s",
+				   strerror(errno));
+	    return KRB5_RC_IO_UNKNOWN;
 	}
     if (count == 0)
 	return KRB5_RC_IO_EOF;
@@ -417,12 +449,24 @@ krb5_rc_io_destroy(krb5_context context, krb5_rc_iostuff *d)
     if (unlink(d->fn) == -1)
 	switch(errno)
 	{
-	case EBADF: return KRB5_RC_IO_UNKNOWN;
-	case EIO: return KRB5_RC_IO_IO;
-	case EPERM: return KRB5_RC_IO_PERM;
-	case EBUSY: return KRB5_RC_IO_PERM;
-	case EROFS: return KRB5_RC_IO_PERM;
-	default: return KRB5_RC_IO_UNKNOWN;
+	case EIO:
+	    krb5_set_error_message(context, KRB5_RC_IO_IO,
+				   "Can't destroy replay cache: %s",
+				   strerror(errno));
+	    return KRB5_RC_IO_IO;
+	case EPERM:
+	case EBUSY:
+	case EROFS:
+	    krb5_set_error_message(context, KRB5_RC_IO_PERM,
+				   "Can't destroy replay cache: %s",
+				   strerror(errno));
+	    return KRB5_RC_IO_PERM;
+	case EBADF:
+	default:
+	    krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
+				   "Can't destroy replay cache: %s",
+				   strerror(errno));
+	    return KRB5_RC_IO_UNKNOWN;
 	}
     return 0;
 }

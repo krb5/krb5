@@ -929,6 +929,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib/krb5/keytab lib/krb5/krb lib/krb5/rcache lib/krb5/os
 
 	lib/gssapi lib/gssapi/generic lib/gssapi/krb5
+	lib/gssapi/mechglue lib/gssapi/spnego
 
 	lib/rpc lib/rpc/unit-test
 

@@ -198,4 +198,4 @@ default location for the local host's
 .B keytab
 file.
 .SH SEE ALSO
-klist(1), kdestroy(1), krb5(3)
+klist(1), kdestroy(1), kerberos(1)

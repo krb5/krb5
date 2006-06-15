@@ -82,6 +82,7 @@ install::
 	f=$(FAKEKA); \
 	if test -n "$$f" ; then \
 		$(INSTALL_PROGRAM) $$f ${DESTDIR}$(SERVER_BINDIR)/$$f; \
+		$(INSTALL_DATA) $(srcdir)/fakeka.M ${DESTDIR}$(SERVER_MANDIR)/fakeka.8; \
 	fi
 
 clean::

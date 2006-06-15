@@ -7,6 +7,8 @@
 #include "gss_libinit.h"
 #include "k5-platform.h"
 
+#include "mglueP.h"
+
 /*
  * Initialize the GSSAPI library.
  */
@@ -26,6 +28,9 @@ int gssint_lib_init(void)
     add_error_table(&et_k5g_error_table);
     add_error_table(&et_ggss_error_table);
 #endif
+    err = gssint_mechglue_init();
+    if (err)
+	return err;
     err = k5_mutex_finish_init(&gssint_krb5_keytab_lock);
     if (err)
 	return err;
@@ -61,6 +66,7 @@ void gssint_lib_fini(void)
     k5_mutex_destroy(&kg_vdb.mutex);
     k5_mutex_destroy(&kg_kdc_flag_mutex);
     k5_mutex_destroy(&gssint_krb5_keytab_lock);
+    gssint_mechglue_fini();
 }
 
 OM_uint32 gssint_initialize_library (void)

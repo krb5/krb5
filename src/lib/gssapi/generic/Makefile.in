@@ -67,11 +67,9 @@ SRCS = \
 	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/disp_major_status.c \
 	$(srcdir)/gssapi_generic.c \
-	$(srcdir)/oid_ops.c \
 	$(srcdir)/rel_buffer.c \
 	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
-	$(srcdir)/util_oid.c \
 	$(srcdir)/util_ordering.c \
 	$(srcdir)/util_set.c \
 	$(srcdir)/util_token.c \
@@ -82,11 +80,9 @@ OBJS = \
 	$(OUTPRE)disp_com_err_status.$(OBJEXT) \
 	$(OUTPRE)disp_major_status.$(OBJEXT) \
 	$(OUTPRE)gssapi_generic.$(OBJEXT) \
-	$(OUTPRE)oid_ops.$(OBJEXT) \
 	$(OUTPRE)rel_buffer.$(OBJEXT) \
 	$(OUTPRE)rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)util_buffer.$(OBJEXT) \
-	$(OUTPRE)util_oid.$(OBJEXT) \
 	$(OUTPRE)util_ordering.$(OBJEXT) \
 	$(OUTPRE)util_set.$(OBJEXT) \
 	$(OUTPRE)util_token.$(OBJEXT) \
@@ -97,11 +93,9 @@ STLIBOBJS = \
 	disp_com_err_status.o \
 	disp_major_status.o \
 	gssapi_generic.o \
-	oid_ops.o \
 	rel_buffer.o \
 	rel_oid_set.o \
 	util_buffer.o \
-	util_oid.o \
 	util_ordering.o \
 	util_set.o \
 	util_token.o \
@@ -170,11 +164,6 @@ gssapi_generic.so gssapi_generic.po $(OUTPRE)gssapi_generic.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.c \
   gssapi_generic.h
-oid_ops.so oid_ops.po $(OUTPRE)oid_ops.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/gssapi/gssapi.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
-  oid_ops.c
 rel_buffer.so rel_buffer.po $(OUTPRE)rel_buffer.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -190,11 +179,6 @@ util_buffer.so util_buffer.po $(OUTPRE)util_buffer.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   util_buffer.c
-util_oid.so util_oid.po $(OUTPRE)util_oid.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
-  util_oid.c
 util_ordering.so util_ordering.po $(OUTPRE)util_ordering.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

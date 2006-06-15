@@ -15,10 +15,6 @@
 #include <string.h>
 #include <errno.h>
 
-#define g_OID_equal(o1,o2) \
-   (((o1)->length == (o2)->length) && \
-    (memcmp((o1)->elements,(o2)->elements,(int) (o1)->length) == 0))
-
 static gss_mech_spec_name name_list = NULL;
 
 /*
