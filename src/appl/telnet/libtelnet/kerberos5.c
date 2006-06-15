@@ -99,7 +99,7 @@ static void kerberos5_forward(Authenticator *);
 
 #endif	/* FORWARD */
 
-static unsigned char str_data[8192] = {IAC, SB, TELOPT_AUTHENTICATION, 0,
+static unsigned char str_data[TELNET_BUFSIZE] = {IAC, SB, TELOPT_AUTHENTICATION, 0,
 			  		AUTHTYPE_KERBEROS_V5, };
 /*static unsigned char str_name[1024] = { IAC, SB, TELOPT_AUTHENTICATION,
 					TELQUAL_NAME, };*/
