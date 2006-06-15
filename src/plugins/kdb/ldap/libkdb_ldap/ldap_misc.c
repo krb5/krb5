@@ -648,7 +648,7 @@ decode_tl_data(tl_data, tl_type, data)
     while(curr < (tl_data->tl_data_contents + tl_data->tl_data_length)) {
 
 	/* get the type of the content */
-	memset(&subtype, curr[0], 1);
+	subtype = (int) curr[0];
 	/* forward by 1 byte*/
 	curr += 1;
     
