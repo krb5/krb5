@@ -1,6 +1,6 @@
 thisconfigdir=../../..
 myfulldir=lib/gssapi/mechglue
-mydir=mechglue
+mydir=lib/gssapi/mechglue
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic
 DEFS=
