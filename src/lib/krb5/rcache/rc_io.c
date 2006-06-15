@@ -281,7 +281,7 @@ krb5_error_code
 krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
 		krb5_rc_iostuff *old)
 {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__CYGWIN__)
     char *new_fn = NULL;
     char *old_fn = NULL;
     off_t offset = 0;
