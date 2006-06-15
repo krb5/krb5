@@ -932,7 +932,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		char *subtreednlist[2]={NULL};
 		krb5_boolean dnoutofsubtree=TRUE;
 
-		if(st=krb5_get_policydn(context, entries, &oldpolicydn) != 0)
+		if ((st=krb5_get_policydn(context, entries, &oldpolicydn)) != 0)
 			goto cleanup;
 		
 		if (strlen(xargs.tktpolicydn) != 0) {
@@ -1281,12 +1281,13 @@ getstringtime(epochtime)
 {
     struct tm           tme;
     char                *strtime=NULL;
+    time_t		posixtime = epochtime;
     
     strtime = calloc (50, 1);
     if (strtime == NULL)
 	return NULL;
     
-    if (gmtime_r((const time_t *)&epochtime, &tme) == NULL)
+    if (gmtime_r(&posixtime, &tme) == NULL)
 	return NULL;
     
     strftime(strtime, 50, "%Y%m%d%H%M%SZ", &tme);
