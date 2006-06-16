@@ -971,7 +971,7 @@ urgsafe_getc(f)
  * getline - a hacked up version of fgets to ignore TELNET escape codes.
  */
 char *
-getline(s, n, iop)
+ftpd_getline(s, n, iop)
 	char *s;
 	int n;
 	register FILE *iop;
@@ -1213,7 +1213,7 @@ yylex()
 		case CMD:
 			(void) signal(SIGALRM, toolong);
 			(void) alarm((unsigned) timeout);
-			if (getline(cbuf, sizeof(cbuf)-1, stdin) == NULL) {
+			if (ftpd_getline(cbuf, sizeof(cbuf)-1, stdin) == NULL) {
 				reply(221, "You could at least say goodbye.");
 				dologout(0);
 			}
