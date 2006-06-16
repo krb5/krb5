@@ -197,7 +197,7 @@ kadm5int_acl_parse_line(lp)
 	    for (op=acle_ops; *op; op++) {
 		char rop;
 
-		rop = (isupper((int) *op)) ? tolower((int) *op) : *op;
+		rop = (isupper((unsigned char) *op)) ? tolower((unsigned char) *op) : *op;
 		found = 0;
 		for (t=0; acl_op_table[t].ao_op; t++) {
 		    if (rop == acl_op_table[t].ao_op) {

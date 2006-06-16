@@ -329,8 +329,8 @@ krb5_425_conv_principal(krb5_context context, const char *name, const char *inst
 		      return retval;
 		  if (domain) {
 		      for (cp = domain; *cp; cp++)
-			  if (isupper((int) (*cp)))
-			      *cp = tolower((int) *cp);
+			  if (isupper((unsigned char) (*cp)))
+			      *cp = tolower((unsigned char) *cp);
 		      strncat(buf, ".", sizeof(buf) - 1 - strlen(buf));
 		      strncat(buf, domain, sizeof(buf) - 1 - strlen(buf));
 		      krb5_xfree(domain);
