@@ -176,10 +176,14 @@ kadmin_parse_name(name, principal)
 static void extended_com_err_fn (const char *myprog, errcode_t code,
 				 const char *fmt, va_list args)
 {
-    const char *emsg;
-    emsg = krb5_get_error_message (context, code);
-    fprintf (stderr, "%s: %s ", myprog, emsg);
-    krb5_free_error_message (context, emsg);
+    if (code) {
+	const char *emsg;
+	emsg = krb5_get_error_message (context, code);
+	fprintf (stderr, "%s: %s ", myprog, emsg);
+	krb5_free_error_message (context, emsg);
+    } else {
+	fprintf (stderr, "%s: ", myprog);
+    }
     vfprintf (stderr, fmt, args);
     fprintf (stderr, "\n");
 }
@@ -723,6 +727,10 @@ void kadmin_cpw(argc, argv)
 	    }
 	    continue;
 	}
+	goto usage;
+    }
+    if (*argv == NULL) {
+	com_err("change_password", 0, "missing principal name");
 	goto usage;
     }
     retval = kadmin_parse_name(*argv, &princ);
