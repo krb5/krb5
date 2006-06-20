@@ -97,7 +97,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         void *handle = NULL;
 
         if (!err) {
-            handle = dlopen(filepath, RTLD_NOW /*| RTLD_GLOBAL*/);
+            handle = dlopen(filepath, RTLD_NOW | RTLD_GLOBAL);
             if (handle == NULL) {
                 const char *e = dlerror();
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
