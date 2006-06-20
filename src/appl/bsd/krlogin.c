@@ -1101,7 +1101,7 @@ static void writer()
     for (;;) {
 	FD_ZERO(&waitread);
 	FD_SET(0, &waitread);
-	n = select(8*sizeof(waitread), &waitread, 0, 0, 0, 0);
+	n = select(1, &waitread, 0, 0, 0, 0);
 	if (n < 0 && errno == EINTR)
 	  continue;
 	if (n > 0)

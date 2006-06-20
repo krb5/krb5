@@ -512,7 +512,7 @@ main(argc, argv0)
       rewrite:
 	FD_ZERO(&rembits);
 	FD_SET(rem, &rembits);
-	if (select(8*sizeof(rembits), 0, &rembits, 0, 0) < 0) {
+	if (select(rem + 1, 0, &rembits, 0, 0) < 0) {
 	    if (errno != EINTR) {
 		perror("select");
 		exit(1);
@@ -550,7 +550,7 @@ main(argc, argv0)
     FD_SET(rem, &readfrom);
     do {
 	ready = readfrom;
-	if (select(8*sizeof(ready), &ready, 0, 0, 0) < 0) {
+	if (select(((rfd2 > rem) ? rfd2 : rem) + 1, &ready, 0, 0, 0) < 0) {
 	    if (errno != EINTR) {
 		perror("select");
 		exit(1);
