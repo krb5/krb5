@@ -39,7 +39,8 @@ kerberos-admin.info and krb5-user.info, respectively.  These files are
 also available as HTML files.
 
 If you are attempting to build under Windows, please see the
-src/windows/README file.
+src/windows/README file.  Note that this release might not build
+under Windows currently.
 
 Reporting Bugs
 --------------
@@ -60,19 +61,15 @@ http://krbdev.mit.edu/rt/
 and logging in as "guest" with password "guest".
 
 Major changes in 1.5
-----------------------
+--------------------
 
-Merged to the trunk and included in this alpha release:
+* plug-in architecture
 
-* plug-in architecture (in-progress)
+* multi-mechanism GSS-API implementation ("mechglue"), donated by
+  Sun Microsystems.
 
-Not yet merged to the trunk, thus not included in this alpha release:
-
-* LDAP plug-in for KDB
-
-* multi-mechanism GSS-API implementation
-
-* SPNEGO implementation
+* Simple and Protected GSS-API negotiation mechanism ("SPNEGO")
+  implementation, donated by Sun Microsystems.
 
 Minor changes in 1.5
 ----------------------
@@ -286,8 +283,13 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Acknowledgements
-----------------
+Acknowledgments
+---------------
+
+Thanks to Russ Allbery for contributing and integrating patches from
+Debian and other places.
+
+Thanks to Novell for donating the KDB abstraction layer.
 
 Thanks to Sun Microsystems for donating their implementations of
 mechglue and SPNEGO.
