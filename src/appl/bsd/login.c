@@ -786,7 +786,7 @@ static int verify_krb_v4_tgt (realm)
     struct hostent *hp;
     KTEXT_ST ticket;
     AUTH_DAT authdata;
-    unsigned long addr;
+    unsigned KRB4_32 addr;
     static /*const*/ char rcmd_str[] = "rcmd";
 #if 0
     char key[8];
