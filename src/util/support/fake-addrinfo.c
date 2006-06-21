@@ -203,9 +203,9 @@ typedef struct {
 	struct hostent *my_hp = NULL;					\
 	int my_h_err, my_ret;						\
 	my_ret = gethostbyname_r((NAME), &TMP.ent,			\
-				 TMP.buf, sizeof (TMP.buf), &TMP.hp,	\
+				 TMP.buf, sizeof (TMP.buf), &my_hp,	\
 				 &my_h_err);				\
-	(HP) = (((my_ret != 0) || (TMP.hp != &TMP.ent))			\
+	(HP) = (((my_ret != 0) || (my_hp != &TMP.ent))			\
 		? 0							\
 		: &TMP.ent);						\
 	(ERR) = my_h_err;						\
@@ -217,7 +217,7 @@ typedef struct {
 	my_ret = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &TMP.ent,	\
 				 TMP.buf, sizeof (TMP.buf), &my_hp,	\
 				 &my_h_err);				\
-	(HP) = (((my_ret != 0) || (TMP.hp != &TMP.ent))			\
+	(HP) = (((my_ret != 0) || (my_hp != &TMP.ent))			\
 		? 0							\
 		: &TMP.ent);						\
 	(ERR) = my_h_err;						\
