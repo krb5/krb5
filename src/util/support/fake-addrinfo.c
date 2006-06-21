@@ -195,45 +195,49 @@ typedef struct {
 #else
 #ifdef GETHOSTBYNAME_R_RETURNS_INT
 typedef struct {
-    struct hostent ent, *hp;
-    int err;
+    struct hostent ent;
     char buf[8192];
 } GET_HOST_TMP;
 #define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
     {									\
+	struct hostent *my_hp;						\
+	int my_h_err;							\
 	(HP) = (gethostbyname_r((NAME), &TMP.ent,			\
 				TMP.buf, sizeof (TMP.buf), &TMP.hp,	\
-				&TMP.err)				\
+				&my_h_err)				\
 		? 0							\
 		: &TMP.ent);						\
-	(ERR) = TMP.err;						\
+	(ERR) = my_h_err;						\
     }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR, TMP) \
     {									\
+	struct hostent *my_hp;						\
+	int my_h_err;							\
 	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &TMP.ent,	\
-				TMP.buf, sizeof (TMP.buf), &TMP.hp,	\
-				&TMP.err)				\
+				TMP.buf, sizeof (TMP.buf), &my_hp,	\
+				&my_h_err)				\
 		? 0							\
 		: &TMP.ent);						\
-	(ERR) = TMP.err;						\
+	(ERR) = my_h_err;						\
     }
 #else
 typedef struct {
     struct hostent ent;
-    int err;
     char buf[8192];
 } GET_HOST_TMP;
 #define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
     {									\
+	int my_h_err;							\
 	(HP) = gethostbyname_r((NAME), &TMP.ent,			\
-			       TMP.buf, sizeof (TMP.buf), &TMP.err);	\
-	(ERR) = TMP.err;						\
+			       TMP.buf, sizeof (TMP.buf), &my_h_err);	\
+	(ERR) = my_h_err;						\
     }
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR, TMP) \
     {									\
+	int my_h_err;							\
 	(HP) = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &TMP.ent,	\
-			       TMP.buf, sizeof (TMP.buf), &TMP.err);	\
-	(ERR) = TMP.err;						\
+			       TMP.buf, sizeof (TMP.buf), &my_h_err);	\
+	(ERR) = my_h_err;						\
     }
 #endif /* returns int? */
 #endif /* _AIX */
@@ -249,29 +253,30 @@ typedef struct servent *GET_SERV_TMP;
 #else
 #ifdef GETSERVBYNAME_R_RETURNS_INT
 typedef struct {
-    struct servent ent, *sp;
-    int err;
+    struct servent ent;
     char buf[8192];
 } GET_SERV_TMP;
 #define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR, TMP) \
     {									\
 	struct servent *my_sp;						\
+	int my_s_err;							\
 	(SP) = (getservbyname_r((NAME), (PROTO), &TMP.ent,		\
 				TMP.buf, sizeof (TMP.buf), &my_sp,	\
-				&TMP.err)				\
+				&my_s_err)				\
 		? 0							\
 		: &TMP.ent);						\
-	(ERR) = TMP.err;						\
+	(ERR) = my_s_err;						\
     }
 #define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR, TMP) \
     {									\
 	struct servent *my_sp;						\
+	int my_s_err;							\
 	(SP) = (getservbyport_r((PORT), (PROTO), &TMP.ent,		\
 				TMP.buf, sizeof (TMP.buf), &my_sp,	\
-				&TMP.err)				\
+				&my_s_err)				\
 		? 0							\
 		: &TMP.ent);						\
-	(ERR) = TMP.err;						\
+	(ERR) = my_s_err;						\
     }
 #else
 /* returns ptr -- IRIX? */
