@@ -35,7 +35,4 @@
 /* GSSAPI Extension functions -- these functions aren't */
 /* in the GSSAPI, but they are provided in this library */
 
-int gssd_pname_to_uid (char *, gss_OID, gss_OID, uid_t *);
-void gss_initialize (void);
-
 #endif /* _GSS_MECHGLUE_H */

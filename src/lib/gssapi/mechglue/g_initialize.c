@@ -666,58 +666,6 @@ const gss_OID oid;
 	return (aMech->mech);
 } /* gssint_get_mechanism */
 
-gss_mechanism_ext
-gssint_get_mechanism_ext(oid)
-const gss_OID oid;
-{
-	gss_mech_info aMech;
-	gss_mechanism_ext mech_ext;
-
-	/* check if the mechanism is already loaded */
-	if ((aMech = searchMechList(oid)) != NULL && aMech->mech_ext != NULL)
-		return (aMech->mech_ext);
-
-	if (gssint_get_mechanism(oid) == NULL)
-		return (NULL);
-
-	if (aMech->dl_handle == NULL)
-		return (NULL);
-
-	/* Load the gss_config_ext struct for this mech */
-
-	mech_ext = (gss_mechanism_ext)malloc(sizeof (struct gss_config_ext));
-
-	if (mech_ext == NULL)
-		return (NULL);
-
-	/*
-	 * dlsym() the mech's 'method' functions for the extended APIs
-	 *
-	 * NOTE:  Until the void *context argument is removed from the
-	 * SPI method functions' signatures it will be necessary to have
-	 * different function pointer typedefs and function names for
-	 * the SPI methods than for the API.  When this argument is
-	 * removed it will be possible to rename gss_*_sfct to gss_*_fct
-	 * and and gssspi_* to gss_*.
-	 */
-	mech_ext->gss_acquire_cred_with_password =
-		(gss_acquire_cred_with_password_sfct)dlsym(aMech->dl_handle,
-			"gssspi_acquire_cred_with_password");
-
-	/* Set aMech->mech_ext */
-	(void) k5_mutex_lock(&g_mechListLock);
-
-	if (aMech->mech_ext == NULL)
-		aMech->mech_ext = mech_ext;
-	else
-		free(mech_ext);	/* we raced and lost; don't leak */
-
-	(void) k5_mutex_unlock(&g_mechListLock);
-
-	return (aMech->mech_ext);
-
-} /* gssint_get_mechanism_ext */
-
 
 /*
  * this routine is used for searching the list of mechanism data.
