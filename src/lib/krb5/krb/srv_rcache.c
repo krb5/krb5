@@ -115,17 +115,13 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     retval = krb5_rc_recover_or_initialize(context, rcache, context->clockskew);
     if (retval) {
 	krb5_rc_close(context, rcache);
-	rcache = 0;
 	goto cleanup;
     }
 
     *rcptr = rcache;
-    rcache = 0;
     retval = 0;
 
 cleanup:
-    if (rcache)
-	krb5_xfree(rcache);
     if (cachename)
 	krb5_xfree(cachename);
     return retval;
