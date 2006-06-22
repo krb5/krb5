@@ -50,6 +50,7 @@
 #include "datastore.h"
 #include "rpc_auth.h"
 #include "msg_headers.h"
+#include "marshall.h"
 
 #include <stdlib.h>
 #include <string.h>
