@@ -3,8 +3,9 @@
  *	 credentical cache API
  *	
  * Written by Frank Dabek July 1998
+ * Updated by Jeffrey Altman June 2006
  *
- * Copyright 1998, 1999 by the Massachusetts Institute of Technology.
+ * Copyright 1998, 1999, 2006 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -28,14 +29,11 @@
  * 
  */
 
-#define NEED_WINDOWS
 #include "k5-int.h"
 #include "stdcc.h"
 #include "stdcc_util.h"
 #include "string.h"
 #include <stdio.h>
-
-apiCB *gCntrlBlock = NULL;
 
 #if defined(_WIN32)
 #include "winccld.h"	
@@ -56,14 +54,37 @@ apiCB *gCntrlBlock = NULL;
 #define SHOW_DEBUG(buf)
 #endif
 
+#ifdef USE_CCAPI_V3
+cc_context_t gCntrlBlock = NULL;
+#else
+apiCB *gCntrlBlock = NULL;
+#endif
+
 /*
  * declare our global object wanna-be
  * must be installed in ccdefops.c
  */
 
 krb5_cc_ops krb5_cc_stdcc_ops = {
-     0,
-     "API",
+      0,
+      "API",
+#ifdef USE_CCAPI_V3
+      krb5_stdccv3_get_name,
+      krb5_stdccv3_resolve,
+      krb5_stdccv3_generate_new,
+      krb5_stdccv3_initialize,
+      krb5_stdccv3_destroy,
+      krb5_stdccv3_close,
+      krb5_stdccv3_store,
+      krb5_stdccv3_retrieve,
+      krb5_stdccv3_get_principal,
+      krb5_stdccv3_start_seq_get,
+      krb5_stdccv3_next_cred,
+      krb5_stdccv3_end_seq_get,
+      krb5_stdccv3_remove, 
+      krb5_stdccv3_set_flags,
+      krb5_stdccv3_get_flags
+#else
       krb5_stdcc_get_name,
       krb5_stdcc_resolve,
       krb5_stdcc_generate_new,
@@ -78,7 +99,8 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdcc_end_seq_get,
       krb5_stdcc_remove, 
       krb5_stdcc_set_flags,
-      krb5_stdcc_get_flags,
+      krb5_stdcc_get_flags
+#endif
 };
 
 #if defined(_WIN32)
@@ -114,6 +136,36 @@ struct err_xlate
 
 static const struct err_xlate err_xlate_table[] =
 {
+#ifdef USE_CCAPI_V3
+        { ccIteratorEnd,			KRB5_CC_END },
+        { ccErrBadParam,			KRB5_FCC_INTERNAL },
+        { ccErrNoMem, 				KRB5_CC_NOMEM },
+        { ccErrInvalidContext, 			KRB5_FCC_INTERNAL },
+        { ccErrInvalidCCache,			KRB5_FCC_INTERNAL },
+        { ccErrInvalidString,			KRB5_FCC_INTERNAL },
+        { ccErrInvalidCredentials,		KRB5_FCC_INTERNAL },
+        { ccErrInvalidCCacheIterator,		KRB5_FCC_INTERNAL },
+        { ccErrInvalidCredentialsIterator,	KRB5_FCC_INTERNAL },
+        { ccErrInvalidLock,			KRB5_FCC_INTERNAL },
+        { ccErrBadName,				KRB5_CC_BADNAME },
+        { ccErrBadCredentialsVersion,		KRB5_FCC_INTERNAL },
+        { ccErrBadAPIVersion,			KRB5_FCC_INTERNAL },
+        { ccErrContextLocked,			KRB5_FCC_INTERNAL },
+        { ccErrContextUnlocked,			KRB5_FCC_INTERNAL },
+        { ccErrCCacheLocked,			KRB5_FCC_INTERNAL },
+        { ccErrCCacheUnlocked,			KRB5_FCC_INTERNAL },
+        { ccErrBadLockType,			KRB5_FCC_INTERNAL },
+        { ccErrNeverDefault,			KRB5_FCC_INTERNAL },
+        { ccErrCredentialsNotFound,		KRB5_CC_NOTFOUND },
+        { ccErrCCacheNotFound,			KRB5_FCC_NOFILE },
+        { ccErrContextNotFound,			KRB5_FCC_INTERNAL },
+        { ccErrServerUnavailable,		KRB5_FCC_NOFILE },
+        { ccErrServerInsecure,			KRB5_FCC_INTERNAL },
+        { ccErrServerCantBecomeUID,		KRB5_FCC_INTERNAL },
+        { ccErrTimeOffsetNotSet,		KRB5_FCC_INTERNAL },
+        { ccErrBadInternalMessage,		KRB5_FCC_INTERNAL },
+        { ccErrNotImplemented,			KRB5_FCC_INTERNAL },
+#else
 	{ CC_BADNAME,				KRB5_CC_BADNAME },
 	{ CC_NOTFOUND,				KRB5_CC_NOTFOUND },
 	{ CC_END,				KRB5_CC_END },
@@ -131,6 +183,7 @@ static const struct err_xlate err_xlate_table[] =
 	{ CC_ERR_CACHE_RELEASE,			KRB5_FCC_INTERNAL /* XXX */ },
 	{ CC_ERR_CACHE_FULL,			KRB5_FCC_INTERNAL /* XXX */ },
 	{ CC_ERR_CRED_VERSION,			KRB5_FCC_INTERNAL /* XXX */ },
+#endif
 	{ 0,					0 }
 };
 
@@ -138,7 +191,7 @@ static krb5_error_code cc_err_xlate(int err)
 {
 	const struct err_xlate *p;
 
-	if (err == CC_NOERROR)
+	if (err == ccNoError)
 		return 0;
 
 	for (p = err_xlate_table; p->cc_err; p++) {
@@ -148,6 +201,536 @@ static krb5_error_code cc_err_xlate(int err)
 	return KRB5_FCC_INTERNAL; /* XXX we need a miscellaneous return */
 }
 
+
+#ifdef USE_CCAPI_V3
+static krb5_error_code stdccv3_setup(krb5_context context,
+				     stdccCacheDataPtr ccapi_data)
+{
+	cc_int32	err;
+
+  	/* make sure the API has been intialized */
+  	if (gCntrlBlock == NULL) {
+		err = cc_initialize(&gCntrlBlock, ccapi_version_max, NULL, NULL);
+		if (err != ccNoError)
+			return cc_err_xlate(err);
+	}
+
+	/*
+	 * No ccapi_data structure, so we don't need to make sure the
+	 * ccache exists.
+	 */
+	if (!ccapi_data)
+		return 0;
+
+	/*
+	 * The ccache already exists
+	 */
+	if (ccapi_data->NamedCache)
+		return 0;
+
+	err = cc_context_open_ccache(gCntrlBlock, ccapi_data->cache_name,
+		      &ccapi_data->NamedCache);
+	if (err == ccNoError)
+		return 0;
+
+	ccapi_data->NamedCache = NULL;
+	return cc_err_xlate(err);
+}
+
+void krb5_stdccv3_shutdown()
+{
+	if (gCntrlBlock)
+		cc_context_release(gCntrlBlock);
+	gCntrlBlock = NULL;
+}
+
+/*
+ * -- generate_new --------------------------------
+ * 
+ * create a new cache with a unique name, corresponds to creating a
+ * named cache initialize the API here if we have to.
+ */
+krb5_error_code KRB5_CALLCONV  krb5_stdccv3_generate_new 
+	(krb5_context context, krb5_ccache *id ) 
+{
+  	krb5_ccache 		newCache = NULL;
+	krb5_error_code		retval;
+	stdccCacheDataPtr	ccapi_data = NULL;
+	char 			*name = NULL;
+	cc_time 		time;
+	int 			err;
+
+	if ((retval = stdccv3_setup(context, NULL)))
+		return retval;
+	
+	retval = KRB5_CC_NOMEM;
+	if (!(newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache))))
+		goto errout;
+  	if (!(ccapi_data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
+		goto errout;
+	if (!(name = malloc(256)))
+		goto errout;
+	
+  	/* create a unique name */
+  	if (retval = cc_context_get_change_time(gCntrlBlock, &time))
+	        goto errout;
+  	sprintf(name, "gen_new_cache%d", time);
+  	
+  	/* create the new cache */
+  	err = cc_context_create_ccache(gCntrlBlock, name, cc_credentials_v5, 0L,
+			&ccapi_data->NamedCache);
+	if (err != ccNoError) {
+		retval = cc_err_xlate(err);
+		goto errout;
+	}
+
+  	/* setup some fields */
+  	newCache->ops = &krb5_cc_stdcc_ops;
+  	newCache->data = ccapi_data;
+	ccapi_data->cache_name = name;
+  	
+  	/* return a pointer to the new cache */
+	*id = newCache;
+	  	
+	return 0;
+
+errout:
+	if (newCache)
+		free(newCache);
+	if (ccapi_data)
+		free(ccapi_data);
+	if (name)
+		free(name);
+	return retval;
+}
+  
+/*
+ * resolve
+ *
+ * create a new cache with the name stored in residual
+ */
+krb5_error_code KRB5_CALLCONV  krb5_stdccv3_resolve 
+        (krb5_context context, krb5_ccache *id , const char *residual ) 
+{
+	krb5_ccache 		newCache = NULL;
+	stdccCacheDataPtr	ccapi_data = NULL;
+	int 			err;
+	krb5_error_code		retval;
+	char 			*cName = NULL;
+	
+	if ((retval = stdccv3_setup(context, NULL)))
+		return retval;
+	
+	retval = KRB5_CC_NOMEM;
+	if (!(newCache = (krb5_ccache) malloc(sizeof(struct _krb5_ccache))))
+		goto errout;
+  	
+  	if (!(ccapi_data = (stdccCacheDataPtr)malloc(sizeof(stdccCacheData))))
+		goto errout;
+
+	if (!(cName = malloc(strlen(residual)+1)))
+		goto errout;
+	
+  	newCache->ops = &krb5_cc_stdcc_ops;
+	newCache->data = ccapi_data;
+	ccapi_data->cache_name = cName;
+
+	strcpy(cName, residual);
+	
+ 	err = cc_context_open_ccache(gCntrlBlock, cName,
+				     &ccapi_data->NamedCache);
+        if (err != ccNoError) {
+		ccapi_data->NamedCache = NULL;
+	        goto errout;
+	}
+
+  	/* return new cache structure */
+	*id = newCache;
+	
+  	return 0;
+	
+errout:
+	if (newCache)
+		free(newCache);
+	if (ccapi_data)
+		free(ccapi_data);
+	if (cName)
+		free(cName);
+	return retval;
+}
+  
+/*
+ * initialize
+ *
+ * initialize the cache, check to see if one already exists for this
+ * principal if not set our principal to this principal. This
+ * searching enables ticket sharing
+ */
+krb5_error_code KRB5_CALLCONV  krb5_stdccv3_initialize 
+       (krb5_context context, krb5_ccache id,  krb5_principal princ) 
+{
+	stdccCacheDataPtr	ccapi_data = NULL;
+  	int 			err;
+  	char 			*cName = NULL;
+	krb5_error_code		retval;
+  	
+	if ((retval = stdccv3_setup(context, NULL)))
+		return retval;
+	
+  	/* test id for null */
+  	if (id == NULL) return KRB5_CC_NOMEM;
+  	
+	if ((retval = krb5_unparse_name(context, princ, &cName)))
+		return retval;
+
+	ccapi_data = id->data;
+
+
+        if (ccapi_data->NamedCache) {
+	        err = cc_ccache_release(ccapi_data->NamedCache);
+	        ccapi_data->NamedCache = NULL;
+	}
+
+	err = cc_context_create_ccache(gCntrlBlock, ccapi_data->cache_name, 
+				       cc_credentials_v5, cName,
+				       &ccapi_data->NamedCache);
+	if (err != ccNoError) {
+		krb5_free_unparsed_name(context, cName);
+		return cc_err_xlate(err);
+	}
+
+	krb5_free_unparsed_name(context, cName);
+	cache_changed();
+	
+	return cc_err_xlate(err);
+}
+
+/*
+ * store
+ *
+ * store some credentials in our cache
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_store 
+        (krb5_context context, krb5_ccache id, krb5_creds *creds )
+{
+	krb5_error_code		retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
+	cc_credentials_t 	c = NULL;
+	int err;
+
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+	
+	/* copy the fields from the almost identical structures */
+	dupK5toCC3(context, creds, &c);
+			
+	/*
+	 * finally store the credential
+	 * store will copy (that is duplicate) everything
+	 */
+	err = cc_ccache_store_credentials(((stdccCacheDataPtr)(id->data))->NamedCache, c->data);
+	if (err != ccNoError)
+		return cc_err_xlate(err);
+	      
+	err = cc_credentials_release(c);
+		 
+	cache_changed();
+	return err;
+}
+
+/*
+ * start_seq_get
+ *
+ * begin an iterator call to get all of the credentials in the cache
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_start_seq_get 
+(krb5_context context, krb5_ccache id , krb5_cc_cursor *cursor )
+{
+	stdccCacheDataPtr 		ccapi_data = id->data;
+	krb5_error_code			retval;
+	int				err;
+	cc_credentials_iterator_t	iterator;
+
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+
+	err = cc_ccache_new_credentials_iterator(ccapi_data->NamedCache,
+						 &iterator);
+	if (err != ccNoError)
+		return cc_err_xlate(err);
+	*cursor = iterator;
+	return 0;
+}
+
+/*
+ * next cred
+ * 
+ * - get the next credential in the cache as part of an iterator call
+ * - this maps to call to cc_seq_fetch_creds
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_next_cred 
+        (krb5_context context, krb5_ccache id,  krb5_cc_cursor *cursor, 
+	 krb5_creds *creds)
+{
+	krb5_error_code			retval;
+	stdccCacheDataPtr		ccapi_data = id->data;
+	int 				err;
+	cc_credentials_t 		cu;
+	cc_credentials_iterator_t	iterator;
+	
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+	
+	iterator = *cursor;
+	if (iterator == 0)
+		return KRB5_CC_END;
+	err = cc_credentials_iterator_next(iterator, &cu);
+
+	if (err == ccIteratorEnd) {
+		cc_credentials_iterator_release(iterator);
+		*cursor = 0;
+	}
+	if (err != ccNoError)
+		return cc_err_xlate(err);
+	
+	/* copy data	(with translation) */
+	dupCC3toK5(context, cu, creds);
+	
+	cc_credentials_release(cu);
+	
+	return 0;
+}
+
+
+/*
+ * retrieve
+ *
+ * - try to find a matching credential in the cache
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_stdccv3_retrieve(context, id, whichfields, mcreds, creds)
+   krb5_context context;
+   krb5_ccache id;
+   krb5_flags whichfields;
+   krb5_creds *mcreds;
+   krb5_creds *creds;
+{
+    return krb5_cc_retrieve_cred_default (context, id, whichfields,
+					  mcreds, creds);
+}
+
+/*
+ *  end seq
+ *
+ * just free up the storage assoicated with the cursor (if we can)
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_end_seq_get 
+        (krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor)
+{
+	krb5_error_code			retval;
+	stdccCacheDataPtr		ccapi_data = NULL;
+	int				err;
+        cc_credentials_iterator_t	iterator;
+
+	ccapi_data = id->data;
+	
+        if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+
+	if (*cursor == NULL)
+		return 0;
+
+        iterator = *cursor;
+
+	err = cc_credentials_iterator_release(iterator);
+	if (err != ccNoError)
+		return cc_err_xlate(err);
+	return(0);
+}
+     
+/*
+ * close
+ *
+ * - free our pointers to the NC
+ */
+krb5_error_code KRB5_CALLCONV 
+krb5_stdccv3_close(krb5_context context, krb5_ccache id)
+{
+	krb5_error_code	retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
+
+	if ((retval = stdccv3_setup(context, NULL)))
+		return retval;
+	
+	/* free it */
+	if (ccapi_data) {
+		if (ccapi_data->cache_name)
+			free(ccapi_data->cache_name);
+   	        if (ccapi_data->NamedCache)
+			cc_ccache_release(ccapi_data->NamedCache);
+		free(ccapi_data);
+		id->data = NULL;
+	}
+	free(id);
+	
+	return 0;
+}
+
+/*
+ * destroy
+ *
+ * - free our storage and the cache
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_stdccv3_destroy (krb5_context context, krb5_ccache id)
+{
+	int err;
+	krb5_error_code	retval;
+	stdccCacheDataPtr	ccapi_data = id->data;
+
+	if ((retval = stdccv3_setup(context, ccapi_data))) {
+		return retval;
+	}
+
+	/* free memory associated with the krb5_ccache */
+	if (ccapi_data) {
+		if (ccapi_data->cache_name)
+			free(ccapi_data->cache_name);
+		if (ccapi_data->NamedCache) {
+			/* destroy the named cache */
+			err = cc_ccache_destroy(ccapi_data->NamedCache);
+			retval = cc_err_xlate(err);
+			cache_changed();
+		}
+		free(ccapi_data);
+		id->data = NULL;
+	}
+	free(id);
+
+	/* If the cache does not exist when we tried to destroy it,
+	   that's fine.  That means someone else destroyed it since
+	   we resolved it. */
+	if (retval == ccErrCCacheNotFound)
+		return 0;
+	return retval;
+}
+
+/*
+ *  getname
+ *
+ * - return the name of the named cache
+ */
+const char * KRB5_CALLCONV krb5_stdccv3_get_name 
+        (krb5_context context, krb5_ccache id )
+{
+	stdccCacheDataPtr	ccapi_data = id->data;
+
+	if (!ccapi_data)
+		return 0;
+
+	return (ccapi_data->cache_name);
+}
+
+
+/* get_principal
+ *
+ * - return the principal associated with the named cache
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_get_principal
+	(krb5_context context, krb5_ccache id , krb5_principal *princ) 
+{
+	int 			err;
+	cc_string_t  		name = NULL;
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+
+	/* another wrapper */
+	err = cc_ccache_get_principal(ccapi_data->NamedCache, cc_credentials_v5, &name);
+
+	if (err != ccNoError) 
+		return cc_err_xlate(err);
+		
+	/* turn it into a krb principal */
+	err = krb5_parse_name(context, name->data, princ);
+
+	cc_string_release(name);
+	
+	return err;	
+}
+
+/*
+ * set_flags
+ *
+ * - currently a NOP since we don't store any flags in the NC
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_set_flags 
+        (krb5_context context, krb5_ccache id , krb5_flags flags)
+{
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+
+	return 0;
+}
+
+/*
+ * get_flags
+ *
+ * - currently a NOP since we don't store any flags in the NC
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_get_flags 
+        (krb5_context context, krb5_ccache id , krb5_flags *flags)
+{
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdccv3_setup(context, ccapi_data)))
+		return retval;
+
+	return 0;
+}
+
+/*
+ * remove
+ *
+ * - remove the specified credentials from the NC
+ */
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_remove 
+        (krb5_context context, krb5_ccache id,
+	 krb5_flags flags, krb5_creds *creds)
+{
+    	cc_credentials_t 	c = NULL;
+    	int 			err;
+	stdccCacheDataPtr	ccapi_data = id->data;
+	krb5_error_code		retval;
+	
+	if ((retval = stdccv3_setup(context, ccapi_data))) {
+		if (retval == KRB5_FCC_NOFILE)
+			return 0;
+		return retval;
+	}
+    	
+    	/* convert to a cred union */
+    	dupK5toCC3(context, creds, &c);
+    	
+    	/* remove it */
+    	err = cc_ccache_remove_credentials(ccapi_data->NamedCache, c);
+    	if (err != ccNoError)
+		return cc_err_xlate(err);
+    	
+    	err = cc_credentials_release(c);
+	cache_changed();
+    	if (err != ccNoError)
+		return cc_err_xlate(err);
+
+        return 0;
+}
+#else /* !USE_CCAPI_V3 */
 static krb5_error_code stdcc_setup(krb5_context context,
 				   stdccCacheDataPtr ccapi_data)
 {
@@ -192,7 +775,7 @@ void krb5_stdcc_shutdown()
 {
 	if (gCntrlBlock)
 		cc_shutdown(&gCntrlBlock);
-	gCntrlBlock = 0;
+	gCntrlBlock = NULL;
 }
 
 /*
@@ -289,9 +872,10 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 	
  	err = cc_open(gCntrlBlock, cName, CC_CRED_V5, 0L,
 		      &ccapi_data->NamedCache);
-	if (err != CC_NOERROR)
-		ccapi_data->NamedCache = NULL;
-	
+        if (err != CC_NOERROR) {
+	        ccapi_data->NamedCache = NULL;
+		goto errout;
+	}
   	/* return new cache structure */
 	*id = newCache;
 	
@@ -388,7 +972,7 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_store
 		
 	/* free the cred union using our local version of cc_free_creds()
 	   since we allocated it locally */
-	err = krb5_free_cc_cred_union(&cu);
+	err = krb5int_free_cc_cred_union(&cu);
 		 
 	cache_changed();
 	return err;
@@ -523,7 +1107,6 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_retrieve
 	return KRB5_CC_NOTFOUND;
 }
 #else
-#include "k5-int.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_stdcc_retrieve(context, id, whichfields, mcreds, creds)
@@ -763,10 +1346,11 @@ krb5_error_code KRB5_CALLCONV krb5_stdcc_remove
     	
     	/* free the cred union using our local version of cc_free_creds()
 	       since we allocated it locally */
-    	err = krb5_free_cc_cred_union(&cu);
+    	err = krb5int_free_cc_cred_union(&cu);
 	cache_changed();
     	if (err != CC_NOERROR)
 		return cc_err_xlate(err);
 
         return 0;
 }
+#endif /* !USE_CCAPI_V3 */
