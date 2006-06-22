@@ -97,6 +97,8 @@ depend-update-makefile: .depend depend-recurse
 	else :; fi
 
 DEPTARGETS = .depend .d .dtmp $(DEP_VERIFY)
+DEPTARGETS_CLEAN = .depend .d .dtmp $(DEPTARGETS_@srcdir@_@CONFIG_RELTOPDIR@)
+DEPTARGETS_@top_srcdir@_. = $(DEP_VERIFY)
 
 #
 # end dependency generation
@@ -105,7 +107,7 @@ DEPTARGETS = .depend .d .dtmp $(DEP_VERIFY)
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) $(DEPTARGETS) $(EXTRA_FILES)
+	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 
 clean-windows::
