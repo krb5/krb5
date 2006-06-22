@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -68,5 +68,9 @@ cc_int_credentials_iterator_release( cc_credentials_iterator_t iter );
 cc_int32
 cc_int_credentials_iterator_next( cc_credentials_iterator_t iter,
                                   cc_credentials_t * credentials );
+
+cc_int32
+cc_int_credentials_iterator_clone( cc_credentials_iterator_t iter,
+                                   cc_credentials_iterator_t * new_iter );
 
 

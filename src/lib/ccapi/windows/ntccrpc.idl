@@ -1,0 +1,30 @@
+[
+    uuid(0012a1de-f7ad-44b0-b597-8ba53159c6fa),
+    version(1.0),
+    pointer_default(unique)
+]
+
+interface portable_ccapi
+{
+    const short MAXMSGLEN = 65536;
+
+    // Locally Unique Identifier
+    //
+
+    struct __LUID {
+        __int32 LowPart;
+        long    HighPart;
+    };
+
+
+    // The Generic CCAPI Message RPC
+
+    __int32 ccapi_Message  (
+            [in] handle_t h,
+            [in, string]  unsigned char * client_name,
+            [in] struct __LUID  luid,
+            [in, length_is(in_len), size_is(MAXMSGLEN)] unsigned char in_buf[],
+            [in] __int32 in_len,
+            [out, length_is(*out_len), size_is(MAXMSGLEN)] unsigned char out_buf[],
+            [out] __int32 * out_len);
+}

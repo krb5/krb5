@@ -1,0 +1,35 @@
+!include <win32.mak>
+
+CFLAGS = -I../include $(cdebug) $(cflags) $(cvarsmt)
+
+CCAPI_SERVER = ccapi_server.exe
+
+CCAPI_DLLFILE = krbcc32.dll
+
+WINLIBS = ws2_32.lib rpcrt4.lib $(guilibsdll)
+
+all:  $(CCAPI_DLLFILE) $(CCAPI_SERVER)
+
+ntccrpc_c.c ntccrpc_s.c ntccrpc.h: ntccrpc.idl ntccrpc.acf
+	midl ntccrpc.idl /acf ntccrpc.acf
+
+CLIENT_OBJS = ntccrpc_c.obj client.obj dllmain.obj
+
+SERVER_OBJS = ntccrpc_s.obj server.obj
+
+CC_CLIENT_LIB = ..\client\cc_client.lib
+
+CC_COMMON_LIB = ..\common\cc_common.lib
+
+CC_SERVER_LIB = ..\server\cc_server.lib
+
+$(CCAPI_DLLFILE): $(CLIENT_OBJS) $(CC_CLIENT_LIB) $(CC_COMMON_LIB)
+        $(link) /NOLOGO /OUT:$@ $(ldebug) $(dlllflags) $(guilibsmt) -def:cacheapi.def $** $(WINLIBS)
+
+$(CCAPI_SERVER): $(SERVER_OBJS) $(CC_SERVER_LIB) $(CC_COMMON_LIB)
+	$(link) /NOLOGO $(conlibsmt) $(ldebug) $(conlflags) /OUT:$@ $** $(WINLIBS)
+
+clean:
+	del *.exe *.dll *.lib *.exp *.obj ntccrpc_c.c ntccrpc_s.c ntccrpc.h
+
+

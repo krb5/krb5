@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -43,7 +43,7 @@
 
 /*
  * Verifiable, extensible message format.
- *
+ * 
  * Format:
  * <size of header block (header_len)>
  * <size of *entire* message, including previous field (flat_len)>
@@ -60,13 +60,13 @@
  * If the header has variable length data it is included in the data blobs. 
  * The header field has the offset from the beginning of the message of the 1st 
  * byte of the data and the length of the data.
- *
  */
 
 #ifndef __CC_MSG_H__
 #define __CC_MSG_H__
 
 #include "CredentialsCache.h"
+#include "generic_lists.h"
 
 struct  cc_msg_t {
     cc_uint32 type;			/*type of message*/
@@ -87,16 +87,15 @@ enum {
     ccmsg_CTX_RELEASE,
     ccmsg_CTX_GET_CHANGE_TIME,
     ccmsg_CTX_GET_DEFAULT_CCACHE_NAME,
-    ccmsg_CTX_COMPARE,
+    ccmsg_CTX_CCACHE_OPEN,
+    ccmsg_CTX_CCACHE_OPEN_DEFAULT,
+    ccmsg_CTX_CCACHE_CREATE,
+    ccmsg_CTX_CCACHE_CREATE_DEFAULT,
+    ccmsg_CTX_CCACHE_CREATE_UNIQUE,
     ccmsg_CTX_NEW_CCACHE_ITERATOR,
     ccmsg_CTX_LOCK,
     ccmsg_CTX_UNLOCK,
-    ccmsg_CTX_CLONE,
-    ccmsg_CCACHE_OPEN,
-    ccmsg_CCACHE_OPEN_DEFAULT,
-    ccmsg_CCACHE_CREATE,
-    ccmsg_CCACHE_CREATE_DEFAULT,
-    ccmsg_CCACHE_CREATE_UNIQUE,
+    ccmsg_CTX_COMPARE,
     ccmsg_CCACHE_RELEASE,
     ccmsg_CCACHE_DESTROY,
     ccmsg_CCACHE_SET_DEFAULT,
@@ -104,29 +103,28 @@ enum {
     ccmsg_CCACHE_GET_NAME,
     ccmsg_CCACHE_GET_PRINCIPAL,
     ccmsg_CCACHE_SET_PRINCIPAL,
-    ccmsg_CCACHE_CREDS_ITERATOR,
+    ccmsg_CCACHE_NEW_CREDS_ITERATOR,
     ccmsg_CCACHE_STORE_CREDS,
     ccmsg_CCACHE_REM_CREDS,
+    ccmsg_CCACHE_MOVE,
+    ccmsg_CCACHE_LOCK,
+    ccmsg_CCACHE_UNLOCK,
     ccmsg_CCACHE_GET_LAST_DEFAULT_TIME,
     ccmsg_CCACHE_GET_CHANGE_TIME,
-    ccmsg_CCACHE_MOVE,
     ccmsg_CCACHE_COMPARE,
     ccmsg_CCACHE_GET_KDC_TIME_OFFSET,
     ccmsg_CCACHE_SET_KDC_TIME_OFFSET,
     ccmsg_CCACHE_CLEAR_KDC_TIME_OFFSET,
     ccmsg_CCACHE_ITERATOR_RELEASE,
     ccmsg_CCACHE_ITERATOR_NEXT,
-    ccmsg_CCACHE_LOCK,
-    ccmsg_CCACHE_UNLOCK,
+    ccmsg_CCACHE_ITERATOR_CLONE,
     ccmsg_CREDS_ITERATOR_RELEASE,
     ccmsg_CREDS_ITERATOR_NEXT,
-    ccmsg_CREDS_RELEASE,
-    ccmsg_CREDS_V4,
-    ccmsg_CREDS_V5
+    ccmsg_CREDS_ITERATOR_CLONE
 };      
 
 #define CC_MSG_MAX_SIZE	1073741824 /*2^30*/
-#define CC_MSG_MAX_TYPE ccmsg_CREDS_V5
+#define CC_MSG_MAX_TYPE ccmsg_CREDS_ITERATOR_CLONE
 #define BLOB_LEN (sizeof(cc_uint32))
 #define MAGIC_DATA_LEN (sizeof(cc_uint32))
 #define MAGIC_HEAD_LEN (sizeof(cc_uint32))
@@ -141,6 +139,23 @@ cc_int32 cci_msg_flatten(cc_msg_t* msg, void **);
 cc_int32 cci_msg_calc_magic(void *flat, int flat_len, cc_uint32 * sizep);
 cc_int32 cci_msg_verify(void* flat, int flat_len, cc_uint32 * sizep);
 cc_int32 cci_msg_unflatten(void *flat, int flat_len, cc_msg_t** msgpp);
-cc_int32 cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, void **);
+cc_int32 cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, char **);
 cc_int32 cci_msg_destroy(cc_msg_t* msg);
+
+/* Add missing byte swapping macros for 64-bit values */
+#ifdef MAC
+#define htonll(x) OSSwapHostToBigInt64(x)
+#define ntohll(x) OSSwapBigToHostInt64(x)
+#else 
+#ifdef _WIN32
+#ifdef _M_IX86
+#define htonll(x) _byteswap_uint64(x)
+#define ntohll(x) _byteswap_uint64(x)
+#else
+#define htonll(x) (x)
+#define ntohll(x) (x)
+#endif
+#endif
+#endif
+
 #endif /*__CC_MSG_H__*/

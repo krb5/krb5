@@ -1,30 +1,21 @@
-# Makefile for the CCAPI Generic Server
+# Makefile for the CCAPI Server Library
 
 !INCLUDE <WIN32.MAK>
 
-CFLAGS = -I../include
+CFLAGS = -I../include $(cdebug) $(cflags) $(cvarsmt)
 
-CCAPI_LIB = ../lib/ccapi.lib
-WINLIBS = user32.lib advapi32.lib
-CCSOBJS = context.obj ccache.obj lists.obj rpc_auth.obj serv_ops.obj
+CC_SERVER_OBJS = ccs_context.obj ccs_ccache.obj ccs_lists.obj rpc_auth.obj serv_ops.obj
 
-all: t_lists.exe t_msg.exe t_ccache.exe t_context.exe ccapi_server.exe
+CC_SERVER_LIB = cc_server.lib
 
-t_lists.exe: t_lists.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_lists.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+CC_COMMON_LIB = ../common/cc_common.lib
 
-t_msg.exe: t_msg.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_msg.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+$(CC_SERVER_LIB): $(CC_SERVER_OBJS)
+        $(implib) /NOLOGO /OUT:$@ $**
 
-t_ccache.exe: t_ccache.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_ccache.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
-
-t_context.exe: t_context.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ t_context.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
-
-ccapi_server.exe: main.obj $(CCSOBJS) $(CCAPI_LIB)
-        link -out:$@ main.obj $(CCSOBJS) $(CCAPI_LIB) $(WINLIBS)
+all: $(CC_SERVER_LIB)
 
 clean: 
-	del *.obj *.exe
+	del *.obj *.lib
 
+ 

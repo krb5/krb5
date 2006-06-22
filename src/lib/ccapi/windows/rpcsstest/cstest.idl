@@ -1,0 +1,14 @@
+[
+uuid(c8b4a635-e9e4-4650-a073-b25610324950),
+    version(1.0),
+    pointer_default(unique)
+]
+
+interface ccapi_cstest
+{
+    long EchoString([in] handle_t h,
+                    [in, string] unsigned char * in_str,
+                    [in] long cb_buffer,
+                    [out] long * cb_len,
+                    [out, string, size_is(cb_buffer)] unsigned char buffer[*]);
+}

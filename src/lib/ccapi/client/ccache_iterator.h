@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -72,6 +72,10 @@ cc_int_ccache_iterator_release( cc_ccache_iterator_t iter );
 cc_int32
 cc_int_ccache_iterator_next( cc_ccache_iterator_t iter,
                              cc_ccache_t * ccache );
+
+cc_int32
+cc_int_ccache_iterator_clone( cc_ccache_iterator_t iter,
+                              cc_ccache_iterator_t * iter_new );
 
 cc_int32
 cc_int_ccache_iterator_set_repeat_count( cc_int_ccache_iterator_t iter, 

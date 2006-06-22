@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -46,7 +46,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <CredentialsCache.h>
+#include "ccache.h"
 #include "ccache_iterator.h"
+#include "cc_rpc.h"
 #include "msg.h"
 #include "msg_headers.h"
 
@@ -56,7 +58,7 @@ cc_int_ccache_iterator_new( cc_ccache_iterator_t * piter,
                             cc_handle ctx,
                             cc_handle handle )
 {
-    cc_int_ccache_iterator_t iter;
+    cc_int_ccache_iterator_t iter = NULL;
 
     if ( piter == NULL )
         return ccErrBadParam;
@@ -66,7 +68,7 @@ cc_int_ccache_iterator_new( cc_ccache_iterator_t * piter,
         return ccErrNoMem;
 
     iter->functions = (cc_ccache_iterator_f*)malloc( sizeof(cc_ccache_iterator_f));
-    if ( iter->functions ) {
+    if ( iter->functions == NULL ) {
         free(iter);
         return ccErrNoMem;
     }
@@ -84,11 +86,12 @@ cc_int_ccache_iterator_new( cc_ccache_iterator_t * piter,
 cc_int32
 cc_int_ccache_iterator_release( cc_ccache_iterator_t iter )
 {
-    cc_int_ccache_iterator_t int_iter;
-    cc_msg_t        *request;
-    ccmsg_ccache_iterator_release_t *request_header;
-    cc_msg_t        *response;
-    cc_int32 code;
+    cc_int_ccache_iterator_t 	int_iter;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_iterator_release_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
+    cc_uint32			type;
+    cc_int32 			code;
 
 
     if ( iter == NULL )
@@ -102,31 +105,43 @@ cc_int_ccache_iterator_release( cc_ccache_iterator_t iter )
     request_header = (ccmsg_ccache_iterator_release_t*)malloc(sizeof(ccmsg_ccache_iterator_release_t));
     if (request_header == NULL)
         return ccErrNoMem;
-    request_header->ctx = int_iter->ctx;
-    request_header->iterator = int_iter->handle;
+    request_header->ctx = htonll(int_iter->ctx);
+    request_header->iterator = htonll(int_iter->handle);
     code = cci_msg_new(ccmsg_CCACHE_ITERATOR_RELEASE, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_iterator_release_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
-    if (response->type == ccmsg_NACK) {
+    type = ntohl(response->type);
+    if (type == ccmsg_NACK) {
         ccmsg_nack_t * nack_header = (ccmsg_nack_t *)response->header;
-        code = nack_header->err_code;
-    } else if (response->type == ccmsg_ACK) {
+        code = ntohl(nack_header->err_code);
+    } else if (type == ccmsg_ACK) {
         code = ccNoError;
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
 
-    free(int_iter->functions);
-    free(int_iter);
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
+
+    if (int_iter->functions)
+	free(int_iter->functions);
+    if (iter)
+	free(int_iter);
     return ccNoError;
 }
 
@@ -134,11 +149,12 @@ cc_int32
 cc_int_ccache_iterator_next( cc_ccache_iterator_t iter,
                              cc_ccache_t * ccache )
 {
-    cc_int_ccache_iterator_t int_iter;
-    cc_msg_t        *request;
-    ccmsg_ccache_iterator_next_t *request_header;
-    cc_msg_t        *response;
-    cc_int32 code;
+    cc_int_ccache_iterator_t 	int_iter;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_iterator_next_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
+    cc_uint32			type;
+    cc_int32 			code;
 
     if ( ccache == NULL )
         return ccErrBadParam;
@@ -151,29 +167,98 @@ cc_int_ccache_iterator_next( cc_ccache_iterator_t iter,
     request_header = (ccmsg_ccache_iterator_next_t*)malloc(sizeof(ccmsg_ccache_iterator_next_t));
     if (request_header == NULL)
         return ccErrNoMem;
-    request_header->ctx = int_iter->ctx;
-    request_header->iterator = int_iter->handle;
+    request_header->ctx = htonll(int_iter->ctx);
+    request_header->iterator = htonll(int_iter->handle);
 
     code = cci_msg_new(ccmsg_CCACHE_ITERATOR_NEXT, &request);
-    if (code != ccNoError) {
-        free(request_header);
-        return code;
-    }
+    if (code != ccNoError)
+	goto cleanup;
 
     code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_iterator_next_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
 
     code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
 
-    if (response->type == ccmsg_NACK) {
+    type = ntohl(response->type);
+    if (type == ccmsg_NACK) {
         ccmsg_nack_t * nack_header = (ccmsg_nack_t *)response->header;
         code = nack_header->err_code;
-    } else if (response->type == ccmsg_ACK) {
+    } else if (type == ccmsg_ACK) {
         ccmsg_ccache_iterator_next_resp_t * response_header = (ccmsg_ccache_iterator_next_resp_t*)response->header;
-        code = cc_ccache_new(ccache, int_iter->ctx, response_header->ccache);
+        code = cc_int_ccache_new(ccache, int_iter->ctx, ntohll(response_header->ccache));
     } else {
         code = ccErrBadInternalMessage;
     }
-    cci_msg_destroy(request);
-    cci_msg_destroy(response);
+    
+  cleanup:
+    if (request_header)
+	free(request_header);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
+    return code;
+}
+
+cc_int32
+cc_int_ccache_iterator_clone( cc_ccache_iterator_t iter,
+                              cc_ccache_iterator_t * new_iter )
+{
+    cc_int_ccache_iterator_t 	int_iter;
+    cc_msg_t        		*request = NULL;
+    ccmsg_ccache_iterator_clone_t *request_header = NULL;
+    cc_msg_t        		*response = NULL;
+    cc_uint32			type;
+    cc_int32 			code;
+
+    if ( iter == NULL || new_iter == NULL )
+        return ccErrBadParam;
+
+    int_iter = (cc_int_ccache_iterator_t)iter;
+
+    if ( int_iter->magic != CC_CCACHE_ITER_MAGIC )
+        return ccErrInvalidCCacheIterator;
+
+    request_header = (ccmsg_ccache_iterator_clone_t*)malloc(sizeof(ccmsg_ccache_iterator_clone_t));
+    if (request_header == NULL)
+        return ccErrNoMem;
+    request_header->ctx = htonll(int_iter->ctx);
+    request_header->iterator = htonll(int_iter->handle);
+
+    code = cci_msg_new(ccmsg_CCACHE_ITERATOR_CLONE, &request);
+    if (code != ccNoError)
+	goto cleanup;
+
+    code = cci_msg_add_header(request, request_header, sizeof(ccmsg_ccache_iterator_clone_t));
+    if (code != ccNoError)
+	goto cleanup;
+    request_header = NULL;
+
+    code = cci_perform_rpc(request, &response);
+    if (code != ccNoError)
+	goto cleanup;
+
+    type = ntohl(response->type);
+    if (type == ccmsg_NACK) {
+        ccmsg_nack_t * nack_header = (ccmsg_nack_t *)response->header;
+        code = ntohl(nack_header->err_code);
+    } else if (type == ccmsg_ACK) {
+        ccmsg_ccache_iterator_clone_resp_t * response_header = (ccmsg_ccache_iterator_clone_resp_t*)response->header;
+        code = cc_int_ccache_iterator_new(new_iter, int_iter->ctx, ntohll(response_header->iterator));
+    } else {
+        code = ccErrBadInternalMessage;
+    }
+
+  cleanup:
+    if (request_header)
+	free(request);
+    if (request)
+	cci_msg_destroy(request);
+    if (response)
+	cci_msg_destroy(response);
     return code;
 }

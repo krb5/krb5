@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -41,7 +41,6 @@
  * $
  */
 
-#define FLAT_CREDS_V5_VERSION   1
 struct cc_flat_data {
     cc_uint32                   type;
     cc_uint32                   length;
@@ -49,15 +48,16 @@ struct cc_flat_data {
 };
 typedef struct cc_flat_data cc_flat_data;
 
+#define FLAT_CREDS_V5_VERSION   1
 struct cci_flat_creds_v5 {
     cc_uint32                   version;        /* version of this structure */
     cc_flat_data                client;
     cc_flat_data                server;
     cc_flat_data		keyblock;
-    cc_time_t			authtime;
-    cc_time_t			starttime;
-    cc_time_t			endtime;
-    cc_time_t			renew_till;
+    cc_time64			authtime;
+    cc_time64			starttime;
+    cc_time64			endtime;
+    cc_time64			renew_till;
     cc_uint32			is_skey;
     cc_uint32			ticket_flags;
     cc_uint32                   address_count;
@@ -67,6 +67,25 @@ struct cci_flat_creds_v5 {
     cc_uint32                   authdata_count;
     cc_uint32 			authdata;  /* offset to array */
 };
+typedef struct cci_flat_creds_v5 cci_flat_creds_v5_t;
+
+struct cci_flat_creds_v4 {
+    cc_uint32			version;
+    char			principal [cc_v4_name_size];
+    char			principal_instance [cc_v4_instance_size];
+    char			service [cc_v4_name_size];
+    char			service_instance [cc_v4_instance_size];
+    char			realm [cc_v4_realm_size];
+    unsigned char		session_key [cc_v4_key_size];
+    cc_int32			kvno;
+    cc_int32			string_to_key_type;
+    cc_time64			issue_date;
+    cc_int32			lifetime;
+    cc_uint32			address;
+    cc_int32			ticket_size;
+    unsigned char		ticket [cc_v4_ticket_size];
+};      
+typedef struct cci_flat_creds_v4 cci_flat_creds_v4_t;
 
 cc_int32
 cci_creds_v4_marshall( cc_credentials_v4_t * creds, 
