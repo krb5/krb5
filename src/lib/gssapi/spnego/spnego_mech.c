@@ -1953,7 +1953,6 @@ get_req_flags(unsigned char **buff_in, OM_uint32 bodysize,
 	      OM_uint32 *req_flags)
 {
 	int len;
-	unsigned char *start = *buff_in;
 
 	if (**buff_in != (CONTEXT | 0x01))
 		return (0);
@@ -2079,8 +2078,8 @@ get_negTokenResp(OM_uint32 *minor_status,
 		 gss_buffer_t *mechListMIC)
 {
 	unsigned char *ptr, *bufstart;
-	int len, bytes;
-	unsigned int tag;
+	int len;
+	unsigned int tag, bytes;
 
 	*negState = ACCEPT_DEFECTIVE_TOKEN;
 	*supportedMech = GSS_C_NO_OID;
@@ -2280,11 +2279,8 @@ make_spnego_tokenInit_msg(spnego_gss_ctx_id_t spnego_ctx,
 	int rspTokenSize = 0;
 	int mechListTokenSize = 0;
 	int micTokenSize = 0;
-	int i;
 	unsigned char *t;
 	unsigned char *ptr;
-	unsigned char *MechListPtr = NULL;
-	gss_buffer_desc MICbuff;
 
 	if (outbuf == GSS_C_NO_BUFFER)
 		return (-1);
@@ -2448,13 +2444,12 @@ make_spnego_tokenTarg_msg(OM_uint32 status, gss_OID mech_wanted,
 			  send_token_flag sendtoken,
 			  gss_buffer_t outbuf)
 {
-	int tlen;
-	int ret;
-	int NegTokenTargSize;
-	int negresultTokenSize;
-	int NegTokenSize;
-	int rspTokenSize;
-	int micTokenSize;
+	int tlen = 0;
+	int ret = 0;
+	int NegTokenTargSize = 0;
+	int NegTokenSize = 0;
+	int rspTokenSize = 0;
+	int micTokenSize = 0;
 	int dataLen = 0;
 	unsigned char *t;
 	unsigned char *ptr;
