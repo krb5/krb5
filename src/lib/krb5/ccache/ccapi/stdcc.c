@@ -203,7 +203,7 @@ static krb5_error_code cc_err_xlate(int err)
 
 
 #ifdef USE_CCAPI_V3
-static krb5_error_code stdccv3_setup(krb5_context context,
+static krb5_error_code stdcc_setup(krb5_context context,
 				     stdccCacheDataPtr ccapi_data)
 {
 	cc_int32	err;
@@ -237,7 +237,7 @@ static krb5_error_code stdccv3_setup(krb5_context context,
 	return cc_err_xlate(err);
 }
 
-void krb5_stdccv3_shutdown()
+void krb5_stdcc_shutdown()
 {
 	if (gCntrlBlock)
 		cc_context_release(gCntrlBlock);
