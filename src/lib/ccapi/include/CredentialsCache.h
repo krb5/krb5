@@ -475,7 +475,7 @@ struct cc_credentials_iterator_f {
                                  cc_credentials_iterator_t iter);
     cc_int32    (*next) (
                                  cc_credentials_iterator_t iter,
-                                 cc_credentials_t* ccache);
+                                 cc_credentials_t* cred);
 
     cc_int32 	(*clone) (	 cc_credentials_iterator_t iter,
 				 cc_credentials_iterator_t* new_iter);
