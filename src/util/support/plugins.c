@@ -95,9 +95,14 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 #if USE_DLOPEN
     if (!err && (statbuf.st_mode & S_IFMT) == S_IFREG) {
         void *handle = NULL;
+#ifdef RTLD_GROUP
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
+#else
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
+#endif
 
         if (!err) {
-            handle = dlopen(filepath, RTLD_NOW | RTLD_GLOBAL);
+            handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
             if (handle == NULL) {
                 const char *e = dlerror();
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
