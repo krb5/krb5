@@ -396,7 +396,7 @@ static gss_mechanism krb5_mech_configs[] = {
 #ifdef MS_BUG_TEST
 static gss_mechanism krb5_mech_configs_hack[] = {
     &krb5_mechanism, &krb5_mechanism_old, NULL
-}
+};
 #endif
 
 #if 1
