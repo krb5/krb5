@@ -66,6 +66,39 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
         return 0;
 }
 
+#define COUNT_LINKED_LIST(COUNT, PTYPE, START, FIELD)	\
+	{						\
+	    int cll_counter = 0;			\
+	    PTYPE cll_ptr = (START);			\
+	    while (cll_ptr != NULL) {			\
+		cll_counter++;				\
+		cll_ptr = cll_ptr->FIELD;		\
+	    }						\
+	    (COUNT) = cll_counter;			\
+	}
+
+errcode_t KRB5_CALLCONV
+profile_copy(profile_t old_profile, profile_t *new_profile)
+{
+    size_t size, i;
+    const_profile_filespec_t *files;
+    prf_file_t file;
+    errcode_t err;
+
+    /* The fields we care about are read-only after creation, so
+       no locking is needed.  */
+    COUNT_LINKED_LIST (size, prf_file_t, old_profile->first_file, next);
+    files = malloc ((size+1) * sizeof(*files));
+    if (files == NULL)
+	return errno;
+    for (i = 0, file = old_profile->first_file; i < size; i++, file = file->next)
+	files[i] = file->data->filespec;
+    files[size] = NULL;
+    err = profile_init (files, new_profile);
+    free (files);
+    return err;
+}
+
 errcode_t KRB5_CALLCONV
 profile_init_path(const_profile_filespec_list_t filepath,
 		  profile_t *ret_profile)
