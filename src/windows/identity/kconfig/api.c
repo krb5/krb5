@@ -677,6 +677,7 @@ khcint_open_space(kconf_conf_space * parent,
     HKEY pkey = NULL;
     HKEY ckey = NULL;
     wchar_t buf[KCONF_MAXCCH_NAME];
+    size_t cb_regpath = 0;
 
     if(!parent)
         p = conf_root;
@@ -686,10 +687,7 @@ khcint_open_space(kconf_conf_space * parent,
     if(n_sname >= KCONF_MAXCCH_NAME || n_sname <= 0)
         return KHM_ERROR_INVALID_PARAM;
 
-    /* SAFE: buf: buffer size == KCONF_MAXCCH_NAME * wchar_t >
-       n_sname * wchar_t */
-    wcsncpy(buf, sname, n_sname);
-    buf[n_sname] = L'\0';
+    StringCchCopyN(buf, ARRAYLENGTH(buf), sname, n_sname);
 
     /* see if there is already a config space by this name. if so,
        return it.  Note that if the configuration space is specified
@@ -760,19 +758,18 @@ khcint_open_space(kconf_conf_space * parent,
     /*SAFE: p->regpath: is valid since it was set using this same
       function. */
     /*SAFE: buf: see above */
-    c->regpath = PMALLOC((wcslen(p->regpath) + wcslen(buf) + 2) * sizeof(wchar_t));
+    cb_regpath = (wcslen(p->regpath) + wcslen(buf) + 2) * sizeof(wchar_t);
+    c->regpath = PMALLOC(cb_regpath);
 
     assert(c->regpath != NULL);
 
-#pragma warning( push )
-#pragma warning( disable: 4995 )
     /*SAFE: c->regpath: allocated above to be big enough */
     /*SAFE: p->regpath: see above */
-    wcscpy(c->regpath, p->regpath);
-    wcscat(c->regpath, L"\\");
+    StringCbCopy(c->regpath, cb_regpath, p->regpath);
+    StringCbCat(c->regpath, cb_regpath, L"\\");
+
     /*SAFE: buf: see above */
-    wcscat(c->regpath, buf);
-#pragma warning( pop )
+    StringCbCat(c->regpath, cb_regpath, buf);
 
     khcint_space_hold(c);
 

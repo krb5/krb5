@@ -4113,7 +4113,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         /* a hyperlink was activated */
         khui_htwnd_link * l;
         l = (khui_htwnd_link *) lParam;
-        wcsncpy(wid, l->id, l->id_len);
+        StringCchCopyN(wid, ARRAYLENGTH(wid), l->id, l->id_len);
         wid[l->id_len] = 0;
 
         if(!wcscmp(wid, L"NewCreds")) {

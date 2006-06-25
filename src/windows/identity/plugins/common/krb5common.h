@@ -33,9 +33,13 @@
 
 #ifndef NO_KRB5
 int khm_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName, 
-                     int FreeContextFlag, krb5_context *ctx,
-                     krb5_ccache *cache);
+                   int FreeContextFlag, krb5_context *ctx,
+                   krb5_ccache *cache);
 
+int
+khm_krb5_get_error_string(krb5_error_code rc,
+                          wchar_t * buffer,
+                          khm_size cb_buffer);
 
 int khm_krb5_initialize(khm_handle ident, krb5_context *, krb5_ccache *);
 

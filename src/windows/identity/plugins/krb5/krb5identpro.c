@@ -212,7 +212,7 @@ update_crossfeed(khui_new_creds * nc,
                         (WPARAM) idx,
                         (LPARAM) srealm);
 
-            if (!wcsicmp(srealm, un_realm) && wcscmp(srealm, un_realm)) {
+            if (!_wcsicmp(srealm, un_realm) && wcscmp(srealm, un_realm)) {
                 /* differ only by case */
 
                 StringCchCopy(un_realm, ARRAYLENGTH(un) - (un_realm - un),
@@ -260,7 +260,7 @@ update_crossfeed(khui_new_creds * nc,
                     (WPARAM) idx,
                     (LPARAM) srealm);
 
-        if (!wcsicmp(srealm, realm) && wcscmp(srealm, realm)) {
+        if (!_wcsicmp(srealm, realm) && wcscmp(srealm, realm)) {
             StringCbCopy(realm, sizeof(realm), srealm);
 
             SetWindowText(d->hw_realm, srealm);
@@ -1145,7 +1145,7 @@ k5_ident_update(khm_int32 msg_type,
     khm_krb5_canon_cc_name(w_ccname, sizeof(w_ccname));
     khm_krb5_canon_cc_name(wid_ccname, sizeof(wid_ccname));
 
-    if (!wcsicmp(w_ccname, wid_ccname))
+    if (!_wcsicmp(w_ccname, wid_ccname))
         kcdb_identity_set_default_int(ident);
 
  _iu_cleanup:
@@ -1499,7 +1499,7 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
                 new_ccname[0] = L'\0';
             }
 
-            if (wcsicmp(new_ccname, reg_ccname)) {
+            if (_wcsicmp(new_ccname, reg_ccname)) {
                 k5_refresh_default_identity(ctx);
                 StringCbCopy(reg_ccname, sizeof(reg_ccname), new_ccname);
             }

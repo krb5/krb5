@@ -211,11 +211,20 @@ khcwarn=$(khcwarn) /WX
 ldebug=$(ldebug) /DEBUG
 cdebug=$(cdebug) -Os -Zi
 
+# Additionally, suppress conflicting default library directives that we
+# might pull in from external libraries.
+
+!ifndef NODEBUG
+lndeflibflag=/NODEFAULTLIB:MSVCRT
+!else
+lndeflibflag=/NODEFAULTLIB:MSVCRTD
+!endif
+
 khcflags=$(cdebug) $(cflags) $(incflags) $(khdefines) $(khcwarn)
-khlguiflags=$(ldebug) $(guilflags)
-khlconflags=$(ldebug) $(conlflags)
-khldllguiflags=$(ldebug) $(dlllflags)
-khldllconflags=$(ldebug) $(dlllflags)
+khlguiflags=$(ldebug) $(guilflags) $(lndeflibflag)
+khlconflags=$(ldebug) $(conlflags) $(lndeflibflag)
+khldllguiflags=$(ldebug) $(dlllflags) $(lndeflibflag)
+khldllconflags=$(ldebug) $(dlllflags) $(lndeflibflag)
 
 !if "$(KH_RUNTIME)" == "STATIC"
 khcflags=$(khcflags) $(cvarsmt)

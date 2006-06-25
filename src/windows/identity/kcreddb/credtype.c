@@ -281,11 +281,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_describe(
             *cbbuf = s;
             rv = KHM_ERROR_TOO_LONG;
         } else {
-#pragma warning(push)
-#pragma warning(disable:4995)
-            wcscpy(buf, str); /* str is one of the string fields in t->ct which has 
-                              been validated when the type was registered. */
-#pragma warning(pop)
+            StringCbCopy(buf, *cbbuf, str);
             *cbbuf = s;
         }
     } else {
@@ -321,10 +317,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_name(
             *cbbuf = s;
             rv = KHM_ERROR_TOO_LONG;
         } else {
-#pragma warning(push)
-#pragma warning(disable: 4995)
-            wcscpy(buf, t->ct.name); /* t->ct.name was validated when the type was registered */
-#pragma warning(pop)
+            StringCbCopy(buf, *cbbuf, t->ct.name);
             *cbbuf = s;
         }
     } else {
