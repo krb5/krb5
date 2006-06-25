@@ -41,10 +41,8 @@ SRCS = \
 	$(srcdir)/g_sign.c \
 	$(srcdir)/g_store_cred.c \
 	$(srcdir)/g_unseal.c \
-	$(srcdir)/g_userok.c \
 	$(srcdir)/g_utils.c \
 	$(srcdir)/g_verify.c \
-	$(srcdir)/gssd_pname_to_uid.c \
 	$(srcdir)/oid_ops.c
 
 STLIBOBJS = \
@@ -78,10 +76,8 @@ STLIBOBJS = \
 	g_sign.o \
 	g_store_cred.o \
 	g_unseal.o \
-	g_userok.o \
 	g_utils.o \
 	g_verify.o \
-	gssd_pname_to_uid.o \
 	oid_ops.o
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
