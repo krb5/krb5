@@ -27,6 +27,7 @@
  */
 
 #include "mglueP.h"
+#include "gss_libinit.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -155,7 +156,6 @@ OM_uint32 *minorStatus;
 gss_OID_set *mechSet;
 {
 	char *fileName;
-	struct stat fileInfo;
 	int i, j;
 	gss_OID curItem;
 
@@ -492,7 +492,6 @@ static void
 updateMechList(void)
 {
 	char *fileName;
-	struct stat fileInfo;
 
 	init_hardcoded();
 	fileName = MECH_CONF;
@@ -560,7 +559,6 @@ init_hardcoded(void)
 	extern gss_mechanism *spnego_gss_get_mech_configs(void);
 	gss_mechanism *cflist;
 	static int inited;
-	gss_mech_info cf;
 
 	if (inited)
 		return;
