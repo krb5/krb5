@@ -7,6 +7,7 @@
 #include <krb5.h>
 #include <kadm5/admin.h>
 #include <kdb.h>
+#include <string.h>
 
 char *whoami;
 

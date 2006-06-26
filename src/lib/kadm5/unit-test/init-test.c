@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <krb5.h>
+#include <string.h>
 
 int main()
 {
