@@ -117,10 +117,6 @@ static const gss_OID_set_desc spnego_oidsets[] = {
 };
 const gss_OID_set_desc * const gss_mech_set_spnego = spnego_oidsets+0;
 
-#define	TWRITE_STR(ptr, str, len) \
-	memcpy((ptr), (char *)(str), (len)); \
-	(ptr) += (len);
-
 #ifdef DEBUG
 #define	dsyslog(a) syslog(LOG_DEBUG, a)
 #else
