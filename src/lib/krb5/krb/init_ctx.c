@@ -516,7 +516,10 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     if (ctx == NULL)
 	return EINVAL;		/* XXX */
 
-    nctx = malloc(sizeof(krb5_context*));
+    nctx = malloc(sizeof(*nctx));
+    if (nctx == NULL)
+	return ENOMEM;
+
     *nctx = *ctx;
 
     nctx->in_tkt_ktypes = NULL;
@@ -549,10 +552,13 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 	goto errout;
     nctx->tgs_ktype_count = ctx->tgs_ktype_count;
 
-    nctx->os_context->default_ccname = strdup(ctx->os_context->default_ccname);
-    if (nctx->os_context->default_ccname == NULL) {
-	ret = ENOMEM;
-	goto errout;
+    if (ctx->os_context->default_ccname != NULL) {
+	nctx->os_context->default_ccname =
+	    strdup(ctx->os_context->default_ccname);
+	if (nctx->os_context->default_ccname == NULL) {
+	    ret = ENOMEM;
+	    goto errout;
+	}
     }
     ret = krb5_get_profile(ctx, &nctx->profile);
     if (ret)

@@ -323,6 +323,7 @@ krb5_copy_addresses
 krb5_copy_authdata
 krb5_copy_authenticator
 krb5_copy_checksum
+krb5_copy_context
 krb5_copy_creds
 krb5_copy_data
 krb5_copy_keyblock
