@@ -192,6 +192,8 @@ errcode_t profile_rename_node
 
 /* prof_file.c */
 
+errcode_t KRB5_CALLCONV profile_copy (profile_t, profile_t *);
+
 errcode_t profile_open_file
 	(const_profile_filespec_t file, prf_file_t *ret_prof);
 
