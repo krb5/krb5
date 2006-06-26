@@ -587,8 +587,7 @@ init_hardcoded(void)
  * module if it has not been already loaded.
  */
 gss_mechanism
-gssint_get_mechanism(oid)
-const gss_OID oid;
+gssint_get_mechanism(gss_OID oid)
 {
 	gss_mech_info aMech;
 	gss_mechanism (*sym)(const gss_OID);
