@@ -289,6 +289,8 @@ Acknowledgments
 Thanks to Russ Allbery for contributing and integrating patches from
 Debian and other places.
 
+Thanks to Michael Calmer for contributing patches for code clean-up.
+
 Thanks to Novell for donating the KDB abstraction layer.
 
 Thanks to Sun Microsystems for donating their implementations of
