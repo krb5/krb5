@@ -951,7 +951,10 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	}
 	if (conn->u.tcp.sgnum == 0) {
 	    /* finished sending */
-	    /* should go back to reading */
+	    /* We should go back to reading, though if we sent a
+	       FIELD_TOOLONG error in reply to a length with the high
+	       bit set, RFC 4120 says we have to close the TCP
+	       stream.  */
 	    goto kill_tcp_connection;
 	}
     } else if (selflags & SSF_READ) {
