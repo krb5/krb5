@@ -393,7 +393,8 @@ init_os_ctx.so init_os_ctx.po $(OUTPRE)init_os_ctx.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h init_os_ctx.c os-proto.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/util/profile/prof_int.h \
+  init_os_ctx.c os-proto.h
 krbfileio.so krbfileio.po $(OUTPRE)krbfileio.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
