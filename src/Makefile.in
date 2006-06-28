@@ -408,7 +408,7 @@ ETOUT =	\
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
 	lib/krb4/krb_err_txt.c
 
-HOUT =	$(INC)krb5.h $(GG)gssapi.h $(PR)profile.h
+HOUT =	$(INC)krb5\krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
 	include/profile.h include/osconf.h \
@@ -546,10 +546,12 @@ install-windows::
 	@if not exist "$(KRB_INSTALL_DIR)\$(NULL)" @echo The directory $(KRB_INSTALL_DIR) does not exist.  Please create it.
 	@if not exist "$(KRB_INSTALL_DIR)\$(NULL)" @dir /b $(KRB_INSTALL_DIR)\nul
 	@if not exist "$(KRB_INSTALL_DIR)\include\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include"
+	@if not exist "$(KRB_INSTALL_DIR)\include\krb5\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include\krb5"
 	@if not exist "$(KRB_INSTALL_DIR)\include\gssapi\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include\gssapi"
 	@if not exist "$(KRB_INSTALL_DIR)\lib\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\lib"
 	@if not exist "$(KRB_INSTALL_DIR)\bin\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\bin"
 	$(CP) include\krb5.h "$(KRB_INSTALL_DIR)\include\."
+	$(CP) include\krb5\krb5.h "$(KRB_INSTALL_DIR)\include\krb5\."
 	$(CP) include\win-mac.h "$(KRB_INSTALL_DIR)\include\."
 	$(CP) include\profile.h "$(KRB_INSTALL_DIR)\include\."
 	$(CP) include\com_err.h "$(KRB_INSTALL_DIR)\include\."
