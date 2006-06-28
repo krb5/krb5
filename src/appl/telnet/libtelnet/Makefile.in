@@ -89,8 +89,8 @@ enc_des.o: key-proto.h
 enc_des.o: misc-proto.h
 install::
 
-# @lib_frag@
-# @libobj_frag@
+@lib_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

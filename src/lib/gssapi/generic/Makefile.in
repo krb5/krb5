@@ -142,7 +142,7 @@ install-headers-unix install:: gssapi.h
 
 depend:: $(ETSRCS)
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

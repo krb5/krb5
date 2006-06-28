@@ -107,8 +107,8 @@ $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
 
 
-# @lib_frag@
-# @libobj_frag@
+@lib_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

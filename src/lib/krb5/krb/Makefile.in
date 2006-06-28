@@ -360,7 +360,7 @@ clean::
 		$(OUTPRE)t_deltat$(EXEEXT) $(OUTPRE)t_deltat.$(OBJEXT) \
 		$(OUTPRE)t_expand$(EXEEXT) $(OUTPRE)t_expand.$(OBJEXT)
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

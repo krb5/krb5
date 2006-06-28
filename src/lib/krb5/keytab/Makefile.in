@@ -55,7 +55,7 @@ clean-windows::
 	$(RM) $(OBJFILE)
 
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

@@ -109,8 +109,8 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 install-unix:: install-libs
 
-# @lib_frag@
-# @libobj_frag@
+@lib_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 
