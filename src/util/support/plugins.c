@@ -500,11 +500,11 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
             }
             
             if (dir != NULL) { closedir (dir); }
-        }
 #else
-	/* Until a Windows implementation of this code is implemented */
-	err = ENOENT;
+	    /* Until a Windows implementation of this code is implemented */
+	    err = ENOENT;
 #endif /* _WIN32 */
+        }
     }
         
     if (err == ENOENT) {
