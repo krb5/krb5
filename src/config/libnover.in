@@ -48,11 +48,6 @@ binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
 	sed  >> binutils.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
 	echo >> binutils.versions "};"
 
-solaris.versions: $(SHLIB_EXPORT_FILE) Makefile
-	echo >  solaris.versions "{ global:"
-	sed  >> solaris.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
-	echo >> solaris.versions " local: *; };"
-
 osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
 	$(RM) osf1.tmp osf1.exports
 	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.tmp
@@ -93,7 +88,7 @@ all-libs: $(LIBBASE)$(DYNOBJEXT) # $(LIBLIST)
 
 clean-libs:
 	$(RM) $(LIBBASE)$(SHLIBEXT)
-	$(RM) binutils.versions osf1.exports solaris.versions
+	$(RM) binutils.versions osf1.exports
 
 install-libs: $(LIBINSTLIST)
 install-shared:

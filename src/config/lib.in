@@ -59,11 +59,6 @@ binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
 	echo >> binutils.versions "};"
 	echo >> binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
 
-solaris.versions: $(SHLIB_EXPORT_FILE) Makefile
-	echo >  solaris.versions "{ global:"
-	sed  >> solaris.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
-	echo >> solaris.versions " local: *; };"
-
 darwin.exports: $(SHLIB_EXPORT_FILE) Makefile
 	sed > darwin-exports.tmp < $(SHLIB_EXPORT_FILE) "s/^/_/"
 	$(MV) darwin-exports.tmp darwin.exports
@@ -129,7 +124,7 @@ clean-libs:
 	$(RM) lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) lib$(LIBBASE)$(PFLIBEXT)
-	$(RM) binutils.versions osf1.exports solaris.versions
+	$(RM) binutils.versions osf1.exports
 
 clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)
