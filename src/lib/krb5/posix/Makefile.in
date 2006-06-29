@@ -15,4 +15,4 @@ all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 
 ##WIN32##LIBOBJS = $(OUTPRE)syslog.obj
-# @libobj_frag@
+@libobj_frag@

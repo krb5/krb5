@@ -37,7 +37,7 @@ t_crc: t_crc.o crc32.o $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_crc.o crc32.o $(SUPPORT_LIB)
 
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

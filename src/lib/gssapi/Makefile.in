@@ -115,8 +115,8 @@ $(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h krb5/gssapi_err_krb5.h gene
 ##DOS##!endif
 
 
-# @lib_frag@
-# @libobj_frag@
+@lib_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

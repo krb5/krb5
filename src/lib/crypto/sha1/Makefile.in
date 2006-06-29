@@ -49,7 +49,7 @@ clean-unix:: clean-libobjs
 t_shs3: t_shs3.o shs.o $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_shs3 t_shs3.o shs.o $(SUPPORT_LIB)
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

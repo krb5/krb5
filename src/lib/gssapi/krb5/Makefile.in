@@ -235,7 +235,7 @@ includes::  gssapi_krb5.h
 
 install::
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 
