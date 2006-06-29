@@ -339,22 +339,6 @@ typedef struct gss_config {
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
 	 );
-    int		     (*pname_to_uid)
-	(
-		    void *,		/* context */
-		    char *,		/* pname */
-		    gss_OID,		/* name type */
-		    gss_OID,		/* mech type */
-		    uid_t *		/* uid */
-		    );
-	OM_uint32		(*gssint_userok)
-	(
-		    void *,		/* context */
-		    OM_uint32 *,	/* minor_status */
-		    const gss_name_t,	/* pname */
-		    const char *,	/* local user */
-		    int *		/* user ok? */
-	/* */);
 	OM_uint32		(*gss_export_name)
 	(
 		void *,			/* context */

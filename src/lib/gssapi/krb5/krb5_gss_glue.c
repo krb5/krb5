@@ -366,8 +366,6 @@ static OM_uint32 k5glue_validate_cred
     k5glue_inquire_context,				\
     k5glue_internal_release_oid,			\
     k5glue_wrap_size_limit,				\
-    NULL,			/* pname_to_uid */	\
-    NULL,			/* userok */		\
     k5glue_export_name,					\
     NULL			/* store_cred */
 
