@@ -41,8 +41,8 @@
 #include	<string.h>
 #include	<k5-int.h>
 #include	<krb5.h>
-#include	"gssapiP_spnego.h"
 #include	<mglueP.h>
+#include	"gssapiP_spnego.h"
 #include	<gssapi_err_generic.h>
 
 #undef g_token_size
