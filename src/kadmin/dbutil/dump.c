@@ -2121,23 +2121,12 @@ load_db(argc, argv)
 	    verbose = 1;
 	else if (!strcmp(argv[aindex], updateoption))
 	    update = 1;
-	else if (!strcmp(argv[aindex], hashoption))
-	{
-	    db5util_db_args_size++;
-	    {
-		char **temp = realloc( db5util_db_args, sizeof(char*) * (db5util_db_args_size+1)); /* one for NULL */
-		if( temp == NULL )
-		{
-		    com_err(progname, ENOMEM, "while parsing command arguments\n");
-		    exit(1);
-		}
-
-		db5util_db_args = temp;
+	else if (!strcmp(argv[aindex], hashoption)) {
+	    if (!add_db_arg("hash=true")) {
+		com_err(progname, ENOMEM, "while parsing command arguments\n");
+		exit(1);
 	    }
-	    db5util_db_args[db5util_db_args_size-1] = "hash=true";
-	    db5util_db_args[db5util_db_args_size]   = NULL;
-	}
-	else
+	} else
 	    break;
     }
     if ((argc - aindex) != 1) {

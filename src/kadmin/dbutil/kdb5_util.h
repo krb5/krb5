@@ -42,6 +42,7 @@ extern int valid_master_key;
 extern krb5_db_entry master_db;
 extern char **db5util_db_args;
 extern int    db5util_db_args_size;
+extern int add_db_arg(char *arg);
 
 extern void usage(void);
 
