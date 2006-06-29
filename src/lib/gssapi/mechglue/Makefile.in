@@ -280,8 +280,6 @@ g_unseal.so g_unseal.po $(OUTPRE)g_unseal.$(OBJEXT): \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_unseal.c mechglue.h \
   mglueP.h
-g_utils.so g_utils.po $(OUTPRE)g_utils.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  g_utils.c
 g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
