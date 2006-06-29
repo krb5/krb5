@@ -38,14 +38,29 @@ SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=gssapi
 
-all-unix:: all-liblinks
+all-unix:: all-liblinks @MAINT@ verify-calling-conventions-gssapi
 
 install-unix:: install-libs
 
-clean-unix:: clean-liblinks clean-libs clean-libobjs
+clean-unix:: clean-liblinks clean-libs clean-libobjs clean-misc-unix
 
 clean-windows::
 	$(RM) gssapi.lib gssapi.bak
+
+clean-misc-unix:
+	$(RM) merged-gssapi-header.h
+
+EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
+EXPORTED_HEADERS= \
+	$(EHDRDIR)$(S)gssapi_krb5.h \
+	$(EHDRDIR)$(S)gssapi_generic.h \
+	$(EHDRDIR)$(S)gssapi.h
+$(EXPORTED_HEADERS): all-recurse
+merged-gssapi-header.h: $(EXPORTED_HEADERS)
+	cat $(EXPORTED_HEADERS) > merged.tmp
+	$(MV) merged.tmp merged-gssapi-header.h
+verify-calling-conventions-gssapi: merged-gssapi-header.h
+	$(PERL) -w $(SRCTOP)/util/def-check.pl merged-gssapi-header.h $(srcdir)/../gssapi32.def
 
 all-windows::
 	cd generic
