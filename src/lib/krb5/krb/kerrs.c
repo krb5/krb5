@@ -28,7 +28,7 @@
 #include <stdarg.h>
 #include "k5-int.h"
 
-void
+void KRB5_CALLCONV_C
 krb5_set_error_message (krb5_context ctx, krb5_error_code code,
 			const char *fmt, ...)
 {
@@ -40,7 +40,7 @@ krb5_set_error_message (krb5_context ctx, krb5_error_code code,
     va_end (args);
 }
 
-void
+void KRB5_CALLCONV
 krb5_vset_error_message (krb5_context ctx, krb5_error_code code,
 			 const char *fmt, va_list args)
 {
@@ -49,7 +49,7 @@ krb5_vset_error_message (krb5_context ctx, krb5_error_code code,
     krb5int_vset_error (&ctx->err, code, fmt, args);
 }
 
-char *
+char * KRB5_CALLCONV
 krb5_get_error_message (krb5_context ctx, krb5_error_code code)
 {
     if (ctx == NULL)
@@ -57,7 +57,7 @@ krb5_get_error_message (krb5_context ctx, krb5_error_code code)
     return krb5int_get_error (&ctx->err, code);
 }
 
-void
+void KRB5_CALLCONV
 krb5_free_error_message (krb5_context ctx, char *msg)
 {
     if (ctx == NULL)
@@ -65,7 +65,7 @@ krb5_free_error_message (krb5_context ctx, char *msg)
     krb5int_free_error (&ctx->err, msg);
 }
 
-void
+void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context ctx)
 {
     if (ctx == NULL)
