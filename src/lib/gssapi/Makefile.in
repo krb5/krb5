@@ -55,7 +55,6 @@ EXPORTED_HEADERS= \
 	$(EHDRDIR)$(S)gssapi_krb5.h \
 	$(EHDRDIR)$(S)gssapi_generic.h \
 	$(EHDRDIR)$(S)gssapi.h
-$(EXPORTED_HEADERS): all-recurse
 merged-gssapi-header.h: $(EXPORTED_HEADERS)
 	cat $(EXPORTED_HEADERS) > merged.tmp
 	$(MV) merged.tmp merged-gssapi-header.h
@@ -131,7 +130,7 @@ clean-windows::
 # appears to be properly serializing the subdir processing and local
 # compiles... so far.
 ##DOS##!if 0
-$(BUILDTOP)/include/gssapi/gssapi.h generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h: all-recurse
+$(EXPORTED_HEADERS) generic/gssapi.h krb5/gssapi_err_krb5.h generic/gssapi_err_generic.h krb5/gssapi_krb5.h: all-recurse
 	: $@ updated by recursion rule
 ##DOS##!endif
 
