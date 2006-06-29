@@ -970,29 +970,37 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    return(major_status);
 }
 
+#ifndef _WIN32
 k5_mutex_t kg_kdc_flag_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static int kdc_flag = 0;
+#endif
 
 krb5_error_code
 krb5_gss_init_context (krb5_context *ctxp)
 {
     krb5_error_code err;
+#ifndef _WIN32
     int is_kdc;
+#endif
 
     err = gssint_initialize_library();
     if (err)
 	return err;
+#ifndef _WIN32
     err = k5_mutex_lock(&kg_kdc_flag_mutex);
     if (err)
 	return err;
     is_kdc = kdc_flag;
     k5_mutex_unlock(&kg_kdc_flag_mutex);
+
     if (is_kdc)
 	return krb5int_init_context_kdc(ctxp);
-    else
-	return krb5_init_context(ctxp);
+#endif
+
+    return krb5_init_context(ctxp);
 }
 
+#ifndef _WIN32
 krb5_error_code
 krb5_gss_use_kdc_context()
 {
@@ -1008,3 +1016,5 @@ krb5_gss_use_kdc_context()
     k5_mutex_unlock(&kg_kdc_flag_mutex);
     return 0;
 }
+#endif
+

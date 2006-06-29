@@ -9,7 +9,9 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef _WIN32
 #include <strings.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #include <gssapi/gssapi.h>

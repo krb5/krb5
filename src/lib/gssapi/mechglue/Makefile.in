@@ -6,7 +6,8 @@ LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../gener
 DEFS=
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)
+##DOS##PREFIXDIR=mechglue
+##DOS##OBJFILE=..\$(OUTPRE)mechglue.lst
 
 ##DOS##DLL_EXP_TYPE=GSS
 
@@ -44,6 +45,41 @@ SRCS = \
 	$(srcdir)/g_utils.c \
 	$(srcdir)/g_verify.c \
 	$(srcdir)/oid_ops.c
+
+OBJS = \
+	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_acquire_cred.$(OBJEXT) \
+	$(OUTPRE)g_canon_name.$(OBJEXT) \
+	$(OUTPRE)g_compare_name.$(OBJEXT) \
+	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_dsp_name.$(OBJEXT) \
+	$(OUTPRE)g_dsp_status.$(OBJEXT) \
+	$(OUTPRE)g_dup_name.$(OBJEXT) \
+	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_export_name.$(OBJEXT) \
+	$(OUTPRE)g_glue.$(OBJEXT) \
+	$(OUTPRE)g_imp_name.$(OBJEXT) \
+	$(OUTPRE)g_imp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_init_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_initialize.$(OBJEXT) \
+	$(OUTPRE)g_inq_context.$(OBJEXT) \
+	$(OUTPRE)g_inq_cred.$(OBJEXT) \
+	$(OUTPRE)g_inq_names.$(OBJEXT) \
+	$(OUTPRE)g_mechname.$(OBJEXT) \
+	$(OUTPRE)g_oid_ops.$(OBJEXT) \
+	$(OUTPRE)g_process_context.$(OBJEXT) \
+	$(OUTPRE)g_rel_buffer.$(OBJEXT) \
+	$(OUTPRE)g_rel_cred.$(OBJEXT) \
+	$(OUTPRE)g_rel_name.$(OBJEXT) \
+	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)g_seal.$(OBJEXT) \
+	$(OUTPRE)g_sign.$(OBJEXT) \
+	$(OUTPRE)g_store_cred.$(OBJEXT) \
+	$(OUTPRE)g_unseal.$(OBJEXT) \
+	$(OUTPRE)g_utils.$(OBJEXT) \
+	$(OUTPRE)g_verify.$(OBJEXT) \
+	$(OUTPRE)oid_ops.$(OBJEXT)
 
 STLIBOBJS = \
 	g_accept_sec_context.o \
@@ -83,7 +119,11 @@ STLIBOBJS = \
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
+$(OBJS): $(EXPORTED_HEADERS)
+
 all-unix:: all-libobjs
+
+##DOS##LIBOBJS = $(OBJS)
 
 clean-unix:: clean-libobjs
 

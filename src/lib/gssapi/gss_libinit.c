@@ -40,9 +40,11 @@ int gssint_lib_init(void)
     err = k5_key_register(K5_KEY_GSS_KRB5_CCACHE_NAME, free);
     if (err)
 	return err;
+#ifndef _WIN32
     err = k5_mutex_finish_init(&kg_kdc_flag_mutex);
     if (err)
 	return err;
+#endif
     return k5_mutex_finish_init(&kg_vdb.mutex);
 }
 
@@ -64,7 +66,9 @@ void gssint_lib_fini(void)
     k5_key_delete(K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME);
     k5_key_delete(K5_KEY_GSS_KRB5_CCACHE_NAME);
     k5_mutex_destroy(&kg_vdb.mutex);
+#ifndef _WIN32
     k5_mutex_destroy(&kg_kdc_flag_mutex);
+#endif
     k5_mutex_destroy(&gssint_krb5_keytab_lock);
     gssint_mechglue_fini();
 }
