@@ -48,3 +48,4 @@ krb5_db_iter_policy
 krb5_db_delete_policy
 krb5_db_free_policy
 krb5_def_store_mkey
+krb5_db_promote

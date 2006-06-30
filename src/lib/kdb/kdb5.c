@@ -217,6 +217,10 @@ kdb_setup_opt_functions(db_library lib)
     if (lib->vftabl.store_master_key == NULL) {
 	lib->vftabl.store_master_key = krb5_def_store_mkey;
     }
+
+    if (lib->vftabl.promote_db == NULL) {
+	lib->vftabl.promote_db = krb5_def_promote_db;
+    }
 }
 
 static int kdb_db2_pol_err_loaded = 0;
