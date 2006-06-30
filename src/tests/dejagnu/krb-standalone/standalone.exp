@@ -19,6 +19,61 @@ if ![setup_kerberos_db 1] {
 # the rest of the tests inside a proc, so that we can easily kill the
 # processes when the procedure ends.
 
+proc dump_and_reload {} {
+    global KDB5_UTIL
+    global tmppwd
+
+    set dumpfile $tmppwd/dump-file
+    set dumpokfile $dumpfile.dump_ok
+
+    set test1name "kdb5_util dump"
+    set test2name "kdb5_util load"
+
+    if [file exists $dumpfile] { file delete $dumpfile }
+    if [file exists $dumpokfile] { file delete $dumpokfile }
+
+    spawn $KDB5_UTIL dump $dumpfile
+    expect {
+	-re "..*" {
+	    fail $test1name
+	    untested $test2name
+	    return
+	}
+	timeout {
+	    fail $test1name
+	    untested $test2name
+	    return
+	}
+	eof { }
+    }
+    if ![check_exit_status $test1name] {
+	untested $test2name
+	return
+    }
+    if ![file exists $dumpfile]||![file exists $dumpokfile] {
+	fail $test1name
+	untested $test2name
+	return
+    }
+    pass $test1name
+
+    spawn $KDB5_UTIL load $dumpfile
+    expect {
+	-re "..*" {
+	    fail $test2name
+	    return
+	}
+	timeout {
+	    fail $test2name
+	    return
+	}
+	eof { }
+    }
+    if [check_exit_status $test2name] {
+	pass $test2name
+    }
+}
+
 proc doit { } {
     global REALMNAME
     global KLIST
@@ -48,6 +103,9 @@ proc doit { } {
     if ![setup_srvtab 1] {
 	return
     }
+
+    # Test dump and load.  Continue on, whatever the result.
+    dump_and_reload
 
     # Use kinit to get a ticket.
     if ![kinit krbtest/admin adminpass$KEY 1] {
