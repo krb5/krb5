@@ -2303,13 +2303,23 @@ load_db(argc, argv)
 	 exit_status++;
     }
 
+#if 0
     if ((kret = krb5_db_fini(kcontext))) {
 	 fprintf(stderr, close_err_fmt,
 		 programname, error_message(kret));
 	 exit_status++;
     }
+#endif
 
     /* close policy db below */
+
+    if (exit_status == 0
+	&& !update
+	&& (kret = krb5_db_promote(kcontext, db5util_db_args))) {
+	fprintf(stderr, "%s: cannot make newly loaded database live (%s)\n",
+		programname, error_message(kret));
+	exit_status++;
+    }
 
 error:
     /*
