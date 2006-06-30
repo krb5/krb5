@@ -2224,7 +2224,8 @@ load_db(argc, argv)
 
     /*
      * Cons up params for the new databases.  If we are not in update
-     * mode, we dont create tmp file and then move it to final place. As it is dependent on DB type, this is not done
+     * mode, we create an alternate database and then promote it to
+     * be the live db.
      */
     newparams = global_params;
     if (! update) {
@@ -2237,6 +2238,11 @@ load_db(argc, argv)
 		      "while retreiving new configuration parameters");
 	      exit_status++;
 	      return;
+	 }
+
+	 if (!add_db_arg("temporary")) {
+	     com_err(progname, ENOMEM, "computing parameters for database");
+	     exit(1);
 	 }
     }
     

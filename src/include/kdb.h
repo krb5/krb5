@@ -238,6 +238,7 @@ krb5_error_code kdb5_db_create ( krb5_context kcontext, char **db_args );
 krb5_error_code krb5_db_fini ( krb5_context kcontext );
 const char * krb5_db_errcode2string ( krb5_context kcontext, long err_code );
 krb5_error_code krb5_db_destroy ( krb5_context kcontext, char **db_args );
+krb5_error_code krb5_db_promote ( krb5_context kcontext, char **db_args );
 krb5_error_code krb5_db_get_age ( krb5_context kcontext, char *db_name, time_t *t );
 krb5_error_code krb5_db_set_option ( krb5_context kcontext, int option, void *value );
 krb5_error_code krb5_db_lock ( krb5_context kcontext, int lock_mode );
