@@ -48,6 +48,8 @@ void
 krb5int_vset_error (struct errinfo *ep, long code,
 		    const char *fmt, va_list args)
 {
+    char *p;
+
     if (ep->msg && ep->msg != ep->scratch_buf) {
 	free (ep->msg);
 	ep->msg = NULL;
@@ -63,18 +65,20 @@ krb5int_vset_error (struct errinfo *ep, long code,
     }
 #endif
     vsnprintf(ep->scratch_buf, sizeof(ep->scratch_buf), fmt, args);
-    ep->msg = ep->scratch_buf;
+    p = strdup(ep->scratch_buf);
+    ep->msg = p ? p : ep->scratch_buf;
 }
 
 char *
 krb5int_get_error (struct errinfo *ep, long code)
 {
     char *r, *r2;
-    if (code != ep->code)
-	krb5int_clear_error (ep);
-    if (ep->msg) {
-	r = ep->msg;
-	ep->msg = NULL;
+    if (code == ep->code && ep->msg) {
+	r = strdup(ep->msg);
+	if (r == NULL) {
+	    strcpy(ep->scratch_buf, _("Out of memory"));
+	    r = ep->scratch_buf;
+	}
 	return r;
     }
     if (initialize() != 0) {
@@ -88,8 +92,12 @@ krb5int_get_error (struct errinfo *ep, long code)
     if (fptr == NULL) {
 	unlock();
 #ifdef HAVE_STRERROR_R
-	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0)
+	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
+	    char *p = strdup(ep->scratch_buf);
+	    if (p)
+		return p;
 	    return ep->scratch_buf;
+	}
 	/* If strerror_r didn't work with the 1K buffer, we can try a
 	   really big one.  This seems kind of gratuitous though.  */
 #define BIG_ERR_BUFSIZ 8192

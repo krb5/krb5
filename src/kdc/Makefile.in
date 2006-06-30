@@ -193,9 +193,9 @@ $(OUTPRE)kerberos_v4.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/kdc.h \
-  $(SRCTOP)/include/kerberosIV/klog.h $(SRCTOP)/include/kerberosIV/krb.h \
-  $(SRCTOP)/include/kerberosIV/krb_db.h $(SRCTOP)/include/kerberosIV/prot.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/syslog.h extern.h kdc_util.h kerberos_v4.c
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/klog.h \
+  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/krb_db.h \
+  $(SRCTOP)/include/kerberosIV/prot.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  extern.h kdc_util.h kerberos_v4.c

@@ -7,6 +7,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\"
+LOCALINCLUDES=-I$(SRCTOP)/util/profile
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=os
@@ -161,8 +162,7 @@ shared:
 
 TEST_PROGS= t_std_conf t_an_to_ln t_locate_kdc
 
-T_STD_CONF_OBJS= t_std_conf.o def_realm.o get_krbhst.o realm_dom.o \
-		hst_realm.o init_os_ctx.o locate_kdc.o dnsglue.o
+T_STD_CONF_OBJS= t_std_conf.o 
 
 T_AN_TO_LN_OBJS = t_an_to_ln.o an_to_ln.o 
 
@@ -239,7 +239,7 @@ check-unix::
 clean:: 
 	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 
@@ -392,7 +392,8 @@ init_os_ctx.so init_os_ctx.po $(OUTPRE)init_os_ctx.$(OBJEXT): \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h init_os_ctx.c os-proto.h
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/util/profile/prof_int.h \
+  init_os_ctx.c os-proto.h
 krbfileio.so krbfileio.po $(OUTPRE)krbfileio.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

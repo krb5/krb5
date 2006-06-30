@@ -485,3 +485,90 @@ krb5_is_permitted_enctype(krb5_context context, krb5_enctype etype)
 
     return(ret);
 }
+
+static krb5_error_code
+copy_ktypes(krb5_context ctx,
+	    unsigned int nktypes,
+	    krb5_enctype *oldktypes,
+	    krb5_enctype **newktypes)
+{
+    unsigned int i;
+
+    *newktypes = NULL;
+    if (!nktypes)
+	return 0;
+
+    *newktypes = malloc(nktypes * sizeof(krb5_enctype));
+    if (*newktypes == NULL)
+	return ENOMEM;
+    for (i = 0; i < nktypes; i++)
+	(*newktypes)[i] = oldktypes[i];
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
+{
+    krb5_error_code ret;
+    krb5_context nctx;
+
+    *nctx_out = NULL;
+    if (ctx == NULL)
+	return EINVAL;		/* XXX */
+
+    nctx = malloc(sizeof(*nctx));
+    if (nctx == NULL)
+	return ENOMEM;
+
+    *nctx = *ctx;
+
+    nctx->in_tkt_ktypes = NULL;
+    nctx->in_tkt_ktype_count = 0;
+    nctx->tgs_ktypes = NULL;
+    nctx->tgs_ktype_count = 0;
+    nctx->default_realm = NULL;
+    nctx->profile = NULL;
+    nctx->db_context = NULL;
+    nctx->ser_ctx_count = 0;
+    nctx->ser_ctx = NULL;
+    nctx->prompt_types = NULL;
+    nctx->os_context->default_ccname = NULL;
+
+    memset(&nctx->libkrb5_plugins, 0, sizeof(nctx->libkrb5_plugins));
+    nctx->vtbl = NULL;
+    nctx->locate_fptrs = NULL;
+
+    memset(&nctx->err, 0, sizeof(nctx->err));
+
+    ret = copy_ktypes(nctx, ctx->in_tkt_ktype_count,
+		      ctx->in_tkt_ktypes, &nctx->in_tkt_ktypes);
+    if (ret)
+	goto errout;
+    nctx->in_tkt_ktype_count = ctx->in_tkt_ktype_count;
+
+    ret = copy_ktypes(nctx, ctx->tgs_ktype_count,
+		      ctx->tgs_ktypes, &nctx->in_tkt_ktypes);
+    if (ret)
+	goto errout;
+    nctx->tgs_ktype_count = ctx->tgs_ktype_count;
+
+    if (ctx->os_context->default_ccname != NULL) {
+	nctx->os_context->default_ccname =
+	    strdup(ctx->os_context->default_ccname);
+	if (nctx->os_context->default_ccname == NULL) {
+	    ret = ENOMEM;
+	    goto errout;
+	}
+    }
+    ret = krb5_get_profile(ctx, &nctx->profile);
+    if (ret)
+	goto errout;
+
+errout:
+    if (ret) {
+	krb5_free_context(nctx);
+    } else {
+	*nctx_out = nctx;
+    }
+    return ret;
+}

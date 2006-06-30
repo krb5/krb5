@@ -510,7 +510,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 			 * If there is a facility present, then parse that.
 			 */
 			if (cp2) {
-			    const struct {
+			    static const struct {
 				const char *name;
 				int value;
 			    } facilities[] = {

@@ -63,7 +63,7 @@ AC_CHECK_HEADER(sys/ptyvar.h, [], [],
 #
 
 AC_CHECK_HEADERS(utmp.h utmpx.h)
-AC_CHECK_FUNCS(setutent setutxent updwtmp updwtmpx logwtmp getutmp getutmpx)
+AC_CHECK_FUNCS(setutent setutxent setutsent updwtmp updwtmpx logwtmp getutmp getutmpx)
 AC_CHECK_FUNCS(utmpname utmpxname)
 
 AC_DEFUN(K5_CHECK_UT_MEMBER,

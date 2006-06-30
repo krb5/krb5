@@ -59,7 +59,7 @@ EXPORTS
 ; GSS-API v2  future extensions
 ;
 	gss_inquire_names_for_mech
-;	gss_inquire_mechs_for_name
+	gss_inquire_mechs_for_name
 	gss_canonicalize_name
 	gss_export_name
 	gss_duplicate_name
@@ -72,6 +72,7 @@ EXPORTS
         gss_krb5_set_allowable_enctypes
         gss_krb5_export_lucid_sec_context
         gss_krb5_free_lucid_sec_context
+	krb5_gss_register_acceptor_identity
 ;
 ; GSS-API variables
 ;

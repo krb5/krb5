@@ -119,11 +119,19 @@ allow for an alternate port number for
 .I kpropd
 to listen on. This is only useful if the program is run in standalone
 mode.
+.TP
+.B \-a
+allows the user to specify the path to the
+.KR kpropd.acl
+file; by default the path used is KPROPD_ACL_FILE
+(normally /usr/local/var/krb5kdc/kpropd.acl).
 .SH FILES
 .TP "\w'kpropd.acl\ \ 'u"
 kpropd.acl
 Access file for
-.BR kpropd .
+.BR kpropd ;
+the default location is KPROPD_ACL_FILE (normally
+/usr/local/var/krb5kdc/kpropd.acl).
 Each entry is a line containing the principal of a host from which the
 local machine will allow Kerberos database propagation via kprop.
 .SH SEE ALSO

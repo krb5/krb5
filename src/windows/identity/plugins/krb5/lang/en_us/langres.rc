@@ -521,6 +521,8 @@ BEGIN
     IDS_CFG_RE_MMK          "Toggle &master KDC"
     IDS_CFG_RE_MND          "&Add new domain mapping"
     IDS_CFG_RE_MDD          "&Remove domain mapping"
+    IDS_KVNO_LONG_DESC      "Key version number"
+    IDS_KVNO_SHORT_DESC     "Kvno"
 END
 
 #endif    // English (U.S.) resources

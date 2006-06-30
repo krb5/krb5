@@ -878,6 +878,17 @@ dnl
 HOST_TYPE=$krb5_cv_host
 AC_SUBST(HOST_TYPE)
 dnl
+dnl Sadly, we seem to have accidentally committed ourselves in 1.4 to
+dnl an ABI that includes the existence of libkrb5support.0 even
+dnl though random apps should never use anything from it.  And on
+dnl the Mac, to which that didn't apply, we can't use major version 0.
+dnl
+case $krb5_cv_host in
+*-*-darwin* | *-*-rhapsody*) SUPPORTLIB_MAJOR=1 ;;
+*)			     SUPPORTLIB_MAJOR=0 ;;
+esac
+AC_SUBST(SUPPORTLIB_MAJOR)
+dnl
 dnl
 if test "$COM_ERR_VERSION" = k5 ; then
 dnl  AC_CONFIG_SUBDIRS(util/et)

@@ -9,7 +9,10 @@ eval 'exec /usr/athena/bin/perl -S $0 ${1+"$@"}'
 use strict;
 use IO::File;
 
-my $h_filename = shift @ARGV || die "usage: $0 header-file [def-file]\n";
+my $verbose = 0;
+my $error = 0;
+if ( $ARGV[0] eq "-v" ) { $verbose = 1; shift @ARGV; }
+my $h_filename = shift @ARGV || die "usage: $0 [-v] header-file [def-file]\n";
 my $d_filename = shift @ARGV;
 
 my $h = open_always($h_filename);
@@ -47,14 +50,12 @@ while (! $h->eof()) {
     }
   Top:
     # drop KRB5INT_BEGIN_DECLS and KRB5INT_END_DECLS
-    if (/^ *KRB5INT_BEGIN_DECLS/) {
-        next LINE;
-    }
-    if (/^ *KRB5INT_END_DECLS/) {
+    if (/^ *(KRB5INT|GSSAPI[A-Z]*)_(BEGIN|END)_DECLS/) {
         next LINE;
     }
     # drop preprocessor directives
     if (/^ *#/) {
+	while (/\\$/) { $_ .= $h->getline(); }
         next LINE;
     }
     if (/^ *\?==/) {
@@ -75,7 +76,7 @@ while (! $h->eof()) {
     }
     # multi-line comments?
     if (/\/\*$/) {
-	$_ .= "\n";
+	$_ .= " ";
 	$len1 = length;
 	$_ .= $h->getline();
 	chop if $len1 < length;
@@ -85,7 +86,7 @@ while (! $h->eof()) {
     if (/^[ \t]*$/) {
         next LINE;
     }
-    if (/ *extern "C" {/) {
+    if (/^ *extern "C" {/) {
         next LINE;
     }
     # elide struct definitions
@@ -180,11 +181,13 @@ while (! $h->eof()) {
     }
 }
 
-print join("\n\t", "Using default calling convention:", sort(@convD));
-print join("\n\t", "\nUsing KRB5_CALLCONV:", sort(@convK));
-print join("\n\t", "\nUsing KRB5_CALLCONV_C:", sort(@convC));
-print join("\n\t", "\nUsing KRB5_CALLCONV_WRONG:", sort(@convW));
-print "\n","-"x70,"\n";
+if ( $verbose ) {
+    print join("\n\t", "Using default calling convention:", sort(@convD));
+    print join("\n\t", "\nUsing KRB5_CALLCONV:", sort(@convK));
+    print join("\n\t", "\nUsing KRB5_CALLCONV_C:", sort(@convC));
+    print join("\n\t", "\nUsing KRB5_CALLCONV_WRONG:", sort(@convW));
+    print "\n","-"x70,"\n";
+}
 
 %conv = ();
 map { $conv{$_} = "default"; } @convD;
@@ -196,8 +199,8 @@ my %vararg = ();
 map { $vararg{$_} = 1; } @vararg;
 
 if (!$d) {
-    print "No .DEF file specified\n";
-    exit;
+    print "No .DEF file specified\n" if $verbose;
+    exit 0;
 }
 
 LINE2:
@@ -213,7 +216,7 @@ while (! $d->eof()) {
         $printit = 0;
         next LINE2;
     }
-    if (/^EXPORTS/) {
+    if (/^EXPORTS/ || /^DESCRIPTION/ || /^HEAPSIZE/) {
         $printit = 0;
         next LINE2;
     }
@@ -221,6 +224,8 @@ while (! $d->eof()) {
     my($xconv);
     if (/PRIVATE/ || /INTERNAL/) {
 	$xconv = "PRIVATE";
+    } elsif (/DATA/) {
+	$xconv = "DATA";
     } elsif (/!CALLCONV/ || /KRB5_CALLCONV_WRONG/) {
 	$xconv = "KRB5_CALLCONV_WRONG";
     } elsif ($vararg{$_}) {
@@ -231,16 +236,23 @@ while (! $d->eof()) {
     s/;.*$//;
 
     if ($xconv eq "PRIVATE") {
-	print "\t private $_\n";
+	print "\t private $_\n" if $verbose;
+	next LINE2;
+    }
+    if ($xconv eq "DATA") {
+	print "\t data $_\n" if $verbose;
 	next LINE2;
     }
     if (!defined($conv{$_})) {
 	print "No calling convention specified for $_!\n";
+	$error = 1;
     } elsif (! ($conv{$_} eq $xconv)) {
 	print "Function $_ should have calling convention '$xconv', but has '$conv{$_}' instead.\n";
+	$error = 1;
     } else {
 #	print "Function $_ is okay.\n";
     }
 }
 
 #print "Calling conventions defined for: ", keys(%conv);
+exit $error;

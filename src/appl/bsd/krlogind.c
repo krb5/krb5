@@ -1045,7 +1045,7 @@ void protocol(f, p)
 	    }
 	}
 
-	if (select(8*sizeof(ibits), &ibits, &obits, &ebits, 0) < 0) {
+	if (select(((p > f) ? p : f) + 1, &ibits, &obits, &ebits, 0) < 0) {
 	    if (errno == EINTR)
 	      continue;
 	    fatalperror(f, "select");

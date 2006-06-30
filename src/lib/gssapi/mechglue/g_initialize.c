@@ -27,6 +27,7 @@
  */
 
 #include "mglueP.h"
+#include "gss_libinit.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -36,29 +37,12 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include <dlfcn.h>
-
-#define	MECH_CONF "/etc/gss/mech"
-
-#define	MECH_LIB_PREFIX1	"/usr/lib/"
-
-#define	MECH_LIB_PREFIX2	""
-
-#define	MECH_LIB_DIR		"gss/"
-
-#define	MECH_LIB_PREFIX	MECH_LIB_PREFIX1 MECH_LIB_PREFIX2 MECH_LIB_DIR
-
-#define MECH_SYM "gss_mech_initialize"
-
 #define	M_DEFAULT	"default"
-
-#include <sys/stat.h>
 
 #include "k5-thread.h"
 
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
-static void loadConfigFile(const char *);
 static void updateMechList(void);
 static void register_mech(gss_mechanism, const char *, void *);
 
@@ -72,9 +56,7 @@ static void init_hardcoded(void);
 static gss_mech_info g_mechList = NULL;
 static gss_mech_info g_mechListTail = NULL;
 static k5_mutex_t g_mechListLock = K5_MUTEX_PARTIAL_INITIALIZER;
-static time_t g_confFileModTime = (time_t)0;
 
-static time_t g_mechSetTime = (time_t)0;
 static gss_OID_set_desc g_mechSet = { 0, NULL };
 static k5_mutex_t g_mechSetLock = K5_MUTEX_PARTIAL_INITIALIZER;
 
@@ -154,8 +136,6 @@ gss_indicate_mechs(minorStatus, mechSet)
 OM_uint32 *minorStatus;
 gss_OID_set *mechSet;
 {
-	char *fileName;
-	struct stat fileInfo;
 	int i, j;
 	gss_OID curItem;
 
@@ -171,18 +151,6 @@ gss_OID_set *mechSet;
 	if (mechSet == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	fileName = MECH_CONF;
-
-#if 0
-	/*
-	 * If we have already computed the mechanisms supported and if it
-	 * is still valid; make a copy and return to caller,
-	 * otherwise build it first.
-	 */
-	if ((stat(fileName, &fileInfo) == 0 &&
-		fileInfo.st_mtime > g_mechSetTime)) {
-	} /* if g_mechSet is out of date or not initialized */
-#endif
 	if (build_mechSet())
 		return GSS_S_FAILURE;
 
@@ -261,20 +229,6 @@ build_mechSet(void)
 	 */
 	(void) k5_mutex_lock(&g_mechListLock);
 
-#if 0
-	/*
-	 * this checks for the case when we need to re-construct the
-	 * g_mechSet structure, but the mechanism list is upto date
-	 * (because it has been read by someone calling
-	 * gssint_get_mechanism)
-	 */
-	if (fileInfo.st_mtime > g_confFileModTime)
-	{
-		g_confFileModTime = fileInfo.st_mtime;
-		loadConfigFile(fileName);
-	}
-#endif
-
 	updateMechList();
 
 	/*
@@ -343,9 +297,6 @@ build_mechSet(void)
 		}
 	}
 
-#if 0
-	g_mechSetTime = fileInfo.st_mtime;
-#endif
 	(void) k5_mutex_unlock(&g_mechSetLock);
 	(void) k5_mutex_unlock(&g_mechListLock);
 
@@ -491,20 +442,9 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 static void
 updateMechList(void)
 {
-	char *fileName;
-	struct stat fileInfo;
 
 	init_hardcoded();
-	fileName = MECH_CONF;
 
-#if 0
-	/* check if mechList needs updating */
-	if (stat(fileName, &fileInfo) == 0 &&
-		(fileInfo.st_mtime > g_confFileModTime)) {
-		loadConfigFile(fileName);
-		g_confFileModTime = fileInfo.st_mtime;
-	}
-#endif
 } /* updateMechList */
 
 /*
@@ -560,7 +500,6 @@ init_hardcoded(void)
 	extern gss_mechanism *spnego_gss_get_mech_configs(void);
 	gss_mechanism *cflist;
 	static int inited;
-	gss_mech_info cf;
 
 	if (inited)
 		return;
@@ -589,12 +528,9 @@ init_hardcoded(void)
  * module if it has not been already loaded.
  */
 gss_mechanism
-gssint_get_mechanism(oid)
-const gss_OID oid;
+gssint_get_mechanism(gss_OID oid)
 {
 	gss_mech_info aMech;
-	gss_mechanism (*sym)(const gss_OID);
-	void *dl;
 
 	if (gssint_initialize_library())
 		return NULL;
@@ -624,99 +560,10 @@ const gss_OID oid;
 	if (aMech->mech) {
 		(void) k5_mutex_unlock(&g_mechListLock);
 		return (aMech->mech);
+	} else {
+		return NULL;
 	}
-
-	/* we found the mechanism, but it is not loaded */
-	if ((dl = dlopen(aMech->uLibName, RTLD_NOW)) == NULL) {
-#if 0
-		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
-				aMech->uLibName, dlerror());
-#endif
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return ((gss_mechanism)NULL);
-	}
-
-	if ((sym = (gss_mechanism (*)(const gss_OID))dlsym(dl, MECH_SYM))
-			== NULL) {
-		(void) dlclose(dl);
-#if 0
-		(void) syslog(LOG_INFO, "unable to initialize mechanism"
-				" library [%s]\n", aMech->uLibName);
-#endif
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return ((gss_mechanism)NULL);
-	}
-
-	/* Call the symbol to get the mechanism table */
-	aMech->mech = (*sym)(aMech->mech_type);
-
-	if (aMech->mech == NULL) {
-		(void) dlclose(dl);
-#if 0
-		(void) syslog(LOG_INFO, "unable to initialize mechanism"
-				" library [%s]\n", aMech->uLibName);
-#endif
-		(void) k5_mutex_unlock(&g_mechListLock);
-		return ((gss_mechanism)NULL);
-	}
-
-	aMech->dl_handle = dl;
-
-	(void) k5_mutex_unlock(&g_mechListLock);
-	return (aMech->mech);
 } /* gssint_get_mechanism */
-
-gss_mechanism_ext
-gssint_get_mechanism_ext(oid)
-const gss_OID oid;
-{
-	gss_mech_info aMech;
-	gss_mechanism_ext mech_ext;
-
-	/* check if the mechanism is already loaded */
-	if ((aMech = searchMechList(oid)) != NULL && aMech->mech_ext != NULL)
-		return (aMech->mech_ext);
-
-	if (gssint_get_mechanism(oid) == NULL)
-		return (NULL);
-
-	if (aMech->dl_handle == NULL)
-		return (NULL);
-
-	/* Load the gss_config_ext struct for this mech */
-
-	mech_ext = (gss_mechanism_ext)malloc(sizeof (struct gss_config_ext));
-
-	if (mech_ext == NULL)
-		return (NULL);
-
-	/*
-	 * dlsym() the mech's 'method' functions for the extended APIs
-	 *
-	 * NOTE:  Until the void *context argument is removed from the
-	 * SPI method functions' signatures it will be necessary to have
-	 * different function pointer typedefs and function names for
-	 * the SPI methods than for the API.  When this argument is
-	 * removed it will be possible to rename gss_*_sfct to gss_*_fct
-	 * and and gssspi_* to gss_*.
-	 */
-	mech_ext->gss_acquire_cred_with_password =
-		(gss_acquire_cred_with_password_sfct)dlsym(aMech->dl_handle,
-			"gssspi_acquire_cred_with_password");
-
-	/* Set aMech->mech_ext */
-	(void) k5_mutex_lock(&g_mechListLock);
-
-	if (aMech->mech_ext == NULL)
-		aMech->mech_ext = mech_ext;
-	else
-		free(mech_ext);	/* we raced and lost; don't leak */
-
-	(void) k5_mutex_unlock(&g_mechListLock);
-
-	return (aMech->mech_ext);
-
-} /* gssint_get_mechanism_ext */
 
 
 /*
@@ -742,244 +589,3 @@ const gss_OID oid;
 	/* none found */
 	return ((gss_mech_info) NULL);
 } /* searchMechList */
-
-
-/*
- * loads the configuration file
- * this is called while having a mutex lock on the mechanism list
- * entries for libraries that have been loaded can't be modified
- * mechNameStr and mech_type fields are not updated during updates
- */
-static void loadConfigFile(fileName)
-const char *fileName;
-{
-	char buffer[BUFSIZ], *oidStr, *oid, *sharedLib, *kernMod, *endp;
-	char *modOptions;
-	char sharedPath[sizeof (MECH_LIB_PREFIX) + BUFSIZ];
-	char *tmpStr;
-	FILE *confFile;
-	gss_OID mechOid;
-	gss_mech_info aMech, tmp;
-	OM_uint32 minor;
-	gss_buffer_desc oidBuf;
-
-	if ((confFile = fopen(fileName, "r")) == NULL) {
-		return;
-	}
-
-	(void) memset(buffer, 0, sizeof (buffer));
-	while (fgets(buffer, BUFSIZ, confFile) != NULL) {
-
-		/* ignore lines beginning with # */
-		if (*buffer == '#')
-			continue;
-
-		/*
-		 * find the first white-space character after
-		 * the mechanism name
-		 */
-		oidStr = buffer;
-		for (oid = buffer; *oid && !isspace(*oid); oid++);
-
-		/* Now find the first non-white-space character */
-		if (*oid) {
-			*oid = '\0';
-			oid++;
-			while (*oid && isspace(*oid))
-				oid++;
-		}
-
-		/*
-		 * If that's all, then this is a corrupt entry. Skip it.
-		 */
-		if (! *oid)
-			continue;
-
-		/* Find the end of the oid and make sure it is NULL-ended */
-		for (endp = oid; *endp && !isspace(*endp); endp++)
-			;
-
-		if (*endp) {
-			*endp = '\0';
-		}
-
-		/*
-		 * check if an entry for this oid already exists
-		 * if it does, and the library is already loaded then
-		 * we can't modify it, so skip it
-		 */
-		oidBuf.value = (void *)oid;
-		oidBuf.length = strlen(oid);
-		if (generic_gss_str_to_oid(&minor, &oidBuf, &mechOid)
-			!= GSS_S_COMPLETE) {
-#if 0
-			(void) syslog(LOG_INFO, "invalid mechanism oid"
-					" [%s] in configuration file", oid);
-#endif
-			continue;
-		}
-
-		k5_mutex_lock(&g_mechListLock);
-		aMech = searchMechList(mechOid);
-		if (aMech && aMech->mech) {
-			free(mechOid->elements);
-			free(mechOid);
-			k5_mutex_unlock(&g_mechListLock);
-			continue;
-		}
-		k5_mutex_unlock(&g_mechListLock);
-
-		/* Find the start of the shared lib name */
-		for (sharedLib = endp+1; *sharedLib && isspace(*sharedLib);
-			sharedLib++)
-			;
-
-		/*
-		 * If that's all, then this is a corrupt entry. Skip it.
-		 */
-		if (! *sharedLib) {
-			free(mechOid->elements);
-			free(mechOid);
-			continue;
-		}
-
-		/*
-		 * Find the end of the shared lib name and make sure it is
-		 *  NULL-terminated.
-		 */
-		for (endp = sharedLib; *endp && !isspace(*endp); endp++)
-			;
-
-		if (*endp) {
-			*endp = '\0';
-		}
-
-		/* Find the start of the optional kernel module lib name */
-		for (kernMod = endp+1; *kernMod && isspace(*kernMod);
-			kernMod++)
-			;
-
-		/*
-		 * If this item starts with a bracket "[", then
-		 * it is not a kernel module, but is a list of
-		 * options for the user module to parse later.
-		 */
-		if (*kernMod && *kernMod != '[') {
-			/*
-			 * Find the end of the shared lib name and make sure
-			 * it is NULL-terminated.
-			 */
-			for (endp = kernMod; *endp && !isspace(*endp); endp++)
-				;
-
-			if (*endp) {
-				*endp = '\0';
-			}
-		} else
-			kernMod = NULL;
-
-		/* Find the start of the optional module options list */
-		for (modOptions = endp+1; *modOptions && isspace(*modOptions);
-			modOptions++);
-
-		if (*modOptions == '[')  {
-			/* move past the opening bracket */
-			for (modOptions = modOptions+1;
-			    *modOptions && isspace(*modOptions);
-			    modOptions++);
-
-			/* Find the closing bracket */
-			for (endp = modOptions;
-				*endp && *endp != ']'; endp++);
-
-			if (endp)
-				*endp = '\0';
-
-		} else {
-			modOptions = NULL;
-		}
-
-		(void) strcpy(sharedPath, MECH_LIB_PREFIX);
-		(void) strcat(sharedPath, sharedLib);
-
-		/*
-		 * are we creating a new mechanism entry or
-		 * just modifying existing (non loaded) mechanism entry
-		 */
-		if (aMech) {
-			/*
-			 * delete any old values and set new
-			 * mechNameStr and mech_type are not modified
-			 */
-			if (aMech->kmodName) {
-				free(aMech->kmodName);
-				aMech->kmodName = NULL;
-			}
-
-			if (aMech->optionStr) {
-				free(aMech->optionStr);
-				aMech->optionStr = NULL;
-			}
-
-			if ((tmpStr = strdup(sharedPath)) != NULL) {
-				if (aMech->uLibName)
-					free(aMech->uLibName);
-				aMech->uLibName = tmpStr;
-			}
-
-			if (kernMod) /* this is an optional parameter */
-				aMech->kmodName = strdup(kernMod);
-
-			if (modOptions) /* optional module options */
-				aMech->optionStr = strdup(modOptions);
-
-			/* the oid is already set */
-			free(mechOid->elements);
-			free(mechOid);
-			continue;
-		}
-
-		/* adding a new entry */
-		aMech = malloc(sizeof (struct gss_mech_config));
-		if (aMech == NULL) {
-			free(mechOid->elements);
-			free(mechOid);
-			continue;
-		}
-		(void) memset(aMech, 0, sizeof (struct gss_mech_config));
-		aMech->mech_type = mechOid;
-		aMech->uLibName = strdup(sharedPath);
-		aMech->mechNameStr = strdup(oidStr);
-
-		/* check if any memory allocations failed - bad news */
-		if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
-			if (aMech->uLibName)
-				free(aMech->uLibName);
-			if (aMech->mechNameStr)
-				free(aMech->mechNameStr);
-			free(mechOid->elements);
-			free(mechOid);
-			free(aMech);
-			continue;
-		}
-		if (kernMod)	/* this is an optional parameter */
-			aMech->kmodName = strdup(kernMod);
-
-		if (modOptions)
-			aMech->optionStr = strdup(modOptions);
-		/*
-		 * add the new entry to the end of the list - make sure
-		 * that only complete entries are added because other
-		 * threads might currently be searching the list.
-		 */
-		tmp = g_mechListTail;
-		g_mechListTail = aMech;
-
-		if (tmp != NULL)
-			tmp->next = aMech;
-
-		if (g_mechList == NULL)
-			g_mechList = aMech;
-	} /* while */
-	(void) fclose(confFile);
-} /* loadConfigFile */

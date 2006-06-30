@@ -434,12 +434,15 @@ static long get_tickets_from_cache(krb5_context ctx,
         if ( !pkrb5_decode_ticket(&KRBv5Credentials.ticket, &tkt)) {
             ti = tkt->enc_part.enctype;
             kcdb_cred_set_attr(cred, attr_id_tkt_enctype, &ti, sizeof(ti));
+            ti = tkt->enc_part.kvno;
+            kcdb_cred_set_attr(cred, attr_id_kvno, &ti, sizeof(ti));
             pkrb5_free_ticket(ctx, tkt);
             tkt = NULL;
         }
 
         ti = KRBv5Credentials.keyblock.enctype;
         kcdb_cred_set_attr(cred, attr_id_key_enctype, &ti, sizeof(ti));
+
         kcdb_cred_set_attr(cred, KCDB_ATTR_LOCATION, wcc_name, 
                            KCDB_CBSIZE_AUTO);
 
@@ -1734,10 +1737,10 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-        strncat(confname, "\\",sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
-        strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
+
+        StringCchCatA(confname, szConfname, "\\");
+        StringCchCatA(confname, szConfname, KRB5_FILE);
+
         return FALSE;
     }
     
@@ -1745,7 +1748,7 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     
     if (configFile)
     {
-        strncpy(confname, *configFile, szConfname);
+        StringCchCopyA(confname, szConfname, *configFile);
         pkrb5_free_config_files(configFile); 
     }
     
@@ -1753,10 +1756,8 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-        strncat(confname, "\\",sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
-        strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
+        StringCchCatA(confname, szConfname, "\\");
+        StringCchCatA(confname, szConfname, KRB5_FILE);
     }
     
     return FALSE;
@@ -1773,25 +1774,19 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
         if (khm_krb5_get_profile_file(krbConFile, sizeof(krbConFile))) {
             GetWindowsDirectoryA(krbConFile,sizeof(krbConFile));
             krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, KRB5_FILE,sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
+            StringCchCatA(confname, szConfname, "\\");
         }
         
         pFind = strrchr(krbConFile, '\\');
         if (pFind) {
-            *pFind = 0;
-            strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
-            strncat(krbConFile, KRB_FILE,sizeof(krbConFile)-strlen(krbConFile));
-            krbConFile[MAX_PATH-1] = '\0';
+            *pFind = '\0';
+            StringCchCatA(krbConFile, ARRAYLENGTH(krbConFile), "\\");
+            StringCchCatA(krbConFile, ARRAYLENGTH(krbConFile), KRB_FILE);
         }
         else
-            krbConFile[0] = 0;
-        
-        strncpy(confname, krbConFile, szConfname);
-        confname[szConfname-1] = '\0';
+            krbConFile[0] = '\0';
+
+        StringCchCopyA(confname, szConfname, krbConFile);
     }
     else if (hKrb4) { 
         unsigned int size = szConfname;
@@ -1800,10 +1795,8 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
             { // Error has happened
                 GetWindowsDirectoryA(confname,szConfname);
                 confname[szConfname-1] = '\0';
-                strncat(confname, "\\",szConfname-strlen(confname));
-                confname[szConfname-1] = '\0';
-                strncat(confname,KRB_FILE,szConfname-strlen(confname));
-                confname[szConfname-1] = '\0';
+                StringCchCatA(confname, szConfname, "\\");
+                StringCchCatA(confname, szConfname, KRB_FILE);
             }
     }
     return FALSE;
@@ -1922,7 +1915,12 @@ khm_krb5_get_realm_list(void)
         wchar_t * d;
 
         if (!khm_get_krb4_con_file(krb_conf,sizeof(krb_conf)) && 
-            (file = fopen(krb_conf, "rt")))
+#if _MSC_VER >= 1400
+            !fopen_s(&file, krb_conf, "rt")
+#else
+	    (file = fopen(krb_conf, "rt"))
+#endif
+	     )
         {
             char lineBuf[256];
 
@@ -2151,7 +2149,8 @@ khm_int32 KHMAPI
 khm_krb5_creds_is_equal(khm_handle vcred1, khm_handle vcred2, void * dummy) {
     if (kcdb_creds_comp_attr(vcred1, vcred2, KCDB_ATTR_LOCATION) ||
         kcdb_creds_comp_attr(vcred1, vcred2, attr_id_key_enctype) ||
-        kcdb_creds_comp_attr(vcred1, vcred2, attr_id_tkt_enctype))
+        kcdb_creds_comp_attr(vcred1, vcred2, attr_id_tkt_enctype) ||
+        kcdb_creds_comp_attr(vcred1, vcred2, attr_id_kvno))
         return 1;
     else
         return 0;

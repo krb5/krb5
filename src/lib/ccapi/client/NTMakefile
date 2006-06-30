@@ -1,22 +1,18 @@
 !INCLUDE <WIN32.MAK>
 
-CFLAGS = -I../include
+CFLAGS = -I../include $(cdebug) $(cflags) $(cvarsmt)
 
-CCAPI_OBJS = cacheapi.obj context.obj ccache.obj credentials.obj ccache_iterator.obj \
-             credentials_iterator.obj ccstring.obj marshall.obj msg.obj 
+CC_CLIENT_OBJS = cacheapi.obj context.obj ccache.obj credentials.obj ccache_iterator.obj \
+             credentials_iterator.obj ccstring.obj ccapiv2.obj
 
-CCAPI_LIB = ccapi.lib
+CC_CLIENT_LIB = cc_client.lib
 
-$(CCAPI_LIB): $(CCAPI_OBJS)
+CC_COMMON_LIB = ..\common\cc_common.lib
+
+$(CC_CLIENT_LIB): $(CC_CLIENT_OBJS)
         $(implib) /NOLOGO /OUT:$@ $**
 
-CCAPI_DLLFILE = krbcc32.dll
-
-
-
-$(CCAPI_DLLFILE): $(CCAPI_LIB)
-        $(DLLGUILINK) -def:windows\krbcc32.def
-        $(DLLPREP)
+all: $(CC_CLIENT_LIB)
 
 clean:
         del *.obj *.lib

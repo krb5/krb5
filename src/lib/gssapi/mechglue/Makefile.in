@@ -6,7 +6,8 @@ LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../gener
 DEFS=
 
 ##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=..\$(OUTPRE)gssapi.$(LIBEXT)
+##DOS##PREFIXDIR=mechglue
+##DOS##OBJFILE=..\$(OUTPRE)mechglue.lst
 
 ##DOS##DLL_EXP_TYPE=GSS
 
@@ -41,11 +42,42 @@ SRCS = \
 	$(srcdir)/g_sign.c \
 	$(srcdir)/g_store_cred.c \
 	$(srcdir)/g_unseal.c \
-	$(srcdir)/g_userok.c \
-	$(srcdir)/g_utils.c \
 	$(srcdir)/g_verify.c \
-	$(srcdir)/gssd_pname_to_uid.c \
 	$(srcdir)/oid_ops.c
+
+OBJS = \
+	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_acquire_cred.$(OBJEXT) \
+	$(OUTPRE)g_canon_name.$(OBJEXT) \
+	$(OUTPRE)g_compare_name.$(OBJEXT) \
+	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_dsp_name.$(OBJEXT) \
+	$(OUTPRE)g_dsp_status.$(OBJEXT) \
+	$(OUTPRE)g_dup_name.$(OBJEXT) \
+	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_export_name.$(OBJEXT) \
+	$(OUTPRE)g_glue.$(OBJEXT) \
+	$(OUTPRE)g_imp_name.$(OBJEXT) \
+	$(OUTPRE)g_imp_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_init_sec_context.$(OBJEXT) \
+	$(OUTPRE)g_initialize.$(OBJEXT) \
+	$(OUTPRE)g_inq_context.$(OBJEXT) \
+	$(OUTPRE)g_inq_cred.$(OBJEXT) \
+	$(OUTPRE)g_inq_names.$(OBJEXT) \
+	$(OUTPRE)g_mechname.$(OBJEXT) \
+	$(OUTPRE)g_oid_ops.$(OBJEXT) \
+	$(OUTPRE)g_process_context.$(OBJEXT) \
+	$(OUTPRE)g_rel_buffer.$(OBJEXT) \
+	$(OUTPRE)g_rel_cred.$(OBJEXT) \
+	$(OUTPRE)g_rel_name.$(OBJEXT) \
+	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)g_seal.$(OBJEXT) \
+	$(OUTPRE)g_sign.$(OBJEXT) \
+	$(OUTPRE)g_store_cred.$(OBJEXT) \
+	$(OUTPRE)g_unseal.$(OBJEXT) \
+	$(OUTPRE)g_verify.$(OBJEXT) \
+	$(OUTPRE)oid_ops.$(OBJEXT)
 
 STLIBOBJS = \
 	g_accept_sec_context.o \
@@ -78,16 +110,17 @@ STLIBOBJS = \
 	g_sign.o \
 	g_store_cred.o \
 	g_unseal.o \
-	g_userok.o \
-	g_utils.o \
 	g_verify.o \
-	gssd_pname_to_uid.o \
 	oid_ops.o
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
 
+$(OBJS): $(EXPORTED_HEADERS)
+
 all-unix:: all-libobjs
+
+##DOS##LIBOBJS = $(OBJS)
 
 clean-unix:: clean-libobjs
 
@@ -100,7 +133,7 @@ install::
 
 includes::
 
-# @libobj_frag@
+@libobj_frag@
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in
@@ -200,8 +233,8 @@ g_initialize.so g_initialize.po $(OUTPRE)g_initialize.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  ../generic/gssapi_err_generic.h g_initialize.c mechglue.h \
-  mglueP.h
+  $(srcdir)/../gss_libinit.h ../generic/gssapi.h ../generic/gssapi_err_generic.h \
+  g_initialize.c mechglue.h mglueP.h
 g_inq_context.so g_inq_context.po $(OUTPRE)g_inq_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -286,26 +319,12 @@ g_unseal.so g_unseal.po $(OUTPRE)g_unseal.$(OBJEXT): \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_unseal.c mechglue.h \
   mglueP.h
-g_userok.so g_userok.po $(OUTPRE)g_userok.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  ../generic/gssapi_err_generic.h g_userok.c mechglue.h \
-  mglueP.h
-g_utils.so g_utils.po $(OUTPRE)g_utils.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
-  g_utils.c
 g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   ../generic/gssapi_err_generic.h g_verify.c mechglue.h \
   mglueP.h
-gssd_pname_to_uid.so gssd_pname_to_uid.po $(OUTPRE)gssd_pname_to_uid.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  ../generic/gssapi_err_generic.h gssd_pname_to_uid.c \
-  mechglue.h mglueP.h
 oid_ops.so oid_ops.po $(OUTPRE)oid_ops.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

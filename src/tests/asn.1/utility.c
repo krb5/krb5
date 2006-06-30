@@ -77,9 +77,9 @@ krb5_error_code krb5_data_hex_parse(krb5_data *d, const char *s)
     for (lo = 0, dp = d->data, cp = s; *cp; cp++) {
 	if (*cp < 0)
 	    return ASN1_PARSE_ERROR;
-	else if (isspace(*cp))
+	else if (isspace((unsigned char) *cp))
 	    continue;
-	else if (isxdigit(*cp)) {
+	else if (isxdigit((unsigned char) *cp)) {
 	    buf[0] = *cp;
 	    v = strtol(buf, NULL, 16);
 	} else

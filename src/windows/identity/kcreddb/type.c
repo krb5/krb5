@@ -391,9 +391,11 @@ FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
             t = ibuf + wcslen(ibuf);
             if(h == 1)
             {
-                LoadString(hinst_kcreddb, IDS_IVL_1H, t, ARRAYLENGTH(ibuf) - wcslen(ibuf));
+                LoadString(hinst_kcreddb, IDS_IVL_1H, t,
+                           (int) (ARRAYLENGTH(ibuf) - wcslen(ibuf)));
             } else {
-                LoadString(hinst_kcreddb, IDS_IVL_H, fbuf, ARRAYLENGTH(fbuf));
+                LoadString(hinst_kcreddb, IDS_IVL_H, fbuf,
+                           (int) ARRAYLENGTH(fbuf));
                 StringCbPrintf(t, sizeof(ibuf) - wcslen(ibuf)*sizeof(wchar_t), fbuf, h);
             }
         }
@@ -415,9 +417,11 @@ FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
             t = ibuf + wcslen(ibuf);
             if(m == 1)
             {
-                LoadString(hinst_kcreddb, IDS_IVL_1M, t, ARRAYLENGTH(ibuf) - wcslen(ibuf));
+                LoadString(hinst_kcreddb, IDS_IVL_1M, t,
+                           (int) (ARRAYLENGTH(ibuf) - wcslen(ibuf)));
             } else {
-                LoadString(hinst_kcreddb, IDS_IVL_M, fbuf, ARRAYLENGTH(fbuf));
+                LoadString(hinst_kcreddb, IDS_IVL_M, fbuf,
+                           (int) ARRAYLENGTH(fbuf));
                 StringCbPrintf(t, sizeof(ibuf) - wcslen(ibuf)*sizeof(wchar_t), fbuf, m);
             }
         }
@@ -434,9 +438,11 @@ FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
             t = ibuf + wcslen(ibuf);
             if(s == 1)
             {
-                LoadString(hinst_kcreddb, IDS_IVL_1S, t, ARRAYLENGTH(ibuf) - wcslen(ibuf));
+                LoadString(hinst_kcreddb, IDS_IVL_1S, t,
+                           (int) (ARRAYLENGTH(ibuf) - wcslen(ibuf)));
             } else {
-                LoadString(hinst_kcreddb, IDS_IVL_S, fbuf, ARRAYLENGTH(fbuf));
+                LoadString(hinst_kcreddb, IDS_IVL_S, fbuf,
+                           (int) ARRAYLENGTH(fbuf));
                 StringCbPrintf(t, sizeof(ibuf) - wcslen(ibuf)*sizeof(wchar_t), fbuf, s);
             }
         }

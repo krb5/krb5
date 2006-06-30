@@ -891,6 +891,36 @@ kill_tcp_connection(struct connection *conn)
     tcp_data_counter--;
 }
 
+static krb5_error_code
+make_toolong_error (krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+	return retval;
+    errpkt.error = KRB_ERR_FIELD_TOOLONG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+	return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+	free(scratch);
+	return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
 static void
 process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 {
@@ -921,7 +951,10 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	}
 	if (conn->u.tcp.sgnum == 0) {
 	    /* finished sending */
-	    /* should go back to reading */
+	    /* We should go back to reading, though if we sent a
+	       FIELD_TOOLONG error in reply to a length with the high
+	       bit set, RFC 4120 says we have to close the TCP
+	       stream.  */
 	    goto kill_tcp_connection;
 	}
     } else if (selflags & SSF_READ) {
@@ -953,12 +986,20 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 				      | (p[2] <<  8)
 				      | p[3]);
 		if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
+		    krb5_error_code err;
 		    /* message too big */
 		    krb5_klog_syslog(LOG_ERR, "TCP client %s wants %lu bytes, cap is %lu",
 				     conn->u.tcp.addrbuf, (unsigned long) conn->u.tcp.msglen,
 				     (unsigned long) conn->u.tcp.bufsiz - 4);
 		    /* XXX Should return an error.  */
-		    goto kill_tcp_connection;
+		    err = make_toolong_error (&conn->u.tcp.response);
+		    if (err) {
+			krb5_klog_syslog(LOG_ERR,
+					 "error constructing KRB_ERR_FIELD_TOOLONG error! %s",
+					 error_message(err));
+			goto kill_tcp_connection;
+		    }
+		    goto have_response;
 		}
 	    }
 	} else {
@@ -987,6 +1028,7 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 		com_err(prog, err, "while dispatching (tcp)");
 		goto kill_tcp_connection;
 	    }
+	have_response:
 	    conn->u.tcp.lenbuf[0] = 0xff & (conn->u.tcp.response->length >> 24);
 	    conn->u.tcp.lenbuf[1] = 0xff & (conn->u.tcp.response->length >> 16);
 	    conn->u.tcp.lenbuf[2] = 0xff & (conn->u.tcp.response->length >> 8);

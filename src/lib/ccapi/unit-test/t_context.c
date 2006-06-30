@@ -68,10 +68,10 @@ int main() {
     int i;
     cc_int32 code;
 
-    code = cci_context_new(5, auth_info, session_info, &ctx);
-    code = cci_context_create_default_ccache(ctx, cc_credentials_v4, "Spike", &ccache);
-    code = cci_context_get_default_ccache_name(ctx, &name);
-    code = cci_context_open_ccache(ctx, name, &ccache);
+    code = ccs_context_new(5, auth_info, session_info, &ctx);
+    code = ccs_context_create_default_ccache(ctx, cc_credentials_v4, "Spike", &ccache);
+    code = ccs_context_get_default_ccache_name(ctx, &name);
+    code = ccs_context_open_ccache(ctx, name, &ccache);
 	
     for (i = 0; i < 5; i++) {
         creds = (cc_credentials_union*)malloc(sizeof(cc_credentials_union));
@@ -79,32 +79,32 @@ int main() {
         creds->credentials.credentials_v4 = (cc_credentials_v4_t*)malloc(sizeof(cc_credentials_v4_t));
         strcpy(creds->credentials.credentials_v4->principal, "Spike");
 
-        code = cci_ccache_store_creds(ccache, creds);
+        code = ccs_ccache_store_creds(ccache, creds);
     }
 
-    code = cci_context_create_ccache(ctx, "ccache 2", cc_credentials_v4, "Jeff", &ccache);
-    code = cci_context_open_ccache(ctx, "ccache 2", &ccache);
+    code = ccs_context_create_ccache(ctx, "ccache 2", cc_credentials_v4_v5, "Jeff", &ccache);
+    code = ccs_context_open_ccache(ctx, "ccache 2", &ccache);
 	
     for (i = 0; i < 5; i++) {
         creds = (cc_credentials_union*)malloc(sizeof(cc_credentials_union));
-        creds->version = cc_credentials_v4;
-        creds->credentials.credentials_v4 = (cc_credentials_v4_t*)malloc(sizeof(cc_credentials_v4_t));
-        strcpy(creds->credentials.credentials_v4->principal, "Jeff");
+        creds->version = cc_credentials_v5;
+        creds->credentials.credentials_v5 = (cc_credentials_v5_t*)malloc(sizeof(cc_credentials_v5_t));
+        strcpy(creds->credentials.credentials_v5->principal, "Jeff");
 
-        cci_ccache_store_creds(ccache, creds);
+        ccs_ccache_store_creds(ccache, creds);
     }
 
-    code = cci_context_ccache_iterator(ctx, &ccache_iterator);
-    while (cci_ccache_iterate_has_next(ccache_iterator)) {
-        code = cci_ccache_iterate_next(ccache_iterator, &ccache_node);
+    code = ccs_context_ccache_iterator(ctx, &ccache_iterator);
+    while (ccs_ccache_iterate_has_next(ccache_iterator)) {
+        code = ccs_ccache_iterate_next(ccache_iterator, &ccache_node);
         ccache = (cc_server_ccache_t *)ccache_node->data;
         printf("%x for %s %s default = %d v %d\n",
                ccache, ccache->principal_v4, ccache->principal_v5, 
                ccache->is_default, ccache->versions);
 
-        code = cci_ccache_new_iterator(ccache, &creds_iterator);
-        while (cci_credentials_iterate_has_next(creds_iterator)) {
-            code = cci_credentials_iterate_next(creds_iterator, &creds_node);
+        code = ccs_ccache_new_iterator(ccache, &creds_iterator);
+        while (ccs_credentials_iterate_has_next(creds_iterator)) {
+            code = ccs_credentials_iterate_next(creds_iterator, &creds_node);
             server_creds = (cc_server_credentials_t *)creds_node->data;	
             printf("\t%s %d\n", 
                    server_creds->creds.credentials.credentials_v4->principal, 

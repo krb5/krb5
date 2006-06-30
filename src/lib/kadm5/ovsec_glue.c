@@ -1,5 +1,6 @@
 #define USE_KADM5_API_VERSION 1
 #include <kadm5/admin.h>
+#include <string.h>
 
 ovsec_kadm_ret_t ovsec_kadm_init_with_password(char *client_name, char *pass,
 					       char *service_name,

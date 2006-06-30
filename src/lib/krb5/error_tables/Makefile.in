@@ -63,7 +63,7 @@ $(OUTPRE)krb524_err.$(OBJEXT): krb524_err.c
 clean-unix:: clean-libobjs
 	$(RM) $(HDRS) $(ETSRCS)
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

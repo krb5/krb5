@@ -52,7 +52,7 @@
 #include "fdset.h"
 
 Ring		netoring, netiring;
-unsigned char	netobuf[2*BUFSIZ], netibuf[BUFSIZ];
+unsigned char	netobuf[2*TELNET_BUFSIZE], netibuf[TELNET_BUFSIZE];
 
 /*
  * Initialize internal network data structures.

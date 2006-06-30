@@ -25,8 +25,8 @@ all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 
-# @libnover_frag@
-# @libobj_frag@
+@libnover_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

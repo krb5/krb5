@@ -131,7 +131,7 @@ krb5_kt_resolve (krb5_context context, const char *name, krb5_keytab *ktid)
 
     pfxlen = cp - name;
 
-    if ( pfxlen == 1 && isalpha(name[0]) ) {
+    if ( pfxlen == 1 && isalpha((unsigned char) name[0]) ) {
         /* We found a drive letter not a prefix - use FILE: */
         pfx = strdup("FILE:");
         if (!pfx)

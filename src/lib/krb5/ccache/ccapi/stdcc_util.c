@@ -19,6 +19,401 @@
 
 #define fieldSize 255
 
+#ifdef USE_CCAPI_V3
+/* krb5int_cc_credentials_release(cc_credentials_t creds)
+ * - function used to release internally generated cc_credentials_t objects
+ */
+static cc_int32 
+krb5int_cc_credentials_release(cc_credentials_t creds) {
+    free(creds);
+    return ccNoError;
+}
+
+static cc_int32 
+krb5int_cc_credentials_compare(cc_credentials_t creds,
+			       cc_credentials_t compare_to,
+			       cc_uint32* equal) {
+    return ccErrNotImplemented;
+}
+
+/*
+ * CopyCC3DataArrayToK5
+ * - copy and translate the null terminated arrays of data records
+ * 	 used in k5 tickets
+ */
+int 
+copyCC3DataArrayToK5(cc_credentials_v5_t *ccCreds, krb5_creds *v5Creds, char whichArray) {
+
+    switch (whichArray) {
+    case kAddressArray: 
+	if (ccCreds->addresses == NULL) {
+	    v5Creds->addresses = NULL;
+	} else {
+
+	    krb5_address 	**addrPtr, *addr;
+	    cc_data		**dataPtr, *data;
+	    unsigned int	numRecords = 0;
+
+	    /* Allocate the array of pointers: */
+	    for (dataPtr = ccCreds->addresses; *dataPtr != NULL; numRecords++, dataPtr++) {}
+
+	    v5Creds->addresses = (krb5_address **) malloc (sizeof(krb5_address *) * (numRecords + 1));
+	    if (v5Creds->addresses == NULL)
+		return ENOMEM;
+
+	    /* Fill in the array, allocating the address structures: */
+	    for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *dataPtr != NULL; addrPtr++, dataPtr++) {
+
+		*addrPtr = (krb5_address *) malloc (sizeof(krb5_address));
+		if (*addrPtr == NULL)
+		    return ENOMEM;
+		data = *dataPtr;
+		addr = *addrPtr;
+
+		addr->addrtype = data->type;
+		addr->magic    = KV5M_ADDRESS;
+		addr->length   = data->length;
+		addr->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * addr->length);
+		if (addr->contents == NULL)
+		    return ENOMEM;
+		memmove(addr->contents, data->data, addr->length); /* copy contents */
+	    }
+
+	    /* Write terminator: */
+	    *addrPtr = NULL;
+	}
+	break;
+    case kAuthDataArray:
+	if (ccCreds->authdata == NULL) {
+	    v5Creds->authdata = NULL;
+	} else {
+	    krb5_authdata 	**authPtr, *auth;
+	    cc_data		**dataPtr, *data;
+	    unsigned int	numRecords = 0;
+
+	    /* Allocate the array of pointers: */
+	    for (dataPtr = ccCreds->authdata; *dataPtr != NULL; numRecords++, dataPtr++) {}
+
+	    v5Creds->authdata = (krb5_authdata **) malloc (sizeof(krb5_authdata *) * (numRecords + 1));
+	    if (v5Creds->authdata == NULL)
+		return ENOMEM;
+
+	    /* Fill in the array, allocating the address structures: */
+	    for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *dataPtr != NULL; authPtr++, dataPtr++) {
+
+		*authPtr = (krb5_authdata *) malloc (sizeof(krb5_authdata));
+		if (*authPtr == NULL)
+		    return ENOMEM;
+		data = *dataPtr;
+		auth = *authPtr;
+
+		auth->ad_type  = data->type;
+		auth->magic    = KV5M_AUTHDATA;
+		auth->length   = data->length;
+		auth->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * auth->length);
+		if (auth->contents == NULL)
+		    return ENOMEM;
+		memmove(auth->contents, data->data, auth->length); /* copy contents */
+	    }
+
+	    /* Write terminator: */
+	    *authPtr = NULL;
+	}
+	break;
+    }
+
+    return 0;
+}
+
+/*
+ * copyK5DataArrayToCC
+ * - analagous to above, but in the other direction
+ */
+int 
+copyK5DataArrayToCC3(krb5_creds *v5Creds, cc_credentials_v5_t * ccCreds, char whichArray)
+{
+    switch (whichArray) {
+    case kAddressArray:
+	if (v5Creds->addresses == NULL) {
+	    ccCreds->addresses = NULL;
+	} else {
+
+	    krb5_address 	**addrPtr, *addr;
+	    cc_data		**dataPtr, *data;
+	    unsigned int	numRecords = 0;
+
+	    /* Allocate the array of pointers: */
+	    for (addrPtr = v5Creds->addresses; *addrPtr != NULL; numRecords++, addrPtr++) {}
+
+	    ccCreds->addresses = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
+	    if (ccCreds->addresses == NULL)
+		return ENOMEM;
+
+	    /* Fill in the array, allocating the address structures: */
+	    for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *addrPtr != NULL; addrPtr++, dataPtr++) {
+
+		*dataPtr = (cc_data *) malloc (sizeof(cc_data));
+		if (*dataPtr == NULL)
+		    return ENOMEM;
+		data = *dataPtr;
+		addr = *addrPtr;
+
+		data->type   = addr->addrtype;
+		data->length = addr->length;
+		data->data   = malloc (sizeof(char) * data->length);
+		if (data->data == NULL)
+		    return ENOMEM;
+		memmove(data->data, addr->contents, data->length); /* copy contents */
+	    }
+
+	    /* Write terminator: */
+	    *dataPtr = NULL;
+	}
+	break;
+    case kAuthDataArray:
+	if (v5Creds->authdata == NULL) {
+	    ccCreds->authdata = NULL;
+	} else {
+	    krb5_authdata 	**authPtr, *auth;
+	    cc_data			**dataPtr, *data;
+	    unsigned int			numRecords = 0;
+
+	    /* Allocate the array of pointers: */
+	    for (authPtr = v5Creds->authdata; *authPtr != NULL; numRecords++, authPtr++) {}
+
+	    ccCreds->authdata = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
+	    if (ccCreds->authdata == NULL)
+		return ENOMEM;
+
+	    /* Fill in the array, allocating the address structures: */
+	    for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *authPtr != NULL; authPtr++, dataPtr++) {
+
+		*dataPtr = (cc_data *) malloc (sizeof(cc_data));
+		if (*dataPtr == NULL)
+		    return ENOMEM;
+		data = *dataPtr;
+		auth = *authPtr;
+
+		data->type   = auth->ad_type;
+		data->length = auth->length;
+		data->data   = malloc (sizeof(char) * data->length);
+		if (data->data == NULL)
+		    return ENOMEM;
+		memmove(data->data, auth->contents, data->length); /* copy contents */
+	    }
+
+	    /* Write terminator: */
+	    *dataPtr = NULL;
+	}
+	break;
+    }
+
+    return 0;
+
+}
+
+/*
+ * dupCC3toK5
+ * - allocate an empty k5 style ticket and copy info from the cc_creds ticket
+ */
+
+krb5_error_code
+dupCC3toK5(krb5_context context, cc_credentials_t src, krb5_creds *dest)
+{
+    const cc_credentials_union 	*cu = src->data;
+    cc_credentials_v5_t		*cv5;
+    krb5_int32 offset_seconds = 0, offset_microseconds = 0;
+    krb5_error_code err;
+
+    if (cu->version != cc_credentials_v5) 
+	return KRB5_CC_NOT_KTYPE;
+
+    cv5 = cu->credentials.credentials_v5;
+
+    /*
+     * allocate and copy
+     * copy all of those damn fields back
+     */
+    err = krb5_parse_name(context, cv5->client, &(dest->client));
+    err = krb5_parse_name(context, cv5->server, &(dest->server));
+    if (err) 
+	return err; /* parsename fails w/o krb5.ini for example */
+
+    /* copy keyblock */
+    dest->keyblock.enctype = cv5->keyblock.type;
+    dest->keyblock.length = cv5->keyblock.length;
+    dest->keyblock.contents = (krb5_octet *)malloc(dest->keyblock.length);
+    memcpy(dest->keyblock.contents, cv5->keyblock.data, dest->keyblock.length);
+
+    /* copy times */
+#if TARGET_OS_MAC
+    err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
+    if (err) 
+	return err;
+#endif
+    dest->times.authtime   = cv5->authtime     + offset_seconds;
+    dest->times.starttime  = cv5->starttime    + offset_seconds;
+    dest->times.endtime    = cv5->endtime      + offset_seconds;
+    dest->times.renew_till = cv5->renew_till   + offset_seconds;
+    dest->is_skey          = cv5->is_skey;
+    dest->ticket_flags     = cv5->ticket_flags;
+
+    /* more branching fields */
+    err = copyCC3DataArrayToK5(cv5, dest, kAddressArray);
+    if (err) 
+	return err;
+
+    /* first ticket */
+    dest->ticket.length = cv5->ticket.length;
+    dest->ticket.data = (char *)malloc(cv5->ticket.length);
+    memcpy(dest->ticket.data, cv5->ticket.data, cv5->ticket.length);
+
+    /* second ticket */
+    dest->second_ticket.length = cv5->second_ticket.length;
+    (dest->second_ticket).data = ( char *)malloc(cv5->second_ticket.length);
+    memcpy(dest->second_ticket.data, cv5->second_ticket.data, cv5->second_ticket.length);
+
+    /* zero out magic number */
+    dest->magic = 0;
+
+    /* authdata */
+    err = copyCC3DataArrayToK5(cv5, dest, kAuthDataArray);
+    if (err) 
+	return err;
+
+    return 0;
+}
+
+/*
+ * dupK5toCC3
+ * - analagous to above but in the reverse direction
+ */
+krb5_error_code
+dupK5toCC3(krb5_context context, krb5_creds *src, cc_credentials_t *dest)
+{
+    cc_credentials_v5_t *c;
+    cc_credentials_union *cu;
+    cc_credentials_f    *f;
+    int err;
+    krb5_int32 offset_seconds = 0, offset_microseconds = 0;
+    cc_credentials_t 		creds = NULL;
+
+    if (dest == NULL) 
+	return KRB5_CC_NOMEM;
+
+    /* allocate the cc_credentials_t */
+    creds = (cc_credentials_t)malloc(sizeof(cc_credentials_d));
+    if (!creds) {
+	err = KRB5_CC_NOMEM;
+	goto cleanup;
+    }
+
+    /* allocate the cred_union */
+    creds->data = NULL;
+    creds->functions = NULL;
+#ifdef TARGET_OS_MAC
+    creds->otherFunctions = NULL;
+#endif
+    f = (cc_credentials_f *)malloc(sizeof(cc_credentials_f));
+    if (!f) {
+	err = KRB5_CC_NOMEM;
+	goto cleanup;
+    }
+    creds->functions = f;
+
+    cu = (cc_credentials_union *)malloc(sizeof(cc_credentials_union));
+    if (!creds->data) {
+	err = KRB5_CC_NOMEM;
+	goto cleanup;
+    }
+    creds->data = cu; 
+
+    f->release = krb5int_cc_credentials_release;
+    f->compare = krb5int_cc_credentials_compare;
+
+    cu->version = cc_credentials_v5;
+
+    c = (cc_credentials_v5_t*)malloc(sizeof(cc_credentials_v5_t));
+    if (!c) {
+	err = KRB5_CC_NOMEM;
+	goto cleanup;
+    }
+    cu->credentials.credentials_v5 = c;
+
+    /* convert krb5 principals to flat principals */
+    err = krb5_unparse_name(context, src->client, &(c->client));
+    if (err) 
+	goto cleanup;
+
+    err = krb5_unparse_name(context, src->server, &(c->server));
+    if (err) 
+	goto cleanup;
+
+    /* copy more fields */
+    c->keyblock.type = src->keyblock.enctype;
+    c->keyblock.length = src->keyblock.length;
+
+    if (src->keyblock.contents != NULL) {
+	c->keyblock.data = (unsigned char *)malloc(src->keyblock.length);
+	memcpy(c->keyblock.data, src->keyblock.contents, src->keyblock.length);
+    } else {
+	c->keyblock.data = NULL;
+    }
+
+#if TARGET_OS_MAC
+    err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
+    if (err) 
+	goto cleanup;
+#endif
+    c->authtime     = src->times.authtime   - offset_seconds;
+    c->starttime    = src->times.starttime  - offset_seconds;
+    c->endtime      = src->times.endtime    - offset_seconds;
+    c->renew_till   = src->times.renew_till - offset_seconds;
+    c->is_skey      = src->is_skey;
+    c->ticket_flags = src->ticket_flags;
+
+    err = copyK5DataArrayToCC3(src, c, kAddressArray);
+    if (err) 
+	goto cleanup;
+
+    c->ticket.length = src->ticket.length;
+    if (src->ticket.data != NULL) {
+	c->ticket.data = (unsigned char *)malloc(src->ticket.length);
+	memcpy(c->ticket.data, src->ticket.data, src->ticket.length);
+    } else {
+	c->ticket.data = NULL;
+    }
+
+    c->second_ticket.length = src->second_ticket.length;
+    if (src->second_ticket.data != NULL) {
+	c->second_ticket.data = (unsigned char *)malloc(src->second_ticket.length);
+	memcpy(c->second_ticket.data, src->second_ticket.data, src->second_ticket.length);
+    } else {
+	c->second_ticket.data = NULL;
+    }
+
+    err = copyK5DataArrayToCC3(src, c, kAuthDataArray);
+    if (err) 
+	goto cleanup;
+
+    *dest = creds;
+    return 0;
+
+  cleanup:
+    if (creds) {
+	if (creds->functions)
+	    free((void *)creds->functions);
+	if (creds->data) {
+	    if (creds->data->credentials.credentials_v5)
+		free(creds->data->credentials.credentials_v5);
+	    free((void *)creds->data);
+	}
+	free(creds);
+    }
+
+    return err;
+}
+#else /* !USE_CCAPI_V3 */
 /*
  * CopyCCDataArrayToK5
  * - copy and translate the null terminated arrays of data records
@@ -323,6 +718,86 @@ void dupK5toCC(krb5_context context, krb5_creds *creds, cred_union **cu)
     return;
 }
 
+/* ----- free_cc_cred_union, etc -------------- */
+/*
+  Since the Kerberos5 library allocates a credentials cache structure
+  (in dupK5toCC() above) with its own memory allocation routines - which
+  may be different than how the CCache allocates memory - the Kerb5 library
+  must have its own version of cc_free_creds() to deallocate it.  These
+  functions do that.  The top-level function to substitue for cc_free_creds()
+  is krb5_free_cc_cred_union().
+
+  If the CCache library wants to use a cred_union structure created by
+  the Kerb5 library, it should make a deep copy of it to "translate" to its
+  own memory allocation space.
+*/
+static void deep_free_cc_data (cc_data data)
+{
+    if (data.data != NULL)
+	free (data.data);
+}
+
+static void deep_free_cc_data_array (cc_data** data) {
+
+    unsigned int	index;
+
+    if (data == NULL)
+	return;
+
+    for (index = 0; data [index] != NULL; index++) {
+	deep_free_cc_data (*(data [index]));
+	free (data [index]);
+    }
+
+    free (data);
+}
+
+static void deep_free_cc_v5_creds (cc_creds* creds)
+{
+    if (creds == NULL)
+	return;
+
+    if (creds -> client != NULL)
+	free (creds -> client);
+    if (creds -> server != NULL)
+	free (creds -> server);
+
+    deep_free_cc_data (creds -> keyblock);
+    deep_free_cc_data (creds -> ticket);
+    deep_free_cc_data (creds -> second_ticket);
+
+    deep_free_cc_data_array (creds -> addresses);
+    deep_free_cc_data_array (creds -> authdata);
+
+    free(creds);
+}
+
+static void deep_free_cc_creds (cred_union creds)
+{
+    if (creds.cred_type == CC_CRED_V4) {
+	/* we shouldn't get this, of course */
+	free (creds.cred.pV4Cred);
+    } else if (creds.cred_type == CC_CRED_V5) {
+	deep_free_cc_v5_creds (creds.cred.pV5Cred);
+    }
+}
+
+/* top-level exported function */
+cc_int32 krb5int_free_cc_cred_union (cred_union** creds)
+{
+    if (creds == NULL)
+	return CC_BAD_PARM;
+
+    if (*creds != NULL) {
+	deep_free_cc_creds (**creds);
+	free (*creds);
+	*creds = NULL;
+    }
+
+    return CC_NOERROR;
+}
+#endif
+
 /*
  * Utility functions...
  */
@@ -475,81 +950,4 @@ int stdccCredsMatch(krb5_context context, krb5_creds *base,
     return FALSE;
 }
 
-/* ----- free_cc_cred_union, etc -------------- */
-/*
-  Since the Kerberos5 library allocates a credentials cache structure
-  (in dupK5toCC() above) with its own memory allocation routines - which
-  may be different than how the CCache allocates memory - the Kerb5 library
-  must have its own version of cc_free_creds() to deallocate it.  These
-  functions do that.  The top-level function to substitue for cc_free_creds()
-  is krb5_free_cc_cred_union().
 
-  If the CCache library wants to use a cred_union structure created by
-  the Kerb5 library, it should make a deep copy of it to "translate" to its
-  own memory allocation space.
-*/
-static void deep_free_cc_data (cc_data data)
-{
-    if (data.data != NULL)
-	free (data.data);
-}
-
-static void deep_free_cc_data_array (cc_data** data) {
-
-    unsigned int	index;
-
-    if (data == NULL)
-	return;
-
-    for (index = 0; data [index] != NULL; index++) {
-	deep_free_cc_data (*(data [index]));
-	free (data [index]);
-    }
-
-    free (data);
-}
-
-static void deep_free_cc_v5_creds (cc_creds* creds)
-{
-    if (creds == NULL)
-	return;
-
-    if (creds -> client != NULL)
-	free (creds -> client);
-    if (creds -> server != NULL)
-	free (creds -> server);
-
-    deep_free_cc_data (creds -> keyblock);
-    deep_free_cc_data (creds -> ticket);
-    deep_free_cc_data (creds -> second_ticket);
-
-    deep_free_cc_data_array (creds -> addresses);
-    deep_free_cc_data_array (creds -> authdata);
-
-    free(creds);
-}
-
-static void deep_free_cc_creds (cred_union creds)
-{
-    if (creds.cred_type == CC_CRED_V4) {
-	/* we shouldn't get this, of course */
-	free (creds.cred.pV4Cred);
-    } else if (creds.cred_type == CC_CRED_V5) {
-	deep_free_cc_v5_creds (creds.cred.pV5Cred);
-    }
-}
-
-/* top-level exported function */
-cc_int32 krb5_free_cc_cred_union (cred_union** creds)
-{
-    if (creds == NULL)
-	return CC_BAD_PARM;
-
-    if (*creds != NULL) {
-	deep_free_cc_creds (**creds);
-	free (*creds);
-	*creds = NULL;
-    }
-
-    return CC_NOERROR;
-}

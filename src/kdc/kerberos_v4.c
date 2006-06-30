@@ -62,7 +62,6 @@
 #include <klog.h>
 #include <prot.h>
 #include <krb_db.h>
-#include <kdc.h>
 
 #ifdef NEED_SWAB_PROTO
 extern void swab(const void *, void *, size_t );
@@ -70,7 +69,7 @@ extern void swab(const void *, void *, size_t );
 
 static int compat_decrypt_key (krb5_key_data *, C_Block,
 					 krb5_keyblock *, int);
-static int kerb_get_principal (char *, char *, Principal *, int,
+static int kerb_get_principal (char *, char *, Principal *,
 					 int *, krb5_keyblock *, krb5_kvno,
 					 int, krb5_deltat *);
 static int check_princ (char *, char *, int, Principal *,
@@ -401,7 +400,6 @@ compat_decrypt_key (krb5_key_data *in5, unsigned char *out4,
 static int
 kerb_get_principal(char *name, char *inst, /* could have wild cards */
 		   Principal *principal,
-		   int maxn,	/* max # name structs to return */
 		   int *more,	/* more tuples than room for */
 		   krb5_keyblock *k5key, krb5_kvno kvno,
 		   int issrv,	/* true if retrieving a service key */
@@ -424,10 +422,6 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
     krb5_error_code retval;
 
     *more = 0;
-    if ( maxn > 1) {
-	lt = klog(L_DEATH_REQ, "KDC V4 is requesting too many principals");
-	return( 0);
-    }
     /* begin setting up the principal structure
      * with the first info we have:
      */
@@ -453,7 +447,7 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
     krb5_free_principal(kdc_context, search);
 
     if (nprinc < 1) {
-        *more = (int)more5 || (nprinc > maxn);
+        *more = (int)more5 || (nprinc > 1);
         return(nprinc);
     } 
 
@@ -576,7 +570,7 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
      * this routine clears the keyblock's contents for us.
      */
     krb5_db_free_principal(kdc_context, &entries, nprinc);
-    *more = (int) more5 || (nprinc > maxn);
+    *more = (int) more5 || (nprinc > 1);
     return( nprinc);
 }
 
@@ -804,7 +798,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
 	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, S_AD_SZ);
+		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
 	    memset(&a_name_data, 0, sizeof(a_name_data));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
@@ -982,7 +976,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
 	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, S_AD_SZ);
+		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
@@ -1028,7 +1022,7 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
     krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
-	   (struct sockaddr *) client, S_AD_SZ);
+	   (struct sockaddr *) client, sizeof (struct sockaddr_in));
 
 }
 
@@ -1040,7 +1034,7 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
     static int more;
  /* long trans; */
 
-    n = kerb_get_principal(p_name, instance, p, 1, &more, k5key, 0,
+    n = kerb_get_principal(p_name, instance, p, &more, k5key, 0,
 			   issrv, k5life);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
@@ -1161,7 +1155,7 @@ set_tgtkey(char *r, krb5_kvno kvno, krb5_boolean use_3des)
 
 /*  log("Getting key for %s", r); */
 
-    n = kerb_get_principal("krbtgt", r, p, 1, &more, &k5key, kvno, 1, NULL);
+    n = kerb_get_principal("krbtgt", r, p, &more, &k5key, kvno, 1, NULL);
     if (n == 0)
 	return (KFAILURE);
 

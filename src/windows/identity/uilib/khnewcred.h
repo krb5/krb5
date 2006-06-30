@@ -415,24 +415,50 @@ typedef struct tag_khui_new_creds {
 #define KHUI_MAXCB_PNAME (KHUI_MAXCCH_PNAME * sizeof(wchar_t))
 
 /*! \brief A descriptor of a panel in the new credentials acquisition tab
+
+    When processing certain credentials messages such as
+    ::KMSG_CRED_PASSWORD, ::KMSG_CRED_NEW_CREDS,
+    ::KMSG_CRED_RENEW_CREDS, a pointer to a ::khui_new_creds structure
+    will be passed in to the message handler.  If the handler of the
+    message needs to add one or more credentials types as participants
+    of the operation, the handler will need to call khui_cw_add_type()
+    and specify a ::khui_new_creds_by_type structure.
+
+    Note that the memory address passed in to the call to
+    khui_cw_add_type() will not be copied.  Therefore, the block of
+    memory should remain as-is for the lifetime of the
+    ::khui_new_creds structure or until it is removed with a call to
+    khui_cw_del_type().
+
+    Some of the credentials messages that require specifying a
+    ::khui_new_creds_by_type structure require providing a
+    user-interface.  In these cases, the fields marked for providing a
+    UI may be required to hold valid values.  If the message does not
+    require providing a UI, these fields will be ignored.
 */
 typedef struct tag_khui_new_creds_by_type {
     khui_new_creds * nc;        /*!< Internal use.  Do not set */
     khm_int32   flags;          /*!< Internal use.  Do not set */
 
     khm_int32   type;           /*!< The identifier of the credentials
-                                  type */
+                                  type.  This is a credentials type
+                                  identifier allocated with a call to
+                                  kcdb_credtype_register(). */
 
     khm_int32   type_deps[KHUI_MAX_TYPE_DEPS];
                                 /*!< credentials types that this
                                     credential type depends on.  Each
                                     element defines a credentials type
                                     identifier that this type depends
-                                    on for this operation. */
+                                    on for this operation.  The number
+                                    of valid values in this array
+                                    should be specified in the \a
+                                    n_type_deps field. */
 
     khm_size    n_type_deps;    /*!< Number of dependencies listed
                                   above.  Should be between 0 and
-                                  ::KHUI_MAX_TYPE_DEPS */
+                                  ::KHUI_MAX_TYPE_DEPS.  Specify 0 if
+                                  there are no dependencies. */
 
     khm_size    ordinal;        /*!< The requested ordinal.  The UI
                                   would attempt to place this panel at
@@ -446,29 +472,49 @@ typedef struct tag_khui_new_creds_by_type {
     wchar_t    *name;           /*!< Name of the panel (localized,
                                   optional).  If NULL, the localized
                                   name of the credentials type is
-                                  used.  */
+                                  used. Only used if providing a
+                                  user-interface. */
 
-    HICON       icon;           /*!< Icon for the panel (optional) */
+    HICON       icon;           /*!< Icon for the panel (optional).
+                                  Only used if providing a
+                                  user-interface. */
 
     wchar_t    *tooltip;        /*!< Tooltip for the panel (localized,
                                   optional).  If NULL, no tooltip will
-                                  be assigned for the panel */
+                                  be assigned for the panel.  Only
+                                  used if providing a
+                                  user-interface.  */
 
     HMODULE     h_module;       /*!< Handle to the module containing
-                                  the dialog resource */
+                                  the dialog resource.  Only used if
+                                  providing a user-interface. */
 
-    LPWSTR      dlg_template;   /*!< The dialog resource */
-    DLGPROC     dlg_proc;       /*!< The dialog procedure */
+    LPWSTR      dlg_template;   /*!< The dialog resource.  Only used
+                                  if providing a user-interface. */
+    DLGPROC     dlg_proc;       /*!< The dialog procedure. Only used
+                                  if providing a user-interface. */
 
-    HWND        hwnd_panel;     /*!< The dialog window */
+    HWND        hwnd_panel;     /*!< The dialog window.  Once the
+                                  dialog panel is created, a handle to
+                                  the panel will be assigned here.
+                                  Note that the handle is assigned
+                                  after a successful call to
+                                  CreateDialogParam and hence would
+                                  not be available when handling the
+                                  WM_INITDIALOG message from the
+                                  dialog procedure.  Only used of
+                                  providing a user-interface. */
+
     HWND        hwnd_tc;        /*!< Internal use. Do not set */
 
     wchar_t    *credtext;       /*!< A brief description of the
                                   current state of this cred
-                                  type. (localized, optional) */
+                                  type. (localized, optional).  Only
+                                  used if providing a
+                                  user-interface. */
 
     LPARAM      aux;            /*!< auxilliary field.  For use by the
-                                  credential provider */
+                                  plug-in. */
 } khui_new_creds_by_type;
 
 /*!\name Flags for khui_new_creds_by_type
@@ -651,6 +697,22 @@ khui_cw_unlock_nc(khui_new_creds * c);
 
     See the description of ::khui_new_cred_panel for information on
     how to populate it to describe a credentials type panel.
+
+    Note that the structure pointed to by \a t is added by reference.
+    The memory pointed to by \a t is not copied.  Hence, the block of
+    memory and any other blocks pointed to by the
+    ::khui_new_creds_by_type structure located there should remain
+    intact for the lifetime of the ::khui_new_creds structure pointed
+    to by \a c or until the credentials type panel is removed from the
+    ::khui_new_creds structure with a call to khui_cw_del_type().
+
+    Generally, a plug-in that calls this function should allocate a
+    block of memory to contain the ::khui_new_creds_by_type structure,
+    fill it in and then pass in the address in a call to
+    khui_cw_add_type() while handling a ::KMSG_CRED_PASSWORD,
+    ::KMSG_CRED_NEW_CREDS or ::KMSG_CRED_RENEW_CREDS message.  Then
+    the plug-in should remove the reference with a call to
+    khui_cw_del_type() while processing ::KMSG_CRED_END.
 
     \see khui_cw_del_type()
     \see \ref cred_acq_panel_spec

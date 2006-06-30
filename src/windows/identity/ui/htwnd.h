@@ -40,6 +40,8 @@ We currently support the following tags:
 
 #define KHUI_HTWND_TRANSPARENT  1
 #define KHUI_HTWND_CLIENTEDGE   2
+#define KHUI_HTWND_HSCROLL      4
+#define KHUI_HTWND_VSCROLL      8
 #define KHUI_HTWND_FOCUS        2048
 
 #define KHUI_HTWND_CLASS L"KhmHtWnd"

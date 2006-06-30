@@ -89,7 +89,7 @@ extern void lreply(int, char *, ...)
 
 /* ftpcmd.y */
 void upper(char *);
-char *getline(char *, int, FILE *);
+char *ftpd_getline(char *, int, FILE *);
 #endif /* FTPD_VAR_H__ */
 
 /* popen.c */

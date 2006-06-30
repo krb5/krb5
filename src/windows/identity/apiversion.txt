@@ -120,15 +120,41 @@ Date=(TBD)
 # Flag for error events to signal that the error event has been committed.
 
 +khui_action_trigger()
+# Function for triggerring an action.
 
 +khui_action_set_hwnd()
+# internal API.  Should not be used by anyone.  Basically sets the HWND that should receive event notifications from the UI library.
 
 +KEPT_PTR
+# error library data type for pointers
 
 +_cptr
+# type cast macro for pointer types
 
 !khc_open_space
 # name parameter is now a const string
 
 !KCDB_ATTRNAME_ISSUE
 # Fixed typo
+
+!kherr_val
+# is now an inline function instead of a macro
+
+!kherr_param
+# is now a structure instead of an integer type
+
++KEPT_NONE
+# new constant signifying a NULL parameter
+
+!_int32, _uint32, _int64, _uint64, _cstr, _tstr, _cptr
+# appropriate typecasts added
+
++vnull
+# macro to insert a NULL parameter
+
+!_report_cs0, _report_cs1, _report_cs2, _report_cs3
+!_report_sr0, _report_sr1, _report_sr2, _report_sr3
+!_report_mr0, _report_mr1, _report_mr2, _report_mr3
+!_report_ts0, _report_ts1, _report_ts2, _report_ts3
+# modified to use _vnull() instead of 0 for NULL parameters
+

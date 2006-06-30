@@ -60,6 +60,11 @@ krb5flags_toString(const void *, khm_size, wchar_t *,
                    khm_size *, khm_int32);
 
 khm_int32 KHMAPI
+kvno_toString(const void * data, khm_size cbdata,
+              wchar_t *destbuf, khm_size *pcbdestbuf,
+              khm_int32 flags);
+
+khm_int32 KHMAPI
 renew_for_cb(khm_handle cred, khm_int32 id, void * buffer,
              khm_size * pcbsize);
 

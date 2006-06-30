@@ -143,7 +143,7 @@ main(void)
     cc_session_info_t * session_info;
     cc_int32            code;
 
-    if ( cci_serv_initialize() != ccNoError )
+    if ( ccs_serv_initialize() != ccNoError )
         return 1;
 
     while ( 1 ) {
@@ -163,7 +163,7 @@ main(void)
         code = obtain_session_info(&session_info);
 
         /* process message */
-        code = cci_serv_process_msg(msg, auth_info, session_info, &resp);
+        code = ccs_serv_process_msg(msg, auth_info, session_info, &resp);
 
         /* flatten response */
         code = cci_msg_flatten(resp, NULL);

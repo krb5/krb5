@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <kadm5/admin.h>
+#include <string.h>
 
 int main(int argc, char **argv)
 {

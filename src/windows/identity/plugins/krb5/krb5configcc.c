@@ -29,16 +29,16 @@
 #define _WIN32_WINNT 0x501
 #endif
 
+#define STRSAFE_NO_DEPRECATE
+
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>
 #include<lm.h>
 #include<commctrl.h>
-
-#pragma warning(push)
-#pragma warning(disable: 4995)
 #include<shlwapi.h>
-#pragma warning(pop)
+
+#include<strsafe.h>
 
 typedef struct tag_k5_file_cc {
     wchar_t path[MAX_PATH];
@@ -97,7 +97,7 @@ void k5_add_file_cc(k5_ccc_data * d, wchar_t * path) {
 
     /* see if it's there first */
     for (i=0; i < d->n_file_ccs; i++) {
-        if(!wcsicmp(d->file_ccs[i].path, path))
+        if(!_wcsicmp(d->file_ccs[i].path, path))
             return;
     }
 
@@ -232,7 +232,7 @@ BOOL k5_ccc_get_mod(k5_ccc_dlg_data * d) {
 
     for (i=0; i < d->work.n_file_ccs; i++) {
         for (j=0; j < d->save.n_file_ccs; j++) {
-            if (!wcsicmp(d->work.file_ccs[i].path,
+            if (!_wcsicmp(d->work.file_ccs[i].path,
                          d->save.file_ccs[j].path))
                 break;
         }
@@ -372,7 +372,7 @@ k5_ccconfig_dlgproc(HWND hwnd,
                     return TRUE; /* nothing to add */
 
                 for (i=0; i < d->work.n_file_ccs; i++) {
-                    if (!wcsicmp(path, d->work.file_ccs[i].path)) {
+                    if (!_wcsicmp(path, d->work.file_ccs[i].path)) {
 
                         /* allow the user to correct case, as appropriate */
                         StringCbCopy(d->work.file_ccs[i].path,
@@ -522,7 +522,7 @@ k5_ccconfig_dlgproc(HWND hwnd,
                                                      LVNI_SELECTED)) != -1) {
                     ListView_GetItemText(lv, lv_idx, 0, buf, ARRAYLENGTH(buf));
                     for (i=0; i < d->work.n_file_ccs; i++) {
-                        if (!wcsicmp(buf, d->work.file_ccs[i].path)) {
+                        if (!_wcsicmp(buf, d->work.file_ccs[i].path)) {
                             k5_del_file_cc(&d->work, i);
                             break;
                         }

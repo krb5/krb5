@@ -166,8 +166,8 @@ clean::
 		TAGS test_ss
 
 
-# @lib_frag@
-# @libobj_frag@
+@lib_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

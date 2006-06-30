@@ -139,22 +139,6 @@ if test $checkout = t; then
 	svn export $repository/$reltag $reldir
 fi
 
-if test $dosrc = t; then
-	if test -d $reldir/src/util/autoconf; then
-		echo "Building autoconf..."
-		(cd $reldir/src/util/autoconf
-			M4=gm4 ./configure
-			make)
-	fi
-	echo "Creating configure scripts..."
-	(cd $reldir/src; util/reconf)
-
-	if test -d $reldir/src/util/autoconf; then
-		echo "Cleaning src/util/autoconf..."
-		(cd $reldir/src/util/autoconf; make distclean)
-	fi
-fi
-
 echo "Editing release-specific files..."
 
 if test $newstyle = t; then 
@@ -162,6 +146,9 @@ if test $newstyle = t; then
 		sed -e '/RELDATE/c\
 #define KRB5_RELDATE "'"$reldate"'"' patchlevel.h > patchlevel.h.new && \
 		mv patchlevel.h.new patchlevel.h)
+	if test $checkout = t; then
+		(cd $reldir && svn log -v $repository/$reltag > doc/CHANGES)
+	fi
 else
 
 	(cd $reldir/src/lib/krb5/krb && \
@@ -180,6 +167,22 @@ else
 #define KRB5_PATCHLEVEL    $relpatch
 EOF
 	)
+fi
+
+if test $dosrc = t; then
+	if test -d $reldir/src/util/autoconf; then
+		echo "Building autoconf..."
+		(cd $reldir/src/util/autoconf
+			M4=gm4 ./configure
+			make)
+	fi
+	echo "Creating configure scripts..."
+	(cd $reldir/src; util/reconf)
+
+	if test -d $reldir/src/util/autoconf; then
+		echo "Cleaning src/util/autoconf..."
+		(cd $reldir/src/util/autoconf; make distclean)
+	fi
 fi
 
 echo "Nuking unneeded files..."

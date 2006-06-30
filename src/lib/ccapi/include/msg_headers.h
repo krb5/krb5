@@ -1,6 +1,6 @@
 /* $Copyright:
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004-2006 by the Massachusetts Institute of Technology.
  * 
  * All rights reserved.
  * 
@@ -57,6 +57,8 @@
  * size divisible by 4. This is to ensure correct alignment
  * and stop different compilers from inserting padding bytes in
  * different places.
+ *
+ * All values are stored in network byte order.
  */
 
 struct ccmsg_ctx_only_t {
@@ -81,18 +83,18 @@ struct ccmsg_init_resp_t {
 typedef struct ccmsg_init_t ccmsg_init_t;
 typedef struct ccmsg_init_resp_t ccmsg_init_resp_t;
 
-struct ccmsg_clone_t {
+struct ccmsg_ctx_clone_t {
     cc_handle   ctx;
     cc_uint32	in_version;		/*client API version*/
 };
-struct ccmsg_clone_resp_t {
+struct ccmsg_ctx_clone_resp_t {
     cc_handle	out_ctx;		/*handle on this ctx*/
     cc_uint32	out_version;		/*server API version*/
     cc_uint32	vendor_offset;		/*offset of vendor blob*/
     cc_uint32	vendor_length;		/*length of vendor blob*/
 };      
-typedef struct ccmsg_clone_t ccmsg_clone_t;
-typedef struct ccmsg_clone_resp_t ccmsg_clone_resp_t;
+typedef struct ccmsg_ctx_clone_t ccmsg_ctx_clone_t;
+typedef struct ccmsg_ctx_clone_resp_t ccmsg_ctx_clone_resp_t;
 
 struct ccmsg_ctx_release_t {
     cc_handle 	ctx;	/*# of ctx to release*/
@@ -103,7 +105,7 @@ struct ccmsg_ctx_get_change_time_t {
     cc_handle	ctx;
 };
 struct ccmsg_ctx_get_change_time_resp_t {
-    cc_time_t	time;
+    cc_time64	time;
 };
 typedef struct ccmsg_ctx_get_change_time_t ccmsg_ctx_get_change_time_t;
 typedef struct ccmsg_ctx_get_change_time_resp_t ccmsg_ctx_get_change_time_resp_t;
@@ -304,7 +306,7 @@ struct ccmsg_ccache_get_last_default_time_t {
     cc_handle	ccache;
 };
 struct ccmsg_ccache_get_last_default_time_resp_t {
-    cc_time_t	last_default_time;
+    cc_time64	last_default_time;
 };
 typedef struct ccmsg_ccache_get_last_default_time_t ccmsg_ccache_get_last_default_time_t;
 typedef struct ccmsg_ccache_get_last_default_time_resp_t ccmsg_ccache_get_last_default_time_resp_t;
@@ -314,7 +316,7 @@ struct ccmsg_ccache_get_change_time_t {
     cc_handle	ccache;
 };
 struct ccmsg_ccache_get_change_time_resp_t {
-    cc_time_t	time;
+    cc_time64	time;
 };
 typedef struct ccmsg_ccache_get_change_time_t ccmsg_ccache_get_change_time_t;
 typedef struct ccmsg_ccache_get_change_time_resp_t ccmsg_ccache_get_change_time_resp_t;
@@ -336,7 +338,7 @@ struct ccmsg_ccache_get_kdc_time_offset_t {
     cc_int32    creds_version;
 };      
 struct ccmsg_ccache_get_kdc_time_offset_resp_t {
-    cc_time_t	offset;
+    cc_time64	offset;
 };
 typedef struct ccmsg_ccache_get_kdc_time_offset_t ccmsg_ccache_get_kdc_time_offset_t;
 typedef struct ccmsg_ccache_get_kdc_time_offset_resp_t ccmsg_ccache_get_kdc_time_offset_resp_t;
@@ -344,7 +346,7 @@ typedef struct ccmsg_ccache_get_kdc_time_offset_resp_t ccmsg_ccache_get_kdc_time
 struct ccmsg_ccache_set_kdc_time_offset_t {
     cc_handle	ctx;
     cc_handle	ccache;
-    cc_time_t	offset;
+    cc_time64	offset;
     cc_int32    creds_version;
 };
 typedef struct ccmsg_ccache_set_kdc_time_offset_t ccmsg_ccache_set_kdc_time_offset_t;
@@ -372,6 +374,16 @@ struct ccmsg_ccache_iterator_next_resp_t {
 typedef struct ccmsg_ccache_iterator_next_t ccmsg_ccache_iterator_next_t;
 typedef struct ccmsg_ccache_iterator_next_resp_t ccmsg_ccache_iterator_next_resp_t;
 
+struct ccmsg_ccache_iterator_clone_t {
+    cc_handle   ctx;
+    cc_handle	iterator;
+};
+struct ccmsg_ccache_iterator_clone_resp_t {
+    cc_handle	iterator;
+};      
+typedef struct ccmsg_ccache_iterator_clone_t ccmsg_ccache_iterator_clone_t;
+typedef struct ccmsg_ccache_iterator_clone_resp_t ccmsg_ccache_iterator_clone_resp_t;
+
 struct ccmsg_creds_iterator_release_t {
     cc_handle	ctx;
     cc_handle	ccache;
@@ -393,37 +405,14 @@ struct ccmsg_creds_iterator_next_resp_t {
 typedef struct ccmsg_creds_iterator_next_t ccmsg_creds_iterator_next_t;
 typedef struct ccmsg_creds_iterator_next_resp_t ccmsg_creds_iterator_next_resp_t;
 
-struct ccmsg_creds_v4_t {
-    cc_uint32 offset;
-    cc_uint32 len;
+struct ccmsg_creds_iterator_clone_t {
+    cc_handle   ctx;
+    cc_handle	iterator;
 };
-typedef struct ccmsg_creds_v4_t ccmsg_creds_v4_t;
-
-struct ccmsg_creds_v5_t {
-    cc_uint32 client_offset;
-    cc_uint32 client_len;
-    cc_uint32 server_offset;
-    cc_uint32 server_len;
-    cc_uint32 keyblock_offset;
-    cc_uint32 keyblock_len;
-    cc_time_t authtime;
-    cc_time_t starttime;
-    cc_time_t endtime;
-    cc_time_t renewtime;
-    cc_uint32 is_skey;
-    cc_uint32 ticket_flags;
-    cc_uint32 address_count;
-    cc_uint32 address_offset;
-    cc_uint32 address_len;
-    cc_uint32 ticket_offset;
-    cc_uint32 ticket_len;
-    cc_uint32 ticket2_offset;
-    cc_uint32 ticket2_len;
-    cc_uint32 authdata_count;
-    cc_uint32 authdata_offset;
-    cc_uint32 authdata_len;
-};
-typedef struct ccmsg_creds_v5_t ccmsg_creds_v5_t;
-
+struct ccmsg_creds_iterator_clone_resp_t {
+    cc_handle	iterator;
+};      
+typedef struct ccmsg_creds_iterator_clone_t ccmsg_creds_iterator_clone_t;
+typedef struct ccmsg_creds_iterator_clone_resp_t ccmsg_creds_iterator_clone_resp_t;
 
 #endif /*__MSG_HEADERS_H__*/

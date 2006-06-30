@@ -717,8 +717,8 @@ mklist(buf, name)
 		 */
 		if ((c == ' ') || !isascii(c))
 			n = 1;
-		else if (islower((int) c))
-			*cp = toupper((int) c);
+		else if (islower((unsigned char) c))
+			*cp = toupper((unsigned char) c);
 	}
 	
 	/*

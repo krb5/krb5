@@ -198,7 +198,7 @@ proc ftp_test { } {
     start_ftp_daemon
 
     # Make an ftp client connection to it.
-    spawn $FTP $hostname [expr 8 + $portbase]
+    spawn $FTP -d -v $hostname [expr 8 + $portbase]
 
     expect_after {
 	"GSSAPI authentication failed" {

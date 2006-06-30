@@ -31,6 +31,7 @@
 #ifdef DEBUG
 #include<assert.h>
 #endif
+#include<strsafe.h>
 
 /**************************************/
 /* khm_krb5_error():           */

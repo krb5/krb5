@@ -76,19 +76,6 @@ typedef struct gss_union_cred_t {
 	gss_union_cred_auxinfo	auxinfo;
 } gss_union_cred_desc, *gss_union_cred_t;
  
-typedef	OM_uint32	    (*gss_acquire_cred_with_password_sfct)(
-		    void *,		/* context */
-		    OM_uint32 *,	/* minor_status */
-		    const gss_name_t,	/* desired_name */
-		    const gss_buffer_t, /* password */
-		    OM_uint32,		/* time_req */
-		    const gss_OID_set,	/* desired_mechs */
-		    int,		/* cred_usage */
-		    gss_cred_id_t *,	/* output_cred_handle */
-		    gss_OID_set *,	/* actual_mechs */
-		    OM_uint32 *		/* time_rec */
-	/* */);
-
 /********************************************************/
 /* The Mechanism Dispatch Table -- a mechanism needs to */
 /* define one of these and provide a function to return */
@@ -352,22 +339,6 @@ typedef struct gss_config {
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
 	 );
-    int		     (*pname_to_uid)
-	(
-		    void *,		/* context */
-		    char *,		/* pname */
-		    gss_OID,		/* name type */
-		    gss_OID,		/* mech type */
-		    uid_t *		/* uid */
-		    );
-	OM_uint32		(*gssint_userok)
-	(
-		    void *,		/* context */
-		    OM_uint32 *,	/* minor_status */
-		    const gss_name_t,	/* pname */
-		    const char *,	/* local user */
-		    int *		/* user ok? */
-	/* */);
 	OM_uint32		(*gss_export_name)
 	(
 		void *,			/* context */
@@ -389,11 +360,6 @@ typedef struct gss_config {
 	/* */);
 } *gss_mechanism;
 
-/* This structure MUST NOT be used by any code outside libgss */
-typedef struct gss_config_ext {
-	gss_acquire_cred_with_password_sfct	gss_acquire_cred_with_password;
-} *gss_mechanism_ext;
-
 /*
  * In the user space we use a wrapper structure to encompass the
  * mechanism entry points.  The wrapper contain the mechanism
@@ -409,7 +375,6 @@ typedef struct gss_mech_config {
 	void *dl_handle;		/* RTLD object handle for the mech */
 	gss_OID mech_type;		/* mechanism oid */
 	gss_mechanism mech;		/* mechanism initialization struct */
-	gss_mechanism_ext mech_ext;	/* extensions */
 	struct gss_mech_config *next;	/* next element in the list */
 } *gss_mech_info;
 
@@ -420,7 +385,6 @@ int gssint_mechglue_init(void);
 void gssint_mechglue_fini(void);
 
 gss_mechanism gssint_get_mechanism (gss_OID);
-gss_mechanism_ext gssint_get_mechanism_ext(const gss_OID);
 OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
 char *gssint_get_kmodName(const gss_OID);
 char *gssint_get_modOptions(const gss_OID);
@@ -482,14 +446,6 @@ OM_uint32
 gssint_get_mechanisms(
 	char *mechArray[],		/* array to populate with mechs */
 	int arrayLen			/* length of passed in array */
-);
-
-OM_uint32
-gssint_userok(
-	OM_uint32 *,		/* minor */
-	const gss_name_t,	/* name */
-	const char *,		/* user */
-	int *			/* user_ok */
 );
 
 OM_uint32

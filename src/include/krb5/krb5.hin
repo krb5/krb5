@@ -1343,6 +1343,8 @@ krb5_error_code KRB5_CALLCONV krb5_init_secure_context
 	(krb5_context *);
 void KRB5_CALLCONV krb5_free_context
 	(krb5_context);
+krb5_error_code KRB5_CALLCONV krb5_copy_context
+	(krb5_context, krb5_context *);
 
 #if KRB5_PRIVATE
 krb5_error_code krb5_set_default_in_tkt_ktypes
@@ -2537,17 +2539,27 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 	(krb5_context context);
 
 /* Error reporting */
-void
+void KRB5_CALLCONV_C
 krb5_set_error_message (krb5_context, krb5_error_code, const char *, ...);
 #ifdef va_start
-void
+void KRB5_CALLCONV
 krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list);
 #endif
-char *
+/*
+ * The behavior of krb5_get_error_message is only defined the first
+ * time it is called after a failed call to a krb5 function using the
+ * same context, and only when the error code passed in is the same as
+ * that returned by the krb5 function.  Future versions may return the
+ * same string for the second and following calls.
+ *
+ * The string returned by this function must be freed using
+ * krb5_free_error_message.
+ */
+char * KRB5_CALLCONV
 krb5_get_error_message (krb5_context, krb5_error_code);
-void
+void KRB5_CALLCONV
 krb5_free_error_message (krb5_context, char *);
-void
+void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context);
 
 

@@ -478,7 +478,7 @@ void PRS(argv)
 				case 'S':
 					standalone++;
 					break;
-				   case 'a':
+				case 'a':
 					if (*word)
 					     acl_file_name = word;
 					else

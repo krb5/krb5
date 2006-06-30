@@ -252,6 +252,14 @@
  *
  * There is no wtmpx file, despite there being utmp and utmpx files.
  *
+ * HP-UX 11.23:
+ *
+ * In addition to other HP-UX issues, 11.23 includes yet another utmp
+ * management interface in utmps.h.  This interface updates a umtpd
+ * daemon which then manages local files.  Directly accessing the files
+ * through the existing, yet deprecated, utmp.h interface results in 
+ * nothing.
+ *
  * Irix 6.x:
  *
  * In utmpx, ut_exit contains __e_termination and __e_exit, which get
@@ -324,10 +332,19 @@
 /*
  * The following grossness exists to avoid duplicating lots of code
  * between the cases where we have an old-style sysV utmp and where we
- * have a modern (Unix98 or XPG4) utmpx.  See the above history rant
- * for further explanation.
+ * have a modern (Unix98 or XPG4) utmpx, or the new (hp-ux 11.23) utmps.  
+ * See the above history rant for further explanation.
  */
-#if defined(HAVE_SETUTXENT) || defined(HAVE_SETUTENT)
+#if defined(HAVE_SETUTXENT) || defined(HAVE_SETUTENT) || defined(HAVE_SETUTSENT)
+#ifdef HAVE_SETUTSENT
+#include <utmps.h>
+#define PTY_STRUCT_UTMPX struct utmps
+#define PTY_SETUTXENT setutsent
+#define PTY_GETUTXENT GETUTSENT
+#define PTY_GETUTXLINE GETUTSLINE
+#define PTY_PUTUTXLINE PUTUTSLINE
+#define PTY_ENDUTXENT endutsent
+#else
 #ifdef HAVE_SETUTXENT
 #define PTY_STRUCT_UTMPX struct utmpx
 #define PTY_SETUTXENT setutxent
@@ -343,7 +360,7 @@
 #define PTY_PUTUTXLINE pututline
 #define PTY_ENDUTXENT endutent
 #endif
-
+#endif
 static int better(const PTY_STRUCT_UTMPX *, const PTY_STRUCT_UTMPX *,
 		  const PTY_STRUCT_UTMPX *);
 static int match_pid(const PTY_STRUCT_UTMPX *,

@@ -8,4 +8,4 @@ LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../db
 
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
-# @libobj_frag@
+@libobj_frag@

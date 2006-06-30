@@ -440,6 +440,22 @@ int main(argc, argv)
 	fd = 0;
     }
 
+/*
+ * AIX passes an IPv4-mapped IPv6 address back from getpeername, but if
+ * that address is later used in connect(), it returns an error.  Convert
+ * IPv4-mapped IPv6 addresses to simple IPv4 addresses on AIX (but don't
+ * do this everywhere since it isn't always the right thing to do, just
+ * the least wrong on AIX).
+ */
+#if defined(_AIX) && defined(KRB5_USE_INET6)
+    if (((struct sockaddr*)&from)->sa_family == AF_INET6 && IN6_IS_ADDR_V4MAPPED(&sa2sin6(&from)->sin6_addr)) {
+	sa2sin(&from)->sin_len = sizeof(struct sockaddr_in);
+	sa2sin(&from)->sin_family = AF_INET;
+	sa2sin(&from)->sin_port = sa2sin6(&from)->sin6_port;
+	memmove(&(sa2sin(&from)->sin_addr.s_addr), &(sa2sin6(&from)->sin6_addr.u6_addr.u6_addr8[12]), 4);
+    }
+#endif
+
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (char *)&on,
 		   sizeof (on)) < 0)
 	syslog(LOG_WARNING, "setsockopt (SO_KEEPALIVE): %m");
@@ -1198,6 +1214,7 @@ void doit(f, fromp)
 	    goto signout_please;
 	}
 	if (pid) {
+	    int maxfd;
 #ifdef POSIX_SIGNALS
 	    sa.sa_handler = cleanup;
 	    (void)sigaction(SIGINT, &sa, (struct sigaction *)0);
@@ -1231,11 +1248,18 @@ void doit(f, fromp)
 	    
 	    FD_ZERO(&readfrom);
 	    FD_SET(f, &readfrom);
+	    maxfd = f;
 	    if(port) {
 		FD_SET(s, &readfrom);
+		if (s > maxfd)
+		    maxfd = s;
 		FD_SET(pv[0], &readfrom);
+		if (pv[0] > maxfd)
+		    maxfd = pv[0];
 	    }
 	    FD_SET(pw[0], &readfrom);
+	    if (pw[0] > maxfd)
+		maxfd = pw[0];
 	    
 	    /* read from f, write to px[1] -- child stdin */
 	    /* read from s, signal child */
@@ -1244,7 +1268,7 @@ void doit(f, fromp)
 
 	    do {
 		ready = readfrom;
-		if (select(8*sizeof(ready), &ready, (fd_set *)0,
+		if (select(maxfd + 1, &ready, (fd_set *)0,
 			   (fd_set *)0, (struct timeval *)0) < 0) {
 		    if (errno == EINTR) {
 			continue;

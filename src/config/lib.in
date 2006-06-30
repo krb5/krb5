@@ -89,6 +89,8 @@ hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
 	  else :; fi; \
 	done; echo "$$a" >> hpux10.tmp
 	echo "+e errno" >> hpux10.tmp
+	echo "+e _GLOBAL__FD_lib$(LIBBASE)_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
+	echo "+e _GLOBAL__FI_lib$(LIBBASE)_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
 	mv -f hpux10.tmp hpux10.exports
 
 lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)

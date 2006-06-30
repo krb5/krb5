@@ -98,7 +98,7 @@ clean-unix:: clean-libobjs
 
 clean-windows::
 
-# @libobj_frag@
+@libobj_frag@
 
 # +++ Dependency line eater +++
 # 

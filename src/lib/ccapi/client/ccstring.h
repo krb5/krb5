@@ -45,7 +45,7 @@
 
 #define CC_STRING_MAGIC ('S'<<24 | 'T'<<16 | 'R'<<8 | 'I')
 
-struct cc_int_string_d {
+struct cci_string_d {
     char*         data;
     cc_string_f*  functions;
 #if TARGET_OS_MAC
@@ -53,13 +53,13 @@ struct cc_int_string_d {
 #endif
     cc_uint32           magic;
 };
-typedef struct cc_int_string_d cc_int_string_d;
-typedef cc_int_string_d*    cc_int_string_t;
+typedef struct cci_string_d cci_string_d;
+typedef cci_string_d*    cci_string_t;
 
 cc_int32
-cc_int_string_new( cc_string_t * pstring, char * data );
+cci_string_new( cc_string_t * pstring, char * data );
 
 cc_int32
-cc_int_string_release( cc_string_t string );
+cci_string_release( cc_string_t string );
 
 

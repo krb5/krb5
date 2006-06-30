@@ -76,8 +76,8 @@ $(DB_DEPS) $(DBOBJLISTS-k5) $(DBSHOBJLISTS): all-recurse
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT) db2_exp.o
 
-# @libnover_frag@
-# @libobj_frag@
+@libnover_frag@
+@libobj_frag@
 
 .depend-verify-db: depend-verify-db-$(DB_VERSION)
 depend-verify-db-k5:

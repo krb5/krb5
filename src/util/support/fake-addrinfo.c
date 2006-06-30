@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2001,2002,2003,2004,2005 by the Massachusetts Institute of Technology,
+ * Copyright (C) 2001,2002,2003,2004,2005,2006 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -162,20 +162,23 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
    either getaddrinfo or one of these two flavors of
    gethostbyname_r?  */
 #if !defined(HAVE_GETHOSTBYNAME_R) || defined(THREADSAFE_GETHOSTBYNAME)
-#define GET_HOST_BY_NAME(NAME, HP, ERR) \
-    { (HP) = gethostbyname (NAME); (ERR) = h_errno; }
-#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
-    { (HP) = gethostbyaddr ((ADDR), (ADDRLEN), (FAMILY)); (ERR) = h_errno; }
+typedef struct hostent *GET_HOST_TMP;
+#define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
+    { TMP = gethostbyname (NAME); (ERR) = h_errno; (HP) = TMP; }
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR, TMP) \
+    { TMP = gethostbyaddr ((ADDR), (ADDRLEN), (FAMILY)); (ERR) = h_errno; (HP) = TMP; }
 #else
 #ifdef _AIX /* XXX should have a feature test! */
-#define GET_HOST_BY_NAME(NAME, HP, ERR) \
-    {									\
-	struct hostent my_h_ent;					\
-	struct hostent_data my_h_ent_data;				\
-	(HP) = (gethostbyname_r((NAME), &my_h_ent, &my_h_ent_data)	\
-		? 0							\
-		: &my_h_ent);						\
-	(ERR) = h_errno;						\
+typedef struct {
+    struct hostent ent;
+    struct hostent_data data;
+} GET_HOST_TMP;
+#define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
+    {								\
+	(HP) = (gethostbyname_r((NAME), &TMP.ent, &TMP.data)	\
+		? 0						\
+		: &my_h_ent);					\
+	(ERR) = h_errno;					\
     }
 /*
 #define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
@@ -191,47 +194,51 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 */
 #else
 #ifdef GETHOSTBYNAME_R_RETURNS_INT
-#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+typedef struct {
+    struct hostent ent;
+    char buf[8192];
+} GET_HOST_TMP;
+#define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
     {									\
-	struct hostent my_h_ent, *my_hp;				\
-	int my_h_err;							\
-	char my_h_buf[8192];						\
-	(HP) = (gethostbyname_r((NAME), &my_h_ent,			\
-				my_h_buf, sizeof (my_h_buf), &my_hp,	\
-				&my_h_err)				\
+	struct hostent *my_hp = NULL;					\
+	int my_h_err, my_ret;						\
+	my_ret = gethostbyname_r((NAME), &TMP.ent,			\
+				 TMP.buf, sizeof (TMP.buf), &my_hp,	\
+				 &my_h_err);				\
+	(HP) = (((my_ret != 0) || (my_hp != &TMP.ent))			\
 		? 0							\
-		: &my_h_ent);						\
+		: &TMP.ent);						\
 	(ERR) = my_h_err;						\
     }
-#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR, TMP) \
     {									\
-	struct hostent my_h_ent, *my_hp;				\
-	int my_h_err;							\
-	char my_h_buf[8192];						\
-	(HP) = (gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
-				my_h_buf, sizeof (my_h_buf), &my_hp,	\
-				&my_h_err)				\
+	struct hostent *my_hp;						\
+	int my_h_err, my_ret;						\
+	my_ret = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &TMP.ent,	\
+				 TMP.buf, sizeof (TMP.buf), &my_hp,	\
+				 &my_h_err);				\
+	(HP) = (((my_ret != 0) || (my_hp != &TMP.ent))			\
 		? 0							\
-		: &my_h_ent);						\
+		: &TMP.ent);						\
 	(ERR) = my_h_err;						\
     }
 #else
-#define GET_HOST_BY_NAME(NAME, HP, ERR) \
+typedef struct {
+    struct hostent ent;
+    char buf[8192];
+} GET_HOST_TMP;
+#define GET_HOST_BY_NAME(NAME, HP, ERR, TMP) \
     {									\
-	struct hostent my_h_ent;					\
 	int my_h_err;							\
-	char my_h_buf[8192];						\
-	(HP) = gethostbyname_r((NAME), &my_h_ent,			\
-			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
+	(HP) = gethostbyname_r((NAME), &TMP.ent,			\
+			       TMP.buf, sizeof (TMP.buf), &my_h_err);	\
 	(ERR) = my_h_err;						\
     }
-#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR) \
+#define GET_HOST_BY_ADDR(ADDR, ADDRLEN, FAMILY, HP, ERR, TMP) \
     {									\
-	struct hostent my_h_ent;					\
 	int my_h_err;							\
-	char my_h_buf[8192];						\
-	(HP) = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &my_h_ent,	\
-			       my_h_buf, sizeof (my_h_buf), &my_h_err);	\
+	(HP) = gethostbyaddr_r((ADDR), (ADDRLEN), (FAMILY), &TMP.ent,	\
+			       TMP.buf, sizeof (TMP.buf), &my_h_err);	\
 	(ERR) = my_h_err;						\
     }
 #endif /* returns int? */
@@ -240,53 +247,57 @@ extern /*@dependent@*/ char *gai_strerror (int code) /*@*/;
 
 /* Now do the same for getservby* functions.  */
 #ifndef HAVE_GETSERVBYNAME_R
-#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
-    ((SP) = getservbyname (NAME, PROTO), (ERR) = (SP) ? 0 : -1)
-#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
-    ((SP) = getservbyport (PORT, PROTO), (ERR) = (SP) ? 0 : -1)
+typedef struct servent *GET_SERV_TMP;
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR, TMP) \
+    (TMP = getservbyname (NAME, PROTO), (SP) = TMP, (ERR) = (SP) ? 0 : -1)
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR, TMP) \
+    (TMP = getservbyport (PORT, PROTO), (SP) = TMP, (ERR) = (SP) ? 0 : -1)
 #else
 #ifdef GETSERVBYNAME_R_RETURNS_INT
-#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
+typedef struct {
+    struct servent ent;
+    char buf[8192];
+} GET_SERV_TMP;
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR, TMP) \
     {									\
-	struct servent my_s_ent, *my_sp;				\
+	struct servent *my_sp;						\
 	int my_s_err;							\
-	char my_s_buf[8192];						\
-	(SP) = (getservbyname_r((NAME), (PROTO), &my_s_ent,		\
-				my_s_buf, sizeof (my_s_buf), &my_sp,	\
+	(SP) = (getservbyname_r((NAME), (PROTO), &TMP.ent,		\
+				TMP.buf, sizeof (TMP.buf), &my_sp,	\
 				&my_s_err)				\
 		? 0							\
-		: &my_s_ent);						\
+		: &TMP.ent);						\
 	(ERR) = my_s_err;						\
     }
-#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR, TMP) \
     {									\
-	struct servent my_s_ent, *my_sp;				\
+	struct servent *my_sp;						\
 	int my_s_err;							\
-	char my_s_buf[8192];						\
-	(SP) = (getservbyport_r((PORT), (PROTO), &my_s_ent,		\
-				my_s_buf, sizeof (my_s_buf), &my_sp,	\
+	(SP) = (getservbyport_r((PORT), (PROTO), &TMP.ent,		\
+				TMP.buf, sizeof (TMP.buf), &my_sp,	\
 				&my_s_err)				\
 		? 0							\
-		: &my_s_ent);						\
+		: &TMP.ent);						\
 	(ERR) = my_s_err;						\
     }
 #else
 /* returns ptr -- IRIX? */
-#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR) \
+typedef struct {
+    struct servent ent;
+    char buf[8192];
+} GET_SERV_TMP;
+#define GET_SERV_BY_NAME(NAME, PROTO, SP, ERR, TMP) \
     {									\
-	struct servent my_s_ent;					\
-	char my_s_buf[8192];						\
-	(SP) = getservbyname_r((NAME), (PROTO), &my_s_ent,		\
-			       my_s_buf, sizeof (my_s_buf));		\
+	(SP) = getservbyname_r((NAME), (PROTO), &TMP.ent,		\
+			       TMP.buf, sizeof (TMP.buf));		\
 	(ERR) = (SP) == NULL;						\
     }
 
-#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR) \
+#define GET_SERV_BY_PORT(PORT, PROTO, SP, ERR, TMP) \
     {									\
-	struct servent my_s_ent, *my_sp;				\
-	char my_s_buf[8192];						\
-	my_sp = getservbyport_r((PORT), (PROTO), &my_s_ent,		\
-				my_s_buf, sizeof (my_s_buf));		\
+	struct servent *my_sp;						\
+	my_sp = getservbyport_r((PORT), (PROTO), &TMP.ent,		\
+				TMP.buf, sizeof (TMP.buf));		\
 	(SP) = my_sp;							\
 	(ERR) = my_sp == 0;						\
 	(ERR) = (ERR);	/* avoid "unused" warning */			\
@@ -774,8 +785,9 @@ static inline int fai_add_hosts_by_name (const char *name,
     struct hostent *hp;
     int i, r;
     int herr;
+    GET_HOST_TMP htmp;
 
-    GET_HOST_BY_NAME (name, hp, herr);
+    GET_HOST_BY_NAME (name, hp, herr, htmp);
     if (hp == 0)
 	return translate_h_errno (herr);
     for (i = 0; hp->h_addr_list[i]; i++) {
@@ -840,6 +852,7 @@ fake_getaddrinfo (const char *name, const char *serv,
 	} else {
 	    struct servent *sp;
 	    int try_dgram_too = 0, s_err;
+	    GET_SERV_TMP stmp;
 
 	    if (socktype == 0) {
 		try_dgram_too = 1;
@@ -847,7 +860,7 @@ fake_getaddrinfo (const char *name, const char *serv,
 	    }
 	try_service_lookup:
 	    GET_SERV_BY_NAME(serv, socktype == SOCK_STREAM ? "tcp" : "udp",
-			     sp, s_err);
+			     sp, s_err, stmp);
 	    if (sp == 0) {
 		if (try_dgram_too) {
 		    socktype = SOCK_DGRAM;
@@ -952,9 +965,11 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 #endif
 	} else {
 	    int herr;
+	    GET_HOST_TMP htmp;
+
 	    GET_HOST_BY_ADDR((const char *) &sinp->sin_addr,
 			     sizeof (struct in_addr),
-			     sa->sa_family, hp, herr);
+			     sa->sa_family, hp, herr, htmp);
 	    if (hp == 0) {
 		if (herr == NO_ADDRESS && !(flags & NI_NAMEREQD)) /* ??? */
 		    goto numeric_host;
@@ -980,9 +995,11 @@ fake_getnameinfo (const struct sockaddr *sa, socklen_t len,
 	    strncpy (service, numbuf, slen);
 	} else {
 	    int serr;
+	    GET_SERV_TMP stmp;
+
 	    GET_SERV_BY_PORT(sinp->sin_port,
 			     (flags & NI_DGRAM) ? "udp" : "tcp",
-			     sp, serr);
+			     sp, serr, stmp);
 	    if (sp == 0)
 		goto numeric_service;
 	    strncpy (service, sp->s_name, slen);
@@ -1185,13 +1202,14 @@ getaddrinfo (const char *name, const char *serv, const struct addrinfo *hint,
 	struct hostent *hp;
 	const char *name2 = 0;
 	int i, herr;
+	GET_HOST_TMP htmp;
 
 	/*
 	 * Current versions of GET_HOST_BY_NAME will fail if the
 	 * target hostname has IPv6 addresses only.  Make sure it
 	 * fails fairly cleanly.
 	 */
-	GET_HOST_BY_NAME (name, hp, herr);
+	GET_HOST_BY_NAME (name, hp, herr, htmp);
 	if (hp == 0) {
 	    /*
 	     * This case probably means it's an IPv6-only name.  If

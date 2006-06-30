@@ -725,14 +725,14 @@ void mput(argc, argv)
 			if (mflag && confirm(argv[0], cp)) {
 				tp = cp;
 				if (mcase) {
-					while (*tp && !islower((int) (*tp))) {
+					while (*tp && !islower((unsigned char) (*tp))) {
 						tp++;
 					}
 					if (!*tp) {
 						tp = cp;
 						tp2 = tmpbuf;
 						while ((*tp2 = *tp) != 0) {
-						     if (isupper((int) *tp2)) {
+						     if (isupper((unsigned char) *tp2)) {
 						        *tp2 = 'a' + *tp2 - 'A';
 						     }
 						     tp++;
@@ -864,14 +864,14 @@ usage:
 	if (loc && mcase) {
 		char *tp = argv[1], *tp2, tmpbuf[MAXPATHLEN];
 
-		while (*tp && !islower((int) *tp)) {
+		while (*tp && !islower((unsigned char) *tp)) {
 			tp++;
 		}
 		if (!*tp) {
 			tp = argv[2];
 			tp2 = tmpbuf;
 			while ((*tp2 = *tp) != 0) {
-				if (isupper((int) *tp2)) {
+				if (isupper((unsigned char) *tp2)) {
 					*tp2 = 'a' + *tp2 - 'A';
 				}
 				tp++;
@@ -994,14 +994,14 @@ void mget(argc, argv)
 		if (mflag && confirm(argv[0], cp)) {
 			tp = cp;
 			if (mcase) {
-				while (*tp && !islower((int) *tp)) {
+				while (*tp && !islower((unsigned char) *tp)) {
 					tp++;
 				}
 				if (!*tp) {
 					tp = cp;
 					tp2 = tmpbuf;
 					while ((*tp2 = *tp) != 0) {
-						if (isupper((int) *tp2)) {
+						if (isupper((unsigned char) *tp2)) {
 							*tp2 = 'a' + *tp2 - 'A';
 						}
 						tp++;

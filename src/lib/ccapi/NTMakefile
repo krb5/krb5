@@ -1,0 +1,25 @@
+CD = cd
+
+all:
+	$(CD) common
+	$(MAKE) -f NTMakefile all
+      	$(CD) ../client
+	$(MAKE) -f NTMakefile all
+	$(CD) ../server
+	$(MAKE) -f NTMakefile all
+	$(CD) ../windows
+	$(MAKE) -f NTMakefile all
+	$(CD) ..
+
+clean:
+	$(CD) common
+	$(MAKE) -f NTMakefile clean
+      	$(CD) ../client
+	$(MAKE) -f NTMakefile clean
+	$(CD) ../server
+	$(MAKE) -f NTMakefile clean
+	$(CD) ../windows
+	$(MAKE) -f NTMakefile clean
+	$(CD) ..
+
+

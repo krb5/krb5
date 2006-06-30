@@ -30,6 +30,7 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
+#include "prof_int.h"		/* XXX for profile_copy, not public yet */
 
 #ifdef USE_LOGIN_LIBRARY
 #include "KerberosLoginPrivate.h"
@@ -414,30 +415,7 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
 krb5_error_code KRB5_CALLCONV
 krb5_get_profile (krb5_context ctx, profile_t *profile)
 {
-    krb5_error_code	retval = 0;
-    profile_filespec_t *files = 0;
-
-    retval = os_get_default_config_files(&files, ctx->profile_secure);
-
-    if (!retval) {
-        retval = profile_init((const_profile_filespec_t *) files,
-			      profile);
-    }
-
-    if (files)
-        free_filespecs(files);
-
-    if (retval == ENOENT)
-        return KRB5_CONFIG_CANTOPEN;
-
-    if ((retval == PROF_SECTION_NOTOP) ||
-        (retval == PROF_SECTION_SYNTAX) ||
-        (retval == PROF_RELATION_SYNTAX) ||
-        (retval == PROF_EXTRA_CBRACE) ||
-        (retval == PROF_MISSING_OBRACE))
-        return KRB5_CONFIG_BADFORMAT;
-
-    return retval;
+    return profile_copy (ctx->profile, profile);
 }	
 
 

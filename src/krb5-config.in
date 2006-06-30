@@ -38,6 +38,7 @@ KDB5_DB_LIB=@KDB5_DB_LIB@
 LDFLAGS='@LDFLAGS@'
 RPATH_FLAG='@RPATH_FLAG@'
 PTHREAD_CFLAGS='@PTHREAD_CFLAGS@'
+DL_LIB='@DL_LIB@'
 
 LIBS='@LIBS@'
 GEN_LIB=@GEN_LIB@
@@ -216,7 +217,7 @@ if test -n "$do_libs"; then
     fi
 
     if test $library = 'krb5'; then
-	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err -lkrb5support $GEN_LIB $LIBS"
+	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err $GEN_LIB $LIBS $DL_LIB"
     fi
 
     echo $lib_flags

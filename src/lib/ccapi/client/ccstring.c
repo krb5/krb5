@@ -50,9 +50,9 @@
 #include "ccstring.h"
 
 cc_int32
-cc_int_string_new( cc_string_t * pstring, char * data )
+cci_string_new( cc_string_t * pstring, char * data )
 {
-    cc_int_string_t string = (cc_int_string_t)malloc(sizeof(cc_int_string_d));
+    cci_string_t string = (cci_string_t)malloc(sizeof(cci_string_d));
     if ( string == NULL )
         return ccErrNoMem;
 
@@ -63,7 +63,7 @@ cc_int_string_new( cc_string_t * pstring, char * data )
     }
 
     string->magic = CC_STRING_MAGIC;
-    string->functions->release = cc_int_string_release;
+    string->functions->release = cci_string_release;
 
     string->data = strdup(data);
     if ( string->data == NULL ) {
@@ -77,13 +77,13 @@ cc_int_string_new( cc_string_t * pstring, char * data )
 }
 
 cc_int32
-cc_int_string_release( cc_string_t str )
+cci_string_release( cc_string_t str )
 {
-    cc_int_string_t int_string;
+    cci_string_t int_string;
     if ( str == NULL )
         return ccErrBadParam;
 
-    int_string = (cc_int_string_t)str;
+    int_string = (cci_string_t)str;
     if ( int_string->magic != CC_STRING_MAGIC )
         return ccErrInvalidString;
 
