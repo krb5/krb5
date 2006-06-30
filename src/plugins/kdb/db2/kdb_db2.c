@@ -1319,7 +1319,7 @@ krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
 	    }
 	    db_name_set = 1;
 	}
-	/* ignore hash argument. Might have been passed from create */
+
 	else if (opt && !strcmp(opt, "hash")) {
 	    flags = KRB5_KDB_CREATE_HASH;
 	} else {
