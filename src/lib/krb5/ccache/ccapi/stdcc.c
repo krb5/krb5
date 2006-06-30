@@ -191,8 +191,13 @@ static krb5_error_code cc_err_xlate(int err)
 {
 	const struct err_xlate *p;
 
+#ifdef USE_CCAPI_V3
 	if (err == ccNoError)
 		return 0;
+#else
+        if (err == CC_NOERROR)
+	        return 0;
+#endif
 
 	for (p = err_xlate_table; p->cc_err; p++) {
 		if (err == p->cc_err)
