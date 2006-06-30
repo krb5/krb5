@@ -105,8 +105,10 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     cachename[p++] = '\0';
 
     retval = krb5_rc_resolve_full(context, &rcache, cachename);
-    if (retval)
+    if (retval) {
+	rcache = 0;
 	goto cleanup;
+    }
 
     /*
      * First try to recover the replay cache; if that doesn't work,
@@ -119,9 +121,12 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
     }
 
     *rcptr = rcache;
+    rcache = 0;
     retval = 0;
 
 cleanup:
+    if (rcache)
+	krb5_xfree(rcache);
     if (cachename)
 	krb5_xfree(cachename);
     return retval;
