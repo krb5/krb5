@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2006 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may

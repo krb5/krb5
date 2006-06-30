@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_db2.c
  *
- * Copyright 1997 by the Massachusetts Institute of Technology.
+ * Copyright 1997,2006 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
