@@ -1890,3 +1890,43 @@ krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
   clean_n_exit:
     return;
 }
+
+krb5_error_code
+krb5_db_promote(krb5_context kcontext, char **db_args)
+{
+    krb5_error_code status = 0;
+    char   *section = NULL;
+    kdb5_dal_handle *dal_handle;
+
+    section = kdb_get_conf_section(kcontext);
+    if (section == NULL) {
+	status = KRB5_KDB_SERVER_INTERNAL_ERR;
+	krb5_set_error_message (kcontext, status,
+		"unable to determine configuration section for realm %s\n",
+		kcontext->default_realm);
+	goto clean_n_exit;
+    }
+
+    if (kcontext->db_context == NULL) {
+	status = kdb_setup_lib_handle(kcontext);
+	if (status) {
+	    goto clean_n_exit;
+	}
+    }
+
+    dal_handle = (kdb5_dal_handle *) kcontext->db_context;
+    status = kdb_lock_lib_lock(dal_handle->lib_handle, FALSE);
+    if (status) {
+	goto clean_n_exit;
+    }
+
+    status =
+	dal_handle->lib_handle->vftabl.promote_db(kcontext, section, db_args);
+    kdb_unlock_lib_lock(dal_handle->lib_handle, FALSE);
+
+  clean_n_exit:
+    if (section)
+	free(section);
+    return status;
+}
+

@@ -176,6 +176,11 @@ typedef struct _kdb_vftabl{
 		       krb5_boolean	  keepold,
 		       krb5_db_entry	* db_entry);
 
+    /* Promote a temporary database to be the live one.  */
+    krb5_error_code (*promote_db) (krb5_context context,
+				   char *conf_section,
+				   char **db_args);
+
 } kdb_vftabl;
 
 typedef struct _db_library {
