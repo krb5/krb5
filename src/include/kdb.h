@@ -465,6 +465,9 @@ krb5_dbe_def_cpw( krb5_context	  context,
 		  krb5_boolean	  keepold,
 		  krb5_db_entry	* db_entry);
 
+krb5_error_code
+krb5_def_promote_db(krb5_context, char *, char **);
+
 krb5_error_code 
 krb5_db_create_policy( krb5_context kcontext, 
 		       osa_policy_ent_t policy);
