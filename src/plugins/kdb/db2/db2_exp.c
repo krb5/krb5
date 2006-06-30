@@ -192,6 +192,9 @@ WRAP_K (krb5_db2_set_master_key_ext,
 WRAP_K (krb5_db2_db_get_mkey,
 	( krb5_context context, krb5_keyblock **key),
 	(context, key));
+WRAP_K (krb5_db2_promote_db,
+	( krb5_context kcontext, char *conf_section, char **db_args ),
+	(kcontext, conf_section, db_args));
 
 static krb5_error_code
 hack_init ()
@@ -246,5 +249,7 @@ kdb_vftabl kdb_function_table = {
   /* db_alloc */                               wrap_krb5_db2_alloc,
   /* db_free */                                wrap_krb5_db2_free,
   /* set_master_key */			       wrap_krb5_db2_set_master_key_ext,
-  /* get_master_key */			       wrap_krb5_db2_db_get_mkey
+  /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
+  /* blah blah blah */ 0,0,0,0,0,0,
+  /* promote_db */			       wrap_krb5_db2_promote_db,
 };
