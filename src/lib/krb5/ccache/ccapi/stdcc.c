@@ -878,10 +878,9 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 	
  	err = cc_open(gCntrlBlock, cName, CC_CRED_V5, 0L,
 		      &ccapi_data->NamedCache);
-        if (err != CC_NOERROR) {
+        if (err != CC_NOERROR)
 	        ccapi_data->NamedCache = NULL;
-		goto errout;
-	}
+
   	/* return new cache structure */
 	*id = newCache;
 	
