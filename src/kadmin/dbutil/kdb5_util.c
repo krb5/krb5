@@ -149,9 +149,13 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 				 const char *fmt, va_list args)
 {
     const char *emsg;
-    emsg = krb5_get_error_message (util_context, code);
-    fprintf (stderr, "%s: %s ", myprog, emsg);
-    krb5_free_error_message (util_context, emsg);
+    if (code) {
+	emsg = krb5_get_error_message (util_context, code);
+	fprintf (stderr, "%s: %s ", myprog, emsg);
+	krb5_free_error_message (util_context, emsg);
+    } else {
+	fprintf (stderr, "%s: ", myprog);
+    }
     vfprintf (stderr, fmt, args);
     fprintf (stderr, "\n");
 }
@@ -164,6 +168,7 @@ int add_db_arg(char *arg)
 		   sizeof(char *) * (db5util_db_args_size + 1));
     if (temp == NULL)
 	return 0;
+    db5util_db_args = temp;
     db5util_db_args[db5util_db_args_size-1] = arg;
     db5util_db_args[db5util_db_args_size]   = NULL;
     return 1;
