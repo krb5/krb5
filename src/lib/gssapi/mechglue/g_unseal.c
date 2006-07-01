@@ -103,8 +103,8 @@ gss_unwrap (minor_status,
             qop_state)
 
 OM_uint32 *		minor_status;
-const gss_ctx_id_t	context_handle;
-const gss_buffer_t	input_message_buffer;
+gss_ctx_id_t		context_handle;
+gss_buffer_t		input_message_buffer;
 gss_buffer_t		output_message_buffer;
 int *			conf_state;
 gss_qop_t *		qop_state;
