@@ -1,7 +1,7 @@
-		   Kerberos Version 5, Release 1.5
+                   Kerberos Version 5, Release 1.5
 
-			    Release Notes
-			The MIT Kerberos Team
+                            Release Notes
+                        The MIT Kerberos Team
 
 Unpacking the Source Distribution
 ---------------------------------
@@ -12,12 +12,12 @@ distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.5.tar.gz
+        gtar zxpf krb5-1.5.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.5.tar.gz | tar xpf -
+        gzcat krb5-1.5.tar.gz | tar xpf -
 
 Both of these methods will extract the sources into krb5-1.5/src and
 the documentation into krb5-1.5/doc.
@@ -63,20 +63,188 @@ and logging in as "guest" with password "guest".
 Major changes in 1.5
 --------------------
 
-* plug-in architecture
+Kerberos 5 Release 1.5 includes many significant changes to the
+Kerberos build system, to GSS-API, and to the Kerberos KDC and
+administration system.  These changes build up infrastructure as part
+of our effrots to make Kerberos more extensible and flexible.  While
+we are confident that these changes will improve Kerberos in the long
+run, significant code restructuring may introduce portability problems
+or change behavior in ways that break applications.  It is always
+important to test a new version of critical security software like
+Kerberos before deploying it in your environment to confirm that the
+new version meets your environment's requirements.  Because of the
+significant restructuring, it is more important than usual to perform
+this testing and to report problems you find.
+
+Highlights of major changes include:
+
+* KDB abstraction layer, donated by Novell.
+
+* plug-in architecture, allowing for extension modules to be loaded at
+  run-time.
 
 * multi-mechanism GSS-API implementation ("mechglue"), donated by
-  Sun Microsystems.
+  Sun Microsystems
 
 * Simple and Protected GSS-API negotiation mechanism ("SPNEGO")
-  implementation, donated by Sun Microsystems.
+  implementation, donated by Sun Microsystems
 
-Minor changes in 1.5
-----------------------
+* Per-directory ChangeLog files have been deleted.  Releases now
+  include auto-generated revision history logs in the combined file
+  doc/CHANGES.
 
-For a list of bugs fixed in krb5-1.5, please consult
+Changes by ticket ID
+--------------------
+
+Listed below are the RT tickets of bugs fixed in krb5-1.5.  Please see
 
 http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.5.html
+
+for a current listing with links to the complete tickets.
+
+581     verify_krb_v4_tgt is not 64-bit clean
+856     patch to add shared library support for BSD/OS 4
+1245    source tree not 64-bit clean
+1288    v4 ticket file format incompatibilities
+1431    fix errno.h references for cygwin
+1434    use win32 rename solution in rcache for cygwin
+1988    profile library fails to handle space in front of comments
+2577    [Russ Allbery] Bug#250966: /usr/sbin/klogind: Authorization
+        behavior not fully documented
+2615    Fwd: Patch for telnet / telnetd to avoid crashes when used
+        with MS kdc and PAC field
+2628    Cygwin build patches
+2648    [Russ Allbery] Bug#262192: libkrb53: krb_get_pw_in_tkt
+        problems with AFS keys
+2712    whitespace patch for src/kdc/kerberos_v4.c
+2759    fake-getaddrinfo.h incorrectly checks for gethostbyname_r errors
+2761    move getaddrinfo hacks into support lib for easier maintenance
+2763    file ccache should be held open while scanning for credentials
+2786    dead code in init_common() causes malloc(0)
+2791    hooks for recording statistics on locking behavior
+2807    Add VERSIONRC branding to krb5 support dll
+2855    Possible thread safety issue in lib/krb5/os/def_realm.c
+2856    Need a function to clone krb5_context structs for thread safe apps
+2863    windows klist won't link
+2880    fix calling convention for thread support fns
+2882    Windows 2003 SP1 ktpass.exe generate keytab files fail to load with 1.4
+2886    krb5_do_preauth could attempt to free NULL pointer
+2931    implement SPNEGO
+2932    implement multi-mech GSSAPI
+2933    plug-in architecture
+2936    supplementary error strings
+2959    profile library should check high-resolution timestamps if available
+2979    threaded test program built even with thread support disabled
+3008    Incorrect cross-references in man pages
+3010    Minor path and service man page fixes
+3011    krb5-config should never return -I/usr/include
+3013    Man pages for fakeka and krb524init
+3014    texinfo variable fixes, info dir entries
+3030    Bug report: Kinit has no suport for addresses in
+        credentials. Kinit -a is not enabled.
+3065    Implement RFC 3961 PRF
+3086    [Sergio Gelato] Bug#311977: libkrb53: gss_init_sec_context
+        sometimes fails to initialise output_token
+3088    don't always require support library when building with sun cc
+3122    fixes for AIX 5.2 select() and IPv4/IPv6 issues
+3129    shlib build problems on HP-UX 10.20 with gcc-3.4.3
+3233    kuserok needs to check for uid 99 on Mac OS X
+3252    Tru64 compilation fails after k5-int.h/krb5.h changes
+3266    Include errno.h in kdc/kerberos_v4.c
+3268    kprop should fall back on port 754 rather than failing
+3269    telnet help should connect to a host named help
+3308    kadmin.local is killed due to segmentation fault when
+        principal name argument is missing.
+3332    don't destroy uninitialized rcache mutex in error cases
+3358    krb5 doesn't build when pthread_mutexattr_setrobust_np is
+        defined but not declared
+3364    plugins should be thread-safe
+3415    Windows 64-bit support
+3416    tweak kdb interface for thread safety
+3417    move/add thread support to support lib
+3423    Add support for utmps interface on HPUX 11.23
+3426    trunk builds without thread support are not working
+3434    sizeof type should be checked at compile time, not configure time
+3438    enhancement: report errno when generic I/O errors happen in kinit
+3445    args to ctype.h macros should be cast to unsigned char, not int
+3466    ioctl header portability fixes for telnet on GNU/kFreeBSD
+3467    Allow GSS_C_NO_OID in krb5_gss_canon_name
+3468    udp_preference_limit typo in krb5.conf man page
+3490    getpwnam_r status checked incorrectly
+3502    Cannot acquire initiator cred using gss_acquire_cred with
+        explicit name on Windows
+3512    updates to NSIS installer for KFW
+3521    Add configurable Build value to File and Product versions for Windows
+3549    library double-free with an empty keytab
+3607    clients/ksu/setenv.c doesn't build on Solaris
+3620    use strerror_r
+3668    Prototype for krb5_c_prf missing const
+3671    shsUpdate should take an unsigned int for length
+3675    unsigned/signed int warnings in krb5_context variables.
+3687    initialize cc_version to 0 not NULL
+3688    Added CoreFoundation bundle plugin support
+3689    build kadm5 headers in generate-files-mac target
+3690    build rpc includes in generate-files-mac target.
+3697    kadmin hangs indefinitely when admin princ has escaped chars
+3706    ipv4+ipv6 messages can trip up KDC replay detection
+3714    fix incorrect padata memory allocation in send_tgs.c
+3716    Plugin search algorithm should take lists of name and directories
+3719    fix bug in flag checking in libdb2 mpool code
+3724    need to export kadm5_set_use_password_server
+3736    Cleanup a number of cast away from const warnings in gssapi
+3739    vsnprintf not present on windows
+3746    krb5_cc_gen_new memory implementation doesn't create a new ccache
+3761    combine kdc.conf, krb5.conf data in KDC programs
+3783    install headers into include/krb5
+3790    memory leak in GSSAPI credential releasing code
+3791    memory leak in gss_krb5_set_allowable_enctypes error path
+3825    krb5int_get_plugin_dir_data() uses + instead of * in realloc
+3826    memory leaks in krb5kdc due to not freeing error messages
+3854    CCAPI krb4int_save_credentials_addr should match prototype
+3866    gld --as-needed not portable enough
+3879    Update texinfo.tex
+3888    ftpd's getline conflicts with current glibc headers
+3898    Export gss_inquire_mechs_for_name for KFW
+3899    Export krb5_gss_register_acceptor_identity in KFW
+3900    update config.guess and config.sub
+3902    g_userok.c has implicit declaration of strlen
+3903    various kadm5 files need string.h
+3905    warning fixes for spnego
+3909    Plugins need to use RTLD_GROUP when available, but definitely
+        not RTLD_GLOBAL
+3910    fix parallel builds for libgss
+3911    getaddrinfo code uses vars outside of storage duration
+3918    fix warnings for lib/gssapi/mechglue/g_initialize.c
+3920    cease export of krb5_gss_*
+3921    remove unimplemented/unused mechglue functions
+3922    mkrel should update patchlevel.h prior to reconf
+3923    implement RFC4120 behavior on TCP requests with high bit set in length
+3924    the krb5_get_server_rcache routine frees already freed memory
+        in error path
+3925    krb5_get_profile should reflect profile in the supplied context
+3927    fix signedness warnings in spnego_mech.c
+3928    fix typo in MS_BUG_TEST case in krb5_gss_glue.c
+3940    Disable MSLSA: ccache in WOW64 on pre-Vista Beta 2 systems
+3942    make gssint_get_mechanism match prototype
+3944    write svn log output when building release
+3945    mkrel should only generate doc/CHANGES for checkouts
+3948    Windows: fix krb5.h generation
+3949    fix plugin.c to compile on Windows
+3950    autoconf 2.60 compatibility
+3951    remove unused dlopen code in lib/gssapi/mechglue/g_initialize.c
+3952    fix calling convention for krb5 error-message routines,
+        document usage of krb5_get_error_message
+3953    t_std_conf references private function due to explicit linking
+        of init_os_ctx.o
+3954    remove mechglue gss_config's gssint_userok and pname_to_uid
+3957    remove unused lib/gssapi/mechglue/g_utils.c
+3959    re-order inclusions in spnego_mech.c to avoid breaking system headers
+3962    krb5_get_server_rcache double free
+3964    "kdb5_util load" to existing db doesn't work, needed for kpropd
+3968    fix memory leak in mechglue/g_init_sec_ctx.c
+3970    test kdb5_util dump/load functionality in dejagnu
+3972    make gss_unwrap match prototype
+3974    work around failure to load into nonexistent db
 
 Copyright Notice and Legal Administrivia
 ----------------------------------------
@@ -239,9 +407,9 @@ lib/gssapi/mechglue/g_imp_name.c
 lib/gssapi/mechglue/g_imp_sec_context.c
 lib/gssapi/mechglue/g_init_sec_context.c
 lib/gssapi/mechglue/g_initialize.c
-lib/gssapi/mechglue/g_inquire_context.c
-lib/gssapi/mechglue/g_inquire_cred.c
-lib/gssapi/mechglue/g_inquire_names.c
+lib/gssapi/mechglue/g_inq_context.c
+lib/gssapi/mechglue/g_inq_cred.c
+lib/gssapi/mechglue/g_inq_names.c
 lib/gssapi/mechglue/g_process_context.c
 lib/gssapi/mechglue/g_rel_buffer.c
 lib/gssapi/mechglue/g_rel_cred.c
@@ -251,10 +419,7 @@ lib/gssapi/mechglue/g_seal.c
 lib/gssapi/mechglue/g_sign.c
 lib/gssapi/mechglue/g_store_cred.c
 lib/gssapi/mechglue/g_unseal.c
-lib/gssapi/mechglue/g_userok.c
-lib/gssapi/mechglue/g_utils.c
 lib/gssapi/mechglue/g_verify.c
-lib/gssapi/mechglue/gssd_pname_to_uid.c
 lib/gssapi/mechglue/mglueP.h
 lib/gssapi/mechglue/oid_ops.c
 lib/gssapi/spnego/gssapiP_spnego.h
@@ -295,6 +460,9 @@ Thanks to Novell for donating the KDB abstraction layer.
 
 Thanks to Sun Microsystems for donating their implementations of
 mechglue and SPNEGO.
+
+Thanks to the numerous others who reported bugs and/or contributed
+patches.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jeffrey Altman, Richard Basch, Jay
