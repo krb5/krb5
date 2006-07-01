@@ -43,6 +43,11 @@ kdb_check: kdc.conf krb5.conf
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump -ov $(TEST_DB).ovdump
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
+	@echo "====> NOTE!"
+	@echo "The following 'create' command is needed due to a change"
+	@echo "in functionality caused by DAL integration.  See ticket 3973."
+	@echo ====
+	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump 
 	$(RUN_SETUP) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump 
 	$(RUN_SETUP) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
