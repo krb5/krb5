@@ -246,6 +246,20 @@ for a current listing with links to the complete tickets.
 3972    make gss_unwrap match prototype
 3974    work around failure to load into nonexistent db
 
+Known bugs by ticket ID:
+------------------------
+
+Listed below are the RT tickets for known bugs in krb5-1.5.  Please
+see
+
+http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/bugs-1.5.html
+
+for an up-to-date list, including links to the complete tickets.
+
+3947    allow multiple calls to krb5_get_error_message to retrieve message
+3956    gssapi compilation errors on Windows
+3973    kdb5_util load now fails if db doesn't exist [workaround]
+
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
