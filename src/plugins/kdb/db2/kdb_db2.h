@@ -44,15 +44,14 @@ typedef struct _krb5_db2_context {
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */
     krb5_keyblock      *db_master_key;  /* Master key of database       */
     osa_adb_policy_t    policy_db;
+    krb5_boolean tempdb;
 } krb5_db2_context;
 
 #define KRB5_DB2_MAX_RETRY 5
 
 #define KDB2_LOCK_EXT ".ok"
+#define KDB2_TEMP_LOCK_EXT "~.ok"
 
-krb5_error_code krb5_db2_db_set_name 
-	(krb5_context,
-		   char * );
 krb5_error_code krb5_db2_db_init 
 	(krb5_context);
 krb5_error_code krb5_db2_db_fini 

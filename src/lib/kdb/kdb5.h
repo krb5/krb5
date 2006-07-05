@@ -20,12 +20,6 @@
 #define KDB_DATABASE_CONF_FILE  DEFAULT_SECURE_PROFILE_PATH
 #define KDB_DATABASE_ENV_PROF KDC_PROFILE_ENV
 
-#define KRB5_KDB_OPEN_RW                0
-#define KRB5_KDB_OPEN_RO                1
-
-#define KRB5_KDB_OPT_SET_DB_NAME        0
-#define KRB5_KDB_OPT_SET_LOCK_MODE      1
-
 #define KRB5_DB_GET_DB_CONTEXT(kcontext)   ( ((kdb5_dal_handle*) (kcontext)->db_context)->db_context )
 #define KRB5_DB_GET_PROFILE(kcontext)  ( (kcontext)->profile )
 #define KRB5_DB_GET_REALM(kcontext)    ( (kcontext)->default_realm )
@@ -175,6 +169,11 @@ typedef struct _kdb_vftabl{
 		       int			  new_kvno,
 		       krb5_boolean	  keepold,
 		       krb5_db_entry	* db_entry);
+
+    /* Promote a temporary database to be the live one.  */
+    krb5_error_code (*promote_db) (krb5_context context,
+				   char *conf_section,
+				   char **db_args);
 
 } kdb_vftabl;
 

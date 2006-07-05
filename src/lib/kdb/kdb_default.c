@@ -329,3 +329,9 @@ krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
     return 0;
 }
 
+krb5_error_code krb5_def_promote_db (krb5_context kcontext,
+				     char *s, char **args)
+{
+    printf("default promote_db\n");
+    return EINVAL;
+}

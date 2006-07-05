@@ -146,9 +146,6 @@ OM_uint32 *		time_rec;
 	if (union_ctx_id == NULL)
 	    goto end;
 
-	union_ctx_id->mech_type = (gss_OID)
-	    malloc(sizeof(gss_OID_desc));
-
 	if (generic_gss_copy_oid(&temp_minor_status, mech_type,
 				 &union_ctx_id->mech_type) != GSS_S_COMPLETE) {
 	    free(union_ctx_id);
@@ -156,7 +153,7 @@ OM_uint32 *		time_rec;
 	}
 
 	/* copy the supplied context handle */
-	union_ctx_id->internal_ctx_id = *context_handle;
+	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
     } else
 	union_ctx_id = *context_handle;
     

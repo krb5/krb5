@@ -1,7 +1,7 @@
 /*
  * kadmin/dbutil/dump.c
  *
- * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2006 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -2224,7 +2224,8 @@ load_db(argc, argv)
 
     /*
      * Cons up params for the new databases.  If we are not in update
-     * mode, we dont create tmp file and then move it to final place. As it is dependent on DB type, this is not done
+     * mode, we create an alternate database and then promote it to
+     * be the live db.
      */
     newparams = global_params;
     if (! update) {
@@ -2237,6 +2238,11 @@ load_db(argc, argv)
 		      "while retreiving new configuration parameters");
 	      exit_status++;
 	      return;
+	 }
+
+	 if (!add_db_arg("temporary")) {
+	     com_err(progname, ENOMEM, "computing parameters for database");
+	     exit(1);
 	 }
     }
     
@@ -2297,13 +2303,23 @@ load_db(argc, argv)
 	 exit_status++;
     }
 
+#if 0
     if ((kret = krb5_db_fini(kcontext))) {
 	 fprintf(stderr, close_err_fmt,
 		 programname, error_message(kret));
 	 exit_status++;
     }
+#endif
 
     /* close policy db below */
+
+    if (exit_status == 0
+	&& !update
+	&& (kret = krb5_db_promote(kcontext, db5util_db_args))) {
+	fprintf(stderr, "%s: cannot make newly loaded database live (%s)\n",
+		programname, error_message(kret));
+	exit_status++;
+    }
 
 error:
     /*
