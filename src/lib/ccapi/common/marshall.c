@@ -137,7 +137,7 @@ cci_creds_v4_unmarshall( char * flat,
 }
 
 
-cc_int32
+static cc_int32
 cci_creds_cc_data_array_count_entries( cc_data ** array, cc_uint32 * pcount)
 {
     cc_uint32 count;
@@ -153,7 +153,7 @@ cci_creds_cc_data_array_count_entries( cc_data ** array, cc_uint32 * pcount)
     return ccNoError;
 }
 
-cc_int32
+static cc_int32
 cci_creds_v5_compute_flat_size( cc_credentials_v5_t * creds, cc_uint32 * plen)
 {
     cc_uint32 len;

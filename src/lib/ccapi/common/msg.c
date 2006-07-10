@@ -282,7 +282,7 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
 {
     cc_generic_list_node_t* gen_node;
     cc_generic_iterate_t* gen_iterator;
-    char *cur_pos;
+    unsigned char *cur_pos;
     cc_uint32 zero = 0;
     cc_uint32 magic = 0;
     cc_uint32 msg_len;
@@ -352,7 +352,7 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
     memcpy(cur_pos, &u32, sizeof(cc_uint32)); /*magic number will go here later*/
     cur_pos += sizeof(cc_uint32);
 
-    if (cur_pos - (char *)msg->flat != msg->flat_len) {
+    if (cur_pos - (unsigned char *)msg->flat != msg->flat_len) {
         fprintf(stderr, "ERROR cur_pos - msg->flat = %d\n",msg->flat_len);
     }
 
@@ -380,10 +380,10 @@ cci_msg_flatten(cc_msg_t* msg, void **flatpp)
  *
  */
 cc_int32
-cci_msg_calc_magic(void *flat, int flat_len, cc_uint32 * magicp)
+cci_msg_calc_magic(void *flat, cc_uint32 flat_len, cc_uint32 * magicp)
 {
     cc_uint32 magic = 0;
-    int i;
+    cc_uint32 i;
 	
     for (i = 0; i < flat_len; i += sizeof(cc_uint32)) {
         magic = magic ^ *(int *)((char *)flat + i);
@@ -403,7 +403,7 @@ cci_msg_calc_magic(void *flat, int flat_len, cc_uint32 * magicp)
  *
  */
 cc_int32 
-cci_msg_verify(void *flat, int flat_len, cc_uint32 * validp)  
+cci_msg_verify(void *flat, cc_uint32 flat_len, cc_uint32 * validp)  
 {
     cc_uint32 *magic1, *magic2;
     cc_uint32 *pheader_len;
@@ -502,7 +502,7 @@ cci_msg_verify(void *flat, int flat_len, cc_uint32 * validp)
  *
  */
 cc_int32
-cci_msg_unflatten(void *flat, int flat_len, cc_msg_t** msgpp) 
+cci_msg_unflatten(void *flat, cc_uint32 flat_len, cc_msg_t** msgpp) 
 {
     cc_msg_t* msg;
     char *cur_pos;
