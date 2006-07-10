@@ -117,7 +117,7 @@ cci_generic_list_new(cc_generic_list_head_t ** listpp)
     if (ret == NULL)
         return ccErrNoMem;
 	
-    ret->type = generic;
+    ret->type = cc_generic_list;
     ret->head = ret->tail = NULL;
     *listpp = ret;
 

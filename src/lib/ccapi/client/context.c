@@ -154,7 +154,7 @@ cc_int_context_release( cc_context_t context )
 
 cc_int32
 cc_int_context_get_change_time( cc_context_t context,
-                                cc_time* time)
+                                cc_time* change_time)
 {
     cc_int_context_t 		int_context;
     cc_msg_t        		*request = NULL;
@@ -199,7 +199,7 @@ cc_int_context_get_change_time( cc_context_t context,
         response_header = (ccmsg_ctx_get_change_time_resp_t*)response->header;
         t64 = ntohll(response_header->time);
 	/* TODO: validate that value is not greater than can fit in cc_time */
-	*time = (cc_time)t64;
+	*change_time = (cc_time)t64;
         code = ccNoError;
     } else {
         code = ccErrBadInternalMessage;

@@ -66,7 +66,7 @@ cc_int_context_release( cc_context_t context );
 
 cc_int32
 cc_int_context_get_change_time( cc_context_t context,
-                                cc_time* time);
+                                cc_time* change_time);
 
 cc_int32
 cc_int_context_get_default_ccache_name( cc_context_t context,

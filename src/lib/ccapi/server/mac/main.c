@@ -4,14 +4,14 @@
 #include "CredentialsCache.h"
 #include "msg.h"
 #include "migServer.h"
+#include "serv_ops.h"
 
 #include <Kerberos/kipc_server.h>
 
 int main (int argc, const char *argv[])
 {
     cc_int32 code = 0;
-    int running = 1;
-
+    
     openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
     syslog (LOG_INFO, "Starting up.");   
 

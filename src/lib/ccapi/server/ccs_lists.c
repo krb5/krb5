@@ -296,7 +296,7 @@ ccs_context_list_new(cc_context_list_head_t ** headpp)
     if (ret == NULL)
         return ccErrNoMem;
     ret->head = ret->tail = NULL;
-	ret->type = context;
+	ret->type = cc_context_list;
     *headpp = ret;
     return ccNoError;
 }

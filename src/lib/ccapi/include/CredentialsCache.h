@@ -277,219 +277,211 @@ typedef struct cc_credentials_union cc_credentials_union;
 /* Exposed parts */
 
 struct cc_context_d {
-    const cc_context_f*	functions;
+    const cc_context_f *functions;
 #if TARGET_OS_MAC
-    const cc_context_f*	otherFunctions;
+    const cc_context_f *otherFunctions;
 #endif
 };
 typedef struct cc_context_d cc_context_d;
-typedef cc_context_d*	cc_context_t;
+typedef cc_context_d *cc_context_t;
 
 struct cc_ccache_d {
-    const cc_ccache_f*	functions;
+    const cc_ccache_f *functions;
 #if TARGET_OS_MAC
-    const cc_ccache_f*	otherFunctions;
+    const cc_ccache_f *otherFunctions;
 #endif
 };
 typedef struct cc_ccache_d cc_ccache_d;
-typedef cc_ccache_d*	cc_ccache_t;
+typedef cc_ccache_d *cc_ccache_t;
 
 struct cc_ccache_iterator_d {
-    const cc_ccache_iterator_f*	functions;
+    const cc_ccache_iterator_f *functions;
 #if TARGET_OS_MAC
-    const cc_ccache_iterator_f*	otherFunctions;
+    const cc_ccache_iterator_f *otherFunctions;
 #endif
 };
 typedef struct cc_ccache_iterator_d cc_ccache_iterator_d;
-typedef cc_ccache_iterator_d*	cc_ccache_iterator_t;
+typedef cc_ccache_iterator_d *cc_ccache_iterator_t;
 
 struct cc_credentials_iterator_d {
-    const cc_credentials_iterator_f*	functions;
+    const cc_credentials_iterator_f *functions;
 #if TARGET_OS_MAC
-    const cc_credentials_iterator_f*	otherFunctions;
+    const cc_credentials_iterator_f *otherFunctions;
 #endif
 };
 typedef struct cc_credentials_iterator_d cc_credentials_iterator_d;
-typedef cc_credentials_iterator_d*	cc_credentials_iterator_t;
+typedef cc_credentials_iterator_d *cc_credentials_iterator_t;
 
 struct cc_string_d {
-    const char*			data;
-    const cc_string_f*	functions;
+    const char *data;
+    const cc_string_f *functions;
 #if TARGET_OS_MAC
-    const cc_string_f*	otherFunctions;
+    const cc_string_f *otherFunctions;
 #endif
 };
 typedef struct cc_string_d cc_string_d;
-typedef cc_string_d*	cc_string_t;
+typedef cc_string_d *cc_string_t;
 
 struct cc_credentials_d {
-    const cc_credentials_union* data;
-    const cc_credentials_f* functions;
+    const cc_credentials_union *data;
+    const cc_credentials_f *functions;
 #if TARGET_OS_MAC
-    const cc_credentials_f*	otherFunctions;
+    const cc_credentials_f *otherFunctions;
 #endif
 };
 typedef struct cc_credentials_d cc_credentials_d;
-typedef cc_credentials_d* cc_credentials_t;
+typedef cc_credentials_d *cc_credentials_t;
 
 /* Function pointer structs */
 
 struct  cc_context_f {
-    cc_int32    (*release) (
-                                cc_context_t context);
-    cc_int32    (*get_change_time) (
-                                cc_context_t context,
-                                cc_time* time);
-    cc_int32    (*get_default_ccache_name) (
-                                cc_context_t context,
-                                cc_string_t* name);
-    cc_int32    (*open_ccache) (
-                                cc_context_t context,
-                                const char* name,
-                                cc_ccache_t* ccache);
-    cc_int32    (*open_default_ccache) (
-                                cc_context_t context,
-                                cc_ccache_t* ccache);
-    cc_int32    (*create_ccache) (
-                                cc_context_t context,
-                                const char* name,
-                                cc_uint32 cred_vers,
-                                const char* principal, 
-                                cc_ccache_t* ccache);
-    cc_int32    (*create_default_ccache) (
-                                cc_context_t context,
-                                cc_uint32 cred_vers,
-                                const char* principal, 
-                                cc_ccache_t* ccache);
-    cc_int32    (*create_new_ccache) (
-                                cc_context_t context,
-                                cc_uint32 cred_vers,
-                                const char* principal, 
-                                cc_ccache_t* ccache);
-    cc_int32    (*new_ccache_iterator) (
-                                cc_context_t context,
-                                cc_ccache_iterator_t* iterator);
-    cc_int32    (*lock) (
-                                cc_context_t context,
-                                cc_uint32 lock_type,
-                                cc_uint32 block);
-    cc_int32    (*unlock) (
-                                cc_context_t context);
-    cc_int32    (*compare) (
-                                cc_context_t context,
-                                cc_context_t compare_to,
-                                cc_uint32* equal);
+    cc_int32 (*release) (cc_context_t in_context);
+    
+    cc_int32 (*get_change_time) (cc_context_t  in_context,
+                                 cc_time      *out_time);
+    
+    cc_int32 (*get_default_ccache_name) (cc_context_t  in_context,
+                                         cc_string_t  *out_name);
+    
+    cc_int32 (*open_ccache) (cc_context_t  in_context,
+                             const char   *in_name,
+                             cc_ccache_t  *out_ccache);
+    
+    cc_int32 (*open_default_ccache) (cc_context_t  in_context,
+                                     cc_ccache_t  *out_ccache);
+    
+    cc_int32 (*create_ccache) (cc_context_t  in_context,
+                               const char   *in_name,
+                               cc_uint32     in_cred_vers,
+                               const char   *in_principal, 
+                               cc_ccache_t  *out_ccache);
+    
+    cc_int32 (*create_default_ccache) (cc_context_t  in_context,
+                                       cc_uint32     in_cred_vers,
+                                       const char   *in_principal, 
+                                       cc_ccache_t  *out_ccache);
+    
+    cc_int32 (*create_new_ccache) (cc_context_t in_context,
+                                   cc_uint32    in_cred_vers,
+                                   const char  *in_principal, 
+                                   cc_ccache_t *out_ccache);
+    
+    cc_int32 (*new_ccache_iterator) (cc_context_t          in_context,
+                                     cc_ccache_iterator_t *out_iterator);
+    
+    cc_int32 (*lock) (cc_context_t in_context,
+                      cc_uint32    in_lock_type,
+                      cc_uint32    in_block);
+    
+    cc_int32 (*unlock) (cc_context_t in_cc_context);
+    
+    cc_int32 (*compare) (cc_context_t  in_cc_context,
+                         cc_context_t  in_compare_to_context,
+                         cc_uint32    *out_equal);
 };
 
 struct cc_ccache_f {
-    cc_int32    (*release) (
-                                 cc_ccache_t ccache);
-    cc_int32    (*destroy) (
-                                 cc_ccache_t ccache);
-    cc_int32    (*set_default) (
-                                 cc_ccache_t ccache);
-    cc_int32    (*get_credentials_version) (
-                                 cc_ccache_t ccache,
-                                 cc_uint32* credentials_version);
-    cc_int32    (*get_name) (
-                                 cc_ccache_t ccache,
-                                 cc_string_t* name);
-    cc_int32    (*get_principal) (
-                                 cc_ccache_t ccache,
-                                 cc_uint32 credentials_version,
-                                 cc_string_t* principal);
-    cc_int32    (*set_principal) (
-                                 cc_ccache_t ccache,
-                                 cc_uint32 credentials_version,
-                                 const char* principal);
-    cc_int32    (*store_credentials) (
-                                 cc_ccache_t ccache,
-                                 const cc_credentials_union* credentials);
-    cc_int32    (*remove_credentials) (
-                                 cc_ccache_t ccache,
-                                 cc_credentials_t credentials);
-    cc_int32    (*new_credentials_iterator) (
-                                 cc_ccache_t ccache,
-                                 cc_credentials_iterator_t* iterator);
-    cc_int32    (*move) (
-                                 cc_ccache_t source,
-                                 cc_ccache_t destination);
-    cc_int32    (*lock) (
-                                 cc_ccache_t ccache,
-                                 cc_uint32 lock_type,
-                                 cc_uint32 block);
-    cc_int32    (*unlock) (
-                                 cc_ccache_t ccache);
-    cc_int32    (*get_last_default_time) (
-                                 cc_ccache_t ccache,
-                                 cc_time* time);
-    cc_int32    (*get_change_time) (
-                                 cc_ccache_t ccache,
-                                 cc_time* time);
-    cc_int32    (*compare) (
-                                cc_ccache_t ccache,
-                                cc_ccache_t compare_to,
-                                cc_uint32* equal);
-    cc_int32	(*get_kdc_time_offset) (
-                                cc_ccache_t ccache,
-                                cc_int32	credentials_version,
-                                cc_time*	time_offset);
-    cc_int32	(*set_kdc_time_offset) (
-                                cc_ccache_t ccache,
-                                cc_int32	credentials_version,
-                                cc_time	time_offset);
-                                
-    cc_int32	(*clear_kdc_time_offset) (
-                                cc_ccache_t	ccache,
-                                cc_int32	credentials_version);
+    cc_int32 (*release) (cc_ccache_t io_ccache);
+    
+    cc_int32 (*destroy) (cc_ccache_t io_ccache);
+    
+    cc_int32 (*set_default) (cc_ccache_t io_ccache);
+    
+    cc_int32 (*get_credentials_version) (cc_ccache_t  in_ccache,
+                                         cc_uint32   *in_credentials_version);
+    
+    cc_int32 (*get_name) (cc_ccache_t  in_ccache,
+                          cc_string_t *out_name);
+    
+    cc_int32 (*get_principal) (cc_ccache_t  in_ccache,
+                               cc_uint32    in_credentials_version,
+                               cc_string_t *out_principal);
+    
+    cc_int32 (*set_principal) (cc_ccache_t  io_ccache,
+                               cc_uint32    in_credentials_version,
+                               const char  *in_principal);
+    
+    cc_int32 (*store_credentials) (cc_ccache_t                 io_ccache,
+                                   const cc_credentials_union *in_credentials_union);
+    
+    cc_int32 (*remove_credentials) (cc_ccache_t      io_ccache,
+                                    cc_credentials_t in_credentials);
+    
+    cc_int32 (*new_credentials_iterator) (cc_ccache_t                in_ccache,
+                                          cc_credentials_iterator_t *out_credentials_iterator);
+    
+    cc_int32 (*move) (cc_ccache_t io_source_ccache,
+                      cc_ccache_t io_destination_ccache);
+    
+    cc_int32 (*lock) (cc_ccache_t io_ccache,
+                      cc_uint32   in_lock_type,
+                      cc_uint32   in_block);
+    
+    cc_int32 (*unlock) (cc_ccache_t io_ccache);
+    
+    cc_int32 (*get_last_default_time) (cc_ccache_t  in_ccache,
+                                       cc_time     *out_last_default_time);
+    
+    cc_int32 (*get_change_time) (cc_ccache_t  in_ccache,
+                                 cc_time     *out_change_time);
+    
+    cc_int32 (*compare) (cc_ccache_t in_ccache,
+                         cc_ccache_t in_compare_to_ccache,
+                         cc_uint32   *out_equal);
+    
+    cc_int32 (*get_kdc_time_offset) (cc_ccache_t  in_ccache,
+                                     cc_int32     in_credentials_version,
+                                     cc_time     *out_time_offset);
+    
+    cc_int32 (*set_kdc_time_offset) (cc_ccache_t io_ccache,
+                                     cc_int32    in_credentials_version,
+                                     cc_time     in_time_offset);
+    
+    cc_int32 (*clear_kdc_time_offset) (cc_ccache_t in_ccache,
+                                       cc_int32	   in_credentials_version);
 };
 
 struct cc_string_f {
-    cc_int32	(*release) (
-                                cc_string_t string);
+    cc_int32 (*release) (cc_string_t in_string);
 };
 
 struct cc_credentials_f {
-    cc_int32	(*release) (
-                                cc_credentials_t credentials);
-    cc_int32    (*compare) (
-                                cc_credentials_t credentials,
-                                cc_credentials_t compare_to,
-                                cc_uint32* equal);
+    cc_int32 (*release) (cc_credentials_t  io_credentials);
+    
+    cc_int32 (*compare) (cc_credentials_t  in_credentials,
+                         cc_credentials_t  in_compare_to_credentials,
+                         cc_uint32        *out_equal);
 };
 
-			   
-struct cc_ccache_iterator_f {
-    cc_int32    (*release) (
-                                 cc_ccache_iterator_t iter);
-    cc_int32    (*next) (
-                                 cc_ccache_iterator_t iter,
-                                 cc_ccache_t* ccache);
 
-    cc_int32 	(*clone) (	 cc_ccache_iterator_t iter,
-				 cc_ccache_iterator_t* new_iter);
+struct cc_ccache_iterator_f {
+    cc_int32 (*release) (cc_ccache_iterator_t io_ccache_iterator);
+    
+    cc_int32 (*next) (cc_ccache_iterator_t  in_ccache_iterator,
+                      cc_ccache_t          *out_ccache);
+    
+    cc_int32 (*clone) (cc_ccache_iterator_t  in_ccache_iterator,
+                       cc_ccache_iterator_t *out_ccache_iterator);
 };
 
 struct cc_credentials_iterator_f {
-    cc_int32    (*release) (
-                                 cc_credentials_iterator_t iter);
-    cc_int32    (*next) (
-                                 cc_credentials_iterator_t iter,
-                                 cc_credentials_t* cred);
-
-    cc_int32 	(*clone) (	 cc_credentials_iterator_t iter,
-				 cc_credentials_iterator_t* new_iter);
+    cc_int32 (*release) (cc_credentials_iterator_t io_credentials_iterator);
+    
+    cc_int32 (*next) (cc_credentials_iterator_t  in_credentials_iterator,
+                      cc_credentials_t          *out_credentials);
+    
+    cc_int32 (*clone) (cc_credentials_iterator_t  in_credentials_iterator,
+                       cc_credentials_iterator_t *out_credentials_iterator);
 };
 
 /*
  * API functions
  */
- 
-CCACHE_API cc_int32 cc_initialize (
-	cc_context_t*		outContext,
-	cc_int32		inVersion,
-	cc_int32*		outSupportedVersion,
-	char const**		outVendor);
+
+CCACHE_API cc_int32 cc_initialize (cc_context_t  *out_context,
+                                   cc_int32       in_version,
+                                   cc_int32      *out_supported_version,
+                                   char const   **out_vendor);
 	
 /*
  * Convenience macros
