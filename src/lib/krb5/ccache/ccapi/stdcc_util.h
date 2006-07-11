@@ -21,14 +21,15 @@
 
 /* protoypes for private functions declared in stdcc_util.c */
 #ifdef USE_CCAPI_V3
-krb5_error_code dupCC3toK5(krb5_context context, cc_credentials_t src, krb5_creds *dest);
-krb5_error_code dupK5toCC3(krb5_context context, krb5_creds *src, cc_credentials_t *dest);
-cc_int32 krb5int_cc_credentials_release(cc_credentials_t creds);
-cc_int32 krb5int_cc_credentials_compare(cc_credentials_t creds,
-					cc_credentials_t compare_to,
-					cc_uint32* equal);
-int copyCC3DataArrayToK5(cc_credentials_v5_t *ccCreds, krb5_creds *v5Creds, char whichArray);
-int copyK5DataArrayToCC3(krb5_creds *v5Creds, cc_credentials_v5_t * ccCreds, char whichArray);
+krb5_error_code 
+copy_cc_credentials_to_krb5_creds (krb5_context in_context, 
+                                   cc_credentials_t in_credentials, 
+                                   krb5_creds *out_creds);
+krb5_error_code
+copy_krb5_creds_to_cc_credentials (krb5_context in_context, 
+                                   krb5_creds *in_creds, 
+                                   cc_credentials_t *out_credentials);
+
 #else
 int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray);
 int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray);
