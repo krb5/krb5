@@ -898,7 +898,10 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_resolve
 		      &ccapi_data->NamedCache);
         if (err != CC_NOERROR) {
 	        ccapi_data->NamedCache = NULL;
-	        goto errout;
+	        if (err != CC_NO_EXIST) {
+	                retval = cc_err_xlate(err);
+	                goto errout;
+		}
         }
         
   	/* return new cache structure */
