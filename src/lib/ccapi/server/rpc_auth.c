@@ -47,6 +47,7 @@
 
 #include "CredentialsCache.h"
 #include "rpc_auth.h"
+#include <string.h>
 
 cc_int32 
 ccs_rpc_is_authorized( cc_auth_info_t* msg_auth, cc_session_info_t* msg_session, cc_auth_info_t* stored_auth, 

@@ -95,7 +95,7 @@
 		A1E70D440A38B5BC007BE3E3 /* NTMakefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NTMakefile; sourceTree = "<group>"; };
 		A1E70D450A38B5BC007BE3E3 /* server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = server.c; sourceTree = "<group>"; };
 		A1E70D460A38B5BC007BE3E3 /* server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = server.c; sourceTree = "<group>"; };
-		A1E70D5D0A38B796007BE3E3 /* CCacheServer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CCacheServer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1E70D5D0A38B796007BE3E3 /* CCacheServer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CCacheServer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1E70D910A38BB67007BE3E3 /* CCacheServer.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CCacheServer.plist; sourceTree = "<group>"; };
 		A1E70D920A38BB67007BE3E3 /* CCacheServerInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = CCacheServerInfo.plist; sourceTree = "<group>"; };
 		A1E70D930A38BB67007BE3E3 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };

@@ -50,10 +50,10 @@
 #define __CC_GENERIC_LISTS_H_
 
 enum cc_list_type {
-    generic = 0,
-    context,
-    cache,
-    credentials
+    cc_generic_list = 0,
+    cc_context_list,
+    cc_cache_list,
+    cc_credentials_list
 };
 
 struct cc_generic_list_node_t {

@@ -68,6 +68,11 @@
 #include "CredentialsCache.h"
 #include "generic_lists.h"
 
+#if TARGET_OS_MAC
+#define htonll(x) OSSwapHostToBigInt64(x)
+#define ntohll(x) OSSwapBigToHostInt64(x)
+#endif
+
 struct  cc_msg_t {
     cc_uint32 type;			/*type of message*/
     cc_uint8 *flat;			/*flattened representation of this message*/
@@ -136,9 +141,9 @@ cc_int32 cci_msg_add_data_blob(cc_msg_t* msg, void *data, cc_uint32 len, cc_uint
 cc_int32 cci_msg_add_header(cc_msg_t* msg, void *header, cc_uint32 header_len);
 cc_int32 cci_msg_calc_blob_pos(cc_msg_t* msg, void *data, cc_uint32 len, cc_uint32 * sizep);
 cc_int32 cci_msg_flatten(cc_msg_t* msg, void **);
-cc_int32 cci_msg_calc_magic(void *flat, int flat_len, cc_uint32 * sizep);
-cc_int32 cci_msg_verify(void* flat, int flat_len, cc_uint32 * sizep);
-cc_int32 cci_msg_unflatten(void *flat, int flat_len, cc_msg_t** msgpp);
+cc_int32 cci_msg_calc_magic(void *flat, cc_uint32 flat_len, cc_uint32 * sizep);
+cc_int32 cci_msg_verify(void* flat, cc_uint32 flat_len, cc_uint32 * sizep);
+cc_int32 cci_msg_unflatten(void *flat, cc_uint32 flat_len, cc_msg_t** msgpp);
 cc_int32 cci_msg_retrieve_blob(cc_msg_t* msg, cc_uint32 blob_offset, cc_uint32 blob_len, char **);
 cc_int32 cci_msg_destroy(cc_msg_t* msg);
 

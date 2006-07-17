@@ -23,9 +23,52 @@
 /* krb5int_cc_credentials_release(cc_credentials_t creds)
  * - function used to release internally generated cc_credentials_t objects
  */
+
+static void 
+free_cc_array (cc_data **io_cc_array)
+{
+    if (io_cc_array) {
+        unsigned int i;
+        
+        for (i = 0; io_cc_array[i]; i++) {
+            if (io_cc_array[i]->data) { free (io_cc_array[i]->data); }
+            free (io_cc_array[i]);
+        }
+        free (io_cc_array);
+    }    
+}
+
 static cc_int32 
-krb5int_cc_credentials_release(cc_credentials_t creds) {
-    free(creds);
+krb5int_cc_credentials_release(cc_credentials_t creds) 
+{
+    if (creds) {
+        if (creds->data) {
+            if (creds->data->version == cc_credentials_v5 &&
+                creds->data->credentials.credentials_v5) {
+                cc_credentials_v5_t *cv5 = creds->data->credentials.credentials_v5;
+                
+                /* should use krb5_free_unparsed_name but we have no context */
+                if (cv5->client) { free (cv5->client); }
+                if (cv5->server) { free (cv5->server); }
+                
+                if (cv5->keyblock.data)      { free (cv5->keyblock.data); }
+                if (cv5->ticket.data)        { free (cv5->ticket.data); }
+                if (cv5->second_ticket.data) { free (cv5->second_ticket.data); }
+                
+                free_cc_array (cv5->addresses);
+                free_cc_array (cv5->authdata);
+                
+                free (cv5);
+                
+            } else if (creds->data->version == cc_credentials_v4 &&
+                       creds->data->credentials.credentials_v4) {
+                free (creds->data->credentials.credentials_v4);
+            }
+            free ((cc_credentials_union *) creds->data);
+        }
+        free(creds);
+    }
+    
     return ccNoError;
 }
 
@@ -36,381 +79,488 @@ krb5int_cc_credentials_compare(cc_credentials_t creds,
     return ccErrNotImplemented;
 }
 
-/*
- * CopyCC3DataArrayToK5
- * - copy and translate the null terminated arrays of data records
- * 	 used in k5 tickets
- */
-int 
-copyCC3DataArrayToK5(cc_credentials_v5_t *ccCreds, krb5_creds *v5Creds, char whichArray) {
-
-    switch (whichArray) {
-    case kAddressArray: 
-	if (ccCreds->addresses == NULL) {
-	    v5Creds->addresses = NULL;
-	} else {
-
-	    krb5_address 	**addrPtr, *addr;
-	    cc_data		**dataPtr, *data;
-	    unsigned int	numRecords = 0;
-
-	    /* Allocate the array of pointers: */
-	    for (dataPtr = ccCreds->addresses; *dataPtr != NULL; numRecords++, dataPtr++) {}
-
-	    v5Creds->addresses = (krb5_address **) malloc (sizeof(krb5_address *) * (numRecords + 1));
-	    if (v5Creds->addresses == NULL)
-		return ENOMEM;
-
-	    /* Fill in the array, allocating the address structures: */
-	    for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *dataPtr != NULL; addrPtr++, dataPtr++) {
-
-		*addrPtr = (krb5_address *) malloc (sizeof(krb5_address));
-		if (*addrPtr == NULL)
-		    return ENOMEM;
-		data = *dataPtr;
-		addr = *addrPtr;
-
-		addr->addrtype = data->type;
-		addr->magic    = KV5M_ADDRESS;
-		addr->length   = data->length;
-		addr->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * addr->length);
-		if (addr->contents == NULL)
-		    return ENOMEM;
-		memmove(addr->contents, data->data, addr->length); /* copy contents */
-	    }
-
-	    /* Write terminator: */
-	    *addrPtr = NULL;
-	}
-	break;
-    case kAuthDataArray:
-	if (ccCreds->authdata == NULL) {
-	    v5Creds->authdata = NULL;
-	} else {
-	    krb5_authdata 	**authPtr, *auth;
-	    cc_data		**dataPtr, *data;
-	    unsigned int	numRecords = 0;
-
-	    /* Allocate the array of pointers: */
-	    for (dataPtr = ccCreds->authdata; *dataPtr != NULL; numRecords++, dataPtr++) {}
-
-	    v5Creds->authdata = (krb5_authdata **) malloc (sizeof(krb5_authdata *) * (numRecords + 1));
-	    if (v5Creds->authdata == NULL)
-		return ENOMEM;
-
-	    /* Fill in the array, allocating the address structures: */
-	    for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *dataPtr != NULL; authPtr++, dataPtr++) {
-
-		*authPtr = (krb5_authdata *) malloc (sizeof(krb5_authdata));
-		if (*authPtr == NULL)
-		    return ENOMEM;
-		data = *dataPtr;
-		auth = *authPtr;
-
-		auth->ad_type  = data->type;
-		auth->magic    = KV5M_AUTHDATA;
-		auth->length   = data->length;
-		auth->contents = (krb5_octet *) malloc (sizeof(krb5_octet) * auth->length);
-		if (auth->contents == NULL)
-		    return ENOMEM;
-		memmove(auth->contents, data->data, auth->length); /* copy contents */
-	    }
-
-	    /* Write terminator: */
-	    *authPtr = NULL;
-	}
-	break;
-    }
-
-    return 0;
-}
-
-/*
- * copyK5DataArrayToCC
- * - analagous to above, but in the other direction
- */
-int 
-copyK5DataArrayToCC3(krb5_creds *v5Creds, cc_credentials_v5_t * ccCreds, char whichArray)
+static krb5_error_code 
+copy_cc_array_to_addresses (krb5_context in_context, 
+                            cc_data **in_cc_array, 
+                            krb5_address ***out_addresses)
 {
-    switch (whichArray) {
-    case kAddressArray:
-	if (v5Creds->addresses == NULL) {
-	    ccCreds->addresses = NULL;
-	} else {
+    krb5_error_code err = 0;
+    
+    if (in_cc_array == NULL) {
+        *out_addresses = NULL;
+        
+    } else {
+        unsigned int count, i;
+        krb5_address **addresses = NULL;
 
-	    krb5_address 	**addrPtr, *addr;
-	    cc_data		**dataPtr, *data;
-	    unsigned int	numRecords = 0;
+        /* get length of array */
+        for (count = 0; in_cc_array[count]; count++);
+        addresses = (krb5_address **) malloc (sizeof (*addresses) * (count + 1));
+        if (!addresses) { err = KRB5_CC_NOMEM; }
+        
+        for (i = 0; !err && i < count; i++) { 
+            addresses[i] = (krb5_address *) malloc (sizeof (krb5_address));
+            if (!addresses[i]) { err = KRB5_CC_NOMEM; }
+            
+            if (!err) {
+                addresses[i]->contents = (krb5_octet *) malloc (sizeof (krb5_octet) * 
+                                                            in_cc_array[i]->length);
+                if (!addresses[i]->contents) { err = KRB5_CC_NOMEM; }
+            }
+            
+            if (!err) {
+                addresses[i]->magic = KV5M_ADDRESS;
+                addresses[i]->addrtype = in_cc_array[i]->type;
+                addresses[i]->length = in_cc_array[i]->length;
+                memcpy (addresses[i]->contents, 
+                        in_cc_array[i]->data, in_cc_array[i]->length);
+            }
+        }
+        
+        if (!err) {
+            addresses[i] = NULL; /* terminator */
+            *out_addresses = addresses;
+            addresses = NULL;
+        }
 
-	    /* Allocate the array of pointers: */
-	    for (addrPtr = v5Creds->addresses; *addrPtr != NULL; numRecords++, addrPtr++) {}
-
-	    ccCreds->addresses = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
-	    if (ccCreds->addresses == NULL)
-		return ENOMEM;
-
-	    /* Fill in the array, allocating the address structures: */
-	    for (dataPtr = ccCreds->addresses, addrPtr = v5Creds->addresses; *addrPtr != NULL; addrPtr++, dataPtr++) {
-
-		*dataPtr = (cc_data *) malloc (sizeof(cc_data));
-		if (*dataPtr == NULL)
-		    return ENOMEM;
-		data = *dataPtr;
-		addr = *addrPtr;
-
-		data->type   = addr->addrtype;
-		data->length = addr->length;
-		data->data   = malloc (sizeof(char) * data->length);
-		if (data->data == NULL)
-		    return ENOMEM;
-		memmove(data->data, addr->contents, data->length); /* copy contents */
-	    }
-
-	    /* Write terminator: */
-	    *dataPtr = NULL;
-	}
-	break;
-    case kAuthDataArray:
-	if (v5Creds->authdata == NULL) {
-	    ccCreds->authdata = NULL;
-	} else {
-	    krb5_authdata 	**authPtr, *auth;
-	    cc_data			**dataPtr, *data;
-	    unsigned int			numRecords = 0;
-
-	    /* Allocate the array of pointers: */
-	    for (authPtr = v5Creds->authdata; *authPtr != NULL; numRecords++, authPtr++) {}
-
-	    ccCreds->authdata = (cc_data **) malloc (sizeof(cc_data *) * (numRecords + 1));
-	    if (ccCreds->authdata == NULL)
-		return ENOMEM;
-
-	    /* Fill in the array, allocating the address structures: */
-	    for (dataPtr = ccCreds->authdata, authPtr = v5Creds->authdata; *authPtr != NULL; authPtr++, dataPtr++) {
-
-		*dataPtr = (cc_data *) malloc (sizeof(cc_data));
-		if (*dataPtr == NULL)
-		    return ENOMEM;
-		data = *dataPtr;
-		auth = *authPtr;
-
-		data->type   = auth->ad_type;
-		data->length = auth->length;
-		data->data   = malloc (sizeof(char) * data->length);
-		if (data->data == NULL)
-		    return ENOMEM;
-		memmove(data->data, auth->contents, data->length); /* copy contents */
-	    }
-
-	    /* Write terminator: */
-	    *dataPtr = NULL;
-	}
-	break;
+        if (addresses) { krb5_free_addresses (in_context, addresses); }
     }
-
-    return 0;
-
+    
+    return err;
 }
 
+static krb5_error_code 
+copy_cc_array_to_authdata (krb5_context in_context, 
+                           cc_data **in_cc_array, 
+                           krb5_authdata ***out_authdata)
+{
+    krb5_error_code err = 0;
+    
+    if (in_cc_array == NULL) {
+        *out_authdata = NULL;
+        
+    } else {
+        unsigned int count, i;
+        krb5_authdata **authdata = NULL;
+        
+        /* get length of array */
+        for (count = 0; in_cc_array[count]; count++);
+        authdata = (krb5_authdata **) malloc (sizeof (*authdata) * (count + 1));
+        if (!authdata) { err = KRB5_CC_NOMEM; }
+        
+        for (i = 0; !err && i < count; i++) { 
+            authdata[i] = (krb5_authdata *) malloc (sizeof (krb5_authdata));
+            if (!authdata[i]) { err = KRB5_CC_NOMEM; }
+            
+            if (!err) {
+                authdata[i]->contents = (krb5_octet *) malloc (sizeof (krb5_octet) * 
+                                                           in_cc_array[i]->length);
+                if (!authdata[i]->contents) { err = KRB5_CC_NOMEM; }
+            }
+            
+            if (!err) {
+                authdata[i]->magic = KV5M_AUTHDATA;
+                authdata[i]->ad_type = in_cc_array[i]->type;
+                authdata[i]->length = in_cc_array[i]->length;
+                memcpy (authdata[i]->contents, 
+                        in_cc_array[i]->data, in_cc_array[i]->length);
+            }
+        }
+        
+        if (!err) {
+            authdata[i] = NULL; /* terminator */
+            *out_authdata = authdata;
+            authdata = NULL;
+        }
+        
+        if (authdata) { krb5_free_authdata (in_context, authdata); }
+    }
+    
+    return err;
+}
+
+static krb5_error_code 
+copy_addresses_to_cc_array (krb5_context in_context, 
+                            krb5_address **in_addresses, 
+                            cc_data ***out_cc_array)
+{
+    krb5_error_code err = 0;
+    
+    if (in_addresses == NULL) {
+        *out_cc_array = NULL;
+        
+    } else {
+        unsigned int count, i;
+        cc_data **cc_array = NULL;
+
+        /* get length of array */
+        for (count = 0; in_addresses[count]; count++);
+        cc_array = (cc_data **) malloc (sizeof (*cc_array) * (count + 1));
+        if (!cc_array) { err = KRB5_CC_NOMEM; }
+    
+        for (i = 0; !err && i < count; i++) { 
+            cc_array[i] = (cc_data *) malloc (sizeof (cc_data));
+            if (!cc_array[i]) { err = KRB5_CC_NOMEM; }
+            
+            if (!err) {
+                cc_array[i]->data = malloc (in_addresses[i]->length);
+                if (!cc_array[i]->data) { err = KRB5_CC_NOMEM; }
+            }
+            
+            if (!err) {
+                cc_array[i]->type = in_addresses[i]->addrtype;
+                cc_array[i]->length = in_addresses[i]->length;
+                memcpy (cc_array[i]->data, in_addresses[i]->contents, in_addresses[i]->length);
+            }
+        }
+        
+        if (!err) {
+            cc_array[i] = NULL; /* terminator */
+            *out_cc_array = cc_array;
+            cc_array = NULL;
+        }
+
+        if (cc_array) { free_cc_array (cc_array); }
+    }
+    
+    
+    return err;
+}
+
+static krb5_error_code 
+copy_authdata_to_cc_array (krb5_context in_context, 
+                           krb5_authdata **in_authdata, 
+                           cc_data ***out_cc_array)
+{
+    krb5_error_code err = 0;
+    
+    if (in_authdata == NULL) {
+        *out_cc_array = NULL;
+
+    } else {
+        unsigned int count, i;
+        cc_data **cc_array = NULL;
+
+        /* get length of array */
+        for (count = 0; in_authdata[count]; count++);
+        cc_array = (cc_data **) malloc (sizeof (*cc_array) * (count + 1));
+        if (!cc_array) { err = KRB5_CC_NOMEM; }
+    
+        for (i = 0; !err && i < count; i++) { 
+            cc_array[i] = (cc_data *) malloc (sizeof (cc_data));
+            if (!cc_array[i]) { err = KRB5_CC_NOMEM; }
+            
+            if (!err) {
+                cc_array[i]->data = malloc (in_authdata[i]->length);
+                if (!cc_array[i]->data) { err = KRB5_CC_NOMEM; }
+            }
+            
+            if (!err) {
+                cc_array[i]->type = in_authdata[i]->ad_type;
+                cc_array[i]->length = in_authdata[i]->length;
+                memcpy (cc_array[i]->data, in_authdata[i]->contents, in_authdata[i]->length);
+            }
+        }
+        
+        if (!err) {
+            cc_array[i] = NULL; /* terminator */
+            *out_cc_array = cc_array;
+            cc_array = NULL;
+        }
+
+        if (cc_array) { free_cc_array (cc_array); }
+    }
+    
+    
+    return err;
+}
+
+
 /*
- * dupCC3toK5
+ * copy_cc_credentials_to_krb5_creds
  * - allocate an empty k5 style ticket and copy info from the cc_creds ticket
  */
 
-krb5_error_code
-dupCC3toK5(krb5_context context, cc_credentials_t src, krb5_creds *dest)
+krb5_error_code 
+copy_cc_credentials_to_krb5_creds (krb5_context in_context, 
+                                   cc_credentials_t in_credentials, 
+                                   krb5_creds *out_creds)
 {
-    const cc_credentials_union 	*cu = src->data;
-    cc_credentials_v5_t		*cv5;
+    krb5_error_code err = 0;
+    const cc_credentials_union *cred_union = in_credentials->data;
+    cc_credentials_v5_t *cv5 = NULL;
     krb5_int32 offset_seconds = 0, offset_microseconds = 0;
-    krb5_error_code err;
-
-    if (cu->version != cc_credentials_v5) 
-	return KRB5_CC_NOT_KTYPE;
-
-    cv5 = cu->credentials.credentials_v5;
-
-    /*
-     * allocate and copy
-     * copy all of those damn fields back
-     */
-    err = krb5_parse_name(context, cv5->client, &(dest->client));
-    err = krb5_parse_name(context, cv5->server, &(dest->server));
-    if (err) 
-	return err; /* parsename fails w/o krb5.ini for example */
-
-    /* copy keyblock */
-    dest->keyblock.enctype = cv5->keyblock.type;
-    dest->keyblock.length = cv5->keyblock.length;
-    dest->keyblock.contents = (krb5_octet *)malloc(dest->keyblock.length);
-    memcpy(dest->keyblock.contents, cv5->keyblock.data, dest->keyblock.length);
-
-    /* copy times */
+    krb5_principal client = NULL;
+    krb5_principal server = NULL;
+    char *ticket_data = NULL;
+    char *second_ticket_data = NULL;
+    unsigned char *keyblock_contents = NULL;
+    krb5_address **addresses = NULL;
+    krb5_authdata **authdata = NULL;
+    
+    if (cred_union->version != cc_credentials_v5) { 
+	err = KRB5_CC_NOT_KTYPE;
+    } else {
+        cv5 = cred_union->credentials.credentials_v5;
+    }
+    
 #if TARGET_OS_MAC
-    err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
-    if (err) 
-	return err;
+    if (!err) {
+        err = krb5_get_time_offsets (in_context, &offset_seconds, &offset_microseconds);
+    }
 #endif
-    dest->times.authtime   = cv5->authtime     + offset_seconds;
-    dest->times.starttime  = cv5->starttime    + offset_seconds;
-    dest->times.endtime    = cv5->endtime      + offset_seconds;
-    dest->times.renew_till = cv5->renew_till   + offset_seconds;
-    dest->is_skey          = cv5->is_skey;
-    dest->ticket_flags     = cv5->ticket_flags;
+    
+    if (!err) {
+        err = krb5_parse_name (in_context, cv5->client, &client);
+    }
+    
+    if (!err) {
+        err = krb5_parse_name (in_context, cv5->server, &server);
+    }
+    
+    if (!err && cv5->keyblock.data) {
+        keyblock_contents = (unsigned char *) malloc (cv5->keyblock.length);
+        if (!keyblock_contents) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err && cv5->ticket.data) {
+        ticket_data = (char *) malloc (cv5->ticket.length);
+        if (!ticket_data) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err && cv5->second_ticket.data) {
+        second_ticket_data = (char *) malloc (cv5->second_ticket.length);
+        if (!second_ticket_data) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err) {
+        /* addresses */
+        err = copy_cc_array_to_addresses (in_context, cv5->addresses, &addresses);
+    }
+ 
+    if (!err) {
+        /* authdata */
+        err = copy_cc_array_to_authdata (in_context, cv5->authdata, &authdata);
+    }
+    
+    if (!err) {
+        /* principals */
+        out_creds->client = client;
+        client = NULL;
+        out_creds->server = server;
+        server = NULL;
+        
+        /* copy keyblock */
+        if (cv5->keyblock.data) {
+            memcpy (keyblock_contents, cv5->keyblock.data, cv5->keyblock.length);
+        }
+        out_creds->keyblock.enctype = cv5->keyblock.type;
+        out_creds->keyblock.length = cv5->keyblock.length;
+        out_creds->keyblock.contents = keyblock_contents;
+        keyblock_contents = NULL;
 
-    /* more branching fields */
-    err = copyCC3DataArrayToK5(cv5, dest, kAddressArray);
-    if (err) 
-	return err;
+        /* copy times */
+        out_creds->times.authtime   = cv5->authtime     + offset_seconds;
+        out_creds->times.starttime  = cv5->starttime    + offset_seconds;
+        out_creds->times.endtime    = cv5->endtime      + offset_seconds;
+        out_creds->times.renew_till = cv5->renew_till   + offset_seconds;
+        out_creds->is_skey          = cv5->is_skey;
+        out_creds->ticket_flags     = cv5->ticket_flags;
 
-    /* first ticket */
-    dest->ticket.length = cv5->ticket.length;
-    dest->ticket.data = (char *)malloc(cv5->ticket.length);
-    memcpy(dest->ticket.data, cv5->ticket.data, cv5->ticket.length);
+        /* first ticket */
+        if (cv5->ticket.data) {
+            memcpy(ticket_data, cv5->ticket.data, cv5->ticket.length);
+        }
+        out_creds->ticket.length = cv5->ticket.length;
+        out_creds->ticket.data = ticket_data;
+        ticket_data = NULL;
+        
+        /* second ticket */
+        if (cv5->second_ticket.data) {
+            memcpy(second_ticket_data, cv5->second_ticket.data, cv5->second_ticket.length);
+        }
+        out_creds->second_ticket.length = cv5->second_ticket.length;
+        out_creds->second_ticket.data = second_ticket_data;
+        second_ticket_data = NULL;
+        
+        out_creds->addresses = addresses;
+        addresses = NULL;
 
-    /* second ticket */
-    dest->second_ticket.length = cv5->second_ticket.length;
-    (dest->second_ticket).data = ( char *)malloc(cv5->second_ticket.length);
-    memcpy(dest->second_ticket.data, cv5->second_ticket.data, cv5->second_ticket.length);
-
-    /* zero out magic number */
-    dest->magic = 0;
-
-    /* authdata */
-    err = copyCC3DataArrayToK5(cv5, dest, kAuthDataArray);
-    if (err) 
-	return err;
-
-    return 0;
+        out_creds->authdata = authdata;
+        authdata = NULL;
+        
+        /* zero out magic number */
+        out_creds->magic = 0;
+    }
+    
+    if (addresses)          { krb5_free_addresses (in_context, addresses); }
+    if (authdata)           { krb5_free_authdata (in_context, authdata); }
+    if (keyblock_contents)  { free (keyblock_contents); }
+    if (ticket_data)        { free (ticket_data); }
+    if (second_ticket_data) { free (second_ticket_data); }
+    if (client)             { krb5_free_principal (in_context, client); }
+    if (server)             { krb5_free_principal (in_context, server); }
+    
+    return err;
 }
 
 /*
- * dupK5toCC3
+ * copy_krb5_creds_to_cc_credentials
  * - analagous to above but in the reverse direction
  */
 krb5_error_code
-dupK5toCC3(krb5_context context, krb5_creds *src, cc_credentials_t *dest)
+copy_krb5_creds_to_cc_credentials (krb5_context in_context, 
+                                   krb5_creds *in_creds, 
+                                   cc_credentials_t *out_credentials)
 {
-    cc_credentials_v5_t *c;
-    cc_credentials_union *cu;
-    cc_credentials_f    *f;
-    int err;
+    krb5_error_code err = 0;
+    cc_credentials_t credentials = NULL;
+    cc_credentials_union *cred_union = NULL;
+    cc_credentials_f    *functions = NULL;
+    cc_credentials_v5_t *cv5 = NULL;
+    char *client = NULL;
+    char *server = NULL;
+    unsigned char *ticket_data = NULL;
+    unsigned char *second_ticket_data = NULL;
+    unsigned char *keyblock_data = NULL;
     krb5_int32 offset_seconds = 0, offset_microseconds = 0;
-    cc_credentials_t 		creds = NULL;
-
-    if (dest == NULL) 
-	return KRB5_CC_NOMEM;
-
-    /* allocate the cc_credentials_t */
-    creds = (cc_credentials_t)malloc(sizeof(cc_credentials_d));
-    if (!creds) {
-	err = KRB5_CC_NOMEM;
-	goto cleanup;
-    }
-
-    /* allocate the cred_union */
-    creds->data = NULL;
-    creds->functions = NULL;
-#ifdef TARGET_OS_MAC
-    creds->otherFunctions = NULL;
-#endif
-    f = (cc_credentials_f *)malloc(sizeof(cc_credentials_f));
-    if (!f) {
-	err = KRB5_CC_NOMEM;
-	goto cleanup;
-    }
-    creds->functions = f;
-
-    cu = (cc_credentials_union *)malloc(sizeof(cc_credentials_union));
-    if (!creds->data) {
-	err = KRB5_CC_NOMEM;
-	goto cleanup;
-    }
-    creds->data = cu; 
-
-    f->release = krb5int_cc_credentials_release;
-    f->compare = krb5int_cc_credentials_compare;
-
-    cu->version = cc_credentials_v5;
-
-    c = (cc_credentials_v5_t*)malloc(sizeof(cc_credentials_v5_t));
-    if (!c) {
-	err = KRB5_CC_NOMEM;
-	goto cleanup;
-    }
-    cu->credentials.credentials_v5 = c;
-
-    /* convert krb5 principals to flat principals */
-    err = krb5_unparse_name(context, src->client, &(c->client));
-    if (err) 
-	goto cleanup;
-
-    err = krb5_unparse_name(context, src->server, &(c->server));
-    if (err) 
-	goto cleanup;
-
-    /* copy more fields */
-    c->keyblock.type = src->keyblock.enctype;
-    c->keyblock.length = src->keyblock.length;
-
-    if (src->keyblock.contents != NULL) {
-	c->keyblock.data = (unsigned char *)malloc(src->keyblock.length);
-	memcpy(c->keyblock.data, src->keyblock.contents, src->keyblock.length);
-    } else {
-	c->keyblock.data = NULL;
-    }
-
+    cc_data **cc_address_array = NULL;
+    cc_data **cc_authdata_array = NULL;
+    
+    if (out_credentials == NULL) { err = KRB5_CC_NOMEM; }
+    
 #if TARGET_OS_MAC
-    err = krb5_get_time_offsets(context, &offset_seconds, &offset_microseconds);
-    if (err) 
-	goto cleanup;
+    if (!err) {
+        err = krb5_get_time_offsets (in_context, &offset_seconds, &offset_microseconds);
+    }
 #endif
-    c->authtime     = src->times.authtime   - offset_seconds;
-    c->starttime    = src->times.starttime  - offset_seconds;
-    c->endtime      = src->times.endtime    - offset_seconds;
-    c->renew_till   = src->times.renew_till - offset_seconds;
-    c->is_skey      = src->is_skey;
-    c->ticket_flags = src->ticket_flags;
-
-    err = copyK5DataArrayToCC3(src, c, kAddressArray);
-    if (err) 
-	goto cleanup;
-
-    c->ticket.length = src->ticket.length;
-    if (src->ticket.data != NULL) {
-	c->ticket.data = (unsigned char *)malloc(src->ticket.length);
-	memcpy(c->ticket.data, src->ticket.data, src->ticket.length);
-    } else {
-	c->ticket.data = NULL;
+    
+    if (!err) {
+        credentials = (cc_credentials_t) malloc (sizeof (*credentials));
+        if (!credentials) { err = KRB5_CC_NOMEM; }
     }
-
-    c->second_ticket.length = src->second_ticket.length;
-    if (src->second_ticket.data != NULL) {
-	c->second_ticket.data = (unsigned char *)malloc(src->second_ticket.length);
-	memcpy(c->second_ticket.data, src->second_ticket.data, src->second_ticket.length);
-    } else {
-	c->second_ticket.data = NULL;
+    
+    if (!err) {
+        functions = (cc_credentials_f *) malloc (sizeof (*functions));
+        if (!functions) { err = KRB5_CC_NOMEM; }
     }
-
-    err = copyK5DataArrayToCC3(src, c, kAuthDataArray);
-    if (err) 
-	goto cleanup;
-
-    *dest = creds;
-    return 0;
-
-  cleanup:
-    if (creds) {
-	if (creds->functions)
-	    free((void *)creds->functions);
-	if (creds->data) {
-	    if (creds->data->credentials.credentials_v5)
-		free(creds->data->credentials.credentials_v5);
-	    free((void *)creds->data);
-	}
-	free(creds);
+    
+    if (!err) {
+        cred_union = (cc_credentials_union *) malloc (sizeof (*cred_union));
+        if (!cred_union) { err = KRB5_CC_NOMEM; }
     }
+    
+    if (!err) {
+        cv5 = (cc_credentials_v5_t *) malloc (sizeof (*cv5));
+        if (!cv5) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err) {
+        err = krb5_unparse_name (in_context, in_creds->client, &client);
+    }
+    
+    if (!err) {
+        err = krb5_unparse_name (in_context, in_creds->server, &server);
+    }
+    
+    if (!err && in_creds->keyblock.contents) {
+        keyblock_data = (unsigned char *) malloc (in_creds->keyblock.length);
+        if (!keyblock_data) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err && in_creds->ticket.data) {
+        ticket_data = (unsigned char *) malloc (in_creds->ticket.length);
+        if (!ticket_data) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err && in_creds->second_ticket.data) {
+        second_ticket_data = (unsigned char *) malloc (in_creds->second_ticket.length);
+        if (!second_ticket_data) { err = KRB5_CC_NOMEM; }
+    }
+    
+    if (!err) {
+        err = copy_addresses_to_cc_array (in_context, in_creds->addresses, &cc_address_array);
+    }
+    
+    if (!err) {
+        err = copy_authdata_to_cc_array (in_context, in_creds->authdata, &cc_authdata_array);
+    }
+        
+    if (!err) {
+        /* principals */
+        cv5->client = client;
+        client = NULL;
+        cv5->server = server;
+        server = NULL;
 
+        /* copy more fields */
+        if (in_creds->keyblock.contents) {
+            memcpy(keyblock_data, in_creds->keyblock.contents, in_creds->keyblock.length);
+        }
+        cv5->keyblock.type = in_creds->keyblock.enctype;
+        cv5->keyblock.length = in_creds->keyblock.length;
+        cv5->keyblock.data = keyblock_data;
+        keyblock_data = NULL;
+        
+        cv5->authtime     = in_creds->times.authtime   - offset_seconds;
+        cv5->starttime    = in_creds->times.starttime  - offset_seconds;
+        cv5->endtime      = in_creds->times.endtime    - offset_seconds;
+        cv5->renew_till   = in_creds->times.renew_till - offset_seconds;
+        cv5->is_skey      = in_creds->is_skey;
+        cv5->ticket_flags = in_creds->ticket_flags;
+
+        if (in_creds->ticket.data) {
+            memcpy (ticket_data, in_creds->ticket.data, in_creds->ticket.length);
+        }
+        cv5->ticket.length = in_creds->ticket.length;
+        cv5->ticket.data = ticket_data;
+        ticket_data = NULL;
+        
+        if (in_creds->second_ticket.data) {
+            memcpy (second_ticket_data, in_creds->second_ticket.data, in_creds->second_ticket.length);
+        }
+        cv5->second_ticket.length = in_creds->second_ticket.length;
+        cv5->second_ticket.data = second_ticket_data;
+        second_ticket_data = NULL;
+        
+        cv5->addresses = cc_address_array;
+        cc_address_array = NULL;
+        
+        cv5->authdata = cc_authdata_array;
+        cc_authdata_array = NULL;       
+        
+        /* Set up the structures to return to the caller */
+        cred_union->version = cc_credentials_v5;
+        cred_union->credentials.credentials_v5 = cv5;
+        cv5 = NULL;
+        
+        credentials->data = cred_union;
+        cred_union = NULL;
+        
+        functions->release = krb5int_cc_credentials_release;
+        functions->compare = krb5int_cc_credentials_compare;
+        credentials->functions = functions;
+        functions = NULL;
+#ifdef TARGET_OS_MAC
+        credentials->otherFunctions = NULL;
+#endif
+        
+        *out_credentials = credentials;
+        credentials = NULL;
+    }
+    
+    if (cc_address_array)   { free_cc_array (cc_address_array); }
+    if (cc_authdata_array)  { free_cc_array (cc_authdata_array); }
+    if (keyblock_data)      { free (keyblock_data); }
+    if (ticket_data)        { free (ticket_data); }
+    if (second_ticket_data) { free (second_ticket_data); }
+    if (client)             { krb5_free_unparsed_name (in_context, client); }
+    if (server)             { krb5_free_unparsed_name (in_context, server); }
+    if (cv5)                { free (cv5); }
+    if (cred_union)         { free (cred_union); }
+    if (functions)          { free (functions); } 
+    if (credentials)        { free (credentials); }
+    
     return err;
 }
 #else /* !USE_CCAPI_V3 */
@@ -739,14 +889,14 @@ static void deep_free_cc_data (cc_data data)
 
 static void deep_free_cc_data_array (cc_data** data) {
 
-    unsigned int	index;
+    unsigned int i;
 
     if (data == NULL)
 	return;
 
-    for (index = 0; data [index] != NULL; index++) {
-	deep_free_cc_data (*(data [index]));
-	free (data [index]);
+    for (i = 0; data [i] != NULL; i++) {
+	deep_free_cc_data (*(data [i]));
+	free (data [i]);
     }
 
     free (data);

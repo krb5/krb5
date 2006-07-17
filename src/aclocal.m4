@@ -158,9 +158,14 @@ fi
 
 dnl find dlopen
 AC_DEFUN([KRB5_AC_FIND_DLOPEN],[
-AC_CHECK_LIB(dl, dlopen,[DL_LIB=-ldl
+old_LIBS="$LIBS"
+DL_LIB=
+AC_SEARCH_LIBS(dlopen, dl, [
+if test "$ac_cv_search_dlopen" != "none required"; then
+  DL_LIB=$ac_cv_search_dlopen
+fi
+LIBS="$old_LIBS"
 AC_DEFINE(USE_DLOPEN,1,[Define if dlopen should be used])])
-dnl AC_CHECK_LIB(ld, main, DL_LIB=-lld)
 AC_SUBST(DL_LIB)
 ])
 

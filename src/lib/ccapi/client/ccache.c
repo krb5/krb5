@@ -816,9 +816,10 @@ cc_int_ccache_move( cc_ccache_t source,
     return code;
 }       
 
+cc_int32
 cc_int_ccache_lock( cc_ccache_t ccache,
-                cc_uint32 lock_type,
-                cc_uint32 block )
+                    cc_uint32 lock_type,
+                    cc_uint32 block )
 {
     cc_int_ccache_t 	int_ccache;
     cc_msg_t        	*request = NULL;
@@ -1004,7 +1005,7 @@ cc_int_ccache_get_last_default_time( cc_ccache_t ccache,
 }
 
 cc_int32
-cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* time )
+cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* change_time )
 {
     cc_int_ccache_t 	int_ccache;
     cc_msg_t        	*request = NULL;
@@ -1049,7 +1050,7 @@ cc_int_ccache_get_change_time( cc_ccache_t ccache, cc_time* time )
         ccmsg_ccache_get_change_time_resp_t * response_header = (ccmsg_ccache_get_change_time_resp_t*)response->header;
         t64 = htonll(response_header->time);
 	/* TODO: validate that we do not overflow 'time' */
-	*time = t64;
+	*change_time = t64;
         code = ccNoError;
     } else {
         code = ccErrBadInternalMessage;

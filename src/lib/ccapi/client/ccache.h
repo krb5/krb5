@@ -114,11 +114,11 @@ cc_int_ccache_unlock( cc_ccache_t ccache );
 
 cc_int32
 cc_int_ccache_get_last_default_time( cc_ccache_t ccache,
-                                cc_time* time );
+                                cc_time* last_default_tim );
 
 cc_int32
 cc_int_ccache_get_change_time( cc_ccache_t ccache,
-                          cc_time* time );
+                          cc_time* change_time );
 
 cc_int32
 cc_int_ccache_compare( cc_ccache_t ccache,
@@ -128,12 +128,12 @@ cc_int_ccache_compare( cc_ccache_t ccache,
 cc_int32	
 cc_int_ccache_get_kdc_time_offset( cc_ccache_t ccache,
                               cc_int32	credentials_version,
-                              cc_time*	time_offset );
+                              cc_time*	kdc_time_offset );
 
 cc_int32
 cc_int_ccache_set_kdc_time_offset( cc_ccache_t ccache,
                               cc_int32	credentials_version,
-                              cc_time	time_offset );
+                              cc_time	kdc_time_offset );
                                 
 cc_int32
 cc_int_ccache_clear_kdc_time_offset( cc_ccache_t	ccache,
