@@ -130,8 +130,8 @@ kdb_db2.so kdb_db2.po $(OUTPRE)kdb_db2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/lib/kdb/kdb5.h kdb_compat.h kdb_db2.c kdb_db2.h \
-  kdb_xdr.h policy_db.h
+  $(SRCTOP)/lib/kdb/kdb5.h kdb_db2.c kdb_db2.h kdb_xdr.h \
+  policy_db.h
 pol_xdr.so pol_xdr.po $(OUTPRE)pol_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/auth.h \
   $(BUILDTOP)/include/gssrpc/auth_gss.h $(BUILDTOP)/include/gssrpc/auth_unix.h \
