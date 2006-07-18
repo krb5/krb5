@@ -4,7 +4,7 @@ thisconfigdir=.
 myfulldir=.
 mydir=.
 # Don't build sample by default: plugins/locate/python 
-SUBDIRS=util include lib @krb524@ kdc kadmin slave clients \
+SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	appl tests \
 	config-files gen-manpages

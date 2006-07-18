@@ -3,12 +3,13 @@
 kadmind \- KADM5 administration server
 .SH SYNOPSIS
 .B kadmind
-[\fB-r\fP \fIrealm\fP] [\fB\-m\fP] [\fB\-nofork\fP] [\fB\-port\fP
+[\fB\-x\fP \fIdb_args\fP] [\fB-r\fP \fIrealm\fP] [\fB\-m\fP] [\fB\-nofork\fP] [\fB\-port\fP
 \fIport-number\fP]
 .SH DESCRIPTION
-This command starts the KADM5 administration server.  The administration
-server runs on the master Kerberos server, which stores the KDC
-principal database and the KADM5 policy database.  
+This command starts the KADM5 administration server.  If the database is db2, 
+the administration server runs on the master Kerberos server, which stores the KDC
+prinicpal database and the KADM5 policy database. If the database is LDAP,
+the administration server and the KDC server need not run on the same machine.  
 .B Kadmind
 accepts remote requests to administer the information in these
 databases.  Remote requests are sent, for example, by
@@ -54,6 +55,34 @@ section below.
 After the server begins running, it puts itself in the background and
 disassociates itself from its controlling terminal.
 .SH OPTIONS
+.TP 
+\fB\-x\fP \fIdb_args\fP
+specifies the database specific arguments.
+
+Options supported for LDAP database are:
+.sp 
+.nf 
+.RS 12
+\-x nconns=<number_of_connections>
+specifies the number of connections to be maintained per LDAP server.
+
+\-x port=<port_number>
+specifies the secure port number where the LDAP server is listening.
+
+\-x host=<hostname>
+specifies the host on which the LDAP server is running.
+The <hostname> should be the same as the host name set in the LDAP server certificate.
+
+\-x binddn=<binddn>
+specifies the DN of the object used by the administration server to bind to the LDAP server. 
+This object should have the read rights on the realm container and write rights on the subtree
+that is referenced by the realm.
+
+\-x bindpwd=<bind_password>
+specifies the password for the above mentioned binddn. It is recommended not to use this option.
+Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
+.RE
+.fi
 .TP
 \fB\-r\fP \fIrealm\fP
 specifies the default realm that kadmind will serve; if it is not
@@ -226,6 +255,9 @@ will exit with an error if this file does
 .I not
 exist.
 .TP
+.B Note:
+The above three files are specific to db2 database.
+.TP
 kadm5.acl
 file containing list of principals and their
 .B kadmin
@@ -240,4 +272,6 @@ kadm5.dict
 file containing dictionary of strings explicitly disallowed as
 passwords.
 .SH SEE ALSO
-kpasswd(1), kadmin(8), kdb5_util(8), kadm5_export(8), kadm5_import(8)
+kpasswd(1), kadmin(8), kdb5_util(8), kadm5_export(8), kadm5_import(8),
+kdb5_ldap_util(8)
+

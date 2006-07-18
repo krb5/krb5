@@ -384,8 +384,9 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     if (vftabl_addrs[0] == NULL) {
 	/* No plugins! */
 	status = KRB5_KDB_DBTYPE_NOTFOUND;
-	krb5_set_error_message (kcontext, status, 
-                                "Unable to find requested database type");
+	krb5_set_error_message (kcontext, status,
+				_("Unable to find requested database module '%s': plugin symbol 'kdb_function_table' not found"),
+				lib_name);
 	goto clean_n_exit;
     }
 

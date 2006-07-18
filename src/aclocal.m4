@@ -101,6 +101,7 @@ libnover_frag=$srcdir/$ac_config_fragdir/libnover.in
 AC_SUBST_FILE(libnover_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
+WITH_LDAP
 KRB5_LIB_PARAMS
 KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
@@ -1752,3 +1753,40 @@ AC_DEFUN([KRB5_AC_LIBUTIL],
   UTIL_LIB=-lutil])dnl
 AC_SUBST(UTIL_LIB)
 ])
+dnl
+dnl
+dnl
+dnl --with-ldap=value
+dnl
+AC_DEFUN(WITH_LDAP,[
+AC_ARG_WITH([ldap],
+[  --with-ldap             compile OpenLDAP database backend module],
+[case "$withval" in
+    OPENLDAP) with_ldap=yes ;;
+    yes | no) ;;
+    EDIRECTORY) AC_MSG_ERROR(Option --with-ldap=EDIRECTORY is deprecated; use --with-edirectory instead.) ;;
+    *)  AC_MSG_ERROR(Invalid option value --with-ldap="$withval") ;;
+esac], with_ldap=no)dnl
+AC_ARG_WITH([edirectory],
+[  --with-edirectory       compile eDirectory database backend module],
+[case "$withval" in
+    yes | no) ;;
+    *)  AC_MSG_ERROR(Invalid option value --with-edirectory="$withval") ;;
+esac], with_edirectory=no)dnl
+
+if test $with_ldap = yes; then
+  if test $with_edirectory = yes; then
+    AC_MSG_ERROR(Cannot enable both OpenLDAP and eDirectory backends; choose one.)
+  fi
+  AC_MSG_NOTICE(enabling OpenLDAP database backend module support)
+  OPENLDAP_PLUGIN=yes
+elif test $with_edirectory = yes; then
+  AC_MSG_NOTICE(enabling eDirectory database backend module support)
+  OPENLDAP_PLUGIN=yes
+  AC_DEFINE(HAVE_EDIRECTORY,1,[Define if LDAP KDB interface should assume eDirectory.])
+else
+  : # neither enabled
+dnl  AC_MSG_NOTICE(disabling ldap backend module support)
+fi
+AC_SUBST(OPENLDAP_PLUGIN)
+])dnl

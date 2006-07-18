@@ -72,5 +72,9 @@ ec KRB5_KDB_DBTYPE_NOTFOUND,	"Unable to find requested database type"
 ec KRB5_KDB_DBTYPE_NOSUP,	"Database type not supported"
 ec KRB5_KDB_DBTYPE_INIT,	"Database library failed to initialize"
 ec KRB5_KDB_SERVER_INTERNAL_ERR,   "Server error"
+ec KRB5_KDB_ACCESS_ERROR,       "Unable to access Kerberos database"
+ec KRB5_KDB_INTERNAL_ERROR,     "Kerberos database internal error"
+ec KRB5_KDB_CONSTRAINT_VIOLATION,  "Kerberos database constraints violated"
+
 
 end

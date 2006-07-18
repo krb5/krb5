@@ -1,0 +1,37 @@
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* kdb_ldap.c, kdb_ldap_conn.c: Include autoconf.h before testing
+	HAVE_UNISTD_H.
+
+2006-03-22  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (DEFS): Define a bunch of macros for local renaming
+	of symbol names duplicated in libkdb5 and exported from there.
+
+2006-03-21  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (SHLIB_EXPDEPS, SHLIB_EXPLIBS): Add kdb5 library.
+	(LIBMAJOR): Bump to 1.
+
+2006-03-20  Ken Raeburn  <raeburn@mit.edu>
+
+	* ldap_misc.c (krb5_ldap_get_keysalt_tuples): Unused function
+	deleted.
+	(LDAP_DEFAULT_ENCTYPE, LDAP_DEFAULT_SALTTYPE): Macros deleted.
+	* kdb_ldap.h (krb5_ldap_get_keysalt_tuples): Don't declare it.
+
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* configure.in, kdb_ldap.c, kdb_ldap_conn.c, kdb_xdr.c, kdb_xdr.h,
+	kerberos.ldif, kerberos.schema, ldap_err.c, ldap_err.h,
+	ldap_fetch_mkey.c, ldap_handle.c, ldap_handle.h,
+	ldap_krbcontainer.c, ldap_krbcontainer.h, ldap_main.h,
+	ldap_misc.c, ldap_misc.h, ldap_principal2.c, ldap_principal.c,
+	ldap_principal.h, ldap_pwd_policy.c, ldap_pwd_policy.h,
+	ldap_realm.c, ldap_realm.h, ldap_service_rights.c,
+	ldap_services.c, ldap_services.h, ldap_service_stash.c,
+	ldap_service_stash.h, ldap_tkt_policy.c, ldap_tkt_policy.h,
+	princ_xdr.c, princ_xdr.h: Moved from plugins/kdb/kdb_ldap.
+	* libkdb_ldap.exports: Copied and updated.
+	* Makefile.in: Copied and updated to build a shared library.
+

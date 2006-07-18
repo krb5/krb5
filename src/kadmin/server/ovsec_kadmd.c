@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
 		     &global_server_handle)) != KADM5_OK) {
 	  const char *e_txt = krb5_get_error_message (context, ret);
 	  krb5_klog_syslog(LOG_ERR, "%s while initializing, aborting",
-		 e_txt);
+			   e_txt);
 	  fprintf(stderr, "%s: %s while initializing, aborting\n",
 		  whoami, e_txt);
 	  krb5_klog_close(context);
@@ -847,6 +847,7 @@ void reset_db(void)
 {
 #ifdef notdef
      kadm5_ret_t ret;
+     char *errmsg;
      
      if (ret = kadm5_flush(global_server_handle)) {
 	  krb5_klog_syslog(LOG_ERR, "FATAL ERROR!  %s while flushing databases.  "
@@ -1164,7 +1165,7 @@ void do_schpw(int s1, kadm5_config_params *params)
        interoperate if the client is single-homed. */
 
     if ((s2 = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	char *errmsg = krb5_get_error_message (context, errno);
+	const char *errmsg = krb5_get_error_message (context, errno);
 	krb5_klog_syslog(LOG_ERR, "cannot create connecting socket: %s",
 			 errmsg);
 	fprintf(stderr, "Cannot create connecting socket: %s",

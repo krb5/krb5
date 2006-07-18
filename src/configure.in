@@ -900,12 +900,29 @@ fi
 if test -n "$KRB4_LIB"; then
   K5_GEN_MAKEFILE(lib/krb4)
 fi
+dnl
+dnl
+ldap_plugin_dir=""
+ldap_lib=""
+if test -n "$OPENLDAP_PLUGIN"; then
+  AC_CHECK_HEADERS(ldap.h lber.h)
+  if test $ac_cv_header_ldap_h = no || test $ac_cv_header_lber_h = no; then
+    AC_ERROR(OpenLDAP headers missing)
+  fi
+  AC_CONFIG_SUBDIRS(plugins/kdb/ldap/libkdb_ldap)
+  K5_GEN_MAKEFILE(plugins/kdb/ldap)
+  K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
+  ldap_plugin_dir=plugins/kdb/ldap
+fi
+AC_SUBST(ldap_plugin_dir)
+
 AC_CONFIG_SUBDIRS(lib/apputils plugins/kdb/db2 appl tests)
 dnl
 if false; then
   AC_CHECK_HEADERS(Python.h python2.3/Python.h)
   AC_CONFIG_SUBDIRS(plugins/locate/python)
 fi
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
