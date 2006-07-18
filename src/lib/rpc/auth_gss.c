@@ -423,7 +423,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 						gd->sec.mech,
 						gd->sec.req_flags,
 						0,		/* time req */
-						NULL,		/* channel */
+						GSS_C_NO_CHANNEL_BINDINGS, 
 						recv_tokenp,
 						NULL,		/* used mech */
 						&send_token,
