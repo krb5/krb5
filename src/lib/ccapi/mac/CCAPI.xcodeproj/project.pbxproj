@@ -29,13 +29,6 @@
 		A1E70D9B0A38BBE2007BE3E3 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70D930A38BB67007BE3E3 /* main.c */; };
 		A1E70D9F0A38BCAD007BE3E3 /* mig.defs in Sources */ = {isa = PBXBuildFile; fileRef = A1E70D9E0A38BCAD007BE3E3 /* mig.defs */; };
 		A1E70DA00A38BCAD007BE3E3 /* mig.defs in Sources */ = {isa = PBXBuildFile; fileRef = A1E70D9E0A38BCAD007BE3E3 /* mig.defs */; settings = {ATTRIBUTES = (Server, ); }; };
-		A1E70DEA0A38C710007BE3E3 /* kipc_client.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE40A38C6FD007BE3E3 /* kipc_client.c */; };
-		A1E70DEB0A38C710007BE3E3 /* kipc_common.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE50A38C6FD007BE3E3 /* kipc_common.c */; };
-		A1E70DEC0A38C710007BE3E3 /* kipc_session.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE70A38C6FD007BE3E3 /* kipc_session.c */; };
-		A1E70DED0A38C71D007BE3E3 /* kipc_common.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE50A38C6FD007BE3E3 /* kipc_common.c */; };
-		A1E70DEE0A38C71D007BE3E3 /* kipc_server.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE60A38C6FD007BE3E3 /* kipc_server.c */; };
-		A1E70DEF0A38C71D007BE3E3 /* kipc_session.c in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE70A38C6FD007BE3E3 /* kipc_session.c */; };
-		A1E70DF00A38C71D007BE3E3 /* notify.defs in Sources */ = {isa = PBXBuildFile; fileRef = A1E70DE80A38C6FD007BE3E3 /* notify.defs */; settings = {ATTRIBUTES = (Server, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,16 +94,6 @@
 		A1E70D930A38BB67007BE3E3 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		A1E70D9E0A38BCAD007BE3E3 /* mig.defs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.mig; path = mig.defs; sourceTree = "<group>"; };
 		A1E70DB10A38C01E007BE3E3 /* mig_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mig_types.h; sourceTree = "<group>"; };
-		A1E70DE00A38C6FD007BE3E3 /* kipc_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kipc_client.h; sourceTree = "<group>"; };
-		A1E70DE10A38C6FD007BE3E3 /* kipc_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kipc_common.h; sourceTree = "<group>"; };
-		A1E70DE20A38C6FD007BE3E3 /* kipc_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kipc_server.h; sourceTree = "<group>"; };
-		A1E70DE30A38C6FD007BE3E3 /* kipc_session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = kipc_session.h; sourceTree = "<group>"; };
-		A1E70DE40A38C6FD007BE3E3 /* kipc_client.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kipc_client.c; sourceTree = "<group>"; };
-		A1E70DE50A38C6FD007BE3E3 /* kipc_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kipc_common.c; sourceTree = "<group>"; };
-		A1E70DE60A38C6FD007BE3E3 /* kipc_server.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kipc_server.c; sourceTree = "<group>"; };
-		A1E70DE70A38C6FD007BE3E3 /* kipc_session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kipc_session.c; sourceTree = "<group>"; };
-		A1E70DE80A38C6FD007BE3E3 /* notify.defs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.mig; path = notify.defs; sourceTree = "<group>"; };
-		A1E70DE90A38C6FD007BE3E3 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libCCAPI.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCCAPI.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -315,36 +298,10 @@
 		A1E70D7E0A38BAC5007BE3E3 /* mac */ = {
 			isa = PBXGroup;
 			children = (
-				A1E70DDE0A38C6FD007BE3E3 /* KerberosIPC */,
 				A1E70D9E0A38BCAD007BE3E3 /* mig.defs */,
 				A1E70DB10A38C01E007BE3E3 /* mig_types.h */,
 			);
 			path = mac;
-			sourceTree = "<group>";
-		};
-		A1E70DDE0A38C6FD007BE3E3 /* KerberosIPC */ = {
-			isa = PBXGroup;
-			children = (
-				A1E70DDF0A38C6FD007BE3E3 /* Kerberos */,
-				A1E70DE40A38C6FD007BE3E3 /* kipc_client.c */,
-				A1E70DE50A38C6FD007BE3E3 /* kipc_common.c */,
-				A1E70DE60A38C6FD007BE3E3 /* kipc_server.c */,
-				A1E70DE70A38C6FD007BE3E3 /* kipc_session.c */,
-				A1E70DE80A38C6FD007BE3E3 /* notify.defs */,
-				A1E70DE90A38C6FD007BE3E3 /* README */,
-			);
-			path = KerberosIPC;
-			sourceTree = "<group>";
-		};
-		A1E70DDF0A38C6FD007BE3E3 /* Kerberos */ = {
-			isa = PBXGroup;
-			children = (
-				A1E70DE00A38C6FD007BE3E3 /* kipc_client.h */,
-				A1E70DE10A38C6FD007BE3E3 /* kipc_common.h */,
-				A1E70DE20A38C6FD007BE3E3 /* kipc_server.h */,
-				A1E70DE30A38C6FD007BE3E3 /* kipc_session.h */,
-			);
-			path = Kerberos;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -426,7 +383,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1E70DA00A38BCAD007BE3E3 /* mig.defs in Sources */,
-				A1E70DF00A38C71D007BE3E3 /* notify.defs in Sources */,
 				A1E70D9B0A38BBE2007BE3E3 /* main.c in Sources */,
 				A1E70D890A38BB47007BE3E3 /* ccs_ccache.c in Sources */,
 				A1E70D8A0A38BB47007BE3E3 /* ccs_context.c in Sources */,
@@ -436,9 +392,6 @@
 				A1E70D8E0A38BB4F007BE3E3 /* generic_lists.c in Sources */,
 				A1E70D8F0A38BB4F007BE3E3 /* marshall.c in Sources */,
 				A1E70D900A38BB4F007BE3E3 /* msg.c in Sources */,
-				A1E70DED0A38C71D007BE3E3 /* kipc_common.c in Sources */,
-				A1E70DEE0A38C71D007BE3E3 /* kipc_server.c in Sources */,
-				A1E70DEF0A38C71D007BE3E3 /* kipc_session.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -458,9 +411,6 @@
 				A1E70D510A38B60C007BE3E3 /* generic_lists.c in Sources */,
 				A1E70D520A38B60C007BE3E3 /* marshall.c in Sources */,
 				A1E70D530A38B60C007BE3E3 /* msg.c in Sources */,
-				A1E70DEA0A38C710007BE3E3 /* kipc_client.c in Sources */,
-				A1E70DEB0A38C710007BE3E3 /* kipc_common.c in Sources */,
-				A1E70DEC0A38C710007BE3E3 /* kipc_session.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
