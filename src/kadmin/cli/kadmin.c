@@ -39,6 +39,10 @@
 #include <time.h>
 #include "kadmin.h"
 
+#if defined(USE_LOGIN_LIBRARY)
+#include <Kerberos/KerberosLoginPrivate.h>
+#endif
+
 /* special struct to convert flag names for principals
    to actual krb5_flags for a principal */
 struct pflag {
@@ -208,6 +212,15 @@ char *kadmin_startup(argc, argv)
     char *svcname;
 
     memset((char *) &params, 0, sizeof(params));
+    
+#if defined(USE_LOGIN_LIBRARY)
+    /* Turn off all password prompting from the KLL */
+    retval = __KLSetPromptMechanism (klPromptMechanism_None);
+    if (retval) {
+        com_err(whoami, retval, "while calling __KLSetPromptMechanism()");
+        exit(1);
+    }    
+#endif
     
     if (strcmp (whoami, "kadmin.local") == 0)
 	set_com_err_hook(extended_com_err_fn);
