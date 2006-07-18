@@ -233,30 +233,36 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
 #if defined(USE_LOGIN_LIBRARY) || defined(USE_LEASH)
    if (desired_name != NULL) {
 #if defined(USE_LOGIN_LIBRARY)
+       KLStatus err = klNoErr;
        char *ccache_name = NULL;
        KLPrincipal kl_desired_princ = NULL;
        
-       if ((code = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
-                                                              &kl_desired_princ))) {
-           *minor_status = code;
+       err = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
+                                                        &kl_desired_princ);
+       
+       if (!err) {
+           char *default_name = krb5_cc_default_name (context);
+           
+           if (default_name) {
+               err = __KLAcquireInitialTicketsForCache (default_name, kl_desired_princ,
+                                                        NULL, NULL, &ccache_name);
+           } else {
+               err = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name);
+           }
+       }
+       
+       if (!err) {
+           err = krb5_cc_resolve (context, ccache_name, &ccache);
+       }
+       
+       if (err) {
+           *minor_status = err;
            return(GSS_S_CRED_UNAVAIL);
        }
        
-       if ((code = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name))) {
-           KLDisposePrincipal (kl_desired_princ);
-           *minor_status = code;
-           return(GSS_S_CRED_UNAVAIL);
-       }
-       
-       if ((code = krb5_cc_resolve (context, ccache_name, &ccache))) {
-           KLDisposeString (ccache_name);
-           KLDisposePrincipal (kl_desired_princ);
-           *minor_status = code;
-           return(GSS_S_CRED_UNAVAIL);
-       }
-   
        if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
        if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
+       
 #elif defined(USE_LEASH)
        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
 	   hLeashDLL = LoadLibrary("leashw32.dll");
