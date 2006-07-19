@@ -342,8 +342,7 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
         goto _exit;
     }
 
-    if(KHM_FAILED(kmm_get_plugin_config(p->p.name, 0, &csp_plugin)) ||
-       KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t))) {
+    if(KHM_FAILED(kmm_get_plugin_config(p->p.name, 0, &csp_plugin))) {
         if(KHM_FAILED(kmm_register_plugin(&(p->p), 0))) {
             _report_mr0(KHERR_ERROR, MSG_IP_NOT_REGISTERED);
 
@@ -357,17 +356,9 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
             p->state = KMM_PLUGIN_STATE_FAIL_NOT_REGISTERED;
             goto _exit;
         }
-
-        if(KHM_FAILED(khc_read_int32(csp_plugin, L"Flags", &t))) {
-            _report_mr0(KHERR_ERROR, MSG_IP_NOT_REGISTERED);
-
-            p->state = KMM_PLUGIN_STATE_FAIL_NOT_REGISTERED;
-            goto _exit;
-        }
-
     }
 
-    if(t & KMM_PLUGIN_FLAG_DISABLED) {
+    if (KHM_SUCCEEDED(khc_read_int32(csp_plugin, L"Disabled", &t)) && t) {
         p->flags |= KMM_PLUGIN_FLAG_DISABLED;
         p->state = KMM_PLUGIN_STATE_FAIL_DISABLED;
         goto _exit;
@@ -619,13 +610,15 @@ void kmmint_init_module(kmm_module_i * m) {
         goto _exit;
     }
 
-    if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"Flags", &i)) &&
-       (i & KMM_MODULE_FLAG_DISABLED)) {
-
+    if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"Disabled", &i)) && i) {
         _report_mr0(KHERR_INFO, MSG_IM_DISABLED);
 
         m->state = KMM_MODULE_STATE_FAIL_DISABLED;
         goto _exit;
+    }
+
+    if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"NoUnload", &i)) && i) {
+        m->flags |= KMM_MODULE_FLAG_NOUNLOAD;
     }
 
     if(KHM_SUCCEEDED(khc_read_int32(csp_mod, L"FailureCount", &i))) {
@@ -963,11 +956,13 @@ void kmmint_exit_module(kmm_module_i * m) {
 
     LeaveCriticalSection(&cs_kmm);
 
-    if(m->h_module) {
+    if(!(m->flags & KMM_MODULE_FLAG_NOUNLOAD) &&
+       m->h_module) {
         FreeLibrary(m->h_module);
     }
 
-    if(m->h_resource && (m->h_resource != m->h_module)) {
+    if(!(m->flags & KMM_MODULE_FLAG_NOUNLOAD) &&
+       m->h_resource && (m->h_resource != m->h_module)) {
         FreeLibrary(m->h_resource);
     }
 

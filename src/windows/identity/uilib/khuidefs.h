@@ -46,8 +46,6 @@
 
 #include<khremote.h>
 
-#include<strsafe.h>
-
 /*! \internal */
 KHMEXP void KHMAPI
 khm_version_init(void);

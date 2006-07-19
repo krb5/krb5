@@ -71,6 +71,7 @@ $(OBJ)\krb4config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 $(DLLFILE): $(OBJFILES) $(VERRESFILE) $(MSGRESFILE)
 	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES) $(SCLIB)
 	$(_VC_MANIFEST_EMBED_DLL)
+	$(_VC_MANIFEST_CLEAN)
 
 all: mkdirs $(MSGRESFILE) $(DLLFILE) lang
 

@@ -85,21 +85,24 @@ typedef struct kmm_module_i_t {
 #define kmm_handle_from_module(m) ((kmm_module) m)
 
 /* LoadLibrary succeeded for module */
-#define KMM_MODULE_FLAG_LOADED      1
+#define KMM_MODULE_FLAG_LOADED      0x00000001
 
 /* init_module entry called */
-#define KMM_MODULE_FLAG_INITP       2
+#define KMM_MODULE_FLAG_INITP       0x00000002
 
 /* the resources have been loaded */
-#define KMM_MODULE_FLAG_RES_LOADED  8
+#define KMM_MODULE_FLAG_RES_LOADED  0x00000008
 
 /* the signature has been verified */
-#define KMM_MODULE_FLAG_SIG         16
+#define KMM_MODULE_FLAG_SIG         0x00000010
 
 /* the module is disabled by the user
-   (option specifed in configuration) */
-#define KMM_MODULE_FLAG_DISABLED    1024
+   (option specified in configuration) */
+#define KMM_MODULE_FLAG_DISABLED    0x00000400
 
+/* the module should not be unloaded
+   (option specified in configuration)*/
+#define KMM_MODULE_FLAG_NOUNLOAD    0x00000800
 
 typedef struct kmm_plugin_i_t {
     kmm_plugin_reg p;
@@ -131,15 +134,15 @@ typedef struct kmm_plugin_i_t {
 #define kmm_plugin_from_handle(ph) ((kmm_plugin_i *) ph)
 
 /* the plugin has already been marked for unload */
-#define KMM_PLUGIN_FLAG_UNLOAD      0x0001
+#define KMM_PLUGIN_FLAG_UNLOAD      0x00000001
 
 /* the plugin is in the kmm_listed_plugins list */
-#define KMM_PLUGIN_FLAG_IN_LIST     0x0002
+#define KMM_PLUGIN_FLAG_IN_LIST     0x00000002
 
 /* the plugin is in the module's plugin list */
-#define KMM_PLUGIN_FLAG_IN_MODLIST  0x0004
+#define KMM_PLUGIN_FLAG_IN_MODLIST  0x00000004
 
-#define KMM_PLUGIN_FLAG_IN_QUEUE    0x0010
+#define KMM_PLUGIN_FLAG_IN_QUEUE    0x00000010
 
 /* the plugin is disabled by the user
     (option specified in configuration) */

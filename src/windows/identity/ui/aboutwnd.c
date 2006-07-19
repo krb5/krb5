@@ -118,13 +118,14 @@ about_dlg_proc(HWND hwnd,
         return FALSE;
 
     case WM_DESTROY:
-        khm_leave_modal();
         khm_del_dialog(hwnd);
         return TRUE;
 
     case WM_COMMAND:
-        if (wParam == MAKEWPARAM(IDOK, BN_CLICKED))
+        if (wParam == MAKEWPARAM(IDOK, BN_CLICKED)) {
+            khm_leave_modal();
             DestroyWindow(hwnd);
+        }
         return TRUE;
     }
 

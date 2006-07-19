@@ -36,5 +36,7 @@ Krb5Cred,KC_SPACE,0,Kerberos V Credentials Provider
         Flags,KC_INT32,0,
       (n),KC_ENDSPACE,0,
     PromptCache,KC_ENDSPACE,0,
+    Realms,KC_SPACE,0,Realm specific configuration (same schema as per identity config)
+    Realms,KC_ENDSPACE,0,
   Parameters,KC_ENDSPACE,0,
 Krb5Cred,KC_ENDSPACE,0,

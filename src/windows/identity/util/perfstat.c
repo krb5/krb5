@@ -253,7 +253,7 @@ perf_dump(char * file) {
 #else
     f = fopen(file, "w");
     if (!f)
-	return;
+        return;
 #endif
 
     fprintf(f, "Leaked allocations list ....\n");
