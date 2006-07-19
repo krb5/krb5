@@ -234,18 +234,18 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    if (desired_name != NULL) {
 #if defined(USE_LOGIN_LIBRARY)
        KLStatus err = klNoErr;
-       char *ccache_name = NULL;
        KLPrincipal kl_desired_princ = NULL;
+       char *default_name = krb5_cc_default_name (context);
+       char *ccache_name = NULL;
        
        err = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
                                                         &kl_desired_princ);
        
        if (!err) {
-           char *default_name = krb5_cc_default_name (context);
-           
            if (default_name) {
-               err = __KLAcquireInitialTicketsForCache (default_name, kl_desired_princ,
-                                                        NULL, NULL, &ccache_name);
+               err = __KLAcquireInitialTicketsForCacheAndPrincipal (default_name, kerberosVersion_V5,
+                                                                    kl_desired_princ, NULL, NULL, 
+                                                                    &ccache_name);
            } else {
                err = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name);
            }
@@ -260,8 +260,8 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
            return(GSS_S_CRED_UNAVAIL);
        }
        
-       if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
        if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
+       if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
        
 #elif defined(USE_LEASH)
        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
