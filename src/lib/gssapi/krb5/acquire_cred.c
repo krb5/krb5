@@ -222,6 +222,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    krb5_cc_cursor cur;
    krb5_creds creds;
    int got_endtime;
+   int caller_provided_ccache_name = 0;
 
    cred->ccache = NULL;
 
@@ -230,27 +231,26 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
    if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
        return(GSS_S_FAILURE);
 
+   /* check to see if the caller provided a ccache name if so 
+    * we will just use that and not search the cache collection */
+   if (GSS_ERROR(kg_caller_provided_ccache_name (minor_status, &caller_provided_ccache_name))) {
+       return(GSS_S_FAILURE);
+   }
+
 #if defined(USE_LOGIN_LIBRARY) || defined(USE_LEASH)
-   if (desired_name != NULL) {
+   if (desired_name && !caller_provided_ccache_name) {
 #if defined(USE_LOGIN_LIBRARY)
        KLStatus err = klNoErr;
-       KLPrincipal kl_desired_princ = NULL;
-       char *default_name = krb5_cc_default_name (context);
        char *ccache_name = NULL;
-       
+       KLPrincipal kl_desired_princ = NULL;
+
        err = __KLCreatePrincipalFromKerberos5Principal ((krb5_principal) desired_name,
                                                         &kl_desired_princ);
        
        if (!err) {
-           if (default_name) {
-               err = __KLAcquireInitialTicketsForCacheAndPrincipal (default_name, kerberosVersion_V5,
-                                                                    kl_desired_princ, NULL, NULL, 
-                                                                    &ccache_name);
-           } else {
-               err = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name);
-           }
+           err = KLAcquireInitialTickets (kl_desired_princ, NULL, NULL, &ccache_name);
        }
-       
+
        if (!err) {
            err = krb5_cc_resolve (context, ccache_name, &ccache);
        }
@@ -260,8 +260,8 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
            return(GSS_S_CRED_UNAVAIL);
        }
        
-       if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
        if (kl_desired_princ != NULL) { KLDisposePrincipal (kl_desired_princ); }
+       if (ccache_name      != NULL) { KLDisposeString (ccache_name); }
        
 #elif defined(USE_LEASH)
        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {

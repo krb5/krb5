@@ -175,6 +175,22 @@ kg_sync_ccache_name (krb5_context context, OM_uint32 *minor_status)
     return (*minor_status == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
 }
 
+/* This function returns whether or not the caller set a cccache name.  Used by
+ * gss_acquire_cred to figure out if the caller wants to only look at this 
+ * ccache or search the cache collection for the desired name */
+OM_uint32
+kg_caller_provided_ccache_name (OM_uint32 *minor_status, 
+int *out_caller_provided_name)
+{
+    if (out_caller_provided_name) {
+        *out_caller_provided_name = 
+	  (k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME) != NULL);
+    }
+    
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
+}
+
 OM_uint32
 kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 {
