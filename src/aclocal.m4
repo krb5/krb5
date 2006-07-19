@@ -870,10 +870,18 @@ dnl
 AC_DEFUN(AC_KRB5_TCL_FIND_CONFIG,[
 AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_MSG_CHECKING(for tclConfig.sh)
+dnl On Debian, we might be given --with-tcl=/usr, or tclsh might
+dnl point us to /usr/lib/tcl8.4; either way, we need to find
+dnl /usr/lib/tcl8.4/tclConfig.sh.
+dnl On NetBSD, we might be given --with-tcl=/usr/pkg, or tclsh
+dnl might point us to /usr/pkg/lib/tcl8.4; we need to find
+dnl /usr/pkg/lib/tclConfig.sh.
 if test -r "$tcl_dir/lib/tclConfig.sh" ; then
   tcl_conf="$tcl_dir/lib/tclConfig.sh"
 elif test -r "$tcl_dir/tclConfig.sh" ; then
   tcl_conf="$tcl_dir/tclConfig.sh"
+elif test -r "$tcl_dir/../tclConfig.sh" ; then
+  tcl_conf="$tcl_dir/../tclConfig.sh"
 else
   tcl_conf=
   lib="$tcl_dir/lib"
