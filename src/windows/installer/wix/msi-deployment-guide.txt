@@ -19,9 +19,15 @@ Kerberos for Windows
      2.1.5     Kerberos V Properties
      2.2     Existing Registry Entries
      2.3     Replacing Configuration Files
-     3.	   Additional Resources
-     4.	   Upgrades
-     5.	   FAQ
+     3.    Network Identity Manager Settings
+     3.1     Common Settings for NetIDMgr
+     3.1.1     General Settings
+     3.1.2     Common Plug-in Settings
+     3.1.3     Settings for the Kerberos 5 Credentials Provider Plug-in
+     3.1.4     Settings for the kerberos 4 Credentials Provider Plug-in
+     4.	   Additional Resources
+     5.	   Upgrades
+     6.	   FAQ
 
 ----------------------------------------------------------------------
 
@@ -445,7 +451,293 @@ Kerberos for Windows
 
 ----------------------------------------------------------------------
 
-3   Additional Resources
+3.   Network Identity Manager Settings
+
+    Configuration options for Network Identity Manager (NetIDMgr) are
+    stored in the Windows registry.  Each option can exist in the user
+    registry hive or the machine registry hive or both.  The value
+    defined in the user hive always overrides the value defined in the
+    machine registry hive.
+
+    All registry keys used by NetIDMgr exist under the key
+    'Software\MIT\NetIDMgr' under the user and machine hive.
+    Deploying a specific configuration option can be achieved by
+    setting the corresponding registry value either by authoring the
+    keys into the MSI via a transform or by deploying a registry based
+    Group Policy Object.  For deployment purposes, it is advisable to
+    deploy values to the machine hive instead of the user hive.
+    Deploying per user settings via the MSI is not supported at this
+    time.
+
+3.1    Common settings for NetIDMgr
+
+    The following sections describe a partial list of options that can
+    be specified for NetIDMgr.  Each set of options is described as a
+    set of registry values.  Each section is preceded by the registry
+    key under which the values of that section must be specified.
+
+3.1.1    General settings
+
+    Registry key : 'Software\MIT\NetIDMgr\CredWindow'
+    --------------
+
+    Value   : AutoInit
+    Type    : DWORD  (0 or 1)
+    Default : 0
+
+        If this value is '1', shows the new credentials dialog if
+        there are no credentials when NetIDMgr starts.
+
+    Value   : AutoImport
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '1', imports credentials from the Windows LSA cache when
+        NetIDMgr starts.
+
+    Value   : AutoDetectNet
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '1', automatically detects network connectivity changes.
+        Network connectivity change notifications are then sent out to
+        individual plug-ins which can perform actions such as renewing
+        credentials or obtaining new credentials.
+
+    Value   : DestroyCredsOnExit
+    Type    : DWORD  (0 or 1)
+    Default : 0
+
+        If '1', all credentials will be destroyed when NetIDMgr exits.
+
+    Value   : KeepRunning
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '1', when NetIDMgr application is closed, it will continue
+        to run in the Windows System Notification Area (System Tray).
+        The application can be exited by choosing the 'Exit' menu
+        option.  If '0', closing the application will cause it to
+        exit completely.
+
+3.1.2    Common Plug-in settings
+
+    Registry key : 'Software\MIT\NetIDMgr\PluginManager\Plugins\<plug-in name>'
+    --------------
+
+    The '<plug-in name>' is one of the following for the standard plug-ins :
+
+    Krb5Cred : Kerberos 5 credentials provider
+    Krb5Ident: Kerberos 5 Identity provider
+    Krb4Cred : Kerberos 4 credentials provider
+
+    Consult the vendors for the plug-in names of other third party
+    plug-ins.  Additionally, the plug-ins configuration panel in the
+    NetIDMgr application provides a list of currently registered
+    plug-ins.
+
+    Value   : Disabled
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        If '1', the plug-in will not be loaded.
+
+    Value   : NoUnload
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        If '1', the plug-in will not be unloaded from memory when the
+        NetIDMgr application exits or if the plug-in is stopped.  The
+        plug-in binary will remain loaded until NetIDMgr terminates.
+
+3.1.3    Settings for the Kerberos 5 credentials provider plug-in
+
+    Registry key : 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred\Parameters'
+    --------------
+
+    Value   : CreateMissingConfig
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        If '1', creates any missing configuration files.
+
+    Value   : MsLsaImport
+    Type    : DWORD (0, 1 or 2)
+    Default : 1
+
+        Controls how credentials are imported from the MSLSA cache.
+        This setting can be one of the following.
+
+        0 : Never
+        1 : Always
+        2 : Only if the principal matches
+
+        Note that this setting only controls how the Kerberos 5
+        plug-in handles importing of credentials from the MSLSA cache.
+        Whether or not credentials are imported at start-up is
+        controlled via general NetIDMgr settings as described in
+        section 3.1.1.
+
+    Value   : MsLsaList
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        If '1', includes credentials from the MSLSA cache in the
+        credentials listing.
+
+    Value   : AutoRenewTickets
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        If '1', automatically renews expiring tickets.  The thresholds
+        at which renewals happen are controlled in general NetIDMgr
+        settings.
+
+    Value   : UseFullRealmList
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        If '1', uses the full realms list as determined by parsing the
+        krb5.ini configuration file in the new credentials dialog box.
+        If this is '0', only the last recently used list of realms
+        will be used.
+
+3.1.3.1    Per-identity settings
+
+    Registry key 1: 'Software\MIT\NetIDMgr\KCDB\Identity\<principal name>\Krb5Cred'
+    Registry key 2: 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred\Parameters\Realms\<realm>'
+    Registry key 3: 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred\Parameters'
+    --------------
+
+    These settings are generally maintained per-identity.  However, if
+    a particular setting is not specified for an identity or if the
+    identity is new, then the values will be looked up in the
+    per-realm configuration key and in the global parameters key in
+    turn.  Global defaults should be set in the global parameters key
+    (key 3).
+
+    Value   : DefaultLifetime
+    Type    : DWORD
+    Default : 36000
+
+        Default ticket lifetime, in seconds.
+
+    Value   : MaxLifetime
+    Type    : DWORD
+    Default : 86400
+
+        Maximum lifetime, in seconds.  This value is used to set the
+        range of the user interface controls that allow setting the
+        lifetime of a ticket.
+
+    Value   : MinLifetime
+    Type    : DWORD
+    Default : 60
+
+        Minimum lifetime, in seconds.  This value is used to set the
+        range of the user interface controls that allow setting the
+        lifetime of a ticket.
+
+    Value   : Forwardable
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        Obtain forwardable tickets.
+
+    Value   : Proxiable
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        Obtain proxiable tickets.
+
+    Value   : Addressless
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        Obtain addressless tickets.
+
+    Value   : Renewable
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        Obtain renewable tickets.
+
+    Value   : DefaultRenewLifetime
+    Type    : DWORD
+    Default : 604800
+
+        Default renewable lifetime, in seconds.
+
+    Value   : MaxRenewLifetime
+    Type    : DWORD
+    Default : 2592000
+
+        Maximum renewable lifetime, in seconds.  The value is used to
+        set the range of the user interface controls that allow
+        setting the renewable lifetime of a ticket.
+
+    Value   : MinRenewLifetime
+    Type    : DWORD
+    Default : 60
+
+        Minimum renewable lifetime, in seconds.  This value is used to
+        set the range of the user interface controls that allow
+        setting the renewable lifetime of a ticket.
+
+3.1.4   Settings for the Kerberos 4 Credentials Provider Plug-in
+
+    Registry key 1: 'Software\MIT\NetIDMgr\KCDB\Identity\<principal name>\Krb4Cred'
+    Registry key 2: 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred\Parameters'
+    ---------------
+
+    Theses settings are also maintained per identity.  However, if the
+    setting is not specified for some identity or if the identity is
+    new, then the global default will be used (registry key 2).
+    Global defaults should be set in the second registry key.
+
+    Value   : Krb4NewCreds
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        If '1', obtains Kerberos 4 credentials.  Note that currently,
+        only one identity can have Kerberos 4 credentials at one time.
+
+    Value   : Krb4Method
+    Type    : DWORD (0, 1 or 2)
+    Default : 0
+
+        Method for obtaining Kerberos 4 credentials.  The values are
+        as follows:
+
+        0 : Automatically determine method
+        1 : Use password
+        2 : Use Kerberos 5 to 4 translation
+
+    Value   : DefaultLifetime
+    Type    : DWORD
+    Default : 36000
+
+        The default ticket lifetime, in seconds.
+
+    Value   : MaxLifetime
+    Type    : DWORD
+    Default : 86400
+
+        Maximum lifetime, in seconds.  This value is used to set the
+        range of the user interface controls that allow setting the
+        lifetime.
+
+    Value   : MinLifetime
+    Type    : DWORD
+    Default : 60
+
+        Minimum lifetime, in seconds.  This value is used to set the
+        range of the user interface controls that allow setting the
+        lifetime.
+
+----------------------------------------------------------------------
+
+4.   Additional Resources
 
     If you want to add registry keys or files you need to create new
     components and features for those.
@@ -476,7 +768,7 @@ Kerberos for Windows
 
 ----------------------------------------------------------------------
 
-4.  Upgrades
+5.  Upgrades
 
     The MSI package is designed to uninstall previous versions of
     "Kerberos for Windows" during installation.  Note that it doesn't
@@ -515,7 +807,7 @@ Kerberos for Windows
 
 ----------------------------------------------------------------------
 
-5.  FAQ
+6.  FAQ
 
     (Q/A's will be added here as needed)
 
