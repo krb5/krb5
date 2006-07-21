@@ -1,0 +1,51 @@
+<html>
+<head>
+  <title>NetIDMgr Notification Icon</title>
+  <meta name="description" content="NetIDMgr Notification Icon">
+  <meta name="keywords" content="icon, netidmgr, notification, tray">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>NetIDMgr Notification Icon</h1>
+
+<p>When NetIDMgr is running, an icon will be placed in the system
+notification area (sometimes referred to as the "tray" area, or the
+"system tray").  The icon will change to reflect the current state of
+the managed credentials.</p>
+
+<p>The icons and their meanings are described below:</p>
+
+<table width="100%" border="1">
+
+<tr>
+<td><img src="images/appicon_empty.bmp" /></td>
+<td>There are no managed credentials for any identity.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_good.bmp" /></td>
+<td>There are valid credentials for all the identities.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_warnexp.bmp" /></td> <td>Some of the
+credentials will expire in the next few minutes.  This icon will be
+displayed even if automatic renewals are enabled.  In this case, the
+credentials in question may get renewed before they expire, and the
+icon will change to reflect this change.</td> </tr>
+
+<tr>
+<td><img src="images/appicon_expired.bmp" /></td>
+<td>some of the managed credentials have expired.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_warning.bmp" /></td> <td>A warning
+message is waiting to be displayed.  Click the icon to view the
+warning message.</td> </tr>
+
+</table>
+
+</body>
+</html>
