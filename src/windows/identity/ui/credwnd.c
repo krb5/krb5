@@ -399,7 +399,6 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
     wchar_t buf[KCONF_MAXCCH_NAME];
     wchar_t * clist = NULL;
     khm_size cbsize;
-    wchar_t * cstr = NULL;
     wchar_t * iter = NULL;
     int i;
     HDC hdc;
@@ -1539,7 +1538,7 @@ cw_get_cell_height(HDC hdc, HFONT hf) {
     SIZE size;
     size_t cbbuf;
     wchar_t buf[64];
-    HFONT hfold;
+    HFONT hfold = NULL;
 
     if (hf)
         hfold = SelectFont(hdc, hf);
@@ -1717,7 +1716,7 @@ cw_erase_rect(HDC hdc,
             break;
 
         default:
-                return;
+            return;
         }
 
         if(tbl->kbm_logo_shade.cx != -1 && type == CW_ER_BLANK) {
@@ -1727,6 +1726,8 @@ cw_erase_rect(HDC hdc,
             rlogo.bottom = r_wnd->bottom;
             rie = IntersectRect(&ri, r_erase, &rlogo);
         } else {
+            ZeroMemory(&rlogo, sizeof(rlogo));
+            ZeroMemory(&ri, sizeof(ri));
             rie = FALSE;
         }
 
@@ -1737,7 +1738,7 @@ cw_erase_rect(HDC hdc,
             HBITMAP hbmold = SelectObject(hdcb, tbl->kbm_logo_shade.hbmp);
 
             BitBlt(hdc, ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top,
-                hdcb, ri.left - rlogo.left, ri.top - rlogo.top, SRCCOPY);
+                   hdcb, ri.left - rlogo.left, ri.top - rlogo.top, SRCCOPY);
             
             SelectObject(hdcb, hbmold);
             DeleteDC(hdcb);
@@ -2145,6 +2146,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
                     Header_SetItem(tbl->hwnd_header, hidx, &hi);
                 }
 
+#if 0
             } else if (tbl->cols[idx].flags &
                        (KHUI_CW_COL_SORT_INC |
                         KHUI_CW_COL_SORT_DEC)) {
@@ -2167,7 +2169,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
                     hidx = Header_OrderToIndex(tbl->hwnd_header, i);
                     Header_SetItem(tbl->hwnd_header, hidx, &hi);
                 }
-
+#endif
             } else {
                 int i;
                 int sort_index = 0;
@@ -2327,7 +2329,7 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     HDC hdc;
     PAINTSTRUCT ps;
     RECT r,rh;
-    HFONT hf_old;
+    HFONT hf_old = NULL;
     int row_s, row_e;
     int col_s, col_e;
     int i,j,x,y,xs,xe,ys,ye;
@@ -4244,7 +4246,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case KHUI_PACTION_UP_TOGGLE:
         { /* cursor up */
             khm_int32 new_row;
-            WPARAM wp;
+            WPARAM wp = 0;
 
             new_row = tbl->cursor_row - 1;
 
@@ -4303,7 +4305,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case KHUI_PACTION_DOWN_TOGGLE:
         { /* cursor down */
             khm_int32 new_row;
-            WPARAM wp;
+            WPARAM wp = 0;
 
             new_row = tbl->cursor_row + 1;
 

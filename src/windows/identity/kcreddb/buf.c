@@ -134,7 +134,7 @@ void kcdb_buf_alloc(kcdb_buf * buf, khm_size slot, khm_ui_2 id, khm_size cbsize)
         }
 
         if(buf->cb_used > f->offset + cbold) {
-            int i;
+            khm_size i;
 
             memmove(
                 ((BYTE *) buf->buffer) + (f->offset + cbnew),

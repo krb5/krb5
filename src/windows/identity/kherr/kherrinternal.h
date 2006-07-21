@@ -60,8 +60,8 @@ extern kherr_event * evt_free_list;
 extern kherr_handler_node * ctx_handlers;
 extern khm_size n_ctx_handlers;
 
-#define parm_type(p) ((int) (((p)>>((sizeof(kherr_param) - 1) * 8)) & 0xff))
-#define parm_data(p) ((p) & ~(((kherr_param)0xff)<<((sizeof(kherr_param) - 1) * 8)))
+#define parm_type(p) ((p).type)
+#define parm_data(p) ((p).data)
 
 void resolve_event_strings(kherr_event *);
 void attach_this_thread(void);

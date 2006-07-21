@@ -805,7 +805,7 @@ khm_cred_dispatch_process_message(khui_new_creds *nc)
 }
 
 void
-khm_cred_process_commandline(void) {
+khm_cred_process_startup_actions(void) {
     khm_handle defident = NULL;
 
     if (!khm_startup.processing)
@@ -818,6 +818,11 @@ khm_cred_process_commandline(void) {
         kcdb_identity_get_default(&defident);
     }
 
+    /* For asynchronous actions, we trigger the action and then exit
+       the loop.  Once the action completes, the completion handler
+       will trigger a continuation message which will result in this
+       function getting called again.  Then we can proceed with the
+       rest of the startup actions. */
     do {
         if (khm_startup.init) {
             if (defident)
@@ -841,21 +846,34 @@ khm_cred_process_commandline(void) {
         }
 
         if (khm_startup.renew) {
-            if (defident)
-                khui_context_set(KHUI_SCOPE_IDENT,
-                                 defident,
-                                 KCDB_CREDTYPE_INVALID,
-                                 NULL, NULL, 0,
-                                 NULL);
-            else
-                khui_context_reset();
+            khm_size count;
 
-            khm_cred_renew_creds();
+            kcdb_credset_get_size(NULL, &count);
+
+            /* if there are no credentials, we just skip over the
+               renew action. */
+
             khm_startup.renew = FALSE;
-            break;
+
+            if (count != 0) {
+                if (defident)
+                    khui_context_set(KHUI_SCOPE_IDENT,
+                                     defident,
+                                     KCDB_CREDTYPE_INVALID,
+                                     NULL, NULL, 0,
+                                     NULL);
+                else
+                    khui_context_reset();
+
+                khm_cred_renew_creds();
+                break;
+            }
         }
 
         if (khm_startup.destroy) {
+
+            khm_startup.destroy = FALSE;
+
             if (defident) {
                 khui_context_set(KHUI_SCOPE_IDENT,
                                  defident,
@@ -864,14 +882,14 @@ khm_cred_process_commandline(void) {
                                  NULL);
 
                 khm_cred_destroy_creds(FALSE, FALSE);
+                break;
             }
-
-            khm_startup.destroy = FALSE;
-            break;
         }
 
         if (khm_startup.autoinit) {
             khm_size count;
+
+            khm_startup.autoinit = FALSE;
 
             kcdb_credset_get_size(NULL, &count);
 
@@ -886,9 +904,8 @@ khm_cred_process_commandline(void) {
                     khui_context_reset();
 
                 khm_cred_obtain_new_creds(NULL);
+                break;
             }
-            khm_startup.autoinit = FALSE;
-            break;
         }
 
         if (khm_startup.exit) {
@@ -899,6 +916,8 @@ khm_cred_process_commandline(void) {
             break;
         }
 
+        /* when we get here, then we are all done with the command
+           line stuff */
         khm_startup.processing = FALSE;
     } while(FALSE);
 
@@ -907,7 +926,7 @@ khm_cred_process_commandline(void) {
 }
 
 void
-khm_cred_begin_commandline(void) {
+khm_cred_begin_startup_actions(void) {
     khm_handle csp_cw;
 
     if (khm_startup.seen)
@@ -932,7 +951,7 @@ khm_cred_begin_commandline(void) {
     khm_startup.seen = TRUE;
     khm_startup.processing = TRUE;
 
-    khm_cred_process_commandline();
+    khm_cred_process_startup_actions();
 }
 
 void

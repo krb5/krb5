@@ -49,11 +49,15 @@ KHMEXP void KHMAPI InitializeRwLock(PRWLOCK pLock)
 
 KHMEXP void KHMAPI DeleteRwLock(PRWLOCK pLock)
 {
-    DeleteCriticalSection(&(pLock->cs));
+    EnterCriticalSection(&pLock->cs);
+
     CloseHandle(pLock->readwx);
     CloseHandle(pLock->writewx);
     pLock->readwx = NULL;
     pLock->writewx = NULL;
+
+    LeaveCriticalSection(&pLock->cs);
+    DeleteCriticalSection(&(pLock->cs));
 }
 
 KHMEXP void KHMAPI LockObtainRead(PRWLOCK pLock)
@@ -93,7 +97,6 @@ KHMEXP void KHMAPI LockObtainWrite(PRWLOCK pLock)
        pLock->writer == GetCurrentThreadId()) {
         pLock->locks++;
         LeaveCriticalSection(&(pLock->cs));
-        assert(FALSE);
         return;
     }
     LeaveCriticalSection(&(pLock->cs));
@@ -108,6 +111,7 @@ KHMEXP void KHMAPI LockObtainWrite(PRWLOCK pLock)
     pLock->locks++;
     pLock->writer = GetCurrentThreadId();
     ResetEvent(pLock->readwx);
+    ResetEvent(pLock->writewx);
     LeaveCriticalSection(&(pLock->cs));
 }
 

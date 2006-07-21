@@ -91,7 +91,7 @@ khm_krb5_initialize(khm_handle ident,
 
     LPCSTR          functionName;
     int             freeContextFlag;
-    krb5_error_code	rc;
+    krb5_error_code	rc = 0;
     krb5_flags          flags = 0;
 
     if (pkrb5_init_context == NULL)
@@ -289,6 +289,12 @@ khm_krb5_find_ccache_for_identity(khm_handle ident, krb5_context *pctx,
 
     ctx = *pctx;
 
+    if (!pcc_initialize ||
+        !pcc_get_NC_info ||
+        !pcc_free_NC_info ||
+        !pcc_shutdown)
+        goto _skip_cc_iter;
+
     code = pcc_initialize(&cc_ctx, CC_API_VER_2, NULL, NULL);
     if (code)
         goto _exit;
@@ -336,6 +342,8 @@ khm_krb5_find_ccache_for_identity(khm_handle ident, krb5_context *pctx,
             (*pkrb5_cc_close)(ctx, cache);
         cache = 0;
     }
+
+ _skip_cc_iter:
 
     if (KHM_SUCCEEDED(kmm_get_plugins_config(0, &csp_plugins))) {
         khc_open_space(csp_plugins, L"Krb5Cred\\Parameters",  0, &csp_params);

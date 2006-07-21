@@ -522,10 +522,10 @@ khm_main_wnd_proc(HWND hwnd,
                 khm_update_standard_toolbar();
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_BEGIN_CMDLINE) {
-                khm_cred_begin_commandline();
+                khm_cred_begin_startup_actions();
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_CONTINUE_CMDLINE) {
-                khm_cred_process_commandline();
+                khm_cred_process_startup_actions();
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_SYNC_CFG) {
                 khm_refresh_config();
@@ -594,7 +594,7 @@ khm_main_wnd_proc(HWND hwnd,
             khm_startup.seen = FALSE;
             khm_startup.processing = FALSE;
 
-            khm_cred_begin_commandline();
+            khm_cred_begin_startup_actions();
         }
         break;
 

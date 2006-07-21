@@ -49,8 +49,14 @@ void kmqint_init(void) {
     khc_load_schema(NULL, schema_kmqconfig);
     khc_open_space(NULL, KMQ_CONF_SPACE_NAME, KHM_PERM_READ, &hconfig);
     if(hconfig) {
-        khc_read_int32(hconfig, KMQ_CONF_QUEUE_DEAD_TIMEOUT_NAME, &kmq_queue_dead_timeout);
-        khc_read_int32(hconfig, KMQ_CONF_CALL_DEAD_TIMEOUT_NAME, &kmq_call_dead_timeout);
+        khm_int32 t = 0;
+
+        khc_read_int32(hconfig, KMQ_CONF_QUEUE_DEAD_TIMEOUT_NAME, &t);
+        kmq_queue_dead_timeout = t;
+
+        khc_read_int32(hconfig, KMQ_CONF_CALL_DEAD_TIMEOUT_NAME, &t);
+        kmq_call_dead_timeout = t;
+
         khc_close_space(hconfig);
     }
     kmqint_init_msg_types();

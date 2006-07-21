@@ -322,8 +322,8 @@ cw_create_prompt(khm_size idx,
                  khm_int32 flags)
 {
     khui_new_creds_prompt * p;
-    size_t cb_prompt;
-    size_t cb_def;
+    size_t cb_prompt = 0;
+    size_t cb_def = 0;
 
     if(prompt && FAILED(StringCbLength(prompt, KHUI_MAXCB_PROMPT, &cb_prompt)))
         return NULL;

@@ -364,8 +364,10 @@ khm_int32 init_imports(void) {
 
 #define CKRV if(!imp_rv) goto _err_ret
 
+#ifndef _WIN64
     imp_rv = LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
     CKRV;
+#endif
 
     imp_rv = LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
     CKRV;

@@ -190,12 +190,12 @@ multi_string_find(const wchar_t * ms,
 
         if(flags & KHM_PREFIX) {
             if(((flags & KHM_CASE_SENSITIVE) && !wcsncmp(s, str, cch_s)) ||
-                (!(flags & KHM_CASE_SENSITIVE) && !wcsnicmp(s, str, cch_s)))
+                (!(flags & KHM_CASE_SENSITIVE) && !_wcsnicmp(s, str, cch_s)))
                 return (wchar_t *) s;
         } else {
             if((cch == cch_s) &&
 				((flags & KHM_CASE_SENSITIVE) && !wcsncmp(s, str, cch)) ||
-                (!(flags & KHM_CASE_SENSITIVE) && !wcsnicmp(s, str, cch)))
+                (!(flags & KHM_CASE_SENSITIVE) && !_wcsnicmp(s, str, cch)))
                 return (wchar_t *) s;
         }
 

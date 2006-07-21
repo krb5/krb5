@@ -568,12 +568,12 @@ _exit:
     return code;
 }
 
-long 
+long
 khm_krb5_list_tickets(krb5_context *krbv5Context)
 {
-    krb5_context	ctx;
+    krb5_context	ctx = NULL;
     krb5_ccache		cache = 0;
-    krb5_error_code	code;
+    krb5_error_code	code = 0;
     apiCB *             cc_ctx = 0;
     struct _infoNC **   pNCi = NULL;
     int                 i;
@@ -581,10 +581,19 @@ khm_krb5_list_tickets(krb5_context *krbv5Context)
     wchar_t *           ms = NULL;
     khm_size            cb;
 
-    ctx = NULL;
-    cache = NULL;
-
     kcdb_credset_flush(krb5_credset);
+
+    if((*krbv5Context == 0) && (code = (*pkrb5_init_context)(krbv5Context))) {
+        goto _exit;
+    }
+
+    ctx = (*krbv5Context);
+
+    if (!pcc_initialize ||
+        !pcc_get_NC_info ||
+        !pcc_free_NC_info ||
+        !pcc_shutdown)
+        goto _skip_cc_iter;
 
     code = pcc_initialize(&cc_ctx, CC_API_VER_2, NULL, NULL);
     if (code)
@@ -593,12 +602,6 @@ khm_krb5_list_tickets(krb5_context *krbv5Context)
     code = pcc_get_NC_info(cc_ctx, &pNCi);
     if (code) 
         goto _exit;
-
-    if((*krbv5Context == 0) && (code = (*pkrb5_init_context)(krbv5Context))) {
-        goto _exit;
-    }
-
-    ctx = (*krbv5Context);
 
     for(i=0; pNCi[i]; i++) {
         char ccname[KRB5_MAXCCH_CCNAME];
@@ -622,6 +625,8 @@ khm_krb5_list_tickets(krb5_context *krbv5Context)
 
         cache = 0;
     }
+
+ _skip_cc_iter:
 
     if (KHM_SUCCEEDED(khc_read_int32(csp_params, L"MsLsaList", &t)) && t) {
         code = (*pkrb5_cc_resolve)(ctx, "MSLSA:", &cache);
@@ -730,10 +735,10 @@ khm_krb5_renew_ident(khm_handle identity)
     krb5_creds          my_creds;
     krb5_data           *realm = 0;
 
+    memset(&my_creds, 0, sizeof(krb5_creds));
+
     if ( !pkrb5_init_context )
         goto cleanup;
-
-    memset(&my_creds, 0, sizeof(krb5_creds));
 
     code = khm_krb5_initialize(identity, &ctx, &cc);
     if (code) 
@@ -1620,7 +1625,7 @@ khm_krb5_ms2mit(BOOL save_creds)
     return(FALSE);
 #else /* NO_KRB5 */
     krb5_context kcontext = 0;
-    krb5_error_code code;
+    krb5_error_code code = 0;
     krb5_ccache ccache=0;
     krb5_ccache mslsa_ccache=0;
     krb5_creds creds;

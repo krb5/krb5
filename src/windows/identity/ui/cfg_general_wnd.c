@@ -24,6 +24,7 @@
 
 /* $Id$ */
 
+#include<shlwapi.h>
 #include<khmapp.h>
 #include<assert.h>
 
@@ -267,8 +268,61 @@ khm_cfg_general_proc(HWND hwnd,
         d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
 
         if (HIWORD(wParam) == BN_CLICKED) {
-            refresh_data(hwnd, d);
-            check_for_modification(d);
+            if (LOWORD(wParam) == IDC_CFG_SHOWLOG) {
+                /* we need to display the logfile */
+                wchar_t buf[512];
+
+                buf[0] = L'\0';
+                khm_get_file_log_path(sizeof(buf), buf);
+
+                if (!buf[0] ||
+                    !PathFileExists(buf)) {
+
+                    wchar_t title[256];
+                    wchar_t msg[550];
+                    wchar_t fmt[256];
+
+                    LoadString(khm_hInstance, IDS_CFG_LOGF_CS,
+                               title, ARRAYLENGTH(title));
+                    LoadString(khm_hInstance, IDS_CFG_LOGF_CSR,
+                               fmt, ARRAYLENGTH(fmt));
+
+                    StringCbPrintf(msg, sizeof(msg), fmt, buf);
+
+                    MessageBox(hwnd, title, msg, MB_OK);
+                    
+                } else {
+                    wchar_t cmdline[550];
+                    STARTUPINFO si;
+                    PROCESS_INFORMATION pi;
+
+                    StringCbCopy(cmdline, sizeof(cmdline), L"notepad.exe ");
+                    StringCbCat(cmdline, sizeof(cmdline), L"\"");
+                    StringCbCat(cmdline, sizeof(cmdline), buf);
+                    StringCbCat(cmdline, sizeof(cmdline), L"\"");
+
+                    ZeroMemory(&si, sizeof(si));
+                    si.cb = sizeof(si);
+                    ZeroMemory(&pi, sizeof(pi));
+
+                    CreateProcess(NULL,
+                                  cmdline,
+                                  NULL, NULL,
+                                  FALSE,
+                                  0, NULL, NULL,
+                                  &si,
+                                  &pi);
+
+                    if (pi.hProcess)
+                        CloseHandle(pi.hProcess);
+                    if (pi.hThread)
+                        CloseHandle(pi.hThread);
+
+                }
+            } else {
+                refresh_data(hwnd, d);
+                check_for_modification(d);
+            }
         }
 
         khm_set_dialog_result(hwnd, 0);

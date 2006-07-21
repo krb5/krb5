@@ -77,6 +77,11 @@ enum khui_wm_cfg_notifications {
       'Apply' button or the 'Ok' button.  The panels are responsible
       for applying the configuration changes and updating their flags
       using khui_cfg_set_flags(). */
+
+    WMCFG_SYNC_NODE_LIST = 4,
+    /*!< Sent from the UI library to the configuration window to
+      notify the window that the node list has changed.  This message
+      is sent synchronously before the node is removed. */
 };
 
 /*! \brief Registration information for a configuration node
