@@ -1225,6 +1225,10 @@ AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most p
 AC_HELP_STRING([--disable-static],[don't build static libraries]), ,
 [enable_static=$default_static])
 
+if test "$enable_static" = yes; then
+  AC_MSG_ERROR([Sorry, static libraries do not work in this release.])
+fi
+
 if test "$enable_static" = no && test "$krb5_force_static" != yes; then
 	AC_MSG_NOTICE([disabling static libraries])
 	LIBLINKS=
