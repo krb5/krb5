@@ -224,11 +224,20 @@ khcwarn=$(khcwarn) /WX
 ldebug=$(ldebug) /DEBUG
 cdebug=$(cdebug) -Os -Zi
 
+# Additionally, suppress conflicting default library directives that we
+# might pull in from external libraries.
+
+!ifndef NODEBUG
+lndeflibflag=/NODEFAULTLIB:MSVCRT
+!else
+lndeflibflag=/NODEFAULTLIB:MSVCRTD
+!endif
+
 khcflags=$(cdebug) $(cflags) $(incflags) $(khdefines) $(khcwarn)
-khlguiflags=$(ldebug) $(guilflags)
-khlconflags=$(ldebug) $(conlflags)
-khldllguiflags=$(ldebug) $(dlllflags)
-khldllconflags=$(ldebug) $(dlllflags)
+khlguiflags=$(ldebug) $(guilflags) $(lndeflibflag)
+khlconflags=$(ldebug) $(conlflags) $(lndeflibflag)
+khldllguiflags=$(ldebug) $(dlllflags) $(lndeflibflag)
+khldllconflags=$(ldebug) $(dlllflags) $(lndeflibflag)
 
 !if "$(KH_RUNTIME)" == "STATIC"
 khcflags=$(khcflags) $(cvarsmt)
@@ -293,5 +302,29 @@ etag::
 	etags -o $(TAGFILE) -a *.c *.h
 
 .SUFFIXES: .h
+
+#
+# Manifest handling
+#
+# Starting with Visual Studio 8, the C compiler and the linker
+# generate manifests so that the applications will link with the
+# correct side-by-side DLLs at run-time.  These are required for
+# correct operation under Windows XP.  We also have custom manifests
+# which need to be merged with the manifests that VS creates.
+#
+# The syntax for invoking the _VC_MANIFEST_EMBED_foo macro is:
+# $(_VC_MANIFEST_EMBED_???) <any additional manifests that need to be merged in>
+#
+
+!ifndef MT
+MT=mt.exe -nologo
+!endif
+
+_VC_MANIFEST_EMBED_EXE= \
+if exist $@.manifest $(MT) -outputresource:$@;1 -manifest $@.manifest
+
+_VC_MANIFEST_EMBED_DLL=$(_VC_MANIFEST_EMBED_EXE)
+
+# End of manifest handling
 
 !endif

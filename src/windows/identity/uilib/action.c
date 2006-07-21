@@ -29,6 +29,8 @@
 #include<utils.h>
 #include<assert.h>
 
+#include<strsafe.h>
+
 khui_action_ref khui_main_menu[] = {
     MENU_SUBMENU(KHUI_MENU_FILE),
     MENU_SUBMENU(KHUI_MENU_CRED),

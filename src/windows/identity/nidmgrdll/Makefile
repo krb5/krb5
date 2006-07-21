@@ -113,8 +113,10 @@ SCLIB=
 
 $(DLLFILE): $(OBJFILES) $(RESFILES)
 	$(DLLGUILINK) $(LIBFILES) $(SDKLIBFILES) $(SCLIB)
+	$(_VC_MANIFEST_EMBED_DLL)
 
 all: mkdirs $(DLLFILE)
 
 clean::
 	$(RM) $(DLLFILE)
+	$(RM) $(DLLFILE).manifest

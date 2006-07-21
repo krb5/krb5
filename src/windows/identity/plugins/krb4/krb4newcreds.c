@@ -115,9 +115,14 @@ void k4_update_data(k4_dlg_data * d) {
 
 khm_boolean k4_should_identity_get_k4(khm_handle ident) {
     khm_int32 idflags = 0;
+    khm_int32 t = TRUE;
     khm_handle csp_ident = NULL;
     khm_handle csp_k4 = NULL;
     khm_boolean get_k4 = TRUE;
+
+    if (KHM_SUCCEEDED(khc_read_int32(csp_params, L"Krb4NewCreds", &t)) &&
+        !t)
+        return FALSE;
 
     if (KHM_FAILED(kcdb_identity_get_flags(ident, &idflags)))
         return FALSE;
@@ -325,8 +330,7 @@ void k4_handle_wmnc_notify(k4_dlg_data * d,
 
             l = (khui_htwnd_link *) lParam;
 
-            wcsncpy(wid, l->id, l->id_len);
-            wid[l->id_len] = 0;
+            StringCchCopyN(wid, ARRAYLENGTH(wid), l->id, l->id_len);
             wids = wcschr(wid, L':');
 
             if (!wids)

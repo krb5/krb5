@@ -274,6 +274,36 @@ krb5flags_toString(const void *d,
     }
 }
 
+khm_int32 KHMAPI
+kvno_toString(const void * data, khm_size cbdata,
+              wchar_t *destbuf, khm_size *pcbdestbuf,
+              khm_int32 flags)
+{
+    int resid = 0;
+    int kvno;
+    wchar_t buf[256];
+    size_t cblength;
+
+    if (cbdata != sizeof(khm_int32))
+        return KHM_ERROR_INVALID_PARAM;
+
+    kvno = *((khm_int32 *) data);
+
+    StringCbPrintf(buf, sizeof(buf), L"#%d", kvno);
+
+    StringCbLength(buf, ARRAYLENGTH(buf), &cblength);
+    cblength += sizeof(wchar_t);
+
+    if (!destbuf || *pcbdestbuf < cblength) {
+        *pcbdestbuf = cblength;
+        return KHM_ERROR_TOO_LONG;
+    } else {
+        StringCbCopy(destbuf, *pcbdestbuf, buf);
+        *pcbdestbuf = cblength;
+        return KHM_ERROR_SUCCESS;
+    }
+}
+
 khm_int32
 serialize_krb5_addresses(krb5_address ** a, void * buf, size_t * pcbbuf)
 {

@@ -62,12 +62,14 @@ typedef enum tag_k5_lsa_import {
 #define TYPENAME_ADDR_LIST      L"AddrList"
 #define TYPENAME_KRB5_FLAGS     L"Krb5Flags"
 #define TYPENAME_KRB5_PRINC     L"Krb5Principal"
+#define TYPENAME_KVNO           L"Kvno"
 
 #define ATTRNAME_KEY_ENCTYPE    L"KeyEncType"
 #define ATTRNAME_TKT_ENCTYPE    L"TktEncType"
 #define ATTRNAME_ADDR_LIST      L"AddrList"
 #define ATTRNAME_KRB5_FLAGS     L"Krb5Flags"
 #define ATTRNAME_KRB5_CCNAME    L"Krb5CCName"
+#define ATTRNAME_KVNO           L"Kvno"
 
 void init_krb();
 void exit_krb();
@@ -84,6 +86,7 @@ extern khm_int32 type_id_enctype;
 extern khm_int32 type_id_addr_list;
 extern khm_int32 type_id_krb5_flags;
 extern khm_int32 type_id_krb5_princ;
+extern khm_int32 type_id_kvno;
 
 extern BOOL      type_regd_krb5_princ;
 
@@ -92,6 +95,7 @@ extern khm_int32 attr_id_tkt_enctype;
 extern khm_int32 attr_id_addr_list;
 extern khm_int32 attr_id_krb5_flags;
 extern khm_int32 attr_id_krb5_ccname;
+extern khm_int32 attr_id_kvno;
 
 extern khm_ui_4  k5_commctl_version;
 

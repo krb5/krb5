@@ -943,12 +943,18 @@ kcdb_creds_is_equal(khm_handle vcred1,
 
     kcdb_cred_lock_read();
     if(!kcdb_cred_is_active_cred(vcred1) ||
-       !kcdb_cred_is_active_cred(vcred2))
+       !kcdb_cred_is_active_cred(vcred2)) {
+
+        code = FALSE;
         goto _exit;
 
+    }
+
     if(vcred1 == vcred2) {
+
         code = TRUE;
         goto _exit;
+
     }
 
     cred1 = vcred1;

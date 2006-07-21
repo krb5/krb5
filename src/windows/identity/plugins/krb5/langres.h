@@ -132,6 +132,8 @@
 #define IDS_CFG_RE_MMK                  214
 #define IDS_CFG_RE_MND                  215
 #define IDS_CFG_RE_MDD                  216
+#define IDS_KVNO_SHORT_DESC             217
+#define IDS_KVNO_LONG_DESC              218
 #define IDC_NCK5_RENEWABLE              1002
 #define IDC_NCK5_FORWARDABLE            1004
 #define IDC_NCK5_REALM                  1005
@@ -204,7 +206,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        118
+#define _APS_NEXT_RESOURCE_VALUE        219
 #define _APS_NEXT_COMMAND_VALUE         40002
 #define _APS_NEXT_CONTROL_VALUE         1079
 #define _APS_NEXT_SYMED_VALUE           101

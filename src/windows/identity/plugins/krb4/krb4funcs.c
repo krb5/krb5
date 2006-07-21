@@ -243,10 +243,10 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-		strncat(confname, "\\",sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
-		strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
+
+        StringCchCatA(confname, szConfname, "\\");
+        StringCchCatA(confname, szConfname, KRB5_FILE);
+
         return FALSE;
     }
     
@@ -254,7 +254,7 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     
     if (configFile)
     {
-        strncpy(confname, *configFile, szConfname);
+        StringCchCopyA(confname, szConfname, *configFile);
         pkrb5_free_config_files(configFile); 
     }
     
@@ -262,10 +262,9 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
-		strncat(confname, "\\",sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
-		strncat(confname, KRB5_FILE,sizeof(confname)-strlen(confname));
-        confname[szConfname-1] = '\0';
+
+        StringCchCatA(confname, szConfname, "\\");
+        StringCchCatA(confname, szConfname, KRB5_FILE);
     }
     
     return FALSE;
@@ -274,51 +273,41 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
 BOOL
 khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
 {
-    if (hKrb5 && !hKrb4)
-	{ // hold krb.con where krb5.ini is located
-            CHAR krbConFile[MAX_PATH]="";
-            LPSTR pFind;
+    if (hKrb5 && !hKrb4) {
+        // hold krb.con where krb5.ini is located
+        CHAR krbConFile[MAX_PATH]="";
+        LPSTR pFind;
 
-	    //strcpy(krbConFile, CLeashApp::m_krbv5_profile->first_file->filename);
-            if (khm_krb5_get_profile_file(krbConFile, sizeof(krbConFile)))	
-                {
-		    GetWindowsDirectoryA(krbConFile,sizeof(krbConFile));
-                    krbConFile[MAX_PATH-1] = '\0';
-                    strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-                    krbConFile[MAX_PATH-1] = '\0';
-                    strncat(krbConFile, KRB5_FILE,sizeof(krbConFile)-strlen(krbConFile));
-                    krbConFile[MAX_PATH-1] = '\0';
-                }
+        if (khm_krb5_get_profile_file(krbConFile, sizeof(krbConFile))) {
+            GetWindowsDirectoryA(krbConFile,sizeof(krbConFile));
+            krbConFile[MAX_PATH-1] = '\0';
 
-            pFind = strrchr(krbConFile, '\\');
-            if (pFind)
-		{
-                    *pFind = 0;
-                    strncat(krbConFile, "\\",sizeof(krbConFile)-strlen(krbConFile));
-                    krbConFile[MAX_PATH-1] = '\0';
-                    strncat(krbConFile, KRB_FILE,sizeof(krbConFile)-strlen(krbConFile));
-                    krbConFile[MAX_PATH-1] = '\0';
-		}
-            else
-                krbConFile[0] = 0;
-            
-            strncpy(confname, krbConFile, szConfname);
+            StringCbCatA(krbConFile, sizeof(krbConFile), "\\");
+        }
+
+        pFind = strrchr(krbConFile, '\\');
+
+        if (pFind) {
+            *pFind = '\0';
+
+            StringCbCatA(krbConFile, sizeof(krbConFile), "\\");
+            StringCbCatA(krbConFile, sizeof(krbConFile), KRB_FILE);
+        } else {
+            krbConFile[0] = '\0';
+        }
+
+        StringCchCopyA(confname, szConfname, krbConFile);
+    } else if (hKrb4) { 
+        unsigned int size = szConfname;
+        memset(confname, '\0', szConfname);
+        if (!pkrb_get_krbconf2(confname, &size)) {
+            GetWindowsDirectoryA(confname,szConfname);
             confname[szConfname-1] = '\0';
-	}
-    else if (hKrb4)
-	{ 
-            unsigned int size = szConfname;
-            memset(confname, '\0', szConfname);
-            if (!pkrb_get_krbconf2(confname, &size))
-		{ // Error has happened
-		    GetWindowsDirectoryA(confname,szConfname);
-                    confname[szConfname-1] = '\0';
-                    strncat(confname, "\\",szConfname-strlen(confname));
-                    confname[szConfname-1] = '\0';
-                    strncat(confname,KRB_FILE,szConfname-strlen(confname));
-                    confname[szConfname-1] = '\0';
-		}
-	}
+            StringCchCatA(confname, szConfname, "\\");
+            StringCchCatA(confname, szConfname, KRB_FILE);
+        }
+    }
+
     return FALSE;
 }
 
@@ -433,7 +422,12 @@ wchar_t * khm_krb5_get_realm_list(void)
         wchar_t * d;
 
         if (!khm_get_krb4_con_file(krb_conf,sizeof(krb_conf)) && 
-            (file = fopen(krb_conf, "rt")))
+#if _MSC_VER >= 1400
+            !fopen_s(&file, krb_conf, "rt")
+#else
+	    (file = fopen(krb_conf, "rt"))
+#endif
+	     )
         {
             char lineBuf[256];
 
@@ -519,25 +513,32 @@ make_postfix(const char * base,
              const char * postfix,
              char ** rcopy)
 {
-    int base_size;
-    int ret_size;
+    size_t base_size;
+    size_t ret_size;
     char * copy = 0;
     char * ret = 0;
+    size_t t;
 
-    base_size = (int) strlen(base) + 1;
-    ret_size = base_size + (int) strlen(postfix) + 1;
+    if (FAILED(StringCbLengthA(base, STRSAFE_MAX_CCH * sizeof(char), &t)))
+        goto cleanup;
+
+    base_size = t + 1;
+
+    if (FAILED(StringCbLengthA(postfix, STRSAFE_MAX_CCH * sizeof(char), &t)))
+        goto cleanup;
+
+    ret_size = base_size + t + 1;
+
     copy = malloc(base_size);
     ret = malloc(ret_size);
 
     if (!copy || !ret)
         goto cleanup;
 
-    strncpy(copy, base, base_size);
-    copy[base_size - 1] = 0;
-
-    strncpy(ret, base, base_size);
-    strncpy(ret + (base_size - 1), postfix, ret_size - (base_size - 1));
-    ret[ret_size - 1] = 0;
+    StringCbCopyNA(copy, base_size, base, base_size);
+    StringCbCopyNA(ret, ret_size, base, base_size);
+    StringCbCopyNA(ret + (base_size - 1), ret_size - (base_size - 1),
+                   postfix, ret_size - (base_size - 1));
 
  cleanup:
     if (!copy || !ret) {

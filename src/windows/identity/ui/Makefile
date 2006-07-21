@@ -27,7 +27,7 @@ MODULE=ui
 
 EXEFILE=$(BINDIR)\netidmgr.exe
 
-MANIFESTFILE=$(BINDIR)\netidmgr.exe.manifest
+MANIFESTFILE=$(BINDIR)\netidmgr.exe.static.manifest
 
 OBJFILES= 			\
 	$(OBJ)\main.obj 	\
@@ -88,7 +88,6 @@ $(MANIFESTFILE): netidmgr.manifest.$(CPU).$(KH_CLVER).debug
 !endif
 	$(CP) $** $@
 
-
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
 SCLIB=bufferoverflowu.lib
 !else
@@ -97,6 +96,6 @@ SCLIB=
 
 $(EXEFILE): $(OBJFILES) $(RESFILES) $(LIBFILES)
 	$(EXEGUILINK) $(SDKLIBFILES) $(SCLIB)
+	$(_VC_MANIFEST_EMBED_EXE) $(MANIFESTFILE)
 
-all: mkdirs $(EXEFILE) $(MANIFESTFILE)
-
+all: mkdirs $(MANIFESTFILE) $(EXEFILE)

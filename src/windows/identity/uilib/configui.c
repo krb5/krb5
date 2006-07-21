@@ -30,6 +30,8 @@
 #include<utils.h>
 #include<assert.h>
 
+#include<strsafe.h>
+
 khm_int32 cfgui_node_serial;
 LONG init_once = 0;
 CRITICAL_SECTION cs_cfgui;
