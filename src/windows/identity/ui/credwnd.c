@@ -34,6 +34,169 @@ khm_int32 khui_cw_flag_id;
 khm_int32 attr_to_action[KCDB_ATTR_MAX_ID + 1];
 
 void
+khm_set_cw_element_font(wchar_t * name, LOGFONT * pfont) {
+    khm_handle csp_cw = NULL;
+    wchar_t * element_name;
+
+    if (name == NULL)
+        element_name = L"FontBase";
+    else
+        element_name = name;
+
+    if (KHM_FAILED(khc_open_space(NULL, L"CredWindow", KHM_PERM_WRITE,
+                                  &csp_cw)))
+        return;
+
+    khc_write_binary(csp_cw, element_name, pfont, sizeof(LOGFONT));
+
+    khc_close_space(csp_cw);
+}
+
+void
+khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfont) {
+    khm_handle csp_cw = NULL;
+    khm_size cb;
+    wchar_t * element_name;
+    khm_boolean try_derive = FALSE;
+
+    if (name == NULL)
+        element_name = L"FontBase";
+    else
+        element_name = name;
+
+    if (use_default)
+        goto _use_defaults;
+
+    if (KHM_FAILED(khc_open_space(NULL, L"CredWindow", 0,
+                                  &csp_cw)))
+        goto _use_defaults;
+
+    cb = sizeof(LOGFONT);
+    if (KHM_FAILED(khc_read_binary(csp_cw, element_name, pfont,
+                                   &cb)) ||
+        cb != sizeof(LOGFONT)) {
+        try_derive = TRUE;
+    }
+
+    if (try_derive) {
+        cb = sizeof(LOGFONT);
+        if (!name ||
+            KHM_FAILED(khc_read_binary(csp_cw, L"FontBase", pfont,
+                                       &cb)) ||
+            cb != sizeof(LOGFONT)) {
+            khc_close_space(csp_cw);
+            goto _use_defaults;
+        }
+
+        if (!wcscmp(name, L"FontHeaderBold") ||
+            !wcscmp(name, L"FontBold")) {
+
+            pfont->lfWeight = FW_BOLD;
+
+        }
+    }
+
+    khc_close_space(csp_cw);
+
+    return;
+
+ _use_defaults:
+
+    ZeroMemory(pfont, sizeof(*pfont));
+
+    if (name == NULL) {
+        LOGFONT lf = {
+            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
+            0,0, /* escapement */
+            FW_THIN,
+            FALSE,
+            FALSE,
+            FALSE,
+            DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY,
+            FF_SWISS,
+            L"MS Shell Dlg"};
+
+        *pfont = lf;
+
+    } else if (!wcscmp(name, L"FontHeader")) {
+        LOGFONT lf = {
+            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
+            0,0, /* escapement */
+            FW_THIN,
+            FALSE,
+            FALSE,
+            FALSE,
+            DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY,
+            FF_SWISS,
+            L"MS Shell Dlg"};
+
+        *pfont = lf;
+
+    } else if (!wcscmp(name, L"FontHeaderBold")) {
+        LOGFONT lf = {
+            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
+            0,0, /* escapement */
+            FW_BOLD,
+            FALSE,
+            FALSE,
+            FALSE,
+            DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY,
+            FF_SWISS,
+            L"MS Shell Dlg"};
+
+        *pfont = lf;
+
+    } else if (!wcscmp(name, L"FontNormal")) {
+        LOGFONT lf = {
+            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
+            0,0, /* escapement */
+            FW_THIN,
+            FALSE,
+            FALSE,
+            FALSE,
+            DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY,
+            FF_SWISS,
+            L"MS Shell Dlg"};
+
+        *pfont = lf;
+
+    } else if (!wcscmp(name, L"FontBold")) {
+        LOGFONT lf = {
+            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
+            0,0, /* escapement */
+            FW_BOLD,
+            FALSE,
+            FALSE,
+            FALSE,
+            DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS,
+            CLIP_DEFAULT_PRECIS,
+            DEFAULT_QUALITY,
+            FF_SWISS,
+            L"MS Shell Dlg"};
+
+        *pfont = lf;
+
+    } else {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+    }
+}
+
+void
 cw_refresh_attribs(HWND hwnd) {
     khm_int32 act;
     kcdb_attrib * attrib;
@@ -240,6 +403,7 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
     wchar_t * iter = NULL;
     int i;
     HDC hdc;
+    LOGFONT log_font;
 
     tbl->hwnd = hwnd;
 
@@ -390,64 +554,21 @@ _skip_col:
 
     hdc = GetWindowDC(hwnd);
 
-    tbl->hf_header =
-        CreateFont(-MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72),0, /* width/height */
-                   0,0, /* escapement */
-                   FW_THIN,
-                   FALSE,
-                   FALSE,
-                   FALSE,
-                   DEFAULT_CHARSET,
-                   OUT_DEFAULT_PRECIS,
-                   CLIP_DEFAULT_PRECIS,
-                   DEFAULT_QUALITY,
-                   FF_SWISS,
-                   L"MS Shell Dlg");
+    khm_get_cw_element_font(hdc, L"FontHeader", FALSE, &log_font);
+    tbl->hf_header = CreateFontIndirect(&log_font);
 
     if(tbl->hf_header && tbl->hwnd_header)
         SendMessage(tbl->hwnd_header, WM_SETFONT, (WPARAM) tbl->hf_header, 0);
 
-    tbl->hf_bold_header =
-        CreateFont(-MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72),0, /* width/height */
-                   0,0, /* escapement */
-                   FW_BOLD,
-                   FALSE,
-                   FALSE,
-                   FALSE,
-                   DEFAULT_CHARSET,
-                   OUT_DEFAULT_PRECIS,
-                   CLIP_DEFAULT_PRECIS,
-                   DEFAULT_QUALITY,
-                   FF_SWISS,
-                   L"MS Shell Dlg");
+    khm_get_cw_element_font(hdc, L"FontHeaderBold", FALSE, &log_font);
+    tbl->hf_bold_header = CreateFontIndirect(&log_font);
 
-    tbl->hf_normal =
-        CreateFont(-MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72),0, /* width/height */
-                   0,0, /* escapement */
-                   FW_THIN,
-                   FALSE,
-                   FALSE,
-                   FALSE,
-                   DEFAULT_CHARSET,
-                   OUT_DEFAULT_PRECIS,
-                   CLIP_DEFAULT_PRECIS,
-                   DEFAULT_QUALITY,
-                   FF_SWISS,
-                   L"MS Shell Dlg");
 
-    tbl->hf_bold =
-        CreateFont(-MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72),0, /* width/height */
-                   0,0, /* escapement */
-                   FW_BOLD,
-                   FALSE,
-                   FALSE,
-                   FALSE,
-                   DEFAULT_CHARSET,
-                   OUT_DEFAULT_PRECIS,
-                   CLIP_DEFAULT_PRECIS,
-                   DEFAULT_QUALITY,
-                   FF_SWISS,
-                   L"MS Shell Dlg");
+    khm_get_cw_element_font(hdc, L"FontNormal", FALSE, &log_font);
+    tbl->hf_normal = CreateFontIndirect(&log_font);
+
+    khm_get_cw_element_font(hdc, L"FontBold", FALSE, &log_font);
+    tbl->hf_bold = CreateFontIndirect(&log_font);
 
     ReleaseDC(hwnd, hdc);
 
@@ -1370,6 +1491,8 @@ cw_unload_view(khui_credwnd_tbl * tbl)
         khc_close_space(tbl->csp_view);
         tbl->csp_view = NULL;
     }
+
+    tbl->cell_height = 0;       /* recalculate cell height next time */
 }
 
 void 
@@ -1411,6 +1534,26 @@ cw_hditem_from_tbl_col(khui_credwnd_col * col, HDITEM *phi)
     phi->cxy = col->width;
 }
 
+int
+cw_get_cell_height(HDC hdc, HFONT hf) {
+    SIZE size;
+    size_t cbbuf;
+    wchar_t buf[64];
+    HFONT hfold;
+
+    if (hf)
+        hfold = SelectFont(hdc, hf);
+
+    LoadString(khm_hInstance, IDS_SAMPLE_STRING, buf, sizeof(buf)/sizeof(buf[0]));
+    StringCchLength(buf, sizeof(buf)/sizeof(buf[0]), &cbbuf);
+    GetTextExtentPoint32(hdc, buf, (int) cbbuf, &size);
+
+    if (hf)
+        SelectFont(hdc, hfold);
+
+    return size.cy;
+}
+
 /* returns a bitmask indicating which measures were changed */
 int 
 cw_update_extents(khui_credwnd_tbl * tbl, 
@@ -1426,24 +1569,25 @@ cw_update_extents(khui_credwnd_tbl * tbl,
 
     if(!tbl->cell_height) {
         HDC dc;
-        HFONT hfold;
-        SIZE size;
-        size_t cbbuf;
-        wchar_t buf[64];
+        int maxheight = 0;
+        int height;
 
         dc = GetWindowDC(tbl->hwnd);
-        if(tbl->hf_normal)
-            hfold = SelectFont(dc, tbl->hf_normal);
 
-        LoadString(khm_hInstance, IDS_SAMPLE_STRING, buf, sizeof(buf)/sizeof(buf[0]));
-        StringCchLength(buf, sizeof(buf)/sizeof(buf[0]), &cbbuf);
-        GetTextExtentPoint32(dc, buf, (int) cbbuf, &size);
+        maxheight = cw_get_cell_height(dc, tbl->hf_normal);
+        height = cw_get_cell_height(dc, tbl->hf_bold);
+        if (height > maxheight)
+            maxheight = height;
+        height = cw_get_cell_height(dc, tbl->hf_header);
+        if (height > maxheight)
+            maxheight = height;
+        height = cw_get_cell_height(dc, tbl->hf_bold_header);
+        if (height > maxheight)
+            maxheight = height;
 
-        if(tbl->hf_normal)
-            SelectFont(dc,hfold);
         ReleaseDC(tbl->hwnd, dc);
 
-        tbl->cell_height = size.cy + tbl->vpad * 2;
+        tbl->cell_height = height + tbl->vpad * 2;
     }
 
     ext_y = (int) tbl->n_rows * tbl->cell_height;
@@ -1990,16 +2134,33 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
                 int i;
 
                 for (i=idx; i < tbl->n_cols; i++) {
-                    if (!(tbl->cols[i].flags &
-                          (KHUI_CW_COL_GROUP |
-                           KHUI_CW_COL_SORT_INC |
-                           KHUI_CW_COL_SORT_DEC)))
+                    if (!(tbl->cols[i].flags & KHUI_CW_COL_GROUP))
+                        break;
+
+                    tbl->cols[i].flags &= ~KHUI_CW_COL_GROUP;
+
+                    cw_hditem_from_tbl_col(&tbl->cols[idx], &hi);
+                    hi.mask = HDI_FORMAT;
+                    hidx = Header_OrderToIndex(tbl->hwnd_header, i);
+                    Header_SetItem(tbl->hwnd_header, hidx, &hi);
+                }
+
+            } else if (tbl->cols[idx].flags &
+                       (KHUI_CW_COL_SORT_INC |
+                        KHUI_CW_COL_SORT_DEC)) {
+                int i;
+
+                /* remove the sort condition from a column */
+
+                for (i=idx; i < tbl->n_cols; i++) {
+                    if (!tbl->cols[i].flags &
+                        (KHUI_CW_COL_SORT_INC |
+                         KHUI_CW_COL_SORT_DEC))
                         break;
 
                     tbl->cols[i].flags &=
-                        ~(KHUI_CW_COL_GROUP |
-                          KHUI_CW_COL_SORT_DEC |
-                          KHUI_CW_COL_SORT_INC);
+                        ~(KHUI_CW_COL_SORT_INC |
+                          KHUI_CW_COL_SORT_DEC);
 
                     cw_hditem_from_tbl_col(&tbl->cols[idx], &hi);
                     hi.mask = HDI_FORMAT;
@@ -2247,8 +2408,14 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         for(i=row_s; i < row_e; i++) {
             selected = tbl->rows[i].flags & KHUI_CW_ROW_SELECTED;
 
-            if(tbl->cursor_row == i)
-                SelectFont(hdc, tbl->hf_bold);
+            if(tbl->cursor_row == i) {
+                if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER)
+                    SelectFont(hdc, tbl->hf_bold_header);
+                else
+                    SelectFont(hdc, tbl->hf_bold);
+            } else if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER) {
+                SelectFont(hdc, tbl->hf_header);
+            }
 
             x = xs;
             if(tbl->rows[i].flags & KHUI_CW_ROW_HEADER) {
@@ -2353,9 +2520,11 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if(tbl->cursor_row == i) {
                 rh.left = tbl->scr_left;
                 rh.right = tbl->scr_left + tbl->ext_width;
-
                 DrawFocusRect(hdc, &rh);
+            }
 
+            if (tbl->cursor_row == i ||
+                (tbl->rows[i].flags & KHUI_CW_ROW_HEADER)) {
                 SelectFont(hdc, tbl->hf_normal);
             }
 
@@ -3961,6 +4130,33 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case KHUI_ACTION_PROPERTIES:
         {
             return cw_properties(hwnd);
+        }
+        break;
+
+    case KHUI_ACTION_LAYOUT_RELOAD:
+        {
+            wchar_t cname[KCONF_MAXCCH_NAME];
+            khm_size cb;
+
+            cname[0] = L'\0';
+
+            if (tbl->csp_view) {
+                cb = sizeof(cname);
+                khc_get_config_space_name(tbl->csp_view,
+                                          cname,
+                                          &cb);
+            }
+
+            cw_unload_view(tbl);
+
+            cw_load_view(tbl, ((cname[0])?cname: NULL), hwnd);
+            cw_insert_header_cols(tbl);
+
+            cw_update_creds(tbl);
+            cw_update_outline(tbl);
+            cw_update_extents(tbl, TRUE);
+
+            InvalidateRect(tbl->hwnd, NULL, TRUE);
         }
         break;
 

@@ -23,9 +23,14 @@ without invoking the <span class="pre">Options</span> menu.
 </p>
 
 <map id="menumap">
-<area shape = "rect" coords = "10,23,93,41" href = "#general">
-<area shape = "rect" coords = "12,41,94,60" href = "#idents">
-<area shape = "rect" coords = "10,59,104,74" href = "#notifs">
+
+<area shape = "rect" coords = "12,24,139,48" href = "#general">
+<area shape = "rect" coords = "11,46,144,68" href = "#apperance">
+<area shape = "rect" coords = "11,68,142,89" href = "#identities">
+<area shape = "rect" coords = "12,91,139,111" href = "#notifications">
+<area shape = "rect" coords = "14,111,134,133" href = "#plugins">
+<area shape = "rect" coords = "12,141,139,208" href = "#pluginspec">
+
 </map>
 
 <p>
@@ -35,16 +40,32 @@ without invoking the <span class="pre">Options</span> menu.
 <ul>
 
 <li><a name="general" /><span class="title">General ...</span>: Opens
-the NetIDMgr general configuration panel.</li>
+the NetIDMgr general configuration panel.  This panel allows you to
+configure settings related to the startup/shutdown of NetIDMgr in
+addition to debugging and monitoring options.</li>
 
-<li><a name="idents" /><span class="title">Identities ...</span>:
-Opens the identities configuration panel.</li>
+<li><a name="apperance" /><span class="title">Appearance ...</span>:
+Provides options for customizing the appearance of the credentials
+window.  Currently, the only options provided are for selecting the
+font used for the credentials list.</li>
 
-<li><a name="notifs" /><span class="title">Notifications ...</span>:
-Opens the Notifications control panel.</li>
+<li><a name="identities" /><span class="title">Identities ...</span>:
+Opens the identities configuration panel.  These options control
+credentials defaults for all identities or for specific identities.</li>
+
+<li><a name="notifications" /><span class="title">Notifications
+...</span>: The notifications configuration panel controls the
+settings used by the NetIDMgr timer that triggers warnings and
+identity renewals.</li>
 
 <li><a name="plugins" /><span class="title">Plugins ...</span>:
-Opens the Plug-ins and Modules control panel.</li>
+Options for enabling or disabling specific plugins and also for
+viewing information about loaded plugins.</li>
+
+<li><a name="pluginspec" /><span class="title">Plugin specific
+configuration panels</span>: Each registered plugin can register one
+or more configuration panels which will appear on the <span
+class="pre">Options</span> menu.</li>
 
 </ul>
 

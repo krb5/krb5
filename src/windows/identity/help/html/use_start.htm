@@ -24,7 +24,8 @@ often, and helps reduce clutter on the desktop.</p>
 
 <p>When NetIDMgr is running, it places an icon in the system
 notification area (sometimes referred to as the "system tray") as
-shown in figure 1.</p>
+shown in figure 1.  Details about the state information represented by
+the icon can be found <a href="html/use_icon.htm">here</a>.</p>
 
 <p>Clicking on this icon brings up the NetIDMgr window.  Right
 clicking on the icon, on the other hand, brings up a menu.</p>
@@ -58,7 +59,10 @@ configuration dialog.
 Only one instance of NetIDMgr can be running at any one time.
 Attempting to start NetIDMgr while it is still running will not do
 anything, unless you provide any command line options that trigger
-some action in the running application instance.
+some action in the running application instance.  If more than one
+version of NetIDMgr is installed on the system, and the older version
+is running at the time the newer version is started, the older version
+will exit allowing the newer version to take over.
 </p>
 
 </body>

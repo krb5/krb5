@@ -273,6 +273,14 @@ khm_main_wnd_proc(HWND hwnd,
         }
             break;
 
+        case KHUI_ACTION_OPT_APPEAR: {
+            khui_config_node node = NULL;
+
+            khui_cfg_open(NULL, L"KhmAppear", &node);
+            khm_show_config_pane(node);
+        }
+            break;
+
         case KHUI_ACTION_OPT_NOTIF: {
             khui_config_node node = NULL;
 
@@ -375,6 +383,7 @@ khm_main_wnd_proc(HWND hwnd,
         case KHUI_ACTION_LAYOUT_TYPE:
         case KHUI_ACTION_LAYOUT_LOC:
         case KHUI_ACTION_LAYOUT_CUST:
+        case KHUI_ACTION_LAYOUT_RELOAD:
             /* otherwise fallthrough and bounce to the creds window */
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);

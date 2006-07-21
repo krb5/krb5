@@ -256,6 +256,13 @@ khm_cfg_general_proc(HWND hwnd,
 
         return FALSE;
 
+    case WM_DESTROY:
+        d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d) {
+            PFREE(d);
+        }
+        return TRUE;
+
     case WM_COMMAND:
         d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
 

@@ -894,6 +894,16 @@ void khm_init_config(void) {
 
     khui_cfg_register(NULL, &reg);
 
+    reg.name = L"KhmAppear";
+    reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_APPEAR);
+    reg.dlg_proc = khm_cfg_appearance_proc;
+    LoadString(khm_hInstance, IDS_CFG_APPEAR_SHORT,
+               wshort, ARRAYLENGTH(wshort));
+    LoadString(khm_hInstance, IDS_CFG_APPEAR_LONG,
+               wlong, ARRAYLENGTH(wlong));
+
+    khui_cfg_register(NULL, &reg);
+
     reg.name = L"KhmIdentities";
     reg.dlg_template = MAKEINTRESOURCE(IDD_CFG_IDENTITIES);
     reg.dlg_proc = khm_cfg_identities_proc;
