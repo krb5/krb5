@@ -1,3 +1,9 @@
+2006-03-13  Jeffrey Altman <jaltman@mit.edu>
+
+	* winlevel.h (new file), version.rc:  Add configurable
+          KRB5_BUILDLEVEL for use on Windows.  Update copyright
+          dates to include 2006.
+
 2005-11-29  Jeffrey Altman <jaltman@mit.edu>
 
 	* Makefile.in: build src/windows/kfwlogon
