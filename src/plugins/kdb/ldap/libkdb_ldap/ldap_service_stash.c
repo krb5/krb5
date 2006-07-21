@@ -50,6 +50,11 @@ krb5_ldap_readpassword(context, ldap_context, password)
     if (ldap_context->service_password_file)
         file = ldap_context->service_password_file;
 
+#ifndef HAVE_STRERROR_R
+# undef strerror_r
+# define strerror_r(ERRNUM, BUF, SIZE) (strncpy(BUF, strerror(ERRNUM), SIZE), BUF[(SIZE)-1] = 0)
+#endif
+
     /* check whether file exists */
     if (access(file, F_OK) < 0) {
         st = errno;
