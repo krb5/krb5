@@ -127,6 +127,43 @@ is_windows_xp (void)
    return fIsWinXP;
 }
 
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+static BOOL
+is_broken_wow64(void)
+{
+    static BOOL fChecked = FALSE;
+    static BOOL fIsBrokenWow64 = FALSE;
+
+    if (!fChecked)
+    {
+	BOOL isWow64 = FALSE;
+	OSVERSIONINFO Version;
+	LPFN_ISWOW64PROCESS fnIsWow64Process = 
+	    (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle("kernel32"),
+						"IsWow64Process");
+
+	/* If we don't find the fnIsWow64Process function then we 
+	 * are not running in a broken Wow64 
+	 */
+	if (fnIsWow64Process) {
+	    memset (&Version, 0x00, sizeof(Version));
+	    Version.dwOSVersionInfoSize = sizeof(Version);
+
+	    if (fnIsWow64Process(GetCurrentProcess(), &isWow64) && 
+		GetVersionEx (&Version)) {
+		if (isWow64 && 
+		    Version.dwPlatformId == VER_PLATFORM_WIN32_NT &&
+		    Version.dwMajorVersion < 6)
+		    fIsBrokenWow64 = TRUE;
+	    } 
+	}
+	fChecked = TRUE;
+    }
+
+    return fIsBrokenWow64;
+}
+
 /* This flag is only supported by versions of Windows which have obtained
  * a code change from Microsoft.   When the code change is installed,
  * setting this flag will cause all retrieved credentials to be stored 
@@ -626,9 +663,9 @@ IsKerberosLogon(VOID)
             usLength = (pSessionData->AuthenticationPackage).Length;
             if (usLength < 256)
             {
-                lstrcpyn (buffer, usBuffer, usLength);
-                lstrcat (buffer,L"");
-                if ( !lstrcmp(L"Kerberos",buffer) )
+                lstrcpynW (buffer, usBuffer, usLength);
+                lstrcatW (buffer,L"");
+                if ( !lstrcmpW(L"Kerberos",buffer) )
                     Success = TRUE;
             }
         }
@@ -1566,7 +1603,7 @@ krb5_lcc_resolve (krb5_context context, krb5_ccache *id, const char *residual)
     KERB_EXTERNAL_TICKET *msticket;
     krb5_error_code retval = KRB5_OK;
 
-    if (!is_windows_2000())
+    if (!is_windows_2000() || is_broken_wow64())
         return KRB5_FCC_NOFILE;
 
     if (!PackageConnectLookup(&LogonHandle, &PackageId))
