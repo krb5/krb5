@@ -247,9 +247,14 @@ perf_dump(char * file) {
     perf_once();
 
     EnterCriticalSection(&cs_alloc);
+#if _MSC_VER >= 1400
+    if (fopen_s(&f, file, "w"))
+        return;
+#else
     f = fopen(file, "w");
     if (!f)
-        return;
+	return;
+#endif
 
     fprintf(f, "Leaked allocations list ....\n");
     fprintf(f, "File\tLine\tThread\tSize\n");

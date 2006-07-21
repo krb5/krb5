@@ -28,6 +28,8 @@
 #include<utils.h>
 #include<assert.h>
 
+#include<strsafe.h>
+
 #define CW_ALLOC_INCR 8
 
 static void cw_free_prompts(khui_new_creds * c);

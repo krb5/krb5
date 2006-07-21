@@ -24,16 +24,16 @@
 
 /* $Id$ */
 
+#define STRSAFE_NO_DEPRECATE
+
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>
 #include<lm.h>
 #include<commctrl.h>
-
-#pragma warning(push)
-#pragma warning(disable: 4995)
 #include<shlwapi.h>
-#pragma warning(pop)
+
+#include<strsafe.h>
 
 typedef struct tag_k5_id_dlg_data {
     khui_config_init_data cfg;
@@ -164,7 +164,7 @@ k5_id_is_mod(HWND hw, k5_id_dlg_data * d) {
     SendDlgItemMessage(hw, IDC_CFG_PUBLICIP, IPM_GETADDRESS,
                        0, (LPARAM) &dwaddress);
 
-    if (wcsicmp(ccache, d->ccache) ||
+    if (_wcsicmp(ccache, d->ccache) ||
 
         d->tc_renew.current != d->renew_life ||
 
@@ -259,7 +259,7 @@ k5_id_write_params(HWND hw, k5_id_dlg_data * d) {
     GetDlgItemText(hw, IDC_CFG_CCACHE, ccache, ARRAYLENGTH(ccache));
 
     if (SUCCEEDED(StringCbLength(ccache, sizeof(ccache), &cb)) &&
-        wcsicmp(ccache, d->ccache)) {
+        _wcsicmp(ccache, d->ccache)) {
         khc_write_string(csp_ident, L"DefaultCCName", ccache);
         StringCbCopy(d->ccache, sizeof(d->ccache), ccache);
     } else {

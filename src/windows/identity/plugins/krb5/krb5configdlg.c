@@ -24,17 +24,16 @@
 
 /* $Id$ */
 
+#define STRSAFE_NO_DEPRECATE
+
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>
 #include<lm.h>
 #include<commctrl.h>
-
-#pragma warning(push)
-#pragma warning(disable: 4995)
 #include<shlwapi.h>
-#pragma warning(pop)
 
+#include<strsafe.h>
 
 typedef struct tag_k5_realm_kdc {
     wchar_t       name[K5_MAXCCH_HOST];
@@ -134,12 +133,12 @@ k5_parse_boolean(const char *s)
     const char *const *p;
 
     for(p=conf_yes; *p; p++) {
-        if (!stricmp(*p,s))
+        if (!_stricmp(*p,s))
             return 1;
     }
 
     for(p=conf_no; *p; p++) {
-        if (!stricmp(*p,s))
+        if (!_stricmp(*p,s))
             return 0;
     }
 
@@ -409,7 +408,7 @@ k5_read_config_data(k5_config_data * d) {
                                      sizeof(kdc_name), values[i]);
 
                     for (j=0; j < d->realms[s].n_kdcs; j++)
-                        if (!wcsicmp(kdc_name, d->realms[s].kdcs[j].name))
+                        if (!_wcsicmp(kdc_name, d->realms[s].kdcs[j].name))
                             break;
 
                     if (j < d->realms[s].n_kdcs) {
@@ -436,7 +435,7 @@ k5_read_config_data(k5_config_data * d) {
                     AnsiStrToUnicode(kdc_name, sizeof(kdc_name), values[i]);
 
                     for (j=0; j < d->realms[s].n_kdcs; j++)
-                        if (!wcsicmp(kdc_name, d->realms[s].kdcs[j].name))
+                        if (!_wcsicmp(kdc_name, d->realms[s].kdcs[j].name))
                             break;
 
                     if (j < d->realms[s].n_kdcs) {
@@ -478,7 +477,7 @@ k5_read_config_data(k5_config_data * d) {
                 AnsiStrToUnicode(wdr_to, sizeof(wdr_to), dr_to);
 
                 for (j=0; j < d->n_realms; j++) {
-                    if (!wcsicmp(wdr_to, d->realms[j].realm))
+                    if (!_wcsicmp(wdr_to, d->realms[j].realm))
                         break;
                 }
 
@@ -588,7 +587,7 @@ k5_write_config_data(k5_config_data * d) {
 
     UnicodeStrToAnsi(astr, sizeof(astr), d->config_file);
 
-    if (stricmp(config_file, astr)) {
+    if (_stricmp(config_file, astr)) {
         assert(FALSE);
     }
 
@@ -1965,7 +1964,7 @@ k5_realms_dlgproc(HWND hwnd,
                                     (d->realms[i].flags & K5_RDFLAG_DELETED))
                                     continue;
 
-                                if (!wcsicmp(d->realms[i].realm, pdisp->item.pszText))
+                                if (!_wcsicmp(d->realms[i].realm, pdisp->item.pszText))
                                     break;
                             }
 
@@ -2084,7 +2083,7 @@ k5_realms_dlgproc(HWND hwnd,
                                     (d->realms[r].kdcs[k].flags & K5_RKFLAG_DELETED))
                                     continue;
 
-                                if (!wcsicmp(d->realms[r].kdcs[k].name,
+                                if (!_wcsicmp(d->realms[r].kdcs[k].name,
                                              pdisp->item.pszText))
                                     break;
                             }
@@ -2283,8 +2282,8 @@ k5_realms_dlgproc(HWND hwnd,
                                     (d->realms[r].domain_maps[m].flags & K5_DMFLAG_DELETED))
                                     continue;
 
-                                if (!wcsicmp(d->realms[r].domain_maps[m].name,
-                                             pdisp->item.pszText))
+                                if (!_wcsicmp(d->realms[r].domain_maps[m].name,
+                                              pdisp->item.pszText))
                                     break;
                             }
 

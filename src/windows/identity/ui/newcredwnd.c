@@ -967,7 +967,8 @@ nc_handle_wm_command(HWND hwnd,
                    l->param_len < ARRAYLENGTH(sparam) &&
                    l->param_len > 0) {
 
-                    wcsncpy(sparam, l->param, l->param_len);
+                    StringCchCopyN(sparam, ARRAYLENGTH(sparam),
+                                   l->param, l->param_len);
                     sparam[l->param_len] = L'\0';
 
                 } else {
@@ -1006,7 +1007,7 @@ nc_handle_wm_command(HWND hwnd,
                 }
 
                 /* if it was for us, then we need to process the message */
-                if(!wcsicmp(sid, CTLINKID_SWITCH_PANEL)) {
+                if(!_wcsicmp(sid, CTLINKID_SWITCH_PANEL)) {
                     khm_int32 credtype;
                     khui_new_creds_by_type * t;
 
@@ -1021,10 +1022,10 @@ nc_handle_wm_command(HWND hwnd,
                                                    WMNC_DIALOG_SWITCH_PANEL),
                                         0);
                     }
-                } else if (!wcsicmp(sid, L"NotDef")) {
+                } else if (!_wcsicmp(sid, L"NotDef")) {
                     d->nc->set_default = FALSE;
                     nc_update_credtext(d);
-                } else if (!wcsicmp(sid, L"MakeDef")) {
+                } else if (!_wcsicmp(sid, L"MakeDef")) {
                     d->nc->set_default = TRUE;
                     nc_update_credtext(d);
                 }

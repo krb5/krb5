@@ -269,21 +269,38 @@
     This message notifies credentials providers that a password change
     request has been received.
 
+    A plug-in handling this message that wishes to participate in the
+    password change operation is expected to add a
+    ::khui_new_creds_by_type to the list of participants in the
+    ::khui_new_creds structure by calling khui_cw_add_type().
+
+    The password change operation requires user interaction.  Any
+    plug-ins that are participating in the operation need to provide a
+    user-interface.
+
     Message parameters:
     - \b vparam : pointer to a ::khui_new_creds structure
+
+    \see khui_cw_add_type(), ::khui_new_creds, ::khui_new_creds_by_type
  */
 #define KMSG_CRED_PASSWORD  16
 
 /*! \brief Initiate the process of obtaining new credentials
 
     The UI sends this message to start the process of obtaining new
-    credentials.  See \ref cred_acq for more information about handling this
-    message.
+    credentials.  See \ref cred_acq for more information about
+    handling this message.
+
+    A plug-in handling this message that wishes to participate in the
+    new credentials acquisition operation is expected to add a
+    ::khui_new_creds_by_type to hte list of participants in the
+    ::khui_new_creds structure by calling khui_cw_add_type().
 
     Message parameters:
     - \b vparam : pointer to a ::khui_new_creds structure
 
-    \see \ref cred_acq
+    \see \ref cred_acq, khui_cw_add_type(), ::khui_new_creds,
+    ::khui_new_creds_by_type
  */
 #define KMSG_CRED_NEW_CREDS 17
 
@@ -292,8 +309,16 @@
     This is a notification sent to individual credentials providers
     that a specified identity's credentials should be renewed.
 
+    A plug-in handling this message that wishes to participate in the
+    renew credentials operation is expected to add a
+    ::khui_new_creds_by_type to the list of participants in the
+    ::khui_new_creds structure by calling khui_cw_add_type().
+
     Message parameters:
     - \b vparam : Pointer to a khui_new_creds object
+
+    \see khui_cw_add_type(), ::khui_new_creds,
+    ::khui_new_creds_by_type
  */
 #define KMSG_CRED_RENEW_CREDS       18
 
@@ -493,7 +518,6 @@
     dialog completion.
 
     Currently, the dialog messages are:
-    - ::KMSG_CRED_INITIAL_CREDS
     - ::KMSG_CRED_NEW_CREDS
     - ::KMSG_CRED_RENEW_CREDS
     - ::KMSG_CRED_DIALOG_SETUP

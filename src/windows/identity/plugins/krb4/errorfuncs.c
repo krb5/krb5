@@ -27,6 +27,8 @@
 #include<krbcred.h>
 #include<kherror.h>
 
+#include<strsafe.h>
+
 extern void (__cdecl *pinitialize_krb_error_func)();
 extern void (__cdecl *pinitialize_kadm_error_table)();
 
@@ -89,8 +91,7 @@ LPSTR err_describe(LPSTR buf, size_t len, long code)
     case kadm_err_base:
 	break;
     default:
-	strncpy(buf, com_err_msg, len);
-	buf[len-1] = '\0';
+        StringCbCopyA(buf, len, com_err_msg);
 	return buf;
     }
 
@@ -194,8 +195,7 @@ LPSTR err_describe(LPSTR buf, size_t len, long code)
             break;
         }
     if(com_err_msg != buf) {
-        strncpy(buf, com_err_msg, len);
-	buf[len-1] = '\0';
+        StringCbCopyA(buf, len, com_err_msg);
     }
     cp = buf + strlen(buf);
     *cp++ = '\n';
