@@ -72,6 +72,7 @@ EXPORTS
         gss_krb5_set_allowable_enctypes
         gss_krb5_export_lucid_sec_context
         gss_krb5_free_lucid_sec_context
+	krb5_gss_register_acceptor_identity
 ;
 ; GSS-API variables
 ;
