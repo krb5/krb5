@@ -139,9 +139,12 @@ is_broken_wow64(void)
     {
 	BOOL isWow64 = FALSE;
 	OSVERSIONINFO Version;
-	LPFN_ISWOW64PROCESS fnIsWow64Process = 
-	    (LPFN_ISWOW64PROCESS)GetProcAddress(GetModuleHandle("kernel32"),
-						"IsWow64Process");
+	HANDLE h1 = NULL;
+	LPFN_ISWOW64PROCESS fnIsWow64Process = NULL;
+		
+	h1 = GetModuleHandle(L"kernel32.dll");
+	fnIsWow64Process = 
+	    (LPFN_ISWOW64PROCESS)GetProcAddress(h1, "IsWow64Process");
 
 	/* If we don't find the fnIsWow64Process function then we 
 	 * are not running in a broken Wow64 
