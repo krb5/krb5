@@ -367,6 +367,13 @@ typedef struct tag_khui_new_creds {
  */
 #define KHUI_NC_RESPONSE_COMPLETED 0x00000020
 
+/*! \brief Processing
+
+    This is an internal flag set while the credentials acquisition
+    process is executing.
+ */
+#define KHUI_NC_RESPONSE_PROCESSING 0x00010000
+
 #define KHUI_NCMASK_RESPONSE (KHUI_NC_RESPONSE_EXIT|KHUI_NC_RESPONSE_NOEXIT)
 #define KHUI_NCMASK_RESULT  (KHUI_NC_RESPONSE_SUCCESS|KHUI_NC_RESPONSE_FAILED|KHUI_NC_RESPONSE_PENDING)
 /*@}*/

@@ -29,8 +29,6 @@
 #define _WIN32_WINNT 0x501
 #endif
 
-#define STRSAFE_NO_DEPRECATE
-
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>

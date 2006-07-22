@@ -226,8 +226,10 @@ void khm_leave_modal(void) {
     }
 
     EnableWindow(khm_hwnd_main, TRUE);
+#if 0
     if (khui_main_window_active)
         SetForegroundWindow(khm_hwnd_main);
+#endif
 
     khui_modal_dialog = NULL;
 }

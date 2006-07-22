@@ -158,3 +158,25 @@ Date=(TBD)
 !_report_ts0, _report_ts1, _report_ts2, _report_ts3
 # modified to use _vnull() instead of 0 for NULL parameters
 
++KCONF_FLAG_WRITEIFMOD
+# new flag for khc_open_space() indicating that the specified handle should only write to a configuration space if the value read from the handle is different from the value being written
+
++KCONF_FLAG_IFMODCI
+# indicates that the string comparison function used for KCONF_FLAG_WRITEIFMOD should be case insensitive.
+
+!khc_write_int32(), khc_write_int64(), khc_write_string(), khc_write_multi_string()
+# Change of behavior.  If the configuration handle has KCONF_FLAG_WRITEIFMOD flag set, only writes if the value being written to is different from the value being read.
+
+!khc_read_string(), khc_read_multi_string(), khc_read_int32(), khc_read_int64(), khc_read_binary(), khc_write_string(), khc_write_int32(), khc_write_int64(), khc_write_binary(), khc_get_type(), khc_value_exists(), khc_remove_value()
+# The value name parameter is now a constant pointer
+
+!khc_load_schema(), khc_unload_schema()
+# The schema pointer is now a constant pointer
+
+-Schema:NetIDMgr\PluginManager\Modules\<module name>\Flags
+-Schema:NetIDMgr\PluginManager\Plugins\<plugin name>\Flags
+# Deprecated.  Replaced by separate values for each of the bits in Flags.  This allows each setting to be deployed independently via GPO.
+
++Schema:NetIDMgr\PluginManager\Modules\<module name>\Disabled
++Schema:NetIDMgr\PluginManager\Plugins\<plugin name>\Disabled
+# If non-zero, the corresponding module or plug-in is disabled.

@@ -220,7 +220,9 @@ void k4_write_identity_data(k4_dlg_data * d) {
         KHM_SUCCEEDED(kcdb_identity_get_config(d->nc->identities[0],
                                                KHM_FLAG_CREATE,
                                                &csp_ident))) {
-        khc_open_space(csp_ident, CSNAME_KRB4CRED, KHM_FLAG_CREATE, &csp_k4);
+        khc_open_space(csp_ident, CSNAME_KRB4CRED,
+                       KHM_FLAG_CREATE | KCONF_FLAG_WRITEIFMOD,
+                       &csp_k4);
 
         if (csp_k4) {
             khc_write_int32(csp_k4, L"Krb4NewCreds", !!d->k4_enabled);

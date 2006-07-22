@@ -6,7 +6,7 @@ Krb4Cred,KC_SPACE,0,"Kerberos IV Credentials Provider"
   Type,KC_INT32,1,
   Flags,KC_INT32,0,
   Parameters,KC_SPACE,0,Parameters for KrbCred
-    Krb4NewCreds,KC_INT32,1,Obtain Kerberos 4 tickets
+    Krb4NewCreds,KC_INT32,1,Obtain Kerberos 4 tickets (Boolean)
     Krb4Method,KC_INT32,0,Method for acquiring K4 tix. 0-Auto;1-Password;2-K524
     CreateMissingConfig,KC_INT32,0,Create missing configuration files
     DefaultLifetime,KC_INT32,36000,Default ticket lifetime

@@ -143,6 +143,31 @@ typedef struct tag_kconf_schema {
 /*! \brief Indicates that the last component of the given configuration path is to be considered to be a configuration value */
 #define KCONF_FLAG_TRAILINGVALUE 0x00000020
 
+/*! \brief Only write values back there is a change
+
+    Any write operations using the handle with check if the value
+    being written is different from the value being read from the
+    handle.  It will only be written if the value is different.
+
+    \note Note that the value being read from a handle takes schema and
+    shadowed configuration handles into consideration while the value
+    being written is only written to the topmost layer of
+    configuration that can be written to.
+
+    \note Note also that this flag does not affect binary values.
+ */
+#define KCONF_FLAG_WRITEIFMOD    0x00000040
+
+/*! \brief Use case-insensitive comparison for KCONF_FLAG_WRITEIFMOD
+
+    When used in combination with \a KCONF_FLAG_WRITEIFMOD , the
+    string comparison used when determining whether the string read
+    from the configuration handle is the same as the string being
+    written will be case insensitive.  If this flag is not set, the
+    comparison will be case sensitive.
+ */
+#define KCONF_FLAG_IFMODCI     0x00000080
+
 /*! \brief Do not parse the configuration space name
 
     If set, disables the parsing of the configuration space for
@@ -262,7 +287,7 @@ khc_close_space(khm_handle conf);
 
 /*! \brief Read a string value from a configuration space
 
-    The \a value parameter specifies the value to read from the
+    The \a value_name parameter specifies the value to read from the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -290,6 +315,10 @@ khc_close_space(khm_handle conf);
     in the call to khc_open_space() is equivalent to specifying all
     three.
 
+    If the value is not found in the configuration space and any
+    shadowed configuration spaces, the function returns \a
+    KHM_ERROR_NOT_FOUND.  In this case, the buffer is left unmodified.
+
     \param[in] buf Buffer to copy the string to.  Specify NULL to just
         retrieve the number of required bytes.
     
@@ -303,18 +332,19 @@ khc_close_space(khm_handle conf);
     \retval KHM_ERROR_TYPE_MISMATCH The specified value is not a string
     \retval KHM_ERROR_TOO_LONG \a buf was NULL or the size of the buffer was insufficient.  The required size is in bufsize.
     \retval KHM_ERROR_SUCCESS Success.  The number of bytes copied is in bufsize.
+    \retval KHM_ERROR_NOT_FOUND The value was not found.
 
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_read_string(khm_handle conf, 
-                wchar_t * value, 
+                const wchar_t * value_name, 
                 wchar_t * buf, 
                 khm_size * bufsize);
 
 /*! \brief Read a multi-string value from a configuration space
 
-    The \a value parameter specifies the value to read from the
+    The \a value_name parameter specifies the value to read from the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -350,6 +380,10 @@ khc_read_string(khm_handle conf,
     in the call to khc_open_space() is equivalent to specifying all
     three.
 
+    If the value is not found in the configuration space and any
+    shadowed configuration spaces, the function returns \a
+    KHM_ERROR_NOT_FOUND.  In this case, the buffer is left unmodified.
+
     \param[in] buf Buffer to copy the multi-string to.  Specify NULL
         to just retrieve the number of required bytes.
     
@@ -363,18 +397,19 @@ khc_read_string(khm_handle conf,
     \retval KHM_ERROR_TYPE_MISMATCH The specified value is not a string
     \retval KHM_ERROR_TOO_LONG \a buf was NULL or the size of the buffer was insufficient.  The required size is in bufsize.
     \retval KHM_ERROR_SUCCESS Success.  The number of bytes copied is in bufsize.
+    \retval KHM_ERROR_NOT_FOUND The value was not found.
 
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_read_multi_string(khm_handle conf, 
-                      wchar_t * value, 
+                      const wchar_t * value_name, 
                       wchar_t * buf, 
                       khm_size * bufsize);
 
 /*! \brief Read a 32 bit integer value from a configuration space
 
-    The \a value parameter specifies the value to read from the
+    The \a value_name parameter specifies the value to read from the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -401,6 +436,10 @@ khc_read_multi_string(khm_handle conf,
     Note that not specifying any of the configuration store specifiers
     in the call to khc_open_space() is equivalent to specifying all
     three.
+
+    If the value is not found in the configuration space and any
+    shadowed configuration spaces, the function returns \a
+    KHM_ERROR_NOT_FOUND.  In this case, the buffer is left unmodified.
 
     \param[in] conf Handle to a configuration space
     \param[in] value The value to query
@@ -415,12 +454,12 @@ khc_read_multi_string(khm_handle conf,
 */
 KHMEXP khm_int32 KHMAPI 
 khc_read_int32(khm_handle conf, 
-               wchar_t * value, 
+               const wchar_t * value_name, 
                khm_int32 * buf);
 
 /*! \brief Read a 64 bit integer value from a configuration space
 
-    The \a value parameter specifies the value to read from the
+    The \a value_name parameter specifies the value to read from the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -448,8 +487,12 @@ khc_read_int32(khm_handle conf,
     in the call to khc_open_space() is equivalent to specifying all
     three.
 
+    If the value is not found in the configuration space and any
+    shadowed configuration spaces, the function returns \a
+    KHM_ERROR_NOT_FOUND.  In this case, the buffer is left unmodified.
+
     \param[in] conf Handle to a configuration space
-    \param[in] value The value to query
+    \param[in] value_name The value to query
     \param[out] buf The buffer to receive the value
 
     \retval KHM_ERROR_NOT_READY The configuration provider has not started
@@ -462,12 +505,12 @@ khc_read_int32(khm_handle conf,
 */
 KHMEXP khm_int32 KHMAPI 
 khc_read_int64(khm_handle conf, 
-               wchar_t * value, 
+               const wchar_t * value_name, 
                khm_int64 * buf);
 
 /*! \brief Read a binary value from a configuration space
 
-    The \a value parameter specifies the value to read from the
+    The \a value_name parameter specifies the value to read from the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -493,6 +536,10 @@ khc_read_int64(khm_handle conf,
     three. Also note that the schema store (KCONF_FLAG_SCHEMA) does
     not support binary values.
 
+    If the value is not found in the configuration space and any
+    shadowed configuration spaces, the function returns \a
+    KHM_ERROR_NOT_FOUND.  In this case, the buffer is left unmodified.
+
     \param[in] buf Buffer to copy the string to.  Specify NULL to just
         retrieve the number of required bytes.
     
@@ -509,13 +556,13 @@ khc_read_int64(khm_handle conf,
 */
 KHMEXP khm_int32 KHMAPI 
 khc_read_binary(khm_handle conf, 
-                wchar_t * value, 
+                const wchar_t * value_name, 
                 void * buf, 
                 khm_size * bufsize);
 
 /*! \brief Write a string value to a configuration space
 
-    The \a value parameter specifies the value to write to the
+    The \a value_name parameter specifies the value to write to the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -530,31 +577,40 @@ khc_read_binary(khm_handle conf,
     khc_open_space().  The precedence of configuration stores are as
     follows:
 
-    - If KCONF_FLAG_USER was specified, then the user configuration
+    - If \a KCONF_FLAG_USER was specified, then the user configuration
       space.
 
-    - Otherwise, if KCONF_FLAG_MACHINE was specified, then the machine
-      configuration space.
+    - Otherwise, if \a KCONF_FLAG_MACHINE was specified, then the
+      machine configuration space.
 
     Note that not specifying any of the configuration store specifiers
     in the call to khc_open_space() is equivalent to specifying all
     three.  Also note that the schema store (KCONF_FLAG_SCHEMA) is
     readonly.
 
+    If the \a KCONF_FLAG_WRITEIFMOD flag is specified in the call to
+    khc_open_space() for obtaining the configuration handle, the
+    specified string will only be written if it is different from the
+    value being read from the handle.
+
+    If the \a KCONF_FLAG_IFMODCI flag is specified along with the \a
+    KCONF_FLAG_WRITEIFMOD flag, then the string comparison used will
+    be case insensitive.
+
     \param[in] conf Handle to a configuration space
-    \param[in] value Name of value to write
+    \param[in] value_name Name of value to write
     \param[in] buf A NULL terminated unicode string not exceeding KCONF_MAXCCH_STRING in characters including terminating NULL
 
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_write_string(khm_handle conf, 
-                 wchar_t * value, 
+                 const wchar_t * value_name, 
                  wchar_t * buf);
 
 /*! \brief Write a multi-string value to a configuration space
 
-    The \a value parameter specifies the value to write to the
+    The \a value_name parameter specifies the value to write to the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -586,16 +642,25 @@ khc_write_string(khm_handle conf,
     three.  Also note that the schema store (KCONF_FLAG_SCHEMA) is
     readonly.
 
+    If the \a KCONF_FLAG_WRITEIFMOD flag is specified in the call to
+    khc_open_space() for obtaining the configuration handle, the
+    specified string will only be written if it is different from the
+    value being read from the handle.
+
+    If the \a KCONF_FLAG_IFMODCI flag is specified along with the \a
+    KCONF_FLAG_WRITEIFMOD flag, then the string comparison used will
+    be case insensitive.
+
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_write_multi_string(khm_handle conf, 
-                       wchar_t * value, 
+                       const wchar_t * value_name, 
                        wchar_t * buf);
 
 /*! \brief Write a 32 bit integer value to a configuration space
 
-    The \a value parameter specifies the value to write to the
+    The \a value_name parameter specifies the value to write to the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -620,17 +685,22 @@ khc_write_multi_string(khm_handle conf,
     in the call to khc_open_space() is equivalent to specifying all
     three.  Also note that the schema store (KCONF_FLAG_SCHEMA) is
     readonly.
+
+    If the \a KCONF_FLAG_WRITEIFMOD flag is specified in the call to
+    khc_open_space() for obtaining the configuration handle, the
+    specified string will only be written if it is different from the
+    value being read from the handle.
 
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_write_int32(khm_handle conf, 
-                wchar_t * value, 
+                const wchar_t * value_name, 
                 khm_int32 buf);
 
 /*! \brief Write a 64 bit integer value to a configuration space
 
-    The \a value parameter specifies the value to write to the
+    The \a value_name parameter specifies the value to write to the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -656,16 +726,21 @@ khc_write_int32(khm_handle conf,
     three.  Also note that the schema store (KCONF_FLAG_SCHEMA) is
     readonly.
 
+    If the \a KCONF_FLAG_WRITEIFMOD flag is specified in the call to
+    khc_open_space() for obtaining the configuration handle, the
+    specified string will only be written if it is different from the
+    value being read from the handle.
+
     \see khc_open_space()
 */
 KHMEXP khm_int32 KHMAPI 
 khc_write_int64(khm_handle conf, 
-                wchar_t * value, 
+                const wchar_t * value_name, 
                 khm_int64 buf);
 
 /*! \brief Write a binary value to a configuration space
 
-    The \a value parameter specifies the value to write to the
+    The \a value_name parameter specifies the value to write to the
     configuration space.  This can be either a value name or a value
     path consisting of a series nested configuration space names
     followed by the value name all separated by backslashes or forward
@@ -695,7 +770,7 @@ khc_write_int64(khm_handle conf,
 */
 KHMEXP khm_int32 KHMAPI 
 khc_write_binary(khm_handle conf, 
-                 wchar_t * value, 
+                 const wchar_t * value_name, 
                  void * buf, 
                  khm_size bufsize);
 
@@ -705,7 +780,7 @@ khc_write_binary(khm_handle conf,
         KC_NONE if the value does not exist.
  */
 KHMEXP khm_int32 KHMAPI 
-khc_get_type(khm_handle conf, wchar_t * value);
+khc_get_type(khm_handle conf, const wchar_t * value_name);
 
 /*! \brief Check which configuration stores contain a specific value.
 
@@ -722,7 +797,7 @@ khc_get_type(khm_handle conf, wchar_t * value);
         value.
  */
 KHMEXP khm_int32 KHMAPI 
-khc_value_exists(khm_handle conf, wchar_t * value);
+khc_value_exists(khm_handle conf, const wchar_t * value);
 
 /*! \brief Remove a value from a configuration space
 
@@ -745,7 +820,7 @@ khc_value_exists(khm_handle conf, wchar_t * value);
 
     \param[in] conf Handle to configuration space to remove value from
 
-    \param[in] value Value to remove
+    \param[in] value_name Value to remove
 
     \param[in] flags Specifies which configuration stores will be
         affected by the removal.  See above.
@@ -763,7 +838,7 @@ khc_value_exists(khm_handle conf, wchar_t * value);
         other stores.
  */
 KHMEXP khm_int32 KHMAPI
-khc_remove_value(khm_handle conf, wchar_t * value, khm_int32 flags);
+khc_remove_value(khm_handle conf, const wchar_t * value_name, khm_int32 flags);
 
 /*! \brief Get the name of a configuration space
 
@@ -805,13 +880,13 @@ khc_get_config_space_parent(khm_handle conf,
  */
 KHMEXP khm_int32 KHMAPI 
 khc_load_schema(khm_handle conf, 
-                kconf_schema * schema);
+                const kconf_schema * schema);
 
 /*! \brief Unload a schema from a configuration space
  */
 KHMEXP khm_int32 KHMAPI 
 khc_unload_schema(khm_handle conf, 
-                  kconf_schema * schema);
+                  const kconf_schema * schema);
 
 /*! \brief Enumerate the subspaces of a configuration space
 

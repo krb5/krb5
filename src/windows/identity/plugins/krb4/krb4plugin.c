@@ -209,6 +209,8 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
 
     case KMSG_SYSTEM_EXIT:
 #ifdef _WIN64
+        /* See above.  On 64-bit platforms, we don't support Krb4 at
+           all. */
         return 0;
 #else
         if(credtype_id_krb4 >= 0)

@@ -24,15 +24,12 @@
 
 /* $Id$ */
 
-#define STRSAFE_NO_DEPRECATE
-
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>
 #include<lm.h>
 #include<commctrl.h>
 #include<shlwapi.h>
-
 #include<strsafe.h>
 
 typedef struct tag_k5_realm_kdc {
