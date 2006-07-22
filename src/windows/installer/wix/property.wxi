@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 
-  Copyright (C) 2004 by the Massachusetts Institute of Technology.
+  Copyright (C) 2004, 2005, 2006 by the Massachusetts Institute of Technology.
   All rights reserved.
  
   Export of this software from the United States of America may
@@ -40,15 +40,16 @@
     <Property Id="ComponentDownload">http://web.mit.edu/kerberos</Property>
 
     <Property Id="UPGRADENSIS">
-        <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="registry" />
+        <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="file"/>
     </Property>
     
     <Property Id="NSISVERSION">
-        <RegistrySearch Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="registry" />
+        <RegistrySearch Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
     </Property>
 
     <Property Id="CantRemoveNSISError">$(loc.CantRemoveNSIS)</Property>
     <Property Id="NoIE501Error">$(loc.IE501Required)</Property>
+
     <!--  Additional properties relating to the UI are in the appropriate UI.wxi file -->
     
     <!-- Configuration properties.  If these properties are defined, then

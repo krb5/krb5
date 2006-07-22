@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 
-  Copyright (C) 2004,2005 by the Massachusetts Institute of Technology.
+  Copyright (C) 2004,2005, 2006 by the Massachusetts Institute of Technology.
   All rights reserved.
  
   Export of this software from the United States of America may
@@ -99,12 +99,14 @@
             Execute="immediate" />
 
 	<CustomAction
-            Id="AbortCantRemoveNSIS"
-            Value="[CantRemoveNSISError]" />
+            Id="AbortCantRemoveNSIS" 
+            Value="[CantRemoveNSISError]" 
+            Property="CantRemoveNSISError" />
 
 	<CustomAction
             Id="AbortNoIE"
-            Value="[NoIE501Error]" />
+            Value="[NoIE501Error]" 
+            Property="NoIE501Error" />
             
         <CustomAction
             Id="ListRunningProcesses"

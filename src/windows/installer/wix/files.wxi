@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 
-  Copyright (C) 2004, 2005 by the Massachusetts Institute of Technology.
+  Copyright (C) 2004, 2005, 2006 by the Massachusetts Institute of Technology.
   All rights reserved.
  
   Export of this software from the United States of America may
@@ -90,11 +90,6 @@
 		    	<Condition>KRB5PRESERVEIDENTITY</Condition>
 		    </Component>
                 
-                    <Component Id="cmf_aklog_exe" Guid="38840074-3D15-45CB-8022-C4A603FC697A" DiskId="1">
-	                    <File Id="fil_aklog_exe" LongName="aklog.exe" Name="aklog.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_aklog_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" Action="createKeyAndRemoveKeyOnUninstall" />
-	                    <Registry Id="reg_ts_aklog_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" Name="Flags" Type="integer" Value="1032" />
-                    </Component>
                     <Component Id="cmf_comerr32_dll" Guid="D8F455F9-E648-4C61-A69D-7116ADEC2DBB" DiskId="1">
 	                    <File Id="fil_comerr32_dll" LongName="comerr32.dll" Name="comerr32.dll" KeyPath="yes" />
                     </Component>
@@ -221,7 +216,7 @@
                     
                     <Component Id="csc_NetIDMgrStartup" Guid="669227E3-0ADC-4173-90C3-631FCFC8EBC3" DiskId="1">
                         <Registry Id="reg_sc_nidmgr_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="NetIDMgrAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="" Target="[dirbin]netidmgr.exe" Show="minimized" />
+                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" />
                         <Condition>USENETIDMGR</Condition>
                     </Component>
 
@@ -354,7 +349,7 @@
 			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_ts_netidmgr_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
-                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Arguments="" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
+                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
                         <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
                     </Component>
                     <!-- /NetIDMgr -->
@@ -362,7 +357,6 @@
                     <!-- Debug symbols -->
                 <?ifdef DebugSyms?>
                     <Component Id="cmf_bin_debug" Guid="C8468854-8261-4781-8119-A612636841E3" DiskId="1">
-	                    <File Id="fil_aklog_pdb" LongName="aklog.pdb" Name="aklog.pdb" />
 	                    <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
 	                    <File Id="fil_gss_pdb" LongName="gss.pdb" Name="gss.pdb" />
 	                    <File Id="fil_gss_client_pdb" LongName="gss-client.pdb" Name="gss-clnt.pdb" />
