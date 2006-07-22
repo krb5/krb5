@@ -282,23 +282,23 @@ Function AddToSystemPath
   Push "$0;"
   Call StrStr
   Pop $2
-  StrCmp $2 "" "" AddToPath_done
+  StrCmp $2 "" 0 AddToPath_done
   Push "$1;"
   Push "$0\;"
   Call StrStr
   Pop $2
-  StrCmp $2 "" "" AddToPath_done
+  StrCmp $2 "" 0 AddToPath_done
   GetFullPathName /SHORT $3 $0
   Push "$1;"
   Push "$3;"
   Call StrStr
   Pop $2
-  StrCmp $2 "" "" AddToPath_done
+  StrCmp $2 "" 0 AddToPath_done
   Push "$1;"
   Push "$3\;"
   Call StrStr
   Pop $2
-  StrCmp $2 "" "" AddToPath_done
+  StrCmp $2 "" 0 AddToPath_done
 
   Call IsNT
   Pop $1
