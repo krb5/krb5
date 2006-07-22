@@ -24,8 +24,6 @@
 
 /* $Id$ */
 
-#define STRSAFE_NO_DEPRECATE
-
 #include<krbcred.h>
 #include<krb5.h>
 #include<assert.h>

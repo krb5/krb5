@@ -165,7 +165,6 @@ kmm_enable_plugin(kmm_plugin p, khm_boolean enable) {
     kmm_plugin_i * pi;
     khm_int32 rv = KHM_ERROR_NOT_FOUND; /* default to error */
     khm_handle csp_plugin = NULL;
-    khm_int32 flags;
 
     EnterCriticalSection(&cs_kmm);
     if (!kmm_is_plugin(p)) {
@@ -179,19 +178,7 @@ kmm_enable_plugin(kmm_plugin p, khm_boolean enable) {
         goto _cleanup;
     }
 
-    if (KHM_FAILED(rv = khc_read_int32(csp_plugin, L"Flags", &flags))) {
-        goto _cleanup;
-    }
-
-    if (enable) {
-        flags &= ~KMM_PLUGIN_FLAG_DISABLED;
-        pi->flags &= ~KMM_PLUGIN_FLAG_DISABLED;
-    } else {
-        flags |= KMM_PLUGIN_FLAG_DISABLED;
-        pi->flags |= KMM_PLUGIN_FLAG_DISABLED;
-    }
-
-    if (KHM_FAILED(rv = khc_write_int32(csp_plugin, L"Flags", flags))) {
+    if (KHM_FAILED(rv = khc_write_int32(csp_plugin, L"Disabled", !enable))) {
         goto _cleanup;
     }
 

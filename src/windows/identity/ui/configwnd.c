@@ -581,7 +581,6 @@ cfgui_dlgproc(HWND hwnd,
         khui_delete_bitmap(&d->kbmp_logo);
         DeleteObject(d->hbr_white);
 
-        khm_leave_modal();
         khm_del_dialog(hwnd);
 
         SetForegroundWindow(khm_hwnd_main);
@@ -643,6 +642,7 @@ cfgui_dlgproc(HWND hwnd,
     case WM_COMMAND:
         switch(wParam) {
         case MAKEWPARAM(IDCANCEL, BN_CLICKED):
+            khm_leave_modal();
             DestroyWindow(hwnd);
             break;
 
@@ -652,6 +652,7 @@ cfgui_dlgproc(HWND hwnd,
 
         case MAKEWPARAM(IDOK, BN_CLICKED):
             cfgui_apply_settings(NULL);
+            khm_leave_modal();
             DestroyWindow(hwnd);
             break;
         }

@@ -35,13 +35,7 @@
 #define KHERR_FACILITY k5_facility
 #define KHERR_FACILITY_ID 64
 
-#include<khdefs.h>
-#include<kcreddb.h>
-#include<kmm.h>
-#include<kconfig.h>
-#include<khuidefs.h>
-#include<kherr.h>
-#include<utils.h>
+#include<netidmgr.h>
 
 #include<krb5funcs.h>
 #include<krb5common.h>
@@ -105,6 +99,7 @@ extern khm_ui_4  k5_commctl_version;
 #define CSNAME_KRB5CRED      L"Krb5Cred"
 #define CSNAME_PARAMS        L"Parameters"
 #define CSNAME_PROMPTCACHE   L"PromptCache"
+#define CSNAME_REALMS        L"Realms"
 
 /* plugin constants */
 #define KRB5_PLUGIN_NAME    L"Krb5Cred"
@@ -173,6 +168,7 @@ typedef struct _fiber_job_t {
     int     prompt_set;
 
     BOOL    null_password;
+    BOOL    valid_principal;
 } fiber_job;
 
 extern fiber_job g_fjob;   /* global fiber job object */

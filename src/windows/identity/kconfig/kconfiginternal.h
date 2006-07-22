@@ -28,11 +28,11 @@
 #define __KHIMAIRA_KCONFIGINTERNAL_H
 
 #include<windows.h>
-#include<strsafe.h>
 #include<kconfig.h>
 #include<khlist.h>
 #include<kherror.h>
 #include<utils.h>
+#include<strsafe.h>
 
 /* TODO: Implement configuration provider interfaces
 
@@ -56,7 +56,7 @@ typedef struct kconf_conf_space_t {
     khm_int32   refcount;
     khm_int32   flags;
 
-    kconf_schema * schema;
+    const kconf_schema * schema;
     khm_int32   nSchema;
 
     TDCL(struct kconf_conf_space_t);

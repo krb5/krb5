@@ -325,6 +325,14 @@ if exist $@.manifest $(MT) -outputresource:$@;1 -manifest $@.manifest
 
 _VC_MANIFEST_EMBED_DLL=$(_VC_MANIFEST_EMBED_EXE)
 
+# Note that if you are merging manifests, then the VS generated
+# manifest should be cleaned up after calling _VC_MANIFEST_EMBED_???.
+# This ensures that even if the DLL or EXE is executed in-place, the
+# embedded manifest will be used.  Otherwise the $@.manifest file will
+# be used.
+_VC_MANIFEST_CLEAN= \
+if exist $@.manifest $(RM) $@.manifest
+
 # End of manifest handling
 
 !endif

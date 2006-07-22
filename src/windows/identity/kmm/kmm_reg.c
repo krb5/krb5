@@ -188,7 +188,8 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
 
     rv = khc_write_int32(csp_plugin, L"Type", plugin->type);
     CKRV;
-    rv = khc_write_int32(csp_plugin, L"Flags", plugin->flags);
+    rv = khc_write_int32(csp_plugin, L"Disabled",
+                         !!(plugin->flags & KMM_PLUGIN_FLAG_DISABLED));
     CKRV;
 
     {
@@ -259,7 +260,7 @@ kmm_register_module(kmm_module_reg * module, khm_int32 config_flags)
     rv = khc_write_string(csp_module, L"ImagePath", module->path);
     CKRV;
 
-    rv = khc_write_int32(csp_module, L"Flags", 0);
+    rv = khc_write_int32(csp_module, L"Disabled", 0);
     CKRV;
 
     /* FileVersion and ProductVersion will be set when the module

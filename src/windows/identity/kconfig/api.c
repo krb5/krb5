@@ -24,6 +24,7 @@
 
 /* $Id$ */
 
+#include<shlwapi.h>
 #include<kconfiginternal.h>
 #include<assert.h>
 
@@ -314,6 +315,11 @@ khcint_RegOpenKeyEx(HKEY hkey, LPCWSTR sSubKey, DWORD ulOptions,
     return rv;
 }
 
+/*! \internal
+
+ \note This function is not a good replacement for RegDeleteKey since
+     it deletes all the subkeys in addition to the key being deleted.
+ */
 LONG
 khcint_RegDeleteKey(HKEY hKey,
                     LPCWSTR lpSubKey) {
@@ -345,7 +351,15 @@ khcint_RegDeleteKey(HKEY hKey,
             /* bingo! ?? */
             if ((sk_name[cch] == L'\0' ||
                  sk_name[cch] == L'~')) {
-                rv = RegDeleteKey(hKey, sk_name);
+
+                /* instead of calling RegDeleteKey we call SHDeleteKey
+                   because we want to blow off all the subkeys as
+                   well.  This is different from the behavior of
+                   RegDeleteKey making khcint_RegDeleteKey not a very
+                   good case sensitive replacement for
+                   RegDeleteKey. */
+
+                rv = SHDeleteKey(hKey, sk_name);
                 goto _cleanup;
             }
         }
@@ -891,7 +905,7 @@ khc_close_space(khm_handle csp) {
 
 KHMEXP khm_int32 KHMAPI 
 khc_read_string(khm_handle pconf, 
-                wchar_t * pvalue, 
+                const wchar_t * pvalue, 
                 wchar_t * buf, 
                 khm_size * bufsize) 
 {
@@ -904,7 +918,7 @@ khc_read_string(khm_handle pconf,
     do {
         HKEY hku = NULL;
         HKEY hkm = NULL;
-        wchar_t * value = NULL;
+        const wchar_t * value = NULL;
         int free_space = 0;
         khm_handle conf = NULL;
         DWORD size;
@@ -928,7 +942,7 @@ khc_read_string(khm_handle pconf,
 
             free_space = 1;
 #if 0
-            wchar_t * back, * forward;
+            const wchar_t * back, * forward;
 
             back = wcsrchr(pvalue, L'\\');
             forward = wcsrchr(pvalue, L'/');
@@ -1053,7 +1067,7 @@ _exit:
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_read_int32(khm_handle pconf, wchar_t * pvalue, khm_int32 * buf) {
+khc_read_int32(khm_handle pconf, const wchar_t * pvalue, khm_int32 * buf) {
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -1070,7 +1084,7 @@ khc_read_int32(khm_handle pconf, wchar_t * pvalue, khm_int32 * buf) {
         HKEY hku = NULL;
         HKEY hkm = NULL;
 
-        wchar_t * value = NULL;
+        const wchar_t * value = NULL;
         int free_space = 0;
         khm_handle conf = NULL;
 
@@ -1089,7 +1103,7 @@ khc_read_int32(khm_handle pconf, wchar_t * pvalue, khm_int32 * buf) {
                 goto _shadow;
             free_space = 1;
 #if 0
-            wchar_t * back, * forward;
+            const wchar_t * back, * forward;
 
             back = wcsrchr(pvalue, L'\\');
             forward = wcsrchr(pvalue, L'/');
@@ -1175,7 +1189,7 @@ _exit:
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_read_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 * buf) {
+khc_read_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 * buf) {
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -1189,7 +1203,7 @@ khc_read_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 * buf) {
         HKEY hku = NULL;
         HKEY hkm = NULL;
 
-        wchar_t * value = NULL;
+        const wchar_t * value = NULL;
         int free_space = 0;
         khm_handle conf = NULL;
 
@@ -1208,7 +1222,7 @@ khc_read_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 * buf) {
                 goto _shadow;
             free_space = 1;
 #if 0
-            wchar_t * back, *forward;
+            const wchar_t * back, *forward;
 
             back = wcsrchr(pvalue, L'\\');
             forward = wcsrchr(pvalue, L'/');
@@ -1294,7 +1308,7 @@ _exit:
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_read_binary(khm_handle pconf, wchar_t * pvalue, 
+khc_read_binary(khm_handle pconf, const wchar_t * pvalue, 
                 void * buf, khm_size * bufsize) {
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -1309,7 +1323,7 @@ khc_read_binary(khm_handle pconf, wchar_t * pvalue,
         HKEY hku = NULL;
         HKEY hkm = NULL;
 
-        wchar_t * value = NULL;
+        const wchar_t * value = NULL;
         int free_space = 0;
         khm_handle conf = NULL;
 
@@ -1326,7 +1340,7 @@ khc_read_binary(khm_handle pconf, wchar_t * pvalue,
                 goto _shadow;
             free_space = 1;
 #if 0
-            wchar_t * back, *forward;
+            const wchar_t * back, *forward;
 
             back = wcsrchr(pvalue, L'\\');
             forward = wcsrchr(pvalue, L'/');
@@ -1419,7 +1433,7 @@ _exit:
 
 KHMEXP khm_int32 KHMAPI 
 khc_write_string(khm_handle pconf, 
-                 wchar_t * pvalue, 
+                 const wchar_t * pvalue, 
                  wchar_t * buf) 
 {
     HKEY pk = NULL;
@@ -1427,7 +1441,7 @@ khc_write_string(khm_handle pconf,
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
     size_t cbsize;
-    wchar_t * value = NULL;
+    const wchar_t * value = NULL;
     int free_space = 0;
     khm_handle conf = NULL;
 
@@ -1438,20 +1452,53 @@ khc_write_string(khm_handle pconf,
     if(pconf && !khc_is_machine_handle(pconf) && !khc_is_user_handle(pconf))
         return KHM_ERROR_INVALID_OPERATION;
 
+    if(FAILED(StringCbLength(buf, KCONF_MAXCB_STRING, &cbsize))) {
+        rv = KHM_ERROR_INVALID_PARAM;
+        goto _exit;
+    }
+
+    cbsize += sizeof(wchar_t);
+
+    if (khc_handle_flags(pconf) & KCONF_FLAG_WRITEIFMOD) {
+        wchar_t tmpbuf[512];
+        wchar_t * buffer;
+        size_t tmpsize = cbsize;
+        khm_boolean is_equal = FALSE;
+
+        if (cbsize <= sizeof(tmpbuf)) {
+            buffer = tmpbuf;
+        } else {
+            buffer = PMALLOC(cbsize);
+        }
+
+        if (KHM_SUCCEEDED(khc_read_string(pconf, pvalue, buffer, &tmpsize)) &&
+            tmpsize == cbsize) {
+            if (khc_handle_flags(pconf) & KCONF_FLAG_IFMODCI)
+                is_equal = !_wcsicmp(buffer, buf);
+            else
+                is_equal = !wcscmp(buffer, buf);
+        }
+
+        if (buffer != tmpbuf)
+            PFREE(buffer);
+
+        if (is_equal) {
+            return KHM_ERROR_SUCCESS;
+        }
+    }
+
     if(wcschr(pvalue, L'\\')
 #if 0
        || wcschr(pvalue, L'/')
 #endif
        ) {
-        if(KHM_FAILED(khc_open_space(
-            pconf, 
-            pvalue, 
-            KCONF_FLAG_TRAILINGVALUE | (pconf?khc_handle_flags(pconf):0), 
-            &conf)))
+        if(KHM_FAILED(khc_open_space(pconf, pvalue, 
+                                     KCONF_FLAG_TRAILINGVALUE | (pconf?khc_handle_flags(pconf):0), 
+                                     &conf)))
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
 #if 0
-        wchar_t * back, *forward;
+        const wchar_t * back, *forward;
 
         back = wcsrchr(pvalue, L'\\');
         forward = wcsrchr(pvalue, L'/');
@@ -1472,13 +1519,6 @@ khc_write_string(khm_handle pconf,
 
     c = khc_space_from_handle(conf);
 
-    if(FAILED(StringCbLength(buf, KCONF_MAXCB_STRING, &cbsize))) {
-        rv = KHM_ERROR_INVALID_PARAM;
-        goto _exit;
-    }
-
-    cbsize += sizeof(wchar_t);
-
     if(khc_is_user_handle(conf)) {
         pk = khcint_space_open_key(c, KHM_PERM_WRITE | KHM_FLAG_CREATE);
     } else {
@@ -1498,14 +1538,14 @@ _exit:
 
 KHMEXP khm_int32 KHMAPI 
 khc_write_int32(khm_handle pconf, 
-                wchar_t * pvalue, 
+                const wchar_t * pvalue, 
                 khm_int32 buf) 
 {
     HKEY pk = NULL;
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
-    wchar_t * value = NULL;
+    const wchar_t * value = NULL;
     int free_space = 0;
     khm_handle conf = NULL;
 
@@ -1515,6 +1555,15 @@ khc_write_int32(khm_handle pconf,
 
     if(pconf && !khc_is_machine_handle(pconf) && !khc_is_user_handle(pconf))
         return KHM_ERROR_INVALID_OPERATION;
+
+    if (khc_handle_flags(pconf) & KCONF_FLAG_WRITEIFMOD) {
+        khm_int32 tmpvalue;
+
+        if (KHM_SUCCEEDED(khc_read_int32(pconf, pvalue, &tmpvalue)) &&
+            tmpvalue == buf) {
+            return KHM_ERROR_SUCCESS;
+        }
+    }
 
     if(wcschr(pvalue, L'\\')
 #if 0
@@ -1529,7 +1578,7 @@ khc_write_int32(khm_handle pconf,
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
 #if 0
-        wchar_t * back, *forward;
+        const wchar_t * back, *forward;
 
         back = wcsrchr(pvalue, L'\\');
         forward = wcsrchr(pvalue, L'/');
@@ -1566,12 +1615,12 @@ khc_write_int32(khm_handle pconf,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_write_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 buf) {
+khc_write_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 buf) {
     HKEY pk = NULL;
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
-    wchar_t * value = NULL;
+    const wchar_t * value = NULL;
     int free_space = 0;
     khm_handle conf = NULL;
 
@@ -1581,6 +1630,15 @@ khc_write_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 buf) {
 
     if(pconf && !khc_is_machine_handle(pconf) && !khc_is_user_handle(pconf))
         return KHM_ERROR_INVALID_OPERATION;
+
+    if (khc_handle_flags(pconf) & KCONF_FLAG_WRITEIFMOD) {
+        khm_int64 tmpvalue;
+
+        if (KHM_SUCCEEDED(khc_read_int64(pconf, pvalue, &tmpvalue)) &&
+            tmpvalue == buf) {
+            return KHM_ERROR_SUCCESS;
+        }
+    }
 
     if(wcschr(pvalue, L'\\')
 #if 0
@@ -1595,7 +1653,7 @@ khc_write_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 buf) {
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
 #if 0
-        wchar_t * back, *forward;
+        const wchar_t * back, *forward;
 
         back = wcsrchr(pvalue, L'\\');
         forward = wcsrchr(pvalue, L'/');
@@ -1633,13 +1691,13 @@ khc_write_int64(khm_handle pconf, wchar_t * pvalue, khm_int64 buf) {
 
 KHMEXP khm_int32 KHMAPI 
 khc_write_binary(khm_handle pconf, 
-                 wchar_t * pvalue, 
+                 const wchar_t * pvalue, 
                  void * buf, khm_size bufsize) {
     HKEY pk = NULL;
     kconf_conf_space * c;
     khm_int32 rv = KHM_ERROR_SUCCESS;
     LONG hr;
-    wchar_t * value = NULL;
+    const wchar_t * value = NULL;
     int free_space = 0;
     khm_handle conf = NULL;
 
@@ -1663,7 +1721,7 @@ khc_write_binary(khm_handle pconf,
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
 #if 0
-        wchar_t * back, *forward;
+        const wchar_t * back, *forward;
 
         back = wcsrchr(pvalue, L'\\');
         forward = wcsrchr(pvalue, L'/');
@@ -1761,7 +1819,7 @@ khc_get_config_space_parent(khm_handle conf, khm_handle * parent) {
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_get_type(khm_handle conf, wchar_t * value) {
+khc_get_type(khm_handle conf, const wchar_t * value) {
     HKEY hkm = NULL;
     HKEY hku = NULL;
     kconf_conf_space * c;
@@ -1819,7 +1877,7 @@ khc_get_type(khm_handle conf, wchar_t * value) {
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_value_exists(khm_handle conf, wchar_t * value) {
+khc_value_exists(khm_handle conf, const wchar_t * value) {
     HKEY hku = NULL;
     HKEY hkm = NULL;
     kconf_conf_space * c;
@@ -1858,7 +1916,7 @@ khc_value_exists(khm_handle conf, wchar_t * value) {
 }
 
 KHMEXP khm_int32 KHMAPI
-khc_remove_value(khm_handle conf, wchar_t * value, khm_int32 flags) {
+khc_remove_value(khm_handle conf, const wchar_t * value, khm_int32 flags) {
     HKEY hku = NULL;
     HKEY hkm = NULL;
     kconf_conf_space * c;
@@ -2030,7 +2088,7 @@ khcint_is_valid_name(wchar_t * name)
 }
 
 khm_int32 
-khcint_validate_schema(kconf_schema * schema,
+khcint_validate_schema(const kconf_schema * schema,
                        int begin,
                        int *end)
 {
@@ -2092,7 +2150,7 @@ khcint_validate_schema(kconf_schema * schema,
 }
 
 khm_int32 
-khcint_load_schema_i(khm_handle parent, kconf_schema * schema, 
+khcint_load_schema_i(khm_handle parent, const kconf_schema * schema, 
                      int begin, int * end)
 {
     int i;
@@ -2153,7 +2211,7 @@ khcint_load_schema_i(khm_handle parent, kconf_schema * schema,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_load_schema(khm_handle conf, kconf_schema * schema)
+khc_load_schema(khm_handle conf, const kconf_schema * schema)
 {
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -2174,7 +2232,7 @@ khc_load_schema(khm_handle conf, kconf_schema * schema)
 }
 
 khm_int32 
-khcint_unload_schema_i(khm_handle parent, kconf_schema * schema, 
+khcint_unload_schema_i(khm_handle parent, const kconf_schema * schema, 
                        int begin, int * end)
 {
     int i;
@@ -2235,7 +2293,7 @@ khcint_unload_schema_i(khm_handle parent, kconf_schema * schema,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_unload_schema(khm_handle conf, kconf_schema * schema)
+khc_unload_schema(khm_handle conf, const kconf_schema * schema)
 {
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
@@ -2363,7 +2421,7 @@ khc_enum_subspaces(khm_handle conf,
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_write_multi_string(khm_handle conf, wchar_t * value, wchar_t * buf)
+khc_write_multi_string(khm_handle conf, const wchar_t * value, wchar_t * buf)
 {
     size_t cb;
     wchar_t vbuf[KCONF_MAXCCH_STRING];
@@ -2394,7 +2452,7 @@ khc_write_multi_string(khm_handle conf, wchar_t * value, wchar_t * buf)
 }
 
 KHMEXP khm_int32 KHMAPI 
-khc_read_multi_string(khm_handle conf, wchar_t * value, 
+khc_read_multi_string(khm_handle conf, const wchar_t * value, 
                       wchar_t * buf, khm_size * bufsize)
 {
     wchar_t vbuf[KCONF_MAXCCH_STRING];

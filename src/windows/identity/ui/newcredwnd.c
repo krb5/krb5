@@ -466,16 +466,18 @@ nc_update_credtext(khui_nc_wnd_data * d)
         }
     }
 
-    if(validId || d->nc->subtype == KMSG_CRED_PASSWORD) {
-        /* TODO: check if all the required fields have valid values
-           before enabling the Ok button */
-        okEnable = TRUE;
-    }
+    if (!(d->nc->response & KHUI_NC_RESPONSE_PROCESSING)) {
+        if(validId || d->nc->subtype == KMSG_CRED_PASSWORD) {
+            /* TODO: check if all the required fields have valid values
+               before enabling the Ok button */
+            okEnable = TRUE;
+        }
 
-    hw = GetDlgItem(d->dlg_main, IDOK);
-    EnableWindow(hw, okEnable);
-    hw = GetDlgItem(d->dlg_bb, IDOK);
-    EnableWindow(hw, okEnable);
+        hw = GetDlgItem(d->dlg_main, IDOK);
+        EnableWindow(hw, okEnable);
+        hw = GetDlgItem(d->dlg_bb, IDOK);
+        EnableWindow(hw, okEnable);
+    }
 }
 
 #define CW_PARAM DWLP_USER
@@ -908,7 +910,7 @@ nc_handle_wm_command(HWND hwnd,
         case IDCANCEL:
             /* the default value for d->nc->result is set to
                KHUI_NC_RESULT_CANCEL */
-            d->nc->response = 0;
+            d->nc->response = KHUI_NC_RESPONSE_PROCESSING;
 
             nc_notify_types(d->nc, 
                             KHUI_WM_NC_NOTIFY, 
@@ -1639,6 +1641,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             khui_new_creds * nc;
 
             nc = d->nc;
+
+            nc->response &= ~KHUI_NC_RESPONSE_PROCESSING;
 
             if(nc->response & KHUI_NC_RESPONSE_NOEXIT) {
                 HWND hw;

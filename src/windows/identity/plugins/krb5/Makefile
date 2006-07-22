@@ -75,6 +75,7 @@ $(OBJ)\krb5config.c: krbconfig.csv $(CONFDIR)\csvschema.cfg
 $(DLLFILE):  $(OBJFILES) $(VERRESFILE) 
 	$(DLLGUILINK) $(MSGRESFILE) $(LIBFILES) $(SDKLIBFILES) $(SCLIB)
 	$(_VC_MANIFEST_EMBED_DLL)
+	$(_VC_MANIFEST_CLEAN)
 
 $(MSGRESFILE): $(OBJ)\krb5_msgs.rc
 

@@ -161,7 +161,7 @@ typedef struct tag_kmm_plugin_info {
     flags , but the \a state of the plugin will indicate that the
     plugin is running.
  */
-#define KMM_PLUGIN_FLAG_DISABLED    0x0400
+#define KMM_PLUGIN_FLAG_DISABLED    0x00000400
 
 /*! \name Plugin types
 @{*/

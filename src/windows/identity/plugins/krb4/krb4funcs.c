@@ -425,9 +425,9 @@ wchar_t * khm_krb5_get_realm_list(void)
 #if _MSC_VER >= 1400
             !fopen_s(&file, krb_conf, "rt")
 #else
-	    (file = fopen(krb_conf, "rt"))
+            (file = fopen(krb_conf, "rt"))
 #endif
-	     )
+            )
         {
             char lineBuf[256];
 

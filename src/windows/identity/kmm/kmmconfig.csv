@@ -8,7 +8,9 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
       Description,KC_STRING,<Description>,Description of the plugin
       Dependencies,KC_STRING,<Dependencies>,Multi string of plugin names of plugins that this plugin depends on
       Type,KC_INT32,0,The type of the plugin
-      Flags,KC_INT32,0,Flags
+#      Flags,KC_INT32,0,Flags (Deprecated)
+      Disabled,KC_INT32,0,Plug-in is disabled (Boolean)
+      NoUnload,KC_INT32,0,Do not unload the plugin (Boolean)
       FailureCount,KC_INT32,0,Number of failed loads
       FailureTime,KC_INT64,0,FILETIME of first failure
       FailureReason,KC_INT32,0,Reason for first failure.  One of the plugin status values.
@@ -21,12 +23,14 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
     ModuleFailureCountResetTime,KC_INT64,72000,Time after first failure at which the failure count is reset
     _Schema,KC_SPACE,0,Module schema
       ImagePath,KC_STRING,<Path to the library binary>,Path to the DLL (including DLL name)
-      Flags,KC_INT32,0,Flags
+#      Flags,KC_INT32,0,Flags (Deprecated)
+      Disabled,KC_INT32,0,Module is disabled (Boolean)
       FailureCount,KC_INT32,0,Number of failed loads
       FailureTime,KC_INT64,0,FILETIME of first failure
       FailureReason,KC_INT32,0,Reason for last failure.  One of the module status values.
       PluginList,KC_STRING,<plugins>,List of plugins implemented in the module
     _Schema,KC_ENDSPACE,0,
+# The OpenAFS plug-in is installed separately.
 #    OpenAFS,KC_SPACE,0,OpenAFS Module
 #      ImagePath,KC_STRING,afscred.dll,
 #      PluginList,KC_STRING,AfsCred,

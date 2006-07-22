@@ -42,72 +42,135 @@ void khui_exit_toolbar(void) {
 
 LRESULT khm_toolbar_notify(LPNMHDR notice) {
     switch(notice->code) {
-        case NM_CUSTOMDRAW:
-            {
-                LPNMTBCUSTOMDRAW nmcd = (LPNMTBCUSTOMDRAW) notice;
-                if(nmcd->nmcd.dwDrawStage == CDDS_PREPAINT) {
-                    return CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTERASE;
-                } else if(nmcd->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
-                    return CDRF_NOTIFYPOSTPAINT;
-                } else if(nmcd->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
-                    /* draw the actual icon */
-                    int iidx;
-                    int ibmp;
-                    HBITMAP hbmp;
-                    RECT r;
+    case TBN_GETINFOTIP:
+        {
+            LPNMTBGETINFOTIP git = (LPNMTBGETINFOTIP) notice;
+            int cmd;
+            khui_action * a;
 
-                    khui_action * act = 
-                        khui_find_action((int) nmcd->nmcd.dwItemSpec);
+            cmd = git->iItem;
+            a = khui_find_action(cmd);
 
-                    if(!act || !act->ib_normal)
-                        return CDRF_DODEFAULT;
+            if (a) {
+                if (a->caption) {
+                    StringCchCopy(git->pszText, git->cchTextMax, a->caption);
+                } else if (a->tooltip) {
+                    StringCchCopy(git->pszText, git->cchTextMax, a->tooltip);
+                } else if (a->is_caption) {
+                    wchar_t buf[INFOTIPSIZE];
 
-                    if((act->state & KHUI_ACTIONSTATE_DISABLED) && 
-                       act->ib_disabled) {
-                        ibmp = act->ib_disabled;
-                    } else if(act->ib_hot && 
-                              ((nmcd->nmcd.uItemState & CDIS_HOT) || 
-                               (nmcd->nmcd.uItemState & CDIS_SELECTED))){
-                        ibmp = act->ib_hot;
-                    } else {
-                        ibmp = act->ib_normal;
-                    }
+                    buf[0] = L'\0';
+                    LoadString(khm_hInstance, a->is_caption,
+                               buf, ARRAYLENGTH(buf));
 
-                    iidx = khui_ilist_lookup_id(ilist_toolbar, ibmp);
-                    if(iidx < 0) {
-                        hbmp = LoadImage(khm_hInstance, 
-                                         MAKEINTRESOURCE(ibmp), 
-                                         IMAGE_BITMAP, 
-                                         KHUI_TOOLBAR_IMAGE_WIDTH, 
-                                         KHUI_TOOLBAR_IMAGE_HEIGHT, 0);
-                        iidx = 
-                            khui_ilist_add_masked_id(ilist_toolbar, 
-                                                     hbmp, 
-                                                     KHUI_TOOLBAR_BGCOLOR, 
-                                                     ibmp);
-                        DeleteObject(hbmp);
-                    }
-
-                    if(iidx < 0)
-                        return CDRF_DODEFAULT;
-
-                    CopyRect(&r, &(nmcd->nmcd.rc));
-                    r.left += ((r.right - r.left) - 
-                               KHUI_TOOLBAR_IMAGE_WIDTH) / 2;
-                    r.top += ((r.bottom - r.top) -
-                              KHUI_TOOLBAR_IMAGE_HEIGHT) / 2;
-
-                    khui_ilist_draw(ilist_toolbar, 
-                                    iidx, 
-                                    nmcd->nmcd.hdc, 
-                                    r.left,
-                                    r.top, 
-                                    0);
-
-                    return CDRF_DODEFAULT;
+                    StringCchCopy(git->pszText, git->cchTextMax, buf);
+                } else {
+                    StringCchCopy(git->pszText, git->cchTextMax, L"");
                 }
+            } else {
+                StringCchCopy(git->pszText,
+                              git->cchTextMax,
+                              L"");
             }
-            break;
+        }
+        break;
+
+    case TBN_HOTITEMCHANGE:
+        {
+            LPNMTBHOTITEM hi = (LPNMTBHOTITEM) notice;
+
+            if (hi->dwFlags & HICF_LEAVING) {
+                khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, L"");
+            } else {
+                khui_action * a;
+                int cmd;
+                wchar_t buf[256];
+
+                cmd = hi->idNew;
+                a = khui_find_action(cmd);
+
+                buf[0] = L'\0';
+
+                if (a) {
+                    if (a->tooltip)
+                        StringCbCopy(buf, sizeof(buf), a->tooltip);
+                    else if (a->is_tooltip) {
+                        LoadString(khm_hInstance, a->is_tooltip,
+                                   buf, ARRAYLENGTH(buf));
+                    }
+                }
+
+                khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, buf);
+            }
+        }
+        break;
+
+    case NM_CUSTOMDRAW:
+        {
+            LPNMTBCUSTOMDRAW nmcd = (LPNMTBCUSTOMDRAW) notice;
+            if(nmcd->nmcd.dwDrawStage == CDDS_PREPAINT) {
+                return CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTERASE;
+            } else if(nmcd->nmcd.dwDrawStage == CDDS_ITEMPREPAINT) {
+                return CDRF_NOTIFYPOSTPAINT;
+            } else if(nmcd->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT) {
+                /* draw the actual icon */
+                int iidx;
+                int ibmp;
+                HBITMAP hbmp;
+                RECT r;
+
+                khui_action * act = 
+                    khui_find_action((int) nmcd->nmcd.dwItemSpec);
+
+                if(!act || !act->ib_normal)
+                    return CDRF_DODEFAULT;
+
+                if((act->state & KHUI_ACTIONSTATE_DISABLED) && 
+                   act->ib_disabled) {
+                    ibmp = act->ib_disabled;
+                } else if(act->ib_hot && 
+                          ((nmcd->nmcd.uItemState & CDIS_HOT) || 
+                           (nmcd->nmcd.uItemState & CDIS_SELECTED))){
+                    ibmp = act->ib_hot;
+                } else {
+                    ibmp = act->ib_normal;
+                }
+
+                iidx = khui_ilist_lookup_id(ilist_toolbar, ibmp);
+                if(iidx < 0) {
+                    hbmp = LoadImage(khm_hInstance, 
+                                     MAKEINTRESOURCE(ibmp), 
+                                     IMAGE_BITMAP, 
+                                     KHUI_TOOLBAR_IMAGE_WIDTH, 
+                                     KHUI_TOOLBAR_IMAGE_HEIGHT, 0);
+                    iidx = 
+                        khui_ilist_add_masked_id(ilist_toolbar, 
+                                                 hbmp, 
+                                                 KHUI_TOOLBAR_BGCOLOR, 
+                                                 ibmp);
+                    DeleteObject(hbmp);
+                }
+
+                if(iidx < 0)
+                    return CDRF_DODEFAULT;
+
+                CopyRect(&r, &(nmcd->nmcd.rc));
+                r.left += ((r.right - r.left) - 
+                           KHUI_TOOLBAR_IMAGE_WIDTH) / 2;
+                r.top += ((r.bottom - r.top) -
+                          KHUI_TOOLBAR_IMAGE_HEIGHT) / 2;
+                
+                khui_ilist_draw(ilist_toolbar, 
+                                iidx, 
+                                nmcd->nmcd.hdc, 
+                                r.left,
+                                r.top, 
+                                0);
+
+                return CDRF_DODEFAULT;
+            }
+        }
+        break;
     }
     return 0;
 }
@@ -246,6 +309,14 @@ void khm_create_standard_toolbar(HWND rebar) {
 
     def = khui_find_menu(KHUI_TOOLBAR_STANDARD);
 
+    if (!def) {
+#ifdef DEBUG
+        assert(FALSE);
+#else
+        return;
+#endif
+    }
+
     hwtb = CreateWindowEx(0
 #if (_WIN32_IE >= 0x0501)
                           | TBSTYLE_EX_MIXEDBUTTONS
@@ -257,6 +328,7 @@ void khm_create_standard_toolbar(HWND rebar) {
                           TBSTYLE_FLAT |
                           TBSTYLE_AUTOSIZE | 
                           TBSTYLE_LIST |
+                          TBSTYLE_TOOLTIPS |
                           CCS_NORESIZE | 
                           CCS_NOPARENTALIGN |
                           CCS_ADJUSTABLE |

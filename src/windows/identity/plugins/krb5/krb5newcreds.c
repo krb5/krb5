@@ -656,6 +656,10 @@ k5_cached_kinit_prompter(void) {
 
         goto _cleanup;
 
+    /* we found a prompt cache.  We take this to imply that the
+       principal is valid. */
+    g_fjob.valid_principal = TRUE;
+
     /* check if there are any prompts currently showing.  If there are
        we check if they are the same as the ones we are going to show.
        In which case we just reuse the exisitng prompts */
@@ -820,6 +824,9 @@ k5_kinit_prompter(krb5_context context,
     BOOL new_prompts = TRUE;
 
     khm_handle csp_prcache = NULL;
+
+    /* we got prompts?  Then we assume that the principal is valid */
+    g_fjob.valid_principal = TRUE;
 
     nc = g_fjob.nc;
 
@@ -1102,6 +1109,128 @@ k5_kinit_prompter(krb5_context context,
         return code;
 }
 
+/*
+
+  The configuration information for each identity comes from a
+  multitude of layers organized as follows.  The ordering is
+  decreasing in priority.  When looking up a value, the value will be
+  looked up in each layer in turn starting at level 0.  The first
+  instance of the value found will be the effective value.
+
+  0  : <identity configuration>\Krb5Cred
+
+  0.1: per user
+
+  0.2: per machine
+
+  1  : <plugin configuration>\Parameters\Realms\<realm of identity>
+
+  1.1: per user
+
+  1.2: per machine
+
+  2  : <plugin configuration>\Parameters
+
+  2.1: per user
+
+  2.2: per machine
+
+  2.3: schema
+
+ */
+khm_int32
+k5_open_config_handle(khm_handle ident,
+                      khm_int32 flags,
+                      khm_handle * ret_csp) {
+
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_i = NULL;
+    khm_handle csp_ik5 = NULL;
+    khm_handle csp_realms = NULL;
+    khm_handle csp_realm = NULL;
+    khm_handle csp_plugins = NULL;
+    khm_handle csp_krbcfg = NULL;
+    khm_handle csp_rv = NULL;
+    wchar_t realm[KCDB_IDENT_MAXCCH_NAME];
+
+    realm[0] = L'\0';
+
+    if (ident) {
+        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+        wchar_t * trealm;
+        khm_size cb_idname = sizeof(idname);
+
+        rv = kcdb_identity_get_name(ident, idname, &cb_idname);
+        if (KHM_SUCCEEDED(rv) &&
+            (trealm = khm_get_realm_from_princ(idname)) != NULL) {
+            StringCbCopy(realm, sizeof(realm), trealm);
+        }
+    }
+
+    if (ident) {
+        rv = kcdb_identity_get_config(ident, flags, &csp_i);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        rv = khc_open_space(csp_i, CSNAME_KRB5CRED, flags, &csp_ik5);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        if (realm[0] == L'\0')
+            goto done_shadow_realm;
+
+        rv = khc_open_space(csp_params, CSNAME_REALMS, flags, &csp_realms);
+        if (KHM_FAILED(rv))
+            goto done_shadow_realm;
+
+        rv = khc_open_space(csp_realms, realm, flags, &csp_realm);
+        if (KHM_FAILED(rv))
+            goto done_shadow_realm;
+
+        rv = khc_shadow_space(csp_realm, csp_params);
+
+    done_shadow_realm:
+
+        if (csp_realm)
+            rv = khc_shadow_space(csp_ik5, csp_realm);
+        else
+            rv = khc_shadow_space(csp_ik5, csp_params);
+
+        csp_rv = csp_ik5;
+
+    } else {
+
+        /* No valid identity specified. We default to the parameters key. */
+        rv = kmm_get_plugins_config(0, &csp_plugins);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        rv = khc_open_space(csp_plugins, CSNAME_KRB5CRED, flags, &csp_krbcfg);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        rv = khc_open_space(csp_krbcfg, CSNAME_PARAMS, flags, &csp_rv);
+    }
+
+ done:
+
+    *ret_csp = csp_rv;
+
+    /* leave csp_ik5.  If it's non-NULL, then it's the return value */
+    /* leave csp_rv.  It's the return value. */
+    if (csp_i)
+        khc_close_space(csp_i);
+    if (csp_realms)
+        khc_close_space(csp_realms);
+    if (csp_realm)
+        khc_close_space(csp_realm);
+    if (csp_plugins)
+        khc_close_space(csp_plugins);
+    if (csp_krbcfg)
+        khc_close_space(csp_krbcfg);
+
+    return rv;
+}
 
 void 
 k5_read_dlg_params(khm_handle conf, 
@@ -1173,11 +1302,11 @@ k5_write_dlg_params(khm_handle conf,
     khc_write_int32(conf, L"Addressless", d->addressless);
     khc_write_int32(conf, L"PublicIP", d->publicIP);
 
-    khc_write_int32(conf, L"DefaultLifetime", 
+    khc_write_int32(conf, L"DefaultLifetime",
                     (khm_int32) d->tc_lifetime.current);
-    khc_write_int32(conf, L"MaxLifetime", 
+    khc_write_int32(conf, L"MaxLifetime",
                     (khm_int32) d->tc_lifetime.max);
-    khc_write_int32(conf, L"MinLifetime", 
+    khc_write_int32(conf, L"MinLifetime",
                     (khm_int32) d->tc_lifetime.min);
 
     khc_write_int32(conf, L"DefaultRenewLifetime", 
@@ -1241,6 +1370,7 @@ k5_prep_kinit_job(khui_new_creds * nc)
     g_fjob.code = 0;
     g_fjob.identity = ident;
     g_fjob.prompt_set = 0;
+    g_fjob.valid_principal = FALSE;
 
     /* if we have external parameters, we should use them as well */
     if (nc->ctx.cb_vparam == sizeof(NETID_DLGINFO) &&
@@ -1342,6 +1472,106 @@ k5_find_tgt_filter(khm_handle cred,
 
     if (cident)
         kcdb_identity_release(cident);
+
+    return rv;
+}
+
+khm_int32
+k5_update_LRU(khm_handle identity)
+{
+    wchar_t * wbuf = NULL;
+    wchar_t * idname = NULL;
+    wchar_t * realm = NULL;
+    khm_size cb;
+    khm_size cb_ms;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    rv = kcdb_identity_get_name(identity, NULL, &cb);
+    assert(rv == KHM_ERROR_TOO_LONG);
+
+    idname = PMALLOC(cb);
+    assert(idname);
+
+    rv = kcdb_identity_get_name(identity, idname, &cb);
+    assert(KHM_SUCCEEDED(rv));
+
+    rv = khc_read_multi_string(csp_params, L"LRUPrincipals", NULL, &cb_ms);
+    if (rv != KHM_ERROR_TOO_LONG)
+        cb_ms = cb + sizeof(wchar_t);
+    else
+        cb_ms += cb + sizeof(wchar_t);
+
+    wbuf = PMALLOC(cb_ms);
+    assert(wbuf);
+
+    cb = cb_ms;
+
+    if (rv == KHM_ERROR_TOO_LONG) {
+        rv = khc_read_multi_string(csp_params, L"LRUPrincipals", wbuf, &cb);
+        assert(KHM_SUCCEEDED(rv));
+
+        if (multi_string_find(wbuf, idname, KHM_CASE_SENSITIVE) != NULL) {
+            /* it's already there.  We remove it here and add it at
+               the top of the LRU list. */
+            multi_string_delete(wbuf, idname, KHM_CASE_SENSITIVE);
+        }
+    } else {
+        multi_string_init(wbuf, cb_ms);
+    }
+
+    cb = cb_ms;
+    rv = multi_string_prepend(wbuf, &cb, idname);
+    assert(KHM_SUCCEEDED(rv));
+
+    rv = khc_write_multi_string(csp_params, L"LRUPrincipals", wbuf);
+
+    realm = khm_get_realm_from_princ(idname);
+    if (realm == NULL || *realm == L'\0')
+        goto _done_with_LRU;
+
+    cb = cb_ms;
+    rv = khc_read_multi_string(csp_params, L"LRURealms", wbuf, &cb);
+
+    if (rv == KHM_ERROR_TOO_LONG) {
+        PFREE(wbuf);
+        wbuf = PMALLOC(cb);
+        assert(wbuf);
+
+        cb_ms = cb;
+
+        rv = khc_read_multi_string(csp_params, L"LRURealms", wbuf, &cb);
+
+        assert(KHM_SUCCEEDED(rv));
+    } else if (rv == KHM_ERROR_SUCCESS) {
+        if (multi_string_find(wbuf, realm, KHM_CASE_SENSITIVE) != NULL) {
+            /* remove the realm and add it at the top later. */
+            multi_string_delete(wbuf, realm, KHM_CASE_SENSITIVE); 
+        }
+    } else {
+        multi_string_init(wbuf, cb_ms);
+    }
+
+    cb = cb_ms;
+    rv = multi_string_prepend(wbuf, &cb, realm);
+
+    if (rv == KHM_ERROR_TOO_LONG) {
+        wbuf = PREALLOC(wbuf, cb);
+
+        rv = multi_string_prepend(wbuf, &cb, realm);
+
+        assert(KHM_SUCCEEDED(rv));
+    }
+
+    rv = khc_write_multi_string(csp_params, L"LRURealms", wbuf);
+    
+    assert(KHM_SUCCEEDED(rv));
+
+ _done_with_LRU:
+
+    if (wbuf)
+        PFREE(wbuf);
+    if (idname)
+        PFREE(idname);
 
     return rv;
 }
@@ -1508,34 +1738,22 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             if(/* !d->dirty && */ nc->n_identities > 0 &&
                nc->subtype == KMSG_CRED_NEW_CREDS) {
 
-                khm_handle h_id = NULL;
-                khm_handle h_idk5 = NULL;
+                khm_handle h_idcfg = NULL;
 
                 do {
-                    if(KHM_FAILED
-                       (kcdb_identity_get_config(nc->identities[0],
-                                                 0,
-                                                 &h_id)))
+                    if (KHM_FAILED
+                        (k5_open_config_handle(nc->identities[0],
+                                               0, &h_idcfg)))
                         break;
 
-                    if(KHM_FAILED
-                       (khc_open_space(h_id, CSNAME_KRB5CRED, 
-                                       0, &h_idk5)))
-                        break;
-
-                    if(KHM_FAILED(khc_shadow_space(h_idk5, csp_params)))
-                        break;
-
-                    k5_read_dlg_params(h_idk5, d);
+                    k5_read_dlg_params(h_idcfg, d);
 
                     PostMessage(nct->hwnd_panel, KHUI_WM_NC_NOTIFY, 
                                 MAKEWPARAM(0,WMNC_DIALOG_SETUP), 0);
                 } while(FALSE);
 
-                if(h_id)
-                    khc_close_space(h_id);
-                if(h_idk5)
-                    khc_close_space(h_idk5);
+                if(h_idcfg)
+                    khc_close_space(h_idcfg);
             }
 
             khui_cw_unlock_nc(nc);
@@ -1825,17 +2043,18 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     assert(g_fjob.state == FIBER_STATE_NONE);
 #endif
 
+                    if (g_fjob.valid_principal &&
+                        nc->n_identities > 0 &&
+                        nc->identities[0]) {
+                        /* the principal was valid, so we can go ahead
+                           and update the LRU */
+                        k5_update_LRU(nc->identities[0]);
+                    }
+
                 } else if (nc->result == KHUI_NC_RESULT_PROCESS &&
                            g_fjob.state == FIBER_STATE_NONE) {
-                    khm_handle sp = NULL;
-                    khm_handle ep = NULL;
+                    khm_handle csp_idcfg = NULL;
                     krb5_context ctx = NULL;
-                    wchar_t * wbuf;
-                    wchar_t * idname;
-                    wchar_t * atsign;
-                    khm_size cb;
-                    khm_size cb_ms;
-                    khm_int32 rv;
 
 		    _reportf(L"Tickets successfully acquired");
 
@@ -1849,20 +2068,16 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     assert(nc->n_identities > 0);
                     assert(nc->identities[0]);
 
-                    if(KHM_SUCCEEDED
-                       (kcdb_identity_get_config(nc->identities[0],
-                                                 KHM_FLAG_CREATE,
-                                                 &sp)) &&
-                       KHM_SUCCEEDED
-                       (khc_open_space(sp, CSNAME_KRB5CRED, 
-                                       KHM_FLAG_CREATE, &ep))) {
-                        k5_write_dlg_params(ep, d);
+                    if (KHM_SUCCEEDED
+                        (k5_open_config_handle(nc->identities[0],
+                                               KHM_FLAG_CREATE |
+                                               KCONF_FLAG_WRITEIFMOD,
+                                               &csp_idcfg))) {
+                        k5_write_dlg_params(csp_idcfg, d);
                     }
 
-                    if(ep != NULL)
-                        khc_close_space(ep);
-                    if(sp != NULL)
-                        khc_close_space(sp);
+                    if(csp_idcfg != NULL)
+                        khc_close_space(csp_idcfg);
 
                     /* We should also quickly refresh the credentials
                        so that the identity flags and ccache
@@ -1892,135 +2107,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         }
                     }
 
-                    /* also add the principal and the realm in to the
-                       LRU lists */
-                    rv = kcdb_identity_get_name(nc->identities[0],
-                                                NULL,
-                                                &cb);
-                    assert(rv == KHM_ERROR_TOO_LONG);
+                    /* and update the LRU */
+                    k5_update_LRU(nc->identities[0]);
 
-                    idname = PMALLOC(cb);
-                    assert(idname);
-
-                    rv = kcdb_identity_get_name(nc->identities[0],
-                                                idname,
-                                                &cb);
-                    assert(KHM_SUCCEEDED(rv));
-
-                    rv = khc_read_multi_string(csp_params,
-                                               L"LRUPrincipals",
-                                               NULL,
-                                               &cb_ms);
-                    if (rv != KHM_ERROR_TOO_LONG)
-                        cb_ms = cb + sizeof(wchar_t);
-                    else
-                        cb_ms += cb + sizeof(wchar_t);
-
-                    wbuf = PMALLOC(cb_ms);
-                    assert(wbuf);
-
-                    cb = cb_ms;
-
-                    if (rv == KHM_ERROR_TOO_LONG) {
-                        rv = khc_read_multi_string(csp_params,
-                                                   L"LRUPrincipals",
-                                                   wbuf,
-                                                   &cb);
-                        assert(KHM_SUCCEEDED(rv));
-
-                        if (multi_string_find(wbuf,
-                                              idname,
-                                              KHM_CASE_SENSITIVE) 
-                            != NULL) {
-                            /* it's already there.  We remove it here
-                               and add it at the top of the LRU
-                               list. */
-                            multi_string_delete(wbuf, idname, KHM_CASE_SENSITIVE);
-                        }
-                    } else {
-                        multi_string_init(wbuf, cb_ms);
-                    }
-
-                    cb = cb_ms;
-                    rv = multi_string_prepend(wbuf, &cb, idname);
-                    assert(KHM_SUCCEEDED(rv));
-
-                    rv = khc_write_multi_string(csp_params,
-                                                L"LRUPrincipals",
-                                                wbuf);
-
-                    atsign = wcschr(idname, L'@');
-                    if (atsign == NULL)
-                        goto _done_with_LRU;
-
-                    atsign++;
-
-                    if (*atsign == L'\0')
-                        goto _done_with_LRU;
-
-                    cb = cb_ms;
-                    rv = khc_read_multi_string(csp_params,
-                                               L"LRURealms",
-                                               wbuf,
-                                               &cb);
-
-                    if (rv == KHM_ERROR_TOO_LONG) {
-                        PFREE(wbuf);
-                        wbuf = PMALLOC(cb);
-                        assert(wbuf);
-
-                        cb_ms = cb;
-
-                        rv = khc_read_multi_string(csp_params,
-                                                   L"LRURealms",
-                                                   wbuf,
-                                                   &cb);
-
-                        assert(KHM_SUCCEEDED(rv));
-                    } else if (rv == KHM_ERROR_SUCCESS) {
-                        if (multi_string_find(wbuf,
-                                              atsign,
-                                              KHM_CASE_SENSITIVE)
-                            != NULL) {
-                            /* remove the realm and add it at the top
-                               later. */
-                            multi_string_delete(wbuf, atsign, KHM_CASE_SENSITIVE); 
-                        }
-                    } else {
-                        multi_string_init(wbuf, cb_ms);
-                    }
-
-                    cb = cb_ms;
-                    rv = multi_string_prepend(wbuf,
-                                              &cb,
-                                              atsign);
-
-                    if (rv == KHM_ERROR_TOO_LONG) {
-                        wbuf = PREALLOC(wbuf, cb);
-
-                        rv = multi_string_prepend(wbuf,
-                                                  &cb,
-                                                  atsign);
-
-                        assert(KHM_SUCCEEDED(rv));
-                    }
-
-                    rv = khc_write_multi_string(csp_params,
-                                                L"LRURealms",
-                                                wbuf);
-                    assert(KHM_SUCCEEDED(rv));
-
-                _done_with_LRU:
-                    
                     if (ctx != NULL)
                         pkrb5_free_context(ctx);
-
-                    if (idname)
-                        PFREE(idname);
-
-                    if (wbuf)
-                        PFREE(wbuf);
-
                 } else if (g_fjob.state == FIBER_STATE_NONE) {
                     /* the user cancelled the operation */
                     r = KHUI_NC_RESPONSE_EXIT | 
