@@ -1,6 +1,6 @@
 /*
 
-Copyright 2005,2006 by the Massachusetts Institute of Technology
+Copyright 2005 by the Massachusetts Institute of Technology
 
 All rights reserved.
 
@@ -194,8 +194,6 @@ int KFW_is_available(void);
 int KFW_get_cred( char * username, char * password, int lifetime, char ** reasonP );
 void KFW_copy_cache_to_system_file(char * user, char * szLogonId);
 int KFW_destroy_tickets_for_principal(char * user);
-int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken);
-int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int size);
 
 #ifdef __cplusplus
 }
