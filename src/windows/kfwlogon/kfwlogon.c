@@ -1,5 +1,5 @@
 /*
-Copyright 2005 by the Massachusetts Institute of Technology
+Copyright 2005,2006 by the Massachusetts Institute of Technology
 
 All rights reserved.
 
@@ -292,6 +292,7 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     char szLogonId[128] = "";
     DWORD count;
     char filename[256];
+    char newfilename[256];
     char commandline[512];
     STARTUPINFO startupinfo;
     PROCESS_INFORMATION procinfo;
@@ -321,14 +322,36 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
         GetWindowsDirectory(filename, sizeof(filename));
     }
 
-    if ( strlen(filename) + strlen(szLogonId) + 2 <= sizeof(filename) ) {
-        strcat(filename, "\\");
-        strcat(filename, szLogonId);    
+    if ( strlen(filename) + strlen(szLogonId) + 2 > sizeof(filename) ) {
+        DebugEvent0("KFW_Logon_Event - filename too long");
+	return;
+    }
 
-        sprintf(commandline, "kfwcpcc.exe \"%s\"", filename);
+    strcat(filename, "\\");
+    strcat(filename, szLogonId);    
 
-        GetStartupInfo(&startupinfo);
-        if (CreateProcessAsUser( pInfo->hToken,
+    KFW_set_ccache_dacl(filename, pInfo->hToken);
+
+    KFW_obtain_user_temp_directory(pInfo->hToken, newfilename, sizeof(newfilename));
+
+    if ( strlen(newfilename) + strlen(szLogonId) + 2 > sizeof(newfilename) ) {
+        DebugEvent0("KFW_Logon_Event - new filename too long");
+	return;
+    }
+
+    strcat(newfilename, "\\");
+    strcat(newfilename, szLogonId);    
+
+    if (!MoveFileEx(filename, newfilename, 
+		     MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
+        DebugEvent("KFW_Logon_Event - MoveFileEx failed GLE = 0x%x", GetLastError());
+	return;
+    }
+
+    sprintf(commandline, "kfwcpcc.exe \"%s\"", newfilename);
+
+    GetStartupInfo(&startupinfo);
+    if (CreateProcessAsUser( pInfo->hToken,
                              "kfwcpcc.exe",
                              commandline,
                              NULL,
@@ -339,12 +362,15 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
                              NULL,
                              &startupinfo,
                              &procinfo)) 
-        {
-            WaitForSingleObject(procinfo.hProcess, 30000);
+    {
+	DebugEvent("KFW_Logon_Event - CommandLine %s", commandline);
 
-            CloseHandle(procinfo.hThread);
-            CloseHandle(procinfo.hProcess);
-        }
+	WaitForSingleObject(procinfo.hProcess, 30000);
+
+	CloseHandle(procinfo.hThread);
+	CloseHandle(procinfo.hProcess);
+    } else {
+	DebugEvent0("KFW_Logon_Event - CreateProcessFailed");
     }
 
     DeleteFile(filename);
