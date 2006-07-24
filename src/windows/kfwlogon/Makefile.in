@@ -12,7 +12,7 @@ LOCALINCLUDES = -I$(BUILDTOP) -I$(PISMERE)\athena\util\loadfuncs \
 	-I$(PISMERE)\athena\auth\leash\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
-SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib
+SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib
 RFLAGS = $(LOCALINCLUDES)
 RCFLAGS = $(RFLAGS) -D_WIN32
 
@@ -23,10 +23,10 @@ $(OUTPRE)kfwlogon.res: kfwlogon.rc ..\version.rc
 $(OUTPRE)kfwcpcc.res: kfwcpcc.rc ..\version.rc
 
 $(OUTPRE)kfwlogon.dll: $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj $(OUTPRE)kfwlogon.res
-    link $(DLL_LINKOPTS) -out:$@ $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj -entry:DllEntryPoint -def:kfwlogon.def $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB)
+    link $(DLL_LINKOPTS) -out:$@ $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj -entry:DllEntryPoint -def:kfwlogon.def $(SYSLIBS) $(KLIB) $(CLIB)
 
 $(OUTPRE)kfwcpcc.exe: $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(OUTPRE)kfwcpcc.res
-    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB)
+    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(SYSLIBS) $(KLIB) $(CLIB)
 
 install::
         copy $(OUTPRE)kfwlogon.dll $(DESTDIR)
