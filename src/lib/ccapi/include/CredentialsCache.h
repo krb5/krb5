@@ -71,7 +71,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-#pragma options align=mac68k
+#pragma pack(push,2)
 #endif
     
 #if defined(_WIN32)
@@ -574,7 +574,7 @@ CCACHE_API cc_int32 cc_initialize (cc_context_t  *out_context,
 			((iterator) -> functions -> clone (iterator, new_iter))
 			
 #if TARGET_OS_MAC
-#pragma options align=reset
+#pragma pack(pop)
 #endif
 
 #ifdef __cplusplus

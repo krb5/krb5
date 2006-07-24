@@ -59,7 +59,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #if TARGET_OS_MAC
-#pragma options align=mac68k
+#pragma pack(push,2)
 #endif
     
 /* Some old types get directly mapped to new types */
@@ -300,7 +300,7 @@ CCACHE_API cc_int32 cc_lock_request(
         const cc_int32 			lock_type);
 
 #if TARGET_OS_MAC
-#pragma options align=reset
+#pragma pack(pop)
 #endif
 
 #ifdef __cplusplus
