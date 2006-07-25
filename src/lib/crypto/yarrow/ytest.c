@@ -95,10 +95,6 @@ int main( int argc, char* argv[] )
     int done_some_tests = 0;
     int i;
     int ret;
-
-#if defined(__MWERKS__) && defined(macintosh)
-    argc = ccommand(&argv);
-#endif
     
     for ( argvp = argv+1, i = 1; i < argc; i++, argvp++ )
     {
