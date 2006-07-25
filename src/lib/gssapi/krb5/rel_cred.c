@@ -49,7 +49,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
    }
 
-   cred = *cred_handle;
+   cred = (krb5_gss_cred_id_t)*cred_handle;
 
    k5_mutex_destroy(&cred->lock);
    /* ignore error destroying mutex */

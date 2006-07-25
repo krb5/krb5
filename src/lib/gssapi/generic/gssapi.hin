@@ -69,9 +69,14 @@ extern "C" {
  * First, define the three platform-dependent pointer types.
  */
 
-typedef void * gss_name_t;
-typedef void * gss_cred_id_t;
-typedef void * gss_ctx_id_t;
+struct gss_name_struct;
+typedef struct gss_name_struct * gss_name_t;
+
+struct gss_cred_id_struct;
+typedef struct gss_cred_id_struct * gss_cred_id_t;
+
+struct gss_ctx_id_struct;
+typedef struct gss_ctx_id_struct * gss_ctx_id_t;
 
 /*
  * The following type must be defined as the smallest natural unsigned integer

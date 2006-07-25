@@ -52,7 +52,7 @@ OM_uint32 krb5_gss_duplicate_name(OM_uint32  *minor_status,
 		return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
 	}
 
-	princ = input_name;
+	princ = (krb5_principal)input_name;
 	if ((code = krb5_copy_principal(context, princ, &outprinc))) {
 		*minor_status = code;
 		krb5_free_context(context);

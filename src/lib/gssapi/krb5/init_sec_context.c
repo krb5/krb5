@@ -688,7 +688,7 @@ mutual_auth(
       return(GSS_S_NO_CONTEXT);
    }
 
-   ctx = (gss_ctx_id_t) *context_handle;
+   ctx = (krb5_gss_ctx_id_t) *context_handle;
 
    /* make sure the context is non-established, and that certain
       arguments are unchanged */
@@ -878,7 +878,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    /* verify the credential, or use the default */
    /*SUPPRESS 29*/
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
-      major_status = kg_get_defcred(minor_status, &cred);
+      major_status = kg_get_defcred(minor_status, (gss_cred_id_t *)&cred);
       if (major_status && GSS_ERROR(major_status)) {
 	 if (*context_handle == GSS_C_NO_CONTEXT)
 	    krb5_free_context(context);
@@ -928,7 +928,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    if (err) {
       k5_mutex_unlock(&cred->lock);
       if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
-	 krb5_gss_release_cred(minor_status, (gss_cred_id_t)&cred);
+	 krb5_gss_release_cred(minor_status, (gss_cred_id_t *)&cred);
       *minor_status = 0;
       if (*context_handle == GSS_C_NO_CONTEXT)
 	 krb5_free_context(context);
@@ -965,7 +965,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    }
 
    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)
-      krb5_gss_release_cred(&tmp_min_stat, (gss_cred_id_t)&cred);
+      krb5_gss_release_cred(&tmp_min_stat, (gss_cred_id_t *)&cred);
 
    return(major_status);
 }

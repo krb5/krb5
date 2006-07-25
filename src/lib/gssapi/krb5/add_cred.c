@@ -342,7 +342,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 
     /* set the outputs */
 
-    if (GSS_ERROR(major_status = krb5_gss_inquire_cred(minor_status, cred,
+    if (GSS_ERROR(major_status = krb5_gss_inquire_cred(minor_status, 
+						       (gss_cred_id_t)cred,
 						       NULL, &lifetime,
 						       NULL, actual_mechs))) {
 	OM_uint32 dummy;
@@ -360,7 +361,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	*acceptor_time_rec = lifetime;
 
     if (output_cred_handle)
-	*output_cred_handle = cred;
+	*output_cred_handle = (gss_cred_id_t)cred;
 
     krb5_free_context(context);
     *minor_status = 0;

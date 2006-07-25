@@ -240,19 +240,19 @@ static int g_delete(db, type, ptr)
 
 int g_save_name(vdb, name)
      g_set *vdb;
-     gss_name_t *name;
+     gss_name_t name;
 {
    return(g_save(vdb, V_NAME, (void *) name));
 }
 int g_save_cred_id(vdb, cred)
      g_set *vdb;
-     gss_cred_id_t *cred;
+     gss_cred_id_t cred;
 {
    return(g_save(vdb, V_CRED_ID, (void *) cred));
 }
 int g_save_ctx_id(vdb, ctx)
      g_set *vdb;
-     gss_ctx_id_t *ctx;
+     gss_ctx_id_t ctx;
 {
    return(g_save(vdb, V_CTX_ID, (void *) ctx));
 }
@@ -268,19 +268,19 @@ int g_save_lucidctx_id(vdb, lctx)
 
 int g_validate_name(vdb, name)
      g_set *vdb;
-     gss_name_t *name;
+     gss_name_t name;
 {
    return(g_validate(vdb, V_NAME, (void *) name));
 }
 int g_validate_cred_id(vdb, cred)
      g_set *vdb;
-     gss_cred_id_t *cred;
+     gss_cred_id_t cred;
 {
    return(g_validate(vdb, V_CRED_ID, (void *) cred));
 }
 int g_validate_ctx_id(vdb, ctx)
      g_set *vdb;
-     gss_ctx_id_t *ctx;
+     gss_ctx_id_t ctx;
 {
    return(g_validate(vdb, V_CTX_ID, (void *) ctx));
 }
@@ -295,19 +295,19 @@ int g_validate_lucidctx_id(vdb, lctx)
 
 int g_delete_name(vdb, name)
      g_set *vdb;
-     gss_name_t *name;
+     gss_name_t name;
 {
    return(g_delete(vdb, V_NAME, (void *) name));
 }
 int g_delete_cred_id(vdb, cred)
      g_set *vdb;
-     gss_cred_id_t *cred;
+     gss_cred_id_t cred;
 {
    return(g_delete(vdb, V_CRED_ID, (void *) cred));
 }
 int g_delete_ctx_id(vdb, ctx)
      g_set *vdb;
-     gss_ctx_id_t *ctx;
+     gss_ctx_id_t ctx;
 {
    return(g_delete(vdb, V_CTX_ID, (void *) ctx));
 }

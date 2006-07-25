@@ -150,19 +150,19 @@ int g_set_entry_add (g_set_elt *s, void *key, void *value);
 int g_set_entry_delete (g_set_elt *s, void *key);
 int g_set_entry_get (g_set_elt *s, void *key, void **value);
 
-int g_save_name (g_set *vdb, gss_name_t *name);
-int g_save_cred_id (g_set *vdb, gss_cred_id_t *cred);
-int g_save_ctx_id (g_set *vdb, gss_ctx_id_t *ctx);
+int g_save_name (g_set *vdb, gss_name_t name);
+int g_save_cred_id (g_set *vdb, gss_cred_id_t cred);
+int g_save_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
 int g_save_lucidctx_id (g_set *vdb, void *lctx);
 
-int g_validate_name (g_set *vdb, gss_name_t *name);
-int g_validate_cred_id (g_set *vdb, gss_cred_id_t *cred);
-int g_validate_ctx_id (g_set *vdb, gss_ctx_id_t *ctx);
+int g_validate_name (g_set *vdb, gss_name_t name);
+int g_validate_cred_id (g_set *vdb, gss_cred_id_t cred);
+int g_validate_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
 int g_validate_lucidctx_id (g_set *vdb, void *lctx);
 
-int g_delete_name (g_set *vdb, gss_name_t *name);
-int g_delete_cred_id (g_set *vdb, gss_cred_id_t *cred);
-int g_delete_ctx_id (g_set *vdb, gss_ctx_id_t *ctx);
+int g_delete_name (g_set *vdb, gss_name_t name);
+int g_delete_cred_id (g_set *vdb, gss_cred_id_t cred);
+int g_delete_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
 int g_delete_lucidctx_id (g_set *vdb, void *lctx);
 
 int g_make_string_buffer (const char *str, gss_buffer_t buffer);
