@@ -101,8 +101,8 @@ UnicodeStringToANSI(UNICODE_STRING uInputString, LPSTR lpszOutputString, int nOu
         lpszOutputString[min(uInputString.Length/2,nOutStringLen-1)] = '\0';
         return TRUE;
     }
-    else
-        lpszOutputString[0] = '\0';
+
+    lpszOutputString[0] = '\0';
     return FALSE;
 }  // UnicodeStringToANSI
 
@@ -163,9 +163,10 @@ DWORD APIENTRY NPLogonNotify(
     /* Convert from Unicode to ANSI */
 
     /*TODO: Use SecureZeroMemory to erase passwords */
-    UnicodeStringToANSI(IL->UserName, uname, MAX_USERNAME_LENGTH);
-    UnicodeStringToANSI(IL->Password, password, MAX_PASSWORD_LENGTH);
-    UnicodeStringToANSI(IL->LogonDomainName, logonDomain, MAX_DOMAIN_LENGTH);
+    if (!UnicodeStringToANSI(IL->UserName, uname, MAX_USERNAME_LENGTH) ||
+	!UnicodeStringToANSI(IL->Password, password, MAX_PASSWORD_LENGTH) ||
+	!UnicodeStringToANSI(IL->LogonDomainName, logonDomain, MAX_DOMAIN_LENGTH))
+	return 0;
 
     /* Make sure AD-DOMAINS sent from login that is sent to us is stripped */
     ctemp = strchr(uname, '@');
@@ -291,11 +292,12 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     char szPath[MAX_PATH] = "";
     char szLogonId[128] = "";
     DWORD count;
-    char filename[256];
-    char newfilename[256];
-    char commandline[512];
+    char filename[MAX_PATH] = "";
+    char newfilename[MAX_PATH] = "";
+    char commandline[MAX_PATH+256] = "";
     STARTUPINFO startupinfo;
     PROCESS_INFORMATION procinfo;
+    HANDLE hf = NULL;
 
     LUID LogonId = {0, 0};
     PSECURITY_LOGON_SESSION_DATA pLogonSessionData = NULL;
@@ -330,9 +332,24 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     strcat(filename, "\\");
     strcat(filename, szLogonId);    
 
-    KFW_set_ccache_dacl(filename, pInfo->hToken);
+    hf = CreateFile(filename, FILE_ALL_ACCESS, 0, NULL, OPEN_EXISTING, 
+		    FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hf == INVALID_HANDLE_VALUE) {
+        DebugEvent0("KFW_Logon_Event - file cannot be opened");
+	return;
+    }
+    CloseHandle(hf);
 
-    KFW_obtain_user_temp_directory(pInfo->hToken, newfilename, sizeof(newfilename));
+    if (KFW_set_ccache_dacl(filename, pInfo->hToken)) {
+        DebugEvent0("KFW_Logon_Event - unable to set dacl");
+	DeleteFile(filename);
+	return;
+    }
+
+    if (KFW_obtain_user_temp_directory(pInfo->hToken, newfilename, sizeof(newfilename))) {
+        DebugEvent0("KFW_Logon_Event - unable to obtain temp directory");
+	return;
+    }
 
     if ( strlen(newfilename) + strlen(szLogonId) + 2 > sizeof(newfilename) ) {
         DebugEvent0("KFW_Logon_Event - new filename too long");
