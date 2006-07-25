@@ -73,7 +73,7 @@
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	pragma options align=mac68k
+#	pragma pack(push,2)
 #endif
 
 #define KRB4_32		DES_INT32
@@ -779,7 +779,7 @@ long win_time_get_epoch(void);
 #endif
 
 #if TARGET_OS_MAC
-#	pragma options align=reset
+#	pragma pack(pop)
 #endif
 
 KRBINT_END_DECLS

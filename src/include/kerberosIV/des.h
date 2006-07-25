@@ -51,7 +51,7 @@
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	pragma options align=mac68k
+#	pragma pack(push,2)
 #endif
 
 #if UINT_MAX >= 0xFFFFFFFFUL
@@ -84,7 +84,7 @@ typedef unsigned char des_cblock[8];	/* crypto-block size */
 typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
 
 #if TARGET_OS_MAC
-#	pragma options align=reset
+#	pragma pack(pop)
 #endif
 
 KRBINT_END_DECLS
@@ -113,7 +113,7 @@ KRBINT_END_DECLS
 KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#	pragma options align=mac68k
+#	pragma pack(push,2)
 #endif
 
 /* Windows declarations */
@@ -186,7 +186,7 @@ int des_is_weak_key(des_cblock);
 void des_cblock_print_file(des_cblock *, FILE *fp);
 
 #if TARGET_OS_MAC
-#	pragma options align=reset
+#	pragma pack(pop)
 #endif
 
 KRBINT_END_DECLS

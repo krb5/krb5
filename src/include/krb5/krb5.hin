@@ -109,7 +109,7 @@
 KRB5INT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
-#    pragma options align=mac68k
+#    pragma pack(push,2)
 #endif
 
 /* from profile.h */
@@ -2564,7 +2564,7 @@ krb5_clear_error_message (krb5_context);
 
 
 #if TARGET_OS_MAC
-#    pragma options align=reset
+#    pragma pack(pop)
 #endif
 
 KRB5INT_END_DECLS
