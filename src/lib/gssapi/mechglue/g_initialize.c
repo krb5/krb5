@@ -89,6 +89,9 @@ gss_OID *oid;
 	OM_uint32 major;
 	gss_mech_info aMech;
 
+	if (gssint_initialize_library())
+		return GSS_S_FAILURE;
+
 	if (minor_status == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
