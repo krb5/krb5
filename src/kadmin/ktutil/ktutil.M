@@ -43,10 +43,14 @@ Clear the current keylist.  Alias:
 .BR clear .
 .TP
 \fBdelete_entry\fP \fIslot\fP
-Delets the entry in slot number
+Delete the entry in slot number
 .I slot
-from the current keylist.  Alais:
+from the current keylist.  Alias:
 .BR delent .
+.TP
+\fBadd_entry\fP (\-key | \-password) \-p \fIprincipal\fP \-k \fIkvno\fP \-e \fIenctype\fP
+Add principal to keylist using key or password.  Alias:
+.BR addent .
 .TP
 .BR list_requests
 Displays a listing of available commands.  Aliases:
