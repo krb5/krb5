@@ -1211,9 +1211,9 @@ AC_DEFUN(KRB5_LIB_AUX,
 [AC_REQUIRE([KRB5_LIB_PARAMS])dnl
 
 # Check whether to build static libraries.
-AC_ARG_ENABLE([static],
-AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most platforms@:>@])
-AC_HELP_STRING([--disable-static],[don't build static libraries]), ,
+dnl AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most platforms@:>@])
+dnl AC_HELP_STRING([--disable-static],[don't build static libraries])
+AC_ARG_ENABLE([static],, ,
 [enable_static=$default_static])
 
 if test "$enable_static" = yes; then
@@ -1236,9 +1236,14 @@ fi
 
 # Check whether to build shared libraries.
 AC_ARG_ENABLE([shared],
-AC_HELP_STRING([--enable-shared],[build shared libraries @<:@enabled for most platforms@:>@])
-AC_HELP_STRING([--disable-shared],[don't build shared libraries]), ,
+dnl AC_HELP_STRING([--enable-shared],[build shared libraries @<:@enabled for most platforms@:>@])
+dnl AC_HELP_STRING([--disable-shared],[don't build shared libraries])
+, ,
 [enable_shared=$default_shared])
+
+if test "$enable_shared" != yes; then
+  AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
+fi
 
 if test "$enable_shared" = yes; then
 	case "$SHLIBEXT" in
@@ -1302,8 +1307,12 @@ fi
 
 # Check whether to build profiled libraries.
 AC_ARG_ENABLE([profiled],
-[  --enable-profiled       build profiled libraries @<:@disabled@:>@],
+dnl [  --enable-profiled       build profiled libraries @<:@disabled@:>@]
+,
 [if test "$enableval" = yes; then
+  AC_MSG_ERROR([Sorry, profiled libraries do not work in this release.])
+fi
+if false; then
 	case $PFLIBEXT in
 	.po-nobuild)
 		AC_MSG_WARN([Profiled libraries not supported on this architecture.])
