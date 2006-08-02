@@ -474,6 +474,8 @@ tgt_again:
 	    goto cleanup;
 	}
 	enc_tkt_transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
+	enc_tkt_transited.magic = 0;
+	enc_tkt_transited.tr_contents.magic = 0;
 	enc_tkt_transited.tr_contents.data = 0;
 	enc_tkt_transited.tr_contents.length = 0;
 	enc_tkt_reply.transited = enc_tkt_transited;

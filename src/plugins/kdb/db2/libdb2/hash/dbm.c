@@ -90,6 +90,7 @@ kdb2_fetch(key)
 	if (__cur_db == NULL) {
 		no_open_db();
 		item.dptr = 0;
+		item.dsize = 0;
 		return (item);
 	}
 	return (kdb2_dbm_fetch(__cur_db, key));
@@ -103,6 +104,7 @@ kdb2_firstkey()
 	if (__cur_db == NULL) {
 		no_open_db();
 		item.dptr = 0;
+		item.dsize = 0;
 		return (item);
 	}
 	return (kdb2_dbm_firstkey(__cur_db));
@@ -117,6 +119,7 @@ kdb2_nextkey(key)
 	if (__cur_db == NULL) {
 		no_open_db();
 		item.dptr = 0;
+		item.dsize = 0;
 		return (item);
 	}
 	return (kdb2_dbm_nextkey(__cur_db));

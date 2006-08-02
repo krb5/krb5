@@ -2389,7 +2389,9 @@ char *adata;
 		char service_name[MAXHOSTNAMELEN+10];
 		char **gservice;
 		struct hostent *hp;
-
+		stat_maj = 0;
+		accept_maj = 0;
+		acquire_maj = 0;
 
 		kerror = radix_encode(adata, gout_buf, &length, 1);
 		if (kerror) {

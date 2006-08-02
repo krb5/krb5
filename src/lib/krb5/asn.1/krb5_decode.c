@@ -526,6 +526,7 @@ krb5_error_code decode_krb5_safe_with_body(
   setup();
   alloc_field(*rep,krb5_safe);
   clear_field(rep,checksum);
+  tmpbody.magic = 0;
 
   check_apptag(20);
   { begin_structure();
