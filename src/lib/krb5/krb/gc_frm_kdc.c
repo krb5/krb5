@@ -768,6 +768,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     client = in_cred->client;
     server = in_cred->server;
+    amb_dump_principal("krb5_get_cred_from_kdc_opt client", client);
+    amb_dump_principal("krb5_get_cred_from_kdc_opt server", server);
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
     tgtptr = NULL;

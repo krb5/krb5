@@ -201,6 +201,8 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     int l;
     char local_host[MAXDNAME+1];
 
+    printf("get_host_realm(host:%s) called\n",host);
+
     if (host) {
 	/* Filter out numeric addresses if the caller utterly failed to
 	   convert them to names.  */
@@ -256,9 +258,11 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
      */
 
     cp = local_host;
+    printf("  local_host: %s\n",local_host);
     realm = default_realm = (char *)NULL;
     temp_realm = 0;
     while (cp) {
+        printf("  trying to look up %s in the domain_realm map\n",cp);
 	retval = profile_get_string(context->profile, "domain_realm", cp,
 				    0, (char *)NULL, &temp_realm);
 	if (retval)
@@ -277,7 +281,9 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 	    cp = strchr(cp, '.');
 	}
     }
+    printf("  done searching the domain_realm map\n");
     if (temp_realm) {
+    printf("  temp_realm is %s\n",temp_realm);
         realm = malloc(strlen(temp_realm) + 1);
         if (!realm) {
             profile_release_string(temp_realm);
@@ -287,47 +293,13 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
         profile_release_string(temp_realm);
     }
 
-#ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
-        int use_dns = _krb5_use_dns_realm(context);
-        if ( use_dns ) {
-            /*
-             * Since this didn't appear in our config file, try looking
-             * it up via DNS.  Look for a TXT records of the form:
-             *
-             * _kerberos.<hostname>
-             *
-             */
-            cp = local_host;
-            do {
-                retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
-                cp = strchr(cp,'.');
-                if (cp) 
-                    cp++;
-            } while (retval && cp && cp[0]);
-        }
+      if (!(cp = (char *)malloc(strlen(KRB5_REFERRAL_REALM)+1)))
+	return ENOMEM;
+      strcpy(cp, KRB5_REFERRAL_REALM);
+      realm = cp;
     }
-#endif /* KRB5_DNS_LOOKUP */
-    if (realm == (char *)NULL) {
-        if (default_realm != (char *)NULL) {
-            /* We are defaulting to the realm of the host */
-            if (!(cp = (char *)malloc(strlen(default_realm)+1)))
-                return ENOMEM;
-            strcpy(cp, default_realm);
-            realm = cp;
-
-            /* Assume the realm name is upper case */
-            for (cp = realm; *cp; cp++)
-                if (islower((unsigned char) (*cp)))
-                    *cp = toupper((unsigned char) *cp);
-        } else {    
-            /* We are defaulting to the local realm */
-            retval = krb5_get_default_realm(context, &realm);
-            if (retval) {
-                return retval;
-            }
-        }
-    }
+    
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
 	if (realm != (char *)NULL)
 	    free(realm);

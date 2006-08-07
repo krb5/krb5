@@ -30,6 +30,7 @@
  * characters in the principal name.
  */
 
+
 #include "k5-int.h"
 
 /*
@@ -79,6 +80,7 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 	krb5_principal	principal;
 	krb5_error_code retval;
 	
+	printf("krb5_parse_name called on %s\n",name);
 	/*
 	 * Pass 1.  Find out how many components there are to the name,
 	 * and get string sizes for the first FCOMPNUM components.
@@ -278,8 +280,22 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 	principal->magic = KV5M_PRINCIPAL;
 	principal->realm.magic = KV5M_DATA;
 	*nprincipal = principal;
+	amb_dump_principal("krb5_parse_name",principal);
+
 	krb5_xfree(default_realm);
+	printf("end of krb5_parse_name()\n");
 	return(0);
 }
 
 
+void amb_dump_principal(char *d, krb5_principal p)
+{
+	int n;
+
+	printf("    **dumping principal from %s\n",d);
+	printf("      principal realm: <%s>\n",p->realm.data);
+	printf("      principal length is %d\n",p->length);
+	for (n=0;n<p->length;n++)
+	  printf("        principal data[%d]: %s\n",n,p->data[n].data);
+	printf("      principal type is %d\n",p->type);
+}

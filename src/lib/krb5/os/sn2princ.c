@@ -68,6 +68,10 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
     register char *cp;
     char localname[MAXHOSTNAMELEN];
 
+    FILE *log;
+
+    printf("krb5_sname_to_principal(host=%s, sname=%s, type=%d)\n",hostname,sname,type);
+    printf("      name types: 0=unknown, 3=srv_host\n");
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {
@@ -105,6 +109,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	try_getaddrinfo_again:
 	    err = getaddrinfo(hostname, 0, &hints, &ai);
 	    if (err) {
+	      printf("probably punting due to bad hostname of %s\n",hostname);
 		if (hints.ai_family == AF_INET) {
 		    /* Just in case it's an IPv6-only name.  */
 		    hints.ai_family = 0;
@@ -145,11 +150,13 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	}
 	if (!remote_host)
 	    return ENOMEM;
+ 	printf("  hostname <%s> after rdns processing\n",remote_host); /* XXX */
 
 	if (type == KRB5_NT_SRV_HST)
 	    for (cp = remote_host; *cp; cp++)
 		if (isupper((unsigned char) (*cp)))
 		    *cp = tolower((unsigned char) (*cp));
+ 	printf("  hostname <%s> after case folding\n",remote_host); /* XXX */
 
 	/*
 	 * Windows NT5's broken resolver gratuitously tacks on a
@@ -167,6 +174,9 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	    free(remote_host);
 	    return retval;
 	}
+
+	printf("  realm <%s> after krb5_get_host_realm\n",hrealms[0]);
+
 	if (!hrealms[0]) {
 	    free(remote_host);
 	    krb5_xfree(hrealms);
@@ -179,6 +189,11 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 				      (char *)0);
 
 	krb5_princ_type(context, *ret_princ) = type;
+
+	printf("krb5_sname_to_principal returning\n");
+	printf("realm: <%s>, sname: <%s>, remote_host: <%s>\n",
+	       realm,sname,remote_host);
+	amb_dump_principal("krb5_sname_to_principal",*ret_princ);
 
 	free(remote_host);
 
