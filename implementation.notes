@@ -1,0 +1,159 @@
+realm referrals, client side implementation:
+===========================================
+- new realm selection priority is:
+  1) client-side locally configured domain_realm mapping
+  2) referral request to kdc (always!)
+  3) DNS TXT record lookup (if configured)
+  4) default realm assumption (realm=DNS domain of server)
+  (this is the same as exists now but with referrals added)
+- whether to do referral or not is *not* configurable
+- client-side realm of "" (empty but *not* null string) used in client
+  libraries to indicate domain_realm mapping failure and fallback to
+  referral
+- krb5_sname_to_principal makes existing call to krb5_get_host_realm
+  - krb5_get_host_realm returns domain_realm mapping if found, otherwise
+    returns "".
+    [this could fall back to TXT or default realm assumption instead]
+    [but it isn't; this happens later if at all; the relevant fallbacks
+    will happen as part of credential-obtaining process]
+- code using alternatives to krb5_sname_to_principal (krb5_parse_name,
+  krb5_build_principal) is on its own.
+- actual referral request handled in krb5_get_cred_from_kdc
+  - client will always request referrals from kdc
+  - realm choice:
+    - if realm supplied, start with that.
+    - if no realm specified, request server referral; if that fails,
+      fall back to TXT request/default realm assumption and try that instead
+      (copy code from krb5_get_host_realm; make fallback a separate function
+      if referrals are runtime-configurable and the same code will be
+      needed in krb5_get_host_realm
+- ccache considerations:
+  - referrals may also have had name canonicalization done.  store the
+    ultimate ticket under the requested service name under the
+    assumption that it will continue to be requested the same way.
+    service names for non-referral requests will never be
+    canonicalized but we should handle that case anyway.
+  - canonical service name still available within the ticket
+  - will/should the library use or search on the canonical principal
+      name as well?
+
+- cross realm routing
+  - if capath present *and* realm is known, attempt to follow to end,
+    allowing shortcuts
+  - recheck for capath entry if realm is rewritten on referral
+    - requests still made with referrals turned on, so referrals along
+      the path, and especially at the end of the path, still work
+    - still need to understand full capth functionality here.
+  - client currently tries to construct a trust path following the DNS
+    hierarchy until it finds a server to ask; this is still useful
+    (maybe?) as a fallback but should only be tried after server
+    referrals have failed.
+  - if referrals provide an initial referral TGT or two, but this path
+    terminates at a server that provides neither a service ticket or a
+    referral, what happens?
+  - establish maximum referral traverse; more than microsoft's 5, but
+    finite
+
+ 
+
+realm referrals, server side implementation:
+===========================================
+- kdc should accept any sort of name, short or long
+  (see below for detailed canonicalization notes)
+- add code to process_tgs_req to handle tgs_req canonicalize flag
+  - add second case for firstpass=1 within the "if (nprincs != 1)" block
+- add new library function to fetch referral realm
+  - Microsoft/umich patch uses static kdc.conf configuration along the
+    same general lines as the domain_realm mapping; compatability with
+    that (logically and probably syntactically) seems desirable and
+    technically unobjectionable.
+  - raeburn thinks it might be interesting to make this overridable
+    with a kdc plugin.
+
+hostname canonicalization, server side
+======================================
+- do not rewrite service names when not also returning a referral; this
+  is a nonstated design requirement for clients that appears to violate
+  the client requirements in the -06 draft, but currently deployed
+  implementations apparently rely upon this not happening.  unclear now
+  if it's the right thing, but we're stuck with it.
+- canonicalization only done:
+  1) if local db lookup of principal as presented fails
+  2) only if uncanonicalized referral has already failed
+  3) only for principals with exactly two parts
+     (this will break NT-SRV-XHST; does anyone care?)
+  4) only for principals with a specified name type,
+     by default NT-SRV-HST and maybe NT-UNKNOWN
+  5) only for principals with specified service names
+- any rewriting action taken on presumed hostnames will end with case
+  folding to lowercase.  there's some conflict on whether this is a
+  "MUST" or "SHOULD" in 4120, but it's clearly appropriate once we're
+  rewriting.
+- strategy for service name canonicalization
+  - if short name, try resolving it serially with a kdc-configured domain list
+  - thus the client can send an unqualified name, but loses security
+  - follow cnames, but don't do rdns lookup
+  - can this break backward compatability?
+  - is blocking on DNS here OK?
+    - utilize a mapping, possibly something automatically generated from
+      local DNS zone(s), to rewrite hostnames for referral.
+- unanswered question: how do we handle servers known by multiple names?
+  provide multiple db entries?  add these to keytab as well?
+
+hostname canonicalization, client side
+======================================
+- our client will always send a fully-qualified name to the server
+  for something that appears to be a hostname
+  (basically the same cases where we do rdns now)
+- idea: client code will not do rdns by default, but instead will resolve
+  hostnames as far as fully qualifying them in the client name resolution
+  environment and following CNAME records
+  [this seems desirable but could be technically problematic]
+
+==============================================================================
+
+
+old implementation
+==================
+client side, part 1: (filling in principal structure):
+- client calls krb5_sname_to_principal
+  - krb5_get_host_realm doesn't (can't) know what the referral
+    status is, but *realmsp[1] can be used to indicate that a fallback
+    realm determination was made (TXT record or usually-bogus
+    default_realm), in which case a referral should be attempted if requested
+  - if fallback data was returned and kdc realm referrals are turned on,
+    krb5_sname_to_principal resets principal domain to ""
+- other options we don't care about:
+  - krb5_parse_name, krb5_build_principal
+    - both of these operate at a low level; although they're
+      user-visible, the general expectation is that the calling code
+      knows exactly what it wants
+
+client side, part 2: krb5_get_credentials
+  - 
+
+krb5_sname_to_principal clears principal realm 
+uses that information and referral status to 
+
+
+- if kdc referrals turned off, call get_host_realm normally
+  - if turned on, calls to get_host_realm with extra ("no fallback") bit set
+    - first, do the existing domain_realm profile checks
+       (iterate through the hostname looking for a match)
+    - if no match, return with an error before trying DNS (TXT record)
+      or default_realm assumption
+  - **OR**
+    - process normally, but set some magic flag somewhere if realm was
+      determined via fallback
+	
+- can use additional parts of hrealms to indicate the fallback status of
+  the realm offered?
+
+old ccache questions:
+====================
+  - questions:
+    - will/should the library use or search on the canonical principal
+      name as well?
+    - when do we need to have the real server name stored as well?
+      is this is needed for app_req?
+    - where can we store both names?
