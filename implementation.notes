@@ -5,11 +5,12 @@ realm referrals, client side implementation:
   2) referral request to kdc (always!)
   3) DNS TXT record lookup (if configured)
   4) default realm assumption (realm=DNS domain of server)
-  (this is the same as exists now but with referrals added)
+  (this is the same as exists now but with referrals added,
+   though 3 and 4 are deferred to get_cred_from_kdc)
 - whether to do referral or not is *not* configurable
 - client-side realm of "" (empty but *not* null string) used in client
   libraries to indicate domain_realm mapping failure and fallback to
-  referral
+  referral.  not subject to configuration.
 - krb5_sname_to_principal makes existing call to krb5_get_host_realm
   - krb5_get_host_realm returns domain_realm mapping if found, otherwise
     returns "".
