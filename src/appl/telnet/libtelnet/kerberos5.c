@@ -260,6 +260,7 @@ kerberos5_send(ap)
 	if (telnet_krb5_realm != NULL) {
 	    krb5_data rdata;
 
+	    rdata.magic = 0;
 	    rdata.length = strlen(telnet_krb5_realm);
 	    rdata.data = (char *) malloc(rdata.length + 1);
 	    if (rdata.data == NULL) {
