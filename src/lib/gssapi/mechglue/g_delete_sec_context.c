@@ -64,6 +64,8 @@ gss_buffer_t		output_token;
      */
     
     ctx = (gss_union_ctx_id_t) *context_handle;
+    if (GSSINT_CHK_LOOP(ctx))
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
     mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {

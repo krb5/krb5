@@ -112,6 +112,7 @@ gss_cred_id_t *		d_cred;
 	if (!union_ctx_id)
 	    return (GSS_S_FAILURE);
 
+	union_ctx_id->loopback = union_ctx_id;
 	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
 	status = generic_gss_copy_oid(&temp_minor_status,
 				      token_mech_type,
@@ -239,6 +240,7 @@ gss_cred_id_t *		d_cred;
 
 		d_u_cred->auxinfo.creation_time = time(0);
 		d_u_cred->auxinfo.time_rec = 0;
+		d_u_cred->loopback = d_u_cred;
 
 		if (mech->gss_inquire_cred) {
 		    status = mech->gss_inquire_cred(mech->context,

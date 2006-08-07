@@ -78,6 +78,7 @@ gss_name_t *		output_name;
     if (!union_name)
 	return (GSS_S_FAILURE);
 
+    union_name->loopback = 0;
     union_name->mech_type = 0;
     union_name->mech_name = 0;
     union_name->name_type = 0;
@@ -121,6 +122,7 @@ gss_name_t *		output_name;
 	    goto allocation_failure;
     }
 
+    union_name->loopback = union_name;
     *output_name = (gss_name_t)union_name;
     return (GSS_S_COMPLETE);
 
