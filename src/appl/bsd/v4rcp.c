@@ -436,7 +436,10 @@ int main(argc, argv)
 			kstream_set_buffer_mode (krem, 0);
 #endif /* KERBEROS && !NOENCRYPTION */
 			(void) response();
-			(void) setuid(userid);
+			if (setuid(userid)) {
+			    error("rcp: can't setuid(user)\n");
+			    exit(1);
+			}
 			source(--argc, ++argv);
 			exit(errs);
 
@@ -452,7 +455,10 @@ int main(argc, argv)
 				krem = kstream_create_from_fd (rem, 0, 0);
 			kstream_set_buffer_mode (krem, 0);
 #endif /* KERBEROS && !NOENCRYPTION */
-			(void) setuid(userid);
+			if (setuid(userid)) {
+			    error("rcp: can't setuid(user)\n");
+			    exit(1);
+			}
 			sink(--argc, ++argv);
 			exit(errs);
 
