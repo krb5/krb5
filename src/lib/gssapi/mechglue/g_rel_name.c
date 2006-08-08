@@ -60,6 +60,8 @@ gss_name_t *		input_name;
      */
     
     union_name = (gss_union_name_t) *input_name;
+    if (GSSINT_CHK_LOOP(union_name))
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
     *input_name = 0;
     *minor_status = 0;
 

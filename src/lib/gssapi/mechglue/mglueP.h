@@ -27,6 +27,7 @@ do {								\
  * Array of context IDs typed by mechanism OID
  */
 typedef struct gss_union_ctx_id_t {
+	struct gss_ctx_id_struct *loopback;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
@@ -36,6 +37,7 @@ typedef struct gss_union_ctx_id_t {
  * mechanism specific name....
  */
 typedef struct gss_union_name_t {
+	struct gss_name_struct *loopback;
 	gss_OID			name_type;
 	gss_buffer_t		external_name;
 	/*
@@ -70,12 +72,22 @@ typedef struct gss_union_cred_auxinfo {
  * Set of Credentials typed on mechanism OID
  */
 typedef struct gss_union_cred_t {
+	struct gss_cred_id_struct *loopback;
 	int			count;
 	gss_OID			mechs_array;
 	gss_cred_id_t		*cred_array;
 	gss_union_cred_auxinfo	auxinfo;
 } gss_union_cred_desc, *gss_union_cred_t;
  
+/*
+ * Rudimentary pointer validation macro to check whether the
+ * "loopback" field of an opaque struct points back to itself.  This
+ * field also catches some programming errors where an opaque pointer
+ * is passed to a function expecting the address of the opaque
+ * pointer.
+ */
+#define GSSINT_CHK_LOOP(p) (!((p) != NULL && (p)->loopback == (p)))
+
 /********************************************************/
 /* The Mechanism Dispatch Table -- a mechanism needs to */
 /* define one of these and provide a function to return */

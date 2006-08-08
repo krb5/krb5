@@ -197,8 +197,10 @@ OM_uint32 *		time_rec;
 	    free(union_ctx_id->mech_type);
 	    free(union_ctx_id);
 	}
-    } else if (*context_handle == GSS_C_NO_CONTEXT)
+    } else if (*context_handle == GSS_C_NO_CONTEXT) {
+	union_ctx_id->loopback = union_ctx_id;
 	*context_handle = (gss_ctx_id_t)union_ctx_id;
+    }
 
 end:
     if (union_name->mech_name == NULL ||

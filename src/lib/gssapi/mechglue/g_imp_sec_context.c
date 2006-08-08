@@ -118,6 +118,7 @@ gss_ctx_id_t *		context_handle;
 					  &token, &ctx->internal_ctx_id);
 
     if (status == GSS_S_COMPLETE) {
+	ctx->loopback = ctx;
 	*context_handle = ctx;
 	return (GSS_S_COMPLETE);
     }
