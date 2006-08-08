@@ -1368,7 +1368,9 @@ getdatasock(fmode)
 			goto bad;
 		sleep(tries);
 	}
-	(void) krb5_seteuid((uid_t)pw->pw_uid);
+	if (krb5_seteuid((uid_t)pw->pw_uid)) {
+		fatal("seteuid user");
+	}
 #ifdef IP_TOS
 #ifdef IPTOS_THROUGHPUT
 	on = IPTOS_THROUGHPUT;
@@ -1378,7 +1380,9 @@ getdatasock(fmode)
 #endif
 	return (fdopen(s, fmode));
 bad:
-	(void) krb5_seteuid((uid_t)pw->pw_uid);
+	if (krb5_seteuid((uid_t)pw->pw_uid)) {
+		fatal("seteuid user");
+	}
 	(void) close(s);
 	return (NULL);
 }
@@ -2187,7 +2191,9 @@ passive()
 		(void) krb5_seteuid((uid_t)pw->pw_uid);
 		goto pasv_error;
 	}
-	(void) krb5_seteuid((uid_t)pw->pw_uid);
+	if (krb5_seteuid((uid_t)pw->pw_uid)) {
+		fatal("seteuid user");
+	}
 	len = sizeof(pasv_addr);
 	if (getsockname(pdata, (struct sockaddr *) &pasv_addr, &len) < 0)
 		goto pasv_error;
