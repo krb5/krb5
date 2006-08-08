@@ -1403,9 +1403,15 @@ void doit(f, fromp)
      * If we're on a system which keeps track of login uids, then
      * set the login uid. 
      */
-    setluid((uid_t) pwd->pw_uid);
+    if (setluid((uid_t) pwd->pw_uid) < 0) {
+	perror("setluid");
+	_exit(1);
+    }
 #endif	/* HAVE_SETLUID */
-    (void) setuid((uid_t)pwd->pw_uid);
+    if (setuid((uid_t)pwd->pw_uid) < 0) {
+	perror("setuid");
+	_exit(1);
+    }
     /* if TZ is set in the parent, drag it in */
     {
       char **findtz = environ;

@@ -1648,7 +1648,10 @@ int main(argc, argv)
 	}
 #endif	/* HAVE_SETLUID */
 #ifdef _IBMR2
-    setuidx(ID_LOGIN, pwd->pw_uid);
+    if (setuidx(ID_LOGIN, pwd->pw_uid) < 0) {
+	perror("setuidx");
+	sleepexit(1);
+    };
 #endif
 
     /* This call MUST succeed */

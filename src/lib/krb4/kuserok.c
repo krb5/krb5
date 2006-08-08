@@ -159,9 +159,11 @@ kuserok(kdata, luser)
 	 */
         if(getuid() == 0) {
 	  uid_t old_euid = geteuid();
-	  seteuid(pwd->pw_uid);
+	  if (seteuid(pwd->pw_uid) < 0)
+	      return NOTOK;
 	  fp = fopen(pbuf, "r");
-	  seteuid(old_euid);	  
+	  if (seteuid(old_euid) < 0)
+	      return NOTOK;
 	  if ((fp) == NULL) {
 	    return(NOTOK);
 	  }

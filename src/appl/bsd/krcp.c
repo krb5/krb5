@@ -620,7 +620,9 @@ int main(argc, argv)
 				   
 		euid = geteuid();
 		if (euid == 0) {
-		    (void) setuid(0);
+		    if (setuid(0)) {
+			perror("rcp setuid 0"); errs++; exit(errs);
+		    }
 		    if(krb5_seteuid(userid)) {
 			perror("rcp seteuid user"); errs++; exit(errs);
 		    }
@@ -638,11 +640,17 @@ int main(argc, argv)
 		  continue;
 		rcmd_stream_init_normal();
 #ifdef HAVE_SETREUID
-		(void) setreuid(0, userid);
+		if (setreuid(0, userid)) {
+		    perror("rcp setreuid 0,user"); errs++; exit(errs);
+		}
 		sink(1, argv+argc-1);
-		(void) setreuid(userid, 0);
+		if (setreuid(userid, 0)) {
+		    perror("rcp setreuid user,0"); errs++; exit(errs);
+		}
 #else
-		(void) setuid(0);
+		if (setuid(0)) {
+		  perror("rcp setuid 0"); errs++; exit(errs);
+		}
 		if(seteuid(userid)) {
 		  perror("rcp seteuid user"); errs++; exit(errs);
 		}
