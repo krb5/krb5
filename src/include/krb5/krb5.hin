@@ -260,6 +260,15 @@ typedef const krb5_principal_data *krb5_const_principal;
 	     : NULL)
 
 /*
+ * Constants for realm referrals.
+ */
+#define        KRB5_REFERRAL_REALM	""
+#define        KRB5_REFERRAL_MAXHOPS	5
+
+/* temporary hack */
+void amb_dump_principal();
+
+/*
  * end "base-defs.h"
  */
 
