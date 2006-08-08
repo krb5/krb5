@@ -27,7 +27,7 @@ do {								\
  * Array of context IDs typed by mechanism OID
  */
 typedef struct gss_union_ctx_id_t {
-	struct gss_ctx_id_struct *loopback;
+	struct gss_union_ctx_id_t *loopback;
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
@@ -37,7 +37,7 @@ typedef struct gss_union_ctx_id_t {
  * mechanism specific name....
  */
 typedef struct gss_union_name_t {
-	struct gss_name_struct *loopback;
+	struct gss_union_name_t *loopback;
 	gss_OID			name_type;
 	gss_buffer_t		external_name;
 	/*
@@ -72,7 +72,7 @@ typedef struct gss_union_cred_auxinfo {
  * Set of Credentials typed on mechanism OID
  */
 typedef struct gss_union_cred_t {
-	struct gss_cred_id_struct *loopback;
+	struct gss_union_cred_t *loopback;
 	int			count;
 	gss_OID			mechs_array;
 	gss_cred_id_t		*cred_array;

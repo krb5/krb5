@@ -492,6 +492,7 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
     if (major_status != GSS_S_COMPLETE)
 	goto allocation_failure;
 
+    union_name->loopback = union_name;
     *external_name =  union_name;
     return (GSS_S_COMPLETE);
 
