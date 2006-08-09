@@ -76,7 +76,6 @@ OBJS = \
 	$(OUTPRE)g_sign.$(OBJEXT) \
 	$(OUTPRE)g_store_cred.$(OBJEXT) \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
-	$(OUTPRE)g_utils.$(OBJEXT) \
 	$(OUTPRE)g_verify.$(OBJEXT) \
 	$(OUTPRE)oid_ops.$(OBJEXT)
 
