@@ -39,6 +39,7 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include	<k5-int.h>
 #include	<krb5.h>
 #include	<mglueP.h>
 #include	"gssapiP_spnego.h"

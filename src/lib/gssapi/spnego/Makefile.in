@@ -18,6 +18,8 @@ STLIBOBJS = spnego_mech.o
 
 all-unix:: all-libobjs
 
+##DOS##LIBOBJS = $(OBJS)
+
 clean-unix:: clean-libobjs
 
 @libobj_frag@
