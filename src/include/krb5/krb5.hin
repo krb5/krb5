@@ -563,6 +563,9 @@ krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_PA_SAM_CHALLENGE_TRACKID	26
 #define KRB5_KEYUSAGE_PA_SAM_RESPONSE		27
 
+/* Defined in KDC referrals draft */
+#define KRB5_KEYUSAGE_PA_REFERRAL		26 /* XXX note conflict with above */
+
 krb5_boolean KRB5_CALLCONV krb5_c_valid_enctype
 	(krb5_enctype ktype);
 krb5_boolean KRB5_CALLCONV krb5_c_valid_cksumtype
@@ -699,8 +702,8 @@ krb5_error_code krb5_decrypt_data
 /* #define	KDC_OPT_RESERVED	0x00080000 */
 /* #define	KDC_OPT_RESERVED	0x00040000 */
 #define	KDC_OPT_REQUEST_ANONYMOUS	0x00020000
-/* #define	KDC_OPT_RESERVED	0x00010000 */
-/* #define	KDC_OPT_RESERVED	0x00008000 */
+#define	KDC_OPT_MSCANONICALIZE		0x00010000
+#define	KDC_OPT_CANONICALIZE		0x00008000
 /* #define	KDC_OPT_RESERVED	0x00004000 */
 /* #define	KDC_OPT_RESERVED	0x00002000 */
 /* #define	KDC_OPT_RESERVED	0x00001000 */
@@ -882,7 +885,8 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_PADATA_SAM_RESPONSE	13 /* draft challenge system response */
 #define KRB5_PADATA_PK_AS_REQ		14 /* PKINIT */
 #define KRB5_PADATA_PK_AS_REP		15 /* PKINIT */
-#define KRB5_PADATA_ETYPE_INFO2 19
+#define KRB5_PADATA_ETYPE_INFO2		19
+#define KRB5_PADATA_REFERRAL		25 /* draft referral system */
 #define KRB5_PADATA_SAM_CHALLENGE_2	30 /* draft challenge system, updated */
 #define KRB5_PADATA_SAM_RESPONSE_2	31 /* draft challenge system, updated */
     
