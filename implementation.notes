@@ -1,3 +1,8 @@
+problems
+========
+- draft spec and RFC are divergent enough that MS machines not usable for
+  testing
+
 realm referrals, client side implementation:
 ===========================================
 - new realm selection priority is:
@@ -110,3 +115,10 @@ hostname canonicalization, client side
   hostnames as far as fully qualifying them in the client name resolution
   environment and following CNAME records
   [this seems desirable but could be technically problematic]
+
+namespace issues
+================
+- defined separate KDC option bit for RFC-style canonicalization since
+  the microsoft implementation is so different
+  - should key usage and padata types be different as well?
+- keyusage defined in draft (26) collides with KRB5_KEYUSAGE_PA_SAM_CHALLENGE_TRACKID
