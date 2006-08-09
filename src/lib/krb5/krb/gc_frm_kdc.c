@@ -780,6 +780,19 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      * Get a TGT for the target realm.
      */
 
+    /* Target realm may be incorrect; if we're here we know that ticket
+       requested already isn't in ccache, so request a referral and
+       collect TGTs as necessary. */
+    
+
+
+
+    /* No luck with referrals, so fall back to assuming a realm and
+       computing a transit path. */
+    
+    /* XXX insert get_host_realm code with default realm assumptions here */
+
+    /* Create minimal credential to match against ccache. */
     retval = tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
 	goto cleanup;
