@@ -765,9 +765,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_principal client, server;
     krb5_creds tgtq, cc_tgt, *tgtptr;
     krb5_boolean old_use_conf_ktypes;
+    char **hrealms;
 
     client = in_cred->client;
     server = in_cred->server;
+     /* XXX hack for testing to force referral */
+    /* XXX */ in_cred->server->realm.data[0]=0;
     amb_dump_principal("krb5_get_cred_from_kdc_opt client", client);
     amb_dump_principal("krb5_get_cred_from_kdc_opt server", server);
     memset(&cc_tgt, 0, sizeof(cc_tgt));
@@ -783,15 +786,21 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     /* Target realm may be incorrect; if we're here we know that ticket
        requested already isn't in ccache, so request a referral and
        collect TGTs as necessary. */
-    
 
-
+    /* XXX implement this */
 
     /* No luck with referrals, so fall back to assuming a realm and
-       computing a transit path. */
+       computing a transit path.  First, fill in a best-guess domain. */
+    /* XXX this needs to be more sophisticated a test; see inotes */
+    if ((server->length >= 2) &&
+	(!strncmp(server->data[0].data, "host", 4))) {
+      retval=krb5_get_fallback_host_realm(context, server->data[1].data,
+					  &hrealms);
+      if (retval) goto cleanup;
+      printf("using fallback realm of %s\n",hrealms[0]);
+      in_cred->server->realm.data=hrealms[0];
+    }
     
-    /* XXX insert get_host_realm code with default realm assumptions here */
-
     /* Create minimal credential to match against ccache. */
     retval = tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
