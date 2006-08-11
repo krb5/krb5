@@ -702,8 +702,8 @@ krb5_error_code krb5_decrypt_data
 /* #define	KDC_OPT_RESERVED	0x00080000 */
 /* #define	KDC_OPT_RESERVED	0x00040000 */
 #define	KDC_OPT_REQUEST_ANONYMOUS	0x00020000
-#define	KDC_OPT_MSCANONICALIZE		0x00010000
-#define	KDC_OPT_CANONICALIZE		0x00008000
+#define	KDC_OPT_CANONICALIZE		0x00010000
+/* #define	KDC_OPT_RESERVED	0x00008000 */
 /* #define	KDC_OPT_RESERVED	0x00004000 */
 /* #define	KDC_OPT_RESERVED	0x00002000 */
 /* #define	KDC_OPT_RESERVED	0x00001000 */
@@ -2252,6 +2252,10 @@ krb5_error_code KRB5_CALLCONV krb5_aname_to_localname
 		int,
 		char * );
 krb5_error_code KRB5_CALLCONV krb5_get_host_realm
+	(krb5_context,
+		const char *,
+		char *** );
+krb5_error_code KRB5_CALLCONV krb5_get_fallback_host_realm
 	(krb5_context,
 		const char *,
 		char *** );
