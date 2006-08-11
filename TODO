@@ -1,0 +1,11 @@
+- teach krb5_get_cred_via_tkt that referrals are OK, really
+- code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
+
+- add klist option to print actual credential principal
+
+- review code for:
+  - string safety, particularly strcmp use
+  - memory leaks
+- check assumptions on dereference of credential members
+- code format
+- remove tracing/debugging code
