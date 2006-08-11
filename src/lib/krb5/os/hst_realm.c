@@ -355,3 +355,74 @@ krb5int_translate_gai_error (int num)
     abort ();
     return -1;
 }
+
+
+/*
+ * Ganked from krb5_get_host_realm; handles case where referrals have
+ * failed and it's time to go look at TXT records or make a DNS-based
+ * assumption.
+ */
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_fallback_host_realm(krb5_context context, const char *host, char ***realmsp)
+{
+    char **retrealms;
+    char *default_realm, *realm, *cp, *temp_realm;
+    krb5_error_code retval;
+    char local_host[MAXDNAME+1];
+
+    printf("get_fallback_host_realm(host:%s) called\n",host);
+
+#ifdef KRB5_DNS_LOOKUP
+    if (realm == (char *)NULL) {
+        int use_dns = _krb5_use_dns_realm(context);
+        if ( use_dns ) {
+            /*
+             * Since this didn't appear in our config file, try looking
+             * it up via DNS.  Look for a TXT records of the form:
+             *
+             * _kerberos.<hostname>
+             *
+             */
+            cp = local_host;
+            do {
+                retval = krb5_try_realm_txt_rr("_kerberos", cp, &realm);
+                cp = strchr(cp,'.');
+                if (cp) 
+                    cp++;
+            } while (retval && cp && cp[0]);
+        }
+    }
+#endif /* KRB5_DNS_LOOKUP */
+    if (realm == (char *)NULL) {
+        if (default_realm != (char *)NULL) {
+            /* We are defaulting to the realm of the host */
+            if (!(cp = (char *)malloc(strlen(default_realm)+1)))
+                return ENOMEM;
+            strcpy(cp, default_realm);
+            realm = cp;
+
+            /* Assume the realm name is upper case */
+            for (cp = realm; *cp; cp++)
+                if (islower((int) (*cp)))
+                    *cp = toupper((int) *cp);
+        } else {    
+            /* We are defaulting to the local realm */
+            retval = krb5_get_default_realm(context, &realm);
+            if (retval) {
+                return retval;
+            }
+        }
+    }
+    if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {
+	if (realm != (char *)NULL)
+	    free(realm);
+	return ENOMEM;
+    }
+
+    retrealms[0] = realm;
+    retrealms[1] = 0;
+    
+    *realmsp = retrealms;
+    return 0;
+}
