@@ -1,6 +1,10 @@
+default: krb5
+
+d = $(CURDIR)
+
 ptest: ptest.c
-	cc -I/mit/amb/k5/trunk/src/include \
-		-L/mit/amb/k5/trunk/src/lib \
+	cc -I$(d)/trunk/src/include \
+		-L$(d)/trunk/src/lib \
 		-g ptest.c -o ptest -lkrb5 -lcom_err
 
 tags:
