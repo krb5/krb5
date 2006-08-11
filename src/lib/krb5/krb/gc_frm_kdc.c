@@ -765,12 +765,13 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_principal client, server;
     krb5_creds tgtq, cc_tgt, *tgtptr;
     krb5_boolean old_use_conf_ktypes;
-    char **hrealms;
+    char **hrealms, *supplied_server_realm;
+    int i;
 
     client = in_cred->client;
     server = in_cred->server;
      /* XXX hack for testing to force referral */
-    /* XXX */ in_cred->server->realm.data[0]=0;
+    /* XXX */ server->realm.data[0]=0;
     amb_dump_principal("krb5_get_cred_from_kdc_opt client", client);
     amb_dump_principal("krb5_get_cred_from_kdc_opt server", server);
     memset(&cc_tgt, 0, sizeof(cc_tgt));
@@ -782,23 +783,83 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     /*
      * Get a TGT for the target realm.
      */
+    
+    /* Set initial realm. */
+    supplied_server_realm=server->realm.data;
+    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
+      /* Use the client realm. */
+      if (!( server->realm.data = (char *)malloc(strlen(client->realm.data)+1)))
+	return ENOMEM;
+      strcpy(server->realm.data, client->realm.data);
+    }
+    else {
+      /* Make a copy of the oringinal supplied server realm. */
+      if (!( server->realm.data = (char *)malloc(strlen(supplied_server_realm)+1)))
+	return ENOMEM;
+      strcpy(server->realm.data, supplied_server_realm);
+    }
+    amb_dump_principal("krb5_get_cred_from_kdc_opt client after mung", client);
+    amb_dump_principal("krb5_get_cred_from_kdc_opt server after mung", server);
 
-    /* Target realm may be incorrect; if we're here we know that ticket
-       requested already isn't in ccache, so request a referral and
-       collect TGTs as necessary. */
+    /* Make sure we have a starting TGT. */
 
-    /* XXX implement this */
+    /* Create minimal credential to match against ccache. */
+    retval = tgt_mcred(context, client, server, client, &tgtq);
+    if (retval)
+	goto cleanup;
 
-    /* No luck with referrals, so fall back to assuming a realm and
-       computing a transit path.  First, fill in a best-guess domain. */
-    /* XXX this needs to be more sophisticated a test; see inotes */
-    if ((server->length >= 2) &&
-	(!strncmp(server->data[0].data, "host", 4))) {
-      retval=krb5_get_fallback_host_realm(context, server->data[1].data,
+    /* Fast path: Is it in the ccache? */
+    context->use_conf_ktypes = 1;
+    retval = krb5_cc_retrieve_cred(context, ccache, RETR_FLAGS,
+				   &tgtq, &cc_tgt);
+    if (!retval) {
+	tgtptr = &cc_tgt;
+    } else if (!HARD_CC_ERR(retval)) {
+	/* Not in ccache, so traverse the transit path. */
+        /* XXX: this will not work if starting TGT needs referrals to be
+	   obtained */
+	retval = do_traversal(context, ccache, client, server,
+			      &cc_tgt, &tgtptr, tgts);
+    }
+    if (retval)
+	goto cleanup;
+    for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
+      /* Main referral loop.  Starting state: should have valid initial
+	 realm set for server as well as a TGT for same. */
+      
+      retval = krb5_get_cred_via_tkt(context, tgtptr,
+				     KDC_OPT_CANONICALIZE | 
+				     FLAGS2OPTS(tgtptr->ticket_flags) |  
+				     kdcopt |
+				     (in_cred->second_ticket.length ?
+				      KDC_OPT_ENC_TKT_IN_SKEY : 0),
+				     tgtptr->addresses, in_cred, out_cred);
+      if (retval) {
+          /* Never exit here, no matter how bad the KDC error looks, just
+	     punt to a non-referral request. */
+	  printf("referred ticket request failed; punting to standard lookup\n");
+	  free (server->realm.data);
+	  server->realm.data=supplied_server_realm;
+	  break;
+      }
+    }
+
+    /* Referrals have failed.  Look up fallback realm if not currently set. */
+    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
+      if (server->length >= 2) {
+	retval=krb5_get_fallback_host_realm(context, server->data[1].data,
 					  &hrealms);
-      if (retval) goto cleanup;
-      printf("using fallback realm of %s\n",hrealms[0]);
-      in_cred->server->realm.data=hrealms[0];
+	if (retval) goto cleanup;
+	printf("using fallback realm of %s\n",hrealms[0]);
+	in_cred->server->realm.data=hrealms[0];
+      }
+      else {
+	/* XXX specified for referral but apparently not in a
+	   <type>/<host> format.  Fall back in some intelligent way or
+	   just punt? */
+	printf("referral specified but no fallback realm.  wtf?  exiting.\n");
+	exit(1);
+      }
     }
     
     /* Create minimal credential to match against ccache. */
