@@ -1,7 +1,47 @@
+notes on krb5_get_cred_from_kdc_opt:
+===================================
+current behaviour:
+  - start with known target realm
+  - check if we have TGT for that realm
+    - if not, traverse world to find TGTs
+  - if that worked, request ticket from ultimate target realm
+
+problems with this:
+  - linear processing doesn't work, since ultimate target realm can change at any time
+  - can't really check if we already have the TGT since required TGT can change
+    - is checking for a cached TGT useful at all, or should we go
+      straight to asking the KDC about it?
+	answer: yes, if there's a proposed realm attached to the
+	principal, search for a matching TGT and use that for the
+	request, but this request should still be made with referrals
+	requested.
+
+notes:
+  - if referred, it comes with a cross-realm TGT for the new realm,
+    so we will always already have a TGT for the new realm, and
+    checking isn't necessary.  we can also be assumed to already have a
+    TGT for the start realm.
+    - BUT, we may not have a TGT initially if we're subject to a
+      domain_realm mapping
+
+new logic:
+  - check for TGT for initial realm in search path
+    - use client cred realm/KDC if not specified
+    - fetch initial remote TGT if specified and not in ccache
+      - via more referrals?  via do_traversal()?
+  - iterate through this loop:
+    - choose KDC from which to request tickets:
+      - note that target realm will change over iterations
+    - request ticket
+      - if cross-realm TGT, change server realm appropriately
+        - via explicit setting if padata returned, else infer
+      - if service ticket returned, operation is complete.
+    - if loop count exceeded, exit
+
 problems
 ========
-- draft spec and RFC are divergent enough that MS machines not usable for
-  testing
+- draft and actual microsoft implementation are divergent enough that MS
+  machines not usable for full testing
 
 realm referrals, client side implementation:
 ===========================================
