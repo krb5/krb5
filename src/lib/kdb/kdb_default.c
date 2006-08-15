@@ -170,6 +170,9 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
 #if HAVE_UMASK
 	(void) umask(oumask);
 #endif
+	krb5_set_error_message (context, e,
+				"%s accessing file '%s'",
+				error_message (e), keyfile);
 	return e;
     }
     enctype = key->enctype;
