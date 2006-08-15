@@ -853,7 +853,7 @@ void kdb5_ldap_create(argc, argv)
 	    com_err(argv[0], retval, "gethostbyname, while adding entries to the database");
 	    goto err_nomsg;
 	}
-	assert (sizeof(princ_name) >= MAXHOSTNAMELEN + 8);
+	assert (sizeof(princ_name) >= strlen(hp->h_name) + strlen(global_params.realm) + 9);
 	/* snprintf(princ_name, MAXHOSTNAMELEN + 8, "kadmin/%s", hp->h_name); */
 	snprintf(princ_name, sizeof(princ_name), "kadmin/%s@%s", hp->h_name, global_params.realm);	
 	if ((retval = krb5_parse_name(util_context, princ_name, &p))) {
