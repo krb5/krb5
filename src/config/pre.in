@@ -194,6 +194,7 @@ prefix=@prefix@
 INSTALL_PREFIX=$(prefix)
 INSTALL_EXEC_PREFIX=@exec_prefix@
 exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
 SHLIB_TAIL_COMP=@SHLIB_TAIL_COMP@
 
 datadir = @datadir@
