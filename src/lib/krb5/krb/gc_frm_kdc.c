@@ -800,6 +800,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
     amb_dump_principal("krb5_get_cred_from_kdc_opt client after mung", client);
     amb_dump_principal("krb5_get_cred_from_kdc_opt server after mung", server);
+    printf("stashed supplied realm of >%s<\n",supplied_server_realm);
 
     /* Make sure we have a starting TGT. */
 
@@ -843,6 +844,9 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	  break;
       }
     }
+
+    amb_dump_principal("krb5_get_cred_from_kdc_opt client at fallback", client);
+    amb_dump_principal("krb5_get_cred_from_kdc_opt server af fallback", server);
 
     /* Referrals have failed.  Look up fallback realm if not currently set. */
     if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
