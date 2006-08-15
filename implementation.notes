@@ -38,6 +38,14 @@ new logic:
       - if service ticket returned, operation is complete.
     - if loop count exceeded, exit
 
+notes on resolving hostnames
+============================
+krb5_get_host_realm does various sanity-checking on supplied hostnames
+including folding them to lowercase and using the local hostname if
+blank.  Currently krb5_get_fallback_host realm is set up to do the same
+thing, with the common code moved to krb5_clean_hostname.  (Stupid
+name...)  Should it really do that, or should it be much more limited?
+
 problems
 ========
 - draft and actual microsoft implementation are divergent enough that MS
