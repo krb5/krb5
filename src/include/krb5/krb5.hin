@@ -2259,14 +2259,11 @@ krb5_error_code KRB5_CALLCONV krb5_get_fallback_host_realm
 	(krb5_context,
 		const char *,
 		char *** );
-krb5_error_code KRB5_CALLCONV krb5_get_fallback_host_realm
-	(krb5_context,
-		const char *,
-		char *** );
 krb5_error_code KRB5_CALLCONV krb5_clean_hostname
 	(krb5_context,
 		const char *,
-		char ** );
+		char *,
+		size_t);
 krb5_error_code KRB5_CALLCONV krb5_free_host_realm
 	(krb5_context,
 		char * const * );
