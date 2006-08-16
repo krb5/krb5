@@ -1,3 +1,5 @@
+- fix debugging in do_traversal
+
 - teach krb5_get_cred_via_tkt that referrals are OK, really
 - code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
 
