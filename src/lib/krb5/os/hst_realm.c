@@ -202,7 +202,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 
     printf("get_host_realm(host:%s) called\n",host);
 
-    krb5_clean_hostname(context, host, &local_host);
+    krb5_clean_hostname(context, host, local_host, sizeof local_host);
 
     /*
        Search for the best match for the host or domain.
@@ -328,7 +328,7 @@ krb5_get_fallback_host_realm(krb5_context context, const char *host, char ***rea
 
     printf("get_fallback_host_realm(host >%s<) called\n",host);
 
-    krb5_clean_hostname(context, host, &local_host);
+    krb5_clean_hostname(context, host, local_host, sizeof local_host);
 
     /* Scan hostname for DNS realm, and save as last-ditch realm
        assumption. */
@@ -411,16 +411,15 @@ krb5_get_fallback_host_realm(krb5_context context, const char *host, char ***rea
  * to do basic sanity checks on supplied hostname.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_clean_hostname(krb5_context context, const char *host, char **local_hostp)
+krb5_clean_hostname(krb5_context context, const char *host, char *local_host, size_t lhsize)
 {
     char **retrealms;
-    char *realm, *cp, *temp_realm, *local_host;
+    char *realm, *cp, *temp_realm;
     krb5_error_code retval;
     int l;
 
-    local_host=*local_hostp;
-
-    printf("krb5_clean_hostname called: host<%s>, local_host<%s>\n",host,local_host);
+    local_host[0]=0;
+    printf("krb5_clean_hostname called: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
     if (host) {
 	/* Filter out numeric addresses if the caller utterly failed to
 	   convert them to names.  */
@@ -445,11 +444,10 @@ krb5_clean_hostname(krb5_context context, const char *host, char **local_hostp)
 	    return KRB5_ERR_NUMERIC_REALM;
 
 	/* Should probably error out if strlen(host) > MAXDNAME.  */
-	strncpy(local_host, host, sizeof(local_host));
-	local_host[sizeof(local_host) - 1] = '\0';
+	strncpy(local_host, host, lhsize);
+	local_host[lhsize - 1] = '\0';
     } else {
-	retval = krb5int_get_fq_local_hostname (local_host,
-						sizeof (local_host));
+        retval = krb5int_get_fq_local_hostname (local_host, lhsize);
 	if (retval)
 	    return retval;
     }
@@ -464,6 +462,6 @@ krb5_clean_hostname(krb5_context context, const char *host, char **local_hostp)
     if (l && local_host[l-1] == '.')
 	    local_host[l-1] = 0;
 
-    printf("krb5_clean_hostname ending: host<%s>, local_host<%s>\n",host,local_host);
+    printf("krb5_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
     return 0;
 }
