@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.5
+		  Kerberos Version 5, Release 1.5.1
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.5.tar.gz.  Instructions on how to extract the entire
+krb5-1.5.1.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.5.tar.gz
+        gtar zxpf krb5-1.5.1.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.5.tar.gz | tar xpf -
+        gzcat krb5-1.5.1.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.5/src and
-the documentation into krb5-1.5/doc.
+Both of these methods will extract the sources into krb5-1.5.1/src and
+the documentation into krb5-1.5.1/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,36 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Major changes in 1.5.1
+----------------------
+
+The only significant change in krb5-1.5.1 is to fix the security
+vulnerabilities decribed in MITKRB5-SA-2006-001, which are local
+privilege escalation vulnerabilities in applications running on Linux
+and AIX.
+
+krb5-1.5.1 changes by ticket ID
+-------------------------------
+
+Listed below are the RT tickets of bugs fixed in krb5-1.5.1.  Please see
+
+http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.5.1.html
+
+for a current listing with links to the complete tickets.
+
+3904 	fix uninitialized vars
+3956 	gssapi compilation errors on Windows
+3971 	broken configure test for dlopen
+3998 	Document add_entry in ktutil man page
+4012 	reverse test for copy_oid_set in lib/gssapi/krb5/indicate_mechs.c
+4036 	reject configure option for static libraries
+4037 	respect LDFLAGS in NetBSD build
+4063 	gss mech glue implementation should validate opaque pointer types
+4088 	gss_import_name can fail to call gssint_initialize_library()
+4125    fix MITKRB5-SA-2006-001: multiple local privilege escalation
+        vulnerabilities
+4137 	ksu spuriously fails when exiting shell when ksu-ing to non-root
 
 Major changes in 1.5
 --------------------
