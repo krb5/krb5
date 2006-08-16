@@ -137,8 +137,8 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     printf("krb5_walk_realm_tree starting\n");
     printf("client is %s\n",client->data);
     printf("server is %s\n",server->data);
-    printf("tree is:\n");
-    for(i=0;tree[i];i++)
+    printf("tree (length %d) is:\n",links);
+    for(i=0;i<links && tree[i];i++)
       amb_dump_principal("krb5_walk_realm_tree tree",tree[i]);
 
     if (!(client->data &&server->data))
@@ -392,8 +392,8 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     printf("krb5_walk_realm_tree ending\n");
     printf("client is %s\n",client->data);
     printf("server is %s\n",server->data);
-    printf("tree is:\n");
-    for(i=0;tree[i];i++)
+    printf("tree (length %d) is:\n",links);
+    for(i=0;i<links && tree[i];i++)
       amb_dump_principal("krb5_walk_realm_tree tree",tree[i]);
     return 0;
 }
