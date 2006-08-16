@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.4.3
+		  Kerberos Version 5, Release 1.4.4
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,14 +7,14 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a tarfile,
-krb5-1.4.3-signed.tar.  The tarfile contains a gzipped tarfile,
-krb5-1.4.3.tar.gz, and its corresponding PGP signature,
-krb5-1.4.3.tar.gz.asc.
+krb5-1.4.4-signed.tar.  The tarfile contains a gzipped tarfile,
+krb5-1.4.4.tar.gz, and its corresponding PGP signature,
+krb5-1.4.4.tar.gz.asc.
 
 You will need the GNU gzip program, and preferably, the GNU tar
 program, to extract the source distribution.
 
-The distribution will extract into a subdirectory "krb5-1.4.3" of the
+The distribution will extract into a subdirectory "krb5-1.4.4" of the
 current directory.
 
 Building and Installing Kerberos 5
@@ -131,6 +131,66 @@ recommend discussing them on the kerberos@mit.edu mailing list.
     http://web.mit.edu/tlyu/papers/krb4peril-ndss04.pdf
 
 ----------------------------------------------------------------------
+
+Major changes in 1.4.4
+----------------------
+
+The only significant change in krb5-1.4.4 is to fix the security
+vulnerabilities decribed in MITKRB5-SA-2006-001, which are local
+privilege escalation vulnerabilities in applications running on Linux
+and AIX.
+
+krb5-1.4.4 changes by ticket ID
+-------------------------------
+
+Listed below are the RT tickets of bugs fixed in krb5-1.4.4.  Please see
+
+http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.4.4.html
+
+for a current listing with links to the complete tickets.
+
+2883	64-bit time_t issues
+3236	krb5.h included in internal files prior to k5-int.h
+3250	don't break make depend in lib/crypto on k5-int.h ordering
+3251	define HAVE_GETADDRINFO / HAVE_GETNAMEINFO in win-mac.h
+3253	KFW Network Identity Manager (Beta 2)
+3254	KFW Logon Network Provider
+3256	Updates to Wix installer source for KFW 3.0 Beta 2
+3257	Updates to NSIS installer for KFW 3.0 Beta 2
+3259	Increase size of PurgeRequest buffers for MSLSA
+3260	NSIS installer for KFW 3.0 Beta 3
+3261	Wix MSI installer for KFW 3.0 Beta 3
+3262	KFW Network Provider updates for KFW 3.0 Beta 3
+3263	Network Identity Manager updates for KFW 3.0 Beta 3
+3271	KFW 3.0 Final NSIS installer updates
+3272	KFW 3.0 Final Wix installer updates
+3273    KFW 3.0 Final Network Identity Manager updates
+3284    KFW 3.1 - Add missing include path
+3285    KFW - Correct identity validation algorithm
+3286    Network Identity Manager - Fix module loading when en_US
+        locale cannot be loaded
+3291    make krb5-1.4 branch build again
+3293    use more caution in testing for pthread_mutex_lock
+3313    doublefree in gc_frm_kdc.c
+3318    KFW installation should not use impersonation
+3320    krb5-config lists libraries in wrong order (krb5-support.in bug)
+3495    Fix gss_acquire_cred to handle case in which leash32.dll is
+        not available
+3501    NetIDMgr 1.1
+3503    Build NetIDMgr Developer Docs
+3542    Updates to NetIDMgr for KFW 3.1
+3938    NetIDMgr updates
+3977    GetModuleHandle needs extension on Win64
+4020    Windows: Wix 2.0.4221 updates
+4027    Windows: NSIS updates for 2.18 release
+4028    Windows NetIDMgr post-1.5 branch commits
+4032    Windows - kfw 3.1 msi deployment guide updates
+4033    Windows NetIDMgr documentation
+4048    Windows Integrated Login Fixes for KFW 3.1
+4053    Windows - fix kfwlogon for Windows 2000
+4126    fix MITKRB5-SA-2006-001: multiple local privilege escalation
+        vulnerabilities
+4138    ksu spuriously fails when exiting shell when ksu-ing to non-root
 
 Minor changes in 1.4.3
 ----------------------
