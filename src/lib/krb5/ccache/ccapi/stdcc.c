@@ -140,8 +140,8 @@ static const struct err_xlate err_xlate_table[] =
         { ccIteratorEnd,			KRB5_CC_END },
         { ccErrBadParam,			KRB5_FCC_INTERNAL },
         { ccErrNoMem, 				KRB5_CC_NOMEM },
-        { ccErrInvalidContext, 			KRB5_FCC_INTERNAL },
-        { ccErrInvalidCCache,			KRB5_FCC_INTERNAL },
+        { ccErrInvalidContext, 			KRB5_FCC_NOFILE },
+        { ccErrInvalidCCache,			KRB5_FCC_NOFILE },
         { ccErrInvalidString,			KRB5_FCC_INTERNAL },
         { ccErrInvalidCredentials,		KRB5_FCC_INTERNAL },
         { ccErrInvalidCCacheIterator,		KRB5_FCC_INTERNAL },
@@ -158,10 +158,10 @@ static const struct err_xlate err_xlate_table[] =
         { ccErrNeverDefault,			KRB5_FCC_INTERNAL },
         { ccErrCredentialsNotFound,		KRB5_CC_NOTFOUND },
         { ccErrCCacheNotFound,			KRB5_FCC_NOFILE },
-        { ccErrContextNotFound,			KRB5_FCC_INTERNAL },
-        { ccErrServerUnavailable,		KRB5_FCC_NOFILE },
-        { ccErrServerInsecure,			KRB5_FCC_INTERNAL },
-        { ccErrServerCantBecomeUID,		KRB5_FCC_INTERNAL },
+        { ccErrContextNotFound,			KRB5_FCC_NOFILE },
+        { ccErrServerUnavailable,		KRB5_CC_IO },
+        { ccErrServerInsecure,			KRB5_CC_IO },
+        { ccErrServerCantBecomeUID,		KRB5_CC_IO },
         { ccErrTimeOffsetNotSet,		KRB5_FCC_INTERNAL },
         { ccErrBadInternalMessage,		KRB5_FCC_INTERNAL },
         { ccErrNotImplemented,			KRB5_FCC_INTERNAL },
@@ -187,6 +187,7 @@ static const struct err_xlate err_xlate_table[] =
 	{ 0,					0 }
 };
 
+/* Note: cc_err_xlate is NOT idempotent.  Don't call it multiple times.  */
 static krb5_error_code cc_err_xlate(int err)
 {
     const struct err_xlate *p;
@@ -203,7 +204,8 @@ static krb5_error_code cc_err_xlate(int err)
         if (err == p->cc_err)
             return p->krb5_err;
     }
-    return KRB5_FCC_INTERNAL; /* XXX we need a miscellaneous return */
+    
+    return KRB5_FCC_INTERNAL;
 }
 
 
@@ -223,7 +225,7 @@ static krb5_error_code stdccv3_setup (krb5_context context,
                                       &ccapi_data->NamedCache);
     }
     
-    return cc_err_xlate(err);
+    return err; /* Don't translate.  Callers will translate for us */
 }
 
 /* krb5_stdcc_shutdown is exported; use the old name */
@@ -340,6 +342,10 @@ krb5_stdccv3_resolve (krb5_context context, krb5_ccache *id , const char *residu
     if (!err) {
         err = cc_context_open_ccache (gCntrlBlock, residual,
                                       &ccapi_data->NamedCache);
+        if (err == ccErrCCacheNotFound) {
+            ccapi_data->NamedCache = NULL;
+            err = 0; /* ccache just doesn't exist yet */
+        }
     }
 
     if (!err) {
