@@ -2,6 +2,7 @@ d=`pwd`
 if ! test -d $d/trunk/src ; then echo "Not in top-level.  Punting."
 else
   title kerberos hacking
+  add svn
   cp $KRB5CCNAME $KRB5CCNAME.backup
   : cd $d/src
   kpath=$d/trunk/src
