@@ -50,7 +50,7 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
         goto cleanup;
 
     if ((retval = krb5_copy_principal(context, pkdcrep->enc_part2->server,
-                                     &(*ppcreds)->server)))
+				      &(*ppcreds)->server)))
         goto cleanup;
 
     if ((retval = krb5_copy_keyblock_contents(context, 
@@ -106,6 +106,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     krb5_error *err_reply;
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
+
+    printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
 
     /* tkt->client must be equal to in_cred->client */
     if (!krb5_principal_compare(context, tkt->client, in_cred->client))
@@ -167,7 +169,7 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	else
 	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
 
-	if (retval) 			/* neither proper reply nor error! */
+	if (retval)			/* neither proper reply nor error! */
 	    goto error_4;
 
 	retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
@@ -218,11 +220,21 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if (!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server))
-	retval = KRB5_KDCREP_MODIFIED;
+    if (!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) {
+        retval = KRB5_KDCREP_MODIFIED;
+	printf("in_cred and encoding don't match; continuing anyway.\n");
+	amb_dump_principal("server principal from in_cred",in_cred->server);
+	amb_dump_principal("encoded server",dec_rep->enc_part2->server);
+	retval=0; /* XXX need sane check */
+    }
 
-    if (!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))
+    if (!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server)) {
 	retval = KRB5_KDCREP_MODIFIED;
+	printf("in_cred and ticket don't match; continuing anyway\n");
+	amb_dump_principal("server principal from in_cred",in_cred->server);
+	amb_dump_principal("server principal from ticket",dec_rep->ticket->server);
+	retval=0; /* XXX need sane check */
+    }
 
     if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
 	retval = KRB5_KDCREP_MODIFIED;
@@ -267,5 +279,6 @@ error_3:;
 
 error_4:;
     free(tgsrep.response.data);
+    printf("krb5_get_cred_via_tkt ending; retval <%s>\n",error_message(retval));
     return retval;
 }
