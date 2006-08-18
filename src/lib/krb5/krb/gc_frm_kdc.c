@@ -770,10 +770,10 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     client = in_cred->client;
     server = in_cred->server;
-     /* XXX hack for testing to force referral */
-    /* XXX */ server->realm.data[0]=0;
-    amb_dump_principal("krb5_get_cred_from_kdc_opt client", client);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt server", server);
+    /* XXX hack for testing to force referral */
+    //    /* XXX */ server->realm.data[0]=0;
+    amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
+    amb_dump_principal("krb5_get_cred_from_kdc_opt initial server", server);
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
     tgtptr = NULL;
@@ -787,20 +787,18 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     /* Set initial realm. */
     supplied_server_realm=server->realm.data;
     if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
-      /* Use the client realm. */
-      if (!( server->realm.data = (char *)malloc(strlen(client->realm.data)+1)))
-	return ENOMEM;
-      strcpy(server->realm.data, client->realm.data);
+        /* Use the client realm. */
+        if (!( server->realm.data = (char *)malloc(strlen(client->realm.data)+1)))
+	    return ENOMEM;
+        strcpy(server->realm.data, client->realm.data);
     }
     else {
-      /* Make a copy of the oringinal supplied server realm. */
-      if (!( server->realm.data = (char *)malloc(strlen(supplied_server_realm)+1)))
-	return ENOMEM;
-      strcpy(server->realm.data, supplied_server_realm);
+        /* Make a copy of the oringinal supplied server realm. */
+        if (!( server->realm.data = (char *)malloc(strlen(supplied_server_realm)+1)))
+	    return ENOMEM;
+	strcpy(server->realm.data, supplied_server_realm);
     }
-    amb_dump_principal("krb5_get_cred_from_kdc_opt client after mung", client);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt server after mung", server);
-    printf("stashed supplied realm of >%s<\n",supplied_server_realm);
+    printf("Supplied realm <%s> stashed\n",supplied_server_realm);
 
     /* Make sure we have a starting TGT. */
 
@@ -825,8 +823,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     if (retval)
 	goto cleanup;
     for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
-      /* Main referral loop.  Starting state: should have valid initial
-	 realm set for server as well as a TGT for same. */
+      /* Main referral loop.  Starting state: will have valid initial
+	 realm set for server as well as a TGT for that realm. */
       
       retval = krb5_get_cred_via_tkt(context, tgtptr,
 				     KDC_OPT_CANONICALIZE | 
@@ -838,7 +836,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
       if (retval) {
           /* Never exit here, no matter how bad the KDC error looks, just
 	     punt to a non-referral request. */
-	  printf("referred ticket request failed; punting to standard lookup\n");
+	  printf("referral tgs-req failed: <%s>\n",error_message(retval));
 	  free (server->realm.data);
 	  server->realm.data=supplied_server_realm;
 	  break;
