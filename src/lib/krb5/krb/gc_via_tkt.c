@@ -220,20 +220,25 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if (!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) {
-        retval = KRB5_KDCREP_MODIFIED;
-	printf("in_cred and encoding don't match; continuing anyway.\n");
-	amb_dump_principal("server principal from in_cred",in_cred->server);
-	amb_dump_principal("encoded server",dec_rep->enc_part2->server);
-	retval=0; /* XXX need sane check */
-    }
-
-    if (!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server)) {
-	retval = KRB5_KDCREP_MODIFIED;
-	printf("in_cred and ticket don't match; continuing anyway\n");
-	amb_dump_principal("server principal from in_cred",in_cred->server);
-	amb_dump_principal("server principal from ticket",dec_rep->ticket->server);
-	retval=0; /* XXX need sane check */
+    if ((!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) ||
+	(!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))) {
+        if (krb5_principal_compare(context, dec_rep->ticket->server, dec_rep->enc_part2->server)) {
+	    /* in_cred server differs from ticket returned, but ticket returned is consistent. */
+	    /* Contrary to draft-ietf-krb-wg-kerberos-referrals-08.txt we
+	       do *not* require padata. */
+	    /* XXX: also check for: return flags from KDC?  ticket type?  whether it's a krbtgt? */
+	  /*
+	    printf("in_cred and encoding don't match; should be a referral\n");
+	    amb_dump_principal("server principal from in_cred",in_cred->server);
+	    amb_dump_principal("encoded server",dec_rep->enc_part2->server);
+	    printf("reply referral flag is %s\n",dec_rep->enc_part2->flags&KDC_OPT_CANONICALIZE?"on":"off");
+	  */
+	}
+	else {
+	    /* in_cred server differs from ticket returned, and ticket
+	       returned is *not* consistent. */
+	    retval = KRB5_KDCREP_MODIFIED;
+	}
     }
 
     if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
@@ -279,6 +284,6 @@ error_3:;
 
 error_4:;
     free(tgsrep.response.data);
-    printf("krb5_get_cred_via_tkt ending; retval <%s>\n",error_message(retval));
+    printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
     return retval;
 }
