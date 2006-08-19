@@ -763,17 +763,20 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 {
     krb5_error_code retval;
     krb5_principal client, server;
-    krb5_creds tgtq, cc_tgt, *tgtptr;
+    krb5_creds tgtq, cc_tgt, *tgtptr, **kdc_tgts;
     krb5_boolean old_use_conf_ktypes;
     char **hrealms, *supplied_server_realm;
     int i;
+
+    if(!(kdc_tgts=calloc(KRB5_REFERRAL_MAXHOPS, sizeof(krb5_creds))))
+	return ENOMEM;
+    /* XXX: this is lazy.  Allocate per use later on. */
 
     client = in_cred->client;
     server = in_cred->server;
     /* XXX hack for testing to force referral */
     //    /* XXX */ server->realm.data[0]=0;
     amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt initial server", server);
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
     tgtptr = NULL;
@@ -823,26 +826,56 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     if (retval)
 	goto cleanup;
     for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
-      /* Main referral loop.  Starting state: will have valid initial
-	 realm set for server as well as a TGT for that realm. */
-      
-      retval = krb5_get_cred_via_tkt(context, tgtptr,
-				     KDC_OPT_CANONICALIZE | 
-				     FLAGS2OPTS(tgtptr->ticket_flags) |  
-				     kdcopt |
-				     (in_cred->second_ticket.length ?
-				      KDC_OPT_ENC_TKT_IN_SKEY : 0),
-				     tgtptr->addresses, in_cred, out_cred);
-      if (retval) {
-          /* Never exit here, no matter how bad the KDC error looks, just
-	     punt to a non-referral request. */
-	  printf("referral tgs-req failed: <%s>\n",error_message(retval));
-	  free (server->realm.data);
-	  server->realm.data=supplied_server_realm;
-	  break;
-      }
+        /* Main referral loop.  Starting state: will have valid initial
+	   realm set for server as well as a TGT for that realm. */
+        amb_dump_principal("referral loop: requesting:", server);
+        retval = krb5_get_cred_via_tkt(context, tgtptr,
+				       KDC_OPT_CANONICALIZE | 
+				       FLAGS2OPTS(tgtptr->ticket_flags) |  
+				       kdcopt |
+				       (in_cred->second_ticket.length ?
+					KDC_OPT_ENC_TKT_IN_SKEY : 0),
+				       tgtptr->addresses, in_cred, out_cred);
+	if (retval) {
+            /* Never exit here, no matter how bad the KDC error looks, just
+	       punt to a non-referral request. */
+	    printf("referral tgs-req failed: <%s>\n",error_message(retval));
+	    //free (server->realm.data);
+	    server->realm.data=supplied_server_realm;
+	    break;
+	}
+	else {
+	    /* Request succeeded; let's see what it is. */
+	    if (krb5_principal_compare(context, in_cred->server, out_cred[0]->server)) {
+	        printf("referral generated ticket for requested server principal\n");
+		amb_dump_principal("server reply",in_cred->server);
+		tgts=&kdc_tgts;
+		/* XXX clean up */
+		return retval;
+	    }
+	    else {
+	        printf("referral generated referral tgt\n");
+		amb_dump_principal("credential got:", out_cred[0]->server);
+		/* need to:
+		   1) stash tgt in tgts
+		   2) use this tgt for next referral
+		   3) rewrite server principal per any padata */
+		/* XXX verify referral TGT before use? */
+		tgtptr=out_cred[0];
+		/* save this credential in tgt sequence */
+		kdc_tgts[i]=tgtptr=out_cred[0];
+		/* copy krbtgt realm to server principal */
+		free(server->realm.data);
+		if(!(server->realm.data=malloc(tgtptr->server->data[1].length)))
+		    return ENOMEM;
+		strncpy(server->realm.data, tgtptr->server->data[1].data, tgtptr->server->data[1].length);
+		server->realm.data[tgtptr->server->data[1].length]=0;
+		server->realm.length=tgtptr->server->data[1].length;
+	    }
+	}
     }
 
+    printf("referral failed; exiting.\n"),exit(1);
     amb_dump_principal("krb5_get_cred_from_kdc_opt client at fallback", client);
     amb_dump_principal("krb5_get_cred_from_kdc_opt server af fallback", server);
 
