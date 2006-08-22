@@ -143,7 +143,7 @@ echo "Editing release-specific files..."
 
 if test $newstyle = t; then 
 	(cd $reldir/src && \
-		sed -e '/RELDATE/c\
+		sed -e '/#[a-z 	]*KRB5_RELDATE/c\
 #define KRB5_RELDATE "'"$reldate"'"' patchlevel.h > patchlevel.h.new && \
 		mv patchlevel.h.new patchlevel.h)
 	if test $checkout = t; then
@@ -189,7 +189,8 @@ echo "Nuking unneeded files..."
 find $reldir \( -name TODO -o -name todo -o -name .cvsignore \
 	-o -name BADSYMS -o -name .Sanitize -o -name .rconf \) -print \
 	| xargs rm -f || true
-find $reldir -type d \( -name autom4te.cache -o -name .svn \) -exec rm -rf {} \; || true
+find $reldir -type d \( -name autom4te.cache -o -name .svn \
+	-o -name \$ac_config_fragdir \) -exec rm -rf {} \; || true
 
 if test $dodoc = t; then
 	echo "Building doc..."
