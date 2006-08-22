@@ -315,17 +315,19 @@ We currently support the following tags:
 <a [id="string"] [param="paramstring"]>link text</a>
 <b>foo</b>
 <u>foo</u>
+<i>foo</i>
+
+<font [color="(color)"] [size="normal|large|huge|(point size)"]>foo</font>
+   (color)=black|white|red|green|blue|grey
+<large>foo</large>
+<huge>foo</huge>
 
 <center>foo</center>
 <left>foo</left>
 <right>foo</right>
 
-<font [color="color"] [size="normal|large|huge"]>foo</font>
-<large>foo</large>
-<huge>foo</huge>
-
 <p [align="left|center|right"]>foo</p>
-<settab pos="">
+<settab pos="(pos)">
 <tab>
 */
 
@@ -467,6 +469,10 @@ static int htw_parse_tag(
     } else if(!_wcsnicmp(start, L"u", c - start)) {
         format_push(s,d, HTW_DEFAULT, FV_UNDERLINE, HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/u", c - start)) {
+        format_pop(s);
+    } else if(!_wcsnicmp(start, L"i", c - start)) {
+        format_push(s,d, HTW_DEFAULT, FV_ITALIC, HTW_DEFAULT);
+    } else if(!_wcsnicmp(start, L"/i", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"large", c - start)) {
         format_push(s,d,-MulDiv(HTW_LARGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, HTW_DEFAULT);
