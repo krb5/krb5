@@ -518,7 +518,17 @@ typedef struct tag_khui_new_creds_by_type {
                                   current state of this cred
                                   type. (localized, optional).  Only
                                   used if providing a
-                                  user-interface. */
+                                  user-interface. If this field is
+                                  non-NULL, then it should point to a
+                                  NULL terminated string that does not
+                                  exceed ::KHUI_MAXCCH_LONG_DESC
+                                  characters in length including the
+                                  terminating NULL.
+
+                                  \see \ref khui_htwnd for information
+                                  on how to format the string for this
+                                  field.
+                                */
 
     LPARAM      aux;            /*!< auxilliary field.  For use by the
                                   plug-in. */
