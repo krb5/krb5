@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2006 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -239,6 +240,30 @@ nc_notify_types(khui_new_creds * c, UINT uMsg,
     }
 }
 
+static void
+nc_clear_password_fields(khui_nc_wnd_data * d)
+{
+    khm_size i;
+    khm_boolean need_sync = FALSE;
+
+    khui_cw_lock_nc(d->nc);
+
+    for (i=0; i < d->nc->n_prompts; i++) {
+        if ((d->nc->prompts[i]->flags & KHUI_NCPROMPT_FLAG_HIDDEN) &&
+            d->nc->prompts[i]->hwnd_edit) {
+            SetWindowText(d->nc->prompts[i]->hwnd_edit,
+                          L"");
+            need_sync = TRUE;
+        }
+    }
+
+    khui_cw_unlock_nc(d->nc);
+
+    if (need_sync) {
+        khui_cw_sync_prompt_values(d->nc);
+    }
+}
+
 #define NC_MAXCCH_CREDTEXT 16384
 #define NC_MAXCB_CREDTEXT (NC_MAXCCH_CREDTEXT * sizeof(wchar_t))
 
@@ -270,7 +295,6 @@ nc_update_credtext(khui_nc_wnd_data * d)
         wchar_t id_string[KCDB_IDENT_MAXCCH_NAME + 256];
         khm_size cbbuf;
         khm_int32 flags;
-
 
         LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_ONE, 
                    main_fmt, (int) ARRAYLENGTH(main_fmt));
@@ -1673,6 +1697,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 EnableWindow(hw, TRUE);
                 hw = GetDlgItem(d->dlg_bb, IDCANCEL);
                 EnableWindow(hw, TRUE);
+
+                nc_clear_password_fields(d);
 
                 return TRUE;
             }
