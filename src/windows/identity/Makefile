@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2006 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -43,7 +44,7 @@ RMAKE_W2K=$(MAKECMD) /nologo all KHBUILD_W2K=1
 
 !else
 RMAKE=$(MAKECMD) /nologo etag
-RMAKE_W2K=$(MAKECMD) /nologo etag KHBUILD_W2K=1
+RMAKE_W2K=echo Skipping W2K target for ETAGS run.
 !endif
 !else
 RMAKE=$(MAKECMD) /nologo test
