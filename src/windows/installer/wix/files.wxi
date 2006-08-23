@@ -328,8 +328,13 @@
                     </Component>
                     
                     <!-- NetIDMgr  -->
-                    <Component Id="cmf_nidmgr32_dll" Guid="EEBA3A0D-CE3D-42F1-8854-D7F63F597202" DiskId="1">
+                    <Component Id="cmf_nidmgr32_dll" Guid="EEBA3A0D-CE3D-42F1-8854-D7F63F597202" DiskId="1" Transitive="yes">
 						<File Id="fil_nidmgr32_dll" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" />
+                        <Condition>VersionNT &gt; 500</Condition>
+                    </Component>
+                    <Component Id="cmf_nidmgr32_dll_w2k" Guid="33F42D7C-03CE-465F-9E0A-5F486FE64B04" DiskId="1" Transitive="yes">
+                        <File Id="fil_nidmgr32_dll" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" src="$(var.BinDir)W2K\nidmgr32.dll" />
+                        <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
                     <Component Id="cmf_krb5cred_dll" Guid="27A7723A-F0D9-4F06-892C-54F0AC6014C3" DiskId="1">
 						<File Id="fil_krb5cred_dll" LongName="krb5cred.dll" Name="krb5cred.dll" KeyPath="yes" />
@@ -343,14 +348,23 @@
                     <Component Id="cmf_krb4cred_en_us_dll" Guid="3FF40A29-E2C3-40F3-B81C-2948494BE4B0" DiskId="1">
 						<File Id="fil_krb4cred_en_us_dll" LongName="krb4cred_en_us.dll" Name="krb4cenu.dll" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_netidmgr_exe" Guid="AEB06D67-B4F3-45B1-AC1E-5C1AFF747756" DiskId="1">
+                    <Component Id="cmf_netidmgr_exe" Guid="AEB06D67-B4F3-45B1-AC1E-5C1AFF747756" DiskId="1" Transitive="yes">
 			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
-			<File Id="fil_netidmgr_exe_manifest" LongName="netidmgr.exe.manifest" Name="netidmgr.emn" />
 			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_ts_netidmgr_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
                         <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
                         <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
+                        <Condition>VersionNT &gt; 500</Condition>
+                    </Component>
+                    <Component Id="cmf_netidmgr_exe_w2k" Guid="0F85D4F3-7897-4FE3-8501-AD0C383CCB4F" DiskId="1" Transitive="yes">
+			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
+			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
+                        <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
+                        <Registry Id="reg_ts_netidmgr_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
+                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
+                        <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
+                        <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
                     <!-- /NetIDMgr -->
                     
@@ -809,6 +823,42 @@
 			    <Shortcut Id="sc_relnotes_html" Advertise="no" Directory="dirShortcut" LongName="Release Notes.lnk" Name="relnotes.lnk" />
                         </File>
                     </Component>
+                </Directory>
+
+                <Directory Id="dirsample" Name="sample" src="$(var.SampleDir)">
+                    <Directory Id="dirsample_templ" LongName="templates" Name="template" src="$(var.SampleDir)templates\">
+                        <Directory Id="dirsample_t_credprov" Name="credprov" src="$(var.SampleDir)templates\credprov\">
+                            <Component Id="cmp_credprov_files" Guid="0D5A01A0-8DA9-4FED-9766-8B4DE6273145" DiskId="1">
+                                <File Id="fil_credprov_Makefile" Name="Makefile" KeyPath="yes" />
+                                <File Id="fil_credprov_config_id_c" Name="conf_id.c" LongName="config_id.c" />
+                                <File Id="fil_credprov_config_ids_c" Name="conf_ids.c" LongName="config_ids.c" />
+                                <File Id="fil_credprov_config_main_c" Name="conf_mn.c" LongName="config_main.c" />
+                                <File Id="fil_credprov_credacq_c" Name="credacq.c" />
+                                <File Id="fil_credprov_credprov_h" Name="credprov.h" />
+                                <File Id="fil_credprov_credtype_c" Name="credtype.c" />
+                                <File Id="fil_credprov_langres_h" Name="langres.h" />
+                                <File Id="fil_credprov_main_c" Name="main.c" />
+                                <File Id="fil_credprov_plugin_c" Name="plugin.c" />
+                                <File Id="fil_credprov_proppage_c" Name="proppage.c" />
+                                <File Id="fil_credprov_README" Name="README" />
+                                <File Id="fil_credprov_version_rc" Name="version.rc" />
+                            </Component>
+
+                            <Directory Id="dirsample_t_credprov_images" Name="images" src="$(var.SampleDir)templates\credprov\images\">
+                                <Component Id="cmp_credprov_images_files" Guid="8A6CD5B8-482D-435F-9172-8F0B6AAA3C3F" DiskId="1">
+                                    <File Id="fil_credprov_plugin_ico" Name="plugin.ico" KeyPath="yes" />
+                                </Component>
+                            </Directory>
+
+                            <Directory Id="dirsample_t_credprov_lang" Name="lang" src="$(var.SampleDir)templates\credprov\lang\">
+                                <Directory Id="dirsample_t_credprov_lang_enus" Name="en_us" src="$(var.SampleDir)templates\credprov\lang\en_us\">
+                                    <Component Id="cmp_credprov_en_us_files" Guid="69C982D3-A1D3-4E23-9629-DE1842937F1D" DiskId="1">
+                                        <File Id="fil_credprov_en_us_langres_rc" Name="langres.rc" KeyPath="yes" />
+                                    </Component>
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                    </Directory>
                 </Directory>
             
             </Directory> <!-- /Kerberos -->
