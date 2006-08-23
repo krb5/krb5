@@ -31,4 +31,5 @@
     - \subpage khui_actions
     - \subpage khui_menus
     - \subpage khui_context
+    - \subpage khui_htwnd
  */

@@ -30,6 +30,7 @@
 #include<lm.h>
 #include<commctrl.h>
 #include<shlwapi.h>
+
 #include<strsafe.h>
 
 typedef struct tag_k5_realm_kdc {
@@ -1005,8 +1006,18 @@ k5_config_dlgproc(HWND hwnd,
             }
 
             /* and the import ticket options */
-            LoadString(hResModule, IDS_K5CFG_IMPORT_OPTIONS,
-                       importopts, ARRAYLENGTH(importopts));
+            {
+                wchar_t csvstring[256];
+                khm_size cb;
+
+                csvstring[0] = L'\0';
+
+                LoadString(hResModule, IDS_K5CFG_IMPORT_OPTIONS,
+                           csvstring, ARRAYLENGTH(csvstring));
+
+                cb = sizeof(importopts);
+                csv_to_multi_string(importopts, &cb, csvstring);
+            }
 
             hw = GetDlgItem(hwnd, IDC_CFG_IMPORT);
 #ifdef DEBUG
