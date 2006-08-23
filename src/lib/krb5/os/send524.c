@@ -98,7 +98,7 @@ krb5int_524_sendto_kdc (context, message, realm, reply, addr, addrlen)
     if (al.naddrs == 0)
 	return KRB5_REALM_UNKNOWN;
 
-    retval = krb5int_sendto (context, message, &al, reply, addr, addrlen, NULL);
+    retval = krb5int_sendto (context, message, &al, NULL, reply, addr, addrlen, NULL, 0, NULL);
     krb5int_free_addrlist (&al);
     return retval;
 #else

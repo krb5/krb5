@@ -381,8 +381,8 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     }
 
     if (addrs.naddrs > 0) {
-        retval = krb5int_sendto (context, message, &addrs, reply, 0, 0,
-                                 &addr_used);
+        retval = krb5int_sendto (context, message, &addrs, 0, reply, 0, 0,
+								 0, 0, &addr_used);
         if (retval == 0) {
             /*
              * Set use_master to 1 if we ended up talking to a master when
@@ -447,35 +447,6 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
  */
 
 #include "cm.h"
-
-static const char *const state_strings[] = {
-    "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
-};
-enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };
-struct incoming_krb5_message {
-    size_t bufsizebytes_read;
-    size_t bufsize;
-    char *buf;
-    char *pos;
-    unsigned char bufsizebytes[4];
-    size_t n_left;
-};
-struct conn_state {
-    SOCKET fd;
-    krb5_error_code err;
-    enum conn_states state;
-    unsigned int is_udp : 1;
-    int (*service)(struct conn_state *, struct select_state *, int);
-    struct addrinfo *addr;
-    struct {
-	struct {
-	    sg_buf sgbuf[2];
-	    sg_buf *sgp;
-	    int sg_count;
-	} out;
-	struct incoming_krb5_message in;
-    } x;
-};
 
 static int getcurtime (struct timeval *tvp)
 {
@@ -552,11 +523,37 @@ static int service_tcp_fd (struct conn_state *conn,
 static int service_udp_fd (struct conn_state *conn,
 			   struct select_state *selstate, int ssflags);
 
+static void
+set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
+{
+    if (!message || message->length == 0) 
+	return;
+
+    if (!state->is_udp) {
+
+	state->x.out.msg_len_buf[0] = (message->length >> 24) & 0xff;
+	state->x.out.msg_len_buf[1] = (message->length >> 16) & 0xff;
+	state->x.out.msg_len_buf[2] = (message->length >>  8) & 0xff;
+	state->x.out.msg_len_buf[3] =  message->length        & 0xff;
+
+	SG_SET(&state->x.out.sgbuf[0], state->x.out.msg_len_buf, 4);
+	SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
+   	state->x.out.sg_count = 2;
+
+    } else {
+
+	SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
+	SG_SET(&state->x.out.sgbuf[1], 0, 0);
+	state->x.out.sg_count = 1;
+
+    }
+}
+
+
 
 static int
 setup_connection (struct conn_state *state, struct addrinfo *ai,
-		  const krb5_data *message, unsigned char *message_len_buf,
-		  char **udpbufp)
+		  const krb5_data *message, char **udpbufp)
 {
     state->state = INITIALIZING;
     state->err = 0;
@@ -565,17 +562,25 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
     state->fd = INVALID_SOCKET;
     SG_SET(&state->x.out.sgbuf[1], 0, 0);
     if (ai->ai_socktype == SOCK_STREAM) {
+	/*
 	SG_SET(&state->x.out.sgbuf[0], message_len_buf, 4);
 	SG_SET(&state->x.out.sgbuf[1], message->data, message->length);
 	state->x.out.sg_count = 2;
+	*/
+	
 	state->is_udp = 0;
 	state->service = service_tcp_fd;
+	set_conn_state_msg_length (state, message);
     } else {
+	/*
 	SG_SET(&state->x.out.sgbuf[0], message->data, message->length);
 	SG_SET(&state->x.out.sgbuf[1], 0, 0);
 	state->x.out.sg_count = 1;
+	*/
+
 	state->is_udp = 1;
 	state->service = service_udp_fd;
+	set_conn_state_msg_length (state, message);
 
 	if (*udpbufp == 0) {
 	    *udpbufp = malloc(krb5_max_dgram_size);
@@ -594,7 +599,10 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
 }
 
 static int
-start_connection (struct conn_state *state, struct select_state *selstate)
+start_connection (struct conn_state *state, 
+		  struct select_state *selstate, 
+		  struct sendto_callback_info* callback_info,
+                  krb5_data* callback_buffer)
 {
     int fd, e;
     struct addrinfo *ai = state->addr;
@@ -628,6 +636,7 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	 */
 	if (SOCKET_ERRNO == EINPROGRESS || SOCKET_ERRNO == EWOULDBLOCK) {
 	    state->state = CONNECTING;
+	    state->fd = fd;
 	} else {
 	    dprint("connect failed: %m\n", SOCKET_ERRNO);
 	    (void) closesocket(fd);
@@ -643,10 +652,36 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	 * stack is broken, but if they gave us a connection, use it.
 	 */
 	state->state = WRITING;
+	state->fd = fd;
     }
     dprint("new state = %s\n", state_strings[state->state]);
 
-    state->fd = fd;
+
+    /*
+     * Here's where KPASSWD callback gets the socket information it needs for
+     * a kpasswd request
+     */
+    if (callback_info) {
+
+	e = callback_info->pfn_callback(state, 
+					callback_info->context, 
+					callback_buffer);
+	if (e != 0) {
+	    dprint("callback failed: %m\n", e);
+	    (void) closesocket(fd);
+	    state->err = e;
+	    state->fd = INVALID_SOCKET;
+	    state->state = FAILED;
+	    return -3;
+	}
+
+	dprint("callback %p (message=%d@%p)\n", 
+	       state,
+	       callback_buffer->length, 
+	       callback_buffer->data);
+
+	set_conn_state_msg_length( state, callback_buffer );
+    }
 
     if (ai->ai_socktype == SOCK_DGRAM) {
 	/* Send it now.  */
@@ -660,7 +695,7 @@ start_connection (struct conn_state *state, struct select_state *selstate)
 	    (void) closesocket(state->fd);
 	    state->fd = INVALID_SOCKET;
 	    state->state = FAILED;
-	    return -3;
+	    return -4;
 	} else {
 	    state->state = READING;
 	}
@@ -699,7 +734,10 @@ start_connection (struct conn_state *state, struct select_state *selstate)
    Otherwise, the caller should immediately move on to process the
    next connection.  */
 static int
-maybe_send (struct conn_state *conn, struct select_state *selstate)
+maybe_send (struct conn_state *conn, 
+	    struct select_state *selstate, 
+	    struct sendto_callback_info* callback_info,
+	    krb5_data* callback_buffer)
 {
     sg_buf *sg;
 
@@ -707,7 +745,7 @@ maybe_send (struct conn_state *conn, struct select_state *selstate)
 	   state_strings[conn->state],
 	   conn->is_udp ? "udp" : "tcp");
     if (conn->state == INITIALIZING)
-	return start_connection(conn, selstate);
+	return start_connection(conn, selstate, callback_info, callback_buffer);
 
     /* Did we already shut down this channel?  */
     if (conn->state == FAILED) {
@@ -1056,22 +1094,27 @@ service_fds (struct select_state *selstate,
 
 krb5_error_code
 krb5int_sendto (krb5_context context, const krb5_data *message,
-                const struct addrlist *addrs, krb5_data *reply,
-                struct sockaddr *localaddr, socklen_t *localaddrlen,
-                int *addr_used)
+                const struct addrlist *addrs,
+		struct sendto_callback_info* callback_info, krb5_data *reply,
+		struct sockaddr *localaddr, socklen_t *localaddrlen,
+                struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
+		int *addr_used)
 {
     int i, pass;
     int delay_this_pass = 2;
     krb5_error_code retval;
     struct conn_state *conns;
+    krb5_data *callback_data = 0;
     size_t n_conns, host;
     struct select_state *sel_state;
     struct timeval now;
     int winning_conn = -1, e = 0;
-    unsigned char message_len_buf[4];
     char *udpbuf = 0;
 
-    dprint("krb5int_sendto(message=%d@%p, addrlist=", message->length, message->data);
+    if (message)
+	dprint("krb5int_sendto(message=%d@%p, addrlist=", message->length, message->data);
+    else
+	dprint("krb5int_sendto(callback=%p, addrlist=", callback_info);
     print_addrlist(addrs);
     dprint(")\n");
 
@@ -1083,7 +1126,18 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     if (conns == NULL) {
 	return ENOMEM;
     }
+
     memset(conns, 0, n_conns * sizeof(conns[i]));
+
+    if (callback_info) {
+	callback_data = malloc(n_conns * sizeof(krb5_data));
+	if (callback_data == NULL) {
+	    return ENOMEM;
+	}
+
+	memset(conns, 0, n_conns * sizeof(callback_data[i]));
+    }
+
     for (i = 0; i < n_conns; i++) {
 	conns[i].fd = INVALID_SOCKET;
     }
@@ -1102,15 +1156,13 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     FD_ZERO(&sel_state->wfds);
     FD_ZERO(&sel_state->xfds);
 
-    message_len_buf[0] = (message->length >> 24) & 0xff;
-    message_len_buf[1] = (message->length >> 16) & 0xff;
-    message_len_buf[2] = (message->length >>  8) & 0xff;
-    message_len_buf[3] =  message->length        & 0xff;
 
     /* Set up connections.  */
     for (host = 0; host < n_conns; host++) {
-	retval = setup_connection (&conns[host], addrs->addrs[host].ai,
-				   message, message_len_buf, &udpbuf);
+	retval = setup_connection(&conns[host], 
+				  addrs->addrs[host].ai,
+				  message, 
+				  &udpbuf);
 	if (retval)
 	    continue;
     }
@@ -1122,7 +1174,10 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	    dprint("host %d\n", host);
 
 	    /* Send to the host, wait for a response, then move on. */
-	    if (maybe_send(&conns[host], sel_state))
+	    if (maybe_send(&conns[host], 
+			   sel_state,
+			   callback_info,
+			   (callback_info ? &callback_data[host] : NULL)))
 		continue;
 
 	    retval = getcurtime(&now);
@@ -1180,6 +1235,10 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
         *addr_used = winning_conn;
     if (localaddr != 0 && localaddrlen != 0 && *localaddrlen > 0)
 	(void) getsockname(conns[winning_conn].fd, localaddr, localaddrlen);
+
+	if (remoteaddr != 0 && remoteaddrlen != 0 && *remoteaddrlen > 0)
+	(void) getpeername(conns[winning_conn].fd, remoteaddr, remoteaddrlen);
+
 egress:
     for (i = 0; i < n_conns; i++) {
 	if (conns[i].fd != INVALID_SOCKET)
@@ -1188,7 +1247,14 @@ egress:
 	    && conns[i].x.in.buf != 0
 	    && conns[i].x.in.buf != udpbuf)
 	    free(conns[i].x.in.buf);
+	if (callback_info) {
+	    callback_info->pfn_cleanup( callback_info->context, &callback_data[i]);
+	}
     }
+
+    if (callback_data) 
+	free(callback_data);
+
     free(conns);
     if (reply->data != udpbuf)
 	free(udpbuf);

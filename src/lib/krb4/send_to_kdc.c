@@ -180,8 +180,8 @@ krb4int_send_to_kdc_addr(
 
     message.length = pkt->length;
     message.data = (char *)pkt->dat; /* XXX yuck */
-    retval = internals.sendto_udp(NULL, &message, &al, &reply, addr,
-				  addrlen, NULL);
+    retval = internals.sendto_udp(NULL, &message, &al, NULL, &reply, addr,
+				  addrlen, NULL, 0, NULL);
     DEB(("sendto_udp returns %d\n", retval));
 free_al:
     internals.free_addrlist(&al);
