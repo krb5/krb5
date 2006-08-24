@@ -1,4 +1,4 @@
-		  Kerberos Version 5, Release 1.5.1
+                  Kerberos Version 5, Release 1.5.1
 
                             Release Notes
                         The MIT Kerberos Team
@@ -77,18 +77,19 @@ http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.5.1.html
 
 for a current listing with links to the complete tickets.
 
-3904 	fix uninitialized vars
-3956 	gssapi compilation errors on Windows
-3971 	broken configure test for dlopen
-3998 	Document add_entry in ktutil man page
-4012 	reverse test for copy_oid_set in lib/gssapi/krb5/indicate_mechs.c
-4036 	reject configure option for static libraries
-4037 	respect LDFLAGS in NetBSD build
-4063 	gss mech glue implementation should validate opaque pointer types
-4088 	gss_import_name can fail to call gssint_initialize_library()
+3904    fix uninitialized vars
+3956    gssapi compilation errors on Windows
+3971    broken configure test for dlopen
+3998    Document add_entry in ktutil man page
+4012    reverse test for copy_oid_set in lib/gssapi/krb5/indicate_mechs.c
+4036    reject configure option for static libraries
+4037    respect LDFLAGS in NetBSD build
+4063    gss mech glue implementation should validate opaque pointer types
+4088    gss_import_name can fail to call gssint_initialize_library()
 4125    fix MITKRB5-SA-2006-001: multiple local privilege escalation
         vulnerabilities
-4137 	ksu spuriously fails when exiting shell when ksu-ing to non-root
+4137    ksu spuriously fails when exiting shell when ksu-ing to non-root
+4168    clean up mkrel patchlevel.h editing etc.
 
 Major changes in 1.5
 --------------------
@@ -96,7 +97,7 @@ Major changes in 1.5
 Kerberos 5 Release 1.5 includes many significant changes to the
 Kerberos build system, to GSS-API, and to the Kerberos KDC and
 administration system.  These changes build up infrastructure as part
-of our effrots to make Kerberos more extensible and flexible.  While
+of our efforts to make Kerberos more extensible and flexible.  While
 we are confident that these changes will improve Kerberos in the long
 run, significant code restructuring may introduce portability problems
 or change behavior in ways that break applications.  It is always
