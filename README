@@ -1,7 +1,7 @@
-		  Kerberos Version 5, Release 1.4.4
+                  Kerberos Version 5, Release 1.4.4
 
-			    Release Notes
-			The MIT Kerberos Team
+                            Release Notes
+                        The MIT Kerberos Team
 
 Unpacking the Source Distribution
 ---------------------------------
@@ -149,21 +149,21 @@ http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.4.4.html
 
 for a current listing with links to the complete tickets.
 
-2883	64-bit time_t issues
-3236	krb5.h included in internal files prior to k5-int.h
-3250	don't break make depend in lib/crypto on k5-int.h ordering
-3251	define HAVE_GETADDRINFO / HAVE_GETNAMEINFO in win-mac.h
-3253	KFW Network Identity Manager (Beta 2)
-3254	KFW Logon Network Provider
-3256	Updates to Wix installer source for KFW 3.0 Beta 2
-3257	Updates to NSIS installer for KFW 3.0 Beta 2
-3259	Increase size of PurgeRequest buffers for MSLSA
-3260	NSIS installer for KFW 3.0 Beta 3
-3261	Wix MSI installer for KFW 3.0 Beta 3
-3262	KFW Network Provider updates for KFW 3.0 Beta 3
-3263	Network Identity Manager updates for KFW 3.0 Beta 3
-3271	KFW 3.0 Final NSIS installer updates
-3272	KFW 3.0 Final Wix installer updates
+2883    64-bit time_t issues
+3236    krb5.h included in internal files prior to k5-int.h
+3250    don't break make depend in lib/crypto on k5-int.h ordering
+3251    define HAVE_GETADDRINFO / HAVE_GETNAMEINFO in win-mac.h
+3253    KFW Network Identity Manager (Beta 2)
+3254    KFW Logon Network Provider
+3256    Updates to Wix installer source for KFW 3.0 Beta 2
+3257    Updates to NSIS installer for KFW 3.0 Beta 2
+3259    Increase size of PurgeRequest buffers for MSLSA
+3260    NSIS installer for KFW 3.0 Beta 3
+3261    Wix MSI installer for KFW 3.0 Beta 3
+3262    KFW Network Provider updates for KFW 3.0 Beta 3
+3263    Network Identity Manager updates for KFW 3.0 Beta 3
+3271    KFW 3.0 Final NSIS installer updates
+3272    KFW 3.0 Final Wix installer updates
 3273    KFW 3.0 Final Network Identity Manager updates
 3284    KFW 3.1 - Add missing include path
 3285    KFW - Correct identity validation algorithm
@@ -191,6 +191,8 @@ for a current listing with links to the complete tickets.
 4126    fix MITKRB5-SA-2006-001: multiple local privilege escalation
         vulnerabilities
 4138    ksu spuriously fails when exiting shell when ksu-ing to non-root
+4147    NetIDMgr Credential Provider Sample Code and Documentation
+4172    improvements to netidmgr dialogs
 
 Minor changes in 1.4.3
 ----------------------
