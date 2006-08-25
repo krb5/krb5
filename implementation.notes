@@ -15,6 +15,10 @@ problems with this:
 	principal, search for a matching TGT and use that for the
 	request, but this request should still be made with referrals
 	requested.
+	new answer: no, absent an actual service ticket for what you're
+	after, start with the local KDC and see what it gives you.  you
+	may get a TGT you already have (which is pointless), but you may
+	also get a referral you need to make sense of it.
 
 notes:
   - if referred, it comes with a cross-realm TGT for the new realm,
@@ -25,18 +29,26 @@ notes:
       domain_realm mapping
 
 new logic:
-  - check for TGT for initial realm in search path
-    - use client cred realm/KDC if not specified
-    - fetch initial remote TGT if specified and not in ccache
-      - via more referrals?  via do_traversal()?
+1) the referrals case:
+  - check for TGT for initial realm
+    - if a remote realm was specified (which must have happened via a
+      domain_realm mapping), obtain a TGT for it the standard way and
+      start with that.
+  - use client realm for server if not specified
   - iterate through this loop:
-    - choose KDC from which to request tickets:
-      - note that target realm will change over iterations
-    - request ticket
-      - if cross-realm TGT, change server realm appropriately
-        - via explicit setting if padata returned, else infer
-      - if service ticket returned, operation is complete.
-    - if loop count exceeded, exit
+    - request ticket with referrals turned on
+    - if that fails:
+      - if this was the first request, punt to non-referrals case
+      - otherwise, retry once without referrals turned on then terminate
+        either way
+    - if it works, either use the service ticket or follow the referral path
+    - if loop count exceeded, hardfail
+2) the nonreferrals case
+  - this is mostly the old walk_realm_tree TGT-finding (which allows
+    limited shortcut referrals per 4120) followed by a standard tgs-req.
+  - originally requested principal is used for this, although if we were
+    handed something without a realm, determine a fallback realm based on
+    DNS TXT records or a truncation of the domain name.
 
 notes on resolving hostnames
 ============================
@@ -170,3 +182,23 @@ namespace issues
   the microsoft implementation is so different
   - should key usage and padata types be different as well?
 - keyusage defined in draft (26) collides with KRB5_KEYUSAGE_PA_SAM_CHALLENGE_TRACKID
+
+from 21 aug 2006 meeting, notable screw cases and notes on same:
+===============================================================
+- referrals which terminate at a non-referral-capable realm should retry
+  the final request without referrals turned on (the "referrals to MIT" case)
+- intermediate cross-realm TGTs should not be cached, only the final
+  service ticket, anything from the local KDC, and anything that came up
+  during the degenerate (walk_realm_tree) unreferred traversal case
+- "too many hops" failure can be a hard failure
+- TGT referrals per original 4120 spec should continue to Just Work
+  - the code path for this is different and doesn't check much.
+    is this a gaping hole waiting to be filled maliciously?
+- bug: principal parsing fails with zero-length realm
+- maybe bug: win->athena referrals don't work
+  - hey, wait, there's no cross-realm TGT there.  wacky.
+- the case where we make a default realm assumption is very important to
+  maintain the current functionality with
+- it's more important to minimize KDC round-trips and perform to
+  minimally functional spec than to make all possible (and probably
+  futile) fallbacks
