@@ -1,55 +1,40 @@
 questions:
 - should do_traversal code for old-style lookups still be requesting referrals?
-
-
-from 21 aug 2006 meeting, notable screw cases and notes on same:
-
-- referrals which terminate at a non-referral-capable realm should retry
-  the final request without referrals turned on (the "referrals to MIT" case)
-- intermediate cross-realm TGTs should not be cached, only the final
-  service ticket, anything from the local KDC, and anything that came up
-  during the degenerate (walk_realm_tree) unreferred traversal case
-- "too many hops" failure can be a hard failure
-- TGT referrals per original 4120 spec should continue to Just Work
-  - the code path for this is different and doesn't check much.
-    is this a gaping hole waiting to be filled maliciously?
-- bug: principal parsing fails with zero-length realm
-- maybe bug: win->athena referrals don't work
-  - hey, wait, there's no cross-realm TGT there.  wacky.
-- the case where we make a default realm assumption is very important to
-  maintain the current functionality with
-- it's more important to minimize KDC round-trips and perform to
-  minimally functional spec than to make all possible (and probably
-  futile) fallbacks
+  If so, within what scope should they actually be used?
 
 current:
-
-- now that we're getting real referral tickets handle them properly in krb5_get_cred_from_kdc_opt
-- referral-relevant credential checks in krb5_get_cred_via_tkt completely disabled; fix
-- verify that cached tickets work properly (it seems so)
 - rewrite verification to be more tightly-coupled to referral case
 - when should ccache be checked during referral process?  never?
 - free TGTs at fallback
-- kvno crashes freeing in_cred after the call completes.  why is this?
 - add error reporting to end of gc_from_kdc
-- clean up TODO and implementation notes
+- deal with fetching remote TGTs after all before referrals
+  - this is needed in domain_realm case
+
+bug fixes:
+- kvno crashes freeing in_cred after the call completes.  why is this?
+  reproduce: "kvno host/maybe.not.ms.mit.edu@NOT.MS.MIT.EDU"
+- assertion failure: "./ptest argos.mit.edu"
+  - might require NOT tickets and no domain_realm setting
 
 low-priority:
-
 - code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
 - add klist option to print actual credential principal
 - referral loop checking
 
-later, hopefully soon:
+later, high-priority, hard:
 - padata parsing
 
-final:
+testing issues:
+- verify that cached tickets work properly
+- verify that intermediate TGTs aren't cached but 
 
+final:
 - check namespace use with tom
 - review code for:
   - string safety, particularly strcmp use -- nothing is guaranteed to be a string,
     do not use string functions at all.
   - memory leaks
 - check assumptions on assumed dereferencability of credential members
-- code format
-- remove tracing/debugging code
+- review code format
+- #ifdef out tracing/debugging code
+- review implementation notes against actual implementation
