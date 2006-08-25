@@ -1,3 +1,7 @@
+questions:
+- should do_traversal code for old-style lookups still be requesting referrals?
+
+
 from 21 aug 2006 meeting, notable screw cases and notes on same:
 
 - referrals which terminate at a non-referral-capable realm should retry
@@ -25,6 +29,10 @@ current:
 - verify that cached tickets work properly (it seems so)
 - rewrite verification to be more tightly-coupled to referral case
 - when should ccache be checked during referral process?  never?
+- free TGTs at fallback
+- kvno crashes freeing in_cred after the call completes.  why is this?
+- add error reporting to end of gc_from_kdc
+- clean up TODO and implementation notes
 
 low-priority:
 
