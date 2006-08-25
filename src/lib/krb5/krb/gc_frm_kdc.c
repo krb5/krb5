@@ -762,51 +762,37 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds ***tgts, int kdcopt)
 {
     krb5_error_code retval;
-    krb5_principal client, server;
-    krb5_creds tgtq, cc_tgt, *tgtptr, **kdc_tgts;
+    krb5_principal client, server, supplied_server;
+    krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
-    char **hrealms, *supplied_server_realm;
-    int i;
-
-    if(!(kdc_tgts=calloc(KRB5_REFERRAL_MAXHOPS, sizeof(krb5_creds))))
-	return ENOMEM;
-    /* XXX: this is lazy.  Allocate per use later on. */
+    char **hrealms;
+    int referral_count;
 
     client = in_cred->client;
     server = in_cred->server;
     /* XXX hack for testing to force referral */
     //    /* XXX */ server->realm.data[0]=0;
+#ifdef DEBUG_REFERRALS
     amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
+#endif
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
     tgtptr = NULL;
     *tgts = NULL;
     old_use_conf_ktypes = context->use_conf_ktypes;
 
-    /*
-     * Get a TGT for the target realm.
-     */
-    
-    /* Set initial realm. */
-    supplied_server_realm=server->realm.data;
-    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
+    /* Copy initially specified principal, then copy client realm for server if no hint. */
+    if ((retval=krb5_copy_principal(context, server, &supplied_server)))
+        return retval;
+    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {   // XXX a realm is not a string!
         /* Use the client realm. */
-        if (!( server->realm.data = (char *)malloc(strlen(client->realm.data)+1)))
+        if (!( server->realm.data = (char *)malloc(client->realm.length)))
 	    return ENOMEM;
-        strcpy(server->realm.data, client->realm.data);
+	memcpy(server->realm.data, client->realm.data, client->realm.length);
     }
-    else {
-        /* Make a copy of the oringinal supplied server realm. */
-        if (!( server->realm.data = (char *)malloc(strlen(supplied_server_realm)+1)))
-	    return ENOMEM;
-	strcpy(server->realm.data, supplied_server_realm);
-    }
-    printf("Supplied realm <%s> stashed\n",supplied_server_realm);
-
-    /* Make sure we have a starting TGT. */
-
-    /* Create minimal credential to match against ccache. */
-    retval = tgt_mcred(context, client, server, client, &tgtq);
+    /* Retreive initial (local) TGT */
+    /* retval = tgt_mcred(context, client, server, client, &tgtq);*/
+    retval = tgt_mcred(context, client, client, client, &tgtq);
     if (retval)
 	goto cleanup;
 
@@ -816,19 +802,27 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 				   &tgtq, &cc_tgt);
     if (!retval) {
 	tgtptr = &cc_tgt;
-    } else if (!HARD_CC_ERR(retval)) {
-	/* Not in ccache, so traverse the transit path. */
-        /* XXX: this will not work if starting TGT needs referrals to be
-	   obtained */
-	retval = do_traversal(context, ccache, client, server,
-			      &cc_tgt, &tgtptr, tgts);
+    } else {
+#ifdef DEBUG_REFERRALS
+      printf("gc_from_kdc: couldn't find local tgt!\n");
+#endif
+      goto cleanup;
     }
-    if (retval)
-	goto cleanup;
-    for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
-        /* Main referral loop.  Starting state: will have valid initial
-	   realm set for server as well as a TGT for that realm. */
-        amb_dump_principal("referral loop: requesting:", server);
+
+#ifdef DEBUG_REFERRALS
+    amb_dump_principal("gc_from_kdc: server as requested", supplied_server);
+#endif
+
+    /*
+     * Try requesting a service ticket from our local KDC with referrals
+     * turned on.  If the first referral succeeds, follow a referral-only
+     * path, otherwise fall back to old-style assumptions.
+     */
+
+    for (referral_count=0;referral_count<KRB5_REFERRAL_MAXHOPS;referral_count++) {
+#ifdef DEBUG_REFERRALS
+        amb_dump_principal("gc_from_kdc: referral loop requesting:", server);
+#endif
         retval = krb5_get_cred_via_tkt(context, tgtptr,
 				       KDC_OPT_CANONICALIZE | 
 				       FLAGS2OPTS(tgtptr->ticket_flags) |  
@@ -837,33 +831,55 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 					KDC_OPT_ENC_TKT_IN_SKEY : 0),
 				       tgtptr->addresses, in_cred, out_cred);
 	if (retval) {
-            /* Never exit here, no matter how bad the KDC error looks, just
-	       punt to a non-referral request. */
-	    printf("referral tgs-req failed: <%s>\n",error_message(retval));
-	    //free (server->realm.data);
-	    server->realm.data=supplied_server_realm;
-	    break;
+#ifdef DEBUG_REFERRALS
+	    printf("gc_from_kdc: referral TGS-REQ request failed: <%s>\n",error_message(retval));
+#endif
+	    /* If we haven't gone anywhere yet, fail through to the
+	       non-referral case. */
+	    if (referral_count==0) {
+#ifdef DEBUG_REFERRALS
+	        printf("gc_from_kdc: initial referral failed; punting to fallback.\n");
+#endif
+	        break;
+	    }
+	    /* Otherwise, try the same query without canonicalization
+	       set, and fail hard if that doesn't work. */
+#ifdef DEBUG_REFERRALS
+	        printf("gc_from_kdc: referral #%d failed; retrying without option.\n",
+		       referral_count+1);
+#endif
+	    retval = krb5_get_cred_via_tkt(context, tgtptr,
+					   FLAGS2OPTS(tgtptr->ticket_flags) |  
+					   kdcopt |
+					   (in_cred->second_ticket.length ?
+					    KDC_OPT_ENC_TKT_IN_SKEY : 0),
+					   tgtptr->addresses
+					   , in_cred, out_cred);
+	    /* Whether or not that succeeded, we're done. */
+	    goto cleanup;
 	}
 	else {
-	    /* Request succeeded; let's see what it is. */
+	    /* Referral request succeeded; let's see what it is. */
 	    if (krb5_principal_compare(context, in_cred->server, out_cred[0]->server)) {
-	        printf("referral generated ticket for requested server principal\n");
-		amb_dump_principal("server reply",in_cred->server);
-		tgts=&kdc_tgts;
-		/* XXX clean up */
-		return retval;
+#ifdef DEBUG_REFERRALS
+	        printf("gc_from_kdc: referral generated ticket for requested server principal\n");
+		amb_dump_principal("gc_from_kdc final referred reply",in_cred->server);
+#endif
+		// tgts=referral_tgts;
+		goto cleanup;
 	    }
 	    else {
-	        printf("referral generated referral tgt\n");
-		amb_dump_principal("credential got:", out_cred[0]->server);
+#ifdef DEBUG_REFERRALS
+	        printf("gc_from_kdc: referral generated referral tgt\n");
+		amb_dump_principal("gc_from_kdc credential received:", out_cred[0]->server);
+#endif
 		/* need to:
-		   1) stash tgt in tgts
+		   1) stash tgt in referral_tgts
 		   2) use this tgt for next referral
 		   3) rewrite server principal per any padata */
-		/* XXX verify referral TGT before use? */
 		tgtptr=out_cred[0];
 		/* save this credential in tgt sequence */
-		kdc_tgts[i]=tgtptr=out_cred[0];
+		referral_tgts[referral_count]=tgtptr=out_cred[0];
 		/* copy krbtgt realm to server principal */
 		free(server->realm.data);
 		if(!(server->realm.data=malloc(tgtptr->server->data[1].length)))
@@ -875,29 +891,46 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	}
     }
 
-    printf("referral failed; exiting.\n"),exit(1);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt client at fallback", client);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt server af fallback", server);
+#ifdef DEBUG_REFERRALS
+    amb_dump_principal("gc_from_kdc client at fallback", client);
+    amb_dump_principal("gc_from_kdc server at fallback", server);
+    printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
+#endif
 
+    /*
+     * At this point referrals have been tried and have failed.  Go back
+     * to the server principal as originally issued and try the conventional path.
+     */
+
+    /* Free any referral TGTs accumulated. */
+    // XXX: to be implemented
+    
     /* Referrals have failed.  Look up fallback realm if not currently set. */
-    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {
+    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) { // XXX a realm is not a string!
       if (server->length >= 2) {
 	retval=krb5_get_fallback_host_realm(context, server->data[1].data,
 					  &hrealms);
 	if (retval) goto cleanup;
-	printf("using fallback realm of %s\n",hrealms[0]);
+#ifdef DEBUG_REFERRALS
+	printf("gc_from_kdc: using fallback realm of %s\n",hrealms[0]);
+#endif
 	in_cred->server->realm.data=hrealms[0];
       }
       else {
-	/* XXX specified for referral but apparently not in a
+	/* XXX realm tagged for referral but apparently not in a
 	   <type>/<host> format.  Fall back in some intelligent way or
 	   just punt? */
-	printf("referral specified but no fallback realm.  wtf?  exiting.\n");
+#ifdef DEBUG_REFERRALS
+	printf("gc_from_kdc: referral specified but no fallback realm.  wtf?  exiting.\n");
+#endif
 	exit(1);
       }
     }
+
+    /*
+     * Get a TGT for the target realm.
+     */
     
-    /* Create minimal credential to match against ccache. */
     retval = tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
 	goto cleanup;
@@ -909,7 +942,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     if (!retval) {
 	tgtptr = &cc_tgt;
     } else if (!HARD_CC_ERR(retval)) {
-	/* Not in ccache, so traverse the transit path. */
 	retval = do_traversal(context, ccache, client, server,
 			      &cc_tgt, &tgtptr, tgts);
     }
@@ -938,6 +970,10 @@ cleanup:
     if (tgtptr == &cc_tgt)
 	krb5_free_cred_contents(context, tgtptr);
     context->use_conf_ktypes = old_use_conf_ktypes;
+
+#ifdef DEBUG_REFERRALS
+    amb_dump_principal("gc_from_kdc: final server",server);
+#endif
 
     return retval;
 }
@@ -968,3 +1004,17 @@ krb5_get_cred_from_kdc_renew(krb5_context context, krb5_ccache ccache,
     return krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts,
 				      KDC_OPT_RENEW);
 }
+
+#ifdef DEBUG_REFERRALS
+void amb_dump_principal(char *d, krb5_principal p)
+{
+	int n;
+
+	printf("    **%s (principal dump)\n",d);
+	printf("      principal realm: <%.*s>\n",p->realm.length,p->realm.data);
+	// printf("      principal length is %d\n",p->length);
+	for (n=0;n<p->length;n++)
+	  printf("        principal data[%d]: %.*s\n",n,p->data[n].length,p->data[n].data);
+	// printf("      principal type is %d\n",p->type);
+}
+#endif
