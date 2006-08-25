@@ -283,16 +283,3 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 	krb5_xfree(default_realm);
 	return(0);
 }
-
-
-void amb_dump_principal(char *d, krb5_principal p)
-{
-	int n;
-
-	printf("    **dumping principal from %s\n",d);
-	printf("      principal realm: <%.*s>\n",p->realm.length,p->realm.data);
-	printf("      principal length is %d\n",p->length);
-	for (n=0;n<p->length;n++)
-	  printf("        principal data[%d]: %.*s\n",n,p->data[n].length,p->data[n].data);
-	printf("      principal type is %d\n",p->type);
-}
