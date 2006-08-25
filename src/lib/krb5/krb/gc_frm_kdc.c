@@ -771,7 +771,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     client = in_cred->client;
     server = in_cred->server;
     /* XXX hack for testing to force referral */
-    //    /* XXX */ server->realm.data[0]=0;
+    // /* XXX */ server->realm.data[0]=0;
 #ifdef DEBUG_REFERRALS
     amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
 #endif
@@ -821,7 +821,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     for (referral_count=0;referral_count<KRB5_REFERRAL_MAXHOPS;referral_count++) {
 #ifdef DEBUG_REFERRALS
-        amb_dump_principal("gc_from_kdc: referral loop requesting:", server);
+        amb_dump_principal("gc_from_kdc: referral loop: tgt in use:", tgtptr->server);
+        amb_dump_principal("gc_from_kdc: referral loop: request is for:", server);
 #endif
         retval = krb5_get_cred_via_tkt(context, tgtptr,
 				       KDC_OPT_CANONICALIZE | 
@@ -894,7 +895,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 #ifdef DEBUG_REFERRALS
     amb_dump_principal("gc_from_kdc client at fallback", client);
     amb_dump_principal("gc_from_kdc server at fallback", server);
-    printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
+    /* XXX hack for testing */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
 #endif
 
     /*
