@@ -8,7 +8,7 @@ current behaviour:
 
 problems with this:
   - linear processing doesn't work, since ultimate target realm can change at any time
-  - can't really check if we already have the TGT since required TGT can change
+  - can't really check if we already have the remote TGT since required TGT can change
     - is checking for a cached TGT useful at all, or should we go
       straight to asking the KDC about it?
 	answer: yes, if there's a proposed realm attached to the
@@ -18,7 +18,9 @@ problems with this:
 	new answer: no, absent an actual service ticket for what you're
 	after, start with the local KDC and see what it gives you.  you
 	may get a TGT you already have (which is pointless), but you may
-	also get a referral you need to make sense of it.
+	also get a referral you need to make sense of it.  EXCEPT that if
+	you start with a non-local realm it came from a domain_realm
+	mapping (which we always trust), so start with that instead.
 
 notes:
   - if referred, it comes with a cross-realm TGT for the new realm,
