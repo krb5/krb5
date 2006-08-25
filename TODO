@@ -1,6 +1,8 @@
 questions:
 - should do_traversal code for old-style lookups still be requesting referrals?
   If so, within what scope should they actually be used?
+- Should we do the single non-referral fallback always or only on certain
+  KDC failure states?  Probably answer this from testing.
 
 current:
 - rewrite verification to be more tightly-coupled to referral case
@@ -9,6 +11,13 @@ current:
 - add error reporting to end of gc_from_kdc
 - deal with fetching remote TGTs after all before referrals
   - this is needed in domain_realm case
+- tgs-req realm needs to match server realm; requesting an ATHENA.MIT.EDU
+  ticket, say, from NOT.MS.MIT.EDU, fails
+  - rewrite initial TGS request
+- rewrite service realm before ticket goes back so that future requests
+  will hit on ccache
+  - testable with "kvno host/argos.mit.edu@NOT.MS.MIT.EDU"
+- write up understanding of current referral scheme to krbcore
 
 bug fixes:
 - kvno crashes freeing in_cred after the call completes.  why is this?
