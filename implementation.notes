@@ -21,6 +21,11 @@ problems with this:
 	also get a referral you need to make sense of it.  EXCEPT that if
 	you start with a non-local realm it came from a domain_realm
 	mapping (which we always trust), so start with that instead.
+	problem: how do you tell if it's from a domain_realm mapping or
+	something user-constructed?  the answer seems to be that if
+	there's a non-local service realm name given for the initial
+	credential that it should always be used no matter what.
+	this might be broken behaviour, though.
 
 notes:
   - if referred, it comes with a cross-realm TGT for the new realm,
@@ -204,3 +209,16 @@ from 21 aug 2006 meeting, notable screw cases and notes on same:
 - it's more important to minimize KDC round-trips and perform to
   minimally functional spec than to make all possible (and probably
   futile) fallbacks
+
+from 25 august 2006 meeting, thoughts on fallbacks:
+==================================================
+Part of the current plan is to move configuration information from the
+client to the server.  This, however, leaves us vulnerable in cases where
+the home KDC ("A") knows that the service principal exists in C but that
+the trust path traverses B, which is not referral capable.  Our
+conclusion is that the server should not be configured to offer referrals
+to C at all, but should of course continue to return a cross-realm TGT to
+B if asked, and that the client fallback to the standard
+non-referral-based traversal is the only functional path here.
+
+But is that really the right thing?
