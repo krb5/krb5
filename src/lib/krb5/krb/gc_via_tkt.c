@@ -107,7 +107,9 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
 
+#ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
+#endif
 
     /* tkt->client must be equal to in_cred->client */
     if (!krb5_principal_compare(context, tkt->client, in_cred->client))
@@ -156,8 +158,13 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 			   tkt, &tgsrep);
     if (enctypes)
 	free(enctypes);
-    if (retval)
+    if (retval) {
+#ifdef DEBUG_REFERRALS
+      printf("krb5_get_cred_via_tkt ending early after send_tgs with: %s\n",
+	     error_message(retval));
+#endif
 	return retval;
+    }
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
@@ -222,17 +229,17 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 
     if ((!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) ||
 	(!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))) {
-        if (krb5_principal_compare(context, dec_rep->ticket->server, dec_rep->enc_part2->server)) {
-	    /* in_cred server differs from ticket returned, but ticket returned is consistent. */
-	    /* Contrary to draft-ietf-krb-wg-kerberos-referrals-08.txt we
-	       do *not* require padata. */
-	    /* XXX: also check for: return flags from KDC?  ticket type?  whether it's a krbtgt? */
-	  /*
-	    printf("in_cred and encoding don't match; should be a referral\n");
-	    amb_dump_principal("server principal from in_cred",in_cred->server);
-	    amb_dump_principal("encoded server",dec_rep->enc_part2->server);
-	    printf("reply referral flag is %s\n",dec_rep->enc_part2->flags&KDC_OPT_CANONICALIZE?"on":"off");
-	  */
+        if (krb5_principal_compare(context, dec_rep->ticket->server, dec_rep->enc_part2->server)
+	    && (kdcoptions&KDC_OPT_CANONICALIZE) ) {
+	    /* in_cred server differs from ticket returned, but ticket
+	       returned is consistent and we requested canonicalization. */
+#if 0
+#ifdef DEBUG_REFERRALS
+	    printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
+	    amb_dump_principal("gc_via_tkt: in_cred",in_cred->server);
+	    amb_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
+#endif
+#endif
 	}
 	else {
 	    /* in_cred server differs from ticket returned, and ticket
@@ -284,6 +291,8 @@ error_3:;
 
 error_4:;
     free(tgsrep.response.data);
+#ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
+#endif
     return retval;
 }
