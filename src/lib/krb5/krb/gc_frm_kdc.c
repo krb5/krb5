@@ -766,7 +766,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
-    int referral_count;
+    int referral_count, i;
 
     client = in_cred->client;
     server = in_cred->server;
@@ -774,9 +774,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     // /* XXX */ server->realm.data[0]=0;
 #ifdef DEBUG_REFERRALS
     amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
+    amb_dump_principal("krb5_get_cred_from_kdc_opt initial server", server);
 #endif
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
+    memset(&referral_tgts, 0, sizeof(referral_tgts));
+
     tgtptr = NULL;
     *tgts = NULL;
     old_use_conf_ktypes = context->use_conf_ktypes;
@@ -790,9 +793,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    return ENOMEM;
 	memcpy(server->realm.data, client->realm.data, client->realm.length);
     }
-    /* Retreive initial (local) TGT */
-    /* retval = tgt_mcred(context, client, server, client, &tgtq);*/
-    retval = tgt_mcred(context, client, client, client, &tgtq);
+    /*
+     * Retreive initial TGT to match the specified server, either for the
+     * local realm in the default (referral) case or for  the remote
+     * realm if we're starting someplace non-local.
+     */
+    retval = tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
 	goto cleanup;
 
@@ -802,11 +808,18 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 				   &tgtq, &cc_tgt);
     if (!retval) {
 	tgtptr = &cc_tgt;
-    } else {
+    } else if (!HARD_CC_ERR(retval)) {
 #ifdef DEBUG_REFERRALS
-      printf("gc_from_kdc: couldn't find local tgt!\n");
+        printf("gc_from_kdc: starting do_traversal to find initial TGT for referral\n");
 #endif
-      goto cleanup;
+	retval = do_traversal(context, ccache, client, server,
+			      &cc_tgt, &tgtptr, tgts);
+    }
+    if (retval) {
+#ifdef DEBUG_REFERRALS
+        printf("gc_from_kdc: failed to find initial TGT for referral\n");
+#endif
+        goto cleanup;
     }
 
 #ifdef DEBUG_REFERRALS
@@ -821,8 +834,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     for (referral_count=0;referral_count<KRB5_REFERRAL_MAXHOPS;referral_count++) {
 #ifdef DEBUG_REFERRALS
-        amb_dump_principal("gc_from_kdc: referral loop: tgt in use:", tgtptr->server);
-        amb_dump_principal("gc_from_kdc: referral loop: request is for:", server);
+        amb_dump_principal("gc_from_kdc: referral loop: tgt in use", tgtptr->server);
+        amb_dump_principal("gc_from_kdc: referral loop: request is for", server);
 #endif
         retval = krb5_get_cred_via_tkt(context, tgtptr,
 				       KDC_OPT_CANONICALIZE | 
@@ -863,16 +876,32 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    /* Referral request succeeded; let's see what it is. */
 	    if (krb5_principal_compare(context, in_cred->server, out_cred[0]->server)) {
 #ifdef DEBUG_REFERRALS
-	        printf("gc_from_kdc: referral generated ticket for requested server principal\n");
+	        printf("gc_from_kdc: request generated ticket for requested server principal\n");
 		amb_dump_principal("gc_from_kdc final referred reply",in_cred->server);
 #endif
-		// tgts=referral_tgts;
+		/*
+		 * Deal with ccache TGT management:
+		 * If we have TGTs already from initial TGT discovery,
+		 * leave it alone.  If we started with a local referral,
+		 * return the initial TGT for the cache but junk the
+		 * rest.
+		 */
+		if (! *tgts) {
+		  /* Free newly-obtained TGTs. */
+		  for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++)
+		      if(referral_tgts[i])
+		          krb5_free_creds(context, referral_tgts[i]);
+		}
+		else {
+		  /* Alocate returnable TGT list. */
+		  // XXX Redo this.
+		}
 		goto cleanup;
 	    }
 	    else {
 #ifdef DEBUG_REFERRALS
-	        printf("gc_from_kdc: referral generated referral tgt\n");
-		amb_dump_principal("gc_from_kdc credential received:", out_cred[0]->server);
+	        printf("gc_from_kdc: request generated referral tgt\n");
+		amb_dump_principal("gc_from_kdc credential received", out_cred[0]->server);
 #endif
 		/* need to:
 		   1) stash tgt in referral_tgts
@@ -895,7 +924,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 #ifdef DEBUG_REFERRALS
     amb_dump_principal("gc_from_kdc client at fallback", client);
     amb_dump_principal("gc_from_kdc server at fallback", server);
-    /* XXX hack for testing */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
+    ///* XXX hack for testing */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
 #endif
 
     /*
@@ -971,9 +1000,16 @@ cleanup:
     if (tgtptr == &cc_tgt)
 	krb5_free_cred_contents(context, tgtptr);
     context->use_conf_ktypes = old_use_conf_ktypes;
-
+    /* Drop the original principal back into in_cred so that it's cached
+       in the expected format. */
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("gc_from_kdc: final server",server);
+    amb_dump_principal("gc_from_kdc: final server principal at cleanup",server);
+#endif
+    // XXX: This blows out as a double-free.  Why?
+    // krb5_free_principal(context, server);
+    server=supplied_server;
+#ifdef DEBUG_REFERRALS
+    amb_dump_principal("gc_from_kdc: final server after reversion",server);
 #endif
 
     return retval;
@@ -1011,11 +1047,10 @@ void amb_dump_principal(char *d, krb5_principal p)
 {
 	int n;
 
-	printf("    **%s (principal dump)\n",d);
-	printf("      principal realm: <%.*s>\n",p->realm.length,p->realm.data);
-	// printf("      principal length is %d\n",p->length);
+	printf("  **%s: ",d);
 	for (n=0;n<p->length;n++)
-	  printf("        principal data[%d]: %.*s\n",n,p->data[n].length,p->data[n].data);
-	// printf("      principal type is %d\n",p->type);
+	  printf("%s<%.*s>",(n>0)?"/":"",p->data[n].length,p->data[n].data);
+	printf("@<%.*s>  (length %d, type %d)\n",p->realm.length,p->realm.data,
+	       p->length, p->type);
 }
 #endif
