@@ -1,41 +1,34 @@
-questions:
-- should do_traversal code for old-style lookups still be requesting referrals?
-  If so, within what scope should they actually be used?
-- Should we do the single non-referral fallback always or only on certain
-  KDC failure states?  Probably answer this from testing.
-
-current:
-- rewrite verification to be more tightly-coupled to referral case
-- when should ccache be checked during referral process?  never?
-- free TGTs at fallback
-- add error reporting to end of gc_from_kdc
-- deal with fetching remote TGTs after all before referrals
-  - this is needed in domain_realm case
-- tgs-req realm needs to match server realm; requesting an ATHENA.MIT.EDU
-  ticket, say, from NOT.MS.MIT.EDU, fails
-  - rewrite initial TGS request
-- rewrite service realm before ticket goes back so that future requests
-  will hit on ccache
-  - testable with "kvno host/argos.mit.edu@NOT.MS.MIT.EDU"
-- write up understanding of current referral scheme to krbcore
-
-bug fixes:
-- kvno crashes freeing in_cred after the call completes.  why is this?
-  reproduce: "kvno host/maybe.not.ms.mit.edu@NOT.MS.MIT.EDU"
-- assertion failure: "./ptest argos.mit.edu"
-  - might require NOT tickets and no domain_realm setting
-
-low-priority:
-- code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
+stuff to add:
+- write up understanding of current referral logic to krbcore
+  - given the length of conversations with hartmans and raeburn, others
+    are likely to take issue with the finer points.
 - add klist option to print actual credential principal
 - referral loop checking
+- properly return TGT string for ccache
+  - old code was convoluted and buggy.  replace.
 
-later, high-priority, hard:
-- padata parsing
+bug fixes:
+- memory management issues:
+  - kvno crashes freeing in_cred after the call completes.  why is this?
+    reproduce: "kvno host/maybe.not.ms.mit.edu@NOT.MS.MIT.EDU"
+  - assertion failure: "./ptest argos.mit.edu"
+    - might require NOT tickets and no domain_realm setting
+    - no longer reproducible?
+  - fix double-free in gc_from_kdc_opt cleanup
 
 testing issues:
 - verify that cached tickets work properly
 - verify that intermediate TGTs aren't cached but 
+- Should we do the single non-referral fallback always or only on certain
+  KDC failure states?  Probably answer this from testing.
+- credential cacheing unreliable; investiagate
+  - "kvno host/argos.mit.edu@NOT.MS.MIT.EDU" with NOT tickets fills up ccache
+
+low-priority:
+- code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
+
+later, high-priority, hard:
+- padata parsing
 
 final:
 - check namespace use with tom
