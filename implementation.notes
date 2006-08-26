@@ -222,3 +222,9 @@ B if asked, and that the client fallback to the standard
 non-referral-based traversal is the only functional path here.
 
 But is that really the right thing?
+
+misc questions answered:
+=======================
+- should do_traversal code for old-style lookups still be requesting referrals?
+  If so, within what scope should they actually be used?
+  - probably not.  the old traversal code is network-intensive and resilient enough as is.
