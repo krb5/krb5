@@ -162,7 +162,8 @@ krb5_ldap_initialize(ldap_context, server_info)
 						  port)) == NULL) {
         st = KRB5_KDB_ACCESS_ERROR;
         if (ldap_context->kcontext)
-            krb5_set_error_message (ldap_context->kcontext, st, "%s", strerror(errno));
+	    krb5_set_error_message (ldap_context->kcontext, st, "%s",
+				    strerror(errno));
 	goto err_out;
     }
     
@@ -172,8 +173,9 @@ krb5_ldap_initialize(ldap_context, server_info)
 	krb5_update_ldap_handle(ldap_server_handle, server_info);
     } else {
         if (ldap_context->kcontext)
-            krb5_set_error_message (ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR, "%s",
-				ldap_err2string(st));
+            krb5_set_error_message (ldap_context->kcontext,
+				    KRB5_KDB_ACCESS_ERROR, "%s",
+				    ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
 	server_info->server_status = OFF;
 	time(&server_info->downtime);
@@ -243,8 +245,9 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
  err_out:
     if (sasl_mech_supported == FALSE) {
         st = KRB5_KDB_ACCESS_ERROR;
-        krb5_set_error_message (context, st, "Certificate based authentication requested but "
-                "not supported by LDAP servers");
+        krb5_set_error_message (context, st,
+			      "Certificate based authentication requested but "
+			      "not supported by LDAP servers");
     }
     return (st);
 }
