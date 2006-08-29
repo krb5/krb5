@@ -201,6 +201,7 @@ typedef struct _krb5_ldap_context {
   k5_mutex_t                    hndl_lock;
   krb5_ldap_krbcontainer_params *krbcontainer;
   krb5_ldap_realm_params        *lrparams;
+  krb5_context                  kcontext;   /* to set the error code and message */
 } krb5_ldap_context;
 
 
@@ -258,5 +259,25 @@ krb5_ldap_read_startup_information(krb5_context );
 
 int
 has_sasl_external_mech(krb5_context, char *);
+
+/* DAL functions */
+
+krb5_error_code
+krb5_ldap_set_option( krb5_context, int, void * );
+
+krb5_error_code
+krb5_ldap_lock( krb5_context, int );
+
+krb5_error_code
+krb5_ldap_unlock( krb5_context );
+
+krb5_error_code
+krb5_ldap_supported_realms( krb5_context, char ** );
+
+krb5_error_code
+krb5_ldap_free_supported_realms( krb5_context, char ** );
+
+krb5_error_code
+krb5_ldap_errcode_2_string( krb5_context, long );
 
 #endif

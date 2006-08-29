@@ -75,6 +75,7 @@ ec KRB5_KDB_SERVER_INTERNAL_ERR,   "Server error"
 ec KRB5_KDB_ACCESS_ERROR,       "Unable to access Kerberos database"
 ec KRB5_KDB_INTERNAL_ERROR,     "Kerberos database internal error"
 ec KRB5_KDB_CONSTRAINT_VIOLATION,  "Kerberos database constraints violated"
+ec KRB5_KDB_PLUGIN_OP_NOTSUPP,  "Plugin does not support the operaton"
 
 
 end

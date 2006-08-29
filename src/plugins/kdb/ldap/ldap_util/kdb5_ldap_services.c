@@ -1743,9 +1743,12 @@ kdb5_ldap_set_service_password(argc, argv)
 
         errcode = tohex(pwd, &hex);
         if (errcode != 0) {
-            if(hex.length != 0)
+            if(hex.length != 0) {
+                memset(hex.data, 0, hex.length);
                 free(hex.data);
+            }
             com_err(me, errcode, "Failed to convert the password to hex");
+            memset(passwd, 0, passwd_len);
             goto cleanup;
         }
         /* Password = {CRYPT}<encrypted password>:<encrypted key> */
@@ -1754,6 +1757,7 @@ kdb5_ldap_set_service_password(argc, argv)
         if (encrypted_passwd.value == NULL) {
             com_err(me, ENOMEM, "while setting service object password");
             memset(passwd, 0, passwd_len);
+            memset(hex.data, 0, hex.length);
             free(hex.data);
             goto cleanup;
         }
@@ -1761,6 +1765,8 @@ kdb5_ldap_set_service_password(argc, argv)
 			       1 + 5 + hex.length + 1] = '\0';
         sprintf((char *)encrypted_passwd.value, "%s#{HEX}%s\n", service_object, hex.data);
         encrypted_passwd.len = strlen((char *)encrypted_passwd.value);
+        memset(hex.data, 0, hex.length);
+        free(hex.data);
     }
 
     /* We should check if the file exists and we have permission to write into that file */
@@ -1912,8 +1918,10 @@ cleanup:
     if (passwd)
         free(passwd);
 
-    if (encrypted_passwd.value)
+    if (encrypted_passwd.value) {
+        memset(encrypted_passwd.value, 0, encrypted_passwd.len);
         free(encrypted_passwd.value);
+    }
 
     if (pfile)
         fclose(pfile);
@@ -1949,6 +1957,7 @@ kdb5_ldap_stash_service_password(argc, argv)
     FILE *pfile = NULL;
     krb5_boolean print_usage = FALSE;
     krb5_data hexpasswd = {0, 0, NULL};
+    mode_t old_mode = 0;
 
     /*
      * Format:
@@ -2047,16 +2056,17 @@ done:
 
 	ret = tohex(pwd, &hexpasswd);
 	if(ret != 0){
-	    if(hexpasswd.length != 0)
-		free(hexpasswd.data);
 	    com_err(me, ret, "Failed to convert the password to hexadecimal");
+            memset(passwd, 0, passwd_len);
 	    goto cleanup;
 	}
     }
+    memset(passwd, 0, passwd_len);
 
     /* TODO: file lock for the service passowrd file */
 
     /* set password in the file */
+    old_mode = umask(0177);
     pfile = fopen(file_name, "a+");
     if (pfile == NULL) {
 	com_err(me, errno, "Failed to open file %s: %s", file_name,
@@ -2064,6 +2074,7 @@ done:
 	goto cleanup;
     }
     rewind (pfile);
+    umask(old_mode);
 
     while (fgets (line, MAX_LEN, pfile) != NULL) {
 	if ((str = strstr (line, service_object)) != NULL) {
@@ -2161,6 +2172,11 @@ done:
     ret = 0;
 
 cleanup:
+
+    if(hexpasswd.length != 0) {
+        memset(hexpasswd.data, 0, hexpasswd.length);
+	free(hexpasswd.data);
+    }
 
     if (service_object)
 	free(service_object);

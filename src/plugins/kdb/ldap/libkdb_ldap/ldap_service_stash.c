@@ -136,6 +136,26 @@ krb5_ldap_readpassword(context, ldap_context, password)
 	    CT.len = strlen((char *)CT.value);
 	    st = dec_password(CT, &PT);
 	    if(st != 0){
+                switch (st) {
+                    case ERR_NO_MEM:
+                        st = ENOMEM;
+                        break;
+                    case ERR_PWD_ZERO:
+                        st = EINVAL;
+                        krb5_set_error_message(context, st, "Password has zero length");
+                        break;
+                    case ERR_PWD_BAD:
+                        st = EINVAL;
+                        krb5_set_error_message(context, st, "Password corrupted");
+                        break;
+                    case ERR_PWD_NOT_HEX:
+                        st = EINVAL;
+                        krb5_set_error_message(context, st, "Not a hexadecimal password");
+                        break;
+                    default:
+	                st = KRB5_KDB_SERVER_INTERNAL_ERR;
+                        break;
+                }
 		goto rp_exit;
 	    }
 	    *password = PT.value;
@@ -192,6 +212,11 @@ tohex(in, ret)
  *   <secret> := {HEX}<password in hexadecimal>
  *
  * <password> is the actual eDirectory password of the service
+ * Return values:
+ * ERR_NO_MEM      - No Memory
+ * ERR_PWD_ZERO    - Password has zero length
+ * ERR_PWD_BAD     - Passowrd corrupted
+ * ERR_PWD_NOT_HEX - Not a hexadecimal password
  */
 
 int dec_password(struct data pwd, struct data *ret){
@@ -202,8 +227,7 @@ int dec_password(struct data pwd, struct data *ret){
     ret->value = NULL;
     
     if (pwd.len == 0) {
-	err = EINVAL;
-        krb5_set_error_message (0, err, "Password has zero length");
+        err = ERR_PWD_ZERO;
         ret->len = 0;
         goto cleanup;
     }
@@ -214,14 +238,13 @@ int dec_password(struct data pwd, struct data *ret){
 	
 	if((pwd.len - strlen("{HEX}")) % 2 != 0){
 	    /* A hexadecimal encoded password should have even length */
-	    err = EINVAL;
-	    krb5_set_error_message (0, err, "Password corrupted");
+            err = ERR_PWD_BAD;
 	    ret->len = 0;
 	    goto cleanup;
 	}
 	ret->value = (unsigned char *)malloc((pwd.len - strlen("{HEX}")) / 2 + 1);
 	if(ret->value == NULL){
-	    err = ENOMEM;
+	    err = ERR_NO_MEM;
 	    ret->len = 0;
 	    goto cleanup;
 	}
@@ -231,8 +254,7 @@ int dec_password(struct data pwd, struct data *ret){
 	    int k;
 	    /* Check if it is a hexadecimal number */
 	    if (isxdigit(pwd.value[i]) == 0 || isxdigit(pwd.value[i + 1]) == 0) {
-		err = EINVAL;
-                krb5_set_error_message (0, err, "Not a hexadecimal password");
+                err = ERR_PWD_NOT_HEX;
                 ret->len = 0;
                 goto cleanup;
 	    }
@@ -241,8 +263,7 @@ int dec_password(struct data pwd, struct data *ret){
 	}
 	goto cleanup;
     } else {
-	err = EINVAL;
-        krb5_set_error_message (0, err, "Not a hexadecimal password");
+        err = ERR_PWD_NOT_HEX;
         ret->len = 0;
         goto cleanup;
     }

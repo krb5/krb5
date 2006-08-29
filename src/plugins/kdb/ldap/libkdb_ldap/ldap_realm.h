@@ -68,7 +68,6 @@ typedef struct _krb5_ldap_realm_params {
   krb5_int32    defsalttype;
   krb5_enctype  *suppenctypes;
   krb5_int32    *suppsalttypes;
-  char          **ldapservers;
   char          **kdcservers;
   char          **adminservers;
   char          **passwdservers;
@@ -95,5 +94,11 @@ krb5_ldap_read_realm_params(krb5_context , char *, krb5_ldap_realm_params **, in
 
 void
 krb5_ldap_free_realm_params(krb5_ldap_realm_params *);
+
+krb5_error_code
+krb5_ldap_create_realm_1(krb5_context, char *, char **);
+
+krb5_error_code
+krb5_ldap_delete_realm_1(krb5_context, char *, char **);
 
 #endif

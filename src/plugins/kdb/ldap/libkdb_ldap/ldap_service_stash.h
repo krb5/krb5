@@ -37,6 +37,11 @@ struct data{
     unsigned char *value;
 };
 
+#define ERR_NO_MEM      1
+#define ERR_PWD_ZERO    2
+#define ERR_PWD_BAD     3
+#define ERR_PWD_NOT_HEX 4
+
 int 
 dec_password(struct data, struct data *);
 

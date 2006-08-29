@@ -205,10 +205,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
 	    if(attr_present == TRUE){
 		    if ((st=store_tl_data(&userinfo_tl_data, KDB_TL_TKTPOLICYDN, policydn)) != 0)
 			    goto cleanup;
-	    }
-	    if(!(mask & KDB_MAX_LIFE_ATTR) && !(mask & KDB_MAX_RLIFE_ATTR) && !(mask & KDB_TKT_FLAGS_ATTR)){
-		    if (attr_present == TRUE)
-			    mask |= KDB_POL_REF_ATTR;
+		    mask |= KDB_POL_REF_ATTR;
 	    }
 
 	    /* KRBPWDPOLICYREFERENCE */
@@ -1068,7 +1065,7 @@ krb5_read_tkt_policyreference(context, ldap_context, entries, policydn)
     if ((st=krb5_get_attributes_mask(context, entries, &mask)) != 0)
 	goto cleanup;
 
-    if ((mask & tkt_mask) != tkt_mask) {
+    if ((mask & tkt_mask) == 0) {
 	if (policydn != NULL) {
 	    st = krb5_ldap_read_policy(context, policydn, &tktpoldnparam, &omask);
 	    if (st && st != KRB5_KDB_NOENTRY) {

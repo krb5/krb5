@@ -161,7 +161,8 @@ krb5_ldap_initialize(ldap_context, server_info)
     if((ldap_server_handle->ldap_handle=ldap_init(server_info->server_name, 
 						  port)) == NULL) {
         st = KRB5_KDB_ACCESS_ERROR;
-        krb5_set_error_message (0, st, "%s", strerror(errno));
+        if (ldap_context->kcontext)
+            krb5_set_error_message (ldap_context->kcontext, st, "%s", strerror(errno));
 	goto err_out;
     }
     
@@ -170,7 +171,8 @@ krb5_ldap_initialize(ldap_context, server_info)
 	server_info->server_status = ON;
 	krb5_update_ldap_handle(ldap_server_handle, server_info);
     } else {
-        krb5_set_error_message (0, KRB5_KDB_ACCESS_ERROR, "%s",
+        if (ldap_context->kcontext)
+            krb5_set_error_message (ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR, "%s",
 				ldap_err2string(st));
         st = KRB5_KDB_ACCESS_ERROR;
 	server_info->server_status = OFF;

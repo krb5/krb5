@@ -427,91 +427,6 @@ void kdb5_ldap_create(argc, argv)
             mask |= LDAP_REALM_PASSWDSERVERS;
         }
 #endif
-        else if (!strcmp(argv[i], "-enctypes")) {
-            char *tlist[MAX_LIST_ENTRIES] = {NULL};
-
-            if (++i > argc-1)
-                goto err_usage;
-            rparams->suppenctypes = (krb5_enctype *)malloc(
-                            sizeof(krb5_enctype) * MAX_LIST_ENTRIES);
-            if (rparams->suppenctypes == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            memset(rparams->suppenctypes, 0, sizeof(krb5_enctype) * MAX_LIST_ENTRIES);
-            if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, tlist)) != 0) {
-                goto cleanup;
-            }
-            for(j = 0; tlist[j] != NULL; j++) {
-                if ((retval = krb5_string_to_enctype(tlist[j],
-                            &rparams->suppenctypes[j]))) {
-		    com_err(argv[0], retval, "Invalid encryption type '%s'",
-			    tlist[j]);
-                    krb5_free_list_entries(tlist);
-                    goto err_nomsg;
-                }
-            }
-            rparams->suppenctypes[j] = END_OF_LIST;
-            qsort(rparams->suppenctypes, (size_t)j, sizeof(krb5_enctype),
-                             compare_int);
-            mask |= LDAP_REALM_SUPPENCTYPE;
-            krb5_free_list_entries(tlist);
-        }
-        else if (!strcmp(argv[i], "-defenctype")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((retval = krb5_string_to_enctype(argv[i], 
-                            &rparams->defenctype))) {
-                com_err(argv[0], retval, "'%s' specified for defenctype, "
-                            "while creating realm '%s'", 
-                            argv[i], global_params.realm);
-                goto err_nomsg;
-            }
-            mask |= LDAP_REALM_DEFENCTYPE;
-        }
-        else if (!strcmp(argv[i], "-salttypes")) {
-            char *tlist[MAX_LIST_ENTRIES] = {NULL};
-
-            if (++i > argc-1)
-                goto err_usage;
-            rparams->suppsalttypes = (krb5_int32 *)malloc(
-                            sizeof(krb5_int32) * MAX_LIST_ENTRIES);
-            if (rparams->suppsalttypes == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            memset(rparams->suppsalttypes, 0, sizeof(krb5_int32) * MAX_LIST_ENTRIES);
-            if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, tlist))) {
-                goto cleanup;
-            }
-            for(j = 0; tlist[j] != NULL; j++) {
-                if ((retval = krb5_string_to_salttype(tlist[j],
-                            &rparams->suppsalttypes[j]))) {
-                    com_err(argv[0], retval, "'%s' specified for salttypes, "
-                            "while creating realm '%s'", 
-                            tlist[j], global_params.realm);
-                    krb5_free_list_entries(tlist);
-                    goto err_nomsg;
-                }
-            }
-            rparams->suppsalttypes[j] = END_OF_LIST;
-            qsort(rparams->suppsalttypes, (size_t)j, sizeof(krb5_int32), 
-                            compare_int);
-            mask |= LDAP_REALM_SUPPSALTTYPE;
-            krb5_free_list_entries(tlist);
-        }
-        else if (!strcmp(argv[i], "-defsalttype")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((retval = krb5_string_to_salttype(argv[i], 
-                            &rparams->defsalttype))) {
-                com_err(argv[0], retval, "'%s' specified for defsalttype, "
-                            "while creating realm '%s'", 
-                            argv[i], global_params.realm);
-                goto err_nomsg;
-            }
-            mask |= LDAP_REALM_DEFSALTTYPE;
-        }
         else if (!strcmp(argv[i], "-s")) {
             do_stash = 1;
         }
@@ -530,43 +445,6 @@ void kdb5_ldap_create(argc, argv)
      * default values and also add to the list of supported
      * enctypes/salttype
      */
-    if ( !(mask & LDAP_REALM_DEFENCTYPE) && (rparams != NULL)) {
-	rparams->defenctype = ENCTYPE_DES3_CBC_SHA1;
-	mask |= LDAP_REALM_DEFENCTYPE;
-	printf("Default enctype not specified: \"des3-cbc-sha1\" "
-		"will be added as the default enctype and to the "
-		"list of supported enctypes.\n");
-	
-	/* Now, add this to the list of supported enctypes. The 
-	 * duplicate values will be removed in DAL-LDAP
-	 */
-	if (mask & LDAP_REALM_SUPPENCTYPE) {
-	    for (i=0; rparams->suppenctypes[i] != END_OF_LIST; i++)
-                ;
-	    assert (i < END_OF_LIST - 1);
-	    rparams->suppenctypes[i] = ENCTYPE_DES3_CBC_SHA1;
-	    rparams->suppenctypes[i + 1] = END_OF_LIST;
-	}
-    }
-
-    if ( !(mask & LDAP_REALM_DEFSALTTYPE) && (rparams != NULL)) {
-	rparams->defsalttype = KRB5_KDB_SALTTYPE_NORMAL;
-	mask |= LDAP_REALM_DEFSALTTYPE;
-	printf("Default salttype not specified: \"normal\" will be "
-		"added as the default salttype and to the list of "
-		"supported salttypes.\n");
-	
-	/* Now, add this to the list of supported salttypes. The 
-	 * duplicate values will be removed in DAL-LDAP
-	 */
-	if (mask & LDAP_REALM_SUPPSALTTYPE) {
-	    for (i=0; rparams->suppsalttypes[i] != END_OF_LIST; i++)
-	        ;
-	    assert (i < END_OF_LIST - 1);
-	    rparams->suppsalttypes[i] = KRB5_KDB_SALTTYPE_NORMAL;
-	    rparams->suppsalttypes[i + 1] = END_OF_LIST;
-	}
-    }
 
     rblock.max_life = global_params.max_life;
     rblock.max_rlife = global_params.max_rlife;
@@ -761,7 +639,7 @@ void kdb5_ldap_create(argc, argv)
 
     /* Create special principals inside the realm subtree */
     {
-	char princ_name[MAX_PRINC_SIZE], localname[MAXHOSTNAMELEN];
+        char princ_name[MAX_PRINC_SIZE];
 	struct hostent *hp = NULL;
 	krb5_principal_data tgt_princ = {
 	    0,					/* magic number */
@@ -770,7 +648,7 @@ void kdb5_ldap_create(argc, argv)
 	    2,					/* int length */
 	    KRB5_NT_SRV_INST			/* int type */
 	};
-	krb5_principal p;
+	krb5_principal p, temp_p=NULL;
 
 	krb5_princ_set_realm_data(util_context, &tgt_princ, global_params.realm);
 	krb5_princ_set_realm_length(util_context, &tgt_princ, strlen(global_params.realm));
@@ -842,31 +720,32 @@ void kdb5_ldap_create(argc, argv)
 	krb5_free_principal(util_context, p);
 
 	/* Create 'kadmin/<hostname>' ... */
-	if (gethostname(localname, sizeof(localname))) {
-	    retval = errno;
-	    com_err(argv[0], retval, "gethostname, while adding entries to the database");
-	    goto err_nomsg;
+	if ((retval=krb5_sname_to_principal(util_context, NULL, "kadmin", KRB5_NT_SRV_HST, &p))) {
+            com_err(argv[0], retval, "krb5_sname_to_principal, while adding entries to the database");
+            goto err_nomsg;
 	}
-	hp = gethostbyname(localname);
-	if (hp == NULL) {
-	    retval = errno;
-	    com_err(argv[0], retval, "gethostbyname, while adding entries to the database");
-	    goto err_nomsg;
+
+	if((retval=krb5_copy_principal(util_context, p, &temp_p))) {
+            com_err(argv[0], retval, "krb5_copy_principal, while adding entries to the database");
+            goto err_nomsg;
 	}
-	assert (sizeof(princ_name) >= strlen(hp->h_name) + strlen(global_params.realm) + 9);
-	/* snprintf(princ_name, MAXHOSTNAMELEN + 8, "kadmin/%s", hp->h_name); */
-	snprintf(princ_name, sizeof(princ_name), "kadmin/%s@%s", hp->h_name, global_params.realm);	
-	if ((retval = krb5_parse_name(util_context, princ_name, &p))) {
-	    com_err(argv[0], retval, "while adding entries to the database");
-	    goto err_nomsg;
+	
+	/* change the realm portion to the default realm */
+	free( temp_p->realm.data );
+	temp_p->realm.length = strlen( util_context->default_realm );
+	temp_p->realm.data = strdup( util_context->default_realm );
+	if( temp_p->realm.data == NULL ) {
+            com_err(argv[0], ENOMEM, "while adding entries to the database");
+            goto err_nomsg;
 	}
 
 	rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
-	if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
+	if ((retval = kdb_ldap_create_principal(util_context, temp_p, TGT_KEY, &rblock))) {
 	    krb5_free_principal(util_context, p);
 	    com_err(argv[0], retval, "while adding entries to the database");
 	    goto err_nomsg;
 	}
+	krb5_free_principal(util_context, temp_p);
 	krb5_free_principal(util_context, p);
 
 	if (ldap_context->lrparams->subtree != NULL)
@@ -1472,220 +1351,6 @@ void kdb5_ldap_modify(argc, argv)
             }
         }
 #endif
-        else if (!strcmp(argv[i], "-enctypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if (rmask & LDAP_REALM_SUPPENCTYPE)
-                free(rparams->suppenctypes);
-            rparams->suppenctypes = (krb5_enctype *)malloc(
-                            sizeof(krb5_enctype) * MAX_LIST_ENTRIES);
-            if (rparams->suppenctypes == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                goto cleanup;
-
-            for(j = 0; list[j] != NULL; j++) {
-                if ((retval = krb5_string_to_enctype(list[j], 
-                            &rparams->suppenctypes[j]))) {
-                    com_err(argv[0], retval, "'%s' specified for enctypes, "
-                            "while modifying information of realm '%s'", 
-                            list[j], global_params.realm);
-                    goto err_nomsg;
-                }
-            }
-            rparams->suppenctypes[j] = END_OF_LIST;
-            qsort(rparams->suppenctypes, (size_t)j, sizeof(krb5_enctype),
-                            compare_int);
-            mask |= LDAP_REALM_SUPPENCTYPE;
-            /* Going to replace the existing value by this new value. Hence
-             * setting flag indicating that add or clear options will be ignored
-             */
-            newenctypes = 1;
-            krb5_free_list_entries(list);
-        }
-        else if (!strcmp(argv[i], "-clearenctypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((!newenctypes) && (rparams->suppenctypes != NULL)) {
-
-                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                    goto cleanup;
-
-                memset(tlist, END_OF_LIST, sizeof(int) * MAX_LIST_ENTRIES);
-                for(j = 0; list[j] != NULL; j++) {
-                    if ((retval = krb5_string_to_enctype(list[j], &tlist[j]))) {
-                        com_err(argv[0], retval, "'%s' specified for clearenctypes, "
-                            "while modifying information of realm '%s'", 
-                            list[j], global_params.realm);
-                        goto err_nomsg;
-                    }
-                }
-                tlist[j] = END_OF_LIST;
-                j = list_modify_int_array(rparams->suppenctypes, (const int*)tlist,
-                    LIST_MODE_DELETE);
-                qsort(rparams->suppenctypes, (size_t)j, sizeof(krb5_enctype),
-                            compare_int);
-                mask |= LDAP_REALM_SUPPENCTYPE;
-                krb5_free_list_entries(list);
-            }
-        }
-        else if (!strcmp(argv[i], "-addenctypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if (!newenctypes) {
-		int *tmp;
-
-                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                    goto cleanup;
-
-                existing_entries = list_count_int_array(rparams->suppenctypes);
-                list_entries = list_count_str_array(list);
-
-		tmp = (krb5_enctype *) realloc (rparams->suppenctypes, 
-			sizeof(krb5_enctype) * (existing_entries+list_entries+1));
-		if (tmp == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
-		rparams->suppenctypes = tmp;
-
-                for(j = 0; list[j] != NULL; j++) {
-                    if ((retval = krb5_string_to_enctype(list[j], &tlist[j]))) {
-                        com_err(argv[0], retval, "'%s' specified for addenctypes, "
-                            "while modifying information of realm '%s'", 
-                            list[j], global_params.realm);
-                        goto err_nomsg;
-                    }
-                }
-                tlist[j] = END_OF_LIST;
-
-                j = list_modify_int_array(rparams->suppenctypes, (const int*)tlist,
-                    LIST_MODE_ADD);
-                qsort(rparams->suppenctypes, (size_t)j, sizeof(krb5_enctype),
-                            compare_int);
-                mask |= LDAP_REALM_SUPPENCTYPE;
-                krb5_free_list_entries(list);
-            }
-        }
-        else if (!strcmp(argv[i], "-defenctype")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((retval = krb5_string_to_enctype(argv[i], 
-                            &rparams->defenctype))) {
-                com_err(argv[0], retval, "'%s' specified for defenctype, "
-                            "while modifying information of realm '%s'", 
-                            argv[i], global_params.realm);
-                goto err_nomsg;
-            }
-            mask |= LDAP_REALM_DEFENCTYPE;
-        }
-        else if (!strcmp(argv[i], "-salttypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if (rmask & LDAP_REALM_SUPPSALTTYPE)
-                free(rparams->suppsalttypes);
-            rparams->suppsalttypes = (krb5_int32 *)malloc(
-                            sizeof(krb5_int32) * MAX_LIST_ENTRIES);
-            if (rparams->suppsalttypes == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                goto cleanup;
-
-            for(j = 0; list[j] != NULL; j++) {
-                if ((retval = krb5_string_to_salttype(list[j], 
-                            &rparams->suppsalttypes[j]))) {
-                    com_err(argv[0], retval, "'%s' specified for salttypes, "
-                            "while modifying information of realm '%s'", 
-                            list[j], global_params.realm);
-                    goto err_nomsg;
-                }
-            }
-            rparams->suppsalttypes[j] = END_OF_LIST;
-            qsort(rparams->suppsalttypes, (size_t)j, sizeof(krb5_int32),
-                            compare_int);
-            mask |= LDAP_REALM_SUPPSALTTYPE;
-            /* Going to replace the existing value by this new value. Hence
-             * setting flag indicating that add or clear options will be ignored
-             */
-            newsalttypes = 1;
-            krb5_free_list_entries(list);
-        }
-        else if (!strcmp(argv[i], "-clearsalttypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((!newsalttypes) && (rparams->suppsalttypes != NULL)) {
-                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                    goto cleanup;
-
-                for(j = 0; list[j] != NULL; j++) {
-                    if ((retval = krb5_string_to_salttype(list[j], &tlist[j]))) {
-                        com_err(argv[0], retval, "'%s' specified for clearsalttypes, "
-                            "while modifying information of realm '%s'", 
-                            list[j], global_params.realm);
-                        goto err_nomsg;
-                    }
-                }
-                tlist[j] = END_OF_LIST;
-                j = list_modify_int_array(rparams->suppsalttypes, (const int*)tlist,
-                    LIST_MODE_DELETE);
-                qsort(rparams->suppsalttypes, (size_t)j, sizeof(krb5_int32),
-                            compare_int);
-                mask |= LDAP_REALM_SUPPSALTTYPE;
-                krb5_free_list_entries(list);
-            }
-        }
-        else if (!strcmp(argv[i], "-addsalttypes")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if (!newsalttypes) {
-		int *tmp;
-                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
-                    goto cleanup;
-
-                existing_entries = list_count_int_array(rparams->suppsalttypes);
-                list_entries = list_count_str_array(list);
-
-		tmp = (krb5_int32 *) realloc (rparams->suppsalttypes,
-			sizeof(krb5_int32) * (existing_entries+list_entries+1));
-		if (tmp == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
-		rparams->suppsalttypes = tmp;
-
-                for(j = 0; list[j] != NULL; j++) {
-                    if ((retval = krb5_string_to_salttype(list[j], &tlist[j]))) {
-                        com_err(argv[0], retval, "'%s' specified for addsalttypes, "
-                            "while modifying information of realm '%s'",
-                            list[j], global_params.realm);
-                        goto err_nomsg;
-                    }
-                }
-                tlist[j] = END_OF_LIST;
-                j = list_modify_int_array(rparams->suppsalttypes, (const int*)tlist,
-                    LIST_MODE_ADD);
-                qsort(rparams->suppsalttypes, (size_t)j, sizeof(krb5_int32),
-                            compare_int);
-                mask |= LDAP_REALM_SUPPSALTTYPE;
-                krb5_free_list_entries(list);
-            }
-        }
-        else if (!strcmp(argv[i], "-defsalttype")) {
-            if (++i > argc-1)
-                goto err_usage;
-            if ((retval = krb5_string_to_salttype(argv[i], 
-                            &rparams->defsalttype))) {
-                com_err(argv[0], retval, "'%s' specified for defsalttype, "
-                            "while modifying information of realm '%s'", 
-                            argv[i], global_params.realm);
-                goto err_nomsg;
-            }
-            mask |= LDAP_REALM_DEFSALTTYPE;
-        }
 	else if ((ret_mask= get_ticket_policy(rparams,&i,argv,argc)) !=0)
 	{
 		mask|=ret_mask;
@@ -2169,50 +1834,6 @@ static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
         if (num_entry_printed == 0)
             printf("\n");
     }
-    if (mask & LDAP_REALM_SUPPENCTYPE) {
-        printf("%25s:", "Supported Enc Types");
-        if (rparams->suppenctypes != NULL) {
-            num_entry_printed = 0;
-            for(tmplist = rparams->suppenctypes; *tmplist != END_OF_LIST;
-                 tmplist++) {
-                retval = krb5_enctype_to_string(*tmplist, buff, BUFF_LEN);
-                if (retval == 0) {
-                    if (num_entry_printed)
-                        printf(" %25s %-50s\n", " ", buff);
-                    else
-                        printf(" %-50s\n", buff);
-                    num_entry_printed++;
-                }
-            }
-        }
-        if (num_entry_printed == 0)
-            printf("\n");
-    }
-    if (mask & LDAP_REALM_DEFENCTYPE) {
-        retval = krb5_enctype_to_string(rparams->defenctype, buff, BUFF_LEN);
-        if (retval == 0) {
-            printf("%25s: %-50s\n", "Default Enc Type", buff);
-        }
-    }
-    if (mask & LDAP_REALM_SUPPSALTTYPE) {
-        printf("%25s:", "Supported Salt Types");
-        if (rparams->suppsalttypes != NULL) {
-            num_entry_printed = 0;
-            for(tmplist = rparams->suppsalttypes; *tmplist != END_OF_LIST;
-                 tmplist++) {
-                retval = krb5_salttype_to_string(*tmplist, buff, BUFF_LEN);
-                if (retval == 0) {
-                    if (num_entry_printed)
-                        printf(" %25s %-50s\n", " ", buff);
-                    else
-                        printf(" %-50s\n", buff);
-                    num_entry_printed++;
-                }
-            }
-        }
-        if (num_entry_printed == 0)
-            printf("\n");
-    }
     if (mask & LDAP_REALM_MAXTICKETLIFE) {
 	    printf("%25s:", "Maximum Ticket Life");
 	    printf(" %s \n", strdur(rparams->max_life));
@@ -2222,10 +1843,11 @@ static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
 	    printf("%25s:", "Maximum Renewable Life");
 	    printf(" %s \n", strdur(rparams->max_renewable_life));
     }
-    printf("%25s: ", "Ticket flags");
-    if (mask & LDAP_POLICY_TKTFLAGS) {
+
+    if (mask & LDAP_REALM_KRBTICKETFLAGS) {
         int ticketflags = rparams->tktflags;
 
+        printf("%25s: ", "Ticket flags");
         if (ticketflags & KRB5_KDB_DISALLOW_POSTDATED)
             printf("%s ","DISALLOW_POSTDATED");
 
@@ -2261,16 +1883,9 @@ static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
 
         if (ticketflags & KRB5_KDB_PWCHANGE_SERVICE)
             printf("%s ","PWCHANGE_SERVICE");
-    }
 
-    if (mask & LDAP_REALM_DEFSALTTYPE) {
-	    retval = krb5_salttype_to_string(rparams->defsalttype, buff, BUFF_LEN);
-	    if (retval == 0) {
-		    printf("\n%25s: %-50s\n", "Default Salt Type", buff);
-	    }
+        printf("\n");
     }
-    /* if (mask & LDAP_REALM_POLICYREFERENCE)
-        printf("%25s: %-50s\n", "Policy Reference", rparams->policyreference);*/
 
 
     return;

@@ -29,7 +29,7 @@ a Kerberos realm.
 Specifies the SSL port number of the LDAP server.
 .SH COMMANDS
 .TP
-\fBcreate\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-enctypes\fP\ \fIsupported_enc_types\fP] [\fB\-defenctype\fP\ \fIdefault_enc_type\fP] [\fB\-salttypes\fP\ \fIsupported_salt_types\fP] [\fB\-defsalttype\fP\ \fIdefault_salt_type\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBcreate\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 Creates realm in directory. Options:
 .RS
 .TP
@@ -40,18 +40,6 @@ Specifies the subtree where principals and other Kerberos objects in the realm a
 Specifies the scope for searching the principals under the 
 .IR subtree .
 The possible values are 1 or one (one level), 2 or sub (subtree).
-.TP
-\fB\-enctypes\fP\ \fIsupported_enc_types\fP
-Specifies the encryption types supported by the realm. This is a colon-separated list.
-.TP
-\fB\-defenctype\fP\ \fIdefault_enc_type\fP
-Specifies the default encryption type for the realm. This is also a part of supported enctypes list.
-.TP
-\fB\-salttypes\fP\ \fIsupported_salt_types\fP
-Specifies the salt types supported by the realm. This is a colon-separated list.
-.TP
-\fB\-defsalttype\fP\ \fIdefault_salt_type\fP
-Specifies the default salt types for the realm.
 .TP
 \fB\-k\fP\ \fImkeytype\fP
 Specifies the key type of the master key in the database; the default is
@@ -235,7 +223,7 @@ Re-enter KDC database master key to verify:
 .RE
 
 .TP
-\fBmodify\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-enctypes\fP\ \fIsupported_enc_types\fP | [\fB\-clearenctypes\fP\ \fIenc_type_list\fP] [\fB\-addenctypes\fP\ \fIenc_type_list\fP]] [\fB\-defenctype\fP\ \fIdefault_enc_type\fP] [\fB\-salttypes\fP\ \fIsupported_salt_types\fP | [\fB\-clearsalttypes\fP\ \fIsalt_type_list\fP] [\fB\-addsalttypes\fP\ \fIsalt_type_list\fP]] [\fB\-defsalttype\fP\ \fIdefault_salt_type\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP | [\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP] [\fB\-addpwddn\fP\ \fIpasswd_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBmodify\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP | [\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP] [\fB\-addpwddn\fP\ \fIpasswd_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 
 Modifies the attributes of a realm. Options:
 .RS
@@ -247,34 +235,6 @@ Specifies the subtree containing principals and other Kerberos objects in the re
 Specifies the scope for searching the principals under the 
 .IR subtree .
 The possible values are 1 or one (one level), 2 or sub (subtree).
-.TP
-\fB\-enctypes\fP\ \fIsupported_enc_types\fP
-Specifies the encryption types supported by the realm. This is a colon-separated list.
-.TP
-\fB\-clearenctypes\fP\ \fIenc_type_list\fP
-Specifies the encryption types that need to be removed from the supported encryption types 
-of the realm. This is a colon-separated list.
-.TP
-\fB\-addenctypes\fP\ \fIenc_type_list\fP
-Specifies the encryption types that need to be added to the supported encryption types of the
-realm. This is a colon-separated list.
-.TP
-\fB\-defenctype\fP\ \fIdefault_enc_type\fP
-Specifies the default encryption type for the realm.
-.TP
-\fB\-salttypes\fP\ \fIsupported_salt_types\fP
-Specifies the salt types supported by the realm. This is a colon-separated list.
-.TP
-\fB\-clearsalttypes\fP\ \fIsalt_type_list\fP
-Specifies the salt types that need to be removed from the supported salt types of the realm.
-This is a colon-separated list.
-.TP
-\fB\-addsalttypes\fP\ \fIsalt_type_list\fP
-Specifies the salt types that need to be added to the supported salt types of the realm. This
-is a colon-separated list.
-.TP
-\fB\-defsalttype\fP\ \fIdefault_salt_type\fP
-Specifies the default salt type for the realm.
 .TP
 \fB\-maxtktlife\fP\ \fImax_ticket_life\fP
 Specifies maximum ticket life for principals in this realm.
@@ -476,14 +436,6 @@ Password for "cn=admin,o=org":
                Realm Name: ATHENA.MIT.EDU
                   Subtree: ou=users,o=org
               SearchScope: ONE
-      Supported Enc Types: DES cbc mode with RSA-MD5
-                           Triple DES cbc mode with HMAC/sha1
-         Default Enc Type: Triple DES cbc mode with HMAC/sha1
-     Supported Salt Types: Version 5
-                           Version 4
-                           Special
-                           AFS version 3
-        Default Salt Type: Version 5
       Maximum ticket life: 0 days 01:00:00
    Maximum renewable life: 0 days 10:00:00
              Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE

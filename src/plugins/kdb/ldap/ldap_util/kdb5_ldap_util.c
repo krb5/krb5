@@ -107,7 +107,7 @@ krb5_boolean manual_mkey = FALSE;
 void usage()
 {
      fprintf(stderr, "Usage: "
-"kdb5_util [-D user_dn [-w passwd]] [-h ldap_server] [-p ldap_port]\n"
+"kdb5_ldap_util [-D user_dn [-w passwd]] [-h ldap_server] [-p ldap_port]\n"
 "\tcmd [cmd_options]\n"
 
 /* Create realm */
@@ -116,8 +116,6 @@ void usage()
 "\t\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
 "\t\t[-pwddn passwd_service_list]\n"
 #endif
-"\t\t[-enctypes supported_enc_types] [-defenctype default_enc_type]\n"
-"\t\t[-salttypes supported_salt_types] [-defsalttype default_salt_type]\n"
 "\t\t[-m|-P password|-sf stashfilename] [-k mkeytype]\n"
 "\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
 "\t\t[ticket_flags] [-r realm]\n"
@@ -131,10 +129,6 @@ void usage()
 "\t\t[-addadmindn admin_service_list]] [-pwddn passwd_service_list |\n"
 "\t\t[-clearpwddn passwd_service_list] [-addpwddn passwd_service_list]]\n"
 #endif
-"\t\t[-enctypes supported_enc_types | [-clearenctypes enc_type_list]\n"
-"\t\t[-addenctypes enc_type_list]] [-defenctype default_enc_type]\n"
-"\t\t[-salttypes supported_salt_types | [-clearsalttypes salt_type_list]\n"
-"\t\t[-addsalttypes salt_type_list]] [-defsalttype default_salt_type]\n"
 "\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
 "\t\t[ticket_flags] [-r realm]\n"
 /* View realm */
@@ -507,6 +501,8 @@ int main(argc, argv)
 	exit_status++;
 	goto cleanup;
     }
+
+    ldap_context->kcontext = util_context;
 
     /* If LDAP parameters are specified, replace them with the values from config */
     if (ldapmask & CMD_LDAP_D) {

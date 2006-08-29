@@ -236,6 +236,7 @@ krb5_error_code krb5_ldap_open( krb5_context context,
 	goto clean_n_exit;
     }
     
+    ldap_context->kcontext = context;
 
     while ( t_ptr && *t_ptr )
     {
