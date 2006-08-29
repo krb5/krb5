@@ -1654,7 +1654,7 @@ krb5_ldap_free_realm_params(rparams)
 krb5_error_code
 krb5_ldap_create_realm_1(krb5_context kcontext, char *conf_section, char **db_args)
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1662,7 +1662,7 @@ krb5_ldap_create_realm_1(krb5_context kcontext, char *conf_section, char **db_ar
 krb5_error_code
 krb5_ldap_delete_realm_1(krb5_context kcontext, char *conf_section, char **db_args)
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }

@@ -1473,7 +1473,7 @@ krb5_add_int_mem_ldap_mod(mods, attribute, op, value)
 krb5_error_code
 krb5_ldap_set_option( krb5_context kcontext, int option, void *value )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1481,7 +1481,7 @@ krb5_ldap_set_option( krb5_context kcontext, int option, void *value )
 krb5_error_code
 krb5_ldap_lock( krb5_context kcontext, int mode )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1489,7 +1489,7 @@ krb5_ldap_lock( krb5_context kcontext, int mode )
 krb5_error_code
 krb5_ldap_unlock( krb5_context kcontext )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1497,7 +1497,7 @@ krb5_ldap_unlock( krb5_context kcontext )
 krb5_error_code
 krb5_ldap_supported_realms( krb5_context kcontext, char **realms )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1505,7 +1505,7 @@ krb5_ldap_supported_realms( krb5_context kcontext, char **realms )
 krb5_error_code
 krb5_ldap_free_supported_realms( krb5_context kcontext, char **realms )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
@@ -1513,7 +1513,7 @@ krb5_ldap_free_supported_realms( krb5_context kcontext, char **realms )
 krb5_error_code
 krb5_ldap_errcode_2_string( krb5_context kcontext, long err_code )
 {
-    krb5_error_code status = KRB5_KDB_PLUGIN_OP_NOTSUPP;
+    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
     krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
     return status;
 }
