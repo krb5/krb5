@@ -36,133 +36,133 @@
  *  OP_ABANDON => ldap_abandon
  */
 
-int translate_ldap_error(int err, int op){
+int translate_ldap_error(int err, int op) {
 
     switch (err) {
-	case LDAP_SUCCESS:
-	    return 0;
+    case LDAP_SUCCESS:
+	return 0;
 
-	case LDAP_OPERATIONS_ERROR:
-	    /* LDAP_OPERATIONS_ERROR: Indicates an internal error. The server is
-	     * unable to respond with a more specific error and is also unable
-	     * to properly respond to a request */
-	case LDAP_UNAVAILABLE_CRITICAL_EXTENSION:
-	    /* LDAP server was unable to satisfy a request because one or more
-	     * critical extensions were not available */
+    case LDAP_OPERATIONS_ERROR:
+	/* LDAP_OPERATIONS_ERROR: Indicates an internal error. The server is
+	 * unable to respond with a more specific error and is also unable
+	 * to properly respond to a request */
+    case LDAP_UNAVAILABLE_CRITICAL_EXTENSION:
+	/* LDAP server was unable to satisfy a request because one or more
+	 * critical extensions were not available */
 	/* This might mean that the schema was not extended ... */
-	case LDAP_UNDEFINED_TYPE:
-	    /* The attribute specified in the modify or add operation does not
-	     * exist in the LDAP server's schema. */
-	    return KRB5_KDB_INTERNAL_ERROR;
+    case LDAP_UNDEFINED_TYPE:
+	/* The attribute specified in the modify or add operation does not
+	 * exist in the LDAP server's schema. */
+	return KRB5_KDB_INTERNAL_ERROR;
 
 
-	case LDAP_INAPPROPRIATE_MATCHING:
-	    /* The matching rule specified in the search filter does not match a
-	     * rule defined for the attribute's syntax */
-	    return KRB5_KDB_UK_RERROR;
+    case LDAP_INAPPROPRIATE_MATCHING:
+	/* The matching rule specified in the search filter does not match a
+	 * rule defined for the attribute's syntax */
+	return KRB5_KDB_UK_RERROR;
 
-	case LDAP_CONSTRAINT_VIOLATION:
-	    /* The attribute value specified in a modify, add, or modify DN
-	     * operation violates constraints placed on the attribute */
-	case LDAP_TYPE_OR_VALUE_EXISTS:
-	    /* The attribute value specified in a modify or add operation
-	     * already exists as a value for that attribute */
+    case LDAP_CONSTRAINT_VIOLATION:
+	/* The attribute value specified in a modify, add, or modify DN
+	 * operation violates constraints placed on the attribute */
+    case LDAP_TYPE_OR_VALUE_EXISTS:
+	/* The attribute value specified in a modify or add operation
+	 * already exists as a value for that attribute */
+	return KRB5_KDB_UK_SERROR;
+
+    case LDAP_INVALID_SYNTAX:
+	/* The attribute value specified in an add, compare, or modify
+	 * operation is an unrecognized or invalid syntax for the attribute */
+	if (op == OP_ADD || op == OP_MOD)
 	    return KRB5_KDB_UK_SERROR;
-
-	case LDAP_INVALID_SYNTAX:
-	    /* The attribute value specified in an add, compare, or modify
-	     * operation is an unrecognized or invalid syntax for the attribute */
-	    if (op == OP_ADD || op == OP_MOD)
-		return KRB5_KDB_UK_SERROR;
-	    else /* OP_CMP */
-		return KRB5_KDB_UK_RERROR;
+	else /* OP_CMP */
+	    return KRB5_KDB_UK_RERROR;
 
 	/* Ensure that the following don't occur in the DAL-LDAP code.
 	 * Don't rely on the LDAP server to catch it */
-	case LDAP_SASL_BIND_IN_PROGRESS:
-	    /* This is not an error. So, this function should not be called */
-	case LDAP_COMPARE_FALSE:
-	case LDAP_COMPARE_TRUE:
-	    /* LDAP_COMPARE_FALSE and LDAP_COMPARE_TRUE are not errors. This
-	     * function should not be invoked for them */
-	case LDAP_RESULTS_TOO_LARGE: /* CLDAP */
-	case LDAP_TIMELIMIT_EXCEEDED:
-	case LDAP_SIZELIMIT_EXCEEDED:
-	    return KRB5_KDB_SERVER_INTERNAL_ERR;
+    case LDAP_SASL_BIND_IN_PROGRESS:
+	/* This is not an error. So, this function should not be called */
+    case LDAP_COMPARE_FALSE:
+    case LDAP_COMPARE_TRUE:
+	/* LDAP_COMPARE_FALSE and LDAP_COMPARE_TRUE are not errors. This
+	 * function should not be invoked for them */
+    case LDAP_RESULTS_TOO_LARGE: /* CLDAP */
+    case LDAP_TIMELIMIT_EXCEEDED:
+    case LDAP_SIZELIMIT_EXCEEDED:
+	return KRB5_KDB_SERVER_INTERNAL_ERR;
 
-	case LDAP_INVALID_DN_SYNTAX:
-	    /* The syntax of the DN is incorrect */
-	    return EINVAL;
+    case LDAP_INVALID_DN_SYNTAX:
+	/* The syntax of the DN is incorrect */
+	return EINVAL;
 
-	case LDAP_PROTOCOL_ERROR:
-	    /* LDAP_PROTOCOL_ERROR: Indicates that the server has received an
-	     * invalid or malformed request from the client */
-	case LDAP_CONFIDENTIALITY_REQUIRED:
+    case LDAP_PROTOCOL_ERROR:
+	/* LDAP_PROTOCOL_ERROR: Indicates that the server has received an
+	 * invalid or malformed request from the client */
+    case LDAP_CONFIDENTIALITY_REQUIRED:
 
 	/* Bind problems ... */
-	case LDAP_AUTH_METHOD_NOT_SUPPORTED:
-//	case LDAP_STRONG_AUTH_NOT_SUPPORTED: // Is this a bind error ?
-	case LDAP_INAPPROPRIATE_AUTH:
-	case LDAP_INVALID_CREDENTIALS:
-	case LDAP_UNAVAILABLE:
+    case LDAP_AUTH_METHOD_NOT_SUPPORTED:
+/*	case LDAP_STRONG_AUTH_NOT_SUPPORTED: // Is this a bind error ? */
+    case LDAP_INAPPROPRIATE_AUTH:
+    case LDAP_INVALID_CREDENTIALS:
+    case LDAP_UNAVAILABLE:
+	return KRB5_KDB_ACCESS_ERROR;
+
+    case LDAP_STRONG_AUTH_REQUIRED:
+	if (op == OP_BIND) /* the LDAP server accepts only strong authentication. */
 	    return KRB5_KDB_ACCESS_ERROR;
+	else /* Client requested an operation such that requires strong authentication */
+	    return KRB5_KDB_CONSTRAINT_VIOLATION;
 
-	case LDAP_STRONG_AUTH_REQUIRED:
-	    if (op == OP_BIND) /* the LDAP server accepts only strong authentication. */
-		return KRB5_KDB_ACCESS_ERROR;
-	    else /* Client requested an operation such that requires strong authentication */
-		return KRB5_KDB_CONSTRAINT_VIOLATION;
+    case LDAP_REFERRAL:
+	return KRB5_KDB_NOENTRY;
 
-	case LDAP_REFERRAL:
+    case LDAP_ADMINLIMIT_EXCEEDED:
+	/* An LDAP server limit set by an administrative authority has been
+	 * exceeded */
+	return KRB5_KDB_CONSTRAINT_VIOLATION;
+    case LDAP_UNWILLING_TO_PERFORM:
+	/* The LDAP server cannot process the request because of
+	 * server-defined restrictions */
+	return KRB5_KDB_CONSTRAINT_VIOLATION;
+
+
+    case LDAP_NO_SUCH_ATTRIBUTE:
+	/* Indicates that the attribute specified in the modify or compare
+	 * operation does not exist in the entry */
+	if (op == OP_MOD)
+	    return KRB5_KDB_UK_SERROR;
+	else /* OP_CMP */
+	    return KRB5_KDB_TRUNCATED_RECORD;
+
+
+    case LDAP_ALIAS_DEREF_PROBLEM:
+	/* Either the client does not have access rights to read the aliased
+	 * object's name or dereferencing is not allowed */
+    case LDAP_PROXY_AUTHZ_FAILURE: // Is this correct ?
+    case LDAP_INSUFFICIENT_ACCESS:
+	/* Caller does not have sufficient rights to perform the requested
+	 * operation */
+	return KRB5_KDB_UNAUTH;
+
+    case LDAP_LOOP_DETECT:
+	/* Client discovered an alias or referral loop */
+	return KRB5_KDB_DB_CORRUPT;
+
+    default:
+
+	if (LDAP_NAME_ERROR (err))
 	    return KRB5_KDB_NOENTRY;
 
-	case LDAP_ADMINLIMIT_EXCEEDED:
-	    /* An LDAP server limit set by an administrative authority has been
-	     * exceeded */
-	    return KRB5_KDB_CONSTRAINT_VIOLATION;
-	case LDAP_UNWILLING_TO_PERFORM:
-	    /* The LDAP server cannot process the request because of
-	     * server-defined restrictions */
-	    return KRB5_KDB_CONSTRAINT_VIOLATION;
-
-
-	case LDAP_NO_SUCH_ATTRIBUTE:
-	    /* Indicates that the attribute specified in the modify or compare
-	     * operation does not exist in the entry */
-	    if (op == OP_MOD)
-		return KRB5_KDB_UK_SERROR;
-	    else /* OP_CMP */
-		return KRB5_KDB_TRUNCATED_RECORD;
-
-
-	case LDAP_ALIAS_DEREF_PROBLEM:
-	    /* Either the client does not have access rights to read the aliased
-	     * object's name or dereferencing is not allowed */
-	case LDAP_PROXY_AUTHZ_FAILURE: // Is this correct ?
-	case LDAP_INSUFFICIENT_ACCESS:
-	    /* Caller does not have sufficient rights to perform the requested
-	     * operation */
+	if (LDAP_SECURITY_ERROR (err))
 	    return KRB5_KDB_UNAUTH;
 
-	case LDAP_LOOP_DETECT:
-	    /* Client discovered an alias or referral loop */
-	    return KRB5_KDB_DB_CORRUPT;
+	if (LDAP_SERVICE_ERROR (err) || LDAP_API_ERROR (err) || LDAP_X_ERROR (err))
+	    return KRB5_KDB_ACCESS_ERROR;
 
-	default:
+	if (LDAP_UPDATE_ERROR(err))
+	    return KRB5_KDB_UK_SERROR;
 
-	    if (LDAP_NAME_ERROR (err))
-		return KRB5_KDB_NOENTRY;
-
-	    if (LDAP_SECURITY_ERROR (err))
-		return KRB5_KDB_UNAUTH;
-
-	    if (LDAP_SERVICE_ERROR (err) || LDAP_API_ERROR (err) || LDAP_X_ERROR (err))
-		return KRB5_KDB_ACCESS_ERROR;
-
-	    if (LDAP_UPDATE_ERROR(err))
-		return KRB5_KDB_UK_SERROR;
-
-	    /* LDAP_OTHER */
-	    return KRB5_KDB_SERVER_INTERNAL_ERR;
+	/* LDAP_OTHER */
+	return KRB5_KDB_SERVER_INTERNAL_ERR;
     }
 }

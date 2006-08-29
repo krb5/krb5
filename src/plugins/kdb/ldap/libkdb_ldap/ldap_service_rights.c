@@ -222,7 +222,7 @@ static char *adminrights_realmcontainer[][2]={
     {"6#subtree#","#DetectIntruder"},
     {"6#subtree#","#LockoutAfterDetection"},
     {"2#subtree#","#LockedByIntruder"},
-    {"6#subtree#","#Surname"}, 
+    {"6#subtree#","#Surname"},
     {"6#subtree#","#krbPwdHistoryLength"},
     {"6#subtree#","#krbMinPwdLife"},
     {"6#subtree#","#krbMaxPwdLife"},
@@ -280,20 +280,20 @@ static char *kerberos_container[][2] = {
 };
 
 
-/* 
+/*
  * This will set the rights for the Kerberos service objects.
  * The function will read the subtree attribute from the specified
  * realm name and will the appropriate rights on both the realm
- * container and the subtree. The kerberos context passed should 
+ * container and the subtree. The kerberos context passed should
  * have a valid ldap handle, with appropriate rights to write acl
- * attributes. 
- * 
+ * attributes.
+ *
  * krb5_context - IN The Kerberos context with valid ldap handle
  *
  */
 
-krb5_error_code 
-krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
+krb5_error_code
+krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
     krb5_context	context;
     int                 servicetype;
     char                *serviceobjdn;
@@ -301,7 +301,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
     char                *subtreeparam;
     int                 mask;
 {
-    
+
     int                    st=0,i=0;
     char                   *realmacls[2]={NULL}, *subtreeacls[2]={NULL}, *seccontacls[2]={NULL}, *krbcontacls[2]={NULL};
     LDAP                   *ld;
@@ -311,43 +311,43 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context      *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    
+
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    if ((serviceobjdn == NULL) || (realmname == NULL) || (servicetype < 0) || (servicetype > 4) 
-        || (ldap_context->krbcontainer->DN == NULL) ) {
+    if ((serviceobjdn == NULL) || (realmname == NULL) || (servicetype < 0) || (servicetype > 4)
+	|| (ldap_context->krbcontainer->DN == NULL)) {
 	st=-1;
 	goto cleanup;
     }
-    
+
     /* If the subtree is null, set the value to root */
-    if(subtreeparam== NULL)
+    if (subtreeparam== NULL)
 	subtree=strdup("");
     else
 	subtree=strdup(subtreeparam);
-    
-    if( subtree == NULL ) {
+
+    if (subtree == NULL) {
 	st = ENOMEM;
 	goto cleanup;
     }
-      
+
     /* Set the rights for the service object on the security container */
     seccontclass.mod_op = LDAP_MOD_ADD;
     seccontclass.mod_type = "ACL";
-    
+
     for (i=0; strcmp(security_container[i][0], "") != 0; i++) {
 
-	seccontacls[0] = (char *)malloc( strlen(security_container[i][0]) + 
-				       strlen(serviceobjdn) + 
-				       strlen(security_container[i][1]) + 1);
+	seccontacls[0] = (char *)malloc(strlen(security_container[i][0]) +
+					strlen(serviceobjdn) +
+					strlen(security_container[i][1]) + 1);
 
-	sprintf( seccontacls[0], "%s%s%s", security_container[i][0], serviceobjdn, 
-		 security_container[i][1]);
+	sprintf(seccontacls[0], "%s%s%s", security_container[i][0], serviceobjdn,
+		security_container[i][1]);
 	seccontclass.mod_values = seccontacls;
-	
+
 	seccontarr[0] = &seccontclass;
-	
+
 	st = ldap_modify_ext_s(ld,
 			       SECURITY_CONTAINER,
 			       seccontarr,
@@ -355,26 +355,26 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 			       NULL);
 	if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 	    free(seccontacls[0]);
-            st = set_ldap_error (context, st, OP_MOD);
+	    st = set_ldap_error (context, st, OP_MOD);
 	    goto cleanup;
 	}
 	free(seccontacls[0]);
     }
-    
+
 
     /* Set the rights for the service object on the kerberos container */
     krbcontclass.mod_op = LDAP_MOD_ADD;
     krbcontclass.mod_type = "ACL";
-    
+
     for (i=0; strcmp(kerberos_container[i][0], "") != 0; i++) {
-	krbcontacls[0] = (char *)malloc( strlen(kerberos_container[i][0]) + strlen(serviceobjdn) 
-				       + strlen(kerberos_container[i][1]) + 1);
-	sprintf(krbcontacls[0], "%s%s%s", kerberos_container[i][0], serviceobjdn, 
-		 kerberos_container[i][1]);
+	krbcontacls[0] = (char *)malloc(strlen(kerberos_container[i][0]) + strlen(serviceobjdn)
+					+ strlen(kerberos_container[i][1]) + 1);
+	sprintf(krbcontacls[0], "%s%s%s", kerberos_container[i][0], serviceobjdn,
+		kerberos_container[i][1]);
 	krbcontclass.mod_values = krbcontacls;
-	
+
 	krbcontarr[0] = &krbcontclass;
-	
+
 	st = ldap_modify_ext_s(ld,
 			       ldap_context->krbcontainer->DN,
 			       krbcontarr,
@@ -382,34 +382,34 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 			       NULL);
 	if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 	    free(krbcontacls[0]);
-            st = set_ldap_error (context, st, OP_MOD);
+	    st = set_ldap_error (context, st, OP_MOD);
 	    goto cleanup;
 	}
 	free(krbcontacls[0]);
     }
-    
+
     /* Set the rights for the realm */
     if (mask & LDAP_REALM_RIGHTS) {
-	
+
 	/* Construct the realm dn from realm name */
-	realmdn = (char * )malloc(strlen("cn=") + strlen(realmname) + 
-				strlen(ldap_context->krbcontainer->DN) + 2);
+	realmdn = (char *)malloc(strlen("cn=") + strlen(realmname) +
+				 strlen(ldap_context->krbcontainer->DN) + 2);
 	sprintf(realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
 
 	realmclass.mod_op = LDAP_MOD_ADD;
 	realmclass.mod_type = "ACL";
-	
+
 	if (servicetype == LDAP_KDC_SERVICE) {
- 	    for (i=0; strcmp(kdcrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *)malloc(strlen(kdcrights_realmcontainer[i][0]) 
-					     + strlen(serviceobjdn) + 
-					     strlen(kdcrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn, 
+	    for (i=0; strcmp(kdcrights_realmcontainer[i][0], "") != 0; i++) {
+		realmacls[0] = (char *)malloc(strlen(kdcrights_realmcontainer[i][0])
+					      + strlen(serviceobjdn) +
+					      strlen(kdcrights_realmcontainer[i][1]) + 1);
+		sprintf(realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
 			kdcrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
-		
+
 		realmarr[0] = &realmclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -417,22 +417,22 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
 	    }
-	} else if(servicetype == LDAP_ADMIN_SERVICE){
-	    for( i=0; strcmp(adminrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc(strlen(adminrights_realmcontainer[i][0]) + 
-					     strlen(serviceobjdn) + 
-					     strlen(adminrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn, 
+	} else if (servicetype == LDAP_ADMIN_SERVICE) {
+	    for (i=0; strcmp(adminrights_realmcontainer[i][0], "") != 0; i++) {
+		realmacls[0] = (char *) malloc(strlen(adminrights_realmcontainer[i][0]) +
+					       strlen(serviceobjdn) +
+					       strlen(adminrights_realmcontainer[i][1]) + 1);
+		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
 			adminrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
-		
+
 		realmarr[0] = &realmclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -440,23 +440,23 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
-		free(realmacls[0]);		    
+		free(realmacls[0]);
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_realmcontainer[i][0], "")!=0; i++) {
-		realmacls[0] = (char *) malloc( strlen(pwdrights_realmcontainer[i][0]) + 
-					     strlen(serviceobjdn) + 
-					     strlen(pwdrights_realmcontainer[i][1]) + 1);
-		sprintf( realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn, 
-			 pwdrights_realmcontainer[i][1]);
+		realmacls[0] = (char *) malloc(strlen(pwdrights_realmcontainer[i][0]) +
+					       strlen(serviceobjdn) +
+					       strlen(pwdrights_realmcontainer[i][1]) + 1);
+		sprintf(realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
+			pwdrights_realmcontainer[i][1]);
 		realmclass.mod_values = realmacls;
-		
+
 		realmarr[0] = &realmclass;
-		
-		
+
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -464,7 +464,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(realmacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
@@ -478,18 +478,18 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 	/* Populate the acl data to be added to the subtree */
 	subtreeclass.mod_op = LDAP_MOD_ADD;
 	subtreeclass.mod_type = "ACL";
-	
+
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc( strlen(kdcrights_subtree[i][0]) + 
-					       strlen(serviceobjdn) + 
-					       strlen(kdcrights_subtree[i][1]) + 1);
-		sprintf( subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn, 
-			 kdcrights_subtree[i][1]);
+		subtreeacls[0] = (char *) malloc(strlen(kdcrights_subtree[i][0]) +
+						 strlen(serviceobjdn) +
+						 strlen(kdcrights_subtree[i][1]) + 1);
+		sprintf(subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
+			kdcrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
-		
+
 		subtreearr[0] = &subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
@@ -497,22 +497,22 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0]) 
-						 + strlen(serviceobjdn) 
+		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0])
+						 + strlen(serviceobjdn)
 						 + strlen(adminrights_subtree[i][1]) + 1);
-		sprintf( subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn, 
-			 adminrights_subtree[i][1]);
+		sprintf(subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
+			adminrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
-		
+
 		subtreearr[0] = &subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
@@ -520,22 +520,22 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st !=LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *)malloc( strlen(pwdrights_subtree[i][0]) 
-						 + strlen(serviceobjdn) 
-						 + strlen(pwdrights_subtree[i][1]) + 1);
-		sprintf( subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn, 
-			 pwdrights_subtree[i][1]);
+		subtreeacls[0] = (char *)malloc(strlen(pwdrights_subtree[i][0])
+						+ strlen(serviceobjdn)
+						+ strlen(pwdrights_subtree[i][1]) + 1);
+		sprintf(subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
+			pwdrights_subtree[i][1]);
 		subtreeclass.mod_values = subtreeacls;
-		
+
 		subtreearr[0] = &subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
@@ -543,7 +543,7 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_TYPE_OR_VALUE_EXISTS && st != LDAP_OTHER) {
 		    free(subtreeacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
@@ -551,13 +551,13 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 	}
     } /* Subtree rights settings ends here */
     st = 0;
-    
- cleanup:
-    
-    if(realmdn)
+
+cleanup:
+
+    if (realmdn)
 	free(realmdn);
 
-    if(subtree)
+    if (subtree)
 	free(subtree);
 
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
@@ -565,20 +565,20 @@ krb5_ldap_add_service_rights( context, servicetype, serviceobjdn, realmname, sub
 }
 
 
-/* 
-   This will set the rights for the Kerberos service objects.
-   The function will read the subtree attribute from the specified
-   realm name and will the appropriate rights on both the realm
-   container and the subtree. The kerberos context passed should 
-   have a valid ldap handle, with appropriate rights to write acl
-   attributes. 
-   
-   krb5_context - IN The Kerberos context with valid ldap handle
+/*
+  This will set the rights for the Kerberos service objects.
+  The function will read the subtree attribute from the specified
+  realm name and will the appropriate rights on both the realm
+  container and the subtree. The kerberos context passed should
+  have a valid ldap handle, with appropriate rights to write acl
+  attributes.
+
+  krb5_context - IN The Kerberos context with valid ldap handle
 
 */
 
 krb5_error_code
-krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
+krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, subtreeparam, mask)
     krb5_context	context;
     int             servicetype;
     char            *serviceobjdn;
@@ -597,50 +597,50 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    
+
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    if((serviceobjdn == NULL) || (realmname == NULL) || (servicetype < 0) || (servicetype > 4) 
-       || (ldap_context->krbcontainer->DN == NULL) ) {
+    if ((serviceobjdn == NULL) || (realmname == NULL) || (servicetype < 0) || (servicetype > 4)
+	|| (ldap_context->krbcontainer->DN == NULL)) {
 	st=-1;
 	goto cleanup;
     }
 
     /* If the subtree is null, set the value to root */
-    if(subtreeparam== NULL)
+    if (subtreeparam== NULL)
 	subtree=strdup("");
     else
 	subtree=strdup(subtreeparam);
-    
-    if( subtree == NULL ) {
+
+    if (subtree == NULL) {
 	st = ENOMEM;
 	goto cleanup;
     }
 
 
     /* Set the rights for the realm */
-    if( mask & LDAP_REALM_RIGHTS ) {
-		
+    if (mask & LDAP_REALM_RIGHTS) {
+
 	/* Construct the realm dn from realm name */
-	realmdn = (char *) malloc( strlen("cn=") + strlen(realmname) + 
-				   strlen(ldap_context->krbcontainer->DN) + 2 );
+	realmdn = (char *) malloc(strlen("cn=") + strlen(realmname) +
+				  strlen(ldap_context->krbcontainer->DN) + 2);
 	sprintf(realmdn,"cn=%s,%s", realmname, ldap_context->krbcontainer->DN);
 
 	realmclass.mod_op=LDAP_MOD_DELETE;
 	realmclass.mod_type="ACL";
-	
+
 	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc(strlen(kdcrights_realmcontainer[i][0]) 
-					       + strlen(serviceobjdn) + 
+		realmacls[0] = (char *) malloc(strlen(kdcrights_realmcontainer[i][0])
+					       + strlen(serviceobjdn) +
 					       strlen(kdcrights_realmcontainer[i][1]) + 1);
-		sprintf( realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn, 
-			 kdcrights_realmcontainer[i][1]);
+		sprintf(realmacls[0], "%s%s%s", kdcrights_realmcontainer[i][0], serviceobjdn,
+			kdcrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
-		
+
 		realmarr[0]=&realmclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -648,22 +648,22 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(realmacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0] = (char *) malloc( strlen(adminrights_realmcontainer[i][0]) + 
-					     strlen(serviceobjdn) + 
-					     strlen(adminrights_realmcontainer[i][1]) + 1);
-		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn, 
+		realmacls[0] = (char *) malloc(strlen(adminrights_realmcontainer[i][0]) +
+					       strlen(serviceobjdn) +
+					       strlen(adminrights_realmcontainer[i][1]) + 1);
+		sprintf(realmacls[0], "%s%s%s", adminrights_realmcontainer[i][0], serviceobjdn,
 			adminrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
-		
+
 		realmarr[0]=&realmclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -671,22 +671,22 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 				       NULL);
 		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(realmacls[0]);
-                    st = set_ldap_error (context, st, OP_MOD);
+		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(realmacls[0]);
 	    }
 	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_realmcontainer[i][0], "") != 0; i++) {
-		realmacls[0]=(char *)malloc( strlen(pwdrights_realmcontainer[i][0]) 
-					     + strlen(serviceobjdn) 
-					     + strlen(pwdrights_realmcontainer[i][1]) + 1);
-		sprintf( realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn, 
-			 pwdrights_realmcontainer[i][1]);
+		realmacls[0]=(char *)malloc(strlen(pwdrights_realmcontainer[i][0])
+					    + strlen(serviceobjdn)
+					    + strlen(pwdrights_realmcontainer[i][1]) + 1);
+		sprintf(realmacls[0], "%s%s%s", pwdrights_realmcontainer[i][0], serviceobjdn,
+			pwdrights_realmcontainer[i][1]);
 		realmclass.mod_values= realmacls;
-		
+
 		realmarr[0]=&realmclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       realmdn,
 				       realmarr,
@@ -700,9 +700,9 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 		free(realmacls[0]);
 	    }
 	}
-	
+
     } /* Realm rights setting ends here */
-    
+
 
     /* Set the rights for the subtree */
     if (mask & LDAP_SUBTREE_RIGHTS) {
@@ -710,18 +710,18 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 	/* Populate the acl data to be added to the subtree */
 	subtreeclass.mod_op=LDAP_MOD_DELETE;
 	subtreeclass.mod_type="ACL";
-	
-	if(servicetype == LDAP_KDC_SERVICE){
+
+	if (servicetype == LDAP_KDC_SERVICE) {
 	    for (i=0; strcmp(kdcrights_subtree[i][0], "")!=0; i++) {
-		subtreeacls[0] = (char *) malloc( strlen(kdcrights_subtree[i][0]) 
-						  + strlen(serviceobjdn) 
-						  + strlen(kdcrights_subtree[i][1]) + 1);
-		sprintf( subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn, 
-			 kdcrights_subtree[i][1]);
+		subtreeacls[0] = (char *) malloc(strlen(kdcrights_subtree[i][0])
+						 + strlen(serviceobjdn)
+						 + strlen(kdcrights_subtree[i][1]) + 1);
+		sprintf(subtreeacls[0], "%s%s%s", kdcrights_subtree[i][0], serviceobjdn,
+			kdcrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
-		
+
 		subtreearr[0]=&subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
@@ -736,39 +736,38 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 	    }
 	} else if (servicetype == LDAP_ADMIN_SERVICE) {
 	    for (i=0; strcmp(adminrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0]) 
-					       + strlen(serviceobjdn) 
-					       + strlen(adminrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn, 
+		subtreeacls[0] = (char *) malloc(strlen(adminrights_subtree[i][0])
+						 + strlen(serviceobjdn)
+						 + strlen(adminrights_subtree[i][1]) + 1);
+		sprintf(subtreeacls[0], "%s%s%s", adminrights_subtree[i][0], serviceobjdn,
 			adminrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
-		
+
 		subtreearr[0]=&subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
 				       NULL,
 				       NULL);
-		if ( st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
+		if (st != LDAP_SUCCESS && st != LDAP_NO_SUCH_ATTRIBUTE) {
 		    free(subtreeacls[0]);
 		    st = set_ldap_error (context, st, OP_MOD);
 		    goto cleanup;
 		}
 		free(subtreeacls[0]);
 	    }
-	}
-	else if (servicetype == LDAP_PASSWD_SERVICE) {
+	} else if (servicetype == LDAP_PASSWD_SERVICE) {
 	    for (i=0; strcmp(pwdrights_subtree[i][0], "") != 0; i++) {
-		subtreeacls[0] = (char *) malloc(strlen(pwdrights_subtree[i][0]) 
-						 + strlen(serviceobjdn) 
+		subtreeacls[0] = (char *) malloc(strlen(pwdrights_subtree[i][0])
+						 + strlen(serviceobjdn)
 						 + strlen(pwdrights_subtree[i][1]) + 1);
-		sprintf(subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn, 
+		sprintf(subtreeacls[0], "%s%s%s", pwdrights_subtree[i][0], serviceobjdn,
 			pwdrights_subtree[i][1]);
 		subtreeclass.mod_values= subtreeacls;
-		
+
 		subtreearr[0]=&subtreeclass;
-		
+
 		st = ldap_modify_ext_s(ld,
 				       subtree,
 				       subtreearr,
@@ -783,15 +782,15 @@ krb5_ldap_delete_service_rights( context, servicetype, serviceobjdn, realmname, 
 	    }
 	}
     } /* Subtree rights setting ends here */
-    
+
     st = 0;
 
- cleanup:
-	
-    if(realmdn)
+cleanup:
+
+    if (realmdn)
 	free(realmdn);
 
-    if(subtree)
+    if (subtree)
 	free(subtree);
 
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);

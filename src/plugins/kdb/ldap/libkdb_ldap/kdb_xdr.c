@@ -1,14 +1,14 @@
 /*
  * lib/kdb/kdb_ldap/kdb_xdr.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology. 
+ * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 #include <k5-int.h>
@@ -90,7 +90,7 @@ krb5_dbe_lookup_tl_data(context, entry, ret_tl_data)
     krb5_tl_data *tl_data;
 
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data->tl_data_next) {
-        if (tl_data->tl_data_type == ret_tl_data->tl_data_type) {
+	if (tl_data->tl_data_type == ret_tl_data->tl_data_type) {
 	    *ret_tl_data = *tl_data;
 	    return(0);
 	}
@@ -115,7 +115,7 @@ krb5_dbe_update_last_pwd_change(context, entry, stamp)
     krb5_octet          buf[4]; /* this is the encoded size of an int32 */
 
     tl_data.tl_data_type = KRB5_TL_LAST_PWD_CHANGE;
-    tl_data.tl_data_length = sizeof(buf); 
+    tl_data.tl_data_length = sizeof(buf);
     krb5_kdb_encode_int32((krb5_int32) stamp, buf);
     tl_data.tl_data_contents = buf;
 
@@ -136,7 +136,7 @@ krb5_dbe_lookup_last_pwd_change(context, entry, stamp)
 
     if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
 	return(code);
-    
+
     if (tl_data.tl_data_length != 4) {
 	*stamp = 0;
 	return(0);
@@ -166,7 +166,7 @@ krb5_dbe_update_mod_princ_data(context, entry, mod_date, mod_princ)
     char		* unparse_mod_princ = 0;
     unsigned int	unparse_mod_princ_size;
 
-    if ((retval = krb5_unparse_name(context, mod_princ, 
+    if ((retval = krb5_unparse_name(context, mod_princ,
 				    &unparse_mod_princ)))
 	return(retval);
 
@@ -210,7 +210,7 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 
     if ((code = krb5_dbe_lookup_tl_data(context, entry, &tl_data)))
 	return(code);
-    
+
     if ((tl_data.tl_data_length < 5) ||
 	(tl_data.tl_data_contents[tl_data.tl_data_length-1] != '\0'))
 	return(KRB5_KDB_TRUNCATED_RECORD);
@@ -226,4 +226,3 @@ krb5_dbe_lookup_mod_princ_data(context, entry, mod_time, mod_princ)
 
     return(0);
 }
-

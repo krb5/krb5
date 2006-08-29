@@ -146,8 +146,8 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 
 /* To be used later */
 typedef struct _krb5_ldap_certificates{
-  char *certificate;
-  int  certtype;
+    char *certificate;
+    int  certtype;
 }krb5_ldap_certificates;
 
 /* ldap server info structure */
@@ -158,25 +158,24 @@ typedef enum _server_status {OFF, ON, NOTSET} krb5_ldap_server_status;
 
 typedef struct _krb5_ldap_server_info krb5_ldap_server_info;
 
-typedef struct  _krb5_ldap_server_handle{
-  int                              msgid;
-  LDAP                             *ldap_handle;
-  krb5_boolean                     server_info_update_pending;
-  krb5_ldap_server_info            *server_info;
-  struct _krb5_ldap_server_handle  *next;
-
-}krb5_ldap_server_handle;
+typedef struct  _krb5_ldap_server_handle {
+    int                              msgid;
+    LDAP                             *ldap_handle;
+    krb5_boolean                     server_info_update_pending;
+    krb5_ldap_server_info            *server_info;
+    struct _krb5_ldap_server_handle  *next;
+} krb5_ldap_server_handle;
 
 struct _krb5_ldap_server_info {
-  krb5_ldap_server_type		server_type;
-  krb5_ldap_server_status       server_status;
-  krb5_ui_4                     num_conns;
-  krb5_ldap_server_handle       *ldap_server_handles;
-  time_t                        downtime;
-  char				*server_name;
-  krb5_ui_4                     port;	
-  char				*root_certificate_file;
-  struct _krb5_ldap_server_info *next;
+    krb5_ldap_server_type	 server_type;
+    krb5_ldap_server_status      server_status;
+    krb5_ui_4                    num_conns;
+    krb5_ldap_server_handle      *ldap_server_handles;
+    time_t                       downtime;
+    char			*server_name;
+    krb5_ui_4                    port;	
+    char			*root_certificate_file;
+    struct _krb5_ldap_server_info *next;
 };
 
 

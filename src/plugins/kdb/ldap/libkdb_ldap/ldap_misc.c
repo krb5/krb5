@@ -40,12 +40,12 @@
  */
 krb5_error_code
 krb5_ldap_read_server_params(context, conf_section, srv_type)
-     krb5_context               context;
-     char                       *conf_section;
-     int                        srv_type;
+    krb5_context               context;
+    char                       *conf_section;
+    int                        srv_type;
 {
     char                        *tempval=NULL, *save_ptr=NULL;
-    const char                  *delims="\t\n\f\v\r ,"; 
+    const char                  *delims="\t\n\f\v\r ,";
     krb5_error_code             st=0;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -56,16 +56,16 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 
     /* copy the conf_section into ldap_context for later use */
     if (conf_section) {
-      ldap_context->conf_section = strdup (conf_section);
-      if (ldap_context->conf_section == NULL) {
-	st = ENOMEM;
-	goto cleanup;
-      }
+	ldap_context->conf_section = strdup (conf_section);
+	if (ldap_context->conf_section == NULL) {
+	    st = ENOMEM;
+	    goto cleanup;
+	}
     }
 
     /* initialize the mutexs and condition variable */
     /* this portion logically doesn't fit here should be moved appropriately */
-    
+
     /* this mutex is used in ldap reconnection pool */
     if (k5_mutex_init(&(ldap_context->hndl_lock)) != 0) {
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
@@ -79,105 +79,103 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      * this parameter defines maximum ldap connections per ldap server
      */
     if (ldap_context->max_server_conns == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section, 
-				    "ldap_conns_per_server", 0, 
+	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section,
+				    "ldap_conns_per_server", 0,
 				    (int *) &ldap_context->max_server_conns)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' "
-                    "attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' "
+				    "attribute");
 	    goto cleanup;
 	}
     }
-    
+
     /* if ldap port is not set read it from database module section of conf file */
     if (ldap_context->port == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section, 
-				    "ldap_ssl_port", 0, 
+	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section,
+				    "ldap_ssl_port", 0,
 				    (int *) &ldap_context->port)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
 	    goto cleanup;
 	}
     }
-    
-    /* if the bind dn is not set read it from the database module section of conf file 
-     * this paramter is populated by one of the KDC, ADMIN or PASSWD dn to be used to connect 
+
+    /* if the bind dn is not set read it from the database module section of conf file
+     * this paramter is populated by one of the KDC, ADMIN or PASSWD dn to be used to connect
      * to LDAP server. the srv_type decides which dn to read.
      */
-    if( ldap_context->bind_dn == NULL ) {
-	
+    if (ldap_context->bind_dn == NULL) {
+
 	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
 				       "ldap_kdc_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
 		goto cleanup;
 	    }
-	}
-	else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
+	} else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
 				       "ldap_kadmind_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
 		goto cleanup;
 	    }
-	}
-	else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
+	} else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
 				       "ldap_kpasswdd_dn", NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
 		goto cleanup;
 	    }
 	}
     }
 
     /* read service_password_file parameter from database module section of conf file
-     * this file contains stashed passwords of the KDC, ADMIN and PASSWD dns. 
+     * this file contains stashed passwords of the KDC, ADMIN and PASSWD dns.
      */
     if (ldap_context->service_password_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
-				   "ldap_service_password_file", NULL, 
+	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
+				   "ldap_service_password_file", NULL,
 				   &ldap_context->service_password_file)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_service_password_file' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_service_password_file' attribute");
 	    goto cleanup;
 	}
     }
-      
+
     /* if root certificate file is not set read it from database module section of conf file
      * this is the trusted root certificate of the Directory.
-     */ 
+     */
     if (ldap_context->root_certificate_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
-				   "ldap_root_certificate_file", NULL, 
+	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
+				   "ldap_root_certificate_file", NULL,
 				   &ldap_context->root_certificate_file)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
 	    goto cleanup;
 	}
     }
-      
-    /* if the ldap server parameter is not set read the list of ldap servers:port from the 
-     * database module section of the conf file 
+
+    /* if the ldap server parameter is not set read the list of ldap servers:port from the
+     * database module section of the conf file
      */
-    
+
     if (ldap_context->server_info_list == NULL) {
 	unsigned int ele=0;
-	
+
 	server_info = &(ldap_context->server_info_list);
-	*server_info = (krb5_ldap_server_info **) calloc (SERV_COUNT+1, 
+	*server_info = (krb5_ldap_server_info **) calloc (SERV_COUNT+1,
 							  sizeof (krb5_ldap_server_info *));
-	
+
 	if (*server_info == NULL) {
 	    st = ENOMEM;
 	    goto cleanup;
 	}
-	
-	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section, 
+
+	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
 				   "ldap_servers", NULL, &tempval)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_servers' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_servers' attribute");
 	    goto cleanup;
 	}
-	
+
 	if (tempval == NULL) {
-	    
-	    (*server_info)[ele] = (krb5_ldap_server_info *)calloc(1, 
+
+	    (*server_info)[ele] = (krb5_ldap_server_info *)calloc(1,
 								  sizeof(krb5_ldap_server_info));
-	    
+
 	    (*server_info)[ele]->server_name = strdup("localhost");
 	    if ((*server_info)[ele]->server_name == NULL) {
 		st = ENOMEM;
@@ -186,10 +184,10 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    (*server_info)[ele]->server_status = NOTSET;
 	} else {
 	    char *port=NULL, *server=NULL, *item=NULL;
-	    
+
 	    item = strtok_r(tempval,delims,&save_ptr);
-	    while(item != NULL && ele<SERV_COUNT){
-		(*server_info)[ele] = (krb5_ldap_server_info *)calloc(1, 
+	    while (item != NULL && ele<SERV_COUNT) {
+		(*server_info)[ele] = (krb5_ldap_server_info *)calloc(1,
 								      sizeof(krb5_ldap_server_info));
 		if ((*server_info)[ele] == NULL) {
 		    st = ENOMEM;
@@ -214,14 +212,14 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	}
     }
 
-    /* the same set of all the above parameters can be obtained from the dbdefaults section of 
+    /* the same set of all the above parameters can be obtained from the dbdefaults section of
      * conf file. Here read the missing parameters from [dbdefaults] section */
 
     if (ldap_context->max_server_conns == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, 
-				    "ldap_conns_per_server", NULL, DEFAULT_CONNS_PER_SERVER, 
+	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION,
+				    "ldap_conns_per_server", NULL, DEFAULT_CONNS_PER_SERVER,
 				    (int *) &ldap_context->max_server_conns)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' attribute");
 	    goto cleanup;
 	}
     }
@@ -231,36 +229,34 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	krb5_set_error_message (context, st, "Minimum connections required per server is 2");
 	goto cleanup;
     }
-    
+
     if (ldap_context->port == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, "ldap_ssl_port", 
+	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, "ldap_ssl_port",
 				    NULL, LDAPS_PORT, &ldap_context->port)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
 	    goto cleanup;
 	}
     }
 
-    if( ldap_context->bind_dn == NULL ) {
+    if (ldap_context->bind_dn == NULL) {
 	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, "ldap_kdc_dn", 
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, "ldap_kdc_dn",
 				       NULL, NULL, &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
 		goto cleanup;
 	    }
-	}
-	else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
-				       "ldap_kadmind_dn", NULL, NULL, 
+	} else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
+				       "ldap_kadmind_dn", NULL, NULL,
 				       &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
 		goto cleanup;
 	    }
-	}
-	else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
-				       "ldap_kpasswdd_dn", NULL, NULL, 
+	} else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
+	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
+				       "ldap_kpasswdd_dn", NULL, NULL,
 				       &ldap_context->bind_dn)) != 0) {
-                krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
+		krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
 		goto cleanup;
 	    }
 	}
@@ -268,25 +264,25 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 
     /* read service_password_file value */
     if (ldap_context->service_password_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
-				   "ldap_service_password_file", NULL, NULL, 
+	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
+				   "ldap_service_password_file", NULL, NULL,
 				   &ldap_context->service_password_file)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_service_passwd_file' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_service_passwd_file' attribute");
 	    goto cleanup;
 	}
     }
-    
+
     /* read root certificate file value */
     if (ldap_context->root_certificate_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, 
-				   "ldap_root_certificate_file", NULL, NULL, 
+	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
+				   "ldap_root_certificate_file", NULL, NULL,
 				   &ldap_context->root_certificate_file)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
+	    krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
 	    goto cleanup;
 	}
     }
-    
- cleanup:
+
+cleanup:
     return(st);
 }
 
@@ -303,9 +299,9 @@ krb5_ldap_free_server_params(ldap_context)
 
     if (ldap_context == NULL)
 	return 0;
-    
+
     /* free all ldap servers list and the ldap handles associated with the ldap server */
-    if(ldap_context->server_info_list) {
+    if (ldap_context->server_info_list) {
 	while (ldap_context->server_info_list[i]) {
 	    if (ldap_context->server_info_list[i]->server_name) {
 		free (ldap_context->server_info_list[i]->server_name);
@@ -328,7 +324,7 @@ krb5_ldap_free_server_params(ldap_context)
 	}
 	krb5_xfree(ldap_context->server_info_list);
     }
-      
+
     if (ldap_context->conf_section != NULL) {
 	krb5_xfree(ldap_context->conf_section);
 	ldap_context->conf_section = NULL;
@@ -391,36 +387,36 @@ krb5_ldap_free_server_params(ldap_context)
 
 krb5_error_code
 is_principal_in_realm(ldap_context, searchfor)
-     krb5_ldap_context          *ldap_context;
-     krb5_const_principal       searchfor;
+    krb5_ldap_context          *ldap_context;
+    krb5_const_principal       searchfor;
 {
     int                         defrealmlen=0;
     char                        *defrealm=NULL;
-  
+
 #define FIND_MAX(a,b) ((a) > (b) ? (a) : (b))
 
     defrealmlen = strlen(ldap_context->lrparams->realm_name);
     defrealm = ldap_context->lrparams->realm_name;
-  
+
     /* care should be taken for inter-realm principals as the default realm can exist in the
-     * realm part of the principal name or can also exist in the second portion of the name part. 
-     * However, if the default realm exist in the second part of the principal portion, then the 
-     * first portion of the principal name SHOULD be "krbtgt". All this check is done in the 
+     * realm part of the principal name or can also exist in the second portion of the name part.
+     * However, if the default realm exist in the second part of the principal portion, then the
+     * first portion of the principal name SHOULD be "krbtgt". All this check is done in the
      * immediate block.
      */
-    if (searchfor->length == 2) 
-	if ((strncasecmp(searchfor->data[0].data, "krbtgt", 
-			 FIND_MAX(searchfor->data[0].length, strlen("krbtgt"))) == 0) && 
-	    (strncasecmp(searchfor->data[1].data, defrealm, 
-			 FIND_MAX(searchfor->data[1].length, defrealmlen)) == 0)) 
+    if (searchfor->length == 2)
+	if ((strncasecmp(searchfor->data[0].data, "krbtgt",
+			 FIND_MAX(searchfor->data[0].length, strlen("krbtgt"))) == 0) &&
+	    (strncasecmp(searchfor->data[1].data, defrealm,
+			 FIND_MAX(searchfor->data[1].length, defrealmlen)) == 0))
 	    return 0;
-  
+
     /* first check the length, if they are not equal, then they are not same */
     if (strlen(defrealm) != searchfor->realm.length)
 	return 1;
-  
+
     /* if the length is equal, check for the contents */
-    if (strncmp(defrealm, searchfor->realm.data, 
+    if (strncmp(defrealm, searchfor->realm.data,
 		searchfor->realm.length) != 0)
 	return 1;
     /* if we are here, then the realm portions match, return 0 */
@@ -429,8 +425,8 @@ is_principal_in_realm(ldap_context, searchfor)
 
 
 /*
- * Deduce the subtree information from the context. A realm can have atmost 2 subtrees. 
- * 1. the Realm container 
+ * Deduce the subtree information from the context. A realm can have atmost 2 subtrees.
+ * 1. the Realm container
  * 2. the actual subtree associated with the Realm
  *
  * However, there are some conditions to be considered to deduce the actual subtree/s associated
@@ -439,7 +435,7 @@ is_principal_in_realm(ldap_context, searchfor)
  *    the realm has only one subtree i.e [Root], i.e. whole of the tree.
  * 2. If the subtree information of the Realm is missing/absent, then the realm has only one
  *    i.e. the Realm container. NOTE: In call cases Realm container SHOULD be the one among the
- *    subtrees or the only one subtree. 
+ *    subtrees or the only one subtree.
  * 3. The subtree information of the realm is overlapping the realm container of the realm, then
  *    the realm has only one subtree and it is the subtree information associated with the realm.
  */
@@ -455,38 +451,38 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     subtree = ldap_context->lrparams->subtree;
     realm_cont_dn = ldap_context->lrparams->realmdn;
 
-    /* 
-     * if subtree attribute value is [Root] of the tree which is represented by a "" 
+    /*
+     * if subtree attribute value is [Root] of the tree which is represented by a ""
      * (null) string, set the ntree value as 1 and do not fill the subtreearr value.
      * In eDirectory the [Root] can be represented as a "" (null) string, however this
-     * representation throws a "No such object" error in OpenLDAP. 
+     * representation throws a "No such object" error in OpenLDAP.
      * Representing [Root] of the tree as NULL pointer (i.e. no value) works in both case.
      */
     if (subtree == NULL || strcasecmp(subtree, "") == 0) {
 	*ntree = 1;
 	return 0;
     }
-	
-    /* 
-     * the subtree attribute value of the realm can be same as the realm container or can 
-     * even overlap. If the check is successful, then the subtree attribute value alone is 
+
+    /*
+     * the subtree attribute value of the realm can be same as the realm container or can
+     * even overlap. If the check is successful, then the subtree attribute value alone is
      * copied to the subtreearr array and the ntree value is set to 1.
      */
     lendiff = strlen(realm_cont_dn) - strlen(subtree);
     if (lendiff >= 0 && (strcasecmp(realm_cont_dn+lendiff, subtree)==0)) {
 	subtreearr[0] = strdup(subtree);
-	if (subtreearr[0] == NULL) 
+	if (subtreearr[0] == NULL)
 	    return ENOMEM;
 	*ntree = 1;
 	return 0;
-    } 
-	
+    }
+
     /*
      * if the subtree attribute value of the realm and the realm container are different,
      * then both of the values are copied to subtreearr and ntree value is set to 2.
      */
     subtreearr[0] = strdup(realm_cont_dn);
-    if (subtreearr[0] == NULL) 
+    if (subtreearr[0] == NULL)
 	return ENOMEM;
     subtreearr[1] = strdup(subtree);
     if (subtreearr[1] == NULL) {
@@ -500,7 +496,7 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
 
 /*
  * This function appends the content with a type into the tl_data structure. Based on the type
- * the length of the content is either pre-defined or computed from the content. 
+ * the length of the content is either pre-defined or computed from the content.
  * Returns 0 in case of success and 1 if the type associated with the content is undefined.
  */
 
@@ -513,116 +509,115 @@ store_tl_data(tl_data, tl_type, value)
     unsigned int                currlen=0, tldatalen=0;
     char                        *curr=NULL;
     void                        *reallocptr=NULL;
-  
+
     tl_data->tl_data_type = KDB_TL_USER_INFO;
-    switch(tl_type)
-    {
+    switch (tl_type) {
     case KDB_TL_PRINCCOUNT:
     case KDB_TL_PRINCTYPE:
     case KDB_TL_MASK:
     {
-    	int *iptr = (int *)value;
-    	int ivalue = *iptr;
-    	
-    	currlen = tl_data->tl_data_length;
-    	tl_data->tl_data_length += 1 + 2 + 2;
+	int *iptr = (int *)value;
+	int ivalue = *iptr;
+
+	currlen = tl_data->tl_data_length;
+	tl_data->tl_data_length += 1 + 2 + 2;
 	/* allocate required memory */
-    	reallocptr = tl_data->tl_data_contents;
-    	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents, 
-    					    tl_data->tl_data_length);
-    	if (tl_data->tl_data_contents == NULL) {
-    	    if (reallocptr)
-    		free (reallocptr);
-    	    return ENOMEM;
-    	}
-    	curr = (char *) (tl_data->tl_data_contents + currlen);
-    	
+	reallocptr = tl_data->tl_data_contents;
+	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents,
+					    tl_data->tl_data_length);
+	if (tl_data->tl_data_contents == NULL) {
+	    if (reallocptr)
+		free (reallocptr);
+	    return ENOMEM;
+	}
+	curr = (char *) (tl_data->tl_data_contents + currlen);
+
 	/* store the tl_type value */
-    	memset(curr, tl_type, 1);
-    	curr += 1;
+	memset(curr, tl_type, 1);
+	curr += 1;
 	/* store the content length */
-    	tldatalen = 2;
-    	STORE16_INT(curr, tldatalen);
-    	curr += 2;
+	tldatalen = 2;
+	STORE16_INT(curr, tldatalen);
+	curr += 2;
 	/* store the content */
-    	STORE16_INT(curr, ivalue);	
-    	curr += 2;
+	STORE16_INT(curr, ivalue);
+	curr += 2;
 	break;
     }
 
     case KDB_TL_USERDN:
     case KDB_TL_TKTPOLICYDN:
     {
-    	char *cptr = (char *)value;
-    	
-    	currlen = tl_data->tl_data_length;
-    	tl_data->tl_data_length += 1 + 2 + strlen(cptr);
-	/* allocate required memory */	
-    	reallocptr = tl_data->tl_data_contents;
-    	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents, 
-    					    tl_data->tl_data_length);
-    	if (tl_data->tl_data_contents == NULL) {
-    	    if (reallocptr)
-    		free (reallocptr);
-    	    return ENOMEM;
-    	}
-    	curr = (char *) (tl_data->tl_data_contents + currlen);
-    	
+	char *cptr = (char *)value;
+
+	currlen = tl_data->tl_data_length;
+	tl_data->tl_data_length += 1 + 2 + strlen(cptr);
+	/* allocate required memory */
+	reallocptr = tl_data->tl_data_contents;
+	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents,
+					    tl_data->tl_data_length);
+	if (tl_data->tl_data_contents == NULL) {
+	    if (reallocptr)
+		free (reallocptr);
+	    return ENOMEM;
+	}
+	curr = (char *) (tl_data->tl_data_contents + currlen);
+
 	/* store the tl_type value */
-    	memset(curr, tl_type, 1);
-    	curr += 1;
+	memset(curr, tl_type, 1);
+	curr += 1;
 	/* store the content length */
-    	tldatalen = strlen(cptr);
-    	STORE16_INT(curr, tldatalen);
-    	curr += 2;
+	tldatalen = strlen(cptr);
+	STORE16_INT(curr, tldatalen);
+	curr += 2;
 	/* store the content */
-    	memcpy(curr, cptr, tldatalen);
-    	curr += tldatalen;
-    	break;
+	memcpy(curr, cptr, tldatalen);
+	curr += tldatalen;
+	break;
     }
 
     case KDB_TL_KEYINFO:
     {
-    	struct berval *key = (struct berval *)value;
-    	
-    	currlen = tl_data->tl_data_length;
-    	tl_data->tl_data_length += 1 + 2 + key->bv_len;
+	struct berval *key = (struct berval *)value;
+
+	currlen = tl_data->tl_data_length;
+	tl_data->tl_data_length += 1 + 2 + key->bv_len;
 	/* allocate required memory */
-    	reallocptr = tl_data->tl_data_contents;
-    	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents, 
-    					    tl_data->tl_data_length);
-    	if (tl_data->tl_data_contents == NULL) {
-    	    if (reallocptr)
-    		free (reallocptr);
-    	    return ENOMEM;
-    	}
-    	curr = (char *) (tl_data->tl_data_contents + currlen);
-    	
+	reallocptr = tl_data->tl_data_contents;
+	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents,
+					    tl_data->tl_data_length);
+	if (tl_data->tl_data_contents == NULL) {
+	    if (reallocptr)
+		free (reallocptr);
+	    return ENOMEM;
+	}
+	curr = (char *) (tl_data->tl_data_contents + currlen);
+
 	/* store the tl_type value */
-    	memset(curr, tl_type, 1);
-    	curr += 1;
+	memset(curr, tl_type, 1);
+	curr += 1;
 	/* store the content length */
-    	tldatalen = key->bv_len;
-    	STORE16_INT(curr, tldatalen);
-    	curr += 2;
+	tldatalen = key->bv_len;
+	STORE16_INT(curr, tldatalen);
+	curr += 2;
 	/* store the content */
-    	memcpy(curr, key->bv_val, key->bv_len);
-    	curr += tldatalen;
-    	break;
+	memcpy(curr, key->bv_val, key->bv_len);
+	curr += tldatalen;
+	break;
     }
-    
+
     default:
 	return 1;
-    
+
     }
     return 0;
 }
 
 /*
- * This function scans the tl_data structure to get the value of a type defined by the tl_type 
- * (second parameter). The tl_data structure has all the data in the tl_data_contents member. 
+ * This function scans the tl_data structure to get the value of a type defined by the tl_type
+ * (second parameter). The tl_data structure has all the data in the tl_data_contents member.
  * The format of the tl_data_contents is as follows.
- * The first byte defines the type of the content that follows. The next 2 bytes define the 
+ * The first byte defines the type of the content that follows. The next 2 bytes define the
  * size n (in terms of bytes) of the content that follows. The next n bytes define the content
  * itself.
  */
@@ -638,22 +633,22 @@ decode_tl_data(tl_data, tl_type, data)
     unsigned char               *curr=NULL;
     int                         *intptr=NULL;
     long                        *longptr=NULL;
-    char                        *DN=NULL;  
+    char                        *DN=NULL;
     krb5_boolean                keyfound=FALSE;
     KEY                         *secretkey = NULL;
 
     *data = NULL;
 
     curr = tl_data->tl_data_contents;
-    while(curr < (tl_data->tl_data_contents + tl_data->tl_data_length)) {
+    while (curr < (tl_data->tl_data_contents + tl_data->tl_data_length)) {
 
 	/* get the type of the content */
 	subtype = (int) curr[0];
 	/* forward by 1 byte*/
 	curr += 1;
-    
+
 	if (subtype == tl_type) {
-	    switch(subtype) {
+	    switch (subtype) {
 
 	    case KDB_TL_PRINCCOUNT:
 	    case KDB_TL_PRINCTYPE:
@@ -664,16 +659,16 @@ decode_tl_data(tl_data, tl_type, data)
 		curr += 2;
 		/* get the actual content */
 		if (sublen == 2) {
-		  /* intptr = malloc(sublen);	  */
+		    /* intptr = malloc(sublen);	  */
 		    intptr = malloc(sizeof(krb5_int32));
-		    if (intptr == NULL) 
+		    if (intptr == NULL)
 			return ENOMEM;
 		    memset(intptr, 0, sublen);
 		    UNSTORE16_INT(curr, (*intptr));
 		    *data = intptr;
-		} else { 
-		    longptr = malloc(sublen);	  
-		    if (longptr == NULL) 
+		} else {
+		    longptr = malloc(sublen);
+		    if (longptr == NULL)
 			return ENOMEM;
 		    memset(longptr, 0, sublen);
 		    UNSTORE32_INT(curr, (*longptr));
@@ -712,18 +707,18 @@ decode_tl_data(tl_data, tl_type, data)
 			return ENOMEM;
 		    secretkey->nkey = 0;
 		    secretkey->keys = NULL;
-		    secretkey->keys = realloc(secretkey->keys, 
-					      sizeof(*(secretkey->keys)) * (limit));	  
+		    secretkey->keys = realloc(secretkey->keys,
+					      sizeof(*(secretkey->keys)) * (limit));
 		    if (secretkey->keys == NULL)
 			return ENOMEM;
 		    memset(secretkey->keys, 0, sizeof (*(secretkey->keys)) * (limit));
 		}
-		if ( i == limit-1) {
+		if (i == limit-1) {
 		    limit *= 2;
-		    secretkey->keys = realloc(secretkey->keys, 
+		    secretkey->keys = realloc(secretkey->keys,
 					      sizeof(*(secretkey->keys)) * (limit));
 		    if (secretkey->keys == NULL)
-                        return ENOMEM;
+			return ENOMEM;
 		    memset(secretkey->keys+i, 0, sizeof (*(secretkey->keys)) * (limit-i));
 		}
 
@@ -751,13 +746,13 @@ decode_tl_data(tl_data, tl_type, data)
     if (tl_type == KDB_TL_KEYINFO) {
 	if (keyfound)
 	    return 0;
-	else 
+	else
 	    return EINVAL;
     }
     return EINVAL;
 }
 
-/* 
+/*
  * wrapper routines for decode_tl_data
  */
 static krb5_error_code
@@ -771,23 +766,23 @@ krb5_get_int_from_tl_data(context, entries, type, intval)
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
     int                         *intptr=NULL;
-    
+
     tl_data.tl_data_type = KDB_TL_USER_INFO;
     if (((st=krb5_dbe_lookup_tl_data(context, entries, &tl_data)) != 0) || tl_data.tl_data_length == 0)
 	goto cleanup;
-    
+
     if (decode_tl_data(&tl_data, type, &voidptr) == 0) {
 	intptr = (int *) voidptr;
 	*intval = *intptr;
 	free(intptr);
     }
 
- cleanup:
+cleanup:
     return st;
 }
 
 /*
- * get the mask representing the attributes set on the directory object (user, policy ...) 
+ * get the mask representing the attributes set on the directory object (user, policy ...)
  */
 krb5_error_code
 krb5_get_attributes_mask(context, entries, mask)
@@ -825,16 +820,16 @@ krb5_get_secretkeys(context, entries, secretkey)
     krb5_error_code             st=0;
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
-    
+
     tl_data.tl_data_type = KDB_TL_USER_INFO;
     if (((st=krb5_dbe_lookup_tl_data(context, entries, &tl_data)) != 0) || tl_data.tl_data_length == 0)
 	goto cleanup;
-    
+
     if (decode_tl_data(&tl_data, KDB_TL_KEYINFO, &voidptr) == 0) {
 	*secretkey = (KEY *) voidptr;
     }
 
- cleanup:
+cleanup:
     return st;
 }
 
@@ -848,7 +843,7 @@ krb5_get_str_from_tl_data(context, entries, type, strval)
     krb5_error_code             st=0;
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
-    
+
     if (type != KDB_TL_USERDN && type != KDB_TL_CONTAINERDN && type != KDB_TL_TKTPOLICYDN) {
 	st = EINVAL;
 	goto cleanup;
@@ -857,12 +852,12 @@ krb5_get_str_from_tl_data(context, entries, type, strval)
     tl_data.tl_data_type = KDB_TL_USER_INFO;
     if (((st=krb5_dbe_lookup_tl_data(context, entries, &tl_data)) != 0) || tl_data.tl_data_length == 0)
 	goto cleanup;
-    
+
     if (decode_tl_data(&tl_data, type, &voidptr) == 0) {
 	*strval = (char *) voidptr;
     }
 
- cleanup:
+cleanup:
     return st;
 }
 
@@ -896,10 +891,10 @@ krb5_get_policydn(context, entries, policydn)
     return krb5_get_str_from_tl_data(context, entries, KDB_TL_TKTPOLICYDN, policydn);
 }
 /*
- * This function reads the attribute values (if the attribute is non-null) from the dn. 
+ * This function reads the attribute values (if the attribute is non-null) from the dn.
  * The read attribute values is compared aganist the attrvalues passed to the function
  * and a bit mask is set for all the matching attributes (attributes existing in both list).
- * The bit to be set is selected such that the index of the attribute in the attrvalues 
+ * The bit to be set is selected such that the index of the attribute in the attrvalues
  * parameter is the position of the bit.
  * For ex: the first element in the attrvalues is present in both list shall set the LSB of the
  * bit mask.
@@ -917,16 +912,16 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
     int                         *mask;
 {
     int                         st=0, one=1;
-    char                        **values=NULL, *attributes[2] = {NULL}; 
+    char                        **values=NULL, *attributes[2] = {NULL};
     LDAPMessage                 *result=NULL, *entry=NULL;
-  
+
     if (strlen(dn) == 0)
-      return LDAP_NO_SUCH_OBJECT;
+	return LDAP_NO_SUCH_OBJECT;
 
     attributes[0] = attribute;
 
     /* read the attribute values from the dn */
-    if((st = ldap_search_ext_s( ld,
+    if ((st = ldap_search_ext_s(ld,
 				dn,
 				LDAP_SCOPE_BASE,
 				0,
@@ -937,11 +932,11 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
 				&timelimit,
 				LDAP_NO_LIMIT,
 				&result)) != LDAP_SUCCESS) {
-        st = set_ldap_error(0, st, OP_SEARCH);
+	st = set_ldap_error(0, st, OP_SEARCH);
 	return st;
     }
-  
-    /* 
+
+    /*
      * If the attribute/attrvalues is NULL, then check for the existence of the object alone
      */
     if (attribute == NULL || attrvalues == NULL)
@@ -950,17 +945,17 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
     /* reset the bit mask */
     *mask = 0;
 
-    if((entry=ldap_first_entry(ld, result)) != NULL) {
+    if ((entry=ldap_first_entry(ld, result)) != NULL) {
 	/* read the attribute values */
-	if((values=ldap_get_values(ld, entry, attribute)) != NULL) {
+	if ((values=ldap_get_values(ld, entry, attribute)) != NULL) {
 	    int i,j;
-	    
-	    /* compare the read attribute values with the attrvalues array and set the 
-	     * appropriate bit mask 
+
+	    /* compare the read attribute values with the attrvalues array and set the
+	     * appropriate bit mask
 	     */
-    	    for(j=0; attrvalues[j]; ++j) {
-    		for(i=0; values[i]; ++i) {
-		    if(strcasecmp(values[i], attrvalues[j]) == 0) {
+	    for (j=0; attrvalues[j]; ++j) {
+		for (i=0; values[i]; ++i) {
+		    if (strcasecmp(values[i], attrvalues[j]) == 0) {
 			*mask |= (one<<j);
 			break;
 		    }
@@ -969,20 +964,20 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
 	    ldap_value_free(values);
 	}
     }
-    
- cleanup:
+
+cleanup:
     ldap_msgfree(result);
     return st;
 }
 
 
 /*
- * This function updates a single attribute with a single value of a specified dn. 
+ * This function updates a single attribute with a single value of a specified dn.
  * This function is mainly used to update krbRealmReferences, krbKdcServers, krbAdminServers...
  * when KDC, ADMIN, PASSWD servers are associated with some realms or vice versa.
  */
 
-krb5_error_code 
+krb5_error_code
 updateAttribute (ld, dn, attribute, value)
     LDAP                        *ld;
     char                        *dn;
@@ -991,7 +986,7 @@ updateAttribute (ld, dn, attribute, value)
 {
     int                         st=0;
     LDAPMod                     modAttr, *mods[2]={NULL};
-    char                        *values[2]={NULL}; 
+    char                        *values[2]={NULL};
 
     values[0] = value;
 
@@ -1001,11 +996,11 @@ updateAttribute (ld, dn, attribute, value)
     modAttr.mod_op = LDAP_MOD_ADD;
     modAttr.mod_values = values;
     mods[0] = &modAttr;
-  
+
     /* ldap modify operation */
     st = ldap_modify_s(ld, dn, mods);
 
-    /* if the {attr,attrval} combination is already present return a success 
+    /* if the {attr,attrval} combination is already present return a success
      * LDAP_ALREADY_EXISTS is for single-valued attribute
      * LDAP_TYPE_OR_VALUE_EXISTS is for multi-valued attribute
      */
@@ -1013,19 +1008,19 @@ updateAttribute (ld, dn, attribute, value)
 	st = 0;
 
     if (st != 0) {
-        st = set_ldap_error (0, st, OP_MOD);
+	st = set_ldap_error (0, st, OP_MOD);
     }
-    
+
     return st;
 }
-   
+
 /*
- * This function deletes a single attribute with a single value of a specified dn. 
+ * This function deletes a single attribute with a single value of a specified dn.
  * This function is mainly used to delete krbRealmReferences, krbKdcServers, krbAdminServers...
  * when KDC, ADMIN, PASSWD servers are disassociated with some realms or vice versa.
  */
 
-krb5_error_code 
+krb5_error_code
 deleteAttribute (ld, dn, attribute, value)
     LDAP                        *ld;
     char                        *dn;
@@ -1034,7 +1029,7 @@ deleteAttribute (ld, dn, attribute, value)
 {
     krb5_error_code             st=0;
     LDAPMod                     modAttr, *mods[2]={NULL};
-    char                        *values[2]={NULL}; 
+    char                        *values[2]={NULL};
 
     values[0] = value;
 
@@ -1044,24 +1039,24 @@ deleteAttribute (ld, dn, attribute, value)
     modAttr.mod_op = LDAP_MOD_DELETE;
     modAttr.mod_values = values;
     mods[0] = &modAttr;
-  
+
     /* ldap modify operation */
     st = ldap_modify_s(ld, dn, mods);
-    
+
     /* if either the attribute or the attribute value is missing return a success */
     if (st == LDAP_NO_SUCH_ATTRIBUTE || st == LDAP_UNDEFINED_TYPE)
 	st = 0;
-   
+
     if (st != 0) {
 	st = set_ldap_error (0, st, OP_MOD);
     }
-    
+
     return st;
 }
 
 
 /*
- * This function takes in 2 string arrays, compares them to remove the matching entries. 
+ * This function takes in 2 string arrays, compares them to remove the matching entries.
  * The first array is the original list and the second array is the modified list. Removing
  * the matching entries will result in a reduced array, where the left over first array elements
  * are the deleted entries and the left over second array elements are the added entries.
@@ -1078,33 +1073,33 @@ disjoint_members(src, dest)
     /* validate the input parameters */
     if (src == NULL || dest == NULL)
 	return 0;
-    
+
     /* compute the first array length */
-    for (i=0;src[i]; ++i) 
+    for (i=0;src[i]; ++i)
 	;
-    
+
     /* return if the length is 0 */
-    if (i==0)  
+    if (i==0)
 	return 0;
 
     /* index of the last element and also the length of the array */
     slen = i-1;
 
     /* compute the second array length */
-    for (i=0;dest[i]; ++i) 
+    for (i=0;dest[i]; ++i)
 	;
 
     /* return if the length is 0 */
     if (i==0)
 	return 0;
-  
+
     /* index of the last element and also the length of the array */
     dlen = i-1;
-  
-    /* check for the similar elements and delete them from both the arrays */
-    for(i=0; src[i]; ++i) {
 
-	for(j=0; dest[j]; ++j) {
+    /* check for the similar elements and delete them from both the arrays */
+    for (i=0; src[i]; ++i) {
+
+	for (j=0; dest[j]; ++j) {
 
 	    /* if the element are same */
 	    if (strcasecmp(src[i], dest[j]) == 0) {
@@ -1122,19 +1117,19 @@ disjoint_members(src, dest)
 		}
 		/* reduce the array length by 1 */
 		slen -= 1;
-	
+
 		/* repeat the same processing for the second array too */
 		if (j != dlen) {
 		    free(dest[j]);
 		    dest[j] = dest[dlen];
 		    dest[dlen] = NULL;
-		} else { 
+		} else {
 		    free(dest[j]);
 		    dest[j] = NULL;
 		}
 		dlen -=1;
 
-		/* the source array is reduced by 1, so reduce the index variable used for 
+		/* the source array is reduced by 1, so reduce the index variable used for
 		 * source array by 1. No need to adjust the second array index variable as
 		 * it is reset while entering the inner loop
 		 */
@@ -1152,7 +1147,7 @@ disjoint_members(src, dest)
  * for later use.
  */
 
-krb5_error_code 
+krb5_error_code
 copy_arrays(src, dest, count)
     char                        **src;
     char                        ***dest;
@@ -1163,8 +1158,8 @@ copy_arrays(src, dest, count)
 
     /* validate the input parameters */
     if (src == NULL || dest == NULL)
-      return 0;
-    
+	return 0;
+
     /* allocate memory for the dest array */
     *dest = (char **) calloc((unsigned) count+1, sizeof(char *));
     if (*dest == NULL) {
@@ -1181,11 +1176,11 @@ copy_arrays(src, dest, count)
 	}
     }
 
- cleanup:
+cleanup:
     /* in case of error free up everything and return */
     if (st != 0) {
 	if (*dest != NULL) {
-	    for(i=0; (*dest)[i]; ++i) {
+	    for (i=0; (*dest)[i]; ++i) {
 		free ((*dest)[i]);
 		(*dest)[i] = NULL;
 	    }
@@ -1218,7 +1213,7 @@ getepochtime(strtime, epochtime)
  * The retval is 0 if the attribute is missing.
  */
 
-krb5_error_code 
+krb5_error_code
 krb5_ldap_get_value(ld, ent, attribute, retval)
     LDAP                        *ld;
     LDAPMessage                 *ent;
@@ -1239,11 +1234,11 @@ krb5_ldap_get_value(ld, ent, attribute, retval)
 }
 
 /*
- * krb5_ldap_get_string() - Returns the first string of the attribute. Intended to 
+ * krb5_ldap_get_string() - Returns the first string of the attribute. Intended to
  *
  *
  */
-krb5_error_code 
+krb5_error_code
 krb5_ldap_get_string(ld, ent, attribute, retstr, attr_present)
     LDAP                        *ld;
     LDAPMessage                 *ent;
@@ -1256,7 +1251,7 @@ krb5_ldap_get_string(ld, ent, attribute, retstr, attr_present)
 
     *retstr = NULL;
     if (attr_present != NULL)
-      *attr_present = FALSE;
+	*attr_present = FALSE;
 
     values=ldap_get_values(ld, ent, attribute);
     if (values != NULL) {
@@ -1272,7 +1267,7 @@ krb5_ldap_get_string(ld, ent, attribute, retstr, attr_present)
     return st;
 }
 
-krb5_error_code 
+krb5_error_code
 krb5_ldap_get_time(ld, ent, attribute, rettime, attr_present)
     LDAP                        *ld;
     LDAPMessage                 *ent;
@@ -1299,24 +1294,24 @@ krb5_ldap_get_time(ld, ent, attribute, rettime, attr_present)
 
 /*
  * Function to allocate, set the values of LDAPMod structure. The LDAPMod structure is then
- * added to the array at the ind 
+ * added to the array at the ind
  */
 
-krb5_error_code 
+krb5_error_code
 krb5_add_member(mods, count)
-     LDAPMod          ***mods;
-     int              *count;
+    LDAPMod          ***mods;
+    int              *count;
 {
     int i=0;
     LDAPMod **lmods=NULL;
-    
+
     if ((*mods) != NULL) {
-      for (;(*mods)[i] != NULL; ++i)
-	;
-    }  
+	for (;(*mods)[i] != NULL; ++i)
+	    ;
+    }
     lmods = (LDAPMod **) realloc((*mods), (2+i) * sizeof(LDAPMod *));
     if (lmods == NULL)
-      return ENOMEM;
+	return ENOMEM;
 
     *mods = lmods;
     (*mods)[i+1] = NULL;
@@ -1328,77 +1323,77 @@ krb5_add_member(mods, count)
 }
 
 krb5_error_code
-krb5_add_str_mem_ldap_mod(mods, attribute, op, values) 
-     LDAPMod  ***mods;
-     char     *attribute;
-     int      op;
-     char     **values;
+krb5_add_str_mem_ldap_mod(mods, attribute, op, values)
+    LDAPMod  ***mods;
+    char     *attribute;
+    int      op;
+    char     **values;
 
 {
     int i=0, j=0;
     krb5_error_code   st=0;
 
     if ((st=krb5_add_member(mods, &i)) != 0)
-      return st;
-    
+	return st;
+
     (*mods)[i]->mod_type = strdup(attribute);
     if ((*mods)[i]->mod_type == NULL)
-      return ENOMEM;
+	return ENOMEM;
     (*mods)[i]->mod_op = op;
 
     if (values != NULL) {
-      for (j=0; values[j] != NULL; ++j)
-	;
-      (*mods)[i]->mod_values = malloc (sizeof(char *) * (j+1));  
-      if ((*mods)[i]->mod_values == NULL)
-	  return ENOMEM;
-      
-      for (j=0; values[j] != NULL; ++j) {
-	(*mods)[i]->mod_values[j] = strdup(values[j]);      
-	if ((*mods)[i]->mod_values[j] == NULL)
+	for (j=0; values[j] != NULL; ++j)
+	    ;
+	(*mods)[i]->mod_values = malloc (sizeof(char *) * (j+1));
+	if ((*mods)[i]->mod_values == NULL)
 	    return ENOMEM;
-      }
-      (*mods)[i]->mod_values[j] = NULL;
+
+	for (j=0; values[j] != NULL; ++j) {
+	    (*mods)[i]->mod_values[j] = strdup(values[j]);
+	    if ((*mods)[i]->mod_values[j] == NULL)
+		return ENOMEM;
+	}
+	(*mods)[i]->mod_values[j] = NULL;
     }
     return 0;
 }
 
 krb5_error_code
-krb5_add_ber_mem_ldap_mod(mods, attribute, op, ber_values) 
-     LDAPMod  ***mods;
-     char     *attribute;
-     int      op;
-     struct berval **ber_values;
+krb5_add_ber_mem_ldap_mod(mods, attribute, op, ber_values)
+    LDAPMod  ***mods;
+    char     *attribute;
+    int      op;
+    struct berval **ber_values;
 
 {
     int i=0, j=0;
     krb5_error_code   st=0;
 
     if ((st=krb5_add_member(mods, &i)) != 0)
-      return st;
-    
+	return st;
+
     (*mods)[i]->mod_type = strdup(attribute);
     if ((*mods)[i]->mod_type == NULL)
-      return ENOMEM;
+	return ENOMEM;
     (*mods)[i]->mod_op = op;
 
     for (j=0; ber_values[j] != NULL; ++j)
-      ;
-    (*mods)[i]->mod_bvalues = malloc (sizeof(struct berval *) * (j+1));  
+	;
+    (*mods)[i]->mod_bvalues = malloc (sizeof(struct berval *) * (j+1));
     if ((*mods)[i]->mod_bvalues == NULL)
 	return ENOMEM;
-    
+
     for (j=0; ber_values[j] != NULL; ++j) {
 	(*mods)[i]->mod_bvalues[j] = calloc(1, sizeof(struct berval));
 	if ((*mods)[i]->mod_bvalues[j] == NULL)
 	    return ENOMEM;
 
-	(*mods)[i]->mod_bvalues[j]->bv_len = ber_values[j]->bv_len;      
+	(*mods)[i]->mod_bvalues[j]->bv_len = ber_values[j]->bv_len;
 	(*mods)[i]->mod_bvalues[j]->bv_val = malloc((*mods)[i]->mod_bvalues[j]->bv_len);
 	if ((*mods)[i]->mod_bvalues[j]->bv_val == NULL)
 	    return ENOMEM;
 
-	memcpy((*mods)[i]->mod_bvalues[j]->bv_val, ber_values[j]->bv_val, 
+	memcpy((*mods)[i]->mod_bvalues[j]->bv_val, ber_values[j]->bv_val,
 	       ber_values[j]->bv_len);
     }
     (*mods)[i]->mod_bvalues[j] = NULL;
@@ -1414,29 +1409,29 @@ format_d (int val)
 }
 
 krb5_error_code
-krb5_add_int_arr_mem_ldap_mod(mods, attribute, op, value) 
-     LDAPMod  ***mods;
-     char     *attribute;
-     int      op;
-     int      *value;
+krb5_add_int_arr_mem_ldap_mod(mods, attribute, op, value)
+    LDAPMod  ***mods;
+    char     *attribute;
+    int      op;
+    int      *value;
 
 {
     int i=0, j=0;
     krb5_error_code   st=0;
 
     if ((st=krb5_add_member(mods, &i)) != 0)
-      return st;
+	return st;
 
     (*mods)[i]->mod_type = strdup(attribute);
     if ((*mods)[i]->mod_type == NULL)
-      return ENOMEM;
+	return ENOMEM;
     (*mods)[i]->mod_op = op;
 
     for (j=0; value[j] != -1; ++j)
-      ;
+	;
 
-    (*mods)[i]->mod_values = malloc(sizeof(char *) * (j+1));  
-    
+    (*mods)[i]->mod_values = malloc(sizeof(char *) * (j+1));
+
     for (j=0; value[j] != -1; ++j) {
 	if (((*mods)[i]->mod_values[j] = format_d(value[j])) == NULL)
 	    return ENOMEM;
@@ -1446,22 +1441,22 @@ krb5_add_int_arr_mem_ldap_mod(mods, attribute, op, value)
 }
 
 krb5_error_code
-krb5_add_int_mem_ldap_mod(mods, attribute, op, value) 
-     LDAPMod  ***mods;
-     char     *attribute;
-     int      op;
-     int      value;
+krb5_add_int_mem_ldap_mod(mods, attribute, op, value)
+    LDAPMod  ***mods;
+    char     *attribute;
+    int      op;
+    int      value;
 
 {
     int i=0;
     krb5_error_code      st=0;
 
     if ((st=krb5_add_member(mods, &i)) != 0)
-      return st;
-    
+	return st;
+
     (*mods)[i]->mod_type = strdup(attribute);
     if ((*mods)[i]->mod_type == NULL)
-      return ENOMEM;
+	return ENOMEM;
 
     (*mods)[i]->mod_op = op;
     (*mods)[i]->mod_values = calloc (2, sizeof(char *));
@@ -1471,50 +1466,50 @@ krb5_add_int_mem_ldap_mod(mods, attribute, op, value)
 }
 
 krb5_error_code
-krb5_ldap_set_option( krb5_context kcontext, int option, void *value )
+krb5_ldap_set_option(krb5_context kcontext, int option, void *value)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
 krb5_error_code
-krb5_ldap_lock( krb5_context kcontext, int mode )
+krb5_ldap_lock(krb5_context kcontext, int mode)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
 krb5_error_code
-krb5_ldap_unlock( krb5_context kcontext )
+krb5_ldap_unlock(krb5_context kcontext)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
 krb5_error_code
-krb5_ldap_supported_realms( krb5_context kcontext, char **realms )
+krb5_ldap_supported_realms(krb5_context kcontext, char **realms)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
 krb5_error_code
-krb5_ldap_free_supported_realms( krb5_context kcontext, char **realms )
+krb5_ldap_free_supported_realms(krb5_context kcontext, char **realms)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
 krb5_error_code
-krb5_ldap_errcode_2_string( krb5_context kcontext, long err_code )
+krb5_ldap_errcode_2_string(krb5_context kcontext, long err_code)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message( kcontext, status, "LDAP %s", error_message( status ) );
+    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
     return status;
 }
 
