@@ -39,14 +39,12 @@
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 #include "ldap_tkt_policy.h"
+extern time_t get_date(char *); /* kadmin/cli/getdate.o */
 
 static void print_policy_params(krb5_ldap_policy_params *policyparams, int mask);
 static char *strdur(time_t duration);
 
-/* get_date() function used from src/kadmin/ldap_util/getdate.c */
-
 extern char *yes;
-
 
 /*
  * This function will create a ticket policy object with the
@@ -88,7 +86,7 @@ kdb5_ldap_create_policy(argc, argv)
 	    if (++i > argc - 1)
 		goto err_usage;
 
-	    date = get_date(argv[i], NULL);
+	    date = get_date(argv[i]);
 	    if (date == (time_t)(-1)) {
 		retval = EINVAL;
 		com_err (me, retval, "while providing time specification");
@@ -102,7 +100,7 @@ kdb5_ldap_create_policy(argc, argv)
 	    if (++i > argc - 1)
 		goto err_usage;
 
-	    date = get_date(argv[i], NULL);
+	    date = get_date(argv[i]);
 	    if (date == (time_t)(-1)) {
 		retval = EINVAL;
 		com_err (me, retval, "while providing time specification");
@@ -454,7 +452,7 @@ kdb5_ldap_modify_policy(argc, argv)
 	    if (++i > argc - 1)
 		goto err_usage;
 
-	    date = get_date(argv[i], NULL);
+	    date = get_date(argv[i]);
 	    if (date == (time_t)(-1)) {
 		retval = EINVAL;
 		com_err (me, retval, "while providing time specification");
@@ -468,7 +466,7 @@ kdb5_ldap_modify_policy(argc, argv)
 	    if (++i > argc - 1)
 		goto err_usage;
 
-	    date = get_date(argv[i], NULL);
+	    date = get_date(argv[i]);
 	    if (date == (time_t)(-1)) {
 		retval = EINVAL;
 		com_err (me, retval, "while providing time specification");

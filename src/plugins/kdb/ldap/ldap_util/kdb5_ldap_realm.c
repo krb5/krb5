@@ -87,6 +87,7 @@
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 #include <ldap_principal.h>
+extern time_t get_date(char *); /* kadmin/cli/getdate.o */
 
 char *yes = "yes\n"; /* \n to compare against result of fgets */
 krb5_key_salt_tuple def_kslist = {ENCTYPE_DES_CBC_CRC, KRB5_KDB_SALTTYPE_NORMAL};
@@ -148,7 +149,7 @@ static int get_ticket_policy(rparams,i,argv,argc)
     if (!strcmp(argv[*i], "-maxtktlife")) {
 	if (++(*i) > argc-1)
 	    goto err_usage;
-	date = get_date(argv[*i], NULL);
+	date = get_date(argv[*i]);
 	if (date == (time_t)(-1)) {
 	    retval = EINVAL;
 	    com_err (me, retval, "while providing time specification");
@@ -163,7 +164,7 @@ static int get_ticket_policy(rparams,i,argv,argc)
 	if (++(*i) > argc-1)
 	    goto err_usage;
 
-	date = get_date(argv[*i], NULL);
+	date = get_date(argv[*i]);
 	if (date == (time_t)(-1)) {
 	    retval = EINVAL;
 	    com_err (me, retval, "while providing time specification");
