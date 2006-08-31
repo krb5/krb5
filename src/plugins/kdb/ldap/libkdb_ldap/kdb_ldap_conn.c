@@ -196,15 +196,24 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
 {
     krb5_error_code             st=0;
     krb5_boolean                sasl_mech_supported=TRUE;
-    int                         cnt=0, version=LDAP_VERSION3, tlsoption=LDAP_OPT_X_TLS_HARD;
+    int                         cnt=0, version=LDAP_VERSION3;
     struct timeval              local_timelimit = {10,0};
+#ifdef LDAP_OPT_X_TLS_HARD
+    int				tlsoption=LDAP_OPT_X_TLS_HARD;
+#endif
 
     if ((st=krb5_validate_ldap_context(context, ldap_context)) != 0)
 	goto err_out;
 
     ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &version);
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
     ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &local_timelimit);
+#elif defined LDAP_X_OPT_CONNECT_TIMEOUT
+    ldap_set_option(NULL, LDAP_X_OPT_CONNECT_TIMEOUT, &local_timelimit);
+#endif
+#ifdef LDAP_OPT_X_TLS_HARD
     ldap_set_option(NULL, LDAP_OPT_X_TLS, &tlsoption);
+#endif
 
     HNDL_LOCK(ldap_context);
     while (ldap_context->server_info_list[cnt] != NULL) {

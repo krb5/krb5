@@ -6,6 +6,29 @@
 #define LDAP_X_ERROR(x) (0)
 #endif
 
+#ifndef LDAP_NAME_ERROR
+#ifdef NAME_ERROR
+#define LDAP_NAME_ERROR NAME_ERROR
+#else
+#define LDAP_NAME_ERROR(x) (0)
+#endif
+#endif
+ 
+#ifndef LDAP_SECURITY_ERROR
+#define LDAP_SECURITY_ERROR(x) (0)
+#endif
+
+#ifndef LDAP_SERVICE_ERROR
+#define LDAP_SERVICE_ERROR(x) (0)
+#endif
+
+#ifndef LDAP_API_ERROR
+#define LDAP_API_ERROR(x) (0)
+#endif
+
+#ifndef LDAP_UPDATE_ERROR
+#define LDAP_UPDATE_ERROR(x) (0)
+#endif
 
 /*
  * The possible KDB errors are
@@ -138,7 +161,9 @@ int translate_ldap_error(int err, int op) {
     case LDAP_ALIAS_DEREF_PROBLEM:
 	/* Either the client does not have access rights to read the aliased
 	 * object's name or dereferencing is not allowed */
+#ifdef LDAP_PROXY_AUTHZ_FAILURE
     case LDAP_PROXY_AUTHZ_FAILURE: // Is this correct ?
+#endif
     case LDAP_INSUFFICIENT_ACCESS:
 	/* Caller does not have sufficient rights to perform the requested
 	 * operation */
