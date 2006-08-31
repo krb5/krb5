@@ -313,9 +313,8 @@ void kdb5_ldap_create(argc, argv)
     char *oldsubtree = NULL;
     char pw_str[1024];
     int do_stash = 0;
-    int i = 0, j = 0;
+    int i = 0;
     int mask = 0, ret_mask = 0;
-    char *me = argv[0];
 #ifdef HAVE_EDIRECTORY
     int rightsmask = 0;
 #endif
@@ -620,7 +619,6 @@ void kdb5_ldap_create(argc, argv)
     /* Create special principals inside the realm subtree */
     {
 	char princ_name[MAX_PRINC_SIZE];
-	struct hostent *hp = NULL;
 	krb5_principal_data tgt_princ = {
 	    0,					/* magic number */
 	    {0, 0, 0},				/* krb5_data realm */
@@ -857,13 +855,12 @@ void kdb5_ldap_modify(argc, argv)
     krb5_boolean no_msg = FALSE;
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
-    int i = 0, j = 0;
+    int i = 0;
     int mask = 0, rmask = 0, ret_mask = 0;
-    char *list[MAX_LIST_ENTRIES];
-    int tlist[MAX_LIST_ENTRIES] = {0};
-    int newenctypes = 0, newsalttypes = 0;
-    int existing_entries = 0, list_entries = 0;
 #ifdef HAVE_EDIRECTORY
+    int j = 0;
+    char *list[MAX_LIST_ENTRIES];
+    int existing_entries = 0, list_entries = 0;
     int newkdcdn = 0, newadmindn = 0, newpwddn = 0;
     char **tempstr = NULL;
     char **oldkdcdns = NULL;
@@ -876,7 +873,6 @@ void kdb5_ldap_modify(argc, argv)
     int rightsmask = 0;
     int subtree_changed = 0;
 #endif
-    char *me = argv[0];
 
     dal_handle = (kdb5_dal_handle *) util_context->db_context;
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
@@ -1730,10 +1726,7 @@ static char *strdur(duration)
  */
 static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
 {
-    char buff[BUFF_LEN] = {0};
     char **slist = NULL;
-    int *tmplist = NULL;
-    krb5_error_code retval = 0;
     int num_entry_printed = 0;
 
     /* Print the Realm Attributes on the standard output */
