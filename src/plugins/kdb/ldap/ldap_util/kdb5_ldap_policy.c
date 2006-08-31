@@ -333,7 +333,7 @@ kdb5_ldap_destroy_policy(argc, argv)
 	goto cleanup;
 
 
-    if ((retval = krb5_ldap_delete_policy(util_context, policydn, policyparams,&mask)))
+    if ((retval = krb5_ldap_delete_policy(util_context, policydn, policyparams, mask)))
 	goto cleanup;
 
     printf("** policy object '%s' deleted.\n", policydn);
