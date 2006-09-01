@@ -33,6 +33,10 @@
 #include "ldap_misc.h"
 #include "ldap_err.h"
 
+#ifdef NEED_STRPTIME_PROTO
+extern char *strptime (const char *, const char *, struct tm *);
+#endif
+
 /*
  * This function reads the parameters from the krb5.conf file. The parameters read here are
  * DAL-LDAP specific attributes. Some of these are ldap_port, ldap_server ....
@@ -1505,11 +1509,9 @@ krb5_ldap_free_supported_realms(krb5_context kcontext, char **realms)
     return status;
 }
 
-krb5_error_code
+const char *
 krb5_ldap_errcode_2_string(krb5_context kcontext, long err_code)
 {
-    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
-    return status;
+    return error_message(err_code);
 }
 

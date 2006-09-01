@@ -32,7 +32,17 @@
 #ifndef _KDB_LDAP_H
 #define _KDB_LDAP_H 1
 
+/* We want the interfaces marked "deprecated" in OpenLDAP.  */
+#define LDAP_DEPRECATED 1
 #include <ldap.h>
+
+/* Check for acceptable versions.  */
+#if defined(LDAP_API_FEATURE_X_OPENLDAP)
+# if LDAP_VENDOR_VERSION < 20224
+#  error This code triggers bugs in old OpenLDAP implementations.  Please update to 2.2.24 or later.
+# endif
+#endif
+
 #include <k5-thread.h>
 #include <kdb5.h>
 #include "k5-int.h"
@@ -229,7 +239,7 @@ krb5_error_code
 krb5_ldap_db_get_age(krb5_context, char *, time_t *);
 
 krb5_error_code 
-krb5_ldap_lib_init();
+krb5_ldap_lib_init(void);
 
 krb5_error_code 
 krb5_ldap_lib_cleanup(void);
@@ -259,6 +269,9 @@ krb5_ldap_read_startup_information(krb5_context );
 int
 has_sasl_external_mech(krb5_context, char *);
 
+krb5_error_code
+krb5_get_policydn(krb5_context, krb5_db_entry *, char **);
+
 /* DAL functions */
 
 krb5_error_code
@@ -276,7 +289,7 @@ krb5_ldap_supported_realms( krb5_context, char ** );
 krb5_error_code
 krb5_ldap_free_supported_realms( krb5_context, char ** );
 
-krb5_error_code
+const char *
 krb5_ldap_errcode_2_string( krb5_context, long );
 
 #endif
