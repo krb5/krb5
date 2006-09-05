@@ -47,7 +47,7 @@ krb5_ldap_create_service(context, service, mask)
     krb5_ldap_service_params    *service;
     int                         mask;
 {
-    int                         i=0, j=0; 
+    int                         i=0, j=0;
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;
     char                        **rdns=NULL, *realmattr=NULL, *strval[3]={NULL};
@@ -74,7 +74,7 @@ krb5_ldap_create_service(context, service, mask)
 	strval[1] = "krbKdcService";
 	realmattr = "krbKdcServers";
     } else if (service->servicetype == LDAP_ADMIN_SERVICE) {
-	strval[1] = "krbAdmService";  
+	strval[1] = "krbAdmService";
 	realmattr = "krbAdmServers";
     } else if (service->servicetype == LDAP_PASSWD_SERVICE) {
 	strval[1] = "krbPwdService";
@@ -84,21 +84,21 @@ krb5_ldap_create_service(context, service, mask)
 	realmattr = "krbKdcServers";
     }
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
-      goto cleanup;
-  
+	goto cleanup;
+
     rdns = ldap_explode_dn(service->servicedn, 1);
     if (rdns == NULL) {
-      st = LDAP_INVALID_DN_SYNTAX;
-      goto cleanup;
+	st = LDAP_INVALID_DN_SYNTAX;
+	goto cleanup;
     }
     memset(strval, 0, sizeof(strval));
     strval[0] = rdns[0];
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "cn", LDAP_MOD_ADD, strval)) != 0)
-      goto cleanup;
-    
+	goto cleanup;
+
     if (mask & LDAP_SERVICE_SERVICEFLAG) {
-        if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbserviceflags", LDAP_MOD_ADD,
-                                          service->krbserviceflags)) != 0)
+	if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbserviceflags", LDAP_MOD_ADD,
+					  service->krbserviceflags)) != 0)
 	    goto cleanup;
     }
 
@@ -110,17 +110,17 @@ krb5_ldap_create_service(context, service, mask)
 	} else {
 	    st = EINVAL;
 	    krb5_set_error_message (context, st, "'krbhostserver' argument invalid");
-            goto cleanup;
+	    goto cleanup;
 	}
     }
-  
+
     if (mask & LDAP_SERVICE_REALMREFERENCE) {
 	if (service->krbrealmreferences != NULL) {
 	    unsigned int realmmask=0;
-	    
+
 	    /* check for the validity of the values */
 	    for (j=0; service->krbrealmreferences[j] != NULL; ++j) {
-		st = checkattributevalue(ld, service->krbrealmreferences[j], "ObjectClass", 
+		st = checkattributevalue(ld, service->krbrealmreferences[j], "ObjectClass",
 					 realmcontclass, &realmmask);
 		CHECK_CLASS_VALIDITY(st, realmmask, "realm object value: ");
 	    }
@@ -128,40 +128,40 @@ krb5_ldap_create_service(context, service, mask)
 					      service->krbrealmreferences)) != 0)
 		goto cleanup;
 	} else {
-            st = EINVAL;
+	    st = EINVAL;
 	    krb5_set_error_message (context, st, "Server has no 'krbrealmreferences'");
-            goto cleanup;
+	    goto cleanup;
 	}
     }
-  
+
     /* ldap add operation */
     if ((st=ldap_add_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
-        st = set_ldap_error (context, st, OP_ADD);
+	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
-  
-    /* 
+
+    /*
      * If the service created has realm/s associated with it, then the realm should be updated
      * to have a reference to the service object just created.
      */
     if (mask & LDAP_SERVICE_REALMREFERENCE) {
 	for (i=0; service->krbrealmreferences[i]; ++i) {
-	    if((st=updateAttribute(ld, service->krbrealmreferences[i], realmattr, 
-				   service->servicedn)) != 0) {
+	    if ((st=updateAttribute(ld, service->krbrealmreferences[i], realmattr,
+				    service->servicedn)) != 0) {
 		sprintf (errbuf, "Error adding 'krbRealmReferences' to %s: ",
 			 service->krbrealmreferences[i]);
-                prepend_err_str (context, errbuf, st, st);
+		prepend_err_str (context, errbuf, st, st);
 		/* delete service object, status ignored intentionally */
 		ldap_delete_s(ld, service->servicedn);
 		goto cleanup;
 	    }
 	}
     }
-    
- cleanup:
+
+cleanup:
 
     if (rdns)
-      ldap_value_free (rdns);
+	ldap_value_free (rdns);
 
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
@@ -193,69 +193,69 @@ krb5_ldap_modify_service(context, service, mask)
 
     /* validate the input parameter */
     if (service == NULL || service->servicedn == NULL) {
-        st = EINVAL;
+	st = EINVAL;
 	krb5_set_error_message (context, st, "Service DN is NULL");
-        goto cleanup;
+	goto cleanup;
     }
 
     SETUP_CONTEXT();
     GET_HANDLE();
 
     if (mask & LDAP_SERVICE_SERVICEFLAG) {
-        if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbserviceflags", LDAP_MOD_REPLACE,
-                                          service->krbserviceflags)) != 0)
+	if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbserviceflags", LDAP_MOD_REPLACE,
+					  service->krbserviceflags)) != 0)
 	    goto cleanup;
     }
 
     if (mask & LDAP_SERVICE_HOSTSERVER) {
 	if (service->krbhostservers != NULL) {
 	    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbhostserver", LDAP_MOD_REPLACE,
-                                              service->krbhostservers)) != 0)
-                goto cleanup;
+					      service->krbhostservers)) != 0)
+		goto cleanup;
 	} else {
-            st = EINVAL;
+	    st = EINVAL;
 	    krb5_set_error_message (context, st, "'krbhostserver' value invalid");
-            goto cleanup;
+	    goto cleanup;
 	}
     }
-  
+
     if (mask & LDAP_SERVICE_REALMREFERENCE) {
 	if (service->krbrealmreferences != NULL) {
 	    unsigned int realmmask=0;
-	    
+
 	    /* check for the validity of the values */
 	    for (j=0; service->krbrealmreferences[j]; ++j) {
-                st = checkattributevalue(ld, service->krbrealmreferences[j], "ObjectClass",
-                                         realmcontclass, &realmmask);
+		st = checkattributevalue(ld, service->krbrealmreferences[j], "ObjectClass",
+					 realmcontclass, &realmmask);
 		CHECK_CLASS_VALIDITY(st, realmmask, "realm object value: ");
 	    }
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbrealmreferences", LDAP_MOD_REPLACE,
-                                              service->krbrealmreferences)) != 0)
-                goto cleanup;
-	    
-	    
+	    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbrealmreferences", LDAP_MOD_REPLACE,
+					      service->krbrealmreferences)) != 0)
+		goto cleanup;
+
+
 	    /* get the attribute of the realm to be set */
 	    if (service->servicetype == LDAP_KDC_SERVICE)
 		realmattr = "krbKdcServers";
 	    else if (service->servicetype == LDAP_ADMIN_SERVICE)
-		realmattr = "krbAdmservers";  
+		realmattr = "krbAdmservers";
 	    else if (service->servicetype == LDAP_PASSWD_SERVICE)
 		realmattr = "krbPwdServers";
 	    else
 		realmattr = "krbKdcServers";
-	    
+
 	    /* read the existing list of krbRealmreferences. this will needed  */
-	    if ((st = ldap_search_s (ld, 
-				     service->servicedn, 
+	    if ((st = ldap_search_s (ld,
+				     service->servicedn,
 				     LDAP_SCOPE_BASE,
 				     0,
 				     attr,
 				     0,
 				     &result)) != LDAP_SUCCESS) {
-                st = set_ldap_error (context, st, OP_SEARCH);
+		st = set_ldap_error (context, st, OP_SEARCH);
 		goto cleanup;
 	    }
-	    
+
 	    ent = ldap_first_entry(ld, result);
 	    if (ent) {
 		if ((values=ldap_get_values(ld, ent, "krbRealmReferences")) != NULL) {
@@ -267,20 +267,20 @@ krb5_ldap_modify_service(context, service, mask)
 	    }
 	    ldap_msgfree(result);
 	} else {
-            st = EINVAL;
+	    st = EINVAL;
 	    krb5_set_error_message (context, st, "'krbRealmReferences' value invalid");
-            goto cleanup;
+	    goto cleanup;
 	}
     }
-	    
+
     /* ldap modify operation */
     if ((st=ldap_modify_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
-        st = set_ldap_error (context, st, OP_MOD);
+	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
-    
-    /* 
-     * If the service modified had realm/s associations changed, then the realm should be 
+
+    /*
+     * If the service modified had realm/s associations changed, then the realm should be
      * updated to reflect the changes.
      */
 
@@ -288,44 +288,42 @@ krb5_ldap_modify_service(context, service, mask)
 	/* get the count of the new list of krbrealmreferences */
 	for (i=0; service->krbrealmreferences[i]; ++i)
 	    ;
-	
+
 	/* make a new copy of the krbrealmreferences */
 	if ((st=copy_arrays(service->krbrealmreferences, &newrealmrefs, i)) != 0)
 	    goto cleanup;
-	
+
 	/* find the deletions/additions to the list of krbrealmreferences */
 	if (disjoint_members(oldrealmrefs, newrealmrefs) != 0)
 	    goto cleanup;
 
-	 /* see if some of the attributes have to be deleted */
+	/* see if some of the attributes have to be deleted */
 	if (oldrealmrefs) {
-	    
+
 	    /* update the dn represented by the attribute that is to be deleted */
-	    for (i=0; oldrealmrefs[i]; ++i) 
-		if((st=deleteAttribute(ld, oldrealmrefs[i], realmattr, service->servicedn)) != 0)
-		{
+	    for (i=0; oldrealmrefs[i]; ++i)
+		if ((st=deleteAttribute(ld, oldrealmrefs[i], realmattr, service->servicedn)) != 0) {
 		    prepend_err_str (context, "Error deleting realm attribute:", st, st);
-                    goto cleanup;
+		    goto cleanup;
 		}
 	}
-	
-	 /* see if some of the attributes have to be added */
-	for (i=0; newrealmrefs[i]; ++i) 
-	    if((st=updateAttribute(ld, newrealmrefs[i], realmattr, service->servicedn)) != 0)
-	    {
+
+	/* see if some of the attributes have to be added */
+	for (i=0; newrealmrefs[i]; ++i)
+	    if ((st=updateAttribute(ld, newrealmrefs[i], realmattr, service->servicedn)) != 0) {
 		prepend_err_str (context, "Error updating realm attribute: ", st, st);
 		goto cleanup;
 	    }
     }
-  
- cleanup:
+
+cleanup:
 
     if (oldrealmrefs) {
 	for (i=0; oldrealmrefs[i]; ++i)
 	    free (oldrealmrefs[i]);
 	free (oldrealmrefs);
     }
-  
+
     if (newrealmrefs) {
 	for (i=0; newrealmrefs[i]; ++i)
 	    free (newrealmrefs[i]);
@@ -352,10 +350,10 @@ krb5_ldap_delete_service(context, service, servicedn)
 
     SETUP_CONTEXT();
     GET_HANDLE();
-    
+
     st = ldap_delete_s(ld, servicedn);
     if (st != 0) {
-        st = set_ldap_error (context, st, OP_DEL);
+	st = set_ldap_error (context, st, OP_DEL);
     }
 
     /* NOTE: This should be removed now as the backlinks are going off in OpenLDAP */
@@ -364,16 +362,16 @@ krb5_ldap_delete_service(context, service, servicedn)
     {
 	int                         i=0;
 	char                        *attr=NULL;
-	
+
 	if (service) {
 	    if (service->krbrealmreferences) {
 		if (service->servicetype == LDAP_KDC_SERVICE)
-		    attr = "krbkdcservers"; 
+		    attr = "krbkdcservers";
 		else if (service->servicetype == LDAP_ADMIN_SERVICE)
 		    attr = "krbadmservers";
 		else if (service->servicetype == LDAP_PASSWD_SERVICE)
 		    attr = "krbpwdservers";
-		
+
 		for (i=0; service->krbrealmreferences[i]; ++i) {
 		    deleteAttribute(ld, service->krbrealmreferences[i], attr, servicedn);
 		}
@@ -382,7 +380,7 @@ krb5_ldap_delete_service(context, service, servicedn)
     }
 #endif
 
- cleanup:
+cleanup:
 
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
@@ -415,8 +413,8 @@ krb5_ldap_read_service(context, servicedn, service, omask)
     char                        **values=NULL;
     int                         i=0, count=0, objectmask=0;
     krb5_error_code             st=0, tempst=0;
-    LDAPMessage                 *result=NULL,*ent=NULL;  
-    char                        *attributes[] = {"krbHostServer", "krbServiceflags", 
+    LDAPMessage                 *result=NULL,*ent=NULL;
+    char                        *attributes[] = {"krbHostServer", "krbServiceflags",
 						 "krbRealmReferences", "objectclass", NULL};
     char                        *attrvalues[] = {"krbService", NULL};
     krb5_ldap_service_params    *lservice=NULL;
@@ -424,23 +422,23 @@ krb5_ldap_read_service(context, servicedn, service, omask)
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
     LDAP                        *ld = NULL;
-    
+
     /* validate the input parameter */
     if (servicedn == NULL) {
 	st = EINVAL;
 	krb5_set_error_message (context, st, "Service DN NULL");
 	goto cleanup;
     }
-    
+
     SETUP_CONTEXT();
     GET_HANDLE();
 
     *omask = 0;
-    
+
     /* the policydn object should be of the krbService object class */
     st = checkattributevalue(ld, servicedn, "objectClass", attrvalues, &objectmask);
     CHECK_CLASS_VALIDITY(st, objectmask, "service object value: ");
-    
+
     /* Initialize service structure */
     lservice =(krb5_ldap_service_params *) calloc(1, sizeof(krb5_ldap_service_params));
     if (lservice == NULL) {
@@ -455,30 +453,30 @@ krb5_ldap_read_service(context, servicedn, service, omask)
 	goto cleanup;
     }
     lservice->tl_data->tl_data_type = KDB_TL_USER_INFO;
-    
+
     LDAP_SEARCH(servicedn, LDAP_SCOPE_BASE, "(objectclass=krbService)", attributes);
 
     lservice->servicedn = strdup(servicedn);
     CHECK_NULL(lservice->servicedn);
 
-    ent=ldap_first_entry(ld, result); 
+    ent=ldap_first_entry(ld, result);
     if (ent != NULL) {
 
-	if((values=ldap_get_values(ld, ent, "krbServiceFlags")) != NULL) {
+	if ((values=ldap_get_values(ld, ent, "krbServiceFlags")) != NULL) {
 	    lservice->krbserviceflags = atoi(values[0]);
 	    *omask |= LDAP_SERVICE_SERVICEFLAG;
 	    ldap_value_free(values);
-	}  
+	}
 
-	if((values=ldap_get_values(ld, ent, "krbHostServer")) != NULL) {
+	if ((values=ldap_get_values(ld, ent, "krbHostServer")) != NULL) {
 	    count = ldap_count_values(values);
 	    if ((st=copy_arrays(values, &(lservice->krbhostservers), count)) != 0)
 		goto cleanup;
 	    *omask |= LDAP_SERVICE_HOSTSERVER;
 	    ldap_value_free(values);
-	} 
+	}
 
-	if((values=ldap_get_values(ld, ent, "krbRealmReferences")) != NULL) {
+	if ((values=ldap_get_values(ld, ent, "krbRealmReferences")) != NULL) {
 	    count = ldap_count_values(values);
 	    if ((st=copy_arrays(values, &(lservice->krbrealmreferences), count)) != 0)
 		goto cleanup;
@@ -486,17 +484,17 @@ krb5_ldap_read_service(context, servicedn, service, omask)
 	    ldap_value_free(values);
 	}
 
-	if((values=ldap_get_values(ld, ent, "objectClass")) != NULL) {
-	    for (i=0; values[i]; ++i){
+	if ((values=ldap_get_values(ld, ent, "objectClass")) != NULL) {
+	    for (i=0; values[i]; ++i) {
 		if (strcasecmp(values[i], "krbKdcService") == 0) {
 		    lservice->servicetype = LDAP_KDC_SERVICE;
 		    break;
-		} 
+		}
 
 		if (strcasecmp(values[i], "krbAdmService") == 0) {
 		    lservice->servicetype = LDAP_ADMIN_SERVICE;
 		    break;
-		} 
+		}
 
 		if (strcasecmp(values[i], "krbPwdService") == 0) {
 		    lservice->servicetype = LDAP_PASSWD_SERVICE;
@@ -507,9 +505,9 @@ krb5_ldap_read_service(context, servicedn, service, omask)
 	}
     }
     ldap_msgfree(result);
-  
- cleanup:
-    if(st != 0) {
+
+cleanup:
+    if (st != 0) {
 	krb5_ldap_free_service(context, lservice);
 	*service = NULL;
     } else {
@@ -524,7 +522,7 @@ krb5_ldap_read_service(context, servicedn, service, omask)
 /*
  * This function frees the krb5_ldap_service_params structure members.
  */
- 
+
 krb5_error_code
 krb5_ldap_free_service(context, service)
     krb5_context                context;
@@ -549,13 +547,13 @@ krb5_ldap_free_service(context, service)
 	    free (service->krbhostservers[i]);
 	free (service->krbhostservers);
     }
-  
+
     if (service->tl_data) {
 	if (service->tl_data->tl_data_contents)
 	    free (service->tl_data->tl_data_contents);
 	free (service->tl_data);
     }
-    
+
     free (service);
     return 0;
 }
@@ -581,13 +579,13 @@ krb5_ldap_set_service_passwd(context, service, passwd)
 
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "userPassword", LDAP_MOD_REPLACE, password)) != 0)
 	goto cleanup;
-    
+
     st = ldap_modify_s(ld, service, mods);
     if (st) {
-        st = set_ldap_error (context, st, OP_MOD);
+	st = set_ldap_error (context, st, OP_MOD);
     }
 
- cleanup:
+cleanup:
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;

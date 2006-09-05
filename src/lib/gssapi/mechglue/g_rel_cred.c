@@ -60,6 +60,8 @@ gss_cred_id_t *		cred_handle;
      */
     
     union_cred = (gss_union_cred_t) *cred_handle;
+    if (GSSINT_CHK_LOOP(union_cred))
+	return (GSS_S_NO_CRED | GSS_S_CALL_INACCESSIBLE_READ);
     *cred_handle = NULL;
 
     if (union_cred == (gss_union_cred_t)GSS_C_NO_CREDENTIAL)

@@ -9,7 +9,12 @@
 
 
 krb5_error_code 
-krb5int_mk_chpw_req(krb5_context context, krb5_auth_context auth_context, krb5_data *ap_req, char *passwd, krb5_data *packet)
+krb5int_mk_chpw_req(
+	krb5_context context, 
+	krb5_auth_context auth_context, 
+	krb5_data *ap_req,
+	char *passwd, 
+	krb5_data *packet)
 {
     krb5_error_code ret = 0;
     krb5_data clearpw;
@@ -33,15 +38,15 @@ krb5int_mk_chpw_req(krb5_context context, krb5_auth_context auth_context, krb5_d
     packet->length = 6 + ap_req->length + cipherpw.length;
     packet->data = (char *) malloc(packet->length);
     if (packet->data == NULL)
-	  {
+	{
 	    ret = ENOMEM;
 	    goto cleanup;
-	  }
+	}
     ptr = packet->data;
 
     /* length */
 
-    *ptr++ = (packet->length>>8) & 0xff;
+    *ptr++ = (packet->length>> 8) & 0xff;
     *ptr++ = packet->length & 0xff;
 
     /* version == 0x0001 big-endian */
@@ -96,8 +101,30 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context, krb5_d
     plen = (*ptr++ & 0xff);
     plen = (plen<<8) | (*ptr++ & 0xff);
 
-    if (plen != packet->length)
-	return(KRB5KRB_AP_ERR_MODIFIED);
+    if (plen != packet->length) 
+	{
+		/*
+		 * MS KDCs *may* send back a KRB_ERROR.  Although
+		 * not 100% correct via RFC3244, it's something
+		 * we can workaround here.
+		 */
+		if (krb5_is_krb_error(packet)) {
+
+			if ((ret = krb5_rd_error(context, packet, &krberror)))
+			return(ret);
+
+			if (krberror->e_data.data  == NULL) {
+				ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code) krberror->error;
+				krb5_free_error(context, krberror);
+				return (ret);
+			}
+		}
+		else
+		{
+			return(KRB5KRB_AP_ERR_MODIFIED);
+		}
+	}
+	
 
     /* verify version number */
 
@@ -367,7 +394,7 @@ krb5int_rd_setpw_rep( krb5_context context, krb5_auth_context auth_context, krb5
 /*
 ** set password version is 0xff80, change password version is 1
 */
-	if (version_number != 0xff80 && version_number != 1)
+	if (version_number != 1 && version_number != 0xff80)
 	    return(KRB5KDC_ERR_BAD_PVNO);
 /*
 ** now fill in ap_rep with the reply -

@@ -32,7 +32,17 @@
 #ifndef _KDB_LDAP_H
 #define _KDB_LDAP_H 1
 
+/* We want the interfaces marked "deprecated" in OpenLDAP.  */
+#define LDAP_DEPRECATED 1
 #include <ldap.h>
+
+/* Check for acceptable versions.  */
+#if defined(LDAP_API_FEATURE_X_OPENLDAP)
+# if LDAP_VENDOR_VERSION < 20224
+#  error This code triggers bugs in old OpenLDAP implementations.  Please update to 2.2.24 or later.
+# endif
+#endif
+
 #include <k5-thread.h>
 #include <kdb5.h>
 #include "k5-int.h"
@@ -146,8 +156,8 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 
 /* To be used later */
 typedef struct _krb5_ldap_certificates{
-  char *certificate;
-  int  certtype;
+    char *certificate;
+    int  certtype;
 }krb5_ldap_certificates;
 
 /* ldap server info structure */
@@ -158,25 +168,24 @@ typedef enum _server_status {OFF, ON, NOTSET} krb5_ldap_server_status;
 
 typedef struct _krb5_ldap_server_info krb5_ldap_server_info;
 
-typedef struct  _krb5_ldap_server_handle{
-  int                              msgid;
-  LDAP                             *ldap_handle;
-  krb5_boolean                     server_info_update_pending;
-  krb5_ldap_server_info            *server_info;
-  struct _krb5_ldap_server_handle  *next;
-
-}krb5_ldap_server_handle;
+typedef struct  _krb5_ldap_server_handle {
+    int                              msgid;
+    LDAP                             *ldap_handle;
+    krb5_boolean                     server_info_update_pending;
+    krb5_ldap_server_info            *server_info;
+    struct _krb5_ldap_server_handle  *next;
+} krb5_ldap_server_handle;
 
 struct _krb5_ldap_server_info {
-  krb5_ldap_server_type		server_type;
-  krb5_ldap_server_status       server_status;
-  krb5_ui_4                     num_conns;
-  krb5_ldap_server_handle       *ldap_server_handles;
-  time_t                        downtime;
-  char				*server_name;
-  krb5_ui_4                     port;	
-  char				*root_certificate_file;
-  struct _krb5_ldap_server_info *next;
+    krb5_ldap_server_type	 server_type;
+    krb5_ldap_server_status      server_status;
+    krb5_ui_4                    num_conns;
+    krb5_ldap_server_handle      *ldap_server_handles;
+    time_t                       downtime;
+    char			*server_name;
+    krb5_ui_4                    port;	
+    char			*root_certificate_file;
+    struct _krb5_ldap_server_info *next;
 };
 
 
@@ -201,6 +210,7 @@ typedef struct _krb5_ldap_context {
   k5_mutex_t                    hndl_lock;
   krb5_ldap_krbcontainer_params *krbcontainer;
   krb5_ldap_realm_params        *lrparams;
+  krb5_context                  kcontext;   /* to set the error code and message */
 } krb5_ldap_context;
 
 
@@ -229,7 +239,7 @@ krb5_error_code
 krb5_ldap_db_get_age(krb5_context, char *, time_t *);
 
 krb5_error_code 
-krb5_ldap_lib_init();
+krb5_ldap_lib_init(void);
 
 krb5_error_code 
 krb5_ldap_lib_cleanup(void);
@@ -258,5 +268,28 @@ krb5_ldap_read_startup_information(krb5_context );
 
 int
 has_sasl_external_mech(krb5_context, char *);
+
+krb5_error_code
+krb5_get_policydn(krb5_context, krb5_db_entry *, char **);
+
+/* DAL functions */
+
+krb5_error_code
+krb5_ldap_set_option( krb5_context, int, void * );
+
+krb5_error_code
+krb5_ldap_lock( krb5_context, int );
+
+krb5_error_code
+krb5_ldap_unlock( krb5_context );
+
+krb5_error_code
+krb5_ldap_supported_realms( krb5_context, char ** );
+
+krb5_error_code
+krb5_ldap_free_supported_realms( krb5_context, char ** );
+
+const char *
+krb5_ldap_errcode_2_string( krb5_context, long );
 
 #endif

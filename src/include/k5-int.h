@@ -487,15 +487,19 @@ extern char *strdup (const char *);
 #include <stdio.h>
 
 struct addrlist;
+struct sendto_callback_info;
 
 /* libos.spec */
 krb5_error_code krb5_lock_file (krb5_context, int, int);
 krb5_error_code krb5_unlock_file (krb5_context, int);
 krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 				 const krb5_data *, krb5_data *, int *, int);
-krb5_error_code krb5int_sendto (krb5_context, const krb5_data *,
-				const struct addrlist *, krb5_data *,
-				struct sockaddr *, socklen_t *, int *);
+
+krb5_error_code krb5int_sendto (krb5_context context, const krb5_data *message,
+                const struct addrlist *addrs, struct sendto_callback_info* callback_info,
+				krb5_data *reply, struct sockaddr *localaddr, socklen_t *localaddrlen,
+                struct sockaddr *remoteaddr, socklen_t *remoteaddrlen, int *addr_used);
+
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file (krb5_context, const char * pathname);
@@ -1610,7 +1614,7 @@ krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
 /* set and change password helpers */
 
 krb5_error_code krb5int_mk_chpw_req
-	(krb5_context context, krb5_auth_context auth_context,
+	(krb5_context context, krb5_auth_context auth_context, 
  			krb5_data *ap_req, char *passwd, krb5_data *packet);
 krb5_error_code krb5int_rd_chpw_rep
 	(krb5_context context, krb5_auth_context auth_context,
@@ -1673,8 +1677,9 @@ typedef struct _krb5int_access {
 				   krb5_data *output);
     /* service location and communication */
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
-				   const struct addrlist *, krb5_data *reply,
-				   struct sockaddr *, socklen_t *, int *);
+				   const struct addrlist *, struct sendto_callback_info*, krb5_data *reply,
+				   struct sockaddr *, socklen_t *,struct sockaddr *,
+				   socklen_t *, int *);
     krb5_error_code (*add_host_to_list)(struct addrlist *lp,
 					const char *hostname,
 					int port, int secport,

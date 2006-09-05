@@ -236,7 +236,7 @@ Functions, macros etc. for manipulating identities.
 
     A bitmask that correspond to all the read/write flags in the mask.
 */
-#define KCDB_IDENT_FLAGMASK_RDWR   0x00000fffL
+#define KCDB_IDENT_FLAGMASK_RDWR    0x00000fffL
 
 /*@}*/
 
@@ -2876,7 +2876,7 @@ typedef struct tag_kcdb_credtype {
                                   kmq_delete_subscription() when the
                                   credentials type is unregistered.*/
 
-    kcdb_cred_comp_func is_equal; /*!< Used to as an additional clause
+    kcdb_cred_comp_func is_equal; /*!< Used as an additional clause
                                   when comparing two credentials for
                                   equality.  The function this is
                                   actually a comparison function, it
@@ -2886,10 +2886,10 @@ typedef struct tag_kcdb_credtype {
                                   rock parameter is always zero.
 
                                   It can be assumed that the identity,
-                                  name and credentials have already
-                                  been found to be equal among the
-                                  credentials and the credential type
-                                  is the type that is being
+                                  name and credentials type have
+                                  already been found to be equal among
+                                  the credentials and the credential
+                                  type is the type that is being
                                   registered.*/
 
 #ifdef _WIN32

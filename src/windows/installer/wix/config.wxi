@@ -48,6 +48,7 @@
     <?define IncDir="$(var.TargetDir)inc\"?>
     <?define LibDir="$(var.TargetDir)lib\i386\"?>
     <?define InstallDir="$(var.TargetDir)install\"?>
+    <?define SampleDir="$(var.TargetDir)sample\"?>
     <?define SystemDir="$(env.SystemRoot)\System32\"?>
 
     <?include lang\config_$(var.BuildLang).wxi?>

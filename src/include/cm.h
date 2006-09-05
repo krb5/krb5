@@ -32,10 +32,52 @@ struct select_state {
     struct timeval end_time;	/* magic: tv_sec==0 => never time out */
 };
 
+
 /* Select state flags.  */
 #define SSF_READ	0x01
 #define SSF_WRITE	0x02
 #define SSF_EXCEPTION	0x04
+
+
+static const char *const state_strings[] = {
+    "INITIALIZING", "CONNECTING", "WRITING", "READING", "FAILED"
+};
+
+
+/* connection states */
+enum conn_states { INITIALIZING, CONNECTING, WRITING, READING, FAILED };
+struct incoming_krb5_message {
+    size_t bufsizebytes_read;
+    size_t bufsize;
+    char *buf;
+    char *pos;
+    unsigned char bufsizebytes[4];
+    size_t n_left;
+};
+struct conn_state {
+    SOCKET fd;
+    krb5_error_code err;
+    enum conn_states state;
+    unsigned int is_udp : 1;
+    int (*service)(struct conn_state *, struct select_state *, int);
+    struct addrinfo *addr;
+    struct {
+	struct {
+	    sg_buf sgbuf[2];
+	    sg_buf *sgp;
+	    int sg_count;
+	    unsigned char msg_len_buf[4];
+	} out;
+	struct incoming_krb5_message in;
+    } x;
+};
+
+struct sendto_callback_info {
+    int  (*pfn_callback) (struct conn_state *, void *, krb5_data *);
+    void (*pfn_cleanup)  (void *, krb5_data *);
+    void  *context;	
+};
+
 
 krb5_error_code krb5int_cm_call_select (const struct select_state *,
 					struct select_state *, int *);

@@ -147,6 +147,7 @@ OM_uint32 *		time_rec;
 
     /* initialize to 0s */
     (void) memset(creds, 0, sizeof (gss_union_cred_desc));
+    creds->loopback = creds;
 
     /* for each requested mech attempt to obtain a credential */
     for (i = 0; i < mechs->count; i++) {
@@ -202,6 +203,7 @@ OM_uint32 *		time_rec;
 	*time_rec = outTime;
 
 
+    creds->loopback = creds;
     *output_cred_handle = (gss_cred_id_t)creds;
     return (GSS_S_COMPLETE);
 }
@@ -405,6 +407,7 @@ gss_add_cred(minor_status, input_cred_handle,
     new_union_cred->mechs_array = new_mechs_array;
     new_union_cred->cred_array = new_cred_array;
     new_union_cred->count++;
+    new_union_cred->loopback = new_union_cred;
 
     /* We're done with the internal name. Free it if we allocated it. */
 

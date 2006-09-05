@@ -48,7 +48,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
     *password = NULL;
 
     if (ldap_context->service_password_file)
-        file = ldap_context->service_password_file;
+	file = ldap_context->service_password_file;
 
 #ifndef HAVE_STRERROR_R
 # undef strerror_r
@@ -57,113 +57,133 @@ krb5_ldap_readpassword(context, ldap_context, password)
 
     /* check whether file exists */
     if (access(file, F_OK) < 0) {
-        st = errno;
+	st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
-        goto rp_exit;
+	krb5_set_error_message (context, st, "%s", errbuf);
+	goto rp_exit;
     }
 
     /* check read access */
     if (access(file, R_OK) < 0) {
-        st = errno;
+	st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
-        goto rp_exit;
+	krb5_set_error_message (context, st, "%s", errbuf);
+	goto rp_exit;
     }
 
-    if((fptr=fopen(file, "r")) == NULL) {
-        st = errno;
+    if ((fptr=fopen(file, "r")) == NULL) {
+	st = errno;
 	strerror_r(errno, errbuf, sizeof(errbuf));
-        krb5_set_error_message (context, st, "%s", errbuf);
-        goto rp_exit;
+	krb5_set_error_message (context, st, "%s", errbuf);
+	goto rp_exit;
     }
-    
+
     /* get the record from the file */
-    while(fgets(line, RECORDLEN, fptr)!= NULL) {
-        char tmp[RECORDLEN];
+    while (fgets(line, RECORDLEN, fptr)!= NULL) {
+	char tmp[RECORDLEN];
 
-        tmp[0] = '\0';
-        /* Handle leading white-spaces */
-        for(start = line; isspace(*start); ++start);
+	tmp[0] = '\0';
+	/* Handle leading white-spaces */
+	for (start = line; isspace(*start); ++start);
 
-        /* Handle comment lines */
-        if (*start == '!' || *start == '#')
-            continue;
-        sscanf(line, "%*[ \t]%[^#]", tmp);
-        if(tmp[0] == '\0')
-            sscanf(line, "%[^#]", tmp);
-        if(strcasecmp(tmp, ldap_context->bind_dn) == 0) {
-            entryfound = 1; /* service_dn record found !!! */
-            break;
-        }
+	/* Handle comment lines */
+	if (*start == '!' || *start == '#')
+	    continue;
+	sscanf(line, "%*[ \t]%[^#]", tmp);
+	if (tmp[0] == '\0')
+	    sscanf(line, "%[^#]", tmp);
+	if (strcasecmp(tmp, ldap_context->bind_dn) == 0) {
+	    entryfound = 1; /* service_dn record found !!! */
+	    break;
+	}
     }
     fclose (fptr);
 
     if (entryfound == 0)  {
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
 	krb5_set_error_message (context, st, "Bind DN entry missing in stash file");
-        goto rp_exit;
+	goto rp_exit;
     }
     /* replace the \n with \0 */
     start = strchr(line, '\n');
     if (start)
-        *start = '\0';
+	*start = '\0';
 
     start = strchr(line, '#');
-    if (start == NULL ) {
-        /* password field missing */
+    if (start == NULL) {
+	/* password field missing */
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message (context, st, "Stash file entry corrupt");
-        goto rp_exit;
+	krb5_set_error_message (context, st, "Stash file entry corrupt");
+	goto rp_exit;
     }
     ++ start;
     /* Extract the plain password / certificate file information */
     {
-        struct data PT, CT;
+	struct data PT, CT;
 
-        /* Check if the entry has the path of a certificate */
-        if(!strncmp(start, "{FILE}", strlen("{FILE}"))) {
+	/* Check if the entry has the path of a certificate */
+	if (!strncmp(start, "{FILE}", strlen("{FILE}"))) {
 	    /* Set *password = {FILE}<path to cert>\0<cert password> */
-            /*ptr = strchr(start, ':');
-	      if(ptr == NULL){ */
+	    /*ptr = strchr(start, ':');
+	      if (ptr == NULL) { */
 	    *password = (unsigned char *)malloc(strlen(start) + 2);
 	    (*password)[strlen(start) + 1] = '\0';
 	    (*password)[strlen(start)] = '\0';
 	    strcpy((char *)(*password), start);
 	    goto got_password;
-        } else {
+	} else {
 	    CT.value = (unsigned char *)start;
 	    CT.len = strlen((char *)CT.value);
 	    st = dec_password(CT, &PT);
-	    if(st != 0){
+	    if (st != 0) {
+		switch (st) {
+		case ERR_NO_MEM:
+		    st = ENOMEM;
+		    break;
+		case ERR_PWD_ZERO:
+		    st = EINVAL;
+		    krb5_set_error_message(context, st, "Password has zero length");
+		    break;
+		case ERR_PWD_BAD:
+		    st = EINVAL;
+		    krb5_set_error_message(context, st, "Password corrupted");
+		    break;
+		case ERR_PWD_NOT_HEX:
+		    st = EINVAL;
+		    krb5_set_error_message(context, st, "Not a hexadecimal password");
+		    break;
+		default:
+		    st = KRB5_KDB_SERVER_INTERNAL_ERR;
+		    break;
+		}
 		goto rp_exit;
 	    }
 	    *password = PT.value;
-        }
+	}
     }
- got_password:
+got_password:
 
- rp_exit:
+rp_exit:
     if (st) {
-        if (*password)
-            free (*password);
-        *password = NULL;
+	if (*password)
+	    free (*password);
+	*password = NULL;
     }
     return st;
 }
 
 /* Encodes a sequence of bytes in hexadecimal */
 
-int 
+int
 tohex(in, ret)
-     krb5_data         in;
-     krb5_data         *ret;
+    krb5_data         in;
+    krb5_data         *ret;
 {
     int                i=0, j=0, err = 0;
-    
+
     ret->length = 0;
     ret->data = NULL;
-    
+
     ret->data = (unsigned char *)malloc((unsigned int)in.length * 2 + 1 /*Null termination */);
     if (ret->data == NULL) {
 	err = ENOMEM;
@@ -171,19 +191,19 @@ tohex(in, ret)
     }
     ret->length = in.length * 2;
     ret->data[ret->length] = 0;
-    
+
     for (i = 0, j = 0; i < in.length; i++, j += 2) {
 	sprintf((char *)ret->data + j, "%x", in.data[i] >> 4);
 	sprintf((char *)ret->data + j + 1, "%x", in.data[i] & 0xf);
     }
-    
- cleanup:
-    
+
+cleanup:
+
     if (ret->length == 0) {
 	free(ret->data);
 	ret->data = NULL;
     }
-    
+
     return err;
 }
 
@@ -192,36 +212,39 @@ tohex(in, ret)
  *   <secret> := {HEX}<password in hexadecimal>
  *
  * <password> is the actual eDirectory password of the service
+ * Return values:
+ * ERR_NO_MEM      - No Memory
+ * ERR_PWD_ZERO    - Password has zero length
+ * ERR_PWD_BAD     - Passowrd corrupted
+ * ERR_PWD_NOT_HEX - Not a hexadecimal password
  */
 
-int dec_password(struct data pwd, struct data *ret){
+int dec_password(struct data pwd, struct data *ret) {
     int err=0;
     int i=0, j=0;
-    
+
     ret->len = 0;
     ret->value = NULL;
-    
+
     if (pwd.len == 0) {
-	err = EINVAL;
-        krb5_set_error_message (0, err, "Password has zero length");
-        ret->len = 0;
-        goto cleanup;
+	err = ERR_PWD_ZERO;
+	ret->len = 0;
+	goto cleanup;
     }
-    
+
     /* Check if it is a hexadecimal encoded password */
-    if (pwd.len >= strlen("{HEX}") && 
+    if (pwd.len >= strlen("{HEX}") &&
 	strncmp((char *)pwd.value, "{HEX}", strlen("{HEX}")) == 0) {
-	
-	if((pwd.len - strlen("{HEX}")) % 2 != 0){
+
+	if ((pwd.len - strlen("{HEX}")) % 2 != 0) {
 	    /* A hexadecimal encoded password should have even length */
-	    err = EINVAL;
-	    krb5_set_error_message (0, err, "Password corrupted");
+	    err = ERR_PWD_BAD;
 	    ret->len = 0;
 	    goto cleanup;
 	}
 	ret->value = (unsigned char *)malloc((pwd.len - strlen("{HEX}")) / 2 + 1);
-	if(ret->value == NULL){
-	    err = ENOMEM;
+	if (ret->value == NULL) {
+	    err = ERR_NO_MEM;
 	    ret->len = 0;
 	    goto cleanup;
 	}
@@ -231,28 +254,25 @@ int dec_password(struct data pwd, struct data *ret){
 	    int k;
 	    /* Check if it is a hexadecimal number */
 	    if (isxdigit(pwd.value[i]) == 0 || isxdigit(pwd.value[i + 1]) == 0) {
-		err = EINVAL;
-                krb5_set_error_message (0, err, "Not a hexadecimal password");
-                ret->len = 0;
-                goto cleanup;
+		err = ERR_PWD_NOT_HEX;
+		ret->len = 0;
+		goto cleanup;
 	    }
 	    sscanf((char *)pwd.value + i, "%2x", &k);
 	    ret->value[j] = k;
 	}
 	goto cleanup;
     } else {
-	err = EINVAL;
-        krb5_set_error_message (0, err, "Not a hexadecimal password");
-        ret->len = 0;
-        goto cleanup;
+	err = ERR_PWD_NOT_HEX;
+	ret->len = 0;
+	goto cleanup;
     }
-    
- cleanup:
-	
-    if(ret->len == 0) {
+
+cleanup:
+
+    if (ret->len == 0) {
 	free(ret->value);
 	ret->value = NULL;
     }
     return(err);
 }
-

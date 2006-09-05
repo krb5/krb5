@@ -40,6 +40,7 @@
 #include "ldap_principal.h"
 #include "ldap_pwd_policy.h"
 
+
 /*
  *      Exposed API
  */
@@ -51,12 +52,12 @@ kdb_vftabl kdb_function_table = {
   /* fini_library */			       krb5_ldap_lib_cleanup,
   /* init_module */			       krb5_ldap_open,
   /* fini_module */			       krb5_ldap_close,
-  /* db_create */			       NULL,
-  /* db_destroy */			       NULL,
+  /* db_create */			       krb5_ldap_create_realm_1,
+  /* db_destroy */			       krb5_ldap_delete_realm_1,
   /* db_get_age */                             krb5_ldap_db_get_age,
-  /* db_set_option */			       NULL,
-  /* db_lock */				       NULL,
-  /* db_unlock */			       NULL,
+  /* db_set_option */			       krb5_ldap_set_option,
+  /* db_lock */				       krb5_ldap_lock,
+  /* db_unlock */			       krb5_ldap_unlock,
   /* db_get_principal */		       krb5_ldap_get_principal,
   /* db_free_principal */		       krb5_ldap_free_principal,
   /* db_put_principal */		       krb5_ldap_put_principal,
@@ -68,11 +69,12 @@ kdb_vftabl kdb_function_table = {
   /* db_iter_policy */                         krb5_ldap_iterate_password_policy,
   /* db_delete_policy */                       krb5_ldap_delete_password_policy,
   /* db_free_policy */                         krb5_ldap_free_password_policy,
-  /* db_supported_realms */		       NULL,
-  /* db_free_supported_realms */	       NULL,
-  /* errcode_2_string */                       NULL,
+  /* db_supported_realms */		       krb5_ldap_supported_realms,
+  /* db_free_supported_realms */	       krb5_ldap_free_supported_realms,
+  /* errcode_2_string */                       krb5_ldap_errcode_2_string,
   /* db_alloc */                               krb5_ldap_alloc,
   /* db_free */                                krb5_ldap_free,
+            /* optional functions */
   /* set_master_key */			       krb5_ldap_set_mkey,
   /* get_master_key */			       krb5_ldap_get_mkey,
   /* setup_master_key_name */		       NULL,

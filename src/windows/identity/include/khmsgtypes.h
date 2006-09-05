@@ -331,7 +331,7 @@
     finalizing dialog creation operations.
 
     Message parameters:
-    - \b vparam : poitner to a ::khui_new_creds structure
+    - \b vparam : pointer to a ::khui_new_creds structure
 
     \note May be sent to individual credential subscriptions.
  */
@@ -472,6 +472,10 @@
 
 /*! \brief A property page is being launced
 
+    Handlers of this message should determine whether or not they
+    should participate in the property sheet and if so, add a
+    ::khui_property_page structure to the property sheet.
+
     Message parameters:
     - \b vparam : pointer to a ::khui_property_sheet structure
  */
@@ -490,6 +494,9 @@
 
 /*! \brief A property page has finished processing
 
+    Handlers of this message should remove any ::khui_property_page
+    structures they added when processing ::KMSG_CRED_PP_BEGIN.
+
     Message parameters:
     - \b vparam : pointer to a ::khui_property_sheet structure
  */
@@ -499,6 +506,13 @@
 
     Message parameters:
     - \b vparam : pointer to a ::khui_property_sheet structure
+
+    \note This is a notification that the property sheet processing
+        has been completed and that the property sheet data structures
+        should be freed.  Any property page data structures should
+        have already been freed while processing KMSG_CRED_PP_END.
+        The validity of the ::khui_property_sheet structure should not
+        be relied upon while processing this message.
  */
 #define KMSG_CRED_PP_DESTROY        131
 

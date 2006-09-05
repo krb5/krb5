@@ -55,6 +55,7 @@ gss_name_t *dest_name;
 	if (!dest_union)
 		goto allocation_failure;
 
+	dest_union->loopback = 0;
 	dest_union->mech_type = 0;
 	dest_union->mech_name = 0;
 	dest_union->name_type = 0;
@@ -92,6 +93,7 @@ gss_name_t *dest_name;
 	}
 
 
+	dest_union->loopback = dest_union;
 	*dest_name = (gss_name_t)dest_union;
 	return (GSS_S_COMPLETE);
 

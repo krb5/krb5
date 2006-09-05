@@ -893,8 +893,12 @@ static void sweep_up(context, cc)
     struct stat  st_temp;
 
     krb5_seteuid(0);
-    krb5_seteuid(target_uid);
-    
+    if (krb5_seteuid(target_uid) < 0) {
+	com_err(prog_name, errno,
+		"while changing to target uid for destroying ccache");
+	exit(1);
+    }
+
     cc_name = krb5_cc_get_name(context, cc);
     if ( ! stat(cc_name, &st_temp)){
 	if ((retval = krb5_cc_destroy(context, cc))){
