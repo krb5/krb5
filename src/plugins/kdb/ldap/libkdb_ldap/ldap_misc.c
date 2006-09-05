@@ -37,6 +37,70 @@
 extern char *strptime (const char *, const char *, struct tm *);
 #endif
 
+/* Get integer or string values from the config section, falling back
+   to the default section, then to hard-coded values.  */
+static errcode_t
+prof_get_integer_def(krb5_context ctx, const char *conf_section,
+		     const char *name, int dfl, krb5_ui_4 *out)
+{
+    errcode_t err;
+    int out_temp = 0;
+
+    err = profile_get_integer (ctx->profile,
+			       KDB_MODULE_SECTION, conf_section, name,
+			       0, &out_temp);
+    if (err) {
+	krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
+				name, error_message(err));
+	return err;
+    }
+    if (out_temp != 0) {
+	*out = out_temp;
+	return 0;
+    }
+    err = profile_get_integer (ctx->profile,
+			       KDB_MODULE_DEF_SECTION, name, 0,
+			       dfl, &out_temp);
+    if (err) {
+	krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
+				name, error_message(err));
+	return err;
+    }
+    *out = out_temp;
+    return 0;
+}
+
+/* We don't have non-null defaults in any of our calls, so don't
+   bother with the extra argument.  */
+static errcode_t
+prof_get_string_def(krb5_context ctx, const char *conf_section,
+		    const char *name, char **out)
+{
+    errcode_t err;
+
+    err = profile_get_string (ctx->profile,
+			      KDB_MODULE_SECTION, conf_section, name,
+			      0, out);
+    if (err) {
+	krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
+				name, error_message(err));
+	return err;
+    }
+    if (*out != 0)
+	return 0;
+    err = profile_get_string (ctx->profile,
+			      KDB_MODULE_DEF_SECTION, name, 0,
+			      0, out);
+    if (err) {
+	krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
+				name, error_message(err));
+	return err;
+    }
+    return 0;
+}
+
+
+
 /*
  * This function reads the parameters from the krb5.conf file. The parameters read here are
  * DAL-LDAP specific attributes. Some of these are ldap_port, ldap_server ....
@@ -83,23 +147,28 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      * this parameter defines maximum ldap connections per ldap server
      */
     if (ldap_context->max_server_conns == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section,
-				    "ldap_conns_per_server", 0,
-				    (int *) &ldap_context->max_server_conns)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' "
-				    "attribute");
+	st = prof_get_integer_def (context, conf_section,
+				   "ldap_conns_per_server",
+				   DEFAULT_CONNS_PER_SERVER,
+				   &ldap_context->max_server_conns);
+	if (st)
 	    goto cleanup;
-	}
+    }
+
+    if (ldap_context->max_server_conns < 2) {
+	st = EINVAL;
+	krb5_set_error_message (context, st,
+				"Minimum connections required per server is 2");
+	goto cleanup;
     }
 
     /* if ldap port is not set read it from database module section of conf file */
     if (ldap_context->port == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_SECTION, conf_section,
-				    "ldap_ssl_port", 0,
-				    (int *) &ldap_context->port)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
+	st = prof_get_integer_def (context, conf_section,
+				   "ldap_ssl_port",
+				   LDAPS_PORT, &ldap_context->port);
+	if (st)
 	    goto cleanup;
-	}
     }
 
     /* if the bind dn is not set read it from the database module section of conf file
@@ -107,25 +176,19 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      * to LDAP server. the srv_type decides which dn to read.
      */
     if (ldap_context->bind_dn == NULL) {
+	char *name = 0;
+	if (srv_type == KRB5_KDB_SRV_TYPE_KDC)
+	    name = "ldap_kdc_dn";
+	else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN)
+	    name = "ldap_kadmind_dn";
+	else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD)
+	    name = "ldap_kpasswdd_dn";
 
-	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				       "ldap_kdc_dn", NULL, &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
+	if (name) {
+	    st = prof_get_string_def (context, conf_section, name,
+				      &ldap_context->bind_dn);
+	    if (st)
 		goto cleanup;
-	    }
-	} else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				       "ldap_kadmind_dn", NULL, &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
-		goto cleanup;
-	    }
-	} else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				       "ldap_kpasswdd_dn", NULL, &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
-		goto cleanup;
-	    }
 	}
     }
 
@@ -133,24 +196,22 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
      * this file contains stashed passwords of the KDC, ADMIN and PASSWD dns.
      */
     if (ldap_context->service_password_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				   "ldap_service_password_file", NULL,
-				   &ldap_context->service_password_file)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_service_password_file' attribute");
+	st = prof_get_string_def (context, conf_section,
+				  "ldap_service_password_file",
+				  &ldap_context->service_password_file);
+	if (st)
 	    goto cleanup;
-	}
     }
 
     /* if root certificate file is not set read it from database module section of conf file
      * this is the trusted root certificate of the Directory.
      */
     if (ldap_context->root_certificate_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
-				   "ldap_root_certificate_file", NULL,
-				   &ldap_context->root_certificate_file)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
+	st = prof_get_string_def (context, conf_section,
+				  "ldap_root_certificate_file",
+				  &ldap_context->root_certificate_file);
+	if (st)
 	    goto cleanup;
-	}
     }
 
     /* if the ldap server parameter is not set read the list of ldap servers:port from the
@@ -213,76 +274,6 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 		++ele;
 	    }
 	    profile_release_string(tempval);
-	}
-    }
-
-    /* the same set of all the above parameters can be obtained from the dbdefaults section of
-     * conf file. Here read the missing parameters from [dbdefaults] section */
-
-    if (ldap_context->max_server_conns == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION,
-				    "ldap_conns_per_server", NULL, DEFAULT_CONNS_PER_SERVER,
-				    (int *) &ldap_context->max_server_conns)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_conns_per_server' attribute");
-	    goto cleanup;
-	}
-    }
-
-    if (ldap_context->max_server_conns < 2) {
-	st = EINVAL;
-	krb5_set_error_message (context, st, "Minimum connections required per server is 2");
-	goto cleanup;
-    }
-
-    if (ldap_context->port == 0) {
-	if ((st=profile_get_integer(context->profile, KDB_MODULE_DEF_SECTION, "ldap_ssl_port",
-				    NULL, LDAPS_PORT, &ldap_context->port)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_ssl_port' attribute");
-	    goto cleanup;
-	}
-    }
-
-    if (ldap_context->bind_dn == NULL) {
-	if (srv_type == KRB5_KDB_SRV_TYPE_KDC) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION, "ldap_kdc_dn",
-				       NULL, NULL, &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kdc_dn' attribute");
-		goto cleanup;
-	    }
-	} else if (srv_type == KRB5_KDB_SRV_TYPE_ADMIN) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
-				       "ldap_kadmind_dn", NULL, NULL,
-				       &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kadmind_dn' attribute");
-		goto cleanup;
-	    }
-	} else if (srv_type == KRB5_KDB_SRV_TYPE_PASSWD) {
-	    if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
-				       "ldap_kpasswdd_dn", NULL, NULL,
-				       &ldap_context->bind_dn)) != 0) {
-		krb5_set_error_message (context, st, "Error reading 'ldap_kpasswdd_dn' attribute");
-		goto cleanup;
-	    }
-	}
-    }
-
-    /* read service_password_file value */
-    if (ldap_context->service_password_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
-				   "ldap_service_password_file", NULL, NULL,
-				   &ldap_context->service_password_file)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_service_passwd_file' attribute");
-	    goto cleanup;
-	}
-    }
-
-    /* read root certificate file value */
-    if (ldap_context->root_certificate_file == NULL) {
-	if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
-				   "ldap_root_certificate_file", NULL, NULL,
-				   &ldap_context->root_certificate_file)) != 0) {
-	    krb5_set_error_message (context, st, "Error reading 'ldap_root_certificate_file' attribute");
-	    goto cleanup;
 	}
     }
 
