@@ -102,9 +102,9 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
 
 
 /*
- * This function reads the parameters from the krb5.conf file. The parameters read here are
- * DAL-LDAP specific attributes. Some of these are ldap_port, ldap_server ....
- *
+ * This function reads the parameters from the krb5.conf file. The
+ * parameters read here are DAL-LDAP specific attributes. Some of
+ * these are ldap_port, ldap_server ....
  */
 krb5_error_code
 krb5_ldap_read_server_params(context, conf_section, srv_type)
@@ -137,14 +137,18 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
     /* this mutex is used in ldap reconnection pool */
     if (k5_mutex_init(&(ldap_context->hndl_lock)) != 0) {
 	st = KRB5_KDB_SERVER_INTERNAL_ERR;
-//	st = -1;
-//	krb5_ldap_dal_err_funcp(context, krb5_err_have_str, st,
-//				"k5_mutex_init failed");
+#if 0
+	st = -1;
+	krb5_ldap_dal_err_funcp(context, krb5_err_have_str, st,
+				"k5_mutex_init failed");
+#endif
 	goto cleanup;
     }
 
-    /* if max_server_conns is not set read it from database module section of conf file
-     * this parameter defines maximum ldap connections per ldap server
+    /*
+     * If max_server_conns is not set read it from database module
+     * section of conf file this parameter defines maximum ldap
+     * connections per ldap server.
      */
     if (ldap_context->max_server_conns == 0) {
 	st = prof_get_integer_def (context, conf_section,
@@ -162,7 +166,8 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	goto cleanup;
     }
 
-    /* if ldap port is not set read it from database module section of conf file */
+    /* If ldap port is not set read it from database module section of
+       conf file.  */
     if (ldap_context->port == 0) {
 	st = prof_get_integer_def (context, conf_section,
 				   "ldap_ssl_port",
@@ -171,9 +176,11 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    goto cleanup;
     }
 
-    /* if the bind dn is not set read it from the database module section of conf file
-     * this paramter is populated by one of the KDC, ADMIN or PASSWD dn to be used to connect
-     * to LDAP server. the srv_type decides which dn to read.
+    /*
+     * If the bind dn is not set read it from the database module
+     * section of conf file this paramter is populated by one of the
+     * KDC, ADMIN or PASSWD dn to be used to connect to LDAP
+     * server.  The srv_type decides which dn to read.
      */
     if (ldap_context->bind_dn == NULL) {
 	char *name = 0;
@@ -192,8 +199,10 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	}
     }
 
-    /* read service_password_file parameter from database module section of conf file
-     * this file contains stashed passwords of the KDC, ADMIN and PASSWD dns.
+    /*
+     * Read service_password_file parameter from database module
+     * section of conf file this file contains stashed passwords of
+     * the KDC, ADMIN and PASSWD dns.
      */
     if (ldap_context->service_password_file == NULL) {
 	st = prof_get_string_def (context, conf_section,
@@ -203,8 +212,10 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    goto cleanup;
     }
 
-    /* if root certificate file is not set read it from database module section of conf file
-     * this is the trusted root certificate of the Directory.
+    /*
+     * If root certificate file is not set read it from database
+     * module section of conf file this is the trusted root
+     * certificate of the Directory.
      */
     if (ldap_context->root_certificate_file == NULL) {
 	st = prof_get_string_def (context, conf_section,
@@ -214,8 +225,9 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    goto cleanup;
     }
 
-    /* if the ldap server parameter is not set read the list of ldap servers:port from the
-     * database module section of the conf file
+    /*
+     * If the ldap server parameter is not set read the list of ldap
+     * servers:port from the database module section of the conf file.
      */
 
     if (ldap_context->server_info_list == NULL) {
@@ -295,7 +307,8 @@ krb5_ldap_free_server_params(ldap_context)
     if (ldap_context == NULL)
 	return 0;
 
-    /* free all ldap servers list and the ldap handles associated with the ldap server */
+    /* Free all ldap servers list and the ldap handles associated with
+       the ldap server.  */
     if (ldap_context->server_info_list) {
 	while (ldap_context->server_info_list[i]) {
 	    if (ldap_context->server_info_list[i]->server_name) {
@@ -393,11 +406,13 @@ is_principal_in_realm(ldap_context, searchfor)
     defrealmlen = strlen(ldap_context->lrparams->realm_name);
     defrealm = ldap_context->lrparams->realm_name;
 
-    /* care should be taken for inter-realm principals as the default realm can exist in the
-     * realm part of the principal name or can also exist in the second portion of the name part.
-     * However, if the default realm exist in the second part of the principal portion, then the
-     * first portion of the principal name SHOULD be "krbtgt". All this check is done in the
-     * immediate block.
+    /*
+     * Care should be taken for inter-realm principals as the default
+     * realm can exist in the realm part of the principal name or can
+     * also exist in the second portion of the name part.  However, if
+     * the default realm exist in the second part of the principal
+     * portion, then the first portion of the principal name SHOULD be
+     * "krbtgt".  All this check is done in the immediate block.
      */
     if (searchfor->length == 2)
 	if ((strncasecmp(searchfor->data[0].data, "krbtgt",
@@ -420,19 +435,24 @@ is_principal_in_realm(ldap_context, searchfor)
 
 
 /*
- * Deduce the subtree information from the context. A realm can have atmost 2 subtrees.
+ * Deduce the subtree information from the context. A realm can have
+ * at most 2 subtrees.
  * 1. the Realm container
  * 2. the actual subtree associated with the Realm
  *
- * However, there are some conditions to be considered to deduce the actual subtree/s associated
- * with the realm. The conditions are as follows
- * 1. If the subtree information of the Realm is [Root] or NULL (that is internal a [Root]) then
- *    the realm has only one subtree i.e [Root], i.e. whole of the tree.
- * 2. If the subtree information of the Realm is missing/absent, then the realm has only one
- *    i.e. the Realm container. NOTE: In call cases Realm container SHOULD be the one among the
- *    subtrees or the only one subtree.
- * 3. The subtree information of the realm is overlapping the realm container of the realm, then
- *    the realm has only one subtree and it is the subtree information associated with the realm.
+ * However, there are some conditions to be considered to deduce the
+ * actual subtree/s associated with the realm.  The conditions are as
+ * follows:
+ * 1. If the subtree information of the Realm is [Root] or NULL (that
+ *    is internal a [Root]) then the realm has only one subtree
+ *    i.e [Root], i.e. whole of the tree.
+ * 2. If the subtree information of the Realm is missing/absent, then the
+ *    realm has only one, i.e., the Realm container.  NOTE: In call cases
+ *    Realm container SHOULD be the one among the subtrees or the only
+ *    one subtree.
+ * 3. The subtree information of the realm is overlapping the realm
+ *    container of the realm, then the realm has only one subtree and
+ *    it is the subtree information associated with the realm.
  */
 krb5_error_code
 krb5_get_subtree_info(ldap_context, subtreearr, ntree)
@@ -447,11 +467,13 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     realm_cont_dn = ldap_context->lrparams->realmdn;
 
     /*
-     * if subtree attribute value is [Root] of the tree which is represented by a ""
-     * (null) string, set the ntree value as 1 and do not fill the subtreearr value.
-     * In eDirectory the [Root] can be represented as a "" (null) string, however this
+     * If subtree attribute value is [Root] of the tree which is
+     * represented by a "" (null) string, set the ntree value as 1 and
+     * do not fill the subtreearr value.  In eDirectory the [Root] can
+     * be represented as a "" (null) string, however this
      * representation throws a "No such object" error in OpenLDAP.
-     * Representing [Root] of the tree as NULL pointer (i.e. no value) works in both case.
+     * Representing [Root] of the tree as NULL pointer (i.e. no value)
+     * works in both case.
      */
     if (subtree == NULL || strcasecmp(subtree, "") == 0) {
 	*ntree = 1;
@@ -459,9 +481,10 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     }
 
     /*
-     * the subtree attribute value of the realm can be same as the realm container or can
-     * even overlap. If the check is successful, then the subtree attribute value alone is
-     * copied to the subtreearr array and the ntree value is set to 1.
+     * The subtree attribute value of the realm can be same as the
+     * realm container or can even overlap.  If the check is
+     * successful, then the subtree attribute value alone is copied to
+     * the subtreearr array and the ntree value is set to 1.
      */
     lendiff = strlen(realm_cont_dn) - strlen(subtree);
     if (lendiff >= 0 && (strcasecmp(realm_cont_dn+lendiff, subtree)==0)) {
@@ -473,8 +496,9 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     }
 
     /*
-     * if the subtree attribute value of the realm and the realm container are different,
-     * then both of the values are copied to subtreearr and ntree value is set to 2.
+     * If the subtree attribute value of the realm and the realm
+     * container are different, then both of the values are copied to
+     * subtreearr and ntree value is set to 2.
      */
     subtreearr[0] = strdup(realm_cont_dn);
     if (subtreearr[0] == NULL)
@@ -490,9 +514,10 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
 }
 
 /*
- * This function appends the content with a type into the tl_data structure. Based on the type
- * the length of the content is either pre-defined or computed from the content.
- * Returns 0 in case of success and 1 if the type associated with the content is undefined.
+ * This function appends the content with a type into the tl_data
+ * structure.  Based on the type the length of the content is either
+ * pre-defined or computed from the content.  Returns 0 in case of
+ * success and 1 if the type associated with the content is undefined.
  */
 
 krb5_error_code
@@ -609,12 +634,13 @@ store_tl_data(tl_data, tl_type, value)
 }
 
 /*
- * This function scans the tl_data structure to get the value of a type defined by the tl_type
- * (second parameter). The tl_data structure has all the data in the tl_data_contents member.
- * The format of the tl_data_contents is as follows.
- * The first byte defines the type of the content that follows. The next 2 bytes define the
- * size n (in terms of bytes) of the content that follows. The next n bytes define the content
- * itself.
+ * This function scans the tl_data structure to get the value of a
+ * type defined by the tl_type (second parameter).  The tl_data
+ * structure has all the data in the tl_data_contents member.  The
+ * format of the tl_data_contents is as follows.  The first byte
+ * defines the type of the content that follows.  The next 2 bytes
+ * define the size n (in terms of bytes) of the content that
+ * follows.  The next n bytes define the content itself.
  */
 
 krb5_error_code
@@ -777,7 +803,8 @@ cleanup:
 }
 
 /*
- * get the mask representing the attributes set on the directory object (user, policy ...)
+ * Get the mask representing the attributes set on the directory
+ * object (user, policy ...).
  */
 krb5_error_code
 krb5_get_attributes_mask(context, entries, mask)
@@ -886,16 +913,18 @@ krb5_get_policydn(context, entries, policydn)
     return krb5_get_str_from_tl_data(context, entries, KDB_TL_TKTPOLICYDN, policydn);
 }
 /*
- * This function reads the attribute values (if the attribute is non-null) from the dn.
- * The read attribute values is compared aganist the attrvalues passed to the function
- * and a bit mask is set for all the matching attributes (attributes existing in both list).
- * The bit to be set is selected such that the index of the attribute in the attrvalues
- * parameter is the position of the bit.
- * For ex: the first element in the attrvalues is present in both list shall set the LSB of the
- * bit mask.
+ * This function reads the attribute values (if the attribute is
+ * non-null) from the dn.  The read attribute values is compared
+ * aganist the attrvalues passed to the function and a bit mask is set
+ * for all the matching attributes (attributes existing in both list).
+ * The bit to be set is selected such that the index of the attribute
+ * in the attrvalues parameter is the position of the bit.  For ex:
+ * the first element in the attrvalues is present in both list shall
+ * set the LSB of the bit mask.
  *
- * In case if either the attribute or the attrvalues parameter to the function is NULL, then
- * the existence of the object is considered and appropriate status is returned back
+ * In case if either the attribute or the attrvalues parameter to the
+ * function is NULL, then the existence of the object is considered
+ * and appropriate status is returned back.
  */
 
 krb5_error_code
@@ -932,7 +961,8 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
     }
 
     /*
-     * If the attribute/attrvalues is NULL, then check for the existence of the object alone
+     * If the attribute/attrvalues is NULL, then check for the
+     * existence of the object alone.
      */
     if (attribute == NULL || attrvalues == NULL)
 	goto cleanup;
@@ -945,8 +975,9 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
 	if ((values=ldap_get_values(ld, entry, attribute)) != NULL) {
 	    int i,j;
 
-	    /* compare the read attribute values with the attrvalues array and set the
-	     * appropriate bit mask
+	    /*
+	     * Compare the read attribute values with the attrvalues
+	     * array and set the appropriate bit mask.
 	     */
 	    for (j=0; attrvalues[j]; ++j) {
 		for (i=0; values[i]; ++i) {
@@ -967,9 +998,11 @@ cleanup:
 
 
 /*
- * This function updates a single attribute with a single value of a specified dn.
- * This function is mainly used to update krbRealmReferences, krbKdcServers, krbAdminServers...
- * when KDC, ADMIN, PASSWD servers are associated with some realms or vice versa.
+ * This function updates a single attribute with a single value of a
+ * specified dn.  This function is mainly used to update
+ * krbRealmReferences, krbKdcServers, krbAdminServers... when KDC,
+ * ADMIN, PASSWD servers are associated with some realms or vice
+ * versa.
  */
 
 krb5_error_code
@@ -1010,9 +1043,11 @@ updateAttribute (ld, dn, attribute, value)
 }
 
 /*
- * This function deletes a single attribute with a single value of a specified dn.
- * This function is mainly used to delete krbRealmReferences, krbKdcServers, krbAdminServers...
- * when KDC, ADMIN, PASSWD servers are disassociated with some realms or vice versa.
+ * This function deletes a single attribute with a single value of a
+ * specified dn.  This function is mainly used to delete
+ * krbRealmReferences, krbKdcServers, krbAdminServers... when KDC,
+ * ADMIN, PASSWD servers are disassociated with some realms or vice
+ * versa.
  */
 
 krb5_error_code
@@ -1051,11 +1086,13 @@ deleteAttribute (ld, dn, attribute, value)
 
 
 /*
- * This function takes in 2 string arrays, compares them to remove the matching entries.
- * The first array is the original list and the second array is the modified list. Removing
- * the matching entries will result in a reduced array, where the left over first array elements
- * are the deleted entries and the left over second array elements are the added entries.
- * These additions and deletions has resulted in the modified second array.
+ * This function takes in 2 string arrays, compares them to remove the
+ * matching entries.  The first array is the original list and the
+ * second array is the modified list.  Removing the matching entries
+ * will result in a reduced array, where the left over first array
+ * elements are the deleted entries and the left over second array
+ * elements are the added entries.  These additions and deletions has
+ * resulted in the modified second array.
  */
 
 krb5_error_code
@@ -1098,15 +1135,19 @@ disjoint_members(src, dest)
 
 	    /* if the element are same */
 	    if (strcasecmp(src[i], dest[j]) == 0) {
-		/* if the matched element is in the middle, then copy the last element to
-		 * the matched index.
+		/*
+		 * If the matched element is in the middle, then copy
+		 * the last element to the matched index.
 		 */
 		if (i != slen) {
 		    free (src[i]);
 		    src[i] = src[slen];
 		    src[slen] = NULL;
 		} else {
-		    /* if the matched element is the last, free it and set it to NULL */
+		    /*
+		     * If the matched element is the last, free it and
+		     * set it to NULL.
+		     */
 		    free (src[i]);
 		    src[i] = NULL;
 		}
@@ -1124,9 +1165,11 @@ disjoint_members(src, dest)
 		}
 		dlen -=1;
 
-		/* the source array is reduced by 1, so reduce the index variable used for
-		 * source array by 1. No need to adjust the second array index variable as
-		 * it is reset while entering the inner loop
+		/*
+		 * The source array is reduced by 1, so reduce the
+		 * index variable used for source array by 1.  No need
+		 * to adjust the second array index variable as it is
+		 * reset while entering the inner loop.
 		 */
 		i -= 1;
 		break;
@@ -1137,9 +1180,9 @@ disjoint_members(src, dest)
 }
 
 /*
- * This function replicates the contents of the src array for later use. Mostly the contents
- * of the src array is obtained from a ldap_search operation and the contents are required
- * for later use.
+ * This function replicates the contents of the src array for later
+ * use. Mostly the contents of the src array is obtained from a
+ * ldap_search operation and the contents are required for later use.
  */
 
 krb5_error_code
@@ -1229,7 +1272,8 @@ krb5_ldap_get_value(ld, ent, attribute, retval)
 }
 
 /*
- * krb5_ldap_get_string() - Returns the first string of the attribute. Intended to
+ * krb5_ldap_get_string() - Returns the first string of the
+ * attribute.  Intended to
  *
  *
  */
@@ -1288,8 +1332,8 @@ krb5_ldap_get_time(ld, ent, attribute, rettime, attr_present)
 }
 
 /*
- * Function to allocate, set the values of LDAPMod structure. The LDAPMod structure is then
- * added to the array at the ind
+ * Function to allocate, set the values of LDAPMod structure. The
+ * LDAPMod structure is then added to the array at the ind
  */
 
 krb5_error_code
