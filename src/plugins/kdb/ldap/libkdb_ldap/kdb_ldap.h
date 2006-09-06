@@ -292,4 +292,7 @@ krb5_ldap_free_supported_realms( krb5_context, char ** );
 const char *
 krb5_ldap_errcode_2_string( krb5_context, long );
 
+void
+krb5_ldap_release_errcode_string (krb5_context, const char *);
+
 #endif

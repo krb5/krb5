@@ -1547,6 +1547,11 @@ krb5_ldap_free_supported_realms(krb5_context kcontext, char **realms)
 const char *
 krb5_ldap_errcode_2_string(krb5_context kcontext, long err_code)
 {
-    return error_message(err_code);
+    return krb5_get_error_message(kcontext, err_code);
 }
 
+void
+krb5_ldap_release_errcode_string(krb5_context kcontext, const char *msg)
+{
+    krb5_free_error_message(kcontext, msg);
+}

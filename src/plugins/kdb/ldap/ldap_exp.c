@@ -72,6 +72,7 @@ kdb_vftabl kdb_function_table = {
   /* db_supported_realms */		       krb5_ldap_supported_realms,
   /* db_free_supported_realms */	       krb5_ldap_free_supported_realms,
   /* errcode_2_string */                       krb5_ldap_errcode_2_string,
+  /* release_errcode_string */		       krb5_ldap_release_errcode_string,
   /* db_alloc */                               krb5_ldap_alloc,
   /* db_free */                                krb5_ldap_free,
             /* optional functions */

@@ -114,6 +114,7 @@ typedef struct _kdb_vftabl{
 
     const char * (*errcode_2_string) (krb5_context kcontext,
 				      long err_code);
+    void (*release_errcode_string) (krb5_context kcontext, const char *msg);
 
     void * (*db_alloc) (krb5_context kcontext, void *ptr, size_t size);
     void   (*db_free)  (krb5_context kcontext, void *ptr);

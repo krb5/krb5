@@ -246,6 +246,7 @@ kdb_vftabl kdb_function_table = {
   /* db_supported_realms */		       NULL,
   /* db_free_supported_realms */	       NULL,
   /* errcode_2_string */                       NULL,
+  /* release_errcode_string */		       NULL,
   /* db_alloc */                               wrap_krb5_db2_alloc,
   /* db_free */                                wrap_krb5_db2_free,
   /* set_master_key */			       wrap_krb5_db2_set_master_key_ext,
