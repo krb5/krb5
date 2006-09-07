@@ -399,3 +399,16 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 #endif
     return 0;
 }
+
+#ifdef DEBUG_REFERRALS
+void dbgref_dump_principal(char *d, krb5_principal p)
+{
+    int n;
+	      
+    printf("  **%s: ",d);
+    for (n=0;n<p->length;n++)
+	printf("%s<%.*s>",(n>0)?"/":"",p->data[n].length,p->data[n].data);
+    printf("@<%.*s>  (length %d, type %d)\n",p->realm.length,p->realm.data,
+	   p->length, p->type);
+}
+#endif

@@ -796,12 +796,15 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     /* Copy client realm to server if no hint. */
     if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {   // XXX a realm is not a string!
         /* Use the client realm. */
+
 #ifdef DEBUG_REFERRALS
         printf("gc_from_kdc: no server realm supplied, using client realm.\n");
 #endif
-        if (!( server->realm.data = (char *)malloc(client->realm.length)))
-	    return ENOMEM;
+			        if (!( server->realm.data = (char *)malloc(client->realm.length+1)))
+			    return ENOMEM;
 	memcpy(server->realm.data, client->realm.data, client->realm.length);
+	server->realm.length = client->realm.length;
+	server->realm.data[server->realm.length] = 0;
     }
     /*
      * Retreive initial TGT to match the specified server, either for the
@@ -1043,15 +1046,3 @@ krb5_get_cred_from_kdc_renew(krb5_context context, krb5_ccache ccache,
 				      KDC_OPT_RENEW);
 }
 
-#ifdef DEBUG_REFERRALS
-void dbgref_dump_principal(char *d, krb5_principal p)
-{
-	int n;
-
-	printf("  **%s: ",d);
-	for (n=0;n<p->length;n++)
-	  printf("%s<%.*s>",(n>0)?"/":"",p->data[n].length,p->data[n].data);
-	printf("@<%.*s>  (length %d, type %d)\n",p->realm.length,p->realm.data,
-	       p->length, p->type);
-}
-#endif
