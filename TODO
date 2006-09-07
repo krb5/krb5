@@ -1,24 +1,31 @@
-stuff to add:
-- write up understanding of current referral logic to krbcore
-  - given the length of conversations with hartmans and raeburn, others
-    are likely to take issue with the finer points.
-- add klist option to print actual credential principal
-- referral loop checking
-- properly return TGT string for ccache
-  - old code was convoluted and buggy.  replace.
-
-bug fixes:
-- memory management issues:
+blocking issues for beta release
+================================
+- fix memory management problems and any other known crash/assertion-fail 
+  cases
   - kvno crashes freeing in_cred after the call completes.  why is this?
     reproduce: "kvno host/maybe.not.ms.mit.edu@NOT.MS.MIT.EDU"
   - assertion failure: "./ptest argos.mit.edu"
     - might require NOT tickets and no domain_realm setting
     - no longer reproducible?
   - fix double-free in gc_from_kdc_opt cleanup
+- correctly return first-hop TGTs for ccache storage
+  - old code was convoluted and buggy.  replace.
+- referral loop checking
+- testing, cleanup, documentation
+
+further work:
+============
+- write up understanding of current referral logic to krbcore
+  - given the length of conversations with hartmans and raeburn, others
+    are likely to take issue with the finer points.
+  - review implementation notes against actual implementation, document changes
+- add klist option to print actual credential principal
+- padata parsing for referral data verification and possible principal rewrite
 
 testing issues:
+==============
 - verify that cached tickets work properly
-- verify that intermediate TGTs aren't cached but 
+- verify that intermediate TGTs aren't cached
 - Should we do the single non-referral fallback always or only on certain
   KDC failure states?  Probably answer this from testing.
 - credential cacheing unreliable; investiagate
@@ -27,10 +34,8 @@ testing issues:
 low-priority:
 - code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
 
-later, high-priority, hard:
-- padata parsing
-
-final:
+final cleanup:
+=============
 - check namespace use with tom
 - review code for:
   - string safety, particularly strcmp use -- nothing is guaranteed to be a string,
@@ -38,5 +43,3 @@ final:
   - memory leaks
 - check assumptions on assumed dereferencability of credential members
 - review code format
-- #ifdef out tracing/debugging code
-- review implementation notes against actual implementation
