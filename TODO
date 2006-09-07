@@ -1,13 +1,12 @@
 blocking issues for beta release
 ================================
-- check assertion failure case:
-  - reproduce: "./ptest argos.mit.edu"
-    - might require NOT tickets and no domain_realm setting
-    - no longer reproducible?
 - correctly return first-hop TGTs for ccache storage
-  - old code was convoluted and buggy.  replace.
+  - old code was convoluted and buggy.  replacement underway.
 - referral loop checking
 - testing, cleanup, documentation
+- ccache match failure; referred tickets are always refetched
+- fallback uses local realm instead of remote fallback realm
+- switch string comparisons to use krb5_is_referral_realm
 
 further work:
 ============
@@ -30,8 +29,9 @@ testing issues:
 low-priority:
 - code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
 
-final cleanup:
+final cleanup: (pre-beta)
 =============
+- scan for leftover bogosities with "XXX" tag
 - check namespace use with tom
 - review code for:
   - string safety, particularly strcmp use -- nothing is guaranteed to be a string,
