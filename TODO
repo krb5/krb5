@@ -1,13 +1,9 @@
 blocking issues for beta release
 ================================
-- fix memory management problems and any other known crash/assertion-fail 
-  cases
-  - kvno crashes freeing in_cred after the call completes.  why is this?
-    reproduce: "kvno host/maybe.not.ms.mit.edu@NOT.MS.MIT.EDU"
-  - assertion failure: "./ptest argos.mit.edu"
+- check assertion failure case:
+  - reproduce: "./ptest argos.mit.edu"
     - might require NOT tickets and no domain_realm setting
     - no longer reproducible?
-  - fix double-free in gc_from_kdc_opt cleanup
 - correctly return first-hop TGTs for ccache storage
   - old code was convoluted and buggy.  replace.
 - referral loop checking

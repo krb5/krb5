@@ -1,5 +1,3 @@
-#define DEBUG_REFERRALS
-
 /*
  * include/krb5.h
  *
@@ -267,9 +265,13 @@ typedef const krb5_principal_data *krb5_const_principal;
 #define        KRB5_REFERRAL_REALM	""
 #define        KRB5_REFERRAL_MAXHOPS	5
 
+/*
+ * Referral debugging hooks.
+ */
+#define DEBUG_REFERRALS
+
 #ifdef DEBUG_REFERRALS
-/* temporary hack */
-void amb_dump_principal();
+void dbgref_dump_principal(char *, krb5_principal);
 #endif
 
 /*

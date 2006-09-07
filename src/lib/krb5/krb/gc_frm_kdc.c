@@ -768,13 +768,22 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     char **hrealms;
     int referral_count, i;
 
+    /* 
+     * Set up client and server pointers.  Make a fresh and modifyable
+     * copy of the in_cred server and save the supplied version.
+     */
     client = in_cred->client;
-    server = in_cred->server;
-    /* XXX hack for testing to force referral */
-    // /* XXX */ server->realm.data[0]=0;
+    if ((retval=krb5_copy_principal(context, in_cred->server, &server)))
+        return retval;
+    supplied_server = in_cred->server;
+    in_cred->server=server;
+
+
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
-    amb_dump_principal("krb5_get_cred_from_kdc_opt initial server", server);
+    /* Hack for testing to force a referral. */
+    // /* WARNING: uncomment for testing only. */ server->realm.data[0]=0;
+    dbgref_dump_principal("krb5_get_cred_from_kdc_opt initial client", client);
+    dbgref_dump_principal("krb5_get_cred_from_kdc_opt initial server", server);
 #endif
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
@@ -784,18 +793,19 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     *tgts = NULL;
     old_use_conf_ktypes = context->use_conf_ktypes;
 
-    /* Copy initially specified principal, then copy client realm for server if no hint. */
-    if ((retval=krb5_copy_principal(context, server, &supplied_server)))
-        return retval;
+    /* Copy client realm to server if no hint. */
     if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {   // XXX a realm is not a string!
         /* Use the client realm. */
+#ifdef DEBUG_REFERRALS
+        printf("gc_from_kdc: no server realm supplied, using client realm.\n");
+#endif
         if (!( server->realm.data = (char *)malloc(client->realm.length)))
 	    return ENOMEM;
 	memcpy(server->realm.data, client->realm.data, client->realm.length);
     }
     /*
      * Retreive initial TGT to match the specified server, either for the
-     * local realm in the default (referral) case or for  the remote
+     * local realm in the default (referral) case or for the remote
      * realm if we're starting someplace non-local.
      */
     retval = tgt_mcred(context, client, server, client, &tgtq);
@@ -823,7 +833,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
 
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("gc_from_kdc: server as requested", supplied_server);
+    dbgref_dump_principal("gc_from_kdc: server as requested", supplied_server);
 #endif
 
     /*
@@ -834,8 +844,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     for (referral_count=0;referral_count<KRB5_REFERRAL_MAXHOPS;referral_count++) {
 #ifdef DEBUG_REFERRALS
-        amb_dump_principal("gc_from_kdc: referral loop: tgt in use", tgtptr->server);
-        amb_dump_principal("gc_from_kdc: referral loop: request is for", server);
+        dbgref_dump_principal("gc_from_kdc: referral loop: tgt in use", tgtptr->server);
+        dbgref_dump_principal("gc_from_kdc: referral loop: request is for", server);
 #endif
         retval = krb5_get_cred_via_tkt(context, tgtptr,
 				       KDC_OPT_CANONICALIZE | 
@@ -877,64 +887,52 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    if (krb5_principal_compare(context, in_cred->server, out_cred[0]->server)) {
 #ifdef DEBUG_REFERRALS
 	        printf("gc_from_kdc: request generated ticket for requested server principal\n");
-		amb_dump_principal("gc_from_kdc final referred reply",in_cred->server);
+		dbgref_dump_principal("gc_from_kdc final referred reply",in_cred->server);
 #endif
+
 		/*
-		 * Deal with ccache TGT management:
-		 * If we have TGTs already from initial TGT discovery,
-		 * leave it alone.  If we started with a local referral,
-		 * return the initial TGT for the cache but junk the
-		 * rest.
+		 * Deal with ccache TGT management: If tgts has been set
+		 * from an initial non-referral TGT discovery, leave it
+		 * alone.  Otherwise, if referral_tgts[0] exists return
+		 * it as the only entry in tgts.  (Further referrals are
+		 * never cached, only referrals from the local KDC.)
 		 */
-		if (! *tgts) {
-		  /* Free newly-obtained TGTs. */
-		  for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++)
-		      if(referral_tgts[i])
-		          krb5_free_creds(context, referral_tgts[i]);
-		}
-		else {
-		  /* Alocate returnable TGT list. */
-		  // XXX Redo this.
+		if (*tgts == NULL) {
+		    /* Alocate returnable TGT list. */
+		    // XXX TBC
 		}
 		goto cleanup;
 	    }
 	    else {
 #ifdef DEBUG_REFERRALS
 	        printf("gc_from_kdc: request generated referral tgt\n");
-		amb_dump_principal("gc_from_kdc credential received", out_cred[0]->server);
+		dbgref_dump_principal("gc_from_kdc credential received", out_cred[0]->server);
 #endif
-		/* need to:
-		   1) stash tgt in referral_tgts
-		   2) use this tgt for next referral
-		   3) rewrite server principal per any padata */
+		/* Point current tgt pointer at newly-received TGT. */
 		tgtptr=out_cred[0];
-		/* save this credential in tgt sequence */
-		referral_tgts[referral_count]=tgtptr=out_cred[0];
-		/* copy krbtgt realm to server principal */
-		free(server->realm.data);
-		if(!(server->realm.data=malloc(tgtptr->server->data[1].length)))
-		    return ENOMEM;
-		strncpy(server->realm.data, tgtptr->server->data[1].data, tgtptr->server->data[1].length);
-		server->realm.data[tgtptr->server->data[1].length]=0;
-		server->realm.length=tgtptr->server->data[1].length;
+		/* Save this credential in tgt sequence. */
+		referral_tgts[referral_count]=out_cred[0];
+		/* Copy krbtgt realm to server principal. */
+		krb5_free_data_contents(context, &server->realm);
+		if ((retval=krb5int_copy_data_contents(context, &tgtptr->server->data[1], &server->realm)))
+		    return retval;
+		/* Future work: rewrite server principal per any supplied padata. */
 	    }
 	}
     }
 
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("gc_from_kdc client at fallback", client);
-    amb_dump_principal("gc_from_kdc server at fallback", server);
-    ///* XXX hack for testing */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
+    dbgref_dump_principal("gc_from_kdc client at fallback", client);
+    dbgref_dump_principal("gc_from_kdc server at fallback", server);
+    /* Hack for testing to shut down immediately after referral attempt. */
+    // /* WARNING: uncomment for testing only. */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
 #endif
 
     /*
      * At this point referrals have been tried and have failed.  Go back
      * to the server principal as originally issued and try the conventional path.
      */
-
-    /* Free any referral TGTs accumulated. */
-    // XXX: to be implemented
-    
+  
     /* Referrals have failed.  Look up fallback realm if not currently set. */
     if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) { // XXX a realm is not a string!
       if (server->length >= 2) {
@@ -1003,14 +1001,17 @@ cleanup:
     /* Drop the original principal back into in_cred so that it's cached
        in the expected format. */
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("gc_from_kdc: final server principal at cleanup",server);
+    dbgref_dump_principal("gc_from_kdc: final hacked server principal at cleanup",server);
 #endif
-    // XXX: This blows out as a double-free.  Why?
-    // krb5_free_principal(context, server);
-    server=supplied_server;
+    krb5_free_principal(context, server);
+    in_cred->server=supplied_server;
 #ifdef DEBUG_REFERRALS
-    amb_dump_principal("gc_from_kdc: final server after reversion",server);
+    dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
 #endif
+    /* Free any referral TGTs accumulated. */
+    for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++)
+        if(referral_tgts[i])
+	    krb5_free_creds(context, referral_tgts[i]);
 
     return retval;
 }
@@ -1043,7 +1044,7 @@ krb5_get_cred_from_kdc_renew(krb5_context context, krb5_ccache ccache,
 }
 
 #ifdef DEBUG_REFERRALS
-void amb_dump_principal(char *d, krb5_principal p)
+void dbgref_dump_principal(char *d, krb5_principal p)
 {
 	int n;
 

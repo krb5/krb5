@@ -236,8 +236,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 #if 0
 #ifdef DEBUG_REFERRALS
 	    printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
-	    amb_dump_principal("gc_via_tkt: in_cred",in_cred->server);
-	    amb_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
+	    dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
+	    dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
 #endif
 #endif
 	}

@@ -134,9 +134,11 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     krb5_error_code cap_code;
 #endif
 
+#ifdef DEBUG_REFERRALS
     printf("krb5_walk_realm_tree starting\n");
-    printf("client is %s\n",client->data);
-    printf("server is %s\n",server->data);
+    printf("  client is %s\n",client->data);
+    printf("  server is %s\n",server->data);
+#endif
 
     if (!(client->data &&server->data))
       return KRB5_NO_TKT_IN_RLM;
@@ -386,12 +388,14 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 #endif
     *tree = rettree;
 
+#ifdef DEBUG_REFERRALS
     printf("krb5_walk_realm_tree ending; tree (length %d) is:\n",links);
     for(i=0;i<links+2;i++) {
         if ((*tree)[i])
-	    amb_dump_principal("krb5_walk_realm_tree tree",(*tree)[i]);
+	    dbgref_dump_principal("krb5_walk_realm_tree tree",(*tree)[i]);
 	else
 	    printf("tree element %i null\n");
     }
+#endif
     return 0;
 }
