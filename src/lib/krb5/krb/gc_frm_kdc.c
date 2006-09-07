@@ -762,7 +762,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			   krb5_creds ***tgts, int kdcopt)
 {
     krb5_error_code retval;
-    krb5_principal client, server, supplied_server;
+    krb5_principal client, server, supplied_server, out_supplied_server;
     krb5_creds tgtq, cc_tgt, *tgtptr, *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean old_use_conf_ktypes;
     char **hrealms;
@@ -775,6 +775,11 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     client = in_cred->client;
     if ((retval=krb5_copy_principal(context, in_cred->server, &server)))
         return retval;
+/* We need a second copy for the output creds*/
+    if ((retval = krb5_copy_principal(context, server, &out_supplied_server)) != 0 ) {
+	krb5_free_principal(context, server);
+	return retval;
+    }
     supplied_server = in_cred->server;
     in_cred->server=server;
 
@@ -1007,7 +1012,9 @@ cleanup:
     dbgref_dump_principal("gc_from_kdc: final hacked server principal at cleanup",server);
 #endif
     krb5_free_principal(context, server);
-    in_cred->server=supplied_server;
+    krb5_free_principal (context, (*out_cred)->server);
+    in_cred->server = supplied_server;
+    (*out_cred)->server= out_supplied_server;
 #ifdef DEBUG_REFERRALS
     dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
 #endif
