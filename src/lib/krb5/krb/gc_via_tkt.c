@@ -162,8 +162,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	free(enctypes);
     if (retval) {
 #ifdef DEBUG_REFERRALS
-      printf("krb5_get_cred_via_tkt ending early after send_tgs with: %s\n",
-	     error_message(retval));
+        printf("krb5_get_cred_via_tkt ending early after send_tgs with: %s\n",
+	       error_message(retval));
 #endif
 	return retval;
     }
