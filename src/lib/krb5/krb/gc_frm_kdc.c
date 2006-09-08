@@ -805,6 +805,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 #ifdef DEBUG_REFERRALS
         printf("gc_from_kdc: no server realm supplied, using client realm.\n");
 #endif
+	krb5_free_data_contents(context, &server->realm);
 	if (!( server->realm.data = (char *)malloc(client->realm.length+1)))
 	    return ENOMEM;
 	memcpy(server->realm.data, client->realm.data, client->realm.length);
@@ -879,8 +880,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    /* Otherwise, try the same query without canonicalization
 	       set, and fail hard if that doesn't work. */
 #ifdef DEBUG_REFERRALS
-	        printf("gc_from_kdc: referral #%d failed; retrying without option.\n",
-		       referral_count+1);
+	    printf("gc_from_kdc: referral #%d failed; retrying without option.\n",
+		   referral_count+1);
 #endif
 	    retval = krb5_get_cred_via_tkt(context, tgtptr,
 					   FLAGS2OPTS(tgtptr->ticket_flags) |  
@@ -911,21 +912,21 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 #ifdef DEBUG_REFERRALS
 #if 0
 		    dbgref_dump_principal("gc_from_kdc: loop compare #1", (*out_cred)->server);
-		    dbgref_dump_principal("gc_from_kdc: loop compare #2", referral_tgts[i]);
+		    dbgref_dump_principal("gc_from_kdc: loop compare #2", referral_tgts[i]->server);
 #endif
 #endif
-		    if (krb5_principal_compare(context, (*out_cred)->server, referral_tgts[i])) {
-		        fprintf("krb5_get_cred_from_kdc_opt: referral routing loop afer %d hops\n",i);
+		    if (krb5_principal_compare(context, (*out_cred)->server, referral_tgts[i]->server)) {
+		        fprintf(stderr, "krb5_get_cred_from_kdc_opt: referral routing loop afer %d hops\n",i);
 			retval=KRB5_KDC_UNREACH;
 			goto cleanup;
 		    }
 		}
 		/* Point current tgt pointer at newly-received TGT. */
-		/* XXX Memory leak for the old tgtptr? */
+		if (tgtptr == &cc_tgt)
+		    krb5_free_cred_contents(context, tgtptr);
 		tgtptr=*out_cred;
-		/* Make copy of cred for referral_tgts. */
-		retval=krb5_copy_creds(context, *out_cred, &referral_tgts[referral_count]);
-		if(retval) goto cleanup;
+		/* Save pointer to tgt in referral_tgts. */
+		referral_tgts[referral_count]=*out_cred;
 		/* Copy krbtgt realm to server principal. */
 		krb5_free_data_contents(context, &server->realm);
 		if ((retval=krb5int_copy_data_contents(context, &tgtptr->server->data[1], &server->realm)))
@@ -988,6 +989,9 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	goto cleanup;
 
     /* Fast path: Is it in the ccache? */
+    /* Free tgtptr data if reused from above. */
+    if (tgtptr == &cc_tgt)
+	krb5_free_cred_contents(context, tgtptr);
     context->use_conf_ktypes = 1;
     retval = krb5_cc_retrieve_cred(context, ccache, RETR_FLAGS,
 				   &tgtq, &cc_tgt);
@@ -1030,15 +1034,17 @@ cleanup:
     krb5_free_principal(context, server);
     in_cred->server = supplied_server;
     if (*out_cred && !retval) {
+        /* Success: free server, swap supplied server back in. */
         krb5_free_principal (context, (*out_cred)->server);
 	(*out_cred)->server= out_supplied_server;
     }
     else {
+        /* 
+	 * Failure: free out_supplied_server.  Don't free out_cred here
+	 * since it's either null or a referral TGT that we free below,
+	 * and we may need it to return.
+	 */
         krb5_free_principal (context, out_supplied_server);
-	if (*out_cred) {
-	    krb5_free_creds(context, *out_cred);
-	    (*out_cred)=NULL;
-	}
     }
 #ifdef DEBUG_REFERRALS
     dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
@@ -1056,7 +1062,7 @@ cleanup:
         if (referral_tgts[0]) {
 	    subretval=1; // XXX This should be something that scans the
 	                 // ccache for this ticket, which we presumably
-	                 // don't want to cache again.
+	                 // don't want to cache again....?
 	    if (subretval) {
 	        /* Allocate returnable TGT list. */
 	        if (!(*tgts=calloc(sizeof (krb5_creds *), 2)))
@@ -1072,7 +1078,7 @@ cleanup:
 	}
     }
 
-    /* Free any other referral TGTs accumulated. */
+    /* Free referral TGTs list. */
     for (i=0;i<KRB5_REFERRAL_MAXHOPS;i++) {
         if(referral_tgts[i]) {
 	    krb5_free_creds(context, referral_tgts[i]);

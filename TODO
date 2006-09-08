@@ -14,7 +14,7 @@ final cleanup:
 - review code for:
   - string safety, particularly strcmp use -- little is guaranteed to be a string,
     do not use string functions without extreme caution.
-  - memory leaks
+  - memory leaks (first pass done, vg runs clean)
   - other memory management issues
 - scan for leftover bogosities with "XXX" tag (in new code only!)
 - review code format
