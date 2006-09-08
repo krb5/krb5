@@ -1,8 +1,34 @@
-blocking issues for beta release
-================================
-- referral loop checking
-- maybe don't return first-hop referral TGT for ccache if it's cached already?
-- testing, cleanup, documentation
+outstanding issues:
+==================
+- Should we return the first-hop referral TGT for ccache even if it's
+  cached already?  Sure, it's newer than anything we'd have, but do we
+  really want to stuff the cache full of almost-identical TGTs if we're
+  doing repeated referrals to the same destination?  Is there a point in
+  returning it at all, since future referrals won't use it and
+  the first non-referral request to that realm (should such a request
+  ever occur) will incur one extra round-trip after which it will be
+  cached?
+
+final cleanup:
+=============
+- review code for:
+  - string safety, particularly strcmp use -- little is guaranteed to be a string,
+    do not use string functions without extreme caution.
+  - memory leaks
+  - other memory management issues
+- scan for leftover bogosities with "XXX" tag (in new code only!)
+- review code format
+- catalog namespace changes for review
+
+integration issues:
+==================
+- review namespace use
+- decide whether to up MAXHOPS
+
+testing issues/open questions:
+=============================
+- Should we do the single non-referral fallback always or only on certain
+  KDC failure states?  Probably answer this from testing.
 
 further work:
 ============
@@ -13,24 +39,3 @@ further work:
 - add klist option to print actual credential principal
 - padata parsing for referral data verification and possible principal rewrite
 - KDC support for referrals
-
-testing issues:
-==============
-- verify that cached tickets work properly
-- verify that intermediate TGTs aren't cached
-- Should we do the single non-referral fallback always or only on certain
-  KDC failure states?  Probably answer this from testing.
-
-low-priority:
-- code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt
-
-final cleanup: (pre-beta)
-=============
-- scan for leftover bogosities with "XXX" tag
-- check namespace use with tom
-- review code for:
-  - string safety, particularly strcmp use -- nothing is guaranteed to be a string,
-    do not use string functions at all.
-  - memory leaks
-- check assumptions on assumed dereferencability of credential members
-- review code format

@@ -906,9 +906,21 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	        printf("gc_from_kdc: request generated referral tgt\n");
 		dbgref_dump_principal("gc_from_kdc credential received", (*out_cred)->server);
 #endif
-		/*
-		 * Point current tgt pointer at newly-received TGT.
-		 */
+		/* Check for referral routing loop. */
+		for (i=0;i<referral_count;i++) {
+#ifdef DEBUG_REFERRALS
+#if 0
+		    dbgref_dump_principal("gc_from_kdc: loop compare #1", (*out_cred)->server);
+		    dbgref_dump_principal("gc_from_kdc: loop compare #2", referral_tgts[i]);
+#endif
+#endif
+		    if (krb5_principal_compare(context, (*out_cred)->server, referral_tgts[i])) {
+		        fprintf("krb5_get_cred_from_kdc_opt: referral routing loop afer %d hops\n",i);
+			retval=KRB5_KDC_UNREACH;
+			goto cleanup;
+		    }
+		}
+		/* Point current tgt pointer at newly-received TGT. */
 		/* XXX Memory leak for the old tgtptr? */
 		tgtptr=*out_cred;
 		/* Make copy of cred for referral_tgts. */
