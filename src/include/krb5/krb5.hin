@@ -2268,7 +2268,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_host_realm
 		char *** );
 krb5_error_code KRB5_CALLCONV krb5_get_fallback_host_realm
 	(krb5_context,
-		const char *,
+		krb5_data *,
 		char *** );
 krb5_error_code KRB5_CALLCONV krb5_clean_hostname
 	(krb5_context,

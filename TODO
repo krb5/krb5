@@ -1,11 +1,7 @@
 blocking issues for beta release
 ================================
-- correctly return first-hop TGTs for ccache storage
-  - old code was convoluted and buggy.  replacement underway.
 - referral loop checking
-- fallback uses local realm instead of remote fallback realm
-- switch string comparisons to use krb5_is_referral_realm
-- wrong TGT in use for referrals with non-local specified domain?
+- maybe don't return first-hop referral TGT for ccache if it's cached already?
 - testing, cleanup, documentation
 
 further work:
@@ -16,6 +12,7 @@ further work:
   - review implementation notes against actual implementation, document changes
 - add klist option to print actual credential principal
 - padata parsing for referral data verification and possible principal rewrite
+- KDC support for referrals
 
 testing issues:
 ==============
@@ -23,8 +20,6 @@ testing issues:
 - verify that intermediate TGTs aren't cached
 - Should we do the single non-referral fallback always or only on certain
   KDC failure states?  Probably answer this from testing.
-- credential cacheing unreliable; investiagate
-  - "kvno host/argos.mit.edu@NOT.MS.MIT.EDU" with NOT tickets fills up ccache
 
 low-priority:
 - code (or explicitly punt) edge cases in krb5_get_cred_from_kdc_opt

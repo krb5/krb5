@@ -109,6 +109,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
+    dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
+    dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
 #endif
 
     /* tkt->client must be equal to in_cred->client */

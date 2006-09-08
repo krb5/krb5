@@ -313,27 +313,35 @@ krb5int_translate_gai_error (int num)
 
 
 /*
- * Ganked from krb5_get_host_realm; handles case where referrals have
- * failed and it's time to go look at TXT records or make a DNS-based
- * assumption.
+ * Ganked from krb5_get_host_realm; handles determining a fallback realm
+ * to try in the case where referrals have failed and it's time to go
+ * look at TXT records or make a DNS-based assumption.
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_fallback_host_realm(krb5_context context, const char *host, char ***realmsp)
+krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***realmsp)
 {
     char **retrealms;
     char *default_realm, *realm, *cp, *temp_realm;
     krb5_error_code retval;
-    char local_host[MAXDNAME+1];
+    char local_host[MAXDNAME+1], host[MAXDNAME+1];
 
+    /* Convert what we hope is a hostname to a string. */
+    memcpy(host, hdata->data, hdata->length);
+    host[hdata->length]=0;
+
+#ifdef DEBUG_REFERRALS    
     printf("get_fallback_host_realm(host >%s<) called\n",host);
+#endif
 
     krb5_clean_hostname(context, host, local_host, sizeof local_host);
 
     /* Scan hostname for DNS realm, and save as last-ditch realm
        assumption. */
     cp = local_host;
+#ifdef DEBUG_REFERRALS    
     printf("  local_host: %s\n",local_host);
+#endif
     realm = default_realm = (char *)NULL;
     temp_realm = 0;
     while (cp && !default_realm) {
@@ -347,8 +355,9 @@ krb5_get_fallback_host_realm(krb5_context context, const char *host, char ***rea
 	    cp = strchr(cp, '.');
 	}
     }
+#ifdef DEBUG_REFERRALS
     printf("  done finding DNS-based default realm: >%s<\n",default_realm);
-
+#endif
 
 #ifdef KRB5_DNS_LOOKUP
     if (realm == (char *)NULL) {
@@ -419,7 +428,9 @@ krb5_clean_hostname(krb5_context context, const char *host, char *local_host, si
     int l;
 
     local_host[0]=0;
+#ifdef DEBUG_REFERRALS
     printf("krb5_clean_hostname called: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
+#endif
     if (host) {
 	/* Filter out numeric addresses if the caller utterly failed to
 	   convert them to names.  */
@@ -462,6 +473,8 @@ krb5_clean_hostname(krb5_context context, const char *host, char *local_host, si
     if (l && local_host[l-1] == '.')
 	    local_host[l-1] = 0;
 
+#ifdef DEBUG_REFERRALS
     printf("krb5_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
+#endif
     return 0;
 }
