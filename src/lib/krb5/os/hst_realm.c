@@ -249,10 +249,10 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     }
 
     if (realm == (char *)NULL) {
-      if (!(cp = (char *)malloc(strlen(KRB5_REFERRAL_REALM)+1)))
-	return ENOMEM;
-      strcpy(cp, KRB5_REFERRAL_REALM);
-      realm = cp;
+        if (!(cp = (char *)malloc(strlen(KRB5_REFERRAL_REALM)+1)))
+	    return ENOMEM;
+	strcpy(cp, KRB5_REFERRAL_REALM);
+	realm = cp;
     }
     
     if (!(retrealms = (char **)calloc(2, sizeof(*retrealms)))) {

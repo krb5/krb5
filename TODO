@@ -3,10 +3,10 @@ blocking issues for beta release
 - correctly return first-hop TGTs for ccache storage
   - old code was convoluted and buggy.  replacement underway.
 - referral loop checking
-- testing, cleanup, documentation
-- ccache match failure; referred tickets are always refetched
 - fallback uses local realm instead of remote fallback realm
 - switch string comparisons to use krb5_is_referral_realm
+- wrong TGT in use for referrals with non-local specified domain?
+- testing, cleanup, documentation
 
 further work:
 ============

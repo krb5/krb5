@@ -266,6 +266,11 @@ typedef const krb5_principal_data *krb5_const_principal;
 #define        KRB5_REFERRAL_MAXHOPS	5
 
 /*
+ * Referral-specific functions.
+ */
+krb5_boolean krb5_is_referral_realm(krb5_data *);
+
+/*
  * Referral debugging hooks.
  */
 #define DEBUG_REFERRALS

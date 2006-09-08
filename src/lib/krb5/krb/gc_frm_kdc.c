@@ -775,7 +775,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     client = in_cred->client;
     if ((retval=krb5_copy_principal(context, in_cred->server, &server)))
         return retval;
-/* We need a second copy for the output creds*/
+    /* We need a second copy for the output creds. */
     if ((retval = krb5_copy_principal(context, server, &out_supplied_server)) != 0 ) {
 	krb5_free_principal(context, server);
 	return retval;
@@ -796,12 +796,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
     tgtptr = NULL;
     *tgts = NULL;
+    *out_cred=NULL;
     old_use_conf_ktypes = context->use_conf_ktypes;
 
     /* Copy client realm to server if no hint. */
-    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) {   // XXX a realm is not a string!
+    if (krb5_is_referral_realm(&server->realm)) {
         /* Use the client realm. */
-
 #ifdef DEBUG_REFERRALS
         printf("gc_from_kdc: no server realm supplied, using client realm.\n");
 #endif
@@ -885,8 +885,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 					   kdcopt |
 					   (in_cred->second_ticket.length ?
 					    KDC_OPT_ENC_TKT_IN_SKEY : 0),
-					   tgtptr->addresses
-					   , in_cred, out_cred);
+					   tgtptr->addresses,
+					   in_cred, out_cred);
 	    /* Whether or not that succeeded, we're done. */
 	    goto cleanup;
 	}
@@ -942,24 +942,24 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      */
   
     /* Referrals have failed.  Look up fallback realm if not currently set. */
-    if (!strcmp(server->realm.data, KRB5_REFERRAL_REALM)) { // XXX a realm is not a string!
-      if (server->length >= 2) {
-	retval=krb5_get_fallback_host_realm(context, server->data[1].data,
-					  &hrealms);
-	if (retval) goto cleanup;
+    if (krb5_is_referral_realm(&server->realm)) {
+        if (server->length >= 2) {
+	    retval=krb5_get_fallback_host_realm(context, server->data[1].data,
+						&hrealms);
+	    if (retval) goto cleanup;
 #ifdef DEBUG_REFERRALS
-	printf("gc_from_kdc: using fallback realm of %s\n",hrealms[0]);
+	    printf("gc_from_kdc: using fallback realm of %s\n",hrealms[0]);
 #endif
-	in_cred->server->realm.data=hrealms[0];
-      }
-      else {
-	/* XXX realm tagged for referral but apparently not in a
-	   <type>/<host> format.  Fall back in some intelligent way or
-	   just punt? */
+	    in_cred->server->realm.data=hrealms[0];
+	}
+	else {
+	    /* XXX realm tagged for referral but apparently not in a
+	       <type>/<host> format.  Fall back in some intelligent way or
+	       just punt? */
 #ifdef DEBUG_REFERRALS
-	printf("gc_from_kdc: referral specified but no fallback realm.  wtf?  exiting.\n");
+	    printf("gc_from_kdc: referral specified but no fallback realm.  wtf?  exiting.\n"); // XXX
 #endif
-	exit(1);
+	    exit(1);
       }
     }
 
@@ -1012,9 +1012,14 @@ cleanup:
     dbgref_dump_principal("gc_from_kdc: final hacked server principal at cleanup",server);
 #endif
     krb5_free_principal(context, server);
-    krb5_free_principal (context, (*out_cred)->server);
     in_cred->server = supplied_server;
-    (*out_cred)->server= out_supplied_server;
+    if (*out_cred) {
+        krb5_free_principal (context, (*out_cred)->server);
+	(*out_cred)->server= out_supplied_server;
+    }
+    else {
+        krb5_free_principal (context, out_supplied_server);
+    }
 #ifdef DEBUG_REFERRALS
     dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
 #endif
@@ -1053,3 +1058,20 @@ krb5_get_cred_from_kdc_renew(krb5_context context, krb5_ccache ccache,
 				      KDC_OPT_RENEW);
 }
 
+krb5_boolean krb5_is_referral_realm(krb5_data *r)
+{
+  /*
+   * Check for a match with KRB5_REFERRAL_REALM.  Currently this relies
+   * on that string constant being zero-length.  (Unlike principal realm
+   * names, KRB5_REFERRAL_REALM is known to be a string.)
+   */
+#ifdef DEBUG_REFERRALS
+    printf("krb5_is_ref_realm: checking <%s> for referralness: %s\n",
+	   r->data,(r->length==0)?"true":"false");
+#endif
+    assert(strlen(KRB5_REFERRAL_REALM)==0);
+    if (r->length==0)
+        return TRUE;
+    else
+        return FALSE;
+}
