@@ -963,6 +963,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    krb5_free_data_contents(context,&in_cred->server->realm);
 	    server->realm.data=hrealms[0];
 	    server->realm.length=strlen(hrealms[0]);
+	    free(hrealms);
 	}
 	else {
 	    /*
