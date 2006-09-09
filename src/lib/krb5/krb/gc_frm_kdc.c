@@ -753,6 +753,11 @@ cleanup:
  * On success, OUT_CRED contains the desired credentials; the caller
  * must free them.
  *
+ * Beware memory management issues if you have modifications in mind.
+ * With the addition of referral support, it is now the case that *tgts,
+ * referral_tgts, tgtptr, referral_tgts, and *out_creds all may point to
+ * the same credential at different times.
+ *
  * Returns errors, system errors.
  */
 
@@ -785,8 +790,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
 
 #ifdef DEBUG_REFERRALS
-    /* Hack for testing to force a referral. */
-    // /* WARNING: uncomment for testing only. */ server->realm.data[0]=0;
     dbgref_dump_principal("gc_from_kdc initial client", client);
     dbgref_dump_principal("gc_from_kdc initial server", server);
 #endif
@@ -939,8 +942,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 #ifdef DEBUG_REFERRALS
     dbgref_dump_principal("gc_from_kdc client at fallback", client);
     dbgref_dump_principal("gc_from_kdc server at fallback", server);
-    /* Hack for testing to shut down immediately after referral attempt. */
-    // /* WARNING: uncomment for testing only. */ printf("gc_from_kdc: referral failed; exiting.\n"),exit(1);
 #endif
 
     /*
@@ -1060,10 +1061,17 @@ cleanup:
 
     if (*tgts == NULL) {
         if (referral_tgts[0]) {
-	    subretval=1; // XXX This should be something that scans the
-	                 // ccache for this ticket, which we presumably
-	                 // don't want to cache again....?
+#if 0
+  	    /*
+	     * This should possibly be a check on the candidate return
+	     * credential against the cache, in the circumstance where we
+	     * don't want to clutter the cache with near-duplicate
+	     * credentials on subsequent iterations.  For now, it is
+	     * disabled.
+	     */
+	    subretval=...?;
 	    if (subretval) {
+#endif
 	        /* Allocate returnable TGT list. */
 	        if (!(*tgts=calloc(sizeof (krb5_creds *), 2)))
 		    return ENOMEM;
@@ -1074,7 +1082,9 @@ cleanup:
 #ifdef DEBUG_REFERRALS
 		dbgref_dump_principal("gc_from_kdc: returning referral TGT for ccache",(*tgts)[0]->server);
 #endif
+#if 0
 	    }
+#endif
 	}
     }
 

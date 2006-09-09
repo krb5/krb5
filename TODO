@@ -8,6 +8,7 @@ outstanding issues:
   the first non-referral request to that realm (should such a request
   ever occur) will incur one extra round-trip after which it will be
   cached?
+  - at the moment, this check is disabled, and initial referral TGTs will be cached.
 
 final cleanup:
 =============
@@ -18,11 +19,11 @@ final cleanup:
   - other memory management issues (open-ended, but looking)
 - review code format (whitespace checked)
   -- nuke icky // comments (and probably attatched code)
-- catalog namespace changes for review
+- remove some of the less interesting debugging output?
 
 integration issues:
 ==================
-- review namespace use
+- review namespace use (mail sent to krbcore with brief summary)
 - decide whether to up MAXHOPS
 - merge with current trunk
 

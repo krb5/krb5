@@ -273,7 +273,7 @@ krb5_boolean krb5_is_referral_realm(krb5_data *);
 /*
  * Referral debugging hooks.
  */
-#define DEBUG_REFERRALS
+/* #define DEBUG_REFERRALS */
 
 #ifdef DEBUG_REFERRALS
 void dbgref_dump_principal(char *, krb5_principal);
