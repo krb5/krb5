@@ -985,6 +985,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      * Get a TGT for the target realm.
      */
     
+    krb5_free_cred_contents(context, &tgtq);
     retval = tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
 	goto cleanup;
