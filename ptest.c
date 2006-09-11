@@ -218,7 +218,7 @@ static void do_v5_kvno (int count, char *names[],
 	    errors++;
 	    continue;
 	}
-	printf("princ returned was %s\n",princ);
+	printf("ptest: princ returned was %s\n",princ);
 	in_creds.keyblock.enctype = etype;
 
 	ret = krb5_get_credentials(context, 0, ccache, &in_creds, &out_creds);

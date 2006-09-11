@@ -200,7 +200,9 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     krb5_error_code retval;
     char local_host[MAXDNAME+1];
 
+#ifdef DEBUG_REFERRALS
     printf("get_host_realm(host:%s) called\n",host);
+#endif
 
     krb5_clean_hostname(context, host, local_host, sizeof local_host);
 
@@ -217,11 +219,15 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
      */
 
     cp = local_host;
+#ifdef DEBUG_REFERRALS
     printf("  local_host: %s\n",local_host);
+#endif
     realm = (char *)NULL;
     temp_realm = 0;
     while (cp) {
+#ifdef DEBUG_REFERRALS
         printf("  trying to look up %s in the domain_realm map\n",cp);
+#endif
 	retval = profile_get_string(context->profile, "domain_realm", cp,
 				    0, (char *)NULL, &temp_realm);
 	if (retval)
@@ -236,9 +242,13 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
 	    cp = strchr(cp, '.');
 	}
     }
+#ifdef DEBUG_REFERRALS
     printf("  done searching the domain_realm map\n");
+#endif
     if (temp_realm) {
+#ifdef DEBUG_REFERRALS
     printf("  temp_realm is %s\n",temp_realm);
+#endif
         realm = malloc(strlen(temp_realm) + 1);
         if (!realm) {
             profile_release_string(temp_realm);
@@ -330,7 +340,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
     memcpy(host, hdata->data, hdata->length);
     host[hdata->length]=0;
 
-#ifdef DEBUG_REFERRALS    
+#ifdef DEBUG_REFERRALS
     printf("get_fallback_host_realm(host >%s<) called\n",host);
 #endif
 
@@ -339,7 +349,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
     /* Scan hostname for DNS realm, and save as last-ditch realm
        assumption. */
     cp = local_host;
-#ifdef DEBUG_REFERRALS    
+#ifdef DEBUG_REFERRALS
     printf("  local_host: %s\n",local_host);
 #endif
     realm = default_realm = (char *)NULL;
