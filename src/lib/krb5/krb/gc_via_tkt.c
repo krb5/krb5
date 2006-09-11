@@ -109,8 +109,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
-    dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
-    dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
 #endif
 
     /* tkt->client must be equal to in_cred->client */
@@ -238,8 +238,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 #if 0
 #ifdef DEBUG_REFERRALS
 	    printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
-	    dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
-	    dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
+	    krb5int_dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
+	    krb5int_dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
 #endif
 #endif
 	}

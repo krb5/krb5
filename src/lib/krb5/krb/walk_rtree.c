@@ -392,7 +392,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     printf("krb5_walk_realm_tree ending; tree (length %d) is:\n",links);
     for(i=0;i<links+2;i++) {
         if ((*tree)[i])
-	    dbgref_dump_principal("krb5_walk_realm_tree tree",(*tree)[i]);
+	    krb5int_dbgref_dump_principal("krb5_walk_realm_tree tree",(*tree)[i]);
 	else
 	    printf("tree element %i null\n");
     }
@@ -401,7 +401,7 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 }
 
 #ifdef DEBUG_REFERRALS
-void dbgref_dump_principal(char *d, krb5_principal p)
+void krb5int_dbgref_dump_principal(char *d, krb5_principal p)
 {
     int n;
 	      

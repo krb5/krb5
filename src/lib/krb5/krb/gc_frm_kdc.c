@@ -790,8 +790,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 
 
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc initial client", client);
-    dbgref_dump_principal("gc_from_kdc initial server", server);
+    krb5int_dbgref_dump_principal("gc_from_kdc initial client", client);
+    krb5int_dbgref_dump_principal("gc_from_kdc initial server", server);
 #endif
     memset(&cc_tgt, 0, sizeof(cc_tgt));
     memset(&tgtq, 0, sizeof(tgtq));
@@ -845,7 +845,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
 
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc: server as requested", supplied_server);
+    krb5int_dbgref_dump_principal("gc_from_kdc: server as requested", supplied_server);
 #endif
 
     /*
@@ -857,8 +857,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     for (referral_count=0;referral_count<KRB5_REFERRAL_MAXHOPS;referral_count++) {
 #ifdef DEBUG_REFERRALS
 #if 0
-        dbgref_dump_principal("gc_from_kdc: referral loop: tgt in use", tgtptr->server);
-        dbgref_dump_principal("gc_from_kdc: referral loop: request is for", server);
+        krb5int_dbgref_dump_principal("gc_from_kdc: referral loop: tgt in use", tgtptr->server);
+        krb5int_dbgref_dump_principal("gc_from_kdc: referral loop: request is for", server);
 #endif
 #endif
         retval = krb5_get_cred_via_tkt(context, tgtptr,
@@ -901,21 +901,21 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    if (krb5_principal_compare(context, in_cred->server, (*out_cred)->server)) {
 #ifdef DEBUG_REFERRALS
 	        printf("gc_from_kdc: request generated ticket for requested server principal\n");
-		dbgref_dump_principal("gc_from_kdc final referred reply",in_cred->server);
+		krb5int_dbgref_dump_principal("gc_from_kdc final referred reply",in_cred->server);
 #endif
 		goto cleanup;
 	    }
 	    else {
 #ifdef DEBUG_REFERRALS
 	        printf("gc_from_kdc: request generated referral tgt\n");
-		dbgref_dump_principal("gc_from_kdc credential received", (*out_cred)->server);
+		krb5int_dbgref_dump_principal("gc_from_kdc credential received", (*out_cred)->server);
 #endif
 		/* Check for referral routing loop. */
 		for (i=0;i<referral_count;i++) {
 #ifdef DEBUG_REFERRALS
 #if 0
-		    dbgref_dump_principal("gc_from_kdc: loop compare #1", (*out_cred)->server);
-		    dbgref_dump_principal("gc_from_kdc: loop compare #2", referral_tgts[i]->server);
+		    krb5int_dbgref_dump_principal("gc_from_kdc: loop compare #1", (*out_cred)->server);
+		    krb5int_dbgref_dump_principal("gc_from_kdc: loop compare #2", referral_tgts[i]->server);
 #endif
 #endif
 		    if (krb5_principal_compare(context, (*out_cred)->server, referral_tgts[i]->server)) {
@@ -940,8 +940,8 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
 
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc client at fallback", client);
-    dbgref_dump_principal("gc_from_kdc server at fallback", server);
+    krb5int_dbgref_dump_principal("gc_from_kdc client at fallback", client);
+    krb5int_dbgref_dump_principal("gc_from_kdc server at fallback", server);
 #endif
 
     /*
@@ -979,7 +979,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     }
 
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc server at fallback after fallback rewrite", server);
+    krb5int_dbgref_dump_principal("gc_from_kdc server at fallback after fallback rewrite", server);
 #endif
 
     /*
@@ -1032,7 +1032,7 @@ cleanup:
     /* Drop the original principal back into in_cred so that it's cached
        in the expected format. */
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc: final hacked server principal at cleanup",server);
+    krb5int_dbgref_dump_principal("gc_from_kdc: final hacked server principal at cleanup",server);
 #endif
     krb5_free_principal(context, server);
     in_cred->server = supplied_server;
@@ -1050,7 +1050,7 @@ cleanup:
         krb5_free_principal (context, out_supplied_server);
     }
 #ifdef DEBUG_REFERRALS
-    dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
+    krb5int_dbgref_dump_principal("gc_from_kdc: final server after reversion",in_cred->server);
 #endif
     /*
      * Deal with ccache TGT management: If tgts has been set from
@@ -1082,7 +1082,7 @@ cleanup:
 		    return subretval;
 		(*tgts)[1]=NULL;
 #ifdef DEBUG_REFERRALS
-		dbgref_dump_principal("gc_from_kdc: returning referral TGT for ccache",(*tgts)[0]->server);
+		krb5int_dbgref_dump_principal("gc_from_kdc: returning referral TGT for ccache",(*tgts)[0]->server);
 #endif
 #if 0
 	    }
@@ -1127,24 +1127,4 @@ krb5_get_cred_from_kdc_renew(krb5_context context, krb5_ccache ccache,
 {
     return krb5_get_cred_from_kdc_opt(context, ccache, in_cred, out_cred, tgts,
 				      KDC_OPT_RENEW);
-}
-
-krb5_boolean krb5_is_referral_realm(krb5_data *r)
-{
-    /*
-     * Check for a match with KRB5_REFERRAL_REALM.  Currently this relies
-     * on that string constant being zero-length.  (Unlike principal realm
-     * names, KRB5_REFERRAL_REALM is known to be a string.)
-     */
-#ifdef DEBUG_REFERRALS
-#if 0
-    printf("krb5_is_ref_realm: checking <%s> for referralness: %s\n",
-	   r->data,(r->length==0)?"true":"false");
-#endif
-#endif
-    assert(strlen(KRB5_REFERRAL_REALM)==0);
-    if (r->length==0)
-        return TRUE;
-    else
-        return FALSE;
 }

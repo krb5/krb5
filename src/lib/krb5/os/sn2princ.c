@@ -201,7 +201,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	printf("krb5_sname_to_principal returning\n");
 	printf("realm: <%s>, sname: <%s>, remote_host: <%s>\n",
 	       realm,sname,remote_host);
-	dbgref_dump_principal("krb5_sname_to_principal",*ret_princ);
+	krb5int_dbgref_dump_principal("krb5_sname_to_principal",*ret_princ);
 #endif
 
 	free(remote_host);

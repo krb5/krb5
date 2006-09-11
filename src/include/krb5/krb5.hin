@@ -263,21 +263,11 @@ typedef const krb5_principal_data *krb5_const_principal;
  * Constants for realm referrals.
  */
 #define        KRB5_REFERRAL_REALM	""
-#define        KRB5_REFERRAL_MAXHOPS	5
 
 /*
  * Referral-specific functions.
  */
-krb5_boolean krb5_is_referral_realm(krb5_data *);
-
-/*
- * Referral debugging hooks.
- */
-/* #define DEBUG_REFERRALS */
-
-#ifdef DEBUG_REFERRALS
-void dbgref_dump_principal(char *, krb5_principal);
-#endif
+krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(krb5_data *);
 
 /*
  * end "base-defs.h"
@@ -2270,11 +2260,6 @@ krb5_error_code KRB5_CALLCONV krb5_get_fallback_host_realm
 	(krb5_context,
 		krb5_data *,
 		char *** );
-krb5_error_code KRB5_CALLCONV krb5_clean_hostname
-	(krb5_context,
-		const char *,
-		char *,
-		size_t);
 krb5_error_code KRB5_CALLCONV krb5_free_host_realm
 	(krb5_context,
 		char * const * );

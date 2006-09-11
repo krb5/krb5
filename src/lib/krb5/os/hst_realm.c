@@ -204,7 +204,7 @@ krb5_get_host_realm(krb5_context context, const char *host, char ***realmsp)
     printf("get_host_realm(host:%s) called\n",host);
 #endif
 
-    krb5_clean_hostname(context, host, local_host, sizeof local_host);
+    krb5int_clean_hostname(context, host, local_host, sizeof local_host);
 
     /*
        Search for the best match for the host or domain.
@@ -344,7 +344,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
     printf("get_fallback_host_realm(host >%s<) called\n",host);
 #endif
 
-    krb5_clean_hostname(context, host, local_host, sizeof local_host);
+    krb5int_clean_hostname(context, host, local_host, sizeof local_host);
 
     /* Scan hostname for DNS realm, and save as last-ditch realm
        assumption. */
@@ -430,7 +430,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
  * to do basic sanity checks on supplied hostname.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_clean_hostname(krb5_context context, const char *host, char *local_host, size_t lhsize)
+krb5int_clean_hostname(krb5_context context, const char *host, char *local_host, size_t lhsize)
 {
     char **retrealms;
     char *realm, *cp, *temp_realm;
@@ -439,7 +439,7 @@ krb5_clean_hostname(krb5_context context, const char *host, char *local_host, si
 
     local_host[0]=0;
 #ifdef DEBUG_REFERRALS
-    printf("krb5_clean_hostname called: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
+    printf("krb5int_clean_hostname called: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
 #endif
     if (host) {
 	/* Filter out numeric addresses if the caller utterly failed to
@@ -484,7 +484,7 @@ krb5_clean_hostname(krb5_context context, const char *host, char *local_host, si
 	    local_host[l-1] = 0;
 
 #ifdef DEBUG_REFERRALS
-    printf("krb5_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
+    printf("krb5int_clean_hostname ending: host<%s>, local_host<%s>, size %d\n",host,local_host,lhsize);
 #endif
     return 0;
 }
