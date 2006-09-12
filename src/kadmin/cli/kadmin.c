@@ -236,15 +236,14 @@ char *kadmin_startup(argc, argv)
 	case 'x':
 	  db_args_size++;
 	  {
-	    char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
-	    if( temp == NULL )
-	      {
-		fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
-			argv[0]);
-		exit(1);
+	      char **temp = realloc(db_args, sizeof(char*) * (db_args_size+1));
+	      if (temp == NULL) {
+		  fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
+			  argv[0]);
+		  exit(1);
 	      }
 
-	    db_args = temp;
+	      db_args = temp;
 	  }
 	  db_args[db_args_size-1] = optarg;
 	  db_args[db_args_size]   = NULL;
@@ -273,13 +272,10 @@ char *kadmin_startup(argc, argv)
 	    break;
         case 'd':
 	    /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
-	    if( !db_name )
-	    {
-		db_name = malloc( strlen(optarg) + sizeof("dbname="));
-	    } 
-	    else
-	    {
-		db_name = realloc( db_name, strlen(optarg) + sizeof("dbname="));
+	    if( !db_name ) {
+		db_name = malloc(strlen(optarg) + sizeof("dbname="));
+	    } else {
+		db_name = realloc(db_name, strlen(optarg) + sizeof("dbname="));
 	    }
 
 	    strcpy( db_name, "dbname=");
@@ -287,10 +283,10 @@ char *kadmin_startup(argc, argv)
 
 	    db_args_size++;
 	    {
-		char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
-		if( temp == NULL )
-		{
-		    fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
+		char **temp = realloc(db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
+		if (temp == NULL) {
+		    fprintf(stderr,
+			    "%s: Cannot initialize. Not enough memory\n",
 			    argv[0]);
 		    exit(1);
 		}
