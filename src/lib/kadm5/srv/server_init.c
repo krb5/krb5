@@ -36,40 +36,35 @@ static int check_handle(void *handle)
      return 0;
 }
 
-static int dup_db_args( kadm5_server_handle_t handle, char **db_args )
+static int dup_db_args(kadm5_server_handle_t handle, char **db_args)
 {
     int count  = 0;
     int ret = 0;
 
-    for( count=0; db_args && db_args[count]; count++ );
-    if( count == 0 )
-    {
+    for (count=0; db_args && db_args[count]; count++);
+    if (count == 0) {
 	handle->db_args = NULL;
 	goto clean_n_exit;
     }
 
     handle->db_args = calloc(sizeof(char*), count+1);
-    if( handle->db_args == NULL )
-    {
+    if (handle->db_args == NULL) {
 	ret=ENOMEM;
 	goto clean_n_exit;
     }
 
-    for(count=0; db_args[count]; count++)
-    {
+    for (count=0; db_args[count]; count++) {
 	handle->db_args[count] = strdup(db_args[count]);
-	if( handle->db_args[count] == NULL )
-	{
+	if (handle->db_args[count] == NULL) {
 	    ret = ENOMEM;
 	    goto clean_n_exit;
 	}
     }
 
  clean_n_exit:
-    if( ret && handle->db_args )
-    {
-	for(count=0; handle->db_args[count]; count++ )
-	    free( handle->db_args[count] );
+    if (ret && handle->db_args) {
+	for (count=0; handle->db_args[count]; count++)
+	    free(handle->db_args[count]);
 
 	free(handle->db_args), handle->db_args = NULL;
     }
@@ -81,11 +76,10 @@ static void free_db_args(kadm5_server_handle_t handle)
 {
     int count;
 
-    if( handle->db_args )
-    {
-	for(count=0; handle->db_args[count]; count++ )
-	    free( handle->db_args[count] );
-	
+    if (handle->db_args) {
+	for (count=0; handle->db_args[count]; count++)
+	    free(handle->db_args[count]);
+
 	free(handle->db_args), handle->db_args = NULL;
     }
 }
@@ -168,14 +162,13 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 
     if (! client_name)
 	 return EINVAL;
-    
+
     if (! (handle = (kadm5_server_handle_t) malloc(sizeof *handle)))
 	 return ENOMEM;
     memset(handle, 0, sizeof(*handle));
 
-    ret = dup_db_args( handle, db_args );
-    if( ret )
-    {
+    ret = dup_db_args(handle, db_args);
+    if (ret) {
 	free(handle);
 	return ret;
     }
@@ -201,7 +194,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
       */
      GENERIC_CHECK_HANDLE(handle, KADM5_OLD_SERVER_API_VERSION,
 			  KADM5_NEW_SERVER_API_VERSION);
-     
+
      /*
       * Acquire relevant profile entries.  In version 2, merge values
       * in params_in with values from profile, based on
@@ -245,7 +238,7 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 			 KADM5_CONFIG_ENCTYPE | \
 			 KADM5_CONFIG_FLAGS | \
 			 KADM5_CONFIG_MAX_LIFE | KADM5_CONFIG_MAX_RLIFE | \
-			 KADM5_CONFIG_EXPIRATION | KADM5_CONFIG_ENCTYPES) 
+			 KADM5_CONFIG_EXPIRATION | KADM5_CONFIG_ENCTYPES)
 
      if ((handle->params.mask & REQUIRED_PARAMS) != REQUIRED_PARAMS) {
 	  krb5_free_context(handle->context);
@@ -255,15 +248,14 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
      }
 
      ret = krb5_set_default_realm(handle->context, handle->params.realm);
-     if( ret )
-     {
+     if (ret) {
 	  krb5_free_context(handle->context);
 	  free_db_args(handle);
 	  free(handle);
 	  return ret;
      }
 
-    ret = krb5_db_open(handle->context, db_args, 
+    ret = krb5_db_open(handle->context, db_args,
 		       KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
     if (ret) {
 	 krb5_free_context(handle->context);
@@ -297,10 +289,10 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
     ret = check_handle((void *) handle);
     if (ret) {
 	free_db_args(handle);
-        free(handle);
+	free(handle);
 	return ret;
     }
-     
+
     /*
      * The KADM5_API_VERSION_1 spec said "If pass (or keytab) is NULL
      * or an empty string, reads the master password from [the stash
@@ -323,15 +315,15 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 			   ((pass == NULL) || !(strlen(pass))) :
 			   ((handle->params.mask & KADM5_CONFIG_MKEY_FROM_KBD)
 			    && handle->params.mkey_from_kbd)
-			   )); 
+			));
     if (ret) {
-        krb5_db_fini(handle->context);
+	krb5_db_fini(handle->context);
 	krb5_free_context(handle->context);
 	free_db_args(handle);
 	free(handle);
 	return ret;
     }
-    
+
     ret = kdb_init_hist(handle, handle->params.realm);
     if (ret) {
 	 krb5_db_fini(handle->context);
@@ -343,16 +335,16 @@ kadm5_ret_t kadm5_init(char *client_name, char *pass,
 
     ret = init_dict(&handle->params);
     if (ret) {
-         krb5_db_fini(handle->context);
+	 krb5_db_fini(handle->context);
 	 krb5_free_principal(handle->context, handle->current_caller);
 	 krb5_free_context(handle->context);
 	 free_db_args(handle);
 	 free(handle);
 	 return ret;
     }
-    
+
     *server_handle = (void *) handle;
-    
+
     return KADM5_OK;
 }
 
@@ -373,7 +365,7 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
     free(handle->lhandle);
     free_db_args(handle);
     free(handle);
- 
+
     return KADM5_OK;
 }
 
@@ -411,7 +403,7 @@ kadm5_ret_t kadm5_flush(void *server_handle)
      CHECK_HANDLE(server_handle);
 
      if ((ret = krb5_db_fini(handle->context)) ||
-	 (ret = krb5_db_open(handle->context, handle->db_args, 
+	 (ret = krb5_db_open(handle->context, handle->db_args,
 			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN)) ||
 	 (ret = adb_policy_close(handle)) ||
 	 (ret = adb_policy_init(handle))) {
