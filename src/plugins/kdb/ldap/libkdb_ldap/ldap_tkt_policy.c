@@ -163,7 +163,7 @@ krb5_ldap_create_policy(context, policy, mask)
 	goto cleanup;
 
     /* ldap add operation */
-    if ((st=ldap_add_s(ld, policy->policydn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_add_ext_s(ld, policy->policydn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
@@ -241,7 +241,7 @@ krb5_ldap_modify_policy(context, policy, mask)
 					  policy->polrefcount)) != 0)
 	    goto cleanup;
     }
-    if ((st=ldap_modify_s(ld, policy->policydn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, policy->policydn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
@@ -379,7 +379,7 @@ krb5_ldap_delete_policy(context, policydn, policy, mask)
 
     if (policy->polrefcount == 0) {
 
-	if ((st=ldap_delete_s(ld, policydn)) != 0) {
+	if ((st=ldap_delete_ext_s(ld, policydn, NULL, NULL)) != 0) {
 	    prepend_err_str (context,ldap_err2string(st),st,st);
 
 	    goto cleanup;

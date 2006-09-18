@@ -135,7 +135,7 @@ krb5_ldap_create_service(context, service, mask)
     }
 
     /* ldap add operation */
-    if ((st=ldap_add_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_add_ext_s(ld, service->servicedn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
@@ -152,7 +152,7 @@ krb5_ldap_create_service(context, service, mask)
 			 service->krbrealmreferences[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete service object, status ignored intentionally */
-		ldap_delete_s(ld, service->servicedn);
+		ldap_delete_ext_s(ld, service->servicedn, NULL, NULL);
 		goto cleanup;
 	    }
 	}
@@ -245,11 +245,15 @@ krb5_ldap_modify_service(context, service, mask)
 		realmattr = "krbKdcServers";
 
 	    /* read the existing list of krbRealmreferences. this will needed  */
-	    if ((st = ldap_search_s (ld,
+	    if ((st = ldap_search_ext_s (ld,
 				     service->servicedn,
 				     LDAP_SCOPE_BASE,
 				     0,
 				     attr,
+				     0,
+				     NULL,
+				     NULL,
+				     NULL,
 				     0,
 				     &result)) != LDAP_SUCCESS) {
 		st = set_ldap_error (context, st, OP_SEARCH);
@@ -274,7 +278,7 @@ krb5_ldap_modify_service(context, service, mask)
     }
 
     /* ldap modify operation */
-    if ((st=ldap_modify_s(ld, service->servicedn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, service->servicedn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
@@ -351,7 +355,7 @@ krb5_ldap_delete_service(context, service, servicedn)
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    st = ldap_delete_s(ld, servicedn);
+    st = ldap_delete_ext_s(ld, servicedn, NULL, NULL);
     if (st != 0) {
 	st = set_ldap_error (context, st, OP_DEL);
     }
@@ -580,7 +584,7 @@ krb5_ldap_set_service_passwd(context, service, passwd)
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "userPassword", LDAP_MOD_REPLACE, password)) != 0)
 	goto cleanup;
 
-    st = ldap_modify_s(ld, service, mods);
+    st = ldap_modify_ext_s(ld, service, mods, NULL, NULL);
     if (st) {
 	st = set_ldap_error (context, st, OP_MOD);
     }

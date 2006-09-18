@@ -992,7 +992,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    if (mods == NULL) {
 		goto cleanup;
 	    }
-	    st=ldap_modify_s(ld, xargs.dn, mods);
+	    st=ldap_modify_ext_s(ld, xargs.dn, mods, NULL, NULL);
 	    if (st != LDAP_SUCCESS) {
 		sprintf(errbuf, "User modification failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_MOD);
@@ -1000,7 +1000,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		goto cleanup;
 	    }
 	} else {
-	    st=ldap_add_s(ld, xargs.dn, mods);
+	    st=ldap_add_ext_s(ld, xargs.dn, mods, NULL, NULL);
 	    if (st != LDAP_SUCCESS) {
 		sprintf(errbuf, "Principal add failed: %s", ldap_err2string(st));
 		st = translate_ldap_error (st, OP_ADD);

@@ -136,22 +136,22 @@ has_sasl_external_mech(context, ldap_server)
     LDAP              *ld=NULL;
     LDAPMessage       *msg=NULL, *res=NULL;
 
-    ld = ldap_open(ldap_server, 389); /*  Should the port number be configurable ? */
-    if (ld == NULL) {
-	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
-	ret = 2; /* Don't know */
-	goto cleanup;
-    }
-
-    /* Anonymous bind */
-    retval = ldap_simple_bind_s(ld, NULL, NULL);
+    retval = ldap_initialize(&ld, ldap_server);
     if (retval != LDAP_SUCCESS) {
 	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
 	goto cleanup;
     }
 
-    retval = ldap_search_s(ld, "", LDAP_SCOPE_BASE, NULL, attrs, 0, &res);
+    /* Anonymous bind */
+    retval = ldap_sasl_bind_s(ld, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (retval != LDAP_SUCCESS) {
+	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
+	ret = 2; /* Don't know */
+	goto cleanup;
+    }
+
+    retval = ldap_search_ext_s(ld, "", LDAP_SCOPE_BASE, NULL, attrs, 0, NULL, NULL, NULL, 0, &res);
     if (retval != LDAP_SUCCESS) {
 	krb5_set_error_message(context, 2, "%s", ERR_MSG1);
 	ret = 2; /* Don't know */
@@ -193,7 +193,7 @@ cleanup:
 	ldap_msgfree(res);
 
     if (ld != NULL)
-	ldap_unbind_s(ld);
+	ldap_unbind_ext_s(ld, NULL, NULL);
 
     return ret;
 }
@@ -295,8 +295,6 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 		goto clean_n_exit;
 	    }
 	} else if (opt && !strcmp(opt, "host")) {
-	    char *port = NULL;
-
 	    if (val == NULL) {
 		status = EINVAL;
 		krb5_set_error_message (context, status, "'host' value missing");
@@ -323,7 +321,6 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 
 	    ldap_context->server_info_list[srv_cnt]->server_status = NOTSET;
 
-	    val = strtok_r(val, ":", &port);
 	    ldap_context->server_info_list[srv_cnt]->server_name = strdup(val);
 	    if (ldap_context->server_info_list[srv_cnt]->server_name == NULL) {
 		free (opt);
@@ -332,25 +329,7 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 		goto clean_n_exit;
 	    }
 
-	    if (port) {
-		ldap_context->server_info_list[srv_cnt]->port = atoi(port);
-	    }
 	    srv_cnt++;
-	} else if (opt && !strcmp(opt, "port")) {
-	    if (ldap_context->port) {
-		free (opt);
-		free (val);
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'port' missing");
-		goto clean_n_exit;
-	    }
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'port' value missing");
-		free(opt);
-		goto clean_n_exit;
-	    }
-	    ldap_context->port = atoi(val);
 	} else if (opt && !strcmp(opt, "cert")) {
 	    if (val == NULL) {
 		status = EINVAL;

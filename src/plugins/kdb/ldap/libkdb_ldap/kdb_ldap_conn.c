@@ -127,9 +127,12 @@ krb5_ldap_bind(ldap_context, ldap_server_handle)
 	}
     } else {
 	/* password based simple bind */
-	st = ldap_simple_bind_s(ldap_server_handle->ldap_handle,
-				ldap_context->bind_dn,
-				ldap_context->bind_pwd);
+        bv.bv_val = ldap_context->bind_pwd;
+        bv.bv_len = strlen(ldap_context->bind_pwd);
+        st = ldap_sasl_bind_s(ldap_server_handle->ldap_handle, 
+                                ldap_context->bind_dn,
+                                NULL, &bv, NULL, 
+                                NULL, NULL);
     }
     return st;
 }
@@ -139,16 +142,8 @@ krb5_ldap_initialize(ldap_context, server_info)
     krb5_ldap_context *ldap_context;
     krb5_ldap_server_info *server_info;
 {
-    int                         port=0;
     krb5_error_code             st=0;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
-
-    if (server_info->port)
-	port = server_info->port;
-    else if (ldap_context->port)
-	port = ldap_context->port;
-    else
-	port = LDAPS_PORT;
 
 
     ldap_server_handle = calloc(1, sizeof(krb5_ldap_server_handle));
@@ -158,12 +153,11 @@ krb5_ldap_initialize(ldap_context, server_info)
     }
 
     /* ldap init */
-    if ((ldap_server_handle->ldap_handle=ldap_init(server_info->server_name,
-						   port)) == NULL) {
-	st = KRB5_KDB_ACCESS_ERROR;
+    if ((st = ldap_initialize(&ldap_server_handle->ldap_handle, server_info->server_name)) != 0) {
 	if (ldap_context->kcontext)
-	    krb5_set_error_message (ldap_context->kcontext, st, "%s",
-				    strerror(errno));
+	    krb5_set_error_message (ldap_context->kcontext, KRB5_KDB_ACCESS_ERROR, "%s",
+				    ldap_err2string(st));
+	st = KRB5_KDB_ACCESS_ERROR;
 	goto err_out;
     }
 
@@ -198,9 +192,6 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
     krb5_boolean                sasl_mech_supported=TRUE;
     int                         cnt=0, version=LDAP_VERSION3;
     struct timeval              local_timelimit = {10,0};
-#ifdef LDAP_OPT_X_TLS_HARD
-    int				tlsoption=LDAP_OPT_X_TLS_HARD;
-#endif
 
     if ((st=krb5_validate_ldap_context(context, ldap_context)) != 0)
 	goto err_out;
@@ -210,9 +201,6 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
     ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &local_timelimit);
 #elif defined LDAP_X_OPT_CONNECT_TIMEOUT
     ldap_set_option(NULL, LDAP_X_OPT_CONNECT_TIMEOUT, &local_timelimit);
-#endif
-#ifdef LDAP_OPT_X_TLS_HARD
-    ldap_set_option(NULL, LDAP_OPT_X_TLS, &tlsoption);
 #endif
 
     HNDL_LOCK(ldap_context);
@@ -305,17 +293,9 @@ krb5_ldap_rebind(ldap_context, ldap_server_handle)
     krb5_ldap_server_handle     **ldap_server_handle;
 {
     krb5_ldap_server_handle     *handle = *ldap_server_handle;
-    int                         port=0;
 
-    if (handle->server_info->port)
-	port = handle->server_info->port;
-    else if (ldap_context->port)
-	port = ldap_context->port;
-    else
-	port = LDAPS_PORT;
-
-    if ((handle->ldap_handle=ldap_init(handle->server_info->server_name, port)) == NULL
-	|| krb5_ldap_bind(ldap_context, handle) != LDAP_SUCCESS)
+    if ((ldap_initialize(&handle->ldap_handle, handle->server_info->server_name) != LDAP_SUCCESS)
+	|| (krb5_ldap_bind(ldap_context, handle) != LDAP_SUCCESS))
 	return krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle);
     return LDAP_SUCCESS;
 }

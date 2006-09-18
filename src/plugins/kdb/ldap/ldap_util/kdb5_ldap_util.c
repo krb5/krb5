@@ -107,7 +107,7 @@ krb5_boolean manual_mkey = FALSE;
 void usage()
 {
     fprintf(stderr, "Usage: "
-"kdb5_ldap_util [-D user_dn [-w passwd]] [-h ldap_server] [-p ldap_port]\n"
+"kdb5_ldap_util [-D user_dn [-w passwd]] [-H ldapuri]\n"
 "\tcmd [cmd_options]\n"
 
 /* Create realm */
@@ -116,7 +116,7 @@ void usage()
 "\t\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
 "\t\t[-pwddn passwd_service_list]\n"
 #endif
-"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype]\n"
+"\t\t[-m|-P password|-sf stashfilename] [-k mkeytype] [-s]\n"
 "\t\t[-maxtktlife max_ticket_life] [-maxrenewlife max_renewable_ticket_life]\n"
 "\t\t[ticket_flags] [-r realm]\n"
 
@@ -373,7 +373,7 @@ int main(argc, argv)
 		goto cleanup;
 	    }
 	    ldapmask |= CMD_LDAP_W;
-	} else if (strcmp(*argv, "-h") == 0 && ARG_VAL) {
+	} else if (strcmp(*argv, "-H") == 0 && ARG_VAL) {
 	    ldap_server = koptarg;
 	    if (ldap_server == NULL) {
 		com_err(progname, ENOMEM, "while reading ldap parameters");
@@ -381,14 +381,6 @@ int main(argc, argv)
 		goto cleanup;
 	    }
 	    ldapmask |= CMD_LDAP_H;
-	} else if (strcmp(*argv, "-p") == 0 && ARG_VAL) {
-	    ldap_port = koptarg;
-	    if (ldap_port == NULL) {
-		com_err(progname, ENOMEM, "while reading ldap parameters");
-		exit_status++;
-		goto cleanup;
-	    }
-	    ldapmask |= CMD_LDAP_P;
 	} else if (cmd_lookup(*argv) != NULL) {
 	    if (cmd_argv[0] == NULL)
 		cmd_argv[0] = *argv;
@@ -561,10 +553,6 @@ int main(argc, argv)
 	    exit_status++;
 	    goto cleanup;
 	}
-    }
-    /* If ldapport is specified, release entry filled by configuration & use this*/
-    if (ldapmask & CMD_LDAP_P) {
-	ldap_context->port = atoi(ldap_port);
     }
     if (bind_dn) {
 	ldap_context->bind_dn = strdup(bind_dn);

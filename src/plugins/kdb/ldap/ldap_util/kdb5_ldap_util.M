@@ -4,7 +4,7 @@ kdb5_ldap_util \- Kerberos Configuration Utility
 .SH SYNOPSIS
 .B kdb5_ldap_util
 [\fB\-D\fP\ \fIuser_dn\fP [\fB\-w\fP\ \fIpasswd\fP]]
-[\fB\-h\fP\ \fIldap_server\fP] [\fB\-p\fP\ \fIldap_port\fP]
+[\fB\-H\fP\ \fIldapuri\fP]
 .I command
 .I [command_options]
 .SH DESCRIPTION
@@ -21,12 +21,8 @@ Specifies the password of
 .IR user_dn .
 This option is not recommended.
 .TP
-\fB\-h\fP\ \fIldap_server\fP
-Specifies the hostname or IP address of the server hosting the LDAP service for 
-a Kerberos realm.
-.TP
-\fB\-p\fP\ \fIldap_port\fP
-Specifies the SSL port number of the LDAP server.
+\fB\-H\fP\ \fIldapuri\fP
+Specifies the URI of the LDAP server.
 .SH COMMANDS
 .TP
 \fBcreate\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]

@@ -594,14 +594,10 @@ This LDAP specific tag indicates the file containing the stashed passwords for t
 objects used for starting the Kerberos servers. This value is used if no
 service password file is mentioned in the configuration section under dbmodules.
 
-.IP ldap_ssl_port
-This LDAP specific tag indicates the value of the SSL port for the LDAP server.
-This value is used if no SSL port is mentioned in the configuration section under dbmodules. 
-
 .IP ldap_server
 This LDAP specific tag indicates the list of LDAP servers. The list of LDAP servers
-is whitespace-separated. The port value can be specified with the server separated by
-a colon. This value is used if no LDAP servers are mentioned in the configuration
+is whitespace-separated. The LDAP server is specified by a LDAP URI.
+This value is used if no LDAP servers are mentioned in the configuration
 section under dbmodules.
 
 .IP ldap_conns_per_server
@@ -639,12 +635,9 @@ as this object.
 This LDAP specific tag indicates the file containing the stashed passwords for the
 objects used for starting the Kerberos servers.
 
-.IP ldap_ssl_port
-This LDAP specific tag indicates the value of the SSL port for the LDAP server. 
-
 .IP ldap_server
 This LDAP specific tag indicates the list of LDAP servers. The list of LDAP servers
-is whitespace-separated. The port value can be specified with the server separated by a colon.
+is whitespace-separated. The LDAP server is specified by a LDAP URI.
 
 .IP ldap_conns_per_server
 This LDAP specific tag indicates the number of connections to be maintained per

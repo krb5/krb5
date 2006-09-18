@@ -349,7 +349,7 @@ krb5_ldap_delete_realm (context, lrealm)
     }
 
     /* Delete the realm object */
-    if ((st=ldap_delete_s(ld, ldap_context->lrparams->realmdn)) != LDAP_SUCCESS) {
+    if ((st=ldap_delete_ext_s(ld, ldap_context->lrparams->realmdn, NULL, NULL)) != LDAP_SUCCESS) {
 	int ost = st;
 	st = translate_ldap_error (st, OP_DEL);
 	krb5_set_error_message (context, st, "Realm Delete FAILED: %s",
@@ -685,11 +685,15 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	mask & LDAP_REALM_PASSWDSERVERS) {
 	char *servers[] = {"krbKdcServers", "krbAdmServers", "krbPwdServers", NULL};
 
-	if ((st= ldap_search_s(ld,
+	if ((st= ldap_search_ext_s(ld,
 			       rparams->realmdn,
 			       LDAP_SCOPE_BASE,
 			       0,
 			       servers,
+			       0,
+			       NULL,
+			       NULL,
+			       NULL,
 			       0,
 			       &result)) != LDAP_SUCCESS) {
 	    st = set_ldap_error (context, st, OP_SEARCH);
@@ -724,7 +728,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 #endif
 
     /* Realm modify opearation */
-    if ((st=ldap_modify_s(ld, rparams->realmdn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, rparams->realmdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
@@ -942,7 +946,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
     }
 
     /* create the kerberos container */
-    if ((st = ldap_add_s(ld, kerberoscontdn, mods)) != LDAP_SUCCESS) {
+    if ((st = ldap_add_ext_s(ld, kerberoscontdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	int ost = st;
 	st = translate_ldap_error (st, OP_ADD);
 	krb5_set_error_message (context, st, "Kerberos Container create FAILED: %s", ldap_err2string(ost));
@@ -960,7 +964,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
 				krbContainerRefclass, &crmask)) != 0) {
 	prepend_err_str (context, "Security Container read FAILED: ", st, st);
 	/* delete Kerberos Container, status ignored intentionally */
-	ldap_delete_s(ld, kerberoscontdn);
+	ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL);
 	goto cleanup;
     }
 
@@ -977,12 +981,12 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
 	goto cleanup;
 
     /* update the security container with krbContainerReference attribute */
-    if ((st=ldap_modify_s(ld, SECURITY_CONTAINER, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, SECURITY_CONTAINER, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	int ost = st;
 	st = translate_ldap_error (st, OP_MOD);
 	krb5_set_error_message (context, st, "Security Container update FAILED: %s", ldap_err2string(ost));
 	/* delete Kerberos Container, status ignored intentionally */
-	ldap_delete_s(ld, kerberoscontdn);
+	ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL);
 	goto cleanup;
     }
 #endif
@@ -1273,7 +1277,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 #endif
 
     /* realm creation operation */
-    if ((st=ldap_add_s(ld, dn, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_add_ext_s(ld, dn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
@@ -1286,7 +1290,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 			rparams->kdcservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
-		ldap_delete_s(ld, dn);
+		ldap_delete_ext_s(ld, dn, NULL, NULL);
 		goto cleanup;
 	    }
 
@@ -1297,7 +1301,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 			rparams->adminservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
-		ldap_delete_s(ld, dn);
+		ldap_delete_ext_s(ld, dn, NULL, NULL);
 		goto cleanup;
 	    }
 
@@ -1308,7 +1312,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 			rparams->passwdservers[i]);
 		prepend_err_str (context, errbuf, st, st);
 		/* delete Realm, status ignored intentionally */
-		ldap_delete_s(ld, dn);
+		ldap_delete_ext_s(ld, dn, NULL, NULL);
 		goto cleanup;
 	    }
 #endif

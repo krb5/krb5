@@ -315,13 +315,13 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 		}
 	    }
 	}
-	st=ldap_modify_s(ld, DN, mods);
+	st=ldap_modify_ext_s(ld, DN, mods, NULL, NULL);
 	if (st != LDAP_SUCCESS) {
 	    st = set_ldap_error(context, st, OP_MOD);
 	    goto cleanup;
 	}
     } else if (ptype == KDB_SERVICE_PRINCIPAL) {
-	st = ldap_delete_s(ld, DN);
+	st = ldap_delete_ext_s(ld, DN, NULL, NULL);
 	if (st != LDAP_SUCCESS) {
 	    st = set_ldap_error (context, st, OP_DEL);
 	    goto cleanup;
