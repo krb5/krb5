@@ -686,16 +686,16 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	char *servers[] = {"krbKdcServers", "krbAdmServers", "krbPwdServers", NULL};
 
 	if ((st= ldap_search_ext_s(ld,
-			       rparams->realmdn,
-			       LDAP_SCOPE_BASE,
-			       0,
-			       servers,
-			       0,
-			       NULL,
-			       NULL,
-			       NULL,
-			       0,
-			       &result)) != LDAP_SUCCESS) {
+				   rparams->realmdn,
+				   LDAP_SCOPE_BASE,
+				   0,
+				   servers,
+				   0,
+				   NULL,
+				   NULL,
+				   NULL,
+				   0,
+				   &result)) != LDAP_SUCCESS) {
 	    st = set_ldap_error (context, st, OP_SEARCH);
 	    goto cleanup;
 	}

@@ -246,16 +246,16 @@ krb5_ldap_modify_service(context, service, mask)
 
 	    /* read the existing list of krbRealmreferences. this will needed  */
 	    if ((st = ldap_search_ext_s (ld,
-				     service->servicedn,
-				     LDAP_SCOPE_BASE,
-				     0,
-				     attr,
-				     0,
-				     NULL,
-				     NULL,
-				     NULL,
-				     0,
-				     &result)) != LDAP_SUCCESS) {
+					 service->servicedn,
+					 LDAP_SCOPE_BASE,
+					 0,
+					 attr,
+					 0,
+					 NULL,
+					 NULL,
+					 NULL,
+					 0,
+					 &result)) != LDAP_SUCCESS) {
 		st = set_ldap_error (context, st, OP_SEARCH);
 		goto cleanup;
 	    }
