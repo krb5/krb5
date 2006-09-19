@@ -464,7 +464,6 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     char uniquename[8];
     krb5_error_code err;
     krb5_mcc_data *d;
-    krb5_mcc_list_node *ptr;
 
     /* Allocate memory */
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -472,9 +471,7 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
 	return KRB5_CC_NOMEM;
 
     lid->ops = &krb5_mcc_ops;
-
-    random_string (context, uniquename, sizeof (uniquename));
-
+    
     err = k5_mutex_lock(&krb5int_mcc_mutex);
     if (err) {
 	free(lid);
@@ -483,15 +480,16 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
     
     /* Check for uniqueness with mutex locked to avoid race conditions */
     while (1) {
+        krb5_mcc_list_node *ptr;
+
+        random_string (context, uniquename, sizeof (uniquename));
+        
 	for (ptr = mcc_head; ptr; ptr=ptr->next) {
             if (!strcmp(ptr->cache->name, uniquename)) {
-		/* name already exists.  Pick a new one and start over. */
-		random_string (context, uniquename, sizeof (uniquename));               
-		ptr = mcc_head;
-		continue;  
+		break;  /* got a match, loop again */
             }
 	}
-	break;  /* got a unique name.  Stop. */
+        if (!ptr) break; /* got to the end without finding a match */
     }
     
     err = new_mcc_data(uniquename, &d);
@@ -518,7 +516,7 @@ random_string (krb5_context context, char *string, krb5_int32 length)
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     krb5_error_code err = 0;
     unsigned char *bytes = NULL;
-    size_t bytecount = length - 1;
+    krb5_int32 bytecount = length - 1;
     
     if (!err) {
         bytes = malloc (bytecount);
