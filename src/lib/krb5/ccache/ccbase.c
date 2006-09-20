@@ -38,6 +38,9 @@ struct krb5_cc_typelist {
     struct krb5_cc_typelist *next;
 };
 extern const krb5_cc_ops krb5_mcc_ops;
+#ifdef USE_KEYRING_CCACHE
+extern const krb5_cc_ops krb5_krcc_ops;
+#endif
 
 #ifdef _WIN32
 extern const krb5_cc_ops krb5_lcc_ops;
@@ -45,12 +48,21 @@ static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NULL };
 static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_lcc_entry };
 #else
 static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
+#ifdef USE_KEYRING_CCACHE
+static struct krb5_cc_typelist cc_file_entry = { &krb5_cc_file_ops,
+						 &cc_mcc_entry };
+static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops,
+						 &cc_file_entry };
+#endif /* USE_KEYRING_CCACHE */
 #endif
 
 static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
-
+#ifdef USE_KEYRING_CCACHE
+static struct krb5_cc_typelist *cc_typehead = &cc_krcc_entry;
+#else
 static struct krb5_cc_typelist *cc_typehead = &cc_fcc_entry;
+#endif
 static k5_mutex_t cc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 int
@@ -67,20 +79,27 @@ krb5int_cc_initialize(void)
     err = k5_mutex_finish_init(&krb5int_cc_file_mutex);
     if (err)
 	return err;
+    err = k5_mutex_finish_init(&krb5int_krcc_mutex);
+    if (err)
+	return err;
     return 0;
 }
 
 void
 krb5int_cc_finalize(void)
 {
+#ifndef USE_KEYRING_CCACHE
     struct krb5_cc_typelist *t, *t_next;
+#endif
     k5_mutex_destroy(&cc_typelist_lock);
     k5_mutex_destroy(&krb5int_cc_file_mutex);
     k5_mutex_destroy(&krb5int_mcc_mutex);
+#ifndef USE_KEYRING_CCACHE
     for (t = cc_typehead; t != &cc_fcc_entry; t = t_next) {
 	t_next = t->next;
 	free(t);
     }
+#endif
 }
 
 

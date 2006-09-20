@@ -95,7 +95,7 @@ krb5_ldap_create_password_policy (context, policy)
 	goto cleanup;
 
     /* password policy object creation */
-    if ((st=ldap_add_s(ld, policy->name, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_add_ext_s(ld, policy->name, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
@@ -150,7 +150,7 @@ krb5_ldap_put_password_policy (context, policy)
 	goto cleanup;
 
     /* modify the password policy object. */
-    if ((st=ldap_modify_s(ld, policy->name, mods)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, policy->name, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
@@ -241,7 +241,7 @@ krb5_ldap_delete_password_policy (context, policy)
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    if ((st=ldap_delete_s(ld, policy)) != LDAP_SUCCESS) {
+    if ((st=ldap_delete_ext_s(ld, policy, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_DEL);
 	goto cleanup;
     }

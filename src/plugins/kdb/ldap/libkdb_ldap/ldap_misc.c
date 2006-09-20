@@ -104,7 +104,7 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
 /*
  * This function reads the parameters from the krb5.conf file. The
  * parameters read here are DAL-LDAP specific attributes. Some of
- * these are ldap_port, ldap_server ....
+ * these are ldap_server ....
  */
 krb5_error_code
 krb5_ldap_read_server_params(context, conf_section, srv_type)
@@ -166,16 +166,6 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	goto cleanup;
     }
 
-    /* If ldap port is not set read it from database module section of
-       conf file.  */
-    if (ldap_context->port == 0) {
-	st = prof_get_integer_def (context, conf_section,
-				   "ldap_ssl_port",
-				   LDAPS_PORT, &ldap_context->port);
-	if (st)
-	    goto cleanup;
-    }
-
     /*
      * If the bind dn is not set read it from the database module
      * section of conf file this paramter is populated by one of the
@@ -227,7 +217,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 
     /*
      * If the ldap server parameter is not set read the list of ldap
-     * servers:port from the database module section of the conf file.
+     * servers from the database module section of the conf file.
      */
 
     if (ldap_context->server_info_list == NULL) {
@@ -260,7 +250,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    }
 	    (*server_info)[ele]->server_status = NOTSET;
 	} else {
-	    char *port=NULL, *server=NULL, *item=NULL;
+	    char *server=NULL, *item=NULL;
 
 	    item = strtok_r(tempval,delims,&save_ptr);
 	    while (item != NULL && ele<SERV_COUNT) {
@@ -270,17 +260,12 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 		    st = ENOMEM;
 		    goto cleanup;
 		}
-		server=strtok_r(item, ":", &port);
-
-		(*server_info)[ele]->server_name = strdup(server);
+		(*server_info)[ele]->server_name = strdup(item);
 		if ((*server_info)[ele]->server_name == NULL) {
 		    st = ENOMEM;
 		    goto cleanup;
 		}
 
-		if (port) {
-		    (*server_info)[ele]->port = atoi(port);
-		}
 		(*server_info)[ele]->server_status = NOTSET;
 		item = strtok_r(NULL,delims,&save_ptr);
 		++ele;
@@ -320,7 +305,7 @@ krb5_ldap_free_server_params(ldap_context)
 	    if (ldap_context->server_info_list[i]->ldap_server_handles) {
 		ldap_server_handle = ldap_context->server_info_list[i]->ldap_server_handles;
 		while (ldap_server_handle) {
-		    ldap_unbind_s(ldap_server_handle->ldap_handle);
+		    ldap_unbind_ext_s(ldap_server_handle->ldap_handle, NULL, NULL);
 		    ldap_server_handle->ldap_handle = NULL;
 		    next_ldap_server_handle = ldap_server_handle->next;
 		    krb5_xfree(ldap_server_handle);
@@ -1026,7 +1011,7 @@ updateAttribute (ld, dn, attribute, value)
     mods[0] = &modAttr;
 
     /* ldap modify operation */
-    st = ldap_modify_s(ld, dn, mods);
+    st = ldap_modify_ext_s(ld, dn, mods, NULL, NULL);
 
     /* if the {attr,attrval} combination is already present return a success
      * LDAP_ALREADY_EXISTS is for single-valued attribute
@@ -1071,7 +1056,7 @@ deleteAttribute (ld, dn, attribute, value)
     mods[0] = &modAttr;
 
     /* ldap modify operation */
-    st = ldap_modify_s(ld, dn, mods);
+    st = ldap_modify_ext_s(ld, dn, mods, NULL, NULL);
 
     /* if either the attribute or the attribute value is missing return a success */
     if (st == LDAP_NO_SUCH_ATTRIBUTE || st == LDAP_UNDEFINED_TYPE)

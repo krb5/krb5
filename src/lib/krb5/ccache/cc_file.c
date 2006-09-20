@@ -1986,9 +1986,15 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
+#ifdef HAVE_MKSTEMP
+     /* mkstemp already created the file above */
+     ret = THREEPARAMOPEN(((krb5_fcc_data *) lid->data)->filename,
+                O_WRONLY | O_BINARY, 0);
+#else
      /* Make sure the file name is reserved */
      ret = THREEPARAMOPEN(((krb5_fcc_data *) lid->data)->filename,
                 O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0);
+#endif
      if (ret == -1) {
 	  retcode = krb5_fcc_interpret(context, errno);
           goto err_out;

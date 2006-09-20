@@ -36,12 +36,20 @@
 #define LDAP_DEPRECATED 1
 #include <ldap.h>
 
-/* Check for acceptable versions.  */
-#if defined(LDAP_API_FEATURE_X_OPENLDAP)
-# if LDAP_VENDOR_VERSION < 20224
-#  error This code triggers bugs in old OpenLDAP implementations.  Please update to 2.2.24 or later.
+/* Check for acceptable versions.
+
+   OpenLDAP version 2.2.6 is known to have some kind of problem that
+   is tickled by the use of multiple handles in this code.  Version
+   2.2.19 in Mac OS 10.4.7 seems to be buggy as well.  Version 2.2.24
+   doesn't have this problem.  Other in-between versions have not been
+   tested.  */
+#ifndef BUILD_WITH_BROKEN_LDAP
+# if defined(LDAP_API_FEATURE_X_OPENLDAP)
+#  if LDAP_VENDOR_VERSION < 20224
+#   error This code triggers bugs in old OpenLDAP implementations.  Please update to 2.2.24 or later.
+#  endif
 # endif
-#endif
+#endif /* BUILD_WITH_BROKEN_LDAP */
 
 #include <k5-thread.h>
 #include <kdb5.h>

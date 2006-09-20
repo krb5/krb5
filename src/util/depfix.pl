@@ -54,6 +54,12 @@ $libgccincdir =~ s,libgcc\.[^ ]*$,include,;
 $libgccincdir = quotemeta($libgccincdir);
 #$srcdirpat = quotemeta($srcdir);
 
+# Tweak here if you need to ignore additional directories.
+#my(@ignoredirs) = ( $libgccincdir, "/var/raeburn/openldap/Install/include" );
+my(@ignoredirs) = ( $libgccincdir );
+
+my($extrasuffixes) = ($STLIBOBJS ne "");
+
 sub my_qm {
     my($x) = @_;
     $x = quotemeta($x);
@@ -87,7 +93,7 @@ sub do_subs {
     local($_) = @_;
     s,\\$, \\,g; s, + \\$, \\,g;
     s,//+,/,g; s, \./, ,g;
-    if ($STLIBOBJS ne "") {
+    if ($extrasuffixes) {
 	# Only care about the additional prefixes if we're building
 	# shared libraries.
 	s,^([a-zA-Z0-9_\-]*)\.o:,$1.so $1.po \$(OUTPRE)$1.\$(OBJEXT):,;
@@ -95,8 +101,11 @@ sub do_subs {
 	s,^([a-zA-Z0-9_\-]*)\.o:,\$(OUTPRE)$1.\$(OBJEXT):,;
     }
     # Drop GCC include files, they're basically system headers.
-    s,$libgccincdir/[^ ]* ,,go;
-    s,$libgccincdir/[^ ]*$,,go;
+    my ($x);
+    foreach $x (@ignoredirs) {
+	s,$x/[^ ]* ,,g;
+	s,$x/[^ ]*$,,g;
+    }
     # Recognize $(SRCTOP) and variants.
     my($srct) = $SRCTOP . "/";
     $_ = strrep(" $srct", " \$(SRCTOP)/", $_);

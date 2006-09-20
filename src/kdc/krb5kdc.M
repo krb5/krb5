@@ -70,12 +70,8 @@ Options supported for LDAP database are:
 \-x nconns=<number_of_connections>
 specifies the number of connections to be maintained per LDAP server.
 
-\-x port=<port_number>
-specifies the secure port number where the LDAP server is listening.
-
-\-x host=<hostname>
-specifies the host on which the LDAP server is running.
-The <hostname> should be the same as the host name set in the LDAP server certificate.
+\-x host=<ldapuri>
+specifies the LDAP server to connect to by a LDAP URI.
 
 \-x binddn=<binddn>
 specifies the DN of the object used by the KDC server to bind to the LDAP server.

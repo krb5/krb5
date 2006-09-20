@@ -224,7 +224,11 @@ cleanup:
 #if !(defined(_WIN32))
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
+#ifdef USE_KEYRING_CCACHE
+	snprintf(name_buf, (unsigned) name_size, "KEYRING:krb5cc");
+#else
 	sprintf(name_buf, "FILE:/tmp/krb5cc_%ld", (long) getuid());
+#endif
 	return 0;
 }
 #endif

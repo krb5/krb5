@@ -43,6 +43,7 @@ void
 krb5int_cc_finalize(void);
 
 extern k5_mutex_t krb5int_mcc_mutex;
+extern k5_mutex_t krb5int_krcc_mutex;
 extern k5_mutex_t krb5int_cc_file_mutex;
 
 #endif /* __KRB5_CCACHE_H__ */
