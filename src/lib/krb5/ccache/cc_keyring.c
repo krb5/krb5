@@ -178,6 +178,7 @@ typedef struct _krb5_krcc_data
 {
     char   *name;		/* Name for this credentials cache */
     k5_mutex_t lock;		/* synchronization */
+    key_serial_t parent_id;	/* parent keyring of this ccache keyring */
     key_serial_t ring_id;	/* keyring representing ccache */
     key_serial_t princ_id;	/* key holding principal info */
     int     numkeys;		/* # of keys in this ring
@@ -256,7 +257,8 @@ static krb5_error_code krb5_krcc_clearcache
     (krb5_context context, krb5_ccache id);
 
 static krb5_error_code krb5_krcc_new_data
-    (const char *, key_serial_t ring, krb5_krcc_data **);
+    (const char *, key_serial_t ring, key_serial_t parent_ring,
+     krb5_krcc_data **);
 
 static krb5_error_code krb5_krcc_save_principal
     (krb5_context context, krb5_ccache id, krb5_principal princ);
@@ -385,12 +387,20 @@ out:
  *
  * Effects:
  * Invalidates the id, and frees any resources associated with the cache.
- * (Does NOT destroy the actual ccache.)
+ * (Does NOT destroy the underlying ccache in the keyring.)
  */
 static krb5_error_code KRB5_CALLCONV
 krb5_krcc_close(krb5_context context, krb5_ccache id)
 {
+    krb5_krcc_data *d;
+
     DEBUG_PRINT(("krb5_krcc_close: entered\n"));
+
+    d = (krb5_krcc_data *) id->data;
+
+    krb5_xfree(d->name);
+    k5_mutex_destroy(&d->lock);
+    krb5_xfree(d);
 
     krb5_xfree(id);
 
@@ -452,7 +462,8 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 	for (i = 0; i < (size / sizeof(key_serial_t)); i++) {
 	    res = keyctl_unlink(keys[i], d->ring_id);
 	    if (res < 0) {
-		com_err("krb5_krcc_clearcache", errno, "unlinking key");
+		com_err("krb5_krcc_clearcache", errno,
+			"unlinking key[%d] %d", i, keys[i]);
 		DEBUG_PRINT(("krb5_krcc_clearcache: error unlinking "
 			     "key %d, res == %d\n", keys[i], res));
 	    }
@@ -488,10 +499,11 @@ krb5_krcc_destroy(krb5_context context, krb5_ccache id)
 
     krb5_krcc_clearcache(context, id);
     krb5_xfree(d->name);
-    res = keyctl_unlink(d->ring_id, KEY_SPEC_SESSION_KEYRING);
+    res = keyctl_unlink(d->ring_id, d->parent_id);
     if (res < 0) {
 	kret = errno;
-	com_err("krb5_krcc_clearcache", errno, "unlinking key");
+	com_err("krb5_krcc_destroy", errno, "unlinking key %d from ring %d",
+		d->ring_id, d->parent_id);
 	goto cleanup;
     }
 cleanup:
@@ -578,20 +590,24 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
 	key = add_key(KRCC_KEY_TYPE_KEYRING, residual, NULL, 0, ring_id);
 	if (key < 0) {
 	    kret = errno;
-	    DEBUG_PRINT(("Error adding new keyring '%s': %s\n",
-			 residual, strerror(errno)));
+	    DEBUG_PRINT(("krb5_krcc_resolve: Error adding new "
+			 "keyring '%s': %s\n", residual, strerror(errno)));
 	    return kret;
 	}
 	DEBUG_PRINT(("krb5_krcc_resolve: new keyring '%s', "
 			"key %d, added to keyring %d\n",
 			residual, key, ring_id));
     } else {
+	DEBUG_PRINT(("krb5_krcc_resolve: found existing "
+			"key %d, with name '%s' in keyring %d\n",
+			key, residual, ring_id));
 	/* Determine key containing principal information */
 	pkey = keyctl_search(key, KRCC_KEY_TYPE_USER,
 			     KRCC_SPEC_PRINC_KEYNAME, 0);
 	if (pkey < 0) {
-	    DEBUG_PRINT(("Error locating principal info for existing "
-			 "ccache in ring %d: %s\n", key, strerror(errno)));
+	    DEBUG_PRINT(("krb5_krcc_resolve: Error locating principal "
+			 "info for existing ccache in ring %d: %s\n",
+			 key, strerror(errno)));
 	    pkey = 0;
 	}
 	/* Determine how many keys exist */
@@ -606,18 +622,18 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
     if (lid == NULL)
 	return KRB5_CC_NOMEM;
 
-    kret = krb5_krcc_new_data(residual, key, &d);
+
+    kret = krb5_krcc_new_data(residual, key, ring_id, &d);
     if (kret) {
 	free(lid);
 	return kret;
     }
 
-    lid->ops = &krb5_krcc_ops;
-
     DEBUG_PRINT(("krb5_krcc_resolve: ring_id %d, princ_id %d, "
 		 "nkeys %d\n", key, pkey, nkeys));
     d->princ_id = pkey;
     d->numkeys = nkeys;
+    lid->ops = &krb5_krcc_ops;
     lid->data = d;
     lid->magic = KV5M_CCACHE;
     *id = lid;
@@ -777,7 +793,8 @@ krb5_krcc_end_seq_get(krb5_context context, krb5_ccache id,
 
    Call with the global list lock held.  */
 static  krb5_error_code
-krb5_krcc_new_data(const char *name, key_serial_t ring, krb5_krcc_data ** datapp)
+krb5_krcc_new_data(const char *name, key_serial_t ring,
+		   key_serial_t parent_ring, krb5_krcc_data ** datapp)
 {
     krb5_error_code kret;
     krb5_krcc_data *d;
@@ -800,6 +817,7 @@ krb5_krcc_new_data(const char *name, key_serial_t ring, krb5_krcc_data ** datapp
     }
     d->princ_id = 0;
     d->ring_id = ring;
+    d->parent_id = parent_ring;
     d->numkeys = 0;
 
     *datapp = d;
@@ -920,7 +938,7 @@ krb5_krcc_generate_new(krb5_context context, krb5_ccache * id)
 	}
     }
 	    
-    kret = krb5_krcc_new_data(uniquename, key, &d);
+    kret = krb5_krcc_new_data(uniquename, key, ring_id, &d);
     k5_mutex_unlock(&krb5int_krcc_mutex);
     if (kret) {
 	krb5_xfree(lid);
