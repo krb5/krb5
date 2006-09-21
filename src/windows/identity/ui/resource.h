@@ -290,6 +290,9 @@
 #define IDS_ACTIONT_OPT_APPEAR          283
 #define IDS_ACTIONT_HELP_CTX            284
 #define IDS_ACTIONT_IMPORT              285
+#define IDS_NC_FAILED_TITLE_I           286
+#define IDS_NC_PWD_FAILED_TITLE_I       287
+#define IDS_NC_REN_FAILED_TITLE_I       288
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009

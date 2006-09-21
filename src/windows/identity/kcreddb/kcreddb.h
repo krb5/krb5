@@ -504,9 +504,7 @@ kcdb_identity_set_default(khm_handle id);
       to notify the KCDB that the specified identity is the default.
       This does not result in the invocation of any other semantics to
       make the identity the default other than releasing the previous
-      defualt identity and making the specified one the default.  As
-      an additional side effect, the notification <::KMSG_KCDB,
-      ::KMSG_KCDB_IDENT, ::KCDB_OP_NEW_DEFAULT> will also not be sent.
+      defualt identity and making the specified one the default.
  */
 KHMEXP khm_int32 KHMAPI
 kcdb_identity_set_default_int(khm_handle id);
@@ -640,7 +638,7 @@ kcdb_identity_set_attr(khm_handle identity,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_set_attrib(khm_handle identity,
-                         wchar_t * attr_name,
+                         const wchar_t * attr_name,
                          void * buffer,
                          khm_size cbbuf);
 
@@ -686,7 +684,7 @@ kcdb_identity_get_attr(khm_handle identity,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_get_attrib(khm_handle identity,
-                         wchar_t * attr_name,
+                         const wchar_t * attr_name,
                          khm_int32 * attr_type,
                          void * buffer,
                          khm_size * pcbbuf);
@@ -751,7 +749,7 @@ kcdb_identity_get_attr_string(khm_handle identity,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_get_attrib_string(khm_handle identity,
-                                wchar_t * attr_name,
+                                const wchar_t * attr_name,
                                 wchar_t * buffer,
                                 khm_size * pcbbuf,
                                 khm_int32 flags);
@@ -1611,7 +1609,7 @@ typedef struct tag_kcdb_cred_request {
     \see kcdb_cred_release()
 */
 KHMEXP khm_int32 KHMAPI 
-kcdb_cred_create(wchar_t *   name, 
+kcdb_cred_create(const wchar_t *   name, 
                  khm_handle  identity,
                  khm_int32   cred_type,
                  khm_handle * result);
@@ -1641,13 +1639,18 @@ kcdb_cred_update(khm_handle vdest,
 
 /*! \brief Set an attribute in a credential by name
 
+    
+
     \param[in] cbbuf Number of bytes of data in \a buffer.  The
         individual data type handlers may copy in less than this many
-        bytes in to the credential.
+        bytes in to the credential.  For some data types where the
+        size of the buffer is fixed or can be determined from its
+        contents, you can specify ::KCDB_CBSIZE_AUTO for this
+        parameter.
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_cred_set_attrib(khm_handle cred, 
-                     wchar_t * name, 
+                     const wchar_t * name, 
                      void * buffer, 
                      khm_size cbbuf);
 
@@ -1686,7 +1689,7 @@ kcdb_cred_set_attr(khm_handle cred,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_cred_get_attrib(khm_handle cred, 
-                     wchar_t * name, 
+                     const wchar_t * name, 
                      khm_int32 * attr_type,
                      void * buffer, 
                      khm_size * cbbuf);
@@ -1791,7 +1794,7 @@ kcdb_cred_get_attr_string(khm_handle vcred,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_cred_get_attrib_string(khm_handle cred, 
-                            wchar_t * name, 
+                            const wchar_t * name, 
                             wchar_t * buffer, 
                             khm_size * cbbuf,
                             khm_int32 flags) ;
@@ -1904,7 +1907,7 @@ kcdb_cred_delete(khm_handle cred);
 KHMEXP khm_int32 KHMAPI 
 kcdb_creds_comp_attrib(khm_handle cred1, 
                        khm_handle cred2, 
-                       wchar_t * name);
+                       const wchar_t * name);
 
 /*! \brief Compare an attribute of two credentials by attribute id.
 
@@ -2219,7 +2222,7 @@ typedef struct tag_kcdb_type {
 /*@}*/
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_type_get_id(wchar_t *name, khm_int32 * id);
+kcdb_type_get_id(const wchar_t *name, khm_int32 * id);
 
 /*! \brief Return the type descriptor for a given type id
 
@@ -2262,7 +2265,7 @@ kcdb_type_get_name(khm_int32 id,
     \param[out] new_id Receives the identifier for the credential attribute type.
 */
 KHMEXP khm_int32 KHMAPI 
-kcdb_type_register(kcdb_type * type, 
+kcdb_type_register(const kcdb_type * type, 
                    khm_int32 * new_id);
 
 /*! \brief Unregister a credential attribute type
@@ -2422,12 +2425,48 @@ UnicodeStrToAnsi( char * dest, size_t cbdest, const wchar_t * src);
 */
 #define KCDB_TYPE_ALL       KCDB_TYPE_INVALID
 
+/*! \brief Void
+
+    No data.  This is not an actual data type.
+ */
 #define KCDB_TYPE_VOID      0
+
+/*! \brief String
+
+    NULL terminated Unicode string.  The byte count for a string
+    attribute always includes the terminating NULL.
+ */
 #define KCDB_TYPE_STRING    1
+
+/*! \brief Data
+
+    A date/time represented in FILETIME format.
+ */
 #define KCDB_TYPE_DATE      2
+
+/*! \brief Interval
+
+    An interval of time represented as the difference between two
+    FILETIME values.
+ */
 #define KCDB_TYPE_INTERVAL  3
+
+/*! \brief 32-bit integer
+
+    A 32-bit signed integer.
+ */
 #define KCDB_TYPE_INT32     4
+
+/*! \brief 64-bit integer
+
+    A 64-bit integer.
+ */
 #define KCDB_TYPE_INT64     5
+
+/*! \brief Raw data
+
+    A raw data buffer.
+ */
 #define KCDB_TYPE_DATA      6
 
 #define KCDB_TYPENAME_VOID      L"Void"
@@ -2509,7 +2548,7 @@ typedef struct tag_kcdb_attrib {
 
 /*! \brief Retrieve the ID of a named attribute */
 KHMEXP khm_int32 KHMAPI 
-kcdb_attrib_get_id(wchar_t *name, 
+kcdb_attrib_get_id(const wchar_t *name, 
                    khm_int32 * id);
 
 /*! \brief Register an attribute
@@ -2518,7 +2557,7 @@ kcdb_attrib_get_id(wchar_t *name,
         attribute.  If the \a id member of the ::kcdb_attrib object is
         set to KCDB_ATTR_INVALID, then a unique ID is generated. */
 KHMEXP khm_int32 KHMAPI 
-kcdb_attrib_register(kcdb_attrib * attrib, 
+kcdb_attrib_register(const kcdb_attrib * attrib, 
                      khm_int32 * new_id);
 
 /*! \brief Retrieve the attribute descriptor for an attribute 
@@ -2974,7 +3013,7 @@ typedef struct tag_kcdb_credtype {
         specified is already in use.
 */
 KHMEXP khm_int32 KHMAPI 
-kcdb_credtype_register(kcdb_credtype * type, 
+kcdb_credtype_register(const kcdb_credtype * type, 
                        khm_int32 * new_id);
 
 /*! \brief Return a held reference to a \a kcdb_credtype object describing the credential type.
@@ -3093,7 +3132,7 @@ kcdb_credtype_describe(khm_int32 id,
 
  */
 KHMEXP khm_int32 KHMAPI 
-kcdb_credtype_get_id(wchar_t * name, 
+kcdb_credtype_get_id(const wchar_t * name, 
                      khm_int32 * id);
 
 /*@}*/
@@ -3155,7 +3194,7 @@ kcdb_buf_get_attr(khm_handle  record,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_buf_get_attrib(khm_handle  record,
-                    wchar_t *   attr_name,
+                    const wchar_t *   attr_name,
                     khm_int32 * attr_type,
                     void *      buffer,
                     khm_size *  pcb_buf);
@@ -3220,7 +3259,7 @@ kcdb_buf_get_attr_string(khm_handle  record,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_buf_get_attrib_string(khm_handle  record,
-                           wchar_t *   attr_name,
+                           const wchar_t *   attr_name,
                            wchar_t *   buffer,
                            khm_size *  pcbbuf,
                            khm_int32   flags);
@@ -3245,7 +3284,7 @@ kcdb_buf_set_attr(khm_handle  record,
 */
 KHMEXP khm_int32 KHMAPI 
 kcdb_buf_set_attrib(khm_handle  record,
-                    wchar_t *   attr_name,
+                    const wchar_t *   attr_name,
                     void *      buffer,
                     khm_size    cbbuf);
 

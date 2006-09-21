@@ -2669,16 +2669,20 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
             InvalidateRect(hwnd, NULL, FALSE);
+
         }
         else if (m->subtype == KMSG_KCDB_IDENT && 
                  m->uparam == KCDB_OP_NEW_DEFAULT) {
 
             InvalidateRect(hwnd, NULL, FALSE);
+
         }
         else if (m->subtype == KMSG_KCDB_ATTRIB &&
                  (m->uparam == KCDB_OP_INSERT ||
                   m->uparam == KCDB_OP_DELETE)) {
+
             cw_refresh_attribs(hwnd);
+
         }
     } else if (m->type == KMSG_KMM &&
                m->subtype == KMSG_KMM_I_DONE) {

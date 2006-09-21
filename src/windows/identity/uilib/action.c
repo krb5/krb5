@@ -1289,12 +1289,9 @@ khui_context_refresh(void) {
             khui_check_action(KHUI_ACTION_SET_DEF_ID, FALSE);
             khui_enable_action(KHUI_ACTION_SET_DEF_ID, TRUE);
         }
-
-        khui_enable_action(KHUI_ACTION_PASSWD_ID, TRUE);
     } else {
         khui_check_action(KHUI_ACTION_SET_DEF_ID, FALSE);
         khui_enable_action(KHUI_ACTION_SET_DEF_ID, FALSE);
-        khui_enable_action(KHUI_ACTION_PASSWD_ID, FALSE);
     }
 
     if (khui_ctx.scope != KHUI_SCOPE_NONE) {

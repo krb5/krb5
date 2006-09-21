@@ -77,12 +77,20 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
     *suggestion = 0;
     *suggest_code = KHERR_SUGGEST_NONE;
 
+    if (WSABASEERR <= code && code < (WSABASEERR + 1064)) {
+        /* winsock error */
+        table_num = WSABASEERR;
+        offset = code - WSABASEERR;
+    }
+
     switch(table_num)
     {
     case krb_err_base:
     case kadm_err_base:
+    case WSABASEERR:
 	break;
     default:
+
         if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
             *suggestion = MSG_ERR_S_INTEGRITY;
         }
@@ -91,9 +99,8 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
 	return;
     }
 
-    if (table_num == krb_err_base)
-        switch(offset)
-        {
+    if (table_num == krb_err_base) {
+        switch(offset) {
         case KDC_NAME_EXP:           /* 001 Principal expired */
         case KDC_SERVICE_EXP:        /* 002 Service expired */
         case KDC_AUTH_EXP:           /* 003 Auth expired */
@@ -170,9 +177,8 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
             /* no extra error msg */
             break;
         }
-    else
-        switch(code)
-        {
+    } else if (table_num == kadm_err_base) {
+        switch(code) {
         case KADM_INSECURE_PW:
             /* if( kadm_info != NULL ){
              * wsprintf(buf, "%s\n%s", com_err_msg, kadm_info);
@@ -198,6 +204,34 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
             /* no extra error msg */
             break;
         }
+    } else if (table_num == WSABASEERR) {
+        switch(code) {
+        case WSAENETDOWN:
+            msg_id = MSG_ERR_NETDOWN;
+            sugg_id = MSG_ERR_S_NETRETRY;
+            sugg_code = KHERR_SUGGEST_RETRY;
+            break;
+
+        case WSATRY_AGAIN:
+            msg_id = MSG_ERR_TEMPDOWN;
+            sugg_id = MSG_ERR_S_TEMPDOWN;
+            sugg_code = KHERR_SUGGEST_RETRY;
+            break;
+
+        case WSAENETUNREACH:
+        case WSAENETRESET:
+        case WSAECONNABORTED:
+        case WSAECONNRESET:
+        case WSAETIMEDOUT:
+        case WSAECONNREFUSED:
+        case WSAEHOSTDOWN:
+        case WSAEHOSTUNREACH:
+            msg_id = MSG_ERR_NOHOST;
+            sugg_id = MSG_ERR_S_NOHOST;
+            sugg_code = KHERR_SUGGEST_RETRY;
+            break;
+        }
+    }
 
     if (msg_id != 0) {
         FormatMessage(FORMAT_MESSAGE_FROM_HMODULE |

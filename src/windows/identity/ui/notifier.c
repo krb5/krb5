@@ -744,6 +744,9 @@ alerter_wnd_proc(HWND hwnd,
                 }
             }
 
+            if (d->hwnd_buttons[0])
+                SetFocus(d->hwnd_buttons[0]);
+
             khm_notify_icon_change(a->severity);
 
             khui_alert_unlock(a);

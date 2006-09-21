@@ -111,7 +111,9 @@ enum khui_wm_nc_notifications {
 
     WMNC_CREDTEXT_LINK,    
     /*!< Sent to a panel dialog proc when a user clicks a credtext
-      embedded link that belongs to that panel */
+      embedded link that belongs to that panel.  The \a lParam
+      parameter of the message is a pointer to a ::khui_htwnd_link
+      structure describing the link. */
 
     WMNC_IDENTITY_CHANGE,   
     /*!< The primary identity has changed */
@@ -219,7 +221,7 @@ typedef LRESULT
     \see \ref cred_acq for more information
 */
 typedef struct tag_khui_new_creds {
-    khm_int32   magic;
+    khm_int32   magic;          /*!< Internal use */
 
     khm_int32   subtype;        /*!< Subtype of the request that is
                                   being handled through this object.
@@ -227,7 +229,7 @@ typedef struct tag_khui_new_creds {
                                   ::KMSG_CRED_NEW_CREDS or
                                   ::KMSG_CRED_RENEW_CREDS */
 
-    CRITICAL_SECTION cs;
+    CRITICAL_SECTION cs;        /*!< Internal use */
 
     khm_boolean set_default;    /*!< After a successfull credentials
                                   acquisition, set the primary
@@ -271,7 +273,7 @@ typedef struct tag_khui_new_creds {
                                 documentation for info on what to do
                                 with this field */
 
-    wchar_t     *password;  /*!< Not set until the dialog ends */
+    wchar_t     *password;  /*!< Not used. */
 
     /* UI stuff */
 

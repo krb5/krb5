@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
- * Copyright (c) 2006 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -264,6 +263,38 @@ nc_clear_password_fields(khui_nc_wnd_data * d)
     }
 }
 
+struct nc_enum_wnd_data {
+    khui_nc_wnd_data * d;
+    khm_boolean enable;
+};
+
+static
+BOOL CALLBACK
+nc_enum_wnd_proc(HWND hwnd,
+                 LPARAM lParam)
+{
+    struct nc_enum_wnd_data * wd;
+
+    wd = (struct nc_enum_wnd_data *) lParam;
+
+    EnableWindow(hwnd, wd->enable);
+
+    return TRUE;
+}
+
+static void
+nc_enable_controls(khui_nc_wnd_data * d, khm_boolean enable)
+{
+    struct nc_enum_wnd_data wd;
+
+    ZeroMemory(&wd, sizeof(wd));
+
+    wd.d = d;
+    wd.enable = enable;
+
+    EnumChildWindows(d->dlg_main, nc_enum_wnd_proc, (LPARAM) &wd);
+}
+
 #define NC_MAXCCH_CREDTEXT 16384
 #define NC_MAXCB_CREDTEXT (NC_MAXCCH_CREDTEXT * sizeof(wchar_t))
 
@@ -524,6 +555,7 @@ nc_handle_wm_create(HWND hwnd,
     int x, y;
     int width, height;
     RECT r;
+    khm_int32 t;
 
     lpc = (LPCREATESTRUCT) lParam;
 
@@ -789,6 +821,17 @@ nc_handle_wm_create(HWND hwnd,
     /* add this to the dialog chain */
     khm_add_dialog(hwnd);
 
+    /* bring the window to the top, if necessary */
+    if (KHM_SUCCEEDED(khc_read_int32(NULL,
+                                     L"CredWindow\\Windows\\NewCred\\ForceToTop",
+                                     &t)) &&
+        t != 0) {
+
+        SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
+                     (SWP_NOMOVE | SWP_NOSIZE));
+
+    }
+
     return TRUE;
 }
 
@@ -936,6 +979,8 @@ nc_handle_wm_command(HWND hwnd,
                KHUI_NC_RESULT_CANCEL */
             d->nc->response = KHUI_NC_RESPONSE_PROCESSING;
 
+            nc_enable_controls(d, FALSE);
+
             nc_notify_types(d->nc, 
                             KHUI_WM_NC_NOTIFY, 
                             MAKEWPARAM(0,WMNC_DIALOG_PREPROCESS), 
@@ -1008,7 +1053,8 @@ nc_handle_wm_command(HWND hwnd,
                    type that is participating in the credentials
                    acquisition process, then we forward the message to
                    the panel that is providing the UI for that cred
-                   type.  We also switch to that panel first. */
+                   type.  We also switch to that panel first, unless
+                   the link is of the form '<credtype>:!<link_tag>'. */
 
                 colon = wcschr(sid, L':');
                 if (colon != NULL) {
@@ -1020,7 +1066,8 @@ nc_handle_wm_command(HWND hwnd,
                         KHM_SUCCEEDED(khui_cw_find_type(d->nc, credtype, &t))){
                         *colon = L':';
 
-                        if (t->ordinal != d->ctab)
+                        if (t->ordinal != d->ctab &&
+                            *(colon + 1) != L'!')
                             PostMessage(hwnd,
                                         KHUI_WM_NC_NOTIFY,
                                         MAKEWPARAM(t->ordinal,
@@ -1031,6 +1078,8 @@ nc_handle_wm_command(HWND hwnd,
                                            KHUI_WM_NC_NOTIFY,
                                            MAKEWPARAM(0, WMNC_CREDTEXT_LINK),
                                            lParam);
+                    } else {
+                        *colon = L':';
                     }
                 }
 
@@ -1257,8 +1306,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             khui_cw_lock_nc(d->nc);
 
             GetWindowRect(d->dlg_ts, &r);
-            if (x + width * d->nc->n_types > (khm_size) (r.right - r.left)) {
-                width = (int)(((r.right - r.left) - x) / d->nc->n_types);
+            if (x + width * (d->nc->n_types + 1) > (khm_size) (r.right - r.left)) {
+                width = (int)(((r.right - r.left) - x) / (d->nc->n_types + 1));
             }
 
             /* first, the control for the main panel */
@@ -1683,6 +1732,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
             if(nc->response & KHUI_NC_RESPONSE_NOEXIT) {
                 HWND hw;
+
+                nc_enable_controls(d, TRUE);
 
                 /* reset state */
                 nc->result = KHUI_NC_RESULT_CANCEL;

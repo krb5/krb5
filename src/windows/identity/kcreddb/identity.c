@@ -570,8 +570,8 @@ kcdbint_ident_set_default(khm_handle vid,
 
         LeaveCriticalSection(&cs_ident);
 
-        if (invoke_identpro)
-            kcdbint_ident_post_message(KCDB_OP_NEW_DEFAULT, new_def);
+        /* if (invoke_identpro) */
+        kcdbint_ident_post_message(KCDB_OP_NEW_DEFAULT, new_def);
     } else {
         LeaveCriticalSection(&cs_ident);
     }
@@ -929,7 +929,7 @@ _exit:
 
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_set_attrib(khm_handle vid,
-                         wchar_t * attr_name,
+                         const wchar_t * attr_name,
                          void * buffer,
                          khm_size cbbuf)
 {
@@ -1025,7 +1025,7 @@ _exit:
 
 KHMEXP khm_int32 KHMAPI 
 kcdb_identity_get_attrib(khm_handle vid,
-                         wchar_t * attr_name,
+                         const wchar_t * attr_name,
                          khm_int32 * attr_type,
                          void * buffer,
                          khm_size * pcbbuf)
@@ -1121,9 +1121,8 @@ _exit:
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_identity_get_attrib_string(
-                                khm_handle vid,
-                                wchar_t * attr_name,
+kcdb_identity_get_attrib_string(khm_handle vid,
+                                const wchar_t * attr_name,
                                 wchar_t * buffer,
                                 khm_size * pcbbuf,
                                 khm_int32 flags)
