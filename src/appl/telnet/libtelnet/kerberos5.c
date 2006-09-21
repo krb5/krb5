@@ -249,6 +249,7 @@ kerberos5_send(ap)
 	}
 
 	memset((char *)&creds, 0, sizeof(creds));
+	printf("calling krb5_sname_to_principal\n");
 	if ((r = krb5_sname_to_principal(telnet_context, RemoteHostName,
 					 "host", KRB5_NT_SRV_HST,
 					 &creds.server))) {
@@ -256,6 +257,7 @@ kerberos5_send(ap)
 		printf("telnet: Kerberos V5: error while constructing service name: %s\r\n", error_message(r));
 	    return(0);
 	}
+	printf("done calling krb5_sname_to_principal\n");
 
 	if (telnet_krb5_realm != NULL) {
 	    krb5_data rdata;

@@ -1893,4 +1893,21 @@ extern int krb5int_prng_init(void);
 #define krb5_copy_error_state(CTX, OCTX) \
 	krb5int_set_error(&(CTX)->errinfo, (OCTX)->errinfo.code, "%s", (OCTX)->errinfo.msg)
 
+/*
+ * Referral definitions, debugging hooks, and subfunctions.
+ */
+#define        KRB5_REFERRAL_MAXHOPS	5
+/* #define DEBUG_REFERRALS */
+
+#ifdef DEBUG_REFERRALS
+void krb5int_dbgref_dump_principal(char *, krb5_principal);
+#endif
+
+/* Common hostname-parsing code. */
+krb5_error_code KRB5_CALLCONV krb5int_clean_hostname
+	(krb5_context,
+		const char *,
+		char *,
+		size_t);
+
 #endif /* _KRB5_INT_H */

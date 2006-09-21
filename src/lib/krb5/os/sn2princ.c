@@ -68,6 +68,12 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
     register char *cp;
     char localname[MAXHOSTNAMELEN];
 
+    FILE *log;
+
+#ifdef DEBUG_REFERRALS
+    printf("krb5_sname_to_principal(host=%s, sname=%s, type=%d)\n",hostname,sname,type);
+    printf("      name types: 0=unknown, 3=srv_host\n");
+#endif
 
     if ((type == KRB5_NT_UNKNOWN) ||
 	(type == KRB5_NT_SRV_HST)) {
@@ -105,6 +111,9 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	try_getaddrinfo_again:
 	    err = getaddrinfo(hostname, 0, &hints, &ai);
 	    if (err) {
+#ifdef DEBUG_REFERRALS
+	        printf("sname_to_princ: probably punting due to bad hostname of %s\n",hostname);
+#endif
 		if (hints.ai_family == AF_INET) {
 		    /* Just in case it's an IPv6-only name.  */
 		    hints.ai_family = 0;
@@ -145,6 +154,9 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	}
 	if (!remote_host)
 	    return ENOMEM;
+#ifdef DEBUG_REFERRALS
+ 	printf("sname_to_princ: hostname <%s> after rdns processing\n",remote_host);
+#endif
 
 	if (type == KRB5_NT_SRV_HST)
 	    for (cp = remote_host; *cp; cp++)
@@ -167,6 +179,11 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 	    free(remote_host);
 	    return retval;
 	}
+
+#ifdef DEBUG_REFERRALS
+	printf("sname_to_princ:  realm <%s> after krb5_get_host_realm\n",hrealms[0]);
+#endif
+
 	if (!hrealms[0]) {
 	    free(remote_host);
 	    krb5_xfree(hrealms);
@@ -179,6 +196,13 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
 				      (char *)0);
 
 	krb5_princ_type(context, *ret_princ) = type;
+
+#ifdef DEBUG_REFERRALS
+	printf("krb5_sname_to_principal returning\n");
+	printf("realm: <%s>, sname: <%s>, remote_host: <%s>\n",
+	       realm,sname,remote_host);
+	krb5int_dbgref_dump_principal("krb5_sname_to_principal",*ret_princ);
+#endif
 
 	free(remote_host);
 

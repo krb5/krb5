@@ -50,7 +50,7 @@ krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *con
         goto cleanup;
 
     if ((retval = krb5_copy_principal(context, pkdcrep->enc_part2->server,
-                                     &(*ppcreds)->server)))
+				      &(*ppcreds)->server)))
         goto cleanup;
 
     if ((retval = krb5_copy_keyblock_contents(context, 
@@ -107,6 +107,12 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     krb5_response tgsrep;
     krb5_enctype *enctypes = 0;
 
+#ifdef DEBUG_REFERRALS
+    printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
+#endif
+
     /* tkt->client must be equal to in_cred->client */
     if (!krb5_principal_compare(context, tkt->client, in_cred->client))
 	return KRB5_PRINC_NOMATCH;
@@ -154,8 +160,13 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 			   tkt, &tgsrep);
     if (enctypes)
 	free(enctypes);
-    if (retval)
+    if (retval) {
+#ifdef DEBUG_REFERRALS
+        printf("krb5_get_cred_via_tkt ending early after send_tgs with: %s\n",
+	       error_message(retval));
+#endif
 	return retval;
+    }
 
     switch (tgsrep.message_type) {
     case KRB5_TGS_REP:
@@ -167,7 +178,7 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 	else
 	    retval = KRB5KRB_AP_ERR_MSG_TYPE;
 
-	if (retval) 			/* neither proper reply nor error! */
+	if (retval)			/* neither proper reply nor error! */
 	    goto error_4;
 
 	retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
@@ -218,11 +229,26 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if (!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server))
-	retval = KRB5_KDCREP_MODIFIED;
-
-    if (!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))
-	retval = KRB5_KDCREP_MODIFIED;
+    if ((!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) ||
+	(!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))) {
+        if (krb5_principal_compare(context, dec_rep->ticket->server, dec_rep->enc_part2->server)
+	    && (kdcoptions&KDC_OPT_CANONICALIZE) ) {
+	    /* in_cred server differs from ticket returned, but ticket
+	       returned is consistent and we requested canonicalization. */
+#if 0
+#ifdef DEBUG_REFERRALS
+	    printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
+	    krb5int_dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
+	    krb5int_dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
+#endif
+#endif
+	}
+	else {
+	    /* in_cred server differs from ticket returned, and ticket
+	       returned is *not* consistent. */
+	    retval = KRB5_KDCREP_MODIFIED;
+	}
+    }
 
     if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
 	retval = KRB5_KDCREP_MODIFIED;
@@ -267,5 +293,8 @@ error_3:;
 
 error_4:;
     free(tgsrep.response.data);
+#ifdef DEBUG_REFERRALS
+    printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
+#endif
     return retval;
 }

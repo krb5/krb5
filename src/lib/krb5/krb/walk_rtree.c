@@ -102,7 +102,7 @@
  * in order to get from the source realm to the destination realm.  It
  * takes a realm separater character (normally ., but presumably there
  * for all those X.500 realms) .  There are two modes it runs in: the
- * ANL krb5.confmode and the hierarchy mode.  The ANL mode is
+ * ANL krb5.conf mode and the hierarchy mode.  The ANL mode is
  * fairly obvious.  The hierarchy mode looks for common components in
  * both the client and server realms.  In general, the pointer scp and
  * ccp are used to walk through the client and server realms.  The
@@ -133,6 +133,13 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     char **cap_nodes;
     krb5_error_code cap_code;
 #endif
+
+#ifdef DEBUG_REFERRALS
+    printf("krb5_walk_realm_tree starting\n");
+    printf("  client is %s\n",client->data);
+    printf("  server is %s\n",server->data);
+#endif
+
     if (!(client->data &&server->data))
       return KRB5_NO_TKT_IN_RLM;
 #ifdef CONFIGURABLE_AUTHENTICATION_PATH
@@ -380,5 +387,28 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
     }
 #endif
     *tree = rettree;
+
+#ifdef DEBUG_REFERRALS
+    printf("krb5_walk_realm_tree ending; tree (length %d) is:\n",links);
+    for(i=0;i<links+2;i++) {
+        if ((*tree)[i])
+	    krb5int_dbgref_dump_principal("krb5_walk_realm_tree tree",(*tree)[i]);
+	else
+	    printf("tree element %i null\n");
+    }
+#endif
     return 0;
 }
+
+#ifdef DEBUG_REFERRALS
+void krb5int_dbgref_dump_principal(char *d, krb5_principal p)
+{
+    int n;
+	      
+    printf("  **%s: ",d);
+    for (n=0;n<p->length;n++)
+	printf("%s<%.*s>",(n>0)?"/":"",p->data[n].length,p->data[n].data);
+    printf("@<%.*s>  (length %d, type %d)\n",p->realm.length,p->realm.data,
+	   p->length, p->type);
+}
+#endif

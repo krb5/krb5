@@ -71,20 +71,18 @@ krb5_copy_principal(krb5_context context, krb5_const_principal inprinc, krb5_pri
             krb5_princ_component(context, tempprinc, i)->data = 0;
     }
 
-    if (tempprinc->realm.length) {
-        tempprinc->realm.data =
-	    malloc(tempprinc->realm.length = inprinc->realm.length);
-        if (!tempprinc->realm.data) {
-	    for (i = 0; i < nelems; i++)
-                free(krb5_princ_component(context, tempprinc, i)->data);
-	    free(tempprinc->data);
-	    free(tempprinc);
-	    return ENOMEM;
-        }
-	memcpy(tempprinc->realm.data, inprinc->realm.data,
-	       inprinc->realm.length);
-    } else
-        tempprinc->realm.data = 0;
+    tempprinc->realm.data =
+        malloc((tempprinc->realm.length = inprinc->realm.length) + 1);
+    if (!tempprinc->realm.data) {
+        for (i = 0; i < nelems; i++)
+	    free(krb5_princ_component(context, tempprinc, i)->data);
+	free(tempprinc->data);
+	free(tempprinc);
+	return ENOMEM;
+    }
+    memcpy(tempprinc->realm.data, inprinc->realm.data,
+	   inprinc->realm.length);
+    tempprinc->realm.data[tempprinc->realm.length] = 0;
 
     *outprinc = tempprinc;
     return 0;
