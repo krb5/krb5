@@ -101,6 +101,9 @@ the c-hanging-comment-starter-p and the c-hanging-comment-ender-p
 variables to nil.  This will be done by the tentative "krb5" style for
 the emacs cc-mode.
 
+Since we are mostly aiming for C '89 compatibility, don't use "//"
+comments.
+
 Spaces go after keywords, but not after function names.  Do not,
 however, put a space after sizeof.  Don't put a space after a cast
 operator, either.  Spaces also do not go before parentheses that are
