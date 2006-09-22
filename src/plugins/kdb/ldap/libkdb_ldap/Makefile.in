@@ -18,7 +18,7 @@ DEFINES = \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
 DEFS=
 
-LOCALINCLUDES = -I$(SRCTOP)/lib/kdb
+LOCALINCLUDES = -I$(SRCTOP)/lib/kdb -I$(SRCTOP)/lib/krb5/asn.1
 
 LIBBASE=kdb_ldap
 LIBMAJOR=1
@@ -51,7 +51,8 @@ SRCS= 	$(srcdir)/kdb_ldap.c \
 	$(srcdir)/ldap_fetch_mkey.c \
 	$(srcdir)/ldap_service_stash.c \
 	$(srcdir)/kdb_xdr.c \
-	$(srcdir)/ldap_err.c
+	$(srcdir)/ldap_err.c \
+	$(srcdir)/princ_key_encode_decode.c
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS= kdb_ldap.o \
@@ -70,7 +71,8 @@ STLIBOBJS= kdb_ldap.o \
 	ldap_fetch_mkey.o \
 	ldap_service_stash.o \
 	kdb_xdr.o \
-	ldap_err.o
+	ldap_err.o \
+	princ_key_encode_decode.o
 
 all-unix:: all-liblinks
 install-unix:: install-libs
@@ -278,3 +280,15 @@ kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 ldap_err.so ldap_err.po $(OUTPRE)ldap_err.$(OBJEXT): \
   $(BUILDTOP)/include/kdb5_err.h $(COM_ERR_DEPS) ldap_err.c \
   ldap_err.h
+princ_key_encode_decode.so princ_key_encode_decode.po $(OUTPRE)princ_key_encode_decode.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/lib/krb5/asn.1/krbasn1.h $(SRCTOP)/lib/krb5/asn.1/asn1_encode.h \
+  $(SRCTOP)/lib/krb5/asn.1/asn1_decode.h $(SRCTOP)/lib/krb5/asn.1/asn1_make.h \
+  $(SRCTOP)/lib/krb5/asn.1/asn1_get.h \
+  princ_key_encode_decode.c princ_key_encode_decode.h

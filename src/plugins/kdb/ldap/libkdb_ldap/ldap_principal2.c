@@ -36,6 +36,7 @@
 #include "ldap_tkt_policy.h"
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
+#include "princ_key_encode_decode.h"
 
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];
@@ -480,6 +481,46 @@ cleanup:
     return st;
 }
 
+/* Decoding ASN.1 encoded key */
+static struct berval **
+krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data) {
+    struct berval **ret = NULL;
+    int currkvno;
+    int num_versions = 1;
+    int i, j, last;
+
+    if (n_key_data <= 0)
+	return NULL;
+
+    /* Find the number of key versions */
+    for (i = 0; i < n_key_data - 1; i++)
+	if (key_data[i].key_data_kvno != key_data[i + 1].key_data_kvno)
+	    num_versions++;
+
+    ret = (struct berval **) malloc (num_versions * sizeof (struct berval *) + 1);
+    for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
+	krb5_data *code;
+	if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
+	    asn1_encode_sequence_of_keys (
+		    key_data+last,
+		    (krb5_int16) i - last + 1,
+		    0, /* For now, mkvno == 0*/
+		    &code);
+	    ret[j] = malloc (sizeof (struct berval));
+	    /*CHECK_NULL(ret[j]); */
+	    ret[j]->bv_len = code->length;
+	    ret[j]->bv_val = code->data;
+	    j++;
+	    last = i + 1;
+
+	    currkvno = key_data[i].key_data_kvno;
+	}
+    }
+    ret[num_versions] = NULL;
+
+    return ret;
+}
+
 krb5_error_code
 krb5_ldap_put_principal(context, entries, nentries, db_args)
     krb5_context               context;
@@ -498,7 +539,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     krb5_boolean                dnfound=TRUE, tktpolicy_set=FALSE;
     krb5_tl_data                *tl_data=NULL;
     krb5_key_data               **keys=NULL;
-    KEY                         *oldkeys=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
@@ -532,8 +572,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	}
 	xargs.ptype = KDB_SERVICE_PRINCIPAL;
 	if (((st=krb5_get_princ_type(context, entries, &(xargs.ptype))) != 0) ||
-	    ((st=krb5_get_userdn(context, entries, &(xargs.dn))) != 0) ||
-	    ((st=krb5_get_secretkeys(context, entries, &oldkeys)) != 0))
+	    ((st=krb5_get_userdn(context, entries, &(xargs.dn))) != 0))
 	    goto cleanup;
 
 	if ((st=process_db_args(context, db_args, &xargs)) != 0)
@@ -771,140 +810,11 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    int kcount=0, zero=0, salttype=0, totalkeys=0;
 	    char *currpos=NULL, *krbsecretkey=NULL;
 
-	    /* delete the old keys */
-	    if (oldkeys) {
-		if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbsecretkey", LDAP_MOD_DELETE | LDAP_MOD_BVALUES,
-						  oldkeys->keys)) != 0)
-		    goto cleanup;
-	    }
+            bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
+                    entries->n_key_data);
 
-	    bersecretkey = malloc (sizeof(struct berval *) * (entries->n_key_data + 1));
-	    CHECK_NULL(bersecretkey);
-	    memset(bersecretkey, 0, sizeof(struct berval *) * (entries->n_key_data + 1));
-
-	    keys = malloc (sizeof (krb5_key_data *) * entries->n_key_data + 1);
-	    CHECK_NULL(keys);
-	    memset(keys, 0, (sizeof (krb5_key_data *) * entries->n_key_data + 1));
-	    for (kcount=0; kcount < entries->n_key_data; ++kcount)
-		keys[kcount] = entries->key_data+kcount;
-	    totalkeys = entries->n_key_data;
-
-	    kcount = 0;
-	    while (totalkeys) {
-		int                    noofkeys=0, currkvno=0, currkvno_org=0, rlen=0;
-		krb5_timestamp         last_pw_changed=0;
-
-		krbsecretkey = malloc (MAX_KEY_LENGTH);
-		CHECK_NULL(krbsecretkey);
-		memset(krbsecretkey, 0, MAX_KEY_LENGTH);
-		currpos = krbsecretkey;
-		rlen = MAX_KEY_LENGTH;
-
-		STORE16_INT(currpos, plen); /* principal len */
-		currpos +=2;
-		rlen -=2;
-
-		for (l=0; l < entries->n_key_data; ++l)
-		    if (keys[l] != NULL) {
-			currkvno = keys[l]->key_data_kvno;
-			break;
-		    }
-
-		currkvno_org = currkvno;
-		STORE16_INT(currpos, currkvno); /* principal key version */
-		currpos +=2;
-		rlen -=2;
-
-		memset(currpos, 0, 2); /* master key version */
-		currpos +=2;
-		rlen -=2;
-
-		if ((st=krb5_dbe_lookup_last_pwd_change(context, entries, &last_pw_changed)) != 0)
-		    goto cleanup;
-		STORE32_INT(currpos, last_pw_changed); /* last pwd change */
-		currpos += 4;
-		rlen -=4;
-
-		for (noofkeys=0; l < entries->n_key_data; ++l)
-		    if (keys[l] && keys[l]->key_data_kvno == currkvno_org)
-			++noofkeys;
-
-		STORE16_INT(currpos, noofkeys); /* number of keys */
-		currpos +=2;
-		rlen -=2;
-
-		/* key type, key length, salt type and salt type */
-		for (l=0; l<entries->n_key_data; ++l) {
-		    if (keys[l] && keys[l]->key_data_kvno == currkvno_org) {
-			STORE16_INT(currpos, keys[l]->key_data_type[0]);
-			currpos +=2;
-			rlen -=2;
-			STORE16_INT(currpos, keys[l]->key_data_length[0]);
-			currpos +=2;
-			rlen -=2;
-
-			STORE16_INT(currpos, keys[l]->key_data_type[1]);
-			currpos +=2;
-			rlen -=2;
-			salttype = keys[l]->key_data_type[1];
-			if (salttype==KRB5_KDB_SALTTYPE_NOREALM || salttype==KRB5_KDB_SALTTYPE_ONLYREALM) {
-			    STORE16_INT(currpos, zero);
-			} else {
-			    STORE16_INT(currpos, keys[l]->key_data_length[1]);
-			}
-			currpos +=2;
-			rlen -=2;
-		    }
-		}
-		if (plen > rlen) {
-		    st = EINVAL;
-		    snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
-		    krb5_set_error_message(context, st, "%s", errbuf);
-		    goto cleanup;
-		}
-		memcpy(currpos, user, (unsigned int)plen);   /* principal name */
-		currpos +=plen;
-		rlen -=plen;
-
-		/* key value, salt value */
-		for (l=0; l<entries->n_key_data; ++l) {
-		    if (keys[l] && keys[l]->key_data_kvno == currkvno_org) {
-			if (keys[l]->key_data_length[0]) {
-			    if (keys[l]->key_data_length[0] > rlen) {
-				st = EINVAL;
-				snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
-				krb5_set_error_message(context, st, "%s", errbuf);
-				goto cleanup;
-			    }
-			    memcpy(currpos, keys[l]->key_data_contents[0], keys[l]->key_data_length[0]);
-			    currpos += keys[l]->key_data_length[0];
-			    rlen -= keys[l]->key_data_length[0];
-			}
-
-			salttype = keys[l]->key_data_type[1];
-			if (keys[l]->key_data_length[1] && (!(salttype==KRB5_KDB_SALTTYPE_NOREALM
-							      || salttype==KRB5_KDB_SALTTYPE_ONLYREALM))) {
-			    if (keys[l]->key_data_length[1] > rlen) {
-				st = EINVAL;
-				snprintf(errbuf, sizeof(errbuf), "Insufficient buffer while storing the key of principal %s", user);
-				krb5_set_error_message(context, st, "%s", errbuf);
-				goto cleanup;
-			    }
-			    memcpy(currpos, keys[l]->key_data_contents[1], keys[l]->key_data_length[1]);
-			    currpos += keys[l]->key_data_length[1];
-			    rlen -= keys[l]->key_data_length[1];
-			}
-			keys[l] = NULL;
-		    }
-		}
-		bersecretkey[kcount] = malloc (sizeof (struct berval));
-		CHECK_NULL(bersecretkey[kcount]);
-		bersecretkey[kcount]->bv_len = currpos - krbsecretkey;
-		bersecretkey[kcount++]->bv_val = krbsecretkey;
-		totalkeys = totalkeys - noofkeys;
-	    }
 	    if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbsecretkey",
-					      LDAP_MOD_ADD | LDAP_MOD_BVALUES, bersecretkey)) != 0)
+					      LDAP_MOD_REPLACE | LDAP_MOD_BVALUES, bersecretkey)) != 0)
 		goto cleanup;
 
 	    if (!(entries->mask & KDB_PRINCIPAL)) {
@@ -1032,15 +942,6 @@ cleanup:
     if (keys)
 	free (keys);
 
-    if (oldkeys) {
-	for (l=0; l < oldkeys->nkey; ++l) {
-	    if (oldkeys->keys[l]->bv_val)
-		free (oldkeys->keys[l]->bv_val);
-	    free (oldkeys->keys[l]);
-	}
-	free (oldkeys->keys);
-	free (oldkeys);
-    }
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     *nentries = i;
@@ -1128,140 +1029,34 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 	goto cleanup;
 
     for (i=0; bvalues[i] != NULL; ++i) {
-
-	ptr = (char *) bvalues[i]->bv_val;
-
-	/* check the consistency of the key */
-
-	if (bvalues[i]->bv_len < KEYHEADER)  /* key smaller than the header size */
-	    continue;
-
-	plen = PRINCIPALLEN(ptr);
-	if (NOOFKEYS(ptr) == 0)
-	    continue;
-
-	keylen = KEYHEADER + (8 * NOOFKEYS(ptr));
-	if (bvalues[i]->bv_len < keylen) /* key or salt header info corrupted*/
-	    continue;
-
-	keylen += plen;
-	if (bvalues[i]->bv_len < keylen) /* principal info corrupted */
-	    continue;
-
-	for (k=0; k<NOOFKEYS(ptr); ++k)
-	    keylen += KEYLENGTH(ptr, k) + SALTLENGTH(ptr, k);
-
-	if (bvalues[i]->bv_len < keylen) /* key or salt values corrupted */
-	    continue;
-
-	pname = PRINCIPALNAME(ptr);   /* set pname to principalName field */
-
-	/* key doesn't belong to the principal */
-	if (strncmp(user, pname, (unsigned) plen) != 0)
-	    continue;
-
-	/* Number of Principal Keys */
-	noofkeys += NOOFKEYS(ptr);
-
-	if ((st=store_tl_data(userinfo_tl_data, KDB_TL_KEYINFO, bvalues[i])) != 0)
-	    goto cleanup;
-
-	pkeyver = PKEYVER(ptr); 	    /* Principal Key Version */
-	mkeyver = MKEYVER(ptr);		    /* Master Key Version */
-
-	if (ist_pkeyver == 0 || pkeyver >= ist_pkeyver) {
-	    ist_pkeyver = pkeyver;
-	    /* last password changed */
-	    last_pw_changed = 0;
-	    last_pw_changed += (ptr[6] & 0xFF) << 24;
-	    last_pw_changed += (ptr[7] & 0xFF) << 16;
-	    last_pw_changed += (ptr[8] & 0xFF) << 8;
-	    last_pw_changed += (ptr[9] & 0xFF) << 0;
-
-	    if ((st=krb5_dbe_update_last_pwd_change(context, entries,
-						    last_pw_changed)) != 0)
-		goto cleanup;
-	}
-
-	reallocptr = key_data;
-	key_data = realloc(key_data, (sizeof(*key_data) * noofkeys));
-	if (key_data == NULL) {
-	    st = ENOMEM;
-	    goto cleanup;
-	}
-
-	currentkey = KEYBODY(ptr);
-	for (k=0; j<noofkeys; ++k, ++j) {
-
-	    key_data[j].key_data_ver = 1;
-	    key_data[j].key_data_kvno = pkeyver;
-
-	    key_data[j].key_data_type[0] = KEYTYPE(ptr,k); /* get  key type */
-	    key_data[j].key_data_length[0] = KEYLENGTH(ptr,k); /* get key length */
-	    key_data[j].key_data_type[1] = SALTTYPE(ptr,k); /* get salt type */
-	    key_data[j].key_data_length[1] = SALTLENGTH(ptr,k); /* get salt length */
-
-	    key_data[j].key_data_contents[0] = malloc(key_data[j].key_data_length[0]);
-	    if (key_data[j].key_data_contents[0] == NULL) {
-		st = ENOMEM;
-		goto cleanup;
-	    }
-	    memcpy(key_data[j].key_data_contents[0], currentkey,
-		   key_data[j].key_data_length[0]);
-
-	    currentsalt = currentkey + key_data[j].key_data_length[0];
-	    if (key_data[j].key_data_length[1] != 0) {
-
-		key_data[j].key_data_ver = 2;
-		key_data[j].key_data_contents[1] = malloc(key_data[j].key_data_length[1]);
-		if (key_data[j].key_data_contents[1] == NULL) {
-		    st = ENOMEM;
-		    goto cleanup;
-		}
-		memcpy(key_data[j].key_data_contents[1], currentsalt,
-		       key_data[j].key_data_length[1]);
-
-	    } else if (key_data[j].key_data_type[1] == KRB5_KDB_SALTTYPE_NOREALM ||
-		       key_data[j].key_data_type[1] == KRB5_KDB_SALTTYPE_ONLYREALM) {
-		char *def_realm = NULL;
-		krb5_data norealmval;
-
-		key_data[j].key_data_ver = 2;
-		switch (key_data[j].key_data_type[1]) {
-		case KRB5_KDB_SALTTYPE_ONLYREALM:
-		    def_realm = entries->princ->realm.data;
-		    key_data[j].key_data_length[1] = strlen (def_realm);
-		    key_data[j].key_data_contents[1] = malloc (key_data[j].key_data_length[1]);
-		    if (key_data[j].key_data_contents[1] == NULL) {
-			st = ENOMEM;
-			goto cleanup;
-		    }
-		    memcpy(key_data[j].key_data_contents[1],
-			   def_realm, key_data[j].key_data_length[1]);
-		    break;
-
-		case KRB5_KDB_SALTTYPE_NOREALM:
-		    memset(&norealmval, 0, sizeof(krb5_data));
-		    if ((st = krb5_principal2salt_norealm(context, entries->princ,
-							  &norealmval)) != 0) {
-			goto cleanup;
-		    }
-
-		    key_data[j].key_data_length[1] = norealmval.length;
-		    key_data[j].key_data_contents[1] = (unsigned char *)norealmval.data;
-		    break;
-		}
-	    } else if (key_data[j].key_data_type[1] == KRB5_KDB_SALTTYPE_V4) {
-		key_data[j].key_data_contents[1] = NULL;
-		key_data[j].key_data_ver = 2;
-	    } else {
-		key_data[j].key_data_contents[1] = NULL;
-	    }
-	    currentkey = currentsalt + key_data[j].key_data_length[1];
-	}
-	entries->n_key_data = noofkeys;
-	entries->key_data = key_data;
+        int mkvno; /* Not used currently */
+        krb5_int16 n_kd;
+        krb5_key_data *kd;
+        krb5_data in;
+                                                                                                                             
+        if (bvalues[i]->bv_len == 0)
+            continue;
+        in.length = bvalues[i]->bv_len;
+        in.data = bvalues[i]->bv_val;
+                                                                                                                             
+        st = asn1_decode_sequence_of_keys (&in,
+                &kd,
+                &n_kd,
+                &mkvno);
+                                                                                                                             
+        if (st != 0) {
+            st = -1; /* Something more appropriate ? */
+            goto cleanup;
+        }
+        noofkeys += n_kd;
+        key_data = realloc (key_data, noofkeys * sizeof (krb5_key_data));
+        for (j = 0; j < n_kd; j++)
+            key_data[noofkeys - n_kd + j] = kd[j];
+        free (kd);
     }
+
+    entries->n_key_data = noofkeys;
+    entries->key_data = key_data;
 
 cleanup:
     ldap_value_free_len(bvalues);
