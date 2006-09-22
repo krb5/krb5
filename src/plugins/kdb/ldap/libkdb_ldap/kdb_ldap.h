@@ -191,7 +191,6 @@ struct _krb5_ldap_server_info {
     krb5_ldap_server_handle      *ldap_server_handles;
     time_t                       downtime;
     char			*server_name;
-    krb5_ui_4                    port;	
     char			*root_certificate_file;
     struct _krb5_ldap_server_info *next;
 };
@@ -205,7 +204,6 @@ typedef struct _krb5_ldap_context {
   krb5_ldap_servicetype         service_type;
   krb5_ldap_server_info         **server_info_list;
   krb5_ui_4                     max_server_conns;
-  krb5_ui_4 		        port;
   char                          *conf_section;
   char 		                *bind_dn;
   char                          *bind_pwd;
