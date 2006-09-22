@@ -501,11 +501,10 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data) {
     for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
 	krb5_data *code;
 	if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
-	    asn1_encode_sequence_of_keys (
-		    key_data+last,
-		    (krb5_int16) i - last + 1,
-		    0, /* For now, mkvno == 0*/
-		    &code);
+	    asn1_encode_sequence_of_keys (key_data+last,
+					  (krb5_int16) i - last + 1,
+					  0, /* For now, mkvno == 0*/
+					  &code);
 	    ret[j] = malloc (sizeof (struct berval));
 	    /*CHECK_NULL(ret[j]); */
 	    ret[j]->bv_len = code->length;
@@ -810,8 +809,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    int kcount=0, zero=0, salttype=0, totalkeys=0;
 	    char *currpos=NULL, *krbsecretkey=NULL;
 
-            bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
-                    entries->n_key_data);
+	    bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
+						     entries->n_key_data);
 
 	    if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbsecretkey",
 					      LDAP_MOD_REPLACE | LDAP_MOD_BVALUES, bersecretkey)) != 0)
@@ -1029,30 +1028,30 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 	goto cleanup;
 
     for (i=0; bvalues[i] != NULL; ++i) {
-        int mkvno; /* Not used currently */
-        krb5_int16 n_kd;
-        krb5_key_data *kd;
-        krb5_data in;
-                                                                                                                             
-        if (bvalues[i]->bv_len == 0)
-            continue;
-        in.length = bvalues[i]->bv_len;
-        in.data = bvalues[i]->bv_val;
-                                                                                                                             
-        st = asn1_decode_sequence_of_keys (&in,
-                &kd,
-                &n_kd,
-                &mkvno);
-                                                                                                                             
-        if (st != 0) {
-            st = -1; /* Something more appropriate ? */
-            goto cleanup;
-        }
-        noofkeys += n_kd;
-        key_data = realloc (key_data, noofkeys * sizeof (krb5_key_data));
-        for (j = 0; j < n_kd; j++)
-            key_data[noofkeys - n_kd + j] = kd[j];
-        free (kd);
+	int mkvno; /* Not used currently */
+	krb5_int16 n_kd;
+	krb5_key_data *kd;
+	krb5_data in;
+
+	if (bvalues[i]->bv_len == 0)
+	    continue;
+	in.length = bvalues[i]->bv_len;
+	in.data = bvalues[i]->bv_val;
+
+	st = asn1_decode_sequence_of_keys (&in,
+					   &kd,
+					   &n_kd,
+					   &mkvno);
+
+	if (st != 0) {
+	    st = -1; /* Something more appropriate ? */
+	    goto cleanup;
+	}
+	noofkeys += n_kd;
+	key_data = realloc (key_data, noofkeys * sizeof (krb5_key_data));
+	for (j = 0; j < n_kd; j++)
+	    key_data[noofkeys - n_kd + j] = kd[j];
+	free (kd);
     }
 
     entries->n_key_data = noofkeys;
