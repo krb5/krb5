@@ -690,39 +690,131 @@ khm_krb5_renew_cred(khm_handle cred)
 {
     khm_handle          identity = NULL;
     krb5_error_code     code = 0;
-    krb5_context        ctx = 0;
-    krb5_ccache         cc = 0;
+    krb5_context        ctx = NULL;
+    krb5_ccache         cc = NULL;
+    krb5_principal	me = NULL, server = NULL;
+    krb5_creds          in_creds, cc_creds;
+    krb5_creds		* out_creds = NULL;
+
+    wchar_t 		wname[512];
+    khm_size		cbname;
+    char                name[512];
+    khm_boolean		brenewIdentity = FALSE;
+    khm_boolean		istgt = FALSE;
+
+    memset(&in_creds, 0, sizeof(in_creds));
+    memset(&cc_creds, 0, sizeof(cc_creds));
 
     if (cred == NULL) {
 #ifdef DEBUG
 	assert(FALSE);
 #endif
-	goto _cleanup;
+	goto cleanup;
     }
 
     if (KHM_FAILED(kcdb_cred_get_identity(cred, &identity))) {
 #ifdef DEBUG
 	assert(FALSE);
 #endif
-	goto _cleanup;
+	goto cleanup;
     }
 
     code = khm_krb5_initialize(identity, &ctx, &cc);
     if (code)
-	goto _cleanup;
+	goto cleanup;
 
-    /* TODO: going here */
+    code = pkrb5_cc_get_principal(ctx, cc, &me);
+    if (code) 
+        goto cleanup;
 
- _cleanup:
+    cbname = sizeof(wname);
+    if (KHM_FAILED(kcdb_cred_get_name(cred, wname, &cbname)))
+	goto cleanup;
 
-    if (identity)
-	kcdb_identity_release(identity);
+    UnicodeStrToAnsi(name, sizeof(name), wname);
+
+    code = pkrb5_parse_name(ctx, name, &server);
+    if (code)
+	goto cleanup;
+
+    in_creds.client = me;
+    in_creds.server = server;
+
+#ifdef KRB5_TC_NOTICKET
+    pkrb5_cc_set_flags(ctx, cc, 0);
+#endif
+
+    if (strlen("krbtgt") != krb5_princ_name(ctx, server)->length ||
+	 strncmp("krbtgt", krb5_princ_name(ctx, server)->data, krb5_princ_name(ctx, server)->length)) 
+    {
+	code = pkrb5_get_renewed_creds(ctx, &cc_creds, me, cc, name);
+	if (code) {
+	    code = pkrb5_cc_retrieve_cred(ctx, cc, 0, &in_creds, &cc_creds);
+	    if (code == 0) {
+		code = pkrb5_cc_remove_cred(ctx, cc, 0, &cc_creds);
+		if (code) {
+		    brenewIdentity = TRUE;
+		    goto cleanup;
+		}
+	    }
+	}
+
+	code = pkrb5_get_credentials(ctx, 0, cc, &in_creds, &out_creds);
+    } else {
+	istgt = TRUE;
+	code = pkrb5_get_renewed_creds(ctx, &cc_creds, me, cc, NULL);
+    }
+
+#ifdef KRB5_TC_NOTICKET
+    pkrb5_cc_set_flags(ctx, cc, KRB5_TC_NOTICKET);
+#endif
+    if (code) {
+	if ( code != KRB5KDC_ERR_ETYPE_NOSUPP ||
+	     code != KRB5_KDC_UNREACH)
+	    khm_krb5_error(code, "krb5_get_renewed_creds()", 0, &ctx, &cc);
+	goto cleanup;
+    }
+
+    if (istgt) {
+	code = pkrb5_cc_initialize(ctx, cc, me);
+	if (code) goto cleanup;
+
+    }
+
+    code = pkrb5_cc_store_cred(ctx, cc, istgt ? &cc_creds : out_creds);
+    if (code) goto cleanup;
+
+
+ cleanup:
+
+    if (in_creds.client == me)
+        in_creds.client = NULL;
+    if (in_creds.server == server)
+        in_creds.server = NULL;
+
+    if (me)
+	pkrb5_free_principal(ctx, me);
+
+    if (server)
+	pkrb5_free_principal(ctx, server);
+
+    pkrb5_free_cred_contents(ctx, &in_creds);
+    pkrb5_free_cred_contents(ctx, &cc_creds);			      
+
+    if (out_creds)
+	pkrb5_free_creds(ctx, out_creds);
 
     if (cc && ctx)
 	pkrb5_cc_close(ctx, cc);
 
     if (ctx)
 	pkrb5_free_context(ctx);
+
+    if (identity) {
+	if (brenewIdentity)
+	    code = khm_krb5_renew_ident(identity);
+	kcdb_identity_release(identity);
+    }
 
     return code;
 }
@@ -731,12 +823,12 @@ int
 khm_krb5_renew_ident(khm_handle identity)
 {
     krb5_error_code     code = 0;
-    krb5_context        ctx = 0;
-    krb5_ccache         cc = 0;
-    krb5_principal      me = 0;
-    krb5_principal      server = 0;
+    krb5_context        ctx = NULL;
+    krb5_ccache         cc = NULL;
+    krb5_principal      me = NULL;
+    krb5_principal      server = NULL;
     krb5_creds          my_creds;
-    krb5_data           *realm = 0;
+    krb5_data           *realm = NULL;
 
     memset(&my_creds, 0, sizeof(krb5_creds));
 
@@ -787,9 +879,9 @@ khm_krb5_renew_ident(khm_handle identity)
 
 cleanup:
     if (my_creds.client == me)
-        my_creds.client = 0;
+        my_creds.client = NULL;
     if (my_creds.server == server)
-        my_creds.server = 0;
+        my_creds.server = NULL;
 
     pkrb5_free_cred_contents(ctx, &my_creds);
 
