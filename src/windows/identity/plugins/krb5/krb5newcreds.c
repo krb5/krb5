@@ -55,6 +55,7 @@ typedef struct k5_dlg_data_t {
 
     wchar_t * cred_message;     /* overrides the credential text, if
                                    non-NULL */
+    BOOL    pwd_change;         /* force a password change */
 } k5_dlg_data;
 
 
@@ -186,6 +187,56 @@ k5_handle_wmnc_notify(HWND hwnd,
         }
         break;
 
+    case WMNC_CREDTEXT_LINK:
+        {
+            k5_dlg_data * d;
+            khui_htwnd_link * l;
+            khui_new_creds * nc;
+            wchar_t linktext[128];
+
+            d = (k5_dlg_data *)(LONG_PTR)
+                GetWindowLongPtr(hwnd, DWLP_USER);
+            nc = d->nc;
+            l = (khui_htwnd_link *) lParam;
+
+            if (!l)
+                break;
+
+            StringCchCopyN(linktext, ARRAYLENGTH(linktext),
+                           l->id, l->id_len);
+
+            if (!wcscmp(linktext, L"Krb5Cred:!Passwd")) {
+                /* we are turning this dialog into a change password dialog... */
+                wchar_t wbuf[KHUI_MAXCCH_BANNER];
+
+                khui_cw_clear_prompts(nc);
+
+                LoadString(hResModule, IDS_NC_PWD_BANNER,
+                           wbuf, ARRAYLENGTH(wbuf));
+                khui_cw_begin_custom_prompts(nc, 3, NULL, wbuf);
+
+                LoadString(hResModule, IDS_NC_PWD_PWD,
+                           wbuf, ARRAYLENGTH(wbuf));
+                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_PASSWORD,
+                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+                LoadString(hResModule, IDS_NC_PWD_NPWD,
+                           wbuf, ARRAYLENGTH(wbuf));
+                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD,
+                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+                LoadString(hResModule, IDS_NC_PWD_NPWD_AGAIN,
+                           wbuf, ARRAYLENGTH(wbuf));
+                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD_AGAIN,
+                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+                d->pwd_change = TRUE;
+
+                return TRUE;
+            }
+        }
+        break;
+
     case WMNC_UPDATE_CREDTEXT:
         {
             k5_dlg_data * d;
@@ -215,7 +266,8 @@ k5_handle_wmnc_notify(HWND hwnd,
                 KHM_SUCCEEDED(kcdb_identity_get_flags(nc->identities[0], 
                                                       &flags)) &&
                 (flags & KCDB_IDENT_FLAG_VALID) &&
-                nc->subtype == KMSG_CRED_NEW_CREDS) {
+                nc->subtype == KMSG_CRED_NEW_CREDS &&
+                !d->pwd_change) {
 
                 if (is_k5_identpro)
                     k5_get_realm_from_nc(nc, tbuf, ARRAYLENGTH(tbuf));
@@ -237,7 +289,8 @@ k5_handle_wmnc_notify(HWND hwnd,
 
                 StringCbCopy(nct->credtext, cbsize, sbuf);
             } else if (nc->n_identities > 0 &&
-                       nc->subtype == KMSG_CRED_PASSWORD) {
+                       (nc->subtype == KMSG_CRED_PASSWORD ||
+                        (nc->subtype == KMSG_CRED_NEW_CREDS && d->pwd_change))) {
                 cbsize = sizeof(tbuf);
                 kcdb_identity_get_name(nc->identities[0], tbuf, &cbsize);
 
@@ -630,6 +683,9 @@ k5_cached_kinit_prompter(void) {
     khm_size n_cur_prompts;
     khm_int32 n_prompts;
     khm_int32 i;
+    khm_int64 iexpiry;
+    FILETIME expiry;
+    FILETIME current;
 
 #ifdef DEBUG
     assert(g_fjob.nc);
@@ -655,6 +711,30 @@ k5_cached_kinit_prompter(void) {
         n_prompts == 0)
 
         goto _cleanup;
+
+    if (KHM_SUCCEEDED(khc_read_int64(csp_prcache, L"ExpiresOn", &iexpiry))) {
+        /* has the cache expired? */
+        expiry = IntToFt(iexpiry);
+        GetSystemTimeAsFileTime(&current);
+
+        if (CompareFileTime(&expiry, &current) < 0)
+            /* already expired */
+            goto _cleanup;
+    } else {
+        FILETIME lifetime;
+        khm_int32 t;
+
+        /* make the cache expire at some point */
+        GetSystemTimeAsFileTime(&current);
+        khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
+        if (t == 0)
+            t = 172800;         /* 48 hours */
+        TimetToFileTimeInterval(t, &lifetime);
+        expiry = FtAdd(&current, &lifetime);
+        iexpiry = FtToInt(&expiry);
+
+        khc_write_int64(csp_prcache, L"ExpiresOn", iexpiry);
+    }
 
     /* we found a prompt cache.  We take this to imply that the
        principal is valid. */
@@ -968,6 +1048,11 @@ k5_kinit_prompter(krb5_context context,
     {
         wchar_t wbanner[KHUI_MAXCCH_BANNER];
         wchar_t wname[KHUI_MAXCCH_PNAME];
+        FILETIME current;
+        FILETIME lifetime;
+        FILETIME expiry;
+        khm_int64 iexpiry;
+        khm_int32 t = 0;
 
         if(banner)
             AnsiStrToUnicode(wbanner, sizeof(wbanner), banner);
@@ -982,28 +1067,40 @@ k5_kinit_prompter(krb5_context context,
             (banner)?wbanner:NULL,
             (name)?wname:NULL);
 
-        if (banner && csp_prcache)
-            khc_write_string(csp_prcache,
-                             L"Banner",
-                             wbanner);
-        else if (csp_prcache)
-            khc_write_string(csp_prcache,
-                             L"Banner",
-                             L"");
+        if (csp_prcache) {
 
-        if (name && csp_prcache)
-            khc_write_string(csp_prcache,
-                             L"Name",
-                             wname);
-        else if (csp_prcache)
-            khc_write_string(csp_prcache,
-                             L"Name",
-                             L"");
+            if (banner)
+                khc_write_string(csp_prcache,
+                                 L"Banner",
+                                 wbanner);
+            else
+                khc_write_string(csp_prcache,
+                                 L"Banner",
+                                 L"");
 
-        if (csp_prcache)
+            if (name)
+                khc_write_string(csp_prcache,
+                                 L"Name",
+                                 wname);
+            else if (csp_prcache)
+                khc_write_string(csp_prcache,
+                                 L"Name",
+                                 L"");
+
             khc_write_int32(csp_prcache,
                             L"PromptCount",
                             (khm_int32) num_prompts);
+
+            GetSystemTimeAsFileTime(&current);
+            khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
+            if (t == 0)
+                t = 172800;         /* 48 hours */
+            TimetToFileTimeInterval(t, &lifetime);
+            expiry = FtAdd(&current, &lifetime);
+            iexpiry = FtToInt(&expiry);
+
+            khc_write_int64(csp_prcache, L"ExpiresOn", iexpiry);
+        }
     }
 
     for(i=0; i < num_prompts; i++) {
@@ -1757,6 +1854,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             }
 
             khui_cw_unlock_nc(nc);
+
+            /* reset the force-password-change flag if this is a new
+               identity. */
+            d->pwd_change = FALSE;
         }
 
         /* fallthrough */
@@ -1949,6 +2050,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             if (nc->subtype == KMSG_CRED_NEW_CREDS) {
                 d = (k5_dlg_data *) nct->aux;
+
+                if (d->pwd_change) {
+                    /* we are forcing a password change */
+                    goto change_password;
+                }
 
                 _begin_task(0);
                 _report_mr0(KHERR_NONE, MSG_CTX_INITAL_CREDS);
@@ -2259,6 +2365,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             } else if (nc->subtype == KMSG_CRED_PASSWORD &&
                        nc->result == KHUI_NC_RESULT_PROCESS) {
 
+            change_password:
+                /* we jump here if there was a password change forced */
+
                 _begin_task(0);
                 _report_mr0(KHERR_NONE, MSG_CTX_PASSWD);
                 _describe();
@@ -2360,6 +2469,74 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     if (code)
                         rv = KHM_ERROR_UNKNOWN;
+                    else if (nc->subtype == KMSG_CRED_NEW_CREDS) {
+                        khm_handle csp_idcfg = NULL;
+                        krb5_context ctx = NULL;
+
+                        /* we forced a password change.  now we need
+                           to get the initial credentials. */
+
+                        d = (k5_dlg_data *) nct->aux;
+
+                        if (d == NULL) {
+                            rv = KHM_ERROR_UNKNOWN;
+                            goto _pwd_exit;
+                        }
+
+                        code = khm_krb5_kinit(NULL, /* context (create one) */
+                                              idname, /* principal_name */
+                                              npwd, /* password */
+                                              NULL, /* ccache name (figure out the identity cc)*/
+                                              (krb5_deltat) d->tc_lifetime.current,
+                                              d->forwardable,
+                                              d->proxiable,
+                                              (krb5_deltat)((d->renewable)?d->tc_renew.current:0),
+                                              d->addressless, /* addressless */
+                                              d->publicIP, /* public IP */
+                                              NULL, /* prompter */
+                                              NULL /* prompter data */);
+
+                        if (code) {
+                            rv = KHM_ERROR_UNKNOWN;
+                            goto _pwd_exit;
+                        }
+
+                        /* save the settings that we used for
+                           obtaining the ticket. */
+                        if (KHM_SUCCEEDED
+                            (k5_open_config_handle(nc->identities[0],
+                                                   KHM_FLAG_CREATE |
+                                                   KCONF_FLAG_WRITEIFMOD,
+                                                   &csp_idcfg))) {
+                            k5_write_dlg_params(csp_idcfg, d);
+                            khc_close_space(csp_idcfg);
+                        }
+
+                        /* and do a quick refresh of the krb5 tickets
+                           so that other plug-ins that depend on krb5
+                           can look up tickets inside NetIDMgr */
+                        khm_krb5_list_tickets(&ctx);
+
+                        /* if there was no default identity, we make
+                           this one the default. */
+                        kcdb_identity_refresh(nc->identities[0]);
+                        {
+                            khm_handle tdefault = NULL;
+
+                            if (KHM_SUCCEEDED(kcdb_identity_get_default(&tdefault))) {
+                                kcdb_identity_release(tdefault);
+                            } else {
+                                _reportf(L"There was no default identity.  Setting defualt");
+                                kcdb_identity_set_default(nc->identities[0]);
+                            }
+                        }
+
+                        /* and then update the LRU too */
+                        k5_update_LRU(nc->identities[0]);
+
+                        if (ctx != NULL)
+                            pkrb5_free_context(ctx);
+                    }
 
                     /* result is only set when code != 0 */
                     if (code && result) {

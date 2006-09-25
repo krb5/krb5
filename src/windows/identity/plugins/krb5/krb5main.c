@@ -30,7 +30,7 @@
 kmm_module h_khModule; /* KMM's handle to this module */
 HINSTANCE hInstance;
 HMODULE hResModule;    /* HMODULE to the resource library */
-const wchar_t * k5_facility = L"Krb5";
+const wchar_t * k5_facility = L"Krb5Cred";
 
 khm_int32 type_id_enctype       = -1;
 khm_int32 type_id_addr_list     = -1;

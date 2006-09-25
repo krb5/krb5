@@ -679,8 +679,11 @@ khm_boolean KHMAPI kcdb_type_data_isValid(
     const void * d,
     khm_size cbd)
 {
-    /* data is always valid, even if d is NULL */
-    return TRUE;
+    /* data is always valid */
+    if (cbd != 0 && d == NULL)
+        return FALSE;
+    else
+        return TRUE;
 }
 
 khm_int32 KHMAPI kcdb_type_data_comp(
@@ -689,8 +692,21 @@ khm_int32 KHMAPI kcdb_type_data_comp(
     const void * d2,
     khm_size cbd2)
 {
-    /* datas can not be compared */
-    return 0;
+    khm_size pref;
+    khm_int32 rv = 0;
+
+    pref = min(cbd1, cbd2);
+
+    if (pref == 0)
+        return (cbd1 < cbd2)? -1 : ((cbd1 > cbd2)? 1 : 0);
+
+    rv = memcmp(d1, d2, pref);
+
+    if (rv == 0) {
+        return (cbd1 < cbd2)? -1 : ((cbd1 > cbd2)? 1 : 0);
+    } else {
+        return rv;
+    }
 }
 
 khm_int32 KHMAPI kcdb_type_data_dup(
@@ -699,14 +715,14 @@ khm_int32 KHMAPI kcdb_type_data_dup(
     void * d_dst,
     khm_size * cbd_dst)
 {
-    if(!cbd_dst)
+    if(!cbd_dst || cbd_src == KCDB_CBSIZE_AUTO)
         return KHM_ERROR_INVALID_PARAM;
 
-    *cbd_dst = cbd_src;
-
     if(!d_dst || *cbd_dst < cbd_src) {
+        *cbd_dst = cbd_src;
         return KHM_ERROR_TOO_LONG;
     } else {
+        *cbd_dst = cbd_src;
         memcpy(d_dst, d_src, cbd_src);
         return KHM_ERROR_SUCCESS;
     }
@@ -889,7 +905,7 @@ void kcdb_type_check_and_delete(khm_int32 id)
     LeaveCriticalSection(&cs_type);
 }
 
-KHMEXP khm_int32 KHMAPI kcdb_type_get_id(wchar_t *name, khm_int32 * id)
+KHMEXP khm_int32 KHMAPI kcdb_type_get_id(const wchar_t *name, khm_int32 * id)
 {
     kcdb_type_i * t;
     size_t cbsize;
@@ -968,7 +984,7 @@ KHMEXP khm_int32 KHMAPI kcdb_type_get_name(khm_int32 id, wchar_t * buffer, khm_s
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI kcdb_type_register(kcdb_type * type, khm_int32 * new_id)
+KHMEXP khm_int32 KHMAPI kcdb_type_register(const kcdb_type * type, khm_int32 * new_id)
 {
     kcdb_type_i *t;
     size_t cbsize;

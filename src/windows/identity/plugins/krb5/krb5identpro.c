@@ -49,15 +49,52 @@ typedef struct tag_k5_new_cred_data {
     HWND hw_realm;
 } k5_new_cred_data;
 
+static
+void
+trim_str(wchar_t * s, khm_size cch) {
+    wchar_t * c, * last_ws;
+
+    for (c = s; *c && iswspace(*c) && ((khm_size)(c - s)) < cch; c++);
+
+    if (((khm_size)(c - s)) >= cch)
+        return;
+
+    if (c != s && ((khm_size)(c - s)) < cch) {
+#if _MSC_VER >= 1400
+        wmemmove_s(s, cch, c, cch - ((khm_size)(c - s)));
+#else
+        memmove(s, c, (cch - ((khm_size)(c - s))) * sizeof(wchar_t));
+#endif
+    }
+
+    last_ws = NULL;
+    for (c = s; *c && ((khm_size)(c - s)) < cch; c++) {
+        if (!iswspace(*c))
+            last_ws = NULL;
+        else if (last_ws == NULL)
+            last_ws = c;
+    }
+
+    if (last_ws)
+        *last_ws = L'\0';
+}
+
 /* Runs in the UI thread */
 int 
 k5_get_realm_from_nc(khui_new_creds * nc, 
                      wchar_t * buf, 
                      khm_size cch_buf) {
     k5_new_cred_data * d;
+    khm_size s;
 
     d = (k5_new_cred_data *) nc->ident_aux;
-    return GetWindowText(d->hw_realm, buf, (int) cch_buf);
+    buf[0] = L'\0';
+    GetWindowText(d->hw_realm, buf, (int) cch_buf);
+    trim_str(buf, cch_buf);
+
+    StringCchLength(buf, cch_buf, &s);
+
+    return (int) s;
 }
 
 /* set the primary identity of a new credentials dialog depending on
@@ -83,6 +120,7 @@ set_identity_from_ui(khui_new_creds * nc,
     assert(cch < KCDB_IDENT_MAXCCH_NAME - 1);
 
     GetWindowText(d->hw_username, un, ARRAYLENGTH(un));
+    trim_str(un, ARRAYLENGTH(un));
 
     realm = khm_get_realm_from_princ(un);
     if (realm)          /* realm was specified */
@@ -113,6 +151,7 @@ set_identity_from_ui(khui_new_creds * nc,
     }
 
     GetWindowText(d->hw_realm, realm, (int) cch_left);
+    trim_str(realm, cch_left);
 
  _set_ident:
     if (KHM_FAILED(rv = kcdb_identity_create(un,
@@ -183,6 +222,7 @@ update_crossfeed(khui_new_creds * nc,
     GetWindowText(d->hw_username,
                   un,
                   ARRAYLENGTH(un));
+    trim_str(un, ARRAYLENGTH(un));
 
     un_realm = khm_get_realm_from_princ(un);
 
@@ -246,6 +286,7 @@ update_crossfeed(khui_new_creds * nc,
 
     GetWindowText(d->hw_realm, realm,
                   ARRAYLENGTH(realm));
+    trim_str(realm, ARRAYLENGTH(realm));
 
     idx = (int)SendMessage(d->hw_realm,
                            CB_FINDSTRINGEXACT,

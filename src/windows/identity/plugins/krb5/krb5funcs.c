@@ -2056,7 +2056,7 @@ khm_krb5_changepwd(char * principal,
                    char** error_str)
 {
     krb5_error_code rc = 0;
-    int result_code;
+    int result_code = 0;
     krb5_data result_code_string, result_string;
     krb5_context context = 0;
     krb5_principal princ = 0;

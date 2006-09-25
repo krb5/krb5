@@ -280,7 +280,7 @@ krb4_id_config_proc(HWND hwnd,
                     khc_close_space(csp_ident);
 
                 if (csp_idk4)
-                    khc_close_space(csp_ident);
+                    khc_close_space(csp_idk4);
 
                 khui_cfg_set_flags_inst(d,
                                         ((applied)? KHUI_CNFLAG_APPLIED: 0),

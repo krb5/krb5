@@ -382,7 +382,7 @@ BEGIN
     IDS_NC_REALM            "Realm"
     IDS_KRB5_WARNING        "Kerberos 5 Warning"
     IDS_K5ERR_NAME_EXPIRED  "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The selected principal name has expired.</p><p><tab>  Please contact your system administrator.</p>"
-    IDS_K5ERR_KEY_EXPIRED   "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The password for the selected identity has expired.</p><p><tab>  Click <a id=""Krb5Cred:Passwd"">here</a> to change the password</p>"
+    IDS_K5ERR_KEY_EXPIRED   "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The password for the selected identity has expired.</p><p><tab>  Click <a id=""Krb5Cred:!Passwd"">here</a> to change the password</p>"
     IDS_KRB5_WARN_FMT       "Kerberos 5: %s\n\n%s"
     IDS_K5ERR_FMT           "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tag>: %s</p>"
     IDS_K5CFG_SHORT_DESC    "Kerberos 5"

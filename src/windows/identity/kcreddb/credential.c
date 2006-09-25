@@ -60,7 +60,7 @@ void kcdb_cred_exit(void)
     places with a read lock on l_creds.  New credentials must be creatable while
     holding either lock. */
 KHMEXP khm_int32 KHMAPI 
-kcdb_cred_create(wchar_t *   name, 
+kcdb_cred_create(const wchar_t *   name, 
                  khm_handle  identity,
                  khm_int32   cred_type,
                  khm_handle * result) 
@@ -318,7 +318,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_get_type(
 
 KHMEXP khm_int32 KHMAPI kcdb_cred_set_attrib(
     khm_handle cred, 
-    wchar_t * name, 
+    const wchar_t * name, 
     void * buffer, 
     khm_size cbbuf)
 {
@@ -421,7 +421,7 @@ _exit:
 
 KHMEXP khm_int32 KHMAPI kcdb_cred_get_attrib(
     khm_handle cred, 
-    wchar_t * name, 
+    const wchar_t * name, 
     khm_int32 * attr_type,
     void * buffer, 
     khm_size * cbbuf) 
@@ -441,7 +441,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_get_attrib(
 
 KHMEXP khm_int32 KHMAPI kcdb_cred_get_attrib_string(
     khm_handle cred, 
-    wchar_t * name, 
+    const wchar_t * name, 
     wchar_t * buffer, 
     khm_size * cbbuf,
     khm_int32 flags) 
@@ -812,7 +812,7 @@ _exit:
 KHMEXP khm_int32 KHMAPI 
 kcdb_creds_comp_attrib(khm_handle cred1, 
                        khm_handle cred2, 
-                       wchar_t * name)
+                       const wchar_t * name)
 {
     khm_int32 attr_id;
 
