@@ -358,7 +358,7 @@
                         <Condition>VersionNT &gt; 500</Condition>
                     </Component>
                     <Component Id="cmf_netidmgr_exe_w2k" Guid="0F85D4F3-7897-4FE3-8501-AD0C383CCB4F" DiskId="1" Transitive="yes">
-			<File Id="fil_netidmgr_exe_w2k" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
+			<File Id="fil_netidmgr_exe_w2k" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" src="$(var.BinDir)W2K\netidmgr.exe"/>
 			<File Id="fil_netidmgr_chm_w2k" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0_w2k" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_ts_netidmgr_1_w2k" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
