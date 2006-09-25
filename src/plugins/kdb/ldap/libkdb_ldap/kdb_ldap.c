@@ -38,7 +38,7 @@
 #include "ldap_misc.h"
 #include <kdb5.h>
 
-static krb5_error_code
+krb5_error_code
 krb5_ldap_get_db_opt(char *input, char **opt, char **val)
 {
     char *pos = strchr(input, '=');
@@ -394,6 +394,8 @@ krb5_error_code krb5_ldap_open(krb5_context context,
     dal_handle->db_context = ldap_context;
     status = krb5_ldap_read_server_params(context, conf_section, mode & 0x0300);
     if (status) {
+	if (ldap_context)
+	    krb5_ldap_free_ldap_context(ldap_context);
 	ldap_context = NULL;
 	dal_handle->db_context = NULL;
 	prepend_err_str (context, "Error reading LDAP server params: ", status, status);

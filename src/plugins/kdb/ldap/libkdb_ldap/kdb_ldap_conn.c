@@ -314,7 +314,22 @@ krb5_error_code krb5_ldap_lib_cleanup()
     return 0;
 }
 
+krb5_error_code
+krb5_ldap_free_ldap_context(krb5_ldap_context *ldap_context)
+{
+    if (ldap_context == NULL)
+	return 0;
 
+    krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
+    ldap_context->krbcontainer = NULL;
+
+    krb5_ldap_free_realm_params(ldap_context->lrparams);
+    ldap_context->lrparams = NULL;
+
+    krb5_ldap_free_server_params(ldap_context);
+
+    return 0;
+}
 
 krb5_error_code
 krb5_ldap_close(krb5_context context)
@@ -331,16 +346,7 @@ krb5_ldap_close(krb5_context context)
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
     dal_handle->db_context = NULL;
 
-    if (ldap_context == NULL)
-	return 0;
-
-    krb5_ldap_free_krbcontainer_params(ldap_context->krbcontainer);
-    ldap_context->krbcontainer = NULL;
-
-    krb5_ldap_free_realm_params(ldap_context->lrparams);
-    ldap_context->lrparams = NULL;
-
-    krb5_ldap_free_server_params(ldap_context);
+    krb5_ldap_free_ldap_context(ldap_context);
 
     return 0;
 }

@@ -29,8 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define MAX_KRB_CONTAINER_LEN	256
-
 #define BUFF_LEN 		64      /* Max len of enctype string */
 #define MAX_PRINC_SIZE 		256
 

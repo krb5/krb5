@@ -87,6 +87,7 @@
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 #include <ldap_principal.h>
+#include <ldap_krbcontainer.h>
 extern time_t get_date(char *); /* kadmin/cli/getdate.o */
 
 char *yes = "yes\n"; /* \n to compare against result of fgets */

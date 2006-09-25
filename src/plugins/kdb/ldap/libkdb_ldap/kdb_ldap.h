@@ -255,12 +255,14 @@ krb5_ldap_alloc( krb5_context kcontext,  void *ptr, size_t size );
 
 void 
 krb5_ldap_free( krb5_context kcontext, void *ptr );
-                                                                                                                             
 krb5_error_code
 krb5_ldap_get_mkey(krb5_context, krb5_keyblock **);
 
 krb5_error_code
 krb5_ldap_set_mkey(krb5_context, char *, krb5_keyblock *);
+
+krb5_error_code
+krb5_ldap_create(krb5_context , char *, char **);
 
 krb5_error_code 
 krb5_ldap_open( krb5_context , char *,
@@ -268,6 +270,9 @@ krb5_ldap_open( krb5_context , char *,
 		int mode );
 krb5_error_code 
 krb5_ldap_close( krb5_context );
+
+krb5_error_code
+krb5_ldap_free_ldap_context(krb5_ldap_context *);
 
 krb5_error_code
 krb5_ldap_read_startup_information(krb5_context );
@@ -279,6 +284,7 @@ krb5_error_code
 krb5_get_policydn(krb5_context, krb5_db_entry *, char **);
 
 /* DAL functions */
+
 
 krb5_error_code
 krb5_ldap_set_option( krb5_context, int, void * );

@@ -38,6 +38,7 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 SRCS= 	$(srcdir)/kdb_ldap.c \
 	$(srcdir)/kdb_ldap_conn.c \
 	$(srcdir)/ldap_realm.c \
+	$(srcdir)/ldap_create.c \
 	$(srcdir)/ldap_krbcontainer.c \
 	$(srcdir)/ldap_principal.c \
 	$(srcdir)/ldap_principal2.c \
@@ -58,6 +59,7 @@ STOBJLISTS=OBJS.ST
 STLIBOBJS= kdb_ldap.o \
 	kdb_ldap_conn.o \
 	ldap_realm.o \
+	ldap_create.o \
 	ldap_krbcontainer.o \
 	ldap_principal.o \
 	ldap_principal2.o \

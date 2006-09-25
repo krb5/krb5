@@ -122,4 +122,7 @@ krb5_add_int_mem_ldap_mod(LDAPMod  ***, char *, int , int);
 krb5_error_code
 krb5_ldap_free_mod_array(LDAPMod **);
 
+krb5_error_code
+krb5_ldap_get_db_opt(char *, char **, char **);
+
 #endif

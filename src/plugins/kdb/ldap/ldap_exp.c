@@ -52,7 +52,7 @@ kdb_vftabl kdb_function_table = {
   /* fini_library */			       krb5_ldap_lib_cleanup,
   /* init_module */			       krb5_ldap_open,
   /* fini_module */			       krb5_ldap_close,
-  /* db_create */			       krb5_ldap_create_realm_1,
+  /* db_create */			       krb5_ldap_create,
   /* db_destroy */			       krb5_ldap_delete_realm_1,
   /* db_get_age */                             krb5_ldap_db_get_age,
   /* db_set_option */			       krb5_ldap_set_option,

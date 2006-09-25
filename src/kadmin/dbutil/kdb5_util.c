@@ -229,11 +229,9 @@ int main(argc, argv)
 	    }
 
        } else if (strcmp(*argv, "-x") == 0 && ARG_VAL) {
-	   db5util_db_args_size++;
 	   if (!add_db_arg(koptarg)) {
-	       fprintf(stderr,"%s: Cannot initialize. Not enough memory\n",
-		       argv[0]);
-	       exit(1);
+		com_err(progname, ENOMEM, "while parsing command arguments\n");
+		exit(1);
 	   }
 
        } else if (strcmp(*argv, "-r") == 0 && ARG_VAL) {

@@ -31,6 +31,8 @@
 #ifndef _LDAP_KRBCONTAINER_H_
 #define _LDAP_KRBCONTAINER_H_ 1
 
+#define MAX_KRB_CONTAINER_LEN	256
+
 /* kerberos container structure */
 
 typedef struct _krb5_ldap_krbcontainer_params {

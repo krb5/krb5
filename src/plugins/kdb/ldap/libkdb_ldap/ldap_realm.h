@@ -96,9 +96,6 @@ void
 krb5_ldap_free_realm_params(krb5_ldap_realm_params *);
 
 krb5_error_code
-krb5_ldap_create_realm_1(krb5_context, char *, char **);
-
-krb5_error_code
 krb5_ldap_delete_realm_1(krb5_context, char *, char **);
 
 #endif

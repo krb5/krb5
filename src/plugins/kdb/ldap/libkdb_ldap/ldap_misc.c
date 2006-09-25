@@ -461,6 +461,16 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
      * works in both case.
      */
     if (subtree == NULL || strcasecmp(subtree, "") == 0) {
+	/* 
+	 * XXX WAF to see if I can get around ldapsearch issue with a null base
+	 * which doesn't work in solaris.  This should probably be a Solaris
+	 * specific #ifdef but I am not sure what define value to use.
+	 */
+	if (realm_cont_dn != NULL) {
+	    subtreearr[0] = strdup(realm_cont_dn);
+	    if (subtreearr[0] == NULL)
+		return ENOMEM;
+	}
 	*ntree = 1;
 	return 0;
     }
