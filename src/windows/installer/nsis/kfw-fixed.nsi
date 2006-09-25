@@ -207,10 +207,7 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32.dll"         "$INSTDIR\bin\krbcc32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbcc32s.exe"        "$INSTDIR\bin\krbcc32s.exe"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krbv4w32.dll"        "$INSTDIR\bin\krbv4w32.dll"      "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe"         "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe.manifest" "$INSTDIR\bin\netidmgr.exe.manifest" "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.chm"         "$INSTDIR\bin\netidmgr.chm"       "$INSTDIR"
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr32.dll"         "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred.dll"         "$INSTDIR\bin\krb4cred.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb5cred.dll"         "$INSTDIR\bin\krb5cred.dll"       "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\krb4cred_en_us.dll"   "$INSTDIR\bin\krb4cred_en_us.dll"       "$INSTDIR"
@@ -222,7 +219,18 @@ Section "KfW Client" secClient
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\kdeltkt.exe"          "$INSTDIR\bin\kdeltkt.exe"        "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\wshelp32.dll"        "$INSTDIR\bin\wshelp32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\xpprof32.dll"        "$INSTDIR\bin\xpprof32.dll"      "$INSTDIR"
-  
+
+  Call GetWindowsVersion
+  Pop $R0
+  StrCmp $R0 "2000" nid_inst2000
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\netidmgr.exe"         "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\nidmgr32.dll"         "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
+  goto nid_done
+nid_inst2000:  
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\W2K\netidmgr.exe"     "$INSTDIR\bin\netidmgr.exe"       "$INSTDIR"
+  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\W2K\nidmgr32.dll"     "$INSTDIR\bin\nidmgr32.dll"       "$INSTDIR"
+nid_done:
+
 !ifdef DEBUG
 !IFDEF CL_1400
   !insertmacro ReplaceDLL "${SYSTEMDIR}\msvcr80d.dll"    "$INSTDIR\bin\msvcr80d.dll"  "$INSTDIR"
@@ -481,8 +489,6 @@ Section "Debug Symbols" secDebug
   File "${KFW_BIN_DIR}\krbcc32s.pdb"
   File "${KFW_BIN_DIR}\krbv4w32.pdb"
   File "${KFW_BIN_DIR}\leashw32.pdb"
-  File "${KFW_BIN_DIR}\netidmgr.pdb"
-  File "${KFW_BIN_DIR}\nidmgr32.pdb"
   File "${KFW_BIN_DIR}\krb4cred.pdb"
   File "${KFW_BIN_DIR}\krb5cred.pdb"
   File "${KFW_BIN_DIR}\ms2mit.pdb"
@@ -491,6 +497,17 @@ Section "Debug Symbols" secDebug
   File "${KFW_BIN_DIR}\kdeltkt.pdb"
   File "${KFW_BIN_DIR}\wshelp32.pdb"
   File "${KFW_BIN_DIR}\xpprof32.pdb"
+
+  Call GetWindowsVersion
+  Pop $R0
+  StrCmp $R0 "2000" nidpdb_inst2000
+  File "${KFW_BIN_DIR}\netidmgr.pdb"
+  File "${KFW_BIN_DIR}\nidmgr32.pdb"
+  goto nidpdb_done
+nidpdb_inst2000:
+  File "${KFW_BIN_DIR}\W2K\netidmgr.pdb"
+  File "${KFW_BIN_DIR}\W2K\nidmgr32.pdb"
+nidpdb_done:
 
 !IFDEF DEBUG
 !IFDEF CL_1400
