@@ -142,7 +142,18 @@ typedef struct tag_khui_config_node_reg {
 */
 #define KHUI_CNFLAG_SYSTEM        0x0010
 
+/*! \brief Settings have been modified
+
+    Settings for this configuration panel have been modified.  This
+    flag should be cleared once the settings have been successfully
+    applied.
+ */
 #define KHUI_CNFLAG_MODIFIED      0x0100
+
+/*! \brief Settings have been applied
+
+    Set once any modified settings were successfully applied.
+ */
 #define KHUI_CNFLAG_APPLIED       0x0200
 
 #define KHUI_CNFLAGMASK_STATIC    0x00ff

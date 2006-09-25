@@ -356,9 +356,9 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,211,7,50,14
     LTEXT           "Productname",IDC_PRODUCT,41,7,163,13,NOT WS_GROUP
-    LTEXT           "© 2005 Massachusetts Institute of Technology",IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
-    LTEXT           "BuildInfo",IDC_BUILDINFO,41,41,220,17,NOT WS_GROUP
-    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,21,20
+    LTEXT           "© 2005-2006 Massachusetts Institute of Technology\n© 2006 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
+    LTEXT           "BuildInfo",IDC_BUILDINFO,41,43,220,15,NOT WS_GROUP
+    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,20,20
     CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,72,220,91
     LTEXT           "Loaded modules",IDC_STATIC,41,60,52,8
 END
@@ -770,6 +770,13 @@ BEGIN
     IDS_ACTIONT_OPT_APPEAR  "Change appearance and display settings"
     IDS_ACTIONT_HELP_CTX    "Display user documentation"
     IDS_ACTIONT_IMPORT      "Import credentials from external sources such as the Windows LSA"
+    IDS_NC_FAILED_TITLE_I   "Failed to get credentials for %s"
+    IDS_NC_PWD_FAILED_TITLE_I "Failed to change password for %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NC_REN_FAILED_TITLE_I "Failed to renew creds for %s"
 END
 
 #endif    // English (U.S.) resources

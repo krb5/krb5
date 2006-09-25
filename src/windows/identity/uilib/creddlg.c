@@ -564,6 +564,35 @@ khui_cw_get_prompt(khui_new_creds * c,
     return rv;
 }
 
+void
+khuiint_trim_str(wchar_t * s, khm_size cch) {
+    wchar_t * c, * last_ws;
+
+    for (c = s; *c && iswspace(*c) && ((khm_size)(c - s)) < cch; c++);
+
+    if (((khm_size)(c - s)) >= cch)
+        return;
+
+    if (c != s && ((khm_size)(c - s)) < cch) {
+#if _MSC_VER >= 1400
+        wmemmove_s(s, cch, c, cch - ((khm_size)(c - s)));
+#else
+        memmove(s, c, (cch - ((khm_size)(c - s)))* sizeof(wchar_t));
+#endif
+    }
+
+    last_ws = NULL;
+    for (c = s; *c && ((khm_size)(c - s)) < cch; c++) {
+        if (!iswspace(*c))
+            last_ws = NULL;
+        else if (last_ws == NULL)
+            last_ws = c;
+    }
+
+    if (last_ws)
+        *last_ws = L'\0';
+}
+
 KHMEXP khm_int32 KHMAPI 
 khui_cw_sync_prompt_values(khui_new_creds * c)
 {
@@ -584,6 +613,7 @@ khui_cw_sync_prompt_values(khui_new_creds * c)
             LeaveCriticalSection(&c->cs);
 
             GetWindowText(hw, tmpbuf, ARRAYLENGTH(tmpbuf));
+            khuiint_trim_str(tmpbuf, ARRAYLENGTH(tmpbuf));
 
             EnterCriticalSection(&c->cs);
             if (n != c->n_prompts)

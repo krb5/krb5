@@ -25,11 +25,13 @@ Krb5Cred,KC_SPACE,0,Kerberos V Credentials Provider
     LRURealms,KC_STRING,,
     LRUPrincipals,KC_STRING,,
     LastDefaultIdent,KC_STRING,,Last known default identity
+    PromptCacheLifetime,KC_INT32,172800,Lifetime of the prompt cache in seconds
     DefaultCCName,KC_STRING,,Default CC name (only per identity)
     PromptCache,KC_SPACE,0,Cache of prompts (only per identity)
       Name,KC_STRING,,
       Banner,KC_STRING,,
       PromptCount,KC_INT32,0,
+      ExpiresOn,KC_INT64,0,FILETIME of when the prompt cache is set to expire
       (n),KC_SPACE,0,Parameters for each prompt
         Prompt,KC_STRING,,
         Type,KC_INT32,0,

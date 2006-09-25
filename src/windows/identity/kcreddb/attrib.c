@@ -500,7 +500,7 @@ kcdb_attrib_exit(void)
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_attrib_get_id(wchar_t *name, khm_int32 * id)
+kcdb_attrib_get_id(const wchar_t *name, khm_int32 * id)
 {
     kcdb_attrib_i * ai;
 
@@ -521,7 +521,7 @@ kcdb_attrib_get_id(wchar_t *name, khm_int32 * id)
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_attrib_register(kcdb_attrib * attrib, khm_int32 * new_id)
+kcdb_attrib_register(const kcdb_attrib * attrib, khm_int32 * new_id)
 {
     kcdb_attrib_i * ai;
     size_t cb_name;

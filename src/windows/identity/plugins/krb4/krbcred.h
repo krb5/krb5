@@ -29,7 +29,7 @@
 
 #include<windows.h>
 
-#define KHERR_FACILITY L"Kerberos4"
+#define KHERR_FACILITY L"Krb4Cred"
 #define KHERR_FACILITY_ID 65
 #define KHERR_HMODULE hResModule
 

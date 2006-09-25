@@ -46,8 +46,11 @@ about_dlg_proc(HWND hwnd,
 
             SetDlgItemText(hwnd, IDC_PRODUCT,
                            TEXT(KH_VERSTR_PRODUCT_1033));
+            /* retain the original copyright strings */
+#ifdef OVERRIDE_COPYRIGHT
             SetDlgItemText(hwnd, IDC_COPYRIGHT,
                            TEXT(KH_VERSTR_COPYRIGHT_1033));
+#endif
             SetDlgItemText(hwnd, IDC_BUILDINFO,
                            TEXT(KH_VERSTR_BUILDINFO_1033));
 

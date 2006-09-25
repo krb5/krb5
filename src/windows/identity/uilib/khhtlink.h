@@ -42,11 +42,30 @@
     Instead, the length fields should be used to extract the string.
  */
 typedef struct tag_khui_htwnd_link {
-    RECT r;
-    wchar_t * id;
-    int id_len;
-    wchar_t * param;
-    int param_len;
+    RECT r;                     /*!< The enclosing rectangle of the
+                                  hyperlink.  Units are screen units
+                                  and the coordinates are relative to
+                                  the top left hand corner of the
+                                  hypertext area.  */
+    wchar_t * id;               /*!< The value of the \a id attribute
+                                  of the link or \a NULL if there was
+                                  no \a id attribute.  This does not
+                                  point to a \a NULL terminated
+                                  string.  The length of the string is
+                                  given by the \a id_len field. */
+    int id_len;                 /*!< The length of the string pointed
+                                  to by \a id in characters.
+                                  Undefined if \a id is \a NULL. */
+    wchar_t * param;            /*!< The value of the \a param
+                                  attribute of the link or \a NULL if
+                                  there was no \a param attribute.
+                                  This does not point to a \a NULL
+                                  terminated string.  The length of
+                                  the string is given by the \a
+                                  param_len field.*/
+    int param_len;              /*!< Length of the string pointed to
+                                  by \a param in characters.
+                                  Undefined if \a param is \a NULL. */
 } khui_htwnd_link;
 
 #define KHUI_MAXCCH_HTLINK_FIELD 256

@@ -35,6 +35,9 @@ CredWindow,KC_SPACE,0,Options for the credentials window
     _Schema,KC_ENDSPACE,0,
     Main,KC_SPACE,0,Main window
     Main,KC_ENDSPACE,0,
+    NewCred,KC_SPACE,0,New credentials window
+      ForceToTop,KC_INT32,1,Force new creds window to the top
+    NewCred,KC_ENDSPACE,0,
   Windows,KC_ENDSPACE,0,
   Views,KC_SPACE,0,Preconfigured views for credentials
    Custom_0,KC_SPACE,0,First custom view.  Additional views have names of the form Custom_N

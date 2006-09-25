@@ -73,7 +73,7 @@ void kcdb_credtype_check_and_delete(khm_int32 id)
 }
 
 KHMEXP khm_int32 KHMAPI 
-kcdb_credtype_register(kcdb_credtype * type, khm_int32 * new_id) 
+kcdb_credtype_register(const kcdb_credtype * type, khm_int32 * new_id) 
 {
     khm_int32 id;
     kcdb_credtype_i * ict;
@@ -330,7 +330,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_name(
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_credtype_get_id(
-    wchar_t * name, 
+    const wchar_t * name, 
     khm_int32 * id)
 {
     int i;

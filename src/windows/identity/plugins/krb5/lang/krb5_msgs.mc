@@ -158,6 +158,42 @@ Destroying Krb5 tickets
 .
 
 MessageId=
+SymbolicName=MSG_ERR_NETDOWN
+Language=English
+A network connection is unavailable
+.
+
+MessageId=
+SymbolicName=MSG_ERR_S_NETRETRY
+Language=English
+Please check your network connection or contact your network administrator for assistance.
+.
+
+MessageId=
+SymbolicName=MSG_ERR_TEMPDOWN
+Language=English
+A temporary network error caused the operation to fail
+.
+
+MessageId=
+SymbolicName=MSG_ERR_S_TEMPDOWN
+Language=English
+Please try again in a few minutes
+.
+
+MessageId=
+SymbolicName=MSG_ERR_NOHOST
+Language=English
+A server could not be reached
+.
+
+MessageId=
+SymbolicName=MSG_ERR_S_NOHOST
+Language=English
+This can be caused by the server being unavailable, network errors, or improper configuration.  Please try again or contact your administrator for assistance.
+.
+
+MessageId=
 SymbolicName=MSG_
 Language=English
 .

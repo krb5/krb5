@@ -110,8 +110,8 @@ MC=mc
 
 # Lots more macros
 
-incflags = -I$(NIDMINCDIR) -I$(OBJ) -I.
-rincflags = /i $(NIDMINCDIR) /i $(OBJ) /i .
+incflags = -I"$(NIDMINCDIR)" -I"$(OBJ)" -I.
+rincflags = /i "$(NIDMINCDIR)" /i "$(OBJ)" /i .
 
 ldebug = $(ldebug) /DEBUG
 cdebug = $(cdebug) -Os -Zi
@@ -120,13 +120,13 @@ cdefines = $(cdefines) -DUNICODE -D_UNICODE
 
 C2OBJ=$(CC) $(cdebug) $(cflags) $(incflags) $(cdefines) /Fo"$@" /c $**
 
-DLLGUILINK=$(LINK) /NOLOGO $(ldebug) $(dlllflags) $(guilibsmt) /OUT:$@ /IMPLIB:$(DEST)\$(@B).lib $**
+DLLGUILINK=$(LINK) /NOLOGO $(ldebug) $(dlllflags) $(guilibsmt) /OUT:"$@" /IMPLIB:$(DEST)\$(@B).lib $**
 
-DLLRESLINK=$(LINK) /NOLOGO /DLL /NOENTRY /MACHINE:$(PROCESSOR_ARCHITECTURE) /OUT:$@ $**
+DLLRESLINK=$(LINK) /NOLOGO /DLL /NOENTRY /MACHINE:$(PROCESSOR_ARCHITECTURE) /OUT:"$@" $**
 
-RC2RES=$(RC) $(RFLAGS) $(rincflags) /fo $@ $**
+RC2RES=$(RC) $(RFLAGS) $(rincflags) /fo "$@" $**
 
-MC2RC=$(MC) $(MCFLAGS) -h $(OBJ)\ -m 1024 -r $(OBJ)\ -x $(OBJ)\ $**
+MC2RC=$(MC) $(MCFLAGS) -h "$(OBJ)\" -m 1024 -r "$(OBJ)\" -x "$(OBJ)\" $**
 
 {}.c{$(OBJ)}.obj:
 	$(C2OBJ)
@@ -139,15 +139,15 @@ MC2RC=$(MC) $(MCFLAGS) -h $(OBJ)\ -m 1024 -r $(OBJ)\ -x $(OBJ)\ $**
 
 mkdirs::
 !if !exist($(DEST))
-	$(MKDIR) $(DEST)
+	$(MKDIR) "$(DEST)"
 !endif
 !if !exist($(OBJ))
-	$(MKDIR) $(OBJ)
+	$(MKDIR) "$(OBJ)"
 !endif
 
 clean::
-	$(RM) $(OBJ)\*.*
-	$(RM) $(DEST)\*.*
+	$(RM) "$(OBJ)\*.*"
+	$(RM) "$(DEST)\*.*"
 
 .SUFFIXES: .h
 
@@ -169,7 +169,7 @@ MT=mt.exe -nologo
 !endif
 
 _VC_MANIFEST_EMBED_EXE= \
-if exist $@.manifest $(MT) -outputresource:$@;1 -manifest $@.manifest
+if exist "$@.manifest" $(MT) -outputresource:"$@";1 -manifest "$@.manifest"
 
 _VC_MANIFEST_EMBED_DLL=$(_VC_MANIFEST_EMBED_EXE)
 
@@ -179,7 +179,7 @@ _VC_MANIFEST_EMBED_DLL=$(_VC_MANIFEST_EMBED_EXE)
 # embedded manifest will be used.  Otherwise the $@.manifest file will
 # be used.
 _VC_MANIFEST_CLEAN= \
-if exist $@.manifest $(RM) $@.manifest
+if exist "$@.manifest" $(RM) "$@.manifest"
 
 # End of manifest handling
 
@@ -189,7 +189,7 @@ if exist $@.manifest $(RM) $@.manifest
 DLL=$(DEST)\$(DLLBASENAME).dll
 
 LIBFILES= \
-	$(NIDMLIBDIR)\nidmgr32.lib
+	"$(NIDMLIBDIR)\nidmgr32.lib"
 
 OBJFILES= \
 	$(OBJ)\credacq.obj	\
@@ -208,7 +208,7 @@ CONFIGHEADER=$(OBJ)\credacq_config.h
 all: mkdirs $(CONFIGHEADER) $(DLL) lang
 
 $(CONFIGHEADER): Makefile
-	$(CP) << $@
+	$(CP) << "$@"
 /* This is a generated file.  Do not modify directly. */
 
 #pragma once
