@@ -275,9 +275,9 @@ int k5_setspecific (k5_key_t keynum, void *value)
 	/* add to global linked list */
 	/*	t->next = 0; */
 	err = TlsSetValue(tls_idx, t);
-	if (err) {
+	if (!err) {
 	    free(t);
-	    return err;
+	    return GetLastError();
 	}
     }
 
