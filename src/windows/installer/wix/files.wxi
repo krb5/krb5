@@ -333,7 +333,7 @@
                         <Condition>VersionNT &gt; 500</Condition>
                     </Component>
                     <Component Id="cmf_nidmgr32_dll_w2k" Guid="33F42D7C-03CE-465F-9E0A-5F486FE64B04" DiskId="1" Transitive="yes">
-                        <File Id="fil_nidmgr32_dll" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" src="$(var.BinDir)W2K\nidmgr32.dll" />
+                        <File Id="fil_nidmgr32_dll_w2k" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" src="$(var.BinDir)W2K\nidmgr32.dll" />
                         <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
                     <Component Id="cmf_krb5cred_dll" Guid="27A7723A-F0D9-4F06-892C-54F0AC6014C3" DiskId="1">
@@ -358,12 +358,12 @@
                         <Condition>VersionNT &gt; 500</Condition>
                     </Component>
                     <Component Id="cmf_netidmgr_exe_w2k" Guid="0F85D4F3-7897-4FE3-8501-AD0C383CCB4F" DiskId="1" Transitive="yes">
-			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
-			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
-                        <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
-                        <Registry Id="reg_ts_netidmgr_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
-                        <Shortcut Id="sc_netidmgr_exe" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
-                        <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
+			<File Id="fil_netidmgr_exe_w2k" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
+			<File Id="fil_netidmgr_chm_w2k" LongName="netidmgr.chm" Name="netidmgr.chm" />
+                        <Registry Id="reg_ts_netidmgr_0_w2k" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
+                        <Registry Id="reg_ts_netidmgr_1_w2k" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Name="Flags" Type="integer" Value="1032" />
+                        <Shortcut Id="sc_netidmgr_exe_w2k" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" WorkingDirectory="[dirbin]"/>
+                        <Shortcut Id="sc_netidmgr_chm_w2k" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="[dirbin]"/>
                         <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
                     <!-- /NetIDMgr -->
