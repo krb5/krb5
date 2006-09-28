@@ -177,7 +177,7 @@ typedef struct {
     {								\
 	(HP) = (gethostbyname_r((NAME), &TMP.ent, &TMP.data)	\
 		? 0						\
-		: &my_h_ent);					\
+		: &TMP.ent);					\
 	(ERR) = h_errno;					\
     }
 /*
