@@ -138,6 +138,7 @@ $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 $(srcdir)/$(thisconfigdir)/configure: @MAINT@ \
 		$(srcdir)/$(thisconfigdir)/configure.in \
 		$(SRCTOP)/patchlevel.h \
+		$(AUTOCONF_HEADER) \
 		$(SRCTOP)/aclocal.m4
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 	case "$(myfulldir)" in \
