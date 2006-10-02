@@ -285,6 +285,7 @@ int main (void)
 
     test_misc(context);
     do_test(context, "");
+    do_test(context, "KEYRING:");
     do_test(context, "MEMORY:");
     do_test(context, "FILE:");
 

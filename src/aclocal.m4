@@ -106,6 +106,7 @@ KRB5_LIB_PARAMS
 KRB5_AC_INITFINI
 KRB5_AC_ENABLE_THREADS
 KRB5_AC_FIND_DLOPEN
+KRB5_AC_KEYRING_CCACHE
 ])dnl
 
 dnl Maintainer mode, akin to what automake provides, 'cept we don't
@@ -1811,3 +1812,14 @@ dnl  AC_MSG_NOTICE(disabling ldap backend module support)
 fi
 AC_SUBST(OPENLDAP_PLUGIN)
 ])dnl
+dnl
+dnl If libkeyutils exists (on Linux) include it and use keyring ccache
+AC_DEFUN(KRB5_AC_KEYRING_CCACHE,[
+  AC_CHECK_HEADERS([keyutils.h],
+    AC_CHECK_LIB(keyutils, add_key, 
+      [dnl Pre-reqs were found
+       AC_DEFINE(USE_KEYRING_CCACHE, 1, [Define if the keyring ccache should be enabled])
+       LIBS="-lkeyutils $LIBS"
+      ]))
+])dnl
+dnl

@@ -26,7 +26,9 @@ STLIBOBJS= \
 	ccdefault.o \
 	ccdefops.o \
 	cc_retr.o \
-	cc_file.o cc_memory.o \
+	cc_file.o \
+	cc_memory.o \
+	cc_keyring.o \
 	ccfns.o \
 	ser_cc.o
 
@@ -37,6 +39,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
 	$(OUTPRE)cc_memory.$(OBJEXT) \
+	$(OUTPRE)cc_keyring.$(OBJEXT) \
 	$(OUTPRE)ccfns.$(OBJEXT) \
 	$(OUTPRE)ser_cc.$(OBJEXT) $(MSLSA_OBJ)
 
@@ -47,6 +50,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/cc_file.c \
 	$(srcdir)/cc_memory.c \
+	$(srcdir)/cc_keyring.c \
 	$(srcdir)/ccfns.c \
 	$(srcdir)/ser_cc.c $(MSLSA_SRC)
 
@@ -157,6 +161,14 @@ cc_memory.so cc_memory.po $(OUTPRE)cc_memory.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h cc_memory.c
+cc_keyring.so cc_keyring.po $(OUTPRE)cc_keyring.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cc_keyring.c
 ccfns.so ccfns.po $(OUTPRE)ccfns.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
