@@ -585,10 +585,13 @@ get_errmsg (krb5_context kcontext, krb5_error_code err_code)
     /* Must be called with dal_handle->lib_handle locked!  */
     assert(kcontext->db_context != NULL);
     dal_handle = (kdb5_dal_handle *) kcontext->db_context;
+    if (dal_handle->lib_handle->vftabl.errcode_2_string == NULL)
+	return;
     e = dal_handle->lib_handle->vftabl.errcode_2_string(kcontext, err_code);
     assert (e != NULL);
     krb5_set_error_message(kcontext, err_code, "%s", e);
-    dal_handle->lib_handle->vftabl.release_errcode_string(kcontext, e);
+    if (dal_handle->lib_handle->vftabl.release_errcode_string)
+	dal_handle->lib_handle->vftabl.release_errcode_string(kcontext, e);
 }
 
 /*

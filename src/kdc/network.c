@@ -904,6 +904,8 @@ make_toolong_error (krb5_data **out)
     errpkt.error = KRB_ERR_FIELD_TOOLONG;
     errpkt.server = tgs_server;
     errpkt.client = NULL;
+    errpkt.cusec = 0;
+    errpkt.ctime = 0;
     errpkt.text.length = 0;
     errpkt.text.data = 0;
     errpkt.e_data.length = 0;
