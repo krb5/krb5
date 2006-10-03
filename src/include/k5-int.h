@@ -550,6 +550,9 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
+#include <krb5/preauth_plugin.h>
+typedef struct _krb5_preauth_context krb5_preauth_context;
+
 /* new encryption provider api */
 
 struct krb5_enc_provider {
@@ -966,13 +969,22 @@ void krb5int_populate_gic_opt (
 
 
 krb5_error_code krb5_do_preauth
-(krb5_context, krb5_kdc_req *,
-		krb5_pa_data **, krb5_pa_data ***,
+(krb5_context, krb5_preauth_context **, krb5_kdc_req *, krb5_data *,
+		krb5_data *, krb5_pa_data **, krb5_pa_data ***,
 		krb5_data *salt, krb5_data *s2kparams,
  krb5_enctype *,
 		krb5_keyblock *,
 		krb5_prompter_fct, void *,
 		krb5_gic_get_as_key_fct, void *);
+void KRB5_CALLCONV krb5_init_preauth_context
+	(krb5_context, krb5_preauth_context **);
+void KRB5_CALLCONV krb5_clear_preauth_context_use_counts
+	(krb5_context, krb5_preauth_context *);
+void KRB5_CALLCONV krb5_preauth_prepare_request
+	(krb5_context, krb5_preauth_context **,
+	 krb5_get_init_creds_opt *, krb5_kdc_req *);
+void KRB5_CALLCONV krb5_free_preauth_context
+	(krb5_context, krb5_preauth_context *);
 
 void KRB5_CALLCONV krb5_free_sam_challenge
 	(krb5_context, krb5_sam_challenge * );
@@ -1062,6 +1074,9 @@ struct _krb5_context {
     struct plugin_dir_handle libkrb5_plugins;
     struct krb5plugin_service_locate_ftable *vtbl;
     void (**locate_fptrs)(void);
+
+    /* preauth module stuff */
+    struct plugin_dir_handle preauth_plugins;
 
     /* error detail info */
     struct errinfo err;

@@ -884,9 +884,14 @@ krb5_error_code krb5_decrypt_data
 #define KRB5_PADATA_ETYPE_INFO		11 /* Etype info for preauth */
 #define KRB5_PADATA_SAM_CHALLENGE	12 /* draft challenge system */
 #define KRB5_PADATA_SAM_RESPONSE	13 /* draft challenge system response */
-#define KRB5_PADATA_PK_AS_REQ		14 /* PKINIT */
-#define KRB5_PADATA_PK_AS_REP		15 /* PKINIT */
+#define KRB5_PADATA_PK_AS_REQ_OLD	14 /* PKINIT */
+#define KRB5_PADATA_PK_AS_REP_OLD	15 /* PKINIT */
+#define KRB5_PADATA_PK_AS_REQ		16 /* PKINIT */
+#define KRB5_PADATA_PK_AS_REP		17 /* PKINIT */
 #define KRB5_PADATA_ETYPE_INFO2		19
+#define KRB5_PADATA_USE_SPECIFIED_KVNO	20
+#define KRB5_PADATA_SAM_REDIRECT	21
+#define KRB5_PADATA_GET_FROM_TYPED_DATA	22
 #define KRB5_PADATA_REFERRAL		25 /* draft referral system */
 #define KRB5_PADATA_SAM_CHALLENGE_2	30 /* draft challenge system, updated */
 #define KRB5_PADATA_SAM_RESPONSE_2	31 /* draft challenge system, updated */

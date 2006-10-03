@@ -171,6 +171,7 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_SECURID_STATE           0x0006
 #define KRB5_TL_DB_ARGS                 0x7fff
 #endif /* SECURID */
+#define KRB5_TL_USER_CERTIFICATE        0x0007
     
 /*
  * Determines the number of failed KDC requests before DISALLOW_ALL_TIX is set

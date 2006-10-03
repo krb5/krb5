@@ -60,6 +60,13 @@
 #include <syslog.h>
 
 #include <assert.h>
+#include "../include/krb5/preauth_plugin.h"
+
+#if TARGET_OS_MAC
+static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/preauth", NULL }; /* should be a list */
+#else
+static const char *objdirs[] = { LIBDIR "/krb5/plugins/preauth", NULL };
+#endif
 
 /* XXX This is ugly and should be in a header file somewhere */
 #ifndef KRB5INT_DES_TYPES_DEFINED
@@ -72,44 +79,74 @@ extern int mit_des_is_weak_key (mit_des_cblock );
 
 typedef krb5_error_code (*verify_proc)
     (krb5_context, krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
+		    void **pa_request_context);
 
 typedef krb5_error_code (*edata_proc)
     (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
 		    krb5_pa_data *data);
 
 typedef krb5_error_code (*return_proc)
     (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa);
+		    krb5_pa_data **send_pa,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
+		    void **pa_request_context);
+
+typedef krb5_error_code (*freepa_proc)
+    (krb5_context, void *pa_module_context, void **pa_request_context);
+
+typedef krb5_error_code (*init_proc)
+    (krb5_context, krb5_preauthtype, void **);
+typedef void (*fini_proc)
+    (krb5_context, krb5_preauthtype, void *);
 
 typedef struct _krb5_preauth_systems {
-    char *	name;
+    const char *name;
     int		type;
     int		flags;
+    void       *pa_sys_context;
+    init_proc   init;
+    fini_proc   fini;
     edata_proc	get_edata;
     verify_proc	verify_padata;
     return_proc return_padata;
+    freepa_proc free_pa_request_context;
 } krb5_preauth_systems;
 
 static krb5_error_code verify_enc_timestamp
     (krb5_context, krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
+		    void **pa_request_context);
 
 static krb5_error_code get_etype_info
     (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
 		    krb5_pa_data *data);
 static krb5_error_code
 get_etype_info2(krb5_context context, krb5_kdc_req *request,
-	       krb5_db_entry *client, krb5_db_entry *server,
-		  krb5_pa_data *pa_data);
+	        krb5_db_entry *client, krb5_db_entry *server,
+		preauth_get_entry_data_proc get_entry_data,
+		void *pa_system_context,
+		krb5_pa_data *pa_data);
 static krb5_error_code
 etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata, 
 			 krb5_db_entry *client,
@@ -122,58 +159,75 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
 static krb5_error_code
 return_etype_info(krb5_context, krb5_pa_data * padata, 
 		  krb5_db_entry *client,
+		  krb5_data *req_pkt,
 		  krb5_kdc_req *request, krb5_kdc_rep *reply,
 		  krb5_key_data *client_key,
 		  krb5_keyblock *encrypting_key,
-		  krb5_pa_data **send_pa);
+		  krb5_pa_data **send_pa,
+		  preauth_get_entry_data_proc get_entry_data,
+		  void *pa_system_context,
+		  void **pa_request_context);
 
 static krb5_error_code
 return_etype_info2(krb5_context, krb5_pa_data * padata, 
 		   krb5_db_entry *client,
+		   krb5_data *req_pkt,
 		   krb5_kdc_req *request, krb5_kdc_rep *reply,
 		   krb5_key_data *client_key,
 		   krb5_keyblock *encrypting_key,
-		   krb5_pa_data **send_pa);
+		   krb5_pa_data **send_pa,
+		   preauth_get_entry_data_proc get_entry_data,
+		   void *pa_system_context,
+		   void **pa_request_context);
 
 static krb5_error_code return_pw_salt
     (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa);
+		    krb5_pa_data **send_pa,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
+		    void **pa_request_context);
 
 /* SAM preauth support */
 static krb5_error_code verify_sam_response
     (krb5_context, krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data);
+		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
+		    void **pa_request_context);
 
 static krb5_error_code get_sam_edata
     (krb5_context, krb5_kdc_req *request,
 		    krb5_db_entry *client, krb5_db_entry *server,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
 		    krb5_pa_data *data);
 static krb5_error_code return_sam_data
     (krb5_context, krb5_pa_data * padata, 
 		    krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request, krb5_kdc_rep *reply,
 		    krb5_key_data *client_key,
 		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa);
-/*
- * Preauth property flags
- */
-#define PA_HARDWARE	0x00000001
-#define PA_REQUIRED	0x00000002
-#define PA_SUFFICIENT	0x00000004
-	/* Not really a padata, so don't include it in the etype list*/
-#define PA_PSEUDO	0x00000008 
+		    krb5_pa_data **send_pa,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_module_context,
+		    void **pa_request_context);
 
-static krb5_preauth_systems preauth_systems[] = {
+static krb5_preauth_systems static_preauth_systems[] = {
     {
 	"timestamp",
         KRB5_PADATA_ENC_TIMESTAMP,
         0,
+	NULL,
+	NULL,
+	NULL,
         0,
 	verify_enc_timestamp,
 	0
@@ -182,6 +236,9 @@ static krb5_preauth_systems preauth_systems[] = {
 	"etype-info",
 	KRB5_PADATA_ETYPE_INFO,
 	0,
+	NULL,
+	NULL,
+	NULL,
 	get_etype_info,
 	0,
 	return_etype_info
@@ -190,6 +247,9 @@ static krb5_preauth_systems preauth_systems[] = {
 	"etype-info2",
 	KRB5_PADATA_ETYPE_INFO2,
 	0,
+	NULL,
+	NULL,
+	NULL,
 	get_etype_info2,
 	0,
 	return_etype_info2
@@ -198,6 +258,9 @@ static krb5_preauth_systems preauth_systems[] = {
 	"pw-salt",
 	KRB5_PADATA_PW_SALT,
 	PA_PSEUDO,		/* Don't include this in the error list */
+	NULL,
+	NULL,
+	NULL,
 	0, 
 	0,
 	return_pw_salt
@@ -206,6 +269,9 @@ static krb5_preauth_systems preauth_systems[] = {
 	"sam-response",
 	KRB5_PADATA_SAM_RESPONSE,
 	0,
+	NULL,
+	NULL,
+	NULL,
 	0,
 	verify_sam_response,
 	return_sam_data
@@ -214,6 +280,9 @@ static krb5_preauth_systems preauth_systems[] = {
 	"sam-challenge",
 	KRB5_PADATA_SAM_CHALLENGE,
 	PA_HARDWARE,		/* causes get_preauth_hint_list to use this */
+	NULL,
+	NULL,
+	NULL,
 	get_sam_edata,
 	0,
 	0
@@ -221,13 +290,361 @@ static krb5_preauth_systems preauth_systems[] = {
     { "[end]", -1,}
 };
 
-#define MAX_PREAUTH_SYSTEMS (sizeof(preauth_systems)/sizeof(preauth_systems[0]))
+static krb5_preauth_systems *preauth_systems;
+static int n_preauth_systems;
+static struct plugin_dir_handle preauth_plugins;
+
+krb5_error_code
+load_preauth_plugins(krb5_context context)
+{
+    struct errinfo err;
+    void **preauth_plugins_ftables;
+    struct krb5plugin_preauth_ftable_v0 *ftable;
+    int module_count, i, j, k;
+    krb5_preauthtype pa_type;
+    void *pa_sys_context;
+    init_proc server_init_proc;
+
+    /* Attempt to load all of the preauth plugins we can find. */
+    PLUGIN_DIR_INIT(&preauth_plugins);
+    if (PLUGIN_DIR_OPEN(&preauth_plugins) == 0) {
+	if (krb5int_open_plugin_dirs(objdirs, NULL,
+				     &preauth_plugins, &err) != 0) {
+	    return KRB5_PLUGIN_NO_HANDLE;
+	}
+    }
+
+    /* Get the method tables provided by the loaded plugins. */
+    memset(&err, 0, sizeof(err));
+    preauth_plugins_ftables = NULL;
+    if (krb5int_get_plugin_dir_data(&preauth_plugins, "preauthentication0",
+				    &preauth_plugins_ftables, &err) != 0) {
+	return KRB5_PLUGIN_NO_HANDLE;
+    }
+
+    /* Count the valid modules. */
+    module_count = sizeof(static_preauth_systems)
+		   / sizeof(static_preauth_systems[0]);
+    if (preauth_plugins_ftables != NULL) {
+	for (i = 0; preauth_plugins_ftables[i] != NULL; i++) {
+	    ftable = preauth_plugins_ftables[i];
+	    if ((ftable->server_flags_proc == NULL) &&
+		(ftable->server_edata_proc == NULL) &&
+		(ftable->server_verify_proc == NULL) &&
+		(ftable->server_return_proc == NULL)) {
+		continue;
+	    }
+	    for (j = 0;
+		 ftable->server_pa_type_list != NULL &&
+		 ftable->server_pa_type_list[j] > 0;
+		 j++) {
+		module_count++;
+	    }
+	}
+    }
+
+    /* Build the complete list of supported preauthentication options, and
+     * leave room for a terminator entry. */
+    preauth_systems = malloc(sizeof(krb5_preauth_systems) * (module_count + 1));
+    if (preauth_systems == NULL) {
+	return ENOMEM;
+    }
+
+    /* Add the locally-supplied mechanisms to the dynamic list first. */
+    for (i = 0, k = 0;
+	 i < sizeof(static_preauth_systems) / sizeof(static_preauth_systems[0]);
+	 i++) {
+	if (static_preauth_systems[i].type == -1)
+	    break;
+	preauth_systems[k] = static_preauth_systems[i];
+	/* Try to initialize the preauth system.  If it fails, we'll remove it
+	 * from the list of systems we'll be using. */
+	pa_sys_context = NULL;
+	pa_type = static_preauth_systems[i].type;
+	server_init_proc = static_preauth_systems[i].init;
+	if ((server_init_proc != NULL) &&
+	    ((*server_init_proc)(context, pa_type, &pa_sys_context) != 0)) {
+	    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
+	    continue;
+	}
+	preauth_systems[k].pa_sys_context = pa_sys_context;
+	k++;
+    }
+
+    /* Now add the dynamically-loaded mechanisms to the list. */
+    if (preauth_plugins_ftables != NULL) {
+	for (i = 0; preauth_plugins_ftables[i] != NULL; i++) {
+	    ftable = preauth_plugins_ftables[i];
+	    if ((ftable->server_flags_proc == NULL) &&
+		(ftable->server_edata_proc == NULL) &&
+		(ftable->server_verify_proc == NULL) &&
+		(ftable->server_return_proc == NULL)) {
+		continue;
+	    }
+	    for (j = 0;
+		 ftable->server_pa_type_list != NULL &&
+		 ftable->server_pa_type_list[j] > 0;
+		 j++) {
+		/* Try to initialize the module.  If it fails, we'll remove it
+		 * from the list of modules we'll be using. */
+		pa_sys_context = NULL;
+		server_init_proc = ftable->server_init_proc;
+		pa_type = ftable->server_pa_type_list[j];
+		if ((server_init_proc != NULL) &&
+		    ((*server_init_proc)(context, pa_type,
+					 &pa_sys_context) != 0)) {
+		    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
+		    continue;
+		}
+		preauth_systems[k].name = ftable->name;
+		pa_type = ftable->server_pa_type_list[j];
+		preauth_systems[k].type = pa_type;
+		preauth_systems[k].flags = ftable->server_flags_proc(context,
+								     pa_type);
+		preauth_systems[k].pa_sys_context = pa_sys_context;
+		preauth_systems[k].init = server_init_proc;
+		preauth_systems[k].fini = ftable->server_fini_proc;
+		preauth_systems[k].get_edata = ftable->server_edata_proc;
+		preauth_systems[k].verify_padata = ftable->server_verify_proc;
+		preauth_systems[k].return_padata = ftable->server_return_proc;
+		preauth_systems[k].free_pa_request_context =
+		    ftable->server_freepa_reqcontext_proc;
+		k++;
+	    }
+	}
+    }
+    n_preauth_systems = k;
+    /* Add the end-of-list marker. */
+    preauth_systems[k].name = "[end]";
+    preauth_systems[k].type = -1;
+}
+
+krb5_error_code
+unload_preauth_plugins(krb5_context context)
+{
+    int i;
+    struct errinfo err;
+    if (preauth_systems != NULL) {
+	for (i = 0; i < n_preauth_systems; i++) {
+	    if (preauth_systems[i].fini != NULL) {
+	        (*preauth_systems[i].fini)(context,
+					   preauth_systems[i].type,
+					   preauth_systems[i].pa_sys_context);
+	    }
+	    memset(&preauth_systems[i], 0, sizeof(preauth_systems[i]));
+	}
+	free(preauth_systems);
+	preauth_systems = NULL;
+	n_preauth_systems = 0;
+	krb5int_close_plugin_dirs(&preauth_plugins);
+    }
+    return 0;
+}
+
+/*
+ * The make_padata_context() function creates a space for storing any context
+ * information which will be needed by return_padata() later.  Each preauth
+ * type gets a context storage location of its own.
+ */
+struct request_pa_context {
+    int n_contexts;
+    struct {
+	krb5_preauth_systems *pa_system;
+	void *pa_context;
+    } *contexts;
+};
+
+static krb5_error_code
+make_padata_context(krb5_context context, void **padata_context)
+{
+    int i;
+    struct request_pa_context *ret;
+
+    ret = malloc(sizeof(*ret));
+    if (ret == NULL) {
+	return ENOMEM;
+    }
+
+    ret->n_contexts = n_preauth_systems;
+    ret->contexts = malloc(sizeof(ret->contexts[0]) * ret->n_contexts);
+    if (ret->contexts == NULL) {
+	free(ret);
+	return ENOMEM;
+    }
+
+    memset(ret->contexts, 0, sizeof(ret->contexts[0]) * ret->n_contexts);
+
+    for (i = 0; i < ret->n_contexts; i++) {
+	ret->contexts[i].pa_system = &preauth_systems[i];
+	ret->contexts[i].pa_context = NULL;
+    }
+
+    *padata_context = ret;
+
+    return 0;
+}
+
+/*
+ * The free_padata_context function frees any context information pointers
+ * which the check_padata() function created but which weren't already cleaned
+ * up by return_padata().
+ */
+krb5_error_code
+free_padata_context(krb5_context kcontext, void **padata_context)
+{
+    struct request_pa_context *context;
+    krb5_preauth_systems *preauth_system;
+    void **pctx, *mctx;
+    int i;
+
+    if (padata_context == NULL)
+	return 0;
+
+    context = *padata_context;
+
+    for (i = 0; i < context->n_contexts; i++) {
+	if (context->contexts[i].pa_context != NULL) {
+	    preauth_system = context->contexts[i].pa_system;
+	    mctx = preauth_system->pa_sys_context;
+	    if (preauth_system->free_pa_request_context != NULL) {
+		pctx = &context->contexts[i].pa_context;
+		(*preauth_system->free_pa_request_context)(kcontext, mctx,
+							   pctx);
+	    }
+	    context->contexts[i].pa_context = NULL;
+	}
+    }
+
+    free(context->contexts);
+    free(context);
+
+    return 0;
+}
+
+/* Retrieve a specified tl_data item from the given entry, and return its
+ * contents in a new krb5_data, which must be freed by the caller. */
+static krb5_error_code
+get_entry_tl_data(krb5_context context, krb5_db_entry *entry,
+		  krb5_int16 tl_data_type, krb5_data **result)
+{
+    krb5_tl_data *tl;
+    for (tl = entry->tl_data; tl != NULL; tl = tl->tl_data_next) {
+	if (tl->tl_data_type == tl_data_type) {
+	    *result = malloc(sizeof(krb5_data));
+	    if (*result == NULL) {
+		return ENOMEM;
+	    }
+	    (*result)->magic = KV5M_DATA;
+	    (*result)->data = malloc(tl->tl_data_length);
+	    if ((*result)->data == NULL) {
+		free(*result);
+		*result = NULL;
+		return ENOMEM;
+	    }
+	    memcpy((*result)->data, tl->tl_data_contents, tl->tl_data_length);
+	    return 0;
+	}
+    }
+    return ENOENT;
+}
+
+/*
+ * Retrieve a specific piece of information pertaining to the entry or the
+ * request and return it in a new krb5_data item which the caller must free.
+ *
+ * This may require massaging data into a contrived format, but it will
+ * hopefully keep us from having to reveal library-internal functions to
+ * modules.
+ */
+static krb5_error_code
+get_entry_data(krb5_context context,
+	       krb5_kdc_req *request, krb5_db_entry *entry,
+	       enum krb5plugin_preauth_entry_request_type type,
+	       krb5_data **result)
+{
+    int i, k;
+    krb5_tl_data *tl;
+    krb5_data *ret;
+    krb5_deltat *delta;
+    krb5_keyblock *keys;
+    krb5_key_data *entry_key;
+
+    switch (type) {
+    case krb5plugin_preauth_entry_request_certificate:
+	return get_entry_tl_data(context, entry,
+				 KRB5_TL_USER_CERTIFICATE, result);
+	break;
+    case krb5plugin_preauth_entry_max_time_skew:
+	ret = malloc(sizeof(krb5_data));
+	if (ret == NULL)
+	    return ENOMEM;
+	delta = malloc(sizeof(krb5_deltat));
+	if (delta == NULL) {
+	    free(ret);
+	    return ENOMEM;
+	}
+	*delta = context->clockskew;
+	ret->data = (char *) delta;
+	ret->length = sizeof(*delta);
+	*result = ret;
+	return 0;
+	break;
+    case krb5plugin_preauth_keys:
+	ret = malloc(sizeof(krb5_data));
+	if (ret == NULL)
+	    return ENOMEM;
+	keys = malloc(sizeof(krb5_keyblock) * (request->nktypes + 1));
+	if (keys == NULL) {
+	    free(ret);
+	    return ENOMEM;
+	}
+	ret->data = (char *) keys;
+	ret->length = sizeof(krb5_keyblock) * (request->nktypes + 1);
+	memset(ret->data, 0, ret->length);
+	k = 0;
+	for (i = 0; i < request->nktypes; i++) {
+	    entry_key = NULL;
+	    if (krb5_dbe_find_enctype(context, entry, request->ktype[i],
+				      -1, 0, &entry_key) != 0)
+		continue;
+	    if (krb5_dbekd_decrypt_key_data(context, &master_keyblock,
+					    entry_key, &keys[k], NULL) != 0) {
+		if (keys[k].contents != NULL)
+		    krb5_free_keyblock_contents(context, &keys[k]);
+		memset(&keys[k], 0, sizeof(keys[k]));
+		continue;
+	    }
+	    k++;
+	}
+	if (k > 0) {
+	    *result = ret;
+	    return 0;
+	} else {
+	    free(keys);
+	    free(ret);
+	}
+	break;
+    case krb5plugin_preauth_request_body:
+	ret = NULL;
+	encode_krb5_kdc_req_body(request, &ret);
+	if (ret != NULL) {
+	    *result = ret;
+	    return 0;
+	}
+	return ASN1_PARSE_ERROR;
+	break;
+    default:
+	break;
+    }
+    return ENOENT;
+}
 
 static krb5_error_code
 find_pa_system(int type, krb5_preauth_systems **preauth)
 {
-    krb5_preauth_systems 	*ap = preauth_systems;
-    
+    krb5_preauth_systems *ap;
+
+    ap = preauth_systems ? preauth_systems : static_preauth_systems;
     while ((ap->type != -1) && (ap->type != type))
 	ap++;
     if (ap->type == -1)
@@ -235,6 +652,111 @@ find_pa_system(int type, krb5_preauth_systems **preauth)
     *preauth = ap;
     return 0;
 } 
+
+static krb5_error_code
+find_pa_context(krb5_preauth_systems *pa_sys,
+		struct request_pa_context *context,
+		void ***pa_context)
+{
+    krb5_preauth_systems *preauth_system;
+    int i;
+
+    *pa_context = 0;
+
+    if (context == NULL)
+	return KRB5KRB_ERR_GENERIC;
+
+    for (i = 0; i < context->n_contexts; i++) {
+	if (context->contexts[i].pa_system == pa_sys) {
+	    *pa_context = &context->contexts[i].pa_context;
+	    return 0;
+	}
+    }
+
+    return KRB5KRB_ERR_GENERIC;
+}
+
+/*
+ * Create a list of indices into the preauth_systems array, sorted by order of
+ * preference.
+ */
+static krb5_boolean
+pa_list_includes(krb5_pa_data **pa_data, krb5_preauthtype pa_type)
+{
+    while (*pa_data != NULL) {
+	if ((*pa_data)->pa_type == pa_type)
+	    return TRUE;
+	pa_data++;
+    }
+    return FALSE;
+}
+static void
+sort_pa_order(krb5_context context, krb5_kdc_req *request, int *pa_order)
+{
+    int i, j, k, n_repliers, n_key_replacers;
+
+    /* First, set up the default order. */
+    i = 0;
+    for (j = 0; j < n_preauth_systems; j++) {
+        if (preauth_systems[j].return_padata != NULL)
+	    pa_order[i++] = j;
+    }
+    n_repliers = i;
+    pa_order[n_repliers] = -1;
+
+    /* Reorder so that PA_REPLACES_KEY modules are listed first. */
+    for (i = 0; i < n_repliers; i++) {
+	/* If this module replaces the key, then it's okay to leave it where it
+	 * is in the order. */
+	if (preauth_systems[pa_order[i]].flags & PA_REPLACES_KEY)
+	    continue;
+	/* If not, search for a module which does, and swap in the first one we
+	 * find. */
+        for (j = i + 1; j < n_repliers; j++) {
+	    if (preauth_systems[pa_order[j]].flags & PA_REPLACES_KEY) {
+                k = pa_order[j];
+		pa_order[j] = pa_order[i];
+		pa_order[i] = k;
+		break;
+	    }
+        }
+    }
+
+    /* Now sort just the modules which replace the key, placing those which
+     * handle the pa_data types provided by the client ahead of the others. */
+    for (i = 0; preauth_systems[pa_order[i]].flags & PA_REPLACES_KEY; i++) {
+	continue;
+    }
+    n_key_replacers = i;
+    for (i = 0; i < n_key_replacers; i++) {
+	if (pa_list_includes(request->padata,
+			     preauth_systems[pa_order[i]].type))
+	    continue;
+        for (j = i + 1; j < n_key_replacers; j++) {
+	    if (pa_list_includes(request->padata,
+			         preauth_systems[pa_order[j]].type)) {
+                k = pa_order[j];
+		pa_order[j] = pa_order[i];
+		pa_order[i] = k;
+		break;
+	    }
+        }
+    }
+#ifdef DEBUG
+    krb5_klog_syslog(LOG_DEBUG, "original preauth mechanism list:");
+    for (i = 0; i < n_preauth_systems; i++) {
+	if (preauth_systems[i].return_padata != NULL)
+            krb5_klog_syslog(LOG_DEBUG, "... %s(%d)", preauth_systems[i].name,
+			     preauth_systems[i].type);
+    }
+    krb5_klog_syslog(LOG_DEBUG, "sorted preauth mechanism list:");
+    for (i = 0; pa_order[i] != -1; i++) {
+        krb5_klog_syslog(LOG_DEBUG, "... %s(%d)",
+			 preauth_systems[pa_order[i]].name,
+			 preauth_systems[pa_order[i]].type);
+    }
+#endif
+}
 
 const char *missing_required_preauth(krb5_db_entry *client,
 				     krb5_db_entry *server,
@@ -287,10 +809,10 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
     e_data->data = 0;
     
     hw_only = isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
-    pa_data = malloc(sizeof(krb5_pa_data *) * (MAX_PREAUTH_SYSTEMS+1));
+    pa_data = malloc(sizeof(krb5_pa_data *) * (n_preauth_systems+1));
     if (pa_data == 0)
 	return;
-    memset(pa_data, 0, sizeof(krb5_pa_data *) * (MAX_PREAUTH_SYSTEMS+1));
+    memset(pa_data, 0, sizeof(krb5_pa_data *) * (n_preauth_systems+1));
     pa = pa_data;
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
@@ -305,7 +827,8 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 	(*pa)->magic = KV5M_PA_DATA;
 	(*pa)->pa_type = ap->type;
 	if (ap->get_edata) {
-	  retval = (ap->get_edata)(kdc_context, request, client, server, *pa);
+	  retval = (ap->get_edata)(kdc_context, request, client, server,
+				   get_entry_data, ap->pa_sys_context, *pa);
 	  if (retval) {
 	    /* just failed on this type, continue */
 	    free(*pa);
@@ -335,22 +858,28 @@ errout:
 /*
  * This routine is called to verify the preauthentication information
  * for a V5 request.
- * 	
+ *
  * Returns 0 if the pre-authentication is valid, non-zero to indicate
  * an error code of some sort.
  */
 
 krb5_error_code
-check_padata (krb5_context context, krb5_db_entry *client,
-	      krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply)
+check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
+	      krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+	      void **padata_context)
 {
     krb5_error_code retval = 0;
     krb5_pa_data **padata;
     krb5_preauth_systems *pa_sys;
-    int			pa_ok = 0, pa_found = 0;
+    void **pa_context;
+    int	pa_ok = 0, pa_found = 0;
 
     if (request->padata == 0)
 	return 0;
+
+    if (make_padata_context(context, padata_context) != 0) {
+	return KRB5KRB_ERR_GENERIC;
+    }
 
 #ifdef DEBUG
     krb5_klog_syslog (LOG_DEBUG, "checking padata");
@@ -361,14 +890,18 @@ check_padata (krb5_context context, krb5_db_entry *client,
 #endif
 	if (find_pa_system((*padata)->pa_type, &pa_sys))
 	    continue;
+	if (find_pa_context(pa_sys, *padata_context, &pa_context))
+	    continue;
 #ifdef DEBUG
 	krb5_klog_syslog (LOG_DEBUG, ".. pa_type %s", pa_sys->name);
 #endif
 	if (pa_sys->verify_padata == 0)
 	    continue;
 	pa_found++;
-	retval = pa_sys->verify_padata(context, client, request,
-				       enc_tkt_reply, *padata);
+	retval = pa_sys->verify_padata(context, client, req_pkt, request,
+				       enc_tkt_reply, *padata,
+				       get_entry_data, pa_sys->pa_sys_context,
+				       pa_context);
 	if (retval) {
 	    char * emsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
@@ -404,9 +937,30 @@ check_padata (krb5_context context, krb5_db_entry *client,
 /* The following switch statement allows us
  * to return some preauth system errors back to the client.
  */
-        switch(retval) {
-	case KRB5KRB_AP_ERR_BAD_INTEGRITY:
+    switch(retval) {
+    case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
+    case KRB5KDC_ERR_ETYPE_NOSUPP:
+    /* rfc 4556 */
+    case KRB5KDC_ERR_CLIENT_NOT_TRUSTED:
+    case KRB5KDC_ERR_INVALID_SIG:
+    case KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED:
+    case KRB5KDC_ERR_CANT_VERIFY_CERTIFICATE:
+    case KRB5KDC_ERR_INVALID_CERTIFICATE:
+    case KRB5KDC_ERR_REVOKED_CERTIFICATE:
+    case KRB5KDC_ERR_REVOCATION_STATUS_UNKNOWN:
+    case KRB5KDC_ERR_CLIENT_NAME_MISMATCH:
+    case KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE:
+    case KRB5KDC_ERR_DIGEST_IN_CERT_NOT_ACCEPTED:
+    case KRB5KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED:
+    case KRB5KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED:
+    case KRB5KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED:
+    /* earlier drafts of what became rfc 4556 */
+    case KRB5KDC_ERR_CERTIFICATE_MISMATCH:
+    case KRB5KDC_ERR_KDC_NOT_TRUSTED:
+    case KRB5KDC_ERR_REVOCATION_STATUS_UNAVAILABLE:
+    /* This value is shared with KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED. */
+    /* case KRB5KDC_ERR_KEY_TOO_WEAK: */
 	return retval;
     default:
 	return KRB5KDC_ERR_PREAUTH_FAILED;
@@ -418,9 +972,10 @@ check_padata (krb5_context context, krb5_db_entry *client,
  * structures which should be returned by the KDC to the client
  */
 krb5_error_code
-return_padata(krb5_context context, krb5_db_entry *client,
+return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	      krb5_kdc_req *request, krb5_kdc_rep *reply,
-	      krb5_key_data *client_key, krb5_keyblock *encrypting_key)
+	      krb5_key_data *client_key, krb5_keyblock *encrypting_key,
+	      void **padata_context)
 {
     krb5_error_code		retval;
     krb5_pa_data **		padata;
@@ -428,7 +983,12 @@ return_padata(krb5_context context, krb5_db_entry *client,
     krb5_pa_data **		send_pa;
     krb5_pa_data *		pa = 0;
     krb5_preauth_systems *	ap;
+    int *			pa_order;
+    int *			pa_type;
     int 			size = 0;
+    void **			pa_context;
+    krb5_boolean		key_modified;
+    krb5_keyblock		original_key;
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
 	if (ap->return_padata)
@@ -437,12 +997,41 @@ return_padata(krb5_context context, krb5_db_entry *client,
 
     if ((send_pa_list = malloc((size+1) * sizeof(krb5_pa_data *))) == NULL)
 	return ENOMEM;
+    if ((pa_order = malloc((size+1) * sizeof(int))) == NULL) {
+	free(send_pa_list);
+	return ENOMEM;
+    }
+    sort_pa_order(context, request, pa_order);
+
+    retval = krb5_copy_keyblock_contents(context, encrypting_key,
+					 &original_key);
+    if (retval) {
+	free(send_pa_list);
+	free(pa_order);
+	return retval;
+    }
+    key_modified = FALSE;
 
     send_pa = send_pa_list;
     *send_pa = 0;
-    
-    for (ap = preauth_systems; ap->type != -1; ap++) {
+
+    for (pa_type = pa_order; *pa_type != -1; pa_type++) {
+	ap = &preauth_systems[*pa_type];
+        if (!key_modified)
+	    if (original_key.enctype != encrypting_key->enctype)
+                key_modified = TRUE;
+        if (!key_modified)
+	    if (original_key.length != encrypting_key->length)
+                key_modified = TRUE;
+        if (!key_modified)
+	    if (memcmp(original_key.contents, encrypting_key->contents,
+		       original_key.length) != 0)
+                key_modified = TRUE;
+	if (key_modified && (ap->flags & PA_REPLACES_KEY))
+	    continue;
 	if (ap->return_padata == 0)
+	    continue;
+	if (find_pa_context(ap, *padata_context, &pa_context))
 	    continue;
 	pa = 0;
 	if (request->padata) {
@@ -453,9 +1042,12 @@ return_padata(krb5_context context, krb5_db_entry *client,
 		}
 	    }
 	}
-	if ((retval = ap->return_padata(context, pa, client, request, reply,
-					client_key, encrypting_key, send_pa)))
+	if ((retval = ap->return_padata(context, pa, client, req_pkt, request, reply,
+					client_key, encrypting_key, send_pa,
+					get_entry_data, ap->pa_sys_context,
+					pa_context))) {
 	    goto cleanup;
+	}
 
 	if (*send_pa)
 	    send_pa++;
@@ -470,6 +1062,8 @@ return_padata(krb5_context context, krb5_db_entry *client,
     }
     
 cleanup:
+    krb5_free_keyblock_contents(context, &original_key);
+    free(pa_order);
     if (send_pa_list)
 	krb5_free_pa_data(context, send_pa_list);
     return (retval);
@@ -508,8 +1102,12 @@ request_contains_enctype (krb5_context context,  const krb5_kdc_req *request,
 
 static krb5_error_code
 verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
+		     krb5_data *req_pkt,
 		     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-		     krb5_pa_data *pa)
+		     krb5_pa_data *pa,
+		     preauth_get_entry_data_proc get_entry_data,
+		     void *pa_system_context,
+		     void **pa_request_context)
 {
     krb5_pa_enc_ts *		pa_enc = 0;
     krb5_error_code		retval;
@@ -749,6 +1347,8 @@ cleanup:
 static krb5_error_code
 get_etype_info(krb5_context context, krb5_kdc_req *request,
 	       krb5_db_entry *client, krb5_db_entry *server,
+	       preauth_get_entry_data_proc get_entry_data,
+	       void *pa_system_context,
 	       krb5_pa_data *pa_data)
 {
   int i;
@@ -764,6 +1364,8 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 static krb5_error_code
 get_etype_info2(krb5_context context, krb5_kdc_req *request,
 	       krb5_db_entry *client, krb5_db_entry *server,
+	       preauth_get_entry_data_proc get_entry_data,
+	       void *pa_system_context,
 	       krb5_pa_data *pa_data)
 {
     return etype_info_helper( context, request, client, server, pa_data, 1);
@@ -849,10 +1451,14 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
 static krb5_error_code
 return_etype_info2(krb5_context context, krb5_pa_data * padata, 
 		   krb5_db_entry *client,
+		   krb5_data *req_pkt,
 		   krb5_kdc_req *request, krb5_kdc_rep *reply,
 		   krb5_key_data *client_key,
 		   krb5_keyblock *encrypting_key,
-		   krb5_pa_data **send_pa)
+		   krb5_pa_data **send_pa,
+		   preauth_get_entry_data_proc get_entry_data,
+	           void *pa_system_context,
+		   void **pa_request_context)
 {
     return etype_info_as_rep_helper(context, padata, client, request, reply,
 				    client_key, encrypting_key, send_pa, 1);
@@ -862,10 +1468,14 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
 static krb5_error_code
 return_etype_info(krb5_context context, krb5_pa_data * padata, 
 		  krb5_db_entry *client,
+		  krb5_data *req_pkt,
 		  krb5_kdc_req *request, krb5_kdc_rep *reply,
 		  krb5_key_data *client_key,
 		  krb5_keyblock *encrypting_key,
-		  krb5_pa_data **send_pa)
+		  krb5_pa_data **send_pa,
+		  preauth_get_entry_data_proc get_entry_data,
+	          void *pa_system_context,
+		  void **pa_request_context)
 {
     return etype_info_as_rep_helper(context, padata, client, request, reply,
 				    client_key, encrypting_key, send_pa, 0);
@@ -873,9 +1483,12 @@ return_etype_info(krb5_context context, krb5_pa_data * padata,
 
 static krb5_error_code
 return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
-	       krb5_db_entry *client, krb5_kdc_req *request,
+	       krb5_db_entry *client, krb5_data *req_pkt, krb5_kdc_req *request,
 	       krb5_kdc_rep *reply, krb5_key_data *client_key,
-	       krb5_keyblock *encrypting_key, krb5_pa_data **send_pa)
+	       krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
+	       preauth_get_entry_data_proc get_entry_data,
+	       void *pa_system_context,
+	       void **pa_request_context)
 {
     krb5_error_code	retval;
     krb5_pa_data *	padata;
@@ -960,9 +1573,12 @@ cleanup:
 
 static krb5_error_code
 return_sam_data(krb5_context context, krb5_pa_data *in_padata,
-		krb5_db_entry *client, krb5_kdc_req *request,
+		krb5_db_entry *client, krb5_data *req_pkt, krb5_kdc_req *request,
 		krb5_kdc_rep *reply, krb5_key_data *client_key,
-		krb5_keyblock *encrypting_key, krb5_pa_data **send_pa)
+		krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
+		preauth_get_entry_data_proc get_entry_data,
+		void *pa_system_context,
+		void **pa_request_context)
 {
     krb5_error_code	retval;
     krb5_data		scratch;
@@ -1101,7 +1717,8 @@ static struct {
 static krb5_error_code
 get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	      krb5_db_entry *client, krb5_db_entry *server,
-	      krb5_pa_data *pa_data)
+	      preauth_get_entry_data_proc get_entry_data,
+	      void *pa_system_context, krb5_pa_data *pa_data)
 {
     krb5_error_code		retval;
     krb5_sam_challenge		sc;
@@ -1472,8 +2089,12 @@ cleanup:
 
 static krb5_error_code
 verify_sam_response(krb5_context context, krb5_db_entry *client,
+		    krb5_data *req_pkt,
 		    krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-		    krb5_pa_data *pa)
+		    krb5_pa_data *pa,
+		    preauth_get_entry_data_proc get_entry_data,
+		    void *pa_system_context,
+		    void **pa_request_context)
 {
     krb5_error_code		retval;
     krb5_data			scratch;

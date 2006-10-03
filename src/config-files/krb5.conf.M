@@ -162,6 +162,12 @@ libraries, use a value of 3 to use the CKSUMTYPE_RSA_MD4_DES
 instead.  This field is ignored when its value is incompatible with
 the session key type.
 
+.IP preferred_preauth_types
+This allows you to set the preferred preauthentication types which the
+client will attempt before others which may be advertised by a KDC.  The
+default value for this setting is "17, 16, 15, 14", which forces libkrb5
+to attempt to use PKINIT if it is supported.
+
 .IP ccache_type
 User this parameter on systems which are DCE clients, to specify the
 type of cache to be created by kinit, or when forwarded tickets are
@@ -175,7 +181,7 @@ Specifies the location of the Kerberos V4 srvtab file.  Default is
 "/etc/srvtab".
 
 .IP krb4_config
-Specifies the location of hte Kerberos V4 configuration file.  Default
+Specifies the location of the Kerberos V4 configuration file.  Default
 is "/etc/krb.conf".
 
 .IP krb4_realms

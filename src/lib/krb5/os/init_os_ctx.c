@@ -391,6 +391,7 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
 
 	ctx->vtbl = 0;
 	PLUGIN_DIR_INIT(&ctx->libkrb5_plugins);
+	PLUGIN_DIR_INIT(&ctx->preauth_plugins);
 
 	retval = os_init_paths(ctx, kdc);
 	/*
@@ -492,6 +493,7 @@ krb5_os_free_context(krb5_context ctx)
 	    ctx->profile = 0;
 	}
 
+	krb5int_close_plugin_dirs (&ctx->preauth_plugins);
 	krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32

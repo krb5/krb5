@@ -50,8 +50,8 @@ static krb5_error_code prepare_error_as (krb5_kdc_req *, int, krb5_data *,
 
 /*ARGSUSED*/
 krb5_error_code
-process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
-	       krb5_data **response)
+process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
+	       const krb5_fulladdr *from, krb5_data **response)
 {
     krb5_db_entry client, server;
     krb5_kdc_rep reply;
@@ -78,6 +78,7 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     char ktypestr[128];
     char rep_etypestr[128];
     char fromstringbuf[70];
+    void *pa_context = NULL;
 
     ticket_reply.enc_part.ciphertext.data = 0;
     e_data.data = 0;
@@ -260,7 +261,8 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
      * Check the preauthentication if it is there.
      */
     if (request->padata) {
-	errcode = check_padata(kdc_context, &client, request, &enc_tkt_reply);
+	errcode = check_padata(kdc_context, &client, req_pkt, request,
+			       &enc_tkt_reply, &pa_context);
 	if (errcode) {
 #ifdef KRBCONF_KDC_MODIFIES_KDB
 	    /*
@@ -381,8 +383,8 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     reply_encpart.caddrs = enc_tkt_reply.caddrs;
 
     /* Fetch the padata info to be returned */
-    errcode = return_padata(kdc_context, &client, request, &reply, client_key,
-			    &encrypting_key);
+    errcode = return_padata(kdc_context, &client, req_pkt, request,
+			    &reply, client_key, &encrypting_key, &pa_context);
     if (errcode) {
 	status = "KDC_RETURN_PADATA";
 	goto errout;
@@ -427,6 +429,9 @@ process_as_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 #endif	/* KRBCONF_KDC_MODIFIES_KDB */
 
 errout:
+    if (pa_context)
+	free_padata_context(kdc_context, &pa_context);
+
     if (status) {
         char * emsg = 0;
 	if (errcode) 

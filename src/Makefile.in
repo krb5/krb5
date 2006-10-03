@@ -3,7 +3,7 @@ datadir=@datadir@
 thisconfigdir=.
 myfulldir=.
 mydir=.
-# Don't build sample by default: plugins/locate/python 
+# Don't build sample by default: plugins/locate/python plugins/preauth/wpse plugins/preauth/cksum_body
 SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
 	appl tests \

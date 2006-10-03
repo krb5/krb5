@@ -711,6 +711,8 @@ int main(int argc, char **argv)
 
     setup_signal_handlers();
 
+    load_preauth_plugins(kcontext);
+
     retval = setup_sam();
     if (retval) {
 	com_err(argv[0], retval, "while initializing SAM");
@@ -738,6 +740,7 @@ int main(int argc, char **argv)
 	errout++;
     }
     krb5_klog_syslog(LOG_INFO, "shutting down");
+    unload_preauth_plugins(kcontext);
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
     if (kdc_realmlist) 

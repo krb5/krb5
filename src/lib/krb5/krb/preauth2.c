@@ -30,6 +30,16 @@
  */
 
 #include "k5-int.h"
+#include "osconf.h"
+#include <krb5/preauth_plugin.h>
+
+#include <unistd.h>
+
+#if TARGET_OS_MAC
+static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/preauth", NULL }; /* should be a list */
+#else
+static const char *objdirs[] = { LIBDIR "/krb5/plugins/preauth", NULL };
+#endif
 
 typedef krb5_error_code (*pa_function)(krb5_context,
 				       krb5_kdc_req *request,
@@ -49,8 +59,396 @@ typedef struct _pa_types_t {
     int flags;
 } pa_types_t;
 
-#define PA_REAL 0x0001
-#define PA_INFO 0x0002
+/* This structure lets us keep track of all of the modules which are loaded,
+ * turning the list of modules and their lists of implemented preauth types
+ * into a single list which we can walk easily. */
+struct _krb5_preauth_context {
+    int n_modules;
+    struct _krb5_preauth_context_module {
+	/* Which of the possibly more than one preauth types which the
+	 * module supports we're using at this point in the list. */
+	krb5_preauthtype pa_type;
+	/* Encryption types which the client claims to support -- we
+	 * copy them directly into the krb5_kdc_req structure during
+	 * krb5_preauth_prepare_request(). */
+	krb5_enctype *enctypes;
+	/* The module's per-module context and a function to clear it. */
+	void *module_context;
+	void (*client_fini)(krb5_context context, krb5_preauthtype pa_type,
+			    void *module_context);
+	/* The module's table, and some of its members, copied here for
+	 * convenience when we populated the list. */
+	struct krb5plugin_preauth_ftable_v0 *ftable;
+	const char *name;
+	int flags, use_count;
+	krb5_error_code (*client_process)(krb5_context context,
+					  void *module_context,
+					  void **request_context,
+					  krb5_kdc_req *request,
+					  krb5_data *encoded_request_body,
+					  krb5_data *encoded_previous_request,
+					  krb5_pa_data *pa_data,
+					  krb5_prompter_fct prompter,
+					  void *prompter_data,
+					  preauth_get_as_key_proc gak_fct,
+					  krb5_data *salt,
+					  krb5_data *s2kparams,
+					  void *gak_data,
+					  krb5_keyblock *as_key,
+					  krb5_pa_data **out_pa_data);
+	krb5_error_code (*client_tryagain)(krb5_context context,
+					   void *module_context,
+					   void **request_context,
+					   krb5_kdc_req *request,
+					   krb5_data *encoded_request_body,
+					   krb5_error *err_reply,
+					   krb5_pa_data *old_pa_data,
+					   krb5_pa_data **new_pa_data);
+	void (*client_cleanup)(krb5_context context, void *module_context,
+			       void **request_context);
+	/* The per-pa_type context which the client_process() function
+	 * might allocate, which we'll need to clean up later by
+	 * calling the client_cleanup() function. */
+	void *request_context;
+    } *modules;
+};
+
+/* Create the per-AS-REQ context. This means loading the modules if we haven't
+ * done that yet (applications which never obtain initial credentials should
+ * never hit this routine), breaking up the module's list of support pa_types
+ * so that we can iterate over the modules more easily, and copying over the
+ * relevant parts of the module's table. */
+void
+krb5_init_preauth_context(krb5_context kcontext,
+			  krb5_preauth_context **preauth_context)
+{
+    int n_modules, n_tables, i, j, k;
+    void **tables;
+    struct krb5plugin_preauth_ftable_v0 *table;
+    krb5_preauth_context *context;
+    void *module_context;
+    krb5_preauthtype pa_type;
+
+    /* load the plugins for the current context */
+    if (PLUGIN_DIR_OPEN(&kcontext->preauth_plugins) == 0) {
+	if (krb5int_open_plugin_dirs(objdirs, NULL,
+				     &kcontext->preauth_plugins,
+				     &kcontext->err) != 0) {
+		return;
+	}
+    }
+
+    /* pull out the module function tables for all of the modules */
+    tables = NULL;
+    if (krb5int_get_plugin_dir_data(&kcontext->preauth_plugins,
+				    "preauthentication0",
+				    &tables,
+				    &kcontext->err) != 0) {
+	return;
+    }
+    if (tables == NULL) {
+	return;
+    }
+
+    /* count how many modules we ended up loading, and how many preauth
+     * types we may claim to support as a result */
+    n_modules = 0;
+    for (n_tables = 0;
+         (tables != NULL) && (tables[n_tables] != NULL);
+         n_tables++) {
+	table = tables[n_tables];
+	if ((table->client_pa_type_list != NULL) &&
+	    (table->client_process != NULL)) {
+	    for (j = 0; table->client_pa_type_list[j] > 0; j++) {
+		n_modules++;
+	    }
+	}
+    }
+
+    /* allocate the space we need */
+    context = malloc(sizeof(*context));
+    if (context == NULL) {
+        return;
+    }
+    context->modules = malloc(sizeof(context->modules[0]) * n_modules);
+    if (context->modules == NULL) {
+        free(context);
+        return;
+    }
+    memset(context->modules, 0, sizeof(context->modules[0]) * n_modules);
+    context->n_modules = n_modules;
+
+    /* fill in the structure */
+    k = 0;
+    for (i = 0; i < n_tables; i++) {
+        table = tables[i];
+        if ((table->client_pa_type_list != NULL) &&
+            (table->client_process != NULL)) {
+            for (j = 0; table->client_pa_type_list[j] > 0; j++) {
+		pa_type = table->client_pa_type_list[j];
+		module_context = NULL;
+		if ((table->client_init != NULL) &&
+		    ((*table->client_init)(kcontext, pa_type,
+		    			   &module_context) != 0)) {
+#ifdef DEBUG
+			fprintf (stderr, "skip module \"%s\", pa_type %d\n",
+				 table->name, pa_type);
+#endif
+			continue;
+		}
+		context->modules[k].pa_type = pa_type;
+		context->modules[k].enctypes = table->client_enctype_list;
+		context->modules[k].module_context = module_context;
+		context->modules[k].client_fini = table->client_fini;
+		context->modules[k].ftable = table;
+		context->modules[k].name = table->name;
+		context->modules[k].flags = (*table->client_flags)(kcontext,
+								   pa_type);
+		context->modules[k].use_count = 0;
+		context->modules[k].client_process = table->client_process;
+		context->modules[k].client_tryagain = table->client_tryagain;
+		context->modules[k].client_cleanup = table->client_cleanup;
+		context->modules[k].request_context = NULL;
+#ifdef DEBUG
+		fprintf (stderr, "init module \"%s\", pa_type %d, flag %d\n",
+			 context->modules[k].name,
+			 context->modules[k].pa_type,
+			 context->modules[k].flags);
+#endif
+		k++;
+	    }
+	}
+    }
+
+    /* return the result */
+    *preauth_context = context;
+}
+
+/* Zero the use counts for the modules herein.  Usually used before we
+ * start processing any data from the server, at which point every module
+ * will again be able to take a crack at whatever the server sent. */
+void
+krb5_clear_preauth_context_use_counts(krb5_context context,
+				      krb5_preauth_context *preauth_context)
+{
+    int i;
+    if (preauth_context != NULL) {
+	for (i = 0; i < preauth_context->n_modules; i++) {
+	    preauth_context->modules[i].use_count = 0;
+	}
+    }
+}
+
+/* Free the per-AS-REQ context. This means clearing any module-specific or
+ * request-specific context which the modules may have created, and then
+ * freeing the context itself. */
+void
+krb5_free_preauth_context(krb5_context context,
+			  krb5_preauth_context *preauth_context)
+{
+    int i;
+    krb5_preauthtype pa_type;
+    void **rctx, *mctx;
+    if (preauth_context != NULL) {
+	for (i = 0; i < preauth_context->n_modules; i++) {
+	    mctx = preauth_context->modules[i].module_context;
+	    if (preauth_context->modules[i].request_context != NULL) {
+		if (preauth_context->modules[i].client_cleanup != NULL) {
+		    rctx = &preauth_context->modules[i].request_context;
+		    preauth_context->modules[i].client_cleanup(context,
+		   					       mctx, rctx);
+		}
+		preauth_context->modules[i].request_context = NULL;
+	    }
+	    if (preauth_context->modules[i].client_fini != NULL) {
+		pa_type = preauth_context->modules[i].pa_type;
+	        (*preauth_context->modules[i].client_fini)(context, pa_type,
+							   mctx);
+	    }
+	    memset(&preauth_context->modules[i], 0,
+	           sizeof(preauth_context->modules[i]));
+	}
+	if (preauth_context->modules != NULL) {
+	    free(preauth_context->modules);
+	    preauth_context->modules = NULL;
+	}
+	free(preauth_context);
+    }
+}
+
+/* Add the named encryption type to the existing list of ktypes. */
+static void
+grow_ktypes(krb5_enctype **out_ktypes, int *out_nktypes, krb5_enctype ktype)
+{
+    int i;
+    krb5_enctype *ktypes;
+    for (i = 0; i < *out_nktypes; i++) {
+	if ((*out_ktypes)[i] == ktype)
+	    return;
+    }
+    ktypes = malloc((*out_nktypes + 2) * sizeof(ktype));
+    if (ktypes) {
+	for (i = 0; i < *out_nktypes; i++)
+	    ktypes[i] = (*out_ktypes)[i];
+	ktypes[i++] = ktype;
+	ktypes[i] = 0;
+	free(*out_ktypes);
+	*out_ktypes = ktypes;
+	*out_nktypes = i;
+    }
+}
+
+/* Add the given pa_data item to the list of items.  Factored out here to make
+ * reading the do_preauth logic easier to read. */
+static int
+grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
+	     krb5_pa_data *addition)
+{
+    krb5_pa_data **pa_list;
+    int i;
+
+    if (out_pa_list == NULL) {
+	return EINVAL;
+    }
+
+    if (*out_pa_list == NULL) {
+	/* Allocate room for one entry and a NULL terminator. */
+	pa_list = malloc(2 * sizeof(krb5_pa_data *));
+	if (pa_list == NULL)
+	    return ENOMEM;
+	pa_list[0] = addition;
+	pa_list[1] = NULL;
+	*out_pa_list = pa_list;
+	*out_pa_list_size = 1;
+    } else {
+	/* Allocate room for one more entry and a NULL terminator. */
+	pa_list = malloc((*out_pa_list_size + 2) * sizeof(krb5_pa_data *));
+	if (pa_list == NULL)
+	    return ENOMEM;
+	for (i = 0; i < *out_pa_list_size; i++)
+	    pa_list[i] = (*out_pa_list)[i];
+	pa_list[i++] = addition;
+	pa_list[i++] = NULL;
+	free(*out_pa_list);
+	*out_pa_list = pa_list;
+	*out_pa_list_size = i;
+    }
+    return 0;
+}
+
+/* Tweak the request body, for now adding any enctypes which the module claims
+ * to add support for to the list, but in the future perhaps doing more
+ * involved things. */
+void
+krb5_preauth_prepare_request(krb5_context kcontext,
+			     krb5_preauth_context **preauth_context,
+			     krb5_get_init_creds_opt *options,
+			     krb5_kdc_req *request)
+{
+    int i, j, k;
+    krb5_enctype *ktypes;
+
+    if ((preauth_context == NULL) || (*preauth_context == NULL)) {
+	return;
+    }
+    /* Add the module-specific enctype list to the request, but only if
+     * it's something we can safely modify. */
+    if (!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST))) {
+	for (i = 0; i < (*preauth_context)->n_modules; i++) {
+	    if ((*preauth_context)->modules[i].enctypes == NULL)
+		continue;
+	    for (j = 0; (*preauth_context)->modules[i].enctypes[j] != 0; j++) {
+		grow_ktypes(&request->ktype, &request->nktypes,
+			    (*preauth_context)->modules[i].enctypes[j]);
+	    }
+	}
+    }
+}
+
+/* Find the first module which provides for the named preauth type which also
+ * hasn't had a chance to run yet (INFO modules don't count, because as a rule
+ * they don't generate preauth data), and run it. */
+static krb5_error_code
+krb5_run_preauth_plugins(krb5_context kcontext,
+			 krb5_preauth_context *preauth_context,
+			 int module_required_flags,
+			 krb5_kdc_req *request,
+			 krb5_data *encoded_request_body,
+			 krb5_data *encoded_previous_request,
+			 krb5_pa_data *in_padata,
+			 krb5_prompter_fct prompter,
+			 void *prompter_data,
+			 preauth_get_as_key_proc gak_fct,
+			 krb5_data *salt,
+			 krb5_data *s2kparams,
+			 void *gak_data,
+			 krb5_keyblock *as_key,
+			 krb5_pa_data ***out_pa_list,
+			 int *out_pa_list_size,
+			 int *module_ret,
+			 int *module_flags)
+{
+    int i;
+    krb5_pa_data *out_pa_data;
+    krb5_error_code ret;
+    struct _krb5_preauth_context_module *module;
+
+    if (preauth_context == NULL) {
+	return ENOENT;
+    }
+    /* iterate over all loaded modules */
+    for (i = 0; i < preauth_context->n_modules; i++) {
+	module = &preauth_context->modules[i];
+	/* skip over those which don't match the preauth type */
+	if (module->pa_type != in_padata->pa_type)
+	    continue;
+	/* skip over those which don't match the flags (INFO vs REAL, mainly) */
+	if ((module->flags & module_required_flags) == 0)
+	    continue;
+	/* if it's a REAL module, try to call it only once per library call */
+	if (module_required_flags & PA_REAL) {
+	    if (module->use_count > 0) {
+#ifdef DEBUG
+		fprintf(stderr, "skipping already-used module \"%s\"(%d)\n",
+			module->name, module->pa_type);
+#endif
+		continue;
+	    }
+	    module->use_count++;
+	}
+	/* run the module's callback function */
+	out_pa_data = NULL;
+#ifdef DEBUG
+	fprintf(stderr, "using module \"%s\" (%d), flags = %d\n",
+		module->name, module->pa_type, module->flags);
+#endif
+	ret = module->client_process(kcontext,
+				     module->module_context,
+				     &module->request_context,
+				     request,
+				     encoded_request_body,
+				     encoded_previous_request,
+				     in_padata,
+				     prompter, prompter_data,
+				     gak_fct, salt, s2kparams, gak_data,
+				     as_key,
+				     &out_pa_data);
+	/* Make note of the module's flags and status. */
+	*module_flags = module->flags;
+	*module_ret = ret;
+	/* Save the new preauth data item. */
+	if (out_pa_data != NULL) {
+	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data);
+	    if (ret != 0)
+		return ret;
+	}
+	break;
+    }
+    if (i >= preauth_context->n_modules) {
+	return ENOENT;
+    }
+    return 0;
+}
 
 static
 krb5_error_code pa_salt(krb5_context context,
@@ -819,9 +1217,70 @@ static const pa_types_t pa_types[] = {
     },
 };
 
+/*
+ * If one of the modules can adjust its AS_REQ data using the contents of the
+ * err_reply, return 0.  If it's the sort of correction which requires that we
+ * ask the user another question, we let the calling application deal with it.
+ */
+krb5_error_code
+krb5_do_preauth_tryagain(krb5_context kcontext,
+			 krb5_preauth_context **preauth_context,
+			 krb5_kdc_req *request,
+			 krb5_data *encoded_request_body,
+			 krb5_error *err_reply, krb5_pa_data **padata)
+{
+    krb5_error_code ret;
+    krb5_pa_data *out_padata;
+    krb5_preauth_context *context;
+    struct _krb5_preauth_context_module *module;
+    int i, j;
+
+    ret = KRB_ERR_GENERIC;
+    if (preauth_context == NULL) {
+       return KRB_ERR_GENERIC;
+    }
+    context = *preauth_context;
+    if (context == NULL) {
+       return KRB_ERR_GENERIC;
+    }
+
+    for (i = 0; padata[i]->pa_type != 0; i++) {
+	out_padata = NULL;
+	for (j = 0; j < context->n_modules; j++) {
+	    module = &context->modules[j];
+	    if (module->pa_type != padata[i]->pa_type) {
+		continue;
+	    }
+	    if (module->client_tryagain == NULL) {
+		continue;
+	    }
+	    if ((*module->client_tryagain)(kcontext,
+					   module->module_context,
+					   module->request_context,
+					   request,
+					   encoded_request_body,
+					   err_reply,
+					   padata[i],
+					   &out_padata) == 0) {
+		if (out_padata != NULL) {
+		    if (padata[i]->contents != NULL)
+			free(padata[i]->contents);
+		    free(padata[i]);
+		    padata[i] = out_padata;
+		    return 0;
+		}
+	    }
+	}
+    }
+    return ret;
+}
+
 krb5_error_code
 krb5_do_preauth(krb5_context context,
+		krb5_preauth_context **preauth_context,
 		krb5_kdc_req *request,
+		krb5_data *encoded_request_body,
+		krb5_data *encoded_previous_request,
 		krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
 		krb5_data *salt, krb5_data *s2kparams,
 		krb5_enctype *etype,
@@ -967,9 +1426,14 @@ krb5_do_preauth(krb5_context context,
 	    default:
 		;
 	    }
-	    for (j=0; pa_types[j].type >= 0; j++) {
+	    /* Try the internally-provided preauth type list. */
+	    if (!realdone) for (j=0; pa_types[j].type >= 0; j++) {
 		if ((in_padata[i]->pa_type == pa_types[j].type) &&
 		    (pa_types[j].flags & paorder[h])) {
+#ifdef DEBUG
+		    fprintf (stderr, "calling internal function for pa_type "
+			     "%d, flag %d\n", pa_types[j].type, paorder[h]);
+#endif
 		    out_pa = NULL;
 
 		    if ((ret = ((*pa_types[j].fct)(context, request,
@@ -980,40 +1444,55 @@ krb5_do_preauth(krb5_context context,
 		      goto cleanup;
 		    }
 
-		    if (out_pa) {
-			if (out_pa_list == NULL) {
-			    if ((out_pa_list =
-				 (krb5_pa_data **)
-				 malloc(2*sizeof(krb5_pa_data *)))
-				== NULL) {
-			      ret = ENOMEM;
-			      goto cleanup;
-			    }
-			} else {
-			    if ((out_pa_list =
-				 (krb5_pa_data **)
-				 realloc(out_pa_list,
-					 (out_pa_list_size+2)*
-					 sizeof(krb5_pa_data *)))
-				== NULL) {
-			      /* XXX this will leak the pointers which
-				   have already been allocated.  oh well. */
-			      ret = ENOMEM;
-			      goto cleanup;
-			    }
-			}
-			
-			out_pa_list[out_pa_list_size++] = out_pa;
+		    ret = grow_pa_list(&out_pa_list, &out_pa_list_size,
+				       out_pa);
+		    if (ret != 0) {
+			    goto cleanup;
 		    }
 		    if (paorder[h] == PA_REAL)
 			realdone = 1;
 		}
 	    }
+
+	    /* Try to use plugins now. */
+	    if ((!realdone) && (preauth_context != NULL)) {
+		if (*preauth_context == NULL) {
+		    krb5_init_preauth_context(context, preauth_context);
+		}
+		if (*preauth_context != NULL) {
+		    int module_ret, module_flags;
+#ifdef DEBUG
+		    fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
+			     in_padata[i]->pa_type, paorder[h]);
+#endif
+		    ret = krb5_run_preauth_plugins(context,
+						   *preauth_context,
+						   paorder[h],
+						   request,
+						   encoded_request_body,
+						   encoded_previous_request,
+						   in_padata[i],
+						   prompter,
+						   prompter_data,
+						   gak_fct,
+						   salt, s2kparams,
+						   gak_data,
+						   as_key,
+						   &out_pa_list,
+						   &out_pa_list_size,
+						   &module_ret,
+						   &module_flags);
+		    if (ret == 0) {
+			if (module_ret == 0) {
+		            if (paorder[h] == PA_REAL) {
+				realdone = 1;
+			    }
+			}
+		    }
+		}
+	    }
 	}
     }
-
-    if (out_pa_list)
-	out_pa_list[out_pa_list_size++] = NULL;
 
     *out_padata = out_pa_list;
     if (etype_info)

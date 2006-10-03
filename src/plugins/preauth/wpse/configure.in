@@ -1,0 +1,14 @@
+K5_AC_INIT(configure.in)
+enable_shared=yes
+build_dynobj=yes
+CONFIG_RULES
+
+AC_CHECK_HEADERS(errno.h string.h)
+
+KRB5_RUN_FLAGS
+dnl The following is for check...
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+AC_CONFIG_HEADERS(config.h)
+V5_AC_OUTPUT_MAKEFILE
