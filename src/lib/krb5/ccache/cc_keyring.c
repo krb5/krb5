@@ -737,13 +737,17 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
 	return KRB5_CC_END;
     memset(creds, 0, sizeof(krb5_creds));
 
-    /* If we're pointing at the entry with the principal, skip it */
-    if (krcursor->keys[krcursor->currkey] == krcursor->princ_id)
-	krcursor->currkey++;
-
     /* If we're pointing past the end of the keys array, there are no more */
     if (krcursor->currkey > krcursor->numkeys)
 	return KRB5_CC_END;
+
+    /* If we're pointing at the entry with the principal, skip it */
+    if (krcursor->keys[krcursor->currkey] == krcursor->princ_id) {
+	krcursor->currkey++;
+	/* Check if we have now reached the end */
+	if (krcursor->currkey > krcursor->numkeys)
+	  return KRB5_CC_END;
+    }
 
     /* Read the key, the right size buffer will ba allocated and returned */
     psize = keyctl_read_alloc(krcursor->keys[krcursor->currkey], &payload);
