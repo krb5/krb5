@@ -1044,7 +1044,10 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 					   &mkvno);
 
 	if (st != 0) {
+	    char *msg = error_message(st);
 	    st = -1; /* Something more appropriate ? */
+	    krb5_set_error_message (context, st,
+				    "unable to decode stored principal key data (%s)", msg);
 	    goto cleanup;
 	}
 	noofkeys += n_kd;
