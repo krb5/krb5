@@ -221,7 +221,7 @@ do-dyn-lclint::
 	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) dyn.c dyntest.c
 
 $(BUILDTOP)/include/gssrpc/types.h: types.stamp
-types.stamp: $(SRCTOP)/include/gssrpc/types.hin config.status
+types.stamp: $(SRCTOP)/include/gssrpc/types.hin $(thisconfigdir)/config.status
 	cd $(thisconfigdir) && $(SHELL) config.status include/gssrpc/types.h
 	touch types.stamp
 
