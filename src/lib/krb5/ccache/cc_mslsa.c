@@ -2648,6 +2648,12 @@ const krb5_cc_ops krb5_lcc_ops = {
      krb5_lcc_end_seq_get,
      krb5_lcc_remove_cred,
      krb5_lcc_set_flags,
-     krb5_lcc_get_flags
+     krb5_lcc_get_flags,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
 };
 #endif /* _WIN32 */

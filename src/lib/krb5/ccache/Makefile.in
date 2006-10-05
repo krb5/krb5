@@ -23,6 +23,7 @@ LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 STLIBOBJS= \
 	ccbase.o \
 	cccopy.o \
+	cccursor.o \
 	ccdefault.o \
 	ccdefops.o \
 	cc_retr.o \
@@ -34,6 +35,7 @@ STLIBOBJS= \
 
 OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccopy.$(OBJEXT) \
+	$(OUTPRE)cccursor.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
@@ -45,6 +47,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 
 SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccopy.c \
+	$(srcdir)/cccursor.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
 	$(srcdir)/cc_retr.c \
@@ -88,6 +91,10 @@ T_CC_OBJS=t_cc.o
 
 t_cc: $(T_CC_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_cc $(T_CC_OBJS) $(KRB5_BASE_LIBS)
+
+T_CCCURSOR_OBJS = t_cccursor.o
+t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
 
 check-unix:: t_cc
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\

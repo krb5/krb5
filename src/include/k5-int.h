@@ -1758,6 +1758,15 @@ struct _krb5_ccache {
     krb5_pointer data;
 };
 
+/*
+ * Per-type ccache cursor.
+ */
+struct krb5_cc_ptcursor {
+    const struct _krb5_cc_ops *ops;
+    krb5_pointer data;
+};
+typedef struct krb5_cc_ptcursor *krb5_cc_ptcursor;
+
 struct _krb5_cc_ops {
     krb5_magic magic;
     char *prefix;
@@ -1788,9 +1797,44 @@ struct _krb5_cc_ops {
 					    krb5_flags);
     krb5_error_code (KRB5_CALLCONV *get_flags) (krb5_context, krb5_ccache,
 						krb5_flags *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_new)(krb5_context,
+						  krb5_cc_ptcursor *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_next)(krb5_context,
+						   krb5_cc_ptcursor,
+						   krb5_ccache *);
+    krb5_error_code (KRB5_CALLCONV *ptcursor_free)(krb5_context,
+						   krb5_cc_ptcursor *);
+    krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache);
+    krb5_error_code (KRB5_CALLCONV *lastchange)(krb5_context,
+						krb5_ccache, krb5_timestamp *);
+    krb5_error_code (KRB5_CALLCONV *wasdefault)(krb5_context, krb5_ccache,
+						krb5_timestamp *);
 };
 
 extern const krb5_cc_ops *krb5_cc_dfl_ops;
+
+krb5_error_code
+krb5int_cc_os_default_name(krb5_context context, char **name);
+
+/*
+ * Cursor for iterating over ccache types
+ */
+struct krb5_cc_typecursor;
+typedef struct krb5_cc_typecursor *krb5_cc_typecursor;
+
+krb5_error_code
+krb5int_cc_typecursor_new(krb5_context context, krb5_cc_typecursor *cursor);
+
+krb5_error_code
+krb5int_cc_typecursor_next(
+    krb5_context context,
+    krb5_cc_typecursor cursor,
+    const struct _krb5_cc_ops **ops);
+
+krb5_error_code
+krb5int_cc_typecursor_free(
+    krb5_context context,
+    krb5_cc_typecursor *cursor);
 
 typedef struct _krb5_donot_replay {
     krb5_magic magic;

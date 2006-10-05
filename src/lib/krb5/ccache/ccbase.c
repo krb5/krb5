@@ -37,6 +37,12 @@ struct krb5_cc_typelist {
     const krb5_cc_ops *ops;
     struct krb5_cc_typelist *next;
 };
+
+struct krb5_cc_typecursor {
+    struct krb5_cc_typelist *tptr;
+};
+/* typedef krb5_cc_typecursor in k5-int.h */
+
 extern const krb5_cc_ops krb5_mcc_ops;
 #ifdef USE_KEYRING_CCACHE
 extern const krb5_cc_ops krb5_krcc_ops;
@@ -212,4 +218,70 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     }
     free(pfx);
     return KRB5_CC_UNKNOWN_TYPE;
+}
+
+/*
+ * cc_typecursor
+ *
+ * Note: to avoid copying the typelist at cursor creation time, among
+ * other things, we assume that the only additions ever occur to the
+ * typelist.
+ */
+krb5_error_code
+krb5int_cc_typecursor_new(krb5_context context, krb5_cc_typecursor *t)
+{
+    krb5_error_code err = 0;
+    krb5_cc_typecursor n = NULL;
+
+    *t = NULL;
+    n = malloc(sizeof(*n));
+    if (n == NULL)
+	return ENOMEM;
+
+    err = k5_mutex_lock(&cc_typelist_lock);
+    if (err)
+	goto errout;
+    n->tptr = cc_typehead;
+    err = k5_mutex_unlock(&cc_typelist_lock);
+    if (err)
+	goto errout;
+
+    *t = n;
+errout:
+    if (err)
+	free(n);
+    return err;
+}
+
+krb5_error_code
+krb5int_cc_typecursor_next(
+    krb5_context context,
+    krb5_cc_typecursor t,
+    const krb5_cc_ops **ops)
+{
+    krb5_error_code err = 0;
+
+    *ops = NULL;
+    if (t->tptr == NULL)
+	return 0;
+
+    err = k5_mutex_lock(&cc_typelist_lock);
+    if (err)
+	goto errout;
+    *ops = t->tptr->ops;
+    t->tptr = t->tptr->next;
+    err = k5_mutex_unlock(&cc_typelist_lock);
+    if (err)
+	goto errout;
+
+errout:
+    return err;
+}
+
+krb5_error_code
+krb5int_cc_typecursor_free(krb5_context context, krb5_cc_typecursor *t)
+{
+    free(*t);
+    *t = NULL;
+    return 0;
 }

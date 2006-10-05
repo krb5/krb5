@@ -297,3 +297,22 @@ krb5_cc_default_name(krb5_context context)
     
     return err ? NULL : os_ctx->default_ccname;
 }
+
+/*
+ * caller must free name
+ */
+krb5_error_code
+krb5int_cc_os_default_name(krb5_context context, char **name)
+{
+    krb5_error_code retval = 0;
+    char *tmpname = NULL;
+
+    *name = NULL;
+    tmpname = malloc(BUFSIZ);
+    if (tmpname == NULL)
+	return ENOMEM;
+
+    retval = get_from_os(tmpname, BUFSIZ);
+    *name = tmpname;
+    return retval;
+}

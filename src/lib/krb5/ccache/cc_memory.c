@@ -75,6 +75,19 @@ static krb5_error_code KRB5_CALLCONV krb5_mcc_store
 static krb5_error_code KRB5_CALLCONV krb5_mcc_set_flags 
 	(krb5_context, krb5_ccache id , krb5_flags flags );
 
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_new(
+    krb5_context,
+    krb5_cc_ptcursor *);
+
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_next(
+    krb5_context,
+    krb5_cc_ptcursor,
+    krb5_ccache *);
+
+static krb5_error_code KRB5_CALLCONV krb5_mcc_ptcursor_free(
+    krb5_context,
+    krb5_cc_ptcursor *);
+
 extern const krb5_cc_ops krb5_mcc_ops;
 extern krb5_error_code krb5_change_cache (void);
 
@@ -96,6 +109,10 @@ typedef struct krb5_mcc_list_node {
     struct krb5_mcc_list_node *next;
     krb5_mcc_data *cache;
 } krb5_mcc_list_node;
+
+struct krb5_mcc_ptcursor_data {
+    struct krb5_mcc_list_node *cur;
+};
 
 k5_mutex_t krb5int_mcc_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static krb5_mcc_list_node *mcc_head = 0;
@@ -651,6 +668,92 @@ krb5_mcc_store(krb5_context ctx, krb5_ccache id, krb5_creds *creds)
     return 0;
 }
 
+static krb5_error_code KRB5_CALLCONV
+krb5_mcc_ptcursor_new(
+    krb5_context context,
+    krb5_cc_ptcursor *cursor)
+{
+    krb5_error_code ret = 0;
+    krb5_cc_ptcursor n = NULL;
+    struct krb5_mcc_ptcursor_data *cdata = NULL;
+
+    *cursor = NULL;
+
+    n = malloc(sizeof(*n));
+    if (n == NULL)
+	return ENOMEM;
+    n->ops = &krb5_mcc_ops;
+    cdata = malloc(sizeof(struct krb5_mcc_ptcursor_data));
+    if (cdata == NULL) {
+	ret = ENOMEM;
+	goto errout;
+    }
+    n->data = cdata;
+    ret = k5_mutex_lock(&krb5int_mcc_mutex);
+    if (ret)
+	goto errout;
+    cdata->cur = mcc_head;
+    ret = k5_mutex_unlock(&krb5int_mcc_mutex);
+    if (ret)
+	goto errout;
+
+errout:
+    if (ret) {
+	krb5_mcc_ptcursor_free(context, &n);
+    }
+    *cursor = n;
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_mcc_ptcursor_next(
+    krb5_context context,
+    krb5_cc_ptcursor cursor,
+    krb5_ccache *ccache)
+{
+    krb5_error_code ret = 0;
+    struct krb5_mcc_ptcursor_data *cdata = NULL;
+
+    *ccache = NULL;
+    cdata = cursor->data;
+    if (cdata->cur == NULL)
+	return 0;
+
+    *ccache = malloc(sizeof(**ccache));
+    if (*ccache == NULL)
+	return ENOMEM;
+
+    (*ccache)->ops = &krb5_mcc_ops;
+    (*ccache)->data = cdata->cur->cache;
+    ret = k5_mutex_lock(&krb5int_mcc_mutex);
+    if (ret)
+	goto errout;
+    cdata->cur = cdata->cur->next;
+    ret = k5_mutex_unlock(&krb5int_mcc_mutex);
+    if (ret)
+	goto errout;
+errout:
+    if (ret && *ccache != NULL) {
+	free(*ccache);
+	*ccache = NULL;
+    }
+    return ret;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_mcc_ptcursor_free(
+    krb5_context context,
+    krb5_cc_ptcursor *cursor)
+{
+    if (*cursor == NULL)
+	return 0;
+    if ((*cursor)->data != NULL)
+	free((*cursor)->data);
+    free(*cursor);
+    *cursor = NULL;
+    return 0;
+}
+
 const krb5_cc_ops krb5_mcc_ops = {
      0,
      "MEMORY",
@@ -669,4 +772,10 @@ const krb5_cc_ops krb5_mcc_ops = {
      krb5_mcc_remove_cred,
      krb5_mcc_set_flags,
      krb5_mcc_get_flags,
+     krb5_mcc_ptcursor_new,
+     krb5_mcc_ptcursor_next,
+     krb5_mcc_ptcursor_free,
+     NULL,
+     NULL,
+     NULL,
 };

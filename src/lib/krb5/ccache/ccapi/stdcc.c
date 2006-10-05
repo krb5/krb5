@@ -83,7 +83,13 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdccv3_end_seq_get,
       krb5_stdccv3_remove, 
       krb5_stdccv3_set_flags,
-      krb5_stdccv3_get_flags
+      krb5_stdccv3_get_flags,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
 #else
       krb5_stdcc_get_name,
       krb5_stdcc_resolve,
@@ -99,7 +105,13 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdcc_end_seq_get,
       krb5_stdcc_remove, 
       krb5_stdcc_set_flags,
-      krb5_stdcc_get_flags
+      krb5_stdcc_get_flags,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
 #endif
 };
 

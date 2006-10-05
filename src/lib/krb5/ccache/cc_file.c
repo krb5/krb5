@@ -2371,4 +2371,10 @@ const krb5_cc_ops krb5_cc_file_ops = {
      krb5_fcc_remove_cred,
      krb5_fcc_set_flags,
      krb5_fcc_get_flags,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
+     NULL,
 };
