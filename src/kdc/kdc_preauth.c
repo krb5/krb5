@@ -989,6 +989,9 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     void **			pa_context;
     krb5_boolean		key_modified;
     krb5_keyblock		original_key;
+    if ((!*padata_context)&& (make_padata_context(context, padata_context) != 0)) {
+	return KRB5KRB_ERR_GENERIC;
+    }
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
 	if (ap->return_padata)
