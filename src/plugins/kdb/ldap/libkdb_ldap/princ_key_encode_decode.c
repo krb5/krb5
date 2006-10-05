@@ -1,3 +1,35 @@
+/* ... copyright ... */
+
+/* Novell key-format scheme:
+
+   KrbKeySet ::= SEQUENCE {
+   attribute-major-vno       [0] UInt16,
+   attribute-minor-vno       [1] UInt16,
+   kvno                      [2] UInt32,
+   mkvno                     [3] UInt32 OPTIONAL,
+   keys                      [4] SEQUENCE OF KrbKey,
+   ...
+   }
+
+   KrbKey ::= SEQUENCE {
+   salt      [0] KrbSalt OPTIONAL,
+   key       [1] EncryptionKey,
+   s2kparams [2] OCTET STRING OPTIONAL,
+    ...
+   }
+
+   KrbSalt ::= SEQUENCE {
+   type      [0] Int32,
+   salt      [1] OCTET STRING OPTIONAL
+   }
+
+   EncryptionKey ::= SEQUENCE {
+   keytype   [0] Int32,
+   keyvalue  [1] OCTET STRING
+   }
+
+ */
+
 #include <k5-int.h>
 #include <kdb.h>
 
@@ -181,10 +213,10 @@ last:
 	if (! ((inner)->next == (inner)->bound + 1 &&			\
 	       (inner)->next == (outer)->next + buflen))		\
 	    cleanup (ASN1_BAD_LENGTH);					\
-	asn1buf_sync(outer, inner, 0, 0, 0, 0, 0);
+	asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
 
 static asn1_error_code
-decode_tagged_integer (asn1buf *buf, int expectedtag, int *val)
+decode_tagged_integer (asn1buf *buf, int expectedtag, long *val)
 {
     int buflen;
     asn1_error_code ret = 0;
@@ -199,9 +231,34 @@ decode_tagged_integer (asn1buf *buf, int expectedtag, int *val)
 
     buflen = t.length;
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
-    ret = asn1_decode_unsigned_integer(&subbuf, (long int *)val); checkerr;
+    ret = asn1_decode_integer(&subbuf, val); checkerr;
 
-    safe_syncbuf(&tmp, (&subbuf));
+    safe_syncbuf(&tmp, &subbuf);
+    *buf = tmp;
+
+last:
+    return ret;
+}
+
+static asn1_error_code
+decode_tagged_unsigned_integer (asn1buf *buf, int expectedtag, unsigned long *val)
+{
+    int buflen;
+    asn1_error_code ret = 0;
+    asn1buf tmp, subbuf;
+    taginfo t;
+
+    /* Work on a copy of 'buf' */
+    ret = asn1buf_imbed(&tmp, buf, 0, 1); checkerr;
+    ret = asn1_get_tag_2(&tmp, &t); checkerr;
+    if (t.tagnum != expectedtag)
+	cleanup (ASN1_MISSING_FIELD);
+
+    buflen = t.length;
+    ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
+    ret = asn1_decode_unsigned_integer(&subbuf, val); checkerr;
+
+    safe_syncbuf(&tmp, &subbuf);
     *buf = tmp;
 
 last:
@@ -229,7 +286,7 @@ decode_tagged_octetstring (asn1buf *buf, int expectedtag, int *len,
     ret = asn1buf_imbed(&subbuf, &tmp, t.length, 0); checkerr;
     ret = asn1_decode_octetstring (&subbuf, len, val); checkerr;
 
-    safe_syncbuf(&tmp, (&subbuf));
+    safe_syncbuf(&tmp, &subbuf);
     *buf = tmp;
 
 last:
@@ -258,20 +315,22 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
     if (t.tagnum == 0) {
 	int buflen;
 	asn1buf slt;
+	unsigned long keytype;
+	int keylen;
 
 	key->key_data_ver = 2;
 	asn1_get_sequence(&subbuf, &length, &seqindef);
 	buflen = length;
 	asn1buf_imbed(&slt, &subbuf, length, seqindef);
 
-	ret = decode_tagged_integer (&slt, 0, (int *)&key->key_data_type[1]);
+	ret = decode_tagged_integer (&slt, 0, &keytype);
+	key->key_data_type[1] = keytype; /* XXX range check?? */
 	checkerr;
 
-	ret = decode_tagged_octetstring (&slt, 1,
-					 (int *)&key->key_data_length[1],
+	ret = decode_tagged_octetstring (&slt, 1, &keylen,
 					 &key->key_data_contents[1]); checkerr;
-
-	safe_syncbuf ((&subbuf), (&slt));
+	safe_syncbuf (&subbuf, &slt);
+	key->key_data_length[1] = keylen; /* XXX range check?? */
 
 	ret = asn1_get_tag_2(&subbuf, &t); checkerr;
     } else
