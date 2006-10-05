@@ -344,6 +344,23 @@ static krb5_error_code krb5_krcc_unparse_ui_2
 extern krb5_error_code krb5_change_cache(void);
 
 /*
+ * Determine how many keys exist in a ccache keyring.
+ * Subtracts out the "hidden" key holding the principal information.
+ */
+static int KRB5_CALLCONV
+krb5_krcc_getkeycount(key_serial_t cred_ring)
+{
+    int res, nkeys;
+    
+    res = keyctl_read(cred_ring, NULL, 0);
+    if (res > 0)
+	nkeys = (res / sizeof(key_serial_t)) - 1;
+    else
+	nkeys = 0;
+    return(nkeys);
+}
+
+/*
  * Modifies:
  * id
  *
@@ -426,10 +443,7 @@ static  krb5_error_code
 krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 {
     krb5_krcc_data *d;
-    key_serial_t *keys;
-    unsigned int size;
     int     res;
-    int     i;
 
     k5_assert_locked(&((krb5_krcc_data *) id->data)->lock);
 
@@ -437,39 +451,14 @@ krb5_krcc_clearcache(krb5_context context, krb5_ccache id)
 
     DEBUG_PRINT(("krb5_krcc_clearcache: ring_id %d, princ_id %d, "
 		 "numkeys is %d\n", d->ring_id, d->princ_id, d->numkeys));
-    if (d->numkeys > 0) {
 
-	size = (d->numkeys + 1) * sizeof(key_serial_t);	/* +1 for princ key */
-	keys = malloc(size);
-  reread:
-	if (!keys)
-	    return KRB5_CC_NOMEM;
-
-	res = keyctl_read(d->ring_id, (char *) keys, size);
-	if (res < 0) {
-	    free(keys);
-	    return errno;
-	}
-	if (res != size) {	/* are there more keys than we thought? */
-	    DEBUG_PRINT(("krb5_krcc_clearcache: numkeys %d, res %d, "
-			 "size %d reallocing key array\n",
-			 d->numkeys, res, size));
-	    size = res;
-	    keys = realloc(keys, (unsigned int) res);
-	    goto reread;
-	}
-
-	for (i = 0; i < (size / sizeof(key_serial_t)); i++) {
-	    res = keyctl_unlink(keys[i], d->ring_id);
-	    if (res < 0) {
-		DEBUG_PRINT(("krb5_krcc_clearcache: error unlinking "
-			     "key %d, res == %d\n", keys[i], res));
-	    }
-	}
-	free(keys);
-	d->numkeys = 0;
-	d->princ_id = 0;
+    res = keyctl_clear(d->ring_id);
+    if (res != 0) {
+	return errno;
     }
+    d->numkeys = 0;
+    d->princ_id = 0;
+
     return KRB5_OK;
 }
 
@@ -609,11 +598,7 @@ krb5_krcc_resolve(krb5_context context, krb5_ccache * id, const char *full_resid
 	    pkey = 0;
 	}
 	/* Determine how many keys exist */
-	res = keyctl_read(key, NULL, 0);
-	if (res > 0)
-	    nkeys = (res / sizeof(key_serial_t)) - 1;
-	else
-	    nkeys = 0;
+	nkeys = krb5_krcc_getkeycount(key);
     }
 
     lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -667,6 +652,13 @@ krb5_krcc_start_seq_get(krb5_context context, krb5_ccache id,
     kret = k5_mutex_lock(&d->lock);
     if (kret)
 	return kret;
+
+    /*
+     * Determine how many keys currently exist and update numkeys.
+     * We cannot depend on the current value of numkeys because
+     * the ccache may have been updated elsewhere
+     */
+    d->numkeys = krb5_krcc_getkeycount(d->ring_id);
 
     size = sizeof(*krcursor) + ((d->numkeys + 1) * sizeof(key_serial_t));
 
@@ -723,13 +715,12 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
     krb5_krcc_cursor krcursor;
     krb5_error_code kret;
     int     psize;
-    void   *payload;
+    void   *payload = NULL;
 
     DEBUG_PRINT(("krb5_krcc_next_cred: entered\n"));
 
     /*
-     * Once the node in the linked list is created, it's never
-     * modified, so we don't need to worry about locking here.
+     * The cursor has the entire list of keys.
      * (Note that we don't support _remove_cred.)
      */
     krcursor = (krb5_krcc_cursor) * cursor;
@@ -755,7 +746,7 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
 	DEBUG_PRINT(("Error reading key %d: %s\n",
 		     krcursor->keys[krcursor->currkey],
 		     strerror(errno)));
-	kret = KRB5_CC_IO;
+	kret = KRB5_FCC_NOFILE;
 	goto freepayload;
     }
     krcursor->currkey++;
@@ -763,7 +754,7 @@ krb5_krcc_next_cred(krb5_context context, krb5_ccache id,
     kret = krb5_krcc_parse_cred(context, id, creds, payload, psize);
 
   freepayload:
-    free(payload);
+    if (payload) free(payload);
     return kret;
 }
 
