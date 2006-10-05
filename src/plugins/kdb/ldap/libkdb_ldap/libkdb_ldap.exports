@@ -47,3 +47,4 @@ krb5_ldap_supported_realms
 krb5_ldap_free_supported_realms
 krb5_ldap_errcode_2_string
 krb5_ldap_release_errcode_string
+krb5_ldap_create
