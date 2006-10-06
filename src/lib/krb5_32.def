@@ -74,6 +74,9 @@ krb5_c_string_to_key_with_params
 	krb5_c_valid_enctype
 	krb5_c_verify_checksum
 	krb5_calculate_checksum
+	krb5_cccol_cursor_free
+	krb5_cccol_cursor_new
+	krb5_cccol_cursor_next
 	krb5_cc_close
 	krb5_cc_copy_creds
 	krb5_cc_default

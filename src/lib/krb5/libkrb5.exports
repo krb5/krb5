@@ -290,6 +290,9 @@ krb5_auth_to_rep
 krb5_build_principal
 krb5_build_principal_ext
 krb5_build_principal_va
+krb5_cccol_cursor_free
+krb5_cccol_cursor_new
+krb5_cccol_cursor_next
 krb5_cc_close
 krb5_cc_copy_creds
 krb5_cc_default
