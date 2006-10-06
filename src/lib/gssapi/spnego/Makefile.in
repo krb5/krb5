@@ -35,8 +35,8 @@ spnego_mech.so spnego_mech.po $(OUTPRE)spnego_mech.$(OBJEXT): \
   $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(SRCTOP)/include/syslog.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../mechglue/mechglue.h \
-  $(srcdir)/../mechglue/mglueP.h ../generic/gssapi_err_generic.h \
-  gssapiP_spnego.h spnego_mech.c
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/include/syslog.h \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
+  $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
+  ../generic/gssapi_err_generic.h gssapiP_spnego.h spnego_mech.c

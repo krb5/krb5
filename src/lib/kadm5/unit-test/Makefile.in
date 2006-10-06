@@ -206,8 +206,8 @@ $(OUTPRE)setkey-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  setkey-test.c
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h setkey-test.c
 $(OUTPRE)randkey-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \

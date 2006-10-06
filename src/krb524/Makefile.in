@@ -120,8 +120,8 @@ $(OUTPRE)cnv_tkt_skey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  cnv_tkt_skey.c krb524d.h
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cnv_tkt_skey.c krb524d.h
 $(OUTPRE)libinit.$(OBJEXT): libinit.c
 $(OUTPRE)krb524.$(OBJEXT): krb524.c
 $(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
@@ -131,8 +131,8 @@ $(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  test.c
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h test.c
 $(OUTPRE)k524init.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
@@ -154,5 +154,5 @@ $(OUTPRE)krb524d.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  krb524d.c krb524d.h
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h krb524d.c krb524d.h
