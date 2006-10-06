@@ -421,9 +421,9 @@ is_principal_in_realm(ldap_context, searchfor)
 
 /*
  * Deduce the subtree information from the context. A realm can have
- * at most 2 subtrees.
+ * multiple subtrees.
  * 1. the Realm container
- * 2. the actual subtree associated with the Realm
+ * 2. the actual subtrees associated with the Realm
  *
  * However, there are some conditions to be considered to deduce the
  * actual subtree/s associated with the realm.  The conditions are as
@@ -432,7 +432,7 @@ is_principal_in_realm(ldap_context, searchfor)
  *    is internal a [Root]) then the realm has only one subtree
  *    i.e [Root], i.e. whole of the tree.
  * 2. If the subtree information of the Realm is missing/absent, then the
- *    realm has only one, i.e., the Realm container.  NOTE: In call cases
+ *    realm has only one, i.e., the Realm container.  NOTE: In all cases
  *    Realm container SHOULD be the one among the subtrees or the only
  *    one subtree.
  * 3. The subtree information of the realm is overlapping the realm
@@ -442,70 +442,79 @@ is_principal_in_realm(ldap_context, searchfor)
 krb5_error_code
 krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     krb5_ldap_context           *ldap_context;
-    char                        **subtreearr;
+    char                        ***subtreearr;
     unsigned int                *ntree;
 {
-    int                         lendiff=0;
-    char                        *subtree=NULL, *realm_cont_dn=NULL;
+    int                         st=0, i=0, subtreecount=0;
+    int				j=0, ncount=0, search_scope=0;
+    char                        **subtree=NULL, *realm_cont_dn=NULL;
+    char                        **subtarr=NULL;
+    char                        *containerref=NULL;
+    char 			**newsubtree=NULL;
 
+    containerref = ldap_context->lrparams->containerref;
     subtree = ldap_context->lrparams->subtree;
     realm_cont_dn = ldap_context->lrparams->realmdn;
+    subtreecount = ldap_context->lrparams->subtreecount;
+    search_scope = ldap_context->lrparams->search_scope;
 
-    /*
-     * If subtree attribute value is [Root] of the tree which is
-     * represented by a "" (null) string, set the ntree value as 1 and
-     * do not fill the subtreearr value.  In eDirectory the [Root] can
-     * be represented as a "" (null) string, however this
-     * representation throws a "No such object" error in OpenLDAP.
-     * Representing [Root] of the tree as NULL pointer (i.e. no value)
-     * works in both case.
-     */
-    if (subtree == NULL || strcasecmp(subtree, "") == 0) {
-	/* 
-	 * XXX WAF to see if I can get around ldapsearch issue with a null base
-	 * which doesn't work in solaris.  This should probably be a Solaris
-	 * specific #ifdef but I am not sure what define value to use.
-	 */
-	if (realm_cont_dn != NULL) {
-	    subtreearr[0] = strdup(realm_cont_dn);
-	    if (subtreearr[0] == NULL)
-		return ENOMEM;
-	}
-	*ntree = 1;
-	return 0;
+    subtarr = (char **) malloc(sizeof(char *) * (subtreecount + 1 /*realm dn*/ + 1 /*containerref*/ + 1));
+    if (subtarr == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+    memset(subtarr, 0, (sizeof(char *) * (subtreecount+1+1+1)));
+
+    /* get the complete subtree list */
+    for (i=0; i<subtreecount && subtree[i]!=NULL; i++) {
+	subtarr[i] = strdup(subtree[i]);
+        if (subtarr[i] == NULL) {
+	    st = ENOMEM;
+	    goto cleanup;
+        }        
     }
 
-    /*
-     * The subtree attribute value of the realm can be same as the
-     * realm container or can even overlap.  If the check is
-     * successful, then the subtree attribute value alone is copied to
-     * the subtreearr array and the ntree value is set to 1.
-     */
-    lendiff = strlen(realm_cont_dn) - strlen(subtree);
-    if (lendiff >= 0 && (strcasecmp(realm_cont_dn+lendiff, subtree)==0)) {
-	subtreearr[0] = strdup(subtree);
-	if (subtreearr[0] == NULL)
-	    return ENOMEM;
-	*ntree = 1;
-	return 0;
+    subtarr[i] = strdup(realm_cont_dn);
+    if (subtarr[i++] == NULL) {
+        st = ENOMEM;
+        goto cleanup;
     }
 
-    /*
-     * If the subtree attribute value of the realm and the realm
-     * container are different, then both of the values are copied to
-     * subtreearr and ntree value is set to 2.
-     */
-    subtreearr[0] = strdup(realm_cont_dn);
-    if (subtreearr[0] == NULL)
-	return ENOMEM;
-    subtreearr[1] = strdup(subtree);
-    if (subtreearr[1] == NULL) {
-	if (subtreearr[0])
-	    free (subtreearr[0]);
-	return ENOMEM;
+    if (containerref != NULL) {
+        subtarr[i] = strdup(containerref);
+        if (subtarr[i++] == NULL) {
+	    st = ENOMEM;
+	    goto cleanup;
+        }
     }
-    *ntree = 2;
-    return 0;
+
+    ncount = i;
+        
+    subtree = (char **) malloc(sizeof(char *) * (ncount + 1));
+    if (subtree == NULL) {
+       st = ENOMEM;
+       goto cleanup;
+    }
+    memset(subtree, 0, (sizeof(char *) * (ncount+1)));
+    remove_overlapping_subtrees(subtarr, &subtree, &ncount, search_scope);
+
+    *ntree = ncount;
+    *subtreearr = subtree;
+
+cleanup:
+    if(subtarr!=NULL) {
+       for(i=0; subtarr[i]!=NULL; i++)
+               free(subtarr[i]);
+       free(subtarr);
+    }
+
+    if(newsubtree!=NULL) {
+       for(i=0; newsubtree[i]!=NULL; i++)
+               free(newsubtree[i]);
+       free(newsubtree);
+    }
+
+    return st;
 }
 
 /*
@@ -561,7 +570,7 @@ store_tl_data(tl_data, tl_type, value)
     }
 
     case KDB_TL_USERDN:
-    case KDB_TL_TKTPOLICYDN:
+    case KDB_TL_LINKDN:
     {
 	char *cptr = (char *)value;
 
@@ -587,36 +596,6 @@ store_tl_data(tl_data, tl_type, value)
 	curr += 2;
 	/* store the content */
 	memcpy(curr, cptr, tldatalen);
-	curr += tldatalen;
-	break;
-    }
-
-    case KDB_TL_KEYINFO:
-    {
-	struct berval *key = (struct berval *)value;
-
-	currlen = tl_data->tl_data_length;
-	tl_data->tl_data_length += 1 + 2 + key->bv_len;
-	/* allocate required memory */
-	reallocptr = tl_data->tl_data_contents;
-	tl_data->tl_data_contents = realloc(tl_data->tl_data_contents,
-					    tl_data->tl_data_length);
-	if (tl_data->tl_data_contents == NULL) {
-	    if (reallocptr)
-		free (reallocptr);
-	    return ENOMEM;
-	}
-	curr = (char *) (tl_data->tl_data_contents + currlen);
-
-	/* store the tl_type value */
-	memset(curr, tl_type, 1);
-	curr += 1;
-	/* store the content length */
-	tldatalen = key->bv_len;
-	STORE16_INT(curr, tldatalen);
-	curr += 2;
-	/* store the content */
-	memcpy(curr, key->bv_val, key->bv_len);
 	curr += tldatalen;
 	break;
     }
@@ -649,9 +628,10 @@ decode_tl_data(tl_data, tl_type, data)
     unsigned char               *curr=NULL;
     int                         *intptr=NULL;
     long                        *longptr=NULL;
-    char                        *DN=NULL;
+    char                        *DN=NULL, **DNarr=NULL;
     krb5_boolean                keyfound=FALSE;
     KEY                         *secretkey = NULL;
+    krb5_error_code             st=-1;
 
     *data = NULL;
 
@@ -691,12 +671,12 @@ decode_tl_data(tl_data, tl_type, data)
 		    *data = longptr;
 		}
 		curr += sublen;
-		return 0;
+		st = 0;
+		return st;
 		break;
 
 	    case KDB_TL_CONTAINERDN:
 	    case KDB_TL_USERDN:
-	    case KDB_TL_TKTPOLICYDN:
 		/* get the length of the content */
 		UNSTORE16_INT(curr, sublen);
 		/* forward by 2 bytes */
@@ -708,49 +688,36 @@ decode_tl_data(tl_data, tl_type, data)
 		DN[sublen] = 0;
 		*data = DN;
 		curr += sublen;
-		return 0;
+		st = 0;
+		return st;
 		break;
 
-	    case KDB_TL_KEYINFO:
-		/* get the length of the content */
-		keyfound = TRUE;
-		UNSTORE16_INT(curr, sublen);
-		/* forward by 2 bytes */
-		curr += 2;
-		if (secretkey == NULL) {
-		    secretkey = malloc(sizeof(*secretkey));
-		    if (secretkey == NULL)
+	    case KDB_TL_LINKDN: 
+		if (DNarr == NULL) {
+		    DNarr = calloc(limit, sizeof(char *));
+		    if (DNarr == NULL)
 			return ENOMEM;
-		    secretkey->nkey = 0;
-		    secretkey->keys = NULL;
-		    secretkey->keys = realloc(secretkey->keys,
-					      sizeof(*(secretkey->keys)) * (limit));
-		    if (secretkey->keys == NULL)
-			return ENOMEM;
-		    memset(secretkey->keys, 0, sizeof (*(secretkey->keys)) * (limit));
 		}
 		if (i == limit-1) {
 		    limit *= 2;
-		    secretkey->keys = realloc(secretkey->keys,
-					      sizeof(*(secretkey->keys)) * (limit));
-		    if (secretkey->keys == NULL)
+		    DNarr = realloc(DNarr, sizeof(char *) * (limit));
+		    if (DNarr == NULL)
 			return ENOMEM;
-		    memset(secretkey->keys+i, 0, sizeof (*(secretkey->keys)) * (limit-i));
 		}
-
-		secretkey->keys[i] = malloc (sizeof(struct berval));
-		if (secretkey->keys[i] == NULL)
+		
+		/* get the length of the content */
+		UNSTORE16_INT(curr, sublen);
+		/* forward by 2 bytes */
+		curr += 2;
+		DNarr[i] = malloc (sublen + 1);
+		if (DNarr[i] == NULL)
 		    return ENOMEM;
-
-		secretkey->keys[i]->bv_len = sublen;
-		secretkey->keys[i]->bv_val = malloc (sublen);
-		if (secretkey->keys[i]->bv_val == NULL)
-		    return ENOMEM;
-
-		memcpy(secretkey->keys[i]->bv_val, curr, sublen);
-		secretkey->nkey = ++i;
-		*data = secretkey;
+		memcpy(DNarr[i], curr, sublen);
+		DNarr[i][sublen] = 0;
+		++i;
 		curr += sublen;
+		*data = DNarr;
+		st=0;
 		break;
 	    }
 	} else {
@@ -759,13 +726,7 @@ decode_tl_data(tl_data, tl_type, data)
 	    curr += 2 + sublen;
 	}
     }
-    if (tl_type == KDB_TL_KEYINFO) {
-	if (keyfound)
-	    return 0;
-	else
-	    return EINVAL;
-    }
-    return EINVAL;
+    return st;
 }
 
 /*
@@ -829,24 +790,25 @@ krb5_get_princ_count(context, entries, pcount)
 }
 
 krb5_error_code
-krb5_get_secretkeys(context, entries, secretkey)
+krb5_get_linkdn(context, entries, link_dn)
     krb5_context                context;
     krb5_db_entry               *entries;
-    KEY                         **secretkey;
+    char                        ***link_dn;
 {
     krb5_error_code             st=0;
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
-
+    
+    *link_dn = NULL;
     tl_data.tl_data_type = KDB_TL_USER_INFO;
     if (((st=krb5_dbe_lookup_tl_data(context, entries, &tl_data)) != 0) || tl_data.tl_data_length == 0)
 	goto cleanup;
-
-    if (decode_tl_data(&tl_data, KDB_TL_KEYINFO, &voidptr) == 0) {
-	*secretkey = (KEY *) voidptr;
+    
+    if (decode_tl_data(&tl_data, KDB_TL_LINKDN, &voidptr) == 0) {
+	*link_dn = (char **) voidptr;
     }
 
-cleanup:
+ cleanup:
     return st;
 }
 
@@ -861,7 +823,7 @@ krb5_get_str_from_tl_data(context, entries, type, strval)
     krb5_tl_data                tl_data;
     void                        *voidptr=NULL;
 
-    if (type != KDB_TL_USERDN && type != KDB_TL_CONTAINERDN && type != KDB_TL_TKTPOLICYDN) {
+    if (type != KDB_TL_USERDN && type != KDB_TL_CONTAINERDN) {
 	st = EINVAL;
 	goto cleanup;
     }
@@ -898,15 +860,6 @@ krb5_get_containerdn(context, entries, containerdn)
     return krb5_get_str_from_tl_data(context, entries, KDB_TL_CONTAINERDN, containerdn);
 }
 
-krb5_error_code
-krb5_get_policydn(context, entries, policydn)
-    krb5_context                context;
-    krb5_db_entry               *entries;
-    char                        **policydn;
-{
-    *policydn = NULL;
-    return krb5_get_str_from_tl_data(context, entries, KDB_TL_TKTPOLICYDN, policydn);
-}
 /*
  * This function reads the attribute values (if the attribute is
  * non-null) from the dn.  The read attribute values is compared
@@ -1301,6 +1254,59 @@ krb5_ldap_get_string(ld, ent, attribute, retstr, attr_present)
     return st;
 }
 
+/*
+ * krb5_ldap_get_strings() - Returns all the values
+ * of the attribute.
+ */
+krb5_error_code
+krb5_ldap_get_strings(ld, ent, attribute, retarr, attr_present)
+    LDAP                        *ld;
+    LDAPMessage                 *ent;
+    char                        *attribute;
+    char                        ***retarr;
+    krb5_boolean                *attr_present;
+{
+    char                           **values=NULL;
+    krb5_error_code                st=0;
+    int                            i=0, count=0;
+                                                                                                                             
+    *retarr = NULL;
+    if (attr_present != NULL)
+      *attr_present = FALSE;
+                                                                                                                             
+    values=ldap_get_values(ld, ent, attribute);
+    if (values != NULL) {
+        if (attr_present != NULL)
+            *attr_present = TRUE;
+                                                                                                                             
+        count = ldap_count_values(values);
+        *retarr  = (char **) calloc(count+1, sizeof(char *));
+        if (*retarr == NULL) {
+            st = ENOMEM;
+            return st;
+        }
+        for (i=0; i< count; ++i) {
+            (*retarr)[i] = strdup(values[i]);
+            if ((*retarr)[i] == NULL) {
+                st = ENOMEM;
+                goto cleanup;
+            }
+        }
+        ldap_value_free(values);
+    }
+
+cleanup:
+    if (st != 0) {
+        if (*retarr != NULL) {
+            for (i=0; i< count; ++i)
+                if ((*retarr)[i] != NULL)
+                    free ((*retarr)[i]);
+            free (*retarr);
+        }
+    }
+    return st;
+}
+
 krb5_error_code
 krb5_ldap_get_time(ld, ent, attribute, rettime, attr_present)
     LDAP                        *ld;
@@ -1374,6 +1380,8 @@ krb5_add_str_mem_ldap_mod(mods, attribute, op, values)
     if ((*mods)[i]->mod_type == NULL)
 	return ENOMEM;
     (*mods)[i]->mod_op = op;
+
+    (*mods)[i]->mod_values = NULL;
 
     if (values != NULL) {
 	for (j=0; values[j] != NULL; ++j)
@@ -1549,4 +1557,275 @@ void
 krb5_ldap_release_errcode_string(krb5_context kcontext, const char *msg)
 {
     krb5_free_error_message(kcontext, msg);
+}
+
+                                                                                                                             
+/*
+ * Get the number of times an object has been referred to in a realm. this is
+ * needed to find out if deleting the attribute will cause dangling links.
+ *
+ * An LDAP handle may be optionally specified to prevent race condition - there
+ * are a limited number of LDAP handles.
+ */
+krb5_error_code
+krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
+        int *count, LDAP *ld) {
+    int                         i, ntrees, st = 0, tempst = 0, gothandle = 0;
+    char                        *refcntattr[2];
+    char                        *filter = NULL;
+    char                        **subtree = NULL, *ptr = NULL;
+    kdb5_dal_handle             *dal_handle = NULL;
+    krb5_ldap_context           *ldap_context = NULL;
+    krb5_ldap_server_handle     *ldap_server_handle = NULL;
+    LDAPMessage                 *result = NULL;
+                                                                                                                             
+                                                                                                                             
+    if (dn == NULL || refattr == NULL) {
+        st = EINVAL;
+        goto cleanup;
+    }
+                                                                                                                             
+    SETUP_CONTEXT();
+    if (ld == NULL) {
+        GET_HANDLE();
+        gothandle = 1;
+    }
+                                                                                                                             
+    refcntattr [0] = refattr;
+    refcntattr [1] = NULL;
+                                                                                                                             
+    ptr = ldap_filter_correct (dn, strlen (dn));
+    if (ptr == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+                                                                                                                             
+    filter = (char *) malloc (strlen (refattr) + strlen (ptr) + 2);
+    if (filter == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+                                                                                                                             
+    sprintf (filter, "%s=%s", refattr, ptr);
+                                                                                                                             
+    if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntrees)) != 0)
+        goto cleanup;
+                                                                                                                             
+    for (i = 0, *count = 0; i < ntrees; i++) {
+        int n;
+                                                                                                                             
+        LDAP_SEARCH(subtree[i],
+                LDAP_SCOPE_SUB,
+                filter,
+                refcntattr);
+        n = ldap_count_entries (ld, result);
+        if (n == -1) {
+            int ret, errcode = 0;
+            ret = ldap_parse_result (ld, result, &errcode, NULL, NULL, NULL, NULL, 0);
+            if (ret != LDAP_SUCCESS)
+                errcode = ret;
+            st = translate_ldap_error (errcode, OP_SEARCH);
+            goto cleanup;
+        }
+                                                                                                                             
+        ldap_msgfree(result);
+        result = NULL;
+                                                                                                                             
+        *count += n;
+    }
+                                                                                                                             
+cleanup:
+    if (filter != NULL)
+        free (filter);
+                                                                                                                             
+    if (result != NULL)
+        ldap_msgfree (result);
+                                                                                                                             
+    if (subtree != NULL) {
+        for (i = 0; i < ntrees; i++)
+            free (subtree[i]);
+        free (subtree);
+    }
+                                                                                                                             
+    if (ptr != NULL)
+        free (ptr);
+                                                                                                                             
+    if (gothandle == 1)
+        krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
+                                                                                                                             
+    return st;
+}
+                                                                                                                             
+/*
+ * For now, policy objects are expected to be directly under the realm
+ * container.
+ */
+krb5_error_code krb5_ldap_policydn_to_name (context, policy_dn, name)
+    krb5_context                context;
+    char                        *policy_dn;
+    char                        **name;
+{
+    int len1, len2;
+    krb5_error_code             st = 0;
+    kdb5_dal_handle             *dal_handle=NULL;
+    krb5_ldap_context           *ldap_context=NULL;
+                                                                                                                             
+    SETUP_CONTEXT();
+                                                                                                                             
+    if (ldap_context->lrparams->realmdn == NULL) {
+        st = EINVAL;
+        goto cleanup;
+    }
+                                                                                                                             
+    len1 = strlen (ldap_context->lrparams->realmdn);
+    len2 = strlen (policy_dn);
+    if (len1 == 0 || len2 == 0 || len1 > len2) {
+        st = EINVAL;
+        goto cleanup;
+    }
+                                                                                                                             
+    if (strcmp (ldap_context->lrparams->realmdn, policy_dn + (len2 - len1)) != 0) {
+        st = EINVAL;
+        goto cleanup;
+    }
+                                                                                                                             
+    {
+        char *rdn;
+        LDAPDN dn;
+        rdn = strndup(policy_dn, len2 - len1 - 1); /* 1 character for ',' */
+                                                                                                                             
+        if (ldap_str2dn (rdn, &dn, LDAP_DN_FORMAT_LDAPV3 | LDAP_DN_PEDANTIC) != 0) {
+            st = EINVAL;
+            goto cleanup;
+        }
+        if (dn[0] == NULL || dn[1] != NULL)
+            st = EINVAL;
+        else if (strcasecmp (dn[0][0]->la_attr.bv_val, "cn") != 0)
+            st = EINVAL;
+        else
+            *name = strndup(dn[0][0]->la_value.bv_val, dn[0][0]->la_value.bv_len);
+                                                                                                                             
+        ldap_memfree (dn);
+    }
+cleanup:
+    return st;
+}
+                                                                                                                             
+krb5_error_code krb5_ldap_name_to_policydn (context, name, policy_dn)
+    krb5_context                context;
+    char                        *name;
+    char                        **policy_dn;
+{
+    int                         len;
+    char                        *ptr = NULL;
+    krb5_error_code             st = 0;
+    kdb5_dal_handle             *dal_handle=NULL;
+    krb5_ldap_context           *ldap_context=NULL;
+
+    *policy_dn = NULL;
+
+    /* validate the input parameters */
+    if(name == NULL) {
+        st = EINVAL;
+        goto cleanup;
+    }
+
+    /* Used for removing policy reference from an object */
+    if (name[0] == '\0') {
+	if ((*policy_dn = strdup ("")) == NULL)
+	    st = ENOMEM;
+	goto cleanup;
+    }
+
+    SETUP_CONTEXT();
+
+    if (ldap_context->lrparams->realmdn == NULL) {
+        st = EINVAL;
+        goto cleanup;
+    }
+    len = strlen (ldap_context->lrparams->realmdn);
+
+    ptr = ldap_filter_correct (name, strlen (name));
+    if (ptr == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+    len += strlen (ptr);
+
+    len += sizeof ("cn=") + 3;
+
+    *policy_dn = (char *) malloc (len);
+    if (*policy_dn == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+
+    sprintf (*policy_dn, "cn=%s,%s", ptr, ldap_context->lrparams->realmdn);
+
+cleanup:
+    if (ptr != NULL)
+        free (ptr);
+    return st;
+}
+
+/* remove overlapping and repeated subtree entries from the list of subtrees */
+krb5_error_code remove_overlapping_subtrees( char **listin, char ***listop, int *subtcount, int sscope)
+{
+    int     slen=0, k=0, j=0, lendiff=0;
+    int     count = *subtcount;
+    char    **subtree = *listop;
+
+    slen = count-1;
+    for (k=0; k<=slen && listin[k]!=NULL ; k++) {
+        for (j=k+1; j<=slen && listin[j]!=NULL ;j++) {
+            lendiff = strlen(listin[k]) - strlen(listin[j]);
+            if (sscope == 2) {
+                if ((lendiff > 0) && (strcasecmp((listin[k])+lendiff, listin[j])==0)) {
+                    if (k != slen ) {
+                        free(listin[k]);
+                        listin[k] = listin[slen];
+                        listin[slen] = NULL;
+                    } else {
+                        free(listin[k]);
+                        listin[k] = NULL;
+                    }
+                    slen-=1;
+                    k-=1;
+                    break;
+                }
+                else if ((lendiff < 0) && (strcasecmp((listin[j])+lendiff, listin[k])==0)) {
+                    if (j != slen ) {
+                        free(listin[j]);
+                        listin[j] = listin[slen];
+                        listin[slen]=NULL;
+                    } else {
+                        free(listin[j]);
+                        listin[j] = NULL;
+                    }
+                    slen-=1;
+ 		    j-=1;
+                }
+	    }
+            if ((lendiff == 0) && (strcasecmp(listin[j], listin[k])==0)) {
+                if (j != slen) {
+                    free(listin[j]);
+                    listin[j] = listin[slen];
+                    listin[slen]=NULL;
+                } else {
+                    free(listin[j]);
+                    listin[j] = NULL;
+                }
+                slen -=1;
+                j-=1;
+            }
+        }
+    }
+    *subtcount=slen+1;
+    for(k=0; k<*subtcount && listin[k]!=NULL; k++) {
+        subtree[k] = strdup(listin[k]);
+        if (subtree[k] == NULL) {
+            return ENOMEM;
+        }
+    }
+    return 0;
 }

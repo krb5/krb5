@@ -47,6 +47,7 @@
 #define LDAP_REALM_MAXTICKETLIFE      0x1000
 #define LDAP_REALM_MAXRENEWLIFE       0x2000
 #define LDAP_REALM_KRBTICKETFLAGS     0x4000
+#define LDAP_REALM_CONTREF  	      0x8000 
 
 extern char *policy_attributes[];
 
@@ -57,10 +58,12 @@ extern char *realm_attributes[];
 typedef struct _krb5_ldap_realm_params {
   char          *realmdn;
   char          *realm_name;
-  char          *subtree;
+  char          **subtree; 
+  char		*containerref;  
   char          *policyreference;
   int           search_scope;
   int           upenabled;
+  int 		subtreecount;
   krb5_int32    max_life;
   krb5_int32    max_renewable_life;
   krb5_int32    tktflags;

@@ -34,11 +34,11 @@
 #include "ldap_err.h"
 
 #define END_OF_LIST -1
-char  *realm_attributes[] = {"krbSearchScope","krbSubTree",
+char  *realm_attributes[] = {"krbSearchScope","krbSubTrees", "krbPrincContainerRef", 
 			     "krbMaxTicketLife", "krbMaxRenewableAge",
 			     "krbTicketFlags", "krbDefaultEncType",
 			     "krbDefaultSaltType", "krbUpEnabled",
-			     "krbPolicyReference", "krbSupportedEncTypes",
+			     "krbTicketPolicyReference", "krbSupportedEncTypes",
 			     "krbSupportedSaltTypes", "krbLdapServers",
 			     "krbKdcServers",  "krbAdmServers",
 			     "krbPwdServers", NULL};
@@ -51,12 +51,12 @@ char  *policy_attributes[] = { "krbMaxTicketLife",
 
 
 
-char  *policyclass[] =     { "krbPolicy", NULL };
+char  *policyclass[] =     { "krbTicketPolicy", NULL };
 char  *kdcclass[] =        { "krbKdcService", NULL };
 char  *adminclass[] =      { "krbAdmService", NULL };
 char  *pwdclass[] =        { "krbPwdService", NULL };
-char  *subtreeclass[] =    { "Organization", "OrganizationalUnit", "Domain",
-			     "Country", "Locality", NULL };
+char  *subtreeclass[] =    { "Organization", "OrganizationalUnit", "Domain", "krbContainer",
+                             "krbRealmContainer", "Country", "Locality", NULL };
 
 int supportedenctypes[] = { ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD4, ENCTYPE_DES_CBC_MD5,
 			    ENCTYPE_DES3_CBC_SHA1, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
@@ -99,8 +99,7 @@ ignore_duplicates(int_list)
  * Function to remove all special characters from a string (rfc2254).
  * Use whenever exact matching is to be done ...
  */
-static char *
-ldap_filter_correct (unsigned char *in, unsigned int len)
+char *ldap_filter_correct (unsigned char *in, unsigned int len)
 {
     int i, count;
     char *out, *ptr;
@@ -263,7 +262,6 @@ cleanup:
     return st;
 }
 
-
 /*
  * Delete the realm along with the principals belonging to the realm in the Directory.
  */
@@ -275,8 +273,8 @@ krb5_ldap_delete_realm (context, lrealm)
 {
     LDAP                        *ld = NULL;
     krb5_error_code             st = 0, tempst=0;
-    char                        **values=NULL, *subtrees[2]={NULL};;
-    LDAPMessage                 *result_arr[3]={NULL}, *result = NULL, *ent = NULL;
+    char                        **values=NULL, **subtrees=NULL, **policy=NULL;
+    LDAPMessage                 **result_arr=NULL, *result = NULL, *ent = NULL;
     krb5_principal              principal;
     int                         l=0, ntree=0, i=0, j=0, mask=0;
     kdb5_dal_handle             *dal_handle = NULL;
@@ -313,8 +311,14 @@ krb5_ldap_delete_realm (context, lrealm)
 	/* LDAP_SEARCH(NULL, LDAP_SCOPE_SUBTREE, filter, attr); */
 	memset(&lcontext, 0, sizeof(krb5_ldap_context));
 	lcontext.lrparams = rparam;
-	if ((st=krb5_get_subtree_info(&lcontext, subtrees, &ntree)) != 0)
+	if ((st=krb5_get_subtree_info(&lcontext, &subtrees, &ntree)) != 0)
 	    goto cleanup;
+
+        result_arr = (LDAPMessage **)  calloc(ntree+1, sizeof(LDAPMessage *));
+        if (result_arr == NULL) {
+            st = ENOMEM;
+            goto cleanup;
+        }
 
 	for (l=0; l < ntree; ++l) {
 	    LDAP_SEARCH(subtrees[l], rparam->search_scope, filter, attr);
@@ -348,6 +352,28 @@ krb5_ldap_delete_realm (context, lrealm)
 	ldap_msgfree(result);
     }
 
+    /* Delete all password policies */
+    {
+	char *attr[] = {NULL}, filter[256];
+
+	void delete_password_policy (krb5_pointer ptr, osa_policy_ent_t pol) {
+	    krb5_ldap_delete_password_policy (context, pol->name);
+	}
+
+	krb5_ldap_iterate_password_policy (context, "*", delete_password_policy, NULL);
+    }
+
+    /* Delete all ticket policies */
+    {
+	if ((st = krb5_ldap_list_policy (context, ldap_context->lrparams->realmdn, &policy)) != 0) {
+	    prepend_err_str (context, "Error reading ticket policy: ", st, st);
+	    goto cleanup;
+	}
+
+	for (i = 0; policy [i] != NULL; i++)
+	    krb5_ldap_delete_policy(context, policy[i]);
+    }
+
     /* Delete the realm object */
     if ((st=ldap_delete_ext_s(ld, ldap_context->lrparams->realmdn, NULL, NULL)) != LDAP_SUCCESS) {
 	int ost = st;
@@ -357,10 +383,20 @@ krb5_ldap_delete_realm (context, lrealm)
     }
 
 cleanup:
-    for (l=0; l < ntree; ++l) {
+    if (subtrees) {
+	for (l=0; l < ntree; ++l) {
 	if (subtrees[l])
 	    free (subtrees[l]);
+        }
+	free (subtrees);
     }
+
+    if (policy != NULL) {
+	for (i = 0; policy[i] != NULL; i++)
+	    free (policy[i]);
+	free (policy);
+    }
+
     krb5_ldap_free_realm_params(rparam);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
@@ -388,8 +424,8 @@ krb5_ldap_modify_realm(context, rparams, mask)
     int                      mask;
 {
     LDAP                  *ld=NULL;
-    krb5_error_code       st=0;
-    char                  *strval[5]={NULL};
+    krb5_error_code       st=0, retval=0;
+    char                  **strval=NULL, *strvalprc[5]={NULL};
 #ifdef HAVE_EDIRECTORY
     char                  **values=NULL;
     char                  **oldkdcservers=NULL, **oldadminservers=NULL, **oldpasswdservers=NULL;
@@ -398,7 +434,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
     char errbuf[1024];
 #endif
     LDAPMod               **mods = NULL;
-    int                   i=0, oldmask=0, objectmask=0;
+    int                   i=0, oldmask=0, objectmask=0,k=0,part_of_subtree=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
@@ -418,6 +454,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	rparams->tl_data == NULL ||
 	rparams->tl_data->tl_data_contents == NULL ||
 	((mask & LDAP_REALM_SUBTREE) && rparams->subtree == NULL) ||
+	((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
 	/* This has to be fixed ... */
 	((mask & LDAP_REALM_DEFENCTYPE) && rparams->suppenctypes == NULL) ||
 	((mask & LDAP_REALM_DEFSALTTYPE) && rparams->suppsalttypes == NULL) ||
@@ -467,16 +504,35 @@ krb5_ldap_modify_realm(context, rparams, mask)
 
     /* SUBTREE ATTRIBUTE */
     if (mask & LDAP_REALM_SUBTREE) {
-	if (strlen(rparams->subtree) != 0) {
-	    st = checkattributevalue(ld, rparams->subtree, "Objectclass", subtreeclass,
-				     &objectmask);
-	    CHECK_CLASS_VALIDITY(st, objectmask, "subtree value: ");
-	}
-	memset(strval, 0, sizeof(strval));
-	strval[0] = rparams->subtree;
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbsubtree", LDAP_MOD_REPLACE,
-					  strval)) != 0)
-	    goto cleanup;
+        if ( rparams->subtree!=NULL)  {
+            /*replace the subtrees with the present if the subtrees are present*/
+            for(k=0;k<rparams->subtreecount && rparams->subtree[k]!=NULL;k++) {
+                    if (strlen(rparams->subtree[k]) != 0) {
+                        st = checkattributevalue(ld, rparams->subtree[k], "Objectclass", subtreeclass,
+                                &objectmask);
+                        CHECK_CLASS_VALIDITY(st, objectmask, "subtree value: ");
+                    }
+            }
+	    strval = rparams->subtree;
+	    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbsubtrees", LDAP_MOD_REPLACE,
+					    strval)) != 0) {
+	       goto cleanup;
+	    }
+        }
+    }
+
+    /* CONTAINERREF ATTRIBUTE */
+    if (mask & LDAP_REALM_CONTREF) {
+        if (strlen(rparams->containerref) != 0 ) {
+            st = checkattributevalue(ld, rparams->containerref, "Objectclass", subtreeclass,
+                     &objectmask);
+            CHECK_CLASS_VALIDITY(st, objectmask, "container reference value: ");
+            strvalprc[0] = rparams->containerref;
+            strvalprc[1] = NULL;
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbPrincContainerRef", LDAP_MOD_REPLACE,
+                            strvalprc)) != 0)
+                goto cleanup;
+        }
     }
 
     /* SEARCHSCOPE ATTRIBUTE */
@@ -728,9 +784,11 @@ krb5_ldap_modify_realm(context, rparams, mask)
 #endif
 
     /* Realm modify opearation */
-    if ((st=ldap_modify_ext_s(ld, rparams->realmdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
-	st = set_ldap_error (context, st, OP_MOD);
-	goto cleanup;
+    if (mods != NULL) {
+        if ((st=ldap_modify_ext_s(ld, rparams->realmdn, mods, NULL, NULL)) != LDAP_SUCCESS) {
+	    st = set_ldap_error (context, st, OP_MOD);
+	    goto cleanup;
+        }
     }
 
 #ifdef HAVE_EDIRECTORY
@@ -932,7 +990,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "cn", LDAP_MOD_ADD, strval)) != 0)
 	goto cleanup;
 
-    /* check if the policy reference value exists and is of krbpolicyreference object class */
+    /* check if the policy reference value exists and is of krbticketpolicyreference object class */
     if (krbcontparams && krbcontparams->policyreference) {
 	st = checkattributevalue(ld, krbcontparams->policyreference, "objectclass", policyclass,
 				 &pmask);
@@ -940,7 +998,7 @@ krb5_ldap_create_krbcontainer(context, krbcontparams)
 
 	strval[0] = krbcontparams->policyreference;
 	strval[1] = NULL;
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpolicyreference", LDAP_MOD_ADD,
+	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_ADD,
 					  strval)) != 0)
 	    goto cleanup;
     }
@@ -1016,8 +1074,9 @@ krb5_ldap_create_realm(context, rparams, mask)
     krb5_error_code             st=0;
     char                        *dn=NULL;
     char                        *strval[4]={NULL};
+    char		        *contref[2]={NULL}; 
     LDAPMod                     **mods = NULL;
-    int                         i=0, objectmask=0;
+    int                         i=0, objectmask=0, subtreecount=0,k=0, part_of_subtree=0; 
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
@@ -1034,6 +1093,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 	rparams == NULL ||
 	rparams->realm_name == NULL ||
 	((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
+	((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) || 
 	((mask & LDAP_REALM_POLICYREFERENCE) && rparams->policyreference == NULL) ||
 	((mask & LDAP_REALM_SUPPSALTTYPE) && rparams->suppsalttypes == NULL) ||
 	((mask & LDAP_REALM_SUPPENCTYPE) && rparams->suppenctypes == NULL) ||
@@ -1069,7 +1129,7 @@ krb5_ldap_create_realm(context, rparams, mask)
 
     strval[0] = "top";
     strval[1] = "krbrealmcontainer";
-    strval[2] = "krbpolicyaux";
+    strval[2] = "krbticketpolicyaux"; 
     strval[3] = NULL;
 
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
@@ -1077,17 +1137,34 @@ krb5_ldap_create_realm(context, rparams, mask)
 
     /* SUBTREE ATTRIBUTE */
     if (mask & LDAP_REALM_SUBTREE) {
-	if (strlen(rparams->subtree) != 0) {
-	    st = checkattributevalue(ld, rparams->subtree, "Objectclass", subtreeclass,
-				     &objectmask);
-	    CHECK_CLASS_VALIDITY(st, objectmask, "realm object value: ");
-
+        if ( rparams->subtree!=NULL)  {
+              subtreecount = rparams->subtreecount;
+	      for (i=0; rparams->subtree[i]!=NULL && i<subtreecount; i++) {
+	          if (strlen(rparams->subtree[i]) != 0) {
+                      st = checkattributevalue(ld, rparams->subtree[i], "Objectclass", subtreeclass,
+                             &objectmask);
+                      CHECK_CLASS_VALIDITY(st, objectmask, "realm object value: ");
+		  }
+	      }
+	      if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbsubtrees", LDAP_MOD_ADD,
+                              rparams->subtree)) != 0) {
+	         goto cleanup;
+	      }
 	}
-	strval[0] = rparams->subtree;
-	strval[1] = NULL;
-	if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbsubtree", LDAP_MOD_ADD,
-					  strval)) != 0)
-	    goto cleanup;
+    }
+
+    /* CONTAINER REFERENCE ATTRIBUTE */
+    if (mask & LDAP_REALM_CONTREF) {
+        if (strlen(rparams->containerref) != 0 ) {
+            st = checkattributevalue(ld, rparams->containerref, "Objectclass", subtreeclass,
+                             &objectmask);
+            CHECK_CLASS_VALIDITY(st, objectmask, "realm object value: ");
+            contref[0] = rparams->containerref;
+            contref[1] = NULL;
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbPrincContainerRef", LDAP_MOD_ADD,
+                                              contref)) != 0)
+                goto cleanup;
+        }
     }
 
     /* SEARCHSCOPE ATTRIBUTE */
@@ -1123,110 +1200,6 @@ krb5_ldap_create_realm(context, rparams, mask)
 	    goto cleanup;
     }
 
-
-    /* DEFAULTENCTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_DEFENCTYPE) {
-	/* check if the entered enctype is valid */
-	if (krb5_c_valid_enctype(rparams->defenctype)) {
-
-	    /* check if the defenctype exists in the suppenctypes list */
-	    if (mask & LDAP_REALM_SUPPENCTYPE) {
-		for (i=0; rparams->suppenctypes[i] != END_OF_LIST; ++i)
-		    if (rparams->defenctype == rparams->suppenctypes[i])
-			break;
-
-		if (rparams->suppenctypes[i] == END_OF_LIST) {
-		    st = EINVAL;
-		    krb5_set_error_message (context, st, "Default enctype not in the "
-					    "supported list");
-		    goto cleanup;
-		}
-	    }
-	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbdefaultenctype", LDAP_MOD_ADD,
-					      rparams->defenctype)) != 0)
-		goto cleanup;
-	} else {
-	    st = EINVAL;
-	    krb5_set_error_message (context, st, "Default enctype not valid");
-	    goto cleanup;
-	}
-    }
-
-    /* DEFAULTSALTTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_DEFSALTTYPE) {
-	/* check if the entered salttype is valid */
-	if (rparams->defsalttype >=0 && rparams->defsalttype<6) {
-
-	    /* check if the defsalttype exists in the suppsalttypes list */
-	    if (mask & LDAP_REALM_SUPPSALTTYPE) {
-		for (i=0; rparams->suppsalttypes[i] != END_OF_LIST; ++i)
-		    if (rparams->defsalttype == rparams->suppsalttypes[i])
-			break;
-
-		if (rparams->suppsalttypes[i] == END_OF_LIST) {
-		    st = EINVAL;
-		    krb5_set_error_message (context, st,
-					    "Default salttype not in the supported list");
-		    goto cleanup;
-		}
-	    }
-
-	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbdefaultsalttype", LDAP_MOD_ADD,
-					      rparams->defsalttype)) != 0)
-		goto cleanup;
-	} else {
-	    st = EINVAL;
-	    krb5_set_error_message (context, st, "Default salttype not valid");
-	    goto cleanup;
-	}
-    }
-
-    /* SUPPORTEDSALTTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_SUPPSALTTYPE) {
-	for (i=0; rparams->suppsalttypes[i] != END_OF_LIST; ++i) {
-	    /* check if the salttypes entered is valid */
-	    if (!(rparams->suppsalttypes[i]>=0 && rparams->suppsalttypes[i]<6)) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "Salttype %d not valid",
-					rparams->suppsalttypes[i]);
-		goto cleanup;
-	    }
-	}
-	ignore_duplicates(rparams->suppsalttypes);
-
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedsalttypes", LDAP_MOD_ADD,
-					      rparams->suppsalttypes)) != 0)
-	    goto cleanup;
-    } else {
-	/* set all the salt types as the suppsalttypes */
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedsalttypes", LDAP_MOD_ADD,
-					      supportedsalttypes)) != 0)
-	    goto cleanup;
-    }
-
-    /* SUPPORTEDENCTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_SUPPENCTYPE) {
-	for (i=0; rparams->suppenctypes[i] != -1; ++i) {
-
-	    /* check if the enctypes entered is valid */
-	    if (krb5_c_valid_enctype(rparams->suppenctypes[i]) == 0) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "Enctype %d not valid",
-					rparams->suppenctypes[i]);
-		goto cleanup;
-	    }
-	}
-	ignore_duplicates(rparams->suppenctypes);
-
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedenctypes", LDAP_MOD_ADD,
-					      rparams->suppenctypes)) != 0)
-	    goto cleanup;
-    } else {
-	/* set all the enc types as the suppenctypes */
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedenctypes", LDAP_MOD_ADD,
-					      supportedenctypes)) != 0)
-	    goto cleanup;
-    }
 
 #ifdef HAVE_EDIRECTORY
 
@@ -1347,6 +1320,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context      *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
+    int valcount=0, x=0;
 
     SETUP_CONTEXT ();
 
@@ -1402,6 +1376,15 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 
     LDAP_SEARCH(rlparams->realmdn, LDAP_SCOPE_BASE, "(objectclass=krbRealmContainer)", realm_attributes);
 
+    if ((st = ldap_count_entries(ld, result)) == 0)
+    {
+        /* This could happen when the DN used to bind and read the realm object
+         * does not have sufficient rights to read its attributes
+         */
+        st = KRB5_KDB_ACCESS_ERROR; /* return some other error ? */
+        goto cleanup;
+    }
+
     ent = ldap_first_entry (ld, result);
     if (ent == NULL) {
 	ldap_get_option (ld, LDAP_OPT_ERROR_NUMBER, (void *) &st);
@@ -1413,16 +1396,34 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 
     /* Read the attributes */
     {
-
-	if ((values=ldap_get_values(ld, ent, "krbSubTree")) != NULL) {
-	    rlparams->subtree = strdup(values[0]);
-	    if (rlparams->subtree==NULL) {
+	if ((values=ldap_get_values(ld, ent, "krbSubTrees")) != NULL) {
+            rlparams->subtreecount = ldap_count_values(values);
+            rlparams->subtree = (char **) malloc(sizeof(char *) * (rlparams->subtreecount + 1));
+	    if (rlparams->subtree == NULL) {
 		st = ENOMEM;
 		goto cleanup;
 	    }
+            for (x=0; x<rlparams->subtreecount; x++) {
+                rlparams->subtree[x] = strdup(values[x]);
+	        if (rlparams->subtree[x] == NULL) {
+		    st = ENOMEM;
+		    goto cleanup;
+	        }
+            }
+            rlparams->subtree[rlparams->subtreecount] = NULL;
 	    *mask |= LDAP_REALM_SUBTREE;
 	    ldap_value_free(values);
 	}
+
+        if((values=ldap_get_values(ld, ent, "krbPrincContainerRef")) != NULL) {
+            rlparams->containerref = strdup(values[0]);
+            if(rlparams->containerref == NULL) {
+                st = ENOMEM;
+                goto cleanup;
+            }
+            *mask |= LDAP_REALM_CONTREF;
+            ldap_value_free(values);
+        }
 
 	if ((values=ldap_get_values(ld, ent, "krbSearchScope")) != NULL) {
 	    rlparams->search_scope=atoi(values[0]);
@@ -1600,8 +1601,11 @@ krb5_ldap_free_realm_params(rparams)
 	if (rparams->realm_name)
 	    krb5_xfree(rparams->realm_name);
 
-	if (rparams->subtree)
+	if (rparams->subtree) {
+	    for (i=0; i<rparams->subtreecount && rparams->subtree[i] ; i++)
+	        krb5_xfree(rparams->subtree[i]);
 	    krb5_xfree(rparams->subtree);
+        }
 
 	if (rparams->suppenctypes)
 	    krb5_xfree(rparams->suppenctypes);

@@ -32,7 +32,7 @@
 #include "kdb_ldap.h"
 #include "ldap_err.h"
 
-char    *policyrefattribute[] = {"krbPolicyReference",NULL};
+char    *policyrefattribute[] = {"krbTicketPolicyReference",NULL};
 char    *krbcontainerrefattr[] = {"krbContainerReference", NULL};
 
 /*
@@ -169,7 +169,7 @@ krb5_ldap_read_krbcontainer_params(krb5_context	context,
 #endif
 
     if ((ent = ldap_first_entry(ld, result))) {
-	if ((st=krb5_ldap_get_string(ld, ent, "krbpolicyreference",
+	if ((st=krb5_ldap_get_string(ld, ent, "krbticketpolicyreference",
 				     &(cparams->policyreference), NULL)) != 0)
 	    goto cleanup;
     }

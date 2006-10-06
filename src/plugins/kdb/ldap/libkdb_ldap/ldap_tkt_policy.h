@@ -40,12 +40,11 @@
 /* policy object structure */
 
 typedef struct _krb5_ldap_policy_params {
-  char                  *policydn;
+  char                  *policy;
   long                  mask;
   long                  maxtktlife;
   long                  maxrenewlife;
   long                  tktflags;
-  long                  polrefcount;
   krb5_tl_data          *tl_data;
 }krb5_ldap_policy_params;
 
@@ -59,7 +58,7 @@ krb5_error_code
 krb5_ldap_read_policy(krb5_context, char *, krb5_ldap_policy_params **, int *);
 
 krb5_error_code
-krb5_ldap_delete_policy(krb5_context, char *, krb5_ldap_policy_params *, int);
+krb5_ldap_delete_policy(krb5_context, char *);
 
 krb5_error_code
 krb5_ldap_clear_policy(krb5_context, char *);

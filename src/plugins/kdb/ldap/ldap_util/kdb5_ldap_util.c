@@ -111,7 +111,7 @@ void usage()
 "\tcmd [cmd_options]\n"
 
 /* Create realm */
-"create          [-subtree subtree_dn] [-sscope search_scope]\n"
+"create          [-subtrees subtree_dn_list] [-sscope search_scope] [-containerref container_reference_dn]\n"
 #ifdef HAVE_EDIRECTORY
 "\t\t[-kdcdn kdc_service_list] [-admindn admin_service_list]\n"
 "\t\t[-pwddn passwd_service_list]\n"
@@ -121,7 +121,7 @@ void usage()
 "\t\t[ticket_flags] [-r realm]\n"
 
 /* modify realm */
-"modify          [-subtree subtree_dn] [-sscope search_scope]\n"
+"modify          [-subtrees subtree_dn_list] [-sscope search_scope] [-containerref container_reference_dn]\n"
 #ifdef HAVE_EDIRECTORY
 "\t\t[-kdcdn kdc_service_list |\n"
 "\t\t[-clearkdcdn kdc_service_list] [-addkdcdn kdc_service_list]]\n"
@@ -173,21 +173,21 @@ void usage()
 #endif
 
 /* Create policy */
-"create_policy   [-maxtktlife max_ticket_life]\n"
-"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy_dn\n"
+"create_policy   [-r realm] [-maxtktlife max_ticket_life]\n"
+"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy\n"
 
 /* Modify policy */
-"modify_policy   [-maxtktlife max_ticket_life]\n"
-"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy_dn\n"
+"modify_policy   [-r realm] [-maxtktlife max_ticket_life]\n"
+"\t\t[-maxrenewlife max_renewable_ticket_life] [ticket_flags] policy\n"
 
 /* View policy */
-"view_policy     policy_dn\n"
+"view_policy     [-r realm] policy\n"
 
 /* Destroy policy */
-"destroy_policy  [-force] policy_dn\n"
+"destroy_policy  [-r realm] [-force] policy\n"
 
 /* List policies */
-"list_policy     [-basedn base_dn]\n"
+"list_policy     [-r realm]\n"
 
 	);
 }
@@ -300,7 +300,7 @@ int main(argc, argv)
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
     char *value = NULL, *conf_section = NULL;
-    krb5_boolean realm_name_required = FALSE;
+    krb5_boolean realm_name_required = TRUE;
     krb5_boolean print_help_message = FALSE;
 
     retval = krb5_init_context(&util_context);
@@ -417,12 +417,9 @@ int main(argc, argv)
     /* We need to check for the presence of default realm name only in
      * the case of realm related operations like create, destroy etc.
      */
-    if ((strcmp(cmd_argv[0], "create") == 0) ||
-	(strcmp(cmd_argv[0], "destroy") == 0) ||
-	(strcmp(cmd_argv[0], "modify") == 0) ||
-	(strcmp(cmd_argv[0], "view") == 0)
-	) {
-	realm_name_required = TRUE;
+    if ((strcmp(cmd_argv[0], "list") == 0) ||
+        (strcmp(cmd_argv[0], "stashsrvpw") == 0)) {
+        realm_name_required = FALSE;
     }
 
     if (!util_context->default_realm) {

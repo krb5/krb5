@@ -37,34 +37,43 @@
 struct timeval timelimit = {300, 0};  /* 5 minutes */
 char     *principal_attributes[] = { "krbprincipalname",
 				     "objectclass",
-				     "krbsecretkey",
+				     "krbprincipalkey",
 				     "krbmaxrenewableage",
 				     "krbmaxticketlife",
 				     "krbticketflags",
 				     "krbprincipalexpiration",
-				     "krbpolicyreference",
+				     "krbticketpolicyreference",
 				     "krbUpEnabled",
 				     "krbpwdpolicyreference",
 				     "krbpasswordexpiration",
+#ifdef  KRBCONF_KDC_MODIFIES_KDB
+                                     "krbLastFailedAuth",
+                                     "krbLoginFailedCount",
+                                     "krbLastSuccessfulAuth",
+#endif
 #ifdef HAVE_EDIRECTORY
 				     "loginexpirationtime",
 				     "logindisabled",
 #endif
 				     "loginexpirationtime",
 				     "logindisabled",
-				     "modifiersname",
 				     "modifytimestamp",
+				     "krbLastPwdChange",
+				     "krbExtraData",
+				     "krbObjectReferences",
 				     NULL };
 
 static char *attributes_set[] = { "krbmaxrenewableage",
 				  "krbmaxticketlife",
 				  "krbticketflags",
 				  "krbprincipalexpiration",
-				  "krbpolicyreference",
+				  "krbticketpolicyreference",
 				  "krbUpEnabled",
 				  "krbpwdpolicyreference",
 				  "krbpasswordexpiration",
-				  "krbsecretkey",
+				  "krbprincipalkey",
+                                  "krblastpwdchange",
+                                  "krbextradata",
 				  NULL };
 
 void
@@ -131,7 +140,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 {
     krb5_db_entry            entry;
     krb5_principal           principal;
-    char                     *subtree[2]={NULL}, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL;
+    char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL; 
     char                     *krbprincipal_attr[] = { "krbPrincipalName", NULL };
     unsigned int             filterlen=0, tree=0, ntree=1, i=0;
     krb5_error_code          st=0, tempst=0;
@@ -163,7 +172,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     memset(filter, 0, filterlen);
     sprintf(filter, FILTER"%s))", match_expr);
 
-    if ((st = krb5_get_subtree_info(ldap_context, subtree, &ntree)) != 0)
+    if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntree)) != 0) 
 	goto cleanup;
 
     GET_HANDLE();
@@ -217,7 +226,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     char                      *user=NULL, *DN=NULL, *strval[10] = {NULL};
     LDAPMod                   **mods=NULL;
     LDAP                      *ld=NULL;
-    int 	              j=0, ptype=KDB_USER_PRINCIPAL, pcount=0, attrsetmask=0;
+    int 	              j=0, ptype=0, pcount=0, attrsetmask=0;
     krb5_error_code           st=0;
     krb5_boolean              singleentry=FALSE;
     KEY                       *secretkey=NULL;
@@ -226,7 +235,6 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     krb5_ldap_server_handle   *ldap_server_handle=NULL;
     krb5_db_entry             entries;
     krb5_boolean              more=0;
-    char * policydn = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -239,9 +247,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
     if (((st=krb5_get_princ_type(context, &entries, &(ptype))) != 0) ||
 	((st=krb5_get_attributes_mask(context, &entries, &(attrsetmask))) != 0) ||
 	((st=krb5_get_princ_count(context, &entries, &(pcount))) != 0) ||
-	((st=krb5_get_userdn(context, &entries, &(DN))) != 0) ||
-	((st=krb5_get_policydn(context, &entries, &policydn)) != 0) ||
-	((st=krb5_get_secretkeys(context, &entries, &secretkey)) != 0))
+	((st=krb5_get_userdn(context, &entries, &(DN))) != 0))
 	goto cleanup;
 
     if (DN == NULL) {
@@ -252,8 +258,13 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 
     GET_HANDLE();
 
-    if (ptype == KDB_USER_PRINCIPAL) {
-
+    if (ptype == KDB_STANDALONE_PRINCIPAL_OBJECT) {
+        st = ldap_delete_ext_s(ld, DN, NULL, NULL);
+        if (st != LDAP_SUCCESS) {
+            st = set_ldap_error (context, st, OP_DEL);
+            goto cleanup;
+        }
+    } else {
 	if (((st=krb5_unparse_name(context, searchfor, &user)) != 0)
 	    || ((st=krb5_ldap_unparse_principal_name(user)) != 0))
 	    goto cleanup;
@@ -267,7 +278,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 	singleentry = (pcount == 1) ? TRUE: FALSE;
 	if (singleentry == FALSE) {
 	    if (secretkey != NULL) {
-		if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbsecretkey", LDAP_MOD_DELETE | LDAP_MOD_BVALUES,
+		if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey", LDAP_MOD_DELETE | LDAP_MOD_BVALUES,
 						  secretkey->keys)) != 0)
 		    goto cleanup;
 	    }
@@ -290,15 +301,11 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 		attrsetmask >>= 1;
 		++j;
 	    }
-	    if (policydn != NULL) {
-		if ((st = krb5_ldap_change_count(context, policydn,2)))
-		    goto cleanup;
-
-	    }
 
 	    /* the same should be done with the objectclass attributes */
 	    {
-		char *attrvalues[] = {"krbpwdpolicyrefaux", "krbpolicyaux", "krbprincipalaux", NULL};
+		char *attrvalues[] = {"krbticketpolicyaux", "krbprincipalaux", NULL};
+//		char *attrvalues[] = {"krbpwdpolicyrefaux", "krbticketpolicyaux", "krbprincipalaux", NULL}; 
 		int p, q, r=0, amask=0;
 
 		if ((st=checkattributevalue(ld, DN, "objectclass", attrvalues, &amask)) != 0)
@@ -318,12 +325,6 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 	st=ldap_modify_ext_s(ld, DN, mods, NULL, NULL);
 	if (st != LDAP_SUCCESS) {
 	    st = set_ldap_error(context, st, OP_MOD);
-	    goto cleanup;
-	}
-    } else if (ptype == KDB_SERVICE_PRINCIPAL) {
-	st = ldap_delete_ext_s(ld, DN, NULL, NULL);
-	if (st != LDAP_SUCCESS) {
-	    st = set_ldap_error (context, st, OP_DEL);
 	    goto cleanup;
 	}
     }

@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <k5-int.h>
+#include <kadm5/admin.h>
 #include "kdb5_ldap_util.h"
 #include "kdb5_ldap_list.h"
 #include "ldap_tkt_policy.h"
@@ -45,6 +46,45 @@ static void print_policy_params(krb5_ldap_policy_params *policyparams, int mask)
 static char *strdur(time_t duration);
 
 extern char *yes;
+extern kadm5_config_params global_params;
+                                                                                                                             
+static krb5_error_code init_ldap_realm (int argc, char *argv[]) {
+    /* This operation is being performed in the context of a realm. So,
+     * initialize the realm */
+    int mask = 0;
+    krb5_error_code retval;
+    kdb5_dal_handle *dal_handle = NULL;
+    krb5_ldap_context *ldap_context=NULL;
+                                                                                                                             
+    dal_handle = (kdb5_dal_handle *) util_context->db_context;
+    ldap_context = (krb5_ldap_context *) dal_handle->db_context;
+    if (!ldap_context) {
+        retval = EINVAL;
+        goto cleanup;
+    }
+                                                                                                                             
+    if (ldap_context->krbcontainer == NULL) {
+        retval = krb5_ldap_read_krbcontainer_params (util_context,
+                &(ldap_context->krbcontainer));
+        if (retval != 0) {
+            com_err(argv[0], retval, "while reading kerberos container information");
+            goto cleanup;
+        }
+    }
+                                                                                                                             
+    if (ldap_context->lrparams == NULL) {
+        retval = krb5_ldap_read_realm_params(util_context,
+                global_params.realm,
+                &(ldap_context->lrparams),
+                &mask);
+                                                                                                                             
+        if (retval != 0) {
+            goto cleanup;
+        }
+    }
+cleanup:
+    return retval;
+}
 
 /*
  * This function will create a ticket policy object with the
@@ -221,12 +261,12 @@ kdb5_ldap_create_policy(argc, argv)
 	} else { /* Any other argument must be policy DN */
 	    /* First check if policy DN is already provided --
 	       if so, there's a usage error */
-	    if (policyparams->policydn != NULL)
+            if (policyparams->policy != NULL)
 		goto err_usage;
 
 	    /* If not present already, fill up policy DN */
-	    policyparams->policydn = strdup(argv[i]);
-	    if (policyparams->policydn == NULL) {
+            policyparams->policy = strdup(argv[i]);
+            if (policyparams->policy == NULL) {
 		retval = ENOMEM;
 		com_err(me, retval, "while creating policy object");
 		goto err_nomsg;
@@ -235,8 +275,13 @@ kdb5_ldap_create_policy(argc, argv)
     }
 
     /* policy DN is a mandatory argument. If not provided, print usage */
-    if (policyparams->policydn == NULL)
+    if (policyparams->policy == NULL)
 	goto err_usage;
+
+    if ((retval = init_ldap_realm (argc, argv))) {
+        com_err(me, retval, "while reading realm information");
+        goto err_nomsg;
+    }
 
     /* Create object with all attributes provided */
     if ((retval = krb5_ldap_create_policy(util_context, policyparams, mask)) != 0)
@@ -282,7 +327,7 @@ kdb5_ldap_destroy_policy(argc, argv)
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_boolean print_usage = FALSE;
     krb5_boolean no_msg = FALSE;
-    char *policydn = NULL;
+    char *policy = NULL;
     int mask = 0;
     int force = 0;
     char buf[5] = {0};
@@ -298,12 +343,12 @@ kdb5_ldap_destroy_policy(argc, argv)
 	} else { /* Any other argument must be policy DN */
 	    /* First check if policy DN is already provided --
 	       if so, there's a usage error */
-	    if (policydn != NULL)
+            if (policy != NULL)
 		goto err_usage;
 
 	    /* If not present already, fill up policy DN */
-	    policydn = strdup(argv[i]);
-	    if (policydn == NULL) {
+            policy = strdup(argv[i]);
+            if (policy == NULL) {
 		retval = ENOMEM;
 		com_err(me, retval, "while destroying policy object");
 		goto err_nomsg;
@@ -311,11 +356,11 @@ kdb5_ldap_destroy_policy(argc, argv)
 	}
     }
 
-    if (policydn == NULL)
+    if (policy == NULL)
 	goto err_usage;
 
     if (!force) {
-	printf("This will delete the policy object '%s', are you sure?\n", policydn);
+        printf("This will delete the policy object '%s', are you sure?\n", policy);
 	printf("(type 'yes' to confirm)? ");
 
 	if (fgets(buf, sizeof(buf), stdin) == NULL) {
@@ -329,14 +374,17 @@ kdb5_ldap_destroy_policy(argc, argv)
 	}
     }
 
-    if ((retval = krb5_ldap_read_policy(util_context, policydn, &policyparams, &mask)))
+    if ((retval = init_ldap_realm (argc, argv)))
+        goto err_nomsg;
+
+    if ((retval = krb5_ldap_read_policy(util_context, policy, &policyparams, &mask)))
 	goto cleanup;
 
 
-    if ((retval = krb5_ldap_delete_policy(util_context, policydn, policyparams, mask)))
+    if ((retval = krb5_ldap_delete_policy(util_context, policy)))
 	goto cleanup;
 
-    printf("** policy object '%s' deleted.\n", policydn);
+    printf("** policy object '%s' deleted.\n", policy);
     goto cleanup;
 
 
@@ -350,8 +398,8 @@ cleanup:
     /* Clean-up structure */
     krb5_ldap_free_policy (util_context, policyparams);
 
-    if (policydn) {
-	free (policydn);
+    if (policy) {
+	free (policy);
     }
 
     if (print_usage) {
@@ -383,7 +431,7 @@ kdb5_ldap_modify_policy(argc, argv)
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_boolean print_usage = FALSE;
     krb5_boolean no_msg = FALSE;
-    char *policydn = NULL;
+    char *policy = NULL;
     int in_mask = 0, out_mask = 0;
     time_t date = 0;
     time_t now = 0;
@@ -421,12 +469,12 @@ kdb5_ldap_modify_policy(argc, argv)
 	} else { /* Any other argument must be policy DN */
 	    /* First check if policy DN is already provided --
 	       if so, there's a usage error */
-	    if (policydn != NULL)
+            if (policy != NULL)
 		goto err_usage;
 
 	    /* If not present already, fill up policy DN */
-	    policydn = strdup(argv[i]);
-	    if (policydn == NULL) {
+            policy = strdup(argv[i]);
+            if (policy == NULL) {
 		retval = ENOMEM;
 		com_err(me, retval, "while modifying policy object");
 		goto err_nomsg;
@@ -434,12 +482,15 @@ kdb5_ldap_modify_policy(argc, argv)
 	}
     }
 
-    if (policydn == NULL)
+    if (policy == NULL)
 	goto err_usage;
 
-    retval = krb5_ldap_read_policy(util_context, policydn, &policyparams, &in_mask);
+    if ((retval = init_ldap_realm (argc, argv)))
+	goto cleanup;
+
+    retval = krb5_ldap_read_policy(util_context, policy, &policyparams, &in_mask);
     if (retval) {
-	com_err(me, retval, "while reading information of policy '%s'", policydn);
+        com_err(me, retval, "while reading information of policy '%s'", policy);
 	goto err_nomsg;
     }
 
@@ -606,8 +657,8 @@ cleanup:
     /* Clean-up structure */
     krb5_ldap_free_policy (util_context, policyparams);
 
-    if (policydn)
-	free (policydn);
+    if (policy)
+        free (policy);
 
     if (print_usage)
 	db_usage(MODIFY_POLICY);
@@ -636,22 +687,25 @@ kdb5_ldap_view_policy(argc, argv)
     krb5_ldap_policy_params *policyparams = NULL;
     krb5_error_code retval = 0;
     krb5_boolean print_usage = FALSE;
-    char *policydn = NULL;
+    char *policy = NULL;
     int mask = 0;
 
     if (argc != 2) {
 	goto err_usage;
     }
 
-    policydn = strdup(argv[1]);
-    if (policydn == NULL) {
+    policy = strdup(argv[1]);
+    if (policy == NULL) {
 	com_err(me, ENOMEM, "while viewing policy");
 	exit_status++;
 	goto cleanup;
     }
 
-    if ((retval = krb5_ldap_read_policy(util_context, policydn, &policyparams, &mask))) {
-	com_err(me, retval, "while viewing policy '%s'", policydn);
+    if ((retval = init_ldap_realm (argc, argv)))
+        goto cleanup;
+
+    if ((retval = krb5_ldap_read_policy(util_context, policy, &policyparams, &mask))) {
+	com_err(me, retval, "while viewing policy '%s'", policy);
 	exit_status++;
 	goto cleanup;
     }
@@ -666,8 +720,8 @@ err_usage:
 cleanup:
     krb5_ldap_free_policy (util_context, policyparams);
 
-    if (policydn)
-	free (policydn);
+    if (policy)
+	free (policy);
 
     if (print_usage) {
 	db_usage(VIEW_POLICY);
@@ -687,7 +741,7 @@ print_policy_params(policyparams, mask)
     int mask;
 {
     /* Print the policy DN */
-    printf("%25s: %s\n", "Ticket policy", policyparams->policydn);
+    printf("%25s: %s\n", "Ticket policy", policyparams->policy);
 
     /* Print max. ticket life and max. renewable life, if present */
     if (mask & LDAP_POLICY_MAXTKTLIFE)
@@ -773,6 +827,9 @@ void kdb5_ldap_list_policies(argc, argv)
 	    goto cleanup;
 	}
     }
+
+    if ((retval = init_ldap_realm (argc, argv)))
+	goto cleanup;
 
     retval = krb5_ldap_list_policy(util_context, basedn, &list);
     if ((retval != 0) || (list == NULL))

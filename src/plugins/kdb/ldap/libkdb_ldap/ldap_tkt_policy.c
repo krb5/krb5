@@ -36,66 +36,6 @@
 /* Ticket policy object management */
 
 /*
- * This function changes the value of policyreference count for a
- * particular ticket policy.  If flag is 1 it will increment else it
- * will reduce by one.
- */
-
-krb5_error_code
-krb5_ldap_change_count(context ,policydn ,flag)
-    krb5_context                context;
-    char                        *policydn;
-    int                         flag;
-{
-
-    krb5_error_code             st=0;
-    int                         objectmask=0;
-    LDAP                        *ld=NULL;
-    char                        *attrvalues[] = { "krbPolicy", NULL};
-    kdb5_dal_handle             *dal_handle=NULL;
-    krb5_ldap_context           *ldap_context=NULL;
-    krb5_ldap_server_handle     *ldap_server_handle=NULL;
-    krb5_ldap_policy_params     *policyparams=NULL;
-    int mask = 0;
-
-    /* validate the input parameters */
-    if (policydn == NULL) {
-	st = EINVAL;
-	prepend_err_str(context,"Ticket Policy Object information missing",st,st);
-	goto cleanup;
-    }
-
-    SETUP_CONTEXT();
-    GET_HANDLE();
-
-    /* the policydn object should be of the krbPolicy object class */
-    st = checkattributevalue(ld, policydn, "objectClass", attrvalues, &objectmask);
-    CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object: ");
-
-    /* Initialize ticket policy structure */
-
-    if ((st = krb5_ldap_read_policy(context, policydn, &policyparams, &mask)))
-	goto cleanup;
-    if (flag == 1) {
-	/*Increment*/
-	policyparams->polrefcount +=1;
-    } else{
-	/*Decrement*/
-	if (policyparams->polrefcount >0) {
-	    policyparams->polrefcount-=1;
-	}
-    }
-    mask |= LDAP_POLICY_COUNT;
-
-    if ((st = krb5_ldap_modify_policy(context, policyparams, mask)))
-	goto cleanup;
-
-cleanup:
-    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-    return st;
-}
-
-/*
  * create the Ticket policy object in Directory.
  */
 krb5_error_code
@@ -106,36 +46,33 @@ krb5_ldap_create_policy(context, policy, mask)
 {
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;
-    char                        **rdns=NULL, *strval[3]={NULL};
+    char                        *strval[3]={NULL}, *policy_dn = NULL;
     LDAPMod                     **mods=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policy == NULL || policy->policydn==NULL) {
+    if (policy == NULL || policy->policy == NULL) {
 	st = EINVAL;
-	krb5_set_error_message (context, st, "Ticket Policy Object DN missing");
+	krb5_set_error_message (context, st, "Ticket Policy Name missing");
 	goto cleanup;
     }
 
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    rdns = ldap_explode_dn(policy->policydn, 1);
-    if (rdns == NULL) {
-	st = LDAP_INVALID_DN_SYNTAX;
+    if ((st = krb5_ldap_name_to_policydn (context, policy->policy, &policy_dn)) != 0)
 	goto cleanup;
-    }
 
     memset(strval, 0, sizeof(strval));
-    strval[0] = rdns[0];
+    strval[0] = policy->policy;
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "cn", LDAP_MOD_ADD, strval)) != 0)
 	goto cleanup;
 
     memset(strval, 0, sizeof(strval));
-    strval[0] = "krbPolicy";
-    strval[1] = "krbPolicyaux";
+    strval[0] = "krbTicketPolicy";
+    strval[1] = "krbTicketPolicyaux";
     if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
 	goto cleanup;
 
@@ -156,21 +93,16 @@ krb5_ldap_create_policy(context, policy, mask)
 					  policy->tktflags)) != 0)
 	    goto cleanup;
     }
-    /*ticket policy reference count attribute added with value 0 */
-
-    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbPolicyRefCount", LDAP_MOD_ADD,
-				      0)) != 0)
-	goto cleanup;
 
     /* ldap add operation */
-    if ((st=ldap_add_ext_s(ld, policy->policydn, mods, NULL, NULL)) != LDAP_SUCCESS) {
+    if ((st=ldap_add_ext_s(ld, policy_dn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_ADD);
 	goto cleanup;
     }
 
 cleanup:
-    if (rdns)
-	ldap_value_free(rdns);
+    if (policy_dn != NULL)
+	free(policy_dn);
 
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
@@ -191,29 +123,33 @@ krb5_ldap_modify_policy(context, policy, mask)
     int                         objectmask=0;
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;
-    char                        *attrvalues[]={"krbPolicy", "krbPolicyAux", NULL}, *strval[2]={NULL};
+    char                        *attrvalues[]={"krbTicketPolicy", "krbTicketPolicyAux", NULL}, *strval[2]={NULL};
+    char                        *policy_dn = NULL;
     LDAPMod                     **mods=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policy == NULL || policy->policydn==NULL) {
+    if (policy == NULL || policy->policy==NULL) {
 	st = EINVAL;
-	krb5_set_error_message (context, st, "Ticket Policy Object DN missing");
+	krb5_set_error_message (context, st, "Ticket Policy Name missing");
 	goto cleanup;
     }
 
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    /* the policydn object should be of the krbPolicy object class */
-    st = checkattributevalue(ld, policy->policydn, "objectClass", attrvalues, &objectmask);
+    if ((st = krb5_ldap_name_to_policydn (context, policy->policy, &policy_dn)) != 0)
+	goto cleanup;
+
+    /* the policydn object should be of the krbTicketPolicy object class */
+    st = checkattributevalue(ld, policy_dn, "objectClass", attrvalues, &objectmask);
     CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object: ");
 
-    if ((objectmask & 0x02) == 0) { /* add krbpolicyaux to the object class list */
+    if ((objectmask & 0x02) == 0) { /* add krbticketpolicyaux to the object class list */
 	memset(strval, 0, sizeof(strval));
-	strval[0] = "krbPolicyAux";
+	strval[0] = "krbTicketPolicyAux";
 	if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
 	    goto cleanup;
     }
@@ -236,17 +172,15 @@ krb5_ldap_modify_policy(context, policy, mask)
 	    goto cleanup;
     }
 
-    if (mask & LDAP_POLICY_COUNT) {
-	if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbpolicyrefcount", LDAP_MOD_REPLACE,
-					  policy->polrefcount)) != 0)
-	    goto cleanup;
-    }
-    if ((st=ldap_modify_ext_s(ld, policy->policydn, mods, NULL, NULL)) != LDAP_SUCCESS) {
+    if ((st=ldap_modify_ext_s(ld, policy_dn, mods, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_MOD);
 	goto cleanup;
     }
 
 cleanup:
+    if (policy_dn != NULL)
+        free(policy_dn);
+
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
@@ -259,9 +193,9 @@ cleanup:
  */
 
 krb5_error_code
-krb5_ldap_read_policy(context, policydn, policy, omask)
+krb5_ldap_read_policy(context, policyname, policy, omask)
     krb5_context	        context;
-    char                        *policydn;
+    char                        *policyname;
     krb5_ldap_policy_params     **policy;
     int                         *omask;
 {
@@ -269,15 +203,15 @@ krb5_ldap_read_policy(context, policydn, policy, omask)
     int                         objectmask=0;
     LDAP                        *ld=NULL;
     LDAPMessage                 *result=NULL,*ent=NULL;
-    char                        *attributes[] = { "krbMaxTicketLife", "krbMaxRenewableAge", "krbTicketFlags", "krbPolicyRefCount", NULL};
-    char                        *attrvalues[] = { "krbPolicy", NULL};
+    char                        *attributes[] = { "krbMaxTicketLife", "krbMaxRenewableAge", "krbTicketFlags", NULL};
+    char                        *attrvalues[] = { "krbTicketPolicy", NULL}, *policy_dn = NULL;
     krb5_ldap_policy_params     *lpolicy=NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
     /* validate the input parameters */
-    if (policydn == NULL  || policy == NULL) {
+    if (policyname == NULL  || policy == NULL) {
 	st = EINVAL;
 	krb5_set_error_message(context, st, "Ticket Policy Object information missing");
 	goto cleanup;
@@ -286,8 +220,11 @@ krb5_ldap_read_policy(context, policydn, policy, omask)
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    /* the policydn object should be of the krbPolicy object class */
-    st = checkattributevalue(ld, policydn, "objectClass", attrvalues, &objectmask);
+    if ((st = krb5_ldap_name_to_policydn (context, policyname, &policy_dn)) != 0)
+	goto cleanup;
+
+    /* the policydn object should be of the krbTicketPolicy object class */
+    st = checkattributevalue(ld, policy_dn, "objectClass", attrvalues, &objectmask);
     CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object: ");
 
     /* Initialize ticket policy structure */
@@ -295,15 +232,18 @@ krb5_ldap_read_policy(context, policydn, policy, omask)
     CHECK_NULL(lpolicy);
     memset(lpolicy, 0, sizeof(krb5_ldap_policy_params));
 
+    if ((lpolicy->policy = strdup (policyname)) == NULL) {
+	st = ENOMEM;
+	goto cleanup;
+    }
+
     lpolicy->tl_data = calloc (1, sizeof(*lpolicy->tl_data));
     CHECK_NULL(lpolicy->tl_data);
     lpolicy->tl_data->tl_data_type = KDB_TL_USER_INFO;
 
-    LDAP_SEARCH(policydn, LDAP_SCOPE_BASE, "(objectclass=krbPolicy)", attributes);
+    LDAP_SEARCH(policy_dn, LDAP_SCOPE_BASE, "(objectclass=krbTicketPolicy)", attributes);
 
     *omask = 0;
-    lpolicy->policydn = strdup(policydn);
-    CHECK_NULL(lpolicy->policydn);
 
     ent=ldap_first_entry(ld, result);
     if (ent != NULL) {
@@ -315,9 +255,6 @@ krb5_ldap_read_policy(context, policydn, policy, omask)
 
 	if (krb5_ldap_get_value(ld, ent, "krbticketflags", (int *) &(lpolicy->tktflags)) == 0)
 	    *omask |= LDAP_POLICY_TKTFLAGS;
-	if (krb5_ldap_get_value(ld, ent, "krbPolicyRefCount", (int *) &(lpolicy->polrefcount)) == 0)
-	    *omask |= LDAP_POLICY_COUNT;
-
     }
     ldap_msgfree(result);
 
@@ -351,19 +288,19 @@ cleanup:
  */
 
 krb5_error_code
-krb5_ldap_delete_policy(context, policydn, policy, mask)
+krb5_ldap_delete_policy(context, policyname)
     krb5_context                context;
-    char                        *policydn;
-    krb5_ldap_policy_params 			*policy;
-    int 			mask;
+    char                        *policyname;
 {
+	int                         refcount = 0;
+	char                        *policy_dn = NULL;
     krb5_error_code             st = 0;
     LDAP                        *ld = NULL;
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
 
-    if (policy == NULL || policydn==NULL) {
+	if (policyname == NULL) {
 	st = EINVAL;
 	prepend_err_str (context,"Ticket Policy Object DN missing",st,st);
 	goto cleanup;
@@ -373,13 +310,18 @@ krb5_ldap_delete_policy(context, policydn, policy, mask)
     SETUP_CONTEXT();
     GET_HANDLE();
 
+    if ((st = krb5_ldap_name_to_policydn (context, policyname, &policy_dn)) != 0)
+        goto cleanup;
 
     /* Checking for policy count for 0 and will not permit delete if
      * it is greater than 0.  */
 
-    if (policy->polrefcount == 0) {
+    if ((st = krb5_ldap_get_reference_count (context, policy_dn,
+                    "krbTicketPolicyReference", &refcount, ld)) != 0)
+        goto cleanup;
 
-	if ((st=ldap_delete_ext_s(ld, policydn, NULL, NULL)) != 0) {
+    if (refcount == 0) {
+	if ((st=ldap_delete_ext_s(ld, policy_dn, NULL, NULL)) != 0) {
 	    prepend_err_str (context,ldap_err2string(st),st,st);
 
 	    goto cleanup;
@@ -391,6 +333,8 @@ krb5_ldap_delete_policy(context, policydn, policy, mask)
     }
 
 cleanup:
+    if (policy_dn != NULL)
+        free (policy_dn);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return st;
 }
@@ -406,10 +350,39 @@ krb5_ldap_list_policy(context, containerdn, policy)
     char                        *containerdn;
     char                        ***policy;
 {
+    int                         i, j, count;
+    char                        **list = NULL;
+    char                        *policycontainerdn = containerdn;
+    kdb5_dal_handle             *dal_handle=NULL;
+    krb5_ldap_context           *ldap_context=NULL;
     krb5_error_code             st=0;
 
-    st = krb5_ldap_list(context, policy, "krbPolicy", containerdn);
+    SETUP_CONTEXT();
+    if (policycontainerdn == NULL) {
+        policycontainerdn = ldap_context->lrparams->realmdn;
+    }
 
+    if ((st = krb5_ldap_list(context, &list, "krbTicketPolicy", policycontainerdn)) != 0)
+	goto cleanup;
+
+    for (i = 0; list[i] != NULL; i++);
+
+    count = i;
+
+    *policy = (char **) calloc ((unsigned) count + 1, sizeof(char *));
+    if (*policy == NULL) {
+	st = ENOMEM;
+	goto cleanup;
+    }
+
+    for (i = 0, j = 0; list[i] != NULL; i++, j++) {
+	int ret;
+	ret = krb5_ldap_policydn_to_name (context, list[i], &(*policy)[i]);
+	if (ret != 0)
+	    j--;
+    }
+
+cleanup:
     return st;
 }
 
@@ -430,8 +403,8 @@ krb5_ldap_free_policy(context, policy)
     if (policy == NULL)
 	return st;
 
-    if (policy->policydn)
-	free (policy->policydn);
+    if (policy->policy)
+	free (policy->policy);
 
     if (policy->tl_data) {
 	if (policy->tl_data->tl_data_contents)

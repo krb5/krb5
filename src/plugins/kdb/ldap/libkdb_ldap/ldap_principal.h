@@ -52,12 +52,16 @@
 
 #define MAX_KEY_LENGTH         1024
 #define CONTAINERDN_ARG        "containerdn"
-#define USERDN_ARG             "userdn"
-#define TKTPOLICYDN_ARG        "tktpolicydn"
+#define USERDN_ARG             "dn"
+#define TKTPOLICY_ARG          "tktpolicy"
+#define LINKDN_ARG             "linkdn"
 
-#define FILTER   "(&(objectclass=krbprincipalaux)(krbprincipalname="
+/* #define FILTER   "(&(objectclass=krbprincipalaux)(krbprincipalname=" */
+ #define FILTER   "(&(|(objectclass=krbprincipalaux)(objectclass=krbprincipal))(krbprincipalname="
+
 #define  KDB_USER_PRINCIPAL    0x01
 #define  KDB_SERVICE_PRINCIPAL 0x02
+#define KDB_STANDALONE_PRINCIPAL_OBJECT 0x01
 
 /* krb5_db_entry */
 #define KDB_PRINCIPAL         0x000001
@@ -94,6 +98,8 @@
 #define KDB_PWD_POL_REF_ATTR                 0x000040
 #define KDB_PWD_EXPIRE_TIME_ATTR             0x000080
 #define KDB_SECRET_KEY                       0x000100
+#define KDB_LAST_PWD_CHANGE_ATTR             0x000200
+#define KDB_EXTRA_DATA                       0x000400
 extern struct timeval timeout;
 extern char *policyclass[];
 
