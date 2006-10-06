@@ -84,6 +84,9 @@ krb5_error_code
 cr_cache(krb5_context, const char *, const char *);
 
 krb5_error_code
+dest_cache(krb5_context, const char *, const char *);
+
+krb5_error_code
 do_chk(krb5_context, struct chklist *, int nmax, int *);
 
 int
@@ -108,12 +111,34 @@ cr_cache(krb5_context context, const char *ccname, const char *pname)
 	    goto errout;
 	printf("created cache %s with principal %s\n", ccname, pname);
     } else
-	printf("created cache %s (uninitialized)\n");
+	printf("created cache %s (uninitialized)\n", ccname);
 errout:
     if (princ != NULL)
 	krb5_free_principal(context, princ);
     if (ccache != NULL)
 	krb5_cc_close(context, ccache);
+    return ret;
+}
+
+krb5_error_code
+dest_cache(krb5_context context, const char *ccname, const char *pname)
+{
+    krb5_error_code ret;
+    krb5_ccache ccache = NULL;
+
+    ret = krb5_cc_resolve(context, ccname, &ccache);
+    if (ret)
+	goto errout;
+    if (pname != NULL) {
+	ret = krb5_cc_destroy(context, ccache);
+	if (ret)
+	    return ret;
+	printf("Destroyed cache %s\n", ccname);
+    } else {
+	printf("Closed cache %s (uninitialized)\n", ccname);
+	ret = krb5_cc_close(context, ccache);
+    }
+errout:
     return ret;
 }
 
@@ -224,7 +249,13 @@ main(int argc, char *argv[])
     if (ret)
 	goto errout;
 
+    for (i = 0; i < NCRLIST; i++) {
+	ret = dest_cache(context, crlist[i].ccname, crlist[i].pname);
+	if (ret) goto errout;
+    }
+
 errout:
+    krb5_free_context(context);
     if (ret) {
 	com_err("main", ret, "");
 	exit(1);
