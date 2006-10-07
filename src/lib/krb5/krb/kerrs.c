@@ -28,6 +28,13 @@
 #include <stdarg.h>
 #include "k5-int.h"
 
+#ifdef DEBUG
+static int error_message_debug = 0;
+#ifndef ERROR_MESSAGE_DEBUG
+#define ERROR_MESSAGE_DEBUG() (error_message_debug != 0)
+#endif
+#endif
+
 void KRB5_CALLCONV_C
 krb5_set_error_message (krb5_context ctx, krb5_error_code code,
 			const char *fmt, ...)
@@ -36,7 +43,17 @@ krb5_set_error_message (krb5_context ctx, krb5_error_code code,
     if (ctx == NULL)
 	return;
     va_start (args, fmt);
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr,
+		"krb5_set_error_message(ctx=%p/err=%p, code=%ld, ...)\n",
+		ctx, &ctx->err, (long) code);
+#endif
     krb5int_vset_error (&ctx->err, code, fmt, args);
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "->%s\n", ctx->err.msg);
+#endif
     va_end (args);
 }
 
@@ -44,22 +61,39 @@ void KRB5_CALLCONV
 krb5_vset_error_message (krb5_context ctx, krb5_error_code code,
 			 const char *fmt, va_list args)
 {
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "krb5_vset_error_message(ctx=%p, code=%ld, ...)\n",
+		ctx, (long) code);
+#endif
     if (ctx == NULL)
 	return;
     krb5int_vset_error (&ctx->err, code, fmt, args);
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "->%s\n", ctx->err.msg);
+#endif
 }
 
-char * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_get_error_message (krb5_context ctx, krb5_error_code code)
 {
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "krb5_get_error_message(%p, %ld)\n", ctx, (long) code);
+#endif
     if (ctx == NULL)
 	return error_message(code);
     return krb5int_get_error (&ctx->err, code);
 }
 
 void KRB5_CALLCONV
-krb5_free_error_message (krb5_context ctx, char *msg)
+krb5_free_error_message (krb5_context ctx, const char *msg)
 {
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "krb5_free_error_message(%p, %p)\n", ctx, msg);
+#endif
     if (ctx == NULL)
 	return;
     krb5int_free_error (&ctx->err, msg);
@@ -68,6 +102,10 @@ krb5_free_error_message (krb5_context ctx, char *msg)
 void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context ctx)
 {
+#ifdef DEBUG
+    if (ERROR_MESSAGE_DEBUG())
+	fprintf(stderr, "krb5_clear_error_message(%p)\n", ctx);
+#endif
     if (ctx == NULL)
 	return;
     krb5int_clear_error (&ctx->err);

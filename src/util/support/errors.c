@@ -69,7 +69,7 @@ krb5int_vset_error (struct errinfo *ep, long code,
     ep->msg = p ? p : ep->scratch_buf;
 }
 
-char *
+const char *
 krb5int_get_error (struct errinfo *ep, long code)
 {
     char *r, *r2;
@@ -125,7 +125,7 @@ krb5int_get_error (struct errinfo *ep, long code)
 	sprintf (ep->scratch_buf, _("error %ld"), code);
 	return ep->scratch_buf;
     }
-    r = fptr(code);
+    r = (char *) fptr(code);
     if (r == NULL) {
 	unlock();
 	goto format_number;
@@ -142,10 +142,10 @@ krb5int_get_error (struct errinfo *ep, long code)
 }
 
 void
-krb5int_free_error (struct errinfo *ep, char *msg)
+krb5int_free_error (struct errinfo *ep, const char *msg)
 {
     if (msg != ep->scratch_buf)
-	free (msg);
+	free ((char *) msg);
 }
 
 void

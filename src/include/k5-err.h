@@ -57,10 +57,10 @@ krb5int_set_error (struct errinfo *ep,
 void
 krb5int_vset_error (struct errinfo *ep, long code,
 		    const char *fmt, va_list args);
-char *
+const char *
 krb5int_get_error (struct errinfo *ep, long code);
 void
-krb5int_free_error (struct errinfo *ep, char *msg);
+krb5int_free_error (struct errinfo *ep, const char *msg);
 void
 krb5int_clear_error (struct errinfo *ep);
 void

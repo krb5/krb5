@@ -2597,10 +2597,10 @@ krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list);
  * The string returned by this function must be freed using
  * krb5_free_error_message.
  */
-char * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_get_error_message (krb5_context, krb5_error_code);
 void KRB5_CALLCONV
-krb5_free_error_message (krb5_context, char *);
+krb5_free_error_message (krb5_context, const char *);
 void KRB5_CALLCONV
 krb5_clear_error_message (krb5_context);
 
