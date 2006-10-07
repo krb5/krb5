@@ -62,7 +62,4 @@ ldap_exp.so ldap_exp.po $(OUTPRE)ldap_exp.$(OBJEXT): \
   $(srcdir)/libkdb_ldap/kdb_ldap.h $(srcdir)/libkdb_ldap/ldap_krbcontainer.h \
   $(srcdir)/libkdb_ldap/ldap_principal.h $(srcdir)/libkdb_ldap/ldap_pwd_policy.h \
   $(srcdir)/libkdb_ldap/ldap_realm.h $(srcdir)/libkdb_ldap/ldap_tkt_policy.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   ldap_exp.c

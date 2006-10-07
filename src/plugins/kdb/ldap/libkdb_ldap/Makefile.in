@@ -98,9 +98,6 @@ kdb_ldap.so kdb_ldap.po $(OUTPRE)kdb_ldap.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.c kdb_ldap.h ldap_err.h ldap_krbcontainer.h \
   ldap_misc.h ldap_realm.h ldap_services.h
 kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
@@ -112,9 +109,6 @@ kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h kdb_ldap_conn.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_service_stash.h \
   ldap_services.h
@@ -127,9 +121,6 @@ ldap_realm.so ldap_realm.po $(OUTPRE)ldap_realm.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.h ldap_realm.c \
   ldap_realm.h ldap_services.h ldap_tkt_policy.h
@@ -142,9 +133,6 @@ ldap_create.so ldap_create.po $(OUTPRE)ldap_create.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_create.c ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.h ldap_realm.h \
   ldap_services.h ldap_tkt_policy.h
@@ -157,9 +145,6 @@ ldap_krbcontainer.so ldap_krbcontainer.po $(OUTPRE)ldap_krbcontainer.$(OBJEXT): 
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.c \
   ldap_krbcontainer.h ldap_main.h ldap_misc.h ldap_realm.h \
   ldap_services.h
@@ -178,9 +163,6 @@ ldap_principal.so ldap_principal.po $(OUTPRE)ldap_principal.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.c ldap_principal.h \
   ldap_realm.h ldap_services.h ldap_tkt_policy.h princ_xdr.h
@@ -199,9 +181,6 @@ ldap_principal2.so ldap_principal2.po $(OUTPRE)ldap_principal2.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_principal.h ldap_principal2.c \
   ldap_pwd_policy.h ldap_realm.h ldap_services.h ldap_tkt_policy.h \
@@ -215,9 +194,6 @@ ldap_pwd_policy.so ldap_pwd_policy.po $(OUTPRE)ldap_pwd_policy.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_pwd_policy.c ldap_pwd_policy.h \
   ldap_realm.h ldap_services.h
@@ -230,9 +206,6 @@ ldap_misc.so ldap_misc.po $(OUTPRE)ldap_misc.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_krbcontainer.h ldap_misc.c \
   ldap_misc.h ldap_realm.h ldap_services.h
 ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): \
@@ -244,9 +217,6 @@ ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_handle.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
 ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT): \
@@ -258,9 +228,6 @@ ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h \
   ldap_tkt_policy.c ldap_tkt_policy.h
@@ -273,9 +240,6 @@ ldap_services.so ldap_services.po $(OUTPRE)ldap_services.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.c \
   ldap_services.h
@@ -288,9 +252,6 @@ ldap_service_rights.so ldap_service_rights.po $(OUTPRE)ldap_service_rights.$(OBJ
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_service_rights.c \
   ldap_services.h
@@ -309,9 +270,6 @@ princ_xdr.so princ_xdr.po $(OUTPRE)princ_xdr.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_krbcontainer.h ldap_principal.h ldap_realm.h \
   ldap_tkt_policy.h princ_xdr.c princ_xdr.h
 ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT): \
@@ -323,9 +281,6 @@ ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_fetch_mkey.c ldap_handle.h ldap_krbcontainer.h \
   ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
 ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT): \
@@ -337,9 +292,6 @@ ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
-  /var/raeburn/openldap/Install/include/lber.h /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
   kdb_ldap.h ldap_handle.h ldap_krbcontainer.h ldap_main.h \
   ldap_misc.h ldap_realm.h ldap_service_stash.c ldap_service_stash.h \
   ldap_services.h
@@ -352,8 +304,5 @@ kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h kdb_xdr.c kdb_xdr.h
 ldap_err.so ldap_err.po $(OUTPRE)ldap_err.$(OBJEXT): \
-  $(BUILDTOP)/include/kdb5_err.h $(COM_ERR_DEPS) /var/raeburn/openldap/Install/include/lber.h \
-  /var/raeburn/openldap/Install/include/lber_types.h \
-  /var/raeburn/openldap/Install/include/ldap.h /var/raeburn/openldap/Install/include/ldap_cdefs.h \
-  /var/raeburn/openldap/Install/include/ldap_features.h \
-  ldap_err.c ldap_err.h
+  $(BUILDTOP)/include/kdb5_err.h $(COM_ERR_DEPS) ldap_err.c \
+  ldap_err.h
