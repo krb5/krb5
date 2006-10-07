@@ -112,7 +112,7 @@ enum krb5plugin_preauth_entry_request_type {
      * implementation, there's a good chance that the result will not match
      * what the client sent, so don't go creating any fatal errors if it
      * doesn't match up. */
-    krb5plugin_preauth_request_body = 4,
+    krb5plugin_preauth_request_body = 4
 };
 typedef krb5_error_code
 (*preauth_get_entry_data_proc)(krb5_context,
