@@ -240,6 +240,7 @@ last:
     return ret;
 }
 
+#if 0 /* not currently used */
 static asn1_error_code
 decode_tagged_unsigned_integer (asn1buf *buf, int expectedtag, unsigned long *val)
 {
@@ -264,6 +265,7 @@ decode_tagged_unsigned_integer (asn1buf *buf, int expectedtag, unsigned long *va
 last:
     return ret;
 }
+#endif
 
 static asn1_error_code
 decode_tagged_octetstring (asn1buf *buf, int expectedtag, int *len,
@@ -340,6 +342,9 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
     {
 	int buflen;
 	asn1buf kbuf;
+	long lval;
+	int ival;
+
 	if (t.tagnum != 1)
 	    cleanup (ASN1_MISSING_FIELD);
 
@@ -347,12 +352,13 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 	buflen = length;
 	ret = asn1buf_imbed(&kbuf, &subbuf, length, seqindef); checkerr;
 
-	ret = decode_tagged_integer (&kbuf, 0, (int *)&key->key_data_type[0]);
+	ret = decode_tagged_integer (&kbuf, 0, &lval);
 	checkerr;
+	key->key_data_type[0] = lval; /* XXX range check? */
 
-	ret = decode_tagged_octetstring (&kbuf, 1,
-					 (int *)&key->key_data_length[0],
+	ret = decode_tagged_octetstring (&kbuf, 1, &ival,
 					 &key->key_data_contents[0]); checkerr;
+	key->key_data_length[0] = ival;
 
 	safe_syncbuf (&subbuf, &kbuf);
     }
@@ -385,6 +391,7 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
     unsigned int length;
     taginfo t;
     int kvno, maj, min;
+    long lval;
 
     *n_key_data = 0;
     *out = NULL;
@@ -395,19 +402,23 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
     ret = asn1buf_imbed(&subbuf, &buf, length, seqindef); checkerr;
 
     /* attribute-major-vno */
-    ret = decode_tagged_integer (&subbuf, 0, &maj); checkerr;
+    ret = decode_tagged_integer (&subbuf, 0, &lval); checkerr;
+    maj = lval;			/* XXX range check? */
 
     /* attribute-minor-vno */
-    ret = decode_tagged_integer (&subbuf, 1, &min); checkerr;
+    ret = decode_tagged_integer (&subbuf, 1, &lval); checkerr;
+    min = lval;			/* XXX range check? */
 
     if (maj != 1 || min != 1)
 	cleanup (ASN1_BAD_FORMAT);
 
     /* kvno (assuming all keys in array have same version) */
-    ret = decode_tagged_integer (&subbuf, 2, &kvno); checkerr;
+    ret = decode_tagged_integer (&subbuf, 2, &lval); checkerr;
+    kvno = lval;		/* XXX range check? */
 
     /* mkvno (optional) */
-    ret = decode_tagged_integer (&subbuf, 3, mkvno); checkerr;
+    ret = decode_tagged_integer (&subbuf, 3, &lval); checkerr;
+    *mkvno = lval;		/* XXX range check? */
 
     ret = asn1_get_tag_2(&subbuf, &t); checkerr;
 

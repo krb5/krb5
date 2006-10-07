@@ -243,7 +243,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	prepend_err_str (context, "Error reading LDAP server params: ", status, status);
 	goto cleanup;
     }
-    if (status = krb5_ldap_db_init(context, ldap_context)) {
+    status = krb5_ldap_db_init(context, ldap_context);
+    if (status) {
 	goto cleanup;
     }
 

@@ -37,6 +37,25 @@
 extern char *strptime (const char *, const char *, struct tm *);
 #endif
 
+/* Linux (GNU Libc) provides a length-limited variant of strdup.
+   But all the world's not Linux.  */
+#undef strndup
+#define strndup my_strndup
+static char *my_strndup (const char *input, size_t limit)
+{
+    size_t len = strlen(input);
+    char *result;
+    if (len > limit) {
+	result = malloc(1 + limit);
+	if (result != NULL) {
+	    memcpy(result, input, limit);
+	    result[limit] = 0;
+	}
+	return result;
+    } else
+	return strdup(input);
+}
+
 /* Get integer or string values from the config section, falling back
    to the default section, then to hard-coded values.  */
 static errcode_t
@@ -250,7 +269,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    }
 	    (*server_info)[ele]->server_status = NOTSET;
 	} else {
-	    char *server=NULL, *item=NULL;
+	    char *item=NULL;
 
 	    item = strtok_r(tempval,delims,&save_ptr);
 	    while (item != NULL && ele<SERV_COUNT) {
@@ -446,7 +465,7 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     unsigned int                *ntree;
 {
     int                         st=0, i=0, subtreecount=0;
-    int				j=0, ncount=0, search_scope=0;
+    int				ncount=0, search_scope=0;
     char                        **subtree=NULL, *realm_cont_dn=NULL;
     char                        **subtarr=NULL;
     char                        *containerref=NULL;
@@ -629,8 +648,6 @@ decode_tl_data(tl_data, tl_type, data)
     int                         *intptr=NULL;
     long                        *longptr=NULL;
     char                        *DN=NULL, **DNarr=NULL;
-    krb5_boolean                keyfound=FALSE;
-    KEY                         *secretkey = NULL;
     krb5_error_code             st=-1;
 
     *data = NULL;

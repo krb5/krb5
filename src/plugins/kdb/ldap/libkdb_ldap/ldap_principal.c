@@ -305,7 +305,7 @@ krb5_ldap_delete_principal(context, searchfor, nentries)
 	    /* the same should be done with the objectclass attributes */
 	    {
 		char *attrvalues[] = {"krbticketpolicyaux", "krbprincipalaux", NULL};
-//		char *attrvalues[] = {"krbpwdpolicyrefaux", "krbticketpolicyaux", "krbprincipalaux", NULL}; 
+/*		char *attrvalues[] = {"krbpwdpolicyrefaux", "krbticketpolicyaux", "krbprincipalaux", NULL};  */
 		int p, q, r=0, amask=0;
 
 		if ((st=checkattributevalue(ld, DN, "objectclass", attrvalues, &amask)) != 0)

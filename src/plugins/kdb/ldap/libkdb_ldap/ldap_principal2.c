@@ -300,7 +300,7 @@ krb5_ldap_get_principal(context, searchfor, entries, nentries, more)
 		}
 	    }
 
-	    // Set tl_data
+	    /* Set tl_data */
 	    {
 		int i;
 		struct berval **ber_tl_data = NULL;
@@ -630,10 +630,9 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     char                        *user=NULL, *subtree=NULL, *principal_dn=NULL;
     char                        **values=NULL, *strval[10]={NULL}, errbuf[1024];
     struct berval	        **bersecretkey=NULL;
-    LDAPMod 		        **mods=NULL, **mod_for_link=NULL;
-    krb5_boolean                dnfound=TRUE, tktpolicy_set=FALSE, create_standalone_prinicipal=FALSE;
+    LDAPMod 		        **mods=NULL;
+    krb5_boolean                tktpolicy_set=FALSE, create_standalone_prinicipal=FALSE;
     krb5_boolean                krb_identity_exists=FALSE, establish_links=FALSE;
-    krb5_boolean                extend_object_with_princrefaux=FALSE;
     char                        *standalone_principal_dn=NULL;
     krb5_tl_data                *tl_data=NULL;
     krb5_key_data               **keys=NULL;
@@ -675,7 +674,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	 * hack if the entries->mask has KRB_PRINCIPAL flag set
 	 * then it is a add operation
 	 */
-	if (entries->mask & KDB_PRINCIPAL == 1)
+	if (entries->mask & KDB_PRINCIPAL)
 	    optype = ADD_PRINCIPAL;
 	else
 	    optype = MODIFY_PRINCIPAL;
@@ -971,9 +970,6 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	}
 
 	if (entries->mask & KDB_KEY_DATA || entries->mask & KDB_KVNO) {
-	    int kcount=0, zero=0, salttype=0, totalkeys=0;
-	    char *currpos=NULL, *krbsecretkey=NULL;
-
 	    bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
 						     entries->n_key_data);
 
@@ -1015,7 +1011,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 
 	} /* Modify Key data ends here */
 
-	// Set tl_data
+	/* Set tl_data */
 	if (entries->tl_data != NULL) {
 	    int count = 0;
 	    struct berval **ber_tl_data = NULL;
@@ -1028,13 +1024,13 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    || ptr->tl_data_type == KRB5_TL_KADM_DATA
 		    || ptr->tl_data_type == KDB_TL_USER_INFO)
 		    continue;
-		count ++;
+		count++;
 	    }
 	    if (count != 0) {
-		int i;
+		int j;
 		ber_tl_data = (struct berval **) calloc (count, sizeof (struct
 									berval*));
-		for (i = 0, ptr = entries->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
+		for (j = 0, ptr = entries->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
 		    /* Ignore tl_data that are stored in separate directory
 		     * attributes */
 		    if (ptr->tl_data_type == KRB5_TL_LAST_PWD_CHANGE
@@ -1044,14 +1040,14 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 			|| ptr->tl_data_type == KRB5_TL_KADM_DATA
 			|| ptr->tl_data_type == KDB_TL_USER_INFO)
 			continue;
-		    if ((st = tl_data2berval (ptr, &ber_tl_data[i])) != 0)
+		    if ((st = tl_data2berval (ptr, &ber_tl_data[j])) != 0)
 			break;
-		    i++;
+		    j++;
 		}
 		if (st != 0) {
-		    for (i = 0; ber_tl_data[i] != NULL; i++) {
-			free (ber_tl_data[i]->bv_val);
-			free (ber_tl_data[i]);
+		    for (j = 0; ber_tl_data[j] != NULL; j++) {
+			free (ber_tl_data[j]->bv_val);
+			free (ber_tl_data[j]);
 		    }
 		    free (ber_tl_data);
 		    goto cleanup;
@@ -1065,10 +1061,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 
 	/* Directory specific attribute */
 	if (xargs.tktpolicydn != NULL) {
-	    int tmask=0, tkttree = 0, subtreednlen = 0, ntre = 0, tktdnlen = 0;
-
-	    char **subtreednlist=NULL;
-	    krb5_boolean dnoutofsubtree=TRUE;
+	    int tmask=0;
 
 	    if (strlen(xargs.tktpolicydn) != 0) {
 		st = checkattributevalue(ld, xargs.tktpolicydn, "objectclass", policyclass, &tmask);
@@ -1289,7 +1282,7 @@ krb5_decode_krbsecretkey(context, entries, bvalues, userinfo_tl_data)
 					   &mkvno);
 
 	if (st != 0) {
-	    char *msg = error_message(st);
+	    const char *msg = error_message(st);
 	    st = -1; /* Something more appropriate ? */
 	    krb5_set_error_message (context, st,
 				    "unable to decode stored principal key data (%s)", msg);

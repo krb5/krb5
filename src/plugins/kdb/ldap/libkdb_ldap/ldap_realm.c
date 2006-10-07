@@ -266,6 +266,12 @@ cleanup:
  * Delete the realm along with the principals belonging to the realm in the Directory.
  */
 
+static void
+delete_password_policy (krb5_pointer ptr, osa_policy_ent_t pol)
+{
+    krb5_ldap_delete_password_policy ((krb5_context)ptr, pol->name);
+}
+
 krb5_error_code
 krb5_ldap_delete_realm (context, lrealm)
     krb5_context                context;
@@ -353,15 +359,7 @@ krb5_ldap_delete_realm (context, lrealm)
     }
 
     /* Delete all password policies */
-    {
-	char *attr[] = {NULL}, filter[256];
-
-	void delete_password_policy (krb5_pointer ptr, osa_policy_ent_t pol) {
-	    krb5_ldap_delete_password_policy (context, pol->name);
-	}
-
-	krb5_ldap_iterate_password_policy (context, "*", delete_password_policy, NULL);
-    }
+    krb5_ldap_iterate_password_policy (context, "*", delete_password_policy, context);
 
     /* Delete all ticket policies */
     {
@@ -424,7 +422,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
     int                      mask;
 {
     LDAP                  *ld=NULL;
-    krb5_error_code       st=0, retval=0;
+    krb5_error_code       st=0;
     char                  **strval=NULL, *strvalprc[5]={NULL};
 #ifdef HAVE_EDIRECTORY
     char                  **values=NULL;
@@ -434,7 +432,7 @@ krb5_ldap_modify_realm(context, rparams, mask)
     char errbuf[1024];
 #endif
     LDAPMod               **mods = NULL;
-    int                   i=0, oldmask=0, objectmask=0,k=0,part_of_subtree=0;
+    int                   i=0, oldmask=0, objectmask=0,k=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
@@ -1076,7 +1074,7 @@ krb5_ldap_create_realm(context, rparams, mask)
     char                        *strval[4]={NULL};
     char		        *contref[2]={NULL}; 
     LDAPMod                     **mods = NULL;
-    int                         i=0, objectmask=0, subtreecount=0,k=0, part_of_subtree=0; 
+    int                         i=0, objectmask=0, subtreecount=0; 
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
@@ -1320,7 +1318,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context      *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    int valcount=0, x=0;
+    int x=0;
 
     SETUP_CONTEXT ();
 
