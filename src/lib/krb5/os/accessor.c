@@ -28,43 +28,62 @@
 #include "k5-int.h"
 #include "os-proto.h"
 
+/* If this trick gets used elsewhere, move it to k5-platform.h.  */
+#ifndef DESIGNATED_INITIALIZERS
+#define DESIGNATED_INITIALIZERS				\
+  /* ANSI/ISO C 1999 supports this...  */		\
+  (__STDC_VERSION__ >= 199901L				\
+   /* ...as does GCC, since version 2.something.  */	\
+   || (!defined __cplusplus && __GNUC__ >= 3))
+#endif
+
 krb5_error_code KRB5_CALLCONV
 krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 {
-  if (version == KRB5INT_ACCESS_VERSION)
-  {
-    krb5int_access internals_temp;
-    internals_temp.free_addrlist = krb5int_free_addrlist;
-    internals_temp.krb5_hmac = krb5_hmac;
-    internals_temp.md5_hash_provider = &krb5int_hash_md5;
-    internals_temp.arcfour_enc_provider = &krb5int_enc_arcfour;
-    internals_temp.sendto_udp = &krb5int_sendto;
-    internals_temp.add_host_to_list = krb5int_add_host_to_list;
-#ifdef KRB5_DNS_LOOKUP
-    internals_temp.make_srv_query_realm = krb5int_make_srv_query_realm;
-    internals_temp.free_srv_dns_data = krb5int_free_srv_dns_data;
-    internals_temp.use_dns_kdc = _krb5_use_dns_kdc;
+    if (version == KRB5INT_ACCESS_VERSION) {
+#if DESIGNATED_INITIALIZERS
+#define S(FIELD, VAL)   .FIELD = VAL
+	static const krb5int_access internals_temp = {
 #else
-    internals_temp.make_srv_query_realm = 0;
-    internals_temp.free_srv_dns_data = 0;
-    internals_temp.use_dns_kdc = 0;
+#define S(FIELD, VAL)   internals_temp.FIELD = VAL
+	    krb5int_access internals_temp;
+#endif
+	    S (free_addrlist, krb5int_free_addrlist),
+	    S (krb5_hmac, krb5_hmac),
+	    S (md5_hash_provider, &krb5int_hash_md5),
+	    S (arcfour_enc_provider, &krb5int_enc_arcfour),
+	    S (sendto_udp, &krb5int_sendto),
+	    S (add_host_to_list, krb5int_add_host_to_list),
+#ifdef KRB5_DNS_LOOKUP
+	    S (make_srv_query_realm, krb5int_make_srv_query_realm),
+	    S (free_srv_dns_data, krb5int_free_srv_dns_data),
+	    S (use_dns_kdc, _krb5_use_dns_kdc),
+#else
+	    S (make_srv_query_realm, 0),
+	    S (free_srv_dns_data, 0),
+	    S (use_dns_kdc, 0),
 #endif
 #ifdef KRB5_KRB4_COMPAT
-    internals_temp.krb_life_to_time = krb5int_krb_life_to_time;
-    internals_temp.krb_time_to_life = krb5int_krb_time_to_life;
-    internals_temp.krb524_encode_v4tkt = krb5int_encode_v4tkt;
+	    S (krb_life_to_time, krb5int_krb_life_to_time),
+	    S (krb_time_to_life, krb5int_krb_time_to_life),
+	    S (krb524_encode_v4tkt, krb5int_encode_v4tkt),
 #else
-    internals_temp.krb_life_to_time = 0;
-    internals_temp.krb_time_to_life = 0;
-    internals_temp.krb524_encode_v4tkt = 0;
+	    S (krb_life_to_time, 0),
+	    S (krb_time_to_life, 0),
+	    S (krb524_encode_v4tkt, 0),
 #endif
-    internals_temp.krb5int_c_mandatory_cksumtype = krb5int_c_mandatory_cksumtype;
-    internals_temp.krb5_ser_pack_int64 = krb5_ser_pack_int64;
-    internals_temp.krb5_ser_unpack_int64 = krb5_ser_unpack_int64;
-    internals_temp.asn1_ldap_encode_sequence_of_keys = krb5int_ldap_encode_sequence_of_keys;
-    internals_temp.asn1_ldap_decode_sequence_of_keys = krb5int_ldap_decode_sequence_of_keys;
-    *internals = internals_temp;
-    return 0;
-  }
-  return KRB5_OBSOLETE_FN;
+	    S (krb5int_c_mandatory_cksumtype, krb5int_c_mandatory_cksumtype),
+	    S (krb5_ser_pack_int64, krb5_ser_pack_int64),
+	    S (krb5_ser_unpack_int64, krb5_ser_unpack_int64),
+	    S (asn1_ldap_encode_sequence_of_keys, krb5int_ldap_encode_sequence_of_keys),
+	    S (asn1_ldap_decode_sequence_of_keys, krb5int_ldap_decode_sequence_of_keys),
+#if DESIGNATED_INITIALIZERS
+	};
+#else
+	0;
+#endif
+	*internals = internals_temp;
+	return 0;
+    }
+    return KRB5_OBSOLETE_FN;
 }
