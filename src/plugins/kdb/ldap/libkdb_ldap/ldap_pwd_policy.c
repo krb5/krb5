@@ -33,9 +33,9 @@
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
 
-static char *password_policy_attributes[] = { "krbmaxpwdlife", "krbminpwdlife", 
-                                              "krbpwdmindiffchars", "krbpwdminlength",
-                                               "krbpwdhistorylength", NULL };
+static char *password_policy_attributes[] = { "krbmaxpwdlife", "krbminpwdlife",
+					      "krbpwdmindiffchars", "krbpwdminlength",
+					      "krbpwdhistorylength", NULL };
 
 /*
  * Function to create password policy object.
@@ -169,7 +169,7 @@ krb5_ldap_put_password_policy (context, policy)
 
 cleanup:
     if (policy_dn != NULL)
-        free (policy_dn);
+	free (policy_dn);
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return(st);
@@ -222,10 +222,10 @@ krb5_ldap_get_password_policy_from_dn (context, name, policy, cnt)
 
 	/* Get the reference count */
 	st = krb5_ldap_get_reference_count (context,
-		name,
-		"krbPwdPolicyReference",
-		&(*policy)->policy_refcnt,
-		ld);
+					    name,
+					    "krbPwdPolicyReference",
+					    &(*policy)->policy_refcnt,
+					    ld);
     }
 
 cleanup:
@@ -245,7 +245,7 @@ cleanup:
  * Convert 'name' into a directory DN and call
  * 'krb5_ldap_get_password_policy_from_dn'
  */
-krb5_error_code 
+krb5_error_code
 krb5_ldap_get_password_policy (context, name, policy, cnt)
     krb5_context                context;
     char                        *name;
@@ -259,11 +259,11 @@ krb5_ldap_get_password_policy (context, name, policy, cnt)
     krb5_clear_error_message(context);
 
     /* validate the input parameters */
-    if(name == NULL) {
+    if (name == NULL) {
 	st = EINVAL;
 	goto cleanup;
     }
-    
+
     st = krb5_ldap_name_to_policydn (context, name, &policy_dn);
     if (st != 0)
 	goto cleanup;
@@ -301,7 +301,7 @@ krb5_ldap_delete_password_policy (context, policy)
 
     st = krb5_ldap_name_to_policydn (context, policy, &policy_dn);
     if (st != 0)
-        goto cleanup;
+	goto cleanup;
 
     if ((st=ldap_delete_ext_s(ld, policy_dn, NULL, NULL)) != LDAP_SUCCESS) {
 	st = set_ldap_error (context, st, OP_DEL);
@@ -311,7 +311,7 @@ krb5_ldap_delete_password_policy (context, policy)
 cleanup:
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     if (policy_dn != NULL)
-        free (policy_dn);
+	free (policy_dn);
 
     return st;
 }
@@ -343,22 +343,22 @@ krb5_ldap_iterate_password_policy(context, match_expr, func, func_arg)
     memset(entry, 0, sizeof(osa_policy_ent_rec));
 
     if (ldap_context->lrparams->realmdn == NULL) {
-        st = EINVAL;
-        goto cleanup;
+	st = EINVAL;
+	goto cleanup;
     }
-                                                                                                                             
+
     LDAP_SEARCH(ldap_context->lrparams->realmdn, LDAP_SCOPE_ONELEVEL, "(objectclass=krbpwdpolicy)", attrs);
-    for(ent=ldap_first_entry(ld, result); ent != NULL; ent=ldap_next_entry(ld, ent)) {
-        krb5_boolean attr_present;
-                                                                                                                             
-        st = krb5_ldap_get_string(ld, ent, "cn", &policy, &attr_present);
-        if (st != 0)
-            goto cleanup;
-        if (attr_present == FALSE)
-            continue;
-        entry->name = policy;
-        (*func)(func_arg, entry);
-        ldap_memfree(policy);
+    for (ent=ldap_first_entry(ld, result); ent != NULL; ent=ldap_next_entry(ld, ent)) {
+	krb5_boolean attr_present;
+
+	st = krb5_ldap_get_string(ld, ent, "cn", &policy, &attr_present);
+	if (st != 0)
+	    goto cleanup;
+	if (attr_present == FALSE)
+	    continue;
+	entry->name = policy;
+	(*func)(func_arg, entry);
+	ldap_memfree(policy);
     }
     ldap_msgfree(result);
 
