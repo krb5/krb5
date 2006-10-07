@@ -435,3 +435,17 @@ prepend_err_str (krb5_context ctx, const char *str, krb5_error_code err,
     omsg = krb5_get_error_message (ctx, err);
     krb5_set_error_message (ctx, err, "%s %s", str, omsg);
 }
+
+extern krb5int_access accessor;
+MAKE_INIT_FUNCTION(kldap_init_fn);
+
+int kldap_init_fn(void)
+{
+    /* Global (per-module) initialization.  */
+    return krb5int_accessor (&accessor, KRB5INT_ACCESS_VERSION);
+}
+
+int kldap_ensure_initialized(void)
+{
+    return CALL_INIT_FUNCTION (kldap_init_fn);
+}

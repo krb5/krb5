@@ -33,12 +33,14 @@
 #include <k5-int.h>
 #include <kdb.h>
 
-#include "princ_key_encode_decode.h"
 #include "krbasn1.h"
 #include "asn1_encode.h"
 #include "asn1_decode.h"
 #include "asn1_make.h"
 #include "asn1_get.h"
+
+#define asn1_encode_sequence_of_keys krb5int_ldap_encode_sequence_of_keys
+#define asn1_decode_sequence_of_keys krb5int_ldap_decode_sequence_of_keys
 
 #define cleanup(err)							\
 	{								\

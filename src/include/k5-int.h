@@ -1476,6 +1476,19 @@ krb5_error_code decode_krb5_pa_enc_ts
 krb5_error_code decode_krb5_sam_key
 	(const krb5_data *, krb5_sam_key **);
 
+struct _krb5_key_data;		/* kdb.h */
+krb5_error_code
+krb5int_ldap_encode_sequence_of_keys (struct _krb5_key_data *key_data,
+				      krb5_int16 n_key_data,
+				      krb5_int32 mkvno,
+				      krb5_data **code);
+
+krb5_error_code
+krb5int_ldap_decode_sequence_of_keys (krb5_data *in,
+				      struct _krb5_key_data **out,
+				      krb5_int16 *n_key_data,
+				      int *mkvno);
+
 /*************************************************************************
  * End of prototypes for krb5_decode.c
  *************************************************************************/
@@ -1718,6 +1731,19 @@ typedef struct _krb5int_access {
         (krb5_int64, krb5_octet **, size_t *);
     krb5_error_code (KRB5_CALLCONV *krb5_ser_unpack_int64)
         (krb5_int64 *, krb5_octet **, size_t *);
+
+    /* Used for KDB LDAP back end.  */
+    krb5_error_code
+    (*asn1_ldap_encode_sequence_of_keys) (struct _krb5_key_data *key_data,
+					  krb5_int16 n_key_data,
+					  krb5_int32 mkvno,
+					  krb5_data **code);
+
+    krb5_error_code
+    (*asn1_ldap_decode_sequence_of_keys) (krb5_data *in,
+					  struct _krb5_key_data **out,
+					  krb5_int16 *n_key_data,
+					  int *mkvno);
 } krb5int_access;
 
 #define KRB5INT_ACCESS_VERSION \

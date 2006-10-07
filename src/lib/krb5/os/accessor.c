@@ -61,6 +61,8 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
     internals_temp.krb5int_c_mandatory_cksumtype = krb5int_c_mandatory_cksumtype;
     internals_temp.krb5_ser_pack_int64 = krb5_ser_pack_int64;
     internals_temp.krb5_ser_unpack_int64 = krb5_ser_unpack_int64;
+    internals_temp.asn1_ldap_encode_sequence_of_keys = krb5int_ldap_encode_sequence_of_keys;
+    internals_temp.asn1_ldap_decode_sequence_of_keys = krb5int_ldap_decode_sequence_of_keys;
     *internals = internals_temp;
     return 0;
   }

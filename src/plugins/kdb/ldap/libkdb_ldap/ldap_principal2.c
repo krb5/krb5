@@ -36,7 +36,6 @@
 #include "ldap_tkt_policy.h"
 #include "ldap_pwd_policy.h"
 #include "ldap_err.h"
-#include "princ_key_encode_decode.h"
 
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];
@@ -558,6 +557,46 @@ process_db_args(context, db_args, xargs, optype)
 cleanup:
     return st;
 }
+
+krb5int_access accessor;
+extern int kldap_ensure_initialized (void);
+
+static krb5_error_code
+asn1_encode_sequence_of_keys (krb5_key_data *key_data, krb5_int16 n_key_data,
+			      krb5_int32 mkvno, krb5_data **code)
+{
+    krb5_error_code err;
+
+    /*
+     * This should be pushed back into other library initialization
+     * code.
+     */
+    err = kldap_ensure_initialized ();
+    if (err)
+	return err;
+
+    return accessor.asn1_ldap_encode_sequence_of_keys(key_data, n_key_data,
+						      mkvno, code);
+}
+
+static krb5_error_code
+asn1_decode_sequence_of_keys (krb5_data *in, krb5_key_data **out,
+			      krb5_int16 *n_key_data, int *mkvno)
+{
+    krb5_error_code err;
+
+    /*
+     * This should be pushed back into other library initialization
+     * code.
+     */
+    err = kldap_ensure_initialized ();
+    if (err)
+	return err;
+
+    return accessor.asn1_ldap_decode_sequence_of_keys(in, out, n_key_data,
+						      mkvno);
+}
+
 
 /* Decoding ASN.1 encoded key */
 static struct berval **
