@@ -25,17 +25,22 @@ This option is not recommended.
 Specifies the URI of the LDAP server.
 .SH COMMANDS
 .TP
-\fBcreate\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBcreate\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-s\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 Creates realm in directory. Options:
 .RS
 .TP
-\fB\-subtree\fP\ \fIsubtree_dn\fP 
-Specifies the subtree where principals and other Kerberos objects in the realm are placed.
+\fB\-subtrees\fP\ \fIsubtree_dn_list\fP 
+Specifies the list of subtrees containing principals and other Kerberos objects of a realm. The list contains the DNs of the subtree
+objects separated by colon(:).
 .TP
 \fB\-sscope\fP\ \fIsearch_scope\fP
 Specifies the scope for searching the principals under the 
 .IR subtree .
-The possible values are 1 or one (one level), 2 or sub (subtree).
+The possible values are 1 or one (one level), 2 or sub (subtrees).
+.TP
+\fB\-containerref\fP\ \fIcontainer_reference_dn\fP 
+Specifies the DN of the container object in which the principals of a realm will be created.
+If the container reference is not configured for a realm, the principals will be created in the realm container. 
 .TP
 \fB\-k\fP\ \fImkeytype\fP
 Specifies the key type of the master key in the database; the default is
@@ -51,6 +56,9 @@ Specifies the master database password. This option is not recommended.
 .TP
 \fB\-sf\fP\ \fIstashfilename\fP
 Specifies the stash file of the master database password.
+.TP
+\fB\-s\fP
+Specifies that the stash file is to be created.
 .TP
 \fB\-maxtktlife\fP\ \fImax_ticket_life\fP
 Specifies maximum ticket life for principals in this realm.
@@ -204,9 +212,8 @@ Specifies the list of Password service objects serving the realm. The list conta
 Password service objects separated by colon(:).
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu
-create -sscope SUB -enctypes des-cbc-crc:des3-cbc-sha1
--defenctype des3-cbc-sha1 -salttypes normal:afs3 -defsalttype normal
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
+create -subtrees o=org -sscope SUB
 -r ATHENA.MIT.EDU\fP
 .nf
 Password for "cn=admin,o=org":
@@ -219,18 +226,24 @@ Re-enter KDC database master key to verify:
 .RE
 
 .TP
-\fBmodify\fP [\fB\-subtree\fP\ \fIsubtree_dn\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP | [\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP] [\fB\-addpwddn\fP\ \fIpasswd_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBmodify\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP | [\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP] [\fB\-addpwddn\fP\ \fIpasswd_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 
 Modifies the attributes of a realm. Options:
 .RS
 .TP
-\fB\-subtree\fP\ \fIsubtree_dn\fP
-Specifies the subtree containing principals and other Kerberos objects in the realm.
+\fB\-subtrees\fP\ \fIsubtree_dn_list\fP
+Specifies the list of subtrees containing principals and other Kerberos objects 
+in the realm.  The list contains the DNs of the subtree objects separated by 
+colon(:). This list replaces the existing list.
 .TP
 \fB\-sscope\fP\ \fIsearch_scope\fP
 Specifies the scope for searching the principals under the 
-.IR subtree .
-The possible values are 1 or one (one level), 2 or sub (subtree).
+.IR subtrees .
+The possible values are 1 or one (one level), 2 or sub (subtrees).
+.TP
+\fB\-containerref\fP\ \fIcontainer_reference_dn\fP 
+Specifies the DN of the container object in which the principals of a realm 
+will be created. 
 .TP
 \fB\-maxtktlife\fP\ \fImax_ticket_life\fP
 Specifies maximum ticket life for principals in this realm.
@@ -239,8 +252,9 @@ Specifies maximum ticket life for principals in this realm.
 Specifies maximum renewable life of tickets for principals in this realm.
 .TP
 \fIticket_flags\fP
-Specifies the ticket flags. If this option is not specified, by default, none of the flags are
-set. This means all the ticket options will be allowed and no restriction will be set.
+Specifies the ticket flags. If this option is not specified, by default, 
+none of the flags are set. This means all the ticket options will be allowed 
+and no restriction will be set.
 
 The various flags are:
 .TP
@@ -408,9 +422,8 @@ Specifies the list of Password service objects that need to be added to the exis
 the DNs of the Password service objects separated by a colon (:).
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org modify -sscope ONE -enctypes
-des3-hmac-sha1:des-cbc-md5 -defenctype des3-hmac-sha1 -addsalttypes v4:special
--r ATHENA.MIT.EDU \fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify 
++requires_preauth -r ATHENA.MIT.EDU \fP
 .nf
 Password for "cn=admin,o=org":
 .fi
@@ -426,11 +439,13 @@ Specifies the Kerberos realm of the database; by default the realm returned by
 is used.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org view -r ATHENA.MIT.EDU\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view 
+-r ATHENA.MIT.EDU\fP
 .nf
 Password for "cn=admin,o=org":
                Realm Name: ATHENA.MIT.EDU
                   Subtree: ou=users,o=org
+                  Subtree: ou=servers,o=org
               SearchScope: ONE
       Maximum ticket life: 0 days 01:00:00
    Maximum renewable life: 0 days 10:00:00
@@ -451,7 +466,8 @@ Specifies the Kerberos realm of the database; by default the realm returned by
 is used.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu destroy -r ATHENA.MIT.EDU\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy 
+-r ATHENA.MIT.EDU\fP
 .nf
 Password for "cn=admin,o=org":
 Deleting KDC database of 'ATHENA.MIT.EDU', are you sure?
@@ -467,7 +483,7 @@ Lists the name of realms.
 .nf
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org list\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list\fP
 Password for "cn=admin,o=org":
 ATHENA.MIT.EDU
 MYREALM
@@ -494,9 +510,15 @@ Re-enter password for "cn=service-kdc,o=org":
 .fi
 .RE
 .TP
-\fBcreate_policy\fP [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP] \fIpolicy_dn\fP
+\fBcreate_policy\fP [\fB\-r\fP\ \fIrealm\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP] \fIpolicy_name\fP
 Creates a ticket policy in directory. Options:
 .RS
+.TP
+\fB\-r\fP\ \fIrealm\fP
+Specifies the Kerberos realm of the database; by default the realm
+returned by
+.IR krb5_default_local_realm (3)
+is used.
 .TP
 \fB\-maxtktlife\fP\ \fImax_ticket_life\fP
 Specifies maximum ticket life for principals.
@@ -629,91 +651,97 @@ sets the
 .SM KRB5_KDB_PWCHANGE_SERVICE
 flag on principals in the database.
 .TP
-\fIpolicy_dn\fP
-Specifies Distinguished name (DN) of the policy.
+\fIpolicy_name\fP
+Specifies the name of the ticket policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu -p 636 create_policy -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable cn=tktpolicy,o=org\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable newpolicy\fP
 .nf
 Password for "cn=admin,o=org":
 .fi
 .RE
 .TP
-\fBmodify_policy\fP [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP] \fIpolicy_dn\fP
+\fBmodify_policy\fP [\fB\-r\fP\ \fIrealm\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP] \fIpolicy_name\fP
 Modifies the attributes of a ticket policy. Options are same as 
 .B create_policy.
 .RS
 .TP
+\fB\-r\fP\ \fIrealm\fP
+Specifies the Kerberos realm of the database; by default the realm
+returned by
+.IR krb5_default_local_realm (3)
+is used.
+.TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu -p 636 modify_policy -maxtktlife "60 minutes" -maxrenewlife "10 hours" +allow_postdated -requires_preauth cn=tktpolicy,o=org\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify_policy -r ATHENA.MIT.EDU -maxtktlife "60 minutes" -maxrenewlife "10 hours" +allow_postdated -requires_preauth policy1\fP
 .nf
 Password for "cn=admin,o=org":
 .fi
 .RE
 .TP
-\fBview_policy\fP \fIpolicy_dn\fP
+\fBview_policy\fP [\fB\-r\fP\ \fIrealm\fP] \fIpolicy_name\fP
 Displays the attributes of a ticket policy. Options:
 .RS
 .TP
-\fIpolicy_dn\fP
+\fIpolicy_name\fP
 Specifies Distinguished name (DN) of the policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu -p 636 view_policy cn=tktpolicy,o=org\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view_policy -r ATHENA.MIT.EDU policy1\fP
 .nf
 Password for "cn=admin,o=org":
-            Ticket policy: cn=tktpolicy,o=org
+            Ticket policy: policy1
       Maximum ticket life: 0 days 01:00:00
    Maximum renewable life: 0 days 10:00:00
              Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
 .fi
 .RE
 .TP
-\fBdestroy_policy\fP [\fB\-force\fP] \fIpolicy_dn\fP
+\fBdestroy_policy\fP [\fB\-r\fP\ \fIrealm\fP] [\fB\-force\fP] \fIpolicy_name\fP
 Destroys an existing ticket policy. Options:
 .RS
+.TP
+\fB\-r\fP\ \fIrealm\fP
+Specifies the Kerberos realm of the database; by default the realm
+returned by
+.IR krb5_default_local_realm (3)
+is used.
 .TP
 \fB\-force\fP
 Forces the deletion of the policy object. If not specified, will be prompted for confirmation while deleting the policy. Enter 
 .B yes
 to confirm the deletion.
 .TP
-\fIpolicy_dn\fP
+\fIpolicy_name\fP
 Specifies Distinguished name (DN) of the policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu -p 636 destroy_policy cn=tktpolicy,o=org\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy_policy -r ATHENA.MIT.EDU policy1\fP
 .nf
 Password for "cn=admin,o=org":
-This will delete the policy object 'cn=tktpolicy,o=org', are you sure?
+This will delete the policy object 'policy1', are you sure?
 (type 'yes' to confirm)? yes
-** policy object 'cn=tktpolicy,o=org' deleted.
+** policy object 'policy1' deleted.
 .fi
 .RE
 .TP
-\fBlist_policy\fP [\fB\-basedn\fP\ \fIbase_dn\fP]
-Lists the name of ticket policies under a given base in directory.  Options:
+\fBlist_policy\fP [\fB\-r\fP\ \fIrealm\fP]
+Lists the ticket policies in \fIrealm\fP if specified or in the default realm.  Options:
 .RS
 .TP
-\fI\-basedn\fP\ \fIbase_dn\fP
-Specifies the base DN for searching the policies, limiting the search to a particular subtree. If this option
-is not provided, LDAP Server specific search base will be used. 
-For eg, in the case of OpenLDAP, value of 
-.B defaultsearchbase
-from 
-.I slapd.conf
-file will be used, where as in the case of eDirectory, the default value 
-for the base DN is 
-.B Root.
+\fB\-r\fP\ \fIrealm\fP
+Specifies the Kerberos realm of the database; by default the realm
+returned by
+.IR krb5_default_local_realm (3)
+is used.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -h ldap-server1.mit.edu -p 636 list_policy
--basedn o=org\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU\fP
 .nf
 Password for "cn=admin,o=org":
-cn=tktpolicy,o=org
-cn=tktpolicy2,o=org
-cn=tktpolicy3,o=org
+newpolicy
+policy1
+policy2
 .fi
 .RE
 

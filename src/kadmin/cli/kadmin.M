@@ -156,26 +156,20 @@ Prevent fallback to AUTH_GSSAPI authentication flavor.
 Specifies the database specific arguments.
 
 Options supported for LDAP database are:
-.sp 
-.nf 
-.RS 14
-\-x port=<port_number>
-specifies the secure port number where the LDAP server is listening.
-
+.RS
+.TP
 \-x host=<hostname>
-specifies the host on which the LDAP server is running.
-The <hostname> should be the same as the host name set in the LDAP server certificate.
-
+specifies the LDAP server to connect to by a LDAP URI.
+.TP
 \-x binddn=<bind_dn>
 specifies the DN of the object used by the administration server to bind to the LDAP server.
 This object should have the read rights on the realm container and write rights on the subtree
 that is referenced by the realm.
-
+.TP
 \-x bindpwd=<bind_password>
 specifies the password for the above mentioned binddn. It is recommended not to use this option.
 Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
 .RE
-.fi
 .SH DATE FORMAT 
 Various commands in kadmin can take a variety of date formats,
 specifying durations or absolute times.  Examples of valid formats are:
@@ -226,20 +220,22 @@ The options are:
 .TP
 \fB\-x\fP \fIdb_princ_args\fP
 Denotes the database specific options. The options for LDAP database are:
-.sp 
-.nf 
 .RS
-\-x userdn=<user_dn>
-Specifies the user object with which the Kerberos user principal is to be associated.
-
+.TP
+\-x dn=<dn>
+Specifies the LDAP object that will contain the Kerberos principal being 
+created.
+.TP
+\-x linkdn=<dn>
+Specifies the LDAP object to which the newly created Kerberos principal object
+ will point to.
+.TP
 \-x containerdn=<container_dn>
-Specifies the container object under which the Kerberos service principal is to be created. 
-
-\-x tktpolicydn=<policydn>
-Associates a ticket policy object to the Kerberos principal.
-
+Specifies the container object under which the Kerberos principal is to be created. 
+.TP
+\-x tktpolicy=<policy>
+Associates a ticket policy to the Kerberos principal.
 .RE
-.fi
 .TP
 \fB\-expire\fP \fIexpdate\fP
 expiration date of the principal
@@ -412,7 +408,7 @@ Re-enter password for principal tlyu/admin@BLEEP.COM:
 Principal "tlyu/admin@BLEEP.COM" created.
 kadmin:
 
-kadmin: addprinc -x userdn=cn=mwm_user,o=org mwm_user
+kadmin: addprinc -x dn=cn=mwm_user,o=org mwm_user
 WARNING: no policy specified for "mwm_user@BLEEP.COM";
 defaulting to no policy.
 Enter password for principal mwm_user@BLEEP.COM: 
@@ -473,13 +469,15 @@ privilege.  Aliased to
 .TP
 \fB\-x\fP \fIdb_princ_args\fP
 Denotes the database specific options. The options for LDAP database are:
-.sp 
-.nf 
 .RS
-\-x tktpolicydn=<policydn>
-Associates a ticket policy object to the Kerberos principal.
+.TP
+\-x tktpolicy=<policy>
+Associates a ticket policy to the Kerberos principal.
+.TP
+\-x linkdn=<dn>
+Associates a Kerberos principal with a LDAP object. This option is honored only
+ if the Kerberos principal is not already associated with a LDAP object. 
 .RE
-.fi
 .TP
 ERRORS:
 KADM5_AUTH_MODIFY (requires "modify" privilege)
@@ -637,7 +635,7 @@ sets the number of past keys kept for a principal. This option is not supported 
 .nf
 .TP
 EXAMPLES:
-kadmin: add_policy -maxlife "2 days" -minlength 5 cn=guests,o=org
+kadmin: add_policy -maxlife "2 days" -minlength 5 guests
 kadmin:
 .TP
 ERRORS:
@@ -744,8 +742,6 @@ test-pol-nopw
 kadmin:
 .RE
 .fi
-.TP
-Note: All the policy names are in the form of DN for LDAP database.
 .TP
 \fBktadd\fP [\fB\-k\fP \fIkeytab\fP] [\fB\-q\fP] [\fB\-e\fP \fIkeysaltlist\fP]
 .br
