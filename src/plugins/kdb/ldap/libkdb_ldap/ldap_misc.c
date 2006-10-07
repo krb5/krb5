@@ -1845,3 +1845,54 @@ krb5_error_code remove_overlapping_subtrees(char **listin, char ***listop, int *
     }
     return 0;
 }
+
+/*
+ * Solaris libldap does not provide the following functions which are in
+ * OpenLDAP.
+ */
+#ifndef HAVE_LDAP_INITIALIZE
+int
+ldap_initialize(LDAP **ldp, char *url)
+{
+    int rc = 0;
+    LDAP *ld = NULL;
+    LDAPURLDesc *ludp = NULL;
+
+    /* For now, we don't use any DN that may be provided.  And on
+       Solaris (based on Mozilla's LDAP client code), we need the
+       _nodn form to parse "ldap://host" without a trailing slash.
+
+       Also, this version won't handle an input string which contains
+       multiple URLs, unlike the OpenLDAP ldap_initialize.  See
+       https://bugzilla.mozilla.org/show_bug.cgi?id=353336#c1 .  */
+#ifdef HAVE_LDAP_URL_PARSE_NODN
+    rc = ldap_url_parse_nodn(url, &ludp);
+#else
+    rc = ldap_url_parse(url, &ludp);
+#endif
+    if (rc == 0) {
+
+	ld = ldap_init(ludp->lud_host, ludp->lud_port);
+	if (ld != NULL) {
+	    *ldp = ld;
+#if 0
+	    printf("lud_host %s lud_port %d\n", ludp->lud_host,
+		   ludp->lud_port);
+#endif
+	}
+	else
+	    rc = KRB5_KDB_ACCESS_ERROR;
+
+	ldap_free_urldesc(ludp);
+    }
+    return rc;
+}
+#endif /* HAVE_LDAP_INITIALIZE */
+
+#ifndef HAVE_LDAP_UNBIND_EXT_S
+int
+ldap_unbind_ext_s(LDAP *ld, LDAPControl **sctrls, LDAPControl **cctrls)
+{
+    return ldap_unbind_ext(ld, sctrls, cctrls);
+}
+#endif /* HAVE_LDAP_UNBIND_EXT_S */

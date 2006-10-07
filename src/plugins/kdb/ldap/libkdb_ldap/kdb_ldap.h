@@ -304,4 +304,13 @@ krb5_ldap_errcode_2_string( krb5_context, long );
 void
 krb5_ldap_release_errcode_string (krb5_context, const char *);
 
+#ifndef HAVE_LDAP_INITIALIZE
+int
+ldap_initialize(LDAP **, char *);
+#endif
+#ifndef HAVE_LDAP_UNBIND_EXT_S
+int
+ldap_unbind_ext_s(LDAP *, LDAPControl **, LDAPControl **);
+#endif
+
 #endif
