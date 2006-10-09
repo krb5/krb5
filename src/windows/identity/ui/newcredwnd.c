@@ -522,7 +522,8 @@ nc_update_credtext(khui_nc_wnd_data * d)
     }
 
     if (!(d->nc->response & KHUI_NC_RESPONSE_PROCESSING)) {
-        if(validId || d->nc->subtype == KMSG_CRED_PASSWORD) {
+        if(validId ||
+           d->nc->subtype == KMSG_CRED_PASSWORD) {
             /* TODO: check if all the required fields have valid values
                before enabling the Ok button */
             okEnable = TRUE;
@@ -876,9 +877,8 @@ nc_add_control_row(khui_nc_wnd_data * d,
         SetRectEmpty(&r_input);
 #ifdef DEBUG
         assert(FALSE);
-#else
-        return;
 #endif
+        return;
     }
 
     if (label)

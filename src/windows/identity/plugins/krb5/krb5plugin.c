@@ -169,6 +169,23 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
     return rv;
 }
 
+khm_int32 KHMAPI
+k5_msg_kcdb(khm_int32 msg_type, khm_int32 msg_subtype,
+            khm_ui_4 uparam, void * vparam)
+{
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    switch(msg_subtype) {
+    case KMSG_KCDB_IDENT:
+        if (uparam == KCDB_OP_DELCONFIG) {
+            k5_remove_from_LRU((khm_handle) vparam);
+        }
+        break;
+    }
+
+    return rv;
+}
+
 
 /* Handler for CRED type messages
 
@@ -241,6 +258,8 @@ k5_msg_callback(khm_int32 msg_type, khm_int32 msg_subtype,
         return k5_msg_system(msg_type, msg_subtype, uparam, vparam);
     case KMSG_CRED:
         return k5_msg_cred(msg_type, msg_subtype, uparam, vparam);
+    case KMSG_KCDB:
+        return k5_msg_kcdb(msg_type, msg_subtype, uparam, vparam);
     }
     return KHM_ERROR_SUCCESS;
 }

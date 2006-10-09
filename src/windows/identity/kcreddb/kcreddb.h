@@ -3310,6 +3310,7 @@ kcdb_buf_release(khm_handle record);
 #define KCDB_OP_SETSEARCH   8
 #define KCDB_OP_UNSETSEARCH 9
 #define KCDB_OP_NEW_DEFAULT 10
+#define KCDB_OP_DELCONFIG   11
 
 /*@}*/
 

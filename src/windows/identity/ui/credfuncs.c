@@ -267,8 +267,9 @@ kmsg_cred_completion(kmq_message *m)
                     kcdb_credset_get_size(tcs, &count);
                     kcdb_credset_delete(tcs);
 
-                    if (count == 0)
-                        break;
+                    if (count == 0) {
+                        goto done_with_op;
+                    }
                 }
 
                 ctx = kherr_peek_context();
@@ -347,6 +348,8 @@ kmsg_cred_completion(kmq_message *m)
 
                 kherr_clear_error();
             }
+
+        done_with_op:
 
             if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
                 kmq_post_message(KMSG_CRED, KMSG_CRED_END, 0, 
@@ -994,11 +997,23 @@ khm_cred_process_startup_actions(void) {
         }
 
         if (khm_startup.autoinit) {
-            khm_size count;
+            khm_size count = 0;
+            khm_handle credset = NULL;
+            khm_int32 ctype_ident = KCDB_CREDTYPE_INVALID;
+            khm_int32 delta = 0;
 
             khm_startup.autoinit = FALSE;
 
-            kcdb_credset_get_size(NULL, &count);
+            kcdb_credset_create(&credset);
+            kcdb_identity_get_type(&ctype_ident);
+
+            kcdb_credset_collect(credset, NULL,
+                                 defident, ctype_ident,
+                                 &delta);
+
+            kcdb_credset_get_size(credset, &count);
+
+            kcdb_credset_delete(credset);
 
             if (count == 0) {
                 if (defident)

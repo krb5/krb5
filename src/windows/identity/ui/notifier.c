@@ -305,6 +305,7 @@ notifier_wnd_proc(HWND hwnd,
             khm_timer_fire(hwnd);
         } else if (wParam == KHUI_REFRESH_TIMER_ID) {
             KillTimer(hwnd, KHUI_REFRESH_TIMER_ID);
+            kcdb_identity_refresh_all();
             khm_timer_refresh(hwnd);
         }
     }
