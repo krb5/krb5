@@ -305,6 +305,8 @@ load_preauth_plugins(krb5_context context)
     void *pa_sys_context;
     init_proc server_init_proc;
 
+    memset(&err, 0, sizeof(err));
+
     /* Attempt to load all of the preauth plugins we can find. */
     PLUGIN_DIR_INIT(&preauth_plugins);
     if (PLUGIN_DIR_OPEN(&preauth_plugins) == 0) {
@@ -315,7 +317,6 @@ load_preauth_plugins(krb5_context context)
     }
 
     /* Get the method tables provided by the loaded plugins. */
-    memset(&err, 0, sizeof(err));
     preauth_plugins_ftables = NULL;
     if (krb5int_get_plugin_dir_data(&preauth_plugins, "preauthentication0",
 				    &preauth_plugins_ftables, &err) != 0) {
