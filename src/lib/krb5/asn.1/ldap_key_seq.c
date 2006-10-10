@@ -144,7 +144,8 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
     if (n_key_data == 0) cleanup (ASN1_MISSING_FIELD);
 
     /* Allocate the buffer */
-    asn1buf_create(&buf);
+    ret = asn1buf_create(&buf);
+    checkerr;
 
     /* Sequence of keys */
     {
@@ -360,7 +361,7 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 
 	ret = decode_tagged_octetstring (&kbuf, 1, &ival,
 					 &key->key_data_contents[0]); checkerr;
-	key->key_data_length[0] = ival;
+	key->key_data_length[0] = ival;	/* XXX range check? */
 
 	safe_syncbuf (&subbuf, &kbuf);
     }
