@@ -1632,7 +1632,7 @@ krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
 	int n;
 
 	LDAP_SEARCH(subtree[i],
-		    LDAP_SCOPE_SUB,
+		    LDAP_SCOPE_SUBTREE,
 		    filter,
 		    refcntattr);
 	n = ldap_count_entries (ld, result);
@@ -1706,6 +1706,7 @@ krb5_error_code krb5_ldap_policydn_to_name (context, policy_dn, name)
 	goto cleanup;
     }
 
+#if defined HAVE_LDAP_STR2DN
     {
 	char *rdn;
 	LDAPDN dn;
@@ -1719,11 +1720,39 @@ krb5_error_code krb5_ldap_policydn_to_name (context, policy_dn, name)
 	    st = EINVAL;
 	else if (strcasecmp (dn[0][0]->la_attr.bv_val, "cn") != 0)
 	    st = EINVAL;
-	else
+	else {
 	    *name = strndup(dn[0][0]->la_value.bv_val, dn[0][0]->la_value.bv_len);
+	    if (*name == NULL)
+		st = EINVAL;
+	}
 
 	ldap_memfree (dn);
     }
+#elif defined HAVE_LDAP_EXPLODE_DN
+    {
+	char *parsed_dn;
+
+	parsed_dn = ldap_explode_dn(policy_dn, 0);
+	if (parsed_dn == NULL) {
+	    st = EINVAL;
+	}
+	else {
+	    if (strncasecmp(parsed_dn[0], "cn=", 3) != 0) {
+		st = EINVAL;
+	    }
+	    else {
+		*name = strdup(parsed_dn[0]);
+		if (*name == NULL)
+		    st = EINVAL;
+	    }
+
+	    ldap_value_free(parsed_dn);
+	}
+    }
+#else
+    st = EINVAL;
+#endif
+
 cleanup:
     return st;
 }

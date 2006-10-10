@@ -614,7 +614,7 @@ krb5_encode_krbsecretkey(krb5_key_data *key_data, int n_key_data) {
 	if (key_data[i].key_data_kvno != key_data[i + 1].key_data_kvno)
 	    num_versions++;
 
-    ret = (struct berval **) malloc (num_versions * sizeof (struct berval *) + 1);
+    ret = (struct berval **) malloc ((num_versions + 1) * sizeof (struct berval *));
     for (i = 0, last = 0, j = 0, currkvno = key_data[0].key_data_kvno; i < n_key_data; i++) {
 	krb5_data *code;
 	if (i == n_key_data - 1 || key_data[i + 1].key_data_kvno != currkvno) {
@@ -1067,8 +1067,8 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    }
 	    if (count != 0) {
 		int j;
-		ber_tl_data = (struct berval **) calloc (count, sizeof (struct
-									berval*));
+		ber_tl_data = (struct berval **) calloc (count + 1,
+							 sizeof (struct berval*));
 		for (j = 0, ptr = entries->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
 		    /* Ignore tl_data that are stored in separate directory
 		     * attributes */
@@ -1091,6 +1091,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    free (ber_tl_data);
 		    goto cleanup;
 		}
+		ber_tl_data[count] = NULL;
 		if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbExtraData",
 						  LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
 						  ber_tl_data)) != 0)
