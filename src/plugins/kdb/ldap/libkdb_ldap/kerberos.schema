@@ -4,7 +4,7 @@
 # Provo, UT 84606
 #
 # VeRsIoN=1.0
-# CoPyRiGhT=(c) Copyright 2005, Novell, Inc.  All rights reserved
+# CoPyRiGhT=(c) Copyright 2006, Novell, Inc.  All rights reserved
 #
 # OIDs:
 #    joint-iso-ccitt(2)
@@ -14,14 +14,12 @@
 #            Novell(113719)
 #              applications(1)
 #                kerberos(301)
-#                  Kerberos Attribute Type(4)
+#                 Kerberos Attribute Type(4) attr# version#
 #                    specific attribute definitions
-#                  Kerberos Attribute Syntax(5)
+#                 Kerberos Attribute Syntax(5)
 #                    specific syntax definitions
-#                  Kerberos Object Class(6)
+#                 Kerberos Object Class(6) class# version#
 #                    specific class definitions
-#                  Kerberos LDAP Extensions (100)
-#                    specific extensions
 
 ########################################################################
 
@@ -32,7 +30,7 @@
 
 ##### This is the principal name in the RFC 1964 specified format
 
-attributetype ( 2.16.840.1.113719.1.301.4.1
+attributetype ( 2.16.840.1.113719.1.301.4.1.1
                 NAME 'krbPrincipalName'
                 EQUALITY caseExactIA5Match
 		SUBSTR caseExactSubstringsMatch
@@ -42,7 +40,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.1
 ##### This specifies the type of the principal, the types could be any of
 ##### the types mentioned in section 6.2 of RFC 4120
 
-attributetype ( 2.16.840.1.113719.1.301.4.3
+attributetype ( 2.16.840.1.113719.1.301.4.3.1
                 NAME 'krbPrincipalType'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -54,7 +52,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.3
 ##### TRUE, if User Password is to be used as the kerberos password.
 ##### FALSE, if User Password and the kerberos password are different.
 
-attributetype ( 2.16.840.1.113719.1.301.4.5
+attributetype ( 2.16.840.1.113719.1.301.4.5.1
                 NAME 'krbUPEnabled'
                 DESC 'Boolean'
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
@@ -63,7 +61,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.5
 
 ##### The time at which the principal expires
 
-attributetype ( 2.16.840.1.113719.1.301.4.6
+attributetype ( 2.16.840.1.113719.1.301.4.6.1
                 NAME 'krbPrincipalExpiration'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
@@ -71,6 +69,8 @@ attributetype ( 2.16.840.1.113719.1.301.4.6
 
 
 ##### The krbTicketFlags attribute holds information about the kerberos flags for a principal
+##### The values (0x00000001 - 0x00800000) are reserved for standards and 
+##### values (0x01000000 - 0x80000000) can be used for proprietary extensions.
 ##### The flags and values as per RFC 4120 and MIT implementation are,
 ##### DISALLOW_POSTDATED	0x00000001
 ##### DISALLOW_FORWARDABLE	0x00000002
@@ -86,7 +86,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.6
 ##### PWCHANGE_SERVICE          0x00002000
 
 
-attributetype ( 2.16.840.1.113719.1.301.4.8
+attributetype ( 2.16.840.1.113719.1.301.4.8.1
                 NAME 'krbTicketFlags'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -95,7 +95,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.8
 
 ##### The maximum ticket lifetime for a principal in seconds
 
-attributetype ( 2.16.840.1.113719.1.301.4.9
+attributetype ( 2.16.840.1.113719.1.301.4.9.1
                 NAME 'krbMaxTicketLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -104,7 +104,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.9
 
 ##### Maximum renewable lifetime for a principal's ticket in seconds
 
-attributetype ( 2.16.840.1.113719.1.301.4.10
+attributetype ( 2.16.840.1.113719.1.301.4.10.1
                 NAME 'krbMaxRenewableAge'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -115,7 +115,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.10
 ##### (FDN of the krbRealmContainer object).
 ##### Example:   cn=ACME.COM, cn=Kerberos, cn=Security
 
-attributetype ( 2.16.840.1.113719.1.301.4.14
+attributetype ( 2.16.840.1.113719.1.301.4.14.1
                 NAME 'krbRealmReferences'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -128,7 +128,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.14
 ##### The values of this attribute need to be updated, when
 ##### the LDAP servers listed here are renamed, moved or deleted.
 
-attributetype ( 2.16.840.1.113719.1.301.4.15
+attributetype ( 2.16.840.1.113719.1.301.4.15.1
                 NAME 'krbLdapServers'
                 EQUALITY caseIgnoreMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
@@ -138,7 +138,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.15
 ##### (FDNs of the krbKdcService objects).
 ##### Example:   cn=kdc - server 1, ou=uvw, o=xyz
 
-attributetype ( 2.16.840.1.113719.1.301.4.17
+attributetype ( 2.16.840.1.113719.1.301.4.17.1
                 NAME 'krbKdcServers'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -148,7 +148,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.17
 ##### (FDNs of the krbPwdService objects).
 ##### Example:   cn=kpasswdd - server 1, ou=uvw, o=xyz
 
-attributetype ( 2.16.840.1.113719.1.301.4.18
+attributetype ( 2.16.840.1.113719.1.301.4.18.1
                 NAME 'krbPwdServers'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -159,7 +159,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.18
 ##### The format is host_name-or-ip_address#protocol#port
 ##### Protocol can be 0 or 1. 0 is for UDP. 1 is for TCP.
 
-attributetype ( 2.16.840.1.113719.1.301.4.24
+attributetype ( 2.16.840.1.113719.1.301.4.24.1
                 NAME 'krbHostServer'
                 EQUALITY caseExactIA5Match
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
@@ -169,7 +169,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.24
 ##### under krbSubTree attribute of krbRealmContainer
 ##### The value can either be 1 (ONE) or 2 (SUB_TREE).
 
-attributetype ( 2.16.840.1.113719.1.301.4.25
+attributetype ( 2.16.840.1.113719.1.301.4.25.1
                 NAME 'krbSearchScope'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -178,7 +178,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.25
 
 ##### FDNs pointing to Kerberos principals
 
-attributetype ( 2.16.840.1.113719.1.301.4.26
+attributetype ( 2.16.840.1.113719.1.301.4.26.1
                 NAME 'krbPrincipalReferences'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -188,7 +188,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.26
 ##### be used as the principal name component for Kerberos.
 ##### The allowed values are cn, sn, uid, givenname, fullname.
 
-attributetype ( 2.16.840.1.113719.1.301.4.28
+attributetype ( 2.16.840.1.113719.1.301.4.28.1
                 NAME 'krbPrincNamingAttr'
                 EQUALITY caseIgnoreMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
@@ -199,7 +199,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.28
 ##### (FDNs of the krbAdmService objects).
 ##### Example:   cn=kadmindd - server 1, ou=uvw, o=xyz
 
-attributetype ( 2.16.840.1.113719.1.301.4.29
+attributetype ( 2.16.840.1.113719.1.301.4.29.1
                 NAME 'krbAdmServers'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -207,7 +207,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.29
 
 ##### Maximum lifetime of a principal's password
 
-attributetype ( 2.16.840.1.113719.1.301.4.30
+attributetype ( 2.16.840.1.113719.1.301.4.30.1
                 NAME 'krbMaxPwdLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -216,7 +216,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.30
 
 ##### Minimum lifetime of a principal's password
 
-attributetype ( 2.16.840.1.113719.1.301.4.31
+attributetype ( 2.16.840.1.113719.1.301.4.31.1
                 NAME 'krbMinPwdLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -225,7 +225,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.31
 
 ##### Minimum number of character clases allowed in a password
 
-attributetype ( 2.16.840.1.113719.1.301.4.32
+attributetype ( 2.16.840.1.113719.1.301.4.32.1
                 NAME 'krbPwdMinDiffChars' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -234,7 +234,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.32
 
 ##### Minimum length of the password
 
-attributetype ( 2.16.840.1.113719.1.301.4.33
+attributetype ( 2.16.840.1.113719.1.301.4.33.1
                 NAME 'krbPwdMinLength' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -243,7 +243,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.33
 
 ##### Number of previous versions of passwords that are stored
 
-attributetype ( 2.16.840.1.113719.1.301.4.34
+attributetype ( 2.16.840.1.113719.1.301.4.34.1
                 NAME 'krbPwdHistoryLength' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -252,7 +252,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.34
 
 ##### FDN pointing to a Kerberos Password Policy object
 
-attributetype ( 2.16.840.1.113719.1.301.4.36
+attributetype ( 2.16.840.1.113719.1.301.4.36.1
                 NAME 'krbPwdPolicyReference'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
@@ -261,7 +261,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.36
 
 ##### The time at which the principal's password expires
 
-attributetype ( 2.16.840.1.113719.1.301.4.37
+attributetype ( 2.16.840.1.113719.1.301.4.37.1
                 NAME 'krbPasswordExpiration'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
@@ -299,7 +299,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.37
 ##### keyvalue  [1] OCTET STRING
 ##### }
 
-attributetype ( 2.16.840.1.113719.1.301.4.39
+attributetype ( 2.16.840.1.113719.1.301.4.39.1
                 NAME 'krbPrincipalKey'
                 EQUALITY octetStringMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
@@ -307,7 +307,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.39
 
 ##### FDN pointing to a Kerberos Ticket Policy object.
 
-attributetype ( 2.16.840.1.113719.1.301.4.40
+attributetype ( 2.16.840.1.113719.1.301.4.40.1
                 NAME 'krbTicketPolicyReference'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
@@ -318,7 +318,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.40
 ##### where principals and other kerberos objects in the realm are configured.
 ##### Example:   ou=acme, ou=pq, o=xyz
 
-attributetype ( 2.16.840.1.113719.1.301.4.41
+attributetype ( 2.16.840.1.113719.1.301.4.41.1
                 NAME 'krbSubTrees'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -329,7 +329,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.41
 ##### subset of the supported encryption/salt types.
 ##### Example: des-cbc-crc:normal
 
-attributetype ( 2.16.840.1.113719.1.301.4.42
+attributetype ( 2.16.840.1.113719.1.301.4.42.1
                 NAME 'krbDefaultEncSaltTypes'
                 EQUALITY caseIgnoreMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
@@ -347,7 +347,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.42
 ##### AFS3            
 ##### Example: des-cbc-crc:normal
 
-attributetype ( 2.16.840.1.113719.1.301.4.43
+attributetype ( 2.16.840.1.113719.1.301.4.43.1
                 NAME 'krbSupportedEncSaltTypes'
                 EQUALITY caseIgnoreMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
@@ -384,7 +384,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.43
 ##### keyvalue  [1] OCTET STRING
 ##### }
 
-attributetype ( 2.16.840.1.113719.1.301.4.44
+attributetype ( 2.16.840.1.113719.1.301.4.44.1
                 NAME 'krbPwdHistory'
                 EQUALITY octetStringMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
@@ -392,7 +392,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.44
 
 ##### The time at which the principal's password last password change happened.
 
-attributetype ( 2.16.840.1.113719.1.301.4.45
+attributetype ( 2.16.840.1.113719.1.301.4.45.1
                 NAME 'krbLastPwdChange'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
@@ -416,7 +416,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.45
 ##### }
 
 
-attributetype ( 2.16.840.1.113719.1.301.4.46
+attributetype ( 2.16.840.1.113719.1.301.4.46.1
                 NAME 'krbMKey'
                 EQUALITY octetStringMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
@@ -424,7 +424,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.46
 
 ##### This stores the alternate principal names for the principal in the RFC 1961 specified format
 
-attributetype ( 2.16.840.1.113719.1.301.4.47
+attributetype ( 2.16.840.1.113719.1.301.4.47.1
                 NAME 'krbPrincipalAliases'
                 EQUALITY caseExactIA5Match
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
@@ -432,7 +432,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.47
 
 ##### The time at which the principal's last successful authentication happened.
 
-attributetype ( 2.16.840.1.113719.1.301.4.48
+attributetype ( 2.16.840.1.113719.1.301.4.48.1
                 NAME 'krbLastSuccessfulAuth'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
@@ -441,7 +441,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.48
 
 ##### The time at which the principal's last failed authentication happened.
 
-attributetype ( 2.16.840.1.113719.1.301.4.49
+attributetype ( 2.16.840.1.113719.1.301.4.49.1
                 NAME 'krbLastFailedAuth'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
@@ -451,7 +451,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.49
 ##### This attribute stores the number of failed authentication attempts
 ##### happened for the principal since the last successful authentication.
 
-attributetype ( 2.16.840.1.113719.1.301.4.50
+attributetype ( 2.16.840.1.113719.1.301.4.50.1
                 NAME 'krbLoginFailedCount' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
@@ -461,7 +461,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.50
 
 ##### This attribute holds the application specific data.
 
-attributetype ( 2.16.840.1.113719.1.301.4.51
+attributetype ( 2.16.840.1.113719.1.301.4.51.1
                 NAME 'krbExtraData'
                 EQUALITY octetStringMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
@@ -471,7 +471,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.51
 ##### This stores the DNs of the directory objects to which the 
 ##### principal object belongs to.
 
-attributetype ( 2.16.840.1.113719.1.301.4.52
+attributetype ( 2.16.840.1.113719.1.301.4.52.1
                 NAME 'krbObjectReferences'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -481,7 +481,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.52
 ##### the additional principal objects and stand alone principal 
 ##### objects (krbPrincipal) can be created.
 
-attributetype ( 2.16.840.1.113719.1.301.4.53
+attributetype ( 2.16.840.1.113719.1.301.4.53.1
                 NAME 'krbPrincContainerRef'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
@@ -494,7 +494,7 @@ attributetype ( 2.16.840.1.113719.1.301.4.53
 
 #### This is a kerberos container for all the realms in a tree.
 
-objectclass ( 2.16.840.1.113719.1.301.6.1
+objectclass ( 2.16.840.1.113719.1.301.6.1.1
                 NAME 'krbContainer'
                 SUP top
 		STRUCTURAL
@@ -503,7 +503,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.1
 
 ##### The krbRealmContainer is created per realm and holds realm specific data.
 
-objectclass ( 2.16.840.1.113719.1.301.6.2
+objectclass ( 2.16.840.1.113719.1.301.6.2.1
                 NAME 'krbRealmContainer'
                 SUP top
 		STRUCTURAL
@@ -521,7 +521,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.2
 #####
 ##### krbKdcService, krbAdmService and krbPwdService derive from this class.
 
-objectclass ( 2.16.840.1.113719.1.301.6.3
+objectclass ( 2.16.840.1.113719.1.301.6.3.1
                 NAME 'krbService'
                 SUP top
                 ABSTRACT
@@ -533,7 +533,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.3
 ##### and have a connection to access Kerberos data with the required 
 ##### access rights.
 
-objectclass ( 2.16.840.1.113719.1.301.6.4
+objectclass ( 2.16.840.1.113719.1.301.6.4.1
                 NAME 'krbKdcService'
                 SUP krbService
 		STRUCTURAL )
@@ -543,7 +543,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.4
 ##### and have a connection to access Kerberos data with the required
 ##### access rights.
 
-objectclass ( 2.16.840.1.113719.1.301.6.5
+objectclass ( 2.16.840.1.113719.1.301.6.5.1
                 NAME 'krbPwdService'
                 SUP krbService
 		STRUCTURAL )
@@ -552,7 +552,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.5
 ###### The principal data auxiliary class. Holds principal information
 ###### and is used to store principal information for Person, Service objects.
 
-objectclass ( 2.16.840.1.113719.1.301.6.8
+objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
 		SUP top
                 AUXILIARY
@@ -561,7 +561,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.8
 
 ###### This class is used to create additional principals and stand alone principals.
 
-objectclass ( 2.16.840.1.113719.1.301.6.9
+objectclass ( 2.16.840.1.113719.1.301.6.9.1
                 NAME 'krbPrincipal'
                 SUP top
                 MUST ( krbPrincipalName )
@@ -571,7 +571,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.9
 ###### The principal references auxiliary class. Holds all principals referred
 ###### from a service
 
-objectclass ( 2.16.840.1.113719.1.301.6.11
+objectclass ( 2.16.840.1.113719.1.301.6.11.1
                 NAME 'krbPrincRefAux'
                 SUP top
                 AUXILIARY
@@ -581,7 +581,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.11
 ##### Representative object for the Kerberos Administration server to bind into a LDAP directory
 ##### and have a connection Id to access Kerberos data with the required access rights.
 
-objectclass ( 2.16.840.1.113719.1.301.6.13
+objectclass ( 2.16.840.1.113719.1.301.6.13.1
                 NAME 'krbAdmService'
                 SUP krbService 
 		STRUCTURAL )
@@ -592,7 +592,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.13
 ##### These policy attributes will be in effect, when the Kerberos
 ##### passwords are different from users' passwords (UP).
 
-objectclass ( 2.16.840.1.113719.1.301.6.14
+objectclass ( 2.16.840.1.113719.1.301.6.14.1
                 NAME 'krbPwdPolicy' 
                 SUP top
                 MUST ( cn )
@@ -602,7 +602,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.14
 ##### The krbTicketPolicyAux holds Kerberos ticket policy attributes.
 ##### This class can be attached to a principal object or realm object.
 
-objectclass ( 2.16.840.1.113719.1.301.6.16
+objectclass ( 2.16.840.1.113719.1.301.6.16.1
                 NAME 'krbTicketPolicyAux'
                 SUP top
                 AUXILIARY
@@ -611,7 +611,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.16
 
 ##### The krbTicketPolicy object is an effective ticket policy that is associated with a realm or a principal
 
-objectclass ( 2.16.840.1.113719.1.301.6.17
+objectclass ( 2.16.840.1.113719.1.301.6.17.1
                 NAME 'krbTicketPolicy'
                 SUP top
                 MUST ( cn ) )

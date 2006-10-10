@@ -3,8 +3,8 @@
 # 1800 South Novell Place
 # Provo, UT 84606
 #
-# VeRsIoN=1.3
-# CoPyRiGhT=(c) Copyright 2005, Novell, Inc.  All rights reserved
+# VeRsIoN=1.0
+# CoPyRiGhT=(c) Copyright 2006, Novell, Inc.  All rights reserved
 #
 # OIDs:
 #    joint-iso-ccitt(2)
@@ -14,109 +14,13 @@
 #            Novell(113719)
 #              applications(1)
 #                kerberos(301)
-#                  Kerberos Attribute Type(4)
+#                 Kerberos Attribute Type(4) attr# version#
 #                    specific attribute definitions
-#                  Kerberos Attribute Syntax(5)
+#                 Kerberos Attribute Syntax(5)
 #                    specific syntax definitions
-#                  Kerberos Object Class(6)
+#                 Kerberos Object Class(6) class# version#
 #                    specific class definitions
-#                  Kerberos LDAP Extensions (100)
-#                    specific extensions
 
-########################################################################
-# 			     Revision History                          #
-########################################################################
-#
-# 1.0  - 04/2004 
-#
-#	- First version
-#
-# 1.1  - 01/2005 
-#
-#	- Added 3 new attributes:
-#		krbContainerReference
-#		krbPrincNamingAttr
-#		krbAdmServers
-#
-#	- Added 2 new classes:
-#		krbContainerRefAux
-#		krbAdmService
-#
-#	- Removed 2 attributes: 
-#		krbLogFile (2.16.840.1.113719.1.301.4.12)
-#		krbReplayCacheFile (2.16.840.1.113719.1.301.4.13)
-#
-#	- Added 'organization', 'organizationalUnit', 'country',
-#         'locality' and 'domain' to the containment list for 
-#	  "krbContainer". Earlier, it had only 'SASSecurity'.
-#
-#	- Removed the optional attributes "krbLogFile" and
-#         "krbReplayCacheFile" from "krbService" class.
-#
-#	- Added "krbAdmServers" and "krbPrincNamingAttr" as
-#         optional attributes to "krbRealmContainer" class.
-#
-#	- Removed the flag "X-NDS_NOT_SCHED_SYNC_IMMEDIATE" for 
-#	  "krbPrincipalExpiration"
-#
-#	- Removed the flags "X-NDS_NOT_SCHED_SYNC_IMMEDIATE" and 
-#	  "X-NDS_PUBLIC_READ" for "krbTicketFlags"
-#
-#	- Removed the flag "X-NDS_PUBLIC_READ" for "krbServiceFlags"
-#
-#	- Modified the comments for:
-#	 	krbPrincipalType
-#	 	krbSecretKey
-#	 	krbUPEnabled
-#	 	krbRealmReferences
-#	 	krbSubTree
-#	 	krbKdcServers
-#	 	krbPwdServers
-#	 	krbSupportedEncTypes
-#	 	krbSupportedSaltTypes
-#	 	krbMasterKey
-#	 	krbHostServer
-#	 	krbSearchScope
-#	 	krbService
-#	 	krbPolicyAux
-#	 	krbTicketFlags
-#	 	krbServiceFlags
-#
-# 1.2  - 04/2005 
-#
-#	- Removed the flag "X-NDS_PUBLIC_READ" for: 
-#		krbMaxTicketLife
-#		krbMaxRenewableAge
-#		krbRealmReferences
-#		krbLdapServers
-#		krbKdcServers
-#		krbPwdServers
-#		krbSupportedEncTypes
-#		krbSupportedSaltTypes
-#		krbDefaultEncType
-#		krbDefaultSaltType
-#		krbHostServer
-#		krbContainerReference
-#		krbAdmServers
-#
-#	- Changed the syntax for "krbLdapServers" from
-#		1.3.6.1.4.1.1466.115.121.1.12 (Distinguished Name) to
-#		1.3.6.1.4.1.1466.115.121.1.15 (Case Ignore String)
-#
-# 1.3  - 04/2005 
-#
-#       - Added 6 new attributes:
-#               krbMaxPwdLife
-#               krbMinPwdLife
-#               krbPwdMinDiffChars
-#               krbPwdMinLength
-#               krbPwdHistoryLength
-#               krbPwdPolicyRefCount
-#               krbPwdPolicyReference
-#
-#       - Added 2 new classes:
-#               krbPwdPolicy
-#               krbPwdPolicyRefAux
 ########################################################################
 
 
@@ -124,105 +28,44 @@
 # 		      Attribute Type Definitions                       #
 ########################################################################
 
-##### This is the principal name in the RFC 1510 specified format
+##### This is the principal name in the RFC 1964 specified format
 
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.1
+attributetypes: ( 2.16.840.1.113719.1.301.4.1.1
                 NAME 'krbPrincipalName'
                 EQUALITY caseExactIA5Match
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### This is the foreign principal name in the RFC 1510 specified format
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.2
-                NAME 'krbForeignPrincipalName'
-                EQUALITY caseExactIA5Match
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+		SUBSTR caseExactSubstringsMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
 
 ##### This specifies the type of the principal, the types could be any of
-##### the following, (refer RFC 1510)
-##### NT_UNKNOWN   	0
-##### NT_PRINCIPAL 	1
-##### NT_SRV_INST       2
-##### NT_SRV_HST        3
-##### NT_SRV_XHST  	4
-##### NT_UID            5
-##### The following is a special principal type as explained,
-##### This is used for X.500 principal names, coded as a Base-64 encoding of the
-##### ASN.1 representation of the distinguished X.500 name. This Base-64 encoding
-##### should be the first element of the principal name (that has only one element)
-##### This constant corresponds to the NT-X500-PRINCIPAL principal type that is
-##### specified in the latest PK INIT IETF draft.
-##### X500_PRINCIPAL    6
+##### the types mentioned in section 6.2 of RFC 4120
 
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.3
+attributetypes: ( 2.16.840.1.113719.1.301.4.3.1
                 NAME 'krbPrincipalType'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
-##### This attribute holds the principal's secret key that is encrypted with
-##### the master key.
-##### The attribute holds data as follows,
-##### First 2 bytes     Length of principal name (princNameLength)
-##### Next 2 bytes      Current version of the principal key
-##### Next 2 bytes      Version of the master key used to encrypt this principal key
-##### Next 4 bytes      Time when password was last chaged
-##### Next 2 bytes      Number of keys for the principal (noOfKeys)
-##### Next 2 bytes      Key type of the first key
-##### Next 2 bytes      Length of the first key (keyLength[1])
-##### Next 2 bytes      Salt type of the first key
-##### Next 2 bytes      Salt Length of the first key (saltLength[1])
-##### ...      ...             (other principals...)
-##### Next 2 bytes      Key type of the last key (There will be "noOfKeys" keys)
-##### Next 2 bytes      Length of the last key  (keyLength[noOfKeys])
-##### Next 2 bytes      Salt type of the last key (There will be "noOfKeys" keys)
-##### Next 2 bytes      Salt Length of the last key  (saltLength[noOfKeys])
-##### Principal name (of princNameLength)
-##### Principal's first key (of keyLength[1])
-##### Principal's first salt (of saltLength[1])
-##### ...      ...            (other principals...)
-##### Principal's last key (of keyLength[noOfKeys])
-##### Principal's last salt (saltLength[noOfKeys])
-##### The byte encoding is in the big endian format.
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.4
-                NAME 'krbSecretKey'
-                EQUALITY octetStringMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
-
-
-##### This flag is used to find whether Universal Password is to be used
+##### This flag is used to find whether directory User Password has to be used
 ##### as kerberos password.
-##### TRUE, if UP is to be used as the kerberos password.
-##### FALSE, if UP and the kerberos password are different.
+##### TRUE, if User Password is to be used as the kerberos password.
+##### FALSE, if User Password and the kerberos password are different.
 
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.5
+attributetypes: ( 2.16.840.1.113719.1.301.4.5.1
                 NAME 'krbUPEnabled'
                 DESC 'Boolean'
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.7
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### The time at which the principal expires
@@ -230,28 +73,17 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.5
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.6
+attributetypes: ( 2.16.840.1.113719.1.301.4.6.1
                 NAME 'krbPrincipalExpiration'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
                 SINGLE-VALUE)
 
 
-##### FDN pointing to a Kerberos Policy object
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.7
-                NAME 'krbPolicyReference'
-                EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
 ##### The krbTicketFlags attribute holds information about the kerberos flags for a principal
-##### The flags as per RFC 1510 are,
+##### The values (0x00000001 - 0x00800000) are reserved for standards and 
+##### values (0x01000000 - 0x80000000) can be used for proprietary extensions.
+##### The flags and values as per RFC 4120 and MIT implementation are,
 ##### DISALLOW_POSTDATED	0x00000001
 ##### DISALLOW_FORWARDABLE	0x00000002
 ##### DISALLOW_TGT_BASED        0x00000004
@@ -269,7 +101,7 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.7
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.8
+attributetypes: ( 2.16.840.1.113719.1.301.4.8.1
                 NAME 'krbTicketFlags'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
@@ -281,12 +113,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.8
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.9
+attributetypes: ( 2.16.840.1.113719.1.301.4.9.1
                 NAME 'krbMaxTicketLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Maximum renewable lifetime for a principal's ticket in seconds
@@ -294,34 +125,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.9
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.10
+attributetypes: ( 2.16.840.1.113719.1.301.4.10.1
                 NAME 'krbMaxRenewableAge'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### This is a set of flags that a Kerberos server requires to enable/disable
-##### support of certain features.
-##### The flags are as follows,
-##### AUTO_RESTART                  (1 << 0)
-##### CHECK_ADDRESSES               (1 << 1)
-##### SUPPORT_V4                    (1 << 2)
-##### USE_PRI_PORT                  (1 << 3)
-##### USE_SEC_PORT                  (1 << 4)
-##### USE_TCP                       (1 << 5)
-##### UNIXTIME_OLD_PATYPE           (1 << 6)
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.11
-                NAME 'krbServiceFlags'
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Forward reference to the Realm object.
@@ -331,18 +139,15 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.11
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.14
+attributetypes: ( 2.16.840.1.113719.1.301.4.14.1
                 NAME 'krbRealmReferences'
                 EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
 
 ##### List of LDAP servers that kerberos servers can contact.
-##### The attribute holds data in the following format,
-##### HostName-or-IPAddress#Port
-##### Where, "#" is a delimiter.
-##### Examples: acme.com#636, 164.164.164.164#1636
+##### The attribute holds data in the ldap uri format,
+##### Example: ldaps://acme.com:636
 #####
 ##### The values of this attribute need to be updated, when
 ##### the LDAP servers listed here are renamed, moved or deleted.
@@ -350,26 +155,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.14
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.15
+attributetypes: ( 2.16.840.1.113719.1.301.4.15.1
                 NAME 'krbLdapServers'
-                EQUALITY caseIgnoreIA5Match
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### Forward reference to an entry that starts a sub-tree
-##### where principals and other kerberos objects in the realm are configured.
-##### Example:   ou=acme, ou=pq, o=xyz
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.16
-                NAME 'krbSubTree'
-                EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                EQUALITY caseIgnoreMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
 
 
 ##### A set of forward references to the KDC Service objects.
@@ -379,11 +168,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.16
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.17
+attributetypes: ( 2.16.840.1.113719.1.301.4.17.1
                 NAME 'krbKdcServers'
                 EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
 
 ##### A set of forward references to the Password Service objects.
@@ -393,100 +181,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.17
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.18
+attributetypes: ( 2.16.840.1.113719.1.301.4.18.1
                 NAME 'krbPwdServers'
                 EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### List of encryption types supported by the Realm.
-##### The supported encryption types are,
-##### DES_CBC_CRC			0x0001
-##### DES_CBC_MD4     			0x0002
-##### DES_CBC_MD5     			0x0003
-##### DES_CBC_RAW     			0x0004
-##### DES3_CBC_SHA    			0x0005
-##### DES3_CBC_RAW    			0x0006
-##### DES_HMAC_SHA1   			0x0008
-##### DES3_CBC_SHA1   			0x0010
-##### AES128_CTS_HMAC_SHA1_96		0x0011
-##### AES256_CTS_HMAC_SHA1_96		0x0012
-##### ARCFOUR_HMAC    			0x0017
-##### ARCFOUR_HMAC_EXP 			0x0018
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.19
-                NAME 'krbSupportedEncTypes'
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### List of salt types supported by the Realm.
-##### The supported salt types are,
-##### NORMAL          0
-##### V4              1
-##### NOREALM         2
-##### ONLYREALM       3
-##### SPECIAL         4
-##### AFS3            5
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.20
-                NAME 'krbSupportedSaltTypes'
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-#####  Default encryption type supported by the Realm.
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.21
-                NAME 'krbDefaultEncType'
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-#####  Default salt type supported by the Realm.
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.22
-                NAME 'krbDefaultSaltType'
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### This attribute holds the kerberos master key.
-##### The encryption type used for generating the key will be the strongest available with NICI.
-##### This attribute will be encrypted with Tree Key and stored.
-##### The attribute holds data as follows,
-##### First 2 bytes holds the version of the master key,
-##### Next 2 bytes holds the encryption type,
-##### Next 4 bytes holds the key length,
-##### Followed by the key.
-##### The byte encoding is in the big endian format.
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.23
-                NAME 'krbMasterKey'
-                EQUALITY octetStringMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
 
 ##### This attribute holds the Host Name or the ip address, 
@@ -497,11 +195,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.23
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.24
+attributetypes: ( 2.16.840.1.113719.1.301.4.24.1
                 NAME 'krbHostServer'
                 EQUALITY caseExactIA5Match
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
 
 
 ##### This attribute holds the scope for searching the principals
@@ -511,38 +208,22 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.24
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.25
+attributetypes: ( 2.16.840.1.113719.1.301.4.25.1
                 NAME 'krbSearchScope'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
-##### FDNs pointing to Kerberos Service principals
+##### FDNs pointing to Kerberos principals
 
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.26
+attributetypes: ( 2.16.840.1.113719.1.301.4.26.1
                 NAME 'krbPrincipalReferences'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
-
-
-##### FDN pointing to the Kerberos container in the tree
-##### If this attribute is not present, then the default
-##### value is cn=Kerberos,cn=Security
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.27
-                NAME 'krbContainerReference'
-                EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
 
 
 ##### This attribute specifies which attribute of the user objects  
@@ -552,13 +233,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.27
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.28
+attributetypes: ( 2.16.840.1.113719.1.301.4.28.1
                 NAME 'krbPrincNamingAttr'
-                DESC 'String'
-                EQUALITY caseIgnoreIA5Match
+                EQUALITY caseIgnoreMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### A set of forward references to the Administration Service objects.
@@ -568,11 +247,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.28
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.29
+attributetypes: ( 2.16.840.1.113719.1.301.4.29.1
                 NAME 'krbAdmServers'
                 EQUALITY distinguishedNameMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
 
 
 ##### Maximum lifetime of a principal's password
@@ -580,12 +258,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.29
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.30
+attributetypes: ( 2.16.840.1.113719.1.301.4.30.1
                 NAME 'krbMaxPwdLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Minimum lifetime of a principal's password
@@ -593,12 +270,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.30
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.31
+attributetypes: ( 2.16.840.1.113719.1.301.4.31.1
                 NAME 'krbMinPwdLife'
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Minimum number of character clases allowed in a password
@@ -606,12 +282,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.31
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.32
+attributetypes: ( 2.16.840.1.113719.1.301.4.32.1
                 NAME 'krbPwdMinDiffChars' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Minimum length of the password
@@ -619,12 +294,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.32
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.33
+attributetypes: ( 2.16.840.1.113719.1.301.4.33.1
                 NAME 'krbPwdMinLength' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### Number of previous versions of passwords that are stored
@@ -632,25 +306,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.33
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.34
+attributetypes: ( 2.16.840.1.113719.1.301.4.34.1
                 NAME 'krbPwdHistoryLength' 
                 EQUALITY integerMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
-
-
-##### Number of principals that refer to this policy
-
-dn: cn=schema
-changetype: modify
-add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.35
-                NAME 'krbPwdPolicyRefCount' 
-                EQUALITY integerMatch
-                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
-                SINGLE-VALUE  
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### FDN pointing to a Kerberos Password Policy object
@@ -658,12 +318,11 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.35
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.36
+attributetypes: ( 2.16.840.1.113719.1.301.4.36.1
                 NAME 'krbPwdPolicyReference'
                 EQUALITY distinguishedNameMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-                SINGLE-VALUE
-                X-NDS_NOT_SCHED_SYNC_IMMEDIATE '1')
+                SINGLE-VALUE)
 
 
 ##### The time at which the principal's password expires
@@ -671,13 +330,280 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.36
 dn: cn=schema
 changetype: modify
 add: attributetypes
-attributetypes: ( 2.16.840.1.113719.1.301.4.37
+attributetypes: ( 2.16.840.1.113719.1.301.4.37.1
                 NAME 'krbPasswordExpiration'
                 EQUALITY generalizedTimeMatch
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
                 SINGLE-VALUE)
 
 
+##### This attribute holds the principal's key (krbPrincipalKey) that is encrypted with
+##### the master key (krbMKey). 
+##### The attribute is ASN.1 encoded.
+#####
+##### The format of the value for this attribute is explained below,
+##### KrbKeySet ::= SEQUENCE {
+##### attribute-major-vno       [0] UInt16,
+##### attribute-minor-vno       [1] UInt16,
+##### kvno                      [2] UInt32,
+##### mkvno                     [3] UInt32 OPTIONAL,
+##### keys                      [4] SEQUENCE OF KrbKey,
+##### ...
+##### }
+#####
+##### KrbKey ::= SEQUENCE {
+##### salt      [0] KrbSalt OPTIONAL,
+##### key       [1] EncryptionKey,
+##### s2kparams [2] OCTET STRING OPTIONAL,
+##### ...
+##### }
+#####
+##### KrbSalt ::= SEQUENCE {
+##### type      [0] Int32,
+##### salt      [1] OCTET STRING OPTIONAL
+##### }
+#####
+##### EncryptionKey ::= SEQUENCE {
+##### keytype   [0] Int32,
+##### keyvalue  [1] OCTET STRING
+##### }
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.39.1
+                NAME 'krbPrincipalKey'
+                EQUALITY octetStringMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
+
+
+##### FDN pointing to a Kerberos Ticket Policy object.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.40.1
+                NAME 'krbTicketPolicyReference'
+                EQUALITY distinguishedNameMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+                SINGLE-VALUE)
+
+
+##### Forward reference to an entry that starts sub-trees
+##### where principals and other kerberos objects in the realm are configured.
+##### Example:   ou=acme, ou=pq, o=xyz
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.41.1
+                NAME 'krbSubTrees'
+                EQUALITY distinguishedNameMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
+
+
+##### Holds the default encryption/salt type combinations of principals for
+##### the Realm. Stores in the form of key:salt strings.
+##### Example: des-cbc-crc:normal
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.42.1
+                NAME 'krbDefaultEncSaltTypes'
+                EQUALITY caseIgnoreMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
+
+
+##### Holds the Supported encryption/salt type combinations of principals for
+##### the Realm. Stores in the form of key:salt strings.
+##### The supported encryption types are mentioned in RFC 3961
+##### The supported salt types are,
+##### NORMAL          
+##### V4              
+##### NOREALM         
+##### ONLYREALM       
+##### SPECIAL         
+##### AFS3            
+##### Example: des-cbc-crc:normal
+#####
+##### This attribute obsoletes the krbSupportedEncTypes and krbSupportedSaltTypes
+##### attributes.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.43.1
+                NAME 'krbSupportedEncSaltTypes'
+                EQUALITY caseIgnoreMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.15)
+
+
+##### This attribute holds the principal's old keys (krbPwdHistory) that is encrypted with
+##### the kadmin/history key.
+##### The attribute is ASN.1 encoded.
+#####
+##### The format of the value for this attribute is explained below,
+##### KrbKeySet ::= SEQUENCE {
+##### attribute-major-vno       [0] UInt16,
+##### attribute-minor-vno       [1] UInt16,
+##### kvno                      [2] UInt32,
+##### mkvno                     [3] UInt32 OPTIONAL -- actually kadmin/history key,
+##### keys                      [4] SEQUENCE OF KrbKey,
+##### ...
+##### }
+#####
+##### KrbKey ::= SEQUENCE {
+##### salt      [0] KrbSalt OPTIONAL,
+##### key       [1] EncryptionKey,
+##### s2kparams [2] OCTET STRING OPTIONAL,
+##### ...
+##### }
+#####
+##### KrbSalt ::= SEQUENCE {
+##### type      [0] Int32,
+##### salt      [1] OCTET STRING OPTIONAL
+##### }
+#####
+##### EncryptionKey ::= SEQUENCE {
+##### keytype   [0] Int32,
+##### keyvalue  [1] OCTET STRING
+##### }
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.44.1
+                NAME 'krbPwdHistory'
+                EQUALITY octetStringMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
+
+
+##### The time at which the principal's password last password change happened.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.45.1
+                NAME 'krbLastPwdChange'
+                EQUALITY generalizedTimeMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+                SINGLE-VALUE)
+
+
+##### This attribute holds the kerberos master key.
+##### This can be used to encrypt principal keys. 
+##### This attribute has to be secured in directory.
+#####
+##### This attribute is ASN.1 encoded.
+##### The format of the value for this attribute is explained below,
+##### KrbMKey ::= SEQUENCE {
+##### kvno    [0] UInt32,
+##### key     [1] MasterKey
+##### }
+#####
+##### MasterKey ::= SEQUENCE {
+##### keytype         [0] Int32,
+##### keyvalue        [1] OCTET STRING
+##### }
+
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.46.1
+                NAME 'krbMKey'
+                EQUALITY octetStringMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
+
+
+##### This stores the alternate principal names for the principal in the RFC 1961 specified format
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.47.1
+                NAME 'krbPrincipalAliases'
+                EQUALITY caseExactIA5Match
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.26)
+
+
+##### The time at which the principal's last successful authentication happened.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.48.1
+                NAME 'krbLastSuccessfulAuth'
+                EQUALITY generalizedTimeMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+                SINGLE-VALUE)
+
+
+##### The time at which the principal's last failed authentication happened.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.49.1
+                NAME 'krbLastFailedAuth'
+                EQUALITY generalizedTimeMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+                SINGLE-VALUE)
+
+
+##### This attribute stores the number of failed authentication attempts
+##### happened for the principal since the last successful authentication.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.50.1
+                NAME 'krbLoginFailedCount' 
+                EQUALITY integerMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 
+                SINGLE-VALUE)
+
+
+
+##### This attribute holds the application specific data.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.51.1
+                NAME 'krbExtraData'
+                EQUALITY octetStringMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.40)
+
+
+##### This attributes holds references to the set of directory objects.
+##### This stores the DNs of the directory objects to which the 
+##### principal object belongs to.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.52.1
+                NAME 'krbObjectReferences'
+                EQUALITY distinguishedNameMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
+
+
+##### This attribute holds references to a Container object where 
+##### the additional principal objects and stand alone principal 
+##### objects (krbPrincipal) can be created.
+
+dn: cn=schema
+changetype: modify
+add: attributetypes
+attributetypes: ( 2.16.840.1.113719.1.301.4.53.1
+                NAME 'krbPrincContainerRef'
+                EQUALITY distinguishedNameMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.12)
+
+
+########################################################################
 ########################################################################
 # 		        Object Class Definitions                       #
 ########################################################################
@@ -687,13 +613,10 @@ attributetypes: ( 2.16.840.1.113719.1.301.4.37
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.1
+objectClasses: ( 2.16.840.1.113719.1.301.6.1.1
                 NAME 'krbContainer'
                 SUP top
-                MUST ( cn )
-                MAY ( krbPolicyReference)
-                X-NDS_NAMING ( 'cn' )
-                X-NDS_CONTAINMENT ( 'SASSecurity' 'organization' 'organizationalUnit' 'country' 'locality' 'domain' ))
+                MUST ( cn ) )
 
 
 ##### The krbRealmContainer is created per realm and holds realm specific data.
@@ -701,13 +624,11 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.1
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.2
+objectClasses: ( 2.16.840.1.113719.1.301.6.2.1
                 NAME 'krbRealmContainer'
                 SUP top
                 MUST ( cn )
-                MAY ( krbMasterKey $ krbUPEnabled $ krbSubTree $ krbSearchScope $ krbLdapServers $ krbSupportedEncTypes $ krbSupportedSaltTypes $ krbDefaultEncType $ krbDefaultSaltType $ krbPolicyReference $ krbKdcServers $ krbPwdServers $ krbAdmServers $ krbPrincNamingAttr )
-                X-NDS_NAMING ( 'cn' )
-                X-NDS_CONTAINMENT ( 'krbContainer' ))
+                MAY ( krbMKey $ krbUPEnabled $ krbSubTrees $ krbSearchScope $ krbLdapServers $ krbSupportedEncSaltTypes $ krbDefaultEncSaltTypes $ krbTicketPolicyReference $ krbKdcServers $ krbPwdServers $ krbAdmServers $ krbPrincNamingAttr $krbPwdPolicyReference $ krbPrincContainerRef ) )
 
 
 ##### An instance of a class derived from krbService is created per
@@ -723,103 +644,61 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.2
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.3
+objectClasses: ( 2.16.840.1.113719.1.301.6.3.1
                 NAME 'krbService'
                 ABSTRACT
-                SUP ( top $ Server $ ndsLoginProperties )
+                SUP ( top )
                 MUST ( cn )
-                MAY ( krbHostServer $ krbServiceFlags $ krbRealmReferences )
-                X-NDS_NAMING 'cn'
-                X-NDS_CONTAINMENT ( 'organization' 'organizationalUnit' 'country' 'locality' 'domain' 'krbRealmContainer' )
-                X-NDS_NOT_CONTAINER '1')
+                MAY ( krbHostServer $ krbRealmReferences ) )
 
 
-##### Representative object for the KDC server to log onto eDirectory
-##### and have a connection Id to access Kerberos data and have the required ACL's
+##### Representative object for the KDC server to bind into a LDAP directory
+##### and have a connection to access Kerberos data with the required 
+##### access rights.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.4
+objectClasses: ( 2.16.840.1.113719.1.301.6.4.1
                 NAME 'krbKdcService'
-                SUP ( krbService )
-                X-NDS_NOT_CONTAINER '1')
+                SUP ( krbService ) )
 
 
-##### Representative object for the Kerberos Password server to log into eDirectory
-##### and have a connection Id to access Kerberos data and have the required ACL's
+##### Representative object for the Kerberos Password server to bind into a LDAP directory
+##### and have a connection to access Kerberos data with the required
+##### access rights.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.5
+objectClasses: ( 2.16.840.1.113719.1.301.6.5.1
                 NAME 'krbPwdService'
-                SUP ( krbService )
-                X-NDS_NOT_CONTAINER '1')
+                SUP ( krbService ) )
 
-
-##### The krbPolicyAux holds Kerberos ticket policy attributes.
-##### This class can be attached to a principal object or realm object.
-
-dn: cn=schema
-changetype: modify
-add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.6
-                NAME 'krbPolicyAux'
-                AUXILIARY
-                MAY ( krbTicketFlags $ krbMaxTicketLife $ krbMaxRenewableAge ))
-
-
-##### The krbPolicy object is an effective policy that is associated with a realm or a principal
-
-dn: cn=schema
-changetype: modify
-add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.7
-                NAME 'krbPolicy'
-                SUP top
-                MUST ( cn )
-                X-NDS_NAMING 'cn'
-                X-NDS_CONTAINMENT ( 'organization' 'organizationalUnit' 'domain' 'country' 'locality' )
-                X-NDS_NOT_CONTAINER '1')
 
 ###### The principal data auxiliary class. Holds principal information
-###### and is used to store principal information for Users and any services.
+###### and is used to store principal information for Person, Service objects.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.8
+objectClasses: ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
                 AUXILIARY
-                MAY ( krbPrincipalName $ krbUPEnabled $ krbSecretKey $ krbPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration ) )
+                MAY ( krbPrincipalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData ) )
 
 
-###### This object is created to hold principals of type other than USER.
+###### This class is used to create additional principals and stand alone principals.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.9
+objectClasses: ( 2.16.840.1.113719.1.301.6.9.1
                 NAME 'krbPrincipal'
                 SUP ( top )
                 MUST ( krbPrincipalName )
-                MAY ( krbPrincipalType )
-                X-NDS_NAMING 'krbPrincipalName'
-                X-NDS_CONTAINMENT ( 'organization' 'organizationalUnit' 'domain' 'krbRealmContainer' 'country' 'locality' )
-                X-NDS_NOT_CONTAINER '1')
+		MAY ( krbObjectReferences ) )
 
-
-###### The foreign principal data auxiliary class. Holds all foreign principal information
-###### and is used to store foreign principal information for Users.
-
-dn: cn=schema
-changetype: modify
-add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.10
-                NAME 'krbForeignPrincipalAux'
-                AUXILIARY
-                MAY krbForeignPrincipalName )
 
 ###### The principal references auxiliary class. Holds all principals referred
 ###### from a service
@@ -827,34 +706,22 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.10
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.11
+objectClasses: ( 2.16.840.1.113719.1.301.6.11.1
                 NAME 'krbPrincRefAux'
+                SUP top
                 AUXILIARY
                 MAY krbPrincipalReferences )
 
 
-###### Kerberos container references auxiliary class. Holds the location
-###### of the Kerberos container object within an eDirectory tree.
+##### Representative object for the Kerberos Administration server to bind into a LDAP directory
+##### and have a connection Id to access Kerberos data with the required access rights.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.12
-                NAME 'krbContainerRefAux'
-                AUXILIARY
-                MAY krbContainerReference )
-
-
-##### Representative object for the Kerberos Administration server to log into eDirectory
-##### and have a connection Id to access Kerberos data and have the required ACL's
-
-dn: cn=schema
-changetype: modify
-add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.13
+objectClasses: ( 2.16.840.1.113719.1.301.6.13.1
                 NAME 'krbAdmService'
-                SUP ( krbService )
-                X-NDS_NOT_CONTAINER '1')
+                SUP ( krbService ) )
 
 
 ##### The krbPwdPolicy object is a template password policy that 
@@ -865,24 +732,32 @@ objectClasses: ( 2.16.840.1.113719.1.301.6.13
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.14
+objectClasses: ( 2.16.840.1.113719.1.301.6.14.1
                 NAME 'krbPwdPolicy' 
                 SUP top
                 MUST ( cn )
-                X-NDS_NAMING 'cn'
-                X-NDS_CONTAINMENT ( 'organization' 'organizationalUnit' 'domain' 'country' 'locality' )
-                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength $ krbPwdPolicyRefCount)
-                X-NDS_NOT_CONTAINER '1')
+                MAY ( krbMaxPwdLife $ krbMinPwdLife $ krbPwdMinDiffChars $ krbPwdMinLength $ krbPwdHistoryLength ) )
 
 
-###### The password policy reference auxiliary class. 
-###### Holds the DN of the password policy object. This is to be attached to principals.
+##### The krbTicketPolicyAux holds Kerberos ticket policy attributes.
+##### This class can be attached to a principal object or realm object.
 
 dn: cn=schema
 changetype: modify
 add: objectclasses
-objectClasses: ( 2.16.840.1.113719.1.301.6.15
-                NAME 'krbPwdPolicyRefAux'
+objectClasses: ( 2.16.840.1.113719.1.301.6.16.1
+                NAME 'krbTicketPolicyAux'
                 AUXILIARY
-                MAY ( krbPwdPolicyReference ) )
+                MAY ( krbTicketFlags $ krbMaxTicketLife $ krbMaxRenewableAge ) )
+
+
+##### The krbTicketPolicy object is an effective ticket policy that is associated with a realm or a principal
+
+dn: cn=schema
+changetype: modify
+add: objectclasses
+objectClasses: ( 2.16.840.1.113719.1.301.6.17.1
+                NAME 'krbTicketPolicy'
+                SUP top
+                MUST ( cn ) )
 
