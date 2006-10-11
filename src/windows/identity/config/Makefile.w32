@@ -70,7 +70,7 @@ NETIDMGR_VERSIONC=$(NETIDMGR_VERSION_MAJOR),$(NETIDMGR_VERSION_MINOR),$(NETIDMGR
 
 # Source information
 NETIDMGR_SRC_COMPANY_1033=Massachusetts Institute of Technology
-NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005 Massachusetts Institute of Technology
+NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005,2006 Massachusetts Institute of Technology
 
 # Choose the default build type if one is not set
 !if ("$(KH_BUILD)" != "DEBUG") && ("$(KH_BUILD)" != "RETAIL")
