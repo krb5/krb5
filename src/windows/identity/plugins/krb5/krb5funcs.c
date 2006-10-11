@@ -702,6 +702,19 @@ khm_krb5_renew_cred(khm_handle cred)
     khm_boolean		brenewIdentity = FALSE;
     khm_boolean		istgt = FALSE;
 
+    khm_int32           flags;
+
+    cbname = sizeof(wname);
+    kcdb_cred_get_name(cred, wname, &cbname);
+    _reportf(L"Krb5 renew cred for %s", wname);
+
+    kcdb_cred_get_flags(cred, &flags);
+
+    if (!(flags & KCDB_CRED_FLAG_INITIAL)) {
+        _reportf(L"Krb5 skipping renewal because this is not an initial credential");
+        return 0;
+    }
+
     memset(&in_creds, 0, sizeof(in_creds));
     memset(&cc_creds, 0, sizeof(cc_creds));
 
@@ -2161,80 +2174,79 @@ khm_krb5_changepwd(char * principal,
     if ( !pkrb5_init_context )
         goto cleanup;
 
-   if (rc = pkrb5_init_context(&context)) {
-       goto cleanup;
-   }
+    if (rc = pkrb5_init_context(&context)) {
+        goto cleanup;
+    }
 
-   if (rc = pkrb5_parse_name(context, principal, &princ)) {
-       goto cleanup;
-   }
+    if (rc = pkrb5_parse_name(context, principal, &princ)) {
+        goto cleanup;
+    }
 
-   pkrb5_get_init_creds_opt_init(&opts);
-   pkrb5_get_init_creds_opt_set_tkt_life(&opts, 5*60);
-   pkrb5_get_init_creds_opt_set_renew_life(&opts, 0);
-   pkrb5_get_init_creds_opt_set_forwardable(&opts, 0);
-   pkrb5_get_init_creds_opt_set_proxiable(&opts, 0);
-   pkrb5_get_init_creds_opt_set_address_list(&opts,NULL);
+    pkrb5_get_init_creds_opt_init(&opts);
+    pkrb5_get_init_creds_opt_set_tkt_life(&opts, 5*60);
+    pkrb5_get_init_creds_opt_set_renew_life(&opts, 0);
+    pkrb5_get_init_creds_opt_set_forwardable(&opts, 0);
+    pkrb5_get_init_creds_opt_set_proxiable(&opts, 0);
+    pkrb5_get_init_creds_opt_set_address_list(&opts,NULL);
 
-   if (rc = pkrb5_get_init_creds_password(context, &creds, princ, 
-                                          password, 0, 0, 0, 
-                                          "kadmin/changepw", &opts)) {
-       if (rc == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+    if (rc = pkrb5_get_init_creds_password(context, &creds, princ, 
+                                           password, 0, 0, 0, 
+                                           "kadmin/changepw", &opts)) {
+        if (rc == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
 #if 0
-           com_err(argv[0], 0,
-                   "Password incorrect while getting initial ticket");
+            com_err(argv[0], 0,
+                    "Password incorrect while getting initial ticket");
 #endif
-       }
-       else {
+        } else {
 #if 0
-           com_err(argv[0], ret, "getting initial ticket");
+            com_err(argv[0], ret, "getting initial ticket");
 #endif
-       }
-       goto cleanup;
-   }
+        }
+        goto cleanup;
+    }
 
-   if (rc = pkrb5_change_password(context, &creds, newpassword,
-                                  &result_code, &result_code_string,
-                                  &result_string)) {
+    if (rc = pkrb5_change_password(context, &creds, newpassword,
+                                   &result_code, &result_code_string,
+                                   &result_string)) {
 #if 0
-       com_err(argv[0], ret, "changing password");
+        com_err(argv[0], ret, "changing password");
 #endif
-       goto cleanup;
-   }
+        goto cleanup;
+    }
 
-   if (result_code) {
-       int len = result_code_string.length + 
-           (result_string.length ? (sizeof(": ") - 1) : 0) +
-           result_string.length;
-       if (len && error_str) {
-           *error_str = PMALLOC(len + 1);
-           if (*error_str)
-               StringCchPrintfA(*error_str, len+1,
-                                "%.*s%s%.*s",
-                                result_code_string.length, 
-                                result_code_string.data,
-                                result_string.length?": ":"",
-                                result_string.length, 
-                                result_string.data);
-       }
-       rc = result_code;
-       goto cleanup;
-   }
+    if (result_code) {
+        int len = result_code_string.length + 
+            (result_string.length ? (sizeof(": ") - 1) : 0) +
+            result_string.length;
+        if (len && error_str) {
+            *error_str = PMALLOC(len + 1);
+            if (*error_str)
+                StringCchPrintfA(*error_str, len+1,
+                                 "%.*s%s%.*s",
+                                 result_code_string.length, 
+                                 result_code_string.data,
+                                 result_string.length?": ":"",
+                                 result_string.length, 
+                                 result_string.data);
+        }
+        rc = result_code;
+        goto cleanup;
+    }
 
  cleanup:
-   if (result_string.data)
-       pkrb5_free_data_contents(context, &result_string);
+    if (result_string.data)
+        pkrb5_free_data_contents(context, &result_string);
 
-   if (result_code_string.data)
-       pkrb5_free_data_contents(context, &result_code_string);
+    if (result_code_string.data)
+        pkrb5_free_data_contents(context, &result_code_string);
 
-   if (princ)
-       pkrb5_free_principal(context, princ);
+    if (princ)
+        pkrb5_free_principal(context, princ);
 
-   if (context)
-       pkrb5_free_context(context);
+    if (context)
+        pkrb5_free_context(context);
 
-   return rc;
+    return rc;
 }
 
 khm_int32 KHMAPI

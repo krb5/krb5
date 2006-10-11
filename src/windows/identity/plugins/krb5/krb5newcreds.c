@@ -232,6 +232,20 @@ k5_handle_wmnc_notify(HWND hwnd,
 
                 d->pwd_change = TRUE;
 
+                if (is_k5_identpro &&
+                    d->nc->n_identities > 0 &&
+                    d->nc->identities[0]) {
+
+                    kcdb_identity_set_flags(d->nc->identities[0],
+                                            KCDB_IDENT_FLAG_VALID,
+                                            KCDB_IDENT_FLAG_VALID);
+
+                }
+
+                PostMessage(d->nc->hwnd, KHUI_WM_NC_NOTIFY,
+                            MAKEWPARAM(0, WMNC_UPDATE_CREDTEXT),
+                            (LPARAM) d->nc);
+
                 return TRUE;
             }
         }
@@ -347,7 +361,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                 /* the above notification effectively takes all our
                    changes into account.  The data we have is no
                    longer out of sync */
-                d->sync = FALSE;
+                d->sync = TRUE;
             }
         }
         break;
@@ -1574,6 +1588,47 @@ k5_find_tgt_filter(khm_handle cred,
 }
 
 khm_int32
+k5_remove_from_LRU(khm_handle identity)
+{
+    wchar_t * wbuf = NULL;
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    khm_size cb;
+    khm_size cb_ms;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    cb = sizeof(idname);
+    rv = kcdb_identity_get_name(identity, idname, &cb);
+    assert(rv == KHM_ERROR_SUCCESS);
+
+    rv = khc_read_multi_string(csp_params, L"LRUPrincipals", NULL, &cb_ms);
+    if (rv != KHM_ERROR_TOO_LONG)
+        cb_ms = sizeof(wchar_t) * 2;
+
+    wbuf = PMALLOC(cb_ms);
+    assert(wbuf);
+
+    cb = cb_ms;
+
+    if (rv == KHM_ERROR_TOO_LONG) {
+        rv = khc_read_multi_string(csp_params, L"LRUPrincipals", wbuf, &cb);
+        assert(KHM_SUCCEEDED(rv));
+
+        if (multi_string_find(wbuf, idname, KHM_CASE_SENSITIVE) != NULL) {
+            multi_string_delete(wbuf, idname, KHM_CASE_SENSITIVE);
+        }
+    } else {
+        multi_string_init(wbuf, cb_ms);
+    }
+
+    rv = khc_write_multi_string(csp_params, L"LRUPrincipals", wbuf);
+
+    if (wbuf)
+        PFREE(wbuf);
+
+    return rv;
+}
+
+khm_int32
 k5_update_LRU(khm_handle identity)
 {
     wchar_t * wbuf = NULL;
@@ -1915,6 +1970,13 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             assert(nc->subtype == KMSG_CRED_NEW_CREDS);
 
+            /* If we are forcing a password change, then we don't do
+               anything here.  Note that if the identity changed, then
+               this field would have been reset, so we would proceed
+               as usual. */
+            if (d->pwd_change)
+                return KHM_ERROR_SUCCESS;
+
             /* if the fiber is already in a kinit, cancel it */
             if(g_fjob.state == FIBER_STATE_KINIT) {
                 g_fjob.command = FIBER_CMD_CANCEL;
@@ -1965,7 +2027,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         break;
 
                     case KRB5KDC_ERR_KEY_EXP:
-                        /* password needs changing */
+                        /* password needs changing. */
                         LoadString(hResModule, IDS_K5ERR_KEY_EXPIRED,
                                    msg, ARRAYLENGTH(msg));
                         break;
@@ -2320,7 +2382,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         kherr_suggestion sug_id;
 
                         /* if we failed to get new tickets, but the
-                           identity isstill valid, then we assume that
+                           identity is still valid, then we assume that
                            the current tickets are still good enough
                            for other credential types to obtain their
                            credentials. */
@@ -2374,7 +2436,13 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 khui_cw_lock_nc(nc);
 
-                if (nc->n_identities == 0 ||
+                if (nc->result == KHUI_NC_RESULT_CANCEL) {
+
+                    khui_cw_set_response(nc, credtype_id_krb5,
+                                         KHUI_NC_RESPONSE_SUCCESS |
+                                         KHUI_NC_RESPONSE_EXIT);
+
+                } else if (nc->n_identities == 0 ||
                     nc->identities[0] == NULL) {
                     _report_mr0(KHERR_ERROR, MSG_PWD_NO_IDENTITY);
                     _suggest_mr(MSG_PWD_S_NO_IDENTITY, KHERR_SUGGEST_RETRY);
@@ -2382,6 +2450,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     khui_cw_set_response(nc, credtype_id_krb5,
                                          KHUI_NC_RESPONSE_FAILED |
                                          KHUI_NC_RESPONSE_NOEXIT);
+
                 } else {
                     wchar_t   widname[KCDB_IDENT_MAXCCH_NAME];
                     char      idname[KCDB_IDENT_MAXCCH_NAME];
@@ -2483,9 +2552,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                             goto _pwd_exit;
                         }
 
+                        /* the password change phase is now done */
+                        d->pwd_change = FALSE;
+
                         code = khm_krb5_kinit(NULL, /* context (create one) */
                                               idname, /* principal_name */
-                                              npwd, /* password */
+                                              npwd, /* new password */
                                               NULL, /* ccache name (figure out the identity cc)*/
                                               (krb5_deltat) d->tc_lifetime.current,
                                               d->forwardable,

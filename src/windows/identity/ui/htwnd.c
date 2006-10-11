@@ -806,7 +806,8 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     EndPaint(hwnd, &ps);
 
-    if (d->ext_width < ext_width) {
+    if (d->ext_width < ext_width ||
+        d->ext_height < ext_height) {
         SCROLLINFO si;
         LONG l;
 

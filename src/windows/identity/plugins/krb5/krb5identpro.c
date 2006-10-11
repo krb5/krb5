@@ -226,8 +226,10 @@ update_crossfeed(khui_new_creds * nc,
 
     un_realm = khm_get_realm_from_princ(un);
 
-    if (un_realm == NULL)
+    if (un_realm == NULL) {
+        EnableWindow(d->hw_realm, TRUE);
         return FALSE;
+    }
 
     if (ctrl_id_src == K5_NCID_UN) {
 
@@ -269,6 +271,15 @@ update_crossfeed(khui_new_creds * nc,
 
         SetWindowText(d->hw_realm,
                       un_realm);
+
+        if (GetFocus() == d->hw_realm) {
+            HWND hw_next = GetNextDlgTabItem(nc->hwnd, d->hw_realm,
+                                             FALSE);
+            if (hw_next)
+                SetFocus(hw_next);
+        }
+
+        EnableWindow(d->hw_realm, FALSE);
 
         return TRUE;
     }
@@ -739,6 +750,7 @@ k5_ident_valiate_name(khm_int32 msg_type,
     char princ_name[KCDB_IDENT_MAXCCH_NAME];
     kcdb_ident_name_xfer * nx;
     krb5_error_code code;
+    wchar_t * atsign;
 
     nx = (kcdb_ident_name_xfer *) vparam;
 
@@ -759,11 +771,18 @@ k5_ident_valiate_name(khm_int32 msg_type,
         return KHM_ERROR_SUCCESS;
     }
 
-    if (princ != NULL) 
+    if (princ != NULL)
         pkrb5_free_principal(k5_identpro_ctx,
                              princ);
 
-    nx->result = KHM_ERROR_SUCCESS;
+    /* krb5_parse_name() accepts principal names with no realm or an
+       empty realm.  We don't. */
+    atsign = wcschr(nx->name_src, L'@');
+    if (atsign == NULL || atsign[1] == L'\0') {
+        nx->result = KHM_ERROR_INVALID_NAME;
+    } else {
+        nx->result = KHM_ERROR_SUCCESS;
+    }
 
     return KHM_ERROR_SUCCESS;
 }
@@ -1032,15 +1051,23 @@ k5_ident_notify_create(khm_int32 msg_type,
     return KHM_ERROR_SUCCESS;
 }
 
+struct k5_ident_update_data {
+    khm_handle identity;
+
+    FILETIME   ft_expire;      /* expiration */
+    FILETIME   ft_issue;       /* issue */
+    FILETIME   ft_rexpire;     /* renew expiration */
+    wchar_t    ccname[KRB5_MAXCCH_CCNAME];
+    khm_int32  k5_flags;
+};
+
 static khm_int32 KHMAPI
 k5_ident_update_apply_proc(khm_handle cred,
                            void * rock) {
-    wchar_t ccname[KRB5_MAXCCH_CCNAME];
-    khm_handle tident = (khm_handle) rock;
+    struct k5_ident_update_data * d = (struct k5_ident_update_data *) rock;
     khm_handle ident = NULL;
     khm_int32 t;
     khm_int32 flags;
-    FILETIME t_expire;
     FILETIME t_cexpire;
     FILETIME t_rexpire;
     khm_size cb;
@@ -1049,12 +1076,15 @@ k5_ident_update_apply_proc(khm_handle cred,
     if (KHM_FAILED(kcdb_cred_get_type(cred, &t)) ||
         t != credtype_id_krb5 ||
         KHM_FAILED(kcdb_cred_get_identity(cred, &ident)))
+
         return KHM_ERROR_SUCCESS;
 
-    if (!kcdb_identity_is_equal(ident,tident))
+    if (!kcdb_identity_is_equal(ident,d->identity))
+
         goto _cleanup;
 
     if (KHM_FAILED(kcdb_cred_get_flags(cred, &flags)))
+
         flags = 0;
 
     if (flags & KCDB_CRED_FLAG_INITIAL) {
@@ -1064,13 +1094,9 @@ k5_ident_update_apply_proc(khm_handle cred,
                                              NULL,
                                              &t_cexpire,
                                              &cb))) {
-            cb = sizeof(t_expire);
-            if (KHM_FAILED(kcdb_identity_get_attr(tident,
-                                                  KCDB_ATTR_EXPIRE,
-                                                  NULL,
-                                                  &t_expire,
-                                                  &cb)) ||
-                CompareFileTime(&t_cexpire, &t_expire) > 0) {
+            if ((d->ft_expire.dwLowDateTime == 0 &&
+                 d->ft_expire.dwHighDateTime == 0) ||
+                CompareFileTime(&t_cexpire, &d->ft_expire) > 0) {
                 goto update_identity;
             }
         }
@@ -1080,52 +1106,35 @@ k5_ident_update_apply_proc(khm_handle cred,
 
  update_identity:
 
-    kcdb_identity_set_attr(tident, KCDB_ATTR_EXPIRE,
-                           &t_cexpire, sizeof(t_cexpire));
+    d->ft_expire = t_cexpire;
 
-    cb = sizeof(ccname);
-    if (KHM_SUCCEEDED(kcdb_cred_get_attr(cred, KCDB_ATTR_LOCATION,
-                                         NULL,
-                                         ccname,
-                                         &cb))) {
-        kcdb_identity_set_attr(tident, attr_id_krb5_ccname,
-                               ccname, cb);
-    } else {
-        kcdb_identity_set_attr(tident, attr_id_krb5_ccname,
-                               NULL, 0);
-    }
-                
-    cb = sizeof(t);
-    if (KHM_SUCCEEDED(kcdb_cred_get_attr(cred,
-                                         attr_id_krb5_flags,
-                                         NULL,
-                                         &t,
-                                         &cb))) {
-
-        kcdb_identity_set_attr(tident, attr_id_krb5_flags, 
-                               &t, sizeof(t));
-
-        cb = sizeof(t_rexpire);
-        if (!(t & TKT_FLG_RENEWABLE) ||
-            KHM_FAILED(kcdb_cred_get_attr(cred,
-                                          KCDB_ATTR_RENEW_EXPIRE,
-                                          NULL,
-                                          &t_rexpire,
-                                          &cb))) {
-            kcdb_identity_set_attr(tident, KCDB_ATTR_RENEW_EXPIRE,
-                                   NULL, 0);
-        } else {
-            kcdb_identity_set_attr(tident, KCDB_ATTR_RENEW_EXPIRE,
-                                   &t_rexpire, sizeof(t_rexpire));
-        }
-    } else {
-        kcdb_identity_set_attr(tident, attr_id_krb5_flags,
-                               NULL, 0);
-        kcdb_identity_set_attr(tident, KCDB_ATTR_RENEW_EXPIRE,
-                               NULL, 0);
+    cb = sizeof(d->ccname);
+    if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_LOCATION, NULL, d->ccname, &cb))) {
+        d->ccname[0] = L'\0';
     }
 
-    rv = KHM_ERROR_EXIT;
+    cb = sizeof(d->k5_flags);
+    if (KHM_FAILED(kcdb_cred_get_attr(cred, attr_id_krb5_flags, NULL,
+                                         &d->k5_flags, &cb))) {
+        d->k5_flags = 0;
+    }
+
+    cb = sizeof(d->ft_issue);
+    if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE, NULL, &d->ft_issue, &cb))) {
+        ZeroMemory(&d->ft_issue, sizeof(d->ft_issue));
+    }
+
+    cb = sizeof(t_rexpire);
+    if ((d->k5_flags & TKT_FLG_RENEWABLE) &&
+        KHM_SUCCEEDED(kcdb_cred_get_attr(cred,
+                                         KCDB_ATTR_RENEW_EXPIRE,
+                                         NULL,
+                                         &t_rexpire,
+                                         &cb))) {
+        d->ft_rexpire = t_rexpire;
+    } else {
+        ZeroMemory(&d->ft_rexpire, sizeof(d->ft_rexpire));
+    }
 
  _cleanup:
     if (ident)
@@ -1140,6 +1149,7 @@ k5_ident_update(khm_int32 msg_type,
                 khm_ui_4 uparam,
                 void * vparam) {
 
+    struct k5_ident_update_data d;
     khm_handle ident;
     khm_handle tident;
     krb5_ccache cc = NULL;
@@ -1153,9 +1163,52 @@ k5_ident_update(khm_int32 msg_type,
     if (ident == NULL)
         return KHM_ERROR_SUCCESS;
 
+    ZeroMemory(&d, sizeof(d));
+    d.identity = ident;
+
     kcdb_credset_apply(NULL,
                        k5_ident_update_apply_proc,
-                       (void *) ident);
+                       (void *) &d);
+
+    if (d.ft_expire.dwLowDateTime != 0 ||
+        d.ft_expire.dwHighDateTime != 0) {
+
+        /* we found a TGT */
+
+        kcdb_identity_set_attr(ident, KCDB_ATTR_EXPIRE,
+                               &d.ft_expire, sizeof(d.ft_expire));
+        if (d.ft_issue.dwLowDateTime != 0 ||
+            d.ft_issue.dwHighDateTime != 0)
+            kcdb_identity_set_attr(ident, KCDB_ATTR_ISSUE,
+                                   &d.ft_issue, sizeof(d.ft_issue));
+        else
+            kcdb_identity_set_attr(ident, KCDB_ATTR_ISSUE, NULL, 0);
+
+        if (d.ft_rexpire.dwLowDateTime != 0 ||
+            d.ft_rexpire.dwHighDateTime != 0)
+            kcdb_identity_set_attr(ident, KCDB_ATTR_RENEW_EXPIRE,
+                                   &d.ft_rexpire, sizeof(d.ft_rexpire));
+        else
+            kcdb_identity_set_attr(ident, KCDB_ATTR_RENEW_EXPIRE, NULL, 0);
+
+        kcdb_identity_set_attr(ident, attr_id_krb5_flags,
+                               &d.k5_flags, sizeof(d.k5_flags));
+
+        if (d.ccname[0])
+            kcdb_identity_set_attr(ident, attr_id_krb5_ccname,
+                                   d.ccname, KCDB_CBSIZE_AUTO);
+        else
+            kcdb_identity_set_attr(ident, attr_id_krb5_ccname, NULL, 0);
+
+    } else {
+        /* Clear out the attributes.  We don't have any information
+           about this identity */
+        kcdb_identity_set_attr(ident, KCDB_ATTR_EXPIRE, NULL, 0);
+        kcdb_identity_set_attr(ident, KCDB_ATTR_ISSUE, NULL, 0);
+        kcdb_identity_set_attr(ident, KCDB_ATTR_RENEW_EXPIRE, NULL, 0);
+        kcdb_identity_set_attr(ident, attr_id_krb5_flags, NULL, 0);
+        kcdb_identity_set_attr(ident, attr_id_krb5_ccname, NULL, 0);
+    }
 
     if (KHM_SUCCEEDED(kcdb_identity_get_default(&tident))) {
         kcdb_identity_release(tident);

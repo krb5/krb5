@@ -617,9 +617,13 @@ kcdb_identity_get_config(khm_handle vid,
                             &hident);
 
         if(KHM_FAILED(rv)) {
+            khm_int32 oldflags;
             EnterCriticalSection(&cs_ident);
+            oldflags = id->flags;
             id->flags &= ~KCDB_IDENT_FLAG_CONFIG;
             LeaveCriticalSection(&cs_ident);
+            if (oldflags & KCDB_IDENT_FLAG_CONFIG)
+                kcdbint_ident_post_message(KCDB_OP_DELCONFIG, id);
             goto _exit;
         }
 

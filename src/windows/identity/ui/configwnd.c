@@ -423,6 +423,209 @@ cfgui_apply_settings(khui_config_node node) {
 }
 
 static void
+cfgui_remove_item(HWND hwtv,
+                  HTREEITEM hItem) {
+    khui_config_node node;
+    HTREEITEM hChild;
+    TVITEMEX itemex;
+
+    for (hChild = TreeView_GetChild(hwtv, hItem);
+         hChild;
+         hChild = TreeView_GetChild(hwtv, hItem)) {
+
+        cfgui_remove_item(hwtv, hChild);
+
+    }
+
+    ZeroMemory(&itemex, sizeof(itemex));
+
+    itemex.mask = TVIF_PARAM;
+    itemex.hItem = hItem;
+
+    TreeView_GetChild(hwtv, &itemex);
+
+    node = (khui_config_node) itemex.lParam;
+
+    if (node) {
+        HWND hw;
+        hw = khui_cfg_get_hwnd(node);
+
+        if (hw)
+            DestroyWindow(hw);
+
+        khui_cfg_release(node);
+    }
+
+    TreeView_DeleteItem(hwtv, hItem);
+}
+
+struct cfgui_child_info {
+    HTREEITEM hItem;
+    khui_config_node node;
+    BOOL checked;
+};
+
+#define CI_ALLOC_INCR 8
+
+static void
+cfgui_sync_node(cfgui_wnd_data * d,
+                HWND hwtv,
+                khui_config_node c,
+                HTREEITEM hItem) {
+    khui_config_node child;
+    HTREEITEM hChild;
+    struct cfgui_child_info * childinfo = NULL;
+    khm_size n_childinfo = 0;
+    khm_size nc_childinfo = 0;
+    khm_size i;
+
+    /* first, get the list of children from the treeview control */
+    for (hChild = TreeView_GetChild(hwtv, hItem);
+         hChild;
+         hChild = TreeView_GetNextSibling(hwtv, hChild)) {
+
+        if (n_childinfo >= nc_childinfo) {
+            nc_childinfo = UBOUNDSS(n_childinfo + 1,
+                                    CI_ALLOC_INCR, CI_ALLOC_INCR);
+#ifdef DEBUG
+            assert(nc_childinfo > n_childinfo);
+#endif
+            childinfo = PREALLOC(childinfo,
+                                 sizeof(*childinfo) * nc_childinfo);
+#ifdef DEBUG
+            assert(childinfo);
+#endif
+        }
+
+        ZeroMemory(&childinfo[n_childinfo],
+                   sizeof(childinfo[n_childinfo]));
+
+        childinfo[n_childinfo].hItem = hChild;
+        childinfo[n_childinfo].checked = FALSE;
+        n_childinfo++;
+    }
+
+    /* now, go through the list of actual nodes and make sure they
+       match up */
+    child = NULL;
+    for (khui_cfg_get_first_child(c, &child);
+         child;
+         khui_cfg_get_next_release(&child)) {
+
+        hChild = (HTREEITEM) khui_cfg_get_param(child);
+
+        for (i=0; i < n_childinfo; i++) {
+            if (childinfo[i].hItem == hChild)
+                break;
+        }
+
+        if (i < n_childinfo) {
+            childinfo[i].checked = TRUE;
+        } else {
+            /* add it to the list, so we can create the node in the
+               tree view control later. */
+            if (n_childinfo >= nc_childinfo) {
+                nc_childinfo = UBOUNDSS(n_childinfo + 1,
+                                        CI_ALLOC_INCR, CI_ALLOC_INCR);
+#ifdef DEBUG
+                assert(nc_childinfo > n_childinfo);
+#endif
+                childinfo = PREALLOC(childinfo,
+                                     sizeof(*childinfo) * nc_childinfo);
+#ifdef DEBUG
+                assert(childinfo);
+#endif
+            }
+
+            ZeroMemory(&childinfo[n_childinfo],
+                       sizeof(childinfo[n_childinfo]));
+
+            childinfo[n_childinfo].node = child;
+            khui_cfg_hold(child);
+            n_childinfo++;
+        }
+    }
+
+    /* by this point, the childinfo list contains items of the
+       following forms:
+
+       1. childinfo[i].hItem != NULL && childinfo[i].checked == TRUE
+
+          Corresponds to a tree view item that has a matching
+          configuration node.  Nothing to do here.
+
+       2. childinfo[i].hItem != NULL && childinfo[i].checked == FALSE
+
+          Corresponds to a tree view item that has no matching
+          configuration node.  These should be removed.
+
+       3. childinfo[i].hItem == NULL && childinfo[i].node != NULL
+
+          Corresponds to a configuration node that has no matching
+          tree view item.  These nodes should be added.
+    */
+
+    /* first do the removals */
+    for (i=0; i < n_childinfo; i++) {
+        if (childinfo[i].hItem == NULL)
+            break;              /* nothing more to see from this point
+                                   on */
+        if (!childinfo[i].checked) {
+            /* remove! */
+            cfgui_remove_item(hwtv, childinfo[i].hItem);
+        }
+    }
+
+    /* continue from where the previous loop left off */
+    for (; i < n_childinfo; i++) {
+#ifdef DEBUG
+        assert(childinfo[i].hItem == NULL);
+        assert(childinfo[i].node != NULL);
+#endif
+
+        cfgui_add_node(d, hwtv, childinfo[i].node, c, FALSE);
+
+        khui_cfg_release(childinfo[i].node);
+        childinfo[i].node = NULL;
+    }
+
+    if (childinfo)
+        PFREE(childinfo);
+
+    /* finally recurse through to the next level */
+    for (hChild = TreeView_GetChild(hwtv, hItem);
+         hChild;
+         hChild = TreeView_GetNextSibling(hwtv, hChild)) {
+
+        TVITEMEX itemex;
+
+        ZeroMemory(&itemex, sizeof(itemex));
+
+        itemex.mask = TVIF_PARAM;
+        itemex.hItem = hChild;
+
+        TreeView_GetItem(hwtv, &itemex);
+
+        if (itemex.lParam) {
+            child = (khui_config_node) itemex.lParam;
+
+            cfgui_sync_node(d, hwtv, child, hChild);
+        }
+    }
+}
+
+static void
+cfgui_sync_node_list(cfgui_wnd_data * d, HWND hwnd) {
+    HWND hwtv;
+    HTREEITEM hItem;
+
+    hwtv = GetDlgItem(hwnd, IDC_CFG_NODELIST);
+    hItem = TreeView_GetRoot(hwtv);
+
+    cfgui_sync_node(d, hwtv, NULL, hItem);
+}
+
+static void
 cfgui_update_state(HWND hwnd, 
                    khm_int32 flags,
                    khui_config_node node) {
@@ -670,7 +873,8 @@ cfgui_dlgproc(HWND hwnd,
             break;
 
         case WMCFG_SYNC_NODE_LIST:
-            /*TODO: synchronize the node lists here */
+            d = cfgui_get_wnd_data(hwnd);
+            cfgui_sync_node_list(d, hwnd);
             break;
         }
 
@@ -825,6 +1029,9 @@ void khm_refresh_config(void) {
 
             khui_cfg_remove(cfg_iter);
         }
+
+        if (tident)
+            kcdb_identity_release(tident);
     }
 
     /* Now iterate through the root level configuration nodes and make

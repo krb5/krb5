@@ -92,16 +92,20 @@ khm_timer_exit(void) {
 static void
 tmr_fire_timer(void) {
     int i;
-    unsigned __int64 curtime;
-    unsigned __int64 err;
-    unsigned __int64 next_event;
+    khm_int64 curtime;
+    khm_int64 err;
+    khm_int64 next_event;
     int     tmr_count[KHUI_N_TTYPES];
-    unsigned __int64 tmr_offset[KHUI_N_TTYPES];
+    khm_int64 tmr_offset[KHUI_N_TTYPES];
     int t;
     khm_handle eff_ident = NULL;
     khui_timer_type eff_type = 0; /* meaningless */
     int fire_count = 0;
     FILETIME ft;
+
+    _begin_task(0);
+    _report_cs0(KHERR_DEBUG_1, L"Checking for expired timers");
+    _describe();
 
     TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR_SMALL, &ft);
     err = FtToInt(&ft);
@@ -119,10 +123,16 @@ tmr_fire_timer(void) {
             khui_timers[i].type != KHUI_TTYPE_ID_MARK &&
             khui_timers[i].expire < curtime + err) {
 
+            _report_cs3(KHERR_DEBUG_1, L"Expiring timer index=%1!d!, type=%2!d!, key=%3!p!",
+                        _int32(i), _int32(khui_timers[i].type),
+                        _cptr(khui_timers[i].key));
+
             t = khui_timers[i].type;
 
             switch(t) {
             case KHUI_TTYPE_ID_RENEW:
+                _report_cs1(KHERR_DEBUG_1, L"Renewing identity %1!p!",
+                            _cptr(khui_timers[i].key));
                 khm_cred_renew_identity(khui_timers[i].key);
                 khui_timers[i].flags |= KHUI_TE_FLAG_EXPIRED;
                 break;
@@ -134,6 +144,8 @@ tmr_fire_timer(void) {
                    we assume that it is safe to trigger a renew_cred
                    call here without checking if there's an imminent
                    renew_identity call. */
+                _report_cs1(KHERR_DEBUG_1, L"Renewing credential %1!p!",
+                            _cptr(khui_timers[i].key));
                 khm_cred_renew_cred(khui_timers[i].key);
                 khui_timers[i].flags |= KHUI_TE_FLAG_EXPIRED;
                 break;
@@ -184,7 +196,7 @@ tmr_fire_timer(void) {
         wchar_t wtime[128];
         wchar_t wmsg[256];
         wchar_t wtitle[64];
-        unsigned __int64 second;
+        khm_int64 second;
         khui_alert * alert = NULL;
 
         khm_size cb;
@@ -249,6 +261,9 @@ tmr_fire_timer(void) {
         khui_alert_show(alert);
         khui_alert_release(alert);
     }
+
+    _end_task();
+
 }
 
 void 
@@ -264,6 +279,85 @@ static int
 tmr_update(khm_handle key, khui_timer_type type, __int64 expire,
            __int64 offset, void * data, khm_boolean reinstate) {
     int i;
+    wchar_t name[KCDB_MAXCCH_NAME];
+    wchar_t tstamp[128];
+    wchar_t *type_str = NULL;
+    SYSTEMTIME st;
+    FILETIME ft;
+    FILETIME ftl;
+    khm_size cb;
+
+    switch(type) {
+    case KHUI_TTYPE_ID_MARK:
+        type_str = L"marker";
+        break;
+
+    case KHUI_TTYPE_CRED_WARN:
+    case KHUI_TTYPE_ID_WARN:
+        type_str = L"warning";
+        break;
+
+    case KHUI_TTYPE_CRED_CRIT:
+    case KHUI_TTYPE_ID_CRIT:
+        type_str = L"critical";
+        break;
+
+    case KHUI_TTYPE_CRED_EXP:
+    case KHUI_TTYPE_ID_EXP:
+        type_str = L"expiry";
+        break;
+
+    case KHUI_TTYPE_CRED_RENEW:
+    case KHUI_TTYPE_ID_RENEW:
+        type_str = L"renew";
+        break;
+    }
+
+    ft = IntToFt(expire);
+    FileTimeToLocalFileTime(&ft, &ftl);
+    FileTimeToSystemTime(&ftl, &st);
+    StringCbPrintf(tstamp, sizeof(tstamp),
+                   L"%d-%d-%d %d:%d:%d",
+                   st.wYear, st.wMonth, st.wDay,
+                   st.wHour, st.wMinute, st.wSecond);
+
+    cb = sizeof(name); name[0] = L'\0';
+    if (type_str == NULL) {
+
+        _report_cs2(KHERR_DEBUG_1,
+                    L"Updating uknown timer of type %1!d! exp(%2!s!)",
+                    _int32(type),
+                    _cstr(tstamp));
+        _resolve();
+
+    } else if (type == KHUI_TTYPE_ID_MARK ||
+               type == KHUI_TTYPE_ID_WARN ||
+               type == KHUI_TTYPE_ID_CRIT ||
+               type == KHUI_TTYPE_ID_EXP ||
+               type == KHUI_TTYPE_ID_RENEW) {
+
+        kcdb_identity_get_name(key, name, &cb);
+        _report_cs3(KHERR_DEBUG_1,
+                    L"Updating identity %1!s! timer for %2!s! exp(%3!s!)",
+                    _cstr(type_str),
+                    _cstr(name),
+                    _cstr(tstamp));
+        _resolve();
+
+    } else if (type == KHUI_TTYPE_CRED_RENEW ||
+               type == KHUI_TTYPE_CRED_WARN ||
+               type == KHUI_TTYPE_CRED_CRIT ||
+               type == KHUI_TTYPE_CRED_EXP) {
+
+        kcdb_cred_get_name(key, name, &cb);
+        _report_cs3(KHERR_DEBUG_1,
+                    L"Updating credential %1!s! timer for %2!s! exp(%3!s!)",
+                    _cstr(type_str),
+                    _cstr(name),
+                    _cstr(tstamp));
+        _resolve();
+
+    }
 
     for (i=0; i < (int) khui_n_timers; i++) {
         if (khui_timers[i].key == key &&
@@ -385,7 +479,7 @@ tmr_next_halflife_timeout(int idx, FILETIME * issue, FILETIME * expire) {
        not expired.  However, we leave it to the caller to update the
        actual timer and mark it as not stale. */
     if (idx >= 0 &&
-        khui_timers[idx].expire < (khm_ui_8) iret) {
+        khui_timers[idx].expire < iret) {
 
         khui_timers[idx].flags &= ~KHUI_TE_FLAG_EXPIRED;
         khui_timers[idx].expire = iret;
@@ -394,7 +488,8 @@ tmr_next_halflife_timeout(int idx, FILETIME * issue, FILETIME * expire) {
     return ret;
 }
 
-/* called with cs_timers held */
+/* called with cs_timers held.  Called once for each credential in the
+   root credentials set. */
 static khm_int32 KHMAPI
 tmr_cred_apply_proc(khm_handle cred, void * rock) {
     khm_handle ident = NULL;
@@ -410,40 +505,56 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     FILETIME fte;
     FILETIME ft_reinst;
     khm_size cb;
+    wchar_t wname[KCDB_MAXCCH_NAME];
+
+    cb = sizeof(wname);
+    wname[0] = L'\0';
+    kcdb_cred_get_name(cred, wname, &cb);
+
+    _report_cs1(KHERR_DEBUG_1, L"Looking at cred [%1!s!]",
+                _cstr(wname));
+    _resolve();
 
     kcdb_cred_get_identity(cred, &ident);
 #ifdef DEBUG
     assert(ident);
 #endif
 
-    /* now get the expiry */
+    /* now get the expiry for the identity*/
     cb = sizeof(ft_expiry);
     if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_EXPIRE,
                                           NULL,
                                           &ft_expiry, &cb))) {
+
+        /* failing which, we get the expiry for this credential */
         cb = sizeof(ft_expiry);
         if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_EXPIRE,
                                           NULL,
                                           &ft_expiry, &cb))) {
             /* we don't have an expiry time to work with */
+            _report_cs1(KHERR_DEBUG_1, L"Skipping cred [%1!s!].  No expiry time",
+                        _cstr(wname));
+            _resolve();
+
             kcdb_identity_release(ident);
             return KHM_ERROR_SUCCESS;
+        } else {
+            /* and the time of issue */
+            cb = sizeof(ft_issue);
+            if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE,
+                                              NULL, &ft_issue, &cb)))
+                ZeroMemory(&ft_issue, sizeof(ft_issue));
         }
-    }
 
-    cb = sizeof(ft_issue);
-    if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_ISSUE,
-                                          NULL,
-                                          &ft_issue, &cb))) {
+    } else {
+        /* also try to get the time of issue. */
         cb = sizeof(ft_issue);
-        if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE,
-                                          NULL,
-                                          &ft_issue, &cb))) {
-            /* we don't really abandon the timer.  In this case, we
-               fall back to using the threshold value to set the
-               expiry timer. */
+        if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_ISSUE,
+                                              NULL, &ft_issue, &cb)))
+            /* if we fail, we just zero out the time of issue and
+               failover to using the threshold value to set the expiry
+               timer instead of the half life algorithm. */
             ZeroMemory(&ft_issue, sizeof(ft_issue));
-        }
     }
 
     /* and the current time */
@@ -540,7 +651,8 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             prev =
                 tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0);
 
-            if (do_halflife)
+            if (do_halflife && (ft_issue.dwLowDateTime != 0 ||
+                                ft_issue.dwHighDateTime != 0))
                 fte = tmr_next_halflife_timeout(prev, &ft_issue, &ft_expiry);
             else
                 fte = FtSub(&ft_expiry, &ft);
@@ -613,15 +725,22 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_EXPIRE,
                                       NULL,
                                       &ft_cred_expiry,
-                                      &cb)))
+                                      &cb))) {
+        _report_cs1(KHERR_DEBUG_1, L"Skipping cred [%1!s!]. Can't lookup cred expiry",
+                    _cstr(wname));
+        _resolve();
         goto _cleanup;
+    }
 
     cb = sizeof(ft_cred_issue);
     if (KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_ISSUE,
                                       NULL,
                                       &ft_cred_issue,
-                                      &cb)))
-        goto _cleanup;
+                                      &cb))) {
+
+        ZeroMemory(&ft_cred_issue, sizeof(ft_cred_issue));
+
+    }
 
     TimetToFileTimeInterval(KHUI_TIMEEQ_ERROR, &ft);
 
@@ -636,8 +755,14 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         ft_delta = FtSub(&ft_expiry, &ft_cred_expiry);
 
         if (CompareFileTime(&ft_cred_expiry, &ft_expiry) >= 0 ||
-            CompareFileTime(&ft_delta, &ft) < 0)
+            CompareFileTime(&ft_delta, &ft) < 0) {
+
+            _report_cs1(KHERR_DEBUG_1,
+                        L"Skipping credential [%1!s!].  The expiry time is too close to the identity expiry.",
+                        _cstr(wname));
+            _resolve();
             goto _cleanup;
+        }
     }
 
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_WARN, 0, 0)) >= 0 &&
@@ -669,8 +794,34 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if ((idx = tmr_find(ident, KHUI_TTYPE_ID_RENEW, 0, 0)) >= 0 &&
         !(khui_timers[idx].flags & KHUI_TE_FLAG_STALE)) {
 
-        //fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
-        fte = tmr_next_halflife_timeout(idx, &ft_cred_issue, &ft_cred_expiry);
+        int cidx = tmr_find(cred, KHUI_TTYPE_CRED_RENEW, 0, 0);
+
+        if (ft_cred_issue.dwLowDateTime == 0 &&
+            ft_cred_issue.dwHighDateTime == 0) {
+            fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
+            /* a special case, for a credential whose remaining
+               lifetime is less than the offset, we try half life on
+               the current time and the expiry. */
+            if (CompareFileTime(&fte, &ft_current) <= 0 &&
+                CompareFileTime(&ft_current, &ft_expiry) < 0) {
+                fte = tmr_next_halflife_timeout(cidx, &ft_current, &ft_cred_expiry);
+#if 0
+                /* now, if we already have a renew timer for this
+                   credential that hasn't expired yet and that is set
+                   for earlier than fte, we let it be. */
+                if (cidx >= 0 &&
+                    khui_timers[cidx].expire < FtToInt(&fte) &&
+                    khui_timers[cidx].expire > FtToInt(&ft_current) &&
+                    !(khui_timers[cidx].flags & KHUI_TE_FLAG_EXPIRED)) {
+
+                    fte = IntToFt(khui_timers[cidx].expire);
+
+                }
+#endif
+            }
+        } else {
+            fte = tmr_next_halflife_timeout(cidx, &ft_cred_issue, &ft_cred_expiry);
+        }
 
         if (CompareFileTime(&fte, &ft_current) > 0) {
             tmr_update(cred, KHUI_TTYPE_CRED_RENEW,
@@ -754,13 +905,18 @@ tmr_purge(void) {
     khui_n_timers = j;
 }
 
-/* go through all the credentials and set timers as appropriate. */
+/* go through all the credentials and set timers as appropriate.  hwnd
+   is the window that will receive the timer events.*/
 void 
 khm_timer_refresh(HWND hwnd) {
     int i;
-    unsigned __int64 next_event = 0;
-    unsigned __int64 curtime;
-    unsigned __int64 diff;
+    khm_int64 next_event = 0;
+    khm_int64 curtime;
+    khm_int64 diff;
+
+    _begin_task(0);
+    _report_cs0(KHERR_DEBUG_1, L"Refreshing timers");
+    _describe();
 
     EnterCriticalSection(&cs_timers);
 
@@ -788,11 +944,17 @@ khm_timer_refresh(HWND hwnd) {
 #endif
     }
 
+    _report_cs1(KHERR_DEBUG_1, L"Starting with %1!d! timers",
+                _int32(khui_n_timers));
+
     kcdb_credset_apply(NULL,
                        tmr_cred_apply_proc,
                        NULL);
 
     tmr_purge();
+
+    _report_cs1(KHERR_DEBUG_1, L"Leaving with %1!d! timers",
+                _int32(khui_n_timers));
 
  _check_next_event:
 
@@ -805,9 +967,11 @@ khm_timer_refresh(HWND hwnd) {
         if (!(khui_timers[i].flags & KHUI_TE_FLAG_EXPIRED) &&
             khui_timers[i].type != KHUI_TTYPE_ID_MARK &&
             (next_event == 0 ||
-             next_event > khui_timers[i].expire))
+             next_event > khui_timers[i].expire)) {
 
             next_event = khui_timers[i].expire;
+
+        }
     }
 
     if (next_event != 0) {
@@ -833,4 +997,6 @@ khm_timer_refresh(HWND hwnd) {
     }
 
     LeaveCriticalSection(&cs_timers);
+
+    _end_task();
 }
