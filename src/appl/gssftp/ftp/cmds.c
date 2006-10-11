@@ -168,7 +168,9 @@ void setpeer(argc, argv)
 		}
 		port = htons(iport);
 	}
+printf("%s: at line %d\n", __FILE__, __LINE__);
 	host = hookup(argv[1], port);
+printf("%s: at line %d\n", __FILE__, __LINE__);
 	if (host) {
 		int overbose;
 
@@ -183,6 +185,7 @@ void setpeer(argc, argv)
 		mode = MODE_S;
 		stru = STRU_F;
 		(void) strcpy(bytename, "8"), bytesize = 8;
+printf("%s: at line %d\n", __FILE__, __LINE__);
 		if (autoauth) {
 			if (do_auth() && autoencrypt) {
  				clevel = PROT_P;
@@ -197,6 +200,7 @@ void setpeer(argc, argv)
 			if(autologin)
 				(void) login(argv[1]);
 		}
+printf("%s: at line %d\n", __FILE__, __LINE__);
 
 #ifndef unix
 /* sigh */
@@ -211,6 +215,7 @@ void setpeer(argc, argv)
  * this ifdef is to keep someone form "porting" this to an incompatible
  * system and not checking this out. This way they have to think about it.
  */
+printf("%s: at line %d\n", __FILE__, __LINE__);
 		overbose = verbose;
 		if (debug == 0)
 			verbose = -1;
