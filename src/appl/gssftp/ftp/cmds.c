@@ -214,6 +214,9 @@ void setpeer(argc, argv)
 		overbose = verbose;
 		if (debug == 0)
 			verbose = -1;
+		if (debug)
+		    printf("%s:%d: verbose=%d debug=%d overbose=%d\n",
+			   __FILE__, __LINE__, verbose, debug, overbose);
 		if (command("SYST") == COMPLETE && overbose) {
 			register char *cp, c=0;
 			cp = strchr(reply_string+4, ' ');
@@ -257,6 +260,9 @@ void setpeer(argc, argv)
 "Remember to set tenex mode when transfering binary files from this machine.\n");
 		}
 		verbose = overbose;
+#else
+		if (debug)
+		    printf("(!defined(unix): not checking remote system type)\n");
 #endif /* unix */
 	}
 }
