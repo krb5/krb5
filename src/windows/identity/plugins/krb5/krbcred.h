@@ -200,6 +200,9 @@ k5_msg_ident(khm_int32 msg_type,
                khm_ui_4 uparam, 
                void * vparam);
 
+khm_int32
+k5_remove_from_LRU(khm_handle identity);
+
 int 
 k5_get_realm_from_nc(khui_new_creds * nc, 
                      wchar_t * buf, 

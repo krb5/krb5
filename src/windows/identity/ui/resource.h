@@ -293,6 +293,7 @@
 #define IDS_NC_FAILED_TITLE_I           286
 #define IDS_NC_PWD_FAILED_TITLE_I       287
 #define IDS_NC_REN_FAILED_TITLE_I       288
+#define IDS_CFG_IDNAME_NON              289
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -389,7 +390,13 @@
 #define IDC_CFG_ITALICS                 1132
 #define IDC_CFG_ADDIDENT                1133
 #define IDC_CFG_IDNAME                  1134
+#define IDC_SM_CTL                      1134
 #define IDC_CFG_SHOWLOG                 1135
+#define IDC_MED_CTL                     1135
+#define IDC_LG_CTL                      1136
+#define IDC_SM_LBL                      1137
+#define IDC_MED_LBL                     1138
+#define IDC_LG_LBL                      1139
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -404,7 +411,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1136
+#define _APS_NEXT_CONTROL_VALUE         1140
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

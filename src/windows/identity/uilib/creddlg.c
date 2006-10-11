@@ -57,6 +57,8 @@ khui_cw_create_cred_blob(khui_new_creds ** ppnc)
     c->result = KHUI_NC_RESULT_CANCEL;
     c->mode = KHUI_NC_MODE_MINI;
 
+    khui_context_create(&c->ctx, KHUI_SCOPE_NONE, NULL, KCDB_CREDTYPE_INVALID, NULL);
+
     *ppnc = c;
 
     return KHM_ERROR_SUCCESS;

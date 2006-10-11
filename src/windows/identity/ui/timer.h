@@ -58,9 +58,9 @@ typedef struct tag_khui_timer_event {
     khm_handle       key;
     khui_timer_type  type;
 
-    unsigned __int64 expire;    /* time at which the timer expires */
-    unsigned __int64 offset;    /* time offset at which the event that
-                                   the timer warns of happens */
+    khm_int64 expire;    /* time at which the timer expires */
+    khm_int64 offset;    /* time offset at which the event that the
+                            timer warns of happens */
     void *           data;
     khm_int32        flags;
 } khui_timer_event;

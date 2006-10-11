@@ -349,7 +349,9 @@ khui_cfg_get_first_child(khui_config_node vparent,
 
     if (parent) {
         for(c = TFIRSTCHILD(parent);
-            c && (c->reg.flags & KHUI_CNFLAG_SUBPANEL);
+            c &&
+                ((c->reg.flags & KHUI_CNFLAG_SUBPANEL) ||
+                 (c->flags & KHUI_CN_FLAG_DELETED));
             c = LNEXT(c));
     } else {
         c = NULL;
@@ -390,7 +392,9 @@ khui_cfg_get_first_subpanel(khui_config_node vparent,
 
     if (parent) {
         for(c = TFIRSTCHILD(parent);
-            c && !(c->reg.flags & KHUI_CNFLAG_SUBPANEL);
+            c &&
+                (!(c->reg.flags & KHUI_CNFLAG_SUBPANEL) ||
+                 (c->flags & KHUI_CN_FLAG_DELETED));
             c = LNEXT(c));
     } else {
         c = NULL;
@@ -458,8 +462,9 @@ khui_cfg_get_next_release(khui_config_node * pvnode) {
         node = cfgui_node_i_from_handle(*pvnode);
         for(nxt_node = LNEXT(node);
             nxt_node &&
-                ((node->reg.flags ^ nxt_node->reg.flags) & 
-                 KHUI_CNFLAG_SUBPANEL);
+                (((node->reg.flags ^ nxt_node->reg.flags) & 
+                  KHUI_CNFLAG_SUBPANEL) ||
+                 (nxt_node->flags & KHUI_CN_FLAG_DELETED));
             nxt_node = LNEXT(nxt_node));
         if (nxt_node)
             cfgui_hold_node(nxt_node);

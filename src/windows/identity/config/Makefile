@@ -1,5 +1,6 @@
 #
-# Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2004,2005,2006 Massachusetts Institute of Technology
+# Copyright (c) 2006 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
