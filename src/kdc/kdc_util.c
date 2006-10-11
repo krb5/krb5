@@ -699,6 +699,8 @@ add_to_transited(krb5_data *tgt_trans, krb5_data *new_trans,
       /* subrealm of the next field too, and we will catch     */
       /* it in a future iteration.                             */
 
+      assert(nlst >= 0);
+      assert(nlst < sizeof(next));
       if ((next[nlst] != '.') && (next[0] != '/') &&
           (pl = subrealm(exp, realm))) {
         added = TRUE;
