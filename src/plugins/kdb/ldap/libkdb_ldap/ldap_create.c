@@ -218,9 +218,10 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 		sprintf(ldap_context->root_certificate_file,"%s %s", oldstr, val);
 		free (oldstr);
 	    }
-	}
+	} else if (opt && !strcmp(opt, "temporary")) {
+	     /* ignore temporary argument, it is a kdb5_util arg meant for db2 */
+	} else {
 	/* ignore hash argument. Might have been passed from create */
-	else {
 	    status = EINVAL;
 	    krb5_set_error_message (context, status, "unknown option \'%s\'",
 				    opt?opt:val);

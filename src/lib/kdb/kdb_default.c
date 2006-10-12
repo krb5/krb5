@@ -321,20 +321,20 @@ krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
 				   char *pwd,
 				   krb5_keyblock *key )
 {
-    printf("default set master key\n");
+    /* printf("default set master key\n"); */
     return 0;
 }
 
 krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
 				   krb5_keyblock **key )
 {
-    printf("default get master key\n");
+    /* printf("default get master key\n"); */
     return 0;
 }
 
 krb5_error_code krb5_def_promote_db (krb5_context kcontext,
 				     char *s, char **args)
 {
-    printf("default promote_db\n");
-    return EINVAL;
+    /* printf("default promote_db\n"); */
+    return KRB5_PLUGIN_OP_NOTSUPP;
 }

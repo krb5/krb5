@@ -1603,6 +1603,12 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 				     && (akey->key_data_type[1] == 0)
 				     && (akey->key_data_length[1] == 0))
 			        dbent.n_key_data--;
+
+			    dbent.mask = KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+				KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_KEY_DATA |
+				KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
+				KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
+
 			    if ((kret = krb5_db_put_principal(kcontext,
 							      &dbent,
 							      &one)) ||
@@ -1752,6 +1758,10 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 		    dbentry.last_success = (krb5_timestamp) t7;
 		    dbentry.last_failed = (krb5_timestamp) t8;
 		    dbentry.fail_auth_count = (krb5_kvno) t9;
+		    dbentry.mask = KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+			KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
+			KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
+			KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
 		} else {
 		    try2read = read_nint_data;
 		    error++;
@@ -1783,6 +1793,30 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 				    error++;
 				    break;
 				}
+				/* test to set mask fields */
+				if (t1 == KRB5_TL_KADM_DATA) {
+				    XDR xdrs;
+				    osa_princ_ent_rec osa_princ_ent;
+
+				    /* 
+				     * Assuming aux_attributes will always be
+				     * there
+				     */
+				    dbentry.mask |= KADM5_AUX_ATTRIBUTES;
+
+				    /* test for an actual policy reference */
+				    memset(&osa_princ_ent, 0, sizeof(osa_princ_ent));
+				    xdrmem_create(&xdrs, (char *)tl->tl_data_contents,
+					    tl->tl_data_length, XDR_DECODE);
+				    if (xdr_osa_princ_ent_rec(&xdrs, &osa_princ_ent) &&
+					    (osa_princ_ent.aux_attributes & KADM5_POLICY) &&
+					    osa_princ_ent.policy != NULL) {
+
+					dbentry.mask |= KADM5_POLICY;
+					kdb_free_entry(NULL, NULL, &osa_princ_ent);
+				    }
+				    xdr_destroy(&xdrs);
+				}
 			    }
 			    else {
 				/* Should be a null field */
@@ -1800,6 +1834,8 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 			    break;
 			}
 		    }
+		    if (!error)
+			dbentry.mask |= KADM5_TL_DATA;
 		}
 
 		/* Get the key data */
@@ -1846,6 +1882,8 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 			    }
 			}
 		    }
+		    if (!error)
+			dbentry.mask |= KADM5_KEY_DATA;
 		}
 
 		/* Get the extra data */
@@ -2093,6 +2131,7 @@ load_db(argc, argv)
     int			update, verbose;
     krb5_int32		crflags;
     int			aindex;
+    int			db_locked = 0;
 
     /*
      * Parse the arguments.
@@ -2259,16 +2298,17 @@ load_db(argc, argv)
 	    return;
 	}
     }
-    else
-    /*
-     * Initialize the database.
-     */
-    if ((kret = krb5_db_open(kcontext, db5util_db_args, 
-			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
-	fprintf(stderr, dbinit_err_fmt,
-		programname, error_message(kret));
-	exit_status++;
-	goto error;
+    else {
+	    /*
+	     * Initialize the database.
+	     */
+	    if ((kret = krb5_db_open(kcontext, db5util_db_args, 
+				     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
+		fprintf(stderr, dbinit_err_fmt,
+			programname, error_message(kret));
+		exit_status++;
+		goto error;
+	    }
     }
 
 
@@ -2277,11 +2317,19 @@ load_db(argc, argv)
      * the update fails.
      */
     if ((kret = krb5_db_lock(kcontext, update?KRB5_DB_LOCKMODE_PERMANENT: KRB5_DB_LOCKMODE_EXCLUSIVE))) {
-	fprintf(stderr, "%s: %s while permanently locking database\n",
-		programname, error_message(kret));
-	exit_status++;
-	goto error;
+	/* 
+	 * Ignore a not supported error since there is nothing to do about it
+	 * anyway.
+	 */
+	if (kret != KRB5_PLUGIN_OP_NOTSUPP) {
+	    fprintf(stderr, "%s: %s while permanently locking database\n",
+		    programname, error_message(kret));
+	    exit_status++;
+	    goto error;
+	}
     }
+    else
+	db_locked = 1;
     
     if (restore_dump(programname, kcontext, (dumpfile) ? dumpfile : stdin_name,
 		     f, verbose, load)) {
@@ -2296,7 +2344,7 @@ load_db(argc, argv)
 	 exit_status++;
     }
     
-    if ((kret = krb5_db_unlock(kcontext))) {
+    if (db_locked && (kret = krb5_db_unlock(kcontext))) {
 	 /* change this error? */
 	 fprintf(stderr, dbunlockerr_fmt,
 		 programname, dbname, error_message(kret));
@@ -2313,12 +2361,17 @@ load_db(argc, argv)
 
     /* close policy db below */
 
-    if (exit_status == 0
-	&& !update
-	&& (kret = krb5_db_promote(kcontext, db5util_db_args))) {
-	fprintf(stderr, "%s: cannot make newly loaded database live (%s)\n",
-		programname, error_message(kret));
-	exit_status++;
+    if (exit_status == 0 && !update) {
+	kret = krb5_db_promote(kcontext, db5util_db_args);
+	/* 
+	 * Ignore a not supported error since there is nothing to do about it
+	 * anyway.
+	 */
+	if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
+	    fprintf(stderr, "%s: cannot make newly loaded database live (%s)\n",
+		    programname, error_message(kret));
+	    exit_status++;
+	}
     }
 
 error:
@@ -2330,7 +2383,12 @@ error:
      */
     if (!update) {
 	 if (exit_status) {
-	      if ((kret = krb5_db_destroy(kcontext, db5util_db_args))) {
+	      kret = krb5_db_destroy(kcontext, db5util_db_args);
+	      /* 
+	       * Ignore a not supported error since there is nothing to do about
+	       * it anyway.
+	       */
+	      if (kret != 0 && kret != KRB5_PLUGIN_OP_NOTSUPP) {
 		   fprintf(stderr, dbdelerr_fmt,
 			   programname, dbname, error_message(kret));
 		   exit_status++;
