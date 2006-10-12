@@ -187,18 +187,24 @@ printf("%s: at line %d\n", __FILE__, __LINE__);
 		(void) strcpy(bytename, "8"), bytesize = 8;
 printf("%s: at line %d\n", __FILE__, __LINE__);
 		if (autoauth) {
+printf("%s: at line %d\n", __FILE__, __LINE__);
 			if (do_auth() && autoencrypt) {
+printf("%s: at line %d\n", __FILE__, __LINE__);
  				clevel = PROT_P;
 				setpbsz(1<<20);
 				if (command("PROT P") == COMPLETE)
 					dlevel = PROT_P;
 				else
 					fprintf(stderr, "ftp: couldn't enable encryption\n");
+printf("%s: at line %d\n", __FILE__, __LINE__);
 			}
+printf("%s: at line %d\n", __FILE__, __LINE__);
 			if(auth_type && clevel == PROT_C)
 				clevel = PROT_S;
+printf("%s: at line %d\n", __FILE__, __LINE__);
 			if(autologin)
 				(void) login(argv[1]);
+printf("%s: at line %d\n", __FILE__, __LINE__);
 		}
 printf("%s: at line %d\n", __FILE__, __LINE__);
 
