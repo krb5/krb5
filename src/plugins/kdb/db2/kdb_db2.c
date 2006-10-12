@@ -337,7 +337,8 @@ krb5_db2_db_init(krb5_context context)
     if ((retval = krb5_db2_db_get_age(context, NULL, &db_ctx->db_lf_time)))
 	goto err_out;
 
-    sprintf(policy_db_name, "%s.kadm5", db_ctx->db_name);
+    sprintf(policy_db_name, db_ctx->tempdb ? "%s~.kadm5" : "%s.kadm5",
+	    db_ctx->db_name);
     sprintf(policy_lock_name, "%s.lock", policy_db_name);
 
     if ((retval = osa_adb_init_db(&db_ctx->policy_db, policy_db_name,
