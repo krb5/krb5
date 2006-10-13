@@ -390,7 +390,7 @@ bt_page(t, h, lp, rp, skip, ilen)
 		mpool_put(t->bt_mp, r, 0);
 		return (NULL);
 	}
-#ifdef PURIFY
+#if 1 /* def PURIFY */
 	memset(l, 0xff, t->bt_psize);
 #endif
 	l->pgno = h->pgno;
