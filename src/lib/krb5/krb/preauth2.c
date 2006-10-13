@@ -78,7 +78,7 @@ struct _krb5_preauth_context {
 			    void *module_context);
 	/* The module's table, and some of its members, copied here for
 	 * convenience when we populated the list. */
-	struct krb5plugin_preauth_ftable_v0 *ftable;
+	struct krb5plugin_preauth_client_ftable_v0 *ftable;
 	const char *name;
 	int flags, use_count;
 	krb5_error_code (*client_process)(krb5_context context,
@@ -124,7 +124,7 @@ krb5_init_preauth_context(krb5_context kcontext,
 {
     int n_modules, n_tables, i, j, k;
     void **tables;
-    struct krb5plugin_preauth_ftable_v0 *table;
+    struct krb5plugin_preauth_client_ftable_v0 *table;
     krb5_preauth_context *context;
     void *module_context;
     krb5_preauthtype pa_type;
@@ -141,7 +141,7 @@ krb5_init_preauth_context(krb5_context kcontext,
     /* pull out the module function tables for all of the modules */
     tables = NULL;
     if (krb5int_get_plugin_dir_data(&kcontext->preauth_plugins,
-				    "preauthentication0",
+				    "preauthentication_client_0",
 				    &tables,
 				    &kcontext->err) != 0) {
 	return;
@@ -157,9 +157,8 @@ krb5_init_preauth_context(krb5_context kcontext,
          (tables != NULL) && (tables[n_tables] != NULL);
          n_tables++) {
 	table = tables[n_tables];
-	if ((table->client_pa_type_list != NULL) &&
-	    (table->client_process != NULL)) {
-	    for (j = 0; table->client_pa_type_list[j] > 0; j++) {
+	if ((table->pa_type_list != NULL) && (table->process != NULL)) {
+	    for (j = 0; table->pa_type_list[j] > 0; j++) {
 		n_modules++;
 	    }
 	}
@@ -182,14 +181,12 @@ krb5_init_preauth_context(krb5_context kcontext,
     k = 0;
     for (i = 0; i < n_tables; i++) {
         table = tables[i];
-        if ((table->client_pa_type_list != NULL) &&
-            (table->client_process != NULL)) {
-            for (j = 0; table->client_pa_type_list[j] > 0; j++) {
-		pa_type = table->client_pa_type_list[j];
+        if ((table->pa_type_list != NULL) && (table->process != NULL)) {
+            for (j = 0; table->pa_type_list[j] > 0; j++) {
+		pa_type = table->pa_type_list[j];
 		module_context = NULL;
-		if ((table->client_init != NULL) &&
-		    ((*table->client_init)(kcontext, pa_type,
-		    			   &module_context) != 0)) {
+		if ((table->init != NULL) &&
+		    ((*table->init)(kcontext, pa_type, &module_context) != 0)) {
 #ifdef DEBUG
 			fprintf (stderr, "skip module \"%s\", pa_type %d\n",
 				 table->name, pa_type);
@@ -197,17 +194,16 @@ krb5_init_preauth_context(krb5_context kcontext,
 			continue;
 		}
 		context->modules[k].pa_type = pa_type;
-		context->modules[k].enctypes = table->client_enctype_list;
+		context->modules[k].enctypes = table->enctype_list;
 		context->modules[k].module_context = module_context;
-		context->modules[k].client_fini = table->client_fini;
+		context->modules[k].client_fini = table->fini;
 		context->modules[k].ftable = table;
 		context->modules[k].name = table->name;
-		context->modules[k].flags = (*table->client_flags)(kcontext,
-								   pa_type);
+		context->modules[k].flags = (*table->flags)(kcontext, pa_type);
 		context->modules[k].use_count = 0;
-		context->modules[k].client_process = table->client_process;
-		context->modules[k].client_tryagain = table->client_tryagain;
-		context->modules[k].client_cleanup = table->client_cleanup;
+		context->modules[k].client_process = table->process;
+		context->modules[k].client_tryagain = table->tryagain;
+		context->modules[k].client_cleanup = table->cleanup;
 		context->modules[k].request_context = NULL;
 #ifdef DEBUG
 		fprintf (stderr, "init module \"%s\", pa_type %d, flag %d\n",

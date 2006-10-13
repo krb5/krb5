@@ -468,10 +468,9 @@ static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_CKSUM_BODY_REQ, 0,
 };
 
-struct krb5plugin_preauth_ftable_v0 preauthentication0 = {
+struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     "cksum_body",
     &supported_client_pa_types[0],
-    &supported_server_pa_types[0],
     NULL,
     NULL,
     NULL,
@@ -479,6 +478,11 @@ struct krb5plugin_preauth_ftable_v0 preauthentication0 = {
     NULL,
     client_process,
     NULL,
+};
+
+struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
+    "cksum_body",
+    &supported_server_pa_types[0],
     server_init,
     server_fini,
     server_get_flags,

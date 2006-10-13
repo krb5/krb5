@@ -299,7 +299,7 @@ load_preauth_plugins(krb5_context context)
 {
     struct errinfo err;
     void **preauth_plugins_ftables;
-    struct krb5plugin_preauth_ftable_v0 *ftable;
+    struct krb5plugin_preauth_server_ftable_v0 *ftable;
     int module_count, i, j, k;
     krb5_preauthtype pa_type;
     void *pa_sys_context;
@@ -318,7 +318,8 @@ load_preauth_plugins(krb5_context context)
 
     /* Get the method tables provided by the loaded plugins. */
     preauth_plugins_ftables = NULL;
-    if (krb5int_get_plugin_dir_data(&preauth_plugins, "preauthentication0",
+    if (krb5int_get_plugin_dir_data(&preauth_plugins,
+				    "preauthentication_server_0",
 				    &preauth_plugins_ftables, &err) != 0) {
 	return KRB5_PLUGIN_NO_HANDLE;
     }
@@ -329,15 +330,15 @@ load_preauth_plugins(krb5_context context)
     if (preauth_plugins_ftables != NULL) {
 	for (i = 0; preauth_plugins_ftables[i] != NULL; i++) {
 	    ftable = preauth_plugins_ftables[i];
-	    if ((ftable->server_flags_proc == NULL) &&
-		(ftable->server_edata_proc == NULL) &&
-		(ftable->server_verify_proc == NULL) &&
-		(ftable->server_return_proc == NULL)) {
+	    if ((ftable->flags_proc == NULL) &&
+		(ftable->edata_proc == NULL) &&
+		(ftable->verify_proc == NULL) &&
+		(ftable->return_proc == NULL)) {
 		continue;
 	    }
 	    for (j = 0;
-		 ftable->server_pa_type_list != NULL &&
-		 ftable->server_pa_type_list[j] > 0;
+		 ftable->pa_type_list != NULL &&
+		 ftable->pa_type_list[j] > 0;
 		 j++) {
 		module_count++;
 	    }
@@ -376,21 +377,21 @@ load_preauth_plugins(krb5_context context)
     if (preauth_plugins_ftables != NULL) {
 	for (i = 0; preauth_plugins_ftables[i] != NULL; i++) {
 	    ftable = preauth_plugins_ftables[i];
-	    if ((ftable->server_flags_proc == NULL) &&
-		(ftable->server_edata_proc == NULL) &&
-		(ftable->server_verify_proc == NULL) &&
-		(ftable->server_return_proc == NULL)) {
+	    if ((ftable->flags_proc == NULL) &&
+		(ftable->edata_proc == NULL) &&
+		(ftable->verify_proc == NULL) &&
+		(ftable->return_proc == NULL)) {
 		continue;
 	    }
 	    for (j = 0;
-		 ftable->server_pa_type_list != NULL &&
-		 ftable->server_pa_type_list[j] > 0;
+		 ftable->pa_type_list != NULL &&
+		 ftable->pa_type_list[j] > 0;
 		 j++) {
 		/* Try to initialize the module.  If it fails, we'll remove it
 		 * from the list of modules we'll be using. */
 		pa_sys_context = NULL;
-		server_init_proc = ftable->server_init_proc;
-		pa_type = ftable->server_pa_type_list[j];
+		server_init_proc = ftable->init_proc;
+		pa_type = ftable->pa_type_list[j];
 		if ((server_init_proc != NULL) &&
 		    ((*server_init_proc)(context, pa_type,
 					 &pa_sys_context) != 0)) {
@@ -398,18 +399,17 @@ load_preauth_plugins(krb5_context context)
 		    continue;
 		}
 		preauth_systems[k].name = ftable->name;
-		pa_type = ftable->server_pa_type_list[j];
+		pa_type = ftable->pa_type_list[j];
 		preauth_systems[k].type = pa_type;
-		preauth_systems[k].flags = ftable->server_flags_proc(context,
-								     pa_type);
+		preauth_systems[k].flags = ftable->flags_proc(context, pa_type);
 		preauth_systems[k].pa_sys_context = pa_sys_context;
 		preauth_systems[k].init = server_init_proc;
-		preauth_systems[k].fini = ftable->server_fini_proc;
-		preauth_systems[k].get_edata = ftable->server_edata_proc;
-		preauth_systems[k].verify_padata = ftable->server_verify_proc;
-		preauth_systems[k].return_padata = ftable->server_return_proc;
+		preauth_systems[k].fini = ftable->fini_proc;
+		preauth_systems[k].get_edata = ftable->edata_proc;
+		preauth_systems[k].verify_padata = ftable->verify_proc;
+		preauth_systems[k].return_padata = ftable->return_proc;
 		preauth_systems[k].free_pa_request_context =
-		    ftable->server_freepa_reqcontext_proc;
+		    ftable->freepa_reqcontext_proc;
 		k++;
 	    }
 	}

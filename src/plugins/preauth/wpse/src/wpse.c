@@ -316,10 +316,9 @@ server_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 static krb5_preauthtype supported_client_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 static krb5_preauthtype supported_server_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 
-struct krb5plugin_preauth_ftable_v0 preauthentication0 = {
+struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     "wpse",
     &supported_client_pa_types[0],
-    &supported_server_pa_types[0],
     NULL,
     client_init,
     client_fini,
@@ -327,6 +326,11 @@ struct krb5plugin_preauth_ftable_v0 preauthentication0 = {
     client_cleanup,
     client_process,
     NULL,
+};
+
+struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
+    "wpse",
+    &supported_server_pa_types[0],
     NULL,
     NULL,
     server_get_flags,

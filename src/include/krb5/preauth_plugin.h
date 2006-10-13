@@ -140,40 +140,37 @@ typedef krb5_error_code
 			   void *gak_data);
 
 /*
- * The function table / structure which a preauth module must export as
- * "preauthentication0".  NOTE: replace "0" with "1" for the type and variable
- * names if this gets picked up by upstream.  If the interfaces work correctly,
- * future versions of the table will add either more callbacks or more
- * arguments to callbacks, and in both cases we'll be able to wrap the v0
- * functions.
+ * The function table / structure which a preauth client module must export as
+ * "preauthentication_client_0".  If the interfaces work correctly, future
+ * versions of the table will add either more callbacks or more arguments to
+ * callbacks, and in both cases we'll be able to wrap the v0 functions.
  */
-typedef struct krb5plugin_preauth_ftable_v0 {
+typedef struct krb5plugin_preauth_client_ftable_v0 {
     /* Not-usually-visible name. */
     char *name;
 
-    /* Pointer to zero-terminated lists of pa_types which this module can
+    /* Pointer to zero-terminated list of pa_types which this module can
      * provide services for. */
-    krb5_preauthtype *client_pa_type_list;
-    krb5_preauthtype *server_pa_type_list;
+    krb5_preauthtype *pa_type_list;
 
     /* Pointer to zero-terminated list of enc_types which this module claims
      * to add support for. */
-    krb5_enctype *client_enctype_list;
+    krb5_enctype *enctype_list;
 
     /* Per-module initialization/cleanup.  The init function is called
      * by libkrb5 when the module is loaded, and the fini function is
      * called before the module is unloaded.  Both are optional and
      * may be called multiple times in case the module is used in
      * multiple contexts.*/
-    krb5_error_code (*client_init)(krb5_context, krb5_preauthtype, void **);
-    void (*client_fini)(krb5_context, krb5_preauthtype, void *);
+    krb5_error_code (*init)(krb5_context, krb5_preauthtype, void **);
+    void (*fini)(krb5_context, krb5_preauthtype, void *);
     /* A callback which returns flags indicating if the module is a "real" or
      * an "info" mechanism, and so on.  This function is called for each entry
      * in the client_pa_type_list. */
-    int (*client_flags)(krb5_context, krb5_preauthtype);
+    int (*flags)(krb5_context, krb5_preauthtype);
     /* Clean up a client context.  Can be NULL. */
-    void (*client_cleanup)(krb5_context context, void *module_context,
-			   void **request_context);
+    void (*cleanup)(krb5_context context, void *module_context,
+		    void **request_context);
     /* Client function which processes server-supplied data in pa_data,
      * returns created data in out_pa_data, storing any of its own state in
      * client_context if data for the associated preauthentication type is
@@ -182,39 +179,55 @@ typedef struct krb5plugin_preauth_ftable_v0 {
      * NOTE! the encoded_previous_request will be NULL the first time this
      * function is called, because it is expected to only ever contain the data
      * obtained from a previous call to this function. */
-    krb5_error_code (*client_process)(krb5_context context,
-				      void *module_context,
-				      void **request_context,
-				      krb5_kdc_req *request,
-				      krb5_data *encoded_request_body,
-				      krb5_data *encoded_previous_request,
-				      krb5_pa_data *pa_data,
-				      krb5_prompter_fct prompter,
-				      void *prompter_data,
-				      preauth_get_as_key_proc gak_fct,
-				      krb5_data *salt, krb5_data *s2kparams,
-				      void *gak_data,
-				      krb5_keyblock *as_key,
-				      krb5_pa_data **out_pa_data);
+    krb5_error_code (*process)(krb5_context context,
+			       void *module_context,
+			       void **request_context,
+			       krb5_kdc_req *request,
+			       krb5_data *encoded_request_body,
+			       krb5_data *encoded_previous_request,
+			       krb5_pa_data *pa_data,
+			       krb5_prompter_fct prompter,
+			       void *prompter_data,
+			       preauth_get_as_key_proc gak_fct,
+			       krb5_data *salt, krb5_data *s2kparams,
+			       void *gak_data,
+			       krb5_keyblock *as_key,
+			       krb5_pa_data **out_pa_data);
     /* Client function which can attempt to use e-data in the error response to
      * try to recover from the given error.  If this function is not NULL, and
      * it stores data in out_pa_data which is different data from the contents
      * of in_pa_data, then the client library will retransmit the request. */
-    krb5_error_code (*client_tryagain)(krb5_context context,
-				       void *module_context,
-				       void **request_context,
-				       krb5_kdc_req *request,
-				       krb5_data *encoded_request_body,
-				       krb5_error *error,
-				       krb5_pa_data *in_pa_data,
-				       krb5_pa_data **out_pa_data);
+    krb5_error_code (*tryagain)(krb5_context context,
+				void *module_context,
+				void **request_context,
+				krb5_kdc_req *request,
+				krb5_data *encoded_request_body,
+				krb5_error *error,
+				krb5_pa_data *in_pa_data,
+				krb5_pa_data **out_pa_data);
+} krb5plugin_preauth_client_ftable_v0;
+
+/*
+ * The function table / structure which a preauth server module must export as
+ * "preauthentication_server_0".  NOTE: replace "0" with "1" for the type and
+ * variable names if this gets picked up by upstream.  If the interfaces work
+ * correctly, future versions of the table will add either more callbacks or
+ * more arguments to callbacks, and in both cases we'll be able to wrap the v0
+ * functions.
+ */
+typedef struct krb5plugin_preauth_server_ftable_v0 {
+    /* Not-usually-visible name. */
+    char *name;
+
+    /* Pointer to zero-terminated list of pa_types which this module can
+     * provide services for. */
+    krb5_preauthtype *pa_type_list;
 
     /* Per-module initialization/cleanup.  The init function is called by the
      * KDC when the module is loaded, and the fini function is called before
      * the module is unloaded.  Both are optional. */
-    krb5_error_code (*server_init_proc)(krb5_context, krb5_preauthtype,
-				        void **);
-    void (*server_fini_proc)(krb5_context, krb5_preauthtype, void *);
+    krb5_error_code (*init_proc)(krb5_context, krb5_preauthtype, void **);
+    void (*fini_proc)(krb5_context, krb5_preauthtype, void *);
     /* Return the flags which the KDC should use for this module.  This is a
      * callback instead of a static value because the module may or may not
      * wish to count itself as a hardware preauthentication module (in other
@@ -222,7 +235,7 @@ typedef struct krb5plugin_preauth_ftable_v0 {
      * site administrator can force a particular preauthentication type to be
      * supported using only hardware).  This function is called for each entry
      * entry in the server_pa_type_list. */
-    int (*server_flags_proc)(krb5_context, krb5_preauthtype);
+    int (*flags_proc)(krb5_context, krb5_preauthtype);
     /* Get preauthentication data to send to the client as part of the "you
      * need to use preauthentication" error.  The module doesn't need to
      * actually provide data if the protocol doesn't require it, but it should
@@ -231,47 +244,46 @@ typedef struct krb5plugin_preauth_ftable_v0 {
      * to create a context because we have no guarantee that the client will
      * ever call again (or that it will hit this server if it does), in which
      * case a context might otherwise hang around forever. */
-    krb5_error_code (*server_edata_proc)(krb5_context, krb5_kdc_req *request,
-					 struct _krb5_db_entry_new *client,
-					 struct _krb5_db_entry_new *server,
-					 preauth_get_entry_data_proc,
-					 void *pa_module_context,
-					 krb5_pa_data *data);
+    krb5_error_code (*edata_proc)(krb5_context, krb5_kdc_req *request,
+				  struct _krb5_db_entry_new *client,
+				  struct _krb5_db_entry_new *server,
+				  preauth_get_entry_data_proc,
+				  void *pa_module_context,
+				  krb5_pa_data *data);
     /* Verify preauthentication data sent by the client, setting the
      * TKT_FLG_PRE_AUTH or TKT_FLG_HW_AUTH flag in the enc_tkt_reply's "flags"
      * field as appropriate, and returning nonzero on failure.  Can create
      * context data for consumption by the return_proc or freepa_proc below. */
-    krb5_error_code (*server_verify_proc)(krb5_context,
-					  struct _krb5_db_entry_new *client,
-					  krb5_data *req_pkt,
-					  krb5_kdc_req *request,
-					  krb5_enc_tkt_part *enc_tkt_reply,
-					  krb5_pa_data *data,
-					  preauth_get_entry_data_proc,
-					  void *pa_module_context,
-					  void **pa_request_context);
+    krb5_error_code (*verify_proc)(krb5_context,
+   				   struct _krb5_db_entry_new *client,
+				   krb5_data *req_pkt,
+				   krb5_kdc_req *request,
+				   krb5_enc_tkt_part *enc_tkt_reply,
+				   krb5_pa_data *data,
+				   preauth_get_entry_data_proc,
+				   void *pa_module_context,
+				   void **pa_request_context);
     /* Generate preauthentication response data to send to the client as part
      * of the AS-REP.  If it needs to override the key which is used to encrypt
      * the response, it can do so.  The module is expected (but not required,
      * if a freepa_proc is also provided) to free any context data it saved in
      * "request_pa_context". */
-    krb5_error_code (*server_return_proc)(krb5_context, krb5_pa_data * padata,
-					  struct _krb5_db_entry_new *client,
-					  krb5_data *req_pkt,
-					  krb5_kdc_req *request,
-					  krb5_kdc_rep *reply,
-					  struct _krb5_key_data *client_keys,
-					  krb5_keyblock *encrypting_key,
-					  krb5_pa_data **send_pa,
-					  preauth_get_entry_data_proc,
-					  void *pa_module_context,
-					  void **pa_request_context);
+    krb5_error_code (*return_proc)(krb5_context, krb5_pa_data * padata,
+				   struct _krb5_db_entry_new *client,
+				   krb5_data *req_pkt,
+				   krb5_kdc_req *request,
+				   krb5_kdc_rep *reply,
+				   struct _krb5_key_data *client_keys,
+				   krb5_keyblock *encrypting_key,
+				   krb5_pa_data **send_pa,
+				   preauth_get_entry_data_proc,
+				   void *pa_module_context,
+				   void **pa_request_context);
     /* Free up the server-side per-request context, in cases where
      * server_return_proc() didn't or for whatever reason was not called.  Can
      * be NULL. */
-    krb5_error_code (*server_freepa_reqcontext_proc)(krb5_context,
-						     void *pa_module_context,
-						     void **request_pa_context);
-} krb5plugin_preauth_ftable_v0;
-
+    krb5_error_code (*freepa_reqcontext_proc)(krb5_context,
+   					      void *pa_module_context,
+					      void **request_pa_context);
+} krb5plugin_preauth_server_ftable_v0;
 #endif /* KRB5_PREAUTH_PLUGIN_H_INCLUDED */
