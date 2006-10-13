@@ -560,7 +560,7 @@ get_entry_tl_data(krb5_context context, krb5_db_entry *entry,
 static krb5_error_code
 get_entry_data(krb5_context context,
 	       krb5_kdc_req *request, krb5_db_entry *entry,
-	       enum krb5plugin_preauth_entry_request_type type,
+	       krb5_int32  type,
 	       krb5_data **result)
 {
     int i, k;
@@ -1109,7 +1109,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     krb5_data *req_pkt,
 		     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
 		     krb5_pa_data *pa,
-		     preauth_get_entry_data_proc get_entry_data,
+		     preauth_get_entry_data_proc ets_get_entry_data,
 		     void *pa_system_context,
 		     void **pa_request_context)
 {
@@ -1351,7 +1351,7 @@ cleanup:
 static krb5_error_code
 get_etype_info(krb5_context context, krb5_kdc_req *request,
 	       krb5_db_entry *client, krb5_db_entry *server,
-	       preauth_get_entry_data_proc get_entry_data,
+	       preauth_get_entry_data_proc etype_get_entry_data,
 	       void *pa_system_context,
 	       krb5_pa_data *pa_data)
 {
@@ -1368,7 +1368,7 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
 static krb5_error_code
 get_etype_info2(krb5_context context, krb5_kdc_req *request,
 	       krb5_db_entry *client, krb5_db_entry *server,
-	       preauth_get_entry_data_proc get_entry_data,
+	       preauth_get_entry_data_proc etype_get_entry_data,
 	       void *pa_system_context,
 	       krb5_pa_data *pa_data)
 {
@@ -1460,7 +1460,7 @@ return_etype_info2(krb5_context context, krb5_pa_data * padata,
 		   krb5_key_data *client_key,
 		   krb5_keyblock *encrypting_key,
 		   krb5_pa_data **send_pa,
-		   preauth_get_entry_data_proc get_entry_data,
+		   preauth_get_entry_data_proc etype_get_entry_data,
 	           void *pa_system_context,
 		   void **pa_request_context)
 {
@@ -1477,7 +1477,7 @@ return_etype_info(krb5_context context, krb5_pa_data * padata,
 		  krb5_key_data *client_key,
 		  krb5_keyblock *encrypting_key,
 		  krb5_pa_data **send_pa,
-		  preauth_get_entry_data_proc get_entry_data,
+		  preauth_get_entry_data_proc etypeget_entry_data,
 	          void *pa_system_context,
 		  void **pa_request_context)
 {
@@ -1490,7 +1490,7 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
 	       krb5_db_entry *client, krb5_data *req_pkt, krb5_kdc_req *request,
 	       krb5_kdc_rep *reply, krb5_key_data *client_key,
 	       krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
-	       preauth_get_entry_data_proc get_entry_data,
+	       preauth_get_entry_data_proc etype_get_entry_data,
 	       void *pa_system_context,
 	       void **pa_request_context)
 {
@@ -1580,7 +1580,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
 		krb5_db_entry *client, krb5_data *req_pkt, krb5_kdc_req *request,
 		krb5_kdc_rep *reply, krb5_key_data *client_key,
 		krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
-		preauth_get_entry_data_proc get_entry_data,
+		preauth_get_entry_data_proc sam_get_entry_data,
 		void *pa_system_context,
 		void **pa_request_context)
 {
@@ -1721,7 +1721,7 @@ static struct {
 static krb5_error_code
 get_sam_edata(krb5_context context, krb5_kdc_req *request,
 	      krb5_db_entry *client, krb5_db_entry *server,
-	      preauth_get_entry_data_proc get_entry_data,
+	      preauth_get_entry_data_proc sam_get_entry_data,
 	      void *pa_system_context, krb5_pa_data *pa_data)
 {
     krb5_error_code		retval;
@@ -2096,7 +2096,7 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 		    krb5_data *req_pkt,
 		    krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
 		    krb5_pa_data *pa,
-		    preauth_get_entry_data_proc get_entry_data,
+		    preauth_get_entry_data_proc sam_get_entry_data,
 		    void *pa_system_context,
 		    void **pa_request_context)
 {

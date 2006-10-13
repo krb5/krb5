@@ -118,7 +118,7 @@ typedef krb5_error_code
 (*preauth_get_entry_data_proc)(krb5_context,
 			       krb5_kdc_req *,
 			       struct _krb5_db_entry_new *,
-			       enum krb5plugin_preauth_entry_request_type,
+			       krb5_int32 request_type,
 			       krb5_data **);
 
 /*
