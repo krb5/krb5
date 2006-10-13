@@ -418,13 +418,13 @@ load_preauth_plugins(krb5_context context)
     /* Add the end-of-list marker. */
     preauth_systems[k].name = "[end]";
     preauth_systems[k].type = -1;
+    return 0;
 }
 
 krb5_error_code
 unload_preauth_plugins(krb5_context context)
 {
     int i;
-    struct errinfo err;
     if (preauth_systems != NULL) {
 	for (i = 0; i < n_preauth_systems; i++) {
 	    if (preauth_systems[i].fini != NULL) {
@@ -564,7 +564,6 @@ get_entry_data(krb5_context context,
 	       krb5_data **result)
 {
     int i, k;
-    krb5_tl_data *tl;
     krb5_data *ret;
     krb5_deltat *delta;
     krb5_keyblock *keys;
@@ -659,7 +658,6 @@ find_pa_context(krb5_preauth_systems *pa_sys,
 		struct request_pa_context *context,
 		void ***pa_context)
 {
-    krb5_preauth_systems *preauth_system;
     int i;
 
     *pa_context = 0;
@@ -904,7 +902,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 				       get_entry_data, pa_sys->pa_sys_context,
 				       pa_context);
 	if (retval) {
-	    char * emsg = krb5_get_error_message (context, retval);
+	    const char * emsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
 			      pa_sys->name, emsg);
 	    krb5_free_error_message (context, emsg);
@@ -926,12 +924,12 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 
     /* pa system was not found, but principal doesn't require preauth */
     if (!pa_found &&
-        !isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
-        !isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH))
+	!isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
+	!isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH))
        return 0;
 
     if (!pa_found) {
-        char *emsg = krb5_get_error_message(context, retval);
+	const char *emsg = krb5_get_error_message(context, retval);
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", emsg);
 	krb5_free_error_message(context, emsg);
     }
