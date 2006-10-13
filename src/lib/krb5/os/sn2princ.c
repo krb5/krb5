@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "os-proto.h"
 #include "fake-addrinfo.h"
 #include <ctype.h>
 #ifdef HAVE_SYS_PARAM_H
@@ -67,8 +68,6 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
     krb5_error_code retval;
     register char *cp;
     char localname[MAXHOSTNAMELEN];
-
-    FILE *log;
 
 #ifdef DEBUG_REFERRALS
     printf("krb5_sname_to_principal(host=%s, sname=%s, type=%d)\n",hostname,sname,type);
