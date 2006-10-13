@@ -433,7 +433,7 @@ errout:
 	free_padata_context(kdc_context, &pa_context);
 
     if (status) {
-        char * emsg = 0;
+	const char * emsg = 0;
 	if (errcode) 
 	    emsg = krb5_get_error_message (kdc_context, errcode);
 
