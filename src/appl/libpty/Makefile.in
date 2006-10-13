@@ -57,7 +57,7 @@ pty_paranoia: pty_paranoia.o $(COM_ERR_DEPLIB) $(PTY_DEPLIB)
 	$(CC_LINK) -o pty_paranoia pty_paranoia.o $(PTY_LIB) $(COM_ERR_LIB) $(LIBS)
 
 check-paranoia: pty_paranoia
-	$(KRB5_RUN_ENV) ./pty_paranoia
+	$(KRB5_RUN_ENV) $(VALGRIND) ./pty_paranoia
 
 install-unix:: install-libs
 

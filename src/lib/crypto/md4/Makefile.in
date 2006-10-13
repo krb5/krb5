@@ -44,7 +44,7 @@ $(OUTPRE)t_mddriver.exe: $(OUTPRE)t_mddriver.obj $(OUTPRE)md4.obj
 	link -out:$@ $**
 
 check-unix:: t_mddriver
-	$(RUN_SETUP) $(C)t_mddriver -x
+	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
 
 check-windows:: $(OUTPRE)t_mddriver.exe
 	$(OUTPRE)$(C)t_mddriver.exe -x

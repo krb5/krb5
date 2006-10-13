@@ -44,6 +44,7 @@ runenv.vals: runenv.vars
 site.exp: runenv.vals Makefile
 	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
 		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
+	echo "set VALGRIND {$(VALGRIND)}" >> site.exp
 	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
 
 # +++ Dependency line eater +++

@@ -34,8 +34,8 @@ $(OUTPRE)t_shs.exe: $(OUTPRE)t_shs.obj $(OUTPRE)shs.obj
 	link -out:$@ $**
 
 check-unix:: t_shs t_shs3
-	$(RUN_SETUP) $(C)t_shs -x
-	$(RUN_SETUP) $(C)t_shs3
+	$(RUN_SETUP) $(VALGRIND) $(C)t_shs -x
+	$(RUN_SETUP) $(VALGRIND) $(C)t_shs3
 
 check-windows:: $(OUTPRE)t_shs.exe $(OUTPRE)t_shs3.exe
 	$(OUTPRE)$(C)t_shs.exe -x

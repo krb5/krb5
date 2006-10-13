@@ -179,13 +179,13 @@ libcrypto.lib:
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_pkcs5
-	$(RUN_SETUP) ./t_nfold
-	$(RUN_SETUP) ./t_encrypt
-	$(RUN_SETUP) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
+	$(RUN_SETUP) $(VALGRIND) ./t_nfold
+	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
+	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
-	$(RUN_SETUP) ./t_hmac
+	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 
-#	$(RUN_SETUP) ./t_pkcs5
+#	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) nfold.$(OBJEXT) $(SUPPORT_LIB)

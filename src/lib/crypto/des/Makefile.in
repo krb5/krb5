@@ -77,11 +77,11 @@ t_afss2k$(EXEEXT): $(TAFSS2KOBJS) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ $(TAFSS2KOBJS) -lcom_err $(SUPPORT_LIB)
 
 check-unix:: verify destest t_afss2k
-	$(RUN_SETUP) ./verify -z
-	$(RUN_SETUP) ./verify -m
-	$(RUN_SETUP) ./verify
-	$(RUN_SETUP) ./destest < $(srcdir)/keytest.data
-	$(RUN_SETUP) ./t_afss2k
+	$(RUN_SETUP) $(VALGRIND) ./verify -z
+	$(RUN_SETUP) $(VALGRIND) ./verify -m
+	$(RUN_SETUP) $(VALGRIND) ./verify
+	$(RUN_SETUP) $(VALGRIND) ./destest < $(srcdir)/keytest.data
+	$(RUN_SETUP) $(VALGRIND) ./t_afss2k
 
 check-windows::
 

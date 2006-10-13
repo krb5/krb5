@@ -98,7 +98,7 @@ t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
 
 check-unix:: t_cc
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) ./t_cc 
+	$(RUN_SETUP) $(VALGRIND) ./t_cc 
 
 clean-unix::
 	$(RM) t_cc t_cc.o

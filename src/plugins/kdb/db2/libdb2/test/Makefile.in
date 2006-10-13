@@ -23,7 +23,7 @@ dbtest: dbtest.o $(DB_DEPLIB)
 	$(CC_LINK) -o $@ dbtest.o $(STRERROR_OBJ) $(DB_LIB)
 
 check:: dbtest
-	$(KRB5_RUN_ENV) srcdir=$(srcdir) TMPDIR=$(TMPDIR) $(FCTSH) $(srcdir)/run.test
+	$(KRB5_RUN_ENV) srcdir=$(srcdir) TMPDIR=$(TMPDIR) $(VALGRIND) $(FCTSH) $(srcdir)/run.test
 
 bttest.o: $(srcdir)/btree.tests/main.c
 	$(CC) $(ALL_CFLAGS) -c $(srcdir)/btree.tests/main.c -o $@

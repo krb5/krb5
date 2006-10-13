@@ -550,9 +550,7 @@ PROFFLAGS=@PROFFLAGS@
 # platform-dependent temporary files that should get cleaned up
 EXTRA_FILES=@EXTRA_FILES@
 
-# The "env" at the end is because sometimes we add local environment
-# variable settings with "@RUN_ENV@ KRB5_CONFIG=foo ..."
-MAYBE_VALGRIND= # valgrind --tool=memcheck --log-file=$(BUILDTOP)/valgrind.out --trace-children=yes -v --leak-check=yes env
+VALGRIND= # valgrind --tool=memcheck --log-file=$(BUILDTOP)/valgrind.out --trace-children=yes -v --leak-check=yes
 
 #
 AUTOCONF_HEADER=$(SRCTOP)/include/autoconf.h.in

@@ -12,7 +12,7 @@ SRCS=$(srcdir)/test_getpw.c
 all:: test_getpw
 
 check:: test_getpw
-	$(RUN_SETUP) ./test_getpw
+	$(RUN_SETUP) $(VALGRIND) ./test_getpw
 
 test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)

@@ -31,15 +31,15 @@ trval: $(srcdir)/trval.c
 check:: krb5_decode_test krb5_encode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
-		$(RUN_SETUP) ./krb5_decode_test
+		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
 	$(RM) test.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
-		$(RUN_SETUP) ./krb5_encode_test > test.out
+		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
 	cmp test.out $(srcdir)/reference_encode.out
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
-		$(RUN_SETUP) ./krb5_encode_test -t > test.out
+		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > test.out
 	cmp test.out $(srcdir)/trval_reference.out
 	$(RM) test.out	
 

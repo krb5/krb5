@@ -72,7 +72,7 @@ fakeka: fakeka.o $(KADMSRV_DEPLIBS) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
 
 check-unix:: rtest
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(srcdir)/rtscript > test.out
+	$(RUN_SETUP) $(VALGRIND) $(srcdir)/rtscript > test.out
 	cmp test.out $(srcdir)/rtest.good
 	$(RM) test.out
 

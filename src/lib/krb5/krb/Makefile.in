@@ -325,7 +325,7 @@ TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) ./t_kerb \
+	$(RUN_SETUP) $(VALGRIND) ./t_kerb \
 		parse_name tytso \
 		parse_name tytso@SHAZAAM \
 		parse_name tytso/root@VEGGIE.COM \
@@ -349,9 +349,9 @@ check-unix:: $(TEST_PROGS)
 	cmp test.out $(srcdir)/t_ref_kerb.out
 	$(RM) test.out
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-		$(RUN_SETUP) ./t_ser
-	$(RUN_SETUP) ./t_deltat
-	$(RUN_SETUP) sh $(srcdir)/transit-tests
+		$(RUN_SETUP) $(VALGRIND) ./t_ser
+	$(RUN_SETUP) $(VALGRIND) ./t_deltat
+	$(RUN_SETUP) $(VALGRIND) sh $(srcdir)/transit-tests
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \

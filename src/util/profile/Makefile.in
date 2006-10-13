@@ -144,7 +144,7 @@ check-unix-tcl-:
 
 check-unix-tcl-ok: profile_tcl
 	cp $(srcdir)/test.ini test2.ini
-	$(KRB5_RUN_ENV) ./profile_tcl $(srcdir)/prof_test1
+	$(KRB5_RUN_ENV) $(VALGRIND) ./profile_tcl $(srcdir)/prof_test1
 
 check-windows:: $(OUTPRE)test_profile.exe $(OUTPRE)test_parse.exe
 	$(RM) $(OUTPRE)*.obj

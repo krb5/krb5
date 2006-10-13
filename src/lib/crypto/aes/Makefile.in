@@ -58,9 +58,9 @@ aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
 
 check:: run-aes-test
 run-aes-test: aes-test
-	$(RUN_SETUP) ./aes-test -k > vk.txt
+	$(RUN_SETUP) $(VALGRIND) ./aes-test -k > vk.txt
 	cmp vk.txt $(srcdir)/expect-vk.txt
-	$(RUN_SETUP) ./aes-test > vt.txt
+	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
 
 clean-unix:: clean-libobjs

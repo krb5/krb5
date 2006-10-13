@@ -92,11 +92,11 @@ t_pcbc: t_pcbc.o pcbc_encrypt.o key_sched.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_pcbc.o pcbc_encrypt.o key_sched.o $(KRB5_BASE_LIBS)
 
 check-unix:: verify t_quad t_pcbc
-	$(RUN_SETUP) ./verify -z
-	$(RUN_SETUP) ./verify -m
-	$(RUN_SETUP) ./verify
-	$(RUN_SETUP) ./t_quad
-	$(RUN_SETUP) ./t_pcbc
+	$(RUN_SETUP) $(VALGRIND) ./verify -z
+	$(RUN_SETUP) $(VALGRIND) ./verify -m
+	$(RUN_SETUP) $(VALGRIND) ./verify
+	$(RUN_SETUP) $(VALGRIND) ./t_quad
+	$(RUN_SETUP) $(VALGRIND) ./t_pcbc
 
 check-windows::
 
