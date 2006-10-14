@@ -1684,7 +1684,8 @@ void pswitch(int flag)
 	ip->connect = connected;
 	connected = op->connect;
 	if (hostname) {
-		(void) strncpy(ip->name, hostname, sizeof(ip->name) - 1);
+		if (ip->name != hostname)
+			(void) strncpy(ip->name, hostname, sizeof(ip->name) - 1);
 		ip->name[strlen(ip->name)] = '\0';
 	} else
 		ip->name[0] = 0;
