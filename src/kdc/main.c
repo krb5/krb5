@@ -581,6 +581,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
      * Setup the v4 mode 
      */
     process_v4_mode(argv[0], v4mode);
+    free(v4mode);
 #endif
 
     /*
