@@ -1190,8 +1190,12 @@ dump_db(argc, argv)
 	     exit_status++;
 	}
 	if (ofile && f != stdout && !exit_status) {
-	     fclose(f);
-	     update_ok_file(ofile);
+	    if (locked) {
+		(void) krb5_lock_file(util_context, fileno(f), KRB5_LOCKMODE_UNLOCK);
+		locked = 0;
+	    }
+	    fclose(f);
+	    update_ok_file(ofile);
 	}
     }
     if (locked)
