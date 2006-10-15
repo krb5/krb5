@@ -36,7 +36,6 @@
 #include <assert.h>
 
 int main () {
-  krb5_error_code ret;
   krb5_data input, output;
   krb5_keyblock *key = NULL;
   unsigned int in_length;
