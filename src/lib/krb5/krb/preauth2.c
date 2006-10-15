@@ -341,8 +341,7 @@ krb5_preauth_prepare_request(krb5_context kcontext,
 			     krb5_get_init_creds_opt *options,
 			     krb5_kdc_req *request)
 {
-    int i, j, k;
-    krb5_enctype *ktypes;
+    int i, j;
 
     if ((preauth_context == NULL) || (*preauth_context == NULL)) {
 	return;

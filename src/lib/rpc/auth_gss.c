@@ -397,7 +397,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 	struct rpc_gss_data	*gd;
 	struct rpc_gss_init_res	 gr;
 	gss_buffer_desc		*recv_tokenp, send_token;
-	OM_uint32		 maj_stat, min_stat, call_stat, ret_flags, req_flags=0;
+	OM_uint32		 maj_stat, min_stat, call_stat, ret_flags;
 
 	log_debug("in authgss_refresh()");
 	

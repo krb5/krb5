@@ -78,7 +78,10 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     int key_usage;
     unsigned char acceptor_flag;
     const gss_buffer_desc *message2 = message;
-    size_t rrc, ec;
+#ifdef CFX_EXERCISE
+    size_t rrc;
+#endif
+    size_t ec;
     unsigned short tok_id;
     krb5_checksum sum;
     krb5_keyblock *key;

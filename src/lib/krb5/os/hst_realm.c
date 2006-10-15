@@ -432,8 +432,7 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
 krb5_error_code KRB5_CALLCONV
 krb5int_clean_hostname(krb5_context context, const char *host, char *local_host, size_t lhsize)
 {
-    char **retrealms;
-    char *realm, *cp, *temp_realm;
+    char *cp;
     krb5_error_code retval;
     int l;
 

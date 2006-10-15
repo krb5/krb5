@@ -717,8 +717,6 @@ static int
 getterminaltype(name)
     char *name;
 {
-    int retval = -1;
-
     settimer(baseline);
 #if	defined(AUTHENTICATION)
     ttsuck();

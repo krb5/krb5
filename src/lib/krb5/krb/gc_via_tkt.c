@@ -183,7 +183,9 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 
 	retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
 	if (err_reply->text.length > 0) {
+#if 0
 	    const char *m;
+#endif
 	    switch (err_reply->error) {
 	    case KRB_ERR_GENERIC:
 		krb5_set_error_message(context, retval,
