@@ -550,7 +550,11 @@ PROFFLAGS=@PROFFLAGS@
 # platform-dependent temporary files that should get cleaned up
 EXTRA_FILES=@EXTRA_FILES@
 
-VALGRIND= # valgrind --tool=memcheck --log-file=$(BUILDTOP)/valgrind.out --trace-children=yes -v --leak-check=yes
+VALGRIND=
+# Need absolute paths here because under kshd or ftpd we may run programs
+# while in other directories.
+VALGRIND_LOGDIR = `cd $(BUILDTOP)&&pwd`
+VALGRIND1 = valgrind --tool=memcheck --log-file=$(SAMPLE_VALGRIND_LOGDIR)/vg --trace-children=yes -v --leak-check=yes --suppressions=`cd $(SRCTOP)&&pwd`/util/valgrind-suppressions
 
 #
 AUTOCONF_HEADER=$(SRCTOP)/include/autoconf.h.in
