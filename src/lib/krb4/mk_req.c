@@ -103,6 +103,10 @@ krb_mk_req_creds_prealm(authent, creds, checksum, myrealm)
     unsigned KRB4_32 time_secs;
     unsigned KRB4_32 time_usecs;
 
+    /* Don't risk exposing stack garbage to correspondent, even if
+       encrypted from other prying eyes.  */
+    memset(&req_st, 0x69, sizeof(req_st));
+
     ticket = &creds->ticket_st;
     /* Get the ticket and move it into the authenticator */
     if (krb_ap_req_debug)
