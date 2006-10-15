@@ -404,7 +404,7 @@ int fd;
 					krb_get_err_text(kerror));
 			return(ERR);
 		  }
-		  memcpy(ucbuf, msg_data.app_data, msg_data.app_length);
+		  memmove(ucbuf, msg_data.app_data, msg_data.app_length);
 		  nin = bufp = msg_data.app_length;
 		}
 #endif /* KRB5_KRB4_COMPAT */
