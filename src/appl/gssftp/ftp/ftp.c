@@ -705,7 +705,7 @@ int getreply(int expecteof)
 						     (unsigned int) len,
 						     schedule, &cred.session,
 						     &hisctladdr, &myctladdr,
-						     &msg_data));
+						     &msg_data);
 			    if (kerror != KSUCCESS) {
 				printf("%d reply %s! (krb_rd_%s: %s)\n", code,
 				       safe ? "modified" : "garbled",
