@@ -674,6 +674,8 @@ mklist(buf, name)
 	argv = (char **)malloc((n+3)*sizeof(char *));
 	if (argv == 0)
 		return(unknown);
+	while (--n >= 0)
+	    argv[n] = 0;
 
 	/*
 	 * Fill up the array of pointers to names.
@@ -2050,7 +2052,7 @@ telsnd()
     int tcc;
     int count;
     int returnValue = 0;
-    unsigned char *tbp;
+    unsigned char *tbp = NULL;
 
     tcc = 0;
     count = 0;
