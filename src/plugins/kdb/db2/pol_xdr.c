@@ -7,6 +7,7 @@
 #include <memory.h>
 #endif
 
+static 
 bool_t xdr_nullstring(XDR *xdrs, char **objp)
 {
      u_int size;

@@ -133,12 +133,17 @@ krb5_db2_db_delete_principal(krb5_context context,
 			     krb5_const_principal searchfor,
 			     int *nentries);
 
-krb5_error_code krb5_db2_lib_init();
+krb5_error_code krb5_db2_lib_init(void);
 
 krb5_error_code krb5_db2_lib_cleanup(void);
 
 krb5_error_code 
 krb5_db2_db_unlock(krb5_context);
+
+krb5_error_code
+krb5_db2_promote_db(krb5_context kcontext,
+		    char *conf_section,
+		    char **db_args);
 
 krb5_error_code 
 krb5_db2_db_set_option ( krb5_context kcontext, 

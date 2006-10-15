@@ -664,7 +664,7 @@ static gss_OID oid = GSS_C_NULL_OID;
 static int mcount = 1, ccount = 1;
 static int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
 
-void
+static void
 worker_bee(void *unused)
 {
     if (call_server(server_host, port, oid, service_name,

@@ -618,7 +618,7 @@ struct _work_plan
     int     export;
 };
 
-void
+static void
 worker_bee(void *param)
 {
     struct _work_plan *work = (struct _work_plan *) param;

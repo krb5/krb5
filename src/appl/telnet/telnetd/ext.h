@@ -141,6 +141,9 @@ extern void
 	suboption (void),
 	telrcv (void),
 	ttloop (void),
+#if	defined(AUTHENTICATION)
+        ttsuck (void),
+#endif
 	tty_binaryin (int),
 	tty_binaryout (int);
 
