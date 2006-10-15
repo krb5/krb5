@@ -1,0 +1,16 @@
+{
+   glibc.getifaddrs.sendto.uninit
+   Memcheck:Param
+   socketcall.sendto(msg)
+   fun:sendto
+   fun:getifaddrs
+   fun:krb5int_foreach_localaddr
+}
+{
+   glibc.getnameinfo.gifname.uninit
+   Memcheck:Param
+   ioctl(SIOCGIFNAME)
+   fun:ioctl
+   fun:getnameinfo
+   fun:krb5int_getnameinfo
+}
