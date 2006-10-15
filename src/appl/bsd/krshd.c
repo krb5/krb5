@@ -1493,7 +1493,7 @@ void doit(f, fromp)
 
 	    if(getenv(save_env[cnt])) {
 		    buf2 = (char *)malloc(strlen(getenv(save_env[cnt]))
-					 +strlen(save_env[cnt]+2));
+					 +strlen(save_env[cnt])+2);
 		    if (buf2) {
 			    sprintf(buf2, "%s=%s", save_env[cnt], 
 				    getenv(save_env[cnt]));
