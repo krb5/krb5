@@ -191,7 +191,7 @@ krb5_rc_dfl_get_span(krb5_context context, krb5_rcache id,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_rc_dfl_init_locked(krb5_context context, krb5_rcache id, krb5_deltat lifespan)
 {
     struct dfl_data *t = (struct dfl_data *)id->data;
