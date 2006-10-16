@@ -4,6 +4,7 @@
 #include <krb5.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <string.h>
 
 #define	TEST_NUM    1000
 
