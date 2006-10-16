@@ -32,6 +32,7 @@
 
 #include <sys/file.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define INITIATION_TIMEOUT 60*15 /* seconds until partially created */
 				 /* context is destroed */
