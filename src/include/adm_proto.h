@@ -70,6 +70,8 @@ krb5_error_code krb5_aprof_init
 	(char *, char *, krb5_pointer *);
 krb5_error_code krb5_aprof_getvals
 	(krb5_pointer, const char **, char ***);
+krb5_error_code krb5_aprof_get_boolean
+        (krb5_pointer, const char **, int, krb5_boolean *);
 krb5_error_code krb5_aprof_get_deltat
 	(krb5_pointer,
 	 const char **,
