@@ -29,6 +29,7 @@
 
 #include <string.h>
 #include "gssapiP_krb5.h"
+#include "gss_libinit.h"
 
 OM_uint32 KRB5_CALLCONV 
 gss_krb5_ccache_name(minor_status, name, out_name)

@@ -25,6 +25,7 @@
  */
 
 #include "gssapiP_generic.h"
+#include "gss_libinit.h"
 #include "com_err.h"
 
 /* XXXX internationalization!! */

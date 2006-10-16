@@ -29,6 +29,7 @@
  */
 
 #include "gssapiP_generic.h"
+#include "gss_libinit.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
