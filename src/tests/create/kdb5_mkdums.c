@@ -395,6 +395,9 @@ char *dbname;
 	com_err(pname, retval, "while initializing database");
 	return(1);
     }
+    /* Done with args */
+    free(args[0]);
+
     if ((retval = krb5_db_verify_master_key(test_context, master_princ, 
 					   &master_keyblock))){
 	com_err(pname, retval, "while verifying master key");
