@@ -50,7 +50,7 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
 		/*
 		 * We may want to include a sanity check here someday....
 		 */
-		if (!(buf = malloc(ilen))) {
+		if (!(buf = malloc(inbuf->length))) {
 			return(ENOMEM);
 		}
 		if ((len2 = krb5_net_read(context, fd, buf, ilen)) != ilen) {
