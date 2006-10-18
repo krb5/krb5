@@ -32,6 +32,7 @@
 #include <errno.h>
 #include "k5-thread.h"
 #include "k5-platform.h"
+#include "supp-int.h"
 
 MAKE_INIT_FUNCTION(krb5int_thread_support_init);
 MAKE_FINI_FUNCTION(krb5int_thread_support_fini);

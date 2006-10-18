@@ -87,7 +87,8 @@ t_mktime: gmt_mktime.c
 threads.so threads.po $(OUTPRE)threads.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h threads.c
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h supp-int.h \
+  threads.c
 init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -95,11 +96,11 @@ init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
   cache-addrinfo.h init-addrinfo.c
 errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
-  $(SRCTOP)/include/k5-thread.h errors.c
+  $(SRCTOP)/include/k5-thread.h errors.c supp-int.h
 gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h gmt_mktime.c
 fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
   $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  cache-addrinfo.h fake-addrinfo.c
+  cache-addrinfo.h fake-addrinfo.c supp-int.h

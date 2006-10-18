@@ -100,6 +100,7 @@
 #include "socket-utils.h"
 #include "k5-platform.h"
 #include "k5-thread.h"
+#include "supp-int.h"
 
 #include <stdio.h>		/* for sprintf */
 #include <errno.h>
@@ -1312,7 +1313,6 @@ void freeaddrinfo (struct addrinfo *ai)
 }
 #endif /* WRAP_GETADDRINFO */
 
-extern int krb5int_call_thread_support_init(void);
 static int krb5int_lock_fac (void)
 {
     int err;

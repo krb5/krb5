@@ -9,6 +9,7 @@
 
 #include "k5-thread.h"
 #include "k5-platform.h"
+#include "supp-int.h"
 
 #ifdef _WIN32
 #ifndef vsnprintf
