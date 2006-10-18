@@ -457,7 +457,7 @@ new_mcc_data (const char *name, krb5_mcc_data **dataptr)
     return 0;
 }
 
-static krb5_error_code random_string (krb5_context, char *, krb5_int32);
+static krb5_error_code random_string (krb5_context, char *, unsigned int);
  
 /*
  * Effects:
@@ -527,13 +527,13 @@ krb5_mcc_generate_new (krb5_context context, krb5_ccache *id)
  * random ccache names in a fixed size buffer.  */
 
 static krb5_error_code
-random_string (krb5_context context, char *string, krb5_int32 length)
+random_string (krb5_context context, char *string, unsigned int length)
 {
     static const unsigned char charlist[] =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     krb5_error_code err = 0;
     unsigned char *bytes = NULL;
-    krb5_int32 bytecount = length - 1;
+    unsigned int bytecount = length - 1;
     
     if (!err) {
         bytes = malloc (bytecount);
@@ -548,7 +548,7 @@ random_string (krb5_context context, char *string, krb5_int32 length)
     }
     
     if (!err) {
-        krb5_int32 i;
+        unsigned int i;
         for (i = 0; i < bytecount; i++) {
             string [i] = charlist[bytes[i] % (sizeof (charlist) - 1)];
         }
@@ -636,7 +636,7 @@ krb5_mcc_set_flags(krb5_context context, krb5_ccache id, krb5_flags flags)
     return KRB5_OK;
 }
 
-krb5_error_code KRB5_CALLCONV
+static krb5_error_code KRB5_CALLCONV
 krb5_mcc_get_flags(krb5_context context, krb5_ccache id, krb5_flags *flags)
 {
     *flags = 0;
