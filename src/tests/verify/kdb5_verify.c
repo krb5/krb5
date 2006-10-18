@@ -214,6 +214,7 @@ main(argc, argv)
     if (str_master_princ) {
 	krb5_free_unparsed_name(context, str_master_princ);
     }
+    krb5_free_principal(context, master_princ);
     krb5_free_context(context);
     exit(0);
 }
