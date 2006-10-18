@@ -298,5 +298,6 @@ int main (int argc, char *argv[])
 	else
 	    printf("\tgetnameinfo => %s, %s\n", hbuf, pbuf);
     }
+    freeaddrinfo(ap);
     return 0;
 }
