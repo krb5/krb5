@@ -90,7 +90,7 @@ net_read(fd, buf, len)
 int
 main(int argc, char *argv[])
 {
-    struct addrinfo *ap, aihints;
+    struct addrinfo *ap, aihints, *apstart;
     int aierr;
     int sock;
     krb5_context context;
@@ -152,6 +152,7 @@ main(int argc, char *argv[])
     }
 
     /* set up the address of the foreign socket for connect() */
+    apstart = ap; /* For freeing later */
     for (sock = -1; ap && sock == -1; ap = ap->ai_next) {
 	char abuf[NI_MAXHOST], pbuf[NI_MAXSERV];
 	char mbuf[NI_MAXHOST + NI_MAXSERV + 64];
@@ -248,6 +249,7 @@ main(int argc, char *argv[])
 	com_err(argv[0], 0, "no error or reply from sendauth!");
 	exit(1);
     }
+    freeaddrinfo(apstart);
     krb5_free_context(context);
     exit(0);
 }

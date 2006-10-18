@@ -231,6 +231,11 @@ main(argc, argv)
 	syslog(LOG_ERR, "%m: while writing data to client");
 	exit(1);
     }
+
+    krb5_free_ticket(context, ticket);
+    if(keytab)
+      krb5_kt_close(context, keytab);
+    krb5_free_principal(context, server);
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);
     exit(0);
