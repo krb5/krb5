@@ -92,8 +92,11 @@ typedef long		kadm5_ret_t;
 #define KADM5_CPW_FUNCTION      0x080000
 #define KADM5_RANDKEY_USED      0x100000
 #endif
+#define KADM5_LOAD		0x200000
+
 /* all but KEY_DATA and TL_DATA */
 #define KADM5_PRINCIPAL_NORMAL_MASK 0x01ffff
+
 
 /* kadm5_policy_ent_t */
 #define KADM5_PW_MAX_LIFE	0x004000

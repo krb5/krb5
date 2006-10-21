@@ -1608,7 +1608,7 @@ process_k5beta_record(fname, kcontext, filep, verbose, linenop)
 				     && (akey->key_data_length[1] == 0))
 			        dbent.n_key_data--;
 
-			    dbent.mask = KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+			    dbent.mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
 				KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_KEY_DATA |
 				KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
 				KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
@@ -1762,7 +1762,7 @@ process_k5beta6_record(fname, kcontext, filep, verbose, linenop)
 		    dbentry.last_success = (krb5_timestamp) t7;
 		    dbentry.last_failed = (krb5_timestamp) t8;
 		    dbentry.fail_auth_count = (krb5_kvno) t9;
-		    dbentry.mask = KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+		    dbentry.mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
 			KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
 			KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
 			KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
@@ -2294,8 +2294,19 @@ load_db(argc, argv)
      */
     if (!update) {
 	if((kret = krb5_db_create(kcontext, db5util_db_args))) {
-	    fprintf(stderr, dbcreaterr_fmt,
-		    programname, dbname, error_message(kret));
+	    const char *emsg = krb5_get_error_message(kcontext, kret);
+	    /* 
+	     * See if something (like DAL KDB plugin) has set a specific error
+	     * message and use that otherwise use default.
+	     */
+
+	    if (emsg != NULL) {
+		fprintf(stderr, "%s: %s\n", programname, emsg);
+		krb5_free_error_message (kcontext, emsg);
+	    } else {
+		fprintf(stderr, dbcreaterr_fmt,
+			programname, dbname, error_message(kret));
+	    }
 	    exit_status++;
 	    kadm5_free_config_params(kcontext, &newparams);
 	    if (dumpfile) fclose(f);
@@ -2307,9 +2318,20 @@ load_db(argc, argv)
 	     * Initialize the database.
 	     */
 	    if ((kret = krb5_db_open(kcontext, db5util_db_args, 
-				     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
-		fprintf(stderr, dbinit_err_fmt,
-			programname, error_message(kret));
+				     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN))) {
+		const char *emsg = krb5_get_error_message(kcontext, kret);
+		/* 
+		 * See if something (like DAL KDB plugin) has set a specific
+		 * error message and use that otherwise use default.
+		 */
+
+		if (emsg != NULL) {
+		    fprintf(stderr, "%s: %s\n", programname, emsg);
+		    krb5_free_error_message (kcontext, emsg);
+		} else {
+		    fprintf(stderr, dbinit_err_fmt,
+			    programname, error_message(kret));
+		}
 		exit_status++;
 		goto error;
 	    }

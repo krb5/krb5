@@ -374,13 +374,20 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 		sprintf(ldap_context->root_certificate_file,"%s %s", oldstr, val);
 		free (oldstr);
 	    }
-	} else if (opt && !strcmp(opt, "temporary")) {
-	    /* ignore temporary argument, it is a kdb5_util arg meant for db2 */
 	} else {
 	    /* ignore hash argument. Might have been passed from create */
 	    status = EINVAL;
-	    krb5_set_error_message (context, status, "unknown option \'%s\'",
-				    opt?opt:val);
+	    if (opt && !strcmp(opt, "temporary")) {
+		/* 
+		 * temporary is passed in when kdb5_util load without -update is done.
+		 * This is unsupported by the LDAP plugin.
+		 */
+		krb5_set_error_message (context, status,
+					"open of LDAP directory aborted, plugin requires -update argument");
+	    } else {
+		krb5_set_error_message (context, status, "unknown option \'%s\'",
+					opt?opt:val);
+	    }
 	    free(opt);
 	    free(val);
 	    goto clean_n_exit;

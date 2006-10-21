@@ -189,7 +189,8 @@ krb5_ldap_list_realm(context, realms)
     char                        ***realms;
 {
     char                        **values = NULL;
-    unsigned int                i = 0, count = 0;
+    unsigned int                i = 0;
+    int                		count = 0;
     krb5_error_code             st = 0, tempst = 0;
     LDAP                        *ld = NULL;
     LDAPMessage                 *result = NULL, *ent = NULL;
@@ -1053,6 +1054,53 @@ cleanup:
 	ldap_value_free (rdns);
 
     ldap_mods_free(mods, 1);
+    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
+    return(st);
+}
+
+/*
+ * Delete the Kerberos container in the Directory
+ */
+
+krb5_error_code
+krb5_ldap_delete_krbcontainer(krb5_context context,
+    const krb5_ldap_krbcontainer_params *krbcontparams)
+{
+    LDAP                        *ld=NULL;
+    char                        *kerberoscontdn=NULL;
+    krb5_error_code             st=0;
+    kdb5_dal_handle             *dal_handle=NULL;
+    krb5_ldap_context           *ldap_context=NULL;
+    krb5_ldap_server_handle     *ldap_server_handle=NULL;
+
+    SETUP_CONTEXT ();
+
+    /* get ldap handle */
+    GET_HANDLE ();
+
+    if (krbcontparams != NULL && krbcontparams->DN != NULL) {
+	kerberoscontdn = krbcontparams->DN;
+    } else {
+	/* If the user has not given, use the default cn=Kerberos,cn=Security */
+#ifdef HAVE_EDIRECTORY
+	kerberoscontdn = KERBEROS_CONTAINER;
+#else
+	st = EINVAL;
+	krb5_set_error_message (context, st, "Kerberos Container information is missing");
+	goto cleanup;
+#endif
+    }
+
+    /* delete the kerberos container */
+    if ((st = ldap_delete_ext_s(ld, kerberoscontdn, NULL, NULL)) != LDAP_SUCCESS) {
+	int ost = st;
+	st = translate_ldap_error (st, OP_ADD);
+	krb5_set_error_message (context, st, "Kerberos Container delete FAILED: %s", ldap_err2string(ost));
+	goto cleanup;
+    }
+
+cleanup:
+
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
     return(st);
 }

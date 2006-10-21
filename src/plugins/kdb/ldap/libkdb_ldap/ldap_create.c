@@ -54,6 +54,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
     krb5_ldap_context *ldap_context=NULL;
     krb5_boolean realm_obj_created = FALSE;
     krb5_boolean krbcontainer_obj_created = FALSE;
+    krb5_ldap_krbcontainer_params kparams = {0};
     int srv_cnt = 0;
     int mask = 0;
 #ifdef HAVE_EDIRECTORY
@@ -218,13 +219,20 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 		sprintf(ldap_context->root_certificate_file,"%s %s", oldstr, val);
 		free (oldstr);
 	    }
-	} else if (opt && !strcmp(opt, "temporary")) {
-	     /* ignore temporary argument, it is a kdb5_util arg meant for db2 */
 	} else {
 	/* ignore hash argument. Might have been passed from create */
 	    status = EINVAL;
-	    krb5_set_error_message (context, status, "unknown option \'%s\'",
-				    opt?opt:val);
+	    if (opt && !strcmp(opt, "temporary")) {
+		/* 
+		 * temporary is passed in when kdb5_util load without -update is done.
+		 * This is unsupported by the LDAP plugin.
+		 */
+		krb5_set_error_message (context, status,
+		    "creation of LDAP entries aborted, plugin requires -update argument");
+	    } else {
+		krb5_set_error_message (context, status, "unknown option \'%s\'",
+					opt?opt:val);
+	    }
 	    free(opt);
 	    free(val);
 	    goto cleanup;
@@ -252,10 +260,6 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
     /* read the kerberos container */
     if ((status = krb5_ldap_read_krbcontainer_params(context,
 			    &(ldap_context->krbcontainer))) == KRB5_KDB_NOENTRY) {
-	krb5_ldap_krbcontainer_params kparams;
-
-	/* The kerberos container does not exist so try to create. */
-	memset(&kparams, 0, sizeof(kparams));
 
 	/* Read the kerberos container location from configuration file */
 	if (ldap_context->conf_section) {
@@ -289,6 +293,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	    krb5_set_error_message(context, status, "while reading kerberos container information");
 	    goto cleanup;
 	}
+
     } else if (status) {
 	krb5_set_error_message(context, status, "while reading kerberos container information");
 	goto cleanup;
@@ -333,8 +338,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	if ((rparams != NULL) && (rparams->kdcservers != NULL)) {
 	    for (i=0; (rparams->kdcservers[i] != NULL); i++) {
 		if ((status=krb5_ldap_add_service_rights(context,
-							 LDAP_KDC_SERVICE, rparams->kdcservers[i],
-							 rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
+				     LDAP_KDC_SERVICE, rparams->kdcservers[i],
+				     rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
 		    goto cleanup;
 		}
 	    }
@@ -346,8 +351,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	if ((rparams != NULL) && (rparams->adminservers != NULL)) {
 	    for (i=0; (rparams->adminservers[i] != NULL); i++) {
 		if ((status=krb5_ldap_add_service_rights(context,
-							 LDAP_ADMIN_SERVICE, rparams->adminservers[i],
-							 rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
+				     LDAP_ADMIN_SERVICE, rparams->adminservers[i],
+				     rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
 		    goto cleanup;
 		}
 	    }
@@ -359,8 +364,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	if ((rparams != NULL) && (rparams->passwdservers != NULL)) {
 	    for (i=0; (rparams->passwdservers[i] != NULL); i++) {
 		if ((status=krb5_ldap_add_service_rights(context,
-							 LDAP_PASSWD_SERVICE, rparams->passwdservers[i],
-							 rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
+				     LDAP_PASSWD_SERVICE, rparams->passwdservers[i],
+				     rparams->realm_name, rparams->subtree, rightsmask)) != 0) {
 		    goto cleanup;
 		}
 	    }
@@ -369,12 +374,19 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 #endif
 
 cleanup:
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
+
     /* If the krbcontainer/realm creation is not complete, do the roll-back here */
-    if ((krbcontainer_obj_created) && (!realm_obj_created))
-	/* XXX WAF this needs to be created !!! */
-	krb5_ldap_delete_krbcontainer(context);
-#endif /**************** END IFDEF'ed OUT *******************************/
+    if ((krbcontainer_obj_created) && (!realm_obj_created)) {
+	int rc;
+	rc = krb5_ldap_delete_krbcontainer(context,
+		    ((kparams.DN != NULL) ? &kparams : NULL));
+	krb5_set_error_message(context, rc,
+	    "could not complete roll-back, error deleting Kerberos Container");
+    }
+
+    /* should call krb5_ldap_free_krbcontainer_params() but can't */
+    if (kparams.DN != NULL)
+	krb5_xfree(kparams.DN);
 
     if (rparams)
 	krb5_ldap_free_realm_params(rparams);

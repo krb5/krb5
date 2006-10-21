@@ -53,4 +53,8 @@ krb5_ldap_read_krbcontainer_params(krb5_context , krb5_ldap_krbcontainer_params 
 krb5_error_code
 krb5_ldap_create_krbcontainer(krb5_context, const krb5_ldap_krbcontainer_params *);
 
+krb5_error_code
+krb5_ldap_delete_krbcontainer(krb5_context,
+    const krb5_ldap_krbcontainer_params *);
+
 #endif

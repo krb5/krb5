@@ -1730,21 +1730,16 @@ krb5_error_code krb5_ldap_policydn_to_name (context, policy_dn, name)
     }
 #elif defined HAVE_LDAP_EXPLODE_DN
     {
-	char *parsed_dn;
+	char **parsed_dn;
 
-	parsed_dn = ldap_explode_dn(policy_dn, 0);
+	/* 1 = return DN components without type prefix */
+	parsed_dn = ldap_explode_dn(policy_dn, 1);
 	if (parsed_dn == NULL) {
 	    st = EINVAL;
-	}
-	else {
-	    if (strncasecmp(parsed_dn[0], "cn=", 3) != 0) {
+	} else {
+	    *name = strdup(parsed_dn[0]);
+	    if (*name == NULL)
 		st = EINVAL;
-	    }
-	    else {
-		*name = strdup(parsed_dn[0]);
-		if (*name == NULL)
-		    st = EINVAL;
-	    }
 
 	    ldap_value_free(parsed_dn);
 	}
