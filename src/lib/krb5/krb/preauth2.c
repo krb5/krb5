@@ -1239,7 +1239,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
        return KRB_ERR_GENERIC;
     }
 
-    for (i = 0; padata[i]->pa_type != 0; i++) {
+    for (i = 0; padata[i] != NULL && padata[i]->pa_type != 0; i++) {
 	out_padata = NULL;
 	for (j = 0; j < context->n_modules; j++) {
 	    module = &context->modules[j];
