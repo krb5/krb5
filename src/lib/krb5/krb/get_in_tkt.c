@@ -795,7 +795,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
 #endif
 
     base = 0;
-    for (p = preauth_types; *p != '\0'; p++) {
+    for (p = preauth_types; *p != '\0';) {
 	/* skip whitespace to find an entry */
 	p += strspn(p, ", ");
 	if (*p != '\0') {
