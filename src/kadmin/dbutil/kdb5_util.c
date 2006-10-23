@@ -378,7 +378,7 @@ static int open_db_and_mkey()
     valid_master_key = 0;
 
     if ((retval = krb5_db_open(util_context, db5util_db_args, 
-			       KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER))) {
+			       KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN))) {
 	com_err(progname, retval, "while initializing database");
 	exit_status++;
 	return(1);

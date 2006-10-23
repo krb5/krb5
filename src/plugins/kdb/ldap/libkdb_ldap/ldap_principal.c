@@ -149,6 +149,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     kdb5_dal_handle          *dal_handle=NULL;
     krb5_ldap_context        *ldap_context=NULL;
     krb5_ldap_server_handle  *ldap_server_handle=NULL;
+    char                     *default_match_expr = "*";
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -165,6 +166,12 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 	    goto cleanup;
 	}
     }
+
+    /* 
+     * If no match_expr then iterate through all krb princs like the db2 plugin
+     */
+    if (match_expr == NULL)
+	match_expr = default_match_expr;
 
     filterlen = strlen(FILTER) + strlen(match_expr) + 2 + 1;  /* 2 for closing brackets */
     filter = malloc (filterlen);
