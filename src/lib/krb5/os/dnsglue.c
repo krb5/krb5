@@ -100,6 +100,7 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
 #endif
 
 #if USE_RES_NINIT
+    memset(&statbuf, 0, sizeof(statbuf));
     ret = res_ninit(&statbuf);
 #else
     ret = res_init();
