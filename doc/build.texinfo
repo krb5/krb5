@@ -387,6 +387,29 @@ building Kerberos; see @ref{Doing the Build}.):
 % make check
 @end example
 
+However, there are several prerequisites that must be satisfied first:
+
+@itemize @bullet
+@item
+Configure and build Kerberos with Tcl support.  Tcl is used to drive the
+test suite.  This often means passing @code{--with-tcl} to configure to
+tell it the location of the Tcl configuration script.  (See
+@xref{Options to Configure}.)
+
+@item
+You have to run @samp{make install} before running @samp{make check}, or
+the test suite will often pick up the installed version of Kerberos
+rather than the newly built one.  You can install into a prefix that
+isn't in the system library search path, though.  This theoretically
+could be fixed with the appropriate environment variable magic in the
+test suite, but hasn't been yet.
+
+@item
+In order to test the RPC layer, the local system has to be running the
+@command{portmap} daemon and it has to be listening to the regular
+network interface (not just localhost).
+@end itemize
+
 @menu
 * The DejaGnu Tests::           
 * The KADM5 Tests::             
