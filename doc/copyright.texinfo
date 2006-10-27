@@ -40,11 +40,16 @@ recognition of their trademark status should be given).
 @vskip 12pt
 @end iftex
 
-The following copyright and permission notice applies to the OpenVision
-Kerberos Administration system located in kadmin/create, kadmin/dbutil,
-kadmin/passwd, kadmin/server, lib/kadm5, and portions of lib/rpc:
+The following copyright and permission notice applies to the
+OpenVision Kerberos Administration system located in
+@code{kadmin/create}, @code{kadmin/dbutil}, @code{kadmin/passwd},
+@code{kadmin/server}, @code{lib/kadm5}, and portions of
+@code{lib/rpc}:
 
 @quotation
+@iftex
+@smallfonts @rm
+@end iftex
 Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
      
 WARNING:  Retrieving the OpenVision Kerberos Administration system source
@@ -84,12 +89,10 @@ been performed by MIT and the Kerberos community.
 @end iftex
 
 @quotation
-
-Portions contributed by Matt Crawford @verb{|<crawdad@fnal.gov>|} were work
+Portions contributed by Matt Crawford @code{<crawdad@@fnal.gov>} were work
 performed at Fermi National Accelerator Laboratory, which is operated
 by Universities Research Association, Inc., under contract
 DE-AC02-76CHO3000 with the U.S. Department of Energy.
-
 @end quotation
 
 @iftex
@@ -98,11 +101,13 @@ DE-AC02-76CHO3000 with the U.S. Department of Energy.
 @vskip 12pt
 @end iftex
 
-Portions of src/lib/crypto have the following copyright:
+Portions of @code{src/lib/crypto} have the following copyright:
 
 @quotation
-
-Copyright (C) 1998 by the FundsXpress, INC.
+@iftex
+@smallfonts @rm
+@end iftex
+Copyright @copyright{} 1998 by the FundsXpress, INC.
 
 All rights reserved.
 
@@ -135,10 +140,12 @@ WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 @end iftex
 
 The implementation of the Yarrow pseudo-random number generator
-in src/lib/crypto/yarrow has the following copyright:
+in @code{src/lib/crypto/yarrow} has the following copyright:
 
 @quotation
-
+@iftex
+@smallfonts @rm
+@end iftex
 Copyright 2000 by Zero-Knowledge Systems, Inc.
 
 Permission to use, copy, modify, distribute, and sell this software
@@ -159,7 +166,6 @@ ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
 @end quotation
 
 @iftex
@@ -169,11 +175,14 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 @end iftex
 
 The implementation of the AES encryption algorithm in
-src/lib/crypto/aes has the following copyright:
+@code{src/lib/crypto/aes} has the following copyright:
 
 @quotation
-
-Copyright (c) 2001, Dr Brian Gladman <brg@@gladman.uk.net>, Worcester, UK.
+@iftex
+@smallfonts @rm
+@end iftex
+Copyright @copyright{} 2001, Dr Brian Gladman @code{<brg@@gladman.uk.net>},
+Worcester, UK.@*
 All rights reserved.
 
 LICENSE TERMS
@@ -199,7 +208,6 @@ DISCLAIMER
 This software is provided 'as is' with no explcit or implied warranties
 in respect of any properties, including, but not limited to, correctness 
 and fitness for purpose.
-
 @end quotation
 
 @iftex
@@ -212,8 +220,11 @@ Portions contributed by Red Hat, including the preauthentication
 plugins, contain the following copyright:
 
 @quotation
-Copyright (c) 2006 Red Hat, Inc.@*
-Portions copyright (c) 2006 Massachusetts Institute of Technology@*
+@iftex
+@smallfonts @rm
+@end iftex
+Copyright @copyright{} 2006 Red Hat, Inc.@*
+Portions copyright @copyright{} 2006 Massachusetts Institute of Technology@*
 All Rights Reserved.@*
 
 Redistribution and use in source and binary forms, with or without
@@ -225,17 +236,14 @@ met:
 @item
 Redistributions of source code must retain the above copyright
 notice, this list of conditions and the following disclaimer.
-
 @item
 Redistributions in binary form must reproduce the above copyright
 notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
-
 @item
 Neither the name of Red Hat, Inc., nor the names of its contributors
 may be used to endorse or promote products derived from this software
 without specific prior written permission.
-
 @end itemize
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS
@@ -259,9 +267,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @end iftex
 
 The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
-src/lib/gssapi, including the following files:
+@code{src/lib/gssapi}, including the following files:
 
-@verbatim
+@smallexample
 lib/gssapi/generic/gssapi_err_generic.et
 lib/gssapi/mechglue/g_accept_sec_context.c
 lib/gssapi/mechglue/g_acquire_cred.c
@@ -299,12 +307,15 @@ lib/gssapi/mechglue/mglueP.h
 lib/gssapi/mechglue/oid_ops.c
 lib/gssapi/spnego/gssapiP_spnego.h
 lib/gssapi/spnego/spnego_mech.c
-@end verbatim
+@end smallexample
 
 are subject to the following license:
 
 @quotation
-Copyright (c) 2004 Sun Microsystems, Inc.
+@iftex
+@smallfonts @rm
+@end iftex
+Copyright @copyright{} 2004 Sun Microsystems, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -326,10 +337,20 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 @end quotation
 
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+
 @value{PRODUCT} includes documentation and software developed at the
 University of California at Berkeley, which includes this copyright
 notice:
 
+@quotation
+@iftex
+@smallfonts @rm
+@end iftex
 Copyright @copyright{} 1983 Regents of the University of California.@*
 All rights reserved.
 
@@ -344,13 +365,6 @@ notice, this list of conditions and the following disclaimer.
 Redistributions in binary form must reproduce the above copyright
 notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
-@item
-All advertising materials mentioning features or use of this software
-must display the following acknowledgement:
-@quotation
-This product includes software developed by the University of
-California, Berkeley and its contributors.
-@end quotation
 @item
 Neither the name of the University nor the names of its contributors
 may be used to endorse or promote products derived from this software
@@ -368,6 +382,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
+@end quotation
 
 @iftex
 @vskip 12pt

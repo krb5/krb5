@@ -288,43 +288,43 @@ plugins, contain the following copyright:
 The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
 src/lib/gssapi, including the following files:
 
-lib/gssapi/generic/gssapi_err_generic.et
-lib/gssapi/mechglue/g_accept_sec_context.c
-lib/gssapi/mechglue/g_acquire_cred.c
-lib/gssapi/mechglue/g_canon_name.c
-lib/gssapi/mechglue/g_compare_name.c
-lib/gssapi/mechglue/g_context_time.c
-lib/gssapi/mechglue/g_delete_sec_context.c
-lib/gssapi/mechglue/g_dsp_name.c
-lib/gssapi/mechglue/g_dsp_status.c
-lib/gssapi/mechglue/g_dup_name.c
-lib/gssapi/mechglue/g_exp_sec_context.c
-lib/gssapi/mechglue/g_export_name.c
-lib/gssapi/mechglue/g_glue.c
-lib/gssapi/mechglue/g_imp_name.c
-lib/gssapi/mechglue/g_imp_sec_context.c
-lib/gssapi/mechglue/g_init_sec_context.c
-lib/gssapi/mechglue/g_initialize.c
-lib/gssapi/mechglue/g_inquire_context.c
-lib/gssapi/mechglue/g_inquire_cred.c
-lib/gssapi/mechglue/g_inquire_names.c
-lib/gssapi/mechglue/g_process_context.c
-lib/gssapi/mechglue/g_rel_buffer.c
-lib/gssapi/mechglue/g_rel_cred.c
-lib/gssapi/mechglue/g_rel_name.c
-lib/gssapi/mechglue/g_rel_oid_set.c
-lib/gssapi/mechglue/g_seal.c
-lib/gssapi/mechglue/g_sign.c
-lib/gssapi/mechglue/g_store_cred.c
-lib/gssapi/mechglue/g_unseal.c
-lib/gssapi/mechglue/g_userok.c
-lib/gssapi/mechglue/g_utils.c
-lib/gssapi/mechglue/g_verify.c
-lib/gssapi/mechglue/gssd_pname_to_uid.c
-lib/gssapi/mechglue/mglueP.h
-lib/gssapi/mechglue/oid_ops.c
-lib/gssapi/spnego/gssapiP_spnego.h
-lib/gssapi/spnego/spnego_mech.c
+  lib/gssapi/generic/gssapi_err_generic.et
+  lib/gssapi/mechglue/g_accept_sec_context.c
+  lib/gssapi/mechglue/g_acquire_cred.c
+  lib/gssapi/mechglue/g_canon_name.c
+  lib/gssapi/mechglue/g_compare_name.c
+  lib/gssapi/mechglue/g_context_time.c
+  lib/gssapi/mechglue/g_delete_sec_context.c
+  lib/gssapi/mechglue/g_dsp_name.c
+  lib/gssapi/mechglue/g_dsp_status.c
+  lib/gssapi/mechglue/g_dup_name.c
+  lib/gssapi/mechglue/g_exp_sec_context.c
+  lib/gssapi/mechglue/g_export_name.c
+  lib/gssapi/mechglue/g_glue.c
+  lib/gssapi/mechglue/g_imp_name.c
+  lib/gssapi/mechglue/g_imp_sec_context.c
+  lib/gssapi/mechglue/g_init_sec_context.c
+  lib/gssapi/mechglue/g_initialize.c
+  lib/gssapi/mechglue/g_inquire_context.c
+  lib/gssapi/mechglue/g_inquire_cred.c
+  lib/gssapi/mechglue/g_inquire_names.c
+  lib/gssapi/mechglue/g_process_context.c
+  lib/gssapi/mechglue/g_rel_buffer.c
+  lib/gssapi/mechglue/g_rel_cred.c
+  lib/gssapi/mechglue/g_rel_name.c
+  lib/gssapi/mechglue/g_rel_oid_set.c
+  lib/gssapi/mechglue/g_seal.c
+  lib/gssapi/mechglue/g_sign.c
+  lib/gssapi/mechglue/g_store_cred.c
+  lib/gssapi/mechglue/g_unseal.c
+  lib/gssapi/mechglue/g_userok.c
+  lib/gssapi/mechglue/g_utils.c
+  lib/gssapi/mechglue/g_verify.c
+  lib/gssapi/mechglue/gssd_pname_to_uid.c
+  lib/gssapi/mechglue/mglueP.h
+  lib/gssapi/mechglue/oid_ops.c
+  lib/gssapi/spnego/gssapiP_spnego.h
+  lib/gssapi/spnego/spnego_mech.c
 
 are subject to the following license:
 
