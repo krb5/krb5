@@ -1,4 +1,4 @@
-		   Kerberos Version 5, Release 1.5
+		   Kerberos Version 5, Release 1.6
 
 			    Release Notes
 			The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.5.tar.gz.  Instructions on how to extract the entire
+krb5-1.6.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.5.tar.gz
+	gtar zxpf krb5-1.6.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.5.tar.gz | tar xpf -
+	gzcat krb5-1.6.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.5/src and
-the documentation into krb5-1.5/doc.
+Both of these methods will extract the sources into krb5-1.6/src and
+the documentation into krb5-1.6/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,30 +59,20 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
-Major changes in 1.5
+Major changes in 1.6
 ----------------------
 
-Merged to the trunk and included in this alpha release:
+krb5-1.6 changes by ticket ID
+-----------------------------
 
-* plug-in architecture (in-progress)
+Listed below are the RT tickets of bugs fixed in krb5-1.6.  Please see
 
-Not yet merged to the trunk, thus not included in this alpha release:
+http://krbdev.mit.edu/rt/NoAuth/krb5-1.6/fixed-1.6.html
 
-* LDAP plug-in for KDB
+for a current listing with links to the complete tickets.
 
-* multi-mechanism GSS-API implementation
-
-* SPNEGO implementation
-
-Minor changes in 1.5
-----------------------
-
-For a list of bugs fixed in krb5-1.5, please consult
-
-http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.5.html
-
-Copyright Notice and Legal Administrivia
-----------------------------------------
+Copyright and Other Legal Notices
+---------------------------------
 
 Copyright (C) 1985-2006 by the Massachusetts Institute of Technology.
 
@@ -112,7 +102,8 @@ IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 Individual source code files are copyright MIT, Cygnus Support,
-Novell, OpenVision, Oracle, Redhat, Sun Soft, FundsXpress, and others.
+Novell, OpenVision Technologies, Oracle, Red Hat, Sun Microsystems,
+FundsXpress, and others.
 
 Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira,
 and Zephyr are trademarks of the Massachusetts Institute of Technology
@@ -124,137 +115,178 @@ manner.  It does NOT prevent a commercial firm from referring to the
 MIT trademarks in order to convey information (although in doing so,
 recognition of their trademark status should be given).
 
-----
+			 --------------------
+
+Portions of src/lib/crypto have the following copyright:
+
+  Copyright (C) 1998 by the FundsXpress, INC.
+
+  All rights reserved.
+
+  Export of this software from the United States of America may require
+  a specific license from the United States Government.  It is the
+  responsibility of any person or organization contemplating export to
+  obtain such a license before exporting.
+
+  WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+  distribute this software and its documentation for any purpose and
+  without fee is hereby granted, provided that the above copyright
+  notice appear in all copies and that both that copyright notice and
+  this permission notice appear in supporting documentation, and that
+  the name of FundsXpress. not be used in advertising or publicity pertaining
+  to distribution of the software without specific, written prior
+  permission.  FundsXpress makes no representations about the suitability of
+  this software for any purpose.  It is provided "as is" without express
+  or implied warranty.
+
+  THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+  IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+  WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+
+			 --------------------
 
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
 kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
 of lib/rpc:
 
-   Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
+  Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
 
-   WARNING: Retrieving the OpenVision Kerberos Administration system 
-   source code, as described below, indicates your acceptance of the 
-   following terms.  If you do not agree to the following terms, do not 
-   retrieve the OpenVision Kerberos administration system.
+  WARNING: Retrieving the OpenVision Kerberos Administration system 
+  source code, as described below, indicates your acceptance of the 
+  following terms.  If you do not agree to the following terms, do not 
+  retrieve the OpenVision Kerberos administration system.
 
-   You may freely use and distribute the Source Code and Object Code
-   compiled from it, with or without modification, but this Source
-   Code is provided to you "AS IS" EXCLUSIVE OF ANY WARRANTY,
-   INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR
-   FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER WARRANTY, WHETHER
-   EXPRESS OR IMPLIED.  IN NO EVENT WILL OPENVISION HAVE ANY LIABILITY
-   FOR ANY LOST PROFITS, LOSS OF DATA OR COSTS OF PROCUREMENT OF 
-   SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INDIRECT, OR
-   CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, INCLUDING, 
-   WITHOUT LIMITATION, THOSE RESULTING FROM THE USE OF THE SOURCE 
-   CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR FOR ANY 
-   OTHER REASON.
+  You may freely use and distribute the Source Code and Object Code
+  compiled from it, with or without modification, but this Source
+  Code is provided to you "AS IS" EXCLUSIVE OF ANY WARRANTY,
+  INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR
+  FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER WARRANTY, WHETHER
+  EXPRESS OR IMPLIED.  IN NO EVENT WILL OPENVISION HAVE ANY LIABILITY
+  FOR ANY LOST PROFITS, LOSS OF DATA OR COSTS OF PROCUREMENT OF 
+  SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INDIRECT, OR
+  CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, INCLUDING, 
+  WITHOUT LIMITATION, THOSE RESULTING FROM THE USE OF THE SOURCE 
+  CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR FOR ANY 
+  OTHER REASON.
 
-   OpenVision retains all copyrights in the donated Source Code. OpenVision
-   also retains copyright to derivative works of the Source Code, whether
-   created by OpenVision or by a third party. The OpenVision copyright 
-   notice must be preserved if derivative works are made based on the 
-   donated Source Code.
+  OpenVision retains all copyrights in the donated Source Code. OpenVision
+  also retains copyright to derivative works of the Source Code, whether
+  created by OpenVision or by a third party. The OpenVision copyright 
+  notice must be preserved if derivative works are made based on the 
+  donated Source Code.
 
-   OpenVision Technologies, Inc. has donated this Kerberos 
-   Administration system to MIT for inclusion in the standard 
-   Kerberos 5 distribution.  This donation underscores our 
-   commitment to continuing Kerberos technology development 
-   and our gratitude for the valuable work which has been 
-   performed by MIT and the Kerberos community.
+  OpenVision Technologies, Inc. has donated this Kerberos 
+  Administration system to MIT for inclusion in the standard 
+  Kerberos 5 distribution.  This donation underscores our 
+  commitment to continuing Kerberos technology development 
+  and our gratitude for the valuable work which has been 
+  performed by MIT and the Kerberos community.
 
-----
+			 --------------------
 
-    Portions contributed by Matt Crawford <crawdad@fnal.gov> were
-    work performed at Fermi National Accelerator Laboratory, which is
-    operated by Universities Research Association, Inc., under
-    contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
+  Portions contributed by Matt Crawford <crawdad@fnal.gov> were
+  work performed at Fermi National Accelerator Laboratory, which is
+  operated by Universities Research Association, Inc., under
+  contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
 
----- The implementation of the Yarrow pseudo-random number generator
-in src/lib/crypto/yarrow has the following copyright:
+			 --------------------
 
-Copyright 2000 by Zero-Knowledge Systems, Inc.
+The implementation of the Yarrow pseudo-random number generator in
+src/lib/crypto/yarrow has the following copyright:
 
-Permission to use, copy, modify, distribute, and sell this software
-and its documentation for any purpose is hereby granted without fee,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Zero-Knowledge Systems,
-Inc. not be used in advertising or publicity pertaining to
-distribution of the software without specific, written prior
-permission.  Zero-Knowledge Systems, Inc. makes no representations
-about the suitability of this software for any purpose.  It is
-provided "as is" without express or implied warranty.
+  Copyright 2000 by Zero-Knowledge Systems, Inc.
 
-ZERO-KNOWLEDGE SYSTEMS, INC. DISCLAIMS ALL WARRANTIES WITH REGARD TO
-THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS, IN NO EVENT SHALL ZERO-KNOWLEDGE SYSTEMS, INC. BE LIABLE FOR
-ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
-OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  Permission to use, copy, modify, distribute, and sell this software
+  and its documentation for any purpose is hereby granted without fee,
+  provided that the above copyright notice appear in all copies and that
+  both that copyright notice and this permission notice appear in
+  supporting documentation, and that the name of Zero-Knowledge Systems,
+  Inc. not be used in advertising or publicity pertaining to
+  distribution of the software without specific, written prior
+  permission.  Zero-Knowledge Systems, Inc. makes no representations
+  about the suitability of this software for any purpose.  It is
+  provided "as is" without express or implied warranty.
 
----- The implementation of the AES encryption algorithm in
+  ZERO-KNOWLEDGE SYSTEMS, INC. DISCLAIMS ALL WARRANTIES WITH REGARD TO
+  THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS, IN NO EVENT SHALL ZERO-KNOWLEDGE SYSTEMS, INC. BE LIABLE FOR
+  ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
+  OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+			 --------------------
+
+The implementation of the AES encryption algorithm in
 src/lib/crypto/aes has the following copyright:
 
- Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
- All rights reserved.
+  Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
+  All rights reserved.
 
- LICENSE TERMS
+  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
- form is allowed (with or without changes) provided that:
+  The free distribution and use of this software in both source and binary 
+  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
-      notice, this list of conditions and the following disclaimer;
+    1. distributions of this source code include the above copyright 
+       notice, this list of conditions and the following disclaimer;
 
-   2. distributions in binary form include the above copyright
-      notice, this list of conditions and the following disclaimer
-      in the documentation and/or other associated materials;
+    2. distributions in binary form include the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+    3. the copyright holder's name is not used to endorse products 
+       built using this software without specific written permission. 
 
- DISCLAIMER
+  DISCLAIMER
 
- This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
- and fitness for purpose.
+  This software is provided 'as is' with no explcit or implied warranties
+  in respect of any properties, including, but not limited to, correctness 
+  and fitness for purpose.
 
----Code, including the preauthentication plugins contains the following copyright:
-     Copyright (c) 2006 Red Hat, Inc.
-    Portions copyright (c) 2006 Massachusetts Institute of Technology
-      All Rights Reserved.
+			 --------------------
 
-     Redistribution and use in source and binary forms, with or without
-     modification, are permitted provided that the following conditions are met:
+Portions contributed by Red Hat, including the preauthentication
+plugins, contain the following copyright:
 
-     Redistributions of source code must retain the above copyright
-	notice, this list of conditions and the following disclaimer.
-     Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in
-	the documentation and/or other materials provided with the
-	distribution.
-     Neither the name of Red Hat, Inc., nor the names of its
-	contributors may be used to endorse or promote products derived
-	from this software without specific prior written permission.
+  Copyright (c) 2006 Red Hat, Inc.
+  Portions copyright (c) 2006 Massachusetts Institute of Technology
+  All Rights Reserved.
 
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
 
-     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-     IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-     TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-     PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
-     OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-     EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-     PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-     PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-     LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-     NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
 
---- The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
-    src/lib/gssapi, including the following files:
+  * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+  * Neither the name of Red Hat, Inc., nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+  OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+			 --------------------
+
+The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
+src/lib/gssapi, including the following files:
 
 lib/gssapi/generic/gssapi_err_generic.et
 lib/gssapi/mechglue/g_accept_sec_context.c
@@ -296,26 +328,61 @@ lib/gssapi/spnego/spnego_mech.c
 
 are subject to the following license:
 
-Copyright (c) 2004 Sun Microsystems, Inc.
+  Copyright (c) 2004 Sun Microsystems, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining a
-copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
 
-The above copyright notice and this permission notice shall be included
-in all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+includes documentation and software developed at the
+University of California at Berkeley, which includes this copyright
+notice:
+
+  Copyright (C) 1983 Regents of the University of California.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the following
+     disclaimer in the documentation and/or other materials provided
+     with the distribution.
+
+  3. Neither the name of the University nor the names of its
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGE.
 
 Acknowledgements
 ----------------
