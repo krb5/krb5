@@ -431,16 +431,15 @@ profile_iterator(void **iter_p, char **ret_name, char **ret_value)
 
 	if (ret_name) {
 		if (name) {
-			*ret_name = malloc(strlen(name)+1);
+			*ret_name = strdup(name);
 			if (!*ret_name)
 				return ENOMEM;
-			strcpy(*ret_name, name);
 		} else
 			*ret_name = 0;
 	}
 	if (ret_value) {
 		if (value) {
-			*ret_value = malloc(strlen(value)+1);
+			*ret_value = strdup(value);
 			if (!*ret_value) {
 				if (ret_name) {
 					free(*ret_name);
@@ -448,7 +447,6 @@ profile_iterator(void **iter_p, char **ret_name, char **ret_value)
 				}
 				return ENOMEM;
 			}
-			strcpy(*ret_value, value);
 		} else
 			*ret_value = 0;
 	}
