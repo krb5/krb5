@@ -383,6 +383,10 @@ void kdb5_ldap_create_service(argc, argv)
     if (extra_argc >= 1) {
 	/* Set service DN as the last argument */
 	extra_argv[extra_argc] = strdup(srvparams->servicedn);
+	if (extra_argv[extra_argc] == NULL) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
 	extra_argc++;
 
 	if ((retval = kdb5_ldap_set_service_password(extra_argc, extra_argv)) != 0) {
@@ -1924,11 +1928,17 @@ kdb5_ldap_stash_service_password(argc, argv)
     if (argc == 4) {
 	/* Find the stash file name */
 	if (strcmp (argv[1], "-f") == 0) {
-	    file_name = strdup (argv[2]);
-	    service_object = strdup (argv[3]);
+	    if (((file_name = strdup (argv[2])) == NULL) ||
+	        ((service_object = strdup (argv[3])) == NULL)) {
+	        com_err(me, ENOMEM, "while setting service object password");
+	        goto cleanup;
+	    }
 	} else if (strcmp (argv[2], "-f") == 0) {
-	    file_name = strdup (argv[3]);
-	    service_object = strdup (argv[1]);
+	    if (((file_name = strdup (argv[3])) == NULL) ||
+	        ((service_object = strdup (argv[1])) == NULL)) {
+	        com_err(me, ENOMEM, "while setting service object password");
+	        goto cleanup;
+	    }
 	} else {
 	    print_usage = TRUE;
 	    goto cleanup;
@@ -1956,6 +1966,10 @@ kdb5_ldap_stash_service_password(argc, argv)
 	    if (section == NULL) {
 		/* Stash file path neither in krb5.conf nor on command line */
 		file_name = strdup(DEF_SERVICE_PASSWD_FILE);
+	        if (file_name == NULL) {
+	            com_err(me, ENOMEM, "while setting service object password");
+	            goto cleanup;
+	        }
 		goto done;
 	    }
 	}

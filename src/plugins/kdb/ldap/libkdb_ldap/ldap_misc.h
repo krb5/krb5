@@ -28,6 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #ifndef _HAVE_LDAP_MISC_H
 #define _HAVE_LDAP_MISC_H 1
 
@@ -136,5 +141,13 @@ krb5_ldap_name_to_policydn (krb5_context, char *, char **);
 
 krb5_error_code
 krb5_ldap_get_db_opt(char *, char **, char **);
+
+krb5_error_code
+populate_krb5_db_entry(krb5_context context,
+    krb5_ldap_context *ldap_context,
+    LDAP *ld,
+    LDAPMessage *ent,
+    krb5_const_principal princ,
+    krb5_db_entry *entry);
 
 #endif

@@ -52,7 +52,7 @@ static krb5_error_code init_ldap_realm (int argc, char *argv[]) {
     /* This operation is being performed in the context of a realm. So,
      * initialize the realm */
     int mask = 0;
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
                                                                                                                              
@@ -814,18 +814,6 @@ void kdb5_ldap_list_policies(argc, argv)
     /* Check for number of arguments */
     if ((argc != 1) && (argc != 3)) {
 	goto err_usage;
-    }
-
-    /* Parse base DN argument if present */
-    if (argc == 3) {
-	if (strcmp(argv[1], "-basedn"))
-	    goto err_usage;
-
-	basedn = strdup(argv[2]);
-	if (basedn == NULL) {
-	    retval = ENOMEM;
-	    goto cleanup;
-	}
     }
 
     if ((retval = init_ldap_realm (argc, argv)))

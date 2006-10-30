@@ -28,9 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+/*
+ * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
 #include "ldap_main.h"
 #include "ldap_realm.h"
 #include "ldap_principal.h"
+#include "ldap_pwd_policy.h"
 #include "ldap_err.h"
 
 #define END_OF_LIST -1

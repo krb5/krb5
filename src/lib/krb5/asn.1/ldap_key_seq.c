@@ -112,7 +112,7 @@ asn1_encode_key(asn1buf *buf,
 
 	ret = asn1_make_sequence(buf, salt_len, &length); checkerr;
 	salt_len += length;
-	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 1, salt_len, &length); checkerr;
+	ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0, salt_len, &length); checkerr;
 	salt_len += length;
 
 	sum += salt_len;
@@ -138,6 +138,7 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
     asn1_error_code ret = 0;
     asn1buf *buf = NULL;
     unsigned int length, sum = 0;
+    unsigned long tmp_ul;
 
     *code = NULL;
 
@@ -167,7 +168,8 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
     /* mkvno */
     if (mkvno < 0)
 	cleanup (ASN1_BAD_FORMAT);
-    ret = asn1_encode_unsigned_integer (buf, (unsigned int)mkvno, &length); checkerr;
+    tmp_ul = (unsigned long)mkvno;
+    ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length); checkerr;
     sum += length;
     ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 3, length, &length); checkerr;
     sum += length;
@@ -175,7 +177,8 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
     /* kvno (assuming all keys in array have same version) */
     if (key_data[0].key_data_kvno < 0)
 	cleanup (ASN1_BAD_FORMAT);
-    ret = asn1_encode_unsigned_integer (buf, (unsigned int)key_data[0].key_data_kvno, &length);
+    tmp_ul = (unsigned long)key_data[0].key_data_kvno;
+    ret = asn1_encode_unsigned_integer (buf, tmp_ul, &length);
     checkerr;
     sum += length;
     ret = asn1_make_etag(buf, CONTEXT_SPECIFIC, 2, length, &length); checkerr;
@@ -202,8 +205,11 @@ asn1_encode_sequence_of_keys (krb5_key_data *key_data,
 last:
     asn1buf_destroy (&buf);
 
-    if (ret != 0 && *code != NULL)
-	free (*code);
+    if (ret != 0 && *code != NULL) {
+        if ((*code)->data != NULL)
+            free ((*code)->data);
+        free (*code);
+    }
 
     return ret;
 }
@@ -219,7 +225,7 @@ last:
 	asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
 
 static asn1_error_code
-decode_tagged_integer (asn1buf *buf, int expectedtag, long *val)
+decode_tagged_integer (asn1buf *buf, asn1_tagnum expectedtag, long *val)
 {
     int buflen;
     asn1_error_code ret = 0;
@@ -271,7 +277,7 @@ last:
 #endif
 
 static asn1_error_code
-decode_tagged_octetstring (asn1buf *buf, int expectedtag, int *len,
+decode_tagged_octetstring (asn1buf *buf, asn1_tagnum expectedtag, int *len,
 			   asn1_octet **val)
 {
     int buflen;
@@ -448,6 +454,11 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 	}
 	safe_syncbuf (&subbuf, &keyseq);
     }
+
+    /*
+     * There could be other data inside the outermost sequence ... tags we don't
+     * know about. So, not invoking "safe_syncbuf(&buf,&subbuf)"
+     */
 
 last:
     if (ret != 0) {

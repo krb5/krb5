@@ -27,11 +27,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 #include <string.h>
 #include <time.h>
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
+#include "ldap_handle.h"
 #include "ldap_err.h"
+#include "ldap_principal.h"
+#include "princ_xdr.h"
+#include "ldap_pwd_policy.h"
 
 #ifdef NEED_STRPTIME_PROTO
 extern char *strptime (const char *, const char *, struct tm *);
@@ -508,31 +516,34 @@ krb5_get_subtree_info(ldap_context, subtreearr, ntree)
     }
 
     ncount = i;
-
-    subtree = (char **) malloc(sizeof(char *) * (ncount + 1));
-    if (subtree == NULL) {
-	st = ENOMEM;
-	goto cleanup;
+    newsubtree = (char **) malloc(sizeof(char *) * (ncount + 1));
+    if (newsubtree == NULL) {
+        st = ENOMEM;
+        goto cleanup;
     }
-    memset(subtree, 0, (sizeof(char *) * (ncount+1)));
-    remove_overlapping_subtrees(subtarr, &subtree, &ncount, search_scope);
+    memset(newsubtree, 0, (sizeof(char *) * (ncount+1)));
+    if ((st = remove_overlapping_subtrees(subtarr, newsubtree, &ncount,
+		search_scope)) != 0) {
+        goto cleanup;
+    }
 
     *ntree = ncount;
-    *subtreearr = subtree;
+    *subtreearr = newsubtree;
 
 cleanup:
-    if (subtarr!=NULL) {
-	for (i=0; subtarr[i]!=NULL; i++)
+    if (subtarr != NULL) {
+	for (i=0; subtarr[i] != NULL; i++)
 	    free(subtarr[i]);
 	free(subtarr);
     }
 
-    if (newsubtree!=NULL) {
-	for (i=0; newsubtree[i]!=NULL; i++)
-	    free(newsubtree[i]);
-	free(newsubtree);
+    if (st != 0) {
+        if (newsubtree != NULL) {
+	    for (i=0; newsubtree[i] != NULL; i++)
+	        free(newsubtree[i]);
+	    free(newsubtree);
+        }
     }
-
     return st;
 }
 
@@ -1283,9 +1294,9 @@ krb5_ldap_get_strings(ld, ent, attribute, retarr, attr_present)
     char                        ***retarr;
     krb5_boolean                *attr_present;
 {
-    char                           **values=NULL;
-    krb5_error_code                st=0;
-    int                            i=0, count=0;
+    char                        **values=NULL;
+    krb5_error_code             st=0;
+    unsigned int                i=0, count=0;
 
     *retarr = NULL;
     if (attr_present != NULL)
@@ -1586,8 +1597,10 @@ krb5_ldap_release_errcode_string(krb5_context kcontext, const char *msg)
  */
 krb5_error_code
 krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
-			       int *count, LDAP *ld) {
-    int                         i, ntrees, st = 0, tempst = 0, gothandle = 0;
+			       int *count, LDAP *ld)
+{
+    int                         i, st = 0, tempst = 0, gothandle = 0;
+    unsigned int		ntrees;
     char                        *refcntattr[2];
     char                        *filter = NULL;
     char                        **subtree = NULL, *ptr = NULL;
@@ -1810,11 +1823,12 @@ cleanup:
 }
 
 /* remove overlapping and repeated subtree entries from the list of subtrees */
-krb5_error_code remove_overlapping_subtrees(char **listin, char ***listop, int *subtcount, int sscope)
+krb5_error_code
+remove_overlapping_subtrees(char **listin, char **listop, int *subtcount, int sscope)
 {
     int     slen=0, k=0, j=0, lendiff=0;
     int     count = *subtcount;
-    char    **subtree = *listop;
+    char    **subtree = listop;
 
     slen = count-1;
     for (k=0; k<=slen && listin[k]!=NULL ; k++) {
@@ -1868,6 +1882,311 @@ krb5_error_code remove_overlapping_subtrees(char **listin, char ***listop, int *
 	}
     }
     return 0;
+}
+
+/*
+ * Fill out a krb5_db_entry princ entry struct given a LDAP message containing
+ * the results of a principal search of the directory.
+ */
+krb5_error_code
+populate_krb5_db_entry (krb5_context context,
+    krb5_ldap_context *ldap_context,
+    LDAP *ld,
+    LDAPMessage *ent,
+    krb5_const_principal princ,
+    krb5_db_entry *entry)
+{
+    krb5_error_code st = 0;
+    unsigned int    mask = 0;
+    krb5_boolean    attr_present = FALSE;
+    char            **values = NULL, *policydn = NULL, *pwdpolicydn = NULL;
+    char            *polname = NULL, *tktpolname = NULL;
+    struct berval   **bvalues = NULL;
+    krb5_tl_data    userinfo_tl_data = {0};
+    char            **link_references = NULL;
+    krb5_ui_2	    entry_len;
+    char *DN = NULL;
+
+    if (princ == NULL) {
+	/* XXX WAF probably should just extract princ from ldap result */
+	st = EINVAL;
+	goto cleanup;
+    } else {
+	if ((st=krb5_copy_principal(context, princ, &(entry->princ))) != 0)
+	    goto cleanup;
+    }
+    /* get the associated directory user information */
+    if ((values = ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
+	int i, pcount=0, kerberos_principal_object_type=0;
+	char *user;
+
+	if ((st=krb5_unparse_name(context, princ, &user)) != 0)
+	    goto cleanup;
+
+	for (i=0; values[i] != NULL; ++i) {
+	    if (strcasecmp(values[i], user) == 0) {
+		pcount = ldap_count_values(values);
+		break;
+	    }
+	}
+	ldap_value_free(values);
+	free(user);
+
+	if ((DN = ldap_get_dn(ld, ent)) == NULL) {
+	    ldap_get_option(ld, LDAP_OPT_RESULT_CODE, &st);
+	    st = set_ldap_error(context, st, 0);
+	    goto cleanup;
+	}
+
+	if ((values=ldap_get_values(ld, ent, "objectclass")) != NULL) {
+	    for (i=0; values[i] != NULL; ++i)
+		if (strcasecmp(values[i], "krbprincipal") == 0) {
+		    kerberos_principal_object_type = KDB_STANDALONE_PRINCIPAL_OBJECT;
+		    if ((st=store_tl_data(&userinfo_tl_data, KDB_TL_PRINCTYPE,
+				&kerberos_principal_object_type)) != 0)
+			goto cleanup;
+		    break;
+		}
+	    ldap_value_free(values);
+	}
+
+	/* add principalcount, DN and principaltype user information to tl_data */
+	if (((st=store_tl_data(&userinfo_tl_data, KDB_TL_PRINCCOUNT, &pcount)) != 0) ||
+	    ((st=store_tl_data(&userinfo_tl_data, KDB_TL_USERDN, DN)) != 0))
+	    goto cleanup;
+    }
+
+    /* read all the kerberos attributes */
+
+    /* KRBLASTSUCCESSFULAUTH */
+    if ((st=krb5_ldap_get_time(ld, ent, "krbLastSuccessfulAuth",
+		&(entry->last_success), &attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE)
+	mask |= KDB_LAST_SUCCESS;
+
+    /* KRBLASTFAILEDAUTH */
+    if ((st=krb5_ldap_get_time(ld, ent, "krbLastFailedAuth",
+		&(entry->last_failed), &attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE)
+	mask |= KDB_LAST_FAILED;
+
+    /* KRBLOGINFAILEDCOUNT */
+    if (krb5_ldap_get_value(ld, ent, "krbLoginFailedCount",
+	    &(entry->fail_auth_count)) == 0)
+	mask |= KDB_FAIL_AUTH_COUNT;
+
+    /* KRBMAXTICKETLIFE */
+    if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", &(entry->max_life)) == 0)
+	mask |= KDB_MAX_LIFE_ATTR;
+
+    /* KRBMAXRENEWABLEAGE */
+    if (krb5_ldap_get_value(ld, ent, "krbmaxrenewableage",
+	    &(entry->max_renewable_life)) == 0)
+	mask |= KDB_MAX_RLIFE_ATTR;
+
+    /* KRBTICKETFLAGS */
+    if (krb5_ldap_get_value(ld, ent, "krbticketflags", &(entry->attributes)) == 0)
+	mask |= KDB_TKT_FLAGS_ATTR;
+
+    /* PRINCIPAL EXPIRATION TIME */
+    if ((st=krb5_ldap_get_time(ld, ent, "krbprincipalexpiration", &(entry->expiration),
+		&attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE)
+	mask |= KDB_PRINC_EXPIRE_TIME_ATTR;
+
+    /* PASSWORD EXPIRATION TIME */
+    if ((st=krb5_ldap_get_time(ld, ent, "krbpasswordexpiration", &(entry->pw_expiration),
+		&attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE)
+	mask |= KDB_PWD_EXPIRE_TIME_ATTR;
+
+    /* KRBPOLICYREFERENCE */
+
+    if ((st=krb5_ldap_get_string(ld, ent, "krbticketpolicyreference", &policydn,
+		&attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE) {
+	/* Ensure that the policy is inside the realm container */
+	if ((st = krb5_ldap_policydn_to_name (context, policydn, &tktpolname)) != 0)
+	    goto cleanup;
+    }
+
+    /* KRBPWDPOLICYREFERENCE */
+    if ((st=krb5_ldap_get_string(ld, ent, "krbpwdpolicyreference", &pwdpolicydn,
+		&attr_present)) != 0)
+	goto cleanup;
+    if (attr_present == TRUE) {
+	krb5_tl_data  kadm_tl_data;
+
+	mask |= KDB_PWD_POL_REF_ATTR;
+
+	/* Ensure that the policy is inside the realm container */
+	if ((st = krb5_ldap_policydn_to_name (context, pwdpolicydn, &polname)) != 0)
+	    goto cleanup;
+
+	if ((st = krb5_update_tl_kadm_data(polname, &kadm_tl_data)) != 0) {
+	    goto cleanup;
+	}
+	krb5_dbe_update_tl_data(context, entry, &kadm_tl_data);
+    }
+
+    /* KRBSECRETKEY */
+    if ((bvalues=ldap_get_values_len(ld, ent, "krbprincipalkey")) != NULL) {
+	mask |= KDB_SECRET_KEY;
+	if ((st=krb5_decode_krbsecretkey(context, entry, bvalues, &userinfo_tl_data)) != 0)
+	    goto cleanup;
+    }
+
+    /* LAST PASSWORD CHANGE */
+    {
+	krb5_timestamp lstpwdchng=0;
+	if ((st=krb5_ldap_get_time(ld, ent, "krbLastPwdChange",
+		    &lstpwdchng, &attr_present)) != 0)
+	    goto cleanup;
+	if (attr_present == TRUE) {
+	    if ((st=krb5_dbe_update_last_pwd_change(context, entry,
+			lstpwdchng)))
+		goto cleanup;
+	    mask |= KDB_LAST_PWD_CHANGE_ATTR;
+	}
+    }
+
+    /* KRBOBJECTREFERENCES */
+    {
+	int i=0;
+
+	if ((st = krb5_ldap_get_strings(ld, ent, "krbobjectreferences",
+		    &link_references, &attr_present)) != 0)
+	    goto cleanup;
+	if (link_references != NULL) {
+	    for (i=0; link_references[i] != NULL; ++i) {
+		if ((st = store_tl_data(&userinfo_tl_data, KDB_TL_LINKDN,
+			    link_references[i])) != 0)
+		    goto cleanup;
+	    }
+	}
+    }
+
+    /* Set tl_data */
+    {
+	int i;
+	struct berval **ber_tl_data = NULL;
+	krb5_tl_data *ptr = NULL;
+
+	if ((ber_tl_data = ldap_get_values_len (ld, ent, "krbExtraData")) != NULL) {
+	    for (i = 0; ber_tl_data[i] != NULL; i++) {
+		if ((st = berval2tl_data (ber_tl_data[i] , &ptr)) != 0)
+		    break;
+		if ((st = krb5_dbe_update_tl_data(context, entry, ptr)) != 0)
+		    break;
+	    }
+	    ldap_value_free_len (ber_tl_data);
+	    if (st != 0)
+		goto cleanup;
+	    mask |= KDB_EXTRA_DATA;
+	}
+    }
+
+    /* update the mask of attributes present on the directory object to the tl_data */
+    if ((st=store_tl_data(&userinfo_tl_data, KDB_TL_MASK, &mask)) != 0)
+	goto cleanup;
+    if ((st=krb5_dbe_update_tl_data(context, entry, &userinfo_tl_data)) != 0)
+	goto cleanup;
+
+#ifdef HAVE_EDIRECTORY
+    {
+	krb5_timestamp              expiretime=0;
+	char                        *is_login_disabled=NULL;
+
+	/* LOGIN EXPIRATION TIME */
+	if ((st=krb5_ldap_get_time(ld, ent, "loginexpirationtime", &expiretime,
+		    &attr_present)) != 0)
+	    goto cleanup;
+
+	if (attr_present == TRUE) {
+	    if ((mask & KDB_PRINC_EXPIRE_TIME_ATTR) == 1) {
+		if (expiretime < entry->expiration)
+		    entry->expiration = expiretime;
+	    } else {
+		entry->expiration = expiretime;
+	    }
+	}
+
+	/* LOGIN DISABLED */
+	if ((st=krb5_ldap_get_string(ld, ent, "logindisabled", &is_login_disabled,
+		    &attr_present)) != 0)
+	    goto cleanup;
+	if (attr_present == TRUE) {
+	    if (strcasecmp(is_login_disabled, "TRUE")== 0)
+		entry->attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
+	    free (is_login_disabled);
+	}
+    }
+#endif
+
+    if ((st=krb5_read_tkt_policy (context, ldap_context, entry, tktpolname)) !=0)
+	goto cleanup;
+
+    /* We already know that the policy is inside the realm container. */
+    if (polname) {
+	osa_policy_ent_t   pwdpol;
+	int                cnt=0;
+	krb5_timestamp     last_pw_changed;
+	krb5_ui_4          pw_max_life;
+
+	memset(&pwdpol, 0, sizeof(pwdpol));
+
+	if ((st=krb5_ldap_get_password_policy(context, polname, &pwdpol, &cnt)) != 0)
+	    goto cleanup;
+	pw_max_life = pwdpol->pw_max_life;
+	free (pwdpol);
+
+	if (pw_max_life > 0) {
+	    if ((st=krb5_dbe_lookup_last_pwd_change(context, entry, &last_pw_changed)) != 0)
+		goto cleanup;
+
+	    if ((mask & KDB_PWD_EXPIRE_TIME_ATTR) == 1) {
+		if ((last_pw_changed + pw_max_life) < entry->pw_expiration)
+		    entry->pw_expiration = last_pw_changed + pw_max_life;
+	    } else
+		entry->pw_expiration = last_pw_changed + pw_max_life;
+	}
+    }
+    /* XXX so krb5_encode_princ_contents() will be happy */
+    entry->len = KRB5_KDB_V1_BASE_LENGTH;
+
+cleanup:
+
+    if (DN != NULL)
+	ldap_memfree(DN);
+
+    if (userinfo_tl_data.tl_data_contents != NULL)
+	free(userinfo_tl_data.tl_data_contents);
+
+    if (pwdpolicydn != NULL)
+	free(pwdpolicydn);
+
+    if (polname != NULL)
+	free(polname);
+
+    if (tktpolname != NULL)
+	free (tktpolname);
+
+    if (policydn != NULL)
+	free(policydn);
+
+    if (link_references) {
+        int i;
+        for (i=0; link_references[i] != NULL; ++i)
+            free (link_references[i]);
+        free (link_references);
+    }
+
+    return (st);
 }
 
 /*

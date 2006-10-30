@@ -343,15 +343,17 @@ void kdb5_ldap_create(argc, argv)
                 goto err_usage;
  
             if(strncmp(argv[i], "", strlen(argv[i]))!=0) {
-                list =  (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
-		memset(list, 0, sizeof(char*)*MAX_LIST_ENTRIES);
+                list = (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
                 if (list == NULL) {
                     retval = ENOMEM;
                     goto cleanup;
                 }
-                if (( retval = krb5_parse_list(argv[i], LIST_DELIMITER, list)))
+                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list))) {
+		    free(list);
+		    list = NULL;
                     goto cleanup;
-                                                                                                                             
+		}
+
                 rparams->subtreecount=0;
                 while(list[rparams->subtreecount]!=NULL)
                     (rparams->subtreecount)++;
@@ -886,13 +888,13 @@ void kdb5_ldap_modify(argc, argv)
     int argc;
     char *argv[];
 {
-    krb5_error_code retval, st;
+    krb5_error_code retval = 0;
     krb5_ldap_realm_params *rparams = NULL;
     krb5_boolean print_usage = FALSE;
     krb5_boolean no_msg = FALSE;
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
-    int i = 0, j = 0;
+    int i = 0;
     int mask = 0, rmask = 0, ret_mask = 0;
     char **slist = {NULL};
 #ifdef HAVE_EDIRECTORY
@@ -942,7 +944,6 @@ void kdb5_ldap_modify(argc, argv)
 		if (rparams->subtree) {
 #ifdef HAVE_EDIRECTORY
                     oldsubtrees =  (char **) calloc(rparams->subtreecount+1, sizeof(char *));
-		    memset(oldsubtrees, 0, szeof(char *) * rparams->subtreecount+1);
                     if (oldsubtrees == NULL) {
                         retval = ENOMEM;
                         goto cleanup;
@@ -955,20 +956,22 @@ void kdb5_ldap_modify(argc, argv)
                         }
                     }
 #endif
-                    for(k=0;k<rparams->subtreecount && rparams->subtree[k];k++)
+                    for(k=0; k<rparams->subtreecount && rparams->subtree[k]; k++)
                         free(rparams->subtree[k]);
                     rparams->subtreecount=0;
                 }
             }
             if (strncmp(argv[i] ,"", strlen(argv[i]))!=0) {
                 slist =  (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
-		memset(slist, 0, sizeof(char*)*MAX_LIST_ENTRIES);
                 if (slist == NULL) {
-                        retval = ENOMEM;
-                        goto cleanup;
-                }
-                if (( retval = krb5_parse_list(argv[i], LIST_DELIMITER, slist)))
+                    retval = ENOMEM;
                     goto cleanup;
+                }
+                if (( retval = krb5_parse_list(argv[i], LIST_DELIMITER, slist))) {
+                    free(slist);
+                    slist = NULL;
+                    goto cleanup;
+                }
                                                                                                                              
                 rparams->subtreecount=0;
                 while(slist[rparams->subtreecount]!=NULL)

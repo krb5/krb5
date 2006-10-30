@@ -129,4 +129,13 @@ krb5_ldap_unparse_principal_name(char *);
 krb5_error_code
 krb5_ldap_parse_principal_name(char *, char **);
 
+krb5_error_code
+krb5_decode_krbsecretkey(krb5_context, krb5_db_entry *, struct berval **,
+    krb5_tl_data *);
+
+krb5_error_code
+berval2tl_data(struct berval *in, krb5_tl_data **out);
+
+krb5_error_code
+krb5_read_tkt_policy (krb5_context, krb5_ldap_context *, krb5_db_entry *, char *);
 #endif
