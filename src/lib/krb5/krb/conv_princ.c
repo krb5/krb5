@@ -246,14 +246,16 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_425_conv_principal(krb5_context context, const char *name, const char *instance, const char *realm, krb5_principal *princ)
+krb5_425_conv_principal(krb5_context context, const char *name,
+			const char *instance, const char *realm,
+			krb5_principal *princ)
 {
      const struct krb_convert *p;
      char buf[256];		/* V4 instances are limited to 40 characters */
      krb5_error_code retval;
      char *domain, *cp;
      char **full_name = 0;
-     const char *names[2], *names2[5];
+     const char *names[5], *names2[2];
      void*	iterator = NULL;
      char** v4realms = NULL;
      char* realm_name = NULL;
