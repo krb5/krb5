@@ -109,15 +109,15 @@ typedef krb5_error_code (*freepa_proc)
     (krb5_context, void *pa_module_context, void **pa_request_context);
 
 typedef krb5_error_code (*init_proc)
-    (krb5_context, krb5_preauthtype, void **);
+    (krb5_context, void **);
 typedef void (*fini_proc)
-    (krb5_context, krb5_preauthtype, void *);
+    (krb5_context, void *);
 
 typedef struct _krb5_preauth_systems {
     const char *name;
     int		type;
     int		flags;
-    void       *pa_sys_context;
+    void       *plugin_context;
     init_proc   init;
     fini_proc   fini;
     edata_proc	get_edata;
@@ -301,8 +301,7 @@ load_preauth_plugins(krb5_context context)
     void **preauth_plugins_ftables;
     struct krb5plugin_preauth_server_ftable_v0 *ftable;
     int module_count, i, j, k;
-    krb5_preauthtype pa_type;
-    void *pa_sys_context;
+    void *plugin_context;
     init_proc server_init_proc;
 
     memset(&err, 0, sizeof(err));
@@ -349,6 +348,7 @@ load_preauth_plugins(krb5_context context)
      * leave room for a terminator entry. */
     preauth_systems = malloc(sizeof(krb5_preauth_systems) * (module_count + 1));
     if (preauth_systems == NULL) {
+	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
 	return ENOMEM;
     }
 
@@ -361,15 +361,14 @@ load_preauth_plugins(krb5_context context)
 	preauth_systems[k] = static_preauth_systems[i];
 	/* Try to initialize the preauth system.  If it fails, we'll remove it
 	 * from the list of systems we'll be using. */
-	pa_sys_context = NULL;
-	pa_type = static_preauth_systems[i].type;
+	plugin_context = NULL;
 	server_init_proc = static_preauth_systems[i].init;
 	if ((server_init_proc != NULL) &&
-	    ((*server_init_proc)(context, pa_type, &pa_sys_context) != 0)) {
+	    ((*server_init_proc)(context, &plugin_context) != 0)) {
 	    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
 	    continue;
 	}
-	preauth_systems[k].pa_sys_context = pa_sys_context;
+	preauth_systems[k].plugin_context = plugin_context;
 	k++;
     }
 
@@ -383,28 +382,34 @@ load_preauth_plugins(krb5_context context)
 		(ftable->return_proc == NULL)) {
 		continue;
 	    }
+	    plugin_context = NULL;
 	    for (j = 0;
 		 ftable->pa_type_list != NULL &&
 		 ftable->pa_type_list[j] > 0;
 		 j++) {
-		/* Try to initialize the module.  If it fails, we'll remove it
+		/* Try to initialize the plugin.  If it fails, we'll remove it
 		 * from the list of modules we'll be using. */
-		pa_sys_context = NULL;
-		server_init_proc = ftable->init_proc;
-		pa_type = ftable->pa_type_list[j];
-		if ((server_init_proc != NULL) &&
-		    ((*server_init_proc)(context, pa_type,
-					 &pa_sys_context) != 0)) {
-		    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
-		    continue;
+		if (j == 0) {
+		    server_init_proc = ftable->init_proc;
+		    if ((server_init_proc != NULL) &&
+		        ((*server_init_proc)(context, &plugin_context) != 0)) {
+			memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
+			continue;
+		    }
 		}
 		preauth_systems[k].name = ftable->name;
-		pa_type = ftable->pa_type_list[j];
-		preauth_systems[k].type = pa_type;
-		preauth_systems[k].flags = ftable->flags_proc(context, pa_type);
-		preauth_systems[k].pa_sys_context = pa_sys_context;
+		preauth_systems[k].type = ftable->pa_type_list[j];
+		if (ftable->flags_proc != NULL)
+		    preauth_systems[k].flags = ftable->flags_proc(context, preauth_systems[k].type);
+		else
+		    preauth_systems[k].flags = 0;
+		preauth_systems[k].plugin_context = plugin_context;
 		preauth_systems[k].init = server_init_proc;
-		preauth_systems[k].fini = ftable->fini_proc;
+		/* Only call fini once for each plugin */
+		if (j == 0)
+		    preauth_systems[k].fini = ftable->fini_proc;
+		else
+		    preauth_systems[k].fini = NULL;
 		preauth_systems[k].get_edata = ftable->edata_proc;
 		preauth_systems[k].verify_padata = ftable->verify_proc;
 		preauth_systems[k].return_padata = ftable->return_proc;
@@ -413,6 +418,7 @@ load_preauth_plugins(krb5_context context)
 		k++;
 	    }
 	}
+	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
     }
     n_preauth_systems = k;
     /* Add the end-of-list marker. */
@@ -429,8 +435,7 @@ unload_preauth_plugins(krb5_context context)
 	for (i = 0; i < n_preauth_systems; i++) {
 	    if (preauth_systems[i].fini != NULL) {
 	        (*preauth_systems[i].fini)(context,
-					   preauth_systems[i].type,
-					   preauth_systems[i].pa_sys_context);
+					   preauth_systems[i].plugin_context);
 	    }
 	    memset(&preauth_systems[i], 0, sizeof(preauth_systems[i]));
 	}
@@ -506,7 +511,7 @@ free_padata_context(krb5_context kcontext, void **padata_context)
     for (i = 0; i < context->n_contexts; i++) {
 	if (context->contexts[i].pa_context != NULL) {
 	    preauth_system = context->contexts[i].pa_system;
-	    mctx = preauth_system->pa_sys_context;
+	    mctx = preauth_system->plugin_context;
 	    if (preauth_system->free_pa_request_context != NULL) {
 		pctx = &context->contexts[i].pa_context;
 		(*preauth_system->free_pa_request_context)(kcontext, mctx,
@@ -721,25 +726,28 @@ sort_pa_order(krb5_context context, krb5_kdc_req *request, int *pa_order)
         }
     }
 
-    /* Now sort just the modules which replace the key, placing those which
-     * handle the pa_data types provided by the client ahead of the others. */
-    for (i = 0; preauth_systems[pa_order[i]].flags & PA_REPLACES_KEY; i++) {
-	continue;
-    }
-    n_key_replacers = i;
-    for (i = 0; i < n_key_replacers; i++) {
-	if (pa_list_includes(request->padata,
-			     preauth_systems[pa_order[i]].type))
+    if (request->padata != NULL) {
+	/* Now reorder the subset of modules which replace the key,
+	 * bubbling those which handle pa_data types provided by the
+	 * client ahead of the others. */
+	for (i = 0; preauth_systems[pa_order[i]].flags & PA_REPLACES_KEY; i++) {
 	    continue;
-        for (j = i + 1; j < n_key_replacers; j++) {
+	}
+	n_key_replacers = i;
+	for (i = 0; i < n_key_replacers; i++) {
 	    if (pa_list_includes(request->padata,
-			         preauth_systems[pa_order[j]].type)) {
-                k = pa_order[j];
-		pa_order[j] = pa_order[i];
-		pa_order[i] = k;
-		break;
+				preauth_systems[pa_order[i]].type))
+		continue;
+	    for (j = i + 1; j < n_key_replacers; j++) {
+		if (pa_list_includes(request->padata,
+				    preauth_systems[pa_order[j]].type)) {
+		    k = pa_order[j];
+		    pa_order[j] = pa_order[i];
+		    pa_order[i] = k;
+		    break;
+		}
 	    }
-        }
+	}
     }
 #ifdef DEBUG
     krb5_klog_syslog(LOG_DEBUG, "original preauth mechanism list:");
@@ -827,7 +835,7 @@ void get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 	(*pa)->pa_type = ap->type;
 	if (ap->get_edata) {
 	  retval = (ap->get_edata)(kdc_context, request, client, server,
-				   get_entry_data, ap->pa_sys_context, *pa);
+				   get_entry_data, ap->plugin_context, *pa);
 	  if (retval) {
 	    /* just failed on this type, continue */
 	    free(*pa);
@@ -899,7 +907,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	pa_found++;
 	retval = pa_sys->verify_padata(context, client, req_pkt, request,
 				       enc_tkt_reply, *padata,
-				       get_entry_data, pa_sys->pa_sys_context,
+				       get_entry_data, pa_sys->plugin_context,
 				       pa_context);
 	if (retval) {
 	    const char * emsg = krb5_get_error_message (context, retval);
@@ -1046,7 +1054,7 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	}
 	if ((retval = ap->return_padata(context, pa, client, req_pkt, request, reply,
 					client_key, encrypting_key, send_pa,
-					get_entry_data, ap->pa_sys_context,
+					get_entry_data, ap->plugin_context,
 					pa_context))) {
 	    goto cleanup;
 	}
