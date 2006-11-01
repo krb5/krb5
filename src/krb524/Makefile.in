@@ -48,7 +48,6 @@ LOCALINCLUDES= $(KRB4_INCLUDES) -I. -I$(srcdir)
 
 # Library sources
 SRCS	= \
-	$(srcdir)/conv_princ.c \
 	$(srcdir)/cnv_tkt_skey.c \
 	$(srcdir)/libinit.c	\
     $(srcdir)/krb524.c
@@ -77,7 +76,7 @@ all-windows:: $(OUTPRE)k524init.exe $(K524LIB)
 krb524test: test.o $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB5_LIB) $(KRB4COMPAT_LIBS)
 
-SERVER_OBJS= krb524d.o cnv_tkt_skey.o conv_princ.o
+SERVER_OBJS= krb524d.o cnv_tkt_skey.o
 CLIENT_OBJS= $(OUTPRE)k524init.$(OBJEXT)
 
 krb524d: $(SERVER_OBJS) $(KADMSRV_DEPLIBS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS) $(APPUTILS_DEPLIB)
@@ -109,10 +108,6 @@ clean-unix::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)conv_princ.$(OBJEXT): $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  conv_princ.c
 $(OUTPRE)cnv_tkt_skey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \

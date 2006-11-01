@@ -60,6 +60,21 @@
 
 static int krb524d_debug = 0;
 
+static int
+krb524_convert_princs(context, client, server, pname, pinst, prealm, 
+		      sname, sinst, srealm)
+     krb5_context context;
+     krb5_principal client, server;
+     char *pname, *pinst, *prealm, *sname, *sinst, *srealm;
+{
+     int ret;
+     
+     if ((ret = krb5_524_conv_principal(context, client, pname, pinst, 
+					prealm)))
+	  return ret;
+     
+     return krb5_524_conv_principal(context, server, sname, sinst, srealm);
+}
 /*
  * Convert a v5 ticket for server to a v4 ticket, using service key
  * skey for both.
