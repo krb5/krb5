@@ -455,7 +455,8 @@ init_sec_context.so init_sec_context.po $(OUTPRE)init_sec_context.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  ../generic/gssapi.h ../generic/gssapi_err_generic.h \
   gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h init_sec_context.c
 inq_context.so inq_context.po $(OUTPRE)inq_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
@@ -633,7 +634,8 @@ set_ccache.so set_ccache.po $(OUTPRE)set_ccache.$(OBJEXT): \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_generic.h ../generic/gssapi_err_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  ../generic/gssapi.h ../generic/gssapi_err_generic.h \
   gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h set_ccache.c
 sign.so sign.po $(OUTPRE)sign.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
