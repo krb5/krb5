@@ -1173,11 +1173,13 @@ static kadm5_ret_t add_to_history(krb5_context context,
 /* FIXME: don't use global variable for this */
 krb5_boolean use_password_server = 0;
 
+#ifdef USE_PASSWORD_SERVER
 static krb5_boolean
 kadm5_use_password_server (void)
 {
     return use_password_server;
 }
+#endif
 
 void
 kadm5_set_use_password_server (void)
