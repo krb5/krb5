@@ -40,51 +40,9 @@
 #endif
 
 /*
- * This file contains two routines: passwd_to_key() converts
- * a password into a DES key (prompting for the password if
- * not supplied), and krb_get_pw_in_tkt() gets an initial ticket for
+ * This file contains one routine: krb_get_pw_in_tkt() gets an initial ticket for
  * a user.
  */
-
-/*
- * passwd_to_key(): given a password, return a DES key.
- * There are extra arguments here which (used to be?)
- * used by srvtab_to_key().
- *
- * If the "passwd" argument is not null, generate a DES
- * key from it, using string_to_key().
- *
- * If the "passwd" argument is null, then on a Unix system we call
- * des_read_password() to prompt for a password and then convert it
- * into a DES key.  But "prompting" the user is harder in a Windows or
- * Macintosh environment, so we rely on our caller to explicitly do
- * that now.
- *
- * In either case, the resulting key is put in the "key" argument,
- * and 0 is returned.
- */
-/*ARGSUSED */
-static int
-passwd_to_key(user,instance,realm,passwd,key)
-    char *user, *instance, *realm, *passwd;
-    C_Block key;
-{
-#if defined(_WIN32)
-    string_to_key(passwd, key);
-#else /* unix */
-#ifdef NOENCRYPTION
-    if (!passwd)
-	placebo_read_password(key, "Password: ", 0);
-#else /* Do encyryption */
-    if (passwd)
-        string_to_key(passwd, key);
-    else {
-        des_read_password((des_cblock *)key, "Password", 0);
-    }
-#endif /* NOENCRYPTION */
-#endif /* unix */
-    return (0);
-}
 
 /*
  * krb_get_pw_in_tkt() takes the name of the server for which the initial
@@ -101,11 +59,11 @@ passwd_to_key(user,instance,realm,passwd,key)
  * non-terminal-oriented environment like the Macintosh (running in a
  * driver) or MS-Windows (in a DLL).
  *
- * krb_get_pw_in_tkt() passes two additional arguments to krb_get_in_tkt():
- * the name of a routine (passwd_to_key()) to be used to get the
- * password in case the "password" argument is null and NULL for the
- * decryption procedure indicating that krb_get_in_tkt should use the 
- * default method of decrypting the response from the KDC.
+ * krb_get_pw_in_tkt() passes two additional arguments to
+ * krb_get_in_tkt(): a routine to be used to get the password in case
+ * the "password" argument is null and NULL for the decryption
+ * procedure indicating that krb_get_in_tkt should use the default
+ * method of decrypting the response from the KDC.
  *
  * The result of the call to krb_get_in_tkt() is returned.
  */
