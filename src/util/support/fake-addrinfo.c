@@ -643,7 +643,9 @@ static int find_face (const char *name, struct face **entry)
 
 #endif
 
+#ifdef FAI_CACHE
 static int krb5int_lock_fac(void), krb5int_unlock_fac(void);
+#endif
 
 static inline int fai_add_hosts_by_name (const char *name,
 					 struct addrinfo *template,
@@ -1313,6 +1315,7 @@ void freeaddrinfo (struct addrinfo *ai)
 }
 #endif /* WRAP_GETADDRINFO */
 
+#ifdef FAI_CACHE
 static int krb5int_lock_fac (void)
 {
     int err;
@@ -1326,6 +1329,7 @@ static int krb5int_unlock_fac (void)
 {
     return k5_mutex_unlock(&krb5int_fac.lock);
 }
+#endif
 
 /* Some systems don't define in6addr_any.  */
 const struct in6_addr krb5int_in6addr_any = IN6ADDR_ANY_INIT;
