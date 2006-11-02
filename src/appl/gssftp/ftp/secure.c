@@ -283,7 +283,7 @@ unsigned int nbyte;
 {
 	static char *outbuf;		/* output ciphertext */
 	static unsigned int bufsize;	/* size of outbuf */
-	ftp_int32 length;
+	ftp_int32 length = 0;
 	ftp_uint32 net_len;
 	unsigned int fudge = smaxbuf - smaxqueue; /* Difference in length
 						     buffer lengths required */

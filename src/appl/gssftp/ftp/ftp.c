@@ -1958,14 +1958,14 @@ char realm[REALM_SZ + 1];
 #endif /* KRB5_KRB4_COMPAT */
 
 #ifdef GSSAPI
-struct {
+static const struct {
     gss_OID mech_type;
     char *service_name;
 } gss_trials[] = {
     { GSS_C_NO_OID, "ftp" },
     { GSS_C_NO_OID, "host" },
 };
-int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
+static const int n_gss_trials = sizeof(gss_trials)/sizeof(gss_trials[0]);
 #endif /* GSSAPI */
 
 int do_auth()
