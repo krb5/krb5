@@ -30,7 +30,6 @@
 
 #include "yarrow.h"
 static Yarrow_CTX y_ctx;
-static int init_error;
 #define yarrow_lock krb5int_yarrow_lock
 k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
