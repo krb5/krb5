@@ -1130,7 +1130,7 @@ finished:
 static int parse_principal_ent(Tcl_Interp *interp, char *list,
 			       kadm5_principal_ent_t *out_princ)
 {
-     kadm5_principal_ent_t princ;
+     kadm5_principal_ent_t princ = 0;
      krb5_error_code krb5_ret;
      int tcl_ret;
      int argc;
@@ -1383,7 +1383,7 @@ static Tcl_DString *unparse_policy_ent(kadm5_policy_ent_t policy)
 static int parse_policy_ent(Tcl_Interp *interp, char *list,
 			    kadm5_policy_ent_t *out_policy)
 {
-     kadm5_policy_ent_t policy;
+     kadm5_policy_ent_t policy = 0;
      int tcl_ret;
      int argc;
      char **argv;
