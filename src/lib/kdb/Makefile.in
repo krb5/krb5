@@ -50,6 +50,7 @@ STLIBOBJS= \
 all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
+	$(RM) adb_err.c adb_err.h
 
 @lib_frag@
 @libobj_frag@
