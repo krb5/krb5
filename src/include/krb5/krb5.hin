@@ -1215,8 +1215,8 @@ typedef struct _krb5_cc_ops krb5_cc_ops;
 /*
  * Cursor for iterating over all ccaches
  */
-struct krb5_cccol_cursor;
-typedef struct krb5_cccol_cursor *krb5_cccol_cursor;
+struct _krb5_cccol_cursor;
+typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 
 /* for retrieve_cred */
 #define	KRB5_TC_MATCH_TIMES		0x00000001

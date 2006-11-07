@@ -43,7 +43,7 @@ struct cc_fullname {
     char *res;
 };
 
-struct krb5_cccol_cursor {
+struct _krb5_cccol_cursor {
     int pos;
     krb5_cc_typecursor typecursor;
     const krb5_cc_ops *ops;
