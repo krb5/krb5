@@ -828,6 +828,13 @@ nc_handle_wm_create(HWND hwnd,
                                      &t)) &&
         t != 0) {
 
+        /* if the main window is not visible, then the SetWindowPos()
+           call is sufficient to bring the new creds window to the
+           top.  However, if the main window is visible but not
+           active, the main window needs to be activated before a
+           child window can be activated. */
+        khm_activate_main_window();
+
         SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
                      (SWP_NOMOVE | SWP_NOSIZE));
 
@@ -1508,6 +1515,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             HWND hw, hw_prev;
             HFONT hf, hfold;
             HDC hdc;
+            BOOL use_large_lables = FALSE;
 
             /* we assume that WMNC_CLEAR_PROMPTS has already been
                received */
@@ -1598,6 +1606,25 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             hdc = GetWindowDC(d->dlg_main);
             hfold = SelectObject(hdc,hf);
 
+            /* first do a trial run and see if we should use the
+               larger text labels or not.  This is so that all the
+               labels and input controls align properly. */
+            for (i=0; i < d->nc->n_prompts; i++) {
+                if (d->nc->prompts[i]->prompt != NULL) {
+                    SIZE s;
+
+                    GetTextExtentPoint32(hdc, 
+                                         d->nc->prompts[i]->prompt, 
+                                         (int) wcslen(d->nc->prompts[i]->prompt),
+                                         &s);
+
+                    if(s.cx >= d->r_n_label.right - d->r_n_label.left) {
+                        use_large_lables = TRUE;
+                        break;
+                    }
+                }
+            }
+
             for(i=0; i<d->nc->n_prompts; i++) {
                 RECT pr, er;
                 SIZE s;
@@ -1608,11 +1635,12 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                                          d->nc->prompts[i]->prompt, 
                                          (int) wcslen(d->nc->prompts[i]->prompt),
                                          &s);
-                    if(s.cx < d->r_n_label.right - d->r_n_label.left) {
+                    if(s.cx < d->r_n_label.right - d->r_n_label.left &&
+                       !use_large_lables) {
                         CopyRect(&pr, &d->r_n_label);
                         CopyRect(&er, &d->r_n_input);
                         dy = d->r_row.bottom;
-                    } else if(s.cx < 
+                    } else if(s.cx <
                               d->r_e_label.right - d->r_e_label.left) {
                         CopyRect(&pr, &d->r_e_label);
                         CopyRect(&er, &d->r_e_input);

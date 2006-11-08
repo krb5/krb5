@@ -321,12 +321,6 @@ kcdb_identity_delete(khm_handle vid) {
        are freed.  Once they are released, kcdb_identity_delete() will
        be called again. */
 
-#if 0
-    EnterCriticalSection(&cs_ident);
-    if(id->refcount == 0) {
-        /*TODO: free up the identity */
-    }
-#endif
  _exit:
     LeaveCriticalSection(&cs_ident);
 
@@ -804,11 +798,11 @@ kcdb_identity_refresh_all(void) {
              ident != NULL;
              ident = next) {
 
-            next = LNEXT(ident);
-
             if (!kcdb_is_active_identity(ident) ||
-                ident->refresh_cycle == kcdb_ident_refresh_cycle)
+                ident->refresh_cycle == kcdb_ident_refresh_cycle) {
+                next = LNEXT(ident);
                 continue;
+            }
 
             kcdb_identity_hold((khm_handle) ident);
 
@@ -818,6 +812,7 @@ kcdb_identity_refresh_all(void) {
 
             EnterCriticalSection(&cs_ident);
 
+            next = LNEXT(ident);
             kcdb_identity_release((khm_handle) ident);
 
             hit_count++;

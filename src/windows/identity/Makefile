@@ -181,7 +181,13 @@ afsplugin: plugincommon
 	$(ECHO) -- Done with $@
 !endif
 
-finale: krb5plugin doc
+!ifdef NODOCBUILD
+doctarget=
+!else
+doctarget=doc
+!endif
+
+finale: krb5plugin $(doctarget)
 	$(ECHO) -- Done.
 
 pdoc:
