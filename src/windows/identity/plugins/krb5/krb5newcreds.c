@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2006 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -126,6 +126,51 @@ k5_handle_wm_destroy(HWND hwnd,
     return TRUE;
 }
 
+LRESULT
+k5_force_password_change(k5_dlg_data * d) {
+    /* we are turning this dialog into a change password dialog... */
+    wchar_t wbuf[KHUI_MAXCCH_BANNER];
+
+    khui_cw_clear_prompts(d->nc);
+
+    LoadString(hResModule, IDS_NC_PWD_BANNER,
+               wbuf, ARRAYLENGTH(wbuf));
+    khui_cw_begin_custom_prompts(d->nc, 3, NULL, wbuf);
+
+    LoadString(hResModule, IDS_NC_PWD_PWD,
+               wbuf, ARRAYLENGTH(wbuf));
+    khui_cw_add_prompt(d->nc, KHUI_NCPROMPT_TYPE_PASSWORD,
+                       wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+    LoadString(hResModule, IDS_NC_PWD_NPWD,
+               wbuf, ARRAYLENGTH(wbuf));
+    khui_cw_add_prompt(d->nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD,
+                       wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+    LoadString(hResModule, IDS_NC_PWD_NPWD_AGAIN,
+               wbuf, ARRAYLENGTH(wbuf));
+    khui_cw_add_prompt(d->nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD_AGAIN,
+                       wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
+
+    d->pwd_change = TRUE;
+
+    if (is_k5_identpro &&
+        d->nc->n_identities > 0 &&
+        d->nc->identities[0]) {
+
+        kcdb_identity_set_flags(d->nc->identities[0],
+                                KCDB_IDENT_FLAG_VALID,
+                                KCDB_IDENT_FLAG_VALID);
+
+    }
+
+    PostMessage(d->nc->hwnd, KHUI_WM_NC_NOTIFY,
+                MAKEWPARAM(0, WMNC_UPDATE_CREDTEXT),
+                (LPARAM) d->nc);
+
+    return TRUE;
+}
+
 INT_PTR
 k5_handle_wmnc_notify(HWND hwnd,
                       WPARAM wParam, 
@@ -151,12 +196,18 @@ k5_handle_wmnc_notify(HWND hwnd,
     case WMNC_DIALOG_SETUP:
         {
             k5_dlg_data * d;
+            BOOL old_sync;
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
             if (d->nc->subtype == KMSG_CRED_PASSWORD)
                 return TRUE;
+
+            /* we save the value of the 'sync' field here because some
+               of the notifications that are generated while setting
+               the controls overwrite the field. */
+            old_sync = d->sync;
 
             /* need to update the controls with d->* */
             SendDlgItemMessage(hwnd, IDC_NCK5_RENEWABLE, 
@@ -184,6 +235,8 @@ k5_handle_wmnc_notify(HWND hwnd,
                                0, d->publicIP);
 
             EnableWindow(GetDlgItem(hwnd, IDC_NCK5_PUBLICIP), !d->addressless);
+
+            d->sync = old_sync;
         }
         break;
 
@@ -206,47 +259,7 @@ k5_handle_wmnc_notify(HWND hwnd,
                            l->id, l->id_len);
 
             if (!wcscmp(linktext, L"Krb5Cred:!Passwd")) {
-                /* we are turning this dialog into a change password dialog... */
-                wchar_t wbuf[KHUI_MAXCCH_BANNER];
-
-                khui_cw_clear_prompts(nc);
-
-                LoadString(hResModule, IDS_NC_PWD_BANNER,
-                           wbuf, ARRAYLENGTH(wbuf));
-                khui_cw_begin_custom_prompts(nc, 3, NULL, wbuf);
-
-                LoadString(hResModule, IDS_NC_PWD_PWD,
-                           wbuf, ARRAYLENGTH(wbuf));
-                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_PASSWORD,
-                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
-
-                LoadString(hResModule, IDS_NC_PWD_NPWD,
-                           wbuf, ARRAYLENGTH(wbuf));
-                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD,
-                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
-
-                LoadString(hResModule, IDS_NC_PWD_NPWD_AGAIN,
-                           wbuf, ARRAYLENGTH(wbuf));
-                khui_cw_add_prompt(nc, KHUI_NCPROMPT_TYPE_NEW_PASSWORD_AGAIN,
-                                   wbuf, NULL, KHUI_NCPROMPT_FLAG_HIDDEN);
-
-                d->pwd_change = TRUE;
-
-                if (is_k5_identpro &&
-                    d->nc->n_identities > 0 &&
-                    d->nc->identities[0]) {
-
-                    kcdb_identity_set_flags(d->nc->identities[0],
-                                            KCDB_IDENT_FLAG_VALID,
-                                            KCDB_IDENT_FLAG_VALID);
-
-                }
-
-                PostMessage(d->nc->hwnd, KHUI_WM_NC_NOTIFY,
-                            MAKEWPARAM(0, WMNC_UPDATE_CREDTEXT),
-                            (LPARAM) d->nc);
-
-                return TRUE;
+                return k5_force_password_change(d);
             }
         }
         break;
@@ -353,15 +366,10 @@ k5_handle_wmnc_notify(HWND hwnd,
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
-            if(!d->sync) {
+            if(!d->sync && d->nc->result == KHUI_NC_RESULT_PROCESS) {
                 kmq_post_sub_msg(k5_sub, KMSG_CRED, 
                                  KMSG_CRED_DIALOG_NEW_OPTIONS, 
                                  0, (void *) d->nc);
-
-                /* the above notification effectively takes all our
-                   changes into account.  The data we have is no
-                   longer out of sync */
-                d->sync = TRUE;
             }
         }
         break;
@@ -616,6 +624,16 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                     goto _switch_to_main;
                 }
             }
+
+#ifdef DEBUG
+            /* log the state of g_fjob.* */
+            _reportf(L"g_fjob state prior to calling khm_krb5_kinit() :");
+            _reportf(L"  g_fjob.principal = [%S]", g_fjob.principal);
+            _reportf(L"  g_fjob.code      = %d", g_fjob.code);
+            _reportf(L"  g_fjob.state     = %d", g_fjob.state);
+            _reportf(L"  g_fjob.prompt_set= %d", g_fjob.prompt_set);
+            _reportf(L"  g_fjob.valid_principal = %d", (int) g_fjob.valid_principal);
+#endif
 
             g_fjob.code =
                 khm_krb5_kinit(0,
@@ -916,8 +934,16 @@ k5_kinit_prompter(krb5_context context,
     khm_size ncp;
     krb5_error_code code = 0;
     BOOL new_prompts = TRUE;
-
     khm_handle csp_prcache = NULL;
+
+#ifdef DEBUG
+    _reportf(L"k5_kinit_prompter() received %d prompts with name=[%S] banner=[%S]",
+             num_prompts,
+             name, banner);
+    for (i=0; i < num_prompts; i++) {
+        _reportf(L"Prompt[%d]: string[%S]", i, prompts[i].prompt);
+    }
+#endif
 
     /* we got prompts?  Then we assume that the principal is valid */
     g_fjob.valid_principal = TRUE;
@@ -1401,6 +1427,7 @@ k5_read_dlg_params(khm_handle conf,
     /* once we read the new data, in, it is no longer considered
        dirty */
     d->dirty = FALSE;
+    d->sync = FALSE;
 }
 
 void 
@@ -1814,6 +1841,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(nct->hwnd_panel, DWLP_USER);
 
+            /* this can be NULL if the dialog was closed while the
+               plug-in thread was processing. */
+            if (d == NULL)
+                break;
+
             if (!is_k5_identpro) {
 
                 /* enumerate all realms and place in realms combo box */
@@ -1881,6 +1913,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(nct->hwnd_panel, DWLP_USER);
 
+            if (d == NULL)
+                break;
+
             /* we only load the identity specific defaults if the user
                hasn't changed the options */
             khui_cw_lock_nc(nc);
@@ -1930,6 +1965,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(nct->hwnd_panel, DWLP_USER);
+            if (d == NULL)
+                break;
 
             if (nc->subtype == KMSG_CRED_PASSWORD) {
                 khm_size n_prompts = 0;
@@ -1993,6 +2030,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 kcdb_identity_hold(ident);
 
                 k5_prep_kinit_job(nc);
+
+                /* after the switch to the fiber, the dialog will be
+                   back in sync with the kinit thread. */
+                d->sync = TRUE;
+
                 khui_cw_unlock_nc(nc);
 
                 SwitchToFiber(k5_kinit_fiber);
@@ -2001,13 +2043,25 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     wchar_t msg[KHUI_MAXCCH_BANNER];
                     khm_size cb;
 
+                    /* Special case.  If the users' password has
+                       expired, we force a password change dialog on
+                       top of the new credentials dialog using a set
+                       of custom prompts, but only if we are the
+                       identity provider. */
+                    if (g_fjob.code == KRB5KDC_ERR_KEY_EXP &&
+                        is_k5_identpro) {
+
+                        k5_force_password_change(d);
+                        goto done_with_bad_princ;
+
+                    }
+
                     /* we can't possibly have succeeded without a
                        password */
-                    if(g_fjob.code) {
-                        if (is_k5_identpro)
-                            kcdb_identity_set_flags(ident,
-                                                    KCDB_IDENT_FLAG_INVALID,
-                                                    KCDB_IDENT_FLAG_INVALID);
+                    if(g_fjob.code && is_k5_identpro) {
+                        kcdb_identity_set_flags(ident,
+                                                KCDB_IDENT_FLAG_INVALID,
+                                                KCDB_IDENT_FLAG_INVALID);
 
                         khui_cw_clear_prompts(nc);
                     }
@@ -2027,9 +2081,11 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         break;
 
                     case KRB5KDC_ERR_KEY_EXP:
-                        /* password needs changing. */
-                        LoadString(hResModule, IDS_K5ERR_KEY_EXPIRED,
-                                   msg, ARRAYLENGTH(msg));
+                        {
+                            /* password needs changing. */
+                            LoadString(hResModule, IDS_K5ERR_KEY_EXPIRED,
+                                       msg, ARRAYLENGTH(msg));
+                        }
                         break;
 
                     default:
@@ -2059,6 +2115,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                         d->cred_message = PMALLOC(cb);
                         StringCbCopy(d->cred_message, cb, msg);
                     }
+
+                done_with_bad_princ:
 
                     k5_free_kinit_job();
 
@@ -2112,6 +2170,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             if (nc->subtype == KMSG_CRED_NEW_CREDS) {
                 d = (k5_dlg_data *) nct->aux;
+                if (d == NULL)
+                    break;
 
                 if (d->pwd_change) {
                     /* we are forcing a password change */
@@ -2538,12 +2598,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     if (code)
                         rv = KHM_ERROR_UNKNOWN;
-                    else if (nc->subtype == KMSG_CRED_NEW_CREDS) {
+                    else {
                         khm_handle csp_idcfg = NULL;
                         krb5_context ctx = NULL;
 
-                        /* we forced a password change.  now we need
-                           to get the initial credentials. */
+                        /* we set a new password.  now we need to get
+                           initial credentials. */
 
                         d = (k5_dlg_data *) nct->aux;
 
@@ -2552,9 +2612,28 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                             goto _pwd_exit;
                         }
 
+                        if (nc->subtype == KMSG_CRED_PASSWORD) {
+                            /* since this was just a password change,
+                               we need to load new credentials options
+                               from the configuration store. */
+                                                                    
+                            if (KHM_SUCCEEDED
+                                (k5_open_config_handle(nc->identities[0],
+                                                       KHM_FLAG_CREATE |
+                                                       KCONF_FLAG_WRITEIFMOD,
+                                                       &csp_idcfg))) {
+                                k5_read_dlg_params(csp_idcfg, d);
+                                khc_close_space(csp_idcfg);
+                                csp_idcfg = NULL;
+                            }
+                        }
+
                         /* the password change phase is now done */
                         d->pwd_change = FALSE;
 
+#ifdef DEBUG
+                        _reportf(L"Calling khm_krb5_kinit()");
+#endif
                         code = khm_krb5_kinit(NULL, /* context (create one) */
                                               idname, /* principal_name */
                                               npwd, /* new password */
@@ -2575,13 +2654,17 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                         /* save the settings that we used for
                            obtaining the ticket. */
-                        if (KHM_SUCCEEDED
+                        if (nc->subtype == KMSG_CRED_NEW_CREDS &&
+                            KHM_SUCCEEDED
                             (k5_open_config_handle(nc->identities[0],
                                                    KHM_FLAG_CREATE |
                                                    KCONF_FLAG_WRITEIFMOD,
                                                    &csp_idcfg))) {
                             k5_write_dlg_params(csp_idcfg, d);
                             khc_close_space(csp_idcfg);
+
+                            /* and then update the LRU too */
+                            k5_update_LRU(nc->identities[0]);
                         }
 
                         /* and do a quick refresh of the krb5 tickets
@@ -2603,11 +2686,31 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                             }
                         }
 
-                        /* and then update the LRU too */
-                        k5_update_LRU(nc->identities[0]);
-
                         if (ctx != NULL)
                             pkrb5_free_context(ctx);
+
+                        if (nc->subtype == KMSG_CRED_PASSWORD) {
+                            /* if we obtained new credentials as a
+                               result of successfully changing the
+                               password, we also schedule an identity
+                               renewal for this identity.  This allows
+                               the other credential types to obtain
+                               credentials for this identity. */
+                            khui_action_context ctx;
+
+                            _reportf(L"Scheduling renewal of [%s] after password change",
+                                     widname);
+
+                            khui_context_create(&ctx,
+                                                KHUI_SCOPE_IDENT,
+                                                nc->identities[0],
+                                                KCDB_CREDTYPE_INVALID,
+                                                NULL);
+                            khui_action_trigger(KHUI_ACTION_RENEW_CRED,
+                                                &ctx);
+
+                            khui_context_release(&ctx);
+                        }
                     }
 
                     /* result is only set when code != 0 */
@@ -2628,9 +2731,6 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                         PFREE(result);
                         PFREE(wresult);
-
-                        /* leave wresult.  It will get freed when the
-                           reported event is freed. */
 
                         /* we don't need to report anything more */
                         code = 0;

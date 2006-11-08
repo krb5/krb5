@@ -602,6 +602,9 @@ khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction,
 KHMEXP void KHMAPI
 khui_menu_remove_action(khui_menu_def * d, khm_size idx) {
 
+    if (!(d->state & KHUI_MENUSTATE_ALLOCD))
+        menu_const_to_allocd(d);
+
     assert(d->state & KHUI_MENUSTATE_ALLOCD);
 
     if (idx < 0 || idx >= d->n_items)
@@ -1172,6 +1175,13 @@ khui_action_context khui_ctx = {
     NULL,
     0};
 
+khm_int32 KHMAPI
+set_cred_select_flag(khm_handle cred, void * rock) {
+    kcdb_cred_set_flags(cred, KCDB_CRED_FLAG_SELECTED,
+                        KCDB_CRED_FLAG_SELECTED);
+    return KHM_ERROR_SUCCESS;
+}
+
 KHMEXP void KHMAPI
 khui_context_create(khui_action_context * ctx,
                     khui_scope scope,
@@ -1188,6 +1198,42 @@ khui_context_create(khui_action_context * ctx,
     tctx.identity = identity;
     tctx.cred_type = cred_type;
     tctx.cred = cred;
+
+    /* fill up the credset based on the scope */
+    if (scope != KHUI_SCOPE_NONE) {
+        if (tctx.credset == NULL)
+            kcdb_credset_create(&tctx.credset);
+        else
+            kcdb_credset_flush(tctx.credset);
+
+        if (scope == KHUI_SCOPE_IDENT) {
+            kcdb_credset_extract(tctx.credset,
+                                 NULL,
+                                 tctx.identity,
+                                 KCDB_CREDTYPE_INVALID);
+        } else if (scope == KHUI_SCOPE_CREDTYPE) {
+            kcdb_credset_extract(tctx.credset,
+                                 NULL,
+                                 tctx.identity,
+                                 tctx.cred_type);
+        } else if (scope == KHUI_SCOPE_CRED) {
+            khm_handle dupcred = NULL;
+            kcdb_cred_dup(cred, &dupcred);
+
+            kcdb_credset_add_cred(tctx.credset, dupcred, -1);
+        } else {
+#ifdef DEBUG
+            /* KHUI_SCOPE_GROUP is not used with
+               khui_context_create() */
+            assert(FALSE);
+#endif
+        }
+
+        kcdb_credset_apply(tctx.credset, set_cred_select_flag,
+                           NULL);
+
+        kcdb_credset_seal(tctx.credset);
+    }
 
     khuiint_copy_context(ctx, &tctx);
 }
