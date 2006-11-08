@@ -44,7 +44,7 @@
 #ident "$Id$"
 
 #ifdef HAVE_CONFIG_H
-#include "../config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_ERRNO_H
@@ -76,8 +76,8 @@ client_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 
 static krb5_error_code
 client_process(krb5_context kcontext,
-	       void *client_module_context,
-	       void **client_request_context,
+	       void *client_plugin_context,
+	       void *client_request_context,
 	       krb5_kdc_req *request,
 	       krb5_data *encoded_request_body,
 	       krb5_data *encoded_previous_request,
@@ -85,8 +85,8 @@ client_process(krb5_context kcontext,
 	       krb5_prompter_fct prompter,
 	       void *prompter_data,
 	       preauth_get_as_key_proc gak_fct,
-	       krb5_data *salt, krb5_data *s2kparams,
 	       void *gak_data,
+	       krb5_data *salt, krb5_data *s2kparams,
 	       krb5_keyblock *as_key,
 	       krb5_pa_data **out_pa_data)
 {
@@ -94,7 +94,7 @@ client_process(krb5_context kcontext,
     krb5_checksum checksum;
     krb5_enctype enctype;
     krb5_cksumtype *cksumtypes;
-    krb5_error_code status;
+    krb5_error_code status = 0;
     krb5_int32 cksumtype, *enctypes;
     unsigned int i, n_enctypes, cksumtype_count;
 
@@ -193,8 +193,7 @@ client_process(krb5_context kcontext,
 
 /* Initialize and tear down the server-side module, and do stat tracking. */
 static krb5_error_code
-server_init(krb5_context kcontext, krb5_preauthtype pa_type,
-	    void **module_context)
+server_init(krb5_context kcontext, void **module_context)
 {
     struct server_stats *stats;
     stats = malloc(sizeof(struct server_stats));
@@ -206,15 +205,14 @@ server_init(krb5_context kcontext, krb5_preauthtype pa_type,
     return 0;
 }
 static void
-server_fini(krb5_context kcontext, krb5_preauthtype pa_type,
-	    void *module_context)
+server_fini(krb5_context kcontext, void *module_context)
 {
     struct server_stats *stats;
     stats = module_context;
     if (stats != NULL) {
 #ifdef DEBUG
-	fprintf(stderr, "Total %d clients failed pa_type %d, %d succeeded.\n",
-		stats->failures, pa_type, stats->successes);
+	fprintf(stderr, "Total: %d clients failed, %d succeeded.\n",
+		stats->failures, stats->successes);
 #endif
 	free(stats);
     }
@@ -254,7 +252,7 @@ server_get_edata(krb5_context kcontext,
 	krb5_free_keyblock_contents(kcontext, &keys[i]);
 
     /* Return the list of encryption types. */
-    enctypes = malloc(i * 4);
+    enctypes = malloc((unsigned)i * 4);
     if (enctypes == NULL) {
 	krb5_free_data(kcontext, key_data);
 	return ENOMEM;
@@ -469,15 +467,16 @@ static krb5_preauthtype supported_server_pa_types[] = {
 };
 
 struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
-    "cksum_body",
-    &supported_client_pa_types[0],
-    NULL,
-    NULL,
-    NULL,
-    client_get_flags,
-    NULL,
-    client_process,
-    NULL,
+    "cksum_body",			    /* name */
+    &supported_client_pa_types[0],	    /* pa_type_list */
+    NULL,				    /* enctype_list */
+    NULL,				    /* plugin init function */
+    NULL,				    /* plugin fini function */
+    client_get_flags,			    /* get flags function */
+    NULL,				    /* request init function */
+    NULL,				    /* request fini function */
+    client_process,			    /* process function */
+    NULL,				    /* try_again function */
 };
 
 struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {

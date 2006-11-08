@@ -774,6 +774,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
     long l;
     char *q, *preauth_types = NULL;
     krb5_pa_data *tmp;
+    int need_free_string = 1;
 
     if ((padata == NULL) || (padata[0] == NULL)) {
 	return 0;
@@ -784,6 +785,7 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
     if ((ret != 0) || (preauth_types == NULL)) {
 	/* Try to use PKINIT first. */
 	preauth_types = "17, 16, 15, 14";
+	need_free_string = 0;
     }
 
 #ifdef DEBUG
@@ -820,6 +822,8 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
 	    }
 	}
     }
+    if (need_free_string)
+	free(preauth_types);
 
 #ifdef DEBUG
     fprintf (stderr, "preauth data types after sorting:");
@@ -861,7 +865,6 @@ krb5_get_init_creds(krb5_context context,
     krb5_kdc_rep *local_as_reply;
     krb5_timestamp time_now;
     krb5_enctype etype = 0;
-    krb5_preauth_context *preauth_context;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -881,7 +884,6 @@ krb5_get_init_creds(krb5_context context,
 
 	local_as_reply = 0;
 
-    preauth_context = NULL;
     err_reply = NULL;
 
     /*
@@ -1017,7 +1019,7 @@ krb5_get_init_creds(krb5_context context,
 	    goto cleanup;
     }
 
-    krb5_init_preauth_context(context, &preauth_context);
+    krb5_preauth_request_context_init(context);
 
     /* nonce is filled in by send_as_request if we don't take care of it */
 
@@ -1084,7 +1086,7 @@ krb5_get_init_creds(krb5_context context,
     request.nonce = (krb5_int32) time_now;
 
     /* give the preauth plugins a chance to prep the request body */
-    krb5_preauth_prepare_request(context, &preauth_context, options, &request);
+    krb5_preauth_prepare_request(context, options, &request);
     ret = encode_krb5_kdc_req_body(&request, &encoded_request_body);
     if (ret)
         goto cleanup;
@@ -1097,7 +1099,7 @@ krb5_get_init_creds(krb5_context context,
 	        krb5_free_pa_data(context, request.padata);
 	        request.padata = NULL;
 	    }
-	    if ((ret = krb5_do_preauth(context, &preauth_context,
+	    if ((ret = krb5_do_preauth(context,
 				       &request,
 				       encoded_request_body,
 				       encoded_previous_request,
@@ -1109,14 +1111,13 @@ krb5_get_init_creds(krb5_context context,
 	} else {
 	    /* retrying after an error other than PREAUTH_NEEDED, using e-data
 	     * to figure out what to change */
-	    if (krb5_do_preauth_tryagain(context, &preauth_context,
+	    if (krb5_do_preauth_tryagain(context,
 					 &request,
 					 encoded_request_body,
 					 encoded_previous_request,
-					 preauth_to_use, err_reply,
-					 &request.padata,
-					 &salt, &s2kparams,
-					 &etype, &as_key,
+					 preauth_to_use,
+					 err_reply,
+					 &salt, &s2kparams, &etype, &as_key,
 					 prompter, prompter_data,
 					 gak_fct, gak_data)) {
 		/* couldn't come up with anything better */
@@ -1188,11 +1189,11 @@ krb5_get_init_creds(krb5_context context,
     }
 
     /* process any preauth data in the as_reply */
-    krb5_clear_preauth_context_use_counts(context, preauth_context);
+    krb5_clear_preauth_context_use_counts(context);
     if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
 					 local_as_reply->padata)))
 	goto cleanup;
-    if ((ret = krb5_do_preauth(context, &preauth_context,
+    if ((ret = krb5_do_preauth(context,
 			       &request,
 			       encoded_request_body, encoded_previous_request,
 			       local_as_reply->padata, &kdc_padata,
@@ -1252,10 +1253,7 @@ krb5_get_init_creds(krb5_context context,
     ret = 0;
 
 cleanup:
-    if (preauth_context != NULL) {
-	krb5_free_preauth_context(context, preauth_context);
-	preauth_context = NULL;
-    }
+    krb5_preauth_request_context_fini(context);
     if (encoded_previous_request != NULL) {
 	krb5_free_data(context, encoded_previous_request);
 	encoded_previous_request = NULL;

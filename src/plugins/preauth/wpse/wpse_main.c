@@ -33,7 +33,7 @@
 #ident "$Id$"
 
 #ifdef HAVE_CONFIG_H
-#include "../config.h"
+#include "config.h"
 #endif
 
 #ifdef HAVE_ERRNO_H
@@ -60,36 +60,36 @@ client_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 }
 
 static krb5_error_code
-client_init(krb5_context kcontext, krb5_preauthtype pa_type, void **ctx)
+client_init(krb5_context kcontext, void **ctx)
 {
-    int *mctx;
+    int *pctx;
 
-    mctx = malloc(sizeof(int));
-    if (mctx == NULL)
+    pctx = malloc(sizeof(int));
+    if (pctx == NULL)
 	return ENOMEM;
-    *mctx = 0;
-    *ctx = mctx;
+    *pctx = 0;
+    *ctx = pctx;
     return 0;
 }
 
 static void
-client_fini(krb5_context kcontext, krb5_preauthtype pa_type, void *ctx)
+client_fini(krb5_context kcontext, void *ctx)
 {
-    int *mctx;
+    int *pctx;
 
-    mctx = ctx;
-    if (mctx) {
+    pctx = ctx;
+    if (pctx) {
 #ifdef DEBUG
-        fprintf(stderr, "wpse module called total of %d times\n", *mctx);
+        fprintf(stderr, "wpse module called total of %d times\n", *pctx);
 #endif
-        free(mctx);
+        free(pctx);
     }
 }
 
 static krb5_error_code
 client_process(krb5_context kcontext,
-	       void *module_context,
-	       void **request_context,
+	       void *plugin_context,
+	       void *request_context,
 	       krb5_kdc_req *request,
 	       krb5_data *encoded_request_body,
 	       krb5_data *encoded_previous_request,
@@ -97,8 +97,8 @@ client_process(krb5_context kcontext,
 	       krb5_prompter_fct prompter,
 	       void *prompter_data,
 	       preauth_get_as_key_proc gak_fct,
-	       krb5_data *salt, krb5_data *s2kparams,
 	       void *gak_data,
+	       krb5_data *salt, krb5_data *s2kparams,
 	       krb5_keyblock *as_key,
 	       krb5_pa_data **out_pa_data)
 {
@@ -106,16 +106,16 @@ client_process(krb5_context kcontext,
     krb5_int32 nnonce, enctype;
     krb5_keyblock *kb;
     krb5_error_code status;
-    int *mctx;
+    int *pctx;
 
 #ifdef DEBUG
     fprintf(stderr, "%d bytes of preauthentication data (type %d)\n",
 	    pa_data->length, pa_data->pa_type);
 #endif
 
-    mctx = module_context;
-    if (mctx) {
-	(*mctx)++;
+    pctx = plugin_context;
+    if (pctx) {
+	(*pctx)++;
     }
 
     if (pa_data->length == 0) {
@@ -134,10 +134,6 @@ client_process(krb5_context kcontext,
 	nnonce = htonl(request->nonce);
 	memcpy(send_pa->contents, &nnonce, 4);
 	*out_pa_data = send_pa;
-	/* Allocate a context. Useful for verifying that we do in fact
-	 * do per-request cleanup. */
-	if (*request_context == NULL)
-	    *request_context = malloc(4);
     } else {
 	/* A reply from the KDC.  Conventionally this would be
 	 * indicated by a different preauthentication type, but this
@@ -163,20 +159,56 @@ client_process(krb5_context kcontext,
     return 0;
 }
 
-static void
-client_cleanup(krb5_context kcontext, void *module_context,
-	       void **request_context)
+#define WPSE_MAGIC 0x77707365
+typedef struct _wpse_req_ctx
 {
-    if (*request_context != NULL) {
-	free(*request_context);
-	*request_context = NULL;
+    int magic;
+    int value;
+} wpse_req_ctx;
+
+static void
+client_req_init(krb5_context kcontext, void *plugin_context, void **req_context_p)
+{
+    wpse_req_ctx *ctx;
+
+    *req_context_p = NULL;
+
+    /* Allocate a request context. Useful for verifying that we do in fact
+     * do per-request cleanup. */
+    ctx = (wpse_req_ctx *) malloc(sizeof(*ctx));
+    if (ctx == NULL)
+	return;
+    ctx->magic = WPSE_MAGIC;
+    ctx->value = 0xc0dec0de;
+
+    *req_context_p = ctx;
+}
+
+static void
+client_req_cleanup(krb5_context kcontext, void *plugin_context, void *req_context)
+{
+    wpse_req_ctx *ctx = (wpse_req_ctx *)req_context;
+
+    if (ctx) {
+#ifdef DEBUG
+	fprintf(stderr, "client_req_cleanup: req_ctx at %p has magic %x and value %x\n",
+		ctx, ctx->magic, ctx->value);
+#endif
+	if (ctx->magic != WPSE_MAGIC) {
+#ifdef DEBUG
+	    fprintf(stderr, "client_req_cleanup: req_context at %p has bad magic value %x\n",
+		    ctx, ctx->magic);
+#endif
+	    return;
+	}
+	free(ctx);
     }
     return;
 }
 
 /* Free state. */
 static krb5_error_code
-server_free_pa_request_context(krb5_context kcontext, void *module_context,
+server_free_pa_request_context(krb5_context kcontext, void *plugin_context,
 			       void **request_context)
 {
     if (*request_context != NULL) {
@@ -317,15 +349,16 @@ static krb5_preauthtype supported_client_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 static krb5_preauthtype supported_server_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 
 struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
-    "wpse",
-    &supported_client_pa_types[0],
-    NULL,
-    client_init,
-    client_fini,
-    client_get_flags,
-    client_cleanup,
-    client_process,
-    NULL,
+    "wpse",				    /* name */
+    &supported_client_pa_types[0],	    /* pa_type_list */
+    NULL,				    /* enctype_list */
+    client_init,			    /* plugin init function */
+    client_fini,			    /* plugin fini function */
+    client_get_flags,			    /* get flags function */
+    client_req_init,			    /* request init function */
+    client_req_cleanup,			    /* request fini function */
+    client_process,			    /* process function */
+    NULL,				    /* try_again function */
 };
 
 struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {

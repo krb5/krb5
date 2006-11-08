@@ -157,20 +157,27 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
      * to add support for. */
     krb5_enctype *enctype_list;
 
-    /* Per-module initialization/cleanup.  The init function is called
-     * by libkrb5 when the module is loaded, and the fini function is
-     * called before the module is unloaded.  Both are optional and
-     * may be called multiple times in case the module is used in
-     * multiple contexts.*/
-    krb5_error_code (*init)(krb5_context, krb5_preauthtype, void **);
-    void (*fini)(krb5_context, krb5_preauthtype, void *);
+    /* Per-plugin initialization/cleanup.  The init function is called
+     * by libkrb5 when the plugin is loaded, and the fini function is
+     * called before the plugin is unloaded.  Both are optional and
+     * may be called multiple times in case the plugin is used in
+     * multiple contexts.  The returned context lives the lifetime of
+     * the krb5_context */
+    krb5_error_code (*init)(krb5_context context, void **plugin_context);
+    void (*fini)(krb5_context context, void *plugin_context);
     /* A callback which returns flags indicating if the module is a "real" or
      * an "info" mechanism, and so on.  This function is called for each entry
      * in the client_pa_type_list. */
-    int (*flags)(krb5_context, krb5_preauthtype);
-    /* Clean up a client context.  Can be NULL. */
-    void (*cleanup)(krb5_context context, void *module_context,
+    int (*flags)(krb5_context context, krb5_preauthtype pa_type);
+    /* Per-request initialization/cleanup.  The request_init function is
+     * called when beginning to process a get_init_creds request and the
+     * request_fini function is called when processing of the request is
+     * complete.  This is optional.  It may be called multiple times in
+     * the lifetime of a krb5_context. */
+    void (*request_init)(krb5_context context, void *plugin_context,
 		    void **request_context);
+    void (*request_fini)(krb5_context context, void *plugin_context,
+		    void *request_context);
     /* Client function which processes server-supplied data in pa_data,
      * returns created data in out_pa_data, storing any of its own state in
      * client_context if data for the associated preauthentication type is
@@ -180,8 +187,8 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
      * function is called, because it is expected to only ever contain the data
      * obtained from a previous call to this function. */
     krb5_error_code (*process)(krb5_context context,
-			       void *module_context,
-			       void **request_context,
+			       void *plugin_context,
+			       void *request_context,
 			       krb5_kdc_req *request,
 			       krb5_data *encoded_request_body,
 			       krb5_data *encoded_previous_request,
@@ -189,8 +196,8 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
 			       krb5_prompter_fct prompter,
 			       void *prompter_data,
 			       preauth_get_as_key_proc gak_fct,
-			       krb5_data *salt, krb5_data *s2kparams,
 			       void *gak_data,
+			       krb5_data *salt, krb5_data *s2kparams,
 			       krb5_keyblock *as_key,
 			       krb5_pa_data **out_pa_data);
     /* Client function which can attempt to use e-data in the error response to
@@ -198,12 +205,19 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
      * it stores data in out_pa_data which is different data from the contents
      * of in_pa_data, then the client library will retransmit the request. */
     krb5_error_code (*tryagain)(krb5_context context,
-				void *module_context,
-				void **request_context,
+				void *plugin_context,
+				void *request_context,
 				krb5_kdc_req *request,
 				krb5_data *encoded_request_body,
-				krb5_error *error,
+				krb5_data *encoded_previous_request,
 				krb5_pa_data *in_pa_data,
+				krb5_error *error,
+				krb5_prompter_fct prompter,
+				void *prompter_data,
+				preauth_get_as_key_proc gak_fct,
+				void *gak_data,
+				krb5_data *salt, krb5_data *s2kparams,
+				krb5_keyblock *as_key,
 				krb5_pa_data **out_pa_data);
 } krb5plugin_preauth_client_ftable_v0;
 
@@ -223,11 +237,11 @@ typedef struct krb5plugin_preauth_server_ftable_v0 {
      * provide services for. */
     krb5_preauthtype *pa_type_list;
 
-    /* Per-module initialization/cleanup.  The init function is called by the
-     * KDC when the module is loaded, and the fini function is called before
-     * the module is unloaded.  Both are optional. */
-    krb5_error_code (*init_proc)(krb5_context, krb5_preauthtype, void **);
-    void (*fini_proc)(krb5_context, krb5_preauthtype, void *);
+    /* Per-plugin initialization/cleanup.  The init function is called by the
+     * KDC when the plugin is loaded, and the fini function is called before
+     * the plugin is unloaded.  Both are optional. */
+    krb5_error_code (*init_proc)(krb5_context, void **);
+    void (*fini_proc)(krb5_context, void *);
     /* Return the flags which the KDC should use for this module.  This is a
      * callback instead of a static value because the module may or may not
      * wish to count itself as a hardware preauthentication module (in other

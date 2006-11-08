@@ -552,9 +552,6 @@ krb5int_locate_server (krb5_context, const krb5_data *realm,
 
 #endif /* KRB5_LIBOS_PROTO__ */
 
-#include <krb5/preauth_plugin.h>
-typedef struct _krb5_preauth_context krb5_preauth_context;
-
 /* new encryption provider api */
 
 struct krb5_enc_provider {
@@ -844,6 +841,71 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 #ifndef KRB5_PREAUTH__
 #define KRB5_PREAUTH__
 
+#include <krb5/preauth_plugin.h>
+
+/* This structure lets us keep track of all of the modules which are loaded,
+ * turning the list of modules and their lists of implemented preauth types
+ * into a single list which we can walk easily. */
+typedef struct _krb5_preauth_context {
+    int n_modules;
+    struct _krb5_preauth_context_module {
+	/* Which of the possibly more than one preauth types which the
+	 * module supports we're using at this point in the list. */
+	krb5_preauthtype pa_type;
+	/* Encryption types which the client claims to support -- we
+	 * copy them directly into the krb5_kdc_req structure during
+	 * krb5_preauth_prepare_request(). */
+	krb5_enctype *enctypes;
+	/* The plugin's per-plugin context and a function to clear it. */
+	void *plugin_context;
+	void (*client_fini)(krb5_context context, void *plugin_context);
+	/* The module's table, and some of its members, copied here for
+	 * convenience when we populated the list. */
+	struct krb5plugin_preauth_client_ftable_v0 *ftable;
+	const char *name;
+	int flags, use_count;
+	krb5_error_code (*client_process)(krb5_context context,
+					  void *plugin_context,
+					  void *request_context,
+					  krb5_kdc_req *request,
+					  krb5_data *encoded_request_body,
+					  krb5_data *encoded_previous_request,
+					  krb5_pa_data *pa_data,
+					  krb5_prompter_fct prompter,
+					  void *prompter_data,
+					  preauth_get_as_key_proc gak_fct,
+					  void *gak_data,
+					  krb5_data *salt,
+					  krb5_data *s2kparams,
+					  krb5_keyblock *as_key,
+					  krb5_pa_data **out_pa_data);
+	krb5_error_code (*client_tryagain)(krb5_context context,
+					   void *plugin_context,
+					   void *request_context,
+					   krb5_kdc_req *request,
+					   krb5_data *encoded_request_body,
+					   krb5_data *encoded_previous_request,
+					   krb5_pa_data *old_pa_data,
+					   krb5_error *err_reply,
+					   krb5_prompter_fct prompter,
+					   void *prompter_data,
+					   preauth_get_as_key_proc gak_fct,
+					   void *gak_data,
+					   krb5_data *salt,
+					   krb5_data *s2kparams,
+					   krb5_keyblock *as_key,
+					   krb5_pa_data **new_pa_data);
+	void (*client_req_init)(krb5_context context, void *plugin_context,
+			       void **request_context);
+	void (*client_req_fini)(krb5_context context, void *plugin_context,
+			       void *request_context);
+	/* The per-pa_type context which the client_process() function
+	 * might allocate, which we'll need to clean up later by
+	 * calling the client_cleanup() function. */
+	void *request_context;
+    } *modules;
+} krb5_preauth_context;
+
 typedef struct _krb5_pa_enc_ts {
     krb5_timestamp	patimestamp;
     krb5_int32		pausec;
@@ -970,23 +1032,39 @@ void krb5int_populate_gic_opt (
     krb5_preauthtype *pre_auth_types, krb5_creds *creds);
 
 
-krb5_error_code krb5_do_preauth
-(krb5_context, krb5_preauth_context **, krb5_kdc_req *, krb5_data *,
-		krb5_data *, krb5_pa_data **, krb5_pa_data ***,
-		krb5_data *salt, krb5_data *s2kparams,
- krb5_enctype *,
-		krb5_keyblock *,
-		krb5_prompter_fct, void *,
-		krb5_gic_get_as_key_fct, void *);
+krb5_error_code KRB5_CALLCONV krb5_do_preauth
+	(krb5_context context,
+	 krb5_kdc_req *request,
+	 krb5_data *encoded_request_body,
+	 krb5_data *encoded_previous_request,
+	 krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
+	 krb5_data *salt, krb5_data *s2kparams,
+	 krb5_enctype *etype, krb5_keyblock *as_key,
+	 krb5_prompter_fct prompter, void *prompter_data,
+	 krb5_gic_get_as_key_fct gak_fct, void *gak_data);
+krb5_error_code KRB5_CALLCONV krb5_do_preauth_tryagain
+	(krb5_context context,
+	 krb5_kdc_req *request,
+	 krb5_data *encoded_request_body,
+	 krb5_data *encoded_previous_request,
+	 krb5_pa_data **in_padata,
+	 krb5_error *err_reply,
+	 krb5_data *salt, krb5_data *s2kparams,
+	 krb5_enctype *etype, krb5_keyblock *as_key,
+	 krb5_prompter_fct prompter, void *prompter_data,
+	 krb5_gic_get_as_key_fct gak_fct, void *gak_data);
 void KRB5_CALLCONV krb5_init_preauth_context
-	(krb5_context, krb5_preauth_context **);
-void KRB5_CALLCONV krb5_clear_preauth_context_use_counts
-	(krb5_context, krb5_preauth_context *);
-void KRB5_CALLCONV krb5_preauth_prepare_request
-	(krb5_context, krb5_preauth_context **,
-	 krb5_get_init_creds_opt *, krb5_kdc_req *);
+	(krb5_context);
 void KRB5_CALLCONV krb5_free_preauth_context
-	(krb5_context, krb5_preauth_context *);
+	(krb5_context);
+void KRB5_CALLCONV krb5_clear_preauth_context_use_counts
+	(krb5_context);
+void KRB5_CALLCONV krb5_preauth_prepare_request
+	(krb5_context, krb5_get_init_creds_opt *, krb5_kdc_req *);
+void KRB5_CALLCONV krb5_preauth_request_context_init
+	(krb5_context);
+void KRB5_CALLCONV krb5_preauth_request_context_fini
+	(krb5_context);
 
 void KRB5_CALLCONV krb5_free_sam_challenge
 	(krb5_context, krb5_sam_challenge * );
@@ -1079,6 +1157,7 @@ struct _krb5_context {
 
     /* preauth module stuff */
     struct plugin_dir_handle preauth_plugins;
+    krb5_preauth_context *preauth_context;
 
     /* error detail info */
     struct errinfo err;
