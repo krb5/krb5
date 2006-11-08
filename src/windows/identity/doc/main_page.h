@@ -76,11 +76,6 @@
     NetIDMgr was developed at the Massachusetts Institute of
     Technology.
 
-    (Contributor list goes here)
-
-    At the moment, no contributers have come forward to accept
-    responsibility.
-
     <a href="http://web.mit.edu/is">Information Services and
     Technology</a> at <a href="http://web.mit.edu">Massachusetts
     Institute of Technology</a>

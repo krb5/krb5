@@ -1700,72 +1700,69 @@ cw_erase_rect(HDC hdc,
     BOOL rie;
     HBRUSH hbr;
 
-    if(RectVisible(hdc, r_erase)) {
+    switch(type) {
+    case CW_ER_BLANK:
+        hbr = tbl->hb_normal;
+        break;
 
-        switch(type) {
-        case CW_ER_BLANK:
-            hbr = tbl->hb_normal;
-            break;
+    case CW_ER_GREY:
+        hbr = tbl->hb_grey;
+        break;
 
-        case CW_ER_GREY:
-            hbr = tbl->hb_grey;
-            break;
+    case CW_ER_SEL:
+        hbr = tbl->hb_sel;
+        break;
 
-        case CW_ER_SEL:
-            hbr = tbl->hb_sel;
-            break;
+    default:
+        return;
+    }
 
-        default:
-            return;
-        }
+    if(tbl->kbm_logo_shade.cx != -1 && type == CW_ER_BLANK) {
+        rlogo.left = r_wnd->right - tbl->kbm_logo_shade.cx;
+        rlogo.right = r_wnd->right;
+        rlogo.top = r_wnd->bottom - tbl->kbm_logo_shade.cy;
+        rlogo.bottom = r_wnd->bottom;
+        rie = IntersectRect(&ri, r_erase, &rlogo);
+    } else {
+        ZeroMemory(&rlogo, sizeof(rlogo));
+        ZeroMemory(&ri, sizeof(ri));
+        rie = FALSE;
+    }
 
-        if(tbl->kbm_logo_shade.cx != -1 && type == CW_ER_BLANK) {
-            rlogo.left = r_wnd->right - tbl->kbm_logo_shade.cx;
-            rlogo.right = r_wnd->right;
-            rlogo.top = r_wnd->bottom - tbl->kbm_logo_shade.cy;
-            rlogo.bottom = r_wnd->bottom;
-            rie = IntersectRect(&ri, r_erase, &rlogo);
-        } else {
-            ZeroMemory(&rlogo, sizeof(rlogo));
-            ZeroMemory(&ri, sizeof(ri));
-            rie = FALSE;
-        }
-
-        if(!rie) {
-            FillRect(hdc, r_erase, hbr);
-        } else {
-            HDC hdcb = CreateCompatibleDC(hdc);
-            HBITMAP hbmold = SelectObject(hdcb, tbl->kbm_logo_shade.hbmp);
-
-            BitBlt(hdc, ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top,
-                   hdcb, ri.left - rlogo.left, ri.top - rlogo.top, SRCCOPY);
+    if(!rie) {
+        FillRect(hdc, r_erase, hbr);
+    } else {
+        HDC hdcb = CreateCompatibleDC(hdc);
+        HBITMAP hbmold = SelectObject(hdcb, tbl->kbm_logo_shade.hbmp);
+        
+        BitBlt(hdc, ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top,
+               hdcb, ri.left - rlogo.left, ri.top - rlogo.top, SRCCOPY);
             
-            SelectObject(hdcb, hbmold);
-            DeleteDC(hdcb);
+        SelectObject(hdcb, hbmold);
+        DeleteDC(hdcb);
 
-            if(r_erase->top < ri.top && r_erase->left < ri.left) {
-                t.left = r_erase->left;
-                t.top = r_erase->top;
-                t.right = ri.left;
-                t.bottom = ri.top;
-                FillRect(hdc, &t, hbr);
-            }
+        if(r_erase->top < ri.top && r_erase->left < ri.left) {
+            t.left = r_erase->left;
+            t.top = r_erase->top;
+            t.right = ri.left;
+            t.bottom = ri.top;
+            FillRect(hdc, &t, hbr);
+        }
 
-            if(r_erase->left < ri.left) {
-                t.left = r_erase->left;
-                t.top = ri.top;
-                t.right = ri.left;
-                t.bottom = ri.bottom;
-                FillRect(hdc, &t, hbr);
-            }
+        if(r_erase->left < ri.left) {
+            t.left = r_erase->left;
+            t.top = ri.top;
+            t.right = ri.left;
+            t.bottom = ri.bottom;
+            FillRect(hdc, &t, hbr);
+        }
 
-            if(r_erase->top < ri.top) {
-                t.left = ri.left;
-                t.top = r_erase->top;
-                t.right = ri.right;
-                t.bottom = ri.top;
-                FillRect(hdc, &t, hbr);
-            }
+        if(r_erase->top < ri.top) {
+            t.left = ri.left;
+            t.top = r_erase->top;
+            t.right = ri.right;
+            t.bottom = ri.top;
+            FillRect(hdc, &t, hbr);
         }
     }
 }
@@ -2322,6 +2319,7 @@ cw_wm_destroy(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+/* handles WM_PAINT and WM_PRINTCLIENT */
 LRESULT 
 cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -2336,13 +2334,28 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     int flag_col = -1;
     int d_x = -1;
     int selected = 0;
+    BOOL has_dc = FALSE;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
 
-    if(!GetUpdateRect(hwnd, &r, FALSE))
-        goto _exit;
+    if (wParam != 0) {
+        /* we assume that if wParam != 0, then that contains a device
+           context for us to draw in.  Otherwise, we have to call
+           BeginPaint() to get one. */
+        hdc = (HDC) wParam;
+        has_dc = TRUE;
+    }
 
-    hdc = BeginPaint(hwnd, &ps);
+    if(!has_dc && !GetUpdateRect(hwnd, &r, FALSE)) {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+        goto _exit;
+    }
+
+    if (!has_dc)
+        hdc = BeginPaint(hwnd, &ps);
+
     if(tbl->hf_normal)
         hf_old = SelectFont(hdc, tbl->hf_normal);
     SetTextAlign(hdc, TA_LEFT | TA_TOP | TA_NOUPDATECP);
@@ -2451,9 +2464,6 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 rh.left = x;
                 rh.right = x + tbl->cols[j].width;
 
-                if(!RectVisible(hdc, &rh))
-                    continue;
-
                 if(!cw_is_custom_attr(tbl->cols[j].attr_id)) {
                     if(!(tbl->rows[i].flags & KHUI_CW_ROW_HEADER)) {
                         cw_erase_rect(hdc, tbl, &r, &rh, (selected)?CW_ER_SEL:CW_ER_BLANK);
@@ -2471,7 +2481,6 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                             SetTextAlign(hdc, 0);
                             DrawText(hdc, buf, (int)((cbbuf / sizeof(wchar_t)) - 1), &rh,
                                      DT_LEFT | DT_VCENTER | DT_NOCLIP | DT_SINGLELINE | DT_END_ELLIPSIS);
-                            //TextOut(hdc, x, y + tbl->vpad, buf, (cbbuf / sizeof(wchar_t)) - 1);
                         }
                     }
                 } else {
@@ -2574,9 +2583,11 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(tbl->hf_normal)
         SelectFont(hdc, hf_old);
 
-    EndPaint(hwnd,&ps);
-_exit:
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+    if (!has_dc)
+        EndPaint(hwnd,&ps);
+
+ _exit:
+    return TRUE;
 }
 
 LRESULT 
@@ -4519,9 +4530,12 @@ khm_credwnd_proc(HWND hwnd,
         /* we don't bother wasting cycles erasing the background
            because the foreground elements completely cover the
            client area */
-        return TRUE;
+        return FALSE;
 
     case WM_PAINT:
+        return cw_wm_paint(hwnd, uMsg, wParam, lParam);
+
+    case WM_PRINTCLIENT:
         return cw_wm_paint(hwnd, uMsg, wParam, lParam);
 
     case WM_SIZE:

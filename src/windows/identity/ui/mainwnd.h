@@ -38,6 +38,7 @@ void khm_register_main_wnd_class(void);
 void khm_unregister_main_wnd_class(void);
 void khm_create_main_window_controls(HWND);
 void khm_create_main_window(void);
+void khm_activate_main_window(void);
 void khm_show_main_window(void);
 void khm_close_main_window(void);
 void khm_hide_main_window(void);

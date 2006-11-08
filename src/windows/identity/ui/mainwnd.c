@@ -803,6 +803,25 @@ khm_show_main_window(void) {
     khm_nCmdShow = SW_RESTORE;
 }
 
+void
+khm_activate_main_window(void) {
+
+    if (!SetForegroundWindow(khm_hwnd_main)) {
+        FLASHWINFO finfo;
+
+        SetActiveWindow(khm_hwnd_main);
+
+        ZeroMemory(&finfo, sizeof(finfo));
+        finfo.cbSize = sizeof(finfo);
+        finfo.hwnd = khm_hwnd_main;
+        finfo.dwFlags = FLASHW_ALL;
+        finfo.uCount = 3;
+        finfo.dwTimeout = 0;
+
+        FlashWindowEx(&finfo);
+    }
+}
+
 void 
 khm_close_main_window(void) {
     khm_handle csp_cw;
