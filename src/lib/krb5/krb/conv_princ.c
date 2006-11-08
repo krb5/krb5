@@ -253,7 +253,7 @@ krb5_425_conv_principal(krb5_context context, const char *name, const char *inst
      krb5_error_code retval;
      char *domain, *cp;
      char **full_name = 0;
-     const char *names[5];
+     const char *names[2], *names2[5];
      void*	iterator = NULL;
      char** v4realms = NULL;
      char* realm_name = NULL;
@@ -262,9 +262,9 @@ krb5_425_conv_principal(krb5_context context, const char *name, const char *inst
      /* First, convert the realm, since the v4 realm is not necessarily the same as the v5 realm
         To do that, iterate over all the realms in the config file, looking for a matching 
         v4_realm line */
-     names [0] = "realms";
-     names [1] = NULL;
-     retval = profile_iterator_create (context -> profile, names, PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY, &iterator);
+     names2 [0] = "realms";
+     names2 [1] = NULL;
+     retval = profile_iterator_create (context -> profile, names2, PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY, &iterator);
      while (retval == 0) {
      	retval = profile_iterator (&iterator, &realm_name, &dummy_value);
      	if ((retval == 0) && (realm_name != NULL)) {
@@ -340,7 +340,7 @@ krb5_425_conv_principal(krb5_context context, const char *name, const char *inst
 	  }
      }
      
-not_service:	
+not_service:
      retval = krb5_build_principal(context, princ, strlen(realm), realm, name,
 				   instance, NULL);
      if (iterator) profile_iterator_free (&iterator);
