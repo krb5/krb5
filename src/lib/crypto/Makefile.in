@@ -215,7 +215,7 @@ t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o t_prng.o t_prng \
-		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o
+		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o
 	-$(RM) t_prng.output
 
 all-windows::
