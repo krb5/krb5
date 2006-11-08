@@ -866,11 +866,6 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
 
             end = wcschr(str, L'\\'); /* safe because cspace was
                                      validated above */
-#if 0
-            if(!end)
-                end = wcschr(str, L'/');  /* safe because cspace was
-                                         validated above */
-#endif
         }
 
         if(!end) {
@@ -886,11 +881,7 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
 
         rv = khcint_open_space(p, str, end - str, flags, &c);
 
-        if(KHM_SUCCEEDED(rv) && (*end == L'\\'
-#if 0
-                                 || *end == L'/'
-#endif
-                                 )) {
+        if(KHM_SUCCEEDED(rv) && (*end == L'\\')) {
             khcint_space_release(p);
             p = c;
             c = NULL;
@@ -951,11 +942,7 @@ khc_read_string(khm_handle pconf,
 
         int i;
 
-        if(wcschr(pvalue, L'\\')
-#if 0
-           || wcschr(pvalue, L'/')
-#endif
-           ) {
+        if((value = wcsrchr(pvalue, L'\\')) != NULL) {
 
             if(KHM_FAILED(khc_open_space(
                 pconf, 
@@ -965,15 +952,14 @@ khc_read_string(khm_handle pconf,
                 goto _shadow;
 
             free_space = 1;
-#if 0
-            const wchar_t * back, * forward;
 
-            back = wcsrchr(pvalue, L'\\');
-            forward = wcsrchr(pvalue, L'/');
-            value = (back > forward)?back:forward; /* works for nulls too */
-#else
-            value = wcsrchr(pvalue, L'\\');
+            if (value) {
+                value++;
+            } else {
+#ifdef DEBUG
+                assert(FALSE);
 #endif
+            }
         } else {
             value = pvalue;
             conf = pconf;
@@ -1115,11 +1101,7 @@ khc_read_int32(khm_handle pconf, const wchar_t * pvalue, khm_int32 * buf) {
 
         int i;
 
-        if(wcschr(pvalue, L'\\')
-#if 0
-           || wcschr(pvalue, L'/')
-#endif
-           ) {
+        if((value = wcsrchr(pvalue, L'\\')) != NULL) {
             if(KHM_FAILED(khc_open_space(
                 pconf, 
                 pvalue, 
@@ -1127,15 +1109,14 @@ khc_read_int32(khm_handle pconf, const wchar_t * pvalue, khm_int32 * buf) {
                 &conf)))
                 goto _shadow;
             free_space = 1;
-#if 0
-            const wchar_t * back, * forward;
 
-            back = wcsrchr(pvalue, L'\\');
-            forward = wcsrchr(pvalue, L'/');
-            value = (back > forward)?back:forward;
-#else
-            value = wcsrchr(pvalue, L'\\');
+            if (value) {
+                value++;
+            } else {
+#ifdef DEBUG
+                assert(FALSE);
 #endif
+            }
         } else {
             value = pvalue;
             conf = pconf;
@@ -1235,11 +1216,7 @@ khc_read_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 * buf) {
 
         int i;
 
-        if(wcschr(pvalue, L'\\')
-#if 0
-           || wcschr(pvalue, L'/')
-#endif
-           ) {
+        if((value = wcsrchr(pvalue, L'\\')) != NULL) {
             if(KHM_FAILED(khc_open_space(
                 pconf, 
                 pvalue, 
@@ -1247,15 +1224,14 @@ khc_read_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 * buf) {
                 &conf)))
                 goto _shadow;
             free_space = 1;
-#if 0
-            const wchar_t * back, *forward;
 
-            back = wcsrchr(pvalue, L'\\');
-            forward = wcsrchr(pvalue, L'/');
-            value = (back > forward)?back:forward;
-#else
-            value = wcsrchr(pvalue, L'\\');
+            if (value) {
+                value++;
+            } else {
+#ifdef DEBUG
+                assert(FALSE);
 #endif
+            }
         } else {
             value = pvalue;
             conf = pconf;
@@ -1354,11 +1330,7 @@ khc_read_binary(khm_handle pconf, const wchar_t * pvalue,
         int free_space = 0;
         khm_handle conf = NULL;
 
-        if(wcschr(pvalue, L'\\')
-#if 0
-           || wcschr(pvalue, L'/')
-#endif
-           ) {
+        if((value = wcsrchr(pvalue, L'\\')) != NULL) {
             if(KHM_FAILED(khc_open_space(
                 pconf, 
                 pvalue, 
@@ -1366,15 +1338,14 @@ khc_read_binary(khm_handle pconf, const wchar_t * pvalue,
                 &conf)))
                 goto _shadow;
             free_space = 1;
-#if 0
-            const wchar_t * back, *forward;
 
-            back = wcsrchr(pvalue, L'\\');
-            forward = wcsrchr(pvalue, L'/');
-            value = (back > forward)?back:forward;
-#else
-            value = wcsrchr(pvalue, L'\\');
+            if (value) {
+                value++;
+            } else {
+#ifdef DEBUG
+                assert(FALSE);
 #endif
+            }
         } else {
             value = pvalue;
             conf = pconf;
@@ -1515,25 +1486,20 @@ khc_write_string(khm_handle pconf,
         }
     }
 
-    if(wcschr(pvalue, L'\\')
-#if 0
-       || wcschr(pvalue, L'/')
-#endif
-       ) {
+    if((value = wcsrchr(pvalue, L'\\')) != NULL) {
         if(KHM_FAILED(khc_open_space(pconf, pvalue, 
                                      KCONF_FLAG_TRAILINGVALUE | (pconf?khc_handle_flags(pconf):0), 
                                      &conf)))
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
-#if 0
-        const wchar_t * back, *forward;
 
-        back = wcsrchr(pvalue, L'\\');
-        forward = wcsrchr(pvalue, L'/');
-        value = (back > forward)?back:forward;
-#else
-        value = wcsrchr(pvalue, L'\\');
+        if (value) {
+            value ++;
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
 #endif
+        }
     } else {
         value = pvalue;
         conf = pconf;
@@ -1594,11 +1560,7 @@ khc_write_int32(khm_handle pconf,
         }
     }
 
-    if(wcschr(pvalue, L'\\')
-#if 0
-       || wcschr(pvalue, L'/')
-#endif
-       ) {
+    if((value = wcsrchr(pvalue, L'\\')) != NULL) {
         if(KHM_FAILED(khc_open_space(
             pconf, 
             pvalue, 
@@ -1606,15 +1568,14 @@ khc_write_int32(khm_handle pconf,
             &conf)))
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
-#if 0
-        const wchar_t * back, *forward;
 
-        back = wcsrchr(pvalue, L'\\');
-        forward = wcsrchr(pvalue, L'/');
-        value = (back > forward)?back:forward;
-#else
-        value = wcsrchr(pvalue, L'\\');
+        if (value) {
+            value ++;
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
 #endif
+        }
     } else {
         value = pvalue;
         conf = pconf;
@@ -1670,11 +1631,7 @@ khc_write_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 buf) {
         }
     }
 
-    if(wcschr(pvalue, L'\\')
-#if 0
-       || wcschr(pvalue, L'/')
-#endif
-       ) {
+    if((value = wcsrchr(pvalue, L'\\')) != NULL) {
         if(KHM_FAILED(khc_open_space(
             pconf, 
             pvalue, 
@@ -1682,15 +1639,14 @@ khc_write_int64(khm_handle pconf, const wchar_t * pvalue, khm_int64 buf) {
             &conf)))
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
-#if 0
-        const wchar_t * back, *forward;
 
-        back = wcsrchr(pvalue, L'\\');
-        forward = wcsrchr(pvalue, L'/');
-        value = (back > forward)?back:forward;
-#else
-        value = wcsrchr(pvalue, L'\\');
+        if (value) {
+            value ++;
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
 #endif
+        }
     } else {
         value = pvalue;
         conf = pconf;
@@ -1739,11 +1695,7 @@ khc_write_binary(khm_handle pconf,
     if(pconf && !khc_is_machine_handle(pconf) && !khc_is_user_handle(pconf))
         return KHM_ERROR_INVALID_OPERATION;
 
-    if(wcschr(pvalue, L'\\')
-#if 0
-       || wcschr(pvalue, L'/')
-#endif
-       ) {
+    if((value = wcsrchr(pvalue, L'\\')) != NULL) {
         if(KHM_FAILED(khc_open_space(
             pconf, 
             pvalue, 
@@ -1751,15 +1703,14 @@ khc_write_binary(khm_handle pconf,
             &conf)))
             return KHM_ERROR_INVALID_PARAM;
         free_space = 1;
-#if 0
-        const wchar_t * back, *forward;
 
-        back = wcsrchr(pvalue, L'\\');
-        forward = wcsrchr(pvalue, L'/');
-        value = (back > forward)?back:forward;
-#else
-        value = wcsrchr(pvalue, L'\\');
+        if (value) {
+            value ++;
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
 #endif
+        }
     } else {
         value = pvalue;
         conf = pconf;
