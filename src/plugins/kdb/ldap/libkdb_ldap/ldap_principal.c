@@ -27,6 +27,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
 
 #include "ldap_main.h"
 #include "kdb_ldap.h"
@@ -130,7 +134,6 @@ krb5_ldap_free_principal(kcontext , entries, nentries)
     return 0;
 }
 
-
 krb5_error_code
 krb5_ldap_iterate(context, match_expr, func, func_arg)
     krb5_context           context;
@@ -141,7 +144,6 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
     krb5_db_entry            entry;
     krb5_principal           principal;
     char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL; 
-    char                     *krbprincipal_attr[] = { "krbPrincipalName", NULL };
     unsigned int             filterlen=0, tree=0, ntree=1, i=0;
     krb5_error_code          st=0, tempst=0;
     LDAP                     *ld=NULL;
@@ -184,21 +186,29 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 
     GET_HANDLE();
 
-    for (tree=0; tree<ntree; ++tree) {
+    for (tree=0; tree < ntree; ++tree) {
 
-	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, krbprincipal_attr);
+	LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
 	for (ent=ldap_first_entry(ld, result); ent != NULL; ent=ldap_next_entry(ld, ent)) {
 	    if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
 		for (i=0; values[i] != NULL; ++i) {
+		    if (values[i])
 		    if (krb5_ldap_parse_principal_name(values[i], &princ_name) != 0)
 			continue;
 		    if (krb5_parse_name(context, princ_name, &principal) != 0)
 			continue;
 		    if (is_principal_in_realm(ldap_context, principal) == 0) {
-			entry.princ = principal;
+			if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent, principal,
+				    &entry)) != 0)
+			    goto cleanup;
 			(*func)(func_arg, &entry);
+			krb5_dbe_free_contents(context, &entry);
+			(void) krb5_free_principal(context, principal);
+			if (princ_name)
+			    free(princ_name);
+			break;
 		    }
-		    krb5_free_principal(context, principal);
+		    (void) krb5_free_principal(context, principal);
 		    if (princ_name)
 			free(princ_name);
 		}

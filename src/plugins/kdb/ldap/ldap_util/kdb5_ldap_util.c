@@ -293,7 +293,6 @@ int main(argc, argv)
     char *bind_dn = NULL;
     char *passwd = NULL;
     char *ldap_server = NULL;
-    char *ldap_port = NULL;
     unsigned int ldapmask = 0;
     unsigned int passwd_len = 0;
     char *prompt = NULL;

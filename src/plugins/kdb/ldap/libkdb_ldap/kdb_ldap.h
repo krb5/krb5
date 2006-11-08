@@ -68,6 +68,10 @@ extern struct timeval timelimit;
 #define  KERBEROS_CONTAINER "cn=Kerberos,cn=Security"
 #endif
 
+#if !defined(LDAP_OPT_RESULT_CODE) && defined(LDAP_OPT_ERROR_NUMBER)
+#define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
+#endif
+
 #define NEG(val)   (val <0) ? abs(val) : -val ;
 #define MAXINTLEN  10
 

@@ -382,10 +382,13 @@ setup_signal_handlers(void)
     (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
     s_action.sa_handler = request_hup;
     (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
+    s_action.sa_handler = SIG_IGN;
+    (void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
 #else  /* POSIX_SIGNALS */
     signal(SIGINT, request_exit);
     signal(SIGTERM, request_exit);
     signal(SIGHUP, request_hup);
+    signal(SIGPIPE, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 
     return;
