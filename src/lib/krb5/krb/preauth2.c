@@ -327,6 +327,66 @@ grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
     return 0;
 }
 
+/*
+ * Retrieve a specific piece of information required by the plugin and
+ * return it in a new krb5_data item.  There are separate request_types
+ * to obtain the data and free it.
+ *
+ * This may require massaging data into a contrived format, but it will
+ * hopefully keep us from having to reveal library-internal functions
+ * or data to the plugin modules.
+ */
+
+static krb5_error_code
+client_data_proc(krb5_context kcontext,
+		 krb5_preauth_client_rock *rock,
+		 krb5_int32 request_type,
+		 krb5_data **retdata)
+{
+    krb5_data *ret;
+    char *data;
+
+    if (rock->magic != CLIENT_ROCK_MAGIC)
+	return EINVAL;
+    if (retdata == NULL)
+	return EINVAL;
+
+    switch (request_type) {
+    case krb5plugin_preauth_client_get_etype:
+	{
+	    krb5_enctype *eptr;
+	    if (rock->as_reply == NULL)
+		return ENOENT;
+	    ret = malloc(sizeof(krb5_data));
+	    if (ret == NULL)
+		return ENOMEM;
+	    data = malloc(sizeof(krb5_enctype));
+	    if (data == NULL) {
+		free(ret);
+		return ENOMEM;
+	    }
+	    ret->data = data;
+	    ret->length = sizeof(krb5_enctype);
+	    eptr = (krb5_enctype *)data;
+	    *eptr = rock->as_reply->enc_part.enctype;
+	    *retdata = ret;
+	    return 0;
+	}
+	break;
+    case krb5plugin_preauth_client_free_etype:
+	ret = *retdata;
+	if (ret == NULL)
+	    return 0;
+	if (ret->data)
+	    free(ret->data);
+	free(ret);
+	return 0;
+	break;
+    default:
+	return EINVAL;
+    }
+}
+
 /* Tweak the request body, for now adding any enctypes which the module claims
  * to add support for to the list, but in the future perhaps doing more
  * involved things. */
@@ -370,6 +430,7 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 			 krb5_data *salt,
 			 krb5_data *s2kparams,
 			 void *gak_data,
+			 krb5_preauth_client_rock *get_data_rock,
 			 krb5_keyblock *as_key,
 			 krb5_pa_data ***out_pa_list,
 			 int *out_pa_list_size,
@@ -413,6 +474,8 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 	ret = module->client_process(kcontext,
 				     module->plugin_context,
 				     module->request_context,
+				     client_data_proc,
+				     get_data_rock,
 				     request,
 				     encoded_request_body,
 				     encoded_previous_request,
@@ -1221,7 +1284,8 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_enctype *etype,
 			 krb5_keyblock *as_key,
 			 krb5_prompter_fct prompter, void *prompter_data,
-			 krb5_gic_get_as_key_fct gak_fct, void *gak_data)
+			 krb5_gic_get_as_key_fct gak_fct, void *gak_data,
+			 krb5_preauth_client_rock *get_data_rock)
 {
     krb5_error_code ret;
     krb5_pa_data *out_padata;
@@ -1251,6 +1315,8 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 	    if ((*module->client_tryagain)(kcontext,
 					   module->plugin_context,
 					   module->request_context,
+					   client_data_proc,
+					   get_data_rock,
 					   request,
 					   encoded_request_body,
 					   encoded_previous_request,
@@ -1283,7 +1349,8 @@ krb5_do_preauth(krb5_context context,
 		krb5_enctype *etype,
 		krb5_keyblock *as_key,
 		krb5_prompter_fct prompter, void *prompter_data,
-		krb5_gic_get_as_key_fct gak_fct, void *gak_data)
+		krb5_gic_get_as_key_fct gak_fct, void *gak_data,
+		krb5_preauth_client_rock *get_data_rock)
 {
     int h, i, j, out_pa_list_size;
     int seen_etype_info2 = 0;
@@ -1471,6 +1538,7 @@ krb5_do_preauth(krb5_context context,
 						   gak_fct,
 						   salt, s2kparams,
 						   gak_data,
+						   get_data_rock,
 						   as_key,
 						   &out_pa_list,
 						   &out_pa_list_size,
