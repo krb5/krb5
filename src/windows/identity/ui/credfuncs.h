@@ -34,9 +34,6 @@ void
 khm_cred_destroy_creds(khm_boolean sync,
                        khm_boolean quiet);
 
-void
-khm_cred_destroy_identity(khm_handle identity);
-
 void 
 khm_cred_renew_identity(khm_handle identity);
 
