@@ -43,13 +43,6 @@ int krb524_convert_tkt_skey
 		   krb5_keyblock *v5_skey, krb5_keyblock *v4_skey,
 			struct sockaddr_in *saddr);
 
-/* conv_princ.c */
-
-int krb524_convert_princs
-	(krb5_context context, krb5_principal client, krb5_principal server,
-	 char *pname, char *pinst, char *prealm,
-	 char *sname, char *sinst, char *srealm);
-
 KRB524INT_END_DECLS
 
 #endif /* KRB524INT_H */
