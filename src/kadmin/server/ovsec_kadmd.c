@@ -301,15 +301,6 @@ int main(int argc, char *argv[])
 
      krb5_klog_init(context, "admin_server", whoami, 1);
 
-     krb5_klog_syslog(LOG_INFO, "Seeding random number generator");
-          ret = krb5_c_random_os_entropy(context, 1, NULL);
-	  if(ret) {
-	    krb5_klog_syslog(LOG_ERR,
-			     "Error getting random seed: %s, aborting",
-			     krb5_get_error_message (context, ret));
-	    exit(1);
-	  }
-	  
      if((ret = kadm5_init("kadmind", NULL,
 			  NULL, &params,
 			  KADM5_STRUCT_VERSION,
@@ -639,6 +630,17 @@ kterr:
 	  exit(1);
      }
      
+     krb5_klog_syslog(LOG_INFO, "Seeding random number generator");
+     ret = krb5_c_random_os_entropy(context, 1, NULL);
+     if (ret) {
+	  krb5_klog_syslog(LOG_ERR, "Error getting random seed: %s, aborting",
+			   krb5_get_error_message(context, ret));
+	  svcauth_gssapi_unset_names();
+	  kadm5_destroy(global_server_handle);
+	  krb5_klog_close(context);
+	  exit(1);
+     }
+	  
      setup_signal_handlers();
      krb5_klog_syslog(LOG_INFO, "starting");
      kadm_svc_run(&params);
