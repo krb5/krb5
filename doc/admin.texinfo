@@ -1401,6 +1401,7 @@ authenticate to KADM5.
 * Policies::                    
 * Global Operations on the Kerberos Database::  
 * Cross-realm Authentication::  
+* Changing the krbtgt Key::
 @end menu
 
 @node Kadmin Options, Date Format, Administrating the Kerberos Database, Administrating the Kerberos Database
@@ -2428,7 +2429,7 @@ confirmation before destroying the database.
 This will have to wait until the next release.  *sigh*
 @end ignore
 
-@node Cross-realm Authentication,  , Global Operations on the Kerberos Database, Administrating the Kerberos Database
+@node Cross-realm Authentication, Changing the krbtgt Key, Global Operations on the Kerberos Database, Administrating the Kerberos Database
 @section Cross-realm Authentication
 
 In order for a KDC in one realm to authenticate Kerberos users in a
@@ -2462,6 +2463,37 @@ as in the example above is recommended.
 It is also very important that these principals have good passwords.
 @value{COMPANY} recommends that TGT principal passwords be at least 26
 characters of random ASCII text.
+
+@node Changing the krbtgt Key,  , Cross-realm Authentication, Administrating the Kerberos Database
+@section Changing the krbtgt Key
+
+A Kerberos Ticket Granting Ticket (TGT) is a service ticket for the
+principal krbtgt/@i{REALM}.  The key for this principal is created when
+the Kerberos database is initialized and need not be changed.  However,
+it will only have the encryption types supported by the KDC at the time
+of the initial database creation.  To allow use of newer encryption
+types for the TGT, this key has to be changed.
+
+Changing this key using the normal @code{kadmin change_password} command
+would invalidate any previously issued TGTs.  Therefore, when changing
+this key, normally one should use the @b{-keepold} flag to
+@code{change_password} to retain the previous key in the database as
+well as the new key.  For example:
+
+@smallexample
+@group
+@b{kadmin:} change_password -randkey -keepold krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+@end group
+@end smallexample
+
+There is currently no way to remove the old key without running
+@code{change_password} without the @b{-keepold} flag (and thereby
+invalidating all existing TGTs).  After issuing this command, the old
+key is still valid and is still vulnerable to (for instance) brute force
+attacks.  To completely retire an old key or encryption type, it's
+therefore currently necessary to declare a flag day, run
+@code{change_password} without the @b{-keepold} flag, and force all
+users to acquire new tickets.
 
 @node Application Servers, Backups of Secure Hosts, Administrating the Kerberos Database, Top
 @chapter Application Servers
