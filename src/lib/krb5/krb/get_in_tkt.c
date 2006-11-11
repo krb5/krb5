@@ -865,6 +865,7 @@ krb5_get_init_creds(krb5_context context,
     krb5_kdc_rep *local_as_reply;
     krb5_timestamp time_now;
     krb5_enctype etype = 0;
+    krb5_preauth_client_rock get_data_rock;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -1091,6 +1092,9 @@ krb5_get_init_creds(krb5_context context,
     if (ret)
         goto cleanup;
 
+    get_data_rock.magic = CLIENT_ROCK_MAGIC;
+    get_data_rock.as_reply = NULL;
+
     /* now, loop processing preauth data and talking to the kdc */
     for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
 	if (!err_reply) {
@@ -1106,7 +1110,8 @@ krb5_get_init_creds(krb5_context context,
 				       preauth_to_use, &request.padata,
 				       &salt, &s2kparams, &etype, &as_key,
 				       prompter, prompter_data,
-				       gak_fct, gak_data)))
+				       gak_fct, gak_data,
+				       &get_data_rock)))
 	        goto cleanup;
 	} else {
 	    /* retrying after an error other than PREAUTH_NEEDED, using e-data
@@ -1119,7 +1124,8 @@ krb5_get_init_creds(krb5_context context,
 					 err_reply,
 					 &salt, &s2kparams, &etype, &as_key,
 					 prompter, prompter_data,
-					 gak_fct, gak_data)) {
+					 gak_fct, gak_data,
+					 &get_data_rock)) {
 		/* couldn't come up with anything better */
 	        ret = err_reply->error + ERROR_TABLE_BASE_krb5;
 	        krb5_free_error(context, err_reply);
@@ -1193,12 +1199,14 @@ krb5_get_init_creds(krb5_context context,
     if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
 					 local_as_reply->padata)))
 	goto cleanup;
+    get_data_rock.as_reply = local_as_reply;
     if ((ret = krb5_do_preauth(context,
 			       &request,
 			       encoded_request_body, encoded_previous_request,
 			       local_as_reply->padata, &kdc_padata,
 			       &salt, &s2kparams, &etype, &as_key, prompter,
-			       prompter_data, gak_fct, gak_data)))
+			       prompter_data, gak_fct, gak_data,
+			       &get_data_rock)))
 	goto cleanup;
 
     /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,

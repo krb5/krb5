@@ -78,6 +78,8 @@ static krb5_error_code
 client_process(krb5_context kcontext,
 	       void *client_plugin_context,
 	       void *client_request_context,
+	       preauth_get_client_data_proc client_get_data_proc,
+	       struct _krb5_preauth_client_rock *rock,
 	       krb5_kdc_req *request,
 	       krb5_data *encoded_request_body,
 	       krb5_data *encoded_previous_request,

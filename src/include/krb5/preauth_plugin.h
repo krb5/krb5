@@ -44,6 +44,7 @@
  */
 struct _krb5_db_entry_new;
 struct _krb5_key_data;
+struct _krb5_preauth_client_rock;
 
 /*
  * Preauth mechanism property flags, unified from previous definitions in the
@@ -122,6 +123,23 @@ typedef krb5_error_code
 			       krb5_data **);
 
 /*
+ * A client module's callback functions are allowed to request various
+ * information to enable it to process a request.
+ */
+enum krb5plugin_preauth_client_request_type {
+    /* The returned krb5_data item holds the enctype used to encrypt the
+     * encrypted portion of the AS_REP packet. */
+    krb5plugin_preauth_client_get_etype = 1,
+    /* Free the data returned from krb5plugin_preauth_client_req_get_etype */
+    krb5plugin_preauth_client_free_etype = 2,
+};
+typedef krb5_error_code
+(*preauth_get_client_data_proc)(krb5_context,
+				struct _krb5_preauth_client_rock *,
+				krb5_int32 request_type,
+				krb5_data **);
+
+/*
  * A callback which will obtain the user's long-term AS key by prompting the
  * user for the password, then salting it properly, and so on.  For the moment,
  * it's identical to the get_as_key callback used inside of libkrb5, but we
@@ -189,6 +207,8 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
     krb5_error_code (*process)(krb5_context context,
 			       void *plugin_context,
 			       void *request_context,
+			       preauth_get_client_data_proc get_data_proc,
+			       struct _krb5_preauth_client_rock *rock,
 			       krb5_kdc_req *request,
 			       krb5_data *encoded_request_body,
 			       krb5_data *encoded_previous_request,
@@ -207,6 +227,8 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
     krb5_error_code (*tryagain)(krb5_context context,
 				void *plugin_context,
 				void *request_context,
+				preauth_get_client_data_proc get_data_proc,
+			        struct _krb5_preauth_client_rock *rock,
 				krb5_kdc_req *request,
 				krb5_data *encoded_request_body,
 				krb5_data *encoded_previous_request,

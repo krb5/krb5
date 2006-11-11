@@ -843,6 +843,17 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 
 #include <krb5/preauth_plugin.h>
 
+#define CLIENT_ROCK_MAGIC 0x4352434b
+/* This structure is passed into the client preauth functions and passed
+ * back to the "get_data_proc" function so that it can locate the
+ * requested information.  It is opaque to the plugin code and can be
+ * expanded in the future as new types of requests are defined which
+ * may require other things to be passed through. */
+typedef struct _krb5_preauth_client_rock {
+	krb5_magic	magic;
+	krb5_kdc_rep	*as_reply;
+} krb5_preauth_client_rock;
+
 /* This structure lets us keep track of all of the modules which are loaded,
  * turning the list of modules and their lists of implemented preauth types
  * into a single list which we can walk easily. */
@@ -867,6 +878,8 @@ typedef struct _krb5_preauth_context {
 	krb5_error_code (*client_process)(krb5_context context,
 					  void *plugin_context,
 					  void *request_context,
+					  preauth_get_client_data_proc get_data_proc,
+					  krb5_preauth_client_rock *rock,
 					  krb5_kdc_req *request,
 					  krb5_data *encoded_request_body,
 					  krb5_data *encoded_previous_request,
@@ -882,6 +895,8 @@ typedef struct _krb5_preauth_context {
 	krb5_error_code (*client_tryagain)(krb5_context context,
 					   void *plugin_context,
 					   void *request_context,
+					   preauth_get_client_data_proc get_data_proc,
+					   krb5_preauth_client_rock *rock,
 					   krb5_kdc_req *request,
 					   krb5_data *encoded_request_body,
 					   krb5_data *encoded_previous_request,
@@ -1041,7 +1056,8 @@ krb5_error_code KRB5_CALLCONV krb5_do_preauth
 	 krb5_data *salt, krb5_data *s2kparams,
 	 krb5_enctype *etype, krb5_keyblock *as_key,
 	 krb5_prompter_fct prompter, void *prompter_data,
-	 krb5_gic_get_as_key_fct gak_fct, void *gak_data);
+	 krb5_gic_get_as_key_fct gak_fct, void *gak_data,
+	 krb5_preauth_client_rock *get_data_rock);
 krb5_error_code KRB5_CALLCONV krb5_do_preauth_tryagain
 	(krb5_context context,
 	 krb5_kdc_req *request,
@@ -1052,7 +1068,8 @@ krb5_error_code KRB5_CALLCONV krb5_do_preauth_tryagain
 	 krb5_data *salt, krb5_data *s2kparams,
 	 krb5_enctype *etype, krb5_keyblock *as_key,
 	 krb5_prompter_fct prompter, void *prompter_data,
-	 krb5_gic_get_as_key_fct gak_fct, void *gak_data);
+	 krb5_gic_get_as_key_fct gak_fct, void *gak_data,
+	 krb5_preauth_client_rock *get_data_rock);
 void KRB5_CALLCONV krb5_init_preauth_context
 	(krb5_context);
 void KRB5_CALLCONV krb5_free_preauth_context
