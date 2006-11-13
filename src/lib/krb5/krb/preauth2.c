@@ -73,6 +73,7 @@ krb5_init_preauth_context(krb5_context kcontext)
     krb5_preauth_context *context = NULL;
     void *plugin_context;
     krb5_preauthtype pa_type;
+    void **rcpp;
 
     /* Only do this once for each krb5_context */
     if (kcontext->preauth_context != NULL)
@@ -143,7 +144,8 @@ krb5_init_preauth_context(krb5_context kcontext)
 		    continue;
 	    }
 
-            for (j = 0; table->pa_type_list[j] > 0; j++) {
+	    rcpp = NULL;
+	    for (j = 0; table->pa_type_list[j] > 0; j++) {
 		pa_type = table->pa_type_list[j];
 		context->modules[k].pa_type = pa_type;
 		context->modules[k].enctypes = table->enctype_list;
@@ -159,15 +161,24 @@ krb5_init_preauth_context(krb5_context kcontext)
 		context->modules[k].use_count = 0;
 		context->modules[k].client_process = table->process;
 		context->modules[k].client_tryagain = table->tryagain;
-		/* Only call request_init and request_fini once per plugin */
+		context->modules[k].request_context = NULL;
+		/*
+		 * Only call request_init and request_fini once per plugin.
+		 * Only the first module within each plugin will ever
+		 * have request_context filled in.  Every module within
+		 * the plugin will have its request_context_pp pointing
+		 * to that entry's request_context.  That way all the
+		 * modules within the plugin share the same request_context
+		 */
 		if (j == 0) {
 		    context->modules[k].client_req_init = table->request_init;
 		    context->modules[k].client_req_fini = table->request_fini;
+		    rcpp = &context->modules[k].request_context;
 		} else {
 		    context->modules[k].client_req_init = NULL;
 		    context->modules[k].client_req_fini = NULL;
 		}
-		context->modules[k].request_context = NULL;
+		context->modules[k].request_context_pp = rcpp;
 #ifdef DEBUG
 		fprintf (stderr, "init module \"%s\", pa_type %d, flag %d\n",
 			 context->modules[k].name,
@@ -239,7 +250,7 @@ krb5_preauth_request_context_init(krb5_context context)
 	for (i = 0; i < context->preauth_context->n_modules; i++) {
 	    pctx = context->preauth_context->modules[i].plugin_context;
 	    if (context->preauth_context->modules[i].client_req_init != NULL) {
-		rctx = &context->preauth_context->modules[i].request_context;
+		rctx = context->preauth_context->modules[i].request_context_pp;
 		(*context->preauth_context->modules[i].client_req_init) (context, pctx, rctx);
 	    }
 	}
@@ -473,7 +484,7 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 #endif
 	ret = module->client_process(kcontext,
 				     module->plugin_context,
-				     module->request_context,
+				     *module->request_context_pp,
 				     client_data_proc,
 				     get_data_rock,
 				     request,
@@ -1314,7 +1325,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 	    }
 	    if ((*module->client_tryagain)(kcontext,
 					   module->plugin_context,
-					   module->request_context,
+					   *module->request_context_pp,
 					   client_data_proc,
 					   get_data_rock,
 					   request,
