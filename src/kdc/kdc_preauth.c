@@ -84,7 +84,8 @@ typedef krb5_error_code (*verify_proc)
 		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
 		    preauth_get_entry_data_proc get_entry_data,
 		    void *pa_module_context,
-		    void **pa_request_context);
+		    void **pa_request_context,
+		    krb5_data **e_data);
 
 typedef krb5_error_code (*edata_proc)
     (krb5_context, krb5_kdc_req *request,
@@ -133,7 +134,8 @@ static krb5_error_code verify_enc_timestamp
 		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
 		    preauth_get_entry_data_proc get_entry_data,
 		    void *pa_system_context,
-		    void **pa_request_context);
+		    void **pa_request_context,
+		    krb5_data **e_data);
 
 static krb5_error_code get_etype_info
     (krb5_context, krb5_kdc_req *request,
@@ -200,7 +202,8 @@ static krb5_error_code verify_sam_response
 		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
 		    preauth_get_entry_data_proc get_entry_data,
 		    void *pa_module_context,
-		    void **pa_request_context);
+		    void **pa_request_context,
+		    krb5_data **e_data);
 
 static krb5_error_code get_sam_edata
     (krb5_context, krb5_kdc_req *request,
@@ -873,12 +876,13 @@ errout:
 krb5_error_code
 check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	      krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-	      void **padata_context)
+	      void **padata_context, krb5_data *e_data)
 {
     krb5_error_code retval = 0;
     krb5_pa_data **padata;
     krb5_preauth_systems *pa_sys;
     void **pa_context;
+    krb5_data *pa_e_data = NULL;
     int	pa_ok = 0, pa_found = 0;
 
     if (request->padata == 0)
@@ -908,7 +912,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	retval = pa_sys->verify_padata(context, client, req_pkt, request,
 				       enc_tkt_reply, *padata,
 				       get_entry_data, pa_sys->plugin_context,
-				       pa_context);
+				       pa_context, &pa_e_data);
 	if (retval) {
 	    const char * emsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
@@ -926,7 +930,29 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	    if (pa_sys->flags & PA_SUFFICIENT) 
 		break;
 	}
+	/*
+	 * If we're looping and e_data was returned, free it here
+	 * since we won't be returning it anyway
+	 */
+	if (pa_e_data != NULL) {
+	    krb5_free_data(context, pa_e_data);
+	    pa_e_data = NULL;
+	}
     }
+
+    /* Return any e_data from the preauth that caused us to exit the loop */
+    if (pa_e_data != NULL) {
+	e_data->data = malloc(pa_e_data->length);
+	if (e_data->data == NULL) {
+	    krb5_free_data(context, pa_e_data);
+	    return KRB5KRB_ERR_GENERIC;
+	}
+	memcpy(e_data->data, pa_e_data->data, pa_e_data->length);
+	e_data->length = pa_e_data->length;
+	krb5_free_data(context, pa_e_data);
+	pa_e_data = NULL;
+    }
+
     if (pa_ok)
 	return 0;
 
@@ -941,9 +967,9 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", emsg);
 	krb5_free_error_message(context, emsg);
     }
-/* The following switch statement allows us
- * to return some preauth system errors back to the client.
- */
+    /* The following switch statement allows us
+     * to return some preauth system errors back to the client.
+     */
     switch(retval) {
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
@@ -1117,7 +1143,8 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     krb5_pa_data *pa,
 		     preauth_get_entry_data_proc ets_get_entry_data,
 		     void *pa_system_context,
-		     void **pa_request_context)
+		     void **pa_request_context,
+		     krb5_data **e_data)
 {
     krb5_pa_enc_ts *		pa_enc = 0;
     krb5_error_code		retval;
@@ -2104,7 +2131,8 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 		    krb5_pa_data *pa,
 		    preauth_get_entry_data_proc sam_get_entry_data,
 		    void *pa_system_context,
-		    void **pa_request_context)
+		    void **pa_request_context,
+		    krb5_data **e_data)
 {
     krb5_error_code		retval;
     krb5_data			scratch;

@@ -262,7 +262,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      */
     if (request->padata) {
 	errcode = check_padata(kdc_context, &client, req_pkt, request,
-			       &enc_tkt_reply, &pa_context);
+			       &enc_tkt_reply, &pa_context, &e_data);
 	if (errcode) {
 #ifdef KRBCONF_KDC_MODIFIES_KDB
 	    /*
