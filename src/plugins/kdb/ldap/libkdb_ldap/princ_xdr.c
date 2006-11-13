@@ -1,6 +1,7 @@
 #include "kdb_ldap.h"
 #include "ldap_principal.h"
 #include "princ_xdr.h"
+#include <kadm5/admin.h>
 
 bool_t
 ldap_xdr_krb5_ui_2(XDR *xdrs, krb5_ui_2 *objp)
@@ -211,7 +212,7 @@ krb5_update_tl_kadm_data(policy_dn, new_tl_data)
 
     memset(princ_entry, 0, sizeof(osa_princ_ent_rec));
     princ_entry->admin_history_kvno = 2;
-    princ_entry->aux_attributes = KDB_POLICY;
+    princ_entry->aux_attributes = KADM5_POLICY;
     princ_entry->policy = policy_dn;
 
     xdralloc_create(&xdrs, XDR_ENCODE);
