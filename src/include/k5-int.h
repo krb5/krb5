@@ -914,10 +914,14 @@ typedef struct _krb5_preauth_context {
 			       void **request_context);
 	void (*client_req_fini)(krb5_context context, void *plugin_context,
 			       void *request_context);
-	/* The per-pa_type context which the client_process() function
+	/* The per-request context which the client_req_init() function
 	 * might allocate, which we'll need to clean up later by
-	 * calling the client_cleanup() function. */
+	 * calling the client_req_fini() function. */
 	void *request_context;
+	/* A pointer to the request_context pointer.  All modules within
+	 * a plugin will point at the request_context of the first
+	 * module within the plugin. */
+	void **request_context_pp;
     } *modules;
 } krb5_preauth_context;
 
