@@ -152,7 +152,7 @@ krb5_error_code unload_preauth_plugins(krb5_context context);
 krb5_error_code check_padata
     (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	       krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-	       void **padata_context);
+	       void **padata_context, krb5_data *e_data);
     
 krb5_error_code return_padata
     (krb5_context context, krb5_db_entry *client,

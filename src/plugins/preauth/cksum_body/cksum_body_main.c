@@ -289,7 +289,8 @@ server_verify(krb5_context kcontext,
 	      krb5_pa_data *data,
 	      preauth_get_entry_data_proc server_get_entry_data,
 	      void *pa_module_context,
-	      void **pa_request_context)
+	      void **pa_request_context,
+	      krb5_data **e_data)
 {
     krb5_int32 cksumtype;
     krb5_checksum checksum;
@@ -302,6 +303,7 @@ server_verify(krb5_context kcontext,
     krb5_cksumtype *cksumtypes;
     krb5_error_code status;
     struct server_stats *stats;
+    krb5_data *test_edata;
 
     stats = pa_module_context;
 
@@ -425,8 +427,33 @@ server_verify(krb5_context kcontext,
 	    fprintf(stderr, "Checksum mismatch.\n");
 	}
 #endif
+	/* Return edata to exercise code that handles edata... */
+	test_edata = malloc(sizeof(*test_edata));
+	if (test_edata != NULL) {
+	    test_edata->data = malloc(20);
+	    if (test_edata->data == NULL) {
+		free(test_edata);
+	    } else {
+		test_edata->length = 20;
+		memset(test_edata->data, 'F', 20); /* fill it with junk */
+		*e_data = test_edata;
+	    }
+	}
 	stats->failures++;
 	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    /* Return edata to exercise code that handles edata... */
+    test_edata = malloc(sizeof(*test_edata));
+    if (test_edata != NULL) {
+	test_edata->data = malloc(20);
+	if (test_edata->data == NULL) {
+	    free(test_edata);
+	} else {
+	    test_edata->length = 20;
+	    memset(test_edata->data, 'S', 20); /* fill it with junk */
+	    *e_data = test_edata;
+	}
     }
 
     /* Note that preauthentication succeeded. */

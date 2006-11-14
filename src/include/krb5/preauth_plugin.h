@@ -298,7 +298,8 @@ typedef struct krb5plugin_preauth_server_ftable_v0 {
 				   krb5_pa_data *data,
 				   preauth_get_entry_data_proc,
 				   void *pa_module_context,
-				   void **pa_request_context);
+				   void **pa_request_context,
+				   krb5_data **e_data);
     /* Generate preauthentication response data to send to the client as part
      * of the AS-REP.  If it needs to override the key which is used to encrypt
      * the response, it can do so.  The module is expected (but not required,

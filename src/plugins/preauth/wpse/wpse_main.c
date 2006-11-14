@@ -247,9 +247,12 @@ server_verify(krb5_context kcontext,
 	      krb5_pa_data *data,
 	      preauth_get_entry_data_proc server_get_entry_data,
 	      void *pa_module_context,
-	      void **pa_request_context)
+	      void **pa_request_context,
+	      krb5_data **e_data)
 {
     krb5_int32 nnonce;
+    krb5_data *test_edata;
+
     /* Verify the preauth data. */
     if (data->length != 4)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
@@ -264,6 +267,19 @@ server_verify(krb5_context kcontext,
      * per-request cleanup. */
     if (*pa_request_context == NULL)
 	*pa_request_context = malloc(4);
+
+    /* Return edata to exercise code that handles edata... */
+    test_edata = malloc(sizeof(*test_edata));
+    if (test_edata != NULL) {
+	test_edata->data = malloc(20);
+	if (test_edata->data == NULL) {
+	    free(test_edata);
+	} else {
+	    test_edata->length = 20;
+	    memset(test_edata->data, '#', 20); /* fill it with junk */
+	    *e_data = test_edata;
+	}
+    }
     return 0;
 }
 
@@ -333,6 +349,7 @@ server_return(krb5_context kcontext,
     enctype = htonl(kb->enctype);
     memcpy((*send_pa)->contents, &enctype, 4);
     memcpy((*send_pa)->contents + 4, kb->contents, kb->length);
+    krb5_free_keyblock_contents(kcontext, encrypting_key);
     krb5_copy_keyblock_contents(kcontext, kb, encrypting_key);
 
     /* Clean up. */
