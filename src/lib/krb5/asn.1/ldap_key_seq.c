@@ -338,8 +338,10 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 	key->key_data_type[1] = keytype; /* XXX range check?? */
 	checkerr;
 
-	ret = decode_tagged_octetstring (&slt, 1, &keylen,
-					 &key->key_data_contents[1]); checkerr;
+	if (asn1buf_remains(&slt, 0) != 0) { /* Salt value is optional */
+	    ret = decode_tagged_octetstring (&slt, 1, &keylen,
+		    &key->key_data_contents[1]); checkerr;
+	}
 	safe_syncbuf (&subbuf, &slt);
 	key->key_data_length[1] = keylen; /* XXX range check?? */
 
@@ -433,7 +435,7 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 
     /* Sequence of keys */
     {
-	int i, ret1, buflen;
+	int i, buflen;
 	asn1buf keyseq;
 	if (t.tagnum != 4)
 	    cleanup (ASN1_MISSING_FIELD);
@@ -447,7 +449,7 @@ krb5_error_code asn1_decode_sequence_of_keys (krb5_data *in,
 		cleanup (ENOMEM);
 	    *out = tmp;
 	    (*out)[i - 1].key_data_kvno = kvno;
-	    ret1 = asn1_decode_key(&keyseq, &(*out)[i - 1]); checkerr;
+	    ret = asn1_decode_key(&keyseq, &(*out)[i - 1]); checkerr;
 	    (*n_key_data)++;
 	    if (asn1buf_remains(&keyseq, 0) == 0)
 		break; /* Not freeing the last key structure */

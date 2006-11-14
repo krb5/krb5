@@ -1847,7 +1847,7 @@ remove_overlapping_subtrees(char **listin, char **listop, int *subtcount, int ss
 		    slen-=1;
 		    k-=1;
 		    break;
-		} else if ((lendiff < 0) && (strcasecmp((listin[j])+lendiff, listin[k])==0)) {
+		} else if ((lendiff < 0) && (strcasecmp((listin[j])+abs(lendiff), listin[k])==0)) {
 		    if (j != slen) {
 			free(listin[j]);
 			listin[j] = listin[slen];
@@ -1963,19 +1963,19 @@ populate_krb5_db_entry (krb5_context context,
 		&(entry->last_success), &attr_present)) != 0)
 	goto cleanup;
     if (attr_present == TRUE)
-	mask |= KDB_LAST_SUCCESS;
+	mask |= KDB_LAST_SUCCESS_ATTR;
 
     /* KRBLASTFAILEDAUTH */
     if ((st=krb5_ldap_get_time(ld, ent, "krbLastFailedAuth",
 		&(entry->last_failed), &attr_present)) != 0)
 	goto cleanup;
     if (attr_present == TRUE)
-	mask |= KDB_LAST_FAILED;
+	mask |= KDB_LAST_FAILED_ATTR;
 
     /* KRBLOGINFAILEDCOUNT */
     if (krb5_ldap_get_value(ld, ent, "krbLoginFailedCount",
 	    &(entry->fail_auth_count)) == 0)
-	mask |= KDB_FAIL_AUTH_COUNT;
+	mask |= KDB_FAIL_AUTH_COUNT_ATTR;
 
     /* KRBMAXTICKETLIFE */
     if (krb5_ldap_get_value(ld, ent, "krbmaxticketlife", &(entry->max_life)) == 0)
@@ -2010,6 +2010,7 @@ populate_krb5_db_entry (krb5_context context,
 		&attr_present)) != 0)
 	goto cleanup;
     if (attr_present == TRUE) {
+	mask |= KDB_POL_REF_ATTR;
 	/* Ensure that the policy is inside the realm container */
 	if ((st = krb5_ldap_policydn_to_name (context, policydn, &tktpolname)) != 0)
 	    goto cleanup;
@@ -2036,7 +2037,7 @@ populate_krb5_db_entry (krb5_context context,
 
     /* KRBSECRETKEY */
     if ((bvalues=ldap_get_values_len(ld, ent, "krbprincipalkey")) != NULL) {
-	mask |= KDB_SECRET_KEY;
+	mask |= KDB_SECRET_KEY_ATTR;
 	if ((st=krb5_decode_krbsecretkey(context, entry, bvalues, &userinfo_tl_data)) != 0)
 	    goto cleanup;
     }
@@ -2087,7 +2088,7 @@ populate_krb5_db_entry (krb5_context context,
 	    ldap_value_free_len (ber_tl_data);
 	    if (st != 0)
 		goto cleanup;
-	    mask |= KDB_EXTRA_DATA;
+	    mask |= KDB_EXTRA_DATA_ATTR;
 	}
     }
 

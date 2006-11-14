@@ -127,6 +127,10 @@ krb5_ldap_readpassword(context, ldap_context, password)
 	    /*ptr = strchr(start, ':');
 	      if (ptr == NULL) { */
 	    *password = (unsigned char *)malloc(strlen(start) + 2);
+	    if (*password == NULL) {
+		st = ENOMEM;
+		goto rp_exit;
+	    }
 	    (*password)[strlen(start) + 1] = '\0';
 	    (*password)[strlen(start)] = '\0';
 	    strcpy((char *)(*password), start);

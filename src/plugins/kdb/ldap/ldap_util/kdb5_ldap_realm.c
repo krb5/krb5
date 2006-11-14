@@ -2206,12 +2206,12 @@ kdb_ldap_create_principal (context, princ, op, pblock)
     STORE16_INT(curr, princtype);
     curr += currlen;
 
-    mask |= KDB_PRINCIPAL;
-    mask |= KDB_ATTRIBUTES ;
-    mask |= KDB_MAX_LIFE ;
-    mask |= KDB_MAX_RLIFE ;
-    mask |= KDB_PRINC_EXPIRE_TIME ;
-    mask |= KDB_KEY_DATA;
+    mask |= KADM5_PRINCIPAL;
+    mask |= KADM5_ATTRIBUTES ;
+    mask |= KADM5_MAX_LIFE ;
+    mask |= KADM5_MAX_RLIFE ;
+    mask |= KADM5_PRINC_EXPIRE_TIME ;
+    mask |= KADM5_KEY_DATA;
 
     entry.tl_data = tl_data;
     entry.n_tl_data += 1;

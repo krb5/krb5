@@ -50,11 +50,9 @@ char     *principal_attributes[] = { "krbprincipalname",
 				     "krbUpEnabled",
 				     "krbpwdpolicyreference",
 				     "krbpasswordexpiration",
-#ifdef  KRBCONF_KDC_MODIFIES_KDB
                                      "krbLastFailedAuth",
                                      "krbLoginFailedCount",
                                      "krbLastSuccessfulAuth",
-#endif
 #ifdef HAVE_EDIRECTORY
 				     "loginexpirationtime",
 				     "logindisabled",
@@ -78,6 +76,9 @@ static char *attributes_set[] = { "krbmaxrenewableage",
 				  "krbprincipalkey",
                                   "krblastpwdchange",
                                   "krbextradata",
+                                  "krbLastSuccessfulAuth",
+                                  "krbLastFailedAuth",
+                                  "krbLoginFailedCount",
 				  NULL };
 
 void

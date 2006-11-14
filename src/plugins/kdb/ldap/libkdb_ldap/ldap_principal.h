@@ -63,29 +63,6 @@
 #define  KDB_SERVICE_PRINCIPAL 0x02
 #define KDB_STANDALONE_PRINCIPAL_OBJECT 0x01
 
-/* krb5_db_entry */
-#define KDB_PRINCIPAL         0x000001
-#define KDB_PRINC_EXPIRE_TIME 0x000002
-#define KDB_PW_EXPIRATION     0x000004
-#define KDB_LAST_PWD_CHANGE   0x000008
-#define KDB_ATTRIBUTES        0x000010
-#define KDB_MAX_LIFE          0x000020
-#define KDB_MOD_TIME          0x000040
-#define KDB_MOD_NAME          0x000080
-#define KDB_KVNO              0x000100
-#define KDB_MKVNO             0x000200
-#define KDB_AUX_ATTRIBUTES    0x000400
-#define KDB_POLICY            0x000800
-#define KDB_POLICY_CLR        0x001000
-#define KDB_MAX_RLIFE         0x002000
-#define KDB_LAST_SUCCESS      0x004000
-#define KDB_LAST_FAILED       0x008000
-#define KDB_FAIL_AUTH_COUNT   0x010000
-#define KDB_KEY_DATA          0x020000
-#define KDB_TL_DATA           0x040000
-#define KDB_CPW_FUNCTION      0x080000
-#define KDB_RANDKEY_USED      0x100000
-
 /* these will be consumed only by krb5_ldap_delete_principal*/
 /* these will be set by krb5_ldap_get_principal and fed into the tl_data */
 
@@ -97,9 +74,12 @@
 #define KDB_UP_FLAG_ATTR                     0x000020
 #define KDB_PWD_POL_REF_ATTR                 0x000040
 #define KDB_PWD_EXPIRE_TIME_ATTR             0x000080
-#define KDB_SECRET_KEY                       0x000100
+#define KDB_SECRET_KEY_ATTR                  0x000100
 #define KDB_LAST_PWD_CHANGE_ATTR             0x000200
-#define KDB_EXTRA_DATA                       0x000400
+#define KDB_EXTRA_DATA_ATTR                  0x000400
+#define KDB_LAST_SUCCESS_ATTR                0x000800
+#define KDB_LAST_FAILED_ATTR                 0x001000
+#define KDB_FAIL_AUTH_COUNT_ATTR             0x002000
 extern struct timeval timeout;
 extern char *policyclass[];
 

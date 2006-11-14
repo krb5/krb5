@@ -187,6 +187,7 @@ populate_policy(krb5_context context,
     osa_policy_ent_t pol_entry)
 {
     int st = 0;
+    char *pol_dn;
 
     pol_entry->name = strdup(pol_name);
     CHECK_NULL(pol_entry->name);
@@ -199,8 +200,10 @@ populate_policy(krb5_context context,
     krb5_ldap_get_value(ld, ent, "krbpwdhistorylength", &(pol_entry->pw_history_num));
 
     /* Get the reference count */
-    st = krb5_ldap_get_reference_count (context, pol_name, "krbPwdPolicyReference",
+    pol_dn = ldap_get_dn(ld, ent);
+    st = krb5_ldap_get_reference_count (context, pol_dn, "krbPwdPolicyReference",
 	    &(pol_entry->policy_refcnt), ld);
+    ldap_memfree(pol_dn);
 
 cleanup:
     return st;
