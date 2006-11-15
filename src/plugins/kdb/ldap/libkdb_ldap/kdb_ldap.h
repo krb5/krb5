@@ -195,7 +195,9 @@ struct _krb5_ldap_server_info {
     krb5_ldap_server_handle      *ldap_server_handles;
     time_t                       downtime;
     char			*server_name;
+#ifdef HAVE_EDIRECTORY
     char			*root_certificate_file;
+#endif
     struct _krb5_ldap_server_info *next;
 };
 

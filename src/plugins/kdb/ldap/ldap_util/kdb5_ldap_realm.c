@@ -900,7 +900,6 @@ void kdb5_ldap_modify(argc, argv)
 #ifdef HAVE_EDIRECTORY
     int j = 0;
     char *list[MAX_LIST_ENTRIES];
-    char **slist = {NULL};
     int existing_entries = 0, list_entries = 0;
     int newkdcdn = 0, newadmindn = 0, newpwddn = 0;
     char **tempstr = NULL;
@@ -1432,6 +1431,8 @@ void kdb5_ldap_modify(argc, argv)
 	}
 
 	if ((mask & LDAP_REALM_SUBTREE)) {
+            int check_subtree = 1;
+
             newsubtrees = (char**) calloc(rparams->subtreecount, sizeof(char*));
 
             if (newsubtrees == NULL) {
@@ -1452,7 +1453,7 @@ void kdb5_ldap_modify(argc, argv)
             for(j=0;oldsubtrees[j]!=NULL;j++) {
                 check_subtree = 1;
                 for(i=0; ( (oldsubtrees[j] && !rparams->subtree[i]) ||
-                        (!oldsubtrees[j] && rparams->subtree[i]))i; i++) {
+                        (!oldsubtrees[j] && rparams->subtree[i])); i++) {
                     if(strcasecmp( oldsubtrees[j], rparams->subtree[i]) == 0) {
                         check_subtree = 0;
                         continue;

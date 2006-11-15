@@ -1076,10 +1076,9 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		int p, q, r=0, amask=0;
 
 		if ((st=checkattributevalue(ld, (xargs.dn) ? xargs.dn : principal_dn,
-					    "objectclass", attrvalues, &amask)) != 0) {
-		    st = KRB5_KDB_UK_RERROR;
+					    "objectclass", attrvalues, &amask)) != 0)
 		    goto cleanup;
-		}
+
 		memset(strval, 0, sizeof(strval));
 		for (p=1, q=0; p<=2; p<<=1, ++q) {
 		    if ((p & amask) == 0)

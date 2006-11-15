@@ -42,10 +42,9 @@
 #define END_OF_LIST -1
 char  *realm_attributes[] = {"krbSearchScope","krbSubTrees", "krbPrincContainerRef", 
 			     "krbMaxTicketLife", "krbMaxRenewableAge",
-			     "krbTicketFlags", "krbDefaultEncType",
-			     "krbDefaultSaltType", "krbUpEnabled",
-			     "krbTicketPolicyReference", "krbSupportedEncTypes",
-			     "krbSupportedSaltTypes", "krbLdapServers",
+			     "krbTicketFlags", "krbUpEnabled",
+			     "krbTicketPolicyReference",
+			     "krbLdapServers",
 			     "krbKdcServers",  "krbAdmServers",
 			     "krbPwdServers", NULL};
 
@@ -63,14 +62,6 @@ char  *adminclass[] =      { "krbAdmService", NULL };
 char  *pwdclass[] =        { "krbPwdService", NULL };
 char  *subtreeclass[] =    { "Organization", "OrganizationalUnit", "Domain", "krbContainer",
                              "krbRealmContainer", "Country", "Locality", NULL };
-
-int supportedenctypes[] = { ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD4, ENCTYPE_DES_CBC_MD5,
-			    ENCTYPE_DES3_CBC_SHA1, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
-			    ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_ARCFOUR_HMAC, -1};
-
-int supportedsalttypes[] = { KRB5_KDB_SALTTYPE_NORMAL, KRB5_KDB_SALTTYPE_V4,
-			     KRB5_KDB_SALTTYPE_NOREALM, KRB5_KDB_SALTTYPE_ONLYREALM,
-			     KRB5_KDB_SALTTYPE_SPECIAL, -1};
 
 
 char  *krbContainerRefclass[] = { "krbContainerRefAux", NULL};
@@ -460,9 +451,6 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	rparams->tl_data->tl_data_contents == NULL ||
 	((mask & LDAP_REALM_SUBTREE) && rparams->subtree == NULL) ||
 	((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) ||
-	/* This has to be fixed ... */
-	((mask & LDAP_REALM_DEFENCTYPE) && rparams->suppenctypes == NULL) ||
-	((mask & LDAP_REALM_DEFSALTTYPE) && rparams->suppsalttypes == NULL) ||
 #ifdef HAVE_EDIRECTORY
 	((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
 	((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
@@ -490,22 +478,6 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	}
     }
 
-    /*
-     * Sort the list of salt-types / enc-types ... just to eliminate duplicates
-     * later.
-     */
-    {
-	if ((mask & LDAP_REALM_SUPPENCTYPE) && rparams->suppenctypes) {
-	    for (i = 0; rparams->suppenctypes [i] != END_OF_LIST; i++) {
-	    }
-	    qsort ((void *)rparams->suppenctypes, (unsigned) i, sizeof(krb5_int32), compare);
-	}
-	if ((mask & LDAP_REALM_SUPPSALTTYPE) && rparams->suppsalttypes) {
-	    for (i = 0; rparams->suppenctypes [i] != END_OF_LIST; i++) {
-	    }
-	    qsort ((void *)rparams->suppsalttypes, (unsigned) i, sizeof(krb5_int32), compare);
-	}
-    }
 
     /* SUBTREE ATTRIBUTE */
     if (mask & LDAP_REALM_SUBTREE) {
@@ -574,124 +546,6 @@ krb5_ldap_modify_realm(context, rparams, mask)
 	    goto cleanup;
     }
 
-
-    /* DEFENCTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_DEFENCTYPE) {
-	/* check if the entered enctype is valid */
-	if (krb5_c_valid_enctype(rparams->defenctype)) {
-
-	    /* check if the defenctype exists in the suppenctypes list */
-	    for (i = 0; rparams->suppenctypes[i] != END_OF_LIST; ++i)
-		if (rparams->defenctype == rparams->suppenctypes[i])
-		    break;
-
-	    /* touching the end of list means defenctype is missing */
-	    if (rparams->suppenctypes[i] == END_OF_LIST) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "Default enctype not in the supported list");
-		goto cleanup;
-	    }
-
-	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbdefaultenctype", LDAP_MOD_REPLACE,
-					      rparams->defenctype)) != 0)
-		goto cleanup;
-	} else {
-	    st = EINVAL;
-	    krb5_set_error_message (context, st, "Invalid default enctype");
-	    goto cleanup;
-	}
-    }
-
-    /* DEFSALTTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_DEFSALTTYPE) {
-	/* check if the entered salttype is valid */
-	if (rparams->defsalttype>=0 && rparams->defsalttype<6) {
-
-	    /* check if the defsalttype exists in the suppsalttypes list */
-	    for (i = 0; rparams->suppsalttypes[i] != END_OF_LIST; ++i)
-		if (rparams->defsalttype == rparams->suppsalttypes[i])
-		    break;
-
-	    /* touching the end of the list means defsalttype is missing */
-	    if (rparams->suppsalttypes[i] == END_OF_LIST) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "Default salttype not in the supported list");
-		goto cleanup;
-	    }
-
-	    if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbdefaultsalttype",
-					      LDAP_MOD_REPLACE, rparams->defsalttype)) != 0)
-		goto cleanup;
-
-	} else {
-	    st = EINVAL;
-	    krb5_set_error_message (context, st, "Invalid default salttype");
-	    goto cleanup;
-	}
-    }
-
-    /* SUPPSALTTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_SUPPSALTTYPE) {
-	krb5_boolean flag=FALSE;
-
-	for (i = 0; rparams->suppsalttypes[i] != END_OF_LIST; ++i) {
-	    /* check if the salttypes entered is valid */
-	    if (!(rparams->suppsalttypes[i]>=0 && rparams->suppsalttypes[i]<6)) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "salttype %d not valid", rparams->suppsalttypes[i]);
-		goto cleanup;
-	    }
-
-	    /* Ensure that the default salt type is supported */
-	    if ((oldmask & LDAP_REALM_DEFSALTTYPE ||
-		 mask & LDAP_REALM_DEFSALTTYPE) &&
-		rparams->defsalttype == rparams->suppsalttypes[i])
-		flag = TRUE;
-	}
-
-	if (flag == FALSE) { /* Default salt type is not supported */
-	    st = EINVAL;
-	    krb5_set_error_message (context, st, "Default salttype not in the supported list");
-	    goto cleanup;
-	}
-	ignore_duplicates(rparams->suppsalttypes);
-
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedsalttypes",
-					      LDAP_MOD_REPLACE, rparams->suppsalttypes)) != 0)
-	    goto cleanup;
-    }
-
-    /* SUPPENCTYPE ATTRIBUTE */
-    if (mask & LDAP_REALM_SUPPENCTYPE) {
-	krb5_boolean flag=FALSE;
-
-	for (i=0; rparams->suppenctypes[i] != END_OF_LIST; ++i) {
-
-	    /* check if the enctypes entered is valid */
-	    if (krb5_c_valid_enctype(rparams->suppenctypes[i]) == 0) {
-		st = EINVAL;
-		krb5_set_error_message (context, st, "Enctype %d not valid", rparams->suppenctypes[i]);
-		goto cleanup;
-	    }
-
-	    /* Ensure that the default encryption type is supported */
-	    if ((oldmask & LDAP_REALM_DEFENCTYPE ||
-		 mask & LDAP_REALM_DEFENCTYPE) &&
-		rparams->defenctype == rparams->suppenctypes[i])
-		flag = TRUE;
-	}
-
-	if (flag == FALSE) { /* Default encryption type is not supported */
-	    st = EINVAL;
-	    krb5_set_error_message(context, st, "Default enctype not in the supported list");
-	    goto cleanup;
-	}
-	ignore_duplicates(rparams->suppenctypes);
-
-	if ((st=krb5_add_int_arr_mem_ldap_mod(&mods, "krbsupportedenctypes",
-					      LDAP_MOD_REPLACE, rparams->suppenctypes)) != 0)
-	    goto cleanup;
-    }
 
 #ifdef HAVE_EDIRECTORY
 
@@ -1147,8 +1001,6 @@ krb5_ldap_create_realm(context, rparams, mask)
 	((mask & LDAP_REALM_SUBTREE) && rparams->subtree  == NULL) ||
 	((mask & LDAP_REALM_CONTREF) && rparams->containerref == NULL) || 
 	((mask & LDAP_REALM_POLICYREFERENCE) && rparams->policyreference == NULL) ||
-	((mask & LDAP_REALM_SUPPSALTTYPE) && rparams->suppsalttypes == NULL) ||
-	((mask & LDAP_REALM_SUPPENCTYPE) && rparams->suppenctypes == NULL) ||
 #ifdef HAVE_EDIRECTORY
 	((mask & LDAP_REALM_KDCSERVERS) && rparams->kdcservers == NULL) ||
 	((mask & LDAP_REALM_ADMINSERVERS) && rparams->adminservers == NULL) ||
@@ -1428,8 +1280,7 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 
     LDAP_SEARCH(rlparams->realmdn, LDAP_SCOPE_BASE, "(objectclass=krbRealmContainer)", realm_attributes);
 
-    if ((st = ldap_count_entries(ld, result)) == 0)
-    {
+    if ((st = ldap_count_entries(ld, result)) <= 0) {
         /* This could happen when the DN used to bind and read the realm object
          * does not have sufficient rights to read its attributes
          */
@@ -1501,49 +1352,6 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
 	if ((values=ldap_get_values(ld, ent, "krbTicketFlags")) != NULL) {
 	    rlparams->tktflags = atoi(values[0]);
 	    *mask |= LDAP_REALM_KRBTICKETFLAGS;
-	    ldap_value_free(values);
-	}
-
-	if ((values=ldap_get_values(ld, ent, "krbDefaultEncType")) != NULL) {
-	    rlparams->defenctype = atoi(values[0]);
-	    if (krb5_c_valid_enctype(rlparams->defenctype) == 0)
-		rlparams->defenctype = ENCTYPE_DES3_CBC_SHA1;
-	    *mask |= LDAP_REALM_DEFENCTYPE;
-	    ldap_value_free(values);
-	}
-
-	if ((values=ldap_get_values(ld, ent, "krbDefaultSaltType")) != NULL) {
-	    rlparams->defsalttype = atoi(values[0]);
-	    if (!(rlparams->defsalttype>=0 && rlparams->defsalttype<6))
-		rlparams->defsalttype = KRB5_KDB_SALTTYPE_NORMAL;
-	    *mask |= LDAP_REALM_DEFSALTTYPE;
-	    ldap_value_free(values);
-	}
-	if ((values=ldap_get_values(ld, ent, "krbSupportedEncTypes")) != NULL) {
-	    count = ldap_count_values(values);
-	    rlparams->suppenctypes = malloc (sizeof(krb5_int32) * (count + 1));
-	    if (rlparams->suppenctypes == NULL) {
-		st = ENOMEM;
-		goto cleanup;
-	    }
-	    for (i=0; i<count; ++i)
-		rlparams->suppenctypes[i] = atoi(values[i]);
-	    rlparams->suppenctypes[count] = -1;
-	    *mask |= LDAP_REALM_SUPPENCTYPE;
-	    ldap_value_free(values);
-	}
-
-	if ((values=ldap_get_values(ld, ent, "krbSupportedSaltTypes")) != NULL) {
-	    count = ldap_count_values(values);
-	    rlparams->suppsalttypes =  malloc (sizeof(krb5_int32) * (count + 1));
-	    if (rlparams->suppsalttypes == NULL) {
-		st = ENOMEM;
-		goto cleanup;
-	    }
-	    for (i=0; i<count; ++i)
-		rlparams->suppsalttypes[i] = atoi(values[i]);
-	    rlparams->suppsalttypes[count] = -1;
-	    *mask |= LDAP_REALM_SUPPSALTTYPE;
 	    ldap_value_free(values);
 	}
 
@@ -1658,12 +1466,6 @@ krb5_ldap_free_realm_params(rparams)
 	        krb5_xfree(rparams->subtree[i]);
 	    krb5_xfree(rparams->subtree);
         }
-
-	if (rparams->suppenctypes)
-	    krb5_xfree(rparams->suppenctypes);
-
-	if (rparams->suppsalttypes)
-	    krb5_xfree(rparams->suppsalttypes);
 
 	if (rparams->kdcservers) {
 	    for (i=0; rparams->kdcservers[i]; ++i)

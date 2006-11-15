@@ -34,20 +34,16 @@
 /* realm specific mask */
 #define LDAP_REALM_SUBTREE            0x0001
 #define LDAP_REALM_SEARCHSCOPE        0x0002
-#define LDAP_REALM_DEFENCTYPE         0x0004
-#define LDAP_REALM_DEFSALTTYPE        0x0008
-#define LDAP_REALM_SUPPENCTYPE        0x0010
-#define LDAP_REALM_SUPPSALTTYPE       0x0020
-#define LDAP_REALM_POLICYREFERENCE    0x0040
-#define LDAP_REALM_UPENABLED          0x0080
-#define LDAP_REALM_LDAPSERVERS        0x0100
-#define LDAP_REALM_KDCSERVERS         0x0200
-#define LDAP_REALM_ADMINSERVERS       0x0400
-#define LDAP_REALM_PASSWDSERVERS      0x0800
-#define LDAP_REALM_MAXTICKETLIFE      0x1000
-#define LDAP_REALM_MAXRENEWLIFE       0x2000
-#define LDAP_REALM_KRBTICKETFLAGS     0x4000
-#define LDAP_REALM_CONTREF  	      0x8000 
+#define LDAP_REALM_POLICYREFERENCE    0x0004
+#define LDAP_REALM_UPENABLED          0x0008
+#define LDAP_REALM_LDAPSERVERS        0x0010
+#define LDAP_REALM_KDCSERVERS         0x0020
+#define LDAP_REALM_ADMINSERVERS       0x0040
+#define LDAP_REALM_PASSWDSERVERS      0x0080
+#define LDAP_REALM_MAXTICKETLIFE      0x0100
+#define LDAP_REALM_MAXRENEWLIFE       0x0200
+#define LDAP_REALM_KRBTICKETFLAGS     0x0400
+#define LDAP_REALM_CONTREF  	      0x0800 
 
 extern char *policy_attributes[];
 
@@ -67,10 +63,6 @@ typedef struct _krb5_ldap_realm_params {
   krb5_int32    max_life;
   krb5_int32    max_renewable_life;
   krb5_int32    tktflags;
-  krb5_enctype  defenctype;
-  krb5_int32    defsalttype;
-  krb5_enctype  *suppenctypes;
-  krb5_int32    *suppsalttypes;
   char          **kdcservers;
   char          **adminservers;
   char          **passwdservers;
