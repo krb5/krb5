@@ -27,10 +27,20 @@
  */
 
 #if defined(__MACH__) && defined(__APPLE__)
-#	include <TargetConditionals.h>
-#	if TARGET_RT_MAC_CFM
-#		error "Use KfM 4.0 SDK headers for CFM compilation."
-#	endif
+#include <TargetConditionals.h>
+#include <AvailabilityMacros.h>
+#if TARGET_RT_MAC_CFM
+#error "Use KfM 4.0 SDK headers for CFM compilation."
+#endif
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_2_AND_LATER_BUT_DEPRECATED_IN_MAC_OS_X_VERSION_10_5
+#define KRB5INT_DES_DEPRECATED AVAILABLE_MAC_OS_X_VERSION_10_2_AND_LATER_BUT_DEPRECATED_IN_MAC_OS_X_VERSION_10_5
+#endif
+#endif /* defined(__MACH__) && defined(__APPLE__) */
+
+/* Macro to add deprecated attribute to DES types and functions */
+/* Currently only defined on Mac OS X 10.5 and later.           */
+#ifndef KRB5INT_DES_DEPRECATED
+#define KRB5INT_DES_DEPRECATED
 #endif
 
 #ifdef __cplusplus
@@ -62,7 +72,9 @@ KRBINT_BEGIN_DECLS
 #define DES_UINT32 unsigned long
 #endif
 
-typedef unsigned char des_cblock[8];	/* crypto-block size */
+typedef unsigned char des_cblock[8] 	/* crypto-block size */
+KRB5INT_DES_DEPRECATED;
+
 /*
  * Key schedule.
  *
@@ -81,7 +93,8 @@ typedef unsigned char des_cblock[8];	/* crypto-block size */
  * have an exact 32-bit int, and nothing should be looking inside a
  * des_key_schedule anyway.
  */
-typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16];
+typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16] 
+KRB5INT_DES_DEPRECATED;
 
 #if TARGET_OS_MAC
 #	pragma pack(pop)
@@ -150,40 +163,69 @@ typedef struct des_ks_struct bit_64;
  * Function Prototypes
  */
 
-int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule);
+int KRB5_CALLCONV des_key_sched (C_Block, Key_schedule) 
+KRB5INT_DES_DEPRECATED;
 
 int KRB5_CALLCONV
 des_pcbc_encrypt (C_Block *in, C_Block *out, long length,
 		  const des_key_schedule schedule, C_Block *ivec,
-		  int enc);
+		  int enc) 
+KRB5INT_DES_DEPRECATED;
 
 unsigned long KRB5_CALLCONV
 des_quad_cksum (const unsigned char *in, unsigned DES_INT32 *out,
-		long length, int out_count, C_Block *seed);
+		long length, int out_count, C_Block *seed) 
+KRB5INT_DES_DEPRECATED;
+
 /*
  * XXX ABI change: used to return void; also, cns/kfm have signed long
  * instead of unsigned long length.
  */
 unsigned long KRB5_CALLCONV
 des_cbc_cksum(const des_cblock *, des_cblock *, unsigned long,
-	      const des_key_schedule, const des_cblock *);
-int KRB5_CALLCONV des_string_to_key (const char *, C_Block);
-void afs_string_to_key(char *, char *, des_cblock);
+	      const des_key_schedule, const des_cblock *) 
+KRB5INT_DES_DEPRECATED;
+
+int KRB5_CALLCONV des_string_to_key (const char *, C_Block) 
+KRB5INT_DES_DEPRECATED;
+
+void afs_string_to_key(char *, char *, des_cblock) 
+KRB5INT_DES_DEPRECATED;
 
 /* XXX ABI change: used to return krb5_error_code */
-int KRB5_CALLCONV des_read_password(des_cblock *, char *, int);
+int KRB5_CALLCONV des_read_password(des_cblock *, char *, int) 
+KRB5INT_DES_DEPRECATED;
+
 int KRB5_CALLCONV des_ecb_encrypt(des_cblock *, des_cblock *,
-				  const des_key_schedule, int);
+				  const des_key_schedule, int) 
+KRB5INT_DES_DEPRECATED;
+
 /* XXX kfm/cns have signed long length */
 int des_cbc_encrypt(des_cblock *, des_cblock *, unsigned long,
-		    const des_key_schedule, const des_cblock *, int);
-void des_fixup_key_parity(des_cblock);
-int des_check_key_parity(des_cblock);
-int KRB5_CALLCONV des_new_random_key(des_cblock);
-void des_init_random_number_generator(des_cblock);
-int des_random_key(des_cblock *);
-int des_is_weak_key(des_cblock);
-void des_cblock_print_file(des_cblock *, FILE *fp);
+		    const des_key_schedule, const des_cblock *, int) 
+KRB5INT_DES_DEPRECATED;
+
+void des_fixup_key_parity(des_cblock) 
+KRB5INT_DES_DEPRECATED;
+
+int des_check_key_parity(des_cblock) 
+KRB5INT_DES_DEPRECATED;
+
+int KRB5_CALLCONV des_new_random_key(des_cblock) 
+KRB5INT_DES_DEPRECATED;
+
+void des_init_random_number_generator(des_cblock) 
+KRB5INT_DES_DEPRECATED;
+
+int des_random_key(des_cblock *) 
+KRB5INT_DES_DEPRECATED;
+
+int des_is_weak_key(des_cblock) 
+KRB5INT_DES_DEPRECATED;
+
+void des_cblock_print_file(des_cblock *, FILE *fp) 
+KRB5INT_DES_DEPRECATED;
+
 
 #if TARGET_OS_MAC
 #	pragma pack(pop)

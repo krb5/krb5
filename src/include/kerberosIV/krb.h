@@ -35,17 +35,27 @@
  * Unfortuantely, they've leaked out everywhere else.
  */
 #if defined(__MACH__) && defined(__APPLE__)
-#	include <TargetConditionals.h>
-#	if TARGET_RT_MAC_CFM
-#		error "Use KfM 4.0 SDK headers for CFM compilation."
-#	endif
-#	ifndef KRB_PRIVATE
-#		define KRB_PRIVATE 0
-#	endif
+#include <TargetConditionals.h>
+#include <AvailabilityMacros.h>
+#if TARGET_RT_MAC_CFM
+#error "Use KfM 4.0 SDK headers for CFM compilation."
+#endif
+#ifndef KRB_PRIVATE
+#define KRB_PRIVATE 0
+#endif
+#ifdef DEPRECATED_IN_MAC_OS_X_VERSION_10_5
+#define KRB5INT_KRB4_DEPRECATED DEPRECATED_IN_MAC_OS_X_VERSION_10_5
+#endif
 #else
-#	ifndef KRB_PRIVATE
-#		define KRB_PRIVATE 1
-#	endif
+#ifndef KRB_PRIVATE
+#define KRB_PRIVATE 1
+#endif
+#endif /* defined(__MACH__) && defined(__APPLE__) */
+
+/* Macro to add deprecated attribute to KRB4 types and functions */
+/* Currently only defined on Mac OS X 10.5 and later.            */
+#ifndef KRB5INT_KRB4_DEPRECATED
+#define KRB5INT_KRB4_DEPRECATED
 #endif
 
 /* Define u_char, u_short, u_int, and u_long. */
@@ -84,9 +94,11 @@ KRBINT_BEGIN_DECLS
 
 #if TARGET_OS_MAC
 /* ABI divergence on Mac for backwards compatibility. */
-extern const char * const * const krb_err_txt;
+extern const char * const * const krb_err_txt 
+KRB5INT_KRB4_DEPRECATED;
 #else
-extern const char * const krb_err_txt[MAX_KRB_ERRORS];
+extern const char * const krb_err_txt[MAX_KRB_ERRORS] 
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 /* General definitions */
@@ -144,10 +156,10 @@ struct ktext {
     int     length;		/* Length of the text */
     unsigned char dat[MAX_KTXT_LEN];	/* The data itself */
     unsigned long mbz;		/* zero to catch runaway strings */
-};
+} KRB5INT_KRB4_DEPRECATED;
 
-typedef struct ktext *KTEXT;
-typedef struct ktext KTEXT_ST;
+typedef struct ktext *KTEXT KRB5INT_KRB4_DEPRECATED;
+typedef struct ktext KTEXT_ST KRB5INT_KRB4_DEPRECATED;
 
 
 /* Definitions for send_to_kdc */
@@ -185,9 +197,9 @@ struct auth_dat {
     unsigned KRB4_32 time_sec;	/* Time ticket issued */
     unsigned KRB4_32 address;	/* Address in ticket */
     KTEXT_ST reply;		/* Auth reply (opt) */
-};
+} KRB5INT_KRB4_DEPRECATED;
 
-typedef struct auth_dat AUTH_DAT;
+typedef struct auth_dat AUTH_DAT KRB5INT_KRB4_DEPRECATED;
 
 /* Structure definition for credentials returned by get_cred */
 
@@ -209,9 +221,9 @@ struct credentials {
 #ifdef _WIN32
     char    address[ADDR_SZ];   /* Address in ticket */
 #endif
-};
+} KRB5INT_KRB4_DEPRECATED;
 
-typedef struct credentials CREDENTIALS;
+typedef struct credentials CREDENTIALS KRB5INT_KRB4_DEPRECATED;
 
 /* Structure definition for rd_private_msg and rd_safe_msg */
 
@@ -222,9 +234,9 @@ struct msg_dat {
     int     swap;			/* swap bytes? */
     KRB4_32  time_sec;			/* msg timestamp seconds */
     unsigned char time_5ms;		/* msg timestamp 5ms units */
-};
+} KRB5INT_KRB4_DEPRECATED;
 
-typedef struct msg_dat MSG_DAT;
+typedef struct msg_dat MSG_DAT KRB5INT_KRB4_DEPRECATED;
 
 
 /* Location of ticket file for save_cred and get_cred */
@@ -420,12 +432,16 @@ extern int krb_debug;
 
 typedef int (KRB5_CALLCONV *key_proc_type)
 	(char *, char *, char *,
-		    char *, C_Block);
+		    char *, C_Block)
+KRB5INT_KRB4_DEPRECATED;
+
 #define KEY_PROC_TYPE_DEFINED
 
 typedef int (KRB5_CALLCONV *decrypt_tkt_type)
 	(char *, char *, char *,
-		    char *, key_proc_type, KTEXT *);
+		    char *, key_proc_type, KTEXT *)
+KRB5INT_KRB4_DEPRECATED;
+
 #define DECRYPT_TKT_TYPE_DEFINED
 
 extern struct _krb5_context * krb5__krb4_context;
@@ -438,201 +454,283 @@ struct sockaddr_in;
 
 /* dest_tkt.c */
 int KRB5_CALLCONV dest_tkt
-	(void);
+	(void)
+KRB5INT_KRB4_DEPRECATED;
+
 /* err_txt.c */
 const char * KRB5_CALLCONV krb_get_err_text
-	(int errnum);
+	(int errnum)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_ad_tkt.c */
 /* Previously not KRB5_CALLCONV */
 int KRB5_CALLCONV get_ad_tkt
-	(char *service, char *sinst, char *realm, int lifetime);
+	(char *service, char *sinst, char *realm, int lifetime)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_admhst.c */
 int KRB5_CALLCONV krb_get_admhst
-	(char *host, char *realm, int idx);
+	(char *host, char *realm, int idx)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_cred.c */
 int KRB5_CALLCONV krb_get_cred
 	(char *service, char *instance, char *realm,
-		   CREDENTIALS *c);
+		   CREDENTIALS *c)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_in_tkt.c */
 /* Previously not KRB5_CALLCONV */
 int KRB5_CALLCONV krb_get_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
-		   key_proc_type, decrypt_tkt_type, char *arg);
+		   key_proc_type, decrypt_tkt_type, char *arg)
+KRB5INT_KRB4_DEPRECATED;
+
 #if KRB_PRIVATE
 /* Previously not KRB5_CALLCONV */
 int KRB5_CALLCONV krb_get_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinst, int life,
 		   key_proc_type, decrypt_tkt_type, char *arg,
-		   char *preauth_p, int preauth_len);
+		   char *preauth_p, int preauth_len)
+KRB5INT_KRB4_DEPRECATED;
 #endif
+
 /* From KfM */
 int KRB5_CALLCONV krb_get_in_tkt_creds(char *, char *, char *, char *, char *,
-    int, key_proc_type, decrypt_tkt_type, char *, CREDENTIALS *);
+    int, key_proc_type, decrypt_tkt_type, char *, CREDENTIALS *)
+KRB5INT_KRB4_DEPRECATED;
+
 
 /* g_krbhst.c */
 int KRB5_CALLCONV krb_get_krbhst
-	(char *host, const char *realm, int idx);
+	(char *host, const char *realm, int idx)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_krbrlm.c */
 int KRB5_CALLCONV krb_get_lrealm
-	(char *realm, int idx);
+	(char *realm, int idx)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_phost.c */
 char * KRB5_CALLCONV krb_get_phost
-	(char * alias);
+	(char * alias)
+KRB5INT_KRB4_DEPRECATED;
+
 /* get_pw_tkt */
 int KRB5_CALLCONV get_pw_tkt 
-        (char *, char *, char *, char *);
+        (char *, char *, char *, char *)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_pw_in_tkt.c */
 int KRB5_CALLCONV krb_get_pw_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
-		   int life, char *password);
+		   int life, char *password)
+KRB5INT_KRB4_DEPRECATED;
+
 #if KRB_PRIVATE
 int KRB5_CALLCONV krb_get_pw_in_tkt_preauth
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
-		   int life, char *password);
+		   int life, char *password)
+KRB5INT_KRB4_DEPRECATED;
 #endif
+
 int KRB5_CALLCONV
 krb_get_pw_in_tkt_creds(char *, char *, char *,
-	char *, char *, int, char *, CREDENTIALS *);
+	char *, char *, int, char *, CREDENTIALS *)
+KRB5INT_KRB4_DEPRECATED;
 
 /* g_svc_in_tkt.c */
 int KRB5_CALLCONV krb_get_svc_in_tkt
 	(char *k_user, char *instance, char *realm,
 		   char *service, char *sinstance,
-		   int life, char *srvtab);
+		   int life, char *srvtab)
+KRB5INT_KRB4_DEPRECATED;
 
 /* g_tf_fname.c */
 int KRB5_CALLCONV krb_get_tf_fullname
-	(const char *ticket_file, char *name, char *inst, char *realm);
+	(const char *ticket_file, char *name, char *inst, char *realm)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_tf_realm.c */
 int KRB5_CALLCONV krb_get_tf_realm
-	(const char *ticket_file, char *realm);
+	(const char *ticket_file, char *realm)
+KRB5INT_KRB4_DEPRECATED;
+
 /* g_tkt_svc.c */
 int KRB5_CALLCONV krb_get_ticket_for_service
 	(char *serviceName,
 		   char *buf, unsigned KRB4_32 *buflen,
 		   int checksum, des_cblock, Key_schedule,
-		   char *version, int includeVersion);
+		   char *version, int includeVersion)
+KRB5INT_KRB4_DEPRECATED;
+
 #if KRB_PRIVATE
 /* in_tkt.c */
 int KRB5_CALLCONV in_tkt
-	(char *name, char *inst);
+	(char *name, char *inst)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV krb_in_tkt
-        (char *pname, char *pinst, char *realm);
+        (char *pname, char *pinst, char *realm)
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 /* kname_parse.c */
 int KRB5_CALLCONV kname_parse
 	(char *name, char *inst, char *realm,
-		   char *fullname);
+		   char *fullname)
+KRB5INT_KRB4_DEPRECATED;
+
 /* Merged from KfM */
 int KRB5_CALLCONV kname_unparse
-	(char *, const char *, const char *, const char *);
+	(char *, const char *, const char *, const char *)
+KRB5INT_KRB4_DEPRECATED;
 
 int KRB5_CALLCONV k_isname
-        (char *);
+        (char *)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV k_isinst
-        (char *);
+        (char *)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV k_isrealm
-        (char *);
+        (char *)
+KRB5INT_KRB4_DEPRECATED;
 
 
 /* kuserok.c */
 int KRB5_CALLCONV kuserok
-	(AUTH_DAT *kdata, char *luser);
+	(AUTH_DAT *kdata, char *luser)
+KRB5INT_KRB4_DEPRECATED;
 
 /* lifetime.c */
 KRB4_32 KRB5_CALLCONV krb_life_to_time
-	(KRB4_32 start, int life);
+	(KRB4_32 start, int life)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV krb_time_to_life
-	(KRB4_32 start, KRB4_32 end);
+	(KRB4_32 start, KRB4_32 end)
+KRB5INT_KRB4_DEPRECATED;
 
 /* mk_auth.c */
 int KRB5_CALLCONV krb_check_auth
 	(KTEXT, unsigned KRB4_32 cksum, MSG_DAT *,
 		   C_Block, Key_schedule,
 		   struct sockaddr_in * local_addr,
-		   struct sockaddr_in * foreign_addr);
+		   struct sockaddr_in * foreign_addr)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV krb_mk_auth
 	(long k4_options, KTEXT ticket,
 		   char *service, char *inst, char *realm,
-		   unsigned KRB4_32 checksum, char *version, KTEXT buf);
+		   unsigned KRB4_32 checksum, char *version, KTEXT buf)
+KRB5INT_KRB4_DEPRECATED;
+
 /* mk_err.c */
 long KRB5_CALLCONV krb_mk_err
-	(u_char *out, KRB4_32 k4_code, char *text);
+	(u_char *out, KRB4_32 k4_code, char *text)
+KRB5INT_KRB4_DEPRECATED;
+
 #if KRB_PRIVATE
 /* mk_preauth.c */
 int krb_mk_preauth
 	(char **preauth_p, int *preauth_len, key_proc_type,
 		   char *name, char *inst, char *realm, char *password,
-		   C_Block);
+		   C_Block)
+KRB5INT_KRB4_DEPRECATED;
+
 void krb_free_preauth
-	(char * preauth_p, int len);
+	(char * preauth_p, int len)
+KRB5INT_KRB4_DEPRECATED;
 #endif
+
 /* mk_priv.c */
 long KRB5_CALLCONV krb_mk_priv
 	(u_char *in, u_char *out,
 		   unsigned KRB4_32 length,
 		   Key_schedule, C_Block *,
 		   struct sockaddr_in * sender,
-		   struct sockaddr_in * receiver);
+		   struct sockaddr_in * receiver)
+KRB5INT_KRB4_DEPRECATED;
+
 /* mk_req.c */
 int KRB5_CALLCONV krb_mk_req
 	(KTEXT authent,
 		   char *service, char *instance, char *realm,
-		   KRB4_32 checksum);
+		   KRB4_32 checksum)
+KRB5INT_KRB4_DEPRECATED;
+
 /* Merged from KfM */
-int KRB5_CALLCONV krb_mk_req_creds(KTEXT, CREDENTIALS *, KRB_INT32);
+int KRB5_CALLCONV krb_mk_req_creds(KTEXT, CREDENTIALS *, KRB_INT32)
+KRB5INT_KRB4_DEPRECATED;
 
 /* Added CALLCONV (KfM exports w/o INTERFACE, but KfW doesn't export?) */
-int KRB5_CALLCONV krb_set_lifetime(int newval);
+int KRB5_CALLCONV krb_set_lifetime(int newval)
+KRB5INT_KRB4_DEPRECATED;
 
 /* mk_safe.c */
 long KRB5_CALLCONV krb_mk_safe
 	(u_char *in, u_char *out, unsigned KRB4_32 length,
 		   C_Block *,
 		   struct sockaddr_in *sender,
-		   struct sockaddr_in *receiver);
+		   struct sockaddr_in *receiver)
+KRB5INT_KRB4_DEPRECATED;
+
 #if KRB_PRIVATE
 /* netread.c */
 int krb_net_read
-	(int fd, char *buf, int len);
+	(int fd, char *buf, int len)
+KRB5INT_KRB4_DEPRECATED;
+
 /* netwrite.c */
 int krb_net_write
-	(int fd, char *buf, int len);
+	(int fd, char *buf, int len)
+KRB5INT_KRB4_DEPRECATED;
+
 /* pkt_clen.c */
 int pkt_clen
-	(KTEXT);
+	(KTEXT)
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 /* put_svc_key.c */
 int KRB5_CALLCONV put_svc_key
 	(char *sfile,
 		   char *name, char *inst, char *realm,
-		   int newvno, char *key);
+		   int newvno, char *key)
+KRB5INT_KRB4_DEPRECATED;
 
 /* rd_err.c */
 int KRB5_CALLCONV krb_rd_err
 	(u_char *in, u_long in_length,
-		   long *k4_code, MSG_DAT *m_data);
+		   long *k4_code, MSG_DAT *m_data)
+KRB5INT_KRB4_DEPRECATED;
+
 /* rd_priv.c */
 long KRB5_CALLCONV krb_rd_priv
 	(u_char *in,unsigned KRB4_32 in_length,
 		   Key_schedule, C_Block *,
 		   struct sockaddr_in *sender,
 		   struct sockaddr_in *receiver,
-		   MSG_DAT *m_data);
+		   MSG_DAT *m_data)
+KRB5INT_KRB4_DEPRECATED;
+
 /* rd_req.c */
 int KRB5_CALLCONV krb_rd_req
 	(KTEXT, char *service, char *inst,
 		   unsigned KRB4_32 from_addr, AUTH_DAT *,
-		   char *srvtab);
+		   char *srvtab)
+KRB5INT_KRB4_DEPRECATED;
+
 /* Merged from KfM */
 int KRB5_CALLCONV
-krb_rd_req_int(KTEXT, char *, char *, KRB_UINT32, AUTH_DAT *, C_Block);
+krb_rd_req_int(KTEXT, char *, char *, KRB_UINT32, AUTH_DAT *, C_Block)
+KRB5INT_KRB4_DEPRECATED;
 
 /* rd_safe.c */
 long KRB5_CALLCONV krb_rd_safe
@@ -640,18 +738,25 @@ long KRB5_CALLCONV krb_rd_safe
 		   C_Block *,
 		   struct sockaddr_in *sender,
 		   struct sockaddr_in *receiver,
-		   MSG_DAT *m_data);
+		   MSG_DAT *m_data)
+KRB5INT_KRB4_DEPRECATED;
+
 /* rd_svc_key.c */
 int KRB5_CALLCONV read_service_key
 	(char *service, char *instance, char *realm,
-		   int kvno, char *file, char *key);
+		   int kvno, char *file, char *key)
+KRB5INT_KRB4_DEPRECATED;
+
 int KRB5_CALLCONV get_service_key
 	(char *service, char *instance, char *realm,
-		   int *kvno, char *file, char *key);
+		   int *kvno, char *file, char *key)
+KRB5INT_KRB4_DEPRECATED;
 
 /* realmofhost.c */
 char * KRB5_CALLCONV krb_realmofhost
-	(char *host);
+	(char *host)
+KRB5INT_KRB4_DEPRECATED;
+
 /* recvauth.c */
 int KRB5_CALLCONV krb_recvauth
 	(long k4_options, int fd, KTEXT ticket,
@@ -659,7 +764,9 @@ int KRB5_CALLCONV krb_recvauth
 		   struct sockaddr_in *foreign_addr,
 		   struct sockaddr_in *local_addr,
 		   AUTH_DAT *kdata, char *srvtab,
-		   Key_schedule schedule, char *version);
+		   Key_schedule schedule, char *version)
+KRB5INT_KRB4_DEPRECATED;
+
 /* sendauth.c */
 int KRB5_CALLCONV krb_sendauth
         (long k4_options, int fd, KTEXT ticket,
@@ -667,51 +774,65 @@ int KRB5_CALLCONV krb_sendauth
 	 unsigned KRB4_32 checksum, MSG_DAT *msg_data,
 	 CREDENTIALS *cred, Key_schedule schedule, 
 	 struct sockaddr_in *laddr, struct sockaddr_in *faddr, 
-	 char *version);
+	 char *version)
+KRB5INT_KRB4_DEPRECATED;
 
 #if KRB_PRIVATE
 /* save_creds.c */
 int KRB5_CALLCONV krb_save_credentials
 	(char *service, char *instance, char *realm,
 		   C_Block session, int lifetime, int kvno,
-		   KTEXT ticket, long issue_date);
+		   KTEXT ticket, long issue_date)
+KRB5INT_KRB4_DEPRECATED;
+
 /* send_to_kdc.c */
 /* XXX PRIVATE? KfM doesn't export. */
 int send_to_kdc
-	(KTEXT pkt, KTEXT rpkt, char *realm);
+	(KTEXT pkt, KTEXT rpkt, char *realm)
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 /* tkt_string.c */
 /* Used to return pointer to non-const char */
 const char * KRB5_CALLCONV tkt_string
-	(void);
+	(void)
+KRB5INT_KRB4_DEPRECATED;
+
 /* Previously not KRB5_CALLCONV, and previously took pointer to non-const. */
 void KRB5_CALLCONV krb_set_tkt_string
-	(const char *);
+	(const char *)
+KRB5INT_KRB4_DEPRECATED;
 
 #if KRB_PRIVATE
 /* tf_util.c */
-int KRB5_CALLCONV tf_init (const char *tf_name, int rw);
+int KRB5_CALLCONV tf_init (const char *tf_name, int rw)
+KRB5INT_KRB4_DEPRECATED;
 
-int KRB5_CALLCONV tf_get_pname (char *p);
+int KRB5_CALLCONV tf_get_pname (char *p)
+KRB5INT_KRB4_DEPRECATED;
 
-int KRB5_CALLCONV tf_get_pinst (char *p);
+int KRB5_CALLCONV tf_get_pinst (char *p)
+KRB5INT_KRB4_DEPRECATED;
 
-int KRB5_CALLCONV tf_get_cred (CREDENTIALS *c);
+int KRB5_CALLCONV tf_get_cred (CREDENTIALS *c)
+KRB5INT_KRB4_DEPRECATED;
 
-void KRB5_CALLCONV tf_close (void);
+void KRB5_CALLCONV tf_close (void)
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 #if KRB_PRIVATE
 /* unix_time.c */
 unsigned KRB4_32 KRB5_CALLCONV unix_time_gmt_unixsec 
-        (unsigned KRB4_32 *);
+        (unsigned KRB4_32 *)
+KRB5INT_KRB4_DEPRECATED;
 
 /*
  * Internal prototypes
  */
 extern int krb_set_key
-	(char *key, int cvt);
+	(char *key, int cvt)
+KRB5INT_KRB4_DEPRECATED;
 
 /* This is exported by KfM.  It was previously not KRB5_CALLCONV. */
 extern int KRB5_CALLCONV decomp_ticket
@@ -719,40 +840,48 @@ extern int KRB5_CALLCONV decomp_ticket
 		   char *pinstance, char *prealm, unsigned KRB4_32 *paddress,
 		   C_Block session, int *life, unsigned KRB4_32 *time_sec,
 		   char *sname, char *sinstance, C_Block,
-		   Key_schedule key_s);
+		   Key_schedule key_s)
+KRB5INT_KRB4_DEPRECATED;
 
 
 extern void cr_err_reply(KTEXT pkt, char *pname, char *pinst, char *prealm,
-			 u_long time_ws, u_long e, char *e_string);
+			 u_long time_ws, u_long e, char *e_string)
+KRB5INT_KRB4_DEPRECATED;
 
 extern int create_ciph(KTEXT c, C_Block session, char *service, 
 		       char *instance, char *realm, unsigned long life,
 		       int kvno, KTEXT tkt, unsigned long kdc_time, 
-		       C_Block key);
+		       C_Block key)
+KRB5INT_KRB4_DEPRECATED;
 
 
 extern int krb_create_ticket(KTEXT tkt, unsigned int flags, char *pname,
 			     char *pinstance, char *prealm, long paddress,
 			     char *session, int life, long time_sec, 
-			     char *sname, char *sinstance, C_Block key);
+			     char *sname, char *sinstance, C_Block key)
+KRB5INT_KRB4_DEPRECATED;
 
 #endif /* KRB_PRIVATE */
 
 /* This function is used by KEYFILE above.  Do not call it directly */
-extern char * krb__get_srvtabname(const char *);
+extern char * krb__get_srvtabname(const char *)
+KRB5INT_KRB4_DEPRECATED;
 
 #if KRB_PRIVATE
 
-extern int krb_kntoln(AUTH_DAT *, char *);
+extern int krb_kntoln(AUTH_DAT *, char *)
+KRB5INT_KRB4_DEPRECATED;
 
 #ifdef KRB5_GENERAL__
 extern int krb_cr_tkt_krb5(KTEXT tkt, unsigned int flags, char *pname,
 			   char *pinstance, char *prealm, long paddress,
 			   char *session, int life, long time_sec, 
 			   char *sname, char *sinstance,  
-			   krb5_keyblock *k5key);
+			   krb5_keyblock *k5key)
+KRB5INT_KRB4_DEPRECATED;
 
-extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
+extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key)
+KRB5INT_KRB4_DEPRECATED;
 
 #endif
 
@@ -762,20 +891,28 @@ extern int krb_set_key_krb5(krb5_context ctx, krb5_keyblock *key);
  * krb_change_password -- merged from KfM
  */
 /* change_password.c */
-int KRB5_CALLCONV krb_change_password(char *, char *, char *, char *, char *);
+int KRB5_CALLCONV krb_change_password(char *, char *, char *, char *, char *)
+KRB5INT_KRB4_DEPRECATED;
 
 /*
  * RealmsConfig-glue.c -- merged from KfM
  */
-int KRB5_CALLCONV krb_get_profile(profile_t *);
+int KRB5_CALLCONV krb_get_profile(profile_t *)
+KRB5INT_KRB4_DEPRECATED;
 
 #ifdef _WIN32
-HINSTANCE get_lib_instance(void);
-unsigned int krb_get_notification_message(void);
-char * KRB5_CALLCONV krb_get_default_user(void);
-int KRB5_CALLCONV krb_set_default_user(char *);
-unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *);
-long win_time_get_epoch(void);
+HINSTANCE get_lib_instance(void)
+KRB5INT_KRB4_DEPRECATED;
+unsigned int krb_get_notification_message(void)
+KRB5INT_KRB4_DEPRECATED;
+char * KRB5_CALLCONV krb_get_default_user(void)
+KRB5INT_KRB4_DEPRECATED;
+int KRB5_CALLCONV krb_set_default_user(char *)
+KRB5INT_KRB4_DEPRECATED;
+unsigned KRB4_32 win_time_gmt_unixsec(unsigned KRB4_32 *)
+KRB5INT_KRB4_DEPRECATED;
+long win_time_get_epoch(void)
+KRB5INT_KRB4_DEPRECATED;
 #endif
 
 #if TARGET_OS_MAC
