@@ -183,12 +183,12 @@ tohex(in, ret)
     krb5_data         in;
     krb5_data         *ret;
 {
-    int                i=0, j=0, err = 0;
+    int                i=0, err = 0;
 
     ret->length = 0;
     ret->data = NULL;
 
-    ret->data = (unsigned char *)malloc((unsigned int)in.length * 2 + 1 /*Null termination */);
+    ret->data = malloc((unsigned int)in.length * 2 + 1 /*Null termination */);
     if (ret->data == NULL) {
 	err = ENOMEM;
 	goto cleanup;
@@ -196,10 +196,8 @@ tohex(in, ret)
     ret->length = in.length * 2;
     ret->data[ret->length] = 0;
 
-    for (i = 0, j = 0; i < in.length; i++, j += 2) {
-	sprintf((char *)ret->data + j, "%x", in.data[i] >> 4);
-	sprintf((char *)ret->data + j + 1, "%x", in.data[i] & 0xf);
-    }
+    for (i = 0; i < in.length; i++)
+	sprintf(ret->data + 2 * i, "%02x", in.data[i] & 0xff);
 
 cleanup:
 
@@ -255,7 +253,7 @@ int dec_password(struct data pwd, struct data *ret) {
 	ret->len = (pwd.len - strlen("{HEX}")) / 2;
 	ret->value[ret->len] = '\0';
 	for (i = strlen("{HEX}"), j = 0; i < pwd.len; i += 2, j++) {
-	    int k;
+	    unsigned int k;
 	    /* Check if it is a hexadecimal number */
 	    if (isxdigit(pwd.value[i]) == 0 || isxdigit(pwd.value[i + 1]) == 0) {
 		err = ERR_PWD_NOT_HEX;

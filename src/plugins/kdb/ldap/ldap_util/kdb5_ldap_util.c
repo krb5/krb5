@@ -220,7 +220,8 @@ static struct _cmd_table {
     {"destroy_service", kdb5_ldap_destroy_service, 1},
     {"list_service",kdb5_ldap_list_services,1},
     {"setsrvpw", kdb5_ldap_set_service_password, 0},
-#else {"stashsrvpw", kdb5_ldap_stash_service_password, 0},
+#else
+    {"stashsrvpw", kdb5_ldap_stash_service_password, 0},
 #endif
     {"create_policy", kdb5_ldap_create_policy, 1},
     {"modify_policy", kdb5_ldap_modify_policy, 1},

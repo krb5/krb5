@@ -67,5 +67,5 @@ extern int  kdb5_ldap_set_service_password(int argc, char **argv);
 extern void kdb5_ldap_set_service_certificate(int argc, char **argv);
 extern void print_service_params(krb5_ldap_service_params *lserparams, int mask);
 extern krb5_error_code convert_realm_name2dn_list(char **list, const char *krbcontainer_loc);
-extern int  kdb5_ldap_stash_service_password(int argc, char **argv);
+extern void kdb5_ldap_stash_service_password(int argc, char **argv);
 

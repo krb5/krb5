@@ -1895,7 +1895,7 @@ cleanup:
  * Convert the user supplied password into hexadecimal and stash it. Only a
  * little more secure than storing plain password in the file ...
  */
-int
+void
 kdb5_ldap_stash_service_password(argc, argv)
     int argc;
     char **argv;
@@ -2154,7 +2154,8 @@ cleanup:
 	usage();
 /*	db_usage(STASH_SRV_PW); */
 
-    return ret;
+    if (ret)
+	exit_status++;
 }
 
 #endif /* #ifdef HAVE_EDIRECTORY */

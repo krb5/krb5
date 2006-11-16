@@ -66,28 +66,6 @@ char  *subtreeclass[] =    { "Organization", "OrganizationalUnit", "Domain", "kr
 
 char  *krbContainerRefclass[] = { "krbContainerRefAux", NULL};
 
-
-static void
-ignore_duplicates(int_list)
-    int         *int_list;
-{
-    int  i=0, j=0, scount=0;
-
-    for (i=0; int_list[i] != END_OF_LIST; scount=i++)
-	;
-
-    for (i=0; i <= scount; ++i) {
-	if (i > 0 && int_list[i] == int_list[i-1]) {
-	    for (j=i; j<=scount; ++j)
-		int_list[j-1] = int_list[j];
-	    int_list[scount] = END_OF_LIST;
-	    --scount;
-	    --i;
-	    continue;
-	}
-    }
-}
-
 /*
  * list realms from eDirectory
  */
@@ -398,16 +376,6 @@ cleanup:
     return st;
 }
 
-static int compare (const void *i, const void *j) {
-    if (*(const krb5_int32 *)i > *(const krb5_int32 *)j)
-	return 1;
-
-    if (*(const krb5_int32 *)i < *(const krb5_int32 *)j)
-	return -1;
-
-    return 0;
-}
-
 
 /*
  * Modify the realm attributes in the Directory.
@@ -430,7 +398,10 @@ krb5_ldap_modify_realm(context, rparams, mask)
     char errbuf[1024];
 #endif
     LDAPMod               **mods = NULL;
-    int                   i=0, oldmask=0, objectmask=0,k=0;
+#ifdef HAVE_EDIRECTORY
+    int                   i=0;
+#endif
+    int                   oldmask=0, objectmask=0,k=0;
     kdb5_dal_handle       *dal_handle=NULL;
     krb5_ldap_context     *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
@@ -1216,7 +1187,9 @@ krb5_ldap_read_realm_params(context, lrealm, rlparamp, mask)
     int             *mask;
 {
     char                   **values=NULL, *krbcontDN=NULL /*, *curr=NULL */;
-    unsigned int           i=0, /* masklen=4, */ count=0;
+#ifdef HAVE_EDIRECTORY
+    unsigned int           count=0;
+#endif
     krb5_error_code        st=0, tempst=0;
     LDAP                   *ld=NULL;
     LDAPMessage            *result=NULL,*ent=NULL;
