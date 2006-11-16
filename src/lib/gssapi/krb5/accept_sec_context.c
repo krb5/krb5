@@ -141,8 +141,10 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 	goto cleanup;
 
     ccache = template_ccache; /* krb5_cc_gen_new will replace so make a copy */
-    if ((retval = krb5_cc_gen_new(context, &ccache)))
+    if ((retval = krb5_cc_gen_new(context, &ccache))) {
+	ccache = NULL;
         goto cleanup;
+    }
     
     if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
 	goto cleanup;
