@@ -143,9 +143,10 @@ krb5_verify_init_creds(krb5_context context,
       if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req", &template_ccache)))
 	 goto cleanup;
       ccache = template_ccache; /* krb5_cc_gen_new will replace so make a copy */
-       
-      if ((ret = krb5_cc_gen_new(context, &ccache)))
-	 goto cleanup;
+      if ((ret = krb5_cc_gen_new(context, &ccache))) {
+	  ccache = NULL;
+	  goto cleanup;
+      }
        
       if ((ret = krb5_cc_initialize(context, ccache, creds->client)))
 	 goto cleanup;
