@@ -278,12 +278,12 @@ krb5_stdccv3_generate_new (krb5_context context, krb5_ccache *id )
     }
     
     if (!err) {
-        err = cc_context_create_new_ccache(gCntrlBlock, cc_credentials_v5, 0L,
-                                           &ccapi_data->NamedCache);
+        err = cc_context_create_new_ccache (gCntrlBlock, cc_credentials_v5, 0L,
+                                            &ccache);
     }
     
     if (!err) {
-        err = cc_ccache_get_name (ccapi_data->NamedCache, &ccstring);
+        err = cc_ccache_get_name (ccache, &ccstring);
     }
     
     if (!err) {
