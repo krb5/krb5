@@ -180,6 +180,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	    }
 
 	    srv_cnt++;
+#ifdef HAVE_EDIRECTORY
 	} else if (opt && !strcmp(opt, "cert")) {
 	    if (val == NULL) {
 		status = EINVAL;
@@ -224,6 +225,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 		sprintf(ldap_context->root_certificate_file,"%s %s", oldstr, val);
 		free (oldstr);
 	    }
+#endif
 	} else {
 	/* ignore hash argument. Might have been passed from create */
 	    status = EINVAL;

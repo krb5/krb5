@@ -229,6 +229,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    goto cleanup;
     }
 
+#ifdef HAVE_EDIRECTORY
     /*
      * If root certificate file is not set read it from database
      * module section of conf file this is the trusted root
@@ -241,6 +242,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	if (st)
 	    goto cleanup;
     }
+#endif
 
     /*
      * If the ldap server parameter is not set read the list of ldap
@@ -270,7 +272,7 @@ krb5_ldap_read_server_params(context, conf_section, srv_type)
 	    (*server_info)[ele] = (krb5_ldap_server_info *)calloc(1,
 								  sizeof(krb5_ldap_server_info));
 
-	    (*server_info)[ele]->server_name = strdup("localhost");
+	    (*server_info)[ele]->server_name = strdup("ldapi://");
 	    if ((*server_info)[ele]->server_name == NULL) {
 		st = ENOMEM;
 		goto cleanup;
@@ -326,9 +328,11 @@ krb5_ldap_free_server_params(ldap_context)
 	    if (ldap_context->server_info_list[i]->server_name) {
 		free (ldap_context->server_info_list[i]->server_name);
 	    }
+#ifdef HAVE_EDIRECTORY
 	    if (ldap_context->server_info_list[i]->root_certificate_file) {
 		free (ldap_context->server_info_list[i]->root_certificate_file);
 	    }
+#endif
 	    if (ldap_context->server_info_list[i]->ldap_server_handles) {
 		ldap_server_handle = ldap_context->server_info_list[i]->ldap_server_handles;
 		while (ldap_server_handle) {
@@ -365,10 +369,12 @@ krb5_ldap_free_server_params(ldap_context)
 	ldap_context->service_password_file = NULL;
     }
 
+#ifdef HAVE_EDIRECTORY
     if (ldap_context->root_certificate_file != NULL) {
 	krb5_xfree(ldap_context->root_certificate_file);
 	ldap_context->root_certificate_file = NULL;
     }
+#endif
 
     if (ldap_context->service_cert_path != NULL) {
 	krb5_xfree(ldap_context->service_cert_path);
@@ -915,8 +921,10 @@ checkattributevalue (ld, dn, attribute, attrvalues, mask)
     char                        **values=NULL, *attributes[2] = {NULL};
     LDAPMessage                 *result=NULL, *entry=NULL;
 
-    if (strlen(dn) == 0)
-	return LDAP_NO_SUCH_OBJECT;
+    if (strlen(dn) == 0) {
+	st = set_ldap_error(0, LDAP_NO_SUCH_OBJECT, OP_SEARCH);
+	return st;
+    }
 
     attributes[0] = attribute;
 
