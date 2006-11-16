@@ -49,6 +49,7 @@ extern char *strptime (const char *, const char *, struct tm *);
    But all the world's not Linux.  */
 #undef strndup
 #define strndup my_strndup
+#ifdef HAVE_LDAP_STR2DN
 static char *my_strndup (const char *input, size_t limit)
 {
     size_t len = strlen(input);
@@ -63,6 +64,7 @@ static char *my_strndup (const char *input, size_t limit)
     } else
 	return strdup(input);
 }
+#endif
 
 /* Get integer or string values from the config section, falling back
    to the default section, then to hard-coded values.  */
@@ -1898,11 +1900,11 @@ remove_overlapping_subtrees(char **listin, char **listop, int *subtcount, int ss
  */
 krb5_error_code
 populate_krb5_db_entry (krb5_context context,
-    krb5_ldap_context *ldap_context,
-    LDAP *ld,
-    LDAPMessage *ent,
-    krb5_const_principal princ,
-    krb5_db_entry *entry)
+			krb5_ldap_context *ldap_context,
+			LDAP *ld,
+			LDAPMessage *ent,
+			krb5_const_principal princ,
+			krb5_db_entry *entry)
 {
     krb5_error_code st = 0;
     unsigned int    mask = 0;
@@ -1912,7 +1914,6 @@ populate_krb5_db_entry (krb5_context context,
     struct berval   **bvalues = NULL;
     krb5_tl_data    userinfo_tl_data = {0};
     char            **link_references = NULL;
-    krb5_ui_2	    entry_len;
     char *DN = NULL;
 
     if (princ == NULL) {

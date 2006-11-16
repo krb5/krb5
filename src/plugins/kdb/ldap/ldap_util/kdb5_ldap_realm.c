@@ -144,13 +144,14 @@ static int get_ticket_policy(rparams,i,argv,argc)
 {
     time_t date;
     time_t now;
-    time(&now);
     int mask = 0;
     krb5_error_code retval = 0;
     krb5_boolean no_msg = FALSE;
 
     krb5_boolean print_usage = FALSE;
     char *me = argv[0];
+
+    time(&now);
     if (!strcmp(argv[*i], "-maxtktlife")) {
 	if (++(*i) > argc-1)
 	    goto err_usage;
