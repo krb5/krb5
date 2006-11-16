@@ -814,6 +814,10 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
     if (al.naddrs == 0) {	/* No good servers */
 	if (al.space)
 	    free_list (&al);
+	krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
+			       "Cannot resolve network address for KDC in realm %.*s",
+			       realm->length, realm->data);
+			       
 	return KRB5_REALM_CANT_RESOLVE;
     }
     *addrlist = al;
