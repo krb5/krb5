@@ -64,6 +64,12 @@ typedef enum tag_k5_lsa_import {
 #define ATTRNAME_KRB5_FLAGS     L"Krb5Flags"
 #define ATTRNAME_KRB5_CCNAME    L"Krb5CCName"
 #define ATTRNAME_KVNO           L"Kvno"
+#define ATTRNAME_KRB5_IDFLAGS   L"Krb5IDFlags"
+
+/* Flag bits for Krb5IDFlags property */
+
+/* identity was imported from MSLSA: */
+#define K5IDFLAG_IMPORTED       0x00000001
 
 void init_krb();
 void exit_krb();
@@ -90,6 +96,7 @@ extern khm_int32 attr_id_addr_list;
 extern khm_int32 attr_id_krb5_flags;
 extern khm_int32 attr_id_krb5_ccname;
 extern khm_int32 attr_id_kvno;
+extern khm_int32 attr_id_krb5_idflags;
 
 extern khm_ui_4  k5_commctl_version;
 

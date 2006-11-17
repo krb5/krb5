@@ -64,7 +64,7 @@ kcdb_identity_set_provider(khm_handle sub)
         kcdb_ident_sub = sub;
 
         if (kcdb_ident_sub)
-            kmq_post_sub_msg(kcdb_ident_sub,
+            kmq_send_sub_msg(kcdb_ident_sub,
                              KMSG_IDENT,
                              KMSG_IDENT_INIT,
                              0,

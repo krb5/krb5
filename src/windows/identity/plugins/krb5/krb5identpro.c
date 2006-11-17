@@ -807,149 +807,120 @@ k5_ident_set_default(khm_int32 msg_type,
                      khm_ui_4 uparam,
                      void * vparam) {
 
-    /* Logic for setting the default identity:
-
-    When setting identity I as the default;
-
-    - If KRB5CCNAME is set
-    - If I["Krb5CCName"] == %KRB5CCNAME%
-    - do nothing
-    - Else
-    - Copy the contents of I["Krb5CCName"] to %KRB5CCNAME
-    - Set I["Krb5CCName"] to %KRB5CCNAME
-    - Else
-    - Set HKCU\Software\MIT\kerberos5,ccname to 
-    "API:".I["Krb5CCName"]
+    /* 
+       Currently, setting the default identity simply sets the
+       "ccname" registry value at "Software\MIT\kerberos5".
     */
 
     if (uparam) {
         /* an identity is being made default */
         khm_handle def_ident = (khm_handle) vparam;
-        wchar_t env_ccname[KRB5_MAXCCH_CCNAME];
         wchar_t id_ccname[KRB5_MAXCCH_CCNAME];
         khm_size cb;
         DWORD dw;
         LONG l;
+        HKEY hk_ccname;
+        DWORD dwType;
+        DWORD dwSize;
+        wchar_t reg_ccname[KRB5_MAXCCH_CCNAME];
+
+        assert(FALSE);
 
 #ifdef DEBUG
         assert(def_ident != NULL);
 #endif
+
+        {
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_size cb;
+
+            cb = sizeof(idname);
+            kcdb_identity_get_name(def_ident, idname, &cb);
+
+            _begin_task(0);
+            _report_cs1(KHERR_DEBUG_1, L"Setting default identity [%1!s!]", _cstr(idname));
+            _describe();
+        }
 
         cb = sizeof(id_ccname);
         if (KHM_FAILED(kcdb_identity_get_attr(def_ident,
                                               attr_id_krb5_ccname,
                                               NULL,
                                               id_ccname,
-                                              &cb)))
-            return KHM_ERROR_UNKNOWN;
+                                              &cb))) {
+            _reportf(L"The specified identity does not have the Krb5CCName property");
+            _end_task();
+            return KHM_ERROR_NOT_FOUND;
+        }
 
         khm_krb5_canon_cc_name(id_ccname, sizeof(id_ccname));
+
+        _reportf(L"Found Krb5CCName property : %s", id_ccname);
 
         StringCbLength(id_ccname, sizeof(id_ccname), &cb);
         cb += sizeof(wchar_t);
 
-        dw = GetEnvironmentVariable(L"KRB5CCNAME",
-                                    env_ccname,
-                                    ARRAYLENGTH(env_ccname));
+        _reportf(L"Setting default CC name in the registry");
 
-        if (dw == 0 &&
-            GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
-            /* KRB5CCNAME not set */
-            HKEY hk_ccname;
-            DWORD dwType;
-            DWORD dwSize;
-            wchar_t reg_ccname[KRB5_MAXCCH_CCNAME];
+        l = RegOpenKeyEx(HKEY_CURRENT_USER,
+                         L"Software\\MIT\\kerberos5",
+                         0,
+                         KEY_READ | KEY_WRITE,
+                         &hk_ccname);
 
-            l = RegOpenKeyEx(HKEY_CURRENT_USER,
-                             L"Software\\MIT\\kerberos5",
-                             0,
-                             KEY_READ | KEY_WRITE,
-                             &hk_ccname);
+        if (l != ERROR_SUCCESS)
+            l = RegCreateKeyEx(HKEY_CURRENT_USER,
+                               L"Software\\MIT\\kerberos5",
+                               0,
+                               NULL,
+                               REG_OPTION_NON_VOLATILE,
+                               KEY_READ | KEY_WRITE,
+                               NULL,
+                               &hk_ccname,
+                               &dw);
 
-            if (l != ERROR_SUCCESS)
-                l = RegCreateKeyEx(HKEY_CURRENT_USER,
-                                   L"Software\\MIT\\kerberos5",
-                                   0,
-                                   NULL,
-                                   REG_OPTION_NON_VOLATILE,
-                                   KEY_READ | KEY_WRITE,
-                                   NULL,
-                                   &hk_ccname,
-                                   &dw);
-
-            if (l != ERROR_SUCCESS)
-                return KHM_ERROR_UNKNOWN;
-
-            dwSize = sizeof(reg_ccname);
-
-            l = RegQueryValueEx(hk_ccname,
-                                L"ccname",
-                                NULL,
-                                &dwType,
-                                (LPBYTE) reg_ccname,
-                                &dwSize);
-
-            if (l != ERROR_SUCCESS ||
-                dwType != REG_SZ ||
-                khm_krb5_cc_name_cmp(reg_ccname, id_ccname)) {
-
-                /* we have to write the new value in */
-
-                l = RegSetValueEx(hk_ccname,
-                                  L"ccname",
-                                  0,
-                                  REG_SZ,
-                                  (BYTE *) id_ccname,
-                                  (DWORD) cb);
-            }
-
-            RegCloseKey(hk_ccname);
-
-            if (l == ERROR_SUCCESS) {
-                k5_update_last_default_identity(def_ident);
-                return KHM_ERROR_SUCCESS;
-            } else
-                return KHM_ERROR_UNKNOWN;
-
-        } else if (dw > ARRAYLENGTH(env_ccname)) {
-            /* buffer was not enough */
-#ifdef DEBUG
-            assert(FALSE);
-#else
+        if (l != ERROR_SUCCESS) {
+            _reportf(L"Can't create registry key : %d", l);
+            _end_task();
             return KHM_ERROR_UNKNOWN;
-#endif
-        } else {
-            /* KRB5CCNAME is set */
-            long code;
-            krb5_context ctx;
-
-            /* if the %KRB5CCNAME is the same as the identity
-               ccache, then it is already the default. */
-            if (!khm_krb5_cc_name_cmp(id_ccname, env_ccname)) {
-                k5_update_last_default_identity(def_ident);
-                return KHM_ERROR_SUCCESS;
-            }
-
-            /* if not, we have to copy the contents of id_ccname
-               to env_ccname */
-            code = pkrb5_init_context(&ctx);
-            if (code)
-                return KHM_ERROR_UNKNOWN;
-
-            code = khm_krb5_copy_ccache_by_name(ctx, 
-                                                env_ccname, 
-                                                id_ccname);
-
-            if (code == 0) {
-                k5_update_last_default_identity(def_ident);
-                khm_krb5_list_tickets(&ctx);
-            }
-
-            if (ctx)
-                pkrb5_free_context(ctx);
-
-            return (code == 0)?KHM_ERROR_SUCCESS:KHM_ERROR_UNKNOWN;
         }
+
+        dwSize = sizeof(reg_ccname);
+
+        l = RegQueryValueEx(hk_ccname,
+                            L"ccname",
+                            NULL,
+                            &dwType,
+                            (LPBYTE) reg_ccname,
+                            &dwSize);
+
+        if (l != ERROR_SUCCESS ||
+            dwType != REG_SZ ||
+            khm_krb5_cc_name_cmp(reg_ccname, id_ccname)) {
+
+            /* we have to write the new value in */
+            
+            l = RegSetValueEx(hk_ccname,
+                              L"ccname",
+                              0,
+                              REG_SZ,
+                              (BYTE *) id_ccname,
+                              (DWORD) cb);
+        }
+
+        RegCloseKey(hk_ccname);
+
+        if (l == ERROR_SUCCESS) {
+            _reportf(L"Successfully set the default ccache");
+            k5_update_last_default_identity(def_ident);
+            _end_task();
+            return KHM_ERROR_SUCCESS;
+        } else {
+            _reportf(L"Can't set the registry value : %d", l);
+            _end_task();
+            return KHM_ERROR_UNKNOWN;
+        }
+
     } else {
         /* the default identity is being forgotten */
 
@@ -1061,6 +1032,11 @@ struct k5_ident_update_data {
     khm_int32  k5_flags;
 };
 
+/* The logic here has to reflect the logic in khm_krb5_list_tickets().
+   We use this to handle an identity update request because some other
+   plug-in or maybe NetIDMgr itself is about to do something
+   important(tm) with the identity and needs to make sure that the
+   properties of the identity are up-to-date. */
 static khm_int32 KHMAPI
 k5_ident_update_apply_proc(khm_handle cred,
                            void * rock) {
@@ -1149,7 +1125,9 @@ k5_ident_update(khm_int32 msg_type,
                 khm_ui_4 uparam,
                 void * vparam) {
 
+#if 0
     struct k5_ident_update_data d;
+#endif
     khm_handle ident;
     khm_handle tident;
     krb5_ccache cc = NULL;
@@ -1163,6 +1141,13 @@ k5_ident_update(khm_int32 msg_type,
     if (ident == NULL)
         return KHM_ERROR_SUCCESS;
 
+#if 0
+    /* we are going to skip doing this here since
+       khm_krb5_list_tickets() performs this function for us each time
+       we enumerate tickets.  Since it also gets run each time our
+       list of tickets changes and since we are basing this operation
+       on existing tickets, we are unlikely to find anything new
+       here.  */
     ZeroMemory(&d, sizeof(d));
     d.identity = ident;
 
@@ -1209,6 +1194,7 @@ k5_ident_update(khm_int32 msg_type,
         kcdb_identity_set_attr(ident, attr_id_krb5_flags, NULL, 0);
         kcdb_identity_set_attr(ident, attr_id_krb5_ccname, NULL, 0);
     }
+#endif
 
     if (KHM_SUCCEEDED(kcdb_identity_get_default(&tident))) {
         kcdb_identity_release(tident);
@@ -1258,18 +1244,54 @@ k5_refresh_default_identity(krb5_context ctx) {
     krb5_principal princ = NULL;
     char * princ_nameA = NULL;
     wchar_t princ_nameW[KCDB_IDENT_MAXCCH_NAME];
+    char * ccname = NULL;
     khm_handle ident = NULL;
     khm_boolean found_default = FALSE;
 
     assert(ctx != NULL);
 
+    _begin_task(0);
+    _report_cs0(KHERR_DEBUG_1, L"Refreshing default identity");
+    _describe();
+
     code = pkrb5_cc_default(ctx, &cc);
-    if (code)
+    if (code) {
+        _reportf(L"Can't open default ccache. code=%d", code);
         goto _nc_cleanup;
+    }
     
     code = pkrb5_cc_get_principal(ctx, cc, &princ);
-    if (code)
+    if (code) {
+        /* try to determine the identity from the ccache name */
+        ccname = pkrb5_cc_get_name(ctx, cc);
+
+        if (ccname) {
+            char * namepart = strchr(ccname, ':');
+
+            _reportf(L"CC name is [%S]", ccname);
+
+            if (namepart == NULL)
+                namepart = ccname;
+            else
+                namepart++;
+
+            _reportf(L"Checking if [%S] is a valid identity name", namepart);
+
+            AnsiStrToUnicode(princ_nameW, sizeof(princ_nameW), namepart);
+            if (kcdb_identity_is_valid_name(princ_nameW)) {
+                kcdb_identity_create(princ_nameW, KCDB_IDENT_FLAG_CREATE, &ident);
+                if (ident) {
+                    _reportf(L"Setting [%S] as the default identity", namepart);
+                    kcdb_identity_set_default_int(ident);
+                    found_default = TRUE;
+                }
+            }
+        } else {
+            _reportf(L"Can't determine ccache name");
+        }
+
         goto _nc_cleanup;
+    }
 
     code = pkrb5_unparse_name(ctx, princ, &princ_nameA);
     if (code)
@@ -1277,14 +1299,22 @@ k5_refresh_default_identity(krb5_context ctx) {
 
     AnsiStrToUnicode(princ_nameW, sizeof(princ_nameW), princ_nameA);
 
-    if (KHM_FAILED(kcdb_identity_create(princ_nameW, 0, &ident)))
-        goto _nc_cleanup;
+    _reportf(L"Found principal [%s]", princ_nameW);
 
+    if (KHM_FAILED(kcdb_identity_create(princ_nameW, KCDB_IDENT_FLAG_CREATE, &ident))) {
+        _reportf(L"Failed to create identity");
+        goto _nc_cleanup;
+    }
+
+    _reportf(L"Setting default identity to [%s]", princ_nameW);
     kcdb_identity_set_default_int(ident);
 
     found_default = TRUE;
 
  _nc_cleanup:
+
+    _end_task();
+
     if (princ_nameA)
         pkrb5_free_unparsed_name(ctx, princ_nameA);
 

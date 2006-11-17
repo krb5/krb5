@@ -192,12 +192,11 @@ void khm_add_dialog(HWND dlg) {
            meaningful value until we enter a modal loop */
         khui_dialogs[n_khui_dialogs].active = FALSE;
         n_khui_dialogs++;
-    }
+    } else {
 #if DEBUG
-    else {
-        assert(FALSE);
-    }
+          assert(FALSE);
 #endif
+    }
 }
 
 /* should only be called from the UI thread */
@@ -254,6 +253,8 @@ void khm_enter_modal(HWND hwnd) {
         EnableWindow(khm_hwnd_main, FALSE);
 
         khui_modal_dialog = hwnd;
+
+        SetForegroundWindow(hwnd);
     }
 }
 

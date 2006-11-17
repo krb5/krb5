@@ -111,9 +111,6 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
 
                 krb5_initialized = TRUE;
 
-                if(ctx != NULL)
-                    pkrb5_free_context(ctx);
-
                 /* now convert this thread to a fiber and create a
                    separate fiber to do kinit stuff */
                 k5_main_fiber = ConvertThreadToFiber(NULL);
@@ -126,6 +123,9 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                 k5_register_config_panels();
 
                 khm_krb5_list_tickets(&ctx);
+
+                if(ctx != NULL)
+                    pkrb5_free_context(ctx);
             }
         }
         break;

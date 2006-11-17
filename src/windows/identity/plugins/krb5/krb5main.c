@@ -50,6 +50,7 @@ khm_int32 attr_id_addr_list     = -1;
 khm_int32 attr_id_krb5_flags    = -1;
 khm_int32 attr_id_krb5_ccname   = -1;
 khm_int32 attr_id_kvno          = -1;
+khm_int32 attr_id_krb5_idflags  = -1;
 
 BOOL attr_regd_key_enctype  = FALSE;
 BOOL attr_regd_tkt_enctype  = FALSE;
@@ -57,6 +58,7 @@ BOOL attr_regd_addr_list    = FALSE;
 BOOL attr_regd_krb5_flags   = FALSE;
 BOOL attr_regd_krb5_ccname  = FALSE;
 BOOL attr_regd_kvno         = FALSE;
+BOOL attr_regd_krb5_idflags = FALSE;
 
 khm_handle csp_plugins      = NULL;
 khm_handle csp_krbcred   = NULL;
@@ -383,6 +385,30 @@ KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         attr_regd_kvno = TRUE;
     }
 
+    if (KHM_FAILED(kcdb_attrib_get_id(ATTRNAME_KRB5_IDFLAGS, &attr_id_krb5_idflags))) {
+        kcdb_attrib attrib;
+
+        ZeroMemory(&attrib, sizeof(attrib));
+
+        attrib.name = ATTRNAME_KRB5_IDFLAGS;
+        attrib.id = KCDB_ATTR_INVALID;
+        attrib.type = KCDB_TYPE_INT32;
+        attrib.flags = KCDB_ATTR_FLAG_PROPERTY |
+            KCDB_ATTR_FLAG_HIDDEN;
+        /* we don't bother localizing these strings since the
+           attribute is hidden.  The user will not see these
+           descriptions anyway. */
+        attrib.short_desc = L"Krb5 ID flags";
+        attrib.long_desc = L"Kerberos 5 Identity Flags";
+
+        rv = kcdb_attrib_register(&attrib, &attr_id_krb5_idflags);
+
+        if (KHM_FAILED(rv))
+            goto _exit;
+
+        attr_regd_krb5_idflags = TRUE;
+    }
+
     rv = kmm_get_plugins_config(0, &csp_plugins);
     if(KHM_FAILED(rv)) goto _exit;
 
@@ -416,6 +442,8 @@ KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module) {
         kcdb_attrib_unregister(attr_id_krb5_ccname);
     if(attr_regd_kvno)
         kcdb_attrib_unregister(attr_id_kvno);
+    if(attr_regd_krb5_idflags)
+        kcdb_attrib_unregister(attr_id_krb5_idflags);
 
     if(type_regd_enctype)
         kcdb_type_unregister(type_id_enctype);

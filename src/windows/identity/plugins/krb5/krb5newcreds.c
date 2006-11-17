@@ -2801,8 +2801,17 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 #endif
             khc_read_int32(csp_params, L"MsLsaImport", &t);
 
-            if (t == 1)
-                khm_krb5_ms2mit(TRUE);
+            if (t != K5_LSAIMPORT_NEVER) {
+                krb5_context ctx = NULL;
+                BOOL imported;
+
+                imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE);
+                if (imported) {
+                    khm_krb5_list_tickets(&ctx);
+                    if (ctx)
+                        pkrb5_free_context(ctx);
+                }
+            }
         }
         break;
     }

@@ -819,14 +819,12 @@ nc_handle_wm_create(HWND hwnd,
 #endif
     /* we defer the creation of the tab buttons for later */
 
-    /* add this to the dialog chain */
-    khm_add_dialog(hwnd);
-
     /* bring the window to the top, if necessary */
     if (KHM_SUCCEEDED(khc_read_int32(NULL,
                                      L"CredWindow\\Windows\\NewCred\\ForceToTop",
                                      &t)) &&
-        t != 0) {
+        t != 0 &&
+        !khm_is_dialog_active()) {
 
         /* if the main window is not visible, then the SetWindowPos()
            call is sufficient to bring the new creds window to the
@@ -839,6 +837,9 @@ nc_handle_wm_create(HWND hwnd,
                      (SWP_NOMOVE | SWP_NOSIZE));
 
     }
+
+    /* add this to the dialog chain */
+    khm_add_dialog(hwnd);
 
     return TRUE;
 }
@@ -1431,7 +1432,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
             nc_update_credtext(d);
 
-            ShowWindow(hwnd, SW_SHOW);
+            ShowWindow(hwnd, SW_SHOWNOACTIVATE);
             SetFocus(hwnd);
 
             if (d->nc->n_identities == 0)
