@@ -23,7 +23,7 @@ krb5_c_init_state
 krb5_c_is_coll_proof_cksum
 krb5_c_is_keyed_cksum
 krb5_c_keyed_checksum_types
-krb5_c_keylength
+krb5_c_keylengths
 krb5_c_make_checksum
 krb5_c_make_random_key
 krb5_c_prf
@@ -32,6 +32,7 @@ krb5_c_random_add_entropy
 krb5_c_random_make_octets
 krb5_c_random_os_entropy
 krb5_c_random_seed
+krb5_c_random_to_key
 krb5_c_string_to_key
 krb5_c_string_to_key_with_params
 krb5_c_valid_cksumtype
