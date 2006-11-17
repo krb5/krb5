@@ -1740,6 +1740,13 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 y += dy;
             }
 
+            if (d->nc->n_prompts > 0 &&
+                d->nc->prompts[0]->hwnd_edit) {
+
+                SetFocus(d->nc->prompts[0]->hwnd_edit);
+
+            }
+
             SelectObject(hdc, hfold);
             ReleaseDC(d->dlg_main, hdc);
 
