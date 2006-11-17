@@ -2981,15 +2981,7 @@ cw_set_row_context(khui_credwnd_tbl * tbl, int row)
         o = (khui_credwnd_outline *) tbl->rows[row].data;
 
         if (tbl->cols[o->col].attr_id == KCDB_ATTR_ID_NAME) {
-            if (TPARENT(o) == NULL) { /* selected an identity */
-                khui_context_set(KHUI_SCOPE_IDENT,
-                                 (khm_handle) o->data,
-                                 KCDB_CREDTYPE_INVALID,
-                                 NULL,
-                                 NULL,
-                                 0,
-                                 tbl->credset);
-            } else {
+            if (TPARENT(o) != NULL) {
                 khui_credwnd_outline * op;
 
                 op = TPARENT(o);
@@ -3005,8 +2997,30 @@ cw_set_row_context(khui_credwnd_tbl * tbl, int row)
                                      0,
                                      tbl->credset);
                 } else {
-                    set_context = FALSE;
+                    /* we can't narrow it down using the standard set
+                       of scopes.  We consider this to be an identity
+                       selection because the user right-clicked on an
+                       identity header. */
+                    khui_context_set(KHUI_SCOPE_IDENT,
+                                     (khm_handle) o->data,
+                                     KCDB_CREDTYPE_INVALID,
+                                     NULL,
+                                     NULL,
+                                     0,
+                                     tbl->credset);
                 }
+            } else {
+                /* The user clicked on an identity header.  Even
+                   though not all credentials belonging to the
+                   identity maybe within the scope right now, we still
+                   consider this to be an identity scope. */
+                khui_context_set(KHUI_SCOPE_IDENT,
+                                 (khm_handle) o->data,
+                                 KCDB_CREDTYPE_INVALID,
+                                 NULL,
+                                 NULL,
+                                 0,
+                                 tbl->credset);
             }
         } else if (tbl->cols[o->col].attr_id == KCDB_ATTR_TYPE_NAME) {
             if (TPARENT(o) == NULL) {
@@ -3022,9 +3036,12 @@ cw_set_row_context(khui_credwnd_tbl * tbl, int row)
                 khui_credwnd_outline * op;
 
                 op = TPARENT(o);
-                if (tbl->cols[op->col].attr_id == KCDB_ATTR_ID_NAME &&
-                    TPARENT(op) == NULL) {
-                    /* credtype under an identity */
+                if (tbl->cols[op->col].attr_id == KCDB_ATTR_ID_NAME) {
+                    /* credtype under an identity.  Even though not
+                       all the credentials of this credtype belonging
+                       to this identity might be within the scope, we
+                       still consider this to be a type selection
+                       under a specific identity. */
                     khui_context_set(KHUI_SCOPE_CREDTYPE,
                                      (khm_handle) op->data,
                                      (khm_int32) (DWORD_PTR) o->data,
@@ -4051,6 +4068,16 @@ cw_properties(HWND hwnd)
         khm_size t = 0;
         khm_int32 cred_type;
 
+        if (ctx.identity == NULL) {
+            /* currently, we can't show a property sheet at this point
+               since most credentials providers don't provide a
+               property sheet that works without an identity. */
+
+            khui_context_release(&ctx);
+            khui_ps_destroy_sheet(ps);
+            return TRUE;
+        }
+
         cred_type = ctx.cred_type;
 
         ps->header.hInstance = khm_hInstance;
@@ -4073,6 +4100,8 @@ cw_properties(HWND hwnd)
                 ps->header.pszCaption = NULL;
             }
         } else {
+            /* we don't actually reach here since we handle this case
+               above */
             kcdb_credtype_describe(cred_type, NULL, &t, KCDB_TS_LONG);
             if(t > 0) {
                 ps->header.pszCaption = PMALLOC(t);
@@ -4488,15 +4517,21 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     cw_set_row_context(tbl, row);
 
+    khm_menu_show_panel(KHUI_MENU_IDENT_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+
+#if 0
+    /* calling cw_set_row_context() should take care of enabling or
+       disabling actions as appropriate.  We don't need to
+       differentiate between IDENT_CTX and TOK_CTX here. */
     if((tbl->rows[row].flags & KHUI_CW_ROW_HEADER) &&
-        (tbl->cols[tbl->rows[row].col].attr_id == KCDB_ATTR_ID_NAME))
-    {
+       (tbl->cols[tbl->rows[row].col].attr_id == KCDB_ATTR_ID_NAME)) {
         khm_menu_show_panel(KHUI_MENU_IDENT_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         //khui_context_reset();
     } else {
         khm_menu_show_panel(KHUI_MENU_TOK_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         //khui_context_reset();
     }
+#endif
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
