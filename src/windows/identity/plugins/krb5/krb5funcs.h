@@ -53,7 +53,9 @@
 // Function Prototypes.
 
 BOOL 
-khm_krb5_ms2mit(BOOL);
+khm_krb5_ms2mit(char * match_princ,
+                BOOL   match_realm,
+                BOOL   save_creds);
 
 int
 khm_krb5_kinit(krb5_context       alt_ctx,
@@ -130,4 +132,15 @@ khm_krb5_get_temp_profile_file(LPSTR confname, UINT szConfname);
 khm_int32 KHMAPI
 khm_krb5_creds_is_equal(khm_handle vcred1, khm_handle vcred2, void * dummy);
 
+void
+khm_krb5_set_identity_flags(khm_handle identity,
+                            khm_int32  flag_mask,
+                            khm_int32  flag_value);
+
+khm_int32
+khm_krb5_get_identity_flags(khm_handle identity);
+
+long
+khm_krb5_get_temp_ccache(krb5_context ctx,
+                         krb5_ccache * cc);
 #endif
