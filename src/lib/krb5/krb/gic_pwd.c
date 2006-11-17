@@ -161,12 +161,14 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
       }
 
       /* if the master is unreachable, return the error from the
-	 slave we were able to contact */
+	 slave we were able to contact or reset the use_master flag */
 
        if ((ret2 != KRB5_KDC_UNREACH) &&
 	    (ret2 != KRB5_REALM_CANT_RESOLVE) &&
 	    (ret2 != KRB5_REALM_UNKNOWN))
 	   ret = ret2;
+       else
+	   use_master = 0;
    }
 
 #ifdef USE_LOGIN_LIBRARY
@@ -181,6 +183,14 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
    if ((ret != KRB5KDC_ERR_KEY_EXP) ||
        (prompter == NULL))
       goto cleanup;
+
+   /* historically the default has been to prompt for password change.
+    * if the change password prompt option has not been set, we continue
+    * to prompt.  Prompting is only disabled if the option has been set
+    * and the value has been set to false.
+    */
+   if (!(options->flags & KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT))
+       goto cleanup;
 
    /* ok, we have an expired password.  Give the user a few chances
       to change it */
