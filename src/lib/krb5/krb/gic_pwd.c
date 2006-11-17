@@ -184,14 +184,6 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
        (prompter == NULL))
       goto cleanup;
 
-   /* historically the default has been to prompt for password change.
-    * if the change password prompt option has not been set, we continue
-    * to prompt.  Prompting is only disabled if the option has been set
-    * and the value has been set to false.
-    */
-   if (!(options->flags & KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT))
-       goto cleanup;
-
    /* ok, we have an expired password.  Give the user a few chances
       to change it */
 
