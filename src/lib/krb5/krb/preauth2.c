@@ -974,7 +974,7 @@ krb5_error_code pa_sam_2(krb5_context context,
 	return(KRB5_SAM_UNSUPPORTED);
    }
 
-   if (!valid_enctype(sc2b->sam_etype)) {
+   if (!krb5_c_valid_enctype(sc2b->sam_etype)) {
 	krb5_free_sam_challenge_2(context, sc2);
 	krb5_free_sam_challenge_2_body(context, sc2b);
 	return(KRB5_SAM_INVALID_ETYPE);
@@ -1450,7 +1450,7 @@ krb5_do_preauth(krb5_context context,
 			/* check if program has support for this etype for more
 			 * precise error reporting.
 			 */
-			if (valid_enctype(etype_info[l]->etype))
+			if (krb5_c_valid_enctype(etype_info[l]->etype))
 			    valid_etype_found++;
 		    }
 		}
