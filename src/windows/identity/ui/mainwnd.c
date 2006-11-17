@@ -226,22 +226,37 @@ khm_main_wnd_proc(HWND hwnd,
             return 0;
 
         case KHUI_ACTION_PASSWD_ID:
+            if (khm_startup.processing)
+                return 0;
+
             khm_cred_change_password(NULL);
             return 0;
 
         case KHUI_ACTION_NEW_CRED:
+            if (khm_startup.processing)
+                return 0;
+
             khm_cred_obtain_new_creds(NULL);
             return 0;
 
         case KHUI_ACTION_RENEW_CRED:
+            if (khm_startup.processing)
+                return 0;
+
             khm_cred_renew_creds();
             return 0;
 
         case KHUI_ACTION_DESTROY_CRED:
+            if (khm_startup.processing)
+                return 0;
+
             khm_cred_destroy_creds(FALSE, FALSE);
             return 0;
 
         case KHUI_ACTION_SET_DEF_ID:
+            if (khm_startup.processing)
+                return 0;
+
             khm_cred_set_default();
             return 0;
 

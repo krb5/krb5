@@ -71,7 +71,7 @@ CredWindow,KC_SPACE,0,Options for the credentials window
    Custom_0,KC_ENDSPACE,0,
    ByIdentity,KC_SPACE,0,The default view
     Description,KC_STRING,View grouped by identity and credential type,
-    ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Name,TimeLeft",
+    ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Location,Name,TimeLeft",
     Columns,KC_SPACE,0,Columns
       _CWFlags,KC_SPACE,0,
         Width,KC_INT32,20,
@@ -87,9 +87,14 @@ CredWindow,KC_SPACE,0,Options for the credentials window
         SortIndex,KC_INT32,1
         Flags,KC_INT32,11
       TypeName,KC_ENDSPACE,0
+      Location,KC_SPACE,0,
+        Width,KC_INT32,50
+        SortIndex,KC_INT32,2
+        Flags,KC_INT32,11
+      Location,KC_ENDSPACE,0,
       Name,KC_SPACE,0
         Width,KC_INT32,200
-        SortIndex,KC_INT32,2
+        SortIndex,KC_INT32,3
         Flags,KC_INT32,3
       Name,KC_ENDSPACE,0
       TimeLeft,KC_SPACE,0
