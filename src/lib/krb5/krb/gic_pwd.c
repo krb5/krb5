@@ -161,12 +161,14 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds, krb5_princ
       }
 
       /* if the master is unreachable, return the error from the
-	 slave we were able to contact */
+	 slave we were able to contact or reset the use_master flag */
 
        if ((ret2 != KRB5_KDC_UNREACH) &&
 	    (ret2 != KRB5_REALM_CANT_RESOLVE) &&
 	    (ret2 != KRB5_REALM_UNKNOWN))
 	   ret = ret2;
+       else
+	   use_master = 0;
    }
 
 #ifdef USE_LOGIN_LIBRARY

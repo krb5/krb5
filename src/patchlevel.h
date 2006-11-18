@@ -55,4 +55,4 @@
 #define KRB5_PATCHLEVEL 4
 #define KRB5_RELTAIL "kfw-3.1.0-beta4"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "tags/kfw-3_1_0-beta3"
+#define KRB5_RELTAG "tags/kfw-3_1_0-beta4"
