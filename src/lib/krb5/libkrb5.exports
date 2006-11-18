@@ -306,6 +306,7 @@ krb5_cc_get_name
 krb5_cc_get_principal
 krb5_cc_get_type
 krb5_cc_initialize
+krb5_cc_new_unique
 krb5_cc_next_cred
 krb5_cc_register
 krb5_cc_remove_cred
