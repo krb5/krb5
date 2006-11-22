@@ -307,12 +307,21 @@ krb4_id_config_proc(HWND hwnd,
     return FALSE;
 }
 
+typedef struct tag_k4_config_dlg_data {
+    khui_config_node node;
+    char             krb_path[MAX_PATH];
+    char             krbrealm_path[MAX_PATH];
+    char             tkt_string[MAX_PATH];
+} k4_config_dlg_data;
 
 INT_PTR CALLBACK
 krb4_confg_proc(HWND hwnd,
                 UINT uMsg,
                 WPARAM wParam,
                 LPARAM lParam) {
+
+    static BOOL in_init = FALSE;
+    k4_config_dlg_data * d;
 
     switch(uMsg) {
     case WM_INITDIALOG:
@@ -323,8 +332,21 @@ krb4_confg_proc(HWND hwnd,
             CHAR ticketName[MAX_PATH];
             char * pticketName;
             unsigned int krb_path_sz = sizeof(krb_path);
-            unsigned int krbrealm_path_sz = sizeof(krbrealm_path); 
-    
+            unsigned int krbrealm_path_sz = sizeof(krbrealm_path);
+            khm_size cbsize;
+
+            d = PMALLOC(sizeof(*d));
+            ZeroMemory(d, sizeof(*d));
+
+#pragma warning(push)
+#pragma warning(disable: 4244)
+            SetWindowLongPtr(hwnd, DWLP_USER, (LONG_PTR) d);
+#pragma warning(pop)
+
+            d->node = (khui_config_node) lParam;
+
+            in_init = TRUE;
+
             // Set KRB.CON 
             memset(krb_path, '\0', sizeof(krb_path));
             if (!pkrb_get_krbconf2(krb_path, &krb_path_sz)) {
@@ -332,6 +354,7 @@ krb4_confg_proc(HWND hwnd,
             } else { // normal find
                 AnsiStrToUnicode(wbuf, sizeof(wbuf), krb_path);
                 SetDlgItemText(hwnd, IDC_CFG_CFGPATH, wbuf);
+                StringCbCopyA(d->krb_path, sizeof(d->krb_path), krb_path);
             }
 
             // Set KRBREALM.CON 
@@ -341,26 +364,128 @@ krb4_confg_proc(HWND hwnd,
             } else {
                 AnsiStrToUnicode(wbuf, sizeof(wbuf), krbrealm_path);
                 SetDlgItemText(hwnd, IDC_CFG_RLMPATH, wbuf);
+                StringCbCopyA(d->krbrealm_path, sizeof(d->krbrealm_path),
+                              krbrealm_path);
             }
 
-            // Set TICKET.KRB file Editbox
-            *ticketName = 0;
-            pkrb_set_tkt_string(0);
+            cbsize = sizeof(wbuf);
+            if (KHM_SUCCEEDED(khc_read_string(csp_params, L"TktString",
+                                              wbuf, &cbsize)) &&
+                wbuf[0] != L'\0') {
+
+                UnicodeStrToAnsi(ticketName, sizeof(ticketName), wbuf);
+
+            } else {
+
+                // Set TICKET.KRB file Editbox
+                *ticketName = 0;
+                pkrb_set_tkt_string(0);
     
-            pticketName = ptkt_string(); 
-            if (pticketName)
-                StringCbCopyA(ticketName, sizeof(ticketName), pticketName);
+                pticketName = ptkt_string(); 
+                if (pticketName)
+                    StringCbCopyA(ticketName, sizeof(ticketName), pticketName);
+
+            }
 	
             if (!*ticketName) {
                 // error
             } else {
                 AnsiStrToUnicode(wbuf, sizeof(wbuf), ticketName);
                 SetDlgItemText(hwnd, IDC_CFG_CACHE, wbuf);
+                StringCbCopyA(d->tkt_string, sizeof(d->tkt_string),
+                              ticketName);
             }
+
+            in_init = FALSE;
+
+        }
+        break;
+
+    case WM_COMMAND:
+        if (MAKEWPARAM(IDC_CFG_CACHE, EN_CHANGE)) {
+            char tkt_string[MAX_PATH];
+            wchar_t wtkt_string[MAX_PATH];
+
+            if (in_init) {
+                return TRUE;
+            }
+
+            d = (k4_config_dlg_data *) (LONG_PTR)
+                GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (d == NULL)
+                return TRUE;
+
+            tkt_string[0] = 0;
+            wtkt_string[0] = 0;
+
+            GetDlgItemText(hwnd, IDC_CFG_CACHE,
+                           wtkt_string, ARRAYLENGTH(wtkt_string));
+            UnicodeStrToAnsi(tkt_string, sizeof(tkt_string),
+                             wtkt_string);
+
+            if (_stricmp(tkt_string, d->tkt_string)) {
+                khui_cfg_set_flags(d->node,
+                                   KHUI_CNFLAG_MODIFIED,
+                                   KHUI_CNFLAG_MODIFIED);
+            } else {
+                khui_cfg_set_flags(d->node,
+                                   0,
+                                   KHUI_CNFLAG_MODIFIED);
+            }
+
+            return TRUE;
+        }
+        break;
+
+    case KHUI_WM_CFG_NOTIFY:
+        if (HIWORD(wParam) == WMCFG_APPLY) {
+            wchar_t wtkt_string[MAX_PATH];
+            char tkt_string[MAX_PATH];
+            int t;
+
+            d = (k4_config_dlg_data *) (LONG_PTR)
+                GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (d == NULL)
+                return TRUE;
+
+            t = GetDlgItemText(hwnd, IDC_CFG_CACHE,
+                               wtkt_string, ARRAYLENGTH(wtkt_string));
+            if (t == 0)
+                return TRUE;
+
+            UnicodeStrToAnsi(tkt_string, sizeof(tkt_string), wtkt_string);
+
+            if (_stricmp(tkt_string, d->tkt_string)) {
+
+                pkrb_set_tkt_string(tkt_string);
+
+                khc_write_string(csp_params, L"TktString", wtkt_string);
+
+                khui_cfg_set_flags(d->node,
+                                   KHUI_CNFLAG_APPLIED,
+                                   KHUI_CNFLAG_APPLIED |
+                                   KHUI_CNFLAG_MODIFIED);
+                khm_krb4_list_tickets();
+            } else {
+                khui_cfg_set_flags(d->node,
+                                   0,
+                                   KHUI_CNFLAG_MODIFIED);
+            }
+
+            return TRUE;
         }
         break;
 
     case WM_DESTROY:
+        d = (k4_config_dlg_data *) (LONG_PTR)
+            GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d) {
+            PFREE(d);
+        }
+
         break;
     }
     return FALSE;

@@ -77,6 +77,11 @@ typedef struct tag_k5_config_data {
     khm_boolean   create_config_file; /* create config_file if missing? */
     khm_boolean   inc_realms;   /* include full realm list in new
                                    credentials dialog? */
+    wchar_t       loaded_config_file[MAX_PATH]; /* path to the
+                                                   configuration file
+                                                   that has been
+                                                   loaded into the
+                                                   realm editor. */
 
     /* [libdefaults] */
     khm_boolean   dns_lookup_kdc;
@@ -548,15 +553,6 @@ k5_write_config_data(k5_config_data * d) {
     if (!k5_is_profile_loaded())
         return;
 
-    if (d->flags & K5_CDFLAG_MOD_DEF_REALM) {
-        if (SUCCEEDED(StringCbLength(d->def_realm,
-                                     sizeof(d->def_realm), &s)) &&
-            s > 0) {
-            khm_krb5_set_default_realm(d->def_realm);
-        }
-        d->flags &= ~K5_CDFLAG_MOD_DEF_REALM;
-    }
-
     /* write the MSLSA import setting */
     if (d->flags & K5_CDFLAG_MOD_LSA_IMPORT) {
         khc_write_int32(csp_params, L"MsLsaImport", d->lsa_import);
@@ -569,7 +565,8 @@ k5_write_config_data(k5_config_data * d) {
     }
 
     if (!(d->flags & 
-          (K5_CDFLAG_MOD_CONF_FILE |
+          (K5_CDFLAG_MOD_DEF_REALM |
+           K5_CDFLAG_MOD_CONF_FILE |
            K5_CDFLAG_MOD_DNS_FALLBACK |
            K5_CDFLAG_MOD_DNS_LOOKUP_RLM |
            K5_CDFLAG_MOD_DNS_LOOKUP_KDC |
@@ -615,6 +612,27 @@ k5_write_config_data(k5_config_data * d) {
         const char * sec_libdefaults[] = { "libdefaults", NULL, NULL };
         khm_size r;
 
+        if (d->flags & K5_CDFLAG_MOD_DEF_REALM) {
+            if (SUCCEEDED(StringCbLength(d->def_realm,
+                                         sizeof(d->def_realm), &s)) &&
+                s > 0) {
+                char defrealm[K5_MAXCCH_REALM];
+
+                UnicodeStrToAnsi(defrealm, sizeof(defrealm), 
+                                 d->def_realm);
+
+                khm_krb5_set_default_realm(d->def_realm);
+
+                sec_libdefaults[1] = "default_realm";
+
+                pprofile_clear_relation(profile, sec_libdefaults);
+
+                rv = pprofile_add_relation(profile, sec_libdefaults,
+                                           defrealm);
+            }
+            d->flags &= ~K5_CDFLAG_MOD_DEF_REALM;
+        }
+
         if (d->flags & K5_CDFLAG_MOD_DNS_LOOKUP_KDC) {
 
             sec_libdefaults[1] = "dns_lookup_kdc";
@@ -627,7 +645,6 @@ k5_write_config_data(k5_config_data * d) {
                                        conf_no[0]);
             d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_KDC;
         }
-
 
         if (d->flags & K5_CDFLAG_MOD_DNS_LOOKUP_RLM) {
 
@@ -995,8 +1012,13 @@ k5_config_dlgproc(HWND hwnd,
 
             SendMessage(hw, CB_SELECTSTRING, -1,
                         (LPARAM) d->def_realm);
+            SetDlgItemText(hwnd, IDC_CFG_DEFREALM, d->def_realm);
+            SendDlgItemMessage(hwnd, IDC_CFG_DEFREALM, CB_LIMITTEXT,
+                               ARRAYLENGTH(d->def_realm) - 1, 0);
 
             SetDlgItemText(hwnd, IDC_CFG_CFGFILE, d->config_file);
+            SendDlgItemMessage(hwnd, IDC_CFG_CFGFILE, EM_LIMITTEXT,
+                               ARRAYLENGTH(d->config_file) - 1, 0);
 
             /* hostname/domain */
             if (NetWkstaGetInfo(NULL, 100, (LPBYTE *) &winfo100) == NERR_Success) {
@@ -1046,6 +1068,9 @@ k5_config_dlgproc(HWND hwnd,
 
             d = &k5_config_dlg_data;
 
+            if (d == NULL)
+                return FALSE;
+
             if (wParam == MAKEWPARAM(IDC_CFG_IMPORT, CBN_SELCHANGE)) {
                 int idx;
                 int modified = FALSE;
@@ -1078,6 +1103,100 @@ k5_config_dlgproc(HWND hwnd,
                                    KHUI_CNFLAG_MODIFIED);
                 return TRUE;
             }
+
+            if (wParam == MAKEWPARAM(IDC_CFG_DEFREALM, CBN_EDITCHANGE)) {
+                wchar_t defrealm[K5_MAXCCH_REALM];
+                int t;
+
+                t = GetDlgItemText(hwnd, IDC_CFG_DEFREALM,
+                                   defrealm, ARRAYLENGTH(defrealm));
+                if (t == 0) {
+                    /* we failed to get the default realm from the
+                       control for some reason. */
+                    SetDlgItemText(hwnd, IDC_CFG_DEFREALM, L"");
+                    StringCbCopy(d->def_realm, sizeof(d->def_realm),
+                                 L"");
+                } else {
+                    StringCbCopy(d->def_realm, sizeof(d->def_realm),
+                                 defrealm);
+                }
+
+                d->flags |= K5_CDFLAG_MOD_DEF_REALM;
+
+                khui_cfg_set_flags(d->node_main,
+                                   KHUI_CNFLAG_MODIFIED,
+                                   KHUI_CNFLAG_MODIFIED);
+                return TRUE;
+            }
+
+            if (wParam == MAKEWPARAM(IDC_CFG_DEFREALM, CBN_SELCHANGE)) {
+                wchar_t defrealm[K5_MAXCCH_REALM];
+                LRESULT cursel, lr;
+
+                cursel = SendDlgItemMessage(hwnd, IDC_CFG_DEFREALM, CB_GETCURSEL,
+                                            0, 0);
+                if (cursel == CB_ERR)
+                    return TRUE;
+
+                lr = SendDlgItemMessage(hwnd, IDC_CFG_DEFREALM, CB_GETLBTEXTLEN,
+                                        cursel, 0);
+#ifdef DEBUG
+                assert(lr < ARRAYLENGTH(defrealm));
+#endif
+                if (lr >= ARRAYLENGTH(defrealm)) {
+                    /* we really shouldn't have any string here that
+                       exceeds that many characters.  But if we do, we
+                       ignore that since we don't consider it
+                       valid. */
+                    return TRUE;
+                }
+
+                lr = SendDlgItemMessage(hwnd, IDC_CFG_DEFREALM, CB_GETLBTEXT,
+                                        cursel, (LPARAM) defrealm);
+                if (lr == CB_ERR) {
+                    /* somehow we failed to copy the value anyway
+                       after all those checks.  */
+#ifdef DEBUG
+                    assert(FALSE);
+#endif
+                    return TRUE;
+                }
+
+                StringCbCopy(d->def_realm, sizeof(d->def_realm),
+                             defrealm);
+
+                d->flags |= K5_CDFLAG_MOD_DEF_REALM;
+
+                khui_cfg_set_flags(d->node_main,
+                                   KHUI_CNFLAG_MODIFIED,
+                                   KHUI_CNFLAG_MODIFIED);
+
+                return TRUE;
+            }
+
+#ifdef ALLOW_CHANGING_KRB5_CONFIG_FILE
+            if (wParam == MAKEWPARAM(IDC_CFG_CFGFILE, EN_CHANGE)) {
+                wchar_t cfgfile[MAX_PATH];
+                int t;
+
+                t = GetDlgItemText(hwnd, IDC_CFG_CFGFILE,
+                                   cfgfile, ARRAYLENGTH(cfgfile));
+
+                if (t == 0) {
+                    StringCbCopy(d->config_file, sizeof(d->config_file),
+                                 L"");
+                } else {
+                    StringCbCopy(d->config_file, sizeof(d->config_file),
+                                 cfgfile);
+                }
+
+                d->flags |= K5_CDFLAG_MOD_CONF_FILE;
+
+                khui_cfg_set_flags(d->node_main,
+                                   KHUI_CNFLAG_MODIFIED,
+                                   KHUI_CNFLAG_MODIFIED);
+            }
+#endif
         }
         break;
 

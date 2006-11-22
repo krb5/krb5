@@ -324,7 +324,8 @@ k5_id_tab_dlgproc(HWND hwnd,
         d = (k5_id_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
-        if (HIWORD(wParam) == EN_CHANGE)
+        if (HIWORD(wParam) == EN_CHANGE ||
+            HIWORD(wParam) == BN_CLICKED)
             k5_id_check_mod(hwnd, d);
         break;
 
