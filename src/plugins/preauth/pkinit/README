@@ -1,0 +1,52 @@
+Building with pkinit enabled:
+=============================
+To build the code you will need OpenSSL headers.  To build
+with smartcard support, OpenSC is required.  The code can
+currently be built w/o smartcard support by defining
+WITHOUT_PKCS11 in the CFLAGS.
+
+Running with pkinit enabled:
+=============================
+The current code depends on environment variables to locate
+the Certificate, Private Key, and Trusted CAs.  Future code
+will have similar features to those in the Heimdal pkinit,
+being able to switch between FILE: and PKCS11: storage
+locations.
+
+In the following, X509_CA_DIR points to an OpenSSL-style
+hashed CA directory where each CA cert is stored in a file
+"<hash of CA cert>.0".
+We assume that X509_CA_DIR will also contain CRL files
+"<hash of CA cert>.r0".
+
+For a pkinit-enabled KDC:
+-------------------------
+1. setenv KDC_CERT <full path to your kdc cert>
+2. setenv KDC_KEY <full path to your kdc key>
+3. setenv X509_CA_DIR <path to your trusted cas directory>
+4. start your kdc
+
+For a pkinit-enabled client using smartcards:
+---------------------------------------------
+1. Follow the directions at http://www.citi.umich.edu/projects/pkinit/smartcard_setup.html
+2. setenv X509_CA_DIR <path to your trusted cas directory>
+
+For a pkinit-enabled client using the filesystem for Cert and Key:
+------------------------------------------------------------------
+1. setenv X509_USER_CERT <full path to your client cert>
+2. setenv X509_USER_KEY <full path to your client key>
+3. setenv X509_CA_DIR <path to your trusted cas directory>
+
+
+Testing
+=======
+We have tested the client code against our server, Heimdal server,
+and Windows 2003 servers, but not yet against a Vista/Longhorn server.
+
+We have not yet been able to test a Windows client against our server.
+
+Known Issues
+============
+- The client principal must currently have the REQUIRES_PREAUTH attribute
+  set to cause the use of pkinit
+- Some error reporting is incomplete

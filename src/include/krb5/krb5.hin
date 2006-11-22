@@ -205,6 +205,12 @@ typedef struct _krb5_data {
 	char *data;
 } krb5_data;
 
+typedef struct _krb5_octet_data {
+	krb5_magic magic;
+	unsigned int length;
+	krb5_octet *data;
+} krb5_octet_data;
+
 /* 
  * Hack length for crypto library to use the afs_string_to_key It is
  * equivalent to -1 without possible sign extension 

@@ -887,3 +887,94 @@ krb5_error_code encode_krb5_setpw_req(const krb5_principal target,
 
   krb5_cleanup();
 }
+
+krb5_error_code encode_krb5_pa_pk_as_req(const krb5_pa_pk_as_req *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_pa_pk_as_req(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_pa_pk_as_req_draft9(const krb5_pa_pk_as_req_draft9 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_pa_pk_as_req_draft9(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_pa_pk_as_rep(const krb5_pa_pk_as_rep *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_pa_pk_as_rep(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_pa_pk_as_rep_draft9(const krb5_pa_pk_as_rep_draft9 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_pa_pk_as_rep_draft9(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_auth_pack(const krb5_auth_pack *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_auth_pack(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_auth_pack_draft9(const krb5_auth_pack_draft9 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_auth_pack_draft9(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_kdc_dh_key_info(const krb5_kdc_dh_key_info *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_kdc_dh_key_info(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_reply_key_pack(const krb5_reply_key_pack *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_reply_key_pack(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_reply_key_pack_draft9(const krb5_reply_key_pack_draft9 *rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_reply_key_pack_draft9(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_td_trusted_certifiers(const krb5_external_principal_identifier **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_td_trusted_certifiers(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+

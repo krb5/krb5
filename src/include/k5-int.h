@@ -248,6 +248,23 @@ typedef INT64_TYPE krb5_int64;
 					/* in e-text) */
 #define	KRB_ERR_FIELD_TOOLONG	61	/* Field is too long for impl. */
 
+/* PKINIT server-reported errors */
+#define KDC_ERR_CLIENT_NOT_TRUSTED		62 /* client cert not trusted */
+#define KDC_ERR_INVALID_SIG			64 /* client signature verify failed */
+#define KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED	65 /* invalid Diffie-Hellman parameters */
+#define KDC_ERR_CANT_VERIFY_CERTIFICATE		70 /* client cert not verifiable to */
+						   /* trusted root cert */
+#define KDC_ERR_INVALID_CERTIFICATE		71 /* client cert had invalid signature */
+#define KDC_ERR_REVOKED_CERTIFICATE		72 /* client cert was revoked */
+#define KDC_ERR_REVOCATION_STATUS_UNKNOWN	73 /* client cert revoked, reason unknown */
+#define KDC_ERR_CLIENT_NAME_MISMATCH		75 /* mismatch between client cert and */
+						   /* principal name */
+#define KDC_ERR_INCONSISTENT_KEY_PURPOSE	77 /* bad extended key use */
+#define KDC_ERR_DIGEST_IN_CERT_NOT_ACCEPTED	78 /* bad digest algorithm in client cert */
+#define KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED	79 /* missing paChecksum in PA-PK-AS-REQ */
+#define KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED 80 /* bad digest algorithm in SignedData */
+#define KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED 81
+
 #endif /* KRB5_ERRORS__ */
 /*
  * End "k5-errors.h"
@@ -411,6 +428,13 @@ typedef struct _krb5_enc_sam_response_enc_2 {
 	krb5_int32	sam_nonce;
 	krb5_data	sam_sad;
 } krb5_enc_sam_response_enc_2;
+
+/*
+ * Keep the pkinit definitions in a separate file so that the plugin
+ * only has to include k5-int-pkinit.h rather than k5-int.h
+ */
+
+#include "k5-int-pkinit.h"
 
 /*
  * Begin "ext-proto.h"
