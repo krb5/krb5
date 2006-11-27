@@ -70,6 +70,11 @@
                         <param name="Name" value="Managing the credentials view layout">
                         <param name="Local" value="html\use_layout.htm">
                         </OBJECT>
+
+                <LI> <OBJECT type="text/sitemap">
+                        <param name="Name" value="Configuring NetIDMgr and identities">
+                        <param name="Local" value="html\use_config.htm">
+                        </OBJECT>
 	</UL>
 	<LI> <OBJECT type="text/sitemap">
 		<param name="Name" value="Menus and Toolbars">
