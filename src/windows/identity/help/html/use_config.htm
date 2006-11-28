@@ -1,0 +1,132 @@
+<html>
+<head>
+  <title>Configuring NetIDMgr and identities</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="configuration">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Configuring NetIDMgr and identities</h1>
+
+<p>All NetIDMgr configuration options can be accessed via the <span
+class="pre">Options</span> menu.  The available configuration panels
+are:
+</p>
+
+<p>
+<ul>
+  <li><p><span class="title">General</span>: General application options
+  for NetIDMgr.</p>
+
+  <ul>
+
+    <li><p><span class="title">Obtain new credentials at
+    startup</span>: If checked, NetIDMgr will check there are initial
+    credentials for the default identity.  If no such credentials are
+    found, NetIDMgr will display a new credentials dialog.</p> </li>
+
+    <li><p><span class="title">Run NetIDMgr in system tray after
+    window close</span>: If checked, NetIDMgr will continue running in
+    the system notification area (sometimes referred to as the system
+    tray) after you close the NetIDMgr window.</p> </li>
+
+    <li><p><span class="title">Monitor network connectivity</span>: When
+    changes to network connectivity are detected, NetIDMgr can notify
+    individual plug-ins about these changes.  Doing so allows each
+    plug-in to respond to the change by obtaining new credentials etc.
+    If this option is cleared, no such notifications are sent and the
+    application would not respond to network changes.</p></li>
+
+    <li><p><span class="title">Log trace events</span>: NetIDMgr can
+    generate debugging information during the course of performing
+    certain actions.  This information aids the developers in fixing
+    problems that you may encounter while using NetIDMgr.</p> </li>
+
+  </ul>
+
+  </li>
+
+  <li><p><span class="title">Appearance</span>: Allows you to set the
+  font used by NetIDMgr.</p></li>
+
+  <li><p><span class="title">Identities</span>: Default settings for all
+  identities and settings for each identity.  Details <a
+  href="#cfg_idents">below</a>.</p></li>
+
+  <li><p><span class="title">Notifications</span>: Notification and timer
+  options.  NetIDMgr can issue warnings when credentials are about to
+  expire. This configuration panel allows you to set the thresholds at
+  which these warnings are issued.  For example, if the warning
+  timeout is set for 10 minutes, NetIDMgr will issue a warning 10
+  minutes before a credential expires.</p>
+
+  <p>The panel also allows you to control the credentials renew timer.
+  If the timer is disabled, NetIDMgr will not automatically attempt to
+  renew credentials.  If the <span class="pre">Renew at half life
+  intervals when possible</span> option is set, then the timer will
+  expire after the credential has less than half its lifetime left.
+  If the renewal operation fails, it will attempt another renwal after
+  half of the remaining liftime is over (i.e. when the credential has
+  less than 1/4 of its original lifetime left) and so on.
+  </p>
+
+  </li>
+
+  <li><p><span class="title">Plugins</span>: Enable/disable and check
+  the status of registered plug-ins.  Enabling or disabling a plug-in
+  only takes effect after a restart of NetIDMgr.</p></li>
+
+</ul>
+</p>
+
+<p><img src="images/screen_config_general.bmp" />
+</p>
+
+<a name="cfg_idents" />
+<h3>Configuration of default settings for all identities</h3>
+
+<p>The <span class="pre">Identities</span> configuration panel allows
+you to set the defaults that will be used for all identities.
+However, most of the settings displayed here can be overridden with
+specific per-identity settings.
+</p>
+
+<p>The panel will have a number of sub panels (or tabs) corresponding
+to each plug-in that maintains per-identity configuration.
+</p>
+
+<p>A list of identities for which configuration information is
+maintained will be shown under the main <span
+class="pre">Identities</span> configuration panel name.  Each of these
+correspond to a <a href="#cfg_ident">per identity</a> configuration
+panel.
+</p>
+
+<p>Note that adding or removing an identity in the configuration panel
+only has the effect of adding or removing the identity to or from the
+list of identities for which configuration information is maintained.
+</p>
+
+<p><img src="images/screen_config_idents.bmp" />
+</p>
+
+<a name="cfg_ident" />
+<h3>Per identity configuration</h3>
+
+<p>You can access the per-identity configuration panel for a specific
+identity by selecting the identity name from the list of configuration
+panels in the configuration dialog.
+</p>
+
+<p>These panels are similar to the <span class="pre">Identities</span>
+configuration panel, but they change per-identity settings.  Changes
+you make in these panels will override the defaults set in the <span
+class="pre">Identities</span> panel.
+</p>
+
+<p><img src="images/screen_config_ident.bmp" />
+</p>
+
+</body>
+</html>
