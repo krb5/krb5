@@ -112,6 +112,9 @@ config_boolean_to_int(
     const char *s
     );
 
+void
+khm_krb4_set_def_tkt_string(void);
+
 wchar_t * khm_krb5_get_default_realm(void);
 wchar_t * khm_krb5_get_realm_list(void);
 

@@ -166,6 +166,7 @@
 #define IDC_CFG_BROWSE                  1039
 #define IDC_CFG_CFGFILEGRP              1040
 #define IDC_CFG_CFGREALMS               1041
+#define IDC_CFG_BROWSE2                 1042
 #define IDC_CFG_REALMS                  1044
 #define IDC_CFG_DOMAINGRP               1045
 #define IDC_CFG_SERVERSGRP              1046
