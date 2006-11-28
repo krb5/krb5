@@ -308,7 +308,7 @@ pkinit_create_edata(krb5_error_code err_code,
 {
     krb5_error_code retval = KRB5KRB_ERR_GENERIC;
     STACK_OF(X509) *trusted_CAs = NULL;
-    krb5_external_principal_identifier **krb5_trusted_certifiers;
+    krb5_external_principal_identifier **krb5_trusted_certifiers = NULL;
     char filename[] = "/etc/grid-security/certificates/ca-bundle.crt";
     krb5_data *data = NULL;
 
@@ -330,7 +330,8 @@ cleanup:
 	    free(data->data);
 	free(data);
     }
-    free_krb5_external_principal_identifier(&krb5_trusted_certifiers);
+    if (krb5_trusted_certifiers != NULL)
+	free_krb5_external_principal_identifier(&krb5_trusted_certifiers);
     return retval;
 }
 static krb5_error_code
