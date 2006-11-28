@@ -106,9 +106,9 @@ khm_convert524(krb5_context alt_ctx)
     increds.times.endtime = 0;
     increds.keyblock.enctype = ENCTYPE_DES_CBC_CRC;
     if ((code = pkrb5_get_credentials(ctx, 0,
-        cc,
-        &increds,
-        &v5creds))) 
+                                      cc,
+                                      &increds,
+                                      &v5creds))) 
     {
         goto cleanup;
     }
@@ -2107,6 +2107,27 @@ khm_krb5_get_temp_profile_file(LPSTR confname, UINT szConfname)
     confname[szConfname-1] = '\0';
     return FALSE;
 }
+
+#ifdef NOT_QUITE_IMPLEMENTED_YET
+BOOL
+khm_krb5_set_profile_file(krb5_context ctx, LPSTR confname)
+{
+    char *conffiles[2];
+
+    if (confname == NULL ||
+        pkrb5_set_config_files == NULL ||
+        ctx == NULL)
+        return FALSE;
+
+    conffiles[0] = confname;
+    conffiles[1] = NULL;
+
+    if (pkrb5_set_config_files(ctx, conffiles))
+        return FALSE;
+    else
+        return TRUE;
+}
+#endif
 
 BOOL 
 khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)

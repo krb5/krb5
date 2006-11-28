@@ -12,5 +12,6 @@ Krb4Cred,KC_SPACE,0,"Kerberos IV Credentials Provider"
     DefaultLifetime,KC_INT32,36000,Default ticket lifetime
     MaxLifetime,KC_INT32,86400,Maximum lifetime
     MinLifetime,KC_INT32,60,Minimum lifetime
+    TktString,KC_STRING,,Ticket string.  Use default if NULL
   Parameters,KC_ENDSPACE,0,
 Krb4Cred,KC_ENDSPACE,0,

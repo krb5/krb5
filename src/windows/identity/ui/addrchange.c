@@ -57,8 +57,8 @@ addr_change_thread(LPVOID dummy) {
         ret = WaitForMultipleObjects(2, h_waits, FALSE, INFINITE);
 
         if ( ret == WAIT_OBJECT_0 ) {
-            kmq_post_message(KMSG_CRED, KMSG_CRED_ADDR_CHANGE,
-                             0, 0);
+            Sleep(3000);        /* wait for things to settle down */
+            kmq_post_message(KMSG_CRED, KMSG_CRED_ADDR_CHANGE, 0, 0);
         } else {
             goto _end_thread;
         }

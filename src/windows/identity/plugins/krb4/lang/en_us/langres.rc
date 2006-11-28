@@ -57,18 +57,12 @@ STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "Kerberos 4 Ticket Options",IDC_STATIC,"Static",
-                    SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
-    CONTROL         "Obtain Kerberos 4 tickets",IDC_NCK4_OBTAIN,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,26,97,10
-    GROUPBOX        "Obtain Kerberos 4 tickets using",IDC_STATIC,7,43,286,72,
-                    WS_GROUP
-    CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,23,58,119,10
-    CONTROL         "Kerberos 5 to 4 translation",IDC_NCK4_K524,"Button",
-                    BS_AUTORADIOBUTTON,23,76,101,10
-    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,23,
-                    94,47,10
+    CONTROL         "Kerberos 4 Ticket Options",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    CONTROL         "Obtain Kerberos 4 tickets",IDC_NCK4_OBTAIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,26,97,10
+    GROUPBOX        "Obtain Kerberos 4 tickets using",IDC_STATIC,7,43,286,72,WS_GROUP
+    CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,23,58,119,10
+    CONTROL         "Kerberos 5 to 4 translation",IDC_NCK4_K524,"Button",BS_AUTORADIOBUTTON,23,76,101,10
+    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,23,94,47,10
 END
 
 IDD_CFG_KRB4 DIALOGEX 0, 0, 255, 182
@@ -79,11 +73,11 @@ BEGIN
     LTEXT           "Ticket cache location",IDC_CFG_LBL_CACHE,7,10,67,8
     EDITTEXT        IDC_CFG_CACHE,83,7,165,14,ES_AUTOHSCROLL
     LTEXT           "Config file path",IDC_CFG_LBL_CFGFILE,7,30,50,8
-    EDITTEXT        IDC_CFG_CFGPATH,83,27,113,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",IDC_CFG_CFGBROW,200,27,48,14
+    EDITTEXT        IDC_CFG_CFGPATH,83,27,165,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Browse...",IDC_CFG_CFGBROW,200,95,48,14,NOT WS_VISIBLE
     LTEXT           "Realm file path",IDC_CFG_LBL_RLMPATH,7,50,48,8
-    EDITTEXT        IDC_CFG_RLMPATH,83,47,113,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse...",IDC_CFG_RLMBROW,200,47,48,14
+    EDITTEXT        IDC_CFG_RLMPATH,83,47,165,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Browse...",IDC_CFG_RLMBROW,200,127,48,14,NOT WS_VISIBLE
 END
 
 IDD_CFG_IDS_KRB4 DIALOGEX 0, 0, 235, 151
@@ -91,10 +85,8 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "Obtain Kerberos 4 tickets",IDC_CFG_GETTIX,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,7,221,17
-    LTEXT           "Note that, if enabled, Kerberos 4 tickets will be acquired during initial credential acquisition and during credential renewals.\n\nHowever, currently Kerberos 4 tickets can only be obtained for the default identity.",
-                    IDC_STATIC,7,91,221,53,SS_SUNKEN
+    CONTROL         "Obtain Kerberos 4 tickets",IDC_CFG_GETTIX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,221,17
+    LTEXT           "Note that, if enabled, Kerberos 4 tickets will be acquired during initial credential acquisition and during credential renewals.\n\nHowever, currently Kerberos 4 tickets can only be obtained for the default identity.",IDC_STATIC,7,91,221,53,SS_SUNKEN
 END
 
 IDD_CFG_ID_KRB4 DIALOGEX 0, 0, 235, 151
@@ -102,9 +94,8 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "Obtain Kerberos 4 tickets for this identity",
-                    IDC_CFG_GETTIX,"Button",BS_AUTOCHECKBOX | WS_DISABLED | 
-                    WS_TABSTOP,7,7,147,10
+    CONTROL         "Obtain Kerberos 4 tickets for this identity",IDC_CFG_GETTIX,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,7,147,10
 END
 
 
