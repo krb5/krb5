@@ -553,6 +553,28 @@ make_postfix(const char * base,
     return ret;
 }
 
+void
+khm_krb4_set_def_tkt_string(void) {
+    wchar_t wtkt_string[MAX_PATH];
+    char tkt_string[MAX_PATH];
+    khm_size cb;
+
+    cb = sizeof(wtkt_string);
+
+    if (KHM_FAILED(khc_read_string(csp_params, L"TktString",
+                                   wtkt_string, &cb)) ||
+        wtkt_string[0] == L'\0') {
+
+        pkrb_set_tkt_string(0);
+
+    } else {
+
+        UnicodeStrToAnsi(tkt_string, sizeof(tkt_string),
+                         wtkt_string);
+        pkrb_set_tkt_string(tkt_string);        
+    }
+}
+
 
 static
 long
@@ -838,6 +860,8 @@ khm_krb4_kinit(char * aname,
         msg = IDS_ERR_REALM;
         goto cleanup;
     }
+
+    khm_krb4_set_def_tkt_string();
 
     err_context = L"fetching ticket";	
     rc4 = (*pkrb_get_pw_in_tkt)(aname, inst, realm, "krbtgt", realm, 

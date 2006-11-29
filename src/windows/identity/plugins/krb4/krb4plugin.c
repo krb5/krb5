@@ -162,9 +162,6 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
 
                 khui_cfg_release(idents);
 
-                krb4_initialized = TRUE;
-
-                khm_krb4_list_tickets();
             }
 
             /* Lookup common data types */
@@ -203,6 +200,12 @@ krb4_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
                                              &attr_id_krb5_flags))) {
                 rv = KHM_ERROR_UNKNOWN;
             }
+
+            krb4_initialized = TRUE;
+
+            khm_krb4_set_def_tkt_string();
+
+            khm_krb4_list_tickets();
 #endif
         }
         break;
