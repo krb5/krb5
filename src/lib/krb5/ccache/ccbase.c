@@ -53,7 +53,16 @@ extern const krb5_cc_ops krb5_lcc_ops;
 static struct krb5_cc_typelist cc_lcc_entry = { &krb5_lcc_ops, NULL };
 static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_lcc_entry };
 #else
+
+#ifdef USE_CCAPI_V3
+extern const krb5_cc_ops krb5_cc_stdcc_ops;
+static struct krb5_cc_typelist cc_stdcc_entry = { &krb5_cc_stdcc_ops, NULL };
+static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, &cc_stdcc_entry };
+#else
+
 static struct krb5_cc_typelist cc_mcc_entry = { &krb5_mcc_ops, NULL };
+#endif /* USE_CCAPI_V3 */
+
 #ifdef USE_KEYRING_CCACHE
 static struct krb5_cc_typelist cc_file_entry = { &krb5_cc_file_ops,
 						 &cc_mcc_entry };
