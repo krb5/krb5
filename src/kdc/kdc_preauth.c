@@ -394,10 +394,22 @@ load_preauth_plugins(krb5_context context)
 		 * from the list of modules we'll be using. */
 		if (j == 0) {
 		    server_init_proc = ftable->init_proc;
-		    if ((server_init_proc != NULL) &&
-		        ((*server_init_proc)(context, &plugin_context) != 0)) {
-			memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
-			continue;
+		    if (server_init_proc != NULL) {
+			krb5_error_code initerr;
+			initerr = (*server_init_proc)(context, &plugin_context);
+			if (initerr) {
+			    const char *emsg;
+			    emsg = krb5_get_error_message(context, initerr);
+			    if (emsg) {
+				krb5_klog_syslog(LOG_ERR,
+					"preauth %s failed to initialize: %s",
+					ftable->name, emsg);
+				krb5_free_error_message(context, emsg);
+			    }
+			    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
+
+			    break;	/* skip all modules in this plugin */
+			}
 		    }
 		}
 		preauth_systems[k].name = ftable->name;
