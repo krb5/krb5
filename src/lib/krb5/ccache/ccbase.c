@@ -72,6 +72,9 @@ static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 static struct krb5_cc_typelist *cc_typehead = INITIAL_TYPEHEAD;
 static k5_mutex_t cc_typelist_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
+static krb5_error_code
+krb5int_cc_getops(krb5_context, const char *, const krb5_cc_ops **);
+
 int
 krb5int_cc_initialize(void)
 {
@@ -162,12 +165,13 @@ krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
 krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 {
-    struct krb5_cc_typelist *tlist;
     char *pfx, *cp;
     const char *resid;
     unsigned int pfxlen;
     krb5_error_code err;
-    
+    const krb5_cc_ops *ops;
+
+    pfx = NULL;
     cp = strchr (name, ':');
     if (!cp) {
 	if (krb5_cc_dfl_ops)
@@ -198,26 +202,72 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
 
     *cache = (krb5_ccache) 0;
 
-    err = k5_mutex_lock(&cc_typelist_lock);
-    if (err) {
+    err = krb5int_cc_getops(context, pfx, &ops);
+    if (pfx != NULL)
 	free(pfx);
+    if (err)
 	return err;
-    }
+
+    return ops->resolve(context, cache, resid);
+}
+
+/*
+ * cc_getops
+ *
+ * Internal function to return the ops vector for a given ccache
+ * prefix string.
+ */
+static krb5_error_code
+krb5int_cc_getops(
+    krb5_context context,
+    const char *pfx,
+    const krb5_cc_ops **ops)
+{
+    krb5_error_code err;
+    struct krb5_cc_typelist *tlist;
+
+    err = k5_mutex_lock(&cc_typelist_lock);
+    if (err)
+	return err;
+
     for (tlist = cc_typehead; tlist; tlist = tlist->next) {
 	if (strcmp (tlist->ops->prefix, pfx) == 0) {
-	    krb5_error_code (KRB5_CALLCONV *ccresolver)() = tlist->ops->resolve;
+	    *ops = tlist->ops;
 	    k5_mutex_unlock(&cc_typelist_lock);
-	    free(pfx);
-	    return (*ccresolver)(context, cache, resid);
+	    return 0;
 	}
     }
     k5_mutex_unlock(&cc_typelist_lock);
     if (krb5_cc_dfl_ops && !strcmp (pfx, krb5_cc_dfl_ops->prefix)) {
-	free (pfx);
-	return (*krb5_cc_dfl_ops->resolve)(context, cache, resid);
+	*ops = krb5_cc_dfl_ops;
+	return 0;
     }
-    free(pfx);
     return KRB5_CC_UNKNOWN_TYPE;
+}
+
+/*
+ * cc_new_unique
+ *
+ * Generate a new unique ccache, given a ccache type and a hint
+ * string.  Ignores the hint string for now.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cc_new_unique(
+    krb5_context context,
+    const char *type,
+    const char *hint,
+    krb5_ccache *id)
+{
+    const krb5_cc_ops *ops;
+    krb5_error_code err;
+
+    *id = NULL;
+
+    err = krb5int_cc_getops(context, type, &ops);
+    if (err)
+	return err;
+
+    return ops->gen_new(context, id);
 }
 
 /*

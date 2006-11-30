@@ -1305,6 +1305,12 @@ krb5_cccol_cursor_next(
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
 
+krb5_error_code KRB5_CALLCONV
+krb5_cc_new_unique(
+    krb5_context context,
+    const char *type,
+    const char *hint,
+    krb5_ccache *id);
 
 /*
  * end "ccache.h"
