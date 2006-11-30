@@ -272,6 +272,8 @@ krb5_free_context(krb5_context ctx)
 	  ctx->ser_ctx = 0;
      }
 
+     krb5_clear_error_message(ctx);
+
      ctx->magic = 0;
      free(ctx);
 }
