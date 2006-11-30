@@ -28,16 +28,26 @@
  * SUCH DAMAGES.
  */
 
+/*
+ * Create a key given random data.  It is assumed that random_key has
+ * already been initialized and random_key->contents have been allocated
+ * with the correct length.
+ */
 #include "k5-int.h"
 #include "etypes.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_keylength(krb5_context context, krb5_enctype enctype,
-		  size_t *keylength)
+krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,
+		     krb5_data *random_data, krb5_keyblock *random_key)
 {
     int i;
+    krb5_error_code ret;
+    const struct krb5_enc_provider *enc;
 
-    if (keylength == NULL)
+    if (random_data == NULL || random_key == NULL)
+	return(EINVAL);
+
+    if (random_key->contents == NULL)
 	return(EINVAL);
 
     for (i=0; i<krb5_enctypes_length; i++) {
@@ -48,7 +58,16 @@ krb5_c_keylength(krb5_context context, krb5_enctype enctype,
     if (i == krb5_enctypes_length)
 	return(KRB5_BAD_ENCTYPE);
 
-    *keylength = krb5_enctypes_list[i].enc->keylength;
+    enc = krb5_enctypes_list[i].enc;
 
-    return(0);
+    if (random_key->length != enc->keylength)
+	return(KRB5_BAD_KEYSIZE);
+
+    ret = ((*(enc->make_key))(random_data, random_key));
+
+    if (ret) {
+	memset(random_key->contents, 0, random_key->length);
+    }
+
+    return(ret);
 }

@@ -52,7 +52,7 @@ STLIBOBJS=\
 	keyblocks.o \
 	keyed_cksum.o		\
 	keyed_checksum_types.o	\
-	keylength.o		\
+	keylengths.o		\
 	make_checksum.o		\
 	make_random_key.o	\
 	mandatory_sumtype.o	\
@@ -61,6 +61,7 @@ STLIBOBJS=\
 	pbkdf2.o		\
 	prf.o \
 	prng.o			\
+	random_to_key.o		\
 	state.o \
 	string_to_cksumtype.o	\
 	string_to_enctype.o	\
@@ -88,7 +89,7 @@ OBJS=\
 	$(OUTPRE)keyblocks.$(OBJEXT) \
 	$(OUTPRE)keyed_cksum.$(OBJEXT)		\
 	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
-	$(OUTPRE)keylength.$(OBJEXT)	\
+	$(OUTPRE)keylengths.$(OBJEXT)	\
 	$(OUTPRE)make_checksum.$(OBJEXT)	\
 	$(OUTPRE)make_random_key.$(OBJEXT)	\
 	$(OUTPRE)mandatory_sumtype.$(OBJEXT)	\
@@ -97,6 +98,7 @@ OBJS=\
 	$(OUTPRE)pbkdf2.$(OBJEXT)		\
 	$(OUTPRE)prf.$(OBJEXT) \
 	$(OUTPRE)prng.$(OBJEXT)			\
+	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)state.$(OBJEXT) \
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
 	$(OUTPRE)string_to_enctype.$(OBJEXT)	\
@@ -124,7 +126,7 @@ SRCS=\
 	$(srcdir)/keyblocks.c \
 	$(srcdir)/keyed_cksum.c		\
 	$(srcdir)/keyed_checksum_types.c\
-	$(srcdir)/keylength.c		\
+	$(srcdir)/keylengths.c		\
 	$(srcdir)/make_checksum.c	\
 	$(srcdir)/make_random_key.c	\
 	$(srcdir)/mandatory_sumtype.c	\
@@ -133,6 +135,7 @@ SRCS=\
 	$(srcdir)/pbkdf2.c	\
 	$(srcdir)/prf.c \
 	$(srcdir)/prng.c		\
+	$(srcdir)/random_to_key.c	\
 	$(srcdir)/state.c \
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_enctype.c	\
@@ -527,7 +530,7 @@ keyed_checksum_types.so keyed_checksum_types.po $(OUTPRE)keyed_checksum_types.$(
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   cksumtypes.h etypes.h keyed_checksum_types.c
-keylength.so keylength.po $(OUTPRE)keylength.$(OBJEXT): \
+keylengths.so keylengths.po $(OUTPRE)keylengths.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
@@ -535,7 +538,7 @@ keylength.so keylength.po $(OUTPRE)keylength.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  etypes.h keylength.c
+  etypes.h keylengths.c
 make_checksum.so make_checksum.po $(OUTPRE)make_checksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -608,6 +611,15 @@ prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(srcdir)/sha1/shs.h $(srcdir)/yarrow/yarrow.h $(srcdir)/yarrow/ycipher.h \
   $(srcdir)/yarrow/yhash.h $(srcdir)/yarrow/ytypes.h \
   prng.c
+random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  etypes.h random_to_key.c
 state.so state.po $(OUTPRE)state.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
