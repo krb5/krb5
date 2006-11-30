@@ -437,9 +437,9 @@ krb5_error_code KRB5_CALLCONV
 		    size_t *blocksize);
 
 krb5_error_code KRB5_CALLCONV
-    krb5_c_keylength
+    krb5_c_keylengths
     (krb5_context context, krb5_enctype enctype,
-		    size_t *keylength);
+		    size_t *keybytes, size_t *keylength);
 
 krb5_error_code KRB5_CALLCONV
 	krb5_c_init_state
@@ -462,6 +462,11 @@ krb5_error_code KRB5_CALLCONV
     krb5_c_make_random_key
     (krb5_context context, krb5_enctype enctype,
 		    krb5_keyblock *k5_random_key);
+
+krb5_error_code KRB5_CALLCONV
+    krb5_c_random_to_key
+    (krb5_context context, krb5_enctype enctype,
+		    krb5_data *random_data, krb5_keyblock *k5_random_key);
 
 /* Register a new entropy sample  with the PRNG. may cause
 * the PRNG to be reseeded, although this is not guaranteed.  See previous randsource definitions
