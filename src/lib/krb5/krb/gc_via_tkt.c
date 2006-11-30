@@ -33,6 +33,13 @@
 
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
+#define IS_TGS_PRINC(c, p)				\
+    ((krb5_princ_size((c), (p)) == 2) &&		\
+     (krb5_princ_component((c), (p), 0)->length ==	\
+      KRB5_TGS_NAME_SIZE) &&				\
+     (!memcmp(krb5_princ_component((c), (p), 0)->data,	\
+	      KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
+
 static krb5_error_code
 krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address, krb5_data *psectkt, krb5_creds **ppcreds)
 {
@@ -96,6 +103,59 @@ cleanup:
     return retval;
 }
  
+static krb5_error_code
+check_reply_server(krb5_context context, krb5_flags kdcoptions,
+		   krb5_creds *in_cred, krb5_kdc_rep *dec_rep)
+{
+
+    if (!krb5_principal_compare(context, dec_rep->ticket->server,
+				dec_rep->enc_part2->server))
+	return KRB5_KDCREP_MODIFIED;
+
+    /* Reply is self-consistent. */
+
+    if (krb5_principal_compare(context, dec_rep->ticket->server,
+			       in_cred->server))
+	return 0;
+
+    /* Server in reply differs from what we requested. */
+
+    if (kdcoptions & KDC_OPT_CANONICALIZE) {
+	/* in_cred server differs from ticket returned, but ticket
+	   returned is consistent and we requested canonicalization. */
+#if 0
+#ifdef DEBUG_REFERRALS
+	printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
+	krb5int_dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
+	krb5int_dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
+#endif
+#endif
+	return 0;
+    }
+
+    /* We didn't request canonicalization. */
+
+    if (!IS_TGS_PRINC(context, in_cred->server) ||
+	!IS_TGS_PRINC(context, dec_rep->ticket->server)) {
+	/* Canonicalization not requested, and not a TGS referral. */
+	return KRB5_KDCREP_MODIFIED;
+    }
+#if 0
+    /*
+     * Is this check needed?  find_nxt_kdc() in gc_frm_kdc.c already
+     * effectively checks this.
+     */
+    if (krb5_realm_compare(context, in_cred->client, in_cred->server) &&
+	in_cred->server->data[1].length == in_cred->client->realm.length &&
+	!memcmp(in_cred->client->realm.data, in_cred->server->data[1].data,
+		in_cred->client->realm.length)) {
+	/* Attempted to rewrite local TGS. */
+	return KRB5_KDCREP_MODIFIED;
+    }
+#endif
+    return 0;
+}
+
 krb5_error_code
 krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 		       krb5_flags kdcoptions, krb5_address *const *address,
@@ -231,26 +291,8 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
     if (!krb5_principal_compare(context, dec_rep->client, tkt->client))
 	retval = KRB5_KDCREP_MODIFIED;
 
-    if ((!krb5_principal_compare(context, dec_rep->enc_part2->server, in_cred->server)) ||
-	(!krb5_principal_compare(context, dec_rep->ticket->server, in_cred->server))) {
-        if (krb5_principal_compare(context, dec_rep->ticket->server, dec_rep->enc_part2->server)
-	    && (kdcoptions&KDC_OPT_CANONICALIZE) ) {
-	    /* in_cred server differs from ticket returned, but ticket
-	       returned is consistent and we requested canonicalization. */
-#if 0
-#ifdef DEBUG_REFERRALS
-	    printf("gc_via_tkt: in_cred and encoding don't match but referrals requested\n");
-	    krb5int_dbgref_dump_principal("gc_via_tkt: in_cred",in_cred->server);
-	    krb5int_dbgref_dump_principal("gc_via_tkt: encoded server",dec_rep->enc_part2->server);
-#endif
-#endif
-	}
-	else {
-	    /* in_cred server differs from ticket returned, and ticket
-	       returned is *not* consistent. */
-	    retval = KRB5_KDCREP_MODIFIED;
-	}
-    }
+    if (retval == 0)
+	retval = check_reply_server(context, kdcoptions, in_cred, dec_rep);
 
     if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
 	retval = KRB5_KDCREP_MODIFIED;
