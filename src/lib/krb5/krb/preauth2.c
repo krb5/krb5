@@ -561,8 +561,8 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
 #ifdef DEBUG
 	fprintf (stderr, "%s:%d: salt len=%d", __FILE__, __LINE__,
 		 salt->length);
-	if (salt->length > 0)
-	    fprintf (stderr, " '%*s'", salt->length, salt->data);
+	if ((int) salt->length > 0)
+	    fprintf (stderr, " '%.*s'", salt->length, salt->data);
 	fprintf (stderr, "; *etype=%d request->ktype[0]=%d\n",
 		 *etype, request->ktype[0]);
 #endif
@@ -1378,9 +1378,9 @@ krb5_do_preauth(krb5_context context,
     }
 
 #ifdef DEBUG
-    fprintf (stderr, "salt len=%d", salt->length);
-    if (salt->length > 0)
-	fprintf (stderr, " '%*s'", salt->length, salt->data);
+    fprintf (stderr, "salt len=%d", (int) salt->length);
+    if ((int) salt->length > 0)
+	fprintf (stderr, " '%.*s'", salt->length, salt->data);
     fprintf (stderr, "; preauth data types:");
     for (i = 0; in_padata[i]; i++) {
 	fprintf (stderr, " %d", in_padata[i]->pa_type);
@@ -1399,7 +1399,7 @@ krb5_do_preauth(krb5_context context,
 	    int k, l, etype_found, valid_etype_found;
 	    /*
 	     * This is really gross, but is necessary to prevent
-	     * lossge when talking to a 1.0.x KDC, which returns an
+	     * lossage when talking to a 1.0.x KDC, which returns an
 	     * erroneous PA-PW-SALT when it returns a KRB-ERROR
 	     * requiring additional preauth.
 	     */
@@ -1487,7 +1487,7 @@ krb5_do_preauth(krb5_context context,
 		    fprintf (stderr, "etype info %d: etype %d salt len=%d",
 			     j, e->etype, e->length);
 		    if (e->length > 0 && e->length != KRB5_ETYPE_NO_SALT)
-			fprintf (stderr, " '%*s'", e->length, e->salt);
+			fprintf (stderr, " '%.*s'", e->length, e->salt);
 		    fprintf (stderr, "\n");
 		}
 #endif
