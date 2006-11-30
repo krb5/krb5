@@ -65,12 +65,10 @@ krb5int_copy_data_contents(krb5_context context, const krb5_data *indata, krb5_d
     if (!indata) {
 	return EINVAL;
     }
-    
 
     outdata->length = indata->length;
     if (outdata->length) {
 	if (!(outdata->data = malloc(outdata->length))) {
-	    krb5_xfree(outdata);
 	    return ENOMEM;
 	}
 	memcpy((char *)outdata->data, (char *)indata->data, outdata->length);
