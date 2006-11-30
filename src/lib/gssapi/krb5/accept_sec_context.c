@@ -93,7 +93,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 {
     krb5_creds ** creds = NULL;
     krb5_error_code retval;
-    krb5_ccache template_ccache = NULL;
     krb5_ccache ccache = NULL;
     krb5_gss_cred_id_t cred = NULL;
     krb5_auth_context new_auth_ctx = NULL;
@@ -134,18 +133,11 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 			goto cleanup;
 		}
 
-    /* Lots of kludging going on here... Some day the ccache interface
-       will be rewritten though */
-
-    if ((retval = krb5_cc_resolve(context, "MEMORY:GSSAPI", &template_ccache)))
-	goto cleanup;
-
-    ccache = template_ccache; /* krb5_cc_gen_new will replace so make a copy */
-    if ((retval = krb5_cc_gen_new(context, &ccache))) {
+    if ((retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache))) {
 	ccache = NULL;
         goto cleanup;
     }
-    
+
     if ((retval = krb5_cc_initialize(context, ccache, creds[0]->client)))
 	goto cleanup;
 
@@ -199,9 +191,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 cleanup:
     if (creds)
 	krb5_free_tgt_creds(context, creds);
-
-    if (template_ccache)
-	(void)krb5_cc_close(context, template_ccache);
 
     if (ccache)
 	(void)krb5_cc_destroy(context, ccache);

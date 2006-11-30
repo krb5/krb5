@@ -60,7 +60,6 @@ krb5_verify_init_creds(krb5_context context,
    krb5_error_code ret;
    krb5_principal server;
    krb5_keytab keytab;
-   krb5_ccache template_ccache;
    krb5_ccache ccache;
    krb5_keytab_entry kte;
    krb5_creds in_creds, *out_creds;
@@ -71,7 +70,6 @@ krb5_verify_init_creds(krb5_context context,
 
    server = NULL;
    keytab = NULL;
-   template_ccache = NULL;
    ccache = NULL;
    out_creds = NULL;
    authcon = NULL;
@@ -139,15 +137,12 @@ krb5_verify_init_creds(krb5_context context,
 	 internals with a coherent idea of "in" and "out". */
 
       /* insert the initial cred into the ccache */
-      
-      if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req", &template_ccache)))
-	 goto cleanup;
-      ccache = template_ccache; /* krb5_cc_gen_new will replace so make a copy */
-      if ((ret = krb5_cc_gen_new(context, &ccache))) {
+
+      if ((ret = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache))) {
 	  ccache = NULL;
 	  goto cleanup;
       }
-       
+
       if ((ret = krb5_cc_initialize(context, ccache, creds->client)))
 	 goto cleanup;
 
@@ -216,8 +211,6 @@ cleanup:
       krb5_free_principal(context, server);
    if (!keytab_arg && keytab)
       krb5_kt_close(context, keytab);
-   if (template_ccache)
-       krb5_cc_close(context, template_ccache);
    if (ccache)
       krb5_cc_destroy(context, ccache);
    if (out_creds)
