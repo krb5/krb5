@@ -147,7 +147,7 @@ SRCS=\
 
 LIBBASE=k5crypto
 LIBMAJOR=3
-LIBMINOR=0
+LIBMINOR=1
 LIBINITFUNC=cryptoint_initialize_library
 LIBFINIFUNC=cryptoint_cleanup_library
 RELDIR=crypto
