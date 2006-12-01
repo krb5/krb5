@@ -305,7 +305,7 @@ load_preauth_plugins(krb5_context context)
     struct krb5plugin_preauth_server_ftable_v0 *ftable;
     int module_count, i, j, k;
     void *plugin_context;
-    init_proc server_init_proc;
+    init_proc server_init_proc = NULL;
 
     memset(&err, 0, sizeof(err));
 
@@ -894,8 +894,11 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     krb5_pa_data **padata;
     krb5_preauth_systems *pa_sys;
     void **pa_context;
-    krb5_data *pa_e_data = NULL;
+    krb5_data *pa_e_data = NULL, *tmp_e_data = NULL;
     int	pa_ok = 0, pa_found = 0;
+    krb5_error_code saved_retval = 0;
+    int use_saved_retval = 0;
+    const char *emsg;
 
     if (request->padata == 0)
 	return 0;
@@ -924,35 +927,62 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	retval = pa_sys->verify_padata(context, client, req_pkt, request,
 				       enc_tkt_reply, *padata,
 				       get_entry_data, pa_sys->plugin_context,
-				       pa_context, &pa_e_data);
+				       pa_context, &tmp_e_data);
 	if (retval) {
-	    const char * emsg = krb5_get_error_message (context, retval);
+	    emsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
 			      pa_sys->name, emsg);
 	    krb5_free_error_message (context, emsg);
 	    if (pa_sys->flags & PA_REQUIRED) {
+		/* free up any previous edata we might have been saving */
+		if (pa_e_data != NULL)
+		    krb5_free_data(context, pa_e_data);
+		pa_e_data = tmp_e_data;
+		tmp_e_data = NULL;
+		use_saved_retval = 0; /* Make sure we use the current retval */
 		pa_ok = 0;
 		break;
+	    }
+	    /*
+	     * We'll return edata from either the first PA_REQUIRED module
+	     * that fails, or the first non-PA_REQUIRED module that fails.
+	     * Hang on to edata from the first non-PA_REQUIRED module.
+	     * If we've already got one saved, simply discard this one.
+	     */
+	    if (tmp_e_data != NULL) {
+		if (pa_e_data == NULL) {
+		    /* save the first error code and e-data */
+		    pa_e_data = tmp_e_data;
+		    tmp_e_data = NULL;
+		    saved_retval = retval;
+		    use_saved_retval = 1;
+		} else {
+		    /* discard this extra e-data from non-PA_REQUIRED module */
+		    krb5_free_data(context, tmp_e_data);
+		    tmp_e_data = NULL;
+		}
 	    }
 	} else {
 #ifdef DEBUG
 	    krb5_klog_syslog (LOG_DEBUG, ".. .. ok");
 #endif
+	    /* Ignore any edata returned on success */
+	    if (tmp_e_data != NULL) {
+	        krb5_free_data(context, tmp_e_data);
+		tmp_e_data = NULL;
+	    }
 	    pa_ok = 1;
-	    if (pa_sys->flags & PA_SUFFICIENT) 
+	    if (pa_sys->flags & PA_SUFFICIENT)
 		break;
-	}
-	/*
-	 * If we're looping and e_data was returned, free it here
-	 * since we won't be returning it anyway
-	 */
-	if (pa_e_data != NULL) {
-	    krb5_free_data(context, pa_e_data);
-	    pa_e_data = NULL;
 	}
     }
 
-    /* Return any e_data from the preauth that caused us to exit the loop */
+    /* Don't bother copying and returning e-data on success */
+    if (pa_ok && pa_e_data != NULL) {
+	krb5_free_data(context, pa_e_data);
+	pa_e_data = NULL;
+    }
+    /* Return any e-data from the preauth that caused us to exit the loop */
     if (pa_e_data != NULL) {
 	e_data->data = malloc(pa_e_data->length);
 	if (e_data->data == NULL) {
@@ -963,6 +993,8 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	e_data->length = pa_e_data->length;
 	krb5_free_data(context, pa_e_data);
 	pa_e_data = NULL;
+	if (use_saved_retval != 0)
+	    retval = saved_retval;
     }
 
     if (pa_ok)
@@ -975,7 +1007,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
        return 0;
 
     if (!pa_found) {
-	const char *emsg = krb5_get_error_message(context, retval);
+	emsg = krb5_get_error_message(context, retval);
 	krb5_klog_syslog (LOG_INFO, "no valid preauth type found: %s", emsg);
 	krb5_free_error_message(context, emsg);
     }
