@@ -216,8 +216,8 @@ and fitness for purpose.
 @vskip 12pt
 @end iftex
 
-Portions contributed by Red Hat, including the preauthentication
-plugins, contain the following copyright:
+Portions contributed by Red Hat, including the pre-authentication
+plug-in framework, contain the following copyright:
 
 @quotation
 @iftex
