@@ -1290,6 +1290,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_data *encoded_request_body,
 			 krb5_data *encoded_previous_request,
 			 krb5_pa_data **padata,
+			 krb5_pa_data ***return_padata,
 			 krb5_error *err_reply,
 			 krb5_data *salt, krb5_data *s2kparams,
 			 krb5_enctype *etype,
@@ -1303,6 +1304,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     krb5_preauth_context *context;
     struct _krb5_preauth_context_module *module;
     int i, j;
+    int out_pa_list_size = 0;
 
     ret = KRB_ERR_GENERIC;
     if (kcontext->preauth_context == NULL) {
@@ -1338,10 +1340,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 					   as_key,
 					   &out_padata) == 0) {
 		if (out_padata != NULL) {
-		    if (padata[i]->contents != NULL)
-			free(padata[i]->contents);
-		    free(padata[i]);
-		    padata[i] = out_padata;
+		    grow_pa_list(return_padata, &out_pa_list_size, out_padata);
 		    return 0;
 		}
 	    }
