@@ -579,7 +579,7 @@ sn2princ.so sn2princ.po $(OUTPRE)sn2princ.$(OBJEXT): \
   $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h sn2princ.c
+  $(SRCTOP)/include/socket-utils.h os-proto.h sn2princ.c
 thread_safe.so thread_safe.po $(OUTPRE)thread_safe.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

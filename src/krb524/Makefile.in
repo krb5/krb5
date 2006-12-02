@@ -109,10 +109,11 @@ clean-unix::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)conv_princ.$(OBJEXT): $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
+$(OUTPRE)conv_princ.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
   $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  conv_princ.c
+  $(SRCTOP)/include/port-sockets.h conv_princ.c krb524d.h
 $(OUTPRE)cnv_tkt_skey.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
