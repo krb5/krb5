@@ -38,11 +38,22 @@ extern unsigned char pkinit_4096_dhprime[4096/8];
 
 typedef struct _pkinit_context {
     int magic;
-    int version;
     int require_eku;
     int require_san;
     int allow_upn;
     int require_crl_checking;
+    char *ctx_identity;
+    char *ctx_anchors;
+    char *ctx_pool;
+    char *ctx_revoke;
+    char *ctx_ocsp;
+    char *ctx_mapping_file;
+    int ctx_princ_in_cert;
+    int ctx_dh_min_bits;
+    int ctx_allow_proxy_certs;
+    DH *dh_1024;
+    DH *dh_2048;
+    DH *dh_4096;
     ASN1_OBJECT *id_pkinit_authData;
     ASN1_OBJECT *id_pkinit_authData9;
     ASN1_OBJECT *id_pkinit_DHKeyData;
@@ -57,13 +68,30 @@ typedef struct _pkinit_context {
 
 typedef struct _pkinit_req_context {
     int magic;
-    int version;
     DH *dh;
+    int dh_size;
+    int require_eku;
+    int require_san;
+    int require_hostname_match;
+    int allow_upn;
+    int require_crl_checking;
+    int win2k_target;
+    int win2k_require_cksum;
+    krb5_preauthtype patype;
 } pkinit_req_context;
 
 /* Function prototypes */
 
 void openssl_init(void);
+
+krb5_error_code pkinit_init_dh_params(krb5_context, pkinit_context *);
+void pkinit_fini_dh_params(krb5_context, pkinit_context *);
+krb5_error_code pkinit_encode_dh_params
+	(BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, int *);
+DH *pkinit_decode_dh_params
+	(DH **, unsigned char **, long ); 
+int pkinit_check_dh_params
+	(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
 
 krb5_error_code pkinit_sign_data
 	(unsigned char *data, int data_len, unsigned char **sig,
@@ -99,7 +127,8 @@ int verify_id_pkinit_san
 		krb5_preauthtype pa_type, pkinit_context *plgctx);
 
 int verify_id_pkinit_eku
-	(X509 * x, krb5_preauthtype pa_type, pkinit_context *plgctx);
+	(pkinit_context *plgctx, X509 *x, krb5_preauthtype pa_type,
+	 int require_eku);
 
 krb5_error_code load_trusted_certifiers
 	(STACK_OF(X509) **, char *);
@@ -128,6 +157,7 @@ void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 void init_krb5_auth_pack(krb5_auth_pack **in);
 void init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in);
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
+void init_krb5_typed_data(krb5_typed_data **in);
 
 void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in);
 void free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in);
@@ -139,4 +169,11 @@ void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
 void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in);
 void free_krb5_trusted_ca(krb5_trusted_ca ***in);
+void free_krb5_typed_data(krb5_typed_data ***in);
+void free_krb5_algorithm_identifier(krb5_algorithm_identifier ***in);
+
+#define TD_TRUSTED_CERTIFIERS 104
+#define TD_INVALID_CERTIFICATES 105
+#define TD_DH_PARAMETERS 109
+
 #endif	/* _PKINIT_H */

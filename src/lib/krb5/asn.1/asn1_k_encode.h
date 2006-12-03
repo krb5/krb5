@@ -330,4 +330,10 @@ asn1_error_code asn1_encode_pa_pk_as_rep_draft9
 
 asn1_error_code asn1_encode_td_trusted_certifiers
 	(asn1buf *buf, const krb5_external_principal_identifier **val, unsigned int *retlen);
+
+asn1_error_code asn1_encode_typed_data
+	(asn1buf *buf, const krb5_typed_data *val, unsigned int *retlen);
+
+asn1_error_code asn1_encode_sequence_of_typed_data
+	(asn1buf *buf, const krb5_typed_data **val, unsigned int *retlen);
 #endif

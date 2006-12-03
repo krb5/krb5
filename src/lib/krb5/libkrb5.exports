@@ -203,6 +203,9 @@ decode_krb5_sam_response_2
 decode_krb5_tgs_rep
 decode_krb5_tgs_req
 decode_krb5_ticket
+decode_krb5_td_dh_parameters
+decode_krb5_td_trusted_certifiers
+decode_krb5_typed_data
 encode_krb5_alt_method
 encode_krb5_ap_rep
 encode_krb5_ap_rep_enc_part
@@ -248,10 +251,12 @@ encode_krb5_sam_key
 encode_krb5_sam_response
 encode_krb5_sam_response_2
 encode_krb5_setpw_req
+encode_krb5_td_dh_parameters
 encode_krb5_td_trusted_certifiers
 encode_krb5_tgs_rep
 encode_krb5_tgs_req
 encode_krb5_ticket
+encode_krb5_typed_data
 et_asn1_error_table
 et_k524_error_table
 et_kdb5_error_table

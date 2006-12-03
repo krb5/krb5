@@ -1039,9 +1039,35 @@ asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algori
 {
   asn1_setup();
 
-  if (val->parameters.length != 0)
-    asn1_addlenfield(val->parameters.length, val->parameters.data, 1, asn1_encode_octetstring);
-  asn1_addlenfield(val->algorithm.length, val->algorithm.data, 0, asn1_encode_octetstring);
+  if (val->parameters.length != 0) {
+    retval = asn1buf_insert_octetstring(buf, val->parameters.length, 
+					val->parameters.data);
+    if(retval) {
+      asn1buf_destroy(&buf);
+      return retval;
+    }
+    sum += val->parameters.length;
+  }
+  
+  retval = asn1_encode_oid(buf, val->algorithm.length, 
+			   val->algorithm.data,
+			   &length);
+  
+  if(retval) {
+    asn1buf_destroy(&buf);
+    return retval;
+  }
+  sum += length;  
+  
+  retval = asn1_make_etag(buf, UNIVERSAL, ASN1_SEQUENCE, 
+			  val->parameters.length + length, 
+			  &length);
+
+  if(retval) {
+    asn1buf_destroy(&buf);
+    return retval;
+  }
+  sum += length;  
 
   asn1_makeseq();
   asn1_cleanup();
@@ -1343,9 +1369,37 @@ asn1_error_code asn1_encode_pa_pk_as_rep_draft9(asn1buf *buf, const krb5_pa_pk_a
 asn1_error_code asn1_encode_td_trusted_certifiers(asn1buf *buf, const krb5_external_principal_identifier **val, unsigned int *retlen)
 {
   asn1_setup();
-  /* unfinished function */
-  asn1_addfield(val,1,asn1_encode_sequence_of_external_principal_identifier);
+  retval = asn1_encode_sequence_of_external_principal_identifier(buf, val, &length);
+  if (retval) {
+    asn1buf_destroy(&buf);
+    return retval;
+  }
   asn1_cleanup();
 }
 
+asn1_error_code asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val, unsigned int *retlen)
+{
+  asn1_setup();
+  int i;
 
+  if(val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
+
+  for(i=0; val[i] != NULL; i++);
+  for(i--; i>=0; i--){
+    retval = asn1_encode_typed_data(buf,val[i],&length);
+    if(retval) return retval;
+    sum += length;
+  }
+  asn1_makeseq();
+
+  asn1_cleanup();
+}
+
+asn1_error_code asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val, unsigned int *retlen)
+{
+  asn1_setup();
+  asn1_addlenfield(val->length, val->data, 1, asn1_encode_octetstring);
+  asn1_addfield(val->type, 0, asn1_encode_integer);
+  asn1_makeseq();
+  asn1_cleanup();
+}

@@ -978,3 +978,20 @@ krb5_error_code encode_krb5_td_trusted_certifiers(const krb5_external_principal_
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_sequence_of_typed_data(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}
+
+krb5_error_code encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **rep, krb5_data **code)
+{
+  krb5_setup();
+  retval = asn1_encode_sequence_of_algorithm_identifier(buf,rep,&length);
+  if(retval) return retval;
+  sum += length;
+  krb5_cleanup();
+}

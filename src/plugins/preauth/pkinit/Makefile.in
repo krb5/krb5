@@ -53,11 +53,13 @@ clean::
 # the Makefile.in file
 #
 pkinit_srv.so pkinit_srv.po $(OUTPRE)pkinit_srv.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h pkinit.h pkinit_srv.c
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  pkinit.h pkinit_srv.c
 pkinit_lib.so pkinit_lib.po $(OUTPRE)pkinit_lib.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h pkinit.h pkinit_lib.c
 pkinit_clnt.so pkinit_clnt.po $(OUTPRE)pkinit_clnt.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h pkinit.h pkinit_clnt.c
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  pkinit.h pkinit_clnt.c

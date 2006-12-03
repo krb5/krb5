@@ -208,16 +208,25 @@ pkinit_lib_init(krb5_context context, void **blob)
     krb5_error_code retval = ENOMEM;
     int tmp = 0;
 
-    plgctx = (pkinit_context *) malloc(sizeof(*plgctx));
+    plgctx = (pkinit_context *) calloc(1, sizeof(*plgctx));
     if (plgctx == NULL) 
 	goto out;
 
     plgctx->magic = PKINIT_CTX_MAGIC;
-    plgctx->version = 0;
-    plgctx->require_eku = 0;
-    plgctx->require_san = 0;
+    plgctx->require_eku = 1;
+    plgctx->require_san = 1;
     plgctx->allow_upn = 0;
     plgctx->require_crl_checking = 0;
+
+    plgctx->ctx_identity = NULL;
+    plgctx->ctx_anchors = NULL;
+    plgctx->ctx_pool = NULL;
+    plgctx->ctx_revoke = NULL;
+    plgctx->ctx_ocsp = NULL;
+    plgctx->ctx_mapping_file = NULL;
+    plgctx->ctx_princ_in_cert = 0;
+    plgctx->ctx_dh_min_bits = 0;
+    plgctx->ctx_allow_proxy_certs = 0;
 
     tmp = OBJ_create("1.3.6.1.5.2.2", "id-pkinit-san", "KRB5PrincipalName");
     if (tmp == NID_undef) 
@@ -278,6 +287,11 @@ pkinit_lib_init(krb5_context context, void **blob)
 
     /* initialize openssl routines */
     openssl_init();
+
+    plgctx->dh_1024 = NULL;
+    plgctx->dh_2048 = NULL;
+    plgctx->dh_4096 = NULL;
+
     retval = 0;
 
   out:
@@ -312,6 +326,197 @@ openssl_init()
 	OpenSSL_add_all_algorithms();
 	did_init++;
     }
+}
+
+void
+pkinit_fini_dh_params(krb5_context context, pkinit_context *plgctx)
+{
+    if (plgctx->dh_1024)
+	DH_free(plgctx->dh_1024);
+    if (plgctx->dh_2048)
+	DH_free(plgctx->dh_2048);
+    if (plgctx->dh_4096)
+	DH_free(plgctx->dh_4096);
+
+    plgctx->dh_1024 = plgctx->dh_2048 = plgctx->dh_4096 = NULL;
+}
+
+krb5_error_code
+pkinit_init_dh_params(krb5_context context, pkinit_context *plgctx)
+{
+    krb5_error_code retval = ENOMEM;
+    plgctx->dh_1024 = DH_new();
+    if (plgctx->dh_1024 == NULL) 
+	goto cleanup;
+    plgctx->dh_1024->p = BN_bin2bn(pkinit_1024_dhprime, 
+	sizeof(pkinit_1024_dhprime), NULL);
+    if ((plgctx->dh_1024->g = BN_new()) == NULL ||
+	(plgctx->dh_1024->q = BN_new()) == NULL)
+	goto cleanup;
+    BN_set_word(plgctx->dh_1024->g, DH_GENERATOR_2);
+    BN_rshift1(plgctx->dh_1024->q, plgctx->dh_1024->p);
+
+    plgctx->dh_2048 = DH_new();
+    if (plgctx->dh_2048 == NULL) 
+	goto cleanup;
+    plgctx->dh_2048->p = BN_bin2bn(pkinit_2048_dhprime, 
+	sizeof(pkinit_2048_dhprime), NULL);
+    if ((plgctx->dh_2048->g = BN_new()) == NULL ||
+	(plgctx->dh_2048->q = BN_new()) == NULL)
+	goto cleanup;
+    BN_set_word(plgctx->dh_2048->g, DH_GENERATOR_2);
+    BN_rshift1(plgctx->dh_2048->q, plgctx->dh_2048->p);
+
+    plgctx->dh_4096 = DH_new();
+    if (plgctx->dh_4096 == NULL) 
+	goto cleanup;
+    plgctx->dh_4096->p = BN_bin2bn(pkinit_4096_dhprime, 
+	sizeof(pkinit_4096_dhprime), NULL);
+    if ((plgctx->dh_4096->g = BN_new()) == NULL ||
+	(plgctx->dh_4096->q = BN_new()) == NULL)
+	goto cleanup;
+    BN_set_word(plgctx->dh_4096->g, DH_GENERATOR_2);
+    BN_rshift1(plgctx->dh_4096->q, plgctx->dh_4096->p);
+
+    retval = 0;
+
+cleanup:
+    if (retval) {
+	pkinit_fini_dh_params(context, plgctx);
+    }
+
+    return retval;
+}
+
+krb5_error_code
+pkinit_encode_dh_params(BIGNUM *p, BIGNUM *g, BIGNUM *q, 
+			unsigned char **buf, int *buf_len) 
+{
+    krb5_error_code retval = ENOMEM;
+    int bufsize = 0, r = 0;
+    unsigned char *tmp = NULL;
+    ASN1_INTEGER *ap = NULL, *ag = NULL, *aq = NULL;
+
+    if ((ap = BN_to_ASN1_INTEGER(p, NULL)) == NULL)
+	goto cleanup;
+    if ((ag = BN_to_ASN1_INTEGER(g, NULL)) == NULL)
+	goto cleanup;
+    if ((aq = BN_to_ASN1_INTEGER(q, NULL)) == NULL)
+	goto cleanup;
+    bufsize = i2d_ASN1_INTEGER(ap, NULL);
+    bufsize += i2d_ASN1_INTEGER(ag, NULL);
+    bufsize += i2d_ASN1_INTEGER(aq, NULL);
+
+    r = ASN1_object_size(1, bufsize, V_ASN1_SEQUENCE);
+
+    tmp = *buf = malloc((size_t) r);
+    if (tmp == NULL) 
+	goto cleanup;
+
+    ASN1_put_object(&tmp, 1, bufsize, V_ASN1_SEQUENCE, V_ASN1_UNIVERSAL);
+
+    i2d_ASN1_INTEGER(ap, &tmp);
+    i2d_ASN1_INTEGER(ag, &tmp);
+    i2d_ASN1_INTEGER(aq, &tmp);
+
+    *buf_len = r;
+
+    retval = 0;
+
+cleanup:
+    if (ap != NULL)
+	ASN1_INTEGER_free(ap);
+    if (ag != NULL)
+	ASN1_INTEGER_free(ag);
+    if (aq != NULL)
+	ASN1_INTEGER_free(aq);
+
+    return retval;
+}
+
+DH *
+pkinit_decode_dh_params(DH ** a, unsigned char **pp, long length)
+{
+    ASN1_INTEGER ai, *aip = NULL;
+
+    M_ASN1_D2I_vars(a, DH *, DH_new);
+
+    M_ASN1_D2I_Init();
+    M_ASN1_D2I_start_sequence();
+    aip = &ai;
+    ai.data = NULL;
+    ai.length = 0;
+    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
+    if (aip == NULL)
+	return NULL;
+    else {
+	(*a)->p = ASN1_INTEGER_to_BN(aip, NULL);
+	if ((*a)->p == NULL)
+	    return NULL;
+	if (ai.data != NULL) {
+	    OPENSSL_free(ai.data);
+	    ai.data = NULL;
+	    ai.length = 0;
+	}
+    }
+    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
+    if (aip == NULL)
+	return NULL;
+    else {
+	(*a)->g = ASN1_INTEGER_to_BN(aip, NULL);
+	if ((*a)->g == NULL)
+	    return NULL;
+	if (ai.data != NULL) {
+	    OPENSSL_free(ai.data);
+	    ai.data = NULL;
+	    ai.length = 0;
+	}
+
+    }
+    M_ASN1_D2I_get_x(ASN1_INTEGER, aip, d2i_ASN1_INTEGER);
+    if (aip == NULL)
+	return NULL;
+    else {
+	(*a)->q = ASN1_INTEGER_to_BN(aip, NULL);
+	if ((*a)->q == NULL)
+	    return NULL;
+	if (ai.data != NULL) {
+	    OPENSSL_free(ai.data);
+	    ai.data = NULL;
+	    ai.length = 0;
+	}
+
+    }
+    M_ASN1_D2I_end_sequence();
+    M_ASN1_D2I_Finish(a, DH_free, 0);
+
+}
+
+int
+pkinit_check_dh_params(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1)
+{
+    BIGNUM *g2 = NULL, *q2 = NULL;
+    int retval = -1;
+
+    if (!BN_cmp(p1, p2)) {
+	g2 = BN_new();
+	BN_set_word(g2, DH_GENERATOR_2);
+	if (!BN_cmp(g1, g2)) {
+	    q2 = BN_new();
+	    BN_rshift1(q2, p1);
+	    if (!BN_cmp(q1, q2)) {
+		pkiDebug("good %d dhparams\n", BN_num_bits(p1));
+		retval = 0;
+	    } else
+		pkiDebug("bad group 2 q dhparameter\n");
+	    BN_free(q2);
+	} else
+	    pkiDebug("bad g dhparameter\n");
+	BN_free(g2);
+    } else
+	pkiDebug("p is not well-known group 2 dhparameter\n");
+
+    return retval;
 }
 
 static int
@@ -618,6 +823,7 @@ pkcs7_signeddata_verify(unsigned char *signed_data,
     i = X509_verify_cert(&cert_ctx);
     if (i <= 0) {
 	int j = X509_STORE_CTX_get_error(&cert_ctx);
+	*cert = X509_dup(cert_ctx.current_cert);
 	switch(j) {
 	    case X509_V_ERR_CERT_REVOKED:
 		retval = KRB5KDC_ERR_REVOKED_CERTIFICATE;
@@ -686,6 +892,8 @@ pkcs7_signeddata_verify(unsigned char *signed_data,
 	BIO_free(out);
     if (store != NULL)
 	X509_STORE_free(store);
+    if (filename != NULL)
+	free(filename);
 
     return retval;
 }
@@ -1053,7 +1261,10 @@ verify_id_pkinit_san(X509 *x,
 }
 
 int
-verify_id_pkinit_eku(X509 * x, krb5_preauthtype pa_type, pkinit_context *plgctx)
+verify_id_pkinit_eku(pkinit_context *plgctx,
+		     X509 * x,
+		     krb5_preauthtype pa_type,
+		     int require_eku)
 {
     int i = 0;
     int ok = 0;
@@ -1122,8 +1333,10 @@ verify_id_pkinit_eku(X509 * x, krb5_preauthtype pa_type, pkinit_context *plgctx)
 cleanup:
     if (!ok) {
 	pkiDebug("didn't find extended key usage (EKU) for pkinit\n");
-	if (!plgctx->require_eku)
+	if (0 == require_eku) {
+	    pkiDebug("configuration says ignore missing EKU\n");
 	    ok = 1;
+	}
     }
 
     return ok;
@@ -1140,8 +1353,7 @@ pkinit_octetstring2key(krb5_context context,
     unsigned char *buf = NULL;
     unsigned char md[SHA_DIGEST_LENGTH];
     unsigned char counter;
-    unsigned char offset;
-    size_t keybytes, keylength;
+    size_t keybytes, keylength, offset;
     int i;
     krb5_data random_data;
 
@@ -1561,11 +1773,11 @@ void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 {
     if (*in == NULL) return;
     if ((*in)->signedAuthPack.data != NULL)
-        free((*in)->signedAuthPack.data);
+	free((*in)->signedAuthPack.data);
     if ((*in)->trustedCertifiers != NULL) 
 	free_krb5_external_principal_identifier(&(*in)->trustedCertifiers);
     if ((*in)->kdcPkId.data != NULL)
-        free((*in)->kdcPkId.data);
+	free((*in)->kdcPkId.data);
     free(*in);
 }
 
@@ -1573,11 +1785,11 @@ void free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
 {
     if (*in == NULL) return;
     if ((*in)->signedAuthPack.data != NULL)
-        free((*in)->signedAuthPack.data);
+	free((*in)->signedAuthPack.data);
     if ((*in)->kdcCert.data != NULL)
-        free((*in)->kdcCert.data);
+	free((*in)->kdcCert.data);
     if ((*in)->encryptionCert.data != NULL)
-        free((*in)->encryptionCert.data);
+	free((*in)->encryptionCert.data);
     if ((*in)->trustedCertifiers != NULL) 
 	free_krb5_trusted_ca(&(*in)->trustedCertifiers);
     free(*in);
@@ -1587,9 +1799,9 @@ void free_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     if (*in == NULL) return;
     if ((*in)->replyKey.contents != NULL)
-        free((*in)->replyKey.contents);
+	free((*in)->replyKey.contents);
     if ((*in)->asChecksum.contents != NULL)
-        free((*in)->asChecksum.contents);
+	free((*in)->asChecksum.contents);
     free(*in);
 }
 
@@ -1597,7 +1809,7 @@ void free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 {
     if (*in == NULL) return;
     if ((*in)->replyKey.contents != NULL)
-        free((*in)->replyKey.contents);
+	free((*in)->replyKey.contents);
     free(*in);
 }
 
@@ -1609,19 +1821,19 @@ void free_krb5_auth_pack(krb5_auth_pack **in)
      * client has that as static memory but server allocates it therefore
      * the server will free it outside of this function
      */
-        if ((*in)->clientPublicValue->algorithm.parameters.data != NULL)
-            free((*in)->clientPublicValue->algorithm.parameters.data);
-        if ((*in)->clientPublicValue->subjectPublicKey.data != NULL)
-            free((*in)->clientPublicValue->subjectPublicKey.data);
-        free((*in)->clientPublicValue);
+	if ((*in)->clientPublicValue->algorithm.parameters.data != NULL)
+	    free((*in)->clientPublicValue->algorithm.parameters.data);
+	if ((*in)->clientPublicValue->subjectPublicKey.data != NULL)
+	    free((*in)->clientPublicValue->subjectPublicKey.data);
+	free((*in)->clientPublicValue);
     }
     if ((*in)->pkAuthenticator.paChecksum.contents != NULL)
-        free((*in)->pkAuthenticator.paChecksum.contents);
+	free((*in)->pkAuthenticator.paChecksum.contents);
     free(*in);
 }
 
 void free_krb5_auth_pack_draft9(krb5_context context,
-                                krb5_auth_pack_draft9 **in)
+				krb5_auth_pack_draft9 **in)
 {
     if ((*in) == NULL) return;
     krb5_free_principal(context, (*in)->pkAuthenticator.kdcName);
@@ -1632,16 +1844,16 @@ void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     if (*in == NULL) return;
     switch ((*in)->choice) {
-        case choice_pa_pk_as_rep_dhInfo:
-            if ((*in)->u.dh_Info.dhSignedData.data != NULL)
-                free((*in)->u.dh_Info.dhSignedData.data);
-            break;
-        case choice_pa_pk_as_rep_encKeyPack:
-            if ((*in)->u.encKeyPack.data != NULL)
-                free((*in)->u.encKeyPack.data);
-            break;
-        default:
-            break;
+	case choice_pa_pk_as_rep_dhInfo:
+	    if ((*in)->u.dh_Info.dhSignedData.data != NULL)
+		free((*in)->u.dh_Info.dhSignedData.data);
+	    break;
+	case choice_pa_pk_as_rep_encKeyPack:
+	    if ((*in)->u.encKeyPack.data != NULL)
+		free((*in)->u.encKeyPack.data);
+	    break;
+	default:
+	    break;
     }
     free(*in);
 }
@@ -1693,6 +1905,35 @@ void free_krb5_trusted_ca(krb5_trusted_ca ***in)
     }
     free(*in);
 }
+
+void free_krb5_typed_data(krb5_typed_data ***in) 
+{
+    int i = 0;
+    if (*in == NULL) return;
+    while ((*in)[i] != NULL) {
+	if ((*in)[i]->data != NULL)
+	    free((*in)[i]->data);
+	free((*in)[i]);
+	i++;
+    }
+    free(*in);
+}
+
+void free_krb5_algorithm_identifier(krb5_algorithm_identifier ***in)
+{
+    int i = 0;
+    if (*in == NULL) return;
+    while ((*in)[i] != NULL) {
+	if ((*in)[i]->algorithm.data != NULL)
+	    free((*in)[i]->algorithm.data);
+	if ((*in)[i]->parameters.data != NULL)
+	    free((*in)[i]->parameters.data);
+	free((*in)[i]);
+	i++;
+    }
+    free(*in);
+}
+
 void init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_req));
@@ -1773,4 +2014,13 @@ void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
     (*in)->u.dhSignedData.data = NULL;
     (*in)->u.encKeyPack.length = 0;
     (*in)->u.encKeyPack.data = NULL;
+}
+
+void init_krb5_typed_data(krb5_typed_data **in) 
+{
+    (*in) = malloc(sizeof(krb5_typed_data));
+    if ((*in) == NULL) return;
+    (*in)->type = 0;
+    (*in)->length = 0;
+    (*in)->data = NULL;
 }

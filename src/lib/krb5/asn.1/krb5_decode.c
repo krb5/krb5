@@ -1044,3 +1044,29 @@ krb5_error_code decode_krb5_reply_key_pack_draft9(const krb5_data *code, krb5_re
   cleanup(free);
 }
 
+krb5_error_code decode_krb5_typed_data(const krb5_data *code, krb5_typed_data ***rep)
+{
+  setup_buf_only();
+  retval = asn1_decode_sequence_of_typed_data(&buf, rep);
+  if (retval) clean_return(retval);
+
+  cleanup(free);
+}
+
+krb5_error_code decode_krb5_td_trusted_certifiers(const krb5_data *code, krb5_external_principal_identifier ***rep)
+{
+  setup_buf_only();
+  retval = asn1_decode_sequence_of_external_principal_identifier(&buf, rep);
+  if (retval) clean_return(retval);
+
+  cleanup(free);
+}
+
+krb5_error_code decode_krb5_td_dh_parameters(const krb5_data *code, krb5_algorithm_identifier ***rep)
+{
+  setup_buf_only();
+  retval = asn1_decode_sequence_of_AlgorithmIdentifier(&buf, rep);
+  if (retval) clean_return(retval);
+
+  cleanup(free);
+}

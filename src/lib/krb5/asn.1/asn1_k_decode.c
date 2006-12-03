@@ -1544,7 +1544,7 @@ asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *
 asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf, krb5_algorithm_identifier *val)
 {
     setup();
-    { begin_structure();
+    { begin_structure_no_tag();
       get_lenfield(val->algorithm.length, val->algorithm.data, 0, asn1_decode_oid);
       opt_lenfield(val->parameters.length, val->parameters.data, 1, asn1_decode_octetstring);
       end_structure();
@@ -1552,9 +1552,33 @@ asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf, krb5_algorithm_id
     cleanup();
 }
 
+asn1_error_code asn1_decode_AlgorithmIdentifier(asn1buf *buf,  krb5_algorithm_identifier *val) {
+
+  setup();
+  { begin_structure();
+    retval = asn1_decode_oid(&subbuf, &val->algorithm.length, 
+			     &val->algorithm.data);
+    if(retval) return retval;
+
+    val->parameters.length = 0;
+    val->parameters.data = NULL;
+
+    if(length > subbuf.next - subbuf.base) {
+      int size = length - (subbuf.next - subbuf.base);
+      retval = asn1buf_remove_octetstring(&subbuf, size, 
+					  &val->parameters.data);
+      if(retval) return retval;
+      val->parameters.length = size;
+    }
+    
+    end_structure();
+  }
+  cleanup();      
+}
+
 asn1_error_code asn1_decode_sequence_of_AlgorithmIdentifier(asn1buf *buf, krb5_algorithm_identifier ***val)
 {
-    decode_array_body(krb5_algorithm_identifier, asn1_decode_algorithm_identifier);
+    decode_array_body(krb5_algorithm_identifier, asn1_decode_AlgorithmIdentifier);
 }
 
 asn1_error_code asn1_decode_kdc_dh_key_info (asn1buf *buf, krb5_kdc_dh_key_info *val)
@@ -1734,6 +1758,26 @@ asn1_error_code asn1_decode_pa_pk_as_rep_draft9(asn1buf *buf, krb5_pa_pk_as_rep_
     } else {
       val->choice = choice_pa_pk_as_rep_UNKNOWN;
     }
+    end_structure();
+  }
+  cleanup();
+}
+
+asn1_error_code asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_typed_data ***val)
+{
+  setup();
+  { 
+    decode_array_body(krb5_typed_data,asn1_decode_typed_data);
+  }
+  cleanup();
+}
+
+asn1_error_code asn1_decode_typed_data(asn1buf *buf, krb5_typed_data *val) 
+{
+  setup();
+  { begin_structure();
+    get_field(val->type,0,asn1_decode_int32);
+    get_lenfield(val->length,val->data,1,asn1_decode_octetstring);
     end_structure();
   }
   cleanup();
