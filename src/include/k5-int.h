@@ -518,8 +518,6 @@ void krb5_os_free_context (krb5_context);
 krb5_error_code os_get_default_config_files 
     (profile_filespec_t **pfiles, krb5_boolean secure);
 
-krb5_error_code krb5_find_config_files (void);
-
 krb5_error_code krb5_os_hostaddr
 	(krb5_context, const char *, krb5_address ***);
 
