@@ -443,6 +443,8 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
 
     k5_assert_locked(&((krb5_fcc_data *) id->data)->lock);
 
+    *princ = NULL;
+
     if (data->version == KRB5_FCC_FVNO_1) {
 	type = KRB5_NT_UNKNOWN;
     } else {
@@ -538,15 +540,18 @@ krb5_fcc_read_addrs(krb5_context context, krb5_ccache id, krb5_address ***addrs)
 	  if ((*addrs)[i] == NULL) {
 	      krb5_free_addresses(context, *addrs);
 	      return KRB5_CC_NOMEM;
-	  }	  
+	  }
+	  (*addrs)[i]->contents = NULL;
 	  kret = krb5_fcc_read_addr(context, id, (*addrs)[i]);
 	  CHECK(kret);
      }
 
      return KRB5_OK;
  errout:
-     if (*addrs)
+     if (*addrs) {
 	 krb5_free_addresses(context, *addrs);
+	 *addrs = NULL;
+     }
      return kret;
 }
 
@@ -593,8 +598,10 @@ krb5_fcc_read_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyb
 
      return KRB5_OK;
  errout:
-     if (keyblock->contents)
+     if (keyblock->contents) {
 	 krb5_xfree(keyblock->contents);
+	 keyblock->contents = NULL;
+     }
      return kret;
 }
 
@@ -632,8 +639,10 @@ krb5_fcc_read_data(krb5_context context, krb5_ccache id, krb5_data *data)
      data->data[data->length] = 0; /* Null terminate, just in case.... */
      return KRB5_OK;
  errout:
-     if (data->data)
+     if (data->data) {
 	 krb5_xfree(data->data);
+	 data->data = NULL;
+     }
      return kret;
 }
 
@@ -675,8 +684,10 @@ krb5_fcc_read_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
 
      return KRB5_OK;
  errout:
-     if (addr->contents)
+     if (addr->contents) {
 	 krb5_xfree(addr->contents);
+	 addr->contents = NULL;
+     }
      return kret;
 }
 
@@ -804,15 +815,18 @@ krb5_fcc_read_authdata(krb5_context context, krb5_ccache id, krb5_authdata ***a)
 	  if ((*a)[i] == NULL) {
 	      krb5_free_authdata(context, *a);
 	      return KRB5_CC_NOMEM;
-	  }	  
+	  }
+	  (*a)[i]->contents = NULL;
 	  kret = krb5_fcc_read_authdatum(context, id, (*a)[i]);
 	  CHECK(kret);
      }
 
      return KRB5_OK;
  errout:
-     if (*a)
+     if (*a) {
 	 krb5_free_authdata(context, *a);
+	 *a = NULL;
+     }
      return kret;
 }
 
@@ -853,8 +867,10 @@ krb5_fcc_read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
     
      return KRB5_OK;
  errout:
-     if (a->contents)
+     if (a->contents) {
 	 krb5_xfree(a->contents);
+	 a->contents = NULL;
+     }
      return kret;
     
 }

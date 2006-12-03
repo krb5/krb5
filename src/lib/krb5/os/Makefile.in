@@ -237,7 +237,7 @@ check-unix::
 	$(RM) ./t_an.*
 
 clean:: 
-	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o
+	$(RM) $(TEST_PROGS) test.out t_std_conf.o t_an_to_ln.o t_locate_kdc.o
 
 @libobj_frag@
 

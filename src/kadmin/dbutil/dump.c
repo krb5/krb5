@@ -2209,7 +2209,7 @@ load_db(argc, argv)
      * Open the dumpfile
      */
     if (dumpfile) {
-	if ((f = fopen(dumpfile, "r+")) == NULL) {
+	if ((f = fopen(dumpfile, "r")) == NULL) {
 	     fprintf(stderr, dfile_err_fmt, programname, dumpfile,
 		     error_message(errno)); 
 	     exit_status++;

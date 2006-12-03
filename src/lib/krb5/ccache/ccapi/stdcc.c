@@ -84,9 +84,9 @@ krb5_cc_ops krb5_cc_stdcc_ops = {
       krb5_stdccv3_remove, 
       krb5_stdccv3_set_flags,
       krb5_stdccv3_get_flags,
-      NULL,
-      NULL,
-      NULL,
+      krb5_stdccv3_ptcursor_new,
+      krb5_stdccv3_ptcursor_next,
+      krb5_stdccv3_ptcursor_free,
       NULL,
       NULL,
       NULL,
@@ -769,6 +769,135 @@ krb5_stdccv3_remove (krb5_context context,
     if (credentials) { cc_credentials_release (credentials); }
     
     return cc_err_xlate (err);
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_stdccv3_ptcursor_new(krb5_context context,
+                          krb5_cc_ptcursor *cursor)
+{
+	krb5_error_code err = 0;
+	krb5_cc_ptcursor ptcursor = NULL;
+	cc_ccache_iterator_t iterator = NULL;
+	
+	ptcursor = malloc(sizeof(*ptcursor));
+	if (ptcursor == NULL) {
+		err = ENOMEM;
+	}
+	else {
+		memset(ptcursor, 0, sizeof(*ptcursor));
+	}
+	
+	if (!err) {
+		err = stdccv3_setup(context, NULL);
+	}
+	if (!err) {
+		ptcursor->ops = &krb5_cc_stdcc_ops;
+		err = cc_context_new_ccache_iterator(gCntrlBlock, &iterator);
+	}
+	
+	if (!err) {
+		ptcursor->data = iterator;
+	}
+	
+	if (err) {
+		if (ptcursor) { krb5_stdccv3_ptcursor_free(context, &ptcursor); }
+		// krb5_stdccv3_ptcursor_free sets ptcursor to NULL for us
+	}
+	
+	*cursor = ptcursor;
+	
+	return err;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_stdccv3_ptcursor_next(
+    krb5_context context,
+    krb5_cc_ptcursor cursor,
+    krb5_ccache *ccache)
+{
+	krb5_error_code err = 0;
+	cc_ccache_iterator_t iterator = NULL;
+	
+	krb5_ccache newCache = NULL;
+	stdccCacheDataPtr ccapi_data = NULL;
+	cc_ccache_t ccCache = NULL;
+	cc_string_t ccstring = NULL;
+	char *name = NULL;
+	
+	// TODO set proper errors, check context param
+	if (!cursor || !cursor->data) {
+		err = ccErrInvalidContext;
+	}
+	
+	*ccache = NULL;
+	
+	if (!err) {
+	    newCache = (krb5_ccache) malloc (sizeof (*newCache));
+	    if (!newCache) { err = KRB5_CC_NOMEM; }
+	}
+
+	if (!err) {
+	    ccapi_data = (stdccCacheDataPtr) malloc (sizeof (*ccapi_data));
+	    if (!ccapi_data) { err = KRB5_CC_NOMEM; }
+	}
+	
+	if (!err) {
+		iterator = cursor->data;
+		err = cc_ccache_iterator_next(iterator, &ccCache);
+	}
+	
+	if (!err) {
+	    err = cc_ccache_get_name (ccCache, &ccstring);
+	}
+
+	if (!err) {
+	    name = (char *) malloc (sizeof (*name) * (strlen (ccstring->data) + 1));
+	    if (!name) { err = KRB5_CC_NOMEM; }
+	}
+	
+	if (!err) {
+	    strcpy (name, ccstring->data);
+	    ccapi_data->cache_name = name;
+	    name = NULL; /* take ownership */
+    
+	    ccapi_data->NamedCache = ccCache;
+	    ccCache = NULL; /* take ownership */
+    
+	    newCache->ops = &krb5_cc_stdcc_ops;
+	    newCache->data = ccapi_data;
+	    ccapi_data = NULL; /* take ownership */
+    
+	    /* return a pointer to the new cache */
+	    *ccache = newCache;
+	    newCache = NULL;
+	}
+ 
+	if (name)       { free (name); }
+	if (ccstring)   { cc_string_release (ccstring); }
+	if (ccCache)    { cc_ccache_release (ccCache); }
+	if (ccapi_data) { free (ccapi_data); }
+	if (newCache)   { free (newCache); }
+	
+	if (err == ccIteratorEnd) {
+		err = ccNoError;
+	}
+	
+	return err;
+}
+
+static krb5_error_code KRB5_CALLCONV
+krb5_stdccv3_ptcursor_free(
+    krb5_context context,
+    krb5_cc_ptcursor *cursor)
+{
+    if (*cursor != NULL) {
+		if ((*cursor)->data != NULL) {
+			cc_ccache_iterator_release((cc_ccache_iterator_t)((*cursor)->data));
+		}
+	    free(*cursor);
+	    *cursor = NULL;
+	}
+    return 0;
 }
 
 #else /* !USE_CCAPI_V3 */

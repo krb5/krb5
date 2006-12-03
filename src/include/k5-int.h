@@ -542,8 +542,6 @@ void krb5_os_free_context (krb5_context);
 krb5_error_code os_get_default_config_files 
     (profile_filespec_t **pfiles, krb5_boolean secure);
 
-krb5_error_code krb5_find_config_files (void);
-
 krb5_error_code krb5_os_hostaddr
 	(krb5_context, const char *, krb5_address ***);
 
@@ -1091,7 +1089,7 @@ krb5_error_code KRB5_CALLCONV krb5_do_preauth_tryagain
 	 krb5_kdc_req *request,
 	 krb5_data *encoded_request_body,
 	 krb5_data *encoded_previous_request,
-	 krb5_pa_data **in_padata,
+	 krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
 	 krb5_error *err_reply,
 	 krb5_data *salt, krb5_data *s2kparams,
 	 krb5_enctype *etype, krb5_keyblock *as_key,
