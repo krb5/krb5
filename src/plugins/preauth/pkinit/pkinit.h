@@ -100,6 +100,13 @@ krb5_error_code pkinit_sign_data
 krb5_error_code create_signature
         (unsigned char **, int *, unsigned char *, int, char *);
 
+krb5_error_code pkinit_decode_data
+	(unsigned char *data, int data_len, unsigned char **decoded,
+		int *decoded_len, char *filename, X509 *cert);
+
+krb5_error_code decode_data
+        (unsigned char **, int *, unsigned char *, int, char *, X509 *cert);
+
 krb5_error_code pkcs7_signeddata_create
 	(unsigned char *, int, unsigned char **, int *, X509 *,
 		char *, ASN1_OBJECT *, krb5_context);

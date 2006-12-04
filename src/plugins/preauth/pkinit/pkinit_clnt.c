@@ -400,6 +400,7 @@ pkinit_as_req_create(krb5_context context,
 		    auth_pack9->clientPublicValue = NULL;
 		    break;
 		case KRB5_PADATA_PK_AS_REQ:
+		    free_krb5_subject_pk_info(&info);
 		    auth_pack->clientPublicValue = NULL;
 		    break;
 	    }
@@ -515,8 +516,8 @@ pkinit_as_req_create(krb5_context context,
 cleanup:
     switch((int)pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
-	    free_krb5_pa_pk_as_req(&req);
 	    free_krb5_auth_pack(&auth_pack);
+	    free_krb5_pa_pk_as_req(&req);
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    free_krb5_pa_pk_as_req_draft9(&req9);
@@ -1557,38 +1558,22 @@ pkinit_get_client_cert(const char *principal,
     return 0;
 }
 
-krb5_error_code
-pkinit_sign_data(unsigned char *data,
-		int data_len,
-		unsigned char **sig,
-		int *sig_len, 
-		char *filename)
-{
 #ifndef WITHOUT_PKCS11
+krb5_error_code
+pkinit_find_private_key(CK_ATTRIBUTE_TYPE usage, CK_OBJECT_HANDLE *objp)
+{
     CK_OBJECT_CLASS cls;
     CK_OBJECT_HANDLE objs[MAX_N_OBJS];
     CK_ATTRIBUTE attrs[4];
-    CK_ULONG count, len;
-    CK_MECHANISM mech;
+    CK_ULONG count;
     CK_BBOOL bool;
     CK_KEY_TYPE keytype;
-    unsigned char sigbuf[1024], *cp;
     int r;
-#endif
 
-    if (!using_pkcs11()) {
-	if (create_signature(sig, sig_len, data, data_len, filename) != 0) {
-	    pkiDebug("failed to create the signature\n");
-	    return KRB5KDC_ERR_PREAUTH_FAILED;
-	}
-	return 0;
-    }
-
-#ifndef WITHOUT_PKCS11
     /*
      * Look for a key that's:
      * 1. private
-     * 2. capable of signing
+     * 2. capable of the specified operation (usually signing or decrypting)
      * 3. RSA (this may be wrong but it's all we can do for now)
      * 4. matches the id of the cert we chose
      *
@@ -1602,7 +1587,7 @@ pkinit_sign_data(unsigned char *data,
     attrs[0].ulValueLen = sizeof cls;
 
     bool = TRUE;
-    attrs[1].type = CKA_SIGN;
+    attrs[1].type = usage;
     attrs[1].pValue = &bool;
     attrs[1].ulValueLen = sizeof bool;
 
@@ -1625,12 +1610,97 @@ pkinit_sign_data(unsigned char *data,
     pkiDebug("found %d private keys %x\n", (int) count, (int) r);
     if (r != CKR_OK || count < 1)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
+    *objp = objs[0];
+    return 0;
+}
+#endif
+
+krb5_error_code
+pkinit_decode_data(unsigned char *data,
+		   int data_len,
+		   unsigned char **decoded_data,
+		   int *decoded_data_len, 
+		   char *filename,
+		   X509 *cert)
+{
+#ifndef WITHOUT_PKCS11
+    CK_OBJECT_HANDLE obj;
+    CK_ULONG len;
+    CK_MECHANISM mech;
+    unsigned char txtbuf[4096], *cp;
+    int r;
+#endif
+
+    if (!using_pkcs11()) {
+	if (decode_data(decoded_data, decoded_data_len, data, data_len, 
+			filename, cert) <= 0) {
+	    pkiDebug("failed to decode data\n");
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+	return 0;
+    }
+
+#ifndef WITHOUT_PKCS11
+    pkinit_find_private_key(CKA_DECRYPT, &obj);
+
+    mech.mechanism = CKM_RSA_PKCS;
+    mech.pParameter = NULL;
+    mech.ulParameterLen = 0;
+
+    if ((r = p11->C_DecryptInit(session, &mech, obj)) != CKR_OK) {
+	pkiDebug("fail C_DecryptInit %x\n", (int) r);
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    len = sizeof txtbuf;
+    pkiDebug("decrypt %d -> %d\n", (int) data_len, (int) len);
+    if ((r = p11->C_Decrypt(session, (krb5_octet *) data, (u_int) data_len, txtbuf, &len)) !=
+	CKR_OK) {
+	pkiDebug("fail C_Decrypt %x\n", (int) r);
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+    pkiDebug("txt size %d\n", (int) len);
+    cp = malloc(len);
+    if (cp == NULL)
+	return ENOMEM;
+    memcpy(cp, txtbuf, len);
+    *decoded_data_len = len;
+    *decoded_data = cp;
+    return 0;
+#endif
+}
+
+krb5_error_code
+pkinit_sign_data(unsigned char *data,
+		int data_len,
+		unsigned char **sig,
+		int *sig_len, 
+		char *filename)
+{
+#ifndef WITHOUT_PKCS11
+    CK_OBJECT_HANDLE obj;
+    CK_ULONG len;
+    CK_MECHANISM mech;
+    unsigned char sigbuf[1024], *cp;
+    int r;
+#endif
+
+    if (!using_pkcs11()) {
+	if (create_signature(sig, sig_len, data, data_len, filename) != 0) {
+	    pkiDebug("failed to create the signature\n");
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+	return 0;
+    }
+
+#ifndef WITHOUT_PKCS11
+    pkinit_find_private_key(CKA_SIGN, &obj);
 
     mech.mechanism = CKM_SHA1_RSA_PKCS;
     mech.pParameter = NULL;
     mech.ulParameterLen = 0;
 
-    if ((r = p11->C_SignInit(session, &mech, objs[0])) != CKR_OK) {
+    if ((r = p11->C_SignInit(session, &mech, obj)) != CKR_OK) {
 	pkiDebug("fail C_SignInit %x\n", (int) r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
@@ -1662,11 +1732,9 @@ client_create_dh(int dh_size,
 		 int *dh_pubkey_len)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    int bufsize = 0;
     unsigned char *buf = NULL;
     int dh_err = 0;
     ASN1_INTEGER *pub_key = NULL;
-    int r = 0;
 
     if (*dh_client == NULL) {
 	if ((*dh_client = DH_new()) == NULL)

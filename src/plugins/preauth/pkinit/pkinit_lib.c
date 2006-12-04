@@ -197,6 +197,11 @@ static int prepare_enc_data
 static int openssl_callback (int, X509_STORE_CTX *);
 static int openssl_callback_ignore_crls (int, X509_STORE_CTX *);
 
+static int pkcs7_decrypt
+	(PKCS7 *p7, X509 *cert, BIO *bio, char *filename);
+
+static BIO * pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename);
+
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \
 	(((x)->ex_flags & EXFLAG_KUSAGE) && !((x)->ex_kusage & (usage)))
@@ -939,9 +944,8 @@ pkcs7_envelopeddata_verify(unsigned char *enveloped_data,
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
-    int flags = PKCS7_BINARY, i = 0, size = 0;
+    int i = 0, size = 0;
     const unsigned char *p = enveloped_data;
-    EVP_PKEY *pkey = NULL;
 
     int tmp_buf_len = 0, tmp_buf2_len = 0;
     unsigned char *tmp_buf = NULL, *tmp_buf2 = NULL;
@@ -961,28 +965,15 @@ pkcs7_envelopeddata_verify(unsigned char *enveloped_data,
 	goto cleanup;
     }
 
-    if (key_filename != NULL) {
-	BIO *tmp = NULL;
-	if ((tmp = BIO_new(BIO_s_file()))
-	    && (BIO_read_filename(tmp, key_filename) > 0))
-	    pkey = (EVP_PKEY *) PEM_read_bio_PrivateKey(tmp, NULL, NULL, NULL);
-	    if (pkey == NULL) {
-		pkiDebug("failed to read key from %s\n", key_filename);
-		retval = ENOMEM;
-		goto cleanup;
-	    }
-	if (tmp != NULL)
-	    BIO_free(tmp);
-    }
-
     out = BIO_new(BIO_s_mem());
-    if (PKCS7_decrypt(p7, pkey, client_cert, out, flags))
-	pkiDebug("PKCS7 Decryption successful\n");
-    else {
+    if (pkcs7_decrypt(p7, client_cert, out, key_filename)) {
+	pkiDebug("PKCS7 decryption successful\n");
+    } else {
 	unsigned long err = ERR_peek_error();
-	krb5_set_error_message(context, retval, "%s\n", 
-			       ERR_error_string(err, NULL));
-	pkiDebug("PKCS7 Decryption failure\n");
+	if (err != 0)
+	    krb5_set_error_message(context, retval, "%s\n", 
+				   ERR_error_string(err, NULL));
+	pkiDebug("PKCS7 decryption failed\n");
 	goto cleanup;
     }
 
@@ -1033,8 +1024,6 @@ pkcs7_envelopeddata_verify(unsigned char *enveloped_data,
 	PKCS7_free(p7);
     if (out != NULL)
 	BIO_free(out);
-    if (pkey != NULL)
-	EVP_PKEY_free(pkey);
     if (tmp_buf != NULL)
 	free(tmp_buf);
     if (tmp_buf2 != NULL)
@@ -1557,13 +1546,61 @@ get_filename(char **name, char *env_name, int type)
 }
 
 krb5_error_code
+decode_data(unsigned char **out_data, int *out_data_len, unsigned char *data,
+	    int data_len, char *filename, X509 *cert)
+{
+    krb5_error_code retval = ENOMEM;
+    BIO *tmp = NULL;
+    EVP_PKEY *pkey = NULL;
+    unsigned char *buf = NULL;
+    int buf_len = 0;
+
+    if (filename == NULL)
+	return ENOENT;
+
+    if ((tmp = BIO_new(BIO_s_file()))
+	&& (BIO_read_filename(tmp, filename) > 0))
+	pkey = (EVP_PKEY *) PEM_read_bio_PrivateKey(tmp, NULL, NULL, NULL);
+    if (pkey == NULL) {
+	pkiDebug("failed to get private key from %s\n", filename);
+	goto cleanup;
+    }
+    if (cert && !X509_check_private_key(cert, pkey)) {
+	pkiDebug("private key does not match certificate\n");
+	goto cleanup;
+    }
+    if (tmp != NULL)
+	BIO_free(tmp);
+
+    buf_len = EVP_PKEY_size(pkey);
+    buf = malloc(buf_len + 10);
+    if (buf == NULL)
+	goto cleanup;
+
+    retval = EVP_PKEY_decrypt(buf, data, data_len, pkey);
+    if (retval <= 0) {
+	pkiDebug("unable to decrypt received data (len=%d)\n", data_len);
+	goto cleanup;
+    }
+    *out_data = buf;
+    *out_data_len = retval;
+
+  cleanup:
+    if (pkey != NULL) 
+	EVP_PKEY_free(pkey);
+    if (retval == ENOMEM)
+	free(buf);
+
+    return retval;
+}
+krb5_error_code
 create_signature(unsigned char **sig, int *sig_len, unsigned char *data,
 		 int data_len, char *filename)
 {
+    krb5_error_code retval = ENOMEM;
     BIO *tmp = NULL;
     EVP_PKEY *pkey = NULL;
     EVP_MD_CTX md_ctx;
-    krb5_error_code retval = ENOMEM;
 
     if (filename == NULL)
 	return ENOENT;
@@ -1767,6 +1804,189 @@ create_krb5_trustedCertifiers(STACK_OF(X509) * sk,
 	free_krb5_external_principal_identifier(&krb5_cas);
 
     return retval;
+}
+
+static int 
+pkcs7_decrypt(PKCS7 *p7, X509 *cert, BIO *data, char *filename) 
+{
+    int flags = PKCS7_BINARY;
+    BIO *tmpmem = NULL;
+    int retval = 0, i = 0;
+    char buf[4096];
+
+    if(p7 == NULL) 
+	return 0;
+
+    if(!PKCS7_type_is_enveloped(p7)) {
+	pkiDebug("wrong pkcs7 content type\n");
+	return 0;
+    }
+
+    if(!(tmpmem = pkcs7_dataDecode(p7, cert, filename))) {
+	pkiDebug("unable to decrypt pkcs7 object\n");
+	return 0;
+    }
+
+    for(;;) {
+	i = BIO_read(tmpmem, buf, sizeof(buf));
+	if (i <= 0) break;
+	BIO_write(data, buf, i);
+	BIO_free_all(tmpmem);
+	return 1;
+    }
+    return retval;
+}
+
+static BIO * 
+pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename)
+{
+    int i = 0, jj= 0, jj2 = 0, tmp_len = 0;
+    BIO *out=NULL,*etmp=NULL,*bio=NULL;
+    unsigned char *tmp=NULL, *tmp1 = NULL;
+    X509_ALGOR *xa;
+    ASN1_OCTET_STRING *data_body=NULL;
+    const EVP_CIPHER *evp_cipher=NULL;
+    EVP_CIPHER_CTX *evp_ctx=NULL;
+    X509_ALGOR *enc_alg=NULL;
+    STACK_OF(X509_ALGOR) *md_sk=NULL;
+    STACK_OF(PKCS7_RECIP_INFO) *rsk=NULL;
+    X509_ALGOR *xalg=NULL;
+    PKCS7_RECIP_INFO *ri=NULL;
+
+    p7->state=PKCS7_S_HEADER;
+
+    rsk=p7->d.enveloped->recipientinfo;
+    enc_alg=p7->d.enveloped->enc_data->algorithm;
+    data_body=p7->d.enveloped->enc_data->enc_data;
+    evp_cipher=EVP_get_cipherbyobj(enc_alg->algorithm);
+    if (evp_cipher == NULL) {
+	PKCS7err(PKCS7_F_PKCS7_DATADECODE,PKCS7_R_UNSUPPORTED_CIPHER_TYPE);
+	goto cleanup;
+    }
+    xalg=p7->d.enveloped->enc_data->algorithm;
+
+    if ((etmp=BIO_new(BIO_f_cipher())) == NULL) {
+	PKCS7err(PKCS7_F_PKCS7_DATADECODE,ERR_R_BIO_LIB);
+	goto cleanup;
+    }
+
+/* It was encrypted, we need to decrypt the secret key
+ * with the private key */
+
+/* Find the recipientInfo which matches the passed certificate
+ * (if any)
+ */
+
+    if (pcert) {
+	for (i=0; i<sk_PKCS7_RECIP_INFO_num(rsk); i++) {
+	    int tmp_ret = 0;
+	    ri=sk_PKCS7_RECIP_INFO_value(rsk,i);
+	    tmp_ret = X509_NAME_cmp(ri->issuer_and_serial->issuer, 
+				    pcert->cert_info->issuer);
+	    if (!tmp_ret) {
+		tmp_ret = M_ASN1_INTEGER_cmp(pcert->cert_info->serialNumber, 
+					     ri->issuer_and_serial->serial);
+		if (!tmp_ret)
+		    break;
+	    }
+	    ri=NULL;
+	}
+	if (ri == NULL) {
+	    PKCS7err(PKCS7_F_PKCS7_DATADECODE, 
+		     PKCS7_R_NO_RECIPIENT_MATCHES_CERTIFICATE);
+	    goto cleanup;
+	}
+	
+    }
+
+/* If we haven't got a certificate try each ri in turn */
+
+    if (pcert == NULL) {
+	for (i=0; i<sk_PKCS7_RECIP_INFO_num(rsk); i++) {
+	    ri=sk_PKCS7_RECIP_INFO_value(rsk,i);
+	    jj = pkinit_decode_data(M_ASN1_STRING_data(ri->enc_key),
+				    M_ASN1_STRING_length(ri->enc_key),
+				    &tmp, &tmp_len, filename, pcert);
+	    if (jj) {
+		PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
+		goto cleanup;
+	    }
+
+	    if (!jj && tmp_len > 0) {
+		jj = tmp_len;
+		break;
+	    }
+
+	    ERR_clear_error();
+	    ri = NULL;
+	}
+    
+	if (ri == NULL) {
+	    PKCS7err(PKCS7_F_PKCS7_DATADECODE, PKCS7_R_NO_RECIPIENT_MATCHES_KEY);
+	    goto cleanup;
+	}
+    }
+    else {
+	jj = pkinit_decode_data(M_ASN1_STRING_data(ri->enc_key),
+				M_ASN1_STRING_length(ri->enc_key),
+				&tmp, &tmp_len, filename, pcert);
+	if (jj || tmp_len <= 0) {
+	    PKCS7err(PKCS7_F_PKCS7_DATADECODE, ERR_R_EVP_LIB);
+	    goto cleanup;
+	}
+	jj = tmp_len;
+    }
+
+    evp_ctx=NULL;
+    BIO_get_cipher_ctx(etmp,&evp_ctx);
+    if (EVP_CipherInit_ex(evp_ctx,evp_cipher,NULL,NULL,NULL,0) <= 0)
+	goto cleanup;
+    if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
+	goto cleanup;
+
+    if (jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
+/* Some S/MIME clients don't use the same key
+ * and effective key length. The key length is
+ * determined by the size of the decrypted RSA key.
+ */
+	if(!EVP_CIPHER_CTX_set_key_length(evp_ctx, jj)) {
+	    PKCS7err(PKCS7_F_PKCS7_DATADECODE, 
+		     PKCS7_R_DECRYPTED_KEY_IS_WRONG_LENGTH);
+	    goto cleanup;
+	}
+    } 
+    if (EVP_CipherInit_ex(evp_ctx,NULL,NULL,tmp,NULL,0) <= 0)
+	goto cleanup;
+
+    OPENSSL_cleanse(tmp,jj);
+
+    if (out == NULL)
+	out=etmp;
+    else
+	BIO_push(out,etmp);
+    etmp=NULL;
+
+    if (data_body->length > 0)
+	bio = BIO_new_mem_buf(data_body->data, data_body->length);
+    else {
+	bio=BIO_new(BIO_s_mem());
+	BIO_set_mem_eof_return(bio,0);
+    }
+    BIO_push(out,bio);
+    bio=NULL;
+
+    if (0) {
+cleanup:
+	if (out != NULL) BIO_free_all(out);
+	if (etmp != NULL) BIO_free_all(etmp);
+	if (bio != NULL) BIO_free_all(bio);
+	out=NULL;
+    }
+
+    if (tmp != NULL)
+	free(tmp);
+
+    return(out);
 }
 
 void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
