@@ -2431,6 +2431,16 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_SALT		0x0080
 
 
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_alloc
+(krb5_context context,
+		krb5_get_init_creds_opt **opt);
+
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_free
+(krb5_context context,
+		krb5_get_init_creds_opt *opt);
+
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init
 (krb5_get_init_creds_opt *opt);
@@ -2478,6 +2488,60 @@ krb5_get_init_creds_opt_set_salt
 		krb5_data *salt);
 
 
+/* Generic preauth option attribute/value pairs */
+typedef struct _krb5_gic_opt_pa_data {
+    krb5_preauthtype pa_type;	/* pa_type this option applies to */
+    char *attr;
+    char *value;
+} krb5_gic_opt_pa_data;
+
+/*
+ * This function allows the caller to supply options to preauth
+ * plugins.  Preauth plugin modules are given a chance to look
+ * at the options at the time this function is called to check
+ * the validity of its options.
+ * The 'opt' pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pa
+		(krb5_context context,
+		krb5_get_init_creds_opt *opt,
+		krb5_principal principal,
+		const char *user_id,
+		const char *password,
+		krb5_prompter_fct prompter,
+		void *prompter_data,
+		int num_preauth_data,
+		krb5_gic_opt_pa_data *preauth_data);
+
+/*
+ * This function allows a preauth plugin to obtain preauth
+ * options. Only options which are applicable to the pa_types
+ * which the plugin module claims to support (pa_types) are
+ * returned.  The preauth_data returned from this function
+ * should be freed by calling krb5_get_init_creds_opt_free_pa().
+ * The 'opt' pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_get_pa
+		(krb5_context context,
+		krb5_get_init_creds_opt *opt,
+		int num_pa_types,
+		krb5_preauthtype *pa_types,
+		int *num_preauth_data,
+		krb5_gic_opt_pa_data **preauth_data);
+
+/*
+ * This function frees the preauth_data that was returned by 
+ * krb5_get_init_creds_opt_get_pa().
+ */
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_free_pa
+		(krb5_context context,
+		 int num_preauth_data,
+		 krb5_gic_opt_pa_data *preauth_data);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password

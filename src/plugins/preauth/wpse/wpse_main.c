@@ -90,6 +90,7 @@ static krb5_error_code
 client_process(krb5_context kcontext,
 	       void *plugin_context,
 	       void *request_context,
+	       krb5_get_init_creds_opt *opt,
 	       preauth_get_client_data_proc client_get_data_proc,
 	       struct _krb5_preauth_client_rock *rock,
 	       krb5_kdc_req *request,
@@ -207,6 +208,31 @@ client_req_cleanup(krb5_context kcontext, void *plugin_context, void *req_contex
     }
     return;
 }
+
+static krb5_error_code
+client_gic_opt(krb5_context kcontext,
+	       void *plugin_context,
+	       krb5_get_init_creds_opt *opt,
+	       krb5_principal principal,
+	       const char *user_id,
+	       const char *password,
+	       krb5_prompter_fct prompter,
+	       void *prompter_data,
+	       int num_preauth_data,
+	       krb5_gic_opt_pa_data *preauth_data)
+{
+    int i;
+#ifdef DEBUG
+    fprintf(stderr, "(wpse) client_gic_opt: received %d preauth_data items\n",
+	    num_preauth_data);
+    for (i = 0; i < num_preauth_data; i++) {
+	fprintf(stderr, "  %3d: attribute '%s', value '%s'\n",
+		i, preauth_data[i].attr, preauth_data[i].value);
+    }
+#endif
+    return 0;
+}
+
 
 /* Free state. */
 static krb5_error_code
@@ -378,6 +404,7 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     client_req_cleanup,			    /* request fini function */
     client_process,			    /* process function */
     NULL,				    /* try_again function */
+    client_gic_opt			    /* get init creds opts function */
 };
 
 struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {

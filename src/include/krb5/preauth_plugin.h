@@ -158,6 +158,25 @@ typedef krb5_error_code
 			   void *gak_data);
 
 /*
+ * Client function which receives krb5_get_init_creds_opt information.
+ * It may also receive specific preauthentication information for the
+ * pa_types that it supports.
+ * The information supplied in {num_preauth_data,preauth_data} should
+ * be copied locally by the module if it wishes to reference it after
+ * returning from this call.
+ */
+typedef krb5_error_code
+(*supply_gic_opts_fct)(krb5_context context,
+		       void *plugin_context,
+		       krb5_get_init_creds_opt *opt,
+		       krb5_principal principal,
+		       const char *user_id,
+		       const char *password,
+		       krb5_prompter_fct prompter,
+		       void *prompter_data,
+		       int num_preauth_data,
+		       krb5_gic_opt_pa_data *preauth_data);
+/*
  * The function table / structure which a preauth client module must export as
  * "preauthentication_client_0".  If the interfaces work correctly, future
  * versions of the table will add either more callbacks or more arguments to
@@ -207,6 +226,7 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
     krb5_error_code (*process)(krb5_context context,
 			       void *plugin_context,
 			       void *request_context,
+			       krb5_get_init_creds_opt *opt,
 			       preauth_get_client_data_proc get_data_proc,
 			       struct _krb5_preauth_client_rock *rock,
 			       krb5_kdc_req *request,
@@ -227,8 +247,9 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
     krb5_error_code (*tryagain)(krb5_context context,
 				void *plugin_context,
 				void *request_context,
+			        krb5_get_init_creds_opt *opt,
 				preauth_get_client_data_proc get_data_proc,
-			        struct _krb5_preauth_client_rock *rock,
+				struct _krb5_preauth_client_rock *rock,
 				krb5_kdc_req *request,
 				krb5_data *encoded_request_body,
 				krb5_data *encoded_previous_request,
@@ -241,6 +262,8 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
 				krb5_data *salt, krb5_data *s2kparams,
 				krb5_keyblock *as_key,
 				krb5_pa_data **out_pa_data);
+    /* Function that gets krb5_get_init_creds_opt and other preauth options */
+    supply_gic_opts_fct gic_opts;
 } krb5plugin_preauth_client_ftable_v0;
 
 /*

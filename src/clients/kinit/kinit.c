@@ -752,12 +752,16 @@ k5_kinit(opts, k5)
     krb5_keytab keytab = 0;
     krb5_creds my_creds;
     krb5_error_code code = 0;
-    krb5_get_init_creds_opt options;
+    krb5_get_init_creds_opt *options = NULL;
+#define NUM_TEST_PA 10
+    krb5_gic_opt_pa_data pa[NUM_TEST_PA];
 
     if (!got_k5)
 	return 0;
 
-    krb5_get_init_creds_opt_init(&options);
+    code = krb5_get_init_creds_opt_alloc(k5->ctx, &options);
+    if (code)
+	goto cleanup;
     memset(&my_creds, 0, sizeof(my_creds));
 
     /*
@@ -766,17 +770,17 @@ k5_kinit(opts, k5)
     */
 
     if (opts->lifetime)
-	krb5_get_init_creds_opt_set_tkt_life(&options, opts->lifetime);
+	krb5_get_init_creds_opt_set_tkt_life(options, opts->lifetime);
     if (opts->rlife)
-	krb5_get_init_creds_opt_set_renew_life(&options, opts->rlife);
+	krb5_get_init_creds_opt_set_renew_life(options, opts->rlife);
     if (opts->forwardable)
-	krb5_get_init_creds_opt_set_forwardable(&options, 1);
+	krb5_get_init_creds_opt_set_forwardable(options, 1);
     if (opts->not_forwardable)
-	krb5_get_init_creds_opt_set_forwardable(&options, 0);
+	krb5_get_init_creds_opt_set_forwardable(options, 0);
     if (opts->proxiable)
-	krb5_get_init_creds_opt_set_proxiable(&options, 1);
+	krb5_get_init_creds_opt_set_proxiable(options, 1);
     if (opts->not_proxiable)
-	krb5_get_init_creds_opt_set_proxiable(&options, 0);
+	krb5_get_init_creds_opt_set_proxiable(options, 0);
     if (opts->addresses)
     {
 	krb5_address **addresses = NULL;
@@ -785,10 +789,10 @@ k5_kinit(opts, k5)
 	    com_err(progname, code, "getting local addresses");
 	    goto cleanup;
 	}
-	krb5_get_init_creds_opt_set_address_list(&options, addresses);
+	krb5_get_init_creds_opt_set_address_list(options, addresses);
     }
     if (opts->no_addresses)
-	krb5_get_init_creds_opt_set_address_list(&options, NULL);
+	krb5_get_init_creds_opt_set_address_list(options, NULL);
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
     {
@@ -800,20 +804,116 @@ k5_kinit(opts, k5)
 	}
     }
 
+    pa[0].pa_type = 130;
+    pa[0].attr = "cksum_attr1";
+    pa[0].value = "cksum_attr1_value";
+
+    pa[1].pa_type = 130;
+    pa[1].attr = "cksum_attr2";
+    pa[1].value = "cksum_attr2_value";
+
+    pa[2].pa_type = 131;
+    pa[2].attr = "wpse_attr1";
+    pa[2].value = "wpse_attr1_value";
+
+    pa[3].pa_type = 131;
+    pa[3].attr = "wpse_attr2";
+    pa[3].value = "wpse_attr2_value";
+
+    pa[4].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[4].attr = "client_cert";
+    pa[4].value = "/tmp/x509up_u20010";
+
+    pa[5].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[5].attr = "client_key";
+    pa[5].value = "/tmp/x509up_u20010";
+
+    pa[6].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[6].attr = "client_ca_dir";
+    pa[6].value = "/etc/grid-security/certificates";
+
+    pa[7].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[7].attr = "client_bundle";
+    pa[7].value = "/etc/grid-security/certificates/ca-bundle.crt";
+
+    pa[8].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[8].attr = "common_attr1";
+    pa[8].value = "common_attr1_value";
+
+    pa[9].pa_type = KRB5_PADATA_SAM_CHALLENGE_2;
+    pa[9].attr = "unhandled_attr1";
+    pa[9].value = "unhandled_attr1_value";
+
+    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL, NULL,
+					  NULL, kinit_prompter, NULL,
+					  NUM_TEST_PA, pa);
+    if (code != 0) {
+	com_err(progname, code, "while setting preauth options - first time");
+	goto cleanup;
+    }
+
+    pa[0].pa_type = 130;
+    pa[0].attr = "cksum_attr1-2";
+    pa[0].value = "cksum_attr1_value-2";
+
+    pa[1].pa_type = 130;
+    pa[1].attr = "cksum_attr2-2";
+    pa[1].value = "cksum_attr2_value-2";
+
+    pa[2].pa_type = 131;
+    pa[2].attr = "wpse_attr1-2";
+    pa[2].value = "wpse_attr1_value-2";
+
+    pa[3].pa_type = 131;
+    pa[3].attr = "wpse_attr2-2";
+    pa[3].value = "wpse_attr2_value-2";
+
+    pa[4].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[4].attr = "pkinit_attr1-2";
+    pa[4].value = "pkinit_attr1_value-2";
+
+    pa[5].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[5].attr = "pkinit_attr2-2";
+    pa[5].value = "pkinit_attr2_value-2";
+
+    pa[6].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[6].attr = "pkinit_attr3-2";
+    pa[6].value = "pkinit_attr3_value-2";
+
+    pa[7].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[7].attr = "pkinit_attr4-2";
+    pa[7].value = "pkinit_attr4_value-2";
+
+    pa[8].pa_type = KRB5_PADATA_PK_AS_REQ;
+    pa[8].attr = "common_attr1-2";
+    pa[8].value = "common_attr1_value-2";
+
+    pa[9].pa_type = 666;
+    pa[9].attr = "unhandled_attr1-2";
+    pa[9].value = "unhandled_attr1_value-2";
+
+    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL, NULL,
+					  NULL, kinit_prompter, NULL,
+					  NUM_TEST_PA, pa);
+    if (code != 0) {
+	com_err(progname, code, "while setting preauth options - second time");
+	goto cleanup;
+    }
+
     switch (opts->action) {
     case INIT_PW:
 	code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
 					    0, kinit_prompter, 0,
 					    opts->starttime, 
 					    opts->service_name,
-					    &options);
+					    options);
 	break;
     case INIT_KT:
 	code = krb5_get_init_creds_keytab(k5->ctx, &my_creds, k5->me,
 					  keytab,
 					  opts->starttime, 
 					  opts->service_name,
-					  &options);
+					  options);
 	break;
     case VALIDATE:
 	code = krb5_get_validated_creds(k5->ctx, &my_creds, k5->me, k5->cc,
@@ -876,6 +976,8 @@ k5_kinit(opts, k5)
     notix = 0;
 
  cleanup:
+    if (options)
+	krb5_get_init_creds_opt_free(k5->ctx, options);
     if (my_creds.client == k5->me) {
 	my_creds.client = 0;
     }

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
    krb5_principal princ;
    char *pname;
    krb5_ccache ccache;
-   krb5_get_init_creds_opt opts;
+   krb5_get_init_creds_opt *opts = NULL;
    krb5_creds creds;
 
    char pw[1024];
@@ -102,26 +102,31 @@ int main(int argc, char *argv[])
        get_name_from_passwd_file(argv[0], context, &princ);
    }
 
-   krb5_get_init_creds_opt_init(&opts);
-   krb5_get_init_creds_opt_set_tkt_life(&opts, 5*60);
-   krb5_get_init_creds_opt_set_renew_life(&opts, 0);
-   krb5_get_init_creds_opt_set_forwardable(&opts, 0);
-   krb5_get_init_creds_opt_set_proxiable(&opts, 0);
+   if ((ret = krb5_get_init_creds_opt_alloc(context, &opts))) {
+	 com_err(argv[0], ret, "allocating krb5_get_init_creds_opt");
+	 exit(1);
+   }
+   krb5_get_init_creds_opt_set_tkt_life(opts, 5*60);
+   krb5_get_init_creds_opt_set_renew_life(opts, 0);
+   krb5_get_init_creds_opt_set_forwardable(opts, 0);
+   krb5_get_init_creds_opt_set_proxiable(opts, 0);
 
    if ((ret = krb5_get_init_creds_password(context, &creds, princ, NULL,
 					   krb5_prompter_posix, NULL, 
-					   0, "kadmin/changepw", &opts))) {
+					   0, "kadmin/changepw", opts))) {
       if (ret == KRB5KRB_AP_ERR_BAD_INTEGRITY)
 	 com_err(argv[0], 0,
 		 "Password incorrect while getting initial ticket");
       else
 	 com_err(argv[0], ret, "getting initial ticket");
+      krb5_get_init_creds_opt_free(context, opts);
       exit(1);
    }
 
    pwlen = sizeof(pw);
    if ((ret = krb5_read_password(context, P1, P2, pw, &pwlen))) {
       com_err(argv[0], ret, "while reading password");
+      krb5_get_init_creds_opt_free(context, opts);
       exit(1);
    }
 
@@ -129,6 +134,7 @@ int main(int argc, char *argv[])
 				   &result_code, &result_code_string,
 				   &result_string))) {
       com_err(argv[0], ret, "changing password");
+      krb5_get_init_creds_opt_free(context, opts);
       exit(1);
    }
 
@@ -138,6 +144,7 @@ int main(int argc, char *argv[])
 	     result_string.length?": ":"",
 	     (int) result_string.length,
 	     result_string.data ? result_string.data : "");
+      krb5_get_init_creds_opt_free(context, opts);
       exit(2);
    }
 
@@ -145,6 +152,7 @@ int main(int argc, char *argv[])
        free(result_string.data);
    if (result_code_string.data != NULL)
        free(result_code_string.data);
+   krb5_get_init_creds_opt_free(context, opts);
 
    printf("Password changed.\n");
    exit(0);
