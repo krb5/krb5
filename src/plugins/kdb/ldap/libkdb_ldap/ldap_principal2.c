@@ -463,6 +463,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
     xargs_t                     xargs = {0};
     char                        *polname = NULL;
     OPERATION optype;
+    krb5_boolean     		found_entry = FALSE;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
@@ -508,7 +509,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	if (entries->mask & KADM5_LOAD) {
 	    int              tree = 0, ntrees = 0, princlen = 0, numlentries = 0;
 	    char             **subtreelist = NULL, *filter = NULL;
-	    krb5_boolean     found_entry = FALSE;
+
 	    /*  A load operation is special, will do a mix-in (add krbprinc
 	     *  attrs to a non-krb object entry) if an object exists with a
 	     *  matching krbprincipalname attribute so try to find existing
@@ -521,7 +522,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		st = EINVAL;
 		krb5_set_error_message(context, st, "operation can not continue, principal name not found");
 		goto cleanup;
-	    }	
+	    }
 	    princlen = strlen(FILTER) + strlen(user) + 2 + 1;      /* 2 for closing brackets */
 	    if ((filter = malloc(princlen)) == NULL) {
 		st = ENOMEM;
@@ -533,10 +534,16 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 	    if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
 		goto cleanup;
 
+	    found_entry = FALSE;
 	    /* search for entry with matching krbprincipalname attribute */
 	    for (tree = 0; found_entry == FALSE && tree < ntrees; ++tree) {
 		result = NULL;
-		LDAP_SEARCH_1(subtreelist[tree], ldap_context->lrparams->search_scope, filter, principal_attributes, IGNORE_STATUS);
+		if (principal_dn == NULL) {
+		    LDAP_SEARCH_1(subtreelist[tree], ldap_context->lrparams->search_scope, filter, principal_attributes, IGNORE_STATUS);
+		} else {
+		    /* just look for entry with principal_dn */
+		    LDAP_SEARCH_1(principal_dn, LDAP_SCOPE_BASE, filter, principal_attributes, IGNORE_STATUS);
+		}
 		if (st == LDAP_SUCCESS) {
 		    numlentries = ldap_count_entries(ld, result);
 		    if (numlentries > 1) {
@@ -565,7 +572,7 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		    }
 		    if (result)
 			ldap_msgfree(result);
-		} else {
+		} else if (st != LDAP_NO_SUCH_OBJECT) {
 		    /* could not perform search, return with failure */
 		    st = set_ldap_error (context, st, 0);
 		    free(filter);
@@ -579,12 +586,18 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 
 	    free(filter);
 
-	    if (found_entry == FALSE) {
+	    if (found_entry == FALSE && principal_dn != NULL) {
+		/* 
+		 * if principal_dn is null then there is code further down to
+		 * deal with setting standalone_principal_dn.  Also note that
+		 * this will set create_standalone_prinicipal true for
+		 * non-mix-in entries which is okay if loading from a dump.
+		 */
 		create_standalone_prinicipal = TRUE;
 		standalone_principal_dn = strdup(principal_dn);
 		CHECK_NULL(standalone_principal_dn);
 	    }
-	} /* end if (entries->mask & KADM5_LOAD && principal_dn == NULL */
+	} /* end if (entries->mask & KADM5_LOAD */
 
 	/* time to generate the DN information with the help of
 	 * containerdn, principalcontainerreference or
@@ -886,11 +899,12 @@ krb5_ldap_put_principal(context, entries, nentries, db_args)
 		krb5_set_error_message(context, st, "Password policy value null");
 		goto cleanup;
 	    }
-	} else if (entries->mask & KADM5_LOAD && principal_dn != NULL) {
+	} else if (entries->mask & KADM5_LOAD && found_entry == TRUE) {
 	    /* 
 	     * a load is special in that existing entries must have attrs that
 	     * removed.
 	     */
+
 	    if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_REPLACE, NULL)) != 0)
 		goto cleanup;
 	}
