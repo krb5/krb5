@@ -33,8 +33,9 @@ typedef struct _stdccCacheData {
 
 /* function protoypes  */
 
+void krb5_stdcc_shutdown(void);
+
 #ifdef USE_CCAPI_V3
-void krb5_stdccv3_shutdown(void);
 
 krb5_error_code KRB5_CALLCONV krb5_stdccv3_close
         (krb5_context, krb5_ccache id );
@@ -88,18 +89,17 @@ krb5_error_code KRB5_CALLCONV krb5_stdccv3_get_flags
 krb5_error_code KRB5_CALLCONV krb5_stdccv3_remove 
         (krb5_context, krb5_ccache id , krb5_flags flags, krb5_creds *creds);
 
-static krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_new
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_new
 		(krb5_context context, krb5_cc_ptcursor *cursor);
 
-static krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_next
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_next
 		(krb5_context context, krb5_cc_ptcursor cursor, krb5_ccache *ccache);
 
-static krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_free
+krb5_error_code KRB5_CALLCONV krb5_stdccv3_ptcursor_free
 		(krb5_context context, krb5_cc_ptcursor *cursor);
 
 
 #else
-void krb5_stdcc_shutdown(void);
 
 krb5_error_code KRB5_CALLCONV krb5_stdcc_close
         (krb5_context, krb5_ccache id );

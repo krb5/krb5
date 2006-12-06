@@ -22,14 +22,16 @@
 /* protoypes for private functions declared in stdcc_util.c */
 #ifdef USE_CCAPI_V3
 krb5_error_code 
-copy_cc_credentials_to_krb5_creds (krb5_context in_context, 
-                                   cc_credentials_t in_credentials, 
-                                   krb5_creds *out_creds);
+copy_cc_cred_union_to_krb5_creds (krb5_context in_context, 
+                                  const cc_credentials_union *in_cred_union, 
+                                  krb5_creds *out_creds);
 krb5_error_code
-copy_krb5_creds_to_cc_credentials (krb5_context in_context, 
-                                   krb5_creds *in_creds, 
-                                   cc_credentials_t *out_credentials);
+copy_krb5_creds_to_cc_cred_union (krb5_context in_context, 
+                                  krb5_creds *in_creds, 
+                                  cc_credentials_union **out_cred_union);
 
+krb5_error_code 
+cred_union_release (cc_credentials_union *in_cred_union);
 #else
 int copyCCDataArrayToK5(cc_creds *cc, krb5_creds *kc, char whichArray);
 int copyK5DataArrayToCC(krb5_creds *kc, cc_creds *cc, char whichArray);
