@@ -17,6 +17,7 @@ kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
 
 $(OUTPRE)kvno.exe: $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) /out:$@ $**
+	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kvno.o kvno

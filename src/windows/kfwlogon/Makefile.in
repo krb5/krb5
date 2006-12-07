@@ -24,9 +24,11 @@ $(OUTPRE)kfwcpcc.res: kfwcpcc.rc ..\version.rc
 
 $(OUTPRE)kfwlogon.dll: $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj $(OUTPRE)kfwlogon.res
     link $(DLL_LINKOPTS) -out:$@ $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj -entry:DllEntryPoint -def:kfwlogon.def $(SYSLIBS) $(KLIB) $(CLIB)
+    $(_VC_MANIFEST_EMBED_DLL)
 
 $(OUTPRE)kfwcpcc.exe: $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(OUTPRE)kfwcpcc.res
     link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(SYSLIBS) $(KLIB) $(CLIB)
+    $(_VC_MANIFEST_EMBED_EXE)
 
 install::
         copy $(OUTPRE)kfwlogon.dll $(DESTDIR)

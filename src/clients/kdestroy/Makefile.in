@@ -17,6 +17,7 @@ kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
 
 $(OUTPRE)kdestroy.exe: $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $**
+	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kdestroy.o kdestroy

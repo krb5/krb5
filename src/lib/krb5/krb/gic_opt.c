@@ -3,7 +3,7 @@
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init(krb5_get_init_creds_opt *opt)
 {
-   opt->flags = 0;
+   opt->flags = KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
 }
 
 void KRB5_CALLCONV
@@ -63,3 +63,13 @@ krb5_get_init_creds_opt_set_salt(krb5_get_init_creds_opt *opt, krb5_data *salt)
    opt->flags |= KRB5_GET_INIT_CREDS_OPT_SALT;
    opt->salt = salt;
 }
+
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_salt(krb5_get_init_creds_opt *opt, int prompt)
+{
+   if (prompt)
+     opt->flags |= KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+   else
+     opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+}
+

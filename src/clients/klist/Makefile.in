@@ -17,6 +17,7 @@ klist: klist.o $(KRB4COMPAT_DEPLIBS)
 
 $(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(SLIB) $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
+	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) klist.o klist

@@ -159,6 +159,7 @@ config-windows:: Makefile-windows
 #
 ##DOS##$(WCONFIG_EXE): outpre-dir wconfig.c
 ##DOS##	$(CC) -Fe$@ -Fo$*.obj wconfig.c $(CCLINKOPTION)
+##DOS## $(_VC_MANIFEST_EMBED_EXE)
 
 ##DOS##MKFDEP=$(WCONFIG_EXE) config\win-pre.in config\win-post.in
 
