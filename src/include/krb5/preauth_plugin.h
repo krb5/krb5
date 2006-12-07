@@ -170,7 +170,6 @@ typedef krb5_error_code
 		       void *plugin_context,
 		       krb5_get_init_creds_opt *opt,
 		       krb5_principal principal,
-		       const char *user_id,
 		       const char *password,
 		       krb5_prompter_fct prompter,
 		       void *prompter_data,

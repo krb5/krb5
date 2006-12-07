@@ -318,7 +318,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_pa(krb5_context context,
 			       krb5_get_init_creds_opt *opt,
 			       krb5_principal principal,
-			       const char *user_id,
 			       const char *password,
 			       krb5_prompter_fct prompter,
 			       void *prompter_data,
@@ -355,7 +354,7 @@ krb5_get_init_creds_opt_set_pa(krb5_context context,
      * already had a chance at any pre-existing options.
      */
     retval = krb5_preauth_supply_preauth_data(context, opte, principal,
-					      user_id, password, prompter,
+					      password, prompter,
 					      prompter_data, num_preauth_data,
 					      preauth_data);
     return retval;
@@ -468,4 +467,92 @@ krb5_get_init_creds_opt_free_pa(krb5_context context,
 	    free(preauth_data[i].value);
     }
     free(preauth_data);
+}
+
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pkinit(krb5_context context,
+				   krb5_get_init_creds_opt *opt,
+				   krb5_principal principal,
+				   const char *x509_user_identity,
+				   const char *x509_anchors,
+				   char * const * x509_chain_list,
+				   char * const * x509_revoke_list,
+				   int flags,
+				   krb5_prompter_fct prompter,
+				   void *prompter_data,
+				   char *password)
+{
+    krb5_gic_opt_pa_data *pad;
+    int num_pad = 0;
+    int i, j;
+    krb5_error_code retval;
+
+    /* Figure out how many preauth data structs we'll need */
+    if (x509_user_identity != NULL)
+	num_pad++;
+    if (x509_anchors != NULL)
+	num_pad++;
+    if (x509_chain_list != NULL)
+	for (j = 0; x509_chain_list[j] != NULL; j++)
+	    num_pad++;
+    if (x509_revoke_list != NULL)
+	for (j = 0; x509_revoke_list[j] != NULL; j++)
+	    num_pad++;
+    if (flags != 0) {
+	/* XXX should be more generic? What other flags are there? */
+#define PKINIT_RSA_PROTOCOL 0x00000002
+	if (flags & PKINIT_RSA_PROTOCOL)
+	    num_pad++;
+    }
+	
+
+    /* Allocate the krb5_gic_opt_pa_data structures and populate */
+    pad = malloc(num_pad * sizeof(krb5_gic_opt_pa_data));
+    if (pad == NULL)
+	return ENOMEM;
+
+    i = 0;
+    if (x509_user_identity != NULL) {
+	pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
+	pad[i].attr = "X509_user_identity";
+	pad[i].value = x509_user_identity;
+	i++;
+    }
+    if (x509_anchors != NULL) {
+	pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
+	pad[i].attr = "X509_anchors";
+	pad[i].value = x509_anchors;
+	i++;
+    }
+    if (x509_chain_list != NULL) {
+	for (j = 0; x509_chain_list[j] != NULL; j++) {
+	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
+	    pad[i].attr = "X509_chain_list";
+	    pad[i].value = x509_chain_list[j];
+	    i++;
+	}
+    }
+    if (x509_revoke_list != NULL) {
+	for (j = 0; x509_revoke_list[j] != NULL; j++) {
+	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
+	    pad[i].attr = "X509_revoke_list";
+	    pad[i].value = x509_revoke_list[j];
+	    i++;
+	}
+    }
+    if (flags != 0) {
+	if (flags & PKINIT_RSA_PROTOCOL) {
+	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
+	    pad[i].attr = "flag_RSA_PROTOCOL";
+	    pad[i].value = "yes";
+	    i++;
+	}
+    }
+
+    retval = krb5_get_init_creds_opt_set_pa(context, opt, principal, password,
+					    prompter, prompter_data, i, pad);
+
+    free(pad);
+    return retval;
 }

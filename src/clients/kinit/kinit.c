@@ -844,7 +844,7 @@ k5_kinit(opts, k5)
     pa[9].attr = "unhandled_attr1";
     pa[9].value = "unhandled_attr1_value";
 
-    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL, NULL,
+    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL,
 					  NULL, kinit_prompter, NULL,
 					  NUM_TEST_PA, pa);
     if (code != 0) {
@@ -892,11 +892,20 @@ k5_kinit(opts, k5)
     pa[9].attr = "unhandled_attr1-2";
     pa[9].value = "unhandled_attr1_value-2";
 
-    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL, NULL,
+    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL,
 					  NULL, kinit_prompter, NULL,
 					  NUM_TEST_PA, pa);
     if (code != 0) {
 	com_err(progname, code, "while setting preauth options - second time");
+	goto cleanup;
+    }
+
+    code = krb5_get_init_creds_opt_set_pkinit(k5->ctx, options, NULL,
+			    "FILE:/tmp/x509up_u20010,/tmp/x509up_u20010",
+			    "DIR:/etc/grid-security/certificates",
+			    NULL, NULL, 2, kinit_prompter, NULL, NULL);
+    if (code != 0) {
+	com_err(progname, code, "while setting pkinit-specific options");
 	goto cleanup;
     }
 
