@@ -33,7 +33,9 @@
 #include "osconf.h"
 #include <krb5/preauth_plugin.h>
 
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 
 #if TARGET_OS_MAC
 static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/preauth", NULL }; /* should be a list */
@@ -64,7 +66,7 @@ typedef struct _pa_types_t {
  * credentials should never hit this routine), breaking up the module's
  * list of support pa_types so that we can iterate over the modules more
  * easily, and copying over the relevant parts of the module's table. */
-void
+void KRB5_CALLCONV
 krb5_init_preauth_context(krb5_context kcontext)
 {
     int n_modules, n_tables, i, j, k;
@@ -198,7 +200,7 @@ krb5_init_preauth_context(krb5_context kcontext)
 /* Zero the use counts for the modules herein.  Usually used before we
  * start processing any data from the server, at which point every module
  * will again be able to take a crack at whatever the server sent. */
-void
+void KRB5_CALLCONV
 krb5_clear_preauth_context_use_counts(krb5_context context)
 {
     int i;
@@ -212,7 +214,7 @@ krb5_clear_preauth_context_use_counts(krb5_context context)
 /* Free the per-krb5_context preauth_context. This means clearing any
  * plugin-specific context which may have been created, and then
  * freeing the context itself. */
-void
+void KRB5_CALLCONV
 krb5_free_preauth_context(krb5_context context)
 {
     int i;
@@ -237,7 +239,7 @@ krb5_free_preauth_context(krb5_context context)
 
 /* Initialize the per-AS-REQ context. This means calling the client_req_init
  * function to give the plugin a chance to allocate a per-request context. */
-void
+void KRB5_CALLCONV
 krb5_preauth_request_context_init(krb5_context context)
 {
     int i;
@@ -259,7 +261,7 @@ krb5_preauth_request_context_init(krb5_context context)
 
 /* Free the per-AS-REQ context. This means clearing any request-specific
  * context which the plugin may have created. */
-void
+void KRB5_CALLCONV
 krb5_preauth_request_context_fini(krb5_context context)
 {
     int i;
@@ -401,7 +403,7 @@ client_data_proc(krb5_context kcontext,
 /* Tweak the request body, for now adding any enctypes which the module claims
  * to add support for to the list, but in the future perhaps doing more
  * involved things. */
-void
+void KRB5_CALLCONV
 krb5_preauth_prepare_request(krb5_context kcontext,
 			     krb5_get_init_creds_opt *options,
 			     krb5_kdc_req *request)
@@ -1284,7 +1286,7 @@ static const pa_types_t pa_types[] = {
  * err_reply, return 0.  If it's the sort of correction which requires that we
  * ask the user another question, we let the calling application deal with it.
  */
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_kdc_req *request,
 			 krb5_data *encoded_request_body,
@@ -1349,7 +1351,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     return ret;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_do_preauth(krb5_context context,
 		krb5_kdc_req *request,
 		krb5_data *encoded_request_body,

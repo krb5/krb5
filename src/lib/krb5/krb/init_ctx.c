@@ -97,7 +97,7 @@ krb5_init_secure_context(krb5_context *context)
 	return init_common (context, TRUE, FALSE);
 }
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5int_init_context_kdc(krb5_context *context)
 {
     return init_common (context, FALSE, TRUE);
