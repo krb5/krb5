@@ -1097,12 +1097,12 @@ krb5_get_init_creds(krb5_context context,
 
     /* now, loop processing preauth data and talking to the kdc */
     for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
+	if (request.padata) {
+	    krb5_free_pa_data(context, request.padata);
+	    request.padata = NULL;
+	}
 	if (!err_reply) {
             /* either our first attempt, or retrying after PREAUTH_NEEDED */
-	    if (request.padata) {
-	        krb5_free_pa_data(context, request.padata);
-	        request.padata = NULL;
-	    }
 	    if ((ret = krb5_do_preauth(context,
 				       &request,
 				       encoded_request_body,
