@@ -161,7 +161,10 @@ krb5_init_preauth_context(krb5_context kcontext)
 		context->modules[k].use_count = 0;
 		context->modules[k].client_process = table->process;
 		context->modules[k].client_tryagain = table->tryagain;
-		context->modules[k].client_supply_gic_opts = table->gic_opts;
+		if (j == 0)
+		    context->modules[k].client_supply_gic_opts = table->gic_opts;
+		else
+		    context->modules[k].client_supply_gic_opts = NULL;
 		context->modules[k].request_context = NULL;
 		/*
 		 * Only call request_init and request_fini once per plugin.
@@ -210,40 +213,20 @@ krb5_clear_preauth_context_use_counts(krb5_context context)
     }
 }
 
-#if 0
-static int
-pa_data_applies(krb5_context context,
-		struct _krb5_preauth_context_module *module,
-		krb5_gic_opt_pa_data *preauth_data)
-{
-    int i;
-    for (i = 0; i < preauth_data->num_pa_types; i++) {
-	if (preauth_data->pa_types[i] == module->pa_type)
-	    return 1;
-    }
-    return 0;
-}
-#endif
-
-/* Give all the preauth plugins a look at the preauth data which is
- * appropriate for the pa_types which they support */
-
+/*
+ * Give all the preauth plugins a look at the preauth option which
+ * has just been set
+ */
 krb5_error_code
 krb5_preauth_supply_preauth_data(krb5_context context,
 				 krb5_gic_opt_ext *opte,
-				 krb5_principal principal,
-				 const char *password,
-				 krb5_prompter_fct prompter,
-				 void *prompter_data,
-				 int num_preauth_data,
-				 krb5_gic_opt_pa_data *preauth_data)
+				 const char *attr,
+				 const char *value)
 {
     krb5_error_code retval;
-    int i, j, m;
+    int i;
     void *pctx;
-    krb5_gic_opt_pa_data *p = NULL;
-    size_t allocsize = num_preauth_data * sizeof(krb5_gic_opt_pa_data);
-    int called_one = 0;
+    const char *emsg = NULL;
 
     if (context->preauth_context == NULL)
 	krb5_init_preauth_context(context);
@@ -254,69 +237,25 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 		"Unable to initialize preauth context");
 	return retval;
     }
-    /*
-     * Create the array to supply to the plugin.
-     * The most we could need is num_preauth_data
-     */
-    p = malloc(allocsize);
-    if (p == NULL)
-	return ENOMEM;
 
     /*
-     * Go down the list of preauth modules, for each module, supply
-     * it with the data appropriate for its pa_type.
-     * (Plugins that support more than one pa_type may be called
-     * with the same data more than once.)
+     * Go down the list of preauth modules, and supply them with the
+     * attribute/value pair.
      */
     for (i = 0; i < context->preauth_context->n_modules; i++) {
-	m = 0;
-	memset(p, 0, allocsize);
-	for (j = 0; j < num_preauth_data; j++) {
-	    /* Send the plugin a shallow copy of the relevant entries */
-	    if (context->preauth_context->modules[i].pa_type ==
-						preauth_data[j].pa_type) {
-		p[m++] = preauth_data[j];
-	    }
-	}
-	/* Call only plugins that have relevant data */
-	if (m == 0)
-	    continue;
-	/*
-	 * If there is a module that *could* handle this option but it
-	 * doesn't handle the client_supply_gic_opts function, don't
-	 * fail below when we check if we called a module.  The module
-	 * may wait until it is called to "process" to look at the
-	 * preauth_data.
-	 */
-	called_one++;
 	if (context->preauth_context->modules[i].client_supply_gic_opts == NULL)
 	    continue;
-
 	pctx = context->preauth_context->modules[i].plugin_context;
 	retval = (*context->preauth_context->modules[i].client_supply_gic_opts)
-			(context,
-			 pctx,
-			 (krb5_get_init_creds_opt *)opte, 
-			 principal,
-			 password,
-			 prompter,
-			 prompter_data,
-			 m,
-			 p); 
-	if (retval)
-	    goto outerr;
+				(context, pctx,
+				 (krb5_get_init_creds_opt *)opte, attr, value); 
+	if (retval) {
+	    emsg = krb5_get_error_message(context, retval);
+	    krb5int_set_error(&context->err, retval, "Preauth plugin %s: %s",
+			      context->preauth_context->modules[i].name, emsg);
+	    break;
+	}
     }
-    /* If no modules are loaded that handle the option, then return an error */
-    if (!called_one) {
-	retval = EINVAL;
-	krb5int_set_error(&context->err, retval,
-		"krb5_preauth_supply_preauth_data: "
-		"No modules are loaded that handle the given options");
-    } else
-	retval = 0;
-outerr:
-    if (p)
-	free(p);
     return retval;
 }
 

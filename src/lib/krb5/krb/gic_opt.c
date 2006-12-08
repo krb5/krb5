@@ -263,15 +263,15 @@ free_gic_opt_ext_preauth_data(krb5_context context,
 static krb5_error_code
 add_gic_opt_ext_preauth_data(krb5_context context,
 			     krb5_gic_opt_ext *opte,
-			     int num_preauth_data,
-			     krb5_gic_opt_pa_data *preauth_data)
+			     const char *attr,
+			     const char *value)
 {
     size_t newsize;
-    int i, j;
+    int i;
     krb5_gic_opt_pa_data *newpad;
 
-    newsize = opte->opt_private->num_preauth_data + num_preauth_data;
-    newsize = newsize * sizeof(*preauth_data);
+    newsize = opte->opt_private->num_preauth_data + 1;
+    newsize = newsize * sizeof(*opte->opt_private->preauth_data);
     if (opte->opt_private->preauth_data == NULL)
 	newpad = malloc(newsize);
     else
@@ -279,136 +279,95 @@ add_gic_opt_ext_preauth_data(krb5_context context,
     if (newpad == NULL)
 	return ENOMEM;
 
-    j = opte->opt_private->num_preauth_data;
-    for (i = 0; i < num_preauth_data; i++) {
-	newpad[j+i].pa_type = -1;
-	newpad[j+i].attr = NULL;
-	newpad[j+i].value = NULL;
+    i = opte->opt_private->num_preauth_data;
+    newpad[i].attr = strdup(attr);
+    if (newpad[i].attr == NULL)
+	return ENOMEM;
+    newpad[i].value = strdup(value);
+    if (newpad[i].value == NULL) {
+	free(newpad[i].attr);
+	return ENOMEM;
     }
-    for (i = 0; i < num_preauth_data; i++) {
-	newpad[j+i].pa_type = preauth_data[i].pa_type;
-	newpad[j+i].attr = strdup(preauth_data[i].attr);
-	newpad[j+i].value = strdup(preauth_data[i].value);
-	if (newpad[j+i].attr == NULL || newpad[j+i].value == NULL)
-	    goto cleanup;
-    }
-    opte->opt_private->num_preauth_data = j+i;
+    opte->opt_private->num_preauth_data += 1;
     opte->opt_private->preauth_data = newpad;
     return 0;
-
-cleanup:
-    for (i = num_preauth_data; i >= 0; i--) {
-	if (newpad[j+i].value != NULL)
-	    free(newpad[j+i].value);
-	if (newpad[j+i].attr != NULL)
-	    free(newpad[j+i].attr);
-    }
-    return ENOMEM;
 }
 
 /*
  * This function allows the caller to supply options to preauth
  * plugins.  Preauth plugin modules are given a chance to look
- * at the options at the time this function is called to check
- * the validity of its options.
+ * at each option at the time this function is called in ordre
+ * to check the validity of the option.
  * The 'opt' pointer supplied to this function must have been
  * obtained using krb5_get_init_creds_opt_alloc()
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_pa(krb5_context context,
 			       krb5_get_init_creds_opt *opt,
-			       krb5_principal principal,
-			       const char *password,
-			       krb5_prompter_fct prompter,
-			       void *prompter_data,
-			       int num_preauth_data,
-			       krb5_gic_opt_pa_data *preauth_data)
+			       const char *attr,
+			       const char *value)
 {
     krb5_error_code retval;
     krb5_gic_opt_ext *opte;
 
     retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-				     "krb5_get_init_creds_opt_set_pkinit");
-    if (retval)
-	return retval;
-
-    if (num_preauth_data <= 0) {
-	retval = EINVAL;
-	krb5int_set_error(&context->err, retval,
-		"krb5_get_init_creds_opt_set_pa: "
-		"num_preauth_data of %d is invalid", num_preauth_data);
-	return retval;
-    }
-
-    /*
-     * Copy all the options into the extended get_init_creds_opt structure
-     */
-    retval = add_gic_opt_ext_preauth_data(context, opte,
-					  num_preauth_data, preauth_data);
+				     "krb5_get_init_creds_opt_set_pa");
     if (retval)
 	return retval;
 
     /*
-     * Give the plugins a chance at the options now.  Note that only
-     * the new options are passed to the plugins.  They should have
-     * already had a chance at any pre-existing options.
+     * Copy the option into the extended get_init_creds_opt structure
      */
-    retval = krb5_preauth_supply_preauth_data(context, opte, principal,
-					      password, prompter,
-					      prompter_data, num_preauth_data,
-					      preauth_data);
+    retval = add_gic_opt_ext_preauth_data(context, opte, attr, value);
+    if (retval)
+	return retval;
+
+    /*
+     * Give the plugins a chance to look at the option now.
+     */
+    retval = krb5_preauth_supply_preauth_data(context, opte, attr, value);
     return retval;
-}
-
-static int
-pa_data_applies(krb5_context context, int num_pa_types,
-		krb5_preauthtype *pa_types, krb5_gic_opt_pa_data *preauth_data)
-{
-    int i;
-    for (i = 0; i < num_pa_types; i++) {
-	if (preauth_data->pa_type == pa_types[i])
-	    return 1;
-    }
-    return 0;
 }
 
 /*
  * This function allows a preauth plugin to obtain preauth
- * options. Only options which are applicable to the pa_types
- * which the plugin module claims to support (pa_types) are
- * returned.  The preauth_data returned from this function
+ * options.  The preauth_data returned from this function
  * should be freed by calling krb5_get_init_creds_opt_free_pa().
+ *
  * The 'opt' pointer supplied to this function must have been
  * obtained using krb5_get_init_creds_opt_alloc()
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_get_pa(krb5_context context,
 			       krb5_get_init_creds_opt *opt,
-			       int num_pa_types,
-			       krb5_preauthtype *pa_types,
 			       int *num_preauth_data,
 			       krb5_gic_opt_pa_data **preauth_data)
 {
-    krb5_error_code retval = ENOMEM;
+    krb5_error_code retval;
     krb5_gic_opt_ext *opte;
     krb5_gic_opt_pa_data *p = NULL;
-    int i, j;
+    int i;
     size_t allocsize;
 
     retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-				     "krb5_get_init_creds_opt_get_pkinit");
+				     "krb5_get_init_creds_opt_get_pa");
     if (retval)
 	return retval;
+
+    if (num_preauth_data == NULL || preauth_data == NULL)
+	return EINVAL;
 
     *num_preauth_data = 0;
     *preauth_data = NULL;
 
-    /* The most we could return is all of them */
+    if (opte->opt_private->num_preauth_data == 0)
+	return 0;
+
     allocsize =
 	    opte->opt_private->num_preauth_data * sizeof(krb5_gic_opt_pa_data);
     p = malloc(allocsize);
     if (p == NULL)
-	return retval;
+	return ENOMEM;
 
     /* Init these to make cleanup easier */
     for (i = 0; i < opte->opt_private->num_preauth_data; i++) {
@@ -416,23 +375,13 @@ krb5_get_init_creds_opt_get_pa(krb5_context context,
 	p[i].value = NULL;
     }
 
-    j = 0;
     for (i = 0; i < opte->opt_private->num_preauth_data; i++) {
-	if (pa_data_applies(context, num_pa_types, pa_types,
-			    &opte->opt_private->preauth_data[i])) {
-	    p[j].pa_type = opte->opt_private->preauth_data[i].pa_type;
-	    p[j].attr = strdup(opte->opt_private->preauth_data[i].attr);
-	    p[j].value = strdup(opte->opt_private->preauth_data[i].value);
-	    if (p[j].attr == NULL || p[j].value == NULL)
-		goto cleanup;
-	    j++;
-	}
+	p[i].attr = strdup(opte->opt_private->preauth_data[i].attr);
+	p[i].value = strdup(opte->opt_private->preauth_data[i].value);
+	if (p[i].attr == NULL || p[i].value == NULL)
+	    goto cleanup;
     }
-    if (j == 0) {
-	retval = ENOENT;
-	goto cleanup;
-    }
-    *num_preauth_data = j;
+    *num_preauth_data = i;
     *preauth_data = p;
     return 0;
 cleanup:
@@ -443,7 +392,7 @@ cleanup:
 	    free(p[i].value);
     }
     free(p);
-    return retval;
+    return ENOMEM;
 }
 
 /*
@@ -470,6 +419,11 @@ krb5_get_init_creds_opt_free_pa(krb5_context context,
 }
 
 
+/*
+ * This function is provided for compatibility with Heimdal's
+ * function of the same name.  We ignore the principal,
+ * password, and prompter parameters.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_pkinit(krb5_context context,
 				   krb5_get_init_creds_opt *opt,
@@ -483,76 +437,46 @@ krb5_get_init_creds_opt_set_pkinit(krb5_context context,
 				   void *prompter_data,
 				   char *password)
 {
-    krb5_gic_opt_pa_data *pad;
-    int num_pad = 0;
-    int i, j;
+    int i;
     krb5_error_code retval;
 
-    /* Figure out how many preauth data structs we'll need */
-    if (x509_user_identity != NULL)
-	num_pad++;
-    if (x509_anchors != NULL)
-	num_pad++;
-    if (x509_chain_list != NULL)
-	for (j = 0; x509_chain_list[j] != NULL; j++)
-	    num_pad++;
-    if (x509_revoke_list != NULL)
-	for (j = 0; x509_revoke_list[j] != NULL; j++)
-	    num_pad++;
-    if (flags != 0) {
-	/* XXX should be more generic? What other flags are there? */
-#define PKINIT_RSA_PROTOCOL 0x00000002
-	if (flags & PKINIT_RSA_PROTOCOL)
-	    num_pad++;
-    }
-	
+#define PKINIT_RSA_PROTOCOL 0x00000002	/* XXX */
 
-    /* Allocate the krb5_gic_opt_pa_data structures and populate */
-    pad = malloc(num_pad * sizeof(krb5_gic_opt_pa_data));
-    if (pad == NULL)
-	return ENOMEM;
-
-    i = 0;
     if (x509_user_identity != NULL) {
-	pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
-	pad[i].attr = "X509_user_identity";
-	pad[i].value = x509_user_identity;
-	i++;
+	retval = krb5_get_init_creds_opt_set_pa(context, opt,
+			    "X509_user_identity", x509_user_identity);
+	if (retval)
+	    return retval;
     }
     if (x509_anchors != NULL) {
-	pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
-	pad[i].attr = "X509_anchors";
-	pad[i].value = x509_anchors;
-	i++;
+	retval = krb5_get_init_creds_opt_set_pa(context, opt,
+			    "X509_anchors", x509_anchors);
+	if (retval)
+	    return retval;
     }
     if (x509_chain_list != NULL) {
-	for (j = 0; x509_chain_list[j] != NULL; j++) {
-	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
-	    pad[i].attr = "X509_chain_list";
-	    pad[i].value = x509_chain_list[j];
-	    i++;
+	for (i = 0; x509_chain_list[i] != NULL; i++) {
+	    retval = krb5_get_init_creds_opt_set_pa(context, opt,
+			    "X509_chain_list", x509_chain_list[i]);
+	    if (retval)
+		return retval;
 	}
     }
     if (x509_revoke_list != NULL) {
-	for (j = 0; x509_revoke_list[j] != NULL; j++) {
-	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
-	    pad[i].attr = "X509_revoke_list";
-	    pad[i].value = x509_revoke_list[j];
-	    i++;
+	for (i = 0; x509_revoke_list[i] != NULL; i++) {
+	    retval = krb5_get_init_creds_opt_set_pa(context, opt,
+			    "X509_revoke_list", x509_revoke_list[i]);
+	    if (retval)
+		return retval;
 	}
     }
     if (flags != 0) {
 	if (flags & PKINIT_RSA_PROTOCOL) {
-	    pad[i].pa_type = KRB5_PADATA_PK_AS_REQ;
-	    pad[i].attr = "flag_RSA_PROTOCOL";
-	    pad[i].value = "yes";
-	    i++;
+	    retval = krb5_get_init_creds_opt_set_pa(context, opt,
+			    "flag_RSA_PROTOCOL", "yes");
+	    if (retval)
+		return retval;
 	}
     }
-
-    retval = krb5_get_init_creds_opt_set_pa(context, opt, principal, password,
-					    prompter, prompter_data, i, pad);
-
-    free(pad);
     return retval;
 }

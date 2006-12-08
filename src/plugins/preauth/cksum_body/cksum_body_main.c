@@ -100,11 +100,10 @@ client_process(krb5_context kcontext,
     krb5_error_code status = 0;
     krb5_int32 cksumtype, *enctypes;
     unsigned int i, n_enctypes, cksumtype_count;
-    krb5_preauthtype patype = KRB5_PADATA_CKSUM_BODY_REQ;
     int num_gic_info = 0;
     krb5_gic_opt_pa_data *gic_info;
 
-    status = krb5_get_init_creds_opt_get_pa(kcontext, opt, 1, &patype,
+    status = krb5_get_init_creds_opt_get_pa(kcontext, opt,
 					    &num_gic_info, &gic_info);
     if (status && status != ENOENT) {
 #ifdef DEBUG
@@ -220,20 +219,12 @@ static krb5_error_code
 client_gic_opt(krb5_context kcontext,
 	       void *plugin_context,
 	       krb5_get_init_creds_opt *opt,
-	       krb5_principal principal,
-	       const char *password,
-	       krb5_prompter_fct prompter,
-	       void *prompter_data,
-	       int num_preauth_data,
-	       krb5_gic_opt_pa_data *preauth_data)
+	       const char *attr,
+	       const char *value)
 {
-    int i;
 #ifdef DEBUG
-    fprintf(stderr, "(cksum_body) client_gic_opt: received %d preauth_data items\n", num_preauth_data); 
-    for (i = 0; i < num_preauth_data; i++) {
-        fprintf(stderr, "  %3d: attribute '%s', value '%s'\n",
-                i, preauth_data[i].attr, preauth_data[i].value);
-    }
+    fprintf(stderr, "(cksum_body) client_gic_opt: received '%s' = '%s'\n",
+	    attr, value); 
 #endif
     return 0;
 }

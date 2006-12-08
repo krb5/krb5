@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <errno.h>
 #include <com_err.h>
 
 #ifdef GETOPT_LONG
@@ -143,6 +144,9 @@ struct k_opts
     char* k4_cache_name;
 
     action_type action;
+
+    int num_pa_opts;
+    krb5_gic_opt_pa_data *pa_opts;
 };
 
 struct k5_data
@@ -283,6 +287,37 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
     fprintf (stderr, "\n");
 }
 
+static int
+add_preauth_opt(struct k_opts *opts, char *av)
+{
+    char *sep, *v;
+    krb5_gic_opt_pa_data *p, *x;
+
+    if (opts->num_pa_opts == 0) {
+	opts->pa_opts = malloc(sizeof(krb5_gic_opt_pa_data));
+	if (opts->pa_opts == NULL)
+	    return ENOMEM;
+    } else {
+	size_t newsize = (opts->num_pa_opts + 1) * sizeof(krb5_gic_opt_pa_data);
+	x = realloc(opts->pa_opts, newsize);
+	if (x == NULL)
+	    return ENOMEM;
+	opts->pa_opts = x;
+    }
+    p = &opts->pa_opts[opts->num_pa_opts];
+    sep = strchr(av, '=');
+    if (sep) {
+	*sep = '\0';
+	v = ++sep;
+	p->value = v;
+    } else {
+	p->value = "yes";
+    }
+    p->attr = av;
+    opts->num_pa_opts++;
+    return 0;
+}
+
 static char *
 parse_options(argc, argv, opts, progname)
     int argc;
@@ -296,7 +331,7 @@ parse_options(argc, argv, opts, progname)
     int use_k5 = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:v"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -378,6 +413,14 @@ parse_options(argc, argv, opts, progname)
 		errflg++;
 	    } else {
 		opts->k5_cache_name = optarg;
+	    }
+	    break;
+	case 'X':
+	    code = add_preauth_opt(opts, optarg);
+	    if (code)
+	    {
+		com_err(progname, code, "while adding preauth option");
+		errflg++;
 	    }
 	    break;
 #if 0
@@ -753,8 +796,7 @@ k5_kinit(opts, k5)
     krb5_creds my_creds;
     krb5_error_code code = 0;
     krb5_get_init_creds_opt *options = NULL;
-#define NUM_TEST_PA 10
-    krb5_gic_opt_pa_data pa[NUM_TEST_PA];
+    int i;
 
     if (!got_k5)
 	return 0;
@@ -804,111 +846,35 @@ k5_kinit(opts, k5)
 	}
     }
 
-    pa[0].pa_type = 130;
-    pa[0].attr = "cksum_attr1";
-    pa[0].value = "cksum_attr1_value";
-
-    pa[1].pa_type = 130;
-    pa[1].attr = "cksum_attr2";
-    pa[1].value = "cksum_attr2_value";
-
-    pa[2].pa_type = 131;
-    pa[2].attr = "wpse_attr1";
-    pa[2].value = "wpse_attr1_value";
-
-    pa[3].pa_type = 131;
-    pa[3].attr = "wpse_attr2";
-    pa[3].value = "wpse_attr2_value";
-
-    pa[4].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[4].attr = "client_cert";
-    pa[4].value = "/tmp/x509up_u20010";
-
-    pa[5].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[5].attr = "client_key";
-    pa[5].value = "/tmp/x509up_u20010";
-
-    pa[6].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[6].attr = "client_ca_dir";
-    pa[6].value = "/etc/grid-security/certificates";
-
-    pa[7].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[7].attr = "client_bundle";
-    pa[7].value = "/etc/grid-security/certificates/ca-bundle.crt";
-
-    pa[8].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[8].attr = "common_attr1";
-    pa[8].value = "common_attr1_value";
-
-    pa[9].pa_type = KRB5_PADATA_SAM_CHALLENGE_2;
-    pa[9].attr = "unhandled_attr1";
-    pa[9].value = "unhandled_attr1_value";
-
-    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL,
-					  NULL, kinit_prompter, NULL,
-					  NUM_TEST_PA, pa);
-    if (code != 0) {
-	com_err(progname, code, "while setting preauth options - first time");
-	goto cleanup;
+    for (i = 0; i < opts->num_pa_opts; i++) {
+	code = krb5_get_init_creds_opt_set_pa(k5->ctx, options,
+					      opts->pa_opts[i].attr,
+					      opts->pa_opts[i].value);
+	if (code != 0) {
+	    com_err(progname, code, "while setting '%s'='%s'",
+		    opts->pa_opts[i].attr, opts->pa_opts[i].value);
+	    goto cleanup;
+	}
     }
 
-    pa[0].pa_type = 130;
-    pa[0].attr = "cksum_attr1-2";
-    pa[0].value = "cksum_attr1_value-2";
-
-    pa[1].pa_type = 130;
-    pa[1].attr = "cksum_attr2-2";
-    pa[1].value = "cksum_attr2_value-2";
-
-    pa[2].pa_type = 131;
-    pa[2].attr = "wpse_attr1-2";
-    pa[2].value = "wpse_attr1_value-2";
-
-    pa[3].pa_type = 131;
-    pa[3].attr = "wpse_attr2-2";
-    pa[3].value = "wpse_attr2_value-2";
-
-    pa[4].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[4].attr = "pkinit_attr1-2";
-    pa[4].value = "pkinit_attr1_value-2";
-
-    pa[5].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[5].attr = "pkinit_attr2-2";
-    pa[5].value = "pkinit_attr2_value-2";
-
-    pa[6].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[6].attr = "pkinit_attr3-2";
-    pa[6].value = "pkinit_attr3_value-2";
-
-    pa[7].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[7].attr = "pkinit_attr4-2";
-    pa[7].value = "pkinit_attr4_value-2";
-
-    pa[8].pa_type = KRB5_PADATA_PK_AS_REQ;
-    pa[8].attr = "common_attr1-2";
-    pa[8].value = "common_attr1_value-2";
-
-    pa[9].pa_type = 666;
-    pa[9].attr = "unhandled_attr1-2";
-    pa[9].value = "unhandled_attr1_value-2";
-
-    code = krb5_get_init_creds_opt_set_pa(k5->ctx, options, NULL,
-					  NULL, kinit_prompter, NULL,
-					  NUM_TEST_PA, pa);
-    if (code != 0) {
-	com_err(progname, code, "while setting preauth options - second time");
+#if 0	/* XXX Testing... */
+    code = krb5_get_init_creds_opt_set_pkinit(
+	    k5->ctx,				/* context */
+	    options,				/* get_init_creds_opt */
+	    NULL,				/* principal */
+	    "/tmp/x509up_u20010",		/* X509_user_identity */
+	    "/etc/grid-security/certificates",	/* X509_anchors */
+	    NULL,				/* X509_chain_list */
+	    NULL,				/* X509_revoke_list */
+	    0,					/* flags */
+	    NULL,				/* prompter_fct */
+	    NULL,				/* prompter_data */
+	    NULL);				/* password */
+    if (code) {
+	com_err(progname, code, "while setting pkinit options");
 	goto cleanup;
     }
-
-    code = krb5_get_init_creds_opt_set_pkinit(k5->ctx, options, NULL,
-			    "FILE:/tmp/x509up_u20010,/tmp/x509up_u20010",
-			    "DIR:/etc/grid-security/certificates",
-			    NULL, NULL, 2, kinit_prompter, NULL, NULL);
-    if (code != 0) {
-	com_err(progname, code, "while setting pkinit-specific options");
-	goto cleanup;
-    }
-
+#endif
     switch (opts->action) {
     case INIT_PW:
 	code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
@@ -989,6 +955,11 @@ k5_kinit(opts, k5)
 	krb5_get_init_creds_opt_free(k5->ctx, options);
     if (my_creds.client == k5->me) {
 	my_creds.client = 0;
+    }
+    if (opts->pa_opts) {
+	free(opts->pa_opts);
+	opts->pa_opts = NULL;
+	opts->num_pa_opts = 0;
     }
     krb5_free_cred_contents(k5->ctx, &my_creds);
     if (keytab)

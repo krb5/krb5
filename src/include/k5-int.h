@@ -910,15 +910,7 @@ typedef struct _krb5_preauth_context {
 					   krb5_data *s2kparams,
 					   krb5_keyblock *as_key,
 					   krb5_pa_data **new_pa_data);
-	krb5_error_code (*client_supply_gic_opts)(krb5_context context,
-						  void *plugin_context,
-						  krb5_get_init_creds_opt *opt,
-						  krb5_principal principal,
-						  const char *password,
-						  krb5_prompter_fct prompter,
-						  void *prompter_data,
-						  int num_preauth_data,
-						  krb5_gic_opt_pa_data *preauth_data);
+	supply_gic_opts_proc client_supply_gic_opts;
 	void (*client_req_init)(krb5_context context, void *plugin_context,
 			       void **request_context);
 	void (*client_req_fini)(krb5_context context, void *plugin_context,

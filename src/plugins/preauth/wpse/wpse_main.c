@@ -213,21 +213,12 @@ static krb5_error_code
 client_gic_opt(krb5_context kcontext,
 	       void *plugin_context,
 	       krb5_get_init_creds_opt *opt,
-	       krb5_principal principal,
-	       const char *password,
-	       krb5_prompter_fct prompter,
-	       void *prompter_data,
-	       int num_preauth_data,
-	       krb5_gic_opt_pa_data *preauth_data)
+	       const char *attr,
+	       const char *value)
 {
-    int i;
 #ifdef DEBUG
-    fprintf(stderr, "(wpse) client_gic_opt: received %d preauth_data items\n",
-	    num_preauth_data);
-    for (i = 0; i < num_preauth_data; i++) {
-	fprintf(stderr, "  %3d: attribute '%s', value '%s'\n",
-		i, preauth_data[i].attr, preauth_data[i].value);
-    }
+    fprintf(stderr, "(wpse) client_gic_opt: received '%s' = '%s'\n",
+	    attr, value);
 #endif
     return 0;
 }

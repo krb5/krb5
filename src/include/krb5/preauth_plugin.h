@@ -159,22 +159,15 @@ typedef krb5_error_code
 
 /*
  * Client function which receives krb5_get_init_creds_opt information.
- * It may also receive specific preauthentication information for the
- * pa_types that it supports.
- * The information supplied in {num_preauth_data,preauth_data} should
- * be copied locally by the module if it wishes to reference it after
- * returning from this call.
+ * The attr and value information supplied should be copied locally by
+ * the module if it wishes to reference it after returning from this call.
  */
 typedef krb5_error_code
-(*supply_gic_opts_fct)(krb5_context context,
-		       void *plugin_context,
-		       krb5_get_init_creds_opt *opt,
-		       krb5_principal principal,
-		       const char *password,
-		       krb5_prompter_fct prompter,
-		       void *prompter_data,
-		       int num_preauth_data,
-		       krb5_gic_opt_pa_data *preauth_data);
+(*supply_gic_opts_proc)(krb5_context context,
+			void *plugin_context,
+			krb5_get_init_creds_opt *opt,
+			const char *attr,
+			const char *value);
 /*
  * The function table / structure which a preauth client module must export as
  * "preauthentication_client_0".  If the interfaces work correctly, future
@@ -261,8 +254,12 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
 				krb5_data *salt, krb5_data *s2kparams,
 				krb5_keyblock *as_key,
 				krb5_pa_data **out_pa_data);
-    /* Function that gets krb5_get_init_creds_opt and other preauth options */
-    supply_gic_opts_fct gic_opts;
+    /*
+     * Client function which receives krb5_get_init_creds_opt information.
+     * The attr and value information supplied should be copied locally by
+     * the module if it wishes to reference it after returning from this call.
+     */
+    supply_gic_opts_proc gic_opts;
 } krb5plugin_preauth_client_ftable_v0;
 
 /*
