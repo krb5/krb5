@@ -239,7 +239,7 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
     krb5_error_code (*tryagain)(krb5_context context,
 				void *plugin_context,
 				void *request_context,
-			        krb5_get_init_creds_opt *opt,
+				krb5_get_init_creds_opt *opt,
 				preauth_get_client_data_proc get_data_proc,
 				struct _krb5_preauth_client_rock *rock,
 				krb5_kdc_req *request,
@@ -342,4 +342,31 @@ typedef struct krb5plugin_preauth_server_ftable_v0 {
    					      void *pa_module_context,
 					      void **request_pa_context);
 } krb5plugin_preauth_server_ftable_v0;
+
+
+/*
+ * This function allows a preauth plugin to obtain preauth
+ * options.  The preauth_data returned from this function
+ * should be freed by calling krb5_get_init_creds_opt_free_pa().
+ *
+ * The 'opt' pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_get_pa
+		(krb5_context context,
+		krb5_get_init_creds_opt *opt,
+		int *num_preauth_data,
+		krb5_gic_opt_pa_data **preauth_data);
+
+/*
+ * This function frees the preauth_data that was returned by
+ * krb5_get_init_creds_opt_get_pa().
+ */
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_free_pa
+		(krb5_context context,
+		 int num_preauth_data,
+		 krb5_gic_opt_pa_data *preauth_data);
+
 #endif /* KRB5_PREAUTH_PLUGIN_H_INCLUDED */
