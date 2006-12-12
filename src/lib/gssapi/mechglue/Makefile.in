@@ -231,10 +231,11 @@ g_init_sec_context.so g_init_sec_context.po $(OUTPRE)g_init_sec_context.$(OBJEXT
   mechglue.h mglueP.h
 g_initialize.so g_initialize.po $(OUTPRE)g_initialize.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
-  $(srcdir)/../gss_libinit.h ../generic/gssapi.h ../generic/gssapi_err_generic.h \
-  g_initialize.c mechglue.h mglueP.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssapi.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_generic.h $(srcdir)/../gss_libinit.h \
+  ../generic/gssapi_err_generic.h g_initialize.c mechglue.h \
+  mglueP.h
 g_inq_context.so g_inq_context.po $(OUTPRE)g_inq_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
