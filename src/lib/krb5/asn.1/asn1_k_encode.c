@@ -1010,7 +1010,6 @@ asn1_error_code asn1_encode_krb_saved_safe_body(asn1buf *buf, const krb5_data *b
 asn1_error_code asn1_encode_pk_authenticator(asn1buf *buf, const krb5_pk_authenticator *val, unsigned int *retlen)
 {
   asn1_setup();
-
   asn1_addlenfield(val->paChecksum.length, val->paChecksum.contents, 3, asn1_encode_octetstring);
   asn1_addfield(val->nonce, 2, asn1_encode_integer);
   asn1_addfield(val->ctime, 1, asn1_encode_kerberos_time);

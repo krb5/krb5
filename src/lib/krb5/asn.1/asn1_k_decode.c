@@ -1653,7 +1653,17 @@ asn1_error_code asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
       }      
 #endif
 
+#if 0
       opt_field(val->supportedCMSTypes, 2, asn1_decode_sequence_of_AlgorithmIdentifier, NULL);
+#else
+      if (asn1buf_remains(&subbuf, seqindef)) {
+        if (tagnum == 2) {
+	  asn1_decode_sequence_of_AlgorithmIdentifier(&subbuf,val->supportedCMSTypes);
+	  if (!taglen && indef) { get_eoc(); }
+	  next_tag();
+	} else val->supportedCMSTypes = NULL;
+      }
+#endif
       opt_lenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_decode_octetstring);
       end_structure();
     }

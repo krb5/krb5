@@ -68,6 +68,11 @@ struct server_stats{
     int successes, failures;
 };
 
+typedef struct _test_svr_req_ctx {
+    int value1;
+    int value2;
+} test_svr_req_ctx;
+
 static int
 client_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 {
@@ -78,6 +83,7 @@ static krb5_error_code
 client_process(krb5_context kcontext,
 	       void *client_plugin_context,
 	       void *client_request_context,
+	       krb5_get_init_creds_opt *opt,
 	       preauth_get_client_data_proc client_get_data_proc,
 	       struct _krb5_preauth_client_rock *rock,
 	       krb5_kdc_req *request,
@@ -99,6 +105,27 @@ client_process(krb5_context kcontext,
     krb5_error_code status = 0;
     krb5_int32 cksumtype, *enctypes;
     unsigned int i, n_enctypes, cksumtype_count;
+    int num_gic_info = 0;
+    krb5_gic_opt_pa_data *gic_info;
+
+    status = krb5_get_init_creds_opt_get_pa(kcontext, opt,
+					    &num_gic_info, &gic_info);
+    if (status && status != ENOENT) {
+#ifdef DEBUG
+	fprintf(stderr, "Error from krb5_get_init_creds_opt_get_pa: %s\n",
+		error_message(status));
+#endif
+	return status;
+    }
+#ifdef DEBUG
+    fprintf(stderr, "(cksum_body) Got the following gic options:\n");
+#endif
+    for (i = 0; i < num_gic_info; i++) {
+#ifdef DEBUG
+	fprintf(stderr, "  '%s' = '%s'\n", gic_info[i].attr, gic_info[i].value);
+#endif
+    }
+    krb5_get_init_creds_opt_free_pa(kcontext, num_gic_info, gic_info);
 
     memset(&checksum, 0, sizeof(checksum));
 
@@ -193,6 +220,20 @@ client_process(krb5_context kcontext,
     return 0;
 }
 
+static krb5_error_code
+client_gic_opt(krb5_context kcontext,
+	       void *plugin_context,
+	       krb5_get_init_creds_opt *opt,
+	       const char *attr,
+	       const char *value)
+{
+#ifdef DEBUG
+    fprintf(stderr, "(cksum_body) client_gic_opt: received '%s' = '%s'\n",
+	    attr, value); 
+#endif
+    return 0;
+}
+
 /* Initialize and tear down the server-side module, and do stat tracking. */
 static krb5_error_code
 server_init(krb5_context kcontext, void **module_context)
@@ -200,7 +241,7 @@ server_init(krb5_context kcontext, void **module_context)
     struct server_stats *stats;
     stats = malloc(sizeof(struct server_stats));
     if (stats == NULL)
-        return ENOMEM;
+	return ENOMEM;
     stats->successes = 0;
     stats->failures = 0;
     *module_context = stats;
@@ -304,6 +345,7 @@ server_verify(krb5_context kcontext,
     krb5_error_code status;
     struct server_stats *stats;
     krb5_data *test_edata;
+    test_svr_req_ctx *svr_req_ctx;
 
     stats = pa_module_context;
 
@@ -456,6 +498,18 @@ server_verify(krb5_context kcontext,
 	}
     }
 
+    /* Return a request context to exercise code that handles it */
+    svr_req_ctx = malloc(sizeof(*svr_req_ctx));
+    if (svr_req_ctx != NULL) {
+	svr_req_ctx->value1 = 111111;
+	svr_req_ctx->value2 = 222222;
+#ifdef DEBUG
+	fprintf(stderr, "server_verify: returning context at %p\n",
+		svr_req_ctx);
+#endif
+    }
+    *pa_request_context = svr_req_ctx;
+
     /* Note that preauthentication succeeded. */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
     stats->successes++;
@@ -479,6 +533,37 @@ server_return(krb5_context kcontext,
 {
     /* We don't need to send data back on the return trip. */
     *send_pa = NULL;
+    return 0;
+}
+
+/* Test server request context freeing */
+static krb5_error_code
+server_free_reqctx(krb5_context kcontext,
+		   void *pa_module_context,
+		   void **pa_request_context)
+{
+    test_svr_req_ctx *svr_req_ctx;
+#ifdef DEBUG
+    fprintf(stderr, "server_free_reqctx: entered!\n");
+#endif
+    if (pa_request_context == NULL)
+	return 0;
+
+    svr_req_ctx = *pa_request_context;
+    if (svr_req_ctx == NULL)
+	return 0;
+
+    if (svr_req_ctx->value1 != 111111 || svr_req_ctx->value2 != 222222) {
+	fprintf(stderr, "server_free_reqctx: got invalid req context "
+		"at %p with values %d and %d\n",
+		svr_req_ctx, svr_req_ctx->value1, svr_req_ctx->value2);
+	return EINVAL;
+    }
+#ifdef DEBUG
+    fprintf(stderr, "server_free_reqctx: freeing context at %p\n", svr_req_ctx);
+#endif
+    free(svr_req_ctx);
+    *pa_request_context = NULL;
     return 0;
 }
 
@@ -506,6 +591,7 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     NULL,				    /* request fini function */
     client_process,			    /* process function */
     NULL,				    /* try_again function */
+    client_gic_opt			    /* get init creds opt function */
 };
 
 struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
@@ -517,5 +603,5 @@ struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
     server_get_edata,
     server_verify,
     server_return,
-    NULL
+    server_free_reqctx
 };

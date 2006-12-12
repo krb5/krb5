@@ -215,11 +215,11 @@ krb5_error_code encode_krb5_reply_key_pack
 krb5_error_code encode_krb5_reply_key_pack_draft9
 	(const krb5_reply_key_pack_draft9 *, krb5_data **code);
 
-krb5_error_code encode_krb5_td_trusted_certifiers
-	(const krb5_external_principal_identifier **, krb5_data **code);
-
 krb5_error_code encode_krb5_typed_data
 	(const krb5_typed_data **, krb5_data **code);
+
+krb5_error_code encode_krb5_td_trusted_certifiers
+	(const krb5_external_principal_identifier **, krb5_data **code);
 
 krb5_error_code encode_krb5_td_dh_parameters
 	(const krb5_algorithm_identifier **, krb5_data **code);

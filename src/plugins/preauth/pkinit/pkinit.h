@@ -31,6 +31,11 @@
 #ifndef _PKINIT_H
 #define _PKINIT_H
 
+#include "pkinit_accessor.h"
+
+#define DH_PROTOCOL     1
+#define RSA_PROTOCOL    2
+
 extern const krb5_octet_data dh_oid;
 extern unsigned char pkinit_1024_dhprime[1024/8];
 extern unsigned char pkinit_2048_dhprime[2048/8];
@@ -38,9 +43,11 @@ extern unsigned char pkinit_4096_dhprime[4096/8];
 
 typedef struct _pkinit_context {
     int magic;
+    krb5_context context;
     int require_eku;
     int require_san;
     int allow_upn;
+    int dh_or_rsa;
     int require_crl_checking;
     char *ctx_identity;
     char *ctx_anchors;
@@ -68,20 +75,47 @@ typedef struct _pkinit_context {
 
 typedef struct _pkinit_req_context {
     int magic;
+    pkinit_context *plugctx;
     DH *dh;
     int dh_size;
     int require_eku;
     int require_san;
     int require_hostname_match;
     int allow_upn;
+    int dh_or_rsa;
     int require_crl_checking;
     int win2k_target;
     int win2k_require_cksum;
     krb5_preauthtype patype;
+    krb5_prompter_fct prompter;
+    void *prompter_data;
+    int pkcs11_method;
+#ifndef WITHOUT_PKCS11
+    char *p11_module_name;
+    void *p11_module;
+    unsigned int slotid;
+    CK_SESSION_HANDLE session;
+    CK_FUNCTION_LIST_PTR p11;
+    CK_BYTE_PTR cert_id;
+    int cert_id_len;
+    CK_MECHANISM_TYPE mech;
+#endif
+    void *credctx;
 } pkinit_req_context;
 
-/* Function prototypes */
+typedef struct _pkinit_cred_context {
+    STACK_OF(X509) *cert;
+    STACK_OF(X509) *trustedCAs;
+    STACK_OF(X509) *untrustedCAs;
+    DH *dh;
+} pkinit_cred_context;
 
+int pkinit_get_certs(int type, STACK_OF(X509) **certs);
+int get_file_certs(char *name, STACK_OF(X509) **certs);
+int get_dir_certs(char *name, STACK_OF(X509) **certs);
+int get_pkcs11_certs(char *name, STACK_OF(X509) **certs);
+
+/* Function prototypes */
 void openssl_init(void);
 
 krb5_error_code pkinit_init_dh_params(krb5_context, pkinit_context *);
@@ -94,14 +128,14 @@ int pkinit_check_dh_params
 	(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
 
 krb5_error_code pkinit_sign_data
-	(unsigned char *data, int data_len, unsigned char **sig,
-		int *sig_len, char *filename);
+	(pkinit_req_context *, unsigned char *data, int data_len, 
+		unsigned char **sig, int *sig_len, char *filename);
 
 krb5_error_code create_signature
         (unsigned char **, int *, unsigned char *, int, char *);
 
 krb5_error_code pkinit_decode_data
-	(unsigned char *data, int data_len, unsigned char **decoded,
+	(pkinit_req_context *, unsigned char *data, int data_len, unsigned char **decoded,
 		int *decoded_len, char *filename, X509 *cert);
 
 krb5_error_code decode_data
@@ -109,7 +143,7 @@ krb5_error_code decode_data
 
 krb5_error_code pkcs7_signeddata_create
 	(unsigned char *, int, unsigned char **, int *, X509 *,
-		char *, ASN1_OBJECT *, krb5_context);
+		char *, ASN1_OBJECT *, krb5_context, pkinit_req_context *);
 
 krb5_error_code pkcs7_signeddata_verify
 	(unsigned char *, int, char **, int *, X509 **,
@@ -127,7 +161,7 @@ krb5_error_code pkcs7_envelopeddata_create
 
 krb5_error_code pkcs7_envelopeddata_verify
 	(unsigned char *, int, char **, int *, X509 *, char *, 
-		krb5_preauthtype , pkinit_context *, X509 **, krb5_context);
+		krb5_preauthtype, X509 **, pkinit_req_context *);
 
 int verify_id_pkinit_san
 	(X509 * x, krb5_principal *out, krb5_context context, 

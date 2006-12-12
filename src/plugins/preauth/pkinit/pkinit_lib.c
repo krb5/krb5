@@ -198,9 +198,10 @@ static int openssl_callback (int, X509_STORE_CTX *);
 static int openssl_callback_ignore_crls (int, X509_STORE_CTX *);
 
 static int pkcs7_decrypt
-	(PKCS7 *p7, X509 *cert, BIO *bio, char *filename);
+	(pkinit_req_context *reqctx, PKCS7 *p7, X509 *cert, BIO *bio, char *filename);
 
-static BIO * pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename);
+static BIO * pkcs7_dataDecode
+	(pkinit_req_context *reqctx,PKCS7 *p7, X509 *pcert, char *filename);
 
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \
@@ -210,16 +211,23 @@ krb5_error_code
 pkinit_lib_init(krb5_context context, void **blob)
 {
     pkinit_context *plgctx;
-    krb5_error_code retval = ENOMEM;
+    krb5_error_code retval;
     int tmp = 0;
 
+    retval = pkinit_accessor_init();
+    if (retval)
+	goto out;
+
+    retval = ENOMEM;
     plgctx = (pkinit_context *) calloc(1, sizeof(*plgctx));
     if (plgctx == NULL) 
 	goto out;
 
     plgctx->magic = PKINIT_CTX_MAGIC;
+    plgctx->context = context;
     plgctx->require_eku = 1;
     plgctx->require_san = 1;
+    plgctx->dh_or_rsa = DH_PROTOCOL;
     plgctx->allow_upn = 0;
     plgctx->require_crl_checking = 0;
 
@@ -583,7 +591,8 @@ pkcs7_signeddata_create(unsigned char *data,
 			X509 * cert,
 			char *filename,
 			ASN1_OBJECT *oid,
-			krb5_context context)
+			krb5_context context,
+			pkinit_req_context *reqctx)
 {
     krb5_error_code retval = ENOMEM;
     PKCS7  *p7 = NULL, *inner_p7 = NULL;
@@ -593,13 +602,19 @@ pkcs7_signeddata_create(unsigned char *data,
     ASN1_TYPE *pkinit_data = NULL;
     STACK_OF(X509) * cert_stack = NULL;
     ASN1_OCTET_STRING *digest_attr = NULL;
-    EVP_MD_CTX ctx;
+    EVP_MD_CTX ctx, ctx2;
     const EVP_MD *md_tmp;
-    unsigned char md_data[EVP_MAX_MD_SIZE], *abuf = NULL;
-    unsigned int md_len, alen;
+    unsigned char md_data[EVP_MAX_MD_SIZE], md_data2[EVP_MAX_MD_SIZE];
+    unsigned char *digestInfo_buf = NULL, *abuf = NULL;
+    unsigned int md_len, md_len2, alen, digestInfo_len;
     STACK_OF(X509_ATTRIBUTE) * sk;
     unsigned char *sig = NULL;
     int sig_len = 0;
+    char *dirname = NULL;
+    X509_ALGOR *alg = NULL;
+    ASN1_OCTET_STRING *digest = NULL;
+    int z = 0, alg_len = 0, digest_len = 0;
+    unsigned char *y = NULL, *alg_buf = NULL, *digest_buf = NULL;
 
     /* start creating PKCS7 data */
     if ((p7 = PKCS7_new()) == NULL)
@@ -612,11 +627,46 @@ pkcs7_signeddata_create(unsigned char *data,
     if (!ASN1_INTEGER_set(p7s->version, 1))
 	goto cleanup;
 
-    /* create a cert chain */
+    /* create a cert chain that has at least the signer's certificate */
     if ((cert_stack = sk_X509_new_null()) == NULL)
 	goto cleanup;
+
+    if (get_filename(&dirname, "X509_CA_DIR", 1) != 0) {
+	pkiDebug("only including signer's certificate\n");
+	sk_X509_push(cert_stack, X509_dup(cert));
+    } else {
+	/* create a cert chain */
+	X509_STORE *certstore = NULL;
+	X509_STORE_CTX certctx;
+	STACK_OF(X509) *certstack = NULL;
+	char buf[256];
+	int i = 0, size = 0;
+
+	if ((certstore = X509_STORE_new()) == NULL) 
+	    goto cleanup;
+	if(!X509_STORE_load_locations(certstore, NULL, dirname))
+	    goto cleanup;
+	pkiDebug("building certificate chain from dir = %s\n", dirname);
+	X509_STORE_set_verify_cb_func(certstore, openssl_callback);
+	X509_STORE_CTX_init(&certctx, certstore, cert, NULL);
+	if (!X509_verify_cert(&certctx)) 
+	    goto cleanup;
+	certstack = X509_STORE_CTX_get1_chain(&certctx);
+	size = sk_X509_num(certstack);
+	pkiDebug("size of certificate chain = %d\n", size);
+	for(i = 0; i < size - 1; i++) {
+	    X509 *x = sk_X509_value(certstack, i);
+	    X509_NAME_oneline(X509_get_subject_name(x), buf, 256);
+	    pkiDebug("cert #%d: %s\n", i, buf);
+	    sk_X509_push(cert_stack, X509_dup(x));
+	}
+	X509_STORE_CTX_cleanup(&certctx);
+	X509_STORE_free(certstore);
+	sk_X509_free(certstack);
+    }
+    if (dirname != NULL)
+	free(dirname);
     p7s->cert = cert_stack;
-    sk_X509_push(cert_stack, X509_dup(cert));
 
     /* fill-in PKCS7_SIGNER_INFO */
     if ((p7si = PKCS7_SIGNER_INFO_new()) == NULL)
@@ -647,7 +697,7 @@ pkcs7_signeddata_create(unsigned char *data,
     /* Set sig algs */
     if (p7si->digest_enc_alg->parameter != NULL)
 	ASN1_TYPE_free(p7si->digest_enc_alg->parameter);
-    p7si->digest_enc_alg->algorithm = OBJ_nid2obj(NID_rsaEncryption);
+    p7si->digest_enc_alg->algorithm = OBJ_nid2obj(NID_sha1WithRSAEncryption);
     if (!(p7si->digest_enc_alg->parameter = ASN1_TYPE_new()))
 	goto cleanup;
     p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
@@ -675,12 +725,69 @@ pkcs7_signeddata_create(unsigned char *data,
     alen = ASN1_item_i2d((ASN1_VALUE *) sk, &abuf,
 			 ASN1_ITEM_rptr(PKCS7_ATTR_SIGN));
     if (abuf == NULL)
-	goto cleanup;
+	goto cleanup2;
 
-    retval = pkinit_sign_data(abuf, alen, &sig, &sig_len, filename);
+    /* ActiveCard can only do RSAEncryption */
+    /* to compute sha1WithRSAEncryption, encode the algorithm ID for the hash 
+     * function and the hash value into an ASN.1 value of type DigestInfo 
+     * DigestInfo::=SEQUENCE{
+     *	digestAlgorithm  AlgorithmIdentifier,
+     *	digest OCTET STRING }
+     */
+    if (reqctx && reqctx->pkcs11_method && 
+	    reqctx->mech == CKM_RSA_PKCS) {
+	pkiDebug("mech = CKM_RSA_PKCS\n");
+	EVP_MD_CTX_init(&ctx2);
+	EVP_DigestInit_ex(&ctx2, md_tmp, NULL);
+	EVP_DigestUpdate(&ctx2, abuf, alen);
+	EVP_DigestFinal_ex(&ctx2, md_data2, &md_len2);
+
+	alg = X509_ALGOR_new();
+	if (alg == NULL)
+	    goto cleanup2;
+	alg->algorithm = OBJ_nid2obj(NID_sha1);
+	alg->parameter = NULL;
+	alg_len = i2d_X509_ALGOR(alg, NULL);
+	alg_buf = malloc(alg_buf);
+	if (alg_buf == NULL)
+	    goto cleanup2;
+
+	digest = ASN1_OCTET_STRING_new();
+	if (digest == NULL)
+	    goto cleanup2;
+	ASN1_OCTET_STRING_set(digest, md_data2, md_len2);
+	digest_len = i2d_ASN1_OCTET_STRING(digest, NULL);
+	digest_buf = malloc(digest_len);
+	if (digest_buf == NULL)
+	    goto cleanup2;
+    
+	digestInfo_len = ASN1_object_size(1, alg_len + digest_len, 
+					  V_ASN1_SEQUENCE);
+	y = digestInfo_buf = malloc(digestInfo_len);
+	if (digestInfo_buf == NULL)
+	    goto cleanup2;
+	ASN1_put_object(&y, 1, alg_len + digest_len, V_ASN1_SEQUENCE, 
+			V_ASN1_UNIVERSAL);
+	i2d_X509_ALGOR(alg, &y);
+	i2d_ASN1_OCTET_STRING(digest, &y);
+#ifdef DEBUG_SIG
+	pkiDebug("signing buffer\n");
+	print_buffer(digestInfo_buf, digestInfo_len);
+	print_buffer_bin(digestInfo_buf, digestInfo_len, "/tmp/client_tosign");
+#endif
+	retval = pkinit_sign_data(reqctx, digestInfo_buf, digestInfo_len, 
+				  &sig, &sig_len, filename);
+    } else {
+	if (reqctx != NULL)
+	    pkiDebug("mech = %s\n", reqctx->pkcs11_method?"CKM_SHA1_RSA_PKCS":"FS");
+	retval = pkinit_sign_data(reqctx, abuf, alen, &sig, &sig_len, filename);
+    }
+#ifdef DEBUG_SIG
+    print_buffer(sig, sig_len);
+#endif
     free(abuf);
     if (retval)
-	goto cleanup;
+	goto cleanup2;
 
     /* Add signature */
     if (!ASN1_STRING_set(p7si->enc_digest, (unsigned char *) sig, sig_len)) {
@@ -689,20 +796,20 @@ pkcs7_signeddata_create(unsigned char *data,
 	krb5_set_error_message(context, retval, "%s\n", 
 			       ERR_error_string(err, NULL));
 	pkiDebug("failed to add a signed digest attribute\n");
-	goto cleanup;
+	goto cleanup2;
     }
     /* adder signer_info to pkcs7 signed */
     if (!PKCS7_add_signer(p7, p7si))
-	goto cleanup;
+	goto cleanup2;
 
     /* start on adding data to the pkcs7 signed */
     if ((inner_p7 = PKCS7_new()) == NULL)
-	goto cleanup;
+	goto cleanup2;
     if ((pkinit_data = ASN1_TYPE_new()) == NULL)
-	goto cleanup;
+	goto cleanup2;
     pkinit_data->type = V_ASN1_OCTET_STRING;
     if ((pkinit_data->value.octet_string = ASN1_OCTET_STRING_new()) == NULL)
-	goto cleanup;
+	goto cleanup2;
     if (!ASN1_OCTET_STRING_set(pkinit_data->value.octet_string, data, 
 			       data_len)) {
 	unsigned long err = ERR_peek_error();
@@ -710,11 +817,11 @@ pkcs7_signeddata_create(unsigned char *data,
 	krb5_set_error_message(context, retval, "%s\n", 
 			       ERR_error_string(err, NULL));
 	pkiDebug("failed to add pkcs7 data\n");
-	goto cleanup;
+	goto cleanup2;
     }
 
     if (!PKCS7_set0_type_other(inner_p7, OBJ_obj2nid(oid), pkinit_data)) 
-	goto cleanup;
+	goto cleanup2;
     if (p7s->contents != NULL)
 	PKCS7_free(p7s->contents);
     p7s->contents = inner_p7;
@@ -726,11 +833,11 @@ pkcs7_signeddata_create(unsigned char *data,
 	krb5_set_error_message(context, retval, "%s\n", 
 			       ERR_error_string(err, NULL));
 	pkiDebug("failed to der encode pkcs7\n");
-	goto cleanup;
+	goto cleanup2;
     }
     if ((p = *signed_data =
 	 (unsigned char *) malloc(*signed_data_len)) == NULL)
-	goto cleanup;
+	goto cleanup2;
 
     /* DER encode PKCS7 data */
     retval = i2d_PKCS7(p7, &p);
@@ -740,14 +847,27 @@ pkcs7_signeddata_create(unsigned char *data,
 	krb5_set_error_message(context, retval, "%s\n", 
 			       ERR_error_string(err, NULL));
 	pkiDebug("failed to der encode pkcs7\n");
-	goto cleanup;
+	goto cleanup2;
     }
     retval = 0;
 
+  cleanup2:
+    EVP_MD_CTX_cleanup(&ctx);
+    if (reqctx && reqctx->pkcs11_method && reqctx->mech == CKM_RSA_PKCS) 
+	EVP_MD_CTX_cleanup(&ctx2);
+    if (alg != NULL)
+	X509_ALGOR_free(alg);
+    if (digest != NULL)
+	ASN1_OCTET_STRING_free(digest);
+    if (alg_buf != NULL)
+	free(alg_buf);
+    if (digest_buf != NULL)
+	free(digest_buf);
+    if (digestInfo_buf != NULL)
+	free(digestInfo_buf);
   cleanup:
     if (p7 != NULL)
 	PKCS7_free(p7);
-    EVP_MD_CTX_cleanup(&ctx);
     if (sig != NULL)
 	free(sig);
 
@@ -782,6 +902,9 @@ pkcs7_signeddata_verify(unsigned char *signed_data,
 	pkiDebug("failed to get the name of the directory for trusted CAs\n");
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
+#ifdef DEBUG_ASN1
+    print_buffer_bin(p, signed_data_len, "/tmp/kdc_signeddata");
+#endif
 
     if ((p7 = d2i_PKCS7(NULL, &p, signed_data_len)) == NULL) {
 	unsigned long err = ERR_peek_error();
@@ -825,9 +948,24 @@ pkcs7_signeddata_verify(unsigned char *signed_data,
 	goto cleanup;
     if (!X509_STORE_CTX_init(&cert_ctx, store, x, p7->d.sign->cert)) 
 	goto cleanup;
+    if (p7->d.sign->cert != NULL) {
+	int sk_size = sk_X509_num(p7->d.sign->cert);
+	int i;
+	char buf[256];
+	pkiDebug("received cert chain of size %d\n", sk_size);
+	for (i = 0; i < sk_size; i++) {
+	    X509 *tmp_cert = sk_X509_value(p7->d.sign->cert, i);
+	    X509_NAME_oneline(X509_get_subject_name(tmp_cert), buf, 256);
+	    pkiDebug("cert #%d: %s\n", i, buf);
+	}
+    }
     i = X509_verify_cert(&cert_ctx);
     if (i <= 0) {
 	int j = X509_STORE_CTX_get_error(&cert_ctx);
+	int sk_size = sk_X509_num(p7->d.sign->cert);
+	int i;
+	char buf[256];
+
 	*cert = X509_dup(cert_ctx.current_cert);
 	switch(j) {
 	    case X509_V_ERR_CERT_REVOKED:
@@ -840,9 +978,17 @@ pkcs7_signeddata_verify(unsigned char *signed_data,
 	    default:
 		retval = KRB5KDC_ERR_INVALID_CERTIFICATE;
 	}
+	X509_NAME_oneline(X509_get_subject_name(*cert), buf, 256);
+	pkiDebug("problem with cert DN = %s (error=%d)\n", buf, j);
 	pkiDebug("%s\n", X509_verify_cert_error_string(j));
 	krb5_set_error_message(context, retval, "%s\n", 
 	    X509_verify_cert_error_string(j));
+	pkiDebug("received cert chain of size %d\n", sk_size);
+	for (i = 0; i < sk_size; i++) {
+	    X509 *tmp_cert = sk_X509_value(p7->d.sign->cert, i);
+	    X509_NAME_oneline(X509_get_subject_name(tmp_cert), buf, 256);
+	    pkiDebug("cert #%d: %s\n", i, buf);
+	}
     }
     X509_STORE_CTX_cleanup(&cert_ctx);
     if (i <= 0) 
@@ -937,15 +1083,16 @@ pkcs7_envelopeddata_verify(unsigned char *enveloped_data,
 			   X509 *client_cert,
 			   char *key_filename,
 			   krb5_preauthtype pa_type,
-			   pkinit_context *plgctx,
 			   X509 ** cert,
-			   krb5_context context)
+			   pkinit_req_context *reqctx)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
     int i = 0, size = 0;
     const unsigned char *p = enveloped_data;
+    krb5_context context = reqctx->plugctx->context;
+    pkinit_context *plgctx = reqctx->plugctx;
 
     int tmp_buf_len = 0, tmp_buf2_len = 0;
     unsigned char *tmp_buf = NULL, *tmp_buf2 = NULL;
@@ -966,7 +1113,7 @@ pkcs7_envelopeddata_verify(unsigned char *enveloped_data,
     }
 
     out = BIO_new(BIO_s_mem());
-    if (pkcs7_decrypt(p7, client_cert, out, key_filename)) {
+    if (pkcs7_decrypt(reqctx, p7, client_cert, out, key_filename)) {
 	pkiDebug("PKCS7 decryption successful\n");
     } else {
 	unsigned long err = ERR_peek_error();
@@ -1094,7 +1241,7 @@ pkcs7_envelopeddata_create(unsigned char *key_pack,
     unsigned char *p = NULL;
 
     retval = pkcs7_signeddata_create(key_pack, key_pack_len, &signed_data,
-	&signed_data_len, kdc_cert, filename, oid, context);
+	&signed_data_len, kdc_cert, filename, oid, context, NULL);
     if (retval) {
 	pkiDebug("failed to create pkcs7 signed data\n");
 	goto cleanup;
@@ -1191,7 +1338,6 @@ verify_id_pkinit_san(X509 *x,
 	    pkiDebug("unable to retrieve subject alt name ext\n");
 	    goto cleanup;
 	}
-
 	pkiDebug("found %d subject alt name extension(s)\n", 
 		sk_GENERAL_NAME_num(ialt));
 
@@ -1208,7 +1354,7 @@ verify_id_pkinit_san(X509 *x,
 #ifdef DEBUG_ASN1
 		    print_buffer_bin(name.data, name.length, "/tmp/pkinit_san");
 #endif
-		    ret = decode_krb5_principal_name(&name, out);
+		    ret = k5int_decode_krb5_principal_name(&name, out);
 		} else if (plgctx->allow_upn && 
 			    !OBJ_cmp(plgctx->id_pkinit_san9, 
 				     gen->d.otherName->type_id)) {
@@ -1807,7 +1953,7 @@ create_krb5_trustedCertifiers(STACK_OF(X509) * sk,
 }
 
 static int 
-pkcs7_decrypt(PKCS7 *p7, X509 *cert, BIO *data, char *filename) 
+pkcs7_decrypt(pkinit_req_context *reqctx, PKCS7 *p7, X509 *cert, BIO *data, char *filename) 
 {
     int flags = PKCS7_BINARY;
     BIO *tmpmem = NULL;
@@ -1822,7 +1968,7 @@ pkcs7_decrypt(PKCS7 *p7, X509 *cert, BIO *data, char *filename)
 	return 0;
     }
 
-    if(!(tmpmem = pkcs7_dataDecode(p7, cert, filename))) {
+    if(!(tmpmem = pkcs7_dataDecode(reqctx, p7, cert, filename))) {
 	pkiDebug("unable to decrypt pkcs7 object\n");
 	return 0;
     }
@@ -1838,7 +1984,7 @@ pkcs7_decrypt(PKCS7 *p7, X509 *cert, BIO *data, char *filename)
 }
 
 static BIO * 
-pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename)
+pkcs7_dataDecode(pkinit_req_context *reqctx, PKCS7 *p7, X509 *pcert, char *filename)
 {
     int i = 0, jj= 0, jj2 = 0, tmp_len = 0;
     BIO *out=NULL,*etmp=NULL,*bio=NULL;
@@ -1904,7 +2050,7 @@ pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename)
     if (pcert == NULL) {
 	for (i=0; i<sk_PKCS7_RECIP_INFO_num(rsk); i++) {
 	    ri=sk_PKCS7_RECIP_INFO_value(rsk,i);
-	    jj = pkinit_decode_data(M_ASN1_STRING_data(ri->enc_key),
+	    jj = pkinit_decode_data(reqctx, M_ASN1_STRING_data(ri->enc_key),
 				    M_ASN1_STRING_length(ri->enc_key),
 				    &tmp, &tmp_len, filename, pcert);
 	    if (jj) {
@@ -1927,7 +2073,7 @@ pkcs7_dataDecode(PKCS7 *p7, X509 *pcert, char *filename)
 	}
     }
     else {
-	jj = pkinit_decode_data(M_ASN1_STRING_data(ri->enc_key),
+	jj = pkinit_decode_data(reqctx, M_ASN1_STRING_data(ri->enc_key),
 				M_ASN1_STRING_length(ri->enc_key),
 				&tmp, &tmp_len, filename, pcert);
 	if (jj || tmp_len <= 0) {

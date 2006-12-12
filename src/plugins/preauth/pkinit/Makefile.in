@@ -27,12 +27,14 @@ SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 SRCS= \
+	$(srcdir)/pkinit_accessor.c \
 	$(srcdir)/pkinit_srv.c \
 	$(srcdir)/pkinit_lib.c \
 	$(srcdir)/pkinit_clnt.c
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS= \
+	pkinit_accessor.o \
 	pkinit_srv.o \
 	pkinit_lib.o \
 	pkinit_clnt.o

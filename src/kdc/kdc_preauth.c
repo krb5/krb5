@@ -77,54 +77,17 @@ typedef des_cblock mit_des_cblock;
 extern void mit_des_fixup_key_parity (mit_des_cblock );
 extern int mit_des_is_weak_key (mit_des_cblock );
 
-typedef krb5_error_code (*verify_proc)
-    (krb5_context, krb5_db_entry *client,
-		    krb5_data *req_pkt,
-		    krb5_kdc_req *request,
-		    krb5_enc_tkt_part * enc_tkt_reply, krb5_pa_data *data,
-		    preauth_get_entry_data_proc get_entry_data,
-		    void *pa_module_context,
-		    void **pa_request_context,
-		    krb5_data **e_data);
-
-typedef krb5_error_code (*edata_proc)
-    (krb5_context, krb5_kdc_req *request,
-		    krb5_db_entry *client, krb5_db_entry *server,
-		    preauth_get_entry_data_proc get_entry_data,
-		    void *pa_module_context,
-		    krb5_pa_data *data);
-
-typedef krb5_error_code (*return_proc)
-    (krb5_context, krb5_pa_data * padata, 
-		    krb5_db_entry *client,
-		    krb5_data *req_pkt,
-		    krb5_kdc_req *request, krb5_kdc_rep *reply,
-		    krb5_key_data *client_key,
-		    krb5_keyblock *encrypting_key,
-		    krb5_pa_data **send_pa,
-		    preauth_get_entry_data_proc get_entry_data,
-		    void *pa_module_context,
-		    void **pa_request_context);
-
-typedef krb5_error_code (*freepa_proc)
-    (krb5_context, void *pa_module_context, void **pa_request_context);
-
-typedef krb5_error_code (*init_proc)
-    (krb5_context, void **);
-typedef void (*fini_proc)
-    (krb5_context, void *);
-
 typedef struct _krb5_preauth_systems {
     const char *name;
     int		type;
     int		flags;
     void       *plugin_context;
-    init_proc   init;
-    fini_proc   fini;
-    edata_proc	get_edata;
-    verify_proc	verify_padata;
-    return_proc return_padata;
-    freepa_proc free_pa_request_context;
+    preauth_server_init_proc	init;
+    preauth_server_fini_proc	fini;
+    preauth_server_edata_proc	get_edata;
+    preauth_server_verify_proc	verify_padata;
+    preauth_server_return_proc	return_padata;
+    preauth_server_free_reqcontext_proc	free_pa_reqctx;
 } krb5_preauth_systems;
 
 static krb5_error_code verify_enc_timestamp
@@ -305,7 +268,7 @@ load_preauth_plugins(krb5_context context)
     struct krb5plugin_preauth_server_ftable_v0 *ftable;
     int module_count, i, j, k;
     void *plugin_context;
-    init_proc server_init_proc = NULL;
+    preauth_server_init_proc server_init_proc = NULL;
 
     memset(&err, 0, sizeof(err));
 
@@ -428,7 +391,7 @@ load_preauth_plugins(krb5_context context)
 		preauth_systems[k].get_edata = ftable->edata_proc;
 		preauth_systems[k].verify_padata = ftable->verify_proc;
 		preauth_systems[k].return_padata = ftable->return_proc;
-		preauth_systems[k].free_pa_request_context =
+		preauth_systems[k].free_pa_reqctx =
 		    ftable->freepa_reqcontext_proc;
 		k++;
 	    }
@@ -527,10 +490,9 @@ free_padata_context(krb5_context kcontext, void **padata_context)
 	if (context->contexts[i].pa_context != NULL) {
 	    preauth_system = context->contexts[i].pa_system;
 	    mctx = preauth_system->plugin_context;
-	    if (preauth_system->free_pa_request_context != NULL) {
+	    if (preauth_system->free_pa_reqctx != NULL) {
 		pctx = &context->contexts[i].pa_context;
-		(*preauth_system->free_pa_request_context)(kcontext, mctx,
-							   pctx);
+		(*preauth_system->free_pa_reqctx)(kcontext, mctx, pctx);
 	    }
 	    context->contexts[i].pa_context = NULL;
 	}

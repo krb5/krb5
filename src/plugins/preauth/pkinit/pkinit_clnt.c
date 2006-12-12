@@ -35,6 +35,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <dlfcn.h>
+#include <sys/stat.h>
 
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
@@ -63,15 +64,12 @@
 #define pkiDebug(args...)
 #endif
 
-#define MAX_CERT_SIZE	4096
-#define MAX_ID_SIZE	4
-#define MAX_N_OBJS	6
-
-#define DH_PROTOCOL	0
-#define RSA_PROTOCOL	1
+#define PKCS11_MODNAME "opensc-pkcs11.so"
+#define PK_SIGLEN_GUESS 1000
 
 krb5_error_code pkinit_client_process
 	(krb5_context context, void *plugin_context, void *request_context,
+		krb5_get_init_creds_opt *opt,
 		preauth_get_client_data_proc get_data_proc,
 		struct _krb5_preauth_client_rock *rock,
 		krb5_kdc_req * request, krb5_data *encoded_request_body,
@@ -83,6 +81,7 @@ krb5_error_code pkinit_client_process
 
 krb5_error_code pkinit_client_tryagain
 	(krb5_context context, void *plugin_context, void *request_context,
+		krb5_get_init_creds_opt *opt,
 		preauth_get_client_data_proc get_data_proc,
 		struct _krb5_preauth_client_rock *rock,
 		krb5_kdc_req * request, krb5_data *encoded_request_body,
@@ -120,10 +119,11 @@ krb5_error_code pa_pkinit_parse_rep
 		krb5_pa_data * in_padata, krb5_pa_data ** out_padata,
 		krb5_enctype etype, krb5_keyblock * as_key, krb5_data *);
 
-static int using_pkcs11(void);
+krb5_error_code pkinit_find_private_key
+	(pkinit_req_context *, CK_ATTRIBUTE_TYPE usage, CK_OBJECT_HANDLE *objp);
 
 krb5_error_code pkinit_get_client_cert
-	(const char *principal, char *filename, X509 ** client_cert);
+	(pkinit_req_context *, const char *, char *, X509 **);
 
 krb5_error_code create_issuerAndSerial
 	(X509 *cert, unsigned char **out, int *out_len);
@@ -144,10 +144,8 @@ static krb5_error_code create_krb5_trustedCas
 	(STACK_OF(X509) *, int flag, krb5_trusted_ca ***);
 
 #ifndef WITHOUT_PKCS11
-static krb5_error_code pkinit_open_session
-	(krb5_context, krb5_prompter_fct, void *);
-
-static void pkinit_close_session(void);
+static krb5_error_code pkinit_login(pkinit_req_context *reqctx, CK_TOKEN_INFO *tip);
+static krb5_error_code pkinit_open_session(pkinit_req_context *);
 #endif
 
 static void init_krb5_subject_pk_info(krb5_subject_pk_info **in);
@@ -188,6 +186,8 @@ pa_pkinit_gen_req(krb5_context context,
     pkiDebug("pa_pkinit_gen_req: enctype = %d\n", *etype);
     cksum.contents = NULL;
     reqctx->patype = in_padata->pa_type;
+    reqctx->prompter = prompter;
+    reqctx->prompter_data = prompter_data;
 
     /* If we don't have a client cert, we're done */
     if (request->client == NULL) {
@@ -198,21 +198,14 @@ pa_pkinit_gen_req(krb5_context context,
     if (retval)
       goto cleanup;
 
-    if (using_pkcs11()) {
-#ifndef WITHOUT_PKCS11
-	if (pkinit_open_session(context, prompter, prompter_data)) {
-	    pkiDebug("can't open pkcs11 session\n");
-	    return KRB5KDC_ERR_PREAUTH_FAILED;
-	}
-#endif
-    } else {
+    if (!reqctx->pkcs11_method) {
 	if (get_filename(&filename, "X509_USER_CERT", 0) != 0) {
 	    pkiDebug("failed to get user's cert\n");
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
 	}
     }
 
-    retval = pkinit_get_client_cert(client_principal, filename, &client_cert);
+    retval = pkinit_get_client_cert(reqctx, client_principal, filename, &client_cert);
     if (filename != NULL)
 	free(filename);
     free(client_principal);
@@ -243,6 +236,10 @@ pa_pkinit_gen_req(krb5_context context,
 				  der_req, &cksum);
     if (retval)
 	goto cleanup;
+#ifdef DEBUG_CKSUM
+    pkiDebug("calculating checksum on buf size (%d)\n", der_req->length);
+    print_buffer(der_req->data, der_req->length);
+#endif
 
     retval = krb5_us_timeofday(context, &ctsec, &cusec);
     if (retval)
@@ -331,7 +328,7 @@ pkinit_as_req_create(krb5_context context,
     krb5_pa_pk_as_req *req = NULL;
     krb5_auth_pack_draft9 *auth_pack9 = NULL;
     krb5_pa_pk_as_req_draft9 *req9 = NULL;
-    int protocol = DH_PROTOCOL;
+    int protocol = reqctx->dh_or_rsa;
     char *filename = NULL;
 #ifdef KDC_CERT
     X509 *kdc_cert = NULL;
@@ -415,10 +412,10 @@ pkinit_as_req_create(krb5_context context,
     /* Encode the authpack */
     switch((int)pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
-	    retval = encode_krb5_auth_pack(auth_pack, &coded_auth_pack); 
+	    retval = k5int_encode_krb5_auth_pack(auth_pack, &coded_auth_pack); 
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
-	    retval = encode_krb5_auth_pack_draft9(auth_pack9, &coded_auth_pack);
+	    retval = k5int_encode_krb5_auth_pack_draft9(auth_pack9, &coded_auth_pack);
 	    break;
     }
     if (retval) {
@@ -429,7 +426,7 @@ pkinit_as_req_create(krb5_context context,
     print_buffer_bin(coded_auth_pack->data, coded_auth_pack->length, "/tmp/client_auth_pack");
 #endif
 
-    if (!using_pkcs11() && get_filename(&filename, "X509_USER_KEY", 0) != 0) {
+    if (!reqctx->pkcs11_method && get_filename(&filename, "X509_USER_KEY", 0) != 0) {
 	pkiDebug("failed to get user key filename\n");
 	retval = -1;
 	goto cleanup;
@@ -446,7 +443,7 @@ pkinit_as_req_create(krb5_context context,
 	    retval = pkcs7_signeddata_create(coded_auth_pack->data,
 	       coded_auth_pack->length, &req->signedAuthPack.data,
 	       &req->signedAuthPack.length, cert, filename, 
-	       plgctx->id_pkinit_authData, context);
+	       plgctx->id_pkinit_authData, context, reqctx);
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    init_krb5_pa_pk_as_req_draft9(&req9);
@@ -457,7 +454,7 @@ pkinit_as_req_create(krb5_context context,
 	    retval = pkcs7_signeddata_create(coded_auth_pack->data,
 	       coded_auth_pack->length, &req9->signedAuthPack.data, 
 	       &req9->signedAuthPack.length, cert, filename,
-	       plgctx->id_pkinit_authData9, context);
+	       plgctx->id_pkinit_authData9, context, reqctx);
 	    break;
     }
     krb5_free_data(context, coded_auth_pack);
@@ -491,7 +488,7 @@ pkinit_as_req_create(krb5_context context,
 		goto cleanup;
 #endif
 	    /* Encode the as-req */
-	    retval = encode_krb5_pa_pk_as_req(req, as_req);
+	    retval = k5int_encode_krb5_pa_pk_as_req(req, as_req);
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    if (trusted_CAs) {
@@ -506,11 +503,12 @@ pkinit_as_req_create(krb5_context context,
 		goto cleanup;
 #endif
 	    /* Encode the as-req */
-	    retval = encode_krb5_pa_pk_as_req_draft9(req9, as_req);
+	    retval = k5int_encode_krb5_pa_pk_as_req_draft9(req9, as_req);
 	    break;
     }
 #ifdef DEBUG_ASN1
-    print_buffer_bin((*as_req)->data, (*as_req)->length, "/tmp/client_as_req");
+    if (!retval)
+	print_buffer_bin((*as_req)->data, (*as_req)->length, "/tmp/client_as_req");
 #endif
 
 cleanup:
@@ -649,12 +647,12 @@ pa_pkinit_parse_rep(krb5_context context,
     if (retval)
 	return retval;
 
-    if (!using_pkcs11() && get_filename(&filename, "X509_USER_CERT", 0) != 0) {
+    if (!reqctx->pkcs11_method && get_filename(&filename, "X509_USER_CERT", 0) != 0) {
 	pkiDebug("failed to get user's cert\n");
 	retval = -1;
 	goto cleanup;
     }
-    retval = pkinit_get_client_cert(princ_name, filename, &client_cert);
+    retval = pkinit_get_client_cert(reqctx, princ_name, filename, &client_cert);
     if (filename != NULL)
 	free(filename);
     if (retval) {
@@ -714,7 +712,6 @@ pkinit_as_rep_parse(krb5_context context,
     long der_len = 0;
     char *filename = NULL;
     krb5_checksum cksum = {0, 0, 0, NULL};
-    int i = 0;
     krb5_principal tmp_server;
 
     assert((as_rep != NULL) && (key_block != NULL));
@@ -723,7 +720,7 @@ pkinit_as_rep_parse(krb5_context context,
     print_buffer_bin(as_rep->data, as_rep->length, "/tmp/client_as_rep");
 #endif
 
-    if ((retval = decode_krb5_pa_pk_as_rep(as_rep, &kdc_reply))) {
+    if ((retval = k5int_decode_krb5_pa_pk_as_rep(as_rep, &kdc_reply))) {
 	pkiDebug("decode_krb5_as_rep failed %d\n", retval);
 	return retval;
     }
@@ -731,6 +728,9 @@ pkinit_as_rep_parse(krb5_context context,
     switch(kdc_reply->choice) {
 	case choice_pa_pk_as_rep_dhInfo:
 	    pkiDebug("as_rep: DH key transport algorithm\n");
+#ifdef DEBUG_ASN1
+    print_buffer_bin(kdc_reply->u.dh_Info.dhSignedData.data, kdc_reply->u.dh_Info.dhSignedData.length, "/tmp/client_kdc_signeddata");
+#endif
 	    if ((retval = pkcs7_signeddata_verify(
 		    kdc_reply->u.dh_Info.dhSignedData.data,
 		    kdc_reply->u.dh_Info.dhSignedData.length,
@@ -743,7 +743,7 @@ pkinit_as_rep_parse(krb5_context context,
 	    break;
 	case choice_pa_pk_as_rep_encKeyPack:
 	    pkiDebug("as_rep: RSA key transport algorithm\n");
-	    if (!using_pkcs11() && get_filename(&filename, "X509_USER_KEY", 0) != 0) {
+	    if (!reqctx->pkcs11_method && get_filename(&filename, "X509_USER_KEY", 0) != 0) {
 		pkiDebug("failed to get client's key filename\n");
 		goto cleanup;
 	    }
@@ -751,7 +751,7 @@ pkinit_as_rep_parse(krb5_context context,
 		    kdc_reply->u.encKeyPack.data,
 		    kdc_reply->u.encKeyPack.length,
 		    &dh_data.data, &dh_data.length, client_cert, filename, 
-		    pa_type, plgctx, &kdc_cert, context)) != 0) {
+		    pa_type, &kdc_cert, reqctx)) != 0) {
 		pkiDebug("failed to verify pkcs7 enveloped data\n");
 		goto cleanup;
 	    }
@@ -806,7 +806,7 @@ pkinit_as_rep_parse(krb5_context context,
 #ifdef DEBUG_ASN1
 	    print_buffer_bin(dh_data.data, dh_data.length, "/tmp/client_dh_key");
 #endif
-	    if ((retval = decode_krb5_kdc_dh_key_info(&dh_data,
+	    if ((retval = k5int_decode_krb5_kdc_dh_key_info(&dh_data,
 						    &kdc_dh)) != 0) {
 		pkiDebug("failed to decode kdc_dh_key_info\n");
 		goto cleanup;
@@ -841,14 +841,14 @@ pkinit_as_rep_parse(krb5_context context,
 #ifdef DEBUG_ASN1
 	    print_buffer_bin(dh_data.data, dh_data.length, "/tmp/client_key_pack");
 #endif
-	    if ((retval = decode_krb5_reply_key_pack(&dh_data, 
+	    if ((retval = k5int_decode_krb5_reply_key_pack(&dh_data, 
 		    &key_pack)) != 0) {
 		pkiDebug("failed to decode reply_key_pack\n");
 		if (pa_type == KRB5_PADATA_PK_AS_REP)
 		    goto cleanup;
 		else {
 		    if ((retval = 
-			decode_krb5_reply_key_pack_draft9(&dh_data, 
+			k5int_decode_krb5_reply_key_pack_draft9(&dh_data, 
 							  &key_pack9)) != 0) {
 			pkiDebug("failed to decode reply_key_pack_draft9\n");
 			goto cleanup;
@@ -887,10 +887,10 @@ pkinit_as_rep_parse(krb5_context context,
 	    print_buffer(encoded_request->data, encoded_request->length);
 	    pkiDebug("encrypting key (%d)\n", key_pack->replyKey.length);
 	    print_buffer(key_pack->replyKey.contents, key_pack->replyKey.length);
-		pkiDebug("received checksum type=%d size=%d ", key_pack->asChecksum.checksum_type, key_pack->asChecksum.length);
-		print_buffer(key_pack->asChecksum.contents, key_pack->asChecksum.length);
-		pkiDebug("expected checksum type=%d size=%d ", cksum.checksum_type, cksum.length);
-		print_buffer(cksum.contents, cksum.length);
+	    pkiDebug("received checksum type=%d size=%d ", key_pack->asChecksum.checksum_type, key_pack->asChecksum.length);
+	    print_buffer(key_pack->asChecksum.contents, key_pack->asChecksum.length);
+	    pkiDebug("expected checksum type=%d size=%d ", cksum.checksum_type, cksum.length);
+	    print_buffer(cksum.contents, cksum.length);
 #endif
 		goto cleanup;
 	    } else
@@ -982,6 +982,7 @@ krb5_error_code
 pkinit_client_process(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
+		      krb5_get_init_creds_opt *opt,
 		      preauth_get_client_data_proc get_data_proc,
 		      struct _krb5_preauth_client_rock *rock,
 		      krb5_kdc_req *request,
@@ -1068,7 +1069,7 @@ pkinit_decode_td_dh_params(krb5_data *data,
     krb5_algorithm_identifier **algId = NULL;
     int i = 0, ok = 0, free_dh = 1;
 
-    retval = decode_krb5_td_dh_parameters(data, &algId);
+    retval = k5int_decode_krb5_td_dh_parameters(data, &algId);
     if (retval) {
 	pkiDebug("decode_krb5_td_dh_parameters failed\n");
 	goto cleanup;
@@ -1076,7 +1077,7 @@ pkinit_decode_td_dh_params(krb5_data *data,
     while (algId[i] != NULL) {
 	DH *dh = NULL;
 	unsigned char *tmp = NULL;
-	int dh_prime_bits = 0, dh_err = 0;
+	int dh_prime_bits = 0;
 
 	if (algId[i]->algorithm.length != dh_oid.length ||
 	    memcmp(algId[i]->algorithm.data, dh_oid.data, dh_oid.length))
@@ -1143,6 +1144,7 @@ krb5_error_code
 pkinit_client_tryagain(krb5_context context,
 		       void *plugin_context,
 		       void *request_context,
+		       krb5_get_init_creds_opt *opt,
 		       preauth_get_client_data_proc get_data_proc,
 		       struct _krb5_preauth_client_rock *rock,
 		       krb5_kdc_req *request,
@@ -1171,7 +1173,6 @@ pkinit_client_tryagain(krb5_context context,
     X509_NAME *xn = NULL;
     STACK_OF(PKCS7_ISSUER_AND_SERIAL) *sk_is = NULL;
     PKCS7_ISSUER_AND_SERIAL *is = NULL;
-    STACK_OF(ASN1_OCTET_STRING) *sk_id = NULL;
     ASN1_OCTET_STRING *id = NULL;
 
     if (reqctx->patype != in_padata->pa_type)
@@ -1181,7 +1182,7 @@ pkinit_client_tryagain(krb5_context context,
 #ifdef DEBUG_ASN1
     print_buffer_bin(err_reply->e_data.data, err_reply->e_data.length, "/tmp/client_edata");
 #endif
-    retval = decode_krb5_typed_data(&err_reply->e_data, &typed_data);
+    retval = k5int_decode_krb5_typed_data(&err_reply->e_data, &typed_data);
     if (retval) {
 	pkiDebug("decode_krb5_typed_data failed\n");
 	goto cleanup;
@@ -1201,7 +1202,7 @@ pkinit_client_tryagain(krb5_context context,
 		pkiDebug("trusted certifiers\n");
 	    else
 		pkiDebug("invalid certificate\n");
-	    retval = decode_krb5_td_trusted_certifiers(&scratch, &krb5_trusted_certifiers);
+	    retval = k5int_decode_krb5_td_trusted_certifiers(&scratch, &krb5_trusted_certifiers);
 	    if (retval) {
 		pkiDebug("failed to decode sequence of trusted certifiers\n");
 		goto cleanup;
@@ -1294,6 +1295,7 @@ cleanup:
 }
 
 #define PKINIT_REQ_CTX_MAGIC 0xdeadbeef
+
 void
 pkinit_client_req_init(krb5_context context,
 		       void *plugin_context,
@@ -1308,15 +1310,28 @@ pkinit_client_req_init(krb5_context context,
     reqctx = (pkinit_req_context *) malloc(sizeof(*reqctx));
     if (reqctx == NULL)
 	return;
+    memset(reqctx, 0, sizeof(*reqctx));
 
     reqctx->magic = PKINIT_REQ_CTX_MAGIC;
+    reqctx->plugctx = plugin_context;
     reqctx->dh = NULL;
     reqctx->dh_size = 1024;
     reqctx->require_eku = plgctx->require_eku;
     reqctx->require_san = plgctx->require_san;
+    reqctx->dh_or_rsa = plgctx->dh_or_rsa;
     reqctx->require_hostname_match = 0;
     reqctx->allow_upn = plgctx->allow_upn;
     reqctx->require_crl_checking = plgctx->require_crl_checking;
+#ifndef WITHOUT_PKCS11
+    reqctx->p11_module_name = strdup(PKCS11_MODNAME);
+    reqctx->p11_module = NULL;
+    reqctx->slotid = 0;
+    reqctx->session = CK_INVALID_HANDLE;
+    reqctx->p11 = NULL;
+    reqctx->pkcs11_method = (getenv("PKCS11") != NULL);
+#else
+    reqctx->pkcs11_method = 0;
+#endif
 
     *request_context = (void *) reqctx;
     pkiDebug("%s: returning reqctx at %p\n", __FUNCTION__, reqctx);
@@ -1331,43 +1346,39 @@ pkinit_client_req_fini(krb5_context context,
     pkinit_req_context *reqctx = (pkinit_req_context *)request_context;
 
     pkiDebug("%s: received reqctx at %p\n", __FUNCTION__, reqctx);
-#ifndef WITHOUT_PKCS11
-    pkinit_close_session();
-#endif
     if (reqctx != NULL) {
 	if (reqctx->magic != PKINIT_REQ_CTX_MAGIC) {
 	    pkiDebug("%s: Bad magic value (%x) in req ctx\n",
-		    __FUNCTION__, reqctx->magic);
+		     __FUNCTION__, reqctx->magic);
 	    return;
 	}
 	if (reqctx->dh != NULL) {
 	    DH_free(reqctx->dh);
 	}
+#ifndef WITHOUT_PKCS11
+	if (reqctx->p11) {
+	    if (reqctx->session) {
+		reqctx->p11->C_CloseSession(reqctx->session);
+		reqctx->session = CK_INVALID_HANDLE;
+	    }
+	    reqctx->p11->C_Finalize(NULL_PTR);
+	    reqctx->p11 = NULL;
+	}
+	if (reqctx->p11_module) {
+	    C_UnloadModule(reqctx->p11_module);
+	    reqctx->p11_module = NULL;
+	}
+	if (reqctx->p11_module_name)
+	    free(reqctx->p11_module_name);
+	if (reqctx->cert_id)
+	    free(reqctx->cert_id);
+#endif
 	free(reqctx);
     }
     return;
 }
 
-static int
-using_pkcs11(void)
-{
-#ifdef WITHOUT_PKCS11
-    return 0;
-#else
-    return (getenv("PKCS11") != NULL);
-#endif
-}
-
 #ifndef WITHOUT_PKCS11
-
-static char *module_name = "opensc-pkcs11.so";
-static void *module = NULL;
-static unsigned int slotid = 0;
-static CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-static CK_FUNCTION_LIST_PTR p11 = NULL;
-static CK_BYTE cert_id[MAX_ID_SIZE];
-static int cert_id_len;
-
 void *
 C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p)
 {
@@ -1376,6 +1387,10 @@ C_LoadModule(const char *modname, CK_FUNCTION_LIST_PTR_PTR p11p)
 
     pkiDebug("loading module \"%s\"... ", modname);
     handle = dlopen(modname, RTLD_NOW);
+    if (handle == NULL) {
+	pkiDebug("failed\n");
+	return NULL;
+    }
     getflist = (CK_RV (*)(CK_FUNCTION_LIST_PTR_PTR)) dlsym(handle, "C_GetFunctionList");
     if (getflist == NULL || (*getflist)(p11p) != CKR_OK) {
 	dlclose(handle);
@@ -1394,105 +1409,138 @@ C_UnloadModule(void *handle)
 }
 
 static krb5_error_code
-pkinit_open_session(krb5_context context,
-		    krb5_prompter_fct prompter,
-		    void *prompter_data)
+pkinit_login(pkinit_req_context *reqctx, CK_TOKEN_INFO *tip)
 {
-    int r;
-    char *s;
-    char pin[32];
-    char custom_module_name[100];
-    krb5_data response_data;
+    krb5_data rdat;
     krb5_prompt kprompt;
     krb5_prompt_type prompt_type;
+    krb5_context ctx = reqctx->plugctx->context;
+    int r = 0;
 
-    if (module != NULL)
-	return 0;
+    if (tip->flags & CKF_PROTECTED_AUTHENTICATION_PATH) {
+	rdat.data = NULL;
+	rdat.length = 0;
+    } else {
+	rdat.data = malloc(tip->ulMaxPinLen + 2);
+	rdat.length = tip->ulMaxPinLen + 1;
 
-    /* Temporary pending use of krb5.conf */
-    if ((s = getenv("PKCS11")) != NULL && strlen(s) > 0) {
-	if (sscanf(s, "%99[^:]:%d", custom_module_name, &slotid) < 2)
-	    slotid = atoi(s);
-	else
-	    module_name = custom_module_name;
+	kprompt.prompt = "PIN";
+	kprompt.hidden = 1;
+	kprompt.reply = &rdat;
+	prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
+
+	/* PROMPTER_INVOCATION */
+	krb5int_set_prompt_types(ctx, &prompt_type);
+	r = (*reqctx->prompter)(ctx, reqctx->prompter_data, NULL, NULL, 1, &kprompt);
+	krb5int_set_prompt_types(ctx, 0);
     }
 
-    /* Load module, init, and open session */
-    module = C_LoadModule(module_name, &p11);
-    if (module == NULL) {
-	pkiDebug("fail C_LoadModule\n");
+    if (r == 0) {
+	r = reqctx->p11->C_Login(reqctx->session, CKU_USER, (u_char *) rdat.data,
+				 rdat.length);
+	if (r != CKR_OK) {
+	    pkiDebug("fail C_Login %x\n", r);
+	    r = KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+    }
+    if (rdat.data)
+	free(rdat.data);
+    return r;
+}
+
+static krb5_error_code
+pkinit_open_session(pkinit_req_context *reqctx)
+{
+    char *s, *cp, *ep;
+    int r, i, gotslot = 0;
+    CK_ULONG count = 0, id;
+    CK_SLOT_ID_PTR slotlist;
+    CK_TOKEN_INFO tinfo;
+
+    if (reqctx->p11_module != NULL)
+	return 0; /* session already open */
+
+    /* Temporary pending use of command line options and krb5.conf */
+    if ((s = getenv("PKCS11")) != NULL && (i = strlen(s)) > 0) {
+	id = strtol(s, &ep, 10);
+	if (*ep == '\0') {
+	    /* got just a slotid */
+	    reqctx->slotid = id;
+	    gotslot = 1;
+	} else if (strchr(s, ':')) {
+	    /* got a module name and slotid */
+	    cp = malloc(i);
+	    sscanf(s, "%[^:]:%d", cp, &reqctx->slotid);
+	    free(reqctx->p11_module_name);
+	    reqctx->p11_module_name = cp;
+	    gotslot = 1;
+	} else {
+	    /* got just a module name */
+	    free(reqctx->p11_module_name);
+	    reqctx->p11_module_name = strdup(s);
+	}
+    }
+
+    /* Load module */
+    reqctx->p11_module = C_LoadModule(reqctx->p11_module_name, &reqctx->p11);
+    if (reqctx->p11_module == NULL)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
-    if ((r = p11->C_Initialize(NULL)) != CKR_OK) {
+
+    /* Init */
+    if ((r = reqctx->p11->C_Initialize(NULL)) != CKR_OK) {
 	pkiDebug("fail C_Initialize %x\n", r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
-    pkiDebug("opening slot %d\n", slotid);
-    if ((r = p11->C_OpenSession(slotid, CKF_SERIAL_SESSION, NULL, NULL, &session)) !=
-	CKR_OK) {
+
+    /* Decide which slot to use */
+    if (!gotslot) {
+	if (reqctx->p11->C_GetSlotList(TRUE, NULL, &count) != CKR_OK)
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	slotlist = (CK_SLOT_ID_PTR) malloc(count * sizeof (CK_SLOT_ID));
+	if (reqctx->p11->C_GetSlotList(TRUE, slotlist, &count) != CKR_OK)
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	/* take the first one for now */
+	reqctx->slotid = slotlist[0];
+	free(slotlist);
+    }
+
+    /* Open session */
+    pkiDebug("init and open slotid %d (1 of %d)\n", reqctx->slotid, (int) count);
+    if ((r = reqctx->p11->C_OpenSession(reqctx->slotid, CKF_SERIAL_SESSION, NULL, NULL,
+					&reqctx->session)) != CKR_OK) {
 	pkiDebug("fail C_OpenSession %x\n", r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    response_data.data = pin;
-    response_data.length = sizeof(pin);
+    /* Login if needed */
+    r = reqctx->p11->C_GetTokenInfo(reqctx->slotid, &tinfo);
+    if (r == CKR_OK && (tinfo.flags & CKF_LOGIN_REQUIRED))
+	r = pkinit_login(reqctx, &tinfo);
 
-    kprompt.prompt = "PIN";
-    kprompt.hidden = 1;
-    kprompt.reply = &response_data;
-    prompt_type = KRB5_PROMPT_TYPE_PREAUTH;
-
-    /* PROMPTER_INVOCATION */
-    krb5int_set_prompt_types(context, &prompt_type);
-    if ((r = ((*prompter)(context, prompter_data, NULL, NULL, 1, &kprompt)))) {
-	krb5int_set_prompt_types(context, 0);
-	return r;
-    }
-    krb5int_set_prompt_types(context, 0);
-
-    if ((r = p11->C_Login(session, CKU_USER, (u_char *) pin, response_data.length)) != CKR_OK) {
-	pkiDebug("fail C_Login %x\n", r);
-	return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
-
-    return 0;
-}
-
-static void
-pkinit_close_session(void)
-{
-    if (p11) {
-	if (session) {
-	    p11->C_CloseSession(session);
-	    session = CK_INVALID_HANDLE;
-	}
-	p11->C_Finalize(NULL_PTR);
-	p11 = NULL;
-    }
-    if (module) {
-	C_UnloadModule(module);
-	module = NULL;
-    }
+    return r;
 }
 #endif
 
 krb5_error_code
-pkinit_get_client_cert(const char *principal,
+pkinit_get_client_cert(pkinit_req_context *reqctx,
+		       const char *principal,
 		       char *filename, 
 		       X509 ** client_cert)
 {
 #ifndef WITHOUT_PKCS11
+    CK_MECHANISM_TYPE_PTR mechp;
+    CK_MECHANISM_INFO info;
     CK_OBJECT_CLASS cls;
-    CK_OBJECT_HANDLE objs[MAX_N_OBJS];
+    CK_OBJECT_HANDLE obj;
     CK_ATTRIBUTE attrs[2];
     CK_ULONG count;
     CK_CERTIFICATE_TYPE certtype;
-    krb5_octet cert[MAX_CERT_SIZE];
+    CK_BYTE_PTR cert, cert_id;
     const unsigned char *cp;
-    int r;
+    int i, r;
 #endif
 
-    if (!using_pkcs11()) {
+    if (!reqctx->pkcs11_method) {
 	if ((*client_cert = get_cert(filename)) == NULL)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
 	else
@@ -1504,7 +1552,37 @@ pkinit_get_client_cert(const char *principal,
 	return KRB5_PRINC_NOMATCH;
     }
 
-    pkiDebug("Reading cert for '%s' from card\n", principal);
+    if (pkinit_open_session(reqctx)) {
+	pkiDebug("can't open pkcs11 session\n");
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    if ((r = reqctx->p11->C_GetMechanismList(reqctx->slotid, NULL, &count)) != CKR_OK
+	|| count <= 0) {
+	pkiDebug("can't find any mechanisms %x\n", r);
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+    mechp = (CK_MECHANISM_TYPE_PTR) malloc(count * sizeof (CK_MECHANISM_TYPE));
+    if (mechp == NULL)
+	return ENOMEM;
+    if ((r = reqctx->p11->C_GetMechanismList(reqctx->slotid, mechp, &count)) != CKR_OK)
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    for (i = 0; i < count; i++) {
+	if ((r = reqctx->p11->C_GetMechanismInfo(reqctx->slotid, mechp[i], &info)) != CKR_OK)
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+#ifdef DEBUG_MECHINFO
+	pkiDebug("mech %x flags %x\n", (int) mechp[i], (int) info.flags);
+	if ((info.flags & (CKF_SIGN|CKF_DECRYPT)) == (CKF_SIGN|CKF_DECRYPT))
+	    pkiDebug("  this mech is good for sign & decrypt\n");
+#endif
+	if (mechp[i] == CKM_RSA_PKCS) {
+	    /* This seems backwards... */
+	    reqctx->mech = (info.flags & CKF_SIGN) ? CKM_SHA1_RSA_PKCS : CKM_RSA_PKCS;
+	}
+    }
+    free(mechp);
+
+    pkiDebug("got %d mechs; reading certs for '%s' from card\n", (int) count, principal);
 
     cls = CKO_CERTIFICATE;
     attrs[0].type = CKA_CLASS;
@@ -1516,42 +1594,63 @@ pkinit_get_client_cert(const char *principal,
     attrs[1].pValue = &certtype;
     attrs[1].ulValueLen = sizeof certtype;
 
-    if (p11->C_FindObjectsInit(session, attrs, 2) != CKR_OK) {
+    if (reqctx->p11->C_FindObjectsInit(reqctx->session, attrs, 2) != CKR_OK) {
 	pkiDebug("fail C_FindObjectsInit\n");
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    /* Look for x.509 cert */
-    if ((r = p11->C_FindObjects(session, objs, 6, &count)) != CKR_OK
-	|| count <= 0) {
-	pkiDebug("can't find any certs %x\n", r);
-	return KRB5KDC_ERR_PREAUTH_FAILED;
+    for (i = 0; ; i++) {
+	/* Look for x.509 cert */
+	if ((r = reqctx->p11->C_FindObjects(reqctx->session, &obj, 1, &count)) != CKR_OK
+	    || count <= 0) {
+	    break;
+	}
+
+	/* Get cert and id len */
+	attrs[0].type = CKA_VALUE;
+	attrs[0].pValue = NULL;
+	attrs[0].ulValueLen = 0;
+
+	attrs[1].type = CKA_ID;
+	attrs[1].pValue = NULL;
+	attrs[1].ulValueLen = 0;
+
+	if ((r = reqctx->p11->C_GetAttributeValue(reqctx->session, obj, attrs, 2)) != CKR_OK
+	    && r != CKR_BUFFER_TOO_SMALL) {
+	    pkiDebug("fail C_GetAttributeValue len %x\n", r);
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+	cert = (CK_BYTE_PTR) malloc((size_t) attrs[0].ulValueLen);
+	cert_id = (CK_BYTE_PTR) malloc((size_t) attrs[1].ulValueLen);
+	if (cert == NULL || cert_id == NULL)
+	    return ENOMEM;
+
+	/* Read the cert and id off the card */
+
+	attrs[0].type = CKA_VALUE;
+	attrs[0].pValue = cert;
+
+	attrs[1].type = CKA_ID;
+	attrs[1].pValue = cert_id;
+
+	if ((r = reqctx->p11->C_GetAttributeValue(reqctx->session, obj, attrs, 2)) != CKR_OK) {
+	    pkiDebug("fail C_GetAttributeValue %x\n", r);
+	    return KRB5KDC_ERR_PREAUTH_FAILED;
+	}
+
+	pkiDebug("cert %d size %d id %d idlen %d\n",
+		 i, (int) attrs[0].ulValueLen, (int) cert_id[0], (int) attrs[1].ulValueLen);
+	/* Just take the first one */
+	if (i == 0) {
+	    reqctx->cert_id = cert_id;
+	    reqctx->cert_id_len = attrs[1].ulValueLen;
+	    cp = (unsigned char *) cert;
+	    *client_cert = d2i_X509(NULL, &cp, (int) attrs[0].ulValueLen);
+	} else
+	    free(cert_id);
+	free(cert);
     }
-    p11->C_FindObjectsFinal(session);
-    pkiDebug("found %d certs\n", (int) count);
-
-    /*
-     * Read the cert and id off the card.
-     * I can't find any way to reliably get the size before doing the read.
-     */
-    attrs[0].type = CKA_VALUE;
-    attrs[0].pValue = cert;
-    attrs[0].ulValueLen = sizeof cert;
-
-    attrs[1].type = CKA_ID;
-    attrs[1].pValue = cert_id;
-    attrs[1].ulValueLen = sizeof cert_id;
-
-    /* Just take the first one. */
-    if ((r = p11->C_GetAttributeValue(session, objs[0], attrs, 2)) != CKR_OK) {
-	pkiDebug("fail C_GetAttributeValue %x\n", r);
-	return KRB5KDC_ERR_PREAUTH_FAILED;
-    }
-
-    pkiDebug("cert size %d id %d\n", (int) attrs[0].ulValueLen, (int) cert_id[0]);
-    cert_id_len = attrs[1].ulValueLen;
-    cp = (unsigned char *) cert;
-    *client_cert = d2i_X509(NULL, &cp, (int) attrs[0].ulValueLen);
+    reqctx->p11->C_FindObjectsFinal(reqctx->session);
     if (*client_cert == NULL)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
 #endif
@@ -1559,27 +1658,35 @@ pkinit_get_client_cert(const char *principal,
 }
 
 #ifndef WITHOUT_PKCS11
+
+/*
+ * Look for a key that's:
+ * 1. private
+ * 2. capable of the specified operation (usually signing or decrypting)
+ * 3. RSA (this may be wrong but it's all we can do for now)
+ * 4. matches the id of the cert we chose
+ *
+ * You must call pkinit_get_client_cert before calling pkinit_find_private_key
+ * (that's because we need the ID of the private key)
+ *
+ * pkcs11 says the id of the key doesn't have to match that of the cert, but
+ * I can't figure out any other way to decide which key to use.
+ *
+ * We should only find one key that fits all the requirements.
+ * If there are more than one, we just take the first one.
+ */
+
 krb5_error_code
-pkinit_find_private_key(CK_ATTRIBUTE_TYPE usage, CK_OBJECT_HANDLE *objp)
+pkinit_find_private_key(pkinit_req_context *reqctx,
+			CK_ATTRIBUTE_TYPE usage,
+			CK_OBJECT_HANDLE *objp)
 {
     CK_OBJECT_CLASS cls;
-    CK_OBJECT_HANDLE objs[MAX_N_OBJS];
     CK_ATTRIBUTE attrs[4];
     CK_ULONG count;
     CK_BBOOL bool;
     CK_KEY_TYPE keytype;
     int r;
-
-    /*
-     * Look for a key that's:
-     * 1. private
-     * 2. capable of the specified operation (usually signing or decrypting)
-     * 3. RSA (this may be wrong but it's all we can do for now)
-     * 4. matches the id of the cert we chose
-     *
-     * pkcs11 says the id of the key doesn't have to match that of the cert, but
-     * I can't figure out any other way to decide which key to use.
-     */
 
     cls = CKO_PRIVATE_KEY;
     attrs[0].type = CKA_CLASS;
@@ -1597,26 +1704,26 @@ pkinit_find_private_key(CK_ATTRIBUTE_TYPE usage, CK_OBJECT_HANDLE *objp)
     attrs[2].ulValueLen = sizeof keytype;
 
     attrs[3].type = CKA_ID;
-    attrs[3].pValue = cert_id;
-    attrs[3].ulValueLen = cert_id_len;
+    attrs[3].pValue = reqctx->cert_id;
+    attrs[3].ulValueLen = reqctx->cert_id_len;
 
-    if (p11->C_FindObjectsInit(session, attrs, 4) != CKR_OK) {
+    if (reqctx->p11->C_FindObjectsInit(reqctx->session, attrs, 4) != CKR_OK) {
 	pkiDebug("krb5_pkinit_sign_data: fail C_FindObjectsInit\n");
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    r = p11->C_FindObjects(session, objs, 6, &count);
-    p11->C_FindObjectsFinal(session);
+    r = reqctx->p11->C_FindObjects(reqctx->session, objp, 1, &count);
+    reqctx->p11->C_FindObjectsFinal(reqctx->session);
     pkiDebug("found %d private keys %x\n", (int) count, (int) r);
     if (r != CKR_OK || count < 1)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
-    *objp = objs[0];
     return 0;
 }
 #endif
 
 krb5_error_code
-pkinit_decode_data(unsigned char *data,
+pkinit_decode_data(pkinit_req_context *reqctx,
+		   unsigned char *data,
 		   int data_len,
 		   unsigned char **decoded_data,
 		   int *decoded_data_len, 
@@ -1627,11 +1734,11 @@ pkinit_decode_data(unsigned char *data,
     CK_OBJECT_HANDLE obj;
     CK_ULONG len;
     CK_MECHANISM mech;
-    unsigned char txtbuf[4096], *cp;
+    unsigned char *cp;
     int r;
 #endif
 
-    if (!using_pkcs11()) {
+    if (!reqctx->pkcs11_method) {
 	if (decode_data(decoded_data, decoded_data_len, data, data_len, 
 			filename, cert) <= 0) {
 	    pkiDebug("failed to decode data\n");
@@ -1641,51 +1748,55 @@ pkinit_decode_data(unsigned char *data,
     }
 
 #ifndef WITHOUT_PKCS11
-    pkinit_find_private_key(CKA_DECRYPT, &obj);
+    if (pkinit_open_session(reqctx)) {
+	pkiDebug("can't open pkcs11 session\n");
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
+
+    pkinit_find_private_key(reqctx, CKA_DECRYPT, &obj);
 
     mech.mechanism = CKM_RSA_PKCS;
     mech.pParameter = NULL;
     mech.ulParameterLen = 0;
 
-    if ((r = p11->C_DecryptInit(session, &mech, obj)) != CKR_OK) {
+    if ((r = reqctx->p11->C_DecryptInit(reqctx->session, &mech, obj)) != CKR_OK) {
 	pkiDebug("fail C_DecryptInit %x\n", (int) r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
-
-    len = sizeof txtbuf;
-    pkiDebug("decrypt %d -> %d\n", (int) data_len, (int) len);
-    if ((r = p11->C_Decrypt(session, (krb5_octet *) data, (u_int) data_len, txtbuf, &len)) !=
+    cp = malloc((size_t) data_len);
+    if (cp == NULL)
+	return ENOMEM;
+    len = data_len;
+    if ((r = reqctx->p11->C_Decrypt(reqctx->session, data, (CK_ULONG) data_len, cp, &len)) !=
 	CKR_OK) {
 	pkiDebug("fail C_Decrypt %x\n", (int) r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
-    pkiDebug("txt size %d\n", (int) len);
-    cp = malloc(len);
-    if (cp == NULL)
-	return ENOMEM;
-    memcpy(cp, txtbuf, len);
+    pkiDebug("decrypt %d -> %d\n", (int) data_len, (int) len);
     *decoded_data_len = len;
     *decoded_data = cp;
-    return 0;
 #endif
+
+    return 0;
 }
 
 krb5_error_code
-pkinit_sign_data(unsigned char *data,
-		int data_len,
-		unsigned char **sig,
-		int *sig_len, 
-		char *filename)
+pkinit_sign_data(pkinit_req_context *reqctx,
+		 unsigned char *data,
+		 int data_len,
+		 unsigned char **sig,
+		 int *sig_len, 
+		 char *filename)
 {
 #ifndef WITHOUT_PKCS11
     CK_OBJECT_HANDLE obj;
     CK_ULONG len;
     CK_MECHANISM mech;
-    unsigned char sigbuf[1024], *cp;
+    unsigned char *cp;
     int r;
 #endif
 
-    if (!using_pkcs11()) {
+    if (reqctx == NULL || !reqctx->pkcs11_method) {
 	if (create_signature(sig, sig_len, data, data_len, filename) != 0) {
 	    pkiDebug("failed to create the signature\n");
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
@@ -1694,33 +1805,48 @@ pkinit_sign_data(unsigned char *data,
     }
 
 #ifndef WITHOUT_PKCS11
-    pkinit_find_private_key(CKA_SIGN, &obj);
+    if (pkinit_open_session(reqctx)) {
+	pkiDebug("can't open pkcs11 session\n");
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+    }
 
-    mech.mechanism = CKM_SHA1_RSA_PKCS;
+    pkinit_find_private_key(reqctx, CKA_SIGN, &obj);
+
+    mech.mechanism = reqctx->mech;
     mech.pParameter = NULL;
     mech.ulParameterLen = 0;
 
-    if ((r = p11->C_SignInit(session, &mech, obj)) != CKR_OK) {
+    if ((r = reqctx->p11->C_SignInit(reqctx->session, &mech, obj)) != CKR_OK) {
 	pkiDebug("fail C_SignInit %x\n", (int) r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    len = sizeof sigbuf;
-    pkiDebug("signing %d -> %d\n", (int) data_len, (int) len);
-    if ((r = p11->C_Sign(session, (krb5_octet *) data, (u_int) data_len, sigbuf, &len)) !=
-	CKR_OK) {
+    /*
+     * Key len would give an upper bound on sig size, but there's no way to
+     * get that. So guess, and if it's too small, re-malloc.
+     */
+    len = PK_SIGLEN_GUESS;
+    cp = malloc((size_t) len);
+    if (cp == NULL)
+	return ENOMEM;
+
+    r = reqctx->p11->C_Sign(reqctx->session, data, (CK_ULONG) data_len, cp, &len);
+    if (r == CKR_BUFFER_TOO_SMALL || (r == CKR_OK && len >= PK_SIGLEN_GUESS)) {
+	free(cp);
+	pkiDebug("C_Sign realloc %d\n", (int) len);
+	cp = malloc((size_t) len);
+	r = reqctx->p11->C_Sign(reqctx->session, data, (CK_ULONG) data_len, cp, &len);
+    }
+    if (r != CKR_OK) {
 	pkiDebug("fail C_Sign %x\n", (int) r);
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
-    pkiDebug("sig size %d\n", (int) len);
-    cp = malloc(len);
-    if (cp == NULL)
-	return ENOMEM;
-    memcpy(cp, sigbuf, len);
+    pkiDebug("sign %d -> %d\n", (int) data_len, (int) len);
     *sig_len = len;
     *sig = cp;
-    return 0;
 #endif
+
+    return 0;
 }
 
 static krb5_error_code
@@ -2090,6 +2216,162 @@ errout:
     return retval;
 }
 
+static krb5_error_code
+handle_gic_opt(krb5_context context,
+	       pkinit_context *plgctx,
+	       char *attr,
+	       char *value)
+{
+    int i, code;
+    struct stat statbuf;
+    char *colon, *sep, *residual;
+#define KS_FILE		1
+#define KS_PKCS11	2
+    int keyset;
+
+    /*
+     * XXX This is all just a hack right now... XXX
+     */
+    /*
+     * Would like to call something like "pkinit_set_identity()" or
+     * pkinit_set_user_identity() here...
+     */
+    if (strcmp(attr, "X509_user_identity") == 0) {
+	residual = strchr(value, ':');
+	if (residual) {
+	    int typelen;
+	    residual++;	/* skip past colon */
+	    typelen = residual - value;
+	    if (strncmp(value, "FILE:", typelen) == 0) {
+		keyset = KS_FILE;
+	    } else if (strncmp(value, "PKCS11:", typelen) == 0) {
+		keyset = KS_PKCS11;
+	    } else {
+		krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+				       "Unsupported key set type while processing '%s'\n", value);
+		return KRB5_PREAUTH_FAILED;
+	    }
+	} else {
+	    keyset = KS_FILE;
+	    residual = value;
+	}
+
+	switch (keyset) {
+	    int certlen;
+	    char certbuf[256];
+	    char keybuf[256];
+	case KS_FILE:
+	    sep = strchr(residual, ',');
+	    if (sep) {
+		certlen = sep - residual;
+		strncpy(certbuf, residual, certlen);
+		certbuf[certlen] = '\0';
+		strncpy(keybuf, ++sep, sizeof keybuf);
+		keybuf[sizeof(keybuf) - 1] = '\0';
+	    } else {
+		strncpy(certbuf, residual, sizeof certbuf);
+		certbuf[sizeof(certbuf) - 1] = '\0';
+		strncpy(keybuf, residual, sizeof keybuf);
+		keybuf[sizeof(keybuf) - 1] = '\0';
+	    }
+	    if ((code = stat(certbuf, &statbuf)) != 0) {
+		krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+			"Could not stat certificate file '%s'", certbuf);
+		return KRB5_PREAUTH_FAILED;
+	    }
+	    if ((code = stat(keybuf, &statbuf)) != 0) {
+		krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+			"Could not stat private key file '%s'", keybuf);
+		return KRB5_PREAUTH_FAILED;
+	    }
+	    pkiDebug("Setting X509_USER_CERT to '%s'\n", certbuf);
+	    setenv("X509_USER_CERT", certbuf, 1);
+	    pkiDebug("Setting X509_USER_KEY to '%s'\n", keybuf);
+	    setenv("X509_USER_KEY", keybuf, 1);
+	    break;
+	case KS_PKCS11:
+	    if ((code = stat(residual, &statbuf)) != 0) {
+		krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+			"Could not stat pkcs11 library '%s'", residual);
+		return KRB5_PREAUTH_FAILED;
+	    }
+	    pkiDebug("Setting PKCS11 to '%s'\n", residual);
+	    setenv("PKCS11", residual, 1);
+	    break;
+	default:
+	    krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+				   "Internal error parsing X509_user_identity\n");
+	    return KRB5_PREAUTH_FAILED;
+	    break;
+	}
+    } else if (strcmp(attr, "X509_anchors") == 0) {
+	/* Would like to call something like "pkinit_add_anchors() here */
+	if ((code = stat(value, &statbuf)) != 0) {
+	   krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+				  "Could not stat X509_anchors directory '%s'",
+				  value);
+	   return KRB5_PREAUTH_FAILED;
+	}
+	pkiDebug("Setting X509_CA_DIR to '%s'\n", value);
+	setenv("X509_CA_DIR", value, 1);
+    } else if (strcmp(attr, "flag_RSA_PROTOCOL") == 0) {
+	if (strcmp(value, "yes") == 0) {
+	    pkiDebug("Setting flag to use RSA_PROTOCOL\n");
+	    plgctx->dh_or_rsa = RSA_PROTOCOL;
+	}
+    }
+#if 0
+    if (strcmp(attr, "client_cert") == 0) {
+	if ((code = stat(value, &statbuf)) != 0) {
+	   krb5_set_error_message(context, KRB5_PREAUTH_FAILED, 
+				  "Could not stat '%s' file '%s'", attr, value);
+	   return KRB5_PREAUTH_FAILED;
+	}
+	pkiDebug("Setting X509_USER_CERT to '%s'\n", value);
+	setenv("X509_USER_CERT", value, 1);
+    }
+    if (strcmp(attr, "client_key") == 0) {
+	if ((code = stat(value, &statbuf)) != 0) {
+	   krb5_set_error_message(context, KRB5_PREAUTH_FAILED, 
+				  "Could not stat '%s' file '%s'", attr, value);
+	   return KRB5_PREAUTH_FAILED;
+	}
+	pkiDebug("Setting X509_USER_KEY to '%s'\n", value);
+	setenv("X509_USER_KEY", value, 1);
+    }
+    if (strcmp(attr, "client_ca_dir") == 0) {
+	if ((code = stat(value, &statbuf)) != 0) {
+	   krb5_set_error_message(context, KRB5_PREAUTH_FAILED, 
+				  "Could not stat '%s' directory '%s'",
+				  attr, value);
+	   return KRB5_PREAUTH_FAILED;
+	}
+	pkiDebug("Setting X509_CA_DIR to '%s'\n", value);
+	setenv("X509_CA_DIR", value, 1);
+    }
+#endif
+    return 0;
+}
+
+static krb5_error_code
+pkinit_client_gic_opt(krb5_context context,
+		      void *plugin_context,
+		      krb5_get_init_creds_opt *opt,
+		      const char *attr,
+		      const char *value)
+{
+    int i;
+    krb5_error_code retval;
+    pkinit_context *plgctx = (pkinit_context *)plugin_context;
+
+    pkiDebug("(pkinit) received '%s' = '%s'\n", attr, value);
+    retval = handle_gic_opt(context, plgctx, attr, value);
+    if (retval)
+	return retval;
+
+    return 0;
+}
+
 static void
 pkinit_client_plugin_fini(krb5_context context, void *blob)
 {
@@ -2110,4 +2392,5 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     pkinit_client_req_fini,     /* (*client_req_fini) */
     pkinit_client_process,	/* (*process) */
     pkinit_client_tryagain,	/* (*tryagain) */
+    pkinit_client_gic_opt	/* (*gic_opt) */
 };
