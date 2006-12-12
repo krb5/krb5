@@ -44,6 +44,12 @@
    logical -- in fact, I'd be concerned if it were otherwise.  But not
    obvious if you're not thinking about it.
 
+   Actually, sometimes even with delayed initialization it could be a
+   problem.
+
+   You may be able to work around it with something like:
+   % env LD_PRELOAD=/usr/lib/libpython2.3.so.1.0 kinit ...blah...
+
    This module seems rather sensitive to bugs in the Python code.  If
    it's not correct, you may get core dumps, Python GC errors, etc.
    Probably more signs of bugs in this code.
