@@ -2290,11 +2290,13 @@ handle_gic_opt(krb5_context context,
 	    setenv("X509_USER_KEY", keybuf, 1);
 	    break;
 	case KS_PKCS11:
+#if 0
 	    if ((code = stat(residual, &statbuf)) != 0) {
 		krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
 			"Could not stat pkcs11 library '%s'", residual);
 		return KRB5_PREAUTH_FAILED;
 	    }
+#endif
 	    pkiDebug("Setting PKCS11 to '%s'\n", residual);
 	    setenv("PKCS11", residual, 1);
 	    break;
