@@ -1734,7 +1734,7 @@ krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	(krb5_context, krb5_ccache, krb5_flags,
 			krb5_creds *, krb5_creds *);
 
-krb5_boolean 
+krb5_boolean KRB5_CALLCONV
 krb5_creds_compare (krb5_context in_context,
                     krb5_creds *in_creds,
                     krb5_creds *in_compare_creds);

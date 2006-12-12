@@ -764,7 +764,7 @@ krb5_libdefault_boolean(krb5_context context, const krb5_data *realm,
 
 /* Sort a pa_data sequence so that types named in the "preferred_preauth_types"
  * libdefaults entry are listed before any others. */
-static krb5_error_code KRB5_CALLCONV
+static krb5_error_code
 sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
 			  krb5_pa_data **padata)
 {
