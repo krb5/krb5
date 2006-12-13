@@ -8,6 +8,8 @@ STLIBOBJS=	hash.o hash_bigkey.o hash_debug.o hash_func.o hash_log2.o \
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
 		-I$(srcdir)/../db
 
+AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
+
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@

@@ -6,6 +6,8 @@ STLIBOBJS=db.o
 
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool
 
+AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
+
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@

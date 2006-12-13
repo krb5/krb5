@@ -8,6 +8,8 @@ STLIBOBJS=	rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o \
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
 		-I$(srcdir)/../db
 
+AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
+
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@

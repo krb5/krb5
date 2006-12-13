@@ -6,6 +6,8 @@ STLIBOBJS=@MEMMOVE_OBJ@ @MKSTEMP_OBJ@ @STRERROR_OBJ@
 
 LOCALINCLUDES=-I../include
 
+AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
+
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@
