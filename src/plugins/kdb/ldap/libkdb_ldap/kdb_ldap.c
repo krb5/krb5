@@ -37,6 +37,7 @@
 #include "kdb_ldap.h"
 #include "ldap_misc.h"
 #include <kdb5.h>
+#include <kadm5/admin.h>
 
 krb5_error_code
 krb5_ldap_get_db_opt(char *input, char **opt, char **val)
@@ -99,8 +100,8 @@ krb5_ldap_read_startup_information(krb5_context context)
     krb5_error_code      retval = 0;
     kdb5_dal_handle      *dal_handle=NULL;
     krb5_ldap_context    *ldap_context=NULL;
-    int                  mask=0;
-
+    int                  mask = 0;
+                                                                                                                             
     SETUP_CONTEXT();
     if ((retval=krb5_ldap_read_krbcontainer_params(context, &(ldap_context->krbcontainer)))) {
 	prepend_err_str (context, "Unable to read Kerberos container", retval, retval);
@@ -110,6 +111,46 @@ krb5_ldap_read_startup_information(krb5_context context)
     if ((retval=krb5_ldap_read_realm_params(context, context->default_realm, &(ldap_context->lrparams), &mask))) {
 	prepend_err_str (context, "Unable to read Realm", retval, retval);
 	goto cleanup;
+    }
+
+    if (((mask & LDAP_REALM_MAXTICKETLIFE) == 0) || ((mask & LDAP_REALM_MAXRENEWLIFE) == 0)
+                                                 || ((mask & LDAP_REALM_KRBTICKETFLAGS) == 0)) {
+        kadm5_config_params  params_in, params_out;
+
+        memset((char *) &params_in, 0, sizeof(params_in));
+        memset((char *) &params_out, 0, sizeof(params_out));
+
+        retval = kadm5_get_config_params(context, 1, &params_in, &params_out);
+        if (retval) {
+            if ((mask & LDAP_REALM_MAXTICKETLIFE) == 0) {
+                ldap_context->lrparams->max_life = 24 * 60 * 60; /* 1 day */
+            }
+            if ((mask & LDAP_REALM_MAXRENEWLIFE) == 0) {
+                ldap_context->lrparams->max_renewable_life = 0;
+            }
+            if ((mask & LDAP_REALM_KRBTICKETFLAGS) == 0) {
+                ldap_context->lrparams->tktflags = KRB5_KDB_DEF_FLAGS;
+            }
+            retval = 0;
+            goto cleanup;
+        }
+
+        if ((mask & LDAP_REALM_MAXTICKETLIFE) == 0) {
+            if (params_out.mask & KADM5_CONFIG_MAX_LIFE)
+                ldap_context->lrparams->max_life = params_out.max_life;
+        }
+
+        if ((mask & LDAP_REALM_MAXRENEWLIFE) == 0) {
+            if (params_out.mask & KADM5_CONFIG_MAX_RLIFE)
+                ldap_context->lrparams->max_renewable_life = params_out.max_rlife;
+        }
+
+        if ((mask & LDAP_REALM_KRBTICKETFLAGS) == 0) {
+            if (params_out.mask & KADM5_CONFIG_FLAGS)
+                ldap_context->lrparams->tktflags = params_out.flags;
+        }
+
+        kadm5_free_config_params(context, &params_out);
     }
 
 cleanup:
