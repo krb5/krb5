@@ -1186,8 +1186,6 @@ krb5_read_tkt_policy (context, ldap_context, entries, policy)
 	    entries->max_life = tktpoldnparam->maxtktlife;
 	else if (ldap_context->lrparams->max_life)
 	    entries->max_life = ldap_context->lrparams->max_life;
-	else
-	    entries->max_life = KRB5_KDB_MAX_LIFE;
     }
 
     if ((mask & KDB_MAX_RLIFE_ATTR) == 0) {
@@ -1195,8 +1193,6 @@ krb5_read_tkt_policy (context, ldap_context, entries, policy)
 	    entries->max_renewable_life = tktpoldnparam->maxrenewlife;
 	else if (ldap_context->lrparams->max_renewable_life)
 	    entries->max_renewable_life = ldap_context->lrparams->max_renewable_life;
-	else
-	    entries->max_renewable_life = KRB5_KDB_MAX_RLIFE;
     }
 
     if ((mask & KDB_TKT_FLAGS_ATTR) == 0) {
