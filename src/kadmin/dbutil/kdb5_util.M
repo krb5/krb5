@@ -34,6 +34,10 @@ However, execution continues regardless of whether or not
 .B kdb5_util
 successfully opens the database, because the database may not exist yet
 or the stash file may be corrupt.
+.PP
+Note that some KDB plugins may not support all
+.B kdb5_util
+commands.
 .SH COMMAND-LINE OPTIONS
 .TP
 \fB\-r\fP\ \fIrealm\fP
@@ -159,7 +163,10 @@ automatically and handled as appropriate.  Unless the
 option is given, 
 .B load
 creates a new database containing only the principals in the dump file,
-overwriting the contents of any previously existing database.  Options:
+overwriting the contents of any previously existing database.  Note that
+when using the LDAP KDB plugin the
+.B \-update
+must be given.  Options:
 .RS
 .TP
 .B \-old
