@@ -131,7 +131,7 @@ enum krb5plugin_preauth_client_request_type {
      * encrypted portion of the AS_REP packet. */
     krb5plugin_preauth_client_get_etype = 1,
     /* Free the data returned from krb5plugin_preauth_client_req_get_etype */
-    krb5plugin_preauth_client_free_etype = 2,
+    krb5plugin_preauth_client_free_etype = 2
 };
 typedef krb5_error_code
 (*preauth_get_client_data_proc)(krb5_context,
