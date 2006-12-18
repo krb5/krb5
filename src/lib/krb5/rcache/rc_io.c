@@ -168,7 +168,9 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	    FREE(d->fn);
 	    d->fn = NULL;
 	}
-	(void) close(d->fd);
+	if (d->fd != -1) {
+	  (void) close(d->fd);
+	}
     }
     return retval;
 }
