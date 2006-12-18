@@ -66,8 +66,8 @@ installation.
 * How Kerberos Works::          
 * Configuration Files::         
 * Using DNS::                   
-* Administrating the Kerberos Database:: 
-* Configuring Kerberos with OpenLDAP back-end:: 
+* Administrating the Kerberos Database::  
+* Configuring Kerberos with OpenLDAP back-end::  
 * Application Servers::         
 * Backups of Secure Hosts::     
 * Bug Reporting::               
@@ -347,8 +347,7 @@ Following are definitions of some of the Kerberos terminology.
 * Supported Encryption Types::  
 * Salts::                       
 * krb5.conf::                   
-* kdc.conf::
-                   
+* kdc.conf::                    
 @end menu
 
 @node Supported Encryption Types, Salts, Configuration Files, Configuration Files
@@ -398,10 +397,9 @@ salt.  The supported values for salts are as follows.
 * domain_realm::                
 * logging::                     
 * capaths::                     
-* dbdefaults::
-* dbmodules:: 
-* Sample krb5.conf File:: 
-      
+* dbdefaults::                  
+* dbmodules::                   
+* Sample krb5.conf File::       
 @end menu
 
 @node libdefaults, appdefaults, krb5.conf, krb5.conf
@@ -949,7 +947,7 @@ and sent to the device /dev/tty04.
 @end group
 @end smallexample
 
-@node capaths,dbdefaults,logging, krb5.conf
+@node capaths, dbdefaults, logging, krb5.conf
 @subsection [capaths]
 
 In order to perform direct (non-hierarchical) cross-realm
@@ -1042,7 +1040,7 @@ can be used with Kerberized clients and servers, but versions prior to
 DCE 1.1 did not fill in the transited field, and should be used with
 caution.
 
-@node dbdefaults,dbmodules,capaths, krb5.conf
+@node dbdefaults, dbmodules, capaths, krb5.conf
 @subsection [dbdefaults]
 
 The [dbdefaults] section provides default values for the database specific parameters. It can also specify the configuration section under [dbmodules] section for database specific parameters used by the database library.(@pxref{dbmodules}). 
@@ -1074,7 +1072,7 @@ This LDAP specific tag indicates the list of LDAP servers that the Kerberos serv
 This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under [dbmodules]. The default value is 5.
 @end table
 
-@node dbmodules,Sample krb5.conf File,dbdefaults, krb5.conf
+@node dbmodules, Sample krb5.conf File, dbdefaults, krb5.conf
 @subsection [dbmodules]
 
 Contains database specific parameters used by the database library. Each tag in the [dbmodules] section of the file names a configuration section for database specific parameters that can be referred to by a realm. The value of the tag is a subsection where the relations in that subsection define the database specific parameters.
@@ -1106,7 +1104,7 @@ This LDAP specific tags indicates the number of connections to be maintained per
 @end table
 
 
-@node Sample krb5.conf File, ,dbmodules, krb5.conf
+@node Sample krb5.conf File,  , dbmodules, krb5.conf
 @subsection Sample krb5.conf File
 
 Here is an example of a generic @code{krb5.conf} file:
@@ -1501,9 +1499,10 @@ authenticate to KADM5.
 * Date Format::                 
 * Principals::                  
 * Policies::                    
-* Global Operations on the Kerberos Database:: 
-* Global Operations on the Kerberos LDAP Database::
+* Global Operations on the Kerberos Database::  
+* Global Operations on the Kerberos LDAP Database::  
 * Cross-realm Authentication::  
+* Changing the krbtgt Key::     
 @end menu
 
 @node Kadmin Options, Date Format, Administrating the Kerberos Database, Administrating the Kerberos Database
@@ -1653,7 +1652,7 @@ Each entry in the Kerberos database contains a Kerberos principal
 that principal.
 
 @menu
-* Retrieving Information About a Principal:: 
+* Retrieving Information About a Principal::  
 * Privileges::                  
 * Adding or Modifying Principals::  
 * Deleting Principals::         
@@ -1665,7 +1664,7 @@ that principal.
 
 @menu
 * Attributes::                  
-* Retrieving a List of Principals::   
+* Retrieving a List of Principals::  
 @end menu
 
 @node Attributes, Retrieving a List of Principals, Retrieving Information About a Principal, Retrieving Information About a Principal
@@ -2370,7 +2369,6 @@ recommend using this option.
 @end table
 
 @node Dumping a Kerberos Database to a File, Restoring a Kerberos Database from a Dump File, Global Operations on the Kerberos Database, Global Operations on the Kerberos Database
-
 @subsection Dumping a Kerberos Database to a File
 
 To dump a Kerberos database into a file, use the @code{kdb5_util}
@@ -2656,25 +2654,25 @@ Specifies the password of user_dn. This option is not recommended.
 Specifies the URI of the LDAP server. It is recommended to use ldapi:// or ldaps:// to connect to the LDAP server.
 @end table
 @menu
-* Creating a Kerberos Realm::
-* Modifying a Kerberos Realm::
-* Retrieving Information about a Kerberos Realm::
-* Destroying a Kerberos Realm::
-* Listing available Kerberos Realms::	
-* Stashing Service Object's Password::	
-* Creating and Modifying a Ticket Policy::	
-* Retrieving Information About a Ticket Policy::	
-* Destroying a Ticket Policy::	
-* Listing available Ticket Policies::
-* Creating a Service Object(eDirectory specific)::	
-* Modifying a Service Object(eDirectory specific)::	
-* Retrieving Information about a Service Object(eDirectory specific)::	
-* Destroying a Service Object(eDirectory specific)::	
-* Listing Available Service Objects(eDirectory specific)::	
-* Setting and Stashing Service Object's Password(eDirectory specific)::
+* Creating a Kerberos Realm::   
+* Modifying a Kerberos Realm::  
+* Retrieving Information about a Kerberos Realm::  
+* Destroying a Kerberos Realm::  
+* Listing available Kerberos Realms::  
+* Stashing Service Object's Password::  
+* Creating and Modifying a Ticket Policy::  
+* Retrieving Information About a Ticket Policy::  
+* Destroying a Ticket Policy::  
+* Listing available Ticket Policies::  
+* Creating a Service Object(eDirectory specific)::  
+* Modifying a Service Object(eDirectory specific)::  
+* Retrieving Information about a Service Object(eDirectory specific)::  
+* Destroying a Service Object(eDirectory specific)::  
+* Listing Available Service Objects(eDirectory specific)::  
+* Setting and Stashing Service Object's Password(eDirectory specific)::  
 @end menu
 
-@node Creating a Kerberos Realm , Modifying a Kerberos Realm, , Global Operations on the Kerberos LDAP Database
+@node Creating a Kerberos Realm, Modifying a Kerberos Realm, Global Operations on the Kerberos LDAP Database, Global Operations on the Kerberos LDAP Database
 @subsection Creating a Kerberos Realm
 
 If you need to create a new realm, use the command as follows: 
@@ -2791,7 +2789,7 @@ shell%
 @menu
 * Command Options Specific to eDirectory(Creating a Kerberos Realm)::
 @end menu
-@node Command Options Specific to eDirectory(Creating a Kerberos Realm), , ,Creating a Kerberos Realm
+@node Command Options Specific to eDirectory(Creating a Kerberos Realm),  , Creating a Kerberos Realm, Creating a Kerberos Realm
  
 @subsubsection Command Options Specific to eDirectory 
 
@@ -2903,12 +2901,12 @@ shell%
 @end smallexample
 
 @menu
-* Command Options Specific to eDirectory(Modifying a Kerberos Realm)::
+* Command Options Specific to eDirectory(Modifying a Kerberos Realm)::  
 @end menu
 
 @end table
 
-@node Command Options Specific to eDirectory(Modifying a Kerberos Realm),  ,  , Modifying a Kerberos Realm
+@node Command Options Specific to eDirectory(Modifying a Kerberos Realm),  , Modifying a Kerberos Realm, Modifying a Kerberos Realm
 @subsubsection Command Options Specific to eDirectory
 
 @table @b
@@ -2960,7 +2958,6 @@ shell%
 
 
 @node Destroying a Kerberos Realm, Listing available Kerberos Realms, Retrieving Information about a Kerberos Realm, Global Operations on the Kerberos LDAP Database
-
 @subsection Destroying a Kerberos Realm
 
 @table @b
@@ -3009,7 +3006,6 @@ shell%
 @end smallexample
 
 @node Stashing Service Object's Password, Creating and Modifying a Ticket Policy, Listing available Kerberos Realms, Global Operations on the Kerberos LDAP Database
-
 @subsection Stashing Service Object's Password
 
 @b{stashsrvpw} [@b{-f} @i{filename}] @b{servicedn}
@@ -3036,7 +3032,6 @@ shell%
 @end smallexample
 
 @node Creating and Modifying a Ticket Policy, Retrieving Information About a Ticket Policy, Stashing Service Object's Password, Global Operations on the Kerberos LDAP Database
-
 @subsection Creating and Modifying a Ticket Policy
 
 This command creates a ticket policy in directory. 
@@ -3187,7 +3182,6 @@ shell%
 @end smallexample
 
 @node Listing available Ticket Policies, Creating a Service Object(eDirectory specific), Destroying a Ticket Policy, Global Operations on the Kerberos LDAP Database
-
 @subsection Listing available Ticket Policies
 
 
@@ -3216,7 +3210,6 @@ shell%
 @end smallexample
 
 @node Creating a Service Object(eDirectory specific), Modifying a Service Object(eDirectory specific), Listing available Ticket Policies, Global Operations on the Kerberos LDAP Database
-
 @subsection Creating a Service Object (eDirectory specific)
 @smallexample
 @b{create_service} @i{-kdc|-admin|-pwd} [@b{-servicehost} @i{service_host_list}] [@b{-realm} @i{realm_list}] [@b{-randpw}|
@@ -3311,8 +3304,7 @@ modify_service -realm ATHENA.MIT.EDU cn=service-kdc,o=org
 shell% 
 @end group
 @end smallexample
-@node Retrieving Information about a Service Object(eDirectory specific), Destroying a Service Object(eDirectory specific),Modifying a Service Object(eDirectory specific),Global Operations on the Kerberos LDAP Database
-
+@node Retrieving Information about a Service Object(eDirectory specific), Destroying a Service Object(eDirectory specific), Modifying a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
 @subsection Retrieving Information about a Service Object(eDirectory specific)
 
 @table @b
@@ -3368,7 +3360,6 @@ shell%
 @end smallexample
 
 @node Listing Available Service Objects(eDirectory specific), Setting and Stashing Service Object's Password(eDirectory specific), Destroying a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
-
 @subsection Listing Available Service Objects(eDirectory specific)
 
 @table @b
@@ -3392,7 +3383,7 @@ shell%
 @end group
 @end smallexample
 
-@node Setting and Stashing Service Object's Password(eDirectory specific), ,   Listing Available Service Objects(eDirectory specific), Global Operations on the Kerberos LDAP Database
+@node Setting and Stashing Service Object's Password(eDirectory specific),  , Listing Available Service Objects(eDirectory specific), Global Operations on the Kerberos LDAP Database
 @subsection Setting and Stashing Service Object's Password (eDirectory specific)
 
 @b{setsrvpw} @b{[-randpw|-fileonly]}@b{[-f} @i{ filename}@b{]} @b{service_dn}
@@ -3427,8 +3418,14 @@ shell%
 @end group
 @end smallexample
 
+@ignore
+@c @node The KDC Logs,  , GLobal operations on the Kerberos LDAP Database, Administrating the Kerberos Database
+@c @section The KDC Logs
 
-@node Cross-realm Authentication, , Global Operations on the Kerberos LDAP Database, Administrating the Kerberos Database
+This will have to wait until the next release.  *sigh*
+@end ignore
+
+@node Cross-realm Authentication, Changing the krbtgt Key, Global Operations on the Kerberos LDAP Database, Administrating the Kerberos Database
 @section Cross-realm Authentication
 
 In order for a KDC in one realm to authenticate Kerberos users in a
@@ -3463,48 +3460,98 @@ It is also very important that these principals have good passwords.
 @value{COMPANY} recommends that TGT principal passwords be at least 26
 characters of random ASCII text.
 
-@ignore
-@c @node The KDC Logs,  , GLobal operations on the Kerberos LDAP Database, Administrating the Kerberos Database
-@c @section The KDC Logs
+@node Changing the krbtgt Key,  , Cross-realm Authentication, Administrating the Kerberos Database
+@section Changing the krbtgt Key
 
-This will have to wait until the next release.  *sigh*
-@end ignore
+A Kerberos Ticket Granting Ticket (TGT) is a service ticket for the
+principal krbtgt/@i{REALM}.  The key for this principal is created when
+the Kerberos database is initialized and need not be changed.  However,
+it will only have the encryption types supported by the KDC at the time
+of the initial database creation.  To allow use of newer encryption
+types for the TGT, this key has to be changed.
+
+Changing this key using the normal @code{kadmin change_password} command
+would invalidate any previously issued TGTs.  Therefore, when changing
+this key, normally one should use the @b{-keepold} flag to
+@code{change_password} to retain the previous key in the database as
+well as the new key.  For example:
+
+@smallexample
+@group
+@b{kadmin:} change_password -randkey -keepold krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
+@end group
+@end smallexample
+
+There is currently no way to remove the old key without running
+@code{change_password} without the @b{-keepold} flag (and thereby
+invalidating all existing TGTs).  After issuing this command, the old
+key is still valid and is still vulnerable to (for instance) brute force
+attacks.  To completely retire an old key or encryption type, it's
+therefore currently necessary to declare a flag day, run
+@code{change_password} without the @b{-keepold} flag, and force all
+users to acquire new tickets.
 
 @node Configuring Kerberos with OpenLDAP back-end, Application Servers, Administrating the Kerberos Database, Top
 @chapter Configuring Kerberos with OpenLDAP back-end
 
 @enumerate
-@item Set up SSL on the OpenLDAP server and client to ensure secure communication when the KDC service and LDAP server are on different machines. ldapi:// can be used if the LDAP server and KDC service are running on the same  machine.
+@item
+Set up SSL on the OpenLDAP server and client to ensure secure
+communication when the KDC service and LDAP server are on different
+machines. @code{ldapi://} can be used if the LDAP server and KDC
+service are running on the same machine.
+
 @enumerate A
-@item Setting up SSL on the OpenLDAP server:
-@noindent
-a. Get a CA certificate using OpenSSL tools
-@noindent
-b. Configure OpenLDAP server for using SSL/TLS
+@item
+Setting up SSL on the OpenLDAP server:
+
+@enumerate a
+@item
+Get a CA certificate using OpenSSL tools
+
+@item
+Configure OpenLDAP server for using SSL/TLS
+
 @noindent
    For the latter, you need to specify the location of CA certificate location in slapd.conf file.
+
 @noindent
    Refer to the following link for more information:
+
 @noindent
 @uref{http://www.openldap.org/doc/admin23/tls.html}
-@item Setting up SSL on OpenLDAP Client:
-@noindent
-a. For the KDC and Admin Server, you need to do the client-side configuration in ldap.conf.
+@end enumerate
+
+@item
+Setting up SSL on OpenLDAP Client:
+
+@enumerate a
+@item
+For the KDC and Admin Server, you need to do the client-side configuration in ldap.conf.
+
 @noindent
 For example,
 @smallexample
 TLS_CACERT @code{/etc/openldap/certs/cacert.pem}
 @end smallexample
 @end enumerate
+@end enumerate
 
-@item Include the Kerberos schema file (kerberos.schema) in the configuration file (slapd.conf) on the LDAP Server, by providing the location where it is stored.
+@item
+Include the Kerberos schema file (kerberos.schema) in the
+configuration file (slapd.conf) on the LDAP Server, by providing the
+location where it is stored.
 
 @smallexample
 include @code{/etc/openldap/schema/kerberos.schema}
 @end smallexample
 
-@item Configure the LDAP server ACLs to enable the KDC and Admin server to read and write the Kerberos data.
-@subsection Sample access control information
+@item
+Configure the LDAP server ACLs to enable the KDC and Admin server to
+read and write the Kerberos data.
+
+@subheading
+Sample access control information
 
 @smallexample
 access to dn.base=""
@@ -3538,14 +3585,19 @@ access to *
 @end smallexample
 
 @noindent
-The above list provides the access control information for the KDC and Admin service object for the realm container and the realm subtree. Thus if the realm subtree or the service objects for a realm are changed then this information should be updated.
+The above list provides the access control information for the KDC and
+Admin service object for the realm container and the realm
+subtree. Thus if the realm subtree or the service objects for a realm
+are changed then this information should be updated.
 
-@item Start the LDAP server as follows: 
+@item
+Start the LDAP server as follows: 
 @smallexample
 slapd -h "ldapi:/// ldaps:///"
 @end smallexample
  
-@item Modify the krb5.conf file to include LDAP specific items listed below:
+@item
+Modify the krb5.conf file to include LDAP specific items listed below:
 @smallexample
 @samp{realms}
 @noindent  @samp{database_module}
@@ -3565,7 +3617,8 @@ For the sample @file{krb5.conf} file, refer to @ref{Sample krb5.conf File}.
 @noindent
 For more details, refer to the section @file{krb5.conf}
 
-@item Create the realm using @samp{kdb5_ldap_util}.
+@item
+Create the realm using @samp{kdb5_ldap_util}.
 
 @smallexample
 @b{kdb5_ldap_util} @b{-D} @i{ cn=admin,o=mit} create @b{-subtrees} @i{ o=mit} @b{-r} @i{MIT.EDU} @b{-s}
@@ -3580,7 +3633,11 @@ For more information, refer to the section @dfn{Global Operations on the Kerbero
 The realm object is created under the ldap_kerberos_container_dn specified in the configuration file. This operation will also create the Kerberos container, if not present already. This will be used to store information related to all realms.
 
 @item 
-Stash the password of the service object used by the KDC and Administration service to bind to the LDAP server using the stashsrvpw command of kdb5_ldap_util. The object DN should be the same as ldap_kdc_dn and ldap_kadmind_dn values specified in the krb5.conf file.
+Stash the password of the service object used by the KDC and
+Administration service to bind to the LDAP server using the stashsrvpw
+command of kdb5_ldap_util. The object DN should be the same as
+ldap_kdc_dn and ldap_kadmind_dn values specified in the krb5.conf
+file.
 
 @smallexample
 @b{kdb5_ldap_util} @b{-D} @i{ cn=admin,o=mit} @i{stashsrvpw} @b{-f} @code{/etc/kerberos/service.keyfile} @i{cn=krbadmin,o=mit}
@@ -3590,7 +3647,7 @@ Stash the password of the service object used by the KDC and Administration serv
 Add krb5principalname to the indexes in slapd.conf to speed up the access.
 @end enumerate
 
-@node Application Servers, Backups of Secure Hosts, Configuring Kerberos with OpenLDAP back-end,  Top
+@node Application Servers, Backups of Secure Hosts, Configuring Kerberos with OpenLDAP back-end, Top
 @chapter Application Servers
 
 If you need to install the @value{PRODUCT} programs on an application
