@@ -1095,7 +1095,7 @@ kadmin_addprinc_usage(func)
 {
     fprintf(stderr, "usage: %s [options] principal\n", func);
     fprintf(stderr, "\toptions are:\n");
-    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-randkey] [-pw password]\n\t\t[-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
+    fprintf(stderr, "\t\t[-x db_princ_args]* [-expire expdate] [-pwexpire pwexpdate] [-maxlife maxtixlife]\n\t\t[-kvno kvno] [-policy policy] [-clearpolicy] [-randkey]\n\t\t[-pw password] [-maxrenewlife maxrenewlife]\n\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n");
     fprintf(stderr, "\tattributes are:\n");
     fprintf(stderr, "%s%s%s",
 	    "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
