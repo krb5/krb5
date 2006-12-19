@@ -249,7 +249,8 @@ typedef int k5_mutex_stats_tmp;
 #define k5_mutex_stats_start()		(0)
 #ifdef __GNUC__
 static inline void
-k5_mutex_lock_update_stats(k5_debug_mutex_stats *m, k5_mutex_stats_tmp t)
+k5_mutex_lock_update_stats(k5_debug_mutex_stats *m __attribute__((unused)),
+			   k5_mutex_stats_tmp t __attribute__((unused)))
 {
 }
 #else
@@ -475,7 +476,7 @@ typedef struct {
 #ifdef DEBUG_THREADS
 # ifdef __GNUC__
 #  define k5_pthread_mutex_lock(M)			\
-	({						\
+	__extension__ ({				\
 	    k5_os_mutex *_m2 = (M);			\
 	    int _r2 = pthread_mutex_lock(&_m2->p);	\
 	    if (_r2 == 0) _m2->owner = pthread_self();	\
