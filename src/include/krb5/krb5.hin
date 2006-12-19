@@ -267,7 +267,7 @@ typedef const krb5_principal_data *krb5_const_principal;
 /*
  * Referral-specific functions.
  */
-krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(krb5_data *);
+krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *);
 
 /*
  * end "base-defs.h"

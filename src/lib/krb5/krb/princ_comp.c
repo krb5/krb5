@@ -66,7 +66,7 @@ krb5_principal_compare(krb5_context context, krb5_const_principal princ1, krb5_c
     return TRUE;
 }
 
-krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(krb5_data *r)
+krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r)
 {
     /*
      * Check for a match with KRB5_REFERRAL_REALM.  Currently this relies
