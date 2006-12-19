@@ -1308,13 +1308,13 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     int i, j;
     int out_pa_list_size = 0;
 
-    ret = KRB_ERR_GENERIC;
+    ret = KRB5KRB_ERR_GENERIC;
     if (kcontext->preauth_context == NULL) {
-       return KRB_ERR_GENERIC;
+       return KRB5KRB_ERR_GENERIC;
     }
     context = kcontext->preauth_context;
     if (context == NULL) {
-       return KRB_ERR_GENERIC;
+       return KRB5KRB_ERR_GENERIC;
     }
 
     for (i = 0; padata[i] != NULL && padata[i]->pa_type != 0; i++) {
