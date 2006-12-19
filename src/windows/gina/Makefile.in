@@ -28,6 +28,7 @@ clean-windows::
 $(OUTPRE)kgina.dll: $(OBJS) $(KLIB) $(CLIB)
 	link $(WINDLLFLAGS) -def:gina.def -out:$*.dll \
 	   $** $(WINLIBS) $(SCLIB)
+	$(_VC_MANIFEST_EMBED_DLL)
 
 $(OUTPRE)ginastub.obj: ginastub.h
 

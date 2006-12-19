@@ -324,7 +324,8 @@ MT=mt.exe -nologo
 _VC_MANIFEST_EMBED_EXE= \
 if exist $@.manifest $(MT) -outputresource:$@;1 -manifest $@.manifest
 
-_VC_MANIFEST_EMBED_DLL=$(_VC_MANIFEST_EMBED_EXE)
+_VC_MANIFEST_EMBED_DLL= \
+if exist $@.manifest $(MT) -outputresource:$@;2 -manifest $@.manifest
 
 # Note that if you are merging manifests, then the VS generated
 # manifest should be cleaned up after calling _VC_MANIFEST_EMBED_???.

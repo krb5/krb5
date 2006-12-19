@@ -2429,7 +2429,7 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST	0x0020
 #define KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST	0x0040
 #define KRB5_GET_INIT_CREDS_OPT_SALT		0x0080
-
+#define KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT	0x0100
 
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init
@@ -2477,7 +2477,10 @@ krb5_get_init_creds_opt_set_salt
 (krb5_get_init_creds_opt *opt,
 		krb5_data *salt);
 
-
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_change_password_prompt
+(krb5_get_init_creds_opt *opt,
+		int prompt);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password
