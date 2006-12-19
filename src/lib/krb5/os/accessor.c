@@ -43,6 +43,9 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
     if (version == KRB5INT_ACCESS_VERSION) {
 #if DESIGNATED_INITIALIZERS
 #define S(FIELD, VAL)   .FIELD = VAL
+#if defined __GNUC__ && __STDC_VERSION__ < 199901L
+	__extension__
+#endif
 	static const krb5int_access internals_temp = {
 #else
 #define S(FIELD, VAL)   internals_temp.FIELD = VAL
