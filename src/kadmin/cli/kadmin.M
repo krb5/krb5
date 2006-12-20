@@ -162,11 +162,13 @@ Options supported for LDAP database are:
 specifies the LDAP server to connect to by a LDAP URI.
 .TP
 \-x binddn=<bind_dn>
+.fi
 specifies the DN of the object used by the administration server to bind to the LDAP server.
-This object should have the read rights on the realm container and write rights on the subtree
-that is referenced by the realm.
+This object should have the read and write rights on the realm container, principal container
+and the subtree that is referenced by the realm.
 .TP
 \-x bindpwd=<bind_password>
+.fi
 specifies the password for the above mentioned binddn. It is recommended not to use this option.
 Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
 .RE
@@ -227,8 +229,9 @@ Specifies the LDAP object that will contain the Kerberos principal being
 created.
 .TP
 \-x linkdn=<dn>
+.fi
 Specifies the LDAP object to which the newly created Kerberos principal object
- will point to.
+will point to.
 .TP
 \-x containerdn=<container_dn>
 Specifies the container object under which the Kerberos principal is to be created. 
@@ -475,8 +478,9 @@ Denotes the database specific options. The options for LDAP database are:
 Associates a ticket policy to the Kerberos principal.
 .TP
 \-x linkdn=<dn>
+.fi
 Associates a Kerberos principal with a LDAP object. This option is honored only
- if the Kerberos principal is not already associated with a LDAP object. 
+if the Kerberos principal is not already associated with a LDAP object. 
 .RE
 .TP
 ERRORS:
