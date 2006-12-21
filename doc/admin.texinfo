@@ -2664,12 +2664,12 @@ Specifies the URI of the LDAP server. It is recommended to use ldapi:// or ldaps
 * Retrieving Information About a Ticket Policy::  
 * Destroying a Ticket Policy::  
 * Listing available Ticket Policies::  
-* Creating a Service Object(eDirectory specific)::  
-* Modifying a Service Object(eDirectory specific)::  
-* Retrieving Information about a Service Object(eDirectory specific)::  
-* Destroying a Service Object(eDirectory specific)::  
-* Listing Available Service Objects(eDirectory specific)::  
-* Setting and Stashing Service Object's Password(eDirectory specific)::  
+* Creating a Service Object (eDirectory)::  
+* Modifying a Service Object (eDirectory)::  
+* Retrieving Service Object Information (eDirectory)::  
+* Destroying a Service Object (eDirectory)::  
+* Listing Available Service Objects (eDirectory)::  
+* Passwords for Service Objects (eDirectory)::  
 @end menu
 
 @node Creating a Kerberos Realm, Modifying a Kerberos Realm, Global Operations on the Kerberos LDAP Database, Global Operations on the Kerberos LDAP Database
@@ -2702,7 +2702,8 @@ Specifies the scope for searching the principals under the subtree. The possible
 Specfies the DN of the container object in which the principals of a realm will be created. If the container reference is not configured for a realm, the principals will be created in the realm container.
 
 @itemx @b{-k} @i{mkeytype}
-Specifies the key type of the master key in the database; the default is that given in @file{kdc.conf} .
+Specifies the key type of the master key in the database; the default
+is that given in @file{kdc.conf}.
 
 @itemx @b{-m} @i{}
 Specifies that the master database password should be read from the TTY rather than fetched from a file on disk.
@@ -2743,31 +2744,52 @@ The various flags are:
 @code{-allow_proxiable} prohibits principals from obtaining proxiable tickets. (Sets the @samp{KRB5_KDB_DISALLOW_PROXABLE} flag.) @code{+allow_proxiable} clears this flag.
 
 @itemx @{-|+@}allow_dup_skey
-@code{-allow_dup_skey} Disables user-to-user authentication for principals by prohibiting principals from obtaining a sessions key for another user. (Sets the @samp{KRB5_KDB_DISALLOW_DUP_SKEY} flag.). @code{+allow_dup_skey} clears this flag.
+@code{-allow_dup_skey} disables user-to-user authentication for
+principals by prohibiting principals from obtaining a sessions key for
+another user.  (Sets the @samp{KRB5_KDB_DISALLOW_DUP_SKEY} flag.)
+@code{+allow_dup_skey} clears this flag.
 
 @itemx @{-|+@}requires_preauth
-@code{+requires_preauth} requires principals to preauthenticate before being allowed to kinit. (Sets the @samp{.SM KRB5_KDB_REQURES_PRE_AUTH} flag.) @code{-requires_preauth} clears this flag.
+@code{+requires_preauth} requires principals to preauthenticate before being allowed to kinit. (Sets the @samp{KRB5_KDB_REQURES_PRE_AUTH} flag.) @code{-requires_preauth} clears this flag.
 
 @itemx @{-|+@}requires_hwauth
-@code{+requires_hwauth} requires principals to preauthenticate using a hardware device before being allowed to kinit. (Sets the @samp{B5_KDB_REQURES_HW_AUTH} flag.)@code{-requires_hwauth} clears this flag.
+@code{+requires_hwauth} requires principals to preauthenticate using a
+hardware device before being allowed to kinit. (Sets the
+@samp{KRB5_KDB_REQURES_HW_AUTH} flag.)  @code{-requires_hwauth} clears
+this flag.
 
 @itemx @{-|+@}allow_svr
-@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{.SM KRB5_KDB_DISALLOW_SVR} flag.) @code{+allow_svr} clears this flag.
+@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{KRB5_KDB_DISALLOW_SVR} flag.) @code{+allow_svr} clears this flag.
 
 @itemx @{-|+@}allow_tgs_req
-@code{-allow_tgs_req} specifies that a @dfn{Ticket-Granting Service (TGS)} request for a service ticket for principals is not permitted. This option is useless for most things.@code{+allow_tgs_req} clears this flag.  The default is @code{+allow_tgs_req}. In effect, @code{-allow_tgs_req} sets the @samp{KRB5_KDB_DISALLOW_TGT_BASED} flag on principals in the database.
+@code{-allow_tgs_req} specifies that a @dfn{Ticket-Granting Service
+(TGS)} request for a service ticket for principals is not
+permitted. This option is useless for most
+things.@code{+allow_tgs_req} clears this flag.  The default is
+@code{+allow_tgs_req}. In effect, @code{-allow_tgs_req} sets the
+@samp{KRB5_KDB_DISALLOW_TGT_BASED} flag on principals in the
+database.
 
 @itemx @{-|+@}allow_tix
-@code{-allow_tix} forbids the issuance of any tickets for principals. @code{+allow_tix} clears this flag. The default is +allow_tix .In effect, -@code{allow_tix} sets the @samp{KRB5_KDB_DISALLOW_ALL_TIX} flag on principals in the database.
+@code{-allow_tix} forbids the issuance of any tickets for
+principals. @code{+allow_tix} clears this flag. The default is
+@code{+allow_tix}.  In effect, @code{-allow_tix} sets the
+@samp{KRB5_KDB_DISALLOW_ALL_TIX} flag on principals in the database.
 
 @itemx @{-|+@}needchange
 @code{+needchange} sets a flag in attributes field to force a password change; 
 @code{-needchange} clears it. The default is @code{-needchange}. In effect,
-+needchange sets the @samp{KRB5_KDB_REQURES_PWCHANGE} flag on principals in the database.
+@code{+needchange} sets the @samp{KRB5_KDB_REQURES_PWCHANGE} flag on
+principals in the database.
 
 @itemx @{-|+@}password_changing_service
-@code{+password_changing_service} sets a flag in the attributes field marking principal as a password change service principal (useless for most things). @code{-password_changing_service} clears the flag. This flag intentionally has a long name. The default is 
-@code{-password_changing_service}. In effect, @code{+password_changing_service} sets the @samp{KRB5_KDB_PWCHANGE_SERVICE} flag on principals in the database.
+@code{+password_changing_service} sets a flag in the attributes field
+marking principal as a password change service principal (useless for
+most things). @code{-password_changing_service} clears the flag. This
+flag intentionally has a long name. The default is
+@code{-password_changing_service}. In effect,
+@code{+password_changing_service} sets the
+@samp{KRB5_KDB_PWCHANGE_SERVICE} flag on principals in the database.
 
 @end table
 
@@ -2787,11 +2809,11 @@ shell%
 @end group
 @end smallexample
 @menu
-* Command Options Specific to eDirectory(Creating a Kerberos Realm)::
+* eDirectory Options (Creating a Kerberos Realm)::
 @end menu
-@node Command Options Specific to eDirectory(Creating a Kerberos Realm),  , Creating a Kerberos Realm, Creating a Kerberos Realm
+@node eDirectory Options (Creating a Kerberos Realm),  , Creating a Kerberos Realm, Creating a Kerberos Realm
  
-@subsubsection Command Options Specific to eDirectory 
+@subsubsection eDirectory Options
 
 @table @b
 @itemx @b{-kdcdn} @i{kdc_servce_list}
@@ -2868,20 +2890,27 @@ The various flags are:
 @code{-allow_dup_skey} Disables user-to-user authentication for principals by prohibiting principals from obtaining a sessions key for another user. (Sets the @samp{KRB5_KDB_DISALLOW_DUP_SKEY} flag.). @code{+allow_dup_skey} clears This flag.
 @itemx @{-|+@}requires_preauth
 @code{+requires_preauth} requires principals to preauthenticate before being allowed to kinit. Sets the 
-@samp{.SM KRB5_KDB_REQURES_PRE_AUTH} flag.@code{-requires_preauth} clears this flag.
+@samp{KRB5_KDB_REQURES_PRE_AUTH} flag.@code{-requires_preauth} clears this flag.
 @itemx @{-|+@}requires_hwauth
 @code{+requires_hwauth} requires principals to preauthenticate using a hardware device before being allowed to kinit. (Sets the 
-@samp{B5_KDB_REQURES_HW_AUTH} flag.)@code{-requires_hwauth} clears this flag.
+@samp{KRB5_KDB_REQURES_HW_AUTH} flag.)@code{-requires_hwauth} clears this flag.
 @itemx @{-|+@}allow_svr
-@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{.SM KRB5_KDB_DISALLOW_SVR} flag.) @code{+allow_svr} clears This flag.
+@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{KRB5_KDB_DISALLOW_SVR} flag.) @code{+allow_svr} clears This flag.
 @itemx @{-|+@}allow_tgs_req
 @code{-allow_tgs_req} specifies that a @dfn{Ticket-Granting Service (TGS)} request for a service ticket for principals is not permitted. This option is useless for most things.@code{+allow_tgs_req} clears this flag. 
-The default is. @code{+allow_tgs_req} .In effect, @code{-allow_tgs_req} sets the @samp{KRB5_KDB_DISALLOW_TGT_BASED} flag on principals in the database.
+The default is. @code{+allow_tgs_req}.  In effect,
+@code{-allow_tgs_req} sets the @samp{KRB5_KDB_DISALLOW_TGT_BASED} flag
+on principals in the database.
 @itemx @{-|+@}allow_tix
-@code{-allow_tix} forbids the issuance of any tickets for principals. @code{+allow_tix} clears this flag. The default is @code{+allow_tix} .In effect, @code{-allow_tix} sets the @samp{KRB5_KDB_DISALLOW_ALL_TIX} flag on principals in the database.
+@code{-allow_tix} forbids the issuance of any tickets for
+principals. @code{+allow_tix} clears this flag. The default is
+@code{+allow_tix}.  In effect, @code{-allow_tix} sets the
+@samp{KRB5_KDB_DISALLOW_ALL_TIX} flag on principals in the database.
 @itemx @{-|+@}needchange
 @code{+needchange} sets a flag in attributes field to force a password change; @code{-needchange} clears it. 
-The default is @code{-needchange} .In effect,@code{+needchange} sets the @samp{KRB5_KDB_REQURES_PWCHANGE} flag on principals in the database.
+The default is @code{-needchange}.  In effect,@code{+needchange} sets
+the @samp{KRB5_KDB_REQURES_PWCHANGE} flag on principals in the
+database.
 @itemx @{-|+@}password_changing_service
 @code{+password_changing_service} sets a flag in the attributes field marking principal as a password change service principal (useless for most things).@code{-password_changing_service} clears the flag. This flag intentionally has a long name. The default is @code{-password_changing_service} 
 In effect, @code{+password_changing_service} sets the @samp{KRB5_KDB_PWCHANGE_SERVICE} flag on principals in the database.
@@ -2901,13 +2930,13 @@ shell%
 @end smallexample
 
 @menu
-* Command Options Specific to eDirectory(Modifying a Kerberos Realm)::  
+* eDirectory Options (Modifying a Kerberos Realm)::  
 @end menu
 
 @end table
 
-@node Command Options Specific to eDirectory(Modifying a Kerberos Realm),  , Modifying a Kerberos Realm, Modifying a Kerberos Realm
-@subsubsection Command Options Specific to eDirectory
+@node eDirectory Options (Modifying a Kerberos Realm),  , Modifying a Kerberos Realm, Modifying a Kerberos Realm
+@subsubsection eDirectory Options
 
 @table @b
 @itemx @b{-kdcdn} @i{kdc_service_list}
@@ -3064,43 +3093,57 @@ Specifies the ticket flags. If this option is not specified, by default, none of
 The various flags are:
 @table @b
 @itemx @{-|+@}allow_postdated
-@code{-allow_postdated} prohibits principals from obtaining postdated tickets. (Sets the @samp{KRB5_KDB_DSALLOW_POSTDATED} flag.).@code{+allow_postdated} clears this flag.
+@code{-allow_postdated} prohibits principals from obtaining postdated tickets. (Sets the @samp{KRB5_KDB_DISALLOW_POSTDATED} flag.).@code{+allow_postdated} clears this flag.
 
 @itemx @{-|+@}allow_forwardable
 
 @code{-allow_forwardable} prohibits principals from obtaining forwardable tickets. (Sets the 
-@samp{KRB5_KDB_DSALLOW_FORWARDABLE} flag.) @code{+allow_forwardable} clears this flag.
+@samp{KRB5_KDB_DISALLOW_FORWARDABLE} flag.) @code{+allow_forwardable} clears this flag.
 
 @itemx @{-|+@}allow_renewable
-@code{-allow_renewable} prohibits principals from obtaining renewable tickets. (Sets the @samp{KRB5_KDB_DSALLOW_RENEWABLE} flag.) @code{+allow_renewable} clears this flag.
+@code{-allow_renewable} prohibits principals from obtaining renewable tickets. (Sets the @samp{KRB5_KDB_DISALLOW_RENEWABLE} flag.) @code{+allow_renewable} clears this flag.
 @itemx @{-|+@}allow_proxiable
-@code{-allow_proxiable} prohibits principals from obtaining proxiable tickets. (Sets the @samp{KRB5_KDB_DSALLOW_PROXABLE} flag.) @code{+allow_proxiable} clears this flag.
+@code{-allow_proxiable} prohibits principals from obtaining proxiable tickets. (Sets the @samp{KRB5_KDB_DISALLOW_PROXABLE} flag.) @code{+allow_proxiable} clears this flag.
 @itemx @{-|+@}allow_dup_skey
-@code{-allow_dup_skey} Disables user-to-user authentication for principals by prohibiting principals from obtaining a sessions key for another user. (Sets the @samp{KRB5_KDB_DSALLOW_DUP_SKEY} flag.). @code{+allow_dup_skey} clears This flag.
+@code{-allow_dup_skey} Disables user-to-user authentication for principals by prohibiting principals from obtaining a sessions key for another user. (Sets the @samp{KRB5_KDB_DISALLOW_DUP_SKEY} flag.). @code{+allow_dup_skey} clears This flag.
 @itemx @{-|+@}requires_preauth
-@code{+requires_preauth} requires principals to preauthenticate before being allowed to kinit. (Sets the @samp{.SM KRB5_KDB_REQURES_PRE_AUTH} flag.) 
+@code{+requires_preauth} requires principals to preauthenticate before being allowed to kinit. (Sets the @samp{KRB5_KDB_REQURES_PRE_AUTH} flag.) 
 @code{-requires_preauth} clears this flag.
 
 @itemx @{-|+@}requires_hwauth
-@code{+requires_hwauth} requires principals to preauthenticate using a hardware device before being allowed to kinit. (Sets the @samp{B5_KDB_REQURES_HW_AUTH} flag.)@code{-requires_hwauth} clears this flag.
+@code{+requires_hwauth} requires principals to preauthenticate using a
+hardware device before being allowed to kinit. (Sets the
+@samp{KRB5_KDB_REQURES_HW_AUTH} flag.)  @code{-requires_hwauth} clears
+this flag.
 
 @itemx @{-|+@}allow_svr
-@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{.SM KRB5_KDB_DSALLOW_SVR} flag.) @code{+allow_svr} clears This flag.
+@code{-allow_svr} prohibits the issuance of service tickets for principals. (Sets the @samp{KRB5_KDB_DISALLOW_SVR} flag.) @code{+allow_svr} clears This flag.
 @itemx @{-|+@}allow_tgs_req
 @code{-allow_tgs_req} specifies that a @dfn{Ticket-Granting Service (TGS)} request for a service ticket for principals is not permitted. This option is useless for most things.@code{+allow_tgs_req} clears this flag. 
-The default is. @code{+allow_tgs_req} .In effect, @code{-allow_tgs_req} sets the @samp{KRB5_KDB_DSALLOW_TGT_BASED} flag on principals in the database.
+The default is @code{+allow_tgs_req}.  In effect,
+@code{-allow_tgs_req} sets the @samp{KRB5_KDB_DISALLOW_TGT_BASED} flag
+on principals in the database.
 
 @itemx @{-|+@}allow_tix
-@code{-allow_tix} forbids the issuance of any tickets for principals. @code{+allow_tix} clears this flag. The default is +allow_tix .In effect, -@code{allow_tix} sets the @samp{KRB5_KDB_DSALLOW_ALL_TIX} flag on principals in the database.
+@code{-allow_tix} forbids the issuance of any tickets for
+principals.  @code{+allow_tix} clears this flag.  The default is
+@code{+allow_tix}.  In effect, @code{-allow_tix} sets the
+@samp{KRB5_KDB_DISALLOW_ALL_TIX} flag on principals in the database.
 
 @itemx @{-|+@}needchange
 @code{+needchange} sets a flag in attributes field to force a password change; 
-@code{-needchange} clears it. The default is @code{-needchange} .In effect,
-+needchange sets the @samp{KRB5_KDB_REQURES_PWCHANGE} flag on principals n the database.
+@code{-needchange} clears it. The default is @code{-needchange}.  In
+effect, @code{+needchange} sets the @samp{KRB5_KDB_REQURES_PWCHANGE}
+flag on principals in the database.
 
 @itemx @{-|+@}password_changing_service
-@code{+password_changing_service} sets a flag n the attributes field marking principal as a password change service principal (useless for most things).@code{-password_changing_service} clears the flag. This flag intentionally has a long name. The default is 
-@code{-password_changing_service}. In effect, @code{+password_changing_service} sets the @samp{KRB5_KDB_PWCHANGE_SERVICE} flag on principals in the database.
+@code{+password_changing_service} sets a flag in the attributes field
+marking principal as a password change service principal (useless for
+most things).  @code{-password_changing_service} clears the flag.
+This flag intentionally has a long name.  The default is
+@code{-password_changing_service}.  In effect,
+@code{+password_changing_service} sets the
+@samp{KRB5_KDB_PWCHANGE_SERVICE} flag on principals in the database.
 @end table
 
 @itemx policy_name
@@ -3181,7 +3224,7 @@ shell%
 @end group
 @end smallexample
 
-@node Listing available Ticket Policies, Creating a Service Object(eDirectory specific), Destroying a Ticket Policy, Global Operations on the Kerberos LDAP Database
+@node Listing available Ticket Policies, Creating a Service Object (eDirectory), Destroying a Ticket Policy, Global Operations on the Kerberos LDAP Database
 @subsection Listing available Ticket Policies
 
 
@@ -3209,8 +3252,8 @@ shell%
 @end group
 @end smallexample
 
-@node Creating a Service Object(eDirectory specific), Modifying a Service Object(eDirectory specific), Listing available Ticket Policies, Global Operations on the Kerberos LDAP Database
-@subsection Creating a Service Object (eDirectory specific)
+@node Creating a Service Object (eDirectory), Modifying a Service Object (eDirectory), Listing available Ticket Policies, Global Operations on the Kerberos LDAP Database
+@subsection Creating a Service Object (eDirectory)
 @smallexample
 @b{create_service} @i{-kdc|-admin|-pwd} [@b{-servicehost} @i{service_host_list}] [@b{-realm} @i{realm_list}] [@b{-randpw}|
 @i{-fileonly}] [@i{-filename}] @b{service_dn}
@@ -3260,8 +3303,8 @@ shell%
 @end smallexample
 @end table
 
-@node Modifying a Service Object(eDirectory specific), Retrieving Information about a Service Object(eDirectory specific), Creating a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
-@subsection Modifying a Service Object(eDirectory specific)
+@node Modifying a Service Object (eDirectory), Retrieving Service Object Information (eDirectory), Creating a Service Object (eDirectory), Global Operations on the Kerberos LDAP Database
+@subsection Modifying a Service Object (eDirectory)
 @smallexample
 @b{modify_service} [@b{-servicehost} @i{service_host_list} |[@b{-clearservicehost} @i{service_host_list}] [@b{-addservicehost} @i{service_host_list}]] [@b{-realm} @i{realm_list} | [@b{-clearrealm} @i{realm_list}] [@b{-addrealm} @i{realm_list}]] service_dn
 @end smallexample
@@ -3304,8 +3347,8 @@ modify_service -realm ATHENA.MIT.EDU cn=service-kdc,o=org
 shell% 
 @end group
 @end smallexample
-@node Retrieving Information about a Service Object(eDirectory specific), Destroying a Service Object(eDirectory specific), Modifying a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
-@subsection Retrieving Information about a Service Object(eDirectory specific)
+@node Retrieving Service Object Information (eDirectory), Destroying a Service Object (eDirectory), Modifying a Service Object (eDirectory), Global Operations on the Kerberos LDAP Database
+@subsection Retrieving Service Object Information (eDirectory)
 
 @table @b
 @itemx view_service service_dn
@@ -3329,8 +3372,8 @@ shell%
 @end group
 @end smallexample
 
-@node Destroying a Service Object(eDirectory specific), Listing Available Service Objects(eDirectory specific), Retrieving Information about a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
-@subsection Destroying a Service Object(eDirectory specific)
+@node Destroying a Service Object (eDirectory), Listing Available Service Objects (eDirectory), Retrieving Service Object Information (eDirectory), Global Operations on the Kerberos LDAP Database
+@subsection Destroying a Service Object (eDirectory)
 @smallexample
 @b{destroy_service} [@b{-force}] [@b{-f} @i{stashfilename}] service_dn
 @end smallexample
@@ -3359,8 +3402,8 @@ shell%
 @end group
 @end smallexample
 
-@node Listing Available Service Objects(eDirectory specific), Setting and Stashing Service Object's Password(eDirectory specific), Destroying a Service Object(eDirectory specific), Global Operations on the Kerberos LDAP Database
-@subsection Listing Available Service Objects(eDirectory specific)
+@node Listing Available Service Objects (eDirectory), Passwords for Service Objects (eDirectory), Destroying a Service Object (eDirectory), Global Operations on the Kerberos LDAP Database
+@subsection Listing Available Service Objects (eDirectory)
 
 @table @b
 @itemx list_service [-basedn base_dn]
@@ -3383,8 +3426,8 @@ shell%
 @end group
 @end smallexample
 
-@node Setting and Stashing Service Object's Password(eDirectory specific),  , Listing Available Service Objects(eDirectory specific), Global Operations on the Kerberos LDAP Database
-@subsection Setting and Stashing Service Object's Password (eDirectory specific)
+@node Passwords for Service Objects (eDirectory),  , Listing Available Service Objects (eDirectory), Global Operations on the Kerberos LDAP Database
+@subsection Passwords for Service Objects (eDirectory)
 
 @b{setsrvpw} @b{[-randpw|-fileonly]}@b{[-f} @i{ filename}@b{]} @b{service_dn}
 
