@@ -68,17 +68,21 @@ Options supported for LDAP database are:
 .nf 
 .RS 8
 \-x nconns=<number_of_connections>
+.fi
 specifies the number of connections to be maintained per LDAP server.
 
+.nf
 \-x host=<ldapuri>
 specifies the LDAP server to connect to by a LDAP URI.
 
 \-x binddn=<binddn>
+.fi
 specifies the DN of the object used by the KDC server to bind to the LDAP server.
-This object should have the rights to read the realm container and the subtree that is referenced
-by the realm.
+This object should have the rights to read the realm container, principal container
+and the subtree that is referenced by the realm.
 
 \-x bindpwd=<bind_password>
+.fi
 specifies the password for the above mentioned binddn. It is recommended not to use this option.
 Instead, the password can be stashed using the stashsrvpw command of kdb5_ldap_util.
 .RE
