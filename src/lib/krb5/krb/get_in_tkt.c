@@ -1134,13 +1134,14 @@ krb5_get_init_creds(krb5_context context,
 		/* No preauth supplied, so can't query the plug-ins. */
 		ret = KRB5KRB_ERR_GENERIC;
 	    }
-	    krb5_free_error(context, err_reply);
-	    err_reply = NULL;
 	    if (ret) {
 		/* couldn't come up with anything better */
 		ret = err_reply->error + ERROR_TABLE_BASE_krb5;
-		goto cleanup;
 	    }
+	    krb5_free_error(context, err_reply);
+	    err_reply = NULL;
+	    if (ret)
+		goto cleanup;
 	}
 
         if (encoded_previous_request != NULL) {
