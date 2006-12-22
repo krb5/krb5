@@ -74,10 +74,11 @@ char  *krbContainerRefclass[] = { "krbContainerRefAux", NULL};
  * Function to remove all special characters from a string (rfc2254).
  * Use whenever exact matching is to be done ...
  */
-char *ldap_filter_correct (unsigned char *in, unsigned int len)
+char *ldap_filter_correct (char *in)
 {
-    int i, count;
+    size_t i, count;
     char *out, *ptr;
+    size_t len = strlen(in);
 
     for (i = 0, count = 0; i < len; i++)
 	switch (in[i]) {
@@ -283,7 +284,7 @@ krb5_ldap_delete_realm (context, lrealm)
 	char *attr[] = {"krbprincipalname", NULL}, *realm=NULL, filter[256];
 	krb5_ldap_context lcontext;
 
-	realm = ldap_filter_correct (lrealm, strlen (lrealm));
+	realm = ldap_filter_correct (lrealm);
 	assert (sizeof (filter) >= sizeof ("(krbprincipalname=)") +
 		strlen (realm) + 2 /* "*@" */ + 1);
 
