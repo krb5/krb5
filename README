@@ -1,7 +1,7 @@
-		   Kerberos Version 5, Release 1.6
+                   Kerberos Version 5, Release 1.6
 
-			    Release Notes
-			The MIT Kerberos Team
+                            Release Notes
+                        The MIT Kerberos Team
 
 Unpacking the Source Distribution
 ---------------------------------
@@ -12,12 +12,12 @@ distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-	gtar zxpf krb5-1.6.tar.gz
+        gtar zxpf krb5-1.6.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-	gzcat krb5-1.6.tar.gz | tar xpf -
+        gzcat krb5-1.6.tar.gz | tar xpf -
 
 Both of these methods will extract the sources into krb5-1.6/src and
 the documentation into krb5-1.6/doc.
@@ -68,6 +68,16 @@ Major changes in 1.6
 
 * LDAP KDB plug-in, donated by Novell.
 
+Note that the implementation of referral handling involves a change to
+the behavior of krb5_sname_to_principal() to return a zero-length
+realm name if it is unable to find the realm corresponding to the
+hostname.  This special realm name signals the ticket-acquisition code
+to request KDC canonicalization of service principal names.  Other
+library code has changed to accommodate this new behavior.  This
+particular method of implementing service principal name referral
+handling may change in the future; we invite discussion on this
+subject.
+
 krb5-1.6 changes by ticket ID
 -----------------------------
 
@@ -77,85 +87,116 @@ http://krbdev.mit.edu/rt/NoAuth/krb5-1.6/fixed-1.6.html
 
 for a current listing with links to the complete tickets.
 
-1204 	Unable to get a TGT cross-realm referral
-2087 	undocumented options for kpropd
-2240 	krb5-config --cflags gssapi when used by OpenSSH-snap-20040212
-2579 	kdc: add_to_transited may reference off end of array...
-2652 	Add support for referrals
-2876 	Tree does not compile with GCC 4.0
-2935 	KDB/LDAP backend
-3089 	krb5_verify_init_creds() is not thread safe
-3091 	add krb5_cc_new_unique()
-3276 	local array of structures not declared static
-3288 	NetIdMgr cannot obtain Kerberos 5 tickets containing addresses
-3322 	get_cred_via_tkt() checks too strict on server principal
-3522 	Error code definitions are outside macros to prevent multiple
-	inclusion in public headers
-3735 	Add TCP change/set password support
-3947 	allow multiple calls to krb5_get_error_message to retrieve message
-3955 	check calling conventions specified for Windows
-3961 	fix stdcc.c to build without USE_CCAPI_V3
-4021 	use GSS_C_NO_CHANNEL_BINDINGS not NULL in lib/rpc/auth_gss.c
-4023 	Turn off KLL automatic prompting support in kadmin
-4024 	gss_acquire_cred auto prompt support shouldn't break
-	gss_krb5_ccache_name()
-4025 	need to look harder for tclConfig.sh
-4055 	remove unused Metrowerks support from yarrow
-4056 	g_canon_name.c if-statement warning cleanup
-4057 	GSSAPI opaque types should be pointers to opaque structs, not void*
-4256 	Make process error
-4292 	LDAP error prevents KfM 6.0 from building on Tiger
-4294 	Bad loop logic in krb5_mcc_generate_new
-4304 	audit referals merge (R18598)
-4389 	cursor for iterating over ccaches
-4412 	Don't segfault if a preauth plugin module fails to load
-4455 	IRIX build fails w/ GCC 4.0 (really GNU ld)
-4482 	enabling LDAP mix-in support for kdb5_util load
-4488 	osf1 -oldstyle_liblookup typo
-4495 	Avoid segfault in krb5_do_preauth_tryagain
-4496 	fix invalid access found by valgrind
-4501 	fix krb5_ldap_iterate to handle NULL match_expr and
-	open_db_and_mkey to use KRB5_KDB_SRV_TYPE_ADMIN
-4534 	don't confuse profile iterator in 425 princ conversion
-4561 	UC Berkeley BSD license change
-4562 	latest Novell ldap patches and kdb5_util dump support for ldap
-4587 	Change preauth plugin context scope and lifetimes
-4624 	remove t_prf and t_prf.o on make clean
-4625 	Make clean in lib/kdb leaves error table files
-4657 	krb5.h not C++-safe due to "struct krb5_cccol_cursor"
-4683 	Remove obsolete/conflicting prototype for krb524_convert_princs
-4688 	Add public function to get keylenth associated with an enctype
-4689 	Update minor version numbers for 1.6
-4690 	Add "get_data" function to the client preauth plugin interface
-4692 	Document changing the krbtgt key
-4693 	Delay kadmind random number initialization until after fork
-4735 	more Novell ldap patches from Nov 6 and Fix for wrong password
-	policy reference count
-4737 	correct client preauth plugin request_context
-4738 	allow server preauth plugin verify_padata function to return e-data
-4739 	cccursor backend for CCAPI
-4755 	update copyrights and acknowledgments
-4770 	Add macros for __attribute__((deprecated)) for krb4 and des APIs
-4771 	LDAP patch from Novell, 2006-10-13
-4772 	fix some warnings in ldap code
-4774 	avoid double frees in ccache manipulation around gen_new
-4775 	include realm in "can't resolve KDC" error message
-4784 	krb5_stdccv3_generate_new returns NULL ccache
-4788 	ccache double free in krb5_fcc_read_addrs().
-4799 	krb5_c_keylength -> krb5_c_keylengths; add krb5_c_random_to_key
-4805 	replace existing calls of cc_gen_new()
-4841 	free error message when freeing context
-4846 	clean up preauth2 salt debug code
-4860 	fix LDAP plugin Makefile.in lib frag substitutions
-4928 	krb5int_copy_data_contents shouldn't free memory it didn't allocate
-4941 	referrals changes to telnet have unconditional debugging printfs
-4942 	skip all modules in plugin if init function fails
-4955 	Referrals code breaks krb5_set_password_using_ccache to Active
-	Directory
-4967 	referrals support assumes all rewrites produce TGS principals
-4972 	return edata from non-PA_REQUIRED preauth types
-4973 	send a new request with the new padata returned by
-	krb5_do_preauth_tryagain()
+1204    Unable to get a TGT cross-realm referral
+2087    undocumented options for kpropd
+2240    krb5-config --cflags gssapi when used by OpenSSH-snap-20040212
+2579    kdc: add_to_transited may reference off end of array...
+2652    Add support for referrals
+2876    Tree does not compile with GCC 4.0
+2935    KDB/LDAP backend
+3089    krb5_verify_init_creds() is not thread safe
+3091    add krb5_cc_new_unique()
+3218    kdb5_util load requires that the dumpfile be writable.
+3276    local array of structures not declared static
+3288    NetIdMgr cannot obtain Kerberos 5 tickets containing addresses
+3322    get_cred_via_tkt() checks too strict on server principal
+3522    Error code definitions are outside macros to prevent multiple
+        inclusion in public headers
+3642    changes for embedding manifest into dlls and exes
+3735    Add TCP change/set password support
+3947    allow multiple calls to krb5_get_error_message to retrieve message
+3955    check calling conventions specified for Windows
+3961    fix stdcc.c to build without USE_CCAPI_V3
+4021    use GSS_C_NO_CHANNEL_BINDINGS not NULL in lib/rpc/auth_gss.c
+4023    Turn off KLL automatic prompting support in kadmin
+4024    gss_acquire_cred auto prompt support shouldn't break
+        gss_krb5_ccache_name()
+4025    need to look harder for tclConfig.sh
+4055    remove unused Metrowerks support from yarrow
+4056    g_canon_name.c if-statement warning cleanup
+4057    GSSAPI opaque types should be pointers to opaque structs, not void*
+4256    Make process error
+4292    LDAP error prevents KfM 6.0 from building on Tiger
+4294    Bad loop logic in krb5_mcc_generate_new
+4304    audit referrals merge (R18598)
+4327    doc/krb5-protocol out of date
+4389    cursor for iterating over ccaches
+4412    Don't segfault if a preauth plugin module fails to load
+4453    krb5-1.6-pre: fix warnings/ improve 64bit compatibility in the
+        ldap plugin
+4454    krb5-1.6-pre: kdb5_ldap_util stashsrvpw does not work
+4455    IRIX build fails w/ GCC 4.0 (really GNU ld)
+4482    enabling LDAP mix-in support for kdb5_util load
+4488    osf1 -oldstyle_liblookup typo
+4495    Avoid segfault in krb5_do_preauth_tryagain
+4496    fix invalid access found by valgrind
+4501    fix krb5_ldap_iterate to handle NULL match_expr and
+        open_db_and_mkey to use KRB5_KDB_SRV_TYPE_ADMIN
+4534    don't confuse profile iterator in 425 princ conversion
+4561    UC Berkeley BSD license change
+4562    latest Novell ldap patches and kdb5_util dump support for ldap
+4566    leaks in preauth plugin support
+4567    KDC can crash for certain client requests when preauth plugins
+        are used
+4587    Change preauth plugin context scope and lifetimes
+4624    remove t_prf and t_prf.o on make clean
+4625    Make clean in lib/kdb leaves error table files
+4657    krb5.h not C++-safe due to "struct krb5_cccol_cursor"
+4683    Remove obsolete/conflicting prototype for krb524_convert_princs
+4688    Add public function to get keylength associated with an enctype
+4689    Update minor version numbers for 1.6
+4690    Add "get_data" function to the client preauth plugin interface
+4692    Document changing the krbtgt key
+4693    Delay kadmind random number initialization until after fork
+4735    more Novell ldap patches from Nov 6 and Fix for wrong password
+        policy reference count
+4737    correct client preauth plugin request_context
+4738    allow server preauth plugin verify_padata function to return e-data
+4739    cccursor backend for CCAPI
+4755    update copyrights and acknowledgments
+4770    Add macros for __attribute__((deprecated)) for krb4 and des APIs
+4771    LDAP patch from Novell, 2006-10-13
+4772    fix some warnings in ldap code
+4773    fix warning in preauth_plugin.h header
+4774    avoid double frees in ccache manipulation around gen_new
+4775    include realm in "can't resolve KDC" error message
+4784    krb5_stdccv3_generate_new returns NULL ccache
+4788    ccache double free in krb5_fcc_read_addrs().
+4799    krb5_c_keylength -> krb5_c_keylengths; add krb5_c_random_to_key
+4805    replace existing calls of cc_gen_new()
+4841    free error message when freeing context
+4846    clean up preauth2 salt debug code
+4860    fix LDAP plugin Makefile.in lib frag substitutions
+4928    krb5int_copy_data_contents shouldn't free memory it didn't allocate
+4941    referrals changes to telnet have unconditional debugging printfs
+4942    skip all modules in plugin if init function fails
+4955    Referrals code breaks krb5_set_password_using_ccache to Active
+        Directory
+4967    referrals support assumes all rewrites produce TGS principals
+4972    return edata from non-PA_REQUIRED preauth types
+4973    send a new request with the new padata returned by
+        krb5_do_preauth_tryagain()
+4980    Remove unused prototype for krb5_find_config_files
+4981    Make clean in lib/krb5/os does not clean test objs
+4991    fix for kdb5_util load bug with dumps from a LDAP KDB
+4994    minor update to kdb5_util man page for LDAP plugin
+5003    krb5_cc_remove should work for the CCAPI
+5005    Reading maxlife, maxrenewlife and ticket flags from conf file
+        in LDAP plugin
+5009    kadmin.local with LDAP backend fails to start when master key
+        enctype is not default enctype
+5022    build the trunk on Windows (again)
+5027    admin guide changes for the LDAP backend
+5032    Don't leak padata when looping for krb5_do_preauth_tryagain()
+5090    krb5_get_init_creds_opt_set_change_password_prompt
+5115    krb5_rc_io_open_internal on error will call close(-1)
+5116    minor ldap specific changes in man page
+5121    keytab code can't match principals with realms not yet determined
+5123    don't pass null pointer to krb5_do_preauth_tryagain()
+5124    use KRB5KRB_ERR_GENERIC, not KRB_ERR_GENERIC in preauth2.c
+5125    Add -clearpolicy to kadmin addprinc usage
+5152    misc cleanups in admin guide ldap sections
+5159    don't split HTML output from makeinfo
 
 Copyright and Other Legal Notices
 ---------------------------------
@@ -201,7 +242,7 @@ manner.  It does NOT prevent a commercial firm from referring to the
 MIT trademarks in order to convey information (although in doing so,
 recognition of their trademark status should be given).
 
-			 --------------------
+                         --------------------
 
 Portions of src/lib/crypto have the following copyright:
 
@@ -230,7 +271,7 @@ Portions of src/lib/crypto have the following copyright:
   WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 
-			 --------------------
+                         --------------------
 
 The following copyright and permission notice applies to the
 OpenVision Kerberos Administration system located in kadmin/create,
@@ -270,14 +311,14 @@ of lib/rpc:
   and our gratitude for the valuable work which has been 
   performed by MIT and the Kerberos community.
 
-			 --------------------
+                         --------------------
 
   Portions contributed by Matt Crawford <crawdad@fnal.gov> were
   work performed at Fermi National Accelerator Laboratory, which is
   operated by Universities Research Association, Inc., under
   contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
 
-			 --------------------
+                         --------------------
 
 The implementation of the Yarrow pseudo-random number generator in
 src/lib/crypto/yarrow has the following copyright:
@@ -303,7 +344,7 @@ src/lib/crypto/yarrow has the following copyright:
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
   OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-			 --------------------
+                         --------------------
 
 The implementation of the AES encryption algorithm in
 src/lib/crypto/aes has the following copyright:
@@ -332,7 +373,7 @@ src/lib/crypto/aes has the following copyright:
   in respect of any properties, including, but not limited to, correctness 
   and fitness for purpose.
 
-			 --------------------
+                         --------------------
 
 Portions contributed by Red Hat, including the pre-authentication
 plug-ins framework, contain the following copyright:
@@ -369,7 +410,7 @@ plug-ins framework, contain the following copyright:
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-			 --------------------
+                         --------------------
 
 The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
 src/lib/gssapi, including the following files:
@@ -435,7 +476,7 @@ are subject to the following license:
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-			 --------------------
+                         --------------------
 
 MIT Kerberos includes documentation and software developed at the
 University of California at Berkeley, which includes this copyright
@@ -472,7 +513,7 @@ notice:
   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
   SUCH DAMAGE.
 
-			 --------------------
+                         --------------------
 
 Portions contributed by Novell, Inc., including the LDAP database
 backend, are subject to the following license:
@@ -484,12 +525,12 @@ backend, are subject to the following license:
   modification, are permitted provided that the following conditions are met:
 
     * Redistributions of source code must retain the above copyright notice,
-	this list of conditions and the following disclaimer.
+        this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
-	notice, this list of conditions and the following disclaimer in the
-	documentation and/or other materials provided with the distribution.
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
     * The copyright holder's name is not used to endorse or promote products
-	derived from this software without specific prior written permission.
+        derived from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -503,8 +544,8 @@ backend, are subject to the following license:
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
 
-Acknowledgements
-----------------
+Acknowledgments
+---------------
 
 Thanks to Red Hat for donating the pre-authentication plug-in
 framework.
