@@ -255,7 +255,7 @@ a different network address based on the forwardable ticket.  This
 allows for authentication forwarding without requiring a password to be
 typed in again.  For example, if a user with a forwardable TGT logs
 into a remote system, the KDC could issue a new TGT for that user with
-the netword address of the remote system, allowing authentication on
+the network address of the remote system, allowing authentication on
 that host to work as though the user were logged in locally.
 
 When the KDC creates a new ticket based on a forwardable ticket, it
