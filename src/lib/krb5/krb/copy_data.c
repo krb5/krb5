@@ -36,6 +36,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_data(krb5_context context, const krb5_data *indata, krb5_data **outdata)
 {
     krb5_data *tempdata;
+    krb5_error_code retval;
 
     if (!indata) {
 	*outdata = 0;
@@ -45,16 +46,12 @@ krb5_copy_data(krb5_context context, const krb5_data *indata, krb5_data **outdat
     if (!(tempdata = (krb5_data *)malloc(sizeof(*tempdata))))
 	return ENOMEM;
 
-    tempdata->length = indata->length;
-    if (tempdata->length) {
-	if (!(tempdata->data = malloc(tempdata->length))) {
-	    krb5_xfree(tempdata);
-	    return ENOMEM;
-	}
-	memcpy((char *)tempdata->data, (char *)indata->data, tempdata->length);
-    } else
-	tempdata->data = 0;
-    tempdata->magic = KV5M_DATA;
+    retval = krb5int_copy_data_contents(context, indata, tempdata);
+    if (retval) {
+	krb5_xfree(tempdata);
+	return retval;
+    }
+
     *outdata = tempdata;
     return 0;
 }
