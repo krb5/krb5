@@ -1017,6 +1017,9 @@ void krb5_free_etype_info
 krb5_error_code
 krb5int_copy_data_contents (krb5_context, const krb5_data *, krb5_data *);
 
+krb5_error_code
+krb5int_copy_creds_contents (krb5_context, const krb5_creds *, krb5_creds *);
+
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     (krb5_context,
 		     krb5_principal,
