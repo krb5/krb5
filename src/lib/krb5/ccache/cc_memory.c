@@ -93,11 +93,13 @@ extern krb5_error_code krb5_change_cache (void);
 
 #define KRB5_OK 0
 
+/* Individual credentials within a cache, in a linked list.  */
 typedef struct _krb5_mcc_link {
     struct _krb5_mcc_link *next;
     krb5_creds *creds;
 } krb5_mcc_link, *krb5_mcc_cursor;
 
+/* Per-cache data header.  */
 typedef struct _krb5_mcc_data {
     char *name;
     k5_mutex_t lock;
@@ -105,11 +107,13 @@ typedef struct _krb5_mcc_data {
     krb5_mcc_cursor link;
 } krb5_mcc_data;
 
+/* List of memory caches.  */
 typedef struct krb5_mcc_list_node {
     struct krb5_mcc_list_node *next;
     krb5_mcc_data *cache;
 } krb5_mcc_list_node;
 
+/* Iterator over memory caches.  */
 struct krb5_mcc_ptcursor_data {
     struct krb5_mcc_list_node *cur;
 };
