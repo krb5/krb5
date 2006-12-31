@@ -88,7 +88,9 @@ static int test_import_name(name)
 	display_buffer(buffer_name);
 	printf("\n");
 	(void) gss_release_buffer(&min_stat, &buffer_name);
-
+#ifdef	GSSAPI_V2
+	(void) gss_release_oid(&min_stat, &name_oid);
+#endif
 	(void) gss_release_name(&min_stat, &gss_name);
 	return 0;
 }
