@@ -65,8 +65,9 @@ char     *principal_attributes[] = { "krbprincipalname",
 				     "krbObjectReferences",
 				     NULL };
 
-static char *attributes_set[] = { "krbmaxrenewableage",
-				  "krbmaxticketlife",
+/* Must match KDB_*_ATTR macros in ldap_principal.h.  */
+static char *attributes_set[] = { "krbmaxticketlife",
+				  "krbmaxrenewableage",
 				  "krbticketflags",
 				  "krbprincipalexpiration",
 				  "krbticketpolicyreference",

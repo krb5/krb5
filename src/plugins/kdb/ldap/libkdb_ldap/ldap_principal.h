@@ -66,6 +66,7 @@
 /* these will be consumed only by krb5_ldap_delete_principal*/
 /* these will be set by krb5_ldap_get_principal and fed into the tl_data */
 
+/* See also attributes_set[] in ldap_principal.c.  */
 #define KDB_MAX_LIFE_ATTR                    0x000001
 #define KDB_MAX_RLIFE_ATTR                   0x000002
 #define KDB_TKT_FLAGS_ATTR                   0x000004
