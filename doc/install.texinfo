@@ -518,10 +518,12 @@ want a stash file, run the above command without the @code{-s} option.
 @subsubsection Add Administrators to the Acl File
 
 Next, you need create an Access Control List (acl) file, and put the
-Kerberos principal of at least one of the administrators into it.  The
-filename should match the value you have set for ``acl_file'' in your
-@code{kdc.conf} file.  The default file name is
-@samp{@value{DefaultAclFile}}.  
+Kerberos principal of at least one of the administrators into it.  This
+file is used by the @code{kadmind} daemon to control which principals
+may view and make privileged modifications to the Kerberos database
+files.  The filename should match the value you have set for
+``acl_file'' in your @code{kdc.conf} file.  The default file name is
+@samp{@value{DefaultAclFile}}.
 
 @include kadm5acl.texinfo
 
