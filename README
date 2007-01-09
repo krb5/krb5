@@ -59,14 +59,23 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
-Major changes in 1.6
-----------------------
+Major changes in krb5-1.6
+-------------------------
 
 * Partial client implementation to handle server name referrals.
 
 * Pre-authentication plug-in framework, donated by Red Hat.
 
 * LDAP KDB plug-in, donated by Novell.
+
+* Fix for MITKRB5-SA-2006-002: the RPC library could call an
+  uninitialized function pointer, which created a security
+  vulnerability for kadmind.
+
+* Fix for MITKRB5-SA-2006-003: the GSS-API mechglue layer could fail
+  to initialize some output pointers, causing callers to attempt to
+  free uninitialized pointers.  This caused a security vulnerability
+  in kadmind.
 
 Note that the implementation of referral handling involves a change to
 the behavior of krb5_sname_to_principal() to return a zero-length
@@ -77,6 +86,17 @@ library code has changed to accommodate this new behavior.  This
 particular method of implementing service principal name referral
 handling may change in the future; we invite discussion on this
 subject.
+
+Major known bugs in krb5-1.6
+----------------------------
+
+5293    crash creating db2 database in non-existent directory
+
+  Attempting to create a KDB in a non-existent directory using the
+  Berkeley DB back end may cause a crash resulting from a null pointer
+  dereference.  If a core dump occurs, this may cause a local exposure
+  of sensitive information such a master key password.  This wil be
+  fixed in an upcoming patch release.
 
 krb5-1.6 changes by ticket ID
 -----------------------------
@@ -197,6 +217,14 @@ for a current listing with links to the complete tickets.
 5125    Add -clearpolicy to kadmin addprinc usage
 5152    misc cleanups in admin guide ldap sections
 5159    don't split HTML output from makeinfo
+5223    Fix typo in user-guide.texinfo
+5245    Repair broken links in NetIdMgr Help
+5260    Deletion of principal fails
+5265    update ldap/Makefile.in for newer autoconf substitution requirements
+5271    Document KDC behavior without stash file
+5279    Document what the kadmind ACL is for
+5301    MITKRB5-SA-2006-002: svctcp_destroy() can call uninitialized function pointer
+5302    MITKRB5-SA-2006-003: mechglue argument handling too lax
 
 Copyright and Other Legal Notices
 ---------------------------------
