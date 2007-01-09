@@ -29,19 +29,22 @@ gss_buffer_t		exported_name;
 {
 	gss_union_name_t		union_name;
 
+	/* Initialize outputs. */
 
-	if (minor_status)
+	if (minor_status != NULL)
 		*minor_status = 0;
 
-	/* check out parameter */
-	if (!exported_name)
+	if (exported_name != GSS_C_NO_BUFFER) {
+		exported_name->value = NULL;
+		exported_name->length = 0;
+	}
+
+	/* Validate arguments. */
+
+	if (minor_status == NULL || exported_name == GSS_C_NO_BUFFER)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	exported_name->value = NULL;
-	exported_name->length = 0;
-
-	/* check input parameter */
-	if (!input_name)
+	if (input_name == GSS_C_NO_NAME)
 		return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
 
 	union_name = (gss_union_name_t)input_name;

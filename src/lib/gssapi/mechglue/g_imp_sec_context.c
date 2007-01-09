@@ -34,6 +34,38 @@
 #endif
 #include <string.h>
 
+static OM_uint32
+val_imp_sec_ctx_args(
+    OM_uint32 *minor_status,
+    gss_buffer_t interprocess_token,
+    gss_ctx_id_t *context_handle)
+{
+
+    /* Initialize outputs. */
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (context_handle != NULL)
+	*context_handle = GSS_C_NO_CONTEXT;
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (interprocess_token == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_DEFECTIVE_TOKEN);
+
+    if (GSS_EMPTY_BUFFER(interprocess_token))
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_DEFECTIVE_TOKEN);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_import_sec_context(minor_status,
                        interprocess_token,
@@ -50,18 +82,13 @@ gss_ctx_id_t *		context_handle;
     gss_union_ctx_id_t	ctx;
     gss_buffer_desc	token;
     gss_mechanism	mech;
-    
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-    
-    if (context_handle == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CONTEXT);
-    *context_handle = GSS_C_NO_CONTEXT;
 
-    if (GSS_EMPTY_BUFFER(interprocess_token))
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_DEFECTIVE_TOKEN);
+    status = val_imp_sec_ctx_args(minor_status,
+				  interprocess_token, context_handle);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
+    /* Initial value needed below. */
     status = GSS_S_FAILURE;
 
     ctx = (gss_union_ctx_id_t) malloc(sizeof(gss_union_ctx_id_desc));

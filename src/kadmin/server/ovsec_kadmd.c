@@ -993,6 +993,11 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
      int i;
      const char *procname;
 
+     client.length = 0;
+     client.value = NULL;
+     server.length = 0;
+     server.value = NULL;
+
      (void) gss_display_name(&minor, client_name, &client, &gss_type);
      (void) gss_display_name(&minor, server_name, &server, &gss_type);
      if (client.value == NULL)

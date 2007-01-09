@@ -32,6 +32,35 @@
 #include <stdlib.h>
 #endif
 
+static OM_uint32
+val_del_sec_ctx_args(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t *context_handle,
+    gss_buffer_t output_token)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (output_token != GSS_C_NO_BUFFER) {
+	output_token->length = 0;
+	output_token->value = NULL;
+    }
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == NULL || *context_handle == GSS_C_NO_CONTEXT)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CONTEXT);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV 
 gss_delete_sec_context (minor_status,
                         context_handle,
@@ -45,18 +74,10 @@ gss_buffer_t		output_token;
     OM_uint32		status;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
-    
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-    if (output_token != GSS_C_NO_BUFFER) {
-	output_token->length = 0;
-	output_token->value = NULL;
-    }
-
-    /* if the context_handle is Null, return NO_CONTEXT error */
-    if(context_handle == NULL || *context_handle == GSS_C_NO_CONTEXT)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+    status = val_del_sec_ctx_args(minor_status, context_handle, output_token);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
     /*
      * select the approprate underlying mechanism routine and

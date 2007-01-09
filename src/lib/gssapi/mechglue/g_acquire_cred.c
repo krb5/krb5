@@ -71,6 +71,43 @@ create_actual_mechs(mechs_array, count)
     return actual_mechs;
 }
 
+static OM_uint32
+val_acq_cred_args(
+    OM_uint32 *minor_status,
+    gss_name_t desired_name,
+    OM_uint32 time_req,
+    gss_OID_set desired_mechs,
+    int cred_usage,
+    gss_cred_id_t *output_cred_handle,
+    gss_OID_set *actual_mechs,
+    OM_uint32 *time_rec)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (output_cred_handle != NULL)
+	*output_cred_handle = GSS_C_NO_CREDENTIAL;
+
+    if (actual_mechs != NULL)
+	*actual_mechs = GSS_C_NULL_OID_SET;
+
+    if (time_rec != NULL)
+	*time_rec = 0;
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (output_cred_handle == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
 
 OM_uint32 KRB5_CALLCONV
 gss_acquire_cred(minor_status,
@@ -101,22 +138,19 @@ OM_uint32 *		time_rec;
     int i;
     gss_union_cred_t creds;
 
-    /* start by checking parameters */
-    if (!minor_status)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-    
-    if (!output_cred_handle)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CRED);
+    major = val_acq_cred_args(minor_status,
+			      desired_name,
+			      time_req,
+			      desired_mechs,
+			      cred_usage,
+			      output_cred_handle,
+			      actual_mechs,
+			      time_rec);
+    if (major != GSS_S_COMPLETE)
+	return (major);
 
-    *output_cred_handle = GSS_C_NO_CREDENTIAL;
-
-    /* Set output parameters to NULL for now */
-    if (actual_mechs)
-	*actual_mechs = GSS_C_NULL_OID_SET;
-
-    if (time_rec)
-	*time_rec = 0;
+    /* Initial value needed below. */
+    major = GSS_S_FAILURE;
 
     /*
      * if desired_mechs equals GSS_C_NULL_OID_SET, then pick an
@@ -208,6 +242,52 @@ OM_uint32 *		time_rec;
     return (GSS_S_COMPLETE);
 }
 
+static OM_uint32
+val_add_cred_args(
+    OM_uint32 *minor_status,
+    gss_cred_id_t input_cred_handle,
+    gss_name_t desired_name,
+    gss_OID desired_mech,
+    gss_cred_usage_t cred_usage,
+    OM_uint32 initiator_time_req,
+    OM_uint32 acceptor_time_req,
+    gss_cred_id_t *output_cred_handle,
+    gss_OID_set *actual_mechs,
+    OM_uint32 *initiator_time_rec,
+    OM_uint32 *acceptor_time_rec)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (output_cred_handle != NULL)
+	*output_cred_handle = GSS_C_NO_CREDENTIAL;
+
+    if (actual_mechs != NULL)
+	*actual_mechs = GSS_C_NO_OID_SET;
+
+    if (acceptor_time_rec != NULL)
+	*acceptor_time_rec = 0;
+
+    if (initiator_time_rec != NULL)
+	*initiator_time_rec = 0;
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (input_cred_handle == GSS_C_NO_CREDENTIAL &&
+	output_cred_handle == NULL)
+
+	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CRED);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 /* V2 KRB5_CALLCONV */
 OM_uint32 KRB5_CALLCONV
 gss_add_cred(minor_status, input_cred_handle,
@@ -238,26 +318,19 @@ gss_add_cred(minor_status, input_cred_handle,
     gss_OID		new_mechs_array = NULL;
     gss_cred_id_t *	new_cred_array = NULL;
 
-    /* check input parameters */
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-
-    if (input_cred_handle == GSS_C_NO_CREDENTIAL &&
-	output_cred_handle == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CRED);
-
-    if (output_cred_handle)
-	*output_cred_handle = GSS_C_NO_CREDENTIAL;
-
-    if (actual_mechs)
-	*actual_mechs = NULL;
-
-    if (acceptor_time_rec)
-	*acceptor_time_rec = 0;
-
-    if (initiator_time_rec)
-	*initiator_time_rec = 0;
+    status = val_add_cred_args(minor_status,
+			       input_cred_handle,
+			       desired_name,
+			       desired_mech,
+			       cred_usage,
+			       initiator_time_req,
+			       acceptor_time_req,
+			       output_cred_handle,
+			       actual_mechs,
+			       initiator_time_rec,
+			       acceptor_time_rec);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
     mech = gssint_get_mechanism(desired_mech);
     if (!mech)

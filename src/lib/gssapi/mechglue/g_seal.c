@@ -28,6 +28,45 @@
 
 #include "mglueP.h"
 
+static OM_uint32
+val_seal_args(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t context_handle,
+    int conf_req_flag,
+    int qop_req,
+    gss_buffer_t input_message_buffer,
+    int *conf_state,
+    gss_buffer_t output_message_buffer)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (output_message_buffer != GSS_C_NO_BUFFER) {
+	output_message_buffer->length = 0;
+	output_message_buffer->value = NULL;
+    }
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == GSS_C_NO_CONTEXT)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    if (input_message_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (output_message_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_seal (minor_status,
           context_handle,
@@ -51,18 +90,12 @@ gss_buffer_t		output_message_buffer;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
 
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-
-    if (context_handle == GSS_C_NO_CONTEXT)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
-
-    if (input_message_buffer == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_READ);
-
-    if (output_message_buffer == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    status = val_seal_args(minor_status, context_handle,
+			   conf_req_flag, qop_req,
+			   input_message_buffer, conf_state,
+			   output_message_buffer);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
     /*
      * select the approprate underlying mechanism routine and
