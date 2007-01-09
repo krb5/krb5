@@ -55,17 +55,21 @@ gss_OID_set *		mechanisms;
     gss_mechanism	mech;
     gss_name_t		internal_name;
     int			i;
-    
-    /* check parms and set to defaults */
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (name != NULL)
+	*name = GSS_C_NO_NAME;
+
+    if (mechanisms != NULL)
+	*mechanisms = GSS_C_NO_OID_SET;
+
+    /* Validate arguments. */
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-
-    if (name)
-	*name = NULL;
-
-    if (mechanisms)
-	*mechanisms = NULL;
 
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
 	/*
@@ -216,6 +220,14 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
     OM_uint32		status, temp_minor_status;
     gss_name_t		internal_name;
 
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (name != NULL)
+	*name = GSS_C_NO_NAME;
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     mech = gssint_get_mechanism (mech_type);
     if (!mech)

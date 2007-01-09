@@ -54,7 +54,9 @@ int *			qop_state;
     if (context_handle == GSS_C_NO_CONTEXT)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
 
-    if ((message_buffer == NULL) || GSS_EMPTY_BUFFER(token_buffer))
+    if ((message_buffer == GSS_C_NO_BUFFER) ||
+	GSS_EMPTY_BUFFER(token_buffer))
+
 	return (GSS_S_CALL_INACCESSIBLE_READ);
 
     /*

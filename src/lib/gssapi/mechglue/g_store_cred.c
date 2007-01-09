@@ -11,6 +11,38 @@
 
 #include <mglueP.h>
 
+static OM_uint32
+val_store_cred_args(
+	OM_uint32 *minor_status,
+	const gss_cred_id_t input_cred_handle,
+	gss_cred_usage_t cred_usage,
+	const gss_OID desired_mech,
+	OM_uint32 overwrite_cred,
+	OM_uint32 default_cred,
+	gss_OID_set *elements_stored,
+	gss_cred_usage_t *cred_usage_stored)
+{
+
+	/* Initialize outputs. */
+
+	if (minor_status != NULL)
+		*minor_status = 0;
+
+	if (elements_stored != NULL)
+		*elements_stored = GSS_C_NULL_OID_SET;
+
+	/* Validate arguments. */
+
+	if (minor_status == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+	if (input_cred_handle == GSS_C_NO_CREDENTIAL)
+		return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CRED);
+
+	return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 gss_store_cred(minor_status,
 			input_cred_handle,
 			cred_usage,
@@ -37,16 +69,19 @@ gss_cred_usage_t	*cred_usage_stored;
 	gss_OID			dmech;
 	int			i;
 
-	/* Start by checking parameters */
-	if (minor_status == NULL)
-		return (GSS_S_CALL_INACCESSIBLE_WRITE|GSS_S_NO_CRED);
-	*minor_status = 0;
+	major_status = val_store_cred_args(minor_status,
+					   input_cred_handle,
+					   cred_usage,
+					   desired_mech,
+					   overwrite_cred,
+					   default_cred,
+					   elements_stored,
+					   cred_usage_stored);
+	if (major_status != GSS_S_COMPLETE)
+		return (major_status);
 
-	if (input_cred_handle == GSS_C_NO_CREDENTIAL)
-		return (GSS_S_CALL_INACCESSIBLE_READ);
-
-	if (elements_stored != NULL)
-		*elements_stored = GSS_C_NULL_OID_SET;
+	/* Initial value needed below. */
+	major_status = GSS_S_FAILURE;
 
 	if (cred_usage_stored != NULL)
 		*cred_usage_stored = GSS_C_BOTH; /* there's no GSS_C_NEITHER */

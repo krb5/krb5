@@ -33,6 +33,54 @@
 #endif
 #include <string.h>
 
+static OM_uint32
+val_init_sec_ctx_args(
+    OM_uint32 *minor_status,
+    gss_cred_id_t claimant_cred_handle,
+    gss_ctx_id_t *context_handle,
+    gss_name_t target_name,
+    gss_OID req_mech_type,
+    OM_uint32 req_flags,
+    OM_uint32 time_req,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_buffer_t input_token,
+    gss_OID *actual_mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (actual_mech_type != NULL)
+	*actual_mech_type = GSS_C_NO_OID;
+
+    if (output_token != GSS_C_NO_BUFFER) {
+	output_token->length = 0;
+	output_token->value = NULL;
+    }
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CONTEXT);
+
+    if (target_name == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+    if (output_token == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_init_sec_context (minor_status,
                       claimant_cred_handle,
@@ -72,30 +120,21 @@ OM_uint32 *		time_rec;
     gss_mechanism	mech;
     gss_cred_id_t	input_cred_handle;
 
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-    output_token->length = 0;
-    output_token->value = NULL;
-
-    /* clear output values */
-    if (actual_mech_type)
-	*actual_mech_type = NULL;
-
-    if (context_handle == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_NO_CONTEXT);
-
-    union_name = (gss_union_name_t) target_name;
-
-    if (target_name == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
-
-    if (output_token == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    output_token->value = NULL;
-    output_token->length = 0;
-
+    status = val_init_sec_ctx_args(minor_status,
+				   claimant_cred_handle,
+				   context_handle,
+				   target_name,
+				   req_mech_type,
+				   req_flags,
+				   time_req,
+				   input_chan_bindings,
+				   input_token,
+				   actual_mech_type,
+				   output_token,
+				   ret_flags,
+				   time_rec);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
     if (req_mech_type)
 	mech_type = (gss_OID)req_mech_type;

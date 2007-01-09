@@ -49,6 +49,9 @@ gss_buffer_t		token_buffer;
     if (context_handle == GSS_C_NO_CONTEXT)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
 
+    if (token_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
     if (GSS_EMPTY_BUFFER(token_buffer))
 	return (GSS_S_CALL_INACCESSIBLE_READ);
 
