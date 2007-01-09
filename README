@@ -95,7 +95,7 @@ Major known bugs in krb5-1.6
   Attempting to create a KDB in a non-existent directory using the
   Berkeley DB back end may cause a crash resulting from a null pointer
   dereference.  If a core dump occurs, this may cause a local exposure
-  of sensitive information such a master key password.  This wil be
+  of sensitive information such a master key password.  This will be
   fixed in an upcoming patch release.
 
 krb5-1.6 changes by ticket ID
