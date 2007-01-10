@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.5.1
+                  Kerberos Version 5, Release 1.5.2
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.5.1.tar.gz.  Instructions on how to extract the entire
+krb5-1.5.2.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.5.1.tar.gz
+        gtar zxpf krb5-1.5.2.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.5.1.tar.gz | tar xpf -
+        gzcat krb5-1.5.2.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.5.1/src and
-the documentation into krb5-1.5.1/doc.
+Both of these methods will extract the sources into krb5-1.5.2/src and
+the documentation into krb5-1.5.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -60,11 +60,59 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+Major changes in krb5-1.5.2
+---------------------------
+
+* Fix for MITKRB5-SA-2006-002: the RPC library could call an
+  uninitialized function pointer, which created a security
+  vulnerability for kadmind.
+
+* Fix for MITKRB5-SA-2006-003: the GSS-API mechglue layer could fail
+  to initialize some output pointers, causing callers to attempt to
+  free uninitialized pointers.  This caused a security vulnerability
+  in kadmind.
+
+Major known bugs in krb5-1.5.2
+------------------------------
+
+5293    crash creating db2 database in non-existent directory
+
+  Attempting to create a KDB in a non-existent directory using the
+  Berkeley DB back end may cause a crash resulting from a null pointer
+  dereference.  If a core dump occurs, this may cause a local exposure
+  of sensitive information such a master key password.  This will be
+  fixed in an upcoming patch release.
+
+krb5-1.5.2 changes by ticket ID
+-------------------------------
+
+Listed below are the RT tickets of bugs fixed in krb5-1.5.2.  Please see
+
+http://krbdev.mit.edu/rt/NoAuth/krb5-1.5/fixed-1.5.2.html
+
+for a current listing with links to the complete tickets.
+
+3965    Autoconf 2.60 datarootdir issue
+4237    windows ccache and keytab file paths without a prefix
+4305    windows thread support frees thread local storage after TlsSetValue
+4309    wix installer - win2k compatibility for netidmgr
+4310    NSIS installer - update for Win2K NetIDMgr
+4312    KFW 3.1 Beta 2 NetIDMgr Changes
+4354    db2 policy database loading broken
+4355    test policy dump/load in make check
+4368    kdc: make_toolong_error does not initialize all fields for
+        krb5_mk_error
+4407    final commits for KFW 3.1 Beta 2
+4499    Document prerequisites for make check
+4500    Initialize buffer before calling res_ninit
+5307    fix MITKRB5-SA-2006-002 for 1.5-branch
+5308    fix MITKRB5-SA-2006-003 for 1.5-branch
+
 Major changes in 1.5.1
 ----------------------
 
 The only significant change in krb5-1.5.1 is to fix the security
-vulnerabilities decribed in MITKRB5-SA-2006-001, which are local
+vulnerabilities described in MITKRB5-SA-2006-001, which are local
 privilege escalation vulnerabilities in applications running on Linux
 and AIX.
 
