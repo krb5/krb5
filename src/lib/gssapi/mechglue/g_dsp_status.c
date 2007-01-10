@@ -54,17 +54,19 @@ gss_buffer_t		status_string;
     gss_OID		mech_type = (gss_OID) req_mech_type;
     gss_mechanism	mech;
 
-    /* check the input parameters */
-    if (!minor_status)
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (status_string != GSS_C_NO_BUFFER) {
+	status_string->length = 0;
+	status_string->value = NULL;
+    }
+
+    if (minor_status == NULL ||
+	message_context == NULL ||
+	status_string == GSS_C_NO_BUFFER)
+
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    *minor_status = 0;
-
-    if (!message_context || status_string == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    status_string->length = 0;
-    status_string->value = NULL;
 
     /* we handle major status codes, and the mechs do the minor */
     if (status_type == GSS_C_GSS_CODE)

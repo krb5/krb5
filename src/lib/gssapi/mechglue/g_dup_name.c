@@ -19,6 +19,37 @@
 #include <string.h>
 #include <errno.h>
 
+static OM_uint32
+val_dup_name_args(
+	OM_uint32 *minor_status,
+	const gss_name_t src_name,
+	gss_name_t *dest_name)
+{
+
+	/* Initialize outputs. */
+
+	if (minor_status != NULL)
+		*minor_status = 0;
+
+	if (dest_name != NULL)
+		*dest_name = GSS_C_NO_NAME;
+
+	/* Validate arguments. */
+
+	if (minor_status == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+	/* if output_name is NULL, simply return */
+	if (dest_name == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+	if (src_name == GSS_C_NO_NAME)
+		return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+	return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_duplicate_name(minor_status,
 		src_name,
@@ -30,20 +61,9 @@ gss_name_t *dest_name;
 		gss_union_name_t src_union, dest_union;
 		OM_uint32 major_status = GSS_S_FAILURE;
 
-
-	if (!minor_status)
-		return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-	*minor_status = 0;
-
-	/* if output_name is NULL, simply return */
-	if (dest_name == NULL)
-		return (GSS_S_CALL_INACCESSIBLE_WRITE | GSS_S_BAD_NAME);
-
-	*dest_name = 0;
-
-	if (src_name == NULL)
-		return (GSS_S_CALL_INACCESSIBLE_READ);
+	major_status = val_dup_name_args(minor_status, src_name, dest_name);
+	if (major_status != GSS_S_COMPLETE)
+		return (major_status);
 
 	src_union = (gss_union_name_t)src_name;
 
