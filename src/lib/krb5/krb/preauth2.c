@@ -33,7 +33,9 @@
 #include "osconf.h"
 #include <krb5/preauth_plugin.h>
 
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 
 #if TARGET_OS_MAC
 static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/preauth", NULL }; /* should be a list */
@@ -64,7 +66,7 @@ typedef struct _pa_types_t {
  * credentials should never hit this routine), breaking up the module's
  * list of support pa_types so that we can iterate over the modules more
  * easily, and copying over the relevant parts of the module's table. */
-void
+void KRB5_CALLCONV
 krb5_init_preauth_context(krb5_context kcontext)
 {
     int n_modules, n_tables, i, j, k;
@@ -202,7 +204,7 @@ krb5_init_preauth_context(krb5_context kcontext)
 /* Zero the use counts for the modules herein.  Usually used before we
  * start processing any data from the server, at which point every module
  * will again be able to take a crack at whatever the server sent. */
-void
+void KRB5_CALLCONV
 krb5_clear_preauth_context_use_counts(krb5_context context)
 {
     int i;
@@ -262,7 +264,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 /* Free the per-krb5_context preauth_context. This means clearing any
  * plugin-specific context which may have been created, and then
  * freeing the context itself. */
-void
+void KRB5_CALLCONV
 krb5_free_preauth_context(krb5_context context)
 {
     int i;
@@ -287,7 +289,7 @@ krb5_free_preauth_context(krb5_context context)
 
 /* Initialize the per-AS-REQ context. This means calling the client_req_init
  * function to give the plugin a chance to allocate a per-request context. */
-void
+void KRB5_CALLCONV
 krb5_preauth_request_context_init(krb5_context context)
 {
     int i;
@@ -309,7 +311,7 @@ krb5_preauth_request_context_init(krb5_context context)
 
 /* Free the per-AS-REQ context. This means clearing any request-specific
  * context which the plugin may have created. */
-void
+void KRB5_CALLCONV
 krb5_preauth_request_context_fini(krb5_context context)
 {
     int i;
@@ -350,37 +352,45 @@ grow_ktypes(krb5_enctype **out_ktypes, int *out_nktypes, krb5_enctype ktype)
     }
 }
 
-/* Add the given pa_data item to the list of items.  Factored out here to make
- * reading the do_preauth logic easier to read. */
+/*
+ * Add the given list of pa_data items to the existing list of items.
+ * Factored out here to make reading the do_preauth logic easier to read.
+ */
 static int
 grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
-	     krb5_pa_data *addition)
+	     krb5_pa_data **addition, int num_addition)
 {
     krb5_pa_data **pa_list;
-    int i;
+    int i, j;
 
-    if (out_pa_list == NULL) {
+    if (out_pa_list == NULL || addition == NULL) {
 	return EINVAL;
     }
 
     if (*out_pa_list == NULL) {
-	/* Allocate room for one entry and a NULL terminator. */
-	pa_list = malloc(2 * sizeof(krb5_pa_data *));
+	/* Allocate room for the new additions and a NULL terminator. */
+	pa_list = malloc((num_addition + 1) * sizeof(krb5_pa_data *));
 	if (pa_list == NULL)
 	    return ENOMEM;
-	pa_list[0] = addition;
-	pa_list[1] = NULL;
+	for (i = 0; i < num_addition; i++)
+	    pa_list[i] = addition[i];
+	pa_list[i] = NULL;
 	*out_pa_list = pa_list;
-	*out_pa_list_size = 1;
+	*out_pa_list_size = num_addition;
     } else {
-	/* Allocate room for one more entry and a NULL terminator. */
-	pa_list = malloc((*out_pa_list_size + 2) * sizeof(krb5_pa_data *));
+	/*
+	 * Allocate room for the existing entries plus
+	 * the new additions and a NULL terminator.
+	 */
+	pa_list = malloc((*out_pa_list_size + num_addition + 1)
+						* sizeof(krb5_pa_data *));
 	if (pa_list == NULL)
 	    return ENOMEM;
 	for (i = 0; i < *out_pa_list_size; i++)
 	    pa_list[i] = (*out_pa_list)[i];
-	pa_list[i++] = addition;
-	pa_list[i++] = NULL;
+	for (j = 0; j < num_addition;)
+	    pa_list[i++] = addition[j++];
+	pa_list[i] = NULL;
 	free(*out_pa_list);
 	*out_pa_list = pa_list;
 	*out_pa_list_size = i;
@@ -451,7 +461,7 @@ client_data_proc(krb5_context kcontext,
 /* Tweak the request body, for now adding any enctypes which the module claims
  * to add support for to the list, but in the future perhaps doing more
  * involved things. */
-void
+void KRB5_CALLCONV
 krb5_preauth_prepare_request(krb5_context kcontext,
 			     krb5_gic_opt_ext *opte,
 			     krb5_kdc_req *request)
@@ -500,7 +510,7 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 			 krb5_gic_opt_ext *opte)
 {
     int i;
-    krb5_pa_data *out_pa_data;
+    krb5_pa_data **out_pa_data;
     krb5_error_code ret;
     struct _krb5_preauth_context_module *module;
 
@@ -552,22 +562,30 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 	*module_ret = ret;
 	/* Save the new preauth data item. */
 	if (out_pa_data != NULL) {
-#if 0
-/* this is a temporary hack for doing "fixed" draft9 client. the client needs to
-send a pa_type 132 to the win2k kdc then the kdc will reply back with a checksum
-instead of the nonce
-*/
+	    int i;
+#if 0	/* draft9 checksum hack */
+	    /*
+	     * this is a temporary hack for doing "fixed" draft9 client.
+	     * the client needs to send a pa_type 132 to the win2k kdc
+	     * then the kdc will reply back with a checksum instead
+	     * of the nonce
+	     */
 	    krb5_pa_data *tmp = NULL;
 	    tmp = malloc(sizeof(krb5_pa_data));
-	    tmp->pa_type=132;
-	    tmp->length = 0;
-	    tmp->contents = NULL;
+	    if (tmp != NULL) {
+		tmp->pa_type=132;
+		tmp->length = 0;
+		tmp->contents = NULL;
+	    }
 #endif
-	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data);
+	    for (i = 0; out_pa_data[i] != NULL; i++);
+	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data, i);
+	    free(out_pa_data);
 	    if (ret != 0)
 		return ret;
-#if 0
-	    grow_pa_list(out_pa_list, out_pa_list_size, tmp);
+#if 0	/* draft9 checksum hack */
+	    if (tmp != NULL)
+		grow_pa_list(out_pa_list, out_pa_list_size, &tmp, 1);
 #endif
 	}
 	break;
@@ -1350,7 +1368,7 @@ static const pa_types_t pa_types[] = {
  * err_reply, return 0.  If it's the sort of correction which requires that we
  * ask the user another question, we let the calling application deal with it.
  */
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_kdc_req *request,
 			 krb5_data *encoded_request_body,
@@ -1367,19 +1385,19 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_gic_opt_ext *opte)
 {
     krb5_error_code ret;
-    krb5_pa_data *out_padata;
+    krb5_pa_data **out_padata;
     krb5_preauth_context *context;
     struct _krb5_preauth_context_module *module;
     int i, j;
     int out_pa_list_size = 0;
 
-    ret = KRB_ERR_GENERIC;
+    ret = KRB5KRB_ERR_GENERIC;
     if (kcontext->preauth_context == NULL) {
-       return KRB_ERR_GENERIC;
+       return KRB5KRB_ERR_GENERIC;
     }
     context = kcontext->preauth_context;
     if (context == NULL) {
-       return KRB_ERR_GENERIC;
+       return KRB5KRB_ERR_GENERIC;
     }
 
     for (i = 0; padata[i] != NULL && padata[i]->pa_type != 0; i++) {
@@ -1408,7 +1426,11 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 					   as_key,
 					   &out_padata) == 0) {
 		if (out_padata != NULL) {
-		    grow_pa_list(return_padata, &out_pa_list_size, out_padata);
+		    int i;
+		    for (i = 0; out_padata[i] != NULL; i++);
+		    grow_pa_list(return_padata, &out_pa_list_size,
+				 out_padata, i);
+		    free(out_padata);
 		    return 0;
 		}
 	    }
@@ -1417,7 +1439,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
     return ret;
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_do_preauth(krb5_context context,
 		krb5_kdc_req *request,
 		krb5_data *encoded_request_body,
@@ -1588,7 +1610,7 @@ krb5_do_preauth(krb5_context context,
 		    }
 
 		    ret = grow_pa_list(&out_pa_list, &out_pa_list_size,
-				       out_pa);
+				       &out_pa, 1);
 		    if (ret != 0) {
 			    goto cleanup;
 		    }

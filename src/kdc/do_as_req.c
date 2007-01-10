@@ -85,6 +85,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     encrypting_key.contents = 0;
     reply.padata = 0;
     session_key.contents = 0;
+    enc_tkt_reply.authorization_data = NULL;
 
     ktypes2str(ktypestr, sizeof(ktypestr),
 	       request->nktypes, request->ktype);
@@ -465,6 +466,8 @@ errout:
 	}
     }
 
+    if (enc_tkt_reply.authorization_data != NULL)
+	krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
     if (encrypting_key.contents)
 	krb5_free_keyblock_contents(kdc_context, &encrypting_key);
     if (reply.padata)

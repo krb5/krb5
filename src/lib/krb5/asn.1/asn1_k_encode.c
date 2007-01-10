@@ -1137,7 +1137,7 @@ asn1_error_code asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val, u
   if (val->clientDHNonce.length != 0)
     asn1_addlenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_encode_octetstring);
   if (val->supportedCMSTypes != NULL)
-    asn1_addfield(val->supportedCMSTypes,2,asn1_encode_sequence_of_algorithm_identifier);
+    asn1_addfield((const krb5_algorithm_identifier **)val->supportedCMSTypes,2,asn1_encode_sequence_of_algorithm_identifier);
   if (val->clientPublicValue != NULL)
     asn1_addfield(val->clientPublicValue,1,asn1_encode_subject_pk_info);
   asn1_addfield(&(val->pkAuthenticator),0,asn1_encode_pk_authenticator);
@@ -1205,7 +1205,7 @@ asn1_error_code asn1_encode_pa_pk_as_req(asn1buf *buf, const krb5_pa_pk_as_req *
     asn1_insert_implicit_octetstring(val->kdcPkId.length,val->kdcPkId.data,2);
 
   if (val->trustedCertifiers != NULL)
-    asn1_addfield(val->trustedCertifiers,1,asn1_encode_sequence_of_external_principal_identifier);
+    asn1_addfield((const krb5_external_principal_identifier **)val->trustedCertifiers,1,asn1_encode_sequence_of_external_principal_identifier);
 
   asn1_insert_implicit_octetstring(val->signedAuthPack.length,val->signedAuthPack.data,0);
 
@@ -1262,7 +1262,7 @@ asn1_error_code asn1_encode_pa_pk_as_req_draft9(asn1buf *buf, const krb5_pa_pk_a
     asn1_insert_implicit_octetstring(val->kdcCert.length,val->kdcCert.data,2);
 
   if (val->trustedCertifiers != NULL)
-    asn1_addfield(val->trustedCertifiers,1,asn1_encode_sequence_of_trusted_ca);
+    asn1_addfield((const krb5_trusted_ca **)val->trustedCertifiers,1,asn1_encode_sequence_of_trusted_ca);
 
   asn1_insert_implicit_octetstring(val->signedAuthPack.length,val->signedAuthPack.data,0);
 

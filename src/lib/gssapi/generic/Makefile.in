@@ -151,9 +151,10 @@ depend:: $(ETSRCS)
 #
 disp_com_err_status.so disp_com_err_status.po $(OUTPRE)disp_com_err_status.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../gss_libinit.h disp_com_err_status.c gssapi.h \
-  gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssapi.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../gss_libinit.h \
+  disp_com_err_status.c gssapiP_generic.h gssapi_err_generic.h \
+  gssapi_generic.h
 disp_major_status.so disp_major_status.po $(OUTPRE)disp_major_status.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
@@ -196,8 +197,9 @@ util_token.so util_token.po $(OUTPRE)util_token.$(OBJEXT): \
   util_token.c
 util_validate.so util_validate.po $(OUTPRE)util_validate.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../gss_libinit.h gssapi.h gssapiP_generic.h \
-  gssapi_err_generic.h gssapi_generic.h util_validate.c
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssapi.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../gss_libinit.h \
+  gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
+  util_validate.c
 gssapi_err_generic.so gssapi_err_generic.po $(OUTPRE)gssapi_err_generic.$(OBJEXT): \
   $(COM_ERR_DEPS) gssapi_err_generic.c

@@ -107,4 +107,5 @@ clean-windows-files::
 	$(RM) .\$(OUTPRE)*.lib .\$(OUTPRE)*.pdb
 	$(RM) .\$(OUTPRE)*.exp .\$(OUTPRE)*.map
 	$(RM) .\$(OUTPRE)*.idb .\$(OUTPRE)*.ilk
+	$(RM) .\$(OUTPRE)*.manifest
 !endif

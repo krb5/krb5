@@ -1123,6 +1123,8 @@ khm_krb5_kinit(krb5_context       alt_ctx,
     _reportf(L"In khm_krb5_kinit");
 
     pkrb5_get_init_creds_opt_init(&options);
+    pkrb5_get_init_creds_opt_set_change_password_prompt(&options, 0);
+
     memset(&my_creds, 0, sizeof(my_creds));
 
     if (alt_ctx) {

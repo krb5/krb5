@@ -136,6 +136,9 @@ static int get_ticket_policy(krb5_ldap_realm_params *rparams, int *i, char *argv
 static krb5_error_code krb5_dbe_update_mod_princ_data_new (krb5_context context, krb5_db_entry *entry, krb5_timestamp mod_date, krb5_const_principal mod_princ);
 static krb5_error_code krb5_dbe_update_tl_data_new ( krb5_context context, krb5_db_entry *entry, krb5_tl_data *new_tl_data);
 
+#define ADMIN_LIFETIME 60*60*3 /* 3 hours */
+#define CHANGEPW_LIFETIME 60*5 /* 5 minutes */
+
 static int get_ticket_policy(rparams,i,argv,argc)
     krb5_ldap_realm_params *rparams;
     int *i;
@@ -339,52 +342,52 @@ void kdb5_ldap_create(argc, argv)
 
     /* Parse the arguments */
     for (i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-subtrees")) {
-            if (++i > argc-1)
-                goto err_usage;
- 
-            if(strncmp(argv[i], "", strlen(argv[i]))!=0) {
-                list = (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
-                if (list == NULL) {
-                    retval = ENOMEM;
-                    goto cleanup;
-                }
-                if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list))) {
+	if (!strcmp(argv[i], "-subtrees")) {
+	    if (++i > argc-1)
+		goto err_usage;
+
+	    if(strncmp(argv[i], "", strlen(argv[i]))!=0) {
+		list = (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
+		if (list == NULL) {
+		    retval = ENOMEM;
+		    goto cleanup;
+		}
+		if ((retval = krb5_parse_list(argv[i], LIST_DELIMITER, list))) {
 		    free(list);
 		    list = NULL;
-                    goto cleanup;
+		    goto cleanup;
 		}
 
-                rparams->subtreecount=0;
-                while(list[rparams->subtreecount]!=NULL)
-                    (rparams->subtreecount)++;
+		rparams->subtreecount=0;
+		while(list[rparams->subtreecount]!=NULL)
+		    (rparams->subtreecount)++;
 		rparams->subtree = list;
 	    } else if(strncmp(argv[i], "", strlen(argv[i]))==0) {
-		 /* dont allow subtree value to be set at the root(NULL, "") of the tree */   
+		 /* dont allow subtree value to be set at the root(NULL, "") of the tree */
 		 com_err(argv[0], EINVAL,
-		          "for subtree while creating realm '%s'",
-		           global_params.realm);
-       	         goto err_nomsg;
-            }
-            rparams->subtree[rparams->subtreecount] = NULL;
-            mask |= LDAP_REALM_SUBTREE;
-        } else if (!strcmp(argv[i], "-containerref")) {
-            if (++i > argc-1)
-                goto err_usage;
+			  "for subtree while creating realm '%s'",
+			   global_params.realm);
+		 goto err_nomsg;
+	    }
+	    rparams->subtree[rparams->subtreecount] = NULL;
+	    mask |= LDAP_REALM_SUBTREE;
+	} else if (!strcmp(argv[i], "-containerref")) {
+	    if (++i > argc-1)
+		goto err_usage;
 	    if(strncmp(argv[i], "", strlen(argv[i]))==0) {
-		 /* dont allow containerref value to be set at the root(NULL, "") of the tree */   
+		 /* dont allow containerref value to be set at the root(NULL, "") of the tree */
 		 com_err(argv[0], EINVAL,
-		          "for container reference while creating realm '%s'",
-		           global_params.realm);
-       	         goto err_nomsg;
-            }
-            rparams->containerref = strdup(argv[i]);
-            if (rparams->containerref == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            mask |= LDAP_REALM_CONTREF;
-        } else if (!strcmp(argv[i], "-sscope")) {
+			  "for container reference while creating realm '%s'",
+			   global_params.realm);
+		 goto err_nomsg;
+	    }
+	    rparams->containerref = strdup(argv[i]);
+	    if (rparams->containerref == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    mask |= LDAP_REALM_CONTREF;
+	} else if (!strcmp(argv[i], "-sscope")) {
 	    if (++i > argc-1)
 		goto err_usage;
 	    /* Possible values for search scope are
@@ -676,8 +679,8 @@ void kdb5_ldap_create(argc, argv)
 	krb5_princ_set_realm_length(util_context, &tgt_princ, strlen(global_params.realm));
 	krb5_princ_component(util_context, &tgt_princ,1)->data = global_params.realm;
 	krb5_princ_component(util_context, &tgt_princ,1)->length = strlen(global_params.realm);
-	/* The container reference value is set to NULL, to avoid service principals 
-         * getting created within the container reference at realm creation */
+	/* The container reference value is set to NULL, to avoid service principals
+	 * getting created within the container reference at realm creation */
 	if (ldap_context->lrparams->containerref != NULL) {
 	    oldcontainerref = ldap_context->lrparams->containerref;
 	    ldap_context->lrparams->containerref = NULL;
@@ -703,6 +706,7 @@ void kdb5_ldap_create(argc, argv)
 	    com_err(argv[0], retval, "while adding entries to the database");
 	    goto err_nomsg;
 	}
+	rblock.max_life = ADMIN_LIFETIME;
 	rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
 	if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
 	    krb5_free_principal(util_context, p);
@@ -717,6 +721,7 @@ void kdb5_ldap_create(argc, argv)
 	    com_err(argv[0], retval, "while adding entries to the database");
 	    goto err_nomsg;
 	}
+	rblock.max_life = CHANGEPW_LIFETIME;
 	rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED |
 	    KRB5_KDB_PWCHANGE_SERVICE;
 	if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
@@ -732,6 +737,7 @@ void kdb5_ldap_create(argc, argv)
 	    com_err(argv[0], retval, "while adding entries to the database");
 	    goto err_nomsg;
 	}
+	rblock.max_life = global_params.max_life;
 	rblock.flags = 0;
 	if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
 	    krb5_free_principal(util_context, p);
@@ -760,6 +766,7 @@ void kdb5_ldap_create(argc, argv)
 	    goto err_nomsg;
 	}
 
+	rblock.max_life = ADMIN_LIFETIME;
 	rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
 	if ((retval = kdb_ldap_create_principal(util_context, temp_p, TGT_KEY, &rblock))) {
 	    krb5_free_principal(util_context, p);
@@ -908,10 +915,10 @@ void kdb5_ldap_modify(argc, argv)
     char **oldadmindns = NULL;
     char **oldpwddns = NULL;
     char **newkdcdns = NULL;
-    char **newsubtrees = NULL; 
+    char **newsubtrees = NULL;
     char **newadmindns = NULL;
     char **newpwddns = NULL;
-    char **oldsubtrees = {NULL}; 
+    char **oldsubtrees = {NULL};
     int rightsmask = 0;
     int subtree_changed = 0;
 #endif
@@ -935,7 +942,7 @@ void kdb5_ldap_modify(argc, argv)
 	goto cleanup;
     /* Parse the arguments */
     for (i = 1; i < argc; i++) {
-        int k = 0;
+	int k = 0;
 	if (!strcmp(argv[i], "-subtrees")) {
 	    if (++i > argc-1)
 		goto err_usage;
@@ -943,66 +950,66 @@ void kdb5_ldap_modify(argc, argv)
 	    if (rmask & LDAP_REALM_SUBTREE) {
 		if (rparams->subtree) {
 #ifdef HAVE_EDIRECTORY
-                    oldsubtrees =  (char **) calloc(rparams->subtreecount+1, sizeof(char *));
-                    if (oldsubtrees == NULL) {
-                        retval = ENOMEM;
-                        goto cleanup;
-                    }
-                    for(k=0; rparams->subtree[k]!=NULL && rparams->subtreecount; k++) {
-                        oldsubtrees[k] = strdup(rparams->subtree[k]);
-                        if( oldsubtrees[k] == NULL ) {
-                            retval = ENOMEM;
-                            goto cleanup;
-                        }
-                    }
+		    oldsubtrees =  (char **) calloc(rparams->subtreecount+1, sizeof(char *));
+		    if (oldsubtrees == NULL) {
+			retval = ENOMEM;
+			goto cleanup;
+		    }
+		    for(k=0; rparams->subtree[k]!=NULL && rparams->subtreecount; k++) {
+			oldsubtrees[k] = strdup(rparams->subtree[k]);
+			if( oldsubtrees[k] == NULL ) {
+			    retval = ENOMEM;
+			    goto cleanup;
+			}
+		    }
 #endif
-                    for(k=0; k<rparams->subtreecount && rparams->subtree[k]; k++)
-                        free(rparams->subtree[k]);
-                    rparams->subtreecount=0;
-                }
-            }
-            if (strncmp(argv[i] ,"", strlen(argv[i]))!=0) {
-                slist =  (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
-                if (slist == NULL) {
-                    retval = ENOMEM;
-                    goto cleanup;
-                }
-                if (( retval = krb5_parse_list(argv[i], LIST_DELIMITER, slist))) {
-                    free(slist);
-                    slist = NULL;
-                    goto cleanup;
-                }
-                                                                                                                             
-                rparams->subtreecount=0;
-                while(slist[rparams->subtreecount]!=NULL)
-                    (rparams->subtreecount)++;
+		    for(k=0; k<rparams->subtreecount && rparams->subtree[k]; k++)
+			free(rparams->subtree[k]);
+		    rparams->subtreecount=0;
+		}
+	    }
+	    if (strncmp(argv[i] ,"", strlen(argv[i]))!=0) {
+		slist =  (char **) calloc(MAX_LIST_ENTRIES, sizeof(char *));
+		if (slist == NULL) {
+		    retval = ENOMEM;
+		    goto cleanup;
+		}
+		if (( retval = krb5_parse_list(argv[i], LIST_DELIMITER, slist))) {
+		    free(slist);
+		    slist = NULL;
+		    goto cleanup;
+		}
+
+		rparams->subtreecount=0;
+		while(slist[rparams->subtreecount]!=NULL)
+		    (rparams->subtreecount)++;
 		rparams->subtree =  slist;
 	    } else if(strncmp(argv[i], "", strlen(argv[i]))==0) {
-		 /* dont allow subtree value to be set at the root(NULL, "") of the tree */   
+		 /* dont allow subtree value to be set at the root(NULL, "") of the tree */
 		    com_err(argv[0], EINVAL,
 			    "for subtree while modifying realm '%s'",
 			    global_params.realm);
 		    goto err_nomsg;
-            }
-            rparams->subtree[rparams->subtreecount] = NULL;
-            mask |= LDAP_REALM_SUBTREE;
-        } else if (!strncmp(argv[i], "-containerref", strlen(argv[i]))) {
-            if (++i > argc-1)
-                goto err_usage;
+	    }
+	    rparams->subtree[rparams->subtreecount] = NULL;
+	    mask |= LDAP_REALM_SUBTREE;
+	} else if (!strncmp(argv[i], "-containerref", strlen(argv[i]))) {
+	    if (++i > argc-1)
+		goto err_usage;
 	    if(strncmp(argv[i], "", strlen(argv[i]))==0) {
-		 /* dont allow containerref value to be set at the root(NULL, "") of the tree */   
+		 /* dont allow containerref value to be set at the root(NULL, "") of the tree */
 		 com_err(argv[0], EINVAL,
-		          "for container reference while modifying realm '%s'",
-		           global_params.realm);
-       	         goto err_nomsg;
-            }
-            rparams->containerref = strdup(argv[i]);
-            if (rparams->containerref == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
-            mask |= LDAP_REALM_CONTREF;
-        } else if (!strcmp(argv[i], "-sscope")) {
+			  "for container reference while modifying realm '%s'",
+			   global_params.realm);
+		 goto err_nomsg;
+	    }
+	    rparams->containerref = strdup(argv[i]);
+	    if (rparams->containerref == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    mask |= LDAP_REALM_CONTREF;
+	} else if (!strcmp(argv[i], "-sscope")) {
 	    if (++i > argc-1)
 		goto err_usage;
 	    /* Possible values for search scope are
@@ -1421,52 +1428,52 @@ void kdb5_ldap_modify(argc, argv)
 
 	if (!(mask & LDAP_REALM_SUBTREE)) {
 	    if (rparams->subtree != NULL) {
-                for(i=0; rparams->subtree[i]!=NULL;i++) {
-                    oldsubtrees[i] = strdup(rparams->subtree[i]);
-                    if( oldsubtrees[i] == NULL ) {
-                        retval = ENOMEM;
-                        goto cleanup;
-                    }
-                }
+		for(i=0; rparams->subtree[i]!=NULL;i++) {
+		    oldsubtrees[i] = strdup(rparams->subtree[i]);
+		    if( oldsubtrees[i] == NULL ) {
+			retval = ENOMEM;
+			goto cleanup;
+		    }
+		}
 	    }
 	}
 
 	if ((mask & LDAP_REALM_SUBTREE)) {
-            int check_subtree = 1;
+	    int check_subtree = 1;
 
-            newsubtrees = (char**) calloc(rparams->subtreecount, sizeof(char*));
+	    newsubtrees = (char**) calloc(rparams->subtreecount, sizeof(char*));
 
-            if (newsubtrees == NULL) {
-                retval = ENOMEM;
-                goto cleanup;
-            }
- 
-            if ( (rparams != NULL) && (rparams->subtree != NULL) ) {
-                for (j=0; j<rparams->subtreecount && rparams->subtree[j]!= NULL; j++) {
-                    newsubtrees[j] = strdup(rparams->subtree[j]);
-                    if (newsubtrees[j] == NULL) {
-                        retval = ENOMEM;
-                        goto cleanup;
-                    }
-                }
-                newsubtrees[j] = NULL;
-            }
-            for(j=0;oldsubtrees[j]!=NULL;j++) {
-                check_subtree = 1;
-                for(i=0; ( (oldsubtrees[j] && !rparams->subtree[i]) ||
-                        (!oldsubtrees[j] && rparams->subtree[i])); i++) {
-                    if(strcasecmp( oldsubtrees[j], rparams->subtree[i]) == 0) {
-                        check_subtree = 0;
-                        continue;
-                    }
-                }
-                if (check_subtree != 0) {
-                    subtree_changed=1;
-                    break;
-                }
-            }
-            /* this will return list of the disjoint members */
-            disjoint_members( oldsubtrees, newsubtrees);
+	    if (newsubtrees == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+
+	    if ( (rparams != NULL) && (rparams->subtree != NULL) ) {
+		for (j=0; j<rparams->subtreecount && rparams->subtree[j]!= NULL; j++) {
+		    newsubtrees[j] = strdup(rparams->subtree[j]);
+		    if (newsubtrees[j] == NULL) {
+			retval = ENOMEM;
+			goto cleanup;
+		    }
+		}
+		newsubtrees[j] = NULL;
+	    }
+	    for(j=0;oldsubtrees[j]!=NULL;j++) {
+		check_subtree = 1;
+		for(i=0; ( (oldsubtrees[j] && !rparams->subtree[i]) ||
+			(!oldsubtrees[j] && rparams->subtree[i])); i++) {
+		    if(strcasecmp( oldsubtrees[j], rparams->subtree[i]) == 0) {
+			check_subtree = 0;
+			continue;
+		    }
+		}
+		if (check_subtree != 0) {
+		    subtree_changed=1;
+		    break;
+		}
+	    }
+	    /* this will return list of the disjoint members */
+	    disjoint_members( oldsubtrees, newsubtrees);
 	}
 
 	if ((mask & LDAP_REALM_SUBTREE) || (mask & LDAP_REALM_KDCSERVERS)) {
@@ -1754,12 +1761,12 @@ cleanup:
 	free(newadmindns);
     }
     if (oldsubtrees) {
-        for (i=0;oldsubtrees[i]!=NULL; i++)
-            free(oldsubtrees[i]);
-        free(oldsubtrees);
+	for (i=0;oldsubtrees[i]!=NULL; i++)
+	    free(oldsubtrees[i]);
+	free(oldsubtrees);
     }
     if (newsubtrees) {
-        for (i=0;newsubtrees[i]!=NULL; i++)
+	for (i=0;newsubtrees[i]!=NULL; i++)
 	    free(newsubtrees[i]);
 	free(oldsubtrees);
     }
@@ -1859,11 +1866,11 @@ static void print_realm_params(krb5_ldap_realm_params *rparams, int mask)
     /* Print the Realm Attributes on the standard output */
     printf("%25s: %-50s\n", "Realm Name", global_params.realm);
     if (mask & LDAP_REALM_SUBTREE) {
-        for (i=0; rparams->subtree[i]!=NULL; i++)
+	for (i=0; rparams->subtree[i]!=NULL; i++)
 	    printf("%25s: %-50s\n", "Subtree", rparams->subtree[i]);
     }
     if (mask & LDAP_REALM_CONTREF)
-        printf("%25s: %-50s\n", "Principal Container Reference", rparams->containerref);
+	printf("%25s: %-50s\n", "Principal Container Reference", rparams->containerref);
     if (mask & LDAP_REALM_SEARCHSCOPE) {
 	if ((rparams->search_scope != 1) &&
 	    (rparams->search_scope != 2)) {
@@ -2119,7 +2126,7 @@ krb5_dbe_update_mod_princ_data_new(context, entry, mod_date, mod_princ)
     char		* unparse_mod_princ = 0;
     unsigned int	unparse_mod_princ_size;
 
-    if ((retval = krb5_unparse_name(context, mod_princ, 
+    if ((retval = krb5_unparse_name(context, mod_princ,
 				    &unparse_mod_princ)))
 	return(retval);
 
@@ -2149,6 +2156,59 @@ krb5_dbe_update_mod_princ_data_new(context, entry, mod_date, mod_princ)
     return(retval);
 }
 
+static krb5_error_code
+kdb_ldap_tgt_keysalt_iterate(ksent, ptr)
+    krb5_key_salt_tuple *ksent;
+    krb5_pointer        ptr;
+{
+    krb5_context        context;
+    krb5_error_code     kret;
+    struct iterate_args *iargs;
+    krb5_keyblock       key;
+    krb5_int32          ind;
+    krb5_data   pwd;
+    krb5_db_entry       *entry;
+
+    iargs = (struct iterate_args *) ptr;
+    kret = 0;
+
+    context = iargs->ctx;
+    entry = iargs->dbentp;
+
+    /*
+     * Convert the master key password into a key for this particular
+     * encryption system.
+     */
+    pwd.data = mkey_password;
+    pwd.length = strlen(mkey_password);
+    kret = krb5_c_random_seed(context, &pwd);
+    if (kret)
+	return kret;
+
+    /*if (!(kret = krb5_dbe_create_key_data(iargs->ctx, iargs->dbentp))) {*/
+    if ((entry->key_data =
+	     (krb5_key_data *) realloc(entry->key_data,
+					    (sizeof(krb5_key_data) *
+					    (entry->n_key_data + 1)))) == NULL)
+	return (ENOMEM);
+
+    memset(entry->key_data + entry->n_key_data, 0, sizeof(krb5_key_data));
+    ind = entry->n_key_data++;
+
+    if (!(kret = krb5_c_make_random_key(context, ksent->ks_enctype,
+					&key))) {
+	kret = krb5_dbekd_encrypt_key_data(context,
+					   iargs->rblock->key,
+					   &key,
+					   NULL,
+					   1,
+					   &entry->key_data[ind]);
+	krb5_free_keyblock_contents(context, &key);
+    }
+    /*}*/
+
+    return(kret);
+}
 /* End duplicate code */
 
 /*
@@ -2172,6 +2232,8 @@ kdb_ldap_create_principal (context, princ, op, pblock)
     int              kvno = 0;
     kdb5_dal_handle *dal_handle = NULL;
     krb5_ldap_context *ldap_context=NULL;
+    struct iterate_args   iargs;
+    krb5_data       *pdata;
 
     if ((pblock == NULL) || (context == NULL)) {
 	retval = EINVAL;
@@ -2234,39 +2296,69 @@ kdb_ldap_create_principal (context, princ, op, pblock)
     if ((retval = krb5_copy_principal(context, princ, &entry.princ)))
 	goto cleanup;
 
-    /* Allocate memory for storing the key */
-    if ((entry.key_data = (krb5_key_data *) malloc(
-	     (sizeof(krb5_key_data)*(entry.n_key_data + 1)))) == NULL) {
-	retval = ENOMEM;
-	goto cleanup;
-    }
-
-    memset(entry.key_data + entry.n_key_data, 0, sizeof(krb5_key_data));
-    entry.n_key_data++;
 
     switch (op) {
     case TGT_KEY:
-	retval = krb5_c_make_random_key(context, 16, &key) ;
-	if (retval) {
-	    goto cleanup;
-	}
+	if ((pdata = krb5_princ_component(context, princ, 1)) &&
+	    pdata->length == strlen("history") &&
+	    !memcmp(pdata->data, "history", strlen("history"))) {
 
-	kvno = 1; /* New key is getting set */
-	retval = krb5_dbekd_encrypt_key_data(context,
-					     &ldap_context->lrparams->mkey,
-					     &key, NULL, kvno,
-					     &entry.key_data[entry.n_key_data - 1]);
-	if (retval) {
-	    goto cleanup;
+	    /* Allocate memory for storing the key */
+	    if ((entry.key_data = (krb5_key_data *) malloc(
+					      sizeof(krb5_key_data))) == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+
+	    memset(entry.key_data, 0, sizeof(krb5_key_data));
+	    entry.n_key_data++;
+
+	    retval = krb5_c_make_random_key(context, global_params.enctype, &key);
+	    if (retval) {
+		goto cleanup;
+	    }
+	    kvno = 1; /* New key is getting set */
+	    retval = krb5_dbekd_encrypt_key_data(context,
+					&ldap_context->lrparams->mkey,
+					&key, NULL, kvno,
+					&entry.key_data[entry.n_key_data - 1]);
+	    krb5_free_keyblock_contents(context, &key);
+	    if (retval) {
+		goto cleanup;
+	    }
+	} else {
+	    /*retval = krb5_c_make_random_key(context, 16, &key) ;*/
+	    iargs.ctx = context;
+	    iargs.rblock = pblock;
+	    iargs.dbentp = &entry;
+
+	    /*
+	     * Iterate through the key/salt list, ignoring salt types.
+	     */
+	    if ((retval = krb5_keysalt_iterate(pblock->kslist,
+					       pblock->nkslist,
+					       1,
+					       kdb_ldap_tgt_keysalt_iterate,
+					       (krb5_pointer) &iargs)))
+		return retval;
 	}
-	krb5_free_keyblock_contents(context, &key);
 	break;
 
     case MASTER_KEY:
+	/* Allocate memory for storing the key */
+	if ((entry.key_data = (krb5_key_data *) malloc(
+					      sizeof(krb5_key_data))) == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+
+	memset(entry.key_data, 0, sizeof(krb5_key_data));
+	entry.n_key_data++;
 	kvno = 1; /* New key is getting set */
 	retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
-					     &ldap_context->lrparams->mkey, NULL, kvno,
-					     &entry.key_data[entry.n_key_data - 1]);
+					 &ldap_context->lrparams->mkey,
+					 NULL, kvno,
+					 &entry.key_data[entry.n_key_data - 1]);
 	if (retval) {
 	    goto cleanup;
 	}

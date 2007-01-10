@@ -702,25 +702,22 @@ krb5_db2_db_create(krb5_context context, char *db_name, krb5_int32 flags)
     }
     db = k5db2_dbopen(db_ctx, db_name, O_RDWR | O_CREAT | O_EXCL, 0600, db_ctx->tempdb);
     if (db == NULL)
-	retval = errno;
-    else
-	(*db->close) (db);
-    if (retval == 0) {
+	return errno;
+    (*db->close) (db);
 
-	db_name2 = db_ctx->tempdb ? gen_dbsuffix(db_name, "~") : strdup(db_name);
-	if (db_name2 == NULL)
-	    return ENOMEM;
-	okname = gen_dbsuffix(db_name2, KDB2_LOCK_EXT);
-	if (!okname)
-	    retval = ENOMEM;
-	else {
-	    fd = open(okname, O_CREAT | O_RDWR | O_TRUNC, 0600);
-	    if (fd < 0)
-		retval = errno;
-	    else
-		close(fd);
-	    free_dbsuffix(okname);
-	}
+    db_name2 = db_ctx->tempdb ? gen_dbsuffix(db_name, "~") : strdup(db_name);
+    if (db_name2 == NULL)
+	return ENOMEM;
+    okname = gen_dbsuffix(db_name2, KDB2_LOCK_EXT);
+    if (!okname)
+	retval = ENOMEM;
+    else {
+	fd = open(okname, O_CREAT | O_RDWR | O_TRUNC, 0600);
+	if (fd < 0)
+	    retval = errno;
+	else
+	    close(fd);
+	free_dbsuffix(okname);
     }
 
     sprintf(policy_db_name, "%s.kadm5", db_name2);

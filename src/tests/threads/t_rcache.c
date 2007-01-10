@@ -168,7 +168,12 @@ int main (int argc, char *argv[])
 	    sleep(1);
 	for (i = 0; i < n; i++)
 	    printf("thread %d total %5d\n", i, ip[i]);
+	free(ip);
     }
 #endif
+#ifdef INIT_ONCE
+    krb5_rc_close(ctx, rcache);
+#endif
+    krb5_free_context(ctx);
     return 0;
 }

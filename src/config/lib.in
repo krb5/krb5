@@ -124,7 +124,7 @@ clean-libs:
 	$(RM) lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) lib$(LIBBASE)$(PFLIBEXT)
-	$(RM) binutils.versions osf1.exports
+	$(RM) binutils.versions osf1.exports darwin.exports hpux10.exports
 
 clean-liblinks:
 	$(RM) $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)

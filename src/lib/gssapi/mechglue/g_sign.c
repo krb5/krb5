@@ -28,6 +28,43 @@
 
 #include "mglueP.h"
 
+static OM_uint32
+val_sign_args(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t context_handle,
+    int qop_req,
+    gss_buffer_t message_buffer,
+    gss_buffer_t msg_token)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (msg_token != GSS_C_NO_BUFFER) {
+	msg_token->value = NULL;
+	msg_token->length = 0;
+    }
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == GSS_C_NO_CONTEXT)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+
+    if (message_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (msg_token == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_sign (minor_status,
           context_handle,
@@ -46,21 +83,11 @@ gss_buffer_t		msg_token;
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
 
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
+    status = val_sign_args(minor_status, context_handle,
+			   qop_req, message_buffer, msg_token);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
-    if (context_handle == GSS_C_NO_CONTEXT)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
-
-    if (message_buffer == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_READ);
-
-    if (msg_token == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    msg_token->value = NULL;
-    msg_token->length = 0;
     /*
      * select the approprate underlying mechanism routine and
      * call it.

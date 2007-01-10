@@ -55,6 +55,7 @@ all:: Makefile $(OUTPRE)$(NAME).exe
 $(OUTPRE)$(NAME).exe: $(NAME).def $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
 	  $(LIBS) $(SYSLIBS) $(SCLIB)
+				$(_VC_MANIFEST_EMBED_EXE)
 
 install::
 	$(CP) $(OUTPRE)$(NAME).exe $(DESTDIR)

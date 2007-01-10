@@ -13,9 +13,11 @@ all-windows:: $(OUTPRE)ms2mit.exe $(OUTPRE)mit2ms.exe
 
 $(OUTPRE)ms2mit.exe: $(OUTPRE)ms2mit.obj
     link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)ms2mit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj user32.lib advapi32.lib $(KLIB) $(CLIB)
+    $(_VC_MANIFEST_EMBED_EXE)
 
 $(OUTPRE)mit2ms.exe: $(OUTPRE)mit2ms.obj
     link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)mit2ms.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj user32.lib advapi32.lib $(KLIB) $(CLIB)
+    $(_VC_MANIFEST_EMBED_EXE)
 
 install::
 	copy $(OUTPRE)ms2mit.exe $(DESTDIR)

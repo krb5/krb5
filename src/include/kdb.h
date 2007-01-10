@@ -84,8 +84,6 @@
 #define KRB5_KDB_CREATE_BTREE		0x00000001
 #define KRB5_KDB_CREATE_HASH		0x00000002
 
-#if !defined(_WIN32)
-
 /*
  * Note --- these structures cannot be modified without changing the
  * database version number in libkdb.a, but should be expandable by
@@ -498,7 +496,5 @@ krb5_db_free_policy( krb5_context kcontext,
 		     osa_policy_ent_t policy);
 
 #define KRB5_KDB_DEF_FLAGS	0
-
-#endif /* !defined(_WIN32) */
 
 #endif /* KRB5_KDB5__ */

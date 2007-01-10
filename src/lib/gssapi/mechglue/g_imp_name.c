@@ -38,6 +38,40 @@
 /* local function to import GSS_C_EXPORT_NAME names */
 static OM_uint32 importExportName(OM_uint32 *, gss_union_name_t);
 
+static OM_uint32
+val_imp_name_args(
+    OM_uint32 *minor_status,
+    gss_buffer_t input_name_buffer,
+    gss_OID input_name_type,
+    gss_name_t *output_name)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (output_name != NULL)
+	*output_name = GSS_C_NO_NAME;
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (output_name == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (input_name_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+    if (GSS_EMPTY_BUFFER(input_name_buffer))
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_import_name(minor_status,
                 input_name_buffer,
@@ -53,22 +87,11 @@ gss_name_t *		output_name;
     gss_union_name_t	union_name;
     OM_uint32		tmp, major_status = GSS_S_FAILURE;
 
-    /* check output parameters */
-    if (!minor_status)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    *minor_status = 0;
-
-    if (output_name == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-
-    *output_name = 0;
-
-    if (input_name_buffer == GSS_C_NO_BUFFER)
-	return (GSS_S_BAD_NAME);
-
-    if (GSS_EMPTY_BUFFER(input_name_buffer))
-	return (GSS_S_BAD_NAME);
+    major_status = val_imp_name_args(minor_status,
+				     input_name_buffer, input_name_type,
+				     output_name);
+    if (major_status != GSS_S_COMPLETE)
+	return (major_status);
 
     /*
      * First create the union name struct that will hold the external

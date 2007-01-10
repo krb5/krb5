@@ -87,6 +87,7 @@ DECL_FUNC_PTR(krb5_get_init_creds_opt_set_renew_life);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_forwardable);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_proxiable);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_address_list);
+DECL_FUNC_PTR(krb5_get_init_creds_opt_set_change_password_prompt);
 DECL_FUNC_PTR(krb5_get_init_creds_password);
 DECL_FUNC_PTR(krb5_get_prompt_types);
 DECL_FUNC_PTR(krb5_build_principal_ext);
@@ -231,6 +232,7 @@ FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_forwardable),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_proxiable),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_address_list),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_change_password_prompt),
     MAKE_FUNC_INFO(krb5_get_init_creds_password),
     MAKE_FUNC_INFO(krb5_get_prompt_types),
     MAKE_FUNC_INFO(krb5_build_principal_ext),

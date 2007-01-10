@@ -20,6 +20,7 @@ kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
 
 $(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
+	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kinit.o kinit

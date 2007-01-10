@@ -192,9 +192,10 @@ typedef krb5_error_code
 			       void *prompter_data,
 			       preauth_get_as_key_proc gak_fct,
 			       void *gak_data,
-			       krb5_data *salt, krb5_data *s2kparams,
+			       krb5_data *salt,
+			       krb5_data *s2kparams,
 			       krb5_keyblock *as_key,
-			       krb5_pa_data **out_pa_data);
+			       krb5_pa_data ***out_pa_data);
 
 /* Client function which can attempt to use e-data in the error response to
  * try to recover from the given error.  If this function is not NULL, and
@@ -216,9 +217,10 @@ typedef krb5_error_code
 				void *prompter_data,
 				preauth_get_as_key_proc gak_fct,
 				void *gak_data,
-				krb5_data *salt, krb5_data *s2kparams,
+				krb5_data *salt,
+				krb5_data *s2kparams,
 				krb5_keyblock *as_key,
-				krb5_pa_data **out_pa_data);
+				krb5_pa_data ***out_pa_data);
 
 /*
  * Client function which receives krb5_get_init_creds_opt information.
@@ -294,6 +296,7 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
      */
     preauth_client_supply_gic_opts_proc gic_opts;
 } krb5plugin_preauth_client_ftable_v0;
+
 
 /***************************************************************************
  *
@@ -380,13 +383,14 @@ typedef krb5_error_code
 			      preauth_get_entry_data_proc,
 			      void *pa_module_context,
 			      void **pa_request_context,
-			      krb5_data **e_data);
+			      krb5_data **e_data,
+			      krb5_authdata ***authz_data);
 
 /* Generate preauthentication response data to send to the client as part
  * of the AS-REP.  If it needs to override the key which is used to encrypt
  * the response, it can do so.  The module is expected (but not required,
- * if a freepa_proc is also provided) to free any context data it saved in
- * "request_pa_context". */
+ * if a preauth_server_free_reqcontext_proc is also provided) to free any
+ * context data it saved in "pa_request_context". */
 typedef krb5_error_code
 (*preauth_server_return_proc)(krb5_context context,
 			      krb5_pa_data * padata,

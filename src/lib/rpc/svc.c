@@ -437,6 +437,8 @@ svc_getreqset(FDSET_TYPE *readfds)
 #endif
 }
 
+extern struct svc_auth_ops svc_auth_gss_ops;
+
 static void
 svc_do_xprt(SVCXPRT *xprt)
 {
@@ -518,6 +520,9 @@ svc_do_xprt(SVCXPRT *xprt)
 		if ((stat = SVC_STAT(xprt)) == XPRT_DIED){
 			SVC_DESTROY(xprt);
 			break;
+		} else if ((xprt->xp_auth != NULL) &&
+			   (xprt->xp_auth->svc_ah_ops != &svc_auth_gss_ops)) {
+			xprt->xp_auth = NULL;
 		}
 	} while (stat == XPRT_MOREREQS);
 

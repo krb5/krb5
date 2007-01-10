@@ -33,6 +33,58 @@
 #include <string.h>
 #include <errno.h>
 
+static OM_uint32
+val_acc_sec_ctx_args(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t *context_handle,
+    gss_cred_id_t verifier_cred_handle,
+    gss_buffer_t input_token_buffer,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_name_t *src_name,
+    gss_OID *mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    gss_cred_id_t *d_cred)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    if (src_name != NULL)
+	*src_name = GSS_C_NO_NAME;
+
+    if (mech_type != NULL)
+	*mech_type = GSS_C_NO_OID;
+
+    if (output_token != GSS_C_NO_BUFFER) {
+	output_token->length = 0;
+	output_token->value = NULL;
+    }
+
+    if (d_cred != NULL)
+	*d_cred = GSS_C_NO_CREDENTIAL;
+
+    /* Validate arguments. */
+
+    if (minor_status == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (context_handle == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    if (input_token_buffer == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_READ);
+
+    if (output_token == GSS_C_NO_BUFFER)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_accept_sec_context (minor_status,
                         context_handle,
@@ -69,26 +121,21 @@ gss_cred_id_t *		d_cred;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
     gss_mechanism	mech;
-    
-    /* check parameters first */
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
- 
-    if (context_handle == NULL || output_token == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
- 
-    /* clear optional fields */
-    output_token->value = NULL;
-    output_token->length = 0;
-    if (src_name)
-	*src_name = NULL;
 
-    if (mech_type)
-	*mech_type = NULL;
+    status = val_acc_sec_ctx_args(minor_status,
+				  context_handle,
+				  verifier_cred_handle,
+				  input_token_buffer,
+				  input_chan_bindings,
+				  src_name,
+				  mech_type,
+				  output_token,
+				  ret_flags,
+				  time_rec,
+				  d_cred);
+    if (status != GSS_S_COMPLETE)
+	return (status);
 
-    if (d_cred)
-	*d_cred = NULL;
     /*
      * if context_handle is GSS_C_NO_CONTEXT, allocate a union context
      * descriptor to hold the mech type information as well as the

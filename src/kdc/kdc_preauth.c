@@ -98,7 +98,8 @@ static krb5_error_code verify_enc_timestamp
 		    preauth_get_entry_data_proc get_entry_data,
 		    void *pa_system_context,
 		    void **pa_request_context,
-		    krb5_data **e_data);
+		    krb5_data **e_data,
+		    krb5_authdata ***authz_data);
 
 static krb5_error_code get_etype_info
     (krb5_context, krb5_kdc_req *request,
@@ -166,7 +167,8 @@ static krb5_error_code verify_sam_response
 		    preauth_get_entry_data_proc get_entry_data,
 		    void *pa_module_context,
 		    void **pa_request_context,
-		    krb5_data **e_data);
+		    krb5_data **e_data,
+		    krb5_authdata ***authz_data);
 
 static krb5_error_code get_sam_edata
     (krb5_context, krb5_kdc_req *request,
@@ -840,6 +842,55 @@ errout:
 }
 
 /*
+ * Add authorization data returned from preauth modules to the ticket
+ * It is assumed that ad is a "null-terminated" array of krb5_authdata ptrs
+ */
+static krb5_error_code
+add_authorization_data(krb5_enc_tkt_part *enc_tkt_part, krb5_authdata **ad)
+{
+    krb5_authdata **newad;
+    int oldones, newones;
+    int i;
+
+    if (enc_tkt_part == NULL || ad == NULL)
+	return EINVAL;
+
+    for (newones = 0; ad[newones] != NULL; newones++);
+    if (newones == 0)
+	return 0;   /* nothing to add */
+
+    if (enc_tkt_part->authorization_data == NULL)
+	oldones = 0;
+    else
+	for (oldones = 0;
+	     enc_tkt_part->authorization_data[oldones] != NULL; oldones++);
+
+    newad = malloc((oldones + newones + 1) * sizeof(krb5_authdata *));
+    if (newad == NULL)
+	return ENOMEM;
+
+    /* Copy any existing pointers */
+    for (i = 0; i < oldones; i++)
+	newad[i] = enc_tkt_part->authorization_data[i];
+
+    /* Add the new ones */
+    for (i = 0; i < newones; i++)
+	newad[oldones+i] = ad[i];
+
+    /* Terminate the new list */
+    newad[oldones+i] = NULL;
+
+    /* Free any existing list */
+    if (enc_tkt_part->authorization_data != NULL)
+	free(enc_tkt_part->authorization_data);
+
+    /* Install our new list */
+    enc_tkt_part->authorization_data = newad;
+
+    return 0;
+}
+
+/*
  * This routine is called to verify the preauthentication information
  * for a V5 request.
  *
@@ -861,6 +912,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     krb5_error_code saved_retval = 0;
     int use_saved_retval = 0;
     const char *emsg;
+    krb5_authdata **tmp_authz_data = NULL;
 
     if (request->padata == 0)
 	return 0;
@@ -889,12 +941,17 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	retval = pa_sys->verify_padata(context, client, req_pkt, request,
 				       enc_tkt_reply, *padata,
 				       get_entry_data, pa_sys->plugin_context,
-				       pa_context, &tmp_e_data);
+				       pa_context, &tmp_e_data, &tmp_authz_data);
 	if (retval) {
 	    emsg = krb5_get_error_message (context, retval);
 	    krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
 			      pa_sys->name, emsg);
 	    krb5_free_error_message (context, emsg);
+	    /* Ignore authorization data returned from modules that fail */
+	    if (tmp_authz_data != NULL) {
+		krb5_free_authdata(context, tmp_authz_data);
+		tmp_authz_data = NULL;
+	    }
 	    if (pa_sys->flags & PA_REQUIRED) {
 		/* free up any previous edata we might have been saving */
 		if (pa_e_data != NULL)
@@ -932,6 +989,12 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
 	    if (tmp_e_data != NULL) {
 	        krb5_free_data(context, tmp_e_data);
 		tmp_e_data = NULL;
+	    }
+	    /* Add any authorization data to the ticket */
+	    if (tmp_authz_data != NULL) {
+		add_authorization_data(enc_tkt_reply, tmp_authz_data);
+		free(tmp_authz_data);
+		tmp_authz_data = NULL;
 	    }
 	    pa_ok = 1;
 	    if (pa_sys->flags & PA_SUFFICIENT)
@@ -1150,7 +1213,8 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
 		     preauth_get_entry_data_proc ets_get_entry_data,
 		     void *pa_system_context,
 		     void **pa_request_context,
-		     krb5_data **e_data)
+		     krb5_data **e_data,
+		     krb5_authdata ***authz_data)
 {
     krb5_pa_enc_ts *		pa_enc = 0;
     krb5_error_code		retval;
@@ -2138,7 +2202,8 @@ verify_sam_response(krb5_context context, krb5_db_entry *client,
 		    preauth_get_entry_data_proc sam_get_entry_data,
 		    void *pa_system_context,
 		    void **pa_request_context,
-		    krb5_data **e_data)
+		    krb5_data **e_data,
+		    krb5_authdata ***authz_data)
 {
     krb5_error_code		retval;
     krb5_data			scratch;

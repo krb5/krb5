@@ -15,6 +15,7 @@ kcpytkt: kcpytkt.o $(KRB4COMPAT_DEPLIBS)
 
 $(OUTPRE)kcpytkt.exe: $(OUTPRE)kcpytkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
 	link $(EXE_LINKOPTS) /out:$@ $**
+	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kcpytkt.o kcpytkt

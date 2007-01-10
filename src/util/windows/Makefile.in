@@ -4,6 +4,8 @@ all-windows:: $(OUTPRE)libecho.exe $(OUTPRE)getopt.lib
 
 $(OUTPRE)libecho.exe: $(OUTPRE)libecho.obj
 	link -out:$@ $** $(SCLIB)
+	$(_VC_MANIFEST_EMBED_EXE)
+	
 
 $(OUTPRE)getopt.lib: $(OUTPRE)getopt.obj $(OUTPRE)getopt_long.obj
 	lib -out:$@ $**
@@ -11,4 +13,4 @@ $(OUTPRE)getopt.lib: $(OUTPRE)getopt.obj $(OUTPRE)getopt_long.obj
 install-windows::
 
 clean-windows::
-	$(RM) $(OUTPRE)*.res $(OUTPRE)*.map $(OUTPRE)*.obj $(OUTPRE)*.exe
+	$(RM) $(OUTPRE)*.res $(OUTPRE)*.map $(OUTPRE)*.obj $(OUTPRE)*.exe $(OUTPRE)*.manifest

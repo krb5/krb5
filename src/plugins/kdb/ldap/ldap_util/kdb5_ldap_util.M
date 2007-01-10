@@ -25,12 +25,12 @@ This option is not recommended.
 Specifies the URI of the LDAP server.
 .SH COMMANDS
 .TP
-\fBcreate\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-s\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBcreate\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-k\fP\ \fImkeytype\fP] [\fB\-m\fP|\fB\-P\fP\ \fIpassword\fP|\fB\-sf\fP\ \fIstashfilename\fP] [\fB\-s\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP] [\fB\-admindn\fP\ \fIadmin_service_list\fP] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 Creates realm in directory. Options:
 .RS
 .TP
-\fB\-subtrees\fP\ \fIsubtree_dn_list\fP 
-Specifies the list of subtrees containing principals and other Kerberos objects of a realm. The list contains the DNs of the subtree
+\fB\-subtrees\fP\ \fIsubtree_dn_list\fP
+Specifies the list of subtrees containing the principals of a realm. The list contains the DNs of the subtree
 objects separated by colon(:).
 .TP
 \fB\-sscope\fP\ \fIsearch_scope\fP
@@ -207,10 +207,6 @@ service objects separated by colon(:).
 Specifies the list of Administration service objects serving the realm. The list contains the DNs
 of the Administration service objects separated by colon(:).
 .TP
-\fB\-pwddn\fP\ \fIpasswd_service_list\fP
-Specifies the list of Password service objects serving the realm. The list contains the DNs of the
-Password service objects separated by colon(:).
-.TP
 EXAMPLE:
 \fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu
 create -subtrees o=org -sscope SUB
@@ -226,14 +222,14 @@ Re-enter KDC database master key to verify:
 .RE
 
 .TP
-\fBmodify\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-pwddn\fP\ \fIpasswd_service_list\fP | [\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP] [\fB\-addpwddn\fP\ \fIpasswd_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
+\fBmodify\fP [\fB\-subtrees\fP\ \fIsubtree_dn_list\fP] [\fB\-sscope\fP\ \fIsearch_scope\fP] [\fB\-containerref\fP\ \fIcontainer_reference_dn\fP] [\fB\-r\fP\ \fIrealm\fP] [\fB\-kdcdn\fP\ \fIkdc_service_list\fP | [\fB\-clearkdcdn\fP\ \fIkdc_service_list\fP] [\fB\-addkdcdn\fP\ \fIkdc_service_list\fP]] [\fB\-admindn\fP\ \fIadmin_service_list\fP | [\fB\-clearadmindn\fP\ \fIadmin_service_list\fP] [\fB\-addadmindn\fP\ \fIadmin_service_list\fP]] [\fB\-maxtktlife\fP\ \fImax_ticket_life\fP] [\fB\-maxrenewlife\fP\ \fImax_renewable_ticket_life\fP] [\fIticket_flags\fP]
 
 Modifies the attributes of a realm. Options:
 .RS
 .TP
 \fB\-subtrees\fP\ \fIsubtree_dn_list\fP
-Specifies the list of subtrees containing principals and other Kerberos objects 
-in the realm.  The list contains the DNs of the subtree objects separated by 
+Specifies the list of subtrees containing the principals of a realm.
+The list contains the DNs of the subtree objects separated by 
 colon(:). This list replaces the existing list.
 .TP
 \fB\-sscope\fP\ \fIsearch_scope\fP
@@ -387,7 +383,7 @@ is used.
 .TP
 \fB\-kdcdn\fP\ \fIkdc_service_list\fP
 Specifies the list of KDC service objects serving the realm. The list contains the DNs of the KDC
-service objects separated by a colon (:).
+service objects separated by a colon (:). This list replaces the existing list.
 .TP
 \fB\-clearkdcdn\fP\ \fIkdc_service_list\fP
 Specifies the list of KDC service objects that need to be removed from the existing list. The list contains
@@ -399,7 +395,7 @@ DNs of the KDC service objects separated by a colon (:).
 .TP
 \fB\-admindn\fP\ \fIadmin_service_list\fP
 Specifies the list of Administration service objects serving the realm. The list contains the DNs
-of the Administration service objects separated by a colon (:).
+of the Administration service objects separated by a colon (:). This list replaces the existing list.
 .TP
 \fB\-clearadmindn\fP\ \fIadmin_service_list\fP
 Specifies the list of Administration service objects that need to be removed from the existing list. The list
@@ -408,18 +404,6 @@ contains the DNs of the Administration service objects separated by a colon (:).
 \fB\-addadmindn\fP\ \fIadmin_service_list\fP
 Specifies the list of Administration service objects that need to be added to the existing list. The list
 contains the DNs of the Administration service objects separated by a colon (:).
-.TP
-\fB\-pwddn\fP\ \fIpasswd_service_list\fP
-Specifies the list of Password service objects serving the realm. The list contains the DNs of the
-Password service objects separated by a colon (:).
-.TP
-\fB\-clearpwddn\fP\ \fIpasswd_service_list\fP
-Specifies the list of Password service objects that need to be removed from the existing list. The list
-contains the DNs of the Password service objects separated by a colon (:).
-.TP
-\fB\-addpwddn\fP\ \fIpasswd_service_list\fP
-Specifies the list of Password service objects that need to be added to the existing list. The list contains
-the DNs of the Password service objects separated by a colon (:).
 .TP
 EXAMPLE:
 \fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify 
@@ -486,14 +470,14 @@ EXAMPLE:
 \fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list\fP
 Password for "cn=admin,o=org":
 ATHENA.MIT.EDU
-MYREALM
+OPENLDAP.MIT.EDU
 MEDIA-LAB.MIT.EDU
 .fi
 .RE
 .TP
 \fBstashsrvpw\fP [\fB\-f\fP\ \fIfilename\fP] \fIservicedn\fP
-Allows an administrator to store the password for service object in a file so that KDC, Administration, and 
-Password server can use it to authenticate to the LDAP server. Options:
+Allows an administrator to store the password for service object in a file so that KDC and Administration
+server can use it to authenticate to the LDAP server. Options:
 .RS
 .TP
 \fB\-f\fP\ \fIfilename\fP
@@ -655,7 +639,7 @@ flag on principals in the database.
 Specifies the name of the ticket policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable newpolicy\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu create_policy -r ATHENA.MIT.EDU -maxtktlife "1 day" -maxrenewlife "1 week" -allow_postdated +needchange -allow_forwardable tktpolicy\fP
 .nf
 Password for "cn=admin,o=org":
 .fi
@@ -673,7 +657,7 @@ returned by
 is used.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify_policy -r ATHENA.MIT.EDU -maxtktlife "60 minutes" -maxrenewlife "10 hours" +allow_postdated -requires_preauth policy1\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu modify_policy -r ATHENA.MIT.EDU -maxtktlife "60 minutes" -maxrenewlife "10 hours" +allow_postdated -requires_preauth tktpolicy\fP
 .nf
 Password for "cn=admin,o=org":
 .fi
@@ -684,13 +668,13 @@ Displays the attributes of a ticket policy. Options:
 .RS
 .TP
 \fIpolicy_name\fP
-Specifies Distinguished name (DN) of the policy.
+Specifies the name of the ticket policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view_policy -r ATHENA.MIT.EDU policy1\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu view_policy -r ATHENA.MIT.EDU tktpolicy\fP
 .nf
 Password for "cn=admin,o=org":
-            Ticket policy: policy1
+            Ticket policy: tktpolicy
       Maximum ticket life: 0 days 01:00:00
    Maximum renewable life: 0 days 10:00:00
              Ticket flags: DISALLOW_FORWARDABLE REQUIRES_PWCHANGE
@@ -713,15 +697,15 @@ Forces the deletion of the policy object. If not specified, will be prompted for
 to confirm the deletion.
 .TP
 \fIpolicy_name\fP
-Specifies Distinguished name (DN) of the policy.
+Specifies the name of the ticket policy.
 .TP
 EXAMPLE:
-\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy_policy -r ATHENA.MIT.EDU policy1\fP
+\fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu destroy_policy -r ATHENA.MIT.EDU tktpolicy\fP
 .nf
 Password for "cn=admin,o=org":
-This will delete the policy object 'policy1', are you sure?
+This will delete the policy object 'tktpolicy', are you sure?
 (type 'yes' to confirm)? yes
-** policy object 'policy1' deleted.
+** policy object 'tktpolicy' deleted.
 .fi
 .RE
 .TP
@@ -739,9 +723,9 @@ EXAMPLE:
 \fBkdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU\fP
 .nf
 Password for "cn=admin,o=org":
-newpolicy
-policy1
-policy2
+tktpolicy
+tmppolicy
+userpolicy
 .fi
 .RE
 
@@ -749,7 +733,7 @@ policy2
 .B Commands Specific to eDirectory
 .TP
 \fBsetsrvpw\fP [\fB\-randpw\fP|\fB\-fileonly\fP] [\fB\-f\fP\ \fIfilename\fP] \fIservice_dn\fP
-Allows an administrator to set password for service objects such as KDC, Administration, and Password server in
+Allows an administrator to set password for service objects such as KDC and Administration server in
 eDirectory and store them in a file. The 
 .I -fileonly 
 option stores the password in a file and not in the eDirectory object. Options:
@@ -785,7 +769,7 @@ Re-enter password for "cn=service-kdc,o=org":
 .fi
 .RE
 .TP
-\fBcreate_service\fP {\fB\-kdc|\-admin|\-pwd\fP} [\fB\-servicehost\fP\ \fIservice_host_list\fP] [\fB\-realm\fP\ \fIrealm_list\fP] [\fB\-randpw|\-fileonly\fP] [\fB\-f\fP\ \fIfilename\fP] \fIservice_dn\fP
+\fBcreate_service\fP {\fB\-kdc|\-admin\fP} [\fB\-servicehost\fP\ \fIservice_host_list\fP] [\fB\-realm\fP\ \fIrealm_list\fP] [\fB\-randpw|\-fileonly\fP] [\fB\-f\fP\ \fIfilename\fP] \fIservice_dn\fP
 Creates a service in directory and assigns appropriate rights. Options:
 .RS
 .TP
@@ -795,9 +779,6 @@ Specifies the service is a KDC service
 \fB\-admin\fP
 Specifies the service is a Administration service
 .TP
-\fB\-pwd\fP
-Specifies the service is a Password service
-.TP
 \fB\-servicehost\fP\ \fIservice_host_list\fP
 Specifies the list of entries separated by a colon (:). Each entry consists of the hostname or IP
 address of the server hosting the service, transport protocol, and the port number of
@@ -806,22 +787,22 @@ For example,
 server1#tcp#88:server2#udp#89.
 .TP
 \fB\-realm\fP\ \fIrealm_list\fP
-Specifies the list of realms that can be serviced by Kerberos. The list contains the name of the realms
+Specifies the list of realms that are to be associated with this service. The list contains the name of the realms
 separated by a colon (:).
 .TP
 \fB\-randpw \fP
-Generates and sets a random password. This options can be specified to store the password both in eDirectory and a file. The 
+Generates and sets a random password. This option is used to set the random password for the service object in directory and also to store it in the file. The 
 .I -fileonly 
 option can not be used if 
 .I -randpw
-option is already specified.
+option is specified.
 .TP
 \fB\-fileonly\fP
 Stores the password only in a file and not in eDirectory. The 
 .I -randpw
 option can not be used when 
 .I -fileonly
-options is specified.
+option is specified.
 .TP
 \fB\-f\fP\ \fIfilename\fP
 Specifies the complete path of the file where the service object password is stashed.
@@ -859,8 +840,8 @@ server hosting the service, transport protocol, and port number of the service
 separated by a pound sign (#).
 .TP
 \fB\-realm\fP\ \fIrealm_list\fP
-Specifies the list of realms that are associated with this service. The list contains the name of
-the realms separated by a colon (:).
+Specifies the list of realms that are to be associated with this service. The list contains the name of
+the realms separated by a colon (:). This list replaces the existing list.
 .TP
 \fB\-clearrealm\fP\ \fIrealm_list\fP
 Specifies the list of realms to be removed from the existing list. The list contains the name of
@@ -930,7 +911,7 @@ Lists the name of services under a given base in directory. Options:
 .RS
 .TP
 \fB\-basedn\fP\ \fIbase_dn\fP
-Specifies the base DN for searching the policies, limiting the search to a particular subtree. If this option
+Specifies the base DN for searching the service objects, limiting the search to a particular subtree. If this option
 is not provided, LDAP Server specific search base will be used. 
 For eg, in the case of OpenLDAP, value of 
 .B defaultsearchbase

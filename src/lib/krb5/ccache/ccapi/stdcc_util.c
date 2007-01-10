@@ -20,9 +20,7 @@
 #define fieldSize 255
 
 #ifdef USE_CCAPI_V3
-/* krb5int_cc_credentials_release(cc_credentials_t creds)
- * - function used to release internally generated cc_credentials_t objects
- */
+
 
 static void 
 free_cc_array (cc_data **io_cc_array)
@@ -36,47 +34,6 @@ free_cc_array (cc_data **io_cc_array)
         }
         free (io_cc_array);
     }    
-}
-
-static cc_int32 
-krb5int_cc_credentials_release(cc_credentials_t creds) 
-{
-    if (creds) {
-        if (creds->data) {
-            if (creds->data->version == cc_credentials_v5 &&
-                creds->data->credentials.credentials_v5) {
-                cc_credentials_v5_t *cv5 = creds->data->credentials.credentials_v5;
-                
-                /* should use krb5_free_unparsed_name but we have no context */
-                if (cv5->client) { free (cv5->client); }
-                if (cv5->server) { free (cv5->server); }
-                
-                if (cv5->keyblock.data)      { free (cv5->keyblock.data); }
-                if (cv5->ticket.data)        { free (cv5->ticket.data); }
-                if (cv5->second_ticket.data) { free (cv5->second_ticket.data); }
-                
-                free_cc_array (cv5->addresses);
-                free_cc_array (cv5->authdata);
-                
-                free (cv5);
-                
-            } else if (creds->data->version == cc_credentials_v4 &&
-                       creds->data->credentials.credentials_v4) {
-                free (creds->data->credentials.credentials_v4);
-            }
-            free ((cc_credentials_union *) creds->data);
-        }
-        free(creds);
-    }
-    
-    return ccNoError;
-}
-
-static cc_int32 
-krb5int_cc_credentials_compare(cc_credentials_t creds,
-			       cc_credentials_t compare_to,
-			       cc_uint32* equal) {
-    return ccErrNotImplemented;
 }
 
 static krb5_error_code 
@@ -282,12 +239,11 @@ copy_authdata_to_cc_array (krb5_context in_context,
  */
 
 krb5_error_code 
-copy_cc_credentials_to_krb5_creds (krb5_context in_context, 
-                                   cc_credentials_t in_credentials, 
-                                   krb5_creds *out_creds)
+copy_cc_cred_union_to_krb5_creds (krb5_context in_context, 
+                                  const cc_credentials_union *in_cred_union, 
+                                  krb5_creds *out_creds)
 {
     krb5_error_code err = 0;
-    const cc_credentials_union *cred_union = in_credentials->data;
     cc_credentials_v5_t *cv5 = NULL;
     krb5_int32 offset_seconds = 0, offset_microseconds = 0;
     krb5_principal client = NULL;
@@ -298,10 +254,10 @@ copy_cc_credentials_to_krb5_creds (krb5_context in_context,
     krb5_address **addresses = NULL;
     krb5_authdata **authdata = NULL;
     
-    if (cred_union->version != cc_credentials_v5) { 
+    if (in_cred_union->version != cc_credentials_v5) { 
 	err = KRB5_CC_NOT_KTYPE;
     } else {
-        cv5 = cred_union->credentials.credentials_v5;
+        cv5 = in_cred_union->credentials.credentials_v5;
     }
     
 #if TARGET_OS_MAC
@@ -409,14 +365,12 @@ copy_cc_credentials_to_krb5_creds (krb5_context in_context,
  * - analagous to above but in the reverse direction
  */
 krb5_error_code
-copy_krb5_creds_to_cc_credentials (krb5_context in_context, 
-                                   krb5_creds *in_creds, 
-                                   cc_credentials_t *out_credentials)
+copy_krb5_creds_to_cc_cred_union (krb5_context in_context, 
+                                  krb5_creds *in_creds, 
+                                  cc_credentials_union **out_cred_union)
 {
     krb5_error_code err = 0;
-    cc_credentials_t credentials = NULL;
     cc_credentials_union *cred_union = NULL;
-    cc_credentials_f    *functions = NULL;
     cc_credentials_v5_t *cv5 = NULL;
     char *client = NULL;
     char *server = NULL;
@@ -427,23 +381,13 @@ copy_krb5_creds_to_cc_credentials (krb5_context in_context,
     cc_data **cc_address_array = NULL;
     cc_data **cc_authdata_array = NULL;
     
-    if (out_credentials == NULL) { err = KRB5_CC_NOMEM; }
+    if (out_cred_union == NULL) { err = KRB5_CC_NOMEM; }
     
 #if TARGET_OS_MAC
     if (!err) {
         err = krb5_get_time_offsets (in_context, &offset_seconds, &offset_microseconds);
     }
 #endif
-    
-    if (!err) {
-        credentials = (cc_credentials_t) malloc (sizeof (*credentials));
-        if (!credentials) { err = KRB5_CC_NOMEM; }
-    }
-    
-    if (!err) {
-        functions = (cc_credentials_f *) malloc (sizeof (*functions));
-        if (!functions) { err = KRB5_CC_NOMEM; }
-    }
     
     if (!err) {
         cred_union = (cc_credentials_union *) malloc (sizeof (*cred_union));
@@ -534,19 +478,8 @@ copy_krb5_creds_to_cc_credentials (krb5_context in_context,
         cred_union->credentials.credentials_v5 = cv5;
         cv5 = NULL;
         
-        credentials->data = cred_union;
+        *out_cred_union = cred_union;
         cred_union = NULL;
-        
-        functions->release = krb5int_cc_credentials_release;
-        functions->compare = krb5int_cc_credentials_compare;
-        credentials->functions = functions;
-        functions = NULL;
-#ifdef TARGET_OS_MAC
-        credentials->otherFunctions = NULL;
-#endif
-        
-        *out_credentials = credentials;
-        credentials = NULL;
     }
     
     if (cc_address_array)   { free_cc_array (cc_address_array); }
@@ -558,11 +491,41 @@ copy_krb5_creds_to_cc_credentials (krb5_context in_context,
     if (server)             { krb5_free_unparsed_name (in_context, server); }
     if (cv5)                { free (cv5); }
     if (cred_union)         { free (cred_union); }
-    if (functions)          { free (functions); } 
-    if (credentials)        { free (credentials); }
     
     return err;
 }
+
+krb5_error_code 
+cred_union_release (cc_credentials_union *in_cred_union) 
+{
+    if (in_cred_union) {
+        if (in_cred_union->version == cc_credentials_v5 &&
+            in_cred_union->credentials.credentials_v5) {
+            cc_credentials_v5_t *cv5 = in_cred_union->credentials.credentials_v5;
+            
+            /* should use krb5_free_unparsed_name but we have no context */
+            if (cv5->client) { free (cv5->client); }
+            if (cv5->server) { free (cv5->server); }
+            
+            if (cv5->keyblock.data)      { free (cv5->keyblock.data); }
+            if (cv5->ticket.data)        { free (cv5->ticket.data); }
+            if (cv5->second_ticket.data) { free (cv5->second_ticket.data); }
+            
+            free_cc_array (cv5->addresses);
+            free_cc_array (cv5->authdata);
+            
+            free (cv5);
+            
+        } else if (in_cred_union->version == cc_credentials_v4 &&
+                   in_cred_union->credentials.credentials_v4) {
+            free (in_cred_union->credentials.credentials_v4);
+        }
+        free ((cc_credentials_union *) in_cred_union);
+    }
+    
+    return 0;
+}
+
 #else /* !USE_CCAPI_V3 */
 /*
  * CopyCCDataArrayToK5

@@ -142,17 +142,20 @@ gss_OID_set *mechSet;
 	int i, j;
 	gss_OID curItem;
 
-	if (!minorStatus)
+	/* Initialize outputs. */
+
+	if (minorStatus != NULL)
+		*minorStatus = 0;
+
+	if (mechSet != NULL)
+		*mechSet = GSS_C_NO_OID_SET;
+
+	/* Validate arguments. */
+	if (minorStatus == NULL || mechSet == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
 	if (gssint_initialize_library())
 		return GSS_S_FAILURE;
-
-	*minorStatus = 0;
-
-
-	/* check output parameter */
-	if (mechSet == NULL)
-		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	if (build_mechSet())
 		return GSS_S_FAILURE;

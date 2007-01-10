@@ -1466,20 +1466,7 @@ asn1_error_code asn1_decode_pk_authenticator_draft9(asn1buf *buf, krb5_pk_authen
     cleanup();
 }
 
-#if 0
-asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *val)
-{
-    setup();
-    { begin_structure();
-      fprintf(stderr, "tagnum=%d tagexpect=%d\n", tagnum, 0);
-      get_field(val->algorithm, 16, asn1_decode_algorithm_identifier);
-      get_lenfield(val->subjectPublicKey.length, val->subjectPublicKey.data, 3, asn1_decode_octetstring);
-      end_structure();
-    }
-    cleanup();
-}
-#endif
-asn1_error_code asn1_decode_alg_identifier(asn1buf *buf,  krb5_algorithm_identifier *val) {
+asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf,  krb5_algorithm_identifier *val) {
 
   setup();
   { begin_structure_no_tag();
@@ -1491,7 +1478,7 @@ asn1_error_code asn1_decode_alg_identifier(asn1buf *buf,  krb5_algorithm_identif
     val->parameters.data = NULL;
 
     if(length > subbuf.next - subbuf.base) {
-      int size = length - (subbuf.next - subbuf.base);
+      unsigned int size = length - (subbuf.next - subbuf.base);
       retval = asn1buf_remove_octetstring(&subbuf, size, 
 					  &val->parameters.data);
       if(retval) return retval;
@@ -1516,7 +1503,7 @@ asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *
 	  && (tagnum || taglen || asn1class != UNIVERSAL))
 	return ASN1_BAD_ID;
 #endif
-      retval = asn1_decode_alg_identifier(&subbuf, &val->algorithm);
+      retval = asn1_decode_algorithm_identifier(&subbuf, &val->algorithm);
       if (retval) return retval;
 
 #if 0
@@ -1541,17 +1528,6 @@ asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *
 }
 
 
-asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf, krb5_algorithm_identifier *val)
-{
-    setup();
-    { begin_structure_no_tag();
-      get_lenfield(val->algorithm.length, val->algorithm.data, 0, asn1_decode_oid);
-      opt_lenfield(val->parameters.length, val->parameters.data, 1, asn1_decode_octetstring);
-      end_structure();
-    }
-    cleanup();
-}
-
 asn1_error_code asn1_decode_AlgorithmIdentifier(asn1buf *buf,  krb5_algorithm_identifier *val) {
 
   setup();
@@ -1564,7 +1540,7 @@ asn1_error_code asn1_decode_AlgorithmIdentifier(asn1buf *buf,  krb5_algorithm_id
     val->parameters.data = NULL;
 
     if(length > subbuf.next - subbuf.base) {
-      int size = length - (subbuf.next - subbuf.base);
+      unsigned int size = length - (subbuf.next - subbuf.base);
       retval = asn1buf_remove_octetstring(&subbuf, size, 
 					  &val->parameters.data);
       if(retval) return retval;
@@ -1775,11 +1751,7 @@ asn1_error_code asn1_decode_pa_pk_as_rep_draft9(asn1buf *buf, krb5_pa_pk_as_rep_
 
 asn1_error_code asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_typed_data ***val)
 {
-  setup();
-  { 
     decode_array_body(krb5_typed_data,asn1_decode_typed_data);
-  }
-  cleanup();
 }
 
 asn1_error_code asn1_decode_typed_data(asn1buf *buf, krb5_typed_data *val) 

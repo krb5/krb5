@@ -498,7 +498,9 @@ krb5_os_free_context(krb5_context ctx)
 		krb5_free_preauth_context(ctx);
 		ctx->preauth_context = NULL;
 	}
+#ifndef VALGRIND_DEBUG
 	krb5int_close_plugin_dirs (&ctx->preauth_plugins);
+#endif
 	krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32

@@ -436,7 +436,7 @@ krb5_stdccv3_store (krb5_context context, krb5_ccache id, krb5_creds *creds )
 {
     krb5_error_code err = 0;
     stdccCacheDataPtr ccapi_data = id->data;
-    cc_credentials_t credentials = NULL;
+    cc_credentials_union *cred_union = NULL;
     
     if (!err) {
         err = stdccv3_setup (context, ccapi_data);
@@ -444,19 +444,18 @@ krb5_stdccv3_store (krb5_context context, krb5_ccache id, krb5_creds *creds )
     
     if (!err) {
         /* copy the fields from the almost identical structures */
-        err = copy_krb5_creds_to_cc_credentials (context, creds, &credentials);
+        err = copy_krb5_creds_to_cc_cred_union (context, creds, &cred_union);
     }
     
     if (!err) {
-        err = cc_ccache_store_credentials (ccapi_data->NamedCache, 
-                                           credentials->data);
+        err = cc_ccache_store_credentials (ccapi_data->NamedCache, cred_union);
     }
     
     if (!err) {
         cache_changed();
     }
     
-    if (credentials) { cc_credentials_release (credentials); }
+    if (cred_union) { cred_union_release (cred_union); }
     
     return cc_err_xlate (err);
 }
@@ -519,7 +518,7 @@ krb5_stdccv3_next_cred (krb5_context context,
         err = cc_credentials_iterator_next (iterator, &credentials);
 
         if (!err && (credentials->data->version == cc_credentials_v5)) {
-            copy_cc_credentials_to_krb5_creds(context, credentials, creds);
+            copy_cc_cred_union_to_krb5_creds(context, credentials->data, creds);
             break;
         }
     }
@@ -742,36 +741,57 @@ krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_remove (krb5_context context, 
                      krb5_ccache id,
                      krb5_flags flags, 
-                     krb5_creds *creds)
+                     krb5_creds *in_creds)
 {
     krb5_error_code err = 0;
     stdccCacheDataPtr ccapi_data = id->data;
-    cc_credentials_t credentials = NULL;
+    cc_credentials_iterator_t iterator = NULL;
+    int found = 0;
     
     if (!err) {
         err = stdccv3_setup(context, ccapi_data);
     }
     
-    if (!err) {
-        err = copy_krb5_creds_to_cc_credentials (context, creds, &credentials);
-    }
     
     if (!err) {
-        err = cc_ccache_remove_credentials (ccapi_data->NamedCache, credentials);
+        err = cc_ccache_new_credentials_iterator(ccapi_data->NamedCache,
+                                                 &iterator);
     }
-    
+
+    /* Note: CCAPI v3 ccaches can contain both v4 and v5 creds */
+    while (!err && !found) {
+        cc_credentials_t credentials = NULL;
+        
+        err = cc_credentials_iterator_next (iterator, &credentials);
+        
+        if (!err && (credentials->data->version == cc_credentials_v5)) {
+            krb5_creds creds;
+            
+            err = copy_cc_cred_union_to_krb5_creds(context, 
+                                                   credentials->data, &creds);
+
+            if (!err) {
+                found = krb5_creds_compare (context, in_creds, &creds);
+                krb5_free_cred_contents (context, &creds);
+            }
+            
+            if (!err && found) {
+                err = cc_ccache_remove_credentials (ccapi_data->NamedCache, credentials);
+            }
+        }
+        
+        if (credentials) { cc_credentials_release (credentials); }
+    }
+    if (err == ccIteratorEnd) { err = ccErrCredentialsNotFound; }    
+
     if (!err) {
         cache_changed ();
-    } else if (err == KRB5_FCC_NOFILE) {
-        err = 0;
     }
-    
-    if (credentials) { cc_credentials_release (credentials); }
     
     return cc_err_xlate (err);
 }
 
-static krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_ptcursor_new(krb5_context context,
                           krb5_cc_ptcursor *cursor)
 {
@@ -809,7 +829,7 @@ krb5_stdccv3_ptcursor_new(krb5_context context,
 	return err;
 }
 
-static krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_ptcursor_next(
     krb5_context context,
     krb5_cc_ptcursor cursor,
@@ -885,7 +905,7 @@ krb5_stdccv3_ptcursor_next(
 	return err;
 }
 
-static krb5_error_code KRB5_CALLCONV
+krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_ptcursor_free(
     krb5_context context,
     krb5_cc_ptcursor *cursor)

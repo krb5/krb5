@@ -9,6 +9,8 @@ STLIBOBJS=	bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o \
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
 		-I$(srcdir)/../db
 
+AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
+
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@

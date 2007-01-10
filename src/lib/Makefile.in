@@ -101,6 +101,7 @@ clean-windows::
 ##WIN32##$(SLIB): $(SDEF) $(SLIBS) $(SGLUE) $(SRES)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(SDEF) -out:$*.dll \
 ##WIN32##	  $(SLIBS) $(SGLUE) $(SRES) $(WINLIBS) $(SCLIB)
+##WIN32##        $(_VC_MANIFEST_EMBED_DLL)
 ##WIN32##$(SDEF): ..\util\support\libkrb5support.exports
 ##WIN32##	echo EXPORTS > $(SDEF).new
 ##WIN32##	type ..\util\support\libkrb5support.exports >> $(SDEF).new
@@ -110,22 +111,27 @@ clean-windows::
 ##WIN32##$(CLIB): $(CDEF) $(CLIBS) $(CGLUE) $(CRES) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(CDEF) -out:$*.dll \
 ##WIN32##	  $(CLIBS) $(CGLUE) $(CRES) $(SLIB) $(WINLIBS) $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 
 ##WIN32##$(PLIB): $(PDEF) $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(PDEF) -out:$*.dll \
 ##WIN32##	  $(PLIBS) $(PGLUE) $(PRES) $(CLIB) $(SLIB) $(WINLIBS)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 
 ##WIN32##$(KLIB): $(KDEF) $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(KDEF) -out:$*.dll \
 ##WIN32##	  $(KLIBS) $(KGLUE) $(KRES) $(CLIB) $(SLIB) $(MITLIBS) $(DNSLIBS) $(WINLIBS) $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 
 ##WIN32##$(GLIB): $(GDEF) $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(SLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(GDEF) -out:$*.dll \
 ##WIN32##	  $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(SLIB) $(WINLIBS) $(SCLIB)
+##WIN32##		$(_VC_MANIFEST_EMBED_DLL)
 
 ##WIN32##$(K4LIB): $(K4DEF) $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(K4DEF) -out:$*.dll \
 ##WIN32##	  $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS) $(SCLIB)
+##WIN32##  	$(_VC_MANIFEST_EMBED_DLL)
 
 ##WIN32##$(K5_GLUE): win_glue.c
 ##WIN32##	$(CC) $(ALL_CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**

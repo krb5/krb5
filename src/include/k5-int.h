@@ -1075,6 +1075,9 @@ krb5int_gic_opt_to_opte(krb5_context context,
 krb5_error_code
 krb5int_copy_data_contents (krb5_context, const krb5_data *, krb5_data *);
 
+krb5_error_code
+krb5int_copy_creds_contents (krb5_context, const krb5_creds *, krb5_creds *);
+
 typedef krb5_error_code (*krb5_gic_get_as_key_fct)
     (krb5_context,
 		     krb5_principal,
@@ -1791,6 +1794,11 @@ krb5_error_code KRB5_CALLCONV krb5int_cc_default
 krb5_error_code KRB5_CALLCONV krb5_cc_retrieve_cred_default
 	(krb5_context, krb5_ccache, krb5_flags,
 			krb5_creds *, krb5_creds *);
+
+krb5_boolean KRB5_CALLCONV
+krb5_creds_compare (krb5_context in_context,
+                    krb5_creds *in_creds,
+                    krb5_creds *in_compare_creds);
 
 void krb5int_set_prompt_types
 	(krb5_context, krb5_prompt_type *);

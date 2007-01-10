@@ -144,6 +144,13 @@ SCLIB=
 DEBUGOPT=/ZI
 !endif
 
+#if the compiler is vstudio 8, generate manifest
+!if exists("$(VCINSTALLDIR)\..\..\MICROSOFT VISUAL STUDIO 8")
+CCLINKOPTION = $(CCLINKOPTION) /MANIFEST
+_VC_MANIFEST_EMBED_EXE = if exist $*.exe.manifest mt.exe -manifest $*.exe.manifest -outputresource:$*.exe;1
+_VC_MANIFEST_EMBED_DLL = if exist $*.dll.manifest mt.exe -manifest $*.dll.manifest -outputresource:$*.dll;2
+!endif 
+
 # /ZI gives better debug info in each object file (MSVC 6.0 or higher).
 # /Zi gives debug info in each object file.
 # /Gs Avoid stack probes (they don't seem to work anyway)

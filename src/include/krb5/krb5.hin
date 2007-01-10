@@ -273,7 +273,7 @@ typedef const krb5_principal_data *krb5_const_principal;
 /*
  * Referral-specific functions.
  */
-krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(krb5_data *);
+krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *);
 
 /*
  * end "base-defs.h"
@@ -926,6 +926,10 @@ krb5_error_code krb5_decrypt_data
 #define	KRB5_ALTAUTH_ATT_CHALLENGE_RESPONSE	64
 
 /* authorization data types */
+#define KRB5_AUTHDATA_IF_RELEVANT   1
+#define KRB5_AUTHDATA_KDC_ISSUED    4
+#define KRB5_AUTHDATA_AND_OR	    5
+#define KRB5_AUTHDATA_MANDATORY_FOR_KDC	8
 #define	KRB5_AUTHDATA_OSF_DCE	64
 #define KRB5_AUTHDATA_SESAME	65
 
@@ -2435,7 +2439,7 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST	0x0020
 #define KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST	0x0040
 #define KRB5_GET_INIT_CREDS_OPT_SALT		0x0080
-
+#define KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT	0x0100
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_alloc
@@ -2493,6 +2497,10 @@ krb5_get_init_creds_opt_set_salt
 (krb5_get_init_creds_opt *opt,
 		krb5_data *salt);
 
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_change_password_prompt
+(krb5_get_init_creds_opt *opt,
+		int prompt);
 
 /* Generic preauth option attribute/value pairs */
 typedef struct _krb5_gic_opt_pa_data {

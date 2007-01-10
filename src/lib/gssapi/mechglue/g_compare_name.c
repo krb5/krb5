@@ -33,6 +33,31 @@
 #endif
 #include <string.h>
 
+static OM_uint32
+val_comp_name_args(
+    OM_uint32 *minor_status,
+    gss_name_t name1,
+    gss_name_t name2,
+    int *name_equal)
+{
+
+    /* Initialize outputs. */
+
+    if (minor_status != NULL)
+	*minor_status = 0;
+
+    /* Validate arguments. */
+
+    if (name1 == GSS_C_NO_NAME || name2 == GSS_C_NO_NAME)
+	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+
+    if (name_equal == NULL)
+	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+    return (GSS_S_COMPLETE);
+}
+
+
 OM_uint32 KRB5_CALLCONV
 gss_compare_name (minor_status,
                   name1,
@@ -50,15 +75,10 @@ int *			name_equal;
     gss_mechanism	mech;
     gss_name_t		internal_name;
     
-    if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
-    *minor_status = 0;
-
-    if (name1 == 0 || name2 == 0)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
-
-    if (name_equal == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+    major_status = val_comp_name_args(minor_status,
+				      name1, name2, name_equal);
+    if (major_status != GSS_S_COMPLETE)
+	return (major_status);
 
     union_name1 = (gss_union_name_t) name1;
     union_name2 = (gss_union_name_t) name2;

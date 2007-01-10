@@ -87,8 +87,8 @@ $(TOPLIBD)/$(LIBBASE)$(SHLIBEXT): $(LIBBASE)$(SHLIBEXT)
 all-libs: $(LIBBASE)$(DYNOBJEXT) # $(LIBLIST)
 
 clean-libs:
-	$(RM) $(LIBBASE)$(SHLIBEXT)
-	$(RM) binutils.versions osf1.exports
+	$(RM) $(LIBBASE)$(DYNOBJEXT)
+	$(RM) binutils.versions osf1.exports darwin.exports hpux10.exports
 
 install-libs: $(LIBINSTLIST)
 install-shared:

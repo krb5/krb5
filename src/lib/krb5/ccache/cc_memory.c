@@ -93,11 +93,13 @@ extern krb5_error_code krb5_change_cache (void);
 
 #define KRB5_OK 0
 
+/* Individual credentials within a cache, in a linked list.  */
 typedef struct _krb5_mcc_link {
     struct _krb5_mcc_link *next;
     krb5_creds *creds;
 } krb5_mcc_link, *krb5_mcc_cursor;
 
+/* Per-cache data header.  */
 typedef struct _krb5_mcc_data {
     char *name;
     k5_mutex_t lock;
@@ -105,11 +107,13 @@ typedef struct _krb5_mcc_data {
     krb5_mcc_cursor link;
 } krb5_mcc_data;
 
+/* List of memory caches.  */
 typedef struct krb5_mcc_list_node {
     struct krb5_mcc_list_node *next;
     krb5_mcc_data *cache;
 } krb5_mcc_list_node;
 
+/* Iterator over memory caches.  */
 struct krb5_mcc_ptcursor_data {
     struct krb5_mcc_list_node *cur;
 };
@@ -329,7 +333,6 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
 {
      krb5_mcc_cursor mcursor;
      krb5_error_code retval;
-     krb5_data *scratch;
 
      /* Once the node in the linked list is created, it's never
 	modified, so we don't need to worry about locking here.  (Note
@@ -339,53 +342,12 @@ krb5_mcc_next_cred(krb5_context context, krb5_ccache id,
 	return KRB5_CC_END;
      memset(creds, 0, sizeof(krb5_creds));     
      if (mcursor->creds) {
-	*creds = *mcursor->creds;
-	retval = krb5_copy_principal(context, mcursor->creds->client, &creds->client);
-	if (retval)
-		return retval;
-	retval = krb5_copy_principal(context, mcursor->creds->server,
-		&creds->server);
-	if (retval)
-		goto cleanclient;
-	retval = krb5_copy_keyblock_contents(context, &mcursor->creds->keyblock,
-		&creds->keyblock);
-	if (retval)
-		goto cleanserver;
-	retval = krb5_copy_addresses(context, mcursor->creds->addresses,
-		&creds->addresses);
-	if (retval)
-		goto cleanblock;
-	retval = krb5_copy_data(context, &mcursor->creds->ticket, &scratch);
-	if (retval)
-		goto cleanaddrs;
-	creds->ticket = *scratch;
-	krb5_xfree(scratch);
-	retval = krb5_copy_data(context, &mcursor->creds->second_ticket, &scratch);
-	if (retval)
-		goto cleanticket;
-	creds->second_ticket = *scratch;
-	krb5_xfree(scratch);
-	retval = krb5_copy_authdata(context, mcursor->creds->authdata,
-		&creds->authdata);
-	if (retval)
-		goto clearticket;
+	 retval = krb5int_copy_creds_contents(context, mcursor->creds, creds);
+	 if (retval)
+	     return retval;
      }
      *cursor = (krb5_cc_cursor)mcursor->next;
      return KRB5_OK;
-
-clearticket:
-	memset(creds->ticket.data,0, (unsigned) creds->ticket.length);
-cleanticket:
-	krb5_xfree(creds->ticket.data);
-cleanaddrs:
-	krb5_free_addresses(context, creds->addresses);
-cleanblock:
-	krb5_xfree(creds->keyblock.contents);
-cleanserver:
-	krb5_free_principal(context, creds->server);
-cleanclient:
-	krb5_free_principal(context, creds->client);
-	return retval;
 }
 
 /*

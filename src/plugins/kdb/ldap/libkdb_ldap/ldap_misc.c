@@ -45,6 +45,10 @@
 extern char *strptime (const char *, const char *, struct tm *);
 #endif
 
+static krb5_error_code
+remove_overlapping_subtrees(char **listin, char **listop, int *subtcount,
+			    int sscope);
+
 /* Linux (GNU Libc) provides a length-limited variant of strdup.
    But all the world's not Linux.  */
 #undef strndup
@@ -418,7 +422,7 @@ is_principal_in_realm(ldap_context, searchfor)
     krb5_ldap_context          *ldap_context;
     krb5_const_principal       searchfor;
 {
-    int                         defrealmlen=0;
+    size_t                      defrealmlen=0;
     char                        *defrealm=NULL;
 
 #define FIND_MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -569,7 +573,7 @@ store_tl_data(tl_data, tl_type, value)
     void                        *value;
 {
     unsigned int                currlen=0, tldatalen=0;
-    char                        *curr=NULL;
+    unsigned char               *curr=NULL;
     void                        *reallocptr=NULL;
 
     tl_data->tl_data_type = KDB_TL_USER_INFO;
@@ -592,7 +596,7 @@ store_tl_data(tl_data, tl_type, value)
 		free (reallocptr);
 	    return ENOMEM;
 	}
-	curr = (char *) (tl_data->tl_data_contents + currlen);
+	curr = (tl_data->tl_data_contents + currlen);
 
 	/* store the tl_type value */
 	memset(curr, tl_type, 1);
@@ -623,7 +627,7 @@ store_tl_data(tl_data, tl_type, value)
 		free (reallocptr);
 	    return ENOMEM;
 	}
-	curr = (char *) (tl_data->tl_data_contents + currlen);
+	curr = (tl_data->tl_data_contents + currlen);
 
 	/* store the tl_type value */
 	memset(curr, tl_type, 1);
@@ -1609,8 +1613,8 @@ krb5_error_code
 krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
 			       int *count, LDAP *ld)
 {
-    int                         i, st = 0, tempst = 0, gothandle = 0;
-    unsigned int		ntrees;
+    int                         st = 0, tempst = 0, gothandle = 0;
+    unsigned int		i, ntrees;
     char                        *refcntattr[2];
     char                        *filter = NULL;
     char                        **subtree = NULL, *ptr = NULL;
@@ -1634,7 +1638,7 @@ krb5_ldap_get_reference_count (krb5_context context, char *dn, char *refattr,
     refcntattr [0] = refattr;
     refcntattr [1] = NULL;
 
-    ptr = ldap_filter_correct (dn, strlen (dn));
+    ptr = ldap_filter_correct (dn);
     if (ptr == NULL) {
 	st = ENOMEM;
 	goto cleanup;
@@ -1809,7 +1813,7 @@ krb5_error_code krb5_ldap_name_to_policydn (context, name, policy_dn)
     }
     len = strlen (ldap_context->lrparams->realmdn);
 
-    ptr = ldap_filter_correct (name, strlen (name));
+    ptr = ldap_filter_correct (name);
     if (ptr == NULL) {
 	st = ENOMEM;
 	goto cleanup;
@@ -1833,7 +1837,7 @@ cleanup:
 }
 
 /* remove overlapping and repeated subtree entries from the list of subtrees */
-krb5_error_code
+static krb5_error_code
 remove_overlapping_subtrees(char **listin, char **listop, int *subtcount, int sscope)
 {
     int     slen=0, k=0, j=0, lendiff=0;

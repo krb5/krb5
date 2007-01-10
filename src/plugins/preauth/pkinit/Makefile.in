@@ -30,14 +30,18 @@ SRCS= \
 	$(srcdir)/pkinit_accessor.c \
 	$(srcdir)/pkinit_srv.c \
 	$(srcdir)/pkinit_lib.c \
-	$(srcdir)/pkinit_clnt.c
+	$(srcdir)/pkinit_clnt.c \
+	$(srcdir)/pkinit_profile.c \
+	$(srcdir)/pkinit_crypto_openssl.c
 
 STOBJLISTS=OBJS.ST
 STLIBOBJS= \
 	pkinit_accessor.o \
 	pkinit_srv.o \
 	pkinit_lib.o \
-	pkinit_clnt.o
+	pkinit_clnt.o \
+	pkinit_profile.o \
+	pkinit_crypto_openssl.o
 
 all-unix:: $(LIBBASE)$(SO_EXT)
 install-unix:: install-libs
@@ -54,14 +58,39 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
+pkinit_accessor.so pkinit_accessor.po $(OUTPRE)pkinit_accessor.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h pkinit_accessor.c
 pkinit_srv.so pkinit_srv.po $(OUTPRE)pkinit_srv.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  pkinit.h pkinit_srv.c
+  pkinit.h pkinit_accessor.h pkinit_srv.c
 pkinit_lib.so pkinit_lib.po $(OUTPRE)pkinit_lib.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h \
-  $(SRCTOP)/include/krb5/preauth_plugin.h pkinit.h pkinit_lib.c
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  pkinit.h pkinit_accessor.h pkinit_lib.c
 pkinit_clnt.so pkinit_clnt.po $(OUTPRE)pkinit_clnt.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  pkinit.h pkinit_clnt.c
+  pkinit.h pkinit_accessor.h pkinit_clnt.c
+pkinit_profile.so pkinit_profile.po $(OUTPRE)pkinit_profile.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h pkinit.h pkinit_accessor.h \
+  pkinit_profile.c
+pkinit_crypto_openssl.so pkinit_crypto_openssl.po $(OUTPRE)pkinit_crypto_openssl.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  pkinit.h pkinit_accessor.h pkinit_crypto_openssl.c \
+  pkinit_crypto_openssl.h

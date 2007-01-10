@@ -38,10 +38,30 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
 {
     krb5_creds *tempcred;
     krb5_error_code retval;
-    krb5_data *scratch;
 
     if (!(tempcred = (krb5_creds *)malloc(sizeof(*tempcred))))
 	return ENOMEM;
+
+    retval = krb5int_copy_creds_contents(context, incred, tempcred);
+    if (retval)
+	free(tempcred);
+    else
+	*outcred = tempcred;
+    return retval;
+}
+
+/*
+ * Copy contents of input credentials structure to supplied
+ * destination, allocating storage for indirect fields as needed.  On
+ * success, the output is a deep copy of the input.  On error, the
+ * output structure is garbage and its contents should be ignored.
+ */
+krb5_error_code
+krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
+			    krb5_creds *tempcred)
+{
+    krb5_error_code retval;
+    krb5_data *scratch;
 
     *tempcred = *incred;
     retval = krb5_copy_principal(context, incred->client, &tempcred->client);
@@ -73,7 +93,6 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
     if (retval)
         goto clearticket;
 
-    *outcred = tempcred;
     return 0;
 
  clearticket:    

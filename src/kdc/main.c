@@ -744,7 +744,9 @@ int main(int argc, char **argv)
 	errout++;
     }
     krb5_klog_syslog(LOG_INFO, "shutting down");
+#ifndef VALGRIND_DEBUG
     unload_preauth_plugins(kcontext);
+#endif
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
     if (kdc_realmlist) 

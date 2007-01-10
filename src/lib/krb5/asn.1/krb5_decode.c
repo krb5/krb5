@@ -1028,9 +1028,20 @@ krb5_error_code decode_krb5_reply_key_pack(const krb5_data *code, krb5_reply_key
   alloc_field(*rep, krb5_reply_key_pack);
 
   retval = asn1_decode_reply_key_pack(&buf, *rep);
-  if (retval) clean_return(retval);
+  if (retval)
+    goto error_out;
 
-  cleanup(free);
+  cleanup_manual();
+error_out:
+  if (rep && *rep) {
+    if ((*rep)->replyKey.contents)
+	free((*rep)->replyKey.contents);
+    if ((*rep)->asChecksum.contents)
+      free((*rep)->asChecksum.contents);
+    free(*rep);
+    *rep = NULL;
+  }
+  return retval;
 }
 
 krb5_error_code decode_krb5_reply_key_pack_draft9(const krb5_data *code, krb5_reply_key_pack_draft9 **rep)
