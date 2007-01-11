@@ -134,6 +134,7 @@ pa_pkinit_gen_req(krb5_context context,
     cksum.contents = NULL;
     reqctx->pa_type = in_padata->pa_type;
 
+    pkiDebug("option included = %d till=%d\n", request->kdc_options, request->till);
     /* If we don't have a client, we're done */
     if (request->client == NULL) {
 	pkiDebug("No request->client; aborting PKINIT\n");
@@ -372,7 +373,7 @@ pkinit_as_req_create(krb5_context context,
 		goto cleanup;
 	    }
 	    retval = cms_signeddata_create(context, plgctx->cryptoctx,
-		reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 0,
+		reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
 		coded_auth_pack->data, coded_auth_pack->length,
 		&req->signedAuthPack.data, &req->signedAuthPack.length);
 #if 0	/* VISTA HACK */

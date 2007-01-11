@@ -163,6 +163,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
     krb5_authdata **my_authz_data = NULL;
+    krb5_kdc_req *tmp_as_req = NULL;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
 
@@ -294,8 +295,19 @@ pkinit_server_verify_padata(krb5_context context,
 		    goto cleanup;
 		}
 	    }
-	    /* check the checksum */
-	    retval = encode_krb5_kdc_req_body(request, &der_req);
+	    /*
+	     * The KDC may have modified the request after decoding it.
+	     * We need to compute the checksum on the data that
+	     * came from the client.  Therefore, we use the original
+	     * packet contents.
+	     */
+	    retval = decode_krb5_as_req(req_pkt, &tmp_as_req); 
+	    if (retval) {
+		pkiDebug("decode_krb5_as_req returned %d\n", (int)retval);
+		goto cleanup;
+	    }
+		
+	    retval = encode_krb5_kdc_req_body(tmp_as_req, &der_req);
 	    if (retval) {
 		pkiDebug("encode_krb5_kdc_req_body returned %d\n", (int) retval);
 		goto cleanup;
@@ -419,7 +431,8 @@ pkinit_server_verify_padata(krb5_context context,
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    free_krb5_pa_pk_as_req_draft9(&reqp9);
     }
-
+    if (tmp_as_req != NULL)
+	krb5_free_kdc_req(context, tmp_as_req); 
     if (scratch.data != NULL)
 	free(scratch.data);
     if (krb5_authz.data != NULL)

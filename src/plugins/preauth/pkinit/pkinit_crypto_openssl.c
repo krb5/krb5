@@ -595,8 +595,13 @@ cms_signeddata_create(krb5_context context,
 	X509_STORE_CTX_init(&certctx, certstore, cert,
 			    id_cryptoctx->intermediateCAs);
 	X509_STORE_CTX_trusted_stack(&certctx, id_cryptoctx->trustedCAs);
-	if (!X509_verify_cert(&certctx))
+	if (!X509_verify_cert(&certctx)) {
+	    pkiDebug("failed to create a certificate chain: %s\n", 
+	    X509_verify_cert_error_string(X509_STORE_CTX_get_error(&certctx)));
+	    if (!sk_X509_num(id_cryptoctx->trustedCAs)) 
+		pkiDebug("No trusted CAs found. Check your X509_anchors\n");
 	    goto cleanup;
+	}
 	certstack = X509_STORE_CTX_get1_chain(&certctx);
 	size = sk_X509_num(certstack);
 	pkiDebug("size of certificate chain = %d\n", size);
