@@ -31,6 +31,11 @@
 #ifndef _PKINIT_ACCESSOR_H
 #define _PKINIT_ACCESSOR_H
 
+/*
+ * Function prototypes
+ */
+krb5_error_code pkinit_accessor_init(void);
+
 #define DEF_EXT_FUNC_PTRS(type) \
 extern krb5_error_code (*k5int_encode_##type)(const type *, krb5_data **); \
 extern krb5_error_code (*k5int_decode_##type)(const krb5_data *, type **)

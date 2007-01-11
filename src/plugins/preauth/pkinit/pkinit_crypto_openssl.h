@@ -226,6 +226,9 @@ static krb5_error_code load_trusted_certifiers
 	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls, 
 		int return_crls, char *filename);
 
+static krb5_error_code load_trusted_certifiers_dir
+	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls,
+	        int return_crls, char *dirname);
 
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \

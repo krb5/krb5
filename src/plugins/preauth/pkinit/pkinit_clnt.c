@@ -103,6 +103,12 @@ krb5_error_code pa_pkinit_parse_rep
 static int pkinit_client_plugin_init(krb5_context context, void **blob);
 static void pkinit_client_plugin_fini(krb5_context context, void *blob);
 
+/*
+static void pkinit_client_profile
+	(krb5_context context, pkinit_context plgctx,
+	 pkinit_req_context reqctx, krb5_kdc_req *request);
+*/
+
 krb5_error_code
 pa_pkinit_gen_req(krb5_context context,
 		  pkinit_context plgctx,
@@ -122,7 +128,7 @@ pa_pkinit_gen_req(krb5_context context,
     krb5_ui_4 nonce = 0;
     krb5_checksum cksum;
     krb5_data *der_req = NULL;
-    char *client_principal = NULL, *server_principal = NULL;
+    char *server_principal = NULL;
     krb5_pa_data **return_pa_data = NULL;
 
     cksum.contents = NULL;
@@ -781,7 +787,7 @@ cleanup:
     return retval;
 }
 
-void
+static void
 pkinit_client_profile(krb5_context context,
 		      pkinit_context plgctx,
 		      pkinit_req_context reqctx,
@@ -1128,7 +1134,7 @@ pkinit_client_req_fini(krb5_context context,
     return;
 }
 
-void
+static void
 pkinit_fini_client_profile(krb5_context context, pkinit_context plgctx)
 {
     /* This should clean up anything allocated in pkinit_init_client_profile */

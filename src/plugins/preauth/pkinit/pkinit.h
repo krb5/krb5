@@ -216,6 +216,12 @@ void pkinit_fini_req_opts(pkinit_req_opts *);
 krb5_error_code pkinit_init_plg_opts(pkinit_plg_opts **);
 void pkinit_fini_plg_opts(pkinit_plg_opts *);
 
+krb5_error_code pkinit_init_identity_opts(pkinit_identity_opts **idopts);
+void pkinit_fini_identity_opts(pkinit_identity_opts *idopts);
+krb5_error_code pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
+					 pkinit_identity_opts **dest_opts);
+
+
 /*
  * these describe the type of CMS message
  */
@@ -498,6 +504,22 @@ krb5_error_code create_issuerAndSerial
 	int *kdcId_len);				/* OUT
 		    receives length of encoded kdcPKId */
 
+/*
+ * process identity options specified via the command-line
+ * or config file and populate the crypto-specific identity
+ * information.
+ */
+krb5_error_code pkinit_initialize_identity
+	(krb5_context context,				/* IN */
+	pkinit_identity_opts *idopts,			/* IN */
+	pkinit_identity_crypto_context id_cryptoctx);	/* IN/OUT */
+
+krb5_error_code pkinit_process_identity_option
+	(krb5_context context,				/* IN */
+	int attr,					/* IN */
+	const char *value,				/* IN */
+	pkinit_identity_crypto_context id_cryptoctx);	/* IN/OUT */ 
+
 krb5_error_code pkinit_get_client_cert
 	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
 		pkinit_req_crypto_context req_cryptoctx,
@@ -630,6 +652,7 @@ void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 void init_krb5_auth_pack(krb5_auth_pack **in);
 void init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in);
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
+void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void init_krb5_typed_data(krb5_typed_data **in);
 void init_krb5_subject_pk_info(krb5_subject_pk_info **in);
 
@@ -647,6 +670,37 @@ void free_krb5_typed_data(krb5_typed_data ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier ***in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);
 void free_krb5_subject_pk_info(krb5_subject_pk_info **in);
+
+/*
+ * Functions in pkinit_profile.c
+ */
+krb5_error_code pkinit_kdcdefault_strings
+	(krb5_context context, const char *option, char ***ret_value);
+krb5_error_code pkinit_kdcdefault_string
+	(krb5_context context, const char *option, char **ret_value);
+krb5_error_code pkinit_kdcdefault_boolean
+	(krb5_context context, const char *option,
+	 int default_value, int *ret_value);
+krb5_error_code pkinit_kdcdefault_integer
+	(krb5_context context, const char *option,
+         int default_value, int *ret_value);
+
+
+krb5_error_code pkinit_libdefault_strings
+	(krb5_context context, const krb5_data *realm,
+         const char *option, char ***ret_value);
+krb5_error_code pkinit_libdefault_string
+	(krb5_context context, const krb5_data *realm,
+         const char *option, char **ret_value);
+krb5_error_code pkinit_libdefault_boolean
+	(krb5_context context, const krb5_data *realm, const char *option,
+	 int default_value, int *ret_value);
+krb5_error_code pkinit_libdefault_integer
+	(krb5_context context, const krb5_data *realm, const char *option,
+	 int default_value, int *ret_value);
+
+krb5_error_code pkinit_get_kdc_hostnames
+	(krb5_context context, krb5_data *realm, char ***hostnames);
 
 /*
  * main api end

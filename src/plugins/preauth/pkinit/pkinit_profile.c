@@ -41,40 +41,8 @@
  */
 
 /* Forward prototypes */
-int
-_krb5_conf_boolean(const char *s);
+static int _krb5_conf_boolean(const char *s);
 
-krb5_error_code
-pkinit_kdcdefault_strings(krb5_context context, const char *option,
-			  char ***ret_value);
-
-krb5_error_code
-pkinit_kdcdefault_string(krb5_context context, const char *option,
-			 char **ret_value);
-
-krb5_error_code
-pkinit_kdcdefault_boolean(krb5_context context, const char *option,
-			  int default_value, int *ret_value);
-
-krb5_error_code
-pkinit_kdcdefault_integer(krb5_context context, const char *option,
-			  int default_value, int *ret_value);
-
-
-krb5_error_code
-pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
-			  const char *option, char ***ret_value);
-krb5_error_code
-pkinit_libdefault_string(krb5_context context, const krb5_data *realm,
-			 const char *option, char **ret_value);
-krb5_error_code
-pkinit_libdefault_boolean(krb5_context context, const krb5_data *realm,
-			  const char *option, int default_value,
-			  int *ret_value);
-krb5_error_code
-pkinit_libdefault_integer(krb5_context context, const krb5_data *realm,
-			  const char *option, int default_value,
-			  int *ret_value);
 /*
  * XXX
  * The following is duplicated verbatim from src/lib/krb5/krb/get_in_tkt.c,
@@ -91,7 +59,7 @@ static const char *const conf_no[] = {
     0,
 };
 
-int
+static int
 _krb5_conf_boolean(const char *s)
 {
     const char *const *p;

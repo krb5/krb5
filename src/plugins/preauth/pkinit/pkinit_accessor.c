@@ -69,7 +69,7 @@ krb5_error_code (*k5int_decode_krb5_td_trusted_certifiers)
  * Grab internal function pointers from the krb5int_accessor
  * structure and make them available
  */
-krb5_error_code pkinit_accessor_init()
+krb5_error_code pkinit_accessor_init(void)
 {
     krb5_error_code retval;
     krb5int_access k5int;

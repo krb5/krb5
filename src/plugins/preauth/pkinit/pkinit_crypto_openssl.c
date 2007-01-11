@@ -2690,11 +2690,6 @@ static krb5_error_code
 pkinit_open_session(krb5_context context,
 		    pkinit_identity_crypto_context id_cryptoctx)
 {
-#if 0
-    char *s, *cp, *vp;
-    BIGNUM *bn;
-    int i;
-#endif
     int r;
     char *cp;
     CK_ULONG count = 0;
@@ -2703,51 +2698,6 @@ pkinit_open_session(krb5_context context,
 
     if (id_cryptoctx->p11_module != NULL)
 	return 0; /* session already open */
-
-#if 0
-    /* Parse options: module name, slot id, cert id, etc. */
-    if ((s = getenv("PKCS11")) != NULL && (i = strlen(s)) > 0) {
-	/* Split string into attr=value substrings */
-	s = strdup(s);
-	for ((cp = strtok(s, ":")); cp; (cp = strtok(NULL, ":"))) {
-	    vp = strchr(cp, '=');
-
-	    /* If there is no "=", this is a pkcs11 module name */
-	    if (vp == NULL) {
-		free(id_cryptoctx->p11_module_name);
-		id_cryptoctx->p11_module_name = strdup(cp);
-		continue;
-	    }
-	    *vp++ = '\0';
-	    if (!strcmp(cp, "module_name")) {
-		free(id_cryptoctx->p11_module_name);
-		id_cryptoctx->p11_module_name = strdup(vp);
-	    } else if (!strcmp(cp, "slotid")) {
-		id_cryptoctx->slotid = atoi(vp);
-	    } else if (!strcmp(cp, "token")) {
-		if (id_cryptoctx->token_label)
-		    free(id_cryptoctx->token_label);
-		id_cryptoctx->token_label = strdup(vp);
-	    } else if (!strcmp(cp, "certid")) {
-		if (id_cryptoctx->cert_id)
-		    free(id_cryptoctx->cert_id);
-		bn = NULL;
-		BN_hex2bn(&bn, vp);
-		id_cryptoctx->cert_id_len = BN_num_bytes(bn);
-		id_cryptoctx->cert_id = (unsigned char *)malloc((size_t) id_cryptoctx->cert_id_len);
-		if (id_cryptoctx->cert_id == NULL)
-		    return ENOMEM;
-		BN_bn2bin(bn, id_cryptoctx->cert_id);
-		BN_free(bn);
-	    } else if (!strcmp(cp, "certlabel")) {
-		if (id_cryptoctx->cert_label)
-		    free(id_cryptoctx->cert_label);
-		id_cryptoctx->cert_label = strdup(vp);
-	    }
-	}
-	free(s);
-    }
-#endif
 
     /* Load module */
     id_cryptoctx->p11_module =
@@ -3160,155 +3110,6 @@ get_key(char *filename)
     return pkey;
 }
 
-#if 0
-krb5_error_code
-pkinit_get_kdc_identity_crypto(krb5_context context,
-			       pkinit_plg_crypto_context plg_cryptoctx,
-			       pkinit_identity_crypto_context id_cryptoctx)
-{
-    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;/* XXX better errcode */
-    char *cert_filename = NULL, *key_filename = NULL;
-    char *ca_trusted_file = NULL, *ca_intermediate_file = NULL;
-    char *ca_trusted_dir = NULL, *ca_intermediate_dir = NULL;
-    char *revoked_file = NULL, *revoked_dir = NULL;
-    X509 *cert = NULL;
-
-    if (get_filename(&cert_filename, "KDC_CERT", 1) != 0) {
-	pkiDebug("failed to get kdc's cert location\n");
-	goto cleanup;
-    }
-
-    if (get_filename(&key_filename, "KDC_KEY", 1) != 0) {
-	pkiDebug("failed to get kdc's private key location\n");
-	goto cleanup;
-    }
-
-    /* get location of the certificate and the private key */
-    if ((cert = get_cert(cert_filename)) == NULL) {
-	pkiDebug("failed to get kdc's cert\n");
-	goto cleanup;
-    }
-    else {
-	/* add the certificate */
-	id_cryptoctx->my_certs = sk_X509_new_null();
-	sk_X509_push(id_cryptoctx->my_certs, cert);
-	id_cryptoctx->cert_index = 0;
-
-	/* add the private key */
-	if ((id_cryptoctx->my_key = get_key(key_filename)) == NULL) {
-	    pkiDebug("failed to get user's private key\n");
-	    goto cleanup;
-	}
-    }
-
-    if (get_filename(&ca_trusted_file, "X509_CA_TRUSTED_BUNDLE", 1) != 0) {
-	pkiDebug("failed to get the name of the ca-bundle file of trusted CAs\n");
-    }
-
-    if (get_filename(&ca_trusted_dir, "X509_CA_TRUSTED_DIR", 1) != 0) {
-	pkiDebug("failed to get the dir of trusted CAs\n");
-    }
-
-    if (ca_trusted_file == NULL && ca_trusted_dir == NULL) {
-	pkiDebug("Either X509_CA_TRUSTED_BUNDLE or X509_CA_TRUSTED_DIR "
-		 "must be specified\n");
-	retval = ENOMEM;
-	goto cleanup;
-    }
-
-    if (ca_trusted_file) {
-	retval = load_trusted_certifiers(&id_cryptoctx->trustedCAs, NULL, 0, 
-					 ca_trusted_file);
-	if (retval)
-	    goto cleanup;
-    }
-
-    if (ca_trusted_dir) {
-	retval = load_trusted_certifiers_dir(&id_cryptoctx->trustedCAs, NULL, 0, 
-					     ca_trusted_dir);
-	if (retval)
-	    goto cleanup;
-    }
-
-    id_cryptoctx->intermediateCAs = NULL;
-    if (get_filename(&ca_intermediate_file, "X509_CA_INTERM_BUNDLE", 1) != 0) {
-	pkiDebug("didn't find the ca-bundle file of interm CAs\n");
-    } else {
-	retval = load_trusted_certifiers(&id_cryptoctx->intermediateCAs,
-					 NULL, 0, ca_intermediate_file);
-	if (retval)
-	    goto cleanup;
-    }
-
-    if (get_filename(&ca_intermediate_dir, "X509_CA_INTERM_DIR", 1) != 0) {
-	pkiDebug("didn't find the dir of interm CAs\n");
-    } else {
-	retval = load_trusted_certifiers_dir(&id_cryptoctx->intermediateCAs,
-					     NULL, 0, ca_intermediate_dir);
-	if (retval)
-	    goto cleanup;
-    }
-
-    id_cryptoctx->revoked = NULL;
-    if (get_filename(&revoked_file, "X509_CRL_BUNDLE", 1) != 0) {
-	pkiDebug("didn't find the ca-bundle file of CRLs\n");
-    } else {
-	retval = load_trusted_certifiers(NULL, &id_cryptoctx->revoked,
-					 1, revoked_file);
-	if (retval)
-	    goto cleanup;
-    }
-
-    if (get_filename(&revoked_dir, "X509_CRL_DIR", 1) != 0) {
-	pkiDebug("didn't find the dir of CRLs\n");
-    } else {
-	retval = load_trusted_certifiers_dir(NULL, &id_cryptoctx->revoked,
-					     1, revoked_dir);
-	if (retval)
-	    goto cleanup;
-    }
-
-    retval = 0;
-cleanup:
-    if (cert_filename != NULL)
-	free(cert_filename);
-    if (key_filename != NULL)
-	free(key_filename);
-    if (ca_trusted_file != NULL)
-	free(ca_trusted_file);
-    if (ca_intermediate_file != NULL)
-	free(ca_intermediate_file);
-    if (ca_trusted_dir != NULL)
-	free(ca_trusted_dir);
-    if (ca_intermediate_dir != NULL)
-	free(ca_intermediate_dir);
-    if (revoked_file != NULL)
-	free(revoked_file);
-    if (revoked_dir != NULL)
-	free(revoked_dir);
-    if (retval) {
-	if (id_cryptoctx->my_certs != NULL) {
-	    sk_X509_pop_free(id_cryptoctx->my_certs, X509_free);
-	    id_cryptoctx->my_certs = NULL;
-	}
-	if (id_cryptoctx->trustedCAs != NULL) {
-	    sk_X509_pop_free(id_cryptoctx->trustedCAs, X509_free);
-	    id_cryptoctx->trustedCAs = NULL;
-	}
-	if (id_cryptoctx->intermediateCAs != NULL) {
-	    sk_X509_pop_free(id_cryptoctx->intermediateCAs, X509_free);
-	    id_cryptoctx->intermediateCAs = NULL;
-	}
-	if (id_cryptoctx->revoked != NULL) {
-	    sk_X509_CRL_pop_free(id_cryptoctx->revoked, X509_CRL_free);
-	    id_cryptoctx->revoked = NULL;
-	}
-    }
-
-    return retval;
-}
-#endif
-
 krb5_error_code
 pkinit_get_kdc_cert(krb5_context context,
 		    pkinit_plg_crypto_context plg_cryptoctx,
@@ -3691,7 +3492,7 @@ cleanup:
     return retval;
 }
 
-krb5_error_code
+static krb5_error_code
 load_trusted_certifiers_dir(STACK_OF(X509) **trusted_CAs,
 			    STACK_OF(X509_CRL) **crls,
 			    int return_crls,
