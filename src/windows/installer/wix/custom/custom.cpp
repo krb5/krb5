@@ -704,9 +704,11 @@ DWORD InstNetProvider(MSIHANDLE hInstall, int bInst) {
     dwSize = 0;
     CHECK(rv = RegQueryValueEx( hkOrder, STR_VAL_ORDER, NULL, NULL, NULL, &dwSize ) );
 
-    strOrder = new TCHAR[ (dwSize + STR_SERVICE_LEN) * sizeof(TCHAR) ];
+    strOrder = new TCHAR[ (dwSize + STR_SERVICE_LEN + 4) * sizeof(TCHAR) ];
 
     CHECK(rv = RegQueryValueEx( hkOrder, STR_VAL_ORDER, NULL, NULL, (LPBYTE) strOrder, &dwSize));
+
+    strOrder[dwSize] = '\0';	/* reg strings are not always nul terminated */
 
     npi_CheckAndAddRemove( strOrder, STR_SERVICE , bInst);
 
