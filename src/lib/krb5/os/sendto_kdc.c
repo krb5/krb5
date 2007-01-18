@@ -1127,7 +1127,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	return ENOMEM;
     }
 
-    memset(conns, 0, n_conns * sizeof(conns[i]));
+    memset(conns, 0, n_conns * sizeof(struct conn_state));
 
     if (callback_info) {
 	callback_data = malloc(n_conns * sizeof(krb5_data));
@@ -1135,7 +1135,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	    return ENOMEM;
 	}
 
-	memset(conns, 0, n_conns * sizeof(callback_data[i]));
+	memset(callback_data, 0, n_conns * sizeof(krb5_data));
     }
 
     for (i = 0; i < n_conns; i++) {
