@@ -225,7 +225,7 @@ END
 IDD_CFG_MAIN DIALOGEX 0, 0, 357, 222
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_CONTEXTHELP
-CAPTION "NetIDMgr Configuration"
+CAPTION "Network Identity Manager Configuration"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Title",IDC_CFG_TITLE,0,0,357,20,SS_CENTERIMAGE
@@ -252,11 +252,11 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,22,196,10
     CONTROL         "&Destroy all credentials on exit",IDC_CFG_DESTROYALL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,39,111,10
-    CONTROL         "&Start NetIDMgr during Windows logon",IDC_CFG_AUTOSTART,
+    CONTROL         "&Start Network Identity Manager during Windows logon",IDC_CFG_AUTOSTART,
                     "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,16,48,135,10
     GROUPBOX        "Other",IDC_CFG_OTHER,7,63,241,85
-    CONTROL         "&Run NetIDMgr in system tray after window close",IDC_CFG_KEEPRUNNING,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,78,170,10
+    CONTROL         "&Run Network Identity Manager in system tray after window close",IDC_CFG_KEEPRUNNING,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,78,230,10
     CONTROL         "Monitor network connectivity",IDC_CFG_NETDETECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,96,106,10
     CONTROL         "Log trace events to trace log at the following location:",IDC_CFG_LOGTOFILE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,113,225,10
@@ -356,7 +356,7 @@ FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,211,7,50,14
     LTEXT           "Productname",IDC_PRODUCT,41,7,163,13,NOT WS_GROUP
-    LTEXT           "© 2005-2006 Massachusetts Institute of Technology\n© 2006 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
+    LTEXT           "© 2005-2007 Massachusetts Institute of Technology\n© 2006-2007 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
     LTEXT           "BuildInfo",IDC_BUILDINFO,41,43,220,15,NOT WS_GROUP
     ICON            IDI_MAIN_APP,IDC_STATIC,6,7,20,20
     CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,72,220,91
@@ -588,7 +588,7 @@ BEGIN
     IDS_ACTION_HELP_CTX     "Help Index"
     IDS_ACTION_HELP_CONTENTS "Contents ..."
     IDS_ACTION_HELP_INDEX   "Index ..."
-    IDS_ACTION_HELP_ABOUT   "About NetIDMgr ..."
+    IDS_ACTION_HELP_ABOUT   "About Network Identity Manager ..."
     IDS_CFG_GENERAL_LONG    "General options"
     IDS_SAMPLE_STRING       "Wxy"
     IDS_NO_CREDS            "<large><center>You currently have no credentials.Click <a id=""NewCreds"">here</a> to obtain new credentials.</center></large>"
@@ -610,7 +610,7 @@ BEGIN
     IDS_ACTION_DESTROY_CRED "De&stroy credentials ..."
     IDS_DEFAULT_FONT        "MS Shell Dlg"
     IDS_NC_CREDTEXT_TABS    "<settab pos=""15""><settab pos=""30""><settab pos=""45"">"
-    IDS_NOTIFY_PREFIX       "NetIDMgr - "
+    IDS_NOTIFY_PREFIX       "Network Identity Manager - "
     IDS_NOTIFY_READY        "Ready"
     IDS_NOTIFY_ATTENTION    "Attention"
     IDS_ALERT_DEFAULT       "Alert"
@@ -629,7 +629,7 @@ BEGIN
     IDS_PROP_COL_VALUE      "Value"
     IDS_NC_NEW_IDENT        "( New identity ... )"
     IDS_NC_CREDTEXT_ID_CHECKING "<font color=""grey"">%s (Checking...)</font>"
-    IDS_ACTION_OPEN_APP     "Open NetIDMgr ..."
+    IDS_ACTION_OPEN_APP     "Open Network Identity Manager ..."
     IDS_CTX_NEW_IDENT       "Obaining new identity"
     IDS_CTX_NEW_CREDS       "Obtaining new credentials"
     IDS_CTX_RENEW_CREDS     "Renewing credentials"
@@ -640,7 +640,7 @@ STRINGTABLE
 BEGIN
     IDS_CTX_PROC_NEW_CREDS  "Obtaining new credentials for %1!s!"
     IDS_CTX_PROC_RENEW_CREDS "Renewing credentials for %1!s!"
-    IDS_ACTION_CLOSE_APP    "Close NetIDMgr window"
+    IDS_ACTION_CLOSE_APP    "Close Network Identity Manager window"
     IDS_NC_FAILED_TITLE     "Failed to acquire credentials"
     IDS_CFG_IDENTITIES_SHORT "Identities"
     IDS_CFG_IDENTITIES_LONG "Global Identity settings"
@@ -661,8 +661,8 @@ BEGIN
     IDS_WARN_EXPIRED        "Some of your credentials have expired."
     IDS_WARN_EXPIRE_ID      "Credentials for %.180s will expire in %s"
     IDS_WARN_EXPIRED_ID     "Credentials for %.220s have expired"
-    IDS_WARN_WM_TITLE       "NetIDMgr is still running"
-    IDS_WARN_WM_MSG         "Click the NetIDMgr icon below to open the application.\n\nOr right click the icon to access the NetIDMgr menu."
+    IDS_WARN_WM_TITLE       "Network Identity Manager is still running"
+    IDS_WARN_WM_MSG         "Click the Network Identity Manager icon below to open the application.\n\nOr right click the icon to access the Network Identity Manager menu."
     IDS_CFG_ID_TAB_SHORT    "General"
     IDS_CFG_ID_TAB_LONG     "General options for this identity"
     IDS_CFG_IDS_TAB_SHORT   "General"
@@ -691,7 +691,7 @@ BEGIN
     IDS_WTPOST_PASSWORD     "  - Changing password"
     IDS_CTX_PROC_PASSWORD   "Changing password for %1!s!"
     IDS_NC_PWD_FAILED_TITLE "Failed to change password"
-    IDS_CMDLINE_HELP        "Command line options for NetIDMgr are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials"
+    IDS_CMDLINE_HELP        "Command line options for Network Identity Manager are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials"
     IDS_PACTION_NEXT        "Next alert..."
     IDS_ERR_TITLE_NO_IDENTPRO "Cannot proceed without identity provider"
 END
@@ -724,15 +724,15 @@ BEGIN
     IDS_CFG_IT_NONE         "No changes"
     IDS_CFG_NODESC          "(Description for plugin %s is not available)"
     IDS_CFG_P_DELCNFT       "About to disable plugin %s"
-    IDS_CFG_P_DELCNFM       "Are you sure you want to disable plugin %s ?\n\nOnce disabled, the services provided by the plugin will no longer be available. In addition, any other plugins that depend on this plugin will also become non functional.\n\nNetIDMgr will need to be restarted for the plugin to be deactivated."
+    IDS_CFG_P_DELCNFM       "Are you sure you want to disable plugin %s ?\n\nOnce disabled, the services provided by the plugin will no longer be available. In addition, any other plugins that depend on this plugin will also become non functional.\n\nNetwork Identity Manager will need to be restarted for the plugin to be deactivated."
     IDS_CFG_P_DELCNFS       "The following plugins depend on this plugin : %s"
     IDS_CFG_P_DELNDEP       "No other plugins depend on this plugin."
     IDS_CFG_P_ENBCNFT       "About to enable plugin %s"
-    IDS_CFG_P_ENBCNFM       "The plugin %s will be marked as enabled.  The plugin will be come active the next time NetIDMgr is started."
+    IDS_CFG_P_ENBCNFM       "The plugin %s will be marked as enabled.  The plugin will be come active the next time Network Identity Manager is started."
     IDS_PISTATE_FAILINIT    "Failed to initialize"
     IDS_CFG_P_UNRCNFT       "Unregistering plugin %s"
-    IDS_CFG_P_UNRCNFM       "Are you sure you want to unregister plugin %s? In addition to this plugin, any other plugins that are provided by the same module will also be unregistered.\n\nThe plugin will no longer be loaded for subsequent sessions of NetIDMgr."
-    IDS_CFG_P_UNRCNFS       "Note that if the plugin was registered by a seprate installer, it should be unregistered by the same installer and not through NetIDMgr.\n\nThe following plugins will be unregistered: %s"
+    IDS_CFG_P_UNRCNFM       "Are you sure you want to unregister plugin %s? In addition to this plugin, any other plugins that are provided by the same module will also be unregistered.\n\nThe plugin will no longer be loaded for subsequent sessions of Network Identity Manager."
+    IDS_CFG_P_UNRCNFS       "Note that if the plugin was registered by a seprate installer, it should be unregistered by the same installer and not through Network Identity Manager.\n\nThe following plugins will be unregistered: %s"
     IDS_ACTION_LAYOUT_CUST  "Custom"
     IDS_APR_HEADER_TEXT     "Header text"
 END
@@ -768,7 +768,7 @@ BEGIN
     IDS_ACTIONT_VIEW_REFRESH 
                             "Re-obtain information about credentials and refresh the credentials display"
     IDS_ACTIONT_OPT_IDENTS  "Change options for identities"
-    IDS_ACTIONT_OPT_KHIM    "Change general application settings for NetIDMgr"
+    IDS_ACTIONT_OPT_KHIM    "Change general application settings for Network Identity Manager"
     IDS_ACTIONT_OPT_NOTIF   "Change notification options"
     IDS_ACTIONT_OPT_PLUGINS "Change options for plug-ins and modules"
     IDS_ACTIONT_OPT_APPEAR  "Change appearance and display settings"
