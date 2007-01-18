@@ -138,6 +138,124 @@ krb4_ids_config_proc(HWND hwnd,
     return FALSE;
 }
 
+typedef struct tag_k4_id_data {
+    khui_config_init_data cfg;
+    khm_int32 gettix;           /* get tickets? */
+    khm_boolean is_default_ident;
+} k4_id_data;
+
+void
+k4_id_read_params(k4_id_data * d) {
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    khm_size cb;
+    khm_handle ident = NULL;
+    khm_handle csp_ident = NULL;
+    khm_handle csp_idk4 = NULL;
+    khm_int32 flags = 0;
+    khm_int32 t;
+
+    khc_read_int32(csp_params, L"Krb4NewCreds", &d->gettix);
+
+    *idname = 0;
+    cb = sizeof(idname);
+    khui_cfg_get_name(d->cfg.ctx_node, idname, &cb);
+
+    kcdb_identity_create(idname, 0, &ident);
+
+    if (ident == NULL) {
+        d->gettix = 0;
+        goto done;
+    }
+
+    kcdb_identity_get_flags(ident, &flags);
+
+    if (!(flags & KCDB_IDENT_FLAG_DEFAULT)) {
+        d->gettix = 0;
+        goto done;
+    }
+
+    d->is_default_ident = TRUE;
+
+    if (d->gettix == 0)
+        goto done;
+
+    if (KHM_FAILED(kcdb_identity_get_config(ident, 0, &csp_ident)))
+        goto done;
+
+    if (KHM_FAILED(khc_open_space(csp_ident, CSNAME_KRB4CRED,
+                                  0, &csp_idk4)))
+        goto close_config;
+
+    if (KHM_SUCCEEDED(khc_read_int32(csp_idk4, L"Krb4NewCreds", &t)) &&
+        !t)
+        d->gettix = 1;
+
+ close_config:
+    if (csp_ident)
+        khc_close_space(csp_ident);
+
+    if (csp_idk4)
+        khc_close_space(csp_idk4);
+
+ done:
+    if (ident)
+        kcdb_identity_release(ident);
+
+    return;
+}
+
+khm_boolean
+k4_id_write_params(HWND hwnd, k4_id_data * d) {
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    khm_size cb_idname = sizeof(idname);
+    khm_handle ident = NULL;
+    khm_int32 flags = 0;
+    khm_handle csp_ident = NULL;
+    khm_handle csp_idk4 = NULL;
+    khm_int32 gettix = 0;
+    khm_boolean applied = FALSE;
+
+    khui_cfg_get_name(d->cfg.ctx_node, idname, &cb_idname);
+
+    kcdb_identity_create(idname, 0, &ident);
+
+    if (ident == NULL)
+        return FALSE;
+
+    kcdb_identity_get_flags(ident, &flags);
+
+    if (!(flags & KCDB_IDENT_FLAG_DEFAULT))
+        goto done_apply;
+
+    if (IsDlgButtonChecked(hwnd, IDC_CFG_GETTIX) == BST_CHECKED)
+        gettix = TRUE;
+
+    if (KHM_FAILED(kcdb_identity_get_config(ident, KHM_FLAG_CREATE,
+                                            &csp_ident)))
+        goto done_apply;
+
+    if (KHM_FAILED(khc_open_space(csp_ident, CSNAME_KRB4CRED,
+                                  KHM_FLAG_CREATE | KCONF_FLAG_WRITEIFMOD,
+                                  &csp_idk4)))
+        goto done_apply;
+
+    khc_write_int32(csp_idk4, L"Krb4NewCreds", gettix);
+
+    applied = TRUE;
+
+ done_apply:
+    if (ident)
+        kcdb_identity_release(ident);
+
+    if (csp_ident)
+        khc_close_space(csp_ident);
+    
+    if (csp_idk4)
+        khc_close_space(csp_idk4);
+
+    return applied;
+}
+
 INT_PTR CALLBACK
 krb4_id_config_proc(HWND hwnd,
                     UINT uMsg,
@@ -146,143 +264,72 @@ krb4_id_config_proc(HWND hwnd,
     switch(uMsg) {
     case WM_INITDIALOG:
         {
-            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
-            khm_size cb;
-            khui_config_init_data * d;
-            khm_handle ident = NULL;
-            khm_handle csp_ident = NULL;
-            khm_handle csp_idk4 = NULL;
-            khm_int32 gettix = 0;
-            khm_int32 flags = 0;
-            khm_int32 t;
-            khm_boolean is_default_ident = FALSE;
+            k4_id_data * d;
 
-            d = PMALLOC(sizeof(khui_config_init_data));
+            d = PMALLOC(sizeof(k4_id_data));
 
             if (!d)
                 break;
 
             ZeroMemory(d, sizeof(*d));
 
-            *d = *((khui_config_init_data *) lParam);
+            d->cfg = *((khui_config_init_data *) lParam);
 
 #pragma warning(push)
 #pragma warning(disable: 4244)
             SetWindowLongPtr(hwnd, DWLP_USER, (LONG_PTR) d);
 #pragma warning(pop)
 
-            khc_read_int32(csp_params, L"Krb4NewCreds", &gettix);
-            if (gettix == 0)
-                goto set_ui;
+            k4_id_read_params(d);
 
-            *idname = 0;
-            cb = sizeof(idname);
-            khui_cfg_get_name(d->ctx_node, idname, &cb);
-
-            kcdb_identity_create(idname, 0, &ident);
-
-            if (ident == NULL) {
-                gettix = 0;
-                goto set_ui;
-            }
-
-            kcdb_identity_get_flags(ident, &flags);
-
-            if (!(flags & KCDB_IDENT_FLAG_DEFAULT)) {
-                gettix = 0;
-                goto set_ui;
-            }
-
-            is_default_ident = TRUE;
-
-            if (KHM_FAILED(kcdb_identity_get_config(ident, 0, &csp_ident)))
-                goto set_ui;
-
-            if (KHM_FAILED(khc_open_space(csp_ident, CSNAME_KRB4CRED,
-                                          0, &csp_idk4)))
-                goto close_config;
-
-            if (KHM_SUCCEEDED(khc_read_int32(csp_idk4, L"Krb4NewCreds", &t)) &&
-                !t)
-                gettix = 0;
-
-        close_config:
-            if (csp_ident)
-                khc_close_space(csp_ident);
-
-            if (csp_idk4)
-                khc_close_space(csp_idk4);
-
-        set_ui:
             CheckDlgButton(hwnd, IDC_CFG_GETTIX,
-                           (gettix)?BST_CHECKED: BST_UNCHECKED);
+                           (d->gettix)?BST_CHECKED: BST_UNCHECKED);
             EnableWindow(GetDlgItem(hwnd, IDC_CFG_GETTIX),
-                         is_default_ident);
+                         d->is_default_ident);
 
-            if (ident)
-                kcdb_identity_release(ident);
+        }
+        break;
+
+    case WM_COMMAND:
+        {
+            k4_id_data * d;
+
+            d = (k4_id_data *) (LONG_PTR)
+                GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (wParam == MAKEWPARAM(IDC_CFG_GETTIX,
+                                     BN_CLICKED)) {
+                int gettix = 0;
+                int modified = 0;
+
+                gettix = (IsDlgButtonChecked(hwnd, IDC_CFG_GETTIX) ==
+                          BST_CHECKED);
+
+                modified = (!!gettix != !!d->gettix);
+
+                khui_cfg_set_flags_inst(&d->cfg,
+                                        ((modified)?KHUI_CNFLAG_MODIFIED: 0),
+                                        KHUI_CNFLAG_MODIFIED);
+            }
         }
         break;
 
     case KHUI_WM_CFG_NOTIFY:
         {
-            khui_config_init_data * d;
+            k4_id_data * d;
 
-            d = (khui_config_init_data *) (LONG_PTR)
+            d = (k4_id_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
             if (!d)
                 break;
 
             if (HIWORD(wParam) == WMCFG_APPLY) {
-                wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
-                khm_size cb_idname = sizeof(idname);
-                khm_handle ident = NULL;
-                khm_int32 flags = 0;
-                khm_handle csp_ident = NULL;
-                khm_handle csp_idk4 = NULL;
-                khm_int32 gettix = 0;
-                khm_int32 applied = FALSE;
+                khm_int32 applied;
 
-                khui_cfg_get_name(d->ctx_node, idname, &cb_idname);
+                applied = k4_id_write_params(hwnd, d);
 
-                kcdb_identity_create(idname, 0, &ident);
-
-                if (ident == NULL)
-                    break;
-
-                kcdb_identity_get_flags(ident, &flags);
-
-                if (!(flags & KCDB_IDENT_FLAG_DEFAULT))
-                    goto done_apply;
-
-                if (IsDlgButtonChecked(hwnd, IDC_CFG_GETTIX) == BST_CHECKED)
-                    gettix = TRUE;
-
-                if (KHM_FAILED(kcdb_identity_get_config(ident, KHM_FLAG_CREATE,
-                                                        &csp_ident)))
-                    goto done_apply;
-
-                if (KHM_FAILED(khc_open_space(csp_ident, CSNAME_KRB4CRED,
-                                              KHM_FLAG_CREATE | KCONF_FLAG_WRITEIFMOD,
-                                              &csp_idk4)))
-                    goto done_apply;
-
-                khc_write_int32(csp_idk4, L"Krb4NewCreds", gettix);
-
-                applied = TRUE;
-
-            done_apply:
-                if (ident)
-                    kcdb_identity_release(ident);
-
-                if (csp_ident)
-                    khc_close_space(csp_ident);
-
-                if (csp_idk4)
-                    khc_close_space(csp_idk4);
-
-                khui_cfg_set_flags_inst(d,
+                khui_cfg_set_flags_inst(&d->cfg,
                                         ((applied)? KHUI_CNFLAG_APPLIED: 0),
                                         (KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED));
             }
@@ -291,9 +338,9 @@ krb4_id_config_proc(HWND hwnd,
 
     case WM_DESTROY:
         {
-            khui_config_init_data * d;
+            k4_id_data * d;
 
-            d = (khui_config_init_data *) (LONG_PTR)
+            d = (k4_id_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
             if (!d)
