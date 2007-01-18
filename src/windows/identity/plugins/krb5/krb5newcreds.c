@@ -641,9 +641,9 @@ k5_kinit_fiber_proc(PVOID lpParameter)
                                g_fjob.password,
                                g_fjob.ccache,
                                g_fjob.lifetime,
-                               g_fjob.forwardable,
-                               g_fjob.proxiable,
-                               (g_fjob.renewable ? g_fjob.renew_life : 0),
+				g_fjob.valid_principal ? g_fjob.forwardable : 0,
+				g_fjob.valid_principal ? g_fjob.proxiable : 0,
+                               (g_fjob.valid_principal && g_fjob.renewable ? g_fjob.renew_life : 0),
                                g_fjob.addressless,
                                g_fjob.publicIP,
                                k5_kinit_prompter,
@@ -2058,7 +2058,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                     /* we can't possibly have succeeded without a
                        password */
-                    if(g_fjob.code && is_k5_identpro) {
+                    if(g_fjob.code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN && 
+		       is_k5_identpro) {
                         kcdb_identity_set_flags(ident,
                                                 KCDB_IDENT_FLAG_INVALID,
                                                 KCDB_IDENT_FLAG_INVALID);
