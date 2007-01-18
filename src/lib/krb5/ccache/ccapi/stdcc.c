@@ -56,6 +56,7 @@
 
 #ifdef USE_CCAPI_V3
 cc_context_t gCntrlBlock = NULL;
+cc_int32 gCCVersion = 0;
 #else
 apiCB *gCntrlBlock = NULL;
 #endif
@@ -222,19 +223,69 @@ static krb5_error_code cc_err_xlate(int err)
 
 
 #ifdef USE_CCAPI_V3
+
+static krb5_error_code stdccv3_get_timeoffset (krb5_context in_context,
+                                               cc_ccache_t  in_ccache)
+{
+    krb5_error_code err = 0;
+    
+    if (gCCVersion >= ccapi_version_5) {
+        krb5_os_context os_ctx = (krb5_os_context) in_context->os_context;
+        cc_time_t time_offset = 0;
+    
+        err = cc_ccache_get_kdc_time_offset (in_ccache, cc_credentials_v5,
+                                             &time_offset);
+    
+        if (!err) {
+            os_ctx->time_offset = time_offset;
+            os_ctx->usec_offset = 0;
+            os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
+                                KRB5_OS_TOFFSET_VALID);
+        }
+        
+        if (err == ccErrTimeOffsetNotSet) {
+            err = 0;  /* okay if there is no time offset */
+        }
+    }
+    
+    return err; /* Don't translate.  Callers will translate for us */
+}
+
+static krb5_error_code stdccv3_set_timeoffset (krb5_context in_context,
+                                               cc_ccache_t  in_ccache)
+{
+    krb5_error_code err = 0;
+    
+    if (gCCVersion >= ccapi_version_5) {
+        krb5_os_context os_ctx = (krb5_os_context) in_context->os_context;
+        
+        if (!err && os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
+            err = cc_ccache_set_kdc_time_offset (in_ccache, 
+                                                 cc_credentials_v5,
+                                                 os_ctx->time_offset);
+        }
+    }
+    
+    return err; /* Don't translate.  Callers will translate for us */
+}
+
 static krb5_error_code stdccv3_setup (krb5_context context,
                                       stdccCacheDataPtr ccapi_data)
 {
     krb5_error_code err = 0;
     
     if (!err && !gCntrlBlock) {
-        err = cc_initialize (&gCntrlBlock, ccapi_version_max, NULL, NULL);
+        err = cc_initialize (&gCntrlBlock, ccapi_version_max, &gCCVersion, NULL);
     }
     
     if (!err && ccapi_data && !ccapi_data->NamedCache) {
         /* ccache has not been opened yet.  open it. */  
         err = cc_context_open_ccache (gCntrlBlock, ccapi_data->cache_name,
                                       &ccapi_data->NamedCache);
+    }
+    
+    if (!err && ccapi_data && ccapi_data->NamedCache) {
+        err = stdccv3_get_timeoffset (context, ccapi_data->NamedCache);
     }
     
     return err; /* Don't translate.  Callers will translate for us */
@@ -245,6 +296,7 @@ void krb5_stdcc_shutdown()
 {
     if (gCntrlBlock) { cc_context_release(gCntrlBlock); }
     gCntrlBlock = NULL;
+    gCCVersion = 0;
 }
 
 /*
@@ -278,8 +330,12 @@ krb5_stdccv3_generate_new (krb5_context context, krb5_ccache *id )
     }
     
     if (!err) {
-        err = cc_context_create_new_ccache (gCntrlBlock, cc_credentials_v5, 0L,
+        err = cc_context_create_new_ccache (gCntrlBlock, cc_credentials_v5, "",
                                             &ccache);
+    }
+    
+    if (!err) {
+        err = stdccv3_set_timeoffset (context, ccache);
     }
     
     if (!err) {
@@ -395,6 +451,7 @@ krb5_stdccv3_initialize (krb5_context context,
     krb5_error_code err = 0;
     stdccCacheDataPtr ccapi_data = id->data;
     char *name = NULL;
+    cc_ccache_t ccache = NULL;
     
     if (id == NULL) { err = KRB5_CC_NOMEM; }
     
@@ -406,22 +463,27 @@ krb5_stdccv3_initialize (krb5_context context,
         err = krb5_unparse_name(context, princ, &name);
     }
     
-    if (!err && ccapi_data->NamedCache) {
-        err = cc_ccache_release(ccapi_data->NamedCache);
-        ccapi_data->NamedCache = NULL;
-    }
-    
     if (!err) {
         err = cc_context_create_ccache (gCntrlBlock, ccapi_data->cache_name, 
                                         cc_credentials_v5, name,
-                                        &ccapi_data->NamedCache);
+                                        &ccache);
     }
     
     if (!err) {
-        cache_changed();
+        err = stdccv3_set_timeoffset (context, ccache);
     }
     
-    if (name) { krb5_free_unparsed_name(context, name); }
+    if (!err) {
+        if (ccapi_data->NamedCache) {
+            err = cc_ccache_release (ccapi_data->NamedCache);
+        }
+        ccapi_data->NamedCache = ccache;
+        ccache = NULL; /* take ownership */
+        cache_changed ();
+    }
+    
+    if (ccache) { cc_ccache_release (ccache); }
+    if (name  ) { krb5_free_unparsed_name(context, name); }
     
     return cc_err_xlate(err);
 }
