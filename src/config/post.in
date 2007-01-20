@@ -107,7 +107,7 @@ DEPTARGETS_@top_srcdir@_. = $(DEP_VERIFY)
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
+	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES) et-[ch]-*.et et-[ch]-*.[ch]
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
 
 clean-windows::

@@ -442,12 +442,17 @@ COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 #.et.c: ; $(COMPILE_ET) $<
 
 .et.h:
-	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.h $*.h) ; \
-		e=$$? ; rm -f $$d.* ; exit $$e
-
+	$(RM) et-h-$*.et et-h-$*.c et-h-$*.h
+	$(CP) $< et-h-$*.et
+	$(COMPILE_ET) et-h-$*.et
+	$(MV) et-h-$*.h $*.h
+	$(RM) et-h-$*.et et-h-$*.c
 .et.c:
-	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.c $*.c) ; \
-		e=$$? ; rm -f $$d.* ; exit $$e
+	$(RM) et-c-$*.et et-c-$*.c et-c-$*.h
+	$(CP) $< et-c-$*.et
+	$(COMPILE_ET) et-c-$*.et
+	$(MV) et-c-$*.c $*.c
+	$(RM) et-c-$*.et et-c-$*.h
 
 # rule to make object files
 #
