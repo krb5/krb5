@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "k5-int.h"
-#include "krb5_err.h"
 #include "auth_con.h"
 
 
