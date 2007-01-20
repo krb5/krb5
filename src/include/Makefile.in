@@ -21,6 +21,12 @@ maybe-make-db.h-redirect:
 	test -r db.h || echo '#include <@DB_HEADER@>' > db.h
 
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
+K5_ET_HEADERS = \
+	../lib/krb5/error_tables/krb5_err.h \
+	../lib/krb5/error_tables/kdb5_err.h \
+	../lib/krb5/error_tables/kv5m_err.h \
+	../lib/krb5/error_tables/krb524_err.h \
+	../lib/krb5/error_tables/asn1_err.h
 BUILT_HEADERS = osconf.h
 
 all-unix:: autoconf.h $(BUILT_HEADERS)
@@ -71,7 +77,7 @@ osconf.h: $(OSCONFSRC) Makefile
 ##DOS##!endif
 ###############################################################################
 
-krb5/krb5.h: $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h asn1_err.h
+krb5/krb5.h: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 	test -d krb5 || mkdir krb5
 	if test -r krb5.h; then \
 	  if cmp -s krb5.h $(srcdir)/krb5.h; then :; else rm -f krb5.h; fi; \
@@ -79,8 +85,7 @@ krb5/krb5.h: $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err
 	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.h
 	echo "#ifndef KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
 	echo "#define KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
-	cat $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h >> krb5/krb5.h
+	cat $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS) >> krb5/krb5.h
 	echo "#endif /* KRB5_KRB5_H_INCLUDED */" >> krb5/krb5.h
 
 verify-calling-conventions-krb5: private-and-public-decls
@@ -92,19 +97,13 @@ private-and-public-decls: krb5/krb5.h $(srcdir)/k5-int.h
 # Build the error table include files:
 # asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
 
-asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h: rebuild-error-tables
+$(K5_ET_HEADERS): rebuild-error-tables
 	: $@
 rebuild-error-tables:
 	(cd ../lib/krb5/error_tables && $(MAKE) includes)
 
 .PHONY: force rebuild-error-tables
 force:
-
-asn1_err.h: $(SRCTOP)/lib/krb5/error_tables/asn1_err.et
-kdb5_err.h: $(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
-krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et	
-kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
-krb524_err.h: $(SRCTOP)/lib/krb5/error_tables/krb524_err.et
 
 clean-unix::
 	$(RM) krb5/krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
