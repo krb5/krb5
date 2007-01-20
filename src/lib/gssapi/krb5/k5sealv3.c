@@ -418,6 +418,10 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    }
 	    message_buffer->value = plain.data;
 	    message_buffer->length = plain.length - ec - 16;
+	    if(message_buffer->length == 0) {
+	      free(message_buffer->value);
+	      message_buffer->value = NULL;
+	    }
 	} else {
 	    /* no confidentiality */
 	    if (conf_state)
