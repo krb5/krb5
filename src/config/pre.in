@@ -258,7 +258,7 @@ STOP_SERVERS_LOCAL = $(STESTDIR)/scripts/stop_servers_local
 transform = @program_transform_name@
 
 RM = rm -f
-CP  = cp
+CP = cp
 MV = mv -f
 CHMOD=chmod
 RANLIB = @RANLIB@
@@ -274,6 +274,7 @@ AUTOCONF = autoconf
 AUTOCONFFLAGS =
 AUTOHEADER = autoheader
 AUTOHEADERFLAGS =
+MOVEIFCHANGED = $(SRCTOP)/config/move-if-changed
 
 HOST_TYPE = @HOST_TYPE@
 SHEXT = @SHEXT@
