@@ -60,10 +60,6 @@
 #ifndef KRB5_DEPRECATED
 #define KRB5_DEPRECATED 0
 #endif
-/* Do not expose private interfaces.  Build system will override. */
-#ifndef KRB5_PRIVATE
-#define KRB5_PRIVATE 0
-#endif
 
 #if defined(__MACH__) && defined(__APPLE__)
 #	include <TargetConditionals.h>
