@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2005 Massachusetts Institute of Technology
  * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -25,63 +24,35 @@
 
 /* $Id$ */
 
-#ifndef __KHIMAIRA_CREDFUNCS_H
-#define __KHIMAIRA_CREDFUNCS_H
+#include<khuidefs.h>
+#include<intaction.h>
 
-void KHMAPI 
-kmsg_cred_completion(kmq_message *m);
-
-void 
-khm_cred_destroy_creds(khm_boolean sync,
-                       khm_boolean quiet);
-
-void
-khm_cred_destroy_identity(khm_handle identity);
-
-void 
-khm_cred_renew_identity(khm_handle identity);
-
-void 
-khm_cred_renew_cred(khm_handle cred);
-
-void 
-khm_cred_renew_creds(void);
-
-void 
-khm_cred_obtain_new_creds(wchar_t * window_title);
-
-void 
-khm_cred_set_default(void);
-
-void 
-khm_cred_change_password(wchar_t * window_title);
-
-void 
-khm_cred_dispatch_process_message(khui_new_creds *nc);
-
-BOOL 
-khm_cred_dispatch_process_level(khui_new_creds *nc);
-
-BOOL
-khm_cred_is_in_dialog(void);
-
-khm_int32
-khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
-                         wchar_t * ident, khm_size cb_ident);
-
-void
-khm_cred_begin_startup_actions(void);
-
-void
-khm_cred_process_startup_actions(void);
-
-void
-khm_cred_refresh(void);
-
-void
-khm_cred_addr_change(void);
-
-void
-khm_cred_import(void);
-
+#ifdef DEBUG
+#include <assert.h>
 #endif
+
+KHMEXP khm_int32 KHMAPI
+khui_request_UI_callback(khm_ui_callback cb, void * rock) {
+
+    khui_ui_callback_data cbdata;
+
+#ifdef DEBUG
+    assert(khui_hwnd_main);
+#endif
+
+    if (khui_hwnd_main == NULL)
+        return KHM_ERROR_NOT_READY;
+
+    ZeroMemory(&cbdata, sizeof(cbdata));
+    cbdata.magic = KHUI_UICBDATA_MAGIC;
+    cbdata.cb = cb;
+    cbdata.rock = rock;
+    cbdata.rv = KHM_ERROR_NOT_IMPLEMENTED;
+
+    SendMessage(khui_hwnd_main, WM_COMMAND,
+                MAKEWPARAM(KHUI_ACTION_UICB, 0),
+                (LPARAM) &cbdata);
+
+    return KHM_ERROR_SUCCESS;
+}
+

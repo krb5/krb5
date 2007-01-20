@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,6 +26,7 @@
 /* $Id$ */
 
 #include<khmapp.h>
+#include<intaction.h>
 #include<assert.h>
 
 ATOM khm_main_window_class;
@@ -62,8 +64,9 @@ mw_restart_refresh_timer(HWND hwnd) {
                                       &timeout)))
             timeout = MW_REFRESH_TIMEOUT;
         khc_close_space(csp_cw);
-    } else
+    } else {
         timeout = MW_REFRESH_TIMEOUT;
+    }
 
     timeout *= 1000;            /* convert to milliseconds */
 
@@ -170,6 +173,27 @@ khm_process_query_app_ver(khm_query_app_version * papp_ver) {
     }
 
     papp_ver->code = KHM_ERROR_SUCCESS;
+}
+
+static void
+khm_ui_cb(LPARAM lParam) {
+    khui_ui_callback_data * pcbdata;
+
+    pcbdata = (khui_ui_callback_data *) lParam;
+
+    if (pcbdata == NULL || pcbdata->magic != KHUI_UICBDATA_MAGIC) {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+        return;
+    }
+
+#ifdef DEBUG
+    assert(pcbdata->cb);
+#endif
+
+    /* make the call */
+    pcbdata->rv = (*pcbdata->cb)(khm_hwnd_main, pcbdata->rock);
 }
 
 LRESULT CALLBACK 
@@ -339,6 +363,10 @@ khm_main_wnd_proc(HWND hwnd,
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
 
+        case KHUI_ACTION_UICB:
+            khm_ui_cb(lParam);
+            break;
+
             /* menu commands */
         case KHUI_PACTION_MENU:
             if(HIWORD(lParam) == 1)
@@ -407,6 +435,12 @@ khm_main_wnd_proc(HWND hwnd,
             /* handle custom actions here */
             {
                 khui_action * act;
+
+                /* check if this is an identity menu action.  (custom
+                   actions that were created for renewing or
+                   destroying specific identities). */
+                if (khm_check_identity_menu_action(LOWORD(wParam)))
+                    break;
 
                 act = khui_find_action(LOWORD(wParam));
                 if (act && act->listener) {
@@ -568,6 +602,9 @@ khm_main_wnd_proc(HWND hwnd,
             } else if (m->type == KMSG_CRED &&
                        m->subtype == KMSG_CRED_ADDR_CHANGE) {
                 khm_cred_addr_change();
+            } else if (m->type == KMSG_CRED &&
+                       m->subtype == KMSG_CRED_ROOTDELTA) {
+                khm_refresh_identity_menus();
             } else if (m->type == KMSG_KMM &&
                        m->subtype == KMSG_KMM_I_DONE) {
                 kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);

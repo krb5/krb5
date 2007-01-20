@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -39,7 +40,7 @@
     - \subpage bugs
     - \subpage releases
 
-    &copy; 2004 Massachusetts Institute of Technology
+    &copy; 2004-2007 Massachusetts Institute of Technology
 */
 
 /*!
@@ -49,7 +50,7 @@
 
     \section license_l MIT License
 
-    Copyright &copy; 2004 Massachusetts Institute of Technology
+    Copyright &copy; 2004,2005,2006,2007 Massachusetts Institute of Technology
  
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation

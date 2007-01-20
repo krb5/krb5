@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -46,6 +47,8 @@ void khm_menu_track_current(void);
 LRESULT khm_menu_measure_item(WPARAM wParam, LPARAM lparam);
 LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lparam);
 void khm_menu_refresh_items(void);
+khm_boolean khm_check_identity_menu_action(khm_int32 act_id);
+void khm_refresh_identity_menus(void);
 
 static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main);
 static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y);

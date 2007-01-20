@@ -1,5 +1,6 @@
 /*
 * Copyright (c) 2005 Massachusetts Institute of Technology
+* Copyright (c) 2007 Secure Endpoints Inc.
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -25,8 +26,7 @@
 /* $Id$ */
 
 #include<windows.h>
-#include<khdefs.h>
-#include<kherror.h>
+#include<netidmgr.h>
 #include<dynimport.h>
 
 HINSTANCE hKrb4 = 0;
@@ -364,30 +364,36 @@ khm_int32 init_imports(void) {
     OSVERSIONINFO osvi;
     int imp_rv = 1;
 
-#define CKRV if(!imp_rv) goto _err_ret
+#define CKRV(m)           \
+  do {                    \
+    if(!imp_rv) {         \
+      _reportf(L"Can't locate all required exports from module [%S]", (m)); \
+      goto _err_ret;      \
+    }                     \
+ } while (FALSE)
 
 #ifndef _WIN64
     imp_rv = LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
-    CKRV;
+    CKRV(KRB4_DLL);
 #endif
 
     imp_rv = LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
-    CKRV;
+    CKRV(KRB5_DLL);
 
     imp_rv = LoadFuncs(COMERR_DLL, ce_fi, &hComErr, 0, 0, 1, 0);
-    CKRV;
+    CKRV(COMERR_DLL);
 
     imp_rv = LoadFuncs(SERVICE_DLL, service_fi, &hService, 0, 1, 0, 0);
-    CKRV;
+    CKRV(SERVICE_DLL);
 
     imp_rv = LoadFuncs(SECUR32_DLL, lsa_fi, &hSecur32, 0, 1, 1, 1);
-    CKRV;
+    CKRV(SECUR32_DLL);
 
     imp_rv = LoadFuncs(KRB524_DLL, k524_fi, &hKrb524, 0, 1, 1, 1);
-    CKRV;
+    CKRV(KRB524_DLL);
 
     imp_rv = LoadFuncs(PROFILE_DLL, profile_fi, &hProfile, 0, 1, 0, 0);
-    CKRV;
+    CKRV(PROFILE_DLL);
 
     imp_rv = LoadFuncs(CCAPI_DLL, ccapi_fi, &hCCAPI, 0, 1, 0, 0);
     /* CCAPI_DLL is optional.  No error check. */
@@ -405,7 +411,7 @@ khm_int32 init_imports(void) {
     {
         // Windows 9x
         imp_rv = LoadFuncs(TOOLHELPDLL, toolhelp_fi, &hToolHelp32, 0, 1, 0, 0);
-        CKRV;
+        CKRV(TOOLHELPDLL);
 
         hPsapi = 0;
     }             
@@ -413,7 +419,7 @@ khm_int32 init_imports(void) {
     {
         // Windows NT
         imp_rv = LoadFuncs(PSAPIDLL, psapi_fi, &hPsapi, 0, 1, 0, 0);
-        CKRV;
+        CKRV(PSAPIDLL);
 
         hToolHelp32 = 0;
     }

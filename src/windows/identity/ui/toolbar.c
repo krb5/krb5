@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -312,9 +313,8 @@ void khm_create_standard_toolbar(HWND rebar) {
     if (!def) {
 #ifdef DEBUG
         assert(FALSE);
-#else
-        return;
 #endif
+        return;
     }
 
     hwtb = CreateWindowEx(0
@@ -340,9 +340,8 @@ void khm_create_standard_toolbar(HWND rebar) {
     if(!hwtb) {
 #ifdef DEBUG
         assert(FALSE);
-#else
-        return;
 #endif
+        return;
     }
 
     hiList = ImageList_Create(

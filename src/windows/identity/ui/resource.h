@@ -294,6 +294,13 @@
 #define IDS_NC_PWD_FAILED_TITLE_I       287
 #define IDS_NC_REN_FAILED_TITLE_I       288
 #define IDS_CFG_IDNAME_NON              289
+#define IDS_MENU_DESTROY_CRED           290
+#define IDS_MENU_RENEW_CRED             291
+#define IDS_ACTION_DESTROY_ALL          292
+#define IDS_ACTION_RENEW_ALL            293
+#define IDS_IDACTION_RENEW              294
+#define IDS_IDACTION_DESTROY            295
+#define IDS_CTX_DESTROY_ID              296
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009

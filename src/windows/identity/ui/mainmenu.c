@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -561,6 +562,289 @@ LRESULT khm_menu_notify_main(LPNMHDR notice) {
     return ret;
 }
 
+struct identity_action_map {
+    khm_handle identity;
+    khm_int32  renew_cmd;
+    khm_int32  destroy_cmd;
+    int        refreshcycle;
+};
+
+#define IDMAP_ALLOC_INCR 8
+
+struct identity_action_map * id_action_map = NULL;
+khm_size n_id_action_map  = 0;
+khm_size nc_id_action_map = 0;
+
+int idcmd_refreshcycle = 0;
+
+static struct identity_action_map *
+create_identity_cmd_map(khm_handle ident) {
+
+    struct identity_action_map * actmap;
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    wchar_t fmt[128];
+    wchar_t tooltip[KHUI_MAXCCH_SHORT_DESC];
+    khm_size cb;
+
+    if (n_id_action_map + 1 > nc_id_action_map) {
+        nc_id_action_map = UBOUNDSS(n_id_action_map + 1,
+                                    IDMAP_ALLOC_INCR,
+                                    IDMAP_ALLOC_INCR);
+#ifdef DEBUG
+        assert(nc_id_action_map > n_id_action_map + 1);
+#endif
+        id_action_map = PREALLOC(id_action_map,
+                                 nc_id_action_map * sizeof(id_action_map[0]));
+#ifdef DEBUG
+        assert(id_action_map);
+#endif
+        ZeroMemory(&id_action_map[n_id_action_map],
+                   sizeof(id_action_map[0]) * (nc_id_action_map - n_id_action_map));
+    }
+
+    actmap = &id_action_map[n_id_action_map];
+    n_id_action_map++;
+
+    cb = sizeof(idname);
+    kcdb_identity_get_name(ident, idname, &cb);
+
+    actmap->identity = ident;
+    kcdb_identity_hold(ident);
+
+    fmt[0] = L'\0';
+    LoadString(khm_hInstance, IDS_IDACTION_RENEW,
+               fmt, ARRAYLENGTH(fmt));
+    StringCbPrintf(tooltip, sizeof(tooltip), fmt, idname);
+
+    actmap->renew_cmd =
+        khui_action_create(NULL, idname, tooltip, NULL,
+                           KHUI_ACTIONTYPE_TRIGGER, NULL);
+
+    fmt[0] = L'\0';
+    LoadString(khm_hInstance, IDS_IDACTION_DESTROY,
+               fmt, ARRAYLENGTH(fmt));
+    StringCbPrintf(tooltip, sizeof(tooltip), fmt, idname);
+
+    actmap->destroy_cmd =
+        khui_action_create(NULL, idname, tooltip, NULL,
+                           KHUI_ACTIONTYPE_TRIGGER, NULL);
+
+    actmap->refreshcycle = idcmd_refreshcycle;
+
+    return actmap;
+}
+
+static void
+purge_identity_cmd_map(void) {
+    khm_size i;
+
+    for (i=0; i < n_id_action_map; i++) {
+        khm_handle ident;
+
+        if (id_action_map[i].refreshcycle != idcmd_refreshcycle) {
+            ident = id_action_map[i].identity;
+            id_action_map[i].identity = NULL;
+            kcdb_identity_release(ident);
+
+            khui_action_delete(id_action_map[i].renew_cmd);
+            khui_action_delete(id_action_map[i].destroy_cmd);
+
+            id_action_map[i].renew_cmd = 0;
+            id_action_map[i].destroy_cmd = 0;
+        }
+    }
+}
+
+static struct identity_action_map *
+get_identity_cmd_map(khm_handle ident) {
+    khm_size i;
+
+    for (i=0; i < n_id_action_map; i++) {
+        if (kcdb_identity_is_equal(id_action_map[i].identity,
+                                   ident))
+            break;
+    }
+
+    if (i < n_id_action_map) {
+        id_action_map[i].refreshcycle = idcmd_refreshcycle;
+        return &id_action_map[i];
+    } else {
+        return create_identity_cmd_map(ident);
+    }
+}
+
+static khm_int32
+get_identity_renew_command(khm_handle ident) {
+    struct identity_action_map * map;
+
+    map = get_identity_cmd_map(ident);
+
+    if (map)
+        return map->renew_cmd;
+    else
+        return 0;
+}
+
+static khm_int32
+get_identity_destroy_command(khm_handle ident) {
+    struct identity_action_map * map;
+
+    map = get_identity_cmd_map(ident);
+
+    if (map)
+        return map->destroy_cmd;
+    else
+        return 0;
+}
+
+void
+khm_refresh_identity_menus(void) {
+    khui_menu_def * renew_def = NULL;
+    khui_menu_def * dest_def = NULL;
+    wchar_t * idlist = NULL;
+    wchar_t * idname = NULL;
+    khm_size cb = 0;
+    khm_size n_idents = 0;
+    khm_size t;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    idcmd_refreshcycle++;
+
+    do {
+        if (idlist)
+            PFREE(idlist);
+        idlist = NULL;
+        cb = 0;
+
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE | KCDB_IDENT_FLAG_EMPTY,
+                                KCDB_IDENT_FLAG_ACTIVE,
+                                NULL,
+                                &cb,
+                                &n_idents);
+        if (rv != KHM_ERROR_TOO_LONG || cb == 0 || cb == sizeof(wchar_t) * 2)
+            break;
+
+        idlist = PMALLOC(cb);
+#ifdef DEBUG
+        assert(idlist);
+#endif
+
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE | KCDB_IDENT_FLAG_EMPTY,
+                                KCDB_IDENT_FLAG_ACTIVE,
+                                idlist,
+                                &cb,
+                                &n_idents);
+        if (rv == KHM_ERROR_TOO_LONG)
+            continue;
+
+        if (KHM_FAILED(rv)) {
+            /* something else went wrong. hmm. */
+            if (idlist)
+                PFREE(idlist);
+            idlist = NULL;
+        }
+        break;
+
+    } while(TRUE);
+
+    renew_def = khui_find_menu(KHUI_MENU_RENEW_CRED);
+    dest_def = khui_find_menu(KHUI_MENU_DESTROY_CRED);
+#ifdef DEBUG
+    assert(renew_def);
+    assert(dest_def);
+#endif
+
+    t = khui_menu_get_size(renew_def);
+    while(t) {
+        khui_menu_remove_action(renew_def, 0);
+        t--;
+    }
+    khui_menu_insert_action(renew_def, 0, KHUI_ACTION_RENEW_ALL, 0);
+
+    t = khui_menu_get_size(dest_def);
+    while(t) {
+        khui_menu_remove_action(dest_def, 0);
+        t--;
+    }
+    khui_menu_insert_action(dest_def, 0, KHUI_ACTION_DESTROY_ALL, 0);
+
+    if (idlist != NULL && n_idents > 0) {
+        khui_menu_insert_action(renew_def, 1, KHUI_MENU_SEP, 0);
+        khui_menu_insert_action(dest_def,  1, KHUI_MENU_SEP, 0);
+    }
+
+    for (idname = idlist; idname && idname[0];
+         idname = multi_string_next(idname)) {
+        khm_handle identity = NULL;
+
+        if (KHM_FAILED(kcdb_identity_create(idname, 0, &identity))) {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+            continue;
+        }
+
+        khui_menu_insert_action(renew_def, 1000,
+                                get_identity_renew_command(identity),
+                                0);
+
+        khui_menu_insert_action(dest_def, 1000,
+                                get_identity_destroy_command(identity),
+                                0);
+    }
+
+    if (idlist)
+        PFREE(idlist);
+
+    purge_identity_cmd_map();
+}
+
+khm_boolean
+khm_check_identity_menu_action(khm_int32 act_id) {
+
+    if (act_id == KHUI_ACTION_DESTROY_ALL) {
+        khm_size i;
+
+        for (i=0; i < n_id_action_map; i++) {
+            if (id_action_map[i].identity != NULL) {
+                khm_cred_destroy_identity(id_action_map[i].identity);
+            }
+        }
+
+        return TRUE;
+    } else if (act_id == KHUI_ACTION_RENEW_ALL) {
+        khm_size i;
+
+        for (i=0; i < n_id_action_map; i++) {
+            if (id_action_map[i].identity != NULL) {
+                khm_cred_renew_identity(id_action_map[i].identity);
+            }
+        }
+
+        return TRUE;
+    } else {
+        khm_size i;
+
+        for (i=0; i < n_id_action_map; i++) {
+            if (id_action_map[i].identity == NULL)
+                continue;
+
+            if (id_action_map[i].renew_cmd == act_id) {
+                khm_cred_renew_identity(id_action_map[i].identity);
+                return TRUE;
+            }
+
+            if (id_action_map[i].destroy_cmd == act_id) {
+                khm_cred_destroy_identity(id_action_map[i].identity);
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+}
+
+
 HMENU khui_hmenu_main = NULL;
 
 void khm_menu_refresh_items(void) {
@@ -625,9 +909,8 @@ void khm_menu_create_main(HWND parent) {
     if(!hwtb) {
 #ifdef DEBUG
         assert(FALSE);
-#else
-        return;
 #endif
+        return;
     }
 
     khui_main_menu_toolbar = hwtb;
