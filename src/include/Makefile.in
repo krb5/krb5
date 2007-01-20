@@ -37,8 +37,8 @@ $(srcdir)/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/acloc
 
 ##DOS##autoconf.h: win-mac.h
 ##DOS##	$(CP) win-mac.h $@
-##DOS##osconf.h: stock\osconf.h
-##DOS##	$(CP) stock\osconf.h $@
+##DOS##osconf.h: osconf.hin
+##DOS##	$(CP) osconf.hin $@
 
 ###############################################################################
 ##DOS##!if 0
@@ -63,7 +63,7 @@ PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 	-e 's+@LOCALSTATEDIR+$(LOCALSTATEDIR)+' \
 	-e 's+@SYSCONFDIR+$(SYSCONFDIR)+' 
 
-OSCONFSRC = $(srcdir)/stock/osconf.h
+OSCONFSRC = $(srcdir)/osconf.hin
 
 osconf.h: $(OSCONFSRC) Makefile
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
