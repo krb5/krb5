@@ -1203,12 +1203,12 @@
         <Show Dialog="ProgressDlg" After="AdminWelcomeDlg" />
       </AdminUISequence>
       <InstallUISequence>
-		<Custom Action="ListRunningProcesses" Before="WelcomeDlg" />
+		<Custom Action="ListRunningProcesses" After="MigrateFeatureStates" />
         <Show Dialog="FatalError" OnExit="error" />
         <Show Dialog="UserExit" OnExit="cancel" />
         <Show Dialog="ExitDialog" OnExit="success" />
         <Show Dialog="PrepareDlg" After="LaunchConditions" />
-        <Show Dialog="WelcomeDlg" After="MigrateFeatureStates">NOT Installed</Show>
+        <Show Dialog="WelcomeDlg" After="ListRunningProcesses">NOT Installed</Show>
         <Show Dialog="ResumeDlg" After="WelcomeDlg">Installed AND (RESUME OR Preselected)</Show>
         <Show Dialog="MaintenanceWelcomeDlg" After="ResumeDlg">Installed AND NOT RESUME AND NOT Preselected</Show>
         <Show Dialog="ProgressDlg" After="MaintenanceWelcomeDlg" />
