@@ -2103,4 +2103,308 @@ krb5_error_code KRB5_CALLCONV krb5int_clean_hostname
 		char *,
 		size_t);
 
+/* Use the above four instead.  */
+krb5_boolean KRB5_CALLCONV valid_enctype
+	(krb5_enctype ktype);
+krb5_boolean KRB5_CALLCONV valid_cksumtype
+	(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
+	(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV is_keyed_cksum
+	(krb5_cksumtype ctype);
+
+krb5_error_code KRB5_CALLCONV krb5_random_confounder
+	(size_t, krb5_pointer);
+
+krb5_error_code krb5_encrypt_data
+	(krb5_context context, krb5_keyblock *key, 
+		krb5_pointer ivec, krb5_data *data, 
+		krb5_enc_data *enc_data);
+
+krb5_error_code krb5_decrypt_data
+	(krb5_context context, krb5_keyblock *key, 
+		krb5_pointer ivec, krb5_enc_data *data, 
+		krb5_data *enc_data);
+
+struct _krb5_kt_ops;
+struct _krb5_kt {	/* should move into k5-int.h */
+    krb5_magic magic;
+    const struct _krb5_kt_ops *ops;
+    krb5_pointer data;
+};
+
+krb5_error_code krb5_set_default_in_tkt_ktypes
+	(krb5_context,
+		const krb5_enctype *);
+krb5_error_code krb5_get_default_in_tkt_ktypes
+	(krb5_context,
+		krb5_enctype **);
+
+krb5_error_code krb5_set_default_tgs_ktypes
+	(krb5_context,
+		const krb5_enctype *);
+
+krb5_error_code KRB5_CALLCONV krb5_get_tgs_ktypes
+	(krb5_context,
+		krb5_const_principal,
+		krb5_enctype **);
+
+void KRB5_CALLCONV krb5_free_ktypes
+	(krb5_context, krb5_enctype *);
+
+krb5_boolean krb5_is_permitted_enctype
+	(krb5_context, krb5_enctype);
+
+krb5_error_code krb5_kdc_rep_decrypt_proc
+	(krb5_context,
+		const krb5_keyblock *,
+		krb5_const_pointer,
+		krb5_kdc_rep * );
+krb5_error_code KRB5_CALLCONV krb5_decrypt_tkt_part
+	(krb5_context,
+		const krb5_keyblock *,
+		krb5_ticket * );
+krb5_error_code krb5_get_cred_from_kdc
+	(krb5_context,
+		krb5_ccache,		/* not const, as reading may save
+					   state */
+		krb5_creds *,
+		krb5_creds **,
+		krb5_creds *** );
+krb5_error_code krb5_get_cred_from_kdc_validate
+	(krb5_context,
+		krb5_ccache,		/* not const, as reading may save
+					   state */
+		krb5_creds *,
+		krb5_creds **,
+		krb5_creds *** );
+krb5_error_code krb5_get_cred_from_kdc_renew
+	(krb5_context,
+		krb5_ccache,		/* not const, as reading may save
+					   state */
+		krb5_creds *,
+		krb5_creds **,
+		krb5_creds *** );
+
+krb5_error_code krb5_get_cred_via_tkt
+	(krb5_context,
+		   krb5_creds *,
+		   krb5_flags,
+		   krb5_address * const *,
+		   krb5_creds *,
+		   krb5_creds **);
+
+krb5_error_code KRB5_CALLCONV krb5_copy_addr
+	(krb5_context,
+		const krb5_address *,
+		krb5_address **);
+
+void krb5_init_ets
+	(krb5_context);
+void krb5_free_ets
+	(krb5_context);
+krb5_error_code krb5_generate_subkey
+	(krb5_context,
+		const krb5_keyblock *, krb5_keyblock **);
+krb5_error_code krb5_generate_seq_number
+	(krb5_context,
+		const krb5_keyblock *, krb5_ui_4 *);
+
+krb5_error_code KRB5_CALLCONV krb5_kt_register
+	(krb5_context,
+		const struct _krb5_kt_ops * );
+
+/* use krb5_free_keytab_entry_contents instead */
+krb5_error_code KRB5_CALLCONV krb5_kt_free_entry
+	(krb5_context,
+		krb5_keytab_entry * );
+
+krb5_error_code krb5_principal2salt_norealm
+	(krb5_context,
+		krb5_const_principal, krb5_data *);
+
+unsigned int KRB5_CALLCONV krb5_get_notification_message
+	(void);
+
+/* chk_trans.c */
+krb5_error_code krb5_check_transited_list
+	(krb5_context, const krb5_data *trans,
+	 const krb5_data *realm1, const krb5_data *realm2);
+
+/* free_rtree.c */
+void krb5_free_realm_tree
+	(krb5_context,
+		krb5_principal *);
+
+void KRB5_CALLCONV krb5_free_authenticator_contents
+	(krb5_context, krb5_authenticator * );
+
+void KRB5_CALLCONV krb5_free_address
+	(krb5_context, krb5_address * );
+
+void KRB5_CALLCONV krb5_free_enc_tkt_part
+	(krb5_context, krb5_enc_tkt_part * );
+
+void KRB5_CALLCONV krb5_free_tickets
+	(krb5_context, krb5_ticket ** );
+void KRB5_CALLCONV krb5_free_kdc_req
+	(krb5_context, krb5_kdc_req * );
+void KRB5_CALLCONV krb5_free_kdc_rep
+	(krb5_context, krb5_kdc_rep * );
+void KRB5_CALLCONV krb5_free_last_req
+	(krb5_context, krb5_last_req_entry ** );
+void KRB5_CALLCONV krb5_free_enc_kdc_rep_part
+	(krb5_context, krb5_enc_kdc_rep_part * );
+void KRB5_CALLCONV krb5_free_ap_req
+	(krb5_context, krb5_ap_req * );
+void KRB5_CALLCONV krb5_free_ap_rep
+	(krb5_context, krb5_ap_rep * );
+void KRB5_CALLCONV krb5_free_cred
+	(krb5_context, krb5_cred *);
+void KRB5_CALLCONV krb5_free_cred_enc_part
+	(krb5_context, krb5_cred_enc_part *);
+void KRB5_CALLCONV krb5_free_pa_data
+	(krb5_context, krb5_pa_data **);
+void KRB5_CALLCONV krb5_free_tkt_authent
+	(krb5_context, krb5_tkt_authent *);
+void KRB5_CALLCONV krb5_free_pwd_data
+	(krb5_context, krb5_pwd_data *);
+void KRB5_CALLCONV krb5_free_pwd_sequences
+	(krb5_context, passwd_phrase_element **);
+krb5_error_code krb5_set_config_files
+	(krb5_context, const char **);
+
+krb5_error_code KRB5_CALLCONV krb5_get_default_config_files
+	(char ***filenames);
+
+void KRB5_CALLCONV krb5_free_config_files
+	(char **filenames);
+krb5_error_code krb5_send_tgs
+	(krb5_context,
+		krb5_flags,
+		const krb5_ticket_times *,
+		const krb5_enctype *,
+		krb5_const_principal,
+		krb5_address * const *,
+		krb5_authdata * const *,
+		krb5_pa_data * const *,
+		const krb5_data *,
+		krb5_creds *,
+		krb5_response * );
+krb5_error_code krb5_decode_kdc_rep
+	(krb5_context,
+		krb5_data *,
+		const krb5_keyblock *,
+		krb5_kdc_rep ** );
+
+krb5_error_code krb5_rd_req_decoded
+	(krb5_context,
+		krb5_auth_context *,
+		const krb5_ap_req *,
+		krb5_const_principal,
+		krb5_keytab,
+		krb5_flags *,
+		krb5_ticket **);
+
+krb5_error_code krb5_rd_req_decoded_anyflag
+	(krb5_context,
+		krb5_auth_context *,
+		const krb5_ap_req *,
+		krb5_const_principal,
+		krb5_keytab,
+		krb5_flags *,
+		krb5_ticket **);
+krb5_error_code KRB5_CALLCONV krb5_cc_register
+	(krb5_context,
+		krb5_cc_ops *,
+		krb5_boolean );
+krb5_error_code krb5_walk_realm_tree
+	(krb5_context,
+		const krb5_data *,
+		const krb5_data *,
+		krb5_principal **,
+		int);
+krb5_error_code KRB5_CALLCONV krb5_auth_con_set_req_cksumtype
+	(krb5_context,
+		krb5_auth_context,
+		krb5_cksumtype);
+
+krb5_error_code krb5_auth_con_set_safe_cksumtype
+	(krb5_context,
+		krb5_auth_context,
+		krb5_cksumtype);
+krb5_error_code krb5_auth_con_setivector
+	(krb5_context,
+		krb5_auth_context,
+		krb5_pointer);
+
+krb5_error_code krb5_auth_con_getivector
+	(krb5_context,
+		krb5_auth_context,
+		krb5_pointer *);
+
+krb5_error_code krb5_auth_con_setpermetypes
+	(krb5_context,
+	    krb5_auth_context,
+	    const krb5_enctype *);
+
+krb5_error_code krb5_auth_con_getpermetypes
+	(krb5_context,
+	    krb5_auth_context,
+	    krb5_enctype **);
+
+krb5_error_code KRB5_CALLCONV
+krb5_server_decrypt_ticket_keyblock
+  	(krb5_context context,
+                const krb5_keyblock *key,
+                krb5_ticket  *ticket);
+
+krb5_error_code krb5_read_message (krb5_context, krb5_pointer, krb5_data *);
+krb5_error_code krb5_write_message (krb5_context, krb5_pointer, krb5_data *);
+int krb5_net_read (krb5_context, int , char *, int);
+int krb5_net_write (krb5_context, int , const char *, int);
+
+krb5_error_code KRB5_CALLCONV krb5_get_realm_domain
+	(krb5_context,
+		const char *,
+		char ** );
+
+krb5_error_code krb5_gen_portaddr
+	(krb5_context,
+		const krb5_address *,
+		krb5_const_pointer,
+		krb5_address **);
+krb5_error_code krb5_gen_replay_name
+	(krb5_context,
+		const krb5_address *,
+		const char *,
+		char **);
+krb5_error_code krb5_make_fulladdr
+	(krb5_context,
+		krb5_address *,
+		krb5_address *,
+		krb5_address *);
+
+krb5_error_code krb5_set_debugging_time
+	(krb5_context, krb5_timestamp, krb5_int32);
+krb5_error_code krb5_use_natural_time
+	(krb5_context);
+krb5_error_code krb5_set_time_offsets
+	(krb5_context, krb5_timestamp, krb5_int32);
+/*
+ * The realm iterator functions
+ */
+
+krb5_error_code KRB5_CALLCONV krb5_realm_iterator_create
+	(krb5_context context, void **iter_p);
+
+krb5_error_code KRB5_CALLCONV krb5_realm_iterator
+	(krb5_context context, void **iter_p, char **ret_realm);
+
+void KRB5_CALLCONV krb5_realm_iterator_free
+	(krb5_context context, void **iter_p);
+
+void KRB5_CALLCONV krb5_free_realm_string
+	(krb5_context context, char *str);
+
 #endif /* _KRB5_INT_H */
