@@ -412,8 +412,10 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	    if (load_16_be(althdr) != 0x0504
 		|| althdr[2] != ptr[2]
 		|| althdr[3] != ptr[3]
-		|| memcmp(althdr+8, ptr+8, 8))
+		|| memcmp(althdr+8, ptr+8, 8)) {
+		free(plain.data);
 		goto defective;
+	    }
 	    message_buffer->value = plain.data;
 	    message_buffer->length = plain.length - ec - 16;
 	} else {
