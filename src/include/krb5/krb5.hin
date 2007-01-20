@@ -91,6 +91,7 @@
 
 #include <stdlib.h>
 #include <limits.h>		/* for *_MAX */
+#include <stdarg.h>
 
 #ifndef KRB5INT_BEGIN_DECLS
 #if defined(__cplusplus)
@@ -1541,12 +1542,9 @@ krb5_error_code KRB5_CALLCONV_C krb5_build_principal_ext
 	(krb5_context, krb5_principal *, unsigned int, const char *, ...);
 krb5_error_code KRB5_CALLCONV_C krb5_build_principal
 	(krb5_context, krb5_principal *, unsigned int, const char *, ...);
-#ifdef va_start
-/* XXX depending on varargs include file defining va_start... */
 krb5_error_code KRB5_CALLCONV krb5_build_principal_va
 	(krb5_context,
 		krb5_principal, unsigned int, const char *, va_list);
-#endif
 
 krb5_error_code KRB5_CALLCONV krb5_425_conv_principal
 	(krb5_context,
@@ -2236,10 +2234,8 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 /* Error reporting */
 void KRB5_CALLCONV_C
 krb5_set_error_message (krb5_context, krb5_error_code, const char *, ...);
-#ifdef va_start
 void KRB5_CALLCONV
 krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list);
-#endif
 /*
  * The behavior of krb5_get_error_message is only defined the first
  * time it is called after a failed call to a krb5 function using the
