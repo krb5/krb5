@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
  * rcp
  */
 #ifdef KERBEROS
-#include <krb5.h>
+#include "k5-int.h"
 #include <com_err.h>
 #include <k5-util.h>
 #endif

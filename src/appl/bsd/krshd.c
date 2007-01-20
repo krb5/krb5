@@ -160,7 +160,7 @@ char copyright[] =
 #endif
 
 #ifdef KERBEROS
-#include <krb5.h>
+#include "k5-int.h"
 #include <com_err.h>
 #include "loginpaths.h"
 #ifdef KRB5_KRB4_COMPAT

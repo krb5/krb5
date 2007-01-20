@@ -68,7 +68,7 @@ char copyright[] =
 #include <sys/wait.h>
 
 #ifdef KERBEROS
-#include <krb5.h>
+#include "k5-int.h"
 #include <k5-util.h>
 #include <com_err.h>
 

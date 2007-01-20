@@ -36,7 +36,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "krb5.h"
+#include "k5-int.h"
 #include "com_err.h"
 
 int main (argc, argv)

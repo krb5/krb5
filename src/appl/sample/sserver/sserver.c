@@ -37,7 +37,7 @@
  * client (this will be correct if this server is started by inetd).
  */
 
-#include "krb5.h"
+#include "k5-int.h"
 #include "com_err.h"
 
 #include <stdio.h>
