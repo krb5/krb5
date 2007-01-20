@@ -25,14 +25,7 @@ SRCS= asn1_err.c kdb5_err.c krb5_err.c kv5m_err.c krb524_err.c
 all-unix:: all-libobjs
 all-libobjs: $(HDRS)
 
-includes:: $(HDRS)
-	for f in $(HDRS) ; do \
-		if cmp $$f $(THDRDIR)/$$f >/dev/null 2>&1; then :; \
-		else \
-			(set -x; $(RM) $(THDRDIR)/$$f; \
-			 $(CP) $$f $(THDRDIR)/$$f) ; \
-		fi ; \
-	done
+includes: $(HDRS)
 
 awk-windows:
 	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
