@@ -77,16 +77,19 @@ osconf.h: $(OSCONFSRC) Makefile
 ##DOS##!endif
 ###############################################################################
 
-krb5/krb5.h: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
+krb5/krb5.h: krb5.stamp; : krb5.h
+krb5.stamp: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 	test -d krb5 || mkdir krb5
 	if test -r krb5.h; then \
 	  if cmp -s krb5.h $(srcdir)/krb5.h; then :; else rm -f krb5.h; fi; \
 	else :; fi
-	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.h
-	echo "#ifndef KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
-	echo "#define KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
-	cat $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS) >> krb5/krb5.h
-	echo "#endif /* KRB5_KRB5_H_INCLUDED */" >> krb5/krb5.h
+	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.new
+	echo "#ifndef KRB5_KRB5_H_INCLUDED" >> krb5/krb5.new
+	echo "#define KRB5_KRB5_H_INCLUDED" >> krb5/krb5.new
+	cat $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS) >> krb5/krb5.new
+	echo "#endif /* KRB5_KRB5_H_INCLUDED */" >> krb5/krb5.new
+	$(MOVEIFCHANGED) krb5/krb5.new krb5/krb5.h
+	touch krb5.stamp
 
 verify-calling-conventions-krb5: private-and-public-decls
 	$(PERL) -w $(SRCTOP)/util/def-check.pl private-and-public-decls $(SRCTOP)/lib/krb5_32.def
@@ -107,7 +110,7 @@ force:
 
 clean-unix::
 	$(RM) krb5/krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h private-and-public-decls
+		asn1_err.h private-and-public-decls krb5.stamp
 	$(RM) $(ET_HEADERS) autoconf.stamp
 
 clean-windows::
