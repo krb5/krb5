@@ -119,12 +119,8 @@ char copyright[] =
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
-     
+
 #include <signal.h>
 #if !defined(KERBEROS) || !defined(KRB5_KRB4_COMPAT)
 /* Ultrix doesn't protect it vs multiple inclusion, and krb.h includes it */

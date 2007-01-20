@@ -60,11 +60,7 @@ char copyright[] =
 #ifdef HAVE_VFORK_H
 #include <vfork.h>
 #endif
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <sys/wait.h>
 
 #ifdef KERBEROS
