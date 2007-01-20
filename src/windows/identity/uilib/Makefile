@@ -37,6 +37,7 @@ UIDLLOBJFILES=			\
 	$(OBJ)\acceldef.obj	\
 	$(OBJ)\configui.obj	\
 	$(OBJ)\trackerwnd.obj	\
+	$(OBJ)\uibind.obj	\
 	$(OBJ)\version.obj
 
 INCFILES=			\
@@ -50,7 +51,8 @@ INCFILES=			\
 	$(INCDIR)\khprops.h	\
 	$(INCDIR)\khconfigui.h	\
 	$(INCDIR)\khtracker.h	\
-	$(INCDIR)\khremote.h
+	$(INCDIR)\khremote.h	\
+	$(INCDIR)\intaction.h
 
 $(OBJ)\actiondef.c: actions.csv actiondef.cfg
 	$(CCSV) $** $@
