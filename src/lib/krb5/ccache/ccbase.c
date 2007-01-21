@@ -71,8 +71,11 @@ static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops,
 #endif /* USE_KEYRING_CCACHE */
 #endif
 
+#ifndef USE_KEYRING_CCACHE
 static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
+#endif
+
 #ifdef USE_KEYRING_CCACHE
 #define INITIAL_TYPEHEAD (&cc_krcc_entry)
 #else
