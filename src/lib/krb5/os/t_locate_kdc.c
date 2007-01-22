@@ -5,6 +5,7 @@
 #include <com_err.h>
 
 #define TEST
+#include "fake-addrinfo.h"
 #include "dnsglue.c"
 #include "dnssrv.c"
 #include "locate_kdc.c"
@@ -19,13 +20,13 @@ const char *prog;
 
 struct addrlist al;
 
-void kfatal (krb5_error_code err)
+static void kfatal (krb5_error_code err)
 {
     com_err (prog, err, "- exiting");
     exit (1);
 }
 
-const char *stypename (int stype)
+static const char *stypename (int stype)
 {
     static char buf[20];
     switch (stype) {
@@ -41,7 +42,7 @@ const char *stypename (int stype)
     }
 }
 
-void print_addrs (void)
+static void print_addrs (void)
 {
     int i;
 
