@@ -132,7 +132,8 @@ krb5int_cc_finalize(void)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
+krb5_cc_register(krb5_context context, const krb5_cc_ops *ops, 
+		 krb5_boolean override)
 {
     struct krb5_cc_typelist *t;
     krb5_error_code err;

@@ -2316,7 +2316,7 @@ krb5_error_code krb5_rd_req_decoded_anyflag
 		krb5_ticket **);
 krb5_error_code KRB5_CALLCONV krb5_cc_register
 	(krb5_context,
-		krb5_cc_ops *,
+		const krb5_cc_ops *,
 		krb5_boolean );
 krb5_error_code krb5_walk_realm_tree
 	(krb5_context,
