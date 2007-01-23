@@ -27,7 +27,7 @@
  */
 
 
-#include "krb5.h"
+#include "k5-int.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "autoconf.h"
@@ -254,7 +254,6 @@ static void test_misc(krb5_context context)
   /* Tests for certain error returns */
   krb5_error_code	kret;
   krb5_ccache id;
-  extern krb5_cc_ops *krb5_cc_dfl_ops;
   krb5_cc_ops *ops_save;
 
   fprintf(stderr, "Testing miscellaneous error conditions\n");
