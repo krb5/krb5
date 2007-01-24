@@ -38,6 +38,9 @@ khm_cred_destroy_creds(khm_boolean sync,
 void
 khm_cred_destroy_identity(khm_handle identity);
 
+void
+khm_cred_renew_all_identities(void);
+
 void 
 khm_cred_renew_identity(khm_handle identity);
 

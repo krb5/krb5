@@ -1254,6 +1254,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 if (flags) {
                     ol->flags |= flags;
                     ol->flags |= KHUI_CW_O_SHOWFLAG;
+		    expstate |= flags;
                 }
             }
         }
@@ -1264,7 +1265,6 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
 
         flags = cw_get_buf_exp_flags(tbl, thiscred);
-        expstate |= flags;
 
         if(visible) {
             khm_int32 c_flags;
@@ -1404,6 +1404,8 @@ _exit:
     if(grouping)
         PFREE(grouping);
 
+    /* note that the expstate is derived from whether or not 
+     * we have expiration states set for any active identities */
     if (n_creds == 0)
         khm_notify_icon_expstate(KHM_NOTIF_EMPTY);
     else if (expstate & CW_EXPSTATE_EXPIRED)

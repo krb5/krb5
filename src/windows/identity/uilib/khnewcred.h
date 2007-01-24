@@ -225,9 +225,9 @@ typedef struct tag_khui_new_creds {
 
     khm_int32   subtype;        /*!< Subtype of the request that is
                                   being handled through this object.
-                                  One of ::KMSG_CRED_INITIAL_CREDS,
-                                  ::KMSG_CRED_NEW_CREDS or
-                                  ::KMSG_CRED_RENEW_CREDS */
+                                  One of ::KMSG_CRED_NEW_CREDS,
+                                  ::KMSG_CRED_RENEW_CREDS or
+                                  ::KMSG_CRED_PASSWORD */
 
     CRITICAL_SECTION cs;        /*!< Internal use */
 

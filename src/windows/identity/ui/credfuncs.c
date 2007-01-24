@@ -367,6 +367,7 @@ kmsg_cred_completion(kmq_message *m)
         /* all is done. */
         {
             khui_new_creds * nc;
+            khm_boolean continue_cmdline = FALSE;
 
             nc = (khui_new_creds *) m->vparam;
 
@@ -379,13 +380,28 @@ kmsg_cred_completion(kmq_message *m)
                 */
 
                 khm_cred_end_dialog(nc);
+            } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
+
+                /* if this is a renewal that was triggered while we
+                   were processing the commandline, then we need to
+                   update the pending renewal count. */
+
+                if (khm_startup.processing) {
+                    LONG renewals;
+                    renewals = InterlockedDecrement(&khm_startup.pending_renewals);
+
+                    if (renewals == 0) {
+                        continue_cmdline = TRUE;
+                    }
+                }
             }
 
             khui_cw_destroy_cred_blob(nc);
 
             kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
 
-            kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
+            if (continue_cmdline)
+                kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
         }
         break;
 
@@ -416,7 +432,35 @@ kmsg_cred_completion(kmq_message *m)
         break;
 
     case KMSG_CRED_IMPORT:
-        kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
+        {
+            khm_boolean continue_cmdline = FALSE;
+            LONG pending_renewals;
+
+            /* once an import operation ends, we have to trigger a
+               renewal so that other plug-ins that didn't participate
+               in the import operation can have a chance at getting
+               the necessary credentials.
+
+               If we are in the middle of processing the commandline,
+               we have to be a little bit careful.  We can't issue a
+               commandline conituation message right now because the
+               import action is still ongoing (since the renewals are
+               part of the action).  Once the renewals have completed,
+               the completion handler will automatically issue a
+               commandline continuation message.  However, if there
+               were no identities to renew, then we have to issue the
+               message ourselves.
+            */
+
+            InterlockedIncrement(&khm_startup.pending_renewals);
+
+            khm_cred_renew_all_identities();
+
+            pending_renewals = InterlockedDecrement(&khm_startup.pending_renewals);
+
+            if (pending_renewals == 0 && khm_startup.processing)
+                kmq_post_message(KMSG_ACT, KMSG_ACT_CONTINUE_CMDLINE, 0, 0);
+        }
         break;
 
     case KMSG_CRED_REFRESH:
@@ -540,6 +584,71 @@ void khm_cred_destroy_identity(khm_handle identity)
     _end_task();
 }
 
+void khm_cred_renew_all_identities(void)
+{
+    khm_size count;
+    khm_size cb = 0;
+    khm_size n_idents = 0;
+    khm_int32 rv;
+    wchar_t * ident_names = NULL;
+    wchar_t * this_ident;
+
+    kcdb_credset_get_size(NULL, &count);
+
+    /* if there are no credentials, we just skip over the renew
+       action. */
+
+    if (count == 0)
+        return;
+
+    ident_names = NULL;
+
+    while (TRUE) {
+        if (ident_names) {
+            PFREE(ident_names);
+            ident_names = NULL;
+        }
+
+        cb = 0;
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_EMPTY, 0,
+                                NULL,
+                                &cb, &n_idents);
+
+        if (n_idents == 0 || rv != KHM_ERROR_TOO_LONG ||
+            cb == 0)
+            break;
+
+        ident_names = PMALLOC(cb);
+        ident_names[0] = L'\0';
+
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_EMPTY, 0,
+                                ident_names,
+                                &cb, &n_idents);
+
+        if (KHM_SUCCEEDED(rv))
+            break;
+    }
+
+    if (ident_names) {
+        for (this_ident = ident_names;
+             this_ident && *this_ident;
+             this_ident = multi_string_next(this_ident)) {
+            khm_handle ident;
+
+            if (KHM_FAILED(kcdb_identity_create(this_ident, 0,
+                                                &ident)))
+                continue;
+
+            khm_cred_renew_identity(ident);
+
+            kcdb_identity_release(ident);
+        }
+
+        PFREE(ident_names);
+        ident_names = NULL;
+    }
+}
+
 void khm_cred_renew_identity(khm_handle identity)
 {
     khui_new_creds * c;
@@ -557,6 +666,12 @@ void khm_cred_renew_identity(khm_handle identity)
     _begin_task(KHERR_CF_TRANSITIVE);
     _report_sr0(KHERR_NONE, IDS_CTX_RENEW_CREDS);
     _describe();
+
+    /* if we are calling this while processing startup actions, we
+       need to keep track of how many we have issued. */
+    if (khm_startup.processing) {
+        InterlockedIncrement(&khm_startup.pending_renewals);
+    }
 
     kmq_post_message(KMSG_CRED, KMSG_CRED_RENEW_CREDS, 0, (void *) c);
 
@@ -581,6 +696,12 @@ void khm_cred_renew_cred(khm_handle cred)
     _report_sr0(KHERR_NONE, IDS_CTX_RENEW_CREDS);
     _describe();
 
+    /* if we are calling this while processing startup actions, we
+       need to keep track of how many we have issued. */
+    if (khm_startup.processing) {
+        InterlockedIncrement(&khm_startup.pending_renewals);
+    }
+
     kmq_post_message(KMSG_CRED, KMSG_CRED_RENEW_CREDS, 0, (void *) c);
 
     _end_task();
@@ -598,6 +719,12 @@ void khm_cred_renew_creds(void)
     _begin_task(KHERR_CF_TRANSITIVE);
     _report_sr0(KHERR_NONE, IDS_CTX_RENEW_CREDS);
     _describe();
+
+    /* if we are calling this while processing startup actions, we
+       need to keep track of how many we have issued. */
+    if (khm_startup.processing) {
+        InterlockedIncrement(&khm_startup.pending_renewals);
+    }
 
     kmq_post_message(KMSG_CRED, KMSG_CRED_RENEW_CREDS, 0, (void *) c);
 
@@ -947,73 +1074,37 @@ khm_cred_process_startup_actions(void) {
         if (khm_startup.import) {
             khm_cred_import();
             khm_startup.import = FALSE;
+
+            /* we also set the renew command to false here because we
+               trigger a renewal for all the identities at the end of
+               the import operation anyway. */
+            khm_startup.renew = FALSE;
             break;
         }
 
         if (khm_startup.renew) {
-            khm_size count;
-            wchar_t * ident_names = NULL;
-            wchar_t * this_ident;
-
-            kcdb_credset_get_size(NULL, &count);
+            LONG pending_renewals;
 
             /* if there are no credentials, we just skip over the
                renew action. */
 
             khm_startup.renew = FALSE;
 
-            if (count != 0) {
-                khm_size cb = 0;
-                khm_size n_idents = 0;
-                khm_int32 rv;
+            InterlockedIncrement(&khm_startup.pending_renewals);
 
-                ident_names = NULL;
+            khm_cred_renew_all_identities();
 
-                while (TRUE) {
-                    if (ident_names) {
-                        PFREE(ident_names);
-                        ident_names = NULL;
-                    }
+            pending_renewals = InterlockedDecrement(&khm_startup.pending_renewals);
 
-                    cb = 0;
-                    rv = kcdb_identity_enum(KCDB_IDENT_FLAG_EMPTY, 0,
-                                            NULL,
-                                            &cb, &n_idents);
-
-                    if (n_idents == 0 || rv != KHM_ERROR_TOO_LONG ||
-                        cb == 0)
-                        break;
-
-                    ident_names = PMALLOC(cb);
-
-                    rv = kcdb_identity_enum(KCDB_IDENT_FLAG_EMPTY, 0,
-                                            ident_names,
-                                            &cb, &n_idents);
-
-                    if (KHM_SUCCEEDED(rv))
-                        break;
-                }
-
-                if (ident_names) {
-                    for (this_ident = ident_names;
-                         this_ident && *this_ident;
-                         this_ident = multi_string_next(this_ident)) {
-                        khm_handle ident;
-
-                        if (KHM_FAILED(kcdb_identity_create(this_ident, 0,
-                                                            &ident)))
-                            continue;
-
-                        khm_cred_renew_identity(ident);
-
-                        kcdb_identity_release(ident);
-                    }
-
-                    PFREE(ident_names);
-                    ident_names = NULL;
-                }
+            if (pending_renewals != 0)
                 break;
-            }
+
+            /* if there were no pending renewals, then we just fall
+               through. This means that either there were no
+               identities to renew, or all the renewals completed.  If
+               all the renewals completed, then the commandline
+               contiuation message wasn't triggered.  Either way, we
+               must fall through if the count is zero. */
         }
 
         if (khm_startup.destroy) {
