@@ -70,12 +70,14 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
 				      locate_service_kadmin, SOCK_STREAM, 0);
 	if (!code) {
 	    /* Success with admin_server but now we need to change the
-	       port number to use DEFAULT_KPASSWD_PORT.  */
+	       port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
 	    int i;
 	    for (i=0; i<addrlist->naddrs; i++) {
 		struct addrinfo *a = addrlist->addrs[i].ai;
 		if (a->ai_family == AF_INET)
 		    sa2sin (a->ai_addr)->sin_port = htons(DEFAULT_KPASSWD_PORT);
+		if (sockType != SOCK_STREAM)
+		    a->ai_socktype = sockType;
 	    }
 	}
     }
