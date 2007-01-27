@@ -290,9 +290,6 @@ krb5_auth_to_rep
 krb5_build_principal
 krb5_build_principal_ext
 krb5_build_principal_va
-krb5_cccol_cursor_free
-krb5_cccol_cursor_new
-krb5_cccol_cursor_next
 krb5_cc_close
 krb5_cc_copy_creds
 krb5_cc_default
@@ -317,11 +314,15 @@ krb5_cc_set_default_name
 krb5_cc_set_flags
 krb5_cc_start_seq_get
 krb5_cc_store_cred
+krb5_cccol_cursor_free
+krb5_cccol_cursor_new
+krb5_cccol_cursor_next
 krb5_change_cache
 krb5_change_password
 krb5_change_set_password
 krb5_check_transited_list
 krb5_chpw_result_code_string
+krb5_clear_error_message
 krb5_copy_addr
 krb5_copy_addresses
 krb5_copy_authdata
@@ -377,6 +378,7 @@ krb5_free_enc_sam_response_enc_2_contents
 krb5_free_enc_sam_response_enc_contents
 krb5_free_enc_tkt_part
 krb5_free_error
+krb5_free_error_message
 krb5_free_etype_info
 krb5_free_host_realm
 krb5_free_kdc_rep
@@ -429,6 +431,7 @@ krb5_get_credentials_validate
 krb5_get_default_config_files
 krb5_get_default_in_tkt_ktypes
 krb5_get_default_realm
+krb5_get_error_message
 krb5_get_host_realm
 krb5_get_in_tkt
 krb5_get_in_tkt_with_keytab
@@ -621,6 +624,7 @@ krb5_set_default_in_tkt_ktypes
 krb5_set_default_realm
 krb5_set_default_tgs_enctypes
 krb5_set_default_tgs_ktypes
+krb5_set_error_message
 krb5_set_password
 krb5_set_password_using_ccache
 krb5_set_principal_realm
@@ -649,6 +653,7 @@ krb5_validate_times
 krb5_verify_init_creds
 krb5_verify_init_creds_opt_init
 krb5_verify_init_creds_opt_set_ap_req_nofail
+krb5_vset_error_message
 krb5_walk_realm_tree
 krb5_write_message
 krb5int_524_sendto_kdc
@@ -666,6 +671,7 @@ krb5int_free_srv_dns_data
 krb5int_generate_and_save_subkey
 krb5int_get_fq_local_hostname
 krb5int_grow_addrlist
+krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_krb_life_to_time
 krb5int_krb_time_to_life
@@ -733,9 +739,3 @@ profile_update_file_data
 profile_update_relation
 profile_verify_node
 profile_write_tree_file
-krb5_set_error_message
-krb5_vset_error_message
-krb5_get_error_message
-krb5_free_error_message
-krb5_clear_error_message
-krb5int_init_context_kdc
