@@ -193,6 +193,7 @@ krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
 
     err = k5_mutex_init(&data->lock);
     if (err) {
+	krb5_xfree(data);
 	krb5_xfree(*id);
 	return err;
     }
@@ -791,6 +792,7 @@ krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
 
     err = k5_mutex_init(&data->lock);
     if (err) {
+	krb5_xfree(data);
 	krb5_xfree(*id);
 	return err;
     }
