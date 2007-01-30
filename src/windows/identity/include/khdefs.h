@@ -113,11 +113,14 @@ typedef size_t khm_size;
     Just a signed version of size_t
  */
 
+#ifndef _SSIZE_T_DEFINED
 #ifdef  _WIN64
 typedef __int64    ssize_t;
 #else
 typedef _W64 int   ssize_t;
 #endif
+#define _SSIZE_T_DEFINED
+#endif 
 
 typedef ssize_t khm_ssize;
 
