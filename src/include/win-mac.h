@@ -82,6 +82,14 @@ typedef int              int32_t;
 typedef unsigned __int64 uint64_t;
 typedef __int64          int64_t;
 #endif
+#ifndef SSIZE_T_DEFINED
+#ifdef _WIN64
+typedef __int64		 ssize_t;
+#else
+typedef _W64 int 	 ssize_t;
+#endif
+#define SSIZE_T_DEFINED
+#endif
 #endif /* KRB5_SYSTYPES__ */
 
 #define MAXHOSTNAMELEN  512
