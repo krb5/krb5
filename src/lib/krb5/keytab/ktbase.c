@@ -24,6 +24,28 @@
  * or implied warranty.
  * 
  *
+ * Copyright 2007 by Secure Endpoints Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation files
+ * (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software,
+ * and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  * Registration functions for keytab.
  */
 
@@ -34,41 +56,60 @@
 extern const krb5_kt_ops krb5_ktf_ops;
 extern const krb5_kt_ops krb5_ktf_writable_ops;
 extern const krb5_kt_ops krb5_kts_ops;
+extern const krb5_kt_ops krb5_mkt_ops;
 
 struct krb5_kt_typelist {
     const krb5_kt_ops *ops;
     const struct krb5_kt_typelist *next;
 };
+const static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
+    &krb5_kts_ops,
+    NULL
+};
+const static struct krb5_kt_typelist krb5_kt_typelist_memory = {
+    &krb5_mkt_ops,
+    &krb5_kt_typelist_srvtab
+};
 const static struct krb5_kt_typelist krb5_kt_typelist_wrfile  = {
     &krb5_ktf_writable_ops,
-    0
+    &krb5_kt_typelist_memory
 };
 const static struct krb5_kt_typelist krb5_kt_typelist_file  = {
     &krb5_ktf_ops,
     &krb5_kt_typelist_wrfile
 };
-const static struct krb5_kt_typelist krb5_kt_typelist_srvtab = {
-    &krb5_kts_ops,
-    &krb5_kt_typelist_file
-};
-static const struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_srvtab;
+
+static const struct krb5_kt_typelist *kt_typehead = &krb5_kt_typelist_file;
 /* Lock for protecting the type list.  */
 static k5_mutex_t kt_typehead_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 int krb5int_kt_initialize(void)
 {
-    return k5_mutex_finish_init(&kt_typehead_lock);
+    int err;
+
+    err = k5_mutex_finish_init(&kt_typehead_lock);
+    if (err)
+	goto done;
+    err = krb5int_mkt_initialize();
+    if (err)
+	goto done;
+
+  done:
+    return(err);
 }
 
 void
 krb5int_kt_finalize(void)
 {
-    struct krb5_kt_typelist *t, *t_next;
+    const struct krb5_kt_typelist *t, *t_next;
+
     k5_mutex_destroy(&kt_typehead_lock);
-    for (t = kt_typehead; t != &krb5_kt_typelist_srvtab; t = t_next) {
+    for (t = kt_typehead; t != &krb5_kt_typelist_file; t = t_next) {
 	t_next = t->next;
-	free(t);
+	free((struct krb5_kt_typelist *)t);
     }
+
+    krb5int_mkt_finalize();
 }
 
 
