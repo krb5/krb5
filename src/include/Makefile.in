@@ -93,8 +93,11 @@ krb5.stamp: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 
 verify-calling-conventions-krb5: private-and-public-decls
 	$(PERL) -w $(SRCTOP)/util/def-check.pl private-and-public-decls $(SRCTOP)/lib/krb5_32.def
-private-and-public-decls: krb5/krb5.h $(srcdir)/k5-int.h
-	cat krb5/krb5.h $(srcdir)/k5-int.h > private-and-public-decls
+
+HEADERS_TO_CHECK = krb5/krb5.h $(srcdir)/k5-int.h $(srcdir)/krb5/preauth_plugin.h
+
+private-and-public-decls: $(HEADERS_TO_CHECK)
+	cat $(HEADERS_TO_CHECK) > $@
 
 #
 # Build the error table include files:
