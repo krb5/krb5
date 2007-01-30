@@ -34,8 +34,6 @@ static void get_init_creds_opt_init( krb5_get_init_creds_opt *outOptions )
 {
     krb5_preauthtype    preauth[] = { KRB5_PADATA_ENC_TIMESTAMP };
     krb5_enctype        etypes[] = {ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_CRC};
-    memset( outOptions, 0, sizeof(*outOptions) );
-    krb5_get_init_creds_opt_init(outOptions);
     krb5_get_init_creds_opt_set_address_list(outOptions, NULL);
     krb5_get_init_creds_opt_set_etype_list( outOptions, etypes, sizeof(etypes)/sizeof(krb5_enctype) );
     krb5_get_init_creds_opt_set_preauth_list(outOptions, preauth, sizeof(preauth)/sizeof(krb5_preauthtype) );
@@ -128,17 +126,21 @@ static kbrccache_t userinitcontext(
 		}
 		if( kres != 0 || have_credentials == 0 )
 		{
-			krb5_get_init_creds_opt options;
-			get_init_creds_opt_init(&options);
+			krb5_get_init_creds_opt *options = NULL;
+			kres = krb5_get_init_creds_opt_alloc(kcontext, &options);
+			if ( kres == 0 )
+			{
+				get_init_creds_opt_init(options);
 /*
 ** no valid credentials - get new ones
 */
-			kres = krb5_get_init_creds_password( kcontext, &kcreds, kme, pPass,
-					NULL /*prompter*/, 
-					NULL /*data*/,
-					0 /*starttime*/,
-					0 /*in_tkt_service*/,
-					&options /*options*/ );
+				kres = krb5_get_init_creds_password( kcontext, &kcreds, kme, pPass,
+						NULL /*prompter*/, 
+						NULL /*data*/,
+						0 /*starttime*/,
+						0 /*in_tkt_service*/,
+						options /*options*/ );
+			}
 			if( kres == 0 )
 			{
 				if( numCreds <= 0 )
@@ -148,6 +150,7 @@ static kbrccache_t userinitcontext(
 				if( kres == 0 )
 					have_credentials = 1;
 			}
+			krb5_get_init_creds_opt_free(kcontext, options);
 		}
 #ifdef NOTUSED
 		if( have_credentials )

@@ -843,7 +843,7 @@ krb5_get_init_creds(krb5_context context,
 		    void *prompter_data,
 		    krb5_deltat start_time,
 		    char *in_tkt_service,
-		    krb5_get_init_creds_opt *options,
+		    krb5_gic_opt_ext *options,
 		    krb5_gic_get_as_key_fct gak_fct,
 		    void *gak_data,
 		    int  *use_master,
@@ -1111,30 +1111,21 @@ krb5_get_init_creds(krb5_context context,
 				       &salt, &s2kparams, &etype, &as_key,
 				       prompter, prompter_data,
 				       gak_fct, gak_data,
-				       &get_data_rock)))
+				       &get_data_rock, options)))
 	        goto cleanup;
 	} else {
-	    if (preauth_to_use != NULL) {
-		/*
-		 * Retry after an error other than PREAUTH_NEEDED,
-		 * using e-data to figure out what to change.
-		 */
-		ret = krb5_do_preauth_tryagain(context,
-					       &request,
-					       encoded_request_body,
-					       encoded_previous_request,
-					       preauth_to_use, &request.padata,
-					       err_reply,
-					       &salt, &s2kparams, &etype,
-					       &as_key,
-					       prompter, prompter_data,
-					       gak_fct, gak_data,
-					       &get_data_rock);
-	    } else {
-		/* No preauth supplied, so can't query the plug-ins. */
-		ret = KRB5KRB_ERR_GENERIC;
-	    }
-	    if (ret) {
+	    /* retrying after an error other than PREAUTH_NEEDED, using e-data
+	     * to figure out what to change */
+	    if (krb5_do_preauth_tryagain(context,
+					 &request,
+					 encoded_request_body,
+					 encoded_previous_request,
+					 preauth_to_use, &request.padata,
+					 err_reply,
+					 &salt, &s2kparams, &etype, &as_key,
+					 prompter, prompter_data,
+					 gak_fct, gak_data,
+					 &get_data_rock, options)) {
 		/* couldn't come up with anything better */
 		ret = err_reply->error + ERROR_TABLE_BASE_krb5;
 	    }
@@ -1214,7 +1205,7 @@ krb5_get_init_creds(krb5_context context,
 			       local_as_reply->padata, &kdc_padata,
 			       &salt, &s2kparams, &etype, &as_key, prompter,
 			       prompter_data, gak_fct, gak_data,
-			       &get_data_rock)))
+			       &get_data_rock, options)))
 	goto cleanup;
 
     /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,

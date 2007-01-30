@@ -90,6 +90,7 @@ static krb5_error_code
 client_process(krb5_context kcontext,
 	       void *plugin_context,
 	       void *request_context,
+	       krb5_get_init_creds_opt *opt,
 	       preauth_get_client_data_proc client_get_data_proc,
 	       struct _krb5_preauth_client_rock *rock,
 	       krb5_kdc_req *request,
@@ -207,6 +208,21 @@ client_req_cleanup(krb5_context kcontext, void *plugin_context, void *req_contex
     }
     return;
 }
+
+static krb5_error_code
+client_gic_opt(krb5_context kcontext,
+	       void *plugin_context,
+	       krb5_get_init_creds_opt *opt,
+	       const char *attr,
+	       const char *value)
+{
+#ifdef DEBUG
+    fprintf(stderr, "(wpse) client_gic_opt: received '%s' = '%s'\n",
+	    attr, value);
+#endif
+    return 0;
+}
+
 
 /* Free state. */
 static krb5_error_code
@@ -378,6 +394,7 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     client_req_cleanup,			    /* request fini function */
     client_process,			    /* process function */
     NULL,				    /* try_again function */
+    client_gic_opt			    /* get init creds opts function */
 };
 
 struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {

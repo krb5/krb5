@@ -2081,6 +2081,16 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT	0x0100
 
 
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_alloc
+(krb5_context context,
+		krb5_get_init_creds_opt **opt);
+
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_free
+(krb5_context context,
+		krb5_get_init_creds_opt *opt);
+
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init
 (krb5_get_init_creds_opt *opt);
@@ -2131,6 +2141,27 @@ void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_change_password_prompt
 (krb5_get_init_creds_opt *opt,
 		int prompt);
+
+/* Generic preauth option attribute/value pairs */
+typedef struct _krb5_gic_opt_pa_data {
+    char *attr;
+    char *value;
+} krb5_gic_opt_pa_data;
+
+/*
+ * This function allows the caller to supply options to preauth
+ * plugins.  Preauth plugin modules are given a chance to look
+ * at each option at the time this function is called in ordre
+ * to check the validity of the option.
+ * The 'opt' pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_pa
+		(krb5_context context,
+		krb5_get_init_creds_opt *opt,
+		const char *attr,
+		const char *value);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password
