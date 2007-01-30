@@ -367,7 +367,7 @@ kmsg_cred_completion(kmq_message *m)
         /* all is done. */
         {
             khui_new_creds * nc;
-            khm_boolean continue_cmdline = FALSE;
+            khm_boolean continue_cmdline = TRUE;
 
             nc = (khui_new_creds *) m->vparam;
 
@@ -380,6 +380,7 @@ kmsg_cred_completion(kmq_message *m)
                 */
 
                 khm_cred_end_dialog(nc);
+
             } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
 
                 /* if this is a renewal that was triggered while we
@@ -390,8 +391,8 @@ kmsg_cred_completion(kmq_message *m)
                     LONG renewals;
                     renewals = InterlockedDecrement(&khm_startup.pending_renewals);
 
-                    if (renewals == 0) {
-                        continue_cmdline = TRUE;
+                    if (renewals != 0) {
+                        continue_cmdline = FALSE;
                     }
                 }
             }
