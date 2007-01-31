@@ -1114,18 +1114,27 @@ krb5_get_init_creds(krb5_context context,
 				       &get_data_rock, options)))
 	        goto cleanup;
 	} else {
-	    /* retrying after an error other than PREAUTH_NEEDED, using e-data
-	     * to figure out what to change */
-	    if (krb5_do_preauth_tryagain(context,
-					 &request,
-					 encoded_request_body,
-					 encoded_previous_request,
-					 preauth_to_use, &request.padata,
-					 err_reply,
-					 &salt, &s2kparams, &etype, &as_key,
-					 prompter, prompter_data,
-					 gak_fct, gak_data,
-					 &get_data_rock, options)) {
+	    if (preauth_to_use != NULL) {
+		/*
+		 * Retry after an error other than PREAUTH_NEEDED,
+		 * using e-data to figure out what to change.
+		 */
+		ret = krb5_do_preauth_tryagain(context,
+					       &request,
+					       encoded_request_body,
+					       encoded_previous_request,
+					       preauth_to_use, &request.padata,
+					       err_reply,
+					       &salt, &s2kparams, &etype,
+					       &as_key,
+					       prompter, prompter_data,
+					       gak_fct, gak_data,
+					       &get_data_rock, options);
+	    } else {
+		/* No preauth supplied, so can't query the plug-ins. */
+		ret = KRB5KRB_ERR_GENERIC;
+	    }
+	    if (ret) {
 		/* couldn't come up with anything better */
 		ret = err_reply->error + ERROR_TABLE_BASE_krb5;
 	    }

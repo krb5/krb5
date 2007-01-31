@@ -64,6 +64,15 @@ krb5_get_init_creds_opt_set_salt(krb5_get_init_creds_opt *opt, krb5_data *salt)
    opt->salt = salt;
 }
 
+void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_change_password_prompt(krb5_get_init_creds_opt *opt, int prompt)
+{
+   if (prompt)
+     opt->flags |= KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+   else
+     opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+}
+
 /*
  * Extending the krb5_get_init_creds_opt structure.  The original
  * krb5_get_init_creds_opt structure is defined publicly.  The
