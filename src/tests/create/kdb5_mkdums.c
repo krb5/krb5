@@ -93,7 +93,6 @@ main(argc, argv)
     krb5_error_code retval;
     char *dbname = 0;
     int enctypedone = 0;
-    extern krb5_kt_ops krb5_ktf_writable_ops;
     int num_to_create;
     char principal_string[BUFSIZ];
     char *suffix = 0;
@@ -150,15 +149,6 @@ main(argc, argv)
     }
 
     if (!(num_to_create && suffix)) usage(progname, 1);
-
-
-    if ((retval = krb5_kt_register(test_context, &krb5_ktf_writable_ops))) {
-        if (retval != KRB5_KT_TYPE_EXISTS) {
-	  com_err(progname, retval,
-		"while registering writable key table functions");
-	  exit(1);
-	}
-    }
 
     if (!enctypedone)
 	master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
