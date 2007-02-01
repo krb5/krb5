@@ -266,7 +266,7 @@ krb5_ktsrvtab_get_name(krb5_context context, krb5_keytab id, char *name, unsigne
     name++;
     len -= strlen(id->ops->prefix)+1;
 
-    if (len < strlen(KTFILENAME(id)+1))
+    if (len < strlen(KTFILENAME(id))+1)
 	return(KRB5_KT_NAME_TOOLONG);
     strcpy(name, KTFILENAME(id));
     /* strcpy will NUL-terminate the destination */

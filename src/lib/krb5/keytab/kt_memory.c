@@ -472,7 +472,7 @@ krb5_mkt_get_name(krb5_context context, krb5_keytab id, char *name, unsigned int
     name++;
     len -= strlen(id->ops->prefix)+1;
 
-    if (len < strlen(KTNAME(id)+1))
+    if (len < strlen(KTNAME(id))+1)
 	return(KRB5_KT_NAME_TOOLONG);
     strcpy(name, KTNAME(id));
     /* strcpy will NUL-terminate the destination */
