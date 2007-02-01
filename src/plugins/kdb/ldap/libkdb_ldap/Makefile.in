@@ -320,5 +320,5 @@ kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h kdb_xdr.c kdb_xdr.h
 ldap_err.so ldap_err.po $(OUTPRE)ldap_err.$(OBJEXT): \
-  $(BUILDTOP)/include/kdb5_err.h $(COM_ERR_DEPS) ldap_err.c \
-  ldap_err.h
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  ldap_err.c ldap_err.h
