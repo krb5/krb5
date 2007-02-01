@@ -283,8 +283,6 @@ int main (void)
     krb5_context context;
     krb5_error_code	kret;
 
-    initialize_krb5_error_table ();
-
     if ((kret = krb5_init_context(&context))) {
 	    printf("Couldn't initialize krb5 library: %s\n",
 		   error_message(kret));
