@@ -57,9 +57,13 @@ port 88 and port 750.
 .IP v4_mode
 This 
 .B string
-specifies how the KDC should respond to Kerberos IV packets. If this
-relation is not specified, the compiled-in default of
-.I nopreauth 
+specifies how the KDC should respond to Kerberos IV packets. Valid
+values for this relation are the same as the valid arguments to the
+.B -4
+flag to
+.BR krb5kdc .
+If this relation is not specified, the compiled-in default of
+.I none
 is used.
 
 .SH REALMS SECTION
