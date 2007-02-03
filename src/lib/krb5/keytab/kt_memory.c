@@ -175,6 +175,7 @@ void krb5int_mkt_finalize(void) {
  	     * krb5_context since we know that the context isn't used by
 	     * krb5_kt_free_entry or krb5_free_principal. */
 	    krb5_kt_free_entry(NULL, cursor->entry);
+	    krb5_xfree(cursor->entry);
 	    krb5_xfree(cursor);
 	}
 
@@ -354,6 +355,7 @@ krb5_mkt_close(krb5_context context, krb5_keytab id)
 	    next_cursor = cursor->next;
 
 	    krb5_kt_free_entry(context, cursor->entry);
+	    krb5_xfree(cursor->entry);
 	    krb5_xfree(cursor);
 	}
 
