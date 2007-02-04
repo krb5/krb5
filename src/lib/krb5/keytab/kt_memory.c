@@ -401,13 +401,12 @@ krb5_mkt_get_entry(krb5_context context, krb5_keytab id,
     for (cursor = KTLINK(id); cursor && cursor->entry; cursor = cursor->next) {
 	entry = cursor->entry;
 
-	/* if the principal isn't the one requested, free new_entry
-	   and continue to the next. */
+	/* if the principal isn't the one requested, continue to the next. */
 
 	if (!krb5_principal_compare(context, principal, entry->principal))
 	    continue;
 
-	/* if the enctype is not ignored and doesn't match, free new_entry
+	/* if the enctype is not ignored and doesn't match, 
 	   and continue to the next */
 	if (enctype != IGNORE_ENCTYPE) {
 	    if ((err = krb5_c_enctype_compare(context, enctype, 
@@ -438,20 +437,21 @@ krb5_mkt_get_entry(krb5_context context, krb5_keytab id,
 
     /* if we found an entry that matches, ... */
     if (match) { 
-	out_entry->magic = entry->magic;
-	out_entry->timestamp = entry->timestamp;
-	out_entry->vno = entry->vno;
-	out_entry->key = entry->key; 
-	err = krb5_copy_keyblock_contents(context, &(entry->key),
+	out_entry->magic = match->magic;
+	out_entry->timestamp = match->timestamp;
+	out_entry->vno = match->vno;
+	out_entry->key = match->key; 
+	err = krb5_copy_keyblock_contents(context, &(match->key),
 					  &(out_entry->key));
 	/*
 	 * Coerce the enctype of the output keyblock in case we
 	 * got an inexact match on the enctype.
 	 */
-	out_entry->key.enctype = enctype;
+	if(enctype != IGNORE_ENCTYPE)
+		out_entry->key.enctype = enctype;
 	if(!err) {
 		err = krb5_copy_principal(context, 
-					  entry->principal, 
+					  match->principal, 
 					  &(out_entry->principal));
 	}
     } else {
