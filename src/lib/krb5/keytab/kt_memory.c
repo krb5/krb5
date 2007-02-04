@@ -442,12 +442,18 @@ krb5_mkt_get_entry(krb5_context context, krb5_keytab id,
 	out_entry->timestamp = entry->timestamp;
 	out_entry->vno = entry->vno;
 	out_entry->key = entry->key; 
+	err = krb5_copy_keyblock_contents(context, &(entry->key),
+					  &(out_entry->key));
 	/*
 	 * Coerce the enctype of the output keyblock in case we
 	 * got an inexact match on the enctype.
 	 */
 	out_entry->key.enctype = enctype;
-	err = krb5_copy_principal(context, entry->principal, &(out_entry->principal));
+	if(!err) {
+		err = krb5_copy_principal(context, 
+					  entry->principal, 
+					  &(out_entry->principal));
+	}
     } else {
 	if (!err)
 	    err = found_wrong_kvno ? KRB5_KT_KVNONOTFOUND : KRB5_KT_NOTFOUND;
@@ -524,7 +530,11 @@ krb5_mkt_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry
     entry->timestamp = mkt_cursor->entry->timestamp;
     entry->vno = mkt_cursor->entry->vno;
     entry->key = mkt_cursor->entry->key; 
-    err = krb5_copy_principal(context, mkt_cursor->entry->principal, &(entry->principal));
+    err = krb5_copy_keyblock_contents(context, &(mkt_cursor->entry->key), 
+				      &(entry->key));
+    if (!err) 
+	    err = krb5_copy_principal(context, mkt_cursor->entry->principal,
+				      &(entry->principal));
     if (!err)
 	*cursor = (krb5_kt_cursor *)mkt_cursor->next;
     KTUNLOCK(id);
@@ -571,9 +581,17 @@ krb5_mkt_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     cursor->entry->magic = entry->magic;
     cursor->entry->timestamp = entry->timestamp;
     cursor->entry->vno = entry->vno;
-    cursor->entry->key = entry->key; 
+    err = krb5_copy_keyblock_contents(context, &(entry->key), 
+				      &(cursor->entry->key));
+    if (err) {
+	krb5_xfree(cursor->entry);
+	krb5_xfree(cursor);
+	goto done;
+    }
+
     err = krb5_copy_principal(context, entry->principal, &(cursor->entry->principal));
     if (err) {
+	krb5_free_keyblock_contents(context, &(cursor->entry->key));
 	krb5_xfree(cursor->entry);
 	krb5_xfree(cursor);
 	goto done;
