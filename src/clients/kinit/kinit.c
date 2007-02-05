@@ -857,24 +857,6 @@ k5_kinit(opts, k5)
 	}
     }
 
-#if 0	/* XXX Testing... */
-    code = krb5_get_init_creds_opt_set_pkinit(
-	    k5->ctx,				/* context */
-	    options,				/* get_init_creds_opt */
-	    NULL,				/* principal */
-	    "/tmp/x509up_u20010",		/* X509_user_identity */
-	    "/etc/grid-security/certificates",	/* X509_anchors */
-	    NULL,				/* X509_chain_list */
-	    NULL,				/* X509_revoke_list */
-	    0,					/* flags */
-	    NULL,				/* prompter_fct */
-	    NULL,				/* prompter_data */
-	    NULL);				/* password */
-    if (code) {
-	com_err(progname, code, "while setting pkinit options");
-	goto cleanup;
-    }
-#endif
     switch (opts->action) {
     case INIT_PW:
 	code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
