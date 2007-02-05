@@ -155,7 +155,12 @@ krb5_c_string_to_key_with_params
 	krb5_get_in_tkt_with_password		; DEPRECATED
 	krb5_get_in_tkt_with_skey		; DEPRECATED
 	krb5_get_init_creds_keytab
+	krb5_get_init_creds_opt_alloc
+	krb5_get_init_creds_opt_free
+	krb5_get_init_creds_opt_free_pa
+	krb5_get_init_creds_opt_get_pa
 	krb5_get_init_creds_opt_init
+	krb5_get_init_creds_opt_set_pa
 	krb5_get_init_creds_opt_set_address_list
 	krb5_get_init_creds_opt_set_etype_list
 	krb5_get_init_creds_opt_set_forwardable

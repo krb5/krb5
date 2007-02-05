@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <errno.h>
 #include <com_err.h>
 
 #ifdef GETOPT_LONG
@@ -143,6 +144,9 @@ struct k_opts
     char* k4_cache_name;
 
     action_type action;
+
+    int num_pa_opts;
+    krb5_gic_opt_pa_data *pa_opts;
 };
 
 struct k5_data
@@ -283,6 +287,37 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
     fprintf (stderr, "\n");
 }
 
+static int
+add_preauth_opt(struct k_opts *opts, char *av)
+{
+    char *sep, *v;
+    krb5_gic_opt_pa_data *p, *x;
+
+    if (opts->num_pa_opts == 0) {
+	opts->pa_opts = malloc(sizeof(krb5_gic_opt_pa_data));
+	if (opts->pa_opts == NULL)
+	    return ENOMEM;
+    } else {
+	size_t newsize = (opts->num_pa_opts + 1) * sizeof(krb5_gic_opt_pa_data);
+	x = realloc(opts->pa_opts, newsize);
+	if (x == NULL)
+	    return ENOMEM;
+	opts->pa_opts = x;
+    }
+    p = &opts->pa_opts[opts->num_pa_opts];
+    sep = strchr(av, '=');
+    if (sep) {
+	*sep = '\0';
+	v = ++sep;
+	p->value = v;
+    } else {
+	p->value = "yes";
+    }
+    p->attr = av;
+    opts->num_pa_opts++;
+    return 0;
+}
+
 static char *
 parse_options(argc, argv, opts, progname)
     int argc;
@@ -296,7 +331,7 @@ parse_options(argc, argv, opts, progname)
     int use_k5 = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:v"))
+    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:RS:vX:"))
 	   != -1) {
 	switch (i) {
 	case 'V':
@@ -378,6 +413,14 @@ parse_options(argc, argv, opts, progname)
 		errflg++;
 	    } else {
 		opts->k5_cache_name = optarg;
+	    }
+	    break;
+	case 'X':
+	    code = add_preauth_opt(opts, optarg);
+	    if (code)
+	    {
+		com_err(progname, code, "while adding preauth option");
+		errflg++;
 	    }
 	    break;
 #if 0
@@ -752,12 +795,15 @@ k5_kinit(opts, k5)
     krb5_keytab keytab = 0;
     krb5_creds my_creds;
     krb5_error_code code = 0;
-    krb5_get_init_creds_opt options;
+    krb5_get_init_creds_opt *options = NULL;
+    int i;
 
     if (!got_k5)
 	return 0;
 
-    krb5_get_init_creds_opt_init(&options);
+    code = krb5_get_init_creds_opt_alloc(k5->ctx, &options);
+    if (code)
+	goto cleanup;
     memset(&my_creds, 0, sizeof(my_creds));
 
     /*
@@ -766,17 +812,17 @@ k5_kinit(opts, k5)
     */
 
     if (opts->lifetime)
-	krb5_get_init_creds_opt_set_tkt_life(&options, opts->lifetime);
+	krb5_get_init_creds_opt_set_tkt_life(options, opts->lifetime);
     if (opts->rlife)
-	krb5_get_init_creds_opt_set_renew_life(&options, opts->rlife);
+	krb5_get_init_creds_opt_set_renew_life(options, opts->rlife);
     if (opts->forwardable)
-	krb5_get_init_creds_opt_set_forwardable(&options, 1);
+	krb5_get_init_creds_opt_set_forwardable(options, 1);
     if (opts->not_forwardable)
-	krb5_get_init_creds_opt_set_forwardable(&options, 0);
+	krb5_get_init_creds_opt_set_forwardable(options, 0);
     if (opts->proxiable)
-	krb5_get_init_creds_opt_set_proxiable(&options, 1);
+	krb5_get_init_creds_opt_set_proxiable(options, 1);
     if (opts->not_proxiable)
-	krb5_get_init_creds_opt_set_proxiable(&options, 0);
+	krb5_get_init_creds_opt_set_proxiable(options, 0);
     if (opts->addresses)
     {
 	krb5_address **addresses = NULL;
@@ -785,10 +831,10 @@ k5_kinit(opts, k5)
 	    com_err(progname, code, "getting local addresses");
 	    goto cleanup;
 	}
-	krb5_get_init_creds_opt_set_address_list(&options, addresses);
+	krb5_get_init_creds_opt_set_address_list(options, addresses);
     }
     if (opts->no_addresses)
-	krb5_get_init_creds_opt_set_address_list(&options, NULL);
+	krb5_get_init_creds_opt_set_address_list(options, NULL);
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
     {
@@ -800,20 +846,49 @@ k5_kinit(opts, k5)
 	}
     }
 
+    for (i = 0; i < opts->num_pa_opts; i++) {
+	code = krb5_get_init_creds_opt_set_pa(k5->ctx, options,
+					      opts->pa_opts[i].attr,
+					      opts->pa_opts[i].value);
+	if (code != 0) {
+	    com_err(progname, code, "while setting '%s'='%s'",
+		    opts->pa_opts[i].attr, opts->pa_opts[i].value);
+	    goto cleanup;
+	}
+    }
+
+#if 0	/* XXX Testing... */
+    code = krb5_get_init_creds_opt_set_pkinit(
+	    k5->ctx,				/* context */
+	    options,				/* get_init_creds_opt */
+	    NULL,				/* principal */
+	    "/tmp/x509up_u20010",		/* X509_user_identity */
+	    "/etc/grid-security/certificates",	/* X509_anchors */
+	    NULL,				/* X509_chain_list */
+	    NULL,				/* X509_revoke_list */
+	    0,					/* flags */
+	    NULL,				/* prompter_fct */
+	    NULL,				/* prompter_data */
+	    NULL);				/* password */
+    if (code) {
+	com_err(progname, code, "while setting pkinit options");
+	goto cleanup;
+    }
+#endif
     switch (opts->action) {
     case INIT_PW:
 	code = krb5_get_init_creds_password(k5->ctx, &my_creds, k5->me,
 					    0, kinit_prompter, 0,
 					    opts->starttime, 
 					    opts->service_name,
-					    &options);
+					    options);
 	break;
     case INIT_KT:
 	code = krb5_get_init_creds_keytab(k5->ctx, &my_creds, k5->me,
 					  keytab,
 					  opts->starttime, 
 					  opts->service_name,
-					  &options);
+					  options);
 	break;
     case VALIDATE:
 	code = krb5_get_validated_creds(k5->ctx, &my_creds, k5->me, k5->cc,
@@ -876,8 +951,15 @@ k5_kinit(opts, k5)
     notix = 0;
 
  cleanup:
+    if (options)
+	krb5_get_init_creds_opt_free(k5->ctx, options);
     if (my_creds.client == k5->me) {
 	my_creds.client = 0;
+    }
+    if (opts->pa_opts) {
+	free(opts->pa_opts);
+	opts->pa_opts = NULL;
+	opts->num_pa_opts = 0;
     }
     krb5_free_cred_contents(k5->ctx, &my_creds);
     if (keytab)
