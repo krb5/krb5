@@ -95,7 +95,7 @@ static void kt_test(krb5_context context, const char *name)
 {
      krb5_error_code kret;
      krb5_keytab kt;
-     char *type;
+     const char *type;
      char buf[BUFSIZ];
      char *p;
      krb5_keytab_entry kent;

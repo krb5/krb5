@@ -1323,7 +1323,7 @@ typedef struct krb5_keytab_entry_st {
 struct _krb5_kt;
 typedef struct _krb5_kt *krb5_keytab;
 
-char * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_kt_get_type (krb5_context, krb5_keytab keytab);
 krb5_error_code KRB5_CALLCONV
 krb5_kt_get_name(krb5_context context, krb5_keytab keytab, char *name,
