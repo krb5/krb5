@@ -165,7 +165,7 @@ while (! $h->eof()) {
 	goto Hadcallc;
     }
     # deal with no CALLCONV indicator
-    s/^.* (\w+) *$/$1/;
+    s/^.* \**(\w+) *$/$1/;
     die "Invalid function name: '$_'" if (!/^[A-Za-z0-9_]+$/);
     push @convD, $_;
     push @vararg, $_ if $vararg;
