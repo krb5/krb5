@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "kt-int.h"
 #include <stdio.h>
 
 #define HEIMDAL_COMPATIBLE
@@ -200,7 +201,7 @@ void krb5int_mkt_finalize(void) {
 krb5_error_code KRB5_CALLCONV 
 krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
 {
-    krb5_mkt_data *data;
+    krb5_mkt_data *data = 0;
     krb5_mkt_list_node *list;
     krb5_error_code err = 0;
 
@@ -275,9 +276,11 @@ krb5_mkt_resolve(krb5_context context, const char *name, krb5_keytab *id)
     err = KTLOCK(*id);
     if (err) {
 	k5_mutex_destroy(&data->lock);
-     	krb5_xfree(data->name);
+     	if (data && data->name) 
+		krb5_xfree(data->name);
 	krb5_xfree(data);
-	krb5_xfree(list->keytab);
+	if (list && list->keytab)
+		krb5_xfree(list->keytab);
 	krb5_xfree(list);
     } else {
 	KTREFCNT(*id)++;
