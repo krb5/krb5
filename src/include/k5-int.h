@@ -2427,7 +2427,7 @@ krb5_error_code krb5_auth_con_getpermetypes
 	    krb5_enctype **);
 
 krb5_error_code KRB5_CALLCONV
-krb5_server_decrypt_ticket_keyblock
+krb5int_server_decrypt_ticket_keyblock
   	(krb5_context context,
                 const krb5_keyblock *key,
                 krb5_ticket  *ticket);

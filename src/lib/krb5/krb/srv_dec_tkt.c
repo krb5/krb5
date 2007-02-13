@@ -39,9 +39,9 @@
 #include <k5-int.h>
 
 krb5_error_code KRB5_CALLCONV
-krb5_server_decrypt_ticket_keyblock(krb5_context context, 
-				    const krb5_keyblock *key,
-				    krb5_ticket *ticket)
+krb5int_server_decrypt_ticket_keyblock(krb5_context context,
+				       const krb5_keyblock *key,
+				       krb5_ticket *ticket)
 {
     krb5_error_code retval;
     krb5_data *realm;
@@ -85,7 +85,8 @@ krb5_server_decrypt_ticket_keytab(krb5_context context,
                                     enctype, &ktent)))
         return retval;
 
-    retval = krb5_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+    retval = krb5int_server_decrypt_ticket_keyblock(context,
+						    &ktent.key, ticket);
     /* Upon error, Free keytab entry first, then return */
 
     (void) krb5_kt_free_entry(context, &ktent);
