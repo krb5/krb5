@@ -619,6 +619,7 @@ krb5_ser_rcache_init
 krb5_ser_unpack_bytes
 krb5_ser_unpack_int32
 krb5_ser_unpack_int64
+krb5_server_decrypt_ticket_keytab
 krb5_set_config_files
 krb5_set_debugging_time
 krb5_set_default_in_tkt_ktypes

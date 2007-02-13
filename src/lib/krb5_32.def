@@ -224,6 +224,7 @@ krb5_c_string_to_key_with_params
 	krb5_recvauth_version
 	krb5_salttype_to_string
 	krb5_sendauth
+	krb5_server_decrypt_ticket_keytab
 	krb5_set_default_realm
 	krb5_set_default_tgs_enctypes
         krb5_set_password

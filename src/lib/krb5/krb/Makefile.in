@@ -89,6 +89,7 @@ STLIBOBJS= \
 	ser_princ.o	\
 	serialize.o	\
 	set_realm.o	\
+	srv_dec_tkt.o	\
 	srv_rcache.o	\
 	str_conv.o	\
 	tgtname.o	\
@@ -175,6 +176,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)ser_princ.$(OBJEXT)	\
 	$(OUTPRE)serialize.$(OBJEXT)	\
 	$(OUTPRE)set_realm.$(OBJEXT)	\
+	$(OUTPRE)srv_dec_tkt.$(OBJEXT)	\
 	$(OUTPRE)srv_rcache.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
 	$(OUTPRE)tgtname.$(OBJEXT)	\
@@ -262,6 +264,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/ser_princ.c	\
 	$(srcdir)/serialize.c	\
 	$(srcdir)/set_realm.c	\
+	$(srcdir)/srv_dec_tkt.c	\
 	$(srcdir)/srv_rcache.c	\
 	$(srcdir)/str_conv.c	\
 	$(srcdir)/tgtname.c	\
@@ -1041,6 +1044,15 @@ set_realm.so set_realm.po $(OUTPRE)set_realm.$(OBJEXT): \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   set_realm.c
+srv_dec_tkt.so srv_dec_tkt.po $(OUTPRE)srv_dec_tkt.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  srv_dec_tkt.c
 srv_rcache.so srv_rcache.po $(OUTPRE)srv_rcache.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

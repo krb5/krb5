@@ -41,10 +41,10 @@ static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
     fprintf(stderr, 
-            "usage: %s [-4 | [-c ccache] [-e etype]] service1 service2 ...\n", 
+            "usage: %s [-4 | [-c ccache] [-e etype] [-k keytab]] service1 service2 ...\n", 
             prog);
 #else
-    fprintf(stderr, "usage: %s [-c ccache] [-e etype] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-c ccache] [-e etype] [-k keytab] service1 service2 ...\n",
             prog);
 #endif
     exit(1);
@@ -54,7 +54,7 @@ int quiet = 0;
 
 static void do_v4_kvno (int argc, char *argv[]);
 static void do_v5_kvno (int argc, char *argv[], 
-                        char *ccachestr, char *etypestr);
+                        char *ccachestr, char *etypestr, char *keytab_name);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -63,7 +63,7 @@ static void extended_com_err_fn (const char *, errcode_t, const char *,
 int main(int argc, char *argv[])
 {
     int option;
-    char *etypestr = 0, *ccachestr = 0;
+    char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
     int v4 = 0;
 
     set_com_err_hook (extended_com_err_fn);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "c:e:hq4")) != -1) {
+    while ((option = getopt(argc, argv, "c:e:hk:q4")) != -1) {
 	switch (option) {
 	case 'c':
 	    ccachestr = optarg;
@@ -81,6 +81,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 'h':
 	    xusage();
+	    break;
+	case 'k':
+	    keytab_name = optarg;
 	    break;
 	case 'q':
 	    quiet = 1;
@@ -97,13 +100,13 @@ int main(int argc, char *argv[])
     if ((argc - optind) < 1)
 	xusage();
 
-    if ((ccachestr != 0 || etypestr != 0) && v4)
+    if ((ccachestr != NULL || etypestr != NULL || keytab_name != NULL) && v4)
 	xusage();
 
     if (v4)
 	do_v4_kvno(argc - optind, argv + optind);
     else
-	do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr);
+	do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr, keytab_name);
     return 0;
 }
 
@@ -169,7 +172,7 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 }
 
 static void do_v5_kvno (int count, char *names[], 
-                        char * ccachestr, char *etypestr)
+                        char * ccachestr, char *etypestr, char *keytab_name)
 {
     krb5_error_code ret;
     int i, errors;
@@ -179,6 +182,7 @@ static void do_v5_kvno (int count, char *names[],
     krb5_creds in_creds, *out_creds;
     krb5_ticket *ticket;
     char *princ;
+    krb5_keytab keytab = NULL;
 
     ret = krb5_init_context(&context);
     if (ret) {
@@ -203,6 +207,14 @@ static void do_v5_kvno (int count, char *names[],
     if (ret) {
 	com_err(prog, ret, "while opening ccache");
 	exit(1);
+    }
+
+    if (keytab_name) {
+	ret = krb5_kt_resolve(context, keytab_name, &keytab);
+	if (ret) {
+	    com_err(prog, ret, "resolving keytab %s", keytab_name);
+	    exit(1);
+	}
     }
 
     ret = krb5_cc_get_principal(context, ccache, &me);
@@ -261,14 +273,32 @@ static void do_v5_kvno (int count, char *names[],
 	    continue;
 	}
 	    
-	if (!quiet)
-	    printf("%s: kvno = %d\n", princ, ticket->enc_part.kvno);
+	if (keytab) {
+	    ret = krb5_server_decrypt_ticket_keytab(context, keytab, ticket);
+	    if (ret) {
+		if (!quiet)
+		    printf("%s: kvno = %d, keytab entry invalid", princ, ticket->enc_part.kvno);
+		com_err(prog, ret, "while decrypting ticket for %s", princ);
+		krb5_free_ticket(context, ticket);
+		krb5_free_creds(context, out_creds);
+		krb5_free_unparsed_name(context, princ);
 
-	krb5_free_ticket(context, ticket);
+		errors++;
+		continue;
+	    }
+	    if (!quiet)
+		printf("%s: kvno = %d, keytab entry valid\n", princ, ticket->enc_part.kvno);
+	} else {
+	    if (!quiet)
+		printf("%s: kvno = %d\n", princ, ticket->enc_part.kvno);
+	}
+
 	krb5_free_creds(context, out_creds);
 	krb5_free_unparsed_name(context, princ);
     }
 
+    if (keytab)
+	krb5_kt_close(context, keytab);
     krb5_free_principal(context, me);
     krb5_cc_close(context, ccache);
     krb5_free_context(context);
