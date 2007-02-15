@@ -1057,16 +1057,6 @@ asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algori
     return retval;
   }
   sum += length;  
-  
-  retval = asn1_make_etag(buf, UNIVERSAL, ASN1_SEQUENCE, 
-			  val->parameters.length + length, 
-			  &length);
-
-  if(retval) {
-    asn1buf_destroy(&buf);
-    return retval;
-  }
-  sum += length;  
 
   asn1_makeseq();
   asn1_cleanup();

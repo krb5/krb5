@@ -1076,7 +1076,7 @@ krb5_error_code decode_krb5_td_trusted_certifiers(const krb5_data *code, krb5_ex
 krb5_error_code decode_krb5_td_dh_parameters(const krb5_data *code, krb5_algorithm_identifier ***rep)
 {
   setup_buf_only();
-  retval = asn1_decode_sequence_of_AlgorithmIdentifier(&buf, rep);
+  retval = asn1_decode_sequence_of_algorithm_identifier(&buf, rep);
   if (retval) clean_return(retval);
 
   cleanup(free);

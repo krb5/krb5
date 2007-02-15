@@ -245,6 +245,7 @@ pkinit_server_verify_padata(krb5_context context,
 	retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
 	goto cleanup;
     } else {
+#if 0
 	if (tmp_client != NULL) {
 	    retval = krb5_principal_compare(context, request->client,
 					    tmp_client);
@@ -260,6 +261,7 @@ pkinit_server_verify_padata(krb5_context context,
 	    retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
 	    goto cleanup;
 	}
+#endif
     }
 
     retval = verify_id_pkinit_eku(context, plgctx->cryptoctx, reqctx->cryptoctx,
@@ -564,8 +566,8 @@ pkinit_server_return_padata(krb5_context context,
     }
 
     /* if this DH, then process finish computing DH key */
-    if (rep->choice == choice_pa_pk_as_rep_dhInfo ||
-	    rep->choice == choice_pa_pk_as_rep_draft9_dhSignedData) {
+    if (rep != NULL && (rep->choice == choice_pa_pk_as_rep_dhInfo ||
+	    rep->choice == choice_pa_pk_as_rep_draft9_dhSignedData)) {
 	pkiDebug("received DH key delivery AS REQ\n");
 	retval = server_process_dh(context, plgctx->cryptoctx,
 	    reqctx->cryptoctx, plgctx->idctx, subjectPublicKey,
@@ -829,7 +831,7 @@ pkinit_server_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_PK_AS_REQ,
     KRB5_PADATA_PK_AS_REQ_OLD,
-    //KRB5_PADATA_PK_AS_REP_OLD,
+    KRB5_PADATA_PK_AS_REP_OLD,
     0
 };
 

@@ -1043,6 +1043,8 @@ cms_signeddata_verify(krb5_context context,
 	    pkiDebug("PKCS7 Verification successful\n");
 	else {
 	    pkiDebug("wrong oid in eContentType\n");
+	    print_buffer(p7->d.sign->contents->type->data, 
+		p7->d.sign->contents->type->length);
 	    retval = KRB5KDC_ERR_PREAUTH_FAILED;
 	    krb5_set_error_message(context, retval, "wrong oid\n");
 	    goto cleanup;
@@ -1153,10 +1155,20 @@ cms_envelopeddata_create(krb5_context context,
     int signed_data_len = 0, enc_data_len = 0, flags = PKCS7_BINARY;
     STACK_OF(X509) *encerts = NULL;
     const EVP_CIPHER *cipher = NULL;
+    int cms_msg_type = CMS_ENVEL_SERVER;
 
     /* create the PKCS7 SignedData portion of the PKCS7 EnvelopedData */
+    switch ((int)pa_type) {
+	case KRB5_PADATA_PK_AS_REQ_OLD:
+	case KRB5_PADATA_PK_AS_REP_OLD:
+	    cms_msg_type = CMS_SIGN_DRAFT9;
+	    break;
+	default:
+	    goto cleanup;
+    }
+
     retval = cms_signeddata_create(context, plgctx, reqctx, idctx,
-	CMS_ENVEL_SERVER, include_certchain, key_pack, key_pack_len,
+	cms_msg_type, include_certchain, key_pack, key_pack_len,
 	&signed_data, &signed_data_len);
     if (retval) {
 	pkiDebug("failed to create pkcs7 signed data\n");
@@ -1481,12 +1493,13 @@ verify_id_pkinit_eku(krb5_context context,
 		tmp_oid = sk_ASN1_OBJECT_value(extusage, i);
 		switch ((int)pa_type) {
 		    case KRB5_PADATA_PK_AS_REQ_OLD:
+		    case KRB5_PADATA_PK_AS_REP_OLD:
 		    case KRB5_PADATA_PK_AS_REQ:
 			if (!OBJ_cmp(oid_client, tmp_oid) ||
 			    !OBJ_cmp(oid_logon, tmp_oid))
 			    flag = 1;
 			break;
-		    case KRB5_PADATA_PK_AS_REP_OLD:
+		    //case KRB5_PADATA_PK_AS_REP_OLD:
 		    case KRB5_PADATA_PK_AS_REP:
 			if (!OBJ_cmp(oid_server, tmp_oid) ||
 			    !OBJ_cmp(oid_kp, tmp_oid))
@@ -2063,12 +2076,28 @@ pkinit_create_sequence_of_principal_identifiers(
     krb5_data *td_certifiers = NULL, *data = NULL;
     krb5_typed_data **typed_data = NULL;
 
-    retval = create_krb5_trustedCertifiers(context, plg_cryptoctx,
-	req_cryptoctx, id_cryptoctx, &krb5_trusted_certifiers);
-    if (retval) {
-	pkiDebug("create_krb5_trustedCertifiers failed\n");
-	goto cleanup;
+    switch(type) {
+        case TD_TRUSTED_CERTIFIERS:
+            retval = create_krb5_trustedCertifiers(context, plg_cryptoctx,
+	        req_cryptoctx, id_cryptoctx, &krb5_trusted_certifiers);
+            if (retval) {
+		pkiDebug("create_krb5_trustedCertifiers failed\n");
+		goto cleanup;
+    	    }
+	    break;
+	case TD_INVALID_CERTIFICATES:
+	    retval = create_krb5_invalidCertificates(context, plg_cryptoctx,
+		req_cryptoctx, id_cryptoctx, &krb5_trusted_certifiers);
+            if (retval) {
+		pkiDebug("create_krb5_invalidCertificates failed\n");
+		goto cleanup;
+    	    }
+	    break;
+	default:
+	    retval = -1;
+	    goto cleanup;
     }
+
     retval = k5int_encode_krb5_td_trusted_certifiers(krb5_trusted_certifiers,
 						     &td_certifiers);
     if (retval) {
@@ -2773,46 +2802,58 @@ pkinit_open_session(krb5_context context,
 
 krb5_error_code
 pkinit_find_private_key(pkinit_identity_crypto_context id_cryptoctx,
-			CK_ATTRIBUTE_TYPE usage,
-			CK_OBJECT_HANDLE *objp)
+                        CK_ATTRIBUTE_TYPE usage,
+                        CK_OBJECT_HANDLE *objp)
 {
     CK_OBJECT_CLASS cls;
     CK_ATTRIBUTE attrs[4];
     CK_ULONG count;
     CK_BBOOL bool;
     CK_KEY_TYPE keytype;
-    int r;
+    int r, nattrs = 0;
 
     cls = CKO_PRIVATE_KEY;
-    attrs[0].type = CKA_CLASS;
-    attrs[0].pValue = &cls;
-    attrs[0].ulValueLen = sizeof cls;
+    attrs[nattrs].type = CKA_CLASS;
+    attrs[nattrs].pValue = &cls;
+    attrs[nattrs].ulValueLen = sizeof cls;
+    nattrs++;
 
+#ifdef PKINIT_USE_KEY_USAGE
+    /*
+     * Some cards get confused if you try to specify a key usage,
+     * so don't, and hope for the best. This will fail if you have
+     * several keys with the same id and different usages but I have
+     * not seen this on real cards.
+     */
     bool = TRUE;
-    attrs[1].type = usage;
-    attrs[1].pValue = &bool;
-    attrs[1].ulValueLen = sizeof bool;
+    attrs[nattrs].type = usage;
+    attrs[nattrs].pValue = &bool;
+    attrs[nattrs].ulValueLen = sizeof bool;
+    nattrs++;
+#endif
 
     keytype = CKK_RSA;
-    attrs[2].type = CKA_KEY_TYPE;
-    attrs[2].pValue = &keytype;
-    attrs[2].ulValueLen = sizeof keytype;
+    attrs[nattrs].type = CKA_KEY_TYPE;
+    attrs[nattrs].pValue = &keytype;
+    attrs[nattrs].ulValueLen = sizeof keytype;
+    nattrs++;
 
-    attrs[3].type = CKA_ID;
-    attrs[3].pValue = id_cryptoctx->cert_id;
-    attrs[3].ulValueLen = id_cryptoctx->cert_id_len;
+    attrs[nattrs].type = CKA_ID;
+    attrs[nattrs].pValue = id_cryptoctx->cert_id;
+    attrs[nattrs].ulValueLen = id_cryptoctx->cert_id_len;
+    nattrs++;
 
     if (id_cryptoctx->p11->C_FindObjectsInit(id_cryptoctx->session,
-	    attrs, 4) != CKR_OK) {
-	pkiDebug("krb5_pkinit_sign_data: fail C_FindObjectsInit\n");
-	return KRB5KDC_ERR_PREAUTH_FAILED;
+            attrs, nattrs) != CKR_OK) {
+        pkiDebug("krb5_pkinit_sign_data: fail C_FindObjectsInit\n");
+        return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
     r = id_cryptoctx->p11->C_FindObjects(id_cryptoctx->session, objp, 1, &count);
     id_cryptoctx->p11->C_FindObjectsFinal(id_cryptoctx->session);
     pkiDebug("found %d private keys %x\n", (int) count, (int) r);
     if (r != CKR_OK || count < 1)
-	return KRB5KDC_ERR_PREAUTH_FAILED;
+        return KRB5KDC_ERR_PREAUTH_FAILED;
     return 0;
 }
 #endif
@@ -3213,6 +3254,16 @@ pkinit_get_client_cert_pkcs11(krb5_context context,
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
+#ifndef PKINIT_USE_MECH_LIST
+    /*
+     * We'd like to use CKM_SHA1_RSA_PKCS for signing if it's available, but
+     * many cards seems to be confused about whether they are capable of
+     * this or not. The safe thing seems to be to ignore the mechanism list,
+     * always use CKM_RSA_PKCS and calculate the sha1 digest ourselves.
+     */
+
+    id_cryptoctx->mech = CKM_RSA_PKCS;
+#else
     if ((r = id_cryptoctx->p11->C_GetMechanismList(id_cryptoctx->slotid, NULL,
 	    &count)) != CKR_OK || count <= 0) {
 	pkiDebug("can't find any mechanisms %x\n", r);
@@ -3243,6 +3294,7 @@ pkinit_get_client_cert_pkcs11(krb5_context context,
 
     pkiDebug("got %d mechs; reading certs for '%s' from card\n",
 	    (int) count, principal);
+#endif
 
     cls = CKO_CERTIFICATE;
     attrs[0].type = CKA_CLASS;
@@ -3774,6 +3826,34 @@ create_identifiers_from_stack(STACK_OF(X509) *sk, krb5_external_principal_identi
   cleanup:
     if (retval)
 	free_krb5_external_principal_identifier(&krb5_cas);
+
+    return retval;
+}
+
+krb5_error_code
+create_krb5_invalidCertificates(krb5_context context,
+			        pkinit_plg_crypto_context plg_cryptoctx,
+			        pkinit_req_crypto_context req_cryptoctx,
+			        pkinit_identity_crypto_context id_cryptoctx,
+			        krb5_external_principal_identifier *** ids)
+{
+
+    krb5_error_code retval = ENOMEM;
+    STACK_OF(X509) *sk = NULL;
+
+    *ids = NULL;
+    if (req_cryptoctx->received_cert == NULL)
+	return KRB5KDC_ERR_PREAUTH_FAILED;
+
+    sk = sk_X509_new_null();
+    if (sk == NULL) 
+	goto cleanup;
+    sk_X509_push(sk, req_cryptoctx->received_cert);
+
+    retval = create_identifiers_from_stack(sk, ids);
+
+    sk_X509_free(sk);
+cleanup:
 
     return retval;
 }

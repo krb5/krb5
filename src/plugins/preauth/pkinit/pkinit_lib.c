@@ -243,10 +243,10 @@ pkinit_initialize_identity(krb5_context context,
 	     context, idopts, id_cryptoctx);
     if (idopts == NULL || id_cryptoctx == NULL)
 	goto errout;
-
+/*
     if (idopts->identity == NULL)
 	goto errout;
-
+*/
     retval = pkinit_process_identity_option(context,
 					    PKINIT_ID_OPT_USER_IDENTITY,
 					    idopts->identity, id_cryptoctx);

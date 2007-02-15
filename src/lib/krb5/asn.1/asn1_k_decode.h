@@ -229,8 +229,5 @@ asn1_error_code asn1_decode_sequence_of_external_principal_identifier
 	(asn1buf *buf, krb5_external_principal_identifier ***val);
 asn1_error_code asn1_decode_sequence_of_trusted_ca
 	(asn1buf *buf, krb5_trusted_ca ***val);
-asn1_error_code asn1_decode_sequence_of_AlgorithmIdentifier
-	(asn1buf *buf, krb5_algorithm_identifier ***val);
-
 
 #endif

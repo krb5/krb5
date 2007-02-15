@@ -1527,34 +1527,9 @@ asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *
     cleanup();
 }
 
-
-asn1_error_code asn1_decode_AlgorithmIdentifier(asn1buf *buf,  krb5_algorithm_identifier *val) {
-
-  setup();
-  { begin_structure();
-    retval = asn1_decode_oid(&subbuf, &val->algorithm.length, 
-			     &val->algorithm.data);
-    if(retval) return retval;
-
-    val->parameters.length = 0;
-    val->parameters.data = NULL;
-
-    if(length > subbuf.next - subbuf.base) {
-      unsigned int size = length - (subbuf.next - subbuf.base);
-      retval = asn1buf_remove_octetstring(&subbuf, size, 
-					  &val->parameters.data);
-      if(retval) return retval;
-      val->parameters.length = size;
-    }
-    
-    end_structure();
-  }
-  cleanup();      
-}
-
-asn1_error_code asn1_decode_sequence_of_AlgorithmIdentifier(asn1buf *buf, krb5_algorithm_identifier ***val)
+asn1_error_code asn1_decode_sequence_of_algorithm_identifier(asn1buf *buf, krb5_algorithm_identifier ***val)
 {
-    decode_array_body(krb5_algorithm_identifier, asn1_decode_AlgorithmIdentifier);
+    decode_array_body(krb5_algorithm_identifier, asn1_decode_algorithm_identifier);
 }
 
 asn1_error_code asn1_decode_kdc_dh_key_info (asn1buf *buf, krb5_kdc_dh_key_info *val)
@@ -1630,11 +1605,11 @@ asn1_error_code asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
 #endif
 
 #if 0
-      opt_field(val->supportedCMSTypes, 2, asn1_decode_sequence_of_AlgorithmIdentifier, NULL);
+      opt_field(val->supportedCMSTypes, 2, asn1_decode_sequence_of_algorithm_identifier, NULL);
 #else
       if (asn1buf_remains(&subbuf, seqindef)) {
         if (tagnum == 2) {
-	  asn1_decode_sequence_of_AlgorithmIdentifier(&subbuf,val->supportedCMSTypes);
+	  asn1_decode_sequence_of_algorithm_identifier(&subbuf, &val->supportedCMSTypes);
 	  if (!taglen && indef) { get_eoc(); }
 	  next_tag();
 	} else val->supportedCMSTypes = NULL;
