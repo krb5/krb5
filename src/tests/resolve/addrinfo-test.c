@@ -56,11 +56,15 @@ static const char *protoname (int p) {
     X(TCP);
     X(UDP);
     X(ICMP);
+#ifdef IPPROTO_IPV6
     X(IPV6);
+#endif
 #ifdef IPPROTO_GRE
     X(GRE);
 #endif
+#ifdef IPPROTO_NONE
     X(NONE);
+#endif
     X(RAW);
 #ifdef IPPROTO_COMP
     X(COMP);
@@ -100,7 +104,9 @@ static void usage () {
 	    "\t-r\tspecify socket type SOCK_RAW\n"
 	    "\n"
 	    "\t-4\tspecify address family AF_INET\n"
+#ifdef AF_INET6
 	    "\t-6\tspecify address family AF_INET6\n"
+#endif
 	    "\n"
 	    "\t-p P\tspecify port P (service name or port number)\n"
 	    "\t-N\thostname is numeric, skip DNS query\n"
@@ -121,7 +127,9 @@ static const char *familyname (int f) {
 	sprintf(buf, "AF %d", f);
 	return buf;
     case AF_INET: return "AF_INET";
+#ifdef AF_INET6
     case AF_INET6: return "AF_INET6";
+#endif
     }
 }
 
@@ -190,9 +198,11 @@ int main (int argc, char *argv[])
 	    case '4':
 		hints.ai_family = AF_INET;
 		break;
+#ifdef AF_INET6
 	    case '6':
 		hints.ai_family = AF_INET6;
 		break;
+#endif
 	    case 'N':
 		numerichost = 1;
 		break;
