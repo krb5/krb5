@@ -675,7 +675,7 @@ default_an_to_ln(krb5_context context, krb5_const_principal aname, const unsigne
 */
 
 krb5_error_code KRB5_CALLCONV
-krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, const int lnsize_in, char *lname)
+krb5_aname_to_localname(krb5_context context, krb5_const_principal aname, int lnsize_in, char *lname)
 {
     krb5_error_code	kret;
     char		*realm;

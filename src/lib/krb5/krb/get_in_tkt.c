@@ -65,7 +65,7 @@
 /* some typedef's for the function args to make things look a bit cleaner */
 
 typedef krb5_error_code (*git_key_proc) (krb5_context,
-						   const krb5_enctype,
+						   krb5_enctype,
 						   krb5_data *,
 						   krb5_const_pointer,
 						   krb5_keyblock **);
@@ -440,7 +440,7 @@ static const krb5_enctype get_in_tkt_enctypes[] = {
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt(krb5_context context,
-		const krb5_flags options,
+		krb5_flags options,
 		krb5_address * const * addrs,
 		krb5_enctype * ktypes,
 		krb5_preauthtype * ptypes,

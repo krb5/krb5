@@ -1686,7 +1686,7 @@ krb5_error_code krb5_encrypt_tkt_part
 
 krb5_error_code krb5_encode_kdc_rep
 	(krb5_context,
-		const krb5_msgtype,
+		krb5_msgtype,
 		const krb5_enc_kdc_rep_part *,
 		int using_subkey,
 		const krb5_keyblock *,

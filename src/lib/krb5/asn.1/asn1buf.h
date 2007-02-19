@@ -122,10 +122,10 @@ asn1_error_code asn1buf_imbed
 	      position starts at the beginning of *subbuf. */
 
 asn1_error_code asn1buf_sync
-	(asn1buf *buf, asn1buf *subbuf, const asn1_class Class, 
-		   const asn1_tagnum lasttag,
-		   const unsigned int length, const int indef,
-		   const int seqindef);
+	(asn1buf *buf, asn1buf *subbuf, asn1_class Class, 
+		   asn1_tagnum lasttag,
+		   unsigned int length, int indef,
+		   int seqindef);
 /* requires  *subbuf is a sub-buffer of *buf, as created by asn1buf_imbed.
              lasttag is the last tagnumber read.
    effects   Synchronizes *buf's current position to match that of *subbuf. */
