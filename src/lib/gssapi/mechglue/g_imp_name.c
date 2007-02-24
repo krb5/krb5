@@ -65,7 +65,10 @@ val_imp_name_args(
     if (input_name_buffer == GSS_C_NO_BUFFER)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
 
-    if (GSS_EMPTY_BUFFER(input_name_buffer))
+    if (input_name_buffer->length == 0)
+	return GSS_S_BAD_NAME;
+
+    if (input_name_buffer->value == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
 
     return (GSS_S_COMPLETE);
