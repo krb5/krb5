@@ -72,7 +72,6 @@ extern struct timeval timelimit;
 #define LDAP_OPT_RESULT_CODE LDAP_OPT_ERROR_NUMBER
 #endif
 
-#define NEG(val)   (val <0) ? abs(val) : -val ;
 #define MAXINTLEN  10
 
 #define IGNORE_STATUS              0
