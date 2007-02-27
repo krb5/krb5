@@ -96,6 +96,7 @@ gss_name_t *output_name;
 		out_union->mech_name = 0;
 		out_union->name_type = 0;
 		out_union->external_name = 0;
+		out_union->loopback = out_union;
 
 		/* Allocate the buffer for the user specified representation */
 		if (gssint_create_copy_buffer(in_union->external_name,
