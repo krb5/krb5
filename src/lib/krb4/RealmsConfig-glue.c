@@ -40,11 +40,6 @@
 #include "k5-int.h"		/* for accessor, addrlist stuff */
 #include "port-sockets.h"
 
-#define KRB5_PRIVATE 1
-/* For krb5_get_default_config_files and krb5_free_config_files */
-#include "krb5.h"
-#undef KRB5_PRIVATE
-
 /* These two *must* be kept in sync to avoid buffer overflows. */
 #define SCNSCRATCH	"%1023s"
 #define SCRATCHSZ	1024

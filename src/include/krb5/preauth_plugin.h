@@ -295,6 +295,7 @@ typedef struct krb5plugin_preauth_client_ftable_v0 {
      * the module if it wishes to reference it after returning from this call.
      */
     preauth_client_supply_gic_opts_proc gic_opts;
+
 } krb5plugin_preauth_client_ftable_v0;
 
 

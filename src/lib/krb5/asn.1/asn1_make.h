@@ -48,9 +48,9 @@
 
 asn1_error_code asn1_make_etag
 	(asn1buf *buf,
-		   const asn1_class asn1class,
-		   const asn1_tagnum tagnum,
-		   const unsigned int in_len,
+		   asn1_class asn1class,
+		   asn1_tagnum tagnum,
+		   unsigned int in_len,
 		   unsigned int *retlen);
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
@@ -61,10 +61,10 @@ asn1_error_code asn1_make_etag
 	     Returns ENOMEM if memory runs out. */
 
 asn1_error_code asn1_make_tag
-	(asn1buf *buf, const asn1_class asn1class,
-		   const asn1_construction construction,
-		   const asn1_tagnum tagnum,
-		   const unsigned int in_len,
+	(asn1buf *buf, asn1_class asn1class,
+		   asn1_construction construction,
+		   asn1_tagnum tagnum,
+		   unsigned int in_len,
 		   unsigned int *retlen);
 /* requires  *buf is allocated, in_len is the length of an ASN.1 encoding
              which has just been inserted in *buf
@@ -121,9 +121,9 @@ asn1_error_code asn1_make_length
 /* "helper" procedure for asn1_make_tag */
 asn1_error_code asn1_make_id
 	(asn1buf *buf,
-		   const asn1_class asn1class,
-		   const asn1_construction construction,
-		   const asn1_tagnum tagnum,
+		   asn1_class asn1class,
+		   asn1_construction construction,
+		   asn1_tagnum tagnum,
 		   unsigned int *retlen);
 /* requires  *buf is allocated, asn1class and tagnum are appropriate for
              the ASN.1 encoding which has just been inserted in *buf

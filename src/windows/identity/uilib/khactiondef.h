@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -65,6 +66,9 @@
 #define KHUI_ACTION_LAYOUT_CUST (KHUI_ACTION_BASE + 30)
 #define KHUI_ACTION_OPT_APPEAR  (KHUI_ACTION_BASE + 31)
 #define KHUI_ACTION_LAYOUT_RELOAD (KHUI_ACTION_BASE + 32)
+#define KHUI_ACTION_RENEW_ALL   (KHUI_ACTION_BASE + 33)
+#define KHUI_ACTION_DESTROY_ALL (KHUI_ACTION_BASE + 34)
+#define KHUI_ACTION_UICB        (KHUI_ACTION_BASE + 35)
 /*@}*/
 
 /*! \name Pseudo actions 
@@ -105,6 +109,7 @@ context.
 #define KHUI_PACTION_PGUP   (KHUI_PACTION_BASE + 26)
 #define KHUI_PACTION_PGUP_EXTEND (KHUI_PACTION_BASE + 27)
 #define KHUI_PACTION_PGDN_EXTEND (KHUI_PACTION_BASE + 28)
+
 /*@}*/
 
 /*! \name Menus
@@ -135,7 +140,9 @@ Stock menus.
 #define KHUI_PMENU_TOK_SEL  (KHUI_MENU_BASE + 10)
 #define KHUI_PMENU_ID_SEL   (KHUI_MENU_BASE + 11)
 
-/* Next menu: 14 */
+#define KHUI_MENU_DESTROY_CRED (KHUI_MENU_BASE + 16)
+#define KHUI_MENU_RENEW_CRED (KHUI_MENU_BASE + 17)
+
 /*@}*/
 
 /*! \name Toolbars

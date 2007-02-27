@@ -566,7 +566,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
    /* if the princ wasn't filled in already, fill it in now */
 
-   if (!cred->princ && (desired_name != GSS_C_NO_CREDENTIAL))
+   if (!cred->princ && (desired_name != GSS_C_NO_NAME))
       if ((code = krb5_copy_principal(context, (krb5_principal) desired_name,
 				      &(cred->princ)))) {
 	 if (cred->ccache)

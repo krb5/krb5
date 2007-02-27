@@ -61,11 +61,7 @@
 #include <netdb.h>
 #include <ctype.h>
 #include <pwd.h>
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <errno.h>
 #ifdef HAVE_VFORK_H
 #include <vfork.h>

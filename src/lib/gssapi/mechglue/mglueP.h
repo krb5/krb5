@@ -427,7 +427,7 @@ OM_uint32 gssint_create_copy_buffer(
 
 OM_uint32 gssint_copy_oid_set(
 	OM_uint32 *,			/* minor_status */
-	const gss_OID_set_desc *,	/* oid set */
+	const gss_OID_set_desc * const,	/* oid set */
 	gss_OID_set *			/* new oid set */
 );
 

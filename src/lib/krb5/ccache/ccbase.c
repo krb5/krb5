@@ -71,8 +71,11 @@ static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops,
 #endif /* USE_KEYRING_CCACHE */
 #endif
 
+#ifndef USE_KEYRING_CCACHE
 static struct krb5_cc_typelist cc_fcc_entry = { &krb5_cc_file_ops,
 						&cc_mcc_entry };
+#endif
+
 #ifdef USE_KEYRING_CCACHE
 #define INITIAL_TYPEHEAD (&cc_krcc_entry)
 #else
@@ -129,7 +132,8 @@ krb5int_cc_finalize(void)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_register(krb5_context context, krb5_cc_ops *ops, krb5_boolean override)
+krb5_cc_register(krb5_context context, const krb5_cc_ops *ops, 
+		 krb5_boolean override)
 {
     struct krb5_cc_typelist *t;
     krb5_error_code err;

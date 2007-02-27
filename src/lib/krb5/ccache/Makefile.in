@@ -57,6 +57,10 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/ccfns.c \
 	$(srcdir)/ser_cc.c $(MSLSA_SRC)
 
+EXTRADEPSRCS= \
+	$(srcdir)/t_cc.c \
+	$(srcdir)/t_cccursor.c
+
 ##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
 
 all-unix:: all-libobjs
@@ -96,12 +100,14 @@ T_CCCURSOR_OBJS = t_cccursor.o
 t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
 
-check-unix:: t_cc
+check-unix:: t_cc t_cccursor
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_cc 
+	$(RUN_SETUP) $(VALGRIND) ./t_cc
+	KRB5_CONFIG=$(srcdir)/../krb/t_krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) $(VALGRIND) ./t_cccursor
 
 clean-unix::
-	$(RM) t_cc t_cc.o
+	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o
 
 ##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
@@ -206,3 +212,9 @@ ser_cc.so ser_cc.po $(OUTPRE)ser_cc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
   $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
   $(SRCTOP)/include/socket-utils.h ser_cc.c
+t_cc.so t_cc.po $(OUTPRE)t_cc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  t_cc.c
+t_cccursor.so t_cccursor.po $(OUTPRE)t_cccursor.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h t_cccursor.c

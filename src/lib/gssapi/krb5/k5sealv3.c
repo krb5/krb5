@@ -301,7 +301,7 @@ OM_uint32
 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 			    OM_uint32 *minor_status,
 			    krb5_gss_ctx_id_rec *ctx,
-			    unsigned char *ptr, int bodysize,
+			    unsigned char *ptr, unsigned int bodysize,
 			    gss_buffer_t message_buffer,
 			    int *conf_state, int *qop_state, int toktype)
 {

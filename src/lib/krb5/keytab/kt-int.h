@@ -36,4 +36,7 @@ int krb5int_kt_initialize(void);
 
 void krb5int_kt_finalize(void);
 
+int krb5int_mkt_initialize(void);
+
+void krb5int_mkt_finalize(void);
 #endif /* __KRB5_KEYTAB_INT_H__ */

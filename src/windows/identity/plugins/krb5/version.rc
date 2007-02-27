@@ -28,7 +28,7 @@
 
 #ifndef LANGVER
 
-#define STR_FILEDESC "Kerberos 5 Plugin for NetIDMgr"
+#define STR_FILEDESC "Kerberos v5 Plugin for Network Identity Manager"
 #define STR_INTNAME  "krb5cred"
 #define STR_ORIGNAME "krb5cred.dll"
 
@@ -67,7 +67,7 @@
         VALUE "InternalName",    STR_INTNAME
         VALUE "LegalCopyright",  KH_VERSTR_COPYRIGHT_1033
         VALUE "OriginalFilename", STR_ORIGNAME
-        VALUE "ProductName",     "NetIDMgr"
+        VALUE "ProductName",     "Network Identity Manager"
         VALUE "ProductVersion",  KH_VERSTR_PRODUCT_1033
 #ifdef KH_VERSTR_COMMENT_1033
         VALUE "Comment", KH_VERSTR_COMMENT_1033

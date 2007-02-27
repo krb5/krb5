@@ -411,7 +411,6 @@ ser_keytab_test(krb5_context kcontext, int verbose)
     krb5_error_code	kret;
     char		ccname[128];
     krb5_keytab		keytab;
-    extern krb5_kt_ops	krb5_ktf_writable_ops;
 
     sprintf(ccname, "temp_kt_%d", (int) getpid());
     if (!(kret = krb5_kt_resolve(kcontext, ccname, &keytab)) &&
@@ -424,12 +423,7 @@ ser_keytab_test(krb5_context kcontext, int verbose)
 			      (krb5_pointer) keytab, KV5M_KEYTAB)) &&
 	    !(kret = krb5_kt_close(kcontext, keytab))) {
 	    sprintf(ccname, "WRFILE:temp_kt_%d", (int) getpid());
-	    if ((kret = krb5_kt_resolve(kcontext, ccname, &keytab)))
-		kret = krb5_kt_register(kcontext, &krb5_ktf_writable_ops);
-	    else
-		kret = krb5_kt_close(kcontext, keytab);
-	    if (!kret &&
-		!(kret = krb5_kt_resolve(kcontext, ccname, &keytab)) &&
+	    if (!(kret = krb5_kt_resolve(kcontext, ccname, &keytab)) &&
 		!(kret = ser_data(verbose, "> Resolved WRFILE keytab",
 				  (krb5_pointer) keytab, KV5M_KEYTAB)) &&
 		!(kret = krb5_kt_close(kcontext, keytab))) {

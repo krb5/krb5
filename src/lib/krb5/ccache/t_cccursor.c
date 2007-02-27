@@ -186,7 +186,7 @@ do_chk(
 	printf("cursor: %s:%s\n", prefix, name);
 
 	if (i < nmax) {
-	    if (!do_chk_one(prefix, name, &chklist[i])) {
+	    if (do_chk_one(prefix, name, &chklist[i])) {
 		*good = 0;
 	    }
 	}

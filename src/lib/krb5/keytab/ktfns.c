@@ -30,7 +30,7 @@
 
 #include "k5-int.h"
 
-char * KRB5_CALLCONV
+const char * KRB5_CALLCONV
 krb5_kt_get_type (krb5_context context, krb5_keytab keytab)
 {
     return keytab->ops->prefix;

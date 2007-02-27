@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -33,6 +34,12 @@ kmsg_cred_completion(kmq_message *m);
 void 
 khm_cred_destroy_creds(khm_boolean sync,
                        khm_boolean quiet);
+
+void
+khm_cred_destroy_identity(khm_handle identity);
+
+void
+khm_cred_renew_all_identities(void);
 
 void 
 khm_cred_renew_identity(khm_handle identity);

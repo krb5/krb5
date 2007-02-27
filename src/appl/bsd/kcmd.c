@@ -89,7 +89,7 @@
 #include <netdb.h>
 
 #include <errno.h>
-#include <krb5.h>
+#include "k5-int.h"
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
 #endif

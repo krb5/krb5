@@ -46,7 +46,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", KH_VERSTR_COMPANY_1033
-            VALUE "FileDescription", "NetIDMgr API"
+            VALUE "FileDescription", "Network Identity Manager API"
             VALUE "FileVersion", KH_VERSION_STRING
             VALUE "InternalName", "nidmgr32"
             VALUE "LegalCopyright", KH_VERSTR_COPYRIGHT_1033

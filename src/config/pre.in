@@ -158,7 +158,7 @@ FAKELIBDIR=$(FAKEPREFIX)/lib
 # PTHREAD_CFLAGS set by configure, not included in CFLAGS so that we
 #		don't pull the pthreads library into shared libraries
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
-	-DKRB5_DEPRECATED=1 -DKRB5_PRIVATE=1 \
+	-DKRB5_DEPRECATED=1 \
 	$(CPPFLAGS) $(CFLAGS) $(PTHREAD_CFLAGS)
 
 CFLAGS = @CFLAGS@
@@ -258,7 +258,7 @@ STOP_SERVERS_LOCAL = $(STESTDIR)/scripts/stop_servers_local
 transform = @program_transform_name@
 
 RM = rm -f
-CP  = cp
+CP = cp
 MV = mv -f
 CHMOD=chmod
 RANLIB = @RANLIB@
@@ -274,6 +274,7 @@ AUTOCONF = autoconf
 AUTOCONFFLAGS =
 AUTOHEADER = autoheader
 AUTOHEADERFLAGS =
+MOVEIFCHANGED = $(SRCTOP)/config/move-if-changed
 
 HOST_TYPE = @HOST_TYPE@
 SHEXT = @SHEXT@
@@ -442,12 +443,17 @@ COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 #.et.c: ; $(COMPILE_ET) $<
 
 .et.h:
-	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.h $*.h) ; \
-		e=$$? ; rm -f $$d.* ; exit $$e
-
+	$(RM) et-h-$*.et et-h-$*.c et-h-$*.h
+	$(CP) $< et-h-$*.et
+	$(COMPILE_ET) et-h-$*.et
+	$(MV) et-h-$*.h $*.h
+	$(RM) et-h-$*.et et-h-$*.c
 .et.c:
-	d=ettmp$$$$ ; (cp $< $$d.et && $(COMPILE_ET) $$d.et && mv $$d.c $*.c) ; \
-		e=$$? ; rm -f $$d.* ; exit $$e
+	$(RM) et-c-$*.et et-c-$*.c et-c-$*.h
+	$(CP) $< et-c-$*.et
+	$(COMPILE_ET) et-c-$*.et
+	$(MV) et-c-$*.c $*.c
+	$(RM) et-c-$*.et et-c-$*.h
 
 # rule to make object files
 #

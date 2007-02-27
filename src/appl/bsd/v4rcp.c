@@ -36,7 +36,7 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
  * rcp
  */
 #ifdef KERBEROS
-#include <krb5.h>
+#include "k5-int.h"
 #include <com_err.h>
 #include <k5-util.h>
 #endif
@@ -73,11 +73,7 @@ static char sccsid[] = "@(#)rcp.c	5.10 (Berkeley) 9/20/88";
 #include <netdb.h>
 #endif
 #include <errno.h>
-#ifdef HAVE_STDARG_H
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 
 #include "port-sockets.h"
 

@@ -564,13 +564,19 @@ module_callback (void *cbdata, int socktype, struct sockaddr *sa)
 	struct addrinfo ai;
 	union {
 	    struct sockaddr_in sin;
+#ifdef KRB5_USE_INET6
 	    struct sockaddr_in6 sin6;
+#endif
 	} u;
     } *x;
 
     if (socktype != SOCK_STREAM && socktype != SOCK_DGRAM)
 	return 0;
-    if (sa->sa_family != AF_INET && sa->sa_family != AF_INET6)
+    if (sa->sa_family != AF_INET
+#ifdef KRB5_USE_INET6
+	&& sa->sa_family != AF_INET6
+#endif
+	)
 	return 0;
     x = malloc (sizeof (*x));
     if (x == 0) {
@@ -585,10 +591,12 @@ module_callback (void *cbdata, int socktype, struct sockaddr *sa)
 	x->u.sin = *(struct sockaddr_in *)sa;
 	x->ai.ai_addrlen = sizeof(struct sockaddr_in);
     }
+#ifdef KRB5_USE_INET6
     if (sa->sa_family == AF_INET6) {
 	x->u.sin6 = *(struct sockaddr_in6 *)sa;
 	x->ai.ai_addrlen = sizeof(struct sockaddr_in6);
     }
+#endif
     if (add_addrinfo_to_list (d->lp, &x->ai, free, x) != 0) {
 	/* Assumes only error is ENOMEM.  */
 	d->out_of_mem = 1;

@@ -39,7 +39,7 @@
 #include <errno.h>
 
 #include "port-sockets.h"
-#include "krb5.h"
+#include "k5-int.h"
 #include "com_err.h"
 
 /* fd 0 is a tcp socket used to talk to the client */

@@ -26,7 +26,7 @@ BEGIN
             VALUE "InternalName", "NetIDMgr"
             VALUE "LegalCopyright", KH_VERSTR_COPYRIGHT_1033
             VALUE "OriginalFilename", "netidmgr.exe"
-            VALUE "ProductName", "NetIDMgr"
+            VALUE "ProductName", "Network Identity Manager"
             VALUE "ProductVersion", KH_VERSTR_PRODUCT_1033
 #ifdef KH_VERSTR_COMMENT_1033
             VALUE "Comment", KH_VERSTR_COMMENT_1033

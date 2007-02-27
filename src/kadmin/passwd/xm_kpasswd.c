@@ -84,14 +84,7 @@ SetWatchCursor()
  *  Set up a com_err hook, for displaying to a motif scrolling widget.
  */
 
-#if __STDC__
-#	include <stdarg.h>
-#else /* varargs: not STDC or no <stdarg> */
-	/* Non-ANSI, always take <varargs.h> path. */
-#	undef VARARGS
-#	define VARARGS 1
-#	include <varargs.h>
-#endif /* varargs */
+#include <stdarg.h>
 
 static void
 #ifdef __STDC__

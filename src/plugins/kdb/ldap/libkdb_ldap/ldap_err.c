@@ -1,6 +1,6 @@
 #include <ldap.h>
 #include <errno.h>
-#include <kdb5_err.h>
+#include <krb5.h>
 #include "ldap_err.h"
 #ifndef LDAP_X_ERROR
 #define LDAP_X_ERROR(x) (0)

@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2005 Massachusetts Institute of Technology
  * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -25,38 +24,35 @@
 
 /* $Id$ */
 
-#ifndef __KHIMAIRA_MAINMENU_H
-#define __KHIMAIRA_MAINMENU_H
+#include<khuidefs.h>
+#include<intaction.h>
 
-extern HWND khui_main_menu_toolbar;
-
-#define MENU_ACTIVATE_DEFAULT   -1
-#define MENU_ACTIVATE_LEFT      -2
-#define MENU_ACTIVATE_RIGHT     -3
-#define MENU_ACTIVATE_NONE      -4
-
-extern int mm_last_hot_item;
-extern BOOL mm_hot_track;
-
-void khm_menu_create_main(HWND rebar);
-LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam);
-LRESULT khm_menu_notify_main(LPNMHDR notice);
-LRESULT khm_menu_activate(int menu_id);
-void khm_menu_show_panel(int id, LONG x, LONG y);
-void khm_menu_track_current(void);
-LRESULT khm_menu_measure_item(WPARAM wParam, LPARAM lparam);
-LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lparam);
-void khm_menu_refresh_items(void);
-khm_boolean khm_check_identity_menu_action(khm_int32 act_id);
-void khm_refresh_identity_menus(void);
-
-static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main);
-static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y);
-
-void khui_init_menu(void);
-void khui_exit_menu(void);
-
-#define MENU_SIZE_ICON_X 16
-#define MENU_SIZE_ICON_Y 16
-
+#ifdef DEBUG
+#include <assert.h>
 #endif
+
+KHMEXP khm_int32 KHMAPI
+khui_request_UI_callback(khm_ui_callback cb, void * rock) {
+
+    khui_ui_callback_data cbdata;
+
+#ifdef DEBUG
+    assert(khui_hwnd_main);
+#endif
+
+    if (khui_hwnd_main == NULL)
+        return KHM_ERROR_NOT_READY;
+
+    ZeroMemory(&cbdata, sizeof(cbdata));
+    cbdata.magic = KHUI_UICBDATA_MAGIC;
+    cbdata.cb = cb;
+    cbdata.rock = rock;
+    cbdata.rv = KHM_ERROR_NOT_IMPLEMENTED;
+
+    SendMessage(khui_hwnd_main, WM_COMMAND,
+                MAKEWPARAM(KHUI_ACTION_UICB, 0),
+                (LPARAM) &cbdata);
+
+    return KHM_ERROR_SUCCESS;
+}
+

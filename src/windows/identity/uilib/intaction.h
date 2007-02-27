@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2005 Massachusetts Institute of Technology
  * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -25,38 +24,21 @@
 
 /* $Id$ */
 
-#ifndef __KHIMAIRA_MAINMENU_H
-#define __KHIMAIRA_MAINMENU_H
+#ifndef __NETIDMGR_ACTION_H_INTERNAL
+#define __NETIDMGR_ACTION_H_INTERNAL
 
-extern HWND khui_main_menu_toolbar;
+/* Internal declarations for exports and data structured used in
+   nidmgr32.dll and netidmgr.exe */
 
-#define MENU_ACTIVATE_DEFAULT   -1
-#define MENU_ACTIVATE_LEFT      -2
-#define MENU_ACTIVATE_RIGHT     -3
-#define MENU_ACTIVATE_NONE      -4
+extern HWND khui_hwnd_main;
 
-extern int mm_last_hot_item;
-extern BOOL mm_hot_track;
+typedef struct tag_khui_ui_callback_data {
+    khm_int32       magic;
+    khm_ui_callback cb;
+    void *          rock;
+    khm_int32       rv;
+} khui_ui_callback_data;
 
-void khm_menu_create_main(HWND rebar);
-LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam);
-LRESULT khm_menu_notify_main(LPNMHDR notice);
-LRESULT khm_menu_activate(int menu_id);
-void khm_menu_show_panel(int id, LONG x, LONG y);
-void khm_menu_track_current(void);
-LRESULT khm_menu_measure_item(WPARAM wParam, LPARAM lparam);
-LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lparam);
-void khm_menu_refresh_items(void);
-khm_boolean khm_check_identity_menu_action(khm_int32 act_id);
-void khm_refresh_identity_menus(void);
-
-static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main);
-static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y);
-
-void khui_init_menu(void);
-void khui_exit_menu(void);
-
-#define MENU_SIZE_ICON_X 16
-#define MENU_SIZE_ICON_Y 16
+#define KHUI_UICBDATA_MAGIC 0x8a08572a
 
 #endif

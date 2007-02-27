@@ -21,6 +21,12 @@ maybe-make-db.h-redirect:
 	test -r db.h || echo '#include <@DB_HEADER@>' > db.h
 
 ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
+K5_ET_HEADERS = \
+	../lib/krb5/error_tables/krb5_err.h \
+	../lib/krb5/error_tables/kdb5_err.h \
+	../lib/krb5/error_tables/kv5m_err.h \
+	../lib/krb5/error_tables/krb524_err.h \
+	../lib/krb5/error_tables/asn1_err.h
 BUILT_HEADERS = osconf.h
 
 all-unix:: autoconf.h $(BUILT_HEADERS)
@@ -37,8 +43,8 @@ $(srcdir)/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/acloc
 
 ##DOS##autoconf.h: win-mac.h
 ##DOS##	$(CP) win-mac.h $@
-##DOS##osconf.h: stock\osconf.h
-##DOS##	$(CP) stock\osconf.h $@
+##DOS##osconf.h: osconf.hin
+##DOS##	$(CP) osconf.hin $@
 
 ###############################################################################
 ##DOS##!if 0
@@ -63,36 +69,41 @@ PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 	-e 's+@LOCALSTATEDIR+$(LOCALSTATEDIR)+' \
 	-e 's+@SYSCONFDIR+$(SYSCONFDIR)+' 
 
-OSCONFSRC = $(srcdir)/stock/osconf.h
+OSCONFSRC = $(srcdir)/osconf.hin
 
 osconf.h: $(OSCONFSRC) Makefile
 	cat $(OSCONFSRC) | sed $(PROCESS_REPLACE) > osconf.new
-	@set -x ; if cmp -s osconf.new osconf.h ; then : osconf.h is current ; \
-	else ($(RM) osconf.h ; $(CP) osconf.new osconf.h) fi
-	$(RM) osconf.new
+	$(MOVEIFCHANGED) osconf.new osconf.h
 ##DOS##!endif
 ###############################################################################
 
-krb5/krb5.h: $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h asn1_err.h
+krb5/krb5.h: krb5.stamp; : krb5.h
+krb5.stamp: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 	test -d krb5 || mkdir krb5
 	if test -r krb5.h; then \
 	  if cmp -s krb5.h $(srcdir)/krb5.h; then :; else rm -f krb5.h; fi; \
 	else :; fi
-	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.h
-	echo "#ifndef KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
-	echo "#define KRB5_KRB5_H_INCLUDED" >> krb5/krb5.h
-	cat $(srcdir)/krb5/krb5.hin krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h >> krb5/krb5.h
-	echo "#endif /* KRB5_KRB5_H_INCLUDED */" >> krb5/krb5.h
+	echo "/* This file is generated, please don't edit it directly.  */" > krb5/krb5.new
+	echo "#ifndef KRB5_KRB5_H_INCLUDED" >> krb5/krb5.new
+	echo "#define KRB5_KRB5_H_INCLUDED" >> krb5/krb5.new
+	cat $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS) >> krb5/krb5.new
+	echo "#endif /* KRB5_KRB5_H_INCLUDED */" >> krb5/krb5.new
+	$(MOVEIFCHANGED) krb5/krb5.new krb5/krb5.h
+	touch krb5.stamp
 
-verify-calling-conventions-krb5: krb5/krb5.h
-	$(PERL) -w $(SRCTOP)/util/def-check.pl krb5/krb5.h $(SRCTOP)/lib/krb5_32.def
+verify-calling-conventions-krb5: private-and-public-decls
+	$(PERL) -w $(SRCTOP)/util/def-check.pl private-and-public-decls $(SRCTOP)/lib/krb5_32.def
+
+HEADERS_TO_CHECK = krb5/krb5.h $(srcdir)/k5-int.h $(srcdir)/krb5/preauth_plugin.h
+
+private-and-public-decls: $(HEADERS_TO_CHECK)
+	cat $(HEADERS_TO_CHECK) > $@
 
 #
 # Build the error table include files:
 # asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
 
-asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h: rebuild-error-tables
+$(K5_ET_HEADERS): rebuild-error-tables
 	: $@
 rebuild-error-tables:
 	(cd ../lib/krb5/error_tables && $(MAKE) includes)
@@ -100,15 +111,9 @@ rebuild-error-tables:
 .PHONY: force rebuild-error-tables
 force:
 
-asn1_err.h: $(SRCTOP)/lib/krb5/error_tables/asn1_err.et
-kdb5_err.h: $(SRCTOP)/lib/krb5/error_tables/kdb5_err.et
-krb5_err.h: $(SRCTOP)/lib/krb5/error_tables/krb5_err.et	
-kv5m_err.h: $(SRCTOP)/lib/krb5/error_tables/kv5m_err.et
-krb524_err.h: $(SRCTOP)/lib/krb5/error_tables/krb524_err.et
-
 clean-unix::
 	$(RM) krb5/krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h
+		asn1_err.h private-and-public-decls krb5.stamp
 	$(RM) $(ET_HEADERS) autoconf.stamp
 
 clean-windows::

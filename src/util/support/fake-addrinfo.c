@@ -1331,8 +1331,15 @@ static int krb5int_unlock_fac (void)
 }
 #endif
 
+#if defined(KRB5_USE_INET6)
 /* Some systems don't define in6addr_any.  */
 const struct in6_addr krb5int_in6addr_any = IN6ADDR_ANY_INIT;
+#else
+/* Are any of the systems without IPv6 support among those where
+   we cross-check the actual exported symbols against the export
+   list?  Not sure, play it safe.  */
+const char krb5int_in6addr_any = 0;
+#endif
 
 int krb5int_getaddrinfo (const char *node, const char *service,
 			 const struct addrinfo *hints,

@@ -4,7 +4,7 @@
 #             in the build tree.
 #
 # Copyright (c) 2004,2005,2006 Massachusetts Institute of Technology
-# Copyright (c) 2006 Secure Endpoints Inc.
+# Copyright (c) 2006,2007 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -47,7 +47,7 @@ KHIMAIRA_WIN32_CONFIG=1
 # Version info
 NETIDMGR_VERSION_MAJOR=1
 NETIDMGR_VERSION_MINOR=1
-NETIDMGR_VERSION_PATCH=8
+NETIDMGR_VERSION_PATCH=9
 NETIDMGR_VERSION_AUX=0
 NETIDMGR_RELEASEDESC=
 
@@ -58,7 +58,7 @@ NETIDMGR_RELEASEDESC=
 #
 # Changes to the API version numbers should be documented in
 # apiversion.txt at the root of the source tree.
-NETIDMGR_VERSION_API=6
+NETIDMGR_VERSION_API=7
 
 # Minimum backwards compatible version.  API versions from
 # NETIDMGR_VERSION_API_MINCOMPAT through NETIDMGR_VERSION_API

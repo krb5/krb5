@@ -193,6 +193,7 @@ krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
 
     err = k5_mutex_init(&data->lock);
     if (err) {
+	krb5_xfree(data);
 	krb5_xfree(*id);
 	return err;
     }
@@ -407,7 +408,7 @@ krb5_ktfile_get_name(krb5_context context, krb5_keytab id, char *name, unsigned 
     name++;
     len -= strlen(id->ops->prefix)+1;
 
-    if (len < strlen(KTFILENAME(id)+1))
+    if (len < strlen(KTFILENAME(id))+1)
 	return(KRB5_KT_NAME_TOOLONG);
     strcpy(name, KTFILENAME(id));
     /* strcpy will NUL-terminate the destination */
@@ -791,6 +792,7 @@ krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
 
     err = k5_mutex_init(&data->lock);
     if (err) {
+	krb5_xfree(data);
 	krb5_xfree(*id);
 	return err;
     }
