@@ -457,8 +457,11 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
     if ((ctx->initiate && direction != 0xff) ||
 	(!ctx->initiate && direction != 0)) {
-	if (toktype == KG_TOK_SEAL_MSG)
+	if (toktype == KG_TOK_SEAL_MSG) {
 	    xfree(token.value);
+	    message_buffer->value = NULL;
+	    message_buffer->length = 0;
+	}
 	*minor_status = G_BAD_DIRECTION;
 	return(GSS_S_BAD_SIG);
     }
