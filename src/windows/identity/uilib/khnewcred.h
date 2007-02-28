@@ -146,6 +146,10 @@ enum khui_wm_nc_notifications {
     WMNC_ADD_CONTROL_ROW,
     /*!< Add a row of controls to a new cred dialog.  This is an
       internal message. */
+
+    WMNC_UPDATE_LAYOUT,
+    /*!< Update the layout of a dialog or window.  This is an internal
+      message. */
 };
 
 /*! \brief Plugins can use WMNC_NOTIFY message codes from here on up
@@ -551,13 +555,6 @@ typedef struct tag_khui_new_creds_by_type {
 /*! \brief Height of a new creds dialog panel in dialog units*/
 #define NCDLG_HEIGHT    166
 
-/*! \brief Width of the button bar in dialog units */
-#define NCDLG_BBAR_WIDTH 60
-/*! \brief Height of a tab button in dialog units */
-#define NCDLG_TAB_HEIGHT 15
-/*! \brief Width of a tab button in dialog units */
-#define NCDLG_TAB_WIDTH 60
-
 /*! \brief A custom prompt */
 typedef struct tag_khui_new_creds_prompt {
     khm_size    index;          /*!< Set to the zero based index
@@ -944,7 +941,7 @@ khui_cw_set_response(khui_new_creds * c,
 
 /*! \brief Check whether a specified credential type panel succeeded
 
-    This is called during the processing of KMSG_CRED_DIALOG_PROCESS
+    This is called during the processing of ::KMSG_CRED_DIALOG_PROCESS
     to determine whether a specified credential type succeeded in
     obtaining credentials.  The credential type that is being queried
     should have also been listed as a dependency when adding the

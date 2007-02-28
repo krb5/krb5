@@ -83,7 +83,7 @@ typedef void (*del_ref_function_t)(const void *key, void *data);
 
 typedef struct tag_hash_bin {
     void * data;
-    void * key;
+    const void * key;
 
     LDCL(struct tag_hash_bin);
 } hash_bin;
@@ -147,7 +147,7 @@ KHMEXP void KHMAPI hash_del_hashtable(hashtable * h);
     \note Not thread-safe.  Applications must serialize calls that
         reference the same hashtable.
  */
-KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data);
+KHMEXP void KHMAPI hash_add(hashtable * h, const void * key, void * data);
 
 /*! \brief Delete an object from a hashtable
 
@@ -161,7 +161,7 @@ KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data);
     \note Not thread-safe.  Applications must serialize calls that
         reference the same hashtable.
  */
-KHMEXP void KHMAPI hash_del(hashtable * h, void * key);
+KHMEXP void KHMAPI hash_del(hashtable * h, const void * key);
 
 /*! \brief Resolve and association
 
@@ -175,7 +175,7 @@ KHMEXP void KHMAPI hash_del(hashtable * h, void * key);
     \note Not thread-safe.  Applications must serialize calls that
         reference the same hashtable.
  */
-KHMEXP void * KHMAPI hash_lookup(hashtable * h, void * key);
+KHMEXP void * KHMAPI hash_lookup(hashtable * h, const void * key);
 
 /*! \brief Check for the presence of an association
 
@@ -190,7 +190,7 @@ KHMEXP void * KHMAPI hash_lookup(hashtable * h, void * key);
     \note Not thead-safe.  Application must serialize calls that
         reference the same hashtable.
  */
-KHMEXP khm_boolean KHMAPI hash_exist(hashtable * h, void * key);
+KHMEXP khm_boolean KHMAPI hash_exist(hashtable * h, const void * key);
 
 /*! \brief Compute a hashvalue for a unicode string
 
@@ -202,6 +202,10 @@ KHMEXP khm_boolean KHMAPI hash_exist(hashtable * h, void * key);
 
     \param[in] str A pointer to a NULL terminated wchar_t string cast
         as (void *).
+
+    \note This function does not check the length of the string \a
+        str.  If the string is not \a NULL terminated, the behavior is
+        undefined.
  */
 KHMEXP khm_int32 hash_string(const void *str);
 
@@ -214,6 +218,10 @@ KHMEXP khm_int32 hash_string(const void *str);
         as (void *).
     \param[in] vs2 A pointer to a NULL terminated wchar_t string cast
         as (void *).
+
+    \note This function does not check the length of the strings \a
+        vs1 and \a vs2.  If the strings are not NULL terminated, the
+        behavior is undefined.
  */
 KHMEXP khm_int32 hash_string_comp(const void *vs1, const void *vs2);
 

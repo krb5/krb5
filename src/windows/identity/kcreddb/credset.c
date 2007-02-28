@@ -1047,7 +1047,8 @@ kcdb_credset_unseal(khm_handle credset) {
 }
 
 
-/* wrapper for qsort and also parameter gobbling FSM. */
+/* wrapper for qsort and also parameter gobbling FSM.  Access to this
+   function is serialized via cs_credset. */
 int __cdecl 
 kcdb_creds_comp_wrapper(const void * a, const void * b)
 {
@@ -1091,11 +1092,15 @@ kcdb_credset_sort(khm_handle credset,
     assert(!(cs->flags & KCDB_CREDSET_FLAG_ENUM));
 #endif
 
+    EnterCriticalSection(&cs_credset);
+
     kcdb_creds_comp_wrapper(rock, NULL);
     kcdb_creds_comp_wrapper(NULL, (void *) comp);
 
     qsort(cs->clist, cs->nclist,
 	  sizeof(kcdb_credset_credref), kcdb_creds_comp_wrapper);
+
+    LeaveCriticalSection(&cs_credset);
 
     LeaveCriticalSection(&(cs->cs));
     return code;

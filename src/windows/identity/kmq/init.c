@@ -115,11 +115,58 @@ void kmqint_detach_this_thread(void) {
 
     q = (kmq_queue *) TlsGetValue(kmq_tls_queue);
     if(q) {
+        kmq_message_ref * r;
+        kmq_message * m;
+
         EnterCriticalSection(&q->cs);
-        q->flags |= KMQ_QUEUE_FLAG_DELETED;
+
+        if (q->flags & KMQ_QUEUE_FLAG_DETACHING) {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+            LeaveCriticalSection(&q->cs);
+            return;
+        }
+
+        q->flags |= KMQ_QUEUE_FLAG_DELETED | KMQ_QUEUE_FLAG_DETACHING;
+
+        QGET(q, &r);
+        while(r) {
+
+            m = r->msg;
+
+            LeaveCriticalSection(&q->cs);
+
+            EnterCriticalSection(&cs_kmq_msg);
+            EnterCriticalSection(&cs_kmq_msg_ref);
+            kmqint_put_message_ref(r);
+            LeaveCriticalSection(&cs_kmq_msg_ref);
+
+            m->nFailed++;
+            if(m->nCompleted + m->nFailed == m->nSent) {
+                kmqint_put_message(m);
+            }
+            LeaveCriticalSection(&cs_kmq_msg);
+
+            EnterCriticalSection(&q->cs);
+
+            QGET(q, &r);
+        }
+
+        CloseHandle(q->wait_o);
+
+        q->wait_o = NULL;
+
+        q->flags &= ~KMQ_QUEUE_FLAG_DETACHING;
+        
         LeaveCriticalSection(&q->cs);
 
-        /* TODO: free up the queued messages */
+        /* For now, we don't free the queue. */
+
+        /* TODO: before we can free the queue, we have to go through
+           all the message type subscriptions and ad-hoc subscriptions
+           and make sure no subscriptions exist which refer to this
+           message queue. */
     }
 }
 
@@ -138,6 +185,8 @@ CRITICAL_SECTION cs_compl;
 DWORD WINAPI kmqint_completion_thread_proc(LPVOID p) {
     kmq_message * m;
     kherr_context * ctx;
+
+    PDESCTHREAD(L"Msg completion thread", L"KMQ");
 
     EnterCriticalSection(&cs_compl);
     do {
@@ -249,3 +298,16 @@ KHMEXP khm_int32 KHMAPI kmq_exit(void) {
 
     return KHM_ERROR_SUCCESS;
 }
+
+#ifdef DEBUG
+
+void kmqint_dump_consumer(FILE * f);
+void kmqint_dump_publisher(FILE * f);
+
+
+KHMEXP void KHMAPI kmqint_dump(FILE * f) {
+    kmqint_dump_consumer(f);
+    kmqint_dump_publisher(f);
+}
+
+#endif

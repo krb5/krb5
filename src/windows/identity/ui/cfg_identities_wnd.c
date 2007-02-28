@@ -483,10 +483,7 @@ write_params_ident(ident_data * d) {
 
 static void
 write_params_idents(void) {
-#if 0
-    int i;
-#endif
-    khm_handle csp_cw;
+    khm_handle csp_cw = NULL;
 
     if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
                                      KHM_FLAG_CREATE, &csp_cw))) {
@@ -508,7 +505,9 @@ write_params_idents(void) {
             cfg_idents.work.sticky = cfg_idents.saved.sticky;
             cfg_idents.applied = TRUE;
         }
+
         khc_close_space(csp_cw);
+        csp_cw = NULL;
     }
 
 #if 0
@@ -530,7 +529,7 @@ init_idents_data(void) {
     khm_size cb;
     int n_tries = 0;
     int i;
-    khm_handle csp_cw;
+    khm_handle csp_cw = NULL;
 
     if (cfg_idents.valid)
         return;
@@ -558,6 +557,9 @@ init_idents_data(void) {
             cfg_idents.saved.sticky = !!t;
         else
             cfg_idents.saved.sticky = FALSE;
+
+        khc_close_space(csp_cw);
+        csp_cw = NULL;
 
     } else {
 

@@ -4618,7 +4618,7 @@ khm_register_credwnd_class(void) {
     wcx.hInstance = khm_hInstance;
     wcx.hIcon = NULL;
     wcx.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
-    wcx.hbrBackground = (HBRUSH) (COLOR_BACKGROUND + 1);
+    wcx.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);
     wcx.lpszMenuName = NULL;
     wcx.lpszClassName = KHUI_CREDWND_CLASS_NAME;
     wcx.hIconSm = NULL;

@@ -30,6 +30,12 @@
 
 #if DEBUG
 #include<assert.h>
+
+#if defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL)
+/* needed for writing out leaked allocation and handle report */
+#include<stdio.h>
+#endif
+
 #endif
 
 HINSTANCE khm_hInstance;
@@ -106,6 +112,13 @@ void khm_parse_commandline(void) {
                  !wcscmp(wargs[i], L"-autoinit")) {
             khm_startup.autoinit = TRUE;
         }
+        else if (!wcscmp(wargs[i], L"-x") ||
+                 !wcscmp(wargs[i], L"--exit") ||
+                 !wcscmp(wargs[i], L"-exit")) {
+            khm_startup.exit = TRUE;
+            khm_startup.remote_exit = TRUE;
+            khm_startup.no_main_window = TRUE;
+        }
         else {
             wchar_t help[2048];
 
@@ -122,7 +135,8 @@ void khm_parse_commandline(void) {
     /* special: always enable renew when other options aren't specified */
     if (!khm_startup.exit &&
         !khm_startup.destroy &&
-        !khm_startup.init)
+        !khm_startup.init &&
+        !khm_startup.remote_exit)
         khm_startup.renew = TRUE;
 }
 
@@ -283,17 +297,25 @@ void khm_leave_modal(void) {
 
     } else {
 
+        HWND last_dialog = NULL;
+
         /* we are exiting a modal loop. */
 
         for (i=0; i < n_khui_dialogs; i++) {
             if(khui_dialogs[i].hwnd != khui_modal_dialog) {
                 EnableWindow(khui_dialogs[i].hwnd, khui_dialogs[i].active);
+                last_dialog = khui_dialogs[i].hwnd;
             }
         }
 
         EnableWindow(khm_hwnd_main, TRUE);
 
         khui_modal_dialog = NULL;
+
+        if(last_dialog)
+            SetActiveWindow(last_dialog);
+        else
+            SetActiveWindow(khm_hwnd_main);
     }
 }
 
@@ -502,6 +524,20 @@ void khm_load_default_modules(void) {
     kmm_load_default_modules();
 }
 
+int version_compare(const khm_version * v1, const khm_version * v2) {
+
+    if (v1->major != v2->major)
+        return ((int)v1->major) - ((int)v2->major);
+
+    if (v1->minor != v2->minor)
+        return ((int)v1->minor) - ((int)v2->minor);
+
+    if (v1->patch != v2->patch)
+        return ((int)v1->patch) - ((int)v2->patch);
+
+    return ((int)v1->aux - ((int)v2->aux));
+}
+
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine,
@@ -510,6 +546,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     int rv = 0;
     HANDLE h_appmutex;
     BOOL slave = FALSE;
+    int mutex_retries = 5;
 
     khm_hInstance = hInstance;
     khm_nCmdShow = nCmdShow;
@@ -518,6 +555,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
     if (khm_startup.error_exit)
         return 0;
+
+ _retry_mutex:
+
+    if (--mutex_retries < 0)
+        return 2;
 
     h_appmutex = CreateMutex(NULL, FALSE, L"Local\\NetIDMgr_GlobalAppMutex");
     if (h_appmutex == NULL)
@@ -530,6 +572,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
  _start_app:
 
     if(!slave) {
+
+        PDESCTHREAD(L"UI", L"App");
 
         /* set this so that we don't accidently invoke an API that
            inadvertently puts up the new creds dialog at an
@@ -545,8 +589,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
         /* we only open a main window if this is the only instance 
            of the application that is running. */
         kmq_init();
-        kmm_init();
         khm_init_gui();
+        kmm_init();
 
         kmq_set_completion_handler(KMSG_CRED, kmsg_cred_completion);
 
@@ -574,9 +618,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         khm_exit_request_daemon();
 
+        kmm_exit();
         khm_exit_gui();
         khm_unregister_window_classes();
-        kmm_exit();
         kmq_exit();
 
         CloseHandle(h_appmutex);
@@ -588,6 +632,9 @@ int WINAPI WinMain(HINSTANCE hInstance,
         DWORD tid;
         void * xfer;
         khm_query_app_version query_app_version;
+        khm_version v;
+        BOOL use_cmd_v2 = TRUE;
+        khm_size cb = 0;
 
         CloseHandle(h_appmutex);
 
@@ -598,11 +645,21 @@ int WINAPI WinMain(HINSTANCE hInstance,
                 break;
 
             retries--;
+
+            /* if the app was just starting, we might have to wait
+               till the main window is created. */
+
             Sleep(1000);
         }
 
-        if (!hwnd)
-            return 2;
+        if (!hwnd) {
+
+            /* if the app was just exiting, we might see the mutex but
+               not the window.  We go back and check if the mutex is
+               still there. */
+
+            goto _retry_mutex;
+        }
 
         /* first check if the remote instance supports a version
            query */
@@ -647,6 +704,31 @@ int WINAPI WinMain(HINSTANCE hInstance,
         CloseHandle(hmap);
         hmap = NULL;
 
+        if (query_app_version.magic != KHM_QUERY_APP_VER_MAGIC ||
+            query_app_version.code != KHM_ERROR_SUCCESS) {
+
+            /* We managed to communicate with the remote instance, but
+               it didn't send us useful information.  The remote
+               instance is not running an actual NetIDMgr instance.
+               However, it owns a top level window that was registered
+               with our classname.  This instance won't function
+               properly if we let it proceed.
+            */
+
+            wchar_t error_msg[1024];
+            wchar_t error_title[256];
+
+            LoadString(khm_hInstance, IDS_REMOTE_FAIL_TITLE,
+                       error_title, ARRAYLENGTH(error_title));
+            LoadString(khm_hInstance, IDS_REMOTE_FAIL,
+                       error_msg, ARRAYLENGTH(error_msg));
+
+            MessageBox(NULL, error_msg, error_title,
+                       MB_OK);
+            
+            goto done_with_remote;
+        }
+
         if (query_app_version.code == KHM_ERROR_SUCCESS &&
             query_app_version.request_swap) {
             /* the request for swap was granted.  We can now
@@ -656,43 +738,149 @@ int WINAPI WinMain(HINSTANCE hInstance,
             goto _start_app;
         }
 
+        /* Now we can work on sending the command-line to the remote
+           instance.  However we need to figure out which version of
+           the startup structure it supports. */
+        v.major = 1;
+        v.minor = 2;
+        v.patch = 0;
+        v.aux = 0;
+
+        if (version_compare(&query_app_version.ver_remote, &app_version) == 0 ||
+            version_compare(&query_app_version.ver_remote, &v) > 0)
+            use_cmd_v2 = TRUE;
+        else
+            use_cmd_v2 = FALSE;
+
         StringCbPrintf(mapname, sizeof(mapname),
                        COMMANDLINE_MAP_FMT,
                        (tid = GetCurrentThreadId()));
+
+        cb = max(sizeof(struct tag_khm_startup_options_v1),
+                 sizeof(struct tag_khm_startup_options_v2));
+
+        cb = UBOUNDSS(cb, 4096, 4096);
+
+#ifdef DEBUG
+        assert(cb >= 4096);
+#endif
 
         hmap = CreateFileMapping(INVALID_HANDLE_VALUE,
                                  NULL,
                                  PAGE_READWRITE,
                                  0,
-                                 4096,
+                                 (DWORD) cb,
                                  mapname);
 
         if (hmap == NULL)
             return 3;
 
-        xfer = MapViewOfFile(hmap,
-                             FILE_MAP_WRITE,
-                             0, 0,
-                             sizeof(khm_startup));
+        /* make the call */
 
-        if (xfer) {
-            memcpy(xfer, &khm_startup, sizeof(khm_startup));
+        if (use_cmd_v2) {
+            /* use the v2 structure */
+            struct tag_khm_startup_options_v2 v2opt;
 
-            SendMessage(hwnd, WM_KHUI_ASSIGN_COMMANDLINE,
-                        0, (LPARAM) tid);
+            ZeroMemory(&v2opt, sizeof(v2opt));
+
+            v2opt.magic = STARTUP_OPTIONS_MAGIC;
+            v2opt.cb_size = sizeof(v2opt);
+
+            v2opt.init = khm_startup.init;
+            v2opt.import = khm_startup.import;
+            v2opt.renew = khm_startup.renew;
+            v2opt.destroy = khm_startup.destroy;
+
+            v2opt.autoinit = khm_startup.autoinit;
+            v2opt.remote_exit = khm_startup.remote_exit;
+
+            v2opt.code = KHM_ERROR_NOT_IMPLEMENTED;
+
+            xfer = MapViewOfFile(hmap,
+                                 FILE_MAP_WRITE,
+                                 0, 0,
+                                 sizeof(v2opt));
+
+            if (xfer) {
+                memcpy(xfer, &v2opt, sizeof(v2opt));
+
+                SendMessage(hwnd, WM_KHUI_ASSIGN_COMMANDLINE_V2,
+                            0, (LPARAM) tid);
+
+                memcpy(&v2opt, xfer, sizeof(v2opt));
+
+                /* If the request looks like it wasn't processed, we
+                   fallback to the v1 request. */
+
+                if (v2opt.code == KHM_ERROR_NOT_IMPLEMENTED)
+                    use_cmd_v2 = FALSE;
+
+                UnmapViewOfFile(xfer);
+                xfer = NULL;
+            }
         }
 
-        if (xfer)
-            UnmapViewOfFile(xfer);
+        if (!use_cmd_v2) {
+            /* use the v1 structure */
+
+            struct tag_khm_startup_options_v1 v1opt;
+
+            ZeroMemory(&v1opt, sizeof(v1opt));
+
+            v1opt.init = khm_startup.init;
+            v1opt.import = khm_startup.import;
+            v1opt.renew = khm_startup.renew;
+            v1opt.destroy = khm_startup.destroy;
+            v1opt.autoinit = khm_startup.autoinit;
+
+            xfer = MapViewOfFile(hmap,
+                                 FILE_MAP_WRITE,
+                                 0, 0,
+                                 sizeof(v1opt));
+
+            if (xfer) {
+                memcpy(xfer, &v1opt, sizeof(v1opt));
+
+                SendMessage(hwnd, WM_KHUI_ASSIGN_COMMANDLINE_V1,
+                            0, (LPARAM) tid);
+
+                UnmapViewOfFile(xfer);
+                xfer = NULL;
+            }
+        }
+
+    done_with_remote:
 
         if (hmap)
             CloseHandle(hmap);
     }
 
-#if defined(DEBUG) && ( defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL))
-    /* writes a report of memory leaks to the specified file.  Should
-       only be enabled on development versions. */
-    PDUMP("memleak.txt");
+#if defined(DEBUG) && (defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL))
+    {
+        FILE * f = NULL;
+
+        KHMEXP void KHMAPI khcint_dump_handles(FILE * f);
+        KHMEXP void KHMAPI perf_dump(FILE * f);
+        KHMEXP void KHMAPI kmqint_dump(FILE * f);
+
+#if _MSC_VER >= 1400
+        if (fopen_s(&f, "memleak.txt", "w") != 0)
+            goto done_with_dump;
+#else
+        f = fopen("memleak.txt", "w");
+        if (f == NULL)
+            goto done_with_dump;
+#endif
+
+        perf_dump(f);
+        khcint_dump_handles(f);
+        kmqint_dump(f);
+
+        fclose(f);
+
+    done_with_dump:
+        ;
+    }
 #endif
 
     return rv;

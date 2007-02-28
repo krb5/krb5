@@ -37,7 +37,7 @@
 #define HASHPTR(p) (((size_t) (p)) % HASHSIZE)
 
 typedef struct tag_allocation {
-    char   file[8];
+    const char * file;
     int    line;
     size_t size;
     void * ptr;
@@ -54,9 +54,48 @@ static allocation * next_alloc = NULL;
 static size_t       idx_next_alloc = 0;
 static allocation * free_alloc = NULL;
 
+typedef struct tag_thread_info {
+#ifdef _WIN32
+    DWORD thread;
+#else
+#error Unsupported platform
+#endif
+    wchar_t name[128];
+    wchar_t creator[128];
+
+    const char * file;
+    int line;
+
+    LDCL(struct tag_thread_info);
+} thread_info;
+
+static thread_info * threads = NULL;
+
+static hashtable fn_hash;
+
 static CRITICAL_SECTION cs_alloc;
 static LONG ctr = 0;
 static int  perf_ready = 0;
+
+static DWORD init_thread = 0;
+
+static khm_int32 hash_stringA(const void * vs) {
+    /* DJB algorithm */
+
+    khm_int32 hv = 13331;
+    char * c;
+
+    for (c = (char *) vs; *c; c++) {
+        hv = ((hv << 5) + hv) + (khm_int32) *c;
+    }
+
+    return (hv & KHM_INT32_MAX);
+}
+
+static khm_int32 hash_string_compA(const void * vs1,
+                                   const void * vs2) {
+    return strcmp((const char *) vs1, (const char *) vs2);
+}
 
 static void perf_once(void) {
     if (InterlockedIncrement(&ctr) == 1) {
@@ -68,9 +107,18 @@ static void perf_once(void) {
         idx_next_alloc = 0;
         free_alloc = NULL;
 
+        ZeroMemory(&fn_hash, sizeof(fn_hash));
+        fn_hash.n = 13;
+        fn_hash.hash = hash_stringA;
+        fn_hash.comp = hash_string_compA;
+        fn_hash.bins = calloc(sizeof(hash_bin *), fn_hash.n);
+
         perf_ready = 1;
     } else {
-        while(!perf_ready) {
+        DWORD this_thread = GetCurrentThreadId();
+
+        while(!perf_ready &&
+              init_thread != this_thread) {
             Sleep(0);           /* relinquish control to the thread
                                    that is initializing the alloc
                                    data. */
@@ -99,7 +147,7 @@ static allocation * get_allocation(void) {
 #define MAXCB_STR 32768
 
 KHMEXP wchar_t *
-perf_wcsdup(char * file, int line, const wchar_t * str) {
+perf_wcsdup(const char * file, int line, const wchar_t * str) {
     size_t cb;
     wchar_t * dest;
 
@@ -114,7 +162,7 @@ perf_wcsdup(char * file, int line, const wchar_t * str) {
 }
 
 KHMEXP char *
-perf_strdup(char * file, int line, const char * str) {
+perf_strdup(const char * file, int line, const char * str) {
     size_t cb;
     char * dest;
 
@@ -129,7 +177,7 @@ perf_strdup(char * file, int line, const char * str) {
 }
 
 KHMEXP void *
-perf_calloc(char * file, int line, size_t num, size_t size) {
+perf_calloc(const char * file, int line, size_t num, size_t size) {
     void * ptr;
     size_t tsize;
 
@@ -145,10 +193,11 @@ perf_calloc(char * file, int line, size_t num, size_t size) {
 }
 
 KHMEXP void * 
-perf_malloc(char * file, int line, size_t s) {
+perf_malloc(const char * file, int line, size_t s) {
     allocation * a;
     void * ptr;
     size_t h;
+    char * fn_copy = NULL;
 
     perf_once();
 
@@ -164,7 +213,33 @@ perf_malloc(char * file, int line, size_t s) {
     if (file[0] == '.' && file[1] == '\\')
         file += 2;
 
-    StringCbCopyA(a->file, sizeof(a->file), file);
+    fn_copy = hash_lookup(&fn_hash, file);
+    if (fn_copy == NULL) {
+
+        size_t cblen = 0;
+        if (FAILED(StringCbLengthA(file, MAX_PATH * sizeof(char),
+                                   &cblen)))
+            fn_copy = NULL;
+        else {
+            fn_copy = malloc(cblen + sizeof(char));
+            if (fn_copy) {
+                hash_bin * b;
+                int hv;
+
+                StringCbCopyA(fn_copy, cblen + sizeof(char), file);
+
+                hv = fn_hash.hash(fn_copy) % fn_hash.n;
+
+                b = malloc(sizeof(*b));
+                b->data = fn_copy;
+                b->key = fn_copy;
+                LINIT(b);
+                LPUSH(&fn_hash.bins[hv], b);
+            }
+        }
+    }
+
+    a->file = fn_copy;
     a->line = line;
     a->size = s;
     a->ptr = ptr;
@@ -181,7 +256,7 @@ perf_malloc(char * file, int line, size_t s) {
 }
 
 KHMEXP void *
-perf_realloc(char * file, int line, void * data, size_t s) {
+perf_realloc(const char * file, int line, void * data, size_t s) {
     void * n_data;
     allocation * a;
     size_t h;
@@ -237,41 +312,100 @@ perf_free  (void * b) {
     LeaveCriticalSection(&cs_alloc);
 }
 
-KHMEXP void
-perf_dump(char * file) {
-    FILE * f;
+KHMEXP void KHMAPI
+perf_dump(FILE * f) {
     size_t i;
     allocation * a;
     size_t total = 0;
+    thread_info * t;
 
     perf_once();
 
     EnterCriticalSection(&cs_alloc);
-#if _MSC_VER >= 1400
-    if (fopen_s(&f, file, "w"))
-        return;
-#else
-    f = fopen(file, "w");
-    if (!f)
-        return;
-#endif
 
-    fprintf(f, "Leaked allocations list ....\n");
-    fprintf(f, "File\tLine\tThread\tSize\n");
+    fprintf(f, "p00\t*** Threads ***\n");
+    fprintf(f, "p00\tFile\tLine\tThread\tName\tCreated by\n");
+
+    for (t = threads; t; t = LNEXT(t)) {
+        fprintf(f, "p01\t%s\t%6d\t%6d\t%S\t%S\n",
+                t->file, t->line, t->thread,
+                t->name, t->creator);
+    }
+
+    fprintf(f, "p02\t--- End Threads ---\n");
+
+    fprintf(f, "p10\t*** Leaked allocations list ***\n");
+    fprintf(f, "p11\tFile\tLine\tThread\tSize\tAddress\n");
 
     for (i=0; i < HASHSIZE; i++) {
         for (a = ht[i]; a; a = LNEXT(a)) {
-            fprintf(f, "%s\t%6d\t%6d\t%6d\n", a->file, a->line,
-		    a->thread, a->size);
+            fprintf(f, "p12\t%s\t%6d\t%6d\t%6d\t0x%p\n", a->file, a->line,
+		    a->thread, a->size, a->ptr);
             total += a->size;
         }
     }
 
-    fprintf(f, "----------------------------------------\n");
-    fprintf(f, "Total\t\t%d\n", total);
-    fprintf(f, "----------------- End ------------------\n");
+    fprintf(f, "p20\t----------------------------------------\n");
+    fprintf(f, "p21\tTotal\t\t%d\n", total);
+    fprintf(f, "p22\t----------------- End ------------------\n");
 
-    fclose(f);
+    LeaveCriticalSection(&cs_alloc);
+}
 
+KHMEXP void
+perf_set_thread_desc(const char * file, int line,
+                     const wchar_t * name, const wchar_t * creator) {
+    thread_info * t;
+    char * fn_copy;
+
+    perf_once();
+
+    t = malloc(sizeof(*t));
+    ZeroMemory(t, sizeof(*t));
+
+#ifdef _WIN32
+    t->thread = GetCurrentThreadId();
+#else
+#error Unsupported platform
+#endif
+
+    StringCbCopy(t->name, sizeof(t->name), name);
+    if (creator)
+        StringCbCopy(t->creator, sizeof(t->creator), creator);
+
+    if (file[0] == '.' && file[1] == '\\')
+        file += 2;
+
+    EnterCriticalSection(&cs_alloc);
+
+    fn_copy = hash_lookup(&fn_hash, file);
+    if (fn_copy == NULL) {
+        size_t cblen = 0;
+        if (FAILED(StringCbLengthA(file, MAX_PATH * sizeof(char),
+                                   &cblen)))
+            fn_copy = NULL;
+        else {
+            fn_copy = malloc(cblen + sizeof(char));
+            if (fn_copy) {
+                hash_bin * b;
+                int hv;
+
+                StringCbCopyA(fn_copy, cblen + sizeof(char), file);
+
+                hv = fn_hash.hash(fn_copy) % fn_hash.n;
+
+                b = malloc(sizeof(*b));
+                b->data = fn_copy;
+                b->key = fn_copy;
+                LINIT(b);
+                LPUSH(&fn_hash.bins[hv], b);
+            }
+        }
+    }
+
+    t->file = fn_copy;
+    t->line = line;
+
+    LPUSH(&threads, t);
     LeaveCriticalSection(&cs_alloc);
 }

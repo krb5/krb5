@@ -63,10 +63,13 @@ KHMEXP void KHMAPI hash_del_hashtable(hashtable * h) {
         }
     }
 
+    if (h->bins)
+        PFREE(h->bins);
+
     PFREE(h);
 }
 
-KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data) {
+KHMEXP void KHMAPI hash_add(hashtable * h, const void * key, void * data) {
     int hv;
     hash_bin * b;
 
@@ -97,7 +100,7 @@ KHMEXP void KHMAPI hash_add(hashtable * h, void * key, void * data) {
     }
 }
 
-KHMEXP void KHMAPI hash_del(hashtable * h, void * key) {
+KHMEXP void KHMAPI hash_del(hashtable * h, const void * key) {
     hash_bin * b;
     int hv;
 
@@ -117,7 +120,7 @@ KHMEXP void KHMAPI hash_del(hashtable * h, void * key) {
     }
 }
 
-KHMEXP void * KHMAPI hash_lookup(hashtable * h, void * key) {
+KHMEXP void * KHMAPI hash_lookup(hashtable * h, const void * key) {
     hash_bin * b;
     int hv;
 
@@ -135,7 +138,7 @@ KHMEXP void * KHMAPI hash_lookup(hashtable * h, void * key) {
     return NULL;
 }
 
-KHMEXP khm_boolean KHMAPI hash_exist(hashtable * h, void * key) {
+KHMEXP khm_boolean KHMAPI hash_exist(hashtable * h, const void * key) {
     hash_bin * b;
     int hv;
 

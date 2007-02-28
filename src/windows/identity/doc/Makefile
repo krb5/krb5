@@ -64,5 +64,5 @@ CHM_FILE = "$(DOCDIR)\netiddev.chm"
 	-$(HHC) $(DOCDIR)\html\index.hhp
 
 clean::
-	$(RMDIR) /s /q $(DOCDIR)\html
-	$(RM) $(DOCDIR)\*.*
+	if exist "$(DOCDIR)/html" $(RMDIR) /s /q "$(DOCDIR)\html"
+	$(RM) "$(DOCDIR)\*.*"

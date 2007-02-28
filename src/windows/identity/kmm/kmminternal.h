@@ -40,6 +40,9 @@
 #include<khmsgtypes.h>
 #include<kherror.h>
 #include<kplugin.h>
+
+#define NOEXPORT
+
 #include<utils.h>
 #include<kconfig.h>
 #include<kcreddb.h>
@@ -104,6 +107,9 @@ typedef struct kmm_module_i_t {
    (option specified in configuration)*/
 #define KMM_MODULE_FLAG_NOUNLOAD    0x00000800
 
+/* the module has been removed from the active modules list. */
+#define KMM_MODULE_FLAG_INACTIVE    0x00001000
+
 typedef struct kmm_plugin_i_t {
     kmm_plugin_reg p;
 
@@ -142,13 +148,17 @@ typedef struct kmm_plugin_i_t {
 /* the plugin is in the module's plugin list */
 #define KMM_PLUGIN_FLAG_IN_MODLIST  0x00000004
 
+/* the plugin has been included in the pending_plugins count. */
 #define KMM_PLUGIN_FLAG_IN_QUEUE    0x00000010
+
+/* the plugin is included in the module's plugin count */
+#define KMM_PLUGIN_FLAG_IN_MODCOUNT 0x00000020
 
 /* the plugin is disabled by the user
     (option specified in configuration) */
 /* (this is defined in kmm.h)
 
- #define KMM_PLUGIN_FLAG_DISABLED    0x0400
+ #define KMM_PLUGIN_FLAG_DISABLED   0x00000400
 
 */
 

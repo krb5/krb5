@@ -47,7 +47,7 @@ KHIMAIRA_WIN32_CONFIG=1
 # Version info
 NETIDMGR_VERSION_MAJOR=1
 NETIDMGR_VERSION_MINOR=1
-NETIDMGR_VERSION_PATCH=9
+NETIDMGR_VERSION_PATCH=10
 NETIDMGR_VERSION_AUX=0
 NETIDMGR_RELEASEDESC=
 
@@ -58,7 +58,7 @@ NETIDMGR_RELEASEDESC=
 #
 # Changes to the API version numbers should be documented in
 # apiversion.txt at the root of the source tree.
-NETIDMGR_VERSION_API=7
+NETIDMGR_VERSION_API=8
 
 # Minimum backwards compatible version.  API versions from
 # NETIDMGR_VERSION_API_MINCOMPAT through NETIDMGR_VERSION_API
@@ -206,6 +206,10 @@ khdefines=-DUNICODE -D_UNICODE
 khcwarn=/Wp64
 !ifndef KH_NO_WX
 khcwarn=$(khcwarn) /WX
+!endif
+
+!if "$(CPU)" == "i386"
+khdefines=$(khdefines) -D_USE_32BIT_TIME_T
 !endif
 
 #DEBUG_SYMBOLS

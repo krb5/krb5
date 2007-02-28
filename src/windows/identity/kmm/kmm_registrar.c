@@ -131,6 +131,9 @@ khm_boolean KHMAPI kmmint_reg_cb(khm_int32 msg_type,
   callback routine ( kmmint_reg_cb() ) */
 DWORD WINAPI kmmint_registrar(LPVOID lpParameter)
 {
+
+    PDESCTHREAD(L"KMM Registrar", L"KMM");
+
     tid_registrar = GetCurrentThreadId();
 
     kmq_subscribe(KMSG_KMM, kmmint_reg_cb);
@@ -139,6 +142,9 @@ DWORD WINAPI kmmint_registrar(LPVOID lpParameter)
     SetEvent(evt_startup);
 
     while(KHM_SUCCEEDED(kmq_dispatch(INFINITE)));
+
+    kmq_unsubscribe(KMSG_KMM, kmmint_reg_cb);
+    kmq_unsubscribe(KMSG_SYSTEM, kmmint_reg_cb);
 
     ExitThread(0);
     /* not reached */
@@ -155,6 +161,8 @@ DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
 {
     DWORD rv = 0;
     kmm_plugin_i * p = (kmm_plugin_i *) lpParameter;
+
+    PDESCTHREAD(p->p.name, L"KMM");
 
     _begin_task(0);
     _report_mr1(KHERR_NONE, MSG_PB_START, _cstr(p->p.name));
@@ -324,8 +332,13 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
            from the initial attempt to start the plugin.  Undo
            the hold we did a few lines earlier. */
         kmm_release_plugin(kmm_handle_from_plugin(p));
+
         /* same for the plugin count for the module. */
+#ifdef DEBUG
+        assert(p->flags & KMM_PLUGIN_FLAG_IN_MODCOUNT);
+#endif
         p->module->plugin_count--;
+        p->flags &= ~KMM_PLUGIN_FLAG_IN_MODCOUNT;
     }
 
     p->state = KMM_PLUGIN_STATE_PREINIT;
@@ -435,6 +448,10 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
 
     } while(FALSE);
 
+#ifdef DEBUG
+    assert(!(p->flags & KMM_PLUGIN_FLAG_IN_MODCOUNT));
+#endif
+    p->flags |= KMM_PLUGIN_FLAG_IN_MODCOUNT;
     p->module->plugin_count++;
 
     LeaveCriticalSection(&cs_kmm);
@@ -485,9 +502,18 @@ _exit:
                 _dupstr(p->p.name), _int32(p->state));
     _end_task();
 
+
+#ifdef ASYNC_PLUGIN_UNLOAD_ON_FAILURE
+
     kmm_hold_plugin(kmm_handle_from_plugin(p));
 
     kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, KMM_REG_EXIT_PLUGIN, (void *) p);
+
+#else
+
+    kmmint_exit_plugin(p);
+
+#endif
 }
 
 /*! \internal
@@ -522,14 +548,15 @@ void kmmint_exit_plugin(kmm_plugin_i * p) {
     EnterCriticalSection(&cs_kmm);
 
     /* undo reference count done in kmmint_init_plugin() */
-    if(p->state == KMM_PLUGIN_STATE_EXITED ||
-       p->state == KMM_PLUGIN_STATE_HOLD) {
+    if(p->flags & KMM_PLUGIN_FLAG_IN_MODCOUNT) {
 
         np = --(p->module->plugin_count);
+        p->flags &= ~KMM_PLUGIN_FLAG_IN_MODCOUNT;
 
     } else {
-        /* the plugin was never active.  We can't base a module unload
-           decision on np */
+        /* the plugin was not included in the module's plugin_count.
+           We can't base a decision to unload the module based on this
+           plugin exiting. */
         np = TRUE;
     }
 
@@ -915,21 +942,43 @@ void kmmint_exit_module(kmm_module_i * m) {
         p = kmm_listed_plugins;
 
         while(p) {
-            if(p->module == m) {
+            if(p->module == m &&
+               (p->flags & KMM_PLUGIN_FLAG_IN_MODCOUNT)) {
+
                 kmm_hold_plugin(kmm_handle_from_plugin(p));
                 kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
                                  KMM_REG_EXIT_PLUGIN, (void *) p);
                 np++;
+
             }
 
             p = LNEXT(p);
         }
+
+#ifdef DEBUG
+        assert(np == m->plugin_count);
+#endif
 
         if(np > 0) {
             /*  we have to go back and wait for the plugins to exit.
                 when the last plugin exits, it automatically posts
                 EXIT_MODULE. We can pick up from there when this
                 happens. */
+            LeaveCriticalSection(&cs_kmm);
+            return;
+        }
+
+    } else {
+
+#ifdef DEBUG
+        assert(m->plugin_count == 0 ||
+               m->state == KMM_MODULE_STATE_EXITPLUG);
+#endif
+
+        /* if there are still plug-ins waiting to be unloaded, then we
+           have to go back and wait for them to finish.  Once they are
+           done, kmmint_exit_module() will get called again. */
+        if (m->plugin_count > 0) {
             LeaveCriticalSection(&cs_kmm);
             return;
         }
@@ -968,6 +1017,14 @@ void kmmint_exit_module(kmm_module_i * m) {
 
     m->h_module = NULL;
     m->h_resource = NULL;
+
+    if (m->flags & KMM_MODULE_FLAG_LOADED) {
+#ifdef DEBUG
+        assert(kmm_active_modules > 0);
+#endif
+        kmm_active_modules--;
+    }
+
     m->flags = 0;
 
     /* release the hold obtained in kmmint_init_module() */
@@ -975,13 +1032,6 @@ void kmmint_exit_module(kmm_module_i * m) {
 
     /* Last but not least, now see if there are any modules left that
        are running. If not, we can safely signal an exit. */
-
-#ifdef DEBUG
-    assert(kmm_active_modules > 0);
-#endif
-
-    kmm_active_modules--;
-
     if (kmm_active_modules == 0) {
         SetEvent(evt_exit);
     }

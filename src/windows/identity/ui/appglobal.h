@@ -40,14 +40,15 @@ extern khm_version app_version;
 
 #define IS_COMMCTL6() (khm_commctl_version >= 0x60000)
 
-typedef struct tag_khm_startup_options_v1 {
+/* The structure used to send command-line options to a remote
+   NetIDMgr session for versions prior to 1.2. */
+struct tag_khm_startup_options_v1 {
     BOOL seen;
     BOOL processing;
 
     BOOL init;
     BOOL import;
     BOOL renew;
-    LONG pending_renewals;
     BOOL destroy;
 
     BOOL autoinit;
@@ -55,10 +56,51 @@ typedef struct tag_khm_startup_options_v1 {
     BOOL error_exit;
 
     BOOL no_main_window;
+};
+
+/* Used on NetIDMgr versions 1.2 and later */
+struct tag_khm_startup_options_v2 {
+    khm_int32 magic;
+    DWORD cb_size;
+
+    BOOL init;
+    BOOL import;
+    BOOL renew;
+    BOOL destroy;
+
+    BOOL autoinit;
+    BOOL remote_exit;
+
+    khm_int32 code;
+} khm_startup_options_xfer;
+
+#define STARTUP_OPTIONS_MAGIC 0x1f280e41
+
+/* Used internally. */
+typedef struct tag_khm_startup_options_int {
+    BOOL seen;
+    BOOL processing;
+    BOOL remote;
+
+    BOOL init;
+    BOOL import;
+    BOOL renew;
+    BOOL destroy;
+
+    BOOL autoinit;
+    BOOL exit;
+    BOOL remote_exit;
+
+    BOOL error_exit;
+
+    BOOL no_main_window;
+
+    LONG pending_renewals;
 } khm_startup_options;
 
 extern khm_startup_options khm_startup;
 
+/* Used to query a remote instance of NetIDMgr for the version. */
 typedef struct tag_khm_query_app_version_v1 {
     khm_int32 magic;
 
@@ -94,6 +136,6 @@ WPARAM khm_message_loop_int(khm_boolean * p_exit);
 
 #define MAX_RES_STRING 1024
 
-#define ELIPSIS L"..."
+#define ELLIPSIS L"..."
 
 #endif

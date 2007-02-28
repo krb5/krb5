@@ -1460,6 +1460,24 @@ k5_write_dlg_params(khm_handle conf,
 }
 
 void 
+k5_free_kinit_job(void)
+{
+    if (g_fjob.principal)
+        PFREE(g_fjob.principal);
+
+    if (g_fjob.password)
+        PFREE(g_fjob.password);
+
+    if (g_fjob.identity)
+        kcdb_identity_release(g_fjob.identity);
+
+    if (g_fjob.ccache)
+        PFREE(g_fjob.ccache);
+
+    ZeroMemory(&g_fjob, sizeof(g_fjob));
+}
+
+void 
 k5_prep_kinit_job(khui_new_creds * nc)
 {
     khui_new_creds_by_type * nct;
@@ -1489,8 +1507,9 @@ k5_prep_kinit_job(khui_new_creds * nc)
     kcdb_identity_get_name(ident, idname, &cbbuf);
     StringCchLength(idname, ARRAYLENGTH(idname), &size);
     size++;
-    
-    ZeroMemory(&g_fjob, sizeof(g_fjob));
+
+    k5_free_kinit_job();
+
     g_fjob.command = FIBER_CMD_KINIT;
     g_fjob.nc = nc;
     g_fjob.nct = nct;
@@ -1569,24 +1588,6 @@ k5_prep_kinit_job(khui_new_creds * nc)
     }
 
     /* leave identity held, since we added a reference above */
-}
-
-void 
-k5_free_kinit_job(void)
-{
-    if (g_fjob.principal)
-        PFREE(g_fjob.principal);
-
-    if (g_fjob.password)
-        PFREE(g_fjob.password);
-
-    if (g_fjob.identity)
-        kcdb_identity_release(g_fjob.identity);
-
-    if (g_fjob.ccache)
-        PFREE(g_fjob.ccache);
-
-    ZeroMemory(&g_fjob, sizeof(g_fjob));
 }
 
 static khm_int32 KHMAPI 
@@ -2014,6 +2015,13 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             if (d->pwd_change)
                 return KHM_ERROR_SUCCESS;
 
+            /* At this point, we assume that the current set of
+               prompts is no longer valid.  And since we might not be
+               able to come up with a set of prompts until the KDC
+               replies (unless we have cached prompts), we remove the
+               ones that are already shown. */
+            khui_cw_clear_prompts(nc);
+
             /* if the fiber is already in a kinit, cancel it */
             if(g_fjob.state == FIBER_STATE_KINIT) {
                 g_fjob.command = FIBER_CMD_CANCEL;
@@ -2120,6 +2128,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 done_with_bad_princ:
 
                     k5_free_kinit_job();
+
+                    if (is_k5_identpro)
+                        kcdb_identity_set_flags(ident,
+                                                KCDB_IDENT_FLAG_UNKNOWN,
+                                                KCDB_IDENT_FLAG_UNKNOWN);
+
 
                 } else if(g_fjob.state == FIBER_STATE_KINIT) {
                     /* this is what we want.  Leave the fiber there. */
@@ -2790,6 +2804,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 PFREE(nct->credtext);
 
             PFREE(nct);
+
+            k5_free_kinit_job();
         }
         break;
 

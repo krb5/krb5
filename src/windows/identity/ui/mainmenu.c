@@ -166,12 +166,7 @@ static void refresh_menu_item(HMENU hm, khui_action * act,
            to add it. */
         mii.fMask = MIIM_STATE;
         if (!GetMenuItemInfo(hm, act->cmd, FALSE, &mii)) {
-            /* the 1000 is fairly arbitrary, but there should be much
-               less menu items on a menu anyway.  If there are that
-               many items, the system would be unusable to the extent
-               that the order of the items would be the least of our
-               worries. */
-            add_action_to_menu(hm, act, 1000, flags);
+            add_action_to_menu(hm, act, idx, flags);
             return;
         }
 
@@ -197,6 +192,7 @@ static void refresh_menu_item(HMENU hm, khui_action * act,
         SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
 
         def = khui_find_menu(act->cmd);
+
         if(def) {
             MENUITEMINFO mii2;
 

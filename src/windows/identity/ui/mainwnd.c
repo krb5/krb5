@@ -220,6 +220,7 @@ khm_main_wnd_proc(HWND hwnd,
         khm_pre_shutdown();
         kmq_unsubscribe_hwnd(KMSG_ACT, hwnd);
         kmq_unsubscribe_hwnd(KMSG_CRED, hwnd);
+        kmq_unsubscribe_hwnd(KMSG_KMM, hwnd);
         HtmlHelp(NULL, NULL, HH_CLOSE_ALL, 0);
         PostQuitMessage(0);
         break;
@@ -286,15 +287,15 @@ khm_main_wnd_proc(HWND hwnd,
 
         case KHUI_ACTION_EXIT:
             DestroyWindow(hwnd);
-            break;
+            return 0;
 
         case KHUI_ACTION_OPEN_APP:
             khm_show_main_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_CLOSE_APP:
             khm_hide_main_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_KHIM: {
             khui_config_node node = NULL;
@@ -302,7 +303,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmGeneral", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_IDENTS: {
             khui_config_node node = NULL;
@@ -310,7 +311,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmIdentities", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_APPEAR: {
             khui_config_node node = NULL;
@@ -318,7 +319,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmAppear", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_NOTIF: {
             khui_config_node node = NULL;
@@ -326,7 +327,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmNotifications", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_PLUGINS: {
             khui_config_node node = NULL;
@@ -334,27 +335,27 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmPlugins", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_CTX:
             khm_html_help(khm_hwnd_main, NULL, HH_HELP_CONTEXT, IDH_WELCOME);
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_CONTENTS:
             khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_TOC, 0);
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_INDEX:
             khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_INDEX, (DWORD_PTR) L"");
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_ABOUT:
             khm_create_about_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_IMPORT:
             khm_cred_import();
-            break;
+            return 0;
 
         case KHUI_ACTION_PROPERTIES:
             /* properties are not handled by the main window.
@@ -365,7 +366,7 @@ khm_main_wnd_proc(HWND hwnd,
 
         case KHUI_ACTION_UICB:
             khm_ui_cb(lParam);
-            break;
+            return 0;
 
             /* menu commands */
         case KHUI_PACTION_MENU:
@@ -445,6 +446,7 @@ khm_main_wnd_proc(HWND hwnd,
                 act = khui_find_action(LOWORD(wParam));
                 if (act && act->listener) {
                     kmq_post_sub_msg(act->listener, KMSG_ACT, KMSG_ACT_ACTIVATE, act->cmd, NULL);
+                    return 0;
                 }
             }
         }
@@ -518,6 +520,8 @@ khm_main_wnd_proc(HWND hwnd,
                      MW_RESIZE_TIMER,
                      MW_RESIZE_TIMEOUT,
                      NULL);
+
+            return 0;
         }
         break;
 
@@ -550,14 +554,19 @@ khm_main_wnd_proc(HWND hwnd,
                 }
                 khc_close_space(csp_cw);
             }
+
+            return 0;
+
         } else if (wParam == MW_REFRESH_TIMER) {
             kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
+
+            return 0;
+
         }
         break;
 
     case WM_MENUSELECT:
         return khm_menu_handle_select(wParam, lParam);
-        break;
 
     case KMQ_WM_DISPATCH:
         {
@@ -611,13 +620,15 @@ khm_main_wnd_proc(HWND hwnd,
             }
             return kmq_wm_end(m, rv);
         }
-        break;
+        return 0;
 
-    case WM_KHUI_ASSIGN_COMMANDLINE:
+    case WM_KHUI_ASSIGN_COMMANDLINE_V1:
         {
             HANDLE hmap;
             void * xfer;
             wchar_t mapname[256];
+            struct tag_khm_startup_options_v1 * pv1opt;
+            int code = KHM_ERROR_SUCCESS;
 
             StringCbPrintf(mapname, sizeof(mapname),
                            COMMANDLINE_MAP_FMT, (DWORD) lParam);
@@ -628,27 +639,110 @@ khm_main_wnd_proc(HWND hwnd,
                 return 1;
 
             xfer = MapViewOfFile(hmap, FILE_MAP_READ, 0, 0,
-                                 sizeof(khm_startup));
+                                 sizeof(*pv1opt));
 
             if (xfer) {
-                memcpy(&khm_startup, xfer, sizeof(khm_startup));
+                pv1opt = (struct tag_khm_startup_options_v1 *) xfer;
+
+                khm_startup.init = pv1opt->init;
+                khm_startup.import = pv1opt->import;
+                khm_startup.renew = pv1opt->renew;
+                khm_startup.destroy = pv1opt->destroy;
+
+                khm_startup.autoinit = pv1opt->autoinit;
+                khm_startup.error_exit = FALSE;
+
+                khm_startup.no_main_window = FALSE;
+                khm_startup.remote_exit = FALSE;
 
                 UnmapViewOfFile(xfer);
+            } else {
+                code = KHM_ERROR_NOT_FOUND;
             }
 
             CloseHandle(hmap);
 
             if(InSendMessage())
-                ReplyMessage(0);
+                ReplyMessage(code);
 
-            khm_startup.exit = FALSE;
+            if (code == KHM_ERROR_SUCCESS) {
+                khm_startup.exit = FALSE;
 
-            khm_startup.seen = FALSE;
-            khm_startup.processing = FALSE;
+                khm_startup.seen = FALSE;
+                khm_startup.remote = TRUE;
+#ifdef DEBUG
+                assert(!khm_startup.processing);
+#endif
+                khm_startup.processing = FALSE;
 
-            khm_cred_begin_startup_actions();
+                khm_cred_begin_startup_actions();
+            }
+
+            return code;
         }
-        break;
+
+    case WM_KHUI_ASSIGN_COMMANDLINE_V2:
+        {
+            HANDLE hmap;
+            void * xfer;
+            wchar_t mapname[256];
+            struct tag_khm_startup_options_v2 *pv2opt;
+            int code = KHM_ERROR_SUCCESS;
+
+            StringCbPrintf(mapname, sizeof(mapname),
+                           COMMANDLINE_MAP_FMT, (DWORD) lParam);
+
+            hmap = OpenFileMapping(FILE_MAP_WRITE, FALSE, mapname);
+
+            if (hmap == NULL)
+                return 1;
+
+            xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
+                                 sizeof(*pv2opt));
+
+            if (xfer) {
+                pv2opt = (struct tag_khm_startup_options_v2 *) xfer;
+
+                if (pv2opt->magic != STARTUP_OPTIONS_MAGIC ||
+                    pv2opt->cb_size != sizeof(*pv2opt)) {
+                    code = KHM_ERROR_INVALID_PARAM;
+                    goto done_with_v2_opt;
+                }
+
+                khm_startup.init = pv2opt->init;
+                khm_startup.import = pv2opt->import;
+                khm_startup.renew = pv2opt->renew;
+                khm_startup.destroy = pv2opt->destroy;
+
+                khm_startup.autoinit = pv2opt->autoinit;
+                khm_startup.exit = pv2opt->remote_exit;
+
+                pv2opt->code = KHM_ERROR_SUCCESS;
+
+            done_with_v2_opt:
+                UnmapViewOfFile(xfer);
+            } else {
+                code = KHM_ERROR_NOT_FOUND;
+            }
+
+            CloseHandle(hmap);
+
+            if(InSendMessage())
+                ReplyMessage(code);
+
+            if (code == KHM_ERROR_SUCCESS) {
+                khm_startup.seen = FALSE;
+                khm_startup.remote = TRUE;
+#ifdef DEBUG
+                assert(!khm_startup.processing);
+#endif
+                khm_startup.processing = FALSE;
+
+                khm_cred_begin_startup_actions();
+            }
+
+            return code;
+        }
 
     case WM_KHUI_QUERY_APP_VERSION:
         {
@@ -676,7 +770,7 @@ khm_main_wnd_proc(HWND hwnd,
 
             CloseHandle(hmap);
         }
-        break;
+        return 0;
 
     }
     return DefWindowProc(hwnd,uMsg,wParam,lParam);
@@ -765,12 +859,80 @@ khm_create_main_window_controls(HWND hwnd_main) {
     khm_hwnd_main_cred = khm_create_credwnd(hwnd_main);
 }
 
+void
+khm_adjust_window_dimensions_for_display(RECT * pr) {
+
+    HMONITOR hmon;
+    RECT     rm;
+    long x, y, width, height;
+
+    x = pr->left;
+    y = pr->top;
+    width = pr->right - pr->left;
+    height = pr->bottom - pr->top;
+
+    /* if the rect doesn't intersect with the display area of any
+       monitor, we just default to the primary monitor. */
+    hmon = MonitorFromRect(pr, MONITOR_DEFAULTTOPRIMARY);
+
+    if (hmon == NULL) {
+        /* huh? we'll just center this on the primary screen */
+        goto nomonitor;
+    } else {
+        MONITORINFO mi;
+
+        ZeroMemory(&mi, sizeof(mi));
+        mi.cbSize = sizeof(mi);
+
+        if (!GetMonitorInfo(hmon, &mi))
+            goto nomonitor;
+
+        CopyRect(&rm, &mi.rcWork);
+
+        goto adjust_dims;
+    }
+
+ nomonitor:
+    /* for some reason we couldn't get a handle on a monitor or we
+       couldn't get the metrics for that monitor.  We default to
+       setting things up on the primary monitor. */
+
+    SetRectEmpty(&rm);
+    if (!SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID) &rm, 0))
+        goto done_with_monitor;
+
+ adjust_dims:
+
+    if (width > (rm.right - rm.left))
+        width = rm.right - rm.left;
+    if (height > (rm.bottom - rm.top))
+        height = rm.bottom - rm.top;
+
+    if (x < rm.left)
+        x = rm.left;
+    if (x + width > rm.right)
+        x = rm.right - width;
+    if (y < rm.top)
+        y = rm.top;
+    if (y + height > rm.bottom)
+        y = rm.bottom - height;
+
+ done_with_monitor:
+    pr->left = x;
+    pr->top = y;
+    pr->right = x + width;
+    pr->bottom = y + height;
+
+}
+
+
 void 
 khm_create_main_window(void) {
     wchar_t buf[1024];
     khm_handle csp_cw = NULL;
     khm_handle csp_mw = NULL;
     int x,y,width,height;
+    RECT r;
 
     LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, 
                buf, ARRAYLENGTH(buf));
@@ -817,13 +979,23 @@ khm_create_main_window(void) {
         khc_close_space(csp_cw);
     }
 
+    /* The saved dimensions might not actually be visible if the user
+       has changed the resolution of the display or if it's a multiple
+       monitor system where the monitor on which the Network Identity
+       Manager window was on previously is no longer connected.  We
+       have to check for that and adjust the dimensions if needed. */
+    SetRect(&r, x, y, x + width, y + height);
+    khm_adjust_window_dimensions_for_display(&r);
+
     khm_hwnd_main = 
         CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
                        MAKEINTATOM(khm_main_window_class),
                        buf,
                        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | 
                        WS_CLIPSIBLINGS,
-                       x, y, width, height,
+                       r.left, r.top,
+                       r.right - r.left,
+                       r.bottom - r.top,
                        khm_hwnd_null,
                        NULL,
                        NULL,

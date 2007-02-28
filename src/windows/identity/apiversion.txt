@@ -220,8 +220,129 @@ Date=(TBD)
 #----------------------------------------------------------------
 Version=7
 AppVersion=1.1.9.0
-Date=(TBD)
-# Released with KFW 3.2.0
+Date=Feb 16, 2007
+# Released with KFW 3.2 Alpha 1
 
 +KHUI_ACTION_UICB
 # Internal action to dispatch a UI callback
+
++WMNC_UPDATE_LAYOUT
+# Used to update the layout and size of the dialogs during a new
+# credentials operation.
+
+- NCDLG_TAB_HEIGHT, NCDLG_TAB_WIDTH
+# No longer used
+
+- NCDLG_BBAR_WIDTH
+# Moved to internal header file
+
++ KCDB_IDENT_FLAG_UNKNOWN
+# Used to indicate that an authority could not be contacted to
+# determine the validity of an identity.
+
++ khui_refresh_actions()
+# Force a refresh of the application menus and toolbars.
+
++ khui_action_lock()
++ khui_action_unlock()
+# Synchronization of action and menu operations.
+
+! khui_alert
+# Structure definition is now internal
+
+! khui_action
+# Structure definition is now internal
+
++ khui_alert_set_type()
++ khui_alert_set_ctx()
++ khui_alert_get_response()
+# Additional functions to setup an alert.
+
+! kmq_message
+# Added field "aborted"
+
++ kmq_abort_call()
++ kmq_is_call_aborted()
+# Added placeholders
+
+! kmq_message_ref
+! kmq_queue
+! kmq_msg_subscription
+! kmq_msg_type
+# Structure definition now internal
+
+! KMQ_MSG_TYPE_MAX
+! KMQ_MAXCCH_TYPE_NAME
+! KMQ_MAXCB_TYPE_NAME
+! KMQ_MSG_SUB_MAGIC
+! KMQ_RCPTTYPE_CB
+! KMQ_RCPTTYPE_HWND
+! KMQ_QUEUE_FLAG_DELETED
+# Macros not internal
+
+#----------------------------------------------------------------
+Version=8
+AppVersion=1.1.10.0
+Date=(TBD)
+# Released with (TBD)
+
+! hash_add(), hash_del(), hash_lookup(), hash_exist()
+# 'key' parameter is now (const void *)
+
+! struct tag_has_bin, hash_bin
+# 'key' member is now (const void *)
+
+
++WMNC_UPDATE_LAYOUT
+# Used to update the layout and size of the dialogs during a new
+# credentials operation.
+
+- NCDLG_TAB_HEIGHT, NCDLG_TAB_WIDTH
+# No longer used
+
+- NCDLG_BBAR_WIDTH
+# Moved to internal header file
+
++ KCDB_IDENT_FLAG_UNKNOWN
+# Used to indicate that an authority could not be contacted to
+# determine the validity of an identity.
+
++ khui_refresh_actions()
+# Force a refresh of the application menus and toolbars.
+
++ khui_action_lock()
++ khui_action_unlock()
+# Synchronization of action and menu operations.
+
+! khui_alert
+# Structure definition is now internal
+
+! khui_action
+# Structure definition is now internal
+
++ khui_alert_set_type()
++ khui_alert_set_ctx()
++ khui_alert_get_response()
+# Additional functions to setup an alert.
+
+! kmq_message
+# Added field "aborted"
+
++ kmq_abort_call()
++ kmq_is_call_aborted()
+# Added placeholders
+
+! kmq_message_ref
+! kmq_queue
+! kmq_msg_subscription
+! kmq_msg_type
+# Structure definition now internal
+
+! KMQ_MSG_TYPE_MAX
+! KMQ_MAXCCH_TYPE_NAME
+! KMQ_MAXCB_TYPE_NAME
+! KMQ_MSG_SUB_MAGIC
+! KMQ_RCPTTYPE_CB
+! KMQ_RCPTTYPE_HWND
+! KMQ_QUEUE_FLAG_DELETED
+# Macros not internal

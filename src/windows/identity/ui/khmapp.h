@@ -36,19 +36,14 @@
 #define KHERR_HMODULE khm_hInstance
 #define KHERR_FACILITY khm_facility
 #define KHERR_FACILITY_ID 3
+
 #define NOEXPORT
 
-#include<khdefs.h>
-#include<khlist.h>
-#include<kherror.h>
-#include<kconfig.h>
-#include<kcreddb.h>
-#include<kmq.h>
-#include<khmsgtypes.h>
-#include<kmm.h>
+#include<netidmgr.h>
+
 #include<khhelp.h>
-#include<khuidefs.h>
-#include<utils.h>
+#include<intaction.h>
+#include<intalert.h>
 
 #include<resource.h>
 #include<credfuncs.h>
