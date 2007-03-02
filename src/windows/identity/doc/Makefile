@@ -65,4 +65,4 @@ CHM_FILE = "$(DOCDIR)\netiddev.chm"
 
 clean::
 	if exist "$(DOCDIR)/html" $(RMDIR) /s /q "$(DOCDIR)\html"
-	$(RM) "$(DOCDIR)\*.*"
+	if exist "$(DOCDIR)" $(RM) "$(DOCDIR)\*.*"
