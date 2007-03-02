@@ -113,6 +113,7 @@ $(HDRDIR)/ss_err.h: ss_err.h $(HDRDIR)/timestamp
 
 clean-unix::
 	$(RM) $(HDRS) $(HDRDIR)/timestamp
+	$(RM) -r $(HDRDIR)
 
 std_rqs.c: std_rqs.ct mk_cmds ct_c.sed ct_c.awk
 

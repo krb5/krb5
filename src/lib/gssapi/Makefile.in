@@ -47,8 +47,9 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs clean-misc-unix
 clean-windows::
 	$(RM) gssapi.lib gssapi.bak
 
-clean-misc-unix:
+clean-misc-unix: clean-recurse
 	$(RM) merged-gssapi-header.h
+	$(RM) -r $(EHDRDIR)
 
 EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= \

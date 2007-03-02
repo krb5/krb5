@@ -77,7 +77,7 @@ includes:: profile.h
 	fi
 
 clean-unix::
-	$(RM) $(BUILDTOP)/include/profile.h
+	$(RM) $(BUILDTOP)/include/profile.h test2.ini test3.ini test2.ini.bak
 
 ##DOS##LIBOBJS = $(OBJS)
 

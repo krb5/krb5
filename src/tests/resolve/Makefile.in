@@ -21,7 +21,7 @@ addrinfo-test: addrinfo-test.o
 fake-addrinfo-test: fake-addrinfo-test.o
 	$(CC_LINK) -o $@ fake-addrinfo-test.o $(SUPPORT_LIB) $(LIBS)
 
-check:: resolve addrinfo-test
+check:: resolve addrinfo-test fake-addrinfo-test
 	$(RUN_SETUP) $(VALGRIND) ./resolve
 	$(RUN_SETUP) $(VALGRIND) ./addrinfo-test -p telnet
 	$(RUN_SETUP) $(VALGRIND) ./fake-addrinfo-test -p telnet
@@ -29,7 +29,7 @@ check:: resolve addrinfo-test
 install::
 
 clean::
-	$(RM) resolve addrinfo-test
+	$(RM) resolve addrinfo-test fake-addrinfo-test
 
 # +++ Dependency line eater +++
 # 
