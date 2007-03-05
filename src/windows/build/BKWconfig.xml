@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- BKW: Build Kerberos for Windows -->
+<BKW_Config>
+	<CommandLine>
+	  <!-- The most changeable parameters can be specified on the command line.
+	       Less changeable params are in section Config, below. -->
+		<Tags>
+			<cvs value="2.6.5 build 1234"/>
+<!--			<svn value="http://anonsvn.mit.edu/foo/bar"/>	-->
+		</Tags>
+		<Directories>
+			<!--	Sources will be checked out of repositories into <src>.  The structure
+						of the repositories will cause pismere/athena to be created under <src>.	-->
+			<src		path="C:\MIT-ISDA\KfW\src2" />
+			
+			<!--	The sample config distributed as a zip must be unzipped into this directory before running the build: -->
+			<extras	path="\auth\krb5\package-extras" />	<!-- Relative to <src>\pismere\athena -->
+			
+			<out		path="path4" />
+		</Directories>
+		<Options>
+			<debug			value="0" />
+			<log				value="1" path="bkw_pl.log" />
+			<clean			value="0" />
+			<nomake		value="0" />
+			<nopackage	value="0" />
+			<verbose		value="0" />
+			<vverbose		value="0" />
+		</Options>
+	</CommandLine>
+	<Config>
+		<CVSROOT	name=":kserver:cvs.mit.edu:/cvs/pismere" />
+		<SVNURL		name="" />
+	</Config>
+	<Stages>
+		<FetchSources></FetchSources>
+		<Make></Make>
+		<PrePackage>
+			<CopyList>
+				<Config>
+					<!--	Debug and Release build results go in different places.
+								The otherwise identical paths differ in one section.  For example:
+								.../target/bin/i386/bin/rel/filename and .../target/bin/i386/dbg/filename.
+								Here we define the two differing sections:	-->
+					<DebugArea		value="dbg" />
+					<ReleaseArea	value="rel" />
+					<!--	Paths in the file list that include <AlwaysTag> will always have the tag replaced 
+								with <DebugArea> or <ReleaseArea>, depending on the type of build.
+								Paths that include <DebugTag> (or <ReleaseTag>) will only have the tag substituted 
+								and be copied when doing a debug (or release) build.  Examples:
+								Will always be copied, from a build-dependent directory:
+						  		<File name="kfwlogon.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" /> 
+						  		Will only be copied in debug build:
+								<File name="netidmgr.exe.static.manifest"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" notrequired="true" />
+								Will always be copied, from a build-independent directory:
+								<File name="des.h"	from="auth\krb4\include\"	to="\inc\krb4" newname="foo.h"/>
+								-->
+					<AlwaysTag	value="%bldtype%" />	<!-- Pick a string that won't appear in a path. -->
+					<DebugTag	value="%debug%" />	<!-- Pick a string that won't appear in a path. -->
+					<ReleaseTag	value="%release%" />	<!-- Pick a string that won't appear in a path. -->
+				</Config>
+				<Files>
+					<Include path="copyfiles.xml" />	<!-- Relative to location of bkw.pl. -->
+				</Files>
+			</CopyList>
+		</PrePackage>
+		<Package></Package>
+		<PostPackage></PostPackage>
+	</Stages>
+</BKW_Config>
