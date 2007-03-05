@@ -5,8 +5,8 @@
 	  <!-- The most changeable parameters can be specified on the command line.
 	       Less changeable params are in section Config, below. -->
 		<Tags>
-			<cvs value="2.6.5 build 1234"/>
-<!--			<svn value="http://anonsvn.mit.edu/foo/bar"/>	-->
+			<cvs value=""/>
+<!--			<svn value=""/>	-->
 		</Tags>
 		<Directories>
 			<!--	Sources will be checked out of repositories into <src>.  The structure
@@ -20,7 +20,8 @@
 		</Directories>
 		<Options>
 			<debug			value="0" />
-			<log				value="1" path="bkw_pl.log" />
+			<logfile			value="1" path="bkw.pl.log" />
+			<repository	value="skip" />
 			<clean			value="0" />
 			<nomake		value="0" />
 			<nopackage	value="0" />
@@ -30,7 +31,7 @@
 	</CommandLine>
 	<Config>
 		<CVSROOT	name=":kserver:cvs.mit.edu:/cvs/pismere" />
-		<SVNURL		name="" />
+		<SVNURL		name="svn+ssh://svn.mit.edu/" />
 	</Config>
 	<Stages>
 		<FetchSources></FetchSources>
