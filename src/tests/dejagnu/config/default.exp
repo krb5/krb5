@@ -83,7 +83,8 @@ if { [string length $VALGRIND] } {
 		set inflags 0
 		# Only run valgrind for local programs, not
 		# system ones.
-		if [string match "/" [string index $arg 0]]&&![string match "/bin/sh" $arg]&&![string match "/bin/ls" $arg]&&![regexp {/kshd$} $arg] {
+#&&![string match "/bin/sh" $arg] sh is used to start kadmind!
+		if [string match "/" [string index $arg 0]]&&![string match "/bin/ls" $arg]&&![regexp {/kshd$} $arg] {
 		    set newargs [concat $newargs $VALGRIND]
 		}
 	    }
