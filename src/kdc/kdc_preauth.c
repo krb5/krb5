@@ -271,6 +271,7 @@ load_preauth_plugins(krb5_context context)
     int module_count, i, j, k;
     void *plugin_context;
     preauth_server_init_proc server_init_proc = NULL;
+    char **kdc_realm_names = NULL;
 
     memset(&err, 0, sizeof(err));
 
@@ -320,6 +321,18 @@ load_preauth_plugins(krb5_context context)
 	return ENOMEM;
     }
 
+    /* Build a list of the names of the supported realms for this KDC.
+     * The list of names is terminated with a NULL. */
+    kdc_realm_names = malloc(sizeof(char *) * (kdc_numrealms + 1));
+    if (kdc_realm_names == NULL) {
+	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
+	return ENOMEM;
+    }
+    for (i = 0; i < kdc_numrealms; i++) {
+	kdc_realm_names[i] = kdc_realmlist[i]->realm_name;
+    }
+    kdc_realm_names[i] = NULL;
+
     /* Add the locally-supplied mechanisms to the dynamic list first. */
     for (i = 0, k = 0;
 	 i < sizeof(static_preauth_systems) / sizeof(static_preauth_systems[0]);
@@ -332,7 +345,7 @@ load_preauth_plugins(krb5_context context)
 	plugin_context = NULL;
 	server_init_proc = static_preauth_systems[i].init;
 	if ((server_init_proc != NULL) &&
-	    ((*server_init_proc)(context, &plugin_context) != 0)) {
+	    ((*server_init_proc)(context, &plugin_context, (const char **)kdc_realm_names) != 0)) {
 	    memset(&preauth_systems[k], 0, sizeof(preauth_systems[k]));
 	    continue;
 	}
@@ -361,7 +374,7 @@ load_preauth_plugins(krb5_context context)
 		    server_init_proc = ftable->init_proc;
 		    if (server_init_proc != NULL) {
 			krb5_error_code initerr;
-			initerr = (*server_init_proc)(context, &plugin_context);
+			initerr = (*server_init_proc)(context, &plugin_context, (const char **)kdc_realm_names);
 			if (initerr) {
 			    const char *emsg;
 			    emsg = krb5_get_error_message(context, initerr);
@@ -400,6 +413,7 @@ load_preauth_plugins(krb5_context context)
 	}
 	krb5int_free_plugin_dir_data(preauth_plugins_ftables);
     }
+    free(kdc_realm_names);
     n_preauth_systems = k;
     /* Add the end-of-list marker. */
     preauth_systems[k].name = "[end]";

@@ -91,8 +91,8 @@ _krb5_conf_boolean(const char *s)
  * already been established.
  */
 krb5_error_code
-pkinit_kdcdefault_strings(krb5_context context, const char *option,
-			  char ***ret_value)
+pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
+			  const char *option, char ***ret_value)
 {
     profile_t profile = NULL;
     const char *names[5];
@@ -102,27 +102,26 @@ pkinit_kdcdefault_strings(krb5_context context, const char *option,
     if (context == NULL)
 	return KV5M_CONTEXT;
 
-    if (context->default_realm == NULL)
-	return EINVAL;
-
     profile = context->profile;
 
-    /*
-     * Try number one:
-     *
-     * [realms]
-     *	    REALM = {
-     *		option = <value>
-     *	    }
-     */
+    if (realmname != NULL) {
+	/*
+	 * Try number one:
+	 *
+	 * [realms]
+	 *	    REALM = {
+	 *		option = <value>
+	 *	    }
+	 */
 
-    names[0] = "realms";
-    names[1] = context->default_realm;
-    names[2] = option;
-    names[3] = 0;
-    retval = profile_get_values(profile, names, &values);
-    if (retval == 0 && values != NULL)
-	goto goodbye;
+	names[0] = "realms";
+	names[1] = realmname;
+	names[2] = option;
+	names[3] = 0;
+	retval = profile_get_values(profile, names, &values);
+	if (retval == 0 && values != NULL)
+	    goto goodbye;
+    }
 
     /*
      * Try number two:
@@ -149,13 +148,13 @@ goodbye:
 }
 
 krb5_error_code
-pkinit_kdcdefault_string(krb5_context context, const char *option,
-			 char **ret_value)
+pkinit_kdcdefault_string(krb5_context context, const char *realmname,
+			 const char *option, char **ret_value)
 {
     krb5_error_code retval;
     char **values = NULL;
 
-    retval = pkinit_kdcdefault_strings(context, option, &values);
+    retval = pkinit_kdcdefault_strings(context, realmname, option, &values);
     if (retval)
 	return retval;
 
@@ -174,13 +173,13 @@ pkinit_kdcdefault_string(krb5_context context, const char *option,
 }
 
 krb5_error_code
-pkinit_kdcdefault_boolean(krb5_context context, const char *option,
-			  int default_value, int *ret_value)
+pkinit_kdcdefault_boolean(krb5_context context, const char *realmname,
+			  const char *option, int default_value, int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
 
-    retval = pkinit_kdcdefault_string(context, option, &string);
+    retval = pkinit_kdcdefault_string(context, realmname, option, &string);
 
     if (retval == 0) {
 	*ret_value = _krb5_conf_boolean(string);
@@ -192,13 +191,13 @@ pkinit_kdcdefault_boolean(krb5_context context, const char *option,
 }
 
 krb5_error_code
-pkinit_kdcdefault_integer(krb5_context context, const char *option,
-			  int default_value, int *ret_value)
+pkinit_kdcdefault_integer(krb5_context context, const char *realmname,
+			  const char *option, int default_value, int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
 
-    retval = pkinit_kdcdefault_string(context, option, &string);
+    retval = pkinit_kdcdefault_string(context, realmname, option, &string);
 
     if (retval == 0) {
         char *endptr;

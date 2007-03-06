@@ -337,7 +337,9 @@ typedef krb5_error_code
 
 /* Preauth plugin initialization function */
 typedef krb5_error_code
-(*preauth_server_init_proc)(krb5_context context, void **plugin_context);
+(*preauth_server_init_proc)(krb5_context context,
+			    void **plugin_context,
+			    const char** realmnames);
 
 /* Preauth plugin cleanup function */
 typedef void

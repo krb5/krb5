@@ -177,7 +177,7 @@ struct _pkinit_req_context {
 };
 
 /*
- * KDC's plugin context
+ * KDC's (per-realm) plugin context
  */
 struct _pkinit_kdc_context {
     int magic;
@@ -185,6 +185,8 @@ struct _pkinit_kdc_context {
     pkinit_plg_opts *opts;
     pkinit_identity_crypto_context idctx;
     pkinit_identity_opts *idopts;
+    char *realmname;
+    unsigned int realmname_len;
 };
 
 /*
@@ -675,14 +677,16 @@ void free_krb5_subject_pk_info(krb5_subject_pk_info **in);
  * Functions in pkinit_profile.c
  */
 krb5_error_code pkinit_kdcdefault_strings
-	(krb5_context context, const char *option, char ***ret_value);
+	(krb5_context context, const char *realmname, const char *option,
+	 char ***ret_value);
 krb5_error_code pkinit_kdcdefault_string
-	(krb5_context context, const char *option, char **ret_value);
+	(krb5_context context, const char *realmname, const char *option,
+	 char **ret_value);
 krb5_error_code pkinit_kdcdefault_boolean
-	(krb5_context context, const char *option,
+	(krb5_context context, const char *realmname, const char *option,
 	 int default_value, int *ret_value);
 krb5_error_code pkinit_kdcdefault_integer
-	(krb5_context context, const char *option,
+	(krb5_context context, const char *realmname, const char *option,
          int default_value, int *ret_value);
 
 

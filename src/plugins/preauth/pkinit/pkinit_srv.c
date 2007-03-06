@@ -76,12 +76,25 @@ static int pkinit_server_get_flags
 
 static krb5_error_code pkinit_init_kdc_req_context
 	(krb5_context, void **blob);
+
 static void pkinit_fini_kdc_req_context
 	(krb5_context context, void *blob);
+
+static int pkinit_server_plugin_init_realm
+	(krb5_context context, const char *realmname,
+	 pkinit_kdc_context *pplgctx);
+
+static void pkinit_server_plugin_fini_realm
+	(krb5_context context, pkinit_kdc_context plgctx);
+
 static int pkinit_server_plugin_init
-	(krb5_context context, void **blob);
+	(krb5_context context, void **blob, const char **realmnames);
+
 static void pkinit_server_plugin_fini
 	(krb5_context context, void *blob);
+
+static pkinit_kdc_context pkinit_find_realm_context
+	(krb5_context context, void *pa_plugin_context, krb5_principal princ);
 
 static krb5_error_code
 pkinit_create_edata(krb5_context context,
@@ -132,7 +145,19 @@ pkinit_server_get_edata(krb5_context context,
 			krb5_pa_data * data)
 {
     krb5_error_code retval = 0;
+    pkinit_kdc_context plgctx = NULL;
+
     pkiDebug("pkinit_get_edata: entered!\n");
+
+    /*
+     * If we don't have a realm context for the given realm,
+     * don't tell the client that we support pkinit! 
+     */
+    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
+				       request->server);
+    if (plgctx == NULL)
+	retval = EINVAL;
+
     return retval;
 }
 
@@ -155,7 +180,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
     krb5_auth_pack_draft9 *auth_pack9 = NULL;
-    pkinit_kdc_context plgctx = (pkinit_kdc_context)pa_plugin_context;
+    pkinit_kdc_context plgctx = NULL;
     pkinit_kdc_req_context reqctx;
     krb5_preauthtype pa_type;
     krb5_principal tmp_client;
@@ -171,7 +196,12 @@ pkinit_server_verify_padata(krb5_context context,
 	return 0;
 
     if (pa_plugin_context == NULL || e_data == NULL)
-	return -1;
+	return EINVAL;
+
+    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
+				       request->server);
+    if (plgctx == NULL)
+	return 0;
 
     scratch.data = data->contents;
     scratch.length = data->length;
@@ -227,7 +257,7 @@ pkinit_server_verify_padata(krb5_context context,
 	    pkiDebug("unrecognized pa_type = %d\n", data->pa_type);
 	    scratch.data = NULL;
 	    scratch.length = 0;
-	    retval = -1;
+	    retval = EINVAL;
 	    goto cleanup;
     }
     if (retval) {
@@ -245,7 +275,6 @@ pkinit_server_verify_padata(krb5_context context,
 	retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
 	goto cleanup;
     } else {
-#if 0
 	if (tmp_client != NULL) {
 	    retval = krb5_principal_compare(context, request->client,
 					    tmp_client);
@@ -261,7 +290,6 @@ pkinit_server_verify_padata(krb5_context context,
 	    retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
 	    goto cleanup;
 	}
-#endif
     }
 
     retval = verify_id_pkinit_eku(context, plgctx->cryptoctx, reqctx->cryptoctx,
@@ -491,7 +519,7 @@ pkinit_server_return_padata(krb5_context context,
     int num_types;
     krb5_cksumtype *cksum_types = NULL;
 
-    pkinit_kdc_context plgctx = (pkinit_kdc_context)pa_plugin_context;
+    pkinit_kdc_context plgctx;
     pkinit_kdc_req_context reqctx;
 
     *send_pa = NULL;
@@ -500,8 +528,16 @@ pkinit_server_return_padata(krb5_context context,
 
     if (pa_request_context == NULL || *pa_request_context == NULL) {
 	pkiDebug("missing request context \n");
-	return -1;
+	return EINVAL;
     }
+    
+    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
+				       request->server);
+    if (plgctx == NULL) {
+	pkiDebug("Unable to locate correct realm context\n");
+	return ENOENT;
+    }
+
     pkiDebug("pkinit_return_padata: entered!\n");
     reqctx = (pkinit_kdc_req_context)*pa_request_context;
 
@@ -602,7 +638,8 @@ pkinit_server_return_padata(krb5_context context,
 	    goto cleanup;
 	}
 #ifdef DEBUG_ASN1
-	print_buffer_bin(encoded_dhkey_info->data, encoded_dhkey_info->length, "/tmp/kdc_dh_key_info");
+	print_buffer_bin(encoded_dhkey_info->data, encoded_dhkey_info->length,
+			 "/tmp/kdc_dh_key_info");
 #endif
 
 	switch ((int)padata->pa_type) {
@@ -849,43 +886,55 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     krb5_error_code retval;
 
-    retval = pkinit_kdcdefault_string(context, "pkinit_identity",
+    pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
+    retval = pkinit_kdcdefault_string(context, plgctx->realmname,
+				      "pkinit_identity",
 				      &plgctx->idopts->identity);
     if (retval != 0 || NULL == plgctx->idopts->identity) {
 	retval = EINVAL;
 	krb5_set_error_message(context, retval,
-			       "No pkinit_identity supplied for the KDC");
+			       "No pkinit_identity supplied for realm %s",
+			       plgctx->realmname);
 	goto errout;
     }
 
-    retval = pkinit_kdcdefault_strings(context, "pkinit_anchors",
+    retval = pkinit_kdcdefault_strings(context, plgctx->realmname,
+				       "pkinit_anchors",
 				       &plgctx->idopts->anchors);
     if (retval != 0 || NULL == plgctx->idopts->anchors) {
 	retval = EINVAL;
 	krb5_set_error_message(context, retval,
-			       "No pkinit_anchors supplied for the KDC");
+			       "No pkinit_anchors supplied for realm %s",
+			       plgctx->realmname);
 	goto errout;
     }
 
-    pkinit_kdcdefault_strings(context, "pkinit_pool",
+    pkinit_kdcdefault_strings(context, plgctx->realmname,
+			      "pkinit_pool",
 			      &plgctx->idopts->intermediates);
 
-    pkinit_kdcdefault_strings(context, "pkinit_revoke",
+    pkinit_kdcdefault_strings(context, plgctx->realmname,
+			      "pkinit_revoke",
 			      &plgctx->idopts->crls);
 
-    pkinit_kdcdefault_string(context, "pkinit_kdc_ocsp",
+    pkinit_kdcdefault_string(context, plgctx->realmname,
+			     "pkinit_kdc_ocsp",
 			     &plgctx->idopts->ocsp);
 
-    pkinit_kdcdefault_string(context, "pkinit_mappings_file",
+    pkinit_kdcdefault_string(context, plgctx->realmname,
+			     "pkinit_mappings_file",
 			     &plgctx->idopts->dn_mapping_file);
 
-    pkinit_kdcdefault_boolean(context, "pkinit_principal_in_certificate",
+    pkinit_kdcdefault_boolean(context, plgctx->realmname,
+			      "pkinit_principal_in_certificate",
 			      1, &plgctx->opts->princ_in_cert);
 
-    pkinit_kdcdefault_boolean(context, "pkinit_allow_proxy_certificate",
+    pkinit_kdcdefault_boolean(context, plgctx->realmname,
+			      "pkinit_allow_proxy_certificate",
 			      0, &plgctx->opts->allow_proxy_certs);
 
-    pkinit_kdcdefault_integer(context, "pkinit_dh_min_bits",
+    pkinit_kdcdefault_integer(context, plgctx->realmname,
+			      "pkinit_dh_min_bits",
 			      0, &plgctx->opts->dh_min_bits);
 
     return 0;
@@ -894,33 +943,65 @@ errout:
     return retval;
 }
 
+static pkinit_kdc_context
+pkinit_find_realm_context(krb5_context context, void *pa_plugin_context,
+			  krb5_principal princ)
+{
+    int i;
+    pkinit_kdc_context *realm_contexts = pa_plugin_context;
+
+    if (pa_plugin_context == NULL)
+	return NULL;
+
+    for (i = 0; realm_contexts[i] != NULL; i++) {
+	pkinit_kdc_context p = realm_contexts[i];
+
+	if ((p->realmname_len == princ->realm.length) &&
+	    (strncmp(p->realmname, princ->realm.data, p->realmname_len) == 0)) {
+	    pkiDebug("%s: returning context at %p for realm '%s'\n",
+		     __FUNCTION__, p, p->realmname);
+	    return p;
+	}
+    }
+    pkiDebug("%s: unable to find realm context for realm '%.*s'\n",
+	     __FUNCTION__, princ->realm.length, princ->realm.data);
+    return NULL;
+}
+
 static int
-pkinit_server_plugin_init(krb5_context context, void **blob)
+pkinit_server_plugin_init_realm(krb5_context context, const char *realmname,
+				pkinit_kdc_context *pplgctx)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_kdc_context *plgctx = NULL;
+    pkinit_kdc_context plgctx = NULL;
 
-    plgctx = (struct _pkinit_kdc_context *)calloc(1, sizeof(*plgctx));
+    *pplgctx = NULL;
+
+    plgctx = (pkinit_kdc_context) calloc(1, sizeof(*plgctx));
     if (plgctx == NULL)
-        return ENOMEM;
+	goto errout;
+
+    pkiDebug("%s: initializing context at %p for realm '%s'\n",
+	     __FUNCTION__, plgctx, realmname);
     memset(plgctx, 0, sizeof(*plgctx));
     plgctx->magic = PKINIT_CTX_MAGIC;
 
-    retval = pkinit_accessor_init();
-    if (retval)
-        goto errout;
-
-    retval = pkinit_init_plg_opts(&plgctx->opts);
-    if (retval)
-        goto errout;
+    plgctx->realmname = strdup(realmname);
+    if (plgctx->realmname == NULL)
+	goto errout;
+    plgctx->realmname_len = strlen(plgctx->realmname);
 
     retval = pkinit_init_plg_crypto(&plgctx->cryptoctx);
     if (retval)
-        goto errout;
+	goto errout;
+
+    retval = pkinit_init_plg_opts(&plgctx->opts);
+    if (retval)
+	goto errout;
 
     retval = pkinit_init_identity_crypto(&plgctx->idctx);
     if (retval)
-        goto errout;
+	goto errout;
 
     retval = pkinit_init_identity_opts(&plgctx->idopts);
     if (retval)
@@ -932,45 +1013,104 @@ pkinit_server_plugin_init(krb5_context context, void **blob)
 
     retval = pkinit_initialize_identity(context, plgctx->idopts, plgctx->idctx);
     if (retval)
-        goto errout;
+	goto errout;
 
-    *blob = plgctx;
-
-    pkiDebug("%s: returning plgctx at %p\n", __FUNCTION__, plgctx);
+    pkiDebug("%s: returning context at %p for realm '%s'\n",
+	     __FUNCTION__, plgctx, realmname);
+    *pplgctx = plgctx;
+    retval = 0;
 
 errout:
     if (retval)
-	pkinit_server_plugin_fini(context, plgctx);
+	pkinit_server_plugin_fini_realm(context, plgctx);
+
+    return retval;
+}
+
+static int
+pkinit_server_plugin_init(krb5_context context, void **blob,
+			  const char **realmnames)
+{
+    krb5_error_code retval = ENOMEM;
+    pkinit_kdc_context plgctx, *realm_contexts = NULL;
+    int i, j, numrealms;
+
+    retval = pkinit_accessor_init();
+    if (retval)
+        return retval;
+
+    /* Determine how many realms we may need to support */
+    for (i = 0; realmnames[i] != NULL; i++) {};
+    numrealms = i;
+
+    realm_contexts = (pkinit_kdc_context *)
+			calloc(numrealms+1, sizeof(pkinit_kdc_context));
+    if (realm_contexts == NULL)
+	return ENOMEM;
+
+    for (i = 0, j = 0; i < numrealms; i++) {
+	pkiDebug("%s: processing realm '%s'\n", __FUNCTION__, realmnames[i]);
+	retval = pkinit_server_plugin_init_realm(context, realmnames[i], &plgctx);
+	if (retval == 0 && plgctx != NULL)
+	    realm_contexts[j++] = plgctx;
+    }
+
+    if (j == 0) {
+	retval = EINVAL;
+	krb5_set_error_message(context, retval, "No realms configured "
+			       "correctly for pkinit support");
+	goto errout;
+    }
+
+    *blob = realm_contexts;
+    retval = 0;
+    pkiDebug("%s: returning context at %p\n", __FUNCTION__, realm_contexts);
+
+errout:
+    if (retval)
+	pkinit_server_plugin_fini(context, realm_contexts);
 
     return retval;
 }
 
 static void
-pkinit_server_plugin_fini(krb5_context context, void *blob)
+pkinit_server_plugin_fini_realm(krb5_context context, pkinit_kdc_context plgctx)
 {
-    struct _pkinit_kdc_context *plgctx = (struct _pkinit_kdc_context *) blob;
-
-    if (plgctx == NULL || plgctx->magic != PKINIT_CTX_MAGIC) {
-	pkiDebug("pkinit_lib_fini: got bad plgctx (%p)!\n", plgctx);
+    if (plgctx == NULL)
 	return;
-    }
-    pkiDebug("%s: freeing   plgctx at %p\n", __FUNCTION__, plgctx);
 
     pkinit_fini_kdc_profile(context, plgctx);
     pkinit_fini_identity_opts(plgctx->idopts);
     pkinit_fini_identity_crypto(plgctx->idctx);
     pkinit_fini_plg_crypto(plgctx->cryptoctx);
     pkinit_fini_plg_opts(plgctx->opts);
+    free(plgctx->realmname);
     free(plgctx);
+}
+
+static void
+pkinit_server_plugin_fini(krb5_context context, void *blob)
+{
+    pkinit_kdc_context *realm_contexts = blob;
+    int i;
+
+    if (realm_contexts == NULL)
+	return;
+
+    for (i = 0; realm_contexts[i] != NULL; i++) {
+	pkinit_server_plugin_fini_realm(context, realm_contexts[i]);
+    }
+    pkiDebug("%s: freeing   context at %p\n", __FUNCTION__, realm_contexts);
+    free(realm_contexts);
 }
 
 static krb5_error_code pkinit_init_kdc_req_context(krb5_context context,
 						   void **ctx)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_kdc_req_context *reqctx = NULL;
+    pkinit_kdc_req_context reqctx = NULL;
 
-    reqctx = (struct _pkinit_kdc_req_context *)malloc(sizeof(*reqctx));
+    reqctx = (pkinit_kdc_req_context)malloc(sizeof(*reqctx));
     if (reqctx == NULL)
 	return retval;
     memset(reqctx, 0, sizeof(*reqctx));
@@ -994,8 +1134,7 @@ cleanup:
 
 static void  pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
 {
-    struct _pkinit_kdc_req_context *reqctx =
-	(struct _pkinit_kdc_req_context *)ctx;
+    pkinit_kdc_req_context reqctx = (pkinit_kdc_req_context)ctx;
 
     if (reqctx == NULL || reqctx->magic != PKINIT_CTX_MAGIC) {
         pkiDebug("pkinit_fini_kdc_req_context: got bad reqctx (%p)!\n", reqctx);

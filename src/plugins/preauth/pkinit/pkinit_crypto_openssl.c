@@ -162,24 +162,30 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
+static int pkinit_oids_refs = 0;
+
 const krb5_octet_data dh_oid = { 0, 7, "\x2A\x86\x48\xce\x3e\x02\x01" };
 
-static krb5_error_code create_identifiers_from_stack(STACK_OF(X509) *sk, krb5_external_principal_identifier *** ids);
+static krb5_error_code
+create_identifiers_from_stack(STACK_OF(X509) *sk,
+			      krb5_external_principal_identifier *** ids);
 
 krb5_error_code
 pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx) {
 
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_plg_crypto_context *ctx = NULL;
+    pkinit_plg_crypto_context ctx = NULL;
 
     /* initialize openssl routines */
     openssl_init();
 
-    ctx = (struct _pkinit_plg_crypto_context *)malloc(sizeof(*ctx));
+    ctx = (pkinit_plg_crypto_context)malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
 
+    pkiDebug("%s: initializing openssl crypto context at %p\n",
+	     __FUNCTION__, ctx);
     retval = pkinit_init_pkinit_oids(ctx);
     if (retval)
 	goto out;
@@ -191,10 +197,8 @@ pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx) {
     *cryptoctx = ctx;
 
 out:
-    if (retval) {
-	free(ctx);
-	OBJ_cleanup();
-    }
+    if (retval && ctx != NULL)
+	    pkinit_fini_plg_crypto(ctx);
 
     return retval;
 }
@@ -202,22 +206,22 @@ out:
 void
 pkinit_fini_plg_crypto(pkinit_plg_crypto_context cryptoctx)
 {
-    struct _pkinit_plg_crypto_context *ctx = cryptoctx;
+    pkiDebug("%s: freeing context at %p\n", __FUNCTION__, cryptoctx);
 
-    if (ctx == NULL)
+    if (cryptoctx == NULL)
 	return;
-    pkinit_fini_pkinit_oids(ctx);
-    pkinit_fini_dh_params(ctx);
-    free(ctx);
+    pkinit_fini_pkinit_oids(cryptoctx);
+    pkinit_fini_dh_params(cryptoctx);
+    free(cryptoctx);
 }
 
 krb5_error_code
 pkinit_init_identity_crypto(pkinit_identity_crypto_context *idctx)
 {
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_identity_crypto_context *ctx = NULL;
+    pkinit_identity_crypto_context ctx = NULL;
 
-    ctx = (struct _pkinit_identity_crypto_context *)malloc(sizeof(*ctx));
+    ctx = (pkinit_identity_crypto_context)malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
@@ -230,13 +234,13 @@ pkinit_init_identity_crypto(pkinit_identity_crypto_context *idctx)
     if (retval)
 	goto out;
 
-    pkiDebug("pkinit_init_identity_crypto: returning ctx at %p\n", ctx);
+    pkiDebug("%s: returning ctx at %p\n", __FUNCTION__, ctx);
     *idctx = ctx;
 
 out:
     if (retval) {
-	free(ctx);
-	OBJ_cleanup();
+	if (ctx)
+	    pkinit_fini_identity_crypto(ctx);
     }
 
     return retval;
@@ -245,15 +249,13 @@ out:
 void
 pkinit_fini_identity_crypto(pkinit_identity_crypto_context idctx)
 {
-    struct _pkinit_identity_crypto_context *ctx = idctx;
-
-    if (ctx == NULL)
+    if (idctx == NULL)
 	return;
 
-    pkiDebug("pkinit_fini_identity_crypto: freeing   ctx at %p\n", ctx);
-    pkinit_fini_certs(ctx);
-    pkinit_fini_pkcs11(ctx);
-    free(ctx);
+    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, idctx);
+    pkinit_fini_certs(idctx);
+    pkinit_fini_pkcs11(idctx);
+    free(idctx);
 }
 
 krb5_error_code
@@ -261,9 +263,9 @@ pkinit_init_req_crypto(pkinit_req_crypto_context *cryptoctx)
 {
 
     krb5_error_code retval = ENOMEM;
-    struct _pkinit_req_crypto_context *ctx = NULL;
+    pkinit_req_crypto_context ctx = NULL;
 
-    ctx = (struct _pkinit_req_crypto_context *)malloc(sizeof(*ctx));
+    ctx = (pkinit_req_crypto_context)malloc(sizeof(*ctx));
     if (ctx == NULL)
 	goto out;
     memset(ctx, 0, sizeof(*ctx));
@@ -273,7 +275,7 @@ pkinit_init_req_crypto(pkinit_req_crypto_context *cryptoctx)
 
     *cryptoctx = ctx;
 
-    pkiDebug("pkinit_init_req_crypto: returning ctx at %p\n", ctx);
+    pkiDebug("%s: returning ctx at %p\n", __FUNCTION__, ctx);
     retval = 0;
 out:
     if (retval)
@@ -283,20 +285,18 @@ out:
 }
 
 void
-pkinit_fini_req_crypto(pkinit_req_crypto_context cryptoctx)
+pkinit_fini_req_crypto(pkinit_req_crypto_context req_cryptoctx)
 {
-    struct _pkinit_req_crypto_context *ctx = cryptoctx;
-
-    if (ctx == NULL)
+    if (req_cryptoctx == NULL)
 	return;
 
-    pkiDebug("pkinit_fini_req_crypto: freeing   ctx at %p\n", ctx);
-    if (ctx->dh != NULL)
-      DH_free(ctx->dh);
-    if (ctx->received_cert != NULL)
-      X509_free(ctx->received_cert);
+    pkiDebug("%s: freeing   ctx at %p\n", __FUNCTION__, req_cryptoctx);
+    if (req_cryptoctx->dh != NULL)
+      DH_free(req_cryptoctx->dh);
+    if (req_cryptoctx->received_cert != NULL)
+      X509_free(req_cryptoctx->received_cert);
 
-    free(ctx);
+    free(req_cryptoctx);
 }
 
 static krb5_error_code
@@ -359,7 +359,9 @@ pkinit_init_pkinit_oids(pkinit_plg_crypto_context ctx)
 	goto out;
     ctx->id_kp_serverAuth = (ASN1_OBJECT *)OBJ_nid2obj(tmp);
 
+    /* Success */
     retval = 0;
+    pkinit_oids_refs++;
 
 out:
     return retval;
@@ -368,7 +370,12 @@ out:
 static void
 pkinit_fini_pkinit_oids(pkinit_plg_crypto_context ctx)
 {
-    OBJ_cleanup();
+    if (ctx == NULL)
+	return;
+
+    /* Only call OBJ_cleanup once! */
+    if (--pkinit_oids_refs == 0)
+	OBJ_cleanup();
 }
 
 static krb5_error_code
@@ -450,6 +457,9 @@ pkinit_init_certs(pkinit_identity_crypto_context ctx)
 static void
 pkinit_fini_certs(pkinit_identity_crypto_context ctx)
 {
+    if (ctx == NULL)
+	return;
+
     if (ctx->my_certs != NULL)
 	sk_X509_pop_free(ctx->my_certs, X509_free);
 
@@ -492,6 +502,9 @@ static void
 pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx)
 {
 #ifndef WITHOUT_PKCS11
+    if (ctx == NULL)
+	return;
+
     if (ctx->p11 != NULL) {
 	if (ctx->session) {
 	    ctx->p11->C_CloseSession(ctx->session);
@@ -1947,7 +1960,7 @@ server_process_dh(krb5_context context,
 static void
 openssl_init()
 {
-    static int did_init;
+    static int did_init = 0;
 
     if (!did_init) {
 	/* initialize openssl routines */
@@ -2557,7 +2570,6 @@ openssl_callback_ignore_crls(int ok, X509_STORE_CTX * ctx)
 static ASN1_OBJECT *
 pkinit_pkcs7type2oid(pkinit_plg_crypto_context cryptoctx, int pkcs7_type)
 {
-
     switch (pkcs7_type) {
 	case CMS_SIGN_CLIENT:
 	    return cryptoctx->id_pkinit_authData;
@@ -3735,7 +3747,8 @@ load_trusted_certifiers(STACK_OF(X509) **trusted_CAs,
 }
 
 static krb5_error_code
-create_identifiers_from_stack(STACK_OF(X509) *sk, krb5_external_principal_identifier *** ids)
+create_identifiers_from_stack(STACK_OF(X509) *sk,
+			      krb5_external_principal_identifier *** ids)
 {
     krb5_error_code retval = ENOMEM;
     int i = 0, sk_size = sk_X509_num(sk);
