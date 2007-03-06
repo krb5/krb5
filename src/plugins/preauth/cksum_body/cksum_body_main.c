@@ -244,7 +244,7 @@ client_gic_opt(krb5_context kcontext,
 
 /* Initialize and tear down the server-side module, and do stat tracking. */
 static krb5_error_code
-server_init(krb5_context kcontext, void **module_context)
+server_init(krb5_context kcontext, void **module_context, const char **realmnames)
 {
     struct server_stats *stats;
     stats = malloc(sizeof(struct server_stats));
