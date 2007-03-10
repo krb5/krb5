@@ -990,7 +990,7 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
      gss_OID gss_type;
      char *a;
      rpcproc_t proc;
-     int i;
+     size_t i;
      const char *procname;
 
      client.length = 0;
