@@ -210,7 +210,7 @@ krb5_ldap_db_init(krb5_context context, krb5_ldap_context *ldap_context)
 	server_info = ldap_context->server_info_list[cnt];
 
 	if (server_info->server_status == NOTSET) {
-	    krb5_ui_4 conns=0;
+	    int conns=0;
 
 	    /*
 	     * Check if the server has to perform certificate-based authentication

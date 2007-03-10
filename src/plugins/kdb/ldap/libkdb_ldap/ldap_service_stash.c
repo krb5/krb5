@@ -183,8 +183,7 @@ tohex(in, ret)
     krb5_data         in;
     krb5_data         *ret;
 {
-    unsigned           i=0;
-    int		       err = 0;
+    int                i=0, err = 0;
 
     ret->length = 0;
     ret->data = NULL;

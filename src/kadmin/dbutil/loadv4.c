@@ -971,7 +971,6 @@ static krb5_error_code fixup_database(context, realm)
 }
     
 #else /* KRB5_KRB4_COMPAT */
-#include <stdio.h>
 void
 load_v4db(argc, argv)
 	int argc;

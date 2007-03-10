@@ -721,8 +721,7 @@ recv_database(context, fd, database_fd, confmsg)
     krb5_data *confmsg;
 {
 	krb5_ui_4	database_size; /* This must be 4 bytes */
-	krb5_ui_4	received_size;
-	int		n;
+	int	received_size, n;
 	char		buf[1024];
 	krb5_data	inbuf, outbuf;
 	krb5_error_code	retval;

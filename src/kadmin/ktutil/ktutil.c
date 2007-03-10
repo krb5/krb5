@@ -213,8 +213,7 @@ void ktutil_list(argc, argv)
     krb5_error_code retval;
     krb5_kt_list lp;
     int show_time = 0, show_keys = 0, show_enctype = 0;
-    int i;
-    unsigned j;
+    int i, j;
     char *pname;
 
     for (i = 1; i < argc; i++) {
@@ -284,3 +283,13 @@ void ktutil_list(argc, argv)
 	krb5_xfree(pname);
     }
 }
+
+
+
+
+
+
+
+
+
+
