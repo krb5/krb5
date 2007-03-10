@@ -1162,7 +1162,7 @@ krb5_read_tkt_policy (context, ldap_context, entries, policy)
 {
     krb5_error_code             st=0;
     unsigned int                mask=0, omask=0;
-    int                         tkt_mask=(KDB_MAX_LIFE_ATTR | KDB_MAX_RLIFE_ATTR | KDB_TKT_FLAGS_ATTR);
+    unsigned int                tkt_mask=(KDB_MAX_LIFE_ATTR | KDB_MAX_RLIFE_ATTR | KDB_TKT_FLAGS_ATTR);
     krb5_ldap_policy_params     *tktpoldnparam=NULL;
 
     if ((st=krb5_get_attributes_mask(context, entries, &mask)) != 0)
