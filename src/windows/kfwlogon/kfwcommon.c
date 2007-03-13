@@ -1,5 +1,6 @@
 /*
 Copyright 2005,2006 by the Massachusetts Institute of Technology
+Copyright 2007 by Secure Endpoints Inc.
 
 All rights reserved.
 
@@ -778,6 +779,8 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	return 1;
     }
 
+    DebugEvent0("KFW_set_ccache_dacl");
+
     /* Get System SID */
     if (!ConvertStringSidToSid("S-1-5-18", &pSystemSID)) {
 	DebugEvent("KFW_set_ccache_dacl - ConvertStringSidToSid GLE = 0x%x", GetLastError());
@@ -833,7 +836,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo DACL (1) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -844,7 +847,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   NULL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo OWNER (2) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -856,7 +859,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo DACL (3) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -867,6 +870,102 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	LocalFree(pSystemSID);
     if (pTokenUser)
 	LocalFree(pTokenUser);
+    if (ccacheACL)
+	LocalFree(ccacheACL);
+    return ret;
+}
+
+int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
+{
+    // SID_IDENTIFIER_AUTHORITY authority = SECURITY_NT_SID_AUTHORITY;
+    PSID pSystemSID = NULL;
+    DWORD SystemSIDlength = 0, UserSIDlength = 0;
+    PACL ccacheACL = NULL;
+    DWORD ccacheACLlength = 0;
+    DWORD retLen;
+    DWORD gle;
+    int ret = 0;  
+
+    if (!filename) {
+	DebugEvent0("KFW_set_ccache_dacl_with_user_sid - invalid parms");
+	return 1;
+    }
+
+    DebugEvent0("KFW_set_ccache_dacl_with_user_sid");
+
+    /* Get System SID */
+    if (!ConvertStringSidToSid("S-1-5-18", &pSystemSID)) {
+	DebugEvent("KFW_set_ccache_dacl - ConvertStringSidToSid GLE = 0x%x", GetLastError());
+	ret = 1;
+	goto cleanup;
+    }
+
+    /* Create ACL */
+    SystemSIDlength = GetLengthSid(pSystemSID);
+    ccacheACLlength = sizeof(ACL) + sizeof(ACCESS_ALLOWED_ACE)
+        + SystemSIDlength - sizeof(DWORD);
+
+    if (pUserSID) {
+	UserSIDlength = GetLengthSid(pUserSID);
+
+	ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength 
+	    - sizeof(DWORD);
+    }
+
+    ccacheACL = (PACL) LocalAlloc(LPTR, ccacheACLlength);
+    if (!ccacheACL) {
+	DebugEvent("KFW_set_ccache_dacl - LocalAlloc GLE = 0x%x", GetLastError());
+	ret = 1;
+	goto cleanup;
+    }
+
+    InitializeAcl(ccacheACL, ccacheACLlength, ACL_REVISION);
+    AddAccessAllowedAceEx(ccacheACL, ACL_REVISION, 0,
+                         STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+                         pSystemSID);
+    if (pUserSID) {
+	AddAccessAllowedAceEx(ccacheACL, ACL_REVISION, 0,
+			     STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+			     pUserSID);
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+				   NULL,
+				   NULL, 
+				   ccacheACL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo DACL (4) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   OWNER_SECURITY_INFORMATION,
+				   pUserSID,
+				   NULL, 
+				   NULL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo OWNER (5) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+    } else {
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+				   NULL,
+				   NULL, 
+				   ccacheACL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo DACL (6) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+    }
+
+  cleanup:
+    if (pSystemSID)
+	LocalFree(pSystemSID);
     if (ccacheACL)
 	LocalFree(ccacheACL);
     return ret;
@@ -894,9 +993,8 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
 }
 
 void
-KFW_copy_cache_to_system_file(char * user, char * szLogonId)
+KFW_copy_cache_to_system_file(char * user, char * filename)
 {
-    char filename[MAX_PATH] = "";
     DWORD count;
     char cachename[MAX_PATH + 8] = "FILE:";
     krb5_context		ctx = 0;
@@ -906,24 +1004,11 @@ KFW_copy_cache_to_system_file(char * user, char * szLogonId)
     krb5_ccache                 ncc = 0;
     PSECURITY_ATTRIBUTES        pSA = NULL;
     
-    if (!pkrb5_init_context || !user || !szLogonId)
+    if (!pkrb5_init_context || !user || !filename)
         return;
 
-    count = GetEnvironmentVariable("TEMP", filename, sizeof(filename));
-    if ( count > sizeof(filename) || count == 0 ) {
-        GetWindowsDirectory(filename, sizeof(filename));
-    }
-
-    DebugEvent0(filename);
-    if ( strlen(filename) + strlen(szLogonId) + 2 > sizeof(filename) ) {
-	DebugEvent0("filename buffer too small");
-        return;
-    }
-
-    strcat(filename, "\\");
-    strcat(filename, szLogonId);    
-
-    strcat(cachename, filename);
+    strncat(cachename, filename, sizeof(cachename));
+    cachename[sizeof(cachename)-1] = '\0';
 
     DebugEvent("KFW_Logon_Event - ccache %s", cachename);
 
