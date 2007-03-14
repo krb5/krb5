@@ -4,7 +4,7 @@
 # returns a list of principals in the keytab
 # sorted and uniquified
 list_princs() {
-    klist -k $keytab | tail +4 | awk '{print $2}' | sort | uniq
+    klist -k $keytab | awk '(NR > 3) {print $2}' | sort | uniq
 }
 
 set_command() {
