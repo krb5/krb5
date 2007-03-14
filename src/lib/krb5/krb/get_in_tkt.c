@@ -1084,8 +1084,21 @@ krb5_get_init_creds(krb5_context context,
      * XXX we know they are the same size... and we should do
      * something better than just the current time
      */
-    request.nonce = (krb5_int32) time_now;
+    {
+	unsigned char random_buf[4];
+	krb5_data random_data;
 
+	random_data.length = 4;
+	random_data.data = random_buf;
+	if (krb5_c_random_make_octets(context, &random_data) == 0)
+	    /* See RT ticket 3196 at MIT.  If we set the high bit, we
+	       may have compatibility problems with Heimdal, because
+	       we (incorrectly) encode this value as signed.  */
+	    request.nonce = 0x7fffffff & load_32_n(random_buf);
+	else
+	    /* XXX  Yuck.  Old version.  */
+	    request.nonce = (krb5_int32) time_now;
+    }
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, options, &request);
     ret = encode_krb5_kdc_req_body(&request, &encoded_request_body);

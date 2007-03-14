@@ -39,6 +39,8 @@
 #define K5_PLATFORM_H
 
 #include "autoconf.h"
+/* for memcpy */
+#include <string.h>
 
 /* Initialization and finalization function support for libraries.
 
@@ -653,6 +655,28 @@ load_64_le (const unsigned char *p)
 #else
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
 #endif
+}
+
+static inline unsigned short
+load_16_n (const unsigned char *p)
+{
+    uint16_t n;
+    memcpy(&n, p, 2);
+    return n;
+}
+static inline unsigned int
+load_32_n (const unsigned char *p)
+{
+    uint32_t n;
+    memcpy(&n, p, 4);
+    return n;
+}
+static inline UINT64_TYPE
+load_64_n (const unsigned char *p)
+{
+    UINT64_TYPE n;
+    memcpy(&n, p, 8);
+    return n;
 }
 
 /* Make the interfaces to getpwnam and getpwuid consistent.
