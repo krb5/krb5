@@ -180,18 +180,6 @@ set passes {
 	{dummy=[verbose -log "AES + DES enctypes"]}
     }
     {
-	aesonly
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES enctypes"]}
-    }
-    {
 	aes-tcp
 	mode=tcp
 	des3_krbtgt=0
