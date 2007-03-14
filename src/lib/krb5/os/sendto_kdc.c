@@ -66,12 +66,14 @@ int krb5int_debug_sendto_kdc = 0;
 static void default_debug_handler (const void *data, size_t len)
 {
 #if 0
-    FILE *logfile;
-    logfile = fopen("/tmp/sendto_kdc.log", "a");
-    if (logfile == NULL)
-	return;
+    static FILE *logfile;
+    if (logfile == NULL) {
+	logfile = fopen("/tmp/sendto_kdc.log", "a");
+	if (logfile == NULL)
+	    return;
+	setbuf(logfile, NULL);
+    }
     fwrite(data, 1, len, logfile);
-    fclose(logfile);
 #else
     fwrite(data, 1, len, stderr);
     /* stderr is unbuffered */
@@ -124,9 +126,21 @@ krb5int_debug_fprint (const char *fmt, ...)
 
     for (; *fmt; fmt++) {
 	if (*fmt != '%') {
-	    /* Possible optimization: Look for % and print all chars
-	       up to it in one call.  */
-	    put(fmt, 1);
+	    const char *fmt2;
+	    size_t len;
+	    for (fmt2 = fmt+1; *fmt2; fmt2++)
+		if (*fmt2 == '%')
+		    break;
+	    len = fmt2 - fmt;
+	    if (0) {
+		FILE *f = fopen("/dev/pts/0", "w+");
+		if (f) {
+		    fprintf(f, "krb5int_debug_fprint: format <%s> fmt2 <%s> put %lu next <%s>\n",
+			    fmt, fmt2, (unsigned long) len, fmt+len-1);
+		}
+	    }
+	    put(fmt, len);
+	    fmt += len - 1;	/* then fmt++ in loop header */
 	    continue;
 	}
 	/* After this, always processing a '%' sequence.  */
