@@ -660,14 +660,22 @@ load_64_le (const unsigned char *p)
 static inline unsigned short
 load_16_n (const unsigned char *p)
 {
+#ifdef _WIN32
+    unsigned __int16 n;
+#else
     uint16_t n;
+#endif
     memcpy(&n, p, 2);
     return n;
 }
 static inline unsigned int
 load_32_n (const unsigned char *p)
 {
+#ifdef _WIN32
+    unsigned __int32 n;
+#else
     uint32_t n;
+#endif
     memcpy(&n, p, 4);
     return n;
 }
