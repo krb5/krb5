@@ -2,40 +2,46 @@
 <!-- BKW: Build Kerberos for Windows -->
 <BKW_Config>
 	<CommandLine>
-	  <!-- The most changeable parameters can be specified on the command line.
-	       Less changeable params are in section Config, below. -->
+		<!-- The most changeable parameters can be specified on the command line.	-->
 		<Tags>
-			<cvs value=""/>
-<!--			<svn value=""/>	-->
-		</Tags>
+			<cvs value="" />
+			<svn value=""/>
+			</Tags>
 		<Directories>
 			<!--	Sources will be checked out of repositories into <src>.  The structure
 						of the repositories will cause pismere/athena to be created under <src>.	-->
-			<src		path="C:\projects\" />
-			
-			<!--	The sample config distributed as a zip must be unzipped into this directory before running the build: -->
-			<extras	path="\auth\krb5\package-extras" />	<!-- Relative to <src>\pismere\athena -->
-			
-			<out		path="path4" />
-		</Directories>
+			<src			path	="C:\projects\Autobuild" />
+			<out			path	="public" /> <!-- Relative to src. -->
+			<unixfind	path	="c:\cygwin\bin" />
+			</Directories>
 		<Options>
-			<debug			value="0" />
-			<logfile			value="1" path="bkw.pl.log" />
-			<repository	value="skip" />
-			<clean			value="0" />
-			<nomake		value="0" />
-			<nopackage	value="0" />
-			<verbose		value="0" />
-			<vverbose		value="0" />
-		</Options>
-	</CommandLine>
-	<Config>
-		<CVSROOT	name=":kserver:cvs.mit.edu:/cvs/pismere" />
-		<SVNURL		name="svn+ssh://svn.mit.edu/" />
-	</Config>
+			<debug value="0" />
+			<logfile value="1" path="bkw.pl.log" />
+			<repository value="skip" />
+			<clean value="0" />
+			<nomake value="0" />
+			<nopackage value="0" />
+			<verbose value="0" />
+			<vverbose value="0" />
+			</Options>
+		</CommandLine>
 	<Stages>
-		<FetchSources></FetchSources>
-		<Make></Make>
+		<FetchSources>
+			<Config>
+				<CVSROOT name=":kserver:cvs.mit.edu:/cvs/pismere" />
+				<SVNURL name="svn.mit.edu" /> <!-- NB:  No protocol or slashes!! -->
+				<KERBEROS_ID name="kpkoch" />
+				<KRB_PLINK name="c:\downloads\plink.exe" /> <!-- Path to a kerberized plink, needed for svn. -->
+				</Config>
+		</FetchSources>
+		<Make>
+			<Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:	-->
+				<Prune dummy="foo" />
+				<Prune name="afsauth" />
+				<Prune name="aklog" />
+				<Prune name="vs" />
+				</Prunes>
+			</Make>
 		<PrePackage>
 			<CopyList>
 				<Config>
@@ -43,8 +49,8 @@
 								The otherwise identical paths differ in one section.  For example:
 								.../target/bin/i386/bin/rel/filename and .../target/bin/i386/dbg/filename.
 								Here we define the two differing sections:	-->
-					<DebugArea		value="dbg" />
-					<ReleaseArea	value="rel" />
+					<DebugArea value="dbg" />
+					<ReleaseArea value="rel" />
 					<!--	Paths in the file list that include <AlwaysTag> will always have the tag replaced 
 								with <DebugArea> or <ReleaseArea>, depending on the type of build.
 								Paths that include <DebugTag> (or <ReleaseTag>) will only have the tag substituted 
@@ -56,16 +62,88 @@
 								Will always be copied, from a build-independent directory:
 								<File name="des.h"	from="auth\krb4\include\"	to="\inc\krb4" newname="foo.h"/>
 								-->
-					<AlwaysTag	value="%bldtype%" />	<!-- Pick a string that won't appear in a path. -->
-					<DebugTag	value="%debug%" />	<!-- Pick a string that won't appear in a path. -->
-					<ReleaseTag	value="%release%" />	<!-- Pick a string that won't appear in a path. -->
-				</Config>
+					<AlwaysTag value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+					<DebugTag value="%debug%" /> <!-- Pick a string that won't appear in a path. -->
+					<ReleaseTag value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+					</Config>
 				<Files>
-					<Include path="copyfiles.xml" />	<!-- Relative to location of bkw.pl. -->
-				</Files>
+					<Include path="copyfiles.xml" />
+					</Files> <!-- Relative to location of bkw.pl. -->
 			</CopyList>
 		</PrePackage>
-		<Package></Package>
-		<PostPackage></PostPackage>
+		<Package>
+			<MSI></MSI>
+			<NSIS></NSIS> <!-- NB:  Most config is done in site-local.nsi.	-->
+			<!-- Theoretically, writing site-local.nsi from xml settings could be done, but isn't.	-->
+		</Package>
+		<PostPackage>
+			<Config>													<!-- This config info will be copied into each CopyList in PostPackage. -->
+				<FileStem name="kfw-3-2-0" />		<!--	<FileStem> will be substituted for %filestem%.	-->
+				</Config>
+			<Zips>
+				<Zip dummy="foo" /> <!-- To force desired XML::Simple behavior	-->
+				<!--	Files will be copied into directory <topdir>; <topdir> will appear in the paths of the files.	-->
+				<!-- File from	paths are relative to <src>/pismere.	-->
+				<!-- File to			paths are relative to <out>.					-->
+				<Zip name="Core Binaries" filename="%filestem%.zip" topdir="%filestem%-final">
+					<CopyList>
+						<Config>
+							<DebugArea value="dbg" />
+							<ReleaseArea value="rel" />
+							<AlwaysTag value="%bldtype%" /> <!-- Pick a string that won't appear in a path. -->
+							<DebugTag value="%debug%" /> <!-- Pick a string that won't appear in a path. -->
+							<ReleaseTag value="%release%" /> <!-- Pick a string that won't appear in a path. -->
+							</Config>
+						<Files>
+							<Include path="corebinaryfiles.xml" />
+							</Files> <!-- Relative to location of bkw.pl. -->
+						</CopyList>
+				</Zip>
+				<Zip name="SDK" filename="%filestem%-sdk.zip" topdir="%filestem%-final">
+					<CopyList>
+						<Files>
+							<Include path="sdkfiles.xml" />
+							</Files> <!-- Relative to location of bkw.pl. -->
+						</CopyList>
+				</Zip>
+				<Zip name="SRC" filename="%filestem%-src.zip" topdir="%filestem%-final">
+					<CopyList>
+						<Files>
+							<!-- File from	paths are relative to <src>/pismere.	-->
+							<!-- File to			paths are relative to <out>.					-->
+							<File dummy="foo" /> <!-- Forces XML::Simple behavior -->
+							<!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
+							<File name="*.*" from="athena" to="src\athena" />
+							<File name="*.*" from="doc" to="src\doc" />
+							<File name="*.*" from="scripts" to="src\scripts" />
+							</Files>
+					</CopyList>
+					<Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:	-->
+						<Prune dummy="foo" />
+						<Prune name="CVS" />
+						<Prune name=".cvsignore" flags="i" />
+						<Prune name="Changelog" flags="i" />
+						<Prune name="obj" />
+						<Prune name="site" />
+						</Prunes>
+					<Requires>
+						<Switch dummy="foo" />
+						<Switch name="REPOSITORY" value="CHECKOUT"/>
+						<ErrorMsg text="Can't build source zip unless both /REPOSITORY CHECKOUT is specified." />
+						</Requires>
+					</Zip>
+				</Zips>			
+			<CopyList>			<!-- Copied at end of post-package step.	-->
+				<Files>
+					<File dummy="foo" />
+					<!-- File from	paths are relative to <src>/pismere.	-->
+					<!-- File to			paths are relative to <out>.					-->
+					<File name="msi-deployment-guide.txt" from="staging\install\wix\" to="" />
+					<File name="netidmgr_userdoc.pdf" from="staging\doc" to="." />
+					<File name="kfw.msi" from="staging\install\wix\" to="" newname="%filestem%.msi" />
+					<File name="MITKerberosForWindows.exe" from="staging\install\nsis" to="" newname="%filestem%.exe" />
+					</Files>
+				</CopyList>
+			</PostPackage>
 	</Stages>
 </BKW_Config>

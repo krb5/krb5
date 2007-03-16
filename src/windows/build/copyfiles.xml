@@ -64,7 +64,7 @@
   		<File name="ms2mit.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="leashw32.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="leash32.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
-<!--  		<File name="leash32.chm"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" /> -->
+  		<File name="leash32.chm"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="kpasswd.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="kvno.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="krbv4w32.pdb"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
@@ -103,8 +103,7 @@
   		<File name="wshelp32.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="ms2mit.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="leashw32.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
-<!--  		<File name="leash32.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" /> -->
-<!--  		<File name="leash32.chm"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" /> -->
+  		<File name="leash32.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="kpasswd.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="kvno.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="krbv4w32.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
@@ -127,9 +126,9 @@
 
 		<!-- Debug build only: -->
 		<File name="khhelp.h"	from="auth\krb5\src\windows\identity\obj\i386\%debug%\inc\"	to="\inc\netidmgr" />
-		<File name="aklog.pdb"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />
+<!--		<File name="aklog.pdb"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />	-->
 		<File name="netidmgr.exe.static.manifest"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" notrequired="true" />
-		<File name="aklog.exe"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />
+<!--		<File name="aklog.exe"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />	-->
 
 		<!-- Build-INdependent files, always copied: -->
 		<File name="relnotes.html"	from="..\doc\kerberos\"	to="\doc" />
@@ -218,4 +217,7 @@
 		<File name="strings_1033.wxl"	from="auth\krb5\src\windows\installer\wix\lang\"	to="\install\wix\lang" />
 		<File name="ui_1033.wxi"	from="auth\krb5\src\windows\installer\wix\lang\"	to="\install\wix\lang" />
 		<File name="license.rtf"	from="auth\krb5\src\windows\installer\wix\lang\"	to="\install\wix\lang" />
+		<File name="krb5.conf"	from="auth\krb5\src\config-files\"	to="\sample" newname="krb5.ini" />
+		<File name="krb.con"	from="auth\krb4\sample-config\"	to="\sample" />
+		<File name="krbrealm.con"	from="auth\krb4\sample-config\"	to="\sample" />
 	</Files>
