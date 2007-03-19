@@ -545,6 +545,7 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
 	sin4 = malloc (sizeof (struct sockaddr_in));
 	if (sin4 == 0)
 	    return EAI_MEMORY;
+        memset (sin4, 0, sizeof (struct sockaddr_in)); /* for sin_zero */
 	n->ai_addr = (struct sockaddr *) sin4;
 	sin4->sin_family = AF_INET;
 	sin4->sin_addr = *(struct in_addr *)addr;
@@ -559,6 +560,7 @@ static inline int fai_add_entry (struct addrinfo **result, void *addr,
 	sin6 = malloc (sizeof (struct sockaddr_in6));
 	if (sin6 == 0)
 	    return EAI_MEMORY;
+        memset (sin6, 0, sizeof (struct sockaddr_in6)); /* for sin_zero */
 	n->ai_addr = (struct sockaddr *) sin6;
 	sin6->sin6_family = AF_INET6;
 	sin6->sin6_addr = *(struct in6_addr *)addr;
