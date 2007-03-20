@@ -1326,12 +1326,6 @@ nc_layout_new_cred_window(khui_nc_wnd_data * ncd) {
 
 #define CW_PARAM DWLP_USER
 
-static void
-nc_add_control_row(khui_nc_wnd_data * d, 
-                   HWND label,
-                   HWND input,
-                   khui_control_size size);
-
 static LRESULT 
 nc_handle_wm_create(HWND hwnd,
                     UINT uMsg,
@@ -1522,7 +1516,7 @@ nc_handle_wm_create(HWND hwnd,
 
     MapDialogRect(ncd->dlg_main, &r);
 
-    /* center the new creds window over the main NetIDMgr window */
+    /* position the new credentials dialog */
     width = r.right - r.left;
     height = r.bottom - r.top;
 
@@ -1540,7 +1534,18 @@ nc_handle_wm_create(HWND hwnd,
         height += (wr.bottom - wr.top) - (cr.bottom - cr.top);
     }
 
-    GetWindowRect(lpc->hwndParent, &r);
+    /* if the parent window is visible, we center the new credentials
+       dialog over the parent.  Otherwise, we center it on the primary
+       display. */
+
+    if (IsWindowVisible(lpc->hwndParent)) {
+        GetWindowRect(lpc->hwndParent, &r);
+    } else {
+        if(!SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID) &r, 0)) {
+            /* failover to the window coordinates */
+            GetWindowRect(lpc->hwndParent, &r);
+        }
+    }
     x = (r.right + r.left)/2 - width / 2;
     y = (r.top + r.bottom)/2 - height / 2;
 
@@ -2042,9 +2047,12 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                                              L"CredWindow\\Windows\\NewCred\\ForceToTop",
                                              &t)) &&
 
-                t != 0 &&
-
-                !khm_is_dialog_active()) {
+                t != 0) {
+                /* it used to be that the above condition also called
+                   !khm_is_dialog_active() to find out whether there
+                   was a dialog active.  If there was, we wouldn't try
+                   to bring the new cred window to the foreground. But
+                   that was not the behavior we want. */
 
                 /* if the main window is not visible, then the SetWindowPos()
                    call is sufficient to bring the new creds window to the
@@ -2378,7 +2386,9 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             if (d->nc->n_prompts > 0 &&
                 d->nc->prompts[0]->hwnd_edit) {
 
-                SetFocus(d->nc->prompts[0]->hwnd_edit);
+                PostMessage(d->dlg_main, WM_NEXTDLGCTL,
+                            (WPARAM) d->nc->prompts[0]->hwnd_edit,
+                            MAKELPARAM(TRUE, 0));
 
             }
 

@@ -95,7 +95,7 @@ EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Obtain Kerberos v4 credentials for this identity",IDC_CFG_GETTIX,
-                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,7,147,10
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,7,165,10
 END
 
 

@@ -144,6 +144,7 @@ DECL_FUNC_PTR(krb5_free_host_realm);
 DECL_FUNC_PTR(krb5_c_random_make_octets);
 DECL_FUNC_PTR(krb5_free_addresses);
 DECL_FUNC_PTR(krb5_free_default_realm);
+DECL_FUNC_PTR(krb5_string_to_deltat);
 
 // Krb524 functions
 DECL_FUNC_PTR(krb524_init_ets);
@@ -160,6 +161,7 @@ DECL_FUNC_PTR(profile_release);
 DECL_FUNC_PTR(profile_get_subsection_names);
 DECL_FUNC_PTR(profile_free_list);
 DECL_FUNC_PTR(profile_get_string);
+DECL_FUNC_PTR(profile_get_integer);
 DECL_FUNC_PTR(profile_get_values);
 DECL_FUNC_PTR(profile_get_relation_names);
 DECL_FUNC_PTR(profile_clear_relation);
@@ -289,6 +291,7 @@ FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_free_host_realm),
     MAKE_FUNC_INFO(krb5_c_random_make_octets),
     MAKE_FUNC_INFO(krb5_free_default_realm),
+    MAKE_FUNC_INFO(krb5_string_to_deltat),
     END_FUNC_INFO
 };
 
@@ -305,6 +308,7 @@ FUNC_INFO profile_fi[] = {
     MAKE_FUNC_INFO(profile_get_subsection_names),
     MAKE_FUNC_INFO(profile_free_list),
     MAKE_FUNC_INFO(profile_get_string),
+    MAKE_FUNC_INFO(profile_get_integer),
     MAKE_FUNC_INFO(profile_get_values),
     MAKE_FUNC_INFO(profile_get_relation_names),
     MAKE_FUNC_INFO(profile_clear_relation),

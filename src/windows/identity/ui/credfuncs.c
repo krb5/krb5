@@ -34,6 +34,7 @@ static HANDLE in_dialog_evt = NULL;
 static LONG init_dialog = 0;
 static khm_int32 dialog_result = 0;
 static wchar_t dialog_identity[KCDB_IDENT_MAXCCH_NAME];
+static khui_new_creds * dialog_nc = NULL;
 
 static void
 dialog_sync_init(void) {
@@ -65,9 +66,28 @@ khm_cred_begin_dialog(void) {
 
     EnterCriticalSection(&cs_dialog);
 
-    if (in_dialog)
+    if (in_dialog) {
         rv = FALSE;
-    else {
+
+        /* if a dialog is being displayed and we got a another request
+           to show one, we bring the existing one to the
+           foreground. */
+        if (dialog_nc && dialog_nc->hwnd) {
+            khm_int32 t = 0;
+
+            if (KHM_SUCCEEDED(khc_read_int32(NULL,
+                                             L"CredWindow\\Windows\\NewCred\\ForceToTop",
+                                             &t)) &&
+                t != 0) {
+
+                khm_activate_main_window();
+
+                SetWindowPos(dialog_nc->hwnd, HWND_TOP, 0, 0, 0, 0,
+                             (SWP_NOMOVE | SWP_NOSIZE));
+            }
+        }
+
+    } else {
         rv = TRUE;
         in_dialog = TRUE;
         ResetEvent(in_dialog_evt);
@@ -87,6 +107,10 @@ khm_cred_end_dialog(khui_new_creds * nc) {
         SetEvent(in_dialog_evt);
     }
     dialog_result = nc->result;
+#ifdef DEBUG
+    assert(dialog_nc == nc);
+#endif
+    dialog_nc = NULL;
     if (nc->subtype == KMSG_CRED_NEW_CREDS &&
         nc->n_identities > 0 &&
         nc->identities[0]) {
@@ -366,6 +390,22 @@ kmsg_cred_completion(kmq_message *m)
 
                 if(evt->suggestion)
                     khui_alert_set_suggestion(alert, evt->suggestion);
+
+                if (nc->subtype == KMSG_CRED_RENEW_CREDS &&
+                    nc->ctx.identity != NULL) {
+
+                    khm_int32 n_cmd;
+
+                    n_cmd = khm_get_identity_new_creds_action(nc->ctx.identity);
+
+                    if (n_cmd != 0) {
+                        khui_alert_add_command(alert, n_cmd);
+                        khui_alert_add_command(alert, KHUI_PACTION_CLOSE);
+
+                        khui_alert_set_flags(alert, KHUI_ALERT_FLAG_DISPATCH_CMD,
+                                             KHUI_ALERT_FLAG_DISPATCH_CMD);
+                    }
+                }
 
                 khui_alert_show(alert);
                 khui_alert_release(alert);
@@ -763,6 +803,7 @@ void khm_cred_change_password(wchar_t * title)
 
     khui_cw_create_cred_blob(&nc);
     nc->subtype = KMSG_CRED_PASSWORD;
+    dialog_nc = nc;
 
     khui_context_get(&nc->ctx);
 
@@ -813,6 +854,31 @@ void khm_cred_change_password(wchar_t * title)
     }
 }
 
+void
+khm_cred_obtain_new_creds_for_ident(khm_handle ident, wchar_t * title)
+{
+    khui_action_context ctx;
+
+    if (ident == NULL)
+        khm_cred_obtain_new_creds(title);
+
+    khui_context_get(&ctx);
+
+    khui_context_set(KHUI_SCOPE_IDENT,
+                     ident,
+                     KCDB_CREDTYPE_INVALID,
+                     NULL,
+                     NULL,
+                     0,
+                     NULL);
+
+    khm_cred_obtain_new_creds(title);
+
+    khui_context_set_indirect(&ctx);
+
+    khui_context_release(&ctx);
+}
+
 void khm_cred_obtain_new_creds(wchar_t * title)
 {
     khui_new_creds * nc;
@@ -824,6 +890,7 @@ void khm_cred_obtain_new_creds(wchar_t * title)
 
     khui_cw_create_cred_blob(&nc);
     nc->subtype = KMSG_CRED_NEW_CREDS;
+    dialog_nc = nc;
 
     khui_context_get(&nc->ctx);
 
@@ -1190,6 +1257,8 @@ khm_cred_process_startup_actions(void) {
            line stuff */
         khm_startup.processing = FALSE;
         khm_startup.remote = FALSE;
+
+        kmq_post_message(KMSG_ACT, KMSG_ACT_END_CMDLINE, 0, 0);
     } while(FALSE);
 
     if (defident)

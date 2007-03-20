@@ -70,7 +70,8 @@ SDKLIBFILES= 			\
 	shell32.lib		\
 	htmlhelp.lib		\
 	iphlpapi.lib		\
-	shlwapi.lib
+	shlwapi.lib		\
+	msimg32.lib
 
 $(OBJ)\uiconfig.c: uiconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@

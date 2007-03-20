@@ -30,7 +30,18 @@
 /* Dynamic imports */
 #include<khdefs.h>
 #include<tlhelp32.h>
+
+#if _WIN32_WINNT < 0x0501
+#define KHM_SAVE_WIN32_WINNT _WIN32_WINNT
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 #include<ntsecapi.h>
+#ifdef KHM_SAVE_WIN32_WINNT
+#undef _WIN32_WINNT
+#define _WIN32_WINNT KHM_SAVE_WIN32_WINNT
+#undef KHM_SAVE_WIN32_WINNT
+#endif
 
 extern HINSTANCE hKrb4;
 extern HINSTANCE hKrb5;
@@ -256,6 +267,7 @@ extern DECL_FUNC_PTR(krb5_get_host_realm);
 extern DECL_FUNC_PTR(krb5_free_host_realm);
 extern DECL_FUNC_PTR(krb5_c_random_make_octets);
 extern DECL_FUNC_PTR(krb5_free_default_realm);
+extern DECL_FUNC_PTR(krb5_string_to_deltat);
 
 // Krb524 functions
 extern DECL_FUNC_PTR(krb524_init_ets);
@@ -272,6 +284,7 @@ extern DECL_FUNC_PTR(profile_release);
 extern DECL_FUNC_PTR(profile_get_subsection_names);
 extern DECL_FUNC_PTR(profile_free_list);
 extern DECL_FUNC_PTR(profile_get_string);
+extern DECL_FUNC_PTR(profile_get_integer);
 extern DECL_FUNC_PTR(profile_get_values);
 extern DECL_FUNC_PTR(profile_get_relation_names);
 extern DECL_FUNC_PTR(profile_clear_relation);

@@ -346,3 +346,8 @@ Date=(TBD)
 ! KMQ_RCPTTYPE_HWND
 ! KMQ_QUEUE_FLAG_DELETED
 # Macros not internal
+
+! khc_value_exists()
+# Behavior change with respect to shadowed handles.  If a value
+# doesn't exist in the top level handle, then each shadowed handle
+# will be tried in turn until the value is found.

@@ -80,6 +80,7 @@ khui_action_ref khui_menu_toolbars[] = {
 };
 
 khui_action_ref khui_menu_view[] = {
+    MENU_ACTION(KHUI_ACTION_LAYOUT_MINI),
     MENU_SUBMENU(KHUI_MENU_COLUMNS),
     MENU_SUBMENU(KHUI_MENU_LAYOUT),
 #if 0
@@ -288,7 +289,8 @@ khui_action_create(const wchar_t * name,
     int i;
     size_t s;
 
-    if (!caption ||
+    if ((name && FAILED(StringCchLength(name, KHUI_MAXCCH_NAME, &s))) ||
+        !caption ||
         FAILED(StringCchLength(caption, KHUI_MAXCCH_SHORT_DESC, &s)) ||
         (tooltip && FAILED(StringCchLength(tooltip, KHUI_MAXCCH_SHORT_DESC, &s))) ||
         (type != KHUI_ACTIONTYPE_TRIGGER && type != KHUI_ACTIONTYPE_TOGGLE)) {
@@ -591,6 +593,7 @@ menu_const_to_allocd(khui_menu_def * d)
 KHMEXP void KHMAPI
 khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 action, khm_int32 flags)
 {
+    khm_size i;
 
     EnterCriticalSection(&cs_actions);
 
@@ -616,12 +619,22 @@ khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 action, khm_i
 
     d->n_items++;
 
+    /* only one action is allowed to have the KHUI_ACTIONREF_DEFAULT
+       flag */
+    if (flags & KHUI_ACTIONREF_DEFAULT) {
+        for (i=0; i < d->n_items; i++) {
+            if (i != idx && (d->items[i].flags & KHUI_ACTIONREF_DEFAULT))
+                d->items[i].flags &= ~KHUI_ACTIONREF_DEFAULT;
+        }
+    }
+
     LeaveCriticalSection(&cs_actions);
 }
 
 KHMEXP void KHMAPI
 khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction, int flags)
 {
+    khm_size i;
 
     if (paction == NULL)
         return;
@@ -646,6 +659,15 @@ khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction,
     d->items[idx].p_action = paction;
 
     d->n_items++;
+
+    /* only one action is allowed to have the KHUI_ACTIONREF_DEFAULT
+       flag */
+    if (flags & KHUI_ACTIONREF_DEFAULT) {
+        for (i=0; i < d->n_items; i++) {
+            if (i != idx && (d->items[i].flags & KHUI_ACTIONREF_DEFAULT))
+                d->items[i].flags &= ~KHUI_ACTIONREF_DEFAULT;
+        }
+    }
 
     LeaveCriticalSection(&cs_actions);
 }
@@ -1063,6 +1085,14 @@ khui_get_cmd_accel_string(khm_int32 cmd,
 
         case VK_F10:
             ap = L"F10";
+            break;
+
+        case VK_F11:
+            ap = L"F11";
+            break;
+
+        case VK_F12:
+            ap = L"F12";
             break;
 
         case VK_DELETE:

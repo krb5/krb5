@@ -120,35 +120,6 @@ typedef struct tag_k5_config_data {
 #define K5_CDFLAG_MOD_INC_REALMS     0x00000100
 #define K5_CDFLAG_MOD_REALMS         0x00001000
 
-static const char *const conf_yes[] = {
-    "y", "yes", "true", "t", "1", "on",
-    0,
-};
-
-static const char *const conf_no[] = {
-    "n", "no", "false", "nil", "0", "off",
-    0,
-};
-
-int
-k5_parse_boolean(const char *s)
-{
-    const char *const *p;
-
-    for(p=conf_yes; *p; p++) {
-        if (!_stricmp(*p,s))
-            return 1;
-    }
-
-    for(p=conf_no; *p; p++) {
-        if (!_stricmp(*p,s))
-            return 0;
-    }
-
-    /* Default to "no" */
-    return 0;
-}
-
 void
 k5_init_config_data(k5_config_data * d) {
     ZeroMemory(d, sizeof(*d));
@@ -325,7 +296,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_lookup_kdc",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_lookup_kdc = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_lookup_kdc = b;
+            else
+                d->dns_lookup_kdc = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_lookup_kdc = FALSE;
@@ -333,7 +309,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_lookup_realm",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_lookup_realm = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_lookup_realm = b;
+            else
+                d->dns_lookup_realm = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_lookup_realm = FALSE;
@@ -341,7 +322,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_fallback",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_fallback = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_fallback = b;
+            else
+                d->dns_fallback = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_fallback = FALSE;
@@ -349,7 +335,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "noaddresses",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->noaddresses = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->noaddresses = b;
+            else
+                d->noaddresses = TRUE;
             pprofile_release_string(boolv);
         } else
             d->noaddresses = TRUE;
@@ -641,8 +632,8 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_lookup_kdc)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
             d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_KDC;
         }
 
@@ -654,8 +645,8 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_lookup_realm)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_RLM;
         }
@@ -668,8 +659,8 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_fallback)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_DNS_FALLBACK;
         }
@@ -682,8 +673,8 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->noaddresses)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_NOADDRESSES;
         }

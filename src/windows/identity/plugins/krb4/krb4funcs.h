@@ -35,7 +35,18 @@
 #include <windows.h>
 #define SECURITY_WIN32
 #include <security.h>
-#include <ntsecapi.h>
+
+#if _WIN32_WINNT < 0x0501
+#define KHM_SAVE_WIN32_WINNT _WIN32_WINNT
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+#include<ntsecapi.h>
+#ifdef KHM_SAVE_WIN32_WINNT
+#undef _WIN32_WINNT
+#define _WIN32_WINNT KHM_SAVE_WIN32_WINNT
+#undef KHM_SAVE_WIN32_WINNT
+#endif
 
 #include <krb5common.h>
 

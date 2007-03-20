@@ -240,23 +240,25 @@ IDD_CFG_GENERAL DIALOGEX 0, 0, 255, 182
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Startup / Shutdown",IDC_CFG_STARTUP_GROUP,7,7,241,50
+    GROUPBOX        "Startup / Shutdown",IDC_CFG_STARTUP_GROUP,7,7,241,44
     CONTROL         "&Obtain new credentials at startup (if none are present)",IDC_CFG_AUTOINIT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,22,196,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,20,196,10
     CONTROL         "&Destroy all credentials on exit",IDC_CFG_DESTROYALL,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,39,111,10
-    CONTROL         "&Start Network Identity Manager during Windows logon",IDC_CFG_AUTOSTART,
-                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,16,48,135,10
-    GROUPBOX        "Other",IDC_CFG_OTHER,7,63,241,85
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,36,111,10
+    GROUPBOX        "Other",IDC_CFG_OTHER,7,55,241,120
     CONTROL         "&Run Network Identity Manager in system tray after window close",IDC_CFG_KEEPRUNNING,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,78,230,10
-    CONTROL         "Monitor network connectivity",IDC_CFG_NETDETECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,96,106,10
-    CONTROL         "Log trace events to trace log at the following location:",IDC_CFG_LOGTOFILE,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,113,225,10
-    EDITTEXT        IDC_CFG_LOGPATH,16,127,173,14,ES_AUTOHSCROLL | ES_READONLY
-    PUSHBUTTON      "Show log ...",IDC_CFG_SHOWLOG,193,127,50,14
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,68,230,10
+    LTEXT           "Clicking on the &notification icon",IDC_CFG_NOTACT_STATIC,26,87,99,8
+    COMBOBOX        IDC_CFG_NOTACTION,133,85,110,48,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "&Monitor network connectivity",IDC_CFG_NETDETECT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,104,106,10
+    CONTROL         "&Log trace events to trace log at the following location:",IDC_CFG_LOGTOFILE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,121,225,10
+    EDITTEXT        IDC_CFG_LOGPATH,16,135,173,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "&Show log",IDC_CFG_SHOWLOG,193,135,50,14
     CONTROL         "A&utomatically import Windows logon identity",IDC_CFG_AUTOIMPORT,
-                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,16,158,165,10
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,16,156,165,10
+    CONTROL         "&Start Network Identity Manager during Windows logon",IDC_CFG_AUTOSTART,
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,113,165,135,10
 END
 
 IDD_CFG_IDENTITIES DIALOGEX 0, 0, 255, 182
@@ -342,18 +344,18 @@ BEGIN
     PUSHBUTTON      "Remove identity ...",IDC_CFG_REMOVE,139,122,78,14
 END
 
-IDD_ABOUT DIALOGEX 0, 0, 268, 170
+IDD_ABOUT DIALOGEX 0, 0, 324, 238
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Network Identity Manager"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,211,7,50,14
-    LTEXT           "Productname",IDC_PRODUCT,41,7,163,13,NOT WS_GROUP
-    LTEXT           "© 2005-2007 Massachusetts Institute of Technology\n© 2006-2007 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,220,18,NOT WS_GROUP
-    LTEXT           "BuildInfo",IDC_BUILDINFO,41,43,220,15,NOT WS_GROUP
-    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,20,20
-    CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,72,220,91
-    LTEXT           "Loaded modules",IDC_STATIC,41,60,52,8
+    DEFPUSHBUTTON   "OK",IDOK,267,7,50,14
+    LTEXT           "Productname",IDC_PRODUCT,41,7,225,13,NOT WS_GROUP
+    LTEXT           "© 2005-2007 Massachusetts Institute of Technology\n© 2006-2007 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,276,23,NOT WS_GROUP
+    LTEXT           "BuildInfo",IDC_BUILDINFO,41,49,276,20,NOT WS_GROUP
+    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,21,20
+    CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,88,276,143
+    LTEXT           "Loaded modules",IDC_STATIC,41,76,52,8
 END
 
 IDD_CFG_APPEAR DIALOGEX 0, 0, 255, 182
@@ -507,11 +509,11 @@ BEGIN
     IDD_ABOUT, DIALOG
     BEGIN
         LEFTMARGIN, 6
-        RIGHTMARGIN, 261
+        RIGHTMARGIN, 317
         VERTGUIDE, 41
-        VERTGUIDE, 204
+        VERTGUIDE, 266
         TOPMARGIN, 7
-        BOTTOMMARGIN, 163
+        BOTTOMMARGIN, 231
     END
 
     IDD_CFG_APPEAR, DIALOG
@@ -623,7 +625,7 @@ BEGIN
     IDS_PROP_COL_VALUE      "Value"
     IDS_NC_NEW_IDENT        "( New identity ... )"
     IDS_NC_CREDTEXT_ID_CHECKING "<font color=""grey"">%s (Checking...)</font>"
-    IDS_ACTION_OPEN_APP     "Open Network Identity Manager"
+    IDS_ACTION_OPEN_APP     "Show Network Identity Manager window"
     IDS_CTX_NEW_IDENT       "Obaining new identity"
     IDS_CTX_NEW_CREDS       "Obtaining new credentials"
     IDS_CTX_RENEW_CREDS     "Renewing credentials"
@@ -634,7 +636,7 @@ STRINGTABLE
 BEGIN
     IDS_CTX_PROC_NEW_CREDS  "Obtaining new credentials for %1!s!"
     IDS_CTX_PROC_RENEW_CREDS "Renewing credentials for %1!s!"
-    IDS_ACTION_CLOSE_APP    "Close Network Identity Manager window"
+    IDS_ACTION_CLOSE_APP    "Hide Network Identity Manager window"
     IDS_NC_FAILED_TITLE     "Failed to acquire credentials"
     IDS_CFG_IDENTITIES_SHORT "Identities"
     IDS_CFG_IDENTITIES_LONG "Global Identity settings"
@@ -774,20 +776,37 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_NC_REN_FAILED_TITLE_I "Failed to renew creds for %s"
+    IDS_NC_REN_FAILED_TITLE_I "Failed to renew credentials for %s"
     IDS_CFG_IDNAME_NON      "No identity selected.  Please select an identity and try again."
     IDS_MENU_DESTROY_CRED   "Destroy"
     IDS_MENU_RENEW_CRED     "Renew"
-    IDS_ACTION_DESTROY_ALL  "All identities"
-    IDS_ACTION_RENEW_ALL    "All identities"
-    IDS_IDACTION_RENEW      "Renew credentials for %s"
-    IDS_IDACTION_DESTROY    "Destroy credentials for %s"
+    IDS_ACTION_DESTROY_ALL  "Destroy all identities"
+    IDS_ACTION_RENEW_ALL    "Renew all identities"
+    IDS_IDACTION_RENEW      "Renew %s"
+    IDS_IDACTION_DESTROY    "Destroy %s"
     IDS_CTX_DESTROY_ID      "Destroying identity %1!s!"
     IDS_NCN_IDENT_INVALID   "Identity %s is invalid."
     IDS_NCN_IDENT_CHECKING  "Checking identity %s ..."
     IDS_NCN_IDENT_UNKNOWN   "Validity of identity %s coudn't be determined."
     IDS_REMOTE_FAIL         "The instance of Network Identity Manager that is already running is not responding to the remote request properly.  Please check if you are running the latest version of Network Identity Manger software included with MIT Kerberos for Windows."
     IDS_REMOTE_FAIL_TITLE   "Failed to communicate with Network Identity Manager"
+    IDS_IDACTION_NEW        "Initialize %s"
+    IDS_IDACTIONT_NEW       "New credentials for %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_IDACTIONT_RENEW     "Renew credentials for %s"
+    IDS_IDACTIONT_DESTROY   "Destroy credentials for %s"
+    IDS_ALERTTYPE_PLUGIN    "Failed to load plug-in"
+    IDS_ALERTTYPE_EXPIRE    "Credential expiration warning"
+    IDS_ALERTTYPE_RENEWFAIL "Failed to renew credentials"
+    IDS_ALERTTYPE_ACQUIREFAIL "Failed to acquire credentials"
+    IDS_ALERTTYPE_CHPW      "Failed to change password"
+    IDS_ACTION_LAYOUT_MINI  "&Advanced"
+    IDS_IDEXPDISP_NOCRED    "(This identity has no credentials)"
+    IDS_IDEXPDISP_1CRED     "(This identity has 1 credential)"
+    IDS_IDEXPDISP_NCRED     "(This identity has %d credentials)"
 END
 
 #endif    // English (U.S.) resources
