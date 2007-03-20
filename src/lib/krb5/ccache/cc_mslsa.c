@@ -1,6 +1,8 @@
 /*
  * lib/krb5/ccache/cc_mslsa.c
  *
+ * Copyright 2007 Secure Endpoints Inc.
+ *
  * Copyright 2003,2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -60,16 +62,25 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
+
 #define SECURITY_WIN32
 #include <security.h>
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT 0x0600
 #include <ntsecapi.h>
 #include <ntstatus.h>
 
-#ifdef COMMENT
-/* The following two features can only be built using a version of the
- * Microsoft Windows Platform SDK which is not currently public.  These
- * features will be disabled until the SDK is made publicly available.
+
+/* The following two features can only be built using the version of the
+ * Platform SDK for Microsoft Windows Vista.  If AES support is defined
+ * in NTSecAPI.h then we know that we have the required data structures.
+ *
+ * To build with the Windows XP SP2 SDK, the NTSecAPI.h from the Vista
+ * SDK should be used in place of the XP SP2 SDK version.
  */
+#ifdef TRUST_ATTRIBUTE_TRUST_USES_AES_KEYS
 #define KERB_SUBMIT_TICKET 1
 #define HAVE_CACHE_INFO_EX2 1
 #endif
@@ -134,6 +145,61 @@ is_windows_xp (void)
    }
 
    return fIsWinXP;
+}
+
+static BOOL
+is_windows_vista (void)
+{
+    static BOOL fChecked = FALSE;
+    static BOOL fIsVista = FALSE;
+
+    if (!fChecked)
+    {
+	OSVERSIONINFO Version;
+
+	memset (&Version, 0x00, sizeof(Version));
+	Version.dwOSVersionInfoSize = sizeof(Version);
+
+	if (GetVersionEx (&Version))
+	{
+	    if (Version.dwPlatformId == VER_PLATFORM_WIN32_NT && Version.dwMajorVersion >= 6)
+		fIsVista = TRUE;
+	}
+	fChecked = TRUE;
+    }
+
+    return fIsVista;
+}
+
+static BOOL
+is_process_uac_limited (void)
+{
+    static BOOL fChecked = FALSE;
+    static BOOL fIsUAC = FALSE;
+
+    if (!fChecked)
+    {
+	NTSTATUS Status = 0;
+	HANDLE  TokenHandle;
+	DWORD   ElevationLevel;
+	DWORD   ReqLen;
+	BOOL    Success;
+
+	if (is_windows_vista()) {
+	    Success = OpenProcessToken( GetCurrentProcess(), TOKEN_QUERY, &TokenHandle );
+	    if ( Success ) {
+		Success = GetTokenInformation( TokenHandle, 
+					       TokenOrigin+1 /* ElevationLevel */,
+					       &ElevationLevel, sizeof(DWORD), &ReqLen );
+		CloseHandle( TokenHandle );
+		if ( Success && ElevationLevel == 3 /* Limited */ )
+		    fIsUAC = TRUE;
+	    }
+	}
+	fChecked = TRUE;
+    }
+    return fIsUAC;
+
 }
 
 typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
@@ -375,6 +441,24 @@ MSSessionKeyToMITKeyblock(KERB_CRYPTO_KEY *mskey, krb5_context context, krb5_key
     krb5_copy_keyblock_contents(context, &tmpblock, keyblock);
 }
 
+static BOOL
+IsMSSessionKeyNull(KERB_CRYPTO_KEY *mskey)
+{
+    DWORD i;
+    
+    if (is_process_uac_limited())
+	return TRUE;
+
+    if (mskey->KeyType == KERB_ETYPE_NULL)
+	return TRUE;
+
+    for ( i=0; i<mskey->Length; i++ ) {
+	if (mskey->Value[i])
+	    return FALSE;
+    }
+
+    return TRUE;
+}
 
 static void
 MSFlagsToMITFlags(ULONG msflags, ULONG *mitflags)
@@ -1036,8 +1120,10 @@ KerbSubmitTicket( HANDLE LogonHandle, ULONG  PackageId,
     krb5_auth_con_getsendsubkey(context, auth_context, &keyblock);
     if (keyblock == NULL)
         krb5_auth_con_getkey(context, auth_context, &keyblock);
-#ifdef TESTING
-    /* do not use this code unless testing the LSA */
+
+    /* make up a key, any key, that can be used to generate the 
+    * encrypted KRB_CRED pdu.  The Vista release LSA requires 
+    * that an enctype other than NULL be used. */
     if (keyblock == NULL) {
         keyblock = (krb5_keyblock *)malloc(sizeof(krb5_keyblock));
         keyblock->enctype = ENCTYPE_ARCFOUR_HMAC;
@@ -1061,7 +1147,6 @@ KerbSubmitTicket( HANDLE LogonHandle, ULONG  PackageId,
         keyblock->contents[15] = 0xd;
         krb5_auth_con_setsendsubkey(context, auth_context, keyblock);
     }
-#endif
     rc = krb5_mk_1cred(context, auth_context, cred, &krb_cred, &replaydata);
     if (rc) {
         krb5_auth_con_free(context, auth_context);
@@ -1191,6 +1276,11 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
     int    ignore_cache = 0;
     krb5_enctype *etype_list = NULL, *ptr = NULL, etype = 0;
 
+    if (is_process_uac_limited()) {
+	Status = STATUS_ACCESS_DENIED;
+        goto cleanup;
+    }
+
     memset(&CacheRequest, 0, sizeof(KERB_QUERY_TKT_CACHE_REQUEST));
     CacheRequest.MessageType = KerbRetrieveTicketMessage;
     CacheRequest.LogonId.LowPart = 0;
@@ -1286,7 +1376,7 @@ GetMSTGT(krb5_context context, HANDLE LogonHandle, ULONG PackageId, KERB_EXTERNA
 #else
         /* Check Supported Enctypes */
         if ( !enforce_tgs_enctypes ||
-             pTicketResponse->Ticket.SessionKey.KeyType == KERB_ETYPE_NULL ||
+	     IsMSSessionKeyNull(&pTicketResponse->Ticket.SessionKey) ||
              krb5_is_permitted_tgs_enctype(context, NULL, pTicketResponse->Ticket.SessionKey.KeyType) ) {
             FILETIME Now, MinLife, EndTime, LocalEndTime;
             __int64  temp;
@@ -2264,7 +2354,7 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
     }
 
     /* Don't return tickets with NULL Session Keys */
-    if ( msticket->SessionKey.KeyType == KERB_ETYPE_NULL) {
+    if ( IsMSSessionKeyNull(&msticket->SessionKey) ) {
         LsaFreeReturnBuffer(msticket);
         goto next_cred;
     }
