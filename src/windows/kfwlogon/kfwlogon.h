@@ -27,8 +27,16 @@ SOFTWARE.
 /* We only support VC 1200 and above anyway */
 #pragma once
 
+/* _WIN32_WINNT must be 0x0501 or greater to pull in definition of
+ * all required LSA data types when the Vista SDK NtSecAPI.h is used. 
+ */
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0501
+#else
+#if _WIN32_WINNT < 0x0501
+#undef _WIN32_WINNT 
+#define _WIN32_WINNT 0x0501
+#endif
 #endif
 
 #include <windows.h>

@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 #include "kfwlogon.h"
-#include <winbase.h>
+#include <windows.h>
 #include <Aclapi.h>
 #include <userenv.h>
 #include <Sddl.h>
@@ -291,34 +291,54 @@ static HINSTANCE hCCAPI = 0;
 static DWORD TraceOption = 0;
 static HANDLE hDLL;
 
+BOOL IsDebugLogging(void)
+{
+    DWORD LSPtype, LSPsize;
+    HKEY NPKey;
+    DWORD dwDebug = FALSE;
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\Network Provider", 
+		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS) {
+	LSPsize=sizeof(dwDebug);
+	if (RegQueryValueEx(NPKey, "Debug", NULL, &LSPtype, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS 
+	    || LSPtype != REG_DWORD)
+	    dwDebug = FALSE;
+
+	RegCloseKey (NPKey);
+    }
+
+    return(dwDebug ? TRUE : FALSE);
+}
+
 void DebugEvent0(char *a) 
 {
-#ifdef DEBUG
     HANDLE h; char *ptbuf[1];
     
-    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-    ptbuf[0] = a;
-    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-    DeregisterEventSource(h);
-#endif
+    if (IsDebugLogging()) {
+	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+	ptbuf[0] = a;
+	ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+	DeregisterEventSource(h);
+    }
 }
 
 #define MAXBUF_ 512
 void DebugEvent(char *b,...) 
 {
-#ifdef DEBUG
     HANDLE h; char *ptbuf[1],buf[MAXBUF_+1];
     va_list marker;
 
-    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-    va_start(marker,b);
-    StringCbVPrintf(buf, MAXBUF_+1,b,marker);
-    buf[MAXBUF_] = '\0';
-    ptbuf[0] = buf;
-    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-    DeregisterEventSource(h);
-    va_end(marker);
-#endif
+    if (IsDebugLogging()) {
+	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+	va_start(marker,b);
+	StringCbVPrintf(buf, MAXBUF_+1,b,marker);
+	buf[MAXBUF_] = '\0';
+	ptbuf[0] = buf;
+	ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+	DeregisterEventSource(h);
+	va_end(marker);
+    }
 }
 
 void
@@ -978,7 +998,7 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
     DWORD dwLen  = 0;
 
     if (!hUserToken || !newfilename || size <= 0)
-	return;
+	return 1;
 
     *newfilename = '\0';
 
@@ -993,7 +1013,7 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
 }
 
 void
-KFW_copy_cache_to_system_file(char * user, char * filename)
+KFW_copy_cache_to_system_file(const char * user, const char * filename)
 {
     DWORD count;
     char cachename[MAX_PATH + 8] = "FILE:";
