@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=util/ss
-mydir=.
+mydir=util/ss
 BUILDTOP=$(REL)..$(S)..
 SED = sed
 DEFS=

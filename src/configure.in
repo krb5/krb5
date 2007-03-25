@@ -891,11 +891,10 @@ AC_SUBST(SUPPORTLIB_MAJOR)
 dnl
 dnl
 if test "$COM_ERR_VERSION" = k5 ; then
-dnl  AC_CONFIG_SUBDIRS(util/et)
   K5_GEN_MAKEFILE(util/et)
 fi
 if test "$SS_VERSION" = k5 ; then
-  AC_CONFIG_SUBDIRS(util/ss)
+  K5_GEN_MAKEFILE(util/ss)
 fi
 if test -n "$KRB4_LIB"; then
   K5_GEN_MAKEFILE(lib/krb4)
@@ -920,12 +919,9 @@ if test -n "$OPENLDAP_PLUGIN"; then
 fi
 AC_SUBST(ldap_plugin_dir)
 
-AC_CONFIG_SUBDIRS(lib/apputils plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body appl tests)
-dnl
-if false; then
-  AC_CHECK_HEADERS(Python.h python2.3/Python.h)
-  AC_CONFIG_SUBDIRS(plugins/locate/python)
-fi
+AC_CONFIG_SUBDIRS(plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body appl tests)
+
+AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
@@ -950,8 +946,12 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/kadm5 lib/kadm5/clnt lib/kadm5/srv lib/kadm5/unit-test
 
+	lib/apputils
+
 	kdc slave krb524 config-files gen-manpages include
 	include/kerberosIV
+
+	plugins/locate/python
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

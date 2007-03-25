@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../..
 myfulldir=plugins/locate/python
-mydir=.
+mydir=plugins/locate/python
 BUILDTOP=$(REL)..$(S)..$(S)..
 
 LIBBASE=python
