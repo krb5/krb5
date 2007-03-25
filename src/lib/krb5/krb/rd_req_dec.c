@@ -61,12 +61,13 @@
 
 static krb5_error_code decrypt_authenticator
 	(krb5_context, const krb5_ap_req *, krb5_authenticator **,
-		   int);
+	 int);
 
 #define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
 static krb5_error_code
-krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req, krb5_keytab keytab)
+krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
+			     krb5_keytab keytab)
 {
     krb5_error_code 	  retval;
     krb5_enctype 	  enctype;

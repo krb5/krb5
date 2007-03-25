@@ -55,7 +55,11 @@ Returns system errors, integrity errors.
 */
 
 static krb5_error_code
-krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf, const krb5_keyblock *keyblock, const krb5_address *local_addr, const krb5_address *remote_addr, krb5_pointer i_vector, krb5_replay_data *replaydata, krb5_data *outbuf)
+krb5_rd_priv_basic(krb5_context context, const krb5_data *inbuf,
+		   const krb5_keyblock *keyblock,
+		   const krb5_address *local_addr,
+		   const krb5_address *remote_addr, krb5_pointer i_vector,
+		   krb5_replay_data *replaydata, krb5_data *outbuf)
 {
     krb5_error_code 	  retval;
     krb5_priv 		* privmsg;
@@ -149,7 +153,9 @@ cleanup_privmsg:;
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_rd_priv(krb5_context context, krb5_auth_context auth_context, const krb5_data *inbuf, krb5_data *outbuf, krb5_replay_data *outdata)
+krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
+	     const krb5_data *inbuf, krb5_data *outbuf,
+	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
     krb5_keyblock       * keyblock;

@@ -46,14 +46,10 @@
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_rd_req(krb5_context context, krb5_auth_context *auth_context, const krb5_data *inbuf, krb5_const_principal server, krb5_keytab keytab, krb5_flags *ap_req_options, krb5_ticket **ticket)
-                 	          
-                                     
-                    	         
-                                 	/* XXX do we really need this */
-               		         
-              		                  
-               	           
+krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
+	    const krb5_data *inbuf, krb5_const_principal server,
+	    krb5_keytab keytab, krb5_flags *ap_req_options,
+	    krb5_ticket **ticket)
 {
     krb5_error_code 	  retval;
     krb5_ap_req 	* request;
@@ -85,9 +81,11 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context, const krb5_da
     /* Get an rcache if necessary. */
     if (((*auth_context)->rcache == NULL)
 	&& ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME)
-&& server) {
+	&& server) {
 	if ((retval = krb5_get_server_rcache(context,
-     krb5_princ_component(context,server,0), &(*auth_context)->rcache)))
+					     krb5_princ_component(context,
+								  server,0),
+					     &(*auth_context)->rcache)))
 	    goto cleanup_auth_context;
     }
 

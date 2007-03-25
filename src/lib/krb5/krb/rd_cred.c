@@ -12,7 +12,8 @@
  * decrypt the enc_part of a krb5_cred
  */
 static krb5_error_code 
-decrypt_credencdata(krb5_context context, krb5_cred *pcred, krb5_keyblock *pkeyblock, krb5_cred_enc_part *pcredenc)
+decrypt_credencdata(krb5_context context, krb5_cred *pcred,
+		    krb5_keyblock *pkeyblock, krb5_cred_enc_part *pcredenc)
 {
     krb5_cred_enc_part  * ppart = NULL;
     krb5_error_code 	  retval;
@@ -51,7 +52,9 @@ cleanup:
 /*----------------------- krb5_rd_cred_basic -----------------------*/
 
 static krb5_error_code 
-krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata, krb5_keyblock *pkeyblock, krb5_replay_data *replaydata, krb5_creds ***pppcreds)
+krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
+		   krb5_keyblock *pkeyblock, krb5_replay_data *replaydata,
+		   krb5_creds ***pppcreds)
 {
     krb5_error_code       retval;
     krb5_cred 		* pcred;
@@ -162,7 +165,9 @@ cleanup_cred:
  * outputs the nonce and an array of the forwarded credentials.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pcreddata, krb5_creds ***pppcreds, krb5_replay_data *outdata)
+krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
+	     krb5_data *pcreddata, krb5_creds ***pppcreds,
+	     krb5_replay_data *outdata)
 {
     krb5_error_code       retval;
     krb5_keyblock       * keyblock;
@@ -183,19 +188,20 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context, krb5_data *pc
         return KRB5_RC_REQUIRED;
 
 
-/* If decrypting with the first keyblock we try fails, perhaps the
- * credentials are stored in the session key so try decrypting with
-    * that.
-*/
+    /*
+     * If decrypting with the first keyblock we try fails, perhaps the
+     * credentials are stored in the session key so try decrypting with
+     * that.
+     */
     if ((retval = krb5_rd_cred_basic(context, pcreddata, keyblock,
 				     &replaydata, pppcreds))) {
 	if ((retval = krb5_rd_cred_basic(context, pcreddata,
 					 auth_context->keyblock,
 					 &replaydata, pppcreds))) {
 	    return retval;
+	}
     }
-    }
-    
+
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
         krb5_timestamp currenttime;

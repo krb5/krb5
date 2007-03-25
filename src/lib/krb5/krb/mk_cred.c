@@ -21,7 +21,8 @@
  * encrypt the enc_part of krb5_cred
  */
 static krb5_error_code 
-encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart, krb5_keyblock *pkeyblock, krb5_enc_data *pencdata)
+encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart,
+		    krb5_keyblock *pkeyblock, krb5_enc_data *pencdata)
 {
     krb5_error_code 	  retval;
     krb5_data 		* scratch;
@@ -62,7 +63,11 @@ encrypt_credencpart(krb5_context context, krb5_cred_enc_part *pcredpart, krb5_ke
 /*----------------------- krb5_mk_ncred_basic -----------------------*/
 
 static krb5_error_code
-krb5_mk_ncred_basic(krb5_context context, krb5_creds **ppcreds, krb5_int32 nppcreds, krb5_keyblock *keyblock, krb5_replay_data *replaydata, krb5_address *local_addr, krb5_address *remote_addr, krb5_cred *pcred)
+krb5_mk_ncred_basic(krb5_context context,
+		    krb5_creds **ppcreds, krb5_int32 nppcreds,
+		    krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		    krb5_address *local_addr, krb5_address *remote_addr,
+		    krb5_cred *pcred)
 {
     krb5_cred_enc_part 	  credenc;
     krb5_error_code	  retval;
@@ -145,7 +150,9 @@ cleanup:
  * outputs an encoded KRB_CRED message suitable for krb5_rd_cred
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context, krb5_creds **ppcreds, krb5_data **ppdata, krb5_replay_data *outdata)
+krb5_mk_ncred(krb5_context context, krb5_auth_context auth_context,
+	      krb5_creds **ppcreds, krb5_data **ppdata,
+	      krb5_replay_data *outdata)
 {
     krb5_address * premote_fulladdr = NULL;
     krb5_address * plocal_fulladdr = NULL;
@@ -286,7 +293,9 @@ error:
  * A convenience function that calls krb5_mk_ncred.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context, krb5_creds *pcreds, krb5_data **ppdata, krb5_replay_data *outdata)
+krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
+	      krb5_creds *pcreds, krb5_data **ppdata,
+	      krb5_replay_data *outdata)
 {
     krb5_error_code retval;
     krb5_creds **ppcreds;

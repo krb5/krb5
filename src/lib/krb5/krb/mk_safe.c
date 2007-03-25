@@ -110,7 +110,9 @@ cleanup_checksum:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_mk_safe(krb5_context context, krb5_auth_context auth_context, const krb5_data *userdata, krb5_data *outbuf, krb5_replay_data *outdata)
+krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
+	     const krb5_data *userdata, krb5_data *outbuf,
+	     krb5_replay_data *outdata)
 {
     krb5_error_code 	  retval;
     krb5_keyblock       * keyblock;
