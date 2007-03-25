@@ -2,7 +2,7 @@ thisconfigdir=../..
 myfulldir=util/profile
 mydir=util/profile
 BUILDTOP=$(REL)..$(S)..
-PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH)
+PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH) -L.
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
 KRB5_RUN_ENV=@KRB5_RUN_ENV@
 DEFS=
@@ -120,10 +120,10 @@ prof_err.o: prof_err.c
 $(srcdir)/profile_tcl.c: profile.swg
 #	(cd $(srcdir) && swig -tcl8 -o profile_tcl.c profile.swg)
 profile_tcl.o: $(srcdir)/profile_tcl.c profile.h
-profile_tcl: profile_tcl.o libprofile.a
+profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o profile_tcl profile_tcl.o \
 		$(TCL_MAYBE_RPATH) \
-		-L../et -L../.. libprofile.a $(TCL_LIBS) $(MLIBS)
+		-L../et -L../.. -lprofile $(TCL_LIBS) $(MLIBS)
 
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
