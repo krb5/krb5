@@ -1,7 +1,8 @@
-thisconfigdir=.
+thisconfigdir=..
 myfulldir=appl
-mydir=.
+mydir=appl
 BUILDTOP=$(REL)..
 
-LOCAL_SUBDIRS= sample simple user_user gss-sample
+LOCAL_SUBDIRS= sample simple user_user gss-sample \
+	libpty bsd gssftp telnet
 

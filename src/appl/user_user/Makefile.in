@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=appl/user_user
-mydir=user_user
+mydir=appl/user_user
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DDEBUG
 PROG_LIBPATH=-L$(TOPLIBD)

@@ -923,6 +923,15 @@ AC_CONFIG_SUBDIRS(plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_bod
 
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
+dnl
+dnl Kludge for simple server --- FIXME is this the best way to do this?
+dnl
+if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS,1,[Define if socket can't be bound to 0.0.0.0])
+fi
+dnl
+AC_CONFIG_SUBDIRS(appl/libpty appl/bsd appl/gssftp appl/telnet)
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
@@ -960,4 +969,8 @@ V5_AC_OUTPUT_MAKEFILE(.
 	kadmin/passwd/unit-test kadmin/ktutil kadmin/server
 	kadmin/testing kadmin/testing/scripts kadmin/testing/util
 
+	appl
+	appl/sample appl/sample/sclient appl/sample/sserver
+	appl/simple appl/simple/client appl/simple/server
+	appl/gss-sample appl/user_user
 )

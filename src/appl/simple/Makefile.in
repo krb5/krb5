@@ -1,5 +1,5 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=appl/simple
-mydir=simple
+mydir=appl/simple
 LOCAL_SUBDIRS = client server
 BUILDTOP=$(REL)..$(S)..

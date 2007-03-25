@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=appl/gss-sample
-mydir=gss-sample
+mydir=appl/gss-sample
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
 PROG_LIBPATH=-L$(TOPLIBD)
