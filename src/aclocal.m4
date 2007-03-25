@@ -1123,10 +1123,7 @@ krb5_force_static=yes])
 AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
 dnl Use define rather than AC_DEFUN to avoid ordering problems.
 [AC_REQUIRE([KRB5_AC_FORCE_STATIC])dnl
-KRB5_BUILD_LIBRARY
-# If we're only building static libraries, they're for build-time use only,
-# so don't install.
-LIBINSTLIST=])
+KRB5_BUILD_LIBRARY])
 
 dnl
 dnl KRB5_BUILD_LIBRARY
@@ -1208,77 +1205,58 @@ dnl Parse configure options related to library building.
 AC_DEFUN(KRB5_LIB_AUX,
 [AC_REQUIRE([KRB5_LIB_PARAMS])dnl
 
-# Check whether to build static libraries.
-dnl AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most platforms@:>@])
-dnl AC_HELP_STRING([--disable-static],[don't build static libraries])
 AC_ARG_ENABLE([static],,
 [if test "$enableval" != no; then
   AC_MSG_ERROR([Sorry, static libraries do not work in this release.])
 fi])
-
-if test "$krb5_force_static" != yes; then
-	AC_MSG_NOTICE([disabling static libraries])
-	LIBLINKS=
-	LIBLIST=
-	OBJLISTS=
-else
-	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
-	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
-	OBJLISTS=OBJS.ST
-	LIBINSTLIST=install-static
-	DEPLIBEXT=$STLIBEXT
-#	CFLAGS="$CFLAGS -D_KDB5_STATIC_LINK"
-fi
-
-# Check whether to build shared libraries.
-AC_ARG_ENABLE([shared],
-, 
+AC_ARG_ENABLE([shared], , 
 [if test "$enableval" != yes; then
   AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
 fi])
 
-case "$SHLIBEXT" in
-.so-nobuild)
-	AC_MSG_WARN([shared libraries not supported on this architecture])
-	RUN_ENV=
-	CC_LINK="$CC_LINK_STATIC"
-	;;
-*)
-	# set this now because some logic below may reset SHLIBEXT
-	DEPLIBEXT=$SHLIBEXT
-	if test "$krb5_force_static" = "yes"; then
-		AC_MSG_RESULT([Forcing static libraries.])
-		# avoid duplicate rules generation for AIX and such
-		SHLIBEXT=.so-nobuild
-		SHLIBVEXT=.so.v-nobuild
-		SHLIBSEXT=.so.s-nobuild
-	else
-		AC_MSG_NOTICE([enabling shared libraries])
-		# Clear some stuff in case of AIX, etc.
-		if test "$STLIBEXT" = "$SHLIBEXT" ; then
-			STLIBEXT=.a-nobuild
-			LIBLIST=
-			LIBLINKS=
-			OBJLISTS=
-			LIBINSTLIST=
-		fi
-		LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
-		case "$SHLIBSEXT" in
-		.so.s-nobuild)
-			LIBINSTLIST="$LIBINSTLIST install-shared"
-			;;
-		*)
-			LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBSEXT)'
-			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
-			LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
-			;;
-		esac
-		OBJLISTS="$OBJLISTS OBJS.SH"
+if test "$SHLIBEXT" = ".so-nobuild"; then
+   AC_MSG_ERROR([Shared libraries are not yet supported on this platform.])
+fi
+
+DEPLIBEXT=$SHLIBEXT
+
+if test "$krb5_force_static" = "yes"; then
+	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
+	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
+	OBJLISTS=OBJS.ST
+	# This used to be install-static, but now we only follow this
+	# path for internal libraries we don't want installed, not for
+	# configure-time requests for installed static libraries.
+	LIBINSTLIST=
+#	CFLAGS="$CFLAGS -D_KDB5_STATIC_LINK"
+
+	AC_MSG_RESULT([Forcing static libraries.])
+	# avoid duplicate rules generation for AIX and such
+	SHLIBEXT=.so-nobuild
+	SHLIBVEXT=.so.v-nobuild
+	SHLIBSEXT=.so.s-nobuild
+else
+	AC_MSG_NOTICE([using shared libraries])
+
+	# Clear some stuff in case of AIX, etc.
+	if test "$STLIBEXT" = "$SHLIBEXT" ; then
+		STLIBEXT=.a-nobuild
 	fi
-	CC_LINK="$CC_LINK_SHARED"
-	;;
-esac
+	case "$SHLIBSEXT" in
+	.so.s-nobuild)
+		LIBLIST='lib$(LIBBASE)$(SHLIBEXT)'
+		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
+		LIBINSTLIST="install-shared"
+		;;
+	*)
+		LIBLIST='lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)'
+		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
+		LIBINSTLIST="install-shlib-soname"
+		;;
+	esac
+	OBJLISTS="OBJS.SH"
+fi
+CC_LINK="$CC_LINK_SHARED"
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
