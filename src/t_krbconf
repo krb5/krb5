@@ -24,15 +24,15 @@
 
 echo "Testing if krb5-config outputs shell variables"
 echo "  Testing --libs argument"
-if `./krb5-config --libs kdb | egrep -s '\\$'`; then 
-	echo "Error './krb5-config --libs kdb' contains shell variables"; 
-	exit 1; 
+if ./krb5-config --libs kdb | egrep -s '\$' > /dev/null; then
+	echo "Error './krb5-config --libs kdb' contains shell variables"
+	exit 1
 fi
 
 echo "  Testing --cflags argument"
-if `./krb5-config --cflags | egrep -s '\\$'`; then \
-	echo "Error './krb5-config --cflags' contains shell variables"; \
-	exit 1; \
+if ./krb5-config --cflags | egrep -s '\$' > /dev/null; then
+	echo "Error './krb5-config --cflags' contains shell variables"
+	exit 1
 fi
 echo "krb5-config tests pass"
 exit 0
