@@ -860,6 +860,24 @@ else
 fi
 AC_SUBST(KRB4_DEJAGNU_TEST)
 
+dnl for plugins/kdb/db2
+dnl
+dnl AIX is unusual in that it wants all symbols resolved at link time
+dnl  Fortunately, it will allow us to link the kdb library now, even if
+dnl it is linked again later.
+case $krb5_cv_host in
+*-*-aix*)
+	DB_EXTRA_LIBS=-ldb
+	;;
+*)
+	DB_EXTRA_LIBS=
+	;;
+esac
+AC_SUBST(DB_EXTRA_LIBS)
+if test "$DB_VERSION" = k5; then
+  AC_CONFIG_SUBDIRS(plugins/kdb/db2/libdb2)
+fi
+
 dnl
 dnl
 dnl Check for thread safety issues.
@@ -935,7 +953,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
 fi
 AC_SUBST(ldap_plugin_dir)
 
-AC_CONFIG_SUBDIRS(plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body)
+AC_CONFIG_SUBDIRS(plugins/preauth/wpse plugins/preauth/cksum_body)
 
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
@@ -977,6 +995,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	include/kerberosIV
 
 	plugins/locate/python
+	plugins/kdb/db2
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

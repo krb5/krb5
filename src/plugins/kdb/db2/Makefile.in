@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../..
 myfulldir=plugins/kdb/db2
-mydir=.
+mydir=plugins/kdb/db2
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -8,6 +8,11 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
 DEFS=
+
+SUBDIRS= $(SUBDIRS-@DB_VERSION@)
+SUBDIRS-sys=
+SUBDIRS-redirect=
+SUBDIRS-k5= libdb2
 
 LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb
 DEFINES = -DPLUGIN
