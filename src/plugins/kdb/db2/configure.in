@@ -1,10 +1,6 @@
 K5_AC_INIT(configure.in)
 CONFIG_RULES
-AC_CHECK_HEADERS(unistd.h)
-AC_TYPE_MODE_T
 AC_TYPE_OFF_T
-
-AC_CHECK_FUNCS(srand48 srand srandom umask)
 
 dnl AIX is unusual in that it wants all symbols resolved at link time
 dnl  Fortunately, it will allow us to link the kdb library now, even if
