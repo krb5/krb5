@@ -213,6 +213,7 @@ krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
         }
     }
 
+    memset(&replaydata, 0, sizeof(replaydata));
     if ((retval = krb5_rd_priv_basic(context, inbuf, keyblock,
 				     plocal_fulladdr,
 				     premote_fulladdr,
