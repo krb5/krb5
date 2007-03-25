@@ -39,8 +39,12 @@ krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
 	    break;
     }
 
-    if (i == krb5_enctypes_length)
+    if (i == krb5_enctypes_length) {
+	krb5int_set_error(&context->err, KRB5_BAD_ENCTYPE,
+			  "Bad encryption type (type %d unknown)",
+			  key->enctype);
 	return(KRB5_BAD_ENCTYPE);
+    }
 
     if ((input->enctype != ENCTYPE_UNKNOWN) &&
 	(krb5_enctypes_list[i].etype != input->enctype))
