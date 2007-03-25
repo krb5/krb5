@@ -41,6 +41,7 @@
 
 /* This program tests the resolve library and sees if it is broken... */
 
+#include "autoconf.h"
 #include <stdio.h>
 
 #if STDC_HEADERS
