@@ -1211,14 +1211,12 @@ AC_DEFUN(KRB5_LIB_AUX,
 # Check whether to build static libraries.
 dnl AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most platforms@:>@])
 dnl AC_HELP_STRING([--disable-static],[don't build static libraries])
-AC_ARG_ENABLE([static],, ,
-[enable_static=$default_static])
-
-if test "$enable_static" = yes; then
+AC_ARG_ENABLE([static],,
+[if test "$enableval" != no; then
   AC_MSG_ERROR([Sorry, static libraries do not work in this release.])
-fi
+fi])
 
-if test "$enable_static" = no && test "$krb5_force_static" != yes; then
+if test "$krb5_force_static" != yes; then
 	AC_MSG_NOTICE([disabling static libraries])
 	LIBLINKS=
 	LIBLIST=
@@ -1234,70 +1232,53 @@ fi
 
 # Check whether to build shared libraries.
 AC_ARG_ENABLE([shared],
-dnl AC_HELP_STRING([--enable-shared],[build shared libraries @<:@enabled for most platforms@:>@])
-dnl AC_HELP_STRING([--disable-shared],[don't build shared libraries])
-, ,
-[enable_shared=$default_shared])
-
-if test "$enable_shared" != yes; then
+, 
+[if test "$enableval" != yes; then
   AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
-fi
+fi])
 
-if test "$enable_shared" = yes; then
-	case "$SHLIBEXT" in
-	.so-nobuild)
-		AC_MSG_WARN([shared libraries not supported on this architecture])
-		RUN_ENV=
-		CC_LINK="$CC_LINK_STATIC"
-		;;
-	*)
-		# set this now because some logic below may reset SHLIBEXT
-		DEPLIBEXT=$SHLIBEXT
-		if test "$krb5_force_static" = "yes"; then
-			AC_MSG_RESULT([Forcing static libraries.])
-			# avoid duplicate rules generation for AIX and such
-			SHLIBEXT=.so-nobuild
-			SHLIBVEXT=.so.v-nobuild
-			SHLIBSEXT=.so.s-nobuild
-		else
-			AC_MSG_NOTICE([enabling shared libraries])
-			# Clear some stuff in case of AIX, etc.
-			if test "$STLIBEXT" = "$SHLIBEXT" ; then
-				STLIBEXT=.a-nobuild
-				LIBLIST=
-				LIBLINKS=
-				OBJLISTS=
-				LIBINSTLIST=
-			fi
-			LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBEXT)'
-			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
-			case "$SHLIBSEXT" in
-			.so.s-nobuild)
-				LIBINSTLIST="$LIBINSTLIST install-shared"
-				;;
-			*)
-				LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBSEXT)'
-				LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
-				LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
-				;;
-			esac
-			OBJLISTS="$OBJLISTS OBJS.SH"
-		fi
-		CC_LINK="$CC_LINK_SHARED"
-		;;
-	esac
-else
+case "$SHLIBEXT" in
+.so-nobuild)
+	AC_MSG_WARN([shared libraries not supported on this architecture])
 	RUN_ENV=
 	CC_LINK="$CC_LINK_STATIC"
-	SHLIBEXT=.so-nobuild
-	SHLIBVEXT=.so.v-nobuild
-	SHLIBSEXT=.so.s-nobuild
-fi
-
-if test "$build_dynobj" = yes; then
-	OBJLISTS=`echo $OBJLISTS | sed -e s/OBJS.ST//g -e s/OBJS.SH//g`
-	OBJLISTS="$OBJLISTS OBJS.SH"
-fi
+	;;
+*)
+	# set this now because some logic below may reset SHLIBEXT
+	DEPLIBEXT=$SHLIBEXT
+	if test "$krb5_force_static" = "yes"; then
+		AC_MSG_RESULT([Forcing static libraries.])
+		# avoid duplicate rules generation for AIX and such
+		SHLIBEXT=.so-nobuild
+		SHLIBVEXT=.so.v-nobuild
+		SHLIBSEXT=.so.s-nobuild
+	else
+		AC_MSG_NOTICE([enabling shared libraries])
+		# Clear some stuff in case of AIX, etc.
+		if test "$STLIBEXT" = "$SHLIBEXT" ; then
+			STLIBEXT=.a-nobuild
+			LIBLIST=
+			LIBLINKS=
+			OBJLISTS=
+			LIBINSTLIST=
+		fi
+		LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBEXT)'
+		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
+		case "$SHLIBSEXT" in
+		.so.s-nobuild)
+			LIBINSTLIST="$LIBINSTLIST install-shared"
+			;;
+		*)
+			LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBSEXT)'
+			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
+			LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
+			;;
+		esac
+		OBJLISTS="$OBJLISTS OBJS.SH"
+	fi
+	CC_LINK="$CC_LINK_SHARED"
+	;;
+esac
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
@@ -1309,20 +1290,6 @@ dnl [  --enable-profiled       build profiled libraries @<:@disabled@:>@]
 ,
 [if test "$enableval" = yes; then
   AC_MSG_ERROR([Sorry, profiled libraries do not work in this release.])
-fi
-if false; then
-	case $PFLIBEXT in
-	.po-nobuild)
-		AC_MSG_WARN([Profiled libraries not supported on this architecture.])
-		;;
-	*)
-		AC_MSG_NOTICE([enabling profiled libraries])
-		LIBLIST="$LIBLIST "'lib$(LIBBASE)$(PFLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT)'
-		OBJLISTS="$OBJLISTS OBJS.PF"
-		LIBINSTLIST="$LIBINSTLIST install-profiled"
-		;;
-	esac
 fi])])
 
 dnl

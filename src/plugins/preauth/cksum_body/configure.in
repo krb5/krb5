@@ -1,6 +1,4 @@
 K5_AC_INIT(configure.in)
-enable_shared=yes
-build_dynobj=yes
 CONFIG_RULES
 
 AC_CHECK_HEADERS(errno.h string.h)

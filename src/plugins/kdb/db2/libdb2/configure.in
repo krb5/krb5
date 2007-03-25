@@ -1,6 +1,5 @@
 K5_AC_INIT(db/db.c)
 AC_CONFIG_HEADER(include/config.h include/db-config.h)
-build_dynobj=yes
 CONFIG_RULES
 
 AC_PATH_PROG(FALSE,false,:)
