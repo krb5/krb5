@@ -844,6 +844,22 @@ case "$krb5_cv_host" in
 esac
 changequote([, ])
 AC_SUBST(PASS)
+
+dnl for tests/
+if test x"$RUNTEST" != x; then
+	HAVE_RUNTEST=yes
+else
+	HAVE_RUNTEST=no
+fi
+AC_SUBST(HAVE_RUNTEST)
+if test "$KRB4_LIB" = ''; then
+	KRB4_DEJAGNU_TEST="KRBIV=0"
+else
+	AC_MSG_RESULT(Kerberos 4 testing enabled)
+	KRB4_DEJAGNU_TEST="KRBIV=1"
+fi
+AC_SUBST(KRB4_DEJAGNU_TEST)
+
 dnl
 dnl
 dnl Check for thread safety issues.
@@ -919,7 +935,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
 fi
 AC_SUBST(ldap_plugin_dir)
 
-AC_CONFIG_SUBDIRS(plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body appl tests)
+AC_CONFIG_SUBDIRS(plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body)
 
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
@@ -973,4 +989,8 @@ V5_AC_OUTPUT_MAKEFILE(.
 	appl/sample appl/sample/sclient appl/sample/sserver
 	appl/simple appl/simple/client appl/simple/server
 	appl/gss-sample appl/user_user
+
+	tests tests/resolve tests/asn.1 tests/create tests/hammer
+	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
+	tests/gss-threads tests/misc
 )
