@@ -81,6 +81,7 @@ krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
     struct time_now now;
     krb5_error_code err;
 
+    now.sec = now.usec = 0;
     err = get_time_now(&now);
     if (err)
 	return err;
