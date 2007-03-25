@@ -225,7 +225,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 				 const char *attr,
 				 const char *value)
 {
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     int i;
     void *pctx;
     const char *emsg = NULL;
@@ -1597,7 +1597,7 @@ krb5_do_preauth(krb5_context context,
 	    if (!realdone) {
 		krb5_init_preauth_context(context);
 		if (context->preauth_context != NULL) {
-		    int module_ret, module_flags;
+		    int module_ret = 0, module_flags;
 #ifdef DEBUG
 		    fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
 			     in_padata[i]->pa_type, paorder[h]);
