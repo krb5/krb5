@@ -1118,9 +1118,7 @@ dnl
 dnl Pull in the necessary stuff to create the libraries.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY,
-[KRB5_BUILD_LIBRARY_WITH_DEPS
-# null out SHLIB_EXPFLAGS because we lack any dependencies
-SHLIB_EXPFLAGS=])
+[KRB5_BUILD_LIBRARY_WITH_DEPS])
 
 dnl
 dnl KRB5_BUILD_LIBRARY_STATIC
