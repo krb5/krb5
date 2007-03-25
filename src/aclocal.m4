@@ -1113,14 +1113,6 @@ AC_SUBST(HESIOD_LIBS)])
 
 
 dnl
-dnl KRB5_BUILD_LIBRARY
-dnl
-dnl Pull in the necessary stuff to create the libraries.
-
-AC_DEFUN(KRB5_BUILD_LIBRARY,
-[KRB5_BUILD_LIBRARY_WITH_DEPS])
-
-dnl
 dnl KRB5_BUILD_LIBRARY_STATIC
 dnl
 dnl Force static library build.
@@ -1137,12 +1129,11 @@ KRB5_BUILD_LIBRARY
 LIBINSTLIST=])
 
 dnl
-dnl KRB5_BUILD_LIBRARY_WITH_DEPS
+dnl KRB5_BUILD_LIBRARY
 dnl
-dnl Like KRB5_BUILD_LIBRARY, but adds in explicit dependencies in the
-dnl generated shared library.
+dnl Pull in the necessary stuff to create the libraries.
 
-AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
+AC_DEFUN(KRB5_BUILD_LIBRARY,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
