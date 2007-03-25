@@ -1117,20 +1117,6 @@ AC_SUBST(HESIOD_LIBS)])
 
 
 dnl
-dnl KRB5_BUILD_LIBRARY_STATIC
-dnl
-dnl Force static library build.
-
-AC_DEFUN(KRB5_AC_FORCE_STATIC,[dnl
-AC_BEFORE([$0],[KRB5_LIB_AUX])dnl
-# krb5_force_static=yes
-])
-AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
-dnl Use define rather than AC_DEFUN to avoid ordering problems.
-[AC_REQUIRE([KRB5_AC_FORCE_STATIC])dnl
-KRB5_BUILD_LIBRARY])
-
-dnl
 dnl KRB5_BUILD_LIBRARY
 dnl
 dnl Pull in the necessary stuff to create the libraries.
