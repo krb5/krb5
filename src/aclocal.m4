@@ -98,6 +98,10 @@ libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
 libnover_frag=$srcdir/$ac_config_fragdir/libnover.in
 AC_SUBST_FILE(libnover_frag)
+libpriv_frag=$srcdir/$ac_config_fragdir/libpriv.in
+AC_SUBST_FILE(libpriv_frag)
+libnodeps_frag=$srcdir/$ac_config_fragdir/libnodeps.in
+AC_SUBST_FILE(libnodeps_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
 WITH_LDAP
@@ -1119,7 +1123,8 @@ dnl Force static library build.
 
 AC_DEFUN(KRB5_AC_FORCE_STATIC,[dnl
 AC_BEFORE([$0],[KRB5_LIB_AUX])dnl
-krb5_force_static=yes])
+# krb5_force_static=yes
+])
 AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
 dnl Use define rather than AC_DEFUN to avoid ordering problems.
 [AC_REQUIRE([KRB5_AC_FORCE_STATIC])dnl
@@ -1244,11 +1249,13 @@ else
 	fi
 	case "$SHLIBSEXT" in
 	.so.s-nobuild)
+		SHLIB_HAVE_MINOR_VERS=no
 		LIBLIST='lib$(LIBBASE)$(SHLIBEXT)'
 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
 		LIBINSTLIST="install-shared"
 		;;
 	*)
+		SHLIB_HAVE_MINOR_VERS=yes
 		LIBLIST='lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)'
 		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
 		LIBINSTLIST="install-shlib-soname"
@@ -1257,6 +1264,7 @@ else
 	OBJLISTS="OBJS.SH"
 fi
 CC_LINK="$CC_LINK_SHARED"
+AC_SUBST(SHLIB_HAVE_MINOR_VERS)
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])

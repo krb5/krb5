@@ -32,6 +32,7 @@ LIBOBJS=$(OUTPRE)daemon.$(OBJEXT)
 SRCS=	$(srcdir)/daemon.c \
 	$(srcdir)/dummy.c
 
+@libpriv_frag@
 @lib_frag@
 @libobj_frag@
 

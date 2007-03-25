@@ -166,7 +166,7 @@ clean::
 		ss.ar ss.tar \
 		TAGS test_ss
 
-
+@libpriv_frag@
 @lib_frag@
 @libobj_frag@
 

@@ -89,6 +89,7 @@ enc_des.o: key-proto.h
 enc_des.o: misc-proto.h
 install::
 
+@libpriv_frag@
 @lib_frag@
 @libobj_frag@
 
