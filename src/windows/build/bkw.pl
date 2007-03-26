@@ -212,17 +212,19 @@ sub main {
 	my $wd 	= $src."\\pismere";
 
 	if ($rverb =~ /checkout/) {
-		print "\n\nHEADS UP!!\n\n";
-		print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
-		print "If this is not what you intended, here's your chance to bail out!\n\n\n";
-		print "Are you sure you want to remove everything under $wd? ";
-		my $char = getc;
-		if (! ($char =~ /y/i)) {die "Info -- operation aborted by user."}
-		!system("rm -rf $wd/*")						or die "Fatal -- Couldn't clean $wd.";
-		!system("rmdir $wd")							or die "Fatal -- Couldn't remove $wd.";
-#		!system("attrib -h -r $wd\\* /s /d")	or die "Fatal -- Couldn't clear read-only attributes.";
-#		!system("del /s /q $wd\\*.*")				or die "Fatal -- Couldn't clean files from $wd."; 
-#		!system("rm -rf $wd\\*.*")					or die "Fatal -- Couldn't clean directories from $wd.";
+		if (-d $wd) {
+			print "\n\nHEADS UP!!\n\n";
+			print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
+			print "If this is not what you intended, here's your chance to bail out!\n\n\n";
+			print "Are you sure you want to remove everything under $wd? ";
+			my $char = getc;
+			if (! ($char =~ /y/i)) {die "Info -- operation aborted by user."}
+			!system("rm -rf $wd/*")						or die "Fatal -- Couldn't clean $wd.";
+			!system("rmdir $wd")							or die "Fatal -- Couldn't remove $wd.";
+			}
+		if (! -d $src)				{mkdir $src				or die "Fatal -- Couldn't create $src.";}
+		if (! -d $wd)				{mkdir $wd				or die "Fatal -- Couldn't create $wd.";}
+		if (! -d "$wd//CVS")	{mkdir "$wd//CVS"	or die "Fatal -- Couldn't create $wd\\CVS.";}
 		}
 
 # Begin logging:
@@ -241,8 +243,8 @@ sub main {
 
 		# Set up cvs environment variables:
 		$ENV{CVSROOT} = $fetch[0]->{CVSROOT}->{name};
-		chdir($src)											or die "Fatal -- couldn't chdir to $src\n";
-		print "Info -- chdir to ".`cd`."\n"				if ($verbose);
+		chdir($src)												or die "Fatal -- couldn't chdir to $src\n";
+		print "Info -- chdir to ".`cd`."\n"			if ($verbose);
 		my $krb5dir	= $wd."\\athena\\auth\\krb5";
 
 		my $cvscmdroot	= "cvs $rverb";
@@ -250,25 +252,23 @@ sub main {
 		if ($rverb =~ /checkout/) {		
 			my @cvsmodules	= (	
 				'krb',  
-				'pismere/athena/util/lib/afscompat', 
 				'pismere/athena/util/lib/delaydlls', 
 				'pismere/athena/util/lib/getopt', 
 				'pismere/athena/util/guiwrap'
 				);
-#				'pismere/athena/util/lib', 
 
 			foreach my $module (@cvsmodules) {
 				$cvscmd = $cvscmdroot." ".$module;
 				$cvscmd .= " ".$tags[0]->{cvs}->{value}	if ($tags[0]->{cvs}->{value});
 				if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-				!system($cvscmd)								or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+				!system($cvscmd)							or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
 				}
 			}
 		else {				## Update.
 			$cvscmd = $cvscmdroot;
 			$cvscmd .= " ".$tags[0]->{cvs}->{value}	if ($tags[0]->{cvs}->{value});
 			if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-			!system($cvscmd)									or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+			!system($cvscmd)								or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
 			}
 					
 		# Set up svn environment variables:
