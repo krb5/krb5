@@ -1231,7 +1231,6 @@ struct _krb5_context {
 	krb5_flags	library_options;
 	krb5_boolean	profile_secure;
 	int		fcc_default_format;
-	int		scc_default_format;
 	krb5_prompt_type *prompt_types;
 	/* Message size above which we'll try TCP first in send-to-kdc
 	   type code.  Aside from the 2**16 size limit, we put no

@@ -117,7 +117,6 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
      *  krb5_int32			for library_options
      *  krb5_int32			for profile_secure
      * 	krb5_int32			for fcc_default_format
-     *  krb5_int32			for scc_default_format
      *    <>				for os_context
      *    <>				for db_context
      *    <>				for profile
@@ -278,12 +277,6 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
 
     /* Now fcc_default_format */
     kret = krb5_ser_pack_int32((krb5_int32) context->fcc_default_format,
-			       &bp, &remain);
-    if (kret)
-	return (kret);
-
-    /* Now scc_default_format */
-    kret = krb5_ser_pack_int32((krb5_int32) context->scc_default_format,
 			       &bp, &remain);
     if (kret)
 	return (kret);
@@ -456,11 +449,6 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	goto cleanup;
     context->fcc_default_format = (int) ibuf;
 
-    /* scc_default_format */
-    if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-	goto cleanup;
-    context->scc_default_format = (int) ibuf;
-    
     /* Attempt to read in the os_context.  It's an array now, but
        we still treat it in most places as a separate object with
        a pointer.  */

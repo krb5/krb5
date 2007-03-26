@@ -234,7 +234,6 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 	profile_get_integer(ctx->profile, "libdefaults", "ccache_type",
 			    0, DEFAULT_CCACHE_TYPE, &tmp);
 	ctx->fcc_default_format = tmp + 0x0500;
-	ctx->scc_default_format = tmp + 0x0500;
 	ctx->prompt_types = 0;
 	ctx->use_conf_ktypes = 0;
 
