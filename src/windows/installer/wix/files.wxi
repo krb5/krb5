@@ -29,12 +29,12 @@
     <Directory Id="SystemFolder" SourceName="System">
         <Component Id="cmf_kfwlogon_DLL" Guid="2F104FEB-2D61-458A-BAE3-B153F151E728">
              <File Id="filekfwlogon_DLL" Name="kfwlogon.dll" LongName="kfwlogon.dll" KeyPath="yes" DiskId="1" src="$(var.BinDir)kfwlogon.dll" />
-             <Registry Id="reg_kfwlogon01" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Action="createKeyAndRemoveKeyOnUninstall" />
-             <Registry Id="reg_kfwlogon02" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" />
-             <Registry Id="reg_kfwlogon03" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Name="Asynchronous" Type="integer" Value="0" />
-             <Registry Id="reg_kfwlogon04" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Name="Impersonate" Type="integer" Value="0" />
-             <Registry Id="reg_kfwlogon05" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Name="DLLName" Type="string" Value="[#filekfwlogon_DLL]" />
-             <Registry Id="reg_kfwlogon06" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\KFWLogon" Name="Logon" Type="string" Value="KFW_Logon_Event" />
+             <Registry Id="reg_kfwlogon01" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Action="createKeyAndRemoveKeyOnUninstall" />
+             <Registry Id="reg_kfwlogon02" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" />
+             <Registry Id="reg_kfwlogon03" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="Asynchronous" Type="integer" Value="0" />
+             <Registry Id="reg_kfwlogon04" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="Impersonate" Type="integer" Value="0" />
+             <Registry Id="reg_kfwlogon05" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="DLLName" Type="string" Value="[#filekfwlogon_DLL]" />
+             <Registry Id="reg_kfwlogon06" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="Logon" Type="string" Value="KFW_Logon_Event" />
              <Registry Id="reg_kfwlogon07" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Action="createKeyAndRemoveKeyOnUninstall" />
              <Registry Id="reg_kfwlogon08" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="AuthentProviderPath" Type="expandable" Value="[SystemFolder]kfwlogon.dll"/>
              <Registry Id="reg_kfwlogon09" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider"/>
