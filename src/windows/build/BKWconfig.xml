@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!-- BKW: Build Kerberos for Windows -->
 <BKW_Config>
 	<CommandLine>
@@ -15,13 +15,13 @@
 			<unixfind	path	="c:\cygwin\bin" />
 			</Directories>
 		<Options>
-			<debug value="0" />
+			<debug value="1" />
 			<logfile value="1" path="bkw.pl.log" />
 			<repository value="skip" />
 			<clean value="0" />
 			<nomake value="0" />
 			<nopackage value="0" />
-			<verbose value="0" />
+			<verbose value="1" />
 			<vverbose value="0" />
 			</Options>
 		</CommandLine>
@@ -31,12 +31,13 @@
 				<CVSROOT name=":kserver:cvs.mit.edu:/cvs/pismere" />
 				<SVNURL name="svn.mit.edu" /> <!-- NB:  No protocol or slashes!! -->
 				<KERBEROS_ID name="kpkoch" />
-				<KRB_PLINK name="c:\downloads\plink.exe" /> <!-- Path to a kerberized plink, needed for svn. -->
+				<KRB_PLINK name="plink.exe" /> <!-- Path to a kerberized plink, needed for svn. -->
+					<!-- NB:  Path separators must be doubled backslashes.  EG:  C:\\WINDOWS\\PLINK.EXE -->
 				</Config>
 		</FetchSources>
 		<Make>
 			<Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:	-->
-				<Prune dummy="foo" />
+				<Prune dummy="foo" />		<!-- Force XML::Simple behavior -->
 				<Prune name="afsauth" />
 				<Prune name="aklog" />
 				<Prune name="vs" />
@@ -129,7 +130,7 @@
 					<Requires>
 						<Switch dummy="foo" />
 						<Switch name="REPOSITORY" value="CHECKOUT"/>
-						<ErrorMsg text="Can't build source zip unless both /REPOSITORY CHECKOUT is specified." />
+						<ErrorMsg text="Can't build source zip unless /REPOSITORY CHECKOUT is specified." />
 						</Requires>
 					</Zip>
 				</Zips>			
