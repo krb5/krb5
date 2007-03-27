@@ -33,6 +33,16 @@
 static /*@null@*/ et_old_error_hook_func com_err_hook = 0;
 k5_mutex_t com_err_hook_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
+#if defined(_WIN32)
+BOOL  isGuiApp() {
+	DWORD mypid;
+	HANDLE myprocess;
+	mypid = GetCurrentProcessId();
+	myprocess = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, mypid);
+	return GetGuiResources(myprocess, 1) > 0;
+	}
+#endif
+
 static void default_com_err_proc (const char *whoami, errcode_t code,
 				  const char *fmt, va_list ap)
 {
@@ -55,14 +65,12 @@ static void default_com_err_proc (const char *whoami, errcode_t code,
 	    vsprintf (errbuf + strlen (errbuf), fmt, ap);
 	errbuf[sizeof(errbuf) - 1] = '\0';
 
-#ifdef _WIN32
-	if (_isatty(_fileno(stderr))) {
+	if (_isatty(_fileno(stderr)) || !isGuiApp()) {
 	    fputs(errbuf, stderr);
 	    fputc('\r', stderr);
 	    fputc('\n', stderr);
 	    fflush(stderr);
 	} else
-#endif /* _WIN32 */
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
 
 #else /* !_WIN32 */
