@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 
     KFW_initialize();
 
-    return KFW_copy_file_cache_to_default_cache(argv[1]);
+    return KFW_copy_file_cache_to_api_cache(argv[1]);
 }
 
 

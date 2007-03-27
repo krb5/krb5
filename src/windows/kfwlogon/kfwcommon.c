@@ -293,19 +293,41 @@ static HANDLE hDLL;
 
 BOOL IsDebugLogging(void)
 {
-    DWORD LSPtype, LSPsize;
+    DWORD LSPsize;
     HKEY NPKey;
     DWORD dwDebug = FALSE;
 
     if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\Network Provider", 
-		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS) {
+		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\NetworkProvider", 
+		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS) 
+    {
 	LSPsize=sizeof(dwDebug);
-	if (RegQueryValueEx(NPKey, "Debug", NULL, &LSPtype, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS 
-	    || LSPtype != REG_DWORD)
+	if (RegQueryValueEx(NPKey, "Debug", NULL, NULL, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS) 
+	{
+	    static int once = 0;
+
 	    dwDebug = FALSE;
 
+	    if (!once) {
+	        HANDLE h; char *ptbuf[1];
+		h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+		ptbuf[0] = "Unable to read debug value";
+		ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+		DeregisterEventSource(h);
+		once++;
+	    }
+	}
 	RegCloseKey (NPKey);
+    } else {
+	static int once = 0;
+	if (!once) {
+	    HANDLE h; char *ptbuf[1];
+ 	    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+	    ptbuf[0] = "Unable to open network provider key";
+	    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+	    DeregisterEventSource(h);
+	    once++;
+	}
     }
 
     return(dwDebug ? TRUE : FALSE);
@@ -719,7 +741,7 @@ KFW_get_cred( char * username,
     char * pname = 0;
     krb5_error_code code;
 
-    if (!pkrb5_init_context || !username || !password)
+    if (!pkrb5_init_context || !username || !password || !password[0])
         return 0;
 
     DebugEvent0(username);
@@ -751,22 +773,23 @@ KFW_get_cred( char * username,
     if ( code ) goto cleanup;
 
     DebugEvent0("got ccache");
+
     if ( lifetime == 0 )
         lifetime = pLeash_get_default_lifetime();
 
-    if ( password[0] ) {
-        code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
-                          pname, 
-                          password,
-                          lifetime,
-                          pLeash_get_default_forwardable(),
-                          pLeash_get_default_proxiable(),
-                          pLeash_get_default_renewable() ? pLeash_get_default_renew_till() : 0,
-                          pLeash_get_default_noaddresses(),
-                          pLeash_get_default_publicip());
-	DebugEvent0("kinit returned");
-        if ( code ) goto cleanup;
-    }
+    DebugEvent0("got lifetime");
+
+    code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
+		      pname, 
+		      password,
+		      lifetime,
+		      pLeash_get_default_forwardable(),
+		      pLeash_get_default_proxiable(),
+		      pLeash_get_default_renewable() ? pLeash_get_default_renew_till() : 0,
+		      pLeash_get_default_noaddresses(),
+		      pLeash_get_default_publicip());
+    DebugEvent0("kinit returned");
+    if ( code ) goto cleanup;
 
   cleanup:
     if ( pname )
@@ -1129,6 +1152,94 @@ KFW_copy_file_cache_to_default_cache(char * filename)
     retval=0;   /* success */
 
   cleanup:
+    if ( cc ) {
+        pkrb5_cc_close(ctx, cc);
+        cc = 0;
+    }
+
+    DeleteFile(filename);
+
+    if ( princ ) {
+        pkrb5_free_principal(ctx, princ);
+        princ = 0;
+    }
+
+    if (ctx)
+        pkrb5_free_context(ctx);
+
+    return 0;
+}
+
+
+int
+KFW_copy_file_cache_to_api_cache(char * filename)
+{
+    char cachename[MAX_PATH + 8] = "FILE:";
+    krb5_context		ctx = 0;
+    krb5_error_code		code;
+    krb5_principal              princ = 0;
+    krb5_ccache			cc  = 0;
+    krb5_ccache                 ncc = 0;
+    char 			*name = NULL;
+    int retval = 1;
+
+    if (!pkrb5_init_context || !filename)
+        return 1;
+
+    if ( strlen(filename) + sizeof("FILE:") > sizeof(cachename) )
+        return 1;
+
+    strcat(cachename, filename);
+
+    code = pkrb5_init_context(&ctx);
+    if (code) ctx = 0;
+
+    code = pkrb5_cc_resolve(ctx, cachename, &cc);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_resolve failed");
+	goto cleanup;
+    }
+    
+    code = pkrb5_cc_get_principal(ctx, cc, &princ);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_get_principal failed");
+	goto cleanup;
+    }
+
+    code = pkrb5_unparse_name(ctx, princ, &name);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_unparse_name failed");
+	goto cleanup;
+    }
+
+    sprintf(cachename, "API:%s", name);
+
+    code = pkrb5_cc_resolve(ctx, cachename, &ncc);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_default failed");
+	goto cleanup;
+    }
+    if (!code) {
+        code = pkrb5_cc_initialize(ctx, ncc, princ);
+
+        if (!code)
+            code = pkrb5_cc_copy_creds(ctx,cc,ncc);
+	if (code) {
+	    DebugEvent0("kfwcpcc krb5_cc_copy_creds failed");
+	    goto cleanup;
+	}
+    }
+    if ( ncc ) {
+        pkrb5_cc_close(ctx, ncc);
+        ncc = 0;
+    }
+
+    retval=0;   /* success */
+
+  cleanup:
+    if (name)
+	pkrb5_free_unparsed_name(ctx, name);
+
     if ( cc ) {
         pkrb5_cc_close(ctx, cc);
         cc = 0;
