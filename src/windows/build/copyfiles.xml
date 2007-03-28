@@ -183,7 +183,7 @@
 		<File name="KfWConfigPage2.ini"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="killer.cpp"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="licenses.rtf"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
-		<File name="site-local.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
+		<File name="site-local-tagged.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="utils.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="msi-deployment-guide.txt"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
 		<File name="config.wxi"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
@@ -192,7 +192,7 @@
 		<File name="kfw.wxs"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
 		<File name="Makefile"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
 		<File name="property.wxi"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
-		<File name="site-local.wxi"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
+		<File name="site-local-tagged.wxi"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
 		<File name="bannrbmp.bmp"	from="auth\krb5\src\windows\installer\wix\Binary\"	to="\install\wix\Binary" />
 		<File name="completi.ico"	from="auth\krb5\src\windows\installer\wix\Binary\"	to="\install\wix\Binary" />
 		<File name="custicon.ico"	from="auth\krb5\src\windows\installer\wix\Binary\"	to="\install\wix\Binary" />
