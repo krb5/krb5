@@ -51,4 +51,5 @@ site.exp: runenv.vals Makefile
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)t_inetd.$(OBJEXT): $(COM_ERR_DEPS) t_inetd.c
+$(OUTPRE)t_inetd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(COM_ERR_DEPS) t_inetd.c

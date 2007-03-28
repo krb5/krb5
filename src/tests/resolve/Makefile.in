@@ -36,7 +36,8 @@ clean::
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-$(OUTPRE)resolve.$(OBJEXT): resolve.c
+$(OUTPRE)resolve.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  resolve.c
 $(OUTPRE)addrinfo-test.$(OBJEXT): addrinfo-test.c
 $(OUTPRE)fake-addrinfo-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
