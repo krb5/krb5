@@ -184,6 +184,7 @@
 		<File name="killer.cpp"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="licenses.rtf"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="site-local-tagged.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
+		<File name="nsi-includes-tagged.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="utils.nsi"	from="auth\krb5\src\windows\installer\nsis\"	to="\install\nsis" />
 		<File name="msi-deployment-guide.txt"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />
 		<File name="config.wxi"	from="auth\krb5\src\windows\installer\wix\"	to="\install\wix" />

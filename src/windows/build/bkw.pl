@@ -457,42 +457,48 @@ sub main {
 		local $tmpfile	= "site-local.sed" ;
 		system("del $tmpfile");
 		# Basic substitutions:
+		local $dblback_wd			= $wd;
+		$dblback_wd						=~ s/\\/\\\\/g;
+		!system("echo s/%BUILDDIR%/$dblback_wd/ >> $tmpfile")							or die "Fatal -- Couldn't modify $tmpfile.";	
 		local $dblback_staging	= "$wd\\staging";
-		$dblback_staging			=~ s/\\/\\\\/g;
-		!system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		$dblback_staging				=~ s/\\/\\\\/g;
+		!system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")				or die "Fatal -- Couldn't modify $tmpfile.";	
 		local $dblback_sample	= "$wd\\staging\\sample";
-		$dblback_sample			=~ s/\\/\\\\/g;
+		$dblback_sample				=~ s/\\/\\\\/g;
 		!system("echo s/%CONFIGDIR-WIX%/$dblback_sample/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
 		!system("echo s/%CONFIGDIR-NSI%/$dblback_staging/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
 		!system("echo s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
 		!system("echo s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
 		!system("echo s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/ >> $tmpfile")			or die "Fatal -- Couldn't modify $tmpfile.";	
 		# Strip out some defines so they can be replaced:  [used for site-local.nsi]
-		!system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")								or die "Fatal -- Couldn't modify $tmpfile.";	
-		!system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")								or die "Fatal -- Couldn't modify $tmpfile.";	
-		!system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")									or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")							or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")							or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")								or die "Fatal -- Couldn't modify $tmpfile.";	
 
 		# Run the script on site-local.wxi:
-		!system("sed -f $tmpfile site-local-tagged.wxi > site-local.wxi")						or die "Fatal -- Couldn't modify site-local.wxi.";
+		!system("sed -f $tmpfile site-local-tagged.wxi > site-local.wxi")					or die "Fatal -- Couldn't modify site-local.wxi.";
 
 		# Now update site-local.nsi:
 		chdir "..\\nsis";
 		print "Info -- chdir to ".`cd`."\n"										if ($verbose);
 		local $tmpfile	= "site-local.sed" ;
-		!system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")					or die "Fatal -- Couldn't modify site-local.wxi.";
+		!system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")				or die "Fatal -- Couldn't modify site-local.wxi.";
 		# Add DEBUG or RELEASE:
 		if ($switches[0]->{debug}->{value}) {				## debug build
-			!system("echo !define DEBUG >> b.tmp")															or die "Fatal -- Couldn't modify b.tmp.";	
+			!system("echo !define DEBUG >> b.tmp")														or die "Fatal -- Couldn't modify b.tmp.";	
 			}
 		else {																		## release build
-			!system("echo !define RELEASE >> b.tmp")															or die "Fatal -- Couldn't modify b.tmp.";	
-			!system("echo !define NO_DEBUG >> b.tmp")													or die "Fatal -- Couldn't modify b.tmp.";	
+			!system("echo !define RELEASE >> b.tmp")														or die "Fatal -- Couldn't modify b.tmp.";	
+			!system("echo !define NO_DEBUG >> b.tmp")												or die "Fatal -- Couldn't modify b.tmp.";	
 			}
 		# Add BETA if present:
 		if ( exists $config->{Versions}->{'BETA_STR'}) {
 			!system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp")	or die "Fatal -- Couldn't modify b.tmp.";	
 			}
-		!system("mv -f b.tmp site-local.nsi")																		or die "Fatal -- Couldn't replace site-local.nsi.";
+		!system("mv -f b.tmp site-local.nsi")																	or die "Fatal -- Couldn't replace site-local.nsi.";
+
+		# Run the script on nsi-includes-tagged.nsi:
+		!system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > nsi-includes.nsi")		or die "Fatal -- Couldn't modify nsi-includes.nsi.";
 
 		if ($verbose) {print "Info -- ***   End prepackage.\n";}
 		
