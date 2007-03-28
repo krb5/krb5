@@ -845,6 +845,9 @@ esac
 changequote([, ])
 AC_SUBST(PASS)
 
+dnl for lib/apputils
+AC_REPLACE_FUNCS(daemon)
+
 dnl for tests/
 if test x"$RUNTEST" != x; then
 	HAVE_RUNTEST=yes
