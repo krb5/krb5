@@ -68,6 +68,7 @@ typedef struct khui_credwnd_outline_t {
 #define KHUI_CW_O_SELECTED      0x00000010
 #define KHUI_CW_O_DATAALLOC     0x00000020
 #define KHUI_CW_O_NOOUTLINE     0x00000040
+#define KHUI_CW_O_RELIDENT      0x00000080
 
 typedef struct khui_credwnd_row_t {
     khm_int32   flags;

@@ -168,6 +168,7 @@ DECL_FUNC_PTR(profile_clear_relation);
 DECL_FUNC_PTR(profile_add_relation);
 DECL_FUNC_PTR(profile_update_relation);
 DECL_FUNC_PTR(profile_release_string);
+DECL_FUNC_PTR(profile_rename_section);
 
 // Service functions
 DECL_FUNC_PTR(OpenSCManagerA);
@@ -315,6 +316,7 @@ FUNC_INFO profile_fi[] = {
     MAKE_FUNC_INFO(profile_add_relation),
     MAKE_FUNC_INFO(profile_update_relation),
     MAKE_FUNC_INFO(profile_release_string),
+    MAKE_FUNC_INFO(profile_rename_section),
     END_FUNC_INFO
 };
 

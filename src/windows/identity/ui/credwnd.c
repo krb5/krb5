@@ -1037,7 +1037,8 @@ cw_del_outline(khui_credwnd_outline *o) {
         o->data)
         PFREE(o->data);
 
-    if ((o->flags & KHUI_CW_O_STICKY) &&
+    if (((o->flags & KHUI_CW_O_STICKY) ||
+         (o->flags & KHUI_CW_O_RELIDENT)) &&
         o->data)
         kcdb_identity_release((khm_handle) o->data);
 
@@ -1666,7 +1667,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         prevcred = NULL;
     }
 
-    /* Add any sticky identities that we haven't seen yet */
+    /* Add any default identities with no credentials and sticky
+       identities that we haven't seen yet */
     if (n_grouping > 0 && 
         tbl->cols[grouping[0]].attr_id == KCDB_ATTR_ID_NAME) {
 
@@ -1677,6 +1679,56 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         khm_size cb_names;
         wchar_t ** idarray = NULL;
         int i;
+
+        /* see if the defualt identity is in the list */
+        {
+            khm_handle id_def = NULL;
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_size cb;
+            khm_int32 flags;
+
+            if (KHM_FAILED(kcdb_identity_get_default(&id_def))) {
+                goto done_with_defident;
+            }
+
+            kcdb_identity_get_flags(id_def, &flags);
+            cb = sizeof(idname);
+            kcdb_identity_get_name(id_def, idname, &cb);
+
+            for (o = tbl->outline; o; o = LNEXT(o)) {
+                if (!wcscmp(idname, o->header))
+                    break;
+            }
+
+            if (o == NULL) {
+                o = cw_new_outline_node(idname);
+                LPUSH(&tbl->outline, o);
+                o->flags = KHUI_CW_O_VISIBLE | KHUI_CW_O_RELIDENT;
+                o->level = 0;
+                o->col = grouping[0];
+                o->data = id_def;
+                o->attr_id = KCDB_ATTR_ID;
+
+                if (flags & KCDB_IDENT_FLAG_STICKY)
+                    o->flags |= KHUI_CW_O_STICKY;
+
+                o->start = n_rows;
+                o->length = 1;
+                o->idx_start = -1;
+
+                if (grouping[0] == tbl->n_cols - 1)
+                    o->flags |= KHUI_CW_O_NOOUTLINE;
+
+                cw_set_tbl_row_header(tbl, n_rows, grouping[0], o);
+
+                n_rows ++;
+            } else {
+                kcdb_identity_release(id_def);
+            }
+
+        done_with_defident:
+            ;
+        }
 
         if (kcdb_identity_enum(KCDB_IDENT_FLAG_STICKY,
                                KCDB_IDENT_FLAG_STICKY,
@@ -1728,10 +1780,15 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             } else {
                 /* not found.  create */
                 o = cw_new_outline_node(idarray[i]);
+                LPUSH(&tbl->outline, o);
                 o->flags = KHUI_CW_O_VISIBLE;
                 o->level = 0;
                 o->col = grouping[0];
                 o->data = (void *) h;
+                o->attr_id = KCDB_ATTR_ID;
+
+                if (grouping[0] == tbl->n_cols - 1)
+                    o->flags |= KHUI_CW_O_NOOUTLINE;
             }
 
             if (o->flags & KHUI_CW_O_STICKY)
@@ -3963,22 +4020,14 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     x += tbl->scr_left;
     y += tbl->scr_top - tbl->header_height;
 
-    if (tbl->flags & KHUI_CW_TBL_EXPIDENT) {
-        int ty = 0;
+    row = -1;
 
-        for (i=0; i < tbl->n_rows; i++) {
-            if (tbl->rows[i].flags & KHUI_CW_ROW_EXPVIEW)
-                ty += tbl->cell_height * CW_EXP_ROW_MULT;
-            else
-                ty += tbl->cell_height;
-
-            if (ty > y)
-                break;
+    for (i=0; i < tbl->n_rows; i++) {
+        if (y >= tbl->rows[i].r_ext.top &&
+            y < tbl->rows[i].r_ext.bottom) {
+            row = i;
+            break;
         }
-
-        row = i;
-    } else {
-        row = y / tbl->cell_height;
     }
 
     col = -1;
@@ -4006,7 +4055,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             o = (khui_credwnd_outline *) tbl->rows[row].data;
 
             /* are we on a widget then? */
-            x -= tbl->cols[tbl->rows[row].col].x;
+            x -= tbl->cols[o->col].x;
 
             if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
                 if(x >= 0 && x < KHUI_SMICON_CX) /* hit */ {
@@ -4116,41 +4165,14 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         if(tbl->mouse_state & CW_MOUSE_WSTICKY) {
             if (tbl->flags & KHUI_CW_TBL_EXPIDENT) {
-                int ty = 0;
 
-                for (i=0; i < tbl->n_rows && i < tbl->mouse_row; i++) {
-                    if (tbl->rows[i].flags & KHUI_CW_ROW_EXPVIEW)
-                        ty += tbl->cell_height * CW_EXP_ROW_MULT;
-                    else
-                        ty += tbl->cell_height;
-                }
-
-                r.top = ty;
-
-                if (tbl->mouse_row < tbl->n_rows &&
-                    (tbl->rows[tbl->mouse_row].flags & KHUI_CW_ROW_EXPVIEW)) {
-                    r.bottom = r.top + tbl->cell_height * CW_EXP_ROW_MULT;
-                } else {
-                    r.bottom = r.top + tbl->cell_height;
-                }
-
-                if (tbl->mouse_row < tbl->n_rows &&
-                    (tbl->rows[tbl->mouse_row].flags & KHUI_CW_ROW_HEADER)) {
-                    khui_credwnd_outline * o;
-
-                    o = (khui_credwnd_outline *) tbl->rows[tbl->mouse_row].data;
-
-                    if (o->flags & KHUI_CW_O_NOOUTLINE) {
-                        r.left = tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                    } else {
-                        r.left = KHUI_SMICON_CX * 3 / 2 + tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                    }
+                if (tbl->mouse_row >= 0 && tbl->mouse_row < tbl->n_rows) {
+                    r = tbl->rows[tbl->mouse_row].r_ext;
+                    OffsetRect(&r, -tbl->scr_left, tbl->header_height - tbl->scr_top);
                     r.right = r.left + KHUI_SMICON_CX;
-                } else {
-#ifdef DEBUG
-                    assert(FALSE);
-#endif
+                    InvalidateRect(tbl->hwnd, &r, TRUE);
                 }
+
             } else {
                 r.left = KHUI_SMICON_CX * 3 / 2 + 
                     tbl->cols[tbl->mouse_col].x - tbl->scr_left;
@@ -4182,41 +4204,14 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         if(tbl->mouse_state & CW_MOUSE_WSTICKY) {
             if (tbl->flags & KHUI_CW_TBL_EXPIDENT) {
-                int ty = 0;
 
-                for (i=0; i < tbl->n_rows && i < tbl->mouse_row; i++) {
-                    if (tbl->rows[i].flags & KHUI_CW_ROW_EXPVIEW)
-                        ty += tbl->cell_height * CW_EXP_ROW_MULT;
-                    else
-                        ty += tbl->cell_height;
-                }
-
-                r.top = ty;
-
-                if (tbl->mouse_row < tbl->n_rows &&
-                    (tbl->rows[tbl->mouse_row].flags & KHUI_CW_ROW_EXPVIEW)) {
-                    r.bottom = r.top + tbl->cell_height * CW_EXP_ROW_MULT;
-                } else {
-                    r.bottom = r.top + tbl->cell_height;
-                }
-
-                if (tbl->mouse_row < tbl->n_rows &&
-                    (tbl->rows[tbl->mouse_row].flags & KHUI_CW_ROW_HEADER)) {
-                    khui_credwnd_outline * o;
-
-                    o = (khui_credwnd_outline *) tbl->rows[tbl->mouse_row].data;
-
-                    if (o->flags & KHUI_CW_O_NOOUTLINE) {
-                        r.left = tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                    } else {
-                        r.left = KHUI_SMICON_CX * 3 / 2 + tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                    }
+                if (tbl->mouse_row >= 0 && tbl->mouse_row < tbl->n_rows) {
+                    r = tbl->rows[tbl->mouse_row].r_ext;
+                    OffsetRect(&r, -tbl->scr_left, tbl->header_height - tbl->scr_top);
                     r.right = r.left + KHUI_SMICON_CX;
-                } else {
-#ifdef DEBUG
-                    assert(FALSE);
-#endif
+                    InvalidateRect(tbl->hwnd, &r, TRUE);
                 }
+
             } else {
                 r.left = KHUI_SMICON_CX * 3 / 2 + 
                     tbl->cols[tbl->mouse_col].x - tbl->scr_left;

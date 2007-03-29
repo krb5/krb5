@@ -291,6 +291,7 @@ extern DECL_FUNC_PTR(profile_clear_relation);
 extern DECL_FUNC_PTR(profile_add_relation);
 extern DECL_FUNC_PTR(profile_update_relation);
 extern DECL_FUNC_PTR(profile_release_string);
+extern DECL_FUNC_PTR(profile_rename_section);
 
 // Service functions
 extern DECL_FUNC_PTR(OpenSCManagerA);
