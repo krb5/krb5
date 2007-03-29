@@ -374,8 +374,8 @@ sub main {
 		
 		chdir("pismere/athena") or die "Fatal -- couldn't chdir to source directory $wd\\pismere\\athena\n";
 		if ($verbose) {print "Info -- chdir to $wd\\pismere\\athena\n";}
-		local $log	= ($switches[0]->{logfile}->{value}) ? " " : " --nolog ";
-		!system("perl ../scripts/build.pl --softdirs --nolog $buildtarget")	or die "Fatal -- build $buildtarget failed.";
+		my $dbgswitch = ($switches[0]->{debug}->{value}) ? " " : "NODEBUG=1";
+		!system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch")	or die "Fatal -- build $buildtarget failed.";
 			
 		chdir("$wd\\pismere") or die "Fatal -- couldn't chdir to $wd\\pismere.";
 		if ($clean) {
