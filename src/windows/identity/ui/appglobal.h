@@ -36,7 +36,7 @@ extern int khm_nCmdShow;
 extern const wchar_t * khm_facility;
 extern kconf_schema schema_uiconfig[];
 extern khm_ui_4 khm_commctl_version;
-extern khm_version app_version;
+extern const khm_version app_version;
 
 #define IS_COMMCTL6() (khm_commctl_version >= 0x60000)
 
@@ -133,6 +133,8 @@ void khm_register_window_classes(void);
 HWND khm_html_help(HWND hwnd, wchar_t * suffix, UINT command, DWORD_PTR data);
 
 WPARAM khm_message_loop_int(khm_boolean * p_exit);
+
+int khm_compare_version(const khm_version * v1, const khm_version * v2);
 
 #define MAX_RES_STRING 1024
 

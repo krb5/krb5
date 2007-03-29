@@ -75,6 +75,7 @@ typedef struct khui_credwnd_row_t {
     khm_handle  data;
     khm_size idx_start;
     khm_size idx_end;
+    RECT        r_ext;          /* extents of this row */
 } khui_credwnd_row;
 
 #define KHUI_CW_ROW_CRED        0x00000002
@@ -111,6 +112,7 @@ typedef struct khui_credwnd_col_t {
 #define KHUI_CW_COL_FIXED_WIDTH 0x00000010
 #define KHUI_CW_COL_FIXED_POS   0x00000020
 #define KHUI_CW_COL_META        0x00000040
+#define KHUI_CW_COL_FILLER      0x00000080
 
 /* Custom column attributes (are not kcdb attributes) */
 #define CW_CA_FLAGS -1
@@ -129,7 +131,12 @@ typedef struct tag_khui_credwnd_ident {
     wchar_t    name[KCDB_IDENT_MAXCCH_NAME];
     wchar_t    credtype_name[KCDB_MAXCCH_NAME];
 
-    khm_size   credcount;
+    khm_size   credcount;       /* count of all credentials */
+    khm_size   id_credcount;    /* count of identity credentials
+                                   (credentials that are of the
+                                   identity type */
+    khm_size   init_credcount;  /* count of initial credentials */
+    FILETIME   ft_expire;
 
 } khui_credwnd_ident;
 
@@ -181,24 +188,36 @@ typedef struct khui_credwnd_tbl_t {
     HFONT hf_header;        /* header text */
     HFONT hf_bold;          /* bold text */
     HFONT hf_bold_header;   /* bold header text */
+
     HBRUSH hb_normal;       /* normal background brush */
-    HBRUSH hb_grey;         /* normal grey background brush */
-    HBRUSH hb_sel;          /* selected background brush */
+    HBRUSH hb_grey;         /* normal background brush (greyed) */
+    HBRUSH hb_s;            /* normal background brush (selected) */
+
+    HBRUSH hb_hdr_bg;       /* header background brush (normal) */
+    HBRUSH hb_hdr_bg_exp;   /* header background brush (expired) */
+    HBRUSH hb_hdr_bg_warn;  /* header background brush (warn) */
+    HBRUSH hb_hdr_bg_crit;  /* header background brush (critical) */
+    HBRUSH hb_hdr_bg_def;   /* header background brush (default) */
+
+    HBRUSH hb_hdr_bg_s;     /* header background brush (selected) */
+    HBRUSH hb_hdr_bg_exp_s; /* header background brush (expired,selected) */
+    HBRUSH hb_hdr_bg_warn_s;/* header background brush (warn,selected) */
+    HBRUSH hb_hdr_bg_crit_s;/* header background brush (critical,selected) */
+    HBRUSH hb_hdr_bg_def_s; /* header background brush (default,selected) */
+
+    COLORREF cr_normal;     /* text color (normal) */
+    COLORREF cr_s;          /* text color (selected) */
+    COLORREF cr_hdr_normal; /* header text color (normal) */
+    COLORREF cr_hdr_s;      /* header text color (selected) */
+    COLORREF cr_hdr_gray;   /* header text color (greyed) */
+    COLORREF cr_hdr_gray_s; /* header text color (greyed,selected) */
+
     COLORREF cr_hdr_outline;/* header outline color */
-    COLORREF cr_normal;     /* normal text color */
-    COLORREF cr_sel;        /* selected text color */
-    COLORREF cr_hdr_normal; /* normal header text color */
-    COLORREF cr_hdr_sel;    /* selected header text color */
-    COLORREF cr_hdr_gray;   /* gray header text color */
-    COLORREF cr_hdr_gray_sel;   /* selected gray header text color */
-    HBRUSH hb_hdr_bg;       /* header background color (normal) */
-    HBRUSH hb_hdr_bg_exp;   /* header background color (expired) */
-    HBRUSH hb_hdr_bg_warn;  /* header background color (warn) */
-    HBRUSH hb_hdr_bg_crit;  /* header background color (critical) */
-    HBRUSH hb_hdr_bg_sel;   /* header background color (selected) */
-    HBRUSH hb_hdr_bg_def;   /* header background color (default) */
+
     HCURSOR hc_hand;        /* the HAND cursor */
     khui_ilist * ilist;     /* image list */
+
+    HICON   hi_lg_ident;    /* large identity icon */
 
 #if 0
     /* icon indices */

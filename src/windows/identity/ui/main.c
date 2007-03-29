@@ -45,7 +45,7 @@ khm_ui_4 khm_commctl_version = 0;
 
 khm_startup_options khm_startup;
 
-khm_version app_version = {KH_VERSION_LIST};
+const khm_version app_version = {KH_VERSION_LIST};
 
 void khm_init_gui(void) {
     khui_init_actions();
@@ -522,7 +522,7 @@ void khm_load_default_modules(void) {
     kmm_load_default_modules();
 }
 
-int version_compare(const khm_version * v1, const khm_version * v2) {
+int khm_compare_version(const khm_version * v1, const khm_version * v2) {
 
     if (v1->major != v2->major)
         return ((int)v1->major) - ((int)v2->major);
@@ -744,8 +744,8 @@ int WINAPI WinMain(HINSTANCE hInstance,
         v.patch = 0;
         v.aux = 0;
 
-        if (version_compare(&query_app_version.ver_remote, &app_version) == 0 ||
-            version_compare(&query_app_version.ver_remote, &v) > 0)
+        if (khm_compare_version(&query_app_version.ver_remote, &app_version) == 0 ||
+            khm_compare_version(&query_app_version.ver_remote, &v) > 0)
             use_cmd_v2 = TRUE;
         else
             use_cmd_v2 = FALSE;

@@ -13,7 +13,7 @@ Krb5Cred,KC_SPACE,0,Kerberos V Credentials Provider
     DefaultLifetime,KC_INT32,36000,Default ticket lifetime
     MaxLifetime,KC_INT32,86400,Maximum lifetime
     MinLifetime,KC_INT32,60,Minimum lifetime
-    Forwardable,KC_INT32,0,Obtain forwardable tickets (boolean)
+    Forwardable,KC_INT32,1,Obtain forwardable tickets (boolean)
     Proxiable,KC_INT32,0,Obtain proxiable tickets (boolean)
     Addressless,KC_INT32,1,Obtain addressless tickets (boolean)
     PublicIP,KC_INT32,0,Additional public IP address to use (int32)

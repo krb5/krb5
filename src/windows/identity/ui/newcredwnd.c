@@ -1570,9 +1570,9 @@ nc_handle_wm_create(HWND hwnd,
         SendMessage(ncd->dlg_main, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_DIALOG_EXPAND), 0);
     } else {
-        /* we don't call this if the dialog is expanded because
-           posting WMNC_DIALOG_EXPAND to the main panel results in
-           this getting called anyway. */
+        /* we don't call nc_layout_main_panel() if the dialog is
+           expanded because posting WMNC_DIALOG_EXPAND to the main
+           panel results in it getting called anyway. */
         nc_layout_main_panel(ncd);
     }
 
@@ -1759,6 +1759,7 @@ nc_handle_wm_command(HWND hwnd,
             khm_html_help(hwnd, NULL, HH_HELP_CONTEXT, IDH_ACTION_NEW_ID);
             return FALSE;
 
+        case IDC_NC_BASIC:
         case IDC_NC_ADVANCED: 
             /* the Options button in the main window was clicked.  we
                respond by expanding the dialog. */
@@ -1919,15 +1920,19 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
         /* fallthrough */
 
     case WMNC_DIALOG_EXPAND:
-        /* we are expanding the dialog box */
+        /* we are switching from basic to advanced or vice versa */
 
-        /* nothing to do? */
+        if (d->nc->mode == KHUI_NC_MODE_EXPANDED) {
+            d->nc->mode = KHUI_NC_MODE_MINI;
+        } else {
+            d->nc->mode = KHUI_NC_MODE_EXPANDED;
+        }
+
+        /* if we are switching to the advanced mode, we clear any
+           notifications because we now have a credential text area
+           for that. */
         if (d->nc->mode == KHUI_NC_MODE_EXPANDED)
-            break;
-
-        d->nc->mode = KHUI_NC_MODE_EXPANDED;
-
-        nc_notify_clear(d);
+            nc_notify_clear(d);
 
         nc_layout_main_panel(d);
 

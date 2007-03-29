@@ -319,6 +319,10 @@
 #define IDS_IDEXPDISP_NOCRED            312
 #define IDS_IDEXPDISP_1CRED             313
 #define IDS_IDEXPDISP_NCRED             314
+#define IDS_CW_DEFAULTTF                315
+#define IDS_CW_TYPEF                    316
+#define IDS_CW_EXPIREF                  317
+#define IDS_CW_EXPIRED                  318
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -425,6 +429,8 @@
 #define IDC_LG_LBL                      1139
 #define IDC_CFG_NOTACTION               1141
 #define IDC_CFG_NOTACT_STATIC           1142
+#define IDC_BUTTON1                     1143
+#define IDC_NC_BASIC                    1143
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -439,7 +445,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1143
+#define _APS_NEXT_CONTROL_VALUE         1144
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

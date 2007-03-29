@@ -1093,6 +1093,7 @@ void
 khm_set_main_window_mode(int mode) {
 
     RECT r;
+    khm_handle csp_cw;
 
     if (mode == khm_main_wnd_mode)
         return;
@@ -1114,6 +1115,14 @@ khm_set_main_window_mode(int mode) {
                      r.right - r.left, r.bottom - r.top,
                      SWP_NOACTIVATE | SWP_NOOWNERZORDER |
                      SWP_NOZORDER);
+    }
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", KHM_PERM_WRITE,
+                                     &csp_cw))) {
+
+        khc_write_int32(csp_cw, L"DefaultWindowMode", mode);
+        khc_close_space(csp_cw);
+
     }
 }
 

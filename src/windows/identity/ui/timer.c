@@ -256,8 +256,9 @@ tmr_fire_timer(void) {
                    wtitle, ARRAYLENGTH(wtitle));
 
         khui_alert_create_simple(wtitle, wmsg, KHERR_WARNING, &alert);
-        khui_alert_set_flags(alert, KHUI_ALERT_FLAG_REQUEST_BALLOON,
-                             KHUI_ALERT_FLAG_REQUEST_BALLOON);
+        khui_alert_set_flags(alert,
+                             KHUI_ALERT_FLAG_REQUEST_BALLOON | KHUI_ALERT_FLAG_DISPATCH_CMD,
+                             KHUI_ALERT_FLAG_REQUEST_BALLOON | KHUI_ALERT_FLAG_DISPATCH_CMD);
 
         if (eff_ident != NULL) {
             khm_int32 cmd;

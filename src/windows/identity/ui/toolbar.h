@@ -37,12 +37,12 @@ void khui_add_action_to_toolbar(HWND toolbar, khui_action * act, int opt, HIMAGE
 void khm_update_standard_toolbar(void);
 
 /* options for khui_add_action_to_toolbar */
-#define KHUI_TOOLBAR_ADD_TEXT   1
-#define KHUI_TOOLBAR_ADD_BITMAP 2
-#define KHUI_TOOLBAR_ADD_LONGTEXT 5
-#define KHUI_TOOLBAR_ADD_DROPDOWN 8
-#define KHUI_TOOLBAR_ADD_SEP    16
-#define KHUI_TOOLBAR_VARSIZE    32
+#define KHUI_TOOLBAR_ADD_TEXT      0x00000001
+#define KHUI_TOOLBAR_ADD_BITMAP    0x00000002
+#define KHUI_TOOLBAR_ADD_LONGTEXT  0x00000005
+#define KHUI_TOOLBAR_ADD_DROPDOWN  0x00000008
+#define KHUI_TOOLBAR_ADD_SEP       0x00000010
+#define KHUI_TOOLBAR_VARSIZE       0x00000020
 
 #define KHUI_TOOLBAR_IMAGE_WIDTH 29
 #define KHUI_TOOLBAR_IMAGE_HEIGHT 27

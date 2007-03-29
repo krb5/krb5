@@ -181,14 +181,15 @@ BEGIN
     PUSHBUTTON      "&>>",IDC_NC_ADVANCED,260,142,34,18
 END
 
-IDD_NC_BBAR DIALOGEX 0, 0, 66, 181
+IDD_NC_BBAR DIALOGEX 0, 0, 66, 190
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "&Ok",IDOK,7,7,52,41,WS_DISABLED
     PUSHBUTTON      "&Cancel",IDCANCEL,7,58,52,19
-    PUSHBUTTON      "&Help",IDC_NC_HELP,7,155,52,19
+    PUSHBUTTON      "<<",IDC_NC_BASIC,7,144,52,14
+    PUSHBUTTON      "&Help",IDC_NC_HELP,7,164,52,19
 END
 
 IDD_PP_IDENT DIALOGEX 0, 0, 235, 156
@@ -412,7 +413,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 59
         TOPMARGIN, 7
-        BOTTOMMARGIN, 174
+        BOTTOMMARGIN, 183
     END
 
     IDD_PP_IDENT, DIALOG
@@ -790,7 +791,7 @@ BEGIN
     IDS_NCN_IDENT_UNKNOWN   "Validity of identity %s coudn't be determined."
     IDS_REMOTE_FAIL         "The instance of Network Identity Manager that is already running is not responding to the remote request properly.  Please check if you are running the latest version of Network Identity Manger software included with MIT Kerberos for Windows."
     IDS_REMOTE_FAIL_TITLE   "Failed to communicate with Network Identity Manager"
-    IDS_IDACTION_NEW        "Initialize %s"
+    IDS_IDACTION_NEW        "Obtain new credentials for %s"
     IDS_IDACTIONT_NEW       "New credentials for %s"
 END
 
@@ -807,6 +808,10 @@ BEGIN
     IDS_IDEXPDISP_NOCRED    "(This identity has no credentials)"
     IDS_IDEXPDISP_1CRED     "(This identity has 1 credential)"
     IDS_IDEXPDISP_NCRED     "(This identity has %d credentials)"
+    IDS_CW_DEFAULTTF        "(Default, %s)"
+    IDS_CW_TYPEF            "(%s)"
+    IDS_CW_EXPIREF          "Expires in %s"
+    IDS_CW_EXPIRED          "(Expired)"
 END
 
 #endif    // English (U.S.) resources

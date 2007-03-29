@@ -140,7 +140,7 @@ void khm_show_newcredwnd(HWND hwnd);
 /* Width of the button bar in dialog units */
 #define NCDLG_BBAR_WIDTH 66
 /* Height of the button bar in dialog units */
-#define NCDLG_BBAR_HEIGHT 181
+#define NCDLG_BBAR_HEIGHT 190
 
 /* Control identifier for the tab control in the new credentials
    dialog. We declare this here since we will be creating the control
