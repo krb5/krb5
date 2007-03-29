@@ -54,7 +54,8 @@ Usage: $0 (-f --config) config-file [options] NMAKE-options
     /clean          Build clean target.
     /nopackage      Skip packaging step.
     /verbose /v        Debug mode - verbose output.
-    /logfile /l path   Where to write output.  If omitted, ...
+    /logfile /l path   Where to write output.  Default is bkw.pl.log
+    /nolog     Don't save output
   Other:
     NMAKE-options    any options you want to pass to NMAKE, which can be:
                      (note: /nologo is always used)
@@ -90,6 +91,7 @@ sub main {
 	       'debug|d',
 	       'config|f:s',
 	       'logfile|l:s',
+	       'nolog',
 	       'repository:s',
 	       'username|u:s',
 	       'verbose|v',
@@ -176,6 +178,9 @@ sub main {
 		$switches[0]->{logfile}->{path} = $OPT->{logfile};
 		$switches[0]->{logfile}->{value} = 1;
 		}
+	if (exists $OPT->{nolog}) {
+		$switches[0]->{logfile}->{value} = 0;
+		}
     our $verbose		= $config->{CommandLine}->{Options}->{verbose}->{value};
     our $vverbose		= $config->{CommandLine}->{Options}->{vverbose}->{value};
     our $clean				= $switches[0]->{clean}->{value};
@@ -221,7 +226,7 @@ sub main {
 			}
 		}
 
-	if ($rverb =~ /checkout/) {
+	if ( ($rverb =~ /checkout/) && (-d $wd) ){
 		print "\n\nHEADS UP!!\n\n";
 		print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
 		print "If this is not what you intended, here's your chance to bail out!\n\n\n";
@@ -248,7 +253,13 @@ sub main {
 	if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"	if ($verbose);}
 	else {
 		if ($verbose) {print "Info -- *** Begin fetching sources.\n";}
-
+		if (! -d $wd) {						## xcopy will create the entire path for us.
+			!system("echo foo > a.tmp")											or die "Fatal -- Couldn't create temporary file in ".`cd`;
+			!system("echo F | xcopy a.tmp $wd\\CVS\\a.tmp")	or die "Fatal -- Couldn't xcopy to $wd.";
+			!system("rm a.tmp")														or die "Fatal -- Couldn't remove temporary file.";
+			!system("rm $wd\\CVS\\a.tmp")									or die "Fatal -- Couldn't remove temporary file.";
+			}
+		
 		# Set up cvs environment variables:
 		$ENV{CVSROOT} = $fetch[0]->{CVSROOT}->{name};
 		chdir($src)											or die "Fatal -- couldn't chdir to $src\n";
@@ -363,7 +374,8 @@ sub main {
 		
 		chdir("pismere/athena") or die "Fatal -- couldn't chdir to source directory $wd\\pismere\\athena\n";
 		if ($verbose) {print "Info -- chdir to $wd\\pismere\\athena\n";}
-			!system("perl ../scripts/build.pl --softdirs $buildtarget")	or die "Fatal -- build $buildtarget failed.";
+		local $log	= ($switches[0]->{logfile}->{value}) ? " " : " --nolog ";
+		!system("perl ../scripts/build.pl --softdirs --nolog $buildtarget")	or die "Fatal -- build $buildtarget failed.";
 			
 		chdir("$wd\\pismere") or die "Fatal -- couldn't chdir to $wd\\pismere.";
 		if ($clean) {
