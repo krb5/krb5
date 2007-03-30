@@ -112,7 +112,42 @@
 														<TT>/vverbose&nbsp;&nbsp;&nbsp;&nbsp; very verbose output</TT><BR>
 														<TT>/config path&nbsp; Path to config file</TT><BR>
 														<TT>/logfile path Where to write output. If omitted, ...</TT><BR>
-														<TT>Other:</TT><BR>
+														<TT>/srcdir dir&nbsp;&nbsp; Source directory to use. Should contain
+															<BR>
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>pismere/athena. 
+															If cvstag or svntag is null,
+															<BR>
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+															the directory should be prepopulated.
+															<BR>
+														</TT><TT>/outdir dir&nbsp;&nbsp; Directory to be created where build results will 
+															go
+															<BR>
+															/repository checkout | co \ What repository action to take.
+															<BR>
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </TT><TT>update&nbsp;&nbsp; 
+															| up | Options are to checkout, update or<BR>
+															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+															/ take no action [skip].
+															<BR>
+															/cvstag tag&nbsp;&nbsp; \ For whichever of these tags is specified,
+															<BR>
+														</TT><TT>/svntag url&nbsp;&nbsp; / the repository action will be done into srcdir
+															<BR>
+															/debug Do debug make instead of release make
+															<BR>
+															/nomake Skip make step
+															<BR>
+															/nopackage Skip packaging step
+															<BR>
+															/clean Build clean target
+															<BR>
+															/verbose Debug mode - verbose output
+															<BR>
+															/config path Path to config file
+															<BR>
+															/logfile path Where to write output. If omitted, ...<BR>
+														</TT><TT>Other:</TT><BR>
 														<TT>NMAKE-options any options you want to pass to NMAKE, which can be:</TT><BR>
 														<TT>(note: /nologo is always used)</TT><BR>
 														<TT>[ nmake options follow ]</TT></P>

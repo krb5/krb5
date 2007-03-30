@@ -111,8 +111,8 @@
             
         <?ifdef OldHelp?>
             <ComponentRef Id="cmf_leash32_hlp" />
-        <?else?>
-            <ComponentRef Id="cmf_leash32_chm" />
+<!--        <?else?>
+            <ComponentRef Id="cmf_leash32_chm" />	-->
         <?endif?>
             <ComponentRef Id="cmf_leashw32_dll" />
             
@@ -213,9 +213,9 @@
                 <?endif?>
             <?endif?>
         <?endif?>
-            <ComponentRef Id="cmf_krb5_ini" />
+<!--            <ComponentRef Id="cmf_krb5_ini" />
             <ComponentRef Id="cmf_krb_con" />
-            <ComponentRef Id="cmf_krbrealm_con" />
+            <ComponentRef Id="cmf_krbrealm_con" />	-->
             
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_client" />

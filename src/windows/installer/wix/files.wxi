@@ -231,9 +231,9 @@
 	                    <File Id="fil_leash32_hlp" LongName="leash32.hlp" Name="leash32.hlp" KeyPath="yes" />
                     </Component>
                 <?else?>
-                    <Component Id="cmf_leash32_chm" Guid="C50E5E0A-B822-4419-855B-1713637BCA6A" DiskId="1">
+<!--                    <Component Id="cmf_leash32_chm" Guid="C50E5E0A-B822-4419-855B-1713637BCA6A" DiskId="1">
 	                    <File Id="fil_leash32_chm" LongName="leash32.chm" Name="leash32.chm" KeyPath="yes" />
-                    </Component>
+                    </Component>	-->
                 <?endif?>
                     <Component Id="cmf_leashw32_dll" Guid="8C145D48-A2FC-4C28-BC05-4368545F1184" DiskId="1">
 	                    <File Id="fil_leashw32_dll" LongName="leashw32.dll" Name="leashw32.dll" KeyPath="yes" />
@@ -888,7 +888,7 @@
         </Directory> <!-- /MIT -->
     </Directory> <!-- /Program Files -->
     <Directory Id="WindowsFolder">
-        <Component Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+<!--        <Component Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
 	        <File Id="fil_krb5_ini" LongName="krb5.ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
         </Component>
         <Component Id="cmf_krb_con" Guid="5E91A051-CF14-45FF-BF64-CEE78A7A90C2" NeverOverwrite="yes" Permanent="yes" DiskId="1">
@@ -896,7 +896,7 @@
         </Component>
         <Component Id="cmf_krbrealm_con" Guid="D667B54F-1C98-43FB-87C6-0F0517623B90" NeverOverwrite="yes" Permanent="yes" DiskId="1">
 	        <File Id="fil_krbrealm_con" LongName="krbrealm.con" Name="krbrealm.con" src="$(var.ConfigDir)krbrealm.con" KeyPath="yes" />
-        </Component>
+        </Component>	-->
     </Directory>
     
     <Directory Id="ProgramMenuFolder">
