@@ -83,6 +83,9 @@ typedef unsigned __int64 uint64_t;
 typedef __int64          int64_t;
 #endif
 #ifndef SSIZE_T_DEFINED
+#ifdef ssize_t
+#undef ssize_t
+#endif
 #ifdef _WIN64
 typedef __int64		 ssize_t;
 #else
