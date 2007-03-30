@@ -775,19 +775,9 @@ k5_cached_kinit_prompter(void) {
             /* already expired */
             goto _cleanup;
     } else {
-        FILETIME lifetime;
-        khm_int32 t;
-
-        /* make the cache expire at some point */
-        GetSystemTimeAsFileTime(&current);
-        khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
-        if (t == 0)
-            t = 172800;         /* 48 hours */
-        TimetToFileTimeInterval(t, &lifetime);
-        expiry = FtAdd(&current, &lifetime);
-        iexpiry = FtToInt(&expiry);
-
-        khc_write_int64(csp_prcache, L"ExpiresOn", iexpiry);
+        /* if there is no value for ExpiresOn, we assume the prompts
+           have already expired. */
+        goto _cleanup;
     }
 
     /* we found a prompt cache.  We take this to imply that the
@@ -1167,9 +1157,16 @@ k5_kinit_prompter(krb5_context context,
                             (khm_int32) num_prompts);
 
             GetSystemTimeAsFileTime(&current);
+#ifdef USE_PROMPT_CACHE_LIFETIME
             khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
             if (t == 0)
                 t = 172800;         /* 48 hours */
+#else
+            khc_read_int32(csp_params, L"MaxRenewLifetime", &t);
+            if (t == 0)
+                t = 2592000;    /* 30 days */
+            t += 604800;        /* + 7 days */
+#endif
             TimetToFileTimeInterval(t, &lifetime);
             expiry = FtAdd(&current, &lifetime);
             iexpiry = FtToInt(&expiry);
