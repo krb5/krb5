@@ -6,13 +6,13 @@
     <!-- TargetDir should point to build target directory and must end with 
          a backslash.  If not specified, assume we are in TargetDir\install -->
 
-    <?define TargetDir="c:\temp\kfw\kfw-3.1.0-alpha\"?>
+    <?define TargetDir="c:\temp\kfw\kfw-3.2.0-alpha\"?>
 
     <!-- ConfigDir should point to directory containing configuration files 
          (krb5.ini, krb.con, krbrealm.con) to be bundled with the installer.
          The directory name should end with a backslash. -->
 
-    <?define ConfigDir="c:\temp\kfw\kfw-2.5-extra\sample-config\"?>
+    <?define ConfigDir="C:\Projects\Autobuild\pismere\staging\sample\"?>
     
     <!-- VersionMajor, VersionMinor and VersionPatch must all be specified, or 
          none should be specified (in which case, the defaults will be
@@ -73,7 +73,7 @@
 
     <?ifndef VersionMajor?>
         <?define VersionMajor="3"?>
-        <?define VersionMinor="1"?>
+        <?define VersionMinor="2"?>
         <?define VersionPatch="0"?>
     <?else?>
         <?if Not ($(var.VersionMinor) And $(var.VersionPatch))?>
