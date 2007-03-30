@@ -1,6 +1,7 @@
 ;-----------------------------------------------------------------
 ; KfW defines and functionality
 ; Copyright (c) 2004 Massachusetts Institute of Technology
+; Copyright (c) 2006 Secure Endpoints Inc.
 
 !define KFW_VERSION "${KFW_MAJORVERSION}.${KFW_MINORVERSION}.${KFW_PATCHLEVEL}"
 
@@ -32,7 +33,7 @@ VIAddVersionKey "CompanyName" "Massachusetts Institute of Technology"
 VIAddVersionKey "ProductVersion" ${VIProductVersion}
 VIAddVersionKey "FileVersion" ${VIProductVersion}
 VIAddVersionKey "FileDescription" "MIT Kerberos for Windows Installer"
-VIAddVersionKey "LegalCopyright" "(C)2004,2005"
+VIAddVersionKey "LegalCopyright" "(C)2004,2005,2006"
 !ifdef DEBUG
 VIAddVersionKey "PrivateBuild" "Checked/Debug"
 !endif               ; End DEBUG
@@ -75,6 +76,7 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   !define KFW_DOC_DIR "${KFW_TARGETDIR}\doc"
   !define KFW_INC_DIR "${KFW_TARGETDIR}\inc"
   !define KFW_LIB_DIR "${KFW_TARGETDIR}\lib\i386"
+  !define KFW_SAMPLE_DIR "${KFW_TARGETDIR}\sample"
   !define KFW_INSTALL_DIR "${KFW_TARGETDIR}\install"
   !define SYSTEMDIR   "$%SystemRoot%\System32" 
  
@@ -546,6 +548,7 @@ Section "KfW SDK" secSDK
   RMDir /r "$INSTDIR\inc"
   RMDir /r "$INSTDIR\lib"
   RMDir /r "$INSTDIR\install"
+  RMDir /r "$INSTDIR\sample"
 
   SetOutPath "$INSTDIR\doc"
   File /r "${KFW_DOC_DIR}\netiddev.chm"
@@ -579,6 +582,9 @@ Section "KfW SDK" secSDK
 
   SetOutPath "$INSTDIR\install"
   File /r "${KFW_INSTALL_DIR}\*"
+
+  SetOutPath "$INSTDIR\sample"
+  File /r "${KFW_SAMPLE_DIR}\*"
 
   CreateShortCut  "$SMPROGRAMS\${PROGRAM_NAME}\Network Identity Developer Documentation.lnk" "$INSTDIR\bin\netiddev.chm" 
 
