@@ -203,7 +203,10 @@ DWORD APIENTRY NPLogonNotify(
     HWND hwndOwner = (HWND)StationHandle;
     BOOLEAN lowercased_name = TRUE;
 
-    if ( !KFW_is_available() )
+    /* Are we interactive? */
+    interactive = (wcscmp(lpStationName, L"WinSta0") == 0);
+
+    if ( !interactive || !KFW_is_available() )
 	return 0;
 
     DebugEvent("NPLogonNotify - LoginId(%d,%d)", lpLogonId->HighPart, lpLogonId->LowPart);
@@ -227,8 +230,7 @@ DWORD APIENTRY NPLogonNotify(
 
     IL = (MSV1_0_INTERACTIVE_LOGON *) lpAuthentInfo;
 
-    /* Are we interactive? */
-    interactive = (wcscmp(lpStationName, L"WinSta0") == 0);
+    DebugEvent("Interactive %s", interactive ? "yes" : "no");
 
     /* Convert from Unicode to ANSI */
 
@@ -315,17 +317,24 @@ DWORD APIENTRY NPLogonNotify(
 	    DebugEvent("LookupAccountName obtained user %s sid in domain %s", acctname, pReferencedDomainName);
 	    code = KFW_set_ccache_dacl_with_user_sid(filename, pUserSid);
 
+#ifdef USE_WINLOGON_EVENT
 	    /* If we are on Vista, setup a LogonScript 
 	     * that will execute the LogonEventHandler entry point via rundll32.exe 
 	     */
 	    if (is_windows_vista()) {
 		ConfigureLogonScript(lpLogonScript, filename);
 		if (*lpLogonScript)
-		    DebugEvent("LogonScript \"%s\"", *lpLogonScript);
+		    DebugEvent0("LogonScript assigned");
 		else
 		    DebugEvent0("No Logon Script");
-
 	    }
+#else
+	    ConfigureLogonScript(lpLogonScript, filename);
+	    if (*lpLogonScript)
+		    DebugEvent0("LogonScript assigned");
+	    else	
+		    DebugEvent0("No Logon Script");
+#endif
 	} else {
 	    DebugEvent0("LookupAccountName failed");
 	    DeleteFile(filename);
@@ -434,6 +443,7 @@ GetSecurityLogonSessionData(HANDLE hToken, PSECURITY_LOGON_SESSION_DATA * ppSess
 
 VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
 {
+#ifdef USE_WINLOGON_EVENT
     WCHAR szUserW[128] = L"";
     char  szUserA[128] = "";
     char szPath[MAX_PATH] = "";
@@ -540,6 +550,7 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     DeleteFile(newfilename);
 
     DebugEvent0("KFW_Logon_Event - End");
+#endif /* USE_WINLOGON_EVENT */
 }
 
 
