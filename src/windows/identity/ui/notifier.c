@@ -118,7 +118,7 @@ alerter_wnd_data * khui_alert_windows = NULL;
 int  iid_normal = IDI_NOTIFY_NONE;
 
 /* The alert currently being displayed in a balloon */
-khui_alert * balloon_alert;
+khui_alert * balloon_alert = NULL;
 
 /**********************************************************************
   Alert Queue
@@ -488,6 +488,7 @@ notifier_wnd_proc(HWND hwnd,
                 balloon_alert = NULL;
 
                 khui_alert_lock(a);
+                a->displayed = FALSE;
 
                 if ((a->flags & KHUI_ALERT_FLAG_DEFACTION) &&
                     !(a->flags & KHUI_ALERT_FLAG_REQUEST_WINDOW) &&
@@ -515,8 +516,15 @@ notifier_wnd_proc(HWND hwnd,
         case NIN_BALLOONTIMEOUT:
             khm_notify_icon_change(KHERR_NONE);
             if (balloon_alert) {
-                khui_alert_release(balloon_alert);
+                khui_alert * a;
+                a = balloon_alert;
                 balloon_alert = NULL;
+
+                khui_alert_lock(a);
+                a->displayed = FALSE;
+                khui_alert_unlock(a);
+
+                khui_alert_release(a);
             }
             break;
         }
@@ -681,9 +689,9 @@ typedef struct tag_alerter_wnd_data {
 #define IDC_NTF_CLOSE    999
 
 #define IDC_NTF_CMDBUTTONS 1001
-#define IDC_FROM_IDX(alert, bn) ((alert) * KHUI_MAX_ALERT_COMMANDS + (bn) + IDC_NTF_CMDBUTTONS)
-#define ALERT_FROM_IDC(idc)  (((idc) - IDC_NTF_CMDBUTTONS) / KHUI_MAX_ALERT_COMMANDS)
-#define BUTTON_FROM_IDC(idc) (((idc) - IDC_NTF_CMDBUTTONS) % KHUI_MAX_ALERT_COMMANDS)
+#define IDC_FROM_IDX(alert, bn) ((alert) * (KHUI_MAX_ALERT_COMMANDS + 1) + (bn) + 1 + IDC_NTF_CMDBUTTONS)
+#define ALERT_FROM_IDC(idc)  (((idc) - IDC_NTF_CMDBUTTONS) / (KHUI_MAX_ALERT_COMMANDS + 1))
+#define BUTTON_FROM_IDC(idc) (((idc) - IDC_NTF_CMDBUTTONS) % (KHUI_MAX_ALERT_COMMANDS + 1) - 1)
 
 /* if the only command in an alert is "Close", we assume that the
    alert has no commands. */
@@ -717,8 +725,9 @@ add_alert_to_wnd_data(alerter_wnd_data * d,
 
     a->flags |= KHUI_ALERT_FLAG_DISPLAY_WINDOW;
 
-    if (!exists)
+    if (!exists) {
         a->displayed = TRUE;
+    }
 
     khui_alert_unlock(a);
 
@@ -1376,7 +1385,7 @@ setup_alerter_window_controls(alerter_wnd_data * d) {
                                        -10, 0,
                                        5, 5,
                                        d->hw_bin,
-                                       (HMENU) (INT_PTR) IDC_FROM_IDX(idx, 0),
+                                       (HMENU) (INT_PTR) IDC_FROM_IDX(idx, -1),
                                        khm_hInstance,
                                        NULL);
 #ifdef DEBUG
@@ -1391,8 +1400,13 @@ setup_alerter_window_controls(alerter_wnd_data * d) {
 
                 last_window = adata->hwnd_marker;
 
-                if (hw_focus == NULL)
-                    hw_focus = adata->hwnd_marker;
+                if (scrollbar) {
+                    EnableWindow(adata->hwnd_marker, TRUE);
+                    if (hw_focus == NULL)
+                        hw_focus = adata->hwnd_marker;
+                } else {
+                    EnableWindow(adata->hwnd_marker, FALSE);
+                }
             }
 
             y += adata->r_alert.bottom;
@@ -1441,7 +1455,7 @@ setup_alerter_window_controls(alerter_wnd_data * d) {
                          SWP_SHOWWINDOW);
         }
 
-        if (hw_focus == NULL)
+        if (hw_focus == NULL || d->n_cmd_buttons == 0)
             hw_focus = d->hw_close;
 
     } else {
@@ -1473,7 +1487,6 @@ setup_alerter_window_controls(alerter_wnd_data * d) {
                      r_window.right - r_window.left,
                      r_window.bottom - r_window.top,
                      SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
     }
 
     if (hw_focus != NULL)
@@ -1644,6 +1657,11 @@ process_command_button(alerter_wnd_data * d, int id) {
 #endif
     if (alert_idx >= d->n_alerts || alert_idx < 0)
         return;
+
+    if (cmd_idx < 0) {
+        /* the user selected a marker button.  Nothing to do. */
+        return;
+    }
 
     adata = QTOP(d);
     while(adata && alert_idx > 0) {
@@ -2011,15 +2029,22 @@ alert_show_minimized(khui_alert * a) {
 
     a->flags |= KHUI_ALERT_FLAG_DISPLAY_BALLOON;
 
-#if (_WIN32_IE >= 0x0501)
+#ifdef DEBUG
+    assert(balloon_alert == NULL);
+#endif
+
     if (balloon_alert) {
+        khui_alert_lock(balloon_alert);
+        balloon_alert->displayed = FALSE;
+        khui_alert_unlock(balloon_alert);
         khui_alert_release(balloon_alert);
         balloon_alert = NULL;
     }
 
     balloon_alert = a;
     khui_alert_hold(a);
-#endif
+
+    a->displayed = TRUE;
 
     khm_notify_icon_balloon(a->severity,
                             tbuf,
@@ -2204,6 +2229,21 @@ show_queued_alerts(void) {
         }
 
         alert_list_destroy(&alist);
+
+        if (n == 0) {
+            khui_alert * a;
+
+            /* no alerts were shown above.  This maybe because none of
+               the alerts were consolidatable or they were requested
+               to be shown in a balloon.  In this case, we just take
+               the first alert from the queue and show it manually. */
+
+            a = alert_queue_get_alert();
+            if (a) {
+                alert_show(a);
+                khui_alert_release(a);
+            }
+        }
 
         check_for_queued_alerts();
     }
@@ -2550,6 +2590,7 @@ alert_bin_wnd_proc(HWND hwnd,
 
                 if (a->suggestion) {
                     HICON hicon;
+                    SIZE sz;
 
                     CopyRect(&r, &adata->r_suggestion);
                     OffsetRect(&r, 0, y);
@@ -2558,14 +2599,18 @@ alert_bin_wnd_proc(HWND hwnd,
 
                     InflateRect(&r, -d->s_pad.cx, -d->s_pad.cy);
 
+                    sz.cx = GetSystemMetrics(SM_CXSMICON);
+                    sz.cy = GetSystemMetrics(SM_CYSMICON);
+
                     hicon = (HICON) LoadImage(NULL,
                                               MAKEINTRESOURCE(OIC_NOTE),
                                               IMAGE_ICON,
-                                              GetSystemMetrics(SM_CXSMICON),
-                                              GetSystemMetrics(SM_CYSMICON),
+                                              sz.cx,
+                                              sz.cy,
                                               LR_SHARED);
 
-                    DrawIcon(hdc, r.left, r.top, hicon);
+                    DrawIconEx(hdc, r.left, r.top, hicon, sz.cx, sz.cy, 0, NULL,
+                               DI_NORMAL);
 
                     r.left += d->s_pad.cx + GetSystemMetrics(SM_CXSMICON);
 
@@ -2688,6 +2733,12 @@ alert_bin_wnd_proc(HWND hwnd,
             y = GET_Y_LPARAM(lParam);
 
             handle_mouse_select(d, x, y);
+        }
+        break;
+
+    case WM_SIZE:
+        {
+            InvalidateRect(hwnd, NULL, TRUE);
         }
         break;
 
@@ -2944,26 +2995,52 @@ void khm_notify_icon_activate(void) {
 
     khm_notify_icon_change(KHERR_NONE);
 
-    if (!is_alert_queue_empty() && !ALERT_DISPLAYED()) {
-
-        khm_show_main_window();
-        show_queued_alerts();
-
-    } else if (balloon_alert != NULL && khui_alert_windows == NULL) {
+    if (balloon_alert != NULL && khui_alert_windows == NULL) {
 
         khui_alert * a;
+        khm_boolean alert_done = FALSE;
 
         a = balloon_alert;
         balloon_alert = NULL;
 
         khui_alert_lock(a);
-        if (balloon_alert->flags & KHUI_ALERT_FLAG_REQUEST_WINDOW) {
+
+        a->displayed = FALSE;
+
+        if ((a->flags & KHUI_ALERT_FLAG_DEFACTION) &&
+            (a->n_alert_commands > 0)) {
+
+            PostMessage(khm_hwnd_main, WM_COMMAND,
+                        MAKEWPARAM(a->alert_commands[0], 
+                                   0),
+                        0);
+            alert_done = TRUE;
+
+        } else if (a->flags & KHUI_ALERT_FLAG_REQUEST_WINDOW) {
+
             alert_show_normal(a);
+            alert_done = TRUE;
+
         }
         khui_alert_unlock(a);
         khui_alert_release(a);
 
-    } else {
+        if (alert_done)
+            return;
+    }
+
+    if (!is_alert_queue_empty() && !ALERT_DISPLAYED()) {
+
+        khm_show_main_window();
+        show_queued_alerts();
+
+        return;
+    }
+
+
+    /* if none of the above applied, then we perform the default
+       action for the notification icon. */
+    {
         khm_int32 cmd = 0;
 
         cmd = get_default_notifier_action();
@@ -3069,6 +3146,7 @@ create_test_alerts(void) {
         StringCbPrintf(buf, sizeof(buf), L"Foo bar baz.  This is alert number %d", i);
         khui_alert_create_simple(L"Title", buf, KHERR_INFO, &a);
         khui_alert_set_type(a, KHUI_ALERTTYPE_PLUGIN);
+        khui_alert_set_suggestion(a, L"This is a suggestion.  It is kinda long to see if the word wrapping actually works as we expect it to.  Just in case, here's a line feed.\n\nDoes this show up on a different line? Cool!");
 
         khui_alert_add_command(a, KHUI_ACTION_NEW_CRED);
         khui_alert_add_command(a, KHUI_ACTION_CLOSE_APP);

@@ -190,61 +190,98 @@ void add_action_to_menu(HMENU hm, khui_action * act,
 
 static void refresh_menu(HMENU hm, khui_menu_def * def);
 
-static void refresh_menu_item(HMENU hm, khui_action * act, 
-                              int idx, int flags) {
+static int refresh_menu_item(HMENU hm, khui_action * act, 
+                             int idx, int flags) {
     MENUITEMINFO mii;
+    khui_menu_def * def;
 
     mii.cbSize = sizeof(mii);
     mii.fMask = 0;
 
-    if (act == NULL)
-        return;
-    else {
-        khui_menu_def * def;
+    if (flags & KHUI_ACTIONREF_END) {
+        /* we have been asked to assert that the menu doesn't have
+           more than idx items */
+        mii.fMask = MIIM_FTYPE;
+        while (GetMenuItemInfo(hm, idx, TRUE, &mii)) {
+            RemoveMenu(hm, idx, MF_BYPOSITION);
+            mii.fMask = MIIM_FTYPE;
+        }
 
-        /* first check if the menu item is there.  Otherwise we need
-           to add it. */
-        mii.fMask = MIIM_STATE;
-        if (!GetMenuItemInfo(hm, act->cmd, FALSE, &mii)) {
+        return 0;
+    }
+
+    /* Check if the menu item is there.  Otherwise we need to add
+       it. */
+    mii.fMask = MIIM_STATE | MIIM_ID | MIIM_FTYPE;
+    if (!GetMenuItemInfo(hm, idx, TRUE, &mii) ||
+        ((flags & KHUI_ACTIONREF_SEP) && !(mii.fType & MFT_SEPARATOR)) ||
+        (!(flags & KHUI_ACTIONREF_SEP) && mii.wID != act->cmd)) {
+        add_action_to_menu(hm, ((flags & KHUI_ACTIONREF_SEP)? NULL : act),
+                           idx, flags);
+        return 0;
+    }
+
+    if (flags & KHUI_ACTIONREF_SEP)
+        return 0;
+
+#ifdef DEBUG
+    assert(act);
+#endif
+    if (!act)
+        return 0;
+
+    if (flags & KHUI_ACTIONREF_DEFAULT) {
+        if (!(mii.fState & MFS_DEFAULT)) {
+            mii.fMask |= MIIM_STATE;
+            mii.fState |= MFS_DEFAULT;
+        }
+    } else {
+        if (mii.fState & MFS_DEFAULT) {
+            RemoveMenu(hm, idx, MF_BYPOSITION);
             add_action_to_menu(hm, act, idx, flags);
-            return;
-        }
-
-        mii.fMask = 0;
-
-        if(act->state & KHUI_ACTIONSTATE_DISABLED) {
-            mii.fMask |= MIIM_STATE;
-            mii.fState = MFS_DISABLED;
-        } else {
-            mii.fMask |= MIIM_STATE;
-            mii.fState = MFS_ENABLED;
-        }
-
-        if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
-            mii.fMask |= MIIM_STATE;
-            if (act->state & KHUI_ACTIONSTATE_CHECKED) {
-                mii.fState |= MFS_CHECKED;
-            } else {
-                mii.fState |= MFS_UNCHECKED;
-            }
-        }
-
-        SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
-
-        def = khui_find_menu(act->cmd);
-
-        if(def) {
-            MENUITEMINFO mii2;
-
-            mii2.cbSize = sizeof(mii2);
-            mii2.fMask = MIIM_SUBMENU;
-
-            if (GetMenuItemInfo(hm, act->cmd, FALSE, &mii2)) {
-                refresh_menu(mii2.hSubMenu, def);
-            }
+            return 0;
         }
     }
+
+    mii.fMask = 0;
+
+    if(act->state & KHUI_ACTIONSTATE_DISABLED) {
+        mii.fMask |= MIIM_STATE;
+        mii.fState &= ~MFS_ENABLED;
+        mii.fState |= MFS_DISABLED;
+    } else {
+        mii.fMask |= MIIM_STATE;
+        mii.fState &= ~MFS_DISABLED;
+        mii.fState |= MFS_ENABLED;
+    }
+
+    if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
+        mii.fMask |= MIIM_STATE;
+        if (act->state & KHUI_ACTIONSTATE_CHECKED) {
+            mii.fState |= MFS_CHECKED;
+        } else {
+            mii.fState |= MFS_UNCHECKED;
+        }
+    }
+
+    SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
+
+    def = khui_find_menu(act->cmd);
+
+    if(def) {
+        MENUITEMINFO mii2;
+
+        mii2.cbSize = sizeof(mii2);
+        mii2.fMask = MIIM_SUBMENU;
+
+        if (GetMenuItemInfo(hm, act->cmd, FALSE, &mii2)) {
+            refresh_menu(mii2.hSubMenu, def);
+        }
+    }
+
+    return 0;
 }
+
 
 static void refresh_menu(HMENU hm, khui_menu_def * def) {
     khui_action_ref * act;
@@ -254,6 +291,8 @@ static void refresh_menu(HMENU hm, khui_menu_def * def) {
         act = khui_menu_get_action(def, i);
         refresh_menu_item(hm, khui_find_action(act->action), (int) i, act->flags);
     }
+
+    refresh_menu_item(hm, NULL, (int) i, KHUI_ACTIONREF_END);
 }
 
 static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main) {
@@ -778,6 +817,8 @@ khm_refresh_identity_menus(void) {
     khm_size t;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
+    khui_action_lock();
+
     idcmd_refreshcycle++;
 
     do {
@@ -867,6 +908,10 @@ khm_refresh_identity_menus(void) {
         PFREE(idlist);
 
     purge_identity_cmd_map();
+
+    khui_action_unlock();
+
+    khui_refresh_actions();
 }
 
 khm_boolean
@@ -929,9 +974,13 @@ void khm_menu_refresh_items(void) {
     if (!khui_hmenu_main)
         return;
 
+    khui_action_lock();
+
     def = khui_find_menu(KHUI_MENU_MAIN);
 
     refresh_menu(khui_hmenu_main, def);
+
+    khui_action_unlock();
 
     DrawMenuBar(khm_hwnd_main);
 }

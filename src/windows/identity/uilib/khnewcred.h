@@ -69,7 +69,8 @@
 */
 enum khui_wm_nc_notifications {
     WMNC_DIALOG_EXPAND = 1, 
-    /*!< The dialog is getting expanded.
+    /*!< The dialog is switching from basic to advanced mode or vice
+      versa.
 
       This message is sent to the new creds dialog to set the dialog
       to expanded mode.  In expanded mode, all credentials type panels

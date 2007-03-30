@@ -31,6 +31,11 @@
 #include<commctrl.h>
 #include<shlwapi.h>
 
+typedef struct tag_k5_ids_opts {
+    khm_int32 renewable;
+    khm_int32 forwardable;
+    khm_int32 addressless;
+} k5_ids_opts;
 
 typedef struct tag_k5_ids_dlg_data {
     khui_config_init_data cfg;
@@ -48,6 +53,10 @@ typedef struct tag_k5_ids_dlg_data {
     time_t life_max;
     time_t renew_min;
     time_t renew_max;
+
+    k5_ids_opts opt;
+    k5_ids_opts opt_saved;
+
 } k5_ids_dlg_data;
 
 static khm_boolean
@@ -57,7 +66,10 @@ k5_ids_is_mod(k5_ids_dlg_data * d) {
         d->life_max != d->tc_life_max.current ||
         d->life_min != d->tc_life_min.current ||
         d->renew_max != d->tc_renew_max.current ||
-        d->renew_min != d->tc_renew_min.current)
+        d->renew_min != d->tc_renew_min.current ||
+        !!d->opt.renewable != !!d->opt_saved.renewable ||
+        !!d->opt.forwardable != !!d->opt_saved.forwardable ||
+        !!d->opt.addressless != !!d->opt_saved.addressless)
         return TRUE;
     return FALSE;
 }
@@ -96,6 +108,9 @@ k5_ids_write_params(k5_ids_dlg_data * d) {
     WRITEPARAM(d->life_min,d->tc_life_min.current, L"MinLifetime");
     WRITEPARAM(d->renew_max,d->tc_renew_max.current, L"MaxRenewLifetime");
     WRITEPARAM(d->renew_min,d->tc_renew_min.current, L"MinRenewLifetime");
+    WRITEPARAM(d->opt_saved.renewable, d->opt.renewable, L"Renewable");
+    WRITEPARAM(d->opt_saved.forwardable, d->opt.forwardable, L"Forwardable");
+    WRITEPARAM(d->opt_saved.addressless, d->opt.addressless, L"Addressless");
 
 #undef WRITEPARAM
 
@@ -106,36 +121,23 @@ k5_ids_write_params(k5_ids_dlg_data * d) {
 
 static void
 k5_ids_read_params(k5_ids_dlg_data * d) {
-    khm_int32 t;
-    khm_int32 rv;
+    k5_params p;
 
-#ifdef DEBUG
-    assert(csp_params);
-#endif
+    khm_krb5_get_identity_params(NULL, &p);
 
-    rv = khc_read_int32(csp_params, L"DefaultLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->life = t;
+    d->life = p.lifetime;
+    d->life_max = p.lifetime_max;
+    d->life_min = p.lifetime_min;
 
-    rv = khc_read_int32(csp_params, L"DefaultRenewLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->renew_life = t;
+    d->renew_life = p.renew_life;
+    d->renew_max = p.renew_life_max;
+    d->renew_min = p.renew_life_min;
 
-    rv = khc_read_int32(csp_params, L"MaxLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->life_max = t;
+    d->opt_saved.forwardable = p.forwardable;
+    d->opt_saved.renewable = p.renewable;
+    d->opt_saved.addressless = p.addressless;
 
-    rv = khc_read_int32(csp_params, L"MinLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->life_min = t;
-
-    rv = khc_read_int32(csp_params, L"MaxRenewLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->renew_max = t;
-
-    rv = khc_read_int32(csp_params, L"MinRenewLifetime", &t);
-    assert(KHM_SUCCEEDED(rv));
-    d->renew_min = t;
+    d->opt = d->opt_saved;
 
     khui_tracker_initialize(&d->tc_life);
     d->tc_life.current = d->life;
@@ -209,6 +211,10 @@ k5_ids_tab_dlgproc(HWND hwnd,
         khui_tracker_refresh(&d->tc_renew);
         khui_tracker_refresh(&d->tc_renew_min);
         khui_tracker_refresh(&d->tc_renew_max);
+
+        CheckDlgButton(hwnd, IDC_CFG_RENEW, (d->opt.renewable ? BST_CHECKED: BST_UNCHECKED));
+        CheckDlgButton(hwnd, IDC_CFG_FORWARD, (d->opt.forwardable ? BST_CHECKED: BST_UNCHECKED));
+        CheckDlgButton(hwnd, IDC_CFG_ADDRESSLESS, (d->opt.addressless ? BST_CHECKED: BST_UNCHECKED));
         break;
 
     case WM_COMMAND:
@@ -216,6 +222,22 @@ k5_ids_tab_dlgproc(HWND hwnd,
             GetWindowLongPtr(hwnd, DWLP_USER);
 
         if (HIWORD(wParam) == EN_CHANGE) {
+            k5_ids_check_mod(d);
+        } else if (HIWORD(wParam) == BN_CLICKED) {
+            switch (LOWORD(wParam)) {
+            case IDC_CFG_RENEW:
+                d->opt.renewable = (IsDlgButtonChecked(hwnd, IDC_CFG_RENEW) == BST_CHECKED);
+                break;
+
+            case IDC_CFG_FORWARD:
+                d->opt.forwardable = (IsDlgButtonChecked(hwnd, IDC_CFG_FORWARD) == BST_CHECKED);
+                break;
+
+            case IDC_CFG_ADDRESSLESS:
+                d->opt.addressless = (IsDlgButtonChecked(hwnd, IDC_CFG_ADDRESSLESS) == BST_CHECKED);
+                break;
+            }
+
             k5_ids_check_mod(d);
         }
         break;
@@ -244,4 +266,5 @@ k5_ids_tab_dlgproc(HWND hwnd,
     }
     return FALSE;
 }
+
 
