@@ -146,9 +146,9 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
    LangString REINSTALL_DOCS ${LANG_ENGLISH} "Re-install Kerberos Documentation"
    LangString DOWNGRADE_DOCS ${LANG_ENGLISH} "Downgrade Kerberos Documentation"
   
-  ReserveFile "${KFW_CONFIG_DIR}\krb.con"
-  ReserveFile "${KFW_CONFIG_DIR}\krbrealm.con"
-  ReserveFile "${KFW_CONFIG_DIR}\krb5.ini"
+  ReserveFile "${KFW_CONFIG_DIR}\sample\krb.con"
+  ReserveFile "${KFW_CONFIG_DIR}\sample\krbrealm.con"
+  ReserveFile "${KFW_CONFIG_DIR}\sample\krb5.ini"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS ;InstallOptions plug-in
   !insertmacro MUI_RESERVEFILE_LANGDLL ;Language selection dialog
 
@@ -188,9 +188,6 @@ Section "KfW Client" secClient
 
    ; Do client components
   SetOutPath "$INSTDIR\bin"
-!ifdef AKLOG
-  !insertmacro ReplaceDLL "${KFW_BIN_DIR}\aklog.exe"           "$INSTDIR\bin\aklog.exe"         "$INSTDIR"
-!endif
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\comerr32.dll"        "$INSTDIR\bin\comerr32.dll"      "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss.exe"             "$INSTDIR\bin\gss.exe"           "$INSTDIR"
   !insertmacro ReplaceDLL "${KFW_BIN_DIR}\gss-client.exe"      "$INSTDIR\bin\gss-client.exe"    "$INSTDIR"
@@ -1424,9 +1421,9 @@ DoDownload:
 
 UsePackaged:
    SetOutPath "$WINDIR"
-   File "${KFW_CONFIG_DIR}\krb5.ini"
-   File "${KFW_CONFIG_DIR}\krb.con"
-   File "${KFW_CONFIG_DIR}\krbrealm.con"
+   File "${KFW_CONFIG_DIR}\sample\krb5.ini"
+   File "${KFW_CONFIG_DIR}\sample\krb.con"
+   File "${KFW_CONFIG_DIR}\sample\krbrealm.con"
    goto done
    
 CheckOther:
