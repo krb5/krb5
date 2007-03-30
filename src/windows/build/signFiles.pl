@@ -13,7 +13,7 @@ sub signFiles {
     foreach $expr (split(" ", $exprs)) {            ## exprs is something like "*.exe *.dll"
         local $cmd  = "find . -iname \"$expr\"";
         local $list = `$cmd`;                       ## $list is files matching *.exe, for example.
-    foreach $target (split("\n", $list)) {
+        foreach $target (split("\n", $list)) {
             $target =~ s|/|\\|g;                    ## Flip path separators from unix-style to windows-style.
             local $template2    = $template;
             $template2          =~ s/%filename%/$target/;
