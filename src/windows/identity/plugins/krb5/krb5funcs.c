@@ -1,5 +1,6 @@
 /*
 * Copyright (c) 2005 Massachusetts Institute of Technology
+* Copyright (c) 2006,2007 Secure Endpoints Inc.
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -25,7 +26,7 @@
 /* $Id$ */
 
 /* Originally this was krb5routines.c in Leash sources.  Subsequently
-modified and adapted for NetIDMgr */
+ * modified and adapted for NetIDMgr */
 
 #include<krbcred.h>
 #include<kherror.h>
@@ -360,11 +361,11 @@ static long get_tickets_from_cache(krb5_context ctx,
     krb5_cc_cursor  KRBv5Cursor;
     krb5_creds	    KRBv5Credentials;
     krb5_ticket    *tkt=NULL;
-    char	   *ClientName;
-    char	   *PrincipalName;
+    char	   *ClientName = NULL;
+    char	   *PrincipalName = NULL;
     wchar_t         wbuf[256];  /* temporary conversion buffer */
     wchar_t         wcc_name[KRB5_MAXCCH_CCNAME]; /* credential cache name */
-    char	   *sServerName;
+    char	   *sServerName = NULL;
     khm_handle      ident = NULL;
     khm_handle      cred = NULL;
     time_t          tt;
@@ -731,9 +732,9 @@ long
 khm_krb5_list_tickets(krb5_context *krbv5Context)
 {
     krb5_context	ctx = NULL;
-    krb5_ccache		cache = 0;
+    krb5_ccache		cache = NULL;
     krb5_error_code	code = 0;
-    apiCB *             cc_ctx = 0;
+    apiCB *             cc_ctx = NULL;
     struct _infoNC **   pNCi = NULL;
     int                 i;
     khm_int32           t;
@@ -1108,10 +1109,10 @@ khm_krb5_kinit(krb5_context       alt_ctx,
                void *             p_data)
 {
     krb5_error_code		        code = 0;
-    krb5_context		        ctx = 0;
-    krb5_ccache			        cc = 0;
-    krb5_principal		        me = 0;
-    char*                       name = 0;
+    krb5_context		        ctx = NULL;
+    krb5_ccache			        cc = NULL;
+    krb5_principal		        me = NULL;
+    char*                       name = NULL;
     krb5_creds			        my_creds;
     krb5_get_init_creds_opt     options;
     krb5_address **             addrs = NULL;
@@ -2602,7 +2603,7 @@ khm_krb5_get_temp_ccache(krb5_context ctx,
     long code = 0;
     krb5_ccache cc = 0;
 
-    StringCbPrintfA(ccname, sizeof(ccname), "API:TempCache%8x", rnd);
+    StringCbPrintfA(ccname, sizeof(ccname), "MEMORY:TempCache%8x", rnd);
 
     code = pkrb5_cc_resolve(ctx, ccname, &cc);
 

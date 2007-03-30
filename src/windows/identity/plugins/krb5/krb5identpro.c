@@ -824,8 +824,6 @@ k5_ident_set_default(khm_int32 msg_type,
         DWORD dwSize;
         wchar_t reg_ccname[KRB5_MAXCCH_CCNAME];
 
-        assert(FALSE);
-
 #ifdef DEBUG
         assert(def_ident != NULL);
 #endif
