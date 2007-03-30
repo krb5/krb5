@@ -87,7 +87,6 @@
   		<File name="nidmgr32.dll"	from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\w2k\"	to="\bin\i386\w2k" />
   		<File name="kfwcpcc.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="kfwlogon.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
-  		<File name="netidmgr.exe.manifest"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386"  notrequired="true" />
   		<File name="netidmgr.chm"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="netidmgr.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="netiddev.chm"	from="..\target\bin\i386\%bldtype%\"	to="\doc" />
@@ -123,12 +122,6 @@
   		<File name="gss.exe"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="comerr32.dll"	from="..\target\bin\i386\%bldtype%\"	to="\bin\i386" />
   		<File name="NetIddev.chm"	from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\doc\"	to="\doc" newname="netiddev.chm" />
-
-		<!-- Debug build only: -->
-		<File name="khhelp.h"	from="auth\krb5\src\windows\identity\obj\i386\%debug%\inc\"	to="\inc\netidmgr" />
-<!--		<File name="aklog.pdb"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />	-->
-		<File name="netidmgr.exe.static.manifest"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" notrequired="true" />
-<!--		<File name="aklog.exe"	from="..\target\bin\i386\%debug%\"	to="\bin\i386" />	-->
 
 		<!-- Build-INdependent files, always copied: -->
 		<File name="relnotes.html"	from="..\doc\kerberos\"	to="\doc" />
