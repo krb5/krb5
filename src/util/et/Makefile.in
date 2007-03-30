@@ -70,7 +70,7 @@ SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 SHLIB_DIRS=-L$(TOPLIBD)
 
-COM_ERR_HDR=$(BUILDTOP)$(S)include\com_err.h
+COM_ERR_HDR=$(BUILDTOP)$(S)include$(S)com_err.h
 
 all-windows:: $(COM_ERR_HDR)
 
