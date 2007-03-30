@@ -15,13 +15,13 @@
 			<unixfind	path	="c:\cygwin\bin" />
 			</Directories>
 		<Options>
-			<debug value="1" />
+			<debug value="0" />
 			<logfile value="1" path="bkw.pl.log" />
 			<repository value="skip" />
 			<clean value="0" />
 			<nomake value="0" />
 			<nopackage value="0" />
-			<verbose value="1" />
+			<verbose value="0" />
 			<vverbose value="0" />
 			</Options>
 		</CommandLine>
