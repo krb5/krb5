@@ -78,7 +78,6 @@
 				</Config>
 			<MSI></MSI>
 			<NSIS></NSIS> <!-- NB:  Most config is done in site-local.nsi.	-->
-			<!-- Theoretically, writing site-local.nsi from xml settings could be done, but isn't.	-->
 		</Package>
 		<PostPackage>
 			<Config>													<!-- This config info will be copied into each CopyList in PostPackage. -->
