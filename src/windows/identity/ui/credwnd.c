@@ -802,19 +802,27 @@ cw_new_outline_node(wchar_t * heading) {
     return o;
 }
 
+/* buf is a handle to a credential or an identity.  the kcdb_buf_*
+   functions work with either. */
 khm_int32 
-cw_get_cred_exp_flags(khui_credwnd_tbl * tbl, khm_handle cred)
+cw_get_buf_exp_flags(khui_credwnd_tbl * tbl, khm_handle buf)
 {
     khm_int32 flags;
     long s;
-    FILETIME ft;
+    FILETIME ft_expire;
+    FILETIME ft_current;
+    FILETIME ft_difference;
     khm_size cbsize;
 
-    cbsize = sizeof(ft);
-    if(KHM_FAILED(kcdb_cred_get_attr(cred, KCDB_ATTR_TIMELEFT, NULL, &ft, &cbsize)))
+    cbsize = sizeof(ft_expire);
+    if(KHM_FAILED(kcdb_buf_get_attr(buf, KCDB_ATTR_EXPIRE, NULL,
+                                    &ft_expire, &cbsize)))
         return 0;
 
-    s = FtIntervalToSeconds(&ft);
+    GetSystemTimeAsFileTime(&ft_current);
+    ft_difference = FtSub(&ft_expire, &ft_current);
+
+    s = FtIntervalToSeconds(&ft_difference);
 
     flags = 0;
     if(s < 0)
@@ -856,7 +864,7 @@ cw_timer_proc(HWND hwnd,
     if(!(r->flags & KHUI_CW_ROW_CRED))
         return; /* we only know what to do with cred rows */
 
-    nflags = cw_get_cred_exp_flags(tbl, (khm_handle) r->data);
+    nflags = cw_get_buf_exp_flags(tbl, (khm_handle) r->data);
     if((r->flags & CW_EXPSTATE_MASK) != nflags) {
         /* flags have changed */
         /* the outline needs to be updated */
@@ -1234,6 +1242,20 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             }
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
             selected = (selected || (ol->flags & KHUI_CW_O_SELECTED));
+
+            /* if the outline node is for an identity, then we have to
+               check the expiration state for the identity. */
+
+            if (ol->attr_id == KCDB_ATTR_ID) {
+                khm_handle ident = (khm_handle) ol->data;
+
+                flags = cw_get_buf_exp_flags(tbl, ident);
+
+                if (flags) {
+                    ol->flags |= flags;
+                    ol->flags |= KHUI_CW_O_SHOWFLAG;
+                }
+            }
         }
         
         /* we need to do this here too just in case we were already at
@@ -1241,7 +1263,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         if (ol)
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
 
-        flags = cw_get_cred_exp_flags(tbl, thiscred);
+        flags = cw_get_buf_exp_flags(tbl, thiscred);
         expstate |= flags;
 
         if(visible) {
@@ -1260,30 +1282,6 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             tbl->rows[n_rows].idx_end = i;
 
             n_rows++;
-        } else if(flags) {
-            khui_credwnd_outline *to;
-            /* the row that is flagged is not visible.  We need to send
-               the flag upstream until we hit a visible outline node */
-            to = ol;
-            while(to && !(to->flags & KHUI_CW_O_VISIBLE)) {
-                to = TPARENT(to);
-            }
-            if(to) {
-                to->flags |= KHUI_CW_O_SHOWFLAG;
-            }
-        }
-
-        /* and we propagate the flags upstream */
-        if(flags) {
-            khui_credwnd_outline *to;
-
-            to = ol;
-            while(to) {
-                if((to->flags & CW_EXPSTATE_MASK) < flags) {
-                    to->flags = (to->flags & ~CW_EXPSTATE_MASK) | flags;
-                }
-                to = TPARENT(to);
-            }
         }
 
         if(prevcred)
@@ -4307,10 +4305,11 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 wp = MK_SHIFT;
             else if (LOWORD(wParam) == KHUI_PACTION_UP_TOGGLE)
                 wp = 0; //MK_CONTROL;
+            else {
 #ifdef DEBUG
-            else
                 assert(FALSE);
 #endif
+            }
 
             cw_select_row(tbl, new_row, wp);
             cw_ensure_row_visible(hwnd, tbl, new_row);
@@ -4366,10 +4365,12 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 wp = MK_SHIFT;
             else if (LOWORD(wParam) == KHUI_PACTION_DOWN_TOGGLE)
                 wp = 0; //MK_CONTROL;
+            else {
 #ifdef DEBUG
-            else
                 assert(FALSE);
 #endif
+            }
+
             cw_select_row(tbl, new_row, wp);
             cw_ensure_row_visible(hwnd, tbl, new_row);
         }
