@@ -36,6 +36,9 @@ enum khm_notif_expstate {
     KHM_NOTIF_EXP
 };
 
+extern khm_int32 khm_notifier_actions[];
+extern khm_size  n_khm_notifier_actions;
+
 void 
 khm_init_notifier(void);
 
@@ -53,5 +56,8 @@ khm_notify_icon_balloon(khm_int32 severity,
 
 void
 khm_notify_icon_expstate(enum khm_notif_expstate expseverity);
+
+void
+khm_notify_icon_activate(void);
 
 #endif

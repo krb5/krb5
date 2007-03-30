@@ -36,6 +36,8 @@ HWND khm_hwnd_main;
 HWND khm_hwnd_rebar;
 HWND khm_hwnd_main_cred;
 
+int  khm_main_wnd_mode = KHM_MAIN_WND_NORMAL;
+
 #define MW_RESIZE_TIMER 1
 #define MW_RESIZE_TIMEOUT 2000
 #define MW_REFRESH_TIMER 2
@@ -193,7 +195,14 @@ khm_ui_cb(LPARAM lParam) {
 #endif
 
     /* make the call */
-    pcbdata->rv = (*pcbdata->cb)(khm_hwnd_main, pcbdata->rock);
+    if (!IsBadCodePtr(pcbdata->cb))
+        pcbdata->rv = (*pcbdata->cb)(khm_hwnd_main, pcbdata->rock);
+    else {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+        pcbdata->rv = KHM_ERROR_INVALID_PARAM;
+    }
 }
 
 LRESULT CALLBACK 
@@ -368,6 +377,25 @@ khm_main_wnd_proc(HWND hwnd,
             khm_ui_cb(lParam);
             return 0;
 
+            /* layout control */
+        case KHUI_ACTION_LAYOUT_MINI:
+            if (khm_main_wnd_mode == KHM_MAIN_WND_MINI) {
+                khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
+            } else {
+                khm_set_main_window_mode(KHM_MAIN_WND_MINI);
+            }
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
+        case KHUI_ACTION_LAYOUT_ID:
+        case KHUI_ACTION_LAYOUT_TYPE:
+        case KHUI_ACTION_LAYOUT_LOC:
+        case KHUI_ACTION_LAYOUT_CUST:
+        case KHUI_ACTION_LAYOUT_RELOAD:
+            khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
             /* menu commands */
         case KHUI_PACTION_MENU:
             if(HIWORD(lParam) == 1)
@@ -423,11 +451,6 @@ khm_main_wnd_proc(HWND hwnd,
         case KHUI_PACTION_DELETE:
 
         case KHUI_PACTION_SELALL:
-        case KHUI_ACTION_LAYOUT_ID:
-        case KHUI_ACTION_LAYOUT_TYPE:
-        case KHUI_ACTION_LAYOUT_LOC:
-        case KHUI_ACTION_LAYOUT_CUST:
-        case KHUI_ACTION_LAYOUT_RELOAD:
             /* otherwise fallthrough and bounce to the creds window */
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
@@ -525,11 +548,27 @@ khm_main_wnd_proc(HWND hwnd,
         }
         break;
 
+    case WM_MOVING:
+        {
+            RECT * r;
+
+            r = (RECT *) lParam;
+            khm_adjust_window_dimensions_for_display(r,
+                                                     KHM_DOCK_AUTO | KHM_DOCKF_XBORDER);
+        }
+        return TRUE;
+
     case WM_TIMER:
         if (wParam == MW_RESIZE_TIMER) {
             RECT r;
             khm_handle csp_cw;
             khm_handle csp_mw;
+            const wchar_t * wconfig;
+
+            if (khm_main_wnd_mode == KHM_MAIN_WND_MINI)
+                wconfig = L"Windows\\MainMini";
+            else
+                wconfig = L"Windows\\Main";
 
             KillTimer(hwnd, wParam);
 
@@ -540,15 +579,22 @@ khm_main_wnd_proc(HWND hwnd,
                                              KHM_PERM_WRITE,
                                              &csp_cw))) {
                 if (KHM_SUCCEEDED(khc_open_space(csp_cw,
-                                                 L"Windows\\Main",
+                                                 wconfig,
                                                  KHM_PERM_WRITE,
                                                  &csp_mw))) {
+                    khm_int32 t;
+
                     khc_write_int32(csp_mw, L"XPos", r.left);
                     khc_write_int32(csp_mw, L"YPos", r.top);
                     khc_write_int32(csp_mw, L"Width",
                                     r.right - r.left);
                     khc_write_int32(csp_mw, L"Height",
                                     r.bottom - r.top);
+
+                    if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)) &&
+                        t != KHM_DOCK_NONE) {
+                        khc_write_int32(csp_mw, L"Dock", KHM_DOCK_AUTO);
+                    }
 
                     khc_close_space(csp_mw);
                 }
@@ -585,6 +631,9 @@ khm_main_wnd_proc(HWND hwnd,
                        m->subtype == KMSG_ACT_CONTINUE_CMDLINE) {
                 khm_cred_process_startup_actions();
             } else if (m->type == KMSG_ACT &&
+                       m->subtype == KMSG_ACT_END_CMDLINE) {
+                /* nothing yet */
+            } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_SYNC_CFG) {
                 khm_refresh_config();
             } else if (m->type == KMSG_ACT &&
@@ -618,6 +667,7 @@ khm_main_wnd_proc(HWND hwnd,
                        m->subtype == KMSG_KMM_I_DONE) {
                 kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);
             }
+
             return kmq_wm_end(m, rv);
         }
         return 0;
@@ -860,7 +910,7 @@ khm_create_main_window_controls(HWND hwnd_main) {
 }
 
 void
-khm_adjust_window_dimensions_for_display(RECT * pr) {
+khm_adjust_window_dimensions_for_display(RECT * pr, int dock) {
 
     HMONITOR hmon;
     RECT     rm;
@@ -908,14 +958,57 @@ khm_adjust_window_dimensions_for_display(RECT * pr) {
     if (height > (rm.bottom - rm.top))
         height = rm.bottom - rm.top;
 
-    if (x < rm.left)
+    switch (dock & KHM_DOCKF_DOCKHINT) {
+    case KHM_DOCK_TOPLEFT:
         x = rm.left;
-    if (x + width > rm.right)
-        x = rm.right - width;
-    if (y < rm.top)
         y = rm.top;
-    if (y + height > rm.bottom)
+        break;
+
+    case KHM_DOCK_TOPRIGHT:
+        x = rm.right - width;
+        y = rm.top;
+        break;
+
+    case KHM_DOCK_BOTTOMRIGHT:
+        x = rm.right - width;
         y = rm.bottom - height;
+        break;
+
+    case KHM_DOCK_BOTTOMLEFT:
+        x = rm.left;
+        y = rm.bottom - height;
+        break;
+
+    case KHM_DOCK_AUTO:
+        {
+            int cxt, cyt;
+
+            cxt = GetSystemMetrics(SM_CXDRAG);
+            cyt = GetSystemMetrics(SM_CYDRAG);
+
+            if (x > rm.left && (x - rm.left) < cxt)
+                x = rm.left;
+            else if ((x + width) < rm.right && (rm.right - (x + width)) < cxt)
+                x = rm.right - width;
+
+            if (y > rm.top && (y - rm.top) < cyt)
+                y = rm.top;
+            else if ((y + height) < rm.bottom && (rm.bottom - (y + height)) < cyt)
+                y = rm.bottom - height;
+        }
+        break;
+    }
+
+    if (!(dock & KHM_DOCKF_XBORDER)) {
+        if (x < rm.left)
+            x = rm.left;
+        if (x + width > rm.right)
+            x = rm.right - width;
+        if (y < rm.top)
+            y = rm.top;
+        if (y + height > rm.bottom)
+            y = rm.bottom - height;
+    }
 
  done_with_monitor:
     pr->left = x;
@@ -925,13 +1018,109 @@ khm_adjust_window_dimensions_for_display(RECT * pr) {
 
 }
 
+void
+khm_get_main_window_rect(RECT * pr) {
+    khm_handle csp_mw = NULL;
+    int x,y,width,height,dock;
+    RECT r;
+    const wchar_t * wconfig;
+
+    x = CW_USEDEFAULT;
+    y = CW_USEDEFAULT;
+    width = CW_USEDEFAULT;
+    height = CW_USEDEFAULT;
+    dock = KHM_DOCK_NONE;
+
+    if (khm_main_wnd_mode == KHM_MAIN_WND_MINI)
+        wconfig = L"CredWindow\\Windows\\MainMini";
+    else
+        wconfig = L"CredWindow\\Windows\\Main";
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL,
+                                     wconfig,
+                                     KHM_PERM_READ,
+                                     &csp_mw))) {
+        khm_int32 t;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"XPos", &t)))
+            x = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"YPos", &t)))
+            y = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Width", &t)))
+            width = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Height", &t)))
+            height = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)))
+            dock = t;
+
+        khc_close_space(csp_mw);
+    }
+
+    /* If there were no default values, we default to using 1/4 of the
+       work area centered on the primary monitor.  If there were any
+       docking hints, then the next call to
+       khm_adjust_window_dimensions_for_display() will reposition the
+       window. */
+    if (width == CW_USEDEFAULT || x == CW_USEDEFAULT) {
+        RECT wr;
+
+        SetRectEmpty(&wr);
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &wr, 0);
+
+        if (width == CW_USEDEFAULT) {
+            width = (wr.right - wr.left) / 2;
+            height = (wr.bottom - wr.top) / 2;
+        }
+
+        if (x == CW_USEDEFAULT) {
+            x = (wr.left + wr.right) / 2 - width / 2;
+            y = (wr.top + wr.bottom) / 2 - height / 2;
+        }
+    }
+
+    /* The saved dimensions might not actually be visible if the user
+       has changed the resolution of the display or if it's a multiple
+       monitor system where the monitor on which the Network Identity
+       Manager window was on previously is no longer connected.  We
+       have to check for that and adjust the dimensions if needed. */
+    SetRect(&r, x, y, x + width, y + height);
+    khm_adjust_window_dimensions_for_display(&r, dock);
+
+    *pr = r;
+}
+
+void
+khm_set_main_window_mode(int mode) {
+
+    RECT r;
+
+    if (mode == khm_main_wnd_mode)
+        return;
+
+    khui_check_action(KHUI_ACTION_LAYOUT_MINI,
+                      ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+    khui_enable_action(KHUI_MENU_LAYOUT,
+                       ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+    khui_enable_action(KHUI_MENU_COLUMNS,
+                       ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+
+    khm_main_wnd_mode = mode;
+    if (khm_hwnd_main) {
+        khm_get_main_window_rect(&r);
+
+        SetWindowPos(khm_hwnd_main,
+                     NULL,
+                     r.left, r.top,
+                     r.right - r.left, r.bottom - r.top,
+                     SWP_NOACTIVATE | SWP_NOOWNERZORDER |
+                     SWP_NOZORDER);
+    }
+}
 
 void 
 khm_create_main_window(void) {
     wchar_t buf[1024];
     khm_handle csp_cw = NULL;
-    khm_handle csp_mw = NULL;
-    int x,y,width,height;
     RECT r;
 
     LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, 
@@ -951,41 +1140,19 @@ khm_create_main_window(void) {
     if (!khm_hwnd_null)
         return;
 
-    x = CW_USEDEFAULT;
-    y = CW_USEDEFAULT;
-    width = CW_USEDEFAULT;
-    height = CW_USEDEFAULT;
-
     if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
                                      KHM_PERM_READ,
                                      &csp_cw))) {
-        if (KHM_SUCCEEDED(khc_open_space(csp_cw,
-                                         L"Windows\\Main",
-                                         KHM_PERM_READ,
-                                         &csp_mw))) {
-            khm_int32 t;
+        khm_int32 t;
 
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"XPos", &t)))
-                x = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"YPos", &t)))
-                y = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Width", &t)))
-                width = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Height", &t)))
-                height = t;
-
-            khc_close_space(csp_mw);
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"DefaultWindowMode", &t))) {
+            khm_set_main_window_mode(t);
         }
+
         khc_close_space(csp_cw);
     }
 
-    /* The saved dimensions might not actually be visible if the user
-       has changed the resolution of the display or if it's a multiple
-       monitor system where the monitor on which the Network Identity
-       Manager window was on previously is no longer connected.  We
-       have to check for that and adjust the dimensions if needed. */
-    SetRect(&r, x, y, x + width, y + height);
-    khm_adjust_window_dimensions_for_display(&r);
+    khm_get_main_window_rect(&r);
 
     khm_hwnd_main = 
         CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,

@@ -34,16 +34,23 @@ extern ATOM khm_main_window_class;
 extern HWND khm_hwnd_main;
 extern HWND khm_hwnd_rebar;
 
+#define KHM_MAIN_WND_NORMAL 0
+#define KHM_MAIN_WND_MINI   1
+
+extern int  khm_main_wnd_mode;
+
 void khm_register_main_wnd_class(void);
 void khm_unregister_main_wnd_class(void);
 void khm_create_main_window_controls(HWND);
 void khm_create_main_window(void);
 void khm_activate_main_window(void);
 void khm_show_main_window(void);
+void khm_set_main_window_mode(int mode);
 void khm_close_main_window(void);
 void khm_hide_main_window(void);
 BOOL khm_is_main_window_visible(void);
 BOOL khm_is_main_window_active(void);
+void khm_adjust_window_dimensions_for_display(RECT * pr, int dock);
 LRESULT khm_rebar_notify(LPNMHDR lpnm);
 
 void
@@ -62,4 +69,13 @@ khm_main_wnd_proc(HWND hwnd,
 #define COMMANDLINE_MAP_FMT              L"Local\\NetIDMgr_Cmdline_%lu"
 #define QUERY_APP_VER_MAP_FMT            L"Local\\NetIDMgr_QueryVer_%lu"
 
+/* dock values for window positioning */
+#define KHM_DOCK_NONE        0
+#define KHM_DOCK_TOPLEFT     1
+#define KHM_DOCK_TOPRIGHT    2
+#define KHM_DOCK_BOTTOMRIGHT 3
+#define KHM_DOCK_BOTTOMLEFT  4
+#define KHM_DOCK_AUTO        256
+#define KHM_DOCKF_DOCKHINT   0x0000ffff
+#define KHM_DOCKF_XBORDER    0x00010000
 #endif

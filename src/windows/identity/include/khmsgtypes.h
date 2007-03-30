@@ -232,13 +232,16 @@
 #define KMSG_ACT_ACTIVATE   6
 
 /*! \brief Internal */
-#define KMSG_ACT_BEGIN_CMDLINE 128
+#define KMSG_ACT_BEGIN_CMDLINE       128
 
 /*! \brief Internal */
-#define KMSG_ACT_CONTINUE_CMDLINE 129
+#define KMSG_ACT_CONTINUE_CMDLINE    129
 
 /*! \brief Internal */
-#define KMSG_ACT_SYNC_CFG 130
+#define KMSG_ACT_SYNC_CFG            130
+
+/*! \brief Internal */
+#define KMSG_ACT_END_CMDLINE         131
 
 /*@}*/
 

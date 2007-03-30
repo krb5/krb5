@@ -202,9 +202,7 @@ void khm_add_dialog(HWND dlg) {
     if(n_khui_dialogs < MAX_UI_DIALOGS - 1) {
         khui_dialogs[n_khui_dialogs].hwnd = dlg;
         khui_dialogs[n_khui_dialogs].hwnd_next = NULL;
-        /* we set .active=FALSE for now.  We don't need this to have a
-           meaningful value until we enter a modal loop */
-        khui_dialogs[n_khui_dialogs].active = FALSE;
+        khui_dialogs[n_khui_dialogs].active = TRUE;
         n_khui_dialogs++;
     } else {
 #if DEBUG

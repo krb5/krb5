@@ -159,6 +159,17 @@
 #define QNEXT(pe) ((pe)->prev)
 #define QPREV(pe) ((pe)->next)
 
+#define QINSERT(pt, pre, pe)                    \
+    do {                                        \
+    if ((pre) == NULL ||                        \
+        QNEXT(pre) == NULL) { QPUT(pt, pe); }   \
+    else {                                      \
+        (pe)->prev = (pre)->prev;               \
+        (pe)->next = (pre);                     \
+        (pre)->prev->next = (pe);               \
+        (pre)->prev = (pe);                     \
+    }} while(0)
+
 /* Trees with FIFO child lists */
 #define TQDCL(type)                             \
     LDCL(type);                                 \
@@ -167,15 +178,36 @@
 
 #define TQINIT(pe)                              \
     do {                                        \
+    LINIT(pe);                                  \
     QINIT(pe);                                  \
     (pe)->parent = NULL; } while(0)
 
-#define TQADDCHILD(pt,pe)                       \
+#define TQPUTCHILD(pt,pe)                       \
     do {                                        \
     QPUT((pt), (pe));                           \
     (pe)->parent = (pt); } while(0)
 
+#define TQINSERT(pt, pre, pe)                   \
+    do {                                        \
+    QINSERT(pt, pre, pe);                       \
+    (pe)->parent = (pt); } while(0)
+
+#define TQGETCHILD(pt,ppe)                      \
+    do {                                        \
+    QGET(pt, ppe);                              \
+    if (*(ppe)) { *(ppe)->parent = NULL; }      \
+    } while(0)
+
+#define TQDELCHILD(pt, pe)                      \
+    do {                                        \
+    QDEL(pt, pe);                               \
+    (pe)->parent = NULL; } while(0)
+
 #define TQFIRSTCHILD(pt) ((pt)?QTOP(pt):NULL)
+
+#define TQNEXTCHILD(pe) QNEXT(pe)
+
+#define TQPREVCHILD(pe) QPREV(pe)
 
 #define TQPARENT(pe) ((pe)?(pe)->parent:NULL)
 

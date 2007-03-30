@@ -338,7 +338,7 @@ IDI_MODIFIED            ICON                    "..\\..\\images\\modified.ico"
 STRINGTABLE 
 BEGIN
     IDS_UNK_ADDR_FMT        "Unknown address type %d"
-    IDS_KRB5_CREDTEXT_0     "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Creds for realm %s</p>"
+    IDS_KRB5_CREDTEXT_0     "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Tickets for realm %s</p>"
     IDS_KRB5_CCNAME_SHORT_DESC "Kerberos v5 CCache"
     IDS_KEY_ENCTYPE_SHORT_DESC "Session EncType"
     IDS_TKT_ENCTYPE_SHORT_DESC "Service EncType"
@@ -500,4 +500,5 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 

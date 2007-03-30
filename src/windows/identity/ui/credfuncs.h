@@ -53,6 +53,9 @@ khm_cred_renew_creds(void);
 void 
 khm_cred_obtain_new_creds(wchar_t * window_title);
 
+void
+khm_cred_obtain_new_creds_for_ident(khm_handle ident, wchar_t * title);
+
 void 
 khm_cred_set_default(void);
 

@@ -6,6 +6,7 @@ CredWindow,KC_SPACE,0,Options for the credentials window
   AutoDetectNet,KC_INT32,1,Automatically detect network connectivity changes
   KeepRunning,KC_INT32,1,Keep running after closing Khimaira
   DefaultView,KC_STRING,ByIdentity,
+  DefaultViewMini,KC_STRING,CompactIdentity,
   ViewList,KC_STRING,"ByIdentity,ByLocation,ByType",
   PaddingHorizontal,KC_INT32,4,
   PaddingVertical,KC_INT32,2,
@@ -26,15 +27,23 @@ CredWindow,KC_SPACE,0,Options for the credentials window
   MinThreshold,KC_INT32,10,Min value for a threshold (0)
   LogToFile,KC_INT32,0,Boolean. If true logs trace events to a nidmdbg.log in the temp folder
   DestroyCredsOnExit,KC_INT32,0,Boolean.  If true; all credentials will be destroyed when NetIDMgr exits.
+  NotificationAction,KC_INT32,50025,Action to perform when the user clicks on the notification icon.
+  DefaultWindowMode,KC_INT32,1,(0-normal; 1-mini)
   Windows,KC_SPACE,0,Window parameters
     _Schema,KC_SPACE,0,Schema
       Width,KC_INT32,0,
       Height,KC_INT32,0,
       XPos,KC_INT32,0,
       YPos,KC_INT32,0,
+      Dock,KC_INT32,0,Dock on window corner (0-none; 1-top left; 2-top right; 3-bottom right; 4-bottom left)
     _Schema,KC_ENDSPACE,0,
     Main,KC_SPACE,0,Main window
     Main,KC_ENDSPACE,0,
+    MainMini,KC_SPACE,0,Main window (mini mode)
+      Width,KC_INT32,470,
+      Height,KC_INT32,500,
+      Dock,KC_INT32,3,
+    MainMini,KC_ENDSPACE,0,
     NewCred,KC_SPACE,0,New credentials window
       ForceToTop,KC_INT32,1,Force new creds window to the top
       AnimateSizeChanges,KC_INT32,1,Animate the new creds window when the size needs changing.
@@ -169,6 +178,19 @@ CredWindow,KC_SPACE,0,Options for the credentials window
       TimeLeft,KC_ENDSPACE,0
     Columns,KC_ENDSPACE,0
    ByLocation,KC_ENDSPACE,0
+   CompactIdentity,KC_SPACE,0,Default Compact View by Identity
+     Description,KC_STRING,Compact view of identities
+     ColumnList,KC_STRING,"IdentityName",
+     ExpandedIdentity,KC_INT32,1,Use expanded display of identity headers
+     NoHeader,KC_INT32,1,Suppress the column header
+     Columns,KC_SPACE,0,
+       IdentityName,KC_SPACE,0,
+         Width,KC_INT32,415,
+         SortIndex,KC_INT32,0,
+         Flags,KC_INT32,11
+       IdentityName,KC_ENDSPACE,0,
+     Columns,KC_ENDSPACE,0,
+   CompactIdentity,KC_ENDSPACE,0
   Views,KC_ENDSPACE,0
   Notices,KC_SPACE,0,Notices and alerts
     MinimizeWarning,KC_INT32,1,Show the minimize warning?

@@ -165,6 +165,11 @@ typedef struct tag_khui_action_ref {
     context menus.  In general, it is good practice to place the
     default item at the top of a menu, although the UI library does
     not enforce this.  This is purely meant as a rendering hint.
+
+    Only one action is allowed to have this flag set.  When an action
+    is added to a menu using khui_menu_insert_action() or
+    khui_menu_insert_paction() and this flag is set, all other menu
+    items will be stripped of this flag.
  */
 #define KHUI_ACTIONREF_DEFAULT      0x20
 
@@ -386,11 +391,10 @@ khui_menu_delete(khui_menu_def * d);
         that are valid for this function are: ::KHUI_ACTIONREF_SEP,
         ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.
         ::KHUI_ACTIONREF_SEP will be automatically added if the
-        command is ::KHUI_MENU_SEP.
-
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
+        command is ::KHUI_MENU_SEP.  If ::KHUI_ACTIONREF_DEFAULT is
+        specified, then all other items in the menu will be stripped
+        of that flag leaving this action as the only one with that
+        flag set.
  */
 KHMEXP void KHMAPI
 khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 cmd, khm_int32 flags);
@@ -423,11 +427,10 @@ khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 cmd, khm_int3
         ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.  For this
         function, ::KHUI_ACTIONREF_PACTION will automatically be aded
         when adding the action.  ::KHUI_ACTIONREF_SEP will be
-        automatically added if the command is ::KHUI_MENU_SEP.
-
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
+        automatically added if the command is ::KHUI_MENU_SEP.  If
+        ::KHUI_ACTIONREF_DEFAULT is specified, then all other items in
+        the menu will be stripped of that flag leaving this action as
+        the only one with that flag set.
 */
 KHMEXP void KHMAPI
 khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * act, khm_int32 flags);
@@ -463,9 +466,6 @@ khui_menu_get_size(khui_menu_def * d);
     If the specified index is out of bounds, then the function returns
     NULL.
 
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
  */
 KHMEXP khui_action_ref *
 khui_menu_get_action(khui_menu_def * d, khm_size idx);

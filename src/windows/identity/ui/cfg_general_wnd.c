@@ -36,6 +36,7 @@ typedef struct tag_cfg_data {
     BOOL auto_detect_net;
     BOOL log_to_file;
     BOOL destroy_creds;
+    khm_int32 notif_action;
 } cfg_data;
 
 typedef struct tag_dlg_data {
@@ -80,6 +81,9 @@ read_params(dlg_data * dd) {
 
     khc_read_int32(csp_cw, L"DestroyCredsOnExit", &t);
     d->destroy_creds = !!t;
+
+    khc_read_int32(csp_cw, L"NotificationAction", &t);
+    d->notif_action = t;
 
     khc_close_space(csp_cw);
 
@@ -144,6 +148,11 @@ write_params(dlg_data * dd) {
         applied = TRUE;
     }
 
+    if (d->notif_action != s->notif_action) {
+        khc_write_int32(csp_cw, L"NotificationAction", d->notif_action);
+        applied = TRUE;
+    }
+
     khc_close_space(csp_cw);
 
     khui_cfg_set_flags(dd->node,
@@ -165,7 +174,8 @@ check_for_modification(dlg_data * dd) {
         !!d->keep_running != !!s->keep_running ||
         !!d->auto_detect_net != !!s->auto_detect_net ||
 	!!d->log_to_file != !!s->log_to_file ||
-        !!d->destroy_creds != !!s->destroy_creds) {
+        !!d->destroy_creds != !!s->destroy_creds ||
+        d->notif_action != s->notif_action) {
 
         khui_cfg_set_flags(dd->node,
                            KHUI_CNFLAG_MODIFIED,
@@ -180,9 +190,22 @@ check_for_modification(dlg_data * dd) {
     }
 }
 
+
+static void
+strip_ampersands(wchar_t * str) {
+    wchar_t *f, *t;
+
+    for(f = t = str; *f; f++)
+        if (*f != L'&')
+            *t++ = *f;
+
+    *t = L'\0';
+}
+
 static void
 refresh_view(HWND hwnd, dlg_data * d) {
     wchar_t buf[512];
+    khm_size i;
 
     CheckDlgButton(hwnd, IDC_CFG_AUTOINIT,
                    (d->work.auto_init?BST_CHECKED:BST_UNCHECKED));
@@ -199,6 +222,44 @@ refresh_view(HWND hwnd, dlg_data * d) {
     CheckDlgButton(hwnd, IDC_CFG_DESTROYALL,
                    (d->work.destroy_creds?BST_CHECKED:BST_UNCHECKED));
 
+    /* we need populate the notification action combo box control and
+       set the current selection to match the default action. */
+
+    if (n_khm_notifier_actions != SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION,
+                                                     CB_GETCOUNT, 0, 0)) {
+
+        for (i=0; i < n_khm_notifier_actions; i++) {
+            int idx;
+
+            khm_get_action_caption(khm_notifier_actions[i],
+                                   buf, sizeof(buf));
+
+            strip_ampersands(buf);
+
+            idx = (int) SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION,
+                                           CB_INSERTSTRING, i,
+                                           (LPARAM) buf);
+
+#ifdef DEBUG
+            if (idx != (int) i) {
+                assert(FALSE);
+            }
+#endif
+        }
+    }
+
+    for (i=0; i < n_khm_notifier_actions; i++) {
+        if (khm_notifier_actions[i] == d->work.notif_action)
+            break;
+    }
+
+    if (i >= n_khm_notifier_actions) {
+        d->work.notif_action = khm_notifier_actions[0];
+        i = 0;
+    }
+
+    SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION, CB_SETCURSEL, i, 0);
+
     /* in addition, we correct the label on the trace log control to
        reflect the actual path that is going to get used */
     if (GetDlgItemText(hwnd, IDC_CFG_LOGPATH, buf,
@@ -212,6 +273,8 @@ refresh_view(HWND hwnd, dlg_data * d) {
 
 static void
 refresh_data(HWND hwnd, dlg_data * d) {
+    int idx;
+
     d->work.auto_init = (IsDlgButtonChecked(hwnd, IDC_CFG_AUTOINIT)
                          == BST_CHECKED);
     d->work.auto_start = (IsDlgButtonChecked(hwnd, IDC_CFG_AUTOSTART)
@@ -226,6 +289,14 @@ refresh_data(HWND hwnd, dlg_data * d) {
 			   == BST_CHECKED);
     d->work.destroy_creds = (IsDlgButtonChecked(hwnd, IDC_CFG_DESTROYALL)
                              == BST_CHECKED);
+
+    idx = (int) SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION, CB_GETCURSEL, 0, 0);
+    if (idx < 0)
+        idx = 0;
+    else if (idx >= (int) n_khm_notifier_actions)
+        idx = (int) n_khm_notifier_actions - 1;
+
+    d->work.notif_action = khm_notifier_actions[idx];
 }
 
 INT_PTR CALLBACK
@@ -323,6 +394,9 @@ khm_cfg_general_proc(HWND hwnd,
                 refresh_data(hwnd, d);
                 check_for_modification(d);
             }
+        } else if (HIWORD(wParam) == CBN_SELCHANGE) {
+            refresh_data(hwnd, d);
+            check_for_modification(d);
         }
 
         khm_set_dialog_result(hwnd, 0);

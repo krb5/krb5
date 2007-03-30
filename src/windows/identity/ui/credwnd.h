@@ -67,6 +67,7 @@ typedef struct khui_credwnd_outline_t {
 #define KHUI_CW_O_SHOWFLAG      0x00000008
 #define KHUI_CW_O_SELECTED      0x00000010
 #define KHUI_CW_O_DATAALLOC     0x00000020
+#define KHUI_CW_O_NOOUTLINE     0x00000040
 
 typedef struct khui_credwnd_row_t {
     khm_int32   flags;
@@ -80,6 +81,7 @@ typedef struct khui_credwnd_row_t {
 #define KHUI_CW_ROW_HEADER      0x00000004
 #define KHUI_CW_ROW_TIMERSET    0x00000008
 #define KHUI_CW_ROW_SELECTED    0x00000010
+#define KHUI_CW_ROW_EXPVIEW     0x00000020
 
 /* row allocation */
 /* initial number of rows to be allocated */
@@ -118,6 +120,22 @@ typedef struct khui_credwnd_col_t {
 #define CW_CANAME_TYPEICON L"_CWTypeIcon"
 
 #define cw_is_custom_attr(i) ((i)<0)
+
+typedef struct tag_khui_credwnd_ident {
+
+    khm_handle ident;
+    khm_int32  ident_flags;
+    khm_int32  credtype;
+    wchar_t    name[KCDB_IDENT_MAXCCH_NAME];
+    wchar_t    credtype_name[KCDB_MAXCCH_NAME];
+
+    khm_size   credcount;
+
+} khui_credwnd_ident;
+
+#define CW_IDENT_ALLOC_INCR 4
+
+#define CW_EXP_ROW_MULT 2
 
 typedef struct khui_credwnd_tbl_t {
     HWND hwnd;                  /* the window that this table belongs to */
@@ -171,6 +189,8 @@ typedef struct khui_credwnd_tbl_t {
     COLORREF cr_sel;        /* selected text color */
     COLORREF cr_hdr_normal; /* normal header text color */
     COLORREF cr_hdr_sel;    /* selected header text color */
+    COLORREF cr_hdr_gray;   /* gray header text color */
+    COLORREF cr_hdr_gray_sel;   /* selected gray header text color */
     HBRUSH hb_hdr_bg;       /* header background color (normal) */
     HBRUSH hb_hdr_bg_exp;   /* header background color (expired) */
     HBRUSH hb_hdr_bg_warn;  /* header background color (warn) */
@@ -198,6 +218,11 @@ typedef struct khui_credwnd_tbl_t {
 
     /* the credentials set */
     khm_handle credset;
+
+    khui_credwnd_ident * idents;
+    khm_size n_idents;
+    khm_size nc_idents;
+
 } khui_credwnd_tbl;
 
 #define KHUI_MAXCB_HEADING 256
@@ -209,6 +234,8 @@ typedef struct khui_credwnd_tbl_t {
 #define KHUI_CW_TBL_ACTIVE      0x00000100
 #define KHUI_CW_TBL_CUSTVIEW    0x00000200
 #define KHUI_CW_TBL_COLSKIP     0x00000400
+#define KHUI_CW_TBL_EXPIDENT    0x00000800
+#define KHUI_CW_TBL_NOHEADER    0x00001000
 
 /* mouse_state constants */
 #define CW_MOUSE_NONE       0x00000000 /* nothing interesting */

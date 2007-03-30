@@ -85,11 +85,19 @@ enum khui_alert_flags {
       are no actions or if ::KHUI_ALERT_FLAG_REQUEST_WINDOW is
       specified.*/
 
+    KHUI_ALERT_FLAG_DISPATCH_CMD    =0x00000020,
+    /*!< If the message has commands, when the user clicks on one of
+      the command buttons, the corresponding command will be
+      immediately dispatched as if khui_action_trigger() is called
+      with a NULL UI context.  Otherwise, the selected command will be
+      stored in the alert and can be retrieved via a call to
+      khui_alert_get_response(). */
+
     KHUI_ALERT_FLAG_VALID_TARGET    =0x00010000,
-    /*!< There is a valid target for the alert */
+    /*!< Internal. There is a valid target for the alert */
 
     KHUI_ALERT_FLAG_VALID_ERROR     =0x00020000,
-    /*!< There is a valid error context associated with the alert */
+    /*!< Internal. There is a valid error context associated with the alert */
 
     KHUI_ALERT_FLAG_DISPLAY_WINDOW  =0x01000000,
     /*!< The alert has been displayed in a window */
@@ -104,9 +112,9 @@ enum khui_alert_flags {
     /*!< The alert should be displayed in a balloon */
 
     KHUI_ALERT_FLAG_MODAL           =0x10000000,
-    /*!< Modal alert.  Do not set direclty. */
+    /*!< Internal. Modal alert.  Do not set direclty. */
 
-    KHUI_ALERT_FLAGMASK_RDWR        =0x0C000010,
+    KHUI_ALERT_FLAGMASK_RDWR        =0x0C000030,
     /*!< Bit mask of flags that can be set by khui_alert_set_flags() */
 };
 
@@ -266,8 +274,8 @@ khui_alert_get_response(khui_alert * alert);
     An exception is when ::KHUI_ALERT_FLAG_DEFACTION is specified in
     flags.  In this case instead of a placeholder balloon prompt, one
     will be shown with the actual title and message (truncated if
-    necessary).  Clicking on the balloon will have the same effect as
-    choosing the first command in the action.
+    necessary).  Clicking on the balloon will cause the first command
+    in the command list to be performed.
 
     The placeholder balloon prompt will have a title derived from the
     first 63 characters of the \a title field in the alert and a
@@ -277,6 +285,32 @@ khui_alert_get_response(khui_alert * alert);
     To this end, it is beneficial to limit the length of the title to
     63 characters (64 counting the terminating NULL).  This limit is
     enforced on Windows.  Also, try to make the title descriptive.
+
+    User interaction with the alert will be as follows:
+
+    - If the alert contains no commands, then the alert will be
+      displayed to the user as described above.  A 'close' button will
+      be added to the alert if the alert is being displayed in a
+      window.
+
+    - If the alert contains commands, has the
+      ::KHUI_ALERT_FLAG_DEFACTION flag set and is displayed in a
+      balloon and the user clicks on it, the first command in the
+      command list will be executed.
+
+    - If the alert contains commands and does not have the
+      ::KHUI_ALERT_FLAG_DEFACTION and has the
+      ::KHUI_ALERT_FLAG_DISPATCH_CMD flag set, then when the user
+      selects one of the command buttons, the corresponding command
+      will immediately be dispatched. (see
+      ::KHUI_ALERT_FLAG_DISPATCH_CMD).
+
+    - If the alert contains command and have neither
+      ::KHUI_ALERT_FLAG_DEFACTION nor ::KHUI_ALERT_FLAG_DISPATCH_CMD,
+      then when the user selects one of the command buttons, the
+      selected command will be stored along with the alert.  It can be
+      retrieved via a call to khui_alert_get_response().
+
  */
 KHMEXP khm_int32 KHMAPI 
 khui_alert_show(khui_alert * alert);

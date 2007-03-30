@@ -231,7 +231,7 @@ kcdb_identity_create(const wchar_t *name,
     StringCbCopy(id->name, namesize, name);
 
     id->flags = (flags & KCDB_IDENT_FLAGMASK_RDWR);
-    id->flags |= KCDB_IDENT_FLAG_ACTIVE;
+    id->flags |= KCDB_IDENT_FLAG_ACTIVE | KCDB_IDENT_FLAG_EMPTY;
     LINIT(id);
 
     EnterCriticalSection(&cs_ident);

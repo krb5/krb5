@@ -792,6 +792,12 @@ khc_get_type(khm_handle conf, const wchar_t * value_name);
     configuration stores that were specified when opening the
     configuration space corresponding to \a conf.
 
+    If the specified handle is shadowed (see khc_shadow_space()) and
+    the value is not found in any of the visible stores for the
+    topmost handle, each of the shadowed handles will be tried in turn
+    until the value is found.  The return value will correspond to the
+    handle where the value is first found.
+
     \return A combination of ::KCONF_FLAG_MACHINE, ::KCONF_FLAG_USER
         and ::KCONF_FLAG_SCHEMA indicating which stores contain the
         value.

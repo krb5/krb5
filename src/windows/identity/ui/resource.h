@@ -305,6 +305,20 @@
 #define IDS_NCN_IDENT_UNKNOWN           299
 #define IDS_REMOTE_FAIL                 300
 #define IDS_REMOTE_FAIL_TITLE           301
+#define IDS_NOTIFICATION_ACTIONS        302
+#define IDS_IDACTION_NEW                302
+#define IDS_IDACTIONT_NEW               303
+#define IDS_IDACTIONT_RENEW             304
+#define IDS_IDACTIONT_DESTROY           305
+#define IDS_ALERTTYPE_PLUGIN            306
+#define IDS_ALERTTYPE_EXPIRE            307
+#define IDS_ALERTTYPE_RENEWFAIL         308
+#define IDS_ALERTTYPE_ACQUIREFAIL       309
+#define IDS_ALERTTYPE_CHPW              310
+#define IDS_ACTION_LAYOUT_MINI          311
+#define IDS_IDEXPDISP_NOCRED            312
+#define IDS_IDEXPDISP_1CRED             313
+#define IDS_IDEXPDISP_NCRED             314
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -409,6 +423,8 @@
 #define IDC_SM_LBL                      1137
 #define IDC_MED_LBL                     1138
 #define IDC_LG_LBL                      1139
+#define IDC_CFG_NOTACTION               1141
+#define IDC_CFG_NOTACT_STATIC           1142
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -423,7 +439,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1140
+#define _APS_NEXT_CONTROL_VALUE         1143
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

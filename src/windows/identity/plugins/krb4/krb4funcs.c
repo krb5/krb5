@@ -32,7 +32,6 @@ modified and adapted for NetIDMgr */
 
 #define SECURITY_WIN32
 #include <security.h>
-#include <ntsecapi.h>
 
 #include <string.h>
 #include <time.h>

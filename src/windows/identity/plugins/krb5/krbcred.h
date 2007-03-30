@@ -176,6 +176,7 @@ typedef struct _fiber_job_t {
 
     BOOL    null_password;
     BOOL    valid_principal;
+    BOOL    retry_if_valid_principal;
 } fiber_job;
 
 extern fiber_job g_fjob;   /* global fiber job object */
@@ -184,8 +185,9 @@ extern fiber_job g_fjob;   /* global fiber job object */
 #define FIBER_CMD_CANCEL    2
 #define FIBER_CMD_CONTINUE  3
 
-#define FIBER_STATE_NONE    0
-#define FIBER_STATE_KINIT   1
+#define FIBER_STATE_NONE          0
+#define FIBER_STATE_KINIT         1
+#define FIBER_STATE_RETRY_KINIT   2
 
 #define K5_SET_CRED_MSG     WMNC_USER
 

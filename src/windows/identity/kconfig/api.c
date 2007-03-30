@@ -2018,26 +2018,35 @@ khc_value_exists(khm_handle conf, const wchar_t * value) {
     if(!khc_is_handle(conf))
         return KHM_ERROR_INVALID_PARAM;
 
-    c = khc_space_from_handle(conf);
+    do {
+        c = khc_space_from_handle(conf);
 
-    if (khc_is_user_handle(conf))
-        hku = khcint_space_open_key(c, KHM_PERM_READ);
-    if (khc_is_machine_handle(conf))
-        hkm = khcint_space_open_key(c, KHM_PERM_READ | KCONF_FLAG_MACHINE);
+        if (khc_is_user_handle(conf))
+            hku = khcint_space_open_key(c, KHM_PERM_READ);
+        if (khc_is_machine_handle(conf))
+            hkm = khcint_space_open_key(c, KHM_PERM_READ | KCONF_FLAG_MACHINE);
 
-    if(hku && (RegQueryValueEx(hku, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
-        rv |= KCONF_FLAG_USER;
-    if(hkm && (RegQueryValueEx(hkm, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
-        rv |= KCONF_FLAG_MACHINE;
+        if(hku && (RegQueryValueEx(hku, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
+            rv |= KCONF_FLAG_USER;
+        if(hkm && (RegQueryValueEx(hkm, value, NULL, &t, NULL, NULL) == ERROR_SUCCESS))
+            rv |= KCONF_FLAG_MACHINE;
 
-    if(c->schema && khc_is_schema_handle(conf)) {
-        for(i=0; i<c->nSchema; i++) {
-            if(!wcscmp(c->schema[i].name, value)) {
-                rv |= KCONF_FLAG_SCHEMA;
-                break;
+        if(c->schema && khc_is_schema_handle(conf)) {
+            for(i=0; i<c->nSchema; i++) {
+                if(!wcscmp(c->schema[i].name, value)) {
+                    rv |= KCONF_FLAG_SCHEMA;
+                    break;
+                }
             }
         }
-    }
+
+        /* if the value is not found at this level and the handle is
+           shadowed, try the next level down. */
+        if (rv == 0 && khc_is_shadowed(conf))
+            conf = khc_shadow(conf);
+        else
+            break;
+    } while (conf);
 
     return rv;
 }
