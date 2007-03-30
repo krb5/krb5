@@ -10,218 +10,286 @@
 			<LINK href="css\main-action(1).css" type="text/css" rel="stylesheet">
 				<META content="MSHTML 6.00.2900.3059" name="GENERATOR"></HEAD>
 	<BODY>
-		<DIV id="PageContent">
-			<TABLE style="MARGIN-TOP: 0px" cellSpacing="0" cellPadding="0" width="100%">
-				<TBODY>
+		<DIV style="MARGIN-LEFT: 10px; MARGIN-RIGHT: 10px" align="left">
+			<DIV class="wiki-content" style="MARGIN-TOP: 5px; MARGIN-BOTTOM: 5px" align="left">The 
+				Kerberos For Windows build is being automated. This description consists of
+			</DIV>
+			<UL>
+				<LI>
+					<A href="#lore-bkw-automation-Buildsteps">Build steps</A>
+				<LI>
+					<A href="#Script-structure">Script structure</A>
+				<LI>
+					<A href="#Configfile">Config file</A>
+				<LI>
+					<A href="#Remainingwork">Remaining work / bug list</A>
+				<LI>
+					<A href="#Troubleshooting">Troubleshooting</A></LI>
+			</UL>
+			<H2><A name="lore-bkw-automation-Buildsteps"></A>Build steps</H2>
+			<P>Building the complete KfW product consists of these steps:</P>
+			<UL>
+				<LI>
+				Setting up the environment
+				<LI>
+				Fetching sources from repositories
+				<LI>
+				Building the sources with nmake
+				<LI>
+				Setting up the packaging environment
+				<LI>
+				Building the two installers -- a msi installer and an exe installer
+				<LI>
+					Building other distribution components
+					<UL>
+						<LI>
+						KfW source distribution
+						<LI>
+						KfW core binaries
+						<LI>
+						KfW SDK
+						<LI>
+						Microsoft redistributable components
+						<LI>
+							Individual files: release notes, Leash user guide, MSI Deployment Guide.
+						</LI>
+					</UL>
+				</LI>
+			</UL>
+			<H2><A name="Script-structure"></A>Script structure</H2>
+			<P>The build is a perl script controlled by command line switches and an XML 
+				configuration file. The config file is required. Settings in the config file 
+				can be overridden by optional command line switches.</P>
+			<P>The main steps in the script are</P>
+			<UL>
+				<LI>
+				Setting up the environment
+				<LI>
+				Fetching the sources from repositories
+				<LI>
+				Building the sources
+				<LI>
+				Setting up the packaging environment
+				<LI>
+				Building the msi with the package nmake
+				<LI>
+					Building the rest of the components
+				</LI>
+			</UL>
+			<P>The usage message shows the available switches:</P>
+			<P><TT>C:\Projects\KfW&gt;perl bkw.pl /?</TT><BR>
+				<TT>Usage: bkw.pl (-f --config) config-file [options] NMAKE-options</TT></P>
+			<P><TT>Options are case insensitive.</TT></P>
+			<P><TT>Options:</TT><BR>
+				<TT>/help /? usage information (what you now see)</TT><BR>
+				<TT>/srcdir dir&nbsp;&nbsp; Source directory to use. Should contain</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					pismere/athena. If cvstag or svntag is null,</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					the directory should be prepopulated.</TT><BR>
+				<TT>/cvstag tag&nbsp;&nbsp; \ For whichever of these tags is specified,</TT><BR>
+				<TT>/svntag url&nbsp;&nbsp; / a checkout will be done into srcdir</TT><BR>
+				<TT>/debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Do debug make instead of 
+					release make</TT><BR>
+				<TT>/outdir dir&nbsp;&nbsp; Directory to be created where build results will go</TT><BR>
+				<TT>/nomake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Skip make step</TT><BR>
+				<TT>/nopackage&nbsp;&nbsp;&nbsp;&nbsp;Skip packaging step</TT><BR>
+				<TT>/clean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Build clean target</TT><BR>
+				<TT>/verbose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Debug mode - verbose output</TT><BR>
+				<TT>/vverbose&nbsp;&nbsp;&nbsp;&nbsp; very verbose output</TT><BR>
+				<TT>/config path&nbsp; Path to config file</TT><BR>
+				<TT>/logfile path Where to write output. If omitted, ...</TT><BR>
+				<TT>/srcdir dir&nbsp;&nbsp; Source directory to use. Should contain
+					<BR>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>pismere/athena. 
+					If cvstag or svntag is null,
+					<BR>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					the directory should be prepopulated.
+					<BR>
+				</TT><TT>/outdir dir&nbsp;&nbsp; Directory to be created where build results will 
+					go
+					<BR>
+					/repository checkout | co \ What repository action to take.
+					<BR>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </TT><TT>update&nbsp;&nbsp; 
+					| up | Options are to checkout, update or<BR>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					/ take no action [skip].
+					<BR>
+					/cvstag tag&nbsp;&nbsp; \ For whichever of these tags is specified,
+					<BR>
+				</TT><TT>/svntag url&nbsp;&nbsp; / the repository action will be done into srcdir
+					<BR>
+					/debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Do debug make instead of 
+					release make
+					<BR>
+					/nomake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Skip make step
+					<BR>
+					/nopackage&nbsp;&nbsp;&nbsp; Skip packaging step
+					<BR>
+					/clean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Build clean target
+					<BR>
+					/verbose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Debug mode - verbose output
+					<BR>
+					/config path&nbsp; Path to config file
+					<BR>
+					/logfile path Where to write output. If omitted, ...<BR>
+				</TT><TT>Other:</TT><BR>
+				<TT>NMAKE-options any options you want to pass to NMAKE, which can be:</TT><BR>
+				<TT>(note: /nologo is always used)</TT><BR>
+				<TT>[ nmake options follow ]</TT></P>
+			<P>Additional controls, not available from the command line:</P>
+			<P><TT>&lt;CVSROOT name=":kserver:cvs.mit.edu:/cvs/pismere" /&gt;</TT><BR>
+				<TT>&lt;SVNURL name="" /&gt;</TT><BR>
+				<TT>&lt;CopyList&gt;&lt;Config&gt;&lt;DebugArea value="dbg" /&gt;</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					&lt;ReleaseArea value="rel" /&gt;</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AlwaysTag 
+					value="%bldtype%" /&gt;</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					&lt;DebugTag value="%debug%" /&gt;</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					&lt;ReleaseTag value="%release%" /&gt;</TT><BR>
+				<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+					&lt;Files&gt;&lt;Include path="copyfiles.xml" /&gt;</TT></P>
+			<P><TT><FONT face="Verdana">The pre-package steps gathers up build results and puts them in 
+						a <FONT face="Courier">target</FONT> area.&nbsp; "target" is hardwired in the 
+						build script.</FONT></TT></P>
+			<P><TT><FONT face="Verdana">The post-package step zips up various files and then copies the 
+						zips and other files to<FONT face="Courier"><EM>srcdir</EM></FONT>/<FONT face="Courier">public</FONT>.&nbsp; 
+						"public" is hardwired in the build script.</FONT></TT></P>
+			<H2><A name="#Configfile"></A>Config file</H2>
+			<H3>
+				CopyLists</H3>
+			<P>
+				CopyLists are used in many places.&nbsp;&nbsp;There is an optional 
+				Configuration section and a required Files section.&nbsp;</P>
+			<P>The configuration section defines the roots of the from and to paths and can 
+				optionally define path substitutions.&nbsp;
+			</P>
+			<P>Internally, the to and from paths are required.&nbsp; They are forced by the 
+				script rather than being set in the config file.&nbsp; Comments in the copyfile 
+				xml indicate this.</P>
+			<P>The overall build configuration specifies a debug or release build.&nbsp; The 
+				debug and release results are put in different places.&nbsp; File entries can 
+				indicate a variable part of a path with a tag such as %bldtype%.&nbsp; The 
+				script will substitute %bldtype% with either dbg or rel, depending on the build 
+				type.&nbsp; The substitution tags are specified with these declarations:</P>
+			<P>
+				<TABLE id="Table1" height="0" cellSpacing="1" cellPadding="1" border="1">
 					<TR>
-						<TD vAlign="top" width="100%"><!-- Inner content table -->
-							<TABLE cellSpacing="0" cellPadding="2" width="100%">
-								<TBODY>
-									<TR>
-										<TD vAlign="top" width="100%">
-											<DIV style="MARGIN-BOTTOM: 10px; MARGIN-LEFT: 10px">
-												<DIV class="wiki-content" style="MARGIN-TOP: 5px; MARGIN-BOTTOM: 5px">The Kerberos 
-													For Windows build is being automated. This description consists of
-												</DIV>
-											</DIV>
-											<DIV id="content" style="MARGIN-LEFT: 10px">
-												<DIV class="wiki-content" style="MARGIN-RIGHT: 10px">
-													<UL>
-														<LI>
-														Build steps
-														<LI>
-														Script structure
-														<LI>
-														Script step details
-														<LI>
-															Remaining work / bug list
-														</LI>
-													</UL>
-													<H2><A name="lore-bkw-automation-Buildsteps"></A>Build steps</H2>
-													<P>Building the complete KfW product consists of these steps:</P>
-													<UL>
-														<LI>
-														Setting up the environment [Done except for subversion, logging]
-														<LI>
-														Fetching sources from repositories [cvs done; subversion being worked on]
-														<LI>
-														Building the sources with nmake [Done]
-														<LI>
-														Setting up the packaging environment [Done]
-														<LI>
-														Building KfW.msi with the packaging nmake [Done]
-														<LI>
-															Building other distribution components [Not done]
-															<UL>
-																<LI>
-																.exe installer
-																<LI>
-																KfW source distribution
-																<LI>
-																KfW core binaries
-																<LI>
-																KfW SDK
-																<LI>
-																Microsoft redistributable components
-																<LI>
-																	Individual files: release notes, Leash user guide, MSI Deployment Guide.
-																</LI>
-															</UL>
-														</LI>
-													</UL>
-													<H2>Script structure</H2>
-													<P>The build is a perl script controlled by command line switches and an XML 
-														configuration file. The config file is required. Settings in the config file 
-														can be overridden by optional command line switches.</P>
-													<P>The main steps in the script are</P>
-													<UL>
-														<LI>
-														Setting up the environment
-														<LI>
-														Fetching the sources from repositories
-														<LI>
-														Building the sources
-														<LI>
-														Setting up the packaging environment
-														<LI>
-														Building the msi with the package nmake
-														<LI>
-															Building the rest of the components [tbd]
-														</LI>
-													</UL>
-													<P>The usage message shows the available switches:</P>
-													<P><TT>C:\Projects\KfW&gt;perl bkw.pl /?</TT><BR>
-														<TT>Usage: bkw.pl (-f --config) config-file [options] NMAKE-options</TT></P>
-													<P><TT>Options are case insensitive.</TT></P>
-													<P><TT>Options:</TT><BR>
-														<TT>/help /? usage information (what you now see)</TT><BR>
-														<TT>/srcdir dir&nbsp;&nbsp; Source directory to use. Should contain</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															pismere/athena. If cvstag or svntag is null,</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															the directory should be prepopulated.</TT><BR>
-														<TT>/cvs?ag tag&nbsp;&nbsp; \ For whichever of these tags is specified,</TT><BR>
-														<TT>/svntag url&nbsp;&nbsp; / a checkout will be done into srcdir</TT><BR>
-														<TT>/debug&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Do debug make instead of 
-															release make</TT><BR>
-														<TT>/outdir dir&nbsp;&nbsp; Directory to be created where build results will go</TT><BR>
-														<TT>/nomake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Skip make step</TT><BR>
-														<TT>/nopackage&nbsp;&nbsp;&nbsp;&nbsp;Skip packaging step</TT><BR>
-														<TT>/clean&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Build clean target</TT><BR>
-														<TT>/verbose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Debug mode - verbose output</TT><BR>
-														<TT>/vverbose&nbsp;&nbsp;&nbsp;&nbsp; very verbose output</TT><BR>
-														<TT>/config path&nbsp; Path to config file</TT><BR>
-														<TT>/logfile path Where to write output. If omitted, ...</TT><BR>
-														<TT>/srcdir dir&nbsp;&nbsp; Source directory to use. Should contain
-															<BR>
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>pismere/athena. 
-															If cvstag or svntag is null,
-															<BR>
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															the directory should be prepopulated.
-															<BR>
-														</TT><TT>/outdir dir&nbsp;&nbsp; Directory to be created where build results will 
-															go
-															<BR>
-															/repository checkout | co \ What repository action to take.
-															<BR>
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </TT><TT>update&nbsp;&nbsp; 
-															| up | Options are to checkout, update or<BR>
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;skip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															/ take no action [skip].
-															<BR>
-															/cvstag tag&nbsp;&nbsp; \ For whichever of these tags is specified,
-															<BR>
-														</TT><TT>/svntag url&nbsp;&nbsp; / the repository action will be done into srcdir
-															<BR>
-															/debug Do debug make instead of release make
-															<BR>
-															/nomake Skip make step
-															<BR>
-															/nopackage Skip packaging step
-															<BR>
-															/clean Build clean target
-															<BR>
-															/verbose Debug mode - verbose output
-															<BR>
-															/config path Path to config file
-															<BR>
-															/logfile path Where to write output. If omitted, ...<BR>
-														</TT><TT>Other:</TT><BR>
-														<TT>NMAKE-options any options you want to pass to NMAKE, which can be:</TT><BR>
-														<TT>(note: /nologo is always used)</TT><BR>
-														<TT>[ nmake options follow ]</TT></P>
-													<P>Additional controls, not available from the command line:</P>
-													<P><TT>&lt;CVSROOT name=":kserver:cvs.mit.edu:/cvs/pismere" /&gt;</TT><BR>
-														<TT>&lt;SVNURL name="" /&gt;</TT><BR>
-														<TT>&lt;CopyList&gt;&lt;Config&gt;&lt;DebugArea value="dbg" /&gt;</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															&lt;ReleaseArea value="rel" /&gt;</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;AlwaysTag 
-															value="%bldtype%" /&gt;</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															&lt;DebugTag value="%debug%" /&gt;</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															&lt;ReleaseTag value="%release%" /&gt;</TT><BR>
-														<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-															&lt;Files&gt;&lt;Include path="copyfiles.xml" /&gt;</TT></P>
-													<H3>The CopyList</H3>
-													<P>The <TT>CopyList</TT> is used during the Setting Up The Packaging Environment 
-														step. Build results and files from all over the source tree are copied into a 
-														'staging' area in a structure the packaging script expects. The staging area is <TT>
-															&lt;src&gt;/pismere/staging</TT>.</P>
-													<P>The original copy list on which this is based had duplicate entries for debug 
-														and release build results. This version only names each file once, which could 
-														reduce maintenance.</P>
-													<P>A copylist entry looks like this:</P>
-													<DIV class="preformattedContent"><PRE>&lt;File name="comerr32.dll" from="..\target\bin\i386\%bldtype%\" to="\bin\i386" /&gt;
-</PRE>
-													</DIV>
-													<P>From paths are relative to <TT>&lt;src&gt;\pismere\athena</TT> and To paths are 
-														relative to <TT>&lt;src&gt;\pismere\staging</TT>.</P>
-													<P>Debug and release build results go into directories containing either 'dbg' or 
-														'rel.' <TT>DebugArea</TT> and <TT>ReleaseArea</TT> describe these strings. If 
-														an entry in the copy list contains the <TT>AlwaysTag</TT> string ('%bldtype%'), 
-														the debug or release file will be copied, depending on the build type. If the 
-														copy list entry contains <TT>DebugTag</TT> ('%debug%'), the file will only be 
-														copied if packaging a debug build. Ditto for <TT>ReleaseTag<?TT>.</P>
-													<P>If we are doing a debug build, the above copylist entry will copy <TT>&lt;src&gt;\pismere\athena\..\target\bin\i386\dbg\comerr32.dll</TT>
-														to <TT>&lt;src&gt;\pismere\staging\bin\i386\comerr32.dll</TT>.</P>
-													<P>There are two other possible attributes in a copylist entry:</P>
-													<UL>
-														<LI>
-															<TT>notrequired</TT>
-														<LI>
-															<TT>newname="filename"</TT>
-														</LI>
-													</UL>
-													<P>Most copylist entries are required and the script will die if they aren't 
-														present. To ignore missing files, add <TT>notrequired</TT>.</P>
-													<P>To rename the file, set the <TT>newname</TT> attribute.</P>
-													<H2><FONT face="Verdana">Remaining work / bug list</FONT></H2>
-													<P>This is a work in progress. What's left:</P>
-													<UL>
-														<LI>
-															<FONT face="Verdana">Produce the remainder of the distribution components. [Listed 
-																above.] </FONT>
-														</LI>
-													</UL>
-													<P>Bugs:</P>
-													<UL>
-														<LI>
-															<FONT face="Verdana">Propogate leash removal through wix scripts. </FONT>
-														<LI>
-															<FONT face="Verdana">Eliminate need for redundant <TT>/debug debug</TT>. </FONT>
-														</LI>
-													</UL>
-												</DIV>
-											</DIV>
-											</TT></TD>
-									</TR>
-								</TBODY></TABLE>
+						<TD>DebugArea</TD>
+						<TD height="21">Path value used in debug build.&nbsp; Must match what the build 
+							script uses.&nbsp; Typically "dbg."</TD>
+					</TR>
+					<TR>
+						<TD>ReleaseArea</TD>
+						<TD height="9">Path value used in release build.&nbsp; Must match the build 
+							script.&nbsp; Typically "rel."</TD>
+					</TR>
+					<TR>
+						<TD>AlwaysTag</TD>
+						<TD height="17">String in file entries which will always be changed to either 
+							DebugArea or ReleaseArea. File is always copied.&nbsp; Typically "%bldtype%."</TD>
+					</TR>
+					<TR>
+						<TD>DebugTag</TD>
+						<TD>String in file entries which will only be changed to DebugArea during a debug 
+							build.&nbsp; File is only copied in a debug build.&nbsp; Typically "%debug%."</TD>
+					</TR>
+					<TR>
+						<TD>ReleaseTag</TD>
+						<TD>String in file entries which will only be changed to ReleaseArea during a 
+							release build.&nbsp; File is only copied in a release build.&nbsp; Typically 
+							"%release%."</TD>
+					</TR>
+					<TR>
+						<TD>FileStem</TD>
+						<TD>%filestem% will always be changed to FileStem.&nbsp; Example:&nbsp; 
+							"kfw-3-2-0."&nbsp; This is used in when building or copying the final build 
+							results.</TD>
+					</TR>
+				</TABLE>
+			</P>
+			<P><STRONG>Example</STRONG></P>
+			<P>Each segment of the file's path that comes from a different place is in a 
+				different color.</P>
+			<P>
+				Release build.&nbsp; Config file:
+			</P>
+			<P>
+				<TABLE id="Table2" cellSpacing="1" cellPadding="1" border="0">
+					<TR>
+						<TD colspan="4"><FONT face="courier">&lt;BKW_Config&gt;</FONT></TD>
+					</TR>
+					<TR>
+						<TD width="23"></TD>
+						<TD colspan="3"><FONT face="courier">&lt;CommandLine&gt;</FONT></TD>
+					</TR>
+					<TR>
+						<TD width="23"></TD>
+						<TD width="20"></TD>
+						<TD colspan="2"><FONT face="courier">&lt;Directories&gt;</FONT></TD>
+					</TR>
+					<TR>
+						<TD width="23"></TD>
+						<TD width="20"></TD>
+						<TD width="22"></TD>
+						<TD><FONT face="courier">&lt;src path ="<FONT color="#000099">C:\projects\Autobuild"</FONT>
+								/&gt;</FONT>
 						</TD>
 					</TR>
-				</TBODY></TABLE>
+				</TABLE>
+			</P>
+			<P>Copylist comments:</P>
+			<P class="code">
+				&lt;!-- File from paths are relative to
+				<src>\<FONT color="#ff00cc">pismere\athena</FONT> --&gt; 
+<BR>  
+		&lt;!-- File to			paths are relative to <src>\<FONT color="#00ff00">pismere\staging</FONT>
+				--&gt;
+			</P>
+			<P>When the script processes this copylist, it will force the from and to paths as 
+				indicated.</P>
+			<P>This line
+			</P>
+			<P class="code">&lt;File name="<FONT color="#00ffff">comerr32.dll</FONT>" from="<FONT color="#ff9933">..\target\bin\i386</FONT>\<FONT color="#ff0000">%bldtype%</FONT>\" 
+				to="\<FONT color="#9966ff">bin\i386</FONT>" /&gt;</P>
+			<P>will result in <FONT face="Courier"><FONT color="#000099">C:\projects\Autobuild</FONT>\<FONT color="#ff00cc">pismere\athena</FONT>\<FONT color="#ff9933">..\target\bin\i386</FONT>\<FONT color="#ff0000">rel</FONT>\<FONT color="#00ffff">comerr32.dll</FONT></FONT></P>
+			<P>being copied to <FONT face="Courier"><FONT color="#000099">C:\projects\Autobuild</FONT>\<FONT color="#00ff00">pismere\staging</FONT>\<FONT color="#9966ff">bin\i386</FONT>\<FONT color="#00ffff">comerr32.dll</FONT></FONT>.</P>
+			<TT>
+				<P>
+					Other possible attributes in a copylist entry:</P>
+				<UL>
+					<LI>
+						<TT>notrequired</TT>
+					<LI>
+						<TT>newname="filename"</TT>
+					</LI>
+				</UL>
+				<P>By default, copylist entries are required and the script will die if they aren't 
+					present. To ignore missing files, add <TT>notrequired</TT>.</P>
+				<P>To rename the file, set the <TT>newname</TT> attribute.</P>
+				<P>Lengthy copy lists can be kept in separate files and included with the Include 
+					directive.&nbsp; Example:</P>
+				<P class="code">&lt;Include path="sdkfiles.xml" /&gt;</P>
+				<H2><FONT face="Verdana"><A name="Remainingwork"></A>Remaining work / bug list</FONT></H2>
+				<P>This is a work in progress. What's left:</P>
+				<P>Bugs:</P>
+				<UL>
+					<LI>
+						<FONT face="Verdana">Eliminate need for redundant <TT>/debug debug</TT>. </FONT>
+					<LI>
+						<FONT face="Verdana">Handle checkout into non-existant directory.</FONT>
+					</LI>
+				</UL>
+				<H2><FONT face="Verdana"><A name="Troubleshooting"></A>Troubleshooting</FONT>
+			</TT></H2>
+			<P><TT><FONT face="Verdana"><STRONG>svn can't create tunnel:<BR>
+						</STRONG>Make sure environment variable SVN_SSH points to a valid 
+						plink.exe.&nbsp; Path separators must be backslashes and must be doubled.</FONT></TT><TT></P>
+			</TT>
 		</DIV>
 	</BODY>
 </HTML>
