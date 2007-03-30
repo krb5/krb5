@@ -47,6 +47,7 @@ typedef struct tag_khm_startup_options_v1 {
     BOOL init;
     BOOL import;
     BOOL renew;
+    LONG pending_renewals;
     BOOL destroy;
 
     BOOL autoinit;

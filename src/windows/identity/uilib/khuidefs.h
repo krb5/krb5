@@ -88,9 +88,39 @@ khm_get_lib_version(khm_version * libver, khm_ui_4 * apiver);
 KHMEXP khm_ui_4 KHMAPI
 khm_get_commctl_version(khm_version * pdvi);
 
+/*! \brief UI callback function
+
+    Used with khui_request_UI_callback().
+
+    \see khui_request_UI_callback()
+ */
 typedef khm_int32
 (KHMAPI *khm_ui_callback)(HWND hwnd_main_wnd, void * rock);
 
+/*! \brief Request a UI callback
+
+    In general, plug-ins in Network Identity Manager run in their own
+    thread and will not be able to interact with the user directly by
+    creating windows of its own.  There are exceptions to this, such
+    as when the plug-in is responding to a new credentials request or
+    if the plug-in provides configuration panels.  However, if a
+    plug-in needs to provide a user interface to the user outside of
+    the provisions already provided by Network Identity Manager, it
+    needs to do so from within the user interface thread.
+
+    To do so, a plug-in would provide a callback function of the type
+    ::khm_ui_callback to this function.  The Network Identity Manager
+    will then call the callback function from within the user
+    interface thread.  At this point, the callback function can create
+    any windows it wishes to create and interact with the user
+    directly.
+
+    Note that when the plug-in creates any windows, it should specify
+    the window handle provided via the \a hwnd_main_wnd parameter as
+    the parent window.
+
+    \see ::khm_ui_callback
+ */
 KHMEXP khm_int32 KHMAPI
 khui_request_UI_callback(khm_ui_callback cb, void * rock);
 
