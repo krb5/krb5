@@ -2,7 +2,7 @@
 	       ----------------------------------------
 
 Kerberos 5 builds on Windows with MSVC++ 6.0, MSVS.NET, and 
-MSVS.NET 2003.  You will need the November 2001 platform SDK or 
+MSVS.NET 2003.  You will need the XP SP2 Platform SDK or 
 later; this SDK is required to define getaddrinfo.  It may or 
 may not build with other compilers or make utilities.
 
@@ -230,20 +230,18 @@ This has the side effect of making them useless to the MIT krb5 library
 when attempting to request additional service tickets.
 
 This new feature has been seen in Windows 2003 Server, Windows 2000 Server SP4,
-and Windows XP SP2 Beta.  We assume that it will be implemented in all future
+and Windows XP SP2.  We assume that it will be implemented in all future
 Microsoft operating systems supporting the Kerberos SSPI.  Microsoft does work
 closely with MIT and has provided a registry key to disable this new feature.
+On server platforms the key is specified as:
 
   HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters
     AllowTGTSessionKey = 0x01 (DWORD)
 
-On Windows XP SP2 Beta 1 the key was specified as 
+On workstation platforms the key is specified as: 
 
   HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos
     AllowTGTSessionKey = 0x01 (DWORD)
-
-However, we anticipate that this will be changed to match the Server platforms 
-in time for SP2 RC1.
 
 It has been noted that the Microsoft Kerberos LSA does not provide enough 
 information within its KERB_EXTERNAL_TICKET structure to properly construct
@@ -290,8 +288,7 @@ The GSS API Sample Client provided in this distribution is compatible with the
 gss-server application built on Unix/Linux systems.  This client is not compatible
 with the Platform SDK/Samples/Security/SSPI/GSS/ samples which Microsoft has been
 shipping as of January 2004.  Revised versions of these samples are available upon 
-request to krbdev@mit.edu.  Microsoft is committed to distribute revised samples
-which are compatible with the MIT distributed tools in a future SDK and via MSDN.
+request to krbdev@mit.edu.  
 
 Kerberos 4 Library Support:
 ---------------------------
