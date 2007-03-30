@@ -51,4 +51,4 @@ $(OBJ)\kmm_msgs.rc: lang\kmm_msgs.mc
 all: mkdirs $(INCFILES) $(MSGRESFILE) $(OBJFILES)
 
 clean::
-	$(RM) $(INCFILES)
+	if exist '..\obj' $(RM) $(INCFILES)

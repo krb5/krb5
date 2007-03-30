@@ -45,4 +45,4 @@ $(OBJ)\kmqconfig.c: kmqconfig.csv $(CONFDIR)\csvschema.cfg
 all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
-	$(RM) $(INCFILES)
+	if exist '..\obj' $(RM) $(INCFILES)

@@ -35,8 +35,7 @@ OBJFILES= \
 all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
-	$(RM) $(INCFILES)
-
+	if exist '..\obj' $(RM) $(INCFILES)
 # Tests
 
 test:: util_test
