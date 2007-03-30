@@ -35,4 +35,4 @@ INCFILES= \
 all: $(INCFILES)
 
 clean::
-	$(RM) $(INCFILES)
+	if exist '..\obj' $(RM) $(INCFILES)
