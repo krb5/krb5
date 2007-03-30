@@ -82,6 +82,12 @@ sub copyFiles {
 					$from	=~ s/%filestem%/$FileStemFragment/g;
 					$to		=~ s/%filestem%/$FileStemFragment/g;
 					}		
+				# %-DEBUG% substitution:
+				local $DebugFragment	= ($switches[0]->{debug}->{value}) ? "-DEBUG" : "";
+if ($from =~ /\-DEBUG/) {print "\n$from ... \n";}
+				$from	=~ s/%\-DEBUG%/$DebugFragment/g;
+				$to		=~ s/%\-DEBUG%/$DebugFragment/g;
+if ($from =~ /DEBUG/) {print "\n$from ... \n";}
 				$to							=~ s/\*.*//;				## Truncate to path before any wildcard
 
 				my $bCopyOK		= 1;

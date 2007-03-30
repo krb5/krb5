@@ -29,10 +29,8 @@
 		<FetchSources>
 			<Config>
 				<CVSROOT name=":kserver:cvs.mit.edu:/cvs/pismere" />
-				<SVNURL name="svn.mit.edu" /> <!-- NB:  No protocol or slashes!! -->
-				<KERBEROS_ID name="kpkoch" />
-				<KRB_PLINK name="plink.exe" /> <!-- Path to a kerberized plink, needed for svn. -->
-					<!-- NB:  Path separators must be doubled backslashes.  EG:  C:\\WINDOWS\\PLINK.EXE -->
+				<SVNURL name="svn.mit.edu" />	<!-- NB:  No protocol or slashes!! -->
+				<USERNAME name="" />					<!-- Needed for svn/plink.  Override from command line -->
 				</Config>
 		</FetchSources>
 		<Make>
@@ -73,13 +71,18 @@
 			</CopyList>
 		</PrePackage>
 		<Package>
+			<Config>
+				<Paths>	
+					<Versions path="pismere/athena/include/kerberos.ver" />		<!-- Relative to <src>. -->
+					</Paths>
+				</Config>
 			<MSI></MSI>
 			<NSIS></NSIS> <!-- NB:  Most config is done in site-local.nsi.	-->
 			<!-- Theoretically, writing site-local.nsi from xml settings could be done, but isn't.	-->
 		</Package>
 		<PostPackage>
 			<Config>													<!-- This config info will be copied into each CopyList in PostPackage. -->
-				<FileStem name="kfw-3-2-0" />		<!--	<FileStem> will be substituted for %filestem%.	-->
+				<FileStem name="kfw-%VERSION_MAJOR%-%VERSION_MINOR%-%VERSION_PATCH%" />		<!--	<FileStem> will be substituted for %filestem%.	-->
 				</Config>
 			<Zips>
 				<Zip dummy="foo" /> <!-- To force desired XML::Simple behavior	-->
@@ -142,7 +145,7 @@
 					<File name="msi-deployment-guide.txt" from="staging\install\wix\" to="" />
 					<File name="netidmgr_userdoc.pdf" from="staging\doc" to="." />
 					<File name="kfw.msi" from="staging\install\wix\" to="" newname="%filestem%.msi" />
-					<File name="MITKerberosForWindows.exe" from="staging\install\nsis" to="" newname="%filestem%.exe" />
+					<File name="MITKerberosForWindows%-DEBUG%.exe" from="staging\install\nsis" to="" newname="%filestem%%-DEBUG%.exe" />
 					</Files>
 				</CopyList>
 			</PostPackage>

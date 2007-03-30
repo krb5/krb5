@@ -38,23 +38,23 @@ Usage: $0 (-f --config) config-file [options] NMAKE-options
 
   Options:
     /help /?        usage information (what you now see).
-    /config path    Path to config file.
-    /srcdir dir     Source directory to use.  Should contain 
+    /config /c path    Path to config file.
+    /srcdir /r dir     Source directory to use.  Should contain 
                     pismere/athena.  If cvstag or svntag is null, 
                     the directory should be prepopulated.
-    /outdir dir     Directory to be created where build results will go
+    /outdir /o dir     Directory to be created where build results will go
     /repository checkout | co \\  What repository action to take.
 	        update   | up  ) Options are to checkout, update or 
 	        skip          /  take no action [skip].
-    /kerberos_id id kerberos id used to access svn if checking out.
-    /cvstag tag   \\ If non-empty, the tag is appended to cvs and svn
-    /svntag tag   / commands to select the rev to fetch.
-    /debug          Do debug make instead of release make.
+    /username /u name  username used to access svn if checking out.
+    /cvstag /c tag   \\ If non-empty, the tag is appended to cvs and svn
+    /svntag /s tag   / commands to select the rev to fetch.
+    /debug /d          Do debug make instead of release make.
     /nomake         Skip make step.
     /clean          Build clean target.
     /nopackage      Skip packaging step.
-    /verbose        Debug mode - verbose output.
-    /logfile path   Where to write output.  If omitted, ...
+    /verbose /v        Debug mode - verbose output.
+    /logfile /l path   Where to write output.  If omitted, ...
   Other:
     NMAKE-options    any options you want to pass to NMAKE, which can be:
                      (note: /nologo is always used)
@@ -91,9 +91,9 @@ sub main {
 	       'config|f:s',
 	       'logfile|l:s',
 	       'repository:s',
-	       'kerberos_id:s',
-	       'verbose',
-	       'vverbose',
+	       'username|u:s',
+	       'verbose|v',
+	       'vverbose|vv',
 	       'nomake',
 	       'clean',
 	       'nopackage',
@@ -114,7 +114,7 @@ sub main {
       }
 
     # List of programs which must be in PATH:
-    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 'hhc', 'candle', 'light', 'makensis', 'nmake');
+    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink');
     my $requirements_met = 1;
     my $first_missing = 0;
     my $error_list = "";
@@ -167,7 +167,7 @@ sub main {
     $switches[0]->{debug}->{value} = $OPT->{debug}				if exists $OPT->{debug};
     $switches[0]->{clean}->{value} = 1											if exists $OPT->{clean};
     $switches[0]->{repository}->{value} = $OPT->{repository}	if exists $OPT->{repository};
-    $fetch[0]->{KERBEROS_ID}->{name} = $OPT->{kerberos_id}	if exists $OPT->{kerberos_id};
+    $fetch[0]->{USERNAME}->{name} = $OPT->{username}	if exists $OPT->{username};
     $switches[0]->{nomake}->{value} = 1										if exists $OPT->{nomake};
     $switches[0]->{nopackage}->{value} = 1									if exists $OPT->{nopackage};
     $switches[0]->{verbose}->{value} = $OPT->{verbose}			if exists $OPT->{verbose};
@@ -211,20 +211,28 @@ sub main {
 
 	my $wd 	= $src."\\pismere";
 
-	if ($rverb =~ /checkout/) {
-		if (-d $wd) {
-			print "\n\nHEADS UP!!\n\n";
-			print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
-			print "If this is not what you intended, here's your chance to bail out!\n\n\n";
-			print "Are you sure you want to remove everything under $wd? ";
-			my $char = getc;
-			if (! ($char =~ /y/i)) {die "Info -- operation aborted by user."}
-			!system("rm -rf $wd/*")						or die "Fatal -- Couldn't clean $wd.";
-			!system("rmdir $wd")							or die "Fatal -- Couldn't remove $wd.";
+	if (! ($rverb =~ /skip/)) {
+		local $len = 0;
+		if (exists $fetch[0]->{USERNAME}->{name}) {
+			$len = length $fetch[0]->{USERNAME}->{name};
 			}
-		if (! -d $src)				{mkdir $src				or die "Fatal -- Couldn't create $src.";}
-		if (! -d $wd)				{mkdir $wd				or die "Fatal -- Couldn't create $wd.";}
-		if (! -d "$wd//CVS")	{mkdir "$wd//CVS"	or die "Fatal -- Couldn't create $wd\\CVS.";}
+	    if ($len < 1) {
+			die "Fatal -- you won't get far accessing the repository without specifying a username.";
+			}
+		}
+
+	if ($rverb =~ /checkout/) {
+		print "\n\nHEADS UP!!\n\n";
+		print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
+		print "If this is not what you intended, here's your chance to bail out!\n\n\n";
+		print "Are you sure you want to remove everything under $wd? ";
+		my $char = getc;
+		if (! ($char =~ /y/i)) {die "Info -- operation aborted by user."}
+		!system("rm -rf $wd/*")						or die "Fatal -- Couldn't clean $wd.";
+		!system("rmdir $wd")							or die "Fatal -- Couldn't remove $wd.";
+#		!system("attrib -h -r $wd\\* /s /d")	or die "Fatal -- Couldn't clear read-only attributes.";
+#		!system("del /s /q $wd\\*.*")				or die "Fatal -- Couldn't clean files from $wd."; 
+#		!system("rm -rf $wd\\*.*")					or die "Fatal -- Couldn't clean directories from $wd.";
 		}
 
 # Begin logging:
@@ -243,8 +251,8 @@ sub main {
 
 		# Set up cvs environment variables:
 		$ENV{CVSROOT} = $fetch[0]->{CVSROOT}->{name};
-		chdir($src)												or die "Fatal -- couldn't chdir to $src\n";
-		print "Info -- chdir to ".`cd`."\n"			if ($verbose);
+		chdir($src)											or die "Fatal -- couldn't chdir to $src\n";
+		print "Info -- chdir to ".`cd`."\n"				if ($verbose);
 		my $krb5dir	= $wd."\\athena\\auth\\krb5";
 
 		my $cvscmdroot	= "cvs $rverb";
@@ -261,28 +269,26 @@ sub main {
 				$cvscmd = $cvscmdroot." ".$module;
 				$cvscmd .= " ".$tags[0]->{cvs}->{value}	if ($tags[0]->{cvs}->{value});
 				if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-				!system($cvscmd)							or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+				!system($cvscmd)								or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
 				}
 			}
 		else {				## Update.
 			$cvscmd = $cvscmdroot;
 			$cvscmd .= " ".$tags[0]->{cvs}->{value}	if ($tags[0]->{cvs}->{value});
 			if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-			!system($cvscmd)								or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+			!system($cvscmd)									or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
 			}
 					
-		# Set up svn environment variables:
-		my $dblback_plink	= $fetch[0]->{KRB_PLINK}->{name};
-		$dblback_plink =~ s/\\/\\\\/g;
-		$ENV{SVN_SSH} = $dblback_plink;
+		# Set up svn environment variable:
+		$ENV{SVN_SSH} = "plink.exe";
 		# If  the directory structure doesn't exist, many cd commands will fail.
-		mkdir($krb5dir);
-		chdir($krb5dir)											or die "Fatal -- couldn't chdir to $krb5dir\n";
+		if (! -d $krb5dir) {mkdir($krb5dir)		or die "Fatal -- Couldn't  create $krb5dir";}
+		chdir($krb5dir)											or die "Fatal -- Couldn't chdir to $krb5dir";
 		print "Info -- chdir to ".`cd`."\n"			if ($verbose);
 		my $svncmd = "svn $rverb ";
 		if ($rverb =~ /checkout/) {		# Append the rest of the checkout command:
 			chdir("..");
-			$svncmd .= "svn+ssh://".$fetch[0]->{KERBEROS_ID}->{name}."@".$fetch[0]->{SVNURL}->{name}."/krb5/trunk krb5";
+			$svncmd .= "svn+ssh://".$fetch[0]->{USERNAME}->{name}."@".$fetch[0]->{SVNURL}->{name}."/krb5/trunk krb5";
 			}
 		if ($tags[0]->{svn}->{value}) {$svncmd .= " ".$tags[0]->{svn}->{value};}	# Add any specific tag
 		if ($verbose) {print "Info -- svn command: $svncmd\n";}
@@ -292,6 +298,7 @@ sub main {
 		}
 ##-- End  repository action.
 		
+##++ Make action:
 	if (	(!$switches[0]->{nomake}->{value}) ) {
 		if ($verbose) {print "Info -- *** Begin preparing for build.\n";}
 
@@ -368,9 +375,65 @@ sub main {
 		if ($verbose) {print "Info -- ***   End build".$buildtext."\n";}
 		}				## End make conditional.
 	else {print "Info -- *** Skipping build.\n"	if ($verbose);}
+##-- Make action.
 		
 	if (!$switches[0]->{nopackage}->{value}) {		## If /clean, this switch will have been cleared.
 		if ($verbose) {print "Info -- *** Begin prepackage.\n";}
+
+		# We read in the version information to be able to update the site-local files in the install build areas:
+		local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
+		open(DAT, "$src/$version_path")		or die "Could not open $version_path.";
+		@raw = <DAT>;
+		close DAT;
+		foreach $line (@raw) {
+			chomp $line;
+			if ($line =~ /#define/) {					# Process #define lines:
+				$line =~ s/#define//;					# Remove #define token
+				$line =~ s/^\s+//;						#  and leading & trailing whitespace
+				$line =~ s/\s+$//;
+				local @qr = split("\"", $line);		# Try splitting with quotes
+				if (exists $qr[1]) {
+					$qr[0] =~ s/^\s+//;				#  Clean up whitespace
+					$qr[0] =~ s/\s+$//;
+					$config->{Versions}->{$qr[0]} = $qr[1];		# Save string
+					}
+				else {												# No quotes, so
+					local @ar = split(" ", $line);		#  split with space
+					$ar[0] =~ s/^\s+//;				#  Clean up whitespace
+					$ar[0] =~ s/\s+$//;
+					$config->{Versions}->{$ar[0]} = $ar[1];			# and  save numeric value
+					}
+				}
+			}
+
+		# Check that the versions we will need for site-local have been defined:
+	    my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
+														'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
+														'VER_PRODUCTNAME_STR');
+	    my $requirements_met = 1;
+	    my $first_missing = 0;
+	    my $error_list = "";
+		foreach my $required (@required_versions) {
+	        if (! exists $config->{Versions}->{$required}) {
+				$requirements_met = 0;
+				if (!$first_missing) {
+					$first_missing = 1;
+					$error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
+					}
+				$error_list .= "$required\n";
+				}
+			}
+		if (!$requirements_met) {
+			print $error_list;
+			exit(0);
+			}
+		# Apply any of these tags to filestem:
+		my $filestem		= $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
+		$filestem			=~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
+		$filestem			=~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
+		$filestem			=~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
+		$config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}	= $filestem;
+		
 		# The build results are copied to a staging area, where the packager expects to find them.
 		#  We put the staging area in the fixed area .../pismere/staging.
 		my $prepackage	= $config->{Stages}->{PrePackage};
@@ -383,24 +446,54 @@ sub main {
 		# Force Where From and To are relative to:
 		$prepackage->{CopyList}->{Config}->{From}->{root}		= "$src\\pismere\\athena";
 		$prepackage->{CopyList}->{Config}->{To}->{root}			= "$src\\pismere\\staging";
-		copyFiles($prepackage->{CopyList}, $config);		## Copy any files
+		copyFiles($prepackage->{CopyList}, $config);				## Copy any files [this step takes a while]
 
 		chdir("staging\\install\\wix") or die "Fatal -- Couldn't cd to $wd\\staging\\install\\wix";
-		print "Info -- chdir to ".`cd`."\n"										if ($verbose);
 		# Correct errors in files.wxi:
 		!system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
 		!system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
 			
-		# Update paths in site-local.wxi:
-		my $dblback_originalDir = $originalDir;
-		$dblback_originalDir =~ s/\\/\\\\/g;
-		!system("sed -f $dblback_originalDir\\site-local.sed site-local.wxi > b.tmp") or die "Fatal -- Couldn't modify site-local.wxi.";
-		my $hexback_wd = $wd;
-		$hexback_wd =~ s/\\/\\\\\\\\\\\\/g;
-		!system("sed 's/%%TARGETDIR%%/$hexback_wd\\\\\\staging\\\\\\/' b.tmp > c.tmp")							or die "Fatal -- Couldn't modify site-local.wxi temporary file.";	
-		!system("sed 's/%%CONFIGDIR%%/$hexback_wd\\\\\\staging\\\\\\sample\\\\\\/' c.tmp > d.tmp")	or die "Fatal -- Couldn't modify site-local.wxi temporary file.";	
-		!system("mv d.tmp site-local.wxi")																														or die "Fatal -- Couldn't replace site-local.wxi.";
-				
+		# Make sed script to run on the site-local configuration files:
+		local $tmpfile	= "site-local.sed" ;
+		system("del $tmpfile");
+		# Basic substitutions:
+		local $dblback_staging	= "$wd\\staging";
+		$dblback_staging			=~ s/\\/\\\\/g;
+		!system("echo s/%TARGETDIR%/$dblback_staging/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		local $dblback_sample	= "$wd\\staging\\sample";
+		$dblback_sample			=~ s/\\/\\\\/g;
+		!system("echo s/%CONFIGDIR-WIX%/$dblback_sample/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo s/%CONFIGDIR-NSI%/$dblback_staging/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/ >> $tmpfile")		or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/ >> $tmpfile")			or die "Fatal -- Couldn't modify $tmpfile.";	
+		# Strip out some defines so they can be replaced:  [used for site-local.nsi]
+		!system("echo /\^!define\.\*RELEASE\.\*\$/d >> $tmpfile")								or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo /\^!define\.\*DEBUG\.\*\$/d >> $tmpfile")								or die "Fatal -- Couldn't modify $tmpfile.";	
+		!system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")									or die "Fatal -- Couldn't modify $tmpfile.";	
+
+		# Run the script on site-local.wxi:
+		!system("sed -f $tmpfile site-local-tagged.wxi > site-local.wxi")						or die "Fatal -- Couldn't modify site-local.wxi.";
+
+		# Now update site-local.nsi:
+		chdir "..\\nsis";
+		print "Info -- chdir to ".`cd`."\n"										if ($verbose);
+		local $tmpfile	= "site-local.sed" ;
+		!system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")					or die "Fatal -- Couldn't modify site-local.wxi.";
+		# Add DEBUG or RELEASE:
+		if ($switches[0]->{debug}->{value}) {				## debug build
+			!system("echo !define DEBUG >> b.tmp")															or die "Fatal -- Couldn't modify b.tmp.";	
+			}
+		else {																		## release build
+			!system("echo !define RELEASE >> b.tmp")															or die "Fatal -- Couldn't modify b.tmp.";	
+			!system("echo !define NO_DEBUG >> b.tmp")													or die "Fatal -- Couldn't modify b.tmp.";	
+			}
+		# Add BETA if present:
+		if ( exists $config->{Versions}->{'BETA_STR'}) {
+			!system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp")	or die "Fatal -- Couldn't modify b.tmp.";	
+			}
+		!system("mv -f b.tmp site-local.nsi")																		or die "Fatal -- Couldn't replace site-local.nsi.";
+
 		if ($verbose) {print "Info -- ***   End prepackage.\n";}
 		
 		if ($verbose) {print "Info -- *** Begin package.\n";}
@@ -428,7 +521,6 @@ sub main {
 
 		$config->{Stages}->{PostPackage}->{CopyList}->{Config}->{From}->{root}		= "$src\\pismere";		## Used after zips are made.
 		$config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}			= "$src\\$toRoot\\ziptemp";
-		my $filestem		= $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
 
 		local $i = 0;
 		while ($zipsXML->{Zip}[$i]) {
@@ -473,7 +565,7 @@ sub main {
 
 					# Prune any unwanted files or directories from the directory we're about to zip:
 					if (exists $zip->{Prunes}) {
-						# Use Unix find instead of Windows find.  Save PATH so we can restore it when we're3 done:
+						# Use Unix find instead of Windows find.  Save PATH so we can restore it when we're done:
 						my $savedPATH	= $ENV{PATH};
 						$ENV{PATH} = $config->{CommandLine}->{Directories}->{unixfind}->{path}.";".$savedPATH;
 						my $prunes = $zip->{Prunes};
