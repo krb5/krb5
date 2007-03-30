@@ -160,7 +160,7 @@ krb5plugin: plugincommon
 	$(ECHO) -- Done with $@
 
 !ifndef NO_KRB4
-doc: krb4plugin
+finale: krb4plugin
 
 krb4plugin: plugincommon
 	$(ECHO) -- Entering $@

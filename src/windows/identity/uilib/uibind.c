@@ -53,6 +53,7 @@ khui_request_UI_callback(khm_ui_callback cb, void * rock) {
                 MAKEWPARAM(KHUI_ACTION_UICB, 0),
                 (LPARAM) &cbdata);
 
-    return KHM_ERROR_SUCCESS;
+    return cbdata.rv;
 }
+
 

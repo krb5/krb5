@@ -26,6 +26,7 @@
 
 #include<khuidefs.h>
 #include<utils.h>
+#include<intalert.h>
 #include<assert.h>
 
 #include<strsafe.h>
@@ -62,7 +63,11 @@ khui_alert_create_empty(khui_alert ** result)
     /* set defaults */
     a->severity = KHERR_INFO;
     a->flags = KHUI_ALERT_FLAG_FREE_STRUCT;
-    
+    a->alert_type = KHUI_ALERTTYPE_NONE;
+    khui_context_create(&a->ctx, KHUI_SCOPE_NONE,
+                        NULL, KCDB_CREDTYPE_INVALID,
+                        NULL);
+
     khui_alert_hold(a);
     EnterCriticalSection(&cs_alerts);
     LPUSH(&kh_alerts, a);
@@ -253,6 +258,57 @@ khui_alert_add_command(khui_alert * alert, khm_int32 command_id)
     return rv;
 }
 
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_type(khui_alert * alert, khui_alert_type alert_type)
+{
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    assert(alert->magic == KHUI_ALERT_MAGIC);
+
+    EnterCriticalSection(&cs_alerts);
+    alert->alert_type = alert_type;
+    LeaveCriticalSection(&cs_alerts);
+
+    return rv;
+}
+
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_ctx(khui_alert * alert,
+                   khui_scope scope,
+                   khm_handle identity,
+                   khm_int32 cred_type,
+                   khm_handle cred)
+{
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    assert(alert->magic == KHUI_ALERT_MAGIC);
+
+    EnterCriticalSection(&cs_alerts);
+    khui_context_release(&alert->ctx);
+    khui_context_create(&alert->ctx,
+                        scope,
+                        identity,
+                        cred_type,
+                        cred);
+    LeaveCriticalSection(&cs_alerts);
+
+    return rv;
+}
+
+KHMEXP khm_int32 KHMAPI
+khui_alert_get_response(khui_alert * alert)
+{
+    khm_int32 response = 0;
+
+    assert(alert->magic == KHUI_ALERT_MAGIC);
+
+    EnterCriticalSection(&cs_alerts);
+    response = alert->response;
+    LeaveCriticalSection(&cs_alerts);
+
+    return response;
+}
+
 KHMEXP khm_int32 KHMAPI 
 khui_alert_show(khui_alert * alert)
 {
@@ -347,6 +403,9 @@ free_alert(khui_alert * alert)
         alert->suggestion = NULL;
         alert->flags &= ~KHUI_ALERT_FLAG_FREE_SUGGEST;
     }
+
+    khui_context_release(&alert->ctx);
+
     if(alert->flags & KHUI_ALERT_FLAG_FREE_STRUCT) {
         alert->flags &= ~KHUI_ALERT_FLAG_FREE_STRUCT;
         alert->magic = 0;

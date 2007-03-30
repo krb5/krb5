@@ -261,6 +261,21 @@ khui_exit_actions(void) {
     DeleteCriticalSection(&cs_actions);
 }
 
+KHMEXP void KHMAPI
+khui_refresh_actions(void) {
+    kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
+}
+
+KHMEXP void KHMAPI
+khui_action_lock(void) {
+    EnterCriticalSection(&cs_actions);
+}
+
+KHMEXP void KHMAPI
+khui_action_unlock(void) {
+    LeaveCriticalSection(&cs_actions);
+}
+
 KHMEXP khm_int32 KHMAPI
 khui_action_create(const wchar_t * name,
                    const wchar_t * caption,
@@ -350,29 +365,36 @@ khui_action_create(const wchar_t * name,
 KHMEXP void * KHMAPI
 khui_action_get_data(khm_int32 action) {
     khui_action * act;
+    void * data;
 
+    EnterCriticalSection(&cs_actions);
     act = khui_find_action(action);
-
-    if (act == NULL)
-        return NULL;
+    if (act == NULL || (act->state & KHUI_ACTIONSTATE_DELETED))
+        data = NULL;
     else
-        return act->data;
+        data = act->data;
+    LeaveCriticalSection(&cs_actions);
+
+    return data;
 }
 
 KHMEXP void KHMAPI
 khui_action_delete(khm_int32 action) {
     khui_action * act;
 
+    EnterCriticalSection(&cs_actions);
+
     act = khui_find_action(action);
 
-    if (act == NULL)
+    if (act == NULL) {
+        LeaveCriticalSection(&cs_actions);
         return;
+    }
 
     /* for the moment, even when the action is deleted, we don't free
        up the block of memory used by the khui_action structure.  When
        a new action is created, it will reuse deleted action
        structures. */
-    EnterCriticalSection(&cs_actions);
     act->state |= KHUI_ACTIONSTATE_DELETED;
     if (act->name)
         PFREE(act->name);
@@ -470,6 +492,8 @@ khui_menu_dup(khui_menu_def * src)
     size_t i;
     size_t n;
 
+    EnterCriticalSection(&cs_actions);
+
     d = khui_menu_create(src->cmd);
 
     if (!(src->state & KHUI_MENUSTATE_ALLOCD))
@@ -484,6 +508,8 @@ khui_menu_dup(khui_menu_def * src)
             khui_menu_insert_action(d, -1, src->items[i].action, 0);
         }
     }
+
+    LeaveCriticalSection(&cs_actions);
 
     return d;
 }
@@ -504,13 +530,13 @@ khui_menu_delete(khui_menu_def * d)
     }
 
     EnterCriticalSection(&cs_actions);
+
     for (i=0; i < khui_n_cust_menus; i++) {
         if (khui_cust_menus[i] == d) {
             khui_cust_menus[i] = NULL;
             break;
         }
     }
-    LeaveCriticalSection(&cs_actions);
 
     for(i=0; i< (int) d->n_items; i++) {
         if(d->items[i].flags & KHUI_ACTIONREF_FREE_PACTION)
@@ -520,6 +546,8 @@ khui_menu_delete(khui_menu_def * d)
     if(d->items)
         PFREE(d->items);
     PFREE(d);
+
+    LeaveCriticalSection(&cs_actions);
 }
 
 static void
@@ -563,6 +591,9 @@ menu_const_to_allocd(khui_menu_def * d)
 KHMEXP void KHMAPI
 khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 action, khm_int32 flags)
 {
+
+    EnterCriticalSection(&cs_actions);
+
     if (!(d->state & KHUI_MENUSTATE_ALLOCD))
         menu_const_to_allocd(d);
 
@@ -584,6 +615,8 @@ khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 action, khm_i
         d->items[idx].flags |= KHUI_ACTIONREF_SEP;
 
     d->n_items++;
+
+    LeaveCriticalSection(&cs_actions);
 }
 
 KHMEXP void KHMAPI
@@ -592,6 +625,8 @@ khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction,
 
     if (paction == NULL)
         return;
+
+    EnterCriticalSection(&cs_actions);
 
     if (!(d->state & KHUI_MENUSTATE_ALLOCD))
         menu_const_to_allocd(d);
@@ -611,40 +646,58 @@ khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * paction,
     d->items[idx].p_action = paction;
 
     d->n_items++;
+
+    LeaveCriticalSection(&cs_actions);
 }
 
 KHMEXP void KHMAPI
 khui_menu_remove_action(khui_menu_def * d, khm_size idx) {
+
+    EnterCriticalSection(&cs_actions);
 
     if (!(d->state & KHUI_MENUSTATE_ALLOCD))
         menu_const_to_allocd(d);
 
     assert(d->state & KHUI_MENUSTATE_ALLOCD);
 
-    if (idx < 0 || idx >= d->n_items)
-        return;
+    if (idx >= 0 && idx < d->n_items) {
 
-    if (idx < d->n_items - 1) {
-        memmove(&d->items[idx], &d->items[idx + 1],
-                ((d->n_items - 1) - idx) * sizeof(d->items[0]));
+        if (idx < d->n_items - 1) {
+            memmove(&d->items[idx], &d->items[idx + 1],
+                    ((d->n_items - 1) - idx) * sizeof(d->items[0]));
+        }
+
+        d->n_items--;
+
     }
 
-    d->n_items--;
+    LeaveCriticalSection(&cs_actions);
 }
 
 KHMEXP khm_size KHMAPI
 khui_menu_get_size(khui_menu_def * d) {
 
+    khm_size size;
+
+    EnterCriticalSection(&cs_actions);
+
     if (d->state & KHUI_MENUSTATE_ALLOCD)
-        return d->n_items;
+        size = d->n_items;
     else
-        return khui_action_list_length(d->items);
+        size = khui_action_list_length(d->items);
+
+    LeaveCriticalSection(&cs_actions);
+
+    return size;
 }
 
 KHMEXP khui_action_ref *
 khui_menu_get_action(khui_menu_def * d, khm_size idx) {
 
+    khui_action_ref * act = NULL;
     khm_size n;
+
+    EnterCriticalSection(&cs_actions);
 
     if (d->state & KHUI_MENUSTATE_ALLOCD)
         n = d->n_items;
@@ -652,9 +705,13 @@ khui_menu_get_action(khui_menu_def * d, khm_size idx) {
         n = khui_action_list_length(d->items);
 
     if (idx < 0 || idx >= n)
-        return NULL;
+        act = NULL;
+    else
+        act = &d->items[idx];
 
-    return &d->items[idx];
+    LeaveCriticalSection(&cs_actions);
+
+    return act;
 }
 
 KHMEXP khui_menu_def * KHMAPI
@@ -663,6 +720,9 @@ khui_find_menu(khm_int32 id) {
     int i;
 
     if (id < KHUI_USERACTION_BASE) {
+
+        /* the list of system menus are considered immutable. */
+
         d = khui_all_menus;
         for(i=0;i<khui_n_all_menus;i++) {
             if(id == d[i].cmd)
@@ -707,7 +767,7 @@ khui_find_action(khm_int32 id) {
 #ifdef DEBUG
         assert(!act || act->cmd == id);
 #endif
-        if (act && act->state & KHUI_ACTIONSTATE_DELETED)
+        if (act && (act->state & KHUI_ACTIONSTATE_DELETED))
             act = NULL;
     }
     LeaveCriticalSection(&cs_actions);
@@ -732,30 +792,43 @@ khui_find_named_action(const wchar_t * name) {
             return &act[i];
     }
 
+    act = NULL;
+
+    EnterCriticalSection(&cs_actions);
+
     pact = khui_cust_actions;
     for(i=0;i<khui_n_cust_actions;i++) {
         if(!pact[i] || !pact[i]->name)
             continue;
 
         if(!wcscmp(pact[i]->name, name)) {
-            if (pact[i]->state & KHUI_ACTIONSTATE_DELETED)
-                return NULL;
-            else
-                return pact[i];
+
+            if (!(pact[i]->state & KHUI_ACTIONSTATE_DELETED)) {
+                act = pact[i];
+            }
+            break;
         }
     }
 
-    return NULL;
+    LeaveCriticalSection(&cs_actions);
+
+    return act;
 }
 
 KHMEXP size_t KHMAPI
 khui_action_list_length(khui_action_ref * ref) {
     size_t c = 0;
+
+    EnterCriticalSection(&cs_actions);
+
     while(ref && ref->action != KHUI_MENU_END &&
           !(ref->flags & KHUI_ACTIONREF_END)) {
         c++;
         ref++;
     }
+
+    LeaveCriticalSection(&cs_actions);
+
     return c;
 }
 
@@ -764,6 +837,8 @@ khui_check_radio_action(khui_menu_def * d, khm_int32 cmd)
 {
     khui_action_ref * r;
     khui_action * act;
+
+    EnterCriticalSection(&cs_actions);
 
     r = d->items;
     while(r && r->action != KHUI_MENU_END &&
@@ -783,6 +858,8 @@ khui_check_radio_action(khui_menu_def * d, khm_int32 cmd)
         r++;
     }
 
+    LeaveCriticalSection(&cs_actions);
+
     kmq_post_message(KMSG_ACT, KMSG_ACT_CHECK, 0, 0);
 }
 
@@ -794,12 +871,18 @@ khui_check_action(khm_int32 cmd, khm_boolean check) {
     if (!act)
         return;
 
+    EnterCriticalSection(&cs_actions);
+
     if (check && !(act->state & KHUI_ACTIONSTATE_CHECKED))
         act->state |= KHUI_ACTIONSTATE_CHECKED;
     else if (!check && (act->state & KHUI_ACTIONSTATE_CHECKED))
         act->state &= ~KHUI_ACTIONSTATE_CHECKED;
-    else
+    else {
+        LeaveCriticalSection(&cs_actions);
         return;
+    }
+
+    LeaveCriticalSection(&cs_actions);
 
     kmq_post_message(KMSG_ACT, KMSG_ACT_CHECK, 0, 0);
 }
@@ -810,6 +893,8 @@ khui_enable_actions(khui_menu_def * d, khm_boolean enable)
     khui_action_ref * r;
     int delta = FALSE;
     khui_action * act;
+
+    EnterCriticalSection(&cs_actions);
 
     r = d->items;
     while(r && r->action != KHUI_MENU_END &&
@@ -834,6 +919,8 @@ khui_enable_actions(khui_menu_def * d, khm_boolean enable)
         r++;
     }
 
+    LeaveCriticalSection(&cs_actions);
+
     if(delta) {
         kmq_post_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
     }
@@ -847,12 +934,18 @@ khui_enable_action(khm_int32 cmd, khm_boolean enable) {
     if (!act)
         return;
 
+    EnterCriticalSection(&cs_actions);
+
     if (enable && (act->state & KHUI_ACTIONSTATE_DISABLED)) {
         act->state &= ~KHUI_ACTIONSTATE_DISABLED;
     } else if (!enable && !(act->state & KHUI_ACTIONSTATE_DISABLED)) {
         act->state |= KHUI_ACTIONSTATE_DISABLED;
-    } else
+    } else {
+        LeaveCriticalSection(&cs_actions);
         return;
+    }
+
+    LeaveCriticalSection(&cs_actions);
 
     kmq_post_message(KMSG_ACT, KMSG_ACT_ENABLE, 0, 0);
 }

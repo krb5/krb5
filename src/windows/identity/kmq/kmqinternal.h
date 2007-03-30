@@ -33,8 +33,134 @@
 #include<kherror.h>
 #include<khmsgtypes.h>
 #include<kconfig.h>
+
+#define NOEXPORT
+
 #include<utils.h>
 #include<strsafe.h>
+
+
+
+
+/*! \brief Message reference */
+typedef struct tag_kmq_message_ref {
+    kmq_message * msg;          /*!< Message that we are referring
+                                  to */
+    kmq_callback_t recipient;   /*!< The recipient of the message */
+
+    LDCL(struct tag_kmq_message_ref);
+} kmq_message_ref;
+
+
+
+
+/*! \brief Message queue
+
+    Each thread gets its own message queue.  When a message is
+    broadcast to which there is a subscriber in a particular thread, a
+    reference to the message is placed in the message queue of the
+    thread.  The dispatch procedure then dispatches the message as
+    described in the message reference.
+*/
+typedef struct tag_kmq_queue {
+    kmq_thread_id thread;       /*!< The thread id  */
+
+    CRITICAL_SECTION cs;
+    HANDLE wait_o;
+
+    khm_int32 load;             /*!< Number of messages waiting to be
+                                  processed on this message queue.  */
+    kmq_timer last_post;        /*!< Time the last message was
+                                  received */
+
+    khm_int32 flags;            /*!< Flags.  Currently, it's just KMQ_QUEUE_FLAG_DELETED */
+
+    /*Q*/
+    QDCL(kmq_message_ref);      /*!< Queue of message references  */
+
+    /*Lnode*/
+    LDCL(struct tag_kmq_queue);
+} kmq_queue;
+
+#define KMQ_QUEUE_FLAG_DELETED   0x00000008
+#define KMQ_QUEUE_FLAG_DETACHING 0x00000010
+
+/*! \brief Message subscription
+
+    A subscription binds a recipient with a message type.  These are
+    specific to a thread. I.e. a subscription that was made in one
+    thread will not receive messages in the context of another thread.
+*/
+typedef struct tag_kmq_msg_subscription {
+    khm_int32 magic;            /*!< Magic number.  Should always be
+                                  ::KMQ_MSG_SUB_MAGIC */
+    khm_int32 type;             /*!< Type of message */
+    khm_int32 rcpt_type;        /*!< Type of recipient.  One of
+                                  ::KMQ_RCPTTYPE_CB or
+                                  ::KMQ_RCPTTYPE_HWND  */
+    union {
+        kmq_callback_t cb;      /*!< Callback if the subscription is
+                                  of callback type */
+        HWND hwnd;              /*!< Window handle if the subscription
+                                  is a windows message type */
+    } recipient;
+
+    kmq_queue * queue;          /*!< Associated queue */
+
+    /*lnode*/
+    LDCL(struct tag_kmq_msg_subscription);
+} kmq_msg_subscription;
+
+#define KMQ_MSG_SUB_MAGIC 0x3821b58e
+
+/*! \brief Callback recipient type
+
+    The recipient is a callback function */
+#define KMQ_RCPTTYPE_CB     1
+
+/*! \brief Windows recipient type
+
+    The recipient is a window */
+#define KMQ_RCPTTYPE_HWND   2
+
+
+
+
+/*! \brief A message type
+ */
+typedef struct tag_kmq_msg_type {
+    khm_int32 id;               /*!< Identifier for the message
+                                  type. */
+    kmq_msg_subscription * subs; /*!< The list of subscriptions */
+    kmq_msg_completion_handler completion_handler; /*!< Completion
+                                  handler for the message type */
+
+    wchar_t * name;             /*!< Name of the message type for
+                                  named types.  Message type names are
+                                  language independant. */
+
+    /*Lnode*/
+    LDCL(struct tag_kmq_msg_type);
+} kmq_msg_type;
+
+/*! \brief The maximum number of message types
+ */
+#define KMQ_MSG_TYPE_MAX 255
+
+/*! \brief Maximum number of characters in a message type name
+
+    The count includes the terminating NULL
+ */
+#define KMQ_MAXCCH_TYPE_NAME 256
+
+/*! \brief Maximum number of bytes in a message type name
+
+    Type count includes the terminating NULL
+ */
+#define KMQ_MAXCB_TYPE_NAME (KMQ_MAXCCH_TYPE_NAME * sizeof(wchar_t))
+
+
+
 
 #define KMQ_CONF_SPACE_NAME L"KMQ"
 #define KMQ_CONF_QUEUE_DEAD_TIMEOUT_NAME L"QueueDeadTimeout"
@@ -69,6 +195,7 @@ void kmqint_post_queue(kmq_queue * q, kmq_message *m);
 void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send);
 kmq_queue * kmqint_get_thread_queue(void);
 void kmqint_get_queue_message_ref(kmq_queue * q, kmq_message_ref ** r);
+void kmqint_put_message_ref(kmq_message_ref * r);
 
 /* publisher */
 extern CRITICAL_SECTION cs_kmq_msg;

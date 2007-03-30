@@ -116,6 +116,15 @@
     if(!(pq)->head) (pq)->head = (pe);          \
     } while(0)
 
+#define QPUSH(pq, pe)                           \
+    do {                                        \
+    (pe)->next = NULL;                          \
+    (pe)->prev = (pq)->head;                    \
+    if((pq)->head) (pq)->head->next = (pe);     \
+    if(!(pq)->tail) (pq)->tail = (pe);          \
+    (pq)->head = (pe);                          \
+    } while (0)
+
 #define QGET(pq, ppe)                                           \
     do {                                                        \
     *(ppe) = (pq)->head;                                        \

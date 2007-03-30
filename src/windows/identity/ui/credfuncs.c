@@ -156,7 +156,11 @@ khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
     return rv;
 }
 
-/* completion handler for KMSG_CRED messages */
+/* Completion handler for KMSG_CRED messages.  We control the overall
+   logic of credentials acquisition and other operations here.  Once a
+   credentials operation is triggered, each successive message
+   completion notification will be used to dispatch the messages for
+   the next step in processing the operation. */
 void KHMAPI 
 kmsg_cred_completion(kmq_message *m)
 {
@@ -183,7 +187,7 @@ kmsg_cred_completion(kmq_message *m)
         nc = (khui_new_creds *) m->vparam;
 
         /* khm_cred_dispatch_process_message() deals with the case
-           where there are not credential types that wants to
+           where there are no credential types that wants to
            participate in this operation. */
         khm_cred_dispatch_process_message(nc);
         break;
@@ -281,6 +285,8 @@ kmsg_cred_completion(kmq_message *m)
 
                 if (nc->subtype == KMSG_CRED_NEW_CREDS) {
 
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_ACQUIREFAIL);
+
                     cb = sizeof(w_idname);
                     if (nc->n_identities == 0 ||
                         KHM_FAILED(kcdb_identity_get_name(nc->identities[0],
@@ -293,9 +299,16 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->identities[0],
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else if (nc->subtype == KMSG_CRED_PASSWORD) {
+
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_CHPW);
 
                     cb = sizeof(w_idname);
                     if (nc->n_identities == 0 ||
@@ -308,9 +321,16 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->identities[0],
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
+
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_RENEWFAIL);
 
                     cb = sizeof(w_idname);
                     if (nc->ctx.identity == NULL ||
@@ -323,6 +343,11 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->ctx.identity,
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else {
@@ -373,11 +398,6 @@ kmsg_cred_completion(kmq_message *m)
 
             if (nc->subtype == KMSG_CRED_NEW_CREDS ||
                 nc->subtype == KMSG_CRED_PASSWORD) {
-
-                /*
-                if (nc->subtype == KMSG_CRED_NEW_CREDS)
-                    khui_context_reset();
-                */
 
                 khm_cred_end_dialog(nc);
 
@@ -1169,6 +1189,7 @@ khm_cred_process_startup_actions(void) {
         /* when we get here, then we are all done with the command
            line stuff */
         khm_startup.processing = FALSE;
+        khm_startup.remote = FALSE;
     } while(FALSE);
 
     if (defident)
@@ -1182,7 +1203,9 @@ khm_cred_begin_startup_actions(void) {
     if (khm_startup.seen)
         return;
 
-    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+    if (!khm_startup.remote &&
+        KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+
         khm_int32 t = 0;
 
         khc_read_int32(csp_cw, L"Autoinit", &t);

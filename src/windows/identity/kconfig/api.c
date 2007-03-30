@@ -26,6 +26,7 @@
 
 #include<shlwapi.h>
 #include<kconfiginternal.h>
+#include<netidmgr_intver.h>
 #include<assert.h>
 
 kconf_conf_space * conf_root = NULL;
@@ -85,6 +86,111 @@ void exit_kconf(void) {
         DeleteCriticalSection(&cs_conf_handle);
     }
 }
+
+#if defined(DEBUG) && (defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL))
+
+#include<stdio.h>
+
+static void
+khcint_dump_space(FILE * f, kconf_conf_space * sp) {
+
+    kconf_conf_space * sc;
+
+    fprintf(f, "c12\t[%S]\t[%S]\t%d\t0x%x\tWin(%s|%s)|%s\n",
+            ((sp->regpath) ? sp->regpath : L"!No Reg path"),
+            sp->name,
+            (int) sp->refcount,
+            (int) sp->flags,
+            ((sp->regkey_user)? "HKCU" : ""),
+            ((sp->regkey_machine)? "HKLM" : ""),
+            ((sp->schema)? "Schema" : ""));
+
+
+    sc = TFIRSTCHILD(sp);
+    while(sc) {
+
+        khcint_dump_space(f, sc);
+
+        sc = LNEXT(sc);
+    }
+}
+
+KHMEXP void KHMAPI
+khcint_dump_handles(FILE * f) {
+    if (khc_is_config_running()) {
+        kconf_handle * h, * sh;
+
+        EnterCriticalSection(&cs_conf_handle);
+        EnterCriticalSection(&cs_conf_global);
+
+        fprintf(f, "c00\t*** Active handles ***\n");
+        fprintf(f, "c01\tHandle\tName\tFlags\tRegpath\n");
+
+        h = conf_handles;
+        while(h) {
+            kconf_conf_space * sp;
+
+            sp = h->space;
+
+            if (!khc_is_handle(h) || sp == NULL) {
+
+                fprintf(f, "c02\t!!INVALID HANDLE!!\n");
+
+            } else {
+
+                fprintf(f, "c02\t0x%p\t[%S]\t0x%x\t[%S]\n",
+                        h,
+                        sp->name,
+                        h->flags,
+                        sp->regpath);
+
+                sh = khc_shadow(h);
+
+                while(sh) {
+
+                    sp = sh->space;
+
+                    if (!khc_is_handle(sh) || sp == NULL) {
+
+                        fprintf(f, "c02\t0x%p:Shadow:0x%p\t[!!INVALID HANDLE!!]\n",
+                                h, sh);
+
+                    } else {
+
+                        fprintf(f, "c02\t0x%p:Shadow:0x%p,[%S]\t0x%x\t[%S]\n",
+                                h, sh,
+                                sp->name,
+                                sh->flags,
+                                sp->regpath);
+
+                    }
+
+                    sh = khc_shadow(sh);
+                }
+
+            }
+
+            h = LNEXT(h);
+        }
+
+        fprintf(f, "c03\t------  End ---------\n");
+
+        fprintf(f, "c10\t*** Active Configuration Spaces ***\n");
+        fprintf(f, "c11\tReg path\tName\tRefcount\tFlags\tLayers\n");
+
+        khcint_dump_space(f, conf_root);
+
+        fprintf(f, "c13\t------  End ---------\n");
+
+        LeaveCriticalSection(&cs_conf_global);
+        LeaveCriticalSection(&cs_conf_handle);
+
+    } else {
+        fprintf(f, "c00\t------- KHC Configuration not running -------\n");
+    }
+}
+
+#endif
 
 /* obtains cs_conf_handle/cs_conf_global */
 kconf_handle * 
@@ -180,6 +286,29 @@ khcint_space_hold(kconf_conf_space * s) {
     LeaveCriticalSection(&cs_conf_global);
 }
 
+/* called with cs_conf_global */
+void
+khcint_try_free_space(kconf_conf_space * s) {
+
+    if (TFIRSTCHILD(s) == NULL &&
+        s->refcount == 0 &&
+        s->schema == NULL) {
+
+        kconf_conf_space * p;
+
+        p = TPARENT(s);
+
+        if (p == NULL)
+            return;
+
+        TDELCHILD(p, s);
+
+        khcint_free_space(s);
+
+        khcint_try_free_space(p);
+    }
+}
+
 /* obtains cs_conf_global */
 void 
 khcint_space_release(kconf_conf_space * s) {
@@ -200,6 +329,15 @@ khcint_space_release(kconf_conf_space * s) {
             (KCONF_SPACE_FLAG_DELETE_M |
              KCONF_SPACE_FLAG_DELETE_U)) {
             khcint_remove_space(s, s->flags);
+        } else {
+#ifdef USE_TRY_FREE
+            /* even if the refcount is zero, we shouldn't free a
+               configuration space just yet since that doesn't play
+               well with the configuration space enumeration mechanism
+               which expects the spaces to dangle around if there is a
+               corresponding registry key or schema. */
+            khcint_try_free_space(s);
+#endif
         }
     }
 
@@ -673,10 +811,10 @@ khcint_free_space(kconf_conf_space * r) {
     if(!r)
         return;
 
-    LPOP(&r->children, &c);
+    TPOPCHILD(r, &c);
     while(c) {
         khcint_free_space(c);
-        LPOP(&r->children, &c);
+        TPOPCHILD(r, &c);
     }
 
     if(r->name)
@@ -847,8 +985,8 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
         flags |= KCONF_FLAG_USER | KCONF_FLAG_MACHINE | KCONF_FLAG_SCHEMA;
 
     if(cspace == NULL) {
-        khcint_space_release(p);
         *result = (khm_handle) khcint_handle_from_space(p, flags);
+        khcint_space_release(p);
         return KHM_ERROR_SUCCESS;
     }
 
@@ -896,6 +1034,9 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
         *result = khcint_handle_from_space(c, flags);
     } else
         *result = NULL;
+
+    if (c)
+        khcint_space_release(c);
 
     return rv;
 }
@@ -2318,7 +2459,7 @@ khc_unload_schema(khm_handle conf, const kconf_schema * schema)
         return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_conf_global);
-    rv = khcint_unload_schema_i(conf, schema, 0, NULL);        
+    rv = khcint_unload_schema_i(conf, schema, 0, NULL);
     LeaveCriticalSection(&cs_conf_global);
 
     return rv;

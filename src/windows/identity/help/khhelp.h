@@ -28,6 +28,6 @@
 #define IDH_NC_CANCEL              3002
 #define IDH_NC_HELP                3003
 #define IDH_NC_TABBUTTON           3004
-#define IDH_NC_OPTIONS             3005
+#define IDH_NC_ADVANCED            3005
 #define IDH_NC_TABMAIN             3006
 #define IDH_NC_SETDEF              3007

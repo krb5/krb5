@@ -13,7 +13,7 @@ Cancels the new credentials operation.
 .topic IDH_NC_HELP
 Provides help for this dialog box.
 
-.topic IDH_NC_OPTIONS
+.topic IDH_NC_ADVANCED
 Expands the dialog and allows you to set additional
 options for the credentials that will be obtained
 by this dialog.

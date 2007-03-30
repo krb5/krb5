@@ -121,7 +121,6 @@
 #define IDD_NC_NEWCRED                  162
 #define IDD_NC_BBAR                     163
 #define IDS_ALERT_NOSEL_TITLE           163
-#define IDD_NC_TS                       164
 #define IDS_ALERT_NOSEL                 164
 #define IDI_ENABLED                     165
 #define IDS_NC_CREDTEXT_ID_VALID        165
@@ -301,6 +300,11 @@
 #define IDS_IDACTION_RENEW              294
 #define IDS_IDACTION_DESTROY            295
 #define IDS_CTX_DESTROY_ID              296
+#define IDS_NCN_IDENT_INVALID           297
+#define IDS_NCN_IDENT_CHECKING          298
+#define IDS_NCN_IDENT_UNKNOWN           299
+#define IDS_REMOTE_FAIL                 300
+#define IDS_REMOTE_FAIL_TITLE           301
 #define IDC_NC_USERNAME                 1007
 #define IDC_NC_PASSWORD                 1008
 #define IDC_NC_CREDTEXT_LABEL           1009
@@ -309,6 +313,7 @@
 #define IDC_NC_CREDTEXT                 1012
 #define IDC_NC_HELP                     1017
 #define IDC_NC_OPTIONS                  1019
+#define IDC_NC_ADVANCED                 1019
 #define IDC_PP_IDNAME                   1026
 #define IDC_PP_IDDEF                    1027
 #define IDC_PP_IDSEARCH                 1028

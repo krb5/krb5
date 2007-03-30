@@ -418,6 +418,9 @@ cw_free_prompts(khui_new_creds * c)
 KHMEXP khm_int32 KHMAPI 
 khui_cw_clear_prompts(khui_new_creds * c)
 {
+    /* the WMNC_CLEAR_PROMPT message needs to be sent before freeing
+       the prompts, because the prompts structure still holds the
+       window handles for the custom prompt controls. */
     SendMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
                 MAKEWPARAM(0,WMNC_CLEAR_PROMPTS), (LPARAM) c);
 

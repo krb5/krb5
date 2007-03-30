@@ -112,91 +112,17 @@ typedef struct tag_kmq_message {
 
     kherr_context * err_ctx;    /*!< Error context for the message */
 
-    khm_int32 refcount;
+    khm_boolean aborted;        /*!< TRUE if the message has been
+                                  aborted. */
 
-    LDCL(struct tag_kmq_message);
+    khm_int32 refcount;         /*!< Internal use */
+
+    LDCL(struct tag_kmq_message); /*!< Internal use */
 } kmq_message;
 
 /*! \brief A handle to a call
  */
 typedef kmq_message *kmq_call;
-
-/*! \brief Message reference */
-typedef struct tag_kmq_message_ref {
-    kmq_message * msg;          /*!< Message that we are referring
-                                  to */
-    kmq_callback_t recipient;   /*!< The recipient of the message */
-
-    LDCL(struct tag_kmq_message_ref);
-} kmq_message_ref;
-
-/*! \brief Message queue
-
-    Each thread gets its own message queue.  When a message is
-    broadcast to which there is a subscriber in a particular thread, a
-    reference to the message is placed in the message queue of the
-    thread.  The dispatch procedure then dispatches the message as
-    described in the message reference.
-*/
-typedef struct tag_kmq_queue {
-    kmq_thread_id thread;       /*!< The thread id  */
-
-    CRITICAL_SECTION cs;
-    HANDLE wait_o;
-
-    khm_int32 load;             /*!< Number of messages waiting to be
-                                  processed on this message queue.  */
-    kmq_timer last_post;        /*!< Time the last message was
-                                  received */
-
-    khm_int32 flags;            /*!< Flags.  Currently, it's just KMQ_QUEUE_FLAG_DELETED */
-
-    /*Q*/
-    QDCL(kmq_message_ref);      /*!< Queue of message references  */
-
-    /*Lnode*/
-    LDCL(struct tag_kmq_queue);
-} kmq_queue;
-
-#define KMQ_QUEUE_FLAG_DELETED 0x0008
-
-/*! \brief Message subscription
-
-    A subscription binds a recipient with a message type.  These are
-    specific to a thread. I.e. a subscription that was made in one
-    thread will not receive messages in the context of another thread.
-*/
-typedef struct tag_kmq_msg_subscription {
-    khm_int32 magic;            /*!< Magic number.  Should always be
-                                  ::KMQ_MSG_SUB_MAGIC */
-    khm_int32 type;             /*!< Type of message */
-    khm_int32 rcpt_type;        /*!< Type of recipient.  One of
-                                  ::KMQ_RCPTTYPE_CB or
-                                  ::KMQ_RCPTTYPE_HWND  */
-    union {
-        kmq_callback_t cb;      /*!< Callback if the subscription is
-                                  of callback type */
-        HWND hwnd;              /*!< Window handle if the subscription
-                                  is a windows message type */
-    } recipient;
-
-    kmq_queue * queue;          /*!< Associated queue */
-
-    /*lnode*/
-    LDCL(struct tag_kmq_msg_subscription);
-} kmq_msg_subscription;
-
-#define KMQ_MSG_SUB_MAGIC 0x3821b58e
-
-/*! \brief Callback recipient type
-
-    The recipient is a callback function */
-#define KMQ_RCPTTYPE_CB     1
-
-/*! \brief Windows recipient type
-
-    The recipient is a window */
-#define KMQ_RCPTTYPE_HWND   2
 
 /* publishers */
 
@@ -214,42 +140,13 @@ typedef struct tag_kmq_msg_subscription {
  */
 typedef void (KHMAPI *kmq_msg_completion_handler)(kmq_message *);
 
-/*! \brief A message type
- */
-typedef struct tag_kmq_msg_type {
-    khm_int32 id;               /*!< Identifier for the message
-                                  type. */
-    kmq_msg_subscription * subs; /*!< The list of subscriptions */
-    kmq_msg_completion_handler completion_handler; /*!< Completion
-                                  handler for the message type */
-
-    wchar_t * name;             /*!< Name of the message type for
-                                  named types.  Message type names are
-                                  language independant. */
-
-    /*Lnode*/
-    LDCL(struct tag_kmq_msg_type);
-} kmq_msg_type;
-
-/*! \brief The maximum number of message types
- */
-#define KMQ_MSG_TYPE_MAX 255
-
-/*! \brief Maximum number of characters in a message type name
-
-    The count includes the terminating NULL
- */
-#define KMQ_MAXCCH_TYPE_NAME 256
-
-/*! \brief Maximum number of bytes in a message type name
-
-    Type count includes the terminating NULL
- */
-#define KMQ_MAXCB_TYPE_NAME (KMQ_MAXCCH_TYPE_NAME * sizeof(wchar_t))
+#ifdef NOEXPORT
 
 KHMEXP khm_int32 KHMAPI kmq_init(void);
 
 KHMEXP khm_int32 KHMAPI kmq_exit(void);
+
+#endif
 
 /*! \brief Register a message type
 
@@ -749,6 +646,46 @@ KHMEXP khm_boolean KHMAPI kmq_has_completed(kmq_call call);
     \retval KHM_ERROR_INVALID_PARAM One of the parameters were invalid.
 */
 KHMEXP khm_int32 KHMAPI kmq_wait(kmq_call call, kmq_timer timeout);
+
+/*! \brief Abort a call
+
+    Abort a pending call.  The call handle should have been obtained
+    using a prior call to kmq_post_message_ex().
+
+    Note that this function may not abort the call immediately.  It
+    merely marks the message as being in an aborted state.  It is upto
+    the individual handlers of the message to check if the message has
+    been aborted and act accordingly.
+
+    The handlers are expected to call kmq_is_call_aborted()
+    periodicially during the processing of specially lengthy
+    operations during the course of handling a message. That function
+    will return \a TRUE if the last dispatched message is now in an
+    aborted state.  In which case, the handler is expected to abort
+    handling the message and return control to the dispatcher.
+ */
+KHMEXP khm_int32 KHMAPI kmq_abort_call(kmq_call call);
+
+/*! \brief Check if the last dispatched message was aborted
+
+    The sender of a message may abort it using a call to
+    kmq_abort_call().  This function checks if the last dispatched
+    message was aborted.
+
+    A handler of a message is expected to call this function
+    periodically if handling the message is going to take a specially
+    long time (e.g. more than 5 or 10 seconds).  If the message is
+    found to be aborted, the handler is expected to abort handling the
+    message, perform any necessary cleanup and return control to the
+    dispatcher.
+
+    Doing this allows operations like new credentials acquisition to
+    be cleanly aborted by the user if she so wishes.  Otherwise,
+    Network Identity Manager has to wait for the message to complete
+    processing since it has no means of cleanly terminating an
+    executing plug-in thread.
+*/
+KHMEXP khm_boolean KHMAPI kmq_is_call_aborted(void);
 
 /*! \brief Sets the completion handler for a specified message type.
 

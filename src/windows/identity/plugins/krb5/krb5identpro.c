@@ -1533,6 +1533,8 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
     wchar_t reg_ccname[KRB5_MAXCCH_CCNAME];
     LONG l;
 
+    PDESCTHREAD(L"Krb5 CCName Monitor", L"Krb5");
+
     l = RegOpenKeyEx(HKEY_CURRENT_USER,
                      L"Software\\MIT\\kerberos5",
                      0,

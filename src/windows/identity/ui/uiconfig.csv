@@ -37,6 +37,9 @@ CredWindow,KC_SPACE,0,Options for the credentials window
     Main,KC_ENDSPACE,0,
     NewCred,KC_SPACE,0,New credentials window
       ForceToTop,KC_INT32,1,Force new creds window to the top
+      AnimateSizeChanges,KC_INT32,1,Animate the new creds window when the size needs changing.
+      AnimationSteps,KC_INT32,7,Number of steps in size-change animation
+      AnimationStepTimeout,KC_INT32,40,Number of milliseconds to wait between each step of the size-change animation
     NewCred,KC_ENDSPACE,0,
   Windows,KC_ENDSPACE,0,
   Views,KC_SPACE,0,Preconfigured views for credentials

@@ -784,9 +784,13 @@ cfgui_dlgproc(HWND hwnd,
         khui_delete_bitmap(&d->kbmp_logo);
         DeleteObject(d->hbr_white);
 
+        cfgui_set_wnd_data(hwnd, NULL);
+
         khm_del_dialog(hwnd);
 
         SetForegroundWindow(khm_hwnd_main);
+
+        PFREE(d);
 
         return FALSE;
 
@@ -1043,6 +1047,8 @@ void khm_refresh_config(void) {
     if (omenu == NULL)
         goto _cleanup;
 
+    khui_action_lock();
+
     do {
         khm_int32 action;
         khm_int32 flags;
@@ -1099,8 +1105,11 @@ void khm_refresh_config(void) {
             break;
     } while(cfg_r);
 
-    if (refresh_menu)
-        khm_menu_refresh_items();
+    khui_action_unlock();
+
+    if (refresh_menu) {
+        khui_refresh_actions();
+    }
 
  _cleanup:
     if (cfg_ids)

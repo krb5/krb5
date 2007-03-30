@@ -55,7 +55,7 @@ kcdb_identity_set_provider(khm_handle sub)
     EnterCriticalSection(&cs_ident);
     if (sub != kcdb_ident_sub) {
         if(kcdb_ident_sub != NULL) {
-            kmq_post_sub_msg(kcdb_ident_sub,
+            kmq_send_sub_msg(kcdb_ident_sub,
                              KMSG_IDENT,
                              KMSG_IDENT_EXIT,
                              0,
@@ -425,10 +425,12 @@ kcdb_identity_set_flags(khm_handle vid,
 
     id->flags = (id->flags & ~mask) | (flag & mask);
 
-    if (flag & KCDB_IDENT_FLAG_VALID)
-        id->flags &= ~KCDB_IDENT_FLAG_INVALID;
-    if (flag & KCDB_IDENT_FLAG_INVALID)
-        id->flags &= ~KCDB_IDENT_FLAG_VALID;
+    if (flag & KCDB_IDENT_FLAG_VALID) {
+        id->flags &= ~(KCDB_IDENT_FLAG_INVALID | KCDB_IDENT_FLAG_UNKNOWN);
+    }
+    if (flag & KCDB_IDENT_FLAG_INVALID) {
+        id->flags &= ~(KCDB_IDENT_FLAG_VALID | KCDB_IDENT_FLAG_UNKNOWN);
+    }
 
     newflags = id->flags;
 
@@ -466,7 +468,9 @@ kcdb_identity_get_flags(khm_handle vid,
 
     id = (kcdb_identity *) vid;
 
+    EnterCriticalSection(&cs_ident);
     *flags = id->flags;
+    LeaveCriticalSection(&cs_ident);
 
     return KHM_ERROR_SUCCESS;
 }

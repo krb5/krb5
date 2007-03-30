@@ -37,6 +37,7 @@
 #define PDUMP(f)   perf_dump(f)
 #define PWCSDUP(s) perf_wcsdup(__FILE__,__LINE__,s)
 #define PSTRDUP(s) perf_strdup(__FILE__,__LINE__,s)
+#define PDESCTHREAD(n,c) perf_set_thread_desc(__FILE__,__LINE__,n,c);
 #else
 #define PMALLOC(s) malloc(s)
 #define PCALLOC(n,s) calloc(n,s)
@@ -45,27 +46,29 @@
 #define PDUMP(f)   ((void) 0)
 #define PWCSDUP(s) wcsdup(s)
 #define PSTRDUP(s) strdup(s)
+#define PDESCTHREAD(n,c)
 #endif
 
 KHMEXP void *
-perf_malloc(char * file, int line, size_t s);
+perf_malloc(const char * file, int line, size_t s);
 
 KHMEXP void *
-perf_realloc(char * file, int line, void * data, size_t s);
+perf_realloc(const char * file, int line, void * data, size_t s);
 
 KHMEXP void
 perf_free  (void * b);
 
-KHMEXP void
-perf_dump  (char * filename);
-
 KHMEXP wchar_t *
-perf_wcsdup(char * file, int line, const wchar_t * str);
+perf_wcsdup(const char * file, int line, const wchar_t * str);
 
 KHMEXP char *
-perf_strdup(char * file, int line, const char * str);
+perf_strdup(const char * file, int line, const char * str);
 
 KHMEXP void *
-perf_calloc(char * file, int line, size_t num, size_t size);
+perf_calloc(const char * file, int line, size_t num, size_t size);
+
+KHMEXP void
+perf_set_thread_desc(const char * file, int line,
+                     const wchar_t * name, const wchar_t * creator);
 
 #endif

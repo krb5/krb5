@@ -37,86 +37,10 @@
 /*!\defgroup khui_alert Alerter and Error Reporting
 @{*/
 
+struct tag_khui_alert;
+typedef struct tag_khui_alert khui_alert;
+
 #define KHUI_MAX_ALERT_COMMANDS  4
-
-/*! \brief An alert
-
-    Describes an alert message that will be shown to the user in a
-    variety of ways depending on the state of the NetIDMgr
-    application.
- */
-typedef struct tag_khui_alert {
-    khm_int32           magic;  /*!< Magic number. Always set to
-                                  KHUI_ALERT_MAGIC */
-
-    khm_int32           severity; /*!< The severity of the alert.  One
-                                    of KHERR_ERROR, KHERR_WARNING or
-                                    KHERR_INFO.  The default is
-                                    KHERR_INFO.  Do not set directly.
-                                    Use khui_alert_set_severity(). */
-
-    khm_int32           alert_commands[KHUI_MAX_ALERT_COMMANDS];
-                                /*!< The command buttons associated
-                                  with the alert.  Use
-                                  khui_alert_add_command() to add a
-                                  command.  The buttons will appear in
-                                  the order in which they were added.
-                                  The first button will be the
-                                  default.  Each command should be a
-                                  known action identifier. */
-    khm_int32           n_alert_commands;
-
-    wchar_t *           title;  /*!< The title of the alert.  Subject
-                                  to ::KHUI_MAXCCH_TITLE.  Use
-                                  khui_alert_set_title() to set.  Do
-                                  not modify directly. */
-
-    wchar_t *           message; /*!< The main message of the alert.
-                                   Subject to ::KHUI_MAXCCH_MESSAGE.
-                                   Use khui_alert_set_message() to
-                                   set.  Do not modify direcly. */
-
-    wchar_t *           suggestion; /*!< A suggestion.  Appears below
-                                      the message text. Use
-                                      khui_alert_set_suggestion() to
-                                      set.  Do not modify directly. */
-
-#ifdef _WIN32
-    POINT               target;
-#endif
-
-    khm_int32           flags;  /*!< combination of
-                                 ::khui_alert_flags.  Do not modify
-                                 directly. */
-
-    kherr_context *     err_context; 
-                                /*!< If non-NULL at the time the alert
-                                  window is shown, this indicates that
-                                  the alert window should provide an
-                                  error viewer for the given error
-                                  context. */
-
-    kherr_event *       err_event; 
-                                /*!< If non-NULL at the time the alert
-                                  window is shown, this indicates that
-                                  the alert window should provide an
-                                  error viewer for the given error
-                                  event.  If an \a err_context is also
-                                  given, the error viewer for the
-                                  context will be below this error. */
-
-    khm_int32           response; 
-                                /*!< Once the alert is displayed to
-                                  the user, when the user clicks one
-                                  of the command buttons, the command
-                                  ID will be assigned here. */
-
-    int                 refcount; /* internal */
-
-    LDCL(struct tag_khui_alert); /* internal */
-} khui_alert;
-
-#define KHUI_ALERT_MAGIC 0x48c39ce9
 
 /*! \brief Maximum number of characters in title including terminating NULL
  */
@@ -185,6 +109,27 @@ enum khui_alert_flags {
     KHUI_ALERT_FLAGMASK_RDWR        =0x0C000010,
     /*!< Bit mask of flags that can be set by khui_alert_set_flags() */
 };
+
+/*! \brief Alert types
+
+    These types can be set with khui_alert_set_type() to indicate
+    which type of alert this is.  The types defined here are
+    identified by the Network Identity Manager and will receive
+    special handling whereever appropriate.
+
+    The type is a hint to the application and will not guarantee a
+    particular behavior.
+ */
+typedef enum tag_khui_alert_types {
+    KHUI_ALERTTYPE_NONE = 0,    /*!< No specific alert type */
+    KHUI_ALERTTYPE_PLUGIN,      /*!< Plug-in or module load related
+                                  alert */
+    KHUI_ALERTTYPE_EXPIRE,      /*!< Credential or identity expiration
+                                  warning */
+    KHUI_ALERTTYPE_RENEWFAIL,   /*!< Failed to renew credentials */
+    KHUI_ALERTTYPE_ACQUIREFAIL, /*!< Failed to acquire credentials */
+    KHUI_ALERTTYPE_CHPW,        /*!< Failed to change password */
+} khui_alert_type;
 
 /*! \brief Create an empty alert object
 
@@ -267,11 +212,38 @@ khui_alert_clear_commands(khui_alert * alert);
 
 /*! \brief Add a command to an alert object
 
-    The command ID should be a valid registered command.
+    The command ID should be a valid registered action.
  */
 KHMEXP khm_int32 KHMAPI 
 khui_alert_add_command(khui_alert * alert, 
                        khm_int32 command_id);
+
+/*! \brief Set the type of alert
+ */
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_type(khui_alert * alert,
+                    khui_alert_type type);
+
+/*! \brief Set the action context for the alert */
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_ctx(khui_alert * alert,
+                   khui_scope scope,
+                   khm_handle identity,
+                   khm_int32 cred_type,
+                   khm_handle cred);
+
+/*! \brief Get the response code from an alert
+
+    Once an alert has been displayed to the user, the user may choose
+    a command from the list of commands provided in the alert (see
+    khui_alert_add_command() ).  This function can retrieve the
+    selected command from the alert.
+
+    \return The selected command or \a 0 if no commands were selected.
+ */
+KHMEXP khm_int32 KHMAPI
+khui_alert_get_response(khui_alert * alert);
+
 
 /*! \brief Display an alert
 
@@ -317,7 +289,6 @@ khui_alert_show(khui_alert * alert);
     This function always opens an alert window (never shows a
     balloon).
 
-    \note Should only be called from the UI thread.
  */
 KHMEXP khm_int32 KHMAPI
 khui_alert_show_modal(khui_alert * alert);
@@ -377,7 +348,7 @@ khui_alert_release(khui_alert * alert);
         disallows access to all other alerts as well.
 
     \note Calling khui_alert_lock() is only necessary if you are
-        modifying the ::khui_alert structure directly.  Calling any of
+        accessing the ::khui_alert structure directly.  Calling any of
         the khui_alert_* functions to modify the alert does not
         require obtaining a lock, as they perform synchronization
         internally.

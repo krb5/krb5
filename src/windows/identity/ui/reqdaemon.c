@@ -350,6 +350,8 @@ khm_reqdaemon_thread_proc(LPVOID vparam) {
     DWORD dw;
 #endif
 
+    PDESCTHREAD(L"Remote Request Daemon", L"App");
+
     khm_register_reqdaemonwnd_class();
 
 #ifdef DEBUG

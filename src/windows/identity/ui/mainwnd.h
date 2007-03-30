@@ -55,8 +55,9 @@ khm_main_wnd_proc(HWND hwnd,
                   WPARAM wParam,
                   LPARAM lParam);
 
-#define WM_KHUI_ASSIGN_COMMANDLINE       32808
 #define WM_KHUI_QUERY_APP_VERSION        32809
+#define WM_KHUI_ASSIGN_COMMANDLINE_V1    32808
+#define WM_KHUI_ASSIGN_COMMANDLINE_V2    32810
 
 #define COMMANDLINE_MAP_FMT              L"Local\\NetIDMgr_Cmdline_%lu"
 #define QUERY_APP_VER_MAP_FMT            L"Local\\NetIDMgr_QueryVer_%lu"

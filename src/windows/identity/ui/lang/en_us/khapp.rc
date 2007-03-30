@@ -34,7 +34,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\r\n"
+    "#include ""afxres.h""\r\0"
 END
 
 3 TEXTINCLUDE 
@@ -174,28 +174,21 @@ BEGIN
     LTEXT           "TplInput",IDC_NC_TPL_INPUT,54,7,240,13,NOT WS_VISIBLE | WS_BORDER
     LTEXT           "TplLabelLg",IDC_NC_TPL_LABEL_LG,7,33,146,10,NOT WS_VISIBLE | WS_BORDER
     LTEXT           "TplInputLg",IDC_NC_TPL_INPUT_LG,155,31,139,13,NOT WS_VISIBLE | WS_BORDER
-    LTEXT           "&Credentials",IDC_NC_CREDTEXT_LABEL,7,66,41,10,NOT WS_GROUP
-    CONTROL         "",IDC_NC_CREDTEXT,"KhmHtWnd",WS_TABSTOP,54,65,240,73,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "&Ok",IDOK,57,142,89,18,WS_DISABLED
-    PUSHBUTTON      "&Cancel",IDCANCEL,158,142,54,18
-    PUSHBUTTON      "&Options >>",IDC_NC_OPTIONS,223,142,71,18
+    LTEXT           "&Credentials",IDC_NC_CREDTEXT_LABEL,7,66,41,10,NOT WS_VISIBLE | NOT WS_GROUP
+    CONTROL         "",IDC_NC_CREDTEXT,"KhmHtWnd",NOT WS_VISIBLE | WS_TABSTOP,54,65,240,95,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "&Ok",IDOK,101,142,89,18,WS_DISABLED
+    PUSHBUTTON      "&Cancel",IDCANCEL,198,142,54,18
+    PUSHBUTTON      "&>>",IDC_NC_ADVANCED,260,142,34,18
 END
 
-IDD_NC_BBAR DIALOGEX 0, 0, 60, 181
+IDD_NC_BBAR DIALOGEX 0, 0, 66, 181
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
 EXSTYLE WS_EX_CONTROLPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "&Ok",IDOK,0,7,53,41,WS_DISABLED
-    PUSHBUTTON      "&Cancel",IDCANCEL,0,58,53,19
-    PUSHBUTTON      "&Help",IDC_NC_HELP,0,155,53,19
-END
-
-IDD_NC_TS DIALOGEX 0, 0, 300, 15
-STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
-EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
+    DEFPUSHBUTTON   "&Ok",IDOK,7,7,52,41,WS_DISABLED
+    PUSHBUTTON      "&Cancel",IDCANCEL,7,58,52,19
+    PUSHBUTTON      "&Help",IDC_NC_HELP,7,155,52,19
 END
 
 IDD_PP_IDENT DIALOGEX 0, 0, 235, 156
@@ -414,7 +407,8 @@ BEGIN
 
     IDD_NC_BBAR, DIALOG
     BEGIN
-        RIGHTMARGIN, 53
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 59
         TOPMARGIN, 7
         BOTTOMMARGIN, 174
     END
@@ -560,7 +554,7 @@ STRINGTABLE
 BEGIN
     IDS_MENU_OPTIONS        "&Options"
     IDS_MENU_HELP           "&Help"
-    IDS_ACTION_PROPERTIES   "&Properties ..."
+    IDS_ACTION_PROPERTIES   "&Properties"
     IDS_ACTION_EXIT         "E&xit"
     IDS_CFG_ROOT_NAME       "Network Identity Manager"
     IDS_ACTION_SET_DEF_ID   "Set as &default"
@@ -568,9 +562,9 @@ BEGIN
     IDS_CFG_ROOT_TITLE      "Network Identity Manager Configuration"
     IDS_CFG_GENERAL_SHORT   "General"
     IDS_ACTION_NEW_CRED     "&New credentials ..."
-    IDS_ACTION_PASSWD_ID    "Change &password ..."
+    IDS_ACTION_PASSWD_ID    "Change &password"
     IDS_ACTION_CHOOSE_COLS  "View columns"
-    IDS_ACTION_DEBUG_WINDOW "Debug window ..."
+    IDS_ACTION_DEBUG_WINDOW "Debug window"
     IDS_ACTION_VIEW_REFRESH "Refresh view"
     IDS_MENU_LAYOUT         "Layout"
     IDS_MENU_TOOLBARS       "Toolbars"
@@ -582,13 +576,13 @@ BEGIN
     IDS_ACTION_LAYOUT_TYPE  "By type"
     IDS_ACTION_LAYOUT_LOC   "By location"
     IDS_ACTION_TB_STANDARD  "Standard"
-    IDS_ACTION_OPT_KHIM     "General ..."
-    IDS_ACTION_OPT_IDENTS   "Identities ..."
-    IDS_ACTION_OPT_NOTIF    "Notifications ..."
+    IDS_ACTION_OPT_KHIM     "General"
+    IDS_ACTION_OPT_IDENTS   "Identities"
+    IDS_ACTION_OPT_NOTIF    "Notifications"
     IDS_ACTION_HELP_CTX     "Help Index"
-    IDS_ACTION_HELP_CONTENTS "Contents ..."
-    IDS_ACTION_HELP_INDEX   "Index ..."
-    IDS_ACTION_HELP_ABOUT   "About Network Identity Manager ..."
+    IDS_ACTION_HELP_CONTENTS "Contents"
+    IDS_ACTION_HELP_INDEX   "Index"
+    IDS_ACTION_HELP_ABOUT   "About Network Identity Manager"
     IDS_CFG_GENERAL_LONG    "General options"
     IDS_SAMPLE_STRING       "Wxy"
     IDS_NO_CREDS            "<large><center>You currently have no credentials.Click <a id=""NewCreds"">here</a> to obtain new credentials.</center></large>"
@@ -607,7 +601,7 @@ BEGIN
     IDS_WTPOST_INIT_CREDS   " - Initial credentials"
     IDS_WTPOST_NEW_CREDS    " - New credentials"
     IDS_ACTION_RENEW_CRED   "R&enew credentials"
-    IDS_ACTION_DESTROY_CRED "De&stroy credentials ..."
+    IDS_ACTION_DESTROY_CRED "De&stroy credentials"
     IDS_DEFAULT_FONT        "MS Shell Dlg"
     IDS_NC_CREDTEXT_TABS    "<settab pos=""15""><settab pos=""30""><settab pos=""45"">"
     IDS_NOTIFY_PREFIX       "Network Identity Manager - "
@@ -629,7 +623,7 @@ BEGIN
     IDS_PROP_COL_VALUE      "Value"
     IDS_NC_NEW_IDENT        "( New identity ... )"
     IDS_NC_CREDTEXT_ID_CHECKING "<font color=""grey"">%s (Checking...)</font>"
-    IDS_ACTION_OPEN_APP     "Open Network Identity Manager ..."
+    IDS_ACTION_OPEN_APP     "Open Network Identity Manager"
     IDS_CTX_NEW_IDENT       "Obaining new identity"
     IDS_CTX_NEW_CREDS       "Obtaining new credentials"
     IDS_CTX_RENEW_CREDS     "Renewing credentials"
@@ -688,11 +682,11 @@ BEGIN
     IDS_PISTATE_EXIT        "Stopped"
     IDS_CTX_PASSWORD        "Changing password"
     IDS_WT_PASSWORD         "Changing password"
-    IDS_WTPOST_PASSWORD     "  - Changing password"
+    IDS_WTPOST_PASSWORD     " - Changing password"
     IDS_CTX_PROC_PASSWORD   "Changing password for %1!s!"
     IDS_NC_PWD_FAILED_TITLE "Failed to change password"
-    IDS_CMDLINE_HELP        "Command line options for Network Identity Manager are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials"
-    IDS_PACTION_NEXT        "Next alert..."
+    IDS_CMDLINE_HELP        "Command line options for Network Identity Manager are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials\n-x or --exit: Exit the running instance of Network Identity Manager"
+    IDS_PACTION_NEXT        "Next alert"
     IDS_ERR_TITLE_NO_IDENTPRO "Cannot proceed without identity provider"
 END
 
@@ -703,7 +697,7 @@ BEGIN
                             "This is quite possibly caused by the identity provider module failing to load properly."
     IDS_NC_REN_FAILED_TITLE "Failed to renew credentials"
     IDS_CW_DEFAULT          "(Default)"
-    IDS_ACTION_OPT_PLUGINS  "Plugins ..."
+    IDS_ACTION_OPT_PLUGINS  "Plugins"
     IDS_NC_SETDEF           "&Set as default identity"
     IDS_NC_ID_DEF           "<p>This identity is the default</p>"
     IDS_NC_ID_WDEF          "<p>Will be the default. (<a id=""NotDef"">Don't make default</a>)</p>"
@@ -745,7 +739,7 @@ BEGIN
     IDS_APR_SAMPLE_TEXT_NORMAL "Sample text (normal). 01234567890"
     IDS_CFG_APPEAR_SHORT    "Appearance"
     IDS_CFG_APPEAR_LONG     "Appearance"
-    IDS_ACTION_OPT_APPEAR   "Appearance ..."
+    IDS_ACTION_OPT_APPEAR   "Appearance"
     IDS_APR_SAMPLE_TEXT_SEL "Sample text (selected). 01234567890"
     IDS_CFG_IDNAME_INV      "The identity name %s is invalid."
     IDS_CFG_IDNAME_PRB      "Can't add new identity %s"
@@ -782,13 +776,18 @@ STRINGTABLE
 BEGIN
     IDS_NC_REN_FAILED_TITLE_I "Failed to renew creds for %s"
     IDS_CFG_IDNAME_NON      "No identity selected.  Please select an identity and try again."
-    IDS_MENU_DESTROY_CRED   "Destroy ..."
-    IDS_MENU_RENEW_CRED     "Renew ..."
+    IDS_MENU_DESTROY_CRED   "Destroy"
+    IDS_MENU_RENEW_CRED     "Renew"
     IDS_ACTION_DESTROY_ALL  "All identities"
     IDS_ACTION_RENEW_ALL    "All identities"
     IDS_IDACTION_RENEW      "Renew credentials for %s"
     IDS_IDACTION_DESTROY    "Destroy credentials for %s"
     IDS_CTX_DESTROY_ID      "Destroying identity %1!s!"
+    IDS_NCN_IDENT_INVALID   "Identity %s is invalid."
+    IDS_NCN_IDENT_CHECKING  "Checking identity %s ..."
+    IDS_NCN_IDENT_UNKNOWN   "Validity of identity %s coudn't be determined."
+    IDS_REMOTE_FAIL         "The instance of Network Identity Manager that is already running is not responding to the remote request properly.  Please check if you are running the latest version of Network Identity Manger software included with MIT Kerberos for Windows."
+    IDS_REMOTE_FAIL_TITLE   "Failed to communicate with Network Identity Manager"
 END
 
 #endif    // English (U.S.) resources
@@ -805,4 +804,5 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 

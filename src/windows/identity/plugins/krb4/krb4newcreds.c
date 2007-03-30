@@ -853,6 +853,9 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
             if (nct->name)
                 PFREE(nct->name);
 
+            if (nct->credtext)
+                PFREE(nct->credtext);
+
             PFREE(nct);
         }
         break;
