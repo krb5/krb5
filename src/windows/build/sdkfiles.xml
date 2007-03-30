@@ -1,147 +1,40 @@
 <?xml version="1.0" encoding="utf-8" ?>
 	<Files>
 		<!-- File from	paths are relative to <src>/pismere.	-->
-		<!-- File to			paths are relative to <out>.					-->
-		<File dummy="foo" /> <!-- Forces XML::Simple behavior -->
+		<!-- File to	paths are relative to <out>.			-->
+		<File dummy="foo" /> <!-- Forces XML::Simple behavior   -->
 			<!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
 
-		<File name="relnotes.html" from="doc\kerberos" to="doc" />
-		<File name="kclient.rtf" from="athena\auth\krb4\kclient\doc" to="doc" />
+		<File name="relnotes.html"  from="doc\kerberos"                 to="doc" />
+		<File name="kclient.rtf"    from="athena\auth\krb4\kclient\doc" to="doc" />
 
-		<File  name="*.h" from="staging\inc" to="inc" />
-<!--	
-		<File  name="*.h" from="staging\inc\kclient" to="inc\kclient\" />
-		<File  name="*.h" from="staging\inc\krb4" to="inc\krb4\" />
-		<File  name="*.h" from="staging\inc\krb5" to="inc\krb5\" />
+		<File  name="*.h"           from="staging\inc"                  to="inc" />
 
-		<File  name="gssapi.h" from="" to="" inc\krb5\gssapi\
-		<File  name="gssapi_generic.h" from="" to="" inc\krb5\gssapi\
-		<File  name="gssapi_krb5.h" from="" to="" inc\krb5\gssapi\
+		<File  name="*.*"           from="staging\install\nsis"         to="install\nsis\" />
 
-		<File  name="des.h" from="" to="" inc\krb5\KerberosIV\
-		<File  name="kadm_err.h" from="" to="" inc\krb5\KerberosIV\
-		<File  name="krb.h" from="" to="" inc\krb5\KerberosIV\
-		<File  name="krb_err.h" from="" to="" inc\krb5\KerberosIV\
-		<File  name="mit-copyright.h" from="" to="" inc\krb5\KerberosIV\
+		<File  name="MITKerberosForWindows%-DEBUG%.exe"
+		                            from="staging\install\nsis"         to="install\nsis\"  newname="%filestem%.exe" />
+        <!-- We'll clean up the MITKerberosForWindows.exe in the target directory in a later step.  -->
 
-		<File  name="krb5.h" from="" to="" inc\krb5\krb5\
-
-		<File  name="cacheapi.h" from="" to="" inc\krbcc\
-
-		<File  name="leasherr.h" from="" to="" inc\leash\
-		<File  name="leashinfo.h" from="" to="" inc\leash\
-		<File  name="leashwin.h" from="" to="" inc\leash\
-
-		<File  name="loadfuncs.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-afs.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-afs36.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-com_err.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-krb.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-krb5.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-krb524.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-leash.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-lsa.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-profile.h" from="" to="" inc\loadfuncs\
-		<File  name="loadfuncs-wshelper.h" from="" to="" inc\loadfuncs\
-
-		<File  name="loadfuncs.c" from="" to="" inc\loadfuncs\
-
-		<File  name="hashtable.h" from="" to="" inc\netidmgr\
-		<File  name="kconfig.h" from="" to="" inc\netidmgr\
-		<File  name="kcreddb.h" from="" to="" inc\netidmgr\
-		<File  name="khaction.h" from="" to="" inc\netidmgr\
-		<File  name="khactiondef.h" from="" to="" inc\netidmgr\
-		<File  name="khalerts.h" from="" to="" inc\netidmgr\
-		<File  name="khconfigui.h" from="" to="" inc\netidmgr\
-		<File  name="khdefs.h" from="" to="" inc\netidmgr\
-		<File  name="kherr.h" from="" to="" inc\netidmgr\
-		<File  name="kherror.h" from="" to="" inc\netidmgr\
-		<File  name="khhtlink.h" from="" to="" inc\netidmgr\
-		<File  name="khlist.h" from="" to="" inc\netidmgr\
-		<File  name="khmsgtypes.h" from="" to="" inc\netidmgr\
-		<File  name="khnewcred.h" from="" to="" inc\netidmgr\
-		<File  name="khprops.h" from="" to="" inc\netidmgr\
-		<File  name="khremote.h" from="" to="" inc\netidmgr\
-		<File  name="khrescache.h" from="" to="" inc\netidmgr\
-		<File  name="khtracker.h" from="" to="" inc\netidmgr\
-		<File  name="khuidefs.h" from="" to="" inc\netidmgr\
-		<File  name="kmm.h" from="" to="" inc\netidmgr\
-		<File  name="kmq.h" from="" to="" inc\netidmgr\
-		<File  name="kplugin.h" from="" to="" inc\netidmgr\
-		<File  name="mstring.h" from="" to="" inc\netidmgr\
-		<File  name="netidmgr.h" from="" to="" inc\netidmgr\
-		<File  name="netidmgr_version.h" from="" to="" inc\netidmgr\
-		<File  name="perfstat.h" from="" to="" inc\netidmgr\
-		<File  name="sync.h" from="" to="" inc\netidmgr\
-		<File  name="utils.h" from="" to="" inc\netidmgr\
-
-		<File  name="nameser.h" from="" to="" inc\wshelper\arpa\
-
-		<File  name="hesiod.h" from="" to="" inc\wshelper\
-		<File  name="mitwhich.h" from="" to="" inc\wshelper\
-		<File  name="resolv.h" from="" to="" inc\wshelper\
-		<File  name="wshelper.h" from="" to="" inc\wshelper\
--->
-
-		<File  name="*.*" from="staging\install\nsis" to="install\nsis\" />
-<!--		<File  name="kfw-fixed.nsi" from="" to="" install\nsis\
-		<File  name="kfw.ico" from="" to="" install\nsis\
-		<File  name="kfw.nsi" from="" to="" install\nsis\
-		<File  name="KfWConfigPage.ini" from="" to="" install\nsis\
-		<File  name="KfWConfigPage2.ini" from="" to="" install\nsis\
-		<File  name="killer.cpp" from="" to="" install\nsis\
-		<File  name="licenses.rtf" from="" to="" install\nsis\
-		<File  name="site-local.nsi" from="" to="" install\nsis\
-		<File  name="utils.nsi" from="" to="" install\nsis\
--->
-
-		<File  name="config.wxi" from="staging\install\wix" to="install\wix\" />
-		<File  name="features.wxi" from="staging\install\wix" to="install\wix\" />
-		<File  name="files.wxi" from="staging\install\wix" to="install\wix\" />
-		<File  name="kfw.wxs" from="staging\install\wix" to="install\wix\" />
-		<File  name="Makefile" from="staging\install\wix" to="install\wix\" />
+		<File  name="config.wxi"    from="staging\install\wix"          to="install\wix\" />
+		<File  name="features.wxi"  from="staging\install\wix"          to="install\wix\" />
+		<File  name="files.wxi"     from="staging\install\wix"          to="install\wix\" />
+		<File  name="kfw.wxs"       from="staging\install\wix"          to="install\wix\" />
+		<File  name="Makefile"      from="staging\install\wix"          to="install\wix\" />
 		<File  name="msi-deployment-guide.txt" from="staging\install\wix" to="install\wix\" />
-		<File  name="property.wxi" from="staging\install\wix" to="install\wix\" />
-		<File  name="site-local.wxi" from="staging\install\wix" to="install\wix\" />
+		<File  name="property.wxi"  from="staging\install\wix"          to="install\wix\" />
+		<File  name="site-local.wxi" from="staging\install\wix"         to="install\wix\" />
 
-		<File  name="*.*" from="staging\install\wix\Binary" to="install\wix\Binary\" />
-<!--		<File  name="bannrbmp.bmp" from="" to="" install\wix\Binary\
-		<File  name="completi.ico" from="" to="" install\wix\Binary\
-		<File  name="custicon.ico" from="" to="" install\wix\Binary\
-		<File  name="dlgbmp.bmp" from="" to="" install\wix\Binary\
-		<File  name="exclamic.ico" from="" to="" install\wix\Binary\
-		<File  name="info.bmp" from="" to="" install\wix\Binary\
-		<File  name="insticon.ico" from="" to="" install\wix\Binary\
-		<File  name="new.bmp" from="" to="" install\wix\Binary\
-		<File  name="removico.ico" from="" to="" install\wix\Binary\
-		<File  name="repairic.ico" from="" to="" install\wix\Binary\
-		<File  name="up.bmp" from="" to="" install\wix\Binary\
--->		
+		<File  name="*.*"           from="staging\install\wix\Binary"   to="install\wix\Binary\" />
 
-		<File  name="custom.cpp" from="staging\install\wix\custom" to="install\wix\custom\" />
-		<File  name="custom.h" from="staging\install\wix\custom" to="install\wix\custom\" />
+		<File  name="custom.cpp"    from="staging\install\wix\custom"   to="install\wix\custom\" />
+		<File  name="custom.h"      from="staging\install\wix\custom"   to="install\wix\custom\" />
 
-		<File  name="config_1033.wxi" from="staging\install\wix\lang" to="install\wix\lang\" />
-		<File  name="strings_1033.wxl" from="staging\install\wix\lang" to="install\wix\lang\" />
-		<File  name="ui_1033.wxi" from="staging\install\wix\lang" to="install\wix\lang\" />
+		<File  name="config_1033.wxi" from="staging\install\wix\lang"   to="install\wix\lang\" />
+		<File  name="strings_1033.wxl" from="staging\install\wix\lang"  to="install\wix\lang\" />
+		<File  name="ui_1033.wxi"   from="staging\install\wix\lang"     to="install\wix\lang\" />
 		<!-- Why not license.rtf? -->
 
-		<File  name="*.lib" from="staging\lib\i386" to="lib\i386\" />
-<!--		
-		<File  name="comerr32.lib" from="" to="" lib\i386\
-		<File  name="delaydlls.lib" from="" to="" lib\i386\
-		<File  name="getopt.lib" from="" to="" lib\i386\
-		<File  name="gssapi32.lib" from="" to="" lib\i386\
-		<File  name="kclnt32.lib" from="" to="" lib\i386\
-		<File  name="krb524.lib" from="" to="" lib\i386\
-		<File  name="krb5_32.lib" from="" to="" lib\i386\
-		<File  name="krbcc32.lib" from="" to="" lib\i386\
-		<File  name="krbv4w32.lib" from="" to="" lib\i386\
-		<File  name="leashw32.lib" from="" to="" lib\i386\
-		<File  name="loadfuncs.lib" from="" to="" lib\i386\
-		<File  name="nidmgr32.lib" from="" to="" lib\i386\
-		<File  name="wshelp32.lib" from="" to="" lib\i386\
-		<File  name="xpprof32.lib" from="" to="" lib\i386\
--->	
+		<File  name="*.lib"         from="staging\lib\i386"             to="lib\i386\" />
 	
 	</Files>
