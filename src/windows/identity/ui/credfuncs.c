@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -500,6 +501,41 @@ void khm_cred_destroy_creds(khm_boolean sync, khm_boolean quiet)
                          KMSG_CRED_DESTROY_CREDS,
                          0,
                          (void *) pctx);
+
+    _end_task();
+}
+
+void khm_cred_destroy_identity(khm_handle identity)
+{
+    khui_action_context * pctx;
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    khm_size cb;
+
+    if (identity == NULL)
+        return;
+
+    pctx = PMALLOC(sizeof(*pctx));
+#ifdef DEBUG
+    assert(pctx);
+#endif
+
+    khui_context_create(pctx,
+                        KHUI_SCOPE_IDENT,
+                        identity,
+                        KCDB_CREDTYPE_INVALID,
+                        NULL);
+
+    cb = sizeof(idname);
+    kcdb_identity_get_name(identity, idname, &cb);
+
+    _begin_task(KHERR_CF_TRANSITIVE);
+    _report_sr1(KHERR_NONE, IDS_CTX_DESTROY_ID, _dupstr(idname));
+    _describe();
+
+    kmq_post_message(KMSG_CRED,
+                     KMSG_CRED_DESTROY_CREDS,
+                     0,
+                     (void *) pctx);
 
     _end_task();
 }

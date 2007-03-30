@@ -782,6 +782,13 @@ STRINGTABLE
 BEGIN
     IDS_NC_REN_FAILED_TITLE_I "Failed to renew creds for %s"
     IDS_CFG_IDNAME_NON      "No identity selected.  Please select an identity and try again."
+    IDS_MENU_DESTROY_CRED   "Destroy ..."
+    IDS_MENU_RENEW_CRED     "Renew ..."
+    IDS_ACTION_DESTROY_ALL  "All identities"
+    IDS_ACTION_RENEW_ALL    "All identities"
+    IDS_IDACTION_RENEW      "Renew credentials for %s"
+    IDS_IDACTION_DESTROY    "Destroy credentials for %s"
+    IDS_CTX_DESTROY_ID      "Destroying identity %1!s!"
 END
 
 #endif    // English (U.S.) resources

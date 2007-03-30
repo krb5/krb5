@@ -352,10 +352,11 @@ int _n_ui_propsheets = 0;
 void khm_add_property_sheet(khui_property_sheet * s) {
     if(_n_ui_propsheets < MAX_UI_PROPSHEETS)
         _ui_propsheets[_n_ui_propsheets++] = s;
+    else {
 #ifdef DEBUG
-    else
         assert(FALSE);
 #endif
+    }
 }
 
 void khm_del_property_sheet(khui_property_sheet * s) {

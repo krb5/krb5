@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -86,6 +87,12 @@ khm_get_lib_version(khm_version * libver, khm_ui_4 * apiver);
  */
 KHMEXP khm_ui_4 KHMAPI
 khm_get_commctl_version(khm_version * pdvi);
+
+typedef khm_int32
+(KHMAPI *khm_ui_callback)(HWND hwnd_main_wnd, void * rock);
+
+KHMEXP khm_int32 KHMAPI
+khui_request_UI_callback(khm_ui_callback cb, void * rock);
 
 /*!@}*/
 

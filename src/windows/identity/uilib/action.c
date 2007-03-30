@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,6 +27,7 @@
 
 #define NOEXPORT
 #include<khuidefs.h>
+#include<intaction.h>
 #include<utils.h>
 #include<assert.h>
 
@@ -164,8 +166,8 @@ khui_action_ref khui_menu_ico_ctx_normal[] = {
     MENU_DEFACTION(KHUI_ACTION_CLOSE_APP),
     MENU_SEP(),
     MENU_ACTION(KHUI_ACTION_NEW_CRED),
-    MENU_ACTION(KHUI_ACTION_RENEW_CRED),
-    MENU_ACTION(KHUI_ACTION_DESTROY_CRED),
+    MENU_SUBMENU(KHUI_MENU_RENEW_CRED),
+    MENU_SUBMENU(KHUI_MENU_DESTROY_CRED),
     MENU_SEP(),
     MENU_ACTION(KHUI_ACTION_EXIT),
     MENU_END()
@@ -178,6 +180,16 @@ khui_action_ref khui_menu_cwheader_ctx[] = {
 };
 
 khui_action_ref khui_menu_columns[] = {
+    MENU_END()
+};
+
+khui_action_ref khui_menu_destroy_cred[] = {
+    MENU_DEFACTION(KHUI_ACTION_DESTROY_ALL),
+    MENU_END()
+};
+
+khui_action_ref khui_menu_renew_cred[] = {
+    MENU_DEFACTION(KHUI_ACTION_RENEW_ALL),
     MENU_END()
 };
 
@@ -204,6 +216,8 @@ khui_menu_def khui_all_menus[] = {
     CONSTMENU(KHUI_MENU_OPTIONS, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_options),
     CONSTMENU(KHUI_MENU_HELP, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_help),
     CONSTMENU(KHUI_MENU_COLUMNS, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_columns),
+    CONSTMENU(KHUI_MENU_RENEW_CRED, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_renew_cred),
+    CONSTMENU(KHUI_MENU_DESTROY_CRED, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_menu_destroy_cred),
 
     /* toolbars */
     CONSTMENU(KHUI_TOOLBAR_STANDARD, KHUI_MENUSTATE_CONSTANT | KHUI_MENUSTATE_SYSTEM, khui_toolbar_standard),
