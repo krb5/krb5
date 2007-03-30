@@ -11,28 +11,14 @@
 		<File  name="*.h"           from="staging\inc"                  to="inc" />
 
 		<File  name="*.*"           from="staging\install\nsis"         to="install\nsis\" />
+        <!-- We'll clean up the exes in the target directory in a later step.  -->
 
-		<File  name="MITKerberosForWindows%-DEBUG%.exe"
-		                            from="staging\install\nsis"         to="install\nsis\"  newname="%filestem%.exe" />
-        <!-- We'll clean up the MITKerberosForWindows.exe in the target directory in a later step.  -->
-
-		<File  name="config.wxi"    from="staging\install\wix"          to="install\wix\" />
-		<File  name="features.wxi"  from="staging\install\wix"          to="install\wix\" />
-		<File  name="files.wxi"     from="staging\install\wix"          to="install\wix\" />
-		<File  name="kfw.wxs"       from="staging\install\wix"          to="install\wix\" />
-		<File  name="Makefile"      from="staging\install\wix"          to="install\wix\" />
-		<File  name="msi-deployment-guide.txt" from="staging\install\wix" to="install\wix\" />
-		<File  name="property.wxi"  from="staging\install\wix"          to="install\wix\" />
-		<File  name="site-local.wxi" from="staging\install\wix"         to="install\wix\" />
-
-		<File  name="*.*"           from="staging\install\wix\Binary"   to="install\wix\Binary\" />
+		<File  name="*.*"           from="staging\install\wix"          to="install\wix\" />
+        <!-- We'll clean up the msi in the target directory in a later step.  -->
 
 		<File  name="custom.cpp"    from="staging\install\wix\custom"   to="install\wix\custom\" />
 		<File  name="custom.h"      from="staging\install\wix\custom"   to="install\wix\custom\" />
 
-		<File  name="config_1033.wxi" from="staging\install\wix\lang"   to="install\wix\lang\" />
-		<File  name="strings_1033.wxl" from="staging\install\wix\lang"  to="install\wix\lang\" />
-		<File  name="ui_1033.wxi"   from="staging\install\wix\lang"     to="install\wix\lang\" />
 		<!-- Why not license.rtf? -->
 
 		<File  name="*.lib"         from="staging\lib\i386"             to="lib\i386\" />

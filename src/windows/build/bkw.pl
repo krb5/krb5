@@ -266,7 +266,7 @@ sub main {
         if ($verbose) {print "Info -- *** Begin fetching sources.\n";}
         if (! -d $wd) {                        ## xcopy will create the entire path for us.
             !system("echo foo > a.tmp")                     or die "Fatal -- Couldn't create temporary file in ".`cd`;
-            !system("echo F | xcopy a.tmp $wd\\CVS\\a.tmp") or die "Fatal -- Couldn't xcopy to $wd.";
+            !system("echo F | xcopy a.tmp $wd\\CVS\\a.tmp") or die "Fatal -- Couldn't xcopy to $wd\\CVS.";
             !system("rm a.tmp")                             or die "Fatal -- Couldn't remove temporary file.";
             !system("rm $wd\\CVS\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
             }
@@ -506,7 +506,6 @@ sub main {
         # Now update site-local.nsi:
         chdir "..\\nsis";
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
-        local $tmpfile    = "site-local.sed" ;
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
         # Add DEBUG or RELEASE:
         if ($switches[0]->{debug}->{value}) {                               ## debug build

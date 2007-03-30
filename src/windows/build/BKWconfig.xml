@@ -115,7 +115,8 @@
                         </CopyList>
                     <Prunes> 
                         <Prune dummy="foo" />
-                        <Prune name="MIT*.exe" />   <!-- MITKerberosForWindows.exe was copied to a new name in sdkfiles.xml. -->
+                        <Prune name="*.exe" />
+                        <Prune name="*.msi" />
                         </Prunes>
                 </Zip>
                 <Zip name="SRC" filename="%filestem%-src.zip" topdir="%filestem%-final">
