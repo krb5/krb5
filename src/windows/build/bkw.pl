@@ -463,18 +463,25 @@ print Dumper($prunes);
         
         # The build results are copied to a staging area, where the packager expects to find them.
         #  We put the staging area in the fixed area .../pismere/staging.
-        my $prepackage    = $config->{Stages}->{PrePackage};
-        my $staging_area = "$wd\\staging";
+        my $prepackage  = $config->{Stages}->{PrePackage};
+        my $staging     = "$wd\\staging";
         chdir($wd) or die "Fatal -- couldn't chdir to $wd\n";
         if ($verbose) {print "Info -- chdir to $wd\n";}
-        (-e $staging_area) or mkdir($staging_area);
+        (-e $staging) or mkdir($staging);
         
         # Force Where From and To are relative to:
         $prepackage->{CopyList}->{Config}->{From}->{root}   = "$wd\\athena";
         $prepackage->{CopyList}->{Config}->{To}->{root}     = "$wd\\staging";
         copyFiles($prepackage->{CopyList}, $config);        ## Copy any files [this step takes a while]
 
-        chdir("staging\\install\\wix") or die "Fatal -- Couldn't cd to $wd\\staging\\install\\wix";
+        # Sign files:
+        chdir($staging) or die "Fatal -- couldn't chdir to $staging\n";
+        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
+        if ($switches[0]->{sign}->{value}) {
+            signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
+            }
+            
+        chdir("$staging\\install\\wix") or die "Fatal -- Couldn't cd to $staging\\install\\wix";
         # Correct errors in files.wxi:
         !system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
         !system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
