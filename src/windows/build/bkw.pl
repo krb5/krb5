@@ -197,7 +197,7 @@ sub main {
     our $vverbose   = $config->{CommandLine}->{Options}->{vverbose}->{value};
     our $clean      = $switches[0]->{clean}->{value};
     local $src      = $paths[0]->{src}->{path};
-    local $toPath   = $paths[0]->{out}->{path};
+    local $out      = $paths[0]->{out}->{path};
 
     if ($clean && !$switches[0]->{nopackage}->{value}) {
         print "Info -- /clean forces /nopackage.\n";
@@ -352,6 +352,7 @@ sub main {
             my $prunes = $config->{Stages}->{Make}->{Prunes};
             my $j=0;
             print "Info -- Processing prunes in ".`cd`."\n"     if ($verbose);
+print Dumper($prunes);
             while ($prunes->{Prune}->[$j]) {
                 if (exists $prunes->{Prune}->[$j]->{name}) {    ## Don't process dummy entry!
                     my $prune    = $prunes->{Prune}->[$j]->{name};
@@ -541,10 +542,10 @@ sub main {
 
 # Begin packaging extra items:
         chdir($src);        # Now in <src>.
-        print "Info -- chdir to ".`cd`."\n"             if ($verbose);
-        system("rm -rf $toPath")                        if (-d $toPath);
-        die "Fatal -- Couldn't remove $src\\$toPath."   if (-d $toPath);
-        mkdir($toPath);
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+        system("rm -rf $out")                       if (-d $out);
+        die "Fatal -- Couldn't remove $out."        if (-d $out);
+        mkdir($out);
         my $zipsXML = $config->{Stages}->{PostPackage}->{Zips};
 
         local $i = 0;
@@ -554,17 +555,17 @@ sub main {
                 $i++;                    
             }                                   ## End zip in xml.
                 
-        $ziptemp    = "$src\\$toPath\\ziptemp"; ## Clean up any temp directory.
-        chdir("$src\\$toPath");
+        $ziptemp    = "$out\\ziptemp";          ## Clean up any temp directory.
+        chdir("$out");
         print "Info -- chdir to ".`cd`."\n"     if ($verbose);
         system("rm -rf $ziptemp")               if (-d $ziptemp);
                 
-        my $out     = $config->{CommandLine}->{Directories}->{out}->{path};
         $config->{Stages}->{PostPackage}->{CopyList}->{Config} = $config->{Stages}->{PostPackage}->{Config};    ## Use the post package config.
         $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{From}->{root}  = "$src\\pismere";
-        $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}    = "$src\\$out";
+        $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}    = "$out";
         copyFiles($config->{Stages}->{PostPackage}->{CopyList}, $config);       ## Copy any files
 
+        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
         if ($switches[0]->{sign}->{value}) {
             signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
             }
@@ -574,7 +575,8 @@ sub main {
 ##-- Package action.
 
     system("rm -rf $src/a.tmp");                ## Clean up junk.
-    system("rm -rf $src/$toPath/ziptemp");    ## Clean up junk.
+    system("rm -rf $out/a.tmp");                ## Clean up junk.
+    system("rm -rf $out/ziptemp");              ## Clean up junk.
                 
 # End logging:
     if ($switches[0]->{logfile}->{value})   {$l->stop;}
