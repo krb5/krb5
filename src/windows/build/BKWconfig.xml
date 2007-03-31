@@ -37,9 +37,7 @@
         <Make>
             <Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:    -->
                 <Prune dummy="foo" />       <!-- Force XML::Simple behavior -->
-                <Prune name="afsauth" />
-                <Prune name="aklog" />
-                <Prune name="vs" />
+                <!-- directories have been excluded by adding them to krb-skip in CVSROOT/modules. -->
                 </Prunes>
             </Make>
         <PrePackage>
