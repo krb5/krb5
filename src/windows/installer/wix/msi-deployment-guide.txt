@@ -481,19 +481,26 @@ Kerberos for Windows
     Registry key : 'Software\MIT\NetIDMgr\CredWindow'
     --------------
 
-    Value   : AutoInit
-    Type    : DWORD  (0 or 1)
-    Default : 0
-
-        If this value is '1', shows the new credentials dialog if
-        there are no credentials when NetIDMgr starts.
-
-    Value   : AutoImport
-    Type    : DWORD  (0 or 1)
+    Value   : AllowAutoRenew
+    Type    : DWORD (Boolean)
     Default : 1
 
-        If '1', imports credentials from the Windows LSA cache when
-        NetIDMgr starts.
+        Enables automatic credential renewal.
+
+
+    Value   : AllowCritical
+    Type    : DWORD (Boolean)
+    Default : 1	
+
+        Enables critical warning notifications.
+
+
+    Value   : AllowWarn	
+    Type    : DWORD (Boolean)
+    Default : 1	
+
+        Enables warning notifications.
+
 
     Value   : AutoDetectNet
     Type    : DWORD  (0 or 1)
@@ -503,6 +510,69 @@ Kerberos for Windows
         Network connectivity change notifications are then sent out to
         individual plug-ins which can perform actions such as renewing
         credentials or obtaining new credentials.
+
+
+    Value   : AutoImport
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '1', imports credentials from the Windows LSA cache when
+        NetIDMgr starts.
+
+
+    Value   : AutoInit
+    Type    : DWORD  (0 or 1)
+    Default : 0
+
+        If this value is '1', shows the new credentials dialog if
+        there are no credentials when NetIDMgr starts.
+
+
+    Value   : AutoStart	
+    Type    : DWORD (0 or 1)
+    Default : 0	
+
+        Start NetIDMgr when Windows starts
+
+
+    Value   : AutoRenewThreshold
+    Type    : DWORD (seconds)
+    Default : 600
+
+        Specifies the time period before credential expiration that will
+        trigger a credential renewal.  Requires AllowAutoRenew to be enabled.
+
+
+    Value   : CriticalThreshold	
+    Type    : DWORD (seconds)
+    Default : 300
+
+        Specifies the time period before credential expiration that will
+        trigger the second and final warning balloon.  Requires AllowCritical
+        to be enabled.
+        
+
+    Value   : DefaultAllowAutoRenew
+    Type    : DWORD (Boolean)
+    Default : 1
+
+	Specifies the Default AllowAutoRenew value for new identities.
+
+
+    Value   : DefaultSticky
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '0', new identities will not be pinned to the display by default.
+        If '1', new identities will be pinned to the display by default.
+
+
+    Value   : DefaultWindowMode
+    Type    : DWORD  (0 or 1)
+    Default : 1
+
+        If '0', Advanced mode is used
+        If '1', Basic mode is used
 
     Value   : DestroyCredsOnExit
     Type    : DWORD  (0 or 1)
@@ -519,6 +589,45 @@ Kerberos for Windows
         The application can be exited by choosing the 'Exit' menu
         option.  If '0', closing the application will cause it to
         exit completely.
+
+    Value   : LogToFile
+    Type    : DWORD  (0 or 1)
+    Default : 0
+
+        If '1', debugging information is logged to %TEMP%\nidmdbg.log
+
+
+    Value   : NotificationAction
+    Type    : DWORD  (50008 or 50025)
+    Default : 50025
+
+        If '50025', the default notification icon menu action will be to
+        Show the Network Identity Manager application windows.
+        If '50008', the default notification icon menu action will be to 
+        display the Obtain New Credentials dialog.
+
+
+    Value   : RefreshTimeout	
+    Type    : DWORD (seconds)
+    Default : 60
+
+        Specifies how often the credential list is refreshed.
+
+
+    Value   : RenewAtHalfLife
+    Type    : DWORD (Boolean)
+    Default : 1
+
+	Enables the use of a half-life algorithm for credential renewals.
+
+
+    Value   : WarnThreshold
+    Type    : DWORD (seconds)
+    Default : 900
+
+        Specifies the time period before credential expiration that will
+        trigger the first warning balloon.  Requires AllowWarn to be enabled.
+
 
 3.1.2    Common Plug-in settings
 
@@ -555,6 +664,14 @@ Kerberos for Windows
     Registry key : 'Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred\Parameters'
     --------------
 
+    Value   : AutoRenewTickets
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        If '1', automatically renews expiring tickets.  The thresholds
+        at which renewals happen are controlled in general NetIDMgr
+        settings.
+
     Value   : CreateMissingConfig
     Type    : DWORD (0 or 1)
     Default : 0
@@ -585,13 +702,6 @@ Kerberos for Windows
         If '1', includes credentials from the MSLSA cache in the
         credentials listing.
 
-    Value   : AutoRenewTickets
-    Type    : DWORD (0 or 1)
-    Default : 1
-
-        If '1', automatically renews expiring tickets.  The thresholds
-        at which renewals happen are controlled in general NetIDMgr
-        settings.
 
     Value   : UseFullRealmList
     Type    : DWORD (0 or 1)
@@ -601,6 +711,7 @@ Kerberos for Windows
         krb5.ini configuration file in the new credentials dialog box.
         If this is '0', only the last recently used list of realms
         will be used.
+
 
 3.1.3.1    Per-identity settings
 
@@ -616,11 +727,37 @@ Kerberos for Windows
     turn.  Global defaults should be set in the global parameters key
     (key 3).
 
+    Value   : Addressless
+    Type    : DWORD (boolean)
+    Default : 1
+
+        Determines if addressless tickets will be obtained for new identities.
+
+
     Value   : DefaultLifetime
     Type    : DWORD
     Default : 36000
 
         Default ticket lifetime, in seconds.
+
+    Value   : DefaultRenewLifetime
+    Type    : DWORD
+    Default : 604800
+
+        Default renewable lifetime, in seconds.
+
+    Value   : FileCCList
+    Type    : SZ
+    Default : <not specified>
+
+        Specifies a comma delimited list of FILE credential caches to monitor
+        for credentials.
+
+    Value   : Forwardable
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        Obtain forwardable tickets.
 
     Value   : MaxLifetime
     Type    : DWORD
@@ -630,44 +767,6 @@ Kerberos for Windows
         range of the user interface controls that allow setting the
         lifetime of a ticket.
 
-    Value   : MinLifetime
-    Type    : DWORD
-    Default : 60
-
-        Minimum lifetime, in seconds.  This value is used to set the
-        range of the user interface controls that allow setting the
-        lifetime of a ticket.
-
-    Value   : Forwardable
-    Type    : DWORD (0 or 1)
-    Default : 0
-
-        Obtain forwardable tickets.
-
-    Value   : Proxiable
-    Type    : DWORD (0 or 1)
-    Default : 0
-
-        Obtain proxiable tickets.
-
-    Value   : Addressless
-    Type    : DWORD (0 or 1)
-    Default : 1
-
-        Obtain addressless tickets.
-
-    Value   : Renewable
-    Type    : DWORD (0 or 1)
-    Default : 1
-
-        Obtain renewable tickets.
-
-    Value   : DefaultRenewLifetime
-    Type    : DWORD
-    Default : 604800
-
-        Default renewable lifetime, in seconds.
-
     Value   : MaxRenewLifetime
     Type    : DWORD
     Default : 2592000
@@ -676,6 +775,14 @@ Kerberos for Windows
         set the range of the user interface controls that allow
         setting the renewable lifetime of a ticket.
 
+    Value   : MinLifetime
+    Type    : DWORD
+    Default : 60
+
+        Minimum lifetime, in seconds.  This value is used to set the
+        range of the user interface controls that allow setting the
+        lifetime of a ticket.
+
     Value   : MinRenewLifetime
     Type    : DWORD
     Default : 60
@@ -683,6 +790,19 @@ Kerberos for Windows
         Minimum renewable lifetime, in seconds.  This value is used to
         set the range of the user interface controls that allow
         setting the renewable lifetime of a ticket.
+
+    Value   : Proxiable
+    Type    : DWORD (0 or 1)
+    Default : 0
+
+        Obtain proxiable tickets.
+
+    Value   : Renewable
+    Type    : DWORD (0 or 1)
+    Default : 1
+
+        Obtain renewable tickets.
+
 
 3.1.4   Settings for the Kerberos 4 Credentials Provider Plug-in
 
