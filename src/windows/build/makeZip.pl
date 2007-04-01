@@ -57,7 +57,7 @@ sub makeZip {
     #  because the CopyList's Config might contain substitution tags.
     $zip->{CopyList}->{Config}->{FileStem}->{name}  = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
     $zip->{CopyList}->{Config}->{From}->{root}      = "$src\\pismere";  ## Add zip-specific config settings.
-    $zip->{CopyList}->{Config}->{To}->{root}        = "$ziptemp\\$zip->{topdir}";
+    $zip->{CopyList}->{Config}->{To}->{root}        = $ziptemp;
     copyFiles($zip->{CopyList}, $config);
     # Drop down into <out>/ziptemp so the path to the added file won't include <out>:
     chdir $ziptemp;
