@@ -77,11 +77,8 @@
 		<File name="xpprof32.dll"   from="staging\bin\i386"     to="\bin\i386\" />
 		<File name="xpprof32.pdb"   from="staging\bin\i386"     to="\bin\i386\" />
 
-<!--		
-target\bin\i386\%bldtype%\ w2k\netidmgr.exe
-target\bin\i386\%bldtype%\ w2k\netidmgr.pdb
-target\bin\i386\%bldtype%\ w2k\nidmgr32.dll
-target\bin\i386\%bldtype%\ w2k\nidmgr32.pdb
--->
-
+		<File name="netidmgr.exe"   from="staging\bin\i386\w2k"     to="\bin\i386\w2k" />
+		<File name="netidmgr.pdb"   from="staging\bin\i386\w2k"     to="\bin\i386\w2k" />
+		<File name="nidmgr32.dll"   from="staging\bin\i386\w2k"     to="\bin\i386\w2k" />
+		<File name="nidmgr32.pdb"   from="staging\bin\i386\w2k"     to="\bin\i386\w2k" />
 	</Files>

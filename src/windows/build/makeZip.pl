@@ -1,9 +1,10 @@
 #!perl -w
 
 #use strict;
-use Data::Dumper;
 
-require "signfiles.pl";
+require "prunefiles.pl";
+
+use Data::Dumper;
 
 sub makeZip {
     local ($zip, $config)   = @_;
@@ -64,40 +65,20 @@ sub makeZip {
     print "Info -- chdir to ".`cd`."\n"         if ($verbose);
 
     # Prune any unwanted files or directories from the directory we're about to zip:
-    if (exists $zip->{Prunes}) {
-        # Use Unix find instead of Windows find.  Save PATH so we can restore it when we're done:
-        local $savedPATH    = $ENV{PATH};
-        $ENV{PATH}          = $config->{CommandLine}->{Directories}->{unixfind}->{path}.";".$savedPATH;
-        local $prunes       = $zip->{Prunes};
-        local $j            = 0;
-        print "Info -- Processing prunes in ".`cd`."\n" if ($verbose);
-        while ($prunes->{Prune}->[$j]) {
-            if (exists $prunes->{Prune}->[$j]->{name}) {        ## Don't process dummy entry!
-                local $prune    = $prunes->{Prune}->[$j]->{name};
-                local $flags    = $prunes->{Prune}->[$j]->{flags};
-                $flags = "" if (!$flags);
-                local $cmd    = "find . -".$flags."name $prune";
-                print "Info -- Looking for filenames containing $prune\n";
-                local $list = `$cmd`;
-                foreach $target (split("\n", $list)) {
-                    print "Info -- Pruning $target\n" if ($verbose);
-                    !system("rm -rf $target")   or die "Error -- Couldn't remove $target.";;
-                    }
-                }
-            $j++;
-            }
-        $ENV{PATH} = $savedPATH;
-        }
+    pruneFiles($zip, $config);
                     
     local $zipfile  = Archive::Zip->new();
     local $topdir   = $zip->{topdir};
     $topdir         =~ s/%filestem%/$filestem/g;
     $zipfile->addTree('.', $topdir);
-    if (-e $zipname)    {!system("rm -f $zipname")     or die "Error -- Couldn't remove $zipname.";}
+    if (-e $zipname)    {!system("rm -f $zipname") or die "Error -- Couldn't remove $zipname.";}
     $zipfile->writeToFileNamed($zipname);
-    print "Info -- created $out\\$zipname.\n"  if ($verbose);
-       # move .zip from <out>/ziptemp to <out>.
-    !system("mv -f $zipname     ..")                    or die "Error -- Couldn't move $zipname to ..";
+    chdir("$out");
+    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+    # move .zip from <out>/ziptemp to <out>.
+    !system("mv -f ziptemp/$zipname .")         or die "Error -- Couldn't move $zipname to ..";
+    system("rm -rf ziptemp")                    if (-d "ziptemp");  ## Clean up any temp directory.
+    print "Info -- created $out\\$zipname.\n"   if ($verbose);
     }
     
 return 1;

@@ -12,8 +12,9 @@ use Data::Dumper;
 use Archive::Zip;
 use Logger;
 require "copyfiles.pl";
+require "prunefiles.pl";
 require "signfiles.pl";
-require "makeZip.pl";
+require "zipXML.pl";
 
 my $BAIL;
 $0 = fileparse($0);
@@ -122,9 +123,9 @@ sub main {
 
     # List of programs which must be in PATH:
     my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink');
-    my $requirements_met = 1;
-    my $first_missing = 0;
-    my $error_list = "";
+    my $requirements_met    = 1;
+    my $first_missing       = 0;
+    my $error_list          = "";
     foreach my $required (@required_list) {
         if (!get_info($required)) {
             $requirements_met = 0;
@@ -150,8 +151,8 @@ sub main {
 
 ##++ Assemble configuration from config file and command line:
 
-    my $configfile;
-    $configfile = $OPT->{config};
+    my $configfile      = $OPT->{config};
+    my $bOutputCleaned  = 0;
 
     print "Info -- Reading configuration from $configfile.\n";
 
@@ -212,6 +213,78 @@ sub main {
     #print "cvs tag: $tags[0]->{cvs}->{value}\n";
     #print "CVSROOT:   $fetch[0]->{CVSROOT}->{name}\n";
 
+    # We read in the version information to be able to update the site-local files in the install build areas:
+    local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
+    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+    @raw = <DAT>;
+    close DAT;
+    foreach $line (@raw) {
+        chomp $line;
+        if ($line =~ /#define/) {                   # Process #define lines:
+            $line =~ s/#define//;                   # Remove #define token
+            $line =~ s/^\s+//;                      #  and leading & trailing whitespace
+            $line =~ s/\s+$//;
+            local @qr = split("\"", $line);         # Try splitting with quotes
+            if (exists $qr[1]) {
+                $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
+                $qr[0] =~ s/\s+$//;
+                $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
+                }
+            else {                                  # No quotes, so
+                local @ar = split(" ", $line);      #  split with space
+                $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
+                $ar[0] =~ s/\s+$//;
+                $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
+                }
+            }
+        }
+
+    # Check that the versions we will need for site-local have been defined:
+    my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
+                             'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
+                             'VER_PRODUCTNAME_STR');
+    $requirements_met   = 1;
+    $first_missing      = 0;
+    $error_list         = "";
+    foreach my $required (@required_versions) {
+        if (! exists $config->{Versions}->{$required}) {
+            $requirements_met = 0;
+            if (!$first_missing) {
+                $first_missing = 1;
+                $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
+                }
+            $error_list .= "$required\n";
+            }
+        }
+    if (!$requirements_met) {
+        print $error_list;
+        exit(0);
+        }
+    # Apply any of these tags to filestem:
+    my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
+    $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
+    $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
+    $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
+    $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
+        
+    # Test the unix find command:
+    if (! exists $config->{CommandLine}->{Directories}->{unixfind}->{path})    {
+        $config->{CommandLine}->{Directories}->{unixfind}->{path}   = "C:\\tools\\cygwin\\bin";
+        }
+    local $unixfind     = $config->{CommandLine}->{Directories}->{unixfind}->{path};
+
+    local $savedPATH    = $ENV{PATH};
+    $ENV{PATH}          = $unixfind.";".$savedPATH;
+print "PATH now $ENV{PATH}\n";
+    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+    if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
+    !system("find . -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
+    local $filesize = -s "b.tmp";
+    $ENV{PATH} = $savedPATH;
+    if ($filesize > 0) {
+        die "Fatal -- $unixfind does not appear to be a path to a UNIX find command.";
+        }
+
 ##-- Assemble configuration from config file and command line.
 
     my $sw = $switches[0]->{repository}->{value};
@@ -227,6 +300,11 @@ sub main {
         die;
         }
     $switches[0]->{repository}->{value} = $rverb;   ## Save canonicalized repository verb.
+
+    if ( ($rverb =~ /checkout/) && $clean) {
+        print "Warning -- Because sources afe being checked out, make clean will not be run.\n";
+        $clean  = $switches[0]->{clean}->{value}    = 0;
+        }
 
     my $wd  = $src."\\pismere";
 
@@ -316,6 +394,15 @@ sub main {
         if ($verbose) {print "Info -- svn command: $svncmd\n";}
         !system($svncmd)            or die "Fatal -- command \"$svncmd\" failed; return code $?\n";
 
+        if ($rverb =~ /checkout/) {        
+            if (! $bOutputCleaned) {                    ## In case somebody cleaned $out before us.
+                if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
+                else            {mkdir($out);}
+                $bOutputCleaned = 1;
+                }
+            zipXML($config->{Stages}->{FetchSources}, $config); ## Make zips.
+            }
+
         if ($verbose) {print "Info -- ***   End fetching sources.\n";}
         }
 ##-- End  repository action.
@@ -345,31 +432,7 @@ sub main {
             }
         
         # Prune any unwanted directories before the build:
-        if (exists $config->{Stages}->{Make}->{Prunes}) {
-            # Use Unix find instead of Windows find.  Save PATH so we can restore it when we're done:
-            my $savedPATH    = $ENV{PATH};
-            $ENV{PATH} = $config->{CommandLine}->{Directories}->{unixfind}->{path}.";".$savedPATH;
-            my $prunes = $config->{Stages}->{Make}->{Prunes};
-            my $j=0;
-            print "Info -- Processing prunes in ".`cd`."\n"     if ($verbose);
-print Dumper($prunes);
-            while ($prunes->{Prune}->[$j]) {
-                if (exists $prunes->{Prune}->[$j]->{name}) {    ## Don't process dummy entry!
-                    my $prune    = $prunes->{Prune}->[$j]->{name};
-                    my $flags    = $prunes->{Prune}->[$j]->{flags};
-                    $flags = "" if (!$flags);
-                    my $cmd    = "find . -".$flags."name $prune";
-                    print "Info -- Looking for filenames containing $prune\n";
-                    my $list = `$cmd`;
-                    foreach $target (split("\n", $list)) {
-                        print "Info -- Pruning $target\n" if ($verbose);
-                        ! system("rm -rf $target")              or die "Unable to prune $target";
-                        }
-                    }
-                $j++;
-                }
-            $ENV{PATH} = $savedPATH;
-            }
+        pruneFiles($config->{Stages}->{Make}, $config);
 
         if ($verbose) {print "Info -- ***   End preparing for build.\n";}
     
@@ -385,7 +448,7 @@ print Dumper($prunes);
         
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        my $dbgswitch = ($switches[0]->{debug}->{value}) ? " " : "NODEBUG=1";
+        local $dbgswitch = ($switches[0]->{debug}->{value}) ? " " : "NODEBUG=1";
         !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch")    or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")               or die "Fatal -- couldn't chdir to $wd.";
@@ -401,76 +464,21 @@ print Dumper($prunes);
 ##-- Make action.
         
 ##++ Package action:
-    if ($switches[0]->{nopackage}->{value}) {      ## If /clean, this switch will have been cleared.
-        print "Info -- *** Skipping packaging.";
-        if (-d $out) {
+    if ($switches[0]->{nopackage}->{value}) {      ## If /clean, nopackage will be set.
+        print "Info -- *** Skipping packaging.\n";
+        if ((-d $out) && ! $bOutputCleaned) {
             print "Warning -- *** Output directory $out will not be cleaned.\n";
             }
         }
     else {
         if ($verbose) {print "Info -- *** Begin prepackage.\n";}
 
-        if (-d $out) {
-            !system("rm -rf $out/*")            or die "Fatal -- Couldn't clean $out.";
-            }
-        else {
-            mkdir($out)                         or die "Fatal -- Couldn't create $out.";
-            }
-
-        # We read in the version information to be able to update the site-local files in the install build areas:
-        local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-        open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
-        @raw = <DAT>;
-        close DAT;
-        foreach $line (@raw) {
-            chomp $line;
-            if ($line =~ /#define/) {                   # Process #define lines:
-                $line =~ s/#define//;                   # Remove #define token
-                $line =~ s/^\s+//;                      #  and leading & trailing whitespace
-                $line =~ s/\s+$//;
-                local @qr = split("\"", $line);         # Try splitting with quotes
-                if (exists $qr[1]) {
-                    $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
-                    $qr[0] =~ s/\s+$//;
-                    $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
-                    }
-                else {                                  # No quotes, so
-                    local @ar = split(" ", $line);      #  split with space
-                    $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
-                    $ar[0] =~ s/\s+$//;
-                    $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
-                    }
-                }
+        if (! $bOutputCleaned) {                        ## In case somebody cleaned $out before us.
+            if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
+            else            {mkdir($out);}
+            $bOutputCleaned = 1;
             }
 
-        # Check that the versions we will need for site-local have been defined:
-        my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
-                                 'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
-                                 'VER_PRODUCTNAME_STR');
-        my $requirements_met = 1;
-        my $first_missing = 0;
-        my $error_list = "";
-        foreach my $required (@required_versions) {
-            if (! exists $config->{Versions}->{$required}) {
-                $requirements_met = 0;
-                if (!$first_missing) {
-                    $first_missing = 1;
-                    $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
-                    }
-                $error_list .= "$required\n";
-                }
-            }
-        if (!$requirements_met) {
-            print $error_list;
-            exit(0);
-            }
-        # Apply any of these tags to filestem:
-        my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
-        $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
-        $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
-        $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
-        $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
-        
         # The build results are copied to a staging area, where the packager expects to find them.
         #  We put the staging area in the fixed area .../pismere/staging.
         my $prepackage  = $config->{Stages}->{PrePackage};
@@ -525,11 +533,13 @@ print Dumper($prunes);
 
         # Run the script on site-local.wxi:
         !system("sed -f $tmpfile site-local-tagged.wxi > site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
+        !system("rm site-local-tagged.wxi")                                 or die "Fatal -- Couldn't remove site-local-tagged.wsi.";
 
         # Now update site-local.nsi:
         chdir "..\\nsis";
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
+        !system("rm site-local-tagged.nsi")                                 or die "Fatal -- Couldn't remove site-local-tagged.nsi.";
         # Add DEBUG or RELEASE:
         if ($switches[0]->{debug}->{value}) {                               ## debug build
             !system("echo !define DEBUG >> b.tmp")                          or die "Fatal -- Couldn't modify b.tmp.";    
@@ -546,6 +556,8 @@ print Dumper($prunes);
 
         # Run the script on nsi-includes-tagged.nsi:
         !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
+        !system("rm nsi-includes-tagged.nsi")                               or die "Fatal -- Couldn't remove nsi-includes-tagged.nsi.";
+        !system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
 
         if ($verbose) {print "Info -- ***   End prepackage.\n";}
         
@@ -563,22 +575,8 @@ print Dumper($prunes);
         !system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
 
 # Begin packaging extra items:
-        chdir($src);        # Now in <src>.
-        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
-        else            {mkdir($out);}
-        my $zipsXML = $config->{Stages}->{PostPackage}->{Zips};
+        zipXML($config->{Stages}->{PostPackage}, $config);                      ## Make zips.
 
-        local $i = 0;
-            while ($zipsXML->{Zip}[$i]) {
-                local $zip = $zipsXML->{Zip}[$i];
-                makeZip($zip, $config)  if (exists $zip->{name});       ## Ignore dummy entry.
-                chdir("$out");
-                print "Info -- chdir to ".`cd`."\n" if ($verbose);
-                system("rm -rf ziptemp")            if (-d "ziptemp");  ## Clean up any temp directory.
-                $i++;                    
-            }                                       ## End zip in xml.
-                
         $config->{Stages}->{PostPackage}->{CopyList}->{Config} = $config->{Stages}->{PostPackage}->{Config};    ## Use the post package config.
         $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{From}->{root}  = "$src\\pismere";
         $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}    = "$out";
