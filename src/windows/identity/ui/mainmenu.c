@@ -49,6 +49,8 @@ void khui_init_menu(void) {
                                 MAX_ILIST, 5, 0);
     for(i=0;i<MAX_ILIST;i++)
         il_icon_id[i] = -1;
+
+    khm_refresh_identity_menus();
 }
 
 void khui_exit_menu(void) {
@@ -258,8 +260,10 @@ static int refresh_menu_item(HMENU hm, khui_action * act,
     if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
         mii.fMask |= MIIM_STATE;
         if (act->state & KHUI_ACTIONSTATE_CHECKED) {
+            mii.fState &= ~MFS_UNCHECKED;
             mii.fState |= MFS_CHECKED;
         } else {
+            mii.fState &= ~MFS_CHECKED;
             mii.fState |= MFS_UNCHECKED;
         }
     }
@@ -817,6 +821,8 @@ khm_refresh_identity_menus(void) {
     khm_size t;
     khm_int32 rv = KHM_ERROR_SUCCESS;
 
+    kcdb_identity_refresh_all();
+
     khui_action_lock();
 
     idcmd_refreshcycle++;
@@ -858,6 +864,18 @@ khm_refresh_identity_menus(void) {
 
     } while(TRUE);
 
+    if (idlist != NULL && n_idents > 0) {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, TRUE);
+    } else {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, FALSE);
+    }
+
     renew_def = khui_find_menu(KHUI_MENU_RENEW_CRED);
     dest_def = khui_find_menu(KHUI_MENU_DESTROY_CRED);
 #ifdef DEBUG
@@ -870,17 +888,18 @@ khm_refresh_identity_menus(void) {
         khui_menu_remove_action(renew_def, 0);
         t--;
     }
-    khui_menu_insert_action(renew_def, 0, KHUI_ACTION_RENEW_ALL, 0);
 
     t = khui_menu_get_size(dest_def);
     while(t) {
         khui_menu_remove_action(dest_def, 0);
         t--;
     }
-    khui_menu_insert_action(dest_def, 0, KHUI_ACTION_DESTROY_ALL, 0);
 
-    if (idlist != NULL && n_idents > 0) {
+    if (idlist != NULL && n_idents > 1) {
+        khui_menu_insert_action(renew_def, 0, KHUI_ACTION_RENEW_ALL, 0);
         khui_menu_insert_action(renew_def, 1, KHUI_MENU_SEP, 0);
+
+        khui_menu_insert_action(dest_def, 0, KHUI_ACTION_DESTROY_ALL, 0);
         khui_menu_insert_action(dest_def,  1, KHUI_MENU_SEP, 0);
     }
 

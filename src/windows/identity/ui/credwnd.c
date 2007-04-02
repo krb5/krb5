@@ -470,30 +470,30 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
         if(KHM_FAILED(khc_read_string(hc_cw, viewval, buf, &cbsize)))
             goto _exit;
         view = buf;
+    } else {
+        khc_write_string(hc_cw, viewval, view);
+    }
 
         /* in addition, if we are loading the default view, we should
            also check the appropriate menu item */
 
-        if (!wcscmp(view, L"ByIdentity"))
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_ID);
-        else if (!wcscmp(view, L"ByLocation"))
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_LOC);
-        else if (!wcscmp(view, L"ByType"))
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_TYPE);
-        else if (!wcscmp(view, L"Custom_0"))
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_CUST);
-        else if (!wcscmp(view, L"CompactIdentity"))
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_MINI);
-
-        kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
-    } else {
-        khc_write_string(hc_cw, viewval, view);
+    if (!wcscmp(view, L"ByIdentity"))
+        khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
+                                KHUI_ACTION_LAYOUT_ID);
+    else if (!wcscmp(view, L"ByLocation"))
+        khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
+                                KHUI_ACTION_LAYOUT_LOC);
+    else if (!wcscmp(view, L"ByType"))
+        khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
+                                KHUI_ACTION_LAYOUT_TYPE);
+    else if (!wcscmp(view, L"Custom_0"))
+        khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
+                                KHUI_ACTION_LAYOUT_CUST);
+    else {
+        /* do nothing */
     }
+
+    kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
 
     if(KHM_FAILED(khc_open_space(hc_vs, view, 0, &hc_v)))
         goto _exit;
@@ -1064,6 +1064,7 @@ cw_new_outline_node(wchar_t * heading) {
         o->header = PMALLOC(cblen);
         StringCbCopy(o->header, cblen, heading);
     }
+    o->start = -1;
 
     return o;
 }
@@ -1708,23 +1709,29 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 o->col = grouping[0];
                 o->data = id_def;
                 o->attr_id = KCDB_ATTR_ID;
-
-                if (flags & KCDB_IDENT_FLAG_STICKY)
-                    o->flags |= KHUI_CW_O_STICKY;
-
-                o->start = n_rows;
-                o->length = 1;
-                o->idx_start = -1;
-
-                if (grouping[0] == tbl->n_cols - 1)
-                    o->flags |= KHUI_CW_O_NOOUTLINE;
-
-                cw_set_tbl_row_header(tbl, n_rows, grouping[0], o);
-
-                n_rows ++;
+                o->start = -1;
             } else {
                 kcdb_identity_release(id_def);
             }
+
+            if (o->start != -1)
+                goto done_with_defident;
+
+            if (flags & KCDB_IDENT_FLAG_STICKY)
+                o->flags |= KHUI_CW_O_STICKY;
+            else
+                o->flags &= ~KHUI_CW_O_STICKY;
+
+            o->start = n_rows;
+            o->length = 1;
+            o->idx_start = -1;
+
+            if (grouping[0] == tbl->n_cols - 1)
+                o->flags |= KHUI_CW_O_NOOUTLINE;
+
+            cw_set_tbl_row_header(tbl, n_rows, grouping[0], o);
+
+            n_rows ++;
 
         done_with_defident:
             ;
@@ -1775,7 +1782,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 /* found it */
                 if (o->start != -1) /* already visible? */
                     continue;
-                o->flags &= KHUI_CW_O_STICKY;
+                o->flags &= KHUI_CW_O_STICKY | KHUI_CW_O_RELIDENT;
                 o->flags |= KHUI_CW_O_VISIBLE;
             } else {
                 /* not found.  create */
@@ -1786,21 +1793,22 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 o->col = grouping[0];
                 o->data = (void *) h;
                 o->attr_id = KCDB_ATTR_ID;
-
-                if (grouping[0] == tbl->n_cols - 1)
-                    o->flags |= KHUI_CW_O_NOOUTLINE;
             }
+
+            if (grouping[0] == tbl->n_cols - 1)
+                o->flags |= KHUI_CW_O_NOOUTLINE;
 
             if (o->flags & KHUI_CW_O_STICKY)
                 kcdb_identity_release(h);
             else
                 /* leave identity held in this case */
-                o->flags |= KHUI_CW_O_STICKY;
+                o->flags |= KHUI_CW_O_STICKY | KHUI_CW_O_RELIDENT;
 
             o->flags &= ~KHUI_CW_O_EXPAND;
             o->start = n_rows;
             o->length = 1;
             o->idx_start = -1;
+            o->idx_end = -1;
 
             cw_set_tbl_row_header(tbl, n_rows, grouping[0], o);
 
@@ -2369,6 +2377,9 @@ cw_draw_header(HDC hdc,
     if (o->flags & KHUI_CW_O_STICKY) {
         /* khui_ilist_draw_id(tbl->ilist, IDB_TK_NEW_SM, hdc, 
            r->left, r->bottom - KHUI_SMICON_CY, 0); */
+        if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
+            r->left += KHUI_SMICON_CX * 3 / 2;
+        }
     } else if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
         if((tbl->mouse_state & CW_MOUSE_WOUTLINE) && 
            tbl->mouse_row == row) {
@@ -3582,7 +3593,7 @@ cw_select_outline(khui_credwnd_outline * o,
 }
 
 static void
-cw_select_cred_row(khui_credwnd_tbl * tbl, int row, int selected) {
+cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected) {
 
     khm_size j;
     khm_size idx_start, idx_end;
@@ -3613,6 +3624,9 @@ cw_select_cred_row(khui_credwnd_tbl * tbl, int row, int selected) {
         idx_end = tbl->rows[row].idx_end;
     }
 
+    if (idx_start == -1 || idx_end == -1)
+        return;
+
     for (j = idx_start; j <= idx_end; j++) {
         khm_handle cred = NULL;
 
@@ -3634,9 +3648,7 @@ cw_unselect_all(khui_credwnd_tbl * tbl)
     for(i=0; i<tbl->n_rows; i++) {
         tbl->rows[i].flags &= ~KHUI_CW_ROW_SELECTED;
 
-        if (!(tbl->rows[i].flags & KHUI_CW_ROW_HEADER)) {
-            cw_select_cred_row(tbl, i, FALSE);
-        }
+        cw_select_row_creds(tbl, i, FALSE);
     }
 
     cw_select_outline_level(tbl->outline, FALSE);
@@ -3856,8 +3868,7 @@ cw_select_all(khui_credwnd_tbl * tbl)
 
     for(i=0; i<tbl->n_rows; i++) {
         tbl->rows[i].flags |= KHUI_CW_ROW_SELECTED;
-        if (!(tbl->rows[i].flags & KHUI_CW_ROW_HEADER))
-            cw_select_cred_row(tbl, i, TRUE);
+        cw_select_row_creds(tbl, i, TRUE);
     }
 
     cw_select_outline_level(tbl->outline, TRUE);
@@ -3913,7 +3924,7 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
 
         for (i = group_begin; i <= group_end; i++) {
             tbl->rows[i].flags |= KHUI_CW_ROW_SELECTED;
-            cw_select_cred_row(tbl, i, TRUE);
+            cw_select_row_creds(tbl, i, TRUE);
         }
     } else if (toggle) {
         BOOL select;
@@ -3929,7 +3940,7 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
             else
                 tbl->rows[i].flags &= ~KHUI_CW_ROW_SELECTED;
 
-            cw_select_cred_row(tbl, i, select);
+            cw_select_row_creds(tbl, i, select);
         }
     } else if (extend) {
         int range_begin;
@@ -3943,7 +3954,7 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
         for (i = range_begin; i <= range_end; i++) {
             tbl->rows[i].flags |= KHUI_CW_ROW_SELECTED;
 
-            cw_select_cred_row(tbl, i, TRUE);
+            cw_select_row_creds(tbl, i, TRUE);
         }
 
         tbl->cursor_row = row;
@@ -4073,7 +4084,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                            x < KHUI_SMICON_CX * 4) {
                     nm_state |= CW_MOUSE_WICON | CW_MOUSE_WIDGET;
                 }
-            } else if (tbl->cols[tbl->rows[row].col].attr_id == KCDB_ATTR_ID_NAME) {
+            } else if (tbl->cols[o->col].attr_id == KCDB_ATTR_ID_NAME) {
                 if (col == tbl->rows[row].col &&
                     x >= 0 &&
                     x < KHUI_SMICON_CX){
@@ -5000,8 +5011,6 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT), KHUI_ACTION_LAYOUT_ID);
-            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 
@@ -5020,9 +5029,6 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT), 
-                                    KHUI_ACTION_LAYOUT_LOC);
-            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 
@@ -5041,9 +5047,6 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT), 
-                                    KHUI_ACTION_LAYOUT_TYPE);
-            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 
@@ -5062,9 +5065,6 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
-            khui_check_radio_action(khui_find_menu(KHUI_MENU_LAYOUT),
-                                    KHUI_ACTION_LAYOUT_CUST);
-            kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
         }
         break;
 

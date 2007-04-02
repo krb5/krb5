@@ -81,7 +81,7 @@ BEGIN
     LTEXT           "Valid till",IDC_STATIC,7,39,24,8
     LTEXT           "Renewable till",IDC_STATIC,7,55,45,12
     LTEXT           "Issued on",IDC_STATIC,7,23,32,8
-    LTEXT           "Credential flags",IDC_STATIC,7,75,37,8
+    LTEXT           "Credential flags",IDC_STATIC,7,75,51,8
     EDITTEXT        IDC_PPK5_NAME,72,7,156,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_PPK5_ISSUE,72,23,156,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_PPK5_VALID,72,39,156,12,ES_AUTOHSCROLL | ES_READONLY
