@@ -89,11 +89,6 @@ sub makeZip {
         $ENV{PATH} = $savedPATH;
         }
                     
-    # Sign files:
-    if ($switches[0]->{sign}->{value}) {
-        signFiles($zip->{Config}->{Signing}, $config);
-        }
-            
     local $zipfile  = Archive::Zip->new();
     local $topdir   = $zip->{topdir};
     $topdir         =~ s/%filestem%/$filestem/g;

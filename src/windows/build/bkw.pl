@@ -403,9 +403,19 @@ print Dumper($prunes);
 ##++ Package action:
     if ($switches[0]->{nopackage}->{value}) {      ## If /clean, this switch will have been cleared.
         print "Info -- *** Skipping packaging.";
+        if (-d $out) {
+            print "Warning -- *** Output directory $out will not be cleaned.\n";
+            }
         }
     else {
         if ($verbose) {print "Info -- *** Begin prepackage.\n";}
+
+        if (-d $out) {
+            !system("rm -rf $out/*")            or die "Fatal -- Couldn't clean $out.";
+            }
+        else {
+            mkdir($out)                         or die "Fatal -- Couldn't create $out.";
+            }
 
         # We read in the version information to be able to update the site-local files in the install build areas:
         local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
@@ -467,9 +477,12 @@ print Dumper($prunes);
         my $staging     = "$wd\\staging";
         chdir($wd)                          or die "Fatal -- couldn't chdir to $wd\n";
         print "Info -- chdir to ".`cd`."\n" if ($verbose);
-        !system("rm -rf $staging/*")        or die "Fatal -- Couldn't clean $staging.";
-        !system("rmdir $staging")           or die "Fatal -- Couldn't remove $staging.";
-        mkdir($staging)                     or die "Fatal -- Couldn't create $staging.";
+        if (-d "staging") {
+            !system("rm -rf $staging/*")        or die "Fatal -- Couldn't clean $staging.";
+            }
+        else {
+            mkdir($staging)                     or die "Fatal -- Couldn't create $staging.";
+            }
         
         # Force Where From and To are relative to:
         $prepackage->{CopyList}->{Config}->{From}->{root}   = "$wd\\athena";
