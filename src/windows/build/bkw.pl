@@ -465,9 +465,11 @@ print Dumper($prunes);
         #  We put the staging area in the fixed area .../pismere/staging.
         my $prepackage  = $config->{Stages}->{PrePackage};
         my $staging     = "$wd\\staging";
-        chdir($wd) or die "Fatal -- couldn't chdir to $wd\n";
-        if ($verbose) {print "Info -- chdir to $wd\n";}
-        (-e $staging) or mkdir($staging);
+        chdir($wd)                          or die "Fatal -- couldn't chdir to $wd\n";
+        print "Info -- chdir to ".`cd`."\n" if ($verbose);
+        !system("rm -rf $staging/*")        or die "Fatal -- Couldn't clean $staging.";
+        !system("rmdir $staging")           or die "Fatal -- Couldn't remove $staging.";
+        mkdir($staging)                     or die "Fatal -- Couldn't create $staging.";
         
         # Force Where From and To are relative to:
         $prepackage->{CopyList}->{Config}->{From}->{root}   = "$wd\\athena";
@@ -550,22 +552,19 @@ print Dumper($prunes);
 # Begin packaging extra items:
         chdir($src);        # Now in <src>.
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        system("rm -rf $out")                       if (-d $out);
-        die "Fatal -- Couldn't remove $out."        if (-d $out);
-        mkdir($out);
+        if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
+        else            {mkdir($out);}
         my $zipsXML = $config->{Stages}->{PostPackage}->{Zips};
 
         local $i = 0;
             while ($zipsXML->{Zip}[$i]) {
                 local $zip = $zipsXML->{Zip}[$i];
-                makeZip($zip, $config)  if (exists $zip->{name});   ## Ignore dummy entry.
+                makeZip($zip, $config)  if (exists $zip->{name});       ## Ignore dummy entry.
+                chdir("$out");
+                print "Info -- chdir to ".`cd`."\n" if ($verbose);
+                system("rm -rf ziptemp")            if (-d "ziptemp");  ## Clean up any temp directory.
                 $i++;                    
-            }                                   ## End zip in xml.
-                
-        $ziptemp    = "$out\\ziptemp";          ## Clean up any temp directory.
-        chdir("$out");
-        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
-        system("rm -rf $ziptemp")               if (-d $ziptemp);
+            }                                       ## End zip in xml.
                 
         $config->{Stages}->{PostPackage}->{CopyList}->{Config} = $config->{Stages}->{PostPackage}->{Config};    ## Use the post package config.
         $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{From}->{root}  = "$src\\pismere";

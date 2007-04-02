@@ -21,7 +21,7 @@
             <clean      value="0" />
             <nomake     value="0" />
             <nopackage  value="0" />
-            <sign       value="0" timestampserver="" />
+            <sign       value="0" />
             <verbose    value="0" />
             <vverbose   value="0" />
             </Options>
@@ -144,10 +144,11 @@
                     <File dummy="foo" />
                     <!-- File from    paths are relative to <src>/pismere.    -->
                     <!-- File to      paths are relative to <out>.            -->
-                    <File name="msi-deployment-guide.txt" from="staging\install\wix\" to="" />
-                    <File name="netidmgr_userdoc.pdf" from="staging\doc" to="." />
-                    <File name="kfw.msi" from="staging\install\wix\" to="" newname="%filestem%.msi" />
+                    <File name="msi-deployment-guide.txt"   from="staging\install\wix\" to="" />
+                    <File name="netidmgr_userdoc.pdf"       from="staging\doc"          to="." />
+                    <File name="kfw.msi"                    from="staging\install\wix\" to="" newname="%filestem%.msi" />
                     <File name="MITKerberosForWindows%-DEBUG%.exe" from="staging\install\nsis" to="" newname="%filestem%%-DEBUG%.exe" />
+                    <File name="relnotes.html"              from="staging\doc"          to="." />
                     </Files>
                 </CopyList>
             </PostPackage>

@@ -18,7 +18,7 @@ sub signFiles {
             local $template2    = $template;
             $template2          =~ s/%filename%/$target/;
             print "Info -- Signing $target\n" if ($verbose);
-            !system($template2) or die "Fatal -- Error signing $target.";
+            !system("$template2") or die "Fatal -- Error signing $target.";
             }
         }
         $ENV{PATH} = $savedPATH;
