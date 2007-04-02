@@ -247,7 +247,7 @@ BEGIN
     CONTROL         "&Destroy all credentials on exit",IDC_CFG_DESTROYALL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,36,111,10
     GROUPBOX        "Other",IDC_CFG_OTHER,7,55,241,120
-    CONTROL         "&Run Network Identity Manager in system tray after window close",IDC_CFG_KEEPRUNNING,
+    CONTROL         "&Run from taskbar notification area after window close",IDC_CFG_KEEPRUNNING,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,68,230,10
     LTEXT           "Clicking on the &notification icon",IDC_CFG_NOTACT_STATIC,26,87,99,8
     COMBOBOX        IDC_CFG_NOTACTION,133,85,110,48,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -564,7 +564,7 @@ BEGIN
     IDS_ACTION_SET_SRCH_ID  "Allow applications to &search"
     IDS_CFG_ROOT_TITLE      "Network Identity Manager Configuration"
     IDS_CFG_GENERAL_SHORT   "General"
-    IDS_ACTION_NEW_CRED     "&New credentials ..."
+    IDS_ACTION_NEW_CRED     "Obtain &new credentials ..."
     IDS_ACTION_PASSWD_ID    "Change &password"
     IDS_ACTION_CHOOSE_COLS  "View columns"
     IDS_ACTION_DEBUG_WINDOW "Debug window"
@@ -582,7 +582,7 @@ BEGIN
     IDS_ACTION_OPT_KHIM     "General"
     IDS_ACTION_OPT_IDENTS   "Identities"
     IDS_ACTION_OPT_NOTIF    "Notifications"
-    IDS_ACTION_HELP_CTX     "Help Index"
+    IDS_ACTION_HELP_CTX     "Help Contents"
     IDS_ACTION_HELP_CONTENTS "Contents"
     IDS_ACTION_HELP_INDEX   "Index"
     IDS_ACTION_HELP_ABOUT   "About Network Identity Manager"

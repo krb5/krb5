@@ -88,10 +88,10 @@ $first_line = 1;
 
 while(<IN>) {
     chomp $_;
-    if($skip_lines > 0) {
-	$skip_lines--;
-    } elsif (m/^\#/) {
+    if (m/^\#/) {
         # ignore
+    } elsif ($skip_lines > 0) {
+        $skip_lines--;
     } else {
 	if($first_line == 0){
 	    print OUT $record_sep;

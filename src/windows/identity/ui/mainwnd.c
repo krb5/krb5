@@ -387,11 +387,14 @@ khm_main_wnd_proc(HWND hwnd,
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
 
+        case KHUI_ACTION_LAYOUT_RELOAD:
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
         case KHUI_ACTION_LAYOUT_ID:
         case KHUI_ACTION_LAYOUT_TYPE:
         case KHUI_ACTION_LAYOUT_LOC:
         case KHUI_ACTION_LAYOUT_CUST:
-        case KHUI_ACTION_LAYOUT_RELOAD:
             khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
@@ -1104,6 +1107,8 @@ khm_set_main_window_mode(int mode) {
                        ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
     khui_enable_action(KHUI_MENU_COLUMNS,
                        ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+
+    khui_refresh_actions();
 
     khm_main_wnd_mode = mode;
     if (khm_hwnd_main) {
