@@ -12,7 +12,6 @@
                     of the repositories will cause pismere/athena to be created under <src>.    -->
             <src        path    ="C:\projects\Autobuild" />
             <out        path    ="C:\projects\Autobuild\public" /> <!-- Must be absolute path. -->
-            <unixfind   path    ="c:\cygwin\bin" />
             </Directories>
         <Options>
             <debug      value="0" />
@@ -33,8 +32,38 @@
                 <SVNURL     name="svn.mit.edu" />   <!-- NB:  No protocol or slashes!! -->
                 <USERNAME   name="" />              <!-- Needed for svn/plink.  Override from command line -->
                 </Config>
-        </FetchSources>
-        <Make></Make>
+            <Zips>
+                <Zip dummy="foo" /> <!-- To force desired XML::Simple behavior    -->
+                <Zip name="SRC" filename="%filestem%-src.zip" topdir="%filestem%-final">
+                    <CopyList>
+                        <Files>
+                            <!-- File from    paths are relative to <src>/pismere.  -->
+                            <!-- File to      paths are relative to <out>.          -->
+                            <File dummy="foo" /> <!-- Forces XML::Simple behavior   -->
+                            <!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
+                            <File name="*.*" from="athena"  to="src\athena" />
+                            <File name="*.*" from="doc"     to="src\doc" />
+                            <File name="*.*" from="scripts" to="src\scripts" />
+                            </Files>
+                    </CopyList>
+                    <Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:    -->
+                        <Prune dummy="foo" />
+                        <Prune name="CVS" />
+                        <Prune name=".cvsignore" flags="i" />
+                        <Prune name="Changelog"  flags="i" />
+                        <Prune name="site" />
+                        </Prunes>
+                    <Requires>
+                        <Switch dummy="foo" />
+                        <Switch name="REPOSITORY" value="CHECKOUT"/>
+                        <ErrorMsg text="Can't build source zip unless /REPOSITORY CHECKOUT is specified." />
+                        </Requires>
+                    </Zip>
+                </Zips>
+            </FetchSources>
+        <Make>
+            <!-- Script checks for prunes. -->
+            </Make>
         <PrePackage>
             <CopyList>
                 <Config>
@@ -110,33 +139,12 @@
                         <Prune dummy="foo" />
                         <Prune name="*.exe" />
                         <Prune name="*.msi" />
+                        <Prune name="*.dll" />
+                        <Prune name="*.obj" />
+                        <Prune name="*.wixobj" />
+                        <Prune name="custom.lib" />
+                        <Prune name="custom.exp" />
                         </Prunes>
-                </Zip>
-                <Zip name="SRC" filename="%filestem%-src.zip" topdir="%filestem%-final">
-                    <CopyList>
-                        <Files>
-                            <!-- File from    paths are relative to <src>/pismere.  -->
-                            <!-- File to      paths are relative to <out>.          -->
-                            <File dummy="foo" /> <!-- Forces XML::Simple behavior   -->
-                            <!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
-                            <File name="*.*" from="athena"  to="src\athena" />
-                            <File name="*.*" from="doc"     to="src\doc" />
-                            <File name="*.*" from="scripts" to="src\scripts" />
-                            </Files>
-                    </CopyList>
-                    <Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:    -->
-                        <Prune dummy="foo" />
-                        <Prune name="CVS" />
-                        <Prune name=".cvsignore" flags="i" />
-                        <Prune name="Changelog" flags="i" />
-                        <Prune name="obj" />
-                        <Prune name="site" />
-                        </Prunes>
-                    <Requires>
-                        <Switch dummy="foo" />
-                        <Switch name="REPOSITORY" value="CHECKOUT"/>
-                        <ErrorMsg text="Can't build source zip unless /REPOSITORY CHECKOUT is specified." />
-                        </Requires>
                     </Zip>
                 </Zips>            
             <CopyList>            <!-- Copied at end of post-package step.    -->

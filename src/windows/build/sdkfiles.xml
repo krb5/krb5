@@ -8,18 +8,14 @@
 		<File name="relnotes.html"  from="doc\kerberos"                 to="doc" />
 		<File name="kclient.rtf"    from="athena\auth\krb4\kclient\doc" to="doc" />
 
-		<File  name="*.h"           from="staging\inc"                  to="inc" />
+		<File  name="*.*"           from="staging\inc"                  to="inc" />
+		<!-- loadfuncs.c is deliberately here.  Otherwise, *.h would work. -->
 
 		<File  name="*.*"           from="staging\install\nsis"         to="install\nsis\" />
         <!-- We'll clean up the exes in the target directory in a later step.  -->
 
 		<File  name="*.*"           from="staging\install\wix"          to="install\wix\" />
         <!-- We'll clean up the msi in the target directory in a later step.  -->
-
-		<File  name="custom.cpp"    from="staging\install\wix\custom"   to="install\wix\custom\" />
-		<File  name="custom.h"      from="staging\install\wix\custom"   to="install\wix\custom\" />
-
-		<!-- Why not license.rtf? -->
 
 		<File  name="*.lib"         from="staging\lib\i386"             to="lib\i386\" />
 	
