@@ -98,7 +98,7 @@ sub main {
            'repository:s',
            'username|u:s',
            'verbose|v',
-           'vverbose|vv',
+           'vverbose',
            'nomake',
            'clean',
            'nopackage',
