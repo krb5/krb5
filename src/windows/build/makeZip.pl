@@ -9,7 +9,7 @@ sub makeZip {
     local ($zip, $config)   = @_;
 
     local $src          = $config->{CommandLine}->{Directories}->{src}->{path};
-    local $toPath       = $config->{CommandLine}->{Directories}->{out}->{path};
+    local $out          = $config->{CommandLine}->{Directories}->{out}->{path};
     local @switches     = $config->{CommandLine}->{Options};
     local $zipname      = $zip->{filename};
     local $filestem     = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
@@ -45,8 +45,8 @@ sub makeZip {
             }
         }
         
-    local $ziptemp    = "$src\\$toPath\\ziptemp";
-    chdir "$src\\$toPath";
+    local $ziptemp    = "$out\\ziptemp";
+    chdir "$out";
     print "Info -- chdir to ".`cd`."\n"         if ($verbose);
     system("rm -rf $ziptemp")                 if (-d $ziptemp);
     die "Fatal -- Couldn't remove $ziptemp"   if (-d $ziptemp);
@@ -100,8 +100,8 @@ sub makeZip {
     $zipfile->addTree('.', $topdir);
     if (-e $zipname)    {!system("rm -f $zipname")     or die "Error -- Couldn't remove $zipname.";}
     $zipfile->writeToFileNamed($zipname);
-    print "Info -- created $src\\$toPath\\$zipname.\n"  if ($verbose);
-       # move .zip from <src>/<out>/ziptemp to <src>/<out>.
+    print "Info -- created $out\\$zipname.\n"  if ($verbose);
+       # move .zip from <out>/ziptemp to <out>.
     !system("mv -f $zipname     ..")                    or die "Error -- Couldn't move $zipname to ..";
     }
     
