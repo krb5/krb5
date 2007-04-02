@@ -4,8 +4,9 @@
     <CommandLine>
         <!-- The most changeable parameters can be specified on the command line.    -->
         <Tags>
-            <cvs value="" />
-            <svn value=""/>
+            <cvs        value="" />
+            <svntag     value="" />
+            <svnbranch  value="" />
             </Tags>
         <Directories>
             <!--    Sources will be checked out of repositories into <src>.  The structure

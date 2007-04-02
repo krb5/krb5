@@ -49,8 +49,9 @@ Usage: $0 (-f --config) config-file [options] NMAKE-options
                 update   | up  ) Options are to checkout, update or 
                 skip          /  take no action [skip].
     /username /u name  username used to access svn if checking out.
-    /cvstag /c tag   \\ If non-empty, the tag is appended to cvs and svn
-    /svntag /s tag   / commands to select the rev to fetch.
+    /cvstag /c tag     use -r <tag> in cvs command
+    /svnbranch /b tag  append /branches/<tag> to svn path.
+    /svntag /s tag     append /tags/<tag> to svn path.
     /debug /d          Do debug make instead of release make.
     /nomake            Skip make step.
     /clean             Build clean target.
@@ -90,6 +91,7 @@ sub main {
            'help|h|?',
            'cvstag|c:s',
            'svntag|s:s',
+           'svnbranch|b:s',
            'srcdir|r:s',
            'outdir|o:s',
            'debug|d',
@@ -168,18 +170,19 @@ sub main {
     @fetch      = $config->{Stages}->{FetchSources}->{Config};
 
     # Update the configuration with overrides from the command line:
-    $tags[0]->{cvs}->{value} = $OPT->{cvstag}                   if exists $OPT->{cvstag};
-    $tags[0]->{svn}->{value} = $OPT->{svnurl}                   if exists $OPT->{svnurl};
-    $paths[0]->{src}->{path} = $OPT->{srcdir}                   if exists $OPT->{srcdir};
-    $paths[0]->{out}->{path} = $OPT->{outdir}                   if exists $OPT->{outdir};
-    $switches[0]->{debug}->{value} = $OPT->{debug}              if exists $OPT->{debug};
-    $switches[0]->{clean}->{value} = 1                          if exists $OPT->{clean};
+    $tags[0]->{cvs}->{value}            = $OPT->{cvstag}        if exists $OPT->{cvstag};
+    $tags[0]->{svntag}->{value}         = $OPT->{svntag}        if exists $OPT->{svntag};
+    $tags[0]->{svnbranch}->{value}      = $OPT->{svnbranch}     if exists $OPT->{svnbranch};
+    $paths[0]->{src}->{path}            = $OPT->{srcdir}        if exists $OPT->{srcdir};
+    $paths[0]->{out}->{path}            = $OPT->{outdir}        if exists $OPT->{outdir};
+    $switches[0]->{debug}->{value}      = $OPT->{debug}         if exists $OPT->{debug};
+    $switches[0]->{clean}->{value}      = 1                     if exists $OPT->{clean};
     $switches[0]->{repository}->{value} = $OPT->{repository}    if exists $OPT->{repository};
-    $fetch[0]->{USERNAME}->{name} = $OPT->{username}            if exists $OPT->{username};
-    $switches[0]->{nomake}->{value} = 1                         if exists $OPT->{nomake};
-    $switches[0]->{nopackage}->{value} = 1                      if exists $OPT->{nopackage};
-    $switches[0]->{verbose}->{value} = $OPT->{verbose}          if exists $OPT->{verbose};
-    $switches[0]->{vverbose}->{value} = $OPT->{verbose}         if exists $OPT->{vverbose};
+    $fetch[0]->{USERNAME}->{name}       = $OPT->{username}      if exists $OPT->{username};
+    $switches[0]->{nomake}->{value}     = 1                     if exists $OPT->{nomake};
+    $switches[0]->{nopackage}->{value}  = 1                     if exists $OPT->{nopackage};
+    $switches[0]->{verbose}->{value}    = $OPT->{verbose}       if exists $OPT->{verbose};
+    $switches[0]->{vverbose}->{value}   = $OPT->{verbose}       if exists $OPT->{vverbose};
     if (exists $OPT->{logfile}) {
         $switches[0]->{logfile}->{path} = $OPT->{logfile};
         $switches[0]->{logfile}->{value} = 1;
@@ -213,60 +216,6 @@ sub main {
     #print "cvs tag: $tags[0]->{cvs}->{value}\n";
     #print "CVSROOT:   $fetch[0]->{CVSROOT}->{name}\n";
 
-    # We read in the version information to be able to update the site-local files in the install build areas:
-    local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
-    @raw = <DAT>;
-    close DAT;
-    foreach $line (@raw) {
-        chomp $line;
-        if ($line =~ /#define/) {                   # Process #define lines:
-            $line =~ s/#define//;                   # Remove #define token
-            $line =~ s/^\s+//;                      #  and leading & trailing whitespace
-            $line =~ s/\s+$//;
-            local @qr = split("\"", $line);         # Try splitting with quotes
-            if (exists $qr[1]) {
-                $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
-                $qr[0] =~ s/\s+$//;
-                $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
-                }
-            else {                                  # No quotes, so
-                local @ar = split(" ", $line);      #  split with space
-                $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
-                $ar[0] =~ s/\s+$//;
-                $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
-                }
-            }
-        }
-
-    # Check that the versions we will need for site-local have been defined:
-    my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
-                             'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
-                             'VER_PRODUCTNAME_STR');
-    $requirements_met   = 1;
-    $first_missing      = 0;
-    $error_list         = "";
-    foreach my $required (@required_versions) {
-        if (! exists $config->{Versions}->{$required}) {
-            $requirements_met = 0;
-            if (!$first_missing) {
-                $first_missing = 1;
-                $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
-                }
-            $error_list .= "$required\n";
-            }
-        }
-    if (!$requirements_met) {
-        print $error_list;
-        exit(0);
-        }
-    # Apply any of these tags to filestem:
-    my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
-    $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
-    $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
-    $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
-    $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
-        
     # Test the unix find command:
     if (! exists $config->{CommandLine}->{Directories}->{unixfind}->{path})    {
         $config->{CommandLine}->{Directories}->{unixfind}->{path}   = "C:\\tools\\cygwin\\bin";
@@ -275,7 +224,6 @@ sub main {
 
     local $savedPATH    = $ENV{PATH};
     $ENV{PATH}          = $unixfind.";".$savedPATH;
-print "PATH now $ENV{PATH}\n";
     print "Info -- chdir to ".`cd`."\n"         if ($verbose);
     if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
     !system("find . -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
@@ -283,6 +231,12 @@ print "PATH now $ENV{PATH}\n";
     $ENV{PATH} = $savedPATH;
     if ($filesize > 0) {
         die "Fatal -- $unixfind does not appear to be a path to a UNIX find command.";
+        }
+        
+    # Don't allow /svntag and /svnbranch simultaneously:
+    if ( (length $tags[0]->{svntag}->{value} > 0)   && 
+         (length $tags[0]->{svnbranch}->{value} > 0) ) {
+        die "Fatal -- Can't specify both /SVNTAG and /SVNBRANCH.";
         }
 
 ##-- Assemble configuration from config file and command line.
@@ -342,22 +296,26 @@ print "PATH now $ENV{PATH}\n";
     if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"    if ($verbose);}
     else {
         if ($verbose) {print "Info -- *** Begin fetching sources.\n";}
-        if (! -d $wd) {                        ## xcopy will create the entire path for us.
+        local $cvspath = "$src";
+        if (! -d $cvspath) {                        ## xcopy will create the entire path for us.
             !system("echo foo > a.tmp")                     or die "Fatal -- Couldn't create temporary file in ".`cd`;
-            !system("echo F | xcopy a.tmp $wd\\CVS\\a.tmp") or die "Fatal -- Couldn't xcopy to $wd\\CVS.";
+            !system("echo F | xcopy a.tmp $cvspath\\a.tmp") or die "Fatal -- Couldn't xcopy to $cvspath.";
             !system("rm a.tmp")                             or die "Fatal -- Couldn't remove temporary file.";
-            !system("rm $wd\\CVS\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
+            !system("rm $cvspath\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
             }
         
         # Set up cvs environment variables:
-        $ENV{CVSROOT}   = $fetch[0]->{CVSROOT}->{name};
-        chdir($src)                                         or die "Fatal -- couldn't chdir to $src\n";
-        print "Info -- chdir to ".`cd`."\n"                 if ($verbose);
-        my $krb5dir     = "$wd\\athena\\auth\\krb5";
+        $ENV{CVSROOT}       = $fetch[0]->{CVSROOT}->{name};
+        local $krb5dir      = "$wd\\athena\\auth\\krb5";
 
-        my $cvscmdroot  = "cvs $rverb";
-        my $cvscmd      = $cvscmdroot;
+        local $cvscmdroot   = "cvs $rverb";
+        if (length $tags[0]->{cvs}->{value} > 0) {
+            $cvscmdroot .= " -r $tags[0]->{cvs}->{value}";
+            }
+
         if ($rverb =~ /checkout/) {        
+            chdir($src)                                     or die "Fatal -- couldn't chdir to $src\n";
+            print "Info -- chdir to ".`cd`."\n"             if ($verbose);
             my @cvsmodules    = (    
                 'krb',  
                 'pismere/athena/util/lib/delaydlls', 
@@ -366,33 +324,108 @@ print "PATH now $ENV{PATH}\n";
                 );
 
             foreach my $module (@cvsmodules) {
-                $cvscmd = $cvscmdroot." ".$module;
-                $cvscmd .= " ".$tags[0]->{cvs}->{value} if ($tags[0]->{cvs}->{value});
+                local $cvscmd = $cvscmdroot." ".$module;
                 if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-                !system($cvscmd)                        or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+                !system($cvscmd)    or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
                 }
             }
         else {                ## Update.
-            $cvscmd = $cvscmdroot;
-            $cvscmd .= " ".$tags[0]->{cvs}->{value}     if ($tags[0]->{cvs}->{value});
-            if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-            !system($cvscmd)                            or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+            chdir($wd)                                      or die "Fatal -- couldn't chdir to $wd\n";
+            print "Info -- chdir to ".`cd`."\n"             if ($verbose);
+            if ($verbose) {print "Info -- cvs command: $cvscmdroot\n";}
+            !system($cvscmdroot)    or die "Fatal -- command \"$cvscmdroot\" failed; return code $?\n";
             }
-                    
+
         # Set up svn environment variable:
         $ENV{SVN_SSH} = "plink.exe";
         # If  the directory structure doesn't exist, many cd commands will fail.
-        if (! -d $krb5dir) {mkdir($krb5dir)             or die "Fatal -- Couldn't  create $krb5dir";}
+        if (! -d $krb5dir) {                                ## xcopy will create the entire path for us.
+            !system("echo foo > a.tmp")                     or die "Fatal -- Couldn't create temporary file in ".`cd`;
+            !system("echo F | xcopy a.tmp $krb5dir\\a.tmp") or die "Fatal -- Couldn't xcopy to $krb5dir.";
+            !system("rm a.tmp")                             or die "Fatal -- Couldn't remove temporary file.";
+            !system("rm $krb5dir\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
+            }
+
         chdir($krb5dir)                                 or die "Fatal -- Couldn't chdir to $krb5dir";
         print "Info -- chdir to ".`cd`."\n"             if ($verbose);
         my $svncmd = "svn $rverb ";
         if ($rverb =~ /checkout/) {        # Append the rest of the checkout command:
             chdir("..");
-            $svncmd .= "svn+ssh://".$fetch[0]->{USERNAME}->{name}."@".$fetch[0]->{SVNURL}->{name}."/krb5/trunk krb5";
+            $svncmd .= "svn+ssh://".$fetch[0]->{USERNAME}->{name}."@".$fetch[0]->{SVNURL}->{name}."/krb5/";
+            if (length $tags[0]->{svntag}->{value} > 0) {
+                $svncmd .= "tags/$tags[0]->{svntag}->{value}";
+                }
+            elsif (length $tags[0]->{svnbranch}->{value} > 0) {
+                $svncmd .= "branches/$tags[0]->{svnbranch}->{value}";
+                }
+            else {
+                $svncmd .= "trunk";
+                }
+
+            $svncmd .= " krb5";
+
             }
-        if ($tags[0]->{svn}->{value}) {$svncmd .= " ".$tags[0]->{svn}->{value};}    # Add any specific tag
         if ($verbose) {print "Info -- svn command: $svncmd\n";}
         !system($svncmd)            or die "Fatal -- command \"$svncmd\" failed; return code $?\n";
+
+        ##++ Read in the version information to be able to update the 
+        #  site-local files in the install build areas.
+        # ** Do this now (after repository update and before first zip) 
+        #    because making zip files requires some configuration data be set up.
+        local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
+        open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+        @raw = <DAT>;
+        close DAT;
+        foreach $line (@raw) {
+            chomp $line;
+            if ($line =~ /#define/) {                   # Process #define lines:
+                $line =~ s/#define//;                   # Remove #define token
+                $line =~ s/^\s+//;                      #  and leading & trailing whitespace
+                $line =~ s/\s+$//;
+                local @qr = split("\"", $line);         # Try splitting with quotes
+                if (exists $qr[1]) {
+                    $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
+                    $qr[0] =~ s/\s+$//;
+                    $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
+                    }
+                else {                                  # No quotes, so
+                    local @ar = split(" ", $line);      #  split with space
+                    $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
+                    $ar[0] =~ s/\s+$//;
+                    $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
+                    }
+                }
+            }
+    
+        # Check that the versions we will need for site-local have been defined:
+        my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
+                                 'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
+                                 'VER_PRODUCTNAME_STR');
+        $requirements_met   = 1;
+        $first_missing      = 0;
+        $error_list         = "";
+        foreach my $required (@required_versions) {
+            if (! exists $config->{Versions}->{$required}) {
+                $requirements_met = 0;
+                if (!$first_missing) {
+                    $first_missing = 1;
+                    $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
+                    }
+                $error_list .= "$required\n";
+                }
+            }
+        if (!$requirements_met) {
+            print $error_list;
+            exit(0);
+            }
+    
+        # Apply any of these tags to filestem:
+        my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
+        $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
+        $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
+        $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
+        $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
+        ##-- Read in the version information & set config info.
 
         if ($rverb =~ /checkout/) {        
             if (! $bOutputCleaned) {                    ## In case somebody cleaned $out before us.
