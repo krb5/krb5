@@ -41,7 +41,7 @@
 #endif	/* HAVE_SYSLOG_H */
 #include <stdarg.h>
 
-#define	KRB5_KLOG_MAX_ERRMSG_SIZE	1024
+#define	KRB5_KLOG_MAX_ERRMSG_SIZE	2048
 #ifndef	MAXHOSTNAMELEN
 #define	MAXHOSTNAMELEN	256
 #endif	/* MAXHOSTNAMELEN */
@@ -257,7 +257,9 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif	/* HAVE_SYSLOG */
 
     /* Now format the actual message */
-#if	HAVE_VSPRINTF
+#if	HAVE_VSNPRINTF
+    vsnprintf(cp, sizeof(outbuf) - (cp - outbuf), actual_format, ap);
+#elif	HAVE_VSPRINTF
     vsprintf(cp, actual_format, ap);
 #else	/* HAVE_VSPRINTF */
     sprintf(cp, actual_format, ((int *) ap)[0], ((int *) ap)[1],
@@ -846,7 +848,9 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     syslogp = &outbuf[strlen(outbuf)];
 
     /* Now format the actual message */
-#ifdef	HAVE_VSPRINTF
+#ifdef	HAVE_VSNPRINTF
+    vsnprintf(syslogp, sizeof(outbuf) - (syslogp - outbuf), format, arglist);
+#elif	HAVE_VSPRINTF
     vsprintf(syslogp, format, arglist);
 #else	/* HAVE_VSPRINTF */
     sprintf(syslogp, format, ((int *) arglist)[0], ((int *) arglist)[1],
