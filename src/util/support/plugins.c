@@ -455,17 +455,9 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
         } else {
             /* load all plugins in each directory */
 #ifndef _WIN32
-	    DIR *dir = NULL;
+	    DIR *dir = opendir (dirnames[i]);
             
-            if (!err) {
-                dir = opendir(dirnames[i]);
-                if (dir == NULL) {
-                    err = errno;
-                    Tprintf ("-> error %d/%s\n", err, strerror (err));
-                }
-            }
-            
-            while (!err) {
+            while (dir != NULL && !err) {
                 struct dirent *d = NULL;
                 char *filepath = NULL;
                 struct plugin_file_handle *handle = NULL;
