@@ -777,7 +777,8 @@
                             <File Id="fil_KfWConfigPage2_ini" LongName="KfWConfigPage2.ini" Name="KFWCONP2.INI" />
                             <File Id="fil_killer_cpp" LongName="killer.cpp" Name="killer.cpp" />
                             <File Id="fil_licenses_rtf" LongName="licenses.rtf" Name="licenses.rtf" />
-                            <File Id="fil_site_local_nsi" LongName="site-local.nsi" Name="SITE-LCN.NSI" />
+                            <File Id="fil_site_local_nsi" LongName="site-local-tagged.nsi" Name="SITE-LCN.NSI" />
+                            <File Id="fil_nsi_incl" LongName="nsi-includes-tagged.nsi" Name="NSI-INCL.NSI" />
                             <File Id="fil_utils_nsi" LongName="utils.nsi" Name="utils.nsi" />
                         </Component>
                     </Directory>
@@ -789,7 +790,7 @@
                             <File Id="fil_kfw_wxs" LongName="kfw.wxs" Name="kfw.wxs" KeyPath="yes" />
                             <File Id="fil_Makefile_" LongName="Makefile" Name="Makefile" />
                             <File Id="fil_property_wxi" LongName="property.wxi" Name="property.wxi" />
-                            <File Id="fil_site_local_wxi" LongName="site-local.wxi" Name="SITE-LCL.WXI" />
+                            <File Id="fil_site_local_wxi" LongName="site-local-tagged.wxi" Name="SITE-LCL.WXI" />
                         </Component>
                         <Directory Id="dirinstall_wix_lang" Name="lang" src="$(var.InstallDir)wix\lang\">
                             <Component Id="cmp_dirinstall_wix_lang" Guid="70741A69-1103-4B54-B146-2E14C271945D" DiskId="1">
