@@ -171,3 +171,12 @@ check_min_life(void *server_handle, krb5_principal principal,
 
     return kadm5_free_principal_ent(handle->lhandle, &princ);
 }
+
+#define MAXPRINCLEN 125
+
+void
+trunc_name(size_t *len, char **dots)
+{
+    *dots = *len > MAXPRINCLEN ? "..." : "";
+    *len = *len > MAXPRINCLEN ? MAXPRINCLEN : *len;
+}

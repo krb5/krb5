@@ -45,3 +45,5 @@ krb5_error_code process_chpw_request(krb5_context context,
 #ifdef SVC_GETARGS
 void  kadm_1(struct svc_req *, SVCXPRT *);
 #endif
+
+void trunc_name(size_t *len, char **dots);
