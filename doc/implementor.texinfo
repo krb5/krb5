@@ -1048,6 +1048,7 @@ building shared libraries for Kerberos.
 @menu
 * AIX Shared Library Support::  
 * Alpha OSF/1 Shared Library Support::  
+* ELF Shared Library Support::  
 @end menu
 
 @node AIX Shared Library Support, Alpha OSF/1 Shared Library Support, Operating System Notes for Shared Libraries, Operating System Notes for Shared Libraries
@@ -1073,7 +1074,7 @@ compiler works fine.  In addition, the AIX 4.1 linker is able to build a
 shared @samp{libkrb5.a} when GNU C is used.
 
 
-@node Alpha OSF/1 Shared Library Support,  , AIX Shared Library Support, Operating System Notes for Shared Libraries
+@node Alpha OSF/1 Shared Library Support, ELF Shared Library Support, AIX Shared Library Support, Operating System Notes for Shared Libraries
 @subsection Alpha OSF/1 Shared Library Support
 
 Shared library support has been tested with V2.1 and higher of the
@@ -1091,7 +1092,23 @@ instead of a possibly installed library. The loader uses the contents of
 @samp{-rpath} before LD_LIBRARY_PATH so we must specify a dummy _RLD_ROOT
 and complete LD_LIBRARY_PATH in our tests.
 
-The one disadvantage with the method we are using....
+The one disadvantage with the method we are using....  [What??  This
+never got finished!]
+
+@node ELF Shared Library Support,  , Alpha OSF/1 Shared Library Support, Operating System Notes for Shared Libraries
+@subsection ELF Shared Library Support
+
+It's tempting to add @samp{-Bsymbolic} to the commands for generating
+shared libraries.  We don't explicitly support overriding our
+(internal or public) symbol names by applications, and binding at
+shared library creation time would result in smaller libraries that
+would load faster.  However, it won't work.  At least with the GNU and
+Solaris linkers and runtime environments, an executable using a data
+symbol exported by a shared library gets a copy of that data,
+initialized at run time by copying, and the program will only function
+properly if that definition can override the one present in the shared
+library.  And, sadly, some of our shared libraries export variables
+that are directly referenced from programs.
 
 @node Porting Issues,  , Shared Libraries, Top
 @chapter Porting Issues
