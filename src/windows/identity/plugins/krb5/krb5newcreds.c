@@ -2710,14 +2710,34 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             if (t != K5_LSAIMPORT_NEVER) {
                 krb5_context ctx = NULL;
+                khm_handle id_default = NULL;
+                khm_handle id_imported = NULL;
                 BOOL imported;
 
-                imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE);
+                imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE,
+                                           &id_imported);
                 if (imported) {
                     khm_krb5_list_tickets(&ctx);
+
                     if (ctx)
                         pkrb5_free_context(ctx);
+
+                    kcdb_identity_refresh(id_imported);
+
+                    if (KHM_SUCCEEDED(kcdb_identity_get_default(&id_default))) {
+                        kcdb_identity_release(id_default);
+                        id_default = NULL;
+                    } else {
+                        _reportf(L"There was no default identity.  Setting default");
+                        kcdb_identity_set_default(id_imported);
+                    }
+
+                    /* and update the LRU */
+                    k5_update_LRU(id_imported);
                 }
+
+                if (id_imported)
+                    kcdb_identity_release(id_imported);
             }
         }
         break;

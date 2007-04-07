@@ -221,6 +221,10 @@ khm_main_wnd_proc(HWND hwnd,
         kmq_subscribe_hwnd(KMSG_KMM, hwnd);
         mw_restart_refresh_timer(hwnd);
 
+        /* if the plug-ins finished loading before the window was
+           created, we would have missed the KMSG_KMM_I_DONE message.
+           So we check if the module load is complete and if so, fire
+           off KMSG_ACT_BEGIN_CMDLINE. */
         if (!kmm_load_pending())
             kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);
         break;

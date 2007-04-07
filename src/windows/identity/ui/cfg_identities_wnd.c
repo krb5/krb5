@@ -500,7 +500,7 @@ write_params_idents(void) {
             cfg_idents.applied = TRUE;
         }
         if (cfg_idents.work.sticky != cfg_idents.saved.sticky) {
-            khc_write_int32(csp_cw, L"DefaultMonitor",
+            khc_write_int32(csp_cw, L"DefaultSticky",
                             !!cfg_idents.work.sticky);
             cfg_idents.work.sticky = cfg_idents.saved.sticky;
             cfg_idents.applied = TRUE;

@@ -108,7 +108,8 @@ typedef struct tag_k5params {
 BOOL 
 khm_krb5_ms2mit(char * match_princ,
                 BOOL   match_realm,
-                BOOL   save_creds);
+                BOOL   save_creds,
+                khm_handle * ret_ident);
 
 int
 khm_krb5_kinit(krb5_context       alt_ctx,

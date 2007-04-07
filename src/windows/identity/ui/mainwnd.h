@@ -33,6 +33,7 @@
 extern ATOM khm_main_window_class;
 extern HWND khm_hwnd_main;
 extern HWND khm_hwnd_rebar;
+extern HWND khm_hwnd_main_cred;
 
 #define KHM_MAIN_WND_NORMAL 0
 #define KHM_MAIN_WND_MINI   1

@@ -47,12 +47,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", KH_VERSTR_COMPANY_1033
             VALUE "FileDescription", "Network Identity Manager API"
-            VALUE "FileVersion", KH_VERSION_STRING
+            VALUE "FileVersion", KH_VERSTR_VERSION_1033
             VALUE "InternalName", "nidmgr32"
             VALUE "LegalCopyright", KH_VERSTR_COPYRIGHT_1033
             VALUE "OriginalFilename", "nidmgr32.dll"
-            VALUE "ProductName", KH_VERSTR_PRODUCT_1033
-            VALUE "ProductVersion", KH_VERSTR_VERSION_1033
+            VALUE "ProductName", "Network Identity Manager"
+            VALUE "ProductVersion", KH_VERSTR_PRODUCT_1033
 #ifdef KH_VERSTR_COMMENT_1033
             VALUE "Comments",     KH_VERSTR_COMMENT_1033
 #endif

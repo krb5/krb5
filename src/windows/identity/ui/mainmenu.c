@@ -820,6 +820,16 @@ khm_refresh_identity_menus(void) {
     khm_size n_idents = 0;
     khm_size t;
     khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_cw = NULL;
+    khm_int32 idflags;
+    khm_int32 def_sticky = 0;
+    khm_boolean sticky_done = FALSE;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+        khc_read_int32(csp_cw, L"DefaultSticky", &def_sticky);
+        khc_close_space(csp_cw);
+        csp_cw = NULL;
+    }
 
     kcdb_identity_refresh_all();
 
@@ -921,6 +931,16 @@ khm_refresh_identity_menus(void) {
         khui_menu_insert_action(dest_def, 1000,
                                 khm_get_identity_destroy_action(identity),
                                 0);
+
+        idflags = 0;
+        kcdb_identity_get_flags(identity, &idflags);
+
+        if (!(idflags & KCDB_IDENT_FLAG_STICKY) && def_sticky) {
+            kcdb_identity_set_flags(identity,
+                                    KCDB_IDENT_FLAG_STICKY,
+                                    KCDB_IDENT_FLAG_STICKY);
+            sticky_done = TRUE;
+        }
     }
 
     if (idlist)
@@ -931,6 +951,10 @@ khm_refresh_identity_menus(void) {
     khui_action_unlock();
 
     khui_refresh_actions();
+
+    if (sticky_done) {
+        InvalidateRect(khm_hwnd_main_cred, NULL, TRUE);
+    }
 }
 
 khm_boolean
