@@ -1,7 +1,7 @@
 ;-----------------------------------------------------------------
 ; KfW defines and functionality
-; Copyright (c) 2004 Massachusetts Institute of Technology
-; Copyright (c) 2006 Secure Endpoints Inc.
+; Copyright (c) 2004,2005,2006,2007 Massachusetts Institute of Technology
+; Copyright (c) 2006,2007 Secure Endpoints Inc.
 
 !define KFW_VERSION "${KFW_MAJORVERSION}.${KFW_MINORVERSION}.${KFW_PATCHLEVEL}"
 
@@ -30,10 +30,10 @@ Name "MIT ${PROGRAM_NAME} ${KFW_VERSION} ${__DATE__} ${__TIME__} Checked/Debug"
 VIProductVersion "${KFW_MAJORVERSION}.${KFW_MINORVERSION}.${KFW_PATCHLEVEL}.00"
 VIAddVersionKey "ProductName" "${PROGRAM_NAME}"
 VIAddVersionKey "CompanyName" "Massachusetts Institute of Technology"
-VIAddVersionKey "ProductVersion" ${VIProductVersion}
-VIAddVersionKey "FileVersion" ${VIProductVersion}
+VIAddVersionKey "FileVersion"  ${VIProductVersion}
+VIAddVersionKey "ProductVersion"  "${KFW_MAJORVERSION}.${KFW_MINORVERSION}.${KFW_PATCHLEVEL}.0"
 VIAddVersionKey "FileDescription" "MIT Kerberos for Windows Installer"
-VIAddVersionKey "LegalCopyright" "(C)2004,2005,2006"
+VIAddVersionKey "LegalCopyright" "(C)2004,2005,2006,2007"
 !ifdef DEBUG
 VIAddVersionKey "PrivateBuild" "Checked/Debug"
 !endif               ; End DEBUG
@@ -444,9 +444,6 @@ skipAllowTgtKey:
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" "Flags" 0x408
-!ifdef AKLOG
-  WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog" "Flags" 0x408
-!endif
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" "Flags" 0x408
   WriteRegDWORD HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" "Flags" 0x408
@@ -466,9 +463,6 @@ SectionEnd
 Section "Debug Symbols" secDebug
 
   SetOutPath "$INSTDIR\bin"
-!ifdef AKLOG
-  File "${KFW_BIN_DIR}\aklog.pdb"
-!endif
   File "${KFW_BIN_DIR}\comerr32.pdb"
   File "${KFW_BIN_DIR}\gss.pdb"
   File "${KFW_BIN_DIR}\gss-client.pdb"
@@ -1144,9 +1138,6 @@ StartRemove:
   Delete "$INSTDIR\doc\netidmgr_userdoc.pdf"
   Delete "$INSTDIR\doc\netiddev.chm"
  
-!ifdef AKLOG
-   Delete /REBOOTOK "$INSTDIR\bin\aklog.exe"
-!endif
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.dll"
    Delete /REBOOTOK "$INSTDIR\bin\gss.exe"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.exe"
@@ -1182,9 +1173,6 @@ StartRemove:
    Delete /REBOOTOK "$SYSDIR\bin\kfwlogon.dll"
    Delete /REBOOTOK "$SYSDIR\bin\kfwcpcc.exe"
 
-!ifdef AKLOG
-   Delete /REBOOTOK "$INSTDIR\bin\aklog.pdb"
-!endif
    Delete /REBOOTOK "$INSTDIR\bin\comerr32.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss.pdb"
    Delete /REBOOTOK "$INSTDIR\bin\gss-client.pdb"
@@ -1341,9 +1329,6 @@ StartRemove:
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy"
-!ifdef AKLOG
-  DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\aklog"
-!endif
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client"
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server"
