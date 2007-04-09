@@ -302,12 +302,16 @@ krb5int_translate_gai_error (int num)
 	return EAFNOSUPPORT;
     case EAI_MEMORY:
 	return ENOMEM;
-#if EAI_NODATA != EAI_NONAME
+#if defined(EAI_NODATA) && EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
 	return KRB5_EAI_NODATA;
 #endif
     case EAI_NONAME:
 	return KRB5_EAI_NONAME;
+#if defined(EAI_OVERFLOW)
+    case EAI_OVERFLOW:
+	return EINVAL;		/* XXX */
+#endif
     case EAI_SERVICE:
 	return KRB5_EAI_SERVICE;
     case EAI_SOCKTYPE:

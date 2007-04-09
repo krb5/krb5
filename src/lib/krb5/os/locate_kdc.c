@@ -157,13 +157,18 @@ static int translate_ai_error (int err)
 #ifdef EAI_ADDRFAMILY
     case EAI_ADDRFAMILY:
 #endif
-#if EAI_NODATA != EAI_NONAME
+#if defined(EAI_NODATA) && EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
 #endif
     case EAI_NONAME:
 	/* Name not known or no address data, but no error.  Do
 	   nothing more.  */
 	return 0;
+#ifdef EAI_OVERFLOW
+    case EAI_OVERFLOW:
+	/* An argument buffer overflowed.  */
+	return EINVAL;		/* XXX */
+#endif
 #ifdef EAI_SYSTEM
     case EAI_SYSTEM:
 	/* System error, obviously.  */
