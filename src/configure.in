@@ -125,7 +125,7 @@ dnl from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
 [Define if "struct sockaddr_storage" is available.])
 dnl
-AC_CONFIG_HEADER(include/autoconf.h)
+AC_CONFIG_HEADER(include/autoconf.h, [: autoconf.h cmds], [: autoconf.h init cmds])
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX
@@ -557,6 +557,11 @@ AC_CHECK_TYPES([uint32_t, int32_t, uint64_t, int64_t, uint_least32_t, uintptr_t,
 #elif defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
 #endif
+])
+AC_CHECK_TYPES([struct cmsghdr, struct in_pktinfo, struct in6_pktinfo], , , [
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 ])
 dnl
 dnl stuff for util/profile
