@@ -40,6 +40,8 @@
 #include <kadm5/admin.h>
 #include <adm_proto.h>
 
+#include "fake-addrinfo.h"
+
 
 #include <krb5.h>
 #include <kdb.h>
@@ -172,20 +174,33 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
   krb5_error_code ret = 0;
   char service_name[MAXHOSTNAMELEN + 8];
   char localname[MAXHOSTNAMELEN];
-  struct hostent *hp;
+  struct addrinfo *ai, ai_hints;
+  int gai_error;
 
   if (gethostname(localname, MAXHOSTNAMELEN)) {
       ret = errno;
       perror("gethostname");
       goto clean_and_exit;
   }
-  hp = gethostbyname(localname);
-  if (hp == NULL) {
-      ret = errno;
-      perror("gethostbyname");
+  memset(&ai_hints, 0, sizeof(ai_hints));
+  ai_hints.ai_flags = AI_CANONNAME;
+  gai_error = getaddrinfo(localname, (char *)NULL, &ai_hints, &ai);
+  if (gai_error) {
+      ret = EINVAL;
+      fprintf(stderr, "getaddrinfo(%s): %s\n", localname,
+	      gai_strerror(gai_error));
       goto clean_and_exit;
   }
-  sprintf(service_name, "kadmin/%s", hp->h_name);
+  if (ai->ai_canonname == NULL) {
+      ret = EINVAL;
+      fprintf(stderr,
+	      "getaddrinfo(%s): Cannot determine canonical hostname.\n",
+	      localname);
+      freeaddrinfo(ai);
+      goto clean_and_exit;
+  }
+  sprintf(service_name, "kadmin/%s", ai->ai_canonname);
+  freeaddrinfo(ai);
 
   if ((ret = add_admin_princ(handle, context,
 			     service_name, realm,
