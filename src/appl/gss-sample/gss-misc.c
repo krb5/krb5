@@ -57,6 +57,9 @@ static char *rcsid = "$Header$";
 #include <sys/socket.h>
 #endif
 #include <errno.h>
+
+#include <autoconf.h>
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -72,7 +75,6 @@ static char *rcsid = "$Header$";
 #include <gssapi/gssapi_generic.h>
 #include "gss-misc.h"
 
-#include <autoconf.h>
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #else
