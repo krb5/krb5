@@ -1165,7 +1165,7 @@ khm_krb5_renew_ident(khm_handle identity)
 
         UnicodeStrToAnsi(cidname, sizeof(cidname), idname);
 
-        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE);
+        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, NULL);
 
         if (imported)
             goto cleanup;
@@ -2096,7 +2096,8 @@ IsKerberosLogon(VOID)
 
 
 BOOL
-khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds)
+khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds,
+                khm_handle * ret_ident)
 {
 #ifdef NO_KRB5
     return(FALSE);
@@ -2238,9 +2239,15 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds)
         /* and mark the identity as having been imported */
         if (ident) {
             khm_krb5_set_identity_flags(ident, K5IDFLAG_IMPORTED, K5IDFLAG_IMPORTED);
+
+            if (ret_ident) {
+                *ret_ident = ident;
+                kcdb_identity_hold(*ret_ident);
+            }
         }
 
         rc = TRUE;
+
     } else {
         /* Enumerate tickets from cache looking for an initial ticket */
         if ((code = pkrb5_cc_start_seq_get(kcontext, mslsa_ccache, &cursor))) 
@@ -2271,6 +2278,9 @@ cleanup:
         pkrb5_cc_close(kcontext, mslsa_ccache);
     if (kcontext)
         pkrb5_free_context(kcontext);
+    if (ident)
+        kcdb_identity_release(ident);
+
     return(rc);
 #endif /* NO_KRB5 */
 }
@@ -2568,6 +2578,10 @@ khm_krb5_get_default_realm(void)
     char * def = 0;
 
     pkrb5_init_context(&ctx);
+
+    if (ctx == 0)
+        return NULL;
+
     pkrb5_get_default_realm(ctx,&def);
     
     if (def) {
