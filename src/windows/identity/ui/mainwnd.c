@@ -93,8 +93,6 @@ khm_pre_shutdown(void) {
     khm_int32 t;
     khm_size s;
 
-    khm_taskbar_remove_window(khm_hwnd_main);
-
     /* Check if we should destroy all credentials on exit... */
 
     if (KHM_FAILED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw)))
@@ -1177,7 +1175,7 @@ khm_create_main_window(void) {
     khm_get_main_window_rect(&r);
 
     khm_hwnd_main = 
-        CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
+        CreateWindowEx(WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW,
                        MAKEINTATOM(khm_main_window_class),
                        buf,
                        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | 
@@ -1211,8 +1209,6 @@ khm_show_main_window(void) {
     } else {
         ShowWindow(khm_hwnd_main, khm_nCmdShow);
         UpdateWindow(khm_hwnd_main);
-
-        khm_taskbar_add_window(khm_hwnd_main);
 
         khm_cred_refresh();
     }
@@ -1304,8 +1300,6 @@ khm_hide_main_window(void) {
         khc_close_space(csp_notices);
 
     ShowWindow(khm_hwnd_main, SW_HIDE);
-
-    khm_taskbar_remove_window(khm_hwnd_main);
 }
 
 BOOL 

@@ -170,7 +170,7 @@ void khm_show_newcredwnd(HWND hwnd);
 /* the maximum control ID that may be used by an identity provider */
 #define NC_IS_CTRL_ID_MAX (NC_IS_CTRL_ID_MIN + NC_IS_MAX_CTRLS - 1)
 
-#define NC_WINDOW_EX_STYLES (WS_EX_DLGMODALFRAME | WS_EX_CONTEXTHELP)
+#define NC_WINDOW_EX_STYLES (WS_EX_DLGMODALFRAME | WS_EX_CONTEXTHELP | WS_EX_APPWINDOW)
 #define NC_WINDOW_STYLES    (WS_DLGFRAME | WS_POPUPWINDOW | WS_CLIPCHILDREN)
 
 #define NC_SZ_STEPS_MIN 3
