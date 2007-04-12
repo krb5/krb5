@@ -10,7 +10,7 @@ sub pruneFiles {
     
     # Use Unix find instead of Windows find.  Save PATH so we can restore it when we're done:
     local $savedPATH    = $ENV{PATH};
-    $ENV{PATH}          = $config->{Config}->{unixfind}->{path}.";".$savedPATH;
+    $ENV{PATH}          = $config->{Config}->{unixfind}->{value}.";".$savedPATH;
     local $j=0;
     print "Info -- Processing prunes in ".`cd`."\n"     if ($verbose);
     while ($prunes->{Prune}->[$j]) {
