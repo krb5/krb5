@@ -1,18 +1,18 @@
 <html>
 <head>
-  <title>NetIDMgr Concepts: Identity</title>
+  <title>Network Identity Manager Concepts: Identity</title>
   <meta name="description" content="NetIDMgr Concepts: Identity">
   <meta name="keywords" content="identity,concepts">
   <link rel="stylesheet" type="text/css" href="nidmgr.css">
 </head>
 <body>
 
-<h1>NetIDMgr Concepts: Identity</h1>
+<h1>Network Identity Manager Concepts: Identity</h1>
 
 <p>While there are many approaches to defining what an identity is, as
-far as the NetIDMgr framework is considered, an identity is the unique
-security principal that is identified by a service.  Each credential
-that is managed by NetIDMgr is assumed to map to a unique identity.
+far as the Network Identity Manager (NetIDMgr) is considered, an identity is the unique
+user identifier that is accepted by a network service.  Each credential
+that is managed by NetIDMgr is assumed to map to a single identity.
 The collection of credentials that map to a single identity is
 considered to belong to that identity.
 </p>
@@ -23,16 +23,11 @@ considered to belong to that identity.
 <a name="default_identity" />
 <h3>Default Identity</h3>
 
-<p>The default identity is the identity that will be picked up by
-other applications as being the default.  For example, an application
-that uses Kerberos 5 can use the credentials found in the default
-Kerberos 5 credentials cache.  Therefore, the Kerberos 5 plug-in
-considers the principal that corresponds to the default credentials
-cache as being the default identity.
+<p>The default identity is the identity that will be used by
+applications when a specific identity has not been requested.  
+The Kerberos v5 plug-in will mark the credential cache that 
+contains the default identity as the default credentials
+cache for the current logon session.
 </p>
-
-<p>
-</p>
-
 </body>
 </html>
