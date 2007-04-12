@@ -1490,12 +1490,8 @@ khui_context_refresh(void) {
 
     if (khui_ctx.scope != KHUI_SCOPE_NONE) {
         khui_enable_action(KHUI_ACTION_PROPERTIES, TRUE);
-        khui_enable_action(KHUI_ACTION_DESTROY_CRED, TRUE);
-        khui_enable_action(KHUI_ACTION_RENEW_CRED, TRUE);
     } else {
         khui_enable_action(KHUI_ACTION_PROPERTIES, FALSE);
-        khui_enable_action(KHUI_ACTION_DESTROY_CRED, FALSE);
-        khui_enable_action(KHUI_ACTION_RENEW_CRED, FALSE);
     }
 
     LeaveCriticalSection(&cs_actions);

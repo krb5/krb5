@@ -49,6 +49,7 @@ OBJFILES= 			\
 	$(OBJ)\reqdaemon.obj	\
 	$(OBJ)\addrchange.obj	\
 	$(OBJ)\debugfuncs.obj	\
+	$(OBJ)\taskbar.obj	\
 	$(OBJ)\cfg_general_wnd.obj \
 	$(OBJ)\cfg_identities_wnd.obj \
 	$(OBJ)\cfg_notif_wnd.obj \
@@ -71,7 +72,8 @@ SDKLIBFILES= 			\
 	htmlhelp.lib		\
 	iphlpapi.lib		\
 	shlwapi.lib		\
-	msimg32.lib
+	msimg32.lib		\
+	ole32.lib
 
 $(OBJ)\uiconfig.c: uiconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@

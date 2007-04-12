@@ -93,6 +93,8 @@ khm_pre_shutdown(void) {
     khm_int32 t;
     khm_size s;
 
+    khm_taskbar_remove_window(khm_hwnd_main);
+
     /* Check if we should destroy all credentials on exit... */
 
     if (KHM_FAILED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw)))
@@ -1133,6 +1135,8 @@ khm_set_main_window_mode(int mode) {
         khc_close_space(csp_cw);
 
     }
+
+    khm_cred_refresh();
 }
 
 void 
@@ -1207,6 +1211,10 @@ khm_show_main_window(void) {
     } else {
         ShowWindow(khm_hwnd_main, khm_nCmdShow);
         UpdateWindow(khm_hwnd_main);
+
+        khm_taskbar_add_window(khm_hwnd_main);
+
+        khm_cred_refresh();
     }
 
     khm_nCmdShow = SW_RESTORE;
@@ -1296,6 +1304,8 @@ khm_hide_main_window(void) {
         khc_close_space(csp_notices);
 
     ShowWindow(khm_hwnd_main, SW_HIDE);
+
+    khm_taskbar_remove_window(khm_hwnd_main);
 }
 
 BOOL 

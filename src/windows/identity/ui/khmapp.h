@@ -60,6 +60,7 @@
 #include<configwnd.h>
 #include<aboutwnd.h>
 #include<debugfuncs.h>
+#include<taskbar.h>
 
 #include<reqdaemon.h>
 #include<notifier.h>

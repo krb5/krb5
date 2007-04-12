@@ -90,8 +90,8 @@ khm_krb5_initialize(khm_handle ident,
     return(0);
 #else
 
-    LPCSTR          functionName;
-    int             freeContextFlag;
+    LPCSTR          functionName = NULL;
+    int             freeContextFlag = 0;
     krb5_error_code	rc = 0;
     krb5_flags          flags = 0;
 

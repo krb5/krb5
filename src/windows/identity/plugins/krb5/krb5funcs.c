@@ -1157,21 +1157,93 @@ khm_krb5_renew_ident(khm_handle identity)
     kcdb_identity_get_name(identity, idname, &cb);
 
     if (khm_krb5_get_identity_flags(identity) & K5IDFLAG_IMPORTED) {
-#ifdef REIMPORT_MSLSA_CREDS
+#ifndef NO_REIMPORT_MSLSA_CREDS
         /* we are trying to renew the identity that was imported from
            MSLSA: */
-        BOOL imported;
-        char                cidname[KCDB_IDENT_MAXCCH_NAME];
+        BOOL  imported;
+        BOOL retry_import = FALSE;
+        char  cidname[KCDB_IDENT_MAXCCH_NAME];
+        khm_handle imported_id = NULL;
+        khm_size cb;
+        FILETIME ft_expire;
+        FILETIME ft_now;
+        FILETIME ft_threshold;
+        krb5_principal princ = NULL;
 
         UnicodeStrToAnsi(cidname, sizeof(cidname), idname);
 
-        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, NULL);
+        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, &imported_id);
+
+        if (imported == 0)
+            goto import_failed;
+
+        /* if the imported identity has already expired or will soon,
+           we clear the cache and try again. */
+        khm_krb5_list_tickets(&ctx);
+
+        cb = sizeof(ft_expire);
+        if (KHM_FAILED(kcdb_identity_get_attr(imported_id, KCDB_ATTR_EXPIRE,
+                                              NULL, &ft_expire, &cb)))
+            goto import_failed;
+
+        GetSystemTimeAsFileTime(&ft_now);
+        TimetToFileTimeInterval(5 * 60, &ft_threshold);
+
+        ft_now = FtAdd(&ft_now, &ft_threshold);
+
+        if (CompareFileTime(&ft_expire, &ft_now) < 0) {
+            /* the ticket lifetime is not long enough */
+
+            code = 0;
+
+            if (ctx == NULL)
+                code = pkrb5_init_context(&ctx);
+            if (code)
+                goto import_failed;
+
+            code = pkrb5_cc_resolve(ctx, "MSLSA:", &cc);
+            if (code)
+                goto import_failed;
+
+            code = pkrb5_cc_get_principal(ctx, cc, &princ);
+            if (code)
+                goto import_failed;
+
+            pkrb5_cc_initialize(ctx, cc, princ);
+
+            retry_import = TRUE;
+        }
+
+    import_failed:
+
+        if (imported_id) {
+            kcdb_identity_release(imported_id);
+            imported_id = NULL;
+        }
+
+        if (ctx) {
+            if (cc) {
+                pkrb5_cc_close(ctx, cc);
+                cc = NULL;
+            }
+
+            if (princ) {
+                pkrb5_free_principal(ctx, princ);
+                princ = NULL;
+            }
+
+            /* leave ctx so we can use it later */
+        }
+
+        if (retry_import)
+            imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, NULL);
 
         if (imported)
             goto cleanup;
 
         /* if the import failed, then we try to renew the identity via
            the usual procedure. */
+
 #else
         /* if we are suppressing further imports from MSLSA, we just
            skip renewing this identity. */

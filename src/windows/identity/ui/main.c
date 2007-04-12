@@ -47,7 +47,12 @@ khm_startup_options khm_startup;
 
 const khm_version app_version = {KH_VERSION_LIST};
 
+HRESULT hr_coinitialize = S_OK;
+
 void khm_init_gui(void) {
+
+    hr_coinitialize = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+
     khui_init_actions();
     khui_init_rescache();
     khui_init_menu();
@@ -55,9 +60,11 @@ void khm_init_gui(void) {
     khm_init_notifier();
     khm_init_config();
     khm_init_debug();
+    khm_init_taskbar_funcs();
 }
 
 void khm_exit_gui(void) {
+    khm_exit_taskbar_funcs();
     khm_exit_debug();
     khm_exit_config();
     khm_exit_notifier();
@@ -65,6 +72,11 @@ void khm_exit_gui(void) {
     khui_exit_menu();
     khui_exit_rescache();
     khui_exit_actions();
+
+    if (hr_coinitialize == S_OK ||
+        hr_coinitialize == S_FALSE) {
+        CoUninitialize();
+    }
 }
 
 void khm_parse_commandline(void) {
