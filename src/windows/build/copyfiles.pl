@@ -6,7 +6,7 @@ use Data::Dumper;
 
 sub copyFiles {
     local ($xml, $config)   = @_;
-    local @switches         = $config->{CommandLine}->{Options};
+    local @odr              = $config->{Config};
     local @files            = $xml->{Files};
     # Check for includes:
     if (exists $xml->{Files}->{Include}->{path}) {
@@ -38,7 +38,7 @@ sub copyFiles {
     my $bPathTags    = (exists $xml->{Config}->{DebugArea}) && (exists $xml->{Config}->{ReleaseArea});
     my $bFileStem    = (exists $xml->{Config}->{FileStem});
     
-    if ($switches[0]->{debug}->{value}) {   ## Debug build tags:
+    if ($odr->{debug}->{def}) {   ## Debug build tags:
         $PathFragment       = $xml->{Config}->{DebugArea}->{value};
         $BuildDependentTag  = $xml->{Config}->{DebugTag}->{value};
         $IgnoreTag          = $xml->{Config}->{ReleaseTag}->{value};
@@ -84,7 +84,7 @@ sub copyFiles {
                     $to     =~ s/%filestem%/$FileStemFragment/g;
                     }        
                 # %-DEBUG% substitution:
-                local $DebugFragment    = ($switches[0]->{debug}->{value}) ? "-DEBUG" : "";
+                local $DebugFragment    = ($odr->{debug}->{def}) ? "-DEBUG" : "";
                 $from       =~ s/%\-DEBUG%/$DebugFragment/g;
                 $to         =~ s/%\-DEBUG%/$DebugFragment/g;
                 $to         =~ s/\*.*//;                ## Truncate to path before any wildcard

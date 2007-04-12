@@ -9,7 +9,7 @@ sub signFiles {
     local $template = $signing->{CommandTemplate}->{value};
     # Use Unix find instead of Windows find.  Save PATH so we can restore it when we're done:
     local $savedPATH= $ENV{PATH};
-    $ENV{PATH}      = $config->{CommandLine}->{Directories}->{unixfind}->{path}.";".$savedPATH;
+    $ENV{PATH}      = $config->{Config}->{unixfind}->{value}.";".$savedPATH;
     foreach $expr (split(" ", $exprs)) {            ## exprs is something like "*.exe *.dll"
         local $cmd  = "find . -iname \"$expr\"";
         local $list = `$cmd`;                       ## $list is files matching *.exe, for example.
