@@ -41,7 +41,7 @@
         <svnbranch  def="0" value="" />
         <CVSROOT    def="A" value=":kserver:cvs.mit.edu:/cvs/pismere" />
         <SVNURL     def="A" value="svn.mit.edu" />   <!-- NB:  No protocol or slashes!! -->
-        <USERNAME   def="0" value="" />  <!-- Needed for svn/plink.  Override from command line -->
+        <username   def="0" value="" />  <!-- Needed for svn/plink.  Override from command line -->
 
         <!-- Environment variables: -->>
         <KH_RELEASE def="1" env="1" value="OFFICIAL" options="OFFICIAL PRERELEASE PRIVATE" />

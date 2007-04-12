@@ -270,8 +270,8 @@ sub main {
 
     if (! ($rverb =~ /skip/)) {
         local $len = 0;
-        if (exists $odr->{USERNAME}->{value}) {
-            $len = length $odr->{USERNAME}->{value};
+        if (exists $odr->{username}->{value}) {
+            $len = length $odr->{username}->{value};
             }
         if ($len < 1) {
             die "Fatal -- you won't get far accessing the repository without specifying a username.";
