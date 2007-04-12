@@ -5,6 +5,17 @@
 <meta name="description" content>
 <meta name="keywords" content="configuration">
 <link rel="stylesheet" type="text/css" href="nidmgr.css">
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="Configuration">
+<param name="Keyword" value="General Options">
+<param name="Keyword" value="Appearance Options">
+<param name="Keyword" value="Notification Options">
+<param name="Keyword" value="Plug-in Management">
+<param name="Keyword" value="Kerberos v5 Configuration">
+<param name="Keyword" value="Kerberos v4 Configuration">
+<param name="Keyword" value="Identity Default Configuration">
+<param name="Keyword" value="Identity Configuration">
+</OBJECT>
 <style>
 <!--
  li.MsoNormal
@@ -24,37 +35,9 @@
 <p>All Network Identity Manager configuration options can be accessed via the
 <span class="pre">Options</span> menu. The available configuration panels are:
 </p>
-<p></p>
 <ul>
 	<li>
 	<p><span class="title">General</span>: General application options for NetIDMgr.</p>
-	<ul>
-		<li>
-		<p><span class="title">Obtain new credentials at startup</span>: If checked, 
-		NetIDMgr will check there are initial credentials for the default identity. 
-		If no such credentials are found, NetIDMgr will display a new credentials 
-		dialog.</p>
-		</li>
-		<li>
-		<p><span class="title">Run NetIDMgr in system tray after window close</span>: 
-		If checked, NetIDMgr will continue running in the system notification area 
-		(sometimes referred to as the system tray) after you close the NetIDMgr 
-		window.</p>
-		</li>
-		<li>
-		<p><span class="title">Monitor network connectivity</span>: When changes 
-		to network connectivity are detected, NetIDMgr can notify individual plug-ins 
-		about these changes. Doing so allows each plug-in to respond to the change 
-		by obtaining new credentials etc. If this option is cleared, no such notifications 
-		are sent and the application would not respond to network changes.</p>
-		</li>
-		<li>
-		<p><span class="title">Log trace events</span>: NetIDMgr can generate debugging 
-		information during the course of performing certain actions. This information 
-		aids the developers in fixing problems that you may encounter while using 
-		NetIDMgr.</p>
-		</li>
-	</ul>
 	</li>
 	<li>
 	<p><span class="title">Appearance</span>: Allows you to set the font used by 
@@ -82,6 +65,12 @@
 	<p><span class="title">Plugins</span>: Enable/disable and check the status of 
 	registered plug-ins. Enabling or disabling a plug-in only takes effect after 
 	a restart of NetIDMgr.</p>
+	</li>
+	<li>
+	<p><span class="title">Kerberos v5</span>: Kerberos v5 Credential Provider Configuration</p>
+	</li>
+	<li>
+	<p><span class="title">Kerberos v4</span>: Kerberos v4 Credential Provider Configuration</p>
 	</li>
 </ul>
 <p></p>
