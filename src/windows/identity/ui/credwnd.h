@@ -69,6 +69,8 @@ typedef struct khui_credwnd_outline_t {
 #define KHUI_CW_O_DATAALLOC     0x00000020
 #define KHUI_CW_O_NOOUTLINE     0x00000040
 #define KHUI_CW_O_RELIDENT      0x00000080
+#define KHUI_CW_O_EMPTY         0x00000100
+/* NOTE: KHUI_CW_O_* shares the same bit-space as CW_EXPSTATE_* */
 
 typedef struct khui_credwnd_row_t {
     khm_int32   flags;
@@ -84,6 +86,7 @@ typedef struct khui_credwnd_row_t {
 #define KHUI_CW_ROW_TIMERSET    0x00000008
 #define KHUI_CW_ROW_SELECTED    0x00000010
 #define KHUI_CW_ROW_EXPVIEW     0x00000020
+/* NOTE: KHUI_CW_ROW_* shares the same bit-space as CW_EXPSTATE_* */
 
 /* row allocation */
 /* initial number of rows to be allocated */
@@ -219,15 +222,6 @@ typedef struct khui_credwnd_tbl_t {
     khui_ilist * ilist;     /* image list */
 
     HICON   hi_lg_ident;    /* large identity icon */
-
-#if 0
-    /* icon indices */
-    int idx_expand;         /* index of 'expanded' icon in image list */
-    int idx_expand_hi;      /* index of 'expanded' icon (highlighted) in image list */
-    int idx_collapse;       /* index of 'collapsed' icon in image list */
-    int idx_collapse_hi;    /* index of 'collapsed' icon (highlighted) in image list */
-    int idx_ident;          /* index of 'identity' icon in image list */
-#endif
 
     /* mouse state */
     khm_int32 mouse_state;        /* state of the mouse can be combo of CW_MOUSE_* values */

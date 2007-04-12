@@ -321,6 +321,10 @@ kcdb_credset_collect(khm_handle cs_dest,
     if(c_sel)
         PFREE(c_sel);
 
+    if (cs_dest == NULL) {
+        kcdb_identity_refresh_all();
+    }
+
     return code;
 }
 
@@ -421,6 +425,10 @@ kcdb_credset_collect_filtered(khm_handle cs_dest,
         PFREE(r_sel);
     if(c_sel)
         PFREE(c_sel);
+
+    if (cs_dest == NULL) {
+        kcdb_identity_refresh_all();
+    }
 
     return code;
 }

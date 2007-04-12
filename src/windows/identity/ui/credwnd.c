@@ -1037,8 +1037,7 @@ cw_del_outline(khui_credwnd_outline *o) {
         o->data)
         PFREE(o->data);
 
-    if (((o->flags & KHUI_CW_O_STICKY) ||
-         (o->flags & KHUI_CW_O_RELIDENT)) &&
+    if ((o->flags & KHUI_CW_O_RELIDENT) &&
         o->data)
         kcdb_identity_release((khm_handle) o->data);
 
@@ -1048,6 +1047,7 @@ cw_del_outline(khui_credwnd_outline *o) {
         LPOP(&(o->children), &c);
     }
 
+    ZeroMemory(o, sizeof(*o));
     PFREE(o);
 }
 
@@ -1420,8 +1420,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             continue;
 
         /* if this credential appears to be the same as another for
-           this view, we skip it */
-        if(prevcred) {
+           this view, we skip it. */
+        if(prevcred && n_grouping > 0) {
             for(j=0; j < (int) tbl->n_cols; j++) {
                 if(kcdb_creds_comp_attr(prevcred, thiscred,
                                         tbl->cols[j].attr_id))
@@ -1576,11 +1576,13 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             /* now ol points at the node at level j we want to be
                in */
             ol->start = n_rows;
-            ol->idx_start = i;
             ol->length = 0;
-            ol->flags &= ~CW_EXPSTATE_MASK;
-            ol->flags &= ~KHUI_CW_O_SHOWFLAG;
-            ol->flags &= ~KHUI_CW_O_STICKY;
+            ol->idx_start = i;
+            ol->idx_end = i;
+            ol->flags &= ~(CW_EXPSTATE_MASK |
+                           KHUI_CW_O_SHOWFLAG |
+                           KHUI_CW_O_STICKY |
+                           KHUI_CW_O_EMPTY);
 
             /* if the outline node is for an identity, then we have to
                check the expiration state for the identity. */
@@ -1594,11 +1596,10 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                     ol->flags |= flags;
                     ol->flags |= KHUI_CW_O_SHOWFLAG;
 		    expstate |= flags;
-                }
-
-                /* if we aren't showing any creds under this outline
-                   level, we should also show any flags. */
-                else if (grouping[j] == tbl->n_cols - 1) {
+                } else if (grouping[j] == tbl->n_cols - 1) {
+                    /* if we aren't showing any creds under this
+                       outline level, we should also show any
+                       flags. */
                     ol->flags |= KHUI_CW_O_SHOWFLAG;
                 }
             }
@@ -1629,7 +1630,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         if (ol)
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
 
-        if(visible && grouping[n_grouping - 1] < tbl->n_cols - 1) {
+        if(visible && n_grouping > 0 &&
+           grouping[n_grouping - 1] < tbl->n_cols - 1) {
             khm_int32 c_flags;
 
             cw_set_tbl_row_cred(tbl, n_rows, thiscred, 
@@ -1704,7 +1706,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             if (o == NULL) {
                 o = cw_new_outline_node(idname);
                 LPUSH(&tbl->outline, o);
-                o->flags = KHUI_CW_O_VISIBLE | KHUI_CW_O_RELIDENT;
+                o->flags = KHUI_CW_O_VISIBLE | KHUI_CW_O_RELIDENT | KHUI_CW_O_EMPTY;
                 o->level = 0;
                 o->col = grouping[0];
                 o->data = id_def;
@@ -1725,6 +1727,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             o->start = n_rows;
             o->length = 1;
             o->idx_start = -1;
+            o->idx_end = -1;
 
             if (grouping[0] == tbl->n_cols - 1)
                 o->flags |= KHUI_CW_O_NOOUTLINE;
@@ -1782,27 +1785,32 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 /* found it */
                 if (o->start != -1) /* already visible? */
                     continue;
-                o->flags &= KHUI_CW_O_STICKY | KHUI_CW_O_RELIDENT;
-                o->flags |= KHUI_CW_O_VISIBLE;
+                o->flags &= KHUI_CW_O_RELIDENT;
+                o->flags |= KHUI_CW_O_STICKY | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY;
+
+                if (!kcdb_identity_is_equal(o->data, h)) {
+                    if (o->flags & KHUI_CW_O_RELIDENT)
+                        kcdb_identity_release(o->data);
+                    o->data = h;
+                    o->flags |= KHUI_CW_O_RELIDENT;
+                    kcdb_identity_hold(h);
+                }
             } else {
                 /* not found.  create */
                 o = cw_new_outline_node(idarray[i]);
                 LPUSH(&tbl->outline, o);
-                o->flags = KHUI_CW_O_VISIBLE;
+                o->flags = KHUI_CW_O_STICKY | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY | KHUI_CW_O_RELIDENT;
                 o->level = 0;
                 o->col = grouping[0];
-                o->data = (void *) h;
+                o->data = h;
+                kcdb_identity_hold(h);
                 o->attr_id = KCDB_ATTR_ID;
             }
 
             if (grouping[0] == tbl->n_cols - 1)
                 o->flags |= KHUI_CW_O_NOOUTLINE;
 
-            if (o->flags & KHUI_CW_O_STICKY)
-                kcdb_identity_release(h);
-            else
-                /* leave identity held in this case */
-                o->flags |= KHUI_CW_O_STICKY | KHUI_CW_O_RELIDENT;
+            kcdb_identity_release(h);
 
             o->flags &= ~KHUI_CW_O_EXPAND;
             o->start = n_rows;
@@ -2367,6 +2375,7 @@ cw_draw_header(HDC hdc,
         FillRect(hdc, r, hbr);
     }
 
+    /* draw the background */
     pl = CreatePen(PS_SOLID, 0, tbl->cr_hdr_outline);
     pold = SelectObject(hdc, pl);
     MoveToEx(hdc, r->left, r->bottom - 1, NULL);
@@ -2374,13 +2383,8 @@ cw_draw_header(HDC hdc,
     SelectObject(hdc, pold);
     DeleteObject(pl);
 
-    if (o->flags & KHUI_CW_O_STICKY) {
-        /* khui_ilist_draw_id(tbl->ilist, IDB_TK_NEW_SM, hdc, 
-           r->left, r->bottom - KHUI_SMICON_CY, 0); */
-        if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
-            r->left += KHUI_SMICON_CX * 3 / 2;
-        }
-    } else if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
+    if (!(o->flags & KHUI_CW_O_NOOUTLINE) &&
+        !(o->flags & KHUI_CW_O_EMPTY)) {
         if((tbl->mouse_state & CW_MOUSE_WOUTLINE) && 
            tbl->mouse_row == row) {
             if(o->flags & KHUI_CW_O_EXPAND) {
@@ -2404,6 +2408,8 @@ cw_draw_header(HDC hdc,
             }
         }
 
+        r->left += KHUI_SMICON_CX * 3 / 2;
+    } else if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
         r->left += KHUI_SMICON_CX * 3 / 2;
     }
 
@@ -2437,10 +2443,10 @@ cw_draw_header(HDC hdc,
 
         } else {
             khui_ilist_draw_id(tbl->ilist, 
-                               ((o->flags & KHUI_CW_O_STICKY)?
+                               ((o->flags & KHUI_CW_O_EMPTY)?
                                 IDB_ID_DIS_SM:
                                 IDB_ID_SM), 
-                               hdc, 
+                               hdc,
                                r->left,
                                (r->top + r->bottom - KHUI_SMICON_CY) / 2, 0);
             r->left += KHUI_SMICON_CX * 3 / 2 ;
@@ -3277,8 +3283,9 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             tbl->hwnd_notif = khm_create_htwnd(
                 tbl->hwnd,
                 buf,
-                r.left,r.top,r.right - r.left,(r.bottom - r.top) /2,
-                WS_EX_TRANSPARENT,
+                r.left,r.top,r.right - r.left,tbl->cell_height * 4,
+                0,              /* This can be WS_EX_TRANSPARENT, but
+                                   we don't fully support it yet. */
                 WS_VISIBLE);
             if(tbl->hwnd_notif) {
                 SendMessage(tbl->hwnd_notif, WM_SETFONT, (WPARAM) tbl->hf_normal, (LPARAM) FALSE);
@@ -3316,7 +3323,7 @@ cw_wm_size(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             rect.left,
             tbl->header_height,
             rect.right - rect.left,
-            (rect.bottom - tbl->header_height) / 2,
+            tbl->cell_height * 4,
             0);
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -3327,7 +3334,6 @@ cw_wm_notify(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
     LPNMHDR pnmh;
-
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
     pnmh = (LPNMHDR) lParam;
     if(pnmh->hwndFrom == tbl->hwnd_header) {
@@ -3392,6 +3398,8 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         else if (m->subtype == KMSG_KCDB_IDENT && 
                  m->uparam == KCDB_OP_NEW_DEFAULT) {
 
+            cw_update_outline(tbl);
+            cw_update_extents(tbl, TRUE);
             InvalidateRect(hwnd, NULL, FALSE);
 
         }
@@ -5475,7 +5483,7 @@ khm_create_credwnd(HWND parent) {
         (0,
          MAKEINTATOM(khui_credwnd_cls),
          L"",
-         WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN,
+         WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
          r.left,
          r.top,
          r.right - r.left,

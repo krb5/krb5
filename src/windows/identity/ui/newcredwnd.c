@@ -883,7 +883,12 @@ nc_update_credtext(khui_nc_wnd_data * d)
 
                 need_layout = TRUE;
 
-            } else if (flags & KCDB_IDENT_FLAG_VALID) {
+            } else if ((flags & KCDB_IDENT_FLAG_VALID) ||
+                       d->nc->subtype == KMSG_CRED_PASSWORD) {
+                /* special case: If we are going to change the
+                   password, we don't expect the identity provider to
+                   validate the identity in real time.  As such, we
+                   assume that the identity is valid. */
  
                /* identity is valid */
                 if (d->notif_type != NC_NOTIFY_NONE) {
@@ -1581,6 +1586,8 @@ nc_handle_wm_create(HWND hwnd,
     /* add this to the dialog chain */
     khm_add_dialog(hwnd);
 
+    khm_taskbar_add_window(hwnd);
+
     return TRUE;
 }
 
@@ -1677,6 +1684,8 @@ nc_handle_wm_destroy(HWND hwnd,
 
     /* remove self from dialog chain */
     khm_del_dialog(hwnd);
+
+    khm_taskbar_remove_window(hwnd);
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
 

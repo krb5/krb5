@@ -60,9 +60,9 @@ BEGIN
     CONTROL         "Kerberos v4 Ticket Options",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
     CONTROL         "Obtain Kerberos v4 credentials",IDC_NCK4_OBTAIN,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,26,128,10
     GROUPBOX        "Obtain Kerberos v4 credentials using",IDC_STATIC,7,43,286,72,WS_GROUP
-    CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,23,58,152,10
-    CONTROL         "Kerberos v5 to v4 translation",IDC_NCK4_K524,"Button",BS_AUTORADIOBUTTON,23,76,152,10
-    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,23,94,152,10
+    CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",BS_AUTORADIOBUTTON,22,59,119,10
+    CONTROL         "Kerberos v5 to v4 translation",IDC_NCK4_K524,"Button",BS_AUTORADIOBUTTON,22,76,109,10
+    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,22,93,47,10
 END
 
 IDD_CFG_KRB4 DIALOGEX 0, 0, 255, 182

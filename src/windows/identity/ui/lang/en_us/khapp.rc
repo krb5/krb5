@@ -8,7 +8,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -34,13 +33,12 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\r\0"
+    "#include ""afxres.h\0"
 END
 
 3 TEXTINCLUDE 
 BEGIN
-    "\r\n"
-    "\0"
+    "\r\0"
 END
 
 #endif    // APSTUDIO_INVOKED
@@ -588,7 +586,7 @@ BEGIN
     IDS_ACTION_HELP_ABOUT   "About Network Identity Manager"
     IDS_CFG_GENERAL_LONG    "General options"
     IDS_SAMPLE_STRING       "Wxy"
-    IDS_NO_CREDS            "<large><center>You currently have no credentials.Click <a id=""NewCreds"">here</a> to obtain new credentials.</center></large>"
+    IDS_NO_CREDS            "<large><p align=""center"">You currently have no credentials.</p><p align=""center"">Click <a id=""NewCreds"">here</a> to obtain new credentials.</p></large>"
     IDS_WT_INIT_CREDS       "Obtain initial credentials"
     IDS_WT_NEW_CREDS        "Obtain new credentials"
 END

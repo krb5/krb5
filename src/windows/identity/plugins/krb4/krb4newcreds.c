@@ -55,33 +55,25 @@ typedef struct tag_k4_dlg_data {
     time_t           lifetime;
 } k4_dlg_data;
 
-void k4_update_display(k4_dlg_data * d) {
-    int i;
-
+void k4_update_display(k4_dlg_data * d, BOOL update_methods) {
     CheckDlgButton(d->hwnd, IDC_NCK4_OBTAIN,
                    (d->k4_enabled)?BST_CHECKED: BST_UNCHECKED);
 
     if (d->k4_enabled) {
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_AUTO), TRUE);
-        EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_PWD ), TRUE);
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_K524), TRUE);
+        EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_PWD ), TRUE);
     } else {
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_AUTO), FALSE);
-        EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_PWD ), FALSE);
         EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_K524), FALSE);
+        EnableWindow(GetDlgItem(d->hwnd, IDC_NCK4_PWD ), FALSE);
     }
 
 #ifdef DEBUG
     assert(d->method >= 0 && d->method < ARRAYLENGTH(method_to_id));
 #endif
 
-    CheckDlgButton(d->hwnd, method_to_id[d->method], BST_CHECKED);
-
-    for (i=0; i < ARRAYLENGTH(method_to_id); i++) {
-        if (i != d->method && method_to_id[i] != 0)
-            CheckDlgButton(d->hwnd, method_to_id[d->method],
-                           BST_UNCHECKED);
-    }
+    CheckRadioButton(d->hwnd, IDC_NCK4_AUTO, IDC_NCK4_PWD, method_to_id[d->method]);
 
     khui_cw_enable_type(d->nc, credtype_id_krb4, d->k4_enabled);
 }
@@ -103,7 +95,7 @@ void k4_update_data(k4_dlg_data * d) {
         khui_cw_enable_type(d->nc, credtype_id_krb4, d->k4_enabled);
     }
 
-    d->method = 0;
+    d->method = K4_METHOD_AUTO;
 
     for (i=K4_METHOD_AUTO; i<=K4_METHOD_K524; i++) {
         if (IsDlgButtonChecked(d->hwnd, method_to_id[i]) == BST_CHECKED) {
@@ -119,19 +111,16 @@ khm_boolean k4_should_identity_get_k4(khm_handle ident) {
     khm_handle csp_ident = NULL;
     khm_handle csp_k4 = NULL;
     khm_boolean get_k4 = TRUE;
-
-    if (KHM_SUCCEEDED(khc_read_int32(csp_params, L"Krb4NewCreds", &t)) &&
-        !t)
-        return FALSE;
+    khm_boolean id_spec = FALSE;
 
     if (KHM_FAILED(kcdb_identity_get_flags(ident, &idflags)))
         return FALSE;
 
     if (!(idflags & KCDB_IDENT_FLAG_DEFAULT)) {
         /* we only support k4 for one identity, and that is the
-           default identity.  If we are trying to get tickets for
-           a non-default identity, then we start off as
-           disabled. */
+           default identity.  If we are trying to get tickets for a
+           non-default identity, then we start off as disabled unless
+           there is no default identity. */
 
         khm_handle defident = NULL;
 
@@ -146,16 +135,27 @@ khm_boolean k4_should_identity_get_k4(khm_handle ident) {
         if (KHM_SUCCEEDED(khc_open_space(csp_ident, CSNAME_KRB4CRED, 0,
                                          &csp_k4))) {
             khm_int32 t = 0;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_k4, L"Krb4NewCreds", &t)) &&
-                !t)
-                get_k4 = FALSE;
+
+            if (KHM_SUCCEEDED(khc_read_int32(csp_k4, L"Krb4NewCreds", &t))) {
+                get_k4 = !!t;
+                id_spec = TRUE;
+            }
 
             khc_close_space(csp_k4);
         }
         khc_close_space(csp_ident);
     }
 
-    return get_k4;
+    /* if there was a value specified for the identity, then that
+       takes precedence. */
+    if (id_spec || !get_k4)
+        return get_k4;
+
+    if (KHM_SUCCEEDED(khc_read_int32(csp_params, L"Krb4NewCreds", &t)) &&
+        !t)
+        return FALSE;
+
+    return TRUE;
 }
 
 void k4_read_identity_data(k4_dlg_data * d) {
@@ -257,8 +257,9 @@ void k4_handle_wmnc_notify(k4_dlg_data * d,
 
                 kcdb_identity_get_flags(d->nc->identities[0], &flags);
 
-                if (flags & KCDB_IDENT_FLAG_INVALID)
+                if (!(flags & KCDB_IDENT_FLAG_VALID)) {
                     break;
+                }
 
                 cb = sizeof(idname);
                 kcdb_identity_get_name(d->nc->identities[0], idname,
@@ -321,7 +322,7 @@ void k4_handle_wmnc_notify(k4_dlg_data * d,
 
     case WMNC_IDENTITY_CHANGE:
         k4_read_identity_data(d);
-        k4_update_display(d);
+        k4_update_display(d, TRUE);
         break;
 
     case WMNC_CREDTEXT_LINK:
@@ -343,7 +344,7 @@ void k4_handle_wmnc_notify(k4_dlg_data * d,
             if (!wcscmp(wids, L"Enable")) {
                 d->k4_enabled = TRUE;
 
-                k4_update_display(d);
+                k4_update_display(d, TRUE);
                 khui_cw_enable_type(d->nc, credtype_id_krb4, TRUE);
             }
         }
@@ -378,17 +379,24 @@ INT_PTR CALLBACK k4_nc_dlg_proc(HWND hwnd,
             d->k4_enabled = TRUE;
             d->method = K4_METHOD_AUTO;
 
-            k4_update_display(d);
+            k4_update_display(d, TRUE);
         }
         break;
 
     case WM_COMMAND:
         {
-            d = (k4_dlg_data *) (LONG_PTR)
-                GetWindowLongPtr(hwnd, DWLP_USER);
+            if (HIWORD(wParam) == BN_CLICKED) {
+                d = (k4_dlg_data *) (LONG_PTR)
+                    GetWindowLongPtr(hwnd, DWLP_USER);
 
-            k4_update_data(d);
-            k4_update_display(d);
+                k4_update_data(d);
+
+                if (LOWORD(wParam) == IDC_NCK4_OBTAIN) {
+                    k4_update_display(d, TRUE);
+                }
+
+                return TRUE;
+            }
         }
         break;
 

@@ -94,7 +94,7 @@ htw_size_table[] = {
 
 htw_align_table[] = {
     {L"left", ALIGN_LEFT},
-    {L"center", ALIGN_LEFT},
+    {L"center", ALIGN_CENTER},
     {L"right", ALIGN_RIGHT}
 };
 
@@ -661,9 +661,10 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         DrawEdge(hdc, &r, EDGE_SUNKEN, BF_ADJUST | BF_RECT | BF_FLAT);
 #endif
 
-    hbk = CreateSolidBrush(RGB(255,255,255));
+    hbk = GetSysColorBrush(COLOR_WINDOW);
     FillRect(hdc, &r, hbk);
-    DeleteObject(hbk);
+    hbk = NULL;                 /* We don't need to destroy system
+                                   brushes */
 
     /* push the default format */
     format_init(&s_stack);
@@ -671,7 +672,7 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     d->l_pixel_y = GetDeviceCaps(hdc, LOGPIXELSY);
     format_push(&s_stack,d, -MulDiv(HTW_NORMAL_SIZE, d->l_pixel_y, 72), FV_NONE, RGB(0,0,0));
 
-    y = d->scroll_top + r.top;
+    y = r.top - d->scroll_top;
 
     par_start = text;
 
@@ -732,10 +733,15 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         x = r.left - d->scroll_left;
 
-        if(align == ALIGN_CENTER)
-            x += (r.right - r.left)/2 - p_width / 2;
-        else if(align == ALIGN_RIGHT)
-            x += (r.right - r.left) - p_width;
+        if(align == ALIGN_CENTER) {
+            if (r.right - r.left > p_width)
+                x += (r.right - r.left)/2 - p_width / 2;
+        }
+
+        else if(align == ALIGN_RIGHT) {
+            if (r.right - r.left > p_width)
+                x += (r.right - r.left) - p_width;
+        }
 
         /* begin wet run */
         p = par_start;
@@ -743,7 +749,7 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         p_width = 0;
 
-        while(*p) {
+        while(p && *p) {
             if(*p == L'<') {
                 int talign = -1;
                 int n;
@@ -766,7 +772,7 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     align = talign;
             } else {
                 HFONT hfold;
-                RECT rd,rt;
+                RECT rd;
 
                 c = wcschr(p, L'<');
                 if(!c)
@@ -777,15 +783,13 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 SetTextColor(hdc, format_color(&s_stack));
 
                 GetTextExtentPoint32(hdc, p, (int)(c - p), &s);
-                rd.left = x + p_width - d->scroll_left;
-                rd.top = y - d->scroll_top;
-                rd.right = x + p_width + s.cx - d->scroll_left;
-                rd.bottom = y + l_height - d->scroll_top;
+                rd.left = x + p_width;
+                rd.top = y;
+                rd.right = rd.left + s.cx;
+                rd.bottom = rd.top + l_height;
 
-                if(IntersectRect(&rt, &rd, &r)) {
-                    DrawText(hdc, p, (int)(c - p), &rd,
-                             DT_BOTTOM | DT_LEFT | DT_SINGLELINE | DT_NOPREFIX);
-                }
+                DrawText(hdc, p, (int)(c - p), &rd,
+                         DT_BOTTOM | DT_LEFT | DT_SINGLELINE | DT_NOPREFIX);
 
                 p_width += s.cx;
 
@@ -994,18 +998,39 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
     case WM_ERASEBKGND:
         {
+            HDC hdc = (HDC) wParam;
             khui_htwnd_data * d;
+            HBRUSH hbr;
+            RECT r;
+
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
 
-            if(d->flags & KHUI_HTWND_TRANSPARENT)
-                return TRUE;
+            GetClientRect(hwnd, &r);
+            hbr = GetSysColorBrush(COLOR_WINDOW);
+            FillRect(hdc, &r, hbr);
 
-            return FALSE;
+            /* no need to destroy the brush since it's a system
+               brush. */
+
+            return TRUE;
         }
+
+    case WM_SIZE:
+        {
+            khui_htwnd_data * d;
+
+            d = (khui_htwnd_data *) (LONG_PTR) GetWindowLongPtr(hwnd, 0);
+
+            if (d) {
+                d->ext_width = 0;
+                d->ext_height = 0;
+            }
+        }
+        return 0;
 
     case WM_PAINT:
         htw_paint(hwnd, uMsg, wParam, lParam);
-        break;
+        return 0;
 
     case WM_SETCURSOR:
         {
@@ -1088,9 +1113,17 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             old_pos = new_pos = d->scroll_left;
             ext = d->ext_width;
 
-            switch(HIWORD(wParam)) {
-            case SB_THUMBTRACK:
+            switch(LOWORD(wParam)) {
             case SB_THUMBPOSITION:
+            case SB_ENDSCROLL:
+                ZeroMemory(&si, sizeof(si));
+                si.cbSize = sizeof(si);
+                si.fMask = SIF_POS;
+                GetScrollInfo(hwnd, SB_HORZ, &si);
+                new_pos = si.nPos;
+                break;
+
+            case SB_THUMBTRACK:
                 ZeroMemory(&si, sizeof(si));
                 si.cbSize = sizeof(si);
                 si.fMask = SIF_TRACKPOS;
@@ -1122,12 +1155,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
             GetClientRect(hwnd, &r);
 
-#if 0
             if (new_pos > ext - (r.right - r.left))
                 new_pos = ext - (r.right - r.left);
-#endif
-            if (new_pos > ext)
-                new_pos = ext;
 
             if (new_pos < 0)
                 new_pos = 0;
@@ -1180,13 +1209,15 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
             if(d->active_link != nl) {
                 if(d->active_link >= 0) {
-                    if(d->flags & KHUI_HTWND_TRANSPARENT)
-                        {
-                            HWND parent = GetParent(hwnd);
-                            if(parent) {
-                                InvalidateRect(parent, NULL, TRUE);
-                            }
+                    if(d->flags & KHUI_HTWND_TRANSPARENT) {
+                        HWND parent = GetParent(hwnd);
+                        if(parent) {
+                            RECT rdest = d->links[d->active_link]->r;
+
+                            MapWindowPoints(hwnd, parent, (LPPOINT) &rdest, 2);
+                            InvalidateRect(parent, &rdest, TRUE);
                         }
+                    }
                     /* although we are invalidating the rect before setting active_link,
                        WM_PAINT will not be issued until wndproc returns */
                     InvalidateRect(hwnd, &(d->links[d->active_link]->r), TRUE);
@@ -1195,13 +1226,15 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
                 if(d->active_link >= 0) {
                     /* although we are invalidating the rect before setting active_link,
                        WM_PAINT will not be issued until wndproc returns */
-                    if(d->flags & KHUI_HTWND_TRANSPARENT)
-                        {
-                            HWND parent = GetParent(hwnd);
-                            if(parent) {
-                                InvalidateRect(parent, NULL, TRUE);
-                            }
+                    if(d->flags & KHUI_HTWND_TRANSPARENT) {
+                        HWND parent = GetParent(hwnd);
+                        if(parent) {
+                            RECT rdest = d->links[d->active_link]->r;
+
+                            MapWindowPoints(hwnd, parent, (LPPOINT) &rdest, 2);
+                            InvalidateRect(parent, &rdest, TRUE);
                         }
+                    }
                     InvalidateRect(hwnd, &(d->links[d->active_link]->r), TRUE);
                 }
             }
