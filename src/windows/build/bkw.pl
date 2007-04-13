@@ -546,6 +546,12 @@ sub main {
             signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
             }
             
+        # Create working directories for building the installers:
+        if (-d "$wd\\buildwix")    {!system("rm -rf $wd\\buildwix/*")               or die "Fatal -- Couldn't clean $wd\\buildwix."}    
+        !system("echo D | xcopy /s $wd\\staging\\install\\wix\\*.* $wd\\buildwix")  or die "Fatal -- Couldn't create $wd\\buildwix.";
+        if (-d "$wd\\buildnsi")    {!system("rm -rf $wd\\buildnsi/*")               or die "Fatal -- Couldn't clean $wd\\buildnsi."}    
+        !system("echo D | xcopy /s $wd\\staging\\install\\nsis\\*.* $wd\\buildnsi") or die "Fatal -- Couldn't create $wd\\buildnsi.";
+
         chdir("$staging\\install\\wix") or die "Fatal -- Couldn't cd to $staging\\install\\wix";
         print "Info -- chdir to ".`cd`."\n"     if ($verbose);
         # Correct errors in files.wxi:
@@ -575,19 +581,17 @@ sub main {
         !system("echo /\^!define\.\*BETA\.\*\$/d >> $tmpfile")              or die "Fatal -- Couldn't modify $tmpfile.";    
 
         # Run the script on site-local.wxi:
-        !system("sed -f $tmpfile site-local-tagged.wxi > site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
-        !system("rm site-local-tagged.wxi")                                 or die "Fatal -- Couldn't remove site-local-tagged.wsi.";
+        !system("sed -f $tmpfile site-local-tagged.wxi > $wd\\buildwix\\site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
 
         # Now update site-local.nsi:
         chdir "..\\nsis";
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
-        !system("rm site-local-tagged.nsi")                                 or die "Fatal -- Couldn't remove site-local-tagged.nsi.";
         # Add DEBUG or RELEASE:
         if ($odr->{debug}->{def}) {                               ## debug build
             !system("echo !define DEBUG >> b.tmp")                          or die "Fatal -- Couldn't modify b.tmp.";    
             }
-        else {                                                              ## release build
+        else {                                                    ## release build
             if (!exists $config->{Versions}->{'BETA_STR'}) {!system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";}
             !system("echo !define NO_DEBUG >> b.tmp")                       or die "Fatal -- Couldn't modify b.tmp.";    
             }
@@ -596,40 +600,35 @@ sub main {
             !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
             !system("echo !define NOT_RELEASE >> b.tmp")                            or die "Fatal -- Couldn't modify b.tmp.";    
             }
-        !system("mv -f b.tmp site-local.nsi")                               or die "Fatal -- Couldn't replace site-local.nsi.";
+        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
 
         # Run the script on nsi-includes-tagged.nsi:
-        !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
-        !system("rm nsi-includes-tagged.nsi")                               or die "Fatal -- Couldn't remove nsi-includes-tagged.nsi.";
+        !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
         !system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
 
         if ($verbose) {print "Info -- ***   End prepackage.\n";}
         
         if ($verbose) {print "Info -- *** Begin package.\n";}
         # Make the msi:
-        if (-d "$wd\\buildwix")    {!system("rm -rf $wd\\buildwix/*")   or die "Fatal -- Couldn't clean $wd\\buildwix."}    
-        !system("echo D | xcopy /s $wd\\staging\\*.* $wd\\buildwix")    or die "Fatal -- Couldn't create $wd\\buildwix.";
-        chdir("$wd\\buildwix\\install\\wix") or die "Fatal -- Couldn't cd to $wd\\buildwix\\install\\wix";
+        chdir("$wd\\buildwix")                      or die "Fatal -- Couldn't cd to $wd\\buildwix";
         print "Info -- *** Make .msi:\n"            if ($verbose);
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         !system("$MAKE")                            or die "Error -- msi installer build failed.";
                 
-        if (-d "$wd\\buildnsi")    {!system("rm -rf $wd\\buildnsi/*")   or die "Fatal -- Couldn't clean $wd\\buildnsi."}    
-        !system("echo D | xcopy /s $wd\\staging\\*.* $wd\\buildnsi")    or die "Fatal -- Couldn't create $wd\\buildnsi.";
-        chdir("$wd\\buildnsi\\install\\nsis") or die "Fatal -- Couldn't cd to $wd\\buildnsi\\install\\nsis";
-        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+        chdir("$wd\\buildnsi")                      or die "Fatal -- Couldn't cd to $wd\\buildnsi";
         print "Info -- *** Make NSIS:\n"            if ($verbose);
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         !system("cl.exe killer.cpp advapi32.lib")   or die "Error -- nsis killer.exe not built.";
         !system("rename killer.exe Killer.exe")     or die "Error -- Couldn't rename killer.exe";
         !system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
 
-        chdir("$wd") or die "Fatal -- Couldn't cd to $wd";
+        chdir("$wd")                                or die "Fatal -- Couldn't cd to $wd";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        !system("xcopy /s $wd\\buildwix\\*.msi $wd\\staging")   or die "Fatal -- Couldn't copy $wd\\buildwix\\*.msi.";
-        !system("del $wd\\buildnsi\\install\\nsis\\killer.exe") or die "Fatal -- Couldn't clean $wd\\buildnsi\\install\\nsis\\killer.exe.";
-        !system("xcopy /s $wd\\buildnsi\\install\\nsis\\*.exe $wd\\staging\\install\\nsis")   or die "Fatal -- Couldn't copy $wd\\buildnsi\\install\\nsis\\*.exe.";
-        !system("rm -rf $wd\\buildwix")             or die "Fatal -- Couldn't remove $wd\\buildwix.";
-        !system("rm -rf $wd\\buildnsi")             or die "Fatal -- Couldn't remove $wd\\buildnsi.";
+        !system("xcopy /s $wd\\buildwix\\*.msi $wd\\staging\\install\\wix")     or die "Fatal -- Couldn't copy $wd\\buildwix\\*.msi.";
+        !system("del $wd\\buildnsi\\killer.exe")    or die "Fatal -- Couldn't clean $wd\\buildnsi\\killer.exe.";
+        !system("xcopy /s $wd\\buildnsi\\*.exe $wd\\staging\\install\\nsis")    or die "Fatal -- Couldn't copy $wd\\buildnsi\\install\\nsis\\*.exe.";
+        !system("rm -rf $wd\\buildwix")            or die "Fatal -- Couldn't remove $wd\\buildwix.";
+        !system("rm -rf $wd\\buildnsi")            or die "Fatal -- Couldn't remove $wd\\buildnsi.";
 
 # Begin packaging extra items:
         zipXML($config->{Stages}->{PostPackage}, $config);                      ## Make zips.
