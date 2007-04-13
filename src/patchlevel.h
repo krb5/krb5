@@ -55,4 +55,4 @@
 #define KRB5_PATCHLEVEL 1
 #define KRB5_RELTAIL "beta1"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "tags/krb5-1-6-1-beta1 "
+#define KRB5_RELTAG "tags/krb5-1-6-1-beta1"
