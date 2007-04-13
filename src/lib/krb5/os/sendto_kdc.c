@@ -497,6 +497,7 @@ krb5int_cm_call_select (const struct select_state *in,
     e = getcurtime(&now);
     if (e)
 	return e;
+try_again:
     if (out->end_time.tv_sec == 0)
 	timo = 0;
     else {
@@ -527,8 +528,11 @@ krb5int_cm_call_select (const struct select_state *in,
     else
 	dprint(":%F\n", &out->rfds, &out->wfds, &out->xfds, out->max);
 
-    if (*sret < 0)
+    if (*sret < 0) {
+	if (e == EINTR)
+	    goto try_again;
 	return e;
+    }
     return 0;
 }
 
