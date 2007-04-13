@@ -1282,6 +1282,23 @@ krb5_get_init_creds(krb5_context context,
     ret = 0;
 
 cleanup:
+    if (ret != 0) {
+	char *client_name;
+	/* See if we can produce a more detailed error message.  */
+	switch (ret) {
+	case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN:
+	    client_name = NULL;
+	    if (krb5_unparse_name(context, client, &client_name) == 0) {
+		krb5_set_error_message(context, ret,
+				       "Client '%s' not found in Kerberos database",
+				       client_name);
+		free(client_name);
+	    }
+	    break;
+	default:
+	    break;
+	}
+    }
     krb5_preauth_request_context_fini(context);
     if (encoded_previous_request != NULL) {
 	krb5_free_data(context, encoded_previous_request);
