@@ -506,7 +506,6 @@ krb5int_cm_call_select (const struct select_state *in,
     e = getcurtime(&now);
     if (e)
 	return e;
-try_again:
     if (out->end_time.tv_sec == 0)
 	timo = 0;
     else {
@@ -537,11 +536,8 @@ try_again:
     else
 	dprint(":%F\n", &out->rfds, &out->wfds, &out->xfds, out->max);
 
-    if (*sret < 0) {
-	if (e == EINTR)
-	    goto try_again;
+    if (*sret < 0)
 	return e;
-    }
     return 0;
 }
 
@@ -1049,9 +1045,14 @@ service_fds (struct select_state *selstate,
     int e, selret;
 
     e = 0;
-    while (selstate->nfds > 0
-	   && (e = krb5int_cm_call_select(selstate, seltemp, &selret)) == 0) {
+    while (selstate->nfds > 0) {
 	int i;
+
+	e = krb5int_cm_call_select(selstate, seltemp, &selret);
+	if (e == EINTR)
+	    continue;
+	if (e != 0)
+	    break;
 
 	dprint("service_fds examining results, selret=%d\n", selret);
 
