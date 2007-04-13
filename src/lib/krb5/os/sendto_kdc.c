@@ -397,7 +397,8 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     if (addrs.naddrs > 0) {
         retval = krb5int_sendto (context, message, &addrs, 0, reply, 0, 0,
 								 0, 0, &addr_used);
-        if (retval == 0) {
+	switch (retval) {
+	case 0:
             /*
              * Set use_master to 1 if we ended up talking to a master when
              * we didn't explicitly request to
@@ -415,7 +416,15 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
             }
             krb5int_free_addrlist (&addrs);
             return 0;
-        }
+	default:
+	    break;
+	    /* Cases here are for constructing useful error messages.  */
+	case KRB5_KDC_UNREACH:
+	    krb5_set_error_message(context, retval,
+				   "Cannot contact any KDC for realm '%.*s'",
+				   realm->length, realm->data);
+	    break;
+	}
         krb5int_free_addrlist (&addrs);
     }
     return retval;
