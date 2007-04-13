@@ -2,7 +2,7 @@
 <!-- BKW: Build Kerberos for Windows -->
 <BKW_Config>
     <Config>
-        <!-- All the parameters are specified here.  They can be over-ridden
+        <!-- All the parameters are specified here.  Most can be over-ridden
                 on the command line.
 
             Parameters are grouped into Options, Directories, Repository and Environment.
@@ -46,7 +46,6 @@
         <!-- Environment variables: -->>
         <KH_RELEASE def="1" env="1" value="OFFICIAL" options="OFFICIAL PRERELEASE PRIVATE" />
         <NODEBUG    def="1" env="1" />  <!-- Interacts with /DEBUG -->
-        
         </Config>
     <Stages>
         <FetchSources>
