@@ -403,9 +403,9 @@ setup_sam(void)
 void
 usage(char *name)
 {
-    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname] [-R replaycachename ]\n\t[-m] [-k masterenctype] [-M masterkeyname] [-p port] [-4 v4mode] [-X] [-n]\n"
-	    "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
-	    "\t\t\tLook at each database documentation for supported arguments\n",
+    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-4 v4mode] [-X] [-n]\n"
+	    "\nwhere,\n\t[-x db_args]* - Any number of database specific arguments.  Look at\n"
+	    "\t\t\teach database module documentation for supported\n\t\t\targuments\n",
 	    name);
     return;
 }
