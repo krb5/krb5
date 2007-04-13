@@ -491,9 +491,11 @@ sub main {
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         local $dbgswitch = ($odr->{debug}->{def}) ? " " : "NODEBUG=1";
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_OFFICIAL=1")    or die "Fatal -- build $buildtarget failed.";
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_KFW=1 BUILD_OFFICIAL=1 DEBUG_SYMBOL=1")
+            or die "Fatal -- build $buildtarget failed.";
             
-        chdir("$wd")               or die "Fatal -- couldn't chdir to $wd.";
+        chdir("$wd")                        or die "Fatal -- couldn't chdir to $wd.";
+        print "Info -- chdir to ".`cd`."\n" if ($verbose);
         if ($clean) {
             if (-d "staging") {
                 !system("rm -rf staging")   or die "Fatal -- Couldn't remove $wd\\staging.";
@@ -588,17 +590,15 @@ sub main {
         print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
         # Add DEBUG or RELEASE:
-        if ($odr->{debug}->{def}) {                               ## debug build
-            !system("echo !define DEBUG >> b.tmp")                          or die "Fatal -- Couldn't modify b.tmp.";    
+        if ($odr->{debug}->{def}) {                    ## debug build
+            !system("echo !define DEBUG >> b.tmp")     or die "Fatal -- Couldn't modify b.tmp.";    
             }
-        else {                                                    ## release build
-            if (!exists $config->{Versions}->{'BETA_STR'}) {!system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";}
-            !system("echo !define NO_DEBUG >> b.tmp")                       or die "Fatal -- Couldn't modify b.tmp.";    
+        else {                                         ## release build
+            !system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";
             }
         # Add BETA if present:
         if (exists $config->{Versions}->{'BETA_STR'}) {
             !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
-            !system("echo !define NOT_RELEASE >> b.tmp")                            or die "Fatal -- Couldn't modify b.tmp.";    
             }
         !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
 
