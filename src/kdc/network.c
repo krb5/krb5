@@ -1,7 +1,7 @@
 /*
  * kdc/network.c
  *
- * Copyright 1990,2000 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
