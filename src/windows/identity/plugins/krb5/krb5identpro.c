@@ -461,7 +461,7 @@ ui_cb(khui_new_creds * nc,
                 (L"COMBOBOX",
                  L"",
                  CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | 
-                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL,
                  0, 0, 100, 100, /* bogus values */
                  hw_parent,
                  (HMENU) K5_NCID_UN,
@@ -502,7 +502,7 @@ ui_cb(khui_new_creds * nc,
                 (L"COMBOBOX",
                  L"",
                  CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | 
-                 WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+                 WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL,
                  0, 0, 100, 100, /* bogus */
                  hw_parent,
                  (HMENU) K5_NCID_REALM,
