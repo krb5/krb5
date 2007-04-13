@@ -121,12 +121,13 @@
           <File name="gss.exe"              from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="comerr32.dll"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="netiddev.chm"         from="..\target\bin\i386\%bldtype%\"                            to="\doc" />
-          <File name="NetIddev.chm"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\doc\"   to="\doc" newname="netiddev.chm" />
+<!-- why copy twice?          <File name="NetIddev.chm"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\doc\"   to="\doc" newname="netiddev.chm" /> -->
 
         <!-- Build-INdependent files, always copied: -->
         <File name="relnotes.html"          from="..\doc\kerberos\"                                         to="\doc" />
         <File name="leash_userdoc.pdf"      from="auth\leash\help\"                                         to="\doc" />
         <File name="NetIdMgr.pdf"           from="auth\krb5\src\windows\identity\doc\"                      to="\doc" newname="netidmgr_userdoc.pdf" />
+        <File name="msi-deployment-guide.txt" from="auth\krb5\src\windows\installer\wix\"   to="\doc" />
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\"            to="\sample\templates\credprov\" />
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\images\"     to="\sample\templates\credprov\images" />
         <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\lang\"       to="\sample\templates\credprov\lang" />
