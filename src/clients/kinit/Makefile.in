@@ -12,15 +12,25 @@ SRCS=kinit.c
 ##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows
 ##WIN32##DEFINES=-DGETOPT_LONG
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KINIT=$(OUTPRE)kinit.exe
+
+##WIN32##EXERES=$(KINIT:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKINIT_APP -fo $@ -r $**
+
 all-unix:: kinit
-all-windows:: $(OUTPRE)kinit.exe
+##WIN32##all-windows:: $(KINIT)
 
 kinit: kinit.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kinit.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)kinit.exe: $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(KINIT): $(OUTPRE)kinit.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** advapi32.lib
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kinit.o kinit
