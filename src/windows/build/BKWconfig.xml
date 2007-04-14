@@ -43,7 +43,7 @@
         <SVNURL     def="A" value="svn.mit.edu" />   <!-- NB:  No protocol or slashes!! -->
         <username   def="0" value="" />  <!-- Needed for svn/plink.  Override from command line -->
 
-        <!-- Environment variables: -->>
+        <!-- Environment variables: -->
         <KH_RELEASE def="1" env="1" value="OFFICIAL" options="OFFICIAL PRERELEASE PRIVATE" />
         <NODEBUG    def="1" env="1" />  <!-- Interacts with /DEBUG -->
         </Config>
@@ -164,16 +164,16 @@
                         </Prunes>
                     </Zip>
                 </Zips>            
-            <CopyList>            <!-- Copied at end of post-package step.    -->
+            <CopyList>            <!-- Copied at end of post-package step.  -->
                 <Files>
                     <File dummy="foo" />
-                    <!-- File from    paths are relative to <src>/pismere.    -->
-                    <!-- File to      paths are relative to <out>.            -->
+                    <!-- File from    paths are relative to <src/pismere>.  -->
+                    <!-- File to      paths are relative to <out>.          -->
                     <File name="msi-deployment-guide.txt"   from="staging\install\wix\" to="" />
-                    <File name="netidmgr_userdoc.pdf"       from="staging\doc"          to="." />
-                    <File name="kfw.msi"                    from="staging\install\wix\" to="" newname="%filestem%.msi" />
-                    <File name="MITKerberosForWindows%-DEBUG%.exe" from="staging\install\nsis" to="" newname="%filestem%%-DEBUG%.exe" />
-                    <File name="relnotes.html"              from="staging\doc"          to="." />
+                    <File name="netidmgr_userdoc.pdf"       from="staging\doc"          to="" />
+                    <File name="kfw.msi"                    from="buildwix"             to="" newname="%filestem%.msi" />
+                    <File name="MITKerberosForWindows%-DEBUG%.exe" from="buildnsi"      to="" newname="%filestem%%-DEBUG%.exe" />
+                    <File name="relnotes.html"              from="staging\doc"          to="" />
                     </Files>
                 </CopyList>
             </PostPackage>

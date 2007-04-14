@@ -245,7 +245,7 @@ sub main {
     # Test the unix find command:
     if (! exists $odr->{unixfind}->{value})    {
         $odr->{unixfind}->{value}   = "C:\\tools\\cygwin\\bin";
-        }
+         }
     local $unixfind     = $odr->{unixfind}->{value};
 
     local $savedPATH    = $ENV{PATH};
@@ -629,23 +629,22 @@ sub main {
         !system("rename killer.exe Killer.exe")     or die "Error -- Couldn't rename killer.exe";
         !system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
 
-        chdir("$wd")                                or die "Fatal -- Couldn't cd to $wd";
-        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        !system("xcopy /s $wd\\buildwix\\*.msi $wd\\staging\\install\\wix")     or die "Fatal -- Couldn't copy $wd\\buildwix\\*.msi.";
-        !system("del $wd\\buildnsi\\killer.exe")    or die "Fatal -- Couldn't clean $wd\\buildnsi\\killer.exe.";
-        !system("xcopy /s $wd\\buildnsi\\*.exe $wd\\staging\\install\\nsis")    or die "Fatal -- Couldn't copy $wd\\buildnsi\\install\\nsis\\*.exe.";
-        !system("rm -rf $wd\\buildwix")            or die "Fatal -- Couldn't remove $wd\\buildwix.";
-        !system("rm -rf $wd\\buildnsi")            or die "Fatal -- Couldn't remove $wd\\buildnsi.";
-
 # Begin packaging extra items:
+        chdir($wd)                                  or die "Fatal -- Couldn't cd to $wd";
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+
         zipXML($config->{Stages}->{PostPackage}, $config);                      ## Make zips.
 
         $config->{Stages}->{PostPackage}->{CopyList}->{Config} = $config->{Stages}->{PostPackage}->{Config};    ## Use the post package config.
         $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{From}->{root}  = "$src\\pismere";
-        $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}    = "$out";
+        $config->{Stages}->{PostPackage}->{CopyList}->{Config}->{To}->{root}    = $out;
         copyFiles($config->{Stages}->{PostPackage}->{CopyList}, $config);       ## Copy any files
 
-        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
+        !system("rm -rf $wd\\buildwix")             or die "Fatal -- Couldn't remove $wd\\buildwix.";
+        !system("rm -rf $wd\\buildnsi")             or die "Fatal -- Couldn't remove $wd\\buildnsi.";
+
+        chdir($out)                                 or die "Fatal -- Couldn't cd to $out";
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         if ($odr->{sign}->{def}) {
             signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
             }
