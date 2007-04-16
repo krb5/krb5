@@ -35,6 +35,7 @@ kadm5_get_config_params
 kadm5_get_policies
 kadm5_get_policy
 kadm5_get_principal
+kadm5_get_principal_keys
 kadm5_get_principals
 kadm5_get_privs
 kadm5_init
