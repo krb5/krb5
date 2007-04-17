@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.5.2
+                  Kerberos Version 5, Release 1.5.3
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.5.2.tar.gz.  Instructions on how to extract the entire
+krb5-1.5.3.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.5.2.tar.gz
+        gtar zxpf krb5-1.5.3.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.5.2.tar.gz | tar xpf -
+        gzcat krb5-1.5.3.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.5.2/src and
-the documentation into krb5-1.5.2/doc.
+Both of these methods will extract the sources into krb5-1.5.3/src and
+the documentation into krb5-1.5.3/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -59,6 +59,28 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Major changes in krb5-1.5.3
+---------------------------
+
+[5512]  Fix MITKRB5-SA-2007-001: telnetd allows login as arbitrary user
+        [CVE-2007-0956, VU#220816]
+
+[5513]  Fix MITKRB5-SA-2007-002: buffer overflow in krb5_klog_syslog
+        [CVE-2007-0957, VU#704024]
+
+[5520]  Fix MITKRB5-SA-2007-003: double-free in kadmind - the RPC
+        library could perform a double-free due to a GSS-API library
+        bug [CVE-2007-1216, VU#419344]
+
+krb5-1.5.3 changes by ticket ID
+-------------------------------
+
+5512 	(krb5-1.5.x) MITKRB5-SA-2007-001: telnetd allows login as
+        arbitrary user
+5513 	(krb5-1.5.x) MITKRB5-SA-2007-002: buffer overflow in
+        krb5_klog_syslog
+5520 	(krb5-1.5.x) MITKRB5-SA-2007-003: double-free in kadmind
 
 Major changes in krb5-1.5.2
 ---------------------------
@@ -342,7 +364,7 @@ for an up-to-date list, including links to the complete tickets.
 Copyright Notice and Legal Administrivia
 ----------------------------------------
 
-Copyright (C) 1985-2006 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2007 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
