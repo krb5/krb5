@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,7 +27,7 @@
 
 /*! \page cred_msgs Handling credentials provider messages
 
-A credentials provider plugin receives a number of messages during the
+A credentials provider plug-in receives a number of messages during the
 course of execution.  This section describes the appropriate ways of
 handling these messages.
 
@@ -34,7 +35,7 @@ handling these messages.
 
 There are only two system messages that a credentials provider needs
 to handle.  Both of these are explained elsewhere as they deal with
-initialization and uninitialization of the plugin.  See the following
+initialization and uninitialization of the plug-in.  See the following
 two sections for details on handling these messages.
 
 - <::KMSG_SYSTEM,::KMSG_SYSTEM_INIT> \ref pi_pt_cred_init

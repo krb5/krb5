@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -62,7 +63,7 @@
    - The property sheet is created and made visible with a call to
      khui_ps_show_sheet().
 
-   - The NetIDMgr message loop takes over.  Further interaction
+   - The Network Identity Manager message loop takes over.  Further interaction
      including notifications of 'Ok','Cancel','Apply' and other
      property sheet related actions are handled through WIN32
      messages.

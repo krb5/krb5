@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -28,16 +29,16 @@
 
 \page pi_structure Structure of a module
 
-A NetIDMgr module is essentially a dynamically loadable library with a
+A Network Identity Manager module is a dynamically loadable library with a
 specific set of exported symbols.  Each export symbol and general
-notes about writing a plugin module are documented below.
+notes about writing a plug-in module are documented below.
 
 \section pi_str_init Initialization
 
 Do not use DllMain or other system specific callback routines to
 perform intilization tasks other than creating mutexes, initializing
 thread local storage and other tasks that must be performed at that
-stage.  Specifically, do not call any NetIDMgr API functions from
+stage.  Specifically, do not call any Network Identity Manager API functions from
 within DllMain.
 
 \section pi_str_cb Callbacks
