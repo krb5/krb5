@@ -9,15 +9,25 @@ SRCS=kdestroy.c
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KDESTROY=$(OUTPRE)kdestroy.exe
+
+##WIN32##EXERES=$(KDESTROY:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKDESTROY_APP -fo $@ -r $**
+
 all-unix:: kdestroy
-all-windows:: $(OUTPRE)kdestroy.exe
+##WIN32##all-windows:: $(KDESTROY)
 
 kdestroy: kdestroy.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kdestroy.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)kdestroy.exe: $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $**
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(KDESTROY): $(OUTPRE)kdestroy.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $**
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kdestroy.o kdestroy

@@ -6,16 +6,26 @@ BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KCPYTKT=$(OUTPRE)kcpytkt.exe
+
+##WIN32##EXERES=$(KCPYTKT:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKCPYTKT_APP -fo $@ -r $**
+
 all-unix:: kcpytkt
-all-windows:: $(OUTPRE)kcpytkt.exe
+##WIN32##all-windows:: $(KCPYTKT)
 all-mac::
 
 kcpytkt: kcpytkt.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kcpytkt.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)kcpytkt.exe: $(OUTPRE)kcpytkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) /out:$@ $**
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(KCPYTKT): $(OUTPRE)kcpytkt.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kcpytkt.o kcpytkt

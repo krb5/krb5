@@ -9,15 +9,26 @@ SRCS=kvno.c
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KVNO=$(OUTPRE)kvno.exe
+
+##WIN32##EXERES=$(KVNO:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKVNO_APP -fo $@ -r $**
+
 all-unix:: kvno
-all-windows:: $(OUTPRE)kvno.exe
+
+##WIN32##all-windows:: $(KVNO)
 
 kvno: kvno.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ kvno.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)kvno.exe: $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) /out:$@ $**
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(KVNO): $(OUTPRE)kvno.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) /out:$@ $**
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) kvno.o kvno

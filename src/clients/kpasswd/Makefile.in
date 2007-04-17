@@ -17,6 +17,16 @@ ksetpwd: ksetpwd.o $(KRB5_BASE_DEPLIBS)
 kpasswd.o:	$(srcdir)/kpasswd.c
 ksetpwd.o:	$(srcdir)/ksetpwd.c
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KPWD=$(OUTPRE)kpasswd.exe
+
+##WIN32##EXERES=$(KPWD:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKPASSWD_APP -fo $@ -r $**
+
 all-unix:: kpasswd ksetpwd
 
 clean-unix::
@@ -26,10 +36,12 @@ install-all install-kdc install-server install-client install-unix::
 	$(INSTALL_PROGRAM) kpasswd $(DESTDIR)$(CLIENT_BINDIR)/`echo kpasswd|sed '$(transform)'`
 	$(INSTALL_DATA) $(srcdir)/kpasswd.M $(DESTDIR)$(CLIENT_MANDIR)/`echo kpasswd|sed '$(transform)'`.1;
 
-all-windows:: $(OUTPRE)kpasswd.exe
+##WIN32##all-windows:: $(KPWD)
 
-$(OUTPRE)kpasswd.exe: $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** $(SCLIB)
+##WIN32##$(KPWD): $(OUTPRE)kpasswd.obj $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
+
 # +++ Dependency line eater +++
 # 
 # Makefile dependencies follow.  This must be the last section in

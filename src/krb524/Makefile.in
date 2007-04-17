@@ -38,6 +38,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 ##WIN32##K4LIB=$(USE_ALTERNATE_KRB4_LIB)
 ##WIN32##!endif
 
+K524EXE = $(OUTPRE)k524init.exe
 K524LIB = $(OUTPRE)krb524.lib
 K524DEP = $(K524LIB)
 K524DEF = krb524.def
@@ -70,9 +71,20 @@ EXTRADEPSRCS = \
 ##WIN32##K524DEP=$(STLIBOBJS)
 ##WIN32##!endif
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##EXERES=$(K524EXE:.exe=.res)
+##WIN32##LIBRES=$(K524LIB:.lib=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKRB524_INIT -fo $@ -r $**
+##WIN32##$(LIBRES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKRB524_LIB -fo $@ -r $**
+
 all-unix:: krb524d krb524test k524init
 
-all-windows:: $(OUTPRE)k524init.exe $(K524LIB)
+##WIN32##all-windows:: $(K524EXE) $(K524LIB)
 
 krb524test: test.o $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o krb524test test.o $(KRB5_LIB) $(KRB4COMPAT_LIBS)
@@ -86,13 +98,13 @@ krb524d: $(SERVER_OBJS) $(KADMSRV_DEPLIBS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS) 
 k524init: $(CLIENT_OBJS) $(KRB5_DEPLIB) $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o k524init $(CLIENT_OBJS) $(KRB5_LIB) $(KRB4COMPAT_LIBS)
 
-$(K524LIB): $(OUTPRE)krb524.$(OBJEXT) $(OUTPRE)libinit.$(OBJEXT) $(KLIB) $(CLIB)
-	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
-	$(_VC_MANIFEST_EMBED_DLL)
+##WIN32##$(K524LIB): $(OUTPRE)krb524.$(OBJEXT) $(OUTPRE)libinit.$(OBJEXT) $(KLIB) $(CLIB) $(LIBRES)
+##WIN32##	link $(DLL_LINKOPTS) -def:$(K524DEF) -out:$*.dll $** $(WINLIBS)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 
-$(OUTPRE)k524init.exe: $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(CLIB) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
-	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS) $(SCLIB)
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(K524EXE): $(OUTPRE)k524init.$(OBJEXT) $(KLIB) $(K4LIB) $(CLIB) $(EXERES) $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** $(WINLIBS) $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 install-unix::
 	$(INSTALL_PROGRAM) krb524d $(DESTDIR)$(SERVER_BINDIR)/krb524d
