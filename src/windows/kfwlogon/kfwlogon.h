@@ -159,7 +159,7 @@ cc_free_NC_info,
 #define MAX_PASSWORD_LENGTH 256
 #define MAX_DOMAIN_LENGTH 256
 
-#define KFW_LOGON_EVENT_NAME TEXT("KFW Logon")
+#define KFW_LOGON_EVENT_NAME TEXT("MIT Kerberos")
 
 BOOLEAN APIENTRY DllEntryPoint(HANDLE dll, DWORD reason, PVOID reserved);
 

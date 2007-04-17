@@ -304,30 +304,9 @@ BOOL IsDebugLogging(void)
 	LSPsize=sizeof(dwDebug);
 	if (RegQueryValueEx(NPKey, "Debug", NULL, NULL, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS) 
 	{
-	    static int once = 0;
-
 	    dwDebug = FALSE;
-
-	    if (!once) {
-	        HANDLE h; char *ptbuf[1];
-		h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-		ptbuf[0] = "Unable to read debug value";
-		ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-		DeregisterEventSource(h);
-		once++;
-	    }
 	}
 	RegCloseKey (NPKey);
-    } else {
-	static int once = 0;
-	if (!once) {
-	    HANDLE h; char *ptbuf[1];
- 	    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-	    ptbuf[0] = "Unable to open network provider key";
-	    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-	    DeregisterEventSource(h);
-	    once++;
-	}
     }
 
     return(dwDebug ? TRUE : FALSE);
@@ -339,9 +318,11 @@ void DebugEvent0(char *a)
     
     if (IsDebugLogging()) {
 	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-	ptbuf[0] = a;
-	ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-	DeregisterEventSource(h);
+	if (h) {
+            ptbuf[0] = a;
+            ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+            DeregisterEventSource(h);
+        }
     }
 }
 
@@ -353,13 +334,15 @@ void DebugEvent(char *b,...)
 
     if (IsDebugLogging()) {
 	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-	va_start(marker,b);
-	StringCbVPrintf(buf, MAXBUF_+1,b,marker);
-	buf[MAXBUF_] = '\0';
-	ptbuf[0] = buf;
-	ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-	DeregisterEventSource(h);
-	va_end(marker);
+        if (h) {
+            va_start(marker,b);
+            StringCbVPrintf(buf, MAXBUF_+1,b,marker);
+            buf[MAXBUF_] = '\0';
+            ptbuf[0] = buf;
+            ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+            DeregisterEventSource(h);
+            va_end(marker);
+        }
     }
 }
 
@@ -1112,10 +1095,10 @@ KFW_copy_file_cache_to_default_cache(char * filename)
     if ( strlen(filename) + sizeof("FILE:") > sizeof(cachename) )
         return 1;
 
-    strcat(cachename, filename);
-
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) return 1;
+
+    strcat(cachename, filename);
 
     code = pkrb5_cc_resolve(ctx, cachename, &cc);
     if (code) {
@@ -1189,10 +1172,10 @@ KFW_copy_file_cache_to_api_cache(char * filename)
     if ( strlen(filename) + sizeof("FILE:") > sizeof(cachename) )
         return 1;
 
-    strcat(cachename, filename);
-
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) return 1;
+
+    strcat(cachename, filename);
 
     code = pkrb5_cc_resolve(ctx, cachename, &cc);
     if (code) {
@@ -1271,7 +1254,7 @@ KFW_destroy_tickets_for_principal(char * user)
         return 0;
 
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) return 1;
 
     code = pkrb5_parse_name(ctx, user, &princ);
     if (code) goto loop_cleanup;
