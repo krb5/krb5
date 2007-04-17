@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -24,20 +25,21 @@
 
 /* $Id$ */
 
-/*! \page cred_data_types Data types in NetIDMgr
+/*! \page cred_data_types Data types in Network Identity Manager
 
-    NetIDMgr's Credentials Database supports several useful data types.  In
-    addition, plug-ins can define custom data types.  Only a few operations
-    are expected of these data types since the core KCDB delegates fine grained
-    operations to other entities that understand the underlying format.
+    Network Identity Manager's Credentials Database supports several
+    useful data types.  In addition, plug-ins can define custom data
+    types.  Only a few operations are expected of these data types
+    since the core KCDB delegates fine grained operations to other
+    entities that understand the underlying format.
 
-    A field in a credential can have any one of these data types, but it must
-    have some data type.  Each value can be at most \a KCDB_TYPE_MAXCB bytes
-    in length regardless of the data type.
+    A field in a credential can have any one of these data types, but
+    it must have some data type.  Each value can be at most \a
+    KCDB_TYPE_MAXCB bytes in length regardless of the data type.
 
-    Some data types have a fixed size (such as \a Int32), while others are
-    variable size.  The required memory for each field in a credential is
-    allocated as needed.
+    Some data types have a fixed size (such as \a Int32), while others
+    are variable size.  The required memory for each field in a
+    credential is allocated as needed.
 
     \section kcdb_pg_dt Data types
 
@@ -47,13 +49,17 @@
 
     \subsubsection kcdb_pg_idt_v Void
 
-    Pretty useless.  This data type is used to indicate that the associated
-    object doesn't actually contain any data.
+    Type identifier : ::KCDB_TYPE_VOID
+
+    The Void data type is used to indicate that the associated object
+    does not contain any data.
 
     \subsubsection kcdb_pg_idt_s String
 
-    A unicode string that is terminated with a unicode NULL (L'\\0').  By
-    default, the type has the following flags :
+    Type identifier : ::KCDB_TYPE_STRING
+
+    A unicode string that is terminated with a unicode NULL (L'\\0').
+    By default, the type has the following flags:
 
     \a KCDB_TYPE_FLAG_CB_AUTO
 
@@ -63,18 +69,23 @@
 
     \subsubsection kcdb_pg_idt_d Date
 
-    Dates and times in NetIDMgr are stored as \a FILETIME structures.  Utility
-    functions are provided for converting from other formats such as \a time_t.
+    Type identifier : ::KCDB_TYPE_DATE
+
+    Dates and times in Network Identity Manager are stored in \a
+    FILETIME structures.  Utility functions are provided for
+    converting from other formats such as \a time_t.
 
     \subsubsection kcdb_pg_idt_i Interval
 
-    Stores an interval of time. Stored as a 64 bit signed integer. The
+    Type identifier : ::KCDB_TYPE_INTERVAL
+
+    Stores an interval of time. Stored as a 64-bit signed integer. The
     string representation of this data type is different from the \a
-    Date data type and designate an interval of time.
+    Date data type and designates an interval of time.
 
     The special value _I64_MAX (which is defined in limits.h as
-    0x7fffffffffffffff, or in otherwords, the largest positive value
-    that can be stored in a 64 bit signed integer) is used to
+    0x7fffffffffffffff, or in other words, the largest positive value
+    that can be stored in a 64-bit signed integer) is used to
     represent an interval of unknown length.
 
     The string representations of a data value of Interval type are
@@ -94,27 +105,34 @@
 
     \subsubsection kcdb_pg_idt_i32 Int32
 
-    A signed 32 bit integer.
+    Type identifier : ::KCDB_TYPE_INT32
+
+    A signed 32-bit integer.
 
     \subsubsection kcdb_pg_idt_i64 Int64
 
-    A signed 64 bit integer.
+    Type identifier : ::KCDB_TYPE_INT64
+
+    A signed 64-bit integer.
 
     \subsubsection kcdb_pg_idt_da Data
 
-    Raw data.  Can contain a byte stream.  This data type can be used by
-    plug-ins to associate raw data with a credential.  However, there is no
-    built in string representation for this data type.  As such, this is not
-    meant to be used for storing anything that has to be displayed to the user
-    verbatim.
+    Type identifier : ::KCDB_TYPE_DATA
+
+    Raw data.  Can contain a byte stream.  This data type can be used
+    by plug-ins to associate raw data with a credential.  However,
+    there is no built-in string representation for this data type.  As
+    such, this is not meant to be used for storing anything that has
+    to be displayed to the user verbatim.
 
     \section kcdb_pg_cust Custom data types
 
     \subsection kcdb_pg_cb Custom data type call backs
 
-    Custom data types in the NetIDMgr Credentials Database are defined using
-    \a kcdb_type structures which must include several callback functions.
-    The expected behavior of these callback functions is documented below.
+    Custom data types in the Network Identity Manager Credentials
+    Database are defined using \a kcdb_type structures that must
+    include several callback functions.  The expected behavior of
+    these callback functions is documented below.
 
     \subsubsection kcdb_pg_cb_ts toString
 
@@ -172,7 +190,7 @@
     definition of what a relative ordering is.  It is left up to each data
     type callback to interpret what 'ascending' and 'descending' mean.
 
-    The return value \a r should be as follows :
+    The return value \a r should be as follows:
 
     \a r < 0 : if \a data1 < \a data2
 

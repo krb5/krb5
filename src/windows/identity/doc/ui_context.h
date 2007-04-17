@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -38,7 +39,7 @@
     context functions and data structures provide access to this
     information.
 
-    The NetIDMgr user interface presents an outline view of all the
+    The Network Identity Manager user interface presents an outline view of all the
     credentials that were provided by credentials providers.  This
     view consists of headers representing the outline levels and rows
     representing individual credentials.
@@ -99,12 +100,12 @@
     obtain and store the context in a location that is accessible to
     the handlers of the message.
 
-    If a plugin needs to obtain the UI context, it should do so by
+    If a plug-in needs to obtain the UI context, it should do so by
     calling khui_context_get() and passing in a pointer to a
     ::khui_action_context structure.
 
     Once obtained, the contents of the ::khui_action_context structure
-    should be considered read-only.  When the plugin is done with the
+    should be considered read-only.  When the plug-in is done with the
     structure, it should call ::khui_context_release().  This cleans
     up any additional memory allocated for storing the context as well
     as releasing all the objects that were referenced from the
