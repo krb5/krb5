@@ -207,6 +207,19 @@ DWORD APIENTRY NPLogonNotify(
     if ( !KFW_is_available() )
         return 0;
 
+    DebugEvent0("NPLogonNotify start");
+
+    /* Remote Desktop / Terminal Server connections to existing sessions 
+     * are interactive logons.  Unfortunately, because the session already
+     * exists the logon script does not get executed and this prevents 
+     * us from being able to execute the rundll32 entrypoint 
+     * LogonEventHandlerA which would process the credential cache this
+     * routine will produce.  Therefore, we must cleanup orphaned cache
+     * files from this routine.  We will take care of it before doing
+     * anything else.
+     */
+    KFW_cleanup_orphaned_caches();
+
     /* Are we interactive? */
     if (lpStationName)
         interactive = (wcsicmp(lpStationName, L"WinSta0") == 0);
@@ -282,12 +295,13 @@ DWORD APIENTRY NPLogonNotify(
 	    goto cleanup;
 	}
 
-	count = GetEnvironmentVariable("TEMP", filename, sizeof(filename));
-	if ( count > sizeof(filename) || count == 0 ) {
-	    GetWindowsDirectory(filename, sizeof(filename));
-	}
+	count = GetTempPath(sizeof(filename), filename);
+        if (count == 0 || count > (sizeof(filename)-1)) {
+            code = -1;
+            goto cleanup;
+        }
 
-	if (_snprintf(filename, sizeof(filename), "%s\\kfwlogon-%d.%d",
+	if (_snprintf(filename, sizeof(filename), "%s\\kfwlogon-%x.%x",
 		       filename, lpLogonId->HighPart, lpLogonId->LowPart) < 0) 
 	{
 	    code = -1;
