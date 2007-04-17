@@ -38,6 +38,10 @@ SOFTWARE.
 #include <lm.h>
 #include <nb30.h>
 
+#include <errno.h>
+#include <malloc.h>
+
+
 /* Function Pointer Declarations for Delayed Loading */
 // CCAPI
 DECL_FUNC_PTR(cc_initialize);
@@ -908,7 +912,6 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
     DWORD SystemSIDlength = 0, UserSIDlength = 0;
     PACL ccacheACL = NULL;
     DWORD ccacheACLlength = 0;
-    DWORD retLen;
     DWORD gle;
     int ret = 0;  
 
@@ -1021,7 +1024,6 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
 void
 KFW_copy_cache_to_system_file(const char * user, const char * filename)
 {
-    DWORD count;
     char cachename[MAX_PATH + 8] = "FILE:";
     krb5_context		ctx = 0;
     krb5_error_code		code;
@@ -1279,3 +1281,72 @@ KFW_destroy_tickets_for_principal(char * user)
     return 0;
 }
 
+
+/* There are scenarios in which an interactive logon will not
+ * result in the LogonScript being executed.  This will result
+ * in orphaned cache files being left in the Temp directory.
+ * This function will search for cache files in the Temp 
+ * directory and delete any that are older than five minutes.
+ */
+void
+KFW_cleanup_orphaned_caches(void)
+{
+    char * temppath = NULL;
+    char * curdir = NULL;
+    DWORD count, count2;
+    WIN32_FIND_DATA FindFileData;
+    HANDLE hFind = INVALID_HANDLE_VALUE;
+    FILETIME now;
+    ULARGE_INTEGER uli_now;
+    FILETIME expired;
+
+    count = GetTempPath(0, NULL);
+    if (count <= 0)
+        return;
+    temppath = (char *) malloc(count);
+    if (!temppath)
+        goto cleanup;
+    count2 = GetTempPath(count, temppath);
+    if (count2 <= 0 || count2 > count)
+        goto cleanup;
+
+    count = GetCurrentDirectory(0, NULL);
+    curdir = (char *)malloc(count);
+    if (!curdir)
+        goto cleanup;
+    count2 = GetCurrentDirectory(count, curdir);
+    if (count2 <= 0 || count2 > count)
+        goto cleanup;
+
+    if (!SetCurrentDirectory(temppath))
+        goto cleanup;
+
+    GetSystemTimeAsFileTime(&now);
+    uli_now.u.LowPart = now.dwLowDateTime;
+    uli_now.u.HighPart = now.dwHighDateTime;
+
+    uli_now.QuadPart -= 3000000000;        /* 5 minutes == 3 billion 100 nano seconds */
+
+    expired.dwLowDateTime = uli_now.u.LowPart;
+    expired.dwHighDateTime = uli_now.u.HighPart;
+
+    hFind = FindFirstFile("kfwlogon-*", &FindFileData);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (CompareFileTime(&FindFileData.ftCreationTime, &expired) < 0) {
+                DebugEvent("Deleting orphaned cache file: \"%s\"", FindFileData.cFileName);
+                DeleteFile(FindFileData.cFileName);
+            }
+        } while ( FindNextFile(hFind, &FindFileData) );
+    }
+
+    SetCurrentDirectory(curdir);
+
+  cleanup:
+    if (temppath)
+        free(temppath);
+    if (hFind != INVALID_HANDLE_VALUE)
+        FindClose(hFind);
+    if (curdir)
+        free(curdir);
+}

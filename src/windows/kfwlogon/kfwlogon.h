@@ -206,6 +206,7 @@ int KFW_destroy_tickets_for_principal(char * user);
 int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken);
 int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID);
 int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int size);
+void KFW_cleanup_orphaned_caches(void);
 
 void CALLBACK LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow);
 
