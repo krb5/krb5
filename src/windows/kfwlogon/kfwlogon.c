@@ -64,15 +64,12 @@ BOOLEAN APIENTRY DllEntryPoint(HANDLE dll, DWORD reason, PVOID reserved)
     return TRUE;
 }
 
-
-
 DWORD APIENTRY NPGetCaps(DWORD index)
 {
     switch (index) {
     case WNNC_NET_TYPE:
-        /* Don't have our own type; use somebody else's. */
+        /* We aren't a file system; We don't have our own type; use somebody else's. */
         return WNNC_NET_SUN_PC_NFS;
-
     case WNNC_START:
         /* Say we are already started, even though we might wait after we receive NPLogonNotify */
         return 1;
@@ -81,6 +78,7 @@ DWORD APIENTRY NPGetCaps(DWORD index)
         return 0;
     }
 }       
+
 
 static BOOL
 WINAPI
@@ -134,6 +132,7 @@ is_windows_vista(void)
    return fIsWinVista;
 }
 
+
 /* Construct a Logon Script that will cause the LogonEventHandler to be executed
  * under in the logon session 
  */
@@ -178,6 +177,7 @@ ConfigureLogonScript(LPWSTR *lpLogonScript, char * filename) {
     free(lpTemp);
 }
 
+
 DWORD APIENTRY NPLogonNotify(
 	PLUID lpLogonId,
 	LPCWSTR lpAuthentInfoType,
@@ -199,17 +199,30 @@ DWORD APIENTRY NPLogonNotify(
     char *reason;
     char *ctemp;
 
-    BOOLEAN interactive;
+    BOOLEAN interactive = TRUE;
     HWND hwndOwner = (HWND)StationHandle;
     BOOLEAN lowercased_name = TRUE;
 
+    /* Can we load KFW binaries? */
+    if ( !KFW_is_available() )
+        return 0;
+
     /* Are we interactive? */
-    interactive = (wcscmp(lpStationName, L"WinSta0") == 0);
+    if (lpStationName)
+        interactive = (wcsicmp(lpStationName, L"WinSta0") == 0);
 
-    if ( !interactive || !KFW_is_available() )
-	return 0;
+    if ( !interactive ) {
+	char station[64]="station";
+        DWORD rv;
 
-    DebugEvent("NPLogonNotify - LoginId(%d,%d)", lpLogonId->HighPart, lpLogonId->LowPart);
+        SetLastError(0);
+	rv = WideCharToMultiByte(CP_UTF8, 0, lpStationName, -1, 
+			    station, sizeof(station), NULL, NULL);
+        DebugEvent("Skipping NPLogonNotify- LoginId(%d,%d) - Interactive(%d:%s) - gle %d", 
+                    lpLogonId->HighPart, lpLogonId->LowPart, interactive, rv != 0 ? station : "failure", GetLastError());
+        return 0;
+    } else
+        DebugEvent("NPLogonNotify - LoginId(%d,%d)", lpLogonId->HighPart, lpLogonId->LowPart);
 
     /* Initialize Logon Script to none */
     *lpLogonScript=NULL;
@@ -217,11 +230,11 @@ DWORD APIENTRY NPLogonNotify(
     /* MSV1_0_INTERACTIVE_LOGON and KERB_INTERACTIVE_LOGON are equivalent for
      * our purposes */
 
-    if ( wcscmp(lpAuthentInfoType,L"MSV1_0:Interactive") && 
-         wcscmp(lpAuthentInfoType,L"Kerberos:Interactive") )
+    if ( wcsicmp(lpAuthentInfoType,L"MSV1_0:Interactive") && 
+         wcsicmp(lpAuthentInfoType,L"Kerberos:Interactive") )
     {
 	char msg[64];
-	WideCharToMultiByte(CP_ACP, 0, lpAuthentInfoType, 0, 
+	WideCharToMultiByte(CP_ACP, 0, lpAuthentInfoType, -1, 
 			    msg, sizeof(msg), NULL, NULL);
 	msg[sizeof(msg)-1]='\0';
         DebugEvent("NPLogonNotify - Unsupported Authentication Info Type: %s", msg);
@@ -229,8 +242,6 @@ DWORD APIENTRY NPLogonNotify(
     }
 
     IL = (MSV1_0_INTERACTIVE_LOGON *) lpAuthentInfo;
-
-    DebugEvent("Interactive %s", interactive ? "yes" : "no");
 
     /* Convert from Unicode to ANSI */
 
@@ -568,10 +579,10 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
     DebugEvent0("LogonEventHandler - Start");
 
     /* Validate lpszCmdLine as a file */
-    hf = CreateFile(lpszCmdLine, FILE_ALL_ACCESS, 0, NULL, OPEN_EXISTING, 
+    hf = CreateFile(lpszCmdLine, GENERIC_READ | DELETE, 0, NULL, OPEN_EXISTING, 
 		    FILE_ATTRIBUTE_NORMAL, NULL);
     if (hf == INVALID_HANDLE_VALUE) {
-        DebugEvent0("LogonEventHandler - file cannot be opened");
+        DebugEvent("LogonEventHandler - \"%s\" cannot be opened", lpszCmdLine);
 	return;
     }
     CloseHandle(hf);
