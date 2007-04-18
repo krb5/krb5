@@ -29,9 +29,13 @@
 
 \page pi_structure Structure of a module
 
-A Network Identity Manager module is a dynamically loadable library with a
-specific set of exported symbols.  Each export symbol and general
-notes about writing a plug-in module are documented below.
+A Network Identity Manager module is a dynamically loadable library
+with a specific set of exported symbols.  Each export symbol and
+general notes about writing a plug-in module are documented below.
+
+\section pi_str_reg  Registration and Version Information
+
+[TODO]
 
 \section pi_str_init Initialization
 
