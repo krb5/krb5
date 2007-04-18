@@ -176,6 +176,13 @@ sub main {
     # Scan the configuration for switch definitions:
     while (($sw, $val) = each %$odr) {
         next if (! exists $val->{def}); ## ?? Should always exist.
+
+        # Set/clear environment variables:
+        if ($val->{env}) {
+            if ($val->{def})    {$ENV{$sw}   = (exists $val->{value}) ? $val->{value} : 1; }
+            else                {delete $ENV{$sw};  }
+            }
+
         # If the switch is in the command line, override the stored value:
         if (exists $OPT->{$sw}) {
             if (exists $val->{value}) {
