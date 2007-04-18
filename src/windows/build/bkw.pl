@@ -359,7 +359,7 @@ sub main {
         my $svncmd = "svn $rverb ";
         if ($rverb =~ /checkout/) {        # Append the rest of the checkout command:
             chdir("..");
-            $svncmd .= "svn+ssh://".$odr->{USERNAME}->{value}."@".$odr->{SVNURL}->{value}."/krb5/";
+            $svncmd .= "svn+ssh://".$odr->{username}->{value}."@".$odr->{SVNURL}->{value}."/krb5/";
             if (length $odr->{svntag}->{value} > 0) {
                 $svncmd .= "tags/$odr->{svntag}->{value}";
                 }
