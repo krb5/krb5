@@ -136,6 +136,8 @@ is_windows_vista(void)
 /* Construct a Logon Script that will cause the LogonEventHandler to be executed
  * under in the logon session 
  */
+
+#define RUNDLL32_CMDLINE "rundll32.exe kfwlogon.dll,LogonEventHandler "
 VOID 
 ConfigureLogonScript(LPWSTR *lpLogonScript, char * filename) {
     DWORD dwLogonScriptLen;
@@ -149,23 +151,20 @@ ConfigureLogonScript(LPWSTR *lpLogonScript, char * filename) {
     if (!filename)
 	return;
 
-    dwLogonScriptLen = strlen("rundll32.exe kfwlogon.dll,LogonEventHandler ") + strlen(filename) + 1;
+    dwLogonScriptLen = strlen(RUNDLL32_CMDLINE) + strlen(filename) + 2;
     lpTemp = (LPSTR) malloc(dwLogonScriptLen); 
     if (!lpTemp)
 	return;
 
-    _snprintf(lpTemp, dwLogonScriptLen, 
-	     "rundll32.exe kfwlogon.dll,LogonEventHandler %s",
-	     filename);
+    _snprintf(lpTemp, dwLogonScriptLen, "%s%s", RUNDLL32_CMDLINE, filename);
 
     SetLastError(0);
-    dwLogonScriptLen = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, lpTemp, strlen(lpTemp), NULL, 0);
+    dwLogonScriptLen = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, lpTemp, -1, NULL, 0);
     DebugEvent("ConfigureLogonScript %s requires %d bytes gle=0x%x", lpTemp, dwLogonScriptLen, GetLastError());
 
     lpScript = LocalAlloc(LMEM_ZEROINIT, dwLogonScriptLen * 2);
     if (lpScript) {
-	if (MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, lpTemp, strlen(lpTemp), 
-				 lpScript, 2 * dwLogonScriptLen))
+	if (MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, lpTemp, -1, lpScript, 2 * dwLogonScriptLen))
 	    *lpLogonScript = lpScript;
 	else {
 	    DebugEvent("ConfigureLogonScript - MultiByteToWideChar failed gle = 0x%x", GetLastError());
@@ -605,7 +604,8 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
     _snprintf(commandline, sizeof(commandline), "kfwcpcc.exe \"%s\"", lpszCmdLine);
 
     GetStartupInfo(&startupinfo);
-    if (CreateProcess( "kfwcpcc.exe",
+    SetLastError(0);
+    if (CreateProcess( NULL,
 		       commandline,
 		       NULL,
 		       NULL,
@@ -623,7 +623,9 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 	CloseHandle(procinfo.hThread);
 	CloseHandle(procinfo.hProcess);
     } else {
-	DebugEvent0("KFW_Logon_Event - CreateProcessFailed");
+	DebugEvent("KFW_Logon_Event - CreateProcessFailed \"%s\" GLE 0x%x", 
+                     commandline, GetLastError());
+        DebugEvent("KFW_Logon_Event PATH %s", getenv("PATH"));
     }
 
     DeleteFile(lpszCmdLine);
