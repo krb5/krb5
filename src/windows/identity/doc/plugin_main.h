@@ -29,38 +29,42 @@
 
 \page plug-ins Network Identity Manager Modules and Plug-ins
 
-Plug-ins and localization are handled by the Network Identity Manager Module Manager
-API.  Each plug-in consists of a dynamically loadable library and zero
-or more associated resource libraries.
+  The Network Identity Manager application does not include any
+  ability to manage any specific type of credential.  Instead it
+  exposes a framework on which plug-ins can be implemented to manage
+  credentials.
 
-For more information about Network Identity Manager Plug-ins, see the following
-sections:
+  Plug-ins and localization are handled by the Network Identity
+  Manager Module Manager API.
 
-- \subpage pi_framework
-- \subpage pi_pt
-- \subpage pi_structure
-- \subpage pi_localization
+  The following sections describe plug-ins in detail:
+
+  - \subpage pi_framework
+  - \subpage pi_pt
+  - \subpage pi_structure
+  - \subpage pi_localization
 */
 
 /*! \page pi_pt Plug-in Types
 
-The types of plug-ins that are currently supported by Network Identity Manager are :
+The types of plug-ins that are currently supported by Network Identity
+Manager are :
 
 \section pi_pt_cred Credential Provider
 
 A credential provider plug-in essentially acts as an interface between
-Network Identity Manager and some entity which defines the credentials for the purpose
-of managing those credentials.
+Network Identity Manager and some entity which defines the credentials
+for the purpose of managing those credentials.
 
 There can be more than one credential provider in a module.
 
 \subsection pi_pt_cred_comm Communication
 
-Communication between Network Identity Manager and a credential provider occurs
-through a message processor.  When registering a credential provider,
-the module initialization code in init_module() specifies
-::KHM_PITYPE_CRED as the \a type member and sets \a msg_proc member to
-a valid message processor in the ::khm_plug-in record.
+Communication between Network Identity Manager and a credential
+provider occurs through a message processor.  When registering a
+credential provider, the module initialization code in init_module()
+specifies ::KHM_PITYPE_CRED as the \a type member and sets \a msg_proc
+member to a valid message processor in the ::khm_plugin record.
 
 \subsection pi_pt_cred_init Initialization
 
@@ -72,8 +76,8 @@ guaranteed to be the first message it receives.
 
 The callback function should return KHM_ERROR_SUCCESS if it
 initializes properly or some other value otherwise.  If the return
-value signals an error, then the plug-in is assume to not be loaded and
-immediately unregistered.
+value signals an error, then the plug-in is assumed to have failed
+initialization and is immediately unloaded.
 
 The message processor is automatically subscribed to the following
 message types:
@@ -85,7 +89,6 @@ message enumerate existing credentials in the system, it should not
 obtain new credentials.  This is because other plug-ins that may depend
 on the new credential messages may not be loaded at this time. See the
 section on \ref cred_msgs for more information.
-
 
 \subsection pi_pt_cred_exit Uninitialization
 
@@ -106,22 +109,6 @@ unsubscribed from as they are automatically removed.
 
 Since credential managers may receive privileged information, the
 signature requirements for credential managers are specially strict.
-
-\section pi_pt_conf Configuration Provider
-
-Provides configuration information.
-[TODO: fill in]
-
-\subsection pi_pt_conf_comm Communication
-[TODO: fill in]
-
-\subsection pi_pt_conf_init Initialization
-[TODO: fill in]
-
-\subsection pi_pt_conf_exit Uninitialization
-[TODO: fill in]
-
-\subsection pi_pt_conf_other Other Notes
 
 */
 

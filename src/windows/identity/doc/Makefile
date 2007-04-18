@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2007 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -53,6 +54,8 @@ INPUT += "$(SRC)\kmm"
 INPUT += "$(SRC)\kherr"
 !ifdef BUILD_AFS
 INPUT += "$(SRC)\plugins\afs"
+
+ALIASES =  "apiversion=$(NETIDMGR_VERSION_API)"
 !endif
 
 IMAGE_PATH = "$(SRC)\doc\images"
