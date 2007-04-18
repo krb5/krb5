@@ -40,7 +40,7 @@ Usage: $0 (-f --config) config-file [options] NMAKE-options
 
   Options:
     /help /?           usage information (what you now see).
-    /config /c path    Path to config file.
+    /config /f path    Path to config file.
     /srcdir /r dir     Source directory to use.  Should contain 
                        pismere/athena.  If cvstag or svntag is null, 
                        the directory should be prepopulated.
@@ -367,79 +367,80 @@ sub main {
             }
         if ($verbose) {print "Info -- svn command: $svncmd\n";}
         !system($svncmd)            or die "Fatal -- command \"$svncmd\" failed; return code $?\n";
-
-        ##++ Read in the version information to be able to update the 
-        #  site-local files in the install build areas.
-        # ** Do this now (after repository update and before first zip) 
-        #    because making zip files requires some configuration data be set up.
-        local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-        open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
-        @raw = <DAT>;
-        close DAT;
-        foreach $line (@raw) {
-            chomp $line;
-            if ($line =~ /#define/) {                   # Process #define lines:
-                $line =~ s/#define//;                   # Remove #define token
-                $line =~ s/^\s+//;                      #  and leading & trailing whitespace
-                $line =~ s/\s+$//;
-                local @qr = split("\"", $line);         # Try splitting with quotes
-                if (exists $qr[1]) {
-                    $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
-                    $qr[0] =~ s/\s+$//;
-                    $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
-                    }
-                else {                                  # No quotes, so
-                    local @ar = split(" ", $line);      #  split with space
-                    $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
-                    $ar[0] =~ s/\s+$//;
-                    $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
-                    }
-                }
-            }
-    
-        # Check that the versions we will need for site-local have been defined:
-        my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
-                                 'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
-                                 'VER_PRODUCTNAME_STR');
-        $requirements_met   = 1;
-        $first_missing      = 0;
-        $error_list         = "";
-        foreach my $required (@required_versions) {
-            if (! exists $config->{Versions}->{$required}) {
-                $requirements_met = 0;
-                if (!$first_missing) {
-                    $first_missing = 1;
-                    $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
-                    }
-                $error_list .= "$required\n";
-                }
-            }
-        if (!$requirements_met) {
-            print $error_list;
-            exit(0);
-            }
-    
-        # Apply any of these tags to filestem:
-        my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
-        $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
-        $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
-        $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
-        $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
-        ##-- Read in the version information & set config info.
-
-        if ($rverb =~ /checkout/) {        
-            if (! $bOutputCleaned) {                    ## In case somebody cleaned $out before us.
-                if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
-                else            {mkdir($out);}
-                $bOutputCleaned = 1;
-                }
-            zipXML($config->{Stages}->{FetchSources}, $config); ## Make zips.
-            }
-
         if ($verbose) {print "Info -- ***   End fetching sources.\n";}
         }
 ##-- End  repository action.
         
+    ##++ Read in the version information to be able to update the 
+    #  site-local files in the install build areas.
+    # ** Do this now (after repository update and before first zip) 
+    #    because making zip files requires some configuration data be set up.
+    local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
+    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+    @raw = <DAT>;
+    close DAT;
+    foreach $line (@raw) {
+        chomp $line;
+        if ($line =~ /#define/) {                   # Process #define lines:
+            $line =~ s/#define//;                   # Remove #define token
+            $line =~ s/^\s+//;                      #  and leading & trailing whitespace
+            $line =~ s/\s+$//;
+            local @qr = split("\"", $line);         # Try splitting with quotes
+            if (exists $qr[1]) {
+                $qr[0] =~ s/^\s+//;                 #  Clean up whitespace
+                $qr[0] =~ s/\s+$//;
+                $config->{Versions}->{$qr[0]} = $qr[1]; # Save string
+                }
+            else {                                  # No quotes, so
+                local @ar = split(" ", $line);      #  split with space
+                $ar[0] =~ s/^\s+//;                 #  Clean up whitespace
+                $ar[0] =~ s/\s+$//;
+                $config->{Versions}->{$ar[0]} = $ar[1]; # and  save numeric value
+                }
+            }
+        }
+    
+    # Check that the versions we will need for site-local have been defined:
+    my @required_versions = ('VER_PROD_MAJOR', 'VER_PROD_MINOR', 'VER_PROD_REV', 
+                             'VER_PROD_MAJOR_STR', 'VER_PROD_MINOR_STR', 'VER_PROD_REV_STR', 
+                             'VER_PRODUCTNAME_STR');
+    $requirements_met   = 1;
+    $first_missing      = 0;
+    $error_list         = "";
+    foreach my $required (@required_versions) {
+        if (! exists $config->{Versions}->{$required}) {
+            $requirements_met = 0;
+            if (!$first_missing) {
+                $first_missing = 1;
+                $error_list = "Fatal -- The following version(s) are not defined in $src/$version_path.\n";
+                }
+            $error_list .= "$required\n";
+            }
+        }
+    if (!$requirements_met) {
+        print $error_list;
+        exit(0);
+        }
+    
+    # Apply any of these tags to filestem:
+    my $filestem    = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
+    $filestem       =~ s/%VERSION_MAJOR%/$config->{Versions}->{'VER_PROD_MAJOR_STR'}/;
+    $filestem       =~ s/%VERSION_MINOR%/$config->{Versions}->{'VER_PROD_MINOR_STR'}/;
+    $filestem       =~ s/%VERSION_PATCH%/$config->{Versions}->{'VER_PROD_REV_STR'}/;
+    $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name}    = $filestem;
+    ##-- Read in the version information & set config info.
+
+##++ Repository action, part 2:
+    if ($rverb =~ /checkout/) {        
+       if (! $bOutputCleaned) {                    ## In case somebody cleaned $out before us.
+           if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
+           else            {mkdir($out);}
+           $bOutputCleaned = 1;
+           }
+       zipXML($config->{Stages}->{FetchSources}, $config); ## Make zips.
+       }
+##-- End  repository action, part 2.
+
 ##++ Make action:
     if (    (!$switches[0]->{nomake}->{value}) ) {
         if ($verbose) {print "Info -- *** Begin preparing for build.\n";}
@@ -538,13 +539,14 @@ sub main {
             }
             
         chdir("$staging\\install\\wix") or die "Fatal -- Couldn't cd to $staging\\install\\wix";
+        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
         # Correct errors in files.wxi:
         !system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
         !system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
             
         # Make sed script to run on the site-local configuration files:
         local $tmpfile      = "site-local.sed" ;
-        system("del $tmpfile");
+        if (-e $tmpfile) {system("del $tmpfile");}
         # Basic substitutions:
         local $dblback_wd   = $wd;
         $dblback_wd         =~ s/\\/\\\\/g;
@@ -578,12 +580,13 @@ sub main {
             !system("echo !define DEBUG >> b.tmp")                          or die "Fatal -- Couldn't modify b.tmp.";    
             }
         else {                                                              ## release build
-            !system("echo !define RELEASE >> b.tmp")                        or die "Fatal -- Couldn't modify b.tmp.";    
+            if (!exists $config->{Versions}->{'BETA_STR'}) {!system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";}
             !system("echo !define NO_DEBUG >> b.tmp")                       or die "Fatal -- Couldn't modify b.tmp.";    
             }
         # Add BETA if present:
-        if ( exists $config->{Versions}->{'BETA_STR'}) {
+        if (exists $config->{Versions}->{'BETA_STR'}) {
             !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
+            !system("echo !define NOT_RELEASE >> b.tmp")                            or die "Fatal -- Couldn't modify b.tmp.";    
             }
         !system("mv -f b.tmp site-local.nsi")                               or die "Fatal -- Couldn't replace site-local.nsi.";
 
@@ -596,16 +599,29 @@ sub main {
         
         if ($verbose) {print "Info -- *** Begin package.\n";}
         # Make the msi:
-        chdir("$wd\\staging\\install\\wix") or die "Fatal -- Couldn't cd to $wd\\staging\\install\\wix";
+        if (-d "$wd\\buildwix")    {!system("rm -rf $wd\\buildwix/*")   or die "Fatal -- Couldn't clean $wd\\buildwix."}    
+        !system("echo D | xcopy /s $wd\\staging\\*.* $wd\\buildwix")    or die "Fatal -- Couldn't create $wd\\buildwix.";
+        chdir("$wd\\buildwix\\install\\wix") or die "Fatal -- Couldn't cd to $wd\\buildwix\\install\\wix";
         print "Info -- *** Make .msi:\n"            if ($verbose);
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         !system("$MAKE")                            or die "Error -- msi installer build failed.";
                 
-        chdir("$wd\\staging\\install\\nsis") or die "Fatal -- Couldn't cd to $wd\\staging\\install\\nsis";
+        if (-d "$wd\\buildnsi")    {!system("rm -rf $wd\\buildnsi/*")   or die "Fatal -- Couldn't clean $wd\\buildnsi."}    
+        !system("echo D | xcopy /s $wd\\staging\\*.* $wd\\buildnsi")    or die "Fatal -- Couldn't create $wd\\buildnsi.";
+        chdir("$wd\\buildnsi\\install\\nsis") or die "Fatal -- Couldn't cd to $wd\\buildnsi\\install\\nsis";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         print "Info -- *** Make NSIS:\n"            if ($verbose);
         !system("cl.exe killer.cpp advapi32.lib")   or die "Error -- nsis killer.exe not built.";
         !system("rename killer.exe Killer.exe")     or die "Error -- Couldn't rename killer.exe";
         !system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
+
+        chdir("$wd") or die "Fatal -- Couldn't cd to $wd";
+        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+        !system("xcopy /s $wd\\buildwix\\*.msi $wd\\staging")   or die "Fatal -- Couldn't copy $wd\\buildwix\\*.msi.";
+        !system("del $wd\\buildnsi\\install\\nsis\\killer.exe") or die "Fatal -- Couldn't clean $wd\\buildnsi\\install\\nsis\\killer.exe.";
+        !system("xcopy /s $wd\\buildnsi\\install\\nsis\\*.exe $wd\\staging\\install\\nsis")   or die "Fatal -- Couldn't copy $wd\\buildnsi\\install\\nsis\\*.exe.";
+        !system("rm -rf $wd\\buildwix")             or die "Fatal -- Couldn't remove $wd\\buildwix.";
+        !system("rm -rf $wd\\buildnsi")             or die "Fatal -- Couldn't remove $wd\\buildnsi.";
 
 # Begin packaging extra items:
         zipXML($config->{Stages}->{PostPackage}, $config);                      ## Make zips.
@@ -627,7 +643,7 @@ sub main {
     system("rm -rf $src/a.tmp");                ## Clean up junk.
     system("rm -rf $out/a.tmp");                ## Clean up junk.
     system("rm -rf $out/ziptemp");              ## Clean up junk.
-                
+
 # End logging:
     if ($switches[0]->{logfile}->{value})   {$l->stop;}
 
