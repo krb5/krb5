@@ -1,38 +1,55 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!-- BKW: Build Kerberos for Windows -->
 <BKW_Config>
-    <CommandLine>
-        <!-- The most changeable parameters can be specified on the command line.    -->
-        <Tags>
-            <cvs        value="" />
-            <svntag     value="" />
-            <svnbranch  value="" />
-            </Tags>
-        <Directories>
-            <!--    Sources will be checked out of repositories into <src>.  The structure
-                    of the repositories will cause pismere/athena to be created under <src>.    -->
-            <src        path    ="C:\projects\Autobuild" />
-            <out        path    ="C:\projects\Autobuild\public" /> <!-- Must be absolute path. -->
-            </Directories>
-        <Options>
-            <debug      value="0" />
-            <logfile    value="1" path="bkw.pl.log" />
-            <repository value="skip" />
-            <clean      value="0" />
-            <nomake     value="0" />
-            <nopackage  value="0" />
-            <sign       value="0" />
-            <verbose    value="0" />
-            <vverbose   value="0" />
-            </Options>
-        </CommandLine>
+    <Config>
+        <!-- All the parameters are specified here.  They can be over-ridden
+                on the command line.
+
+            Parameters are grouped into Options, Directories, Repository and Environment.
+
+            Attributes a parameter can have:
+            def:  defined or not.  A value of 'A' for 'always' means the    
+               option can't be negated on the command line.                 
+            value:  string value, if the option can have a value.  If the option
+               can't take a value, omit the value attribute.
+            options:  space-delimited list, the 1st element is the default.
+               Synonyms for a valid option are concatenated with '|'.      
+            env: an environment variable will be set to value or deleted,  
+                depending on def.                                                    
+            -->
+        <!-- Options: -->
+        <clean      def="0" />
+        <debug      def="0" />
+        <help       def="0" />
+        <logfile    def="1" value="bkw.pl.log" />
+        <make       def="1" />
+        <package    def="1" />
+        <repository def="1" value="skip" options="skip checkout|co update|up" />
+        <sign       def="0" />
+        <verbose    def="0" />
+        <vverbose   def="0" />
+
+        <!-- Directory settings: -->
+        <!--    Sources will be checked out of repositories into <src>.  The structure
+                of the repositories will cause pismere/athena to be created under <src>.    -->
+        <src        def="A" value="C:\KfW" />        <!-- Must be absolute path. -->
+        <out        def="A" value="C:\KfW\public" /> <!-- Must be absolute path. -->
+
+        <!-- Repository settings: -->
+        <cvstag     def="0" value="" />
+        <svntag     def="0" value="" />
+        <svnbranch  def="0" value="" />
+        <CVSROOT    def="A" value=":kserver:cvs.mit.edu:/cvs/pismere" />
+        <SVNURL     def="A" value="svn.mit.edu" />   <!-- NB:  No protocol or slashes!! -->
+        <USERNAME   def="0" value="" />  <!-- Needed for svn/plink.  Override from command line -->
+
+        <!-- Environment variables: -->>
+        <KH_RELEASE def="1" env="1" value="OFFICIAL" options="OFFICIAL PRERELEASE PRIVATE" />
+        <NODEBUG    def="1" env="1" />  <!-- Interacts with /DEBUG -->
+        
+        </Config>
     <Stages>
         <FetchSources>
-            <Config>
-                <CVSROOT    name=":kserver:cvs.mit.edu:/cvs/pismere" />
-                <SVNURL     name="svn.mit.edu" />   <!-- NB:  No protocol or slashes!! -->
-                <USERNAME   name="" />              <!-- Needed for svn/plink.  Override from command line -->
-                </Config>
             <Zips>
                 <Zip dummy="foo" /> <!-- To force desired XML::Simple behavior    -->
                 <Zip name="SRC" filename="%filestem%-src.zip" topdir="%filestem%-final">
@@ -52,7 +69,7 @@
                         <Prune name="CVS" />
                         <Prune name=".cvsignore" flags="i" />
                         <Prune name="Changelog"  flags="i" />
-                        <Prune name="site" />
+<!--                        <Prune name="site" />   -->
                         </Prunes>
                     <Requires>
                         <Switch dummy="foo" />

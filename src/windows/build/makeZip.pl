@@ -9,15 +9,15 @@ use Data::Dumper;
 sub makeZip {
     local ($zip, $config)   = @_;
 
-    local $src          = $config->{CommandLine}->{Directories}->{src}->{path};
-    local $out          = $config->{CommandLine}->{Directories}->{out}->{path};
-    local @switches     = $config->{CommandLine}->{Options};
-    local $zipname      = $zip->{filename};
-    local $filestem     = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
-    $zipname            =~ s/%filestem%/$filestem/g;
+    local $odr      = $config->{Config};    ## Options, directories, repository, environment.
+    local $src      = $odr->{src}->{value};
+    local $out      = $odr->{out}->{value};
+    local $zipname  = $zip->{filename};
+    local $filestem = $config->{Stages}->{PostPackage}->{Config}->{FileStem}->{name};
+    $zipname        =~ s/%filestem%/$filestem/g;
     if (exists $zip->{Requires}) {
         local $bMakeIt  = 1;
-        local $rverb    = $switches[0]->{repository}->{value};
+        local $rverb    = $odr->{repository}->{value};
         local $j        = 0;
         while ($zip->{Requires}->{Switch}[$j]) {                    ## Check Require switches
             local $switch    = $zip->{Requires}->{Switch}[$j];

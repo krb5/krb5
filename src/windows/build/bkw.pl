@@ -34,13 +34,13 @@ sub get_info {
 
 sub usage {
     print <<USAGE;
-Usage: $0 (-f --config) config-file [options] NMAKE-options
+Usage: $0 [options] NMAKE-options
 
   Options are case insensitive.
 
   Options:
     /help /?           usage information (what you now see).
-    /config /f path    Path to config file.
+    /config /f path    Path to config file.  Default is bkwconfig.xml.
     /srcdir /r dir     Source directory to use.  Should contain 
                        pismere/athena.  If cvstag or svntag is null, 
                        the directory should be prepopulated.
@@ -50,17 +50,16 @@ Usage: $0 (-f --config) config-file [options] NMAKE-options
                 skip          /  take no action [skip].
     /username /u name  username used to access svn if checking out.
     /cvstag /c tag     use -r <tag> in cvs command
-    /svnbranch /b tag  append /branches/<tag> to svn path.
-    /svntag /s tag     append /tags/<tag> to svn path.
+    /svnbranch /b tag  use /branches/<tag> instead of /trunk.
+    /svntag /s tag     use /tags/<tag> instead of /trunk.
     /debug /d          Do debug make instead of release make.
-    /nomake            Skip make step.
+    /[no]make          Control the make step.
     /clean             Build clean target.
-    /nopackage         Skip packaging step.
-    /sign              Sign files
-    /nosign            Don't sign files
+    /[no]package       Control the packaging step.
+    /[no]sign          Control signing of executable files.
     /verbose /v        Debug mode - verbose output.
-    /logfile /l path   Where to write output.  Default is bkw.pl.log
-    /nolog             Don't save output
+    /logfile /l path   Where to write output.  Default is bkw.pl.log.
+    /nolog             Don't save output.
   Other:
     NMAKE-options      any options you want to pass to NMAKE, which can be:
                        (note: /nologo is always used)
@@ -82,6 +81,9 @@ EOH
 }
 
 sub main {
+    local $cmdline = "bkw.pl";
+    foreach $arg (@ARGV) {$cmdline .= " $arg";}
+
     Getopt::Long::Configure('no_bundling', 'no_auto_abbrev',
            'no_getopt_compat', 'require_order',
            'ignore_case', 'pass_through',
@@ -92,21 +94,21 @@ sub main {
            'cvstag|c:s',
            'svntag|s:s',
            'svnbranch|b:s',
-           'srcdir|r:s',
-           'outdir|o:s',
+           'src|r:s',
+           'out|o:s',
            'debug|d',
-           'config|f:s',
+           'nodebug',
+           'config|f=s',
            'logfile|l:s',
            'nolog',
            'repository:s',
            'username|u:s',
            'verbose|v',
            'vverbose',
-           'nomake',
+           'make!',
            'clean',
-           'nopackage',
-           'sign',
-           'nosign',
+           'package!',
+           'sign!',
            );
 
     if ( $OPT->{help} ) {
@@ -114,17 +116,22 @@ sub main {
         exit(0);
         }
         
+    delete $OPT->{foo};        
+
 ##++ Validate required conditions:
 
-    if ($OPT->{config}) {}
-    else {
-        print "Fatal -- Configuration file must be specified.\n";
+    local $argvsize = @ARGV;
+    if ($argvsize > 0) {
+        print "Error -- invalid argument:  $ARGV[0]\n";
         usage();
-        exit(0);
+        die;
         }
+        
+    if (! exists $OPT->{config}) {$OPT->{config}  = "bkwconfig.xml";}
 
     # List of programs which must be in PATH:
-    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink');
+    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
+                         'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink', 'filever');
     my $requirements_met    = 1;
     my $first_missing       = 0;
     my $error_list          = "";
@@ -161,66 +168,78 @@ sub main {
     # Get configuration file:
     my $xml = new XML::Simple();
     $config = $xml->XMLin($configfile);
+    # Set up convenience variables:
+    local $odr  = $config->{Config};    ## Options, directories, repository, environment.
+
+#while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
+
+    # Scan the configuration for switch definitions:
+    while (($sw, $val) = each %$odr) {
+        next if (! exists $val->{def}); ## ?? Should always exist.
+        # If the switch is in the command line, override the stored value:
+        if (exists $OPT->{$sw}) {
+            if (exists $val->{value}) {
+                $val->{value}   = $OPT->{$sw};  
+                $val->{def}     = 1;
+                }
+            else {
+                $val->{def}   = $OPT->{$sw};    ## If no<switch>, value will be zero.
+                }
+            }
+        # If the switch can be negated, test that, too:
+        if ( ! ($val->{def} =~ /A/)) {
+            local $nosw = "no".$sw;
+            if (exists $OPT->{$nosw}) {
+                $val->{def} = 0;
+                }
+            }
+    
+        # For any switch definition with fixed values ("options"), validate:
+        if (exists $val->{options}) {
+            local $bValid   = 0;
+            # options can be like value1|syn1 value2|syn2|syn3
+            foreach $option (split(/ /, $val->{options})) {
+                local $bFirst   = 1;
+                local $sFirst;
+                foreach $opt (split(/\|/, $option)) {
+                    # opt will be like value2, syn2, syn3
+                    if ($bFirst) {
+                        $sFirst = $opt; ## Remember the full name of the option.
+                        $bFirst = 0;
+                        }
+                    if ($val->{value} =~ /$opt/i) {
+                        $val->{value} = $sFirst;    ## Save the full name.
+                        $bValid = 1;
+                        }
+                    }
+                }
+            if (! $bValid) {
+                print "Fatal -- invalid $sw value $val->{value}.  Possible values are $val->{options}.\n";
+                usage();
+                die;
+                }
+            }
+        }
 
     # Set up convenience variables:
-    my (@switches, @paths, @tags, @fetch);
-    @switches   = $config->{CommandLine}->{Options};
-    @paths      = $config->{CommandLine}->{Directories};
-    @tags       = $config->{CommandLine}->{Tags};
-    @fetch      = $config->{Stages}->{FetchSources}->{Config};
+    our $verbose    = $odr->{verbose}->{def};
+    our $vverbose   = $odr->{vverbose}->{def};
+    our $clean      = $clean->{clean}->{def};
+    local $src      = $odr->{src}->{value};
+    local $out      = $odr->{out}->{value};
 
-    # Update the configuration with overrides from the command line:
-    $tags[0]->{cvs}->{value}            = $OPT->{cvstag}        if exists $OPT->{cvstag};
-    $tags[0]->{svntag}->{value}         = $OPT->{svntag}        if exists $OPT->{svntag};
-    $tags[0]->{svnbranch}->{value}      = $OPT->{svnbranch}     if exists $OPT->{svnbranch};
-    $paths[0]->{src}->{path}            = $OPT->{srcdir}        if exists $OPT->{srcdir};
-    $paths[0]->{out}->{path}            = $OPT->{outdir}        if exists $OPT->{outdir};
-    $switches[0]->{debug}->{value}      = $OPT->{debug}         if exists $OPT->{debug};
-    $switches[0]->{clean}->{value}      = 1                     if exists $OPT->{clean};
-    $switches[0]->{repository}->{value} = $OPT->{repository}    if exists $OPT->{repository};
-    $fetch[0]->{USERNAME}->{name}       = $OPT->{username}      if exists $OPT->{username};
-    $switches[0]->{nomake}->{value}     = 1                     if exists $OPT->{nomake};
-    $switches[0]->{nopackage}->{value}  = 1                     if exists $OPT->{nopackage};
-    $switches[0]->{verbose}->{value}    = $OPT->{verbose}       if exists $OPT->{verbose};
-    $switches[0]->{vverbose}->{value}   = $OPT->{verbose}       if exists $OPT->{vverbose};
-    if (exists $OPT->{logfile}) {
-        $switches[0]->{logfile}->{path} = $OPT->{logfile};
-        $switches[0]->{logfile}->{value} = 1;
-        }
-    if (exists $OPT->{nolog}) {
-        $switches[0]->{logfile}->{value} = 0;
-        }
-    if (exists $OPT->{sign}) {
-        $switches[0]->{sign}->{timestampserver} = $OPT->{sign};
-        $switches[0]->{sign}->{value} = 1;
-        }
-    if (exists $OPT->{nosign}) {
-        $switches[0]->{sign}->{value} = 0;
-        }
-    our $verbose    = $config->{CommandLine}->{Options}->{verbose}->{value};
-    our $vverbose   = $config->{CommandLine}->{Options}->{vverbose}->{value};
-    our $clean      = $switches[0]->{clean}->{value};
-    local $src      = $paths[0]->{src}->{path};
-    local $out      = $paths[0]->{out}->{path};
-
-    if ($clean && !$switches[0]->{nopackage}->{value}) {
+    if ($clean && $odr->{package}->{def}) {
         print "Info -- /clean forces /nopackage.\n";
-        $switches[0]->{nopackage}->{value} = 1;
+        $odr->{package}->{def} = 0;
         }
 
     if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
     
-    # Examples of use:
-    #print "Logfile path: $switches[0]->{log}->{path}\n";
-    #print "src path: $paths[0]->{src}->{path}\n";
-    #print "cvs tag: $tags[0]->{cvs}->{value}\n";
-    #print "CVSROOT:   $fetch[0]->{CVSROOT}->{name}\n";
-
     # Test the unix find command:
-    if (! exists $config->{CommandLine}->{Directories}->{unixfind}->{path})    {
-        $config->{CommandLine}->{Directories}->{unixfind}->{path}   = "C:\\tools\\cygwin\\bin";
+    if (! exists $odr->{unixfind}->{value})    {
+        $odr->{unixfind}->{value}   = "C:\\tools\\cygwin\\bin";
         }
-    local $unixfind     = $config->{CommandLine}->{Directories}->{unixfind}->{path};
+    local $unixfind     = $odr->{unixfind}->{value};
 
     local $savedPATH    = $ENV{PATH};
     $ENV{PATH}          = $unixfind.";".$savedPATH;
@@ -234,38 +253,25 @@ sub main {
         }
         
     # Don't allow /svntag and /svnbranch simultaneously:
-    if ( (length $tags[0]->{svntag}->{value} > 0)   && 
-         (length $tags[0]->{svnbranch}->{value} > 0) ) {
+    if ( (length $odr->{svntag}->{value} > 0)   && 
+         (length $odr->{svnbranch}->{value} > 0) ) {
         die "Fatal -- Can't specify both /SVNTAG and /SVNBRANCH.";
         }
 
 ##-- Assemble configuration from config file and command line.
 
-    my $sw = $switches[0]->{repository}->{value};
-    my $rverb;
-    if       ($sw =~ /skip/i)       {$rverb = "skip";}
-    elsif    ($sw =~ /update/i)     {$rverb = "update";}
-    elsif    ($sw =~ /up/i)         {$rverb = "update";}
-    elsif    ($sw =~ /checkout/i)   {$rverb = "checkout";}
-    elsif    ($sw =~ /co/i)         {$rverb = "checkout";}
-    else {
-        print "Fatal -- invalid /repository value.\n";
-        usage();
-        die;
-        }
-    $switches[0]->{repository}->{value} = $rverb;   ## Save canonicalized repository verb.
-
+    local $rverb = $odr->{repository}->{value};
     if ( ($rverb =~ /checkout/) && $clean) {
         print "Warning -- Because sources afe being checked out, make clean will not be run.\n";
-        $clean  = $switches[0]->{clean}->{value}    = 0;
+        $clean  = $odr->{clean}->{def}    = 0;
         }
 
     my $wd  = $src."\\pismere";
 
     if (! ($rverb =~ /skip/)) {
         local $len = 0;
-        if (exists $fetch[0]->{USERNAME}->{name}) {
-            $len = length $fetch[0]->{USERNAME}->{name};
+        if (exists $odr->{USERNAME}->{value}) {
+            $len = length $odr->{USERNAME}->{value};
             }
         if ($len < 1) {
             die "Fatal -- you won't get far accessing the repository without specifying a username.";
@@ -285,13 +291,15 @@ sub main {
 
 # Begin logging:
     my $l;
-    if ($switches[0]->{logfile}->{value}) {
-        print "Info -- logging to $switches[0]->{logfile}->{path}.\n";
-        $l = new Logger $switches[0]->{logfile}->{path};
+    if ($odr->{logfile}->{def}) {
+        print "Info -- logging to $odr->{logfile}->{value}.\n";
+        $l = new Logger $odr->{logfile}->{value};
         $l->start;
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
 
+    print "Executing $cmdline\n";
+       
 ##++ Begin repository action:
     if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"    if ($verbose);}
     else {
@@ -305,12 +313,12 @@ sub main {
             }
         
         # Set up cvs environment variables:
-        $ENV{CVSROOT}       = $fetch[0]->{CVSROOT}->{name};
+        $ENV{CVSROOT}       = $odr->{CVSROOT}->{value};
         local $krb5dir      = "$wd\\athena\\auth\\krb5";
 
         local $cvscmdroot   = "cvs $rverb";
-        if (length $tags[0]->{cvs}->{value} > 0) {
-            $cvscmdroot .= " -r $tags[0]->{cvs}->{value}";
+        if (length $odr->{cvstag}->{value} > 0) {
+            $cvscmdroot .= " -r $odr->{cvstag}->{value}";
             }
 
         if ($rverb =~ /checkout/) {        
@@ -351,12 +359,12 @@ sub main {
         my $svncmd = "svn $rverb ";
         if ($rverb =~ /checkout/) {        # Append the rest of the checkout command:
             chdir("..");
-            $svncmd .= "svn+ssh://".$fetch[0]->{USERNAME}->{name}."@".$fetch[0]->{SVNURL}->{name}."/krb5/";
-            if (length $tags[0]->{svntag}->{value} > 0) {
-                $svncmd .= "tags/$tags[0]->{svntag}->{value}";
+            $svncmd .= "svn+ssh://".$odr->{USERNAME}->{value}."@".$odr->{SVNURL}->{value}."/krb5/";
+            if (length $odr->{svntag}->{value} > 0) {
+                $svncmd .= "tags/$odr->{svntag}->{value}";
                 }
-            elsif (length $tags[0]->{svnbranch}->{value} > 0) {
-                $svncmd .= "branches/$tags[0]->{svnbranch}->{value}";
+            elsif (length $odr->{svnbranch}->{value} > 0) {
+                $svncmd .= "branches/$odr->{svnbranch}->{value}";
                 }
             else {
                 $svncmd .= "trunk";
@@ -442,7 +450,7 @@ sub main {
 ##-- End  repository action, part 2.
 
 ##++ Make action:
-    if (    (!$switches[0]->{nomake}->{value}) ) {
+    if (    ($odr->{make}->{def}) ) {
         if ($verbose) {print "Info -- *** Begin preparing for build.\n";}
 
         chdir("$wd") or die "Fatal -- couldn't chdir to $wd\n";
@@ -482,8 +490,8 @@ sub main {
         
         chdir("$wd\\athena") or die "Fatal -- couldn't chdir to source directory $wd\\athena\n";
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        local $dbgswitch = ($switches[0]->{debug}->{value}) ? " " : "NODEBUG=1";
-        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch")    or die "Fatal -- build $buildtarget failed.";
+        local $dbgswitch = ($odr->{debug}->{def}) ? " " : "NODEBUG=1";
+        !system("perl ../scripts/build.pl --softdirs --nolog $buildtarget $dbgswitch BUILD_OFFICIAL=1")    or die "Fatal -- build $buildtarget failed.";
             
         chdir("$wd")               or die "Fatal -- couldn't chdir to $wd.";
         if ($clean) {
@@ -498,7 +506,7 @@ sub main {
 ##-- Make action.
         
 ##++ Package action:
-    if ($switches[0]->{nopackage}->{value}) {      ## If /clean, nopackage will be set.
+    if (! $odr->{package}->{def}) {      ## If /clean, nopackage will be set.
         print "Info -- *** Skipping packaging.\n";
         if ((-d $out) && ! $bOutputCleaned) {
             print "Warning -- *** Output directory $out will not be cleaned.\n";
@@ -534,7 +542,7 @@ sub main {
         # Sign files:
         chdir($staging) or die "Fatal -- couldn't chdir to $staging\n";
         print "Info -- chdir to ".`cd`."\n"     if ($verbose);
-        if ($switches[0]->{sign}->{value}) {
+        if ($odr->{sign}->{def}) {
             signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
             }
             
@@ -576,7 +584,7 @@ sub main {
         !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
         !system("rm site-local-tagged.nsi")                                 or die "Fatal -- Couldn't remove site-local-tagged.nsi.";
         # Add DEBUG or RELEASE:
-        if ($switches[0]->{debug}->{value}) {                               ## debug build
+        if ($odr->{debug}->{def}) {                               ## debug build
             !system("echo !define DEBUG >> b.tmp")                          or die "Fatal -- Couldn't modify b.tmp.";    
             }
         else {                                                              ## release build
@@ -632,7 +640,7 @@ sub main {
         copyFiles($config->{Stages}->{PostPackage}->{CopyList}, $config);       ## Copy any files
 
         print "Info -- chdir to ".`cd`."\n"     if ($verbose);
-        if ($switches[0]->{sign}->{value}) {
+        if ($odr->{sign}->{def}) {
             signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
             }
 
@@ -645,7 +653,7 @@ sub main {
     system("rm -rf $out/ziptemp");              ## Clean up junk.
 
 # End logging:
-    if ($switches[0]->{logfile}->{value})   {$l->stop;}
+    if ($odr->{logfile}->{def})   {$l->stop;}
 
     return 0;
     }                                           ## End subroutine main.
