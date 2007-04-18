@@ -5,6 +5,7 @@
 		<File dummy="foo" /> <!-- Forces XML::Simple behavior -->
 			<!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
 
+		<File name="netidmgr_userdoc.pdf" from="staging\doc"    to="doc" />
 		<File name="leash_userdoc.pdf" from="staging\doc"       to="doc" />
 		<File name="relnotes.html"  from="doc\kerberos"         to="doc" />
 
