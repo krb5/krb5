@@ -11,18 +11,16 @@ use XML::Simple;
 use Data::Dumper;
 use Archive::Zip;
 use Logger;
-require "commandandcontrol.pl";
 require "copyfiles.pl";
 require "prunefiles.pl";
-require "repository1.pl";
 require "signfiles.pl";
 require "zipXML.pl";
 
 my $BAIL;
-$0                      = fileparse($0);
-my $MAKE                = 'NMAKE';
+$0 = fileparse($0);
+my $OPT = {foo => 'bar'};
+my $MAKE = 'NMAKE';
 our $config;
-local $bOutputCleaned   = 0;
 
 sub get_info {
     my $cmd = shift || die;
@@ -32,6 +30,42 @@ sub get_info {
     chomp($full);
     $full = "\"".$full."\"";
     return { cmd => $cmd, full => $full};
+    }
+
+sub usage {
+    print <<USAGE;
+Usage: $0 [options] NMAKE-options
+
+  Options are case insensitive.
+
+  Options:
+    /help /?           usage information (what you now see).
+    /config /f path    Path to config file.  Default is bkwconfig.xml.
+    /srcdir /r dir     Source directory to use.  Should contain 
+                       pismere/athena.  If cvstag or svntag is null, 
+                       the directory should be prepopulated.
+    /outdir /o dir     Directory to be created where build results will go
+    /repository checkout | co \\  What repository action to take.
+                update   | up  ) Options are to checkout, update or 
+                skip          /  take no action [skip].
+    /username /u name  username used to access svn if checking out.
+    /cvstag /c tag     use -r <tag> in cvs command
+    /svnbranch /b tag  use /branches/<tag> instead of /trunk.
+    /svntag /s tag     use /tags/<tag> instead of /trunk.
+    /debug /d          Do debug make instead of release make.
+    /[no]make          Control the make step.
+    /clean             Build clean target.
+    /[no]package       Control the packaging step.
+    /[no]sign          Control signing of executable files.
+    /verbose /v        Debug mode - verbose output.
+    /logfile /l path   Where to write output.  Default is bkw.pl.log.
+    /nolog             Don't save output.
+  Other:
+    NMAKE-options      any options you want to pass to NMAKE, which can be:
+                       (note: /nologo is always used)
+
+USAGE
+    system("$MAKE /?");
     }
 
 sub handler {
@@ -50,9 +84,50 @@ sub main {
     local $cmdline = "bkw.pl";
     foreach $arg (@ARGV) {$cmdline .= " $arg";}
 
-    local @savedARGV    = @ARGV;
+    Getopt::Long::Configure('no_bundling', 'no_auto_abbrev',
+           'no_getopt_compat', 'require_order',
+           'ignore_case', 'pass_through',
+           'prefix_pattern=(--|-|\+|\/)',
+           );
+    GetOptions($OPT,
+           'help|h|?',
+           'cvstag|c:s',
+           'svntag|s:s',
+           'svnbranch|b:s',
+           'src|r:s',
+           'out|o:s',
+           'debug|d',
+           'nodebug',
+           'config|f=s',
+           'logfile|l:s',
+           'nolog',
+           'repository:s',
+           'username|u:s',
+           'verbose|v',
+           'vverbose',
+           'make!',
+           'clean',
+           'package!',
+           'sign!',
+           );
+
+    if ( $OPT->{help} ) {
+        usage();
+        exit(0);
+        }
+        
+    delete $OPT->{foo};        
 
 ##++ Validate required conditions:
+
+    local $argvsize = @ARGV;
+    if ($argvsize > 0) {
+        print "Error -- invalid argument:  $ARGV[0]\n";
+        usage();
+        die;
+        }
+        
+    if (! exists $OPT->{config}) {$OPT->{config}  = "bkwconfig.xml";}
 
     # List of programs which must be in PATH:
     my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
@@ -85,18 +160,120 @@ sub main {
 
 ##++ Assemble configuration from config file and command line:
 
-    local $config   = commandandcontrol("bkwconfig.xml", 0);
+    my $configfile      = $OPT->{config};
+    my $bOutputCleaned  = 0;
+
+    print "Info -- Reading configuration from $configfile.\n";
+
+    # Get configuration file:
+    my $xml = new XML::Simple();
+    $config = $xml->XMLin($configfile);
+    # Set up convenience variables:
+    local $odr  = $config->{Config};    ## Options, directories, repository, environment.
+
+#while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
+
+    # Scan the configuration for switch definitions:
+    while (($sw, $val) = each %$odr) {
+        next if (! exists $val->{def}); ## ?? Should always exist.
+
+        # Set/clear environment variables:
+        if ($val->{env}) {
+            if ($val->{def})    {$ENV{$sw}   = (exists $val->{value}) ? $val->{value} : 1; }
+            else                {delete $ENV{$sw};  }
+            }
+
+        # If the switch is in the command line, override the stored value:
+        if (exists $OPT->{$sw}) {
+            if (exists $val->{value}) {
+                $val->{value}   = $OPT->{$sw};  
+                $val->{def}     = 1;
+                }
+            else {
+                $val->{def}   = $OPT->{$sw};    ## If no<switch>, value will be zero.
+                }
+            }
+        # If the switch can be negated, test that, too:
+        if ( ! ($val->{def} =~ /A/)) {
+            local $nosw = "no".$sw;
+            if (exists $OPT->{$nosw}) {
+                $val->{def} = 0;
+                }
+            }
+    
+        # For any switch definition with fixed values ("options"), validate:
+        if (exists $val->{options}) {
+            local $bValid   = 0;
+            # options can be like value1|syn1 value2|syn2|syn3
+            foreach $option (split(/ /, $val->{options})) {
+                local $bFirst   = 1;
+                local $sFirst;
+                foreach $opt (split(/\|/, $option)) {
+                    # opt will be like value2, syn2, syn3
+                    if ($bFirst) {
+                        $sFirst = $opt; ## Remember the full name of the option.
+                        $bFirst = 0;
+                        }
+                    if ($val->{value} =~ /$opt/i) {
+                        $val->{value} = $sFirst;    ## Save the full name.
+                        $bValid = 1;
+                        }
+                    }
+                }
+            if (! $bValid) {
+                print "Fatal -- invalid $sw value $val->{value}.  Possible values are $val->{options}.\n";
+                usage();
+                die;
+                }
+            }
+        }
 
     # Set up convenience variables:
-    local $odr      = $config->{Config};    ## Options, directories, repository, environment.
     our $verbose    = $odr->{verbose}->{def};
     our $vverbose   = $odr->{vverbose}->{def};
+    our $clean      = $clean->{clean}->{def};
     local $src      = $odr->{src}->{value};
-    local $wd       = $src."\\pismere";
+    local $out      = $odr->{out}->{value};
+
+    if ($clean && $odr->{package}->{def}) {
+        print "Info -- /clean forces /nopackage.\n";
+        $odr->{package}->{def} = 0;
+        }
+
+    if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
+    
+    # Test the unix find command:
+    if (! exists $odr->{unixfind}->{value})    {
+        $odr->{unixfind}->{value}   = "C:\\tools\\cygwin\\bin";
+         }
+    local $unixfind     = $odr->{unixfind}->{value};
+
+    local $savedPATH    = $ENV{PATH};
+    $ENV{PATH}          = $unixfind.";".$savedPATH;
+    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+    if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
+    !system("find . -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
+    local $filesize = -s "b.tmp";
+    $ENV{PATH} = $savedPATH;
+    if ($filesize > 0) {
+        die "Fatal -- $unixfind does not appear to be a path to a UNIX find command.";
+        }
+        
+    # Don't allow /svntag and /svnbranch simultaneously:
+    if ( (length $odr->{svntag}->{value} > 0)   && 
+         (length $odr->{svnbranch}->{value} > 0) ) {
+        die "Fatal -- Can't specify both /SVNTAG and /SVNBRANCH.";
+        }
 
 ##-- Assemble configuration from config file and command line.
 
-    local $rverb    = $odr->{repository}->{value};
+    local $rverb = $odr->{repository}->{value};
+    if ( ($rverb =~ /checkout/) && $clean) {
+        print "Warning -- Because sources afe being checked out, make clean will not be run.\n";
+        $clean  = $odr->{clean}->{def}    = 0;
+        }
+
+    my $wd  = $src."\\pismere";
 
     if (! ($rverb =~ /skip/)) {
         local $len = 0;
@@ -119,24 +296,6 @@ sub main {
         !system("rmdir $wd")    or die "Fatal -- Couldn't remove $wd.";
         }
 
-##++ Begin repository action:
-    repository1($config);
-
-    @ARGV       = @savedARGV;
-    # Now use the configuration file in the repository sources, forcing use of that config file:
-    $config     = commandandcontrol("$src/pismere/athena/auth/krb5/src/windows/build/bkwconfig.xml", 1);
-        
-##-- End  repository action.
-
-    # Set up convenience variables:
-    $odr        = $config->{Config};    ## Options, directories, repository, environment.
-    $verbose    = $odr->{verbose}->{def};
-    $vverbose   = $odr->{vverbose}->{def};
-    our $clean  = $odr->{clean}->{def};
-    $src        = $odr->{src}->{value};
-    $out        = $odr->{out}->{value};
-    $wd         = "$src\\pismere";
-    
 # Begin logging:
     my $l;
     if ($odr->{logfile}->{def}) {
@@ -146,45 +305,86 @@ sub main {
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
 
-    print "Info -- Executing $cmdline\n";
-    print "Info -- Option settings:\n";
-    foreach $sw (sort keys %$odr) {
-        local $val  = $odr->{$sw};
-        if ($val->{def}) {
-            if (exists $val->{value})   {print "        $sw $val->{value}\n";}
-            else                        {print "        $sw\n";}
+    print "Executing $cmdline\n";
+       
+##++ Begin repository action:
+    if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"    if ($verbose);}
+    else {
+        if ($verbose) {print "Info -- *** Begin fetching sources.\n";}
+        local $cvspath = "$src";
+        if (! -d $cvspath) {                        ## xcopy will create the entire path for us.
+            !system("echo foo > a.tmp")                     or die "Fatal -- Couldn't create temporary file in ".`cd`;
+            !system("echo F | xcopy a.tmp $cvspath\\a.tmp") or die "Fatal -- Couldn't xcopy to $cvspath.";
+            !system("rm a.tmp")                             or die "Fatal -- Couldn't remove temporary file.";
+            !system("rm $cvspath\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
             }
-        else                            {print "        no$sw\n";}
-        }
+        
+        # Set up cvs environment variables:
+        $ENV{CVSROOT}       = $odr->{CVSROOT}->{value};
+        local $krb5dir      = "$wd\\athena\\auth\\krb5";
 
-    if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
-    
-    if ( ($rverb =~ /checkout/) && $clean) {
-        print "Warning -- Because sources afe being checked out, make clean will not be run.\n";
-        $clean  = $odr->{clean}->{def}    = 0;
-        }
+        local $cvscmdroot   = "cvs $rverb";
+        if (length $odr->{cvstag}->{value} > 0) {
+            $cvscmdroot .= " -r $odr->{cvstag}->{value}";
+            }
 
-    if ($clean && $odr->{package}->{def}) {
-        print "Info -- /clean forces /nopackage.\n";
-        $odr->{package}->{def} = 0;
-        }
+        if ($rverb =~ /checkout/) {        
+            chdir($src)                                     or die "Fatal -- couldn't chdir to $src\n";
+            print "Info -- chdir to ".`cd`."\n"             if ($verbose);
+            my @cvsmodules    = (    
+                'krb',  
+                'pismere/athena/util/lib/delaydlls', 
+                'pismere/athena/util/lib/getopt', 
+                'pismere/athena/util/guiwrap'
+                );
 
-    # Test the unix find command:
-    if (! exists $odr->{unixfind}->{value})    {
-        $odr->{unixfind}->{value}   = "C:\\tools\\cygwin\\bin";
-         }
-    local $unixfind     = $odr->{unixfind}->{value};
+            foreach my $module (@cvsmodules) {
+                local $cvscmd = $cvscmdroot." ".$module;
+                if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
+                !system($cvscmd)    or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+                }
+            }
+        else {                ## Update.
+            chdir($wd)                                      or die "Fatal -- couldn't chdir to $wd\n";
+            print "Info -- chdir to ".`cd`."\n"             if ($verbose);
+            if ($verbose) {print "Info -- cvs command: $cvscmdroot\n";}
+            !system($cvscmdroot)    or die "Fatal -- command \"$cvscmdroot\" failed; return code $?\n";
+            }
 
-    local $savedPATH    = $ENV{PATH};
-    $ENV{PATH}          = $unixfind.";".$savedPATH;
-    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-    if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
-    !system("find . -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
-    local $filesize = -s "b.tmp";
-    $ENV{PATH} = $savedPATH;
-    if ($filesize > 0) {
-        die "Fatal -- $unixfind does not appear to be a path to a UNIX find command.";
+        # Set up svn environment variable:
+        $ENV{SVN_SSH} = "plink.exe";
+        # If  the directory structure doesn't exist, many cd commands will fail.
+        if (! -d $krb5dir) {                                ## xcopy will create the entire path for us.
+            !system("echo foo > a.tmp")                     or die "Fatal -- Couldn't create temporary file in ".`cd`;
+            !system("echo F | xcopy a.tmp $krb5dir\\a.tmp") or die "Fatal -- Couldn't xcopy to $krb5dir.";
+            !system("rm a.tmp")                             or die "Fatal -- Couldn't remove temporary file.";
+            !system("rm $krb5dir\\a.tmp")                   or die "Fatal -- Couldn't remove temporary file.";
+            }
+
+        chdir($krb5dir)                                 or die "Fatal -- Couldn't chdir to $krb5dir";
+        print "Info -- chdir to ".`cd`."\n"             if ($verbose);
+        my $svncmd = "svn $rverb ";
+        if ($rverb =~ /checkout/) {        # Append the rest of the checkout command:
+            chdir("..");
+            $svncmd .= "svn+ssh://".$odr->{username}->{value}."@".$odr->{SVNURL}->{value}."/krb5/";
+            if (length $odr->{svntag}->{value} > 0) {
+                $svncmd .= "tags/$odr->{svntag}->{value}";
+                }
+            elsif (length $odr->{svnbranch}->{value} > 0) {
+                $svncmd .= "branches/$odr->{svnbranch}->{value}";
+                }
+            else {
+                $svncmd .= "trunk";
+                }
+
+            $svncmd .= " krb5";
+
+            }
+        if ($verbose) {print "Info -- svn command: $svncmd\n";}
+        !system($svncmd)            or die "Fatal -- command \"$svncmd\" failed; return code $?\n";
+        if ($verbose) {print "Info -- ***   End fetching sources.\n";}
         }
+##-- End  repository action.
         
     ##++ Read in the version information to be able to update the 
     #  site-local files in the install build areas.
