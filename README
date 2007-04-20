@@ -83,82 +83,93 @@ http://krbdev.mit.edu/rt/NoAuth/krb5-1.6/fixed-1.6.1.html
 
 for a current listing with links to the complete tickets.
 
-2724 	kdc.conf man page typo in v4_mode section
-5233 	Change in behaviour in gss_release_buffer() by mechtypes
+2724    kdc.conf man page typo in v4_mode section
+5233    Change in behaviour in gss_release_buffer() by mechtypes
         introduces memory leak
-5238 	fix leak in gss_krb5int_unseal_token_v3
-5246 	Memory leak in tests/gssapi/t_imp_name.c
-5257 	error on gethostbyname is tested on errno instead of h_errno
-5293 	crash creating db2 database in non-existent directory
-5294 	create KDC database directory
-5343 	updated Windows README
-5344 	Update to KFW NSIS installer
-5349 	Proposed implementation of krb5_server_decrypt_ticket_keyblock
+5238    fix leak in gss_krb5int_unseal_token_v3
+5246    Memory leak in tests/gssapi/t_imp_name.c
+5257    error on gethostbyname is tested on errno instead of h_errno
+5293    crash creating db2 database in non-existent directory
+5294    create KDC database directory
+5343    updated Windows README
+5344    Update to KFW NSIS installer
+5349    Proposed implementation of krb5_server_decrypt_ticket_keyblock
         and krb5_server_decrypt_ticket_keytab
-5353 	kfw wix installer - memory overwrite error
-5393 	krb5-1.6: tcp kpasswd service required if only admin_server is
+5353    kfw wix installer - memory overwrite error
+5393    krb5-1.6: tcp kpasswd service required if only admin_server is
         specified in krb5.conf
-5394 	krb5-1.6: segfault on password change
-5396 	Master ticket for NetIdMgr 1.2 commits
-5397 	NIM string tables
-5398 	NIM Kerberos v4 configuration dialog
-5399 	NIM Correct Visual Identity Expiration Status
-5400 	NIM Kerberos 5 Provider corrections
-5403 	Add KDC timesyncing support to the CCAPI ccache backend
-5408 	NIM - Context sensitive system tray menu and more
-5409 	KFW MSI installer corrections
-5410 	kt_file.c memory leak on error in krb5_kt_resolve /
+5394    krb5-1.6: segfault on password change
+5396    Master ticket for NetIdMgr 1.2 commits
+5397    NIM string tables
+5398    NIM Kerberos v4 configuration dialog
+5399    NIM Correct Visual Identity Expiration Status
+5400    NIM Kerberos 5 Provider corrections
+5403    Add KDC timesyncing support to the CCAPI ccache backend
+5408    NIM - Context sensitive system tray menu and more
+5409    KFW MSI installer corrections
+5410    kt_file.c memory leak on error in krb5_kt_resolve /
         krb5_kt_wresolve
-5414 	NIM Bug Fixes
-5418 	KFW: 32-bit builds use the pismere krbv4w32.dll library
-5419 	Microsoft Windows Visual Studio does not define ssize_t
-5420 	get_init_creds_opt extensibility
-5437 	hack to permit GetEnvironmentVariable usage without requiring
+5414    NIM Bug Fixes
+5418    KFW: 32-bit builds use the pismere krbv4w32.dll library
+5419    Microsoft Windows Visual Studio does not define ssize_t
+5420    get_init_creds_opt extensibility
+5437    hack to permit GetEnvironmentVariable usage without requiring
         getenv() conversion
-5445 	gsstest doesn't like krb5-1.6 GSSAPI library
+5445    gsstest doesn't like krb5-1.6 GSSAPI library
         [also MITKRB5-SA-2007-003]
-5446 	KfW 3.1: stderr of kinit/klist/kdestroy cannot be re-directed
+5446    KfW 3.1: stderr of kinit/klist/kdestroy cannot be re-directed
         to file
-5447 	tail portability bug in k5srvutil
-5452 	NIM Improved Alert Management
-5453 	Windows - some apps define ssize_t as a preprocessor symbol
-5454 	krb5_get_cred_from_kdc fails to null terminate the tgt list
-5455 	valgrind detects uninitialized (but really unused) bytes in
+5447    tail portability bug in k5srvutil
+5452    NIM Improved Alert Management
+5453    Windows - some apps define ssize_t as a preprocessor symbol
+5454    krb5_get_cred_from_kdc fails to null terminate the tgt list
+5455    valgrind detects uninitialized (but really unused) bytes in
         'queue'
-5457 	More existence tests; path update
-5458 	osf1: get proper library dependencies installed
-5461 	reverting commit to windows WIX installer (revision 19207)
-5469 	KFW: Vista Integrated Logon
-5476 	Zero sockaddrs in fai_add_entry() so we can compare them with
+5457    More existence tests; path update
+5458    osf1: get proper library dependencies installed
+5461    reverting commit to windows WIX installer (revision 19207)
+5469    KFW: Vista Integrated Logon
+5476    Zero sockaddrs in fai_add_entry() so we can compare them with
         memcmp()
-5477 	Enable Vista support for MSLSA
-5478 	NIM: New Default View and miscellaneous fixes
-5480 	krb5 library uses kdc.conf when it shouldn't
-5490 	KfW build automation
-5491 	WIX installer stores WinLogon event handler under wrong
+5477    Enable Vista support for MSLSA
+5478    NIM: New Default View and miscellaneous fixes
+5480    krb5 library uses kdc.conf when it shouldn't
+5490    KfW build automation
+5491    WIX installer stores WinLogon event handler under wrong
         registry value
-5492 	remove unwanted files from kfw build script
-5493 	KFW: problems with non-interactive logons
-5495 	NIM commits for KFW 3.2 Beta 1
-5496 	more bug fixes for NIM 1.2 (KFW 3.2)
-5503 	msi deployment guide updates for KFW 3.2
-5504 	Network Identity Manager 1.2 User Manual
-5505 	More commits for NIM 1.2 Beta 1
-5507 	MITKRB5-SA-2007-002: buffer overflow in krb5_klog_syslog
-5508 	MITKRB5-SA-2007-001: telnetd allows login as arbitrary user
-5509 	service location plugin returning no addresses handled
+5492    remove unwanted files from kfw build script
+5493    KFW: problems with non-interactive logons
+5495    NIM commits for KFW 3.2 Beta 1
+5496    more bug fixes for NIM 1.2 (KFW 3.2)
+5503    msi deployment guide updates for KFW 3.2
+5504    Network Identity Manager 1.2 User Manual
+5505    More commits for NIM 1.2 Beta 1
+5507    MITKRB5-SA-2007-002: buffer overflow in krb5_klog_syslog
+5508    MITKRB5-SA-2007-001: telnetd allows login as arbitrary user
+5509    service location plugin returning no addresses handled
         incorrectly
-5510 	krb5int_open_plugin_dirs errors out if directory does not
+5510    krb5int_open_plugin_dirs errors out if directory does not
         exist
-5514 	wix installer - modify file list
-5515 	KFW NSIS installer - copyright updates and aklog removal
-5516 	NIM 1.2.0.1 corrections
-5518 	EAI_NODATA deprecated, not always defined
-5522 	NIM 3.2 documentation update
-5523 	KFW 3.2 Beta 2 commits
-5524 	NIM doxyfile.cfg - update to Doxygen 1.5.2
-5525 	NIM 1.2 HtmlHelp User Documentation
-5526 	NIM - Fix taskbar button visibility on Vista
+5514    wix installer - modify file list
+5515    KFW NSIS installer - copyright updates and aklog removal
+5516    NIM 1.2.0.1 corrections
+5518    EAI_NODATA deprecated, not always defined
+5521    KfW build system (post kfw-3.2-beta1)
+5522    NIM 3.2 documentation update
+5523    KFW 3.2 Beta 2 commits
+5524    NIM doxyfile.cfg - update to Doxygen 1.5.2
+5525    NIM 1.2 HtmlHelp User Documentation
+5526    NIM - Fix taskbar button visibility on Vista
+5527    kfw build - include netidmgr_userdoc.pdf in zip file
+5528    Add vertical scrollbars to realm fields in dialogs
+5529    Missing version resource info on krb5 files
+5530    KFW 3.2.0.7002 about dialogue will not respond to alt-f4
+5532    KFW Network Provider Improvements
+5533    updates for NIM developer documentation
+5534    kfwlogon corrections for XP
+5535    More NIM Developer documentation updates
+5537    only check current dir for a.tmp
+5539    add option to export instead of checkout, etc.
 
 Major changes in krb5-1.6
 -------------------------
