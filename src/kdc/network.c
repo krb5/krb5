@@ -850,7 +850,7 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 	     struct sockaddr *from, socklen_t *fromlen,
 	     struct sockaddr *to, socklen_t *tolen)
 {
-#if !defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)
+#if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
     if (to && tolen)
 	*tolen = 0;
     return recvfrom(s, buf, len, flags, from, fromlen);
@@ -926,7 +926,7 @@ send_to_from(int s, void *buf, size_t len, int flags,
 	     const struct sockaddr *to, socklen_t tolen,
 	     const struct sockaddr *from, socklen_t fromlen)
 {
-#if !defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)
+#if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
     return sendto(s, buf, len, flags, to, tolen);
 #else
     struct iovec iov;
