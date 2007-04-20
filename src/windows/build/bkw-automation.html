@@ -124,7 +124,7 @@
                     &nbsp; /config /f path&nbsp;&nbsp; Path to config file. Default is 
                     bkwconfig.xml.
                     <BR>
-                    &nbsp; /src /r dir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Source directory to use. 
+                    &nbsp; /src /s dir&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Source directory to use. 
                     Should contain
                     <BR>
                     &nbsp;&nbsp;&nbsp; 
@@ -140,19 +140,18 @@
                     <BR>
                 </TT><TT>&nbsp; /repository checkout | co \ What repository action to take.
                     <BR>
-                    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    update&nbsp;&nbsp; | up&nbsp; ) Options are to checkout, update or
-                    <BR>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    skip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ take no 
-                    action [skip].
-                    <BR>
+                    &nbsp;&nbsp;&nbsp; &nbsp;/r&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    update&nbsp;&nbsp; | up&nbsp;\ Options are to checkout, update, export<BR>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;export&nbsp;&nbsp; 
+                    | ex \ or take no action [skip].&nbsp;<BR>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+                    skip<BR>
                     &nbsp; /username /u name username used to access svn if checking out.
                     <BR>
                     &nbsp; /cvstag /c tag&nbsp;&nbsp;&nbsp; use -r &lt;tag&gt;
                     <TAG>in cvs 
 command <BR>&nbsp; /svnbranch /b tag use 
-/branches/&lt;tag&gt;<TAG>&nbsp;instead of /trunk.<BR>&nbsp; /svntag /s tag&nbsp;&nbsp;&nbsp; use 
+/branches/&lt;tag&gt;<TAG>&nbsp;instead of /trunk.<BR>&nbsp; /svntag /t tag&nbsp;&nbsp;&nbsp; use 
 /tags/&lt;tag&gt;<TAG>&nbsp;instead of /trunk.<BR>&nbsp; /debug 
 /d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Do&nbsp;debug make instead of 
 release make. <BR>&nbsp; 

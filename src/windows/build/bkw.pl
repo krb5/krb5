@@ -41,17 +41,18 @@ Usage: $0 [options] NMAKE-options
   Options:
     /help /?           usage information (what you now see).
     /config /f path    Path to config file.  Default is bkwconfig.xml.
-    /srcdir /r dir     Source directory to use.  Should contain 
+    /srcdir /s dir     Source directory to use.  Should contain 
                        pismere/athena.  If cvstag or svntag is null, 
                        the directory should be prepopulated.
     /outdir /o dir     Directory to be created where build results will go
     /repository checkout | co \\  What repository action to take.
-                update   | up  ) Options are to checkout, update or 
-                skip          /  take no action [skip].
+       /r       update   | up \\  Options are to checkout, update, export
+                export   | ex \\  or skip (take no action).
+                skip        
     /username /u name  username used to access svn if checking out.
     /cvstag /c tag     use -r <tag> in cvs command
     /svnbranch /b tag  use /branches/<tag> instead of /trunk.
-    /svntag /s tag     use /tags/<tag> instead of /trunk.
+    /svntag /t tag     use /tags/<tag> instead of /trunk.
     /debug /d          Do debug make instead of release make.
     /[no]make          Control the make step.
     /clean             Build clean target.
@@ -89,27 +90,38 @@ sub main {
            'ignore_case', 'pass_through',
            'prefix_pattern=(--|-|\+|\/)',
            );
-    GetOptions($OPT,
-           'help|h|?',
-           'cvstag|c:s',
-           'svntag|s:s',
-           'svnbranch|b:s',
-           'src|r:s',
-           'out|o:s',
-           'debug|d',
-           'nodebug',
-           'config|f=s',
-           'logfile|l:s',
-           'nolog',
-           'repository:s',
-           'username|u:s',
-           'verbose|v',
-           'vverbose',
-           'make!',
-           'clean',
-           'package!',
-           'sign!',
-           );
+
+    local @goargs   = ('config|f=s');
+    if (!GetOptions($OPT, @goargs)) {
+        Usage();
+        exit(0);
+        }
+
+    if (! exists $OPT->{config}) {$OPT->{config}  = "bkwconfig.xml";}
+    my $configfile  = $OPT->{config};
+    print "Info -- Reading configuration from $configfile.\n";
+    my $xml         = new XML::Simple();
+    $config         = $xml->XMLin($configfile); ## Read in configuration file.
+
+    # Set up convenience variables:
+    local $odr  = $config->{Config};    ## Options, directories, repository, environment.
+
+    # Build argument description from Config section of the XML,
+    #  to parse the rest of the arguments:
+    local @xmlargs;
+    while (($sw, $val) = each %$odr) {
+        local $arg  = $sw;
+        if (exists $val->{abbr})    {$arg .= "|$val->{abbr}";}
+        if (exists $val->{value})   {       ## Can't do both negations and string values.
+            $arg .= ":s";
+            }
+        else {    
+            if (! ($val->{def} =~ /A/)) {$arg .= "!";}
+            }
+        push @xmlargs, $arg;
+        }
+
+    if (!GetOptions($OPT, @xmlargs)) {$OPT->{help} = 1;}
 
     if ( $OPT->{help} ) {
         usage();
@@ -119,15 +131,6 @@ sub main {
     delete $OPT->{foo};        
 
 ##++ Validate required conditions:
-
-    local $argvsize = @ARGV;
-    if ($argvsize > 0) {
-        print "Error -- invalid argument:  $ARGV[0]\n";
-        usage();
-        die;
-        }
-        
-    if (! exists $OPT->{config}) {$OPT->{config}  = "bkwconfig.xml";}
 
     # List of programs which must be in PATH:
     my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
@@ -160,16 +163,7 @@ sub main {
 
 ##++ Assemble configuration from config file and command line:
 
-    my $configfile      = $OPT->{config};
     my $bOutputCleaned  = 0;
-
-    print "Info -- Reading configuration from $configfile.\n";
-
-    # Get configuration file:
-    my $xml = new XML::Simple();
-    $config = $xml->XMLin($configfile);
-    # Set up convenience variables:
-    local $odr  = $config->{Config};    ## Options, directories, repository, environment.
 
 #while ($v = each %$OPT) {print "$v: $OPT->{$v}\n";}
 
@@ -265,11 +259,14 @@ sub main {
         die "Fatal -- Can't specify both /SVNTAG and /SVNBRANCH.";
         }
 
+    # /logfile and /nolog interact:
+    if ($odr->{nolog}->{def})  {$odr->{logfile}->{def} = 0;}
+
 ##-- Assemble configuration from config file and command line.
 
     local $rverb = $odr->{repository}->{value};
-    if ( ($rverb =~ /checkout/) && $clean) {
-        print "Warning -- Because sources afe being checked out, make clean will not be run.\n";
+    if ( (($rverb =~ /checkout/) || ($rverb =~ /export/)) && $clean) {
+        print "Warning -- Because sources are being checked out, make clean will not be run.\n";
         $clean  = $odr->{clean}->{def}    = 0;
         }
 
@@ -285,9 +282,18 @@ sub main {
             }
         }
 
-    if ( ($rverb =~ /checkout/) && (-d $wd) ){
+    print "Executing $cmdline\n";
+    local $argvsize = @ARGV;
+    if ($argvsize > 0) {
+        print "\nArguments for NMAKE: ";
+        map {print " $_ "} @ARGV;
+        print "\n";
+        }
+       
+    #                (------------------------------------------------)
+    if ( (-d $wd) && ( ($rverb =~ /export/) || ($rverb =~ /checkout/) ) ) {
         print "\n\nHEADS UP!!\n\n";
-        print "/REPOSITORY CHECKOUT will cause everything under $wd to be deleted.\n";
+        print "/REPOSITORY ".uc($rverb)." will cause everything under $wd to be deleted.\n";
         print "If this is not what you intended, here's your chance to bail out!\n\n\n";
         print "Are you sure you want to remove everything under $wd? ";
         my $char = getc;
@@ -305,8 +311,6 @@ sub main {
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
 
-    print "Executing $cmdline\n";
-       
 ##++ Begin repository action:
     if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"    if ($verbose);}
     else {
@@ -328,7 +332,7 @@ sub main {
             $cvscmdroot .= " -r $odr->{cvstag}->{value}";
             }
 
-        if ($rverb =~ /checkout/) {        
+        if (($rverb =~ /checkout/) || ($rverb =~ /export/)) {        
             chdir($src)                                     or die "Fatal -- couldn't chdir to $src\n";
             print "Info -- chdir to ".`cd`."\n"             if ($verbose);
             my @cvsmodules    = (    
@@ -337,11 +341,11 @@ sub main {
                 'pismere/athena/util/lib/getopt', 
                 'pismere/athena/util/guiwrap'
                 );
-
+            local $logging = $odr->{logfile}->{def} ? ">> $odr->{logfile}->{value} 2>&1" : " ";
             foreach my $module (@cvsmodules) {
                 local $cvscmd = $cvscmdroot." ".$module;
                 if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
-                !system($cvscmd)    or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
+                !system("$cvscmd") or die "Fatal -- command \"$cvscmd\" failed; return code $?\n";
                 }
             }
         else {                ## Update.
@@ -364,8 +368,12 @@ sub main {
         chdir($krb5dir)                                 or die "Fatal -- Couldn't chdir to $krb5dir";
         print "Info -- chdir to ".`cd`."\n"             if ($verbose);
         my $svncmd = "svn $rverb ";
-        if ($rverb =~ /checkout/) {        # Append the rest of the checkout command:
+        if (($rverb =~ /checkout/) || ($rverb =~ /export/)) {        # Append the rest of the checkout/export command:
             chdir("..");
+            if ($rverb =~ /export/) {
+                ## svn export will fail if the destination directory exists
+                rmdir "krb5";
+            }       
             $svncmd .= "svn+ssh://".$odr->{username}->{value}."@".$odr->{SVNURL}->{value}."/krb5/";
             if (length $odr->{svntag}->{value} > 0) {
                 $svncmd .= "tags/$odr->{svntag}->{value}";
@@ -446,7 +454,7 @@ sub main {
     ##-- Read in the version information & set config info.
 
 ##++ Repository action, part 2:
-    if ($rverb =~ /checkout/) {        
+    if (($rverb =~ /checkout/) || ($rverb =~ /export/)) {        
        if (! $bOutputCleaned) {                    ## In case somebody cleaned $out before us.
            if (-d $out)    {!system("rm -rf $out/*")   or die "Fatal -- Couldn't clean $out."}    ## Clean output directory.
            else            {mkdir($out);}
