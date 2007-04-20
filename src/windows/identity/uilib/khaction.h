@@ -32,64 +32,8 @@
 /*! \defgroup khui_actions Actions
   @{*/
 
-/*! \brief An action */
-typedef struct tag_khui_action {
-    khm_int32 cmd;            /*!< action identifier */
-    khm_int32 type;           /*!< combination of KHUI_ACTIONTYPE_* */
-    wchar_t * name;           /*!< name for named actions.  NULL if
-                                not named. */
-
-    /* The following fields are only for use by NetIDMgr */
-    khm_int16 ib_normal;      /*!< (internal) normal bitmap (index) (toolbar sized icon) */
-    khm_int16 ib_hot;         /*!< (internal) hot bitmap (index) (toolbar sized icon) */
-    khm_int16 ib_disabled;    /*!< (internal) disabled bitmap (index) (toolbar sized icon) */
-
-    khm_int16 ib_icon;        /*!< (internal) index of small (16x16) icon (for menu) (small icon) */
-    khm_int16 ib_icon_dis;    /*!< (internal) index of disabled (greyed) icon (small icon) */
-
-    khm_int16 is_caption;     /*!< (internal) index of string resource for caption */
-    khm_int16 is_tooltip;     /*!< (internal) same for description / tooltip */
-    khm_int16 ih_topic;       /*!< (internal) help topic */
-
-    /* The following fields are specified for custom actions */
-    wchar_t * caption;        /*!< Caption (localized) (limited by
-                                  KHUI_MAXCCH_SHORT_DESC).  The
-                                  caption is used for representing the
-                                  action in menus and toolbars. */
-    wchar_t * tooltip;        /*!< Tooltip (localized) (limited by
-                                  KHUI_MAXCCH_SHORT_DESC).  If this is
-                                  specified, whenever the user hovers
-                                  over the menu item or toolbar button
-                                  representing the action, the tooltip
-                                  will be displayed either on a
-                                  tooltip window or in the status
-                                  bar. */
-    khm_handle listener;      /*!< Listener of this action.  Should be
-                                  a handle to a message
-                                  subscription. When the action is
-                                  invoked, a message of type
-                                  ::KMSG_ACT and subtype
-                                  ::KMSG_ACT_ACTIVATE will be posted
-                                  to this subscriber. The \a uparam
-                                  parameter of the message will have
-                                  the identifier of the action. */
-    void *    data;           /*!< User data for custom action.  This
-                                  field is not used by the UI library.
-                                  It is reserved for plugins to store
-                                  data that is specific for this
-                                  action.  The data that's passed in
-                                  in the \a userdata parameter to
-                                  khui_action_create() will be stored
-                                  here and can be retrieved by calling
-                                  khui_action_get_data(). */
-    void *    reserved1;      /*!< Reserved. */
-    void *    reserved2;      /*!< Reserved. */
-    void *    reserved3;      /*!< Reserved. */
-
-    /* For all actions */
-    int state;                /*!< current state. combination of
-                                  KHUI_ACTIONSTATE_* */
-} khui_action;
+struct tag_khui_action;
+typedef struct tag_khui_action khui_action;
 
 /*! \brief Unknown action type
 
@@ -221,6 +165,11 @@ typedef struct tag_khui_action_ref {
     context menus.  In general, it is good practice to place the
     default item at the top of a menu, although the UI library does
     not enforce this.  This is purely meant as a rendering hint.
+
+    Only one action is allowed to have this flag set.  When an action
+    is added to a menu using khui_menu_insert_action() or
+    khui_menu_insert_paction() and this flag is set, all other menu
+    items will be stripped of this flag.
  */
 #define KHUI_ACTIONREF_DEFAULT      0x20
 
@@ -343,6 +292,40 @@ extern int khui_n_all_menus;
 
 /* functions */
 
+/*! \brief Refresh the global action table
+
+    Changes to system menus and toolbars may not be immediately
+    reflected in the user interface.  Calling this function forces the
+    UI to reparse the action tables and menus and refresh the
+    application menu bar and toolbars.
+
+ */
+KHMEXP void KHMAPI
+khui_refresh_actions(void);
+
+/*! \brief Lock the action and menu tables
+
+    This function, along with khui_action_unlock() is used to prevent
+    changes from being made to shared menus and actions while they are
+    being updated.  In particular, changes to shared menus usually
+    need to be done in a batch and may suffer corruption of other
+    threads access or modify the menu while one thread is updating it.
+    Operations on shared menus should always be done with the actions
+    locked.
+*/
+KHMEXP void KHMAPI
+khui_action_lock(void);
+
+/*! \brief Unlock the action and menu tables
+
+    Unlocks the action and menu tables after a call to
+    khui_action_lock().
+
+    \see khui_action_lock()
+ */
+KHMEXP void KHMAPI
+khui_action_unlock(void);
+
 /*! \brief Create a new menu
 
     Creates a new menu.  The returned data structure must be freed by
@@ -408,11 +391,10 @@ khui_menu_delete(khui_menu_def * d);
         that are valid for this function are: ::KHUI_ACTIONREF_SEP,
         ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.
         ::KHUI_ACTIONREF_SEP will be automatically added if the
-        command is ::KHUI_MENU_SEP.
-
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
+        command is ::KHUI_MENU_SEP.  If ::KHUI_ACTIONREF_DEFAULT is
+        specified, then all other items in the menu will be stripped
+        of that flag leaving this action as the only one with that
+        flag set.
  */
 KHMEXP void KHMAPI
 khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 cmd, khm_int32 flags);
@@ -445,11 +427,10 @@ khui_menu_insert_action(khui_menu_def * d, khm_size idx, khm_int32 cmd, khm_int3
         ::KHUI_ACTIONREF_SUBMENU, ::KHUI_ACTIONREF_DEFAULT.  For this
         function, ::KHUI_ACTIONREF_PACTION will automatically be aded
         when adding the action.  ::KHUI_ACTIONREF_SEP will be
-        automatically added if the command is ::KHUI_MENU_SEP.
-
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
+        automatically added if the command is ::KHUI_MENU_SEP.  If
+        ::KHUI_ACTIONREF_DEFAULT is specified, then all other items in
+        the menu will be stripped of that flag leaving this action as
+        the only one with that flag set.
 */
 KHMEXP void KHMAPI
 khui_menu_insert_paction(khui_menu_def * d, khm_size idx, khui_action * act, khm_int32 flags);
@@ -485,9 +466,6 @@ khui_menu_get_size(khui_menu_def * d);
     If the specified index is out of bounds, then the function returns
     NULL.
 
-    \note The ::khui_menu_def structure is not thread safe.  Multiple
-        threads modifying the same ::khui_menu_def structure may cause
-        thread safety issues.
  */
 KHMEXP khui_action_ref *
 khui_menu_get_action(khui_menu_def * d, khm_size idx);
@@ -887,9 +865,28 @@ KHMEXP size_t KHMAPI khui_action_list_length(khui_action_ref * ref);
 
 /*! \brief Create a new action
 
+    Creates a new custom action.  The created custom action can be
+    added to menus, toolbars and can be triggered by
+    khui_action_trigger().
+
+    When the action is triggered as a result of the user selecting a
+    menu item, a toolbar item or as a result of calling
+    khui_action_trigger(), the subscription identified by \a hsub will
+    received a message of type ::KMSG_ACT, subtype
+    ::KMSG_ACT_ACTIVATE.  The \a uparam for the message will be the
+    action identifier that was returned by khui_action_create().  The
+    \a vparam of the message will currently be set to \a NULL.
+
+    Actions can optionally be named.  The name is not actively used by
+    the Network Identity Manager framework, but can be used to label
+    actions so that they can be looked up later using
+    khui_find_named_action().
+
     \param[in] name Name for a named action.  The name must be unique
-        among all registered actions. (limited by KHUI_MAXCCH_NAME)
+        among all registered actions. (limited by KHUI_MAXCCH_NAME).
         (Optional. Set to NULL if the action is not a named action.)
+        See \a note below for additional restrictions on the name of
+        the action.
 
     \param[in] caption The localized caption for the action.  This
         will be shown in menus, toolbars and buttons when the action
@@ -900,11 +897,7 @@ KHMEXP size_t KHMAPI khui_action_list_length(khui_action_ref * ref);
         by KHUI_MAXCCH_SHORT_DESC) (Optional, set to NULL if there is
         no tooltip associated with the action)
 
-    \param[in] hsub The subscription that is notified when the action
-        is triggered. (Optional) The subscription can be created with
-        kmq_create_subscription().  The handle will be released when
-        it is no longer needed.  Hence, the caller should not release
-        it.
+    \param[in] userdata A custom value.
 
     \param[in] type The type of the action.  Currently it should be
         set to either ::KHUI_ACTIONTYPE_TRIGGER or
@@ -912,7 +905,11 @@ KHMEXP size_t KHMAPI khui_action_list_length(khui_action_ref * ref);
         initial state will be unchecked.  Use khui_check_action()
         function to change the checked state of the action.
 
-    \param[in] userdata A custom value.
+    \param[in] hsub The subscription that is notified when the action
+        is triggered. (Optional) The subscription must be created with
+        kmq_create_subscription().  The handle will be released when
+        it is no longer needed.  Hence, the caller should not release
+        it.
 
     \return The identifier of the new action or zero if the action
         could not be created.

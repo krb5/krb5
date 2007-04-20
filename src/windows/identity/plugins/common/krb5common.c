@@ -90,8 +90,8 @@ khm_krb5_initialize(khm_handle ident,
     return(0);
 #else
 
-    LPCSTR          functionName;
-    int             freeContextFlag;
+    LPCSTR          functionName = NULL;
+    int             freeContextFlag = 0;
     krb5_error_code	rc = 0;
     krb5_flags          flags = 0;
 
@@ -164,8 +164,10 @@ khm_krb5_initialize(khm_handle ident,
             khm_krb5_error(rc, "krb5_cc_set_flags()", 0, ctx, 
             cache);
         else if ((rc == KRB5_FCC_NOFILE || rc == KRB5_CC_NOTFOUND) && *ctx != NULL) {
-            if (*cache != NULL)
+            if (*cache != NULL) {
                 (*pkrb5_cc_close)(*ctx, *cache);
+                *cache = NULL;
+            }
         }
         return rc;
     }

@@ -462,6 +462,7 @@ find_nxt_kdc(struct tr_state *ts)
 	if (ts->ntgts > 0) {
 	    /* Punt NXT_TGT from KDC_TGTS if bogus. */
 	    krb5_free_creds(ts->ctx, ts->kdc_tgts[--ts->ntgts]);
+	    ts->kdc_tgts[ts->ntgts] = NULL;
 	}
 	TR_DBG_RET(ts, "find_nxt_kdc", KRB5_KDCREP_MODIFIED);
 	return KRB5_KDCREP_MODIFIED;

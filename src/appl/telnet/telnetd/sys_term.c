@@ -1287,12 +1287,25 @@ start_login(host, autologin, name)
 #endif
 #if	defined (AUTHENTICATION)
 	if (auth_level >= 0 && autologin == AUTH_VALID) {
+		if (name[0] == '-') {
+		    /*
+		     * Authenticated and authorized to log in to an
+		     * account starting with '-'?  Even if that
+		     * unlikely case comes to pass, the current login
+		     * program will not parse the resulting command
+		     * line properly.
+		     */
+		    syslog(LOG_ERR, "user name cannot start with '-'");
+		    fatal(net, "user name cannot start with '-'");
+		    exit(1);
+		}
 # if	!defined(NO_LOGIN_F)
 #if	defined(LOGIN_CAP_F)
 		argv = addarg(argv, "-F");
 #else
 		argv = addarg(argv, "-f");
 #endif
+		argv = addarg(argv, "--");
 		argv = addarg(argv, name);
 # else
 #  if defined(LOGIN_R)
@@ -1371,17 +1384,27 @@ start_login(host, autologin, name)
 			pty = xpty;
 		}
 #  else
+		argv = addarg(argv, "--");
 		argv = addarg(argv, name);
 #  endif
 # endif
 	} else
 #endif
 	if (getenv("USER")) {
-		argv = addarg(argv, getenv("USER"));
+		char *user = getenv("USER");
+		if (user[0] == '-') {
+		    /* "telnet -l-x ..." */
+		    syslog(LOG_ERR, "user name cannot start with '-'");
+		    fatal(net, "user name cannot start with '-'");
+		    exit(1);
+		}
+		argv = addarg(argv, "--");
+		argv = addarg(argv, user);
 #if	defined(LOGIN_ARGS) && defined(NO_LOGIN_P)
 		{
 			register char **cpp;
 			for (cpp = environ; *cpp; cpp++)
+			    if ((*cpp)[0] != '-')
 				argv = addarg(argv, *cpp);
 		}
 #endif

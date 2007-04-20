@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define NOEXPORT
+
 #include<khuidefs.h>
 #include<utils.h>
 

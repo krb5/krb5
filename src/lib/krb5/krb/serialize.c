@@ -58,7 +58,7 @@ krb5_error_code
 krb5_register_serializer(krb5_context kcontext, const krb5_ser_entry *entry)
 {
     krb5_error_code	kret;
-    krb5_ser_handle	stable;
+    krb5_ser_entry *	stable;
 
     kret = 0;
     /* See if it's already there, if so, we're good to go. */
@@ -66,12 +66,12 @@ krb5_register_serializer(krb5_context kcontext, const krb5_ser_entry *entry)
 	/*
 	 * Can't find our type.  Create a new entry.
 	 */
-	if ((stable = (krb5_ser_handle) malloc(sizeof(krb5_ser_entry) *
-					       (kcontext->ser_ctx_count+1)))) {
+	if ((stable = (krb5_ser_entry *) malloc(sizeof(krb5_ser_entry) *
+						(kcontext->ser_ctx_count+1)))) {
 	    /* Copy in old table */
 	    if (kcontext->ser_ctx_count)
 	         memcpy(stable, kcontext->ser_ctx,
-		        sizeof(krb5_ser_entry) * kcontext->ser_ctx_count);
+			sizeof(krb5_ser_entry) * kcontext->ser_ctx_count);
 	    /* Copy in new entry */
 	    memcpy(&stable[kcontext->ser_ctx_count], entry,
 		   sizeof(krb5_ser_entry));

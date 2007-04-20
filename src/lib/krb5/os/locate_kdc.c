@@ -157,13 +157,18 @@ static int translate_ai_error (int err)
 #ifdef EAI_ADDRFAMILY
     case EAI_ADDRFAMILY:
 #endif
-#if EAI_NODATA != EAI_NONAME
+#if defined(EAI_NODATA) && EAI_NODATA != EAI_NONAME
     case EAI_NODATA:
 #endif
     case EAI_NONAME:
 	/* Name not known or no address data, but no error.  Do
 	   nothing more.  */
 	return 0;
+#ifdef EAI_OVERFLOW
+    case EAI_OVERFLOW:
+	/* An argument buffer overflowed.  */
+	return EINVAL;		/* XXX */
+#endif
 #ifdef EAI_SYSTEM
     case EAI_SYSTEM:
 	/* System error, obviously.  */
@@ -786,28 +791,28 @@ krb5int_locate_server (krb5_context context, const krb5_data *realm,
 
     code = module_locate_server(context, realm, &al, svc, socktype, family);
     Tprintf("module_locate_server returns %d\n", code);
-    if (code != KRB5_PLUGIN_NO_HANDLE) {
-	*addrlist = al;
-	return code;
-    }
+    if (code == KRB5_PLUGIN_NO_HANDLE) {
+	/*
+	 * We always try the local file before DNS.  Note that there
+	 * is no way to indicate "service not available" via the
+	 * config file.
+	 */
 
-    /*
-     * We always try the local file before DNS
-     */
-
-    code = prof_locate_server(context, realm, &al, svc, socktype, family);
-
-    /* We could put more heuristics here, like looking up a hostname
-       of "kerberos."+REALM, etc.  */
+	code = prof_locate_server(context, realm, &al, svc, socktype, family);
 
 #ifdef KRB5_DNS_LOOKUP
-    if (code) {
-	krb5_error_code code2;
-	code2 = dns_locate_server(context, realm, &al, svc, socktype, family);
-	if (code2 != KRB5_PLUGIN_NO_HANDLE)
-	    code = code2;
-    }
+	if (code) {		/* Try DNS for all profile errors?  */
+	    krb5_error_code code2;
+	    code2 = dns_locate_server(context, realm, &al, svc, socktype,
+				      family);
+	    if (code2 != KRB5_PLUGIN_NO_HANDLE)
+		code = code2;
+	}
 #endif /* KRB5_DNS_LOOKUP */
+
+	/* We could put more heuristics here, like looking up a hostname
+	   of "kerberos."+REALM, etc.  */
+    }
     if (code == 0)
 	Tprintf ("krb5int_locate_server found %d addresses\n",
 		 al.naddrs);

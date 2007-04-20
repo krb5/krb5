@@ -52,7 +52,8 @@ INCFILES=			\
 	$(INCDIR)\khconfigui.h	\
 	$(INCDIR)\khtracker.h	\
 	$(INCDIR)\khremote.h	\
-	$(INCDIR)\intaction.h
+	$(INCDIR)\intaction.h	\
+	$(INCDIR)\intalert.h
 
 $(OBJ)\actiondef.c: actions.csv actiondef.cfg
 	$(CCSV) $** $@

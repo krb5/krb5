@@ -120,35 +120,6 @@ typedef struct tag_k5_config_data {
 #define K5_CDFLAG_MOD_INC_REALMS     0x00000100
 #define K5_CDFLAG_MOD_REALMS         0x00001000
 
-static const char *const conf_yes[] = {
-    "y", "yes", "true", "t", "1", "on",
-    0,
-};
-
-static const char *const conf_no[] = {
-    "n", "no", "false", "nil", "0", "off",
-    0,
-};
-
-int
-k5_parse_boolean(const char *s)
-{
-    const char *const *p;
-
-    for(p=conf_yes; *p; p++) {
-        if (!_stricmp(*p,s))
-            return 1;
-    }
-
-    for(p=conf_no; *p; p++) {
-        if (!_stricmp(*p,s))
-            return 0;
-    }
-
-    /* Default to "no" */
-    return 0;
-}
-
 void
 k5_init_config_data(k5_config_data * d) {
     ZeroMemory(d, sizeof(*d));
@@ -263,6 +234,7 @@ k5_is_profile_loaded(void) {
     assert(pprofile_add_relation);
     assert(pprofile_update_relation);
     assert(pprofile_flush);
+    assert(pprofile_rename_section);
 #endif
 
     if (!pprofile_init ||
@@ -276,7 +248,8 @@ k5_is_profile_loaded(void) {
         !pprofile_clear_relation ||
         !pprofile_add_relation ||
         !pprofile_update_relation ||
-        !pprofile_flush)
+        !pprofile_flush ||
+        !pprofile_rename_section)
 
         return FALSE;
 
@@ -325,7 +298,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_lookup_kdc",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_lookup_kdc = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_lookup_kdc = b;
+            else
+                d->dns_lookup_kdc = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_lookup_kdc = FALSE;
@@ -333,7 +311,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_lookup_realm",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_lookup_realm = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_lookup_realm = b;
+            else
+                d->dns_lookup_realm = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_lookup_realm = FALSE;
@@ -341,7 +324,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "dns_fallback",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->dns_fallback = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->dns_fallback = b;
+            else
+                d->dns_fallback = FALSE;
             pprofile_release_string(boolv);
         } else
             d->dns_fallback = FALSE;
@@ -349,7 +337,12 @@ k5_read_config_data(k5_config_data * d) {
         rv = pprofile_get_string(profile, "libdefaults", "noaddresses",
                                  NULL, NULL, &boolv);
         if (!rv && boolv) {
-            d->noaddresses = k5_parse_boolean(boolv);
+            khm_boolean b;
+
+            if (!khm_krb5_parse_boolean(boolv, &b))
+                d->noaddresses = b;
+            else
+                d->noaddresses = TRUE;
             pprofile_release_string(boolv);
         } else
             d->noaddresses = TRUE;
@@ -538,7 +531,7 @@ k5_read_config_data(k5_config_data * d) {
     d->flags = 0;
 }
 
-void
+int
 k5_write_config_data(k5_config_data * d) {
     char astr[MAX_PATH * 2];
     char config_file[MAX_PATH];
@@ -546,22 +539,25 @@ k5_write_config_data(k5_config_data * d) {
     const char *filenames[2];
     long rv;
     khm_size s;
+    int applied = FALSE;
 
     if (d->flags == 0)
-        return;
+        return FALSE;
 
     if (!k5_is_profile_loaded())
-        return;
+        return FALSE;
 
     /* write the MSLSA import setting */
     if (d->flags & K5_CDFLAG_MOD_LSA_IMPORT) {
         khc_write_int32(csp_params, L"MsLsaImport", d->lsa_import);
         d->flags &= ~K5_CDFLAG_MOD_LSA_IMPORT;
+        applied = TRUE;
     }
 
     if (d->flags & K5_CDFLAG_MOD_INC_REALMS) {
         khc_write_int32(csp_params, L"UseFullRealmList", d->inc_realms);
         d->flags &= ~K5_CDFLAG_MOD_INC_REALMS;
+        applied = TRUE;
     }
 
     if (!(d->flags & 
@@ -575,7 +571,7 @@ k5_write_config_data(k5_config_data * d) {
            K5_CDFLAG_MOD_REALMS))) {
 
         d->flags = 0;
-        return;
+        return applied;
     }
 
     khm_krb5_get_profile_file(config_file, ARRAYLENGTH(config_file));
@@ -629,6 +625,7 @@ k5_write_config_data(k5_config_data * d) {
 
                 rv = pprofile_add_relation(profile, sec_libdefaults,
                                            defrealm);
+                applied = TRUE;
             }
             d->flags &= ~K5_CDFLAG_MOD_DEF_REALM;
         }
@@ -641,9 +638,10 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_lookup_kdc)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
             d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_KDC;
+            applied = TRUE;
         }
 
         if (d->flags & K5_CDFLAG_MOD_DNS_LOOKUP_RLM) {
@@ -654,10 +652,11 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_lookup_realm)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_DNS_LOOKUP_RLM;
+            applied = TRUE;
         }
 
         if (d->flags & K5_CDFLAG_MOD_DNS_FALLBACK) {
@@ -668,10 +667,11 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->dns_fallback)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_DNS_FALLBACK;
+            applied = TRUE;
         }
 
         if (d->flags & K5_CDFLAG_MOD_NOADDRESSES) {
@@ -682,10 +682,11 @@ k5_write_config_data(k5_config_data * d) {
 
             rv = pprofile_add_relation(profile, sec_libdefaults,
                                        (d->noaddresses)?
-                                       conf_yes[0]:
-                                       conf_no[0]);
+                                       KRB5_CONF_YES:
+                                       KRB5_CONF_NO);
 
             d->flags &= ~K5_CDFLAG_MOD_NOADDRESSES;
+            applied = TRUE;
         }
 
         /* now we look at the [realms] section */
@@ -735,7 +736,10 @@ k5_write_config_data(k5_config_data * d) {
                             pprofile_add_relation(profile, sec_admin,
                                                   host);
 
-                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_NEW;
+                        d->realms[r].kdcs[k].flags &= ~ (K5_RKFLAG_NEW |
+                                                         K5_RKFLAG_MOD_MASTER |
+                                                         K5_RKFLAG_MOD_ADMIN);
+                        applied = TRUE;
                     }
                 }
 
@@ -754,6 +758,7 @@ k5_write_config_data(k5_config_data * d) {
                            is deleted and not in the profile file
                            anymore. */
                         d->realms[r].domain_maps[m].flags |= K5_DMFLAG_NEW;
+                        applied = TRUE;
                     } else if (!(d->realms[r].domain_maps[m].flags &
                                K5_DMFLAG_DELETED) &&
                              (d->realms[r].domain_maps[m].flags &
@@ -762,10 +767,12 @@ k5_write_config_data(k5_config_data * d) {
                                               realm);
 
                         d->realms[r].domain_maps[m].flags &= ~K5_DMFLAG_NEW;
+                        applied = TRUE;
                     }
                 }
 
-                d->realms[r].flags &= ~K5_RDFLAG_NEW;
+                d->realms[r].flags &= ~(K5_RDFLAG_NEW |
+                                        K5_RDFLAG_MODIFED);
 
             } else if ((d->realms[r].flags & K5_RDFLAG_DELETED) &&
                        !(d->realms[r].flags & K5_RDFLAG_NEW)) {
@@ -783,7 +790,10 @@ k5_write_config_data(k5_config_data * d) {
                         sec_all[2] = values[v];
                         pprofile_clear_relation(profile, sec_all);
                     }
+                    sec_all[2] = NULL;
+                    pprofile_rename_section(profile, sec_all, NULL);
                     pprofile_free_list(values);
+                    applied = TRUE;
                 }
 
                 rv = pprofile_get_relation_names(profile, sec_domain_realm,
@@ -803,6 +813,7 @@ k5_write_config_data(k5_config_data * d) {
                                               values[v]);
                                 pprofile_clear_relation(profile, 
                                                         sec_domain_map);
+                                applied = TRUE;
                             }
                             pprofile_release_string(maprealm);
                         }
@@ -815,7 +826,8 @@ k5_write_config_data(k5_config_data * d) {
                    deleted and is not in the profile file. */
                 d->realms[r].flags |= K5_RDFLAG_NEW;
 
-            } else if (!(d->realms[r].flags & K5_RDFLAG_DELETED)) {
+            } else if (!(d->realms[r].flags & K5_RDFLAG_DELETED) &&
+                       (d->realms[r].flags & K5_RDFLAG_MODIFED)) {
                 khm_size k;
                 khm_size m;
 
@@ -839,6 +851,8 @@ k5_write_config_data(k5_config_data * d) {
                         pprofile_update_relation(profile, sec_master,
                                                  host, NULL);
 
+                        applied = TRUE;
+
                         /* as above, setting 'new' flag to indicate
                            that the item does not exist in the profile
                            file. */
@@ -858,7 +872,10 @@ k5_write_config_data(k5_config_data * d) {
                             pprofile_add_relation(profile, sec_admin,
                                                   host);
 
-                        d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_NEW;
+                        d->realms[r].kdcs[k].flags &= ~(K5_RKFLAG_NEW |
+                                                        K5_RKFLAG_MOD_ADMIN |
+                                                        K5_RKFLAG_MOD_MASTER);
+                        applied = TRUE;
                         continue;
                     }
 
@@ -873,6 +890,7 @@ k5_write_config_data(k5_config_data * d) {
                                                   host);
                         }
 
+                        applied = TRUE;
                         d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_MOD_MASTER;
                     }
 
@@ -887,6 +905,7 @@ k5_write_config_data(k5_config_data * d) {
                                                      host, NULL);
                         }
 
+                        applied = TRUE;
                         d->realms[r].kdcs[k].flags &= ~K5_RKFLAG_MOD_ADMIN;
                     }
                 }
@@ -904,6 +923,7 @@ k5_write_config_data(k5_config_data * d) {
 
                         pprofile_clear_relation(profile, sec_domain_map);
                         d->realms[r].domain_maps[m].flags |= K5_DMFLAG_NEW;
+                        applied = TRUE;
 
                     } else if (!(d->realms[r].domain_maps[m].flags &
                                K5_DMFLAG_DELETED) &&
@@ -914,6 +934,8 @@ k5_write_config_data(k5_config_data * d) {
                         pprofile_add_relation(profile, sec_domain_map,
                                               realm);
                         d->realms[r].domain_maps[m].flags &= ~K5_DMFLAG_NEW;
+                        applied = TRUE;
+
                     }
                 }
 
@@ -954,6 +976,8 @@ k5_write_config_data(k5_config_data * d) {
     }
 
     d->flags = 0;
+
+    return applied;
 }
 
 /* actual dialog stuff */
@@ -1208,13 +1232,14 @@ k5_config_dlgproc(HWND hwnd,
 
             if (HIWORD(wParam) == WMCFG_APPLY) {
                 khm_int32 oflags;
+                int applied;
 
                 oflags = d->flags;
-                k5_write_config_data(d);
+                applied = k5_write_config_data(d);
 
                 if (d->flags != oflags) {
                     khui_cfg_set_flags(d->node_main,
-                                       KHUI_CNFLAG_APPLIED,
+                                       (applied ? KHUI_CNFLAG_APPLIED : 0),
                                        KHUI_CNFLAG_APPLIED |
                                        KHUI_CNFLAG_MODIFIED);
                 }
@@ -2673,12 +2698,11 @@ k5_realms_dlgproc(HWND hwnd,
 
     case KHUI_WM_CFG_NOTIFY:
         /* the realms dialog receives this notification after the top
-           level krb5 configuration panel has received it.  Therefore,
-           we assume that any changes have already been applied.  When
-           applying changes, we switch the mod bits off to indicate
-           that the changes have been written.  We just have to
-           repaint the screen at this point. */
+           level krb5 configuration panel has received it. */
         if (HIWORD(wParam) == WMCFG_APPLY) {
+            int applied;
+
+            applied = k5_write_config_data(d);
             k5_purge_config_data(d, TRUE, TRUE, TRUE);
             k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
             if (d->c_realm != -1) {
@@ -2688,6 +2712,10 @@ k5_realms_dlgproc(HWND hwnd,
                 k5_update_kdcs_display(GetDlgItem(hwnd, IDC_CFG_KDC), NULL, 0);
                 k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
             }
+            khui_cfg_set_flags(d->node_realm,
+                               (applied ? KHUI_CNFLAG_APPLIED : 0),
+                               KHUI_CNFLAG_APPLIED);
+
         }
         break;
     }

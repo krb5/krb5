@@ -33,7 +33,6 @@
 
 #define SECURITY_WIN32
 #include <security.h>
-#include <ntsecapi.h>
 
 #include <string.h>
 #include <time.h>
@@ -229,9 +228,91 @@ typedef struct tag_identlist {
 
 static void
 tc_prep_idlist(identlist * idlist) {
+    khm_int32 rv;
+    khm_size cb_ids = 0;
+    khm_size n_ids = 0;
+    khm_size i;
+    wchar_t * ids = NULL;
+    wchar_t *thisid;
+
     idlist->list = NULL;
     idlist->n_list = 0;
     idlist->nc_list = 0;
+
+    do {
+
+        if (ids) {
+            PFREE(ids);
+            ids = NULL;
+        }
+
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE,
+                                KCDB_IDENT_FLAG_ACTIVE,
+                                NULL,
+                                &cb_ids,
+                                &n_ids);
+
+        if (rv != KHM_ERROR_TOO_LONG)
+            break;              /* something else is wrong */
+
+        if (n_ids == 0 || cb_ids == 0)
+            break;              /* no identities to process */
+
+#ifdef DEBUG
+        assert(cb_ids > 0);
+#endif
+
+        ids = PMALLOC(cb_ids);
+#ifdef DEBUG
+        assert(ids != NULL);
+#endif
+        if (ids == NULL)
+            break;
+
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE,
+                                KCDB_IDENT_FLAG_ACTIVE,
+                                ids,
+                                &cb_ids,
+                                &n_ids);
+
+        if (KHM_SUCCEEDED(rv))
+            break;
+
+    } while (TRUE);
+
+    if (ids == NULL)
+        return;
+
+    if (KHM_FAILED(rv) || n_ids == 0) {
+        if (ids)
+            PFREE(ids);
+        return;
+    }
+
+    idlist->nc_list = UBOUNDSS(n_ids, IDLIST_ALLOC_INCR, IDLIST_ALLOC_INCR);
+
+    idlist->list = PCALLOC(idlist->nc_list, sizeof(idlist->list[0]));
+
+    for (i = 0, thisid = ids;
+         thisid && thisid[0];
+         thisid = multi_string_next(thisid)) {
+
+        khm_handle ident;
+
+        rv = kcdb_identity_create(thisid, 0, &ident);
+
+        if (KHM_FAILED(rv))
+            continue;
+
+        idlist->list[i].ident = ident;
+        idlist->list[i].count = 0;
+
+        i++;
+    }
+
+    idlist->n_list = i;
+
+    PFREE(ids);
 }
 
 static ident_data *
@@ -287,42 +368,102 @@ tc_add_ident_to_list(identlist * idlist, khm_handle ident) {
 static void
 tc_set_ident_data(identlist * idlist) {
     khm_size i;
+    wchar_t k5idtype[KCDB_MAXCCH_NAME];
+
+    k5idtype[0] = L'\0';
+    LoadString(hResModule, IDS_KRB5_NC_NAME,
+               k5idtype, ARRAYLENGTH(k5idtype));
 
     for (i=0; i < idlist->n_list; i++) {
 #ifdef DEBUG
         assert(idlist->list[i].ident);
 #endif
 
-        kcdb_identity_set_attr(idlist->list[i].ident,
-                               attr_id_krb5_ccname,
-                               idlist->list[i].ccname,
-                               KCDB_CBSIZE_AUTO);
+        if (idlist->list[i].count > 0) {
+            khm_int32 t;
 
-        kcdb_identity_set_attr(idlist->list[i].ident,
-                               KCDB_ATTR_EXPIRE,
-                               &idlist->list[i].ft_expire,
-                               sizeof(idlist->list[i].ft_expire));
-
-        kcdb_identity_set_attr(idlist->list[i].ident,
-                               KCDB_ATTR_ISSUE,
-                               &idlist->list[i].ft_issue,
-                               sizeof(idlist->list[i].ft_issue));
-
-        kcdb_identity_set_attr(idlist->list[i].ident,
-                               attr_id_krb5_flags,
-                               &idlist->list[i].krb5_flags,
-                               sizeof(idlist->list[i].krb5_flags));
-
-        if (idlist->list[i].ft_renewexpire.dwLowDateTime == 0 &&
-            idlist->list[i].ft_renewexpire.dwHighDateTime == 0) {
+            t = credtype_id_krb5;
             kcdb_identity_set_attr(idlist->list[i].ident,
-                                   KCDB_ATTR_RENEW_EXPIRE,
-                                   NULL, 0);
+                                   KCDB_ATTR_TYPE,
+                                   &t,
+                                   sizeof(t));
+
+            /* We need to manually add the type name if we want the
+               name to show up in the property list for the identity.
+               The type name is only automatically calculated for
+               credentials. */
+            kcdb_identity_set_attr(idlist->list[i].ident,
+                                   KCDB_ATTR_TYPE_NAME,
+                                   k5idtype,
+                                   KCDB_CBSIZE_AUTO);
+
+            kcdb_identity_set_attr(idlist->list[i].ident,
+                                   attr_id_krb5_ccname,
+                                   idlist->list[i].ccname,
+                                   KCDB_CBSIZE_AUTO);
+
+            kcdb_identity_set_attr(idlist->list[i].ident,
+                                   KCDB_ATTR_EXPIRE,
+                                   &idlist->list[i].ft_expire,
+                                   sizeof(idlist->list[i].ft_expire));
+
+            kcdb_identity_set_attr(idlist->list[i].ident,
+                                   KCDB_ATTR_ISSUE,
+                                   &idlist->list[i].ft_issue,
+                                   sizeof(idlist->list[i].ft_issue));
+
+            kcdb_identity_set_attr(idlist->list[i].ident,
+                                   attr_id_krb5_flags,
+                                   &idlist->list[i].krb5_flags,
+                                   sizeof(idlist->list[i].krb5_flags));
+
+            if (idlist->list[i].ft_renewexpire.dwLowDateTime == 0 &&
+                idlist->list[i].ft_renewexpire.dwHighDateTime == 0) {
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_RENEW_EXPIRE,
+                                       NULL, 0);
+            } else {
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_RENEW_EXPIRE,
+                                       &idlist->list[i].ft_renewexpire,
+                                       sizeof(idlist->list[i].ft_renewexpire));
+            }
+
         } else {
-            kcdb_identity_set_attr(idlist->list[i].ident,
-                                   KCDB_ATTR_RENEW_EXPIRE,
-                                   &idlist->list[i].ft_renewexpire,
-                                   sizeof(idlist->list[i].ft_renewexpire));
+            /* We didn't see any TGTs for this identity.  We have to
+               remove all the Krb5 supplied properties. */
+
+            khm_int32 t;
+            khm_size cb;
+
+            cb = sizeof(t);
+            if (KHM_SUCCEEDED(kcdb_identity_get_attr(idlist->list[i].ident,
+                                                     KCDB_ATTR_TYPE, NULL,
+                                                     &t,
+                                                     &cb)) &&
+                t == credtype_id_krb5) {
+
+                /* disown this and remove all our properties. the
+                   system will GC this identity if nobody claims it.*/
+
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_TYPE, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_TYPE_NAME, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       attr_id_krb5_ccname, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_EXPIRE, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_ISSUE, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       attr_id_krb5_flags, NULL, 0);
+                kcdb_identity_set_attr(idlist->list[i].ident,
+                                       KCDB_ATTR_RENEW_EXPIRE, NULL, 0);
+            } else {
+                /* otherwise, this identity doesn't belong to us.  We
+                   should leave it as is. */
+            }
         }
     }
 }
@@ -919,7 +1060,7 @@ khm_krb5_renew_cred(khm_handle cred)
 #endif
 
     if (strlen("krbtgt") != krb5_princ_name(ctx, server)->length ||
-	 strncmp("krbtgt", krb5_princ_name(ctx, server)->data, krb5_princ_name(ctx, server)->length)) 
+        strncmp("krbtgt", krb5_princ_name(ctx, server)->data, krb5_princ_name(ctx, server)->length)) 
     {
 	code = pkrb5_get_renewed_creds(ctx, &cc_creds, me, cc, name);
 	if (code) {
@@ -1004,8 +1145,8 @@ khm_krb5_renew_ident(khm_handle identity)
     krb5_creds          my_creds;
     krb5_data           *realm = NULL;
     wchar_t             idname[KCDB_IDENT_MAXCCH_NAME];
-    char                cidname[KCDB_IDENT_MAXCCH_NAME];
     khm_size            cb;
+    khm_int32           k5_flags;
 
     memset(&my_creds, 0, sizeof(krb5_creds));
 
@@ -1016,19 +1157,129 @@ khm_krb5_renew_ident(khm_handle identity)
     kcdb_identity_get_name(identity, idname, &cb);
 
     if (khm_krb5_get_identity_flags(identity) & K5IDFLAG_IMPORTED) {
+#ifndef NO_REIMPORT_MSLSA_CREDS
         /* we are trying to renew the identity that was imported from
            MSLSA: */
-        BOOL imported;
+        BOOL  imported;
+        BOOL retry_import = FALSE;
+        char  cidname[KCDB_IDENT_MAXCCH_NAME];
+        khm_handle imported_id = NULL;
+        khm_size cb;
+        FILETIME ft_expire;
+        FILETIME ft_now;
+        FILETIME ft_threshold;
+        krb5_principal princ = NULL;
 
         UnicodeStrToAnsi(cidname, sizeof(cidname), idname);
 
-        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE);
+        imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, &imported_id);
+
+        if (imported == 0)
+            goto import_failed;
+
+        /* if the imported identity has already expired or will soon,
+           we clear the cache and try again. */
+        khm_krb5_list_tickets(&ctx);
+
+        cb = sizeof(ft_expire);
+        if (KHM_FAILED(kcdb_identity_get_attr(imported_id, KCDB_ATTR_EXPIRE,
+                                              NULL, &ft_expire, &cb)))
+            goto import_failed;
+
+        GetSystemTimeAsFileTime(&ft_now);
+        TimetToFileTimeInterval(5 * 60, &ft_threshold);
+
+        ft_now = FtAdd(&ft_now, &ft_threshold);
+
+        if (CompareFileTime(&ft_expire, &ft_now) < 0) {
+            /* the ticket lifetime is not long enough */
+
+            code = 0;
+
+            if (ctx == NULL)
+                code = pkrb5_init_context(&ctx);
+            if (code)
+                goto import_failed;
+
+            code = pkrb5_cc_resolve(ctx, "MSLSA:", &cc);
+            if (code)
+                goto import_failed;
+
+            code = pkrb5_cc_get_principal(ctx, cc, &princ);
+            if (code)
+                goto import_failed;
+
+            pkrb5_cc_initialize(ctx, cc, princ);
+
+            retry_import = TRUE;
+        }
+
+    import_failed:
+
+        if (imported_id) {
+            kcdb_identity_release(imported_id);
+            imported_id = NULL;
+        }
+
+        if (ctx) {
+            if (cc) {
+                pkrb5_cc_close(ctx, cc);
+                cc = NULL;
+            }
+
+            if (princ) {
+                pkrb5_free_principal(ctx, princ);
+                princ = NULL;
+            }
+
+            /* leave ctx so we can use it later */
+        }
+
+        if (retry_import)
+            imported = khm_krb5_ms2mit(cidname, FALSE, TRUE, NULL);
 
         if (imported)
             goto cleanup;
 
         /* if the import failed, then we try to renew the identity via
            the usual procedure. */
+
+#else
+        /* if we are suppressing further imports from MSLSA, we just
+           skip renewing this identity. */
+        goto cleanup;
+#endif
+    }
+
+    cb = sizeof(k5_flags);
+    if (KHM_SUCCEEDED(kcdb_identity_get_attr(identity,
+                                             attr_id_krb5_flags,
+                                             NULL,
+                                             &k5_flags,
+                                             &cb)) &&
+        !(k5_flags & TKT_FLG_RENEWABLE)) {
+
+        code = KRB5KDC_ERR_BADOPTION;
+        goto cleanup;
+    }
+
+    {
+        FILETIME ft_now;
+        FILETIME ft_exp;
+
+        cb = sizeof(ft_exp);
+        GetSystemTimeAsFileTime(&ft_now);
+        if (KHM_SUCCEEDED(kcdb_identity_get_attr(identity,
+                                                 KCDB_ATTR_EXPIRE,
+                                                 NULL,
+                                                 &ft_exp,
+                                                 &cb)) &&
+            CompareFileTime(&ft_exp, &ft_now) < 0) {
+
+            code = KRB5KRB_AP_ERR_TKT_EXPIRED;
+            goto cleanup;
+
+        }
     }
 
     code = khm_krb5_initialize(identity, &ctx, &cc);
@@ -1917,7 +2168,8 @@ IsKerberosLogon(VOID)
 
 
 BOOL
-khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds)
+khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds,
+                khm_handle * ret_ident)
 {
 #ifdef NO_KRB5
     return(FALSE);
@@ -2002,11 +2254,11 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds)
 
             wname[0] = L'\0';
 
-            kcdb_identity_get_config(ident, 0, &idconfig);
+            kcdb_identity_get_config(ident, KHM_FLAG_CREATE, &idconfig);
             if (idconfig == NULL)
                 goto _done_checking_config;
 
-            khc_open_space(idconfig, CSNAME_KRB5CRED, 0, &k5config);
+            khc_open_space(idconfig, CSNAME_KRB5CRED, KHM_FLAG_CREATE, &k5config);
             if (k5config == NULL)
                 goto _done_checking_config;
 
@@ -2059,9 +2311,15 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds)
         /* and mark the identity as having been imported */
         if (ident) {
             khm_krb5_set_identity_flags(ident, K5IDFLAG_IMPORTED, K5IDFLAG_IMPORTED);
+
+            if (ret_ident) {
+                *ret_ident = ident;
+                kcdb_identity_hold(*ret_ident);
+            }
         }
 
         rc = TRUE;
+
     } else {
         /* Enumerate tickets from cache looking for an initial ticket */
         if ((code = pkrb5_cc_start_seq_get(kcontext, mslsa_ccache, &cursor))) 
@@ -2092,6 +2350,9 @@ cleanup:
         pkrb5_cc_close(kcontext, mslsa_ccache);
     if (kcontext)
         pkrb5_free_context(kcontext);
+    if (ident)
+        kcdb_identity_release(ident);
+
     return(rc);
 #endif /* NO_KRB5 */
 }
@@ -2389,6 +2650,10 @@ khm_krb5_get_default_realm(void)
     char * def = 0;
 
     pkrb5_init_context(&ctx);
+
+    if (ctx == 0)
+        return NULL;
+
     pkrb5_get_default_realm(ctx,&def);
     
     if (def) {
@@ -2575,7 +2840,7 @@ khm_krb5_set_identity_flags(khm_handle identity,
     }
 
     t &= ~flag_mask;
-    t |= flag_value | flag_mask;
+    t |= (flag_value & flag_mask);
 
     kcdb_identity_set_attr(identity,
                            attr_id_krb5_idflags,
@@ -2611,4 +2876,612 @@ khm_krb5_get_temp_ccache(krb5_context ctx,
         *prcc = cc;
 
     return code;
+}
+
+/*
+
+  The configuration information for each identity comes from a
+  multitude of layers organized as follows.  The ordering is
+  decreasing in priority.  When looking up a value, the value will be
+  looked up in each layer in turn starting at level 0.  The first
+  instance of the value found will be the effective value.
+
+  0  : <identity configuration>\Krb5Cred
+
+  0.1: per user
+
+  0.2: per machine
+
+  1  : <plugin configuration>\Parameters\Realms\<realm of identity>
+
+  1.1: per user
+
+  1.2: per machine
+
+  2  : <plugin configuration>\Parameters
+
+  2.1: per user
+
+  2.2: per machine
+
+  2.3: schema
+
+ */
+khm_int32
+khm_krb5_get_identity_config(khm_handle ident,
+                            khm_int32 flags,
+                            khm_handle * ret_csp) {
+
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_i = NULL;
+    khm_handle csp_ik5 = NULL;
+    khm_handle csp_realms = NULL;
+    khm_handle csp_realm = NULL;
+    khm_handle csp_plugins = NULL;
+    khm_handle csp_krbcfg = NULL;
+    khm_handle csp_rv = NULL;
+    wchar_t realm[KCDB_IDENT_MAXCCH_NAME];
+
+    realm[0] = L'\0';
+
+    if (ident) {
+        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+        wchar_t * trealm;
+        khm_size cb_idname = sizeof(idname);
+
+        rv = kcdb_identity_get_name(ident, idname, &cb_idname);
+        if (KHM_SUCCEEDED(rv) &&
+            (trealm = khm_get_realm_from_princ(idname)) != NULL) {
+            StringCbCopy(realm, sizeof(realm), trealm);
+        }
+    }
+
+    if (ident) {
+        rv = kcdb_identity_get_config(ident, flags, &csp_i);
+        if (KHM_FAILED(rv))
+            goto try_realm;
+
+        rv = khc_open_space(csp_i, CSNAME_KRB5CRED, flags, &csp_ik5);
+        if (KHM_FAILED(rv))
+            goto try_realm;
+
+    try_realm:
+
+        if (realm[0] == L'\0')
+            goto done_shadow_realm;
+
+        rv = khc_open_space(csp_params, CSNAME_REALMS, flags, &csp_realms);
+        if (KHM_FAILED(rv))
+            goto done_shadow_realm;
+
+        rv = khc_open_space(csp_realms, realm, flags, &csp_realm);
+        if (KHM_FAILED(rv))
+            goto done_shadow_realm;
+
+        rv = khc_shadow_space(csp_realm, csp_params);
+
+    done_shadow_realm:
+
+        if (csp_ik5) {
+            if (csp_realm)
+                rv = khc_shadow_space(csp_ik5, csp_realm);
+            else
+                rv = khc_shadow_space(csp_ik5, csp_params);
+
+            csp_rv = csp_ik5;
+        } else {
+            if (csp_realm)
+                csp_rv = csp_realm;
+        }
+    }
+
+    if (csp_rv == NULL) {
+
+        /* No valid identity specified or the specified identity
+           doesn't have any configuration. We default to the
+           parameters key. */
+
+        /* we don't just return csp_params since that's a global
+           handle that we shouldn't close until the plugin is
+           unloaded.  The caller is going to close the returned handle
+           when it is done.  So we need to create a new csp_params
+           that can safely be closed. */
+
+        rv = kmm_get_plugins_config(0, &csp_plugins);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        rv = khc_open_space(csp_plugins, CSNAME_KRB5CRED, flags, &csp_krbcfg);
+        if (KHM_FAILED(rv))
+            goto done;
+
+        rv = khc_open_space(csp_krbcfg, CSNAME_PARAMS, flags, &csp_rv);
+    }
+
+ done:
+
+    *ret_csp = csp_rv;
+
+    /* leave csp_ik5.  If it's non-NULL, then it's the return value */
+    /* leave csp_rv.  It's the return value. */
+    if (csp_i)
+        khc_close_space(csp_i);
+    if (csp_realms)
+        khc_close_space(csp_realms);
+
+    /* csp_realm can also be a return value if csp_ik5 was NULL */
+    if (csp_realm && csp_realm != csp_rv)
+        khc_close_space(csp_realm);
+
+    if (csp_plugins)
+        khc_close_space(csp_plugins);
+    if (csp_krbcfg)
+        khc_close_space(csp_krbcfg);
+
+    return rv;
+}
+
+/* from get_in_tkt.c */
+static krb5_error_code
+get_libdefault_string(profile_t profile, const char * realm,
+                      const char * option, char ** ret_val) {
+    char realmstr[K5_MAXCCH_REALM];
+    char **nameval = NULL;
+    const char * names[4];
+    krb5_error_code code = 0;
+
+    names[0] = "libdefaults";
+
+    if (!realm || !realm[0])
+        goto try_number_two;
+
+    StringCbCopyA(realmstr, sizeof(realmstr), realm);
+
+    /*
+     * Try number one:
+     *
+     * [libdefaults]
+     *		REALM = {
+     *			option = <boolean>
+     *		}
+     */
+
+    names[1] = realmstr;
+    names[2] = option;
+    names[3] = 0;
+    code = pprofile_get_values(profile, names, &nameval);
+    if (code == 0 && nameval && nameval[0])
+	goto goodbye;
+
+ try_number_two:
+
+    /*
+     * Try number two:
+     *
+     * [libdefaults]
+     *		option = <boolean>
+     */
+    
+    names[1] = option;
+    names[2] = 0;
+    code = pprofile_get_values(profile, names, &nameval);
+    if (code == 0 && nameval && nameval[0])
+	goto goodbye;
+
+ goodbye:
+    if (!nameval) 
+	return(ENOENT);
+
+    if (!nameval[0]) {
+        code = ENOENT;
+    } else {
+        size_t cb;
+
+        if (FAILED(StringCbLengthA(nameval[0], K5_MAXCCH_REALM * sizeof(char), &cb))) {
+            code = ENOMEM;
+        } else {
+            cb += sizeof(char);
+            *ret_val = PMALLOC(cb);
+
+            if (!*ret_val)
+                code = ENOMEM;
+            else {
+                StringCbCopyA(*ret_val, cb, nameval[0]);
+                code = 0;
+            }
+        }
+    }
+
+    pprofile_free_list(nameval);
+
+    return code;
+}
+
+khm_int32
+khm_krb5_get_identity_params(khm_handle ident, k5_params * p) {
+
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_id = NULL;
+    khm_int32 regf = 0;
+    khm_int32 proff = 0;
+    khm_int32 e;
+    khm_int32 v;
+    CHAR confname[MAX_PATH];
+    CHAR realmname[K5_MAXCCH_REALM];
+
+    ZeroMemory(p, sizeof(*p));
+
+    rv = khm_krb5_get_identity_config(ident, 0, &csp_id);
+    if (KHM_FAILED(rv))
+        goto done_reg;
+
+
+#define GETVAL(vname, vfield, flag) \
+    do {                            \
+    e = khc_value_exists(csp_id, vname);                               \
+    rv = khc_read_int32(csp_id, vname, &v);                            \
+    if (KHM_FAILED(rv)) goto done_reg;                                 \
+    p->vfield = v;                                                     \
+    if ((e & ~KCONF_FLAG_SCHEMA) != 0) regf |= flag;                   \
+    } while(FALSE)
+
+    /* Flags */
+    GETVAL(L"Renewable", renewable, K5PARAM_F_RENEW);
+    GETVAL(L"Forwardable", forwardable, K5PARAM_F_FORW);
+    GETVAL(L"Proxiable", proxiable, K5PARAM_F_PROX);
+    GETVAL(L"Addressless", addressless, K5PARAM_F_ADDL);
+    GETVAL(L"PublicIP", publicIP, K5PARAM_F_PUBIP);
+
+    /* Lifetime */
+    GETVAL(L"DefaultLifetime", lifetime, K5PARAM_F_LIFE);
+    GETVAL(L"MaxLifetime", lifetime_max, K5PARAM_F_LIFE_H);
+    GETVAL(L"MinLifetime", lifetime_min, K5PARAM_F_LIFE_L);
+
+    /* Renewable lifetime */
+    GETVAL(L"DefaultRenewLifetime", renew_life, K5PARAM_F_RLIFE);
+    GETVAL(L"MaxRenewLifetime", renew_life_max, K5PARAM_F_RLIFE_H);
+    GETVAL(L"MinRenewLifetime", renew_life_min, K5PARAM_F_RLIFE_L);
+
+#undef GETVAL
+
+ done_reg:
+
+    if (csp_id)
+        khc_close_space(csp_id);
+
+    /* if all the parameters were read from the registry, then we have
+       no reason to read from the profile file. */
+    if (regf == K5PARAM_FM_ALL) {
+        p->source_reg = regf;
+        return KHM_ERROR_SUCCESS;
+    }
+
+    if (rv)
+        return rv;
+
+    /* we need to figure out the realm name, since there might be
+       per-realm configuration in the profile file. */
+
+    realmname[0] = '\0';
+
+    if (ident) {
+        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+        khm_size cb;
+
+        idname[0] = L'\0';
+        cb = sizeof(idname);
+        rv = kcdb_identity_get_name(ident, idname, &cb);
+        if (KHM_SUCCEEDED(rv)) {
+            wchar_t * wrealm;
+
+            wrealm = khm_get_realm_from_princ(idname);
+            if (wrealm) {
+                UnicodeStrToAnsi(realmname, sizeof(realmname), wrealm);
+            }
+        }
+    }
+
+    /* If we get here, then some of the settings we read from the
+       configuration actually came from the schema.  In other words,
+       the values weren't really defined for this identity.  So we now
+       have to read the values from the krb5 configuration file. */
+
+    if (!khm_krb5_get_profile_file(confname, sizeof(confname))) {
+        profile_t profile;
+        const char * filenames[2];
+        long retval;
+
+        filenames[0] = confname;
+        filenames[1] = NULL;
+
+        if (!pprofile_init(filenames, &profile)) {
+
+            /* default ticket lifetime */
+            if (!(regf & K5PARAM_F_LIFE)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "ticket_lifetime", &value);
+
+                if (retval == 0 && value) {
+                    krb5_deltat d;
+
+                    retval = pkrb5_string_to_deltat(value, &d);
+                    if (retval == KRB5_DELTAT_BADFORMAT) {
+                        /* Historically some sites use relations of
+                           the form 'ticket_lifetime = 24000' where
+                           the unit is left out but is assumed to be
+                           seconds. Then there are other sites which
+                           use the form 'ticket_lifetime = 600' where
+                           the unit is assumed to be minutes.  While
+                           these are technically wrong (a unit needs
+                           to be specified), we try to accomodate for
+                           this using the safe assumption that the
+                           unit is seconds and tack an 's' to the end
+                           and see if that works. */
+
+                        size_t cch;
+                        char tmpbuf[256];
+                        char * buf;
+
+                        do {
+                            if (FAILED(StringCchLengthA(value, 1024 /* unresonably large size */,
+                                                        &cch)))
+                                break;
+
+                            cch += sizeof(char) * 2; /* NULL and new 's' */
+                            if (cch > ARRAYLENGTH(tmpbuf))
+                                buf = PMALLOC(cch * sizeof(char));
+                            else
+                                buf = tmpbuf;
+
+                            StringCchCopyA(buf, cch, value);
+                            StringCchCatA(buf, cch, "s");
+
+                            retval = pkrb5_string_to_deltat(buf, &d);
+                            if (retval == 0) {
+                                p->lifetime = d;
+                                proff |= K5PARAM_F_LIFE;
+                            }
+
+                            if (buf != tmpbuf)
+                                PFREE(buf);
+
+                        } while(0);
+
+                    } else if (retval == 0) {
+                        p->lifetime = d;
+                        proff |= K5PARAM_F_LIFE;
+                    }
+
+                    PFREE(value);
+                }
+            }
+
+            if (!(regf & K5PARAM_F_RLIFE)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "renew_lifetime", &value);
+                if (retval == 0 && value) {
+                    krb5_deltat d;
+
+                    retval = pkrb5_string_to_deltat(value, &d);
+                    if (retval == 0) {
+                        p->renew_life = d;
+                        proff |= K5PARAM_F_RLIFE;
+                    }
+                    PFREE(value);
+                }
+            }
+
+            if (!(regf & K5PARAM_F_FORW)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "forwardable", &value);
+                if (retval == 0 && value) {
+                    khm_boolean b;
+
+                    if (!khm_krb5_parse_boolean(value, &b))
+                        p->forwardable = b;
+                    else
+                        p->forwardable = FALSE;
+                    PFREE(value);
+                    proff |= K5PARAM_F_FORW;
+                }
+            }
+
+            if (!(regf & K5PARAM_F_RENEW)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "renewable", &value);
+                if (retval == 0 && value) {
+                    khm_boolean b;
+
+                    if (!khm_krb5_parse_boolean(value, &b))
+                        p->renewable = b;
+                    else
+                        p->renewable = TRUE;
+                    PFREE(value);
+                    proff |= K5PARAM_F_RENEW;
+                }
+            }
+
+            if (!(regf & K5PARAM_F_ADDL)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "noaddresses", &value);
+                if (retval == 0 && value) {
+                    khm_boolean b;
+
+                    if (!khm_krb5_parse_boolean(value, &b))
+                        p->addressless = b;
+                    else
+                        p->addressless = TRUE;
+                    PFREE(value);
+                    proff |= K5PARAM_F_ADDL;
+                }
+            }
+
+            if (!(regf & K5PARAM_F_PROX)) {
+                char * value = NULL;
+                retval = get_libdefault_string(profile, realmname,
+                                               "proxiable", &value);
+                if (retval == 0 && value) {
+                    khm_boolean b;
+
+                    if (!khm_krb5_parse_boolean(value, &b))
+                        p->proxiable = b;
+                    else
+                        p->proxiable = FALSE;
+                    PFREE(value);
+                    proff |= K5PARAM_F_PROX;
+                }
+            }
+
+            pprofile_release(profile);
+        }
+    }
+
+    p->source_reg = regf;
+    p->source_prof = proff;
+
+    return rv;
+}
+
+/* Note that p->source_reg and p->source_prof is used in special ways
+   here.  All fields that are flagged in source_reg will be written to
+   the configuration (if they are different from what
+   khm_krb5_get_identity_params() reports).  All fields that are
+   flagged in source_prof will be removed from the configuration
+   (thereby exposing the value defined in the profile file). */
+khm_int32
+khm_krb5_set_identity_params(khm_handle ident, const k5_params * p) {
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_id = NULL;
+    k5_params p_s;
+    khm_int32 source_reg = p->source_reg;
+    khm_int32 source_prof = p->source_prof;
+
+    rv = khm_krb5_get_identity_config(ident,
+                                      KHM_PERM_WRITE | KHM_FLAG_CREATE |
+                                      KCONF_FLAG_WRITEIFMOD,
+                                      &csp_id);
+    if (KHM_FAILED(rv))
+        goto done_reg;
+
+    khm_krb5_get_identity_params(ident, &p_s);
+
+    /* Remove any bits that don't make sense.  Not all values can be
+       specified in the profile file. */
+    source_prof &= K5PARAM_FM_PROF;
+
+    /* if a flag appears in both source_prof and source_reg, remove
+       the flag from source_reg. */
+    source_reg &= ~source_prof;
+
+    /* we only write values that have changed, and that are flagged in
+       source_reg */
+
+    if ((source_reg & K5PARAM_F_RENEW) &&
+        !!p_s.renewable != !!p->renewable)
+        khc_write_int32(csp_id, L"Renewable", !!p->renewable);
+
+    if ((source_reg & K5PARAM_F_FORW) &&
+        !!p_s.forwardable != !!p->forwardable)
+        khc_write_int32(csp_id, L"Forwardable", !!p->forwardable);
+
+    if ((source_reg & K5PARAM_F_PROX) &&
+        !!p_s.proxiable != !!p->proxiable)
+        khc_write_int32(csp_id, L"Proxiable", !!p->proxiable);
+
+    if ((source_reg & K5PARAM_F_ADDL) &&
+        !!p_s.addressless != !!p->addressless)
+        khc_write_int32(csp_id, L"Addressless", !!p->addressless);
+
+    if ((source_reg & K5PARAM_F_PUBIP) &&
+        p_s.publicIP != p->publicIP)
+        khc_write_int32(csp_id, L"PublicIP", p->publicIP);
+
+    if ((source_reg & K5PARAM_F_LIFE) &&
+        p_s.lifetime != p->lifetime)
+        khc_write_int32(csp_id, L"DefaultLifetime", p->lifetime);
+
+    if ((source_reg & K5PARAM_F_LIFE_H) &&
+        p_s.lifetime_max != p->lifetime_max)
+        khc_write_int32(csp_id, L"MaxLifetime", p->lifetime_max);
+
+    if ((source_reg & K5PARAM_F_LIFE_L) &&
+        p_s.lifetime_min != p->lifetime_min)
+        khc_write_int32(csp_id, L"MinLifetime", p->lifetime_min);
+
+    if ((source_reg & K5PARAM_F_RLIFE) &&
+        p_s.renew_life != p->renew_life)
+        khc_write_int32(csp_id, L"DefaultRenewLifetime", p->renew_life);
+
+    if ((source_reg & K5PARAM_F_RLIFE_H) &&
+        p_s.renew_life_max != p->renew_life_max)
+        khc_write_int32(csp_id, L"MaxRenewLifetime", p->renew_life_max);
+
+    if ((source_reg & K5PARAM_F_RLIFE_L) &&
+        p_s.renew_life_min != p->renew_life_min)
+        khc_write_int32(csp_id, L"MinRenewLifetime", p->renew_life_min);
+
+    /* and now, remove the values that are present in source_prof.
+       Not all values are removed since not all values can be
+       specified in the profile file. */
+    if (source_prof & K5PARAM_F_RENEW)
+        khc_remove_value(csp_id, L"Renewable", 0);
+
+    if (source_prof & K5PARAM_F_FORW)
+        khc_remove_value(csp_id, L"Forwardable", 0);
+
+    if (source_prof & K5PARAM_F_PROX)
+        khc_remove_value(csp_id, L"Proxiable", 0);
+
+    if (source_prof & K5PARAM_F_ADDL)
+        khc_remove_value(csp_id, L"Addressless", 0);
+
+    if (source_prof & K5PARAM_F_LIFE)
+        khc_remove_value(csp_id, L"DefaultLifetime", 0);
+
+    if (source_prof & K5PARAM_F_RLIFE)
+        khc_remove_value(csp_id, L"DefaultRenewLifetime", 0);
+
+ done_reg:
+    if (csp_id != NULL)
+        khc_close_space(csp_id);
+
+    return rv;
+}
+
+static const char *const conf_yes[] = {
+    "y", "yes", "true", "t", "1", "on",
+    0,
+};
+
+static const char *const conf_no[] = {
+    "n", "no", "false", "nil", "0", "off",
+    0,
+};
+
+int
+khm_krb5_parse_boolean(const char *s, khm_boolean * b)
+{
+    const char *const *p;
+
+    for(p=conf_yes; *p; p++) {
+        if (!_stricmp(*p,s)) {
+            *b = TRUE;
+            return 0;
+        }
+    }
+
+    for(p=conf_no; *p; p++) {
+        if (!_stricmp(*p,s)) {
+            *b = FALSE;
+            return 0;
+        }
+    }
+
+    /* Default to "no" */
+    return KHM_ERROR_INVALID_PARAM;
 }

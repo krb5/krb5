@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../..
 myfulldir=tests/threads
-mydir=threads
+mydir=tests/threads
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

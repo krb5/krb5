@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,107 +26,158 @@
 /* $Id$ */
 
 /*!
-\page pi_framework Plugin Framework
+\page pi_framework Plug-in Framework
 
-\section pi_fw_pnm Plugins and Modules
+\section pi_fw_pnm Introduction to Plug-ins, Modules and Messages
 
-\subsection pi_fw_pnm_p Plugins
+\subsection pi_fw_pnm_p Plug-ins
 
-A NetIDMgr plugin is a package that implements a defined API that will
-perform credentials management or related tasks on behalf of NetIDMgr.
-The core NetIDMgr codebase does not interact directly with Kerberos of
-AFS or any other external entity directly.  Instead, plugins are used
-to abstract out this task.
+A plug-in is a package that implements a defined API that will perform
+credentials management or related tasks on behalf of Network Identity
+Manager.
 
-Each plugin has a name.  The name should be unique among the loaded
-plugins, or the plugin will fail to load.
+The Network Identity Manager architecture is message based.  The core
+of each plug-in is a message handler.  The plug-in integrates with the
+application by subscribing to, and handling specific types of
+messages.
 
-The method in which NetIDMgr communicates with a plugin depends on the
-plugin type.  For more information on each plugin type, please refer
-to \ref pi_pt.
-
-Most plugin types rely on a message processor for communication.
-During plugin registration, the module specifies the message processor
-for the plugin, which acts as the only point of contact between the
-NetIDMgr core and the plugin.  Some other plugins require exporting
-specific functions.
+The plug-in message handler runs in its own thread and receive
+asynchronous messages.  There are exceptions, such as when one plug-in
+requires another plug-in to handle a specific message before it can
+handle the message.  In addition, during certain operations that
+require user interaction, each plug-in can delegate code that will run
+in the main application thread (the user interface thread) to process
+window messages.
 
 \subsection pi_fw_pnw_m Modules
 
-One or more plugins can be bundled together into a module.  A module
-is essentially a dynamically loadable library which contain a specific
-set of callbacks.  Currently, the only two required callbacks for a
-module are :
+One or more plug-ins can be bundled together into a module.  A module
+is a dynamically loadable library which exports a specific set of
+callbacks.  Currently, the only two required callbacks for a module
+are :
 
 - init_module(), and
 - exit_module()
 
-\section pi_fw_pm Plugin/Module Manager
+For more information about how a module is structured, see \ref
+pi_structure .
 
-The plugin manager maintains a separate thread for loading and
-registering modules.  When a module is successfully loaded and it
-registers one or more plugins, a new thread is created for each
-plugin.  Plugin specific initialization and other callback functions
-are called from within this new thread.  This is to prevent one plugin
-from "hanging" other plugins and the main NetIDMgr UI threads.
+\subsection pi_fw_pnm_msg Messages and Message Queues
+
+An integral part of this framework is the messaging system.  Most of
+the communication between the Network Identity Manager application and
+plug-ins is conducted through passing messages.
+
+A message has a type and subtype and is denoted in this documentation
+as \< \e message_type, \e message_subtype\>.  For example, when a
+plug-in is loaded, the first message it receives is \< ::KMSG_SYSTEM,
+::KMSG_SYSTEM_INIT \>.
+
+Each thread in the application, specially threads that were created
+for individual plug-in messages handlers, has an associated message
+queue that stores and manages all the messages that have been sent to
+subscribers in that thread.
+
+The most common recipient of a message is a message callback function
+(see ::kmq_callback_t ). The message handler for a plug-in is one such
+example. A message callback function receives the message type,
+subtype and two optional parameters for the message.
+
+Any acceptable recipient can subscribe to broadcast messages of any
+type.  Once subscribed, whenever a message of that type is broadcast,
+the message will get queued on the corresponding message queue.  Then,
+one of the dispatch functions can dispatch the message to the correct
+callback function. (see ::kmq_dispatch).
+
+Next \subpage pi_fw_pm ...
+
+*/
+
+/*!
+
+\page pi_fw_pm Module Manager
+
+The module manager is tasked with loading, unloading and managing the
+plug-in message processing. It maintains a separate thread for loading
+and registering modules.  When a module is successfully loaded and it
+registers one or more plug-ins, a new thread is created for each
+plug-in.  Plug-in specific initialization and other callback functions
+are called from within this new thread.  This is to prevent one
+plug-in from "hanging" other plug-ins and the main Network Identity
+Manager user interface threads.
 
 Read more :
 - \ref pi_structure
 
 \subsection pi_fw_pm_load Load sequence
 
-When kmm_load_module() is called, the following sequence of events
-happen.
+When kmm_load_module() is called to load a specific module, the
+following sequence of events occur:
 
-- The standard system search path is used to locate the binary.
+- The registration information for the module is located on the
+  registry key \c
+  \Software\MIT\NetIDMgr\PluginManager\Modules\[ModuleName].
 
-- The binary is loaded into the address space of NetIDMgr along with
-  any dependencies not already loaded.
+- The \c ImagePath value from the registration information is used to
+  locate the module binary.  If it is not an absolute path, then the
+  binary is located using the standard system search path starting
+  from the directory in which Network Identity Manager binaries are
+  located.
 
-- If the NetIDMgr core binary is signed, then the signature is checked
-  against the system and user certificate stores.  If this fails, the
-  module is unloaded. See \ref pi_fw_pm_unload.
+- The binary is loaded into the address space of Network Identity
+  Manager along with any dependencies not already loaded.
 
-- init_module() for the loaded module is called.  If this function
-  returns an error or if no plugins are registered, then the module is
-  unloaded. See \ref pi_fw_pm_unload.
+- If the Network Identity Manager core binary is signed, then the
+  signature is checked against the system and user certificate stores.
+  If this fails, the module is unloaded. See \ref pi_fw_pm_unload.
+
+- The init_module() entry point for the loaded module is called.  If
+  this function returns an error or if no plug-ins are registered,
+  then the module is immediately unloaded. See \ref pi_fw_pm_unload.
 
 - During processing of init_module(), if any localized resource
   libraries are specified using kmm_set_locale_info(), then one of the
   localized libraries will be loaded. See \ref pi_localization
 
 - During processing of init_module(), the module registers all the
-  plugins that it is implementing by calling kmm_register_plugin() for
+  plug-ins that it is implementing by calling kmm_register_plugin() for
   each.
 
-- Once init_module() returns, each plugin is initialized.  The method
-  by which a plugin is initialized depends on the plugin type.  The
-  initialization code for the plugin may indicate that it didn't
-  initialize properly, in which case the plugin is immediately
-  unregistered.  No further calls are made to the plugin.
+- Once init_module() returns, each plug-in is initialized.  The method
+  by which a plug-in is initialized depends on the plug-in type.  The
+  initialization code for the plug-in may indicate that it didn't
+  initialize properly, in which case the plug-in is immediately
+  unregistered.  No further calls are made to the plug-in.
 
-- If no plugin is successfully loaded, the module is unloaded. See
+- If no plug-in is successfully loaded, the module is unloaded. See
   \ref pi_fw_pm_unload.
 
-- During normal operation, any registered plugins for a module can be
-  unloaded explicitly, or the plugin itself may signal that it should
-  be unloaded.  If at anytime, all the plugins for the module are
-  unloaded, then the module itself is also unloaded.
+- During normal operation, any registered plug-ins for a module can be
+  unloaded explicitly, or the plug-in itself may signal that it should
+  be unloaded.  If at anytime, all the plug-ins for the module are
+  unloaded, then the module itself is also unloaded unless the \c
+  NoUnload registry value is set in the module key.
 
 \subsection pi_fw_pm_unload Unload sequence
 
-- For each of the plugins that are registered for a module, the exit
+- For each of the plug-ins that are registered for a module, the exit
   code is invoked.  The method by which this happens depends on the
-  plugin type.  The plugin is not given a chance to object to the
-  decision to unload. Each plugin is responsible for performing
+  plug-in type.  The plug-in is not given a chance to veto the
+  decision to unload. Each plug-in is responsible for performing
   cleanup tasks, freeing resources and unsubscribing from any message
   classes that it has subscribed to.
 
-- exit_module() is called for the module.
+- The exit_module() entry point is called for the module.
 
 - If any localized resource libraries were loaded for the module, they
   are unloaded.
 
 - The module is unloaded.
+
+The following diagram illustrates the relationship between modules and
+plug-ins as implemented in the Kerberos 5 plug-in distributed with
+Network Identity Manager.
+
+\image html modules_plugins_krb5.png
 
  */

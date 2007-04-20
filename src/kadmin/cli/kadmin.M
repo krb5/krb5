@@ -749,11 +749,29 @@ kadmin:
 .TP
 \fBktadd\fP [\fB\-k\fP \fIkeytab\fP] [\fB\-q\fP] [\fB\-e\fP \fIkeysaltlist\fP]
 .br
-[\fIprincipal\fP | \fB\-glob\fP \fIprinc-exp\fP] [\fI...\fP]
+[\fB\-norandkey\fP] [[\fIprincipal\fP | \fB\-glob\fP \fIprinc-exp\fP] [\fI...\fP]
 .br
 Adds a principal or all principals matching
 .I princ-exp
-to a keytab, randomizing each principal's key in the process.  Requires the
+to a keytab.
+It randomizes each principal's key in the process, to prevent a
+compromised admin account from reading out all of the keys from the
+database.  However,
+.B kadmin.local
+has the
+.B \-norandkey
+option, which leaves the keys and their version numbers unchanged,
+similar to the Kerberos V4
+.B ext_srvtab
+command.
+That allows users to continue to use the passwords they know
+to login normally, while simultaneously allowing scripts
+to login to the same account using a keytab.
+There is no significant security risk added since
+.B kadmin.local
+must be run by root on the KDC anyway.
+.sp
+Requires the
 .I inquire
 and 
 .I changepw

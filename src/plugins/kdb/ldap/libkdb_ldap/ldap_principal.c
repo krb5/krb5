@@ -194,7 +194,6 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 	for (ent=ldap_first_entry(ld, result); ent != NULL; ent=ldap_next_entry(ld, ent)) {
 	    if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
 		for (i=0; values[i] != NULL; ++i) {
-		    if (values[i])
 		    if (krb5_ldap_parse_principal_name(values[i], &princ_name) != 0)
 			continue;
 		    if (krb5_parse_name(context, princ_name, &principal) != 0)

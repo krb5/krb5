@@ -81,9 +81,30 @@ int kmqint_notify_msg_completion(kmq_message * m) {
 
 /* called with cs_mkq_global && cs_kmq_types held */
 void kmqint_free_msg_type(int t) {
-    /*TODO: free the message type*/
-    /* must set handler to NULL before freeing type */
-    /* must set msg_type[t] = NULL before starting to free type */
+    kmq_msg_type * pt;
+    kmq_msg_subscription * s;
+
+    pt = msg_types[t];
+
+    msg_types[t] = NULL;
+
+    if (pt == NULL)
+        return;
+
+    /* all the subscriptions attached to a message type are owned by
+       the message type */
+    LPOP(&pt->subs, &s);
+    while(s) {
+        s->magic = 0;
+
+        PFREE(s);
+
+        LPOP(&pt->subs, &s);
+    }
+
+    pt->completion_handler = NULL;
+
+    PFREE(pt);
 }
 
 /*! \internal

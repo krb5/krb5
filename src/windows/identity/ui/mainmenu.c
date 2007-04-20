@@ -49,6 +49,8 @@ void khui_init_menu(void) {
                                 MAX_ILIST, 5, 0);
     for(i=0;i<MAX_ILIST;i++)
         il_icon_id[i] = -1;
+
+    khm_refresh_identity_menus();
 }
 
 void khui_exit_menu(void) {
@@ -76,6 +78,50 @@ int khui_get_icon_index(int id) {
     return i;
 }
 
+void khm_get_action_caption(khm_int32 action, wchar_t * buf, khm_size cb_buf) {
+    khui_action * act;
+
+    StringCbCopy(buf, cb_buf, L"");
+
+    khui_action_lock();
+    act = khui_find_action(action);
+
+    if (act == NULL)
+        goto done;
+
+    if (act->caption) {
+        StringCbCopy(buf, cb_buf, act->caption);
+    } else if (act->is_caption) {
+        LoadString(khm_hInstance, act->is_caption,
+                   buf, (int)(cb_buf / sizeof(wchar_t)));
+    }
+
+ done:
+    khui_action_unlock();
+}
+
+void khm_get_action_tooltip(khm_int32 action, wchar_t * buf, khm_size cb_buf) {
+    khui_action * act;
+
+    StringCbCopy(buf, cb_buf, L"");
+
+    khui_action_lock();
+    act = khui_find_action(action);
+
+    if (act == NULL)
+        goto done;
+
+    if (act->tooltip) {
+        StringCbCopy(buf, cb_buf, act->tooltip);
+    } else if (act->is_tooltip) {
+        LoadString(khm_hInstance, act->is_tooltip,
+                   buf, (int) (cb_buf / sizeof(wchar_t)));
+    }
+
+ done:
+    khui_action_unlock();
+}
+
 void add_action_to_menu(HMENU hm, khui_action * act, 
                         int idx, int flags) {
     MENUITEMINFO mii;
@@ -93,13 +139,7 @@ void add_action_to_menu(HMENU hm, khui_action * act,
     } else {
         khui_menu_def * def;
 
-        if (act->caption) {
-            StringCbCopy(buf, sizeof(buf), act->caption);
-        } else {
-            LoadString(khm_hInstance, 
-                       act->is_caption, 
-                       buf, ARRAYLENGTH(buf));
-        }
+        khm_get_action_caption(act->cmd, buf, sizeof(buf));
 
         if(khui_get_cmd_accel_string(act->cmd, accel, 
                                      ARRAYLENGTH(accel))) {
@@ -141,8 +181,10 @@ void add_action_to_menu(HMENU hm, khui_action * act,
             }
         }
 
-        if(flags & KHUI_ACTIONREF_DEFAULT)
+        if(flags & KHUI_ACTIONREF_DEFAULT) {
+            mii.fMask |= MIIM_STATE;
             mii.fState |= MFS_DEFAULT;
+        }
     }
 
     InsertMenuItem(hm,idx,TRUE,&mii);
@@ -150,95 +192,126 @@ void add_action_to_menu(HMENU hm, khui_action * act,
 
 static void refresh_menu(HMENU hm, khui_menu_def * def);
 
-static void refresh_menu_item(HMENU hm, khui_action * act, 
-                              int idx, int flags) {
+static int refresh_menu_item(HMENU hm, khui_action * act, 
+                             int idx, int flags) {
     MENUITEMINFO mii;
+    khui_menu_def * def;
 
     mii.cbSize = sizeof(mii);
     mii.fMask = 0;
 
-    if (act == NULL)
-        return;
-    else {
-        khui_menu_def * def;
-
-        /* first check if the menu item is there.  Otherwise we need
-           to add it. */
-        mii.fMask = MIIM_STATE;
-        if (!GetMenuItemInfo(hm, act->cmd, FALSE, &mii)) {
-            /* the 1000 is fairly arbitrary, but there should be much
-               less menu items on a menu anyway.  If there are that
-               many items, the system would be unusable to the extent
-               that the order of the items would be the least of our
-               worries. */
-            add_action_to_menu(hm, act, 1000, flags);
-            return;
+    if (flags & KHUI_ACTIONREF_END) {
+        /* we have been asked to assert that the menu doesn't have
+           more than idx items */
+        mii.fMask = MIIM_FTYPE;
+        while (GetMenuItemInfo(hm, idx, TRUE, &mii)) {
+            RemoveMenu(hm, idx, MF_BYPOSITION);
+            mii.fMask = MIIM_FTYPE;
         }
 
-        mii.fMask = 0;
+        return 0;
+    }
 
-        if(act->state & KHUI_ACTIONSTATE_DISABLED) {
+    /* Check if the menu item is there.  Otherwise we need to add
+       it. */
+    mii.fMask = MIIM_STATE | MIIM_ID | MIIM_FTYPE;
+    if (!GetMenuItemInfo(hm, idx, TRUE, &mii) ||
+        ((flags & KHUI_ACTIONREF_SEP) && !(mii.fType & MFT_SEPARATOR)) ||
+        (!(flags & KHUI_ACTIONREF_SEP) && mii.wID != act->cmd)) {
+        add_action_to_menu(hm, ((flags & KHUI_ACTIONREF_SEP)? NULL : act),
+                           idx, flags);
+        return 0;
+    }
+
+    if (flags & KHUI_ACTIONREF_SEP)
+        return 0;
+
+#ifdef DEBUG
+    assert(act);
+#endif
+    if (!act)
+        return 0;
+
+    if (flags & KHUI_ACTIONREF_DEFAULT) {
+        if (!(mii.fState & MFS_DEFAULT)) {
             mii.fMask |= MIIM_STATE;
-            mii.fState = MFS_DISABLED;
-        } else {
-            mii.fMask |= MIIM_STATE;
-            mii.fState = MFS_ENABLED;
+            mii.fState |= MFS_DEFAULT;
         }
-
-        if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
-            mii.fMask |= MIIM_STATE;
-            if (act->state & KHUI_ACTIONSTATE_CHECKED) {
-                mii.fState |= MFS_CHECKED;
-            } else {
-                mii.fState |= MFS_UNCHECKED;
-            }
-        }
-
-        SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
-
-        def = khui_find_menu(act->cmd);
-        if(def) {
-            MENUITEMINFO mii2;
-
-            mii2.cbSize = sizeof(mii2);
-            mii2.fMask = MIIM_SUBMENU;
-
-            if (GetMenuItemInfo(hm, act->cmd, FALSE, &mii2)) {
-                refresh_menu(mii2.hSubMenu, def);
-            }
+    } else {
+        if (mii.fState & MFS_DEFAULT) {
+            RemoveMenu(hm, idx, MF_BYPOSITION);
+            add_action_to_menu(hm, act, idx, flags);
+            return 0;
         }
     }
+
+    mii.fMask = 0;
+
+    if(act->state & KHUI_ACTIONSTATE_DISABLED) {
+        mii.fMask |= MIIM_STATE;
+        mii.fState &= ~MFS_ENABLED;
+        mii.fState |= MFS_DISABLED;
+    } else {
+        mii.fMask |= MIIM_STATE;
+        mii.fState &= ~MFS_DISABLED;
+        mii.fState |= MFS_ENABLED;
+    }
+
+    if(act->type & KHUI_ACTIONTYPE_TOGGLE) {
+        mii.fMask |= MIIM_STATE;
+        if (act->state & KHUI_ACTIONSTATE_CHECKED) {
+            mii.fState &= ~MFS_UNCHECKED;
+            mii.fState |= MFS_CHECKED;
+        } else {
+            mii.fState &= ~MFS_CHECKED;
+            mii.fState |= MFS_UNCHECKED;
+        }
+    }
+
+    SetMenuItemInfo(hm, act->cmd, FALSE, &mii);
+
+    def = khui_find_menu(act->cmd);
+
+    if(def) {
+        MENUITEMINFO mii2;
+
+        mii2.cbSize = sizeof(mii2);
+        mii2.fMask = MIIM_SUBMENU;
+
+        if (GetMenuItemInfo(hm, act->cmd, FALSE, &mii2)) {
+            refresh_menu(mii2.hSubMenu, def);
+        }
+    }
+
+    return 0;
 }
+
 
 static void refresh_menu(HMENU hm, khui_menu_def * def) {
     khui_action_ref * act;
-    int i;
+    khm_size i, n;
 
-    act = def->items;
-    i = 0;
-    while ((def->n_items == -1 && act->action != KHUI_MENU_END) ||
-           (def->n_items >= 0 && i < (int) def->n_items)) {
-        refresh_menu_item(hm, khui_find_action(act->action), i, act->flags);
-        act++; i++;
+    for(i = 0, n = khui_menu_get_size(def); i < n; i++) {
+        act = khui_menu_get_action(def, i);
+        refresh_menu_item(hm, khui_find_action(act->action), (int) i, act->flags);
     }
+
+    refresh_menu_item(hm, NULL, (int) i, KHUI_ACTIONREF_END);
 }
 
 static HMENU mm_create_menu_from_def(khui_menu_def * def, BOOL main) {
     HMENU hm;
     khui_action_ref * act;
-    int i;
+    khm_size i, n;
 
     if (main)
         hm = CreateMenu();
     else
         hm = CreatePopupMenu();
 
-    act = def->items;
-    i = 0;
-    while((!(def->state & KHUI_MENUSTATE_ALLOCD) && act->action != KHUI_MENU_END) ||
-          ((def->state & KHUI_MENUSTATE_ALLOCD) && i < (int) def->n_items)) {
-        add_action_to_menu(hm,khui_find_action(act->action),i,act->flags);
-        act++; i++;
+    for (i = 0, n = khui_menu_get_size(def); i < n; i++) {
+        act = khui_menu_get_action(def, i);
+        add_action_to_menu(hm, khui_find_action(act->action), (int) i, act->flags);
     }
 
     return hm;
@@ -419,12 +492,8 @@ LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam) {
         if(act == NULL || (act->is_tooltip == 0 && act->tooltip == NULL))
             khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, NULL);
         else {
-            if (act->tooltip)
-                StringCbCopy(buf, sizeof(buf), act->tooltip);
-            else
-                LoadString(khm_hInstance, 
-                           act->is_tooltip, 
-                           buf, ARRAYLENGTH(buf));
+            khm_get_action_tooltip(act->cmd, buf, sizeof(buf));
+
             khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, buf);
         }
     }
@@ -566,6 +635,7 @@ struct identity_action_map {
     khm_handle identity;
     khm_int32  renew_cmd;
     khm_int32  destroy_cmd;
+    khm_int32  new_cmd;
     int        refreshcycle;
 };
 
@@ -583,7 +653,9 @@ create_identity_cmd_map(khm_handle ident) {
     struct identity_action_map * actmap;
     wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
     wchar_t fmt[128];
+    wchar_t caption[KHUI_MAXCCH_SHORT_DESC];
     wchar_t tooltip[KHUI_MAXCCH_SHORT_DESC];
+    wchar_t actionname[KHUI_MAXCCH_NAME];
     khm_size cb;
 
     if (n_id_action_map + 1 > nc_id_action_map) {
@@ -611,25 +683,54 @@ create_identity_cmd_map(khm_handle ident) {
     actmap->identity = ident;
     kcdb_identity_hold(ident);
 
-    fmt[0] = L'\0';
-    LoadString(khm_hInstance, IDS_IDACTION_RENEW,
-               fmt, ARRAYLENGTH(fmt));
-    StringCbPrintf(tooltip, sizeof(tooltip), fmt, idname);
+#define GETFORMAT(I) do { fmt[0] = L'\0'; LoadString(khm_hInstance, I, fmt, ARRAYLENGTH(fmt)); } while(0)
+#define EXPFORMAT(d,s) do { StringCbPrintf(d, sizeof(d), fmt, s); } while(0)
+    /* renew */
+
+    GETFORMAT(IDS_IDACTIONT_RENEW);
+    EXPFORMAT(tooltip, idname);
+
+    GETFORMAT(IDS_IDACTION_RENEW);
+    EXPFORMAT(caption, idname);
+
+    StringCbPrintf(actionname, sizeof(actionname), L"R:%s", idname);
 
     actmap->renew_cmd =
-        khui_action_create(NULL, idname, tooltip, NULL,
+        khui_action_create(actionname, caption, tooltip, NULL,
                            KHUI_ACTIONTYPE_TRIGGER, NULL);
 
-    fmt[0] = L'\0';
-    LoadString(khm_hInstance, IDS_IDACTION_DESTROY,
-               fmt, ARRAYLENGTH(fmt));
-    StringCbPrintf(tooltip, sizeof(tooltip), fmt, idname);
+    /* destroy */
+
+    GETFORMAT(IDS_IDACTIONT_DESTROY);
+    EXPFORMAT(tooltip, idname);
+
+    GETFORMAT(IDS_IDACTION_DESTROY);
+    EXPFORMAT(caption, idname);
+
+    StringCbPrintf(actionname, sizeof(actionname), L"D:%s", idname);
 
     actmap->destroy_cmd =
-        khui_action_create(NULL, idname, tooltip, NULL,
+        khui_action_create(actionname, caption, tooltip, NULL,
+                           KHUI_ACTIONTYPE_TRIGGER, NULL);
+
+    /* new */
+
+    GETFORMAT(IDS_IDACTIONT_NEW);
+    EXPFORMAT(tooltip, idname);
+
+    GETFORMAT(IDS_IDACTION_NEW);
+    EXPFORMAT(caption, idname);
+
+    StringCbPrintf(actionname, sizeof(actionname), L"N:%s", idname);
+
+    actmap->new_cmd =
+        khui_action_create(actionname, caption, tooltip, NULL,
                            KHUI_ACTIONTYPE_TRIGGER, NULL);
 
     actmap->refreshcycle = idcmd_refreshcycle;
+
+#undef GETFORMAT
+#undef EXPFORMAT
 
     return actmap;
 }
@@ -673,8 +774,8 @@ get_identity_cmd_map(khm_handle ident) {
     }
 }
 
-static khm_int32
-get_identity_renew_command(khm_handle ident) {
+khm_int32
+khm_get_identity_renew_action(khm_handle ident) {
     struct identity_action_map * map;
 
     map = get_identity_cmd_map(ident);
@@ -685,14 +786,26 @@ get_identity_renew_command(khm_handle ident) {
         return 0;
 }
 
-static khm_int32
-get_identity_destroy_command(khm_handle ident) {
+khm_int32
+khm_get_identity_destroy_action(khm_handle ident) {
     struct identity_action_map * map;
 
     map = get_identity_cmd_map(ident);
 
     if (map)
         return map->destroy_cmd;
+    else
+        return 0;
+}
+
+khm_int32
+khm_get_identity_new_creds_action(khm_handle ident) {
+    struct identity_action_map * map;
+
+    map = get_identity_cmd_map(ident);
+
+    if (map)
+        return map->new_cmd;
     else
         return 0;
 }
@@ -707,6 +820,20 @@ khm_refresh_identity_menus(void) {
     khm_size n_idents = 0;
     khm_size t;
     khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_handle csp_cw = NULL;
+    khm_int32 idflags;
+    khm_int32 def_sticky = 0;
+    khm_boolean sticky_done = FALSE;
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+        khc_read_int32(csp_cw, L"DefaultSticky", &def_sticky);
+        khc_close_space(csp_cw);
+        csp_cw = NULL;
+    }
+
+    kcdb_identity_refresh_all();
+
+    khui_action_lock();
 
     idcmd_refreshcycle++;
 
@@ -747,6 +874,18 @@ khm_refresh_identity_menus(void) {
 
     } while(TRUE);
 
+    if (idlist != NULL && n_idents > 0) {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, TRUE);
+    } else {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, FALSE);
+    }
+
     renew_def = khui_find_menu(KHUI_MENU_RENEW_CRED);
     dest_def = khui_find_menu(KHUI_MENU_DESTROY_CRED);
 #ifdef DEBUG
@@ -759,17 +898,18 @@ khm_refresh_identity_menus(void) {
         khui_menu_remove_action(renew_def, 0);
         t--;
     }
-    khui_menu_insert_action(renew_def, 0, KHUI_ACTION_RENEW_ALL, 0);
 
     t = khui_menu_get_size(dest_def);
     while(t) {
         khui_menu_remove_action(dest_def, 0);
         t--;
     }
-    khui_menu_insert_action(dest_def, 0, KHUI_ACTION_DESTROY_ALL, 0);
 
-    if (idlist != NULL && n_idents > 0) {
+    if (idlist != NULL && n_idents > 1) {
+        khui_menu_insert_action(renew_def, 0, KHUI_ACTION_RENEW_ALL, 0);
         khui_menu_insert_action(renew_def, 1, KHUI_MENU_SEP, 0);
+
+        khui_menu_insert_action(dest_def, 0, KHUI_ACTION_DESTROY_ALL, 0);
         khui_menu_insert_action(dest_def,  1, KHUI_MENU_SEP, 0);
     }
 
@@ -785,18 +925,36 @@ khm_refresh_identity_menus(void) {
         }
 
         khui_menu_insert_action(renew_def, 1000,
-                                get_identity_renew_command(identity),
+                                khm_get_identity_renew_action(identity),
                                 0);
 
         khui_menu_insert_action(dest_def, 1000,
-                                get_identity_destroy_command(identity),
+                                khm_get_identity_destroy_action(identity),
                                 0);
+
+        idflags = 0;
+        kcdb_identity_get_flags(identity, &idflags);
+
+        if (!(idflags & KCDB_IDENT_FLAG_STICKY) && def_sticky) {
+            kcdb_identity_set_flags(identity,
+                                    KCDB_IDENT_FLAG_STICKY,
+                                    KCDB_IDENT_FLAG_STICKY);
+            sticky_done = TRUE;
+        }
     }
 
     if (idlist)
         PFREE(idlist);
 
     purge_identity_cmd_map();
+
+    khui_action_unlock();
+
+    khui_refresh_actions();
+
+    if (sticky_done) {
+        InvalidateRect(khm_hwnd_main_cred, NULL, TRUE);
+    }
 }
 
 khm_boolean
@@ -838,6 +996,12 @@ khm_check_identity_menu_action(khm_int32 act_id) {
                 khm_cred_destroy_identity(id_action_map[i].identity);
                 return TRUE;
             }
+
+            if (id_action_map[i].new_cmd == act_id) {
+                khm_cred_obtain_new_creds_for_ident(id_action_map[i].identity,
+                                                    NULL);
+                return TRUE;
+            }
         }
     }
 
@@ -853,9 +1017,13 @@ void khm_menu_refresh_items(void) {
     if (!khui_hmenu_main)
         return;
 
+    khui_action_lock();
+
     def = khui_find_menu(KHUI_MENU_MAIN);
 
     refresh_menu(khui_hmenu_main, def);
+
+    khui_action_unlock();
 
     DrawMenuBar(khm_hwnd_main);
 }

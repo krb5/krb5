@@ -232,11 +232,21 @@ Functions, macros etc. for manipulating identities.
  */
 #define KCDB_IDENT_FLAG_STICKY      0x00000800L
 
+/*! \brief Unknown state
+
+    The validity of the identity cannot be determined.  This usually
+    means that an authority could not be contacted.  This flag is to
+    be treated as transient.  If ::KCDB_IDENT_FLAG_INVALID or
+    ::KCDB_IDENT_FLAG_VALID is set for the identity, this flag is to
+    be ignored.
+ */
+#define KCDB_IDENT_FLAG_UNKNOWN     0x00001000L
+
 /*! \brief Read/write flags mask.
 
     A bitmask that correspond to all the read/write flags in the mask.
 */
-#define KCDB_IDENT_FLAGMASK_RDWR    0x00000fffL
+#define KCDB_IDENT_FLAGMASK_RDWR    0x00001fffL
 
 /*@}*/
 
@@ -431,7 +441,9 @@ kcdb_identity_delete(khm_handle id);
     If ::KCDB_IDENT_FLAG_INVALID is set using this function, then the
     ::KCDB_IDENT_FLAG_VALID will be automatically reset, and vice
     versa.  Resetting either bit does not undo this change, and will
-    leave the identity's validity unspecified.
+    leave the identity's validity unspecified.  Setting either of
+    ::KCDB_IDENT_FLAG_INVALID or ::KCDB_IDENT_FLAG_VALID will
+    automatically reset ::KCDB_IDENT_FLAG_UNKNOWN.
 
     Note that setting or resetting certain flags have other semantic
     side-effects:

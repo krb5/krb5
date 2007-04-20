@@ -168,6 +168,11 @@
 /*! \brief An incompatibility was found */
 #define KHM_ERROR_INCOMPATIBLE      (KHM_ERROR_BASE + 21)
 
+/*! \brief The operation was put on hold
+
+    A request was put on hold or postponed. */
+#define KHM_ERROR_HELD              (KHM_ERROR_BASE + 22)
+
 /*@}*/ /*kherror_codes*/
 
 /*! \brief Tests whether a return value indicates success */

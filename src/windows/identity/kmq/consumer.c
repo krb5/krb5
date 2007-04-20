@@ -36,6 +36,70 @@ kmq_message_ref * kmq_msg_ref_free = NULL;
 /* ad-hoc subscriptions */
 kmq_msg_subscription * kmq_adhoc_subs = NULL;
 
+#ifdef DEBUG
+
+#include<stdio.h>
+
+void
+kmqint_dump_consumer(FILE * f) {
+    kmq_message_ref * r;
+    kmq_msg_subscription * s;
+
+    int n_free = 0;
+    int n_adhoc = 0;
+
+    EnterCriticalSection(&cs_kmq_msg_ref);
+
+    fprintf(f, "qc0\t*** Free Message References ***\n");
+
+    fprintf(f, "qc1\tAddress\n");
+
+    r = kmq_msg_ref_free;
+    while(r) {
+        n_free ++;
+
+        fprintf(f, "qc2\t0x%p\n", r);
+
+        r = LNEXT(r);
+    }
+
+    fprintf(f, "qc3\tTotal free message references : %d\n", n_free);
+
+    fprintf(f, "qc4\t--- End ---\n");
+
+    LeaveCriticalSection(&cs_kmq_msg_ref);
+
+    EnterCriticalSection(&cs_kmq_global);
+
+    fprintf(f, "qc5\t*** Adhoc Message Subscriptions ***\n");
+
+    fprintf(f, "qc6\tAddress\tMsg Type\tRcpt Type\tRcpt\tQueue\n");
+
+    s = kmq_adhoc_subs;
+
+    while(s) {
+        n_adhoc ++;
+
+        fprintf(f, "qc7\t0x%p\t%d\t%s\t0x%p\t0x%p\n",
+                s,
+                s->type,
+                (s->rcpt_type == KMQ_RCPTTYPE_CB)?"CALLBACK":"HWND",
+                (s->rcpt_type == KMQ_RCPTTYPE_CB) ? (void *) s->recipient.cb: (void *) s->recipient.hwnd,
+                s->queue);
+
+        s = LNEXT(s);
+    }
+
+    fprintf(f, "qc8\tTotal ad-hoc subscriptions : %d\n", n_adhoc);
+
+    fprintf(f, "qc9\t--- End ---\n");
+
+    LeaveCriticalSection(&cs_kmq_global);
+
+}
+
+#endif
+
 /*! \internal
     \brief Get a message ref object
     \note called with cs_kmq_msg_ref held */
@@ -89,9 +153,15 @@ kmq_queue * kmqint_get_thread_queue(void) {
     */
 void kmqint_get_queue_message_ref(kmq_queue * q, kmq_message_ref ** r) {
     EnterCriticalSection(&q->cs);
-    QGET(q,r);
-    if(QTOP(q))
-        SetEvent(q->wait_o);
+
+    if (q->flags & KMQ_QUEUE_FLAG_DELETED) {
+        *r = NULL;
+    } else {
+        QGET(q,r);
+        if(QTOP(q))
+            SetEvent(q->wait_o);
+    }
+
     LeaveCriticalSection(&q->cs);
 }
 
@@ -101,6 +171,13 @@ void kmqint_get_queue_message_ref(kmq_queue * q, kmq_message_ref ** r) {
     */
 void kmqint_post_queue(kmq_queue * q, kmq_message *m) {
     kmq_message_ref *r;
+
+    EnterCriticalSection(&q->cs);
+    if (q->flags & KMQ_QUEUE_FLAG_DELETED) {
+        LeaveCriticalSection(&q->cs);
+        return;
+    }
+    LeaveCriticalSection(&q->cs);
 
     EnterCriticalSection(&cs_kmq_msg_ref);
     r = kmqint_get_message_ref();
@@ -142,11 +219,8 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
             if (IsBadCodePtr(s->recipient.cb)) {
                 rv = KHM_ERROR_INVALID_OPERATION;
             } else {
-                if (IsBadCodePtr(s->recipient.cb))
-                    rv = KHM_ERROR_INVALID_OPERATION;
-                else
-                    rv = s->recipient.cb(m->type, m->subtype, 
-                                         m->uparam, m->vparam);
+                rv = s->recipient.cb(m->type, m->subtype, 
+                                     m->uparam, m->vparam);
             }
             m->refcount--;
             if(KHM_SUCCEEDED(rv))
@@ -154,6 +228,14 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
             else
                 m->nFailed++;
         } else {
+
+            EnterCriticalSection(&q->cs);
+            if (q->flags & KMQ_QUEUE_FLAG_DELETED) {
+                LeaveCriticalSection(&q->cs);
+                return;
+            }
+            LeaveCriticalSection(&q->cs);
+
             EnterCriticalSection(&cs_kmq_msg_ref);
             r = kmqint_get_message_ref();
             LeaveCriticalSection(&cs_kmq_msg_ref);
@@ -173,8 +255,6 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
 
 #ifdef _WIN32
     else if(s->rcpt_type == KMQ_RCPTTYPE_HWND) {
-        m->refcount++;
-
         if(try_send && 
            GetCurrentThreadId() == GetWindowThreadProcessId(s->recipient.hwnd, 
                                                             NULL)) {
@@ -185,11 +265,24 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
                message has completed when (m->nCompleted + m->nFailed
                == m->nSent).  Therefore, we only increment nSent after
                the message is sent. */
+
+            m->refcount++;
+
+            /* the kmq_wm_begin()/kmq_wm_end() and kmq_wm_dispatch()
+               handlers decrement the reference count on the message
+               when they are done. */
             SendMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, 
                         m->type, (LPARAM) m);
+
             m->nSent++;
+
         } else {
             m->nSent++;
+            m->refcount++;
+
+            /* the kmq_wm_begin()/kmq_wm_end() and kmq_wm_dispatch()
+               handlers decrement the reference count on the message
+               when they are done. */
             PostMessage(s->recipient.hwnd, KMQ_WM_DISPATCH, 
                         m->type, (LPARAM) m);
         }
@@ -202,8 +295,6 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
            deleted an ad-hoc subscription. */
 #ifdef DEBUG
         assert(FALSE);
-#else
-        return;
 #endif
     }
 }
@@ -401,6 +492,11 @@ KHMEXP LRESULT KHMAPI kmq_wm_dispatch(LPARAM lparm, kmq_callback_t cb) {
     return TRUE;
 }
 
+KHMEXP khm_boolean KHMAPI kmq_is_call_aborted(void) {
+    /* TODO: Implement this */
+    return FALSE;
+}
+
 /*! \internal
 
     \note Obtains ::cs_kmq_global, kmq_queue::cs, ::cs_kmq_msg_ref, ::cs_kmq_msg, 
@@ -427,6 +523,12 @@ KHMEXP khm_int32 KHMAPI kmq_dispatch(kmq_timer timeout) {
 
             if (m->err_ctx)
                 kherr_push_context(m->err_ctx);
+
+            /* TODO: before dispatching the message, the message being
+               dispatched for this thread needs to be stored so that
+               it can be looked up in kmq_is_call_aborted(). This
+               needs to happen in kmq_wm_dispatch() and
+               kmq_wm_begin() as well. */
 
             /* dispatch */
             rv = r->recipient(m->type, m->subtype, m->uparam, m->vparam);

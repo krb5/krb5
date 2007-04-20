@@ -61,6 +61,7 @@
 
 /* Include Python.h before autoconf.h, because our autoconf.h seems
    to confuse Python's headers.  */
+#include <autoconf.h>
 #if HAVE_PYTHON_H
 #include <Python.h>
 #elif HAVE_PYTHON2_3_PYTHON_H
@@ -68,7 +69,6 @@
 #else
 #error "Where's the Python header file?"
 #endif
-#include <autoconf.h>
 #include <errno.h>
 #include "k5-platform.h"	/* for init/fini macros */
 #include "fake-addrinfo.h"

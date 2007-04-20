@@ -66,12 +66,14 @@ int krb5int_debug_sendto_kdc = 0;
 static void default_debug_handler (const void *data, size_t len)
 {
 #if 0
-    FILE *logfile;
-    logfile = fopen("/tmp/sendto_kdc.log", "a");
-    if (logfile == NULL)
-	return;
+    static FILE *logfile;
+    if (logfile == NULL) {
+	logfile = fopen("/tmp/sendto_kdc.log", "a");
+	if (logfile == NULL)
+	    return;
+	setbuf(logfile, NULL);
+    }
     fwrite(data, 1, len, logfile);
-    fclose(logfile);
 #else
     fwrite(data, 1, len, stderr);
     /* stderr is unbuffered */
@@ -124,9 +126,21 @@ krb5int_debug_fprint (const char *fmt, ...)
 
     for (; *fmt; fmt++) {
 	if (*fmt != '%') {
-	    /* Possible optimization: Look for % and print all chars
-	       up to it in one call.  */
-	    put(fmt, 1);
+	    const char *fmt2;
+	    size_t len;
+	    for (fmt2 = fmt+1; *fmt2; fmt2++)
+		if (*fmt2 == '%')
+		    break;
+	    len = fmt2 - fmt;
+	    if (0) {
+		FILE *f = fopen("/dev/pts/0", "w+");
+		if (f) {
+		    fprintf(f, "krb5int_debug_fprint: format <%s> fmt2 <%s> put %lu next <%s>\n",
+			    fmt, fmt2, (unsigned long) len, fmt+len-1);
+		}
+	    }
+	    put(fmt, len);
+	    fmt += len - 1;	/* then fmt++ in loop header */
 	    continue;
 	}
 	/* After this, always processing a '%' sequence.  */
@@ -383,7 +397,8 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     if (addrs.naddrs > 0) {
         retval = krb5int_sendto (context, message, &addrs, 0, reply, 0, 0,
 								 0, 0, &addr_used);
-        if (retval == 0) {
+	switch (retval) {
+	case 0:
             /*
              * Set use_master to 1 if we ended up talking to a master when
              * we didn't explicitly request to
@@ -401,7 +416,15 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
             }
             krb5int_free_addrlist (&addrs);
             return 0;
-        }
+	default:
+	    break;
+	    /* Cases here are for constructing useful error messages.  */
+	case KRB5_KDC_UNREACH:
+	    krb5_set_error_message(context, retval,
+				   "Cannot contact any KDC for realm '%.*s'",
+				   realm->length, realm->data);
+	    break;
+	}
         krb5int_free_addrlist (&addrs);
     }
     return retval;
@@ -1022,9 +1045,14 @@ service_fds (struct select_state *selstate,
     int e, selret;
 
     e = 0;
-    while (selstate->nfds > 0
-	   && (e = krb5int_cm_call_select(selstate, seltemp, &selret)) == 0) {
+    while (selstate->nfds > 0) {
 	int i;
+
+	e = krb5int_cm_call_select(selstate, seltemp, &selret);
+	if (e == EINTR)
+	    continue;
+	if (e != 0)
+	    break;
 
 	dprint("service_fds examining results, selret=%d\n", selret);
 

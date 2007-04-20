@@ -635,19 +635,41 @@ k5_kinit_fiber_proc(PVOID lpParameter)
             _reportf(L"  g_fjob.valid_principal = %d", (int) g_fjob.valid_principal);
 #endif
 
+            /* If we don't know if we have a valid principal, we
+               restrict the options that are set when we call kinit.
+               This way we will be able to use the response from the
+               KDC to verify the principal. */
+
+            g_fjob.retry_if_valid_principal = (g_fjob.forwardable ||
+                                               g_fjob.proxiable ||
+                                               g_fjob.renewable);
+
+        retry_kinit:
             g_fjob.code =
                 khm_krb5_kinit(0,
                                g_fjob.principal,
                                g_fjob.password,
                                g_fjob.ccache,
                                g_fjob.lifetime,
-				g_fjob.valid_principal ? g_fjob.forwardable : 0,
-				g_fjob.valid_principal ? g_fjob.proxiable : 0,
+                               g_fjob.valid_principal ? g_fjob.forwardable : 0,
+                               g_fjob.valid_principal ? g_fjob.proxiable : 0,
                                (g_fjob.valid_principal && g_fjob.renewable ? g_fjob.renew_life : 0),
                                g_fjob.addressless,
                                g_fjob.publicIP,
                                k5_kinit_prompter,
                                &g_fjob);
+
+            /* If the principal was found to be valid, and if we
+               restricted the options that were being passed to kinit,
+               then we need to retry the kinit call.  This time we use
+               the real options. */
+            if (g_fjob.state == FIBER_STATE_RETRY_KINIT) {
+#ifdef DEBUG
+                assert(g_fjob.valid_principal);
+#endif
+                g_fjob.state = FIBER_STATE_KINIT;
+                goto retry_kinit;
+            }
         }
 
     _switch_to_main:
@@ -753,19 +775,9 @@ k5_cached_kinit_prompter(void) {
             /* already expired */
             goto _cleanup;
     } else {
-        FILETIME lifetime;
-        khm_int32 t;
-
-        /* make the cache expire at some point */
-        GetSystemTimeAsFileTime(&current);
-        khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
-        if (t == 0)
-            t = 172800;         /* 48 hours */
-        TimetToFileTimeInterval(t, &lifetime);
-        expiry = FtAdd(&current, &lifetime);
-        iexpiry = FtToInt(&expiry);
-
-        khc_write_int64(csp_prcache, L"ExpiresOn", iexpiry);
+        /* if there is no value for ExpiresOn, we assume the prompts
+           have already expired. */
+        goto _cleanup;
     }
 
     /* we found a prompt cache.  We take this to imply that the
@@ -946,7 +958,20 @@ k5_kinit_prompter(krb5_context context,
 #endif
 
     /* we got prompts?  Then we assume that the principal is valid */
-    g_fjob.valid_principal = TRUE;
+
+    if (!g_fjob.valid_principal) {
+        g_fjob.valid_principal = TRUE;
+
+        /* if the flags that were used to call kinit were restricted
+           because we didn't know the validity of the principal, then
+           we need to go back and retry the call with the correct
+           flags. */
+        if (g_fjob.retry_if_valid_principal) {
+            _reportf(L"Retrying kinit call due to restricted flags on first call.");
+            g_fjob.state = FIBER_STATE_RETRY_KINIT;
+            return KRB5_LIBOS_PWDINTR;
+        }
+    }
 
     nc = g_fjob.nc;
 
@@ -1132,9 +1157,16 @@ k5_kinit_prompter(krb5_context context,
                             (khm_int32) num_prompts);
 
             GetSystemTimeAsFileTime(&current);
+#ifdef USE_PROMPT_CACHE_LIFETIME
             khc_read_int32(csp_params, L"PromptCacheLifetime", &t);
             if (t == 0)
                 t = 172800;         /* 48 hours */
+#else
+            khc_read_int32(csp_params, L"MaxRenewLifetime", &t);
+            if (t == 0)
+                t = 2592000;    /* 30 days */
+            t += 604800;        /* + 7 days */
+#endif
             TimetToFileTimeInterval(t, &lifetime);
             expiry = FtAdd(&current, &lifetime);
             iexpiry = FtToInt(&expiry);
@@ -1198,7 +1230,7 @@ k5_kinit_prompter(krb5_context context,
        actual acquisition of credentials. */
     if(g_fjob.command != FIBER_CMD_CONTINUE &&
        g_fjob.command != FIBER_CMD_KINIT) {
-        code = -2;
+        code = KRB5_LIBOS_PWDINTR;
         goto _exit;
     }
 
@@ -1241,164 +1273,32 @@ k5_kinit_prompter(krb5_context context,
 
     /* entering a NULL password is equivalent to cancelling out */
     if (g_fjob.null_password)
-        return -2;
+        return KRB5_LIBOS_PWDINTR;
     else
         return code;
 }
 
-/*
-
-  The configuration information for each identity comes from a
-  multitude of layers organized as follows.  The ordering is
-  decreasing in priority.  When looking up a value, the value will be
-  looked up in each layer in turn starting at level 0.  The first
-  instance of the value found will be the effective value.
-
-  0  : <identity configuration>\Krb5Cred
-
-  0.1: per user
-
-  0.2: per machine
-
-  1  : <plugin configuration>\Parameters\Realms\<realm of identity>
-
-  1.1: per user
-
-  1.2: per machine
-
-  2  : <plugin configuration>\Parameters
-
-  2.1: per user
-
-  2.2: per machine
-
-  2.3: schema
-
- */
-khm_int32
-k5_open_config_handle(khm_handle ident,
-                      khm_int32 flags,
-                      khm_handle * ret_csp) {
-
-    khm_int32 rv = KHM_ERROR_SUCCESS;
-    khm_handle csp_i = NULL;
-    khm_handle csp_ik5 = NULL;
-    khm_handle csp_realms = NULL;
-    khm_handle csp_realm = NULL;
-    khm_handle csp_plugins = NULL;
-    khm_handle csp_krbcfg = NULL;
-    khm_handle csp_rv = NULL;
-    wchar_t realm[KCDB_IDENT_MAXCCH_NAME];
-
-    realm[0] = L'\0';
-
-    if (ident) {
-        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
-        wchar_t * trealm;
-        khm_size cb_idname = sizeof(idname);
-
-        rv = kcdb_identity_get_name(ident, idname, &cb_idname);
-        if (KHM_SUCCEEDED(rv) &&
-            (trealm = khm_get_realm_from_princ(idname)) != NULL) {
-            StringCbCopy(realm, sizeof(realm), trealm);
-        }
-    }
-
-    if (ident) {
-        rv = kcdb_identity_get_config(ident, flags, &csp_i);
-        if (KHM_FAILED(rv))
-            goto done;
-
-        rv = khc_open_space(csp_i, CSNAME_KRB5CRED, flags, &csp_ik5);
-        if (KHM_FAILED(rv))
-            goto done;
-
-        if (realm[0] == L'\0')
-            goto done_shadow_realm;
-
-        rv = khc_open_space(csp_params, CSNAME_REALMS, flags, &csp_realms);
-        if (KHM_FAILED(rv))
-            goto done_shadow_realm;
-
-        rv = khc_open_space(csp_realms, realm, flags, &csp_realm);
-        if (KHM_FAILED(rv))
-            goto done_shadow_realm;
-
-        rv = khc_shadow_space(csp_realm, csp_params);
-
-    done_shadow_realm:
-
-        if (csp_realm)
-            rv = khc_shadow_space(csp_ik5, csp_realm);
-        else
-            rv = khc_shadow_space(csp_ik5, csp_params);
-
-        csp_rv = csp_ik5;
-
-    } else {
-
-        /* No valid identity specified. We default to the parameters key. */
-        rv = kmm_get_plugins_config(0, &csp_plugins);
-        if (KHM_FAILED(rv))
-            goto done;
-
-        rv = khc_open_space(csp_plugins, CSNAME_KRB5CRED, flags, &csp_krbcfg);
-        if (KHM_FAILED(rv))
-            goto done;
-
-        rv = khc_open_space(csp_krbcfg, CSNAME_PARAMS, flags, &csp_rv);
-    }
-
- done:
-
-    *ret_csp = csp_rv;
-
-    /* leave csp_ik5.  If it's non-NULL, then it's the return value */
-    /* leave csp_rv.  It's the return value. */
-    if (csp_i)
-        khc_close_space(csp_i);
-    if (csp_realms)
-        khc_close_space(csp_realms);
-    if (csp_realm)
-        khc_close_space(csp_realm);
-    if (csp_plugins)
-        khc_close_space(csp_plugins);
-    if (csp_krbcfg)
-        khc_close_space(csp_krbcfg);
-
-    return rv;
-}
 
 void 
-k5_read_dlg_params(khm_handle conf, 
-                   k5_dlg_data * d)
+k5_read_dlg_params(k5_dlg_data * d, khm_handle identity)
 {
-    khm_int32 i;
+    k5_params p;
 
-    khc_read_int32(conf, L"Renewable", &i);
-    d->renewable = i;
-    khc_read_int32(conf, L"Forwardable", &i);
-    d->forwardable = i;
-    khc_read_int32(conf, L"Proxiable", &i);
-    d->proxiable = i;
-    khc_read_int32(conf, L"Addressless", &i);
-    d->addressless = i;
-    khc_read_int32(conf, L"PublicIP", &i);
-    d->publicIP = i;
+    khm_krb5_get_identity_params(identity, &p);
 
-    khc_read_int32(conf, L"DefaultLifetime", &i);
-    d->tc_lifetime.current = i;
-    khc_read_int32(conf, L"MaxLifetime", &i);
-    d->tc_lifetime.max = i;
-    khc_read_int32(conf, L"MinLifetime", &i);
-    d->tc_lifetime.min = i;
+    d->renewable = p.renewable;
+    d->forwardable = p.forwardable;
+    d->proxiable = p.proxiable;
+    d->addressless = p.addressless;
+    d->publicIP = p.publicIP;
 
-    khc_read_int32(conf, L"DefaultRenewLifetime", &i);
-    d->tc_renew.current = i;
-    khc_read_int32(conf, L"MaxRenewLifetime", &i);
-    d->tc_renew.max = i;
-    khc_read_int32(conf, L"MinRenewLifetime", &i);
-    d->tc_renew.min = i;
+    d->tc_lifetime.current = p.lifetime;
+    d->tc_lifetime.max = p.lifetime_max;
+    d->tc_lifetime.min = p.lifetime_min;
+
+    d->tc_renew.current = p.renew_life;
+    d->tc_renew.max = p.renew_life_max;
+    d->tc_renew.min = p.renew_life_min;
 
     /* however, if this has externally supplied defaults, we have to
        use them too. */
@@ -1431,32 +1331,54 @@ k5_read_dlg_params(khm_handle conf,
 }
 
 void 
-k5_write_dlg_params(khm_handle conf, 
-                    k5_dlg_data * d)
+k5_write_dlg_params(k5_dlg_data * d, khm_handle identity)
 {
-    khc_write_int32(conf, L"Renewable", d->renewable);
-    khc_write_int32(conf, L"Forwardable", d->forwardable);
-    khc_write_int32(conf, L"Proxiable", d->proxiable);
-    khc_write_int32(conf, L"Addressless", d->addressless);
-    khc_write_int32(conf, L"PublicIP", d->publicIP);
 
-    khc_write_int32(conf, L"DefaultLifetime",
-                    (khm_int32) d->tc_lifetime.current);
-    khc_write_int32(conf, L"MaxLifetime",
-                    (khm_int32) d->tc_lifetime.max);
-    khc_write_int32(conf, L"MinLifetime",
-                    (khm_int32) d->tc_lifetime.min);
+    k5_params p;
 
-    khc_write_int32(conf, L"DefaultRenewLifetime", 
-                    (khm_int32) d->tc_renew.current);
-    khc_write_int32(conf, L"MaxRenewLifetime", 
-                    (khm_int32) d->tc_renew.max);
-    khc_write_int32(conf, L"MinRenewLifetime", 
-                    (khm_int32) d->tc_renew.min);
+    ZeroMemory(&p, sizeof(p));
+
+    p.source_reg = K5PARAM_FM_ALL; /* we want to write all the
+                                      settings to the registry, if
+                                      necessary. */
+
+    p.renewable = d->renewable;
+    p.forwardable = d->forwardable;
+    p.proxiable = d->proxiable;
+    p.addressless = d->addressless;
+    p.publicIP = d->publicIP;
+
+    p.lifetime = (krb5_deltat) d->tc_lifetime.current;
+    p.lifetime_max = (krb5_deltat) d->tc_lifetime.max;
+    p.lifetime_min = (krb5_deltat) d->tc_lifetime.min;
+
+    p.renew_life = (krb5_deltat) d->tc_renew.current;
+    p.renew_life_max = (krb5_deltat) d->tc_renew.max;
+    p.renew_life_min = (krb5_deltat) d->tc_renew.min;
+
+    khm_krb5_set_identity_params(identity, &p);
 
     /* as in k5_read_dlg_params, once we write the data in, the local
        data is no longer dirty */
     d->dirty = FALSE;
+}
+
+void 
+k5_free_kinit_job(void)
+{
+    if (g_fjob.principal)
+        PFREE(g_fjob.principal);
+
+    if (g_fjob.password)
+        PFREE(g_fjob.password);
+
+    if (g_fjob.identity)
+        kcdb_identity_release(g_fjob.identity);
+
+    if (g_fjob.ccache)
+        PFREE(g_fjob.ccache);
+
+    ZeroMemory(&g_fjob, sizeof(g_fjob));
 }
 
 void 
@@ -1489,8 +1411,9 @@ k5_prep_kinit_job(khui_new_creds * nc)
     kcdb_identity_get_name(ident, idname, &cbbuf);
     StringCchLength(idname, ARRAYLENGTH(idname), &size);
     size++;
-    
-    ZeroMemory(&g_fjob, sizeof(g_fjob));
+
+    k5_free_kinit_job();
+
     g_fjob.command = FIBER_CMD_KINIT;
     g_fjob.nc = nc;
     g_fjob.nct = nct;
@@ -1509,6 +1432,13 @@ k5_prep_kinit_job(khui_new_creds * nc)
     g_fjob.identity = ident;
     g_fjob.prompt_set = 0;
     g_fjob.valid_principal = FALSE;
+    g_fjob.retry_if_valid_principal = FALSE;
+
+                                /* the value for
+                                   retry_if_valid_principal is not
+                                   necessarily the correct value here,
+                                   but the correct value will be
+                                   assigned k5_kinit_fiber_proc(). */
 
     /* if we have external parameters, we should use them as well */
     if (nc->ctx.cb_vparam == sizeof(NETID_DLGINFO) &&
@@ -1569,24 +1499,6 @@ k5_prep_kinit_job(khui_new_creds * nc)
     }
 
     /* leave identity held, since we added a reference above */
-}
-
-void 
-k5_free_kinit_job(void)
-{
-    if (g_fjob.principal)
-        PFREE(g_fjob.principal);
-
-    if (g_fjob.password)
-        PFREE(g_fjob.password);
-
-    if (g_fjob.identity)
-        kcdb_identity_release(g_fjob.identity);
-
-    if (g_fjob.ccache)
-        PFREE(g_fjob.ccache);
-
-    ZeroMemory(&g_fjob, sizeof(g_fjob));
 }
 
 static khm_int32 KHMAPI 
@@ -1890,7 +1802,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             }
 
             if (nc->subtype == KMSG_CRED_NEW_CREDS) {
-                k5_read_dlg_params(csp_params, d);
+                k5_read_dlg_params(d, NULL);
             }
 
             PostMessage(hwnd, KHUI_WM_NC_NOTIFY, 
@@ -1925,22 +1837,10 @@ k5_msg_cred_dialog(khm_int32 msg_type,
             if(/* !d->dirty && */ nc->n_identities > 0 &&
                nc->subtype == KMSG_CRED_NEW_CREDS) {
 
-                khm_handle h_idcfg = NULL;
+                k5_read_dlg_params(d, nc->identities[0]);
 
-                do {
-                    if (KHM_FAILED
-                        (k5_open_config_handle(nc->identities[0],
-                                               0, &h_idcfg)))
-                        break;
-
-                    k5_read_dlg_params(h_idcfg, d);
-
-                    PostMessage(nct->hwnd_panel, KHUI_WM_NC_NOTIFY, 
-                                MAKEWPARAM(0,WMNC_DIALOG_SETUP), 0);
-                } while(FALSE);
-
-                if(h_idcfg)
-                    khc_close_space(h_idcfg);
+                PostMessage(nct->hwnd_panel, KHUI_WM_NC_NOTIFY, 
+                            MAKEWPARAM(0,WMNC_DIALOG_SETUP), 0);
             }
 
             khui_cw_unlock_nc(nc);
@@ -2013,6 +1913,15 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                as usual. */
             if (d->pwd_change)
                 return KHM_ERROR_SUCCESS;
+
+#if 0
+            /* Clearing the prompts at this point is a bad idea since
+               the prompter depends on the prompts to know if this set
+               of prompts is the same as the new set and if so, use
+               the values entered in the old prompts as responses to
+               the new one. */
+            khui_cw_clear_prompts(nc);
+#endif
 
             /* if the fiber is already in a kinit, cancel it */
             if(g_fjob.state == FIBER_STATE_KINIT) {
@@ -2120,6 +2029,12 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 done_with_bad_princ:
 
                     k5_free_kinit_job();
+
+                    if (is_k5_identpro)
+                        kcdb_identity_set_flags(ident,
+                                                KCDB_IDENT_FLAG_UNKNOWN,
+                                                KCDB_IDENT_FLAG_UNKNOWN);
+
 
                 } else if(g_fjob.state == FIBER_STATE_KINIT) {
                     /* this is what we want.  Leave the fiber there. */
@@ -2245,7 +2160,19 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                                     NULL)))) {
 		    _reportf(L"No password entered, but a valid TGT exists. Continuing");
                     g_fjob.code = 0;
-		}
+		} else if (g_fjob.state == FIBER_STATE_NONE &&
+                           g_fjob.code == 0 &&
+                           nc->n_identities > 0 &&
+                           nc->identities[0] != NULL) {
+
+                    /* we had a password and we used it to get
+                       tickets.  We should reset the IMPORTED flag now
+                       since the tickets are not imported. */
+
+                    khm_krb5_set_identity_flags(nc->identities[0],
+                                                K5IDFLAG_IMPORTED,
+                                                0);
+                }
 
                 if(g_fjob.code != 0) {
                     wchar_t tbuf[1024];
@@ -2282,7 +2209,6 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                 } else if (nc->result == KHUI_NC_RESULT_PROCESS &&
                            g_fjob.state == FIBER_STATE_NONE) {
-                    khm_handle csp_idcfg = NULL;
                     krb5_context ctx = NULL;
 
 		    _reportf(L"Tickets successfully acquired");
@@ -2297,16 +2223,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     assert(nc->n_identities > 0);
                     assert(nc->identities[0]);
 
-                    if (KHM_SUCCEEDED
-                        (k5_open_config_handle(nc->identities[0],
-                                               KHM_FLAG_CREATE |
-                                               KCONF_FLAG_WRITEIFMOD,
-                                               &csp_idcfg))) {
-                        k5_write_dlg_params(csp_idcfg, d);
-                    }
-
-                    if(csp_idcfg != NULL)
-                        khc_close_space(csp_idcfg);
+                    k5_write_dlg_params(d, nc->identities[0]);
 
                     /* We should also quickly refresh the credentials
                        so that the identity flags and ccache
@@ -2617,16 +2534,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                             /* since this was just a password change,
                                we need to load new credentials options
                                from the configuration store. */
-                                                                    
-                            if (KHM_SUCCEEDED
-                                (k5_open_config_handle(nc->identities[0],
-                                                       KHM_FLAG_CREATE |
-                                                       KCONF_FLAG_WRITEIFMOD,
-                                                       &csp_idcfg))) {
-                                k5_read_dlg_params(csp_idcfg, d);
-                                khc_close_space(csp_idcfg);
-                                csp_idcfg = NULL;
-                            }
+
+                            k5_read_dlg_params(d, nc->identities[0]);
                         }
 
                         /* the password change phase is now done */
@@ -2655,14 +2564,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
                         /* save the settings that we used for
                            obtaining the ticket. */
-                        if (nc->subtype == KMSG_CRED_NEW_CREDS &&
-                            KHM_SUCCEEDED
-                            (k5_open_config_handle(nc->identities[0],
-                                                   KHM_FLAG_CREATE |
-                                                   KCONF_FLAG_WRITEIFMOD,
-                                                   &csp_idcfg))) {
-                            k5_write_dlg_params(csp_idcfg, d);
-                            khc_close_space(csp_idcfg);
+                        if (nc->subtype == KMSG_CRED_NEW_CREDS) {
+
+                            k5_write_dlg_params(d, nc->identities[0]);
 
                             /* and then update the LRU too */
                             k5_update_LRU(nc->identities[0]);
@@ -2790,6 +2694,8 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 PFREE(nct->credtext);
 
             PFREE(nct);
+
+            k5_free_kinit_job();
         }
         break;
 
@@ -2804,14 +2710,34 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             if (t != K5_LSAIMPORT_NEVER) {
                 krb5_context ctx = NULL;
+                khm_handle id_default = NULL;
+                khm_handle id_imported = NULL;
                 BOOL imported;
 
-                imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE);
+                imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE,
+                                           &id_imported);
                 if (imported) {
                     khm_krb5_list_tickets(&ctx);
+
                     if (ctx)
                         pkrb5_free_context(ctx);
+
+                    kcdb_identity_refresh(id_imported);
+
+                    if (KHM_SUCCEEDED(kcdb_identity_get_default(&id_default))) {
+                        kcdb_identity_release(id_default);
+                        id_default = NULL;
+                    } else {
+                        _reportf(L"There was no default identity.  Setting default");
+                        kcdb_identity_set_default(id_imported);
+                    }
+
+                    /* and update the LRU */
+                    k5_update_LRU(id_imported);
                 }
+
+                if (id_imported)
+                    kcdb_identity_release(id_imported);
             }
         }
         break;

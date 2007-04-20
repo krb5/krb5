@@ -256,8 +256,21 @@ tmr_fire_timer(void) {
                    wtitle, ARRAYLENGTH(wtitle));
 
         khui_alert_create_simple(wtitle, wmsg, KHERR_WARNING, &alert);
-        khui_alert_set_flags(alert, KHUI_ALERT_FLAG_REQUEST_BALLOON,
-                             KHUI_ALERT_FLAG_REQUEST_BALLOON);
+        khui_alert_set_flags(alert,
+                             KHUI_ALERT_FLAG_REQUEST_BALLOON | KHUI_ALERT_FLAG_DISPATCH_CMD,
+                             KHUI_ALERT_FLAG_REQUEST_BALLOON | KHUI_ALERT_FLAG_DISPATCH_CMD);
+
+        if (eff_ident != NULL) {
+            khm_int32 cmd;
+
+            cmd = khm_get_identity_new_creds_action(eff_ident);
+
+            if (cmd) {
+                khui_alert_add_command(alert, cmd);
+                khui_alert_add_command(alert, KHUI_PACTION_CLOSE);
+            }
+        }
+
         khui_alert_show(alert);
         khui_alert_release(alert);
     }

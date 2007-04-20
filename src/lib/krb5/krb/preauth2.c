@@ -225,7 +225,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
 				 const char *attr,
 				 const char *value)
 {
-    krb5_error_code retval;
+    krb5_error_code retval = 0;
     int i;
     void *pctx;
     const char *emsg = NULL;
@@ -596,6 +596,16 @@ krb5_run_preauth_plugins(krb5_context kcontext,
     return 0;
 }
 
+static inline krb5_data
+padata2data(krb5_pa_data p)
+{
+    krb5_data d;
+    d.magic = KV5M_DATA;
+    d.length = p.length;
+    d.data = (char *) p.contents;
+    return d;
+}
+
 static
 krb5_error_code pa_salt(krb5_context context,
 			krb5_kdc_req *request,
@@ -609,11 +619,9 @@ krb5_error_code pa_salt(krb5_context context,
 {
     krb5_data tmp;
 
-    tmp.data = in_padata->contents;
-    tmp.length = in_padata->length;
+    tmp = padata2data(*in_padata);
     krb5_free_data_contents(context, salt);
     krb5int_copy_data_contents(context, &tmp, salt);
-    
 
     if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
 	salt->length = SALT_TYPE_AFS_LENGTH;
@@ -1623,7 +1631,7 @@ krb5_do_preauth(krb5_context context,
 	    if (!realdone) {
 		krb5_init_preauth_context(context);
 		if (context->preauth_context != NULL) {
-		    int module_ret, module_flags;
+		    int module_ret = 0, module_flags;
 #ifdef DEBUG
 		    fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
 			     in_padata[i]->pa_type, paorder[h]);

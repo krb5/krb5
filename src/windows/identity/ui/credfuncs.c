@@ -34,6 +34,7 @@ static HANDLE in_dialog_evt = NULL;
 static LONG init_dialog = 0;
 static khm_int32 dialog_result = 0;
 static wchar_t dialog_identity[KCDB_IDENT_MAXCCH_NAME];
+static khui_new_creds * dialog_nc = NULL;
 
 static void
 dialog_sync_init(void) {
@@ -65,9 +66,28 @@ khm_cred_begin_dialog(void) {
 
     EnterCriticalSection(&cs_dialog);
 
-    if (in_dialog)
+    if (in_dialog) {
         rv = FALSE;
-    else {
+
+        /* if a dialog is being displayed and we got a another request
+           to show one, we bring the existing one to the
+           foreground. */
+        if (dialog_nc && dialog_nc->hwnd) {
+            khm_int32 t = 0;
+
+            if (KHM_SUCCEEDED(khc_read_int32(NULL,
+                                             L"CredWindow\\Windows\\NewCred\\ForceToTop",
+                                             &t)) &&
+                t != 0) {
+
+                khm_activate_main_window();
+
+                SetWindowPos(dialog_nc->hwnd, HWND_TOP, 0, 0, 0, 0,
+                             (SWP_NOMOVE | SWP_NOSIZE));
+            }
+        }
+
+    } else {
         rv = TRUE;
         in_dialog = TRUE;
         ResetEvent(in_dialog_evt);
@@ -87,6 +107,10 @@ khm_cred_end_dialog(khui_new_creds * nc) {
         SetEvent(in_dialog_evt);
     }
     dialog_result = nc->result;
+#ifdef DEBUG
+    assert(dialog_nc == nc);
+#endif
+    dialog_nc = NULL;
     if (nc->subtype == KMSG_CRED_NEW_CREDS &&
         nc->n_identities > 0 &&
         nc->identities[0]) {
@@ -156,7 +180,11 @@ khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
     return rv;
 }
 
-/* completion handler for KMSG_CRED messages */
+/* Completion handler for KMSG_CRED messages.  We control the overall
+   logic of credentials acquisition and other operations here.  Once a
+   credentials operation is triggered, each successive message
+   completion notification will be used to dispatch the messages for
+   the next step in processing the operation. */
 void KHMAPI 
 kmsg_cred_completion(kmq_message *m)
 {
@@ -183,7 +211,7 @@ kmsg_cred_completion(kmq_message *m)
         nc = (khui_new_creds *) m->vparam;
 
         /* khm_cred_dispatch_process_message() deals with the case
-           where there are not credential types that wants to
+           where there are no credential types that wants to
            participate in this operation. */
         khm_cred_dispatch_process_message(nc);
         break;
@@ -281,6 +309,8 @@ kmsg_cred_completion(kmq_message *m)
 
                 if (nc->subtype == KMSG_CRED_NEW_CREDS) {
 
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_ACQUIREFAIL);
+
                     cb = sizeof(w_idname);
                     if (nc->n_identities == 0 ||
                         KHM_FAILED(kcdb_identity_get_name(nc->identities[0],
@@ -293,9 +323,16 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->identities[0],
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else if (nc->subtype == KMSG_CRED_PASSWORD) {
+
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_CHPW);
 
                     cb = sizeof(w_idname);
                     if (nc->n_identities == 0 ||
@@ -308,9 +345,16 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->identities[0],
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
+
+                    khui_alert_set_type(alert, KHUI_ALERTTYPE_RENEWFAIL);
 
                     cb = sizeof(w_idname);
                     if (nc->ctx.identity == NULL ||
@@ -323,6 +367,11 @@ kmsg_cred_completion(kmq_message *m)
                                    ws_tfmt, ARRAYLENGTH(ws_tfmt));
                         StringCbPrintf(ws_title, sizeof(ws_title),
                                        ws_tfmt, w_idname);
+                        khui_alert_set_ctx(alert,
+                                           KHUI_SCOPE_IDENT,
+                                           nc->ctx.identity,
+                                           KCDB_CREDTYPE_INVALID,
+                                           NULL);
                     }
 
                 } else {
@@ -341,6 +390,22 @@ kmsg_cred_completion(kmq_message *m)
 
                 if(evt->suggestion)
                     khui_alert_set_suggestion(alert, evt->suggestion);
+
+                if (nc->subtype == KMSG_CRED_RENEW_CREDS &&
+                    nc->ctx.identity != NULL) {
+
+                    khm_int32 n_cmd;
+
+                    n_cmd = khm_get_identity_new_creds_action(nc->ctx.identity);
+
+                    if (n_cmd != 0) {
+                        khui_alert_add_command(alert, n_cmd);
+                        khui_alert_add_command(alert, KHUI_PACTION_CLOSE);
+
+                        khui_alert_set_flags(alert, KHUI_ALERT_FLAG_DISPATCH_CMD,
+                                             KHUI_ALERT_FLAG_DISPATCH_CMD);
+                    }
+                }
 
                 khui_alert_show(alert);
                 khui_alert_release(alert);
@@ -373,11 +438,6 @@ kmsg_cred_completion(kmq_message *m)
 
             if (nc->subtype == KMSG_CRED_NEW_CREDS ||
                 nc->subtype == KMSG_CRED_PASSWORD) {
-
-                /*
-                if (nc->subtype == KMSG_CRED_NEW_CREDS)
-                    khui_context_reset();
-                */
 
                 khm_cred_end_dialog(nc);
 
@@ -743,6 +803,7 @@ void khm_cred_change_password(wchar_t * title)
 
     khui_cw_create_cred_blob(&nc);
     nc->subtype = KMSG_CRED_PASSWORD;
+    dialog_nc = nc;
 
     khui_context_get(&nc->ctx);
 
@@ -793,6 +854,31 @@ void khm_cred_change_password(wchar_t * title)
     }
 }
 
+void
+khm_cred_obtain_new_creds_for_ident(khm_handle ident, wchar_t * title)
+{
+    khui_action_context ctx;
+
+    if (ident == NULL)
+        khm_cred_obtain_new_creds(title);
+
+    khui_context_get(&ctx);
+
+    khui_context_set(KHUI_SCOPE_IDENT,
+                     ident,
+                     KCDB_CREDTYPE_INVALID,
+                     NULL,
+                     NULL,
+                     0,
+                     NULL);
+
+    khm_cred_obtain_new_creds(title);
+
+    khui_context_set_indirect(&ctx);
+
+    khui_context_release(&ctx);
+}
+
 void khm_cred_obtain_new_creds(wchar_t * title)
 {
     khui_new_creds * nc;
@@ -804,6 +890,7 @@ void khm_cred_obtain_new_creds(wchar_t * title)
 
     khui_cw_create_cred_blob(&nc);
     nc->subtype = KMSG_CRED_NEW_CREDS;
+    dialog_nc = nc;
 
     khui_context_get(&nc->ctx);
 
@@ -1169,6 +1256,9 @@ khm_cred_process_startup_actions(void) {
         /* when we get here, then we are all done with the command
            line stuff */
         khm_startup.processing = FALSE;
+        khm_startup.remote = FALSE;
+
+        kmq_post_message(KMSG_ACT, KMSG_ACT_END_CMDLINE, 0, 0);
     } while(FALSE);
 
     if (defident)
@@ -1182,7 +1272,9 @@ khm_cred_begin_startup_actions(void) {
     if (khm_startup.seen)
         return;
 
-    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+    if (!khm_startup.remote &&
+        KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
+
         khm_int32 t = 0;
 
         khc_read_int32(csp_cw, L"Autoinit", &t);

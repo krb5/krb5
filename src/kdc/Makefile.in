@@ -86,7 +86,7 @@ install::
 	fi
 
 clean::
-	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest
+	$(RM) kdc5_err.h kdc5_err.c krb5kdc rtest.o rtest fakeka.o fakeka
 
 # +++ Dependency line eater +++
 # 

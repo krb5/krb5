@@ -30,6 +30,66 @@ CRITICAL_SECTION cs_kmq_msg;
 kmq_message * msg_free = NULL;
 kmq_message * msg_active = NULL;
 
+#ifdef DEBUG
+
+#include<stdio.h>
+
+void
+kmqint_dump_publisher(FILE * f) {
+
+    int n_free = 0;
+    int n_active = 0;
+    kmq_message * m;
+
+    EnterCriticalSection(&cs_kmq_msg);
+
+    fprintf(f, "qp0\t*** Free Messages ***\n");
+    fprintf(f, "qp1\tAddress\n");
+
+    m = msg_free;
+    while(m) {
+        n_free++;
+
+        fprintf(f, "qp2\t0x%p\n", m);
+
+        m = LNEXT(m);
+    }
+
+    fprintf(f, "qp3\tTotal free messages : %d\n", n_free);
+
+    fprintf(f, "qp4\t*** Active Messages ***\n");
+    fprintf(f, "qp5\tAddress\tType\tSubtype\tuParam\tvParam\tnSent\tnCompleted\tnFailed\twait_o\trefcount\n");
+
+    m = msg_active;
+    while(m) {
+
+        n_active++;
+
+        fprintf(f, "qp6\t0x%p\t%d\t%d\t0x%x\t0x%p\t%d\t%d\t%d\t0x%p\t%d\n",
+                m,
+                (int) m->type,
+                (int) m->subtype,
+                (unsigned int) m->uparam,
+                m->vparam,
+                (int) m->nSent,
+                (int) m->nCompleted,
+                (int) m->nFailed,
+                (void *) m->wait_o,
+                (int) m->refcount);
+
+        m = LNEXT(m);
+    }
+
+    fprintf(f, "qp7\tTotal number of active messages = %d\n", n_active);
+
+    fprintf(f, "qp8\t--- End ---\n");
+
+    LeaveCriticalSection(&cs_kmq_msg);
+
+}
+
+#endif
+
 /*! \internal
     \brief Get a message object
     \note called with ::cs_kmq_msg held */
@@ -181,6 +241,12 @@ kmq_post_message_ex(khm_int32 type, khm_int32 subtype,
     return kmqint_post_message_ex(type, subtype, uparam, blob, call, FALSE);
 }
 
+KHMEXP khm_int32 KHMAPI
+kmq_abort_call(kmq_call call)
+{
+    /* TODO: Implement this */
+    return KHM_ERROR_NOT_IMPLEMENTED;
+}
 
 /*! \internal
 */
@@ -445,15 +511,21 @@ kmq_post_thread_quit_message(kmq_thread_id thread,
     return KHM_ERROR_SUCCESS;
 }
 
-/* TODO:Implement these */
 KHMEXP khm_int32 KHMAPI 
 kmq_get_next_response(kmq_call call, void ** resp) {
+    /* TODO: Implement this */
     return 0;
 }
 
 KHMEXP khm_boolean KHMAPI 
 kmq_has_completed(kmq_call call) {
-    return (call->nCompleted + call->nFailed == call->nSent);
+    khm_boolean completed;
+
+    EnterCriticalSection(&cs_kmq_msg);
+    completed = (call->nCompleted + call->nFailed == call->nSent);
+    LeaveCriticalSection(&cs_kmq_msg);
+
+    return completed;
 }
 
 KHMEXP khm_int32 KHMAPI 
@@ -480,4 +552,5 @@ kmq_set_completion_handler(khm_int32 type,
                            kmq_msg_completion_handler handler) {
     return kmqint_msg_type_set_handler(type, handler);
 }
+
 

@@ -96,6 +96,12 @@ g_order_init(void **vqueue, gssint_uint64 seqnum,
    if ((q = (queue *) malloc(sizeof(queue))) == NULL)
       return(ENOMEM);
 
+   /* This stops valgrind from complaining about writing uninitialized
+      data if the caller exports the context and writes it to a file.
+      We don't actually use those bytes at all, but valgrind still
+      complains.  */
+   memset(q, 0xfe, sizeof(*q));
+
    q->do_replay = do_replay;
    q->do_sequence = do_sequence;
    q->mask = wide_nums ? ~(gssint_uint64)0 : 0xffffffffUL;

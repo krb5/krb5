@@ -40,4 +40,5 @@ $(srcdir)/include/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
 
 clean-includes::
 	$(RM) $(HDRS) include/*.stmp
+@libnodeps_frag@
 @lib_frag@

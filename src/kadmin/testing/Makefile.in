@@ -7,4 +7,4 @@ LOCAL_SUBDIRS = scripts util
 all::
 
 clean::
-	-$(RM) -r krb5-test-root
+	-$(RM) -r krb5-test-root admin_* init-* kadmin_* kdc_rcache.* ovsec-*

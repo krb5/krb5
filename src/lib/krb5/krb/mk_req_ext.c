@@ -258,7 +258,10 @@ cleanup:
 }
 
 static krb5_error_code
-krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent, krb5_principal client, krb5_checksum *cksum, krb5_keyblock *key, krb5_ui_4 seq_number, krb5_authdata **authorization)
+krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
+			    krb5_principal client, krb5_checksum *cksum,
+			    krb5_keyblock *key, krb5_ui_4 seq_number,
+			    krb5_authdata **authorization)
 {
     krb5_error_code retval;
     

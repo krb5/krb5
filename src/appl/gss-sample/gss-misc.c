@@ -57,6 +57,9 @@ static char *rcsid = "$Header$";
 #include <sys/socket.h>
 #endif
 #include <errno.h>
+
+#include <autoconf.h>
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

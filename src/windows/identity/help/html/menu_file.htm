@@ -1,13 +1,13 @@
 <html>
 <head>
-  <title>File Menu</title>
+  <title>Network Identity Manager - File Menu</title>
   <meta name="description" content="File menu">
   <meta name="keywords" content="file menu">
   <link rel="stylesheet" type="text/css" href="nidmgr.css">
 </head>
 <body>
 
-<h1>File Menu</h1>
+<h1>Network Identity File Menu</h1>
 
 <p>
 Click an item on the menu to go to the description of the action, or
@@ -22,22 +22,21 @@ right of the action.  You can use the hot key to trigger the action
 without invoking the <span class="pre">File</span> menu.
 </p>
 
-<map id="menumap">
-<area shape = "rect" coords = "12,24,115,46" href = "#properties">
-<area shape = "rect" coords = "12,55,166,76" href = "#exit">
-</map>
-
 <p>
-<img src="images/screen_menu_file.bmp" usemap="#menumap"/>
+<map name="FPMap0">
+<area href="#properties" shape="rect" coords="1, 21, 131, 42">
+<area href="#exit" shape="rect" coords="1, 40, 129, 65">
+</map>
+<img src="images/screen_menu_file.png" usemap="#FPMap0"/>
 </p>
 
 <ul>
 
-  <li><a name="properties"/>
+  <li><a name="properties"></a>
   <span class="title">Properties...</span>: Displays a property
   sheet for the selected credential, identity or credential type.</li>
 
-  <li><a name="exit" />
+  <li><a name="exit"></a>
   <span class="title">Exit</span>: Exits Network Identity Manager</li>
 
 </ul>

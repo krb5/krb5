@@ -472,6 +472,12 @@ MAKE_COMMANDS-k5= $(BUILDTOP)/util/ss/mk_cmds
 
 ## Parameters to be set by configure for use in lib.in:
 ##
+#
+# These settings are for building shared libraries only.  Including
+# libpriv.in will override with values appropriate for static
+# libraries that we don't install.  Some values will depend on whether
+# the platform supports major and minor version number extensions on
+# shared libraries, hence the FOO_@@ settings.
 
 LN_S=@LN_S@
 AR=@AR@
@@ -479,19 +485,26 @@ AR=@AR@
 # Set to "lib$(LIBBASE)$(STEXT) lib$(LIBBASE)$(SHEXT) lib$(LIBBASE)$(PFEXT)" or
 # some subset thereof by configure; determines which types of libs get
 # built.
-LIBLIST=@LIBLIST@
+LIBLIST=$(LIBLIST_@SHLIB_HAVE_MINOR_VERS@)
+LIBLIST_yes=lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)
+LIBLIST_no=lib$(LIBBASE)$(SHLIBEXT)
 
 # Set by configure; list of library symlinks to make to $(TOPLIBD)
-LIBLINKS=@LIBLINKS@
+LIBLINKS=$(LIBLINKS_@SHLIB_HAVE_MINOR_VERS@)
+LIBLINKS_yes=$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)
+LIBLINKS_no=$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)
 
 # Set by configure; list of install targets
-LIBINSTLIST=@LIBINSTLIST@
+LIBINSTLIST=$(LIBINSTLIST_@SHLIB_HAVE_MINOR_VERS@)
+LIBINSTLIST_yes=install-shlib-soname
+LIBINSTLIST_no=install-shared
 
 # Some of these should really move to pre.in, since programs will need
 # it too. (e.g. stuff that has dependencies on the libraries)
 
 # usually .a
-STLIBEXT=@STLIBEXT@
+STLIBEXT_if_static=@STLIBEXT@
+STLIBEXT=.a-nobuild
 
 # usually .so.$(LIBMAJOR).$(LIBMINOR)
 SHLIBVEXT=@SHLIBVEXT@
@@ -533,7 +546,7 @@ SHLIB_EXPFLAGS=@SHLIB_EXPFLAGS@
 
 # Set to "OBJS.ST OBJS.SH OBJS.PF" or some subset thereof by
 # configure; determines which types of object files get built.
-OBJLISTS=@OBJLISTS@
+OBJLISTS=OBJS.SH
 
 # Note that $(LIBSRCS) *cannot* contain any variable references, or
 # the suffix substitution will break on some platforms!

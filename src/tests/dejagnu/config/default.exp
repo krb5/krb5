@@ -83,7 +83,8 @@ if { [string length $VALGRIND] } {
 		set inflags 0
 		# Only run valgrind for local programs, not
 		# system ones.
-		if [string match "/" [string index $arg 0]]&&![string match "/bin/sh" $arg]&&![string match "/bin/ls" $arg]&&![regexp {/kshd$} $arg] {
+#&&![string match "/bin/sh" $arg] sh is used to start kadmind!
+		if [string match "/" [string index $arg 0]]&&![string match "/bin/ls" $arg]&&![regexp {/kshd$} $arg] {
 		    set newargs [concat $newargs $VALGRIND]
 		}
 	    }
@@ -177,18 +178,6 @@ set passes {
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des-cbc-crc}
 	{master_key_type=aes256-cts-hmac-sha1-96}
 	{dummy=[verbose -log "AES + DES enctypes"]}
-    }
-    {
-	aesonly
-	mode=udp
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES enctypes"]}
     }
     {
 	aes-tcp
@@ -361,18 +350,6 @@ set unused_passes {
 	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
 	}
 	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
-    }
-    # This won't work for anything using GSSAPI until it gets AES support.
-    {
-	aes-only
-	des3_krbtgt=0
-	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
-	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
-	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES only, no DES or DES3 support"]}
     }
 }
 #	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal }

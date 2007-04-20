@@ -230,7 +230,7 @@ khm_int32 khm_register_propertywnd_class(void)
     wcx.hInstance = khm_hInstance;
     wcx.hIcon = NULL;
     wcx.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
-    wcx.hbrBackground = (HBRUSH) (COLOR_BACKGROUND + 1);
+    wcx.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
     wcx.lpszMenuName = NULL;
     wcx.lpszClassName = KHUI_PROPERTYWND_CLASS_NAME;
     wcx.hIconSm = NULL;

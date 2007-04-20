@@ -49,4 +49,4 @@ $(OBJ)\kcredres.res: lang\en_us\kcredres.rc
 all: mkdirs $(INCFILES) $(OBJ)\kcredres.res $(OBJFILES)
 
 clean::
-	$(RM) $(INCFILES)
+	if exist '..\obj' $(RM) $(INCFILES)

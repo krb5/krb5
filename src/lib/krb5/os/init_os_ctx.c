@@ -336,7 +336,7 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
 
     retval = os_get_default_config_files(&files, secure);
 
-    if (retval == 0)
+    if (retval == 0 && kdc)
 	retval = add_kdc_config_file(&files);
 
     if (!retval) {

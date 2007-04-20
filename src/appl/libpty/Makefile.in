@@ -106,7 +106,7 @@ pty_err.c: pty_err.et
 $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
 
-
+@libpriv_frag@
 @lib_frag@
 @libobj_frag@
 

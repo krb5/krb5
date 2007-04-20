@@ -98,6 +98,10 @@ libobj_frag=$srcdir/$ac_config_fragdir/libobj.in
 AC_SUBST_FILE(libobj_frag)
 libnover_frag=$srcdir/$ac_config_fragdir/libnover.in
 AC_SUBST_FILE(libnover_frag)
+libpriv_frag=$srcdir/$ac_config_fragdir/libpriv.in
+AC_SUBST_FILE(libpriv_frag)
+libnodeps_frag=$srcdir/$ac_config_fragdir/libnodeps.in
+AC_SUBST_FILE(libnodeps_frag)
 dnl
 KRB5_AC_PRAGMA_WEAK_REF
 WITH_LDAP
@@ -1118,33 +1122,6 @@ dnl
 dnl Pull in the necessary stuff to create the libraries.
 
 AC_DEFUN(KRB5_BUILD_LIBRARY,
-[KRB5_BUILD_LIBRARY_WITH_DEPS
-# null out SHLIB_EXPFLAGS because we lack any dependencies
-SHLIB_EXPFLAGS=])
-
-dnl
-dnl KRB5_BUILD_LIBRARY_STATIC
-dnl
-dnl Force static library build.
-
-AC_DEFUN(KRB5_AC_FORCE_STATIC,[dnl
-AC_BEFORE([$0],[KRB5_LIB_AUX])dnl
-krb5_force_static=yes])
-AC_DEFUN(KRB5_BUILD_LIBRARY_STATIC,
-dnl Use define rather than AC_DEFUN to avoid ordering problems.
-[AC_REQUIRE([KRB5_AC_FORCE_STATIC])dnl
-KRB5_BUILD_LIBRARY
-# If we're only building static libraries, they're for build-time use only,
-# so don't install.
-LIBINSTLIST=])
-
-dnl
-dnl KRB5_BUILD_LIBRARY_WITH_DEPS
-dnl
-dnl Like KRB5_BUILD_LIBRARY, but adds in explicit dependencies in the
-dnl generated shared library.
-
-AC_DEFUN(KRB5_BUILD_LIBRARY_WITH_DEPS,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
 AC_REQUIRE([AC_PROG_LN_S])dnl
 AC_REQUIRE([AC_PROG_RANLIB])dnl
@@ -1219,96 +1196,61 @@ dnl Parse configure options related to library building.
 AC_DEFUN(KRB5_LIB_AUX,
 [AC_REQUIRE([KRB5_LIB_PARAMS])dnl
 
-# Check whether to build static libraries.
-dnl AC_HELP_STRING([--enable-static],[build static libraries @<:@disabled for most platforms@:>@])
-dnl AC_HELP_STRING([--disable-static],[don't build static libraries])
-AC_ARG_ENABLE([static],, ,
-[enable_static=$default_static])
-
-if test "$enable_static" = yes; then
+AC_ARG_ENABLE([static],,
+[if test "$enableval" != no; then
   AC_MSG_ERROR([Sorry, static libraries do not work in this release.])
+fi])
+AC_ARG_ENABLE([shared], , 
+[if test "$enableval" != yes; then
+  AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
+fi])
+
+if test "$SHLIBEXT" = ".so-nobuild"; then
+   AC_MSG_ERROR([Shared libraries are not yet supported on this platform.])
 fi
 
-if test "$enable_static" = no && test "$krb5_force_static" != yes; then
-	AC_MSG_NOTICE([disabling static libraries])
-	LIBLINKS=
-	LIBLIST=
-	OBJLISTS=
-else
+DEPLIBEXT=$SHLIBEXT
+
+if test "$krb5_force_static" = "yes"; then
 	LIBLIST='lib$(LIBBASE)$(STLIBEXT)'
 	LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT)'
 	OBJLISTS=OBJS.ST
-	LIBINSTLIST=install-static
-	DEPLIBEXT=$STLIBEXT
+	# This used to be install-static, but now we only follow this
+	# path for internal libraries we don't want installed, not for
+	# configure-time requests for installed static libraries.
+	LIBINSTLIST=
 #	CFLAGS="$CFLAGS -D_KDB5_STATIC_LINK"
-fi
 
-# Check whether to build shared libraries.
-AC_ARG_ENABLE([shared],
-dnl AC_HELP_STRING([--enable-shared],[build shared libraries @<:@enabled for most platforms@:>@])
-dnl AC_HELP_STRING([--disable-shared],[don't build shared libraries])
-, ,
-[enable_shared=$default_shared])
-
-if test "$enable_shared" != yes; then
-  AC_MSG_ERROR([Sorry, this release builds only shared libraries, cannot disable them.])
-fi
-
-if test "$enable_shared" = yes; then
-	case "$SHLIBEXT" in
-	.so-nobuild)
-		AC_MSG_WARN([shared libraries not supported on this architecture])
-		RUN_ENV=
-		CC_LINK="$CC_LINK_STATIC"
-		;;
-	*)
-		# set this now because some logic below may reset SHLIBEXT
-		DEPLIBEXT=$SHLIBEXT
-		if test "$krb5_force_static" = "yes"; then
-			AC_MSG_RESULT([Forcing static libraries.])
-			# avoid duplicate rules generation for AIX and such
-			SHLIBEXT=.so-nobuild
-			SHLIBVEXT=.so.v-nobuild
-			SHLIBSEXT=.so.s-nobuild
-		else
-			AC_MSG_NOTICE([enabling shared libraries])
-			# Clear some stuff in case of AIX, etc.
-			if test "$STLIBEXT" = "$SHLIBEXT" ; then
-				STLIBEXT=.a-nobuild
-				LIBLIST=
-				LIBLINKS=
-				OBJLISTS=
-				LIBINSTLIST=
-			fi
-			LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBEXT)'
-			LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
-			case "$SHLIBSEXT" in
-			.so.s-nobuild)
-				LIBINSTLIST="$LIBINSTLIST install-shared"
-				;;
-			*)
-				LIBLIST="$LIBLIST "'lib$(LIBBASE)$(SHLIBSEXT)'
-				LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
-				LIBINSTLIST="$LIBINSTLIST install-shlib-soname"
-				;;
-			esac
-			OBJLISTS="$OBJLISTS OBJS.SH"
-		fi
-		CC_LINK="$CC_LINK_SHARED"
-		;;
-	esac
-else
-	RUN_ENV=
-	CC_LINK="$CC_LINK_STATIC"
+	AC_MSG_RESULT([Forcing static libraries.])
+	# avoid duplicate rules generation for AIX and such
 	SHLIBEXT=.so-nobuild
 	SHLIBVEXT=.so.v-nobuild
 	SHLIBSEXT=.so.s-nobuild
-fi
+else
+	AC_MSG_NOTICE([using shared libraries])
 
-if test "$build_dynobj" = yes; then
-	OBJLISTS=`echo $OBJLISTS | sed -e s/OBJS.ST//g -e s/OBJS.SH//g`
-	OBJLISTS="$OBJLISTS OBJS.SH"
+	# Clear some stuff in case of AIX, etc.
+	if test "$STLIBEXT" = "$SHLIBEXT" ; then
+		STLIBEXT=.a-nobuild
+	fi
+	case "$SHLIBSEXT" in
+	.so.s-nobuild)
+		SHLIB_HAVE_MINOR_VERS=no
+		LIBLIST='lib$(LIBBASE)$(SHLIBEXT)'
+		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT)'
+		LIBINSTLIST="install-shared"
+		;;
+	*)
+		SHLIB_HAVE_MINOR_VERS=yes
+		LIBLIST='lib$(LIBBASE)$(SHLIBEXT) lib$(LIBBASE)$(SHLIBSEXT)'
+		LIBLINKS='$(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT) $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT)'
+		LIBINSTLIST="install-shlib-soname"
+		;;
+	esac
+	OBJLISTS="OBJS.SH"
 fi
+CC_LINK="$CC_LINK_SHARED"
+AC_SUBST(SHLIB_HAVE_MINOR_VERS)
 
 if test -z "$LIBLIST"; then
 	AC_MSG_ERROR([must enable one of shared or static libraries])
@@ -1320,20 +1262,6 @@ dnl [  --enable-profiled       build profiled libraries @<:@disabled@:>@]
 ,
 [if test "$enableval" = yes; then
   AC_MSG_ERROR([Sorry, profiled libraries do not work in this release.])
-fi
-if false; then
-	case $PFLIBEXT in
-	.po-nobuild)
-		AC_MSG_WARN([Profiled libraries not supported on this architecture.])
-		;;
-	*)
-		AC_MSG_NOTICE([enabling profiled libraries])
-		LIBLIST="$LIBLIST "'lib$(LIBBASE)$(PFLIBEXT)'
-		LIBLINKS="$LIBLINKS "'$(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT)'
-		OBJLISTS="$OBJLISTS OBJS.PF"
-		LIBINSTLIST="$LIBINSTLIST install-profiled"
-		;;
-	esac
 fi])])
 
 dnl

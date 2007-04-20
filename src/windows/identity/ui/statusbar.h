@@ -31,6 +31,7 @@ typedef struct khm_statusbar_part_t {
     int id;
     int width;
     int wtype; /* one of KHUI_SB_WTYPE_* */
+    HICON hIcon;
 } khm_statusbar_part;
 
 #define KHUI_SB_WTYPE_RELATIVE    1

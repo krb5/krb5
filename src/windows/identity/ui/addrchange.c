@@ -39,6 +39,8 @@ addr_change_thread(LPVOID dummy) {
     OVERLAPPED overlap;
     DWORD ret;
 
+    PDESCTHREAD(L"Address change waiter", L"App");
+
     ZeroMemory(&overlap, sizeof(overlap));
 
     h_notify = NULL;

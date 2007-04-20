@@ -494,6 +494,16 @@ kadm5_ret_t    kadm5_free_name_list(void *server_handle, char **names,
 
 krb5_error_code kadm5_init_krb5_context (krb5_context *);
 
+/*
+ * kadm5_get_principal_keys is used only by kadmin.local to extract existing
+ * keys from the database without changing them.  It should never be exposed
+ * to the network protocol.
+ */
+kadm5_ret_t    kadm5_get_principal_keys(void *server_handle,
+					krb5_principal principal,
+					krb5_keyblock **keyblocks,
+					int *n_keys);
+
 #if USE_KADM5_API_VERSION == 1
 /*
  * OVSEC_KADM_API_VERSION_1 should be, if possible, compile-time

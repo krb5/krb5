@@ -32,7 +32,10 @@
 #include "auth_con.h"
 
 static krb5_error_code
-krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata, const krb5_keyblock *keyblock, krb5_replay_data *replaydata, krb5_address *local_addr, krb5_address *remote_addr, krb5_pointer i_vector, krb5_data *outbuf)
+krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
+		   const krb5_keyblock *keyblock, krb5_replay_data *replaydata,
+		   krb5_address *local_addr, krb5_address *remote_addr,
+		   krb5_pointer i_vector, krb5_data *outbuf)
 {
     krb5_error_code 	retval;
     krb5_priv 		privmsg;

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -32,10 +33,10 @@ localized resource libraries with the module manager when it receives
 the init_module() callback.  Note that you can only register localized
 resource libraries during init_module().
 
-The localized resource library is global to a module.  Each plugin is
+The localized resource library is global to a module.  Each plug-in is
 not allowed to define its own localization library, although it is
 free to load and use any library as it sees fit.  The module manager
-does not manage these libraries for the plugin.
+does not manage these libraries for the plug-in.
 
 \section pi_loc_spec Specification of localized resources
 
@@ -104,4 +105,5 @@ the regular WIN32 API.
 - ::kmm_LoadString
 
 */
+
 

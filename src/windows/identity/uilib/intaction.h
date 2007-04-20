@@ -41,4 +41,68 @@ typedef struct tag_khui_ui_callback_data {
 
 #define KHUI_UICBDATA_MAGIC 0x8a08572a
 
+/*! \addtogroup khui_actions
+@{ */
+
+/*! \brief An action */
+typedef struct tag_khui_action {
+    khm_int32 cmd;            /*!< action identifier */
+    khm_int32 type;           /*!< combination of KHUI_ACTIONTYPE_* */
+    wchar_t * name;           /*!< name for named actions.  NULL if
+                                not named. */
+
+    /* The following fields are only for use by NetIDMgr */
+    khm_int16 ib_normal;      /*!< (internal) normal bitmap (index) (toolbar sized icon) */
+    khm_int16 ib_hot;         /*!< (internal) hot bitmap (index) (toolbar sized icon) */
+    khm_int16 ib_disabled;    /*!< (internal) disabled bitmap (index) (toolbar sized icon) */
+
+    khm_int16 ib_icon;        /*!< (internal) index of small (16x16) icon (for menu) (small icon) */
+    khm_int16 ib_icon_dis;    /*!< (internal) index of disabled (greyed) icon (small icon) */
+
+    khm_int16 is_caption;     /*!< (internal) index of string resource for caption */
+    khm_int16 is_tooltip;     /*!< (internal) same for description / tooltip */
+    khm_int16 ih_topic;       /*!< (internal) help topic */
+
+    /* The following fields are specified for custom actions */
+    wchar_t * caption;        /*!< Caption (localized) (limited by
+                                  KHUI_MAXCCH_SHORT_DESC).  The
+                                  caption is used for representing the
+                                  action in menus and toolbars. */
+    wchar_t * tooltip;        /*!< Tooltip (localized) (limited by
+                                  KHUI_MAXCCH_SHORT_DESC).  If this is
+                                  specified, whenever the user hovers
+                                  over the menu item or toolbar button
+                                  representing the action, the tooltip
+                                  will be displayed either on a
+                                  tooltip window or in the status
+                                  bar. */
+    khm_handle listener;      /*!< Listener of this action.  Should be
+                                  a handle to a message
+                                  subscription. When the action is
+                                  invoked, a message of type
+                                  ::KMSG_ACT and subtype
+                                  ::KMSG_ACT_ACTIVATE will be posted
+                                  to this subscriber. The \a uparam
+                                  parameter of the message will have
+                                  the identifier of the action. */
+    void *    data;           /*!< User data for custom action.  This
+                                  field is not used by the UI library.
+                                  It is reserved for plugins to store
+                                  data that is specific for this
+                                  action.  The data that's passed in
+                                  in the \a userdata parameter to
+                                  khui_action_create() will be stored
+                                  here and can be retrieved by calling
+                                  khui_action_get_data(). */
+    void *    reserved1;      /*!< Reserved. */
+    void *    reserved2;      /*!< Reserved. */
+    void *    reserved3;      /*!< Reserved. */
+
+    /* For all actions */
+    int state;                /*!< current state. combination of
+                                  KHUI_ACTIONSTATE_* */
+} khui_action;
+
+/*@}*/
+
 #endif

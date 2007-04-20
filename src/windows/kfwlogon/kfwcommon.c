@@ -1,5 +1,6 @@
 /*
 Copyright 2005,2006 by the Massachusetts Institute of Technology
+Copyright 2007 by Secure Endpoints Inc.
 
 All rights reserved.
 
@@ -23,7 +24,7 @@ SOFTWARE.
 */
 
 #include "kfwlogon.h"
-#include <winbase.h>
+#include <windows.h>
 #include <Aclapi.h>
 #include <userenv.h>
 #include <Sddl.h>
@@ -36,6 +37,10 @@ SOFTWARE.
 #include <winsock2.h>
 #include <lm.h>
 #include <nb30.h>
+
+#include <errno.h>
+#include <malloc.h>
+
 
 /* Function Pointer Declarations for Delayed Loading */
 // CCAPI
@@ -290,34 +295,59 @@ static HINSTANCE hCCAPI = 0;
 static DWORD TraceOption = 0;
 static HANDLE hDLL;
 
+BOOL IsDebugLogging(void)
+{
+    DWORD LSPsize;
+    HKEY NPKey;
+    DWORD dwDebug = FALSE;
+
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
+		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\NetworkProvider", 
+		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS) 
+    {
+	LSPsize=sizeof(dwDebug);
+	if (RegQueryValueEx(NPKey, "Debug", NULL, NULL, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS) 
+	{
+	    dwDebug = FALSE;
+	}
+	RegCloseKey (NPKey);
+    }
+
+    return(dwDebug ? TRUE : FALSE);
+}
+
 void DebugEvent0(char *a) 
 {
-#ifdef DEBUG
     HANDLE h; char *ptbuf[1];
     
-    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-    ptbuf[0] = a;
-    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-    DeregisterEventSource(h);
-#endif
+    if (IsDebugLogging()) {
+	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+	if (h) {
+            ptbuf[0] = a;
+            ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+            DeregisterEventSource(h);
+        }
+    }
 }
 
 #define MAXBUF_ 512
 void DebugEvent(char *b,...) 
 {
-#ifdef DEBUG
     HANDLE h; char *ptbuf[1],buf[MAXBUF_+1];
     va_list marker;
 
-    h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
-    va_start(marker,b);
-    StringCbVPrintf(buf, MAXBUF_+1,b,marker);
-    buf[MAXBUF_] = '\0';
-    ptbuf[0] = buf;
-    ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
-    DeregisterEventSource(h);
-    va_end(marker);
-#endif
+    if (IsDebugLogging()) {
+	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
+        if (h) {
+            va_start(marker,b);
+            StringCbVPrintf(buf, MAXBUF_+1,b,marker);
+            buf[MAXBUF_] = '\0';
+            ptbuf[0] = buf;
+            ReportEvent(h, EVENTLOG_INFORMATION_TYPE, 0, 0, NULL, 1, 0, (const char **)ptbuf, NULL);
+            DeregisterEventSource(h);
+            va_end(marker);
+        }
+    }
 }
 
 void
@@ -698,7 +728,7 @@ KFW_get_cred( char * username,
     char * pname = 0;
     krb5_error_code code;
 
-    if (!pkrb5_init_context || !username || !password)
+    if (!pkrb5_init_context || !username || !password || !password[0])
         return 0;
 
     DebugEvent0(username);
@@ -730,22 +760,23 @@ KFW_get_cred( char * username,
     if ( code ) goto cleanup;
 
     DebugEvent0("got ccache");
+
     if ( lifetime == 0 )
         lifetime = pLeash_get_default_lifetime();
 
-    if ( password[0] ) {
-        code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
-                          pname, 
-                          password,
-                          lifetime,
-                          pLeash_get_default_forwardable(),
-                          pLeash_get_default_proxiable(),
-                          pLeash_get_default_renewable() ? pLeash_get_default_renew_till() : 0,
-                          pLeash_get_default_noaddresses(),
-                          pLeash_get_default_publicip());
-	DebugEvent0("kinit returned");
-        if ( code ) goto cleanup;
-    }
+    DebugEvent0("got lifetime");
+
+    code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
+		      pname, 
+		      password,
+		      lifetime,
+		      pLeash_get_default_forwardable(),
+		      pLeash_get_default_proxiable(),
+		      pLeash_get_default_renewable() ? pLeash_get_default_renew_till() : 0,
+		      pLeash_get_default_noaddresses(),
+		      pLeash_get_default_publicip());
+    DebugEvent0("kinit returned");
+    if ( code ) goto cleanup;
 
   cleanup:
     if ( pname )
@@ -777,6 +808,8 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	DebugEvent0("KFW_set_ccache_dacl - invalid parms");
 	return 1;
     }
+
+    DebugEvent0("KFW_set_ccache_dacl");
 
     /* Get System SID */
     if (!ConvertStringSidToSid("S-1-5-18", &pSystemSID)) {
@@ -833,7 +866,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo DACL (1) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -844,7 +877,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   NULL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo OWNER (2) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -856,7 +889,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
-	    DebugEvent("SetNamedSecurityInfo DACL failed: GLE = 0x%lX", gle);
+	    DebugEvent("SetNamedSecurityInfo DACL (3) failed: GLE = 0x%lX", gle);
 	    if (gle != ERROR_NO_TOKEN)
 		ret = 1;
 	}
@@ -872,6 +905,101 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
     return ret;
 }
 
+int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
+{
+    // SID_IDENTIFIER_AUTHORITY authority = SECURITY_NT_SID_AUTHORITY;
+    PSID pSystemSID = NULL;
+    DWORD SystemSIDlength = 0, UserSIDlength = 0;
+    PACL ccacheACL = NULL;
+    DWORD ccacheACLlength = 0;
+    DWORD gle;
+    int ret = 0;  
+
+    if (!filename) {
+	DebugEvent0("KFW_set_ccache_dacl_with_user_sid - invalid parms");
+	return 1;
+    }
+
+    DebugEvent0("KFW_set_ccache_dacl_with_user_sid");
+
+    /* Get System SID */
+    if (!ConvertStringSidToSid("S-1-5-18", &pSystemSID)) {
+	DebugEvent("KFW_set_ccache_dacl - ConvertStringSidToSid GLE = 0x%x", GetLastError());
+	ret = 1;
+	goto cleanup;
+    }
+
+    /* Create ACL */
+    SystemSIDlength = GetLengthSid(pSystemSID);
+    ccacheACLlength = sizeof(ACL) + sizeof(ACCESS_ALLOWED_ACE)
+        + SystemSIDlength - sizeof(DWORD);
+
+    if (pUserSID) {
+	UserSIDlength = GetLengthSid(pUserSID);
+
+	ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength 
+	    - sizeof(DWORD);
+    }
+
+    ccacheACL = (PACL) LocalAlloc(LPTR, ccacheACLlength);
+    if (!ccacheACL) {
+	DebugEvent("KFW_set_ccache_dacl - LocalAlloc GLE = 0x%x", GetLastError());
+	ret = 1;
+	goto cleanup;
+    }
+
+    InitializeAcl(ccacheACL, ccacheACLlength, ACL_REVISION);
+    AddAccessAllowedAceEx(ccacheACL, ACL_REVISION, 0,
+                         STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+                         pSystemSID);
+    if (pUserSID) {
+	AddAccessAllowedAceEx(ccacheACL, ACL_REVISION, 0,
+			     STANDARD_RIGHTS_ALL | SPECIFIC_RIGHTS_ALL,
+			     pUserSID);
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+				   NULL,
+				   NULL, 
+				   ccacheACL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo DACL (4) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   OWNER_SECURITY_INFORMATION,
+				   pUserSID,
+				   NULL, 
+				   NULL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo OWNER (5) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+    } else {
+	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
+				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
+				   NULL,
+				   NULL, 
+				   ccacheACL,
+				   NULL)) {
+	    gle = GetLastError();
+	    DebugEvent("SetNamedSecurityInfo DACL (6) failed: GLE = 0x%lX", gle);
+	    if (gle != ERROR_NO_TOKEN)
+		ret = 1;
+	}
+    }
+
+  cleanup:
+    if (pSystemSID)
+	LocalFree(pSystemSID);
+    if (ccacheACL)
+	LocalFree(ccacheACL);
+    return ret;
+}
+
 int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int size)
 {
     int  retval = 0;
@@ -879,7 +1007,7 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
     DWORD dwLen  = 0;
 
     if (!hUserToken || !newfilename || size <= 0)
-	return;
+	return 1;
 
     *newfilename = '\0';
 
@@ -894,10 +1022,8 @@ int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int siz
 }
 
 void
-KFW_copy_cache_to_system_file(char * user, char * szLogonId)
+KFW_copy_cache_to_system_file(const char * user, const char * filename)
 {
-    char filename[MAX_PATH] = "";
-    DWORD count;
     char cachename[MAX_PATH + 8] = "FILE:";
     krb5_context		ctx = 0;
     krb5_error_code		code;
@@ -906,24 +1032,11 @@ KFW_copy_cache_to_system_file(char * user, char * szLogonId)
     krb5_ccache                 ncc = 0;
     PSECURITY_ATTRIBUTES        pSA = NULL;
     
-    if (!pkrb5_init_context || !user || !szLogonId)
+    if (!pkrb5_init_context || !user || !filename)
         return;
 
-    count = GetEnvironmentVariable("TEMP", filename, sizeof(filename));
-    if ( count > sizeof(filename) || count == 0 ) {
-        GetWindowsDirectory(filename, sizeof(filename));
-    }
-
-    DebugEvent0(filename);
-    if ( strlen(filename) + strlen(szLogonId) + 2 > sizeof(filename) ) {
-	DebugEvent0("filename buffer too small");
-        return;
-    }
-
-    strcat(filename, "\\");
-    strcat(filename, szLogonId);    
-
-    strcat(cachename, filename);
+    strncat(cachename, filename, sizeof(cachename));
+    cachename[sizeof(cachename)-1] = '\0';
 
     DebugEvent("KFW_Logon_Event - ccache %s", cachename);
 
@@ -984,10 +1097,10 @@ KFW_copy_file_cache_to_default_cache(char * filename)
     if ( strlen(filename) + sizeof("FILE:") > sizeof(cachename) )
         return 1;
 
-    strcat(cachename, filename);
-
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) return 1;
+
+    strcat(cachename, filename);
 
     code = pkrb5_cc_resolve(ctx, cachename, &cc);
     if (code) {
@@ -1043,6 +1156,94 @@ KFW_copy_file_cache_to_default_cache(char * filename)
 }
 
 
+int
+KFW_copy_file_cache_to_api_cache(char * filename)
+{
+    char cachename[MAX_PATH + 8] = "FILE:";
+    krb5_context		ctx = 0;
+    krb5_error_code		code;
+    krb5_principal              princ = 0;
+    krb5_ccache			cc  = 0;
+    krb5_ccache                 ncc = 0;
+    char 			*name = NULL;
+    int retval = 1;
+
+    if (!pkrb5_init_context || !filename)
+        return 1;
+
+    if ( strlen(filename) + sizeof("FILE:") > sizeof(cachename) )
+        return 1;
+
+    code = pkrb5_init_context(&ctx);
+    if (code) return 1;
+
+    strcat(cachename, filename);
+
+    code = pkrb5_cc_resolve(ctx, cachename, &cc);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_resolve failed");
+	goto cleanup;
+    }
+    
+    code = pkrb5_cc_get_principal(ctx, cc, &princ);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_get_principal failed");
+	goto cleanup;
+    }
+
+    code = pkrb5_unparse_name(ctx, princ, &name);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_unparse_name failed");
+	goto cleanup;
+    }
+
+    sprintf(cachename, "API:%s", name);
+
+    code = pkrb5_cc_resolve(ctx, cachename, &ncc);
+    if (code) {
+	DebugEvent0("kfwcpcc krb5_cc_default failed");
+	goto cleanup;
+    }
+    if (!code) {
+        code = pkrb5_cc_initialize(ctx, ncc, princ);
+
+        if (!code)
+            code = pkrb5_cc_copy_creds(ctx,cc,ncc);
+	if (code) {
+	    DebugEvent0("kfwcpcc krb5_cc_copy_creds failed");
+	    goto cleanup;
+	}
+    }
+    if ( ncc ) {
+        pkrb5_cc_close(ctx, ncc);
+        ncc = 0;
+    }
+
+    retval=0;   /* success */
+
+  cleanup:
+    if (name)
+	pkrb5_free_unparsed_name(ctx, name);
+
+    if ( cc ) {
+        pkrb5_cc_close(ctx, cc);
+        cc = 0;
+    }
+
+    DeleteFile(filename);
+
+    if ( princ ) {
+        pkrb5_free_principal(ctx, princ);
+        princ = 0;
+    }
+
+    if (ctx)
+        pkrb5_free_context(ctx);
+
+    return 0;
+}
+
+
 int 
 KFW_destroy_tickets_for_principal(char * user)
 {
@@ -1055,7 +1256,7 @@ KFW_destroy_tickets_for_principal(char * user)
         return 0;
 
     code = pkrb5_init_context(&ctx);
-    if (code) ctx = 0;
+    if (code) return 1;
 
     code = pkrb5_parse_name(ctx, user, &princ);
     if (code) goto loop_cleanup;
@@ -1080,3 +1281,72 @@ KFW_destroy_tickets_for_principal(char * user)
     return 0;
 }
 
+
+/* There are scenarios in which an interactive logon will not
+ * result in the LogonScript being executed.  This will result
+ * in orphaned cache files being left in the Temp directory.
+ * This function will search for cache files in the Temp 
+ * directory and delete any that are older than five minutes.
+ */
+void
+KFW_cleanup_orphaned_caches(void)
+{
+    char * temppath = NULL;
+    char * curdir = NULL;
+    DWORD count, count2;
+    WIN32_FIND_DATA FindFileData;
+    HANDLE hFind = INVALID_HANDLE_VALUE;
+    FILETIME now;
+    ULARGE_INTEGER uli_now;
+    FILETIME expired;
+
+    count = GetTempPath(0, NULL);
+    if (count <= 0)
+        return;
+    temppath = (char *) malloc(count);
+    if (!temppath)
+        goto cleanup;
+    count2 = GetTempPath(count, temppath);
+    if (count2 <= 0 || count2 > count)
+        goto cleanup;
+
+    count = GetCurrentDirectory(0, NULL);
+    curdir = (char *)malloc(count);
+    if (!curdir)
+        goto cleanup;
+    count2 = GetCurrentDirectory(count, curdir);
+    if (count2 <= 0 || count2 > count)
+        goto cleanup;
+
+    if (!SetCurrentDirectory(temppath))
+        goto cleanup;
+
+    GetSystemTimeAsFileTime(&now);
+    uli_now.u.LowPart = now.dwLowDateTime;
+    uli_now.u.HighPart = now.dwHighDateTime;
+
+    uli_now.QuadPart -= 3000000000;        /* 5 minutes == 3 billion 100 nano seconds */
+
+    expired.dwLowDateTime = uli_now.u.LowPart;
+    expired.dwHighDateTime = uli_now.u.HighPart;
+
+    hFind = FindFirstFile("kfwlogon-*", &FindFileData);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            if (CompareFileTime(&FindFileData.ftCreationTime, &expired) < 0) {
+                DebugEvent("Deleting orphaned cache file: \"%s\"", FindFileData.cFileName);
+                DeleteFile(FindFileData.cFileName);
+            }
+        } while ( FindNextFile(hFind, &FindFileData) );
+    }
+
+    SetCurrentDirectory(curdir);
+
+  cleanup:
+    if (temppath)
+        free(temppath);
+    if (hFind != INVALID_HANDLE_VALUE)
+        FindClose(hFind);
+    if (curdir)
+        free(curdir);
+}

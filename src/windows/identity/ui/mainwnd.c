@@ -36,6 +36,8 @@ HWND khm_hwnd_main;
 HWND khm_hwnd_rebar;
 HWND khm_hwnd_main_cred;
 
+int  khm_main_wnd_mode = KHM_MAIN_WND_NORMAL;
+
 #define MW_RESIZE_TIMER 1
 #define MW_RESIZE_TIMEOUT 2000
 #define MW_REFRESH_TIMER 2
@@ -193,7 +195,14 @@ khm_ui_cb(LPARAM lParam) {
 #endif
 
     /* make the call */
-    pcbdata->rv = (*pcbdata->cb)(khm_hwnd_main, pcbdata->rock);
+    if (!IsBadCodePtr(pcbdata->cb))
+        pcbdata->rv = (*pcbdata->cb)(khm_hwnd_main, pcbdata->rock);
+    else {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+        pcbdata->rv = KHM_ERROR_INVALID_PARAM;
+    }
 }
 
 LRESULT CALLBACK 
@@ -212,6 +221,10 @@ khm_main_wnd_proc(HWND hwnd,
         kmq_subscribe_hwnd(KMSG_KMM, hwnd);
         mw_restart_refresh_timer(hwnd);
 
+        /* if the plug-ins finished loading before the window was
+           created, we would have missed the KMSG_KMM_I_DONE message.
+           So we check if the module load is complete and if so, fire
+           off KMSG_ACT_BEGIN_CMDLINE. */
         if (!kmm_load_pending())
             kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);
         break;
@@ -220,6 +233,7 @@ khm_main_wnd_proc(HWND hwnd,
         khm_pre_shutdown();
         kmq_unsubscribe_hwnd(KMSG_ACT, hwnd);
         kmq_unsubscribe_hwnd(KMSG_CRED, hwnd);
+        kmq_unsubscribe_hwnd(KMSG_KMM, hwnd);
         HtmlHelp(NULL, NULL, HH_CLOSE_ALL, 0);
         PostQuitMessage(0);
         break;
@@ -286,15 +300,15 @@ khm_main_wnd_proc(HWND hwnd,
 
         case KHUI_ACTION_EXIT:
             DestroyWindow(hwnd);
-            break;
+            return 0;
 
         case KHUI_ACTION_OPEN_APP:
             khm_show_main_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_CLOSE_APP:
             khm_hide_main_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_KHIM: {
             khui_config_node node = NULL;
@@ -302,7 +316,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmGeneral", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_IDENTS: {
             khui_config_node node = NULL;
@@ -310,7 +324,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmIdentities", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_APPEAR: {
             khui_config_node node = NULL;
@@ -318,7 +332,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmAppear", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_NOTIF: {
             khui_config_node node = NULL;
@@ -326,7 +340,7 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmNotifications", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_OPT_PLUGINS: {
             khui_config_node node = NULL;
@@ -334,27 +348,27 @@ khm_main_wnd_proc(HWND hwnd,
             khui_cfg_open(NULL, L"KhmPlugins", &node);
             khm_show_config_pane(node);
         }
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_CTX:
             khm_html_help(khm_hwnd_main, NULL, HH_HELP_CONTEXT, IDH_WELCOME);
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_CONTENTS:
             khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_TOC, 0);
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_INDEX:
             khm_html_help(khm_hwnd_main, NULL, HH_DISPLAY_INDEX, (DWORD_PTR) L"");
-            break;
+            return 0;
 
         case KHUI_ACTION_HELP_ABOUT:
             khm_create_about_window();
-            break;
+            return 0;
 
         case KHUI_ACTION_IMPORT:
             khm_cred_import();
-            break;
+            return 0;
 
         case KHUI_ACTION_PROPERTIES:
             /* properties are not handled by the main window.
@@ -365,7 +379,29 @@ khm_main_wnd_proc(HWND hwnd,
 
         case KHUI_ACTION_UICB:
             khm_ui_cb(lParam);
-            break;
+            return 0;
+
+            /* layout control */
+        case KHUI_ACTION_LAYOUT_MINI:
+            if (khm_main_wnd_mode == KHM_MAIN_WND_MINI) {
+                khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
+            } else {
+                khm_set_main_window_mode(KHM_MAIN_WND_MINI);
+            }
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
+        case KHUI_ACTION_LAYOUT_RELOAD:
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
+        case KHUI_ACTION_LAYOUT_ID:
+        case KHUI_ACTION_LAYOUT_TYPE:
+        case KHUI_ACTION_LAYOUT_LOC:
+        case KHUI_ACTION_LAYOUT_CUST:
+            khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
 
             /* menu commands */
         case KHUI_PACTION_MENU:
@@ -422,11 +458,6 @@ khm_main_wnd_proc(HWND hwnd,
         case KHUI_PACTION_DELETE:
 
         case KHUI_PACTION_SELALL:
-        case KHUI_ACTION_LAYOUT_ID:
-        case KHUI_ACTION_LAYOUT_TYPE:
-        case KHUI_ACTION_LAYOUT_LOC:
-        case KHUI_ACTION_LAYOUT_CUST:
-        case KHUI_ACTION_LAYOUT_RELOAD:
             /* otherwise fallthrough and bounce to the creds window */
             return SendMessage(khm_hwnd_main_cred, uMsg, 
                                wParam, lParam);
@@ -445,6 +476,7 @@ khm_main_wnd_proc(HWND hwnd,
                 act = khui_find_action(LOWORD(wParam));
                 if (act && act->listener) {
                     kmq_post_sub_msg(act->listener, KMSG_ACT, KMSG_ACT_ACTIVATE, act->cmd, NULL);
+                    return 0;
                 }
             }
         }
@@ -518,14 +550,32 @@ khm_main_wnd_proc(HWND hwnd,
                      MW_RESIZE_TIMER,
                      MW_RESIZE_TIMEOUT,
                      NULL);
+
+            return 0;
         }
         break;
+
+    case WM_MOVING:
+        {
+            RECT * r;
+
+            r = (RECT *) lParam;
+            khm_adjust_window_dimensions_for_display(r,
+                                                     KHM_DOCK_AUTO | KHM_DOCKF_XBORDER);
+        }
+        return TRUE;
 
     case WM_TIMER:
         if (wParam == MW_RESIZE_TIMER) {
             RECT r;
             khm_handle csp_cw;
             khm_handle csp_mw;
+            const wchar_t * wconfig;
+
+            if (khm_main_wnd_mode == KHM_MAIN_WND_MINI)
+                wconfig = L"Windows\\MainMini";
+            else
+                wconfig = L"Windows\\Main";
 
             KillTimer(hwnd, wParam);
 
@@ -536,9 +586,11 @@ khm_main_wnd_proc(HWND hwnd,
                                              KHM_PERM_WRITE,
                                              &csp_cw))) {
                 if (KHM_SUCCEEDED(khc_open_space(csp_cw,
-                                                 L"Windows\\Main",
+                                                 wconfig,
                                                  KHM_PERM_WRITE,
                                                  &csp_mw))) {
+                    khm_int32 t;
+
                     khc_write_int32(csp_mw, L"XPos", r.left);
                     khc_write_int32(csp_mw, L"YPos", r.top);
                     khc_write_int32(csp_mw, L"Width",
@@ -546,18 +598,28 @@ khm_main_wnd_proc(HWND hwnd,
                     khc_write_int32(csp_mw, L"Height",
                                     r.bottom - r.top);
 
+                    if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)) &&
+                        t != KHM_DOCK_NONE) {
+                        khc_write_int32(csp_mw, L"Dock", KHM_DOCK_AUTO);
+                    }
+
                     khc_close_space(csp_mw);
                 }
                 khc_close_space(csp_cw);
             }
+
+            return 0;
+
         } else if (wParam == MW_REFRESH_TIMER) {
             kmq_post_message(KMSG_CRED, KMSG_CRED_REFRESH, 0, 0);
+
+            return 0;
+
         }
         break;
 
     case WM_MENUSELECT:
         return khm_menu_handle_select(wParam, lParam);
-        break;
 
     case KMQ_WM_DISPATCH:
         {
@@ -575,6 +637,9 @@ khm_main_wnd_proc(HWND hwnd,
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_CONTINUE_CMDLINE) {
                 khm_cred_process_startup_actions();
+            } else if (m->type == KMSG_ACT &&
+                       m->subtype == KMSG_ACT_END_CMDLINE) {
+                /* nothing yet */
             } else if (m->type == KMSG_ACT &&
                        m->subtype == KMSG_ACT_SYNC_CFG) {
                 khm_refresh_config();
@@ -609,15 +674,18 @@ khm_main_wnd_proc(HWND hwnd,
                        m->subtype == KMSG_KMM_I_DONE) {
                 kmq_post_message(KMSG_ACT, KMSG_ACT_BEGIN_CMDLINE, 0, 0);
             }
+
             return kmq_wm_end(m, rv);
         }
-        break;
+        return 0;
 
-    case WM_KHUI_ASSIGN_COMMANDLINE:
+    case WM_KHUI_ASSIGN_COMMANDLINE_V1:
         {
             HANDLE hmap;
             void * xfer;
             wchar_t mapname[256];
+            struct tag_khm_startup_options_v1 * pv1opt;
+            int code = KHM_ERROR_SUCCESS;
 
             StringCbPrintf(mapname, sizeof(mapname),
                            COMMANDLINE_MAP_FMT, (DWORD) lParam);
@@ -628,27 +696,110 @@ khm_main_wnd_proc(HWND hwnd,
                 return 1;
 
             xfer = MapViewOfFile(hmap, FILE_MAP_READ, 0, 0,
-                                 sizeof(khm_startup));
+                                 sizeof(*pv1opt));
 
             if (xfer) {
-                memcpy(&khm_startup, xfer, sizeof(khm_startup));
+                pv1opt = (struct tag_khm_startup_options_v1 *) xfer;
+
+                khm_startup.init = pv1opt->init;
+                khm_startup.import = pv1opt->import;
+                khm_startup.renew = pv1opt->renew;
+                khm_startup.destroy = pv1opt->destroy;
+
+                khm_startup.autoinit = pv1opt->autoinit;
+                khm_startup.error_exit = FALSE;
+
+                khm_startup.no_main_window = FALSE;
+                khm_startup.remote_exit = FALSE;
 
                 UnmapViewOfFile(xfer);
+            } else {
+                code = KHM_ERROR_NOT_FOUND;
             }
 
             CloseHandle(hmap);
 
             if(InSendMessage())
-                ReplyMessage(0);
+                ReplyMessage(code);
 
-            khm_startup.exit = FALSE;
+            if (code == KHM_ERROR_SUCCESS) {
+                khm_startup.exit = FALSE;
 
-            khm_startup.seen = FALSE;
-            khm_startup.processing = FALSE;
+                khm_startup.seen = FALSE;
+                khm_startup.remote = TRUE;
+#ifdef DEBUG
+                assert(!khm_startup.processing);
+#endif
+                khm_startup.processing = FALSE;
 
-            khm_cred_begin_startup_actions();
+                khm_cred_begin_startup_actions();
+            }
+
+            return code;
         }
-        break;
+
+    case WM_KHUI_ASSIGN_COMMANDLINE_V2:
+        {
+            HANDLE hmap;
+            void * xfer;
+            wchar_t mapname[256];
+            struct tag_khm_startup_options_v2 *pv2opt;
+            int code = KHM_ERROR_SUCCESS;
+
+            StringCbPrintf(mapname, sizeof(mapname),
+                           COMMANDLINE_MAP_FMT, (DWORD) lParam);
+
+            hmap = OpenFileMapping(FILE_MAP_WRITE, FALSE, mapname);
+
+            if (hmap == NULL)
+                return 1;
+
+            xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
+                                 sizeof(*pv2opt));
+
+            if (xfer) {
+                pv2opt = (struct tag_khm_startup_options_v2 *) xfer;
+
+                if (pv2opt->magic != STARTUP_OPTIONS_MAGIC ||
+                    pv2opt->cb_size != sizeof(*pv2opt)) {
+                    code = KHM_ERROR_INVALID_PARAM;
+                    goto done_with_v2_opt;
+                }
+
+                khm_startup.init = pv2opt->init;
+                khm_startup.import = pv2opt->import;
+                khm_startup.renew = pv2opt->renew;
+                khm_startup.destroy = pv2opt->destroy;
+
+                khm_startup.autoinit = pv2opt->autoinit;
+                khm_startup.exit = pv2opt->remote_exit;
+
+                pv2opt->code = KHM_ERROR_SUCCESS;
+
+            done_with_v2_opt:
+                UnmapViewOfFile(xfer);
+            } else {
+                code = KHM_ERROR_NOT_FOUND;
+            }
+
+            CloseHandle(hmap);
+
+            if(InSendMessage())
+                ReplyMessage(code);
+
+            if (code == KHM_ERROR_SUCCESS) {
+                khm_startup.seen = FALSE;
+                khm_startup.remote = TRUE;
+#ifdef DEBUG
+                assert(!khm_startup.processing);
+#endif
+                khm_startup.processing = FALSE;
+
+                khm_cred_begin_startup_actions();
+            }
+
+            return code;
+        }
 
     case WM_KHUI_QUERY_APP_VERSION:
         {
@@ -676,7 +827,7 @@ khm_main_wnd_proc(HWND hwnd,
 
             CloseHandle(hmap);
         }
-        break;
+        return 0;
 
     }
     return DefWindowProc(hwnd,uMsg,wParam,lParam);
@@ -765,12 +916,232 @@ khm_create_main_window_controls(HWND hwnd_main) {
     khm_hwnd_main_cred = khm_create_credwnd(hwnd_main);
 }
 
+void
+khm_adjust_window_dimensions_for_display(RECT * pr, int dock) {
+
+    HMONITOR hmon;
+    RECT     rm;
+    long x, y, width, height;
+
+    x = pr->left;
+    y = pr->top;
+    width = pr->right - pr->left;
+    height = pr->bottom - pr->top;
+
+    /* if the rect doesn't intersect with the display area of any
+       monitor, we just default to the primary monitor. */
+    hmon = MonitorFromRect(pr, MONITOR_DEFAULTTOPRIMARY);
+
+    if (hmon == NULL) {
+        /* huh? we'll just center this on the primary screen */
+        goto nomonitor;
+    } else {
+        MONITORINFO mi;
+
+        ZeroMemory(&mi, sizeof(mi));
+        mi.cbSize = sizeof(mi);
+
+        if (!GetMonitorInfo(hmon, &mi))
+            goto nomonitor;
+
+        CopyRect(&rm, &mi.rcWork);
+
+        goto adjust_dims;
+    }
+
+ nomonitor:
+    /* for some reason we couldn't get a handle on a monitor or we
+       couldn't get the metrics for that monitor.  We default to
+       setting things up on the primary monitor. */
+
+    SetRectEmpty(&rm);
+    if (!SystemParametersInfo(SPI_GETWORKAREA, 0, (PVOID) &rm, 0))
+        goto done_with_monitor;
+
+ adjust_dims:
+
+    if (width > (rm.right - rm.left))
+        width = rm.right - rm.left;
+    if (height > (rm.bottom - rm.top))
+        height = rm.bottom - rm.top;
+
+    switch (dock & KHM_DOCKF_DOCKHINT) {
+    case KHM_DOCK_TOPLEFT:
+        x = rm.left;
+        y = rm.top;
+        break;
+
+    case KHM_DOCK_TOPRIGHT:
+        x = rm.right - width;
+        y = rm.top;
+        break;
+
+    case KHM_DOCK_BOTTOMRIGHT:
+        x = rm.right - width;
+        y = rm.bottom - height;
+        break;
+
+    case KHM_DOCK_BOTTOMLEFT:
+        x = rm.left;
+        y = rm.bottom - height;
+        break;
+
+    case KHM_DOCK_AUTO:
+        {
+            int cxt, cyt;
+
+            cxt = GetSystemMetrics(SM_CXDRAG);
+            cyt = GetSystemMetrics(SM_CYDRAG);
+
+            if (x > rm.left && (x - rm.left) < cxt)
+                x = rm.left;
+            else if ((x + width) < rm.right && (rm.right - (x + width)) < cxt)
+                x = rm.right - width;
+
+            if (y > rm.top && (y - rm.top) < cyt)
+                y = rm.top;
+            else if ((y + height) < rm.bottom && (rm.bottom - (y + height)) < cyt)
+                y = rm.bottom - height;
+        }
+        break;
+    }
+
+    if (!(dock & KHM_DOCKF_XBORDER)) {
+        if (x < rm.left)
+            x = rm.left;
+        if (x + width > rm.right)
+            x = rm.right - width;
+        if (y < rm.top)
+            y = rm.top;
+        if (y + height > rm.bottom)
+            y = rm.bottom - height;
+    }
+
+ done_with_monitor:
+    pr->left = x;
+    pr->top = y;
+    pr->right = x + width;
+    pr->bottom = y + height;
+
+}
+
+void
+khm_get_main_window_rect(RECT * pr) {
+    khm_handle csp_mw = NULL;
+    int x,y,width,height,dock;
+    RECT r;
+    const wchar_t * wconfig;
+
+    x = CW_USEDEFAULT;
+    y = CW_USEDEFAULT;
+    width = CW_USEDEFAULT;
+    height = CW_USEDEFAULT;
+    dock = KHM_DOCK_NONE;
+
+    if (khm_main_wnd_mode == KHM_MAIN_WND_MINI)
+        wconfig = L"CredWindow\\Windows\\MainMini";
+    else
+        wconfig = L"CredWindow\\Windows\\Main";
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL,
+                                     wconfig,
+                                     KHM_PERM_READ,
+                                     &csp_mw))) {
+        khm_int32 t;
+
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"XPos", &t)))
+            x = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"YPos", &t)))
+            y = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Width", &t)))
+            width = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Height", &t)))
+            height = t;
+        if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)))
+            dock = t;
+
+        khc_close_space(csp_mw);
+    }
+
+    /* If there were no default values, we default to using 1/4 of the
+       work area centered on the primary monitor.  If there were any
+       docking hints, then the next call to
+       khm_adjust_window_dimensions_for_display() will reposition the
+       window. */
+    if (width == CW_USEDEFAULT || x == CW_USEDEFAULT) {
+        RECT wr;
+
+        SetRectEmpty(&wr);
+        SystemParametersInfo(SPI_GETWORKAREA, 0, &wr, 0);
+
+        if (width == CW_USEDEFAULT) {
+            width = (wr.right - wr.left) / 2;
+            height = (wr.bottom - wr.top) / 2;
+        }
+
+        if (x == CW_USEDEFAULT) {
+            x = (wr.left + wr.right) / 2 - width / 2;
+            y = (wr.top + wr.bottom) / 2 - height / 2;
+        }
+    }
+
+    /* The saved dimensions might not actually be visible if the user
+       has changed the resolution of the display or if it's a multiple
+       monitor system where the monitor on which the Network Identity
+       Manager window was on previously is no longer connected.  We
+       have to check for that and adjust the dimensions if needed. */
+    SetRect(&r, x, y, x + width, y + height);
+    khm_adjust_window_dimensions_for_display(&r, dock);
+
+    *pr = r;
+}
+
+void
+khm_set_main_window_mode(int mode) {
+
+    RECT r;
+    khm_handle csp_cw;
+
+    if (mode == khm_main_wnd_mode)
+        return;
+
+    khui_check_action(KHUI_ACTION_LAYOUT_MINI,
+                      ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+    khui_enable_action(KHUI_MENU_LAYOUT,
+                       ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+    khui_enable_action(KHUI_MENU_COLUMNS,
+                       ((mode == KHM_MAIN_WND_MINI)? FALSE : TRUE));
+
+    khui_refresh_actions();
+
+    khm_main_wnd_mode = mode;
+    if (khm_hwnd_main) {
+        khm_get_main_window_rect(&r);
+
+        SetWindowPos(khm_hwnd_main,
+                     NULL,
+                     r.left, r.top,
+                     r.right - r.left, r.bottom - r.top,
+                     SWP_NOACTIVATE | SWP_NOOWNERZORDER |
+                     SWP_NOZORDER);
+    }
+
+    if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", KHM_PERM_WRITE,
+                                     &csp_cw))) {
+
+        khc_write_int32(csp_cw, L"DefaultWindowMode", mode);
+        khc_close_space(csp_cw);
+
+    }
+
+    khm_cred_refresh();
+}
+
 void 
 khm_create_main_window(void) {
     wchar_t buf[1024];
     khm_handle csp_cw = NULL;
-    khm_handle csp_mw = NULL;
-    int x,y,width,height;
+    RECT r;
 
     LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, 
                buf, ARRAYLENGTH(buf));
@@ -789,41 +1160,29 @@ khm_create_main_window(void) {
     if (!khm_hwnd_null)
         return;
 
-    x = CW_USEDEFAULT;
-    y = CW_USEDEFAULT;
-    width = CW_USEDEFAULT;
-    height = CW_USEDEFAULT;
-
     if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow",
                                      KHM_PERM_READ,
                                      &csp_cw))) {
-        if (KHM_SUCCEEDED(khc_open_space(csp_cw,
-                                         L"Windows\\Main",
-                                         KHM_PERM_READ,
-                                         &csp_mw))) {
-            khm_int32 t;
+        khm_int32 t;
 
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"XPos", &t)))
-                x = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"YPos", &t)))
-                y = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Width", &t)))
-                width = t;
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Height", &t)))
-                height = t;
-
-            khc_close_space(csp_mw);
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"DefaultWindowMode", &t))) {
+            khm_set_main_window_mode(t);
         }
+
         khc_close_space(csp_cw);
     }
 
+    khm_get_main_window_rect(&r);
+
     khm_hwnd_main = 
-        CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
+        CreateWindowEx(WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW,
                        MAKEINTATOM(khm_main_window_class),
                        buf,
                        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | 
                        WS_CLIPSIBLINGS,
-                       x, y, width, height,
+                       r.left, r.top,
+                       r.right - r.left,
+                       r.bottom - r.top,
                        khm_hwnd_null,
                        NULL,
                        NULL,
@@ -850,6 +1209,8 @@ khm_show_main_window(void) {
     } else {
         ShowWindow(khm_hwnd_main, khm_nCmdShow);
         UpdateWindow(khm_hwnd_main);
+
+        khm_cred_refresh();
     }
 
     khm_nCmdShow = SW_RESTORE;

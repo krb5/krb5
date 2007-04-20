@@ -24,7 +24,7 @@ else
 	AC_MSG_RESULT(Kerberos 4 authentication enabled)
 	AC_DEFINE(KRB4,1,[Define if krb4 authentication is enabled])
 fi
-KRB5_BUILD_LIBRARY_STATIC
+KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS
 dnl
 old_LIBS="$LIBS"

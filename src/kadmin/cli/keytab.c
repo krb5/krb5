@@ -55,9 +55,17 @@ static char *etype_string(krb5_enctype enctype);
 
 static int quiet;
 
+#ifdef KADMIN_LOCAL
+static int norandkey;
+#endif
+
 static void add_usage()
 {
+#ifdef KADMIN_LOCAL
+     fprintf(stderr, "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [-norandkey] [principal | -glob princ-exp] [...]\n");
+#else
      fprintf(stderr, "Usage: ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [principal | -glob princ-exp] [...]\n");
+#endif
 }
      
 static void rem_usage()
@@ -126,6 +134,9 @@ void kadmin_keytab_add(int argc, char **argv)
 
      argc--; argv++;
      quiet = 0;
+#ifdef KADMIN_LOCAL
+     norandkey = 0;
+#endif
      while (argc) {
 	  if (strncmp(*argv, "-k", 2) == 0) {
 	       argc--; argv++;
@@ -136,6 +147,10 @@ void kadmin_keytab_add(int argc, char **argv)
 	       keytab_str = *argv;
 	  } else if (strcmp(*argv, "-q") == 0) {
 	       quiet++;
+#ifdef KADMIN_LOCAL
+        } else if (strcmp(*argv, "-norandkey") == 0) {
+             norandkey++;
+#endif
 	  } else if (strcmp(*argv, "-e") == 0) {
 	       argc--;
 	       if (argc < 1) {
@@ -159,6 +174,13 @@ void kadmin_keytab_add(int argc, char **argv)
 	  add_usage();
 	  return;
      }
+
+#ifdef KADMIN_LOCAL
+     if (norandkey && ks_tuple) {
+       fprintf(stderr, "cannot specify keysaltlist when not changing key\n");
+       return;
+     }
+#endif
 
      if (process_keytab(context, &keytab_str, &keytab))
 	  return;
@@ -261,6 +283,11 @@ int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
 	  goto cleanup;
      }
 
+#ifdef KADMIN_LOCAL
+     if (norandkey)
+       code = kadm5_get_principal_keys(handle, princ, &keys, &nkeys);
+     else
+#endif
      if (keepold || ks_tuple != NULL) {
 	 code = kadm5_randkey_principal_3(lhandle, princ,
 					  keepold, n_ks_tuple, ks_tuple,

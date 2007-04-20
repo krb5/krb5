@@ -44,9 +44,11 @@
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
 static void updateMechList(void);
+static void freeMechList(void);
 static void register_mech(gss_mechanism, const char *, void *);
 
 static OM_uint32 build_mechSet(void);
+static void free_mechSet(void);
 static void init_hardcoded(void);
 
 /*
@@ -74,6 +76,8 @@ gssint_mechglue_fini(void)
 {
 	k5_mutex_destroy(&g_mechSetLock);
 	k5_mutex_destroy(&g_mechListLock);
+	free_mechSet();
+	freeMechList();
 }
 
 
@@ -219,6 +223,21 @@ gss_OID_set *mechSet;
 } /* gss_indicate_mechs */
 
 
+/* Call with g_mechSetLock held, or during final cleanup.  */
+static void
+free_mechSet(void)
+{
+	int i;
+
+	if (g_mechSet.count != 0) {
+		for (i = 0; i < g_mechSet.count; i++)
+			free(g_mechSet.elements[i].elements);
+		free(g_mechSet.elements);
+		g_mechSet.elements = NULL;
+		g_mechSet.count = 0;
+	}
+}
+
 static OM_uint32
 build_mechSet(void)
 {
@@ -244,13 +263,7 @@ build_mechSet(void)
 	(void) k5_mutex_lock(&g_mechSetLock);
 
 	/* if the oid list already exists we must free it first */
-	if (g_mechSet.count != 0) {
-		for (i = 0; i < g_mechSet.count; i++)
-			free(g_mechSet.elements[i].elements);
-		free(g_mechSet.elements);
-		g_mechSet.elements = NULL;
-		g_mechSet.count = 0;
-	}
+	free_mechSet();
 
 	/* determine how many elements to have in the list */
 	mList = g_mechList;
@@ -452,6 +465,19 @@ updateMechList(void)
 	init_hardcoded();
 
 } /* updateMechList */
+
+static void
+freeMechList(void)
+{
+	gss_mech_info cf, next_cf;
+
+	for (cf = g_mechList; cf != NULL; cf = next_cf) {
+		next_cf = cf->next;
+		free(cf->uLibName);
+		free(cf->mechNameStr);
+		free(cf);
+	}
+}
 
 /*
  * Register a mechanism.  Called with g_mechListLock held.

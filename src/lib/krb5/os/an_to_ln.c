@@ -47,7 +47,7 @@
 #include <regexpr.h>
 #endif	/* !HAVE_REGCOMP && HAVE_REGEXP_H && HAVE_COMPILE */
 
-#define	MAX_FORMAT_BUFFER	1024
+#define	MAX_FORMAT_BUFFER	((size_t)1024)
 #ifndef	min
 #define	min(a,b)	((a>b) ? b : a)
 #endif	/* min */

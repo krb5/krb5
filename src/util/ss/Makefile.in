@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../..
 myfulldir=util/ss
-mydir=.
+mydir=util/ss
 BUILDTOP=$(REL)..$(S)..
 SED = sed
 DEFS=
@@ -113,6 +113,7 @@ $(HDRDIR)/ss_err.h: ss_err.h $(HDRDIR)/timestamp
 
 clean-unix::
 	$(RM) $(HDRS) $(HDRDIR)/timestamp
+	$(RM) -r $(HDRDIR)
 
 std_rqs.c: std_rqs.ct mk_cmds ct_c.sed ct_c.awk
 
@@ -165,7 +166,7 @@ clean::
 		ss.ar ss.tar \
 		TAGS test_ss
 
-
+@libpriv_frag@
 @lib_frag@
 @libobj_frag@
 

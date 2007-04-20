@@ -1996,6 +1996,61 @@ done:
 }
 
 /*
+ * Return the list of keys like kadm5_randkey_principal,
+ * but don't modify the principal.
+ */
+kadm5_ret_t
+kadm5_get_principal_keys(void *server_handle /* IN */,
+                         krb5_principal principal /* IN */,
+                         krb5_keyblock **keyblocks /* OUT */,
+                         int *n_keys /* OUT */)
+{
+    krb5_db_entry               kdb;
+    osa_princ_ent_rec           adb;
+    krb5_key_data               *key_data;
+    kadm5_ret_t                 ret;
+    kadm5_server_handle_t       handle = server_handle;
+
+    if (keyblocks)
+         *keyblocks = NULL;
+
+    CHECK_HANDLE(server_handle);
+
+    if (principal == NULL)
+        return EINVAL;
+
+    if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
+       return(ret);
+
+    if (keyblocks) {
+         if (handle->api_version == KADM5_API_VERSION_1) {
+              /* Version 1 clients will expect to see a DES_CRC enctype. */
+              if ((ret = krb5_dbe_find_enctype(handle->context, &kdb,
+                                              ENCTYPE_DES_CBC_CRC,
+                                              -1, -1, &key_data)))
+                   goto done;
+
+              if ((ret = decrypt_key_data(handle->context, 1, key_data,
+                                         keyblocks, NULL)))
+                   goto done;
+         } else {
+              ret = decrypt_key_data(handle->context,
+                                     kdb.n_key_data, kdb.key_data,
+                                     keyblocks, n_keys);
+              if (ret)
+                   goto done;
+         }
+    }
+
+    ret = KADM5_OK;
+done:
+    kdb_free_entry(handle, &kdb, &adb);
+
+    return ret;
+}
+
+
+/*
  * Allocate an array of n_key_data krb5_keyblocks, fill in each
  * element with the results of decrypting the nth key in key_data with
  * master_keyblock, and if n_keys is not NULL fill it in with the

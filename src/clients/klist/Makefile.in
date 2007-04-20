@@ -9,15 +9,25 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS = klist.c
 
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KLIST=$(OUTPRE)klist.exe
+
+##WIN32##EXERES=$(KLIST:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKLIST_APP -fo $@ -r $**
+
 all-unix:: klist
-all-windows:: $(OUTPRE)klist.exe
+##WIN32##all-windows:: $(KLIST)
 
 klist: klist.o $(KRB4COMPAT_DEPLIBS)
 	$(CC_LINK) -o $@ klist.o $(KRB4COMPAT_LIBS)
 
-$(OUTPRE)klist.exe: $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(SLIB) $(KLIB) $(CLIB)
-	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
-	$(_VC_MANIFEST_EMBED_EXE)
+##WIN32##$(KLIST): $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(SLIB) $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
 	$(RM) klist.o klist

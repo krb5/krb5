@@ -37,13 +37,16 @@
 
 #include<khaction.h>
 #include<khactiondef.h>
-#include<khrescache.h>
 #include<khhtlink.h>
 #include<khnewcred.h>
 #include<khprops.h>
 #include<khalerts.h>
 #include<khconfigui.h>
 #include<khtracker.h>
+
+#ifdef NOEXPORT
+#include<khrescache.h>
+#endif
 
 #include<khremote.h>
 
@@ -115,9 +118,23 @@ typedef khm_int32
     any windows it wishes to create and interact with the user
     directly.
 
-    Note that when the plug-in creates any windows, it should specify
-    the window handle provided via the \a hwnd_main_wnd parameter as
-    the parent window.
+    The callback function would be called synchronously.
+    khui_request_UI_callback() will not return until the user
+    interface processes the request and calls the callback function.
+    The return code of khui_request_UI_callback() will be the return
+    code of the callback.
+
+    \param[in] cb The callback function which will be called from the
+        user interface thread.
+
+    \param[in] rock An arbitrary parameter which will be passed into
+        the callback function.
+
+    \return The return value of \a cb.
+
+    \note When the plug-in creates any windows, it should specify the
+        window handle provided via the \a hwnd_main_wnd parameter as
+        the parent window.
 
     \see ::khm_ui_callback
  */

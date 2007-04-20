@@ -3,14 +3,12 @@
 // Used by C:\work\pismere\athena\auth\krb5\src\windows\identity\ui\lang\en_us\khapp.rc
 //
 #define IDI_MAIN_APP                    104
-#define IDD_PROPPAGE_MEDIUM             106
 #define IDD_PP_CRED                     106
 #define IDD_PP_IDENT                    107
 #define IDB_TK_REFRESH                  108
 #define IDS_MAIN_WINDOW_TITLE           108
 #define IDS_MENU_FILE                   109
 #define IDB_ID                          110
-#define IDS_MENU_IDENTITY               110
 #define IDS_MENU_CRED                   110
 #define IDB_ID_DELETE                   111
 #define IDS_MENU_VIEW                   111
@@ -23,17 +21,13 @@
 #define IDB_TK_DELETE                   115
 #define IDS_ACTION_EXIT                 115
 #define IDB_TK_NEW                      116
-#define IDS_ACTION_NEW_ID               116
 #define IDS_CFG_ROOT_NAME               116
 #define IDS_ACTION_SET_DEF_ID           117
 #define IDS_ACTION_SET_SRCH_ID          118
 #define IDB_VW_REFRESH_SM               118
-#define IDS_ACTION_DESTROY_ID           119
 #define IDR_MENU_BAR                    119
 #define IDS_CFG_ROOT_TITLE              119
-#define IDS_ACTION_RENEW_ID             120
 #define IDS_CFG_GENERAL_SHORT           120
-#define IDS_ACTION_ADD_CRED             121
 #define IDB_TB_BLANK                    121
 #define IDS_ACTION_NEW_CRED             121
 #define IDS_ACTION_PASSWD_ID            122
@@ -57,7 +51,6 @@
 #define IDB_ID_NEW_DIS_SM               131
 #define IDS_ACTION_OPT_KHIM             132
 #define IDB_ID_NEW_SM                   132
-#define IDS_ACTION_OPT_INIT             133
 #define IDB_ID_REFRESH_DIS              133
 #define IDS_ACTION_OPT_IDENTS           133
 #define IDS_ACTION_OPT_NOTIF            134
@@ -71,7 +64,6 @@
 #define IDS_ACTION_HELP_ABOUT           138
 #define IDB_TK_DELETE_SM                138
 #define IDB_TK_DIS_SM                   139
-#define IDS_ACTIONINFO_NEW_ID           139
 #define IDS_CFG_GENERAL_LONG            139
 #define IDB_TK_NEW_DIS                  140
 #define IDS_SAMPLE_STRING               140
@@ -82,7 +74,6 @@
 #define IDB_TK_REFRESH_DIS              143
 #define IDS_WT_NEW_CREDS                143
 #define IDB_TK_REFRESH_DIS_SM           144
-#define IDS_NC_PASSWORD                 144
 #define IDS_NC_IDENTITY                 144
 #define IDB_TK_REFRESH_SM               145
 #define IDS_NC_IDENTS                   145
@@ -116,12 +107,10 @@
 #define IDS_PACTION_OK                  160
 #define IDB_FLAG_CRITICAL               161
 #define IDS_PACTION_CANCEL              161
-#define IDD_NC_PASSWORD                 162
 #define IDS_PACTION_CLOSE               162
 #define IDD_NC_NEWCRED                  162
 #define IDD_NC_BBAR                     163
 #define IDS_ALERT_NOSEL_TITLE           163
-#define IDD_NC_TS                       164
 #define IDS_ALERT_NOSEL                 164
 #define IDI_ENABLED                     165
 #define IDS_NC_CREDTEXT_ID_VALID        165
@@ -166,7 +155,6 @@
 #define IDS_CFG_IDENTITY_SHORT          186
 #define IDI_CFG_DELETED                 186
 #define IDS_CFG_IDENTITY_LONG           187
-#define IDI_ICON1                       187
 #define IDI_ID                          187
 #define IDS_CTX_DESTROY_CREDS           188
 #define IDB_IMPORT_SM_DIS               188
@@ -204,7 +192,6 @@
 #define IDS_PISTATE_FAILUNK             205
 #define IDI_APPICON_EXP                 205
 #define IDS_PISTATE_FAILMAX             206
-#define IDI_ICON4                       206
 #define IDI_APPICON_OK                  206
 #define IDS_PISTATE_FAILREG             207
 #define IDI_CFG_PLUGIN                  207
@@ -301,38 +288,46 @@
 #define IDS_IDACTION_RENEW              294
 #define IDS_IDACTION_DESTROY            295
 #define IDS_CTX_DESTROY_ID              296
-#define IDC_NC_USERNAME                 1007
-#define IDC_NC_PASSWORD                 1008
+#define IDS_NCN_IDENT_INVALID           297
+#define IDS_NCN_IDENT_CHECKING          298
+#define IDS_NCN_IDENT_UNKNOWN           299
+#define IDS_REMOTE_FAIL                 300
+#define IDS_REMOTE_FAIL_TITLE           301
+#define IDS_IDACTION_NEW                302
+#define IDS_IDACTIONT_NEW               303
+#define IDS_IDACTIONT_RENEW             304
+#define IDS_IDACTIONT_DESTROY           305
+#define IDS_ALERTTYPE_PLUGIN            306
+#define IDS_ALERTTYPE_EXPIRE            307
+#define IDS_ALERTTYPE_RENEWFAIL         308
+#define IDS_ALERTTYPE_ACQUIREFAIL       309
+#define IDS_ALERTTYPE_CHPW              310
+#define IDS_ACTION_LAYOUT_MINI          311
+#define IDS_IDEXPDISP_NOCRED            312
+#define IDS_IDEXPDISP_1CRED             313
+#define IDS_IDEXPDISP_NCRED             314
+#define IDS_CW_DEFAULTTF                315
+#define IDS_CW_TYPEF                    316
+#define IDS_CW_EXPIREF                  317
+#define IDS_CW_EXPIRED                  318
 #define IDC_NC_CREDTEXT_LABEL           1009
-#define IDC_NC_PASSWORD_LABEL           1010
-#define IDC_NC_USERNAME_LABEL           1011
 #define IDC_NC_CREDTEXT                 1012
 #define IDC_NC_HELP                     1017
-#define IDC_NC_OPTIONS                  1019
+#define IDC_NC_ADVANCED                 1019
 #define IDC_PP_IDNAME                   1026
 #define IDC_PP_IDDEF                    1027
 #define IDC_PP_IDSEARCH                 1028
-#define IDC_PP_IDSTATUS                 1029
-#define IDC_PP_IDSTATUSIMG              1030
-#define IDC_PP_IDVALID                  1031
-#define IDC_PP_IDRENEW                  1032
-#define IDC_NC_IDENTITY                 1033
-#define IDC_NC_IDENTITY_LABEL           1034
 #define IDC_PP_PROPLIST                 1035
 #define IDC_PP_CPROPLIST                1036
-#define IDC_NC_REALM                    1037
-#define IDC_NC_REALM_LABEL              1038
 #define IDC_NC_TPL_ROW                  1039
 #define IDC_NC_TPL_PANEL                1040
 #define IDC_NC_TPL_LABEL                1041
 #define IDC_NC_TPL_INPUT                1042
 #define IDC_NC_TPL_LABEL_LG             1043
 #define IDC_NC_TPL_INPUT_LG             1044
-#define IDC_NC_TPL_ROW2                 1045
 #define IDC_NC_TPL_ROW_LG               1045
 #define IDC_CFG_NODELIST                1045
 #define IDAPPLY                         1048
-#define IDC_CFG_SUMMARY                 1049
 #define IDC_CFG_TITLE                   1050
 #define IDC_CFG_PANE                    1051
 #define IDC_NOTIF_MONITOR               1053
@@ -351,15 +346,11 @@
 #define IDC_CFG_OTHER                   1066
 #define IDC_CFG_MONITOR                 1069
 #define IDC_CFG_STICKY                  1070
-#define IDC_CFG_IDENTS                  1071
-#define IDC_CFG_IDENTITY                1072
 #define IDC_CFG_RENEW                   1075
 #define IDC_CFG_REMOVE                  1076
 #define IDC_CFG_TAB                     1077
 #define IDC_CFG_TARGET                  1078
 #define IDC_CFG_PLUGINS                 1079
-#define IDC_CFG_PLUGINGRP               1080
-#define IDC_CFG_LBL_DESC                1083
 #define IDC_CFG_DESC                    1084
 #define IDC_CFG_LBL_STATE               1085
 #define IDC_CFG_STATE                   1086
@@ -367,7 +358,6 @@
 #define IDC_CFG_DEPS                    1088
 #define IDC_CFG_DISABLE                 1089
 #define IDC_CFG_ENABLE                  1090
-#define IDC_CFG_PROVGRP                 1091
 #define IDC_CFG_LBL_MOD                 1092
 #define IDC_CFG_MODULE                  1093
 #define IDC_CFG_LBL_VEN                 1094
@@ -378,7 +368,6 @@
 #define IDC_PRODUCT                     1100
 #define IDC_COPYRIGHT                   1101
 #define IDC_BUILDINFO                   1102
-#define IDC_LIST1                       1103
 #define IDC_MODULES                     1103
 #define IDC_PP_CONFIG                   1104
 #define IDC_CFG_UNREGISTER              1107
@@ -396,7 +385,6 @@
 #define IDC_CFG_BOLD                    1131
 #define IDC_CFG_ITALICS                 1132
 #define IDC_CFG_ADDIDENT                1133
-#define IDC_CFG_IDNAME                  1134
 #define IDC_SM_CTL                      1134
 #define IDC_CFG_SHOWLOG                 1135
 #define IDC_MED_CTL                     1135
@@ -404,6 +392,9 @@
 #define IDC_SM_LBL                      1137
 #define IDC_MED_LBL                     1138
 #define IDC_LG_LBL                      1139
+#define IDC_CFG_NOTACTION               1141
+#define IDC_CFG_NOTACT_STATIC           1142
+#define IDC_NC_BASIC                    1143
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -418,7 +409,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1140
+#define _APS_NEXT_CONTROL_VALUE         1144
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

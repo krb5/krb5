@@ -1,7 +1,7 @@
 /*
  * include/k5-thread.h
  *
- * Copyright 2004,2005,2006 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005,2006,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -270,6 +270,23 @@ void KRB5_CALLCONV krb5int_mutex_report_stats(/* k5_mutex_t *m */);
 #endif
 
 
+
+/* The mutex structure we use, k5_mutex_t, has some OS-specific bits,
+   and some non-OS-specific bits for debugging and profiling.
+
+   The OS specific bits, in k5_os_mutex, break down into three primary
+   implementations, POSIX threads, Windows threads, and no thread
+   support.  However, the POSIX thread version is further subdivided:
+   In one case, we can determine at run time whether the thread
+   library is linked into the application, and use it only if it is
+   present; in the other case, we cannot, and the thread library must
+   be linked in always, but can be used unconditionally.  In the
+   former case, the k5_os_mutex structure needs to hold both the POSIX
+   and the non-threaded versions.
+
+   The various k5_os_mutex_* operations are the OS-specific versions,
+   applied to the OS-specific data, and k5_mutex_* uses k5_os_mutex_*
+   to do the OS-specific parts of the work.  */
 
 /* Define the OS mutex bit.  */
 

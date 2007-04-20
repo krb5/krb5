@@ -91,6 +91,7 @@ OBJFILES= \
 	$(UIDIR)\acceldef.obj		\
 	$(UIDIR)\configui.obj		\
 	$(UIDIR)\trackerwnd.obj		\
+	$(UIDIR)\uibind.obj		\
 	$(UIDIR)\version.obj
 
 RESFILES= \
@@ -119,5 +120,5 @@ $(DLLFILE): $(OBJFILES) $(RESFILES)
 all: mkdirs $(DLLFILE)
 
 clean::
-	$(RM) $(DLLFILE)
-	$(RM) $(DLLFILE).manifest
+	if exist '$(DLLFILE)' $(RM) $(DLLFILE)
+	if exist '$(DLLFILE).manifest' $(RM) $(DLLFILE).manifest

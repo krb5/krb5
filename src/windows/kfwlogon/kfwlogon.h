@@ -1,6 +1,7 @@
 /*
 
 Copyright 2005,2006 by the Massachusetts Institute of Technology
+Copyright 2007 by Secure Endpoints Inc.
 
 All rights reserved.
 
@@ -26,8 +27,16 @@ SOFTWARE.
 /* We only support VC 1200 and above anyway */
 #pragma once
 
+/* _WIN32_WINNT must be 0x0501 or greater to pull in definition of
+ * all required LSA data types when the Vista SDK NtSecAPI.h is used. 
+ */
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT 0x0501
+#else
+#if _WIN32_WINNT < 0x0501
+#undef _WIN32_WINNT 
+#define _WIN32_WINNT 0x0501
+#endif
 #endif
 
 #include <windows.h>
@@ -150,7 +159,7 @@ cc_free_NC_info,
 #define MAX_PASSWORD_LENGTH 256
 #define MAX_DOMAIN_LENGTH 256
 
-#define KFW_LOGON_EVENT_NAME TEXT("KFW Logon")
+#define KFW_LOGON_EVENT_NAME TEXT("MIT Kerberos")
 
 BOOLEAN APIENTRY DllEntryPoint(HANDLE dll, DWORD reason, PVOID reserved);
 
@@ -192,10 +201,14 @@ static BOOL WINAPI UnicodeStringToANSI(UNICODE_STRING uInputString, LPSTR lpszOu
 
 int KFW_is_available(void);
 int KFW_get_cred( char * username, char * password, int lifetime, char ** reasonP );
-void KFW_copy_cache_to_system_file(char * user, char * szLogonId);
+void KFW_copy_cache_to_system_file(const char * user, const char * filename);
 int KFW_destroy_tickets_for_principal(char * user);
 int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken);
+int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID);
 int KFW_obtain_user_temp_directory(HANDLE hUserToken, char *newfilename, int size);
+void KFW_cleanup_orphaned_caches(void);
+
+void CALLBACK LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow);
 
 #ifdef __cplusplus
 }

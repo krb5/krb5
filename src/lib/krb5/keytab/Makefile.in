@@ -150,7 +150,7 @@ kt_memory.so kt_memory.po $(OUTPRE)kt_memory.$(OBJEXT): \
   $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  kt_memory.c
+  kt-int.h kt_memory.c
 kt_srvtab.so kt_srvtab.po $(OUTPRE)kt_srvtab.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
