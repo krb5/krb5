@@ -175,7 +175,7 @@ pkinit_server_verify_padata(krb5_context context,
 			    krb5_authdata ***authz_data)
 {
     krb5_error_code retval = 0;	
-    krb5_data scratch = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
+    krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
     krb5_pa_pk_as_req *reqp = NULL;
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
@@ -189,6 +189,7 @@ pkinit_server_verify_padata(krb5_context context,
     int valid_eku = 0, valid_san = 0;
     krb5_authdata **my_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
+    krb5_data k5data;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
 
@@ -203,11 +204,8 @@ pkinit_server_verify_padata(krb5_context context,
     if (plgctx == NULL)
 	return 0;
 
-    scratch.data = data->contents;
-    scratch.length = data->length;
-
 #ifdef DEBUG_ASN1
-    print_buffer_bin(scratch.data, scratch.length, "/tmp/kdc_as_req");
+    print_buffer_bin(data->contents, data->length, "/tmp/kdc_as_req");
 #endif
     /* create a per-request context */
     retval = pkinit_init_kdc_req_context(context, (void **)&reqctx);
@@ -215,13 +213,13 @@ pkinit_server_verify_padata(krb5_context context,
 	goto cleanup;
     reqctx->pa_type = data->pa_type;
 
+    PADATA_TO_KRB5DATA(data, &k5data);
+
     switch ((int)data->pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
 	    pkiDebug("processing KRB5_PADATA_PK_AS_REQ\n");
 	    pa_type = (int)data->pa_type;
-	    retval = k5int_decode_krb5_pa_pk_as_req(&scratch, &reqp);
-	    scratch.data = NULL;
-	    scratch.length = 0;
+	    retval = k5int_decode_krb5_pa_pk_as_req(&k5data, &reqp);
 	    if (retval) {
 		pkiDebug("decode_krb5_pa_pk_as_req failed\n");
 		goto cleanup;
@@ -231,16 +229,14 @@ pkinit_server_verify_padata(krb5_context context,
 		reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_CLIENT,
 		plgctx->opts->require_crl_checking,
 		reqp->signedAuthPack.data, reqp->signedAuthPack.length,
-		&scratch.data, &scratch.length, &krb5_authz.data, 
+		&authp_data.data, &authp_data.length, &krb5_authz.data, 
 		&krb5_authz.length);
 	    break;
 	case KRB5_PADATA_PK_AS_REP_OLD:
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    pkiDebug("processing KRB5_PADATA_PK_AS_REQ_OLD\n");
 	    pa_type = KRB5_PADATA_PK_AS_REQ_OLD;
-	    retval = k5int_decode_krb5_pa_pk_as_req_draft9(&scratch, &reqp9);
-	    scratch.data = NULL;
-	    scratch.length = 0;
+	    retval = k5int_decode_krb5_pa_pk_as_req_draft9(&k5data, &reqp9);
 	    if (retval) {
 		pkiDebug("decode_krb5_pa_pk_as_req_draft9 failed\n");
 		goto cleanup;
@@ -250,13 +246,11 @@ pkinit_server_verify_padata(krb5_context context,
 		reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_DRAFT9,
 		plgctx->opts->require_crl_checking,
 		reqp9->signedAuthPack.data, reqp9->signedAuthPack.length,
-		&scratch.data, &scratch.length, &krb5_authz.data, 
+		&authp_data.data, &authp_data.length, &krb5_authz.data, 
 		&krb5_authz.length);
 	    break;
 	default:
 	    pkiDebug("unrecognized pa_type = %d\n", data->pa_type);
-	    scratch.data = NULL;
-	    scratch.length = 0;
 	    retval = EINVAL;
 	    goto cleanup;
     }
@@ -303,11 +297,13 @@ pkinit_server_verify_padata(krb5_context context,
     }
 
 #ifdef DEBUG_ASN1
-    print_buffer_bin(scratch.data, scratch.length, "/tmp/kdc_auth_pack");
+    print_buffer_bin(authp_data.data, authp_data.length, "/tmp/kdc_auth_pack");
 #endif
+
+    OCTETDATA_TO_KRB5DATA(&authp_data, &k5data);
     switch ((int)data->pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
-	    retval = k5int_decode_krb5_auth_pack(&scratch, &auth_pack);
+	    retval = k5int_decode_krb5_auth_pack(&k5data, &auth_pack);
 	    if (retval) {
 		pkiDebug("failed to decode krb5_auth_pack\n");
 		goto cleanup;
@@ -390,7 +386,7 @@ pkinit_server_verify_padata(krb5_context context,
 	    break;
 	case KRB5_PADATA_PK_AS_REP_OLD:
 	case KRB5_PADATA_PK_AS_REQ_OLD:
-	    retval = k5int_decode_krb5_auth_pack_draft9(&scratch, &auth_pack9);
+	    retval = k5int_decode_krb5_auth_pack_draft9(&k5data, &auth_pack9);
 	    if (retval) {
 		pkiDebug("failed to decode krb5_auth_pack_draft9\n");
 		goto cleanup;
@@ -463,8 +459,8 @@ pkinit_server_verify_padata(krb5_context context,
     }
     if (tmp_as_req != NULL)
 	krb5_free_kdc_req(context, tmp_as_req); 
-    if (scratch.data != NULL)
-	free(scratch.data);
+    if (authp_data.data != NULL)
+	free(authp_data.data);
     if (krb5_authz.data != NULL)
 	free(krb5_authz.data);
     if (reqctx != NULL)
@@ -501,9 +497,9 @@ pkinit_server_return_padata(krb5_context context,
     int i = 0;
 
     unsigned char *subjectPublicKey = NULL;
-    unsigned char **dh_pubkey = NULL, *server_key = NULL;
-    int subjectPublicKey_len = 0;
-    int server_key_len = 0, dh_pubkey_len = 0;
+    unsigned char *dh_pubkey = NULL, *server_key = NULL;
+    unsigned int subjectPublicKey_len = 0;
+    unsigned int server_key_len = 0, dh_pubkey_len = 0;
 
     krb5_kdc_dh_key_info dhkey_info;
     krb5_data *encoded_dhkey_info = NULL;
@@ -516,7 +512,7 @@ pkinit_server_return_padata(krb5_context context,
     krb5_reply_key_pack *key_pack = NULL;
     krb5_reply_key_pack_draft9 *key_pack9 = NULL;
     krb5_data *encoded_key_pack = NULL;
-    int num_types;
+    unsigned int num_types;
     krb5_cksumtype *cksum_types = NULL;
 
     pkinit_kdc_context plgctx;
@@ -638,7 +634,8 @@ pkinit_server_return_padata(krb5_context context,
 	    goto cleanup;
 	}
 #ifdef DEBUG_ASN1
-	print_buffer_bin(encoded_dhkey_info->data, encoded_dhkey_info->length,
+	print_buffer_bin((unsigned char *)encoded_dhkey_info->data,
+			 encoded_dhkey_info->length,
 			 "/tmp/kdc_dh_key_info");
 #endif
 
@@ -646,7 +643,8 @@ pkinit_server_return_padata(krb5_context context,
 	    case KRB5_PADATA_PK_AS_REQ:
 		retval = cms_signeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_SERVER, 1,
-		    encoded_dhkey_info->data, encoded_dhkey_info->length,
+		    (unsigned char *)encoded_dhkey_info->data,
+		    encoded_dhkey_info->length,
 		    &rep->u.dh_Info.dhSignedData.data,
 		    &rep->u.dh_Info.dhSignedData.length);
 		if (retval) {
@@ -658,7 +656,8 @@ pkinit_server_return_padata(krb5_context context,
 	    case KRB5_PADATA_PK_AS_REQ_OLD:
 		retval = cms_signeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_DRAFT9, 1,
-		    encoded_dhkey_info->data, encoded_dhkey_info->length,
+		    (unsigned char *)encoded_dhkey_info->data,
+		    encoded_dhkey_info->length,
 		    &rep9->u.dhSignedData.data,
 		    &rep9->u.dhSignedData.length);
 		if (retval) {
@@ -727,7 +726,8 @@ pkinit_server_return_padata(krb5_context context,
 		rep->choice = choice_pa_pk_as_rep_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, padata->pa_type, 1, 
-		    encoded_key_pack->data, encoded_key_pack->length, 
+		    (unsigned char *)encoded_key_pack->data,
+		    encoded_key_pack->length,
 		    &rep->u.encKeyPack.data, &rep->u.encKeyPack.length);
 		break;
 	    case KRB5_PADATA_PK_AS_REP_OLD:
@@ -755,16 +755,18 @@ pkinit_server_return_padata(krb5_context context,
 		rep9->choice = choice_pa_pk_as_rep_draft9_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, padata->pa_type, 1, 
-		    encoded_key_pack->data, encoded_key_pack->length, 
+		    (unsigned char *)encoded_key_pack->data,
+		    encoded_key_pack->length,
 		    &rep9->u.encKeyPack.data, &rep9->u.encKeyPack.length);
 		break;
 	}
 	if (retval) {
-	    pkiDebug("failed to create pkcs7 enveloped data\n");
+	    pkiDebug("failed to create pkcs7 enveloped data: %s\n", error_message(retval));
 	    goto cleanup;
 	}
 #ifdef DEBUG_ASN1
-	print_buffer_bin(encoded_key_pack->data, encoded_key_pack->length,
+	print_buffer_bin((unsigned char *)encoded_key_pack->data,
+			 encoded_key_pack->length,
 			 "/tmp/kdc_key_pack");
 	switch ((int)padata->pa_type) {
 	    case KRB5_PADATA_PK_AS_REQ:
@@ -797,7 +799,8 @@ pkinit_server_return_padata(krb5_context context,
     }
 #ifdef DEBUG_ASN1
     if (out_data != NULL)
-	print_buffer_bin(out_data->data, out_data->length, "/tmp/kdc_as_rep");
+	print_buffer_bin((unsigned char *)out_data->data, out_data->length,
+			 "/tmp/kdc_as_rep");
 #endif
 
     *send_pa = (krb5_pa_data *) malloc(sizeof(krb5_pa_data));
@@ -872,7 +875,7 @@ static krb5_preauthtype supported_server_pa_types[] = {
     0
 };
 
-void
+static void
 pkinit_fini_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     /*
@@ -1033,7 +1036,8 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
 {
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_context plgctx, *realm_contexts = NULL;
-    int i, j, numrealms;
+    int i, j;
+    size_t numrealms;
 
     retval = pkinit_accessor_init();
     if (retval)

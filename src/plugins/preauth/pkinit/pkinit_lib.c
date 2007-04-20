@@ -212,13 +212,12 @@ pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
     return 0;
 cleanup:
     pkinit_fini_identity_opts(newopts);   
+    return retval;
 }
 
 void
 pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
 {
-    int i;
-
     if (idopts == NULL)
 	return;
 
@@ -243,13 +242,30 @@ pkinit_initialize_identity(krb5_context context,
 	     context, idopts, id_cryptoctx);
     if (idopts == NULL || id_cryptoctx == NULL)
 	goto errout;
-/*
-    if (idopts->identity == NULL)
-	goto errout;
-*/
-    retval = pkinit_process_identity_option(context,
-					    PKINIT_ID_OPT_USER_IDENTITY,
-					    idopts->identity, id_cryptoctx);
+
+    /*
+     * If identity was specified, use that.  (For the kdc, this
+     * is specified as pkinit_identity in the kdc.conf.  For users,
+     * this is specified on the command line via X509_user_identity.)
+     * If a user did not specify identity on the command line,
+     * then we will try alternatives which may have been specified
+     * in the config file.
+     */
+    if (idopts->identity != NULL)
+	retval = pkinit_process_identity_option(context,
+						PKINIT_ID_OPT_USER_IDENTITY,
+						idopts->identity, id_cryptoctx);
+    else {
+	for (i = 0;
+	     retval != 0
+	     && idopts->identity_alt != NULL
+	     && idopts->identity_alt[i] != NULL; i++) {
+		retval = pkinit_process_identity_option(context,
+						    PKINIT_ID_OPT_USER_IDENTITY,
+						    idopts->identity_alt[i],
+						    id_cryptoctx);
+	}
+    }
     if (retval)
 	goto errout;
 
@@ -414,6 +430,8 @@ void free_krb5_trusted_ca(krb5_trusted_ca ***in)
 		if ((*in)[i]->u.issuerAndSerial.data != NULL)
 		    free((*in)[i]->u.issuerAndSerial.data);
 		break;
+	    case choice_trusted_cas_UNKNOWN:
+		break;
 	}
 	free((*in)[i]);
 	i++;
@@ -573,7 +591,7 @@ init_krb5_subject_pk_info(krb5_subject_pk_info **in)
 
 /* debugging functions */
 void
-print_buffer(unsigned char *buf, int len)
+print_buffer(unsigned char *buf, unsigned int len)
 {
     int i = 0;
     if (len <= 0)
@@ -585,7 +603,7 @@ print_buffer(unsigned char *buf, int len)
 }
 
 void
-print_buffer_bin(unsigned char *buf, int len, char *filename)
+print_buffer_bin(unsigned char *buf, unsigned int len, char *filename)
 {
     FILE *f = NULL;
     int i = 0;

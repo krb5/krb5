@@ -29,6 +29,7 @@
  */
 
 #include <k5-int.h>
+#include "pkinit_accessor.h"
 
 #define DEF_FUNC_PTRS(type) \
 krb5_error_code (*k5int_encode_##type)(const type *, krb5_data **); \

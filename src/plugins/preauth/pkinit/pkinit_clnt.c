@@ -284,7 +284,8 @@ pkinit_as_req_create(krb5_context context,
 	    auth_pack9->pkAuthenticator.nonce = nonce;
 	    auth_pack9->pkAuthenticator.kdcName = server;
 	    auth_pack9->pkAuthenticator.kdcRealm.magic = 0;
-	    auth_pack9->pkAuthenticator.kdcRealm.data = server->realm.data;
+	    auth_pack9->pkAuthenticator.kdcRealm.data =
+					(unsigned char *)server->realm.data;
 	    auth_pack9->pkAuthenticator.kdcRealm.length = server->realm.length;
 	    free(cksum->contents);
 	    break;
@@ -360,7 +361,8 @@ pkinit_as_req_create(krb5_context context,
 	goto cleanup;
     }
 #ifdef DEBUG_ASN1
-    print_buffer_bin(coded_auth_pack->data, coded_auth_pack->length,
+    print_buffer_bin((unsigned char *)coded_auth_pack->data,
+		     coded_auth_pack->length,
 		     "/tmp/client_auth_pack");
 #endif
 
@@ -374,7 +376,7 @@ pkinit_as_req_create(krb5_context context,
 	    }
 	    retval = cms_signeddata_create(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
-		coded_auth_pack->data, coded_auth_pack->length,
+		(unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
 		&req->signedAuthPack.data, &req->signedAuthPack.length);
 #if 0	/* VISTA HACK */
 	    if (retval == 0) {
@@ -392,7 +394,7 @@ pkinit_as_req_create(krb5_context context,
 	    }
 	    retval = cms_signeddata_create(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_DRAFT9, 1,
-		coded_auth_pack->data, coded_auth_pack->length,
+		(unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
 		&req9->signedAuthPack.data, &req9->signedAuthPack.length);
 	    break;
     }
@@ -446,7 +448,7 @@ pkinit_as_req_create(krb5_context context,
     }
 #ifdef DEBUG_ASN1
     if (!retval)
-	print_buffer_bin((*as_req)->data, (*as_req)->length,
+	print_buffer_bin((unsigned char *)(*as_req)->data, (*as_req)->length,
 			 "/tmp/client_as_req");
 #endif
 
@@ -530,18 +532,19 @@ pkinit_as_rep_parse(krb5_context context,
     krb5_kdc_dh_key_info *kdc_dh = NULL;
     krb5_reply_key_pack *key_pack = NULL;
     krb5_reply_key_pack_draft9 *key_pack9 = NULL;
-    krb5_data dh_data = { 0, 0, NULL };
+    krb5_octet_data dh_data = { 0, 0, NULL };
     unsigned char *client_key = NULL, *kdc_hostname = NULL;
-    unsigned char **hostnames = NULL;
-    int client_key_len = 0;
+    unsigned int client_key_len = 0;
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_principal tmp_server;
-    int valid_eku = 0, valid_san = 0, flag = 0, i = 0;
+    int valid_eku = 0, valid_san = 0, i = 0;
+    krb5_data k5data;
 
     assert((as_rep != NULL) && (key_block != NULL));
 
 #ifdef DEBUG_ASN1
-    print_buffer_bin(as_rep->data, as_rep->length, "/tmp/client_as_rep");
+    print_buffer_bin((unsigned char *)as_rep->data, as_rep->length,
+		     "/tmp/client_as_rep");
 #endif
 
     if ((retval = k5int_decode_krb5_pa_pk_as_rep(as_rep, &kdc_reply))) {
@@ -608,26 +611,35 @@ pkinit_as_rep_parse(krb5_context context,
 		    goto cleanup;
 		}
 	    } else if (pa_type == KRB5_PADATA_PK_AS_REP_OLD) {
+		char **hostnames = NULL;
+		int name_matched = 0;
+
 		if (reqctx->opts->require_hostname_match) {
-		    retval = pkinit_get_kdc_hostnames(context,
-						      &request->server->realm, 
-						      &hostnames);
+		    retval = pkinit_libdefault_strings(context,
+						       &request->server->realm, 
+						       "pkinit_win2k_hostname",
+						       &hostnames);
 		    if (retval) {
-			retval = KRB5KDC_ERR_PREAUTH_FAILED;
+			pkiDebug("No pkinit_win2k_hostname values found in "
+				 "the config file.\n");
+			retval = KRB5KDC_ERR_KDC_NOT_TRUSTED;
 			goto cleanup;
 		    }
-		    i = 0;
-		    while(hostnames[i]) {
-			if (!strncmp(kdc_hostname, hostnames[i], 
-				strlen(kdc_hostname))) {
-			    pkiDebug("dnsName matches client's KDC name\n");
-			    flag = 1;
+		    for (i = 0; hostnames != NULL && hostnames[i] != NULL; i++) {
+			pkiDebug("Comparing cert's dnsName '%s' with "
+				 "trusted win2k hostname '%s'\n",
+				 kdc_hostname, hostnames[i]);
+			if (strcmp((char *)kdc_hostname, hostnames[i]) == 0) { 
+			    pkiDebug("Cert's dnsName, '%s', matched\n",
+				     kdc_hostname);
+			    name_matched = 1;
 			    break;
 			}
-			i++;
 		    }
-		    if (!flag) {
-			pkiDebug("dnsName does not match client's KDC name\n");
+		    profile_free_list(hostnames);
+		    if (!name_matched) {
+			pkiDebug("Cert's dnsName, '%s', NOT matched\n",
+				 kdc_hostname);
 			retval = KRB5KDC_ERR_KDC_NOT_TRUSTED;
 			goto cleanup;
 		    }
@@ -650,13 +662,15 @@ pkinit_as_rep_parse(krb5_context context,
 	goto cleanup;
     }
 
+    OCTETDATA_TO_KRB5DATA(&dh_data, &k5data);
+
     switch(kdc_reply->choice) {
 	case choice_pa_pk_as_rep_dhInfo:
 #ifdef DEBUG_ASN1
 	    print_buffer_bin(dh_data.data, dh_data.length,
 			     "/tmp/client_dh_key");
 #endif
-	    if ((retval = k5int_decode_krb5_kdc_dh_key_info(&dh_data,
+	    if ((retval = k5int_decode_krb5_kdc_dh_key_info(&k5data,
 		    &kdc_dh)) != 0) {
 		pkiDebug("failed to decode kdc_dh_key_info\n");
 		goto cleanup;
@@ -686,14 +700,14 @@ pkinit_as_rep_parse(krb5_context context,
 	    print_buffer_bin(dh_data.data, dh_data.length,
 			     "/tmp/client_key_pack");
 #endif
-	    if ((retval = k5int_decode_krb5_reply_key_pack(&dh_data,
+	    if ((retval = k5int_decode_krb5_reply_key_pack(&k5data,
 		    &key_pack)) != 0) {
 		pkiDebug("failed to decode reply_key_pack\n");
 		if (pa_type == KRB5_PADATA_PK_AS_REP)
 		    goto cleanup;
 		else {
 		    if ((retval =
-			k5int_decode_krb5_reply_key_pack_draft9(&dh_data,
+			k5int_decode_krb5_reply_key_pack_draft9(&k5data,
 							  &key_pack9)) != 0) {
 			pkiDebug("failed to decode reply_key_pack_draft9\n");
 			goto cleanup;
@@ -774,12 +788,6 @@ cleanup:
     if (key_pack9 != NULL)
 	free_krb5_reply_key_pack_draft9(&key_pack9);
 
-    if (hostnames != NULL) {
-	i = 0;
-	while(hostnames[i]) 
-	    free(hostnames[i++]);
-	free(hostnames);
-    }
     if (kdc_hostname != NULL)
 	free(kdc_hostname);
 
@@ -828,6 +836,9 @@ pkinit_client_profile(krb5_context context,
     pkinit_libdefault_strings(context, &request->server->realm,
 			      "pkinit_revoke",
 			      &reqctx->idopts->crls);
+    pkinit_libdefault_strings(context, &request->server->realm,
+			      "pkinit_identity_alt",
+			      &reqctx->idopts->identity_alt);
 }
 
 krb5_error_code
@@ -957,7 +968,8 @@ pkinit_client_tryagain(krb5_context context,
 	return retval;
 
 #ifdef DEBUG_ASN1
-    print_buffer_bin(err_reply->e_data.data, err_reply->e_data.length, "/tmp/client_edata");
+    print_buffer_bin((unsigned char *)err_reply->e_data.data,
+		     err_reply->e_data.length, "/tmp/client_edata");
 #endif
     retval = k5int_decode_krb5_typed_data(&err_reply->e_data, &typed_data);
     if (retval) {
@@ -968,8 +980,7 @@ pkinit_client_tryagain(krb5_context context,
     print_buffer_bin(typed_data[0]->data, typed_data[0]->length,
 		     "/tmp/client_typed_data");
 #endif
-    scratch.data = typed_data[0]->data;
-    scratch.length = typed_data[0]->length;
+    OCTETDATA_TO_KRB5DATA(typed_data[0], &scratch);
 
     switch(typed_data[0]->type) {
 	case TD_TRUSTED_CERTIFIERS:
@@ -1212,7 +1223,7 @@ pkinit_client_plugin_fini(krb5_context context, void *blob)
 }
 
 static krb5_error_code
-add_string_to_array(krb5_context context, char ***array, char *addition)
+add_string_to_array(krb5_context context, char ***array, const char *addition)
 {
     char **out = NULL;
 

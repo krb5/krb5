@@ -53,21 +53,14 @@
 #define pkiDebug(args...)
 #endif
 
+/* Macros to deal with converting between various data types... */
+#define PADATA_TO_KRB5DATA(pad, k5d) \
+    (k5d)->length = (pad)->length; (k5d)->data = (char *)(pad)->contents;
+#define OCTETDATA_TO_KRB5DATA(octd, k5d) \
+    (k5d)->length = (octd)->length; (k5d)->data = (char *)(octd)->data;
+
 extern const krb5_octet_data dh_oid;
 
-/* forward declarations of pkinit structures */
-struct _pkinit_context;
-typedef struct _pkinit_context *pkinit_context;
-struct _pkinit_kdc_context;
-typedef struct _pkinit_kdc_context *pkinit_kdc_context;
-struct _pkinit_req_context;
-typedef struct _pkinit_req_context *pkinit_req_context;
-struct _pkinit_kdc_req_context;
-typedef struct _pkinit_kdc_req_context *pkinit_kdc_req_context;
-
-/*
- * forward declarations of crypto-specific pkinit structures
- */
 /*
  * notes about crypto contexts:
  *
@@ -146,6 +139,7 @@ typedef struct _pkinit_req_opts {
 
 typedef struct _pkinit_identity_opts {
     char *identity;
+    char **identity_alt;
     char **anchors;
     char **intermediates;
     char **crls;
@@ -163,6 +157,7 @@ struct _pkinit_context {
     pkinit_plg_opts *opts;
     pkinit_identity_opts *idopts;
 };
+typedef struct _pkinit_context *pkinit_context;
 
 /*
  * Client's per-request context
@@ -175,6 +170,7 @@ struct _pkinit_req_context {
     pkinit_identity_opts *idopts;
     krb5_preauthtype pa_type;
 };
+typedef struct _pkinit_kdc_context *pkinit_kdc_context;
 
 /*
  * KDC's (per-realm) plugin context
@@ -188,6 +184,7 @@ struct _pkinit_kdc_context {
     char *realmname;
     unsigned int realmname_len;
 };
+typedef struct _pkinit_req_context *pkinit_req_context;
 
 /*
  * KDC's per-request context
@@ -199,6 +196,7 @@ struct _pkinit_kdc_req_context {
     krb5_auth_pack_draft9 *rcv_auth_pack9;
     krb5_preauthtype pa_type;
 };
+typedef struct _pkinit_kdc_req_context *pkinit_kdc_req_context;
 
 /*
  * Functions to initialize and cleanup various context
@@ -251,13 +249,13 @@ krb5_error_code cms_signeddata_create
 	unsigned char *auth_pack,			/* IN
 		    contains DER encoded AuthPack (CMS_SIGN_CLIENT)
 		    or DER encoded DHRepInfo (CMS_SIGN_SERVER) */
-	int auth_pack_len,				/* IN
+	unsigned int auth_pack_len,			/* IN
 		    contains length of auth_pack */
 	unsigned char **signed_data,			/* OUT
 		    for CMS_SIGN_CLIENT receives DER encoded
 		    SignedAuthPack (CMS_SIGN_CLIENT) or DER
 		    encoded DHInfo (CMS_SIGN_SERVER) */ 
-	int *signed_data_len);				/* OUT
+	unsigned int *signed_data_len);			/* OUT
 		    receives length of signed_data */
 
 /*
@@ -280,18 +278,18 @@ krb5_error_code cms_signeddata_verify
 	unsigned char *signed_data,			/* IN
 		    contains DER encoded SignedAuthPack (CMS_SIGN_CLIENT)
 		    or DER encoded DHInfo (CMS_SIGN_SERVER) */
-	int signed_data_len,				/* IN
+	unsigned int signed_data_len,			/* IN
 		    contains length of signed_data*/
 	unsigned char **auth_pack,			/* OUT
 		    receives DER encoded AuthPack (CMS_SIGN_CLIENT)
 		    or DER encoded DHRepInfo (CMS_SIGN_SERVER)*/
-	int *auth_pack_len,				/* OUT
+	unsigned int *auth_pack_len,			/* OUT
 		    receives length of auth_pack */
 	unsigned char **authz_data,			/* OUT
 		    receives required authorization data that
 		    contains the verified certificate chain
 		    (only used by the KDC) */
-	int *authz_data_len);				/* OUT
+	unsigned int *authz_data_len);			/* OUT
 		    receives length of authz_data */
 
 /*
@@ -308,11 +306,11 @@ krb5_error_code cms_envelopeddata_create
 		    SignedData should contain certificate path */
 	unsigned char *key_pack,			/* IN
 		    contains DER encoded ReplyKeyPack */
-	int key_pack_len,				/* IN
+	unsigned int key_pack_len,			/* IN
 		    contains length of key_pack */
 	unsigned char **envel_data,			/* OUT
 		    receives DER encoded encKeyPack */
-	int *envel_data_len);				/* OUT
+	unsigned int *envel_data_len);			/* OUT
 		    receives length of envel_data */
 
 /*
@@ -329,11 +327,11 @@ krb5_error_code cms_envelopeddata_verify
 		    strictly enforced */
 	unsigned char *envel_data,			/* IN
 		    contains DER encoded encKeyPack */
-	int envel_data_len,				/* IN
+	unsigned int envel_data_len,			/* IN
 		    contains length of envel_data */ 
 	unsigned char **signed_data,			/* OUT
 		    receives ReplyKeyPack */
-	int *signed_data_len);				/* OUT
+	unsigned int *signed_data_len);			/* OUT
 		    receives length of signed_data */
 
 /*
@@ -383,7 +381,7 @@ krb5_error_code pkinit_octetstring2key
 		    specifies the enc type */
 	unsigned char *key,				/* IN
 		    contains the DH secret key */
-	int key_len,					/* IN
+	unsigned int key_len,				/* IN
 		    contains length of key */
 	krb5_keyblock * krb5key);			/* OUT
 		    receives kerberos session key */
@@ -401,11 +399,11 @@ krb5_error_code client_create_dh
 		    specifies the DH modulous, eg 1024, 2048, or 4096 */
         unsigned char **dh_paramas,			/* OUT
 		    contains DER encoded DH params */
-	int *dh_params_len,				/* OUT
+	unsigned int *dh_params_len,			/* OUT
 		    contains length of dh_parmas */
         unsigned char **dh_pubkey,			/* OUT
 		    receives DER encoded DH pub key */ 
-	int *dh_pubkey_len);				/* OUT
+	unsigned int *dh_pubkey_len);			/* OUT
 		    receives length of dh_pubkey */
 
 /*
@@ -420,11 +418,11 @@ krb5_error_code client_process_dh
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	unsigned char *dh_pubkey,			/* IN
 		    contains client's DER encoded DH pub key */
-	int dh_pubkey_len,				/* IN
+	unsigned int dh_pubkey_len,			/* IN
 		    contains length of dh_pubkey */
 	unsigned char **dh_session_key,			/* OUT
 		    receives DH secret key */
-	int *dh_session_key_len);			/* OUT
+	unsigned int *dh_session_key_len);		/* OUT
 		    receives length of dh_session_key */
 
 /*
@@ -453,15 +451,15 @@ krb5_error_code server_process_dh
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	unsigned char *received_pubkey,			/* IN
 		    contains client's DER encoded DH pub key */
-	int received_pub_len,				/* IN
+	unsigned int received_pub_len,			/* IN
 		    contains length of received_pubkey */
 	unsigned char **dh_pubkey,			/* OUT
 		    receives KDC's DER encoded DH pub key */ 
-	int *dh_pubkey_len,				/* OUT
+	unsigned int *dh_pubkey_len,			/* OUT
 		    receives length of dh_pubkey */
 	unsigned char **server_key,			/* OUT
 		    receives DH secret key */
-	int *server_key_len);				/* OUT
+	unsigned int *server_key_len);			/* OUT
 		    receives length of server_key */
 
 /*
@@ -503,7 +501,7 @@ krb5_error_code create_issuerAndSerial
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	unsigned char **kdcId_buf,			/* OUT
 		    receives DER encoded kdcPKId */
-	int *kdcId_len);				/* OUT
+	unsigned int *kdcId_len);				/* OUT
 		    receives length of encoded kdcPKId */
 
 /*
@@ -623,7 +621,7 @@ krb5_error_code pkinit_check_kdc_pkid
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	unsigned char *pdid_buf,			/* IN
 		    contains DER encoded kdcPKId */
-	int pkid_len,					/* IN
+	unsigned int pkid_len,				/* IN
 		    contains length of pdid_buf */
 	int *valid_kdcPkId);				/* OUT
 		    1 if kdcPKId matches, otherwise 0 */
@@ -711,7 +709,7 @@ krb5_error_code pkinit_get_kdc_hostnames
  */
 
 /* debugging functions */
-void print_buffer(unsigned char *, int);
-void print_buffer_bin(unsigned char *, int, char *);
+void print_buffer(unsigned char *, unsigned int);
+void print_buffer_bin(unsigned char *, unsigned int, char *);
 
 #endif	/* _PKINIT_H */

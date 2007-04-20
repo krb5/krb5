@@ -64,6 +64,8 @@ struct _pkinit_identity_crypto_context {
     int pkcs11_method;
     krb5_prompter_fct prompter;
     void *prompter_data;
+    char *cert_filename;
+    char *key_filename;
 #ifndef WITHOUT_PKCS11
     char *p11_module_name;
     void *p11_module;
@@ -114,31 +116,34 @@ static krb5_error_code pkinit_init_pkcs11(pkinit_identity_crypto_context ctx);
 static void pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx);
 
 static krb5_error_code pkinit_encode_dh_params
-        (BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, int *);
+	(BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, unsigned int *);
 static DH *pkinit_decode_dh_params
-        (DH **, unsigned char **, long );
+	(DH **, unsigned char **, unsigned int );
 static int pkinit_check_dh_params
-        (BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
+	(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
 
 static krb5_error_code pkinit_sign_data
-        (krb5_context context, pkinit_identity_crypto_context cryptoctx,
-		unsigned char *data, int data_len,
-		unsigned char **sig, int *sig_len);
+	(krb5_context context, pkinit_identity_crypto_context cryptoctx,
+		unsigned char *data, unsigned int data_len,
+		unsigned char **sig, unsigned int *sig_len);
 
 static krb5_error_code create_signature
-        (unsigned char **, int *, unsigned char *, int, EVP_PKEY *pkey);
+	(unsigned char **, unsigned int *, unsigned char *, unsigned int,
+		EVP_PKEY *pkey);
 
 static krb5_error_code pkinit_decode_data
-        (krb5_context context, pkinit_identity_crypto_context cryptoctx,
-		unsigned char *data, int data_len,
-                unsigned char **decoded, int *decoded_len);
+	(krb5_context context, pkinit_identity_crypto_context cryptoctx,
+		unsigned char *data, unsigned int data_len,
+		unsigned char **decoded, unsigned int *decoded_len);
 
 static krb5_error_code decode_data
-        (unsigned char **, int *, unsigned char *, int,
+	(unsigned char **, unsigned int *, unsigned char *, unsigned int,
 		EVP_PKEY *pkey, X509 *cert);
 
-void print_dh(DH *, unsigned char *);
-void print_pubkey(BIGNUM *, unsigned char *);
+#ifdef DEBUG_DH
+static void print_dh(DH *, char *);
+static void print_pubkey(BIGNUM *, char *);
+#endif
 
 static krb5_error_code get_filename(char **, char *, int);
 static X509 *get_cert(char *filename);
@@ -193,12 +198,12 @@ static krb5_error_code pkinit_get_client_cert_pkcs11
 		krb5_get_init_creds_opt *opt);
 static krb5_error_code pkinit_sign_data_pkcs11
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
-		unsigned char *data, int data_len, unsigned char **sig,
-		int *sig_len);
+		unsigned char *data, unsigned int data_len,
+		unsigned char **sig, unsigned int *sig_len);
 static krb5_error_code pkinit_decode_data_pkcs11
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
-		unsigned char *data, int data_len,
-		unsigned char **decoded_data, int *decoded_data_len);
+		unsigned char *data, unsigned int data_len,
+		unsigned char **decoded_data, unsigned int *decoded_data_len);
 #endif	/* WITHOUT_PKCS11 */
 
 static krb5_error_code pkinit_get_client_cert_fs
@@ -209,18 +214,19 @@ static krb5_error_code pkinit_get_client_cert_fs
 		krb5_get_init_creds_opt *opt);
 static krb5_error_code pkinit_sign_data_fs
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
-		unsigned char *data, int data_len, unsigned char **sig,
-		int *sig_len);
+		unsigned char *data, unsigned int data_len,
+		unsigned char **sig, unsigned int *sig_len);
 static krb5_error_code pkinit_decode_data_fs
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
-		unsigned char *data, int data_len,
-		unsigned char **decoded_data, int *decoded_data_len);
+		unsigned char *data, unsigned int data_len,
+		unsigned char **decoded_data, unsigned int *decoded_data_len);
 
 static krb5_error_code der_decode_data
 	(unsigned char *, long, unsigned char **, long *);
 
 static int encode_signeddata
-	(unsigned char *data, int data_len, unsigned char **out, int *out_len);
+	(unsigned char *data, unsigned int data_len,
+	 unsigned char **out, unsigned int *out_len);
 
 static krb5_error_code load_trusted_certifiers
 	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls, 
@@ -228,7 +234,14 @@ static krb5_error_code load_trusted_certifiers
 
 static krb5_error_code load_trusted_certifiers_dir
 	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls,
-	        int return_crls, char *dirname);
+		int return_crls, char *dirname);
+
+static krb5_error_code
+create_krb5_invalidCertificates(krb5_context context,
+				pkinit_plg_crypto_context plg_cryptoctx,
+				pkinit_req_crypto_context req_cryptoctx,
+				pkinit_identity_crypto_context id_cryptoctx,
+				krb5_external_principal_identifier *** ids);
 
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \

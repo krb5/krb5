@@ -103,7 +103,7 @@
     return retval; }\
   sum += length; }
 
-/* asn1_addfield -- add a field, or component, to the encoding */
+/* asn1_addfield_implicit -- add an implicitly tagged field, or component, to the encoding */
 #define asn1_addfield_implicit(value,tag,encoder)\
 { retval = encoder(buf,value,&length);\
   if(retval){\
@@ -116,7 +116,7 @@
     return retval; }\
   sum += length; }
 
-/* asn1_addlenfield -- add a field whose length must be separately specified */
+/* asn1_insert_implicit_octetstring -- add an octet string with implicit tagging */
 #define asn1_insert_implicit_octetstring(len,value,tag)\
 { retval = asn1buf_insert_octetstring(buf,len,value);\
   if(retval){\
@@ -129,6 +129,7 @@
     return retval; }\
   sum += length; }
 
+/* asn1_insert_implicit_bitstring -- add a bitstring with implicit tagging */
 #define asn1_insert_implicit_bitstring(len,value,tag)\
 { retval = asn1buf_insert_octetstring(buf,len,value);\
   if(retval){\

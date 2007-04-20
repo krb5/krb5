@@ -233,6 +233,7 @@ typedef krb5_error_code
 				       krb5_get_init_creds_opt *opt,
 				       const char *attr,
 				       const char *value);
+
 /*
  * The function table / structure which a preauth client module must export as
  * "preauthentication_client_0".  If the interfaces work correctly, future
