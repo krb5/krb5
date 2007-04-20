@@ -252,7 +252,7 @@ sub main {
     $ENV{PATH}          = $unixfind.";".$savedPATH;
     print "Info -- chdir to ".`cd`."\n"         if ($verbose);
     if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
-    !system("find . -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
+    !system("find . -maxdepth 0 -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
     local $filesize = -s "b.tmp";
     $ENV{PATH} = $savedPATH;
     if ($filesize > 0) {
