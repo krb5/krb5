@@ -67,11 +67,9 @@
                             </Files>
                     </CopyList>
                     <Prunes> <!-- Files to be removed from current build to match what is in the 3.1 distribution:    -->
-                        <Prune dummy="foo" />
                         <Prune name="CVS" />
                         <Prune name=".cvsignore" flags="i" />
                         <Prune name="Changelog"  flags="i" />
-<!--                        <Prune name="site" />   -->
                         </Prunes>
                     <Requires>
                         <Switch dummy="foo" />
@@ -155,16 +153,6 @@
                             <Include path="sdkfiles.xml" />         <!-- Included file is relative to location of bkw.pl. -->
                             </Files>
                         </CopyList>
-                    <Prunes> 
-                        <Prune dummy="foo" />
-                        <Prune name="*.exe" />
-                        <Prune name="*.msi" />
-                        <Prune name="*.dll" />
-                        <Prune name="*.obj" />
-                        <Prune name="*.wixobj" />
-                        <Prune name="custom.lib" />
-                        <Prune name="custom.exp" />
-                        </Prunes>
                     </Zip>
                 </Zips>            
             <CopyList>            <!-- Copied at end of post-package step.  -->

@@ -341,7 +341,6 @@ sub main {
                 'pismere/athena/util/lib/getopt', 
                 'pismere/athena/util/guiwrap'
                 );
-            local $logging = $odr->{logfile}->{def} ? ">> $odr->{logfile}->{value} 2>&1" : " ";
             foreach my $module (@cvsmodules) {
                 local $cvscmd = $cvscmdroot." ".$module;
                 if ($verbose) {print "Info -- cvs command: $cvscmd\n";}
