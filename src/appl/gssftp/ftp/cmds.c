@@ -168,9 +168,7 @@ void setpeer(argc, argv)
 		}
 		port = htons(iport);
 	}
-printf("%s: at line %d\n", __FILE__, __LINE__);
 	host = hookup(argv[1], port);
-printf("%s: at line %d\n", __FILE__, __LINE__);
 	if (host) {
 		int overbose;
 
@@ -185,28 +183,20 @@ printf("%s: at line %d\n", __FILE__, __LINE__);
 		mode = MODE_S;
 		stru = STRU_F;
 		(void) strcpy(bytename, "8"), bytesize = 8;
-printf("%s: at line %d\n", __FILE__, __LINE__);
 		if (autoauth) {
-printf("%s: at line %d\n", __FILE__, __LINE__);
 			if (do_auth() && autoencrypt) {
-printf("%s: at line %d\n", __FILE__, __LINE__);
  				clevel = PROT_P;
 				setpbsz(1<<20);
 				if (command("PROT P") == COMPLETE)
 					dlevel = PROT_P;
 				else
 					fprintf(stderr, "ftp: couldn't enable encryption\n");
-printf("%s: at line %d\n", __FILE__, __LINE__);
 			}
-printf("%s: at line %d\n", __FILE__, __LINE__);
 			if(auth_type && clevel == PROT_C)
 				clevel = PROT_S;
-printf("%s: at line %d\n", __FILE__, __LINE__);
 			if(autologin)
 				(void) login(argv[1]);
-printf("%s: at line %d\n", __FILE__, __LINE__);
 		}
-printf("%s: at line %d\n", __FILE__, __LINE__);
 
 #ifndef unix
 /* sigh */
@@ -221,7 +211,6 @@ printf("%s: at line %d\n", __FILE__, __LINE__);
  * this ifdef is to keep someone form "porting" this to an incompatible
  * system and not checking this out. This way they have to think about it.
  */
-printf("%s: at line %d\n", __FILE__, __LINE__);
 		overbose = verbose;
 		if (debug == 0)
 			verbose = -1;
