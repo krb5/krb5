@@ -306,8 +306,10 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
  */
 static int need_double_quotes(char *str)
 {
-	if (!str || !*str)
-		return 0;
+	if (!str)
+                return 0;
+        if (*str)
+		return 1;
 	if (isspace((int) (*str)) ||isspace((int) (*(str + strlen(str) - 1))))
 		return 1;
 	if (strchr(str, '\n') || strchr(str, '\t') || strchr(str, '\b'))
