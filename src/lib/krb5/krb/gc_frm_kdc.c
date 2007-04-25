@@ -1043,6 +1043,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    krb5_free_creds(context, (*tgts)[i]);
 	}
 	free(*tgts);
+	*tgts = NULL;
     }
     context->use_conf_ktypes = 1;
     retval = krb5_cc_retrieve_cred(context, ccache, RETR_FLAGS,
