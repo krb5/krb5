@@ -1225,6 +1225,17 @@ make_toolong_error (krb5_data **out)
 }
 
 static void
+queue_tcp_outgoing_response(struct connection *conn)
+{
+    store_32_be(conn->u.tcp.response->length, conn->u.tcp.lenbuf);
+    SG_SET(&conn->u.tcp.sgbuf[1], conn->u.tcp.response->data,
+	   conn->u.tcp.response->length);
+    conn->u.tcp.sgp = conn->u.tcp.sgbuf;
+    conn->u.tcp.sgnum = 2;
+    FD_SET(conn->fd, &sstate.wfds);
+}
+
+static void
 process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 {
     if (selflags & SSF_WRITE) {
@@ -1284,10 +1295,7 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 	    conn->u.tcp.offset += nread;
 	    if (conn->u.tcp.offset == 4) {
 		unsigned char *p = (unsigned char *)conn->u.tcp.buffer;
-		conn->u.tcp.msglen = ((p[0] << 24)
-				      | (p[1] << 16)
-				      | (p[2] <<  8)
-				      | p[3]);
+		conn->u.tcp.msglen = load_32_be(p);
 		if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
 		    krb5_error_code err;
 		    /* message too big */
@@ -1332,16 +1340,8 @@ process_tcp_connection(struct connection *conn, const char *prog, int selflags)
 		goto kill_tcp_connection;
 	    }
 	have_response:
-	    conn->u.tcp.lenbuf[0] = 0xff & (conn->u.tcp.response->length >> 24);
-	    conn->u.tcp.lenbuf[1] = 0xff & (conn->u.tcp.response->length >> 16);
-	    conn->u.tcp.lenbuf[2] = 0xff & (conn->u.tcp.response->length >> 8);
-	    conn->u.tcp.lenbuf[3] = 0xff & (conn->u.tcp.response->length >> 0);
-	    SG_SET(&conn->u.tcp.sgbuf[1], conn->u.tcp.response->data,
-		   conn->u.tcp.response->length);
-	    conn->u.tcp.sgp = conn->u.tcp.sgbuf;
-	    conn->u.tcp.sgnum = 2;
+	    queue_tcp_outgoing_response(conn);
 	    FD_CLR(conn->fd, &sstate.rfds);
-	    FD_SET(conn->fd, &sstate.wfds);
 	}
     } else
 	abort();
