@@ -95,7 +95,19 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 {
     krb5_error_code 	  retval = 0;
     krb5_timestamp 	  currenttime;
-
+    krb5_principal_data princ_data;
+    
+    req->ticket->enc_part2 == NULL;
+    if (server && krb5_is_referral_realm(&server->realm)) {
+	char *realm;
+	princ_data = *server;
+	server = &princ_data;
+	retval = krb5_get_default_realm(context, &realm);
+	if (retval)
+	    return retval;
+	princ_data.realm.data = realm;
+	princ_data.realm.length = strlen(realm);
+    }
     if (server && !krb5_principal_compare(context, server, req->ticket->server)) {
 	char *found_name = 0, *wanted_name = 0;
 	if (krb5_unparse_name(context, server, &wanted_name) == 0
@@ -105,7 +117,8 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 				   found_name, wanted_name);
 	krb5_free_unparsed_name(context, wanted_name);
 	krb5_free_unparsed_name(context, found_name);
-	return KRB5KRB_AP_WRONG_PRINC;
+	retval =  KRB5KRB_AP_WRONG_PRINC;
+	goto cleanup;
     }
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
@@ -115,12 +128,12 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if ((*auth_context)->keyblock) { /* User to User authentication */
     	if ((retval = krb5_decrypt_tkt_part(context, (*auth_context)->keyblock,
 					    req->ticket)))
-	    return retval;
+goto cleanup;
 	krb5_free_keyblock(context, (*auth_context)->keyblock);
 	(*auth_context)->keyblock = NULL;
     } else {
     	if ((retval = krb5_rd_req_decrypt_tkt_part(context, req, keytab)))
-	    return retval;
+	    goto cleanup;
     }
 
     /* XXX this is an evil hack.  check_valid_flag is set iff the call
@@ -365,10 +378,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     retval = 0;
     
 cleanup:
+    if (server == &princ_data)
+	krb5_free_default_realm(context, princ_data.realm.data);
     if (retval) {
 	/* only free if we're erroring out...otherwise some
 	   applications will need the output. */
-        krb5_free_enc_tkt_part(context, req->ticket->enc_part2);
+	if (req->ticket->enc_part2)
+	    krb5_free_enc_tkt_part(context, req->ticket->enc_part2);
 	req->ticket->enc_part2 = NULL;
     }
     return retval;
