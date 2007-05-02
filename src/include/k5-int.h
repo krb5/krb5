@@ -1048,9 +1048,9 @@ void krb5_free_etype_info
 #define KRB5_GET_INIT_CREDS_OPT_SHADOWED 0x40000000
 
 #define krb5_gic_opt_is_extended(s) \
-    (((s)->flags & KRB5_GET_INIT_CREDS_OPT_EXTENDED) ? 1 : 0)
+    ((s) && ((s)->flags & KRB5_GET_INIT_CREDS_OPT_EXTENDED) ? 1 : 0)
 #define krb5_gic_opt_is_shadowed(s) \
-    (((s)->flags & KRB5_GET_INIT_CREDS_OPT_SHADOWED) ? 1 : 0)
+    ((s) && ((s)->flags & KRB5_GET_INIT_CREDS_OPT_SHADOWED) ? 1 : 0)
 
 
 typedef struct _krb5_gic_opt_private {
