@@ -206,8 +206,18 @@ krb5int_gic_opte_copy(krb5_context context,
     oe = krb5int_gic_opte_alloc(context);
     if (NULL == oe)
 	return ENOMEM;
-    memcpy(oe, opt, sizeof(*opt));
-    /* Fix these -- overwritten by the copy */
+
+    if (opt)
+        memcpy(oe, opt, sizeof(*opt));
+
+    /*
+     * Fix the flags -- the EXTENDED flag would have been
+     * overwritten by the copy if there was one.  The
+     * SHADOWED flag is necessary to ensure that the
+     * krb5_gic_opt_ext structure that was allocated
+     * here will be freed by the library because the
+     * application is unaware of its existence.
+     */
     oe->flags |= ( KRB5_GET_INIT_CREDS_OPT_EXTENDED |
 		   KRB5_GET_INIT_CREDS_OPT_SHADOWED);
 
