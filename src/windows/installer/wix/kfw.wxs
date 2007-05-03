@@ -148,7 +148,7 @@
 	<AdminExecuteSequence />
         <InstallExecuteSequence>
 	<Custom Action="KillRunningProcesses" After="InstallValidate"/>
-	<RemoveExistingProducts After="KillRunningProcesses">UPGRADEPISMERE Or UPGRADEKFW</RemoveExistingProducts>
+	<RemoveExistingProducts After="KillRunningProcesses">(Not Installed) And (UPGRADEPISMERE Or UPGRADEKFW)</RemoveExistingProducts>
 	<!-- When running with a UI, CCP_Success property is not passed down to the server. -->
 	<Custom Action="AbortNoIE" Before="RemoveNsisInstallation">UILevel = 0 And (Not Installed) And (CCP_Success &lt;&gt; 1)</Custom>
 	<Custom Action="RemoveNsisInstallation" Before="AbortCantRemoveNSIS">UPGRADENSIS &lt;&gt; "" And UILevel &gt;= 4</Custom>
@@ -171,7 +171,7 @@
         
         <!-- KfW MSI -->
         <Upgrade Id="61211594-AAA1-4A98-A299-757326763CC7">
-            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="no" MigrateFeatures="yes" Property="UPGRADEKFW" />
+            <UpgradeVersion IgnoreRemoveFailure="no" IncludeMinimum="no" Maximum="$(var.VersionString)" IncludeMaximum="yes" MigrateFeatures="yes" Property="UPGRADEKFW" />
         </Upgrade>
        
         <!-- NSIS installation -->
