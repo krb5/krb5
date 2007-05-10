@@ -1,7 +1,7 @@
 /*
  * kdc/extern.h
  *
- * Copyright 1990,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2001,2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -82,10 +82,7 @@ kdc_realm_t *find_realm_data (char *, krb5_ui_4);
 #define	max_renewable_life_for_realm	kdc_active_realm->realm_maxrlife
 #define	master_keyblock			kdc_active_realm->realm_mkey
 #define	master_princ			kdc_active_realm->realm_mprinc
-#define	tgs_server_struct		*(kdc_active_realm->realm_tgsprinc)
 #define	tgs_server			kdc_active_realm->realm_tgsprinc
-#define	dbm_db_name			kdc_active_realm->realm_dbname
-#define	primary_port			kdc_active_realm->realm_pport
 #define reject_bad_transit		kdc_active_realm->realm_reject_bad_transit
 
 /* various externs for KDC */
