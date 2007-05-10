@@ -96,7 +96,8 @@ k5_md5des_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
 
     mit_des_cbc_encrypt((krb5_pointer) output->data,
 			(krb5_pointer) output->data, output->length,
-			schedule, (unsigned char *) mit_des_zeroblock, 1);
+			schedule, (const unsigned char *) mit_des_zeroblock,
+			1);
 
     return(0);
 }
@@ -148,7 +149,8 @@ k5_md5des_verify(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data 
     if (!compathash) {
 	mit_des_cbc_encrypt((krb5_pointer) hash->data,
 			    (krb5_pointer) plaintext, hash->length,
-			    schedule, (unsigned char *) mit_des_zeroblock, 0);
+			    schedule,
+			    (const unsigned char *) mit_des_zeroblock, 0);
     } else {
 	mit_des_cbc_encrypt((krb5_pointer) hash->data,
 			    (krb5_pointer) plaintext, hash->length,

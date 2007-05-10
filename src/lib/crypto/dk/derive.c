@@ -60,10 +60,10 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
 	return(ENOMEM);
     }
 
-    inblock.data = inblockdata;
+    inblock.data = (char *) inblockdata;
     inblock.length = blocksize;
 
-    outblock.data = outblockdata;
+    outblock.data = (char *) outblockdata;
     outblock.length = blocksize;
 
     /* initialize the input block */
@@ -71,8 +71,8 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
     if (in_constant->length == inblock.length) {
 	memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5_nfold(in_constant->length*8, in_constant->data,
-		   inblock.length*8, inblock.data);
+	krb5_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+		   inblock.length*8, (unsigned char *) inblock.data);
     }
 
     /* loop encrypting the blocks until enough key bytes are generated */
@@ -93,7 +93,7 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
 
     /* postprocess the key */
 
-    inblock.data = rawkey;
+    inblock.data = (char *) rawkey;
     inblock.length = keybytes;
 
     (*(enc->make_key))(&inblock, outkey);
@@ -145,10 +145,10 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
 	return(ENOMEM);
     }
 
-    inblock.data = inblockdata;
+    inblock.data = (char *) inblockdata;
     inblock.length = blocksize;
 
-    outblock.data = outblockdata;
+    outblock.data = (char *) outblockdata;
     outblock.length = blocksize;
 
     /* initialize the input block */
@@ -156,8 +156,8 @@ krb5_derive_random(const struct krb5_enc_provider *enc,
     if (in_constant->length == inblock.length) {
 	memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5_nfold(in_constant->length*8, in_constant->data,
-		   inblock.length*8, inblock.data);
+	krb5_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+		   inblock.length*8, (unsigned char *) inblock.data);
     }
 
     /* loop encrypting the blocks until enough key bytes are generated */

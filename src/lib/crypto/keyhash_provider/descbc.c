@@ -55,8 +55,8 @@ k5_descbc_hash(const krb5_keyblock *key, krb5_keyusage usage, const krb5_data *i
     mit_des_cbc_cksum((unsigned char *) input->data, 
 		      (unsigned char *) output->data, input->length,
 		      schedule, 
-		      ivec? (unsigned char *)ivec->data: 
-		            (unsigned char *)mit_des_zeroblock);
+		      ivec? (const unsigned char *)ivec->data: 
+		            (const unsigned char *)mit_des_zeroblock);
 
     memset(schedule, 0, sizeof(schedule));
 

@@ -68,7 +68,7 @@ k5_des3_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
     krb5int_des3_cbc_encrypt((krb5_pointer) input->data,
 			     (krb5_pointer) output->data, input->length,
 			     schedule[0], schedule[1], schedule[2],
-			     ivec?(unsigned char *) ivec->data:(unsigned char *)mit_des_zeroblock);
+			     ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
 
     zap(schedule, sizeof(schedule));
 
@@ -90,7 +90,7 @@ k5_des3_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
     krb5int_des3_cbc_decrypt((krb5_pointer) input->data,
 			     (krb5_pointer) output->data, input->length,
 			     schedule[0], schedule[1], schedule[2],
-			     ivec?(unsigned char *) ivec->data:(unsigned char *)mit_des_zeroblock);
+			     ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
 
     zap(schedule, sizeof(schedule));
 

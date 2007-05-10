@@ -37,8 +37,18 @@ static void printd (const char *descr, krb5_data *d) {
 }
 #endif
 
-#define enc(OUT, IN, CTX) (aes_enc_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
-#define dec(OUT, IN, CTX) (aes_dec_blk((IN),(OUT),(CTX)) == aes_good ? (void) 0 : abort())
+static inline void enc(char *out, const char *in, aes_ctx *ctx)
+{
+    if (aes_enc_blk((const unsigned char *)in, (unsigned char *)out, ctx)
+	!= aes_good)
+	abort();
+}
+static inline void dec(char *out, const char *in, aes_ctx *ctx)
+{
+    if (aes_dec_blk((const unsigned char *)in, (unsigned char *)out, ctx)
+	!= aes_good)
+	abort();
+}
 
 static void xorblock(char *out, const char *in)
 {
@@ -52,7 +62,7 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     aes_ctx ctx;
-    unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
     int nblocks = 0, blockno;
 
 /*    CHECK_SIZES; */
@@ -106,7 +116,7 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output)
 {
     aes_ctx ctx;
-    unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
     int nblocks = 0, blockno;
 
     CHECK_SIZES;

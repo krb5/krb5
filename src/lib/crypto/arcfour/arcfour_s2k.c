@@ -43,7 +43,7 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
     return ENOMEM;
 
   /* make the string.  start by creating the unicode version of the password*/
-  asctouni(copystr, string->data, slen );
+  asctouni(copystr, (unsigned char *) string->data, slen);
 
   /* the actual MD4 hash of the data */
   krb5_MD4Init(&md4_context);

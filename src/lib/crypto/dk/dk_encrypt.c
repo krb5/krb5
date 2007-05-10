@@ -59,7 +59,8 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
-    unsigned char *plaintext, *kedata, *kidata, *cn;
+    unsigned char *plaintext, *kedata, *kidata;
+    char *cn;
     krb5_keyblock ke, ki;
 
     /* allocate and set up plaintext and to-be-derived keys */
@@ -95,7 +96,7 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
 
     /* derive the keys */
 
-    d1.data = constantdata;
+    d1.data = (char *) constantdata;
     d1.length = K5CLENGTH;
 
     d1.data[0] = (usage>>24)&0xff;
@@ -116,7 +117,7 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
     /* put together the plaintext */
 
     d1.length = blocksize;
-    d1.data = plaintext;
+    d1.data = (char *) plaintext;
 
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &d1)))
 	goto cleanup;
@@ -129,7 +130,7 @@ krb5_dk_encrypt(const struct krb5_enc_provider *enc,
     /* encrypt the plaintext */
 
     d1.length = plainlen;
-    d1.data = plaintext;
+    d1.data = (char *) plaintext;
 
     d2.length = plainlen;
     d2.data = output->data;
@@ -224,7 +225,8 @@ krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
-    unsigned char *plaintext, *kedata, *kidata, *cn;
+    unsigned char *plaintext, *kedata, *kidata;
+    char *cn;
     krb5_keyblock ke, ki;
 
     /* allocate and set up plaintext and to-be-derived keys */
@@ -260,7 +262,7 @@ krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
 
     /* derive the keys */
 
-    d1.data = constantdata;
+    d1.data = (char *) constantdata;
     d1.length = K5CLENGTH;
 
     d1.data[0] = (usage>>24)&0xff;
@@ -281,7 +283,7 @@ krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
     /* put together the plaintext */
 
     d1.length = blocksize;
-    d1.data = plaintext;
+    d1.data = (char *) plaintext;
 
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &d1)))
 	goto cleanup;
@@ -295,7 +297,7 @@ krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
     /* encrypt the plaintext */
 
     d1.length = plainlen;
-    d1.data = plaintext;
+    d1.data = (char *) plaintext;
 
     d2.length = plainlen;
     d2.data = output->data;

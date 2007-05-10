@@ -1,7 +1,7 @@
 /*
  * lib/crypto/yarrow/ycipher.c
  *
- * Copyright (C) 2001 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2001, 2007 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -74,7 +74,7 @@ int krb5int_yarrow_cipher_encrypt_block
   const struct krb5_enc_provider *enc = &yarrow_enc_provider;
   ind.data = (char *) in;
   ind.length = CIPHER_BLOCK_SIZE;
-  outd.data = out;
+  outd.data = (char *) out;
   outd.length = CIPHER_BLOCK_SIZE;
   ret = enc->encrypt (&ctx->key, 0, &ind, &outd);
   if (ret)

@@ -1,7 +1,7 @@
 /*
  * src/lib/krb5/asn.1/asn1_k_decode.c
  * 
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -813,7 +813,9 @@ static asn1_error_code asn1_decode_etype_info2_entry(asn1buf *buf, krb5_etype_in
   { begin_structure();
     get_field(val->etype,0,asn1_decode_enctype);
     if (tagnum == 1) {
-	    get_lenfield(val->length,val->salt,1,asn1_decode_generalstring);
+	char *salt;
+	get_lenfield(val->length,salt,1,asn1_decode_generalstring);
+	val->salt = (krb5_octet *) salt;
     } else {
 	    val->length = KRB5_ETYPE_NO_SALT;
 	    val->salt = 0;
