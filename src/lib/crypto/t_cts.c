@@ -1,7 +1,7 @@
 /*
  * lib/crypto/vectors.c
  *
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -157,8 +157,7 @@ static void test_cts()
 	    printf("error %ld from krb5int_aes_decrypt\n", (long)err);
 	    exit(1);
 	}
-	if (out2.length != in.length
-	    || memcmp(in.data, out2.data, in.length)) {
+	if (!data_eq(out2, in)) {
 	    printd("Decryption result DOESN'T MATCH", &out2);
 	    exit(1);
 	}
