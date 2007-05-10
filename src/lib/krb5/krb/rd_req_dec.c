@@ -2,7 +2,7 @@
  * lib/krb5/krb/rd_req_dec.c
  *
  * Copyright (c) 1994 CyberSAFE Corporation.
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -189,9 +189,8 @@ goto cleanup;
 	 */
       	krb5_get_default_realm(context, &lrealm);
       	if ((trans->tr_contents.data && trans->tr_contents.data[0]) ||
-          strlen(lrealm) != realm->length ||
-          memcmp(lrealm, realm->data, strlen(lrealm))) {
-            retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
+	    !data_eq_string(*realm, lrealm)) {
+	    retval = KRB5KRB_AP_ERR_ILL_CR_TKT;
       	}
       	free(lrealm);
     }

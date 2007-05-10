@@ -540,13 +540,9 @@ krb5_error_code get_best_principal(context, plist, client)
 	    return retval;
 	}
 	
-	if (krb5_princ_realm(context, *client)->length ==
-	    krb5_princ_realm(context, temp_client)->length  
-	    && (!memcmp (krb5_princ_realm(context, *client)->data,
-			 krb5_princ_realm(context, temp_client)->data,
-			 krb5_princ_realm(context, temp_client)->length))){
-	    
-	    
+	if (data_eq(*krb5_princ_realm(context, *client),
+		    *krb5_princ_realm(context, temp_client))) {
+
 	    if (nelem &&
 		krb5_princ_size(context, *client) > 0 &&
 		krb5_princ_size(context, temp_client) > 0) {
@@ -554,9 +550,8 @@ krb5_error_code get_best_principal(context, plist, client)
 		    krb5_princ_component(context, *client, 0);
 		krb5_data *p2 = 
 		    krb5_princ_component(context, temp_client, 0);
-		
-		if ((p1->length == p2->length) &&
-		    (!memcmp(p1->data,p2->data,p1->length))){
+
+		if (data_eq(*p1, *p2)) {
 		    
 		    if (auth_debug){
 			fprintf(stderr,

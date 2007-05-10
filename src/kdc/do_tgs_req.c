@@ -1,7 +1,7 @@
 /*
  * kdc/do_tgs_req.c
  *
- * Copyright 1990,1991,2001 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -173,8 +173,7 @@ tgt_again:
 		krb5_data *tgs_1 =
 		    krb5_princ_component(kdc_context, tgs_server, 1);
 
-		if (!tgs_1 || server_1->length != tgs_1->length ||
-		    memcmp(server_1->data, tgs_1->data, tgs_1->length)) {
+		if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
 		    krb5_db_free_principal(kdc_context, &server, nprincs);
 		    find_alternate_tgs(request, &server, &more, &nprincs);
 		    firstpass = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1994,2003,2005 by the Massachusetts Institute of Technology.
+ * Copyright (c) 1994,2003,2005,2007 by the Massachusetts Institute of Technology.
  * Copyright (c) 1994 CyberSAFE Corporation
  * Copyright (c) 1993 Open Computing Security Group
  * Copyright (c) 1990,1991 by the Massachusetts Institute of Technology.
@@ -139,12 +139,9 @@ static void tr_dbg_rtree(struct tr_state *, const char *, krb5_principal);
 #define HARD_CC_ERR(r) ((r) && (r) != KRB5_CC_NOTFOUND &&	\
 	(r) != KRB5_CC_NOT_KTYPE)
 
-#define IS_TGS_PRINC(c, p)				\
-    ((krb5_princ_size((c), (p)) == 2) &&		\
-     (krb5_princ_component((c), (p), 0)->length ==	\
-      KRB5_TGS_NAME_SIZE) &&				\
-     (!memcmp(krb5_princ_component((c), (p), 0)->data,	\
-	      KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
+#define IS_TGS_PRINC(c, p)						\
+    (krb5_princ_size((c), (p)) == 2 &&					\
+     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
 
 /*
  * Flags for ccache lookups of cross-realm TGTs.
@@ -447,9 +444,7 @@ find_nxt_kdc(struct tr_state *ts)
 
 	r2 = krb5_princ_component(ts->ctx, *kdcptr, 1);
 
-	if (r1 != NULL && r2 != NULL &&
-	    r1->length == r2->length &&
-	    !memcmp(r1->data, r2->data, r1->length)) {
+	if (r1 != NULL && r2 != NULL && data_eq(*r1, *r2)) {
 	    break;
 	}
     }
@@ -929,8 +924,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		    r1 = &referral_tgts[referral_count-1]->server->data[1];
 
 		r2 = &(*out_cred)->server->data[1];
-		if (r1->length == r2->length &&
-		    !memcmp(r1->data, r2->data, r1->length)) {
+		if (data_eq(*r1, *r2)) {
 		    DPRINTF(("gc_from_kdc: referred back to "
 			     "previous realm; fall back\n"));
 		    krb5_free_creds(context, *out_cred);

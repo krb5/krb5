@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  * 
  * This software is being provided to you, the LICENSEE, by the 
@@ -2479,4 +2479,41 @@ void KRB5_CALLCONV krb5_realm_iterator_free
 void KRB5_CALLCONV krb5_free_realm_string
 	(krb5_context context, char *str);
 
+/* Some data comparison and conversion functions.  */
+#if 0
+static inline int data_cmp(krb5_data d1, krb5_data d2)
+{
+    if (d1.length < d2.length) return -1;
+    if (d1.length > d2.length) return 1;
+    return memcmp(d1.data, d2.data, d1.length);
+}
+static inline int data_eq (krb5_data d1, krb5_data d2)
+{
+    return data_cmp(d1, d2) == 0;
+}
+#else
+static inline int data_eq (krb5_data d1, krb5_data d2)
+{
+    return (d1.length == d2.length
+	    && !memcmp(d1.data, d2.data, d1.length));
+}
+#endif
+static inline krb5_data string2data (char *str)
+{
+    krb5_data d;
+    d.magic = KV5M_DATA;
+    d.length = strlen(str);
+    d.data = str;
+    return d;
+}
+static inline int data_eq_string (krb5_data d, char *s)
+{
+    return data_eq(d, string2data(s));
+}
+static inline int authdata_eq (krb5_authdata a1, krb5_authdata a2)
+{
+    return (a1.ad_type == a2.ad_type
+	    && a1.length == a2.length
+	    && !memcmp(a1.contents, a2.contents, a1.length));
+}
 #endif /* _KRB5_INT_H */

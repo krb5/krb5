@@ -21,6 +21,7 @@
  */
 
 #include "autoconf.h"
+#include "k5-int.h"		/* for data_eq */
 #include <krb5.h>
 #include "com_err.h"
 
@@ -122,8 +123,7 @@ int main(argc, argv)
      if (!nodelete) {
 	 krb5_data *crealm = krb5_princ_realm (context, client);
 	 krb5_data *srealm = krb5_princ_realm (context, server);
-	 if (crealm->length != srealm->length
-	     || memcmp (crealm->data, srealm->data, crealm->length)) {
+	 if (!data_eq(*crealm, *srealm)) {
 	     /* Since krb4 ticket files don't store the realm name
 		separately, and the client realm is assumed to be the
 		realm of the first ticket, let's not store an initial

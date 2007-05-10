@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/princ_comp.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,11 +33,8 @@
 krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(krb5_context context, krb5_const_principal princ1, krb5_const_principal princ2)
 {
-    if (krb5_princ_realm(context, princ1)->length != 
-	krb5_princ_realm(context, princ2)->length ||
-	memcmp (krb5_princ_realm(context, princ1)->data, 
-	 	krb5_princ_realm(context, princ2)->data,
-		krb5_princ_realm(context, princ2)->length))
+    if (!data_eq(*krb5_princ_realm(context, princ1),
+		 *krb5_princ_realm(context, princ2)))
 	return FALSE;
 
     return TRUE;
@@ -59,8 +56,7 @@ krb5_principal_compare(krb5_context context, krb5_const_principal princ1, krb5_c
     for (i = 0; i < (int) nelem; i++) {
 	register const krb5_data *p1 = krb5_princ_component(context, princ1, i);
 	register const krb5_data *p2 = krb5_princ_component(context, princ2, i);
-	if (p1->length != p2->length ||
-	    memcmp(p1->data, p2->data, p1->length))
+	if (!data_eq(*p1, *p2))
 	    return FALSE;
     }
     return TRUE;

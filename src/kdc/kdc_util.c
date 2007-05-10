@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_util.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -137,11 +137,10 @@ concat_authorization_data(krb5_authdata **first, krb5_authdata **second,
 krb5_boolean
 realm_compare(krb5_principal princ1, krb5_principal princ2)
 {
-  krb5_data *realm1 = krb5_princ_realm(kdc_context, princ1);
-  krb5_data *realm2 = krb5_princ_realm(kdc_context, princ2);
+    krb5_data *realm1 = krb5_princ_realm(kdc_context, princ1);
+    krb5_data *realm2 = krb5_princ_realm(kdc_context, princ2);
 
-  return((realm1->length == realm2->length) &&
-         !memcmp(realm1->data, realm2->data, realm1->length));
+    return data_eq(*realm1, *realm2);
 }
 
 /*
@@ -150,13 +149,11 @@ realm_compare(krb5_principal princ1, krb5_principal princ2)
  */
 krb5_boolean krb5_is_tgs_principal(krb5_principal principal)
 {
-	if ((krb5_princ_size(kdc_context, principal) > 0) &&
-	    (krb5_princ_component(kdc_context, principal, 0)->length ==
-	     KRB5_TGS_NAME_SIZE) &&
-	    (!memcmp(krb5_princ_component(kdc_context, principal, 0)->data,
-		     KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
-		return TRUE;
-	return FALSE;
+    if ((krb5_princ_size(kdc_context, principal) > 0) &&
+	data_eq_string (*krb5_princ_component(kdc_context, principal, 0),
+			KRB5_TGS_NAME))
+	return TRUE;
+    return FALSE;
 }
 
 /*
@@ -237,11 +234,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
        
        we set a flag here for checking below.
        */
-    if ((krb5_princ_realm(kdc_context, apreq->ticket->server)->length !=
-	 krb5_princ_realm(kdc_context, tgs_server)->length) ||
-	memcmp(krb5_princ_realm(kdc_context, apreq->ticket->server)->data,
-	       krb5_princ_realm(kdc_context, tgs_server)->data,
-	       krb5_princ_realm(kdc_context, tgs_server)->length))
+    if (!data_eq(*krb5_princ_realm(kdc_context, apreq->ticket->server),
+		 *krb5_princ_realm(kdc_context, tgs_server)))
 	foreign_server = TRUE;
 
     if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
@@ -332,8 +326,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 	krb5_data *tkt_realm = krb5_princ_realm(kdc_context, 
 						(*ticket)->enc_part2->client);
 	krb5_data *tgs_realm = krb5_princ_realm(kdc_context, tgs_server);
-	if (tkt_realm->length == tgs_realm->length &&
-	    !memcmp(tkt_realm->data, tgs_realm->data, tgs_realm->length)) {
+	if (data_eq(*tkt_realm, *tgs_realm)) {
 	    /* someone in a foreign realm claiming to be local */
 	    krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
 	    retval = KRB5KDC_ERR_POLICY;
@@ -1173,11 +1166,8 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
 	}
 	/* ...and that the second component matches the server realm... */
 	if ((krb5_princ_size(kdc_context, ticket->server) <= 1) ||
-	    (krb5_princ_component(kdc_context, ticket->server, 1)->length !=
-	     krb5_princ_realm(kdc_context, request->server)->length) ||
-	    memcmp(krb5_princ_component(kdc_context, ticket->server, 1)->data,
-		   krb5_princ_realm(kdc_context, request->server)->data,
-		   krb5_princ_realm(kdc_context, request->server)->length)) {
+	    !data_eq(*krb5_princ_component(kdc_context, ticket->server, 1),
+		     *krb5_princ_realm(kdc_context, request->server))) {
 	    *status = "BAD TGS SERVER INSTANCE";
 	    return KRB_AP_ERR_NOT_US;
 	}
@@ -1235,9 +1225,7 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     /* can not proxy ticket granting tickets */
     if (isflagset(request->kdc_options, KDC_OPT_PROXY) &&
 	(!request->server->data ||
-	 request->server->data[0].length != KRB5_TGS_NAME_SIZE ||
-	 memcmp(request->server->data[0].data, KRB5_TGS_NAME,
-		KRB5_TGS_NAME_SIZE))) {
+	 !data_eq_string(request->server->data[0], KRB5_TGS_NAME))) {
 	*status = "CAN'T PROXY TGT";
 	return KDC_ERR_BADOPTION;
     }

@@ -351,11 +351,8 @@ krb5_error_code get_closest_principal(context, plist, client, found)
 	    continue;
 	}
 	
-	if (krb5_princ_realm(context, *client)->length ==
-	    krb5_princ_realm(context, temp_client)->length
-	    && (!memcmp (krb5_princ_realm(context, *client)->data,
-			 krb5_princ_realm(context, temp_client)->data,
-			 krb5_princ_realm(context, temp_client)->length))){
+	if (data_eq(*krb5_princ_realm(context, *client),
+		    *krb5_princ_realm(context, temp_client))) {
 	    
 	    got_one = TRUE;
 	    for(j =0; j < cnelem; j ++){
@@ -364,8 +361,7 @@ krb5_error_code get_closest_principal(context, plist, client, found)
 		krb5_data *p2 =
 		    krb5_princ_component(context, temp_client, j);
 		
-		if (!p1 || !p2 || (p1->length != p2->length) ||
-		    memcmp(p1->data,p2->data,p1->length)){
+		if (!p1 || !p2 || !data_eq(*p1, *p2)) {
 		    got_one = FALSE;
 		    break;
 		}

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/chk_trans.c
  *
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -292,13 +292,6 @@ struct check_data {
     krb5_principal *tgs;
 };
 
-static int
-same_data (krb5_data *d1, krb5_data *d2)
-{
-    return (d1->length == d2->length
-	    && !memcmp (d1->data, d2->data, d1->length));
-}
-
 static krb5_error_code
 check_realm_in_list (krb5_data *realm, void *data)
 {
@@ -307,7 +300,7 @@ check_realm_in_list (krb5_data *realm, void *data)
 
     Tprintf ((".. checking '%.*s'\n", (int) realm->length, realm->data));
     for (i = 0; cdata->tgs[i]; i++) {
-	if (same_data (krb5_princ_realm (cdata->ctx, cdata->tgs[i]), realm))
+	if (data_eq (*krb5_princ_realm (cdata->ctx, cdata->tgs[i]), *realm))
 	    return 0;
     }
     Tprintf (("BAD!\n"));

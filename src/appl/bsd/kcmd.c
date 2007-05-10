@@ -1348,22 +1348,17 @@ int default_realm(principal)
      krb5_principal principal;
 {
     char *def_realm;
-    unsigned int realm_length;
     int retval;
-    
-    realm_length = krb5_princ_realm(bsd_context, principal)->length;
     
     if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
 	return 0;
     }
-    
-    if ((realm_length != strlen(def_realm)) ||
-	(memcmp(def_realm, krb5_princ_realm(bsd_context, principal)->data, 
-		realm_length))) {
+
+    if (!data_eq_string(*krb5_princ_realm(bsd_context, principal),
+			def_realm)) {
 	free(def_realm);
 	return 0;
     }	
     free(def_realm);
     return 1;
 }
-

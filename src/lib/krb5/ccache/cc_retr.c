@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_retr.c
  *
- * Copyright 1990,1991,1999 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1999,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -114,11 +114,7 @@ data_match(const krb5_data *data1, const krb5_data *data2)
     }
     if (!data2) return FALSE;
 
-    if (data1->length != data2->length)
-	return FALSE;
-    else
-	return memcmp(data1->data, data2->data, (unsigned) data1->length) 
-	  ? FALSE : TRUE;
+    return data_eq(*data1, *data2) ? TRUE : FALSE;
 }
 
 static int
@@ -352,17 +348,11 @@ krb5_creds_compare (krb5_context in_context,
     }
     
     if (equal) {
-        equal = (in_creds->ticket.length  == in_compare_creds->ticket.length &&
-                 (!in_creds->ticket.length ||
-                  !memcmp (in_creds->ticket.data, in_compare_creds->ticket.data,
-                           in_creds->ticket.length)));
+	equal = data_eq(in_creds->ticket, in_compare_creds->ticket);
     }
     
     if (equal) {
-        equal = (in_creds->second_ticket.length  == in_compare_creds->second_ticket.length &&
-                 (!in_creds->second_ticket.length ||
-                  !memcmp (in_creds->second_ticket.data, in_compare_creds->second_ticket.data,
-                           in_creds->second_ticket.length)));
+	equal = data_eq(in_creds->second_ticket, in_compare_creds->second_ticket);
     }
     
     if (equal) {
@@ -372,11 +362,7 @@ krb5_creds_compare (krb5_context in_context,
         
         if (authdata && compare_authdata) { 
             for (i = 0; (equal && authdata[i] && compare_authdata[i]); i++) {
-                equal = (authdata[i]->ad_type == compare_authdata[i]->ad_type &&
-                         authdata[i]->length  == compare_authdata[i]->length &&
-                         (!authdata[i]->length || 
-                          !memcmp (authdata[i]->contents, compare_authdata[i]->contents,
-                                   authdata[i]->length)));
+		equal = authdata_eq(*authdata[i], *compare_authdata[i]);
             }
             if (equal) { equal = (!authdata[i] && !compare_authdata[i]); }
         } else {

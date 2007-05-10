@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/gc_via_tgt.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,12 +33,9 @@
 
 #define in_clock_skew(date, now) (labs((date)-(now)) < context->clockskew)
 
-#define IS_TGS_PRINC(c, p)				\
-    ((krb5_princ_size((c), (p)) == 2) &&		\
-     (krb5_princ_component((c), (p), 0)->length ==	\
-      KRB5_TGS_NAME_SIZE) &&				\
-     (!memcmp(krb5_princ_component((c), (p), 0)->data,	\
-	      KRB5_TGS_NAME, KRB5_TGS_NAME_SIZE)))
+#define IS_TGS_PRINC(c, p)						\
+    (krb5_princ_size((c), (p)) == 2 &&					\
+     data_eq_string(*krb5_princ_component((c), (p), 0), KRB5_TGS_NAME))
 
 static krb5_error_code
 krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address, krb5_data *psectkt, krb5_creds **ppcreds)
@@ -146,9 +143,7 @@ check_reply_server(krb5_context context, krb5_flags kdcoptions,
      * effectively checks this.
      */
     if (krb5_realm_compare(context, in_cred->client, in_cred->server) &&
-	in_cred->server->data[1].length == in_cred->client->realm.length &&
-	!memcmp(in_cred->client->realm.data, in_cred->server->data[1].data,
-		in_cred->client->realm.length)) {
+	data_eq(*in_cred->server->data[1], *in_cred->client->realm) {
 	/* Attempted to rewrite local TGS. */
 	return KRB5_KDCREP_MODIFIED;
     }

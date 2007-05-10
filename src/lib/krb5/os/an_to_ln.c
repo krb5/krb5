@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/an_to_ln.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -630,8 +630,7 @@ default_an_to_ln(krb5_context context, krb5_const_principal aname, const unsigne
     if ((retval = krb5_get_default_realm(context, &def_realm))) {
 	return(retval);
     }
-    if (((size_t) realm_length != strlen(def_realm)) ||
-        (memcmp(def_realm, krb5_princ_realm(context, aname)->data, realm_length))) {
+    if (!data_eq_string(*krb5_princ_realm(context, aname), def_realm)) {
         free(def_realm);
         return KRB5_LNAME_NOTRANS;
     }
