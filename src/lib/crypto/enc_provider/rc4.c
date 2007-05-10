@@ -43,13 +43,7 @@ static const krb5_data arcfour_weakkeys[] = {
     {KV5M_DATA, 0, 0}
 };
 
-/*xxx we really should check for c9x here and use inline on 
- * more than just gcc. */
-#if ((__GNUC__ >= 2) )
-static __inline__ unsigned int k5_arcfour_byte(ArcfourContext * ctx)
-#else
-static unsigned int k5_arcfour_byte(ArcfourContext * ctx)
-#endif /* gcc inlines*/
+static inline unsigned int k5_arcfour_byte(ArcfourContext * ctx)
 {
   unsigned int x;
   unsigned int y;
