@@ -35,12 +35,12 @@ k5_arcfour_make_key(const krb5_data *, krb5_keyblock *);
 
 static const unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
 static const unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
-static const krb5_data arcfour_weakkeys[] = {
-    {KV5M_DATA, sizeof (arcfour_weakkey1),
-     (char * ) arcfour_weakkey1},
-    {KV5M_DATA, sizeof (arcfour_weakkey2),
-     (char * ) arcfour_weakkey2},
-    {KV5M_DATA, 0, 0}
+static const struct {
+    size_t length;
+    const unsigned char *data;
+} arcfour_weakkeys[] = {
+    { sizeof (arcfour_weakkey1), arcfour_weakkey1},
+    { sizeof (arcfour_weakkey2), arcfour_weakkey2},
 };
 
 static inline unsigned int k5_arcfour_byte(ArcfourContext * ctx)
@@ -84,10 +84,12 @@ k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key,
   if (key_len != 16)
     return KRB5_BAD_MSIZE;     /*this is probably not the correct error code
 				 to return */
-  for(counter=0;arcfour_weakkeys[counter].length >0; counter++)
-    if (memcmp(key, arcfour_weakkeys[counter].data,
-	       arcfour_weakkeys[counter].length) == 0)
-      return KRB5DES_WEAK_KEY; /* most certainly not the correct error */
+  for (counter=0;
+       counter < sizeof(arcfour_weakkeys)/sizeof(arcfour_weakkeys[0]);
+       counter++)
+      if (!memcmp(key, arcfour_weakkeys[counter].data,
+		  arcfour_weakkeys[counter].length))
+	  return KRB5DES_WEAK_KEY; /* most certainly not the correct error */
 
   state = &ctx->state[0];
   ctx->x = 0;
