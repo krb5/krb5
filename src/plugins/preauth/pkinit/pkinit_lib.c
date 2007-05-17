@@ -40,6 +40,10 @@
 
 #define FAKECERT
 
+const krb5_octet_data
+	dh_oid = { 0, 7, (unsigned char *)"\x2A\x86\x48\xce\x3e\x02\x01" };
+
+
 krb5_error_code pkinit_init_req_opts(pkinit_req_opts **reqopts)
 {
     krb5_error_code retval = ENOMEM;
@@ -51,11 +55,11 @@ krb5_error_code pkinit_init_req_opts(pkinit_req_opts **reqopts)
 	return retval;
 
     opts->require_eku = 1;
+    opts->accept_secondary_eku = 0;
     opts->require_san = 1;
     opts->allow_upn = 0;
     opts->dh_or_rsa = DH_PROTOCOL;
     opts->require_crl_checking = 0;
-    opts->require_hostname_match = 0;
     opts->dh_size = 1024;
     opts->win2k_target = 0;
     opts->win2k_require_cksum = 0;
@@ -83,14 +87,13 @@ krb5_error_code pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
 	return retval;
 
     opts->require_eku = 1;
+    opts->accept_secondary_eku = 0;
     opts->require_san = 1;
     opts->dh_or_rsa = DH_PROTOCOL;
     opts->allow_upn = 0;
     opts->require_crl_checking = 0;
 
-    opts->princ_in_cert = 0;
     opts->dh_min_bits = 0;
-    opts->allow_proxy_certs = 0;
 
     *plgopts = opts;
 
@@ -226,6 +229,7 @@ pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
     free_list(idopts->anchors);
     free_list(idopts->intermediates);
     free_list(idopts->crls);
+    free_list(idopts->identity_alt);
 	
     free(idopts);
 }
@@ -238,8 +242,7 @@ pkinit_initialize_identity(krb5_context context,
     krb5_error_code retval = EINVAL;
     int i;
 
-    pkiDebug("pkinit_initialize_identity %p %p %p\n",
-	     context, idopts, id_cryptoctx);
+    pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
     if (idopts == NULL || id_cryptoctx == NULL)
 	goto errout;
 
@@ -251,20 +254,19 @@ pkinit_initialize_identity(krb5_context context,
      * then we will try alternatives which may have been specified
      * in the config file.
      */
-    if (idopts->identity != NULL)
+    if (idopts->identity != NULL) {
 	retval = pkinit_process_identity_option(context,
 						PKINIT_ID_OPT_USER_IDENTITY,
 						idopts->identity, id_cryptoctx);
-    else {
-	for (i = 0;
-	     retval != 0
-	     && idopts->identity_alt != NULL
-	     && idopts->identity_alt[i] != NULL; i++) {
+    } else if (idopts->identity_alt != NULL) {
+	for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
 		retval = pkinit_process_identity_option(context,
 						    PKINIT_ID_OPT_USER_IDENTITY,
 						    idopts->identity_alt[i],
 						    id_cryptoctx);
-	}
+    } else {
+	pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
+	goto errout;
     }
     if (retval)
 	goto errout;

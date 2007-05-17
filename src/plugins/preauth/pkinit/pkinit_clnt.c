@@ -43,6 +43,8 @@
 /* #define DEBUG */
 /* #define DEBUG_DH */
 
+int longhorn = 0;	/* XXX Talking to a Longhorn server? */
+
 krb5_error_code pkinit_client_process
 	(krb5_context context, void *plugin_context, void *request_context,
 		krb5_get_init_creds_opt *opt,
@@ -134,7 +136,8 @@ pa_pkinit_gen_req(krb5_context context,
     cksum.contents = NULL;
     reqctx->pa_type = in_padata->pa_type;
 
-    pkiDebug("option included = %d till=%d\n", request->kdc_options, request->till);
+    pkiDebug("kdc_options = 0x%x  till = %d\n",
+	     request->kdc_options, request->till);
     /* If we don't have a client, we're done */
     if (request->client == NULL) {
 	pkiDebug("No request->client; aborting PKINIT\n");
@@ -215,8 +218,8 @@ pa_pkinit_gen_req(krb5_context context,
     return_pa_data[0]->length = out_data->length;
     return_pa_data[0]->contents = (krb5_octet *) out_data->data;
 
-    if (return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
-	&& reqctx->opts->win2k_require_cksum) {
+    if ((return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
+	&& reqctx->opts->win2k_require_cksum) || (longhorn == 1)) {
 	return_pa_data[1]->pa_type = 132;
 	return_pa_data[1]->length = 0;
 	return_pa_data[1]->contents = NULL;
@@ -378,12 +381,10 @@ pkinit_as_req_create(krb5_context context,
 		reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
 		(unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
 		&req->signedAuthPack.data, &req->signedAuthPack.length);
-#if 0	/* VISTA HACK */
-	    if (retval == 0) {
-		pkiDebug("Hacking SignedAuthPack for VISTA!\n");
-		req->signedAuthPack.data +=4;
-		req->signedAuthPack.length -= 4;
-	    }
+#ifdef DEBUG_ASN1
+	    print_buffer_bin((unsigned char *)req->signedAuthPack.data,
+			     req->signedAuthPack.length,
+			     "/tmp/client_signed_data");
 #endif
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
@@ -397,6 +398,11 @@ pkinit_as_req_create(krb5_context context,
 		(unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
 		&req9->signedAuthPack.data, &req9->signedAuthPack.length);
 	    break;
+#ifdef DEBUG_ASN1
+	    print_buffer_bin((unsigned char *)req9->signedAuthPack.data,
+			     req9->signedAuthPack.length,
+			     "/tmp/client_signed_data_draft9");
+#endif
     }
     krb5_free_data(context, coded_auth_pack);
     if (retval) {
@@ -411,7 +417,6 @@ pkinit_as_req_create(krb5_context context,
 		reqctx->cryptoctx, reqctx->idctx, &req->trustedCertifiers);
 	    if (retval)
 		goto cleanup;
-
 	    retval = create_issuerAndSerial(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, reqctx->idctx, &req->kdcPkId.data,
 		&req->kdcPkId.length);
@@ -420,13 +425,6 @@ pkinit_as_req_create(krb5_context context,
 
 	    /* Encode the as-req */
 	    retval = k5int_encode_krb5_pa_pk_as_req(req, as_req);
-#if 0	/* VISTA HACK */
-	    if (retval == 0) {
-		pkiDebug("Hacking SignedAuthPack for VISTA!\n");
-		req->signedAuthPack.data -=4;
-		req->signedAuthPack.length += 4;
-	    }
-#endif
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 #if 0
@@ -512,6 +510,152 @@ cleanup:
     return retval;
 }
 
+static krb5_error_code
+verify_kdc_san(krb5_context context,
+	       pkinit_context plgctx,
+	       pkinit_req_context reqctx,
+	       krb5_principal kdcprinc,
+	       int *valid_san,
+	       int *need_eku_checking)
+{
+    krb5_error_code retval;
+    char **certhosts = NULL, **cfghosts = NULL;
+    krb5_principal *princs = NULL;
+    unsigned char ***get_dns;
+    int i, j;
+
+    *valid_san = 0;
+    *need_eku_checking = 1;
+
+    retval = pkinit_libdefault_strings(context,
+				       krb5_princ_realm(context, kdcprinc), 
+				       "pkinit_kdc_hostname",
+				       &cfghosts);
+    if (retval || cfghosts == NULL) {
+	pkiDebug("%s: No pkinit_kdc_hostname values found in config file\n",
+		 __FUNCTION__);
+	get_dns = NULL;
+    } else {
+	pkiDebug("%s: pkinit_kdc_hostname values found in config file\n",
+		 __FUNCTION__);
+	get_dns = (unsigned char ***)&certhosts;
+    }
+
+    retval = crypto_retrieve_cert_sans(context, plgctx->cryptoctx,
+				       reqctx->cryptoctx, reqctx->idctx,
+				       &princs, NULL, get_dns);
+    if (retval) {
+	pkiDebug("%s: error from retrieve_certificate_sans()\n", __FUNCTION__);
+	retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
+	goto out;
+    }
+#if 0
+    retval = call_san_checking_plugins(context, plgctx, reqctx, idctx,
+				       princs, hosts, &plugin_decision,
+				       need_eku_checking);
+    pkiDebug("%s: call_san_checking_plugins() returned retval %d\n",
+	     __FUNCTION__);
+    if (retval) {
+	retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
+	goto out;
+    }
+    pkiDebug("%s: call_san_checking_plugins() returned decision %d and "
+	     "need_eku_checking %d\n",
+	     __FUNCTION__, plugin_decision, *need_eku_checking);
+    if (plugin_decision != NO_DECISION) {
+	retval = plugin_decision;
+	goto out;
+    }
+#endif
+
+    pkiDebug("%s: Checking pkinit sans\n", __FUNCTION__);
+    for (i = 0; princs != NULL && princs[i] != NULL; i++) {
+	if (krb5_principal_compare(context, princs[i], kdcprinc)) {
+	    pkiDebug("%s: pkinit san match found\n", __FUNCTION__);
+	    *valid_san = 1;
+	    *need_eku_checking = 0;
+	    retval = 0;
+	    goto out;
+	}
+    }
+    pkiDebug("%s: no pkinit san match found\n", __FUNCTION__);
+
+    if (certhosts == NULL) {
+	pkiDebug("%s: no certhosts (or we wouldn't accept them anyway)\n",
+		 __FUNCTION__);
+	retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
+	goto out;
+    }
+
+    for (i = 0; certhosts[i] != NULL; i++) {
+	for (j = 0; cfghosts != NULL && cfghosts[j] != NULL; j++) {
+	    pkiDebug("%s: comparing cert name '%s' with config name '%s'\n",
+		     __FUNCTION__, certhosts[i], cfghosts[j]);
+	    if (strcmp(certhosts[i], cfghosts[j]) == 0) {
+		pkiDebug("%s: we have a dnsName match\n", __FUNCTION__);
+		*valid_san = 1;
+		retval = 0;
+		goto out;
+	    }
+	}
+    }
+    pkiDebug("%s: no dnsName san match found\n", __FUNCTION__);
+
+    /* We found no match */
+    retval = 0;
+
+out:
+    if (princs != NULL) {
+	for (i = 0; princs[i] != NULL; i++)
+	    krb5_free_principal(context, princs[i]);
+	free(princs);
+    }
+    if (certhosts != NULL) {
+	for (i = 0; certhosts[i] != NULL; i++)
+	    free(certhosts[i]);
+	free(certhosts);
+    }
+    if (cfghosts != NULL)
+	profile_free_list(cfghosts);
+
+    pkiDebug("%s: returning retval %d, valid_san %d, need_eku_checking %d\n",
+	     __FUNCTION__, retval, *valid_san, *need_eku_checking);
+    return retval;
+}
+ 
+static krb5_error_code
+verify_kdc_eku(krb5_context context,
+	       pkinit_context plgctx,
+	       pkinit_req_context reqctx,
+	       int *eku_accepted)
+{
+    krb5_error_code retval;
+
+    *eku_accepted = 0;
+
+    if (reqctx->opts->require_eku == 0) {
+	pkiDebug("%s: configuration requests no EKU checking\n", __FUNCTION__);
+	*eku_accepted = 1;
+	retval = 0;
+	goto out;
+    }
+    retval = crypto_check_cert_eku(context, plgctx->cryptoctx,
+				   reqctx->cryptoctx, reqctx->idctx,
+				   1, /* kdc cert */
+				   reqctx->opts->accept_secondary_eku,
+				   eku_accepted);
+    if (retval) {
+	pkiDebug("%s: Error from crypto_check_cert_eku %d (%s)\n",
+		 __FUNCTION__, retval, error_message(retval));
+	goto out;
+    }
+
+out:
+    pkiDebug("%s: returning retval %d, eku_accepted %d\n",
+	     __FUNCTION__, retval, *eku_accepted);
+    return retval;
+}
+
 /*
  * Parse PA-PK-AS-REP message. Optionally evaluates the message's certificate chain.
  * Optionally returns various components.
@@ -536,9 +680,10 @@ pkinit_as_rep_parse(krb5_context context,
     unsigned char *client_key = NULL, *kdc_hostname = NULL;
     unsigned int client_key_len = 0;
     krb5_checksum cksum = {0, 0, 0, NULL};
-    krb5_principal tmp_server;
-    int valid_eku = 0, valid_san = 0, i = 0;
     krb5_data k5data;
+    int valid_san = 0;
+    int valid_eku = 0;
+    int need_eku_checking = 1;
 
     assert((as_rep != NULL) && (key_block != NULL));
 
@@ -588,79 +733,30 @@ pkinit_as_rep_parse(krb5_context context,
 	    goto cleanup;
     }
 
-    if (reqctx->opts->require_san) {
-	retval = verify_id_pkinit_san(context, plgctx->cryptoctx,
-	    reqctx->cryptoctx, reqctx->idctx, pa_type,
-	    plgctx->opts->allow_upn, &tmp_server, &kdc_hostname, &valid_san);
+    retval = verify_kdc_san(context, plgctx, reqctx, request->server,
+			    &valid_san, &need_eku_checking);
+    if (retval)
+	    goto cleanup;
+    if (!valid_san) {
+	pkiDebug("%s: did not find an acceptable SAN in KDC certificate\n",
+		 __FUNCTION__);
+	retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
+	goto cleanup;
+    }
+
+    if (need_eku_checking) {
+	retval = verify_kdc_eku(context, plgctx, reqctx, 
+				&valid_eku);
 	if (retval)
 	    goto cleanup;
-	if (!valid_san) {
-	    pkiDebug("failed to verify id-pkinit-san\n");
-	    retval = KRB5KDC_ERR_KDC_NOT_TRUSTED;
+	if (!valid_eku) {
+	    pkiDebug("%s: did not find an acceptable EKU in KDC certificate\n",
+		     __FUNCTION__);
+	    retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
 	    goto cleanup;
-	} else {
-	    if (pa_type == KRB5_PADATA_PK_AS_REP &&
-		    tmp_server != NULL) {
-		retval = krb5_principal_compare(context, request->server,
-						tmp_server);
-		krb5_free_principal(context, tmp_server);
-		if (!retval) {
-		    pkiDebug("identity in the certificate does not match "
-			    "the requested principal\n");
-		    retval = KRB5KDC_ERR_KDC_NAME_MISMATCH;
-		    goto cleanup;
-		}
-	    } else if (pa_type == KRB5_PADATA_PK_AS_REP_OLD) {
-		char **hostnames = NULL;
-		int name_matched = 0;
-
-		if (reqctx->opts->require_hostname_match) {
-		    retval = pkinit_libdefault_strings(context,
-						       &request->server->realm, 
-						       "pkinit_win2k_hostname",
-						       &hostnames);
-		    if (retval) {
-			pkiDebug("No pkinit_win2k_hostname values found in "
-				 "the config file.\n");
-			retval = KRB5KDC_ERR_KDC_NOT_TRUSTED;
-			goto cleanup;
-		    }
-		    for (i = 0; hostnames != NULL && hostnames[i] != NULL; i++) {
-			pkiDebug("Comparing cert's dnsName '%s' with "
-				 "trusted win2k hostname '%s'\n",
-				 kdc_hostname, hostnames[i]);
-			if (strcmp((char *)kdc_hostname, hostnames[i]) == 0) { 
-			    pkiDebug("Cert's dnsName, '%s', matched\n",
-				     kdc_hostname);
-			    name_matched = 1;
-			    break;
-			}
-		    }
-		    profile_free_list(hostnames);
-		    if (!name_matched) {
-			pkiDebug("Cert's dnsName, '%s', NOT matched\n",
-				 kdc_hostname);
-			retval = KRB5KDC_ERR_KDC_NOT_TRUSTED;
-			goto cleanup;
-		    }
-		} else {
-		    pkiDebug("config options says skip hostname check\n");
-		}
-	    }
 	}
-    } else {
-	pkiDebug("config option says not to check for SAN\n");
-    }
-
-    retval = verify_id_pkinit_eku(context, plgctx->cryptoctx, reqctx->cryptoctx,
-	reqctx->idctx, pa_type, reqctx->opts->require_eku, &valid_eku);
-    if (retval)
-	goto cleanup;
-    if (!valid_eku) {
-	pkiDebug("failed to verify id-pkinit-KPKdc\n");
-	retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
-	goto cleanup;
-    }
+    } else 
+	pkiDebug("%s: skipping EKU check\n", __FUNCTION__);
 
     OCTETDATA_TO_KRB5DATA(&dh_data, &k5data);
 
@@ -703,7 +799,7 @@ pkinit_as_rep_parse(krb5_context context,
 	    if ((retval = k5int_decode_krb5_reply_key_pack(&k5data,
 		    &key_pack)) != 0) {
 		pkiDebug("failed to decode reply_key_pack\n");
-		if (pa_type == KRB5_PADATA_PK_AS_REP)
+		if (pa_type == KRB5_PADATA_PK_AS_REP && longhorn == 0)
 		    goto cleanup;
 		else {
 		    if ((retval =
@@ -729,9 +825,10 @@ pkinit_as_rep_parse(krb5_context context,
 	    if (key_pack->asChecksum.checksum_type == 14)
 		key_pack->asChecksum.checksum_type = CKSUMTYPE_NIST_SHA;
 	    retval = krb5_c_make_checksum(context,
-		key_pack->asChecksum.checksum_type,
-		&key_pack->replyKey, KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
-		encoded_request, &cksum);
+					  key_pack->asChecksum.checksum_type,
+					  &key_pack->replyKey,
+					  KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
+					  encoded_request, &cksum);
 	    if (retval) {
 		pkiDebug("failed to make a checksum\n");
 		goto cleanup;
@@ -802,6 +899,8 @@ pkinit_client_profile(krb5_context context,
 		      pkinit_req_context reqctx,
 		      krb5_kdc_req *request)
 {
+    char *eku_string = NULL;
+
     pkiDebug("pkinit_client_profile %p %p %p %p\n",
 	     context, plgctx, reqctx, request);
 
@@ -813,18 +912,39 @@ pkinit_client_profile(krb5_context context,
 			      "pkinit_win2k_require_binding",
 			      reqctx->opts->win2k_require_cksum,
 			      &reqctx->opts->win2k_require_cksum);
+    /* Temporarily just set global flag from config file */
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_require_eku",
-			      reqctx->opts->require_eku,
-			      &reqctx->opts->require_eku);
+			      "pkinit_longhorn",
+			      0,
+			      &longhorn);
     pkinit_libdefault_boolean(context, &request->server->realm,
 			      "pkinit_require_krbtgt_otherName",
 			      reqctx->opts->require_san,
 			      &reqctx->opts->require_san);
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_require_hostname_match",
-			      reqctx->opts->require_hostname_match,
-			      &reqctx->opts->require_hostname_match);
+			      "pkinit_allow_upn",
+			      reqctx->opts->allow_upn,
+			      &reqctx->opts->allow_upn);
+    pkinit_libdefault_string(context, &request->server->realm,
+			     "pkinit_eku_checking",
+			     &eku_string);
+    if (eku_string != NULL) {
+	if (strcasecmp(eku_string, "kpKDC") == 0) {
+	    reqctx->opts->require_eku = 1;
+	    reqctx->opts->accept_secondary_eku = 0;
+	} else if (strcasecmp(eku_string, "kpServerAuth") == 0) {
+	    reqctx->opts->require_eku = 1;
+	    reqctx->opts->accept_secondary_eku = 1;
+	} else if (strcasecmp(eku_string, "none") == 0) {
+	    reqctx->opts->require_eku = 0;
+	    reqctx->opts->accept_secondary_eku = 0;
+	} else {
+	    pkiDebug("%s: Invalid value for pkinit_eku_checking: '%s'\n",
+		     __FUNCTION__, eku_string);
+	}
+	free(eku_string);
+    }
+
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)
 	pkinit_libdefault_strings(context, &request->server->realm,
@@ -905,8 +1025,11 @@ pkinit_client_process(krb5_context context,
 	pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
 	retval = pkinit_initialize_identity(context, reqctx->idopts,
 					    reqctx->idctx);
-	if (retval)
+	if (retval) {
+	    pkiDebug("pkinit_initialize_identity returned %d (%s)\n",
+		     retval, error_message(retval));
 	    return retval;
+	}
 	retval = pa_pkinit_gen_req(context, plgctx, reqctx, request,
 				   in_padata, out_padata, prompter,
 				   prompter_data, opt);
@@ -916,8 +1039,11 @@ pkinit_client_process(krb5_context context,
 	 */
 	retval = (*get_data_proc)(context, rock,
 				krb5plugin_preauth_client_get_etype, &cdata);
-	if (retval)
+	if (retval) {
+	    pkiDebug("get_data_proc returned %d (%s)\n",
+		     retval, error_message(retval));
 	    return retval;
+	}
 	enctype = *((krb5_enctype *)cdata->data);
 	(*get_data_proc)(context, rock,
 			 krb5plugin_preauth_client_free_etype, &cdata);
@@ -1077,11 +1203,11 @@ pkinit_client_req_init(krb5_context context,
 	goto cleanup;
 	
     reqctx->opts->require_eku = plgctx->opts->require_eku;
+    reqctx->opts->accept_secondary_eku = plgctx->opts->accept_secondary_eku;
     reqctx->opts->require_san = plgctx->opts->require_san;
     reqctx->opts->dh_or_rsa = plgctx->opts->dh_or_rsa;
     reqctx->opts->allow_upn = plgctx->opts->allow_upn;
     reqctx->opts->require_crl_checking = plgctx->opts->require_crl_checking;
-    reqctx->opts->require_hostname_match = 0;
 
     retval = pkinit_init_req_crypto(&reqctx->cryptoctx);
     if (retval)

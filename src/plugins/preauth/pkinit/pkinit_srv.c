@@ -147,7 +147,7 @@ pkinit_server_get_edata(krb5_context context,
     krb5_error_code retval = 0;
     pkinit_kdc_context plgctx = NULL;
 
-    pkiDebug("pkinit_get_edata: entered!\n");
+    pkiDebug("pkinit_server_get_edata: entered!\n");
 
     /*
      * If we don't have a realm context for the given realm,
@@ -158,6 +158,138 @@ pkinit_server_get_edata(krb5_context context,
     if (plgctx == NULL)
 	retval = EINVAL;
 
+    return retval;
+}
+
+static krb5_error_code
+verify_client_san(krb5_context context,
+		  pkinit_kdc_context plgctx,
+		  pkinit_kdc_req_context reqctx,
+		  krb5_principal client,
+		  int *valid_san)
+{
+    krb5_error_code retval;
+    krb5_principal *princs = NULL;
+    krb5_principal *upns = NULL;
+    int i;
+    
+    retval = crypto_retrieve_cert_sans(context, plgctx->cryptoctx,
+				       reqctx->cryptoctx, plgctx->idctx,
+				       &princs,
+				       plgctx->opts->allow_upn ? &upns : NULL,
+				       NULL);
+    if (retval) {
+	pkiDebug("%s: error from retrieve_certificate_sans()\n", __FUNCTION__);
+	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+	goto out;
+    }
+    /* XXX Verify this is consistent with client side XXX */
+#if 0
+    retval = call_san_checking_plugins(context, plgctx, reqctx, princs,
+				       upns, NULL, &plugin_decision, &ignore);
+    pkiDebug("%s: call_san_checking_plugins() returned retval %d\n",
+	     __FUNCTION__);
+    if (retval) {
+	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+	goto cleanup;
+    }
+    pkiDebug("%s: call_san_checking_plugins() returned decision %d\n",
+	     __FUNCTION__, plugin_decision);
+    if (plugin_decision != NO_DECISION) {
+	retval = plugin_decision;
+	goto out;
+    }
+#endif
+
+    pkiDebug("%s: Checking pkinit sans\n", __FUNCTION__);
+    for (i = 0; princs != NULL && princs[i] != NULL; i++) {
+	if (krb5_principal_compare(context, princs[i], client)) {
+	    pkiDebug("%s: pkinit san match found\n", __FUNCTION__);
+	    *valid_san = 1;
+	    retval = 0;
+	    goto out;
+	}
+    }
+    pkiDebug("%s: no pkinit san match found\n", __FUNCTION__);
+    /*
+     * XXX if cert has names but none match, should we
+     * be returning KRB5KDC_ERR_CLIENT_NAME_MISMATCH here?
+     */
+
+    if (upns == NULL) {
+	pkiDebug("%s: no upn sans (or we wouldn't accept them anyway)\n",
+		 __FUNCTION__);
+	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+	goto out;
+    }
+
+    pkiDebug("%s: Checking upn sans\n", __FUNCTION__);
+    for (i = 0; upns[i] != NULL; i++) {
+	if (krb5_principal_compare(context, upns[i], client)) {
+	    pkiDebug("%s: upn san match found\n", __FUNCTION__);
+	    *valid_san = 1;
+	    retval = 0;
+	    goto out;
+	}
+    }
+    pkiDebug("%s: no upn san match found\n", __FUNCTION__);
+
+    /* We found no match */
+    if (princs != NULL || upns != NULL) {
+	*valid_san = 0;
+	/* XXX ??? If there was one or more name in the cert, but
+	 * none matched the client name, then return mismatch? */
+	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+    }
+    retval = 0;
+
+out:
+    if (princs != NULL) {
+	for (i = 0; princs[i] != NULL; i++)
+	    krb5_free_principal(context, princs[i]);
+	free(princs);
+    }
+    if (upns != NULL) {
+	for (i = 0; upns[i] != NULL; i++)
+	    krb5_free_principal(context, upns[i]);
+	free(upns);
+    }
+    pkiDebug("%s: returning retval %d, valid_san %d\n",
+	     __FUNCTION__, retval, *valid_san);
+    return retval;
+}
+
+static krb5_error_code
+verify_client_eku(krb5_context context,
+		  pkinit_kdc_context plgctx,
+		  pkinit_kdc_req_context reqctx,
+		  int *eku_accepted)
+{
+    krb5_error_code retval;
+
+    *eku_accepted = 0;
+
+    if (plgctx->opts->require_eku == 0) {
+	pkiDebug("%s: configuration requests no EKU checking\n", __FUNCTION__);
+	*eku_accepted = 1;
+	retval = 0;
+	goto out;
+    }
+
+    retval = crypto_check_cert_eku(context, plgctx->cryptoctx,
+				   reqctx->cryptoctx, plgctx->idctx,
+				   0, /* kdc cert */
+				   plgctx->opts->accept_secondary_eku,
+				   eku_accepted);
+    if (retval) {
+	pkiDebug("%s: Error from crypto_check_cert_eku %d (%s)\n",
+		 __FUNCTION__, retval, error_message(retval));
+	goto out;
+    }
+
+out:
+    pkiDebug("%s: returning retval %d, eku_accepted %d\n",
+	     __FUNCTION__, retval, *eku_accepted);
     return retval;
 }
 
@@ -183,7 +315,6 @@ pkinit_server_verify_padata(krb5_context context,
     pkinit_kdc_context plgctx = NULL;
     pkinit_kdc_req_context reqctx;
     krb5_preauthtype pa_type;
-    krb5_principal tmp_client;
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
@@ -259,39 +390,25 @@ pkinit_server_verify_padata(krb5_context context,
 	goto cleanup;
     }
 
-    retval = verify_id_pkinit_san(context, plgctx->cryptoctx, reqctx->cryptoctx,
-	plgctx->idctx, data->pa_type, plgctx->opts->allow_upn, &tmp_client,
-	NULL, &valid_san);
+    retval = verify_client_san(context, plgctx, reqctx, request->client,
+			       &valid_san);
     if (retval)
 	goto cleanup;
+
     if (!valid_san) {
-	pkiDebug("failed to verify id-pkinit-san\n");
-	retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
+	pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
+		 __FUNCTION__);
+	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
 	goto cleanup;
-    } else {
-	if (tmp_client != NULL) {
-	    retval = krb5_principal_compare(context, request->client,
-					    tmp_client);
-	    krb5_free_principal(context, tmp_client);
-	    if (!retval) {
-		pkiDebug("identity in the certificate does not match "
-			 "the requested principal\n");
-		retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
-		goto cleanup;
-	    }
-	} else {
-	    pkiDebug("didn't find Kerberos identity in certificate\n");
-	    retval = KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
-	    goto cleanup;
-	}
     }
 
-    retval = verify_id_pkinit_eku(context, plgctx->cryptoctx, reqctx->cryptoctx,
-	plgctx->idctx, data->pa_type, plgctx->opts->require_eku, &valid_eku);
+    retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
     if (retval)
 	goto cleanup;
+
     if (!valid_eku) {
-	pkiDebug("failed to verify id-pkinit-KPClientAuth\n");
+	pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
+		 __FUNCTION__);
 	retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
 	goto cleanup;
     }
@@ -718,11 +835,6 @@ pkinit_server_return_padata(krb5_context context,
 		    goto cleanup;
 		}
 
-		init_krb5_pa_pk_as_rep(&rep);
-		if (rep == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
 		rep->choice = choice_pa_pk_as_rep_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, padata->pa_type, 1, 
@@ -747,11 +859,7 @@ pkinit_server_return_padata(krb5_context context,
 		    pkiDebug("failed to encode reply_key_pack\n");
 		    goto cleanup;
 		}
-		init_krb5_pa_pk_as_rep_draft9(&rep9);
-		if (rep9 == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
+
 		rep9->choice = choice_pa_pk_as_rep_draft9_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, padata->pa_type, 1, 
@@ -888,6 +996,7 @@ static krb5_error_code
 pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 {
     krb5_error_code retval;
+    char *eku_string = NULL;
 
     pkiDebug("%s: entered for realm %s\n", __FUNCTION__, plgctx->realmname);
     retval = pkinit_kdcdefault_string(context, plgctx->realmname,
@@ -928,17 +1037,30 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 			     "pkinit_mappings_file",
 			     &plgctx->idopts->dn_mapping_file);
 
-    pkinit_kdcdefault_boolean(context, plgctx->realmname,
-			      "pkinit_principal_in_certificate",
-			      1, &plgctx->opts->princ_in_cert);
-
-    pkinit_kdcdefault_boolean(context, plgctx->realmname,
-			      "pkinit_allow_proxy_certificate",
-			      0, &plgctx->opts->allow_proxy_certs);
-
     pkinit_kdcdefault_integer(context, plgctx->realmname,
 			      "pkinit_dh_min_bits",
 			      0, &plgctx->opts->dh_min_bits);
+
+    pkinit_kdcdefault_string(context, plgctx->realmname,
+			     "pkinit_eku_checking",
+			     &eku_string);
+    if (eku_string != NULL) {
+	if (strcasecmp(eku_string, "kpClientAuth") == 0) {
+	    plgctx->opts->require_eku = 1;
+	    plgctx->opts->accept_secondary_eku = 0;
+	} else if (strcasecmp(eku_string, "scLogin") == 0) {
+	    plgctx->opts->require_eku = 1;
+	    plgctx->opts->accept_secondary_eku = 1;
+	} else if (strcasecmp(eku_string, "none") == 0) {
+	    plgctx->opts->require_eku = 0;
+	    plgctx->opts->accept_secondary_eku = 0;
+	} else {
+	    pkiDebug("%s: Invalid value for pkinit_eku_checking: '%s'\n",
+		     __FUNCTION__, eku_string);
+	}
+	free(eku_string);
+    }
+
 
     return 0;
 errout:
@@ -1041,7 +1163,7 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
 
     retval = pkinit_accessor_init();
     if (retval)
-        return retval;
+	return retval;
 
     /* Determine how many realms we may need to support */
     for (i = 0; realmnames[i] != NULL; i++) {};
@@ -1141,8 +1263,8 @@ static void  pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     pkinit_kdc_req_context reqctx = (pkinit_kdc_req_context)ctx;
 
     if (reqctx == NULL || reqctx->magic != PKINIT_CTX_MAGIC) {
-        pkiDebug("pkinit_fini_kdc_req_context: got bad reqctx (%p)!\n", reqctx);
-        return;
+	pkiDebug("pkinit_fini_kdc_req_context: got bad reqctx (%p)!\n", reqctx);
+	return;
     }
     pkiDebug("%s: freeing   reqctx at %p\n", __FUNCTION__, reqctx);
 
