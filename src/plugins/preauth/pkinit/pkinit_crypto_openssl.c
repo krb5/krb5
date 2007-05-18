@@ -4263,6 +4263,7 @@ cleanup:
 #define CATYPE_INTERMEDIATES	2
 #define CATYPE_CRLS		3
 
+#ifndef WITHOUT_PKCS11
 static krb5_error_code
 parse_pkcs11_options(krb5_context context,
 		     pkinit_identity_crypto_context id_cryptoctx,
@@ -4342,6 +4343,7 @@ cleanup:
     /* XXX Clean up other stuff too? */
     return retval;
 }
+#endif
 
 static krb5_error_code
 parse_fs_options(krb5_context context,
@@ -4427,8 +4429,10 @@ process_option_identity(krb5_context context, const char *value,
 	typelen = residual - value;
 	if (strncmp(value, "FILE:", typelen) == 0) {
 	    idtype = IDTYPE_FILE;
+#ifndef WITHOUT_PKCS11
 	} else if (strncmp(value, "PKCS11:", typelen) == 0) {
 	    idtype = IDTYPE_PKCS11;
+#endif
 	} else if (strncmp(value, "PKCS12:", typelen) == 0) {
 	    idtype = IDTYPE_PKCS12;
 	} else if (strncmp(value, "DIR:", typelen) == 0) {
