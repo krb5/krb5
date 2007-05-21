@@ -684,18 +684,14 @@ krb5_error_code krb5int_pbkdf2_hmac_sha1 (const krb5_data *, unsigned long,
 /* Make this a function eventually?  */
 #ifdef _WIN32
 # define krb5int_zap_data(ptr, len) SecureZeroMemory(ptr, len)
-#elif defined(__palmos__) && !defined(__GNUC__)
-/* CodeWarrior 8.3 complains about passing a pointer to volatile in to
-   memset.  On the other hand, we probably want it for gcc.  */
-# define krb5int_zap_data(ptr, len) memset(ptr, 0, len)
+#elif defined(__GNUC__)
+static inline void krb5int_zap_data(void *ptr, size_t len)
+{
+    memset(ptr, 0, len);
+    asm volatile ("" : : "g" (ptr), "g" (len));
+}
 #else
 # define krb5int_zap_data(ptr, len) memset((volatile void *)ptr, 0, len)
-# if defined(__GNUC__) && defined(__GLIBC__)
-/* GNU libc generates multiple bogus initialization warnings if we
-   pass memset a volatile pointer.  The compiler should do well enough
-   with memset even without GNU libc's attempt at optimization.  */
-# undef memset
-# endif
 #endif /* WIN32 */
 #define zap(p,l) krb5int_zap_data(p,l)
 
