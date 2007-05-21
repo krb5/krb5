@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/init_ctx.c
  *
- * Copyright 1994,1999,2000, 2002, 2003  by the Massachusetts Institute of Technology.
+ * Copyright 1994,1999,2000, 2002, 2003, 2007  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -533,7 +533,7 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->ser_ctx_count = 0;
     nctx->ser_ctx = NULL;
     nctx->prompt_types = NULL;
-    nctx->os_context->default_ccname = NULL;
+    nctx->os_context.default_ccname = NULL;
 
     memset(&nctx->preauth_plugins, 0, sizeof(nctx->preauth_plugins));
     nctx->preauth_context = NULL;
@@ -556,10 +556,10 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 	goto errout;
     nctx->tgs_ktype_count = ctx->tgs_ktype_count;
 
-    if (ctx->os_context->default_ccname != NULL) {
-	nctx->os_context->default_ccname =
-	    strdup(ctx->os_context->default_ccname);
-	if (nctx->os_context->default_ccname == NULL) {
+    if (ctx->os_context.default_ccname != NULL) {
+	nctx->os_context.default_ccname =
+	    strdup(ctx->os_context.default_ccname);
+	if (nctx->os_context.default_ccname == NULL) {
 	    ret = ENOMEM;
 	    goto errout;
 	}

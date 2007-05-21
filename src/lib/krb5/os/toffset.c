@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/toffset.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -38,7 +38,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
     krb5_int32 sec, usec;
     krb5_error_code retval;
 
@@ -60,7 +60,7 @@ krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 micr
 krb5_error_code 
 krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
 
     os_ctx->time_offset = seconds;
     os_ctx->usec_offset = microseconds;
@@ -76,7 +76,7 @@ krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32
 krb5_error_code 
 krb5_use_natural_time(krb5_context context)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
 
     os_ctx->os_flags &= ~(KRB5_OS_TOFFSET_VALID|KRB5_OS_TOFFSET_TIME);
 
@@ -89,7 +89,7 @@ krb5_use_natural_time(krb5_context context)
 krb5_error_code KRB5_CALLCONV
 krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 *microseconds)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
 
     if (seconds)
 	*seconds = os_ctx->time_offset;
@@ -105,7 +105,7 @@ krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 
 krb5_error_code 
 krb5_set_time_offsets(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
 
     os_ctx->time_offset = seconds;
     os_ctx->usec_offset = microseconds;

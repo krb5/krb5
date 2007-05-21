@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/ustime.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -36,7 +36,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_us_timeofday(krb5_context context, krb5_timestamp *seconds, krb5_int32 *microseconds)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
     krb5_int32 sec, usec;
     krb5_error_code retval;
     

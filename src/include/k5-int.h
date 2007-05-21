@@ -1203,16 +1203,7 @@ struct _krb5_context {
 	unsigned int	in_tkt_ktype_count;
 	krb5_enctype	*tgs_ktypes;
 	unsigned int	tgs_ktype_count;
-	/* This used to be a void*, but since we always allocate them
-	   together (though in different source files), and the types
-	   are declared in the same header, might as well just combine
-	   them.
-
-	   The array[1] is so the existing code treating the field as
-	   a pointer will still work.  For cleanliness, it should
-	   eventually get changed to a single element instead of an
-	   array.  */
-	struct _krb5_os_context	os_context[1];
+	struct _krb5_os_context	os_context;
 	char		*default_realm;
 	profile_t	profile;
 	void		*db_context;

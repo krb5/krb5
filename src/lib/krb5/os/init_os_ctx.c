@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/init_ctx.c
  *
- * Copyright 1994 by the Massachusetts Institute of Technology.
+ * Copyright 1994, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -382,7 +382,7 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
     WSADATA wsaData;
 #endif /* _WIN32 */
 
-	os_ctx = ctx->os_context;
+	os_ctx = &ctx->os_context;
 	os_ctx->magic = KV5M_OS_CONTEXT;
 	os_ctx->time_offset = 0;
 	os_ctx->usec_offset = 0;
@@ -480,7 +480,7 @@ krb5_os_free_context(krb5_context ctx)
 {
 	krb5_os_context os_ctx;
 
-	os_ctx = ctx->os_context;
+	os_ctx = &ctx->os_context;
 	
 	if (os_ctx->default_ccname) {
 		free(os_ctx->default_ccname);

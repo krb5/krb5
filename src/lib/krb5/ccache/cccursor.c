@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cccursor.c
  *
- * Copyright 2006 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -120,7 +120,7 @@ krb5_cccol_cursor_next(
     krb5_os_context os_ctx = NULL;
 
     *ccache = NULL;
-    os_ctx = context->os_context;
+    os_ctx = &context->os_context;
 
     switch (cursor->pos) {
     case CCCURSOR_CONTEXT:

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/timeofday.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -35,7 +35,7 @@
 krb5_error_code KRB5_CALLCONV
 krb5_timeofday(krb5_context context, register krb5_timestamp *timeret)
 {
-    krb5_os_context os_ctx = context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
     time_t tval;
 
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {

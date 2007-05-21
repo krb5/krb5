@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/ser_ctx.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -132,11 +132,10 @@ krb5_context_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 	if (context->default_realm)
 	    required += strlen(context->default_realm);
 	/* Calculate size required by os_context, if appropriate */
-	if (context->os_context)
-	    kret = krb5_size_opaque(kcontext,
-				    KV5M_OS_CONTEXT,
-				    (krb5_pointer) context->os_context,
-				    &required);
+	kret = krb5_size_opaque(kcontext,
+				KV5M_OS_CONTEXT,
+				(krb5_pointer) &context->os_context,
+				&required);
 
 	/* Calculate size required by db_context, if appropriate */
 	if (!kret && context->db_context)
@@ -282,14 +281,12 @@ krb5_context_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **b
 	return (kret);
 
     /* Now handle os_context, if appropriate */
-    if (context->os_context) {
-	kret = krb5_externalize_opaque(kcontext, KV5M_OS_CONTEXT,
-				       (krb5_pointer) context->os_context,
-				       &bp, &remain);
-	if (kret)
-	    return (kret);
-    }
-	
+    kret = krb5_externalize_opaque(kcontext, KV5M_OS_CONTEXT,
+				   (krb5_pointer) &context->os_context,
+				   &bp, &remain);
+    if (kret)
+	return (kret);
+
     /* Now handle database context, if appropriate */
     if (context->db_context) {
 	kret = krb5_externalize_opaque(kcontext, KV5M_DB_CONTEXT,
@@ -462,7 +459,7 @@ krb5_context_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet *
 	/* Put the newly allocated data into the krb5_context
 	   structure where we're really keeping it these days.  */
 	if (osp)
-	    *context->os_context = *osp;
+	    context->os_context = *osp;
 	free(osp);
     }
 

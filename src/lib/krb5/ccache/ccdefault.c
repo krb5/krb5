@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/ccdefault.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,7 +45,7 @@ krb5_cc_default(krb5_context context, krb5_ccache *ccache)
 	if (!context || context->magic != KV5M_CONTEXT)
 		return KV5M_CONTEXT;
 	
-	os_ctx = context->os_context;
+	os_ctx = &context->os_context;
 	
 	return krb5_cc_resolve(context, krb5_cc_default_name(context), ccache);
 }

@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/ccdefname.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -261,7 +261,7 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
     
     if (!err) {
         /* free the old ccname and store the new one */
-        krb5_os_context os_ctx = context->os_context;
+        krb5_os_context os_ctx = &context->os_context;
         if (os_ctx->default_ccname) { free (os_ctx->default_ccname); }
         os_ctx->default_ccname = new_ccname;
         new_ccname = NULL;  /* don't free */
@@ -282,7 +282,7 @@ krb5_cc_default_name(krb5_context context)
     if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
     
     if (!err) {
-        os_ctx = context->os_context;
+        os_ctx = &context->os_context;
         
         if (os_ctx->default_ccname == NULL) {
             /* Default ccache name has not been set yet */

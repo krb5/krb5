@@ -1,7 +1,7 @@
 /*
  * lib/krb5/ccache/cc_file.c
  *
- * Copyright 1990,1991,1992,1993,1994,2000,2004 Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1992,1993,1994,2000,2004,2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Original stdio support copyright 1995 by Cygnus Support.
@@ -1205,7 +1205,7 @@ krb5_fcc_close_file (krb5_context context, krb5_fcc_data *data)
 static krb5_error_code
 krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 {
-    krb5_os_context os_ctx = (krb5_os_context)context->os_context;
+    krb5_os_context os_ctx = &context->os_context;
     krb5_fcc_data *data = (krb5_fcc_data *)id->data;
     krb5_ui_2 fcc_fvno;
     krb5_ui_2 fcc_flen;
