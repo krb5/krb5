@@ -172,6 +172,9 @@ verify_client_san(krb5_context context,
     krb5_principal *princs = NULL;
     krb5_principal *upns = NULL;
     int i;
+#ifdef DEBUG_SAN_INFO
+    char *client_string = NULL, *san_string;
+#endif
     
     retval = crypto_retrieve_cert_sans(context, plgctx->cryptoctx,
 				       reqctx->cryptoctx, plgctx->idctx,
@@ -201,8 +204,17 @@ verify_client_san(krb5_context context,
     }
 #endif
 
+#ifdef DEBUG_SAN_INFO
+    krb5_unparse_name(context, client, &client_string);
+#endif
     pkiDebug("%s: Checking pkinit sans\n", __FUNCTION__);
     for (i = 0; princs != NULL && princs[i] != NULL; i++) {
+#ifdef DEBUG_SAN_INFO
+	krb5_unparse_name(context, princs[i], &san_string);
+	pkiDebug("%s: Comparing client '%s' to pkinit san value '%s'\n",
+		 __FUNCTION__, client_string, san_string);
+	krb5_free_unparsed_name(context, san_string);
+#endif
 	if (krb5_principal_compare(context, princs[i], client)) {
 	    pkiDebug("%s: pkinit san match found\n", __FUNCTION__);
 	    *valid_san = 1;
@@ -225,6 +237,12 @@ verify_client_san(krb5_context context,
 
     pkiDebug("%s: Checking upn sans\n", __FUNCTION__);
     for (i = 0; upns[i] != NULL; i++) {
+#ifdef DEBUG_SAN_INFO
+	krb5_unparse_name(context, upns[i], &san_string);
+	pkiDebug("%s: Comparing client '%s' to upn san value '%s'\n",
+		 __FUNCTION__, client_string, san_string);
+	krb5_free_unparsed_name(context, san_string);
+#endif
 	if (krb5_principal_compare(context, upns[i], client)) {
 	    pkiDebug("%s: upn san match found\n", __FUNCTION__);
 	    *valid_san = 1;
@@ -254,6 +272,10 @@ out:
 	    krb5_free_principal(context, upns[i]);
 	free(upns);
     }
+#ifdef DEBUG_SAN_INFO
+    if (client_string != NULL)
+	krb5_free_unparsed_name(context, client_string);
+#endif
     pkiDebug("%s: returning retval %d, valid_san %d\n",
 	     __FUNCTION__, retval, *valid_san);
     return retval;
@@ -1040,6 +1062,10 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     pkinit_kdcdefault_integer(context, plgctx->realmname,
 			      "pkinit_dh_min_bits",
 			      0, &plgctx->opts->dh_min_bits);
+
+    pkinit_kdcdefault_boolean(context, plgctx->realmname,
+			      "pkinit_allow_upn",
+			      0, &plgctx->opts->allow_upn);
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
 			     "pkinit_eku_checking",
