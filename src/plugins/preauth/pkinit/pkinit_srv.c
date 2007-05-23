@@ -683,7 +683,7 @@ pkinit_server_return_padata(krb5_context context,
     }
 
     for(i = 0; i < request->nktypes; i++) {
-	enctype = request->ktype[0];
+	enctype = request->ktype[i];
 	if (!krb5_c_valid_enctype(enctype))
 	    continue;
 	else {
