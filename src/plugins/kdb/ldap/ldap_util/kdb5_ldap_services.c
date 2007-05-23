@@ -45,11 +45,17 @@
 
 #ifdef HAVE_EDIRECTORY
 
-krb5_error_code
+static krb5_error_code
+convert_realm_name2dn_list(char **list, const char *krbcontainer_loc);
+
+static krb5_error_code
 rem_service_entry_from_file(int argc,
 			    char *argv[],
 			    char *file_name,
 			    char *service_object);
+
+static void
+print_service_params(krb5_ldap_service_params *lserparams, int mask);
 
 extern char *yes;
 extern krb5_boolean db_inited;
