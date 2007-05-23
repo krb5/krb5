@@ -406,13 +406,19 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 
    Linux: Stub mutex routines exist, but pthread_once does not.
 
-   Solaris: In libc there's a pthread_once that doesn't seem to do
+   Solaris <10: In libc there's a pthread_once that doesn't seem to do
    anything.  Bleah.  But pthread_mutexattr_setrobust_np is defined
    only in libpthread.  However, some version of GNU libc (Red Hat's
    Fedora Core 5, reportedly) seems to have that function, but no
    declaration, so we'd have to declare it in order to test for its
    address.  We now have tests to see if pthread_once actually works,
    so stick with that for now.
+
+   Solaris 10: The real thread support now lives in libc, and
+   libpthread is just a filter object.  So we might as well use the
+   real functions unconditionally.  Since we haven't got a test for
+   this property yet, we use NO_WEAK_PTHREADS defined in aclocal.m4
+   depending on the OS type.
 
    IRIX 6.5 stub pthread support in libc is really annoying.  The
    pthread_mutex_lock function returns ENOSYS for a program not linked
@@ -428,7 +434,7 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    If we find a platform with non-functional stubs and no weak
    references, we may have to resort to some hack like dlsym on the
    symbol tables of the current process.  */
-#ifdef HAVE_PRAGMA_WEAK_REF
+#if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
 # pragma weak pthread_once
 # pragma weak pthread_mutex_lock
 # pragma weak pthread_mutex_unlock
@@ -460,11 +466,9 @@ extern int krb5int_pthread_loaded(void);
 # endif
 #endif
 
-#ifdef HAVE_PRAGMA_WEAK_REF
+#if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
-#endif
 
-#ifdef HAVE_PRAGMA_WEAK_REF
 /* Can't rely on useful stubs -- see above regarding Solaris.  */
 typedef struct {
     pthread_once_t o;
