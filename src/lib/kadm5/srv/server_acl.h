@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/srv/server_acl.h
  *
- * Copyright 1995-2004 by the Massachusetts Institute of Technology.
+ * Copyright 1995-2004, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,8 +45,6 @@
 #else	/* DEBUG */
 #define	DPRINT(l1, cl, al)
 #endif	/* DEBUG */
-#define	DLOG(l1, cl, msg)	if ((cl & l1) != 0)	\
-					com_err(programname, 0, msg)
 
 /*
  * Access control bits.
