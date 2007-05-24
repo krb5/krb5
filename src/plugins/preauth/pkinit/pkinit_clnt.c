@@ -1023,10 +1023,10 @@ pkinit_client_process(krb5_context context,
     if (processing_request) {
 	pkinit_client_profile(context, plgctx, reqctx, request);
 	pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
-	retval = pkinit_initialize_identity(context, reqctx->idopts,
+	retval = pkinit_identity_initialize(context, reqctx->idopts,
 					    reqctx->idctx);
 	if (retval) {
-	    pkiDebug("pkinit_initialize_identity returned %d (%s)\n",
+	    pkiDebug("pkinit_identity_initialize returned %d (%s)\n",
 		     retval, error_message(retval));
 	    return retval;
 	}

@@ -37,6 +37,14 @@
 #include <profile.h>
 #include "pkinit_accessor.h"
 
+#ifndef WITHOUT_PKCS11
+#include <opensc/pkcs11.h>
+
+#define PKCS11_MODNAME "opensc-pkcs11.so"
+#define PK_SIGLEN_GUESS 1000
+#define PK_NOSLOT 999999
+#endif
+
 #define DH_PROTOCOL     1
 #define RSA_PROTOCOL    2
 
@@ -54,6 +62,16 @@
 #endif
 
 extern int longhorn;	    /* XXX Talking to a Longhorn server? */
+
+#define IDTYPE_FILE     1
+#define IDTYPE_DIR      2
+#define IDTYPE_PKCS11   3
+#define IDTYPE_ENVVAR   4
+#define IDTYPE_PKCS12   5
+
+#define CATYPE_ANCHORS          1
+#define CATYPE_INTERMEDIATES    2
+#define CATYPE_CRLS             3
 
 /* Macros to deal with converting between various data types... */
 #define PADATA_TO_KRB5DATA(pad, k5d) \
@@ -147,6 +165,16 @@ typedef struct _pkinit_identity_opts {
     char **crls;
     char *ocsp;
     char *dn_mapping_file;
+    int  idtype;
+    char *cert_filename;
+    char *key_filename;
+#ifndef WITHOUT_PKCS11
+    char *p11_module_name;
+    CK_SLOT_ID slotid;
+    char *token_label;
+    char *cert_id_string;
+    char *cert_label;
+#endif
 } pkinit_identity_opts;
 
 
@@ -215,7 +243,7 @@ void pkinit_fini_identity_opts(pkinit_identity_opts *idopts);
 krb5_error_code pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
 					 pkinit_identity_opts **dest_opts);
 
-krb5_error_code pkinit_initialize_identity
+krb5_error_code pkinit_identity_initialize
 	(krb5_context context,				/* IN */
 	 pkinit_identity_opts *idopts,			/* IN */
 	 pkinit_identity_crypto_context id_cryptoctx);	/* IN/OUT */

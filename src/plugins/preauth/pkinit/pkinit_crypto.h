@@ -349,19 +349,39 @@ krb5_error_code create_issuerAndSerial
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	unsigned char **kdcId_buf,			/* OUT
 		    receives DER encoded kdcPKId */
-	unsigned int *kdcId_len);				/* OUT
+	unsigned int *kdcId_len);			/* OUT
 		    receives length of encoded kdcPKId */
 
 /*
- * process identity options specified via the command-line
- * or config file and populate the crypto-specific identity
- * information.
+ * process the values from idopts and obtain the cert(s)
+ * specified by those options, populating the id_cryptoctx.
  */
-krb5_error_code pkinit_process_identity_option
+krb5_error_code crypto_load_certs
 	(krb5_context context,				/* IN */
-	int attr,					/* IN */
-	const char *value,				/* IN */
-	pkinit_identity_crypto_context id_cryptoctx);	/* IN/OUT */ 
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_opts *idopts,			/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	const char *principal,				/* IN */
+	krb5_get_init_creds_opt *opt);			/* IN */
+
+/*
+ * process the values from idopts and obtain the anchor or
+ * intermediate certificates, or crls specified by idtype,
+ * catype, and id
+ */
+krb5_error_code crypto_load_cas_and_crls
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_opts *idopts,			/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	int idtype,					/* IN 
+		    defines the storage type (file, directory, etc) */
+	int catype,					/* IN
+		    defines the ca type (anchor, intermediate, crls) */
+	char *id);					/* IN
+		    defines the location (filename, directory name, etc) */
 
 krb5_error_code pkinit_get_kdc_cert
 	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,

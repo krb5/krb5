@@ -47,15 +47,7 @@
 
 #include "pkinit.h"
 
-#ifndef WITHOUT_PKCS11
-#include <opensc/pkcs11.h>
-#endif
-
 #define DN_BUF_LEN  256
-
-#define PKCS11_MODNAME "opensc-pkcs11.so"
-#define PK_SIGLEN_GUESS 1000
-#define PK_NOSLOT 999999
 
 struct _pkinit_identity_crypto_context {
     STACK_OF(X509) *my_certs;   /* available user certs */
@@ -67,18 +59,17 @@ struct _pkinit_identity_crypto_context {
     int pkcs11_method;
     krb5_prompter_fct prompter;
     void *prompter_data;
-    char *cert_filename;
-    char *key_filename;
 #ifndef WITHOUT_PKCS11
     char *p11_module_name;
-    void *p11_module;
     CK_SLOT_ID slotid;
     char *token_label;
+    char *cert_label;
+    /* These are crypto-specific */
+    void *p11_module;
     CK_SESSION_HANDLE session;
     CK_FUNCTION_LIST_PTR p11;
     CK_BYTE_PTR cert_id;
     int cert_id_len;
-    char *cert_label;
     CK_MECHANISM_TYPE mech;
 #endif
 };
@@ -107,8 +98,8 @@ struct _pkinit_req_crypto_context {
 struct _pkinit_cred_info {
     X509 *cert;
     EVP_PKEY *key;
-    char *cert_label;
-    int label_len;
+    CK_BYTE_PTR cert_id;
+    int cert_id_len;
 };
 typedef struct _pkinit_cred_info * pkinit_cred_info;
 
@@ -201,21 +192,6 @@ CK_RV pkinit_C_Decrypt
 		CK_BYTE_PTR pData, CK_ULONG_PTR pulDataLen);
 #endif
 
-static krb5_error_code pkinit_get_client_cert
-	(krb5_context context,
-		pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal,
-		krb5_get_init_creds_opt *opt);
-
-static krb5_error_code pkinit_get_client_cert_pkcs11
-	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal,
-		krb5_get_init_creds_opt *opt,
-		pkinit_cred_info *creds);
 static krb5_error_code pkinit_sign_data_pkcs11
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,
 		unsigned char *data, unsigned int data_len,
@@ -225,22 +201,6 @@ static krb5_error_code pkinit_decode_data_pkcs11
 		unsigned char *data, unsigned int data_len,
 		unsigned char **decoded_data, unsigned int *decoded_data_len);
 #endif	/* WITHOUT_PKCS11 */
-
-static krb5_error_code pkinit_get_client_cert_pkcs12
-	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal,
-		krb5_get_init_creds_opt *opt, 
-		pkinit_cred_info *creds);
-
-static krb5_error_code pkinit_get_client_cert_fs
-	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal,
-		krb5_get_init_creds_opt *opt, 
-		pkinit_cred_info *creds);
 
 static krb5_error_code pkinit_match_cert
 	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
@@ -260,14 +220,6 @@ static krb5_error_code pkinit_decode_data_fs
 
 static krb5_error_code der_decode_data
 	(unsigned char *, long, unsigned char **, long *);
-
-static krb5_error_code load_trusted_certifiers
-	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls, 
-		int return_crls, char *filename);
-
-static krb5_error_code load_trusted_certifiers_dir
-	(STACK_OF(X509) **trusted_CAs, STACK_OF(X509_CRL) **crls,
-		int return_crls, char *dirname);
 
 static krb5_error_code
 create_krb5_invalidCertificates(krb5_context context,
