@@ -47,7 +47,7 @@ int longhorn = 0;	/* XXX Talking to a Longhorn server? */
 
 krb5_error_code pkinit_client_process
 	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *opt,
+		krb5_get_init_creds_opt *gic_opt,
 		preauth_get_client_data_proc get_data_proc,
 		struct _krb5_preauth_client_rock *rock,
 		krb5_kdc_req * request, krb5_data *encoded_request_body,
@@ -59,7 +59,7 @@ krb5_error_code pkinit_client_process
 
 krb5_error_code pkinit_client_tryagain
 	(krb5_context context, void *plugin_context, void *request_context,
-		krb5_get_init_creds_opt *opt,
+		krb5_get_init_creds_opt *gic_opt,
 		preauth_get_client_data_proc get_data_proc,
 		struct _krb5_preauth_client_rock *rock,
 		krb5_kdc_req * request, krb5_data *encoded_request_body,
@@ -81,7 +81,7 @@ krb5_error_code pa_pkinit_gen_req
 		pkinit_req_context reqctx, krb5_kdc_req * request,
 		krb5_pa_data * in_padata, krb5_pa_data *** out_padata,
 		krb5_prompter_fct prompter, void *prompter_data,
-		krb5_get_init_creds_opt *opt);
+		krb5_get_init_creds_opt *gic_opt);
 
 krb5_error_code pkinit_as_req_create
 	(krb5_context context, pkinit_context plgctx,
@@ -120,7 +120,7 @@ pa_pkinit_gen_req(krb5_context context,
 		  krb5_pa_data *** out_padata,
 		  krb5_prompter_fct prompter,
 		  void *prompter_data,
-		  krb5_get_init_creds_opt *opt)
+		  krb5_get_init_creds_opt *gic_opt)
 {
 
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
@@ -130,7 +130,6 @@ pa_pkinit_gen_req(krb5_context context,
     krb5_ui_4 nonce = 0;
     krb5_checksum cksum;
     krb5_data *der_req = NULL;
-    char *server_principal = NULL;
     krb5_pa_data **return_pa_data = NULL;
 
     cksum.contents = NULL;
@@ -144,16 +143,12 @@ pa_pkinit_gen_req(krb5_context context,
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
-    /* XXX Does this belong elsewhere ? */
-    retval = krb5_unparse_name(context, request->server, &server_principal);
-    if (retval)
-	return retval;
-
-    retval = pkinit_get_kdc_cert(context, plgctx->cryptoctx,
-	reqctx->cryptoctx, reqctx->idctx, server_principal, opt);
-    free(server_principal);
-    if (retval)
+    retval = pkinit_get_kdc_cert(context, plgctx->cryptoctx, reqctx->cryptoctx,
+				 reqctx->idctx, request->server);
+    if (retval) {
+	pkiDebug("pkinit_get_kdc_cert returned %d\n", retval);
 	goto cleanup;
+    }
 
     /* checksum of the encoded KDC-REQ-BODY */
     retval = encode_krb5_kdc_req_body(request, &der_req);
@@ -965,7 +960,7 @@ krb5_error_code
 pkinit_client_process(krb5_context context,
 		      void *plugin_context,
 		      void *request_context,
-		      krb5_get_init_creds_opt *opt,
+		      krb5_get_init_creds_opt *gic_opt,
 		      preauth_get_client_data_proc get_data_proc,
 		      struct _krb5_preauth_client_rock *rock,
 		      krb5_kdc_req *request,
@@ -1023,8 +1018,9 @@ pkinit_client_process(krb5_context context,
     if (processing_request) {
 	pkinit_client_profile(context, plgctx, reqctx, request);
 	pkinit_identity_set_prompter(reqctx->idctx, prompter, prompter_data);
-	retval = pkinit_identity_initialize(context, reqctx->idopts,
-					    reqctx->idctx);
+	retval = pkinit_identity_initialize(context, plgctx->cryptoctx,
+					    reqctx->cryptoctx, reqctx->idopts,
+					    reqctx->idctx, 1, request->client);
 	if (retval) {
 	    pkiDebug("pkinit_identity_initialize returned %d (%s)\n",
 		     retval, error_message(retval));
@@ -1032,7 +1028,7 @@ pkinit_client_process(krb5_context context,
 	}
 	retval = pa_pkinit_gen_req(context, plgctx, reqctx, request,
 				   in_padata, out_padata, prompter,
-				   prompter_data, opt);
+				   prompter_data, gic_opt);
     } else {
 	/*
 	 * Get the enctype of the reply.
@@ -1061,7 +1057,7 @@ krb5_error_code
 pkinit_client_tryagain(krb5_context context,
 		       void *plugin_context,
 		       void *request_context,
-		       krb5_get_init_creds_opt *opt,
+		       krb5_get_init_creds_opt *gic_opt,
 		       preauth_get_client_data_proc get_data_proc,
 		       struct _krb5_preauth_client_rock *rock,
 		       krb5_kdc_req *request,
@@ -1141,7 +1137,7 @@ pkinit_client_tryagain(krb5_context context,
 
     if (do_again) {
 	retval = pa_pkinit_gen_req(context, plgctx, reqctx, request, in_padata,
-				   out_padata, prompter, prompter_data, opt);
+				   out_padata, prompter, prompter_data, gic_opt);
 	if (retval)
 	    goto cleanup;
     }
@@ -1421,7 +1417,7 @@ handle_gic_opt(krb5_context context,
 static krb5_error_code
 pkinit_client_gic_opt(krb5_context context,
 		      void *plugin_context,
-		      krb5_get_init_creds_opt *opt,
+		      krb5_get_init_creds_opt *gic_opt,
 		      const char *attr,
 		      const char *value)
 {

@@ -48,8 +48,20 @@
 #include "pkinit.h"
 
 #define DN_BUF_LEN  256
+#define MAX_CREDS_ALLOWED 20
+
+struct _pkinit_cred_info {
+    X509 *cert;
+    EVP_PKEY *key;
+#ifndef WITHOUT_PKCS11
+    CK_BYTE_PTR cert_id;
+    int cert_id_len;
+#endif
+};
+typedef struct _pkinit_cred_info * pkinit_cred_info;
 
 struct _pkinit_identity_crypto_context {
+    pkinit_cred_info creds[MAX_CREDS_ALLOWED+1];
     STACK_OF(X509) *my_certs;   /* available user certs */
     int cert_index;             /* cert to use out of available certs*/
     EVP_PKEY *my_key;           /* available user keys if in filesystem */
@@ -95,13 +107,24 @@ struct _pkinit_req_crypto_context {
     DH *dh;
 };
 
-struct _pkinit_cred_info {
-    X509 *cert;
-    EVP_PKEY *key;
-    CK_BYTE_PTR cert_id;
-    int cert_id_len;
+#define CERT_MAGIC 0x53534c43
+struct _pkinit_cert_data {
+    unsigned int magic;
+    pkinit_plg_crypto_context plgctx;
+    pkinit_req_crypto_context reqctx;
+    pkinit_identity_crypto_context idctx;
+    pkinit_cred_info cred;
+    unsigned int index;	    /* Index of this cred in the creds[] array */
 };
-typedef struct _pkinit_cred_info * pkinit_cred_info;
+
+#define ITER_MAGIC 0x53534c49
+struct _pkinit_cert_iter_data {
+    unsigned int magic;
+    pkinit_plg_crypto_context plgctx;
+    pkinit_req_crypto_context reqctx;
+    pkinit_identity_crypto_context idctx;
+    unsigned int index;
+};
 
 static void openssl_init(void);
 
@@ -201,13 +224,6 @@ static krb5_error_code pkinit_decode_data_pkcs11
 		unsigned char *data, unsigned int data_len,
 		unsigned char **decoded_data, unsigned int *decoded_data_len);
 #endif	/* WITHOUT_PKCS11 */
-
-static krb5_error_code pkinit_match_cert
-	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal, krb5_get_init_creds_opt *opt,
-		pkinit_cred_info *creds);
 
 static krb5_error_code pkinit_sign_data_fs
 	(krb5_context context, pkinit_identity_crypto_context id_cryptoctx,

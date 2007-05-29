@@ -1248,7 +1248,6 @@ asn1_error_code asn1_decode_trusted_ca(asn1buf *buf, krb5_trusted_ca *val)
 {
     setup();
     { begin_choice();
-      fprintf(stderr, "%s: ********************** The CHOICE is %d **********************\n", __FUNCTION__, tagnum);
       if (tagnum == choice_trusted_cas_principalName) {
 	val->choice = choice_trusted_cas_principalName;
 	asn1_decode_krb5_principal_name(&subbuf, &(val->u.principalName));

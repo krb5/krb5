@@ -52,6 +52,57 @@ enum cms_msg_types {
 };
 
 /*
+ * storage types for identity information
+ */
+#define IDTYPE_FILE     1
+#define IDTYPE_DIR      2
+#define IDTYPE_PKCS11   3
+#define IDTYPE_ENVVAR   4
+#define IDTYPE_PKCS12   5
+
+/*
+ * ca/crl types
+ */
+#define CATYPE_ANCHORS          1
+#define CATYPE_INTERMEDIATES    2
+#define CATYPE_CRLS             3
+
+/*
+ * The following represent Key Usage values that we
+ * may care about in a certificate
+ */
+#define PKINIT_KU_DIGITALSIGNATURE      0x80000000
+#define PKINIT_KU_KEYENCIPHERMENT       0x40000000
+
+/*
+ * The following represent Extended Key Usage oid values
+ * that we may care about in a certificate
+ */
+#define PKINIT_EKU_PKINIT               0x80000000
+#define PKINIT_EKU_MSSCLOGIN            0x40000000
+#define PKINIT_EKU_CLIENTAUTH           0x20000000
+#define PKINIT_EKU_EMAILPROTECTION      0x10000000
+
+
+/* Handle to cert, opaque above crypto interface */
+typedef struct _pkinit_cert_info *pkinit_cert_handle;
+
+/* Handle to cert iteration information, opaque above crypto interface */
+typedef struct _pkinit_cert_iter_info *pkinit_cert_iter_handle;
+
+#define PKINIT_ITER_NO_MORE	0x11111111  /* XXX */
+
+typedef struct _pkinit_cert_matching_data {
+    pkinit_cert_handle ch;  /* cert handle for this certificate */
+    char *subject_dn;	    /* rfc2253-style subject name string */
+    char *issuer_dn;	    /* rfc2253-style issuer name string */
+    unsigned int ku_bits;   /* key usage information */
+    unsigned int eku_bits;  /* extended key usage information */
+    krb5_principal *sans;   /* Null-terminated array of subject alternative
+			       name info (pkinit and ms-upn) */
+} pkinit_cert_matching_data;
+
+/*
  * Functions to initialize and cleanup crypto contexts
  */
 krb5_error_code pkinit_init_plg_crypto(pkinit_plg_crypto_context *);
@@ -362,8 +413,90 @@ krb5_error_code crypto_load_certs
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_opts *idopts,			/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
-	const char *principal,				/* IN */
-	krb5_get_init_creds_opt *opt);			/* IN */
+	krb5_principal princ);				/* IN */
+
+/*
+ * Free up information held from crypto_load_certs()
+ */
+krb5_error_code crypto_free_cert_info
+	(krb5_context context,
+	pkinit_plg_crypto_context plg_cryptoctx,
+	pkinit_req_crypto_context req_cryptoctx,
+	pkinit_identity_crypto_context id_cryptoctx);
+
+
+/*
+ * Get number of certificates available after crypto_load_certs()
+ */
+krb5_error_code crypto_cert_get_count
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
+	int *cert_count);				/* OUT */
+
+/*
+ * Begin iteration over the certs loaded in crypto_load_certs()
+ */
+krb5_error_code crypto_cert_iteration_begin
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
+	pkinit_cert_iter_handle *iter_handle);		/* OUT */
+
+/*
+ * End iteration over the certs loaded in crypto_load_certs()
+ */
+krb5_error_code crypto_cert_iteration_end
+	(krb5_context context,				/* IN */
+	pkinit_cert_iter_handle iter_handle);		/* IN */
+
+/*
+ * Get next certificate handle
+ */
+krb5_error_code crypto_cert_iteration_next
+	(krb5_context context,				/* IN */
+	pkinit_cert_iter_handle iter_handle,		/* IN */
+	pkinit_cert_handle *cert_handle);		/* OUT */
+
+/*
+ * Release cert handle
+ */
+krb5_error_code crypto_cert_release
+	(krb5_context context,				/* IN */
+	pkinit_cert_handle cert_handle);		/* IN */
+
+/*
+ * Get certificate matching information
+ */
+krb5_error_code crypto_cert_get_matching_data
+	(krb5_context context,				/* IN */
+	pkinit_cert_handle cert_handle,			/* IN */
+	pkinit_cert_matching_data **ret_data);		/* OUT */
+
+/*
+ * Free certificate information
+ */
+krb5_error_code crypto_cert_free_matching_data
+	(krb5_context context,				/* IN */
+	pkinit_cert_matching_data *data);		/* IN */
+
+/*
+ * Make the given certificate "the chosen one"
+ */
+krb5_error_code crypto_cert_select
+	(krb5_context context,				/* IN */
+	pkinit_cert_matching_data *data);		/* IN */
+
+/*
+ * Select the default certificate as "the chosen one"
+ */
+krb5_error_code crypto_cert_select_default
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_crypto_context id_cryptoctx);	/* IN */
 
 /*
  * process the values from idopts and obtain the anchor or
@@ -383,11 +516,16 @@ krb5_error_code crypto_load_cas_and_crls
 	char *id);					/* IN
 		    defines the location (filename, directory name, etc) */
 
+/*
+ * on the client, obtain the kdc's certificate to include
+ * in a request
+ */
 krb5_error_code pkinit_get_kdc_cert
-	(krb5_context context, pkinit_plg_crypto_context plg_cryptoctx,
-		pkinit_req_crypto_context req_cryptoctx,
-		pkinit_identity_crypto_context id_cryptoctx,
-		const char *principal, krb5_get_init_creds_opt *opt);
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	krb5_principal princ);				/* IN */
 
 /*
  * this function creates edata that contains TD-DH-PARAMETERS

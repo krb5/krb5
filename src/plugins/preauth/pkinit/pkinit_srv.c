@@ -657,6 +657,8 @@ pkinit_server_return_padata(krb5_context context,
     pkinit_kdc_context plgctx;
     pkinit_kdc_req_context reqctx;
 
+    int fixed_keypack = 0;
+
     *send_pa = NULL;
     if (padata == NULL || padata->length <= 0 || padata->contents == NULL)
 	return 0;
@@ -814,49 +816,66 @@ pkinit_server_return_padata(krb5_context context,
 	    goto cleanup;
 	}
 
-	switch ((int)padata->pa_type) {
-	    case KRB5_PADATA_PK_AS_REQ:
-		init_krb5_reply_key_pack(&key_pack);
-		if (key_pack == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
-		/* retrieve checksums for a given enctype of the reply key */
-		retval = krb5_c_keyed_checksum_types(context,
-		    encrypting_key->enctype, &num_types, &cksum_types);
-		if (retval)
-		    goto cleanup;
+	/* check if PA_TYPE of 132 is present which means the client is
+	 * requesting that a checksum is send back instead of the nonce
+	 */
+	for (i = 0; request->padata[i] != NULL; i++) {
+	    pkiDebug("%s: Checking pa_type 0x%08x\n",
+		     __FUNCTION__, request->padata[i]->pa_type);
+	    if (request->padata[i]->pa_type == 132
+		/* XXX The asn1 encoding from Apple seems to be incorrect? */
+	        ||  request->padata[i]->pa_type == 0xffffff84) 
+		fixed_keypack = 1;
+	}
+	pkiDebug("%s: return checksum instead of nonce = %d\n",
+		 __FUNCTION__, fixed_keypack);
 
-		/* pick the first of acceptable enctypes for the checksum */
-		retval = krb5_c_make_checksum(context, cksum_types[0],
+	/* if this is an RFC reply or draft9 client requested a checksum 
+	 * in the reply instead of the nonce, create an RFC-style keypack
+	 */
+	if ((int)padata->pa_type == KRB5_PADATA_PK_AS_REQ || fixed_keypack) {
+	    init_krb5_reply_key_pack(&key_pack);
+	    if (key_pack == NULL) {
+		retval = ENOMEM;
+		goto cleanup;
+	    }
+	    /* retrieve checksums for a given enctype of the reply key */
+	    retval = krb5_c_keyed_checksum_types(context,
+		encrypting_key->enctype, &num_types, &cksum_types);
+	    if (retval)
+		goto cleanup;
+
+	    /* pick the first of acceptable enctypes for the checksum */
+	    retval = krb5_c_make_checksum(context, cksum_types[0],
 		    encrypting_key, KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
 		    req_pkt, &key_pack->asChecksum);
-		if (retval) {
-		    pkiDebug("unable to calculate AS REQ checksum\n");
-		    goto cleanup;
-		}
+	    if (retval) {
+		pkiDebug("unable to calculate AS REQ checksum\n");
+		goto cleanup;
+	    }
 #ifdef DEBUG_CKSUM
-		pkiDebug("calculating checksum on buf size = %d\n",
-			req_pkt->length);
-		print_buffer(req_pkt->data, req_pkt->length);
-		pkiDebug("checksum size = %d\n",
-			key_pack->asChecksum.length);
-		print_buffer(key_pack->asChecksum.contents,
-			     key_pack->asChecksum.length);
-		pkiDebug("encrypting key (%d)\n", encrypting_key->length);
-		print_buffer(encrypting_key->contents, encrypting_key->length);
+	    pkiDebug("calculating checksum on buf size = %d\n", req_pkt->length);
+	    print_buffer(req_pkt->data, req_pkt->length);
+	    pkiDebug("checksum size = %d\n", key_pack->asChecksum.length);
+	    print_buffer(key_pack->asChecksum.contents, 
+			 key_pack->asChecksum.length);
+	    pkiDebug("encrypting key (%d)\n", encrypting_key->length);
+	    print_buffer(encrypting_key->contents, encrypting_key->length);
 #endif
 
-		krb5_copy_keyblock_contents(context, encrypting_key,
-					    &key_pack->replyKey);
+	    krb5_copy_keyblock_contents(context, encrypting_key,
+					&key_pack->replyKey);
 
-		retval = k5int_encode_krb5_reply_key_pack(key_pack,
-						    &encoded_key_pack);
-		if (retval) {
-		    pkiDebug("failed to encode reply_key_pack\n");
-		    goto cleanup;
-		}
+	    retval = k5int_encode_krb5_reply_key_pack(key_pack,
+						      &encoded_key_pack);
+	    if (retval) {
+		pkiDebug("failed to encode reply_key_pack\n");
+		goto cleanup;
+	    }
+	}
 
+	switch ((int)padata->pa_type) {
+	    case KRB5_PADATA_PK_AS_REQ:
 		rep->choice = choice_pa_pk_as_rep_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
 		    reqctx->cryptoctx, plgctx->idctx, padata->pa_type, 1, 
@@ -866,21 +885,26 @@ pkinit_server_return_padata(krb5_context context,
 		break;
 	    case KRB5_PADATA_PK_AS_REP_OLD:
 	    case KRB5_PADATA_PK_AS_REQ_OLD:
-		init_krb5_reply_key_pack_draft9(&key_pack9);
-		if (key_pack9 == NULL) {
-		    retval = ENOMEM;
-		    goto cleanup;
-		}
-		key_pack9->nonce = reqctx->rcv_auth_pack9->pkAuthenticator.nonce;
-		krb5_copy_keyblock_contents(context, encrypting_key,
-					    &key_pack9->replyKey);
+		/* if the request is from the broken draft9 client that
+		 * expects back a nonce, create it now 
+		 */
+		if (!fixed_keypack) {
+		    init_krb5_reply_key_pack_draft9(&key_pack9);
+		    if (key_pack9 == NULL) {
+			retval = ENOMEM;
+			goto cleanup;
+		    }
+		    key_pack9->nonce = reqctx->rcv_auth_pack9->pkAuthenticator.nonce;
+		    krb5_copy_keyblock_contents(context, encrypting_key,
+						&key_pack9->replyKey);
 
-		retval = k5int_encode_krb5_reply_key_pack_draft9(key_pack9,
+		    retval = k5int_encode_krb5_reply_key_pack_draft9(key_pack9,
 							   &encoded_key_pack);
-		if (retval) {
-		    pkiDebug("failed to encode reply_key_pack\n");
-		    goto cleanup;
-		}
+		    if (retval) {
+			pkiDebug("failed to encode reply_key_pack\n");
+			goto cleanup;
+		    }
+		} 
 
 		rep9->choice = choice_pa_pk_as_rep_draft9_encKeyPack;
 		retval = cms_envelopeddata_create(context, plgctx->cryptoctx,
@@ -982,7 +1006,10 @@ pkinit_server_return_padata(krb5_context context,
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 	    free_krb5_pa_pk_as_req_draft9(&reqp9);
 	    free_krb5_pa_pk_as_rep_draft9(&rep9);
-	    free_krb5_reply_key_pack_draft9(&key_pack9);
+	    if (!fixed_keypack)
+		free_krb5_reply_key_pack_draft9(&key_pack9);
+	    else
+		free_krb5_reply_key_pack(&key_pack);
 	    break;
     }
 
@@ -1162,7 +1189,8 @@ pkinit_server_plugin_init_realm(krb5_context context, const char *realmname,
     if (retval)
 	goto errout;
 
-    retval = pkinit_identity_initialize(context, plgctx->idopts, plgctx->idctx);
+    retval = pkinit_identity_initialize(context, plgctx->cryptoctx, NULL,
+					plgctx->idopts, plgctx->idctx, 0, NULL);
     if (retval)
 	goto errout;
 

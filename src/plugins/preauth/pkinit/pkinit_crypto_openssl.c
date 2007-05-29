@@ -164,8 +164,6 @@ unsigned char pkinit_4096_dhprime[4096/8] = {
 
 static int pkinit_oids_refs = 0;
 
-#define MAX_CREDS_ALLOWED 20
-
 krb5_error_code
 pkinit_init_plg_crypto(pkinit_plg_crypto_context *cryptoctx) {
 
@@ -434,7 +432,10 @@ static krb5_error_code
 pkinit_init_certs(pkinit_identity_crypto_context ctx)
 {
     krb5_error_code retval = ENOMEM;
+    int i;
 
+    for (i = 0; i < MAX_CREDS_ALLOWED; i++)
+	ctx->creds[i] = NULL;
     ctx->my_certs = NULL;
     ctx->cert_index = 0;
     ctx->my_key = NULL;
@@ -3343,8 +3344,7 @@ pkinit_get_kdc_cert(krb5_context context,
 		    pkinit_plg_crypto_context plg_cryptoctx,
 		    pkinit_req_crypto_context req_cryptoctx,
 		    pkinit_identity_crypto_context id_cryptoctx,
-		    const char *principal,
-		    krb5_get_init_creds_opt *opt)
+		    krb5_principal princ)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
 
@@ -3359,9 +3359,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
 			  pkinit_req_crypto_context req_cryptoctx,
 			  pkinit_identity_opts *idopts,
 			  pkinit_identity_crypto_context id_cryptoctx,
-			  const char *principal,
-			  krb5_get_init_creds_opt *opt,
-			  pkinit_cred_info *creds)
+			  krb5_principal princ)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     X509 *x = NULL;
@@ -3438,14 +3436,16 @@ pkinit_get_certs_pkcs12(krb5_context context,
 	    goto cleanup;
 	}
     }
-    creds[0] = malloc(sizeof(struct _pkinit_cred_info));
-    if (creds[0] == NULL)
+    id_cryptoctx->creds[0] = malloc(sizeof(struct _pkinit_cred_info));
+    if (id_cryptoctx->creds[0] == NULL)
 	goto cleanup;
-    creds[0]->cert = x;
-    creds[0]->cert_id = NULL;
-    creds[0]->cert_id_len = 0;
-    creds[0]->key = y;
-    creds[1] = NULL;
+    id_cryptoctx->creds[0]->cert = x;
+#ifndef WITHOUT_PKCS11
+    id_cryptoctx->creds[0]->cert_id = NULL;
+    id_cryptoctx->creds[0]->cert_id_len = 0;
+#endif
+    id_cryptoctx->creds[0]->key = y;
+    id_cryptoctx->creds[1] = NULL;
 
     retval = 0;
 
@@ -3462,54 +3462,40 @@ cleanup:
 }
 
 static krb5_error_code
-pkinit_get_certs_fs(krb5_context context,
-			  pkinit_plg_crypto_context plg_cryptoctx,
-			  pkinit_req_crypto_context req_cryptoctx,
-			  pkinit_identity_opts *idopts,
-			  pkinit_identity_crypto_context id_cryptoctx,
-			  const char *principal,
-			  krb5_get_init_creds_opt *opt,
-			  pkinit_cred_info *creds)
+pkinit_load_fs_cert_and_key(krb5_context context,
+			    pkinit_identity_crypto_context id_cryptoctx,
+			    char *certname,
+			    char *keyname,
+			    int cindex)
 {
-    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
+    krb5_error_code retval = ENOMEM;
     X509 *x = NULL;
     EVP_PKEY *y = NULL;
 
-    if (idopts->cert_filename == NULL) {
-	pkiDebug("%s: failed to get user's cert location\n", __FUNCTION__);
-	goto cleanup;
-    }
-
-    if (idopts->key_filename == NULL) {
-	pkiDebug("%s: failed to get user's private key location\n", __FUNCTION__);
-	goto cleanup;
-    }
-
     /* load the certificate */
-    if ((x = get_cert(idopts->cert_filename)) == NULL) {
-	pkiDebug("failed to load user's certificate from '%s'\n",
-		 idopts->cert_filename);
+    x = get_cert(certname);
+    if (x == NULL) {
+	pkiDebug("failed to load user's certificate from '%s'\n", certname);
 	goto cleanup;
     }
-    else {
-	/* add the private key */
-	if ((y = get_key(idopts->key_filename)) == NULL) {
-	    pkiDebug("failed to load user's private key from '%s'\n",
-		     idopts->key_filename);
-	    goto cleanup;
-	}
+    y = get_key(keyname);
+    if (y == NULL) {
+	pkiDebug("failed to load user's private key from '%s'\n", keyname);
+	goto cleanup;
     }
 
-    creds[0] = malloc(sizeof(struct _pkinit_cred_info));
-    if (creds[0] == NULL)
+    id_cryptoctx->creds[cindex] = malloc(sizeof(struct _pkinit_cred_info));
+    if (id_cryptoctx->creds[cindex] == NULL)
 	goto cleanup;
-    creds[0]->cert = x;
-    creds[0]->cert_id = NULL;
-    creds[0]->cert_id_len = 0;
-    creds[0]->key = y;
-    creds[1] = NULL;
+    id_cryptoctx->creds[cindex]->cert = x;
+#ifndef WITHOUT_PKCS11
+    id_cryptoctx->creds[cindex]->cert_id = NULL;
+    id_cryptoctx->creds[cindex]->cert_id_len = 0;
+#endif
+    id_cryptoctx->creds[cindex]->key = y;
+    id_cryptoctx->creds[cindex+1] = NULL;
 
-retval = 0;
+    retval = 0;
 
 cleanup:
     if (retval) {
@@ -3521,6 +3507,120 @@ cleanup:
     return retval;
 }
 
+static krb5_error_code
+pkinit_get_certs_fs(krb5_context context,
+			  pkinit_plg_crypto_context plg_cryptoctx,
+			  pkinit_req_crypto_context req_cryptoctx,
+			  pkinit_identity_opts *idopts,
+			  pkinit_identity_crypto_context id_cryptoctx,
+			  krb5_principal princ)
+{
+    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
+
+    if (idopts->cert_filename == NULL) {
+	pkiDebug("%s: failed to get user's cert location\n", __FUNCTION__);
+	goto cleanup;
+    }
+
+    if (idopts->key_filename == NULL) {
+	pkiDebug("%s: failed to get user's private key location\n",
+		 __FUNCTION__);
+	goto cleanup;
+    }
+
+    retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
+					 idopts->cert_filename,
+					 idopts->key_filename, 0);
+cleanup:
+    return retval;
+}
+
+static krb5_error_code
+pkinit_get_certs_dir(krb5_context context,
+		     pkinit_plg_crypto_context plg_cryptoctx,
+		     pkinit_req_crypto_context req_cryptoctx,
+		     pkinit_identity_opts *idopts,
+		     pkinit_identity_crypto_context id_cryptoctx,
+		     krb5_principal princ)
+{
+    krb5_error_code retval = ENOMEM;
+    DIR *d = NULL;
+    struct dirent *dentry = NULL;
+    char certname[1024];
+    char keyname[1024];
+    int i = 0, len;
+    char *dirname, *suf;
+
+    if (idopts->cert_filename == NULL) {
+	pkiDebug("%s: failed to get user's certificate directory location\n",
+		 __FUNCTION__);
+	return ENOENT;
+    }
+
+    dirname = idopts->cert_filename;
+    d = opendir(dirname);
+    if (d == NULL)
+	return errno;
+
+    /*
+     * We'll assume that certs are named XXX.crt and the corresponding
+     * key is named XXX.key
+     */
+    while ((i < MAX_CREDS_ALLOWED) &&  (dentry = readdir(d)) != NULL) {
+	/* Ignore subdirectories and anything starting with a dot */
+#ifdef DT_DIR
+	if (dentry->d_type == DT_DIR)
+	    continue;
+#endif
+	if (dentry->d_name[0] == '.')
+	    continue;
+	len = strlen(dentry->d_name);
+	if (len < 5)
+	    continue;
+	suf = dentry->d_name + (len - 4);
+	if (strncmp(suf, ".crt", 4) != 0)
+	    continue;
+
+	/* Checked length */
+	if (strlen(dirname) + strlen(dentry->d_name) + 2 > sizeof(certname)) {
+	    pkiDebug("%s: Path too long -- directory '%s' and file '%s'\n",
+		     __FUNCTION__, dirname, dentry->d_name);
+	    continue;
+	}
+	snprintf(certname, sizeof(certname), "%s/%s", dirname, dentry->d_name);
+	snprintf(keyname, sizeof(keyname), "%s/%s", dirname, dentry->d_name);
+	len = strlen(keyname);
+	keyname[len - 3] = 'k';
+	keyname[len - 2] = 'e';
+	keyname[len - 1] = 'y';
+
+	retval = pkinit_load_fs_cert_and_key(context, id_cryptoctx,
+					     certname, keyname, i);
+	if (retval == 0) {
+	    pkiDebug("%s: Successfully loaded cert (and key) for %s\n",
+		     __FUNCTION__, dentry->d_name);
+	    i++;
+	}
+	else
+	    continue;
+    }
+
+    if (i == 0) {
+	pkiDebug("%s: No cert/key pairs found in directory '%s'\n",
+		 __FUNCTION__, idopts->cert_filename);
+	retval = ENOENT;
+	goto cleanup;
+    }
+
+    retval = 0;
+
+  cleanup:
+    if (d) 
+	closedir(d);
+
+    return retval;
+}
+
 #ifndef WITHOUT_PKCS11
 static krb5_error_code
 pkinit_get_certs_pkcs11(krb5_context context,
@@ -3528,9 +3628,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 			pkinit_req_crypto_context req_cryptoctx,
 			pkinit_identity_opts *idopts,
 			pkinit_identity_crypto_context id_cryptoctx,
-			const char *principal,
-			krb5_get_init_creds_opt *opt,
-			pkinit_cred_info *creds)
+			krb5_principal princ)
 {
 #ifdef PKINIT_USE_MECH_LIST
     CK_MECHANISM_TYPE_PTR mechp;
@@ -3546,10 +3644,6 @@ pkinit_get_certs_pkcs11(krb5_context context,
     int i, r;
     unsigned int nattrs;
     X509 *x = NULL;
-
-    if (principal == NULL) {
-	return KRB5_PRINC_NOMATCH;  /* XXX ??? */
-    }
 
     /* Copy stuff from idopts -> id_cryptoctx */
     if (idopts->p11_module_name != NULL) {
@@ -3630,8 +3724,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
     }
     free(mechp);
 
-    pkiDebug("got %d mechs; reading certs for '%s' from card\n",
-	     (int) count, principal);
+    pkiDebug("got %d mechs from card\n", (int) count);
 #endif
 
     cls = CKO_CERTIFICATE;
@@ -3673,7 +3766,7 @@ pkinit_get_certs_pkcs11(krb5_context context,
 	/* Look for x.509 cert */
 	if ((r = id_cryptoctx->p11->C_FindObjects(id_cryptoctx->session,
 		&obj, 1, &count)) != CKR_OK || count <= 0) {
-	    creds[i] = NULL;
+	    id_cryptoctx->creds[i] = NULL;
 	    break;
 	}
 
@@ -3718,13 +3811,13 @@ pkinit_get_certs_pkcs11(krb5_context context,
 	x = d2i_X509(NULL, &cp, (int) attrs[0].ulValueLen);
 	if (x == NULL)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
-	creds[i] = malloc(sizeof(struct _pkinit_cred_info));
-	if (creds[i] == NULL)
+	id_cryptoctx->creds[i] = malloc(sizeof(struct _pkinit_cred_info));
+	if (id_cryptoctx->creds[i] == NULL)
 	    return KRB5KDC_ERR_PREAUTH_FAILED;
-	creds[i]->cert = x;
-	creds[i]->key = NULL;
-	creds[i]->cert_id = cert_id;
-	creds[i]->cert_id_len = attrs[1].ulValueLen;
+	id_cryptoctx->creds[i]->cert = x;
+	id_cryptoctx->creds[i]->key = NULL;
+	id_cryptoctx->creds[i]->cert_id = cert_id;
+	id_cryptoctx->creds[i]->cert_id_len = attrs[1].ulValueLen;
 	free(cert);
     }
     id_cryptoctx->p11->C_FindObjectsFinal(id_cryptoctx->session);
@@ -3734,44 +3827,76 @@ pkinit_get_certs_pkcs11(krb5_context context,
 }
 #endif
 
+
+static void
+free_cred_info(krb5_context context,
+	       pkinit_identity_crypto_context id_cryptoctx,
+	       struct _pkinit_cred_info *cred)
+{
+    if (cred != NULL) {
+	if (cred->cert != NULL)
+	    X509_free(cred->cert);
+	if (cred->key != NULL)
+	    EVP_PKEY_free(cred->key);
+#ifndef WITHOUT_PKCS11
+	if (cred->cert_id != NULL)
+	    free(cred->cert_id);
+#endif
+	free(cred);
+    }
+}
+
+krb5_error_code
+crypto_free_cert_info(krb5_context context,
+		      pkinit_plg_crypto_context plg_cryptoctx,
+		      pkinit_req_crypto_context req_cryptoctx,
+		      pkinit_identity_crypto_context id_cryptoctx)
+{
+    int i;
+
+    if (id_cryptoctx == NULL)
+	return EINVAL;
+
+    for (i = 0; i < MAX_CREDS_ALLOWED; i++) {
+	if (id_cryptoctx->creds[i] != NULL) {
+	    free_cred_info(context, id_cryptoctx, id_cryptoctx->creds[i]);
+	}
+    }
+    return 0;
+}
+
 krb5_error_code
 crypto_load_certs(krb5_context context,
 		  pkinit_plg_crypto_context plg_cryptoctx,
 		  pkinit_req_crypto_context req_cryptoctx,
 		  pkinit_identity_opts *idopts,
 		  pkinit_identity_crypto_context id_cryptoctx,
-		  const char *principal,
-		  krb5_get_init_creds_opt *opt)
+		  krb5_principal princ)
 {
-    pkinit_cred_info *creds = NULL;
     krb5_error_code retval;
-
-    creds = calloc(MAX_CREDS_ALLOWED + 1, sizeof(*creds));
-    if (creds == NULL) {
-	retval = ENOMEM;
-	goto cleanup;
-    }
 
     switch(idopts->idtype) {
 	case IDTYPE_FILE:
 	    retval = pkinit_get_certs_fs(context, plg_cryptoctx,
 					 req_cryptoctx, idopts,
-					 id_cryptoctx, 
-					 principal, opt, creds);
+					 id_cryptoctx, princ);
+	    break;
+	case IDTYPE_DIR:
+	    retval = pkinit_get_certs_dir(context, plg_cryptoctx,
+					  req_cryptoctx, idopts,
+					  id_cryptoctx, princ);
 	    break;
 #ifndef WITHOUT_PKCS11
 	case IDTYPE_PKCS11:
 	    retval = pkinit_get_certs_pkcs11(context, plg_cryptoctx,
 					     req_cryptoctx, idopts,
-					     id_cryptoctx,
-					     principal, opt, creds);
+					     id_cryptoctx, princ);
 	    break;
 #endif
 	case IDTYPE_PKCS12:
 	    retval = pkinit_get_certs_pkcs12(context, plg_cryptoctx,
 					     req_cryptoctx, idopts,
-					     id_cryptoctx,
-					     principal, opt, creds);
+					     id_cryptoctx, princ);
 		break;
 	default:
 	    retval = EINVAL;
@@ -3779,68 +3904,434 @@ crypto_load_certs(krb5_context context,
     if (retval)
 	goto cleanup;
 
-    /* pick the right certificate/key from the retrieved certs */
-    retval = pkinit_match_cert(context, plg_cryptoctx, req_cryptoctx,
-			       id_cryptoctx, principal, opt, creds);
 cleanup:
-    if (creds)
-	free(creds);
     return retval;
 }
 
-/* XXX This needs to move above "the line"! */
-static krb5_error_code
-pkinit_match_cert(krb5_context context,
-		  pkinit_plg_crypto_context plg_cryptoctx,
-		  pkinit_req_crypto_context req_cryptoctx,
-		  pkinit_identity_crypto_context id_cryptoctx,
-		  const char *principal,
-		  krb5_get_init_creds_opt *opt,
-		  pkinit_cred_info *creds)
+/*
+ * Get number of certificates available after crypto_load_certs()
+ */
+krb5_error_code
+crypto_cert_get_count(krb5_context context,
+		      pkinit_plg_crypto_context plg_cryptoctx,
+		      pkinit_req_crypto_context req_cryptoctx,
+		      pkinit_identity_crypto_context id_cryptoctx,
+		      int *cert_count)
 {
+    int count;
 
-    krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    int i, creds_index = 0;
+    if (id_cryptoctx == NULL || id_cryptoctx->creds[0] == NULL)
+	return EINVAL;
 
-    /* add code to find the right certificate */
+    for (count = 0;
+	 count <= MAX_CREDS_ALLOWED && id_cryptoctx->creds[count] != NULL;
+	 count++);
+    *cert_count = count;
+    return 0;
+}
 
+
+/*
+ * Begin iteration over the certs loaded in crypto_load_certs()
+ */
+krb5_error_code
+crypto_cert_iteration_begin(krb5_context context,
+			    pkinit_plg_crypto_context plg_cryptoctx,
+			    pkinit_req_crypto_context req_cryptoctx,
+			    pkinit_identity_crypto_context id_cryptoctx,
+			    pkinit_cert_iter_handle *ih_ret)
+{
+    struct _pkinit_cert_iter_data *id;
+
+    if (id_cryptoctx == NULL || ih_ret == NULL)
+	return EINVAL;
+    if (id_cryptoctx->creds[0] == NULL)	/* No cred info available */
+	return ENOENT;
+
+    id = calloc(1, sizeof(*id));
+    if (id == NULL)
+	return ENOMEM;
+    id->magic = ITER_MAGIC;
+    id->plgctx = plg_cryptoctx,
+    id->reqctx = req_cryptoctx,
+    id->idctx = id_cryptoctx;
+    id->index = 0;
+    *ih_ret = (pkinit_cert_iter_handle) id;
+    return 0;
+}
+
+/*
+ * End iteration over the certs loaded in crypto_load_certs()
+ */
+krb5_error_code
+crypto_cert_iteration_end(krb5_context context,
+			  pkinit_cert_iter_handle ih)
+{
+    struct _pkinit_cert_iter_data *id = (struct _pkinit_cert_iter_data *)ih;
+
+    if (id == NULL || id->magic != ITER_MAGIC)
+	return EINVAL;
+    free(ih);
+    return 0;
+}
+
+/*
+ * Get next certificate handle
+ */
+krb5_error_code
+crypto_cert_iteration_next(krb5_context context,
+			   pkinit_cert_iter_handle ih,
+			   pkinit_cert_handle *ch_ret)
+{
+    struct _pkinit_cert_iter_data *id = (struct _pkinit_cert_iter_data *)ih;
+    struct _pkinit_cert_data *cd;
+    pkinit_identity_crypto_context id_cryptoctx;
+
+    if (id == NULL || id->magic != ITER_MAGIC)
+	return EINVAL;
+
+    if (ch_ret == NULL)
+	return EINVAL;
+
+    id_cryptoctx = id->idctx;
+    if (id_cryptoctx == NULL)
+	return EINVAL;
+
+    if (id_cryptoctx->creds[id->index] == NULL)
+	return PKINIT_ITER_NO_MORE;
+    
+    cd = calloc(1, sizeof(*cd));
+    if (cd == NULL)
+	return ENOMEM;
+
+    cd->magic = CERT_MAGIC;
+    cd->plgctx = id->plgctx;
+    cd->reqctx = id->reqctx;
+    cd->idctx = id->idctx;
+    cd->index = id->index;
+    cd->cred = id_cryptoctx->creds[id->index++];
+    *ch_ret = (pkinit_cert_handle)cd;
+    return 0;
+}
+
+/*
+ * Release cert handle
+ */
+krb5_error_code
+crypto_cert_release(krb5_context context,
+		    pkinit_cert_handle ch)
+{
+    struct _pkinit_cert_data *cd = (struct _pkinit_cert_data *)ch;
+    if (cd == NULL || cd->magic != CERT_MAGIC)
+	return EINVAL;
+    free(cd);
+    return 0;
+}
+
+/*
+ * Get certificate Key Usage and Extended Key Usage
+ */
+static krb5_error_code
+crypto_retieve_X509_key_usage(krb5_context context,
+			      pkinit_plg_crypto_context plgcctx,
+			      pkinit_req_crypto_context reqcctx,
+			      X509 *x,
+			      unsigned int *ret_ku_bits,
+			      unsigned int *ret_eku_bits)
+{
+    krb5_error_code retval = 0;
+    int i;
+    unsigned int eku_bits = 0, ku_bits = 0;
+    ASN1_BIT_STRING *usage = NULL;
+
+    if (ret_ku_bits == NULL && ret_eku_bits == NULL)
+	return EINVAL;
+
+    if (ret_eku_bits)
+	*ret_eku_bits = 0;
+    else {
+	pkiDebug("%s: EKUs not requested, not checking\n", __FUNCTION__);
+	goto check_kus;
+    }
+    
+    /* Start with Extended Key usage */
+    i = X509_get_ext_by_NID(x, NID_ext_key_usage, -1);
+    if (i >= 0) {
+	EXTENDED_KEY_USAGE *eku;
+
+	eku = X509_get_ext_d2i(x, NID_ext_key_usage, NULL, NULL);
+	if (eku) {
+	    for (i = 0; i < sk_ASN1_OBJECT_num(eku); i++) {
+		ASN1_OBJECT *certoid;
+		certoid = sk_ASN1_OBJECT_value(eku, i);
+		if ((OBJ_cmp(certoid, plgcctx->id_pkinit_KPClientAuth)) == 0)
+		    eku_bits |= PKINIT_EKU_PKINIT;
+		else if ((OBJ_cmp(certoid, OBJ_nid2obj(NID_ms_smartcard_login))) == 0)
+		    eku_bits |= PKINIT_EKU_MSSCLOGIN;
+		else if ((OBJ_cmp(certoid, OBJ_nid2obj(NID_client_auth))) == 0)
+		    eku_bits |= PKINIT_EKU_CLIENTAUTH;
+		else if ((OBJ_cmp(certoid, OBJ_nid2obj(NID_email_protect))) == 0)
+		    eku_bits |= PKINIT_EKU_EMAILPROTECTION;
+	    }
+	    EXTENDED_KEY_USAGE_free(eku);
+	}
+    }
+    pkiDebug("%s: returning eku 0x%08x\n", __FUNCTION__, eku_bits);
+    *ret_eku_bits = eku_bits;
+
+check_kus:
+    /* Now the Key Usage bits */
+    if (ret_ku_bits)
+	*ret_ku_bits = 0;
+    else {
+	pkiDebug("%s: KUs not requested, not checking\n", __FUNCTION__);
+	goto out;
+    }
+
+    /* Make sure usage exists before checking bits */
+    usage = X509_get_ext_d2i(x, NID_key_usage, NULL, NULL);
+    if (usage) {
+	if (!ku_reject(x, X509v3_KU_DIGITAL_SIGNATURE))
+	    ku_bits |= PKINIT_KU_DIGITALSIGNATURE;
+	if (!ku_reject(x, X509v3_KU_KEY_ENCIPHERMENT))
+	    ku_bits |= PKINIT_KU_KEYENCIPHERMENT;
+	ASN1_BIT_STRING_free(usage);
+    }
+
+    pkiDebug("%s: returning ku 0x%08x\n", __FUNCTION__, ku_bits);
+    *ret_ku_bits = ku_bits;
+    retval = 0;
+out:
+    return retval;
+}
+
+/*
+ * Return a string format of an X509_NAME in buf where
+ * size is an in/out parameter.  On input it is the size
+ * of the buffer, and on output it is the actual length
+ * of the name.
+ * If buf is NULL, returns the length req'd to hold name
+ */
+static char *
+X509_NAME_oneline_ex(X509_NAME * a,
+		     char *buf,
+		     unsigned int *size,
+		     unsigned long flag)
+{
+  BIO *out = NULL;
+
+  out = BIO_new(BIO_s_mem ());
+  if (X509_NAME_print_ex(out, a, 0, flag) > 0) {
+    if (buf != NULL && *size > (int) BIO_number_written(out)) {
+      memset(buf, 0, *size);
+      BIO_read(out, buf, (int) BIO_number_written(out));
+    }
+    else {
+      *size = BIO_number_written(out);
+    }
+  }
+  BIO_free(out);
+  return (buf);
+}
+
+/*
+ * Get certificate information
+ */
+krb5_error_code
+crypto_cert_get_matching_data(krb5_context context,
+			      pkinit_cert_handle ch,
+			      pkinit_cert_matching_data **ret_md)
+{
+    krb5_error_code retval;
+    pkinit_cert_matching_data *md;
+    krb5_principal *pkinit_sans =NULL, *upn_sans = NULL;
+    struct _pkinit_cert_data *cd = (struct _pkinit_cert_data *)ch;
+    int i, j;
+    char buf[DN_BUF_LEN];
+    unsigned int bufsize = sizeof(buf);
+
+    if (cd == NULL || cd->magic != CERT_MAGIC)
+	return EINVAL;
+    if (ret_md == NULL)
+	return EINVAL;
+
+    md = calloc(1, sizeof(*md));
+    if (md == NULL)
+	return ENOMEM;
+
+    md->ch = ch;
+
+    /* get the subject name (in rfc2253 format) */
+    X509_NAME_oneline_ex(X509_get_subject_name(cd->cred->cert),
+			 buf, &bufsize, XN_FLAG_SEP_COMMA_PLUS);
+    md->subject_dn = strdup(buf);
+    if (md->subject_dn == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
+
+    /* get the issuer name (in rfc2253 format) */
+    X509_NAME_oneline_ex(X509_get_issuer_name(cd->cred->cert),
+			 buf, &bufsize, XN_FLAG_SEP_COMMA_PLUS);
+    md->issuer_dn = strdup(buf);
+    if (md->issuer_dn == NULL) {
+	retval = ENOMEM;
+	goto cleanup;
+    }
+
+    /* get the san data */
+    retval = crypto_retrieve_X509_sans(context, cd->plgctx, cd->reqctx,
+				       cd->cred->cert, &pkinit_sans,
+				       &upn_sans, NULL);
+    if (retval)
+	goto cleanup;
+
+    j = 0;
+    if (pkinit_sans != NULL) {
+	for (i = 0; pkinit_sans[i] != NULL; i++)
+	    j++;
+    }
+    if (upn_sans != NULL) {
+	for (i = 0; upn_sans[i] != NULL; i++)
+	    j++;
+    }
+    if (j != 0) {
+	md->sans = calloc((size_t)j+1, sizeof(*md->sans));
+	if (md->sans == NULL) {
+	    retval = ENOMEM;
+	    goto cleanup;
+	}
+	j = 0;
+	if (pkinit_sans != NULL) {
+	    for (i = 0; pkinit_sans[i] != NULL; i++)
+		md->sans[j++] = pkinit_sans[i];
+	    free(pkinit_sans);
+	}
+	if (upn_sans != NULL) {
+	    for (i = 0; upn_sans[i] != NULL; i++)
+		md->sans[j++] = upn_sans[i];
+	    free(upn_sans);
+	}
+	md->sans[j] = NULL;
+    } else
+	md->sans = NULL;
+
+    /* get the KU and EKU data */
+
+    retval = crypto_retieve_X509_key_usage(context, cd->plgctx, cd->reqctx,
+					   cd->cred->cert,
+					   &md->ku_bits, &md->eku_bits);
+    if (retval)
+	goto cleanup;
+
+    *ret_md = md;
+    retval = 0;
+cleanup:
+    if (retval) {
+	if (md)
+	    crypto_cert_free_matching_data(context, md);
+    }
+    return retval;
+}
+
+/*
+ * Free certificate information
+ */
+krb5_error_code
+crypto_cert_free_matching_data(krb5_context context,
+		      pkinit_cert_matching_data *md)
+{
+    krb5_principal p;
+    int i;
+
+    if (md == NULL)
+	return EINVAL;
+    if (md->subject_dn)
+	free(md->subject_dn);
+    if (md->issuer_dn)
+	free(md->issuer_dn);
+    if (md->sans) {
+	for (i = 0, p = md->sans[i]; p != NULL; p = md->sans[++i])
+	    krb5_free_principal(context, p);
+	free(md->sans);
+    }
+    free(md);
+    return 0;
+}
+
+/*
+ * Make this matching certificate "the chosen one"
+ */
+krb5_error_code
+crypto_cert_select(krb5_context context,
+		   pkinit_cert_matching_data *md)
+{
+    struct _pkinit_cert_data *cd;
+    if (md == NULL)
+	return EINVAL;
+
+    cd = (struct _pkinit_cert_data *)md->ch;
+    if (cd == NULL || cd->magic != CERT_MAGIC)
+	return EINVAL;
+    
     /* copy the selected cert into our id_cryptoctx */ 
-    id_cryptoctx->my_certs = sk_X509_new_null();	
-    sk_X509_push(id_cryptoctx->my_certs, creds[creds_index]->cert);
-    id_cryptoctx->cert_index = 0;
+    if (cd->idctx->my_certs != NULL) {
+	/* XXX free existing cert stack! */
+	return 9999;
+    }
+    cd->idctx->my_certs = sk_X509_new_null();	
+    sk_X509_push(cd->idctx->my_certs, cd->cred->cert);
+    cd->idctx->creds[cd->index]->cert = NULL;	    /* Don't free it twice */
+    cd->idctx->cert_index = 0;
 
-    if (id_cryptoctx->pkcs11_method != 1) {
-	id_cryptoctx->my_key = creds[creds_index]->key;
+    if (cd->idctx->pkcs11_method != 1) {
+	cd->idctx->my_key = cd->cred->key;
+	cd->idctx->creds[cd->index]->key = NULL;    /* Don't free it twice */
     } 
 #ifndef WITHOUT_PKCS11
     else {
-	id_cryptoctx->cert_id = creds[creds_index]->cert_id;
-	id_cryptoctx->cert_id_len = creds[creds_index]->cert_id_len;
+	cd->idctx->cert_id = cd->cred->cert_id;
+	cd->idctx->creds[cd->index]->cert_id = NULL; /* Don't free it twice */
+	cd->idctx->cert_id_len = cd->cred->cert_id_len;
     }
 #endif
-
-    /* free unused cred_infos XXX cred_fini() instead! */
-    for (i = 0; ; i++) {
-	if (creds[i] == NULL) break;
-	else if (i == creds_index) {
-	    free (creds[i]);
-	} else {
-	    if (creds[i]->cert != NULL)
-		X509_free(creds[i]->cert);
-	    if (creds[i]->key != NULL)
-		EVP_PKEY_free(creds[i]->key);
-#ifndef WITHOUT_PKCS11
-	    if (creds[i]->cert_id != NULL)
-		free(creds[i]->cert_id);
-#endif
-	    free(creds[i]);
-	}
-    }
-
-    retval = 0;
-cleanup:
-    return retval;
+    return 0;
 }
+
+/*
+ * Choose the default certificate as "the chosen one"
+ */
+krb5_error_code
+crypto_cert_select_default(krb5_context context,
+			   pkinit_plg_crypto_context plg_cryptoctx,
+			   pkinit_req_crypto_context req_cryptoctx,
+			   pkinit_identity_crypto_context id_cryptoctx)
+{
+    /* copy the selected cert into our id_cryptoctx */ 
+    if (id_cryptoctx->my_certs != NULL) {
+	/* XXX free existing cert stack! */
+	return 9999;
+    }
+    id_cryptoctx->my_certs = sk_X509_new_null();	
+    sk_X509_push(id_cryptoctx->my_certs, id_cryptoctx->creds[0]->cert);
+    id_cryptoctx->creds[0]->cert = NULL;	/* Don't free it twice */
+    id_cryptoctx->cert_index = 0;
+
+    if (id_cryptoctx->pkcs11_method != 1) {
+	id_cryptoctx->my_key = id_cryptoctx->creds[0]->key;
+	id_cryptoctx->creds[0]->key = NULL;	/* Don't free it twice */
+    } 
+#ifndef WITHOUT_PKCS11
+    else {
+	id_cryptoctx->cert_id = id_cryptoctx->creds[0]->cert_id;
+	id_cryptoctx->creds[0]->cert_id = NULL; /* Don't free it twice */
+	id_cryptoctx->cert_id_len = id_cryptoctx->creds[0]->cert_id_len;
+    }
+#endif
+    return 0;
+}
+
+
 
 static krb5_error_code
 load_cas_and_crls(krb5_context context,
@@ -4028,8 +4519,10 @@ load_cas_and_crls_dir(krb5_context context,
 	    goto cleanup;
 	}
 	/* Ignore subdirectories and anything starting with a dot */
+#ifdef DT_DIR
 	if (dentry->d_type == DT_DIR)
 	    continue;
+#endif
 	if (dentry->d_name[0] == '.')
 	    continue;
 	snprintf(filename, sizeof(filename), "%s/%s", dirname, dentry->d_name);

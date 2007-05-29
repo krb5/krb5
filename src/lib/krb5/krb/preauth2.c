@@ -563,30 +563,11 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 	/* Save the new preauth data item. */
 	if (out_pa_data != NULL) {
 	    int i;
-#if 0	/* draft9 checksum hack */
-	    /*
-	     * this is a temporary hack for doing "fixed" draft9 client.
-	     * the client needs to send a pa_type 132 to the win2k kdc
-	     * then the kdc will reply back with a checksum instead
-	     * of the nonce
-	     */
-	    krb5_pa_data *tmp = NULL;
-	    tmp = malloc(sizeof(krb5_pa_data));
-	    if (tmp != NULL) {
-		tmp->pa_type=132;
-		tmp->length = 0;
-		tmp->contents = NULL;
-	    }
-#endif
 	    for (i = 0; out_pa_data[i] != NULL; i++);
 	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data, i);
 	    free(out_pa_data);
 	    if (ret != 0)
 		return ret;
-#if 0	/* draft9 checksum hack */
-	    if (tmp != NULL)
-		grow_pa_list(out_pa_list, out_pa_list_size, &tmp, 1);
-#endif
 	}
 	break;
     }

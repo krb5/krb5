@@ -61,17 +61,11 @@
 #define pkiDebug(args...)
 #endif
 
+/* Solaris compiler doesn't grok __FUNCTION__ 
+ * hack for now.  Fix all the uses eventually. */
+#define __FUNCTION__ __func__
+
 extern int longhorn;	    /* XXX Talking to a Longhorn server? */
-
-#define IDTYPE_FILE     1
-#define IDTYPE_DIR      2
-#define IDTYPE_PKCS11   3
-#define IDTYPE_ENVVAR   4
-#define IDTYPE_PKCS12   5
-
-#define CATYPE_ANCHORS          1
-#define CATYPE_INTERMEDIATES    2
-#define CATYPE_CRLS             3
 
 /* Macros to deal with converting between various data types... */
 #define PADATA_TO_KRB5DATA(pad, k5d) \
@@ -245,8 +239,19 @@ krb5_error_code pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
 
 krb5_error_code pkinit_identity_initialize
 	(krb5_context context,				/* IN */
+	 pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	 pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	 pkinit_identity_opts *idopts,			/* IN */
-	 pkinit_identity_crypto_context id_cryptoctx);	/* IN/OUT */
+	 pkinit_identity_crypto_context id_cryptoctx,	/* IN/OUT */
+	 int do_matching,				/* IN */
+	 krb5_principal princ);				/* IN (optional) */
+
+krb5_error_code pkinit_cert_matching
+	(krb5_context context,
+	pkinit_plg_crypto_context plg_cryptoctx,
+	pkinit_req_crypto_context req_cryptoctx,
+	pkinit_identity_crypto_context id_cryptoctx,
+	krb5_principal princ);
 
 /*
  * initialization and free functions
