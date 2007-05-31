@@ -946,17 +946,30 @@ dnl
 ldap_plugin_dir=""
 ldap_lib=""
 if test -n "$OPENLDAP_PLUGIN"; then
-  AC_CHECK_HEADERS(ldap.h lber.h)
-  if test $ac_cv_header_ldap_h = no || test $ac_cv_header_lber_h = no; then
-    AC_ERROR(OpenLDAP headers missing)
-  fi
+  AC_CHECK_HEADERS(ldap.h lber.h, :, [AC_MSG_ERROR($ac_header not found)])
+  AC_CHECK_LIB(ldap, ldap_init, :, [AC_MSG_ERROR(libldap not found or missing ldap_init)])
   old_LIBS="$LIBS"
   LIBS="$LIBS -lldap"
   AC_CHECK_FUNCS(ldap_initialize ldap_url_parse_nodn ldap_unbind_ext_s ldap_str2dn ldap_explode_dn)
   LIBS="$old_LIBS"
-  AC_CONFIG_SUBDIRS(plugins/kdb/ldap/libkdb_ldap)
+
+  BER_OKAY=0
+  AC_CHECK_LIB(ldap, ber_init, [BER_OKAY=1])
+  if test "$BER_OKAY" = "1"; then 
+    LDAP_LIBS='-lldap'
+  else
+    AC_CHECK_LIB(lber, ber_init, [BER_OKAY=1], [AC_MSG_WARN([libber not found])])
+    if test "$BER_OKAY" = "1"; then 
+      LDAP_LIBS='-lldap -llber'
+    else
+      AC_ERROR("BER library missing - cannot build LDAP database module")
+    fi
+  fi
+  AC_SUBST(LDAP_LIBS)
+
   K5_GEN_MAKEFILE(plugins/kdb/ldap)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
+  K5_GEN_MAKEFILE(plugins/kdb/ldap/libkdb_ldap)
   ldap_plugin_dir=plugins/kdb/ldap
 fi
 AC_SUBST(ldap_plugin_dir)
