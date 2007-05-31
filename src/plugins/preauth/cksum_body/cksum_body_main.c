@@ -43,9 +43,7 @@
 
 #ident "$Id$"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "autoconf.h"
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>

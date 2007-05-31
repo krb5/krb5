@@ -399,7 +399,7 @@ AC_CHECK_HEADER(termios.h,dnl
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
 dnl
 KRB5_SIGTYPE
-AC_CHECK_HEADERS(stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h)
+AC_CHECK_HEADERS(stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
 AC_HEADER_STDARG
 KRB5_AC_INET6
 dnl
@@ -961,8 +961,6 @@ if test -n "$OPENLDAP_PLUGIN"; then
 fi
 AC_SUBST(ldap_plugin_dir)
 
-AC_CONFIG_SUBDIRS(plugins/preauth/wpse plugins/preauth/cksum_body)
-
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
 dnl
@@ -1004,6 +1002,8 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	plugins/locate/python
 	plugins/kdb/db2
+	plugins/preauth/cksum_body
+	plugins/preauth/wpse
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

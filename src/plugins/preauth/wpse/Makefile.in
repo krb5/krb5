@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../..
 myfulldir=plugins/preauth/wpse
-mydir=.
+mydir=plugins/preauth/wpse
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -40,3 +40,11 @@ clean::
 @libobj_frag@
 
 # +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+wpse_main.so wpse_main.po $(OUTPRE)wpse_main.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/preauth_plugin.h \
+  wpse_main.c

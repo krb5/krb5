@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../..
 myfulldir=plugins/preauth/cksum_body
-mydir=.
+mydir=plugins/preauth/cksum_body
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
@@ -40,3 +40,11 @@ clean::
 @libobj_frag@
 
 # +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+cksum_body_main.so cksum_body_main.po $(OUTPRE)cksum_body_main.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/preauth_plugin.h \
+  cksum_body_main.c
