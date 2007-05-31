@@ -97,7 +97,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     krb5_timestamp 	  currenttime;
     krb5_principal_data princ_data;
     
-    req->ticket->enc_part2 == NULL;
+    req->ticket->enc_part2 = NULL;
     if (server && krb5_is_referral_realm(&server->realm)) {
 	char *realm;
 	princ_data = *server;

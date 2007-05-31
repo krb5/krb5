@@ -1,0 +1,543 @@
+/*
+ * $Header$
+ *
+ * Copyright 2006 Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ * require a specific license from the United States Government.
+ * It is the responsibility of any person or organization contemplating
+ * export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
+#include "ccs_common.h"
+
+struct ccs_lock_state_d {
+    cc_int32 invalid_object_err;
+    cc_int32 pending_lock_err;
+    cc_int32 no_lock_err;
+    ccs_lock_array_t locks;
+    cc_uint64 first_pending_lock_index;
+};
+
+struct ccs_lock_state_d ccs_lock_state_initializer = { 1, 1, 1, NULL, 0 };
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_new (ccs_lock_state_t *out_lock_state, 
+                             cc_int32          in_invalid_object_err, 
+                             cc_int32          in_pending_lock_err, 
+                             cc_int32          in_no_lock_err)
+{
+    cc_int32 err = ccNoError;
+    ccs_lock_state_t lock_state = NULL;
+    
+    if (!out_lock_state) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        lock_state = malloc (sizeof (*lock_state));
+        if (lock_state) { 
+            *lock_state = ccs_lock_state_initializer;
+        } else {
+            err = cci_check_error (ccErrNoMem); 
+        }
+    }
+    
+    if (!err) {
+        err = ccs_lock_array_new (&lock_state->locks);
+    }
+    
+    if (!err) {
+        lock_state->invalid_object_err = in_invalid_object_err;
+        lock_state->pending_lock_err = in_pending_lock_err;
+        lock_state->no_lock_err = in_no_lock_err;
+        
+        *out_lock_state = lock_state;
+        lock_state = NULL;
+    }
+    
+    ccs_lock_state_release (lock_state);
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_release (ccs_lock_state_t io_lock_state)
+{
+    cc_int32 err = ccNoError;
+    
+    if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
+
+    if (!err) {
+        ccs_lock_array_release (io_lock_state->locks);
+        free (io_lock_state);
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_allow_read (ccs_lock_state_t  in_lock_state,
+                                    ccs_pipe_t        in_client_pipe,
+                                    cc_uint32        *out_allow_read)
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 allow_read = 0;
+    
+    if (!in_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_allow_read                 ) { err = cci_check_error (ccErrBadParam); }
+    
+    /* A client may read if no other clients have write locks */
+    
+    if (!err) {
+        cc_uint64 lock_count = in_lock_state->first_pending_lock_index;
+        if (lock_count == 0) {
+            allow_read = 1;
+        } else {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (in_lock_state->locks, 0);
+            cc_uint32 is_read_lock;
+            cc_uint32 is_for_client;
+            
+            err = ccs_lock_is_read_lock (lock, &is_read_lock);
+            
+            if (!err) {
+                err = ccs_lock_is_for_client (lock, in_client_pipe, &is_for_client);
+            }
+            
+            if (!err) {
+                /* read locks or write lock we own */
+                allow_read = (is_read_lock || is_for_client);  
+            }
+        }
+    }
+    
+    if (!err) {
+        *out_allow_read = allow_read;
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_allow_write (ccs_lock_state_t  in_lock_state,
+                                     ccs_pipe_t        in_client_pipe,
+                                     cc_uint32        *out_allow_write)
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 allow_write = 0;
+    
+    if (!in_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_allow_write                ) { err = cci_check_error (ccErrBadParam); }
+    
+    /* A client may write if there are no locks or if it has a write lock */
+    
+    if (!err) {
+        cc_uint64 lock_count = in_lock_state->first_pending_lock_index;
+        if (lock_count == 0) {
+            allow_write = 1;
+        } else {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (in_lock_state->locks, 0);
+            cc_uint32 is_write_lock = 0;
+            cc_uint32 is_for_client = 0;
+            
+            err = ccs_lock_is_write_lock (lock, &is_write_lock);
+            
+            if (!err) {
+                err = ccs_lock_is_for_client (lock, in_client_pipe, &is_for_client);
+            }
+            
+            if (!err) {
+                allow_write = (is_write_lock && is_for_client);
+            }
+        }
+    }
+    
+    if (!err) {
+        *out_allow_write = allow_write;
+    }
+    
+    return cci_check_error (err);    
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static cc_int32 ccs_lock_status_add_pending_lock (ccs_lock_state_t  io_lock_state,
+                                                  ccs_pipe_t        in_client_pipe,
+                                                  ccs_pipe_t        in_reply_pipe,
+                                                  cc_uint32         in_lock_type,
+                                                  cc_uint64        *out_lock_index)
+{
+    cc_int32 err = ccNoError;
+    ccs_lock_t lock = NULL;
+    
+    if (!io_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_reply_pipe) ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        err = ccs_lock_new (&lock, in_lock_type, 
+                            io_lock_state->invalid_object_err,
+                            in_client_pipe, in_reply_pipe);
+    }
+    
+    if (!err) {
+        err = ccs_lock_array_insert (io_lock_state->locks, lock,
+                                     ccs_lock_array_count (io_lock_state->locks));
+        if (!err) { lock = NULL; /* take ownership */ }
+    }
+    
+    if (!err) {
+        *out_lock_index = ccs_lock_array_count (io_lock_state->locks) - 1;
+    }
+    
+    ccs_lock_release (lock);
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+static cc_int32 ccs_lock_status_remove_lock (ccs_lock_state_t io_lock_state,
+                                             cc_uint64        in_lock_index)
+{
+    cc_int32 err = ccNoError;
+    
+    if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        err = ccs_lock_array_remove (io_lock_state->locks, in_lock_index);
+        
+        if (!err && in_lock_index < io_lock_state->first_pending_lock_index) { 
+            io_lock_state->first_pending_lock_index--; 
+        }
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
+                                            cc_uint64        in_pending_lock_index)
+{
+    cc_int32 err = ccNoError;
+    cc_uint64 new_lock_index = 0;
+    
+    if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err && in_pending_lock_index < io_lock_state->first_pending_lock_index) {
+        err = cci_check_error (ccErrBadParam);
+    }
+    
+    if (!err) {
+        err = ccs_lock_array_move (io_lock_state->locks, 
+                                   in_pending_lock_index, 
+                                   io_lock_state->first_pending_lock_index,
+                                   &new_lock_index);
+        if (!err) { io_lock_state->first_pending_lock_index++; }
+    }
+    
+    if (!err) {
+        ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, 
+                                                          new_lock_index);
+        err = ccs_lock_grant_lock (lock);
+    }
+    
+    return cci_check_error (err);    
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_state,
+                                                   ccs_pipe_t        in_pending_lock_client_pipe,
+                                                   cc_uint32         in_pending_lock_type,
+                                                   cc_uint32        *out_grant_lock)
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 is_write_locked = 0;
+    cc_uint32 client_has_lock = 0;
+    cc_uint32 client_lock_type = 0;
+    cc_uint32 grant_lock = 0;
+    
+    if (!io_lock_state                               ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_pending_lock_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_grant_lock                              ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        cc_uint64 i;
+        cc_uint64 lock_count = io_lock_state->first_pending_lock_index;
+        
+        for (i = 0; !err && i < lock_count; i++) {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            cc_uint32 lock_type = 0;
+            cc_uint32 lock_is_for_client = 0;
+            
+            err = ccs_lock_type (lock, &lock_type);
+            
+            if (!err) {
+                err = ccs_lock_is_for_client (lock, in_pending_lock_client_pipe, 
+                                              &lock_is_for_client);
+            }
+            
+            if (!err) {
+                if (lock_type == cc_lock_write || lock_type == cc_lock_upgrade) {
+                    if (is_write_locked) {
+                        cci_debug_printf ("WARNING %s() multiple write locks.", 
+                                          __FUNCTION__);
+                    }
+                    is_write_locked = 1;
+                }
+                
+                if (lock_is_for_client) {
+                    if (client_has_lock) {
+                        cci_debug_printf ("WARNING %s() client has multiple locks.", 
+                                          __FUNCTION__);
+                    }
+                    client_has_lock = 1;
+                    client_lock_type = lock_type;
+                }
+            }
+        }
+    }
+    
+    if (!err) {
+        cc_uint64 lock_count = io_lock_state->first_pending_lock_index;
+        
+        if (in_pending_lock_type == cc_lock_write) {
+            if (client_has_lock) {
+                err = cci_check_error (ccErrBadLockType);
+            } else {
+                grant_lock = (lock_count == 0);
+            }
+            
+        } else if (in_pending_lock_type == cc_lock_read) {
+            if (client_has_lock) {
+                err = cci_check_error (ccErrBadLockType);
+            } else {
+                grant_lock = !is_write_locked;
+            }
+            
+        } else if (in_pending_lock_type == cc_lock_upgrade) {
+            if (!client_has_lock || (client_lock_type != cc_lock_read && 
+                                     client_lock_type != cc_lock_downgrade)) {
+                err = cci_check_error (ccErrBadLockType);
+            } else {
+                /* don't grant if other clients have read locks */
+                grant_lock = (lock_count == 1); 
+            }
+            
+        } else if (in_pending_lock_type == cc_lock_downgrade) {
+            if (!client_has_lock || (client_lock_type != cc_lock_write && 
+                                     client_lock_type != cc_lock_upgrade)) {
+                err = cci_check_error (ccErrBadLockType);
+            } else {
+                /* downgrades can never block */
+                grant_lock = 1;
+            }
+        } else {
+            err = cci_check_error (ccErrBadLockType);
+       }
+    }
+    
+    if (!err) {
+        *out_grant_lock = grant_lock;
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_lock_state) 
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 done = 1;
+    
+    if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
+    
+    /* The lock array should now be in one of two states: empty or containing 
+        * only read locks because if it contained a write lock we would have just
+        * deleted it.  Look at the pending locks and see if we can grant them. 
+        * Note that downgrade locks mean we must check all pending locks each pass
+        * since a downgrade lock might be last in the list. */
+    
+    
+    while (!err && !done) {
+        cc_uint64 i;
+        cc_uint64 count = ccs_lock_array_count (io_lock_state->locks);
+        cc_uint32 granted_lock = 0;
+        
+        for (i = io_lock_state->first_pending_lock_index; !err && i < count; i++) {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            cc_uint32 lock_type = 0;
+            ccs_pipe_t client_pipe = NULL;
+            cc_uint32 can_grant_lock_now = 0;
+
+            err = ccs_lock_client (lock, &client_pipe);
+            
+            if (!err) {
+                err = ccs_lock_type (lock, &lock_type);
+            }
+            
+            if (!err) {
+                err = ccs_lock_state_check_pending_lock (io_lock_state, client_pipe,
+                                                         lock_type, &can_grant_lock_now);
+            }
+
+            if (!err && can_grant_lock_now) {
+                err = ccs_lock_status_grant_lock (io_lock_state, i);
+                if (!err) { granted_lock = 1; }
+            }
+        }
+        
+        if (!err && !granted_lock) {
+            done = 1;
+        }
+    } 
+    
+    return cci_check_error (err);    
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
+                             ccs_pipe_t        in_client_pipe,
+                             ccs_pipe_t        in_reply_pipe,
+                             cc_uint32         in_lock_type,
+                             cc_uint32         in_block,
+                             cc_uint32        *out_will_block)
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 can_grant_lock_now = 0;
+    cc_uint32 will_block = 0;
+    
+    if (!io_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_reply_pipe) ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_will_block                 ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        /* Sanity check: if there are any pending locks for this client
+         * the client must have timed out waiting for our reply.  Remove any
+         * existing pending locks for the client. */
+        cc_uint64 i;
+        cc_uint64 count = ccs_lock_array_count (io_lock_state->locks);
+
+        for (i = io_lock_state->first_pending_lock_index; !err && i < count; i++) {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            cc_uint32 has_pending_lock_for_client = 0;
+            
+            err = ccs_lock_is_for_client (lock, in_client_pipe, &has_pending_lock_for_client);
+            
+            if (!err && has_pending_lock_for_client) {
+                cci_debug_printf ("WARNING %s() removing pending lock for client.", __FUNCTION__);
+                err = ccs_lock_status_remove_lock (io_lock_state, i);
+            }
+        }
+    }
+    
+    if (!err) {
+        err = ccs_lock_state_check_pending_lock (io_lock_state, in_client_pipe,
+                                                 in_lock_type, &can_grant_lock_now);
+    }
+        
+    if (!err) {
+        if (!can_grant_lock_now && !in_block) {
+            err = cci_check_error (io_lock_state->pending_lock_err);
+            
+        } else {
+            cc_uint64 new_lock_index = 0;
+            
+            err = ccs_lock_status_add_pending_lock (io_lock_state,
+                                                    in_client_pipe,
+                                                    in_reply_pipe,
+                                                    in_lock_type,
+                                                    &new_lock_index);
+            
+            if (!err) {
+                if (can_grant_lock_now) {
+                    err = ccs_lock_status_grant_lock (io_lock_state,
+                                                      new_lock_index);
+                    
+                    if (!err && (in_lock_type == cc_lock_downgrade)) {
+                        /* downgrades can allow us to grant other locks */
+                        err = ccs_lock_status_try_to_grant_pending_locks (io_lock_state);
+                    }
+                } else {
+                    will_block = 1;
+                }
+            }
+        }
+    }
+    
+    if (!err) {
+        *out_will_block = will_block;
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
+                                ccs_pipe_t       in_client_pipe)
+{
+    cc_int32 err = ccNoError;
+    cc_uint32 found_lock = 0;
+    
+    if (!io_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        cc_uint64 i;
+        cc_uint64 lock_count = io_lock_state->first_pending_lock_index;
+        
+        for (i = 0; !err && i < lock_count; i++) {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            
+            err = ccs_lock_is_for_client (lock, in_client_pipe, &found_lock);
+            
+            if (!err && found_lock) {
+                cci_debug_printf ("%s: Removing lock %p.", __FUNCTION__, lock);
+                err = ccs_lock_status_remove_lock (io_lock_state, i);
+                break;
+            }
+        }
+    }
+
+    if (!err && !found_lock) {
+        err = cci_check_error (io_lock_state->no_lock_err);
+    }
+    
+    if (!err) {
+        err = ccs_lock_status_try_to_grant_pending_locks (io_lock_state);
+    }    
+    
+    return cci_check_error (err);    
+}
+                                                  

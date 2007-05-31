@@ -230,7 +230,7 @@ static krb5_error_code stdccv3_get_timeoffset (krb5_context in_context,
     krb5_error_code err = 0;
     
     if (gCCVersion >= ccapi_version_5) {
-        krb5_os_context os_ctx = (krb5_os_context) in_context->os_context;
+        krb5_os_context os_ctx = (krb5_os_context) &in_context->os_context;
         cc_time_t time_offset = 0;
     
         err = cc_ccache_get_kdc_time_offset (in_ccache, cc_credentials_v5,
@@ -257,7 +257,7 @@ static krb5_error_code stdccv3_set_timeoffset (krb5_context in_context,
     krb5_error_code err = 0;
     
     if (gCCVersion >= ccapi_version_5) {
-        krb5_os_context os_ctx = (krb5_os_context) in_context->os_context;
+        krb5_os_context os_ctx = (krb5_os_context) &in_context->os_context;
         
         if (!err && os_ctx->os_flags & KRB5_OS_TOFFSET_VALID) {
             err = cc_ccache_set_kdc_time_offset (in_ccache, 
