@@ -116,13 +116,6 @@ static krb5_error_code KRB5_CALLCONV
 krb5_ktsrvtab_resolve(krb5_context context, const char *name, krb5_keytab *id)
 {
     krb5_ktsrvtab_data *data;
-    FILE *fp;
-
-    /* Make sure we can open the srvtab file for reading. */
-    fp = fopen(name, "r");
-    if (!fp)
-	return(errno);
-    fclose(fp);
 
     if ((*id = (krb5_keytab) malloc(sizeof(**id))) == NULL)
 	return(ENOMEM);
