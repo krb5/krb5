@@ -991,8 +991,12 @@ cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
     
     if (!err) {
         *out_will_block = will_block;
-        *out_reply_data = reply_data;
-        reply_data = NULL; /* take ownership */
+        if (!will_block) {
+            *out_reply_data = reply_data;
+            reply_data = NULL; /* take ownership */
+        } else {
+            *out_reply_data = NULL;
+        }
     }
     
     cci_stream_release (reply_data);

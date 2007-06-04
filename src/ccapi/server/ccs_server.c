@@ -144,14 +144,14 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
                                           enum cci_msg_id_t       in_request_name,
                                           cci_identifier_t        in_request_identifier,
                                           cci_stream_t            in_request_data,
-                                          cc_uint32              *out_reply_immediately,
+                                          cc_uint32              *out_will_block,
                                           cci_stream_t           *out_reply_data)
 {
     cc_int32 err = ccNoError;
 
     if (!ccs_pipe_valid (in_reply_pipe)) { err = cci_check_error (ccErrBadParam); }
     if (!in_request_data               ) { err = cci_check_error (ccErrBadParam); }
-    if (!out_reply_immediately         ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_will_block                ) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_data                ) { err = cci_check_error (ccErrBadParam); }
 
     if (!err) {
@@ -166,7 +166,7 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
                                                            in_cache_collection,
                                                            in_request_name,
                                                            in_request_data,
-                                                           out_reply_immediately,
+                                                           out_will_block,
                                                            out_reply_data);
             }
                 
@@ -185,7 +185,7 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
                                                  in_cache_collection,
                                                  in_request_name,
                                                  in_request_data,
-                                                 out_reply_immediately,
+                                                 out_will_block,
                                                  out_reply_data);
             }                
                         
@@ -206,7 +206,7 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
             }
             
             if (!err) {
-                *out_reply_immediately = 1; /* can't block */
+                *out_will_block = 0; /* can't block */
             }
             
         } else if (in_request_name > cci_credentials_iterator_first_msg_id &&
@@ -228,7 +228,7 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
             }
             
             if (!err) {
-                *out_reply_immediately = 1; /* can't block */
+                *out_will_block = 0; /* can't block */
             }
  
         } else {
@@ -250,7 +250,7 @@ cc_int32 ccs_server_handle_request (ccs_pipe_t     in_client_pipe,
     cc_int32 err = ccNoError;
     enum cci_msg_id_t request_name = 0;
     cci_identifier_t request_identifier = NULL;
-    cc_uint32 reply_immediately = 1;
+    cc_uint32 will_block = 0;
     cci_stream_t reply_data = NULL;
     
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
@@ -288,16 +288,19 @@ cc_int32 ccs_server_handle_request (ccs_pipe_t     in_client_pipe,
                                                    request_name,
                                                    request_identifier,
                                                    in_request, 
-                                                   &reply_immediately,
+                                                   &will_block,
                                                    &reply_data);
         }
         
-        if (server_err || reply_immediately) {
+        if (server_err || !will_block) {
+
+            /* send a reply now if the server isn't blocked on something */
             err = ccs_server_send_reply (in_reply_pipe, server_err, reply_data);
         }
     }
 
     cci_identifier_release (request_identifier);
+    cci_stream_release (reply_data);
     
     return cci_check_error (err);    
 }
@@ -318,7 +321,7 @@ cc_int32 ccs_server_send_reply (ccs_pipe_t     in_reply_pipe,
     }
     
     if (!err && in_reply_data && cci_stream_size (in_reply_data) > 0) {
-        err = cci_stream_write (in_reply_data, 
+        err = cci_stream_write (reply, 
                                 cci_stream_data (in_reply_data), 
                                 cci_stream_size (in_reply_data));
     }
