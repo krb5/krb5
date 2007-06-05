@@ -35,6 +35,10 @@ cc_int32 _cci_check_error (cc_int32    in_err,
                            int         in_line);
 #define cci_check_error(err) _cci_check_error(err, __FUNCTION__, __FILE__, __LINE__)
 
-void cci_debug_printf (const char *in_format, ...) __attribute__ ((format (printf, 1, 2)));
+void cci_debug_printf (const char *in_format, ...)
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+__attribute__ ((__format__ (__printf__, 1, 2)))
+#endif
+;
 
 #endif /* CCI_DEBUGGING_H */
