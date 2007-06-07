@@ -78,7 +78,7 @@ cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
+cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
 {
     cc_int32 err = ccNoError;
     
@@ -116,9 +116,9 @@ cc_int32 ccs_credentials_write (ccs_credentials_t in_credentials,
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_credentials_compare_identifier (ccs_credentials_t  in_credentials,
-                                                    cci_identifier_t   in_identifier,
-                                                    cc_uint32         *out_equal)
+cc_int32 ccs_credentials_compare_identifier (ccs_credentials_t  in_credentials,
+                                             cci_identifier_t   in_identifier,
+                                             cc_uint32         *out_equal)
 {
     cc_int32 err = ccNoError;
     

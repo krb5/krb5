@@ -42,9 +42,9 @@ cc_int32 ccs_ccache_reset (ccs_ccache_t  io_ccache,
 cc_int32 ccs_ccache_swap_contents (ccs_ccache_t io_source_ccache, 
                                    ccs_ccache_t io_destination_ccache);
 
-inline cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache);
+cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache);
 
-inline cc_int32 ccs_ccache_compare_identifier (ccs_ccache_t      in_ccache,
+cc_int32 ccs_ccache_compare_identifier (ccs_ccache_t      in_ccache,
                                         cci_identifier_t  in_identifier,
                                         cc_uint32        *out_equal);
 

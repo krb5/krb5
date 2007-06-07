@@ -32,8 +32,8 @@
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_os_pipe_copy (ccs_os_pipe_t *out_pipe,
-                                  ccs_os_pipe_t  in_pipe)
+cc_int32 ccs_os_pipe_copy (ccs_os_pipe_t *out_pipe,
+                           ccs_os_pipe_t  in_pipe)
 {
     cc_int32 err = ccNoError;
     
@@ -48,16 +48,16 @@ inline cc_int32 ccs_os_pipe_copy (ccs_os_pipe_t *out_pipe,
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_os_pipe_release (ccs_os_pipe_t io_pipe)
+cc_int32 ccs_os_pipe_release (ccs_os_pipe_t io_pipe)
 {
     return ccNoError;    
 }
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_os_pipe_compare (ccs_os_pipe_t  in_pipe,
-                                     ccs_os_pipe_t  in_compare_to_pipe,
-                                     cc_uint32     *out_equal)
+cc_int32 ccs_os_pipe_compare (ccs_os_pipe_t  in_pipe,
+                              ccs_os_pipe_t  in_compare_to_pipe,
+                              cc_uint32     *out_equal)
 {
     cc_int32 err = ccNoError;
     

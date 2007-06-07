@@ -31,7 +31,7 @@
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 cci_os_identifier_new_uuid (cci_uuid_string_t *out_uuid_string)
+cc_int32 cci_os_identifier_new_uuid (cci_uuid_string_t *out_uuid_string)
 {
     cc_int32 err = ccNoError;
     cci_uuid_string_t uuid_string = NULL;

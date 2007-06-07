@@ -30,6 +30,6 @@
 #include "cci_types.h"
 #include <stdarg.h>
 
-inline void cci_os_debug_vprintf (const char *in_format, va_list in_args);
+void cci_os_debug_vprintf (const char *in_format, va_list in_args);
 
 #endif /* CCI_OS_DEBUGGING_H */

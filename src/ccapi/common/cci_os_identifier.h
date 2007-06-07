@@ -29,6 +29,6 @@
 
 #include "cci_types.h"
 
-inline cc_int32 cci_os_identifier_new_uuid (cci_uuid_string_t *out_uuid_string);
+cc_int32 cci_os_identifier_new_uuid (cci_uuid_string_t *out_uuid_string);
 
 #endif /* CCI_OS_IDENTIFIER_H */

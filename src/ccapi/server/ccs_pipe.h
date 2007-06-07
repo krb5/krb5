@@ -35,7 +35,7 @@ cc_int32 ccs_pipe_new (ccs_pipe_t    *out_pipe,
 cc_int32 ccs_pipe_copy (ccs_pipe_t *out_pipe,
                         ccs_pipe_t  in_pipe);
 
-inline cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe);
+cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe);
 
 cc_int32 ccs_pipe_compare (ccs_pipe_t  in_pipe,
                            ccs_pipe_t  in_compare_to_pipe,

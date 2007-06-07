@@ -33,9 +33,9 @@ cc_int32 cci_stream_new (cci_stream_t *out_stream);
 
 cc_uint32 cci_stream_release (cci_stream_t io_stream);
 
-inline cc_uint64 cci_stream_size (cci_stream_t in_stream);
+cc_uint64 cci_stream_size (cci_stream_t in_stream);
 
-inline const char *cci_stream_data (cci_stream_t in_stream);
+const char *cci_stream_data (cci_stream_t in_stream);
 
 cc_uint32 cci_stream_read (cci_stream_t  in_stream, 
                            void         *io_data,

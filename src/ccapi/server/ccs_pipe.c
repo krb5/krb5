@@ -68,7 +68,7 @@ cc_int32 ccs_pipe_new (ccs_pipe_t    *out_pipe,
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe)
+cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe)
 {
     cc_int32 err = ccNoError;
     

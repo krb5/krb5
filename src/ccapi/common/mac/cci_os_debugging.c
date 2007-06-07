@@ -30,7 +30,7 @@
 
 /* ------------------------------------------------------------------------ */
 
-inline void cci_os_debug_vprintf (const char *in_format, va_list in_args)
+void cci_os_debug_vprintf (const char *in_format, va_list in_args)
 {
     dvprintf (in_format, in_args);
 }

@@ -85,7 +85,7 @@ cc_int32 ccs_cache_collection_new (ccs_cache_collection_t *out_cache_collection)
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_cache_collection_release (ccs_cache_collection_t io_cache_collection)
+cc_int32 ccs_cache_collection_release (ccs_cache_collection_t io_cache_collection)
 {
     cc_int32 err = ccNoError;
     
@@ -103,9 +103,9 @@ inline cc_int32 ccs_cache_collection_release (ccs_cache_collection_t io_cache_co
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 ccs_cache_collection_compare_identifier (ccs_cache_collection_t  in_cache_collection,
-                                                         cci_identifier_t        in_identifier,
-                                                         cc_uint32              *out_equal)
+cc_int32 ccs_cache_collection_compare_identifier (ccs_cache_collection_t  in_cache_collection,
+                                                  cci_identifier_t        in_identifier,
+                                                  cc_uint32              *out_equal)
 {
     cc_int32 err = ccNoError;
     

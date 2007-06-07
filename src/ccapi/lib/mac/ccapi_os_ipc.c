@@ -40,7 +40,7 @@ static pthread_key_t g_server_died_key = 0;
 
 /* ------------------------------------------------------------------------ */
 
-inline cc_int32 cci_os_ipc_thread_init (void)
+cc_int32 cci_os_ipc_thread_init (void)
 {
     cc_int32 err = ccNoError;
 
