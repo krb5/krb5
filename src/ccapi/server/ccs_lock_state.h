@@ -36,14 +36,6 @@ cc_int32 ccs_lock_state_new (ccs_lock_state_t *out_lock_state,
 
 cc_int32 ccs_lock_state_release (ccs_lock_state_t io_lock_state);
 
-cc_int32 ccs_lock_state_allow_read (ccs_lock_state_t  in_lock_state,
-                                    ccs_pipe_t        in_client_pipe,
-                                    cc_uint32        *out_allow_read);
-
-cc_int32 ccs_lock_state_allow_write (ccs_lock_state_t  in_lock_state,
-                                     ccs_pipe_t        in_client_pipe,
-                                     cc_uint32        *out_allow_write);
-
 cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
                              ccs_pipe_t        in_client_pipe,
                              ccs_pipe_t        in_reply_pipe,
