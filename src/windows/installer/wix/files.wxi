@@ -664,6 +664,11 @@
                                 <File Id="fil_mit_copyright_.h" LongName="mit-copyright.h" Name="MIT-COPY.H" />
                             </Component>
                         </Directory>
+                        <Directory Id="dirinc_krb5_krb5" Name="krb5" src="$(var.IncDir)\krb5\krb5\">
+                            <Component Id="cmp_dirinc_krb5_krb5" Guid="D1E4E3D8-EF04-4DD6-B01E-F87876509869" DiskId="1">
+                                <File Id="fil_krb5_h_inc" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
+                            </Component>
+                        </Directory>
                         <Component Id="cmp_dirinc_krb5" Guid="7FD8008B-2F46-4613-8A09-989F643258F1" DiskId="1">
                             <File Id="fil_com_err_.h" LongName="com_err.h" Name="com_err.h" />
                             <File Id="fil_krb5_.h" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
