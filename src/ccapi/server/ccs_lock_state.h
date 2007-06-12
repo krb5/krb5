@@ -46,4 +46,7 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
 cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
                                 ccs_pipe_t       in_client_pipe);
 
+cc_int32 ccs_lock_state_invalidate_lock (ccs_lock_state_t io_lock_state,
+                                         ccs_lock_t       in_lock);
+
 #endif /* CCS_LOCK_STATE_H */

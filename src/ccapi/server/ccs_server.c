@@ -31,14 +31,18 @@
 
 cci_uuid_string_t g_server_id = NULL;
 ccs_cache_collection_t g_cache_collection = NULL;
-ccs_pipe_array_t g_client_pipe_array = NULL;
+ccs_client_array_t g_client_array = NULL;
 
 /* ------------------------------------------------------------------------ */
 
- cc_int32 ccs_server_initialize (void)
+int main (int argc, const char *argv[])
 {
-    cc_int32 err = ccNoError;
-
+    cc_int32 err = 0;
+    
+    if (!err) {
+        err = ccs_os_server_initialize (argc, argv);
+    }
+    
     if (!err) {
         err = cci_identifier_new_uuid (&g_server_id);
     }
@@ -48,25 +52,22 @@ ccs_pipe_array_t g_client_pipe_array = NULL;
     }
     
     if (!err) {
-        err = ccs_pipe_array_new (&g_client_pipe_array);
+        err = ccs_client_array_new (&g_client_array);
     }
     
-    return cci_check_error (err);    
-}
-
-/* ------------------------------------------------------------------------ */
-
- cc_int32 ccs_server_cleanup (void)
-{
-    cc_int32 err = ccNoError;
+    if (!err) {
+        err = ccs_os_server_listen_loop (argc, argv);
+    }
     
     if (!err) {
         free (g_server_id);
         cci_check_error (ccs_cache_collection_release (g_cache_collection));
-        cci_check_error (ccs_pipe_array_release (g_client_pipe_array));
+        cci_check_error (ccs_client_array_release (g_client_array));
+        
+        err = ccs_os_server_cleanup (argc, argv);
     }
     
-    return cci_check_error (err);    
+    return cci_check_error (err) ? 1 : 0;
 }
 
 #pragma mark -
@@ -83,20 +84,20 @@ cc_int32 ccs_server_new_identifier (cci_identifier_t *out_identifier)
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_server_add_client (ccs_os_pipe_t in_connection_os_pipe)
+cc_int32 ccs_server_add_client (ccs_pipe_t in_connection_pipe)
 {
     cc_int32 err = ccNoError;
-    ccs_pipe_t connection_pipe = NULL;
+    ccs_client_t client = NULL;
     
     if (!err) {
-        err = ccs_pipe_new (&connection_pipe, in_connection_os_pipe);
+        err = ccs_client_new (&client, in_connection_pipe);
     }
     
     if (!err) {
-        cci_debug_printf ("%s: Adding client %p.", __FUNCTION__, connection_pipe);
-        err = ccs_pipe_array_insert (g_client_pipe_array, 
-                                     connection_pipe,
-                                     ccs_pipe_array_count (g_client_pipe_array));
+        cci_debug_printf ("%s: Adding client %p.", __FUNCTION__, client);
+        err = ccs_client_array_insert (g_client_array, 
+                                       client,
+                                       ccs_client_array_count (g_client_array));
     }
 
     return cci_check_error (err);    
@@ -104,23 +105,23 @@ cc_int32 ccs_server_add_client (ccs_os_pipe_t in_connection_os_pipe)
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_server_remove_client (ccs_os_pipe_t in_connection_os_pipe)
+cc_int32 ccs_server_remove_client (ccs_pipe_t in_connection_pipe)
 {
     cc_int32 err = ccNoError;
 
     if (!err) {
         cc_uint64 i;
-        cc_uint64 count = ccs_pipe_array_count (g_client_pipe_array);
+        cc_uint64 count = ccs_client_array_count (g_client_array);
         cc_uint32 found = 0;
         
         for (i = 0; !err && i < count; i++) {
-            ccs_pipe_t client = ccs_pipe_array_object_at_index (g_client_pipe_array, i);
+            ccs_client_t client = ccs_client_array_object_at_index (g_client_array, i);
             
-            err = ccs_pipe_compare_to_os_pipe (client, in_connection_os_pipe, &found);
+            err = ccs_client_uses_pipe (client, in_connection_pipe, &found);
             
             if (!err && found) {
                 cci_debug_printf ("%s: Removing client %p.", __FUNCTION__, client);
-                err = ccs_pipe_array_remove (g_client_pipe_array, i);
+                err = ccs_client_array_remove (g_client_array, i);
                 break;
             }
         }
@@ -129,6 +130,63 @@ cc_int32 ccs_server_remove_client (ccs_os_pipe_t in_connection_os_pipe)
             cci_debug_printf ("WARNING %s() didn't find client in client list.", 
                               __FUNCTION__);
         }        
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_server_client_for_pipe (ccs_pipe_t    in_client_pipe,
+                                     ccs_client_t *out_client)
+{
+    cc_int32 err = ccNoError;
+    ccs_client_t client_for_pipe = NULL;
+    
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_client                     ) { err = cci_check_error (ccErrBadParam); }
+
+    if (!err) {
+        cc_uint64 i;
+        cc_uint64 count = ccs_client_array_count (g_client_array);
+        
+        for (i = 0; !err && i < count; i++) {
+            ccs_client_t client = ccs_client_array_object_at_index (g_client_array, i);
+            cc_uint32 uses_pipe = 0;
+            
+            err = ccs_client_uses_pipe (client, in_client_pipe, &uses_pipe);
+            
+            if (!err && uses_pipe) {
+                client_for_pipe = client;
+                break;
+            }
+        }
+    }
+    
+    if (!err) {
+        *out_client = client_for_pipe; /* may be NULL if not found */
+    }
+
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_server_client_is_valid (ccs_pipe_t  in_client_pipe,
+                                     cc_uint32  *out_client_is_valid)
+{
+    cc_int32 err = ccNoError;
+    ccs_client_t client = NULL;
+    
+    if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_client_is_valid            ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        err = ccs_server_client_for_pipe (in_client_pipe, &client);
+    }
+    
+    if (!err) {
+        *out_client_is_valid = (client != NULL);
     }
     
     return cci_check_error (err);    

@@ -29,13 +29,16 @@
 
 #include "ccs_types.h"
 
-cc_int32 ccs_lock_new (ccs_lock_t *out_lock,
-                       cc_uint32   in_type,
-                       cc_int32    in_invalid_object_err,
-                       ccs_pipe_t  in_client_pipe,
-                       ccs_pipe_t  in_reply_pipe);
+cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
+                       cc_uint32         in_type,
+                       cc_int32          in_invalid_object_err,
+                       ccs_pipe_t        in_client_pipe,
+                       ccs_pipe_t        in_reply_pipe,
+                       ccs_lock_state_t  in_lock_state_owner);
 
 cc_int32 ccs_lock_release (ccs_lock_t io_lock);
+
+cc_int32 ccs_lock_invalidate (ccs_lock_t io_lock);
 
 cc_int32 ccs_lock_grant_lock (ccs_lock_t io_lock);
 
@@ -51,11 +54,11 @@ cc_int32 ccs_lock_is_read_lock (ccs_lock_t  in_lock,
 cc_int32 ccs_lock_is_write_lock (ccs_lock_t  in_lock,
                                  cc_uint32  *out_is_write_lock);
 
-cc_int32 ccs_lock_is_for_client (ccs_lock_t  in_lock,
-                                 ccs_pipe_t  in_client_pipe,
-                                 cc_uint32  *out_is_for_client);
+cc_int32 ccs_lock_is_for_client_pipe (ccs_lock_t     in_lock,
+                                      ccs_pipe_t     in_client_pipe,
+                                      cc_uint32     *out_is_for_client_pipe);
 
-cc_int32 ccs_lock_client (ccs_lock_t  in_lock,
-                          ccs_pipe_t *out_client_pipe);
+cc_int32 ccs_lock_client_pipe (ccs_lock_t  in_lock,
+                               ccs_pipe_t *out_client_pipe);
 
 #endif /* CCS_LOCK_H */

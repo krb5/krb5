@@ -32,24 +32,28 @@ struct ccs_lock_d {
     cc_int32  invalid_object_err;
     ccs_pipe_t client_pipe;
     ccs_pipe_t reply_pipe;
+    ccs_lock_state_t lock_state_owner; /* pointer to owner */
 };
 
-struct ccs_lock_d ccs_lock_initializer = { 0, 1, 1, NULL, NULL };
+struct ccs_lock_d ccs_lock_initializer = { 0, 1, 1, CCS_PIPE_NULL, CCS_PIPE_NULL, NULL };
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lock_new (ccs_lock_t *out_lock,
-                       cc_uint32   in_type,
-                       cc_int32    in_invalid_object_err,
-                       ccs_pipe_t  in_client_pipe,
-                       ccs_pipe_t  in_reply_pipe)
+cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
+                       cc_uint32         in_type,
+                       cc_int32          in_invalid_object_err,
+                       ccs_pipe_t        in_client_pipe,
+                       ccs_pipe_t        in_reply_pipe,
+                       ccs_lock_state_t  in_lock_state_owner)
 {
     cc_int32 err = ccNoError;
     ccs_lock_t lock = NULL;
+    ccs_client_t client = NULL;
     
     if (!out_lock                       ) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_reply_pipe) ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_lock_state_owner            ) { err = cci_check_error (ccErrBadParam); }
     
     if (in_type != cc_lock_read && 
         in_type != cc_lock_write &&
@@ -68,17 +72,20 @@ cc_int32 ccs_lock_new (ccs_lock_t *out_lock,
     }
     
     if (!err) {
-        err = ccs_pipe_copy (&lock->client_pipe, in_client_pipe);
+        err = ccs_server_client_for_pipe (in_client_pipe, &client);
     }
     
     if (!err) {
-        err = ccs_pipe_copy (&lock->reply_pipe, in_reply_pipe);
-    }
-    
-    if (!err) {
+        lock->client_pipe = in_client_pipe;
+        lock->reply_pipe = in_reply_pipe;
         lock->type = in_type;
         lock->invalid_object_err = in_invalid_object_err;
-        
+        lock->lock_state_owner = in_lock_state_owner;
+    
+        err = ccs_client_add_lockref (client, lock);
+    }
+     
+    if (!err) {
         *out_lock = lock;
         lock = NULL;
     }
@@ -93,21 +100,46 @@ cc_int32 ccs_lock_new (ccs_lock_t *out_lock,
 cc_int32 ccs_lock_release (ccs_lock_t io_lock)
 {
     cc_int32 err = ccNoError;
+    ccs_client_t client = NULL;
     
     if (!io_lock) { err = cci_check_error (ccErrBadParam); }
     
     if (!err && io_lock->pending) {
         err = ccs_server_send_reply (io_lock->reply_pipe, 
                                      io_lock->invalid_object_err, NULL);
+        
+        io_lock->pending = 0;
     }
     
     if (!err) {
-        ccs_pipe_release (io_lock->client_pipe);
-        ccs_pipe_release (io_lock->reply_pipe);
+        err = ccs_server_client_for_pipe (io_lock->client_pipe, &client);
+    }
+    
+    if (!err) {
+        err = ccs_client_remove_lockref (client, io_lock);
+    }
+    
+    if (!err) {
         free (io_lock);
     }
     
     return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_invalidate (ccs_lock_t io_lock)
+{
+    cc_int32 err = ccNoError;
+    
+    if (!io_lock) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        io_lock->pending = 0; /* client is dead, don't try to talk to it */
+        err = ccs_lock_state_invalidate_lock (io_lock->lock_state_owner, io_lock);
+    }
+    
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -122,11 +154,13 @@ cc_int32 ccs_lock_grant_lock (ccs_lock_t io_lock)
         if (io_lock->pending) {
             err = ccs_server_send_reply (io_lock->reply_pipe, err, NULL);
             
-            if (!err) {
-                ccs_pipe_release (io_lock->reply_pipe);
-                io_lock->pending = 0;
-                io_lock->reply_pipe = NULL;
+            if (err) {
+                cci_debug_printf ("WARNING %s() called on a lock belonging to a dead client!", 
+                                  __FUNCTION__);
             }
+            
+            io_lock->pending = 0;
+            io_lock->reply_pipe = CCS_PIPE_NULL;
         } else {
             cci_debug_printf ("WARNING %s() called on non-pending lock!", 
                               __FUNCTION__);
@@ -208,19 +242,18 @@ cc_int32 ccs_lock_is_write_lock (ccs_lock_t  in_lock,
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lock_is_for_client (ccs_lock_t     in_lock,
-                                 ccs_pipe_t     in_client_pipe,
-                                 cc_uint32     *out_is_for_client)
+cc_int32 ccs_lock_is_for_client_pipe (ccs_lock_t     in_lock,
+                                      ccs_pipe_t     in_client_pipe,
+                                      cc_uint32     *out_is_for_client_pipe)
 {
     cc_int32 err = ccNoError;
     
     if (!in_lock                        ) { err = cci_check_error (ccErrBadParam); }
-    if (!out_is_for_client              ) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
+    if (!out_is_for_client_pipe         ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = ccs_pipe_compare (in_lock->client_pipe, in_client_pipe, 
-                                out_is_for_client);
+        *out_is_for_client_pipe = (in_lock->client_pipe == in_client_pipe);
     }
     
     return cci_check_error (err);    
@@ -229,8 +262,8 @@ cc_int32 ccs_lock_is_for_client (ccs_lock_t     in_lock,
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lock_client (ccs_lock_t  in_lock,
-                          ccs_pipe_t *out_client_pipe)
+cc_int32 ccs_lock_client_pipe (ccs_lock_t  in_lock,
+                               ccs_pipe_t *out_client_pipe)
 {
     cc_int32 err = ccNoError;
     

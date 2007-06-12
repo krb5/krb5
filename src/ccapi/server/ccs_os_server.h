@@ -29,6 +29,12 @@
 
 #include "ccs_types.h"
 
+cc_int32 ccs_os_server_initialize (int argc, const char *argv[]);
+
+cc_int32 ccs_os_server_cleanup (int argc, const char *argv[]);
+
+cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]);
+
 cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
                                    cci_stream_t in_reply_stream);
 

@@ -32,6 +32,7 @@
 #include "cci_mig_reply.h"
 #include "ccs_os_server.h"
 
+
 /* ------------------------------------------------------------------------ */
 
 static boolean_t ccs_server_demux (mach_msg_header_t *request, 
@@ -45,7 +46,7 @@ static boolean_t ccs_server_demux (mach_msg_header_t *request,
     
     if (!handled && request->msgh_id == MACH_NOTIFY_NO_SENDERS) {
         kern_return_t err = KERN_SUCCESS;
-
+        
         err = ccs_server_remove_client (request->msgh_local_port);
         
         if (!err) {
@@ -57,37 +58,11 @@ static boolean_t ccs_server_demux (mach_msg_header_t *request,
         if (!err) {
             handled = 1;  /* was a port we are tracking */
         }
-
+        
         cci_check_error (err);
     }
     
     return handled;    
-}
-
-/* ------------------------------------------------------------------------ */
-
-int main (int argc, const char *argv[])
-{
-    cc_int32 err = 0;
-    
-    openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
-    syslog (LOG_INFO, "Starting up.");   
-    
-    if (!err) {
-        err = ccs_server_initialize ();
-    }
-    
-    if (!err) {
-        err = kipc_server_run_server (ccs_server_demux);
-    }
-    
-    /* cleanup ccs resources */
-    ccs_server_cleanup ();
-    
-    syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
-    
-    /* exit */
-    return err ? 1 : 0;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -130,6 +105,85 @@ kern_return_t ccs_mipc_create_client_connection (mach_port_t    in_server_port,
 
 /* ------------------------------------------------------------------------ */
 
+kern_return_t ccs_mipc_request (mach_port_t             in_connection_port,
+                                mach_port_t             in_reply_port,
+                                cci_mipc_inl_request_t  in_inl_request,
+                                mach_msg_type_number_t  in_inl_requestCnt,
+                                cci_mipc_ool_request_t  in_ool_request,
+                                mach_msg_type_number_t  in_ool_requestCnt)
+{
+    kern_return_t err = KERN_SUCCESS;
+    cci_stream_t request_stream = NULL;
+    
+    if (!err) {
+        err = cci_stream_new (&request_stream);
+    }
+    
+    if (!err) {
+        if (in_inl_requestCnt) {
+            err = cci_stream_write (request_stream, in_inl_request, in_inl_requestCnt);
+            
+        } else if (in_ool_requestCnt) {
+            err = cci_stream_write (request_stream, in_ool_request, in_ool_requestCnt);
+            
+        } else {
+            err = cci_check_error (ccErrBadInternalMessage);
+        }
+    }
+    
+    if (!err) {
+        err = ccs_server_handle_request (in_connection_port, in_reply_port, request_stream);
+    }
+    
+    cci_stream_release (request_stream);
+    if (in_ool_requestCnt) { vm_deallocate (mach_task_self (), (vm_address_t) in_ool_request, in_ool_requestCnt); }
+    
+    return cci_check_error (err);
+}
+
+#pragma mark -
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_os_server_initialize (int argc, const char *argv[])
+{
+    cc_int32 err = 0;
+    
+    openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
+    syslog (LOG_INFO, "Starting up.");   
+
+    syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_os_server_cleanup (int argc, const char *argv[])
+{
+    cc_int32 err = 0;
+    
+    openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
+    syslog (LOG_INFO, "Starting up.");   
+    
+    syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
+    
+    return cci_check_error (err);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[])
+{
+    /* Run the Mach IPC listen loop.  
+     * This will call ccs_mipc_create_client_connection for new clients
+     * and ccs_mipc_request for existing clients */
+    
+    return cci_check_error (kipc_server_run_server (ccs_server_demux));
+}
+
+/* ------------------------------------------------------------------------ */
+
 cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
                                    cci_stream_t in_reply_stream)
 {
@@ -165,7 +219,7 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
     }
     
     if (!err) {
-        err = ccs_mipc_reply (ccs_pipe_os (in_reply_pipe), 
+        err = ccs_mipc_reply (in_reply_pipe, 
                               inl_reply, inl_reply_length,
                               ool_reply, ool_reply_length);
     }
@@ -177,57 +231,6 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
     }
     
     if (ool_reply_length) { vm_deallocate (mach_task_self (), (vm_address_t) ool_reply, ool_reply_length); }
-    
-    return cci_check_error (err);
-}
-                                     
-
-/* ------------------------------------------------------------------------ */
-
-kern_return_t ccs_mipc_request (mach_port_t             in_connection_port,
-                                mach_port_t             in_reply_port,
-                                cci_mipc_inl_request_t  in_inl_request,
-                                mach_msg_type_number_t  in_inl_requestCnt,
-                                cci_mipc_ool_request_t  in_ool_request,
-                                mach_msg_type_number_t  in_ool_requestCnt)
-{
-    kern_return_t err = KERN_SUCCESS;
-    cci_stream_t request_stream = NULL;
-    ccs_pipe_t connection_pipe = NULL;
-    ccs_pipe_t reply_pipe = NULL;
-    
-    if (!err) {
-        err = cci_stream_new (&request_stream);
-    }
-    
-    if (!err) {
-        if (in_inl_requestCnt) {
-            err = cci_stream_write (request_stream, in_inl_request, in_inl_requestCnt);
-            
-        } else if (in_ool_requestCnt) {
-            err = cci_stream_write (request_stream, in_ool_request, in_ool_requestCnt);
-            
-        } else {
-            err = cci_check_error (ccErrBadInternalMessage);
-        }
-    }
-    
-    if (!err) {
-        err = ccs_pipe_new (&connection_pipe, in_connection_port);
-    }
-    
-    if (!err) {
-        err = ccs_pipe_new (&reply_pipe, in_reply_port);
-    }
-    
-    if (!err) {
-        err = ccs_server_handle_request (connection_pipe, reply_pipe, request_stream);
-    }
-    
-    ccs_pipe_release (connection_pipe);
-    ccs_pipe_release (reply_pipe);
-    cci_stream_release (request_stream);
-    if (in_ool_requestCnt) { vm_deallocate (mach_task_self (), (vm_address_t) in_ool_request, in_ool_requestCnt); }
     
     return cci_check_error (err);
 }

@@ -111,7 +111,8 @@ static cc_int32 ccs_lock_status_add_pending_lock (ccs_lock_state_t  io_lock_stat
     if (!err) {
         err = ccs_lock_new (&lock, in_lock_type, 
                             io_lock_state->invalid_object_err,
-                            in_client_pipe, in_reply_pipe);
+                            in_client_pipe, in_reply_pipe, 
+                            io_lock_state);
     }
     
     if (!err) {
@@ -211,8 +212,8 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
             err = ccs_lock_type (lock, &lock_type);
             
             if (!err) {
-                err = ccs_lock_is_for_client (lock, in_pending_lock_client_pipe, 
-                                              &lock_is_for_client);
+                err = ccs_lock_is_for_client_pipe (lock, in_pending_lock_client_pipe, 
+                                                   &lock_is_for_client);
             }
             
             if (!err) {
@@ -287,16 +288,13 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
 static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_lock_state) 
 {
     cc_int32 err = ccNoError;
-    cc_uint32 done = 1;
+    cc_uint32 done = 0;
     
     if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
     
-    /* The lock array should now be in one of two states: empty or containing 
-        * only read locks because if it contained a write lock we would have just
-        * deleted it.  Look at the pending locks and see if we can grant them. 
-        * Note that downgrade locks mean we must check all pending locks each pass
-        * since a downgrade lock might be last in the list. */
-    
+    /* Look at the pending locks and see if we can grant them. 
+     * Note that downgrade locks mean we must check all pending locks each pass
+     * since a downgrade lock might be last in the list. */
     
     while (!err && !done) {
         cc_uint64 i;
@@ -306,10 +304,10 @@ static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_
         for (i = io_lock_state->first_pending_lock_index; !err && i < count; i++) {
             ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
             cc_uint32 lock_type = 0;
-            ccs_pipe_t client_pipe = NULL;
+            ccs_pipe_t client_pipe = CCS_PIPE_NULL;
             cc_uint32 can_grant_lock_now = 0;
 
-            err = ccs_lock_client (lock, &client_pipe);
+            err = ccs_lock_client_pipe (lock, &client_pipe);
             
             if (!err) {
                 err = ccs_lock_type (lock, &lock_type);
@@ -365,7 +363,7 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
             ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
             cc_uint32 has_pending_lock_for_client = 0;
             
-            err = ccs_lock_is_for_client (lock, in_client_pipe, &has_pending_lock_for_client);
+            err = ccs_lock_is_for_client_pipe (lock, in_client_pipe, &has_pending_lock_for_client);
             
             if (!err && has_pending_lock_for_client) {
                 cci_debug_printf ("WARNING %s() removing pending lock for client.", __FUNCTION__);
@@ -433,7 +431,7 @@ cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
         for (i = 0; !err && i < lock_count; i++) {
             ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
             
-            err = ccs_lock_is_for_client (lock, in_client_pipe, &found_lock);
+            err = ccs_lock_is_for_client_pipe (lock, in_client_pipe, &found_lock);
             
             if (!err && found_lock) {
                 cci_debug_printf ("%s: Removing lock %p.", __FUNCTION__, lock);
@@ -453,4 +451,33 @@ cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
     
     return cci_check_error (err);    
 }
-                                                  
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_lock_state_invalidate_lock (ccs_lock_state_t io_lock_state,
+                                         ccs_lock_t       in_lock)
+{
+    cc_int32 err = ccNoError;
+    
+    if (!io_lock_state) { err = ccErrBadParam; }
+    
+    if (!err) {
+        cc_uint64 i;
+        cc_uint64 count = ccs_lock_array_count (io_lock_state->locks);
+        
+        for (i = 0; !err && i < count; i++) {
+            ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            
+            if (lock == in_lock) {
+                err = ccs_lock_status_remove_lock (io_lock_state, i);
+                
+                if (!err) {
+                    err = ccs_lock_status_try_to_grant_pending_locks (io_lock_state);
+                    break;
+                }                        
+            }
+        }
+    }
+    
+    return cci_check_error (err);    
+}

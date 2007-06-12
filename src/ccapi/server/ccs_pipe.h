@@ -29,24 +29,6 @@
 
 #include "ccs_types.h"
 
-cc_int32 ccs_pipe_new (ccs_pipe_t    *out_pipe,
-                       ccs_os_pipe_t  in_os_pipe);
-
-cc_int32 ccs_pipe_copy (ccs_pipe_t *out_pipe,
-                        ccs_pipe_t  in_pipe);
-
-cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe);
-
-cc_int32 ccs_pipe_compare (ccs_pipe_t  in_pipe,
-                           ccs_pipe_t  in_compare_to_pipe,
-                           cc_uint32  *out_equal);
-
-cc_int32 ccs_pipe_compare_to_os_pipe (ccs_pipe_t     in_pipe,
-                                      ccs_os_pipe_t  in_compare_to_os_pipe,
-                                      cc_uint32      *out_equal);
-
 cc_int32 ccs_pipe_valid (ccs_pipe_t in_pipe);
-
-ccs_os_pipe_t ccs_pipe_os (ccs_pipe_t in_pipe);
 
 #endif /* CCS_PIPE_H */

@@ -24,16 +24,21 @@
  * or implied warranty.
  */
 
-#include "ccs_common.h"
-#include "ccs_os_pipe.h"
-#include <mach/port.h>
+#ifndef CCS_LOCK_REFERENCE_H
+#define CCS_LOCK_REFERENCE_H
 
-/* On Mac OS X ccs_pipe_t is a mach_port_t */
+#include "ccs_types.h"
 
-/* ------------------------------------------------------------------------ */
+cc_int32 ccs_lockref_new (ccs_lockref_t *out_lockref,
+                          ccs_client_t   in_client_owner,
+                          ccs_lock_t     in_lock);
 
-cc_int32 ccs_os_pipe_valid (ccs_pipe_t in_pipe)
-{
-    return MACH_PORT_VALID (in_pipe);
-}
+cc_int32 ccs_lockref_release (ccs_lockref_t io_lockref);
 
+cc_int32 ccs_lockref_invalidate (ccs_lockref_t io_lockref);
+
+cc_int32 ccs_lockref_is_for_lock (ccs_lockref_t in_lockref,
+                                  ccs_lock_t    in_lock,
+                                  cc_uint32    *out_is_for_lock);
+
+#endif /* CCS_LOCK_REFERENCE_H */

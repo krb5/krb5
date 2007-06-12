@@ -31,7 +31,9 @@
 
 struct cci_array_d;
 
-typedef struct cci_array_d *ccs_pipe_array_t;
+typedef struct cci_array_d *ccs_client_array_t;
+
+typedef struct cci_array_d *ccs_lockref_array_t;
 
 typedef struct cci_array_d *ccs_lock_array_t;
 
@@ -41,19 +43,19 @@ typedef struct cci_array_d *ccs_lock_array_t;
 
 #if TARGET_OS_MAC
 #include <mach/mach_types.h>
-typedef mach_port_t ccs_os_pipe_t;  /* Mach IPC port */
-#define CCS_OS_PIPE_NULL MACH_PORT_NULL
+typedef mach_port_t ccs_pipe_t;  /* Mach IPC port */
+#define CCS_PIPE_NULL MACH_PORT_NULL
 
 #else
-typedef int ccs_os_pipe_t; /* Unix domain socket */
-#define CCS_OS_PIPE_NULL -1
+typedef int ccs_pipe_t; /* Unix domain socket */
+#define CCS_PIPE_NULL -1
 
 #endif
 
 #pragma mark -
 
-struct ccs_pipe_d;
-typedef struct ccs_pipe_d *ccs_pipe_t;
+struct ccs_lockref_d;
+typedef struct ccs_lockref_d *ccs_lockref_t;
 
 struct ccs_list_d;
 struct ccs_list_iterator_d;

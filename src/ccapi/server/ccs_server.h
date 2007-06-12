@@ -29,15 +29,17 @@
 
 #include "ccs_types.h"
 
-cc_int32 ccs_server_initialize (void);
-
-cc_int32 ccs_server_cleanup (void);
-
 cc_int32 ccs_server_new_identifier (cci_identifier_t *out_identifier);
 
-cc_int32 ccs_server_add_client (ccs_os_pipe_t in_connection_os_pipe);
+cc_int32 ccs_server_add_client (ccs_pipe_t in_connection_pipe);
 
-cc_int32 ccs_server_remove_client (ccs_os_pipe_t in_connection_os_pipe);
+cc_int32 ccs_server_remove_client (ccs_pipe_t in_connection_pipe);
+
+cc_int32 ccs_server_client_for_pipe (ccs_pipe_t    in_client_pipe,
+                                     ccs_client_t *out_client);
+
+cc_int32 ccs_server_client_is_valid (ccs_pipe_t  in_client_pipe,
+                                     cc_uint32  *out_client_is_valid);
 
 cc_int32 ccs_server_handle_request (ccs_pipe_t     in_client_pipe,
                                     ccs_pipe_t     in_reply_pipe,
