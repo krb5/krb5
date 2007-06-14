@@ -34,7 +34,7 @@
 #if defined(_WIN32)
 #include <winsock.h>
 #else
-#include <sys/types.h>
+#include <stdint.h>
 #endif
 
 #ifdef __cplusplus
@@ -57,8 +57,6 @@ extern "C" {
 #else
 #define CCACHE_API
 #endif
-
-#include <time.h>
 
 /*
  * Constants

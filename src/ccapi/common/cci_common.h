@@ -27,25 +27,24 @@
 #ifndef CCI_COMMON_H
 #define CCI_COMMON_H
 
+#include <CredentialsCache.h>
+
 #include <sys/types.h>
-
-#if TARGET_OS_MAC
-#include <stdint.h>
-#include <unistd.h>
-#define VECTOR_FUNCTIONS_INITIALIZER ,NULL
-#else
-#include "win-mac.h"
-#define VECTOR_FUNCTIONS_INITIALIZER
-#pragma warning (disable: 4068)
-#endif
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <com_err.h>
 
-#include <CredentialsCache.h>
+#if TARGET_OS_MAC
+#include <unistd.h>
+#define VECTOR_FUNCTIONS_INITIALIZER ,NULL
+#else
+#include "win-mac.h"
+#define VECTOR_FUNCTIONS_INITIALIZER
+/* hide "#pragma mark" warnings on Windows */
+#pragma warning (disable: 4068)
+#endif
 
 #define k_cci_context_initial_ccache_name "Initial default ccache"
 

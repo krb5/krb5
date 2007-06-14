@@ -29,6 +29,8 @@
 
 #include "cci_common.h"
 
+#include <time.h>
+
 #include "ccs_array.h"
 #include "ccs_list.h"
 #include "ccs_cache_collection.h"
