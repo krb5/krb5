@@ -345,7 +345,6 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_data k5data;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
-
     if (data == NULL || data->length <= 0 || data->contents == NULL)
 	return 0;
 
@@ -377,7 +376,11 @@ pkinit_server_verify_padata(krb5_context context,
 		pkiDebug("decode_krb5_pa_pk_as_req failed\n");
 		goto cleanup;
 	    }
-
+#ifdef DEBUG_ASN1
+	    print_buffer_bin(reqp->signedAuthPack.data,
+			     reqp->signedAuthPack.length,
+			     "/tmp/kdc_signed_data");
+#endif
 	    retval = cms_signeddata_verify(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_CLIENT,
 		plgctx->opts->require_crl_checking,
@@ -394,6 +397,11 @@ pkinit_server_verify_padata(krb5_context context,
 		pkiDebug("decode_krb5_pa_pk_as_req_draft9 failed\n");
 		goto cleanup;
 	    }
+#ifdef DEBUG_ASN1
+	    print_buffer_bin(reqp9->signedAuthPack.data,
+			     reqp9->signedAuthPack.length,
+			     "/tmp/kdc_signed_data_draft9");
+#endif
 
 	    retval = cms_signeddata_verify(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, plgctx->idctx, CMS_SIGN_DRAFT9,
@@ -416,14 +424,12 @@ pkinit_server_verify_padata(krb5_context context,
 			       &valid_san);
     if (retval)
 	goto cleanup;
-
     if (!valid_san) {
 	pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
 		 __FUNCTION__);
 	retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
 	goto cleanup;
     }
-
     retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
     if (retval)
 	goto cleanup;
@@ -466,13 +472,13 @@ pkinit_server_verify_padata(krb5_context context,
 	     * came from the client.  Therefore, we use the original
 	     * packet contents.
 	     */
-	    retval = decode_krb5_as_req(req_pkt, &tmp_as_req); 
+	    retval = k5int_decode_krb5_as_req(req_pkt, &tmp_as_req); 
 	    if (retval) {
 		pkiDebug("decode_krb5_as_req returned %d\n", (int)retval);
 		goto cleanup;
 	    }
 		
-	    retval = encode_krb5_kdc_req_body(tmp_as_req, &der_req);
+	    retval = k5int_encode_krb5_kdc_req_body(tmp_as_req, &der_req);
 	    if (retval) {
 		pkiDebug("encode_krb5_kdc_req_body returned %d\n", (int) retval);
 		goto cleanup;
@@ -548,29 +554,36 @@ pkinit_server_verify_padata(krb5_context context,
     }
 
     /* return authorization data to be included in the ticket */
-    my_authz_data = malloc(2 * sizeof(*my_authz_data));
-    if (my_authz_data == NULL) {
-	retval = ENOMEM;
-	pkiDebug("Couldn't allocate krb5_authdata ptr array\n");
-	goto cleanup;
+    switch ((int)data->pa_type) {
+	case KRB5_PADATA_PK_AS_REQ:
+#if 1
+	    my_authz_data = malloc(2 * sizeof(*my_authz_data));
+	    if (my_authz_data == NULL) {
+		retval = ENOMEM;
+		pkiDebug("Couldn't allocate krb5_authdata ptr array\n");
+		goto cleanup;
+	    }
+	    my_authz_data[1] = NULL;
+	    my_authz_data[0] = malloc(sizeof(krb5_authdata));
+	    if (my_authz_data[0] == NULL) {
+		retval = ENOMEM;
+		pkiDebug("Couldn't allocate krb5_authdata\n");
+		free(my_authz_data);
+		goto cleanup;
+	    }
+	    my_authz_data[0]->magic = KV5M_AUTHDATA;
+	    my_authz_data[0]->ad_type = KRB5_AUTHDATA_INITIAL_VERIFIED_CAS;
+	    my_authz_data[0]->contents = krb5_authz.data;
+	    krb5_authz.data = NULL; /* Don't free during cleanup! */
+	    my_authz_data[0]->length = krb5_authz.length;
+	    *authz_data = my_authz_data;
+	    pkiDebug("Returning %d bytes of authorization data\n", 
+		     krb5_authz.length);
+#endif
+	    break;
+	default: 
+	    *authz_data = NULL;
     }
-    my_authz_data[1] = NULL;
-    my_authz_data[0] = malloc(sizeof(krb5_authdata));
-    if (my_authz_data[0] == NULL) {
-	retval = ENOMEM;
-	pkiDebug("Couldn't allocate krb5_authdata\n");
-	free(my_authz_data);
-	goto cleanup;
-    }
-    my_authz_data[0]->magic = KV5M_AUTHDATA;
-    my_authz_data[0]->ad_type = 1;
-    my_authz_data[0]->contents = krb5_authz.data;
-    krb5_authz.data = NULL; /* Don't free during cleanup! */
-    my_authz_data[0]->length = krb5_authz.length;
-    *authz_data = my_authz_data;
-    pkiDebug("Returning %d bytes of authorization data\n", krb5_authz.length);
-    *authz_data = my_authz_data;
-
     /* remember to set the PREAUTH flag in the reply */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
     *pa_request_context = reqctx;
@@ -597,7 +610,7 @@ pkinit_server_verify_padata(krb5_context context,
 	    free_krb5_pa_pk_as_req_draft9(&reqp9);
     }
     if (tmp_as_req != NULL)
-	krb5_free_kdc_req(context, tmp_as_req); 
+	k5int_krb5_free_kdc_req(context, tmp_as_req); 
     if (authp_data.data != NULL)
 	free(authp_data.data);
     if (krb5_authz.data != NULL)
@@ -693,6 +706,7 @@ pkinit_server_return_padata(krb5_context context,
 	    break;
 	}
     }
+
     if (i == request->nktypes) {
 	retval = KRB5KDC_ERR_ETYPE_NOSUPP;
 	goto cleanup;
@@ -822,9 +836,7 @@ pkinit_server_return_padata(krb5_context context,
 	for (i = 0; request->padata[i] != NULL; i++) {
 	    pkiDebug("%s: Checking pa_type 0x%08x\n",
 		     __FUNCTION__, request->padata[i]->pa_type);
-	    if (request->padata[i]->pa_type == 132
-		/* XXX The asn1 encoding from Apple seems to be incorrect? */
-	        ||  request->padata[i]->pa_type == 0xffffff84) 
+	    if (request->padata[i]->pa_type == 132)
 		fixed_keypack = 1;
 	}
 	pkiDebug("%s: return checksum instead of nonce = %d\n",
@@ -1088,11 +1100,22 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
 
     pkinit_kdcdefault_integer(context, plgctx->realmname,
 			      "pkinit_dh_min_bits",
-			      0, &plgctx->opts->dh_min_bits);
+			      PKINIT_DEFAULT_DH_MIN_BITS,
+			      &plgctx->opts->dh_min_bits);
+    if (plgctx->opts->dh_min_bits < 1024) {
+	pkiDebug("%s: invalid value (%d) for pkinit_dh_min_bits, "
+		 "using default value (%d) instead\n", __FUNCTION__,
+		 plgctx->opts->dh_min_bits, PKINIT_DEFAULT_DH_MIN_BITS);
+	plgctx->opts->dh_min_bits = PKINIT_DEFAULT_DH_MIN_BITS;
+    }
 
     pkinit_kdcdefault_boolean(context, plgctx->realmname,
 			      "pkinit_allow_upn",
 			      0, &plgctx->opts->allow_upn);
+
+    pkinit_kdcdefault_boolean(context, plgctx->realmname,
+			      "pkinit_require_crl_checking",
+			      0, &plgctx->opts->require_crl_checking);
 
     pkinit_kdcdefault_string(context, plgctx->realmname,
 			     "pkinit_eku_checking",

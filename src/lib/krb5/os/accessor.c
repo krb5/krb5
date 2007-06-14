@@ -104,6 +104,10 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    S (decode_krb5_typed_data, decode_krb5_typed_data),
 	    S (decode_krb5_td_trusted_certifiers, decode_krb5_td_trusted_certifiers),
 	    S (decode_krb5_td_dh_parameters, decode_krb5_td_dh_parameters),
+	    S (decode_krb5_as_req, decode_krb5_as_req),
+	    S (encode_krb5_kdc_req_body, encode_krb5_kdc_req_body),
+	    S (krb5_free_kdc_req, krb5_free_kdc_req),
+	    S (krb5int_set_prompt_types, krb5int_set_prompt_types)
 #if DESIGNATED_INITIALIZERS
 	};
 #else

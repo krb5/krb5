@@ -91,7 +91,7 @@ typedef struct _krb5_trusted_ca {
 		choice_trusted_cas_UNKNOWN = -1,
 		choice_trusted_cas_principalName = 0,
 		choice_trusted_cas_caName = 1,
-		choice_trusted_cas_issuerAndSerial = 2,
+		choice_trusted_cas_issuerAndSerial = 2
 	} choice;
 	union {
 		krb5_principal	principalName;
@@ -159,7 +159,7 @@ typedef struct _krb5_pa_pk_as_rep_draft9 {
 	enum {
 		choice_pa_pk_as_rep_draft9_UNKNOWN = -1,
 		choice_pa_pk_as_rep_draft9_dhSignedData = 0,
-		choice_pa_pk_as_rep_draft9_encKeyPack = 1,
+		choice_pa_pk_as_rep_draft9_encKeyPack = 1
 	} choice;
 	union {
 		krb5_octet_data dhSignedData;
@@ -172,7 +172,7 @@ typedef struct _krb5_pa_pk_as_rep {
 	enum {
 		choice_pa_pk_as_rep_UNKNOWN = -1,
 		choice_pa_pk_as_rep_dhInfo = 0,
-		choice_pa_pk_as_rep_encKeyPack = 1,
+		choice_pa_pk_as_rep_encKeyPack = 1
 	} choice;
 	union {
 		krb5_dh_rep_info    dh_Info;

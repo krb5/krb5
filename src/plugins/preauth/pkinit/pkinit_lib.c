@@ -56,11 +56,10 @@ krb5_error_code pkinit_init_req_opts(pkinit_req_opts **reqopts)
 
     opts->require_eku = 1;
     opts->accept_secondary_eku = 0;
-    opts->require_san = 1;
     opts->allow_upn = 0;
     opts->dh_or_rsa = DH_PROTOCOL;
     opts->require_crl_checking = 0;
-    opts->dh_size = 1024;
+    opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
     opts->win2k_target = 0;
     opts->win2k_require_cksum = 0;
 
@@ -88,12 +87,11 @@ krb5_error_code pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
 
     opts->require_eku = 1;
     opts->accept_secondary_eku = 0;
-    opts->require_san = 1;
     opts->dh_or_rsa = DH_PROTOCOL;
     opts->allow_upn = 0;
     opts->require_crl_checking = 0;
 
-    opts->dh_min_bits = 0;
+    opts->dh_min_bits = PKINIT_DEFAULT_DH_MIN_BITS;
 
     *plgopts = opts;
 
@@ -153,6 +151,7 @@ void free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 
 void free_krb5_auth_pack(krb5_auth_pack **in)
 {
+    int i = 0;
     if ((*in) == NULL) return;
     if ((*in)->clientPublicValue != NULL) {
     /* not freeing clientPublicValue->algorithm.algorithm.data because
@@ -167,6 +166,13 @@ void free_krb5_auth_pack(krb5_auth_pack **in)
     }
     if ((*in)->pkAuthenticator.paChecksum.contents != NULL)
 	free((*in)->pkAuthenticator.paChecksum.contents);
+    if ((*in)->supportedCMSTypes != NULL) {
+	while ((*in)->supportedCMSTypes[i] != NULL) {
+	    free((*in)->supportedCMSTypes[i]);
+	    i++;
+	}
+	free((*in)->supportedCMSTypes);
+    }
     free(*in);
 }
 

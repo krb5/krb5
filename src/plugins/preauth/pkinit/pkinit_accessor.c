@@ -64,6 +64,14 @@ krb5_error_code (*k5int_encode_krb5_td_trusted_certifiers)
 krb5_error_code (*k5int_decode_krb5_td_trusted_certifiers)
 	(const krb5_data *, krb5_external_principal_identifier ***);
 
+krb5_error_code (*k5int_decode_krb5_as_req)
+	(const krb5_data *output, krb5_kdc_req **rep);
+krb5_error_code (*k5int_encode_krb5_kdc_req_body)
+	(const krb5_kdc_req *rep, krb5_data **code);
+void KRB5_CALLCONV (*k5int_krb5_free_kdc_req)
+	(krb5_context, krb5_kdc_req * );
+void (*k5int_set_prompt_types)
+	(krb5_context, krb5_prompt_type *);
 
 
 /*
@@ -97,5 +105,9 @@ k5int_decode_##type = k5int.decode_##type;
 
     /* special cases... */
     k5int_decode_krb5_principal_name = k5int.decode_krb5_principal_name;
+    k5int_decode_krb5_as_req = k5int.decode_krb5_as_req;
+    k5int_encode_krb5_kdc_req_body = k5int.encode_krb5_kdc_req_body;
+    k5int_krb5_free_kdc_req = k5int.krb5_free_kdc_req;
+    k5int_set_prompt_types = k5int.krb5int_set_prompt_types;
     return 0;
 }

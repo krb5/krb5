@@ -55,10 +55,18 @@
 #define PKINIT_CTX_MAGIC	0x05551212
 #define PKINIT_REQ_CTX_MAGIC	0xdeadbeef
 
+#define PKINIT_DEFAULT_DH_MIN_BITS  2048
+
+/* Make pkiDebug(fmt,...) print, or not.  */
 #ifdef DEBUG
-#define pkiDebug(args...)	printf(args)
+#define pkiDebug	printf
 #else
-#define pkiDebug(args...)
+/* Still evaluates for side effects.  */
+static inline void pkiDebug (const char *fmt, ...) { }
+/* This is better if the compiler doesn't inline variadic functions
+   well, but gcc will warn about "left-hand operand of comma
+   expression has no effect".  Still evaluates for side effects.  */
+/* #define pkiDebug	(void) */
 #endif
 
 /* Solaris compiler doesn't grok __FUNCTION__ 
@@ -117,7 +125,6 @@ typedef struct _pkinit_identity_crypto_context *pkinit_identity_crypto_context;
 typedef struct _pkinit_plg_opts {
     int require_eku;	    /* require EKU checking (default is true) */
     int accept_secondary_eku;/* accept secondary EKU (default is false) */
-    int require_san;	    /* require SAN checking (default is true) */
     int allow_upn;	    /* allow UPN-SAN instead of pkinit-SAN */
     int dh_or_rsa;	    /* selects DH or RSA based pkinit */
     int require_crl_checking; /* require CRL for a CA (default is false) */ 
@@ -130,7 +137,6 @@ typedef struct _pkinit_plg_opts {
 typedef struct _pkinit_req_opts {
     int require_eku;
     int accept_secondary_eku;
-    int require_san;
     int allow_upn;
     int dh_or_rsa;
     int require_crl_checking;
@@ -236,6 +242,12 @@ krb5_error_code pkinit_init_identity_opts(pkinit_identity_opts **idopts);
 void pkinit_fini_identity_opts(pkinit_identity_opts *idopts);
 krb5_error_code pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
 					 pkinit_identity_opts **dest_opts);
+
+/*
+ * Functions in pkinit_identity.c
+ */
+char * idtype2string(int idtype);
+char * catype2string(int catype);
 
 krb5_error_code pkinit_identity_initialize
 	(krb5_context context,				/* IN */

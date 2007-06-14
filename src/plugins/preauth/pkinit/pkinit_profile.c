@@ -247,7 +247,6 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
 
     profile = context->profile;
 
-    names[0] = "libdefaults";
 
     if (realm != NULL) {
 	/*
@@ -259,6 +258,24 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
 	 *	  }
 	 */
 
+	names[0] = "libdefaults";
+	names[1] = realmstr;
+	names[2] = option;
+	names[3] = 0;
+	retval = profile_get_values(profile, names, &values);
+	if (retval == 0 && values != NULL && values[0] != NULL)
+	    goto goodbye;
+
+	/*
+	 * Try number two:
+	 *
+	 * [realms]
+	 *	REALM = {
+	 *		option = <value>
+	 *	}
+	 */
+
+	names[0] = "realms";
 	names[1] = realmstr;
 	names[2] = option;
 	names[3] = 0;
@@ -266,13 +283,15 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
 	if (retval == 0 && values != NULL && values[0] != NULL)
 	    goto goodbye;
     }
+
     /*
-     * Try number two:
+     * Try number three:
      *
      * [libdefaults]
      *	      option = <value>
      */
 
+    names[0] = "libdefaults";
     names[1] = option;
     names[2] = 0;
     retval = profile_get_values(profile, names, &values);

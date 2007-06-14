@@ -170,9 +170,6 @@ static void print_dh(DH *, char *);
 static void print_pubkey(BIGNUM *, char *);
 #endif
 
-static X509 *get_cert(char *filename);
-static EVP_PKEY *get_key(char *filename);
-
 static int prepare_enc_data
 	(unsigned char *indata, int indata_len, unsigned char **outdata,
 		int *outdata_len);
@@ -255,5 +252,8 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \
 	(((x)->ex_flags & EXFLAG_KUSAGE) && !((x)->ex_kusage & (usage)))
+
+static char *
+pkinit_pkcs11_code_to_text(int err);
 
 #endif	/* _PKINIT_CRYPTO_OPENSSL_H */

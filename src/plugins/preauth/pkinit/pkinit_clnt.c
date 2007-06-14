@@ -151,7 +151,7 @@ pa_pkinit_gen_req(krb5_context context,
     }
 
     /* checksum of the encoded KDC-REQ-BODY */
-    retval = encode_krb5_kdc_req_body(request, &der_req);
+    retval = k5int_encode_krb5_kdc_req_body(request, &der_req);
     if (retval) {
 	pkiDebug("encode_krb5_kdc_req_body returned %d\n", (int) retval);
 	goto cleanup;
@@ -298,9 +298,19 @@ pkinit_as_req_create(krb5_context context,
 	    auth_pack->pkAuthenticator.cusec = cusec;
 	    auth_pack->pkAuthenticator.nonce = nonce;
 	    auth_pack->pkAuthenticator.paChecksum = *cksum;
-	    auth_pack->supportedCMSTypes = NULL;
 	    auth_pack->clientDHNonce.length = 0;
 	    auth_pack->clientPublicValue = info;
+
+	    /* add List of CMS algorithms */
+#if 1
+	    retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
+			reqctx->cryptoctx, reqctx->idctx, 
+			&auth_pack->supportedCMSTypes);
+	    if (retval)
+		goto cleanup;
+#else
+	    auth_pack->supportedCMSTypes = NULL;
+#endif
 	    break;
 	default:
 	    pkiDebug("as_req: unrecognized pa_type = %d\n",
@@ -907,19 +917,21 @@ pkinit_client_profile(krb5_context context,
 			      "pkinit_win2k_require_binding",
 			      reqctx->opts->win2k_require_cksum,
 			      &reqctx->opts->win2k_require_cksum);
-    /* Temporarily just set global flag from config file */
     pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_longhorn",
-			      0,
-			      &longhorn);
-    pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_require_krbtgt_otherName",
-			      reqctx->opts->require_san,
-			      &reqctx->opts->require_san);
-    pkinit_libdefault_boolean(context, &request->server->realm,
-			      "pkinit_allow_upn",
-			      reqctx->opts->allow_upn,
-			      &reqctx->opts->allow_upn);
+			      "pkinit_require_crl_checking",
+			      reqctx->opts->require_crl_checking,
+			      &reqctx->opts->require_crl_checking);
+    pkinit_libdefault_integer(context, &request->server->realm,
+			      "pkinit_dh_min_bits",
+			      reqctx->opts->dh_size,
+			      &reqctx->opts->dh_size);
+    if (reqctx->opts->dh_size != 1024 && reqctx->opts->dh_size != 2048
+        && reqctx->opts->dh_size != 4096) {
+	pkiDebug("%s: invalid value (%d) for pkinit_dh_min_bits, "
+		 "using default value (%d) instead\n", __FUNCTION__,
+		 reqctx->opts->dh_size, PKINIT_DEFAULT_DH_MIN_BITS);
+	reqctx->opts->dh_size = PKINIT_DEFAULT_DH_MIN_BITS;
+    }
     pkinit_libdefault_string(context, &request->server->realm,
 			     "pkinit_eku_checking",
 			     &eku_string);
@@ -939,6 +951,11 @@ pkinit_client_profile(krb5_context context,
 	}
 	free(eku_string);
     }
+    /* Temporarily just set global flag from config file */
+    pkinit_libdefault_boolean(context, &request->server->realm,
+			      "pkinit_longhorn",
+			      0,
+			      &longhorn);
 
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)
@@ -952,7 +969,7 @@ pkinit_client_profile(krb5_context context,
 			      "pkinit_revoke",
 			      &reqctx->idopts->crls);
     pkinit_libdefault_strings(context, &request->server->realm,
-			      "pkinit_identity_alt",
+			      "pkinit_identities",
 			      &reqctx->idopts->identity_alt);
 }
 
@@ -1200,7 +1217,6 @@ pkinit_client_req_init(krb5_context context,
 	
     reqctx->opts->require_eku = plgctx->opts->require_eku;
     reqctx->opts->accept_secondary_eku = plgctx->opts->accept_secondary_eku;
-    reqctx->opts->require_san = plgctx->opts->require_san;
     reqctx->opts->dh_or_rsa = plgctx->opts->dh_or_rsa;
     reqctx->opts->allow_upn = plgctx->opts->allow_upn;
     reqctx->opts->require_crl_checking = plgctx->opts->require_crl_checking;

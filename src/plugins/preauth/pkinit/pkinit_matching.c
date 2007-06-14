@@ -45,7 +45,7 @@ typedef enum {
     kw_issuer = 2,
     kw_san = 3,
     kw_eku = 4,
-    kw_ku = 5,
+    kw_ku = 5
 } keyword_type;
 
 static char *
@@ -64,7 +64,7 @@ keyword2string(unsigned int kw)
 typedef enum {
     relation_none = 0,
     relation_and = 1,
-    relation_or = 2,
+    relation_or = 2
 } relation_type;
 
 static char *
@@ -81,7 +81,7 @@ relation2string(unsigned int rel)
 typedef enum {
     kwvaltype_undefined = 0,
     kwvaltype_regexp = 1,
-    kwvaltype_list = 2,
+    kwvaltype_list = 2
 } kw_value_type;
 
 static char *
@@ -188,7 +188,7 @@ parse_list_value(krb5_context context,
 {
     krb5_error_code retval;
     char *comma;
-    struct ku_desc *ku;
+    struct ku_desc *ku = NULL;
     int found;
     size_t len;
     unsigned int *bitptr;
@@ -382,7 +382,7 @@ parse_rule_set(krb5_context context,
     const char *rule;
     int remaining, totlen;
     krb5_error_code ret, retval;
-    rule_component *rc, *trc;
+    rule_component *rc = NULL, *trc;
     rule_set *rs;
 
 
@@ -485,6 +485,8 @@ component_match(krb5_context context,
 	    match = regexp_match(context, rc, md->issuer_dn);
 	    break;
 	case kw_san:
+	    if (md->sans == NULL)
+		break;
 	    for (i = 0, p = md->sans[i]; p != NULL; p = md->sans[++i]) {
 		krb5_unparse_name(context, p, &princ_string);
 		match = regexp_match(context, rc, princ_string);
@@ -665,7 +667,7 @@ obtain_all_cert_matching_data(krb5_context context,
     int i, cert_count;
     pkinit_cert_iter_handle ih = NULL;
     pkinit_cert_handle ch;
-    pkinit_cert_matching_data **matchdata;
+    pkinit_cert_matching_data **matchdata = NULL;
 
     retval = crypto_cert_get_count(context, plg_cryptoctx, req_cryptoctx,
 				   id_cryptoctx, &cert_count);
@@ -740,7 +742,7 @@ pkinit_cert_matching(krb5_context context,
     rule_set *rs = NULL;
     int match_found = 0;
     pkinit_cert_matching_data **matchdata = NULL;
-    pkinit_cert_matching_data *the_matching_cert;
+    pkinit_cert_matching_data *the_matching_cert = NULL;
 
     /* If no matching rules, select the default cert and we're done */
     pkinit_libdefault_strings(context, krb5_princ_realm(context, princ),

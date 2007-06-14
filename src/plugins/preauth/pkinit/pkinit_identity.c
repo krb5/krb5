@@ -83,6 +83,30 @@ cleanup:
     return ENOMEM;
 }
 
+char *
+idtype2string(int idtype)
+{
+    switch(idtype) {
+    case IDTYPE_FILE: return "FILE"; break;
+    case IDTYPE_DIR: return "DIR"; break;
+    case IDTYPE_PKCS11: return "PKCS11"; break;
+    case IDTYPE_PKCS12: return "PKCS12"; break;
+    case IDTYPE_ENVVAR: return "ENV"; break;
+    default: return "INVALID"; break;
+    }
+}
+
+char *
+catype2string(int catype)
+{
+    switch(catype) {
+    case CATYPE_ANCHORS: return "ANCHORS"; break;
+    case CATYPE_INTERMEDIATES: return "INTERMEDIATES"; break;
+    case CATYPE_CRLS: return "CRLS"; break;
+    default: return "INVALID"; break;
+    }
+}
+
 krb5_error_code
 pkinit_init_identity_opts(pkinit_identity_opts **idopts)
 {
@@ -301,7 +325,6 @@ parse_pkcs11_options(krb5_context context,
     retval = 0;
 cleanup:
     free(s);
-    /* XXX Clean up other stuff too? */
     return retval;
 }
 #endif
@@ -413,7 +436,7 @@ process_option_identity(krb5_context context,
     }
 
     idopts->idtype = idtype;
-    pkiDebug("%s: idtype is %d\n", __FUNCTION__, idopts->idtype);
+    pkiDebug("%s: idtype is %s\n", __FUNCTION__, idtype2string(idopts->idtype));
     switch (idtype) {
     case IDTYPE_ENVVAR:
 	return process_option_identity(context, plg_cryptoctx, req_cryptoctx,
@@ -457,12 +480,12 @@ process_option_ca_crl(krb5_context context,
     unsigned int typelen;
     int idtype;
 
-    pkiDebug("%s: processing catype %d, value '%s'\n",
-	     __FUNCTION__, catype, value);
+    pkiDebug("%s: processing catype %s, value '%s'\n",
+	     __FUNCTION__, catype2string(catype), value);
     residual = strchr(value, ':');
     if (residual == NULL) {
 	pkiDebug("No type given for '%s'\n", value);
-	return EINVAL;	    /* XXX */
+	return EINVAL;
     }
     residual++; /* skip past colon */
     typelen = residual - value;
