@@ -34,8 +34,6 @@
 #if TARGET_OS_MAC
 #warning Workaround for AppleConnect crash causes leak
 #include <CoreFoundation/CoreFoundation.h>
-#else
-#pragma warning (disable: 4068)
 #endif
 
 /* ------------------------------------------------------------------------ */

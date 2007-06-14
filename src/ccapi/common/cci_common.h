@@ -36,6 +36,7 @@
 #else
 #include "win-mac.h"
 #define VECTOR_FUNCTIONS_INITIALIZER
+#pragma warning (disable: 4068)
 #endif
 
 #include <stdarg.h>
