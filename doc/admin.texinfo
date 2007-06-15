@@ -399,6 +399,7 @@ salt.  The supported values for salts are as follows.
 * capaths::                     
 * dbdefaults::                  
 * dbmodules::                   
+* pkinit client options::
 * Sample krb5.conf File::       
 @end menu
 
@@ -1074,7 +1075,7 @@ This LDAP specific tag indicates the list of LDAP servers that the Kerberos serv
 This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under [dbmodules]. The default value is 5.
 @end table
 
-@node dbmodules, pkinit options, dbdefaults, krb5.conf
+@node dbmodules, pkinit client options, dbdefaults, krb5.conf
 @subsection [dbmodules]
 
 Contains database specific parameters used by the database library. Each tag in the [dbmodules] section of the file names a configuration section for database specific parameters that can be referred to by a realm. The value of the tag is a subsection where the relations in that subsection define the database specific parameters.
@@ -1105,8 +1106,13 @@ This LDAP specific tags indicates the number of connections to be maintained per
 
 @end table
 
-@node pkinit options, Sample krb5.conf File, dbmodules, krb5.conf
+@node pkinit client options, Sample krb5.conf File, dbmodules, krb5.conf
 @subsection pkinit options
+
+@menu
+* pkinit identity syntax::
+* pkinit krb5.conf options::
+@end menu
 
 The following are @b{pkinit-specific} options.
 Note that these values may be specified in @code{[libdefaults]}
@@ -1148,7 +1154,7 @@ The search order is:
 @end smallexample
 @end enumerate
 
-@node pkinit identity syntax, pkinit krb5.conf options, pkinit options, pkinit options
+@node pkinit identity syntax, pkinit krb5.conf options, pkinit client options, pkinit client options
 @subsubsection Specifying pkinit identity information
 
 The syntax for specifying Public Key identity, trust, and revocation
@@ -1202,8 +1208,7 @@ they will be used.
 @i{pkcs12-file-name} is the name of a @code{PKCS #12} format file, containing
 the user's certificate and private key.
 
-@item PKCS11:[@b{module_name=}]@i{module-name}[@b{:slotid=}@i{slot-id}]@
-[@b{:token=}@i{token-label}][@b{:certid=}@i{cert-id}][@b{:certlabel=}@i{cert-label}]
+@item PKCS11:[@b{module_name=}]@i{module-name}[@b{:slotid=}@i{slot-id}][@b{:token=}@i{token-label}][@b{:certid=}@i{cert-id}][@b{:certlabel=}@i{cert-label}]
 All keyword/values are optional.
 @i{module-name} specifies the location of a library implementing
 @code{PKCS #11}.  If a value is encountered with not keyword, it
@@ -1224,7 +1229,7 @@ previous values.  For example, @code{ENV:X509_PROXY}, where environment
 variable @code{X509_PROXY} has been set to @code{FILE:/tmp/my_proxy.pem}.
 @end table
 
-@node pkinit krb5.conf options,  , pkinit identity syntax, pkinit options
+@node pkinit krb5.conf options,  , pkinit identity syntax, pkinit client options
 @subsubsection pkinit krb5.conf options
 @table @b
 
@@ -1374,7 +1379,7 @@ pkinit_cert_match = <EKU>msScLogin,clientAuth<KU>digitalSignature
 @end example
 @end table
 
-@node Sample krb5.conf File,  , pkinit options, krb5.conf
+@node Sample krb5.conf File,  , pkinit client options, krb5.conf
 @subsection Sample krb5.conf File
 
 Here is an example of a generic @code{krb5.conf} file:
@@ -1459,6 +1464,7 @@ Here is an example of a generic @code{krb5.conf} file:
 @menu
 * kdcdefaults::                 
 * realms (kdc.conf)::           
+* pkinit kdc options::
 * Sample kdc.conf File::        
 @end menu
 
@@ -1495,7 +1501,7 @@ The default value is @value{DefaultV4Mode}.
 @comment these values found in krb5/src/kdc/kerberos_v4.c in v4mode_table
 @end table
 
-@node realms (kdc.conf), pkinit options, kdcdefaults, kdc.conf
+@node realms (kdc.conf), pkinit kdc options, kdcdefaults, kdc.conf
 @subsection [realms]
 
 Each tag in the [realms] section of the file names a Kerberos realm.
@@ -1679,8 +1685,13 @@ This option defaults to @code{true}.
 
 @end table
 
-@node pkinit options, Sample kdc.conf File, realms (kdc.conf), kdc.conf
+@node pkinit kdc options, Sample kdc.conf File, realms (kdc.conf), kdc.conf
 @subsection pkinit options
+
+@menu
+* pkinit kdc.conf options::
+@end menu
+
 The following are @b{pkinit-specific} options.
 Note that these values may be specified in @code{[kdcdefaults]}
 as global defaults,
@@ -1708,7 +1719,7 @@ The search order is:
 @end smallexample
 @end enumerate
 
-@node pkinit kdc.conf options,  , pkinit options, pkinit options
+@node pkinit kdc.conf options,  , pkinit kdc options, pkinit kdc options
 @subsubsection pkinit kdc.conf options
 
 For information about the syntax of some of these options,
@@ -1790,7 +1801,7 @@ The use of this option is @b{not recommended}.
 @end table
 @end table
 
-@node Sample kdc.conf File,  , pkinit options, kdc.conf
+@node Sample kdc.conf File,  , pkinit kdc options, kdc.conf
 @subsection Sample kdc.conf File
 
 Here's an example of a @code{kdc.conf} file:

@@ -1444,6 +1444,9 @@ krb5_error_code encode_krb5_error
 krb5_error_code encode_krb5_authdata
 	(const krb5_authdata **rep, krb5_data **code);
 
+krb5_error_code encode_krb5_authdata_elt
+	(const krb5_authdata *rep, krb5_data **code);
+
 krb5_error_code encode_krb5_pwd_sequence
 	(const passwd_phrase_element *rep, krb5_data **code);
 
@@ -1975,6 +1978,8 @@ typedef struct _krb5int_access {
 	(krb5_context, krb5_kdc_req * );
     void (*krb5int_set_prompt_types)
 	(krb5_context, krb5_prompt_type *);
+    krb5_error_code (*encode_krb5_authdata_elt)
+	(const krb5_authdata *rep, krb5_data **code);
 
 } krb5int_access;
 

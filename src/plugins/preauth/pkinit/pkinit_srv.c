@@ -330,6 +330,7 @@ pkinit_server_verify_padata(krb5_context context,
 {
     krb5_error_code retval = 0;	
     krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
+    krb5_octet_data *encoded_pkinit_authz_data = NULL;
     krb5_pa_pk_as_req *reqp = NULL;
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
@@ -340,7 +341,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
-    krb5_authdata **my_authz_data = NULL;
+    krb5_authdata **my_authz_data = NULL, *pkinit_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
 
@@ -571,14 +572,45 @@ pkinit_server_verify_padata(krb5_context context,
 		free(my_authz_data);
 		goto cleanup;
 	    }
+	    /* AD-INITIAL-VERIFIED-CAS must be wrapped in AD-IF-RELEVANT */
 	    my_authz_data[0]->magic = KV5M_AUTHDATA;
-	    my_authz_data[0]->ad_type = KRB5_AUTHDATA_INITIAL_VERIFIED_CAS;
-	    my_authz_data[0]->contents = krb5_authz.data;
-	    krb5_authz.data = NULL; /* Don't free during cleanup! */
-	    my_authz_data[0]->length = krb5_authz.length;
+	    my_authz_data[0]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
+
+	    /* create an internal AD-INITIAL-VERIFIED-CAS data */
+	    pkinit_authz_data = malloc(sizeof(krb5_authdata));
+	    if (pkinit_authz_data == NULL) {
+		retval = ENOMEM;
+		pkiDebug("Couldn't allocate krb5_authdata\n");
+		free(my_authz_data[0]);
+		free(my_authz_data);
+		goto cleanup;
+	    }
+	    pkinit_authz_data->ad_type = KRB5_AUTHDATA_INITIAL_VERIFIED_CAS;
+	    /* content of this ad-type contains the certification
+	       path with which the client certificate was validated
+	     */
+	    pkinit_authz_data->contents = krb5_authz.data;
+	    pkinit_authz_data->length = krb5_authz.length;
+	    retval = k5int_encode_krb5_authdata_elt(pkinit_authz_data, 
+			    &encoded_pkinit_authz_data);
+#ifdef DEBUG_ASN1
+	    print_buffer_bin(encoded_pkinit_authz_data->data, encoded_pkinit_authz_data->length, "/tmp/kdc_pkinit_authz_data");
+#endif
+	    free(pkinit_authz_data);
+	    if (retval) {
+		pkiDebug("k5int_encode_krb5_authdata_elt failed\n");
+		free(my_authz_data[0]);
+		free(my_authz_data);
+		goto cleanup;
+	    }
+
+	    my_authz_data[0]->contents = encoded_pkinit_authz_data->data;
+	    my_authz_data[0]->length = encoded_pkinit_authz_data->length;
 	    *authz_data = my_authz_data;
 	    pkiDebug("Returning %d bytes of authorization data\n", 
 		     krb5_authz.length);
+	    encoded_pkinit_authz_data->data = NULL; /* Don't free during cleanup*/
+	    free(encoded_pkinit_authz_data);
 #endif
 	    break;
 	default: 

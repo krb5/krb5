@@ -435,8 +435,11 @@ POSSIBILITY OF SUCH DAMAGE.
 @vskip 12pt
 @end iftex
 
-Portions funded by Sandia National Laborartories and developed by
-the University of Michigan, Center for Information Technology Integration, including the PKINIT implementation, are subject to the following license:
+Portions funded by Sandia National Laborartory
+and developed by the University of Michigan's
+Center for Information Technology Integration,
+including the PKINIT implementation, are subject
+to the following license:
 
 @quotation
 @iftex

@@ -77,5 +77,7 @@ extern void KRB5_CALLCONV (*k5int_krb5_free_kdc_req)
 	(krb5_context, krb5_kdc_req * );
 extern void (*k5int_set_prompt_types)
 	(krb5_context, krb5_prompt_type *);
+extern krb5_error_code (*k5int_encode_krb5_authdata_elt)
+	(const krb5_authdata *rep, krb5_data **code);
 
 #endif /* _PKINIT_ACCESSOR_H */

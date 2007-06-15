@@ -697,6 +697,23 @@ krb5_error_code encode_krb5_authdata(const krb5_authdata **rep, krb5_data **code
   krb5_cleanup();
 }
 
+krb5_error_code encode_krb5_authdata_elt(const krb5_authdata *rep, krb5_data **code)
+{
+  asn1_error_code retval;
+  asn1buf *buf=NULL;
+  unsigned int length;
+  
+  if(rep == NULL) return ASN1_MISSING_FIELD;
+
+  retval = asn1buf_create(&buf);
+  if(retval) return retval;
+
+  retval = asn1_encode_krb5_authdata_elt(buf,rep, &length);
+  if(retval) return retval;
+
+  krb5_cleanup();
+}
+
 krb5_error_code encode_krb5_alt_method(const krb5_alt_method *rep, krb5_data **code)
 {
   krb5_setup();

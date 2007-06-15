@@ -1317,7 +1317,7 @@ cms_signeddata_verify(krb5_context context,
 	}
 #ifdef DEBUG_ASN1
 	print_buffer_bin((unsigned char *)authz->data, authz->length,
-			 "/tmp/kdc_authz");
+			 "/tmp/kdc_ad_initial_verified_cas");
 #endif
 	*authz_data = (unsigned char *)malloc(authz->length);
 	if (*authz_data == NULL) {
