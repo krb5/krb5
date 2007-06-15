@@ -4606,8 +4606,7 @@ load_cas_and_crls(krb5_context context,
 	}
 	break;
     default:
-	retval = ENOTSUP;
-	goto cleanup;
+	return ENOTSUP;
     }
 
     if (!(in = BIO_new_file(filename, "r"))) {
@@ -4620,6 +4619,7 @@ load_cas_and_crls(krb5_context context,
     /* This loads from a file, a stack of x509/crl/pkey sets */
     if ((sk = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL)) == NULL) {
 	pkiDebug("%s: error reading file '%s'\n", __FUNCTION__, filename);
+	retval = EIO;
 	goto cleanup;
     }
 
@@ -4669,7 +4669,8 @@ load_cas_and_crls(krb5_context context,
     }
 
     /* If we added something and there wasn't a stack in the
-     * context before, add the temporary stack to the context. */
+     * context before, add the temporary stack to the context.
+     */
     switch(catype) {
     case CATYPE_ANCHORS:
 	if (sk_X509_num(ca_certs) == 0) {
@@ -4727,7 +4728,7 @@ load_cas_and_crls_dir(krb5_context context,
 		      int catype,
 		      char *dirname) 
 {
-    krb5_error_code retval = ENOMEM;
+    krb5_error_code retval = EINVAL;
     DIR *d = NULL;
     struct dirent *dentry = NULL;
     char filename[1024];
@@ -4737,7 +4738,7 @@ load_cas_and_crls_dir(krb5_context context,
 
     d = opendir(dirname);
     if (d == NULL) 
-	goto cleanup;
+	return ENOENT;
 
     while ((dentry = readdir(d))) {
 	if (strlen(dirname) + strlen(dentry->d_name) + 2 > sizeof(filename)) {
@@ -4763,7 +4764,7 @@ load_cas_and_crls_dir(krb5_context context,
     retval = 0;
 
   cleanup:
-    if (d) 
+    if (d != NULL) 
 	closedir(d);
 
     return retval;
