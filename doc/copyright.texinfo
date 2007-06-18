@@ -435,7 +435,7 @@ POSSIBILITY OF SUCH DAMAGE.
 @vskip 12pt
 @end iftex
 
-Portions funded by Sandia National Laborartory
+Portions funded by Sandia National Laboratory
 and developed by the University of Michigan's
 Center for Information Technology Integration,
 including the PKINIT implementation, are subject
