@@ -241,6 +241,7 @@
             <ComponentRef Id="cmp_dirinc_krb4" />
             <ComponentRef Id="cmp_dirinc_krb5_gssapi" />
             <ComponentRef Id="cmp_dirinc_krb5_KerberosIV" />
+            <ComponentRef Id="cmp_dirinc_krb5_krb5" />
             <ComponentRef Id="cmp_dirinc_krb5" />
             <ComponentRef Id="cmp_dirinc_krbcc" />
             <ComponentRef Id="cmp_dirinc_leash" />
