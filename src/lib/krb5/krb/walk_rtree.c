@@ -167,6 +167,9 @@ krb5_walk_realm_tree(krb5_context context, const krb5_data *client, const krb5_d
 		links++;
 	    }
 	}
+	if (cap_nodes[links] != NULL)
+	    krb5_xfree(cap_nodes[links]);
+
 	cap_nodes[links] = cap_server; /* put server on end of list */
 	/* this simplifies the code later and make */
 	/* cleanup eaiser as well */
