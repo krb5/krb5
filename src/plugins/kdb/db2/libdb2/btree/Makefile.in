@@ -45,10 +45,12 @@ bt_get.so bt_get.po $(OUTPRE)bt_get.$(OBJEXT): $(BUILDTOP)/include/db-config.h \
   $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
   $(srcdir)/../include/db.h $(srcdir)/../mpool/mpool.h \
   ../include/config.h bt_get.c btree.h extern.h
-bt_open.so bt_open.po $(OUTPRE)bt_open.$(OBJEXT): $(BUILDTOP)/include/db-config.h \
-  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
-  $(srcdir)/../include/db.h $(srcdir)/../mpool/mpool.h \
-  ../include/config.h bt_open.c btree.h extern.h
+bt_open.so bt_open.po $(OUTPRE)bt_open.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/db-config.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \
+  $(srcdir)/../mpool/mpool.h ../include/config.h bt_open.c \
+  btree.h extern.h
 bt_overflow.so bt_overflow.po $(OUTPRE)bt_overflow.$(OBJEXT): \
   $(BUILDTOP)/include/db-config.h $(srcdir)/../include/db-int.h \
   $(srcdir)/../include/db-queue.h $(srcdir)/../include/db.h \

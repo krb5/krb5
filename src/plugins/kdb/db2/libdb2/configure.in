@@ -69,9 +69,6 @@ dnl sys/param.h for AIX 4.3.3 (actually sys/machine.h)
 dnl There's also sys/endian.h on IRIX, but we already check _MIPSE{L,B}.
 AC_C_CONST
 
-AC_CHECK_FUNC(mkstemp, ,
-[AC_DEFINE(mkstemp, krb5int_mkstemp,[Define to \`krb5int_mkstemp' to use private mkstemp function])])
-
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM
