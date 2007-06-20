@@ -330,7 +330,7 @@ pkinit_server_verify_padata(krb5_context context,
 {
     krb5_error_code retval = 0;	
     krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
-    krb5_octet_data *encoded_pkinit_authz_data = NULL;
+    krb5_data *encoded_pkinit_authz_data = NULL;
     krb5_pa_pk_as_req *reqp = NULL;
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
@@ -557,7 +557,6 @@ pkinit_server_verify_padata(krb5_context context,
     /* return authorization data to be included in the ticket */
     switch ((int)data->pa_type) {
 	case KRB5_PADATA_PK_AS_REQ:
-#if 1
 	    my_authz_data = malloc(2 * sizeof(*my_authz_data));
 	    if (my_authz_data == NULL) {
 		retval = ENOMEM;
@@ -594,7 +593,9 @@ pkinit_server_verify_padata(krb5_context context,
 	    retval = k5int_encode_krb5_authdata_elt(pkinit_authz_data, 
 			    &encoded_pkinit_authz_data);
 #ifdef DEBUG_ASN1
-	    print_buffer_bin(encoded_pkinit_authz_data->data, encoded_pkinit_authz_data->length, "/tmp/kdc_pkinit_authz_data");
+	    print_buffer_bin((unsigned char *)encoded_pkinit_authz_data->data,
+			     encoded_pkinit_authz_data->length,
+			     "/tmp/kdc_pkinit_authz_data");
 #endif
 	    free(pkinit_authz_data);
 	    if (retval) {
@@ -604,14 +605,14 @@ pkinit_server_verify_padata(krb5_context context,
 		goto cleanup;
 	    }
 
-	    my_authz_data[0]->contents = encoded_pkinit_authz_data->data;
+	    my_authz_data[0]->contents =
+			    (krb5_octet *) encoded_pkinit_authz_data->data;
 	    my_authz_data[0]->length = encoded_pkinit_authz_data->length;
 	    *authz_data = my_authz_data;
 	    pkiDebug("Returning %d bytes of authorization data\n", 
 		     krb5_authz.length);
 	    encoded_pkinit_authz_data->data = NULL; /* Don't free during cleanup*/
 	    free(encoded_pkinit_authz_data);
-#endif
 	    break;
 	default: 
 	    *authz_data = NULL;
@@ -649,11 +650,8 @@ pkinit_server_verify_padata(krb5_context context,
 	free(krb5_authz.data);
     if (reqctx != NULL)
 	pkinit_fini_kdc_req_context(context, reqctx);
-    if (auth_pack != NULL) {
-	if (auth_pack->clientPublicValue->algorithm.algorithm.data != NULL)
-	    free(auth_pack->clientPublicValue->algorithm.algorithm.data);
+    if (auth_pack != NULL)
 	free_krb5_auth_pack(&auth_pack);
-    }
     if (auth_pack9 != NULL)
 	free_krb5_auth_pack_draft9(context, &auth_pack9);
 
@@ -959,7 +957,8 @@ pkinit_server_return_padata(krb5_context context,
 		break;
 	}
 	if (retval) {
-	    pkiDebug("failed to create pkcs7 enveloped data: %s\n", error_message(retval));
+	    pkiDebug("failed to create pkcs7 enveloped data: %s\n",
+		     error_message(retval));
 	    goto cleanup;
 	}
 #ifdef DEBUG_ASN1
@@ -1339,8 +1338,8 @@ pkinit_server_plugin_fini(krb5_context context, void *blob)
     free(realm_contexts);
 }
 
-static krb5_error_code pkinit_init_kdc_req_context(krb5_context context,
-						   void **ctx)
+static krb5_error_code
+pkinit_init_kdc_req_context(krb5_context context, void **ctx)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_req_context reqctx = NULL;
@@ -1367,7 +1366,8 @@ cleanup:
     return retval;
 }
 
-static void  pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
+static void
+pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
 {
     pkinit_kdc_req_context reqctx = (pkinit_kdc_req_context)ctx;
 
@@ -1378,12 +1378,8 @@ static void  pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     pkiDebug("%s: freeing   reqctx at %p\n", __FUNCTION__, reqctx);
 
     pkinit_fini_req_crypto(reqctx->cryptoctx);
-    if (reqctx->rcv_auth_pack != NULL) {
-	if (reqctx->rcv_auth_pack->clientPublicValue != NULL &&
-	    reqctx->rcv_auth_pack->clientPublicValue->algorithm.algorithm.data != NULL)
-		free(reqctx->rcv_auth_pack->clientPublicValue->algorithm.algorithm.data);
+    if (reqctx->rcv_auth_pack != NULL)
 	free_krb5_auth_pack(&reqctx->rcv_auth_pack);
-    }
     if (reqctx->rcv_auth_pack9 != NULL)
 	free_krb5_auth_pack_draft9(context, &reqctx->rcv_auth_pack9);
 

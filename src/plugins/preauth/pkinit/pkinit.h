@@ -37,6 +37,20 @@
 #include <profile.h>
 #include "pkinit_accessor.h"
 
+/*
+ * It is anticipated that all the special checks currently
+ * required when talking to a Longhorn server will go away
+ * by the time it is officially released and all references
+ * to the longhorn global can be removed and any code
+ * #ifdef'd with LONGHORN_BETA_COMPAT can be removed.
+ * And this #define!
+ */
+#define LONGHORN_BETA_COMPAT 1
+#ifdef LONGHORN_BETA_COMPAT
+extern int longhorn;	    /* XXX Talking to a Longhorn server? */
+#endif
+
+
 #ifndef WITHOUT_PKCS11
 #include <opensc/pkcs11.h>
 
@@ -72,8 +86,6 @@ static inline void pkiDebug (const char *fmt, ...) { }
 /* Solaris compiler doesn't grok __FUNCTION__ 
  * hack for now.  Fix all the uses eventually. */
 #define __FUNCTION__ __func__
-
-extern int longhorn;	    /* XXX Talking to a Longhorn server? */
 
 /* Macros to deal with converting between various data types... */
 #define PADATA_TO_KRB5DATA(pad, k5d) \
@@ -273,13 +285,6 @@ void init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in);
 void init_krb5_reply_key_pack(krb5_reply_key_pack **in);
 void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in);
 
-/*
- * a note about freeing krb5_auth_pack. the caller, if needed,
- * should separately free clientPublicValue->algorithm.algorithm.data.
- * in our implementation the client uses a static value for the
- * alg oid but on the kdc side the oid is decoded (and thus
- * allocated) from the rcvd msg
- */
 void init_krb5_auth_pack(krb5_auth_pack **in);
 void init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in);
 void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in);
@@ -298,9 +303,12 @@ void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in);
 void free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in);
 void free_krb5_trusted_ca(krb5_trusted_ca ***in);
 void free_krb5_typed_data(krb5_typed_data ***in);
-void free_krb5_algorithm_identifier(krb5_algorithm_identifier ***in);
+void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
+void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);
 void free_krb5_subject_pk_info(krb5_subject_pk_info **in);
+krb5_error_code pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src);
+
 
 /*
  * Functions in pkinit_profile.c

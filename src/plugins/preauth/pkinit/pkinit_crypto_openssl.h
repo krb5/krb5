@@ -244,10 +244,16 @@ create_krb5_invalidCertificates(krb5_context context,
 static krb5_error_code
 create_identifiers_from_stack(STACK_OF(X509) *sk,
 			      krb5_external_principal_identifier *** ids);
+#ifdef LONGHORN_BETA_COMPAT
 static int
 wrap_signeddata(unsigned char *data, unsigned int data_len,
 		unsigned char **out, unsigned int *out_len,
 		int is_longhorn_server);
+#else
+static int
+wrap_signeddata(unsigned char *data, unsigned int data_len,
+		unsigned char **out, unsigned int *out_len);
+#endif
 
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
 #define ku_reject(x, usage) \

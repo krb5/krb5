@@ -40,10 +40,20 @@
 
 #include "pkinit.h"
 
-/* #define DEBUG */
-/* #define DEBUG_DH */
-
-int longhorn = 0;	/* XXX Talking to a Longhorn server? */
+#ifdef LONGHORN_BETA_COMPAT
+/*
+ * It is anticipated that all the special checks currently
+ * required when talking to a Longhorn server will go away
+ * by the time it is officially released and all references
+ * to the longhorn global can be removed and any code
+ * #ifdef'd with LONGHORN_BETA_COMPAT can be removed.
+ *
+ * Current testing (20070620) is against a patched Beta 3
+ * version of Longhorn.  Most, if not all, problems should
+ * be fixed in SP1 of Longhorn.
+ */
+int longhorn = 0;	/* Talking to a Longhorn server? */
+#endif
 
 krb5_error_code pkinit_client_process
 	(krb5_context context, void *plugin_context, void *request_context,
@@ -104,12 +114,6 @@ krb5_error_code pa_pkinit_parse_rep
 
 static int pkinit_client_plugin_init(krb5_context context, void **blob);
 static void pkinit_client_plugin_fini(krb5_context context, void *blob);
-
-/*
-static void pkinit_client_profile
-	(krb5_context context, pkinit_context plgctx,
-	 pkinit_req_context reqctx, krb5_kdc_req *request);
-*/
 
 krb5_error_code
 pa_pkinit_gen_req(krb5_context context,
@@ -213,8 +217,18 @@ pa_pkinit_gen_req(krb5_context context,
     return_pa_data[0]->length = out_data->length;
     return_pa_data[0]->contents = (krb5_octet *) out_data->data;
 
+#ifdef LONGHORN_BETA_COMPAT
+    /*
+     * LH Beta 3 requires the extra pa-data, even for RFC requests,
+     * in order to get the Checksum rather than a Nonce in the reply.
+     * This can be removed when LH SP1 is released.
+     */
     if ((return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
 	&& reqctx->opts->win2k_require_cksum) || (longhorn == 1)) {
+#else
+    if ((return_pa_data[0]->pa_type == KRB5_PADATA_PK_AS_REP_OLD
+	&& reqctx->opts->win2k_require_cksum)) {
+#endif
 	return_pa_data[1]->pa_type = 132;
 	return_pa_data[1]->length = 0;
 	return_pa_data[1]->contents = NULL;
@@ -302,15 +316,11 @@ pkinit_as_req_create(krb5_context context,
 	    auth_pack->clientPublicValue = info;
 
 	    /* add List of CMS algorithms */
-#if 1
 	    retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
 			reqctx->cryptoctx, reqctx->idctx, 
 			&auth_pack->supportedCMSTypes);
 	    if (retval)
 		goto cleanup;
-#else
-	    auth_pack->supportedCMSTypes = NULL;
-#endif
 	    break;
 	default:
 	    pkiDebug("as_req: unrecognized pa_type = %d\n",
@@ -322,7 +332,11 @@ pkinit_as_req_create(krb5_context context,
     switch(protocol) {
 	case DH_PROTOCOL:
 	    pkiDebug("as_req: DH key transport algorithm\n");
-	    info->algorithm.algorithm = dh_oid;
+	    retval = pkinit_copy_krb5_octet_data(&info->algorithm.algorithm, &dh_oid);
+	    if (retval) {
+		pkiDebug("failed to copy dh_oid\n");
+		goto cleanup;
+	    }
 
 	    /* create client-side DH keys */
 	    if ((retval = client_create_dh(context, plgctx->cryptoctx,
@@ -433,7 +447,7 @@ pkinit_as_req_create(krb5_context context,
 	    break;
 	case KRB5_PADATA_PK_AS_REQ_OLD:
 #if 0
-/* draft9 KDC doesn't like this draft9 structure of the trusted cas. */
+	    /* W2K3 KDC doesn't like this */
 	    retval = create_krb5_trustedCas(context, plgctx->cryptoctx,
 		reqctx->cryptoctx, reqctx->idctx, 1, &req9->trustedCertifiers);
 	    if (retval)
@@ -662,7 +676,8 @@ out:
 }
 
 /*
- * Parse PA-PK-AS-REP message. Optionally evaluates the message's certificate chain.
+ * Parse PA-PK-AS-REP message. Optionally evaluates the message's
+ * certificate chain.
  * Optionally returns various components.
  */
 krb5_error_code
@@ -804,7 +819,16 @@ pkinit_as_rep_parse(krb5_context context,
 	    if ((retval = k5int_decode_krb5_reply_key_pack(&k5data,
 		    &key_pack)) != 0) {
 		pkiDebug("failed to decode reply_key_pack\n");
+#ifdef LONGHORN_BETA_COMPAT
+    /*
+     * LH Beta 3 requires the extra pa-data, even for RFC requests,
+     * in order to get the Checksum rather than a Nonce in the reply.
+     * This can be removed when LH SP1 is released.
+     */
 		if (pa_type == KRB5_PADATA_PK_AS_REP && longhorn == 0)
+#else
+		if (pa_type == KRB5_PADATA_PK_AS_REP)
+#endif
 		    goto cleanup;
 		else {
 		    if ((retval =
@@ -824,8 +848,10 @@ pkinit_as_rep_parse(krb5_context context,
 		    break;
 		}
 	    }
-	    /* this is hack but windows sends back sha1 checksum
-	     * with checksum type of 14. mit has no 14 checksum type
+	    /*
+	     * This is hack but Windows sends back SHA1 checksum
+	     * with checksum type of 14. There is currently no
+	     * checksum type of 14 defined.
 	     */
 	    if (key_pack->asChecksum.checksum_type == 14)
 		key_pack->asChecksum.checksum_type = CKSUMTYPE_NIST_SHA;
@@ -951,11 +977,13 @@ pkinit_client_profile(krb5_context context,
 	}
 	free(eku_string);
     }
+#ifdef LONGHORN_BETA_COMPAT
     /* Temporarily just set global flag from config file */
     pkinit_libdefault_boolean(context, &request->server->realm,
 			      "pkinit_longhorn",
 			      0,
 			      &longhorn);
+#endif
 
     /* Only process anchors here if they were not specified on command line */
     if (reqctx->idopts->anchors == NULL)
@@ -1168,7 +1196,7 @@ cleanup:
 	free_krb5_typed_data(&typed_data);
 
     if (algId != NULL)
-	free_krb5_algorithm_identifier(&algId);
+	free_krb5_algorithm_identifiers(&algId);
 
     pkiDebug("pkinit_client_tryagain: returning %d (%s)\n",
 	     retval, error_message(retval));
@@ -1296,7 +1324,8 @@ pkinit_init_client_profile(krb5_context context, pkinit_context plgctx)
     return 0;
 }
 
-static int pkinit_client_plugin_init(krb5_context context, void **blob)
+static int
+pkinit_client_plugin_init(krb5_context context, void **blob)
 {
     krb5_error_code retval = ENOMEM;
     struct _pkinit_context *ctx = NULL;

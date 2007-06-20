@@ -1168,7 +1168,7 @@ This option has context-specific behavior.
 @itemx pkinit_identities
 @i{file-name} specifies the name of a PEM-format file
 containing the user's certificate.  If @i{key-file-name} is
-not specified, the uesr's private key is expected to be
+not specified, the user's private key is expected to be
 in @i{file-name} as well.  Otherwise, @i{key-file-name}
 is the name of the file containing the private key.
 @item pkinit_anchors

@@ -766,7 +766,8 @@ pkinit_cert_matching(krb5_context context,
 	retval = parse_rule_set(context, rules[x], &rs);
 	if (retval) {
 	    if (retval == EINVAL) {
-		fprintf(stderr, "Ignoring invalid rule pkinit_cert_match = '%s'\n", rules[x]); 
+		pkiDebug("%s: Ignoring invalid rule pkinit_cert_match = '%s'\n",
+			 __FUNCTION__, rules[x]); 
 		continue;
 	    }
 	    goto cleanup;

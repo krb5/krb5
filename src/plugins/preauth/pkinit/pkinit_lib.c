@@ -44,7 +44,8 @@ const krb5_octet_data
 	dh_oid = { 0, 7, (unsigned char *)"\x2A\x86\x48\xce\x3e\x02\x01" };
 
 
-krb5_error_code pkinit_init_req_opts(pkinit_req_opts **reqopts)
+krb5_error_code
+pkinit_init_req_opts(pkinit_req_opts **reqopts)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_req_opts *opts = NULL;
@@ -68,14 +69,16 @@ krb5_error_code pkinit_init_req_opts(pkinit_req_opts **reqopts)
     return 0;
 }
 
-void pkinit_fini_req_opts(pkinit_req_opts *opts)
+void
+pkinit_fini_req_opts(pkinit_req_opts *opts)
 {
     if (opts != NULL)
 	free(opts);
     return;
 }
 
-krb5_error_code pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
+krb5_error_code
+pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_plg_opts *opts = NULL;
@@ -98,14 +101,16 @@ krb5_error_code pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
     return 0;
 }
 
-void pkinit_fini_plg_opts(pkinit_plg_opts *opts)
+void
+pkinit_fini_plg_opts(pkinit_plg_opts *opts)
 {
     if (opts != NULL)
 	free(opts);
     return;
 }
 
-void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
+void
+free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 {
     if (*in == NULL) return;
     if ((*in)->signedAuthPack.data != NULL)
@@ -117,7 +122,8 @@ void free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
     free(*in);
 }
 
-void free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
+void
+free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
 {
     if (*in == NULL) return;
     if ((*in)->signedAuthPack.data != NULL)
@@ -131,7 +137,8 @@ void free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
     free(*in);
 }
 
-void free_krb5_reply_key_pack(krb5_reply_key_pack **in)
+void
+free_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     if (*in == NULL) return;
     if ((*in)->replyKey.contents != NULL)
@@ -141,7 +148,8 @@ void free_krb5_reply_key_pack(krb5_reply_key_pack **in)
     free(*in);
 }
 
-void free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
+void
+free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 {
     if (*in == NULL) return;
     if ((*in)->replyKey.contents != NULL)
@@ -149,15 +157,13 @@ void free_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
     free(*in);
 }
 
-void free_krb5_auth_pack(krb5_auth_pack **in)
+void
+free_krb5_auth_pack(krb5_auth_pack **in)
 {
-    int i = 0;
     if ((*in) == NULL) return;
     if ((*in)->clientPublicValue != NULL) {
-    /* not freeing clientPublicValue->algorithm.algorithm.data because
-     * client has that as static memory but server allocates it therefore
-     * the server will free it outside of this function
-     */
+	if ((*in)->clientPublicValue->algorithm.algorithm.data != NULL)
+	    free((*in)->clientPublicValue->algorithm.algorithm.data);
 	if ((*in)->clientPublicValue->algorithm.parameters.data != NULL)
 	    free((*in)->clientPublicValue->algorithm.parameters.data);
 	if ((*in)->clientPublicValue->subjectPublicKey.data != NULL)
@@ -166,17 +172,13 @@ void free_krb5_auth_pack(krb5_auth_pack **in)
     }
     if ((*in)->pkAuthenticator.paChecksum.contents != NULL)
 	free((*in)->pkAuthenticator.paChecksum.contents);
-    if ((*in)->supportedCMSTypes != NULL) {
-	while ((*in)->supportedCMSTypes[i] != NULL) {
-	    free((*in)->supportedCMSTypes[i]);
-	    i++;
-	}
-	free((*in)->supportedCMSTypes);
-    }
+    if ((*in)->supportedCMSTypes != NULL)
+	free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     free(*in);
 }
 
-void free_krb5_auth_pack_draft9(krb5_context context,
+void
+free_krb5_auth_pack_draft9(krb5_context context,
 				krb5_auth_pack_draft9 **in)
 {
     if ((*in) == NULL) return;
@@ -184,7 +186,8 @@ void free_krb5_auth_pack_draft9(krb5_context context,
     free(*in);
 }
 
-void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
+void
+free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     if (*in == NULL) return;
     switch ((*in)->choice) {
@@ -202,7 +205,8 @@ void free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     free(*in);
 }
 
-void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
+void
+free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
 {
     if (*in == NULL) return;
     if ((*in)->u.encKeyPack.data != NULL)
@@ -210,7 +214,8 @@ void free_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
     free(*in);
 }
 
-void free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in)
+void
+free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in)
 {
     int i = 0;
     if (*in == NULL) return;
@@ -227,7 +232,8 @@ void free_krb5_external_principal_identifier(krb5_external_principal_identifier 
     free(*in);
 }
 
-void free_krb5_trusted_ca(krb5_trusted_ca ***in)
+void
+free_krb5_trusted_ca(krb5_trusted_ca ***in)
 {
     int i = 0;
     if (*in == NULL) return;
@@ -252,7 +258,8 @@ void free_krb5_trusted_ca(krb5_trusted_ca ***in)
     free(*in);
 }
 
-void free_krb5_typed_data(krb5_typed_data ***in)
+void
+free_krb5_typed_data(krb5_typed_data ***in)
 {
     int i = 0;
     if (*in == NULL) return;
@@ -265,17 +272,26 @@ void free_krb5_typed_data(krb5_typed_data ***in)
     free(*in);
 }
 
-void free_krb5_algorithm_identifier(krb5_algorithm_identifier ***in)
+void
+free_krb5_algorithm_identifier(krb5_algorithm_identifier *in)
 {
-    int i = 0;
-    if (*in == NULL) return;
-    while ((*in)[i] != NULL) {
-	if ((*in)[i]->algorithm.data != NULL)
-	    free((*in)[i]->algorithm.data);
-	if ((*in)[i]->parameters.data != NULL)
-	    free((*in)[i]->parameters.data);
-	free((*in)[i]);
-	i++;
+    if (in == NULL)
+	return;
+    if (in->algorithm.data != NULL)
+	free(in->algorithm.data);
+    if (in->parameters.data != NULL)
+	free(in->parameters.data);
+    free(in);
+}
+
+void
+free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in)
+{
+    int i;
+    if (in == NULL || *in == NULL)
+	return;
+    for (i = 0; (*in)[i] != NULL; i++) {
+	free_krb5_algorithm_identifier((*in)[i]);
     }
     free(*in);
 }
@@ -300,7 +316,8 @@ free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in)
     free(*in);
 }
 
-void init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
+void
+init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_req));
     if ((*in) == NULL) return;
@@ -311,7 +328,8 @@ void init_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
     (*in)->kdcPkId.length = 0;
 }
 
-void init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
+void
+init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_req_draft9));
     if ((*in) == NULL) return;
@@ -324,7 +342,8 @@ void init_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
     (*in)->encryptionCert.length = 0;
 }
 
-void init_krb5_reply_key_pack(krb5_reply_key_pack **in)
+void
+init_krb5_reply_key_pack(krb5_reply_key_pack **in)
 {
     (*in) = malloc(sizeof(krb5_reply_key_pack));
     if ((*in) == NULL) return;
@@ -334,7 +353,8 @@ void init_krb5_reply_key_pack(krb5_reply_key_pack **in)
     (*in)->asChecksum.length = 0;
 }
 
-void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
+void
+init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
 {
     (*in) = malloc(sizeof(krb5_reply_key_pack_draft9));
     if ((*in) == NULL) return;
@@ -342,7 +362,8 @@ void init_krb5_reply_key_pack_draft9(krb5_reply_key_pack_draft9 **in)
     (*in)->replyKey.length = 0;
 }
 
-void init_krb5_auth_pack(krb5_auth_pack **in)
+void
+init_krb5_auth_pack(krb5_auth_pack **in)
 {
     (*in) = malloc(sizeof(krb5_auth_pack));
     if ((*in) == NULL) return;
@@ -353,14 +374,16 @@ void init_krb5_auth_pack(krb5_auth_pack **in)
     (*in)->pkAuthenticator.paChecksum.contents = NULL;
 }
 
-void init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in)
+void
+init_krb5_auth_pack_draft9(krb5_auth_pack_draft9 **in)
 {
     (*in) = malloc(sizeof(krb5_auth_pack_draft9));
     if ((*in) == NULL) return;
     (*in)->clientPublicValue = NULL;
 }
 
-void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
+void
+init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_rep));
     if ((*in) == NULL) return;
@@ -372,7 +395,8 @@ void init_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     (*in)->u.encKeyPack.data = NULL;
 }
 
-void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
+void
+init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
 {
     (*in) = malloc(sizeof(krb5_pa_pk_as_rep_draft9));
     if ((*in) == NULL) return;
@@ -382,7 +406,8 @@ void init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
     (*in)->u.encKeyPack.data = NULL;
 }
 
-void init_krb5_typed_data(krb5_typed_data **in)
+void
+init_krb5_typed_data(krb5_typed_data **in)
 {
     (*in) = malloc(sizeof(krb5_typed_data));
     if ((*in) == NULL) return;
@@ -400,6 +425,24 @@ init_krb5_subject_pk_info(krb5_subject_pk_info **in)
     (*in)->algorithm.parameters.length = 0;
     (*in)->subjectPublicKey.data = NULL;
     (*in)->subjectPublicKey.length = 0;
+}
+
+krb5_error_code
+pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src)
+{
+    if (dst == NULL || src == NULL)
+	return EINVAL;
+    if (src->data == NULL) {
+	dst->data = NULL;
+	dst->length = 0;
+	return 0;
+    }
+    dst->data = malloc(src->length);
+    if (dst->data == NULL)
+	return ENOMEM;
+    memcpy(dst->data, src->data, src->length);
+    dst->length = src->length;
+    return 0;
 }
 
 /* debugging functions */
