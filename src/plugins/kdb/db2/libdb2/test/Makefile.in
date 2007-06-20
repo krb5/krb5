@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../../../..
 myfulldir=plugins/kdb/db2/libdb2/test
-mydir=test
+mydir=plugins/kdb/db2/libdb2/test
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 
 FCTSH = @FCTSH@

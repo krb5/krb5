@@ -615,6 +615,18 @@ dnl types libdb2 wants
 dnl
 AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t, int8_t, int16_t, int32_t])
 dnl
+dnl Some libdb2 test programs want a shell that supports functions.
+FCTSH=false
+AC_PATH_PROG(SH,sh,false)
+AC_PATH_PROG(SH5,sh5,false)
+AC_PATH_PROG(BASH,bash,false)
+for prog in $SH $SH5 $BASH; do
+  if $prog -c 'foo() { true; } foo' >/dev/null 2>&1; then
+    FCTSH=$prog ; break
+  fi
+done
+AC_SUBST(FCTSH)
+dnl
 dnl Test for POSIX 2001 *printf support (X/Open System Interfaces extension
 dnl to ANSI/ISO C 1999 specification).  Specifically, positional
 dnl specifications; not checking for other features like %zx at present.
@@ -926,9 +938,6 @@ case $krb5_cv_host in
 	;;
 esac
 AC_SUBST(DB_EXTRA_LIBS)
-if test "$DB_VERSION" = k5; then
-  AC_CONFIG_SUBDIRS(plugins/kdb/db2/libdb2)
-fi
 
 dnl
 dnl
@@ -1059,6 +1068,13 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	plugins/locate/python
 	plugins/kdb/db2
+	plugins/kdb/db2/libdb2
+	plugins/kdb/db2/libdb2/hash
+	plugins/kdb/db2/libdb2/btree
+	plugins/kdb/db2/libdb2/db
+	plugins/kdb/db2/libdb2/mpool
+	plugins/kdb/db2/libdb2/recno
+	plugins/kdb/db2/libdb2/test
 	plugins/preauth/cksum_body
 	plugins/preauth/wpse
 

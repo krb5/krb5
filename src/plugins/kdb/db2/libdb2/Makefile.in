@@ -1,6 +1,6 @@
-thisconfigdir=.
+thisconfigdir=../../../..
 myfulldir=plugins/kdb/db2/libdb2
-mydir=.
+mydir=plugins/kdb/db2/libdb2
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCAL_SUBDIRS=hash btree db mpool recno test
 

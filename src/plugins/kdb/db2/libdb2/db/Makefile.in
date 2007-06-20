@@ -1,6 +1,6 @@
-thisconfigdir=./..
+thisconfigdir=../../../../..
 myfulldir=plugins/kdb/db2/libdb2/db
-mydir=db
+mydir=plugins/kdb/db2/libdb2/db
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=db.o
 
