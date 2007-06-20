@@ -87,13 +87,25 @@ krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req, krb5_
 }
 
 static krb5_error_code
-krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, const krb5_ap_req *req, krb5_const_principal server, krb5_keytab keytab, krb5_flags *ap_req_options, krb5_ticket **ticket, int check_valid_flag)
+krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
+			const krb5_ap_req *req, krb5_const_principal server,
+			krb5_keytab keytab, krb5_flags *ap_req_options,
+			krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code 	  retval = 0;
     krb5_timestamp 	  currenttime;
 
-    if (server && !krb5_principal_compare(context, server, req->ticket->server))
+    if (server && !krb5_principal_compare(context, server, req->ticket->server)) {
+	char *found_name = 0, *wanted_name = 0;
+	if (krb5_unparse_name(context, server, &wanted_name) == 0
+	    && krb5_unparse_name(context, req->ticket->server, &found_name) == 0)
+	    krb5_set_error_message(context, KRB5KRB_AP_WRONG_PRINC,
+				   "Wrong principal in request (found %s, wanted %s)",
+				   found_name, wanted_name);
+	krb5_free_unparsed_name(context, wanted_name);
+	krb5_free_unparsed_name(context, found_name);
 	return KRB5KRB_AP_WRONG_PRINC;
+    }
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?	*/
@@ -241,15 +253,21 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, c
     if ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_PERMIT_ALL) {
 	/* no etype check needed */;
     } else if ((*auth_context)->permitted_etypes == NULL) {
+	int etype;
 	/* check against the default set */
 	if ((!krb5_is_permitted_enctype(context,
-					req->ticket->enc_part.enctype)) ||
+					etype = req->ticket->enc_part.enctype)) ||
 	    (!krb5_is_permitted_enctype(context,
-					req->ticket->enc_part2->session->enctype)) ||
+					etype = req->ticket->enc_part2->session->enctype)) ||
 	    (((*auth_context)->authentp->subkey) &&
 	     !krb5_is_permitted_enctype(context,
-					(*auth_context)->authentp->subkey->enctype))) {
+					etype = (*auth_context)->authentp->subkey->enctype))) {
+	    char enctype_name[30];
 	    retval = KRB5_NOPERM_ETYPE;
+	    if (krb5_enctype_to_string(etype, enctype_name, sizeof(enctype_name)) == 0)
+		krb5_set_error_message(context, retval,
+				       "Encryption type %s not permitted",
+				       enctype_name);
 	    goto cleanup;
 	}
     } else {
@@ -261,7 +279,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, c
 		req->ticket->enc_part.enctype)
 		break;
 	if (!(*auth_context)->permitted_etypes[i]) {
+	    char enctype_name[30];
 	    retval = KRB5_NOPERM_ETYPE;
+	    if (krb5_enctype_to_string(req->ticket->enc_part.enctype,
+				       enctype_name, sizeof(enctype_name)) == 0)
+		krb5_set_error_message(context, retval,
+				       "Encryption type %s not permitted",
+				       enctype_name);
 	    goto cleanup;
 	}
 	
@@ -270,7 +294,13 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, c
 		req->ticket->enc_part2->session->enctype)
 		break;
 	if (!(*auth_context)->permitted_etypes[i]) {
+	    char enctype_name[30];
 	    retval = KRB5_NOPERM_ETYPE;
+	    if (krb5_enctype_to_string(req->ticket->enc_part2->session->enctype,
+				       enctype_name, sizeof(enctype_name)) == 0)
+		krb5_set_error_message(context, retval,
+				       "Encryption type %s not permitted",
+				       enctype_name);
 	    goto cleanup;
 	}
 	
@@ -280,7 +310,14 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context, c
 		    (*auth_context)->authentp->subkey->enctype)
 		    break;
 	    if (!(*auth_context)->permitted_etypes[i]) {
+		char enctype_name[30];
 		retval = KRB5_NOPERM_ETYPE;
+		if (krb5_enctype_to_string((*auth_context)->authentp->subkey->enctype,
+					   enctype_name,
+					   sizeof(enctype_name)) == 0)
+		    krb5_set_error_message(context, retval,
+					   "Encryption type %s not permitted",
+					   enctype_name);
 		goto cleanup;
 	    }
 	}
@@ -337,7 +374,10 @@ cleanup:
 }
 
 krb5_error_code
-krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context, const krb5_ap_req *req, krb5_const_principal server, krb5_keytab keytab, krb5_flags *ap_req_options, krb5_ticket **ticket)
+krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
+		    const krb5_ap_req *req, krb5_const_principal server,
+		    krb5_keytab keytab, krb5_flags *ap_req_options,
+		    krb5_ticket **ticket)
 {
   krb5_error_code retval;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
@@ -348,7 +388,11 @@ krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context, const
 }
 
 krb5_error_code
-krb5_rd_req_decoded_anyflag(krb5_context context, krb5_auth_context *auth_context, const krb5_ap_req *req, krb5_const_principal server, krb5_keytab keytab, krb5_flags *ap_req_options, krb5_ticket **ticket)
+krb5_rd_req_decoded_anyflag(krb5_context context,
+			    krb5_auth_context *auth_context,
+			    const krb5_ap_req *req,
+			    krb5_const_principal server, krb5_keytab keytab,
+			    krb5_flags *ap_req_options, krb5_ticket **ticket)
 {
   krb5_error_code retval;
   retval = krb5_rd_req_decoded_opt(context, auth_context,
@@ -359,7 +403,8 @@ krb5_rd_req_decoded_anyflag(krb5_context context, krb5_auth_context *auth_contex
 }
 
 static krb5_error_code
-decrypt_authenticator(krb5_context context, const krb5_ap_req *request, krb5_authenticator **authpp, int is_ap_req)
+decrypt_authenticator(krb5_context context, const krb5_ap_req *request,
+		      krb5_authenticator **authpp, int is_ap_req)
 {
     krb5_authenticator *local_auth;
     krb5_error_code retval;
@@ -390,4 +435,3 @@ free(scratch.data);}
     clean_scratch();
     return retval;
 }
-
