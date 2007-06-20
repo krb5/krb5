@@ -621,8 +621,13 @@ AC_PATH_PROG(SH,sh,false)
 AC_PATH_PROG(SH5,sh5,false)
 AC_PATH_PROG(BASH,bash,false)
 for prog in $SH $SH5 $BASH; do
-  if $prog -c 'foo() { true; } foo' >/dev/null 2>&1; then
-    FCTSH=$prog ; break
+  AC_MSG_CHECKING(if $prog supports functions)
+  if $prog -c 'foo() { true; }; foo' >/dev/null 2>&1; then
+    AC_MSG_RESULT(yes)
+    FCTSH=$prog
+    break
+  else
+    AC_MSG_RESULT(no)
   fi
 done
 AC_SUBST(FCTSH)
