@@ -575,9 +575,6 @@ VALGRIND=
 VALGRIND_LOGDIR = `cd $(BUILDTOP)&&pwd`
 VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg --trace-children=yes -v --leak-check=yes --suppressions=`cd $(SRCTOP)&&pwd`/util/valgrind-suppressions
 
-#
-AUTOCONF_HEADER=$(SRCTOP)/include/autoconf.h.in
-
 ##
 ## end of pre.in
 ############################################################

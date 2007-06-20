@@ -138,14 +138,8 @@ $(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
 $(srcdir)/$(thisconfigdir)/configure: @MAINT@ \
 		$(srcdir)/$(thisconfigdir)/configure.in \
 		$(SRCTOP)/patchlevel.h \
-		$(AUTOCONF_HEADER) \
 		$(SRCTOP)/aclocal.m4
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
-	case "$(myfulldir)" in \
-	"" ) echo myfulldir not set in makefile ; exit 1 ;; \
-	. | appl* | tests* ) echo skipping ac syms check here ;; \
-	*) $(SRCTOP)/util/check-ac-syms $(top_srcdir) $(mydir)/$(BUILDTOP) $(AUTOCONF_HEADER) ;; \
-	esac
 	cd $(srcdir)/$(thisconfigdir) && \
 		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
 	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
