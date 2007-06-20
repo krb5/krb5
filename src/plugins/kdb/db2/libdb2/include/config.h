@@ -11,8 +11,8 @@
 #ifndef HAVE_INT8_T
 #define int8_t signed char
 #endif
-#ifndef HAVE_U_INT_8_T
-#define u_int_8_t unsigned char
+#ifndef HAVE_U_INT8_T
+#define u_int8_t unsigned char
 #endif
 #ifndef HAVE_INT32_T
 #define int32_t int
