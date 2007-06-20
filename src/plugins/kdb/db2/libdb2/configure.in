@@ -69,24 +69,12 @@ dnl sys/param.h for AIX 4.3.3 (actually sys/machine.h)
 dnl There's also sys/endian.h on IRIX, but we already check _MIPSE{L,B}.
 AC_C_CONST
 
-dnl checks for library functions
-AC_CHECK_FUNC(memmove, ,
-[MEMMOVE_OBJ=memmove.o
-AC_DEFINE(memmove, kdb2__memmove,[Define to kdb2__memmove to provide private memmove function])
-AC_DEFINE(MEMMOVE,1,[Define if memmove.o is compiled in])])
-AC_SUBST(MEMMOVE_OBJ)
-
 AC_CHECK_FUNC(mkstemp, ,
 [AC_DEFINE(mkstemp, krb5int_mkstemp,[Define to \`krb5int_mkstemp' to use private mkstemp function])])
-
-AC_CHECK_FUNC(strerror, ,
-[STRERROR_OBJ=strerror.o
-AC_DEFINE(strerror, kdb2__strerror,[Define to \`kdb2__strerror' to provide private strerror function])])
-AC_SUBST(STRERROR_OBJ)
 
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_PROGRAM
 KRB5_RUN_FLAGS
 AC_CONFIG_FILES(include/generated.stmp:Makefile.in)
-V5_AC_OUTPUT_MAKEFILE(. hash btree db mpool recno clib test)
+V5_AC_OUTPUT_MAKEFILE(. hash btree db mpool recno test)

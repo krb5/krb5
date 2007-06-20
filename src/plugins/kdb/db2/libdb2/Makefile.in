@@ -2,13 +2,13 @@ thisconfigdir=.
 myfulldir=plugins/kdb/db2/libdb2
 mydir=.
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCAL_SUBDIRS=hash btree db mpool recno clib test
+LOCAL_SUBDIRS=hash btree db mpool recno test
 
 LIBBASE=db
 LIBMAJOR=1
 LIBMINOR=1
 STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \
-	recno/OBJS.ST clib/OBJS.ST
+	recno/OBJS.ST
 SUBDIROBJLISTS=$(STOBJLISTS)
 RELDIR=../plugins/kdb/db2/libdb2
 
