@@ -1,7 +1,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003, 2004, 2005 Massachusetts Institute of Technology.
+ * Copyright 2003, 2004, 2005, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -33,14 +33,19 @@
  * + SIZE_MAX
  * + shared library init/fini hooks
  * + consistent getpwnam/getpwuid interfaces
+ * + va_copy fudged if not provided
+ * + [v]asprintf
  */
 
 #ifndef K5_PLATFORM_H
 #define K5_PLATFORM_H
 
 #include "autoconf.h"
-/* for memcpy */
 #include <string.h>
+#include <stdarg.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /* Initialization and finalization function support for libraries.
 
@@ -403,7 +408,6 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define UINT64_TYPE unsigned long long
 #endif
 
-#include <limits.h>
 #ifndef SIZE_MAX
 # define SIZE_MAX ((size_t)((size_t)0 - 1))
 #endif
@@ -741,6 +745,91 @@ load_64_n (const unsigned char *p)
 /* Will get warnings about unused variables.  */
 # define k5_getpwuid_r(UID, REC, BUF, BUFSIZE, OUT) \
 	(*(OUT) = getpwuid(UID), *(OUT) == NULL ? -1 : 0)
+#endif
+
+/* Since the original ANSI C spec left it undefined whether or
+   how you could copy around a va_list, C 99 added va_copy.
+   For old implementations, let's do our best to fake it.
+
+   XXX Doesn't yet handle implementations with __va_copy (early draft)
+   or GCC's __builtin_va_copy.  */
+#if defined(HAS_VA_COPY) || defined(va_copy)
+/* Do nothing.  */
+#elif defined(CAN_COPY_VA_LIST)
+#define va_copy(dest, src)	((dest) = (src))
+#else
+/* Assume array type, but still simply copyable.
+
+   There is, theoretically, the possibility that va_start will
+   allocate some storage pointed to by the va_list, and in that case
+   we'll just lose.  If anyone cares, we could try to devise a test
+   for that case.  */
+#define va_copy(dest, src)	memcmp(dest, src, sizeof(va_list))
+#endif
+
+/* Provide [v]asprintf interfaces.  */
+#ifndef HAVE_VSNPRINTF
+#error We need an implementation of vsnprintf.
+#endif
+#ifndef HAVE_VASPRINTF
+#define vasprintf k5_vasprintf
+/* On error: BSD: Set *ret to NULL.  GNU: *ret is undefined.
+
+   Since we want to be able to use the GNU version directly, we need
+   provide only the weaker guarantee in this version.  */
+static inline int
+vasprintf(char **ret, const char *format, va_list ap)
+{
+    va_list ap2;
+    char *str = NULL, *nstr;
+    int len = 80, len2;
+
+    while (1) {
+	if (len < 0 || (size_t) len != len) {
+	    free(str);
+	    return -1;
+	}
+	nstr = realloc(str, (size_t) len);
+	if (nstr == NULL) {
+	    free(str);
+	    return -1;
+	}
+	str = nstr;
+	va_copy(ap2, ap);
+	len2 = vsnprintf(str, (size_t) len, format, ap2);
+	va_end(ap2);
+	if (len2 >= 0 && len2 < len) {
+	    if (len2 < len-1) {
+		/* In a lot of cases, 80 will be quite a lot more than
+		   we need.  */
+		nstr = realloc(str, (size_t) len2+1);
+		if (nstr)
+		    str = nstr;
+	    }
+	    *ret = str;
+	    return len2;
+	}
+	/* ISO C vsnprintf returns the needed length.  Some old
+	   vsnprintf implementations return -1 on truncation.  */
+	if (len2 >= len)
+	    len = len2 + 1;
+	else
+	    len *= 2;
+    }
+}
+/* Assume HAVE_ASPRINTF iff HAVE_VASPRINTF.  */
+#define asprintf k5_asprintf
+static inline int
+k5_asprintf(char **ret, const char *format, ...)
+{
+    va_list ap;
+    int n;
+
+    va_start(ap, format);
+    n = vasprintf(ret, format, ap);
+    va_end(ap);
+    return n;
+}
 #endif
 
 

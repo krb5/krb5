@@ -14,6 +14,33 @@ dnl
 dnl
 AC_REQUIRE_CPP
 dnl
+AC_CACHE_CHECK(if va_copy is available, krb5_cv_va_copy,
+[AC_COMPILE_IFELSE([
+#include <stdarg.h>
+void f(va_list ap) {
+  va_list ap2;
+  va_copy(ap2, ap);
+  va_end(ap2);
+}], krb5_cv_va_copy=yes, krb5_cv_va_copy=no)])
+if test "$krb5_cv_va_copy" = yes; then
+  AC_DEFINE(HAS_VA_COPY,1,[Define if va_copy macro or function is available.])
+fi
+dnl
+dnl Note that this isn't checking if the copied value *works*, just
+dnl whether the C language constraints permit the copying.  If
+dnl va_list is defined as an array type, it can't be assigned.
+AC_CACHE_CHECK(if va_list objects can be copied by assignment,
+	       krb5_cv_va_simple_copy,
+[AC_COMPILE_IFELSE([
+#include <stdarg.h>
+void f(va_list va2) {
+  va_list va1;
+  va1 = va2;
+}], krb5_cv_va_simple_copy=yes, krb5_cv_va_simple_copy=no)])
+if test "$krb5_cv_va_simple_copy" = yes; then
+  AC_DEFINE(CAN_COPY_VA_LIST,1,[Define if va_list objects can be simply copied by assignment.])
+fi
+dnl
 dnl The following lines are so that configure --help gives some global 
 dnl configuration options.
 dnl

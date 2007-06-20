@@ -50,22 +50,24 @@ krb5int_vset_error (struct errinfo *ep, long code,
 		    const char *fmt, va_list args)
 {
     char *p;
+    char *str = NULL;
+    va_list args2;
 
     if (ep->msg && ep->msg != ep->scratch_buf) {
 	free (ep->msg);
 	ep->msg = NULL;
     }
     ep->code = code;
-#ifdef HAVE_VASPRINTF
-    {
-	char *str = NULL;
-	if (vasprintf(&str, fmt, args) >= 0 && str != NULL) {
-	    ep->msg = str;
-	    return;
-	}
+    va_copy(args2, args);
+    if (vasprintf(&str, fmt, args2) >= 0 && str != NULL) {
+	va_end(args2);
+	ep->msg = str;
+	return;
     }
-#endif
+    va_end(args2);
+    /* Allocation failure?  */
     vsnprintf(ep->scratch_buf, sizeof(ep->scratch_buf), fmt, args);
+    /* Try again, just in case.  */
     p = strdup(ep->scratch_buf);
     ep->msg = p ? p : ep->scratch_buf;
 }

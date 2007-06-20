@@ -370,10 +370,16 @@ static void kt_test(krb5_context context, const char *name)
 static void do_test(krb5_context context, const char *prefix, 
 		    krb5_boolean delete)
 {
-  char name[300], filename[300];
+  char *name, *filename;
 
-  sprintf(filename, "/tmp/kttest.%ld", (long) getpid());
-  sprintf(name, "%s%s", prefix, filename);
+  if (asprintf(&filename, "/tmp/kttest.%ld", (long) getpid()) < 0) {
+      perror("asprintf");
+      exit(1);
+  }
+  if (asprintf(&name, "%s%s", prefix, filename) < 0) {
+      perror("asprintf");
+      exit(1);
+  }
   printf("Starting test on %s\n", name);
   kt_test(context, name);
   printf("Test on %s passed\n", name);
