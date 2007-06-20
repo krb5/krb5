@@ -31,7 +31,8 @@ STLIBOBJS= \
 	plugins.o \
 	errors.o \
 	gmt_mktime.o \
-	fake-addrinfo.o
+	fake-addrinfo.o \
+	@MKSTEMP_ST_OBJ@
 
 LIBOBJS= \
 	$(OUTPRE)threads.$(OBJEXT) \
@@ -39,7 +40,8 @@ LIBOBJS= \
 	$(OUTPRE)plugins.$(OBJEXT) \
 	$(OUTPRE)errors.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
-	$(OUTPRE)fake-addrinfo.$(OBJEXT)
+	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
+	@MKSTEMP_OBJ@
 
 STOBJLISTS=OBJS.ST
 
@@ -52,7 +54,9 @@ SRCS=\
 	$(srcdir)/init-addrinfo.c \
 	$(srcdir)/errors.c \
 	$(srcdir)/gmt_mktime.c \
-	$(srcdir)/fake-addrinfo.c
+	$(srcdir)/fake-addrinfo.c \
+	$(srcdir)/mkstemp.c
+
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.
 SHLIB_EXPLIBS= $(LIBS) $(DL_LIB)
@@ -75,6 +79,15 @@ $(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
 
 t_mktime: gmt_mktime.c
 	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
+
+SHLIB_EXPORT_FILE=libkrb5support.exports
+
+libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
+	cat $(srcdir)/libkrb5support-fixed.exports > new-exports
+	for i in @EXTRA_SUPPORT_SYMS@ .; do \
+	  if test "$$i" != .; then echo $$i >> new-exports; else :; fi ; \
+	done
+	$(MV) new-exports libkrb5support.exports
 
 @lib_frag@
 @libobj_frag@

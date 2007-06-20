@@ -77,9 +77,7 @@ AC_DEFINE(MEMMOVE,1,[Define if memmove.o is compiled in])])
 AC_SUBST(MEMMOVE_OBJ)
 
 AC_CHECK_FUNC(mkstemp, ,
-[MKSTEMP_OBJ=mkstemp.o
-AC_DEFINE(mkstemp, kdb2__mkstemp,[Define to \`kdb2__mkstemp' to provide private mkstemp function])])
-AC_SUBST(MKSTEMP_OBJ)
+[AC_DEFINE(mkstemp, krb5int_mkstemp,[Define to \`krb5int_mkstemp' to use private mkstemp function])])
 
 AC_CHECK_FUNC(strerror, ,
 [STRERROR_OBJ=strerror.o

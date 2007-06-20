@@ -35,9 +35,7 @@
 static char sccsid[] = "@(#)mktemp.c	8.1 (Berkeley) 6/4/93";
 #endif /* LIBC_SCCS and not lint */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "k5-platform.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,14 +43,17 @@ static char sccsid[] = "@(#)mktemp.c	8.1 (Berkeley) 6/4/93";
 #include <errno.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
 
-static int _gettemp();
+static int _gettemp(char *, int *);
 
-mkstemp(path)
+int mkstemp(path)
 	char *path;
 {
 	int fd;
@@ -60,7 +61,7 @@ mkstemp(path)
 	return (_gettemp(path, &fd) ? fd : -1);
 }
 
-static
+static int
 _gettemp(path, doopen)
 	char *path;
 	register int *doopen;

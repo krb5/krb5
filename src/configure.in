@@ -159,6 +159,19 @@ AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
 AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gethostbyname2 getifaddrs gmtime_r localtime_r pthread_mutex_lock sched_yield bswap16 bswap64 mkstemp getusershell lstat access ftime getcwd srand48 srand srandom stat strchr strerror strerror_r strstr timezone umask waitpid sem_init sem_trywait daemon)
+dnl
+EXTRA_SUPPORT_SYMS=
+AC_CHECK_FUNC(mkstemp,
+[MKSTEMP_ST_OBJ=
+MKSTEMP_OBJ=],
+[MKSTEMP_ST_OBJ='mkstemp.o'
+MKSTEMP_OBJ='$(OUTPRE)mkstemp.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_mkstemp"
+AC_DEFINE(mkstemp,krb5int_mkstemp,[Define to krb5int_mkstemp if the OS does not provide it.])])
+AC_SUBST(MKSTEMP_OBJ)
+AC_SUBST(MKSTEMP_ST_OBJ)
+AC_SUBST(EXTRA_SUPPORT_SYMS)
+dnl
 AC_HEADER_STDARG
 DECLARE_SYS_ERRLIST
 AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h krb_db.h kdc.h)
