@@ -20,10 +20,8 @@ SHLIB_EXPLIBS=$(SUPPORT_LIB)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-AUTOCONF_HEADER=$(srcdir)/include/config.h.in
-
 all-unix:: includes all-libs
-all-prerecurse: include/config.h include/db-config.h
+all-prerecurse: $(HDRS)
 clean-unix:: clean-libs clean-includes
 
 includes:: $(HDRS)
@@ -31,17 +29,9 @@ includes:: $(HDRS)
 $(HDRDIR)/db.h: $(srcdir)/include/db.h
 	$(CP) $(srcdir)/include/db.h $@
 $(HDRDIR)/db-config.h: include/db-config.h
-	$(CP) include/db-config.h $@
+	$(CP) $(srcdir)/include/db-config.h $@
 $(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
 	$(CP) $(srcdir)/include/db-ndbm.h $@
-
-include/config.h include/db-config.h: include/generated.stmp
-include/generated.stmp: $(srcdir)/include/config.h.in $(srcdir)/include/db-config.h.in
-	cd $(thisconfigdir) && $(SHELL) config.status
-$(srcdir)/include/config.h.in: @MAINT@ $(srcdir)/include/autoconf.stmp
-$(srcdir)/include/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
-	cd $(srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
-	touch $(srcdir)/include/autoconf.stmp
 
 clean-includes::
 	$(RM) $(HDRS) include/*.stmp

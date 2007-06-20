@@ -29,6 +29,7 @@
  *
  * Currently:
  * + make "static inline" work
+ * + [u]int{8,16,32}_t types
  * + 64-bit types and load/store code
  * + SIZE_MAX
  * + shared library init/fini hooks

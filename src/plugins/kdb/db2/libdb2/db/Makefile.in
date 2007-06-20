@@ -6,8 +6,6 @@ STLIBOBJS=db.o
 
 LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool
 
-AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
-
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@
@@ -19,6 +17,7 @@ SRCS= $(STLIBOBJS:.o=.c)
 # Makefile dependencies follow.  This must be the last section in
 # the Makefile.in file
 #
-db.so db.po $(OUTPRE)db.$(OBJEXT): $(BUILDTOP)/include/db-config.h \
-  $(srcdir)/../include/db-int.h $(srcdir)/../include/db.h \
-  ../include/config.h db.c
+db.so db.po $(OUTPRE)db.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/db-config.h $(srcdir)/../include/config.h \
+  $(srcdir)/../include/db-config.h $(srcdir)/../include/db-int.h \
+  $(srcdir)/../include/db.h db.c

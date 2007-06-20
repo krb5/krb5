@@ -611,6 +611,10 @@ DO_TCL=
 test "$TCL_LIBS" != "" && DO_TCL=ok
 AC_SUBST(DO_TCL)
 dnl
+dnl types libdb2 wants
+dnl
+AC_CHECK_TYPES([ssize_t, u_char, u_int, u_long, u_int8_t, u_int16_t, u_int32_t, int8_t, int16_t, int32_t])
+dnl
 dnl Test for POSIX 2001 *printf support (X/Open System Interfaces extension
 dnl to ANSI/ISO C 1999 specification).  Specifically, positional
 dnl specifications; not checking for other features like %zx at present.
