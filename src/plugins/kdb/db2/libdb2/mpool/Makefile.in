@@ -11,3 +11,15 @@ AUTOCONF_HEADER=$(srcdir)/../include/config.h.in
 all-unix:: all-libobjs
 clean-unix:: clean-libobjs
 @libobj_frag@
+
+SRCS= $(STLIBOBJS:.o=.c)
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+mpool.so mpool.po $(OUTPRE)mpool.$(OBJEXT): $(BUILDTOP)/include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
+  $(srcdir)/../include/db.h ../include/config.h mpool.c \
+  mpool.h
