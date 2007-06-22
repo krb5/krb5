@@ -122,6 +122,7 @@ k5_handle_wm_destroy(HWND hwnd,
     }
 
     PFREE(d);
+    SetWindowLongPtr(hwnd, DWLP_USER, 0);
 
     return TRUE;
 }
@@ -184,6 +185,9 @@ k5_handle_wmnc_notify(HWND hwnd,
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
+            if (d == NULL)
+                return TRUE;
+
             if (d->nc->subtype == KMSG_CRED_NEW_CREDS) {
                 khui_tracker_reposition(&d->tc_lifetime);
                 khui_tracker_reposition(&d->tc_renew);
@@ -200,6 +204,9 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (d == NULL)
+                return TRUE;
 
             if (d->nc->subtype == KMSG_CRED_PASSWORD)
                 return TRUE;
@@ -249,6 +256,10 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *)(LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (d == NULL)
+                return TRUE;
+
             nc = d->nc;
             l = (khui_htwnd_link *) lParam;
 
@@ -277,6 +288,9 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                return TRUE;
+
             nc = d->nc;
             khui_cw_find_type(nc, credtype_id_krb5, &nct);
 
@@ -352,6 +366,8 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                break;
 
             kmq_post_sub_msg(k5_sub, KMSG_CRED, 
                              KMSG_CRED_DIALOG_NEW_IDENTITY, 
@@ -365,6 +381,8 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                break;
 
             if(!d->sync && d->nc->result == KHUI_NC_RESULT_PROCESS) {
                 kmq_post_sub_msg(k5_sub, KMSG_CRED, 
@@ -382,6 +400,8 @@ k5_handle_wmnc_notify(HWND hwnd,
 
             d = (k5_dlg_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                break;
 
             msg = (wchar_t *) lParam;
 
@@ -420,6 +440,8 @@ k5_handle_wm_notify(HWND hwnd,
         pnmh->code == IPN_FIELDCHANGED) {
 
         d = (k5_dlg_data *) (LONG_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return 0;
 
         SendDlgItemMessage(hwnd, IDC_NCK5_PUBLICIP,
                            IPM_GETADDRESS,
@@ -444,6 +466,8 @@ k5_handle_wm_command(HWND hwnd,
     k5_dlg_data * d;
 
     d = (k5_dlg_data *)(LONG_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+    if (d == NULL)
+        return FALSE;
 
     cid = LOWORD(wParam);
     notif = HIWORD(wParam);

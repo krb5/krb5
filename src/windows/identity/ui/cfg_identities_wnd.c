@@ -230,6 +230,8 @@ handle_cfg_notify(HWND hwnd,
     HWND hw;
 
     node = get_window_node(hwnd);
+    if (node == NULL)
+        return TRUE;
 
     if (HIWORD(wParam) == WMCFG_APPLY) {
 
@@ -255,6 +257,8 @@ handle_notify(HWND hwnd,
 
     lpnm = (LPNMHDR) lParam;
     node = get_window_node(hwnd);
+    if (node == NULL)
+        return FALSE;
 
     if (lpnm->idFrom == IDC_CFG_TAB) {
         switch(lpnm->code) {
@@ -864,11 +868,14 @@ khm_cfg_add_ident_proc(HWND hwnd,
 
         khui_cw_destroy_cred_blob(d->nc);
         PFREE(d);
+        SetWindowLongPtr(hwnd, DWLP_USER, 0);
         break;
 
     case KHUI_WM_NC_NOTIFY:
         d = (add_ident_data *)(LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            break;
 
         switch(HIWORD(wParam)) {
         case WMNC_ADD_CONTROL_ROW:

@@ -1081,6 +1081,7 @@ khui_cfg_free_dialog_data(HWND hwnd_dlg) {
 
     if (d) {
         PFREE(d);
+        SetWindowLongPtr(hwnd_dlg, DWLP_USER, 0);
     }
 
     return (d)?KHM_ERROR_SUCCESS: KHM_ERROR_NOT_FOUND;

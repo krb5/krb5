@@ -2356,7 +2356,10 @@ alerter_wnd_proc(HWND hwnd,
             d = (alerter_wnd_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, NTF_PARAM);
 
-            destroy_alerter_wnd_data(d);
+            if (d) {
+                destroy_alerter_wnd_data(d);
+                SetWindowLongPtr(hwnd, NTF_PARAM, 0);
+            }
 
             return TRUE;
         }
@@ -2446,6 +2449,8 @@ alert_bin_wnd_proc(HWND hwnd,
 #ifdef DEBUG
             assert(d);
 #endif
+            if (d == NULL)
+                break;
 
             if (in_printclient) {
                 hdc = (HDC) wParam;
@@ -2745,6 +2750,7 @@ alert_bin_wnd_proc(HWND hwnd,
     case WM_DESTROY:
         {
             /* nothing needs to be done here */
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
         }
         return 0;
     }

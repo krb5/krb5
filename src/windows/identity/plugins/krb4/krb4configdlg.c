@@ -113,6 +113,9 @@ krb4_ids_config_proc(HWND hwnd,
         d = (k4_ids_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         if (HIWORD(wParam) == BN_CLICKED) {
             k4_ids_check_mod(hwnd, d);
         }
@@ -121,6 +124,9 @@ krb4_ids_config_proc(HWND hwnd,
     case KHUI_WM_CFG_NOTIFY:
         d = (k4_ids_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d == NULL)
+            break;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             k4_ids_write_params(hwnd, d);
@@ -131,7 +137,11 @@ krb4_ids_config_proc(HWND hwnd,
         d = (k4_ids_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
-        PFREE(d);
+        if (d) {
+            PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, (LONG_PTR) 0);
+        }
+
         break;
     }
 
@@ -297,6 +307,9 @@ krb4_id_config_proc(HWND hwnd,
             d = (k4_id_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
+            if (d == NULL)
+                break;
+
             if (wParam == MAKEWPARAM(IDC_CFG_GETTIX,
                                      BN_CLICKED)) {
                 int gettix = 0;
@@ -321,7 +334,7 @@ krb4_id_config_proc(HWND hwnd,
             d = (k4_id_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
-            if (!d)
+            if (d == NULL)
                 break;
 
             if (HIWORD(wParam) == WMCFG_APPLY) {
@@ -343,10 +356,12 @@ krb4_id_config_proc(HWND hwnd,
             d = (k4_id_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
-            if (!d)
+            if (d == NULL)
                 break;
 
             PFREE(d);
+
+            SetWindowLongPtr(hwnd, DWLP_USER, 0);
         }
         break;
     }
@@ -531,6 +546,7 @@ krb4_confg_proc(HWND hwnd,
 
         if (d) {
             PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, (LONG_PTR) 0);
         }
 
         break;

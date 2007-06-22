@@ -71,6 +71,8 @@ config_dlgproc(HWND hwnd,
         {
             d = (config_main_dlg_data *)
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                break;
 
             /* WMCFG_APPLY is the only notification we care about */
 
@@ -88,8 +90,10 @@ config_dlgproc(HWND hwnd,
 
         /* TODO: perform any other required uninitialization here */
 
-        if (d)
+        if (d) {
             free(d);
+            SetWindowLongPtr(hwnd, DWLP_USER);
+        }
 
         break;
     }

@@ -187,6 +187,9 @@ LRESULT CALLBACK khui_property_wnd_proc(
         case PW_WM_SET_RECORD:
             {
                 child = (pw_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+                if (child == NULL)
+                    break;
+
                 kcdb_buf_release(child->record);
                 child->record = (khm_handle) lParam;
                 kcdb_buf_hold(child->record);
@@ -197,8 +200,11 @@ LRESULT CALLBACK khui_property_wnd_proc(
         case WM_DESTROY:
             {
                 child = (pw_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
-                kcdb_buf_release(child->record);
-                PFREE(child);
+                if (child) {
+                    kcdb_buf_release(child->record);
+                    PFREE(child);
+                    SetWindowLongPtr(hwnd, 0, 0);
+                }
             }
             break;
 

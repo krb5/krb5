@@ -389,6 +389,9 @@ INT_PTR CALLBACK k4_nc_dlg_proc(HWND hwnd,
                 d = (k4_dlg_data *) (LONG_PTR)
                     GetWindowLongPtr(hwnd, DWLP_USER);
 
+                if (d == NULL)
+                    break;
+
                 k4_update_data(d);
 
                 if (LOWORD(wParam) == IDC_NCK4_OBTAIN) {
@@ -404,6 +407,10 @@ INT_PTR CALLBACK k4_nc_dlg_proc(HWND hwnd,
         {
             d = (k4_dlg_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
+
+            if (d == NULL)
+                break;
+
             k4_handle_wmnc_notify(d, wParam, lParam);
         }
         break;
@@ -413,9 +420,13 @@ INT_PTR CALLBACK k4_nc_dlg_proc(HWND hwnd,
             d = (k4_dlg_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
+            if (d == NULL)
+                break;
+
             d->nct->aux = 0;
 
             PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, 0);
         }
         break;
     }

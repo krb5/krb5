@@ -308,6 +308,8 @@ khm_cfg_appearance_proc(HWND hwnd,
 
     case WM_COMMAND:
         d = (dlg_data *) (LONG_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (wParam == MAKEWPARAM(IDC_CFG_FONTS, CBN_SELCHANGE)) {
             LRESULT idx;
@@ -417,11 +419,14 @@ khm_cfg_appearance_proc(HWND hwnd,
                 DeleteObject(d->c_font_normal);
 
             PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, 0);
         }
         return TRUE;
 
     case KHUI_WM_CFG_NOTIFY:
         d = (dlg_data *) (LONG_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             write_params(d);
