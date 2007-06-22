@@ -47,7 +47,7 @@
     The format of the message is :
     - uMsg : KHUI_WM_NC_NOTIFY
     - HIWORD(wParam) : one of ::khui_wm_nc_notifications
-    - LPARAM : pointer to the ::khui_new_creds structure
+    - LPARAM : pointer to the ::khui_new_creds structure (except where noted)
 */
 #define KHUI_WM_NC_NOTIFY (WM_APP + 0x101)
 
@@ -64,80 +64,221 @@
 /*! \brief Credentials dialog notifications
 
     These notifications will be sent to the individual dialog
-    procedures of the credential type panels as a ::KHUI_WM_NC_NOTIFY
-    message.
+    procedures of the credential type panels or to the new credentials
+    window as a ::KHUI_WM_NC_NOTIFY message.
 */
 enum khui_wm_nc_notifications {
     WMNC_DIALOG_EXPAND = 1, 
     /*!< The dialog is switching from basic to advanced mode or vice
       versa.
 
-      This message is sent to the new creds dialog to set the dialog
-      to expanded mode.  In expanded mode, all credentials type panels
-      are visible as opposed to the compressed mode where they are not
-      visible.  The message is not sent to credentials type panels.*/
+      In expanded mode, all credentials type panels are visible as
+      opposed to the compressed mode where they are not visible.  The
+      message is not sent to credentials type panels.
 
-    WMNC_DIALOG_SETUP,      
-    /*!< Sent by NetIDMgr to the new creds window to notify it that
-      the dialog should create all the type configuration panels.
+      Only sent to the new credentials window.
+    */
+
+    WMNC_DIALOG_SETUP,
+    /*!< Sent to the new creds window to notify it that the dialog
+      should create all the type configuration panels.
         
       Until this message is issued, none of the credentials type
       panels exist.  The credentials type panels will receive
-      WM_INITDIALOG etc as per the normal dialog creation process. */
+      WM_INITDIALOG etc as per the normal dialog creation process.
 
-    WMNC_DIALOG_ACTIVATE,   
-    /*!< Sent by NetIDMgr to the new creds window to notify it that
-      the dialog should do final initialization work and activate. */
+      Only sent to the new credentials window.
+    */
 
-    WMNC_DIALOG_MOVE,       
-    /*!< Sent by the new creds widnow to all the panels notifying them
-      that the NC window is moving. */
+    WMNC_DIALOG_ACTIVATE,
+    /*!< Sent to the new creds window to notify it that the dialog
+      should do final initialization work and activate.
 
-    WMNC_DIALOG_SWITCH_PANEL, 
+      Only sent to the new credentials window.
+    */
+
+    WMNC_DIALOG_MOVE,
+    /*!< The new credentials window has moved.
+
+      This message is sent to all the credentials type panels when the
+      new credentials window is being moved.  It will be sent
+      continuously if the user is dragging the window.  Plug-ins
+      rarely need to know their position on the screen.  However, if
+      there are any other windows that were created by the plug-in,
+      such as floating controls or tooltips, they may need to be
+      repositioned in response to this message.
+
+      Sent to all the credentials type panels.
+     */
+
+    WMNC_DIALOG_SWITCH_PANEL,
     /*!< Sent to the new creds window to cause it to switch to the
       panel identified by LOWORD(wParam).
 
       Does nothing if the specified panel is already the current
       panel.  If the dialog is in compact mode and making the
       specified panel visible requires switching to expanded mode, the
-      dialog will do so. */
+      dialog will do so.
 
-    WMNC_UPDATE_CREDTEXT,   
-    /*!< Sent to all the credential type panels for a credentials
-      window to request them to update the credential text.
+      Only sent to the new credentials window.
+    */
 
-      When sent to the new credentials window, causes it to send the
-      WMNC_UPDATE_CREDTEXT message to all the credential type panels
-      and update the cred text window.*/
+    WMNC_UPDATE_CREDTEXT,
+    /*!< Update the credentials text associated with a panel.
 
-    WMNC_CREDTEXT_LINK,    
-    /*!< Sent to a panel dialog proc when a user clicks a credtext
-      embedded link that belongs to that panel.  The \a lParam
-      parameter of the message is a pointer to a ::khui_htwnd_link
-      structure describing the link. */
+      During the new credentials operation, each plug-in is expected
+      to maintain a textual representation of the credentials that the
+      plug-in expects to obtain for the selected identity.  It can,
+      alternatively, be used to indicate the state of the credentials
+      type in respect to the selected identity (for example, whether
+      the credentials type is disabled for the identity and why).
 
-    WMNC_IDENTITY_CHANGE,   
-    /*!< The primary identity has changed */
+      This text is not visible when the new credentials window is in
+      basic mode, but it is visible when the window is in advanced
+      mode.  The following image shows the expanded new credentials
+      window including the credentials text from a several plug-ins:
 
-    WMNC_CLEAR_PROMPTS,     
-    /*!< Sent to the new creds window to clear any custom prompts */
+      \image html new_creds_expanded.png
 
-    WMNC_SET_PROMPTS,       
-    /*!< Sent to the new creds window to set custom prompts */
+      Once this message is received, each plug-in should construct its
+      credentials text string and store it in the \c credtext member
+      of its ::khui_new_creds_by_type structure as shown in the sample
+      code below:
+
+      \code
+      // Handler for window message WM_NC_NOTIFY with
+      // HWND hwnd, WPARAM wParam and LPARAM lParam
+
+      // This structure holds the dialog data for the panel.  We
+      // assume it has 'nc' and 'nct' fields that point to the
+      // khui_new_creds and khui_new_creds_by_type structures
+      // respectively.
+
+      ...
+      struct nc_dialog_data * d;
+      ...
+
+      // Retrieve the data structure from the dialog user data.
+      d = (struct nc_dialog_data *) GetWindowLongPtr(hwnd, DWLP_USER);
+
+      switch (HIWORD(wParam)) {
+      case WMNC_UPDATE_CREDTEXT:
+        {
+          wchar_t buffer[KHUI_MAXCCH_LONG_DESC];
+          size_t cb_size;
+
+          // we are being requested to update the credentials text. We
+          // already allocated a buffer when we created the nct
+          // structure.  So we can just set the text here.
+
+          // The credentials text should reflect the credentials that
+          // will be obtained when the new credentials operation
+          // completes.
+
+          assert(d && d->nc && d->nct);
+
+          if (d->nct->credtext) {
+              free(d->nct->credtext);
+              d->nct->credtext = NULL;
+          }
+
+          // We only display something if there is a selected identity
+          if (d->nc->n_identities > 0) {
+            StringCbPrintf(buffer, sizeof(buffer),
+                           L"<p>My Credentials<tab>: %s</p>",
+                           get_credential_name(d));
+            StringCbLength(buffer, sizeof(buffer), &cb_size);
+            cb_size += sizeof(wchar_t); // account for the terminating NULL
+
+            d->nct->credtext = malloc(cb_size);
+            if (d->nct->credtext) {
+               StringCbCopy(d->nct->credtext, cb_size, buffer);
+            }
+          }
+
+          break;
+        }
+
+      ... // Handler other notifications
+      }
+      \endcode
+
+      The text that is specified as the credentials text is formatted
+      hypertext.  For more information about support for formatting
+      and hypertext and handling hyperlinks, see \ref khui_htwnd.
+
+      \note When this message is sent to the new credentials window,
+      the application will send the ::WMNC_UPDATE_CREDTEXT message to
+      all the credential type panels and update the credential text
+      window. */
+
+    WMNC_CREDTEXT_LINK,
+    /*!< A hyperlink was activated.
+
+      Sent to a panel dialog procedure when a user clicks an embedded
+      link in the credentials text that belongs to that panel.  The \a
+      lParam parameter of the message is a pointer to a
+      ::khui_htwnd_link structure describing the link.
+
+      \see \ref khui_htwnd
+
+      \note The \a lParam parameter does not point to a
+      ::khui_new_creds structure for this message.
+    */
+
+    WMNC_IDENTITY_CHANGE,
+    /*!< The primary identity has changed.
+
+      The ::khui_new_creds structure contains a list of identities to
+      which the current operation should be applied.  In its current
+      implementation, only the first identity in this list is used.
+      Therefore, the list will contain at most one identity.  It is
+      possible for the list to be empty (for example, if the user
+      hasn't selected an identity yet).
+
+      When handling this notification, the plug-in should check the \c
+      n_identities member of the ::khui_new_creds structure to see
+      whether there are any identities selected.  This value would be
+      either zero or one.  If it is non-zero, then a handle to the
+      selected identity will be in \c khui_new_creds::identities[0].
+
+      Plug-ins typically use this notfication to load identity
+      specific settings when a new identity is selected.
+
+      This notification is sent to all the credentials type panels.
+     */
+
+    WMNC_CLEAR_PROMPTS,
+    /*!< Sent to the new creds window to clear any custom prompts.
+
+      Only sent to the new credentials window.
+     */
+
+    WMNC_SET_PROMPTS,
+    /*!< Sent to the new creds window to set custom prompts.
+
+      Only sent to the new credentials window. */
     
-    WMNC_DIALOG_PREPROCESS, 
-    /*!< Sent to all the credentials type panels to notify them that
-      the dialog is about to be processed */
+    WMNC_DIALOG_PREPROCESS,
+    /*!< The credentials acquisition process is about to start.
 
-    WMNC_DIALOG_PROCESS,    
-    /*!< Process the dialog and signal whether to exit the dialog or
-      not */
+      Sent to all the credentials type panels to notify them that the
+      credentials acquisition process will start.  Once all plug-ins
+      have handled the notification, the application will start
+      sending out <::KMSG_CRED, ::KMSG_CRED_PROCESS> messages to the
+      credentials providers which are participating in the new
+      credentials operation.
+    */
 
-    WMNC_DIALOG_PROCESS_COMPLETE, 
+    WMNC_DIALOG_PROCESS,
+    /*!< This notification is no longer used. */
+#pragma deprecated(WMNC_DIALOG_PROCESS)
+
+    WMNC_DIALOG_PROCESS_COMPLETE,
     /*!< Sent to the new creds window to indicate that the all the
       threads have completed processing.*/
 
-    WMNC_TYPE_STATE,        
+    WMNC_TYPE_STATE,
     /*!< Sent to the new creds window as notification that a
       particular credentials type has changed state from enabled to
       disabled or vice versa.  The LPARAM member of the message

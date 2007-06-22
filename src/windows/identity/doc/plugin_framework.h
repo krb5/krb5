@@ -97,82 +97,140 @@ Next \subpage pi_fw_pm ...
 
 \page pi_fw_pm Module Manager
 
-The module manager is tasked with loading, unloading and managing the
-plug-in message processing. It maintains a separate thread for loading
-and registering modules.  When a module is successfully loaded and it
-registers one or more plug-ins, a new thread is created for each
-plug-in.  Plug-in specific initialization and other callback functions
-are called from within this new thread.  This is to prevent one
-plug-in from "hanging" other plug-ins and the main Network Identity
-Manager user interface threads.
+The Module Manager is tasked with loading and unloading modules as
+well as managing the plug-in message processing.
+
+When a module is successfully loaded, it registers one or more
+plug-ins.  The Module Manager creates a new thread for each of these
+plug-ins.  Then the initialization message to the plug-in is sent and
+the message dispatch loop is started in this new thread.  Having each
+plug-in in a separate thread prevents one plug-in from "hanging" other
+plug-ins and the user interface.
+
+\note For compatibility with future versions of Network Identity
+Manager, a plug-in should not depend on the fact that it is running in
+its own thread.
 
 Read more :
 - \ref pi_structure
 
-\subsection pi_fw_pm_load Load sequence
+\section pi_fw_pm_load Module Load Sequence
 
 When kmm_load_module() is called to load a specific module, the
 following sequence of events occur:
 
-- The registration information for the module is located on the
-  registry key \c
-  \Software\MIT\NetIDMgr\PluginManager\Modules\[ModuleName].
+<ul>
 
-- The \c ImagePath value from the registration information is used to
+ <li>
+  The registration information for the module is located on the
+  registry key \c
+  \\Software\\MIT\\NetIDMgr\\PluginManager\\Modules\\[ModuleName]. \see
+  \ref config
+ </li>
+
+ <li> The module will not be loaded if one of the following conditions are
+  true:
+
+  <ul>
+   <li>
+    The \c Disabled value is defined and non-zero.
+   </li>
+
+   <li>
+    The \c FailureCount value is defined and exceeds the maximum
+    failure count.  By default, the maximum failure count is three,
+    although it can be set by adding the registry value \c
+    ModuleMaxFailureCount in registry key \c
+    Software\\MIT\\NetIDMgr\\PluginManager\\Modules .
+   </li>
+  </ul>
+ </li>
+
+ <li>
+  The \c ImagePath value from the registration information is used to
   locate the module binary.  If it is not an absolute path, then the
   binary is located using the standard system search path starting
   from the directory in which Network Identity Manager binaries are
   located.
+ </li>
 
-- The binary is loaded into the address space of Network Identity
+ <li>
+  The binary is loaded into the address space of Network Identity
   Manager along with any dependencies not already loaded.
+ </li>
 
-- If the Network Identity Manager core binary is signed, then the
+ <li>
+  If the Network Identity Manager core binary is signed, then the
   signature is checked against the system and user certificate stores.
   If this fails, the module is unloaded. See \ref pi_fw_pm_unload.
+ </li>
 
-- The init_module() entry point for the loaded module is called.  If
+ <li>
+  The init_module() entry point for the loaded module is called.  If
   this function returns an error or if no plug-ins are registered,
   then the module is immediately unloaded. See \ref pi_fw_pm_unload.
 
-- During processing of init_module(), if any localized resource
-  libraries are specified using kmm_set_locale_info(), then one of the
-  localized libraries will be loaded. See \ref pi_localization
+  <ul>
+   <li>
+    During processing of init_module(), if any localized resource
+    libraries are specified using kmm_set_locale_info(), then one of the
+    localized libraries will be loaded. See \ref pi_localization
+   </li>
 
-- During processing of init_module(), the module registers all the
-  plug-ins that it is implementing by calling kmm_register_plugin() for
-  each.
+   <li> 
+    During processing of init_module(), the module registers all the
+    plug-ins that it is implementing by calling kmm_provide_plugin()
+    for each.
+   </li>
+  </ul>
+ </li>
 
-- Once init_module() returns, each plug-in is initialized.  The method
+ <li>
+  Once init_module() returns, each plug-in is initialized.  The method
   by which a plug-in is initialized depends on the plug-in type.  The
   initialization code for the plug-in may indicate that it didn't
   initialize properly, in which case the plug-in is immediately
   unregistered.  No further calls are made to the plug-in.
+ </li>
 
-- If no plug-in is successfully loaded, the module is unloaded. See
+ <li>
+  If no plug-in is successfully loaded, the module is unloaded. See
   \ref pi_fw_pm_unload.
+ </li>
+</ul>
 
-- During normal operation, any registered plug-ins for a module can be
+  During normal operation, any registered plug-ins for a module can be
   unloaded explicitly, or the plug-in itself may signal that it should
   be unloaded.  If at anytime, all the plug-ins for the module are
   unloaded, then the module itself is also unloaded unless the \c
   NoUnload registry value is set in the module key.
 
-\subsection pi_fw_pm_unload Unload sequence
+\section pi_fw_pm_unload Unload sequence
 
-- For each of the plug-ins that are registered for a module, the exit
+<ul>
+ <li>
+  For each of the plug-ins that are registered for a module, the exit
   code is invoked.  The method by which this happens depends on the
   plug-in type.  The plug-in is not given a chance to veto the
   decision to unload. Each plug-in is responsible for performing
   cleanup tasks, freeing resources and unsubscribing from any message
   classes that it has subscribed to.
+ </li>
 
-- The exit_module() entry point is called for the module.
+ <li>
+  Once all the plug-ins have been unloaded, the exit_module() entry
+  point is called for the module.
+ </li>
 
-- If any localized resource libraries were loaded for the module, they
+ <li>
+  If any localized resource libraries were loaded for the module, they
   are unloaded.
+ </li>
 
-- The module is unloaded.
+ <li>
+  The module is unloaded.
+ </li>
+</ul>
 
 The following diagram illustrates the relationship between modules and
 plug-ins as implemented in the Kerberos 5 plug-in distributed with

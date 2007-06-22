@@ -25,12 +25,12 @@
 
 /* $Id$ */
 
-/*! \page cred Credentials Providers 
+/*! \page cred Credentials Providers
 
     \section cred_contents Contents
 
     - \subpage cred_data_types
+    - \subpage cred_msgs
     - \subpage cred_acq
     - \subpage cred_prop_pages
-    - \subpage cred_msgs
 */

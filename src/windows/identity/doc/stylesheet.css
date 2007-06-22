@@ -6,14 +6,28 @@ BODY,TD {
 }
 H1 {
 	text-align: center;
-       font-size: 160%;
+        font-size: 160%;
+        border-bottom: 1px solid #88b7c8;
+        margin-bottom: 1em;
+        padding-top: 0.5em;
+        padding-bottom: 0.5em;
+        background-color: #e8eef2;
 }
 H2 {
-       font-size: 120%;
+        margin-top: 1em;
+        font-size: 120%;
+        padding: 0.5em;
+        background-color: #f0f0f0;
+        border-bottom: 1px solid #888888;
 }
 H3 {
        font-size: 100%;
 }
+
+H4 {
+       font-size: 100%;
+}
+
 CAPTION { font-weight: bold }
 DIV.qindex {
 	width: 100%;
@@ -357,3 +371,17 @@ HR { height: 1px;
 .directory p { margin: 0px; white-space: nowrap; }
 .directory div { display: none; margin: 0px; }
 .directory img { vertical-align: -30%; }
+
+DL.note {
+  background-color: #eeeeee;
+  width: 100%;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #bbbbbb;
+  -moz-border-radius: 4px 4px 4px 4px;
+}
+
+DL.note DT {
+  font-size: 75%;
+}
+
