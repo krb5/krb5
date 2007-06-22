@@ -351,3 +351,13 @@ Date=(TBD)
 # Behavior change with respect to shadowed handles.  If a value
 # doesn't exist in the top level handle, then each shadowed handle
 # will be tried in turn until the value is found.
+
+#----------------------------------------------------------------
+Version=9
+AppVersion=1.3.0.0
+Date=(TBD)
+# Released with (TBD)
+
++ KHERR_CTX_NEWCHILD
++ KHERR_CTX_FOLDCHILD
+# Added to kherr.h to support additional notifications
