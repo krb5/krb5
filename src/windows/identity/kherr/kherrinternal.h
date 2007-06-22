@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_KHERRORINTERNAL_H
 #define __KHIMAIRA_KHERRORINTERNAL_H
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<kherr.h>
 #include<utils.h>

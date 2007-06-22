@@ -56,8 +56,6 @@
 
 void init_krb();
 void exit_krb();
-KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module);
-KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module);
 
 /* globals */
 extern kmm_module h_khModule;

@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<sync.h>
 #include<assert.h>

@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<utils.h>
 #include<malloc.h>

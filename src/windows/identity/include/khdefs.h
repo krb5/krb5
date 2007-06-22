@@ -177,7 +177,12 @@ typedef unsigned __int64 khm_lparm;
 #define KHMEXP_EXP __declspec(dllexport)
 #define KHMEXP_IMP __declspec(dllimport)
 
+#ifdef _NIMLIB_
 #define KHMEXP KHMEXP_EXP
+#else
+#define KHMEXP KHMEXP_IMP
+#endif
+
 #endif
 
 /* Generic permission values */

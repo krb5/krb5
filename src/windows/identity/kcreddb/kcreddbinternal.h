@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_KCREDDBINTERNAL_H__
 #define __KHIMAIRA_KCREDDBINTERNAL_H__
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<kcreddb.h>
 #include<kmq.h>

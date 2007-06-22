@@ -25,6 +25,7 @@
 /* $Id$ */
 
 #define NOEXPORT
+#define _NIMLIB_
 
 #include<khuidefs.h>
 #include<utils.h>
