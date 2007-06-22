@@ -2070,12 +2070,24 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                                                  tab is the main
                                                  panel. */
 
+            /* we don't enable animations until a specific timeout
+               elapses after showing the window.  We don't need to
+               animate any size changes if the user has barely had a
+               chance to notice the original size. This prevents the
+               new cred window from appearing in an animated state. */
+            SetTimer(hwnd, NC_TIMER_ENABLEANIMATE, ENABLEANIMATE_TIMEOUT, NULL);
+
+            ShowWindow(hwnd, SW_SHOWNORMAL);
+
             /* bring the window to the top, if necessary */
             if (KHM_SUCCEEDED(khc_read_int32(NULL,
                                              L"CredWindow\\Windows\\NewCred\\ForceToTop",
                                              &t)) &&
 
                 t != 0) {
+
+                BOOL sfw = FALSE;
+
                 /* it used to be that the above condition also called
                    !khm_is_dialog_active() to find out whether there
                    was a dialog active.  If there was, we wouldn't try
@@ -2087,22 +2099,30 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                    top.  However, if the main window is visible but not
                    active, the main window needs to be activated before a
                    child window can be activated. */
-                khm_activate_main_window();
 
-                SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0,
-                             (SWP_NOMOVE | SWP_NOSIZE));
+                SetActiveWindow(hwnd);
+
+                sfw = SetForegroundWindow(hwnd);
+
+                if (!sfw) {
+                    FLASHWINFO fi;
+
+                    ZeroMemory(&fi, sizeof(fi));
+
+                    fi.cbSize = sizeof(fi);
+                    fi.hwnd = hwnd;
+                    fi.dwFlags = FLASHW_ALL;
+                    fi.uCount = 3;
+                    fi.dwTimeout = 0; /* use the default cursor blink rate */
+
+                    FlashWindowEx(&fi);
+
+                    d->flashing_enabled = TRUE;
+                }
+
+            } else {
+                SetFocus(hwnd);
             }
-
-            ShowWindow(hwnd, SW_SHOWNOACTIVATE);
-
-            /* we don't enable animations until a specific timeout
-               elapses after showing the window.  We don't need to
-               animate any size changes if the user has barely had a
-               chance to notice the original size. This prevents the
-               new cred window from appearing in an animated state. */
-            SetTimer(hwnd, NC_TIMER_ENABLEANIMATE, ENABLEANIMATE_TIMEOUT, NULL);
-
-            SetFocus(hwnd);
 
             if (d->nc->n_identities == 0)
                 break;
@@ -2817,12 +2837,52 @@ static LRESULT nc_handle_wm_help(HWND hwnd,
     return TRUE;
 }
 
+static LRESULT nc_handle_wm_activate(HWND hwnd,
+                                     UINT uMsg,
+                                     WPARAM wParam,
+                                     LPARAM lParam) {
+    if (uMsg == WM_MOUSEACTIVATE ||
+        wParam == WA_ACTIVE || wParam == WA_CLICKACTIVE) {
+
+        FLASHWINFO fi;
+        khui_nc_wnd_data * d;
+        DWORD_PTR ex_style;
+
+        d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+
+        if (d && d->flashing_enabled) {
+            ZeroMemory(&fi, sizeof(fi));
+
+            fi.cbSize = sizeof(fi);
+            fi.hwnd = hwnd;
+            fi.dwFlags = FLASHW_STOP;
+
+            FlashWindowEx(&fi);
+
+            d->flashing_enabled = FALSE;
+        }
+
+        ex_style = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+
+        if (ex_style & WS_EX_TOPMOST) {
+            SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        }
+    }
+
+    return (uMsg == WM_MOUSEACTIVATE)? MA_ACTIVATE : 0;
+}
+
 static LRESULT CALLBACK nc_window_proc(HWND hwnd,
                                        UINT uMsg,
                                        WPARAM wParam,
                                        LPARAM lParam)
 {
     switch(uMsg) {
+    case WM_MOUSEACTIVATE:
+    case WM_ACTIVATE:
+        return nc_handle_wm_activate(hwnd, uMsg, wParam, lParam);
+
     case WM_CREATE:
         return nc_handle_wm_create(hwnd, uMsg, wParam, lParam);
 
@@ -2882,6 +2942,7 @@ HWND khm_create_newcredwnd(HWND parent, khui_new_creds * c)
 {
     wchar_t wtitle[256];
     HWND hwnd;
+    khm_int32 force_topmost = 0;
 
     if (c->window_title == NULL) {
         if (c->subtype == KMSG_CRED_PASSWORD)
@@ -2896,7 +2957,9 @@ HWND khm_create_newcredwnd(HWND parent, khui_new_creds * c)
                        ARRAYLENGTH(wtitle));
     }
 
-    hwnd = CreateWindowEx(NC_WINDOW_EX_STYLES,
+    khc_read_int32(NULL, L"CredWindow\\Windows\\NewCred\\ForceToTop", &force_topmost);
+
+    hwnd = CreateWindowEx(NC_WINDOW_EX_STYLES | (force_topmost ? WS_EX_TOPMOST : 0),
                           MAKEINTATOM(khui_newcredwnd_cls),
                           ((c->window_title)?c->window_title: wtitle),
                           NC_WINDOW_STYLES,
