@@ -362,7 +362,7 @@ enum kherr_context_flags {
                                   threads whose current error context
                                   is this one. */
 
-    KHERR_CFMASK_INITIAL = 0x0000000a,
+    KHERR_CFMASK_INITIAL   = 0x0000000a,
                                 /*!< Allowed initial flags */
 };
 
@@ -580,14 +580,14 @@ KHMEXP void KHMAPI kherr_remove_ctx_handler(kherr_ctx_handler h,
         when the event is freed other than that implied by \a flags.
  */
 KHMEXP kherr_event * KHMAPI kherr_report(
-    enum kherr_severity severity,
+    kherr_severity severity,
     const wchar_t * short_desc,
     const wchar_t * facility,
     const wchar_t * location,
     const wchar_t * long_desC,
     const wchar_t * suggestion,
     khm_int32 facility_id,
-    enum kherr_suggestion suggestion_id,
+    kherr_suggestion suggestion_id,
     kherr_param p1,
     kherr_param p2,
     kherr_param p3,
@@ -606,7 +606,7 @@ KHMEXP kherr_event * KHMAPI kherr_report(
     string against the arguments.
  */
 KHMEXP kherr_event * __cdecl
-kherr_reportf_ex(enum kherr_severity severity,
+kherr_reportf_ex(kherr_severity severity,
                  const wchar_t * facility,
                  khm_int32 facility_id,
 #ifdef _WIN32
