@@ -131,6 +131,9 @@ void khm_parse_commandline(void) {
             khm_startup.remote_exit = TRUE;
             khm_startup.no_main_window = TRUE;
         }
+        else if (!wcscmp(wargs[i], L"--minimized")) {
+            khm_startup.no_main_window = TRUE;
+        }
         else {
             wchar_t help[2048];
 
@@ -617,8 +620,13 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         khm_create_main_window();
 
-        if (!khm_startup.no_main_window)
+        if (!khm_startup.no_main_window &&
+            nCmdShow != SW_SHOWMINNOACTIVE &&
+            nCmdShow != SW_MINIMIZE &&
+            nCmdShow != SW_SHOWMINIMIZED) {
+
             khm_show_main_window();
+        }
 
         khm_refresh_config();
 
