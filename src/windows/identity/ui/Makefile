@@ -75,6 +75,10 @@ SDKLIBFILES= 			\
 	msimg32.lib		\
 	ole32.lib
 
+!if "$(APPVER)" != "5.0"
+SDKLIBFILES = $(SDKLIBFILES) uxtheme.lib
+!endif
+
 $(OBJ)\uiconfig.c: uiconfig.csv $(CONFDIR)\csvschema.cfg
 	$(CCSV) $** $@
 
