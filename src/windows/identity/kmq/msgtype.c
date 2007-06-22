@@ -104,6 +104,8 @@ void kmqint_free_msg_type(int t) {
 
     pt->completion_handler = NULL;
 
+    LDELETE(&all_msg_types, pt);
+
     PFREE(pt);
 }
 
@@ -374,8 +376,12 @@ khm_int32 kmqint_msg_type_set_handler(khm_int32 type, kmq_msg_completion_handler
     if (type == KMSG_SYSTEM)
         return KHM_ERROR_INVALID_PARAM;
 
-    if(!msg_types[type])
-        kmqint_msg_type_create(type);
+    if(!msg_types[type]) {
+        if (handler)
+            kmqint_msg_type_create(type);
+        else
+            return KHM_ERROR_SUCCESS;
+    }
 
     if(!msg_types[type])
         return KHM_ERROR_NO_RESOURCES;
