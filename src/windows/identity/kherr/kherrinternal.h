@@ -34,6 +34,9 @@
 #include<utils.h>
 #include<strsafe.h>
 
+#define IS_KHERR_CTX(c) ((c) && (c)->magic == KHERR_CONTEXT_MAGIC)
+#define IS_KHERR_EVENT(e) ((e) && (e)->magic == KHERR_EVENT_MAGIC)
+
 typedef struct tag_kherr_thread {
     khm_size nc_ctx;
     khm_size n_ctx;

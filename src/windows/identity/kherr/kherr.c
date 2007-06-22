@@ -199,10 +199,17 @@ kherr_context * peek_context(void) {
 
     t = (kherr_thread *) TlsGetValue(tls_error);
     if (t) {
-        if (t->n_ctx > 0)
-            return t->ctx[t->n_ctx - 1];
-        else
+        if (t->n_ctx > 0) {
+            kherr_context * c;
+
+            c = t->ctx[t->n_ctx - 1];
+
+            assert(c == NULL || IS_KHERR_CTX(c));
+
+            return c;
+        } else {
             return NULL;
+        }
     } else
         return NULL;
 }
@@ -252,6 +259,7 @@ kherr_context * pop_context(void) {
     if (t) {
         if (t->n_ctx > 0) {
             c = t->ctx[--(t->n_ctx)];
+            assert(IS_KHERR_CTX(c));
             return c;
         } else
             return NULL;
@@ -278,6 +286,7 @@ kherr_event * get_empty_event(void) {
 }
 
 void free_event_params(kherr_event * e) {
+    assert(IS_KHERR_EVENT(e));
     if(parm_type(e->p1) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p1));
         PFREE((void*) parm_data(e->p1));
@@ -304,7 +313,7 @@ void free_event(kherr_event * e) {
 
     EnterCriticalSection(&cs_error);
 
-    assert(e->magic == KHERR_EVENT_MAGIC);
+    assert(IS_KHERR_EVENT(e));
 
 #ifdef DEBUG_CONTEXT
     kherr_debug_printf(L"Freeing event 0x%x\n", e);
@@ -371,7 +380,8 @@ void free_context(kherr_context * c) {
     kherr_context * ch;
     kherr_event * e;
 
-    assert(c->magic == KHERR_CONTEXT_MAGIC);
+    assert(IS_KHERR_CTX(c));
+
 #ifdef DEBUG_CONTEXT
     kherr_debug_printf(L"Freeing context 0x%x\n", c);
 #endif
@@ -406,6 +416,9 @@ void free_context(kherr_context * c) {
 void add_event(kherr_context * c, kherr_event * e)
 {
     kherr_event * te;
+
+    assert(IS_KHERR_CTX(c));
+    assert(IS_KHERR_EVENT(e));
 
     EnterCriticalSection(&cs_error);
     te = QBOTTOM(c);
@@ -678,7 +691,7 @@ void resolve_event_strings(kherr_event * e)
 
 
 KHMEXP void KHMAPI kherr_evaluate_event(kherr_event * e) {
-    if (!e)
+    if (!IS_KHERR_EVENT(e))
         return;
 
     EnterCriticalSection(&cs_error);
@@ -692,7 +705,7 @@ KHMEXP void KHMAPI kherr_evaluate_last_event(void) {
     DWORD tid;
 
     c = peek_context();
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
     tid = GetCurrentThreadId();
 
@@ -701,7 +714,7 @@ KHMEXP void KHMAPI kherr_evaluate_last_event(void) {
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(!e)
+    if(!IS_KHERR_EVENT(e))
         goto _exit;
 
     resolve_event_strings(e);
@@ -731,7 +744,7 @@ kherr_reportf(const wchar_t * long_desc_fmt, ...) {
                      ,NULL
 #endif
                      );
-    if (e) {
+    if (IS_KHERR_EVENT(e)) {
         kherr_evaluate_event(e);
     }
 
@@ -767,7 +780,7 @@ kherr_reportf_ex(enum kherr_severity severity,
                      ,hModule
 #endif
                      );
-    if (e) {
+    if (IS_KHERR_EVENT(e)) {
         kherr_evaluate_event(e);
     }
 
@@ -852,7 +865,7 @@ KHMEXP void KHMAPI kherr_suggest(wchar_t * suggestion,
         return;
 
     c = peek_context();
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
 
     tid = GetCurrentThreadId();
@@ -862,7 +875,7 @@ KHMEXP void KHMAPI kherr_suggest(wchar_t * suggestion,
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(!e)
+    if(!IS_KHERR_EVENT(e))
         goto _exit;
 
     /* if strings have already been resolved in this event, we cant
@@ -885,7 +898,7 @@ KHMEXP void KHMAPI kherr_location(wchar_t * location) {
     DWORD tid;
 
     c = peek_context();
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
     tid = GetCurrentThreadId();
 
@@ -894,7 +907,7 @@ KHMEXP void KHMAPI kherr_location(wchar_t * location) {
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(!e)
+    if(!IS_KHERR_EVENT(e))
         goto _exit;
     e->location = location;
 _exit:
@@ -908,7 +921,7 @@ KHMEXP void KHMAPI kherr_facility(wchar_t * facility,
     DWORD tid;
 
     c = peek_context();
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
     tid = GetCurrentThreadId();
     EnterCriticalSection(&cs_error);
@@ -916,7 +929,7 @@ KHMEXP void KHMAPI kherr_facility(wchar_t * facility,
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(!e)
+    if(!IS_KHERR_EVENT(e))
         goto _exit;
     e->facility = facility;
     e->facility_id = facility_id;
@@ -930,7 +943,7 @@ KHMEXP void KHMAPI kherr_set_desc_event(void) {
     DWORD tid;
 
     c = peek_context();
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
     tid = GetCurrentThreadId();
 
@@ -939,7 +952,7 @@ KHMEXP void KHMAPI kherr_set_desc_event(void) {
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(!e || c->desc_event)
+    if(!IS_KHERR_EVENT(e) || c->desc_event)
         goto _exit;
 
     QDEL(c,e);
@@ -960,7 +973,7 @@ KHMEXP void KHMAPI kherr_del_last_event(void) {
 
     c = peek_context();
 
-    if(!c)
+    if(!IS_KHERR_CTX(c))
         return;
 
     tid = GetCurrentThreadId();
@@ -970,7 +983,7 @@ KHMEXP void KHMAPI kherr_del_last_event(void) {
     while (e != NULL && e->thread_id != tid)
         e = QPREV(e);
 
-    if(e) {
+    if(IS_KHERR_EVENT(e)) {
         QDEL(c, e);
         if(c->err_event == e) {
             pick_err_event(c);
@@ -982,12 +995,15 @@ KHMEXP void KHMAPI kherr_del_last_event(void) {
 
 KHMEXP void KHMAPI kherr_push_context(kherr_context * c)
 {
-    kherr_context * p;
+    kherr_context * p = NULL;
     int new_context = FALSE;
+
+    if (!IS_KHERR_CTX(c))
+        return;
 
     EnterCriticalSection(&cs_error);
     p = peek_context();
-    if(p && (c->flags & KHERR_CF_UNBOUND)) {
+    if(IS_KHERR_CTX(p) && (c->flags & KHERR_CF_UNBOUND)) {
         LDELETE(&ctx_root_list, c);
         TADDCHILD(p,c);
         c->flags &= ~KHERR_CF_UNBOUND;
@@ -996,15 +1012,16 @@ KHMEXP void KHMAPI kherr_push_context(kherr_context * c)
     }
     push_context(c);
 
-    if (new_context)
+    if (new_context && IS_KHERR_CTX(p)) {
         notify_ctx_event(KHERR_CTX_BEGIN, c);
+    }
 
     LeaveCriticalSection(&cs_error);
 }
 
 KHMEXP void KHMAPI kherr_push_new_context(khm_int32 flags) 
 {
-    kherr_context * p;
+    kherr_context * p = NULL;
     kherr_context * c;
 
     flags &= KHERR_CFMASK_INITIAL;
@@ -1012,7 +1029,7 @@ KHMEXP void KHMAPI kherr_push_new_context(khm_int32 flags)
     EnterCriticalSection(&cs_error);
     p = peek_context();
     c = get_empty_context();
-    if(p) {
+    if(IS_KHERR_CTX(p)) {
         LDELETE(&ctx_root_list, c);
         TADDCHILD(p,c);
         c->flags &= ~KHERR_CF_UNBOUND;
@@ -1022,6 +1039,9 @@ KHMEXP void KHMAPI kherr_push_new_context(khm_int32 flags)
     push_context(c);
 
     notify_ctx_event(KHERR_CTX_BEGIN, c);
+    if (IS_KHERR_CTX(p)) {
+        notify_ctx_event(KHERR_CTX_NEWCHILD, p);
+    }
 
     LeaveCriticalSection(&cs_error);
 }
@@ -1038,7 +1058,7 @@ kherr_event * fold_context(kherr_context * c) {
     kherr_event * e;
     kherr_event * g;
 
-    if (!c)
+    if (!IS_KHERR_CTX(c))
         return NULL;
 
     EnterCriticalSection(&cs_error);
@@ -1066,7 +1086,7 @@ kherr_event * fold_context(kherr_context * c) {
         c->desc_event = NULL;
     }
 
-    if (e)
+    if (IS_KHERR_EVENT(e))
         e->flags |= KHERR_RF_CONTEXT_FOLD;
 
     LeaveCriticalSection(&cs_error);
@@ -1075,14 +1095,18 @@ kherr_event * fold_context(kherr_context * c) {
 }
 
 KHMEXP void KHMAPI kherr_hold_context(kherr_context * c) {
-    assert(c && c->magic == KHERR_CONTEXT_MAGIC);
+
+    if(!IS_KHERR_CTX(c))
+        return;
     EnterCriticalSection(&cs_error);
     c->refcount++;
     LeaveCriticalSection(&cs_error);
 }
 
 KHMEXP void KHMAPI kherr_release_context(kherr_context * c) {
-    assert(c && c->magic == KHERR_CONTEXT_MAGIC);
+    if (!IS_KHERR_CTX(c))
+        return;
+
     EnterCriticalSection(&cs_error);
     c->refcount--;
     if (c->refcount == 0) {
@@ -1090,7 +1114,7 @@ KHMEXP void KHMAPI kherr_release_context(kherr_context * c) {
         kherr_context * p;
 
 	e = QBOTTOM(c);
-	if (e && !(e->flags & KHERR_RF_COMMIT)) {
+	if (IS_KHERR_EVENT(e) && !(e->flags & KHERR_RF_COMMIT)) {
 	    notify_ctx_event(KHERR_CTX_EVTCOMMIT, c);
 	    e->flags |= KHERR_RF_COMMIT;
 	}
@@ -1098,7 +1122,7 @@ KHMEXP void KHMAPI kherr_release_context(kherr_context * c) {
         notify_ctx_event(KHERR_CTX_END, c);
 
         p = TPARENT(c);
-        if (p) {
+        if (IS_KHERR_CTX(p)) {
             e = fold_context(c);
             if (e)
                 add_event(p, e);
@@ -1118,7 +1142,7 @@ KHMEXP void KHMAPI kherr_pop_context(void) {
 
     EnterCriticalSection(&cs_error);
     c = pop_context();
-    if(c) {
+    if(IS_KHERR_CTX(c)) {
         kherr_release_context(c);
     }
     LeaveCriticalSection(&cs_error);
@@ -1128,7 +1152,7 @@ KHMEXP kherr_context * KHMAPI kherr_peek_context(void) {
     kherr_context * c;
 
     c = peek_context();
-    if (c)
+    if (IS_KHERR_CTX(c))
         kherr_hold_context(c);
 
     return c;
@@ -1140,7 +1164,7 @@ KHMEXP khm_boolean KHMAPI kherr_is_error(void) {
 }
 
 KHMEXP khm_boolean KHMAPI kherr_is_error_i(kherr_context * c) {
-    if(c && c->severity <= KHERR_ERROR)
+    if(IS_KHERR_CTX(c) && c->severity <= KHERR_ERROR)
         return TRUE;
     else
         return FALSE;
@@ -1148,16 +1172,18 @@ KHMEXP khm_boolean KHMAPI kherr_is_error_i(kherr_context * c) {
 
 KHMEXP void KHMAPI kherr_clear_error(void) {
     kherr_context * c = peek_context();
-    if (c)
+    if (IS_KHERR_CTX(c))
         kherr_clear_error_i(c);
 }
 
 KHMEXP void KHMAPI kherr_clear_error_i(kherr_context * c) {
     kherr_event * e;
-    if (c) {
+    if (IS_KHERR_CTX(c)) {
         EnterCriticalSection(&cs_error);
         e = QTOP(c);
         while(e) {
+            assert(IS_KHERR_EVENT(e));
+
             e->flags |= KHERR_RF_INERT;
             e = QNEXT(e);
         }
@@ -1177,7 +1203,7 @@ KHMEXP void KHMAPI
 kherr_set_progress(khm_ui_4 num, khm_ui_4 denom)
 {
     kherr_context * c = peek_context();
-    if(c) {
+    if(IS_KHERR_CTX(c)) {
         EnterCriticalSection(&cs_error);
 
         if (num > denom)
@@ -1194,7 +1220,7 @@ kherr_set_progress(khm_ui_4 num, khm_ui_4 denom)
             notify_ctx_event(KHERR_CTX_PROGRESS, c);
 
             for (p = TPARENT(c);
-                 p && !CTX_USES_OWN_PROGRESS(p);
+                 IS_KHERR_CTX(p) && !CTX_USES_OWN_PROGRESS(p);
                  p = TPARENT(p)) {
 
                 notify_ctx_event(KHERR_CTX_PROGRESS, p);
@@ -1229,7 +1255,7 @@ get_progress(kherr_context * c, khm_ui_4 * pnum, khm_ui_4 * pdenom)
 
             khm_ui_4 cnum, cdenom;
 
-            assert(cc);
+            assert(IS_KHERR_CTX(cc));
 
             get_progress(cc, &cnum, &cdenom);
 
@@ -1275,9 +1301,14 @@ kherr_get_progress_i(kherr_context * c,
 KHMEXP kherr_event * KHMAPI kherr_get_first_event(kherr_context * c)
 {
     kherr_event * e;
+
+    if (!IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     e = QTOP(c);
     LeaveCriticalSection(&cs_error);
+    assert(e == NULL || IS_KHERR_EVENT(e));
     return e;
 }
 
@@ -1285,9 +1316,13 @@ KHMEXP kherr_event * KHMAPI kherr_get_next_event(kherr_event * e)
 {
     kherr_event * ee;
 
+    if (!IS_KHERR_EVENT(e))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     ee = QNEXT(e);
     LeaveCriticalSection(&cs_error);
+    assert(ee == NULL || IS_KHERR_EVENT(ee));
     return ee;
 }
 
@@ -1295,19 +1330,27 @@ KHMEXP kherr_event * KHMAPI kherr_get_prev_event(kherr_event * e)
 {
     kherr_event * ee;
 
+    if (!IS_KHERR_EVENT(e))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     ee = QPREV(e);
     LeaveCriticalSection(&cs_error);
-
+    assert(ee == NULL || IS_KHERR_EVENT(ee));
     return ee;
 }
 
 KHMEXP kherr_event * KHMAPI kherr_get_last_event(kherr_context * c)
 {
     kherr_event * e;
+
+    if (!IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     e = QBOTTOM(c);
     LeaveCriticalSection(&cs_error);
+    assert(e == NULL || IS_KHERR_EVENT(e));
     return e;
 }
 
@@ -1315,8 +1358,11 @@ KHMEXP kherr_context * KHMAPI kherr_get_first_context(kherr_context * c)
 {
     kherr_context * cc;
 
+    if (c != NULL && !IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
-    if (c) {
+    if (IS_KHERR_CTX(c)) {
         cc = TFIRSTCHILD(c);
         if (cc)
             kherr_hold_context(cc);
@@ -1326,29 +1372,40 @@ KHMEXP kherr_context * KHMAPI kherr_get_first_context(kherr_context * c)
             kherr_hold_context(cc);
     }
     LeaveCriticalSection(&cs_error);
+    assert(cc == NULL || IS_KHERR_CTX(cc));
     return cc;
 }
 
 KHMEXP kherr_context * KHMAPI kherr_get_next_context(kherr_context * c)
 {
     kherr_context * cc;
+
+    if (!IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     cc = LNEXT(c);
     if (cc)
         kherr_hold_context(cc);
     LeaveCriticalSection(&cs_error);
+    assert(cc == NULL || IS_KHERR_CTX(cc));
     return cc;
 }
 
 KHMEXP kherr_event * KHMAPI kherr_get_err_event(kherr_context * c)
 {
     kherr_event * e;
+
+    if (!IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     if(!c->err_event) {
         pick_err_event(c);
     }
     e = c->err_event;
     LeaveCriticalSection(&cs_error);
+    assert(e == NULL || IS_KHERR_EVENT(e));
     return e;
 }
 
@@ -1356,9 +1413,13 @@ KHMEXP kherr_event * KHMAPI kherr_get_desc_event(kherr_context * c)
 {
     kherr_event * e;
 
+    if (!IS_KHERR_CTX(c))
+        return NULL;
+
     EnterCriticalSection(&cs_error);
     e = c->desc_event;
     LeaveCriticalSection(&cs_error);
+    assert(e == NULL || IS_KHERR_EVENT(e));
     return e;
 }
 
