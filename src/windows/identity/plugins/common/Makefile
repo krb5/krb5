@@ -36,8 +36,8 @@ OBJFILES= \
 all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
-	if exist '..\..\obj' $(RM) $(INCFILES)
-	if exist '..\..\obj' $(RM) $(OBJFILES)
+	if exist "$(INCDIR)" $(RM) $(INCFILES)
+	if exist "$(LIBDIR)" $(RM) $(OBJFILES)
 
 {}.c{$(LIBDIR)}.obj:
 	$(C2OBJ)
