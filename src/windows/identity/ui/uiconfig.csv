@@ -1,21 +1,20 @@
 Name,Type,Value,Description
-CredWindow,KC_SPACE,0,Options for the credentials window
-  AutoInit,KC_INT32,0,Prompt for creds if there arent any
-  AutoStart,KC_INT32,0,Start Khimaira when Windows starts
-  AutoImport,KC_INT32,1,Import Windows creds when Khimaira starts
-  AutoDetectNet,KC_INT32,1,Automatically detect network connectivity changes
-  KeepRunning,KC_INT32,1,Keep running after closing Khimaira
-  DefaultView,KC_STRING,ByIdentity,
-  DefaultViewMini,KC_STRING,CompactIdentity,
-  ViewList,KC_STRING,"ByIdentity,ByLocation,ByType",
-  PaddingHorizontal,KC_INT32,4,
-  PaddingVertical,KC_INT32,2,
-  PaddingHeader,KC_INT32,16,
-  Monitor,KC_INT32,1,Monitor credentials
-  DefaultMonitor,KC_INT32,1,Default Monitor value for new identities
-  RefreshTimeout,KC_INT32,60,In seconds
+CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network Identity Manager application."
+  AutoInit,KC_INT32,0,"Boolean. Prompt for new credentials if no credentials are present during startup."
+  AutoStart,KC_INT32,0,"[PRIVATE] Boolean. Start Network Identity Manager automatically when the current user logs in."
+  AutoImport,KC_INT32,1,"Boolean. Import credentials from the LSA cache when Network Identity Manager starts."
+  AutoDetectNet,KC_INT32,1,"Boolean. Automatically detect network connectivity changes."
+  KeepRunning,KC_INT32,1,"Boolean. Run from the system notification area after the main window is closed."
+  DefaultView,KC_STRING,ByIdentity,"[PRIVATE] Name of the default view in Advanced mode."
+  DefaultViewMini,KC_STRING,CompactIdentity,"[PRIVATE] Name of the default view in Basic mode."
+  PaddingHorizontal,KC_INT32,4,"[PRIVATE]"
+  PaddingVertical,KC_INT32,2,"[PRIVATE]"
+  PaddingHeader,KC_INT32,16,"[PRIVATE]"
+  Monitor,KC_INT32,1,"Boolean. Monitor credentials for expiration and renewal."
+  DefaultMonitor,KC_INT32,1,"Boolean. This is the default Monitor value that is assigned for new identities."
+  RefreshTimeout,KC_INT32,60,"Number of seconds between credentials window refreshes.  The credentials window automatically triggers a refresh operation.  This value specifies the number of seconds that must elapse between two refreshes.  During the refresh, all the credentials provider plug-ins will need to re-enumerate their respective credentials."
   WarnThreshold,KC_INT32,900,In seconds
-  AllowWarn,KC_INT32,1,Boolean. Enables warning.
+  AllowWarn,KC_INT32,1,"Boolean. Enables warning."
   CriticalThreshold,KC_INT32,300,In seconds
   AllowCritical,KC_INT32,1,Boolean. Enables critical.
   AutoRenewThreshold,KC_INT32,600,In seconds
