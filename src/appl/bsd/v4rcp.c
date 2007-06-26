@@ -122,6 +122,8 @@ static kstream kstream_create_rcp_from_fd(read_fd, write_fd, sched, ivec)
      des_cblock *ivec;
 {
   kstream tmp = (kstream)malloc(sizeof(*tmp));
+  if (tmp == NULL)
+      return NULL;
   tmp->encrypting = 1;
   tmp->read_fd = read_fd;
   tmp->write_fd = write_fd;
@@ -145,6 +147,8 @@ static kstream kstream_create_from_fd(read_fd, write_fd, sched, session)
 {
   /* just set it up... */
   kstream tmp = (kstream)malloc(sizeof(*tmp));
+  if (tmp == NULL)
+      return NULL;
   tmp->encrypting = 0;
   tmp->read_fd = read_fd;
   tmp->write_fd = write_fd;
@@ -429,6 +433,10 @@ int main(argc, argv)
 								   &crypt_session_key);
 			} else
 				krem = kstream_create_from_fd (rem, 0, 0);
+			if (krem == NULL) {
+			    error("rcp: out of memory\n");
+			    exit(1);
+			}
 			kstream_set_buffer_mode (krem, 0);
 #endif /* KERBEROS && !NOENCRYPTION */
 			(void) response();
@@ -449,6 +457,10 @@ int main(argc, argv)
 								   &crypt_session_key);
 			} else
 				krem = kstream_create_from_fd (rem, 0, 0);
+			if (krem == NULL) {
+			    error("rcp: out of memory\n");
+			    exit(1);
+			}
 			kstream_set_buffer_mode (krem, 0);
 #endif /* KERBEROS && !NOENCRYPTION */
 			if (setuid(userid)) {
