@@ -64,8 +64,7 @@ gssrpc__svcauth_unix(
 		char area_machname[MAX_MACHINE_NAME+1];
 		int area_gids[NGRPS];
 	} *area;
-	u_int auth_len;
-	int str_len, gid_len;
+	u_int auth_len, str_len, gid_len;
 	register int i;
 
 	rqst->rq_xprt->xp_auth = &svc_auth_none;
@@ -74,7 +73,9 @@ gssrpc__svcauth_unix(
 	aup = &area->area_aup;
 	aup->aup_machname = area->area_machname;
 	aup->aup_gids = area->area_gids;
-	auth_len = (u_int)msg->rm_call.cb_cred.oa_length;
+	auth_len = msg->rm_call.cb_cred.oa_length;
+	if (auth_len > INT_MAX)
+		return AUTH_BADCRED;
 	xdrmem_create(&xdrs, msg->rm_call.cb_cred.oa_base, auth_len,XDR_DECODE);
 	buf = XDR_INLINE(&xdrs, (int)auth_len);
 	if (buf != NULL) {
@@ -84,7 +85,7 @@ gssrpc__svcauth_unix(
 			stat = AUTH_BADCRED;
 			goto done;
 		}
-		memmove(aup->aup_machname, (caddr_t)buf, (u_int)str_len);
+		memmove(aup->aup_machname, buf, str_len);
 		aup->aup_machname[str_len] = 0;
 		str_len = RNDUP(str_len);
 		buf += str_len / BYTES_PER_XDR_UNIT;
@@ -104,7 +105,7 @@ gssrpc__svcauth_unix(
 		 * timestamp, hostname len (0), uid, gid, and gids len (0).
 		 */
 		if ((5 + gid_len) * BYTES_PER_XDR_UNIT + str_len > auth_len) {
-			(void) printf("bad auth_len gid %d str %d auth %d\n",
+			(void) printf("bad auth_len gid %u str %u auth %u\n",
 			    gid_len, str_len, auth_len);
 			stat = AUTH_BADCRED;
 			goto done;
