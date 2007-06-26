@@ -251,16 +251,11 @@ static int kstream_write(krem, buf, len)
     int st;
     unsigned int outlen = (len + 7) & (~7U);
 
-    if (krem->writelen < outlen) {
-      if (krem->writelen == 0) {
-	krem->inbuf = (char*)malloc(outlen);
-	krem->outbuf = (char*)malloc(outlen+8);
-      } else {
-	krem->inbuf = (char*)realloc(krem->inbuf, outlen);
+    if (krem->writelen < outlen || krem->outbuf == 0) {
+	krem->inbuf = (char*)realloc(krem->inbuf, outlen ? outlen : 1);
 	krem->outbuf = (char*)realloc(krem->outbuf, outlen+8);
-      }
-      if(!krem->inbuf || !krem->outbuf) { errno = ENOMEM; return -1; }
-      krem->writelen = outlen;
+	if(!krem->inbuf || !krem->outbuf) { errno = ENOMEM; return -1; }
+	krem->writelen = outlen;
     }
 
     outlen = (len + 7) & (~7U);
