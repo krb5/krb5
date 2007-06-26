@@ -948,27 +948,16 @@ allocbuf(bp, fd, blksize)
 }
 
 void
-#ifdef HAVE_STDARG_H
 error(char *fmt, ...)
-#else
-/*VARARGS1*/
-error(fmt, va_alist)
-     char *fmt;
-     va_dcl
-#endif
 {
     va_list ap;
     char buf[BUFSIZ], *cp = buf;
     
-#ifdef HAVE_STDARG_H
     va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
 
     errs++;
     *cp++ = 1;
-    (void) vsprintf(cp, fmt, ap);
+    (void) vsnprintf(cp, sizeof(buf) - (cp-buf), fmt, ap);
     va_end(ap);
 
     if (krem)
@@ -1008,13 +997,13 @@ strsave(sp)
 char *sp;
 {
 	register char *ret;
-	
-	if((ret = (char *)malloc((unsigned) strlen(sp)+1)) == NULL) {
+
+	ret = strdup(sp);
+	if (ret == NULL) {
 		fprintf(stderr, "rcp: no memory for saving args\n");
 		exit(1);
 	}
-	(void) strcpy(ret,sp);
-	return(ret);
+	return ret;
 }
 #endif
 
