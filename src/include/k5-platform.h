@@ -48,6 +48,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef _WIN32
+#define CAN_COPY_VA_LIST
+#endif
+
 /* Initialization and finalization function support for libraries.
 
    At top level, before the functions are defined or even declared:
@@ -770,8 +774,24 @@ load_64_n (const unsigned char *p)
 
 /* Provide [v]asprintf interfaces.  */
 #ifndef HAVE_VSNPRINTF
+#ifdef _WIN32
+static inline int
+vsnprintf(char *str, size_t size, const char *format, va_list args)
+{
+    va_list args_copy;
+    int length;
+
+    va_copy(args_copy, args);
+    length = _vscprintf(format, args_copy);
+    va_end(args_copy);
+    if (size)
+	_vsnprintf(str, size, format, args);
+    return length;
+}
+#else /* not win32 */
 #error We need an implementation of vsnprintf.
-#endif
+#endif /* win32? */
+#endif /* no vsnprintf */
 #ifndef HAVE_VASPRINTF
 #define vasprintf k5_vasprintf
 /* On error: BSD: Set *ret to NULL.  GNU: *ret is undefined.
