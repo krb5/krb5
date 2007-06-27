@@ -166,8 +166,7 @@ AC_CHECK_FUNC(mkstemp,
 MKSTEMP_OBJ=],
 [MKSTEMP_ST_OBJ='mkstemp.o'
 MKSTEMP_OBJ='$(OUTPRE)mkstemp.$(OBJEXT)'
-EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_mkstemp"
-AC_DEFINE(mkstemp,krb5int_mkstemp,[Define to krb5int_mkstemp if the OS does not provide it.])])
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_mkstemp"])
 AC_SUBST(MKSTEMP_OBJ)
 AC_SUBST(MKSTEMP_ST_OBJ)
 AC_SUBST(EXTRA_SUPPORT_SYMS)

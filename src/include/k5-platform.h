@@ -835,6 +835,7 @@ k5_asprintf(char **ret, const char *format, ...)
 
 #ifndef HAVE_MKSTEMP
 extern int krb5int_mkstemp(char *);
+#define mkstemp krb5int_mkstemp
 #endif
 
 #endif /* K5_PLATFORM_H */
