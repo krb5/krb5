@@ -1,4 +1,27 @@
 /*
+ * Copyright 2007 Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+/*
  * Copyright 1987, 1988, 1989 by MIT Student Information Processing
  * Board
  *
@@ -14,38 +37,17 @@
 char * ss_name(sci_idx)
     int sci_idx;
 {
-    register char *ret_val;
     register ss_data *infop;
     
     infop = ss_info(sci_idx);
     if (infop->current_request == (char const *)NULL) {
-	ret_val = malloc((unsigned)
-			 (strlen(infop->subsystem_name)+1)
-			 * sizeof(char));
-	if (ret_val == (char *)NULL)
-	    return((char *)NULL);
-	strcpy(ret_val, infop->subsystem_name);
-	return(ret_val);
-    }
-    else {
-	register char *cp;
-	register char const *cp1;
-	ret_val = malloc((unsigned)sizeof(char) * 
-			 (strlen(infop->subsystem_name)+
-			  strlen(infop->current_request)+
-			  4));
-	cp = ret_val;
-	cp1 = infop->subsystem_name;
-	while (*cp1)
-	    *cp++ = *cp1++;
-	*cp++ = ' ';
-	*cp++ = '(';
-	cp1 = infop->current_request;
-	while (*cp1)
-	    *cp++ = *cp1++;
-	*cp++ = ')';
-	*cp = '\0';
-	return(ret_val);
+	return strdup(infop->subsystem_name);
+    } else {
+	char *ret_val;
+	if (asprintf(&ret_val, "%s (%s)",
+		     infop->subsystem_name, infop->current_request) < 0)
+	    return NULL;
+	return ret_val;
     }
 }
 
