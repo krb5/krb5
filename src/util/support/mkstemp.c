@@ -51,6 +51,16 @@ static char sccsid[] = "@(#)mktemp.c	8.1 (Berkeley) 6/4/93";
 #define O_BINARY 0
 #endif
 
+#if !defined S_ISDIR
+#if defined S_IFMT
+#define S_ISDIR(MODE)	(((MODE) & S_IFMT) == S_IFDIR)
+#elif defined _S_IFMT
+#define S_ISDIR(MODE)	(((MODE) & _S_IFMT) == _S_IFDIR)
+#else
+/* Hope that there's a S_ISDIR function defined.  */
+#endif
+#endif
+
 static int _gettemp(char *, int *);
 
 int mkstemp(path)
