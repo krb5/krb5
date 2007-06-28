@@ -25,6 +25,11 @@ LIBMINOR=1
 LIBINITFUNC=krb5int_thread_support_init
 LIBFINIFUNC=krb5int_thread_support_fini
 
+MKSTEMP_ST_OBJ= @MKSTEMP_ST_OBJ@
+MKSTEMP_OBJ= @MKSTEMP_OBJ@
+##DOS##MKSTEMP_ST_OBJ= mkstemp.o
+##DOS##MKSTEMP_OBJ= $(OUTPRE)mkstemp.$(OBJEXT)
+
 STLIBOBJS= \
 	threads.o \
 	init-addrinfo.o \
@@ -32,7 +37,7 @@ STLIBOBJS= \
 	errors.o \
 	gmt_mktime.o \
 	fake-addrinfo.o \
-	@MKSTEMP_ST_OBJ@
+	$(MKSTEMP_ST_OBJ)
 
 LIBOBJS= \
 	$(OUTPRE)threads.$(OBJEXT) \
@@ -41,7 +46,7 @@ LIBOBJS= \
 	$(OUTPRE)errors.$(OBJEXT) \
 	$(OUTPRE)gmt_mktime.$(OBJEXT) \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
-	@MKSTEMP_OBJ@
+	$(MKSTEMP_OBJ)
 
 STOBJLISTS=OBJS.ST
 
@@ -81,13 +86,24 @@ t_mktime: gmt_mktime.c
 	$(CC) $(ALL_CFLAGS) -DTEST_LEAP -o t_mktime $(srcdir)/gmt_mktime.c
 
 SHLIB_EXPORT_FILE=libkrb5support.exports
+##DOS##all-windows:: libkrb5support.exports
 
+EXTRA_SUPPORT_SYMS= @EXTRA_SUPPORT_SYMS@
+##DOS##EXTRA_SUPPORT_SYMS= krb5int_mkstemp
+
+##DOS##!if 0
 libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile
 	cat $(srcdir)/libkrb5support-fixed.exports > new-exports
-	for i in @EXTRA_SUPPORT_SYMS@ .; do \
+	for i in $(EXTRA_SUPPORT_SYMS) .; do \
 	  if test "$$i" != .; then echo $$i >> new-exports; else :; fi ; \
 	done
 	$(MV) new-exports libkrb5support.exports
+##DOS##!endif
+##DOS##libkrb5support.exports: libkrb5support-fixed.exports Makefile
+##DOS##	$(CP) libkrb5support-fixed.exports new-exports
+##DOS##	for %%x in ($(EXTRA_SUPPORT_SYMS) .) do if not %%x==. echo %%x >> new-exports
+##DOS##	$(RM) libkrb5support.exports
+##DOS##	$(MV) new-exports libkrb5support.exports
 
 @lib_frag@
 @libobj_frag@
