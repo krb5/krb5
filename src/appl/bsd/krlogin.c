@@ -1794,7 +1794,7 @@ static void
 prf(f)
      char *f;
 {
-    fprintf(stderr, f);
+    fprintf(stderr, "%s", f);
     fprintf(stderr, CRLF);
 }
 
