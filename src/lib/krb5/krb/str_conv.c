@@ -1,7 +1,7 @@
 /*
  * lib/kadm/str_conv.c
  *
- * Copyright 1995, 1999 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1999, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -148,11 +148,23 @@ extern char *strptime (const char *, const char *,
 static char *strptime (const char *, const char *, struct tm *);
 #endif
 
+#ifndef HAVE_LOCALTIME_R
+static inline struct tm *
+localtime_r(const time_t *t, struct tm *buf)
+{
+    struct tm *tm = localtime(t);
+    if (tm == NULL)
+	return NULL;
+    *buf = *tm;
+    return buf;
+}
+#endif
+
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp)
 {
     int i;
-    struct tm timebuf;
+    struct tm timebuf, timebuf2;
     time_t now, ret_time;
     char *s;
     static const char * const atime_format_table[] = {
@@ -175,16 +187,14 @@ krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp)
 
 
     now = time((time_t *) NULL);
+    if (localtime_r(&now, &timebuf2) == NULL)
+	return EINVAL;
     for (i=0; i<atime_format_table_nents; i++) {
         /* We reset every time throughout the loop as the manual page
 	 * indicated that no guarantees are made as to preserving timebuf
 	 * when parsing fails
 	 */
-#ifdef HAVE_LOCALTIME_R
-	(void) localtime_r(&now, &timebuf);
-#else
-	memcpy(&timebuf, localtime(&now), sizeof(timebuf));
-#endif
+	timebuf = timebuf2;
 	if ((s = strptime(string, atime_format_table[i], &timebuf))
 	    && (s != string)) {
  	    /* See if at end of buffer - otherwise partial processing */
