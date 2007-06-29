@@ -142,6 +142,11 @@ while (! $h->eof()) {
 	s/ *\([^\(\)]*\)//g;
 	goto Striparg;
     }
+    # Also strip out attributes, or what's left over of them.
+    if (/__attribute__/) {
+	s/[ \t]*__attribute__[ \t]*//g;
+	goto Striparg;
+    }
     # replace return type etc with one token indicating calling convention
     if (/CALLCONV/) {
 	if (/\bKRB5_CALLCONV_WRONG\b/) {
