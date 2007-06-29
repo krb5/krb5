@@ -793,6 +793,14 @@ vsnprintf(char *str, size_t size, const char *format, va_list args)
 #endif /* win32? */
 #endif /* no vsnprintf */
 #ifndef HAVE_VASPRINTF
+
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+static inline int k5_vasprintf(char **, const char *, va_list)
+    __attribute__((__format__(__printf__, 2, 0)));
+static inline int k5_asprintf(char **, const char *, ...)
+    __attribute__((__format__(__printf__, 2, 3)));
+#endif
+
 #define vasprintf k5_vasprintf
 /* On error: BSD: Set *ret to NULL.  GNU: *ret is undefined.
 
