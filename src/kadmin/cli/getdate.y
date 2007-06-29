@@ -586,6 +586,7 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
     time_t	tod;
     time_t	Julian;
     int		i;
+    struct tm	*tm;
 
     if (Year < 0)
 	Year = -Year;
@@ -610,41 +611,64 @@ Convert(Month, Day, Year, Hours, Minutes, Seconds, Meridian, DSTmode)
     if ((tod = ToSeconds(Hours, Minutes, Seconds, Meridian)) < 0)
 	return -1;
     Julian += tod;
-    if (DSTmode == DSTon
-     || (DSTmode == DSTmaybe && localtime(&Julian)->tm_isdst))
+    if (DSTmode == DSTon)
 	Julian -= 60 * 60;
+    else if (DSTmode == DSTmaybe) {
+	tm = localtime(&Julian);
+	if (tm == NULL)
+	    return -1;
+	else if (tm->tm_isdst)
+	    Julian -= 60 * 60;
+    }
     return Julian;
 }
 
 
 static time_t
-DSTcorrect(Start, Future)
+DSTcorrect(Start, Future, error)
     time_t	Start;
     time_t	Future;
+    int		*error;
 {
     time_t	StartDay;
     time_t	FutureDay;
+    struct tm	*tm;
 
-    StartDay = (localtime(&Start)->tm_hour + 1) % 24;
-    FutureDay = (localtime(&Future)->tm_hour + 1) % 24;
+    tm = localtime(&Start);
+    if (tm == NULL) {
+	*error = 1;
+	return -1;
+    }
+    StartDay = (tm->tm_hour + 1) % 24;
+    tm = localtime(&Future);
+    if (tm == NULL) {
+	*error = 1;
+	return -1;
+    }
+    FutureDay = (tm->tm_hour + 1) % 24;
     return (Future - Start) + (StartDay - FutureDay) * 60L * 60L;
 }
 
 
 static time_t
-RelativeDate(Start, DayOrdinal, DayNumber)
+RelativeDate(Start, DayOrdinal, DayNumber, error)
     time_t	Start;
     time_t	DayOrdinal;
     time_t	DayNumber;
+    int		*error;
 {
     struct tm	*tm;
     time_t	now;
 
     now = Start;
     tm = localtime(&now);
+    if (tm == NULL) {
+	*error = 1;
+	return -1;
+    }
     now += SECSPERDAY * ((DayNumber - tm->tm_wday + 7) % 7);
     now += 7 * SECSPERDAY * (DayOrdinal <= 0 ? DayOrdinal : DayOrdinal - 1);
-    return DSTcorrect(Start, now);
+    return DSTcorrect(Start, now, error);
 }
 
 
@@ -657,10 +681,13 @@ RelativeMonth(Start, RelMonth)
     time_t	Month;
     time_t	Year;
     time_t	ret;
+    int		error;
 
     if (RelMonth == 0)
 	return 0;
     tm = localtime(&Start);
+    if (tm == NULL)
+	return -1;
     Month = 12 * tm->tm_year + tm->tm_mon + RelMonth;
     Year = Month / 12;
     Month = Month % 12 + 1;
@@ -669,7 +696,10 @@ RelativeMonth(Start, RelMonth)
 		  MER24, DSTmaybe);
     if (ret == -1)
       return ret;
-    return DSTcorrect(Start, ret);
+    ret = DSTcorrect(Start, ret, &error);
+    if (error)
+	return -1;
+    return ret;
 }
 
 
@@ -865,6 +895,7 @@ get_date(p)
     time_t		Start;
     time_t		tod;
     time_t		delta;
+    int			error = 0;
 
     yyInput = p;
     if (now == NULL) {
@@ -875,10 +906,15 @@ get_date(p)
 	if (! (tm = gmtime (&ftz.time)))
 	    return -1;
 	gmt = *tm;	/* Make a copy, in case localtime modifies *tm.  */
-	ftz.timezone = difftm (&gmt, localtime (&ftz.time)) / 60;
+	tm = localtime(&ftz.time);
+	if (tm == NULL)
+	    return -1;
+	ftz.timezone = difftm (&gmt, tm) / 60;
     }
 
     tm = localtime(&now->time);
+    if (tm == NULL)
+	return -1;
     yyYear = tm->tm_year;
     yyMonth = tm->tm_mon + 1;
     yyDay = tm->tm_mday;
@@ -952,8 +988,10 @@ get_date(p)
      */
     if (yyHaveDate || yyHaveTime || yyHaveDay) {
 	Start = Convert(yyMonth, yyDay, yyYear, yyHour, yyMinutes, yySeconds,
-		    yyMeridian, yyDSTmode);
+			yyMeridian, yyDSTmode);
 	if (Start < 0)
+	    return -1;
+	if (error != 0)
 	    return -1;
     }
     else {
@@ -990,7 +1028,9 @@ get_date(p)
      * above and be able to cause failure.
      */
     if (yyHaveDay && !yyHaveDate) {
-	tod = RelativeDate(Start, yyDayOrdinal, yyDayNumber);
+	tod = RelativeDate(Start, yyDayOrdinal, yyDayNumber, &error);
+	if (error != 0)
+	    return -1;
 	Start += tod;
     }
 
