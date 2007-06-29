@@ -1,7 +1,7 @@
 /*
  * lib/kadm/logger.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -168,6 +168,14 @@ static struct log_entry	def_log_entry;
  *			  profile.
  */
 static krb5_context err_context;
+
+static void
+klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
+
 static void
 klog_com_err_proc(const char *whoami, long int code, const char *format, va_list ap)
 {
@@ -257,16 +265,8 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
 #endif	/* HAVE_SYSLOG */
 
     /* Now format the actual message */
-#if	HAVE_VSNPRINTF
     vsnprintf(cp, sizeof(outbuf) - (cp - outbuf), actual_format, ap);
-#elif	HAVE_VSPRINTF
-    vsprintf(cp, actual_format, ap);
-#else	/* HAVE_VSPRINTF */
-    sprintf(cp, actual_format, ((int *) ap)[0], ((int *) ap)[1],
-	    ((int *) ap)[2], ((int *) ap)[3],
-	    ((int *) ap)[4], ((int *) ap)[5]);
-#endif	/* HAVE_VSPRINTF */
-    
+
     /*
      * Now that we have the message formatted, perform the output to each
      * logging specification.
@@ -796,6 +796,13 @@ severity2string(int severity)
  */
 static int
 klog_vsyslog(int priority, const char *format, va_list arglist)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 0)))
+#endif
+    ;
+
+static int
+klog_vsyslog(int priority, const char *format, va_list arglist)
 {
     char	outbuf[KRB5_KLOG_MAX_ERRMSG_SIZE];
     int		lindex;
@@ -848,15 +855,7 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     syslogp = &outbuf[strlen(outbuf)];
 
     /* Now format the actual message */
-#ifdef	HAVE_VSNPRINTF
     vsnprintf(syslogp, sizeof(outbuf) - (syslogp - outbuf), format, arglist);
-#elif	HAVE_VSPRINTF
-    vsprintf(syslogp, format, arglist);
-#else	/* HAVE_VSPRINTF */
-    sprintf(syslogp, format, ((int *) arglist)[0], ((int *) arglist)[1],
-	    ((int *) arglist)[2], ((int *) arglist)[3],
-	    ((int *) arglist)[4], ((int *) arglist)[5]);
-#endif	/* HAVE_VSPRINTF */
 
     /*
      * If the user did not use krb5_klog_init() instead of dropping

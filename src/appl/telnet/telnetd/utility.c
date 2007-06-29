@@ -393,6 +393,13 @@ netflush()
  */
 static void
 netprintf_ext(int noflush, int seturg, const char *fmt, va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
+
+static void
+netprintf_ext(int noflush, int seturg, const char *fmt, va_list args)
 {
 	size_t remain;
 	size_t maxoutlen;
@@ -412,11 +419,7 @@ netprintf_ext(int noflush, int seturg, const char *fmt, va_list args)
 	if (maxoutlen >= sizeof(buf))
 		return;		/* highly unlikely */
 
-#ifdef HAVE_VSNPRINTF
 	len = vsnprintf(buf, sizeof(buf), fmt, args);
-#else
-	len = vsprintf(buf, fmt, args);	/* XXX need to fix for SunOS? */
-#endif
 
 	/*
 	 * The return value from sprintf()-like functions may be the

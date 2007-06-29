@@ -1464,26 +1464,15 @@ dataconn(name, size, fmode)
  * XXX callers need to limit total length of output string to
  * FTP_BUFSIZ
  */
-#ifdef STDARG
 void
 secure_error(char *fmt, ...)
-#else
-/* VARARGS1 */
-void
-secure_error(fmt, p1, p2, p3, p4, p5)
-	char *fmt;
-#endif
 {
 	char buf[FTP_BUFSIZ];
-#ifdef STDARG
 	va_list ap;
 
 	va_start(ap, fmt);
-	vsprintf(buf, fmt, ap);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
-#else
-	sprintf(buf, fmt, p1, p2, p3, p4, p5);
-#endif
 	reply(535, "%s", buf);
 	syslog(LOG_ERR, "%s", buf);
 }
@@ -2612,36 +2601,29 @@ static char *onefile[] = {
  * XXX callers need to limit total length of output string to
  * FTP_BUFSIZ
  */
-#ifdef STDARG
 static int
 secure_fprintf(FILE *stream, char *fmt, ...)
-#else
-static int
-secure_fprintf(stream, fmt, p1, p2, p3, p4, p5)
-FILE *stream;
-char *fmt;
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
 #endif
+    ;
+
+static int
+secure_fprintf(FILE *stream, char *fmt, ...)
 {
         char s[FTP_BUFSIZ];
         int rval;
-#ifdef STDARG
         va_list ap;
 
         va_start(ap, fmt);
         if (dlevel == PROT_C) rval = vfprintf(stream, fmt, ap);
         else {
-                vsprintf(s, fmt, ap);
+		vsnprintf(s, sizeof(s), fmt, ap);
                 rval = secure_write(fileno(stream), s, strlen(s));
         }
         va_end(ap);
 
         return(rval);
-#else
-        if (dlevel == PROT_C)
-                return(fprintf(stream, fmt, p1, p2, p3, p4, p5));
-        sprintf(s, fmt, p1, p2, p3, p4, p5);
-        return(secure_write(fileno(stream), s, strlen(s)));
-#endif
 }
 
 void

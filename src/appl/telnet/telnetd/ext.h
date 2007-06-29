@@ -184,9 +184,21 @@ extern void
 	willoption (int),
 	wontoption (int);
 
-extern void netprintf (const char *, ...);
-extern void netprintf_urg (const char *fmt, ...);
-extern void netprintf_noflush (const char *fmt, ...);
+extern void netprintf (const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
+extern void netprintf_urg (const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
+extern void netprintf_noflush (const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
 extern int netwrite (const unsigned char *, size_t);
 extern void netputs (const char *);
 

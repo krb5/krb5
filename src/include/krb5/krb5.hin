@@ -1,7 +1,7 @@
 /* -*- c -*-
  * include/krb5.h
  *
- * Copyright 1989,1990,1995,2001, 2003  by the Massachusetts Institute of Technology.
+ * Copyright 1989,1990,1995,2001, 2003, 2007  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -2264,9 +2264,17 @@ krb5_prompt_type* KRB5_CALLCONV krb5_get_prompt_types
 
 /* Error reporting */
 void KRB5_CALLCONV_C
-krb5_set_error_message (krb5_context, krb5_error_code, const char *, ...);
+krb5_set_error_message (krb5_context, krb5_error_code, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
 void KRB5_CALLCONV
-krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list);
+krb5_vset_error_message (krb5_context, krb5_error_code, const char *, va_list)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
 /*
  * The behavior of krb5_get_error_message is only defined the first
  * time it is called after a failed call to a krb5 function using the

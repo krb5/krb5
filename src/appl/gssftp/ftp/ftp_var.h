@@ -173,7 +173,11 @@ extern	char *tail();
 extern	char *mktemp();
 #endif
 
-extern int command(char *, ...);
+extern int command(char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
 
 char *remglob (char **, int);
 int another (int *, char ***, char *);

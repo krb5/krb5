@@ -1,7 +1,7 @@
 /*
  * include/k5-err.h
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -53,10 +53,18 @@ struct errinfo {
 void
 krb5int_set_error (struct errinfo *ep,
 		   long code,
-		   const char *fmt, ...);
+		   const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
 void
 krb5int_vset_error (struct errinfo *ep, long code,
-		    const char *fmt, va_list args);
+		    const char *fmt, va_list args)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
 const char *
 krb5int_get_error (struct errinfo *ep, long code);
 void

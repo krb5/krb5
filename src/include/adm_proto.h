@@ -1,7 +1,7 @@
 /*
  * include/krb5/adm_proto.h
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -62,7 +62,11 @@ krb5_error_code krb5_klog_init
 	 char *,
 	 krb5_boolean);
 void krb5_klog_close (krb5_context);
-int krb5_klog_syslog (int, const char *, ...);
+int krb5_klog_syslog (int, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
 void krb5_klog_reopen (krb5_context);
 
 /* alt_prof.c */

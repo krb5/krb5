@@ -1,7 +1,7 @@
 /*
  * kdc/kerberos_v4.c
  *
- * Copyright 1985, 1986, 1987, 1988,1991 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988,1991,2007 by the Massachusetts Institute
  * of Technology.
  * All Rights Reserved.
  *
@@ -75,7 +75,11 @@ static int kerb_get_principal (char *, char *, Principal *,
 static int check_princ (char *, char *, int, Principal *,
 				  krb5_keyblock *, int, krb5_deltat *);
 
-char * v4_klog (int, const char *, ...);
+static char * v4_klog (int, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
 #define klog v4_klog
 
 /* take this out when we don't need it anymore */
@@ -271,7 +275,7 @@ process_v4(const krb5_data *pkt, const krb5_fulladdr *client_fulladdr,
     return(retval);
 }
 
-char * v4_klog( int type, const char *format, ...)
+static char * v4_klog( int type, const char *format, ...)
 {
     int logpri = LOG_INFO;
     va_list pvar;

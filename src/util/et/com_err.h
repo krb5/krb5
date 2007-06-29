@@ -39,10 +39,18 @@ extern "C" {
 
 /* Public interfaces */
 extern void KRB5_CALLCONV_C com_err
-	(const char *, errcode_t, const char *, ...);
+	(const char *, errcode_t, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
 extern void KRB5_CALLCONV com_err_va
 	(const char *whoami, errcode_t code, const char *fmt,
-	 va_list ap);
+	 va_list ap)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 0)))
+#endif
+    ;
 extern /*@observer@*//*@dependent@*/ const char * KRB5_CALLCONV error_message
 	(errcode_t)
        /*@modifies internalState@*/;

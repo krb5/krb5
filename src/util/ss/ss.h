@@ -49,7 +49,11 @@ void ss_list_requests __SS_PROTO;
 void ss_quit __SS_PROTO;
 char *ss_current_request();
 char *ss_name(int);
-void ss_error (int, long, char const *, ...);
+void ss_error (int, long, char const *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+    ;
 void ss_perror (int, long, char const *);
 int ss_listen (int);
 int ss_create_invocation(char *, char *, char *, ss_request_table *, int *);

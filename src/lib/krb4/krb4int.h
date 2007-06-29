@@ -1,7 +1,7 @@
 /*
  * lib/krb4/krb4int.h
  *
- * Copyright 2001-2002 by the Massachusetts Institute of Technology.
+ * Copyright 2001-2002, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -62,7 +62,11 @@ int krb_get_in_tkt_preauth_creds(char *, char *, char *,
 void kset_logfile(char *);
 
 /* log.c */
-void krb_log(const char *, ...);
+void krb_log(const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 1, 2)))
+#endif
+    ;
 
 void krb_set_logfile(char *);
 
