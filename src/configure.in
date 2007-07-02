@@ -15,12 +15,18 @@ dnl
 AC_REQUIRE_CPP
 dnl
 AC_CACHE_CHECK(if va_copy is available, krb5_cv_va_copy,
-[AC_COMPILE_IFELSE([
+[AC_LINK_IFELSE([
 #include <stdarg.h>
 void f(va_list ap) {
   va_list ap2;
   va_copy(ap2, ap);
   va_end(ap2);
+}
+va_list x;
+int main()
+{
+  f(x);
+  return 0;
 }], krb5_cv_va_copy=yes, krb5_cv_va_copy=no)])
 if test "$krb5_cv_va_copy" = yes; then
   AC_DEFINE(HAS_VA_COPY,1,[Define if va_copy macro or function is available.])
