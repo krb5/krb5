@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #endif
 
+#include "k5-platform.h"
+
 typedef void * pointer;
 
 #include "ss.h"
