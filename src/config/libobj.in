@@ -17,12 +17,15 @@
 
 OBJS.ST: $(STLIBOBJS) Makefile
 	@echo $(STLIBOBJS) > $@
+	: updated $@
 
 OBJS.SH: $(SHLIBOBJS) Makefile
 	@echo $(SHLIBOBJS) > $@
+	: updated $@
 
 OBJS.PF: $(PFLIBOBJS) Makefile
 	@echo $(PFLIBOBJS) > $@
+	: updated $@
 
 all-libobjs: $(OBJLISTS)
 
