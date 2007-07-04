@@ -195,7 +195,7 @@ $(GSSAPI_KRB5_HDR): gssapi_krb5.h
 all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
 all-unix:: all-libobjs
 
-error_map.h: $(SRCTOP)/util/gen-map.pl Makefile
+error_map.h: $(SRCTOP)/util/gen-map.pl $(SRCTOP)/util/ktemplate.pm Makefile
 	$(PERL) -I$(SRCTOP)/util $(SRCTOP)/util/gen-map.pl -oerror_map.new \
 		NAME=gsserrmap \
 		KEY=OM_uint32 \
