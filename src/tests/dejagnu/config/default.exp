@@ -2090,6 +2090,8 @@ proc do_klist_err { testname } {
 
 proc do_kdestroy { testname } {
     global KDESTROY
+    global spawn_id
+
     spawn $KDESTROY -5
     if ![check_exit_status $testname] {
 	fail $testname
