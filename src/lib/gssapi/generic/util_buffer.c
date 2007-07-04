@@ -37,12 +37,10 @@ int g_make_string_buffer(str, buffer)
 {
    buffer->length = strlen(str);
 
-   if ((buffer->value = (void *) xmalloc(buffer->length + 1)) == NULL) {
+   if ((buffer->value = strdup(str)) == NULL) {
       buffer->length = 0;
       return(0);
    }
-
-   strcpy(buffer->value, str);
 
    return(1);
 }
