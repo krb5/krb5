@@ -783,6 +783,7 @@ typedef enum {
     K5_KEY_COM_ERR,
     K5_KEY_GSS_KRB5_SET_CCACHE_OLD_NAME,
     K5_KEY_GSS_KRB5_CCACHE_NAME,
+    K5_KEY_GSS_KRB5_ERROR_MESSAGE,
     K5_KEY_MAX
 } k5_key_t;
 /* rename shorthand symbols for export */
