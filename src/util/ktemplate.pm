@@ -57,6 +57,13 @@ sub run {
 	print STDERR "$0: No output file specified.\n";
 	&usage;
     }
+    print OUTFILE "/*\n";
+    print OUTFILE " * This file is generated, please don't edit it.\n";
+    print OUTFILE " * script: $0\n";
+    print OUTFILE " * args:\n *\t", join("\n *\t", @ARGV), "\n";
+    print OUTFILE " * The rest of this file is copied from a template, with\n";
+    print OUTFILE " * substitutions.  See the template for copyright info.\n";
+    print OUTFILE " */\n";
     while (<DATA>) {
 	print OUTFILE &do_substitution($_);
     }
