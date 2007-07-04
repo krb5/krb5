@@ -247,6 +247,20 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 				       "KDC returned error string: %s",
 				       err_reply->text.data);
 		break;
+	    case KDC_ERR_S_PRINCIPAL_UNKNOWN:
+	        {
+		    char *s_name;
+		    if (krb5_unparse_name(context, in_cred->server, &s_name) == 0) {
+			krb5_set_error_message(context, retval,
+					       "Server %s not found in Kerberos database",
+					       s_name);
+			krb5_free_unparsed_name(context, s_name);
+		    } else
+			/* In case there's a stale S_PRINCIPAL_UNKNOWN
+			   report already noted.  */
+			krb5_clear_error_message(context);
+		}
+		break;
 	    default:
 #if 0 /* We should stop the KDC from sending back this text, because
 	 if the local language doesn't match the KDC's language, we'd
