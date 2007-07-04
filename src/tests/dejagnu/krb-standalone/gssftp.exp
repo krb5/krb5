@@ -206,7 +206,7 @@ proc ftp_test { } {
 	    catch "expect_after"
 	    return
 	}
-	-re "--->.*" { exp_continue }
+	-re "--->\[^\r\n\]*\r\n" { exp_continue }
 	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z/+\]*" { exp_continue }
 	-re "sealed \[A-Z()\]*" { exp_continue }
 	-re "secure_command\[A-Z()\]*" { exp_continue }
