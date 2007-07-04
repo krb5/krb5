@@ -253,6 +253,7 @@ proc v4ftp_test { } {
     expect {
 	"GSSAPI error minor: Unsupported credentials cache format version number" {}
 	"GSSAPI error minor: No credentials cache found" {}
+	-re "GSSAPI error minor: Credentials cache file '.*' not found" {}
 	"GSSAPI error minor: Decrypt integrity check failed" {}
     }
     expect "GSSAPI error: initializing context"
