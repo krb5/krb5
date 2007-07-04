@@ -1240,8 +1240,19 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
     }
 
     f = THREEPARAMOPEN (data->filename, open_flag | O_BINARY, 0600);
-    if (f == NO_FILE)
-	return krb5_fcc_interpret (context, errno);
+    if (f == NO_FILE) {
+	switch (errno) {
+	case ENOENT:
+	    retval = KRB5_FCC_NOFILE;
+	    fprintf(stderr, "stuffing error message in context %p\n", context);
+	    krb5_set_error_message(context, retval,
+				   "Credentials cache file '%s' not found",
+				   data->filename);
+	    return retval;
+	default:
+	    return krb5_fcc_interpret (context, errno);
+	}
+    }
 
     data->mode = mode;
 
