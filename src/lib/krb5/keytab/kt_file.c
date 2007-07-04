@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/kt_file.c
  *
- * Copyright 1990,1991,1995 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,1995,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -1068,10 +1068,23 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	    errno = 0;
 	    KTFILEP(id) = fopen(KTFILENAME(id), fopen_mode_rbplus);
 	    if (!KTFILEP(id))
-		return errno ? errno : EMFILE;
+		goto report_errno;
 	    writevno = 1;
-	} else				/* some other error */
-	    return errno ? errno : EMFILE;
+	} else {
+	report_errno:
+	    switch (errno) {
+	    case 0:
+		/* XXX */
+		return EMFILE;
+	    case ENOENT:
+		krb5_set_error_message(context, ENOENT,
+				       "Key table file '%s' not found",
+				       KTFILENAME(id));
+		return ENOENT;
+	    default:
+		return errno;
+	    }
+	}
     }
     if ((kerror = krb5_lock_file(context, fileno(KTFILEP(id)), mode))) {
 	(void) fclose(KTFILEP(id));
