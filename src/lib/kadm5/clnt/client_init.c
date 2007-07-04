@@ -605,6 +605,50 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
 				&gss_client_creds, NULL, NULL);
      if (gssstat != GSS_S_COMPLETE) {
 	  code = KADM5_GSS_ERROR;
+#if 0 /* for debugging only */
+	  {
+	      OM_uint32 maj_status, min_status, message_context = 0;
+	      gss_buffer_desc status_string;
+	      do {
+		  maj_status = gss_display_status(&min_status,
+						  gssstat,
+						  GSS_C_GSS_CODE,
+						  GSS_C_NO_OID,
+						  &message_context,
+						  &status_string);
+		  if (maj_status == GSS_S_COMPLETE) {
+		      fprintf(stderr, "MAJ: %.*s\n",
+			      (int) status_string.length,
+			      (char *)status_string.value);
+		      gss_release_buffer(&min_status, &status_string);
+		  } else {
+		      fprintf(stderr,
+			      "MAJ? gss_display_status returns 0x%lx?!\n",
+			      (unsigned long) maj_status);
+		      message_context = 0;
+		  }
+	      } while (message_context != 0);
+	      do {
+		  maj_status = gss_display_status(&min_status,
+						  minor_stat,
+						  GSS_C_MECH_CODE,
+						  GSS_C_NO_OID,
+						  &message_context,
+						  &status_string);
+		  if (maj_status == GSS_S_COMPLETE) {
+		      fprintf(stderr, "MIN: %.*s\n",
+			      (int) status_string.length,
+			      (char *)status_string.value);
+		      gss_release_buffer(&min_status, &status_string);
+		  } else {
+		      fprintf(stderr,
+			      "MIN? gss_display_status returns 0x%lx?!\n",
+			      (unsigned long) maj_status);
+		      message_context = 0;
+		  }
+	      } while (message_context != 0);
+	  }
+#endif
 	  goto error;
      }
 
