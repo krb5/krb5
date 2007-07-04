@@ -1,5 +1,5 @@
 /*
- * Copyright 1997 by Massachusetts Institute of Technology
+ * Copyright 1997, 2007 by Massachusetts Institute of Technology
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -89,6 +89,7 @@ krb5_gss_validate_cred(minor_status, cred_handle)
 	k5_mutex_assert_locked(&cred->lock);
 	k5_mutex_unlock(&cred->lock);
     }
+    save_error_info(*minor_status, context);
     krb5_free_context(context);
     return maj;
 }

@@ -67,6 +67,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
    if ((code = krb5_timeofday(context, &now))) {
       *minor_status = code;
+      save_error_info(*minor_status, context);
       return(GSS_S_FAILURE);
    }
 
@@ -78,6 +79,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 				      ctx->initiate?ctx->here:ctx->there,
 				      &init))) {
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 return(GSS_S_FAILURE);
       }
       if (! kg_save_name((gss_name_t) init)) {
@@ -93,6 +95,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 				      &accept))) {
 	 if (init) krb5_free_principal(context, init);
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 return(GSS_S_FAILURE);
       }
       if (! kg_save_name((gss_name_t) accept)) {

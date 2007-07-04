@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -682,5 +682,25 @@ extern k5_mutex_t kg_kdc_flag_mutex;
 krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 
 krb5_error_code krb5_gss_use_kdc_context(void);
+
+/* For error message handling.  */
+/* Returns a shared string, not a private copy!  */
+extern char *
+krb5_gss_get_error_message(OM_uint32 minor_code);
+extern void
+krb5_gss_save_error_string(OM_uint32 minor_code, char *msg);
+extern void
+krb5_gss_save_error_message(OM_uint32 minor_code, const char *format, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
+extern void
+krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx);
+#define get_error_message krb5_gss_get_error_message
+#define save_error_string krb5_gss_save_error_string
+#define save_error_message krb5_gss_save_error_message
+#define save_error_info krb5_gss_save_error_info
+extern void krb5_gss_delete_error_info(void *p);
 
 #endif /* _GSSAPIP_KRB5_H_ */

@@ -195,9 +195,18 @@ $(GSSAPI_KRB5_HDR): gssapi_krb5.h
 all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
 all-unix:: all-libobjs
 
+error_map.h: $(SRCTOP)/util/gen-map.pl Makefile
+	$(PERL) -I$(SRCTOP)/util $(SRCTOP)/util/gen-map.pl -oerror_map.new \
+		NAME=gsserrmap \
+		KEY=OM_uint32 \
+		VALUE="char *" \
+		COMPARE=compare_OM_uint32 \
+		FREEVALUE=free_string
+	$(MV) error_map.new error_map.h
+
 clean-unix::
 	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h
-	-$(RM) gssapi_krb5.h
+	-$(RM) gssapi_krb5.h error_map.h
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS)
@@ -355,7 +364,8 @@ disp_status.so disp_status.po $(OUTPRE)disp_status.$(OBJEXT): \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_generic.h \
   $(srcdir)/../gss_libinit.h ../generic/gssapi_err_generic.h \
-  disp_status.c gssapiP_krb5.h gssapi_err_krb5.h gssapi_krb5.h
+  disp_status.c error_map.h gssapiP_krb5.h gssapi_err_krb5.h \
+  gssapi_krb5.h
 duplicate_name.so duplicate_name.po $(OUTPRE)duplicate_name.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \

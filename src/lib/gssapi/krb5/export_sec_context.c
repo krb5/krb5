@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/export_sec_context.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -36,7 +36,7 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     gss_ctx_id_t	*context_handle;
     gss_buffer_t	interprocess_token;
 {
-    krb5_context	context;
+    krb5_context	context = NULL;
     krb5_error_code	kret;
     OM_uint32		retval;
     size_t		bufsize, blen;
@@ -92,6 +92,9 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     return (GSS_S_COMPLETE);
 
 error_out:
+    if (retval != GSS_S_COMPLETE)
+	if (kret != 0 && context != 0)
+	    save_error_info(kret, context);
     if (obuffer && bufsize) {
 	    memset(obuffer, 0, bufsize);
 	    xfree(obuffer);

@@ -113,6 +113,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
       if ((code = krb5_copy_principal(context, input, &princ))) {
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
@@ -215,6 +216,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
    if (code) {
       *minor_status = (OM_uint32) code;
+      save_error_info(*minor_status, context);
       krb5_free_context(context);
       return(GSS_S_BAD_NAME);
    }

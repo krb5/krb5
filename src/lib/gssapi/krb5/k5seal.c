@@ -362,6 +362,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
     context = ctx->k5_context;
     if ((code = krb5_timeofday(context, &now))) {
 	*minor_status = code;
+	save_error_info(*minor_status, context);
 	return(GSS_S_FAILURE);
     }
 
@@ -388,6 +389,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 
     if (code) {
 	*minor_status = code;
+	save_error_info(*minor_status, context);
 	return(GSS_S_FAILURE);
     }
 

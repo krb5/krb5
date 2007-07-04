@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -93,7 +93,6 @@ static char *krb5_gss_keytab = NULL;
 OM_uint32 KRB5_CALLCONV
 krb5_gss_register_acceptor_identity(const char *keytab)
 {
-    size_t	len;
     char *new, *old;
     int err;
 
@@ -104,11 +103,9 @@ krb5_gss_register_acceptor_identity(const char *keytab)
     if (keytab == NULL)
 	return GSS_S_FAILURE;
 
-    len = strlen(keytab);
-    new = malloc(len + 1);
+    new = strdup(keytab);
     if (new == NULL)
 	return GSS_S_FAILURE;
-    strcpy(new, keytab);
 
     err = k5_mutex_lock(&gssint_krb5_keytab_lock);
     if (err) {
@@ -175,9 +172,12 @@ acquire_accept_cred(context, minor_status, desired_name, output_princ, cred)
       princ = (krb5_principal) desired_name;
       if ((code = krb5_kt_get_entry(context, kt, princ, 0, 0, &entry))) {
 	 (void) krb5_kt_close(context, kt);
-	 if (code == KRB5_KT_NOTFOUND)
-	    *minor_status = KG_KEYTAB_NOMATCH;
-	 else
+	 if (code == KRB5_KT_NOTFOUND) {
+	     char *errstr = krb5_get_error_message(context, code);
+	     krb5_set_error_message(context, KG_KEYTAB_NOMATCH, "%s", errstr);
+	     krb5_free_error_message(context, errstr);
+	     *minor_status = KG_KEYTAB_NOMATCH;
+	 } else
 	    *minor_status = code;
 	 return(GSS_S_CRED_UNAVAIL);
       }
@@ -538,6 +538,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
          k5_mutex_destroy(&cred->lock);
          xfree(cred);
 	 /* minor_status set by acquire_accept_cred() */
+	 save_error_info(*minor_status, context);
 	 krb5_free_context(context);
 	 return(ret);
       }
@@ -560,6 +561,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
          k5_mutex_destroy(&cred->lock);
          xfree(cred);
 	 /* minor_status set by acquire_init_cred() */
+	 save_error_info(*minor_status, context);
 	 krb5_free_context(context);
 	 return(ret);
       }
@@ -576,6 +578,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
          k5_mutex_destroy(&cred->lock);
          xfree(cred);
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
@@ -600,6 +603,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
          k5_mutex_destroy(&cred->lock);
          xfree(cred);
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 krb5_free_context(context);
 	 return(GSS_S_FAILURE);
       }
@@ -649,6 +653,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
       k5_mutex_destroy(&cred->lock);
       xfree(cred);
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      save_error_string(*minor_status, "error saving credentials");
       krb5_free_context(context);
       return(GSS_S_FAILURE);
    }

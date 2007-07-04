@@ -65,8 +65,10 @@ krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
 
       if ((major = kg_seal(minor_status, *context_handle, 0,
 			   GSS_C_QOP_DEFAULT,
-			   &empty, NULL, output_token, KG_TOK_DEL_CTX)))
-	 return(major);
+			   &empty, NULL, output_token, KG_TOK_DEL_CTX))) {
+	  save_error_info(*minor_status, context);
+	  return(major);
+      }
    }
 
    /* invalidate the context handle */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -122,6 +122,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     major_status = krb5_gss_validate_cred_1(minor_status, input_cred_handle,
 					    context);
     if (GSS_ERROR(major_status)) {
+	save_error_info(*minor_status, context);
 	krb5_free_context(context);
 	return major_status;
     }
@@ -150,6 +151,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     }
 
     if (GSS_ERROR(kg_sync_ccache_name(context, minor_status))) {
+	save_error_info(*minor_status, context);
 	krb5_free_context(context);
 	return GSS_S_FAILURE;
     }
@@ -203,6 +205,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 	    xfree(new_cred);
 
 	    *minor_status = code;
+	    save_error_info(*minor_status, context);
 	    krb5_free_context(context);
 	    return(GSS_S_FAILURE);
 	}
@@ -232,6 +235,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		xfree(new_cred);
 
 		*minor_status = code;
+		save_error_info(*minor_status, context);
 		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
@@ -243,6 +247,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		xfree(new_cred);
 
 		*minor_status = code;
+		save_error_info(*minor_status, context);
 		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
@@ -261,8 +266,9 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
 
-		krb5_free_context(context);
 		*minor_status = code;
+		save_error_info(*minor_status, context);
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
 	} else {
@@ -301,9 +307,10 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
 		if (new_cred->princ)
 		    krb5_free_principal(context, new_cred->princ);
 		xfree(new_cred);
-		krb5_free_context(context);
 
 		*minor_status = code;
+		save_error_info(*minor_status, context);
+		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	    }
 	} else {

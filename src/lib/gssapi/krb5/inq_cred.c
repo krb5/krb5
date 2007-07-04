@@ -1,5 +1,5 @@
 /*
- * Copyright 2000 by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -148,6 +148,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
 	  (code = krb5_copy_principal(context, cred->princ, &ret_name))) {
 	 k5_mutex_unlock(&cred->lock);
 	 *minor_status = code;
+	 save_error_info(*minor_status, context);
 	 ret = GSS_S_FAILURE;
 	 goto fail;
       }

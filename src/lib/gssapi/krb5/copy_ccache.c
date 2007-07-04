@@ -41,6 +41,7 @@ gss_krb5int_copy_ccache(minor_status, cred_handle, out_ccache)
    if (code) {
        k5_mutex_unlock(&k5creds->lock);
        *minor_status = code;
+       save_error_info(*minor_status, context);
        krb5_free_context(context);
        return(GSS_S_FAILURE);
    }
@@ -48,12 +49,9 @@ gss_krb5int_copy_ccache(minor_status, cred_handle, out_ccache)
        code = krb5_cc_store_cred(context, out_ccache, &creds);
    krb5_cc_end_seq_get(context, k5creds->ccache, &cursor);
    k5_mutex_unlock(&k5creds->lock);
+   *minor_status = code;
+   if (code)
+       save_error_info(*minor_status, context);
    krb5_free_context(context);
-   if (code) {
-       *minor_status = code;
-       return(GSS_S_FAILURE);
-   } else {
-       *minor_status = 0;
-       return(GSS_S_COMPLETE);
-   }
+   return code ? GSS_S_FAILURE : GSS_S_COMPLETE;
 }

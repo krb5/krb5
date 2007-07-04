@@ -1,5 +1,5 @@
 /*
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 2001, 2007 by the Massachusetts Institute of Technology.
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
  * Permission to use, copy, modify, distribute, and sell this software
@@ -493,6 +493,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     unsigned int bodysize;
     int err;
     int toktype2;
+    OM_uint32 ret;
 
     /* validate the context handle */
     if (! kg_validate_ctx_id(context_handle)) {
@@ -540,11 +541,14 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
     }
 
     if (ctx->proto == 0)
-	return kg_unseal_v1(ctx->k5_context, minor_status, ctx, ptr, bodysize,
-			    message_buffer, conf_state, qop_state,
-			    toktype);
+	ret = kg_unseal_v1(ctx->k5_context, minor_status, ctx, ptr, bodysize,
+			   message_buffer, conf_state, qop_state,
+			   toktype);
     else
-	return gss_krb5int_unseal_token_v3(&ctx->k5_context, minor_status, ctx,
-					   ptr, bodysize, message_buffer,
-					   conf_state, qop_state, toktype);
+	ret = gss_krb5int_unseal_token_v3(&ctx->k5_context, minor_status, ctx,
+					  ptr, bodysize, message_buffer,
+					  conf_state, qop_state, toktype);
+    if (ret != 0)
+	save_error_info (*minor_status, ctx->k5_context);
+    return ret;
 }

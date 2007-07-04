@@ -40,6 +40,10 @@ int gssint_lib_init(void)
     err = k5_key_register(K5_KEY_GSS_KRB5_CCACHE_NAME, free);
     if (err)
 	return err;
+    err = k5_key_register(K5_KEY_GSS_KRB5_ERROR_MESSAGE,
+			  krb5_gss_delete_error_info);
+    if (err)
+	return err;
 #ifndef _WIN32
     err = k5_mutex_finish_init(&kg_kdc_flag_mutex);
     if (err)

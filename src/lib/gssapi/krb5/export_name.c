@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/export_name.c
  *
- * Copyright 1997 by the Massachusetts Institute of Technology.
+ * Copyright 1997, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -60,6 +60,7 @@ OM_uint32 krb5_gss_export_name(OM_uint32  *minor_status,
 				      &str))) {
 		if (minor_status)
 			*minor_status = code;
+		save_error_info(code, context);
 		krb5_free_context(context);
 		return(GSS_S_FAILURE);
 	}

@@ -186,7 +186,7 @@ int *out_caller_provided_name)
         *out_caller_provided_name = 
 	  (k5_getspecific(K5_KEY_GSS_KRB5_CCACHE_NAME) != NULL);
     }
-    
+
     *minor_status = 0;
     return GSS_S_COMPLETE;
 }
@@ -220,6 +220,8 @@ kg_get_ccache_name (OM_uint32 *minor_status, const char **out_name)
 		    err = errno;
 	    }
 	}
+	if (err && context)
+	    save_error_info(err, context);
 	if (context)
 	    krb5_free_context(context);
     }

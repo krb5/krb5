@@ -1,5 +1,5 @@
 /*
- * Copyright 2000,2002, 2003 by the Massachusetts Institute of Technology.
+ * Copyright 2000,2002, 2003, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -853,8 +853,11 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 	   *minor_status = kerr;
 	   return GSS_S_FAILURE;
        }
-       if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
+       if (GSS_ERROR(kg_sync_ccache_name(context, minor_status))) {
+	   save_error_info(*minor_status, context);
+	   krb5_free_context(context);
 	   return GSS_S_FAILURE;
+       }
    } else {
        context = ((krb5_gss_ctx_id_rec *)*context_handle)->k5_context;
    }
@@ -871,6 +874,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 
    if (! kg_validate_name(target_name)) {
       *minor_status = (OM_uint32) G_VALIDATE_FAILED;
+      save_error_info(*minor_status, context);
       if (*context_handle == GSS_C_NO_CONTEXT)
 	  krb5_free_context(context);
       return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
@@ -888,6 +892,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
    } else {
       major_status = krb5_gss_validate_cred(minor_status, claimant_cred_handle);
       if (GSS_ERROR(major_status)) {
+	  save_error_info(*minor_status, context);
 	  if (*context_handle == GSS_C_NO_CONTEXT)
 	      krb5_free_context(context);
 	  return(major_status);
@@ -947,9 +952,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
 				    output_token, ret_flags, time_rec,
 				    context, default_mech);
       k5_mutex_unlock(&cred->lock);
-      if (*context_handle == GSS_C_NO_CONTEXT)
+      if (*context_handle == GSS_C_NO_CONTEXT) {
+	  save_error_info (*minor_status, context);
 	  krb5_free_context(context);
-      else
+      } else
 	  ((krb5_gss_ctx_id_rec *) *context_handle)->k5_context = context;
    } else {
       /* mutual_auth doesn't care about the credentials */

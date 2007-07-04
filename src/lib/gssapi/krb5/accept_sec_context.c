@@ -1,5 +1,5 @@
 /*
- * Copyright 2000, 2004  by the Massachusetts Institute of Technology.
+ * Copyright 2000, 2004, 2007  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -292,7 +292,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
     */
    /*SUPPRESS 29*/
    if (*context_handle != GSS_C_NO_CONTEXT) {
-      *minor_status = 0;
+      *minor_status = EINVAL;
+      save_error_string(EINVAL, "accept_sec_context called with existing context handle");
       krb5_free_context(context);
       return(GSS_S_FAILURE);
    }
@@ -391,6 +392,7 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
 
    if ((code = krb5_auth_con_init(context, &auth_context))) {
        major_status = GSS_S_FAILURE;
+       save_error_info(code, context);
        goto fail;
    }
    if (cred->rcache) {
@@ -993,6 +995,8 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
    if (!verifier_cred_handle && cred_handle) {
 	   krb5_gss_release_cred(minor_status, &cred_handle);
    }
+   if (major_status && *minor_status && context)
+       save_error_info(*minor_status, context);
    krb5_free_context(context);
    return (major_status);
 }

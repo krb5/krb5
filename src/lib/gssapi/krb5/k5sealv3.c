@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/k5sealv3.c
  *
- * Copyright 2003,2004 by the Massachusetts Institute of Technology.
+ * Copyright 2003,2004,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -491,6 +491,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 	if (err) {
 	error:
 	    *minor_status = err;
+	    save_error_info(*minor_status, context);
 	    return GSS_S_BAD_SIG; /* XXX */
 	}
 	if (!valid) {
