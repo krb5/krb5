@@ -4214,6 +4214,7 @@ crypto_free_cert_info(krb5_context context,
     for (i = 0; i < MAX_CREDS_ALLOWED; i++) {
 	if (id_cryptoctx->creds[i] != NULL) {
 	    free_cred_info(context, id_cryptoctx, id_cryptoctx->creds[i]);
+	    id_cryptoctx->creds[i] = NULL;
 	}
     }
     return 0;
