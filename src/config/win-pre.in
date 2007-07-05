@@ -187,6 +187,7 @@ LIBCMD=lib
 AWK=rem
 RC = rc
 CVTRES = cvtres
+PERL=perl
 
 WCONFIG_EXE=$(BUILDTOP)\$(OUTPRE)wconfig.exe
 WCONFIG=$(WCONFIG_EXE:.exe=) $(WCONFIG_FLAGS)
