@@ -545,13 +545,14 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
     static generic_ret		ret;
     char			*prime_arg1,
 				*prime_arg2;
-    char			prime_arg[BUFSIZ];
     gss_buffer_desc		client_name,
 				service_name;
     OM_uint32			minor_stat;
     kadm5_server_handle_t	handle;
     restriction_t		*rp;
     char                        *errmsg;
+    size_t			tlen1, tlen2, clen, slen;
+    char			*tdots1, *tdots2, *cdots, *sdots;
 
     xdr_free(xdr_generic_ret, &ret);
 
@@ -572,7 +573,14 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 	 ret.code = KADM5_BAD_PRINCIPAL;
 	 goto exit_func;
     }
-    sprintf(prime_arg, "%s to %s", prime_arg1, prime_arg2);
+    tlen1 = strlen(prime_arg1);
+    trunc_name(&tlen1, &tdots1);
+    tlen2 = strlen(prime_arg2);
+    trunc_name(&tlen2, &tdots2);
+    clen = client_name.length;
+    trunc_name(&clen, &cdots);
+    slen = service_name.length;
+    trunc_name(&slen, &sdots);
 
     ret.code = KADM5_OK;
     if (! CHANGEPW_SERVICE(rqstp)) {
@@ -590,8 +598,15 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
     } else
 	 ret.code = KADM5_AUTH_INSUFFICIENT;
     if (ret.code != KADM5_OK) {
-	 log_unauth("kadm5_rename_principal", prime_arg,
-		    &client_name, &service_name, rqstp);
+	 krb5_klog_syslog(LOG_NOTICE,
+			  "Unauthorized request: kadm5_rename_principal, "
+			  "%.*s%s to %.*s%s, "
+			  "client=%.*s%s, service=%.*s%s, addr=%s",
+			  tlen1, prime_arg1, tdots1,
+			  tlen2, prime_arg2, tdots2,
+			  clen, client_name.value, cdots,
+			  slen, service_name.value, sdots,
+			  inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
     } else {
 	 ret.code = kadm5_rename_principal((void *)handle, arg->src,
 						arg->dest);
@@ -600,8 +615,15 @@ rename_principal_2_svc(rprinc_arg *arg, struct svc_req *rqstp)
 	 else
 	     errmsg = krb5_get_error_message(handle ? handle->context : NULL, ret.code);
 
-	 log_done("kadm5_rename_principal", prime_arg, errmsg,
-		  &client_name, &service_name, rqstp);
+	 krb5_klog_syslog(LOG_NOTICE,
+			  "Request: kadm5_rename_principal, "
+			  "%.*s%s to %.*s%s, %s, "
+			  "client=%.*s%s, service=%.*s%s, addr=%s",
+			  tlen1, prime_arg1, tdots1,
+			  tlen2, prime_arg2, tdots2, errmsg,
+			  clen, client_name.value, cdots,
+			  slen, service_name.value, sdots,
+			  inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
     }
     free_server_handle(handle);
     free(prime_arg1);
