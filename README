@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.6.1
+                  Kerberos Version 5, Release 1.6.2
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.6.1.tar.gz.  Instructions on how to extract the entire
+krb5-1.6.2.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.6.1.tar.gz
+        gtar zxpf krb5-1.6.2.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.6.1.tar.gz | tar xpf -
+        gzcat krb5-1.6.2.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.6.1/src and
-the documentation into krb5-1.6.1/doc.
+Both of these methods will extract the sources into krb5-1.6.2/src and
+the documentation into krb5-1.6.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -58,6 +58,30 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Major changes in krb5-1.6.2
+---------------------------
+
+[5585]  fix MITKRB5-SA-2007-004: kadmind affected by multiple RPC
+        library vulnerabilities [CVE-2007-2442/VU#356961,
+        CVE-2007-2443/VU#365313]
+[5586]  fix MITKRB5-SA-2007-005: kadmind vulnerable to buffer overflow
+         [CVE-2007-2798/VU#554257]
+
+krb5-1.6.2 changes by ticket ID
+-------------------------------
+
+5541    remove debugging code accidentally left in ftp/cmds.c
+5546    race condition in referrals fallback
+5547    profile stores empty string values without double quotes
+5551    rd_req_decoded needs to deal with referral realms
+5552    minor incompatability krb5-1.6.1 and OpenSSH_4.6p1, OpenSSL 0.9.8e
+5554    Modify WIX installer to better support upgrading betas
+5573    Kfw 3.2.0.msi is missing a file krb5/krb5.h
+5579    krb5_walk_realm_tree leaks in capaths case
+5585    fix MITKRB5-SA-2007-004 [CVE-2007-2442/VU#356961,
+        CVE-2007-2443/VU#365313]
+5586    fix MITKRB5-SA-2007-005 [CVE-2007-2798/VU#554257]
 
 Major changes in krb5-1.6.1
 ---------------------------
