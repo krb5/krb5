@@ -148,6 +148,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
      rqst->rq_xprt->xp_auth = &svc_auth_none;
      
      memset((char *) &call_res, 0, sizeof(call_res));
+     creds.client_handle.length = 0;
+     creds.client_handle.value = NULL;
      
      cred = &msg->rm_call.cb_cred;
      verf = &msg->rm_call.cb_verf;
