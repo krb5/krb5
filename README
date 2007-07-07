@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.5.3
+                  Kerberos Version 5, Release 1.5.4
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.5.3.tar.gz.  Instructions on how to extract the entire
+krb5-1.5.4.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.5.3.tar.gz
+        gtar zxpf krb5-1.5.4.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.5.3.tar.gz | tar xpf -
+        gzcat krb5-1.5.4.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.5.3/src and
-the documentation into krb5-1.5.3/doc.
+Both of these methods will extract the sources into krb5-1.5.4/src and
+the documentation into krb5-1.5.4/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -60,6 +60,20 @@ http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
+Major changes in krb5-1.5.4
+---------------------------
+
+[5591]  (krb5-1.5.x) fix MITKRB5-SA-2007-004 [CVE-2007-2442/VU#356961,
+        CVE-2007-2443/VU#365313]
+[5592]  (krb5-1.5.x) fix MITKRB5-SA-2007-005 [CVE-2007-2798/VU#554257]
+
+krb5-1.5.4 changes by ticket ID
+-------------------------------
+
+5591    (krb5-1.5.x) fix MITKRB5-SA-2007-004 [CVE-2007-2442/VU#356961,
+        CVE-2007-2443/VU#365313]
+5592    (krb5-1.5.x) fix MITKRB5-SA-2007-005 [CVE-2007-2798/VU#554257]
+
 Major changes in krb5-1.5.3
 ---------------------------
 
@@ -76,11 +90,11 @@ Major changes in krb5-1.5.3
 krb5-1.5.3 changes by ticket ID
 -------------------------------
 
-5512 	(krb5-1.5.x) MITKRB5-SA-2007-001: telnetd allows login as
+5512    (krb5-1.5.x) MITKRB5-SA-2007-001: telnetd allows login as
         arbitrary user
-5513 	(krb5-1.5.x) MITKRB5-SA-2007-002: buffer overflow in
+5513    (krb5-1.5.x) MITKRB5-SA-2007-002: buffer overflow in
         krb5_klog_syslog
-5520 	(krb5-1.5.x) MITKRB5-SA-2007-003: double-free in kadmind
+5520    (krb5-1.5.x) MITKRB5-SA-2007-003: double-free in kadmind
 
 Major changes in krb5-1.5.2
 ---------------------------
