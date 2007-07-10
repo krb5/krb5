@@ -37,7 +37,7 @@ install::
 generate-files-mac: kadmin_ct.c getdate.c
 
 clean::
-	$(RM) $(PROG).local $(PROG) $(OBJS)
+	$(RM) $(PROG).local $(PROG) $(COMMON_OBJS) $(KADMIN_OBJS) $(LOCAL_OBJS)
 clean-unix::
 	$(RM) getdate.c kadmin_ct.c
 
