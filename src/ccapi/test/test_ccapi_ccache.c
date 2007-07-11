@@ -12,16 +12,16 @@
 
 
 int check_cc_ccache_release() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_release");
 	
 	#ifndef cc_ccache_release
 	log_error("cc_ccache_release is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -46,21 +46,22 @@ int check_cc_ccache_release() {
 cc_int32 check_once_cc_ccache_release(cc_context_t context, cc_ccache_t ccache, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_release
-	
 	cc_int32 possible_return_values[2] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
+
 	cc_string_t name = NULL;
 	
 	err = cc_ccache_get_name(ccache, &name);
 	err = cc_ccache_release(ccache);
 	ccache = NULL;
+	
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_release
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	// check returned error
 	check_err(err, expected_err, possible_return_values);
@@ -85,16 +86,16 @@ cc_int32 check_once_cc_ccache_release(cc_context_t context, cc_ccache_t ccache, 
 
 
 int check_cc_ccache_destroy() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_destroy");
 	
 	#ifndef cc_ccache_destroy
 	log_error("cc_ccache_destroy is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -119,17 +120,18 @@ int check_cc_ccache_destroy() {
 cc_int32 check_once_cc_ccache_destroy(cc_context_t context, cc_ccache_t ccache, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_destroy
-	
 	cc_int32 possible_return_values[2] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
+
 	cc_string_t name = NULL;
+	
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_destroy
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_get_name(ccache, &name);
 	err = cc_ccache_destroy(ccache);
@@ -158,16 +160,16 @@ cc_int32 check_once_cc_ccache_destroy(cc_context_t context, cc_ccache_t ccache, 
 
 
 int check_cc_ccache_set_default() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_set_default");
 	
 	#ifndef cc_ccache_set_default
 	log_error("cc_ccache_set_default is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -224,20 +226,21 @@ int check_cc_ccache_set_default() {
 cc_int32 check_once_cc_ccache_set_default(cc_context_t context, cc_ccache_t ccache, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_set_default
-	
 	cc_int32 possible_return_values[3] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 		ccErrCCacheNotFound, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
+
 	cc_ccache_t default_ccache = NULL;
 	cc_string_t name = NULL;
 	cc_string_t default_name = NULL;
+	
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_set_default
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_set_default(ccache);
 	// check returned error
@@ -276,16 +279,16 @@ cc_int32 check_once_cc_ccache_set_default(cc_context_t context, cc_ccache_t ccac
 
 
 int check_cc_ccache_get_credentials_version() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_get_credentials_version");
 	
 	#ifndef cc_ccache_get_credentials_version
 	log_error("cc_ccache_get_credentials_version is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -359,19 +362,20 @@ int check_cc_ccache_get_credentials_version() {
 cc_int32 check_once_cc_ccache_get_credentials_version(cc_ccache_t ccache, cc_uint32 expected_cred_vers, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_get_credentials_version
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 		ccErrBadParam, 
 		ccErrCCacheNotFound, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
+
 	cc_uint32 stored_cred_vers = 0;
+	
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_get_credentials_version
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_get_credentials_version(ccache, &stored_cred_vers);
 	
@@ -394,16 +398,16 @@ cc_int32 check_once_cc_ccache_get_credentials_version(cc_ccache_t ccache, cc_uin
 
 
 int check_cc_ccache_get_name() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_get_name");
 	
 	#ifndef cc_ccache_get_name
 	log_error("cc_ccache_get_name is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -461,19 +465,20 @@ int check_cc_ccache_get_name() {
 cc_int32 check_once_cc_ccache_get_name(cc_ccache_t ccache, const char *expected_name, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_get_name
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 		ccErrBadParam, 
 		ccErrCCacheNotFound, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
+
 	cc_string_t stored_name = NULL;
+	
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_get_name
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	if (expected_name == NULL) { // we want to try with a NULL param
 		err = cc_ccache_get_name(ccache, NULL);
@@ -501,18 +506,61 @@ cc_int32 check_once_cc_ccache_get_name(cc_ccache_t ccache, const char *expected_
 
 // ---------------------------------------------------------------------------
 
+cc_int32 check_once_cc_ccache_get_principal(cc_ccache_t ccache, cc_uint32 cred_vers, const char *expected_principal, cc_int32 expected_err, const char *description) {
+	cc_int32 err = ccNoError;
+	cc_string_t stored_principal = NULL;
+		
+	cc_int32 possible_return_values[6] = {
+		ccNoError, 
+		ccErrNoMem, 
+		ccErrBadCredentialsVersion, 
+		ccErrBadParam, 
+		ccErrInvalidCCache, 
+		ccErrCCacheNotFound, 
+	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_get_principal
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+	
+	if (expected_principal == NULL) { // we want to try with a NULL param
+		err = cc_ccache_get_principal(ccache, cred_vers, NULL);
+	}
+	else {
+		err = cc_ccache_get_principal(ccache, cred_vers, &stored_principal);
+	}
+	
+	// check returned error
+	check_err(err, expected_err, possible_return_values);
+	
+	if (!err) {
+		check_if(strcmp(stored_principal->data, expected_principal), "expected princ == \"%s\" stored princ == \"%s\"", expected_principal, stored_principal->data);
+	}
+	
+	if (stored_principal) { cc_string_release(stored_principal); }
+	
+	#endif /* cc_ccache_get_principal */
+	
+	END_CHECK_ONCE;
+	
+	return err;
+}
+
+// ---------------------------------------------------------------------------
 
 int check_cc_ccache_get_principal() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_get_principal");
 	
 	#ifndef cc_ccache_get_principal
 	log_error("cc_ccache_get_principal is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -572,63 +620,19 @@ int check_cc_ccache_get_principal() {
 	END_TEST_AND_RETURN	
 }
 
-cc_int32 check_once_cc_ccache_get_principal(cc_ccache_t ccache, cc_uint32 cred_vers, const char *expected_principal, cc_int32 expected_err, const char *description) {
-	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_get_principal
-	
-	cc_int32 possible_return_values[6] = {
-		ccNoError, 
-		ccErrNoMem, 
-		ccErrBadCredentialsVersion, 
-		ccErrBadParam, 
-		ccErrInvalidCCache, 
-		ccErrCCacheNotFound, 
-	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
-	cc_string_t stored_principal = NULL;
-	
-	if (expected_principal == NULL) { // we want to try with a NULL param
-		err = cc_ccache_get_principal(ccache, cred_vers, NULL);
-	}
-	else {
-		err = cc_ccache_get_principal(ccache, cred_vers, &stored_principal);
-	}
-	
-	// check returned error
-	check_err(err, expected_err, possible_return_values);
-	
-	if (!err) {
-		check_if(strcmp(stored_principal->data, expected_principal), "expected princ == \"%s\" stored princ == \"%s\"", expected_principal, stored_principal->data);
-	}
-	
-	if (stored_principal) { cc_string_release(stored_principal); }
-	
-	#endif /* cc_ccache_get_principal */
-	
-	END_CHECK_ONCE;
-	
-	return err;
-}
-
-
 // ---------------------------------------------------------------------------
 
-
 int check_cc_ccache_set_principal() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_set_principal");
 	
 	#ifndef cc_ccache_set_principal
 	log_error("cc_ccache_set_principal is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -742,11 +746,8 @@ int check_cc_ccache_set_principal() {
 
 cc_int32 check_once_cc_ccache_set_principal(cc_ccache_t ccache, cc_uint32 cred_vers, const char *in_principal, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_set_principal
-	
+	cc_string_t stored_principal = NULL;
+		
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrNoMem, 
@@ -755,9 +756,12 @@ cc_int32 check_once_cc_ccache_set_principal(cc_ccache_t ccache, cc_uint32 cred_v
 		ccErrBadParam, 
 		ccErrCCacheNotFound, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
 	
-	cc_string_t stored_principal = NULL;
+	#ifdef cc_ccache_set_principal
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_set_principal(ccache, cred_vers, in_principal);
 	
@@ -787,19 +791,19 @@ cc_int32 check_once_cc_ccache_set_principal(cc_ccache_t ccache, cc_uint32 cred_v
 
 
 int check_cc_ccache_store_credentials() {
-	BEGIN_TEST("cc_ccache_store_credentials");
-	
-	#ifndef cc_ccache_store_credentials
-	log_error("cc_ccache_store_credentials is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
 	cc_ccache_t dup_ccache = NULL;
 	cc_credentials_union creds_union;
 	cc_string_t name = NULL;
+	
+	BEGIN_TEST("cc_ccache_store_credentials");
+	
+	#ifndef cc_ccache_store_credentials
+	log_error("cc_ccache_store_credentials is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -887,11 +891,9 @@ int check_cc_ccache_store_credentials() {
 
 cc_int32 check_once_cc_ccache_store_credentials(cc_ccache_t ccache, const cc_credentials_union *credentials, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_store_credentials
-	
+	cc_credentials_iterator_t creds_iterator = NULL;
+	cc_credentials_t creds = NULL;
+		
 	cc_int32 possible_return_values[5] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
@@ -899,10 +901,12 @@ cc_int32 check_once_cc_ccache_store_credentials(cc_ccache_t ccache, const cc_cre
 		ccErrBadCredentialsVersion, 
 		ccErrCCacheNotFound, 
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
 	
-	cc_credentials_iterator_t creds_iterator = NULL;
-	cc_credentials_t creds = NULL;
+	#ifdef cc_ccache_store_credentials
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_store_credentials(ccache, credentials);
 		
@@ -942,13 +946,6 @@ cc_int32 check_once_cc_ccache_store_credentials(cc_ccache_t ccache, const cc_cre
 
 
 int check_cc_ccache_remove_credentials() {
-	BEGIN_TEST("cc_ccache_remove_credentials");
-	
-	#ifndef cc_ccache_remove_credentials
-	log_error("cc_ccache_remove_credentials is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -959,6 +956,13 @@ int check_cc_ccache_remove_credentials() {
 	cc_credentials_iterator_t creds_iterator = NULL;
 	cc_string_t name = NULL;
 	unsigned int i;
+	
+	BEGIN_TEST("cc_ccache_remove_credentials");
+	
+	#ifndef cc_ccache_remove_credentials
+	log_error("cc_ccache_remove_credentials is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -1038,11 +1042,9 @@ int check_cc_ccache_remove_credentials() {
 
 cc_int32 check_once_cc_ccache_remove_credentials(cc_ccache_t ccache, cc_credentials_t in_creds, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_remove_credentials
-	
+	cc_credentials_iterator_t creds_iterator = NULL;
+	cc_credentials_t creds = NULL;
+		
 	cc_int32 possible_return_values[5] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
@@ -1050,10 +1052,12 @@ cc_int32 check_once_cc_ccache_remove_credentials(cc_ccache_t ccache, cc_credenti
 		ccErrCredentialsNotFound, 
 		ccErrCCacheNotFound,
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
 	
-	cc_credentials_iterator_t creds_iterator = NULL;
-	cc_credentials_t creds = NULL;
+	#ifdef cc_ccache_remove_credentials
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_remove_credentials(ccache, in_creds);
 		
@@ -1095,19 +1099,19 @@ cc_int32 check_once_cc_ccache_remove_credentials(cc_ccache_t ccache, cc_credenti
 
 
 int check_cc_ccache_new_credentials_iterator() {
-	BEGIN_TEST("cc_ccache_new_credentials_iterator");
-	
-	#ifndef cc_ccache_new_credentials_iterator
-	log_error("cc_ccache_new_credentials_iterator is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
 	cc_ccache_t dup_ccache = NULL;
 	cc_credentials_iterator_t creds_iterator = NULL;
 	cc_string_t name = NULL;
+	
+	BEGIN_TEST("cc_ccache_new_credentials_iterator");
+	
+	#ifndef cc_ccache_new_credentials_iterator
+	log_error("cc_ccache_new_credentials_iterator is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -1170,16 +1174,17 @@ int check_cc_ccache_new_credentials_iterator() {
 cc_int32 check_once_cc_ccache_new_credentials_iterator(cc_ccache_t ccache, cc_credentials_iterator_t *iterator, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_new_credentials_iterator
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrBadParam, 
 		ccErrNoMem, 
 		ccErrCCacheNotFound, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_new_credentials_iterator
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_ccache_new_credentials_iterator(ccache, iterator);
@@ -1197,15 +1202,47 @@ cc_int32 check_once_cc_ccache_new_credentials_iterator(cc_ccache_t ccache, cc_cr
 
 // ---------------------------------------------------------------------------
 
+cc_int32 check_once_cc_ccache_get_change_time(cc_ccache_t ccache, cc_time_t *last_time, cc_int32 expected_err, const char *description) {
+	cc_int32 err = ccNoError;
+	cc_time_t this_time = 0;
+		
+	cc_int32 possible_return_values[4] = {
+		ccNoError, 
+		ccErrInvalidCCache, 
+		ccErrBadParam, 
+		ccErrCCacheNotFound, 
+	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_get_change_time
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+	
+	if (last_time == NULL) {
+		err = cc_ccache_get_change_time(ccache, NULL); // passed NULL to compare against because intention is actually to pass bad param instead
+	} else {
+		err = cc_ccache_get_change_time(ccache, &this_time);
+	}
+	
+	// check returned error
+	check_err(err, expected_err, possible_return_values);
+	
+	if ((!err) && last_time) {
+		check_if(this_time <= *last_time, "change time didn't increase when expected");
+		*last_time = this_time;
+	}
+		
+	#endif /* cc_ccache_get_change_time */
+	
+	END_CHECK_ONCE;
+	
+	return err;
+}
+
+// ---------------------------------------------------------------------------
 
 int check_cc_ccache_get_change_time() {
-	BEGIN_TEST("cc_ccache_get_change_time");
-	
-	#ifndef cc_ccache_get_change_time
-	log_error("cc_ccache_get_change_time is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t dummy_ccache = NULL;
@@ -1214,6 +1251,13 @@ int check_cc_ccache_get_change_time() {
 	cc_credentials_iterator_t creds_iterator = NULL;
 	cc_credentials_t credentials = NULL;
 	cc_time_t last_time = 0;
+	
+    BEGIN_TEST("cc_ccache_get_change_time");
+	
+	#ifndef cc_ccache_get_change_time
+	log_error("cc_ccache_get_change_time is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -1322,56 +1366,51 @@ int check_cc_ccache_get_change_time() {
 	END_TEST_AND_RETURN
 }
 
-cc_int32 check_once_cc_ccache_get_change_time(cc_ccache_t ccache, cc_time_t *last_time, cc_int32 expected_err, const char *description) {
+
+// ---------------------------------------------------------------------------
+
+cc_int32 check_once_cc_ccache_get_last_default_time(cc_ccache_t ccache, cc_time_t *last_time, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_get_change_time
-	
-	cc_int32 possible_return_values[4] = {
+	cc_time_t this_time = 0;
+		
+	cc_int32 possible_return_values[5] = {
 		ccNoError, 
 		ccErrInvalidCCache, 
 		ccErrBadParam, 
+		ccErrNeverDefault, 
 		ccErrCCacheNotFound, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_get_last_default_time
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
-	cc_time_t this_time = 0;
-	
 	if (last_time == NULL) {
-		err = cc_ccache_get_change_time(ccache, NULL); // passed NULL to compare against because intention is actually to pass bad param instead
+		err = cc_ccache_get_last_default_time(ccache, NULL); // passed NULL to compare against because intention is actually to pass bad param instead
 	} else {
-		err = cc_ccache_get_change_time(ccache, &this_time);
+		err = cc_ccache_get_last_default_time(ccache, &this_time);
 	}
 	
 	// check returned error
 	check_err(err, expected_err, possible_return_values);
 	
-	if ((!err) && last_time) {
-		check_if(this_time <= *last_time, "change time didn't increase when expected");
+	if (!err && last_time) {
+		check_if(this_time > *last_time, "last default time isn't as expected");
 		*last_time = this_time;
 	}
 		
-	#endif /* cc_ccache_get_change_time */
+	#endif /* cc_ccache_get_last_default_time */
 	
 	END_CHECK_ONCE;
 	
 	return err;
 }
 
-
 // ---------------------------------------------------------------------------
 
-
 int check_cc_ccache_get_last_default_time() {
-	BEGIN_TEST("cc_ccache_get_last_default_time");
-	
-	#ifndef cc_ccache_get_last_default_time
-	log_error("cc_ccache_get_last_default_time is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache_1 = NULL;
@@ -1379,6 +1418,13 @@ int check_cc_ccache_get_last_default_time() {
 	cc_time_t last_time_1 = 0;
 	cc_time_t last_time_2 = 0;
 	cc_string_t name = NULL;
+	
+	BEGIN_TEST("cc_ccache_get_last_default_time");
+	
+	#ifndef cc_ccache_get_last_default_time
+	log_error("cc_ccache_get_last_default_time is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -1454,57 +1500,9 @@ int check_cc_ccache_get_last_default_time() {
 	END_TEST_AND_RETURN
 }
 
-cc_int32 check_once_cc_ccache_get_last_default_time(cc_ccache_t ccache, cc_time_t *last_time, cc_int32 expected_err, const char *description) {
-	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_get_last_default_time
-	
-	cc_int32 possible_return_values[5] = {
-		ccNoError, 
-		ccErrInvalidCCache, 
-		ccErrBadParam, 
-		ccErrNeverDefault, 
-		ccErrCCacheNotFound, 
-	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
-	cc_time_t this_time = 0;
-	
-	if (last_time == NULL) {
-		err = cc_ccache_get_last_default_time(ccache, NULL); // passed NULL to compare against because intention is actually to pass bad param instead
-	} else {
-		err = cc_ccache_get_last_default_time(ccache, &this_time);
-	}
-	
-	// check returned error
-	check_err(err, expected_err, possible_return_values);
-	
-	if (!err && last_time) {
-		check_if(this_time > *last_time, "last default time isn't as expected");
-		*last_time = this_time;
-	}
-		
-	#endif /* cc_ccache_get_last_default_time */
-	
-	END_CHECK_ONCE;
-	
-	return err;
-}
-
-
 // ---------------------------------------------------------------------------
 
-
 int check_cc_ccache_move() {
-	BEGIN_TEST("cc_ccache_move");
-	
-	#ifndef cc_ccache_move
-	log_error("cc_ccache_move is not implemented yet");
-	failure_count++;
-	#else
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t source = NULL;
@@ -1512,6 +1510,13 @@ int check_cc_ccache_move() {
 	
 	cc_credentials_union creds_union;
 	unsigned int i = 0;
+	
+	BEGIN_TEST("cc_ccache_move");
+	
+	#ifndef cc_ccache_move
+	log_error("cc_ccache_move is not implemented yet");
+	failure_count++;
+	#else
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -1569,18 +1574,6 @@ int check_cc_ccache_move() {
 
 cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_ccache_move
-	
-	cc_int32 possible_return_values[3] = {
-		ccNoError, 
-		ccErrInvalidCCache, 
-		ccErrCCacheNotFound,
-	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
-	
 	cc_credentials_t dst_creds[10] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, };
 	cc_credentials_t creds = NULL;
 	cc_credentials_iterator_t cred_iterator = NULL;
@@ -1588,7 +1581,19 @@ cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, 
 	
 	cc_string_t src_principal = NULL;
 	cc_string_t dst_principal = NULL;
+	
+	cc_int32 possible_return_values[3] = {
+		ccNoError, 
+		ccErrInvalidCCache, 
+		ccErrCCacheNotFound,
+	};
 
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_ccache_move
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+	
 	if (destination) {
 		// verify all of destination's credentials are no longer there (save a list and call remove_cred for each, expecting an err in response)	
 		if (!err) {
@@ -1669,18 +1674,18 @@ cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, 
 // ---------------------------------------------------------------------------
 
 int check_cc_ccache_compare() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache_a = NULL;
+	cc_ccache_t ccache_b = NULL;
+	cc_uint32 equal = 0;
+	
 	BEGIN_TEST("cc_ccache_compare");
 	
 	#ifndef cc_ccache_compare
 	log_error("cc_ccache_compare is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache_a = NULL;
-	cc_ccache_t ccache_b = NULL;
-	cc_uint32 equal = 0;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 
@@ -1726,10 +1731,7 @@ int check_cc_ccache_compare() {
 
 cc_int32 check_once_cc_ccache_compare(cc_ccache_t ccache, cc_ccache_t compare_to, cc_uint32 *equal, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_ccache_compare
+	cc_uint32 actually_equal = 0;
 	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
@@ -1737,9 +1739,12 @@ cc_int32 check_once_cc_ccache_compare(cc_ccache_t ccache, cc_ccache_t compare_to
 		ccErrBadParam, 
 		ccErrServerUnavailable,
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_ccache_compare
 	
-	cc_uint32 actually_equal = 0;
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	if (equal) {
 		actually_equal = *equal;
@@ -1768,17 +1773,17 @@ cc_int32 check_once_cc_ccache_compare(cc_ccache_t ccache, cc_ccache_t compare_to
 // ---------------------------------------------------------------------------
 
 int check_cc_ccache_get_kdc_time_offset() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_time_t time_offset = 0;
+	
 	BEGIN_TEST("cc_ccache_get_kdc_time_offset");
 	
 	#ifndef cc_ccache_get_kdc_time_offset
 	log_error("cc_ccache_get_kdc_time_offset is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_time_t time_offset = 0;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 
@@ -1827,10 +1832,7 @@ int check_cc_ccache_get_kdc_time_offset() {
 
 cc_int32 check_once_cc_ccache_get_kdc_time_offset(cc_ccache_t ccache, cc_int32 credentials_version, cc_time_t *time_offset, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_ccache_get_kdc_time_offset
+	cc_time_t expected_offset;
 	
 	cc_int32 possible_return_values[7] = {
 		ccNoError, 
@@ -1841,9 +1843,12 @@ cc_int32 check_once_cc_ccache_get_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 		ccErrServerUnavailable, 
 		ccErrBadCredentialsVersion,	
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_ccache_get_kdc_time_offset
 	
-	cc_time_t expected_offset;
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	if (time_offset) {
 		expected_offset = *time_offset;
@@ -1867,16 +1872,16 @@ cc_int32 check_once_cc_ccache_get_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 // ---------------------------------------------------------------------------
 
 int check_cc_ccache_set_kdc_time_offset() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_set_kdc_time_offset");
 	
 	#ifndef cc_ccache_set_kdc_time_offset
 	log_error("cc_ccache_set_kdc_time_offset is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 
@@ -1906,11 +1911,8 @@ int check_cc_ccache_set_kdc_time_offset() {
 
 cc_int32 check_once_cc_ccache_set_kdc_time_offset(cc_ccache_t ccache, cc_int32 credentials_version, cc_time_t time_offset, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_ccache_set_kdc_time_offset
-	
+	cc_time_t stored_offset = 0;
+		
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrCCacheNotFound, 
@@ -1919,10 +1921,13 @@ cc_int32 check_once_cc_ccache_set_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 		ccErrServerUnavailable, 
 		ccErrBadCredentialsVersion,
 	};
+
+    BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_ccache_set_kdc_time_offset
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
-	cc_time_t stored_offset = 0;
-		
 	err = cc_ccache_set_kdc_time_offset(ccache, credentials_version, time_offset);
 	
 	// check returned error
@@ -1945,16 +1950,16 @@ cc_int32 check_once_cc_ccache_set_kdc_time_offset(cc_ccache_t ccache, cc_int32 c
 // ---------------------------------------------------------------------------
 
 int check_cc_ccache_clear_kdc_time_offset() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_ccache_clear_kdc_time_offset");
 	
 	#ifndef cc_ccache_clear_kdc_time_offset
 	log_error("cc_ccache_clear_kdc_time_offset is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 
@@ -1990,10 +1995,7 @@ int check_cc_ccache_clear_kdc_time_offset() {
 
 cc_int32 check_once_cc_ccache_clear_kdc_time_offset(cc_ccache_t ccache, cc_int32 credentials_version, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
-
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_ccache_clear_kdc_time_offset
+	cc_time_t stored_offset = 0;
 	
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
@@ -2003,10 +2005,12 @@ cc_int32 check_once_cc_ccache_clear_kdc_time_offset(cc_ccache_t ccache, cc_int32
 		ccErrServerUnavailable, 
 		ccErrBadCredentialsVersion,
 	};
+	BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_ccache_clear_kdc_time_offset
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 
-	cc_time_t stored_offset = 0;
-	
 	err = cc_ccache_clear_kdc_time_offset(ccache, credentials_version);
 	
 	// check returned error

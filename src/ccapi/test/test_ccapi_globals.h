@@ -1,7 +1,7 @@
 #ifndef _TEST_CCAPI_GLOBALS_H_
 #define _TEST_CCAPI_GLOBALS_H_
 
-#include <Kerberos/CredentialsCache.h>
+#include "CredentialsCache.h"
 
 /* GLOBALS */
 extern unsigned int total_failure_count;

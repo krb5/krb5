@@ -1,7 +1,7 @@
 #ifndef _TEST_CCAPI_UTIL_H_
 #define _TEST_CCAPI_UTIL_H_
 
-#include <Kerberos/CredentialsCache.h>
+#include <CredentialsCache.h>
 #include "test_ccapi_globals.h"
 #include "test_ccapi_log.h"
 

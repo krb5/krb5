@@ -1,7 +1,7 @@
 #ifndef _TEST_CCAPI_CCACHE_H_
 #define _TEST_CCAPI_CCACHE_H_
 
-#include <Kerberos/CredentialsCache.h>
+#include <CredentialsCache.h>
 
 
 int check_cc_ccache_release();

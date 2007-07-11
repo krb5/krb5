@@ -1,3 +1,5 @@
+#include "CredentialsCache.h"
+
 #include "test_ccapi_iterators.h"
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
@@ -6,13 +8,13 @@
 // ---------------------------------------------------------------------------
 
 int check_cc_ccache_iterator_next() {
-	BEGIN_TEST("cc_ccache_iterator_next");
-		
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
 	cc_ccache_iterator_t iterator = NULL;
 	unsigned int i;
+
+    BEGIN_TEST("cc_ccache_iterator_next");
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
@@ -83,7 +85,7 @@ int check_cc_ccache_iterator_next() {
 cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_uint32 expected_count, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 
-	BEGIN_CHECK_ONCE(description);
+//	BEGIN_CHECK_ONCE(description);
 
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
@@ -115,7 +117,7 @@ cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_ui
 	
 	check_if(actual_count != expected_count, "iterator didn't iterate over all ccaches");
 
-	END_CHECK_ONCE;
+//	END_CHECK_ONCE;
 
 	return err;	
 }
@@ -124,8 +126,6 @@ cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_ui
 // ---------------------------------------------------------------------------
 
 int check_cc_credentials_iterator_next() {
-	BEGIN_TEST("cc_credentials_iterator_next");
-		
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
 	cc_ccache_t ccache = NULL;
@@ -133,6 +133,8 @@ int check_cc_credentials_iterator_next() {
 	cc_credentials_iterator_t iterator = NULL;
 	unsigned int i;
 	
+	BEGIN_TEST("cc_credentials_iterator_next");
+		
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	
 	if (!err) {
@@ -205,9 +207,9 @@ int check_cc_credentials_iterator_next() {
 }
 
 cc_int32 check_once_cc_credentials_iterator_next(cc_credentials_iterator_t iterator, cc_uint32 expected_count, cc_int32 expected_err, const char *description) {
-	cc_int32 err = ccNoError;
-
-	BEGIN_CHECK_ONCE(description);
+	cc_int32            err             = ccNoError;
+	cc_credentials_t    creds           = NULL;
+	cc_uint32           actual_count    = 0;
 
 	cc_int32 possible_return_values[5] = {
 		ccNoError, 
@@ -216,10 +218,10 @@ cc_int32 check_once_cc_credentials_iterator_next(cc_credentials_iterator_t itera
 		ccErrNoMem, 
 		ccErrInvalidCredentialsIterator,
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 
-	cc_credentials_t creds = NULL;
-	cc_uint32 actual_count = 0;
+    BEGIN_CHECK_ONCE(description);
+
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 
 	while (!err) {
 		err = cc_credentials_iterator_next(iterator, &creds);
