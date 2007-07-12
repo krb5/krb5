@@ -201,15 +201,18 @@ get_default_IM()
 	static char banner[1024];
 	
 	if (uname(&name) < 0)
-		sprintf(banner, "\r\nError getting hostname: %s\r\n",
-		    strerror(errno));
+	    snprintf(banner, sizeof(banner),
+		     "\r\nError getting hostname: %s\r\n",
+		     strerror(errno));
         else {
 #if defined(_AIX)
-		sprintf(banner, "\r\n    %%h (%s release %s.%s) (%%t)\r\n\r\n",
-		    name.sysname, name.version, name.release);
+	    snprintf(banner, sizeof(banner),
+		     "\r\n    %%h (%s release %s.%s) (%%t)\r\n\r\n",
+		     name.sysname, name.version, name.release);
 #else
-		sprintf(banner, "\r\n    %%h (%s release %s %s) (%%t)\r\n\r\n",
-		    name.sysname, name.release, name.version);
+	    snprintf(banner, sizeof(banner),
+		     "\r\n    %%h (%s release %s %s) (%%t)\r\n\r\n",
+		     name.sysname, name.release, name.version);
 #endif
 	}
 	return banner;
@@ -966,10 +969,10 @@ static void doit(who)
 	if (secflag) {
 		char slave_dev[16];
 /*xxx This code needs to be fixed to work without ptynum; I don't understand why they don't currently use line, so I don't really know how to fix.*/
-		sprintf(tty_dev, "/dev/pty/%03d", ptynum);
+		snprintf(tty_dev, sizeof(tty_dev), "/dev/pty/%03d", ptynum);
 		if (setdevs(tty_dev, &dv) < 0)
 		 	fatal(net, "cannot set pty security");
-		sprintf(slave_dev, "/dev/ttyp%03d", ptynum);
+		snprintf(slave_dev, sizeof(slave_dev), "/dev/ttyp%03d", ptynum);
 		if (setdevs(slave_dev, &dv) < 0)
 		 	fatal(net, "cannot set tty security");
 	}

@@ -486,7 +486,7 @@ etype_string(enctype)
     
     if ((retval = krb5_enctype_to_string(enctype, buf, sizeof(buf)))) {
 	/* XXX if there's an error != EINVAL, I should probably report it */
-	sprintf(buf, "etype %d", enctype);
+	snprintf(buf, sizeof(buf), "etype %d", enctype);
     }
 
     return buf;

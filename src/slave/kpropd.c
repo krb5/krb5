@@ -394,7 +394,7 @@ kpropd_com_err_proc(whoami, code, fmt, args)
 
 	error_buf[0] = '\0';
 	if (fmt)
-		vsprintf(error_buf, fmt, args);
+	    vsnprintf(error_buf, sizeof(error_buf), fmt, args);
 	syslog(LOG_ERR, "%s%s%s%s%s", whoami ? whoami : "", whoami ? ": " : "",
 	       code ? error_message(code) : "", code ? " " : "", error_buf);
 }

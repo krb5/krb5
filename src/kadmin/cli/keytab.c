@@ -99,15 +99,11 @@ static int process_keytab(krb5_context my_context, char **keytab_str,
 		    return 1;
 	       }
 	  } else {
-	       char *tmp = *keytab_str;
-
-	       *keytab_str = (char *)
-		    malloc(strlen("WRFILE:")+strlen(tmp)+1);
-	       if (*keytab_str == NULL) {
-		    com_err(whoami, ENOMEM, "while creating keytab name");
-		    return 1;
+	       if (asprintf(keytab_str, "WRFILE:%s", *keytab_str) < 0) {
+		   *keytab_str = NULL;
+		   com_err(whoami, ENOMEM, "while creating keytab name");
+		   return 1;
 	       }
-	       sprintf(*keytab_str, "WRFILE:%s", tmp);
 	  }
 	  
 	  code = krb5_kt_resolve(my_context, *keytab_str, keytab);
@@ -488,7 +484,7 @@ static char *etype_string(enctype)
     krb5_error_code ret;
 
     if ((ret = krb5_enctype_to_string(enctype, buf, sizeof(buf))))
-	sprintf(buf, "etype %d", enctype);
+	snprintf(buf, sizeof(buf), "etype %d", enctype);
 
     return buf;
 }

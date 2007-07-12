@@ -717,9 +717,10 @@ k4_begin(opts, k4)
 	krb_get_lrealm(k4->realm, 1);
 
     if (k4->inst[0])
-	sprintf(k4->name, "%s.%s@%s", k4->aname, k4->inst, k4->realm);
+	snprintf(k4->name, sizeof(k4->name), "%s.%s@%s",
+		 k4->aname, k4->inst, k4->realm);
     else
-	sprintf(k4->name, "%s@%s", k4->aname, k4->realm);
+	snprintf(k4->name, sizeof(k4->name), "%s@%s", k4->aname, k4->realm);
     opts->principal_name = k4->name;
 
  skip:
@@ -982,7 +983,8 @@ k4_kinit(opts, k4, ctx)
 	    krb5_error_code code;
 	    char prompt[1024];
 
-	    sprintf(prompt, "Password for %s", opts->principal_name);
+	    snprintf(prompt, sizeof(prompt),
+		     "Password for %s", opts->principal_name);
 	    stash_password[0] = 0;
 	    /*
 	      Note: krb5_read_password does not actually look at the
@@ -1038,13 +1040,12 @@ static char*
 getvprogname(v, progname)
     char *v, *progname;
 {
-    unsigned int len = strlen(progname) + 2 + strlen(v) + 2;
-    char *ret = malloc(len);
-    if (ret)
-	sprintf(ret, "%s(v%s)", progname, v);
+    char *ret;
+
+    if (asprintf(&ret, "%s(v%s)", progname, v) < 0)
+	return progname;
     else
-	ret = progname;
-    return ret;
+	return ret;
 }
 
 #ifdef HAVE_KRB524

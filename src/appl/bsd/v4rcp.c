@@ -812,8 +812,9 @@ void sink(argc, argv)
 			SCREWUP("size not delimited");
 		if (targisdir) {
 			if (strlen(targ) + strlen(cp) + 1 < sizeof(nambuf)) {
-				(void) sprintf(nambuf, "%s%s%s", targ,
-				    *targ ? "/" : "", cp);
+			    (void) snprintf(nambuf, sizeof(nambuf),
+					    "%s%s%s", targ,
+					    *targ ? "/" : "", cp);
 			} else {
 				SCREWUP("target directory name too long");
 			}
