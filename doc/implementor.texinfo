@@ -103,6 +103,14 @@ We also conditionally tailor code for the GNU C compiler in a few
 places where it helps performance or debugging, but the code should
 still work fine with other C compilers.
 
+Inline functions should always be specified in the code as
+@code{static inline}, as the behavior of other forms vary across GCC
+versions and C and C++ language standards.  We assume that static
+copies of inline functions will not be generated if they are not
+needed; under some compilers that behave otherwise (such as the
+current Sun compiler as of this writing) may produce executables and
+libraries much larger than they need to be.
+
 On UNIX platforms, ... @i{(should outline what POSIX stuff we
 require)}.
 
@@ -119,6 +127,36 @@ the real dependencies are not out of date, because some versions of
 targets to manage building in subdirectories in parallel builds.
 (Actually, this is more my view of how we've been doing things than
 official policy.  ---Ken)
+
+Some of our code uses the SUSv2/C99 functions @code{snprintf} and
+@code{vsnprintf}.  Since the two specifications differ, we assume that
+either specification may be followed: If truncation occurs, the return
+value may be the untruncated output length, or it may be negative (or
+may be zero if a zero length was supplied).  It is therefore not
+permitted in our code to call these functions with a zero output
+length in order to determine the desired buffer size.  A NULL output
+pointer is not permitted.  In the header @file{k5-platform.h} we
+provide inline definitions for some platforms where these functions do
+not exist.
+
+We also use the extension functions @code{asprintf} and
+@code{vasprintf}, available on modern GNU and BSD based systems.  The
+behaviors of these functions on errors vary between the two system
+types -- BSD stores a NULL as the output pointer, and GNU doesn't set
+it.  We assume either may be the case: The output pointer may be
+unchanged or may be overwritten with NULL, and our code should thus
+assume it may be garbage, and should be assigned to if the value
+matters after an error is detected.  Again, @file{k5-platform.h}
+provides workarounds for systems where these functions are not
+defined.
+
+Using these functions instead of plain @code{sprintf} without length
+checking may make our code slightly less vulnerable to buffer
+overruns.
+
+If necessary, we may eventually use a @code{[v]asnprintf} interface
+like that of the GNU C library, but we have not done so yet.  Do not
+write code using that interface.
 
 @node Networking, Thread Safety, Compiler and OS Requirements, Top
 @chapter Networking
@@ -204,7 +242,7 @@ consider dropping support for systems without IPv6 support.
 Somewhere between IRIX 6.5.14 and 6.5.16, partial IPv6 support was
 introduced to the extent that the configuration system detects the
 IPv6 support and attempts to use it.  Code compiles, but then upon
-linking, one discovers that ``in6addr_any'' is not defined in any
+linking, one discovers that @code{in6addr_any} is not defined in any
 system library.  The header file @file{fake-addrinfo.h} provides a
 static copy as a workaround.  This run time IPv6 code has still not
 been tested.
