@@ -153,7 +153,7 @@ check_min_life(void *server_handle, krb5_principal principal,
 		} else {
 		    if (*(ptr = &time_string[strlen(time_string)-1]) == '\n')
 			*ptr = '\0';
-		    sprintf(msg_ret, errstr, time_string);
+		    snprintf(msg_ret, msg_len, errstr, time_string);
 		}
 	    }
 

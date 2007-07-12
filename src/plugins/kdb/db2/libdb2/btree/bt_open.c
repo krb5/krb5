@@ -414,7 +414,8 @@ tmp()
 	if (envtmp && ((strlen(envtmp)+sizeof(fn)+1) > sizeof(path)))
 	    return(-1);
 
-	(void)sprintf(path, "%s%s", (envtmp ? envtmp : "/tmp"), fn);
+	(void)snprintf(path, sizeof(path),
+		       "%s%s", (envtmp ? envtmp : "/tmp"), fn);
 
 #ifdef SIG_BLOCK
 	(void)sigfillset(&set);

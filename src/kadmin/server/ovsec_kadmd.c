@@ -467,7 +467,7 @@ int main(int argc, char *argv[])
 	  fprintf(stderr, "%s: Cannot bind socket.\n", whoami);
 	  fprintf(stderr, "bind: %s\n", e_txt);
 	  errno = oerrno;
-	  sprintf(portbuf, "%d", ntohs(addr.sin_port));
+	  snprintf(portbuf, sizeof(portbuf), "%d", ntohs(addr.sin_port));
 	  krb5_klog_syslog(LOG_ERR, "cannot bind simple chpw socket: %s",
 			   e_txt);
 	  if(oerrno == EADDRINUSE) {
@@ -924,14 +924,12 @@ char *build_princ_name(char *name, char *realm)
 {
      char *fullname;
 
-     fullname = (char *) malloc(strlen(name) + 1 +
-				(realm ? strlen(realm) + 1 : 0));
-     if (fullname == NULL)
-	  return NULL;
-     if (realm)
-	  sprintf(fullname, "%s@%s", name, realm);
-     else
-	  strcpy(fullname, name);
+     if (realm) {
+	 if (asprintf(&fullname, "%s@%s", name, realm) < 0)
+	     fullname = NULL;
+     } else
+	 fullname = strdup(name);
+
      return fullname;
 }
 

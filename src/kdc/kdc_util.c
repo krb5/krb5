@@ -1523,9 +1523,9 @@ ktypes2str(char *s, size_t len, int nktypes, krb5_enctype *ktype)
 	return;
     }
 
-    sprintf(s, "%d etypes {", nktypes);
+    snprintf(s, len, "%d etypes {", nktypes);
     for (i = 0; i < nktypes; i++) {
-	sprintf(stmp, "%s%ld", i ? " " : "", (long)ktype[i]);
+	snprintf(stmp, sizeof(stmp), "%s%ld", i ? " " : "", (long)ktype[i]);
 	if (strlen(s) + strlen(stmp) + sizeof("}") > len)
 	    break;
 	strcat(s, stmp);
@@ -1560,18 +1560,19 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
 	return;
     }
 
-    sprintf(s, "etypes {rep=%ld", (long)rep->enc_part.enctype);
+    snprintf(s, len, "etypes {rep=%ld", (long)rep->enc_part.enctype);
 
     if (rep->ticket != NULL) {
-	sprintf(stmp, " tkt=%ld", (long)rep->ticket->enc_part.enctype);
+	snprintf(stmp, sizeof(stmp),
+		 " tkt=%ld", (long)rep->ticket->enc_part.enctype);
 	strcat(s, stmp);
     }
 
     if (rep->ticket != NULL
 	&& rep->ticket->enc_part2 != NULL
 	&& rep->ticket->enc_part2->session != NULL) {
-	sprintf(stmp, " ses=%ld",
-		(long)rep->ticket->enc_part2->session->enctype);
+	snprintf(stmp, sizeof(stmp), " ses=%ld",
+		 (long)rep->ticket->enc_part2->session->enctype);
 	strcat(s, stmp);
     }
     strcat(s, "}");

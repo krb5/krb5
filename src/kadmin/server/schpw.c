@@ -80,8 +80,8 @@ process_chpw_request(context, server_handle, realm, s, keytab, sockin,
     if (vno != 1) {
 	ret = KRB5KDC_ERR_BAD_PVNO;
 	numresult = KRB5_KPASSWD_BAD_VERSION;
-	sprintf(strresult,
-		"Request contained unknown protocol version number %d", vno);
+	snprintf(strresult, sizeof(strresult),
+		 "Request contained unknown protocol version number %d", vno);
 	goto chpwfail;
     }
 

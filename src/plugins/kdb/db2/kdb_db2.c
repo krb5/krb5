@@ -337,9 +337,11 @@ krb5_db2_db_init(krb5_context context)
     if ((retval = krb5_db2_db_get_age(context, NULL, &db_ctx->db_lf_time)))
 	goto err_out;
 
-    sprintf(policy_db_name, db_ctx->tempdb ? "%s~.kadm5" : "%s.kadm5",
-	    db_ctx->db_name);
-    sprintf(policy_lock_name, "%s.lock", policy_db_name);
+    snprintf(policy_db_name, sizeof(policy_db_name),
+	     db_ctx->tempdb ? "%s~.kadm5" : "%s.kadm5",
+	     db_ctx->db_name);
+    snprintf(policy_lock_name, sizeof(policy_lock_name),
+	     "%s.lock", policy_db_name);
 
     if ((retval = osa_adb_init_db(&db_ctx->policy_db, policy_db_name,
 				  policy_lock_name, OSA_ADB_POLICY_DB_MAGIC)))
@@ -720,8 +722,9 @@ krb5_db2_db_create(krb5_context context, char *db_name, krb5_int32 flags)
 	free_dbsuffix(okname);
     }
 
-    sprintf(policy_db_name, "%s.kadm5", db_name2);
-    sprintf(policy_lock_name, "%s.lock", policy_db_name);
+    snprintf(policy_db_name, sizeof(policy_db_name), "%s.kadm5", db_name2);
+    snprintf(policy_lock_name, sizeof(policy_lock_name),
+	     "%s.lock", policy_db_name);
 
     retval = osa_adb_create_db(policy_db_name,
 			       policy_lock_name, OSA_ADB_POLICY_DB_MAGIC);
@@ -851,8 +854,9 @@ krb5_db2_db_destroy(krb5_context context, char *dbname)
     if (retval1 || retval2)
 	return (retval1 ? retval1 : retval2);
 
-    sprintf(policy_db_name, "%s.kadm5", dbname);
-    sprintf(policy_lock_name, "%s.lock", policy_db_name);
+    snprintf(policy_db_name, sizeof(policy_db_name), "%s.kadm5", dbname);
+    snprintf(policy_lock_name, sizeof(policy_lock_name),
+	     "%s.lock", policy_db_name);
 
     retval1 = osa_adb_destroy_db(policy_db_name,
 				 policy_lock_name, OSA_ADB_POLICY_DB_MAGIC);
@@ -1694,8 +1698,9 @@ krb5_db2_db_rename(context, from, to)
 	   now.  */
 	char    policy[2048], new_policy[2048];
 	assert (strlen(db_ctx->db_name) < 2000);
-	sprintf(policy, "%s.kadm5", db_ctx->db_name);
-	sprintf(new_policy, "%s~.kadm5", db_ctx->db_name);
+	snprintf(policy, sizeof(policy), "%s.kadm5", db_ctx->db_name);
+	snprintf(new_policy, sizeof(new_policy),
+		 "%s~.kadm5", db_ctx->db_name);
 	if (0 != rename(new_policy, policy)) {
 	    retval = errno;
 	    goto errout;

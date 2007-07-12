@@ -293,7 +293,9 @@ static char * v4_klog( int type, const char *format, ...)
     case L_TKT_REQ:
     case L_APPL_REQ:
 	strcpy(log_text, "PROCESS_V4:");
-	vsprintf(log_text+strlen(log_text), format, pvar);
+	vsnprintf(log_text+strlen(log_text),
+		  sizeof(log_text) - strlen(log_text),
+		  format, pvar);
 	krb5_klog_syslog(logpri, "%s", log_text);
     default:
 	/* ignore the other types... */
@@ -327,7 +329,7 @@ hang(void)
             pause(); */
     } else {
         char buf[256];
-        sprintf(buf,
+        snprintf(buf, sizeof(buf),
 	   "Kerberos will wait %d seconds before dying so as not to loop init",
 		(int) pause_int);
         klog(L_KRB_PERR, buf);
@@ -564,7 +566,7 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 	  toggle ^= 1;
 	  date = &principal->mod_date, text = principal->mod_date_txt) {
 	tp = localtime( (time_t *) date);
-	sprintf( text, "%4d-%02d-%02d",
+	snprintf(text, sizeof(principal->mod_date_txt), "%4d-%02d-%02d",
 		 tp->tm_year > 1900 ? tp->tm_year : tp->tm_year + 1900,
 		 tp->tm_mon + 1, tp->tm_mday); /* January is 0, not 1 */
     }
