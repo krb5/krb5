@@ -6,7 +6,7 @@
 #include <limits.h>
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
-
+#include "test_ccapi_context.h"
 
 // ---------------------------------------------------------------------------
 
@@ -506,7 +506,11 @@ cc_int32 check_once_cc_ccache_get_name(cc_ccache_t ccache, const char *expected_
 
 // ---------------------------------------------------------------------------
 
-cc_int32 check_once_cc_ccache_get_principal(cc_ccache_t ccache, cc_uint32 cred_vers, const char *expected_principal, cc_int32 expected_err, const char *description) {
+cc_int32 check_once_cc_ccache_get_principal(cc_ccache_t ccache, 
+                                            cc_uint32 cred_vers, 
+                                            const char *expected_principal, 
+                                            cc_int32 expected_err, 
+                                            const char *description) {
 	cc_int32 err = ccNoError;
 	cc_string_t stored_principal = NULL;
 		
@@ -573,7 +577,7 @@ int check_cc_ccache_get_principal() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo/BAR@BAZ.ORG", &ccache);
 	}
 	if (!err) {
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, "foo/BAR@BAZ.ORG", ccNoError);
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, "foo/BAR@BAZ.ORG", ccNoError, "Description 1");
 	}
 	else {
 		log_error("cc_context_create_new_ccache failed, can't complete test");
@@ -589,7 +593,7 @@ int check_cc_ccache_get_principal() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v4, "foo.BAR@BAZ.ORG", &ccache);
 	}
 	if (!err) {
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4, "foo.BAR@BAZ.ORG", ccNoError);
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4, "foo.BAR@BAZ.ORG", ccNoError, "Description 2");
 	}
 	else {
 		log_error("cc_context_create_new_ccache failed, can't complete test");
@@ -602,7 +606,7 @@ int check_cc_ccache_get_principal() {
 		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4_v5, "foo.BAR@BAZ.ORG", 
 			ccErrBadCredentialsVersion,
 			"passing cc_credentials_v4_v5 (shouldn't be allowed)");
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, NULL, ccErrBadParam);
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, NULL, ccErrBadParam, "Description 3");
 	}
 	
 	if (ccache) {
