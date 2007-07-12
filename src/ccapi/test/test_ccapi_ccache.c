@@ -577,7 +577,7 @@ int check_cc_ccache_get_principal() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo/BAR@BAZ.ORG", &ccache);
 	}
 	if (!err) {
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, "foo/BAR@BAZ.ORG", ccNoError, "Description 1");
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, "foo/BAR@BAZ.ORG", ccNoError, "trying to get krb5 princ for krb5 ccache");
 	}
 	else {
 		log_error("cc_context_create_new_ccache failed, can't complete test");
@@ -593,7 +593,7 @@ int check_cc_ccache_get_principal() {
 		err = cc_context_create_new_ccache(context, cc_credentials_v4, "foo.BAR@BAZ.ORG", &ccache);
 	}
 	if (!err) {
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4, "foo.BAR@BAZ.ORG", ccNoError, "Description 2");
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4, "foo.BAR@BAZ.ORG", ccNoError, "trying to get krb4 princ for krb4 ccache");
 	}
 	else {
 		log_error("cc_context_create_new_ccache failed, can't complete test");
@@ -606,7 +606,7 @@ int check_cc_ccache_get_principal() {
 		check_once_cc_ccache_get_principal(ccache, cc_credentials_v4_v5, "foo.BAR@BAZ.ORG", 
 			ccErrBadCredentialsVersion,
 			"passing cc_credentials_v4_v5 (shouldn't be allowed)");
-		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, NULL, ccErrBadParam, "Description 3");
+		check_once_cc_ccache_get_principal(ccache, cc_credentials_v5, NULL, ccErrBadParam, "passed null out param");
 	}
 	
 	if (ccache) {
@@ -1610,7 +1610,7 @@ cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, 
 			}
 		}
 		if (err == ccIteratorEnd) {
-			!err;
+			err = ccNoError;
 		}
 		if (cred_iterator) { 
 			cc_credentials_iterator_release(cred_iterator); 
