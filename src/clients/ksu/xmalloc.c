@@ -28,6 +28,8 @@
  */
 
 #include "ksu.h"
+#include <stdarg.h>
+#include "k5-platform.h"
 
 void *xmalloc (size_t sz)
 {
@@ -65,4 +67,18 @@ char *xstrdup (const char *src)
     char *dst = xmalloc (len);
     memcpy (dst, src, len);
     return dst;
+}
+
+char *xasprintf (const char *format, ...)
+{
+    char *out;
+    va_list args;
+
+    va_start (args, format);
+    if (vasprintf(&out, format, args) < 0) {
+	perror (prog_name);
+	exit (1);
+    }
+    va_end(args);
+    return out;
 }

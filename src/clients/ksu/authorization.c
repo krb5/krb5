@@ -349,7 +349,6 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
     char ***out_fcmd;
     char **out_err;
 {
-    char * out_path;
     char * err;
     char ** tmp_fcmd;
     char * path_ptr, *path;
@@ -402,10 +401,7 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
 		return FALSE;
 	    }
 
-	    out_path = (char *) xmalloc(strlen(tc) + strlen(fcmd) + 2);
-	    sprintf(out_path,"%s/%s",tc, fcmd );
-
-	    tmp_fcmd[i] = out_path;
+	    tmp_fcmd[i] = xasprintf("%s/%s", tc, fcmd);
 
 	    i++;
 
