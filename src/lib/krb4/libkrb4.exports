@@ -1,5 +1,3 @@
-FreeParameterSet
-ParmCompare
 __krb_sendauth_hidden_tkt_len
 ad_print
 afs_passwd_to_key
@@ -11,12 +9,6 @@ decomp_tkt_krb5
 dest_tkt
 et_kadm_error_table
 et_krb_error_table
-fGetChar
-fGetKeywordValue
-fGetLiteral
-fGetParameterSet
-fGetToken
-fUngetChar
 fgetst
 get_ad_tkt
 get_pw_tkt

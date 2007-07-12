@@ -175,14 +175,14 @@ SERVER_KRB_SRCS = \
 	fgetst.c	rd_svc_key.c	cr_err_repl.c \
 	rd_req.c	g_svc_in_tkt.c	recvauth.c \
 	ad_print.c	cr_death_pkt.c \
-	kparse.c	put_svc_key.c	sendauth.c
+	put_svc_key.c	sendauth.c
 SERVER_KRB_OBJS = \
 	$(OUTPRE)klog.$(OBJEXT) $(OUTPRE)kuserok.$(OBJEXT) $(OUTPRE)log.$(OBJEXT) \
 	$(OUTPRE)kntoln.$(OBJEXT) \
 	$(OUTPRE)fgetst.$(OBJEXT) $(OUTPRE)rd_svc_key.$(OBJEXT) $(OUTPRE)cr_err_repl.$(OBJEXT) \
 	$(OUTPRE)rd_req.$(OBJEXT) $(OUTPRE)g_svc_in_tkt.$(OBJEXT) $(OUTPRE)recvauth.$(OBJEXT) \
 	$(OUTPRE)ad_print.$(OBJEXT) $(OUTPRE)cr_death_pkt.$(OBJEXT) \
-	$(OUTPRE)kparse.$(OBJEXT) $(OUTPRE)put_svc_key.$(OBJEXT) $(OUTPRE)sendauth.$(OBJEXT)
+	$(OUTPRE)put_svc_key.$(OBJEXT) $(OUTPRE)sendauth.$(OBJEXT)
 #
 # These objects are included on Unix and Windows (for kstream and kadm)
 # but not under Mac (there are no file descriptors).
@@ -612,11 +612,6 @@ cr_death_pkt.so cr_death_pkt.po $(OUTPRE)cr_death_pkt.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(SRCTOP)/include/kerberosIV/prot.h cr_death_pkt.c
-kparse.so kparse.po $(OUTPRE)kparse.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) \
-  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/kparse.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/kerberosIV/mit-copyright.h \
-  kparse.c
 put_svc_key.so put_svc_key.po $(OUTPRE)put_svc_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
