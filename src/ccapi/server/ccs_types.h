@@ -47,11 +47,17 @@ typedef mach_port_t ccs_pipe_t;  /* Mach IPC port */
 #define CCS_PIPE_NULL MACH_PORT_NULL
 
 #else
+
+#ifdef WIN32
+typedef char* ccs_pipe_t;
+#define CCS_PIPE_NULL (char*)NULL
+
+#else
 typedef int ccs_pipe_t; /* Unix domain socket */
 #define CCS_PIPE_NULL -1
 
 #endif
-
+#endif
 #pragma mark -
 
 struct ccs_lockref_d;
