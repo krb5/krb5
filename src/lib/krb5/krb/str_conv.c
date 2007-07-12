@@ -264,9 +264,9 @@ krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen
     if (!ndone) {
 #define sftime_default_len	2+1+2+1+4+1+2+1+2+1
 	if (buflen >= sftime_default_len) {
-	    sprintf(buffer, "%02d/%02d/%4d %02d:%02d",
-		    tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
-		    tmp->tm_hour, tmp->tm_min);
+	    snprintf(buffer, buflen, "%02d/%02d/%4d %02d:%02d",
+		     tmp->tm_mday, tmp->tm_mon+1, 1900+tmp->tm_year,
+		     tmp->tm_hour, tmp->tm_min);
 	    ndone = strlen(buffer);
 	}
     }
@@ -309,14 +309,14 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
 
     memset (tmpbuf, 0, sizeof (tmpbuf));
     if (days == 0)
-	sprintf(buffer, "%d:%02d:%02d", hours, minutes, seconds);
+	snprintf(buffer, buflen, "%d:%02d:%02d", hours, minutes, seconds);
     else if (hours || minutes || seconds)
-	sprintf(buffer, "%d %s %02d:%02d:%02d", days,
-		(days > 1) ? "days" : "day",
-		hours, minutes, seconds);
+	snprintf(buffer, buflen, "%d %s %02d:%02d:%02d", days,
+		 (days > 1) ? "days" : "day",
+		 hours, minutes, seconds);
     else
-	sprintf(buffer, "%d %s", days,
-		(days > 1) ? "days" : "day");
+	snprintf(buffer, buflen, "%d %s", days,
+		 (days > 1) ? "days" : "day");
     if (tmpbuf[sizeof(tmpbuf)-1] != 0)
 	/* Something must be very wrong with my math above, or the
 	   assumptions going into it...  */

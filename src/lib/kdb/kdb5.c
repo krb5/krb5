@@ -269,8 +269,9 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     } else
 #endif
     {
-	sprintf(buf, "Program not built to support %s database type\n",
-		lib_name);
+	snprintf(buf, sizeof(buf),
+		 "Program not built to support %s database type\n",
+		 lib_name);
 	status = KRB5_KDB_DBTYPE_NOSUP;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;
@@ -282,8 +283,9 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
 
     if ((status = (*lib)->vftabl.init_library())) {
 	/* ERROR. library not initialized cleanly */
-	sprintf(buf, "%s library initialization failed, error code %ld\n",
-		lib_name, status);
+	snprintf(buf, sizeof(buf),
+		 "%s library initialization failed, error code %ld\n",
+		 lib_name, status);
 	status = KRB5_KDB_DBTYPE_INIT;
 	krb5_db_set_err(kcontext, krb5_err_have_str, status, buf);
 	goto clean_n_exit;

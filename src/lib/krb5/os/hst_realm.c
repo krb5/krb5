@@ -105,7 +105,8 @@ krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
     } else {
         if ( strlen(prefix) + strlen(name) + 3 > MAXDNAME )
             return KRB5_ERR_HOST_REALM_UNKNOWN;
-        sprintf(host,"%s.%s", prefix, name);
+        if (snprintf(host, sizeof(host), "%s.%s", prefix, name) >= sizeof(host))
+	    return KRB5_ERR_HOST_REALM_UNKNOWN;
 
         /* Realm names don't (normally) end with ".", but if the query
            doesn't end with "." and doesn't get an answer as is, the

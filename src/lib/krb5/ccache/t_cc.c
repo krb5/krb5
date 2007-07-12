@@ -170,7 +170,7 @@ static void cc_test(krb5_context context, const char *name, int flags)
 
      {
        /* Copy the cache test*/
-       sprintf(newcache, "%s.new", name);
+       snprintf(newcache, sizeof(newcache), "%s.new", name);
        kret = krb5_cc_resolve(context, newcache, &id2);
        CHECK(kret, "resolve of new cache");
        
@@ -212,12 +212,11 @@ static void cc_test(krb5_context context, const char *name, int flags)
  */
 static int check_registered(krb5_context context, const char *prefix)
 {
-
   char name[300];
   krb5_error_code kret;
   krb5_ccache id;
 
-  sprintf(name, "%s/tmp/cctest.%ld", prefix, (long) getpid());
+  snprintf(name, sizeof(name), "%s/tmp/cctest.%ld", prefix, (long) getpid());
 
   kret = krb5_cc_resolve(context, name, &id);
   if(kret != KRB5_OK) {
@@ -242,7 +241,7 @@ static void do_test(krb5_context context, const char *prefix)
 {
   char name[300];
 
-  sprintf(name, "%s/tmp/cctest.%ld", prefix, (long) getpid());
+  snprintf(name, sizeof(name), "%s/tmp/cctest.%ld", prefix, (long) getpid());
   printf("Starting test on %s\n", name);
   cc_test (context, name, 0);
   cc_test (context, name, !0);

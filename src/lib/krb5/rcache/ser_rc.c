@@ -121,13 +121,13 @@ krb5_rcache_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **bu
 	    fnamep = krb5_rc_get_name(kcontext, rcache);
 	    namelen += (strlen(fnamep)+1);
 
-	    if ((rcname = (char *) malloc(namelen))) {
-		/* Format the rcache name. */
-		if (rcache->ops && rcache->ops->type)
-		    sprintf(rcname, "%s:%s", rcache->ops->type, fnamep);
-		else
-		    strcpy(rcname, fnamep);
+	    if (rcache->ops && rcache->ops->type) {
+		if (asprintf(&rcname, "%s:%s", rcache->ops->type, fnamep) < 0)
+		    rcname = NULL;
+	    } else
+		rcname = strdup(fnamep);
 
+	    if (rcname) {
 		/* Put the length of the file name */
 		(void) krb5_ser_pack_int32((krb5_int32) strlen(rcname),
 					   &bp, &remain);

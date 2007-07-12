@@ -70,7 +70,7 @@ krb5_kt_default_name(krb5_context context, char *name, size_t namesize)
 	    defname[len]= '\0';
 	    if ( (len + strlen(krb5_defkeyname) + 1) > namesize )
 		return KRB5_CONFIG_NOTENUFSPACE;
-	    sprintf(name, krb5_defkeyname, defname);
+	    snprintf(name, namesize, krb5_defkeyname, defname);
 	}
 #else
 	if (namesize < (strlen(krb5_defkeyname)+1))

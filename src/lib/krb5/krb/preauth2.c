@@ -799,21 +799,21 @@ krb5_error_code pa_sam(krb5_context context,
 			prompter_data, salt, s2kparams, as_key, gak_data)))
 	   return(ret);
     }
-    sprintf(name, "%.*s",
-	    SAMDATA(sam_challenge->sam_type_name, "SAM Authentication",
-		    sizeof(name) - 1));
+    snprintf(name, sizeof(name), "%.*s",
+	     SAMDATA(sam_challenge->sam_type_name, "SAM Authentication",
+		     sizeof(name) - 1));
 
-    sprintf(banner, "%.*s",
-	    SAMDATA(sam_challenge->sam_challenge_label,
-		    sam_challenge_banner(sam_challenge->sam_type),
-		    sizeof(banner)-1));
+    snprintf(banner, sizeof(banner), "%.*s",
+	     SAMDATA(sam_challenge->sam_challenge_label,
+		     sam_challenge_banner(sam_challenge->sam_type),
+		     sizeof(banner)-1));
 
     /* sprintf(prompt, "Challenge is [%s], %s: ", challenge, prompt); */
-    sprintf(prompt, "%s%.*s%s%.*s",
-	    sam_challenge->sam_challenge.length?"Challenge is [":"",
-	    SAMDATA(sam_challenge->sam_challenge, "", 20),
-	    sam_challenge->sam_challenge.length?"], ":"",
-	    SAMDATA(sam_challenge->sam_response_prompt, "passcode", 55));
+    snprintf(prompt, sizeof(prompt), "%s%.*s%s%.*s",
+	     sam_challenge->sam_challenge.length?"Challenge is [":"",
+	     SAMDATA(sam_challenge->sam_challenge, "", 20),
+	     sam_challenge->sam_challenge.length?"], ":"",
+	     SAMDATA(sam_challenge->sam_response_prompt, "passcode", 55));
 
     response_data.data = response;
     response_data.length = sizeof(response);
@@ -1064,20 +1064,20 @@ krb5_error_code pa_sam_2(krb5_context context,
 	}
    }
 
-   sprintf(name, "%.*s",
+   snprintf(name, sizeof(name), "%.*s",
 	SAMDATA(sc2b->sam_type_name, "SAM Authentication",
 	sizeof(name) - 1));
 
-   sprintf(banner, "%.*s",
-	SAMDATA(sc2b->sam_challenge_label,
-	sam_challenge_banner(sc2b->sam_type),
-	sizeof(banner)-1));
+   snprintf(banner, sizeof(banner), "%.*s",
+	    SAMDATA(sc2b->sam_challenge_label,
+		    sam_challenge_banner(sc2b->sam_type),
+		    sizeof(banner)-1));
 
-   sprintf(prompt, "%s%.*s%s%.*s",
-	sc2b->sam_challenge.length?"Challenge is [":"",
-	SAMDATA(sc2b->sam_challenge, "", 20),
-	sc2b->sam_challenge.length?"], ":"",
-	SAMDATA(sc2b->sam_response_prompt, "passcode", 55));
+   snprintf(prompt, sizeof(prompt), "%s%.*s%s%.*s",
+	    sc2b->sam_challenge.length?"Challenge is [":"",
+	    SAMDATA(sc2b->sam_challenge, "", 20),
+	    sc2b->sam_challenge.length?"], ":"",
+	    SAMDATA(sc2b->sam_response_prompt, "passcode", 55));
 
    response_data.data = response;
    response_data.length = sizeof(response);

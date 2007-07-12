@@ -249,9 +249,9 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     numshift = 0;
     cp = (unsigned char *) oid->elements;
     number = (unsigned long) cp[0];
-    sprintf(numstr, "%lu ", (unsigned long)number/40);
+    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number/40);
     string_length += strlen(numstr);
-    sprintf(numstr, "%lu ", (unsigned long)number%40);
+    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number%40);
     string_length += strlen(numstr);
     for (i=1; i<oid->length; i++) {
 	if ((OM_uint32) (numshift+7) < (sizeof (OM_uint32)*8)) {/* XXX */
@@ -262,7 +262,7 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
 	    return(GSS_S_FAILURE);
 	}
 	if ((cp[i] & 0x80) == 0) {
-	    sprintf(numstr, "%lu ", (unsigned long)number);
+	    snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number);
 	    string_length += strlen(numstr);
 	    number = 0;
 	    numshift = 0;
@@ -276,16 +276,16 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     if ((bp = (char *) malloc(string_length))) {
 	strcpy(bp, "{ ");
 	number = (OM_uint32) cp[0];
-	sprintf(numstr, "%lu ", (unsigned long)number/40);
+	snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number/40);
 	strcat(bp, numstr);
-	sprintf(numstr, "%lu ", (unsigned long)number%40);
+	snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number%40);
 	strcat(bp, numstr);
 	number = 0;
 	cp = (unsigned char *) oid->elements;
 	for (i=1; i<oid->length; i++) {
 	    number = (number << 7) | (cp[i] & 0x7f);
 	    if ((cp[i] & 0x80) == 0) {
-		sprintf(numstr, "%lu ", (unsigned long)number);
+		snprintf(numstr, sizeof(numstr), "%lu ", (unsigned long)number);
 		strcat(bp, numstr);
 		number = 0;
 	    }

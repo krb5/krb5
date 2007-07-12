@@ -1060,7 +1060,7 @@ krb5_error_code KRB5_CALLCONV  krb5_stdcc_generate_new
 	
   	/* create a unique name */
   	cc_get_change_time(gCntrlBlock, &change_time);
-  	sprintf(name, "gen_new_cache%d", change_time);
+  	snprintf(name, 256, "gen_new_cache%d", change_time);
   	
   	/* create the new cache */
   	err = cc_create(gCntrlBlock, name, name, CC_CRED_V5, 0L,

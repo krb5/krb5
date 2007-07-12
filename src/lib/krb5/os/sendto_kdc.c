@@ -122,7 +122,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 
     va_start(args, fmt);
 
-#define putf(FMT,X)	(sprintf(tmpbuf,FMT,X),putstr(tmpbuf))
+#define putf(FMT,X)	(snprintf(tmpbuf,sizeof(tmpbuf),FMT,X),putstr(tmpbuf))
 
     for (; *fmt; fmt++) {
 	if (*fmt != '%') {
@@ -152,7 +152,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 	case 'E':
 	    /* %E => krb5_error_code */
 	    kerr = va_arg(args, krb5_error_code);
-	    sprintf(tmpbuf, "%lu/", (unsigned long) kerr);
+	    snprintf(tmpbuf, sizeof(tmpbuf), "%lu/", (unsigned long) kerr);
 	    putstr(tmpbuf);
 	    p = error_message(kerr);
 	    putstr(p);
@@ -204,7 +204,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 	    /* %t => struct timeval * */
 	    tv = va_arg(args, struct timeval *);
 	    if (tv) {
-		sprintf(tmpbuf, "%ld.%06ld",
+		snprintf(tmpbuf, sizeof(tmpbuf), "%ld.%06ld",
 			(long) tv->tv_sec, (long) tv->tv_usec);
 		putstr(tmpbuf);
 	    } else
@@ -226,7 +226,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 	    else if (ai->ai_socktype == SOCK_STREAM)
 		strcpy(tmpbuf, "stream");
 	    else
-		sprintf(tmpbuf, "socktype%d", ai->ai_socktype);
+		snprintf(tmpbuf, sizeof(tmpbuf), "socktype%d", ai->ai_socktype);
 	    if (0 != getnameinfo (ai->ai_addr, ai->ai_addrlen,
 				  addrbuf, sizeof (addrbuf),
 				  portbuf, sizeof (portbuf),
@@ -234,9 +234,12 @@ krb5int_debug_fprint (const char *fmt, ...)
 		if (ai->ai_addr->sa_family == AF_UNSPEC)
 		    strcpy(tmpbuf + strlen(tmpbuf), " AF_UNSPEC");
 		else
-		    sprintf(tmpbuf + strlen(tmpbuf), " af%d", ai->ai_addr->sa_family);
+		    snprintf(tmpbuf + strlen(tmpbuf),
+			     sizeof(tmpbuf)-strlen(tmpbuf),
+			     " af%d", ai->ai_addr->sa_family);
 	    } else
-		sprintf(tmpbuf + strlen(tmpbuf), " %s.%s", addrbuf, portbuf);
+		snprintf(tmpbuf + strlen(tmpbuf), sizeof(tmpbuf)-strlen(tmpbuf),
+			 " %s.%s", addrbuf, portbuf);
 	    putstr(tmpbuf);
 	    break;
 	case 'D':

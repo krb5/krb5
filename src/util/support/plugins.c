@@ -49,6 +49,8 @@
 #include <unistd.h>
 #endif
 
+#include "k5-platform.h"
+
 #include <stdarg.h>
 static void Tprintf (const char *fmt, ...)
 {
@@ -377,15 +379,11 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
     if (!err) {
         int j;
         for (i = 0; !err && (filebases[i] != NULL); i++) {
-            size_t baselen = strlen (filebases[i]);
             for (j = 0; !err && (fileexts[j] != NULL); j++) {
-                size_t len = baselen + strlen (fileexts[j]) + 2; /* '.' + NULL */
-                tempnames[i+j] = malloc (len * sizeof (char));
-                if (tempnames[i+j] == NULL) { 
-                    err = errno; 
-                } else {
-                    sprintf (tempnames[i+j], "%s%s", filebases[i], fileexts[j]);
-                }
+		if (asprintf(&tempnames[i+j], "%s%s", filebases[i], fileexts[j]) < 0) {
+		    tempnames[i+j] = NULL;
+		    err = errno;
+		}
             }
         }
     }
@@ -426,7 +424,6 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
     }
     
     for (i = 0; !err && dirnames[i] != NULL; i++) {
-	size_t dirnamelen = strlen (dirnames[i]) + 1; /* '/' */
         if (filenames != NULL) {
             /* load plugins with names from filenames from each directory */
             int j;
@@ -436,11 +433,9 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
 		char *filepath = NULL;
 		
 		if (!err) {
-		    filepath = malloc (dirnamelen + strlen (filenames[j]) + 1); /* NULL */
-		    if (filepath == NULL) { 
-			err = errno; 
-		    } else {
-			sprintf (filepath, "%s/%s", dirnames[i], filenames[j]);
+		    if (asprintf(&filepath, "%s/%s", dirnames[i], filenames[j]) < 0) {
+			filepath = NULL;
+			err = errno;
 		    }
 		}
 		
@@ -472,11 +467,9 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                 
 		if (!err) {
                     int len = NAMELEN (d);
-		    filepath = malloc (dirnamelen + len + 1); /* NULL */
-		    if (filepath == NULL) { 
-			err = errno; 
-		    } else {
-			sprintf (filepath, "%s/%*s", dirnames[i], len, d->d_name);
+		    if (asprintf(&filepath, "%s/%*s", dirnames[i], len, d->d_name) < 0) {
+			filepath = NULL;
+			err = errno;
 		    }
 		}
                 

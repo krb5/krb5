@@ -36,14 +36,16 @@ krb5_gen_replay_name(krb5_context context, const krb5_address *address, const ch
 {
     char * tmp;
     int i;
+    int len;
 
-    if ((*string = malloc(strlen(uniq) + (address->length * 2) + 1)) == NULL)
+    len = strlen(uniq) + (address->length * 2) + 1;
+    if ((*string = malloc(len)) == NULL)
 	return ENOMEM;
 
-    sprintf(*string, "%s", uniq);
-    tmp = (*string) + strlen(uniq);
+    snprintf(*string, len, "%s", uniq);
+    tmp = *string + strlen(uniq);
     for (i = 0; i < address->length; i++) {
-	sprintf(tmp, "%.2x", address->contents[i] & 0xff);
+	snprintf(tmp, len - (tmp-*string), "%.2x", address->contents[i] & 0xff);
 	tmp += 2;
     }
     return 0;

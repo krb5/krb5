@@ -468,20 +468,17 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
      * admin database name and lockfile are now always derived from dbname
      */
     if (params.mask & KADM5_CONFIG_DBNAME) {
-	 params.admin_dbname = (char *) malloc(strlen(params.dbname) + 7);
-	 if (params.admin_dbname) {
-	      sprintf(params.admin_dbname, "%s.kadm5", params.dbname);
-	      params.mask |= KADM5_CONFIG_ADBNAME;
-	 }
+	if (asprintf(&params.admin_dbname, "%s.kadm5", params.dbname) > 0)
+	    params.mask |= KADM5_CONFIG_ADBNAME;
+	else
+	    params.admin_dbname = NULL;
     }
 
     if (params.mask & KADM5_CONFIG_ADBNAME) {
-	 params.admin_lockfile = (char *) malloc(strlen(params.admin_dbname)
-						 + 6);
-	 if (params.admin_lockfile) {
-	      sprintf(params.admin_lockfile, "%s.lock", params.admin_dbname);
-	      params.mask |= KADM5_CONFIG_ADB_LOCKFILE;
-	 }
+	if (asprintf(&params.admin_lockfile, "%s.lock", params.admin_dbname) > 0)
+	    params.mask |= KADM5_CONFIG_ADB_LOCKFILE;
+	else
+	    params.admin_lockfile = NULL;
     }
     
     /* Get the value for the admin (policy) database lock file*/
@@ -816,7 +813,7 @@ kadm5_get_admin_service_name(krb5_context ctx,
 	ret = ENOMEM;
 	goto err_params;
     }
-    sprintf(admin_name, "kadmin/%s", hp->h_name);
+    snprintf(admin_name, maxlen, "kadmin/%s", hp->h_name);
 
 err_params:
     kadm5_free_config_params(ctx, &params_out);

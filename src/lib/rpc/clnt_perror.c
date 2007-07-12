@@ -81,9 +81,11 @@ clnt_sperror(CLIENT *rpch, char *s)
 	char *bufstart = get_buf();
 	char *str = bufstart;
 	char *strstart = str;
+	char *strend;
 
 	if (str == 0)
 		return (0);
+	strend = str + BUFSIZ;
 	CLNT_GETERR(rpch, &e);
 
 	strncpy (str, s, BUFSIZ - 1);
@@ -113,19 +115,19 @@ clnt_sperror(CLIENT *rpch, char *s)
 	case RPC_CANTSEND:
 	case RPC_CANTRECV:
 		/* 10 for the string */
-		if(str - bufstart + 10 + strlen(strerror(e.re_errno)) < BUFSIZ)
-		    (void) sprintf(str, "; errno = %s",
-				   strerror(e.re_errno)); 
+		if (str - bufstart + 10 + strlen(strerror(e.re_errno)) < BUFSIZ)
+		    (void) snprintf(str, strend-str, "; errno = %s",
+				    strerror(e.re_errno)); 
 		str += strlen(str);
 		break;
 
 	case RPC_VERSMISMATCH:
 		/* 33 for the string, 22 for the numbers */
 		if(str - bufstart + 33 + 22 < BUFSIZ)
-		    (void) sprintf(str,
-				   "; low version = %lu, high version = %lu", 
-				   (u_long) e.re_vers.low,
-				   (u_long) e.re_vers.high);
+		    (void) snprintf(str, strend-str,
+				    "; low version = %lu, high version = %lu", 
+				    (u_long) e.re_vers.low,
+				    (u_long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
@@ -133,17 +135,17 @@ clnt_sperror(CLIENT *rpch, char *s)
 		err = auth_errmsg(e.re_why);
 		/* 8 for the string */
 		if(str - bufstart + 8 < BUFSIZ)
-		    (void) sprintf(str,"; why = ");
+		    (void) snprintf(str, strend-str, "; why = ");
 		str += strlen(str);
 		if (err != NULL) {
 			if(str - bufstart + strlen(err) < BUFSIZ)
-			    (void) sprintf(str, "%s",err);
+			    (void) snprintf(str, strend-str, "%s",err);
 		} else {
 		    /* 33 for the string, 11 for the number */
 		    if(str - bufstart + 33 + 11 < BUFSIZ)
-			(void) sprintf(str,
-				       "(unknown authentication error - %d)",
-				       (int) e.re_why);
+			(void) snprintf(str, strend-str,
+					"(unknown authentication error - %d)",
+					(int) e.re_why);
 		}
 		str += strlen(str);
 		break;
@@ -151,25 +153,25 @@ clnt_sperror(CLIENT *rpch, char *s)
 	case RPC_PROGVERSMISMATCH:
 		/* 33 for the string, 22 for the numbers */
 		if(str - bufstart + 33 + 22 < BUFSIZ)
-		    (void) sprintf(str,
-				   "; low version = %lu, high version = %lu",
-				   (u_long) e.re_vers.low,
-				   (u_long) e.re_vers.high);
+		    (void) snprintf(str, strend-str,
+				    "; low version = %lu, high version = %lu",
+				    (u_long) e.re_vers.low,
+				    (u_long) e.re_vers.high);
 		str += strlen(str);
 		break;
 
 	default:	/* unknown */
 		/* 14 for the string, 22 for the numbers */
 		if(str - bufstart + 14 + 22 < BUFSIZ)
-		    (void) sprintf(str,
-				   "; s1 = %lu, s2 = %lu",
-				   (u_long) e.re_lb.s1,
-				   (u_long) e.re_lb.s2);
+		    (void) snprintf(str, strend-str,
+				    "; s1 = %lu, s2 = %lu",
+				    (u_long) e.re_lb.s1,
+				    (u_long) e.re_lb.s2);
 		str += strlen(str);
 		break;
 	}
-	if(str - bufstart + 1 < BUFSIZ)
-	    (void) sprintf(str, "\n");
+	if (str - bufstart + 1 < BUFSIZ)
+	    (void) snprintf(str, strend-str, "\n");
 	return(strstart) ;
 }
 
@@ -252,10 +254,12 @@ char *
 clnt_spcreateerror(char *s)
 {
 	char *str = get_buf();
+	char *strend;
 
 	if (str == 0)
 		return(0);
-	(void) sprintf(str, "%s: ", s);
+	strend = str+BUFSIZ;
+	(void) snprintf(str, strend-str, "%s: ", s);
 	str[BUFSIZ - 1] = '\0';
 	(void) strncat(str, clnt_sperrno(rpc_createerr.cf_stat), BUFSIZ - 1);
 	switch (rpc_createerr.cf_stat) {
@@ -273,8 +277,9 @@ clnt_spcreateerror(char *s)
 		    if (m)
 			(void) strncat(str, m, BUFSIZ - 1 - strlen(str));
 		    else
-			(void) sprintf(&str[strlen(str)], "Error %d",
-				       rpc_createerr.cf_error.re_errno);
+			(void) snprintf(&str[strlen(str)], BUFSIZ - strlen(str),
+					"Error %d",
+					rpc_createerr.cf_error.re_errno);
 		}
 		break;
 

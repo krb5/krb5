@@ -76,8 +76,7 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
     size_t dirlen;
 
     GETDIR;
-    if (fn && *fn)
-    {
+    if (fn && *fn) {
 	if (!(d->fn = malloc(strlen(*fn) + dirlen + 1)))
 	    return KRB5_RC_IO_MALLOC;
 	(void) strcpy(d->fn, dir);
@@ -85,43 +84,34 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	(void) strcat(d->fn, *fn);
 	d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC | O_EXCL |
 			       O_BINARY, 0600);
-    }
-    else
-    {
-	/* %d is max 11 digits (-, 10 digits of 32-bit number)
-	 * 11 + /krb5_RC + aaa = 24, +6 for slop */
-	if (!(d->fn = malloc(30 + dirlen)))
+    } else {
+	if (asprintf(&d->fn, "%s%skrb5_RC%daaa",
+		     dir, PATH_SEPARATOR, (int) UNIQUE) < 0) {
+	    d->fn = NULL;
 	    return KRB5_RC_IO_MALLOC;
-	if (fn)
-	    if (!(*fn = malloc(35))) {
-		FREE(d->fn);
-		return KRB5_RC_IO_MALLOC;
-	    }
-	(void) sprintf(d->fn, "%s%skrb5_RC%d", dir, PATH_SEPARATOR,
-		       (int) UNIQUE);
-	c = d->fn + strlen(d->fn);
-	(void) strcpy(c, "aaa");
+	}
+	c = d->fn + strlen(d->fn) - 3;
 	while ((d->fd = THREEPARAMOPEN(d->fn, O_WRONLY | O_CREAT | O_TRUNC |
-				       O_EXCL | O_BINARY, 0600)) == -1)
-	{
-	    if ((c[2]++) == 'z')
-	    {
+				       O_EXCL | O_BINARY, 0600)) == -1)	{
+	    if ((c[2]++) == 'z') {
 		c[2] = 'a';
-		if ((c[1]++) == 'z')
-		{
+		if ((c[1]++) == 'z') {
 		    c[1] = 'a';
 		    if ((c[0]++) == 'z')
 			break; /* sigh */
 		}
 	    }
 	}
-	if (fn)
-	    (void) strcpy(*fn, d->fn + dirlen);
+	if (fn) {
+	    *fn = strdup(d->fn + dirlen);
+	    if (*fn == NULL) {
+		free(d->fn);
+		return KRB5_RC_IO_MALLOC;
+	    }
+	}
     }
-    if (d->fd == -1)
-    {
-	switch(errno)
-	{
+    if (d->fd == -1) {
+	switch(errno) {
 	case EFBIG:
 #ifdef EDQUOT
 	case EDQUOT:

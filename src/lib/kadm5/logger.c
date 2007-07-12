@@ -189,7 +189,7 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     char	*syslogp;
 
     /* Make the header */
-    sprintf(outbuf, "%s: ", whoami);
+    snprintf(outbuf, sizeof(outbuf), "%s: ", whoami);
     /*
      * Squirrel away address after header for syslog since syslog makes
      * a header
@@ -844,13 +844,13 @@ klog_vsyslog(int priority, const char *format, va_list arglist)
     cp += 15;
 #endif	/* HAVE_STRFTIME */
 #ifdef VERBOSE_LOGS
-    sprintf(cp, " %s %s[%ld](%s): ",
-	    log_control.log_hostname ? log_control.log_hostname : "", 
-	    log_control.log_whoami ? log_control.log_whoami : "", 
-	    (long) getpid(),
-	    severity2string(priority));
+    snprintf(cp, sizeof(outbuf) - (cp-outbuf), " %s %s[%ld](%s): ",
+	     log_control.log_hostname ? log_control.log_hostname : "", 
+	     log_control.log_whoami ? log_control.log_whoami : "", 
+	     (long) getpid(),
+	     severity2string(priority));
 #else
-    sprintf(cp, " ");
+    snprintf(cp, sizeof(outbuf) - (cp-outbuf), " ");
 #endif
     syslogp = &outbuf[strlen(outbuf)];
 

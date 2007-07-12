@@ -125,7 +125,8 @@ krb5int_get_error (struct errinfo *ep, long code)
 		return r2;
 	}
     format_number:
-	sprintf (ep->scratch_buf, _("error %ld"), code);
+	snprintf (ep->scratch_buf, sizeof(ep->scratch_buf),
+		  _("error %ld"), code);
 	return ep->scratch_buf;
     }
     r = (char *) fptr(code);

@@ -115,11 +115,8 @@ display_unknown(kind, value, buffer)
 {
    char *str;
 
-   if ((str =
-	(char *) xmalloc(strlen(unknown_error)+strlen(kind)+7)) == NULL)
-      return(0);
-
-   sprintf(str, unknown_error, kind, value);
+   if (asprintf(&str, unknown_error, kind, value) < 0)
+       return(0);
 
    buffer->length = strlen(str);
    buffer->value = str;

@@ -93,7 +93,7 @@ krb_in_tkt (
 	err = cc_initialize (&cc_context, ccapi_version_3, &cc_version, NULL);
     
 	if (err == ccNoError) {
-        sprintf (principal, "%s%s%s@%s", pname, (pinst [0] == '\0') ? "" : ".", pinst, realm);
+	    snprintf (principal, sizeof(principal), "%s%s%s@%s", pname, (pinst [0] == '\0') ? "" : ".", pinst, realm);
 	}
     
 	if (err == ccNoError) {

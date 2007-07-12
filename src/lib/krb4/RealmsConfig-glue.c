@@ -473,7 +473,7 @@ krb_get_krbhst(
 	    return KFAILURE;
 	if (strlen(entry->host) + 6 >= MAXHOSTNAMELEN)
 	    return KFAILURE;
-	sprintf(host, "%s:%d", entry->host, entry->port);
+	snprintf(host, MAXHOSTNAMELEN, "%s:%d", entry->host, entry->port);
 	return KSUCCESS;
     }
 #endif

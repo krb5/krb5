@@ -407,15 +407,14 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
 	retval = ENOMEM;
 	
 	new_file = old_file = 0;
-	new_file = malloc(strlen(outfile) + 5);
-	if (!new_file)
-		goto errout;
-	old_file = malloc(strlen(outfile) + 5);
-	if (!old_file)
-		goto errout;
-
-	sprintf(new_file, "%s.$$$", outfile);
-	sprintf(old_file, "%s.bak", outfile);
+	if (asprintf(&new_file, "%s.$$$", outfile) < 0) {
+	    new_file = NULL;
+	    goto errout;
+	}
+	if (asprintf(&old_file, "%s.bak", outfile) < 0) {
+	    old_file = NULL;
+	    goto errout;
+	}
 
 	errno = 0;
 

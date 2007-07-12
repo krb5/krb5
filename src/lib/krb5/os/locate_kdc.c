@@ -257,8 +257,11 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
 #ifdef AI_NUMERICSERV
     hint.ai_flags = AI_NUMERICSERV;
 #endif
-    sprintf(portbuf, "%d", ntohs(port));
-    sprintf(secportbuf, "%d", ntohs(secport));
+    if (snprintf(portbuf, sizeof(portbuf), "%d", ntohs(port)) >= sizeof(portbuf))
+	/* XXX */
+	return EINVAL;
+    if (snprintf(secportbuf, sizeof(secportbuf), "%d", ntohs(secport)) >= sizeof(secportbuf))
+	return EINVAL;
     err = getaddrinfo (hostname, portbuf, &hint, &addrs);
     if (err) {
 	Tprintf ("\tgetaddrinfo(\"%s\", \"%s\", ...)\n\treturns %d: %s\n",

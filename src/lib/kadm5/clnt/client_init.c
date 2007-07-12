@@ -405,23 +405,21 @@ kadm5_get_init_creds(kadm5_server_handle_t handle,
 
      if (init_type == INIT_CREDS) {
 	  ccache = ccache_in;
-	  handle->cache_name = (char *)
-	       malloc(strlen(krb5_cc_get_type(handle->context, ccache)) +
-		      strlen(krb5_cc_get_name(handle->context, ccache)) + 2);
-	  if (handle->cache_name == NULL) {
-	       code = ENOMEM;
-	       goto error;
+	  if (asprintf(&handle->cache_name, "%s:%s",
+		       krb5_cc_get_type(handle->context, ccache),
+		       krb5_cc_get_name(handle->context, ccache)) < 0) {
+	      handle->cache_name = NULL;
+	      code = ENOMEM;
+	      goto error;
 	  }
-	  sprintf(handle->cache_name, "%s:%s",
-		  krb5_cc_get_type(handle->context, ccache),
-		  krb5_cc_get_name(handle->context, ccache));
      } else {
 	  static int counter = 0;
 
-	  handle->cache_name = malloc(sizeof("MEMORY:kadm5_")
-				      + 3*sizeof(counter));
-	  sprintf(handle->cache_name, "MEMORY:kadm5_%u", counter++);
-
+	  if (asprintf(&handle->cache_name, "MEMORY:kadm5_%u", counter++) < 0) {
+	      handle->cache_name = NULL;
+	      code = ENOMEM;
+	      goto error;
+	  }
 	  code = krb5_cc_resolve(handle->context, handle->cache_name,
 				 &ccache);
 	  if (code) 
@@ -477,6 +475,7 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
      krb5_keytab kt;
      krb5_get_init_creds_opt opt;
      krb5_creds mcreds, outcreds;
+     int n;
 
      ctx = handle->context;
      kt = NULL;
@@ -487,20 +486,17 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
 
      code = ENOMEM;
      if (realm) {
-          if ((strlen(svcname) + strlen(realm) + 1) >= full_svcname_len)
-	       goto error;
-	  sprintf(full_svcname, "%s@%s", svcname, realm);
+	 n = snprintf(full_svcname, full_svcname_len, "%s@%s",
+		      svcname, realm);
+	 if (n < 0 || n >= full_svcname_len)
+	     goto error;
      } else {
-	  /* krb5_princ_realm(client) is not null terminated */
-          if ((strlen(svcname) + krb5_princ_realm(ctx, client)->length + 1)
-	      >= full_svcname_len)
-	       goto error;
-
-	  strcpy(full_svcname, svcname);
-	  strcat(full_svcname, "@");
-	  strncat(full_svcname,
-		  krb5_princ_realm(ctx, client)->data,
-		  krb5_princ_realm(ctx, client)->length);
+	 /* krb5_princ_realm(client) is not null terminated */
+	 n = snprintf(full_svcname, full_svcname_len, "%s@%.*s",
+		      svcname, krb5_princ_realm(ctx, client)->length,
+		      krb5_princ_realm(ctx, client)->data);
+	 if (n < 0 || n >= full_svcname_len)
+	     goto error;
      }
 
      if (init_type != INIT_CREDS)

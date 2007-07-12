@@ -261,9 +261,12 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
 	  gtime->tm_mday > 31 || gtime->tm_hour > 23 ||
 	  gtime->tm_min > 59 || gtime->tm_sec > 59)
 	  return ASN1_BAD_GMTIME;
-      sprintf(s, "%04d%02d%02d%02d%02d%02dZ",
-	      1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
-	      gtime->tm_hour, gtime->tm_min, gtime->tm_sec);
+      if (snprintf(s, sizeof(s), "%04d%02d%02d%02d%02d%02dZ",
+		   1900+gtime->tm_year, gtime->tm_mon+1, gtime->tm_mday,
+		   gtime->tm_hour, gtime->tm_min, gtime->tm_sec)
+	  >= sizeof(s))
+	  /* Shouldn't be possible given above tests.  */
+	  return ASN1_BAD_GMTIME;
       sp = s;
   }
 

@@ -607,14 +607,13 @@ krb5_ktf_keytab_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet 
 		fnamep = ktfile_def_name;
 	    namelen += (strlen(fnamep)+1);
 
-	    if ((ktname = (char *) malloc(namelen))) {
-		/* Format the keytab name. */
-		if (keytab->ops && keytab->ops->prefix)
-		    sprintf(ktname, "%s:%s", keytab->ops->prefix, fnamep);
+	    if (keytab->ops && keytab->ops->prefix) {
+		if (asprintf(&ktname, "%s:%s", keytab->ops->prefix, fnamep) < 0)
+		    ktname = NULL;
+	    } else
+		ktname = strdup(fnamep);
 
-		else
-		    strcpy(ktname, fnamep);
-
+	    if (ktname) {
 		/* Fill in the file-specific keytab information. */
 		if (ktdata) {
 		    if (ktdata->openf) {

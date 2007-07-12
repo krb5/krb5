@@ -84,8 +84,10 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     if ( strlen(service) + strlen(protocol) + realm->length + 6 
          > MAXDNAME )
 	return 0;
-    sprintf(host, "%s.%s.%.*s", service, protocol, (int) realm->length,
-	    realm->data);
+    if (snprintf(host, sizeof(host), "%s.%s.%.*s",
+		 service, protocol, (int) realm->length,
+		 realm->data) >= sizeof(host))
+	return 0;
 
     /* Realm names don't (normally) end with ".", but if the query
        doesn't end with "." and doesn't get an answer as is, the

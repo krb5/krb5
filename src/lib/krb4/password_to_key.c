@@ -35,6 +35,8 @@
 #include "krb.h"
 #include "krb4int.h"
 
+#include "k5-platform.h"
+
 /*
  * passwd_to_key(): given a password, return a DES key.
  * There are extra arguments here which (used to be?)
@@ -107,17 +109,15 @@ krb5_passwd_to_key(
     char	*passwd,
     C_Block	key)
 {
-    size_t	len, tlen;
     char	*p;
 
     if (user && instance && realm && passwd) {
-        len = MAX_K_NAME_SZ + strlen(passwd) + 1;
-	tlen = strlen(passwd) + strlen(realm) + strlen(user) + strlen(instance) + 1;
-	if (tlen > len)
+	if (strlen(realm) + strlen(user) + strlen(instance) > MAX_K_NAME_SZ)
+	    /* XXX Is this right?  The old code returned 0, which is
+	       also what it returns after sucessfully generating a
+	       key.  The other error path returns -1.  */
 	    return 0;
-        p = malloc (tlen);
-        if (p != NULL) {
-            sprintf (p, "%s%s%s%s", passwd, realm, user, instance);
+	if (asprintf(&p, "%s%s%s%s", passwd, realm, user, instance) >= 0) {
             des_string_to_key (p, key);
             free (p);
             return 0;

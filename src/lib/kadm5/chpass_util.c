@@ -139,12 +139,13 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
   if ((code != KADM5_PASS_Q_TOOSHORT) && 
       (code != KADM5_PASS_REUSE) &&(code != KADM5_PASS_Q_CLASS) && 
       (code != KADM5_PASS_Q_DICT) && (code != KADM5_PASS_TOOSOON)) {
-    /* Can't get more info for other errors */
-    sprintf(buffer, "%s %s", error_message(code), 
-	    string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE));
-    sprintf(msg_ret, "%s\n%s\n", string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED), 
-	    buffer);
-    return(code);
+      /* Can't get more info for other errors */
+      snprintf(buffer, sizeof(buffer), "%s %s", error_message(code), 
+	       string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE));
+      snprintf(msg_ret, msg_len, "%s\n%s\n",
+	       string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED), 
+	       buffer);
+      return(code);
   }
 
   /* Ok, we have a password quality error. Return a good message */
@@ -200,31 +201,31 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
   code2 = kadm5_get_policy(lhandle, princ_ent.policy,
 			   &policy_ent);
   if (code2 != 0) {
-    sprintf(msg_ret, "%s %s\n%s %s\n\n%s\n ", error_message(code2), 
-	    string_text(CHPASS_UTIL_GET_POLICY_INFO),
-	    error_message(code),
-	    string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE),
-	    string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED));
-    (void) kadm5_free_principal_ent(lhandle, &princ_ent);
-    return(code);
+      snprintf(msg_ret, msg_len, "%s %s\n%s %s\n\n%s\n ", error_message(code2), 
+	       string_text(CHPASS_UTIL_GET_POLICY_INFO),
+	       error_message(code),
+	       string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE),
+	       string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED));
+      (void) kadm5_free_principal_ent(lhandle, &princ_ent);
+      return(code);
   }
   
   if (code == KADM5_PASS_Q_TOOSHORT) {
-    sprintf(msg_ret, string_text(CHPASS_UTIL_PASSWORD_TOO_SHORT), 
-	    policy_ent.pw_min_length);
-    (void) kadm5_free_principal_ent(lhandle, &princ_ent);
-    (void) kadm5_free_policy_ent(lhandle, &policy_ent);
-    return(code);
+      snprintf(msg_ret, msg_len, string_text(CHPASS_UTIL_PASSWORD_TOO_SHORT), 
+	       policy_ent.pw_min_length);
+      (void) kadm5_free_principal_ent(lhandle, &princ_ent);
+      (void) kadm5_free_policy_ent(lhandle, &policy_ent);
+      return(code);
   }
 
 /* Can't get more info for other errors */
 
   if (code == KADM5_PASS_Q_CLASS) {
-    sprintf(msg_ret, string_text(CHPASS_UTIL_TOO_FEW_CLASSES), 
-	    policy_ent.pw_min_classes);
-    (void) kadm5_free_principal_ent(lhandle, &princ_ent);
-    (void) kadm5_free_policy_ent(lhandle, &policy_ent);
-    return(code);
+      snprintf(msg_ret, msg_len, string_text(CHPASS_UTIL_TOO_FEW_CLASSES), 
+	       policy_ent.pw_min_classes);
+      (void) kadm5_free_principal_ent(lhandle, &princ_ent);
+      (void) kadm5_free_policy_ent(lhandle, &policy_ent);
+      return(code);
   }
 
   if (code == KADM5_PASS_TOOSOON) {
@@ -237,18 +238,19 @@ kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
     if (*(ptr = &time_string[strlen(time_string)-1]) == '\n')
       *ptr = '\0';
 
-    sprintf(msg_ret, string_text(CHPASS_UTIL_PASSWORD_TOO_SOON), 
-	    time_string);
+    snprintf(msg_ret, msg_len, string_text(CHPASS_UTIL_PASSWORD_TOO_SOON), 
+	     time_string);
     (void) kadm5_free_principal_ent(lhandle, &princ_ent);
     (void) kadm5_free_policy_ent(lhandle, &policy_ent);
     return(code);
   }
 
   /* We should never get here, but just in case ... */
-  sprintf(buffer, "%s %s", error_message(code), 
-	  string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE));
-  sprintf(msg_ret, "%s\n%s\n", string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED), 
-	  buffer);
+  snprintf(buffer, sizeof(buffer), "%s %s", error_message(code), 
+	   string_text(CHPASS_UTIL_WHILE_TRYING_TO_CHANGE));
+  snprintf(msg_ret, msg_len, "%s\n%s\n",
+	   string_text(CHPASS_UTIL_PASSWORD_NOT_CHANGED), 
+	   buffer);
   (void) kadm5_free_principal_ent(lhandle, &princ_ent);
   (void) kadm5_free_policy_ent(lhandle, &policy_ent);
   return(code);

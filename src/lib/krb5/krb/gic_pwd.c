@@ -257,10 +257,12 @@ krb5_get_init_creds_password(krb5_context context,
 
       if (strcmp(pw0.data, pw1.data) != 0) {
 	 ret = KRB5_LIBOS_BADPWDMATCH;
-	 sprintf(banner, "%s.  Please try again.", error_message(ret));
+	 snprintf(banner, sizeof(banner),
+		  "%s.  Please try again.", error_message(ret));
       } else if (pw0.length == 0) {
 	 ret = KRB5_CHPW_PWDNULL;
-	 sprintf(banner, "%s.  Please try again.", error_message(ret));
+	 snprintf(banner, sizeof(banner),
+		  "%s.  Please try again.", error_message(ret));
       } else {
 	 int result_code;
 	 krb5_data code_string;
@@ -295,11 +297,11 @@ krb5_get_init_creds_password(krb5_context context,
 	 if (result_string.length > (sizeof(banner)-100))
 	    result_string.length = sizeof(banner)-100;
 
-	 sprintf(banner, "%.*s%s%.*s.  Please try again.\n",
-		 (int) code_string.length, code_string.data,
-		 result_string.length ? ": " : "",
-		 (int) result_string.length,
-		 result_string.data ? result_string.data : "");
+	 snprintf(banner, sizeof(banner), "%.*s%s%.*s.  Please try again.\n",
+		  (int) code_string.length, code_string.data,
+		  result_string.length ? ": " : "",
+		  (int) result_string.length,
+		  result_string.data ? result_string.data : "");
 
 	 krb5_xfree(code_string.data);
 	 krb5_xfree(result_string.data);
@@ -340,14 +342,16 @@ cleanup:
 	  ((hours = ((as_reply->enc_part2->key_exp-now)/(60*60))) <= 7*24) &&
 	  (hours >= 0)) {
 	 if (hours < 1)
-	    sprintf(banner,
-		    "Warning: Your password will expire in less than one hour.");
+	     snprintf(banner, sizeof(banner),
+		      "Warning: Your password will expire in less than one hour.");
 	 else if (hours <= 48)
-	    sprintf(banner, "Warning: Your password will expire in %d hour%s.",
-		    hours, (hours == 1)?"":"s");
+	     snprintf(banner, sizeof(banner),
+		      "Warning: Your password will expire in %d hour%s.",
+		      hours, (hours == 1)?"":"s");
 	 else
-	    sprintf(banner, "Warning: Your password will expire in %d days.",
-		    hours/24);
+	     snprintf(banner, sizeof(banner),
+		      "Warning: Your password will expire in %d days.",
+		      hours/24);
 
 	 /* ignore an error here */
          /* PROMPTER_INVOCATION */
@@ -376,17 +380,17 @@ cleanup:
 	       delta = (*last_req)->value - now;
 
 	       if (delta < 3600)
-		  sprintf(banner,
-		    "Warning: Your password will expire in less than one "
-		     "hour on %s", ts);
+		   snprintf(banner, sizeof(banner),
+			    "Warning: Your password will expire in less than one hour on %s",
+			    ts);
 	       else if (delta < 86400*2)
-		  sprintf(banner,
-		     "Warning: Your password will expire in %d hour%s on %s",
-		     delta / 3600, delta < 7200 ? "" : "s", ts);
+		   snprintf(banner, sizeof(banner),
+			    "Warning: Your password will expire in %d hour%s on %s",
+			    delta / 3600, delta < 7200 ? "" : "s", ts);
 	       else
-		  sprintf(banner,
-		     "Warning: Your password will expire in %d days on %s",
-		     delta / 86400, ts);
+		   snprintf(banner, sizeof(banner),
+			    "Warning: Your password will expire in %d days on %s",
+			    delta / 86400, ts);
 	       /* ignore an error here */
 	       /* PROMPTER_INVOCATION */
 	       (*prompter)(context, data, 0, banner, 0, 0);

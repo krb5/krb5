@@ -213,7 +213,8 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 			result = ENOMEM;
 			goto cleanup;
 		} else {
-			sprintf (name_buf, "API:%s", default_name -> data);
+		    snprintf (name_buf, name_size, "API:%s",
+			      default_name -> data);
 		}
 	}
 	
@@ -233,8 +234,8 @@ cleanup:
 #if !(defined(_WIN32))
 static krb5_error_code get_from_os(char *name_buf, int name_size)
 {
-	sprintf(name_buf, "FILE:/tmp/krb5cc_%ld", (long) getuid());
-	return 0;
+    snprintf(name_buf, name_size, "FILE:/tmp/krb5cc_%ld", (long) getuid());
+    return 0;
 }
 #endif
 #endif
