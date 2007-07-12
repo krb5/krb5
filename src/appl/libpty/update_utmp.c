@@ -550,9 +550,9 @@ pty_update_utmp(int process_type, int pid, const char *username,
     strcpy(utmp_id, cp);
 #else
     if (len > 2 && *(cp - 1) != '/')
-      sprintf(utmp_id, "k%s", cp - 1);
+	snprintf(utmp_id, sizeof(utmp_id), "k%s", cp - 1);
     else
-      sprintf(utmp_id, "k0%s", cp);
+	snprintf(utmp_id, sizeof(utmp_id), "k0%s", cp);
 #endif
     strncpy(utx.ut_id, utmp_id, sizeof(utx.ut_id));
     /*

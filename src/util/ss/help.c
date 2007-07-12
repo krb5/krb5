@@ -38,8 +38,9 @@ void ss_help (argc, argv, sci_idx, info_ptr)
     }
     else if (argc != 2) {
 	/* should do something better than this */
-	sprintf(buffer, "usage:\n\t%s [topic|command]\nor\t%s\n",
-		request_name, request_name);
+	snprintf(buffer, sizeof(buffer),
+		 "usage:\n\t%s [topic|command]\nor\t%s\n",
+		 request_name, request_name);
 	ss_perror(sci_idx, 0, buffer);
 	return;
     }
