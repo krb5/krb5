@@ -5,10 +5,10 @@
 #include "test_ccapi_util.h"
 
 int check_cc_initialize() {
-	BEGIN_TEST("cc_initialize");
-	
 	cc_int32 err = 0;
 	cc_context_t context = NULL;
+	
+	BEGIN_TEST("cc_initialize");
 	
 	// try every api_version
 	err = check_once_cc_initialize(&context, ccapi_version_2, NULL, NULL, 11, NULL);                 // err == CC_NOT_SUPP, not reflected in documentation rev 8
@@ -30,14 +30,15 @@ cc_int32 check_once_cc_initialize(cc_context_t *out_context, cc_int32 in_version
 	cc_int32 err = 0;
 	cc_context_t context;
 	
-	BEGIN_CHECK_ONCE(description);
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrNoMem, 
 		ccErrBadAPIVersion, 
 		ccErrBadParam,
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_initialize(out_context, in_version, out_supported_version, out_vendor);
@@ -146,15 +147,15 @@ cc_int32 check_once_cc_context_get_version(cc_context_t *out_context, cc_int32 i
 }
 
 int check_cc_context_release() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	
 	BEGIN_TEST("cc_context_release");
 	
 	#ifndef cc_context_release
 	log_error("cc_context_release is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
 	
 	// try with valid context
 	err = check_once_cc_context_release(&context, ccNoError, NULL);
@@ -173,17 +174,17 @@ int check_cc_context_release() {
 
 cc_int32 check_once_cc_context_release(cc_context_t *out_context, cc_int32 expected_err, const char *description) {
 	cc_int32 err = 0;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_release
-	
 	cc_context_t context = NULL;
-	
+		
 	cc_int32 possible_return_values[2] = {
 		ccNoError, 
 		ccErrInvalidContext, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_release
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	if (out_context) {
@@ -213,6 +214,14 @@ cc_int32 check_once_cc_context_release(cc_context_t *out_context, cc_int32 expec
 }
 
 int check_cc_context_get_change_time() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_time_t last_change_time = 0;
+	cc_ccache_t ccache = NULL;
+	cc_credentials_union creds_union;
+	cc_credentials_iterator_t creds_iterator = NULL;
+	cc_credentials_t credentials = NULL;
+	
 	BEGIN_TEST("cc_context_get_change_time");
 	
 	#ifndef cc_context_get_change_time
@@ -231,14 +240,6 @@ int check_cc_context_get_change_time() {
 	 * 	the default ccache is changed
 	 * clean up memory
 	 */
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_time_t last_change_time = 0;
-	cc_ccache_t ccache = NULL;
-	cc_credentials_union creds_union;
-	cc_credentials_iterator_t creds_iterator = NULL;
-	cc_credentials_t credentials = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {
@@ -318,20 +319,20 @@ int check_cc_context_get_change_time() {
 
 cc_int32 check_once_cc_context_get_change_time(cc_context_t context, cc_time_t *time, cc_int32 expected_err, const char *description) {
 	cc_int32 err = 0;
-	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_get_change_time
-	
+	cc_time_t last_change_time;
+	cc_time_t current_change_time = 0;
+		
 	cc_int32 possible_return_values[3] = {
 		ccNoError, 
 		ccErrInvalidContext, 
 		ccErrBadParam,
 	};
-	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
+
+    BEGIN_CHECK_ONCE(description);
 	
-	cc_time_t last_change_time;
-	cc_time_t current_change_time = 0;
+	#ifdef cc_context_get_change_time
+	
+	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	if (time != NULL) { // if we were passed NULL, then we're looking to pass a bad param
 		err = cc_context_get_change_time(context, &current_change_time);
@@ -355,17 +356,17 @@ cc_int32 check_once_cc_context_get_change_time(cc_context_t context, cc_time_t *
 }
 
 int check_cc_context_get_default_ccache_name() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	
 	BEGIN_TEST("cc_context_get_default_ccache_name");
 	
 	#ifndef cc_context_get_default_ccache_name
 	log_error("cc_context_get_default_ccache_name is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -397,16 +398,17 @@ int check_cc_context_get_default_ccache_name() {
 cc_int32 check_once_cc_context_get_default_ccache_name(cc_context_t context, cc_string_t *name, cc_int32 expected_err, const char *description) {
 	cc_int32 err = 0;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_get_default_ccache_name
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrInvalidContext, 
 		ccErrBadParam, 
 		ccErrNoMem, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_get_default_ccache_name
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	if (name != NULL) { // if we were passed NULL, then we're looking to pass a bad param
@@ -430,17 +432,17 @@ cc_int32 check_once_cc_context_get_default_ccache_name(cc_context_t context, cc_
 }
 
 int check_cc_context_open_ccache() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	
 	BEGIN_TEST("cc_context_open_ccache");
 	
 	#ifndef cc_context_open_ccache
 	log_error("cc_context_open_ccache is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -488,10 +490,6 @@ cc_int32 check_once_cc_context_open_ccache(cc_context_t context, const char *nam
 	cc_int32 err = 0;
 	cc_string_t stored_name = NULL;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_open_ccache
-	
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrBadName, 
@@ -500,6 +498,11 @@ cc_int32 check_once_cc_context_open_ccache(cc_context_t context, const char *nam
 		ccErrCCacheNotFound, 
 		ccErrBadParam, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_open_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	if (ccache != NULL) { // if we were passed NULL, then we're looking to pass a bad param
@@ -537,16 +540,16 @@ cc_int32 check_once_cc_context_open_ccache(cc_context_t context, const char *nam
 }
 
 int check_cc_context_open_default_ccache() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	
 	BEGIN_TEST("cc_context_open_default_ccache");
 	
 	#ifndef cc_context_open_default_ccache
 	log_error("cc_context_open_default_ccache is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -580,10 +583,6 @@ cc_int32 check_once_cc_context_open_default_ccache(cc_context_t context, cc_ccac
 	cc_string_t given_name = NULL;
 	cc_string_t default_name = NULL;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_open_default_ccache
-	
 	cc_int32 possible_return_values[5] = {
 		ccNoError, 
 		ccErrInvalidContext, 
@@ -591,6 +590,11 @@ cc_int32 check_once_cc_context_open_default_ccache(cc_context_t context, cc_ccac
 		ccErrCCacheNotFound, 
 		ccErrBadParam, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_open_default_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	if (ccache != NULL) { // if we were passed NULL, then we're looking to pass a bad param
@@ -628,17 +632,17 @@ cc_int32 check_once_cc_context_open_default_ccache(cc_context_t context, cc_ccac
 }
 
 int check_cc_context_create_ccache() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	
 	BEGIN_TEST("cc_context_create_ccache");
 	
 	#ifndef cc_context_create_ccache
 	log_error("cc_context_create_ccache is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -682,10 +686,6 @@ cc_int32 check_once_cc_context_create_ccache(cc_context_t context, const char *n
 	cc_string_t stored_principal = NULL;
 	cc_uint32 stored_creds_vers = 0;
 
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_create_ccache
-	
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrBadName, 
@@ -694,6 +694,10 @@ cc_int32 check_once_cc_context_create_ccache(cc_context_t context, const char *n
 		ccErrNoMem, 
 		ccErrBadCredentialsVersion, 
 	};
+	BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_create_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	err = cc_context_create_ccache(context, name, cred_vers, principal, ccache);
@@ -733,17 +737,17 @@ cc_int32 check_once_cc_context_create_ccache(cc_context_t context, const char *n
 }
 
 int check_cc_context_create_default_ccache() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	
 	BEGIN_TEST("cc_context_create_default_ccache");
 	
 	#ifndef cc_context_create_default_ccache
 	log_error("cc_context_create_default_ccache is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -779,10 +783,6 @@ cc_int32 check_once_cc_context_create_default_ccache(cc_context_t context, cc_ui
 	cc_string_t stored_principal = NULL;
 	cc_uint32 stored_creds_vers = 0;
 
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_create_default_ccache
-	
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrBadName, // how can this be possible when the name isn't a parameter?
@@ -791,6 +791,11 @@ cc_int32 check_once_cc_context_create_default_ccache(cc_context_t context, cc_ui
 		ccErrNoMem, 
 		ccErrBadCredentialsVersion, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_create_default_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	err = cc_context_create_default_ccache(context, cred_vers, principal, ccache);
@@ -823,17 +828,17 @@ cc_int32 check_once_cc_context_create_default_ccache(cc_context_t context, cc_ui
 }
 
 int check_cc_context_create_new_ccache() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	
 	BEGIN_TEST("cc_context_create_new_ccache");
 	
 	#ifndef cc_context_create_new_ccache
 	log_error("cc_context_create_new_ccache is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -872,10 +877,6 @@ cc_int32 check_once_cc_context_create_new_ccache(cc_context_t context, cc_int32 
 	cc_string_t stored_principal = NULL;
 	cc_uint32 stored_creds_vers = 0;
 	
-	BEGIN_CHECK_ONCE(description);
-	
-	#ifdef cc_context_create_new_ccache
-	
 	cc_int32 possible_return_values[6] = {
 		ccNoError, 
 		ccErrBadName, // how can this be possible when the name isn't a parameter?
@@ -884,6 +885,11 @@ cc_int32 check_once_cc_context_create_new_ccache(cc_context_t context, cc_int32 
 		ccErrNoMem, 
 		ccErrBadCredentialsVersion, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+	
+	#ifdef cc_context_create_new_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 		
 	err = cc_context_create_new_ccache(context, cred_vers, principal, ccache);
@@ -933,18 +939,18 @@ cc_int32 check_once_cc_context_create_new_ccache(cc_context_t context, cc_int32 
 }
 
 int check_cc_context_new_ccache_iterator() {
+	cc_int32 err = 0;
+	cc_context_t context = NULL;
+	cc_ccache_t ccache = NULL;
+	cc_string_t name = NULL;
+	cc_ccache_iterator_t iterator = NULL;
+	
 	BEGIN_TEST("cc_context_new_ccache_iterator");
 	
 	#ifndef cc_context_new_ccache_iterator
 	log_error("cc_context_new_ccache_iterator is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context = NULL;
-	cc_ccache_t ccache = NULL;
-	cc_string_t name = NULL;
-	cc_ccache_iterator_t iterator = NULL;
 	
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
 	if (!err) {	
@@ -977,16 +983,17 @@ int check_cc_context_new_ccache_iterator() {
 cc_int32 check_once_cc_context_new_ccache_iterator(cc_context_t context, cc_ccache_iterator_t *iterator, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_context_create_new_ccache
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrBadParam, 
 		ccErrNoMem, 
 		ccErrInvalidContext, 
 	};
+
+    BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_context_create_new_ccache
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_context_new_ccache_iterator(context, iterator);
@@ -1005,17 +1012,17 @@ cc_int32 check_once_cc_context_new_ccache_iterator(cc_context_t context, cc_ccac
 // ---------------------------------------------------------------------------
 
 int check_cc_context_compare(){
+	cc_int32 err = 0;
+	cc_context_t context_a = NULL;
+	cc_context_t context_b = NULL;
+	cc_uint32 equal = 0;
+	
 	BEGIN_TEST("cc_context_compare");
 	
 	#ifndef cc_context_compare
 	log_error("cc_context_compare is not implemented yet");
 	failure_count++;
 	#else
-	
-	cc_int32 err = 0;
-	cc_context_t context_a = NULL;
-	cc_context_t context_b = NULL;
-	cc_uint32 equal = 0;
 	
 	err = cc_initialize(&context_a, ccapi_version_3, NULL, NULL);
 	if (!err) {
@@ -1038,16 +1045,17 @@ int check_cc_context_compare(){
 cc_int32 check_once_cc_context_compare(cc_context_t context, cc_context_t compare_to, cc_uint32 *equal, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 
-	BEGIN_CHECK_ONCE(description);
-
-	#ifdef cc_context_compare
-	
 	cc_int32 possible_return_values[4] = {
 		ccNoError, 
 		ccErrInvalidContext, 
 		ccErrBadParam, 
 		ccErrServerUnavailable,
 	};
+
+    BEGIN_CHECK_ONCE(description);
+
+	#ifdef cc_context_compare
+	
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
 	
 	err = cc_context_compare(context, compare_to, equal);
