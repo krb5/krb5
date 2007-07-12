@@ -159,7 +159,7 @@ krb_mk_auth(options, ticket, service, inst, realm, checksum, version, buf)
 #ifdef ATHENA_COMPAT
     /* this is only for compatibility with old servers */
     if (options & KOPT_DO_OLDSTYLE) {
-	(void) sprintf(buf->dat,"%d ",ticket->length);
+	(void) snprintf(buf->dat, sizeof(buf->dat), "%d ",ticket->length);
 	(void) write(fd, buf, strlen(buf));
 	(void) write(fd, (char *) ticket->dat, ticket->length);
 	return(rem);
