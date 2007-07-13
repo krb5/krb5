@@ -418,9 +418,9 @@ month_sname.so month_sname.po $(OUTPRE)month_sname.$(OBJEXT): \
   krb4int.h month_sname.c
 password_to_key.so password_to_key.po $(OUTPRE)password_to_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/port-sockets.h \
-  krb4int.h password_to_key.c
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/port-sockets.h krb4int.h password_to_key.c
 pkt_cipher.so pkt_cipher.po $(OUTPRE)pkt_cipher.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(KRB_ERR_H_DEP) $(BUILDTOP)/include/profile.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
