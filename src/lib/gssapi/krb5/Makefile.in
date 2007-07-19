@@ -215,7 +215,7 @@ clean-windows::
 	$(RM) $(EHDRDIR)\gssapi_krb5.h
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
-generate-files-mac: gssapi_krb5.h
+generate-files-mac: gssapi_krb5.h error_map.h
 
 ##DOS##!if 0
 gssapi_krb5.h: gssapi_krb5.hin
