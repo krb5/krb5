@@ -70,22 +70,38 @@ cc_int32 ccs_lock_array_move (ccs_lock_array_t  io_array,
 
 #pragma mark -
 
-cc_int32 ccs_lockref_object_release (void *io_lockref);
+cc_int32 ccs_callback_array_new (ccs_callback_array_t *out_array);
 
-cc_int32 ccs_lockref_array_new (ccs_lockref_array_t *out_array);
+cc_int32 ccs_callback_array_release (ccs_callback_array_t io_array);
 
-cc_int32 ccs_lockref_array_release (ccs_lockref_array_t io_array);
+cc_uint64 ccs_callback_array_count (ccs_callback_array_t in_array);
 
-cc_uint64 ccs_lockref_array_count (ccs_lockref_array_t in_array);
+ccs_callback_t ccs_callback_array_object_at_index (ccs_callback_array_t io_array,
+						   cc_uint64            in_position);
 
-ccs_lockref_t ccs_lockref_array_object_at_index (ccs_lockref_array_t io_array,
-                                                 cc_uint64           in_position);
+cc_int32 ccs_callback_array_insert (ccs_callback_array_t io_array,
+				    ccs_callback_t       in_callback,
+				    cc_uint64            in_position);
 
-cc_int32 ccs_lockref_array_insert (ccs_lockref_array_t io_array,
-                                   ccs_lockref_t       in_lockref,
-                                   cc_uint64           in_position);
+cc_int32 ccs_callback_array_remove (ccs_callback_array_t io_array,
+				    cc_uint64           in_position);
 
-cc_int32 ccs_lockref_array_remove (ccs_lockref_array_t io_array,
-                                   cc_uint64           in_position);
+#pragma mark -
+
+cc_int32 ccs_callbackref_array_new (ccs_callbackref_array_t *out_array);
+
+cc_int32 ccs_callbackref_array_release (ccs_callbackref_array_t io_array);
+
+cc_uint64 ccs_callbackref_array_count (ccs_callbackref_array_t in_array);
+
+ccs_callback_t ccs_callbackref_array_object_at_index (ccs_callbackref_array_t io_array,
+						      cc_uint64               in_position);
+
+cc_int32 ccs_callbackref_array_insert (ccs_callbackref_array_t io_array,
+				       ccs_callback_t          in_callback,
+				       cc_uint64               in_position);
+
+cc_int32 ccs_callbackref_array_remove (ccs_callbackref_array_t io_array,
+				       cc_uint64               in_position);
 
 #endif /* CCS_ARRAY_H */

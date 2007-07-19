@@ -34,11 +34,11 @@ cc_int32 ccs_client_new (ccs_client_t *out_client,
 
 cc_int32 ccs_client_release (ccs_client_t io_client);
 
-cc_int32 ccs_client_add_lockref (ccs_client_t io_client,
-                                 ccs_lock_t   in_lock);
+cc_int32 ccs_client_add_callback (ccs_client_t   io_client,
+				  ccs_callback_t in_lock);
 
-cc_int32 ccs_client_remove_lockref (ccs_client_t io_client,
-                                    ccs_lock_t   in_lock);
+cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
+				     ccs_callback_t in_lock);
 
 cc_int32 ccs_client_uses_pipe (ccs_client_t  in_client,
                                ccs_pipe_t    in_pipe,

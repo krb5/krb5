@@ -29,7 +29,9 @@
 
 #include "cci_types.h"
 
-typedef void *cci_array_object_t;
+struct cci_array_object_d;
+typedef struct cci_array_object_d *cci_array_object_t;
+
 typedef cc_int32 (*cci_array_object_release_t) (cci_array_object_t);
 
 struct cci_array_d;

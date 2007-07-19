@@ -29,7 +29,7 @@
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_client_object_release (void *io_client)
+static cc_int32 ccs_client_object_release (cci_array_object_t io_client)
 {
     return cci_check_error (ccs_client_release ((ccs_client_t) io_client));    
 }
@@ -60,7 +60,7 @@ cc_uint64 ccs_client_array_count (ccs_client_array_t in_array)
 ccs_client_t ccs_client_array_object_at_index (ccs_client_array_t io_array,
                                                cc_uint64          in_position)
 {
-    return cci_array_object_at_index (io_array, in_position);
+    return (ccs_client_t) cci_array_object_at_index (io_array, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -69,7 +69,7 @@ cc_int32 ccs_client_array_insert (ccs_client_array_t io_array,
                                   ccs_client_t       in_client,
                                   cc_uint64          in_position)
 {
-    return cci_array_insert (io_array, in_client, in_position);
+    return cci_array_insert (io_array, (cci_array_object_t) in_client, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -84,7 +84,7 @@ cc_int32 ccs_client_array_remove (ccs_client_array_t io_array,
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_lock_object_release (void *io_lock)
+static cc_int32 ccs_lock_object_release (cci_array_object_t io_lock)
 {
     return cci_check_error (ccs_lock_release ((ccs_lock_t) io_lock));    
 }
@@ -115,7 +115,7 @@ cc_uint64 ccs_lock_array_count (ccs_lock_array_t in_array)
 ccs_lock_t ccs_lock_array_object_at_index (ccs_lock_array_t io_array,
                                            cc_uint64        in_position)
 {
-    return cci_array_object_at_index (io_array, in_position);
+    return (ccs_lock_t) cci_array_object_at_index (io_array, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -124,7 +124,7 @@ cc_int32 ccs_lock_array_insert (ccs_lock_array_t io_array,
                                 ccs_lock_t       in_lock,
                                 cc_uint64        in_position)
 {
-    return cci_array_insert (io_array, in_lock, in_position);
+    return cci_array_insert (io_array, (cci_array_object_t) in_lock, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -148,53 +148,102 @@ cc_int32 ccs_lock_array_move (ccs_lock_array_t  io_array,
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lockref_object_release (void *io_lockref)
+static cc_int32 ccs_callback_object_release (cci_array_object_t io_callback)
 {
-    return cci_check_error (ccs_lockref_release ((ccs_lockref_t) io_lockref));    
+    return cci_check_error (ccs_callback_release ((ccs_callback_t) io_callback));    
 }
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lockref_array_new (ccs_lockref_array_t *out_array)
+cc_int32 ccs_callback_array_new (ccs_callback_array_t *out_array)
 {
-    return cci_array_new (out_array, ccs_lockref_object_release);
+    return cci_array_new (out_array, ccs_callback_object_release);
 }
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lockref_array_release (ccs_lockref_array_t io_array)
+cc_int32 ccs_callback_array_release (ccs_callback_array_t io_array)
 {
     return cci_array_release (io_array);
 }
 
 /* ------------------------------------------------------------------------ */
 
-cc_uint64 ccs_lockref_array_count (ccs_lockref_array_t in_array)
+cc_uint64 ccs_callback_array_count (ccs_callback_array_t in_array)
 {
     return cci_array_count (in_array);
 }
 
 /* ------------------------------------------------------------------------ */
 
-ccs_lockref_t ccs_lockref_array_object_at_index (ccs_lockref_array_t io_array,
-                                                 cc_uint64           in_position)
+ccs_callback_t ccs_callback_array_object_at_index (ccs_callback_array_t io_array,
+						   cc_uint64            in_position)
 {
-    return cci_array_object_at_index (io_array, in_position);
+    return (ccs_callback_t) cci_array_object_at_index (io_array, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lockref_array_insert (ccs_lockref_array_t io_array,
-                                   ccs_lockref_t       in_lockref,
-                                   cc_uint64           in_position)
+cc_int32 ccs_callback_array_insert (ccs_callback_array_t io_array,
+				    ccs_callback_t       in_callback,
+				    cc_uint64            in_position)
 {
-    return cci_array_insert (io_array, in_lockref, in_position);
+    return cci_array_insert (io_array, (cci_array_object_t) in_callback, in_position);
 }
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lockref_array_remove (ccs_lockref_array_t io_array,
-                                   cc_uint64           in_position)
+cc_int32 ccs_callback_array_remove (ccs_callback_array_t io_array,
+				    cc_uint64           in_position)
+{
+    return cci_array_remove (io_array, in_position);
+}
+
+#pragma mark -
+
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_callbackref_array_new (ccs_callbackref_array_t *out_array)
+{
+    return cci_array_new (out_array, NULL /* Just a reference, not owner */ );
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_callbackref_array_release (ccs_callbackref_array_t io_array)
+{
+    return cci_array_release (io_array);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_uint64 ccs_callbackref_array_count (ccs_callbackref_array_t in_array)
+{
+    return cci_array_count (in_array);
+}
+
+/* ------------------------------------------------------------------------ */
+
+ccs_callback_t ccs_callbackref_array_object_at_index (ccs_callbackref_array_t io_array,
+						      cc_uint64               in_position)
+{
+    return (ccs_callback_t) cci_array_object_at_index (io_array, in_position);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_callbackref_array_insert (ccs_callbackref_array_t io_array,
+				       ccs_callback_t          in_callback,
+				       cc_uint64               in_position)
+{
+    return cci_array_insert (io_array, (cci_array_object_t) in_callback, in_position);
+}
+
+/* ------------------------------------------------------------------------ */
+
+cc_int32 ccs_callbackref_array_remove (ccs_callbackref_array_t io_array,
+				       cc_uint64               in_position)
 {
     return cci_array_remove (io_array, in_position);
 }

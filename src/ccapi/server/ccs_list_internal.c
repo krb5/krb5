@@ -67,6 +67,7 @@ static cc_int32 ccs_list_iterator_object_release (cci_array_object_t io_list_ite
 static cc_int32 ccs_list_iterator_update (ccs_list_iterator_t  io_list_iterator,
                                           ccs_list_action_enum in_action,
                                           cc_uint64 in_object_index);
+
 #pragma mark -
 
 /* ------------------------------------------------------------------------ */
@@ -124,7 +125,7 @@ cc_int32 ccs_list_release (ccs_list_t io_list)
         cc_uint64 i;
         
         for (i = 0; i < cci_array_count (io_list->iterators); i++) {
-            ccs_list_iterator_release (cci_array_object_at_index (io_list->iterators, i));
+            ccs_list_iterator_release ((ccs_list_iterator_t) cci_array_object_at_index (io_list->iterators, i));
         }
         free (io_list->iterators);
         cci_array_release (io_list->objects);
@@ -183,6 +184,14 @@ cc_int32 ccs_list_count (ccs_list_t  in_list,
 
 /* ------------------------------------------------------------------------ */
 
+static ccs_list_iterator_t ccs_list_iterator_at_index (ccs_list_t in_list,
+						       cc_uint64  in_index)
+{
+    return (ccs_list_iterator_t) cci_array_object_at_index (in_list->iterators, in_index);   
+}
+
+/* ------------------------------------------------------------------------ */
+
 static cc_int32 ccs_list_find_index (ccs_list_t        in_list,
                                      cci_identifier_t  in_identifier,
                                      cc_uint64        *out_object_index)
@@ -218,9 +227,9 @@ static cc_int32 ccs_list_find_index (ccs_list_t        in_list,
 }
 
 /* ------------------------------------------------------------------------ */
-cc_int32 ccs_list_find (ccs_list_t        in_list,
-                        cci_identifier_t  in_identifier,
-                        ccs_object_t     *out_object)
+cc_int32 ccs_list_find (ccs_list_t         in_list,
+                        cci_identifier_t   in_identifier,
+                        ccs_list_object_t *out_object)
 {
     cc_int32 err = ccNoError;
     cc_uint64 i;
@@ -258,7 +267,7 @@ static cc_int32 ccs_list_find_iterator_index (ccs_list_t        in_list,
         
         for (i = 0; !err && i < cci_array_count (in_list->iterators); i++) {
             cc_uint32 equal = 0;
-            ccs_list_iterator_t iterator = cci_array_object_at_index (in_list->iterators, i);
+            ccs_list_iterator_t iterator = ccs_list_iterator_at_index (in_list, i);
             
             err = cci_identifier_compare (iterator->identifier, in_identifier, &equal);
             
@@ -294,7 +303,7 @@ cc_int32 ccs_list_find_iterator (ccs_list_t           in_list,
     }
     
     if (!err) {
-        *out_list_iterator = cci_array_object_at_index (in_list->iterators, i);
+        *out_list_iterator = ccs_list_iterator_at_index (in_list, i);
     }
     
     return cci_check_error (err);    
@@ -302,8 +311,8 @@ cc_int32 ccs_list_find_iterator (ccs_list_t           in_list,
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_list_add (ccs_list_t   io_list,
-                       ccs_object_t in_object)
+cc_int32 ccs_list_add (ccs_list_t        io_list,
+                       ccs_list_object_t in_object)
 {
     cc_int32 err = ccNoError;
     cc_uint64 add_index;
@@ -322,7 +331,7 @@ cc_int32 ccs_list_add (ccs_list_t   io_list,
         cc_uint64 i;
         
         for (i = 0; !err && i < cci_array_count (io_list->iterators); i++) {
-            ccs_list_iterator_t iterator = cci_array_object_at_index (io_list->iterators, i);
+            ccs_list_iterator_t iterator = ccs_list_iterator_at_index (io_list, i);
             
             err = ccs_list_iterator_update (iterator, ccs_list_action_insert, add_index);
         }        
@@ -355,7 +364,7 @@ cc_int32 ccs_list_remove (ccs_list_t       io_list,
         cc_uint64 i;
         
         for (i = 0; !err && i < cci_array_count (io_list->iterators); i++) {
-            ccs_list_iterator_t iterator = cci_array_object_at_index (io_list->iterators, i);
+            ccs_list_iterator_t iterator = ccs_list_iterator_at_index (io_list, i);
             
             err = ccs_list_iterator_update (iterator, ccs_list_action_remove, remove_index);
         }        
@@ -388,7 +397,7 @@ cc_int32 ccs_list_push_front (ccs_list_t       io_list,
         cc_uint64 i;
         
         for (i = 0; !err && i < cci_array_count (io_list->iterators); i++) {
-            ccs_list_iterator_t iterator = cci_array_object_at_index (io_list->iterators, i);
+            ccs_list_iterator_t iterator = ccs_list_iterator_at_index (io_list, i);
             
             err = ccs_list_iterator_update (iterator, 
                                             ccs_list_action_push_front, 
@@ -430,7 +439,8 @@ static cc_int32 ccs_list_iterator_new (ccs_list_iterator_t *out_list_iterator,
         list_iterator->current = 0;
         
         err = cci_array_insert (io_list->iterators, 
-                                list_iterator, cci_array_count (io_list->iterators));
+                                (cci_array_object_t) list_iterator, 
+				cci_array_count (io_list->iterators));
     }
 
     if (!err) {
@@ -532,7 +542,7 @@ cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator)
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_list_iterator_current (ccs_list_iterator_t  io_list_iterator,
-                                    ccs_object_t        *out_object)
+                                    ccs_list_object_t   *out_object)
 {
     cc_int32 err = ccNoError;
     
@@ -554,7 +564,7 @@ cc_int32 ccs_list_iterator_current (ccs_list_iterator_t  io_list_iterator,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_list_iterator_next (ccs_list_iterator_t  io_list_iterator,
-                                 ccs_object_t        *out_object)
+                                 ccs_list_object_t   *out_object)
 {
     cc_int32 err = ccNoError;
     

@@ -42,7 +42,7 @@
 #include "ccs_lock_state.h"
 #include "ccs_pipe.h"
 #include "ccs_client.h"
-#include "ccs_lockref.h"
+#include "ccs_callback.h"
 #include "ccs_server.h"
 
 #endif /* CCS_COMMON_H */

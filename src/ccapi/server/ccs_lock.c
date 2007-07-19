@@ -28,14 +28,14 @@
 
 struct ccs_lock_d {
     cc_uint32 type;
-    cc_uint32 pending;
-    cc_int32  invalid_object_err;
-    ccs_pipe_t client_pipe;
-    ccs_pipe_t reply_pipe;
-    ccs_lock_state_t lock_state_owner; /* pointer to owner */
+    ccs_lock_state_t lock_state_owner;
+    ccs_callback_t callback;
 };
 
-struct ccs_lock_d ccs_lock_initializer = { 0, 1, 1, CCS_PIPE_NULL, CCS_PIPE_NULL, NULL };
+struct ccs_lock_d ccs_lock_initializer = { 0, NULL, NULL };
+
+static cc_int32 ccs_lock_invalidate_callback (ccs_callback_owner_t io_lock,
+					      ccs_callback_t       in_callback);
 
 /* ------------------------------------------------------------------------ */
 
@@ -48,7 +48,6 @@ cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
 {
     cc_int32 err = ccNoError;
     ccs_lock_t lock = NULL;
-    ccs_client_t client = NULL;
     
     if (!out_lock                       ) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
@@ -72,19 +71,17 @@ cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
     }
     
     if (!err) {
-        err = ccs_server_client_for_pipe (in_client_pipe, &client);
-    }
-    
-    if (!err) {
-        lock->client_pipe = in_client_pipe;
-        lock->reply_pipe = in_reply_pipe;
         lock->type = in_type;
-        lock->invalid_object_err = in_invalid_object_err;
         lock->lock_state_owner = in_lock_state_owner;
-    
-        err = ccs_client_add_lockref (client, lock);
+
+        err = ccs_callback_new (&lock->callback, 
+				in_invalid_object_err, 
+				in_client_pipe, 
+				in_reply_pipe,
+				(ccs_callback_owner_t) lock,
+				ccs_lock_invalidate_callback);
     }
-     
+    
     if (!err) {
         *out_lock = lock;
         lock = NULL;
@@ -100,26 +97,11 @@ cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
 cc_int32 ccs_lock_release (ccs_lock_t io_lock)
 {
     cc_int32 err = ccNoError;
-    ccs_client_t client = NULL;
     
     if (!io_lock) { err = cci_check_error (ccErrBadParam); }
-    
-    if (!err && io_lock->pending) {
-        err = ccs_server_send_reply (io_lock->reply_pipe, 
-                                     io_lock->invalid_object_err, NULL);
         
-        io_lock->pending = 0;
-    }
-    
     if (!err) {
-        err = ccs_server_client_for_pipe (io_lock->client_pipe, &client);
-    }
-    
-    if (!err) {
-        err = ccs_client_remove_lockref (client, io_lock);
-    }
-    
-    if (!err) {
+	free (io_lock->callback);
         free (io_lock);
     }
     
@@ -128,18 +110,21 @@ cc_int32 ccs_lock_release (ccs_lock_t io_lock)
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_lock_invalidate (ccs_lock_t io_lock)
+static cc_int32 ccs_lock_invalidate_callback (ccs_callback_owner_t io_lock,
+					      ccs_callback_t       in_callback)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_lock) { err = cci_check_error (ccErrBadParam); }
+    if (!io_lock    ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_callback) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        io_lock->pending = 0; /* client is dead, don't try to talk to it */
-        err = ccs_lock_state_invalidate_lock (io_lock->lock_state_owner, io_lock);
+	ccs_lock_t lock = (ccs_lock_t) io_lock;
+	
+	err = ccs_lock_state_invalidate_lock (lock->lock_state_owner, lock);
     }
     
-    return cci_check_error (err);
+    return cci_check_error (err);    
 }
 
 /* ------------------------------------------------------------------------ */
@@ -151,20 +136,7 @@ cc_int32 ccs_lock_grant_lock (ccs_lock_t io_lock)
     if (!io_lock) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        if (io_lock->pending) {
-            err = ccs_server_send_reply (io_lock->reply_pipe, err, NULL);
-            
-            if (err) {
-                cci_debug_printf ("WARNING %s() called on a lock belonging to a dead client!", 
-                                  __FUNCTION__);
-            }
-            
-            io_lock->pending = 0;
-            io_lock->reply_pipe = CCS_PIPE_NULL;
-        } else {
-            cci_debug_printf ("WARNING %s() called on non-pending lock!", 
-                              __FUNCTION__);
-        }
+	err = ccs_callback_reply_to_client (io_lock->callback, NULL);
     }
     
     return cci_check_error (err);    
@@ -181,7 +153,7 @@ cc_uint32 ccs_lock_is_pending (ccs_lock_t  in_lock,
     if (!out_pending) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        *out_pending = in_lock->pending;
+	err = ccs_callback_is_pending (in_lock->callback, out_pending);
     }
     
     return cci_check_error (err);    
@@ -253,7 +225,8 @@ cc_int32 ccs_lock_is_for_client_pipe (ccs_lock_t     in_lock,
     if (!out_is_for_client_pipe         ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        *out_is_for_client_pipe = (in_lock->client_pipe == in_client_pipe);
+	err = ccs_callback_is_for_client_pipe (in_lock->callback, in_client_pipe, 
+					       out_is_for_client_pipe);
     }
     
     return cci_check_error (err);    
@@ -271,7 +244,7 @@ cc_int32 ccs_lock_client_pipe (ccs_lock_t  in_lock,
     if (!out_client_pipe) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        *out_client_pipe = in_lock->client_pipe;
+	err = ccs_callback_client_pipe (in_lock->callback, out_client_pipe);
     }
     
     return cci_check_error (err);    

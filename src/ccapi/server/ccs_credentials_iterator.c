@@ -28,10 +28,10 @@
 
 /* ------------------------------------------------------------------------ */
 
-static  cc_int32 ccs_credentials_iterator_release (ccs_credentials_iterator_t io_credentials_iterator,
-                                                   ccs_ccache_t               io_ccache,
-                                                   cci_stream_t               in_request_data,
-                                                   cci_stream_t               io_reply_data)
+static cc_int32 ccs_credentials_iterator_release (ccs_credentials_iterator_t io_credentials_iterator,
+						  ccs_ccache_t               io_ccache,
+						  cci_stream_t               in_request_data,
+						  cci_stream_t               io_reply_data)
 {
     cc_int32 err = ccNoError;
     
@@ -49,10 +49,10 @@ static  cc_int32 ccs_credentials_iterator_release (ccs_credentials_iterator_t io
 
 /* ------------------------------------------------------------------------ */
 
-static  cc_int32 ccs_credentials_iterator_next (ccs_credentials_iterator_t io_credentials_iterator,
-                                                ccs_ccache_t               io_ccache,
-                                                cci_stream_t               in_request_data,
-                                                cci_stream_t               io_reply_data)
+static cc_int32 ccs_credentials_iterator_next (ccs_credentials_iterator_t io_credentials_iterator,
+					       ccs_ccache_t               io_ccache,
+					       cci_stream_t               in_request_data,
+					       cci_stream_t               io_reply_data)
 {
     cc_int32 err = ccNoError;
     ccs_credentials_t credentials = NULL;

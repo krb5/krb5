@@ -33,7 +33,9 @@ struct cci_array_d;
 
 typedef struct cci_array_d *ccs_client_array_t;
 
-typedef struct cci_array_d *ccs_lockref_array_t;
+typedef struct cci_array_d *ccs_callback_array_t;
+
+typedef struct cci_array_d *ccs_callbackref_array_t;
 
 typedef struct cci_array_d *ccs_lock_array_t;
 
@@ -60,8 +62,8 @@ typedef int ccs_pipe_t; /* Unix domain socket */
 #endif
 #pragma mark -
 
-struct ccs_lockref_d;
-typedef struct ccs_lockref_d *ccs_lockref_t;
+struct ccs_callback_d;
+typedef struct ccs_callback_d *ccs_callback_t;
 
 struct ccs_list_d;
 struct ccs_list_iterator_d;

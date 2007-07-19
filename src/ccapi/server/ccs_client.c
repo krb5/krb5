@@ -28,7 +28,7 @@
 
 struct ccs_client_d {
     ccs_pipe_t client_pipe;
-    ccs_lockref_array_t lockrefs;
+    ccs_callbackref_array_t callbacks; /* references, not owner */
 };
 
 struct ccs_client_d ccs_client_initializer = { CCS_PIPE_NULL, NULL };
@@ -54,12 +54,14 @@ cc_int32 ccs_client_new (ccs_client_t *out_client,
     }
     
     if (!err) {
-        err = ccs_lockref_array_new (&client->lockrefs);
+        err = ccs_callbackref_array_new (&client->callbacks);
+    }
+    
+    if (!err) {
+	err = ccs_pipe_copy (&client->client_pipe, in_client_pipe);
     }
         
     if (!err) {
-        client->client_pipe = in_client_pipe;
-        
         *out_client = client;
         client = NULL;
     }
@@ -78,7 +80,8 @@ cc_int32 ccs_client_release (ccs_client_t io_client)
     if (!io_client) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        ccs_lockref_array_release (io_client->lockrefs);
+        ccs_callbackref_array_release (io_client->callbacks);
+	ccs_pipe_release (io_client->client_pipe);
         free (io_client);
     }
     
@@ -87,25 +90,18 @@ cc_int32 ccs_client_release (ccs_client_t io_client)
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_client_add_lockref (ccs_client_t io_client,
-                                 ccs_lock_t   in_lock)
+cc_int32 ccs_client_add_callback (ccs_client_t   io_client,
+				  ccs_callback_t in_callback)
 {
     cc_int32 err = ccNoError;
-    ccs_lockref_t lockref = NULL;
     
-    if (!io_client) { err = cci_check_error (ccErrBadParam); }
+    if (!io_client  ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_callback) { err = cci_check_error (ccErrBadParam); }
     
-    if (!err) {
-        err = ccs_lockref_new (&lockref, io_client, in_lock);
-    }
-    
-    if (!err) {
-        err = ccs_lockref_array_insert (io_client->lockrefs, lockref,
-                                        ccs_lockref_array_count (io_client->lockrefs));
-        if (!err) { lockref = NULL; /* take ownership */ }
-    }
-    
-    ccs_lockref_release (lockref);
+     if (!err) {
+        err = ccs_callbackref_array_insert (io_client->callbacks, in_callback,
+					    ccs_callback_array_count (io_client->callbacks));
+     }
     
     return cci_check_error (err);    
 }
@@ -113,8 +109,8 @@ cc_int32 ccs_client_add_lockref (ccs_client_t io_client,
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_client_remove_lockref (ccs_client_t io_client,
-                                    ccs_lock_t   in_lock)
+cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
+				     ccs_callback_t in_callback)
 {
     cc_int32 err = ccNoError;
     cc_uint32 found_lock = 0;
@@ -123,19 +119,18 @@ cc_int32 ccs_client_remove_lockref (ccs_client_t io_client,
     
     if (!err) {
         cc_uint64 i;
-        cc_uint64 lock_count = ccs_lockref_array_count (io_client->lockrefs);
+        cc_uint64 lock_count = ccs_callbackref_array_count (io_client->callbacks);
         
         for (i = 0; !err && i < lock_count; i++) {
-            ccs_lockref_t lockref = ccs_lockref_array_object_at_index (io_client->lockrefs, i);
+            ccs_callback_t callback = ccs_callbackref_array_object_at_index (io_client->callbacks, i);
             
-            err = ccs_lockref_is_for_lock (lockref, in_lock, &found_lock);
-            
-            if (!err && found_lock) {
-                err = ccs_lockref_invalidate (lockref);
+            if (callback == in_callback) {
+                err = ccs_callback_invalidate (callback);
                 
                 if (!err) {
-                    cci_debug_printf ("%s: Removing lockref %p.", __FUNCTION__, lockref);
-                    err = ccs_lockref_array_remove (io_client->lockrefs, i);
+                    cci_debug_printf ("%s: Removing callback reference %p.", 
+				      __FUNCTION__, callback);
+                    err = ccs_callbackref_array_remove (io_client->callbacks, i);
                     break;
                 }
             }
@@ -143,7 +138,7 @@ cc_int32 ccs_client_remove_lockref (ccs_client_t io_client,
     }
     
     if (!err && !found_lock) {
-        cci_debug_printf ("%s: WARNING! lockref not found.", __FUNCTION__);
+        cci_debug_printf ("%s: WARNING! callback not found.", __FUNCTION__);
     }
     
     return cci_check_error (err);    

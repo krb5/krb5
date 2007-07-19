@@ -133,9 +133,11 @@ cc_int32 cci_array_release (cci_array_t io_array)
     if (!err) {
         cc_uint64 i;
         
-        for (i = 0; i < io_array->count; i++) {
-            io_array->object_release (io_array->objects[i]);
-        }
+        if (io_array->object_release) {
+	    for (i = 0; i < io_array->count; i++) {
+		io_array->object_release (io_array->objects[i]);
+	    }
+	}
         free (io_array->objects);
         free (io_array);
     }
@@ -193,15 +195,14 @@ cc_int32 cci_array_insert (cci_array_t        io_array,
     }
     
     if (!err) {
-        unsigned char **objects = (unsigned char **)io_array->objects;
         cc_uint64 move_count = io_array->count - in_position;
         
         if (move_count > 0) {
-            memmove (&objects[in_position + 1], &objects[in_position],
-                     move_count * sizeof (*objects));
+            memmove (&io_array->objects[in_position + 1], &io_array->objects[in_position],
+                     move_count * sizeof (*io_array->objects));
         }
         
-        objects[in_position] = in_object;
+        io_array->objects[in_position] = in_object;
         io_array->count++;
     }
     
@@ -222,16 +223,15 @@ cc_int32 cci_array_remove (cci_array_t io_array,
     }
     
     if (!err) {
-        unsigned char **objects = (unsigned char **)io_array->objects;
         cc_uint64 move_count = io_array->count - in_position - 1;
-        cci_array_object_t object = objects[in_position];
+        cci_array_object_t object = io_array->objects[in_position];
         
         if (move_count > 0) {
-            memmove (&objects[in_position], &objects[in_position + 1],
-                     move_count * sizeof (*objects));
+            memmove (&io_array->objects[in_position], &io_array->objects[in_position + 1],
+                     move_count * sizeof (*io_array->objects));
         }
         
-        io_array->object_release (object);
+        if (io_array->object_release) { io_array->object_release (object); }
         io_array->count--;
         
         cci_array_resize (io_array, io_array->count);
@@ -281,12 +281,11 @@ cc_int32 cci_array_move (cci_array_t  io_array,
         }
         
         if (move_count > 0) {
-            unsigned char **objects = (unsigned char **)io_array->objects;
-            cci_array_object_t object = objects[in_position];
+            cci_array_object_t object = io_array->objects[in_position];
             
-            memmove (&objects[move_to], &objects[move_from], 
-                     move_count * sizeof (*objects));
-            objects[real_new_position] = object;
+            memmove (&io_array->objects[move_to], &io_array->objects[move_from], 
+                     move_count * sizeof (*io_array->objects));
+            io_array->objects[real_new_position] = object;
         }
         
         *out_real_new_position = real_new_position;

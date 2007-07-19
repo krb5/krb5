@@ -38,8 +38,6 @@ cc_int32 ccs_lock_new (ccs_lock_t       *out_lock,
 
 cc_int32 ccs_lock_release (ccs_lock_t io_lock);
 
-cc_int32 ccs_lock_invalidate (ccs_lock_t io_lock);
-
 cc_int32 ccs_lock_grant_lock (ccs_lock_t io_lock);
 
 cc_uint32 ccs_lock_is_pending (ccs_lock_t  in_lock,

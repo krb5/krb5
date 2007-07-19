@@ -29,14 +29,14 @@
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_cache_collection_list_object_release (void *io_object)
+static cc_int32 ccs_cache_collection_list_object_release (ccs_list_object_t io_object)
 {
     return cci_check_error (ccs_cache_collection_release ((ccs_cache_collection_t) io_object));
 }
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_cache_collection_list_object_compare_identifier (void             *in_cache_collection,
+static cc_int32 ccs_cache_collection_list_object_compare_identifier (ccs_list_object_t in_cache_collection,
                                                                      cci_identifier_t  in_identifier,
                                                                      cc_uint32        *out_equal)
 {
@@ -70,7 +70,7 @@ cc_int32 ccs_cache_collection_list_find (ccs_cache_collection_list_t  in_list,
                                          cci_identifier_t             in_identifier,
                                          ccs_cache_collection_t       *out_cache_collection)
 {
-    return ccs_list_find (in_list, in_identifier, (ccs_object_t *) out_cache_collection);
+    return ccs_list_find (in_list, in_identifier, (ccs_list_object_t *) out_cache_collection);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -78,7 +78,7 @@ cc_int32 ccs_cache_collection_list_find (ccs_cache_collection_list_t  in_list,
 cc_int32 ccs_cache_collection_list_add (ccs_cache_collection_list_t io_list,
                                         ccs_cache_collection_t      in_cache_collection)
 {
-    return ccs_list_add (io_list, in_cache_collection);
+    return ccs_list_add (io_list, (ccs_list_object_t) in_cache_collection);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -100,16 +100,16 @@ cc_int32 ccs_cache_collection_list_release (ccs_cache_collection_list_t io_list)
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_ccache_list_object_release (void *io_ccache)
+static cc_int32 ccs_ccache_list_object_release (ccs_list_object_t io_ccache)
 {
     return cci_check_error (ccs_ccache_release ((ccs_ccache_t) io_ccache));
 }
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_ccache_list_object_compare_identifier (void             *in_ccache,
-                                                           cci_identifier_t  in_identifier,
-                                                           cc_uint32        *out_equal)
+static cc_int32 ccs_ccache_list_object_compare_identifier (ccs_list_object_t  in_ccache,
+                                                           cci_identifier_t   in_identifier,
+                                                           cc_uint32         *out_equal)
 {
     return ccs_ccache_compare_identifier ((ccs_ccache_t) in_ccache,
                                           in_identifier,
@@ -149,7 +149,7 @@ cc_int32 ccs_ccache_list_find (ccs_ccache_list_t  in_list,
                                cci_identifier_t   in_identifier,
                                ccs_ccache_t      *out_ccache)
 {
-    return ccs_list_find (in_list, in_identifier, (ccs_object_t *) out_ccache);
+    return ccs_list_find (in_list, in_identifier, (ccs_list_object_t *) out_ccache);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -167,7 +167,7 @@ cc_int32 ccs_ccache_list_find_iterator (ccs_ccache_list_t           in_list,
 cc_int32 ccs_ccache_list_add (ccs_ccache_list_t io_list,
                               ccs_ccache_t      in_ccache)
 {
-    return ccs_list_add (io_list, in_ccache);
+    return ccs_list_add (io_list, (ccs_list_object_t) in_ccache);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -214,7 +214,7 @@ cc_int32 ccs_ccache_list_iterator_clone (ccs_ccache_list_iterator_t  in_list_ite
 cc_int32 ccs_ccache_list_iterator_next (ccs_ccache_list_iterator_t  io_list_iterator,
                                         ccs_ccache_t               *out_ccache)
 {
-    return ccs_list_iterator_next (io_list_iterator, (ccs_object_t *) out_ccache);
+    return ccs_list_iterator_next (io_list_iterator, (ccs_list_object_t *) out_ccache);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -228,16 +228,16 @@ cc_int32 ccs_ccache_list_iterator_release (ccs_ccache_list_iterator_t io_list_it
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_credentials_list_object_release (void *io_object)
+static cc_int32 ccs_credentials_list_object_release (ccs_list_object_t io_object)
 {
     return cci_check_error (ccs_credentials_release ((ccs_credentials_t) io_object));
 }
 
 /* ------------------------------------------------------------------------ */
 
-static cc_int32 ccs_credentials_list_object_compare_identifier (void             *in_credentials,
-                                                                cci_identifier_t  in_identifier,
-                                                                cc_uint32        *out_equal)
+static cc_int32 ccs_credentials_list_object_compare_identifier (ccs_list_object_t  in_credentials,
+                                                                cci_identifier_t   in_identifier,
+                                                                cc_uint32         *out_equal)
 {
     return ccs_credentials_compare_identifier ((ccs_credentials_t) in_credentials,
                                                in_identifier,
@@ -277,7 +277,7 @@ cc_int32 ccs_credentials_list_find (ccs_credentials_list_t  in_list,
                                     cci_identifier_t        in_identifier,
                                     ccs_credentials_t      *out_credentials)
 {
-    return ccs_list_find (in_list, in_identifier, (ccs_object_t *) out_credentials);
+    return ccs_list_find (in_list, in_identifier, (ccs_list_object_t *) out_credentials);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -295,7 +295,7 @@ cc_int32 ccs_credentials_list_find_iterator (ccs_credentials_list_t           in
 cc_int32 ccs_credentials_list_add (ccs_credentials_list_t io_list,
                                    ccs_credentials_t      in_credential)
 {
-    return ccs_list_add (io_list, in_credential);
+    return ccs_list_add (io_list, (ccs_list_object_t) in_credential);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -334,7 +334,7 @@ cc_int32 ccs_credentials_list_iterator_clone (ccs_credentials_list_iterator_t  i
 cc_int32 ccs_credentials_list_iterator_next (ccs_credentials_list_iterator_t  io_list_iterator,
                                              ccs_credentials_t               *out_credential)
 {
-    return ccs_list_iterator_next (io_list_iterator, (ccs_object_t *) out_credential);
+    return ccs_list_iterator_next (io_list_iterator, (ccs_list_object_t *) out_credential);
 }
 
 /* ------------------------------------------------------------------------ */

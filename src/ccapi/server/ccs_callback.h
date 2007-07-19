@@ -24,21 +24,39 @@
  * or implied warranty.
  */
 
-#ifndef CCS_LOCK_REFERENCE_H
-#define CCS_LOCK_REFERENCE_H
+#ifndef CCS_CALLBACK_H
+#define CCS_CALLBACK_H
 
 #include "ccs_types.h"
 
-cc_int32 ccs_lockref_new (ccs_lockref_t *out_lockref,
-                          ccs_client_t   in_client_owner,
-                          ccs_lock_t     in_lock);
+struct ccs_callback_owner_d;
+typedef struct ccs_callback_owner_d *ccs_callback_owner_t;
 
-cc_int32 ccs_lockref_release (ccs_lockref_t io_lockref);
+typedef cc_int32 (*ccs_callback_owner_invalidate_t) (ccs_callback_owner_t, ccs_callback_t);
 
-cc_int32 ccs_lockref_invalidate (ccs_lockref_t io_lockref);
 
-cc_int32 ccs_lockref_is_for_lock (ccs_lockref_t in_lockref,
-                                  ccs_lock_t    in_lock,
-                                  cc_uint32    *out_is_for_lock);
+cc_int32 ccs_callback_new (ccs_callback_t                  *out_callback,
+			   cc_int32                         in_invalid_object_err,
+			   ccs_pipe_t                       in_client_pipe,
+			   ccs_pipe_t                       in_reply_pipe,
+			   ccs_callback_owner_t             in_owner,
+			   ccs_callback_owner_invalidate_t  in_owner_invalidate_function);
 
-#endif /* CCS_LOCK_REFERENCE_H */
+cc_int32 ccs_callback_release (ccs_callback_t io_callback);
+
+cc_int32 ccs_callback_invalidate (ccs_callback_t io_callback);
+
+cc_int32 ccs_callback_reply_to_client (ccs_callback_t io_callback,
+				       cci_stream_t   in_stream);
+
+cc_uint32 ccs_callback_is_pending (ccs_callback_t  in_callback,
+				   cc_uint32      *out_pending);
+
+cc_int32 ccs_callback_is_for_client_pipe (ccs_callback_t  in_callback,
+					  ccs_pipe_t      in_client_pipe,
+					  cc_uint32      *out_is_for_client_pipe);
+
+cc_int32 ccs_callback_client_pipe (ccs_callback_t  in_callback,
+				   ccs_pipe_t     *out_client_pipe);
+
+#endif /* CCS_CALLBACK_H */

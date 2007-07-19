@@ -28,6 +28,7 @@
 #define CCS_LIST_INTERNAL_H
 
 #include "cci_common.h"
+#include "cci_array_internal.h"
 
 struct ccs_list_d;
 typedef struct ccs_list_d *ccs_list_t;
@@ -35,9 +36,9 @@ typedef struct ccs_list_d *ccs_list_t;
 struct ccs_list_iterator_d;
 typedef struct ccs_list_iterator_d *ccs_list_iterator_t;
 
-typedef void *ccs_object_t;
-typedef cc_int32 (*ccs_object_release_t) (ccs_object_t);
-typedef cc_int32 (*ccs_object_compare_identifier_t) (ccs_object_t, cci_identifier_t, cc_uint32 *);
+typedef cci_array_object_t ccs_list_object_t;
+typedef cc_int32 (*ccs_object_release_t) (ccs_list_object_t);
+typedef cc_int32 (*ccs_object_compare_identifier_t) (ccs_list_object_t, cci_identifier_t, cc_uint32 *);
 
 cc_int32 ccs_list_new (ccs_list_t                      *out_list,
                        cc_int32                         in_object_not_found_err,
@@ -56,16 +57,16 @@ cc_int32 ccs_list_release_iterator (ccs_list_t       io_list,
 cc_int32 ccs_list_count (ccs_list_t  in_list,
                          cc_uint64  *out_count);
 
-cc_int32 ccs_list_find (ccs_list_t        in_list,
-                        cci_identifier_t  in_identifier,
-                        ccs_object_t     *out_object);
+cc_int32 ccs_list_find (ccs_list_t         in_list,
+                        cci_identifier_t   in_identifier,
+                        ccs_list_object_t *out_object);
 
 cc_int32 ccs_list_find_iterator (ccs_list_t           in_list,
                                  cci_identifier_t     in_identifier,
                                  ccs_list_iterator_t *out_list_iterator);
 
-cc_int32 ccs_list_add (ccs_list_t   io_list,
-                       ccs_object_t in_object);
+cc_int32 ccs_list_add (ccs_list_t        io_list,
+                       ccs_list_object_t in_object);
 
 cc_int32 ccs_list_remove (ccs_list_t       io_list,
                           cci_identifier_t in_identifier);
@@ -81,10 +82,10 @@ cc_int32 ccs_list_iterator_clone (ccs_list_iterator_t  in_list_iterator,
                                   ccs_list_iterator_t *out_list_iterator);
 
 cc_int32 ccs_list_iterator_current (ccs_list_iterator_t  io_list_iterator,
-                                    ccs_object_t        *out_object);
+                                    ccs_list_object_t   *out_object);
 
 cc_int32 ccs_list_iterator_next (ccs_list_iterator_t  io_list_iterator,
-                                 ccs_object_t        *out_object);
+                                 ccs_list_object_t   *out_object);
 
 cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator);
 
