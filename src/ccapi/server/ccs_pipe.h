@@ -31,4 +31,9 @@
 
 cc_int32 ccs_pipe_valid (ccs_pipe_t in_pipe);
 
+cc_int32 ccs_pipe_copy (ccs_pipe_t *out_pipe,
+			ccs_pipe_t  in_pipe);
+
+cc_int32 ccs_pipe_release (ccs_pipe_t io_pipe);
+
 #endif /* CCS_PIPE_H */
