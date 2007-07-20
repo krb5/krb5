@@ -63,7 +63,19 @@ static krb5_error_code decrypt_authenticator
 	(krb5_context, const krb5_ap_req *, krb5_authenticator **,
 	 int);
 
-#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
+krb5_error_code
+krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
+{
+    krb5_timestamp currenttime;
+    krb5_error_code retval;
+
+    retval = krb5_timeofday(context, &currenttime);
+    if (retval)
+	return retval;
+    if (!(labs((date)-currenttime) < context->clockskew))
+	return KRB5KRB_AP_ERR_SKEW;
+    return 0;
+}
 
 static krb5_error_code
 krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
@@ -94,7 +106,6 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 			krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code 	  retval = 0;
-    krb5_timestamp 	  currenttime;
     krb5_principal_data princ_data;
     
     req->ticket->enc_part2 = NULL;
@@ -246,13 +257,8 @@ goto cleanup;
     if (retval != 0)
 	    goto cleanup;
 
-    if ((retval = krb5_timeofday(context, &currenttime)))
+    if ((retval = krb5int_check_clockskew(context, (*auth_context)->authentp->ctime)))
 	goto cleanup;
-
-    if (!in_clock_skew((*auth_context)->authentp->ctime)) {
-	retval = KRB5KRB_AP_ERR_SKEW;
-	goto cleanup;
-    }
 
     if (check_valid_flag) {
       if (req->ticket->enc_part2->flags & TKT_FLG_INVALID) {

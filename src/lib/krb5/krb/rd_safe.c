@@ -1,7 +1,7 @@
 /*
  * lib/krb5/krb/rd_safe.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -30,8 +30,6 @@
 #include "k5-int.h"
 #include "cleanup.h"
 #include "auth_con.h"
-
-#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
 
 /*
  parses a KRB_SAFE message from inbuf, placing the integrity-protected user
@@ -231,15 +229,9 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
 	krb5_donot_replay replay;
-    	krb5_timestamp currenttime;
 
-	if ((retval = krb5_timeofday(context, &currenttime)))
+	if ((retval = krb5int_check_clockskew(context, replaydata.timestamp)))
 	    goto error;
-
-	if (!in_clock_skew(replaydata.timestamp)) {
-	    retval =  KRB5KRB_AP_ERR_SKEW;
-	    goto error;
-	}
 
 	if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr, 
 					   "_safe", &replay.client)))

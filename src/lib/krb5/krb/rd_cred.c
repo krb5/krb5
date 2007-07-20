@@ -158,8 +158,6 @@ cleanup_cred:
 
 /*----------------------- krb5_rd_cred -----------------------*/
 
-#define in_clock_skew(date) (labs((date)-currenttime) < context->clockskew)
-
 /*
  * This functions takes as input an KRB_CRED message, validates it, and
  * outputs the nonce and an array of the forwarded credentials.
@@ -204,15 +202,9 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
-        krb5_timestamp currenttime;
 
-        if ((retval = krb5_timeofday(context, &currenttime)))
+        if ((retval = krb5int_check_clockskew(context, replaydata.timestamp)))
             goto error;
-
-        if (!in_clock_skew(replaydata.timestamp)) {
-            retval =  KRB5KRB_AP_ERR_SKEW;
-            goto error;
-        }
 
         if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr,
 					   "_forw", &replay.client)))
