@@ -248,6 +248,7 @@ extern void *xmalloc (size_t),
     *xrealloc (void *, size_t), 
     *xcalloc (size_t, size_t);
 extern char *xstrdup (const char *);
+extern char *xasprintf (const char *format, ...);
 
 #ifndef HAVE_UNSETENV
 void unsetenv (char *);
