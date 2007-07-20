@@ -27,7 +27,7 @@
 /*
  * slave/kpropd.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -282,9 +282,18 @@ void doit(fd)
 
 	fromlen = sizeof (from);
 	if (getpeername(fd, (struct sockaddr *) &from, &fromlen) < 0) {
-		fprintf(stderr, "%s: ", progname);
-		perror("getpeername");
+#ifdef ENOTSOCK
+	    if (errno == ENOTSOCK && fd == 0 && !standalone) {
+		fprintf(stderr,
+			"%s: Standard input does not appear to be a network socket.\n"
+			"\t(Not run from inetd, and missing the -S option?)\n",
+			progname);
 		exit(1);
+	    }
+#endif
+	    fprintf(stderr, "%s: ", progname);
+	    perror("getpeername");
+	    exit(1);
 	}
 	if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (caddr_t) &on,
 		       sizeof (on)) < 0) {
