@@ -28,6 +28,7 @@
  */
 
 #include "autoconf.h"
+#include "k5-platform.h"	/* for asprintf */
 #include <krb5.h>
 #ifdef KRB5_KRB4_COMPAT
 #include <kerberosIV/krb.h>
