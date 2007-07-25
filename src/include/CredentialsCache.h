@@ -69,7 +69,8 @@ enum {
     ccapi_version_4 = 4,
     ccapi_version_5 = 5,
     ccapi_version_6 = 6,
-    ccapi_version_max = ccapi_version_6
+    ccapi_version_7 = 7,
+    ccapi_version_max = ccapi_version_7
 };
  
 /* Errors */
@@ -341,7 +342,7 @@ struct  cc_context_f {
                          cc_context_t  in_compare_to_context,
                          cc_uint32    *out_equal);
 
-    cc_int32 (*wait_for_change) (cc_context_t  in_cc_context);
+    cc_int32 (*wait_for_change) (cc_context_t in_cc_context);
 };
 
 struct cc_ccache_f {
@@ -404,7 +405,7 @@ struct cc_ccache_f {
     cc_int32 (*clear_kdc_time_offset) (cc_ccache_t io_ccache,
                                        cc_uint32   in_credentials_version);
     
-    cc_int32 (*wait_for_change) (cc_ccache_t  in_ccache);
+    cc_int32 (*wait_for_change) (cc_ccache_t in_ccache);
 };
 
 struct cc_string_f {
