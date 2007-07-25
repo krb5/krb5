@@ -128,9 +128,7 @@ cc_int32 cci_array_release (cci_array_t io_array)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_array) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_array) {
         cc_uint64 i;
         
         if (io_array->object_release) {

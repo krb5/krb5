@@ -77,12 +77,20 @@ cc_int32 ccs_client_release (ccs_client_t io_client)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_client) { err = cci_check_error (ccErrBadParam); }
-    
-    if (!err) {
-        ccs_callbackref_array_release (io_client->callbacks);
+    if (!err && io_client) {
+	cc_uint64 i;
+	cc_uint64 lock_count = ccs_callbackref_array_count (io_client->callbacks);
+	
+	for (i = 0; !err && i < lock_count; i++) {
+	    ccs_callback_t callback = ccs_callbackref_array_object_at_index (io_client->callbacks, i);
+	    
+	    cci_debug_printf ("%s: Invalidating callback reference %p.", __FUNCTION__, callback);
+	    ccs_callback_invalidate (callback);
+	}
+	
+	ccs_callbackref_array_release (io_client->callbacks);
 	ccs_pipe_release (io_client->client_pipe);
-        free (io_client);
+	free (io_client);
     }
     
     return cci_check_error (err);    
@@ -125,14 +133,9 @@ cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
             ccs_callback_t callback = ccs_callbackref_array_object_at_index (io_client->callbacks, i);
             
             if (callback == in_callback) {
-                err = ccs_callback_invalidate (callback);
-                
-                if (!err) {
-                    cci_debug_printf ("%s: Removing callback reference %p.", 
-				      __FUNCTION__, callback);
-                    err = ccs_callbackref_array_remove (io_client->callbacks, i);
-                    break;
-                }
+		cci_debug_printf ("%s: Removing callback reference %p.", __FUNCTION__, callback);
+		err = ccs_callbackref_array_remove (io_client->callbacks, i);
+		break;
             }
         }
     }
@@ -152,9 +155,9 @@ cc_int32 ccs_client_uses_pipe (ccs_client_t  in_client,
 {
     cc_int32 err = ccNoError;
     
-    if (in_client    ) { err = cci_check_error (ccErrBadParam); }
-    if (in_pipe      ) { err = cci_check_error (ccErrBadParam); }
-    if (out_uses_pipe) { err = cci_check_error (ccErrBadParam); }
+    if (!in_client    ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_pipe      ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_uses_pipe) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
         *out_uses_pipe = (in_client->client_pipe == in_pipe);

@@ -119,9 +119,7 @@ cc_int32 ccs_list_release (ccs_list_t io_list)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_list) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_list) {
         cc_uint64 i;
         
         for (i = 0; i < cci_array_count (io_list->iterators); i++) {
@@ -521,9 +519,7 @@ cc_int32 ccs_list_iterator_release (ccs_list_iterator_t io_list_iterator)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_list_iterator) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_list_iterator) {
         cc_uint64 i = 0;
         
         if (ccs_list_find_iterator_index (io_list_iterator->list, 

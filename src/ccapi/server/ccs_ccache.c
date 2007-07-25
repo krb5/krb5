@@ -229,9 +229,7 @@ cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_ccache) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_ccache) {
         cci_identifier_release (io_ccache->identifier);
         ccs_lock_state_release (io_ccache->lock_state);
         free (io_ccache->name);
@@ -294,6 +292,7 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
                                     ccs_cache_collection_t io_cache_collection)
 {
     cc_int32 err = ccNoError;
+    cci_stream_t reply_data = NULL;
     
     if (!io_ccache          ) { err = cci_check_error (ccErrBadParam); }
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
@@ -313,6 +312,14 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
     }
     
     if (!err) {
+        err = cci_stream_new (&reply_data);
+    }
+    
+    if (!err) {
+	err = cci_stream_write_time (reply_data, io_ccache->last_changed_time);
+    }
+
+    if (!err) {
 	/* Loop over callbacks sending messages to them */
 	cc_uint64 i;
         cc_uint64 count = ccs_callback_array_count (io_ccache->change_callbacks);
@@ -320,7 +327,7 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
         for (i = 0; !err && i < count; i++) {
             ccs_callback_t callback = ccs_callback_array_object_at_index (io_ccache->change_callbacks, i);
             
-	    err = ccs_callback_reply_to_client (callback, NULL);
+	    err = ccs_callback_reply_to_client (callback, reply_data);
 	    
 	    if (!err) {
 		cci_debug_printf ("%s: Removing callback reference %p.", __FUNCTION__, callback);
@@ -328,9 +335,10 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
 		break;
 	    }
         }
-	
     }
 
+    cci_stream_release (reply_data);
+    
     return cci_check_error (err);
 }
 
@@ -834,10 +842,12 @@ static cc_int32 ccs_ccache_wait_for_change (ccs_pipe_t              in_client_pi
 					    ccs_ccache_t            io_ccache,
 					    ccs_cache_collection_t  io_cache_collection,
 					    cci_stream_t            in_request_data,
+					    cci_stream_t            io_reply_data,
 					    cc_uint32              *out_will_block)
 {
     cc_int32 err = ccNoError;
-    ccs_callback_t callback = NULL;
+    cc_time_t last_wait_for_change_time = 0;
+    cc_uint32 will_block = 0;
     
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_reply_pipe )) { err = cci_check_error (ccErrBadParam); }
@@ -847,25 +857,38 @@ static cc_int32 ccs_ccache_wait_for_change (ccs_pipe_t              in_client_pi
     if (!out_will_block                 ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-	err = ccs_callback_new (&callback, 
-				ccErrInvalidCCache, 
-				in_client_pipe, 
-				in_reply_pipe,
-				(ccs_callback_owner_t) io_ccache,
-				ccs_ccache_invalidate_change_callback);
+        err = cci_stream_read_time (in_request_data, &last_wait_for_change_time);
     }
     
     if (!err) {
-        err = ccs_callback_array_insert (io_ccache->change_callbacks, callback,
-					 ccs_callback_array_count (io_ccache->change_callbacks));
-        if (!err) { callback = NULL; /* take ownership */ }
+	if (last_wait_for_change_time < io_ccache->last_changed_time) {
+	    err = cci_stream_write_time (io_reply_data, io_ccache->last_changed_time);
+	    
+	} else {
+	    ccs_callback_t callback = NULL;
+
+	    err = ccs_callback_new (&callback, 
+				    ccErrInvalidCCache, 
+				    in_client_pipe, 
+				    in_reply_pipe,
+				    (ccs_callback_owner_t) io_ccache,
+				    ccs_ccache_invalidate_change_callback);
+	
+	    if (!err) {
+		err = ccs_callback_array_insert (io_ccache->change_callbacks, callback,
+						 ccs_callback_array_count (io_ccache->change_callbacks));
+		if (!err) { callback = NULL; /* take ownership */ }
+		
+		will_block = 1;
+	    }
+	    
+	    ccs_callback_release (callback);
+	}
     }
-    
+	
     if (!err) {
-	*out_will_block = 1;
+	*out_will_block = will_block;
     }
-    
-    ccs_callback_release (callback);
     
     return cci_check_error (err);    
 }
@@ -1087,7 +1110,8 @@ cc_int32 ccs_ccache_handle_message (ccs_pipe_t              in_client_pipe,
         } else if (in_request_name == cci_ccache_wait_for_change_msg_id) {
             err = ccs_ccache_wait_for_change (in_client_pipe, in_reply_pipe, 
 					      io_ccache, io_cache_collection,
-					      in_request_data, &will_block);
+					      in_request_data, reply_data,
+					      &will_block);
             
         } else if (in_request_name == cci_ccache_get_kdc_time_offset_msg_id) {
             err = ccs_ccache_get_kdc_time_offset (io_ccache, io_cache_collection,

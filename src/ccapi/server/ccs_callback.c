@@ -102,29 +102,30 @@ cc_int32 ccs_callback_new (ccs_callback_t                  *out_callback,
 cc_int32 ccs_callback_release (ccs_callback_t io_callback)
 {
     cc_int32 err = ccNoError;
-    ccs_client_t client = NULL;
     
-    if (!io_callback) { err = cci_check_error (ccErrBadParam); }
-    
-    if (!err && io_callback->pending) {
-        err = ccs_server_send_reply (io_callback->reply_pipe, 
-                                     io_callback->invalid_object_err, NULL);
-        
-        io_callback->pending = 0;
-    }
-    
-    if (!err) {
-        err = ccs_server_client_for_pipe (io_callback->client_pipe, &client);
-    }
-    
-    if (!err) {
-        err = ccs_client_remove_callback (client, io_callback);
-    }
-    
-    if (!err) {
-	ccs_pipe_release (io_callback->client_pipe);
-	ccs_pipe_release (io_callback->reply_pipe);
-        free (io_callback);
+    if (!err && io_callback) {
+	ccs_client_t client = NULL;
+
+	if (io_callback->pending) {
+	    err = ccs_server_send_reply (io_callback->reply_pipe, 
+					 io_callback->invalid_object_err, NULL);
+	    
+	    io_callback->pending = 0;
+	}
+	
+	if (!err) {
+	    err = ccs_server_client_for_pipe (io_callback->client_pipe, &client);
+	}
+	
+	if (!err) {
+	    err = ccs_client_remove_callback (client, io_callback);
+	}
+	
+	if (!err) {
+	    ccs_pipe_release (io_callback->client_pipe);
+	    ccs_pipe_release (io_callback->reply_pipe);
+	    free (io_callback);
+	}
     }
     
     return cci_check_error (err);    
@@ -157,6 +158,8 @@ cc_int32 ccs_callback_reply_to_client (ccs_callback_t io_callback,
     
     if (!err) {
         if (io_callback->pending) {
+	    cci_debug_printf ("%s: callback %p replying to client.", __FUNCTION__, io_callback);
+
             err = ccs_server_send_reply (io_callback->reply_pipe, err, in_stream);
             
             if (err) {

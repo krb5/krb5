@@ -43,6 +43,7 @@ typedef struct cci_context_d {
 #endif
     cci_identifier_t identifier;
     cc_uint32 synchronized;
+    cc_time_t last_wait_for_change_time;
 } *cci_context_t;
 
 /* ------------------------------------------------------------------------ */
@@ -51,6 +52,7 @@ struct cci_context_d cci_context_initializer = {
     NULL 
     VECTOR_FUNCTIONS_INITIALIZER,
     NULL,
+    0,
     0
 };
 
@@ -249,19 +251,37 @@ cc_int32 ccapi_context_wait_for_change (cc_context_t  in_context)
 {
     cc_int32 err = ccNoError;
     cci_context_t context = (cci_context_t) in_context;
+    cci_stream_t request = NULL;
+    cci_stream_t reply = NULL;
     
     if (!in_context) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_context_sync (context, 0);
+        err = cci_stream_new (&request);
     }
     
     if (!err) {
-        err =  cci_ipc_send_no_launch (cci_context_wait_for_change_msg_id,
-                                       context->identifier,
-                                       NULL, NULL);
+        err = cci_stream_write_time (request, context->last_wait_for_change_time);
+    }
+
+    if (!err) {
+        err = cci_context_sync (context, 1);
     }
     
+    if (!err) {
+        err = cci_ipc_send (cci_context_wait_for_change_msg_id,
+			    context->identifier,
+			    request, 
+			    &reply);
+    }
+
+    if (!err) {
+        err = cci_stream_read_time (reply, &context->last_wait_for_change_time);
+    }
+    
+    cci_stream_release (request);
+    cci_stream_release (reply);
+
     return cci_check_error (err);
 }
 

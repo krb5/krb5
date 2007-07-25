@@ -82,9 +82,7 @@ cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_credentials) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_credentials) {
         cci_cred_union_release (io_credentials->cred_union);
         cci_identifier_release (io_credentials->identifier);
         free (io_credentials);

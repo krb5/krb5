@@ -98,9 +98,7 @@ cc_int32 ccs_lock_release (ccs_lock_t io_lock)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_lock) { err = cci_check_error (ccErrBadParam); }
-        
-    if (!err) {
+    if (!err && io_lock) {
 	free (io_lock->callback);
         free (io_lock);
     }

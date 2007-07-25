@@ -141,16 +141,14 @@ cc_int32 cci_identifier_release (cci_identifier_t in_identifier)
 {
     cc_int32 err = ccNoError;
     
-    if (!in_identifier) { err = ccErrBadParam; }
-    
     /* Do not free the static "uninitialized" identifier */
-    if (!err && in_identifier != cci_identifier_uninitialized) {
+    if (!err && in_identifier && in_identifier != cci_identifier_uninitialized) {
         free (in_identifier->server_id);
         free (in_identifier->object_id);
         free (in_identifier);
     }
     
-    return err;
+    return cci_check_error (err);
 }
 
 #pragma mark -

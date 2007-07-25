@@ -81,9 +81,7 @@ cc_int32 ccs_lock_state_release (ccs_lock_state_t io_lock_state)
 {
     cc_int32 err = ccNoError;
     
-    if (!io_lock_state) { err = ccErrBadParam; }
-
-    if (!err) {
+    if (!err && io_lock_state) {
         ccs_lock_array_release (io_lock_state->locks);
         free (io_lock_state);
     }

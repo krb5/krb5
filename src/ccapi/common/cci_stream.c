@@ -134,9 +134,7 @@ cc_uint32 cci_stream_release (cci_stream_t io_stream)
 {	
     cc_int32 err = ccNoError;
     
-    if (!io_stream) { err = ccErrBadParam; }
-    
-    if (!err) {
+    if (!err && io_stream) {
         free (io_stream->data);
         free (io_stream);
     }

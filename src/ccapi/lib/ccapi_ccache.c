@@ -44,6 +44,7 @@ typedef struct cci_ccache_d {
     cc_ccache_f *vector_functions;
 #endif
     cci_identifier_t identifier;
+    cc_time_t last_wait_for_change_time;
 } *cci_ccache_t;
 
 /* ------------------------------------------------------------------------ */
@@ -52,6 +53,7 @@ struct cci_ccache_d cci_ccache_initializer = {
     NULL 
     VECTOR_FUNCTIONS_INITIALIZER, 
     NULL,
+    0
 };
 
 cc_ccache_f cci_ccache_f_initializer = { 
@@ -594,15 +596,33 @@ cc_int32 ccapi_ccache_wait_for_change (cc_ccache_t  in_ccache)
 {
     cc_int32 err = ccNoError;
     cci_ccache_t ccache = (cci_ccache_t) in_ccache;
+    cci_stream_t request = NULL;
+    cci_stream_t reply = NULL;
     
     if (!in_ccache) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
+        err = cci_stream_new (&request);
+    }
+    
+    if (!err) {
+        err = cci_stream_write_time (request, ccache->last_wait_for_change_time);
+    }
+    
+    if (!err) {
         err =  cci_ipc_send (cci_ccache_wait_for_change_msg_id,
                              ccache->identifier,
-                             NULL, NULL);
+                             request, 
+			     &reply);
     }
+    
+    if (!err) {
+        err = cci_stream_read_time (reply, &ccache->last_wait_for_change_time);
+    }    
         
+    cci_stream_release (request);
+    cci_stream_release (reply);
+    
     return cci_check_error (err);
 }
 
