@@ -1,7 +1,7 @@
 #
 # lib/krb5/error_tables/krb5_err.et
 #
-# Copyright 1989,1990,1991 by the Massachusetts Institute of Technology.
+# Copyright 1989,1990,1991,2007 by the Massachusetts Institute of Technology.
 # All Rights Reserved.
 #
 # Export of this software from the United States of America may
@@ -68,7 +68,7 @@ error_code KRB5KDC_ERR_PREAUTH_REQUIRED, "Additional pre-authentication required
 error_code KRB5KDC_ERR_SERVER_NOMATCH,	"Requested server and ticket don't match"
 error_code KRB5PLACEHOLD_27,		"KRB5 error code 27"
 error_code KRB5PLACEHOLD_28,		"KRB5 error code 28"
-error_code KRB5PLACEHOLD_29,		"KRB5 error code 29"
+error_code KRB5KDC_ERR_SVC_UNAVAILABLE, "A service is not available that is required to process the request"
 error_code KRB5PLACEHOLD_30,		"KRB5 error code 30"
 # vv 31
 error_code KRB5KRB_AP_ERR_BAD_INTEGRITY, "Decrypt integrity check failed"

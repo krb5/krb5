@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/sendto_kdc.c
  *
- * Copyright 1990,1991,2001,2002,2004,2005 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001,2002,2004,2005,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -312,6 +312,30 @@ in_addrlist (struct addrinfo *thisaddr, struct addrlist *list)
     return 0;
 }
 
+static int
+check_for_svc_unavailable (krb5_context context,
+			   const krb5_data *reply,
+			   void *msg_handler_data)
+{
+    krb5_error_code *retval = (krb5_error_code *)msg_handler_data;
+
+    *retval = 0;
+
+    if (krb5_is_krb_error(reply)) {
+	krb5_error *err_reply;
+
+	if (decode_krb5_error(reply, &err_reply) == 0) {
+	    *retval = err_reply->error;
+	    krb5_free_error(context, err_reply);
+
+	    /* Returning 0 means continue to next KDC */
+	    return (*retval != KDC_ERR_SVC_UNAVAILABLE);
+	}
+    }
+
+    return 1;
+}
+
 /*
  * send the formatted request 'message' to a KDC for realm 'realm' and
  * return the response (if any) in 'reply'.
@@ -398,8 +422,10 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     }
 
     if (addrs.naddrs > 0) {
+	krb5_error_code err = 0;
+
         retval = krb5int_sendto (context, message, &addrs, 0, reply, 0, 0,
-								 0, 0, &addr_used);
+				 0, 0, &addr_used, check_for_svc_unavailable, &err);
 	switch (retval) {
 	case 0:
             /*
@@ -423,9 +449,13 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 	    break;
 	    /* Cases here are for constructing useful error messages.  */
 	case KRB5_KDC_UNREACH:
-	    krb5_set_error_message(context, retval,
-				   "Cannot contact any KDC for realm '%.*s'",
-				   realm->length, realm->data);
+	    if (err == KDC_ERR_SVC_UNAVAILABLE) {
+		retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
+	    } else {
+		krb5_set_error_message(context, retval,
+				       "Cannot contact any KDC for realm '%.*s'",
+				       realm->length, realm->data);
+	    }
 	    break;
 	}
         krb5int_free_addrlist (&addrs);
@@ -1041,9 +1071,12 @@ service_udp_fd(struct conn_state *conn, struct select_state *selstate,
 }
 
 static int
-service_fds (struct select_state *selstate,
+service_fds (krb5_context context,
+	     struct select_state *selstate,
 	     struct conn_state *conns, size_t n_conns, int *winning_conn,
-	     struct select_state *seltemp)
+	     struct select_state *seltemp,
+	     int (*msg_handler)(krb5_context, const krb5_data *, void *),
+	     void *msg_handler_data)
 {
     int e, selret;
 
@@ -1087,9 +1120,22 @@ service_fds (struct select_state *selstate,
 		   state_strings[(int) conns[i].state]);
 
 	    if (conns[i].service (&conns[i], selstate, ssflags)) {
-		dprint("fd service routine says we're done\n");
-		*winning_conn = i;
-		return 1;
+		int stop = 1;
+
+		if (msg_handler != NULL) {
+		    krb5_data reply;
+
+		    reply.data = conns[i].x.in.buf;
+		    reply.length = conns[i].x.in.pos - conns[i].x.in.buf;
+
+		    stop = (msg_handler(context, &reply, msg_handler_data) != 0);
+		}
+
+		if (stop) {
+		    dprint("fd service routine says we're done\n");
+		    *winning_conn = i;
+		    return 1;
+		}
 	    }
 	}
     }
@@ -1129,7 +1175,10 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 		struct sendto_callback_info* callback_info, krb5_data *reply,
 		struct sockaddr *localaddr, socklen_t *localaddrlen,
                 struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
-		int *addr_used)
+		int *addr_used,
+		/* return 0 -> keep going, 1 -> quit */
+		int (*msg_handler)(krb5_context, const krb5_data *, void *),
+		void *msg_handler_data)
 {
     int i, pass;
     int delay_this_pass = 2;
@@ -1216,8 +1265,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 		goto egress;
 	    sel_state->end_time = now;
 	    sel_state->end_time.tv_sec += 1;
-	    e = service_fds(sel_state, conns, host+1, &winning_conn,
-			    sel_state+1);
+	    e = service_fds(context, sel_state, conns, host+1, &winning_conn,
+			    sel_state+1, msg_handler, msg_handler_data);
 	    if (e)
 		break;
 	    if (pass > 0 && sel_state->nfds == 0)
@@ -1237,7 +1286,8 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
 	   call with the last one from the above loop, if the loop
 	   actually calls select.  */
 	sel_state->end_time.tv_sec += delay_this_pass;
-	e = service_fds(sel_state, conns, host+1, &winning_conn, sel_state+1);
+	e = service_fds(context, sel_state, conns, host+1, &winning_conn,
+		        sel_state+1, msg_handler, msg_handler_data);
 	if (e)
 	    break;
 	if (sel_state->nfds == 0)
