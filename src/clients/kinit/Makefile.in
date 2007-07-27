@@ -49,6 +49,6 @@ install-unix::
 #
 $(OUTPRE)kinit.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(KRB_ERR_H_DEP) $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/kerberosIV/des.h \
-  $(SRCTOP)/include/kerberosIV/krb.h $(SRCTOP)/include/krb5.h \
-  kinit.c
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
+  $(SRCTOP)/include/krb5.h kinit.c
