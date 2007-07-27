@@ -461,6 +461,10 @@ krb5_ktfile_get_next(krb5_context context, krb5_keytab id, krb5_keytab_entry *en
     kerror = KTLOCK(id);
     if (kerror)
 	return kerror;
+    if (KTFILEP(id) == NULL) {
+	KTUNLOCK(id);
+	return KRB5_KT_IOERR;
+    }
     if (fseek(KTFILEP(id), *fileoff, 0) == -1) {
 	KTUNLOCK(id);
 	return KRB5_KT_END;
