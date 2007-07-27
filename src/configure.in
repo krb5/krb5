@@ -90,6 +90,9 @@ AC_SUBST(LIBUTIL)
 dnl for kdc
 AC_CHECK_HEADERS(syslog.h stdarg.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
+KRB5_NEED_PROTO([#include <stdarg.h>
+#include <stdio.h>
+],vasprintf)
 KRB5_NEED_PROTO([#include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
