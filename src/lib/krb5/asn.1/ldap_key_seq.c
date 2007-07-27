@@ -341,7 +341,8 @@ static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 	if (asn1buf_remains(&slt, 0) != 0) { /* Salt value is optional */
 	    ret = decode_tagged_octetstring (&slt, 1, &keylen,
 		    &key->key_data_contents[1]); checkerr;
-	}
+	} else
+	    keylen = 0;
 	safe_syncbuf (&subbuf, &slt);
 	key->key_data_length[1] = keylen; /* XXX range check?? */
 
