@@ -792,6 +792,7 @@ vsnprintf(char *str, size_t size, const char *format, va_list args)
 #error We need an implementation of vsnprintf.
 #endif /* win32? */
 #endif /* no vsnprintf */
+
 #ifndef HAVE_VASPRINTF
 
 #if !defined(__cplusplus) && (__GNUC__ > 2)
@@ -859,7 +860,21 @@ k5_asprintf(char **ret, const char *format, ...)
     va_end(ap);
     return n;
 }
+
+#elif defined(NEED_VASPRINTF_PROTO)
+
+extern int vasprintf(char **, const char *, va_list)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 0)))
 #endif
+    ;
+extern int asprintf(char **, const char *, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 2, 3)))
+#endif
+    ;
+
+#endif /* have vasprintf and prototype? */
 
 #ifndef HAVE_MKSTEMP
 extern int krb5int_mkstemp(char *);
