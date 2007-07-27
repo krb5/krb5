@@ -1105,6 +1105,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	    kerror = errno;
 	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
+	    KTFILEP(id) = 0;
 	    return kerror;
 	}
     } else {
@@ -1116,6 +1117,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 		kerror = errno;
 	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
+	    KTFILEP(id) = 0;
 	    return kerror;
 	}
 	kt_vno = KTVERSION(id) = ntohs(kt_vno);
@@ -1123,6 +1125,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	    (kt_vno != KRB5_KT_VNO_1)) {
 	    (void) krb5_unlock_file(context, fileno(KTFILEP(id)));
 	    (void) fclose(KTFILEP(id));
+	    KTFILEP(id) = 0;
 	    return KRB5_KEYTAB_BADVNO;
 	}
     }
