@@ -121,7 +121,7 @@ cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
 				     ccs_callback_t in_callback)
 {
     cc_int32 err = ccNoError;
-    cc_uint32 found_lock = 0;
+    cc_uint32 found_callback = 0;
     
     if (!io_client) { err = cci_check_error (ccErrBadParam); }
     
@@ -134,13 +134,14 @@ cc_int32 ccs_client_remove_callback (ccs_client_t   io_client,
             
             if (callback == in_callback) {
 		cci_debug_printf ("%s: Removing callback reference %p.", __FUNCTION__, callback);
+		found_callback = 1;
 		err = ccs_callbackref_array_remove (io_client->callbacks, i);
 		break;
             }
         }
     }
     
-    if (!err && !found_lock) {
+    if (!err && !found_callback) {
         cci_debug_printf ("%s: WARNING! callback not found.", __FUNCTION__);
     }
     

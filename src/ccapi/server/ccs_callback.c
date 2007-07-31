@@ -117,7 +117,8 @@ cc_int32 ccs_callback_release (ccs_callback_t io_callback)
 	    err = ccs_server_client_for_pipe (io_callback->client_pipe, &client);
 	}
 	
-	if (!err) {
+	if (!err && client) {
+	    /* if client object still has a reference to us, remove it */
 	    err = ccs_client_remove_callback (client, io_callback);
 	}
 	

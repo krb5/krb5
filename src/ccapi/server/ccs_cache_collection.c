@@ -484,6 +484,7 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
     cc_int32 err = ccNoError;
     ccs_ccache_t old_default = NULL;
     ccs_ccache_t new_default = NULL;
+    cc_uint32 equal = 0;
     
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_identifier      ) { err = cci_check_error (ccErrBadParam); }
@@ -494,29 +495,34 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
     }
     
     if (!err) {
+	err = ccs_ccache_compare_identifier (old_default, in_identifier, &equal);
+    }
+    
+    
+    if (!err && !equal) {
         err = ccs_ccache_list_push_front (io_cache_collection->ccaches,
                                           in_identifier);
-    }
-    
-    if (!err) {
-        err = ccs_ccache_notify_default_state_changed (old_default,
-                                                       io_cache_collection,
-                                                       FALSE /* no longer default */);
-    }
-    
-    if (!err) {
-        err = ccs_cache_collection_get_default_ccache (io_cache_collection, 
-                                                       &new_default);
-    }
-    
-    if (!err) {
-        err = ccs_ccache_notify_default_state_changed (new_default,
-                                                       io_cache_collection,
-                                                       TRUE /* now default */);
-    }
-    
-    if (!err) {
-        err = ccs_cache_collection_changed (io_cache_collection);
+	
+	if (!err) {
+	    err = ccs_ccache_notify_default_state_changed (old_default,
+							   io_cache_collection,
+							   FALSE /* no longer default */);
+	}
+	
+	if (!err) {
+	    err = ccs_cache_collection_get_default_ccache (io_cache_collection, 
+							   &new_default);
+	}
+	
+	if (!err) {
+	    err = ccs_ccache_notify_default_state_changed (new_default,
+							   io_cache_collection,
+							   TRUE /* now default */);
+	}
+	
+	if (!err) {
+	    err = ccs_cache_collection_changed (io_cache_collection);
+	}
     }
 
     return cci_check_error (err);

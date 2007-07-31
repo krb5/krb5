@@ -118,6 +118,8 @@ cc_int32 ccs_ccache_new (ccs_ccache_t      *out_ccache,
         if (!err) {
             /* first cache is default */
             ccache->last_default_time = (count == 0) ? now : 0;
+	    cci_debug_printf ("%s ccache->last_default_time is %d.", 
+			     __FUNCTION__, ccache->last_default_time);
             ccache->last_changed_time = now;
         }
     }
@@ -862,6 +864,7 @@ static cc_int32 ccs_ccache_wait_for_change (ccs_pipe_t              in_client_pi
     
     if (!err) {
 	if (last_wait_for_change_time < io_ccache->last_changed_time) {
+	    cci_debug_printf ("%s returning immediately", __FUNCTION__);
 	    err = cci_stream_write_time (io_reply_data, io_ccache->last_changed_time);
 	    
 	} else {
@@ -879,6 +882,7 @@ static cc_int32 ccs_ccache_wait_for_change (ccs_pipe_t              in_client_pi
 						 ccs_callback_array_count (io_ccache->change_callbacks));
 		if (!err) { callback = NULL; /* take ownership */ }
 		
+		cci_debug_printf ("%s blocking", __FUNCTION__);
 		will_block = 1;
 	    }
 	    

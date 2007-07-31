@@ -125,6 +125,7 @@ cc_int32 cc_initialize (cc_context_t  *out_context,
             case ccapi_version_4:
             case ccapi_version_5:
             case ccapi_version_6:
+            case ccapi_version_7:
                 break;
             
             default: 
