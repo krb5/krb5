@@ -11,12 +11,6 @@
 #include "k5-platform.h"
 #include "supp-int.h"
 
-#ifdef _WIN32
-#ifndef vsnprintf
-#define vsnprintf _vsnprintf
-#endif
-#endif
-
 /* It would be nice to just use error_message() always.  Pity that
    it's defined in a library that depends on this one, and we're not
    allowed to make circular dependencies.  */
