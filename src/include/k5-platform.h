@@ -788,6 +788,17 @@ vsnprintf(char *str, size_t size, const char *format, va_list args)
 	_vsnprintf(str, size, format, args);
     return length;
 }
+static inline int
+snprintf(char *str, size_t size, const char *format, ...)
+{
+    va_list args;
+    int n;
+
+    va_start(args, format);
+    n = vsnprintf(str, size, format, args);
+    va_end(args);
+    return n;
+}
 #else /* not win32 */
 #error We need an implementation of vsnprintf.
 #endif /* win32? */
