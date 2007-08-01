@@ -220,9 +220,10 @@ usage(progname)
 	    USAGE_BREAK
 	    "[-v] [-R] "
 	    "[-k [-t keytab_file]] "
-	    USAGE_BREAK
 	    "[-c cachename] "
-	    "[-S service_name] [principal]"
+	    USAGE_BREAK
+	    "[-S service_name]"
+	    "[-X <attribute>[=<value>]] [principal]"
 	    "\n\n", 
 	    progname);
 
@@ -273,6 +274,7 @@ fprintf(stderr, USAGE_OPT_FMT, indent, col1)
     /* This options is not yet available: */
     /* ULINE("\t", "-C Kerberos 4 cache name",     OPTTYPE_KRB4); */
     ULINE("\t", "-S service",                   OPTTYPE_BOTH);
+    ULINE("\t", "-X <attribute>[=<value>]",     OPTTYPE_KRB5);
     exit(2);
 }
 

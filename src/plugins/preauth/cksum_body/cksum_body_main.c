@@ -41,7 +41,7 @@
  * The AS-REP carries no preauthentication data for this scheme.
  */
 
-#ident "$Id$"
+#ident "$Id: cksum_body_main.c,v 1.4 2007/01/02 22:33:50 kwc Exp $"
 
 #include "autoconf.h"
 
@@ -66,6 +66,11 @@ struct server_stats{
     int successes, failures;
 };
 
+typedef struct _test_svr_req_ctx {
+    int value1;
+    int value2;
+} test_svr_req_ctx;
+
 static int
 client_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 {
@@ -89,9 +94,9 @@ client_process(krb5_context kcontext,
 	       void *gak_data,
 	       krb5_data *salt, krb5_data *s2kparams,
 	       krb5_keyblock *as_key,
-	       krb5_pa_data **out_pa_data)
+	       krb5_pa_data ***out_pa_data)
 {
-    krb5_pa_data *send_pa;
+    krb5_pa_data **send_pa;
     krb5_checksum checksum;
     krb5_enctype enctype;
     krb5_cksumtype *cksumtypes;
@@ -188,23 +193,31 @@ client_process(krb5_context kcontext,
     }
 
     /* Allocate the preauth data structure. */
-    send_pa = malloc(sizeof(krb5_pa_data));
+    send_pa = malloc(2 * sizeof(krb5_pa_data *));
     if (send_pa == NULL) {
 	krb5_free_checksum_contents(kcontext, &checksum);
 	return ENOMEM;
     }
-    send_pa->pa_type = KRB5_PADATA_CKSUM_BODY_REQ;
-    send_pa->length = 4 + checksum.length;
-    send_pa->contents = malloc(4 + checksum.length);
-    if (send_pa->contents == NULL) {
+    send_pa[1] = NULL;	/* Terminate list */
+    send_pa[0] = malloc(sizeof(krb5_pa_data));
+    if (send_pa[0] == NULL) {
 	krb5_free_checksum_contents(kcontext, &checksum);
+	free(send_pa);
+	return ENOMEM;
+    }
+    send_pa[0]->pa_type = KRB5_PADATA_CKSUM_BODY_REQ;
+    send_pa[0]->length = 4 + checksum.length;
+    send_pa[0]->contents = malloc(4 + checksum.length);
+    if (send_pa[0]->contents == NULL) {
+	krb5_free_checksum_contents(kcontext, &checksum);
+	free(send_pa[0]);
 	free(send_pa);
 	return ENOMEM;
     }
 
     /* Store the checksum. */
-    memcpy(send_pa->contents, &cksumtype, 4);
-    memcpy(send_pa->contents + 4, checksum.contents, checksum.length);
+    memcpy(send_pa[0]->contents, &cksumtype, 4);
+    memcpy(send_pa[0]->contents + 4, checksum.contents, checksum.length);
     *out_pa_data = send_pa;
 
     /* Clean up. */
@@ -229,7 +242,7 @@ client_gic_opt(krb5_context kcontext,
 
 /* Initialize and tear down the server-side module, and do stat tracking. */
 static krb5_error_code
-server_init(krb5_context kcontext, void **module_context)
+server_init(krb5_context kcontext, void **module_context, const char **realmnames)
 {
     struct server_stats *stats;
     stats = malloc(sizeof(struct server_stats));
@@ -324,7 +337,8 @@ server_verify(krb5_context kcontext,
 	      preauth_get_entry_data_proc server_get_entry_data,
 	      void *pa_module_context,
 	      void **pa_request_context,
-	      krb5_data **e_data)
+	      krb5_data **e_data,
+	      krb5_authdata ***authz_data)
 {
     krb5_int32 cksumtype;
     krb5_checksum checksum;
@@ -338,9 +352,14 @@ server_verify(krb5_context kcontext,
     krb5_error_code status;
     struct server_stats *stats;
     krb5_data *test_edata;
+    test_svr_req_ctx *svr_req_ctx;
+    krb5_authdata **my_authz_data = NULL;
 
     stats = pa_module_context;
 
+#ifdef DEBUG
+    fprintf(stderr, "cksum_body: server_verify\n");
+#endif
     /* Verify the preauth data.  Start with the checksum type. */
     if (data->length < 4) {
 	stats->failures++;
@@ -477,6 +496,54 @@ server_verify(krb5_context kcontext,
 	return KRB5KDC_ERR_PREAUTH_FAILED;
     }
 
+    /*
+     * Return some junk authorization data just to exercise the
+     * code path handling the returned authorization data.
+     *
+     * NOTE that this is NOT VALID authorization data!
+     */
+#ifdef DEBUG
+    fprintf(stderr, "cksum_body: doing authorization data!\n");
+#endif
+#if 1 /* USE_5000_AD */
+#define AD_ALLOC_SIZE 5000
+    /* ad_header consists of a sequence tag (0x30) and length (0x82 0x1384)
+     * followed by octet string tag (0x04) and length (0x82 0x1380) */
+    krb5_octet ad_header[] = {0x30, 0x82, 0x13, 0x84, 0x04, 0x82, 0x13, 0x80};
+#else
+#define AD_ALLOC_SIZE 100
+    /* ad_header consists of a sequence tag (0x30) and length (0x62)
+     * followed by octet string tag (0x04) and length (0x60) */
+    krb5_octet ad_header[] = {0x30, 0x62, 0x04, 0x60};
+#endif
+    my_authz_data = malloc(2 * sizeof(*my_authz_data));
+    if (my_authz_data != NULL) {
+	my_authz_data[1] = NULL;
+	my_authz_data[0] = malloc(sizeof(krb5_authdata));
+	if (my_authz_data[0] == NULL) {
+	    free(my_authz_data);
+	    return ENOMEM;
+	}
+	my_authz_data[0]->contents = malloc(AD_ALLOC_SIZE);
+	if (my_authz_data[0]->contents == NULL) {
+	    free(my_authz_data[0]);
+	    free(my_authz_data);
+	    return ENOMEM;
+	}
+	memset(my_authz_data[0]->contents, '\0', AD_ALLOC_SIZE);
+	my_authz_data[0]->magic = KV5M_AUTHDATA;
+	my_authz_data[0]->ad_type = 1;
+	my_authz_data[0]->length = AD_ALLOC_SIZE;
+	memcpy(my_authz_data[0]->contents, ad_header, sizeof(ad_header));
+	sprintf(my_authz_data[0]->contents + sizeof(ad_header),
+	       "cksum authorization data: %d bytes worth!\n", AD_ALLOC_SIZE);
+	*authz_data = my_authz_data;
+#ifdef DEBUG
+	fprintf(stderr, "Returning %d bytes of authorization data\n",
+		AD_ALLOC_SIZE);
+#endif
+    }
+
     /* Return edata to exercise code that handles edata... */
     test_edata = malloc(sizeof(*test_edata));
     if (test_edata != NULL) {
@@ -489,6 +556,18 @@ server_verify(krb5_context kcontext,
 	    *e_data = test_edata;
 	}
     }
+
+    /* Return a request context to exercise code that handles it */
+    svr_req_ctx = malloc(sizeof(*svr_req_ctx));
+    if (svr_req_ctx != NULL) {
+	svr_req_ctx->value1 = 111111;
+	svr_req_ctx->value2 = 222222;
+#ifdef DEBUG
+	fprintf(stderr, "server_verify: returning context at %p\n",
+		svr_req_ctx);
+#endif
+    }
+    *pa_request_context = svr_req_ctx;
 
     /* Note that preauthentication succeeded. */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
@@ -516,6 +595,37 @@ server_return(krb5_context kcontext,
     return 0;
 }
 
+/* Test server request context freeing */
+static krb5_error_code
+server_free_reqctx(krb5_context kcontext,
+		   void *pa_module_context,
+		   void **pa_request_context)
+{
+    test_svr_req_ctx *svr_req_ctx;
+#ifdef DEBUG
+    fprintf(stderr, "server_free_reqctx: entered!\n");
+#endif
+    if (pa_request_context == NULL)
+	return 0;
+
+    svr_req_ctx = *pa_request_context;
+    if (svr_req_ctx == NULL)
+	return 0;
+
+    if (svr_req_ctx->value1 != 111111 || svr_req_ctx->value2 != 222222) {
+	fprintf(stderr, "server_free_reqctx: got invalid req context "
+		"at %p with values %d and %d\n",
+		svr_req_ctx, svr_req_ctx->value1, svr_req_ctx->value2);
+	return EINVAL;
+    }
+#ifdef DEBUG
+    fprintf(stderr, "server_free_reqctx: freeing context at %p\n", svr_req_ctx);
+#endif
+    free(svr_req_ctx);
+    *pa_request_context = NULL;
+    return 0;
+}
+
 static int
 server_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 {
@@ -529,7 +639,7 @@ static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_CKSUM_BODY_REQ, 0,
 };
 
-struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
+struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
     "cksum_body",			    /* name */
     &supported_client_pa_types[0],	    /* pa_type_list */
     NULL,				    /* enctype_list */
@@ -543,7 +653,7 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     client_gic_opt			    /* get init creds opt function */
 };
 
-struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
+struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
     "cksum_body",
     &supported_server_pa_types[0],
     server_init,
@@ -552,5 +662,5 @@ struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
     server_get_edata,
     server_verify,
     server_return,
-    NULL
+    server_free_reqctx
 };

@@ -919,6 +919,11 @@ esac
 changequote([, ])
 AC_SUBST(PASS)
 
+dnl for pkinit
+old_LIBS="$LIBS"
+AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+LIBS="$old_LIBS"
+
 dnl for lib/apputils
 AC_REPLACE_FUNCS(daemon)
 
@@ -1090,6 +1095,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	plugins/kdb/db2/libdb2/test
 	plugins/preauth/cksum_body
 	plugins/preauth/wpse
+	plugins/preauth/pkinit
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

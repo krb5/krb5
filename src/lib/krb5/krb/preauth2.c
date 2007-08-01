@@ -71,7 +71,7 @@ krb5_init_preauth_context(krb5_context kcontext)
 {
     int n_modules, n_tables, i, j, k;
     void **tables;
-    struct krb5plugin_preauth_client_ftable_v0 *table;
+    struct krb5plugin_preauth_client_ftable_v1 *table;
     krb5_preauth_context *context = NULL;
     void *plugin_context;
     krb5_preauthtype pa_type;
@@ -93,7 +93,7 @@ krb5_init_preauth_context(krb5_context kcontext)
     /* pull out the module function tables for all of the modules */
     tables = NULL;
     if (krb5int_get_plugin_dir_data(&kcontext->preauth_plugins,
-				    "preauthentication_client_0",
+				    "preauthentication_client_1",
 				    &tables,
 				    &kcontext->err) != 0) {
 	return;
@@ -352,37 +352,45 @@ grow_ktypes(krb5_enctype **out_ktypes, int *out_nktypes, krb5_enctype ktype)
     }
 }
 
-/* Add the given pa_data item to the list of items.  Factored out here to make
- * reading the do_preauth logic easier to read. */
+/*
+ * Add the given list of pa_data items to the existing list of items.
+ * Factored out here to make reading the do_preauth logic easier to read.
+ */
 static int
 grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
-	     krb5_pa_data *addition)
+	     krb5_pa_data **addition, int num_addition)
 {
     krb5_pa_data **pa_list;
-    int i;
+    int i, j;
 
-    if (out_pa_list == NULL) {
+    if (out_pa_list == NULL || addition == NULL) {
 	return EINVAL;
     }
 
     if (*out_pa_list == NULL) {
-	/* Allocate room for one entry and a NULL terminator. */
-	pa_list = malloc(2 * sizeof(krb5_pa_data *));
+	/* Allocate room for the new additions and a NULL terminator. */
+	pa_list = malloc((num_addition + 1) * sizeof(krb5_pa_data *));
 	if (pa_list == NULL)
 	    return ENOMEM;
-	pa_list[0] = addition;
-	pa_list[1] = NULL;
+	for (i = 0; i < num_addition; i++)
+	    pa_list[i] = addition[i];
+	pa_list[i] = NULL;
 	*out_pa_list = pa_list;
-	*out_pa_list_size = 1;
+	*out_pa_list_size = num_addition;
     } else {
-	/* Allocate room for one more entry and a NULL terminator. */
-	pa_list = malloc((*out_pa_list_size + 2) * sizeof(krb5_pa_data *));
+	/*
+	 * Allocate room for the existing entries plus
+	 * the new additions and a NULL terminator.
+	 */
+	pa_list = malloc((*out_pa_list_size + num_addition + 1)
+						* sizeof(krb5_pa_data *));
 	if (pa_list == NULL)
 	    return ENOMEM;
 	for (i = 0; i < *out_pa_list_size; i++)
 	    pa_list[i] = (*out_pa_list)[i];
-	pa_list[i++] = addition;
-	pa_list[i++] = NULL;
+	for (j = 0; j < num_addition;)
+	    pa_list[i++] = addition[j++];
+	pa_list[i] = NULL;
 	free(*out_pa_list);
 	*out_pa_list = pa_list;
 	*out_pa_list_size = i;
@@ -502,7 +510,7 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 			 krb5_gic_opt_ext *opte)
 {
     int i;
-    krb5_pa_data *out_pa_data;
+    krb5_pa_data **out_pa_data;
     krb5_error_code ret;
     struct _krb5_preauth_context_module *module;
 
@@ -554,7 +562,10 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 	*module_ret = ret;
 	/* Save the new preauth data item. */
 	if (out_pa_data != NULL) {
-	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data);
+	    int i;
+	    for (i = 0; out_pa_data[i] != NULL; i++);
+	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data, i);
+	    free(out_pa_data);
 	    if (ret != 0)
 		return ret;
 	}
@@ -1363,7 +1374,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 			 krb5_gic_opt_ext *opte)
 {
     krb5_error_code ret;
-    krb5_pa_data *out_padata;
+    krb5_pa_data **out_padata;
     krb5_preauth_context *context;
     struct _krb5_preauth_context_module *module;
     int i, j;
@@ -1404,7 +1415,11 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 					   as_key,
 					   &out_padata) == 0) {
 		if (out_padata != NULL) {
-		    grow_pa_list(return_padata, &out_pa_list_size, out_padata);
+		    int i;
+		    for (i = 0; out_padata[i] != NULL; i++);
+		    grow_pa_list(return_padata, &out_pa_list_size,
+				 out_padata, i);
+		    free(out_padata);
 		    return 0;
 		}
 	    }
@@ -1584,7 +1599,7 @@ krb5_do_preauth(krb5_context context,
 		    }
 
 		    ret = grow_pa_list(&out_pa_list, &out_pa_list_size,
-				       out_pa);
+				       &out_pa, 1);
 		    if (ret != 0) {
 			    goto cleanup;
 		    }

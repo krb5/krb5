@@ -435,6 +435,72 @@ POSSIBILITY OF SUCH DAMAGE.
 @vskip 12pt
 @end iftex
 
+Portions funded by Sandia National Laboratory
+and developed by the University of Michigan's
+Center for Information Technology Integration,
+including the PKINIT implementation, are subject
+to the following license:
+
+@quotation
+@iftex
+@smallfonts @rm
+@end iftex
+
+COPYRIGHT @copyright{} 2006-2007@*
+THE REGENTS OF THE UNIVERSITY OF MICHIGAN@*
+ALL RIGHTS RESERVED
+
+Permission is granted to use, copy, create derivative works
+and redistribute this software and such derivative works
+for any purpose, so long as the name of The University of
+Michigan is not used in any advertising or publicity
+pertaining to the use of distribution of this software
+without specific, written prior authorization.  If the
+above copyright notice or any other identification of the
+University of Michigan is included in any copy of any
+portion of this software, then the disclaimer below must
+also be included.
+
+THIS SOFTWARE IS PROVIDED AS IS, WITHOUT REPRESENTATION
+FROM THE UNIVERSITY OF MICHIGAN AS TO ITS FITNESS FOR ANY
+PURPOSE, AND WITHOUT WARRANTY BY THE UNIVERSITY OF
+MICHIGAN OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING
+WITHOUT LIMITATION THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+REGENTS OF THE UNIVERSITY OF MICHIGAN SHALL NOT BE LIABLE
+FOR ANY DAMAGES, INCLUDING SPECIAL, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES, WITH RESPECT TO ANY CLAIM ARISING
+OUT OF OR IN CONNECTION WITH THE USE OF THE SOFTWARE, EVEN
+IF IT HAS BEEN OR IS HEREAFTER ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+@end quotation
+
+The pkcs11.h file included in the PKINIT code has the
+following license:
+
+@quotation
+@iftex
+@smallfonts @rm
+@end iftex
+
+Copyright 2006 g10 Code GmbH
+Copyright 2006 Andreas Jellinghaus
+
+This file is free software; as a special exception the author gives
+unlimited permission to copy and/or distribute it, with or without
+modifications, as long as this notice is preserved.
+
+This file is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY, to the extent permitted by law; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.
+
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+
 Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notices and this permission notice are
 preserved on all copies.

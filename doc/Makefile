@@ -1,5 +1,5 @@
 SRCDIR=../src
-DVI=texi2dvi
+DVI=texi2dvi4a2ps	# texi2dvi
 DVIPS=dvips -o "$@"
 PSPDF=ps2pdf
 INFO=makeinfo
