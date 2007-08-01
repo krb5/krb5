@@ -2271,7 +2271,7 @@ cw_erase_rect(HDC hdc,
         rlogo.right = r_wnd->right;
         rlogo.top = r_wnd->bottom - tbl->kbm_logo_shade.cy;
         rlogo.bottom = r_wnd->bottom;
-        rie = IntersectRect(&ri, r_erase, &rlogo);
+        rie = FALSE;	/* Don't show watermark. */
     } else {
         ZeroMemory(&rlogo, sizeof(rlogo));
         ZeroMemory(&ri, sizeof(ri));
