@@ -1,4 +1,5 @@
 #include "k5-int.h"
+#include "int-proto.h"
 
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init(krb5_get_init_creds_opt *opt)

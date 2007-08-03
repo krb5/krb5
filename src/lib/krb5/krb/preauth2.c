@@ -32,6 +32,7 @@
 #include "k5-int.h"
 #include "osconf.h"
 #include <krb5/preauth_plugin.h>
+#include "int-proto.h"
 
 #if !defined(_WIN32)
 #include <unistd.h>
@@ -562,9 +563,9 @@ krb5_run_preauth_plugins(krb5_context kcontext,
 	*module_ret = ret;
 	/* Save the new preauth data item. */
 	if (out_pa_data != NULL) {
-	    int i;
-	    for (i = 0; out_pa_data[i] != NULL; i++);
-	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data, i);
+	    int j;
+	    for (j = 0; out_pa_data[j] != NULL; j++);
+	    ret = grow_pa_list(out_pa_list, out_pa_list_size, out_pa_data, j);
 	    free(out_pa_data);
 	    if (ret != 0)
 		return ret;
@@ -1415,10 +1416,10 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 					   as_key,
 					   &out_padata) == 0) {
 		if (out_padata != NULL) {
-		    int i;
-		    for (i = 0; out_padata[i] != NULL; i++);
+		    int k;
+		    for (k = 0; out_padata[k] != NULL; k++);
 		    grow_pa_list(return_padata, &out_pa_list_size,
-				 out_padata, i);
+				 out_padata, k);
 		    free(out_padata);
 		    return 0;
 		}
