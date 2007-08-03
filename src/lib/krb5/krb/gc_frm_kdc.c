@@ -901,78 +901,108 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    /* Whether or not that succeeded, we're done. */
 	    goto cleanup;
 	}
-	else {
-	    /* Referral request succeeded; let's see what it is. */
-	    if (krb5_principal_compare(context, in_cred->server,
-				       (*out_cred)->server)) {
-		DPRINTF(("gc_from_kdc: request generated ticket "
-			 "for requested server principal\n"));
-		DUMP_PRINC("gc_from_kdc final referred reply",
-			   in_cred->server);
+	/* Referral request succeeded; let's see what it is. */
+	if (krb5_principal_compare(context, in_cred->server,
+				   (*out_cred)->server)) {
+	    DPRINTF(("gc_from_kdc: request generated ticket "
+		     "for requested server principal\n"));
+	    DUMP_PRINC("gc_from_kdc final referred reply",
+		       in_cred->server);
+
+	    /*
+	     * Check if the return enctype is one that we requested if
+	     * needed.
+	     */
+	    if (old_use_conf_ktypes || context->tgs_ktype_count == 0)
 		goto cleanup;
+	    for (i = 0; i < context->tgs_ktype_count; i++) {
+		if ((*out_cred)->keyblock.enctype == context->tgs_ktypes[i]) {
+		    /* Found an allowable etype, so we're done */
+		    goto cleanup;
+		}
 	    }
-	    else if (IS_TGS_PRINC(context, (*out_cred)->server)) {
-		krb5_data *r1, *r2;
+	    /*
+	     *  We need to try again, but this time use the
+	     *  tgs_ktypes in the context. At this point we should
+	     *  have all the tgts to succeed.
+	     */
 
-		DPRINTF(("gc_from_kdc: request generated referral tgt\n"));
-		DUMP_PRINC("gc_from_kdc credential received",
-			   (*out_cred)->server);
+	    /* Free "wrong" credential */
+	    krb5_free_creds(context, *out_cred);
+	    *out_cred = NULL;
+	    /* Re-establish tgs etypes */
+	    context->use_conf_ktypes = old_use_conf_ktypes;
+	    retval = krb5_get_cred_via_tkt(context, tgtptr,
+					   KDC_OPT_CANONICALIZE | 
+					   FLAGS2OPTS(tgtptr->ticket_flags) |  
+					   kdcopt |
+					   (in_cred->second_ticket.length ?
+					    KDC_OPT_ENC_TKT_IN_SKEY : 0),
+					   tgtptr->addresses,
+					   in_cred, out_cred);
+	    goto cleanup;
+	}
+	else if (IS_TGS_PRINC(context, (*out_cred)->server)) {
+	    krb5_data *r1, *r2;
 
-		if (referral_count == 0)
-		    r1 = &tgtptr->server->data[1];
-		else
-		    r1 = &referral_tgts[referral_count-1]->server->data[1];
+	    DPRINTF(("gc_from_kdc: request generated referral tgt\n"));
+	    DUMP_PRINC("gc_from_kdc credential received",
+		       (*out_cred)->server);
 
-		r2 = &(*out_cred)->server->data[1];
-		if (data_eq(*r1, *r2)) {
-		    DPRINTF(("gc_from_kdc: referred back to "
-			     "previous realm; fall back\n"));
-		    krb5_free_creds(context, *out_cred);
-		    *out_cred = NULL;
-		    break;
-		}
-		/* Check for referral routing loop. */
-		for (i=0;i<referral_count;i++) {
-#if 0
-		    DUMP_PRINC("gc_from_kdc: loop compare #1",
-			       (*out_cred)->server);
-		    DUMP_PRINC("gc_from_kdc: loop compare #2",
-			       referral_tgts[i]->server);
-#endif
-		    if (krb5_principal_compare(context,
-					       (*out_cred)->server,
-					       referral_tgts[i]->server)) {
-			DFPRINTF((stderr,
-				  "krb5_get_cred_from_kdc_opt: "
-				  "referral routing loop - "
-				  "got referral back to hop #%d\n", i));
-			retval=KRB5_KDC_UNREACH;
-			goto cleanup;
-		    }
-		}
-		/* Point current tgt pointer at newly-received TGT. */
-		if (tgtptr == &cc_tgt)
-		    krb5_free_cred_contents(context, tgtptr);
-		tgtptr=*out_cred;
-		/* Save pointer to tgt in referral_tgts. */
-		referral_tgts[referral_count]=*out_cred;
-		/* Copy krbtgt realm to server principal. */
-		krb5_free_data_contents(context, &server->realm);
-		retval = krb5int_copy_data_contents(context,
-						    &tgtptr->server->data[1],
-						    &server->realm);
-		if (retval)
-		    return retval;
-		/*
-		 * Future work: rewrite server principal per any
-		 * supplied padata.
-		 */
-	    } else {
-		/* Not a TGT; punt to fallback. */
+	    if (referral_count == 0)
+		r1 = &tgtptr->server->data[1];
+	    else
+		r1 = &referral_tgts[referral_count-1]->server->data[1];
+
+	    r2 = &(*out_cred)->server->data[1];
+	    if (data_eq(*r1, *r2)) {
+		DPRINTF(("gc_from_kdc: referred back to "
+			 "previous realm; fall back\n"));
 		krb5_free_creds(context, *out_cred);
 		*out_cred = NULL;
 		break;
 	    }
+	    /* Check for referral routing loop. */
+	    for (i=0;i<referral_count;i++) {
+#if 0
+		DUMP_PRINC("gc_from_kdc: loop compare #1",
+			   (*out_cred)->server);
+		DUMP_PRINC("gc_from_kdc: loop compare #2",
+			   referral_tgts[i]->server);
+#endif
+		if (krb5_principal_compare(context,
+					   (*out_cred)->server,
+					   referral_tgts[i]->server)) {
+		    DFPRINTF((stderr,
+			      "krb5_get_cred_from_kdc_opt: "
+			      "referral routing loop - "
+			      "got referral back to hop #%d\n", i));
+		    retval=KRB5_KDC_UNREACH;
+		    goto cleanup;
+		}
+	    }
+	    /* Point current tgt pointer at newly-received TGT. */
+	    if (tgtptr == &cc_tgt)
+		krb5_free_cred_contents(context, tgtptr);
+	    tgtptr=*out_cred;
+	    /* Save pointer to tgt in referral_tgts. */
+	    referral_tgts[referral_count]=*out_cred;
+	    /* Copy krbtgt realm to server principal. */
+	    krb5_free_data_contents(context, &server->realm);
+	    retval = krb5int_copy_data_contents(context,
+						&tgtptr->server->data[1],
+						&server->realm);
+	    if (retval)
+		return retval;
+	    /*
+	     * Future work: rewrite server principal per any
+	     * supplied padata.
+	     */
+	} else {
+	    /* Not a TGT; punt to fallback. */
+	    krb5_free_creds(context, *out_cred);
+	    *out_cred = NULL;
+	    break;
 	}
     }
 
