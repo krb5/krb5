@@ -906,7 +906,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 	    /* Whether or not that succeeded, we're done. */
 	    goto cleanup;
 	}
-	else {
 	    /* Referral request succeeded; let's see what it is. */
 	    if (krb5_principal_compare(context, in_cred->server,
 				       (*out_cred)->server)) {
@@ -914,6 +913,38 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 			 "for requested server principal\n"));
 		DUMP_PRINC("gc_from_kdc final referred reply",
 			   in_cred->server);
+
+	    /*
+	     * Check if the return enctype is one that we requested if
+	     * needed.
+	     */
+	    if (old_use_conf_ktypes || context->tgs_ktype_count == 0)
+		goto cleanup;
+	    for (i = 0; i < context->tgs_ktype_count; i++) {
+		if ((*out_cred)->keyblock.enctype == context->tgs_ktypes[i]) {
+		    /* Found an allowable etype, so we're done */
+		    goto cleanup;
+		}
+	    }
+	    /*
+	     *  We need to try again, but this time use the
+	     *  tgs_ktypes in the context. At this point we should
+	     *  have all the tgts to succeed.
+	     */
+
+	    /* Free "wrong" credential */
+	    krb5_free_creds(context, *out_cred);
+	    *out_cred = NULL;
+	    /* Re-establish tgs etypes */
+	    context->use_conf_ktypes = old_use_conf_ktypes;
+	    retval = krb5_get_cred_via_tkt(context, tgtptr,
+					   KDC_OPT_CANONICALIZE | 
+					   FLAGS2OPTS(tgtptr->ticket_flags) |  
+					   kdcopt |
+					   (in_cred->second_ticket.length ?
+					    KDC_OPT_ENC_TKT_IN_SKEY : 0),
+					   tgtptr->addresses,
+					   in_cred, out_cred);
 		goto cleanup;
 	    }
 	    else if (IS_TGS_PRINC(context, (*out_cred)->server)) {
@@ -978,7 +1009,6 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
 		krb5_free_creds(context, *out_cred);
 		*out_cred = NULL;
 		break;
-	    }
 	}
     }
 
