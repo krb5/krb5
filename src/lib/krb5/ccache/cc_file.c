@@ -1964,6 +1964,9 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
 					    NUL */
      krb5_fcc_data *data;
+     krb5_int16 fcc_fvno = htons(context->fcc_default_format);
+     krb5_int16 fcc_flen = 0;
+     int errsave, cnt;
      
      /* Allocate memory */
      lid = (krb5_ccache) malloc(sizeof(struct _krb5_ccache));
@@ -1977,10 +1980,12 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      ret = mkstemp(scratch);
      if (ret == -1) {
 	 return krb5_fcc_interpret(context, errno);
-     } else close(ret);
+     }
 
      lid->data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));
      if (lid->data == NULL) {
+	  close(ret);
+	  unlink(scratch);
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
      }
@@ -1988,6 +1993,8 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      ((krb5_fcc_data *) lid->data)->filename = (char *)
 	  malloc(strlen(scratch) + 1);
      if (((krb5_fcc_data *) lid->data)->filename == NULL) {
+	  close(ret);
+	  unlink(scratch);
 	  krb5_xfree(((krb5_fcc_data *) lid->data));
 	  krb5_xfree(lid);
 	  return KRB5_CC_NOMEM;
@@ -2002,63 +2009,54 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
      data = (krb5_fcc_data *) lid->data;
 
      retcode = k5_mutex_init(&data->lock);
-     if (retcode)
+     if (retcode) {
+	 close(ret);
+	 unlink(scratch);
 	 goto err_out;
+     }
 
      /* Set up the filename */
      strcpy(((krb5_fcc_data *) lid->data)->filename, scratch);
 
-     /* Make sure the file name is reserved */
-     ret = THREEPARAMOPEN(((krb5_fcc_data *) lid->data)->filename,
-                O_CREAT | O_EXCL | O_WRONLY | O_BINARY, 0);
-     if (ret == -1) {
-	  retcode = krb5_fcc_interpret(context, errno);
-          goto err_out;
-     } else {
-          krb5_int16 fcc_fvno = htons(context->fcc_default_format);
-          krb5_int16 fcc_flen = 0;
-          int errsave, cnt;
-
-          /* Ignore user's umask, set mode = 0600 */
+     /* Ignore user's umask, set mode = 0600 */
 #ifndef HAVE_FCHMOD
 #ifdef HAVE_CHMOD
-          chmod(((krb5_fcc_data *) lid->data)->filename, S_IRUSR | S_IWUSR);
+     chmod(((krb5_fcc_data *) lid->data)->filename, S_IRUSR | S_IWUSR);
 #endif
 #else
-          fchmod(ret, S_IRUSR | S_IWUSR);
+     fchmod(ret, S_IRUSR | S_IWUSR);
 #endif
-          if ((cnt = write(ret, (char *)&fcc_fvno, sizeof(fcc_fvno)))
-              != sizeof(fcc_fvno)) {
-              errsave = errno;
-              (void) close(ret);
-              (void) unlink(((krb5_fcc_data *) lid->data)->filename);
-              retcode = (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
-              goto err_out;
-	  }
-	  /* For version 4 we save a length for the rest of the header */
-          if (context->fcc_default_format == KRB5_FCC_FVNO_4) {
-            if ((cnt = write(ret, (char *)&fcc_flen, sizeof(fcc_flen)))
-                != sizeof(fcc_flen)) {
-                errsave = errno;
-                (void) close(ret);
-                (void) unlink(((krb5_fcc_data *) lid->data)->filename);
-                retcode = (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
-                goto err_out;
-	    }
-	  }
-          if (close(ret) == -1) {
-              errsave = errno;
-              (void) unlink(((krb5_fcc_data *) lid->data)->filename);
-              retcode = krb5_fcc_interpret(context, errsave);
-              goto err_out;
-	  }
-	  *id = lid;
-          /* default to open/close on every trn - otherwise destroy 
-             will get as to state confused */
-          ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
-	  krb5_change_cache ();
-	  return KRB5_OK;
+     if ((cnt = write(ret, (char *)&fcc_fvno, sizeof(fcc_fvno)))
+	 != sizeof(fcc_fvno)) {
+	  errsave = errno;
+	  (void) close(ret);
+	  (void) unlink(((krb5_fcc_data *) lid->data)->filename);
+	  retcode = (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
+	  goto err_out;
      }
+     /* For version 4 we save a length for the rest of the header */
+     if (context->fcc_default_format == KRB5_FCC_FVNO_4) {
+	  if ((cnt = write(ret, (char *)&fcc_flen, sizeof(fcc_flen)))
+	      != sizeof(fcc_flen)) {
+	       errsave = errno;
+	       (void) close(ret);
+	       (void) unlink(((krb5_fcc_data *) lid->data)->filename);
+	       retcode = (cnt == -1) ? krb5_fcc_interpret(context, errsave) : KRB5_CC_IO;
+	       goto err_out;
+	  }
+     }
+     if (close(ret) == -1) {
+	  errsave = errno;
+	  (void) unlink(((krb5_fcc_data *) lid->data)->filename);
+	  retcode = krb5_fcc_interpret(context, errsave);
+	  goto err_out;
+     }
+     *id = lid;
+     /* default to open/close on every trn - otherwise destroy 
+	will get as to state confused */
+     ((krb5_fcc_data *) lid->data)->flags = KRB5_TC_OPENCLOSE;
+     krb5_change_cache ();
+     return KRB5_OK;
 
 err_out:
      krb5_xfree(((krb5_fcc_data *) lid->data)->filename);
