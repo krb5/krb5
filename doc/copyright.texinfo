@@ -500,6 +500,7 @@ PURPOSE.
 @hrule
 @vskip 12pt
 @end iftex
+@end quotation
 
 Permission is granted to make and distribute verbatim copies of this
 manual provided the copyright notices and this permission notice are
