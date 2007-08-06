@@ -81,7 +81,8 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    S (asn1_ldap_encode_sequence_of_keys, krb5int_ldap_encode_sequence_of_keys),
 	    S (asn1_ldap_decode_sequence_of_keys, krb5int_ldap_decode_sequence_of_keys),
 	    S (encode_krb5_pa_pk_as_req, encode_krb5_pa_pk_as_req),
-	    S (encode_krb5_pa_pk_as_req_draft9, encode_krb5_pa_pk_as_req_draft9),	    S (encode_krb5_pa_pk_as_rep, encode_krb5_pa_pk_as_rep),
+	    S (encode_krb5_pa_pk_as_req_draft9, encode_krb5_pa_pk_as_req_draft9),
+            S (encode_krb5_pa_pk_as_rep, encode_krb5_pa_pk_as_rep),
 	    S (encode_krb5_pa_pk_as_rep_draft9, encode_krb5_pa_pk_as_rep_draft9),
 	    S (encode_krb5_auth_pack, encode_krb5_auth_pack),
 	    S (encode_krb5_auth_pack_draft9, encode_krb5_auth_pack_draft9),
@@ -108,7 +109,7 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 	    S (encode_krb5_kdc_req_body, encode_krb5_kdc_req_body),
 	    S (krb5_free_kdc_req, krb5_free_kdc_req),
 	    S (krb5int_set_prompt_types, krb5int_set_prompt_types),
-	    S (encode_krb5_authdata_elt, encode_krb5_authdata_elt)
+	    S (encode_krb5_authdata_elt, encode_krb5_authdata_elt),
 #if DESIGNATED_INITIALIZERS
 	};
 #else
