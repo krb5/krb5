@@ -40,9 +40,6 @@ alpha*-dec-osf*)
 		LOGINLIBS="$LOGINLIBS -lsecurity"
 	)
 	;;
-*-*-sunos4*)
-	ac_cv_header_termios_h=no
-	;;
 esac
 dnl
 dnl krshd does not use krb524...

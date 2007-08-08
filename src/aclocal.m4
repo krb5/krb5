@@ -1,5 +1,5 @@
 AC_PREREQ(2.52)
-AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
 Massachusetts Institute of Technology.
 ])
 dnl
@@ -609,7 +609,6 @@ if test "$GCC" = yes; then
   fi
 fi])
 # maybe add -Waggregate-return, or can we assume that actually works by now?
-# -Wno-comment used to be used for SunOS system header <sys/stream.h>
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
 extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
  -Wcast-align -Wconversion -Wshadow"

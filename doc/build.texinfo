@@ -754,7 +754,7 @@ HP/UX 10.20.
 
 Platforms for which there is shared library support but not significant
 testing include FreeBSD, OpenBSD, AIX (4.3.3), Linux, NetBSD 1.4.x
-(i386), and SunOS 4.x.
+(i386).
 
 To enable shared libraries on the above platforms, run the configure
 script with the option @samp{--enable-shared}.
