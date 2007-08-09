@@ -30,6 +30,9 @@
 #define OEMRESOURCE
 
 #include<khmapp.h>
+#if _WIN32_WINNT >= 0x0501
+#include<uxtheme.h>
+#endif
 #include<assert.h>
 
 ATOM khui_newcredwnd_cls;
@@ -1402,6 +1405,11 @@ nc_handle_wm_create(HWND hwnd,
     if (hf_main)
         SendMessage(ncd->tab_wnd, WM_SETFONT, (WPARAM) hf_main, FALSE);
 
+#if _WIN32_WINNT >= 0x0501
+    EnableThemeDialogTexture(ncd->dlg_main,
+                             ETDT_ENABLETAB);
+#endif
+
     {
         RECT r_main;
         RECT r_area;
@@ -1982,6 +1990,12 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
 #ifdef DEBUG
                     assert(d->nc->types[i]->hwnd_panel);
+#endif
+#if _WIN32_WINNT >= 0x0501
+                    if (d->nc->types[i]->hwnd_panel) {
+                        EnableThemeDialogTexture(d->nc->types[i]->hwnd_panel,
+                                                 ETDT_ENABLETAB);
+                    }
 #endif
                 }
             }
