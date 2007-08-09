@@ -237,34 +237,22 @@ sub main {
     if ($vverbose) {print "Debug -- Config: ".Dumper($config);}
     
     # Test the unix find command:
-    # List of directories where it might be:
-    my @find_dirs = ('c:\\cygwin\\bin', 'c:\\tools\\cygwin\\bin');
-    if (exists $odr->{unixfind}->{value})    {    ## Was an additional place to look specified?
-        push (@find_dirs, $odr->{unixfind}->{value});
+    if (! exists $odr->{unixfind}->{value})    {
+        $odr->{unixfind}->{value}   = "C:\\tools\\cygwin\\bin";
+         }
+    local $unixfind     = $odr->{unixfind}->{value};
+
+    local $savedPATH    = $ENV{PATH};
+    $ENV{PATH}          = $unixfind.";".$savedPATH;
+    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+    if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
+    !system("find . -maxdepth 0 -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
+    local $filesize = -s "b.tmp";
+    $ENV{PATH} = $savedPATH;
+    if ($filesize > 0) {
+        die "Fatal -- $unixfind does not appear to be a path to a UNIX find command.";
         }
-    my $bFindFound      = 0;
-    foreach my $dir (@find_dirs) {
-        if (-d $dir) {
-            local $savedPATH    = $ENV{PATH};
-            $ENV{PATH}          = $dir.";".$savedPATH;
-            if (-e "a.tmp") {!system("rm a.tmp")        or die "Fatal -- Couldn't clean temporary file a.tmp.";}
-            !system("find . -maxdepth 0 -name a.tmp > b.tmp 2>&1")  or die "Fatal -- find test failed.";
-            local $filesize = -s "b.tmp";
-            $ENV{PATH} = $savedPATH;
-            if ($filesize <= 0) {
-                $bFindFound                 = 1;
-                $odr->{unixfind}->{value}   = $dir;
-                last;
-                }
-            }
-        }
-    if (! $bFindFound) {
-        print "Fatal -- unix find command not found in \n";
-        map {print " $_ "} @find_dirs;
-        print "\n";
-        die;
-        }
-                
+        
     # Don't allow /svntag and /svnbranch simultaneously:
     if ( (length $odr->{svntag}->{value} > 0)   && 
          (length $odr->{svnbranch}->{value} > 0) ) {
@@ -294,6 +282,14 @@ sub main {
             }
         }
 
+    print "Executing $cmdline\n";
+    local $argvsize = @ARGV;
+    if ($argvsize > 0) {
+        print "\nArguments for NMAKE: ";
+        map {print " $_ "} @ARGV;
+        print "\n";
+        }
+       
     #                (------------------------------------------------)
     if ( (-d $wd) && ( ($rverb =~ /export/) || ($rverb =~ /checkout/) ) ) {
         print "\n\nHEADS UP!!\n\n";
@@ -314,16 +310,6 @@ sub main {
         $l->start;
         $l->no_die_handler;        ## Needed so XML::Simple won't throw exceptions.
         }
-
-    print "Executing $cmdline\n";
-    local $argvsize = @ARGV;
-    if ($argvsize > 0) {
-        print "\nArguments for NMAKE: ";
-        map {print " $_ "} @ARGV;
-        print "\n";
-        }
-       
-    print "Info -- Using unix find in $odr->{unixfind}->{value}\n"   if ($verbose);
 
 ##++ Begin repository action:
     if ($rverb =~ /skip/) {print "Info -- *** Skipping repository access.\n"    if ($verbose);}
