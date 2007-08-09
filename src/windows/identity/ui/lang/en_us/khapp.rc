@@ -33,7 +33,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h\0"
+    "#include ""afxres.h""\0"
 END
 
 3 TEXTINCLUDE 
@@ -352,8 +352,8 @@ BEGIN
     LTEXT           "Productname",IDC_PRODUCT,41,7,225,13,NOT WS_GROUP
     LTEXT           "© 2005-2007 Massachusetts Institute of Technology\n© 2006-2007 Secure Endpoints Inc.",IDC_COPYRIGHT,41,23,276,23,NOT WS_GROUP
     LTEXT           "BuildInfo",IDC_BUILDINFO,41,49,276,20,NOT WS_GROUP
-    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,21,20
-    CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,88,276,143
+    ICON            IDI_MAIN_APP,IDC_STATIC,6,7,20,20
+    CONTROL         "",IDC_MODULES,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,41,88,276,143
     LTEXT           "Loaded modules",IDC_STATIC,41,76,52,8
 END
 
@@ -826,5 +826,6 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 
 
