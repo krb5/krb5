@@ -28,6 +28,7 @@
 
 #include<windows.h>
 #include<utils.h>
+#include<crtdbg.h>
 #include<malloc.h>
 #include<stdio.h>
 #include<strsafe.h>
@@ -81,6 +82,16 @@ static int  perf_ready = 0;
 
 static DWORD init_thread = 0;
 
+#ifdef _DEBUG
+/*  */
+#define OPS_TILL_MEM_CHECK 1024
+static int ops_till_mem_check = OPS_TILL_MEM_CHECK;
+#endif
+
+#define _PERF_BLOCK_TYPE(t) (_CLIENT_BLOCK | ((t) << 16))
+#define _RMEM_BLOCK         _PERF_BLOCK_TYPE(0)
+#define _PERF_BLOCK         _PERF_BLOCK_TYPE(1)
+
 static khm_int32 hash_stringA(const void * vs) {
     /* DJB algorithm */
 
@@ -104,7 +115,8 @@ static void perf_once(void) {
         InitializeCriticalSection(&cs_alloc);
         ZeroMemory(ht, sizeof(ht));
 
-        next_alloc = malloc(sizeof(allocation) * ALLOCBLOCK);
+        next_alloc = _malloc_dbg(sizeof(allocation) * ALLOCBLOCK, _PERF_BLOCK,
+                                __FILE__, __LINE__);
         assert(next_alloc);
         idx_next_alloc = 0;
         free_alloc = NULL;
@@ -113,7 +125,8 @@ static void perf_once(void) {
         fn_hash.n = 13;
         fn_hash.hash = hash_stringA;
         fn_hash.comp = hash_string_compA;
-        fn_hash.bins = calloc(sizeof(hash_bin *), fn_hash.n);
+        fn_hash.bins = _calloc_dbg(fn_hash.n, sizeof(hash_bin *),
+                                   _PERF_BLOCK, __FILE__, __LINE__);
 
         perf_ready = 1;
     } else {
@@ -134,7 +147,9 @@ static allocation * get_allocation(void) {
     LPOP(&free_alloc, &a);
     if (!a) {
         if (idx_next_alloc == ALLOCBLOCK) {
-            next_alloc = malloc(sizeof(allocation) * ALLOCBLOCK);
+            next_alloc = _malloc_dbg(sizeof(allocation) * ALLOCBLOCK,
+                                     _PERF_BLOCK,
+                                     __FILE__, __LINE__);
             assert(next_alloc);
             idx_next_alloc = 0;
         }
@@ -208,7 +223,7 @@ perf_malloc(const char * file, int line, size_t s) {
     EnterCriticalSection(&cs_alloc);
     a = get_allocation();
 
-    ptr = malloc(s);
+    ptr = _malloc_dbg(s, _RMEM_BLOCK, file, line);
 
     assert(ptr);                /* TODO: handle this gracefully */
 
@@ -223,7 +238,8 @@ perf_malloc(const char * file, int line, size_t s) {
                                    &cblen)))
             fn_copy = NULL;
         else {
-            fn_copy = malloc(cblen + sizeof(char));
+            fn_copy = _malloc_dbg(cblen + sizeof(char), _PERF_BLOCK,
+                                  __FILE__, __LINE__);
             if (fn_copy) {
                 hash_bin * b;
                 int hv;
@@ -232,7 +248,8 @@ perf_malloc(const char * file, int line, size_t s) {
 
                 hv = fn_hash.hash(fn_copy) % fn_hash.n;
 
-                b = malloc(sizeof(*b));
+                b = _malloc_dbg(sizeof(*b), _PERF_BLOCK,
+                                __FILE__, __LINE__);
                 b->data = fn_copy;
                 b->key = fn_copy;
                 LINIT(b);
@@ -252,6 +269,14 @@ perf_malloc(const char * file, int line, size_t s) {
     h = HASHPTR(ptr);
 
     LPUSH(&ht[h], a);
+
+#ifdef _DEBUG
+    if (-- ops_till_mem_check <= 0) {
+        assert(_CrtCheckMemory());
+        ops_till_mem_check = OPS_TILL_MEM_CHECK;
+    }
+#endif
+
     LeaveCriticalSection(&cs_alloc);
 
     return ptr;
@@ -269,7 +294,8 @@ perf_realloc(const char * file, int line, void * data, size_t s) {
     perf_once();
     h = HASHPTR(data);
 
-    n_data = realloc(data, s);
+    n_data = _realloc_dbg(data, s, _RMEM_BLOCK,
+                          __FILE__, __LINE__);
 
     assert(n_data);
 
@@ -288,6 +314,14 @@ perf_realloc(const char * file, int line, void * data, size_t s) {
 
     h = HASHPTR(n_data);
     LPUSH(&ht[h], a);
+
+#ifdef _DEBUG
+    if (-- ops_till_mem_check <= 0) {
+        assert(_CrtCheckMemory());
+        ops_till_mem_check = OPS_TILL_MEM_CHECK;
+    }
+#endif
+
     LeaveCriticalSection(&cs_alloc);
 
     return n_data;
@@ -309,8 +343,20 @@ perf_free  (void * b) {
 
     assert(a);
 
-    LDELETE(&ht[h], a);
-    LPUSH(&free_alloc, a);
+    if (a) {
+        LDELETE(&ht[h], a);
+        LPUSH(&free_alloc, a);
+
+        _free_dbg(b, _RMEM_BLOCK);
+    }
+
+#ifdef _DEBUG
+    if (-- ops_till_mem_check <= 0) {
+        assert(_CrtCheckMemory());
+        ops_till_mem_check = OPS_TILL_MEM_CHECK;
+    }
+#endif
+
     LeaveCriticalSection(&cs_alloc);
 }
 

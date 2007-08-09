@@ -44,7 +44,7 @@
 #define PREALLOC(d,s) realloc(d,s)
 #define PFREE(p)   free(p)
 #define PDUMP(f)   ((void) 0)
-#define PWCSDUP(s) wcsdup(s)
+#define PWCSDUP(s) _wcsdup(s)
 #define PSTRDUP(s) strdup(s)
 #define PDESCTHREAD(n,c)
 #endif
