@@ -81,7 +81,7 @@ void exit_krb() {
 }
 
 /* called by the NetIDMgr module manager */
-KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module) {
+KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
     khm_int32 rv = KHM_ERROR_SUCCESS;
     kmm_plugin_reg pi;
     wchar_t buf[256];
@@ -426,7 +426,7 @@ _exit:
 }
 
 /* called by the NetIDMgr module manager */
-KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module) {
+KHMEXP_EXP khm_int32 KHMAPI exit_module(kmm_module h_module) {
     exit_imports();
     exit_error_funcs();
 

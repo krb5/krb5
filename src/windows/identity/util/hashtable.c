@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<perfstat.h>
 #include<hashtable.h>
 #include<stdlib.h>

@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<khuidefs.h>
 #include<intaction.h>
 
@@ -55,5 +57,6 @@ khui_request_UI_callback(khm_ui_callback cb, void * rock) {
 
     return cbdata.rv;
 }
+
 
 

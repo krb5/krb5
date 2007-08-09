@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<khuidefs.h>
 #include<commctrl.h>
 #include<assert.h>
@@ -470,5 +472,6 @@ khui_tracker_kill_controls(khui_tracker * tc) {
     tc->fn_edit = NULL;
     tc->fn_tracker = NULL;
 }
+
 
 

@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<khuidefs.h>
 #include<utils.h>
 #include<intalert.h>
@@ -34,6 +36,7 @@
 /***********************************************************************
   Alerter
 ***********************************************************************/
+
 
 khui_alert * kh_alerts = NULL;
 CRITICAL_SECTION cs_alerts;

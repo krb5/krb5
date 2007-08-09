@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<mstring.h>
 #include<kherror.h>
 #include<strsafe.h>

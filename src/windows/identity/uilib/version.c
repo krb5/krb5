@@ -24,6 +24,8 @@
 
 /* $Id$ */
 
+#define _NIMLIB_
+
 #include<shlwapi.h>
 #include<khuidefs.h>
 #include<netidmgr_intver.h>

@@ -84,7 +84,7 @@ plugin.
 
     \note This callback is required.
 */
-KHMEXP khm_int32 KHMAPI init_module(kmm_module h_module);
+KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module);
 
 /*! \brief Type for init_module() */
 typedef khm_int32 (KHMAPI *init_module_t)(kmm_module);
@@ -104,7 +104,7 @@ typedef khm_int32 (KHMAPI *init_module_t)(kmm_module);
 
     Essentially, this is a message subscriber for KMQ messages.
 */
-KHMEXP khm_int32 KHMAPI _plugin_proc(khm_int32 msg_type, khm_int32 msg_subtype, khm_ui_4 uparam, void * vparam);
+KHMEXP_EXP khm_int32 KHMAPI _plugin_proc(khm_int32 msg_type, khm_int32 msg_subtype, khm_ui_4 uparam, void * vparam);
 
 /*! \brief Type for init_plugin() */
 typedef kmq_callback_t _plugin_proc_t;
@@ -127,7 +127,7 @@ typedef kmq_callback_t _plugin_proc_t;
 
     \note This callback is not required.
 */
-KHMEXP khm_int32 KHMAPI exit_module(kmm_module h_module);
+KHMEXP_EXP khm_int32 KHMAPI exit_module(kmm_module h_module);
 
 /*! \brief Type for exit_module() */
 typedef khm_int32 (KHMAPI *exit_module_t)(kmm_module);

@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_KMMINTERNAL_H
 #define __KHIMAIRA_KMMINTERNAL_H
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<shlwapi.h>
 #include<strsafe.h>

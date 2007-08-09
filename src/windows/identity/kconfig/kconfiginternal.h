@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_KCONFIGINTERNAL_H
 #define __KHIMAIRA_KCONFIGINTERNAL_H
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<kconfig.h>
 #include<khlist.h>

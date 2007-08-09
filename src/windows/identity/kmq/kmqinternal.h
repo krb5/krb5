@@ -27,6 +27,8 @@
 #ifndef __KHIMAIRA_KMQINTERNAL_H
 #define __KHIMAIRA_KMQINTERNAL_H
 
+#define _NIMLIB_
+
 #include<windows.h>
 #include<kmq.h>
 #include<khlist.h>
