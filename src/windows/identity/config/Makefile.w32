@@ -46,9 +46,9 @@ KHIMAIRA_WIN32_CONFIG=1
 
 # Version info
 NETIDMGR_VERSION_MAJOR=1
-NETIDMGR_VERSION_MINOR=2
+NETIDMGR_VERSION_MINOR=3
 NETIDMGR_VERSION_PATCH=0
-NETIDMGR_VERSION_AUX=2
+NETIDMGR_VERSION_AUX=0
 NETIDMGR_RELEASEDESC=
 
 # The API version.  This number must be incremented each time the API
@@ -58,7 +58,7 @@ NETIDMGR_RELEASEDESC=
 #
 # Changes to the API version numbers should be documented in
 # apiversion.txt at the root of the source tree.
-NETIDMGR_VERSION_API=8
+NETIDMGR_VERSION_API=9
 
 # Minimum backwards compatible version.  API versions from
 # NETIDMGR_VERSION_API_MINCOMPAT through NETIDMGR_VERSION_API
