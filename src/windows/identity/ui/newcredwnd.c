@@ -93,6 +93,8 @@ nc_common_dlg_proc(HWND hwnd,
             khui_nc_wnd_data * d;
             d = (khui_nc_wnd_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                break;
 
             /* message sent by parent to notify us of something */
             switch(HIWORD(wParam)) {
@@ -1684,6 +1686,8 @@ nc_handle_wm_destroy(HWND hwnd,
     khm_del_dialog(hwnd);
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return TRUE;
 
     d->nc->ident_cb(d->nc, WMNC_IDENT_EXIT, NULL, 0, 0, 0);
 
@@ -1701,6 +1705,7 @@ nc_handle_wm_destroy(HWND hwnd,
     d->dlg_main = NULL;
 
     PFREE(d);
+    SetWindowLongPtr(hwnd, CW_PARAM, 0);
 
     return TRUE;
 }
@@ -1714,6 +1719,8 @@ nc_handle_wm_command(HWND hwnd,
     khui_nc_wnd_data * d;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return 0;
 
     switch(HIWORD(wParam)) {
     case BN_CLICKED:
@@ -1885,6 +1892,8 @@ static LRESULT nc_handle_wm_moving(HWND hwnd,
     khui_nc_wnd_data * d;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return FALSE;
 
     nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY, 
                     MAKEWPARAM(0, WMNC_DIALOG_MOVE), (LPARAM) d->nc, TRUE);
@@ -1901,6 +1910,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
     int id;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return FALSE;
 
     switch(HIWORD(wParam)) {
 
@@ -2587,6 +2598,8 @@ static LRESULT nc_handle_wm_timer(HWND hwnd,
     khui_nc_wnd_data * d;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return FALSE;
 
     if (wParam == NC_TIMER_SIZER) {
 
@@ -2702,6 +2715,9 @@ static LRESULT nc_handle_wm_notify(HWND hwnd,
     khui_nc_wnd_data * d;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return FALSE;
+
     nmhdr = (LPNMHDR) lParam;
 
     if (nmhdr->code == TCN_SELCHANGE) {
@@ -2752,6 +2768,8 @@ static LRESULT nc_handle_wm_help(HWND hwnd,
     khui_nc_wnd_data * d;
 
     d = (khui_nc_wnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, CW_PARAM);
+    if (d == NULL)
+        return FALSE;
 
     hlp = (HELPINFO *) lParam;
 

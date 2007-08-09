@@ -354,6 +354,10 @@ k5_ccconfig_dlgproc(HWND hwnd,
     case WM_COMMAND:
         d = (k5_ccc_dlg_data *) (DWORD_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d == NULL)
+            break;
+
         switch(wParam) {
         case MAKEWPARAM(IDC_CFG_ADD, BN_CLICKED):
             {
@@ -543,14 +547,21 @@ k5_ccconfig_dlgproc(HWND hwnd,
         d = (k5_ccc_dlg_data *) (DWORD_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         k5_free_file_ccs(&d->work);
         k5_free_file_ccs(&d->save);
         PFREE(d);
+        SetWindowLongPtr(hwnd, DWLP_USER, 0);
         return TRUE;
 
     case KHUI_WM_CFG_NOTIFY:
         d = (k5_ccc_dlg_data *) (DWORD_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d == NULL)
+            break;
 
         switch(HIWORD(wParam)) {
         case WMCFG_APPLY:

@@ -221,6 +221,9 @@ k5_ids_tab_dlgproc(HWND hwnd,
         d = (k5_ids_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         if (HIWORD(wParam) == EN_CHANGE) {
             k5_ids_check_mod(d);
         } else if (HIWORD(wParam) == BN_CLICKED) {
@@ -245,6 +248,10 @@ k5_ids_tab_dlgproc(HWND hwnd,
     case KHUI_WM_CFG_NOTIFY:
         d = (k5_ids_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d == NULL)
+            break;
+
         if (HIWORD(wParam) == WMCFG_APPLY) {
             k5_ids_write_params(d);
         }
@@ -254,6 +261,9 @@ k5_ids_tab_dlgproc(HWND hwnd,
         d = (k5_ids_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         khui_tracker_kill_controls(&d->tc_life);
         khui_tracker_kill_controls(&d->tc_renew);
         khui_tracker_kill_controls(&d->tc_life_min);
@@ -262,9 +272,13 @@ k5_ids_tab_dlgproc(HWND hwnd,
         khui_tracker_kill_controls(&d->tc_renew_max);
 
         PFREE(d);
+
+        SetWindowLongPtr(hwnd, DWLP_USER, 0);
+
         break;
     }
     return FALSE;
 }
+
 
 

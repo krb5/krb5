@@ -142,6 +142,8 @@ cfgui_initialize_dialog(HWND hwnd) {
     HICON hicon;
 
     d = cfgui_get_wnd_data(hwnd);
+    if (d == NULL)
+        return;
 
     /* create and fill the image list for the treeview */
 
@@ -241,6 +243,8 @@ cfgui_uninitialize_dialog(HWND hwnd) {
     HWND hwtv;
 
     d = cfgui_get_wnd_data(hwnd);
+    if (d == NULL)
+        return;
 
     hwtv = GetDlgItem(hwnd, IDC_CFG_NODELIST);
 
@@ -298,6 +302,9 @@ cfgui_activate_node(HWND hwnd, khui_config_node node) {
     HWND hwtv;
 
     d = cfgui_get_wnd_data(hwnd);
+    if (d == NULL)
+        return;
+
     hwtv = GetDlgItem(hwnd, IDC_CFG_NODELIST);
     hItem = (HTREEITEM) khui_cfg_get_param(node);
 
@@ -636,6 +643,9 @@ cfgui_update_state(HWND hwnd,
     int idx;
 
     d = cfgui_get_wnd_data(hwnd);
+    if (d == NULL)
+        return;
+
     hwtv = GetDlgItem(hwnd, IDC_CFG_NODELIST);
     hItem = (HTREEITEM) khui_cfg_get_param(node);
 
@@ -679,6 +689,9 @@ cfgui_dlgproc_generic(HWND hwnd,
 
     case WM_CTLCOLORSTATIC:
         d = cfgui_get_wnd_data(hwnd);
+        if (d == NULL)
+            break;
+
         return (BOOL)(DWORD_PTR) d->hbr_white;
 
     case WM_ERASEBKGND:
@@ -689,6 +702,8 @@ cfgui_dlgproc_generic(HWND hwnd,
             RECT r_fill;
 
             d = cfgui_get_wnd_data(hwnd);
+            if (d == NULL)
+                break;
 
             GetClientRect(hwnd, &r_client);
             SetRectEmpty(&r_logo);
@@ -781,6 +796,9 @@ cfgui_dlgproc(HWND hwnd,
         cfgui_uninitialize_dialog(hwnd);
 
         d = cfgui_get_wnd_data(hwnd);
+        if (d == NULL)
+            break;
+
         khui_delete_bitmap(&d->kbmp_logo);
         DeleteObject(d->hbr_white);
 
@@ -842,6 +860,9 @@ cfgui_dlgproc(HWND hwnd,
     case WM_CTLCOLORSTATIC:
         {
             d = cfgui_get_wnd_data(hwnd);
+            if (d == NULL)
+                break;
+
             return (BOOL)(DWORD_PTR) d->hbr_white;
         }
         /* implicit break */
@@ -878,6 +899,9 @@ cfgui_dlgproc(HWND hwnd,
 
         case WMCFG_SYNC_NODE_LIST:
             d = cfgui_get_wnd_data(hwnd);
+            if (d == NULL)
+                break;
+
             cfgui_sync_node_list(d, hwnd);
             break;
         }

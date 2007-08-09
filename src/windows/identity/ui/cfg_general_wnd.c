@@ -332,11 +332,14 @@ khm_cfg_general_proc(HWND hwnd,
         d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
         if (d) {
             PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, 0);
         }
         return TRUE;
 
     case WM_COMMAND:
         d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (HIWORD(wParam) == BN_CLICKED) {
             if (LOWORD(wParam) == IDC_CFG_SHOWLOG) {
@@ -405,6 +408,8 @@ khm_cfg_general_proc(HWND hwnd,
 
     case KHUI_WM_CFG_NOTIFY:
         d = (dlg_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             write_params(d);

@@ -88,6 +88,8 @@ config_id_dlgproc(HWND hwnd,
     case KHUI_WM_CFG_NOTIFY:
         d = (config_id_dlg_data *)
             GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            break;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             /* TODO: apply changes */
@@ -108,6 +110,7 @@ config_id_dlgproc(HWND hwnd,
                 /* TODO: perform any other required uninitialization */
 
                 free(d);
+                SetWindowLongPtr(hwnd, DWLP_USER, 0);
             }
         }
         break;

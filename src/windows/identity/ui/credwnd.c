@@ -1127,13 +1127,16 @@ cw_timer_proc(HWND hwnd,
     KillTimer(hwnd, idEvent);
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
-    r = (khui_credwnd_row *) idEvent;
-    r->flags &= ~KHUI_CW_ROW_TIMERSET;
+    if (tbl == NULL)
+        return;
 
+    r = (khui_credwnd_row *) idEvent;
     nr = (int)(r - tbl->rows);
 
     if(nr < 0 || nr >= tbl->n_rows)
         return;
+
+    r->flags &= ~KHUI_CW_ROW_TIMERSET;
 
     if(r->flags & KHUI_CW_ROW_CRED) {
 
@@ -3024,11 +3027,14 @@ cw_wm_destroy(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
 
-    cw_save_view(tbl, NULL);
+    if (tbl) {
+        cw_save_view(tbl, NULL);
 
-    cw_unload_view(tbl);
+        cw_unload_view(tbl);
 
-    PFREE(tbl);
+        PFREE(tbl);
+        SetWindowLongPtr(hwnd, 0, 0);
+    }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
@@ -3051,6 +3057,8 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     BOOL has_dc = FALSE;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        goto _exit;
 
     if (wParam != 0) {
         /* we assume that if wParam != 0, then that contains a device
@@ -3311,20 +3319,20 @@ cw_wm_size(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     khui_credwnd_tbl * tbl;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl) {
+        cw_update_extents(tbl, TRUE);
 
-    cw_update_extents(tbl, TRUE);
+        GetClientRect(hwnd, &rect);
 
-    GetClientRect(hwnd, &rect);
-
-    if(tbl->hwnd_notif) {
-        SetWindowPos(
-            tbl->hwnd_notif,
-            tbl->hwnd_header,
-            rect.left,
-            tbl->header_height,
-            rect.right - rect.left,
-            tbl->cell_height * 4,
-            0);
+        if(tbl->hwnd_notif) {
+            SetWindowPos(tbl->hwnd_notif,
+                         tbl->hwnd_header,
+                         rect.left,
+                         tbl->header_height,
+                         rect.right - rect.left,
+                         tbl->cell_height * 4,
+                         0);
+        }
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
@@ -3335,6 +3343,9 @@ cw_wm_notify(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     khui_credwnd_tbl * tbl;
     LPNMHDR pnmh;
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
+
     pnmh = (LPNMHDR) lParam;
     if(pnmh->hwndFrom == tbl->hwnd_header) {
         LPNMHEADER ph;
@@ -3360,6 +3371,9 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0); 
 
     kmq_wm_begin(lParam, &m);
+
+    if (tbl == NULL)
+        goto _skip_message;
 
     if(m->type == KMSG_CRED) {
         switch (m->subtype) {
@@ -3572,6 +3586,8 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     _skip_action:
         ;
     }
+
+ _skip_message:
 
     return kmq_wm_end(m, rv);
 }
@@ -4027,6 +4043,8 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     int nm_state,nm_row,nm_col;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
 
     /* we are basically trying to capture events where the mouse is
        hovering over one of the 'hotspots'.  There are two kinds of
@@ -4276,6 +4294,9 @@ cw_wm_hscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     int newpos;
 
     tbl = (khui_credwnd_tbl *) (LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
+
     GetClientRect(hwnd, &cr);
     dx = tbl->scr_left;
 
@@ -4437,6 +4458,8 @@ cw_wm_vscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     RECT cr;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
 
     GetClientRect(hwnd, &cr);
     cr.top += tbl->header_height;
@@ -4567,6 +4590,8 @@ cw_pp_ident_proc(HWND hwnd,
     case WM_COMMAND:
         s = (khui_property_sheet *) (LONG_PTR) 
             GetWindowLongPtr(hwnd, DWLP_USER);
+        if (s == NULL)
+            return 0;
 
         switch(wParam) {
         case MAKEWPARAM(IDC_PP_IDDEF, BN_CLICKED):
@@ -4625,6 +4650,8 @@ cw_pp_ident_proc(HWND hwnd,
             lpp = (LPPSHNOTIFY) lParam;
             s = (khui_property_sheet *) (LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (s == NULL)
+                return 0;
 
             switch(lpp->hdr.code) {
             case PSN_APPLY:
@@ -4794,6 +4821,8 @@ cw_properties(HWND hwnd)
 
     khui_context_get(&ctx);
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
 
     if(ctx.scope == KHUI_SCOPE_NONE) {
         khui_context_release(&ctx);
@@ -4946,6 +4975,8 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     khui_credwnd_tbl * tbl;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
 
     if(HIWORD(wParam) == BN_CLICKED && 
        LOWORD(wParam) == KHUI_HTWND_CTLID) {
@@ -5303,6 +5334,8 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     khui_credwnd_tbl * tbl;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return 0;
 
     GetWindowRect(hwnd, &r);
 

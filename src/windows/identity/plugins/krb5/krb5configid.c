@@ -324,6 +324,9 @@ k5_id_tab_dlgproc(HWND hwnd,
         d = (k5_id_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         if (HIWORD(wParam) == EN_CHANGE ||
             HIWORD(wParam) == BN_CLICKED)
             k5_id_check_mod(hwnd, d);
@@ -332,6 +335,9 @@ k5_id_tab_dlgproc(HWND hwnd,
     case KHUI_WM_CFG_NOTIFY:
         d = (k5_id_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
+
+        if (d == NULL)
+            break;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             k5_id_write_params(hwnd, d);
@@ -342,6 +348,9 @@ k5_id_tab_dlgproc(HWND hwnd,
         d = (k5_id_dlg_data *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
 
+        if (d == NULL)
+            break;
+
         khui_tracker_kill_controls(&d->tc_life);
         khui_tracker_kill_controls(&d->tc_renew);
 
@@ -349,6 +358,7 @@ k5_id_tab_dlgproc(HWND hwnd,
             kcdb_identity_release(d->ident);
 
         PFREE(d);
+        SetWindowLongPtr(hwnd, DWLP_USER, 0);
         break;
     }
     return FALSE;

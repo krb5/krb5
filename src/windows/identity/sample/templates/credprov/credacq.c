@@ -147,6 +147,8 @@ handle_wm_command(HWND hwnd, WPARAM wParam, LPARAM lParam) {
     struct nc_dialog_data * d;
 
     d = (struct nc_dialog_data *) GetWindowLongPtr(hwnd, DWLP_USER);
+    if (d == NULL)
+        return FALSE;
 
     /* TODO: handle WM_COMMAND */
     return FALSE;
@@ -165,6 +167,7 @@ handle_wm_destroy(HWND hwnd, WPARAM wParam, LPARAM lParam) {
         d->nct = NULL;
 
         free(d);
+        SetWindowLongPtr(hwnd, DWLP_USER, 0);
     }
 
     /* TODO: Perform any additional uninitialization */

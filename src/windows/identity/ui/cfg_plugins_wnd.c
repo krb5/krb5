@@ -371,6 +371,8 @@ khm_cfg_plugins_proc(HWND hwnd,
 
             d = (plugin_dlg_data *) (LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                return FALSE;
 
             if (wParam == IDC_CFG_PLUGINS &&
                 (lpnm = (LPNMHDR) lParam) &&
@@ -426,6 +428,8 @@ khm_cfg_plugins_proc(HWND hwnd,
 
             d = (plugin_dlg_data *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
+            if (d == NULL)
+                return FALSE;
 
             switch (wParam) {
             case MAKEWPARAM(IDC_CFG_ENABLE, BN_CLICKED):
@@ -627,6 +631,9 @@ khm_cfg_plugins_proc(HWND hwnd,
 #ifdef DEBUG
             assert(d);
 #endif
+            if (d == NULL)
+                return TRUE;
+
             for (i=0; i<d->n_info; i++) {
 #ifdef DEBUG
                 assert(d->info[i]);
@@ -637,6 +644,7 @@ khm_cfg_plugins_proc(HWND hwnd,
             }
 
             PFREE(d);
+            SetWindowLongPtr(hwnd, DWLP_USER, 0);
 
             khm_set_dialog_result(hwnd, 0);
         }

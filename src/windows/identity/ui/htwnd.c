@@ -642,6 +642,8 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     int ext_height = 0;
 
     d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (d == NULL)
+        return 0;
 
     if(!GetUpdateRect(hwnd, &r, !(d->flags & KHUI_HTWND_TRANSPARENT)))
         return 0;
@@ -945,6 +947,9 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             BOOL rv;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                return 0;
+
             newtext = (wchar_t *) lParam;
 
             if(d->text) {
@@ -978,21 +983,24 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             int i;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
-            if(d->text)
-                PFREE(d->text);
-            d->text = 0;
+            if (d) {
+                if(d->text)
+                    PFREE(d->text);
+                d->text = 0;
 
-            if(d->links) {
-                for(i=0;i<d->max_links;i++) {
-                    if(d->links[i])
-                        PFREE(d->links[i]);
+                if(d->links) {
+                    for(i=0;i<d->max_links;i++) {
+                        if(d->links[i])
+                            PFREE(d->links[i]);
+                    }
+                    PFREE(d->links);
                 }
-                PFREE(d->links);
+
+                clear_styles(d);
+
+                PFREE(d);
+                SetWindowLongPtr(hwnd, 0, 0);
             }
-
-            clear_styles(d);
-
-            PFREE(d);
         }
         break;
 
@@ -1004,6 +1012,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             RECT r;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                return FALSE;
 
             GetClientRect(hwnd, &r);
             hbr = GetSysColorBrush(COLOR_WINDOW);
@@ -1040,6 +1050,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
                 break;
                 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             if(d->active_link >= 0) {
                 SetCursor(d->hc_hand);
@@ -1053,6 +1065,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             khui_htwnd_data * d;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             d->flags |= KHUI_HTWND_FOCUS;
 
@@ -1065,6 +1079,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             khui_htwnd_data * d;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             d->flags &= ~KHUI_HTWND_FOCUS;
 
@@ -1077,6 +1093,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             khui_htwnd_data * d;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             d->md_link = d->active_link;
 
@@ -1089,6 +1107,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             khui_htwnd_data * d;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             if(d->md_link == d->active_link && d->md_link >= 0) {
                 /* clicked */
@@ -1109,6 +1129,8 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             RECT r;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
 
             old_pos = new_pos = d->scroll_left;
             ext = d->ext_width;
@@ -1194,6 +1216,9 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
             int nl;
 
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+            if (d == NULL)
+                break;
+
             p.x = GET_X_LPARAM(lParam) + d->scroll_left;
             p.y = GET_Y_LPARAM(lParam) + d->scroll_top;
                 

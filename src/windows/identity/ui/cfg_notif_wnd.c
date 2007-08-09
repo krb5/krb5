@@ -282,6 +282,8 @@ khm_cfg_notifications_proc(HWND hwnd,
 
     case WM_COMMAND: {
         d = (notif_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (HIWORD(wParam) == BN_CLICKED) {
             refresh_data(hwnd, d);
@@ -299,6 +301,9 @@ khm_cfg_notifications_proc(HWND hwnd,
 
     case WM_TIMER: {
         d = (notif_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
+
         KillTimer(hwnd, 1);
         check_for_modification(d);
 
@@ -309,6 +314,8 @@ khm_cfg_notifications_proc(HWND hwnd,
 
     case WM_DESTROY: {
         d = (notif_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         khui_tracker_kill_controls(&d->tc_renew);
         khui_tracker_kill_controls(&d->tc_warn1);
@@ -325,6 +332,8 @@ khm_cfg_notifications_proc(HWND hwnd,
 
     case KHUI_WM_CFG_NOTIFY: {
         d = (notif_data *) (DWORD_PTR) GetWindowLongPtr(hwnd, DWLP_USER);
+        if (d == NULL)
+            return FALSE;
 
         if (HIWORD(wParam) == WMCFG_APPLY) {
             write_params(d);
