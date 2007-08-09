@@ -33,6 +33,8 @@ khm_int32 khui_cw_flag_id;
 
 khm_int32 attr_to_action[KCDB_ATTR_MAX_ID + 1];
 
+khm_int32   bHideWatermarks = 0;
+
 void
 khm_set_cw_element_font(wchar_t * name, LOGFONT * pfont) {
     khm_handle csp_cw = NULL;
@@ -461,6 +463,8 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
     if(KHM_FAILED(khc_open_space(NULL, L"CredWindow", KHM_PERM_READ | KHM_PERM_WRITE,
                                  &hc_cw)))
         return;
+
+    khc_read_int32(hc_cw, L"HideWatermarks", &bHideWatermarks);
 
     if(KHM_FAILED(khc_open_space(hc_cw, L"Views", KHM_PERM_READ, &hc_vs)))
         goto _exit;
@@ -2274,7 +2278,8 @@ cw_erase_rect(HDC hdc,
         rlogo.right = r_wnd->right;
         rlogo.top = r_wnd->bottom - tbl->kbm_logo_shade.cy;
         rlogo.bottom = r_wnd->bottom;
-        rie = IntersectRect(&ri, r_erase, &rlogo);
+        if (bHideWatermarks)    {rie = FALSE;}
+        else                    {rie = IntersectRect(&ri, r_erase, &rlogo);}
     } else {
         ZeroMemory(&rlogo, sizeof(rlogo));
         ZeroMemory(&ri, sizeof(ri));
