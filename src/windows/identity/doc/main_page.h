@@ -114,6 +114,11 @@
     The Network Identity Manager version number is set as the file and
     product version of <tt>nidmgr32.dll</tt>.
 
+    The API version refers to the version of the API exposed by
+    <tt>nidmgr32.dll</tt>.  A plug-in that was built against a
+    particular API version will be compatible with any version of
+    Network Identity Manager whose API version is the same.
+
     - <b>1.2.0.2</b> Kerberos for Windows 3.2 Beta 2 <em>Apr 11, 2007</em>\n
       API version : <b>8</b>
 

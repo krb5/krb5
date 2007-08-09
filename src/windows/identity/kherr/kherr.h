@@ -911,10 +911,39 @@ KHMEXP void KHMAPI kherr_set_progress(khm_ui_4 num, khm_ui_4 denom);
 #define _progress(num,denom) kherr_set_progress((num),(denom))
 
 /*! \brief Get the progress meter of the current error context
+
+    This is equivalent to calling kherr_get_progress_i() for the
+    current error context.  I.e. :
+
+    \code
+    kherr_context * ctx;
+
+    ctx = kherr_peek_context();
+    kherr_get_progress_i(ctx, &num, &denom);
+    kherr_release_context(ctx);
+    \endcode
+
+    \see kherr_get_progress_i()
  */
 KHMEXP void KHMAPI kherr_get_progress(khm_ui_4 * num, khm_ui_4 * denom);
 
 /*! \brief Get the progress meter of an error context
+
+    The progress meter for the current context can be set by calling
+    kherr_set_progress() (or using the ::_progress macro).  The
+    progress value returned by this function is as follows:
+
+    If one or more of the following conditions are true, then the
+    returned progress values are the values set for the context using
+    the most recent call to kherr_set_progress():
+
+    - if the numerator and the denominator are non-zero
+
+    - if the ::KHERR_CF_OWN_PROGRESS flag is set for the context.
+
+    Otherwise, the function will calculate the progress by enumerating
+    all the child context for the context and summing up the
+    normalized numerators and the denominators for them.
  */
 KHMEXP void KHMAPI kherr_get_progress_i(kherr_context * c, khm_ui_4 * num, khm_ui_4 * denom);
 
