@@ -1939,6 +1939,13 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
         /* we are switching from basic to advanced or vice versa */
 
         if (d->nc->mode == KHUI_NC_MODE_EXPANDED) {
+
+            if (d->current_panel != 0) {
+                d->current_panel = 0;
+                TabCtrl_SetCurSel(d->tab_wnd, 0);
+                nc_layout_new_cred_window(d);
+            }
+
             d->nc->mode = KHUI_NC_MODE_MINI;
         } else {
             d->nc->mode = KHUI_NC_MODE_EXPANDED;
