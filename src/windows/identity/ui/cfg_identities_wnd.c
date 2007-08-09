@@ -494,19 +494,19 @@ write_params_idents(void) {
         if (cfg_idents.work.monitor != cfg_idents.saved.monitor) {
             khc_write_int32(csp_cw, L"DefaultMonitor",
                             !!cfg_idents.work.monitor);
-            cfg_idents.work.monitor = cfg_idents.saved.monitor;
+            cfg_idents.saved.monitor = cfg_idents.work.monitor;
             cfg_idents.applied = TRUE;
         }
         if (cfg_idents.work.auto_renew != cfg_idents.saved.auto_renew) {
             khc_write_int32(csp_cw, L"DefaultAllowAutoRenew",
                             !!cfg_idents.work.auto_renew);
-            cfg_idents.work.auto_renew = cfg_idents.saved.auto_renew;
+            cfg_idents.saved.auto_renew = cfg_idents.work.auto_renew;
             cfg_idents.applied = TRUE;
         }
         if (cfg_idents.work.sticky != cfg_idents.saved.sticky) {
             khc_write_int32(csp_cw, L"DefaultSticky",
                             !!cfg_idents.work.sticky);
-            cfg_idents.work.sticky = cfg_idents.saved.sticky;
+            cfg_idents.saved.sticky = cfg_idents.work.sticky;
             cfg_idents.applied = TRUE;
         }
 
