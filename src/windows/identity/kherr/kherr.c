@@ -86,7 +86,9 @@ KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
         filter = KHERR_CTX_BEGIN |
             KHERR_CTX_DESCRIBE |
             KHERR_CTX_END |
-            KHERR_CTX_ERROR;
+            KHERR_CTX_ERROR |
+            KHERR_CTX_NEWCHILD |
+            KHERR_CTX_FOLDCHILD;
 
     /* Since commit events are the most frequent, we put those
        handlers at the top of the list.  When dispatching a commit
@@ -1014,6 +1016,7 @@ KHMEXP void KHMAPI kherr_push_context(kherr_context * c)
 
     if (new_context && IS_KHERR_CTX(p)) {
         notify_ctx_event(KHERR_CTX_BEGIN, c);
+        notify_ctx_event(KHERR_CTX_NEWCHILD, p);
     }
 
     LeaveCriticalSection(&cs_error);
@@ -1128,6 +1131,9 @@ KHMEXP void KHMAPI kherr_release_context(kherr_context * c) {
                 add_event(p, e);
 
             TDELCHILD(p, c);
+
+            notify_ctx_event(KHERR_CTX_FOLDCHILD, p);
+
             kherr_release_context(p);
         } else {
             LDELETE(&ctx_root_list, c);

@@ -379,13 +379,16 @@ enum kherr_context_flags {
     \see kherr_add_ctx_handler()
 */
 enum kherr_ctx_event {
-    KHERR_CTX_BEGIN  = 0x0001,  /*!< A new context was created */
-    KHERR_CTX_DESCRIBE=0x0002,  /*!< A context was described */
-    KHERR_CTX_END    = 0x0004,  /*!< A context was closed */
-    KHERR_CTX_ERROR  = 0x0008,  /*!< A context switched to an error
-                                  state */
-    KHERR_CTX_EVTCOMMIT = 0x0010 /*!< A event was committed into the
-				   context */
+    KHERR_CTX_BEGIN     = 0x00000001, /*!< A new context was created */
+    KHERR_CTX_DESCRIBE  = 0x00000002, /*!< A context was described */
+    KHERR_CTX_END       = 0x00000004, /*!< A context was closed */
+    KHERR_CTX_ERROR     = 0x00000008, /*!< A context switched to an
+                                        error state */
+    KHERR_CTX_EVTCOMMIT = 0x00000010, /*!< A event was committed into
+                                        the context */
+    KHERR_CTX_NEWCHILD  = 0x00000020, /*!< A new child context was created */
+    KHERR_CTX_FOLDCHILD = 0x00000040, /*!< A child context was folded */
+    KHERR_CTX_PROGRESS  = 0x00000080, /*!< Progress marker updated for context */
 };
 
 /*! \brief Context event handler
