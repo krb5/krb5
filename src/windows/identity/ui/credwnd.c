@@ -685,7 +685,7 @@ _skip_col:
         COLORREF bg_hdr_warn = RGB(235,235,134);
         COLORREF bg_hdr_crit = RGB(235,184,134);
         COLORREF bg_hdr_exp = RGB(235,134,134);
-        COLORREF bg_hdr_def = RGB(184,235,134);
+        COLORREF bg_hdr_def = GetSysColor(COLOR_WINDOW);
 
         tbl->cr_normal =       GetSysColor(COLOR_WINDOWTEXT);
         tbl->cr_s =            GetSysColor(COLOR_WINDOWTEXT);
