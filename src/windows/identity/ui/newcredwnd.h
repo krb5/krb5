@@ -92,6 +92,10 @@ typedef struct khui_nc_wnd_data_t {
                                    change operation. */
     int  sz_ch_timeout;         /* Milliseconds between each increment */
 
+    BOOL flashing_enabled;      /* The window maybe still flashing
+                                   from the last call to
+                                   FlashWindowEx(). */
+
     /* Custom controls and identity specifiers */
 
     HWND hwnd_banner;           /* static control for banner */
