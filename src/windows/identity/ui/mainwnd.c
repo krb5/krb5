@@ -305,6 +305,7 @@ khm_main_wnd_proc(HWND hwnd,
         case KHUI_ACTION_VIEW_REFRESH:
             khm_cred_refresh();
             InvalidateRect(khm_hwnd_main_cred, NULL, FALSE);
+            khui_action_trigger(KHUI_ACTION_LAYOUT_RELOAD, NULL);   /* Hack causes refresh button to work in Basic view. */
             return 0;
 
         case KHUI_ACTION_PASSWD_ID:
