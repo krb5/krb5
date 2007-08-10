@@ -92,7 +92,7 @@ Kerberos for Windows
        
        (edit the kfw-modified.msi to include the necessary changes)
 
-       > msitran -g kfw-modified.msi kfw.msi kfw-transform.mst
+       > msitran -g kfw.msi kfw-modified.msi kfw-transform.mst
 
        (generates kfw-transform.mst, which is the transform)
 
