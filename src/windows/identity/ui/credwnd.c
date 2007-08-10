@@ -3387,6 +3387,9 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
             InvalidateRect(hwnd, NULL, FALSE);
+
+            khui_action_trigger(KHUI_ACTION_LAYOUT_RELOAD, NULL);   /* Hack causes updates to be displayed. */
+
             break;
 
         case KMSG_CRED_PP_BEGIN:
