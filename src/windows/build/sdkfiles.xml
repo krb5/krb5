@@ -7,7 +7,7 @@
 
 		<File name="relnotes.html"  from="doc\kerberos"                 to="doc" />
 		<File name="kclient.rtf"    from="athena\auth\krb4\kclient\doc" to="doc" />
-                <File name="msi-deployment-guide.txt" from="athena\auth\krb5\src\windows\installer\wix\"   to="\doc" />
+        <File name="msi-deployment-guide.txt" from="athena\auth\krb5\src\windows\installer\wix\"   to="\doc" />
 
 		<File  name="*.*"           from="staging\inc"                  to="inc" />
 		<!-- loadfuncs.c is deliberately here.  Otherwise, *.h would work. -->
