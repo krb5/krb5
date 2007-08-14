@@ -136,7 +136,6 @@ ser_data(int verbose, char *msg, krb5_pointer ctx, krb5_magic dtype)
 	    /* Free the data */
 	    switch (dtype) {
 	    case KV5M_CONTEXT:
-		krb5_db_fini((krb5_context) nctx);
 		krb5_free_context((krb5_context) nctx);
 		break;
 	    case KV5M_AUTH_CONTEXT:
