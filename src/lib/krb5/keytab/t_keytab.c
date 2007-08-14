@@ -385,6 +385,8 @@ static void do_test(krb5_context context, const char *prefix,
   printf("Test on %s passed\n", name);
   if(delete)
 	  unlink(filename);
+  free(filename);
+  free(name);
 
 }
 
