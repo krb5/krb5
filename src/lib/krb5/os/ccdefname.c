@@ -143,7 +143,7 @@ try_dir(
 #endif
 
 #if defined(_WIN32)
-static krb5_error_code get_from_os(char *name_buf, int name_size)
+static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
 	char *prefix = krb5_cc_dfl_ops->prefix;
         int size;
@@ -197,7 +197,7 @@ static krb5_error_code get_from_os(char *name_buf, int name_size)
 
 #if defined(USE_CCAPI)
 
-static krb5_error_code get_from_os(char *name_buf, int name_size)
+static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
 	krb5_error_code result = 0;
 	cc_context_t cc_context = NULL;
@@ -232,7 +232,7 @@ cleanup:
 
 #else
 #if !(defined(_WIN32))
-static krb5_error_code get_from_os(char *name_buf, int name_size)
+static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
     snprintf(name_buf, name_size, "FILE:/tmp/krb5cc_%ld", (long) getuid());
     return 0;

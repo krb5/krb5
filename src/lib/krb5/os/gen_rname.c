@@ -36,7 +36,7 @@ krb5_gen_replay_name(krb5_context context, const krb5_address *address, const ch
 {
     char * tmp;
     int i;
-    int len;
+    unsigned int len;
 
     len = strlen(uniq) + (address->length * 2) + 1;
     if ((*string = malloc(len)) == NULL)
