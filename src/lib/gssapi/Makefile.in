@@ -148,13 +148,13 @@ gss_libinit.so gss_libinit.po $(OUTPRE)gss_libinit.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/gssapi.h \
-  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
-  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
-  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
-  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
-  $(srcdir)/generic/gssapiP_generic.h $(srcdir)/generic/gssapi_generic.h \
-  $(srcdir)/krb5/gssapiP_krb5.h $(srcdir)/mechglue/mechglue.h \
-  $(srcdir)/mechglue/mglueP.h generic/gssapi_err_generic.h \
-  gss_libinit.c gss_libinit.h krb5/gssapi_err_krb5.h \
-  krb5/gssapi_krb5.h
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int-pkinit.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(srcdir)/generic/gssapiP_generic.h \
+  $(srcdir)/generic/gssapi_generic.h $(srcdir)/krb5/gssapiP_krb5.h \
+  $(srcdir)/mechglue/mechglue.h $(srcdir)/mechglue/mglueP.h \
+  generic/gssapi_err_generic.h gss_libinit.c gss_libinit.h \
+  krb5/gssapi_err_krb5.h krb5/gssapi_krb5.h

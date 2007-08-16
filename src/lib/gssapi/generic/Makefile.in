@@ -198,7 +198,8 @@ util_buffer.so util_buffer.po $(OUTPRE)util_buffer.$(OBJEXT): \
   util_buffer.c
 util_errmap.so util_errmap.po $(OUTPRE)util_errmap.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
   errmap.h gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   util_errmap.c
 util_ordering.so util_ordering.po $(OUTPRE)util_ordering.$(OBJEXT): \
