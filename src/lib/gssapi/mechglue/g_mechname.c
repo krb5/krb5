@@ -79,6 +79,7 @@ gss_add_mech_name_type(minor_status, name_type, mech)
     p = malloc(sizeof(gss_mech_spec_name_desc));
     if (!p) {
 	*minor_status = ENOMEM;
+	map_errcode(minor_status);
 	goto allocation_failure;
     }
     p->name_type = 0;
@@ -86,12 +87,16 @@ gss_add_mech_name_type(minor_status, name_type, mech)
     
     major_status = generic_gss_copy_oid(minor_status, name_type,
 					&p->name_type);
-    if (major_status)
+    if (major_status) {
+	map_errcode(minor_status);
 	goto allocation_failure;
+    }
     major_status = generic_gss_copy_oid(minor_status, mech,
 					&p->mech);
-    if (major_status)
+    if (major_status) {
+	map_errcode(minor_status);
 	goto allocation_failure;
+    }
 
     p->next = name_list;
     p->prev = 0;

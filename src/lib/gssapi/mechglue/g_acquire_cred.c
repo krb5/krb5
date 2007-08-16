@@ -384,8 +384,10 @@ gss_add_cred(minor_status, input_cred_handle,
 				    GSS_C_NULL_OID_SET, cred_usage,
 				    &cred, NULL, &time_rec);
 
-    if (status != GSS_S_COMPLETE)
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	goto errout;
+    }
 
     /* may need to set credential auxinfo strucutre */
     if (union_cred->auxinfo.creation_time == 0) {

@@ -128,8 +128,10 @@ gss_name_t *		output_name;
 	major_status = generic_gss_copy_oid(minor_status,
 					    input_name_type,
 					    &union_name->name_type);
-	if (major_status != GSS_S_COMPLETE)
+	if (major_status != GSS_S_COMPLETE) {
+	    map_errcode(minor_status);
 	    goto allocation_failure;
+	}
     }
 
     /*
@@ -250,13 +252,16 @@ importExportName(minor, unionName)
      * have created it.
      */
     if (mech->gss_export_name) {
-	if ((major = mech->gss_import_name(mech->context, minor,
-					   &expName, (gss_OID)GSS_C_NT_EXPORT_NAME,
-					   &unionName->mech_name)) != GSS_S_COMPLETE ||
-	    (major = generic_gss_copy_oid(minor, &mechOid,
-					  &unionName->mech_type)) !=
-	    GSS_S_COMPLETE) {
-	    return (major);
+	major = mech->gss_import_name(mech->context, minor,
+				      &expName, (gss_OID)GSS_C_NT_EXPORT_NAME,
+				      &unionName->mech_name);
+	if (major != GSS_S_COMPLETE)
+	    map_error(minor, mech);
+	else {
+	    major = generic_gss_copy_oid(minor, &mechOid,
+					 &unionName->mech_type);
+	    if (major != GSS_S_COMPLETE)
+		map_errcode(minor);
 	}
 	return (major);
     }
@@ -349,8 +354,14 @@ importExportName(minor, unionName)
     expName.value = nameLen ? (void *)buf : NULL;
     major = mech->gss_import_name(mech->context, minor, &expName,
 				  GSS_C_NULL_OID, &unionName->mech_name);
-    if (major != GSS_S_COMPLETE)
+    if (major != GSS_S_COMPLETE) {
+	map_error(minor, mech);
 	return (major);
+    }
 
-    return (generic_gss_copy_oid(minor, &mechOid, &unionName->mech_type));
+    major = generic_gss_copy_oid(minor, &mechOid, &unionName->mech_type);
+    if (major != GSS_S_COMPLETE) {
+	map_errcode(minor);
+    }
+    return major;
 } /* importExportName */

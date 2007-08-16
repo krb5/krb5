@@ -135,6 +135,7 @@ int *		open;
 			open);
 
     if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return status;
     }
 

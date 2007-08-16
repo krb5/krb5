@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2006,2007 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -472,8 +472,10 @@ init_ctx_new(OM_uint32 *minor_status,
 	 */
 	ret = generic_gss_copy_oid(minor_status, (*mechSet)->elements,
 				   &sc->internal_mech);
-	if (ret != GSS_S_COMPLETE)
-		goto cleanup;
+	if (ret != GSS_S_COMPLETE) {
+	    map_errcode(minor_status);
+	    goto cleanup;
+	}
 
 	if (put_mech_set(*mechSet, &sc->DER_mechTypes) < 0) {
 		generic_gss_release_oid(&tmpmin, &sc->internal_mech);
@@ -527,6 +529,7 @@ init_ctx_cont(OM_uint32 *minor_status, gss_ctx_id_t *ctx, gss_buffer_t buf,
 	}
 	if (acc_negState == REJECT) {
 		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		map_errcode(minor_status);
 		*tokflag = NO_TOKEN_SEND;
 		ret = GSS_S_FAILURE;
 		goto cleanup;
@@ -579,10 +582,12 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	 */
 	if (supportedMech == GSS_C_NO_OID) {
 		*minor_status = ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR;
+		map_errcode(minor_status);
 		return GSS_S_DEFECTIVE_TOKEN;
 	}
 	if (acc_negState == ACCEPT_DEFECTIVE_TOKEN) {
 		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		map_errcode(minor_status);
 		return GSS_S_DEFECTIVE_TOKEN;
 	}
 	if (!g_OID_equal(supportedMech, sc->internal_mech)) {
@@ -607,6 +612,7 @@ init_ctx_nego(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 			 * mech selected.
 			 */
 			*minor_status = ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR;
+			map_errcode(minor_status);
 			ret = GSS_S_DEFECTIVE_TOKEN;
 		}
 	} else if (sc->mech_complete) {
@@ -639,6 +645,7 @@ init_ctx_reselect(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 	ret = generic_gss_copy_oid(minor_status, supportedMech,
 				   &sc->internal_mech);
 	if (ret != GSS_S_COMPLETE) {
+		map_errcode(minor_status);
 		sc->internal_mech = GSS_C_NO_OID;
 		*tokflag = NO_TOKEN_SEND;
 		return ret;
@@ -1058,6 +1065,7 @@ acc_ctx_vfy_oid(OM_uint32 *minor_status,
 	mech = gssint_get_mechanism(sc->internal_mech);
 	if (mech == NULL || mech->gss_indicate_mechs == NULL) {
 		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		map_errcode(minor_status);
 		*negState = REJECT;
 		*tokflag = ERROR_TOKEN_SEND;
 		return GSS_S_BAD_MECH;
@@ -1065,6 +1073,7 @@ acc_ctx_vfy_oid(OM_uint32 *minor_status,
 	ret = mech->gss_indicate_mechs(NULL, minor_status, &mech_set);
 	if (ret != GSS_S_COMPLETE) {
 		*tokflag = NO_TOKEN_SEND;
+		map_error(minor_status, mech);
 		goto cleanup;
 	}
 	ret = gss_test_oid_set_member(minor_status, mechoid,
@@ -1073,6 +1082,7 @@ acc_ctx_vfy_oid(OM_uint32 *minor_status,
 		goto cleanup;
 	if (!present) {
 		*minor_status = ERR_SPNEGO_NEGOTIATION_FAILED;
+		map_errcode(minor_status);
 		*negState = REJECT;
 		*tokflag = ERROR_TOKEN_SEND;
 		ret = GSS_S_BAD_MECH;
@@ -1730,6 +1740,7 @@ get_available_mechs(OM_uint32 *minor_status,
 	(void) gss_release_oid_set(&tmpmin, &mechs);
 	if (found == 0 || stat != GSS_S_COMPLETE) {
 		*minor_status = ERR_SPNEGO_NO_MECHS_AVAILABLE;
+		map_errcode(minor_status);
 		if (stat == GSS_S_COMPLETE)
 			stat = GSS_S_FAILURE;
 	}
@@ -1769,8 +1780,10 @@ get_mech_oid(OM_uint32 *minor_status, unsigned char **buff_in, size_t length)
 
 	status = generic_gss_copy_oid(minor_status, &toid, &mech_out);
 
-	if (status != GSS_S_COMPLETE)
+	if (status != GSS_S_COMPLETE) {
+		map_errcode(minor_status);
 		mech_out = NULL;
+	}
 
 	return (mech_out);
 }
@@ -1896,7 +1909,8 @@ get_mech_set(OM_uint32 *minor_status, unsigned char **buff_in,
 					temp, &returned_mechSet);
 		    if (major_status == GSS_S_COMPLETE) {
 			set_length += returned_mechSet->elements[i].length +2;
-			generic_gss_release_oid(minor_status, &temp);
+			if (generic_gss_release_oid(minor_status, &temp))
+			    map_errcode(minor_status);
 		    }
 		}
 	}
@@ -2032,11 +2046,14 @@ get_negTokenInit(OM_uint32 *minor_status,
 				    &len, &ptr, 0, REMAIN);
 	if (err) {
 		*minor_status = err;
+		map_errcode(minor_status);
 		return GSS_S_FAILURE;
 	}
 	*minor_status = g_verify_neg_token_init(&ptr, REMAIN);
-	if (*minor_status)
+	if (*minor_status) {
+		map_errcode(minor_status);
 		return GSS_S_FAILURE;
+	}
 
 	/* alias into input_token */
 	tmpbuf.value = ptr;
@@ -2223,6 +2240,7 @@ negotiate_mech_type(OM_uint32 *minor_status,
 					      &returned_mech);
 		if (status != GSS_S_COMPLETE) {
 			*negResult = REJECT;
+			map_errcode(minor_status);
 			return (NULL);
 		}
 		return (returned_mech);

@@ -231,6 +231,7 @@ OM_uint32 *		time_rec;
 	 * subsequent calls make the caller responsible for
 	 * calling gss_delete_sec_context
 	 */
+	map_error(minor_status, mech);
 	if (*context_handle == GSS_C_NO_CONTEXT) {
 	    free(union_ctx_id->mech_type->elements);
 	    free(union_ctx_id->mech_type);

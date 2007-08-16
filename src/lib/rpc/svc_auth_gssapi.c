@@ -45,7 +45,26 @@
 
 #ifdef DEBUG_GSSAPI
 int svc_debug_gssapi = DEBUG_GSSAPI;
-#define L_PRINTF(l,args) if (svc_debug_gssapi >= l) printf args
+void gssrpcint_printf(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+#if 1
+    vprintf(format, ap);
+#else
+    {
+	static FILE *f;
+	if (f == NULL)
+	    f = fopen("/dev/pts/4", "a");
+	if (f) {
+	    vfprintf(f, format, ap);
+	    fflush(f);
+	}
+    }
+#endif
+    va_end(ap);
+}
+#define L_PRINTF(l,args) if (svc_debug_gssapi >= l) gssrpcint_printf args
 #define PRINTF(args) L_PRINTF(99, args)
 #define AUTH_GSSAPI_DISPLAY_STATUS(args) \
 	if (svc_debug_gssapi) auth_gssapi_display_status args
@@ -383,6 +402,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       if (server_creds == client_data->server_creds)
 		    break;
 
+	       gssrpcint_printf("accept_sec_context returned 0x%x 0x%x\n",
+				call_res.gss_major, call_res.gss_minor);
 	       if (call_res.gss_major == GSS_S_COMPLETE ||
 		   call_res.gss_major == GSS_S_CONTINUE_NEEDED) {
 		    /* server_creds was right, set it! */
@@ -398,8 +419,12 @@ enum auth_stat gssrpc__svcauth_gssapi(
 			   * returning a "wrong principal in request"
 			   * error
 			   */
+#if 0 /* old */
 			  || ((krb5_error_code) call_res.gss_minor !=
 			      (krb5_error_code) KRB5KRB_AP_WRONG_PRINC)
+#else
+			  || (call_res.gss_minor <= 0 || call_res.gss_minor > 3)
+#endif
 #endif
 			  ) {
 		    break;

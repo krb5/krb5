@@ -113,8 +113,10 @@ gss_OID *		output_name_type;
 	major_status = generic_gss_copy_oid(minor_status,
 					    union_name->name_type,
 					    output_name_type);
-	if (major_status != GSS_S_COMPLETE)
+	if (major_status != GSS_S_COMPLETE) {
+	    map_errcode(minor_status);
 	    return (major_status);
+	}
     }
 
     if ((output_name_buffer->value =

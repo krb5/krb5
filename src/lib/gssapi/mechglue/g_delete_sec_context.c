@@ -91,13 +91,15 @@ gss_buffer_t		output_token;
     
     if (mech) {
 
-	if (mech->gss_delete_sec_context)
+	if (mech->gss_delete_sec_context) {
 	    status = mech->gss_delete_sec_context(
 						  mech->context,
 						  minor_status,
 						  &ctx->internal_ctx_id,
 						  output_token);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	/* now free up the space for the union context structure */

@@ -189,7 +189,54 @@ proc ftp_test { } {
     }
 
     #
-    # set KRB5_KTNAME
+    # set KRB5_KTNAME *incorrectly*
+    #
+    set env(KRB5_KTNAME) FILE:$tmppwd/srvtabxx
+    verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"
+
+    # Force some auth errors.
+    set testname "ftp auth errors"
+
+    # Start the ftp daemon.
+    start_ftp_daemon
+
+    # Try connecting.
+    spawn $FTP -d -v $hostname [expr 8 + $portbase]
+    expect_after {
+	-re "--->\[^\r\n\]*\r\n" { exp_continue }
+	-re "encoding \[0-9\]* bytes MIC \[a-zA-Z/+\]*" { exp_continue }
+	-re "sealed \[A-Z()\]*" { exp_continue }
+	-re "secure_command\[A-Z()\]*" { exp_continue }
+	timeout {
+	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    catch "expect_after"
+	    return
+	}
+    }
+    expect -nocase "connected to $hostname"
+    expect -nocase -re "$localhostname.*ftp server .version \[0-9.\]*. ready."
+    expect -re "Using authentication type GSSAPI; ADAT must follow"
+    expect "GSSAPI accepted as authentication type"
+    expect -re "Trying to authenticate to <ftp@.*>"
+    # The ftp client doesn't print the gssapi error except on the last attempt.
+#    expect "GSSAPI error major: Unspecified GSS failure."
+#    expect -re "GSSAPI error minor: Key table file '.*' not found"
+    expect -re "Trying to authenticate to <host@.*>"
+    expect "GSSAPI error major: Unspecified GSS failure."
+    expect -re "GSSAPI error minor: Server host/.* not found in Kerberos database"
+    expect -re "Name (.*): "
+    close -i $spawn_id
+    wait -i $spawn_id
+    wait -i $ftpd_spawn_id
+    catch "close -i $ftpd_spawn_id"
+
+    #
+    # set KRB5_KTNAME correctly now
     #
     set env(KRB5_KTNAME) FILE:$tmppwd/srvtab
     verbose "KRB5_KTNAME=$env(KRB5_KTNAME)"

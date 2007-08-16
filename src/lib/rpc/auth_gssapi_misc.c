@@ -15,7 +15,8 @@
 
 #ifdef DEBUG_GSSAPI
 int misc_debug_gssapi = DEBUG_GSSAPI;
-#define L_PRINTF(l,args) if (misc_debug_gssapi >= l) printf args
+extern void gssrpcint_printf(const char *, ...);
+#define L_PRINTF(l,args) if (misc_debug_gssapi >= l) gssrpcint_printf args
 #define PRINTF(args) L_PRINTF(99, args)
 #define AUTH_GSSAPI_DISPLAY_STATUS(args) \
 	if (misc_debug_gssapi) auth_gssapi_display_status args
@@ -178,6 +179,9 @@ static void auth_gssapi_display_status_1(
 	  fprintf (stderr, "GSS-API authentication error %s: ", m);
 	  fwrite (msg.value, msg.length, 1, stderr);
 	  putc ('\n', stderr);
+	  if (misc_debug_gssapi)
+	      gssrpcint_printf("GSS-API authentication error %s: %*s\n",
+			       m, msg.length, msg.value);
 	  (void) gss_release_buffer(&minor_stat, &msg);
 	  
 	  if (!msg_ctx)

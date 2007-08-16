@@ -62,13 +62,15 @@ OM_uint32 *		time_rec;
     
     if (mech) {
 
-	if (mech->gss_context_time)
+	if (mech->gss_context_time) {
 	    status = mech->gss_context_time(
 					    mech->context,
 					    minor_status,
 					    ctx->internal_ctx_id,
 					    time_rec);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return(status);

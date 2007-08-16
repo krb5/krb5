@@ -104,9 +104,13 @@ gss_name_t *output_name;
 			goto allocation_failure;
 
 		if (in_union->name_type != GSS_C_NULL_OID) {
-			if ((major_status = generic_gss_copy_oid(minor_status,
-				in_union->name_type, &out_union->name_type)))
+		    major_status = generic_gss_copy_oid(minor_status,
+							in_union->name_type,
+							&out_union->name_type);
+		    if (major_status) {
+			map_errcode(minor_status);
 			goto allocation_failure;
+		    }
 		}
 
 	}
@@ -130,8 +134,10 @@ gss_name_t *output_name;
 
 	/* now let's create the new mech name */
 	if ((major_status = generic_gss_copy_oid(minor_status, mech_type,
-						&dest_union->mech_type)))
-		goto allocation_failure;
+						 &dest_union->mech_type))) {
+	    map_errcode(minor_status);
+	    goto allocation_failure;
+	}
 
 	if ((major_status =
 		gssint_import_internal_name(minor_status, mech_type,

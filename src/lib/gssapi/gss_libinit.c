@@ -44,6 +44,9 @@ int gssint_lib_init(void)
 			  krb5_gss_delete_error_info);
     if (err)
 	return err;
+    err = gssint_mecherrmap_init();
+    if (err)
+	return err;
 #ifndef _WIN32
     err = k5_mutex_finish_init(&kg_kdc_flag_mutex);
     if (err)
@@ -74,6 +77,7 @@ void gssint_lib_fini(void)
     k5_mutex_destroy(&kg_kdc_flag_mutex);
 #endif
     k5_mutex_destroy(&gssint_krb5_keytab_lock);
+    gssint_mecherrmap_destroy();
     gssint_mechglue_fini();
 }
 

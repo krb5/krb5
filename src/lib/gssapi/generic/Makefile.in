@@ -70,6 +70,7 @@ SRCS = \
 	$(srcdir)/rel_buffer.c \
 	$(srcdir)/rel_oid_set.c \
 	$(srcdir)/util_buffer.c \
+	$(srcdir)/util_errmap.c \
 	$(srcdir)/util_ordering.c \
 	$(srcdir)/util_set.c \
 	$(srcdir)/util_token.c \
@@ -83,6 +84,7 @@ OBJS = \
 	$(OUTPRE)rel_buffer.$(OBJEXT) \
 	$(OUTPRE)rel_oid_set.$(OBJEXT) \
 	$(OUTPRE)util_buffer.$(OBJEXT) \
+	$(OUTPRE)util_errmap.$(OBJEXT) \
 	$(OUTPRE)util_ordering.$(OBJEXT) \
 	$(OUTPRE)util_set.$(OBJEXT) \
 	$(OUTPRE)util_token.$(OBJEXT) \
@@ -96,6 +98,7 @@ STLIBOBJS = \
 	rel_buffer.o \
 	rel_oid_set.o \
 	util_buffer.o \
+	util_errmap.o \
 	util_ordering.o \
 	util_set.o \
 	util_token.o \
@@ -110,6 +113,19 @@ $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
 all-unix:: all-libobjs
 
+errmap.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
+		$(SRCTOP)/util/t_enum.pm $(SRCTOP)/util/t_tsenum.pm
+	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl tsenum errmap.h \
+		NAME=mecherrmap TYPE="struct mecherror" COMPARE=mecherror_cmp \
+		COPY=mecherror_copy PRINT=mecherror_print
+
+maptest.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
+		$(SRCTOP)/util/t_enum.pm $(SRCTOP)/util/t_tsenum.pm
+	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl tsenum maptest.h \
+		NAME=foo TYPE=elt COMPARE=eltcmp COPY=eltcp PRINT=eltprt
+maptest.o: maptest.c maptest.h
+maptest: maptest.o
+	$(CC_LINK) -o maptest maptest.o $(SUPPORT_LIB)
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -180,6 +196,11 @@ util_buffer.so util_buffer.po $(OUTPRE)util_buffer.$(OBJEXT): \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   util_buffer.c
+util_errmap.so util_errmap.po $(OUTPRE)util_errmap.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  errmap.h gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
+  util_errmap.c
 util_ordering.so util_ordering.po $(OUTPRE)util_ordering.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \

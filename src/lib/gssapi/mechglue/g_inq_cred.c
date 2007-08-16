@@ -91,8 +91,10 @@ gss_OID_set *		mechanisms;
 					name ? &internal_name : NULL,
 					lifetime, cred_usage, mechanisms);
 
-	if (status != GSS_S_COMPLETE)
+	if (status != GSS_S_COMPLETE) {
+	    map_error(minor_status, mech);
 	    return(status);
+	}
 
 	if (name) {
 	    /*
@@ -103,6 +105,7 @@ gss_OID_set *		mechanisms;
 						      name);
 	    if (status != GSS_S_COMPLETE) {
 		*minor_status = temp_minor_status;
+		map_error(minor_status, mech);
 		if (mechanisms && *mechanisms) {
 		    (void) gss_release_oid_set(
 			&temp_minor_status,
@@ -249,8 +252,10 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 					    initiator_lifetime,
 					    acceptor_lifetime, cred_usage);
 	
-    if (status != GSS_S_COMPLETE)
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return (status);
+    }
 
     if (name) {
 	/*
@@ -261,6 +266,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 	    internal_name, name);
 	if (status != GSS_S_COMPLETE) {
 	    *minor_status = temp_minor_status;
+	    map_error(minor_status, mech);
 	    return (status);
 	}
     }

@@ -82,8 +82,10 @@ gss_cred_id_t *		cred_handle;
 		     minor_status,
 		     &union_cred->cred_array[j]);
 
-	    if (temp_status != GSS_S_COMPLETE)
-		status = GSS_S_NO_CRED;
+		if (temp_status != GSS_S_COMPLETE) {
+		    map_error(minor_status, mech);
+		    status = GSS_S_NO_CRED;
+		}
 
 	    } else
 		status = GSS_S_UNAVAILABLE;

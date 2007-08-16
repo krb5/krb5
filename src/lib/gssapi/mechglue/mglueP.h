@@ -489,4 +489,25 @@ gssint_put_der_length(
 	unsigned int		/* max_len */
 );
 
+/* Use this to map an error code that was returned from a mech
+   operation; the mech will be asked to produce the associated error
+   messages.
+
+   Remember that if the minor status code cannot be returned to the
+   caller (e.g., if it's stuffed in an automatic variable and then
+   ignored), then we don't care about producing a mapping.  */
+#define map_error(MINORP, MECH) \
+    (*(MINORP) = gssint_mecherrmap_map(*(MINORP), &(MECH)->mech_type))
+#define map_error_oid(MINORP, MECHOID) \
+    (*(MINORP) = gssint_mecherrmap_map(*(MINORP), (MECHOID)))
+
+/* Use this to map an errno value or com_err error code being
+   generated within the mechglue code (e.g., by calling generic oid
+   ops).  Any errno or com_err values produced by mech operations
+   should be processed with map_error.  This means they'll be stored
+   separately even if the mech uses com_err, because we can't assume
+   that it will use com_err.  */
+#define map_errcode(MINORP) \
+    (*(MINORP) = gssint_mecherrmap_map_errcode(*(MINORP)))
+
 #endif /* _GSS_MECHGLUEP_H */

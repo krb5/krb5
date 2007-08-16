@@ -101,15 +101,18 @@ gss_cred_usage_t	*cred_usage_stored;
 		if (mech_cred == GSS_C_NO_CREDENTIAL)
 			return (GSS_S_NO_CRED);
 
-		return (mech->gss_store_cred(mech->context,
-						minor_status,
-						(gss_cred_id_t)mech_cred,
-						cred_usage,
-						desired_mech,
-						overwrite_cred,
-						default_cred,
-						elements_stored,
-						cred_usage_stored));
+		major_status = mech->gss_store_cred(mech->context,
+						    minor_status,
+						    (gss_cred_id_t)mech_cred,
+						    cred_usage,
+						    desired_mech,
+						    overwrite_cred,
+						    default_cred,
+						    elements_stored,
+						    cred_usage_stored);
+		if (major_status != GSS_S_COMPLETE)
+		    map_error(minor_status, mech);
+		return major_status;
 	}
 
 	/* desired_mech == GSS_C_NULL_OID -> store all elements */
@@ -139,8 +142,10 @@ gss_cred_usage_t	*cred_usage_stored;
 						default_cred,
 						NULL,
 						cred_usage_stored);
-		if (major_status != GSS_S_COMPLETE)
-			continue;
+		if (major_status != GSS_S_COMPLETE) {
+		    map_error(minor_status, mech);
+		    continue;
+		}
 
 		/* Succeeded for at least one mech */
 

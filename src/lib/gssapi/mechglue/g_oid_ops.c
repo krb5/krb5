@@ -2,7 +2,7 @@
 /*
  * lib/gssapi/mechglue/g_oid_ops.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -46,7 +46,11 @@ gss_create_empty_oid_set(minor_status, oid_set)
     OM_uint32	*minor_status;
     gss_OID_set	*oid_set;
 {
-	return generic_gss_create_empty_oid_set(minor_status, oid_set);
+    OM_uint32 status;
+    status = generic_gss_create_empty_oid_set(minor_status, oid_set);
+    if (status != GSS_S_COMPLETE)
+	map_errcode(minor_status);
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -55,7 +59,11 @@ gss_add_oid_set_member(minor_status, member_oid, oid_set)
     gss_OID	member_oid;
     gss_OID_set	*oid_set;
 {
-     return generic_gss_add_oid_set_member(minor_status, member_oid, oid_set);
+    OM_uint32 status;
+    status = generic_gss_add_oid_set_member(minor_status, member_oid, oid_set);
+    if (status != GSS_S_COMPLETE)
+	map_errcode(minor_status);
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -74,7 +82,10 @@ gss_oid_to_str(minor_status, oid, oid_str)
     gss_OID		oid;
     gss_buffer_t	oid_str;
 {
-    return generic_gss_oid_to_str(minor_status, oid, oid_str);
+    OM_uint32 status = generic_gss_oid_to_str(minor_status, oid, oid_str);
+    if (status != GSS_S_COMPLETE)
+	map_errcode(minor_status);
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -83,6 +94,9 @@ gss_str_to_oid(minor_status, oid_str, oid)
     gss_buffer_t	oid_str;
     gss_OID		*oid;
 {
-    return generic_gss_str_to_oid(minor_status, oid_str, oid);
+    OM_uint32 status = generic_gss_str_to_oid(minor_status, oid_str, oid);
+    if (status != GSS_S_COMPLETE)
+	map_errcode(minor_status);
+    return status;
 }
 

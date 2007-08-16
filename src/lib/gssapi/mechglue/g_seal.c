@@ -106,7 +106,7 @@ gss_buffer_t		output_message_buffer;
     mech = gssint_get_mechanism (ctx->mech_type);
     
     if (mech) {
-	if (mech->gss_seal)
+	if (mech->gss_seal) {
 	    status = mech->gss_seal(
 				    mech->context,
 				    minor_status,
@@ -116,7 +116,9 @@ gss_buffer_t		output_message_buffer;
 				    input_message_buffer,
 				    conf_state,
 				    output_message_buffer);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 	
 	return(status);
@@ -165,6 +167,7 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
 {
     gss_union_ctx_id_t	ctx;
     gss_mechanism	mech;
+    OM_uint32		major_status;
 
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
@@ -190,7 +193,11 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     if (!mech->gss_wrap_size_limit)
 	return (GSS_S_UNAVAILABLE);
     
-    return (mech->gss_wrap_size_limit(mech->context, minor_status,
-				      ctx->internal_ctx_id, conf_req_flag, qop_req,
-				      req_output_size, max_input_size));
+    major_status = mech->gss_wrap_size_limit(mech->context, minor_status,
+					     ctx->internal_ctx_id,
+					     conf_req_flag, qop_req,
+					     req_output_size, max_input_size);
+    if (major_status != GSS_S_COMPLETE)
+	map_error(minor_status, mech);
+    return major_status;
 }

@@ -120,6 +120,7 @@ gss_OID *oid;
 				k5_mutex_unlock(&g_mechListLock);
 				return (GSS_S_COMPLETE);
 			}
+			map_error(minor_status, aMech->mech);
 		}
 		aMech = aMech->next;
 	} /* while */

@@ -102,8 +102,10 @@ gss_buffer_t		interprocess_token;
     
     status = mech->gss_export_sec_context(mech->context, minor_status,
 					  &ctx->internal_ctx_id, &token);
-    if (status != GSS_S_COMPLETE)
+    if (status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return (status);
+    }
 
     length = token.length + 4 + ctx->mech_type->length;
     interprocess_token->length = length;

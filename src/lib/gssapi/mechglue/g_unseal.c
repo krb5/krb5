@@ -80,7 +80,7 @@ int *			qop_state;
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech) {
-	if (mech->gss_unseal) 
+	if (mech->gss_unseal) {
 	    status = mech->gss_unseal(
 				      mech->context,
 				      minor_status,
@@ -89,7 +89,9 @@ int *			qop_state;
 				      output_message_buffer,
 				      conf_state,
 				      qop_state);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return(status);

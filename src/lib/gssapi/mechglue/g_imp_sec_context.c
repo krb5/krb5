@@ -149,6 +149,7 @@ gss_ctx_id_t *		context_handle;
 	*context_handle = ctx;
 	return (GSS_S_COMPLETE);
     }
+    map_error(minor_status, mech);
     
 error_out:
     if (ctx) {

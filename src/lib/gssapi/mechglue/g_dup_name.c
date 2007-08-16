@@ -90,8 +90,10 @@ gss_name_t *dest_name;
 		major_status = generic_gss_copy_oid(minor_status,
 						src_union->name_type,
 						&dest_union->name_type);
-		if (major_status != GSS_S_COMPLETE)
-			goto allocation_failure;
+		if (major_status != GSS_S_COMPLETE) {
+		    map_errcode(minor_status);
+		    goto allocation_failure;
+		}
 	}
 
 	/*
@@ -101,8 +103,10 @@ gss_name_t *dest_name;
 		major_status = generic_gss_copy_oid(minor_status,
 							src_union->mech_type,
 							&dest_union->mech_type);
-		if (major_status != GSS_S_COMPLETE)
-			goto allocation_failure;
+		if (major_status != GSS_S_COMPLETE) {
+		    map_errcode(minor_status);
+		    goto allocation_failure;
+		}
 
 		major_status = gssint_import_internal_name(minor_status,
 							dest_union->mech_type,

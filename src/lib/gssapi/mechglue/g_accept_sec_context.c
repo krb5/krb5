@@ -211,8 +211,10 @@ gss_cred_id_t *		d_cred;
 		return GSS_S_CONTINUE_NEEDED;
 	    
 	    /* if the call failed, return with failure */
-	    if (status != GSS_S_COMPLETE)
+	    if (status != GSS_S_COMPLETE) {
+		map_error(minor_status, mech);
 		goto error_out;
+	    }
 
 	    /*
 	     * if src_name is non-NULL,
@@ -227,6 +229,7 @@ gss_cred_id_t *		d_cred;
 		       internal_name, &tmp_src_name);
 		if (temp_status != GSS_S_COMPLETE) {
 		    *minor_status = temp_minor_status;
+		    map_error(minor_status, mech);
 		    if (output_token->length)
 			(void) gss_release_buffer(&temp_minor_status,
 						  output_token);
@@ -297,6 +300,8 @@ gss_cred_id_t *		d_cred;
 						    &d_u_cred->auxinfo.time_rec,
 						    &d_u_cred->auxinfo.cred_usage,
 						    NULL);
+		    if (status != GSS_S_COMPLETE)
+			map_error(minor_status, mech);
 		}
 
 		if (internal_name != NULL) {
@@ -305,6 +310,7 @@ gss_cred_id_t *		d_cred;
 			internal_name, &tmp_src_name);
 		    if (temp_status != GSS_S_COMPLETE) {
 			*minor_status = temp_minor_status;
+			map_error(minor_status, mech);
 			if (output_token->length)
 			    (void) gss_release_buffer(
 				&temp_minor_status,

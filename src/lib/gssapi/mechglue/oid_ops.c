@@ -95,8 +95,8 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 
 	p = (gss_OID) malloc(sizeof(gss_OID_desc));
 	if (!p) {
-		*minor_status = ENOMEM;
-		return GSS_S_FAILURE;
+	    *minor_status = ENOMEM;
+	    return GSS_S_FAILURE;
 	}
 	p->length = oid->length;
 	p->elements = malloc(p->length);

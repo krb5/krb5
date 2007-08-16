@@ -97,7 +97,7 @@ gss_buffer_t		msg_token;
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech) {
-	if (mech->gss_sign)
+	if (mech->gss_sign) {
 	    status = mech->gss_sign(
 				    mech->context,
 				    minor_status,
@@ -105,7 +105,9 @@ gss_buffer_t		msg_token;
 				    qop_req,
 				    message_buffer,
 				    msg_token);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return(status);

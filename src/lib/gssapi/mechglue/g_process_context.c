@@ -65,13 +65,15 @@ gss_buffer_t		token_buffer;
 
     if (mech) {
 
-	if (mech->gss_process_context_token)
+	if (mech->gss_process_context_token) {
 	    status = mech->gss_process_context_token(
 						    mech->context,
 						    minor_status,
 						    ctx->internal_ctx_id,
 						    token_buffer);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return(status);

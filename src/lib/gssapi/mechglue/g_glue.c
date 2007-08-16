@@ -263,14 +263,16 @@ gss_name_t	*internal_name;
 
     mech = gssint_get_mechanism (mech_type);
     if (mech) {
-	if (mech->gss_import_name)
+	if (mech->gss_import_name) {
 	    status = mech->gss_import_name (
 					    mech->context,
 					    minor_status,
 					    union_name->external_name,
 					    union_name->name_type,
 					    internal_name);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return (status);
@@ -301,11 +303,15 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
-    if (mech->gss_export_name)
-	return (mech->gss_export_name(mech->context,
-				      minor_status,
-				      internal_name,
-				      name_buf));
+    if (mech->gss_export_name) {
+	status = mech->gss_export_name(mech->context,
+				       minor_status,
+				       internal_name,
+				       name_buf);
+	if (status != GSS_S_COMPLETE)
+	    map_error(minor_status, mech);
+	return status;
+    }
 
     /*
      * if we are here it is because the mechanism does not provide
@@ -339,8 +345,10 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
 					 internal_name,
 					 &dispName,
 					 &nameOid))
-	!= GSS_S_COMPLETE)
+	!= GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	return (status);
+    }
 
     /* determine the size of the buffer needed */
     mechOidDERLen = gssint_der_length_size(mech_type->length);
@@ -409,14 +417,16 @@ gss_OID		*name_type;
 
     mech = gssint_get_mechanism (mech_type);
     if (mech) {
-	if (mech->gss_display_name)
+	if (mech->gss_display_name) {
 	    status = mech->gss_display_name (
 					     mech->context,
 					     minor_status,
 					     internal_name,
 					     external_name,
 					     name_type);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return (status);
@@ -435,12 +445,14 @@ gss_name_t	*internal_name;
 
     mech = gssint_get_mechanism (mech_type);
     if (mech) {
-	if (mech->gss_release_name)
+	if (mech->gss_release_name) {
 	    status = mech->gss_release_name (
 					     mech->context,
 					     minor_status,
 					     internal_name);
-	else
+	    if (status != GSS_S_COMPLETE)
+		map_error(minor_status, mech);
+	} else
 	    status = GSS_S_UNAVAILABLE;
 
 	return (status);
@@ -467,7 +479,10 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 
     union_name = (gss_union_name_t) malloc (sizeof(gss_union_name_desc));
     if (!union_name) {
-	    goto allocation_failure;
+	major_status = GSS_S_FAILURE;
+	*minor_status = ENOMEM;
+	map_errcode(minor_status);
+	goto allocation_failure;
     }
     union_name->mech_type = 0;
     union_name->mech_name = internal_name;
@@ -476,8 +491,10 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 
     major_status = generic_gss_copy_oid(minor_status, &mech->mech_type,
 					&union_name->mech_type);
-    if (major_status != GSS_S_COMPLETE)
+    if (major_status != GSS_S_COMPLETE) {
+	map_errcode(minor_status);
 	goto allocation_failure;
+    }
 
     union_name->external_name =
 	(gss_buffer_t) malloc(sizeof(gss_buffer_desc));
@@ -489,8 +506,10 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 					  internal_name,
 					  union_name->external_name,
 					  &union_name->name_type);
-    if (major_status != GSS_S_COMPLETE)
+    if (major_status != GSS_S_COMPLETE) {
+	map_error(minor_status, mech);
 	goto allocation_failure;
+    }
 
     union_name->loopback = union_name;
     *external_name = /*(gss_name_t) CHECK */union_name;
