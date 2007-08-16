@@ -835,7 +835,7 @@ cleanup:
 			ret = GSS_S_FAILURE;
 		}
 	}
-	gss_release_buffer(tmpmin, &mechtok_out);
+	gss_release_buffer(&tmpmin, &mechtok_out);
 	if (ret == GSS_S_COMPLETE) {
 		/*
 		 * Now, switch the output context to refer to the
