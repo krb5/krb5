@@ -61,7 +61,7 @@ extern int gssint_put_der_length(OM_uint32, unsigned char **, OM_uint32);
 /* private routines for spnego_mechanism */
 static spnego_token_t make_spnego_token(char *);
 static gss_buffer_desc make_err_msg(char *);
-static int g_token_size(gss_OID_const, OM_uint32);
+static int g_token_size(gss_OID_const, unsigned int);
 static int g_make_token_header(gss_OID_const, unsigned int,
 			       unsigned char **, unsigned int);
 static int g_verify_token_header(gss_OID_const, unsigned int *,
