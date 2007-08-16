@@ -1,7 +1,7 @@
 /*
  * lib/gssapi/krb5/rel_oid.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -69,6 +69,7 @@ krb5_gss_internal_release_oid(minor_status, oid)
      * return GSS_S_CONTINUE_NEEDED for any OIDs it does not recognize.
      */
    
+    *minor_status = 0;
     if ((*oid != gss_mech_krb5) &&
 	(*oid != gss_mech_krb5_old) &&
 	(*oid != gss_mech_krb5_wrong) &&
@@ -79,7 +80,6 @@ krb5_gss_internal_release_oid(minor_status, oid)
     }
     else {
 	*oid = GSS_C_NO_OID;
-	*minor_status = 0;
 	return(GSS_S_COMPLETE);
     }
 }
