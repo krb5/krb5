@@ -143,7 +143,7 @@ clean-windows::
 	$(RM) $(HDRS)
 	-if exist $(EHDRDIR)\nul rmdir $(EHDRDIR)
 
-generate-files-mac: gssapi.h
+generate-files-mac: gssapi.h errmap.h
 
 # Krb5InstallHeaders($(EXPORTED_HEADERS), $(KRB5_INCDIR)/krb5)
 install-headers-unix install:: gssapi.h
