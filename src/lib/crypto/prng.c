@@ -161,7 +161,7 @@ read_entropy_from_device (krb5_context context, const char *device)
   krb5_data data;
   struct stat sb;
   int fd;
-  unsigned char buf[YARROW_SLOW_THRESH/8];
+  unsigned char buf[YARROW_SLOW_THRESH/8], *bp;
   int left;
   fd = open (device, O_RDONLY);
   if (fd == -1)
@@ -172,14 +172,16 @@ read_entropy_from_device (krb5_context context, const char *device)
     close(fd);
     return 0;
   }
-  for (left = sizeof (buf); left > 0;) {
+
+  for (bp = &buf, left = sizeof (buf); left > 0;) {
     ssize_t count;
-    count = read (fd, &buf, (unsigned) left);
+    count = read (fd, bp, (unsigned) left);
     if (count <= 0) {
       close(fd);
       return 0;
     }
     left -= count;
+    bp += count;
   }
   close (fd);
   data.length = sizeof (buf);
@@ -198,7 +200,7 @@ krb5_c_random_os_entropy (krb5_context context,
   int unused;
   int *oursuccess = success?success:&unused;
   *oursuccess = 0;
-  /* If we are getting strong data then try that first.  We aare
+  /* If we are getting strong data then try that first.  We are
      guaranteed to cause a reseed of some kind if strong is true and
      we have both /dev/random and /dev/urandom.  We want the strong
      data included in the reseed so we get it first.*/
