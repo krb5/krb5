@@ -625,6 +625,19 @@ if test "$GCC" = yes ; then
     else
       CFLAGS="$CFLAGS -pedantic"
     fi
+    AC_CACHE_CHECK([if GCC supports -Wno-format-zero-length],
+    		   krb5_cv_gcc_Wno_format_zero_length,
+    [# first try without, then with
+    AC_TRY_COMPILE([], 1;,
+      [old_cflags="$CFLAGS"
+       CFLAGS="$CFLAGS -Wno-format-zero-length"
+       AC_TRY_COMPILE([], 1;, krb5_cv_gcc_Wno_format_zero_length=yes,
+       krb5_cv_gcc_Wno_format_zero_length=no)
+       CFLAGS="$old_cflags"],
+      [AC_MSG_ERROR(compiling simple test program with $CFLAGS failed)])])
+    if test "$krb5_cv_gcc_Wno_format_zero_length" = yes; then
+      CFLAGS="$CFLAGS -Wno-format-zero-length"
+    fi
   fi
   if test "`uname -s`" = Darwin ; then
     # Someday this should be a feature test.
