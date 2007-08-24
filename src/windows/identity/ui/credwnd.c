@@ -3127,6 +3127,7 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     int selected = 0;
     int rowheight = 0;
     BOOL has_dc = FALSE;
+    BOOL has_updaterect = TRUE;
 
     tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
     if (tbl == NULL)
@@ -3140,15 +3141,16 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         has_dc = TRUE;
     }
 
-    if(!has_dc && !GetUpdateRect(hwnd, &r, FALSE)) {
-#ifdef DEBUG
-        assert(FALSE);
-#endif
-        goto _exit;
+    if (!has_dc && !GetUpdateRect(hwnd, &r, FALSE)) {
+        has_updaterect = FALSE;
     }
 
-    if (!has_dc)
-        hdc = BeginPaint(hwnd, &ps);
+    if (!has_dc) {
+        if (has_updaterect)
+            hdc = BeginPaint(hwnd, &ps);
+        else
+            hdc = GetDC(hwnd);
+    }
 
     if(tbl->hf_normal)
         hf_old = SelectFont(hdc, tbl->hf_normal);
@@ -3377,8 +3379,12 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(tbl->hf_normal)
         SelectFont(hdc, hf_old);
 
-    if (!has_dc)
-        EndPaint(hwnd,&ps);
+    if (!has_dc) {
+        if (has_updaterect)
+            EndPaint(hwnd,&ps);
+        else
+            ReleaseDC(hwnd, hdc);
+    }
 
  _exit:
     return TRUE;
