@@ -1145,16 +1145,8 @@ khm_cred_process_startup_actions(void) {
        rest of the startup actions. */
     do {
         if (khm_startup.init) {
-            if (defident)
-                khui_context_set(KHUI_SCOPE_IDENT,
-                                 defident,
-                                 KCDB_CREDTYPE_INVALID,
-                                 NULL, NULL, 0,
-                                 NULL);
-            else
-                khui_context_reset();
 
-            khm_cred_obtain_new_creds(NULL);
+            khm_cred_obtain_new_creds_for_ident(defident, NULL);
             khm_startup.init = FALSE;
             break;
         }
@@ -1200,13 +1192,7 @@ khm_cred_process_startup_actions(void) {
             khm_startup.destroy = FALSE;
 
             if (defident) {
-                khui_context_set(KHUI_SCOPE_IDENT,
-                                 defident,
-                                 KCDB_CREDTYPE_INVALID,
-                                 NULL, NULL, 0,
-                                 NULL);
-
-                khm_cred_destroy_creds(FALSE, FALSE);
+                khm_cred_destroy_identity(defident);
                 break;
             }
         }
@@ -1253,6 +1239,13 @@ khm_cred_process_startup_actions(void) {
             break;
         }
 
+        if (khm_startup.display & SOPTS_DISPLAY_HIDE) {
+            khm_hide_main_window();
+        } else if (khm_startup.display & SOPTS_DISPLAY_SHOW) {
+            khm_show_main_window();
+        }
+        khm_startup.display = 0;
+
         /* when we get here, then we are all done with the command
            line stuff */
         khm_startup.processing = FALSE;
@@ -1288,6 +1281,25 @@ khm_cred_begin_startup_actions(void) {
 
         khc_close_space(csp_cw);
 
+    }
+
+    /* if this is a remote request, and no specific options were
+       specified other than --renew, then we perform the default
+       action, as if the user clicked on the tray icon. */
+    if (khm_startup.remote &&
+        !khm_startup.exit &&
+        !khm_startup.destroy &&
+        !khm_startup.autoinit &&
+        !khm_startup.init &&
+        !khm_startup.remote_exit &&
+        !khm_startup.import &&
+        !khm_startup.display) {
+
+        khm_int32 def_action = khm_get_default_notifier_action();
+
+        if (def_action > 0) {
+            khui_action_trigger(def_action, NULL);
+        }
     }
 
     khm_startup.seen = TRUE;

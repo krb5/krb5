@@ -42,7 +42,7 @@ extern const khm_version app_version;
 
 /* The structure used to send command-line options to a remote
    NetIDMgr session for versions prior to 1.2. */
-struct tag_khm_startup_options_v1 {
+typedef struct tag_khm_startup_options_v1 {
     BOOL seen;
     BOOL processing;
 
@@ -56,12 +56,12 @@ struct tag_khm_startup_options_v1 {
     BOOL error_exit;
 
     BOOL no_main_window;
-};
+} khm_startup_options_v1;
 
-/* Used on NetIDMgr versions 1.2 and later */
-struct tag_khm_startup_options_v2 {
-    khm_int32 magic;
-    DWORD cb_size;
+/* Used on NetIDMgr version 1.2.x */
+typedef struct tag_khm_startup_options_v2 {
+    khm_int32 magic;            /* set to STARTUP_OPTIONS_MAGIC */
+    DWORD cb_size;              /* size of structure, in bytes */
 
     BOOL init;
     BOOL import;
@@ -72,28 +72,48 @@ struct tag_khm_startup_options_v2 {
     BOOL remote_exit;
 
     khm_int32 code;
-} khm_startup_options_xfer;
+} khm_startup_options_v2;
+
+/* Used on NetIDMgr version 1.3.1 and later */
+typedef struct tag_khm_startup_options_v3 {
+    struct tag_khm_startup_options_v2 v2opt;
+
+    khm_int32 remote_display;   /* combination of SOPTS_DISPLAY_* */
+} khm_startup_options_v3;
 
 #define STARTUP_OPTIONS_MAGIC 0x1f280e41
 
+/* The following macros are used with
+   tag_khm_startup_options_v3->remote_display */
+
+/* Show (unhide) the main window. */
+#define SOPTS_DISPLAY_SHOW    0x00000001
+
+/* Hide the main window. (Can't be used with SOPTS_DISPLAY_SHOW) */
+#define SOPTS_DISPLAY_HIDE    0x00000002
+
+/* Suppress the default action on the remote end */
+#define SOPTS_DISPLAY_NODEF   0x00000004
+
 /* Used internally. */
 typedef struct tag_khm_startup_options_int {
-    BOOL seen;
-    BOOL processing;
-    BOOL remote;
+    khm_boolean seen;
+    khm_boolean processing;
+    khm_boolean remote;         /* is this a remote request? */
 
-    BOOL init;
-    BOOL import;
-    BOOL renew;
-    BOOL destroy;
+    khm_boolean init;
+    khm_boolean import;
+    khm_boolean renew;
+    khm_boolean destroy;
 
-    BOOL autoinit;
-    BOOL exit;
-    BOOL remote_exit;
+    khm_boolean autoinit;
+    khm_boolean exit;
+    khm_boolean remote_exit;
 
-    BOOL error_exit;
+    khm_boolean error_exit;
 
-    BOOL no_main_window;
+    khm_boolean no_main_window;
+    khm_int32 display;          /* SOPTS_DISPLAY_* */
 
     LONG pending_renewals;
 } khm_startup_options;

@@ -148,19 +148,7 @@ khm_process_query_app_ver(khm_query_app_version * papp_ver) {
     if (papp_ver->request_swap) {
         khm_version ver_caller = papp_ver->ver_caller;
 
-        if (ver_caller.major >   app_version.major ||
-
-            (ver_caller.major == app_version.major &&
-             ver_caller.minor >  app_version.minor) ||
-
-            (ver_caller.major == app_version.major &&
-             ver_caller.minor == app_version.minor &&
-             ver_caller.aux >    app_version.aux) ||
-
-            (ver_caller.major == app_version.major &&
-             ver_caller.minor == app_version.minor &&
-             ver_caller.aux ==   app_version.aux &&
-             ver_caller.patch >  app_version.patch)) {
+        if (khm_compare_version(&ver_caller, &app_version) > 0) {
 
             papp_ver->request_swap = TRUE;
 
@@ -690,7 +678,7 @@ khm_main_wnd_proc(HWND hwnd,
             HANDLE hmap;
             void * xfer;
             wchar_t mapname[256];
-            struct tag_khm_startup_options_v1 * pv1opt;
+            khm_startup_options_v1 * pv1opt;
             int code = KHM_ERROR_SUCCESS;
 
             StringCbPrintf(mapname, sizeof(mapname),
@@ -705,7 +693,7 @@ khm_main_wnd_proc(HWND hwnd,
                                  sizeof(*pv1opt));
 
             if (xfer) {
-                pv1opt = (struct tag_khm_startup_options_v1 *) xfer;
+                pv1opt = (khm_startup_options_v1 *) xfer;
 
                 khm_startup.init = pv1opt->init;
                 khm_startup.import = pv1opt->import;
@@ -717,6 +705,7 @@ khm_main_wnd_proc(HWND hwnd,
 
                 khm_startup.no_main_window = FALSE;
                 khm_startup.remote_exit = FALSE;
+                khm_startup.display = 0;
 
                 UnmapViewOfFile(xfer);
             } else {
@@ -749,7 +738,8 @@ khm_main_wnd_proc(HWND hwnd,
             HANDLE hmap;
             void * xfer;
             wchar_t mapname[256];
-            struct tag_khm_startup_options_v2 *pv2opt;
+            khm_startup_options_v2 *pv2opt = NULL;
+            khm_startup_options_v3 *pv3opt = NULL;
             int code = KHM_ERROR_SUCCESS;
 
             StringCbPrintf(mapname, sizeof(mapname),
@@ -764,10 +754,11 @@ khm_main_wnd_proc(HWND hwnd,
                                  sizeof(*pv2opt));
 
             if (xfer) {
-                pv2opt = (struct tag_khm_startup_options_v2 *) xfer;
+                pv2opt = (khm_startup_options_v2 *) xfer;
 
                 if (pv2opt->magic != STARTUP_OPTIONS_MAGIC ||
-                    pv2opt->cb_size != sizeof(*pv2opt)) {
+                    (pv2opt->cb_size != sizeof(*pv2opt) &&
+                     pv2opt->cb_size != sizeof(*pv3opt))) {
                     code = KHM_ERROR_INVALID_PARAM;
                     goto done_with_v2_opt;
                 }
@@ -781,6 +772,14 @@ khm_main_wnd_proc(HWND hwnd,
                 khm_startup.exit = pv2opt->remote_exit;
 
                 pv2opt->code = KHM_ERROR_SUCCESS;
+
+                if (pv2opt->cb_size == sizeof(*pv3opt)) {
+                    pv3opt = (khm_startup_options_v3 *) xfer;
+
+                    khm_startup.display = pv3opt->remote_display;
+                } else {
+                    khm_startup.display = 0;
+                }
 
             done_with_v2_opt:
                 UnmapViewOfFile(xfer);

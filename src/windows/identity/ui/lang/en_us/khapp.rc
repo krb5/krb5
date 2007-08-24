@@ -389,6 +389,18 @@ BEGIN
     EDITTEXT        IDC_LG_CTL,141,50,131,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
 END
 
+IDD_CMDLINE DIALOGEX 0, 0, 309, 286
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_CAPTION | WS_SYSMENU
+CAPTION "Commandline options for Network Identity Manager"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,252,265,50,14
+    ICON            IDI_MAIN_APP,IDC_STATIC,7,7,21,20
+    LTEXT           "Productname",IDC_PRODUCT,40,7,262,13,NOT WS_GROUP
+    CONTROL         "",IDC_CONTENT,"RichEdit20A",ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_BORDER | WS_VSCROLL | WS_TABSTOP,40,22,262,231
+    LTEXT           "© 2005-2007 Massachusetts Institute of Technology\n© 2006-2007 Secure Endpoints Inc.",IDC_COPYRIGHT,7,258,240,21,NOT WS_GROUP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -534,9 +546,25 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 88
     END
+
+    IDD_CMDLINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        VERTGUIDE, 40
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 279
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// KHMRTFRESOURCE
+//
+
+IDR_CMDLINERTF          KHMRTFRESOURCE          "cmdline.rtf"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -686,7 +714,6 @@ BEGIN
     IDS_WTPOST_PASSWORD     " - Changing password"
     IDS_CTX_PROC_PASSWORD   "Changing password for %1!s!"
     IDS_NC_PWD_FAILED_TITLE "Failed to change password"
-    IDS_CMDLINE_HELP        "Command line options for Network Identity Manager are :\n\n-a or --autoinit: Auto initialize credentials\n-i or --kinit: Obtain new credentials\n-d or --destroy: Destroy default identity\n-r or --renew: Renew all credentials\n-x or --exit: Exit the running instance of Network Identity Manager"
     IDS_PACTION_NEXT        "Next alert"
     IDS_ERR_TITLE_NO_IDENTPRO "Cannot proceed without identity provider"
 END

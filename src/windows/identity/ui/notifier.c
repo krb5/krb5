@@ -91,9 +91,6 @@ alert_consolidate(alert_list * alist,
                   khui_alert * alert,
                   khm_boolean add_from_queue);
 
-static khm_int32
-get_default_notifier_action(void);
-
 /* Globals */
 
 /* window class registration atom for message only notifier window
@@ -421,7 +418,7 @@ notifier_wnd_proc(HWND hwnd,
                    icon is present in the menu and that it is marked
                    as the default. */
 
-                def_cmd = get_default_notifier_action();
+                def_cmd = khm_get_default_notifier_action();
 
                 if (khm_is_main_window_visible()) {
                     menu_id = KHUI_MENU_ICO_CTX_NORMAL;
@@ -2969,8 +2966,8 @@ void khm_notify_icon_remove(void) {
     Shell_NotifyIcon(NIM_DELETE, &ni);
 }
 
-static khm_int32
-get_default_notifier_action(void) {
+khm_int32
+khm_get_default_notifier_action(void) {
     khm_int32 def_cmd = KHUI_ACTION_OPEN_APP;
     khm_handle csp_cw = NULL;
     khm_size i;
@@ -3049,7 +3046,7 @@ void khm_notify_icon_activate(void) {
     {
         khm_int32 cmd = 0;
 
-        cmd = get_default_notifier_action();
+        cmd = khm_get_default_notifier_action();
 
         if (cmd == KHUI_ACTION_OPEN_APP) {
             if (khm_is_main_window_visible()) {

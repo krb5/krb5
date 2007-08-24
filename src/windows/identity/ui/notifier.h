@@ -60,4 +60,7 @@ khm_notify_icon_expstate(enum khm_notif_expstate expseverity);
 void
 khm_notify_icon_activate(void);
 
+khm_int32
+khm_get_default_notifier_action(void);
+
 #endif
