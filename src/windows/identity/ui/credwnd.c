@@ -1239,11 +1239,21 @@ cw_timer_proc(HWND hwnd,
         FILETIME ft_now;
 
         o = (khui_credwnd_outline *) r->data;
-#ifdef DEBUG
-        assert(r->flags & KHUI_CW_ROW_EXPVIEW);
-        assert(o->attr_id == KCDB_ATTR_ID);
-        assert(tbl->flags & KHUI_CW_TBL_EXPIDENT);
-#endif
+
+        /* we only handle timers for header rows if :
+
+           1.  The table is displaying expanded identity information
+           2.  The row displaying an expanded view
+           3.  The relevant outline object is for an identity
+
+           If these conditions aren't met, it is because we lost a
+           race killing this timer while switching modes.
+         */
+        if (!(tbl->flags & KHUI_CW_TBL_EXPIDENT) ||
+            !(r->flags & KHUI_CW_ROW_EXPVIEW) ||
+            !(o->attr_id == KCDB_ATTR_ID))
+
+            return;
 
         nflags = cw_get_buf_exp_flags(tbl, (khm_handle) o->data);
         if ((o->flags & CW_EXPSTATE_MASK) != nflags) {
