@@ -2697,7 +2697,8 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
             hi.mask = HDI_ORDER;
             Header_GetItem(tbl->hwnd_header, ph->iItem, &hi);
 
-            if(tbl->cols[hi.iOrder].flags & KHUI_CW_COL_FIXED_WIDTH)
+            if (tbl->cols[hi.iOrder].flags & (KHUI_CW_COL_FIXED_WIDTH |
+                                              KHUI_CW_COL_FILLER))
                 return TRUE;
             else
                 return FALSE;
