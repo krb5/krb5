@@ -198,16 +198,16 @@ typedef struct khui_credwnd_tbl_t {
     HBRUSH hb_s;            /* normal background brush (selected) */
 
     HBRUSH hb_hdr_bg;       /* header background brush (normal) */
+    HBRUSH hb_hdr_bg_cred;  /* header background brush (valid creds) */
     HBRUSH hb_hdr_bg_exp;   /* header background brush (expired) */
     HBRUSH hb_hdr_bg_warn;  /* header background brush (warn) */
     HBRUSH hb_hdr_bg_crit;  /* header background brush (critical) */
-    HBRUSH hb_hdr_bg_def;   /* header background brush (default) */
 
     HBRUSH hb_hdr_bg_s;     /* header background brush (selected) */
+    HBRUSH hb_hdr_bg_cred_s;/* header background brush (valid creds) */
     HBRUSH hb_hdr_bg_exp_s; /* header background brush (expired,selected) */
     HBRUSH hb_hdr_bg_warn_s;/* header background brush (warn,selected) */
     HBRUSH hb_hdr_bg_crit_s;/* header background brush (critical,selected) */
-    HBRUSH hb_hdr_bg_def_s; /* header background brush (default,selected) */
 
     COLORREF cr_normal;     /* text color (normal) */
     COLORREF cr_s;          /* text color (selected) */

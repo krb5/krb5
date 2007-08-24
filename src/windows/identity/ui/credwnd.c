@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -435,6 +435,24 @@ cw_mix_colors(COLORREF c1, COLORREF c2, int alpha) {
     return RGB(r,g,b);
 }
 
+static COLORREF
+cw_get_theme_color(khm_handle hc, const wchar_t * name, COLORREF ref_color) {
+    khm_int32 t;
+    COLORREF c;
+    int alpha;
+
+    if (KHM_FAILED(khc_read_int32(hc, name, &t))) {
+#ifdef DEBUG
+        assert(FALSE);
+#endif
+        return ref_color;
+    }
+
+    alpha = ((t >> 24) & 0xff);
+    c = (COLORREF) (t & 0xffffff);
+    return cw_mix_colors(ref_color, c, alpha);
+}
+
 void 
 cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
     khm_handle hc_cw = NULL;
@@ -649,8 +667,6 @@ _skip_col:
 
     tbl->flags |= KHUI_CW_TBL_INITIALIZED | KHUI_CW_TBL_COL_DIRTY | KHUI_CW_TBL_ACTIVE;
 
-    /*TODO: the graphics objects should be customizable */
-
     hdc = GetWindowDC(hwnd);
 
     khm_get_cw_element_font(hdc, L"FontHeader", FALSE, &log_font);
@@ -680,24 +696,64 @@ _skip_col:
                                     LR_DEFAULTCOLOR));
 
     {
+
 #define SEL_ALPHA 50
 
-        COLORREF bg_s = GetSysColor(COLOR_HIGHLIGHT);
-        COLORREF bg_normal = GetSysColor(COLOR_WINDOW);
-        COLORREF bg_gray = RGB(240,240,240);
-        COLORREF bg_hdr = RGB(240,240,240);
-        COLORREF bg_hdr_warn = RGB(235,235,134);
-        COLORREF bg_hdr_crit = RGB(235,184,134);
-        COLORREF bg_hdr_exp = RGB(235,134,134);
-        COLORREF bg_hdr_def = GetSysColor(COLOR_WINDOW);
+        khm_handle hc_themes = NULL;
+        khm_handle hc_theme = NULL;
 
-        tbl->cr_normal =       GetSysColor(COLOR_WINDOWTEXT);
-        tbl->cr_s =            GetSysColor(COLOR_WINDOWTEXT);
-        tbl->cr_hdr_outline =  RGB(0,0,0);
-        tbl->cr_hdr_normal =   GetSysColor(COLOR_WINDOWTEXT);
-        tbl->cr_hdr_s =        GetSysColor(COLOR_WINDOWTEXT);
-        tbl->cr_hdr_gray =     GetSysColor(COLOR_GRAYTEXT);
-        tbl->cr_hdr_gray_s =   GetSysColor(COLOR_HIGHLIGHTTEXT);
+        COLORREF bg_s;
+        COLORREF bg_normal;
+        COLORREF bg_gray;
+        COLORREF bg_hdr;
+        COLORREF bg_hdr_cred;
+        COLORREF bg_hdr_warn;
+        COLORREF bg_hdr_crit;
+        COLORREF bg_hdr_exp;
+
+        COLORREF bg_hdr_s;
+        COLORREF bg_hdr_cred_s;
+        COLORREF bg_hdr_warn_s;
+        COLORREF bg_hdr_crit_s;
+        COLORREF bg_hdr_exp_s;
+
+        cbsize = sizeof(buf);
+        if (KHM_SUCCEEDED(khc_read_string(hc_cw, L"DefaultTheme", buf, &cbsize)) &&
+            KHM_SUCCEEDED(khc_open_space(hc_cw, L"Themes", KHM_PERM_READ, &hc_themes)) &&
+            KHM_SUCCEEDED(khc_open_space(hc_themes, buf, KHM_PERM_READ, &hc_theme))) {
+
+            bg_s           = cw_get_theme_color(hc_theme, L"ClrSelection", 0);
+            bg_normal      = cw_get_theme_color(hc_theme, L"ClrBackground", 0);
+            bg_gray        = cw_get_theme_color(hc_theme, L"ClrGray", 0);
+            bg_hdr         = cw_get_theme_color(hc_theme, L"ClrHeader", 0);
+            bg_hdr_cred    = cw_get_theme_color(hc_theme, L"ClrHeaderCred", 0);
+            bg_hdr_warn    = cw_get_theme_color(hc_theme, L"ClrHeaderWarn", 0);
+            bg_hdr_crit    = cw_get_theme_color(hc_theme, L"ClrHeaderCrit", 0);
+            bg_hdr_exp     = cw_get_theme_color(hc_theme, L"ClrHeaderExp", 0);
+            bg_hdr_s       = cw_get_theme_color(hc_theme, L"ClrHeaderSel", bg_s);
+            bg_hdr_cred_s  = cw_get_theme_color(hc_theme, L"ClrHeaderCredSel", bg_s);
+            bg_hdr_warn_s  = cw_get_theme_color(hc_theme, L"ClrHeaderWarnSel", bg_s);
+            bg_hdr_crit_s  = cw_get_theme_color(hc_theme, L"ClrHeaderCritSel", bg_s);
+            bg_hdr_exp_s   = cw_get_theme_color(hc_theme, L"ClrHeaderExpSel", bg_s);
+
+            tbl->cr_normal      = cw_get_theme_color(hc_theme, L"ClrText", 0);
+            tbl->cr_s           = cw_get_theme_color(hc_theme, L"ClrTextSel", bg_s);
+            tbl->cr_hdr_outline = cw_get_theme_color(hc_theme, L"ClrHeaderOutline", 0);
+            tbl->cr_hdr_normal  = cw_get_theme_color(hc_theme, L"ClrTextHeader", 0);
+            tbl->cr_hdr_s       = cw_get_theme_color(hc_theme, L"ClrTextHeaderSel", bg_s);
+            tbl->cr_hdr_gray    = cw_get_theme_color(hc_theme, L"ClrTextHeaderGray", 0);
+            tbl->cr_hdr_gray_s  = cw_get_theme_color(hc_theme, L"ClrTextHeaderGraySel", bg_s);
+        } else {
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+        }
+
+        if (hc_theme)
+            khc_close_space(hc_theme);
+        if (hc_themes)
+            khc_close_space(hc_themes);
+        hc_theme = hc_themes = NULL;
 
         if (khm_main_wnd_mode == KHM_MAIN_WND_MINI) {
             bg_hdr = bg_normal;
@@ -709,16 +765,16 @@ _skip_col:
         tbl->hb_s =           CreateSolidBrush(cw_mix_colors(bg_s, bg_normal, SEL_ALPHA));
 
         tbl->hb_hdr_bg =      CreateSolidBrush(bg_hdr);
+        tbl->hb_hdr_bg_cred = CreateSolidBrush(bg_hdr_cred);
         tbl->hb_hdr_bg_warn = CreateSolidBrush(bg_hdr_warn);
         tbl->hb_hdr_bg_crit = CreateSolidBrush(bg_hdr_crit);
         tbl->hb_hdr_bg_exp =  CreateSolidBrush(bg_hdr_exp);
-        tbl->hb_hdr_bg_def =  CreateSolidBrush(bg_hdr_def);
 
-        tbl->hb_hdr_bg_s =      CreateSolidBrush(cw_mix_colors(bg_s, bg_hdr, SEL_ALPHA));
-        tbl->hb_hdr_bg_warn_s = CreateSolidBrush(cw_mix_colors(bg_s, bg_hdr_warn, SEL_ALPHA));
-        tbl->hb_hdr_bg_crit_s = CreateSolidBrush(cw_mix_colors(bg_s, bg_hdr_crit, SEL_ALPHA));
-        tbl->hb_hdr_bg_exp_s =  CreateSolidBrush(cw_mix_colors(bg_s, bg_hdr_exp, SEL_ALPHA));
-        tbl->hb_hdr_bg_def_s =  CreateSolidBrush(cw_mix_colors(bg_s, bg_hdr_def, SEL_ALPHA));
+        tbl->hb_hdr_bg_s =      CreateSolidBrush(bg_s);
+        tbl->hb_hdr_bg_cred_s = CreateSolidBrush(bg_hdr_cred_s);
+        tbl->hb_hdr_bg_warn_s = CreateSolidBrush(bg_hdr_warn_s);
+        tbl->hb_hdr_bg_crit_s = CreateSolidBrush(bg_hdr_crit_s);
+        tbl->hb_hdr_bg_exp_s =  CreateSolidBrush(bg_hdr_exp_s);
     }
 
     tbl->ilist = khui_create_ilist(KHUI_SMICON_CX, KHUI_SMICON_CY-1, 20, 8, 0);
@@ -1887,13 +1943,13 @@ cw_unload_view(khui_credwnd_tbl * tbl)
     SafeDeleteObject(tbl->hb_hdr_bg_crit);
     SafeDeleteObject(tbl->hb_hdr_bg_exp);
     SafeDeleteObject(tbl->hb_hdr_bg_warn);
-    SafeDeleteObject(tbl->hb_hdr_bg_def);
+    SafeDeleteObject(tbl->hb_hdr_bg_cred);
 
     SafeDeleteObject(tbl->hb_hdr_bg_s);
     SafeDeleteObject(tbl->hb_hdr_bg_crit_s);
     SafeDeleteObject(tbl->hb_hdr_bg_exp_s);
     SafeDeleteObject(tbl->hb_hdr_bg_warn_s);
-    SafeDeleteObject(tbl->hb_hdr_bg_def_s);
+    SafeDeleteObject(tbl->hb_hdr_bg_cred_s);
 
 #undef SafeDeleteObject
 
@@ -2363,8 +2419,8 @@ cw_draw_header(HDC hdc,
                 hbr = tbl->hb_hdr_bg_crit_s;
             else if ((o->flags & CW_EXPSTATE_MASK) == CW_EXPSTATE_WARN)
                 hbr = tbl->hb_hdr_bg_warn_s;
-            else if (idf & KCDB_IDENT_FLAG_DEFAULT)
-                hbr = tbl->hb_hdr_bg_def_s;
+            else if ((colattr == KCDB_ATTR_ID_NAME) && !(o->flags & KHUI_CW_O_EMPTY)) 
+                hbr = tbl->hb_hdr_bg_cred_s;
             else
                 hbr = tbl->hb_hdr_bg_s;
         } else {
@@ -2374,8 +2430,8 @@ cw_draw_header(HDC hdc,
                 hbr = tbl->hb_hdr_bg_crit;
             else if ((o->flags & CW_EXPSTATE_MASK) == CW_EXPSTATE_WARN)
                 hbr = tbl->hb_hdr_bg_warn;
-            else if (idf & KCDB_IDENT_FLAG_DEFAULT)
-                hbr = tbl->hb_hdr_bg_def;
+            else if ((colattr == KCDB_ATTR_ID_NAME) && !(o->flags & KHUI_CW_O_EMPTY)) 
+                hbr = tbl->hb_hdr_bg_cred;
             else
                 hbr = tbl->hb_hdr_bg;
         }
@@ -2550,9 +2606,9 @@ cw_draw_header(HDC hdc,
 
             tr.left = max(tr.right - cx_str, tr.left + cx_id + KHUI_SMICON_CX * 2);
             if (selected)
-                SetTextColor(hdc, tbl->cr_hdr_gray_s);
+                SetTextColor(hdc, tbl->cr_hdr_s);
             else
-                SetTextColor(hdc, tbl->cr_hdr_gray);
+                SetTextColor(hdc, tbl->cr_hdr_normal);
             DrawText(hdc, typestr, len, &tr, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
         }
 
@@ -2609,9 +2665,9 @@ cw_draw_header(HDC hdc,
                 len = (int) wcslen(buf);
 
                 if (selected)
-                    SetTextColor(hdc, tbl->cr_hdr_gray_s);
+                    SetTextColor(hdc, tbl->cr_hdr_s);
                 else
-                    SetTextColor(hdc, tbl->cr_hdr_gray);
+                    SetTextColor(hdc, tbl->cr_hdr_normal);
                 DrawText(hdc, buf, len, &tr, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
             }
         }
