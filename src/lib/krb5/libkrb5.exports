@@ -661,7 +661,6 @@ krb5_verify_init_creds_opt_set_ap_req_nofail
 krb5_vset_error_message
 krb5_walk_realm_tree
 krb5_write_message
-krb5int_524_sendto_kdc
 krb5int_accessor
 krb5int_cc_default
 krb5int_cleanup_library
