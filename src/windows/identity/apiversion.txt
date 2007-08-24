@@ -361,3 +361,7 @@ Date=(TBD)
 + KHERR_CTX_NEWCHILD
 + KHERR_CTX_FOLDCHILD
 # Added to kherr.h to support additional notifications
+
++ WMNC_IDENT_PREPROCESS
+# Preprocess the identity selector controls before fetching the
+# selected identity

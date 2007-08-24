@@ -722,6 +722,17 @@ ui_cb(khui_new_creds * nc,
     case WMNC_IDENT_WMSG:
         return handle_wnd_msg(nc, hwnd, uMsg, wParam, lParam);
 
+    case WMNC_IDENT_PREPROCESS:
+        {
+#ifdef DEBUG
+            assert(d != NULL);
+#endif
+            if (d) {
+                set_identity_from_ui(nc, d);
+            }
+        }
+        return TRUE;
+
     case WMNC_IDENT_EXIT:
         {
 #ifdef DEBUG

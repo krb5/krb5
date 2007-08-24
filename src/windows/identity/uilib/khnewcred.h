@@ -329,6 +329,12 @@ enum khui_wm_nc_ident_notify {
     WMNC_IDENT_EXIT,
     /*!< Terminate a credentials acquisition dialog. Sent just before
       the dialog is terminated. */
+
+    WMNC_IDENT_PREPROCESS,
+    /*!< The identity is about to be fetched from the \a
+       ::khui_new_creds structure.  The callback is expected to ensure
+       that the primary identity listed in that structure is
+       consistent with the user selection. */
 };
 
 /*! \name Standard credtext link IDs

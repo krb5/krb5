@@ -982,6 +982,9 @@ khm_cfg_add_ident_proc(HWND hwnd,
             if (!d || !d->nc)
                 break;
 
+            if (d->nc->ident_cb)
+                d->nc->ident_cb(d->nc, WMNC_IDENT_PREPROCESS, NULL, 0, 0, 0);
+
             /* check if there was an identity selected */
             if (d->nc->n_identities == 0 ||
                 d->nc->identities[0] == NULL) {
