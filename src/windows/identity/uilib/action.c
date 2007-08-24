@@ -497,6 +497,7 @@ khui_action_trigger(khm_int32 action, khui_action_context * ctx) {
 
     if (ctx) {
 	khui_context_set_indirect(&save);
+        khui_context_release(&save);
     }
 }
 
