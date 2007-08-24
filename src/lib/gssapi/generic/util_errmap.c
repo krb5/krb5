@@ -1,6 +1,8 @@
 #include "gssapiP_generic.h"
 #include <string.h>
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 /* The mapping table is 0-based, but let's export codes that are
    1-based, keeping 0 for errors or unknown errors.
