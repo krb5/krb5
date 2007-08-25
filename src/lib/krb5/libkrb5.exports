@@ -1,3 +1,4 @@
+_krb5_conf_boolean
 decode_krb5_alt_method
 decode_krb5_ap_rep
 decode_krb5_ap_rep_enc_part
