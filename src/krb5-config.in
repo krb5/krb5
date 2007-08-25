@@ -176,11 +176,17 @@ fi
 
 
 if test -n "$do_libs"; then
+    # Assumes /usr/lib is the standard library directory everywhere...
+    if test "$libdir" = /usr/lib; then
+	libdirarg=
+    else
+	libdirarg="-L$libdir"
+    fi
     # Ugly gross hack for our build tree
     lib_flags=`echo $CC_LINK | sed -e 's/\$(CC)//' \
 	    -e 's/\$(PURE)//' \
 	    -e 's#\$(PROG_RPATH)#'$libdir'#' \
-	    -e 's#\$(PROG_LIBPATH)#-L'$libdir'#' \
+	    -e 's#\$(PROG_LIBPATH)#'$libdirarg'#' \
 	    -e 's#\$(RPATH_FLAG)#'"$RPATH_FLAG"'#' \
 	    -e 's#\$(LDFLAGS)#'"$LDFLAGS"'#' \
 	    -e 's#\$(PTHREAD_CFLAGS)#'"$PTHREAD_CFLAGS"'#' \
