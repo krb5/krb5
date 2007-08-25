@@ -496,6 +496,7 @@ krb5int_cc_default
 krb5int_cleanup_library
 krb5int_cm_call_select
 krb5int_foreach_localaddr
+krb5int_free_addrlist
 krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_sendtokdc_debug_handler
