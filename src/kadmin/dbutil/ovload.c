@@ -15,7 +15,6 @@
 #include    "nstrtok.h"
 
 #define LINESIZE	32768 /* XXX */
-#define PLURAL(count)	(((count) == 1) ? error_message(IMPORT_SINGLE_RECORD) : error_message(IMPORT_PLURAL_RECORDS))
 
 static int parse_pw_hist_ent(current, hist)
    char *current;
