@@ -1558,7 +1558,11 @@ krb5_error_code KRB5_CALLCONV krb5_get_server_rcache
 krb5_error_code KRB5_CALLCONV_C krb5_build_principal_ext
 	(krb5_context, krb5_principal *, unsigned int, const char *, ...);
 krb5_error_code KRB5_CALLCONV_C krb5_build_principal
-	(krb5_context, krb5_principal *, unsigned int, const char *, ...);
+	(krb5_context, krb5_principal *, unsigned int, const char *, ...)
+#if __GNUC__ >= 4
+    __attribute__ ((sentinel))
+#endif
+    ;
 krb5_error_code KRB5_CALLCONV krb5_build_principal_va
 	(krb5_context,
 		krb5_principal, unsigned int, const char *, va_list);
