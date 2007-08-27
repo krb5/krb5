@@ -109,6 +109,12 @@ KRB5INT_BEGIN_DECLS
 #    pragma pack(push,2)
 #endif
 
+#if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 30203
+# define KRB5_ATTR_DEPRECATED __attribute__((deprecated))
+#else
+# define KRB5_ATTR_DEPRECATED
+#endif
+
 /* from profile.h */
 struct _profile_t;
 /* typedef struct _profile_t *profile_t; */
@@ -1707,7 +1713,7 @@ krb5_get_profile
 	(krb5_context, struct _profile_t * /* profile_t */ *);
 
 #if KRB5_DEPRECATED
-krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
 	(krb5_context,
 		krb5_flags,
 		krb5_address * const *,
@@ -1728,7 +1734,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt
 		krb5_ccache,
 		krb5_kdc_rep ** );
 
-krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_password
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_password
 	(krb5_context,
 		krb5_flags,
 		krb5_address * const *,
@@ -1739,7 +1745,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_password
 		krb5_creds *,
 		krb5_kdc_rep ** );
 
-krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_skey
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_skey
 	(krb5_context,
 		krb5_flags,
 		krb5_address * const *,
@@ -1750,7 +1756,7 @@ krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_skey
 		krb5_creds *,
 		krb5_kdc_rep ** );
 
-krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_keytab
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_get_in_tkt_with_keytab
 	(krb5_context,
 		krb5_flags,
 		krb5_address * const *,
@@ -1923,12 +1929,12 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_setrecvsubkey(
     krb5_context, krb5_auth_context, krb5_keyblock *);
 
 #if KRB5_DEPRECATED
-krb5_error_code KRB5_CALLCONV krb5_auth_con_getlocalsubkey
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_auth_con_getlocalsubkey
 	(krb5_context,
 		krb5_auth_context,
 		krb5_keyblock **);
 
-krb5_error_code KRB5_CALLCONV krb5_auth_con_getremotesubkey
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_auth_con_getremotesubkey
 	(krb5_context,
 		krb5_auth_context,
 		krb5_keyblock **);
@@ -1945,7 +1951,7 @@ krb5_error_code KRB5_CALLCONV krb5_auth_con_getremoteseqnumber
 		krb5_int32 *);
 
 #if KRB5_DEPRECATED
-krb5_error_code KRB5_CALLCONV krb5_auth_con_initivector
+KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV krb5_auth_con_initivector
 	(krb5_context,
 		krb5_auth_context);
 #endif
@@ -2313,5 +2319,7 @@ KRB5INT_END_DECLS
 /* Don't use this!  We're going to phase it out.  It's just here to keep
    applications from breaking right away.  */
 #define krb5_const const
+
+#undef KRB5_ATTR_DEPRECATED
 
 #endif /* KRB5_GENERAL__ */
