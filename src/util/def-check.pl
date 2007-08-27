@@ -89,6 +89,7 @@ while (! $h->eof()) {
     if (/^ *extern "C" {/) {
         next LINE;
     }
+    s/KRB5_ATTR_DEPRECATED//;
     # elide struct definitions
   Struct1:
     if (/{[^}]*}/) {
