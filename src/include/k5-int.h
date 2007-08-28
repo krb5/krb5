@@ -104,10 +104,7 @@
 #define ANSI_STDIO
 #endif
 
-#ifndef KRB5_AUTOCONF__
-#define KRB5_AUTOCONF__
 #include "autoconf.h"
-#endif
 
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
@@ -171,16 +168,6 @@ typedef INT64_TYPE krb5_int64;
 
 /* Get error info support.  */
 #include "k5-err.h"
-
-/* krb5/krb5.h includes many other .h files in the krb5 subdirectory.
-   The ones that it doesn't include, we include below.  */
-
-/*
- * Begin "k5-errors.h"
- */
-#ifndef KRB5_ERRORS__
-#define KRB5_ERRORS__
-
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -268,11 +255,6 @@ typedef INT64_TYPE krb5_int64;
 #define KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED	79 /* missing paChecksum in PA-PK-AS-REQ */
 #define KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED 80 /* bad digest algorithm in SignedData */
 #define KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED 81
-
-#endif /* KRB5_ERRORS__ */
-/*
- * End "k5-errors.h"
- */
 
 /*
  * This structure is returned in the e-data field of the KRB-ERROR
@@ -440,12 +422,6 @@ typedef struct _krb5_enc_sam_response_enc_2 {
 
 #include "k5-int-pkinit.h"
 
-/*
- * Begin "ext-proto.h"
- */
-#ifndef KRB5_EXT_PROTO__
-#define KRB5_EXT_PROTO__
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -456,23 +432,6 @@ extern char *strdup (const char *);
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#endif /* KRB5_EXT_PROTO__ */
-/*
- * End "ext-proto.h"
- */
-
-/*
- * Begin "sysincl.h"
- */
-#ifndef KRB5_SYSINCL__
-#define KRB5_SYSINCL__
-
-#ifndef KRB5_SYSTYPES__
-#define KRB5_SYSTYPES__
-/* needed for much of the rest -- but already handled in krb5.h? */
-/* #include <sys/types.h> */
-#endif /* KRB5_SYSTYPES__ */
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -500,17 +459,6 @@ extern char *strdup (const char *);
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
-#endif /* KRB5_SYSINCL__ */
-/*
- * End "sysincl.h"
- */
-
-/*
- * Begin "los-proto.h"
- */
-#ifndef KRB5_LIBOS_PROTO__
-#define KRB5_LIBOS_PROTO__
 
 #include <stdio.h>
 
@@ -577,8 +525,6 @@ krb5_error_code
 krb5int_locate_server (krb5_context, const krb5_data *realm,
 		       struct addrlist *, enum locate_service_type svc,
 		       int sockettype, int family);
-
-#endif /* KRB5_LIBOS_PROTO__ */
 
 /* new encryption provider api */
 
@@ -795,12 +741,6 @@ krb5_error_code krb5_encrypt_helper
  * End "los-proto.h"
  */
 
-/*
- * Begin "libos.h"
- */
-#ifndef KRB5_LIBOS__
-#define KRB5_LIBOS__
-
 typedef struct _krb5_os_context {
 	krb5_magic		magic;
 	krb5_int32		time_offset;
@@ -831,11 +771,6 @@ typedef struct _krb5_os_context {
 #define	KRB5_LOCKMODE_EXCLUSIVE	0x0002
 #define	KRB5_LOCKMODE_DONTBLOCK	0x0004
 #define	KRB5_LOCKMODE_UNLOCK	0x0008
-
-#endif /* KRB5_LIBOS__ */
-/*
- * End "libos.h"
- */
 
 /*
  * Define our view of the size of a DES key.
