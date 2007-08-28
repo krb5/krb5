@@ -111,6 +111,8 @@ KRB5INT_BEGIN_DECLS
 
 #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 30203
 # define KRB5_ATTR_DEPRECATED __attribute__((deprecated))
+#elif defined _WIN32
+# define KRB5_ATTR_DEPRECATED __declspec(deprecated)
 #else
 # define KRB5_ATTR_DEPRECATED
 #endif
