@@ -29,7 +29,6 @@
 #include<khuidefs.h>
 #include<utils.h>
 #include<assert.h>
-
 #include<strsafe.h>
 
 #define CW_ALLOC_INCR 8
@@ -581,7 +580,7 @@ khuiint_trim_str(wchar_t * s, khm_size cch) {
         return;
 
     if (c != s && ((khm_size)(c - s)) < cch) {
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && __STDC_WANT_SECURE_LIB__
         wmemmove_s(s, cch, c, cch - ((khm_size)(c - s)));
 #else
         memmove(s, c, (cch - ((khm_size)(c - s)))* sizeof(wchar_t));

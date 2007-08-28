@@ -52,6 +52,14 @@ const khm_version app_version = {KH_VERSION_LIST};
 
 HRESULT hr_coinitialize = S_OK;
 
+#if defined(DEBUG) && (defined(KH_BUILD_PRIVATE) || defined(KH_BUILD_SPECIAL))
+
+KHMEXP void KHMAPI khcint_dump_handles(FILE * f);
+KHMEXP void KHMAPI perf_dump(FILE * f);
+KHMEXP void KHMAPI kmqint_dump(FILE * f);
+
+#endif
+
 void khm_init_gui(void) {
 
     hr_coinitialize = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -1035,11 +1043,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     {
         FILE * f = NULL;
 
-        KHMEXP void KHMAPI khcint_dump_handles(FILE * f);
-        KHMEXP void KHMAPI perf_dump(FILE * f);
-        KHMEXP void KHMAPI kmqint_dump(FILE * f);
-
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && __STDC_WANT_SECURE_LIB__
         if (fopen_s(&f, "memleak.txt", "w") != 0)
             goto done_with_dump;
 #else

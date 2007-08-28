@@ -1392,10 +1392,7 @@ khm_krb5_kinit(krb5_context       alt_ctx,
         code = pkrb5_cc_resolve(ctx, ccache, &cc);
     } else {
 	khm_handle identity = NULL;
-	khm_handle csp_ident = NULL;
-	khm_handle csp_k5 = NULL;
 	wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
-	wchar_t wccname[MAX_PATH];
 	char ccname[MAX_PATH];
 	char * pccname = principal_name;
 	khm_size cb;
@@ -1403,30 +1400,15 @@ khm_krb5_kinit(krb5_context       alt_ctx,
 	idname[0] = L'\0';
 	AnsiStrToUnicode(idname, sizeof(idname), principal_name);
 
-	cb = sizeof(wccname);
+	cb = sizeof(ccname);
 
 	if (KHM_SUCCEEDED(kcdb_identity_create(idname, 0, &identity)) &&
+            KHM_SUCCEEDED(khm_krb5_get_identity_default_ccacheA(identity, ccname, &cb))) {
 
-	    KHM_SUCCEEDED(kcdb_identity_get_config(identity, 0, &csp_ident)) &&
-
-	    KHM_SUCCEEDED(khc_open_space(csp_ident, CSNAME_KRB5CRED, 0,
-					 &csp_k5)) &&
-
-	    KHM_SUCCEEDED(khc_read_string(csp_k5, L"DefaultCCName",
-					  wccname, &cb)) &&
-
-	    cb > sizeof(wchar_t)) {
-
-            _reportf(L"Using DefaultCCName [%s] from identity", wccname);
-
-	    UnicodeStrToAnsi(ccname, sizeof(ccname), wccname);
 	    pccname = ccname;
+
 	}
 
-	if (csp_k5)
-	    khc_close_space(csp_k5);
-	if (csp_ident)
-	    khc_close_space(csp_ident);
 	if (identity)
 	    kcdb_identity_release(identity);
 
@@ -2182,8 +2164,8 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds,
     krb5_cc_cursor cursor=0;
     krb5_principal princ = 0;
     khm_handle ident = NULL;
-    wchar_t wname[KCDB_IDENT_MAXCCH_NAME];
-    char    cname[KCDB_IDENT_MAXCCH_NAME];
+    wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+    char    ccname[MAX_PATH];
     char *cache_name = NULL;
     char *princ_name = NULL;
     BOOL rc = FALSE;
@@ -2210,9 +2192,9 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds,
         if (code = pkrb5_unparse_name(kcontext, princ, &princ_name))
             goto cleanup;
 
-        AnsiStrToUnicode(wname, sizeof(wname), princ_name);
+        AnsiStrToUnicode(idname, sizeof(idname), princ_name);
 
-        kherr_reportf(L"Unparsed name [%s]", wname);
+        kherr_reportf(L"Unparsed name [%s]", idname);
 
         /* see if we have to match a specific principal */
         if (match_princ != NULL) {
@@ -2245,48 +2227,26 @@ khm_krb5_ms2mit(char * match_princ, BOOL match_realm, BOOL save_creds,
             PFREE(wdefrealm);
         }
 
-        if (KHM_SUCCEEDED(kcdb_identity_create(wname,
+        if (KHM_SUCCEEDED(kcdb_identity_create(idname,
                                                KCDB_IDENT_FLAG_CREATE,
                                                &ident))) {
-            khm_handle idconfig = NULL;
-            khm_handle k5config = NULL;
             khm_size cb;
 
-            wname[0] = L'\0';
+            cb = sizeof(ccname);
 
-            kcdb_identity_get_config(ident, KHM_FLAG_CREATE, &idconfig);
-            if (idconfig == NULL)
-                goto _done_checking_config;
+            khm_krb5_get_identity_default_ccacheA(ident, ccname, &cb);
 
-            khc_open_space(idconfig, CSNAME_KRB5CRED, KHM_FLAG_CREATE, &k5config);
-            if (k5config == NULL)
-                goto _done_checking_config;
-
-            cb = sizeof(wname);
-            khc_read_string(k5config,
-                            L"DefaultCCName",
-                            wname, &cb);
-
-        _done_checking_config:
-
-            if (idconfig)
-                khc_close_space(idconfig);
-            if (k5config)
-                khc_close_space(k5config);
-
-            if (wname[0]) {
-                UnicodeStrToAnsi(cname, sizeof(cname), wname);
-            } else {
-                StringCbPrintfA(cname, sizeof(cname), "API:%s", princ_name);
-            }
-
-            cache_name = cname;
+            cache_name = ccname;
 
         } else {
             /* the identity could not be created.  we just use the
                name of the principal as the ccache name. */
-            StringCbPrintfA(cname, sizeof(cname), "API:%s", princ_name);
-            cache_name = cname;
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+            kherr_reportf(L"Failed to create identity");
+            StringCbPrintfA(ccname, sizeof(ccname), "API:%s", princ_name);
+            cache_name = ccname;
         }
 
         kherr_reportf(L"Resolving target cache [%S]\n", cache_name);
@@ -2453,7 +2413,7 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
         StringCchCopyA(confname, szConfname, krbConFile);
     }
     else if (hKrb4) { 
-        unsigned int size = szConfname;
+        size_t size = szConfname;
         memset(confname, '\0', szConfname);
         if (!pkrb_get_krbconf2(confname, &size))
             { // Error has happened
@@ -2477,7 +2437,7 @@ readstring(FILE * file, char * buf, int len)
                 buf[i] = '\0';
                 return i;
             } else {
-                buf[i] = c;
+                buf[i] = (char) c;
             }
         } else {
             if (c == '\n') {
@@ -2579,7 +2539,7 @@ khm_krb5_get_realm_list(void)
         wchar_t * d;
 
         if (!khm_get_krb4_con_file(krb_conf,sizeof(krb_conf)) && 
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && __STDC_WANT_SECURE_LIB__
             !fopen_s(&file, krb_conf, "rt")
 #else
             (file = fopen(krb_conf, "rt"))
@@ -3095,6 +3055,79 @@ get_libdefault_string(profile_t profile, const char * realm,
     pprofile_free_list(nameval);
 
     return code;
+}
+
+khm_int32
+khm_krb5_get_identity_default_ccache(khm_handle ident, wchar_t * buf, khm_size * pcb) {
+    khm_handle csp_id = NULL;
+    khm_int32 rv = KHM_ERROR_SUCCESS;
+
+    rv = khm_krb5_get_identity_config(ident, 0, &csp_id);
+
+    if (KHM_SUCCEEDED(rv))
+        rv = khc_read_string(csp_id, L"DefaultCCName", buf, pcb);
+
+    if (KHM_FAILED(rv) && rv != KHM_ERROR_TOO_LONG) {
+        /* we need to figure out the default ccache from the principal
+           name */
+        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+        wchar_t ccname[MAX_PATH];
+        khm_size cb;
+
+        cb = sizeof(idname);
+        kcdb_identity_get_name(ident, idname, &cb);
+        StringCbCopy(ccname, sizeof(ccname), idname);
+        khm_krb5_canon_cc_name(ccname, sizeof(ccname));
+        StringCbLength(ccname, sizeof(ccname), &cb);
+
+        _reportf(L"Setting CCache [%s] for identity [%s]", ccname, idname);
+
+        if (buf && *pcb >= cb) {
+            StringCbCopy(buf, *pcb, ccname);
+            *pcb = cb;
+            rv = KHM_ERROR_SUCCESS;
+        } else {
+            *pcb = cb;
+            rv = KHM_ERROR_TOO_LONG;
+        }
+    } else if (KHM_SUCCEEDED(rv)) {
+        wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+        khm_size cb;
+
+        cb = sizeof(idname);
+        kcdb_identity_get_name(ident, idname, &cb);
+
+        _reportf(L"Found CCache [%s] for identity [%s]", buf, idname);
+    }
+
+    if (csp_id != NULL)
+        khc_close_space(csp_id);
+
+    return rv;
+}
+
+khm_int32
+khm_krb5_get_identity_default_ccacheA(khm_handle ident, char * buf, khm_size * pcb) {
+    wchar_t wccname[MAX_PATH];
+    khm_size cbcc;
+    khm_int32 rv;
+
+    cbcc = sizeof(wccname);
+    rv = khm_krb5_get_identity_default_ccache(ident, wccname, &cbcc);
+
+    if (KHM_SUCCEEDED(rv)) {
+        cbcc = sizeof(char) * cbcc / sizeof(wchar_t);
+        if (buf == NULL || *pcb < cbcc) {
+            *pcb = cbcc;
+            rv = KHM_ERROR_TOO_LONG;
+        } else {
+            UnicodeStrToAnsi(buf, *pcb, wccname);
+            *pcb = cbcc;
+            rv = KHM_ERROR_SUCCESS;
+        }
+    }
+
+    return rv;
 }
 
 khm_int32

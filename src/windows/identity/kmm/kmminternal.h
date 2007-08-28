@@ -244,6 +244,7 @@ kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l);
 #define KMM_CSNAME_PLUGINS L"Plugins"
 #define KMM_CSNAME_MODULES L"Modules"
 #define KMM_VALNAME_LOADLIST L"LoadList"
+#define KMM_VALNAME_IMAGEPATH L"ImagePath"
 
 void
 kmmint_add_to_module_queue(void);

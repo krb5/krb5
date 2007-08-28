@@ -220,9 +220,6 @@ DWORD WINAPI kmqint_completion_thread_proc(LPVOID p) {
     LeaveCriticalSection(&cs_compl);
 
     ExitThread(0);
-
-    /* not reached */
-    return 0;
 }
 
 int kmqint_call_completion_handler(kmq_msg_completion_handler h,

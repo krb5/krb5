@@ -68,7 +68,6 @@ addr_change_thread(LPVOID dummy) {
     
  _end_thread:
     ExitThread(0);
-    return 0;                   /* unreachable */
 }
 
 void

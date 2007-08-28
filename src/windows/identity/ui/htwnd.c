@@ -463,23 +463,23 @@ static int htw_parse_tag(
 
         n = 1;
     } else if(!_wcsnicmp(start, L"b", c - start)) {
-        format_push(s,d, HTW_DEFAULT, FV_BOLD, HTW_DEFAULT);
+        format_push(s,d, HTW_DEFAULT, FV_BOLD, (COLORREF) HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/b", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"u", c - start)) {
-        format_push(s,d, HTW_DEFAULT, FV_UNDERLINE, HTW_DEFAULT);
+        format_push(s,d, HTW_DEFAULT, FV_UNDERLINE, (COLORREF) HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/u", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"i", c - start)) {
-        format_push(s,d, HTW_DEFAULT, FV_ITALIC, HTW_DEFAULT);
+        format_push(s,d, HTW_DEFAULT, FV_ITALIC, (COLORREF) HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/i", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"large", c - start)) {
-        format_push(s,d,-MulDiv(HTW_LARGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, HTW_DEFAULT);
+        format_push(s,d,-MulDiv(HTW_LARGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, (COLORREF) HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/large", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"huge", c - start)) {
-        format_push(s,d,-MulDiv(HTW_HUGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, HTW_DEFAULT);
+        format_push(s,d,-MulDiv(HTW_HUGE_SIZE, d->l_pixel_y, 72), HTW_DEFAULT, (COLORREF) HTW_DEFAULT);
     } else if(!_wcsnicmp(start, L"/huge", c - start)) {
         format_pop(s);
     } else if(!_wcsnicmp(start, L"center", c - start)) {
@@ -610,9 +610,9 @@ static void htw_assert_style(HDC hdc, khui_htwnd_data * d, int style)
     lf.lfEscapement = 0;
     lf.lfOrientation = 0;
     lf.lfWeight = (d->styles[style].variation & FV_BOLD)? FW_BOLD: FW_NORMAL;
-    lf.lfItalic = !!(d->styles[style].variation & FV_ITALIC);
-    lf.lfUnderline = !!(d->styles[style].variation & FV_UNDERLINE);
-    lf.lfStrikeOut = !!(d->styles[style].variation & FV_STRIKEOUT);
+    lf.lfItalic = (BYTE) !!(d->styles[style].variation & FV_ITALIC);
+    lf.lfUnderline = (BYTE) !!(d->styles[style].variation & FV_UNDERLINE);
+    lf.lfStrikeOut = (BYTE) !!(d->styles[style].variation & FV_STRIKEOUT);
     lf.lfCharSet = DEFAULT_CHARSET;
     lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
     lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
@@ -840,7 +840,7 @@ static LRESULT htw_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             else
                 d->flags &= ~KHUI_HTWND_VSCROLL;
 
-            l = GetWindowLongPtr(hwnd, GWL_STYLE);
+            l = (LONG) GetWindowLongPtr(hwnd, GWL_STYLE);
             l &= ~(WS_HSCROLL | WS_VSCROLL);
 
             l |= ((d->flags & KHUI_HTWND_HSCROLL) ? WS_HSCROLL : 0) |

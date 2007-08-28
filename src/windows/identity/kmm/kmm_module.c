@@ -166,6 +166,7 @@ kmmint_read_module_info(kmm_module_i * m) {
     wchar_t resname[256];       /* the resource names are a lot shorter */
     wchar_t * r;
     VS_FIXEDFILEINFO *vff;
+    UINT c;
 
     assert(m->name);
     assert(m->path);
@@ -203,14 +204,14 @@ kmmint_read_module_info(kmm_module_i * m) {
     if(!VerQueryValue(m->version_info,
                      L"\\VarFileInfo\\Translation",
                      (LPVOID*) &languages,
-                     &cb)) {
+                     &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_NO_TRANS, _dupstr(m->path));
         _location(L"VerQueryValue");
         goto _cleanup;
     }
 
-    n_languages = (int) (cb / sizeof(*languages));
+    n_languages = (int) (c / sizeof(*languages));
 
     /* Try searching for the user's default language first */
     lang = GetUserDefaultLangID();
@@ -261,14 +262,14 @@ kmmint_read_module_info(kmm_module_i * m) {
                    languages[i].codepage);
 
     if (!VerQueryValue(m->version_info,
-                       resname, (LPVOID *) &r, &cb)) {
+                       resname, (LPVOID *) &r, &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING, 
                     _cstr(TEXT(NIMV_MODULE)));
         goto _cleanup;
     }
 
-    if (cb > KMM_MAXCB_NAME ||
+    if (c > KMM_MAXCB_NAME ||
         FAILED(StringCbLength(r, KMM_MAXCB_NAME, &cb))) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
@@ -290,14 +291,14 @@ kmmint_read_module_info(kmm_module_i * m) {
                    languages[i].codepage);
 
     if (!VerQueryValue(m->version_info,
-                       resname, (LPVOID *) &r, &cb)) {
+                       resname, (LPVOID *) &r, &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING, 
                     _cstr(TEXT(NIMV_APIVER)));
         goto _cleanup;
     }
 
-    if (cb > KMM_MAXCB_NAME ||
+    if (c > KMM_MAXCB_NAME ||
         FAILED(StringCbLength(r, KMM_MAXCB_NAME, &cb))) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
@@ -328,14 +329,14 @@ kmmint_read_module_info(kmm_module_i * m) {
                    languages[i].codepage);
 
     if (!VerQueryValue(m->version_info,
-                       resname, (LPVOID *) &r, &cb)) {
+                       resname, (LPVOID *) &r, &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING, 
                     _cstr(L"FileDescription"));
         goto _cleanup;
     }
 
-    if (cb > KMM_MAXCB_DESC ||
+    if (c > KMM_MAXCB_DESC ||
         FAILED(StringCbLength(r, KMM_MAXCB_DESC, &cb))) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
@@ -363,14 +364,14 @@ kmmint_read_module_info(kmm_module_i * m) {
                    languages[i].codepage);
 
     if (!VerQueryValue(m->version_info,
-                       resname, (LPVOID *) &r, &cb)) {
+                       resname, (LPVOID *) &r, &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING,
                     _cstr(TEXT(NIMV_SUPPORT)));
         goto _cleanup;
     }
 
-    if (cb > KMM_MAXCB_SUPPORT ||
+    if (c > KMM_MAXCB_SUPPORT ||
         FAILED(StringCbLength(r, KMM_MAXCB_SUPPORT, &cb))) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
@@ -398,14 +399,14 @@ kmmint_read_module_info(kmm_module_i * m) {
                    languages[i].codepage);
 
     if (!VerQueryValue(m->version_info,
-                       resname, (LPVOID *) &r, &cb)) {
+                       resname, (LPVOID *) &r, &c)) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING, 
                     _cstr(L"LegalCopyright"));
         goto _cleanup;
     }
 
-    if (cb > KMM_MAXCB_SUPPORT ||
+    if (c > KMM_MAXCB_SUPPORT ||
         FAILED(StringCbLength(r, KMM_MAXCB_SUPPORT, &cb))) {
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_TOO_LONG,
@@ -423,9 +424,8 @@ kmmint_read_module_info(kmm_module_i * m) {
 
     if (!VerQueryValue(m->version_info,
                        L"\\",
-                       (LPVOID *) &vff,
-                       &cb) ||
-        cb != sizeof(*vff)) {
+                       (LPVOID *) &vff, &c) ||
+        c != sizeof(*vff)) {
 
         rv = KHM_ERROR_INVALID_PARAM;
         _report_mr1(KHERR_WARNING, MSG_RMI_RES_MISSING, 

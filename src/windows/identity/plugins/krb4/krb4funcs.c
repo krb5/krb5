@@ -297,7 +297,7 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
 
         StringCchCopyA(confname, szConfname, krbConFile);
     } else if (hKrb4) { 
-        unsigned int size = szConfname;
+        size_t size = szConfname;
         memset(confname, '\0', szConfname);
         if (!pkrb_get_krbconf2(confname, &size)) {
             GetWindowsDirectoryA(confname,szConfname);
@@ -319,10 +319,10 @@ readstring(FILE * file, char * buf, int len)
 	{	
 		if (i < sizeof(buf)) {
 			if (c == '\n') {
-				buf[i] = '\0';
-				return i;
+                            buf[i] = '\0';
+                            return i;
 			} else {
-				buf[i] = c;
+                            buf[i] = (char)c;
 			}
 		} else {
 			if (c == '\n') {

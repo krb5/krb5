@@ -33,6 +33,8 @@
 
 #include<strsafe.h>
 
+#pragma warning(disable: 4204 4221)
+
 typedef struct tag_k5_realm_kdc {
     wchar_t       name[K5_MAXCCH_HOST];
     khm_boolean   admin;        /* admin server? */
@@ -1034,7 +1036,7 @@ k5_config_dlgproc(HWND hwnd,
                             (LPARAM) d->realms[i].realm);
             }
 
-            SendMessage(hw, CB_SELECTSTRING, -1,
+            SendMessage(hw, CB_SELECTSTRING, (WPARAM) -1,
                         (LPARAM) d->def_realm);
             SetDlgItemText(hwnd, IDC_CFG_DEFREALM, d->def_realm);
             SendDlgItemMessage(hwnd, IDC_CFG_DEFREALM, CB_LIMITTEXT,
@@ -1082,7 +1084,7 @@ k5_config_dlgproc(HWND hwnd,
             SendMessage(hw, CB_SETCURSEL, 0, d->lsa_import);
             t = importopts;
             SendMessage(hw, CB_GETLBTEXT, d->lsa_import,(LPARAM) t);
-            SendMessage(hw, CB_SELECTSTRING, -1, (LPARAM) t);
+            SendMessage(hw, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) t);
         }
         break;
 

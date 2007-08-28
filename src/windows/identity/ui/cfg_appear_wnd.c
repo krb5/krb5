@@ -358,7 +358,7 @@ khm_cfg_appearance_proc(HWND hwnd,
 
         } else if (wParam == MAKEWPARAM(IDC_CFG_ITALICS, BN_CLICKED)) {
 
-            d->lf_work.lfItalic =
+            d->lf_work.lfItalic = (BYTE)
                 (IsDlgButtonChecked(hwnd, IDC_CFG_ITALICS) == BST_CHECKED);
 
             refresh_view(hwnd, d);

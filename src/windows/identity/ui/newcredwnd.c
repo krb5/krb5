@@ -2973,7 +2973,7 @@ void khm_register_newcredwnd_class(void)
 
 void khm_unregister_newcredwnd_class(void)
 {
-    UnregisterClass((LPWSTR) khui_newcredwnd_cls, khm_hInstance);
+    UnregisterClass(MAKEINTATOM(khui_newcredwnd_cls), khm_hInstance);
 }
 
 HWND khm_create_newcredwnd(HWND parent, khui_new_creds * c)

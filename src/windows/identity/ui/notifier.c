@@ -409,7 +409,7 @@ notifier_wnd_proc(HWND hwnd,
                 POINT pt;
                 int menu_id;
                 khui_menu_def * mdef;
-                khui_action_ref * act;
+                khui_action_ref * act = NULL;
                 khm_size i, n;
                 khm_int32 def_cmd;
 
@@ -2451,6 +2451,7 @@ alert_bin_wnd_proc(HWND hwnd,
 
             if (in_printclient) {
                 hdc = (HDC) wParam;
+                ZeroMemory(&ps, sizeof(ps));
             } else {
                 hdc = BeginPaint(hwnd, &ps);
             }
@@ -2483,7 +2484,7 @@ alert_bin_wnd_proc(HWND hwnd,
                 khui_alert * a;
 
 #ifndef ALERT_STATIC_BACKGROUND
-#define MIX_C(v1, v2, p) (((int)v1) * p + (((int) v2) * (256 - p)))
+#define MIX_C(v1, v2, p) ((COLOR16)(((int)v1) * p + (((int) v2) * (256 - p))))
 #define ALPHA 50
                 if (in_printclient || ps.fErase) {
                     TRIVERTEX v[2];
@@ -2516,14 +2517,14 @@ alert_bin_wnd_proc(HWND hwnd,
                         v[1].Blue =  MIX_C(GetBValue(clr), GetBValue(clr2), ALPHA);
                     } else {
                         clr = GetSysColor(COLOR_BTNHIGHLIGHT);
-                        v[0].Red =   ((int)GetRValue(clr)) << 8;
-                        v[0].Green = ((int)GetGValue(clr)) << 8;
-                        v[0].Blue =  ((int)GetBValue(clr)) << 8;
+                        v[0].Red =   (COLOR16) ((int)GetRValue(clr)) << 8;
+                        v[0].Green = (COLOR16) ((int)GetGValue(clr)) << 8;
+                        v[0].Blue =  (COLOR16) ((int)GetBValue(clr)) << 8;
 
                         clr = GetSysColor(COLOR_BTNFACE);
-                        v[1].Red =   ((int)GetRValue(clr)) << 8;
-                        v[1].Green = ((int)GetGValue(clr)) << 8;
-                        v[1].Blue =  ((int)GetBValue(clr)) << 8;
+                        v[1].Red =   (COLOR16) ((int)GetRValue(clr)) << 8;
+                        v[1].Green = (COLOR16) ((int)GetGValue(clr)) << 8;
+                        v[1].Blue =  (COLOR16) ((int)GetBValue(clr)) << 8;
                     }
 
                     gr.UpperLeft = 0;
@@ -2773,7 +2774,7 @@ ATOM khm_register_alerter_wnd_class(void)
     wcx.cbWndExtra = DLGWINDOWEXTRA + sizeof(LONG_PTR);
     wcx.hInstance = khm_hInstance;
     wcx.hIcon = LoadIcon(khm_hInstance, MAKEINTRESOURCE(IDI_MAIN_APP));
-    wcx.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));
+    wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcx.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
     wcx.lpszMenuName = NULL;
     wcx.lpszClassName = KHUI_ALERTER_CLASS;
@@ -2798,7 +2799,7 @@ ATOM khm_register_alert_bin_wnd_class(void)
     wcx.cbWndExtra = sizeof(LONG_PTR);
     wcx.hInstance = khm_hInstance;
     wcx.hIcon = NULL;
-    wcx.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));
+    wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcx.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
     wcx.lpszMenuName = NULL;
     wcx.lpszClassName = KHUI_ALERTBIN_CLASS;

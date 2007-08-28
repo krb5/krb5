@@ -225,8 +225,8 @@ refresh_view(HWND hwnd, dlg_data * d) {
     /* we need populate the notification action combo box control and
        set the current selection to match the default action. */
 
-    if (n_khm_notifier_actions != SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION,
-                                                     CB_GETCOUNT, 0, 0)) {
+    if (n_khm_notifier_actions != (khm_size) SendDlgItemMessage(hwnd, IDC_CFG_NOTACTION,
+                                                                CB_GETCOUNT, 0, 0)) {
 
         for (i=0; i < n_khm_notifier_actions; i++) {
             int idx;

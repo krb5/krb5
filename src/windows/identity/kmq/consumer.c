@@ -84,7 +84,7 @@ kmqint_dump_consumer(FILE * f) {
                 s,
                 s->type,
                 (s->rcpt_type == KMQ_RCPTTYPE_CB)?"CALLBACK":"HWND",
-                (s->rcpt_type == KMQ_RCPTTYPE_CB) ? (void *) s->recipient.cb: (void *) s->recipient.hwnd,
+                (s->rcpt_type == KMQ_RCPTTYPE_CB)? s->recipient.cb: (void *) s->recipient.hwnd,
                 s->queue);
 
         s = LNEXT(s);
@@ -216,12 +216,8 @@ void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send
                the message queue. */
             m->refcount++;
             m->nSent++;
-            if (IsBadCodePtr(s->recipient.cb)) {
-                rv = KHM_ERROR_INVALID_OPERATION;
-            } else {
-                rv = s->recipient.cb(m->type, m->subtype, 
-                                     m->uparam, m->vparam);
-            }
+            rv = s->recipient.cb(m->type, m->subtype, 
+                                 m->uparam, m->vparam);
             m->refcount--;
             if(KHM_SUCCEEDED(rv))
                 m->nCompleted++;

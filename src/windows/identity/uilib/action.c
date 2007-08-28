@@ -519,9 +519,9 @@ khui_menu_dup(khui_menu_def * src)
 
     for (i=0; i<n; i++) {
         if (src->items[i].flags & KHUI_ACTIONREF_PACTION) {
-            khui_menu_insert_paction(d, -1, src->items[i].p_action, src->items[i].flags);
+            khui_menu_insert_paction(d, (khm_size) -1, src->items[i].p_action, src->items[i].flags);
         } else {
-            khui_menu_insert_action(d, -1, src->items[i].action, 0);
+            khui_menu_insert_action(d, (khm_size) -1, src->items[i].action, 0);
         }
     }
 
@@ -994,9 +994,9 @@ khui_create_global_accel_table(void) {
 
     accels = PMALLOC(sizeof(ACCEL) * khui_n_accel_global);
     for(i=0;i<khui_n_accel_global;i++) {
-        accels[i].cmd = khui_accel_global[i].cmd;
-        accels[i].fVirt = khui_accel_global[i].mod;
-        accels[i].key = khui_accel_global[i].key;
+        accels[i].cmd = (WORD) khui_accel_global[i].cmd;
+        accels[i].fVirt = (BYTE) khui_accel_global[i].mod;
+        accels[i].key = (WORD) khui_accel_global[i].key;
     }
 
     ha = CreateAcceleratorTable(accels, khui_n_accel_global);
@@ -1135,7 +1135,7 @@ khui_get_cmd_accel_string(khm_int32 cmd,
     } else {
         wchar_t mbuf[2];
 
-        mbuf[0] = def->key;
+        mbuf[0] = (wchar_t) def->key;
         mbuf[1] = L'\0';
 
         if(FAILED(StringCbCat(buf, bufsiz, mbuf)))

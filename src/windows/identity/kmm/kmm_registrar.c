@@ -147,8 +147,6 @@ DWORD WINAPI kmmint_registrar(LPVOID lpParameter)
     kmq_unsubscribe(KMSG_SYSTEM, kmmint_reg_cb);
 
     ExitThread(0);
-    /* not reached */
-    return 0;
 }
 
 /*! \internal
@@ -174,14 +172,9 @@ DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
 
     p->tid_thread = GetCurrentThreadId();
 
-    if (IsBadCodePtr(p->p.msg_proc)) {
-        _report_mr0(KHERR_WARNING, MSG_PB_INVALID_CODE_PTR);
-        rv = KHM_ERROR_INVALID_PARAM;
-    } else {
-        rv = (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
-                              0, (void *) &(p->p));
-        _report_mr1(KHERR_INFO, MSG_PB_INIT_RV, _int32(rv));
-    }
+    rv = (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
+                          0, (void *) &(p->p));
+    _report_mr1(KHERR_INFO, MSG_PB_INIT_RV, _int32(rv));
 
     /* if it fails to initialize, we exit the plugin */
     if(KHM_FAILED(rv)) {
@@ -294,9 +287,6 @@ DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
     TlsSetValue(tls_kmm, (LPVOID) 0);
 
     ExitThread(rv);
-
-    /* not reached */
-    return rv;
 }
 
 /*! \internal
@@ -684,12 +674,12 @@ void kmmint_init_module(kmm_module_i * m) {
         }
     }
 
-    if(khc_read_string(csp_mod, L"ImagePath", NULL, &sz) == 
+    if(khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, NULL, &sz) == 
        KHM_ERROR_TOO_LONG) {
         if(m->path)
             PFREE(m->path);
         m->path = PMALLOC(sz);
-        khc_read_string(csp_mod, L"ImagePath", m->path, &sz);
+        khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, m->path, &sz);
     } else {
         _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
 
