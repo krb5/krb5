@@ -41,10 +41,10 @@ static void xusage()
 {
 #ifdef KRB5_KRB4_COMPAT
     fprintf(stderr, 
-            "usage: %s [-4 | [-c ccache] [-e etype] [-k keytab]] service1 service2 ...\n", 
+            "usage: %s [-4 | [-c ccache] [-e etype] [-k keytab] [-S sname]] service1 service2 ...\n", 
             prog);
 #else
-    fprintf(stderr, "usage: %s [-c ccache] [-e etype] [-k keytab] service1 service2 ...\n",
+    fprintf(stderr, "usage: %s [-c ccache] [-e etype] [-k keytab] [-S sname] service1 service2 ...\n",
             prog);
 #endif
     exit(1);
@@ -54,7 +54,8 @@ int quiet = 0;
 
 static void do_v4_kvno (int argc, char *argv[]);
 static void do_v5_kvno (int argc, char *argv[], 
-                        char *ccachestr, char *etypestr, char *keytab_name);
+                        char *ccachestr, char *etypestr, char *keytab_name,
+			char *sname);
 
 #include <com_err.h>
 static void extended_com_err_fn (const char *, errcode_t, const char *,
@@ -64,6 +65,7 @@ int main(int argc, char *argv[])
 {
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
+    char *sname = NULL;
     int v4 = 0;
 
     set_com_err_hook (extended_com_err_fn);
@@ -71,7 +73,7 @@ int main(int argc, char *argv[])
     prog = strrchr(argv[0], '/');
     prog = prog ? (prog + 1) : argv[0];
 
-    while ((option = getopt(argc, argv, "c:e:hk:q4")) != -1) {
+    while ((option = getopt(argc, argv, "c:e:hk:q4S:")) != -1) {
 	switch (option) {
 	case 'c':
 	    ccachestr = optarg;
@@ -91,6 +93,9 @@ int main(int argc, char *argv[])
 	case '4':
 	    v4 = 1;
 	    break;
+	case 'S':
+	    sname = optarg;
+	    break;
 	default:
 	    xusage();
 	    break;
@@ -103,10 +108,14 @@ int main(int argc, char *argv[])
     if ((ccachestr != NULL || etypestr != NULL || keytab_name != NULL) && v4)
 	xusage();
 
+    if (sname != NULL && v4)
+	xusage();
+
     if (v4)
 	do_v4_kvno(argc - optind, argv + optind);
     else
-	do_v5_kvno(argc - optind, argv + optind, ccachestr, etypestr, keytab_name);
+	do_v5_kvno(argc - optind, argv + optind,
+		   ccachestr, etypestr, keytab_name, sname);
     return 0;
 }
 
@@ -172,7 +181,8 @@ static void extended_com_err_fn (const char *myprog, errcode_t code,
 }
 
 static void do_v5_kvno (int count, char *names[], 
-                        char * ccachestr, char *etypestr, char *keytab_name)
+                        char * ccachestr, char *etypestr, char *keytab_name,
+			char *sname)
 {
     krb5_error_code ret;
     int i, errors;
@@ -230,7 +240,13 @@ static void do_v5_kvno (int count, char *names[],
 
 	in_creds.client = me;
 
-	ret = krb5_parse_name(context, names[i], &in_creds.server);
+	if (sname != NULL) {
+	    ret = krb5_sname_to_principal(context, names[i],
+					  sname, KRB5_NT_SRV_HST,
+					  &in_creds.server);
+	} else {
+	    ret = krb5_parse_name(context, names[i], &in_creds.server);
+	}
 	if (ret) {
 	    if (!quiet)
 		com_err(prog, ret, "while parsing principal name %s", names[i]);
