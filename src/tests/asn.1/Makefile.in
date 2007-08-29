@@ -9,9 +9,9 @@ RUN_SETUP = @KRB5_RUN_ENV@
 
 SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_encode_test.c \
 	$(srcdir)/ktest.c $(srcdir)/ktest_equal.c $(srcdir)/utility.c \
-	$(srcdir)/trval.c
+	$(srcdir)/trval.c $(srcdir)/t_trval.c
 
-all:: krb5_encode_test krb5_decode_test trval
+all:: krb5_encode_test krb5_decode_test t_trval
 
 LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
 
@@ -25,8 +25,8 @@ DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
 krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o krb5_decode_test $(DECOBJS) $(KRB5_BASE_LIBS)
 
-trval: $(srcdir)/trval.c
-	$(CC) -o trval $(ALL_CFLAGS) -DSTANDALONE $(srcdir)/trval.c
+t_trval: t_trval.o
+	$(CC) -o t_trval $(ALL_CFLAGS) t_trval.o
 
 check:: krb5_decode_test krb5_encode_test
 	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
@@ -46,7 +46,7 @@ check:: krb5_decode_test krb5_encode_test
 install::
 
 clean::
-	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval t_trval
 
 
 ################ Dependencies ################
@@ -104,3 +104,4 @@ $(OUTPRE)utility.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/lib/krb5/asn.1/asn1buf.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h \
   utility.c utility.h
 $(OUTPRE)trval.$(OBJEXT): trval.c
+$(OUTPRE)t_trval.$(OBJEXT): t_trval.c trval.c
