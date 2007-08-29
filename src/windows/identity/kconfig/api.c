@@ -2069,7 +2069,7 @@ khc_remove_value(khm_handle conf, const wchar_t * value, khm_int32 flags) {
 
     c = khc_space_from_handle(conf);
 
-    if(!khc_is_machine_handle(conf))
+    if(khc_is_user_handle(conf))
         hku = khcint_space_open_key(c, KHM_PERM_READ);
     hkm = khcint_space_open_key(c, KHM_PERM_READ | KCONF_FLAG_MACHINE);
 
