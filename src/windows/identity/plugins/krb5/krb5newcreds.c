@@ -181,7 +181,7 @@ k5_handle_wmnc_notify(HWND hwnd,
     case WMNC_DIALOG_MOVE:
         {
             k5_dlg_data * d;
-                
+
             d = (k5_dlg_data *)(LONG_PTR) 
                 GetWindowLongPtr(hwnd, DWLP_USER);
 
@@ -1355,34 +1355,9 @@ k5_read_dlg_params(k5_dlg_data * d, khm_handle identity)
     d->sync = FALSE;
 }
 
-void 
-k5_write_dlg_params(k5_dlg_data * d, khm_handle identity, char * ccache)
+void
+k5_ensure_identity_ccache_is_watched(khm_handle identity, char * ccache)
 {
-
-    k5_params p;
-
-    ZeroMemory(&p, sizeof(p));
-
-    p.source_reg = K5PARAM_FM_ALL; /* we want to write all the
-                                      settings to the registry, if
-                                      necessary. */
-
-    p.renewable = d->renewable;
-    p.forwardable = d->forwardable;
-    p.proxiable = d->proxiable;
-    p.addressless = d->addressless;
-    p.publicIP = d->publicIP;
-
-    p.lifetime = (krb5_deltat) d->tc_lifetime.current;
-    p.lifetime_max = (krb5_deltat) d->tc_lifetime.max;
-    p.lifetime_min = (krb5_deltat) d->tc_lifetime.min;
-
-    p.renew_life = (krb5_deltat) d->tc_renew.current;
-    p.renew_life_max = (krb5_deltat) d->tc_renew.max;
-    p.renew_life_min = (krb5_deltat) d->tc_renew.min;
-
-    khm_krb5_set_identity_params(identity, &p);
-
     /* if we used a FILE: ccache, we should add it to FileCCList.
        Otherwise the tickets are not going to get listed. */
     do {
@@ -1462,6 +1437,37 @@ k5_write_dlg_params(k5_dlg_data * d, khm_handle identity, char * ccache)
             PFREE(mlist);
 
     } while(FALSE);
+}
+
+void 
+k5_write_dlg_params(k5_dlg_data * d, khm_handle identity, char * ccache)
+{
+
+    k5_params p;
+
+    ZeroMemory(&p, sizeof(p));
+
+    p.source_reg = K5PARAM_FM_ALL; /* we want to write all the
+                                      settings to the registry, if
+                                      necessary. */
+
+    p.renewable = d->renewable;
+    p.forwardable = d->forwardable;
+    p.proxiable = d->proxiable;
+    p.addressless = d->addressless;
+    p.publicIP = d->publicIP;
+
+    p.lifetime = (krb5_deltat) d->tc_lifetime.current;
+    p.lifetime_max = (krb5_deltat) d->tc_lifetime.max;
+    p.lifetime_min = (krb5_deltat) d->tc_lifetime.min;
+
+    p.renew_life = (krb5_deltat) d->tc_renew.current;
+    p.renew_life_max = (krb5_deltat) d->tc_renew.max;
+    p.renew_life_min = (krb5_deltat) d->tc_renew.min;
+
+    khm_krb5_set_identity_params(identity, &p);
+
+    k5_ensure_identity_ccache_is_watched(identity, ccache);
 
     /* as in k5_read_dlg_params, once we write the data in, the local
        data is no longer dirty */
@@ -2059,6 +2065,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 if(g_fjob.state == FIBER_STATE_NONE) {
                     wchar_t msg[KHUI_MAXCCH_BANNER];
                     khm_size cb;
+                    int code;
+
+                    code = g_fjob.code;
 
                     /* Special case.  If the users' password has
                        expired, we force a password change dialog on
@@ -2143,7 +2152,7 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                     k5_free_kinit_job();
 
                     if (is_k5_identpro) {
-                        if (g_fjob.code == 0)
+                        if (code == 0)
                             kcdb_identity_set_flags(ident,
                                                     KCDB_IDENT_FLAG_VALID,
                                                     KCDB_IDENT_FLAG_VALID);
@@ -2832,6 +2841,9 @@ k5_msg_cred_dialog(khm_int32 msg_type,
                 imported = khm_krb5_ms2mit(NULL, (t == K5_LSAIMPORT_MATCH), TRUE,
                                            &id_imported);
                 if (imported) {
+                    if (id_imported)
+                        k5_ensure_identity_ccache_is_watched(id_imported, NULL);
+
                     khm_krb5_list_tickets(&ctx);
 
                     if (ctx)
