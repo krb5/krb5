@@ -18,15 +18,6 @@
 
 EXPORTS
 
-	krb5_free_kdc_req
-	encode_krb5_kdc_req_body
-	decode_krb5_as_req
-	krb5_c_random_to_key
-	krb5_c_keylengths
-	krb5int_set_prompt_types
-	profile_get_values
-	profile_free_list
-
 	krb5_425_conv_principal
 	krb5_524_conv_principal
 	krb5_address_compare
