@@ -55,6 +55,15 @@ prints a usage statement and exits
 specifies that Kerberos version 4 tickets should be acquired and
 described.  This option is only available if Kerberos 4 support was
 enabled at compilation time.
+.TP
+.B \-S sname
+specifies that krb5_sname_to_principal() will be used to build
+principal names.  If this flag is specified, the
+.B service1 service2 ...
+arguments are interpreted as hostnames (rather than principal names),
+and
+.B sname
+is interpreted as the service name.
 .SH ENVIRONMENT
 .B Kvno
 uses the following environment variable:
