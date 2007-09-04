@@ -1788,7 +1788,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 11
+#define KRB5INT_ACCESS_STRUCT_VERSION 12
 
 #ifndef ANAME_SZ
 struct ktext;			/* from krb.h, for krb524 support */
