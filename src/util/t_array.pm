@@ -41,6 +41,7 @@ __DATA__
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include <stdint.h>
 
 struct <NAME>__header {
     size_t allocated;
@@ -93,7 +94,7 @@ static inline int
     ptr = realloc(arr->elts, newsize);
     if (ptr == NULL)
 	return -1;
-    memset((char *)arr->elts + oldsize, 0, newsize - oldsize);
+    memset((char *)ptr + oldsize, 0, newsize - oldsize);
     arr->elts = ptr;
     arr->allocated = newcount;
     return 0;
