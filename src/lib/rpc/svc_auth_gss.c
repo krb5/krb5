@@ -339,7 +339,7 @@ svcauth_gss_validate(struct svc_req *rqst, struct svc_rpc_gss_data *gd, struct r
 	oa = &msg->rm_call.cb_cred;
 	IXDR_PUT_ENUM(buf, oa->oa_flavor);
 	IXDR_PUT_LONG(buf, oa->oa_length);
-	if (oa->oa_length) {
+	if (oa->oa_length && oa->oa_length <= sizeof(rpchdr)) {
 		memcpy((caddr_t)buf, oa->oa_base, oa->oa_length);
 		buf += RNDUP(oa->oa_length) / sizeof(int32_t);
 	}
