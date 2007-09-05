@@ -211,8 +211,9 @@ kadm5_modify_policy_internal(void *server_handle,
     if((mask & KADM5_POLICY))
 	return KADM5_BAD_MASK;
 		
-    ret = krb5_db_get_policy(handle->context, entry->policy, &p, &cnt);
-    if( ret && (cnt==0) )
+    if ((ret = krb5_db_get_policy(handle->context, entry->policy, &p, &cnt)))
+	return ret;
+    if (cnt != 1)
 	return KADM5_UNK_POLICY;
 
     if ((mask & KADM5_PW_MAX_LIFE))
