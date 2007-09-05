@@ -22,7 +22,8 @@
 
 #ifdef DEBUG_GSSAPI
 int auth_debug_gssapi = DEBUG_GSSAPI;
-#define L_PRINTF(l,args) if (auth_debug_gssapi >= l) printf args
+extern void gssrpcint_printf(const char *format, ...);
+#define L_PRINTF(l,args) if (auth_debug_gssapi >= l) gssrpcint_printf args
 #define PRINTF(args) L_PRINTF(99, args)
 #define AUTH_GSSAPI_DISPLAY_STATUS(args) \
 	if (auth_debug_gssapi) auth_gssapi_display_status args

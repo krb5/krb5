@@ -114,18 +114,20 @@ all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
 all-unix:: all-libobjs
 
 errmap.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
-		$(SRCTOP)/util/t_enum.pm $(SRCTOP)/util/t_tsenum.pm
-	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl tsenum errmap.h \
-		NAME=mecherrmap TYPE="struct mecherror" COMPARE=mecherror_cmp \
-		COPY=mecherror_copy PRINT=mecherror_print
+		$(SRCTOP)/util/t_bimap.pm
+	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl bimap errmap.h \
+		NAME=mecherrmap LEFT=OM_uint32 RIGHT="struct mecherror" \
+		LEFTPRINT=print_OM_uint32 RIGHTPRINT=mecherror_print \
+		LEFTCMP=cmp_OM_uint32 RIGHTCMP=mecherror_cmp
 
 maptest.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
-		$(SRCTOP)/util/t_enum.pm $(SRCTOP)/util/t_tsenum.pm
-	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl tsenum maptest.h \
-		NAME=foo TYPE=elt COMPARE=eltcmp COPY=eltcp PRINT=eltprt
+		$(SRCTOP)/util/t_bimap.pm
+	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl bimap maptest.h \
+		NAME=foo LEFT=int RIGHT=elt LEFTPRINT=intprt RIGHTPRINT=eltprt \
+		LEFTCMP=intcmp RIGHTCMP=eltcmp
 maptest.o: maptest.c maptest.h
 maptest: maptest.o
-	$(CC_LINK) -o maptest maptest.o $(SUPPORT_LIB)
+	$(CC_LINK) -o maptest maptest.o
 
 ##DOS##LIBOBJS = $(OBJS)
 

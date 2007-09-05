@@ -402,8 +402,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       if (server_creds == client_data->server_creds)
 		    break;
 
-	       gssrpcint_printf("accept_sec_context returned 0x%x 0x%x\n",
-				call_res.gss_major, call_res.gss_minor);
+	       PRINTF(("accept_sec_context returned 0x%x 0x%x wrong-princ=%#x\n",
+		       call_res.gss_major, call_res.gss_minor, KRB5KRB_AP_WRONG_PRINC));
 	       if (call_res.gss_major == GSS_S_COMPLETE ||
 		   call_res.gss_major == GSS_S_CONTINUE_NEEDED) {
 		    /* server_creds was right, set it! */
@@ -419,12 +419,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 			   * returning a "wrong principal in request"
 			   * error
 			   */
-#if 0 /* old */
 			  || ((krb5_error_code) call_res.gss_minor !=
 			      (krb5_error_code) KRB5KRB_AP_WRONG_PRINC)
-#else
-			  || (call_res.gss_minor <= 0 || call_res.gss_minor > 3)
-#endif
 #endif
 			  ) {
 		    break;
@@ -437,8 +433,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	  /* done with call args */
 	  xdr_free(xdr_authgssapi_init_arg, &call_arg);
 
-	  PRINTF(("svcauth_gssapi: accept_sec_context returned %#x\n",
-		  call_res.gss_major));
+	  PRINTF(("svcauth_gssapi: accept_sec_context returned %#x %#x\n",
+		  call_res.gss_major, call_res.gss_minor));
 	  if (call_res.gss_major != GSS_S_COMPLETE &&
 	      call_res.gss_major != GSS_S_CONTINUE_NEEDED) {
 	       AUTH_GSSAPI_DISPLAY_STATUS(("accepting context",

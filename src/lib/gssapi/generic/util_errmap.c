@@ -1,3 +1,28 @@
+/*
+ * Copyright 2007 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ */
+
 #include "gssapiP_generic.h"
 #include <string.h>
 #ifndef _WIN32
@@ -17,6 +42,17 @@ struct mecherror {
 };
 
 static inline int
+cmp_OM_uint32(OM_uint32 m1, OM_uint32 m2)
+{
+    if (m1 < m2)
+	return -1;
+    else if (m1 > m2)
+	return 1;
+    else
+	return 0;
+}
+
+static inline int
 mecherror_cmp(struct mecherror m1, struct mecherror m2)
 {
     if (m1.code < m2.code)
@@ -32,14 +68,22 @@ mecherror_cmp(struct mecherror m1, struct mecherror m2)
     return memcmp(m1.mech.elements, m2.mech.elements, m1.mech.length);
 }
 
+static void
+print_OM_uint32 (OM_uint32 value, FILE *f)
+{
+    fprintf(f, "%lu", (unsigned long) value);
+}
+
 static inline int
 mecherror_copy(struct mecherror *dest, struct mecherror src)
 {
     *dest = src;
-    if (src.mech.length) {
-	dest->mech.elements = malloc(src.mech.length);
-	if (dest->mech.elements == NULL)
+    dest->mech.elements = malloc(src.mech.length);
+    if (dest->mech.elements == NULL) {
+	if (src.mech.length)
 	    return ENOMEM;
+	else
+	    return 0;
     }
     memcpy(dest->mech.elements, src.mech.elements, src.mech.length);
     return 0;
@@ -66,6 +110,7 @@ mecherror_print(struct mecherror value, FILE *f)
 	fprintf(f, "(com_err)");
 	return;
     }
+    fprintf(f, "%p=", value.mech.elements);
     if (generic_gss_oid_to_str(&minor, &value.mech, &str)) {
 	fprintf(f, "(error in conversion)");
 	return;
@@ -86,44 +131,20 @@ mecherror_print(struct mecherror value, FILE *f)
 #include "krb5.h"		/* for KRB5KRB_AP_WRONG_PRINC */
 
 static mecherrmap m;
+static k5_mutex_t mutex = K5_MUTEX_PARTIAL_INITIALIZER;
+static OM_uint32 next_fake = 100000;
 
 int gssint_mecherrmap_init(void)
 {
     int err;
-    OM_uint32 n;
 
     err = mecherrmap_init(&m);
     if (err)
 	return err;
-
-    /* This is *so* gross.
-
-       The RPC code depends on being able to recognize the "wrong
-       principal" minor status return from the Kerberos mechanism.
-       But a totally generic enumeration of status codes as they come
-       up makes that impossible.  So "register" that status code
-       early, and always with the same value.
-
-       Of course, to make things worse, we're treating each mechanism
-       OID separately, and there are three for Kerberos.  */
-    {
-	/* Declare here to avoid including header files not generated
-	   yet.  */
-	extern const gss_OID_desc *const gss_mech_krb5;
-	extern const gss_OID_desc *const gss_mech_krb5_old;
-	extern const gss_OID_desc *const gss_mech_krb5_wrong;
-
-	const OM_uint32 wrong_princ = (OM_uint32) KRB5KRB_AP_WRONG_PRINC;
-
-	n = gssint_mecherrmap_map(wrong_princ, gss_mech_krb5);
-	if (n <= 0)
-	    return ENOMEM;
-	n = gssint_mecherrmap_map(wrong_princ, gss_mech_krb5_old);
-	if (n <= 0)
-	    return ENOMEM;
-	n = gssint_mecherrmap_map(wrong_princ, gss_mech_krb5_wrong);
-	if (n <= 0)
-	    return ENOMEM;
+    err = k5_mutex_finish_init(&mutex);
+    if (err) {
+	mecherrmap_destroy(&m);
+	return err;
     }
 
     return 0;
@@ -142,21 +163,87 @@ void gssint_mecherrmap_destroy(void)
 {
     mecherrmap_foreach(&m, free_one, NULL);
     mecherrmap_destroy(&m);
+    k5_mutex_destroy(&mutex);
 }
 
 OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
 {
-    struct mecherror me;
-    int err, added;
-    long idx;
+    const struct mecherror *mep;
+    struct mecherror me, me_copy;
+    const OM_uint32 *p;
+    int err;
+    OM_uint32 new_status;
+
+#ifdef DEBUG
+    FILE *f;
+    f = fopen("/dev/pts/9", "w+");
+    if (f == NULL)
+	f = stderr;
+#endif
 
     me.code = minor;
     me.mech = *oid;
-    err = mecherrmap_find_or_append(&m, me, &idx, &added);
+    err = k5_mutex_lock(&mutex);
     if (err) {
+#ifdef DEBUG
+	if (f != stderr) fclose(f);
+#endif
 	return 0;
     }
-    return idx+1;
+
+    /* Is this status+oid already mapped?  */
+    p = mecherrmap_findright(&m, me);
+    if (p != NULL) {
+	k5_mutex_unlock(&mutex);
+#ifdef DEBUG
+	fprintf(f, "%s: found ", __func__);
+	mecherror_print(me, f);
+	fprintf(f, " in map as %lu\n", (unsigned long) *p);
+	if (f != stderr) fclose(f);
+#endif
+	return *p;
+    }
+    /* Is this status code already mapped to something else
+       mech-specific?  */
+    mep = mecherrmap_findleft(&m, minor);
+    if (mep == NULL) {
+	/* Map it to itself plus this mech-oid.  */
+	new_status = minor;
+    } else {
+	/* Already assigned.  Pick a fake new value and map it.  */
+	/* There's a theoretical infinite loop risk here, if we fill
+	   in 2**32 values.  Also, returning 0 has a special
+	   meaning.  */
+	do {
+	    next_fake++;
+	    new_status = next_fake;
+	    if (new_status == 0)
+		/* ??? */;
+	} while (mecherrmap_findleft(&m, new_status) != NULL);
+    }
+    err = mecherror_copy(&me_copy, me);
+    if (err) {
+	k5_mutex_unlock(&mutex);
+	return err;
+    }
+    err = mecherrmap_add(&m, new_status, me_copy);
+    k5_mutex_unlock(&mutex);
+    if (err) {
+	if (me_copy.mech.length)
+	    free(me_copy.mech.elements);
+    }
+#ifdef DEBUG
+    fprintf(f, "%s: mapping ", __func__);
+    mecherror_print(me, f);
+    fprintf(f, " to %lu: err=%d\nnew map: ", (unsigned long) new_status, err);
+    mecherrmap_printmap(&m, f);
+    fprintf(f, "\n");
+    if (f != stderr) fclose(f);
+#endif
+    if (err)
+	return 0;
+    else
+	return new_status;
 }
 
 static gss_OID_desc no_oid = { 0, 0 };
@@ -168,25 +255,21 @@ OM_uint32 gssint_mecherrmap_map_errcode(OM_uint32 errcode)
 int gssint_mecherrmap_get(OM_uint32 minor, gss_OID mech_oid,
 			  OM_uint32 *mech_minor)
 {
-    struct mecherror me;
+    const struct mecherror *p;
     int err;
-    long size;
 
     if (minor == 0) {
 	return EINVAL;
     }
-    err = mecherrmap_size(&m, &size);
-    if (err) {
+    err = k5_mutex_lock(&mutex);
+    if (err)
 	return err;
-    }
-    if (minor > size) {
+    p = mecherrmap_findleft(&m, minor);
+    k5_mutex_unlock(&mutex);
+    if (!p) {
 	return EINVAL;
     }
-    err = mecherrmap_get(&m, minor-1, &me);
-    if (err) {
-	return err;
-    }
-    *mech_oid = me.mech;
-    *mech_minor = me.code;
+    *mech_oid = p->mech;
+    *mech_minor = p->code;
     return 0;
 }

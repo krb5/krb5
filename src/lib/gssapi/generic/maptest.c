@@ -24,6 +24,18 @@ static void eltprt(elt v, FILE *f)
 {
     fprintf(f, "{%d,%d}", v.a, v.b);
 }
+static int intcmp(int left, int right)
+{
+    if (left < right)
+	return -1;
+    if (left > right)
+	return 1;
+    return 0;
+}
+static void intprt(int v, FILE *f)
+{
+    fprintf(f, "%d", v);
+}
 
 #include "maptest.h"
 
@@ -31,24 +43,25 @@ foo foo1;
 
 int main ()
 {
-    int err;
     elt v1 = { 1, 2 }, v2 = { 3, 4 };
-    long idx;
-    int added;
+    const elt *vp;
+    const int *ip;
 
-    err = foo_init(&foo1);
-    assert(err == 0);
-    err = foo_find_or_append(&foo1, v1, &idx, &added);
-    assert(err == 0);
-    printf("v1: idx=%ld added=%d\n", idx, added);
-    err = foo_find_or_append(&foo1, v2, &idx, &added);
-    assert(err == 0);
-    printf("v2: idx=%ld added=%d\n", idx, added);
-    err = foo_find_or_append(&foo1, v2, &idx, &added);
-    assert(err == 0);
-    printf("v2: idx=%ld added=%d\n", idx, added);
-    err = foo_find_or_append(&foo1, v1, &idx, &added);
-    assert(err == 0);
-    printf("v1: idx=%ld added=%d\n", idx, added);
+    assert(0 == foo_init(&foo1));
+    vp = foo_findleft(&foo1, 47);
+    assert(vp == NULL);
+    assert(0 == foo_add(&foo1, 47, v1));
+    vp = foo_findleft(&foo1, 47);
+    assert(vp != NULL);
+    assert(0 == eltcmp(*vp, v1));
+    vp = foo_findleft(&foo1, 3);
+    assert(vp == NULL);
+    assert(0 == foo_add(&foo1, 93, v2));
+    ip = foo_findright(&foo1, v1);
+    assert(ip != NULL);
+    assert(*ip == 47);
+    printf("Map content: ");
+    foo_printmap(&foo1, stdout);
+    printf("\n");
     return 0;
 }
