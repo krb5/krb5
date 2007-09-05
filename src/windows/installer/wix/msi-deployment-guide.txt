@@ -898,9 +898,14 @@ Kerberos for Windows
 
     Versions of Kerberos that are upgraded by the MSI package are :
 
-    1) "Kerberos for Windows" MSI package
+    1) "Kerberos for Windows" 32-bit i386 MSI package
 
        Upgrade code {61211594-AAA1-4A98-A299-757326763CC7}
+       Upto current release
+
+    2) "Kerberos for Windows" 64-bit amd64 MSI package
+
+       Upgrade code {6DA9CD86-6028-4852-8C94-452CAC229244}
        Upto current release
 
     2) "MIT Project Pismere Kerberos for Windows" MSI package and 
@@ -919,6 +924,11 @@ Kerberos for Windows
        "Kerberos for Windows" NSIS package if running unattended.  This
        means that group policy based deployments will fail on machines
        that have the "Kerberos for Windows" NSIS package installed.
+
+       Note that the NSIS package is only available for 32-bit i386.
+       You cannot install both the 32-bit NSIS and 64-bit amd64 MSI 
+       packages on the same machine.  To install both 32-bit and 64-bit
+       KFW, you must use the MSI packages of both.
 
     If you have used a different MSI package to install Kerberos for
     Windows and wish to upgrade it you can author rows into the

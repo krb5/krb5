@@ -39,14 +39,34 @@
             <?endif?>
         <?endif?>
     <?endif?>
-    
+
+    <!-- Build type specifications -->
+    <?ifndef env.CPU?>
+        <?error CPU is not set ?>
+    <?endif?>
+    <?if $(env.CPU) = "i386"?>
+        <?define InstallerVersion="110"?>
+        <?define Platform="Intel"?>
+        <?define Win64="no"?>
+    <?elseif $(env.CPU) = "AMD64"?>
+        <?define InstallerVersion="200"?>
+        <?define Platform="x64"?>
+        <?define Win64="yes"?>
+    <?else?>
+        <?error Unknown build type?>
+    <?endif?>
     
     <?define KfwRegRoot="SOFTWARE\MIT\Kerberos"?>
-    
-    <?define BinDir="$(var.TargetDir)bin\i386\"?>
+
+    <?if $(env.CPU) = "i386"?>    
+            <?define BinDir="$(var.TargetDir)bin\i386\"?>
+            <?define LibDir="$(var.TargetDir)lib\i386\"?>
+    <?else?>
+            <?define BinDir="$(var.TargetDir)bin\amd64\"?>
+            <?define LibDir="$(var.TargetDir)lib\amd64\"?>
+    <?endif?>
     <?define DocDir="$(var.TargetDir)doc\"?>
     <?define IncDir="$(var.TargetDir)inc\"?>
-    <?define LibDir="$(var.TargetDir)lib\i386\"?>
     <?define InstallDir="$(var.TargetDir)install\"?>
     <?define SampleDir="$(var.TargetDir)sample\"?>
     <?define SystemDir="$(env.SystemRoot)\System32\"?>
