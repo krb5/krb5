@@ -78,7 +78,8 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
      */
     s1 = creds->server;
     ret = decode_krb5_ticket(&creds->ticket, &tkt);
-    if (ret) return ret;
+    /* Bail out on errors in case someone is storing a non-ticket. */
+    if (ret) return 0;
     s2 = tkt->server;
     if (!krb5_principal_compare(context, s1, s2)) {
 	creds->server = s2;
