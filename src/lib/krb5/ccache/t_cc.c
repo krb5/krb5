@@ -123,6 +123,7 @@ static void cc_test(krb5_context context, const char *name, int flags)
      krb5_cc_cursor cursor;
      const char *c_name;
      char newcache[300];
+     char *save_type;
 
      init_test_cred(context);
 
@@ -135,7 +136,9 @@ static void cc_test(krb5_context context, const char *name, int flags)
      CHECK_STR(c_name, "get_name");
 
      c_name = krb5_cc_get_type(context, id);
-     CHECK_STR(c_name, "get_prefix");
+     CHECK_STR(c_name, "get_type");
+     save_type=strdup(c_name);
+     CHECK_STR(save_type, "copying type");
 
      kret = krb5_cc_store_cred(context, id, &test_creds);
      CHECK(kret, "store");
@@ -192,17 +195,22 @@ static void cc_test(krb5_context context, const char *name, int flags)
      kret = krb5_cc_destroy(context, id);
      CHECK(kret, "destroy");
 
-#if 0
      /* ----------------------------------------------------- */
      /* Tests the generate new code */
-     kret = krb5_cc_resolve(context, name, &id);
-     CHECK(kret, "resolve");
-     kret = krb5_cc_gen_new(context, &id);
-     CHECK(kret, "gen_new");
-     kret = krb5_cc_destroy(context, id);
-     CHECK(kret, "destroy");
-#endif
+     kret = krb5_cc_new_unique(context, save_type,
+			       NULL, &id2);
+     CHECK(kret, "new_unique");
+			       
+     kret = krb5_cc_initialize(context, id2, test_creds.client);
+     CHECK(kret, "initialize");
 
+     kret = krb5_cc_store_cred(context, id2, &test_creds);
+     CHECK(kret, "store");
+
+     kret = krb5_cc_destroy(context, id2);
+     CHECK(kret, "destroy id2");
+
+     free(save_type);
      free_test_cred(context);
 
 }
