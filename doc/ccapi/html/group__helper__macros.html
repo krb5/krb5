@@ -33,7 +33,7 @@
 <li>#define <a class="el" href="group__helper__macros.html#ga1bbc05414ad4c17cea9cd5e5c50c7cc">cc_ccache_remove_credentials</a>(ccache, credentials)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; remove_credentials (ccache, credentials))
 <li>#define <a class="el" href="group__helper__macros.html#g893b31c419e71c2f528781d3036fa3ff">cc_ccache_new_credentials_iterator</a>(ccache, iterator)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; new_credentials_iterator (ccache, iterator))
 <li>#define <a class="el" href="group__helper__macros.html#gb8c2624719ee1c4be5f1b1bc4844f0cc">cc_ccache_lock</a>(ccache, type, block)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; lock (ccache, type, block))
-<li>#define <a class="el" href="group__helper__macros.html#gc98101af7822d1c3d5612723140ea960">cc_ccache_unlock</a>(ccache, unlock)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; unlock (ccache, unlock))
+<li>#define <a class="el" href="group__helper__macros.html#ge9b13c950cb6ee636c4a73d6c569a811">cc_ccache_unlock</a>(ccache)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; unlock (ccache))
 <li>#define <a class="el" href="group__helper__macros.html#g884b0c60718fa1057574a3cd844e96ee">cc_ccache_get_last_default_time</a>(ccache, last_default_time)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; get_last_default_time (ccache, last_default_time))
 <li>#define <a class="el" href="group__helper__macros.html#gb19ef7d2b1bcfb474e18e157fb3bc9c6">cc_ccache_get_change_time</a>(ccache, change_time)&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; get_change_time (ccache, change_time))
 <li>#define <a class="el" href="group__helper__macros.html#ge1238f80c37ae89486f2ba29bcbcae38">cc_ccache_move</a>(source, destination)&nbsp;&nbsp;&nbsp;((source) -&gt; functions -&gt; move (source, destination))
@@ -626,20 +626,17 @@ Helper macro for <a class="el" href="structcc__ccache__f.html">cc_ccache_f</a> n
 Helper macro for <a class="el" href="structcc__ccache__f.html">cc_ccache_f</a> lock() 
 </div>
 </div><p>
-<a class="anchor" name="gc98101af7822d1c3d5612723140ea960"></a><!-- doxytag: member="CredentialsCache.h::cc_ccache_unlock" ref="gc98101af7822d1c3d5612723140ea960" args="(ccache, unlock)" -->
+<a class="anchor" name="ge9b13c950cb6ee636c4a73d6c569a811"></a><!-- doxytag: member="CredentialsCache.h::cc_ccache_unlock" ref="ge9b13c950cb6ee636c4a73d6c569a811" args="(ccache)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">#define cc_ccache_unlock          </td>
           <td>(</td>
-          <td class="paramtype">ccache,         <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unlock&nbsp;</td>
+          <td class="paramtype">ccache&nbsp;</td>
           <td class="paramname">          </td>
           <td>&nbsp;)&nbsp;</td>
-          <td width="100%">&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; unlock (ccache, unlock))</td>
+          <td width="100%">&nbsp;&nbsp;&nbsp;((ccache) -&gt; functions -&gt; unlock (ccache))</td>
         </tr>
       </table>
 </div>
@@ -1037,7 +1034,7 @@ Helper macro for <a class="el" href="structcc__credentials__iterator__f.html">cc
 Helper macro for <a class="el" href="structcc__credentials__iterator__f.html">cc_credentials_iterator_f</a> clone() 
 </div>
 </div><p>
-<hr size="1"><address style="text-align: right;"><small>Generated on Thu Aug 23 12:45:25 2007 for Credentials Cache API by&nbsp;
+<hr size="1"><address style="text-align: right;"><small>Generated on Mon Sep 10 17:00:32 2007 for Credentials Cache API by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.3 </small></address>
 </body>

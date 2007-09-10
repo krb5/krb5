@@ -1514,8 +1514,8 @@ CCACHE_API cc_int32 cc_initialize (cc_context_t  *out_context,
 #define		cc_ccache_lock(ccache, type, block) \
 			((ccache) -> functions -> lock (ccache, type, block))
 /*! Helper macro for cc_ccache_f unlock() */
-#define		cc_ccache_unlock(ccache, unlock) \
-			((ccache) -> functions -> unlock (ccache, unlock))
+#define		cc_ccache_unlock(ccache) \
+			((ccache) -> functions -> unlock (ccache))
 /*! Helper macro for cc_ccache_f get_last_default_time() */
 #define		cc_ccache_get_last_default_time(ccache, last_default_time) \
 			((ccache) -> functions -> get_last_default_time (ccache, last_default_time))
