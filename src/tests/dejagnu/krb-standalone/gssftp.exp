@@ -180,6 +180,8 @@ proc ftp_test { } {
 	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
 	return
     }
+    # Force the host key to exist, so we get consistent errors below.
+    catch "add_random_key host/$hostname 0"
 
     #
     # Save settings of KRB5_KTNAME
@@ -224,11 +226,11 @@ proc ftp_test { } {
     expect "GSSAPI accepted as authentication type"
     expect -re "Trying to authenticate to <ftp@.*>"
     # The ftp client doesn't print the gssapi error except on the last attempt.
+#    expect "GSSAPI error major: Unspecified GSS failure."
+#    expect -re "GSSAPI error minor: Key table file '.*' not found"
+    expect -re "Trying to authenticate to <host@.*>"
     expect "GSSAPI error major: Unspecified GSS failure."
     expect -re "GSSAPI error minor: Key table file '.*' not found"
-#    expect -re "Trying to authenticate to <host@.*>"
-#    expect "GSSAPI error major: Unspecified GSS failure."
-#    expect -re "GSSAPI error minor: Server host/.* not found in Kerberos database"
     expect -re "Name (.*): "
     close -i $spawn_id
     wait -i $spawn_id
