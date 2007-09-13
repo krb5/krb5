@@ -207,8 +207,6 @@
   asn1buf subbuf;						\
   int seqindef;							\
   int indef;							\
-  unused_var(taglen);						\
-  unused_var(construction);					\
   retval = asn1_get_sequence(buf, &length, &seqindef);		\
   if (retval) return retval;					\
   retval = asn1buf_imbed(&subbuf, buf, length, seqindef);	\
@@ -1329,6 +1327,22 @@ asn1_error_code asn1_decode_algorithm_identifier(asn1buf *buf,  krb5_algorithm_i
 
   setup();
   { begin_structure_no_tag();
+    /*
+     * Forbid indefinite encoding because we don't read enough tag
+     * information from the trailing octets ("ANY DEFINED BY") to
+     * synchronize EOC tags, etc.
+     */
+    if (seqindef) return ASN1_BAD_FORMAT;
+    /*
+     * Set up tag variables because we don't actually call anything
+     * that fetches tag info for us; it's all buried in the decoder
+     * primitives.
+     */
+    tagnum = ASN1_TAGNUM_CEILING;
+    asn1class = UNIVERSAL;
+    construction = PRIMITIVE;
+    taglen = 0;
+    indef = 0;
     retval = asn1_decode_oid(&subbuf, &val->algorithm.length, 
 			     &val->algorithm.data);
     if(retval) return retval;
@@ -1376,7 +1390,12 @@ asn1_error_code asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *
       retval = asn1buf_remove_octetstring(&subbuf, taglen, 
 					  &val->subjectPublicKey.data);
       if(retval) return retval;
-      val->subjectPublicKey.length = taglen;      
+      val->subjectPublicKey.length = taglen;
+      /*
+       * We didn't call any macro that does next_tag(); do so now to
+       * preload tag of any trailing encodings.
+       */
+      next_tag();
       end_structure();
     }
     cleanup();
