@@ -216,6 +216,10 @@ typedef INT64_TYPE krb5_int64;
 					   /* required */
 #define KDC_ERR_SERVER_NOMATCH		26 /* Requested server and */
 					   /* ticket don't match*/
+#define KDC_ERR_SVC_UNAVAILABLE		29 /* A service is not
+					    * available that is
+					    * required to process the
+					    * request */
 /* Application errors */
 #define	KRB_AP_ERR_BAD_INTEGRITY 31	/* Decrypt integrity check failed */
 #define	KRB_AP_ERR_TKT_EXPIRED	32	/* Ticket expired */
@@ -498,7 +502,9 @@ krb5_error_code krb5_sendto_kdc (krb5_context, const krb5_data *,
 krb5_error_code krb5int_sendto (krb5_context context, const krb5_data *message,
                 const struct addrlist *addrs, struct sendto_callback_info* callback_info,
 				krb5_data *reply, struct sockaddr *localaddr, socklen_t *localaddrlen,
-                struct sockaddr *remoteaddr, socklen_t *remoteaddrlen, int *addr_used);
+                struct sockaddr *remoteaddr, socklen_t *remoteaddrlen, int *addr_used,
+		int (*msg_handler)(krb5_context, const krb5_data *, void *),
+		void *msg_handler_data);
 
 krb5_error_code krb5_get_krbhst (krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst (krb5_context, char * const * );
@@ -1885,7 +1891,9 @@ typedef struct _krb5int_access {
     krb5_error_code (*sendto_udp) (krb5_context, const krb5_data *msg,
 				   const struct addrlist *, struct sendto_callback_info*, krb5_data *reply,
 				   struct sockaddr *, socklen_t *,struct sockaddr *,
-				   socklen_t *, int *);
+				   socklen_t *, int *,
+				   int (*msg_handler)(krb5_context, const krb5_data *, void *),
+				   void *msg_handler_data);
     krb5_error_code (*add_host_to_list)(struct addrlist *lp,
 					const char *hostname,
 					int port, int secport,

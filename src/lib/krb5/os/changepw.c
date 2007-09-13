@@ -247,6 +247,8 @@ krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
 				   NULL,
 				   ss2sa(&remote_addr),
                                    &addrlen,
+				   NULL,
+				   NULL,
 				   NULL
 		 ))) {
 
