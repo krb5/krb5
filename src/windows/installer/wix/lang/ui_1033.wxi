@@ -29,7 +29,7 @@
       <Dialog Id="AdminWelcomeDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="[ButtonText_Next]">
           <Publish Property="InstallMode" Value="Server Image">1</Publish>
-          <Publish Event="NewDialog" Value="AdminRegistrationDlg">1</Publish>
+          <Publish Event="NewDialog" Value="AdminInstallPointDlg">1</Publish>
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="[ButtonText_Cancel]">
           <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
@@ -180,7 +180,7 @@
           <Publish Event="SpawnDialog" Value="AdminBrowseDlg">1</Publish>
         </Control>
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="[ButtonText_Back]">
-          <Publish Event="NewDialog" Value="AdminRegistrationDlg">1</Publish>
+          <Publish Event="NewDialog" Value="AdminWelcomeDlg">1</Publish>
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="[ButtonText_Next]">
           <Publish Event="SetTargetPath" Value="TARGETDIR">1</Publish>
@@ -197,35 +197,6 @@
         </Control>
         <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
           <Text>[DlgTitleFont]Network Location</Text>
-        </Control>
-      </Dialog>
-      <Dialog Id="AdminRegistrationDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
-        <Control Id="OrganizationLabel" Type="Text" X="45" Y="71" Width="285" Height="30" TabSkip="no">
-          <Text>&amp;Please enter the name of your organization in the box below.  This will be used as default company name for subsequent installations of [ProductName]:</Text>
-        </Control>
-        <Control Id="OrganizationEdit" Type="Edit" X="45" Y="105" Width="220" Height="18" Property="COMPANYNAME" Text="{80}" />
-        <Control Id="CDKeyLabel" Type="Text" X="45" Y="130" Width="50" Height="10" TabSkip="no">
-          <Text>CD &amp;Key:</Text>
-        </Control>
-        <Control Id="CDKeyEdit" Type="MaskedEdit" X="45" Y="143" Width="250" Height="16" Property="PIDKEY" Text="[PIDTemplate]" />
-        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Image="yes" Text="[ButtonText_Back]">
-          <Publish Event="NewDialog" Value="AdminWelcomeDlg">1</Publish>
-        </Control>
-        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="[ButtonText_Next]">
-          <Publish Event="ValidateProductID" Value="0">0</Publish>
-          <Publish Event="NewDialog" Value="AdminInstallPointDlg">ProductID</Publish>
-        </Control>
-        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="[ButtonText_Cancel]">
-          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
-        </Control>
-        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="374" Height="44" TabSkip="no" Text="[BannerBitmap]" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="374" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="374" Height="0" />
-        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes">
-          <Text>Please enter your company information</Text>
-        </Control>
-        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes">
-          <Text>[DlgTitleFont]Company Information</Text>
         </Control>
       </Dialog>
       <Dialog Id="BrowseDlg" Width="370" Height="270" Title="[ProductName] [Setup]" NoMinimize="yes">
