@@ -161,7 +161,7 @@ dnl from old include/configure.in
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], 
 [Define if "struct sockaddr_storage" is available.])
 dnl
-AC_CONFIG_HEADER(include/autoconf.h, [: autoconf.h cmds], [: autoconf.h init cmds])
+AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
 AC_PROG_INSTALL
 AC_PROG_AWK
 AC_PROG_LEX

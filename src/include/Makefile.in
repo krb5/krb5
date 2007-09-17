@@ -48,10 +48,10 @@ $(srcdir)/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/acloc
 
 ###############################################################################
 ##DOS##!if 0
+# config.status will now update autoconf.stamp itself.
 autoconf.h: autoconf.stamp
 autoconf.stamp: $(srcdir)/autoconf.h.in $(thisconfigdir)/config.status
 	(cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/autoconf.h)
-	touch autoconf.stamp
 
 SYSCONFDIR = @sysconfdir@
 LOCALSTATEDIR = @localstatedir@
