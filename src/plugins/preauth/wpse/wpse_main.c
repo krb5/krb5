@@ -30,7 +30,7 @@
 
 /* Worst. Preauthentication. Scheme. Ever. */
 
-#ident "$Id$"
+#ident "$Id: wpse_main.c,v 1.3 2007/01/02 22:33:51 kwc Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -103,9 +103,9 @@ client_process(krb5_context kcontext,
 	       void *gak_data,
 	       krb5_data *salt, krb5_data *s2kparams,
 	       krb5_keyblock *as_key,
-	       krb5_pa_data **out_pa_data)
+	       krb5_pa_data ***out_pa_data)
 {
-    krb5_pa_data *send_pa;
+    krb5_pa_data **send_pa;
     krb5_int32 nnonce, enctype;
     krb5_keyblock *kb;
     krb5_error_code status;
@@ -123,19 +123,26 @@ client_process(krb5_context kcontext,
 
     if (pa_data->length == 0) {
 	/* Create preauth data. */
-	send_pa = malloc(sizeof(krb5_pa_data));
+	send_pa = malloc(2 * sizeof(krb5_pa_data *));
 	if (send_pa == NULL)
 	    return ENOMEM;
-	send_pa->pa_type = KRB5_PADATA_WPSE_REQ;
-	send_pa->length = 4;
-	send_pa->contents = malloc(4);
-	if (send_pa->contents == NULL) {
+	send_pa[1] = NULL;  /* Terminate list */
+	send_pa[0] = malloc(sizeof(krb5_pa_data));
+	if (send_pa[0] == NULL) {
+	    free(send_pa);
+	    return ENOMEM;
+	}
+	send_pa[0]->pa_type = KRB5_PADATA_WPSE_REQ;
+	send_pa[0]->length = 4;
+	send_pa[0]->contents = malloc(4);
+	if (send_pa[0]->contents == NULL) {
+	    free(send_pa[0]);
 	    free(send_pa);
 	    return ENOMEM;
 	}
 	/* Store the preauth data. */
 	nnonce = htonl(request->nonce);
-	memcpy(send_pa->contents, &nnonce, 4);
+	memcpy(send_pa[0]->contents, &nnonce, 4);
 	*out_pa_data = send_pa;
     } else {
 	/* A reply from the KDC.  Conventionally this would be
@@ -264,11 +271,16 @@ server_verify(krb5_context kcontext,
 	      preauth_get_entry_data_proc server_get_entry_data,
 	      void *pa_module_context,
 	      void **pa_request_context,
-	      krb5_data **e_data)
+	      krb5_data **e_data,
+	      krb5_authdata ***authz_data)
 {
     krb5_int32 nnonce;
     krb5_data *test_edata;
+    krb5_authdata **my_authz_data;
 
+#ifdef DEBUG
+    fprintf(stderr, "wpse: server_verify()!\n");
+#endif
     /* Verify the preauth data. */
     if (data->length != 4)
 	return KRB5KDC_ERR_PREAUTH_FAILED;
@@ -283,6 +295,54 @@ server_verify(krb5_context kcontext,
      * per-request cleanup. */
     if (*pa_request_context == NULL)
 	*pa_request_context = malloc(4);
+
+    /*
+     * Return some junk authorization data just to exercise the
+     * code path handling the returned authorization data.
+     *
+     * NOTE that this is NOT VALID authorization data!
+     */
+#ifdef DEBUG
+    fprintf(stderr, "wpse: doing authorization data!\n");
+#endif
+#if 1 /* USE_5000_AD */
+#define AD_ALLOC_SIZE 5000
+    /* ad_header consists of a sequence tag (0x30) and length (0x82 0x1384)
+     * followed by octet string tag (0x04) and length (0x82 0x1380) */
+    krb5_octet ad_header[] = {0x30, 0x82, 0x13, 0x84, 0x04, 0x82, 0x13, 0x80};
+#else
+#define AD_ALLOC_SIZE 100
+    /* ad_header consists of a sequence tag (0x30) and length (0x62)
+     * followed by octet string tag (0x04) and length (0x60) */
+    krb5_octet ad_header[] = {0x30, 0x62, 0x04, 0x60};
+#endif
+    my_authz_data = malloc(2 * sizeof(*my_authz_data));
+    if (my_authz_data != NULL) {
+        my_authz_data[1] = NULL;
+        my_authz_data[0] = malloc(sizeof(krb5_authdata));
+        if (my_authz_data[0] == NULL) {
+            free(my_authz_data);
+            return ENOMEM;
+        }
+        my_authz_data[0]->contents = malloc(AD_ALLOC_SIZE);
+        if (my_authz_data[0]->contents == NULL) {
+            free(my_authz_data[0]);
+            free(my_authz_data);
+            return ENOMEM;
+        }
+        memset(my_authz_data[0]->contents, '\0', AD_ALLOC_SIZE);
+        my_authz_data[0]->magic = KV5M_AUTHDATA;
+        my_authz_data[0]->ad_type = 1;
+        my_authz_data[0]->length = AD_ALLOC_SIZE;
+        memcpy(my_authz_data[0]->contents, ad_header, sizeof(ad_header));
+        sprintf(my_authz_data[0]->contents + sizeof(ad_header),
+               "wpse authorization data: %d bytes worth!\n", AD_ALLOC_SIZE);
+        *authz_data = my_authz_data;
+#ifdef DEBUG
+        fprintf(stderr, "Returning %d bytes of authorization data\n",
+                AD_ALLOC_SIZE);
+#endif
+    }
 
     /* Return edata to exercise code that handles edata... */
     test_edata = malloc(sizeof(*test_edata));
@@ -368,6 +428,7 @@ server_return(krb5_context kcontext,
     krb5_free_keyblock_contents(kcontext, encrypting_key);
     krb5_copy_keyblock_contents(kcontext, kb, encrypting_key);
 
+
     /* Clean up. */
     krb5_free_keyblock(kcontext, kb);
 
@@ -377,13 +438,13 @@ server_return(krb5_context kcontext,
 static int
 server_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 {
-    return PA_HARDWARE | PA_REPLACES_KEY;
+    return PA_HARDWARE | PA_REPLACES_KEY | PA_SUFFICIENT;
 }
 
 static krb5_preauthtype supported_client_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 static krb5_preauthtype supported_server_pa_types[] = {KRB5_PADATA_WPSE_REQ, 0};
 
-struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
+struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
     "wpse",				    /* name */
     &supported_client_pa_types[0],	    /* pa_type_list */
     NULL,				    /* enctype_list */
@@ -397,7 +458,7 @@ struct krb5plugin_preauth_client_ftable_v0 preauthentication_client_0 = {
     client_gic_opt			    /* get init creds opts function */
 };
 
-struct krb5plugin_preauth_server_ftable_v0 preauthentication_server_0 = {
+struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
     "wpse",
     &supported_server_pa_types[0],
     NULL,

@@ -205,6 +205,12 @@ typedef struct _krb5_data {
 	char *data;
 } krb5_data;
 
+typedef struct _krb5_octet_data {
+	krb5_magic magic;
+	unsigned int length;
+	krb5_octet *data;
+} krb5_octet_data;
+
 /* 
  * Hack length for crypto library to use the afs_string_to_key It is
  * equivalent to -1 without possible sign extension 
@@ -920,6 +926,11 @@ krb5_error_code krb5_decrypt_data
 #define	KRB5_ALTAUTH_ATT_CHALLENGE_RESPONSE	64
 
 /* authorization data types */
+#define KRB5_AUTHDATA_IF_RELEVANT   1
+#define KRB5_AUTHDATA_KDC_ISSUED    4
+#define KRB5_AUTHDATA_AND_OR	    5
+#define KRB5_AUTHDATA_MANDATORY_FOR_KDC	8
+#define KRB5_AUTHDATA_INITIAL_VERIFIED_CAS	9
 #define	KRB5_AUTHDATA_OSF_DCE	64
 #define KRB5_AUTHDATA_SESAME	65
 

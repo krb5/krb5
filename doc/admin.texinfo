@@ -21,7 +21,7 @@
 
 @include definitions.texinfo
 @set EDITION 1.0
-@set UPDATED June 16, 2000
+@set UPDATED June 14, 2007
 
 @finalout                               @c don't print black warning boxes
 
@@ -399,6 +399,7 @@ salt.  The supported values for salts are as follows.
 * capaths::                     
 * dbdefaults::                  
 * dbmodules::                   
+* pkinit client options::
 * Sample krb5.conf File::       
 @end menu
 
@@ -591,6 +592,8 @@ If this flag is set, initial tickets by default will be proxiable.
 The default value for this flag is @value{DefaultProxiable}.
 
 @end table
+
+
 
 @node appdefaults, login, libdefaults, krb5.conf
 @subsection [appdefaults]
@@ -1072,7 +1075,7 @@ This LDAP specific tag indicates the list of LDAP servers that the Kerberos serv
 This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under [dbmodules]. The default value is 5.
 @end table
 
-@node dbmodules, Sample krb5.conf File, dbdefaults, krb5.conf
+@node dbmodules, pkinit client options, dbdefaults, krb5.conf
 @subsection [dbmodules]
 
 Contains database specific parameters used by the database library. Each tag in the [dbmodules] section of the file names a configuration section for database specific parameters that can be referred to by a realm. The value of the tag is a subsection where the relations in that subsection define the database specific parameters.
@@ -1103,8 +1106,280 @@ This LDAP specific tags indicates the number of connections to be maintained per
 
 @end table
 
+@node pkinit client options, Sample krb5.conf File, dbmodules, krb5.conf
+@subsection pkinit options
 
-@node Sample krb5.conf File,  , dbmodules, krb5.conf
+@menu
+* pkinit identity syntax::
+* pkinit krb5.conf options::
+@end menu
+
+The following are @b{pkinit-specific} options.
+Note that these values may be specified in @code{[libdefaults]}
+as global defaults,
+or within a realm-specific subsection of @code{[libdefaults]},
+or may be specified as realm-specific values in the
+@code{[realms]} section.
+Also note that a realm-specific value over-rides, does not add to,
+a generic @code{[libdefaults]} specification.
+The search order is:
+@enumerate
+@item realm-specific subsection of @code{[libdefaults]}
+@smallexample
+@group
+[libdefaults]
+    EXAMPLE.COM = @{
+        pkinit_anchors = FILE:/usr/local/example.com.crt
+    @}
+@end group
+@end smallexample
+
+@item realm-specific value in the @code{[realms]} section,
+@smallexample
+@group
+[realms]
+    OTHERREALM.ORG = @{
+        pkinit_anchors = FILE:/usr/local/otherrealm.org.crt
+    @}
+@end group
+@end smallexample
+
+@item generic value in the @code{[libdefaults]} section.
+@smallexample
+@group
+[libdefaults]
+    pkinit_anchors = DIR:/usr/local/generic_trusted_cas/
+
+@end group
+@end smallexample
+@end enumerate
+
+@node pkinit identity syntax, pkinit krb5.conf options, pkinit client options, pkinit client options
+@subsubsection Specifying pkinit identity information
+
+The syntax for specifying Public Key identity, trust, and revocation
+information for pkinit is as follows: 
+@table @b
+
+@item FILE:@i{file-name}[,@i{key-file-name}]
+This option has context-specific behavior.
+@table @b
+@item pkinit_identity
+@itemx pkinit_identities
+@i{file-name} specifies the name of a PEM-format file
+containing the user's certificate.  If @i{key-file-name} is
+not specified, the user's private key is expected to be
+in @i{file-name} as well.  Otherwise, @i{key-file-name}
+is the name of the file containing the private key.
+@item pkinit_anchors
+@itemx pkinit_pool
+@i{file-name} is assumed to be the name of an OpenSSL-style
+ca-bundle file.
+@end table
+
+@item DIR:@i{directory-name}
+This option has context-specific behavior.
+@table @b
+@item pkinit_identity
+@itemx pkinit_identities
+@i{directory-name} specifies a directory with files named
+@code{*.crt} and @code{*.key}, where the first part of the
+file name is the same for matching pairs of certificate and
+private key files.  When a file with a name ending with @code{.crt}
+is found, a matching file ending with @code{.key} is assumed
+to contain the private key.  If no such file is found, then
+the certificate in the @code{.crt} is not used. 
+@item pkinit_anchors
+@itemx pkinit_pool
+@i{directory-name} is assumed to be an OpenSSL-style hashed CA directory
+where each CA cert is stored in a file named @i{hash-of-ca-cert}.@i{#}.
+This infrastructure is encouraged, but all files in the directory
+will be examined and if they contain certificates (in PEM format),
+they will be used.
+@item pkinit_revoke
+@i{directory-name} is assumed to be an OpenSSL-style hashed CA directory
+where each revocation list is stored in a file named @i{hash-of-ca-cert}.@b{r}@i{#}.
+This infrastructure is encouraged, but all files in the directory
+will be examined and if they contain a revocation list (in PEM format),
+they will be used.
+@end table
+
+@item PKCS12:@i{pkcs12-file-name}
+@i{pkcs12-file-name} is the name of a @code{PKCS #12} format file, containing
+the user's certificate and private key.
+
+@item PKCS11:[@b{module_name=}]@i{module-name}[@b{:slotid=}@i{slot-id}][@b{:token=}@i{token-label}][@b{:certid=}@i{cert-id}][@b{:certlabel=}@i{cert-label}]
+All keyword/values are optional.
+@i{module-name} specifies the location of a library implementing
+@code{PKCS #11}.  If a value is encountered with not keyword, it
+is assumed to be the @i{module-name}.  If no @i{module-name} is
+specified, the default is @code{opensc-pkcs11.so}. 
+@b{slotid=} and/or @b{token=} may be specified to force the use of a
+particular smard card reader or token if there is more than one
+available.
+@b{certid=} and/or @b{certlabel=} may be specified to force the selection
+of a particular certificate on the device.  See the @code{pkinit_cert_match}
+configuration option for more ways to select a particular certificate to
+use for pkinit.
+
+@item ENV:@i{environment-variable-name}
+@i{environment-variable-name} specifies the name of an environment
+variable which has been set to a value conforming to one of the
+previous values.  For example, @code{ENV:X509_PROXY}, where environment
+variable @code{X509_PROXY} has been set to @code{FILE:/tmp/my_proxy.pem}.
+@end table
+
+@node pkinit krb5.conf options,  , pkinit identity syntax, pkinit client options
+@subsubsection pkinit krb5.conf options
+@table @b
+
+@item pkinit_identities
+Specifies the location(s) to be used to find the user's X.509 identity
+information.  This option may be specified multiple times.
+Each value is attempted in order until identity information is found
+and authentication is attempted.  Note that these values are @b{not}
+used if the user specifies @b{X509_user_identity} on the command line.
+
+@item pkinit_anchors
+Specifies the location of trusted anchor (root) certificates which
+the client trusts to sign KDC certificates.  This option may be
+specified multiple times.  These values from the config file are
+@b{not} used if the user specifies @b{X509_anchors} on the command line.
+
+@item pkinit_pool
+Specifies the location of intermediate certificates which may be
+used by the client to complete the trust chain between a KDC
+certificate and a trusted anchor.  This option may be specified
+multiple times.
+
+@item pkinit_revoke
+Specifies the location of Certificate Revocation List (CRL) information
+to be used by the client when verifying the validity of the KDC
+certificate presented.  This option may be specified multiple times.
+
+@item pkinit_require_crl_checking
+The default certificate verification process will always check
+the available revocation information to see if a certificate has
+been revoked.  If a match is found for the certificate in a CRL,
+verification fails.  If the certificate being verified is not listed
+in a CRL, or there is no CRL present for its issuing CA,
+and @code{pkinit_require_crl_checking} is @code{false},
+then verification succeeds.
+
+However, if @code{pkinit_require_crl_checking} is @code{true} and
+there is no CRL information available for the issuing CA,
+then verification fails.
+
+@code{pkinit_require_crl_checking} should be set to @code{true}
+if the policy is such that up-to-date CRLs @b{must} be present for
+every CA.
+
+@item pkinit_dh_min_bits
+Specifies the size of the Diffie-Hellman key the client will
+attempt to use.  The acceptable values are currently 1024, 2048,
+and 4096.  The default is 2048.
+
+@item pkinit_win2k
+This flag specifies whether the target realm is assumed
+to support only the @i{old}, pre-RFC version of the protocol.
+The default is false.
+
+@item pkinit_win2k_require_binding
+If this flag is set to true, it expects that the target
+KDC is patched to return a reply with a checksum rather than a
+nonce.  The default is false.
+
+@item pkinit_eku_checking
+This option specifies what Extended Key Usage value the KDC certificate
+presented to the client must contain.
+(@b{Note} that if the KDC certificate has the pkinit
+SubjectAlternativeName encoded as the Kerberos TGS name, EKU checking
+is not necessary since the issuing CA has certified this as a KDC
+certificate.)
+The values recognized in the @code{krb5.conf} file are:
+@table @b
+@item kpKDC
+This is the default value and specifies that the KDC must have the
+id-pkinit-KPKdc EKU as defined in RFC4556.
+@item kpServerAuth
+If @code{kpServerAuth} is specified, a KDC certificate with the
+id-kp-serverAuth EKU as used by Microsoft will be accepted.
+@item none
+If @code{none} is specified, then the KDC certificate will not be
+checked to verify it has an acceptable EKU.  The use of this option
+is @b{not recommended}.
+@end table
+
+@item pkinit_kdc_hostname
+The presense of this option indicates that the client is willing to
+accept a KDC certificate with a dNSName SAN (Subject Alternative Name)
+rather than requiring the id-pkinit-san as defined in RFC4556.  This
+option may be specified multiple times.  Its value should contain
+the acceptable hostname for the KDC (as contained in its certificate).
+
+@item pkinit_cert_match
+Specifies matching rules that the client certificate must match before
+it is used to attempt pkinit authentication.  If a user has multiple
+certificates available (on a smart card, or via other media), there
+must be exactly one certificate chosen before attempting pkinit
+authentication.  This option may be specified multiple times.  All the
+available certificates are checked against each rule in order until
+there is a match of exactly one certificate.
+
+The Subject and Issuer comparison strings are the RFC2253 string
+representations from the certificate Subject DN and Issuer DN values.
+
+The syntax of the matching rules is:
+@example
+[@i{relation-operator}]@i{component-rule} @code{...}
+@end example
+where
+@table @i
+@item relation-operator
+can be either @code{&&}, meaning all component rules must match,
+or @code{||}, meaning only one component rule must match.
+The default is @code{&&} if not specified.
+
+@item component-rule
+can be one of the following.  Note that there is no punctuation
+or whitespace between component rules.
+@table @b
+@item @code{<SUBJECT>}@i{regular-expression}
+@item @code{<ISSUER>}@i{regular-expression}
+@item @code{<SAN>}@i{regular-expression}
+@item @code{<EKU>}@i{extended-key-usage-list}
+where @i{extended-key-usage-list} is a comma-separated list of
+required Extended Key Usage values.  All values in the list must
+be present in the certificate.
+@smallexample
+@group
+@code{pkinit}
+@code{msScLogin}
+@code{clientAuth}
+@code{emailProtection}
+@end group
+@end smallexample
+@item @code{<KU>}@i{key-usage-list}
+where @i{key-usage-list} is a comma-separated list of required
+Key Usage values.  All values in the list must be present in
+the certificate.
+@smallexample
+@group
+@code{digitalSignature}
+@code{keyEncipherment}
+@end group
+@end smallexample
+@end table
+@end table
+Examples:
+@example
+pkinit_cert_match = ||<SUBJECT>.*DoE.*<SAN>.*@@EXAMPLE.COM
+pkinit_cert_match = &&<EKU>msScLogin,clientAuth<ISSUER>.*DoE.*
+pkinit_cert_match = <EKU>msScLogin,clientAuth<KU>digitalSignature
+@end example
+@end table
+
+@node Sample krb5.conf File,  , pkinit client options, krb5.conf
 @subsection Sample krb5.conf File
 
 Here is an example of a generic @code{krb5.conf} file:
@@ -1189,6 +1464,7 @@ Here is an example of a generic @code{krb5.conf} file:
 @menu
 * kdcdefaults::                 
 * realms (kdc.conf)::           
+* pkinit kdc options::
 * Sample kdc.conf File::        
 @end menu
 
@@ -1225,7 +1501,7 @@ The default value is @value{DefaultV4Mode}.
 @comment these values found in krb5/src/kdc/kerberos_v4.c in v4mode_table
 @end table
 
-@node realms (kdc.conf), Sample kdc.conf File, kdcdefaults, kdc.conf
+@node realms (kdc.conf), pkinit kdc options, kdcdefaults, kdc.conf
 @subsection [realms]
 
 Each tag in the [realms] section of the file names a Kerberos realm.
@@ -1409,7 +1685,123 @@ This option defaults to @code{true}.
 
 @end table
 
-@node Sample kdc.conf File,  , realms (kdc.conf), kdc.conf
+@node pkinit kdc options, Sample kdc.conf File, realms (kdc.conf), kdc.conf
+@subsection pkinit options
+
+@menu
+* pkinit kdc.conf options::
+@end menu
+
+The following are @b{pkinit-specific} options.
+Note that these values may be specified in @code{[kdcdefaults]}
+as global defaults,
+or within a realm-specific subsection of @code{[realms]}.
+Also note that a realm-specific value over-rides, does not add to,
+a generic @code{[kdcdefaults]} specification.
+The search order is:
+@enumerate
+@item realm-specific subsection of @code{[realms]}
+@smallexample
+@group
+[realms]
+    EXAMPLE.COM = @{
+        pkinit_anchors = FILE:/usr/local/example.com.crt
+    @}
+@end group
+@end smallexample
+
+@item generic value in the @code{[kdcdefaults]} section.
+@smallexample
+@group
+[kdcdefaults]
+    pkinit_anchors = DIR:/usr/local/generic_trusted_cas/
+@end group
+@end smallexample
+@end enumerate
+
+@node pkinit kdc.conf options,  , pkinit kdc options, pkinit kdc options
+@subsubsection pkinit kdc.conf options
+
+For information about the syntax of some of these options,
+see @xref{pkinit identity syntax}.
+
+@table @b
+@item pkinit_identity
+Specifies the location of the KDC's X.509 identity information.
+This option is @b{required} if pkinit is to be supported by the
+KDC.
+
+@item pkinit_anchors
+Specifies the location of trusted anchor (root) certificates
+which the KDC trusts to sign client certificates.
+This option is @b{required} if pkinit is to be supported by the
+KDC.
+This option may be specified multiple times.
+
+@item pkinit_pool
+Specifies the location of intermediate certificates which may be
+used by the KDC to complete the trust chain between a client's
+certificate and a trusted anchor.
+This option may be specified multiple times.
+
+@item pkinit_revoke
+Specifies the location of Certificate Revocation List (CRL)
+information to be used by the KDC when verifying the validity
+of client certificates.
+This option may be specified multiple times.
+
+@item pkinit_require_crl_checking
+The default certificate verification process will always check
+the available revocation information to see if a certificate has
+been revoked.  If a match is found for the certificate in a CRL,
+verification fails.  If the certificate being verified is not listed
+in a CRL, or there is no CRL present for its issuing CA,
+and @code{pkinit_require_crl_checking} is @code{false},
+then verification succeeds.
+
+However, if @code{pkinit_require_crl_checking} is @code{true} and
+there is no CRL information available for the issuing CA,
+then verification fails.
+
+@code{pkinit_require_crl_checking} should be set to @code{true}
+if the policy is such that up-to-date CRLs @b{must} be present for
+every CA.
+
+@item pkinit_dh_min_bits
+Specifies the minimum number of bits the KDC is willing to accept
+for a client's Diffie-Hellman key.  The default is 2048.
+
+@item pkinit_allow_upn
+Specifies that the KDC is willing to accept client certificates with
+the Microsoft UserPrincipalName (UPN) Subject Alternative Name
+(SAN).  This means the KDC accepts the binding of the UPN in the
+certificate to the Kerberos principal name.
+
+The default is false.
+
+Without this option, the KDC will only
+accept certificates with the id-pkinit-san as defined in RFC4556.
+There is currently no option to disable SAN checking in the KDC.
+
+@item pkinit_eku_checking
+This option specifies what Extended Key Usage (EKU) values the
+KDC is willing to accept in client certificates.
+The values recognized in the @code{kdc.conf} file are:
+@table @b
+@item kpClientAuth
+This is the default value and specifies that client certificates must
+have the id-pkinit-KPClientAuth EKU as defined in RFC4556.
+@item scLogin
+If @code{scLogin} is specified, client certificates with the
+Microsoft Smart Card Login EKU (id-ms-kp-sc-logon) will be accepted.
+@item none
+If @code{none} is specified, then client certificates will not be
+checked to verify they have an acceptable EKU.
+The use of this option is @b{not recommended}.
+@end table
+@end table
+
+@node Sample kdc.conf File,  , pkinit kdc options, kdc.conf
 @subsection Sample kdc.conf File
 
 Here's an example of a @code{kdc.conf} file:

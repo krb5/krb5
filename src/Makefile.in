@@ -6,6 +6,7 @@ mydir=.
 # Don't build sample by default: plugins/locate/python plugins/preauth/wpse plugins/preauth/cksum_body
 SUBDIRS=util include lib @krb524@ kdc kadmin @ldap_plugin_dir@ slave clients \
 	plugins/kdb/db2 \
+	plugins/preauth/pkinit \
 	appl tests \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
@@ -67,7 +68,7 @@ INSTALLMKDIRS = $(KRB5ROOT) $(KRB5MANROOT) $(KRB5OTHERMKDIRS) \
 		$(ADMIN_BINDIR) $(SERVER_BINDIR) $(CLIENT_BINDIR) \
 		$(ADMIN_MANDIR) $(SERVER_MANDIR) $(CLIENT_MANDIR) \
 		$(FILE_MANDIR) $(KRB5_LIBDIR) $(KRB5_INCDIR) \
-		$(KRB5_DB_MODULE_DIR) \
+		$(KRB5_DB_MODULE_DIR) $(KRB5_PA_MODULE_DIR) \
 		$(KRB5_LIBKRB5_MODULE_DIR) \
 		@localstatedir@ @localstatedir@/krb5kdc \
 		$(KRB5_INCSUBDIRS) $(datadir) $(EXAMPLEDIR)
@@ -100,6 +101,7 @@ fake-install:
 	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
+	(w=`pwd`; cd plugins/preauth/pkinit && $(MAKE) install DESTDIR="$$w/util/fakedest")
 
 #	(w=`pwd`; cd plugins/locate/python && $(MAKE) install DESTDIR="$$w/util/fakedest")
 

@@ -39,7 +39,9 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 [\fB\-A\fP]
 [\fB\-v\fP] [\fB\-R\fP]
 [\fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]] [\fB\-c\fP \fIcache_name\fP]
-[\fB\-S\fP \fIservice_name\fP] [\fIprincipal\fP]
+[\fB\-S\fP \fIservice_name\fP]
+[\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]]
+[\fIprincipal\fP]
 .ad b
 .br
 .SH DESCRIPTION
@@ -174,6 +176,28 @@ specify an alternate service name to use when
 getting initial tickets.  (Applicable to Kerberos 5 or if using both
 Kerberos 5 and Kerberos 4 with a kdc that supports Kerberos 5 to Kerberos 4
 ticket conversion.)
+.TP
+\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]
+specify a pre\-authentication attribute and value to be passed to
+pre\-authentication plugins.  The acceptable \fIattribute\fP and
+\fIvalue\fP values vary from pre\-authentication plugin to plugin.
+This option may be specified multiple times to specify multiple
+attributes.  If no \fIvalue\fP is specified, it is assumed to be
+"yes".
+.sp
+.nf
+The following attributes are recognized by the OpenSSL pkinit
+pre-authentication mechanism:
+.in +.3i
+\fBX509_user_identity\fP=\fIvalue\fP
+   specify where to find user's X509 identity information
+\fBX509_anchors\fP=\fIvalue\fP
+   specify where to find trusted X509 anchor information
+\fBflag_RSA_PROTOCOL\fP[=yes]
+   specify use of RSA, rather than the default Diffie-Hellman protocol
+.in -.3i
+.fi
+.sp
 .SH ENVIRONMENT
 .B Kinit
 uses the following environment variables:
