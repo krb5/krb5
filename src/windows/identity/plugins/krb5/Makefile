@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2007 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -110,3 +111,5 @@ clean::
 !if defined(INCFILES)
 	$(RM) $(INCFILES)
 !endif
+	if exist vc70.pdb  $(RM) vc70.pdb
+	if exist vc80.pdb  $(RM) vc80.pdb
