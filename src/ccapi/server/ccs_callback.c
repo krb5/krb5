@@ -142,7 +142,12 @@ cc_int32 ccs_callback_invalidate (ccs_callback_t io_callback)
     
     if (!err) {
         io_callback->pending = 0; /* client is dead, don't try to talk to it */
-        err = io_callback->owner_invalidate (io_callback->owner, io_callback);
+	if (io_callback->owner_invalidate) {
+	    err = io_callback->owner_invalidate (io_callback->owner, io_callback);
+	} else {
+	    cci_debug_printf ("WARNING %s() unable to notify callback owner!", 
+			      __FUNCTION__);
+	}
     }
     
     return cci_check_error (err);
@@ -222,7 +227,7 @@ cc_int32 ccs_callback_client_pipe (ccs_callback_t  in_callback,
 {
     cc_int32 err = ccNoError;
     
-    if (!in_callback        ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_callback    ) { err = cci_check_error (ccErrBadParam); }
     if (!out_client_pipe) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
