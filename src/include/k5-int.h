@@ -900,7 +900,7 @@ typedef struct _krb5_preauth_context {
 	preauth_client_plugin_fini_proc client_fini;
 	/* The module's table, and some of its members, copied here for
 	 * convenience when we populated the list. */
-	struct krb5plugin_preauth_client_ftable_v0 *ftable;
+	struct krb5plugin_preauth_client_ftable_v1 *ftable;
 	const char *name;
 	int flags, use_count;
 	preauth_client_process_proc client_process;
