@@ -846,9 +846,19 @@ changequote([, ])
 AC_SUBST(PASS)
 
 dnl for pkinit
+AC_CACHE_CHECK(for a recent enough OpenSSL, k5_cv_openssl_version_okay,
+[AC_COMPILE_IFELSE([#include <openssl/opensslv.h>
+#if OPENSSL_VERSION_NUMBER < 0x00908000L
+# error openssl is too old, need 0.9.8
+#endif
+int i = 1;
+], k5_cv_openssl_version_okay=yes, k5_cv_openssl_version_okay=no)])
 old_LIBS="$LIBS"
 AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
 LIBS="$old_LIBS"
+if test "$k5_cv_openssl_version_okay" = yes; then
+  AC_CONFIG_SUBDIRS(plugins/preauth/pkinit)
+fi
 
 dnl
 dnl
@@ -926,7 +936,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
 fi
 AC_SUBST(ldap_plugin_dir)
 
-AC_CONFIG_SUBDIRS(lib/apputils plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/pkinit plugins/preauth/cksum_body appl tests)
+AC_CONFIG_SUBDIRS(lib/apputils plugins/kdb/db2 plugins/preauth/wpse plugins/preauth/cksum_body appl tests)
 dnl
 if false; then
   AC_CHECK_HEADERS(Python.h python2.3/Python.h)
