@@ -48,5 +48,11 @@ krb5_error_code krb5_ser_checksum_init (krb5_context);
 krb5_error_code krb5_ser_keyblock_init (krb5_context);
 krb5_error_code krb5_ser_principal_init (krb5_context);
 
+krb5_error_code
+krb5_preauth_supply_preauth_data(krb5_context context,
+				 krb5_gic_opt_ext *opte,
+				 const char *attr,
+				 const char *value);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
 
