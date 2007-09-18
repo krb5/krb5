@@ -99,7 +99,7 @@ cc_int32 ccs_lock_release (ccs_lock_t io_lock)
     cc_int32 err = ccNoError;
     
     if (!err && io_lock) {
-	free (io_lock->callback);
+	ccs_callback_release (io_lock->callback);
         free (io_lock);
     }
     
