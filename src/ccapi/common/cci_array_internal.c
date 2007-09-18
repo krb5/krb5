@@ -270,7 +270,8 @@ cc_int32 cci_array_move (cci_array_t  io_array,
             move_to = in_position;
             move_count = in_new_position - in_position - 1;
             real_new_position = in_new_position - 1;
-        } else {
+	    
+        } else if (in_position > in_new_position) {
             /* shift left */
             move_from = in_new_position;
             move_to = in_new_position + 1;
