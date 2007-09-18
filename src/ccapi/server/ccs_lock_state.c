@@ -154,15 +154,53 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
                                             cc_uint64        in_pending_lock_index)
 {
     cc_int32 err = ccNoError;
-    cc_uint64 new_lock_index = 0;
     
     if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
     
-    if (!err && in_pending_lock_index < io_lock_state->first_pending_lock_index) {
-        err = cci_check_error (ccErrBadParam);
+    if (!err) {
+        if (in_pending_lock_index < io_lock_state->first_pending_lock_index ||
+            in_pending_lock_index >= ccs_lock_array_count (io_lock_state->locks)) {
+            err = cci_check_error (ccErrBadParam);
+        }
     }
     
     if (!err) {
+        ccs_lock_t pending_lock = ccs_lock_array_object_at_index (io_lock_state->locks,
+                                                                  in_pending_lock_index);
+        cc_uint32 type = 0;
+        ccs_pipe_t pending_client_pipe = CCS_PIPE_NULL;
+        
+        err = ccs_lock_type (pending_lock, &type);
+        
+        if (!err) {
+            err = ccs_lock_client_pipe (pending_lock, &pending_client_pipe);
+        }
+
+        if (!err && (type == cc_lock_upgrade || type == cc_lock_downgrade)) {
+            /* lock upgrades or downgrades.  Find the old lock and remove it. */
+            cc_uint64 i;
+            
+            for (i = 0; !err && i < io_lock_state->first_pending_lock_index; i++) {
+                ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+                cc_uint32 is_lock_for_client = 0;
+                
+                err = ccs_lock_is_for_client_pipe (lock, pending_client_pipe, &is_lock_for_client);
+                
+                if (!err && is_lock_for_client) {
+                    cci_debug_printf ("%s: Removing old lock %p at index %d to replace with pending lock %p.", 
+                                      __FUNCTION__, lock, (int) i, pending_lock);
+                    err = ccs_lock_status_remove_lock (io_lock_state, i);
+                    if (!err) { i--; in_pending_lock_index--; /* We removed one so back up an index */ }
+                    break;
+                }
+            }
+            
+        }
+    }
+    
+    if (!err) {
+        cc_uint64 new_lock_index = 0;
+        
         err = ccs_lock_array_move (io_lock_state->locks, 
                                    in_pending_lock_index, 
                                    io_lock_state->first_pending_lock_index,
@@ -171,8 +209,7 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
     }
     
     if (!err) {
-        ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, 
-                                                          new_lock_index);
+        ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, 0);
         err = ccs_lock_grant_lock (lock);
     }
     
@@ -191,7 +228,9 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
     cc_int32 err = ccNoError;
     cc_uint32 is_write_locked = 0;
     cc_uint32 client_has_lock = 0;
+    cc_uint32 other_clients_have_locks = 0;
     cc_uint32 client_lock_type = 0;
+    cc_uint64 client_lock_index = 0;
     cc_uint32 grant_lock = 0;
     
     if (!io_lock_state                               ) { err = cci_check_error (ccErrBadParam); }
@@ -216,20 +255,16 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
             
             if (!err) {
                 if (lock_type == cc_lock_write || lock_type == cc_lock_upgrade) {
-                    if (is_write_locked) {
-                        cci_debug_printf ("WARNING %s() multiple write locks.", 
-                                          __FUNCTION__);
-                    }
                     is_write_locked = 1;
                 }
                 
-                if (lock_is_for_client) {
-                    if (client_has_lock) {
-                        cci_debug_printf ("WARNING %s() client has multiple locks.", 
-                                          __FUNCTION__);
-                    }
+                if (!lock_is_for_client) {
+                    other_clients_have_locks = 1;
+                    
+                } else if (!client_has_lock) { /* only record type of 1st lock */
                     client_has_lock = 1;
                     client_lock_type = lock_type;
+                    client_lock_index = i;
                 }
             }
         }
@@ -258,7 +293,7 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
                 err = cci_check_error (ccErrBadLockType);
             } else {
                 /* don't grant if other clients have read locks */
-                grant_lock = (lock_count == 1); 
+                grant_lock = !other_clients_have_locks; 
             }
             
         } else if (in_pending_lock_type == cc_lock_downgrade) {
@@ -271,7 +306,7 @@ static cc_int32 ccs_lock_state_check_pending_lock (ccs_lock_state_t  io_lock_sta
             }
         } else {
             err = cci_check_error (ccErrBadLockType);
-       }
+        }
     }
     
     if (!err) {
@@ -304,7 +339,7 @@ static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_
             cc_uint32 lock_type = 0;
             ccs_pipe_t client_pipe = CCS_PIPE_NULL;
             cc_uint32 can_grant_lock_now = 0;
-
+            
             err = ccs_lock_client_pipe (lock, &client_pipe);
             
             if (!err) {
@@ -315,7 +350,7 @@ static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_
                 err = ccs_lock_state_check_pending_lock (io_lock_state, client_pipe,
                                                          lock_type, &can_grant_lock_now);
             }
-
+            
             if (!err && can_grant_lock_now) {
                 err = ccs_lock_status_grant_lock (io_lock_state, i);
                 if (!err) { granted_lock = 1; }
@@ -323,6 +358,7 @@ static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_
         }
         
         if (!err && !granted_lock) {
+            /* we walked over all the locks and couldn't grant any of them */
             done = 1;
         }
     } 
@@ -339,33 +375,33 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
                              ccs_pipe_t        in_reply_pipe,
                              cc_uint32         in_lock_type,
                              cc_uint32         in_block,
-                             cc_uint32        *out_will_block)
+                             cc_uint32        *out_will_send_reply)
 {
     cc_int32 err = ccNoError;
     cc_uint32 can_grant_lock_now = 0;
-    cc_uint32 will_block = 0;
     
     if (!io_lock_state                  ) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_client_pipe)) { err = cci_check_error (ccErrBadParam); }
     if (!ccs_pipe_valid (in_reply_pipe) ) { err = cci_check_error (ccErrBadParam); }
-    if (!out_will_block                 ) { err = cci_check_error (ccErrBadParam); }
+    if (!out_will_send_reply            ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
         /* Sanity check: if there are any pending locks for this client
          * the client must have timed out waiting for our reply.  Remove any
          * existing pending locks for the client. */
         cc_uint64 i;
-        cc_uint64 count = ccs_lock_array_count (io_lock_state->locks);
-
-        for (i = io_lock_state->first_pending_lock_index; !err && i < count; i++) {
+        
+        for (i = io_lock_state->first_pending_lock_index; !err && i < ccs_lock_array_count (io_lock_state->locks); i++) {
             ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
             cc_uint32 has_pending_lock_for_client = 0;
             
             err = ccs_lock_is_for_client_pipe (lock, in_client_pipe, &has_pending_lock_for_client);
             
             if (!err && has_pending_lock_for_client) {
-                cci_debug_printf ("WARNING %s() removing pending lock for client.", __FUNCTION__);
+                cci_debug_printf ("WARNING %s: Removing unexpected pending lock %p at index %d.", 
+                                  __FUNCTION__, lock, (int) i);
                 err = ccs_lock_status_remove_lock (io_lock_state, i);
+                if (!err) { i--;  /* We removed one so back up an index */ }
             }
         }
     }
@@ -374,7 +410,7 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
         err = ccs_lock_state_check_pending_lock (io_lock_state, in_client_pipe,
                                                  in_lock_type, &can_grant_lock_now);
     }
-        
+    
     if (!err) {
         if (!can_grant_lock_now && !in_block) {
             err = cci_check_error (io_lock_state->pending_lock_err);
@@ -388,24 +424,20 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
                                                     in_lock_type,
                                                     &new_lock_index);
             
-            if (!err) {
-                if (can_grant_lock_now) {
-                    err = ccs_lock_status_grant_lock (io_lock_state,
-                                                      new_lock_index);
-                    
-                    if (!err && (in_lock_type == cc_lock_downgrade)) {
-                        /* downgrades can allow us to grant other locks */
-                        err = ccs_lock_status_try_to_grant_pending_locks (io_lock_state);
-                    }
-                } else {
-                    will_block = 1;
+            if (!err && can_grant_lock_now) {
+                err = ccs_lock_status_grant_lock (io_lock_state, new_lock_index);
+                
+                if (!err && (in_lock_type == cc_lock_downgrade)) {
+                    /* downgrades can allow us to grant other locks */
+                    err = ccs_lock_status_try_to_grant_pending_locks (io_lock_state);
                 }
             }
         }
     }
     
     if (!err) {
-        *out_will_block = will_block;
+        /* ccs_lock_state_add sends its replies via callback so caller shouldn't */
+        *out_will_send_reply = 1;
     }
     
     return cci_check_error (err);    
@@ -424,21 +456,30 @@ cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
     
     if (!err) {
         cc_uint64 i;
-        cc_uint64 lock_count = io_lock_state->first_pending_lock_index;
         
-        for (i = 0; !err && i < lock_count; i++) {
+        /* Remove all locks for this client.  
+         * There should only be one so warn if there are multiple */
+        for (i = 0; !err && i < io_lock_state->first_pending_lock_index; i++) {
             ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, i);
+            cc_uint32 is_for_client = 0;
             
-            err = ccs_lock_is_for_client_pipe (lock, in_client_pipe, &found_lock);
+            err = ccs_lock_is_for_client_pipe (lock, in_client_pipe, &is_for_client);
             
-            if (!err && found_lock) {
-                cci_debug_printf ("%s: Removing lock %p.", __FUNCTION__, lock);
+            if (!err && is_for_client) {
+                if (found_lock) {
+                    cci_debug_printf ("WARNING %s: Found multiple locks for client.", 
+                                      __FUNCTION__);
+                }
+                
+                found_lock = 1;
+                
+                cci_debug_printf ("%s: Removing lock %p at index %d.", __FUNCTION__, lock, (int) i);
                 err = ccs_lock_status_remove_lock (io_lock_state, i);
-                break;
+                if (!err) { i--;  /* We removed one so back up an index */ }
             }
         }
     }
-
+    
     if (!err && !found_lock) {
         err = cci_check_error (io_lock_state->no_lock_err);
     }

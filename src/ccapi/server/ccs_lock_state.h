@@ -41,7 +41,7 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
                              ccs_pipe_t        in_reply_pipe,
                              cc_uint32         in_lock_type,
                              cc_uint32         in_block,
-                             cc_uint32        *out_will_block);
+                             cc_uint32        *out_will_send_reply);
 
 cc_int32 ccs_lock_state_remove (ccs_lock_state_t io_lock_state,
                                 ccs_pipe_t       in_client_pipe);
