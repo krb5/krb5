@@ -111,4 +111,3 @@ $(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/kerberosIV/des.h $(SRCTOP)/include/kerberosIV/krb.h \
   $(srcdir)/../arpa/ftp.h $(srcdir)/../ftp/secure.c secure.h
 $(OUTPRE)getdtablesize.$(OBJEXT): $(srcdir)/../../bsd/getdtablesize.c
-$(OUTPRE)setenv.$(OBJEXT): $(srcdir)/../../bsd/setenv.c
