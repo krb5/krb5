@@ -151,7 +151,7 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[])
     
     openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
     syslog (LOG_INFO, "Starting up.");   
-
+    
     syslog (LOG_NOTICE, "Exiting: %s (%d)", kipc_error_string (err), err);
     
     return cci_check_error (err);
@@ -198,7 +198,7 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
     
     if (!err) {
         /* depending on how big the message is, use the fast inline buffer or  
-        * the slow dynamically allocated buffer */
+         * the slow dynamically allocated buffer */
         mach_msg_type_number_t reply_length = cci_stream_size (in_reply_stream);
         
         if (reply_length > kCCAPIMaxILMsgSize) {            
@@ -208,6 +208,7 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
             err = vm_read (mach_task_self (), 
                            (vm_address_t) cci_stream_data (in_reply_stream), reply_length, 
                            (vm_address_t *) &ool_reply, &ool_reply_length);
+            cci_check_error (err);
             
         } else {
             //cci_debug_printf ("%s choosing in line buffer (size is %d)",
@@ -222,6 +223,7 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
         err = ccs_mipc_reply (in_reply_pipe, 
                               inl_reply, inl_reply_length,
                               ool_reply, ool_reply_length);
+        cci_check_error (err);
     }
     
     if (!err) {
