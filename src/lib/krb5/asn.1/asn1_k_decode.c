@@ -1523,7 +1523,7 @@ asn1_error_code asn1_decode_pa_pk_as_rep_draft9(asn1buf *buf, krb5_pa_pk_as_rep_
       get_lenfield(val->u.encKeyPack.length, val->u.encKeyPack.data,
 		    choice_pa_pk_as_rep_draft9_encKeyPack, asn1_decode_octetstring);
     } else {
-      val->choice = choice_pa_pk_as_rep_UNKNOWN;
+      val->choice = choice_pa_pk_as_rep_draft9_UNKNOWN;
     }
     end_structure();
   }
