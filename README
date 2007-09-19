@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.6.2
+                  Kerberos Version 5, Release 1.6.3
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.6.2.tar.gz.  Instructions on how to extract the entire
+krb5-1.6.3.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.6.2.tar.gz
+        gtar zxpf krb5-1.6.3.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.6.2.tar.gz | tar xpf -
+        gzcat krb5-1.6.3.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.6.2/src and
-the documentation into krb5-1.6.2/doc.
+Both of these methods will extract the sources into krb5-1.6.3/src and
+the documentation into krb5-1.6.3/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -58,6 +58,53 @@ You may view bug reports by visiting
 http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
+
+Major changes in krb5-1.6.3
+---------------------------
+
+[5706]  fix CVE-2007-3999, CVE-2007-4743 svc_auth_gss.c buffer overflow
+[5707]  fix CVE-2007-4000 modify_policy vulnerability
+
+    The above are two kadmind vulnerabilities described in
+    MITKRB5-SA-2007-006.  CVE-2007-3999 is actually a vulnerability in
+    the RPC library.
+
+[5617]  Add PKINIT support
+
+    At this point, PKINIT support should be considered to be ALPHA
+    code.  We would greatly appreciate testing and feedback of PKINIT
+    support.
+
+krb5-1.6.3 changes by ticket ID
+-------------------------------
+
+3334    libkrb5 treats all KDC errors as terminal
+4950    gc_frm_kdc doesn't adjust use_conf_ktypes in referrals case
+5471    krb5_ktfile_get_entry() can invalidate keytab file handle
+5542    Optimize file/directory pruning
+5548    Look for unix find command in multiple places
+5577    MSI Deployment Guide
+5581    Build fails in lib/gssapi/spnego
+5584    NIM Changes Post KFW 3.2
+5604    NIM update inconsistency when deleting credentials
+5607    NIM GUI: Default identity display should not have a background color
+5609    NIM GUI picture does not track tray icon
+5613    NIM GUI: views jump around on the screen
+5617    Add PKINIT support
+5623    NIM: apply does not update saved values of general identities cfg page
+5624    krb5_fcc_generate_new() doesn't work with mkstemp()
+5629    gss_init_sec_context does not release output token buffer when
+        used with spnego mech
+5636    remove unused src/windows/identity/uilib/Makefile.w2k
+5645    export krb5_get_profile
+5653    compilation failure with IRIX native compiler
+5666    read_entropy_from_device on partial read will not fill buffer
+5697    make ccache handle referrals better
+5700    -S sname option for kvno
+5704    new warnings in pkinit code (patch needs review)
+5706    fix CVE-2007-3999, CVE-2007-4743 svc_auth_gss.c buffer overflow
+5707    fix CVE-2007-4000 modify_policy vulnerability
+5708    krb5_fcc_generate_new is non-functional
 
 Major changes in krb5-1.6.2
 ---------------------------
@@ -708,6 +755,58 @@ backend, are subject to the following license:
   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
 
+                         --------------------
+
+Portions funded by Sandia National Laboratory and developed by the
+University of Michigan's Center for Information Technology
+Integration, including the PKINIT implementation, are subject to the
+following license:
+
+  COPYRIGHT (C) 2006-2007
+  THE REGENTS OF THE UNIVERSITY OF MICHIGAN
+  ALL RIGHTS RESERVED
+
+  Permission is granted to use, copy, create derivative works
+  and redistribute this software and such derivative works
+  for any purpose, so long as the name of The University of
+  Michigan is not used in any advertising or publicity
+  pertaining to the use of distribution of this software
+  without specific, written prior authorization.  If the
+  above copyright notice or any other identification of the
+  University of Michigan is included in any copy of any
+  portion of this software, then the disclaimer below must
+  also be included.
+
+  THIS SOFTWARE IS PROVIDED AS IS, WITHOUT REPRESENTATION
+  FROM THE UNIVERSITY OF MICHIGAN AS TO ITS FITNESS FOR ANY
+  PURPOSE, AND WITHOUT WARRANTY BY THE UNIVERSITY OF
+  MICHIGAN OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING
+  WITHOUT LIMITATION THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+  REGENTS OF THE UNIVERSITY OF MICHIGAN SHALL NOT BE LIABLE
+  FOR ANY DAMAGES, INCLUDING SPECIAL, INDIRECT, INCIDENTAL, OR
+  CONSEQUENTIAL DAMAGES, WITH RESPECT TO ANY CLAIM ARISING
+  OUT OF OR IN CONNECTION WITH THE USE OF THE SOFTWARE, EVEN
+  IF IT HAS BEEN OR IS HEREAFTER ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGES.
+
+                         --------------------
+
+The pkcs11.h file included in the PKINIT code has the following
+license:
+
+  Copyright 2006 g10 Code GmbH
+  Copyright 2006 Andreas Jellinghaus
+
+  This file is free software; as a special exception the author gives
+  unlimited permission to copy and/or distribute it, with or without
+  modifications, as long as this notice is preserved.
+
+  This file is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY, to the extent permitted by law; without even
+  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  PURPOSE.
+
 Acknowledgments
 ---------------
 
@@ -722,6 +821,16 @@ mechglue and SPNEGO.
 
 Thanks to iDefense for notifying us about the vulnerability in
 MITKRB5-SA-2007-002.
+
+Thanks to the CITI group at the University of Michigan for
+contributing the implementation of PKINIT.
+
+Thanks to Tenable Network Security and 3Com's Zero Day Initiative for
+discovering CVE-2007-3999.  Thanks to Kevin Coffman (UMich), Will
+Fiveash (Sun), and Nico Williams (Sun) for help with developing the
+revised patch.
+
+Thanks to Garrett Wollman of MIT CSAIL for discovering CVE-2007-4000.
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jeffrey Altman, Justin Anderson,
