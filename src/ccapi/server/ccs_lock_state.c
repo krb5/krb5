@@ -194,7 +194,6 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
                     break;
                 }
             }
-            
         }
     }
     
