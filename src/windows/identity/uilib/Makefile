@@ -63,3 +63,6 @@ $(OBJ)\acceldef.c: accel.csv acceldef.cfg
 
 all: mkdirs $(INCFILES) $(UIDLLOBJFILES)
 
+clean::
+	if exist "$(INCDIR)" $(RM) $(INCFILES)
+

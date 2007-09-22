@@ -35,4 +35,4 @@ INCFILES= \
 all: $(INCFILES)
 
 clean::
-	if exist '..\obj' $(RM) $(INCFILES)
+	if exist "$(INCDIR)" $(RM) $(INCFILES)

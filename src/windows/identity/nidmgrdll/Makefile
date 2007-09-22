@@ -123,5 +123,4 @@ all: mkdirs $(DLLFILE)
 clean::
 	if exist $(DLLFILE) $(RM) $(DLLFILE)
 	if exist $(DLLFILE).manifest $(RM) $(DLLFILE).manifest
-	if exist vc70.pdb  $(RM) vc70.pdb
-	if exist vc80.pdb  $(RM) vc80.pdb
+
