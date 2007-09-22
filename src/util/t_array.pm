@@ -41,7 +41,9 @@ __DATA__
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
-#include <stdint.h>
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
 
 struct <NAME>__header {
     size_t allocated;
