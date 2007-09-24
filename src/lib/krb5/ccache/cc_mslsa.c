@@ -313,25 +313,23 @@ UnicodeToANSI(LPTSTR lpInputString, LPSTR lpszOutputString, int nOutStringLen)
             return FALSE;
         } else {
             if (WideCharToMultiByte(CP_ACP, 
-				    WC_NO_BEST_FIT_CHARS | WC_COMPOSITECHECK, 
+				    /* WC_NO_BEST_FIT_CHARS | */ WC_COMPOSITECHECK, 
 				    (LPCWSTR) lpInputString, -1,
 				    lpszOutputString, 
 				    nOutStringLen, NULL, NULL) == 0)
 		return FALSE;
         }
     } 
-    else if (((LPBYTE) lpInputString)[1] == '\0')
+    else
     {
         // Looks like unicode, better translate it
         if (WideCharToMultiByte(CP_ACP, 
-				WC_NO_BEST_FIT_CHARS | WC_COMPOSITECHECK, 
+				/* WC_NO_BEST_FIT_CHARS | */ WC_COMPOSITECHECK, 
 				(LPCWSTR) lpInputString, -1,
 				lpszOutputString, 
 				nOutStringLen, NULL, NULL) == 0)
 	    return FALSE;
     }
-    else
-        lstrcpyA(lpszOutputString, (LPSTR) lpInputString);
 
     return TRUE;
 }  // UnicodeToANSI
