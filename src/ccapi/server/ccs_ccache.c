@@ -593,7 +593,7 @@ static cc_int32 ccs_ccache_set_principal (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_read_string (io_reply_data, &principal);
+        err = cci_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
