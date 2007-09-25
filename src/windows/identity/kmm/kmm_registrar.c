@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -551,9 +552,10 @@ void kmmint_exit_plugin(kmm_plugin_i * p) {
     }
 
     /* The plugin is in an error state.  We need to keep the plugin
-       record in tact so that the failure information is kept
-       around. */
-    if (p->state < KMM_PLUGIN_STATE_NONE) {
+       record intact so that the failure information is kept around.
+       Also, we shouldn't release the plugin if it appears that
+       kmmint_init_plugin() was never called for it. */
+    if (p->state < KMM_PLUGIN_STATE_HOLD) {
         release_plugin = FALSE;
     }
 
@@ -602,6 +604,13 @@ void kmmint_init_module(kmm_module_i * m) {
 
     kmm_hold_module(kmm_handle_from_module(m));
 
+    /* If the module is not in the pre-init state, we can't
+       initialize it. */
+    if(m->state != KMM_MODULE_STATE_PREINIT) {
+        _report_mr1(KHERR_INFO, MSG_IM_NOT_PREINIT, _int32(m->state));
+        goto _exit;
+    }
+
     if(KHM_FAILED(kmm_get_modules_config(0, &csp_mods))) {
         _report_mr0(KHERR_ERROR, MSG_IM_GET_CONFIG);
         _location(L"kmm_get_modules_config()");
@@ -612,13 +621,6 @@ void kmmint_init_module(kmm_module_i * m) {
 
     khc_read_int32(csp_mods, L"ModuleMaxFailureCount", &max_fail_count);
     khc_read_int64(csp_mods, L"ModuleFailureCountResetTime", &fail_reset_time);
-
-    /* If the module is not in the pre-init state, we can't
-       initialize it. */
-    if(m->state != KMM_MODULE_STATE_PREINIT) {
-        _report_mr1(KHERR_INFO, MSG_IM_NOT_PREINIT, _int32(m->state));
-        goto _exit;
-    }
 
     if(KHM_FAILED(kmm_get_module_config(m->name, 0, &csp_mod))) {
         _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
