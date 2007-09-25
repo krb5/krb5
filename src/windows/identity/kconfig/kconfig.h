@@ -235,10 +235,10 @@ typedef struct tag_kconf_schema {
         specified in \a cspace is relative to the parent.  Set this to
         NULL to indicate the root configuration space.  
 
-    \param[in] cspace The confiuration path.  This can be up to
-        ::KCONF_MAXCCH_PATH characters in length.  Use either
-        backslashes or forward slashes to specify hiearchy.  Set this
-        to NULL to reopen the parent configuration space.
+    \param[in] cspace The configuration path.  This can be up to
+        ::KCONF_MAXCCH_PATH characters in length.  Use backslashes to
+        specify hiearchy.  Set this to NULL to reopen the parent
+        configuration space.
 
     \param[in] flags Flags.  This can be a combination of KCONF_FLAG_*
         constants and KHM_FLAG_CREATE.  If none of ::KCONF_FLAG_USER,
