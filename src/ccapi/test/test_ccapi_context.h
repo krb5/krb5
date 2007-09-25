@@ -1,7 +1,7 @@
 #ifndef _TEST_CCAPI_CONTEXT_H_
 #define _TEST_CCAPI_CONTEXT_H_
 
-#include <CredentialsCache.h>
+#include "test_ccapi_globals.h"
 
 int check_cc_initialize();
 cc_int32 check_once_cc_initialize(cc_context_t *out_context, cc_int32 in_version, cc_int32 *out_supported_version, char const **out_vendor, cc_int32 expected_err, const char *description);

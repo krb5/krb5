@@ -29,7 +29,7 @@ build-base: $(OBJECTS)
 build-tests: $(TEST_OBJECTS)
 
 # rule to compile files in src directory
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: %.c
 	$(CC) -c -o $@ $<
 
 # Make a build directory
@@ -46,7 +46,7 @@ $(TEST_NAMES): $(TEST_OBJECTS)
 	$(CC) -o $(TESTDIR)/$@ $(OBJDIR)/$@.o $(OBJECTS) $(LIBS)
 
 copy-script:
-	cp $(SRCDIR)/$(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)
+	cp $(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)
 
 success-message:
 	@echo

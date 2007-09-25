@@ -1,7 +1,13 @@
 #ifndef _TEST_CCAPI_GLOBALS_H_
 #define _TEST_CCAPI_GLOBALS_H_
 
-#include "CredentialsCache.h"
+#include <krb5.h> // gets us TARGET_OS_MAC
+
+#ifdef TARGET_OS_MAC
+#include <Kerberos/CredentialsCache.h>
+#else
+#include <CredentialsCache.h>
+#endif
 
 /* GLOBALS */
 extern unsigned int total_failure_count;

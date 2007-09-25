@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <krb5.h>
 #include "test_ccapi_util.h"
 
 

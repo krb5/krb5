@@ -1,5 +1,4 @@
-#include "CredentialsCache.h"
-
+#include "test_ccapi_globals.h"
 #include "test_ccapi_iterators.h"
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"

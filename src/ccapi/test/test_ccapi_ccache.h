@@ -1,8 +1,7 @@
 #ifndef _TEST_CCAPI_CCACHE_H_
 #define _TEST_CCAPI_CCACHE_H_
 
-#include <CredentialsCache.h>
-
+#include "test_ccapi_globals.h"
 
 int check_cc_ccache_release();
 cc_int32 check_once_cc_ccache_release(cc_context_t context, cc_ccache_t ccache, cc_int32 expected_err, const char *description);

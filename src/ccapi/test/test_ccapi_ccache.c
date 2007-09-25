@@ -1,4 +1,3 @@
-#include "test_ccapi_ccache.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -7,6 +6,7 @@
 #include "test_ccapi_check.h"
 #include "test_ccapi_util.h"
 #include "test_ccapi_context.h"
+#include "test_ccapi_ccache.h"
 
 // ---------------------------------------------------------------------------
 
