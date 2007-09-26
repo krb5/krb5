@@ -226,8 +226,10 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
 			len += strlen(home_env);
 	}
 	expanded_filename = malloc(len);
-	if (expanded_filename == 0)
+	if (expanded_filename == 0) {
+	    free(prf);
 	    return errno;
+	}
 	if (home_env) {
 	    strcpy(expanded_filename, home_env);
 	    strcat(expanded_filename, filespec+1);

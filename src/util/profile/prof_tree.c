@@ -92,6 +92,8 @@ errcode_t profile_create_node(const char *name, const char *value,
 	if (!new)
 		return ENOMEM;
 	memset(new, 0, sizeof(struct profile_node));
+	/* Set magic here so profile_free_node will free memory */
+	new->magic = PROF_MAGIC_NODE;
 	new->name = strdup(name);
 	if (new->name == 0) {
 	    profile_free_node(new);
@@ -104,7 +106,6 @@ errcode_t profile_create_node(const char *name, const char *value,
 		    return ENOMEM;
 		}
 	}
-	new->magic = PROF_MAGIC_NODE;
 
 	*ret_node = new;
 	return 0;

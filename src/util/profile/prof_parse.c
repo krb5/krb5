@@ -242,6 +242,7 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
 #ifndef PROFILE_SUPPORTS_FOREIGN_NEWLINES
 		retval = parse_line(bptr, &state);
 		if (retval) {
+		  profile_free_node(state.root_section);
 			free (bptr);
 			return retval;
 		}
@@ -286,6 +287,7 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
 			newp = p + strlen (p) + 1;
 			retval = parse_line (p, &state);
 			if (retval) {
+			    profile_free_node(state.root_section);
 			    free (bptr);
 			    return retval;
 			}
