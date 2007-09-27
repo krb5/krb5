@@ -796,16 +796,18 @@ khui_find_menu(khm_int32 id) {
 
 KHMEXP khui_action * KHMAPI
 khui_find_action(khm_int32 id) {
-    khui_action * act;
+    khui_action * act = NULL;
     int i;
 
-    act = khui_actions;
-    for(i=0;i<khui_n_actions;i++) {
-        if(act[i].cmd == id)
-            return &act[i];
-    }
+    if (id < KHUI_USERACTION_BASE) {
+        act = khui_actions;
+        for(i=0;i<khui_n_actions;i++) {
+            if(act[i].cmd == id)
+                return &act[i];
+        }
 
-    act = NULL;
+        return NULL;
+    }
 
     EnterCriticalSection(&cs_actions);
     if (id >= KHUI_USERACTION_BASE &&
