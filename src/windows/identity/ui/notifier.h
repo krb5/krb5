@@ -48,6 +48,9 @@ khm_exit_notifier(void);
 void 
 khm_notify_icon_change(khm_int32 severity);
 
+void
+khm_notify_icon_tooltip(wchar_t * s);
+
 void 
 khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
