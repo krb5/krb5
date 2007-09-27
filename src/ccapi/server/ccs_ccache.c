@@ -29,9 +29,10 @@
 struct ccs_ccache_d {
     cci_identifier_t identifier;
     ccs_lock_state_t lock_state;
-    cc_uint32 cred_vers;
+    cc_uint32 creds_version;
     char *name;
-    char *principal;
+    char *v4_principal;
+    char *v5_principal;
     cc_time_t last_default_time;
     cc_time_t last_changed_time;
     cc_uint32 kdc_time_offset_v4_valid;
@@ -42,7 +43,7 @@ struct ccs_ccache_d {
     ccs_callback_array_t change_callbacks;
 };
 
-struct ccs_ccache_d ccs_ccache_initializer = { NULL, NULL, 0, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL };
+struct ccs_ccache_d ccs_ccache_initializer = { NULL, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL };
 
 static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
                                     ccs_cache_collection_t io_cache_collection);
@@ -50,7 +51,7 @@ static cc_int32 ccs_ccache_changed (ccs_ccache_t           io_ccache,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 ccs_ccache_new (ccs_ccache_t      *out_ccache,
-                         cc_uint32          in_cred_vers,
+                         cc_uint32          in_creds_version,
                          const char        *in_name,
                          const char        *in_principal,
                          ccs_ccache_list_t  io_ccache_list)
@@ -83,22 +84,24 @@ cc_int32 ccs_ccache_new (ccs_ccache_t      *out_ccache,
     }
     
     if (!err) {
-        ccache->cred_vers = in_cred_vers;
-
-        if (in_cred_vers != cc_credentials_v4 &&
-            in_cred_vers != cc_credentials_v5) {
-            err = cci_check_error (ccErrBadCredentialsVersion);
-        }      
-    }
-    
-    if (!err) {
         ccache->name = strdup (in_name);
         if (!ccache->name) { err = cci_check_error (ccErrNoMem); }
     }
     
     if (!err) {
-        ccache->principal = strdup (in_principal);
-        if (!ccache->principal) { err = cci_check_error (ccErrNoMem); }
+        ccache->creds_version = in_creds_version;
+
+        if (ccache->creds_version == cc_credentials_v4) {
+            ccache->v4_principal = strdup (in_principal);
+            if (!ccache->v4_principal) { err = cci_check_error (ccErrNoMem); }
+            
+        } else if (ccache->creds_version == cc_credentials_v5) {
+            ccache->v5_principal = strdup (in_principal);
+            if (!ccache->v5_principal) { err = cci_check_error (ccErrNoMem); }
+
+        } else {
+            err = cci_check_error (ccErrBadCredentialsVersion);
+        }
     }
     
     if (!err) {
@@ -143,25 +146,30 @@ cc_int32 ccs_ccache_new (ccs_ccache_t      *out_ccache,
 
 cc_int32 ccs_ccache_reset (ccs_ccache_t            io_ccache,
 			   ccs_cache_collection_t  io_cache_collection,
-                           cc_uint32               in_cred_vers,
+                           cc_uint32               in_creds_version,
                            const char             *in_principal)
 {
     cc_int32 err = ccNoError;
-    char *principal = NULL;
+    char *v4_principal = NULL;
+    char *v5_principal = NULL;
     ccs_credentials_list_t credentials = NULL;
     
     if (!io_ccache) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        if (in_cred_vers != cc_credentials_v4 &&
-            in_cred_vers != cc_credentials_v5) {
+        io_ccache->creds_version = in_creds_version;
+        
+        if (io_ccache->creds_version == cc_credentials_v4) {
+            v4_principal = strdup (in_principal);
+            if (!v4_principal) { err = cci_check_error (ccErrNoMem); }
+            
+        } else if (io_ccache->creds_version == cc_credentials_v5) {
+            v5_principal = strdup (in_principal);
+            if (!v5_principal) { err = cci_check_error (ccErrNoMem); }
+            
+        } else {
             err = cci_check_error (ccErrBadCredentialsVersion);
         }
-    }
-    
-    if (!err) {
-        principal = strdup (in_principal);
-        if (!io_ccache->principal) { err = cci_check_error (ccErrNoMem); }
     }
     
     if (!err) {
@@ -169,12 +177,19 @@ cc_int32 ccs_ccache_reset (ccs_ccache_t            io_ccache,
     }
     
     if (!err) {
-        io_ccache->cred_vers = in_cred_vers;
-
-        free (io_ccache->principal);
-        io_ccache->principal = principal;
-        principal = NULL; /* take ownership */
+        io_ccache->kdc_time_offset_v4 = 0;
+        io_ccache->kdc_time_offset_v4_valid = 0;
+        io_ccache->kdc_time_offset_v5 = 0;
+        io_ccache->kdc_time_offset_v5_valid = 0;
         
+        if (io_ccache->v4_principal) { free (io_ccache->v4_principal); }
+        io_ccache->v4_principal = v4_principal;
+        v4_principal = NULL; /* take ownership */
+        
+        if (io_ccache->v5_principal) { free (io_ccache->v5_principal); }
+        io_ccache->v5_principal = v5_principal;
+        v5_principal = NULL; /* take ownership */
+
         ccs_credentials_list_release (io_ccache->credentials);
         io_ccache->credentials = credentials;
         credentials = NULL; /* take ownership */
@@ -182,7 +197,8 @@ cc_int32 ccs_ccache_reset (ccs_ccache_t            io_ccache,
 	err = ccs_ccache_changed (io_ccache, io_cache_collection);
     }
     
-    free (principal);
+    free (v4_principal);
+    free (v5_principal);
     ccs_credentials_list_release (credentials);
     
     return cci_check_error (err);    
@@ -235,7 +251,8 @@ cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache)
         cci_identifier_release (io_ccache->identifier);
         ccs_lock_state_release (io_ccache->lock_state);
         free (io_ccache->name);
-        free (io_ccache->principal);
+        free (io_ccache->v4_principal);
+        free (io_ccache->v5_principal);
         ccs_credentials_list_release (io_ccache->credentials);
         ccs_callback_array_release (io_ccache->change_callbacks);
         free (io_ccache);
@@ -529,7 +546,7 @@ static cc_int32 ccs_ccache_get_credentials_version (ccs_ccache_t           io_cc
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_uint32 (io_reply_data, io_ccache->cred_vers);
+        err = cci_stream_write_uint32 (io_reply_data, io_ccache->creds_version);
     }
     
     return cci_check_error (err);    
@@ -564,6 +581,7 @@ static cc_int32 ccs_ccache_get_principal (ccs_ccache_t           io_ccache,
                                           cci_stream_t           io_reply_data)
 {
     cc_int32 err = ccNoError;
+    cc_uint32 version = 0;
     
     if (!io_ccache          ) { err = cci_check_error (ccErrBadParam); }
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
@@ -571,7 +589,23 @@ static cc_int32 ccs_ccache_get_principal (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        err = cci_stream_write_string (io_reply_data, io_ccache->principal);
+        err = cci_stream_read_uint32 (in_request_data, &version);
+    }
+    
+    if (!err && version == cc_credentials_v4_v5) {
+        err = cci_check_error (ccErrBadCredentialsVersion);
+    }
+    
+    if (!err) {
+        if (version == cc_credentials_v4) {
+            err = cci_stream_write_string (io_reply_data, io_ccache->v4_principal);
+            
+        } else if (version == cc_credentials_v5) {
+            err = cci_stream_write_string (io_reply_data, io_ccache->v5_principal);
+            
+        } else {
+            err = cci_check_error (ccErrBadCredentialsVersion);
+        }
     }
     
     return cci_check_error (err);    
@@ -585,6 +619,7 @@ static cc_int32 ccs_ccache_set_principal (ccs_ccache_t           io_ccache,
                                           cci_stream_t           io_reply_data)
 {
     cc_int32 err = ccNoError;
+    cc_uint32 version = 0;
     char *principal = NULL;
     
     if (!io_ccache          ) { err = cci_check_error (ccErrBadParam); }
@@ -593,16 +628,44 @@ static cc_int32 ccs_ccache_set_principal (ccs_ccache_t           io_ccache,
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
+        err = cci_stream_read_uint32 (in_request_data, &version);
+    }
+    
+    if (!err) {
         err = cci_stream_read_string (in_request_data, &principal);
     }
     
     if (!err) {
-        free (io_ccache->principal);
-        io_ccache->principal = principal;
-        principal = NULL;
+        /* reset KDC time offsets because they are per-KDC */
+        if (version == cc_credentials_v4) {
+            io_ccache->kdc_time_offset_v4 = 0;
+            io_ccache->kdc_time_offset_v4_valid = 0;
+            
+            if (io_ccache->v4_principal) { free (io_ccache->v4_principal); }
+            io_ccache->v4_principal = principal;
+            principal = NULL; /* take ownership */
+            
+            
+        } else if (version == cc_credentials_v5) {
+            io_ccache->kdc_time_offset_v5 = 0;
+            io_ccache->kdc_time_offset_v5_valid = 0;
+            
+            if (io_ccache->v5_principal) { free (io_ccache->v5_principal); }
+            io_ccache->v5_principal = principal;
+            principal = NULL; /* take ownership */
 
+        } else {
+            err = cci_check_error (ccErrBadCredentialsVersion);
+        }
+    }
+    
+    if (!err) {
+        io_ccache->creds_version |= version;
+        
         err = ccs_ccache_changed (io_ccache, io_cache_collection);
     }
+    
+    free (principal);
         
     return cci_check_error (err);    
 }

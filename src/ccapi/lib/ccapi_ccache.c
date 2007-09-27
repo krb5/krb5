@@ -286,6 +286,7 @@ cc_int32 ccapi_ccache_get_principal (cc_ccache_t  in_ccache,
 {
     cc_int32 err = ccNoError;
     cci_ccache_t ccache = (cci_ccache_t) in_ccache;
+    cci_stream_t request = NULL;
     cci_stream_t reply = NULL;
     char *principal = NULL;
     
@@ -293,9 +294,17 @@ cc_int32 ccapi_ccache_get_principal (cc_ccache_t  in_ccache,
     if (!out_principal) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
+        err = cci_stream_new (&request);
+    }
+    
+    if (!err) {
+        err = cci_stream_write_uint32 (request, in_credentials_version);
+    }
+    
+    if (!err) {
         err =  cci_ipc_send (cci_ccache_get_principal_msg_id,
                              ccache->identifier,
-                             NULL,
+                             request,
                              &reply);
     }
     
@@ -307,6 +316,7 @@ cc_int32 ccapi_ccache_get_principal (cc_ccache_t  in_ccache,
         err = cci_string_new (out_principal, principal);
     }
     
+    cci_stream_release (request);
     cci_stream_release (reply);
     free (principal);
     
@@ -328,6 +338,10 @@ cc_int32 ccapi_ccache_set_principal (cc_ccache_t  io_ccache,
     
     if (!err) {
         err = cci_stream_new (&request);
+    }
+    
+    if (!err) {
+        err = cci_stream_write_uint32 (request, in_credentials_version);
     }
     
     if (!err) {
