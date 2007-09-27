@@ -144,6 +144,7 @@ Stock menus.
 
 #define KHUI_MENU_DESTROY_CRED (KHUI_MENU_BASE + 16)
 #define KHUI_MENU_RENEW_CRED (KHUI_MENU_BASE + 17)
+#define KHUI_MENU_SETDEF    (KHUI_MENU_BASE + 18)
 
 /*@}*/
 

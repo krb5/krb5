@@ -214,6 +214,7 @@
 #define IDS_WTPOST_PASSWORD             218
 #define IDS_CTX_PROC_PASSWORD           219
 #define IDS_NC_PWD_FAILED_TITLE         220
+#define IDS_MENU_SETDEF                 221
 #define IDS_PACTION_NEXT                222
 #define IDS_ERR_TITLE_NO_IDENTPRO       223
 #define IDS_ERR_MSG_NO_IDENTPRO         224
@@ -311,6 +312,8 @@
 #define IDS_CW_TYPEF                    316
 #define IDS_CW_EXPIREF                  317
 #define IDS_CW_EXPIRED                  318
+#define IDS_IDACTIONT_SETDEF            319
+#define IDS_IDACTION_SETDEF             320
 #define IDS_ACTION_VIEW_ALL_IDS         321
 #define IDC_NC_CREDTEXT_LABEL           1009
 #define IDC_NC_CREDTEXT                 1012

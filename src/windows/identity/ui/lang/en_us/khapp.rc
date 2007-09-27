@@ -714,6 +714,7 @@ BEGIN
     IDS_WTPOST_PASSWORD     " - Changing password"
     IDS_CTX_PROC_PASSWORD   "Changing password for %1!s!"
     IDS_NC_PWD_FAILED_TITLE "Failed to change password"
+    IDS_MENU_SETDEF         "Set default"
     IDS_PACTION_NEXT        "Next alert"
     IDS_ERR_TITLE_NO_IDENTPRO "Cannot proceed without identity provider"
 END
@@ -837,10 +838,12 @@ BEGIN
     IDS_CW_TYPEF            "(%s)"
     IDS_CW_EXPIREF          "Expires in %s"
     IDS_CW_EXPIRED          "(Expired)"
+    IDS_IDACTIONT_SETDEF    "Set %s as default identity"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_IDACTION_SETDEF     "%s"
     IDS_ACTION_VIEW_ALL_IDS "All identities"
 END
 
@@ -858,6 +861,7 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 
 
 

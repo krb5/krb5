@@ -59,6 +59,8 @@ khm_cred_obtain_new_creds_for_ident(khm_handle ident, wchar_t * title);
 void 
 khm_cred_set_default(void);
 
+void khm_cred_set_default_identity(khm_handle identity);
+
 void 
 khm_cred_change_password(wchar_t * window_title);
 

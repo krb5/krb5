@@ -103,6 +103,10 @@ typedef struct tag_khui_action {
                                   KHUI_ACTIONSTATE_* */
 } khui_action;
 
+
+#define KHUI_ACTIONTYPE_IDENTITY 0x00010000
+
+
 /*@}*/
 
 #endif

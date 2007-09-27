@@ -299,4 +299,8 @@ void    khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default,
 
 void    khm_set_cw_element_font(wchar_t * name, LOGFONT * pfont);
 
+void    khm_draw_identity_menu_item(HWND hwnd, LPDRAWITEMSTRUCT lpd, khui_action * act);
+
+void    khm_measure_identity_menu_item(HWND hwnd, LPMEASUREITEMSTRUCT lpm, khui_action * act);
+
 #endif
