@@ -32,6 +32,7 @@ CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network
   NotificationAction,KC_INT32,50025,Action to perform when the user clicks on the notification icon.
   DefaultWindowMode,KC_INT32,1,(0-normal; 1-mini)
   DefaultTheme,KC_STRING,Default,Default theme.  The name should correspond to a subspace in Themes
+  ViewAllIdents,KC_INT32,0,"Boolean. Try to display all known identities if non-zero."
   Windows,KC_SPACE,0,Window parameters
     _Schema,KC_SPACE,0,Schema
       Width,KC_INT32,0,

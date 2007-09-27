@@ -839,6 +839,11 @@ BEGIN
     IDS_CW_EXPIRED          "(Expired)"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_ACTION_VIEW_ALL_IDS "All identities"
+END
+
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -853,6 +858,7 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 
 
 

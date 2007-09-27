@@ -407,6 +407,11 @@ khm_main_wnd_proc(HWND hwnd,
             return 0;
 
             /* layout control */
+
+        case KHUI_ACTION_VIEW_ALL_IDS:
+            return SendMessage(khm_hwnd_main_cred, uMsg, 
+                               wParam, lParam);
+
         case KHUI_ACTION_LAYOUT_MINI:
 
             if (khm_main_wnd_mode == KHM_MAIN_WND_MINI) {
