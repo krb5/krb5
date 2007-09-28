@@ -47,7 +47,7 @@ KHIMAIRA_WIN32_CONFIG=1
 # Version info
 NETIDMGR_VERSION_MAJOR=1
 NETIDMGR_VERSION_MINOR=3
-NETIDMGR_VERSION_PATCH=0
+NETIDMGR_VERSION_PATCH=1
 NETIDMGR_VERSION_AUX=0
 NETIDMGR_RELEASEDESC=
 
@@ -58,7 +58,7 @@ NETIDMGR_RELEASEDESC=
 #
 # Changes to the API version numbers should be documented in
 # apiversion.txt at the root of the source tree.
-NETIDMGR_VERSION_API=9
+NETIDMGR_VERSION_API=10
 
 # Minimum backwards compatible version.  API versions from
 # NETIDMGR_VERSION_API_MINCOMPAT through NETIDMGR_VERSION_API
@@ -70,7 +70,7 @@ NETIDMGR_VERSIONC=$(NETIDMGR_VERSION_MAJOR),$(NETIDMGR_VERSION_MINOR),$(NETIDMGR
 
 # Source information
 NETIDMGR_SRC_COMPANY_1033=Massachusetts Institute of Technology
-NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005,2006 Massachusetts Institute of Technology
+NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005-2007 Massachusetts Institute of Technology
 
 # Choose the default build type if one is not set
 !if ("$(KH_BUILD)" != "DEBUG") && ("$(KH_BUILD)" != "RETAIL")
