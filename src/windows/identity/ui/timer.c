@@ -861,8 +861,6 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
     if (ident)
         kcdb_identity_release(ident);
 
-    khui_action_trigger(KHUI_ACTION_LAYOUT_RELOAD, NULL);   /* Hack causes updates to be displayed. */
-
     return KHM_ERROR_SUCCESS;
 }
 
