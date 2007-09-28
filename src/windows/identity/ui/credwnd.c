@@ -35,6 +35,23 @@ khm_int32 attr_to_action[KCDB_ATTR_MAX_ID + 1];
 
 khm_int32   bHideWatermarks = 0;
 
+/* forward declarations */
+static void
+cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected);
+
+static void 
+cw_set_row_context(khui_credwnd_tbl * tbl, int row);
+
+static void
+cw_update_outline(khui_credwnd_tbl * tbl);
+
+static void 
+cw_update_selection_state(khui_credwnd_tbl * tbl);
+
+static void 
+cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam);
+
+
 void
 khm_set_cw_element_font(wchar_t * name, LOGFONT * pfont) {
     khm_handle csp_cw = NULL;
@@ -1072,6 +1089,9 @@ cw_update_creds(khui_credwnd_tbl * tbl)
         tbl->idents[i].credcount = 0;
         tbl->idents[i].id_credcount = 0;
         tbl->idents[i].init_credcount = 0;
+        tbl->idents[i].credtype_name[0] = L'\0';
+        tbl->idents[i].credtype = KCDB_CREDTYPE_INVALID;
+        tbl->idents[i].ft_expire = IntToFt(0);
     }
 
     kcdb_credset_apply(tbl->credset, cw_credset_iter_func, (void *) tbl);
@@ -1163,11 +1183,6 @@ cw_get_buf_exp_flags(khui_credwnd_tbl * tbl, khm_handle buf)
 
     return flags;
 }
-
-void cw_update_outline(khui_credwnd_tbl * tbl);
-
-static void 
-cw_update_selection_state(khui_credwnd_tbl * tbl);
 
 VOID CALLBACK 
 cw_timer_proc(HWND hwnd,
@@ -1392,7 +1407,9 @@ iwcscmp(const void * p1, const void * p2) {
     return wcscmp(s1, s2);
 }
 
-void 
+#define MAX_GROUPING 256
+
+static void 
 cw_update_outline(khui_credwnd_tbl * tbl)
 {
     int i,j,n_rows;
@@ -1405,7 +1422,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
        group the display by.  Say we are grouping by identity and then
        by type, then grouping[0]=col# of identity and grouping[1]=col#
        of type */
-    khm_int32 * grouping = NULL;
+    khm_int32 grouping[MAX_GROUPING];
     khui_credwnd_outline * ol = NULL;
     int n_grouping;
     wchar_t buf[256];
@@ -1443,8 +1460,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
     }
 
     /* determine the grouping order */
-    grouping = PMALLOC(sizeof(khm_int32) * tbl->n_cols);
-    for(i=0; i < (int) tbl->n_cols; i++)
+    n_grouping = min(MAX_GROUPING, tbl->n_cols);
+    for(i=0; i < n_grouping; i++)
         grouping[i] = -1;
     n_grouping = 0;
 
@@ -1452,6 +1469,12 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         /* since cw_update_creds has run, the KHUI_CW_COL_GROUP flag
            only exists for columns that has a valid sort_index */
         if(tbl->cols[i].flags & KHUI_CW_COL_GROUP) {
+#ifdef DEBUG
+            assert(tbl->cols[i].sort_index < MAX_GROUPING);
+#endif
+            if (tbl->cols[i].sort_index >= MAX_GROUPING)
+                continue;
+
             grouping[tbl->cols[i].sort_index] = i;
             if(n_grouping <= tbl->cols[i].sort_index)
                 n_grouping = tbl->cols[i].sort_index + 1;
@@ -1474,8 +1497,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
     } else {
         /* kill any pending timers */
         for(i=0; i < (int) tbl->n_rows; i++) 
-            if(tbl->rows[i].flags & KHUI_CW_ROW_TIMERSET)
-            {
+            if(tbl->rows[i].flags & KHUI_CW_ROW_TIMERSET) {
                 KillTimer(tbl->hwnd, (UINT_PTR) &(tbl->rows[i]));
                 tbl->rows[i].flags &= ~KHUI_CW_ROW_TIMERSET;
             }
@@ -1525,15 +1547,24 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         /* now we have to walk up until we get to the parent of the
            outline level we should be in */
         while(ol && ol->level >= level) {
+
+            /* we are closing this outline level.  */
             ol->length = n_rows - ol->start;
             ol->idx_end = i - 1;
+
+            if ((ol->flags & KHUI_CW_O_SELECTED) &&
+                ol->length > 0) {
+                tbl->n_rows = n_rows;
+                cw_select_row_creds(tbl, ol->start, TRUE);
+            }
+
             ol = TPARENT(ol);
         }
 
         if(ol) {
             visible = (ol->flags & KHUI_CW_O_VISIBLE) && 
                 (ol->flags & KHUI_CW_O_EXPAND);
-            selected = (ol->flags & KHUI_CW_O_SELECTED);
+            selected = !!(ol->flags & KHUI_CW_O_SELECTED);
         } else {
             visible = TRUE;
             selected = FALSE;
@@ -1695,13 +1726,14 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             }
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
             selected = (selected || (ol->flags & KHUI_CW_O_SELECTED));
-
         }
 
         /* we need to do this here too just in case we were already at
            the level we were supposed to be in */
-        if (ol)
+        if (ol) {
             visible = visible && (ol->flags & KHUI_CW_O_EXPAND);
+            selected = (selected || (ol->flags & KHUI_CW_O_SELECTED));
+        }
 
         if(visible && n_grouping > 0 &&
            grouping[n_grouping - 1] < tbl->n_cols - 1) {
@@ -1733,8 +1765,17 @@ cw_update_outline(khui_credwnd_tbl * tbl)
     }
 
     while(ol) {
+        /* close all open outline levels */
+
         ol->length = n_rows - ol->start;
         ol->idx_end = i - 1;
+
+        if ((ol->flags & KHUI_CW_O_SELECTED) &&
+            ol->length > 0) {
+            tbl->n_rows = n_rows;
+            cw_select_row_creds(tbl, ol->start, TRUE);
+        }
+
         ol = TPARENT(ol);
     }
 
@@ -1756,7 +1797,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         wchar_t ** idarray = NULL;
         int i;
 
-        /* see if the defualt identity is in the list */
+        /* see if the default identity is in the list */
         {
             khm_handle id_def = NULL;
             wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
@@ -1779,7 +1820,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             if (o == NULL) {
                 o = cw_new_outline_node(idname);
                 LPUSH(&tbl->outline, o);
-                o->flags = KHUI_CW_O_VISIBLE | KHUI_CW_O_RELIDENT | KHUI_CW_O_EMPTY;
+                o->flags = KHUI_CW_O_RELIDENT;
                 o->level = 0;
                 o->col = grouping[0];
                 o->data = id_def;
@@ -1792,10 +1833,13 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             if (o->start != -1)
                 goto done_with_defident;
 
+            o->flags &= ~(KHUI_CW_O_SHOWFLAG |
+                          KHUI_CW_O_NOOUTLINE |
+                          KHUI_CW_O_STICKY);
+            o->flags |= KHUI_CW_O_EXPAND | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY;
+
             if (flags & KCDB_IDENT_FLAG_STICKY)
                 o->flags |= KHUI_CW_O_STICKY;
-            else
-                o->flags &= ~KHUI_CW_O_STICKY;
 
             o->start = n_rows;
             o->length = 1;
@@ -1858,7 +1902,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 /* found it */
                 if (o->start != -1) /* already visible? */
                     continue;
-                o->flags &= KHUI_CW_O_RELIDENT;
+                o->flags &= (KHUI_CW_O_RELIDENT | KHUI_CW_O_SELECTED);
                 o->flags |= KHUI_CW_O_STICKY | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY;
 
                 if (!kcdb_identity_is_equal(o->data, h)) {
@@ -1912,10 +1956,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         tbl->cursor_row = tbl->n_rows - 1;
     if (tbl->cursor_row < 0)
         tbl->cursor_row = 0;
-_exit:
-    if(grouping)
-        PFREE(grouping);
 
+_exit:
     /* note that the expstate is derived from whether or not 
      * we have expiration states set for any active identities */
     if (n_creds == 0)
@@ -2836,6 +2878,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, FALSE);
 
@@ -2895,6 +2938,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, FALSE);
 
@@ -2986,6 +3030,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, FALSE);
         }
@@ -3061,6 +3106,7 @@ cw_wm_create(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     cw_update_creds(tbl);
     cw_update_outline(tbl);
+    cw_select_row(tbl, tbl->cursor_row, 0);
     cw_update_selection_state(tbl);
     cw_update_extents(tbl, FALSE);
 
@@ -3459,10 +3505,9 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
+            cw_set_row_context(tbl, tbl->cursor_row);
             InvalidateRect(hwnd, NULL, FALSE);
-
-            khui_action_trigger(KHUI_ACTION_LAYOUT_RELOAD, NULL);   /* Hack causes updates to be displayed. */
-
             break;
 
         case KMSG_CRED_PP_BEGIN:
@@ -3487,6 +3532,8 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
+            cw_set_row_context(tbl, tbl->cursor_row);
             InvalidateRect(hwnd, NULL, FALSE);
 
         }
@@ -3603,6 +3650,7 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -3654,6 +3702,7 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_creds(tbl);
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -3714,16 +3763,8 @@ cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected) {
         khui_credwnd_outline * o;
 
         o = (khui_credwnd_outline *) tbl->rows[row].data;
-        if (o->col == tbl->n_cols - 1) {
-            /* this is a special case where the outline column is the
-               last displayed column.  In this case, the credentials
-               do not occupy any rows, and this header row acts as a
-               group credential row. */
-            idx_start = o->idx_start;
-            idx_end = o->idx_end;
-        } else {
-            return;
-        }
+        idx_start = o->idx_start;
+        idx_end = o->idx_end;
     } else {
         idx_start = tbl->rows[row].idx_start;
         idx_end = tbl->rows[row].idx_end;
@@ -3760,10 +3801,64 @@ cw_unselect_all(khui_credwnd_tbl * tbl)
 }
 
 static void
+cw_update_cred_row_selection_state(khui_credwnd_tbl * tbl,
+                                   int row) {
+    khm_int32 flags;
+    khm_size idx_start, idx_end;
+    khm_size k;
+    khm_boolean found_selected = FALSE;
+    khm_boolean found_unselected = FALSE;
+    khm_boolean row_select = TRUE;
+
+#ifdef DEBUG
+    assert(row >= 0 && row < tbl->n_rows);
+#endif
+    if (row < 0 || row >= tbl->n_rows)
+        return;
+
+    idx_start = tbl->rows[row].idx_start;
+    idx_end = tbl->rows[row].idx_end;
+
+    for (k = idx_start; k <= idx_end && select; k++) {
+        khm_handle cred = NULL;
+
+        if (KHM_SUCCEEDED(kcdb_credset_get_cred(tbl->credset, (khm_int32) k,
+                                                &cred))) {
+            kcdb_cred_get_flags(cred, &flags);
+            if (!(flags & KCDB_CRED_FLAG_SELECTED)) {
+                found_unselected = TRUE;
+                row_select = FALSE;
+            } else {
+                found_selected = TRUE;
+            }
+            kcdb_cred_release(cred);
+        } else {
+            row_select = FALSE;
+#ifdef DEBUG
+            assert(FALSE);
+#endif
+        }
+    }
+
+    if (row_select)
+        tbl->rows[row].flags |= KHUI_CW_ROW_SELECTED;
+    else
+        tbl->rows[row].flags &= ~KHUI_CW_ROW_SELECTED;
+
+    if (found_selected && found_unselected) {
+        /* if there were selected and unselected credentials
+           associated with the same row, we need to set the selection
+           state of all of them to match what the user is going to
+           see. */
+        cw_select_row_creds(tbl, row, row_select);
+    }
+}
+
+static void
 cw_update_outline_selection_state(khui_credwnd_tbl * tbl,
                                   khui_credwnd_outline * o)
 {
-    BOOL select = TRUE;
+    khm_boolean select = TRUE;
     int j;
 
     for (j = o->start + 1; j < o->start + o->length; j++) {
@@ -3771,6 +3866,8 @@ cw_update_outline_selection_state(khui_credwnd_tbl * tbl,
             cw_update_outline_selection_state(tbl,
                                               (khui_credwnd_outline *)
                                               tbl->rows[j].data);
+        } else {
+            cw_update_cred_row_selection_state(tbl, j);
         }
 
         if (!(tbl->rows[j].flags & KHUI_CW_ROW_SELECTED)) {
@@ -3787,10 +3884,10 @@ cw_update_outline_selection_state(khui_credwnd_tbl * tbl,
        nothing. */
 
     if (o->length == 1) {
-        select = (tbl->rows[o->start].flags & KHUI_CW_ROW_SELECTED);
+        select = !!(o->flags & KHUI_CW_O_SELECTED);
+    } else {
+        cw_select_outline(o, select);
     }
-
-    cw_select_outline(o, select);
 
     if (select) {
         tbl->rows[o->start].flags |= KHUI_CW_ROW_SELECTED;
@@ -3804,8 +3901,6 @@ cw_update_selection_state(khui_credwnd_tbl * tbl)
 {
     int i;
 
-    cw_select_outline_level(tbl->outline, FALSE);
-
     for (i=0; i < tbl->n_rows; i++) {
         if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER) {
             khui_credwnd_outline * o;
@@ -3815,6 +3910,8 @@ cw_update_selection_state(khui_credwnd_tbl * tbl)
             cw_update_outline_selection_state(tbl, o);
 
             i += o->length - 1;
+        } else {
+            cw_update_cred_row_selection_state(tbl, i);
         }
     }
 }
@@ -4029,6 +4126,8 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
 
         for (i = group_begin; i <= group_end; i++) {
             tbl->rows[i].flags |= KHUI_CW_ROW_SELECTED;
+            if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER)
+                cw_select_outline((khui_credwnd_outline *) tbl->rows[i].data, TRUE);
             cw_select_row_creds(tbl, i, TRUE);
         }
     } else if (toggle) {
@@ -4045,6 +4144,9 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
             else
                 tbl->rows[i].flags &= ~KHUI_CW_ROW_SELECTED;
 
+            if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER)
+                cw_select_outline((khui_credwnd_outline *) tbl->rows[i].data, select);
+
             cw_select_row_creds(tbl, i, select);
         }
     } else if (extend) {
@@ -4058,6 +4160,9 @@ cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
 
         for (i = range_begin; i <= range_end; i++) {
             tbl->rows[i].flags |= KHUI_CW_ROW_SELECTED;
+
+            if (tbl->rows[i].flags & KHUI_CW_ROW_HEADER)
+                cw_select_outline((khui_credwnd_outline *) tbl->rows[i].data, TRUE);
 
             cw_select_row_creds(tbl, i, TRUE);
         }
@@ -5109,8 +5214,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
         }
@@ -5126,8 +5232,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -5144,8 +5251,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -5162,8 +5270,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -5180,8 +5289,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
 
@@ -5198,8 +5308,9 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             cw_update_creds(tbl);
             cw_update_outline(tbl);
-            cw_update_selection_state(tbl);
             cw_update_extents(tbl, TRUE);
+            cw_select_row(tbl, tbl->cursor_row, 0);
+            cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
         }
