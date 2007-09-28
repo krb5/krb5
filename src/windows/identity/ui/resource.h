@@ -204,7 +204,9 @@
 #define IDS_PISTATE_REG                 211
 #define IDD_CFG_ADDIDENT                211
 #define IDS_PISTATE_HOLD                212
+#define IDD_CMDLINE                     212
 #define IDS_PISTATE_INIT                213
+#define IDR_CMDLINERTF                  213
 #define IDS_PISTATE_RUN                 214
 #define IDS_PISTATE_EXIT                215
 #define IDS_CTX_PASSWORD                216
@@ -395,6 +397,8 @@
 #define IDC_CFG_NOTACTION               1141
 #define IDC_CFG_NOTACT_STATIC           1142
 #define IDC_NC_BASIC                    1143
+#define IDC_RICHEDIT21                  1144
+#define IDC_CONTENT                     1144
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
 #define IDA_DOWN                        40005
@@ -407,9 +411,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        212
+#define _APS_NEXT_RESOURCE_VALUE        214
 #define _APS_NEXT_COMMAND_VALUE         40010
-#define _APS_NEXT_CONTROL_VALUE         1144
+#define _APS_NEXT_CONTROL_VALUE         1145
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
