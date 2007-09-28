@@ -1644,7 +1644,6 @@ HANDLE h_ccname_exit_event;
 HANDLE h_ccname_thread;
 
 DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
-    krb5_context ctx = 0;
 
     HKEY hk_ccname;
     HANDLE h_notify;
@@ -1696,11 +1695,6 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
         reg_ccname[0] = L'\0';
     }
 
-    l = pkrb5_init_context(&ctx);
-
-    if (l)
-        goto _exit_0;
-
     h_notify = CreateEvent(NULL, FALSE, FALSE, L"Local\\Krb5CCNameChangeNotifier");
 
     if (h_notify == NULL)
@@ -1748,8 +1742,16 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
             }
 
             if (_wcsicmp(new_ccname, reg_ccname)) {
-                k5_refresh_default_identity(ctx);
-                StringCbCopy(reg_ccname, sizeof(reg_ccname), new_ccname);
+                krb5_context ctx = NULL;
+
+                l = pkrb5_init_context(&ctx);
+                if (l == 0 && ctx != NULL) {
+                    k5_refresh_default_identity(ctx);
+                    StringCbCopy(reg_ccname, sizeof(reg_ccname), new_ccname);
+                }
+
+                if (ctx)
+                    pkrb5_free_context(ctx);
             }
 
         } else {
@@ -1765,9 +1767,6 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
  _exit_0:
 
     RegCloseKey(hk_ccname);
-
-    if (ctx)
-        pkrb5_free_context(ctx);
 
  _exit:
     ExitThread(rv);
