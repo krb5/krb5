@@ -69,6 +69,7 @@ $skip_lines = 0;
 @pquote = {};
 $file_prefix = "";
 $record_prefix = "";
+$finc = "";
 $field_sep = ",";
 $record_postfix = "";
 $record_sep = "\n";
@@ -82,20 +83,25 @@ do $cfgfn;
 open(IN, "<".$infn) or die "Can't open input file:".$infn;
 open(OUT, ">".$outfn) or die "Can't open output file:".$outfn;
 
-print OUT $file_prefix;
-
 $first_line = 1;
 
 while(<IN>) {
     chomp $_;
     if (m/^\#/) {
-        # ignore
+        if (m/^\#\@/) {
+            ($inc) = m/^\#\@(.*)/;
+            $finc = $finc.$inc."\n";
+        } else {
+            # ignore
+        }
     } elsif ($skip_lines > 0) {
         $skip_lines--;
     } else {
 	if($first_line == 0){
 	    print OUT $record_sep;
 	} else {
+            $file_prefix =~ s/\$finc/$finc/;
+            print OUT $file_prefix;
 	    $first_line = 0;
 	}
 
@@ -116,6 +122,10 @@ while(<IN>) {
 	}
 	print OUT $record_postfix;
     }
+}
+
+if ($first_line == 1) {
+    print OUT $file_prefix;
 }
 
 print OUT $file_postfix;
