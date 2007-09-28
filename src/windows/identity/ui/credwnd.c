@@ -5406,6 +5406,33 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     x = GET_X_LPARAM(lParam);
     y = GET_Y_LPARAM(lParam);
 
+    /* if the user invokes the context menu using the keyboard, we get
+       x=-1 and y=-1.  In this case, we use the cursor_row as the
+       target row. */
+    if (x == -1 && y == -1) {
+
+        row = tbl->cursor_row;
+
+        if (tbl->flags & KHUI_CW_TBL_EXPIDENT) {
+            int i;
+
+            y = 0;
+            for (i=0; i < tbl->n_rows && i < row; i++) {
+                if (tbl->rows[i].flags & KHUI_CW_ROW_EXPVIEW)
+                    y += tbl->cell_height * CW_EXP_ROW_MULT;
+                else
+                    y += tbl->cell_height;
+            }
+        } else {
+            y = row * tbl->cell_height;
+        }
+
+        x = r.left;
+        y = y + r.top + tbl->header_height - tbl->scr_top;
+        
+        goto have_row;
+    }
+
     x += tbl->scr_left - r.left;
     y += tbl->scr_top - tbl->header_height - r.top;
 
@@ -5440,23 +5467,21 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if(row < 0 || row >= (int) tbl->n_rows)
         return FALSE;
 
+    /* now, if the user has right clicked outside the selection, we
+       treat the right-click as a regular click before showing the
+       context menu. */
+    if (!(tbl->rows[row].flags & KHUI_CW_ROW_SELECTED)) {
+        cw_select_row(tbl, row, 0);
+    }
+
+    x = GET_X_LPARAM(lParam);
+    y = GET_Y_LPARAM(lParam);
+
+ have_row:
+
     cw_set_row_context(tbl, row);
 
-    khm_menu_show_panel(KHUI_MENU_IDENT_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-
-#if 0
-    /* calling cw_set_row_context() should take care of enabling or
-       disabling actions as appropriate.  We don't need to
-       differentiate between IDENT_CTX and TOK_CTX here. */
-    if((tbl->rows[row].flags & KHUI_CW_ROW_HEADER) &&
-       (tbl->cols[tbl->rows[row].col].attr_id == KCDB_ATTR_ID_NAME)) {
-        khm_menu_show_panel(KHUI_MENU_IDENT_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        //khui_context_reset();
-    } else {
-        khm_menu_show_panel(KHUI_MENU_TOK_CTX, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-        //khui_context_reset();
-    }
-#endif
+    khm_menu_show_panel(KHUI_MENU_IDENT_CTX, x, y);
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
