@@ -5013,34 +5013,6 @@ cw_properties(HWND hwnd)
     if(ctx.scope == KHUI_SCOPE_NONE) {
         khui_context_release(&ctx);
         return FALSE;
-
-        /* While it seems like a good idea, doing this is not */
-#if 0
-        /* try to establish a context based on the current cursor
-           position */
-        if(tbl->cursor_row >= 0 && tbl->cursor_row < (int) tbl->n_rows) {
-            if(tbl->rows[tbl->cursor_row].flags & KHUI_CW_ROW_HEADER) {
-                if(tbl->cols[tbl->rows[tbl->cursor_row].col].attr_id == KCDB_ATTR_ID_NAME) {
-                    /* identity context */
-                    ctx.ctx = KHUI_SCOPE_IDENT;
-                    ctx.identity = (khm_handle) 
-                        ((khui_credwnd_outline *) tbl->rows[tbl->cursor_row].data)->data;
-                } else if(tbl->cols[tbl->rows[tbl->cursor_row].col].attr_id == KCDB_ATTR_TYPE_NAME) {
-                    ctx.ctx = KHUI_SCOPE_CREDTYPE;
-                    ctx.cred_type = (khm_int32) (DWORD_PTR) 
-                        ((khui_credwnd_outline *) tbl->rows[tbl->cursor_row].data)->data;
-                } else {
-                    ctx.ctx = KHUI_SCOPE_GROUP;
-                    //ctx.parm = (khm_lparm) tbl->rows[tbl->cursor_row].data;
-                    /* TODO: Figure out method of establishing a credgroup */
-                }
-            } else {
-                /* a credential context */
-                ctx.ctx = KHUI_SCOPE_CRED;
-                ctx.cred = (khm_handle) tbl->rows[tbl->cursor_row].data;
-            }
-        }
-#endif
     }
 
     /* if still no context, then we can't show a property sheet */
