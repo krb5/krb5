@@ -1,3 +1,5 @@
+#@#include<windows.h>
+#@#define RGBA(r,g,b,a) ((((DWORD) ((a) & 0xff)) << 24) | RGB(r,g,b))
 Name,Type,Value,Description
 CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network Identity Manager application."
   AutoInit,KC_INT32,0,"Boolean. Prompt for new credentials if no credentials are present during startup."
@@ -29,6 +31,7 @@ CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network
   DestroyCredsOnExit,KC_INT32,0,Boolean.  If true; all credentials will be destroyed when NetIDMgr exits.
   NotificationAction,KC_INT32,50025,Action to perform when the user clicks on the notification icon.
   DefaultWindowMode,KC_INT32,1,(0-normal; 1-mini)
+  DefaultTheme,KC_STRING,Default,Default theme.  The name should correspond to a subspace in Themes
   Windows,KC_SPACE,0,Window parameters
     _Schema,KC_SPACE,0,Schema
       Width,KC_INT32,0,
@@ -52,6 +55,18 @@ CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network
     NewCred,KC_ENDSPACE,0,
   Windows,KC_ENDSPACE,0,
   Views,KC_SPACE,0,Preconfigured views for credentials
+   _Schema,KC_SPACE,0,Schema for view definitions
+     Description,KC_STRING,"",Description of the view
+     ColumnList,KC_STRING,"","List of columns for the view, in order"
+     _AppVersion,KC_BINARY,0,Binary version stamp
+     Columns,KC_SPACE,0,"Column definitions.  Each column name should have a corresponding subspace here.  The name of the column should be a property or field name, unless it is a pseudo column like _CWFlags."
+       _Schema,KC_SPACE,0,Column definition schema
+        Width,KC_INT32,0,Width of the column
+        SortIndex,KC_INT32,0,Sort index
+        Flags,KC_INT32,0,Flags (See KHUI_CW_COL_* values)
+       _Schema,KC_ENDSPACE,0
+     Columns,KC_ENDSPACE,0
+   _Schema,KC_ENDSPACE,0,
    Custom_0,KC_SPACE,0,First custom view.  Additional views have names of the form Custom_N
     Description,KC_STRING,Custom view,
     ColumnList,KC_STRING,"_CWFlags,IdentityName,TypeName,Name,TimeLeft",
@@ -208,4 +223,50 @@ CredWindow,KC_SPACE,0,"Options for the credentials window as well as the Network
   Notices,KC_SPACE,0,Notices and alerts
     MinimizeWarning,KC_INT32,1,Show the minimize warning?
   Notices,KC_ENDSPACE,0
+  Themes,KC_SPACE,0,Color schemes for the credentials display
+    _Schema,KC_SPACE,0,Schema for color schemes
+      ClrSelection,KC_INT32,0,"Background (Selection)"
+      ClrBackground,KC_INT32,0,"Background (Normal)"
+      ClrGray,KC_INT32,0,"Background (Gray)"
+      ClrHeader,KC_INT32,0,"Header (Normal)"
+      ClrHeaderCred,KC_INT32,0,"Header (with credentials)"
+      ClrHeaderWarn,KC_INT32,0,"Header (Warning)"
+      ClrHeaderCrit,KC_INT32,0,"Header (Critical)"
+      ClrHeaderExp,KC_INT32,0,"Header (Expired)"
+      ClrHeaderSel,KC_INT32,0,"Header (Normal, Selected)"
+      ClrHeaderCredSel,KC_INT32,0,"Header (with credentials, Selected)"
+      ClrHeaderWarnSel,KC_INT32,0,"Header (Warning, Selected)"
+      ClrHeaderCritSel,KC_INT32,0,"Header (Critical, Selected)"
+      ClrHeaderExpSel,KC_INT32,0,"Header (Expired, Selected)"
+      ClrHeaderOutline,KC_INT32,0,"Header (Outline color)"
+      ClrText,KC_INT32,0,"Text (Normal)"
+      ClrTextSel,KC_INT32,0,"Text (Selected)"
+      ClrTextHeader,KC_INT32,0,"Text (Header)"
+      ClrTextHeaderSel,KC_INT32,0,"Text (Header, Selected)"
+      ClrTextHeaderGray,KC_INT32,0,"Text (Header, Gray)"
+      ClrTextHeaderGraySel,KC_INT32,0,"Text (Header, Gray, Selected)"
+    _Schema,KC_ENDSPACE,0,
+    Default,KC_SPACE,0,Default color scheme
+      ClrSelection,KC_INT32,"RGB(192,192,192)",
+      ClrBackground,KC_INT32,"RGB(255,255,255)",
+      ClrGray,KC_INT32,"RGB(240,240,240)",
+      ClrHeader,KC_INT32,"RGB(240,240,240)",
+      ClrHeaderCred,KC_INT32,"RGB(184,235,134)",
+      ClrHeaderWarn,KC_INT32,"RGB(235,235,134)",
+      ClrHeaderCrit,KC_INT32,"RGB(235,184,134)",
+      ClrHeaderExp,KC_INT32,"RGB(235,134,134)",
+      ClrHeaderSel,KC_INT32,"RGB(200,200,200)",
+      ClrHeaderCredSel,KC_INT32,"RGB(144,195, 94)",
+      ClrHeaderWarnSel,KC_INT32,"RGB(195,195, 94)",
+      ClrHeaderCritSel,KC_INT32,"RGB(195,144, 94)",
+      ClrHeaderExpSel,KC_INT32,"RGB(195, 94, 94)",
+      ClrHeaderOutline,KC_INT32,"RGB(15,15,15)",
+      ClrText,KC_INT32,"RGB(15,15,15)",
+      ClrTextSel,KC_INT32,"RGB(0,0,0)",
+      ClrTextHeader,KC_INT32,"RGB(15,15,15)",
+      ClrTextHeaderSel,KC_INT32,"RGB(0,0,0)",
+      ClrTextHeaderGray,KC_INT32,"RGB(192,192,192)",
+      ClrTextHeaderGraySel,KC_INT32,"RGB(240,240,240)",
+    Default,KC_ENDSPACE,0
+  Themes,KC_ENDSPACE,0
 CredWindow,KC_ENDSPACE,0
