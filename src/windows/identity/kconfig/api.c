@@ -2105,6 +2105,7 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
     kconf_conf_space * cc;
     kconf_conf_space * cn;
     kconf_conf_space * p;
+    khm_boolean free_c = FALSE;
 
     /* TODO: if this is the last child space and the parent is marked
        for deletion, delete the parent as well. */
@@ -2131,7 +2132,7 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
     cc = TFIRSTCHILD(c);
     if (!cc && c->refcount == 0) {
         TDELCHILD(p, c);
-        khcint_free_space(c);
+        free_c = TRUE;
     } else {
         c->flags |= (flags &
                      (KCONF_SPACE_FLAG_DELETE_M |
@@ -2168,6 +2169,10 @@ khcint_remove_space(kconf_conf_space * c, khm_int32 flags) {
             if (hk)
                 khcint_RegDeleteKey(hk, c->name);
         }
+    }
+
+    if (free_c) {
+        khcint_free_space(c);
     }
 
     return KHM_ERROR_SUCCESS;
