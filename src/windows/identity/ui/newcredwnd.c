@@ -1564,6 +1564,21 @@ nc_handle_wm_create(HWND hwnd,
     x = (r.right + r.left)/2 - width / 2;
     y = (r.top + r.bottom)/2 - height / 2;
 
+    /* we want to check if the entire rect is visible on the screen.
+       If the main window is visible and in basic mode, we might end
+       up with a rect that is partially outside the screen. */
+    {
+        RECT r;
+
+        SetRect(&r, x, y, x + width, y + height);
+        khm_adjust_window_dimensions_for_display(&r, 0);
+
+        x = r.left;
+        y = r.top;
+        width = r.right - r.left;
+        height = r.bottom - r.top;
+    }
+
     MoveWindow(hwnd, x, y, width, height, FALSE);
 
     ncd->dlg_bb = CreateDialogParam(khm_hInstance,
@@ -2710,10 +2725,10 @@ static LRESULT nc_handle_wm_timer(HWND hwnd,
 
 #ifdef DEBUG
         {
-            long dx = (r_now.right - d->sz_ch_target.right) *
+            long dx = ((r_now.right - r_now.left) - d->sz_ch_target.right) *
                 (d->sz_ch_source.right - d->sz_ch_target.right);
 
-            long dy = (r_now.bottom - d->sz_ch_target.bottom) *
+            long dy = ((r_now.bottom - r_now.top) - d->sz_ch_target.bottom) *
                 (d->sz_ch_source.bottom - d->sz_ch_target.bottom);
 
             if (dx < 0 || dy < 0) {
@@ -2728,11 +2743,20 @@ static LRESULT nc_handle_wm_timer(HWND hwnd,
         AdjustWindowRectEx(&r_now, NC_WINDOW_STYLES, FALSE,
                            NC_WINDOW_EX_STYLES);
 
+        {
+            RECT r;
+
+            GetWindowRect(hwnd, &r);
+            OffsetRect(&r_now, r.left - r_now.left, r.top - r_now.top);
+        }
+
+        khm_adjust_window_dimensions_for_display(&r_now, 0);
+
         SetWindowPos(hwnd, NULL,
-                     0, 0,
+                     r_now.left, r_now.top,
                      r_now.right - r_now.left,
                      r_now.bottom - r_now.top,
-                     SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER |
+                     SWP_NOACTIVATE | SWP_NOOWNERZORDER |
                      SWP_NOZORDER);
 
         /* and now we wait for the next timer message */
