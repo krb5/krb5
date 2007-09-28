@@ -119,6 +119,9 @@
     particular API version will be compatible with any version of
     Network Identity Manager whose API version is the same.
 
+    - <b>1.3.0.0</b> Kerberos for Windows 3.2 <em>August 15, 2007</em>\n
+      API version : <b>9</b>
+
     - <b>1.2.0.2</b> Kerberos for Windows 3.2 Beta 2 <em>Apr 11, 2007</em>\n
       API version : <b>8</b>
 
