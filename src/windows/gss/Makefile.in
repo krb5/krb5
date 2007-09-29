@@ -11,7 +11,11 @@ BUILDTOP=..\..
 
 !if defined(KRB5_KFW_COMPILE)
 KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
+!if ( "$(CPU)" == "i386" )
 KFWLIB= $(BUILDTOP)\..\..\..\..\target\lib\$(CPU)\$(OUTPRE_DBG)\krbcc32.lib
+!else
+KFWLIB= $(BUILDTOP)\..\..\..\..\target\lib\$(CPU)\$(OUTPRE_DBG)\krbcc64.lib
+!endif
 !endif
 LOCALINCLUDES= /I$(BUILDTOP) /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 $(KFWINC)
 
@@ -29,7 +33,7 @@ all:: Makefile $(OUTPRE)gss.exe
 
 $(OUTPRE)gss.exe: gss.def $(OBJS) $(XOBJS) $(LIBS)
 	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
-	  $(LIBS) $(SYSLIBS) $(KFWLIB)
+	  $(LIBS) $(SYSLIBS) $(KFWLIB) $(SCLIB)
 
 $(OBJS) $(XOBJS): gss.h
 

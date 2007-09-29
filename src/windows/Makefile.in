@@ -14,11 +14,9 @@ all-windows::
 	@echo Making in windows\wintel
 	cd ..\wintel
 	$(MAKE) -$(MFLAGS)
-!if ( "$(CPU)" != "ALPHA64" ) && ( "$(CPU)" != "IA64" ) && ( "$(CPU)" != "AMD64" )
        @echo Making in windows\gss
 	cd ..\gss
 	$(MAKE) -$(MFLAGS)
-!endif
 	@echo Making in windows\gina
 	cd ..\gina
 	$(MAKE) -$(MFLAGS)
