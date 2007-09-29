@@ -61,8 +61,7 @@ k5_id_read_params(k5_id_dlg_data * d) {
     khm_size cb;
     khm_int32 rv;
     khm_int32 t;
-    khm_handle csp_ident;
-    khm_handle csp_idroot = NULL;
+    khm_handle csp_ident = NULL;
 
     cb = sizeof(idname);
     rv = khui_cfg_get_name(d->cfg.ctx_node, idname, &cb);
@@ -75,17 +74,7 @@ k5_id_read_params(k5_id_dlg_data * d) {
     assert(KHM_SUCCEEDED(rv));
 #endif
 
-    rv = kcdb_identity_get_config(d->ident, 0, &csp_idroot);
-    if (KHM_SUCCEEDED(rv) &&
-        KHM_SUCCEEDED(khc_open_space(csp_idroot, CSNAME_KRB5CRED, 0,
-                                     &csp_ident))) {
-        khc_shadow_space(csp_ident, csp_params);
-    } else {
-        csp_ident = csp_params;
-    }
-
-    if (csp_idroot)
-        khc_close_space(csp_idroot);
+    khm_krb5_get_identity_config(d->ident, 0, &csp_ident);
 
     rv = khc_read_int32(csp_ident, L"DefaultLifetime",  &t);
     if (KHM_SUCCEEDED(rv))
@@ -146,7 +135,7 @@ k5_id_read_params(k5_id_dlg_data * d) {
     d->tc_renew.min = 0;
     d->tc_renew.max = 3600 * 24 * 30;
 
-    if (csp_ident != csp_params)
+    if (csp_ident)
         khc_close_space(csp_ident);
 }
 

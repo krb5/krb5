@@ -515,8 +515,6 @@ static long get_tickets_from_cache(krb5_context ctx,
 
 #ifdef KRB5_TC_NOTICKET
     flags = KRB5_TC_NOTICKET;
-#else
-    flags = 0;
 #endif
 
     {
@@ -1005,6 +1003,7 @@ khm_krb5_renew_cred(khm_handle cred)
     khm_boolean		istgt = FALSE;
 
     khm_int32           flags;
+    int                 ccflags = 0;
 
     cbname = sizeof(wname);
     kcdb_cred_get_name(cred, wname, &cbname);
@@ -1055,9 +1054,8 @@ khm_krb5_renew_cred(khm_handle cred)
     in_creds.client = me;
     in_creds.server = server;
 
-#ifdef KRB5_TC_NOTICKET
-    pkrb5_cc_set_flags(ctx, cc, 0);
-#endif
+    ccflags = KRB5_TC_OPENCLOSE;
+    pkrb5_cc_set_flags(ctx, cc, ccflags);
 
     if (strlen("krbtgt") != krb5_princ_name(ctx, server)->length ||
         strncmp("krbtgt", krb5_princ_name(ctx, server)->data, krb5_princ_name(ctx, server)->length)) 
@@ -1080,9 +1078,6 @@ khm_krb5_renew_cred(khm_handle cred)
 	code = pkrb5_get_renewed_creds(ctx, &cc_creds, me, cc, NULL);
     }
 
-#ifdef KRB5_TC_NOTICKET
-    pkrb5_cc_set_flags(ctx, cc, KRB5_TC_NOTICKET);
-#endif
     if (code) {
 	if ( code != KRB5KDC_ERR_ETYPE_NOSUPP ||
 	     code != KRB5_KDC_UNREACH)
@@ -1094,6 +1089,8 @@ khm_krb5_renew_cred(khm_handle cred)
 	code = pkrb5_cc_initialize(ctx, cc, me);
 	if (code) goto cleanup;
 
+        ccflags = KRB5_TC_OPENCLOSE;
+        pkrb5_cc_set_flags(ctx, cc, ccflags);
     }
 
     code = pkrb5_cc_store_cred(ctx, cc, istgt ? &cc_creds : out_creds);
@@ -1101,7 +1098,6 @@ khm_krb5_renew_cred(khm_handle cred)
 
 
  cleanup:
-
     if (in_creds.client == me)
         in_creds.client = NULL;
     if (in_creds.server == server)
@@ -1147,6 +1143,7 @@ khm_krb5_renew_ident(khm_handle identity)
     wchar_t             idname[KCDB_IDENT_MAXCCH_NAME];
     khm_size            cb;
     khm_int32           k5_flags;
+    int                 ccflags;
 
     memset(&my_creds, 0, sizeof(krb5_creds));
 
@@ -1304,13 +1301,13 @@ khm_krb5_renew_ident(khm_handle identity)
     my_creds.client = me;
     my_creds.server = server;
 
-#ifdef KRB5_TC_NOTICKET
-    pkrb5_cc_set_flags(ctx, cc, 0);
-#endif
+    pkrb5_cc_set_flags(ctx, cc, KRB5_TC_OPENCLOSE);
     code = pkrb5_get_renewed_creds(ctx, &my_creds, me, cc, NULL);
+    ccflags = KRB5_TC_OPENCLOSE;
 #ifdef KRB5_TC_NOTICKET
-    pkrb5_cc_set_flags(ctx, cc, KRB5_TC_NOTICKET);
+    ccflags |= KRB5_TC_NOTICKET;
 #endif
+    pkrb5_cc_set_flags(ctx, cc, ccflags);
     if (code) {
         if ( code != KRB5KDC_ERR_ETYPE_NOSUPP ||
             code != KRB5_KDC_UNREACH)
@@ -1319,6 +1316,9 @@ khm_krb5_renew_ident(khm_handle identity)
     }
 
     code = pkrb5_cc_initialize(ctx, cc, me);
+    if (code) goto cleanup;
+
+    code = pkrb5_cc_set_flags(ctx, cc, KRB5_TC_OPENCLOSE);
     if (code) goto cleanup;
 
     code = pkrb5_cc_store_cred(ctx, cc, &my_creds);
@@ -3057,30 +3057,129 @@ get_libdefault_string(profile_t profile, const char * realm,
     return code;
 }
 
+
+const struct escape_char_sequences {
+    wchar_t character;
+    wchar_t escape;
+} file_cc_escapes[] = {
+
+    /* in ASCII order */
+
+    {L'\"', L'd'},
+    {L'$',  L'$'},
+    {L'%',  L'r'},
+    {L'\'', L'i'},
+    {L'*',  L's'},
+    {L'/',  L'f'},
+    {L':',  L'c'},
+    {L'<',  L'l'},
+    {L'>',  L'g'},
+    {L'?',  L'q'},
+    {L'\\', L'b'},
+    {L'|',  L'p'}
+};
+
+static void
+escape_string_for_filename(const wchar_t * s,
+                           wchar_t * buf,
+                           khm_size cb_buf)
+{
+    wchar_t * d;
+    int i;
+
+    for (d = buf; *s && cb_buf > sizeof(wchar_t) * 3; s++) {
+        if (iswpunct(*s)) {
+            for (i=0; i < ARRAYLENGTH(file_cc_escapes); i++) {
+                if (*s == file_cc_escapes[i].character)
+                    break;
+            }
+
+            if (i < ARRAYLENGTH(file_cc_escapes)) {
+                *d++ = L'$';
+                *d++ = file_cc_escapes[i].escape;
+                cb_buf -= sizeof(wchar_t) * 2;
+                continue;
+            }
+        }
+
+        *d++ = *s;
+        cb_buf -= sizeof(wchar_t);
+    }
+
+#ifdef DEBUG
+    assert(cb_buf >= sizeof(wchar_t));
+#endif
+    *d++ = L'\0';
+}
+
+static khm_int32
+get_default_file_cache_for_identity(const wchar_t * idname,
+                                    wchar_t * ccname,
+                                    khm_size * pcb)
+{
+    wchar_t escf[MAX_PATH] = L"";
+    wchar_t tmppath[MAX_PATH] = L"";
+    wchar_t tccname[MAX_PATH];
+    khm_size cb;
+
+    escape_string_for_filename(idname, escf, sizeof(escf));
+    GetTempPath(ARRAYLENGTH(tmppath), tmppath);
+
+    StringCbPrintf(tccname, sizeof(tccname), L"FILE:%s\\krb5cc.%s", tmppath, escf);
+    StringCbLength(tccname, sizeof(tccname), &cb);
+    cb += sizeof(wchar_t);
+
+    if (ccname && *pcb >= cb) {
+        StringCbCopy(ccname, *pcb, tccname);
+        *pcb = cb;
+        return KHM_ERROR_SUCCESS;
+    } else {
+        *pcb = cb;
+        return KHM_ERROR_TOO_LONG;
+    }
+}
+
 khm_int32
 khm_krb5_get_identity_default_ccache(khm_handle ident, wchar_t * buf, khm_size * pcb) {
     khm_handle csp_id = NULL;
     khm_int32 rv = KHM_ERROR_SUCCESS;
+    khm_size cbt;
 
     rv = khm_krb5_get_identity_config(ident, 0, &csp_id);
 
+    cbt = *pcb;
     if (KHM_SUCCEEDED(rv))
-        rv = khc_read_string(csp_id, L"DefaultCCName", buf, pcb);
+        rv = khc_read_string(csp_id, L"DefaultCCName", buf, &cbt);
 
-    if (KHM_FAILED(rv) && rv != KHM_ERROR_TOO_LONG) {
+    if ((KHM_FAILED(rv) && rv != KHM_ERROR_TOO_LONG) ||
+        (KHM_SUCCEEDED(rv) && buf[0] == L'\0')) {
         /* we need to figure out the default ccache from the principal
            name */
         wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
         wchar_t ccname[MAX_PATH];
         khm_size cb;
+        khm_int32 use_file_cache = 0;
+
+        khc_read_int32(csp_id, L"DefaultToFileCache", &use_file_cache);
 
         cb = sizeof(idname);
         kcdb_identity_get_name(ident, idname, &cb);
-        StringCbCopy(ccname, sizeof(ccname), idname);
+
+        if (use_file_cache) {
+            cb = sizeof(ccname);
+            rv = get_default_file_cache_for_identity(idname, ccname, &cb);
+#ifdef DEBUG
+            assert(KHM_SUCCEEDED(rv));
+#endif
+        } else {                /* generate an API: cache */
+            StringCbPrintf(ccname, sizeof(ccname), L"API:%s", idname);
+        }
         khm_krb5_canon_cc_name(ccname, sizeof(ccname));
-        StringCbLength(ccname, sizeof(ccname), &cb);
 
         _reportf(L"Setting CCache [%s] for identity [%s]", ccname, idname);
+
+        StringCbLength(ccname, sizeof(ccname), &cb);
+        cb += sizeof(wchar_t);
 
         if (buf && *pcb >= cb) {
             StringCbCopy(buf, *pcb, ccname);
@@ -3093,6 +3192,8 @@ khm_krb5_get_identity_default_ccache(khm_handle ident, wchar_t * buf, khm_size *
     } else if (KHM_SUCCEEDED(rv)) {
         wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
         khm_size cb;
+
+        *pcb = cbt;
 
         cb = sizeof(idname);
         kcdb_identity_get_name(ident, idname, &cb);
