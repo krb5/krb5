@@ -27,7 +27,11 @@ extern int krb5_is_ccdll_loaded();
 #define LF_NODLL	1
 #define LF_NOFUNC	2
 
+#ifdef _WIN64
+#define KRBCC_DLL      "krbcc64.dll"
+#else
 #define KRBCC_DLL      "krbcc32.dll"
+#endif
 
 static int LoadFuncs(const char* dll_name, FUNC_INFO fi[],
 		     HINSTANCE* ph, int debug);
