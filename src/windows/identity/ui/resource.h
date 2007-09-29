@@ -214,7 +214,6 @@
 #define IDS_WTPOST_PASSWORD             218
 #define IDS_CTX_PROC_PASSWORD           219
 #define IDS_NC_PWD_FAILED_TITLE         220
-#define IDS_CMDLINE_HELP                221
 #define IDS_PACTION_NEXT                222
 #define IDS_ERR_TITLE_NO_IDENTPRO       223
 #define IDS_ERR_MSG_NO_IDENTPRO         224
@@ -397,7 +396,6 @@
 #define IDC_CFG_NOTACTION               1141
 #define IDC_CFG_NOTACT_STATIC           1142
 #define IDC_NC_BASIC                    1143
-#define IDC_RICHEDIT21                  1144
 #define IDC_CONTENT                     1144
 #define IDA_ACTIVATE_MENU               40003
 #define IDA_UP                          40004
