@@ -82,6 +82,11 @@
 #if defined(USE_LOGIN_LIBRARY)
 #include <Kerberos/KerberosLoginPrivate.h>
 #elif defined(USE_LEASH)
+#ifdef _WIN64
+#define LEASH_DLL "leashw64.dll"
+#else
+#define LEASH_DLL "leashw32.dll"
+#endif
 static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
 #endif
@@ -265,7 +270,7 @@ acquire_init_cred(context, minor_status, desired_name, output_princ, cred)
        
 #elif defined(USE_LEASH)
        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
-	   hLeashDLL = LoadLibrary("leashw32.dll");
+	   hLeashDLL = LoadLibrary(LEASH_DLL);
 	   if ( hLeashDLL != INVALID_HANDLE_VALUE ) {
 	       (FARPROC) pLeash_AcquireInitialTicketsIfNeeded =
 		   GetProcAddress(hLeashDLL, "not_an_API_Leash_AcquireInitialTicketsIfNeeded");
