@@ -50,21 +50,17 @@
 		    InstallDefault="$(var.DebugSymInstallDefault)" 
                     Level="$(var.DebugSymLowLevel)" 
                     Title="$(loc.StrKerberosClientDebugTitle)">
-                        <ComponentRef Id="cmf_bin_debug"/>
-			<ComponentRef Id="cmp_ClientSystemDebug"/>
+                    <ComponentRef Id="cmf_bin_debug"/>
+		    <ComponentRef Id="cmp_ClientSystemDebug"/>
+                    <?include runtime_debug.wxi?>
 	        </Feature>
 	    <?endif?>
-
-            <ComponentRef Id="cmf_leash32_exe" />
-            <ComponentRef Id="csc_leash32_exe" />
 
             <ComponentRef Id="cmf_comerr32_dll" />
             <ComponentRef Id="cmf_gss_exe" />
             <ComponentRef Id="cmf_gss_client_exe" />
             <ComponentRef Id="cmf_gss_server_exe" />
             <ComponentRef Id="cmf_gssapi32_dll" />
-            <ComponentRef Id="cmf_k524init_exe" />
-            <ComponentRef Id="cmf_kclnt32_dll" />
             <ComponentRef Id="cmf_kdestroy_exe" />
             <ComponentRef Id="cmf_kcpytkt_exe" />
             <ComponentRef Id="cmf_kdeltkt_exe" />
@@ -74,34 +70,56 @@
             <ComponentRef Id="cmf_kvno_exe" />
             <ComponentRef Id="cmf_krb5_32_dll" />
             <ComponentRef Id="cmf_k5sprt32_dll" />
-            <ComponentRef Id="cmf_krb524_dll" />
             <ComponentRef Id="cmf_krbcc32_dll" />
             <ComponentRef Id="cmf_krbcc32s_exe" />
+            <ComponentRef Id="cmf_ms2mit_exe" />
+            <ComponentRef Id="cmf_mit2ms_exe" />
+            <ComponentRef Id="cmf_wshelp32_dll" />
+            <ComponentRef Id="cmf_xpprof32_dll" />
+
+            <ComponentRef Id="cmf_leashw32_dll" />
+
+        <?if $(var.Platform) = "Intel" ?>
+            <ComponentRef Id="cmf_leash32_exe" />
+            <ComponentRef Id="csc_leash32_exe" />
+
+            <ComponentRef Id="cmf_k524init_exe" />
+            <ComponentRef Id="cmf_kclnt32_dll" />
+            <ComponentRef Id="cmf_krb524_dll" />
             <ComponentRef Id="cmf_krbv4w32_dll" />
+        <?endif?>
             
             <ComponentRef Id="cmf_nidmgr32_dll" />
+        <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmf_nidmgr32_dll_w2k" />
+        <?endif?>
             <ComponentRef Id="cmf_krb5cred_dll" />
             <ComponentRef Id="cmf_krb5cred_en_us_dll" />
+        <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmf_krb4cred_dll" />
             <ComponentRef Id="cmf_krb4cred_en_us_dll" />
+        <?endif?>
             <ComponentRef Id="cmf_netidmgr_exe" />
+        <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmf_netidmgr_exe_w2k" />
-
+        <?endif?>
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />
             <ComponentRef Id="cmf_kfwcpcc_EXE" />
+
+        <?if $(var.Platform) = "Intel" ?>
             <!-- Kerberos IV options -->
             <ComponentRef Id="rcm_krb4_1" />
             <ComponentRef Id="rcm_krb4_2" />
             <ComponentRef Id="rcm_krb4_3" />
             <ComponentRef Id="rcm_krb4_4" />
+        <?endif?>
             
             <!-- Kerberos V options -->
             <ComponentRef Id="rcm_krb5_1" />
             <ComponentRef Id="rcm_krb5_2" />
             <ComponentRef Id="rcm_krb5_3" />
 
-            
+        <?if $(var.Platform) = "Intel" ?>
             <!-- Leash config options -->
             <ComponentRef Id="rcm_leash_1" />
             <ComponentRef Id="rcm_leash_2" />
@@ -114,7 +132,7 @@
         <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
         <?endif?>
-            <ComponentRef Id="cmf_leashw32_dll" />
+        <?endif?>
             
             <!-- Leash dll options -->
             <ComponentRef Id="rcm_leashdll_1" />
@@ -134,85 +152,8 @@
             <ComponentRef Id="rcm_leashdll_16" />
             <ComponentRef Id="rcm_leashdll_17" />
             
-            <ComponentRef Id="cmf_ms2mit_exe" />
-            <ComponentRef Id="cmf_mit2ms_exe" />
-            <ComponentRef Id="cmf_wshelp32_dll" />
-            <ComponentRef Id="cmf_xpprof32_dll" />
-
             <ComponentRef Id="cmf_psapi_dll" />
             
-        <?ifndef Debug?>
-            <?ifdef CL1200?>
-                <ComponentRef Id="cmf_mfc42_dll" />
-                <ComponentRef Id="cmf_msvcp60_dll" />
-                <ComponentRef Id="cmf_msvcrt_dll" />
-            <?else?>
-                <?ifdef CL1300?>
-                    <ComponentRef Id="cmf_mfc70_dll" />
-                    <ComponentRef Id="cmf_msvcr70_dll" />
-                    <ComponentRef Id="cmf_msvcp70_dll" />
-                    <ComponentRef Id="cmf_mfc70chs_dll" />
-                    <ComponentRef Id="cmf_mfc70cht_dll" />
-                    <ComponentRef Id="cmf_mfc70deu_dll" />
-                    <ComponentRef Id="cmf_mfc70enu_dll" />
-                    <ComponentRef Id="cmf_mfc70esp_dll" />
-                    <ComponentRef Id="cmf_mfc70fra_dll" />
-                    <ComponentRef Id="cmf_mfc70ita_dll" />
-                    <ComponentRef Id="cmf_mfc70jpn_dll" />
-                    <ComponentRef Id="cmf_mfc70kor_dll" />
-                <?else?> <!-- 1310 -->
-                    <ComponentRef Id="cmf_mfc71_dll" />
-                    <ComponentRef Id="cmf_msvcr71_dll" />
-                    <ComponentRef Id="cmf_msvcp71_dll" />
-                    <ComponentRef Id="cmf_mfc71chs_dll" />
-                    <ComponentRef Id="cmf_mfc71cht_dll" />
-                    <ComponentRef Id="cmf_mfc71deu_dll" />
-                    <ComponentRef Id="cmf_mfc71enu_dll" />
-                    <ComponentRef Id="cmf_mfc71esp_dll" />
-                    <ComponentRef Id="cmf_mfc71fra_dll" />
-                    <ComponentRef Id="cmf_mfc71ita_dll" />
-                    <ComponentRef Id="cmf_mfc71jpn_dll" />
-                    <ComponentRef Id="cmf_mfc71kor_dll" />
-                <?endif?>
-            <?endif?>
-        <?else?>
-            <?ifdef CL1200?>
-                <ComponentRef Id="cmf_mfc42d_dll" />
-                <ComponentRef Id="cmf_msvcp60d_dll" />
-                <ComponentRef Id="cmf_msvcrtd_dll" />
-                <ComponentRef Id="cmf_runtime_debug1200" />
-            <?else?>
-                <?ifdef CL1300?>
-                    <ComponentRef Id="cmf_mfc70d_dll" />
-                    <ComponentRef Id="cmf_msvcr70d_dll" />
-                    <ComponentRef Id="cmf_msvcp70d_dll" />
-                    <ComponentRef Id="cmf_mfc70chs_dll" />
-                    <ComponentRef Id="cmf_mfc70cht_dll" />
-                    <ComponentRef Id="cmf_mfc70deu_dll" />
-                    <ComponentRef Id="cmf_mfc70enu_dll" />
-                    <ComponentRef Id="cmf_mfc70esp_dll" />
-                    <ComponentRef Id="cmf_mfc70fra_dll" />
-                    <ComponentRef Id="cmf_mfc70ita_dll" />
-                    <ComponentRef Id="cmf_mfc70jpn_dll" />
-                    <ComponentRef Id="cmf_mfc70kor_dll" />
-                    <ComponentRef Id="cmf_runtime_debug1300" />
-                <?else?> <!-- 1310 -->
-                    <ComponentRef Id="cmf_mfc71d_dll" />
-                    <ComponentRef Id="cmf_msvcr71d_dll" />
-                    <ComponentRef Id="cmf_msvcp71d_dll" />
-                    <ComponentRef Id="cmf_mfc71chs_dll" />
-                    <ComponentRef Id="cmf_mfc71cht_dll" />
-                    <ComponentRef Id="cmf_mfc71deu_dll" />
-                    <ComponentRef Id="cmf_mfc71enu_dll" />
-                    <ComponentRef Id="cmf_mfc71esp_dll" />
-                    <ComponentRef Id="cmf_mfc71fra_dll" />
-                    <ComponentRef Id="cmf_mfc71ita_dll" />
-                    <ComponentRef Id="cmf_mfc71jpn_dll" />
-                    <ComponentRef Id="cmf_mfc71kor_dll" />
-                    <ComponentRef Id="cmf_runtime_debug1310" />
-                <?endif?>
-            <?endif?>
-        <?endif?>
             <ComponentRef Id="cmf_krb5_ini" />
             <ComponentRef Id="cmf_krb_con" />
             <ComponentRef Id="cmf_krbrealm_con" />
@@ -223,9 +164,12 @@
             <Feature Id="feaKfwLeashStartup" AllowAdvertise="no" Display="hidden" Level="130">
                 <Condition Level="30">LEASHAUTOSTART = 1</Condition>
                 <ComponentRef Id="csc_NetIDMgrStartup" />
-                <ComponentRef Id="csc_LeashStartup" />
+                <?if $(var.Platform) = "Intel"?>
+                        <ComponentRef Id="csc_LeashStartup" />
+                <?endif?>
             </Feature>
 
+            <?include runtime.wxi?>
         </Feature> <!-- /feaKfwClient -->
         
         <Feature
@@ -237,8 +181,13 @@
             Title="$(loc.KerberosSDKTitle)">
             
             <ComponentRef Id="cmp_dirdoc_netid" />
+        <?if $(var.Platform) = "Intel" ?>
             <ComponentRef Id="cmp_dirinc_kclient" />
             <ComponentRef Id="cmp_dirinc_krb4" />
+            <ComponentRef Id="cmp_dirlib_i386" />
+        <?else?>
+            <ComponentRef Id="cmp_dirlib_amd64" />
+        <?endif?>
             <ComponentRef Id="cmp_dirinc_krb5_gssapi" />
             <ComponentRef Id="cmp_dirinc_krb5_KerberosIV" />
             <ComponentRef Id="cmp_dirinc_krb5_krb5" />
@@ -249,7 +198,6 @@
             <ComponentRef Id="cmp_dirinc_wshelper" />
             <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
 	    <ComponentRef Id="cmp_dirinc_netidmgr" />
-            <ComponentRef Id="cmp_dirlib_i386" />
             <ComponentRef Id="cmp_dirinstall_nsis" />
             <ComponentRef Id="cmp_dirinstall_wix" />
             <ComponentRef Id="cmp_dirinstall_wix_lang" />
@@ -270,7 +218,9 @@
             Level="30" 
             Title="$(loc.KerberosDocTitle)">
 
-            <ComponentRef Id="efl_leash_userdoc_pdf" />
+            <?if $(var.Platform) = "Intel"?>
+                    <ComponentRef Id="efl_leash_userdoc_pdf" />
+            <?endif?>
             <ComponentRef Id="efl_netidmgr_userdoc_pdf" />
             <ComponentRef Id="efl_relnotes_html" />
             

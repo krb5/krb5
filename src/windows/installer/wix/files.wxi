@@ -27,7 +27,7 @@
 <Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
 <Directory Id="TARGETDIR" Name="SourceDir">
     <Directory Id="SystemFolder" SourceName="System">
-        <Component Id="cmf_kfwlogon_DLL" Guid="2F104FEB-2D61-458A-BAE3-B153F151E728">
+        <Component Win64="$(var.Win64)" Id="cmf_kfwlogon_DLL" Guid="$(var.cmf_kfwlogon_DLL_guid)">
              <File Id="filekfwlogon_DLL" Name="kfwlogon.dll" LongName="kfwlogon.dll" KeyPath="yes" DiskId="1" src="$(var.BinDir)kfwlogon.dll" />
              <Registry Id="reg_kfwlogon01" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Action="createKeyAndRemoveKeyOnUninstall" />
              <Registry Id="reg_kfwlogon02" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" />
@@ -43,11 +43,11 @@
              <Registry Id="reg_kfwlogon12" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Class" Type="integer" Value="2" />
              <Registry Id="reg_kfwlogon13" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Name" Type="string" Value="MIT Kerberos"/>
          </Component>
-         <Component Id="cmf_kfwcpcc_EXE" Guid="C3284E7A-3665-45A6-B64E-C909B1D1BAA6">
+         <Component Win64="$(var.Win64)" Id="cmf_kfwcpcc_EXE" Guid="$(var.cmf_kfwcpcc_EXE_guid)">
              <File Id="filekfwcpcc_EXE"  Name="kfwcpcc.exe"  LongName="kfwcpcc.exe"  DiskId="1" src="$(var.BinDir)kfwcpcc.exe" />
          </Component>
      <?ifdef DebugSyms?>
-         <Component Id="cmp_ClientSystemDebug" Guid="2D13ED48-53C2-4878-B196-2AD7F4100998">
+         <Component Win64="$(var.Win64)" Id="cmp_ClientSystemDebug" Guid="$(var.cmp_ClientSystemDebug_guid)">
      		<File Id="filekfwlogon_PDB" Name="kfwlogon.pdb" LongName="kfwlogon.pdb" KeyPath="yes" DiskId="1" src="$(var.BinDir)kfwlogon.pdb" />
      		<File Id="filekfwcpcc_PDB" Name="kfwcpcc.pdb" LongName="kfwcpcc.pdb" DiskId="1" src="$(var.BinDir)kfwcpcc.pdb" />
          </Component>
@@ -58,286 +58,290 @@
             <Directory Id="KERBEROSDIR" Name="Kerberos">
                 <Directory Id="dirbin" Name="bin" src="$(var.BinDir)">
                 
+                <?if $(var.Platform) = "Intel" ?>
 		    <!-- Kerberos IV options -->
-		    <Component Id="rcm_krb4_1" Guid="34262966-9196-49D6-86C9-AE98D3116DC0" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb4_1" Guid="$(var.rcm_krb4_1_guid)" DiskId="1">
 		    	<Registry Id="reg_krb4_1" Root="HKLM" Key="Software\MIT\Kerberos4" Name="krb.realms" Type="string" Value="[KRB4KRBREALMS]" KeyPath="yes"/>
 		    	<Condition>KRB4KRBREALMS</Condition>
 		    </Component>
-		    <Component Id="rcm_krb4_2" Guid="812334C6-EBDF-482C-8CB3-A6398AF9EDFC" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb4_2" Guid="$(var.rcm_krb4_2_guid)" DiskId="1">
 		    	<Registry Id="reg_krb4_2" Root="HKLM" Key="Software\MIT\Kerberos4" Name="krb.conf" Type="string" Value="[KRB4KRBCONF]" KeyPath="yes"/>
 		    	<Condition>KRB4KRBCONF</Condition>
 		    </Component>
-		    <Component Id="rcm_krb4_3" Guid="5556ECD9-8721-41C2-846C-034C239B48F1" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb4_3" Guid="$(var.rcm_krb4_3_guid)" DiskId="1">
 		    	<Registry Id="reg_krb4_3" Root="HKLM" Key="Software\MIT\Kerberos4" Name="configdir" Type="string" Value="[KRB4CONFIGDIR]" KeyPath="yes"/>
 		    	<Condition>KRB4CONFIGDIR</Condition>
 		    </Component>
-		    <Component Id="rcm_krb4_4" Guid="61371A93-7F59-439D-A89C-070E100F465B" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb4_4" Guid="$(var.rcm_krb4_4_guid)" DiskId="1">
 		    	<Registry Id="reg_krb4_4" Root="HKLM" Key="Software\MIT\Kerberos4" Name="ticketfile" Type="string" Value="[KRB4TICKETFILE]" KeyPath="yes"/>
 		    	<Condition>KRB4TICKETFILE</Condition>
 		    </Component>
+                <?endif?>
 		    
 		    <!-- Kerberos V options -->
-		    <Component Id="rcm_krb5_1" Guid="E190F8B9-51FA-4FB1-884C-C8AFA37F8653" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb5_1" Guid="$(var.rcm_krb5_1_guid)" DiskId="1">
 		    	<Registry Id="reg_krb5_1" Root="HKLM" Key="Software\MIT\kerberos5" Name="config" Type="string" Value="[KRB5CONFIG]" KeyPath="yes" />
 		    	<Condition>KRB5CONFIG</Condition>
 		    </Component>
-		    <Component Id="rcm_krb5_2" Guid="AE7D4305-6193-4094-8C82-73862AE01DCE" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb5_2" Guid="$(var.rcm_krb5_2_guid)" DiskId="1">
 		    	<Registry Id="reg_krb5_2" Root="HKLM" Key="Software\MIT\kerberos5" Name="ccname" Type="string" Value="[KRB5CCNAME]" KeyPath="yes" />
 		    	<Condition>KRB5CCNAME</Condition>
 		    </Component>
-		    <Component Id="rcm_krb5_3" Guid="853EE035-99AA-489A-8FB6-74C76624E92A" DiskId="1">
+		    <Component Win64="$(var.Win64)" Id="rcm_krb5_3" Guid="$(var.rcm_krb5_3_guid)" DiskId="1">
 		    	<Registry Id="reg_krb5_3" Root="HKLM" Key="Software\MIT\kerberos5" Name="PreserveInitialTicketIdentity" Type="integer" Value="[KRB5PRESERVEIDENTITY]" KeyPath="yes" />
 		    	<Condition>KRB5PRESERVEIDENTITY</Condition>
 		    </Component>
                 
-                    <Component Id="cmf_comerr32_dll" Guid="D8F455F9-E648-4C61-A69D-7116ADEC2DBB" DiskId="1">
-	                    <File Id="fil_comerr32_dll" LongName="comerr32.dll" Name="comerr32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_comerr32_dll" Guid="$(var.cmf_comerr32_dll_guid)" DiskId="1">
+	                    <File Id="fil_comerr32_dll" LongName="$(var.cmf_comerr32_dll_name)" Name="$(var.cmf_comerr32_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_gss_exe" Guid="8CAF09C4-68A2-46DC-A618-AEF16D832E54" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_gss_exe" Guid="$(var.cmf_gss_exe_guid)" DiskId="1">
 	                    <File Id="fil_gss_exe" LongName="gss.exe" Name="gss.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_gss_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_gss_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_gss_client_exe" Guid="983E0887-0C8B-49AB-8F59-DFE3A4E45E89" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_gss_client_exe" Guid="$(var.cmf_gss_client_exe_guid)" DiskId="1">
 	                    <File Id="fil_gss_client_exe" LongName="gss-client.exe" Name="gss-clnt.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_gss_client_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_gss_client_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-client" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_gss_server_exe" Guid="B165FE41-D0DD-4DFC-92E6-A99ADA23BE8B" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_gss_server_exe" Guid="$(var.cmf_gss_server_exe_guid)" DiskId="1">
 	                    <File Id="fil_gss_server_exe" LongName="gss-server.exe" Name="gss-srvr.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_gss_server_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_gss_server_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\gss-server" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_gssapi32_dll" Guid="5B0F2989-BB85-40BF-BB7A-E77693972CF9" DiskId="1">
-	                    <File Id="fil_gssapi32_dll" LongName="gssapi32.dll" Name="gssapi32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_gssapi32_dll" Guid="$(var.cmf_gssapi32_dll_guid)" DiskId="1">
+	                    <File Id="fil_gssapi32_dll" LongName="$(var.cmf_gssapi32_dll_name)" Name="$(var.cmf_gssapi32_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_k524init_exe" Guid="20BE4EA5-C465-4AF3-9A4F-BB80934167E3" DiskId="1">
+                <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_k524init_exe" Guid="$(var.cmf_k524init_exe_guid)" DiskId="1">
 	                    <File Id="fil_k524init_exe" LongName="k524init.exe" Name="k524init.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_k524init_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_k524init_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\k524init" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kclnt32_dll" Guid="D396C1E7-080E-49F5-92BA-73BCEDF09C8E" DiskId="1">
-	                    <File Id="fil_kclnt32_dll" LongName="kclnt32.dll" Name="kclnt32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_kclnt32_dll" Guid="$(var.cmf_kclnt32_dll_guid)" DiskId="1">
+	                    <File Id="fil_kclnt32_dll" LongName="$(var.cmf_kclnt32_dll_name)" Name="$(var.cmf_kclnt32_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_kdestroy_exe" Guid="D1E9C111-7760-4EE6-86CF-D4B4064B0ABA" DiskId="1">
+                <?endif?>
+                    <Component Win64="$(var.Win64)" Id="cmf_kdestroy_exe" Guid="$(var.cmf_kdestroy_exe_guid)" DiskId="1">
 	                    <File Id="fil_kdestroy_exe" LongName="kdestroy.exe" Name="kdestroy.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kdestroy_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kdestroy_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdestroy" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kcpytkt_exe" Guid="6B20E57C-0033-4dcf-B3C9-74ED0B2CF46E" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_kcpytkt_exe" Guid="$(var.cmf_kcpytkt_exe_guid)" DiskId="1">
 	                    <File Id="fil_kcpytkt_exe" LongName="kcpytkt.exe" Name="kcpytkt.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kcpytkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kcpytkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kcpytkt" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kdeltkt_exe" Guid="C7528C87-9B61-439a-8EA8-AD4BE3D758F9" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_kdeltkt_exe" Guid="$(var.cmf_kdeltkt_exe_guid)" DiskId="1">
 	                    <File Id="fil_kdeltkt_exe" LongName="kdeltkt.exe" Name="kdeltkt.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kdeltkt_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kdeltkt_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kdeltkt" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kinit_exe" Guid="80643A09-EF28-4714-BC62-B64FC5B17CAA" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_kinit_exe" Guid="$(var.cmf_kinit_exe_guid)" DiskId="1">
 	                    <File Id="fil_kinit_exe" LongName="kinit.exe" Name="kinit.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kinit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kinit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kinit" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_klist_exe" Guid="24FB6003-BC7A-4BF1-9503-82D398EC02D7" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_klist_exe" Guid="$(var.cmf_klist_exe_guid)" DiskId="1">
 	                    <File Id="fil_klist_exe" LongName="klist.exe" Name="klist.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_klist_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_klist_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\klist" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kpasswd_exe" Guid="3FA4AB96-FF12-460A-814E-3380E220787C" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_kpasswd_exe" Guid="$(var.cmf_kpasswd_exe_guid)" DiskId="1">
 	                    <File Id="fil_kpasswd_exe" LongName="kpasswd.exe" Name="kpasswd.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kpasswd_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kpasswd_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kpasswd" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_kvno_exe" Guid="7759D524-1F88-4483-975F-DDD33A511512" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_kvno_exe" Guid="$(var.cmf_kvno_exe_guid)" DiskId="1">
 	                    <File Id="fil_kvno_exe" LongName="kvno.exe" Name="kvno.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_kvno_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_kvno_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\kvno" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_krb5_32_dll" Guid="31E40356-CBAC-4FC6-9A34-C6F6C72A27CA" DiskId="1">
-	                    <File Id="fil_krb5_32_dll" LongName="krb5_32.dll" Name="krb5_32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_krb5_32_dll" Guid="$(var.cmf_krb5_32_dll_guid)" DiskId="1">
+	                    <File Id="fil_krb5_32_dll" LongName="$(var.cmf_krb5_32_dll_name)" Name="$(var.cmf_krb5_32_dll_name)" KeyPath="yes" />
 	                    <Environment Id="env_kclient_path" Action="set" Name="PATH" Part="last" System="yes" Value="[KERBEROSDIR]bin" />
                     </Component>
-                    <Component Id="cmf_k5sprt32_dll" Guid="F2381331-9201-4c02-866F-2038676771D4" DiskId="1">
-	                    <File Id="fil_k5sprt32_dll" LongName="k5sprt32.dll" Name="k5sprt32.dll" />
+                    <Component Win64="$(var.Win64)" Id="cmf_k5sprt32_dll" Guid="$(var.cmf_k5sprt32_dll_guid)" DiskId="1">
+	                    <File Id="fil_k5sprt32_dll" LongName="$(var.cmf_k5sprt32_dll_name)" Name="$(var.cmf_k5sprt32_dll_name)" />
                     </Component>
-                    <Component Id="cmf_krb524_dll" Guid="98685874-A9AA-4BC5-9830-271D9CF52C17" DiskId="1">
-	                    <File Id="fil_krb524_dll" LongName="krb524.dll" Name="krb524.dll" KeyPath="yes" />
+        <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krb524_dll" Guid="$(var.cmf_krb524_dll_guid)" DiskId="1">
+	                    <File Id="fil_krb524_dll" LongName="$(var.cmf_krb524_dll_name)" Name="$(var.cmf_krb524_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_krbcc32_dll" Guid="A50FA27D-F203-4C19-9047-B7976171FB94" DiskId="1">
-	                    <File Id="fil_krbcc32_dll" LongName="krbcc32.dll" Name="krbcc32.dll" KeyPath="yes" />
+        <?endif?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krbcc32_dll" Guid="$(var.cmf_krbcc32_dll_guid)" DiskId="1">
+	                    <File Id="fil_krbcc32_dll" LongName="$(var.cmf_krbcc32_dll_name)" Name="$(var.cmf_krbcc32_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_krbcc32s_exe" Guid="7D5F0817-DACF-4B54-BB8D-94DD63626DB5" DiskId="1">
-	                    <File Id="fil_krbcc32s_exe" LongName="krbcc32s.exe" Name="krbcc32s.exe" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_krbcc32s_exe" Guid="$(var.cmf_krbcc32s_exe_guid)" DiskId="1">
+	                    <File Id="fil_krbcc32s_exe" LongName="$(var.cmf_krbcc32s_exe_name)" Name="$(var.cmf_krbcc32s_exe_name)" KeyPath="yes" />
 	                    <Registry Id="reg_ts_krbcc32s_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\krbcc32s" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\krbcc32s" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_krbv4w32_dll" Guid="DFA23F6C-5297-4876-AF52-6F7CF2CB34AC" DiskId="1">
-	                    <File Id="fil_krbv4w32_dll" LongName="krbv4w32.dll" Name="krbv4w32.dll" KeyPath="yes" />
+        <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krbv4w32_dll" Guid="$(var.cmf_krbv4w32_dll_guid)" DiskId="1">
+	                    <File Id="fil_krbv4w32_dll" LongName="$(var.cmf_krbv4w32_dll_name)" Name="$(var.cmf_krbv4w32_dll_name)" KeyPath="yes" />
                     </Component>
 
-                    <Component Id="cmf_leash32_exe" Guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
 	                    <File Id="fil_leash32_exe" LongName="leash32.exe" Name="leash32.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
                     </Component>
 
-                    <Component Id="csc_leash32_exe" Guid="8A096700-47B1-4A0B-B7B5-44F75086DEAE" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="csc_leash32_exe" Guid="$(var.csc_leash32_exe_guid)" DiskId="1">
                         <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" LongName="Leash Kerberos Ticket Manager.lnk" Name="Leash32.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
                         <Condition>USELEASH</Condition>
                     </Component>
 
                     <!-- Leash32 configuration -->
-                    <Component Id="rcm_leash_1" Guid="B91648A0-26F7-43BB-A954-202FF3811E3C" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_1" Guid="$(var.rcm_leash_1_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_1" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AfsStatus" Type="integer" Value="[LEASHAFSSTATUS]" KeyPath="yes"/>
 	                    <Condition>LEASHAFSSTATUS</Condition>
                     </Component>
-                    <Component Id="rcm_leash_2" Guid="0D8DCC52-F855-4C46-86A1-198E6EE0CB8A" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_2" Guid="$(var.rcm_leash_2_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_2" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="createmissingconfig" Type="integer" Value="[LEASHCREATEMISSINGCONFIG]" KeyPath="yes"/>
 	                    <Condition>LEASHCREATEMISSINGCONFIG</Condition>
                     </Component>
-                    <Component Id="rcm_leash_3" Guid="9610A7E3-251F-4286-B776-1C3AF5DE7815" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_3" Guid="$(var.rcm_leash_3_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_3" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="AutoRenewTickets" Type="integer" Value="[LEASHAUTORENEWTICKETS]" KeyPath="yes"/>
 	                    <Condition>LEASHAUTORENEWTICKETS</Condition>
                     </Component>
                     <!--
-                    <Component Id="rcm_leash_4" Guid="815AED84-2437-4EBC-B561-F847833DB3A5" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_4" Guid="$(var.rcm_leash_4_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_4" Root="HKLM" Key="Software\MIT\Leash" Action="createKey" KeyPath="yes"/>
                     </Component>
                     -->
-                    <Component Id="rcm_leash_5" Guid="A0D3D75F-762E-4D5C-909B-53E7396CEDB6" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_5" Guid="$(var.rcm_leash_5_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_5" Root="HKLM" Key="Software\MIT\Leash" Name="lock_file_locations" Type="integer" Value="[LEASHLOCKFILELOCATIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHLOCKFILELOCATIONS</Condition>
                     </Component>
-                    <Component Id="rcm_leash_6" Guid="F675C145-6F9D-4BC4-9DA0-CAFB47A96A71" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leash_6" Guid="$(var.rcm_leash_6_guid)" DiskId="1">
 	                    <Registry Id="reg_leash_6" Root="HKLM" Key="Software\MIT\Leash" Name="MsLsaImport" Type="integer" Value="[LEASHMSLSAIMPORT]" KeyPath="yes"/>
 	                    <Condition>LEASHMSLSAIMPORT</Condition>
                     </Component>
-                    
-                    <Component Id="csc_NetIDMgrStartup" Guid="669227E3-0ADC-4173-90C3-631FCFC8EBC3" DiskId="1">
-                        <Registry Id="reg_sc_nidmgr_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="NetIDMgrAutoStart" Type="integer" Value="1" KeyPath="yes" />
-                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" />
-                        <Condition>USENETIDMGR</Condition>
-                    </Component>
-
-                    <Component Id="csc_LeashStartup" Guid="0DF73BCD-F34E-4B01-AA71-0EE08EB62F70" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="csc_LeashStartup" Guid="$(var.csc_LeashStartup_guid)" DiskId="1">
                         <Registry Id="reg_sc_leash_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="LeashAutoStart" Type="integer" Value="1" KeyPath="yes" />
                         <Shortcut Id="sc_leash_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Leash Credentials Manager.lnk" Name="leash32.lnk" Arguments="[LEASHAUTOINIT]" Target="[dirbin]leash32.exe" Show="minimized" />
                         <Condition>USELEASH</Condition>
                     </Component>
 
                 <?ifdef OldHelp?>
-                    <Component Id="cmf_leash32_hlp" Guid="919616D6-1605-4A79-8E33-C18A0D0F25E3" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_leash32_hlp" Guid="$(var.cmf_leash32_hlp_guid)" DiskId="1">
 	                    <File Id="fil_leash32_hlp" LongName="leash32.hlp" Name="leash32.hlp" KeyPath="yes" />
                     </Component>
                 <?else?>
-                    <Component Id="cmf_leash32_chm" Guid="C50E5E0A-B822-4419-855B-1713637BCA6A" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_leash32_chm" Guid="$(var.cmf_leash32_chm_guid)" DiskId="1">
 	                    <File Id="fil_leash32_chm" LongName="leash32.chm" Name="leash32.chm" KeyPath="yes" />
                     </Component>
                 <?endif?>
-                    <Component Id="cmf_leashw32_dll" Guid="8C145D48-A2FC-4C28-BC05-4368545F1184" DiskId="1">
-	                    <File Id="fil_leashw32_dll" LongName="leashw32.dll" Name="leashw32.dll" KeyPath="yes" />
+        <?endif?>
+                    
+                    <Component Win64="$(var.Win64)" Id="cmf_leashw32_dll" Guid="$(var.cmf_leashw32_dll_guid)" DiskId="1">
+	                    <File Id="fil_leashw32_dll" LongName="$(var.cmf_leashw32_dll_name)" Name="$(var.cmf_leashw32_dll_name)" KeyPath="yes" />
                     </Component>
                     
                     <!-- Leash DLL configuration -->
-                    <Component Id="rcm_leashdll_1" Guid="54C949DA-AF1E-4412-81AF-F502BD5904D2" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_1" Guid="$(var.rcm_leashdll_1_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_1" Root="HKLM" Key="Software\MIT\Leash" Name="lifetime" Type="integer" Value="[LEASHLIFETIME]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFETIME</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_2" Guid="9B553794-45E7-49FB-B6D9-1C3C9BB6E00D" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_2" Guid="$(var.rcm_leashdll_2_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_2" Root="HKLM" Key="Software\MIT\Leash" Name="renew_till" Type="integer" Value="[LEASHRENEWTILL]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWTILL</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_3" Guid="E3D1284C-17F6-41E3-9AA7-2ED05432060F" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_3" Guid="$(var.rcm_leashdll_3_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_3" Root="HKLM" Key="Software\MIT\Leash" Name="renewable" Type="integer" Value="[LEASHRENEWABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWABLE</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_4" Guid="A02831D5-48B2-4E82-A670-EDCEBC197273" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_4" Guid="$(var.rcm_leashdll_4_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_4" Root="HKLM" Key="Software\MIT\Leash" Name="forwardable" Type="integer" Value="[LEASHFORWARDABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHFORWARDABLE</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_5" Guid="5FDB0C01-6668-43E3-9C83-2CD364D97BF3" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_5" Guid="$(var.rcm_leashdll_5_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_5" Root="HKLM" Key="Software\MIT\Leash" Name="noaddresses" Type="integer" Value="[LEASHNOADDRESSES]" KeyPath="yes"/>
 	                    <Condition>LEASHNOADDRESSES</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_6" Guid="999BD59C-5C1E-446E-9D38-F4E26DD27D09" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_6" Guid="$(var.rcm_leashdll_6_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_6" Root="HKLM" Key="Software\MIT\Leash" Name="proxiable" Type="integer" Value="[LEASHPROXIABLE]" KeyPath="yes"/>
 	                    <Condition>LEASHPROXIABLE</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_7" Guid="C908AA17-DD21-4193-BA1D-535A2FD3D803" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_7" Guid="$(var.rcm_leashdll_7_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_7" Root="HKLM" Key="Software\MIT\Leash" Name="publicip" Type="integer" Value="[LEASHPUBLICIP]" KeyPath="yes"/>
 	                    <Condition>LEASHPUBLICIP</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_8" Guid="02926245-2327-46F9-AEF6-89E2DB0D90E1" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_8" Guid="$(var.rcm_leashdll_8_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_8" Root="HKLM" Key="Software\MIT\Leash" Name="usekrb4" Type="integer" Value="[LEASHUSEKRB4]" KeyPath="yes"/>
 	                    <Condition>LEASHUSEKRB4</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_9" Guid="B45BBA29-7A67-4FF7-AAA4-80044D46C451" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_9" Guid="$(var.rcm_leashdll_9_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_9" Root="HKLM" Key="Software\MIT\Leash" Name="hide_kinit_options" Type="integer" Value="[LEASHHIDEKINITOPTIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHHIDEKINITOPTIONS</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_10" Guid="1DDC4D78-BDB4-48CD-A4E9-024FA9706100" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_10" Guid="$(var.rcm_leashdll_10_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_10" Root="HKLM" Key="Software\MIT\Leash" Name="life_min" Type="integer" Value="[LEASHLIFEMIN]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFEMIN</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_11" Guid="39134333-58C7-4C6B-B690-2322D3AE928A" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_11" Guid="$(var.rcm_leashdll_11_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_11" Root="HKLM" Key="Software\MIT\Leash" Name="life_max" Type="integer" Value="[LEASHLIFEMAX]" KeyPath="yes"/>
 	                    <Condition>LEASHLIFEMAX</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_12" Guid="BBB6F5C3-290F-4A21-A630-E8630C6EAB67" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_12" Guid="$(var.rcm_leashdll_12_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_12" Root="HKLM" Key="Software\MIT\Leash" Name="renew_min" Type="integer" Value="[LEASHRENEWMIN]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWMIN</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_13" Guid="0F86A73E-DB31-45E7-9156-BE0EC99076A7" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_13" Guid="$(var.rcm_leashdll_13_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_13" Root="HKLM" Key="Software\MIT\Leash" Name="renew_max" Type="integer" Value="[LEASHRENEWMAX]" KeyPath="yes"/>
 	                    <Condition>LEASHRENEWMAX</Condition>
                     </Component>
                     <!--
-                    <Component Id="rcm_leashdll_14" Guid="FE0F06A2-62E7-46C1-9BFF-337C50DB78C7" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_14" Guid="$(var.rcm_leashdll_14_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_14" Root="HKLM" Key="Software\MIT\Leash32\Settings" Action="createKey" />
                     </Component>
                     -->
-                    <Component Id="rcm_leashdll_15" Guid="2DAC4693-6435-4278-A584-3D2B74BE87D5" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_15" Guid="$(var.rcm_leashdll_15_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_15" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="uppercaserealm" Type="integer" Value="[LEASHUPPERCASEREALM]" KeyPath="yes"/>
 	                    <Condition>LEASHUPPERCASEREALM</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_16" Guid="FE3DDD47-CCDE-44F8-8C86-97F2C3545443" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_16" Guid="$(var.rcm_leashdll_16_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_16" Root="HKLM" Key="Software\MIT\Leash32\Settings" Name="timehost" Type="string" Value="[LEASHTIMEHOST]" KeyPath="yes"/>
 	                    <Condition>LEASHTIMEHOST</Condition>
                     </Component>
-                    <Component Id="rcm_leashdll_17" Guid="1B685E1B-32F2-49A5-9B7D-4288741A2C17" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="rcm_leashdll_17" Guid="$(var.rcm_leashdll_17_guid)" DiskId="1">
 	                    <Registry Id="reg_leashdll_17" Root="HKLM" Key="Software\MIT\Leash" Name="preserve_kinit_options" Type="integer" Value="[LEASHPRESERVEKINITOPTIONS]" KeyPath="yes"/>
 	                    <Condition>LEASHPRESERVEKINITOPTIONS</Condition>
                     </Component>
                     
-                    <Component Id="cmf_ms2mit_exe" Guid="63D189DC-5EE4-49E2-B5E9-6E74A28602C8" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_ms2mit_exe" Guid="$(var.cmf_ms2mit_exe_guid)" DiskId="1">
 	                    <File Id="fil_ms2mit_exe" LongName="ms2mit.exe" Name="ms2mit.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_ms2mit_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_ms2mit_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ms2mit" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_mit2ms_exe" Guid="4F487781-5B55-48c1-A3FA-8BC6ECA4FEA1" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_mit2ms_exe" Guid="$(var.cmf_mit2ms_exe_guid)" DiskId="1">
 	                    <File Id="fil_mit2ms_exe" LongName="mit2ms.exe" Name="mit2ms.exe" KeyPath="yes" />
 	                    <Registry Id="reg_ts_mit2ms_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_mit2ms_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\mit2ms" Name="Flags" Type="integer" Value="1032" />
                     </Component>
-                    <Component Id="cmf_wshelp32_dll" Guid="B9D9F5F1-CA93-4F56-B6F8-343F21484CDE" DiskId="1">
-	                    <File Id="fil_wshelp32_dll" LongName="wshelp32.dll" Name="wshelp32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_wshelp32_dll" Guid="$(var.cmf_wshelp32_dll_guid)" DiskId="1">
+	                    <File Id="fil_wshelp32_dll" LongName="$(var.cmf_wshelp32_dll_name)" Name="$(var.cmf_wshelp32_dll_name)" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_xpprof32_dll" Guid="A7DF8BAF-7188-4C24-89FB-C8EB51571FD2" DiskId="1">
-	                    <File Id="fil_xpprof32_dll" LongName="xpprof32.dll" Name="xpprof32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_xpprof32_dll" Guid="$(var.cmf_xpprof32_dll_guid)" DiskId="1">
+	                    <File Id="fil_xpprof32_dll" LongName="$(var.cmf_xpprof32_dll_name)" Name="$(var.cmf_xpprof32_dll_name)" KeyPath="yes" />
                     </Component>
                     
                     <!-- NetIDMgr  -->
-                    <Component Id="cmf_nidmgr32_dll" Guid="EEBA3A0D-CE3D-42F1-8854-D7F63F597202" DiskId="1" Transitive="yes">
-						<File Id="fil_nidmgr32_dll" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_nidmgr32_dll" Guid="$(var.cmf_nidmgr32_dll_guid)" DiskId="1" Transitive="yes">
+						<File Id="fil_nidmgr32_dll" LongName="$(var.cmf_nidmgr32_dll_name)" Name="$(var.cmf_nidmgr32_dll_name)" KeyPath="yes" />
                         <Condition>VersionNT &gt; 500</Condition>
                     </Component>
-                    <Component Id="cmf_nidmgr32_dll_w2k" Guid="33F42D7C-03CE-465F-9E0A-5F486FE64B04" DiskId="1" Transitive="yes">
-                        <File Id="fil_nidmgr32_dll_w2k" LongName="nidmgr32.dll" Name="nidmgr32.dll" KeyPath="yes" src="$(var.BinDir)W2K\nidmgr32.dll" />
+                    <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_nidmgr32_dll_w2k" Guid="$(var.cmf_nidmgr32_dll_w2k_guid)" DiskId="1" Transitive="yes">
+                        <File Id="fil_nidmgr32_dll_w2k" LongName="$(var.cmf_nidmgr32_dll_name)" Name="$(var.cmf_nidmgr32_dll_name)" KeyPath="yes" src="$(var.BinDir)W2K\nidmgr32.dll" />
                         <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
-                    <Component Id="cmf_krb5cred_dll" Guid="27A7723A-F0D9-4F06-892C-54F0AC6014C3" DiskId="1">
-						<File Id="fil_krb5cred_dll" LongName="krb5cred.dll" Name="krb5cred.dll" KeyPath="yes" />
+                    <?endif?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krb5cred_dll" Guid="$(var.cmf_krb5cred_dll_guid)" DiskId="1">
+			<File Id="fil_krb5cred_dll" LongName="$(var.cmf_krb5cred_dll_name)" Name="$(var.cmf_krb5cred_dll_name)" KeyPath="yes" />
                         <Registry Id="reg_krb5cred_1" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb5" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_krb5cred_2" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb5" Name="ImagePath" Type="string" Value="[#fil_krb5cred_dll]" />
                         <Registry Id="reg_krb5cred_3" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb5" Name="PluginList" Type="string" Value="Krb5Cred,Krb5Ident" />
@@ -353,11 +357,12 @@
                         <Registry Id="reg_krb5cred_d" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" Name="Type" Type="integer" Value="2" />
                         <Registry Id="reg_krb5cred_e" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" Name="Flags" Type="integer" Value="0" />
                     </Component>
-                    <Component Id="cmf_krb5cred_en_us_dll" Guid="EA9ABE05-A85B-43BB-8741-50D3C3128632" DiskId="1">
-						<File Id="fil_krb5cred_en_us_dll" LongName="krb5cred_en_us.dll" Name="krb5cenu.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_krb5cred_en_us_dll" Guid="$(var.cmf_krb5cred_en_us_dll_guid)" DiskId="1">
+			<File Id="fil_krb5cred_en_us_dll" LongName="$(var.cmf_krb5cred_en_us_dll_name)" Name="krb5cenu.dll" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_krb4cred_dll" Guid="E3B86954-9D5D-4929-A5E6-B22ED03E6D6C" DiskId="1">
-						<File Id="fil_krb4cred_dll" LongName="krb4cred.dll" Name="krb4cred.dll" KeyPath="yes" />
+        <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_krb4cred_dll" Guid="$(var.cmf_krb4cred_dll_guid)" DiskId="1">
+			<File Id="fil_krb4cred_dll" LongName="$(var.cmf_krb4cred_dll_name)" Name="$(var.cmf_krb4cred_dll_name)" KeyPath="yes" />
                         <Registry Id="reg_krb4cred_1" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Action="createKeyAndRemoveKeyOnUninstall" />
                         <Registry Id="reg_krb4cred_2" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="ImagePath" Type="string" Value="[#fil_krb4cred_dll]" />
                         <Registry Id="reg_krb4cred_3" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" Name="PluginList" Type="string" Value="Krb4Cred" />
@@ -368,10 +373,11 @@
                         <Registry Id="reg_krb4cred_8" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Type" Type="integer" Value="1" />
                         <Registry Id="reg_krb4cred_9" Root="HKLM" Key="Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" Name="Flags" Type="integer" Value="0" />
                     </Component>
-                    <Component Id="cmf_krb4cred_en_us_dll" Guid="3FF40A29-E2C3-40F3-B81C-2948494BE4B0" DiskId="1">
-						<File Id="fil_krb4cred_en_us_dll" LongName="krb4cred_en_us.dll" Name="krb4cenu.dll" KeyPath="yes" />
+                    <Component Win64="$(var.Win64)" Id="cmf_krb4cred_en_us_dll" Guid="$(var.cmf_krb4cred_en_us_dll_guid)" DiskId="1">
+			<File Id="fil_krb4cred_en_us_dll" LongName="$(var.cmf_krb4cred_en_us_dll_name)" Name="krb4cenu.dll" KeyPath="yes" />
                     </Component>
-                    <Component Id="cmf_netidmgr_exe" Guid="AEB06D67-B4F3-45B1-AC1E-5C1AFF747756" DiskId="1" Transitive="yes">
+        <?endif?>
+                    <Component Win64="$(var.Win64)" Id="cmf_netidmgr_exe" Guid="$(var.cmf_netidmgr_exe_guid)" DiskId="1" Transitive="yes">
 			<File Id="fil_netidmgr_exe" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" />
 			<File Id="fil_netidmgr_chm" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -380,7 +386,8 @@
                         <Shortcut Id="sc_netidmgr_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="dirbin"/>
                         <Condition>VersionNT &gt; 500</Condition>
                     </Component>
-                    <Component Id="cmf_netidmgr_exe_w2k" Guid="0F85D4F3-7897-4FE3-8501-AD0C383CCB4F" DiskId="1" Transitive="yes">
+                    <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="cmf_netidmgr_exe_w2k" Guid="$(var.cmf_netidmgr_exe_w2k_guid)" DiskId="1" Transitive="yes">
 			<File Id="fil_netidmgr_exe_w2k" LongName="netidmgr.exe" Name="netidmgr.exe" KeyPath="yes" src="$(var.BinDir)W2K\netidmgr.exe"/>
 			<File Id="fil_netidmgr_chm_w2k" LongName="netidmgr.chm" Name="netidmgr.chm" />
                         <Registry Id="reg_ts_netidmgr_0_w2k" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\netidmgr" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -389,18 +396,52 @@
                         <Shortcut Id="sc_netidmgr_chm_w2k" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Documentation.lnk" Name="netidchm.lnk" Target="[dirbin]netidmgr.chm" WorkingDirectory="dirbin"/>
                         <Condition>VersionNT &lt;= 500</Condition>
                     </Component>
+                    <?endif?>
+                    <Component Win64="$(var.Win64)" Id="csc_NetIDMgrStartup" Guid="$(var.csc_NetIDMgrStartup_guid)" DiskId="1">
+                        <Registry Id="reg_sc_nidmgr_marker" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="NetIDMgrAutoStart" Type="integer" Value="1" KeyPath="yes" />
+                        <Shortcut Id="sc_netidmgr_exe_startup" Advertise="no" Directory="StartupFolder" LongName="Network Identity Manager.lnk" Name="netidmgr.lnk" Target="[dirbin]netidmgr.exe" Show="minimized" />
+                        <Condition>USENETIDMGR</Condition>
+                    </Component>
                     <!-- /NetIDMgr -->
                     
                     <!-- Debug symbols -->
                 <?ifdef DebugSyms?>
-                    <Component Id="cmf_bin_debug" Guid="C8468854-8261-4781-8119-A612636841E3" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_bin_debug" Guid="$(var.cmf_bin_debug_guid)" DiskId="1">
+                        <?if $(var.Platform) = "Intel" ?>
+	                    <File Id="fil_k524init_pdb" LongName="k524init.pdb" Name="k524init.pdb" />
+	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
+	                    <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
+	                    <File Id="fil_leash32_pdb" LongName="leash32.pdb" Name="leash32.pdb" />
+
 	                    <File Id="fil_comerr32_pdb" LongName="comerr32.pdb" Name="comerr32.pdb" />
+	                    <File Id="fil_gssapi32_pdb" LongName="gssapi32.pdb" Name="gssapi32.pdb" />
+	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
+	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" />
+	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
+	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
+	                    <File Id="fil_krbv4w32_pdb" LongName="krbv4w32.pdb" Name="krbv4w32.pdb" />
+	                    <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
+	                    <File Id="fil_wshelp32_pdb" LongName="wshelp32.pdb" Name="wshelp32.pdb" />
+	                    <File Id="fil_xpprof32_pdb" LongName="xpprof32.pdb" Name="xpprof32.pdb" />
+	                    <File Id="fil_krb4cred_pdb" LongName="krb4cred.pdb" Name="krb4cred.pdb" />
+	                    <File Id="fil_krb5cred_pdb" LongName="krb5cred.pdb" Name="krb5cred.pdb" />
+	                    <File Id="fil_nidmgr32_pdb" LongName="nidmgr32.pdb" Name="nidmgr32.pdb" />
+                        <?else?>
+	                    <File Id="fil_comerr64_pdb" LongName="comerr64.pdb" Name="comerr64.pdb" />
+	                    <File Id="fil_gssapi64_pdb" LongName="gssapi64.pdb" Name="gssapi64.pdb" />
+	                    <File Id="fil_krb5_64_pdb" LongName="krb5_64.pdb" Name="krb5_64.pdb" KeyPath="yes" />
+	                    <File Id="fil_k5sprt64_pdb" LongName="k5sprt64.pdb" Name="k5sprt64.pdb" />
+	                    <File Id="fil_krbcc64_pdb" LongName="krbcc64.pdb" Name="krbcc64.pdb" />
+	                    <File Id="fil_krbcc64s_pdb" LongName="krbcc64s.pdb" Name="krbcc64s.pdb" />
+	                    <File Id="fil_leashw64_pdb" LongName="leashw64.pdb" Name="leashw64.pdb" />
+	                    <File Id="fil_wshelp64_pdb" LongName="wshelp64.pdb" Name="wshelp64.pdb" />
+	                    <File Id="fil_xpprof64_pdb" LongName="xpprof64.pdb" Name="xpprof64.pdb" />
+	                    <File Id="fil_krb5cred_pdb" LongName="krb5cred.pdb" Name="krb5cred.pdb" />
+	                    <File Id="fil_nidmgr64_pdb" LongName="nidmgr64.pdb" Name="nidmgr64.pdb" />
+                        <?endif?>
 	                    <File Id="fil_gss_pdb" LongName="gss.pdb" Name="gss.pdb" />
 	                    <File Id="fil_gss_client_pdb" LongName="gss-client.pdb" Name="gss-clnt.pdb" />
 	                    <File Id="fil_gss_server_pdb" LongName="gss-server.pdb" Name="gss-srvr.pdb" />
-	                    <File Id="fil_gssapi32_pdb" LongName="gssapi32.pdb" Name="gssapi32.pdb" />
-	                    <File Id="fil_k524init_pdb" LongName="k524init.pdb" Name="k524init.pdb" />
-	                    <File Id="fil_kclnt32_pdb" LongName="kclnt32.pdb" Name="kclnt32.pdb" />
 	                    <File Id="fil_kdestroy_pdb" LongName="kdestroy.pdb" Name="kdestroy.pdb" />
 	                    <File Id="fil_kcpytkt_pdb" LongName="kcpytkt.pdb" Name="kcpytkt.pdb" />
 	                    <File Id="fil_kdeltkt_pdb" LongName="kdeltkt.pdb" Name="kdeltkt.pdb" />
@@ -408,234 +449,222 @@
 	                    <File Id="fil_klist_pdb" LongName="klist.pdb" Name="klist.pdb" />
 	                    <File Id="fil_kpasswd_pdb" LongName="kpasswd.pdb" Name="kpasswd.pdb" />
 	                    <File Id="fil_kvno_pdb" LongName="kvno.pdb" Name="kvno.pdb" />
-	                    <File Id="fil_krb5_32_pdb" LongName="krb5_32.pdb" Name="krb5_32.pdb" KeyPath="yes" />
-	                    <File Id="fil_k5sprt32_pdb" LongName="k5sprt32.pdb" Name="k5sprt32.pdb" />
-	                    <File Id="fil_krb524_pdb" LongName="krb524.pdb" Name="krb524.pdb" />
-	                    <File Id="fil_krbcc32_pdb" LongName="krbcc32.pdb" Name="krbcc32.pdb" />
-	                    <File Id="fil_krbcc32s_pdb" LongName="krbcc32s.pdb" Name="krbcc32s.pdb" />
-	                    <File Id="fil_krbv4w32_pdb" LongName="krbv4w32.pdb" Name="krbv4w32.pdb" />
-	                    <File Id="fil_leash32_pdb" LongName="leash32.pdb" Name="leash32.pdb" />
-	                    <File Id="fil_leashw32_pdb" LongName="leashw32.pdb" Name="leashw32.pdb" />
 	                    <File Id="fil_ms2mit_pdb" LongName="ms2mit.pdb" Name="ms2mit.pdb" />
 	                    <File Id="fil_mit2ms_pdb" LongName="mit2ms.pdb" Name="mit2ms.pdb" />
-	                    <File Id="fil_wshelp32_pdb" LongName="wshelp32.pdb" Name="wshelp32.pdb" />
-	                    <File Id="fil_xpprof32_pdb" LongName="xpprof32.pdb" Name="xpprof32.pdb" />
-	                    <File Id="fil_krb4cred_pdb" LongName="krb4cred.pdb" Name="krb4cred.pdb" />
-	                    <File Id="fil_krb5cred_pdb" LongName="krb5cred.pdb" Name="krb5cred.pdb" />
 	                    <File Id="fil_netidmgr_pdb" LongName="netidmgr.pdb" Name="netidmgr.pdb" />
-	                    <File Id="fil_nidmgr32_pdb" LongName="nidmgr32.pdb" Name="nidmgr32.pdb" />
                     </Component>
                 <?endif?>
                 
-                    <!-- Runtime -->
+                    <!-- Runtime (for compilers previous to VS8) -->
                 <?ifndef Debug?>
                     <?ifdef CL1200?>
-                        <Component Id="cmf_mfc42_dll" Guid="BE2D0D08-E26E-4906-BEEA-1C550BA9B405" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_mfc42_dll" Guid="BE2D0D08-E26E-4906-BEEA-1C550BA9B405" DiskId="1">
 	                        <File Id="fil_mfc42_dll" LongName="mfc42.dll" Name="mfc42.dll" src="$(var.SystemDir)mfc42.dll" KeyPath="yes" />
                         </Component>
-                        <Component Id="cmf_msvcp60_dll" Guid="7DBB5E61-AA59-4FD8-87CA-7F139D355050" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_msvcp60_dll" Guid="7DBB5E61-AA59-4FD8-87CA-7F139D355050" DiskId="1">
 	                        <File Id="fil_msvcp60_dll" LongName="msvcp60.dll" Name="msvcp60.dll" src="$(var.SystemDir)msvcp60.dll" KeyPath="yes" />
                         </Component>
-                        <Component Id="cmf_msvcrt_dll" Guid="07B1612B-F52B-4A22-BC20-948BB7D50916" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_msvcrt_dll" Guid="07B1612B-F52B-4A22-BC20-948BB7D50916" DiskId="1">
 	                        <File Id="fil_msvcrt_dll" LongName="msvcrt.dll" Name="msvcrt.dll" src="$(var.SystemDir)msvcrt.dll" KeyPath="yes" />
                         </Component>
-                    <?else?>
-                        <?ifdef CL1300?>
-                            <Component Id="cmf_mfc70_dll" Guid="E064D66F-45A5-46FA-A0C0-EE68B5DCA248" DiskId="1">
+                    <?endif?>
+                    <?ifdef CL1300?>
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70_dll" Guid="E064D66F-45A5-46FA-A0C0-EE68B5DCA248" DiskId="1">
 	                            <File Id="fil_mfc70_dll" LongName="mfc70.dll" Name="mfc70.dll" src="$(var.SystemDir)mfc70.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcr70_dll" Guid="3489059D-B8C5-4F9A-9DF9-CC8F19B97898" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcr70_dll" Guid="3489059D-B8C5-4F9A-9DF9-CC8F19B97898" DiskId="1">
 	                            <File Id="fil_msvcr70_dll" LongName="msvcr70.dll" Name="msvcr70.dll" src="$(var.SystemDir)msvcr70.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcp70_dll" Guid="E3E6DC28-A229-45D7-804B-BC5A2CAB86B6" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcp70_dll" Guid="E3E6DC28-A229-45D7-804B-BC5A2CAB86B6" DiskId="1">
 	                            <File Id="fil_msvcp70_dll" LongName="msvcp70.dll" Name="msvcp70.dll" src="$(var.SystemDir)msvcp70.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
 	                            <File Id="fil_mfc70chs_dll" LongName="mfc70chs.dll" Name="mfc70chs.dll" src="$(var.SystemDir)mfc70chs.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
 	                            <File Id="fil_mfc70cht_dll" LongName="mfc70cht.dll" Name="mfc70cht.dll" src="$(var.SystemDir)mfc70cht.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
 	                            <File Id="fil_mfc70deu_dll" LongName="mfc70deu.dll" Name="mfc70deu.dll" src="$(var.SystemDir)mfc70deu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
 	                            <File Id="fil_mfc70enu_dll" LongName="mfc70enu.dll" Name="mfc70enu.dll" src="$(var.SystemDir)mfc70enu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
 	                            <File Id="fil_mfc70esp_dll" LongName="mfc70esp.dll" Name="mfc70esp.dll" src="$(var.SystemDir)mfc70esp.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
 	                            <File Id="fil_mfc70fra_dll" LongName="mfc70fra.dll" Name="mfc70fra.dll" src="$(var.SystemDir)mfc70fra.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
 	                            <File Id="fil_mfc70ita_dll" LongName="mfc70ita.dll" Name="mfc70ita.dll" src="$(var.SystemDir)mfc70ita.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
 	                            <File Id="fil_mfc70jpn_dll" LongName="mfc70jpn.dll" Name="mfc70jpn.dll" src="$(var.SystemDir)mfc70jpn.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
 	                            <File Id="fil_mfc70kor_dll" LongName="mfc70kor.dll" Name="mfc70kor.dll" src="$(var.SystemDir)mfc70kor.dll" KeyPath="yes" />
                             </Component>
-                        <?else?> <!-- CL1310 -->
-                            <Component Id="cmf_mfc71_dll" Guid="6A4854A8-35AE-42CB-9671-9F6F096BE20C" DiskId="1">
+                    <?endif?>
+                    <?ifdef CL1310?>
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71_dll" Guid="6A4854A8-35AE-42CB-9671-9F6F096BE20C" DiskId="1">
 	                            <File Id="fil_mfc71_dll" LongName="mfc71.dll" Name="mfc71.dll" src="$(var.SystemDir)mfc71.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcr71_dll" Guid="C6952DEE-E62A-4635-9CE8-405F1E459FB2" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcr71_dll" Guid="C6952DEE-E62A-4635-9CE8-405F1E459FB2" DiskId="1">
 	                            <File Id="fil_msvcr71_dll" LongName="msvcr71.dll" Name="msvcr71.dll" src="$(var.SystemDir)msvcr71.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcp71_dll" Guid="CA7D0EDE-0B81-4709-86E9-31DC8543918F" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcp71_dll" Guid="CA7D0EDE-0B81-4709-86E9-31DC8543918F" DiskId="1">
 	                            <File Id="fil_msvcp71_dll" LongName="msvcp71.dll" Name="msvcp71.dll" src="$(var.SystemDir)msvcp71.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
 	                            <File Id="fil_mfc71chs_dll" LongName="mfc71chs.dll" Name="mfc71chs.dll" src="$(var.SystemDir)mfc71chs.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
 	                            <File Id="fil_mfc71cht_dll" LongName="mfc71cht.dll" Name="mfc71cht.dll" src="$(var.SystemDir)mfc71cht.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
 	                            <File Id="fil_mfc71deu_dll" LongName="mfc71deu.dll" Name="mfc71deu.dll" src="$(var.SystemDir)mfc71deu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
 	                            <File Id="fil_mfc71enu_dll" LongName="mfc71enu.dll" Name="mfc71enu.dll" src="$(var.SystemDir)mfc71enu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
 	                            <File Id="fil_mfc71esp_dll" LongName="mfc71esp.dll" Name="mfc71esp.dll" src="$(var.SystemDir)mfc71esp.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
 	                            <File Id="fil_mfc71fra_dll" LongName="mfc71fra.dll" Name="mfc71fra.dll" src="$(var.SystemDir)mfc71fra.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
 	                            <File Id="fil_mfc71ita_dll" LongName="mfc71ita.dll" Name="mfc71ita.dll" src="$(var.SystemDir)mfc71ita.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
 	                            <File Id="fil_mfc71jpn_dll" LongName="mfc71jpn.dll" Name="mfc71jpn.dll" src="$(var.SystemDir)mfc71jpn.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
 	                            <File Id="fil_mfc71kor_dll" LongName="mfc71kor.dll" Name="mfc71kor.dll" src="$(var.SystemDir)mfc71kor.dll" KeyPath="yes" />
                             </Component>
-                        <?endif?>
                     <?endif?>
                 <?else?> <!-- Debug -->
                     <?ifdef CL1200?>
-                        <Component Id="cmf_mfc42d_dll" Guid="B7360C15-61FA-409F-8F0A-87B96FB30BBD" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_mfc42d_dll" Guid="B7360C15-61FA-409F-8F0A-87B96FB30BBD" DiskId="1">
 	                        <File Id="fil_mfc42d_dll" LongName="mfc42d.dll" Name="mfc42d.dll" src="$(var.SystemDir)mfc42d.dll" KeyPath="yes" />
                         </Component>
-                        <Component Id="cmf_msvcp60d_dll" Guid="BFF28D63-B60A-48B6-A403-A7DE00BDB37E" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_msvcp60d_dll" Guid="BFF28D63-B60A-48B6-A403-A7DE00BDB37E" DiskId="1">
 	                        <File Id="fil_msvcp60d_dll" LongName="msvcp60d.dll" Name="msvcp60d.dll" src="$(var.SystemDir)msvcp60d.dll" KeyPath="yes" />
                         </Component>
-                        <Component Id="cmf_msvcrtd_dll" Guid="69069738-3202-43C3-92A3-4139816B6527" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_msvcrtd_dll" Guid="69069738-3202-43C3-92A3-4139816B6527" DiskId="1">
 	                        <File Id="fil_msvcrtd_dll" LongName="msvcrtd.dll" Name="msvcrtd.dll" src="$(var.SystemDir)msvcrtd.dll" KeyPath="yes" />
                         </Component>
-                        <Component Id="cmf_runtime_debug1200" Guid="3FAD9513-AB33-4eed-9359-E96F8D5ABD2A" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmf_runtime_debug1200" Guid="3FAD9513-AB33-4eed-9359-E96F8D5ABD2A" DiskId="1">
 	                        <File Id="fil_mfc42d_pdb" LongName="mfc42d.pdb" Name="mfc42d.pdb" src="$(var.SystemDir)mfc42d.pdb" />
 	                        <File Id="fil_msvcp60d_pdb" LongName="msvcp60d.pdb" Name="msvcp60d.pdb" src="$(var.SystemDir)msvcp60d.pdb" />
 	                        <File Id="fil_msvcrtd_pdb" LongName="msvcrtd.pdb" Name="msvcrtd.pdb" src="$(var.SystemDir)msvcrtd.pdb" KeyPath="yes" />
                         </Component>
-                    <?else?>
-                        <?ifdef CL1300?>
-                            <Component Id="cmf_mfc70d_dll" Guid="40C7120A-9B28-4DD1-86D0-9F66056A2463" DiskId="1">
+                    <?endif?>
+                    <?ifdef CL1300?>
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70d_dll" Guid="40C7120A-9B28-4DD1-86D0-9F66056A2463" DiskId="1">
 	                            <File Id="fil_mfc70d_dll" LongName="mfc70d.dll" Name="mfc70d.dll" src="$(var.SystemDir)mfc70d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcr70d_dll" Guid="D0A7B06E-6F65-4559-A99A-63C4C837BE0E" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcr70d_dll" Guid="D0A7B06E-6F65-4559-A99A-63C4C837BE0E" DiskId="1">
 	                            <File Id="fil_msvcr70d_dll" LongName="msvcr70d.dll" Name="msvcr70d.dll" src="$(var.SystemDir)msvcr70d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcp70d_dll" Guid="DC82F644-8705-4C89-BE63-4CD6680BF580" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcp70d_dll" Guid="DC82F644-8705-4C89-BE63-4CD6680BF580" DiskId="1">
 	                            <File Id="fil_msvcp70d_dll" LongName="msvcp70d.dll" Name="msvcp70d.dll" src="$(var.SystemDir)msvcp70d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70chs_dll" Guid="CAFD61A5-8A13-4A7C-AA15-6FEED7D43A3A" DiskId="1">
 	                            <File Id="fil_mfc70chs_dll" LongName="mfc70chs.dll" Name="mfc70chs.dll" src="$(var.SystemDir)mfc70chs.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70cht_dll" Guid="A3F60016-825A-4096-A45F-98B4972FF1CA" DiskId="1">
 	                            <File Id="fil_mfc70cht_dll" LongName="mfc70cht.dll" Name="mfc70cht.dll" src="$(var.SystemDir)mfc70cht.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70deu_dll" Guid="D146EE00-8880-4E39-A131-784B947883DB" DiskId="1">
 	                            <File Id="fil_mfc70deu_dll" LongName="mfc70deu.dll" Name="mfc70deu.dll" src="$(var.SystemDir)mfc70deu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70enu_dll" Guid="11E2059D-62E6-40DF-87C1-B03E425048CE" DiskId="1">
 	                            <File Id="fil_mfc70enu_dll" LongName="mfc70enu.dll" Name="mfc70enu.dll" src="$(var.SystemDir)mfc70enu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70esp_dll" Guid="3D1AAC2A-0FB1-4EF7-8406-1BF771CEB4BB" DiskId="1">
 	                            <File Id="fil_mfc70esp_dll" LongName="mfc70esp.dll" Name="mfc70esp.dll" src="$(var.SystemDir)mfc70esp.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70fra_dll" Guid="36A2B8B3-E6C6-4725-96B8-82905D2ADE4E" DiskId="1">
 	                            <File Id="fil_mfc70fra_dll" LongName="mfc70fra.dll" Name="mfc70fra.dll" src="$(var.SystemDir)mfc70fra.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70ita_dll" Guid="4EE49FC8-ED41-48F4-90A9-1FC06FE6237D" DiskId="1">
 	                            <File Id="fil_mfc70ita_dll" LongName="mfc70ita.dll" Name="mfc70ita.dll" src="$(var.SystemDir)mfc70ita.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70jpn_dll" Guid="A6ADFFF1-C48B-446C-9B7D-6137F00EC0E4" DiskId="1">
 	                            <File Id="fil_mfc70jpn_dll" LongName="mfc70jpn.dll" Name="mfc70jpn.dll" src="$(var.SystemDir)mfc70jpn.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc70kor_dll" Guid="720F98E2-5525-41CA-8734-98B0A5756708" DiskId="1">
 	                            <File Id="fil_mfc70kor_dll" LongName="mfc70kor.dll" Name="mfc70kor.dll" src="$(var.SystemDir)mfc70kor.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_runtime_debug1300" Guid="157D7DE8-6AFE-44b3-A317-840667C76D0D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_runtime_debug1300" Guid="157D7DE8-6AFE-44b3-A317-840667C76D0D" DiskId="1">
 	                            <File Id="fil_mfc70d_pdb" LongName="mfc70d.pdb" Name="mfc70d.pdb" src="$(var.SystemDir)mfc70d.pdb" />
 	                            <File Id="fil_msvcr70d_pdb" LongName="msvcr70d.pdb" Name="msvcr70d.pdb" src="$(var.SystemDir)msvcr70d.pdb" KeyPath="yes" />
 	                            <File Id="fil_msvcp70d_pdb" LongName="msvcp70d.pdb" Name="msvcp70d.pdb" src="$(var.SystemDir)msvcp70d.pdb" />
                             </Component>
-                        <?else?> <!-- CL1310 -->
-                            <Component Id="cmf_mfc71d_dll" Guid="0E0A47A3-892C-4526-8591-C719E1A184F2" DiskId="1">
+                    <?endif?>
+                    <?ifdef CL1310?>
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71d_dll" Guid="0E0A47A3-892C-4526-8591-C719E1A184F2" DiskId="1">
 	                            <File Id="fil_mfc71d_dll" LongName="mfc71d.dll" Name="mfc71d.dll" src="$(var.SystemDir)mfc71d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcr71d_dll" Guid="CB2A282D-CF73-4DA8-929D-8035776F4FB8" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcr71d_dll" Guid="CB2A282D-CF73-4DA8-929D-8035776F4FB8" DiskId="1">
 	                            <File Id="fil_msvcr71d_dll" LongName="msvcr71d.dll" Name="msvcr71d.dll" src="$(var.SystemDir)msvcr71d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_msvcp71d_dll" Guid="7D6003B6-B3A1-417A-BE16-5DDD52023456" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_msvcp71d_dll" Guid="7D6003B6-B3A1-417A-BE16-5DDD52023456" DiskId="1">
 	                            <File Id="fil_msvcp71d_dll" LongName="msvcp71d.dll" Name="msvcp71d.dll" src="$(var.SystemDir)msvcp71d.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71chs_dll" Guid="693F64CF-1AE5-4756-94CC-095ED48C217F" DiskId="1">
 	                            <File Id="fil_mfc71chs_dll" LongName="mfc71chs.dll" Name="mfc71chs.dll" src="$(var.SystemDir)mfc71chs.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71cht_dll" Guid="A5552AAE-048F-41AB-AC2D-6C96411D812D" DiskId="1">
 	                            <File Id="fil_mfc71cht_dll" LongName="mfc71cht.dll" Name="mfc71cht.dll" src="$(var.SystemDir)mfc71cht.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71deu_dll" Guid="E8AE39B8-1B23-4DC9-944F-CA823F53CFF3" DiskId="1">
 	                            <File Id="fil_mfc71deu_dll" LongName="mfc71deu.dll" Name="mfc71deu.dll" src="$(var.SystemDir)mfc71deu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71enu_dll" Guid="1FF5B6B6-4015-40F1-AEFF-004DBCFDB5E7" DiskId="1">
 	                            <File Id="fil_mfc71enu_dll" LongName="mfc71enu.dll" Name="mfc71enu.dll" src="$(var.SystemDir)mfc71enu.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71esp_dll" Guid="028AC2DA-B4F9-4A9E-A728-1100B3C7E259" DiskId="1">
 	                            <File Id="fil_mfc71esp_dll" LongName="mfc71esp.dll" Name="mfc71esp.dll" src="$(var.SystemDir)mfc71esp.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71fra_dll" Guid="7D6C3457-F08C-426C-BEE2-8D9F214223C5" DiskId="1">
 	                            <File Id="fil_mfc71fra_dll" LongName="mfc71fra.dll" Name="mfc71fra.dll" src="$(var.SystemDir)mfc71fra.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71ita_dll" Guid="5CE98F88-CD33-4887-9634-B6263B6DB3CB" DiskId="1">
 	                            <File Id="fil_mfc71ita_dll" LongName="mfc71ita.dll" Name="mfc71ita.dll" src="$(var.SystemDir)mfc71ita.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71jpn_dll" Guid="6DE66BB3-5DD2-4D87-89E4-D73FF405932C" DiskId="1">
 	                            <File Id="fil_mfc71jpn_dll" LongName="mfc71jpn.dll" Name="mfc71jpn.dll" src="$(var.SystemDir)mfc71jpn.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_mfc71kor_dll" Guid="B7290849-638E-4C39-9E56-0D73CF564D69" DiskId="1">
 	                            <File Id="fil_mfc71kor_dll" LongName="mfc71kor.dll" Name="mfc71kor.dll" src="$(var.SystemDir)mfc71kor.dll" KeyPath="yes" />
                             </Component>
-                            <Component Id="cmf_runtime_debug1310" Guid="0125814E-9EED-4d57-A4E6-3E685CE5AB5C" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmf_runtime_debug1310" Guid="0125814E-9EED-4d57-A4E6-3E685CE5AB5C" DiskId="1">
 	                            <File Id="fil_mfc71d_pdb" LongName="mfc71d.pdb" Name="mfc71d.pdb" src="$(var.SystemDir)mfc71d.pdb" />
 	                            <File Id="fil_msvcr71d_pdb" LongName="msvcr71d.pdb" Name="msvcr71d.pdb" src="$(var.SystemDir)msvcr71d.pdb" KeyPath="yes" />
 	                            <File Id="fil_msvcp71d_pdb" LongName="msvcp71d.pdb" Name="msvcp71d.pdb" src="$(var.SystemDir)msvcp71d.pdb" />
                             </Component>
-                        <?endif?>
                     <?endif?>
                 <?endif?>
                 
-                    <Component Id="cmf_psapi_dll" Guid="877F4DD5-8AE0-451C-8F4D-C27F6F30D221" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_psapi_dll" Guid="877F4DD5-8AE0-451C-8F4D-C27F6F30D221" DiskId="1">
 	                    <File Id="fil_psapi_dll" LongName="psapi.dll" Name="psapi.dll" src="$(var.SystemDir)psapi.dll" KeyPath="yes" />
                     </Component>
                 
                 </Directory> <!-- /bin -->
                 
                 <Directory Id="dirinc" Name="inc" src="$(var.IncDir)">
+                  <?if $(var.Platform) = "Intel"?>
                     <Directory Id="dirinc_kclient" Name="kclient" src="$(var.IncDir)kclient\">
-                        <Component Id="cmp_dirinc_kclient" Guid="96215203-7FF5-4576-AAC5-F5035B64CC37" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_kclient" Guid="96215203-7FF5-4576-AAC5-F5035B64CC37" DiskId="1">
                             <File Id="fil_kclient_h" LongName="kclient.h" Name="kclient.h" KeyPath="yes" />
                             <File Id="fil_kcmacerr_h" LongName="kcmacerr.h" Name="kcmacerr.h" />
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_krb4" Name="krb4" src="$(var.IncDir)krb4\">
-                        <Component Id="cmp_dirinc_krb4" Guid="5D2E3F2E-87AE-4905-84AC-AC503662D1B0" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb4" Guid="5D2E3F2E-87AE-4905-84AC-AC503662D1B0" DiskId="1">
                             <File Id="fil_com_err_h" LongName="com_err.h" Name="com_err.h" />
                             <File Id="fil_conf_pc_h" LongName="conf-pc.h" Name="conf-pc.h" />
                             <File Id="fil_conf_h" LongName="conf.h" Name="conf.h" />
@@ -647,16 +676,17 @@
                             <File Id="fil_osconf_h" LongName="osconf.h" Name="osconf.h" />
                         </Component>
                     </Directory>
+                  <?endif?>
                     <Directory Id="dirinc_krb5" Name="krb5" src="$(var.IncDir)krb5\">
                         <Directory Id="dirinc_krb5_gssapi" Name="gssapi" src="$(var.IncDir)\krb5\gssapi\">
-                            <Component Id="cmp_dirinc_krb5_gssapi" Guid="BD3C190B-1EBB-4d14-81DD-B2000DC4EAC7" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5_gssapi" Guid="BD3C190B-1EBB-4d14-81DD-B2000DC4EAC7" DiskId="1">
                                 <File Id="fil_gssapi_h" LongName="gssapi.h" Name="gssapi.h" KeyPath="yes" />
                                 <File Id="fil_gssapi_generic_h" LongName="gssapi_generic.h" Name="GSSAPI_G.H" />
                                 <File Id="fil_gssapi_krb5_h" LongName="gssapi_krb5.h" Name="GSSAPI_K.H" />
                             </Component>
                         </Directory>
                         <Directory Id="dirinc_krb5_KerberosIV" LongName="KerberosIV" Name="krb4" src="$(var.IncDir)\krb5\KerberosIV\">
-                            <Component Id="cmp_dirinc_krb5_KerberosIV" Guid="307B8031-2589-4f92-A303-EF4231328490" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5_KerberosIV" Guid="307B8031-2589-4f92-A303-EF4231328490" DiskId="1">
                                 <File Id="fil_des_.h" LongName="des.h" Name="des.h" />
                                 <File Id="fil_kadm_err_.h" LongName="kadm_err.h" Name="kadm_err.h" />
                                 <File Id="fil_krb_.h" LongName="krb.h" Name="krb.h" KeyPath="yes" />
@@ -665,11 +695,11 @@
                             </Component>
                         </Directory>
                         <Directory Id="dirinc_krb5_krb5" Name="krb5" src="$(var.IncDir)\krb5\krb5\">
-                            <Component Id="cmp_dirinc_krb5_krb5" Guid="D1E4E3D8-EF04-4DD6-B01E-F87876509869" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5_krb5" Guid="D1E4E3D8-EF04-4DD6-B01E-F87876509869" DiskId="1">
                                 <File Id="fil_krb5_h_inc" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
                             </Component>
                         </Directory>
-                        <Component Id="cmp_dirinc_krb5" Guid="7FD8008B-2F46-4613-8A09-989F643258F1" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krb5" Guid="7FD8008B-2F46-4613-8A09-989F643258F1" DiskId="1">
                             <File Id="fil_com_err_.h" LongName="com_err.h" Name="com_err.h" />
                             <File Id="fil_krb5_.h" LongName="krb5.h" Name="krb5.h" KeyPath="yes" />
                             <File Id="fil_profile_.h" LongName="profile.h" Name="profile.h" />
@@ -677,19 +707,19 @@
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_krbcc" Name="krbcc" src="$(var.IncDir)krbcc\">
-                        <Component Id="cmp_dirinc_krbcc" Guid="2CE4B708-7D45-41e4-8A53-BF2D78451A81" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_krbcc" Guid="2CE4B708-7D45-41e4-8A53-BF2D78451A81" DiskId="1">
                             <File Id="fil_cacheapi_h" LongName="cacheapi.h" Name="cacheapi.h" KeyPath="yes" />
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_leash" Name="leash" src="$(var.IncDir)leash\">
-                        <Component Id="cmp_dirinc_leash" Guid="FCF269AB-D9BC-49bd-B9F3-D6EA9697D8D7" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_leash" Guid="FCF269AB-D9BC-49bd-B9F3-D6EA9697D8D7" DiskId="1">
                             <File Id="fil_leasherr_h" LongName="leasherr.h" Name="leasherr.h" />
                             <File Id="fil_leashinfo_h" LongName="leashinfo.h" Name="LEASHINF.H" />
                             <File Id="fil_leashwin_h" LongName="leashwin.h" Name="leashwin.h" KeyPath="yes" />
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_loadfuncs" LongName="loadfuncs" Name="loadfunc" src="$(var.IncDir)loadfuncs\">
-                        <Component Id="cmp_dirinc_loadfuncs" Guid="C8E59D05-4502-498b-A107-1DF65C3A27D3" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_loadfuncs" Guid="C8E59D05-4502-498b-A107-1DF65C3A27D3" DiskId="1">
                             <File Id="fil_loadfuncs_afs_h" LongName="loadfuncs-afs.h" Name="LF-AFS.H" />
                             <File Id="fil_loadfuncs_afs36_h" LongName="loadfuncs-afs36.h" Name="LF-AFS36.H" />
                             <File Id="fil_loadfuncs_com_err_h" LongName="loadfuncs-com_err.h" Name="LF-COMER.H" />
@@ -705,7 +735,7 @@
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_netidmgr" Name="netidmgr" src="$(var.IncDir)netidmgr\">
-                        <Component Id="cmp_dirinc_netidmgr" Guid="EBD8BA04-574A-4081-A994-BCEC8ACBC878" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_netidmgr" Guid="EBD8BA04-574A-4081-A994-BCEC8ACBC878" DiskId="1">
                             <File Id="fil_hashtable_h" LongName="hashtable.h" Name="HASHTABL.H" />
                             <File Id="fil_kconfig_h" LongName="kconfig.h" Name="kconfig.h" /> 
                             <File Id="fil_kcreddb_h" LongName="kcreddb.h" Name="kcreddb.h" /> 
@@ -737,14 +767,14 @@
                         </Component>
                     </Directory>
                     <Directory Id="dirinc_wshelper" Name="wshelper" src="$(var.IncDir)wshelper\">
-                        <Component Id="cmp_dirinc_wshelper" Guid="5A4FCD76-6DC6-455c-B465-FD8123252EBD" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinc_wshelper" Guid="5A4FCD76-6DC6-455c-B465-FD8123252EBD" DiskId="1">
                             <File Id="fil_hesiod_h" LongName="hesiod.h" Name="hesiod.h" />
                             <File Id="fil_mitwhich_h" LongName="mitwhich.h" Name="mitwhich.h" />
                             <File Id="fil_resolv_h" LongName="resolv.h" Name="resolv.h" />
                             <File Id="fil_wshelper_h" LongName="wshelper.h" Name="wshelper.h" KeyPath="yes" />
                         </Component>
                         <Directory Id="dirinc_wshelper_arpa" Name="arpa" src="$(var.IncDir)\wshelper\arpa\">
-                            <Component Id="cmp_dirinc_wshelper_arpa" Guid="42A19215-91D6-4cd6-8BE8-95105849B862" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinc_wshelper_arpa" Guid="42A19215-91D6-4cd6-8BE8-95105849B862" DiskId="1">
                                 <File Id="fil_nameser_h" LongName="nameser.h" Name="nameser.h" KeyPath="yes" />
                             </Component>
                         </Directory>
@@ -752,29 +782,48 @@
                 </Directory>
                 
                 <Directory Id="dirlib" Name="lib" src="$(var.LibDir)">
+                   <?if $(var.Platform) = "Intel" ?>
                     <Directory Id="dirlib_i386" Name="i386" src="$(var.LibDir)">
-                        <Component Id="cmp_dirlib_i386" Guid="CFEE3ED4-92D4-49e1-BB78-8BCBC60C3E57" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirlib_i386" Guid="CFEE3ED4-92D4-49e1-BB78-8BCBC60C3E57" DiskId="1">
                             <File Id="fil_comerr32_lib" LongName="comerr32.lib" Name="comerr32.lib" />
-                            <File Id="fil_delaydlls_lib" LongName="delaydlls.lib" Name="DELAYDLL.LIB" />
-                            <File Id="fil_getopt_lib" LongName="getopt.lib" Name="getopt.lib" />
+                            <File Id="fil_delaydlls_32_lib" LongName="delaydlls.lib" Name="DELAYDLL.LIB" />
+                            <File Id="fil_getopt_32_lib" LongName="getopt.lib" Name="getopt.lib" />
                             <File Id="fil_gssapi32_lib" LongName="gssapi32.lib" Name="gssapi32.lib" />
                             <File Id="fil_kclnt32_lib" LongName="kclnt32.lib" Name="kclnt32.lib" />
-                            <File Id="fil_krb524_lib" LongName="krb524.lib" Name="krb524.lib" />
+                            <File Id="fil_krb524_32_lib" LongName="krb524.lib" Name="krb524.lib" />
+                            <File Id="fil_krbv4w32_lib" LongName="krbv4w32.lib" Name="krbv4w32.lib" />
                             <File Id="fil_krb5_32_lib" LongName="krb5_32.lib" Name="krb5_32.lib" KeyPath="yes" />
                             <File Id="fil_krbcc32_lib" LongName="krbcc32.lib" Name="krbcc32.lib" />
-                            <File Id="fil_krbv4w32_lib" LongName="krbv4w32.lib" Name="krbv4w32.lib" />
                             <File Id="fil_leashw32_lib" LongName="leashw32.lib" Name="leashw32.lib" />
-                            <File Id="fil_loadfuncs_lib" LongName="loadfuncs.lib" Name="LOADFUNC.LIB" />
+                            <File Id="fil_loadfuncs_32_lib" LongName="loadfuncs.lib" Name="LOADFUNC.LIB" />
                             <File Id="fil_wshelp32_lib" LongName="wshelp32.lib" Name="wshelp32.lib" />
                             <File Id="fil_xpprof32_lib" LongName="xpprof32.lib" Name="xpprof32.lib" />
                             <File Id="fil_nidmgr32_lib" LongName="nidmgr32.lib" Name="nidmgr32.lib" />
                         </Component>
                     </Directory>
+                    <?endif?>
+                    <?if $(var.Platform) = "x64" ?>
+                    <Directory Id="dirlib_amd64" Name="amd64" src="$(var.LibDir)">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirlib_amd64" Guid="F9A54201-FFD6-4a45-B021-276D9F6C40A2" DiskId="1">
+                            <File Id="fil_comerr64_lib" LongName="comerr64.lib" Name="comerr64.lib" />
+                            <File Id="fil_delaydlls_64_lib" LongName="delaydlls.lib" Name="DELAYDLL.LIB" />
+                            <File Id="fil_getopt_64_lib" LongName="getopt.lib" Name="getopt.lib" />
+                            <File Id="fil_gssapi64_lib" LongName="gssapi64.lib" Name="gssapi64.lib" />
+                            <File Id="fil_krb5_64_lib" LongName="krb5_64.lib" Name="krb5_64.lib" KeyPath="yes" />
+                            <File Id="fil_krbcc64_lib" LongName="krbcc64.lib" Name="krbcc64.lib" />
+                            <File Id="fil_leashw64_lib" LongName="leashw64.lib" Name="leashw64.lib" />
+                            <File Id="fil_loadfuncs_64_lib" LongName="loadfuncs.lib" Name="LOADFUNC.LIB" />
+                            <File Id="fil_wshelp64_lib" LongName="wshelp64.lib" Name="wshelp64.lib" />
+                            <File Id="fil_xpprof64_lib" LongName="xpprof64.lib" Name="xpprof64.lib" />
+                            <File Id="fil_nidmgr64_lib" LongName="nidmgr64.lib" Name="nidmgr64.lib" />
+                        </Component>
+                    </Directory>
+                    <?endif?>
                 </Directory>
                 
                 <Directory Id="dirinstall" Name="install" src="$(var.InstallDir)">
                     <Directory Id="dirinstall_nsis" Name="nsis" src="$(var.InstallDir)nsis\">
-                        <Component Id="cmp_dirinstall_nsis" Guid="711C3910-5369-44f3-A023-E09E86A1C749" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinstall_nsis" Guid="711C3910-5369-44f3-A023-E09E86A1C749" DiskId="1">
                             <File Id="fil_kfw_fixed_nsi" LongName="kfw-fixed.nsi" Name="KFW-FIXD.NSI" KeyPath="yes" />
                             <File Id="fil_kfw_ico" LongName="kfw.ico" Name="kfw.ico" />
                             <File Id="fil_kfw_nsi" LongName="kfw.nsi" Name="kfw.nsi" />
@@ -788,7 +837,7 @@
                         </Component>
                     </Directory>
                     <Directory Id="dirinstall_wix" Name="wix" src="$(var.InstallDir)wix\">
-                        <Component Id="cmp_dirinstall_wix" Guid="14DD16AB-6920-4ee1-8B78-623F39DB70BB" DiskId="1">
+                        <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix" Guid="14DD16AB-6920-4ee1-8B78-623F39DB70BB" DiskId="1">
                             <File Id="fil_config_wxi" LongName="config.wxi" Name="config.wxi" />
                             <File Id="fil_features_wxi" LongName="features.wxi" Name="features.wxi" />
                             <File Id="fil_files_wxi" LongName="files.wxi" Name="files.wxi" />
@@ -798,14 +847,14 @@
                             <File Id="fil_site_local_wxi" LongName="site-local-tagged.wxi" Name="SITE-LCL.WXI" />
                         </Component>
                         <Directory Id="dirinstall_wix_lang" Name="lang" src="$(var.InstallDir)wix\lang\">
-                            <Component Id="cmp_dirinstall_wix_lang" Guid="70741A69-1103-4B54-B146-2E14C271945D" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_lang" Guid="70741A69-1103-4B54-B146-2E14C271945D" DiskId="1">
                                 <File Id="fil_config_1033_wxi" LongName="config_1033.wxi" Name="CFG-1033.WXI" KeyPath="yes" />
                                 <File Id="fil_strings_1033_wxl" LongName="strings_1033.wxl" Name="STR-1033.WXL" />
                                 <File Id="fil_ui_1033_wxi" LongName="ui_1033.wxi" Name="ui_1033.wxi" />
                             </Component>
                         </Directory>
                         <Directory Id="dirinstall_wix_Binary" Name="Binary" src="$(var.InstallDir)wix\Binary\">
-                            <Component Id="cmp_dirinstall_wix_Binary" Guid="5F021D71-A398-41FD-8F9C-9C0665C18660" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_Binary" Guid="5F021D71-A398-41FD-8F9C-9C0665C18660" DiskId="1">
                                 <File Id="fil_bannrbmp_bmp" LongName="bannrbmp.bmp" Name="bannrbmp.bmp" />
                                 <File Id="fil_completi_ico" LongName="completi.ico" Name="completi.ico" />
                                 <File Id="fil_custicon_ico" LongName="custicon.ico" Name="custicon.ico" />
@@ -820,7 +869,7 @@
                             </Component>
                         </Directory>
                         <Directory Id="dirinstall_wix_custom" Name="custom" src="$(var.InstallDir)wix\custom\">
-                            <Component Id="cmp_dirinstall_wix_custom" Guid="872AA948-39B0-4CDC-B764-7EB69F280E50" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_custom" Guid="872AA948-39B0-4CDC-B764-7EB69F280E50" DiskId="1">
                                 <File Id="fil_custom_cpp" LongName="custom.cpp" Name="custom.cpp" KeyPath="yes" />
                                 <File Id="fil_custom_h" LongName="custom.h" Name="custom.h" />
                             </Component>
@@ -829,25 +878,27 @@
                 </Directory>
                 
                 <Directory Id="dirdoc" Name="doc" src="$(var.DocDir)">
-                    <Component Id="efl_leash_userdoc_pdf" Guid="68FB24DD-5EC2-4db1-AD42-5B9DDEC247C5" DiskId="1">
+                <?if $(var.Platform) = "Intel" ?>
+                    <Component Win64="$(var.Win64)" Id="efl_leash_userdoc_pdf" Guid="68FB24DD-5EC2-4db1-AD42-5B9DDEC247C5" DiskId="1">
                         <File Id="fil_leash_userdoc_pdf" LongName="leash_userdoc.pdf" Name="leash.pdf" KeyPath="yes">
 			    <Shortcut Id="sc_leash_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Leash User Documentation.lnk" Name="leashdoc.lnk" />
                         </File>
                         <Condition>USELEASH</Condition>
                     </Component>
-                    <Component Id="efl_netidmgr_userdoc_pdf" Guid="7F5A91C1-C6D3-4F64-A6AC-C0AF337B4ED6" DiskId="1">
+                <?endif?>
+                    <Component Win64="$(var.Win64)" Id="efl_netidmgr_userdoc_pdf" Guid="7F5A91C1-C6D3-4F64-A6AC-C0AF337B4ED6" DiskId="1">
                         <File Id="fil_netidmgr_userdoc_pdf" LongName="netidmgr_userdoc.pdf" Name="netidmgr.pdf" KeyPath="yes">
 			    <Shortcut Id="sc_netidmgr_userdoc_pdf" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager User Documentation.lnk" Name="netiddoc.lnk" />
                         </File>
                         <Condition>USENETIDMGR</Condition>
                     </Component>
-                    <Component Id="cmp_dirdoc_netid" Guid="D501BAF7-7E63-4864-AFED-1528D1C59B1B" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmp_dirdoc_netid" Guid="D501BAF7-7E63-4864-AFED-1528D1C59B1B" DiskId="1">
                         <File Id="fil_netidmgr_devdoc_chm" Name="netiddev.chm" KeyPath="yes">
 			    <Shortcut Id="sc_netidmgr_devdoc_chm" Advertise="no" Directory="dirShortcut" LongName="Network Identity Manager Developer Documentation.lnk" Name="netiddev.lnk" />
                         </File>
                         <Condition>USENETIDMGR</Condition>
                     </Component>
-                    <Component Id="efl_relnotes_html" Guid="C65F920A-039D-4839-848F-0AD7B445F376" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="efl_relnotes_html" Guid="C65F920A-039D-4839-848F-0AD7B445F376" DiskId="1">
                         <File Id="fil_relnotes_html" LongName="relnotes.html" Name="RELNOTES.HTM" KeyPath="yes">
 			    <Shortcut Id="sc_relnotes_html" Advertise="no" Directory="dirShortcut" LongName="Release Notes.lnk" Name="relnotes.lnk" />
                         </File>
@@ -857,7 +908,7 @@
                 <Directory Id="dirsample" Name="sample" src="$(var.SampleDir)">
                     <Directory Id="dirsample_templ" LongName="templates" Name="template" src="$(var.SampleDir)templates\">
                         <Directory Id="dirsample_t_credprov" Name="credprov" src="$(var.SampleDir)templates\credprov\">
-                            <Component Id="cmp_credprov_files" Guid="0D5A01A0-8DA9-4FED-9766-8B4DE6273145" DiskId="1">
+                            <Component Win64="$(var.Win64)" Id="cmp_credprov_files" Guid="0D5A01A0-8DA9-4FED-9766-8B4DE6273145" DiskId="1">
                                 <File Id="fil_credprov_Makefile" Name="Makefile" KeyPath="yes" />
                                 <File Id="fil_credprov_config_id_c" Name="conf_id.c" LongName="config_id.c" />
                                 <File Id="fil_credprov_config_ids_c" Name="conf_ids.c" LongName="config_ids.c" />
@@ -874,14 +925,14 @@
                             </Component>
 
                             <Directory Id="dirsample_t_credprov_images" Name="images" src="$(var.SampleDir)templates\credprov\images\">
-                                <Component Id="cmp_credprov_images_files" Guid="8A6CD5B8-482D-435F-9172-8F0B6AAA3C3F" DiskId="1">
+                                <Component Win64="$(var.Win64)" Id="cmp_credprov_images_files" Guid="8A6CD5B8-482D-435F-9172-8F0B6AAA3C3F" DiskId="1">
                                     <File Id="fil_credprov_plugin_ico" Name="plugin.ico" KeyPath="yes" />
                                 </Component>
                             </Directory>
 
                             <Directory Id="dirsample_t_credprov_lang" Name="lang" src="$(var.SampleDir)templates\credprov\lang\">
                                 <Directory Id="dirsample_t_credprov_lang_enus" Name="en_us" src="$(var.SampleDir)templates\credprov\lang\en_us\">
-                                    <Component Id="cmp_credprov_en_us_files" Guid="69C982D3-A1D3-4E23-9629-DE1842937F1D" DiskId="1">
+                                    <Component Win64="$(var.Win64)" Id="cmp_credprov_en_us_files" Guid="69C982D3-A1D3-4E23-9629-DE1842937F1D" DiskId="1">
                                         <File Id="fil_credprov_en_us_langres_rc" Name="langres.rc" KeyPath="yes" />
                                     </Component>
                                 </Directory>
@@ -894,13 +945,13 @@
         </Directory> <!-- /MIT -->
     </Directory> <!-- /Program Files -->
     <Directory Id="WindowsFolder">
-        <Component Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+        <Component Win64="$(var.Win64)" Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
 	        <File Id="fil_krb5_ini" LongName="krb5.ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
         </Component>
-        <Component Id="cmf_krb_con" Guid="5E91A051-CF14-45FF-BF64-CEE78A7A90C2" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+        <Component Win64="$(var.Win64)" Id="cmf_krb_con" Guid="5E91A051-CF14-45FF-BF64-CEE78A7A90C2" NeverOverwrite="yes" Permanent="yes" DiskId="1">
 	        <File Id="fil_krb_con" LongName="krb.con" Name="krb.con" src="$(var.ConfigDir)krb.con" KeyPath="yes" />
         </Component>
-        <Component Id="cmf_krbrealm_con" Guid="D667B54F-1C98-43FB-87C6-0F0517623B90" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+        <Component Win64="$(var.Win64)" Id="cmf_krbrealm_con" Guid="D667B54F-1C98-43FB-87C6-0F0517623B90" NeverOverwrite="yes" Permanent="yes" DiskId="1">
 	        <File Id="fil_krbrealm_con" LongName="krbrealm.con" Name="krbrealm.con" src="$(var.ConfigDir)krbrealm.con" KeyPath="yes" />
         </Component>
     </Directory>
@@ -912,7 +963,7 @@
     <Directory Id="StartupFolder">
     </Directory>
     
-    <Component Id="rcm_common" Guid="486D84B6-CCE5-4b95-B8E2-7DFBDB4CF9A2">
+    <Component Win64="$(var.Win64)" Id="rcm_common" Guid="486D84B6-CCE5-4b95-B8E2-7DFBDB4CF9A2">
         <Registry Id="reg_common0" Root="HKLM" Key="$(var.KfwRegRoot)" Action="createKeyAndRemoveKeyOnUninstall" />
         <Registry Id="reg_common1" Root="HKLM" Key="$(var.KfwRegRoot)" KeyPath="yes" />
         <Registry Id="reg_common2" Root="HKLM" Key="$(var.KfwRegRoot)" Name="InstallDir" Type="string" Value="[KERBEROSDIR]"/>
@@ -927,7 +978,7 @@
     <?endif?>
     </Component>
     
-    <Component Id="rcm_client" Guid="901179B2-7369-43b1-ACF3-4C7F37482CC7">
+    <Component Win64="$(var.Win64)" Id="rcm_client" Guid="901179B2-7369-43b1-ACF3-4C7F37482CC7">
         <Registry Id="reg_client0" Root="HKLM" Key="$(var.KfwRegRoot)\Client" Action="createKeyAndRemoveKeyOnUninstall"/>
 
         <Registry Id="reg_client1" Root="HKLM" Key="$(var.KfwRegRoot)\Client\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
@@ -953,7 +1004,7 @@
         <Registry Id="reg_client20" Root="HKLM" Key="$(var.KfwRegRoot)\Client\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
 
-    <Component Id="rcm_sdk" Guid="96AA90C7-8C60-4341-A15B-3DEDF29DA9F1">
+    <Component Win64="$(var.Win64)" Id="rcm_sdk" Guid="96AA90C7-8C60-4341-A15B-3DEDF29DA9F1">
         <Registry Id="reg_sdk0" Root="HKLM" Key="$(var.KfwRegRoot)\SDK" Action="createKeyAndRemoveKeyOnUninstall"/>
 
         <Registry Id="reg_sdk1" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
@@ -979,7 +1030,7 @@
         <Registry Id="reg_sdk20" Root="HKLM" Key="$(var.KfwRegRoot)\SDK\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
     
-    <Component Id="rcm_docs" Guid="C7EADA0F-8FF7-4e7b-9372-5553BDD5812F">
+    <Component Win64="$(var.Win64)" Id="rcm_docs" Guid="C7EADA0F-8FF7-4e7b-9372-5553BDD5812F">
         <Registry Id="reg_docs0" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation" Action="createKeyAndRemoveKeyOnUninstall"/>
 
         <Registry Id="reg_docs1" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\CurrentVersion" Action="createKeyAndRemoveKeyOnUninstall"/>
@@ -1004,6 +1055,49 @@
         <Registry Id="reg_docs19" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="MinorVersion" Type="integer" Value="$(var.VersionMinor)" />
         <Registry Id="reg_docs20" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
+
+    <!-- Shared assembly runtime for VS 2005 -->
+    <?ifdef CL1400?>
+    	<?ifdef env.CommonProgramFiles6432?>
+    	  <?define CPF="$(env.CommonProgramFiles(x86)"?>
+    	<?else?>
+    	  <?define CPF="$(env.CommonProgramFiles)"?>
+    	<?endif?>
+
+    	<?if $(var.Platform) = "x64" ?>
+    		<?ifndef Debug?>
+    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_CRT_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_CRT_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86_x64.msm"/>
+    		<?else?>
+    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugCRT_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugCRT_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugMFC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugMFC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86_x64.msm"/>
+    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86_x64.msm"/>
+    		<?endif?>
+    	<?else?>
+    		<?ifndef Debug?>
+    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_CRT_x86.msm"/>
+    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_CRT_x86.msm"/>
+    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFC_x86.msm"/>
+    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFC_x86.msm"/>
+    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86.msm"/>
+    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86.msm"/>
+    		<?else?>
+    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugCRT_x86.msm"/>
+    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugCRT_x86.msm"/>
+    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugMFC_x86.msm"/>
+    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugMFC_x86.msm"/>
+    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86.msm"/>
+    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86.msm"/>
+    		<?endif?>
+    	<?endif?>
+    <?endif?>
 
 </Directory>
 </Include>
