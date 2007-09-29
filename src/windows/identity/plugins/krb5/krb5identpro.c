@@ -830,40 +830,13 @@ k5_ident_set_default_int(khm_handle def_ident) {
     cb = sizeof(id_ccname);
     if (KHM_FAILED(kcdb_identity_get_attr(def_ident, attr_id_krb5_ccname, NULL,
                                           id_ccname, &cb))) {
-        khm_handle csp_ident = NULL;
-        khm_handle csp_k5 = NULL;
-
         _reportf(L"The specified identity does not have the Krb5CCName property");
 
         cb = sizeof(id_ccname);
-        if (KHM_SUCCEEDED(kcdb_identity_get_config(def_ident, 0, &csp_ident)) &&
-            KHM_SUCCEEDED(khc_open_space(csp_ident, CSNAME_KRB5CRED, 0, &csp_k5)) &&
-            KHM_SUCCEEDED(khc_read_string(csp_k5, L"DefaultCCName",
-                                          id_ccname, &cb))) {
-
-            _reportf(L"Found CC name in configuration [%s]", id_ccname);
-        } else {
-            /* last resort, use the name of the identity as the cc
-               name */
-            cb = sizeof(id_ccname);
-            if (KHM_FAILED(kcdb_identity_get_name(def_ident, id_ccname, &cb))) {
-                _reportf(L"Can't use name of identity as CCName");
-                _end_task();
-
-                id_ccname[0] = L'\0';
-            }
-        }
-
-        if (csp_k5)
-            khc_close_space(csp_k5);
-        if (csp_ident)
-            khc_close_space(csp_ident);
-
-        if (id_ccname[0] == L'\0')
+        if (KHM_FAILED(khm_krb5_get_identity_default_ccache(def_ident, id_ccname, &cb))) {
             return KHM_ERROR_INVALID_PARAM;
+        }
     }
-
-    khm_krb5_canon_cc_name(id_ccname, sizeof(id_ccname));
 
     _reportf(L"Found Krb5CCName property : %s", id_ccname);
 
