@@ -1119,7 +1119,7 @@ void khm_refresh_config(void) {
                 goto _next_cfg;
             }
 
-            khui_menu_insert_action(omenu, -1, action, 0);
+            khui_menu_insert_action(omenu, (khm_size) -1, action, 0);
 
             refresh_menu = TRUE;
         }

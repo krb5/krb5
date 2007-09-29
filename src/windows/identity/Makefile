@@ -55,6 +55,10 @@ RMAKE=$(MAKECMD) /nologo clean
 RMAKE_W2K=$(MAKECMD) /nologo clean KHBUILD_W2K=1
 !endif
 
+!if "$(CPU)" != "i386"
+NO_KRB4=1
+!endif
+
 start:
 
 config: start

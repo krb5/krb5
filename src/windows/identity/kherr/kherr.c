@@ -314,23 +314,26 @@ free_event_params(kherr_event * e)
     if(parm_type(e->p1) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p1));
         PFREE((void*) parm_data(e->p1));
-        ZeroMemory(&e->p1, sizeof(e->p1));
     }
+    ZeroMemory(&e->p1, sizeof(e->p1));
+
     if(parm_type(e->p2) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p2));
         PFREE((void*) parm_data(e->p2));
-        ZeroMemory(&e->p2, sizeof(e->p2));
     }
+    ZeroMemory(&e->p2, sizeof(e->p2));
+
     if(parm_type(e->p3) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p3));
         PFREE((void*) parm_data(e->p3));
-        ZeroMemory(&e->p3, sizeof(e->p3));
     }
+    ZeroMemory(&e->p3, sizeof(e->p3));
+
     if(parm_type(e->p4) == KEPT_STRINGT) {
         assert((void *) parm_data(e->p4));
         PFREE((void*) parm_data(e->p4));
-        ZeroMemory(&e->p4, sizeof(e->p4));
     }
+    ZeroMemory(&e->p4, sizeof(e->p4));
 }
 
 static void
@@ -339,15 +342,25 @@ free_event(kherr_event * e)
     EnterCriticalSection(&cs_error);
 
     assert(IS_KHERR_EVENT(e));
+#ifdef DEBUG
+    assert(LNEXT(e) == NULL);
+    assert(LPREV(e) == NULL);
+#endif
 
 #ifdef DEBUG_CONTEXT
-    kherr_debug_printf(L"Freeing event 0x%x\n", e);
     if (!(e->flags & KHERR_RF_STR_RESOLVED))
         resolve_event_strings(e);
-    if (e->short_desc)
-        kherr_debug_printf(L"  Desc(S):[%s]\n", e->short_desc);
-    if (e->long_desc)
-        kherr_debug_printf(L"  Desc(L):[%s]\n", e->long_desc);
+
+    if (e->short_desc && e->long_desc) {
+        kherr_debug_printf(L"E:%s (%s)\n", e->short_desc, e->long_desc);
+    } else if (e->short_desc) {
+        kherr_debug_printf(L"E:%s\n", e->short_desc);
+    } else if (e->long_desc) {
+        kherr_debug_printf(L"E:%s\n", e->long_desc);
+    } else {
+        kherr_debug_printf(L"E:[No description for event 0x%p]\n", e);
+    }
+
     if (e->suggestion)
         kherr_debug_printf(L"  Suggest:[%s]\n", e->suggestion);
     if (e->facility)
@@ -449,6 +462,9 @@ add_event(kherr_context * c, kherr_event * e)
 
     assert(IS_KHERR_CTX(c));
     assert(IS_KHERR_EVENT(e));
+#ifdef DEBUG
+    assert(LPREV(e) == NULL && LNEXT(e) == NULL);
+#endif
 
     EnterCriticalSection(&cs_error);
     te = QBOTTOM(c);
@@ -502,46 +518,67 @@ pick_err_event(kherr_context * c)
 }
 
 static void
-arg_from_param(DWORD_PTR ** parm, kherr_param p)
+va_arg_from_param(va_list * parm, kherr_param p)
 {
-    int t;
+    int t = parm_type(p);
 
-    if (p.type != KEPT_NONE) {
-        t = parm_type(p);
-        if (t == KEPT_INT32 ||
-            t == KEPT_UINT32 ||
-            t == KEPT_STRINGC ||
-            t == KEPT_STRINGT ||
-            t == KEPT_PTR) {
+    khm_int32 * pi;
+    wchar_t ** ps;
+    void ** pptr;
+    khm_int64 * pli;
 
-            *(*parm)++ = (DWORD_PTR) parm_data(p);
+    if (t != KEPT_NONE) {
+        switch (t) {
+        case KEPT_INT32:
+        case KEPT_UINT32:
+            pi = (khm_int32 *)(*parm);
+            va_arg(*parm, khm_int32);
+            *pi = (khm_int32) parm_data(p);
+            break;
 
-        } else if (t == KEPT_INT64 ||
-                   t == KEPT_UINT64) {
-            *(*parm)++ = (DWORD_PTR) parm_data(p) & 0xffffffff;
-            *(*parm)++ = (DWORD_PTR) (parm_data(p) >> 32) & 0xffffffff;
-        } else
-            *(*parm)++ = 0;
+        case KEPT_STRINGC:
+        case KEPT_STRINGT:
+            ps = (wchar_t **) (*parm);
+            va_arg(*parm, wchar_t *);
+            *ps = (wchar_t *) parm_data(p);
+            break;
+
+        case KEPT_PTR:
+            pptr = (void **) (*parm);
+            va_arg(*parm, void *);
+            *pptr = (void *) parm_data(p);
+            break;
+
+        case KEPT_INT64:
+        case KEPT_UINT64:
+            pli = (khm_int64 *) (*parm);
+            va_arg(*parm, khm_int64);
+            *pli = (khm_int64) parm_data(p);
+            break;
+
+#ifdef DEBUG
+        default:
+            assert(FALSE);
+#endif
+        }
     }
 }
 
-/* The 'buf' parameter MUST point to a DWORD_PTR[8] array */
 static void
-args_from_event(DWORD_PTR * buf, kherr_event * e)
+va_args_from_event(va_list args, kherr_event * e, khm_size cb)
 {
-    arg_from_param(&buf, e->p1);
-    arg_from_param(&buf, e->p2);
-    arg_from_param(&buf, e->p3);
-    arg_from_param(&buf, e->p4);
-}
+    ZeroMemory(args, cb);
 
-#ifdef _WIN64
-#  error resolve_string_resource() does not work on 64 bit architectures
-#endif
+    va_arg_from_param(&args, e->p1);
+    va_arg_from_param(&args, e->p2);
+    va_arg_from_param(&args, e->p3);
+    va_arg_from_param(&args, e->p4);
+}
 
 static void
 resolve_string_resource(kherr_event * e,
                         const wchar_t ** str,
+                        va_list vl,
                         khm_int32 if_flag,
                         khm_int32 or_flag)
 {
@@ -558,18 +595,9 @@ resolve_string_resource(kherr_event * e,
             *str = NULL;
         else {
             wchar_t * s;
-            DWORD_PTR args[8];
 
-            args_from_event(args, e);
-
-            chars = FormatMessage(FORMAT_MESSAGE_FROM_STRING |
-                               FORMAT_MESSAGE_ARGUMENT_ARRAY,
-                               tfmt,
-                               0,
-                               0,
-                               tbuf,
-                               ARRAYLENGTH(tbuf),
-                               (va_list *) args);
+            chars = FormatMessage(FORMAT_MESSAGE_FROM_STRING, tfmt,
+                                  0, 0, tbuf, ARRAYLENGTH(tbuf), &vl);
 
             if (chars == 0) {
                 *str = NULL;
@@ -586,33 +614,27 @@ resolve_string_resource(kherr_event * e,
     }
 }
 
-#ifdef _WIN64
-#  error resolve_msg_resource() does not work on 64 bit architectures
-#endif
-
 static void
 resolve_msg_resource(kherr_event * e,
                      const wchar_t ** str,
+                     va_list vl,
                      khm_int32 if_flag,
                      khm_int32 or_flag)
 {
     wchar_t tbuf[KHERR_MAXCCH_STRING];
     size_t chars = 0;
     size_t bytes = 0;
-    DWORD_PTR args[8];
 
     if(e->flags & if_flag) {
         if(e->h_module != NULL) {
-            args_from_event(args, e);
 
-            chars = FormatMessage(FORMAT_MESSAGE_FROM_HMODULE |
-                                  FORMAT_MESSAGE_ARGUMENT_ARRAY,
+            chars = FormatMessage(FORMAT_MESSAGE_FROM_HMODULE,
                                   (LPCVOID) e->h_module,
                                   (DWORD)(DWORD_PTR) *str,
                                   0,
                                   tbuf,
                                   ARRAYLENGTH(tbuf),
-                                  (va_list *) args);
+                                  &vl);
         }
 
         if(e->h_module == NULL || chars == 0) {
@@ -640,13 +662,10 @@ resolve_msg_resource(kherr_event * e,
     }
 }
 
-#ifdef _WIN64
-#  error resolve_string() does not work on 64 bit architectures
-#endif
-
 static void
 resolve_string(kherr_event * e,
                const wchar_t ** str,
+               va_list vl,
                khm_int32 mask,
                khm_int32 free_if,
                khm_int32 or_flag)
@@ -654,21 +673,18 @@ resolve_string(kherr_event * e,
     wchar_t tbuf[KHERR_MAXCCH_STRING];
     size_t chars;
     size_t bytes;
-    DWORD_PTR args[8];
 
     if (((e->flags & mask) == 0 ||
-        (e->flags & mask) == free_if) &&
+         (e->flags & mask) == free_if) &&
         *str != NULL) {
 
-        args_from_event(args, e);
-        chars = FormatMessage(FORMAT_MESSAGE_FROM_STRING |
-                              FORMAT_MESSAGE_ARGUMENT_ARRAY,
+        chars = FormatMessage(FORMAT_MESSAGE_FROM_STRING,
                               (LPCVOID) *str,
                               0,
                               0,
                               tbuf,
                               ARRAYLENGTH(tbuf),
-                              (va_list *) args);
+                              &vl);
 
         if ((e->flags & mask) == free_if) {
             PFREE((void *) *str);
@@ -695,41 +711,46 @@ resolve_string(kherr_event * e,
 void
 resolve_event_strings(kherr_event * e)
 {
-    resolve_string(e, &e->short_desc,
+    DWORD_PTR args[8];
+    va_list vl = (va_list) args;
+
+    va_args_from_event(vl, e, sizeof(args));
+
+    resolve_string(e, &e->short_desc, vl,
                    KHERR_RFMASK_SHORT_DESC,
                    KHERR_RF_FREE_SHORT_DESC,
                    KHERR_RF_FREE_SHORT_DESC);
 
-    resolve_string(e, &e->long_desc,
+    resolve_string(e, &e->long_desc, vl,
                    KHERR_RFMASK_LONG_DESC,
                    KHERR_RF_FREE_LONG_DESC,
                    KHERR_RF_FREE_LONG_DESC);
 
-    resolve_string(e, &e->suggestion,
+    resolve_string(e, &e->suggestion, vl,
                    KHERR_RFMASK_SUGGEST,
                    KHERR_RF_FREE_SUGGEST,
                    KHERR_RF_FREE_SUGGEST);
 
-    resolve_string_resource(e, &e->short_desc,
+    resolve_string_resource(e, &e->short_desc, vl,
                             KHERR_RF_RES_SHORT_DESC,
                             KHERR_RF_FREE_SHORT_DESC);
 
-    resolve_string_resource(e, &e->long_desc,
-                            KHERR_RF_RES_LONG_DESC, 
+    resolve_string_resource(e, &e->long_desc, vl,
+                            KHERR_RF_RES_LONG_DESC,
                             KHERR_RF_FREE_LONG_DESC);
 
-    resolve_string_resource(e, &e->suggestion,
-                            KHERR_RF_RES_SUGGEST, 
+    resolve_string_resource(e, &e->suggestion, vl,
+                            KHERR_RF_RES_SUGGEST,
                             KHERR_RF_FREE_SUGGEST);
 
-    resolve_msg_resource(e, &e->short_desc,
-                         KHERR_RF_MSG_SHORT_DESC, 
+    resolve_msg_resource(e, &e->short_desc, vl,
+                         KHERR_RF_MSG_SHORT_DESC,
                          KHERR_RF_FREE_SHORT_DESC);
-    resolve_msg_resource(e, &e->long_desc,
-                         KHERR_RF_MSG_LONG_DESC, 
+    resolve_msg_resource(e, &e->long_desc, vl,
+                         KHERR_RF_MSG_LONG_DESC,
                          KHERR_RF_FREE_LONG_DESC);
-    resolve_msg_resource(e, &e->suggestion,
-                         KHERR_RF_MSG_SUGGEST, 
+    resolve_msg_resource(e, &e->suggestion, vl,
+                         KHERR_RF_MSG_SUGGEST,
                          KHERR_RF_FREE_SUGGEST);
 
     /* get rid of dangling reference now that we have done everything

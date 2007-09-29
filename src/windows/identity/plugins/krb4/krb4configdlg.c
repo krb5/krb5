@@ -393,8 +393,8 @@ krb4_confg_proc(HWND hwnd,
             CHAR krbrealm_path[MAX_PATH];
             CHAR ticketName[MAX_PATH];
             char * pticketName;
-            unsigned int krb_path_sz = sizeof(krb_path);
-            unsigned int krbrealm_path_sz = sizeof(krbrealm_path);
+            size_t krb_path_sz = sizeof(krb_path);
+            size_t krbrealm_path_sz = sizeof(krbrealm_path);
             khm_size cbsize;
 
             d = PMALLOC(sizeof(*d));

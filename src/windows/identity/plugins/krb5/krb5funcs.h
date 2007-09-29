@@ -198,6 +198,12 @@ khm_krb5_set_identity_params(khm_handle ident, const k5_params * p);
 khm_int32
 khm_krb5_get_identity_params(khm_handle ident, k5_params * p);
 
+khm_int32
+khm_krb5_get_identity_default_ccache(khm_handle ident, wchar_t * buf, khm_size * pcb);
+
+khm_int32
+khm_krb5_get_identity_default_ccacheA(khm_handle ident, char * buf, khm_size * pcb);
+
 /* Utility */
 
 wchar_t * 

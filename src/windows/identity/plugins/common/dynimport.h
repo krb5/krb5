@@ -49,11 +49,15 @@ extern HINSTANCE hProfile;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifdef _WIN64
+#define CCAPI_DLL     "krbcc64.dll"
+#define KRBCC32_DLL   "krbcc64.dll"
+#else
 #define CCAPI_DLL     "krbcc32.dll"
 #define KRBCC32_DLL   "krbcc32.dll"
+#endif
 #define SERVICE_DLL   "advapi32.dll"
 #define SECUR32_DLL   "secur32.dll"
-#define PROFILE_DLL   "xpprof32.dll"
 
 //////////////////////////////////////////////////////////////////////////////
 

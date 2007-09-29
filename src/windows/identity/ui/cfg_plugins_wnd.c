@@ -131,7 +131,7 @@ void update_dialog_fields(HWND hwnd,
     for (t = info->plugin.reg.dependencies; t && *t;
          t = multi_string_next(t)) {
         SendDlgItemMessage(hwnd, IDC_CFG_DEPS,
-                           LB_INSERTSTRING, -1, (LPARAM) t);
+                           LB_INSERTSTRING, (WPARAM) -1, (LPARAM) t);
     }
 
     if (info->plugin.reg.module)

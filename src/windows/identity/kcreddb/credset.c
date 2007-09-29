@@ -1054,28 +1054,17 @@ kcdb_credset_unseal(khm_handle credset) {
     return rv;
 }
 
+/* These are protected with cs_credset */
+static void * _creds_comp_rock = NULL;
+static kcdb_cred_comp_func _creds_comp_func = NULL;
 
-/* wrapper for qsort and also parameter gobbling FSM.  Access to this
-   function is serialized via cs_credset. */
+/* Need cs_credset when calling this function. */
 int __cdecl 
 kcdb_creds_comp_wrapper(const void * a, const void * b)
 {
-    static void * rock = NULL;
-    static kcdb_cred_comp_func comp = NULL;
-
-    if(!b) {
-        rock = (void *) a;
-        return 0;
-    }
-
-    if(!a) {
-        comp = (kcdb_cred_comp_func) b;
-        return 0;
-    }
-
-    return comp((khm_handle) ((kcdb_credset_credref *)a)->cred, 
-                (khm_handle) ((kcdb_credset_credref *)b)->cred, 
-                rock);
+    return (*_creds_comp_func)((khm_handle) ((kcdb_credset_credref *)a)->cred, 
+                               (khm_handle) ((kcdb_credset_credref *)b)->cred, 
+                               _creds_comp_rock);
 }
 
 KHMEXP khm_int32 KHMAPI 
@@ -1102,8 +1091,8 @@ kcdb_credset_sort(khm_handle credset,
 
     EnterCriticalSection(&cs_credset);
 
-    kcdb_creds_comp_wrapper(rock, NULL);
-    kcdb_creds_comp_wrapper(NULL, (void *) comp);
+    _creds_comp_rock = rock;
+    _creds_comp_func = comp;
 
     qsort(cs->clist, cs->nclist,
 	  sizeof(kcdb_credset_credref), kcdb_creds_comp_wrapper);

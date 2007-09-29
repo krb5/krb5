@@ -203,7 +203,7 @@ void khm_start_file_log(void) {
     khm_get_file_log_path(sizeof(temppath), temppath);
 
     logfile = NULL;
-#if _MSC_VER >= 1400
+#if _MSC_VER >= 1400 && __STDC_WANT_SECURE_LIB__
     _wfopen_s(&logfile, temppath, L"w");
 #else
     logfile = _wfopen(temppath, L"w");

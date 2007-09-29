@@ -153,7 +153,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_update(khm_handle vdest,
                     goto _skip_copy;
             }
 
-            kcdb_buf_set_value(&dest->buf, i, i, srcbuf, cbsrcbuf);
+            kcdb_buf_set_value(&dest->buf, i, (khm_ui_2) i, srcbuf, cbsrcbuf);
             rv = KHM_ERROR_SUCCESS;
 
 	_skip_copy:
@@ -166,7 +166,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_update(khm_handle vdest,
 	    if (!(a->flags & KCDB_ATTR_FLAG_COMPUTED) &&
 		(a->flags & KCDB_ATTR_FLAG_TRANSIENT) &&
 		kcdb_cred_val_exist(dest, i)) {
-		kcdb_buf_set_value(&dest->buf, i, i, NULL, 0);
+		kcdb_buf_set_value(&dest->buf, i, (khm_ui_2) i, NULL, 0);
 
 		rv = KHM_ERROR_SUCCESS;
 	    }
@@ -372,7 +372,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_set_attr(
 
     if (buffer == 0) {
         /* we are removing the value */
-        kcdb_buf_alloc(&cred->buf, attr_id, attr_id, 0);
+        kcdb_buf_alloc(&cred->buf, attr_id, (khm_ui_2) attr_id, 0);
         code = KHM_ERROR_SUCCESS;
         goto _exit;
     }
@@ -393,7 +393,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_set_attr(
         goto _exit;
     }
 
-    kcdb_buf_alloc(&cred->buf, attr_id, attr_id, cbdest);
+    kcdb_buf_alloc(&cred->buf, attr_id, (khm_ui_2) attr_id, cbdest);
     if(!kcdb_cred_buf_exist(cred, attr_id)) {
         code = KHM_ERROR_NO_RESOURCES;
         goto _exit;
@@ -402,7 +402,7 @@ KHMEXP khm_int32 KHMAPI kcdb_cred_set_attr(
     if(KHM_FAILED(code =
         type->dup(buffer, cbbuf, kcdb_cred_buf_get(cred,attr_id), &cbdest))) 
     {
-        kcdb_buf_alloc(&cred->buf, attr_id, attr_id, 0);
+        kcdb_buf_alloc(&cred->buf, attr_id, (khm_ui_2) attr_id, 0);
         goto _exit;
     }
 

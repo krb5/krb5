@@ -217,7 +217,7 @@ typedef struct tag_khui_menu_def {
 } khui_menu_def;
 
 #ifdef NOEXPORT
-#define CONSTMENU(c,s,i) {c,s,-1,-1,i}
+#define CONSTMENU(c,s,i) {c,s,(khm_size)-1,(khm_size)-1,i}
 #endif
 
 /*! \brief Unspecified menu

@@ -635,7 +635,7 @@ kherr_reportf(const wchar_t * long_desc_fmt,
     then only the first part of the string that fits within the limit
     is duplicated.
 
-    The resulign ::kherr_param must be passed in to kherr_report().
+    The resulting ::kherr_param must be passed in to kherr_report().
     The event logging framework will free the duplicated string once
     the data is no longer required.
  */

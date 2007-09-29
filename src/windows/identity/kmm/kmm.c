@@ -61,7 +61,7 @@ khm_boolean kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l)
 
         EnterCriticalSection(&cs_kmm);
         m->h_resource = h;
-        m->lcid_resource = l->language;
+        m->lcid_resource = (WORD) l->language;
         LeaveCriticalSection(&cs_kmm);
 
         return TRUE;
@@ -72,7 +72,7 @@ khm_boolean kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l)
 
         EnterCriticalSection(&cs_kmm);
         m->h_resource = m->h_module;
-        m->lcid_resource = l->language;
+        m->lcid_resource = (WORD) l->language;
         LeaveCriticalSection(&cs_kmm);
 
         return TRUE;

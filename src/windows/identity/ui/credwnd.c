@@ -33,8 +33,6 @@ khm_int32 khui_cw_flag_id;
 
 khm_int32 attr_to_action[KCDB_ATTR_MAX_ID + 1];
 
-khm_int32   bHideWatermarks = 0;
-
 /* forward declarations */
 static void
 cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected);
@@ -125,8 +123,8 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
 
     if (name == NULL) {
         LOGFONT lf = {
-            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
-            0,0, /* escapement */
+            0,0,
+            0,0,
             FW_THIN,
             FALSE,
             FALSE,
@@ -137,13 +135,15 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
             DEFAULT_QUALITY,
             FF_SWISS,
             L"MS Shell Dlg"};
+
+        lf.lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 
         *pfont = lf;
 
     } else if (!wcscmp(name, L"FontHeader")) {
         LOGFONT lf = {
-            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
-            0,0, /* escapement */
+            0,0,
+            0,0,
             FW_THIN,
             FALSE,
             FALSE,
@@ -154,13 +154,15 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
             DEFAULT_QUALITY,
             FF_SWISS,
             L"MS Shell Dlg"};
+
+        lf.lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 
         *pfont = lf;
 
     } else if (!wcscmp(name, L"FontHeaderBold")) {
         LOGFONT lf = {
-            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
-            0,0, /* escapement */
+            0,0,
+            0,0,
             FW_BOLD,
             FALSE,
             FALSE,
@@ -172,12 +174,14 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
             FF_SWISS,
             L"MS Shell Dlg"};
 
+        lf.lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+
         *pfont = lf;
 
     } else if (!wcscmp(name, L"FontNormal")) {
         LOGFONT lf = {
-            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
-            0,0, /* escapement */
+            0,0,
+            0,0,
             FW_THIN,
             FALSE,
             FALSE,
@@ -189,12 +193,14 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
             FF_SWISS,
             L"MS Shell Dlg"};
 
+        lf.lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+
         *pfont = lf;
 
     } else if (!wcscmp(name, L"FontBold")) {
         LOGFONT lf = {
-            -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72), 0, /* width/height */
-            0,0, /* escapement */
+            0,0,
+            0,0,
             FW_BOLD,
             FALSE,
             FALSE,
@@ -205,6 +211,8 @@ khm_get_cw_element_font(HDC hdc, wchar_t * name, BOOL use_default, LOGFONT * pfo
             DEFAULT_QUALITY,
             FF_SWISS,
             L"MS Shell Dlg"};
+
+        lf.lfHeight = -MulDiv(8, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 
         *pfont = lf;
 
@@ -499,8 +507,6 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
                                  &hc_cw)))
         return;
 
-    khc_read_int32(hc_cw, L"HideWatermarks", &bHideWatermarks);
-
     if(KHM_FAILED(khc_open_space(hc_cw, L"Views", KHM_PERM_READ, &hc_vs)))
         goto _exit;
 
@@ -719,20 +725,20 @@ _skip_col:
         khm_handle hc_themes = NULL;
         khm_handle hc_theme = NULL;
 
-        COLORREF bg_s;
-        COLORREF bg_normal;
-        COLORREF bg_gray;
-        COLORREF bg_hdr;
-        COLORREF bg_hdr_cred;
-        COLORREF bg_hdr_warn;
-        COLORREF bg_hdr_crit;
-        COLORREF bg_hdr_exp;
+        COLORREF bg_s          = 0;
+        COLORREF bg_normal     = 0;
+        COLORREF bg_gray       = 0;
+        COLORREF bg_hdr        = 0;
+        COLORREF bg_hdr_cred   = 0;
+        COLORREF bg_hdr_warn   = 0;
+        COLORREF bg_hdr_crit   = 0;
+        COLORREF bg_hdr_exp    = 0;
 
-        COLORREF bg_hdr_s;
-        COLORREF bg_hdr_cred_s;
-        COLORREF bg_hdr_warn_s;
-        COLORREF bg_hdr_crit_s;
-        COLORREF bg_hdr_exp_s;
+        COLORREF bg_hdr_s      = 0;
+        COLORREF bg_hdr_cred_s = 0;
+        COLORREF bg_hdr_warn_s = 0;
+        COLORREF bg_hdr_crit_s = 0;
+        COLORREF bg_hdr_exp_s  = 0;
 
         cbsize = sizeof(buf);
         if (KHM_SUCCEEDED(khc_read_string(hc_cw, L"DefaultTheme", buf, &cbsize)) &&
@@ -763,7 +769,7 @@ _skip_col:
         } else {
 #ifdef DEBUG
             assert(FALSE);
-#endif
+#endif            
         }
 
         if (hc_theme)
@@ -1843,8 +1849,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
 
             o->start = n_rows;
             o->length = 1;
-            o->idx_start = -1;
-            o->idx_end = -1;
+            o->idx_start = (khm_size) -1;
+            o->idx_end = (khm_size) -1;
 
             if (grouping[0] == tbl->n_cols - 1)
                 o->flags |= KHUI_CW_O_NOOUTLINE;
@@ -1932,8 +1938,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             o->flags &= ~KHUI_CW_O_EXPAND;
             o->start = n_rows;
             o->length = 1;
-            o->idx_start = -1;
-            o->idx_end = -1;
+            o->idx_start = (khm_size) -1;
+            o->idx_end = (khm_size) -1;
 
             cw_set_tbl_row_header(tbl, n_rows, grouping[0], o);
 
@@ -2386,8 +2392,7 @@ cw_erase_rect(HDC hdc,
         rlogo.right = r_wnd->right;
         rlogo.top = r_wnd->bottom - tbl->kbm_logo_shade.cy;
         rlogo.bottom = r_wnd->bottom;
-        if (bHideWatermarks)    {rie = FALSE;}
-        else                    {rie = IntersectRect(&ri, r_erase, &rlogo);}
+        rie = IntersectRect(&ri, r_erase, &rlogo);
     } else {
         ZeroMemory(&rlogo, sizeof(rlogo));
         ZeroMemory(&ri, sizeof(ri));
@@ -3161,7 +3166,7 @@ LRESULT
 cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
-    HDC hdc;
+    HDC hdc = NULL;
     PAINTSTRUCT ps;
     RECT r,rh;
     HFONT hf_old = NULL;

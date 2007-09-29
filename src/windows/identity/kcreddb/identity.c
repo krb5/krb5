@@ -880,10 +880,10 @@ kcdb_identity_set_attr(khm_handle vid,
 
     if (buffer == NULL) {
         /* we are removing a value */
-        slot = kcdb_buf_slot_by_id(&id->buf, attr_id);
+        slot = kcdb_buf_slot_by_id(&id->buf, (khm_ui_2) attr_id);
         if (slot != KCDB_BUF_INVALID_SLOT &&
             kcdb_buf_exist(&id->buf, slot))
-            kcdb_buf_alloc(&id->buf, slot, attr_id, 0);
+            kcdb_buf_alloc(&id->buf, slot, (khm_ui_2) attr_id, 0);
         code = KHM_ERROR_SUCCESS;
         goto _exit;
     }
@@ -904,8 +904,8 @@ kcdb_identity_set_attr(khm_handle vid,
         goto _exit;
     }
 
-    kcdb_buf_alloc(&id->buf, KCDB_BUF_APPEND, attr_id, cbdest);
-    slot = kcdb_buf_slot_by_id(&id->buf, attr_id);
+    kcdb_buf_alloc(&id->buf, KCDB_BUF_APPEND, (khm_ui_2) attr_id, cbdest);
+    slot = kcdb_buf_slot_by_id(&id->buf, (khm_ui_2) attr_id);
     if(slot == KCDB_BUF_INVALID_SLOT || !kcdb_buf_exist(&id->buf, slot)) {
         code = KHM_ERROR_NO_RESOURCES;
         goto _exit;
@@ -914,7 +914,7 @@ kcdb_identity_set_attr(khm_handle vid,
     if(KHM_FAILED(code =
         type->dup(buffer, cbbuf, kcdb_buf_get(&id->buf, slot), &cbdest)))
     {
-        kcdb_buf_alloc(&id->buf, slot, attr_id, 0);
+        kcdb_buf_alloc(&id->buf, slot, (khm_ui_2) attr_id, 0);
         goto _exit;
     }
 
@@ -984,7 +984,7 @@ kcdb_identity_get_attr(khm_handle vid,
     id = (kcdb_identity *) vid;
 
     if(!(id->flags & KCDB_IDENT_FLAG_ATTRIBS) ||
-        (slot = kcdb_buf_slot_by_id(&id->buf, attr_id)) == KCDB_BUF_INVALID_SLOT ||
+       (slot = kcdb_buf_slot_by_id(&id->buf, (khm_ui_2) attr_id)) == KCDB_BUF_INVALID_SLOT ||
         !kcdb_buf_val_exist(&id->buf, slot)) 
     {
         code = KHM_ERROR_NOT_FOUND;
@@ -1077,7 +1077,7 @@ kcdb_identity_get_attr_string(khm_handle vid,
     id = (kcdb_identity *) vid;
 
     if(!(id->flags & KCDB_IDENT_FLAG_ATTRIBS) ||
-        (slot = kcdb_buf_slot_by_id(&id->buf, attr_id)) == KCDB_BUF_INVALID_SLOT ||
+       (slot = kcdb_buf_slot_by_id(&id->buf, (khm_ui_2) attr_id)) == KCDB_BUF_INVALID_SLOT ||
         !kcdb_buf_val_exist(&id->buf, slot)) 
     {
         code = KHM_ERROR_NOT_FOUND;

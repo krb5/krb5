@@ -217,7 +217,7 @@ static int refresh_menu_item(HMENU hm, khui_action * act,
     mii.fMask = MIIM_STATE | MIIM_ID | MIIM_FTYPE;
     if (!GetMenuItemInfo(hm, idx, TRUE, &mii) ||
         ((flags & KHUI_ACTIONREF_SEP) && !(mii.fType & MFT_SEPARATOR)) ||
-        (!(flags & KHUI_ACTIONREF_SEP) && mii.wID != act->cmd)) {
+        (!(flags & KHUI_ACTIONREF_SEP) && mii.wID != (WORD) act->cmd)) {
         add_action_to_menu(hm, ((flags & KHUI_ACTIONREF_SEP)? NULL : act),
                            idx, flags);
         return 0;

@@ -81,7 +81,7 @@
     \note Not all functions that take a count of bytes support the \a
         KCDB_CBSIZE_AUTO value.
 */
-#define KCDB_CBSIZE_AUTO (-1)
+#define KCDB_CBSIZE_AUTO ((khm_size) -1)
 
 /*!
 \defgroup kcdb_ident Identities
