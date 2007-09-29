@@ -34,6 +34,11 @@
 #elif defined(USE_LEASH)
 static void (*pLeash_AcquireInitialTicketsIfNeeded)(krb5_context,krb5_principal,char*,int) = NULL;
 static HANDLE hLeashDLL = INVALID_HANDLE_VALUE;
+#ifdef _WIN64
+#define LEASH_DLL "leashw64.dll"
+#else
+#define LEASH_DLL "leashw32.dll"
+#endif
 #endif
 
 
@@ -86,7 +91,7 @@ krb5int_cc_default(krb5_context context, krb5_ccache *ccache)
 #else
 #ifdef USE_LEASH
     if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
-        hLeashDLL = LoadLibrary("leashw32.dll");
+        hLeashDLL = LoadLibrary(LEASH_DLL);
         if ( hLeashDLL != INVALID_HANDLE_VALUE ) {
             (FARPROC) pLeash_AcquireInitialTicketsIfNeeded =
             GetProcAddress(hLeashDLL, "not_an_API_Leash_AcquireInitialTicketsIfNeeded");
