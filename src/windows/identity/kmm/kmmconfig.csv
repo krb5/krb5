@@ -35,13 +35,13 @@ PluginManager,KC_SPACE,0,Plugin Manager Configuration
 #      ImagePath,KC_STRING,afscred.dll,
 #      PluginList,KC_STRING,AfsCred,
 #    OpenAFS,KC_ENDSPACE,0,
-    MITKrb5,KC_SPACE,0,MIT Kerberos V
-      ImagePath,KC_STRING,krb5cred.dll,
-      PluginList,KC_STRING,Krb5Cred,
-    MITKrb5,KC_ENDSPACE,0,
-    MITKrb4,KC_SPACE,0,MIT Kerberos IV
-      ImagePath,KC_STRING,krb4cred.dll,
-      PluginList,KC_STRING,Krb4Cred,
-    MITKrb4,KC_ENDSPACE,0,
+#    MITKrb5,KC_SPACE,0,MIT Kerberos V
+#      ImagePath,KC_STRING,krb5cred.dll,
+#      PluginList,KC_STRING,Krb5Cred,
+#    MITKrb5,KC_ENDSPACE,0,
+#    MITKrb4,KC_SPACE,0,MIT Kerberos IV
+#     ImagePath,KC_STRING,krb4cred.dll,
+#      PluginList,KC_STRING,Krb4Cred,
+#    MITKrb4,KC_ENDSPACE,0,
   Modules,KC_ENDSPACE,0,
 PluginManager,KC_ENDSPACE,0,
