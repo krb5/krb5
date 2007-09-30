@@ -9,5 +9,5 @@
 
 
 EXPORTS
-    krb524_convert_creds_kdc
-    krb524_init_ets
+    krb524_convert_creds_kdc	@1
+    krb524_init_ets		@2
