@@ -72,7 +72,8 @@ Major changes in krb5-1.6.3
 [5617]  Add PKINIT support
 
     At this point, PKINIT support should be considered to be ALPHA
-    code.  We would greatly appreciate testing and feedback of PKINIT
+    code.  APIs and configuration details may change in the future.
+    We would greatly appreciate testing and feedback of PKINIT
     support.
 
 krb5-1.6.3 changes by ticket ID
