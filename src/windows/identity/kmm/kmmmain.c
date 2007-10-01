@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -117,9 +118,10 @@ KHMEXP void KHMAPI kmm_exit(void)
 
     LeaveCriticalSection(&cs_kmm);
     WaitForSingleObject(evt_exit, INFINITE);
-    EnterCriticalSection(&cs_kmm);
 
-    kmq_post_thread_quit_message(tid_registrar, 0, NULL);
+    kmq_send_thread_quit_message(tid_registrar, 0);
+
+    EnterCriticalSection(&cs_kmm);
 
     hash_del_hashtable(hash_plugins);
     hash_del_hashtable(hash_modules);

@@ -202,7 +202,7 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags)
         if(rv != KHM_ERROR_TOO_LONG) {
             if (rv == KHM_ERROR_NOT_FOUND) {
 
-                scb = cb = cch * sizeof(wchar_t);
+                scb = cb = (cch + 1) * sizeof(wchar_t);
                 pl = PMALLOC(cb);
                 multi_string_init(pl, cb);
                 rv = KHM_ERROR_SUCCESS;
