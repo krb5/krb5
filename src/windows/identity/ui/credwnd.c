@@ -543,6 +543,11 @@ cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
         /* do nothing */
     }
 
+    if (KHM_FAILED(khc_read_int32(hc_cw, L"ViewAllIdents", &tbl->view_all_idents)))
+        tbl->view_all_idents = 0;
+
+    khui_check_action(KHUI_ACTION_VIEW_ALL_IDS, tbl->view_all_idents);
+
     kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
 
     if(KHM_FAILED(khc_open_space(hc_vs, view, 0, &hc_v)))
@@ -1808,6 +1813,9 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         wchar_t ** idarray = NULL;
         int i;
 
+        khm_int32 and_flags = 0;
+        khm_int32 eq_flags = 0;
+
         /* see if the default identity is in the list */
         {
             khm_handle id_def = NULL;
@@ -1868,8 +1876,16 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             ;
         }
 
-        if (kcdb_identity_enum(KCDB_IDENT_FLAG_STICKY,
-                               KCDB_IDENT_FLAG_STICKY,
+        if (tbl->view_all_idents) {
+            and_flags = 0;
+            eq_flags = 0;
+        } else {
+            and_flags = KCDB_IDENT_FLAG_STICKY;
+            eq_flags = KCDB_IDENT_FLAG_STICKY;
+        }
+
+        if (kcdb_identity_enum(and_flags,
+                               eq_flags,
                                NULL,
                                &cb_names,
                                &n_idents) != KHM_ERROR_TOO_LONG ||
@@ -1884,8 +1900,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         assert(idarray);
 #endif
 
-        if (KHM_FAILED(kcdb_identity_enum(KCDB_IDENT_FLAG_STICKY,
-                                          KCDB_IDENT_FLAG_STICKY,
+        if (KHM_FAILED(kcdb_identity_enum(and_flags,
+                                          eq_flags,
                                           idnames,
                                           &cb_names,
                                           &n_idents)))
@@ -1899,10 +1915,19 @@ cw_update_outline(khui_credwnd_tbl * tbl)
 
         for (i=0; i < (int) n_idents; i++) {
             khm_handle h;
+            khm_int32 f_sticky;
+            khm_int32 flags;
 
             if (KHM_FAILED(kcdb_identity_create(idarray[i], 
                                                 KCDB_IDENT_FLAG_CREATE, &h)))
                 continue;
+
+            kcdb_identity_get_flags(h, &flags);
+
+            if (flags & KCDB_IDENT_FLAG_STICKY)
+                f_sticky = KHUI_CW_O_STICKY;
+            else
+                f_sticky = 0;
 
             for (o = tbl->outline; o; o = LNEXT(o)) {
                 if (!wcscmp(idarray[i], o->header))
@@ -1914,7 +1939,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 if (o->start != -1) /* already visible? */
                     continue;
                 o->flags &= (KHUI_CW_O_RELIDENT | KHUI_CW_O_SELECTED);
-                o->flags |= KHUI_CW_O_STICKY | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY;
+                o->flags |= f_sticky | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY;
 
                 if (!kcdb_identity_is_equal(o->data, h)) {
                     if (o->flags & KHUI_CW_O_RELIDENT)
@@ -1927,7 +1952,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 /* not found.  create */
                 o = cw_new_outline_node(idarray[i]);
                 LPUSH(&tbl->outline, o);
-                o->flags = KHUI_CW_O_STICKY | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY | KHUI_CW_O_RELIDENT;
+                o->flags = f_sticky | KHUI_CW_O_VISIBLE | KHUI_CW_O_EMPTY | KHUI_CW_O_RELIDENT;
                 o->level = 0;
                 o->col = grouping[0];
                 o->data = h;
@@ -4361,6 +4386,8 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             tbl->mouse_state = CW_MOUSE_WIDGET | CW_MOUSE_WSTICKY;
 
+            khm_refresh_identity_menus();
+
             return 0;
         } else if ((nm_state & CW_MOUSE_WICON) &&
                    (tbl->mouse_state & CW_MOUSE_WICON)) {
@@ -4861,6 +4888,7 @@ cw_pp_ident_proc(HWND hwnd,
                 kcdb_identity_set_flags(s->identity, flags,
                                         KCDB_IDENT_FLAG_STICKY |
                                         KCDB_IDENT_FLAG_DEFAULT);
+                khm_refresh_identity_menus();
                 return TRUE;
 
             case PSN_RESET:
@@ -5296,6 +5324,30 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_selection_state(tbl);
 
             InvalidateRect(tbl->hwnd, NULL, TRUE);
+        }
+        break;
+
+    case KHUI_ACTION_VIEW_ALL_IDS:
+        {
+            khm_handle hc_cw = NULL;
+
+            tbl->view_all_idents = !tbl->view_all_idents;
+
+            cw_update_outline(tbl);
+            cw_update_extents(tbl, TRUE);
+            cw_update_selection_state(tbl);
+
+            InvalidateRect(tbl->hwnd, NULL, TRUE);
+
+            if(KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", KHM_PERM_READ | KHM_PERM_WRITE,
+                                            &hc_cw))) {
+                khc_write_int32(hc_cw, L"ViewAllIdents", tbl->view_all_idents);
+                khc_close_space(hc_cw);
+            }
+
+            khui_check_action(KHUI_ACTION_VIEW_ALL_IDS, tbl->view_all_idents);
+
+            khm_refresh_identity_menus();
         }
         break;
 

@@ -237,6 +237,8 @@ typedef struct khui_credwnd_tbl_t {
     khm_size n_idents;
     khm_size nc_idents;
 
+    khm_int32 view_all_idents;
+
 } khui_credwnd_tbl;
 
 #define KHUI_MAXCB_HEADING 256

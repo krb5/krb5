@@ -311,6 +311,7 @@
 #define IDS_CW_TYPEF                    316
 #define IDS_CW_EXPIREF                  317
 #define IDS_CW_EXPIRED                  318
+#define IDS_ACTION_VIEW_ALL_IDS         321
 #define IDC_NC_CREDTEXT_LABEL           1009
 #define IDC_NC_CREDTEXT                 1012
 #define IDC_NC_HELP                     1017

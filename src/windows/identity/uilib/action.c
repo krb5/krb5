@@ -83,8 +83,9 @@ khui_action_ref khui_menu_toolbars[] = {
 
 khui_action_ref khui_menu_view[] = {
     MENU_ACTION(KHUI_ACTION_LAYOUT_MINI),
-    MENU_SUBMENU(KHUI_MENU_COLUMNS),
     MENU_SUBMENU(KHUI_MENU_LAYOUT),
+    MENU_ACTION(KHUI_ACTION_VIEW_ALL_IDS),
+    MENU_SUBMENU(KHUI_MENU_COLUMNS),
 #if 0
     /* not implemented yet */
     MENU_SUBMENU(KHUI_MENU_TOOLBARS),
