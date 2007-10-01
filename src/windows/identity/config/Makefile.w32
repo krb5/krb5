@@ -290,9 +290,9 @@ MC2RC=$(MC) $(MCFLAGS) -h $(OBJ)\ -m 1024 -r $(OBJ)\ -x $(OBJ)\ $**
 	$(RC2RES)
 
 clean::
-!if exist($(OBJ))
-	$(RM) $(OBJ)\
-!endif
+ 	if exist '$(OBJ)' $(RM) $(OBJ)
+ 	if exist vc70.pdb  $(RM) vc70.pdb
+        if exist vc80.pdb  $(RM) vc80.pdb
 
 test::
 

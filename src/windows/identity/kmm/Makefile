@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2007 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -51,4 +52,6 @@ $(OBJ)\kmm_msgs.rc: lang\kmm_msgs.mc
 all: mkdirs $(INCFILES) $(MSGRESFILE) $(OBJFILES)
 
 clean::
-	if exist '..\obj' $(RM) $(INCFILES)
+	if exist ..\obj $(RM) $(INCFILES)
+	if exist vc70.pdb  $(RM) vc70.pdb
+	if exist vc80.pdb  $(RM) vc80.pdb

@@ -36,6 +36,8 @@ all: mkdirs $(INCFILES) $(OBJFILES)
 
 clean::
 	if exist '..\obj' $(RM) $(INCFILES)
+	if exist 'vc70.pdb'  $(RM) vc70.pdb
+	if exist 'vc80.pdb'  $(RM) vc80.pdb
 # Tests
 
 test:: util_test

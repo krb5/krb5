@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2004 Massachusetts Institute of Technology
+# Copyright (c) 2007 Secure Endpoints Inc.
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -36,4 +37,5 @@ $(CHMFILE): netidmgr.hhp
 	$(CP) netidmgr.chm $(CHMFILE)
 
 clean::
-	if exist '..\obj' $(RM) $(INCFILES)
+	if exist ..\obj $(RM) $(INCFILES)
+	if exist netidmgr.chm $(RM) netidmgr.chm
