@@ -1,10 +1,17 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
+static void
+init_common(krb5_get_init_creds_opt *opt)
+{
+    opt->flags |= KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+}
+
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init(krb5_get_init_creds_opt *opt)
 {
-   opt->flags = KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT;
+    opt->flags = 0;
+    init_common(opt);
 }
 
 void KRB5_CALLCONV
@@ -174,6 +181,7 @@ krb5_get_init_creds_opt_alloc(krb5_context context,
 	return ENOMEM;
 
     *opt = (krb5_get_init_creds_opt *) opte;
+    init_common(*opt);
     return 0;
 }
 
