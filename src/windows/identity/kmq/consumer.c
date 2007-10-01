@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
+ * 
+ * Copyright (c) 2007 Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -201,6 +203,7 @@ void kmqint_post_queue(kmq_queue * q, kmq_message *m) {
     \brief Post a message to a subscriber
     \note Obtains ::cs_kmq_msg_ref, ::cs_kmq_msg, kmq_queue::cs
     \note Should be called with ::cs_kmq_msg held
+    \note Should be called with ::cs_kmq_types held if try_send is true
     */
 void kmqint_post(kmq_msg_subscription * s, kmq_message * m, khm_boolean try_send) {
     if(s->rcpt_type == KMQ_RCPTTYPE_CB) {

@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
  *
+ * Copyright (c) 2007 Secure Endpoints Inc.
+ *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -296,6 +298,8 @@ kmqint_post_sub_msg_ex(khm_handle sub, khm_int32 type, khm_int32 subtype,
     } else
         m->wait_o = NULL;
 
+    if (try_send)
+        EnterCriticalSection(&cs_kmq_types);
     EnterCriticalSection(&cs_kmq_msg);
     kmqint_post((kmq_msg_subscription *) sub, m, try_send);
 
@@ -303,6 +307,8 @@ kmqint_post_sub_msg_ex(khm_handle sub, khm_int32 type, khm_int32 subtype,
         kmqint_put_message(m);
     }
     LeaveCriticalSection(&cs_kmq_msg);
+    if (try_send)
+        LeaveCriticalSection(&cs_kmq_types);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -356,6 +362,8 @@ kmqint_post_subs_msg_ex(khm_handle * subs, khm_size   n_subs, khm_int32 type,
     } else
         m->wait_o = NULL;
 
+    if (try_send)
+        EnterCriticalSection(&cs_kmq_types);
     EnterCriticalSection(&cs_kmq_msg);
     for(i=0;i<n_subs;i++) {
         kmqint_post((kmq_msg_subscription *) subs[i], m, try_send);
@@ -365,6 +373,8 @@ kmqint_post_subs_msg_ex(khm_handle * subs, khm_size   n_subs, khm_int32 type,
         kmqint_put_message(m);
     }
     LeaveCriticalSection(&cs_kmq_msg);
+    if (try_send)
+        EnterCriticalSection(&cs_kmq_types);
 
     return KHM_ERROR_SUCCESS;
 }
@@ -552,5 +562,6 @@ kmq_set_completion_handler(khm_int32 type,
                            kmq_msg_completion_handler handler) {
     return kmqint_msg_type_set_handler(type, handler);
 }
+
 
 

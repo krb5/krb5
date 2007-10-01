@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
  *
+ * Copyright (c) 2007 Secure Endpoints Inc.
+ *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -604,6 +606,9 @@ KHMEXP khm_int32 KHMAPI kmq_free_call(kmq_call call);
     becomes active will exit with a KHM_ERROR_EXIT code.
     kmq_send_thread_quit_message() will wait for this to happen before
     returning.
+
+    This function should not be called by the thread identified by the
+    \a thread parameter.
     */
 KHMEXP khm_int32 KHMAPI kmq_send_thread_quit_message(
     kmq_thread_id thread, 
