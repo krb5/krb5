@@ -42,7 +42,7 @@ khm_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName,
                  krb5_ccache * cache)
 {
 #ifdef NO_KRB5
-    return 0;
+    return -1;
 #else
 
 #ifdef SHOW_MESSAGE_IN_AN_ANNOYING_WAY
@@ -87,12 +87,12 @@ khm_krb5_initialize(khm_handle ident,
                     krb5_ccache *cache)
 {
 #ifdef NO_KRB5
-    return(0);
+    return(-1);
 #else
 
     LPCSTR          functionName = NULL;
     int             freeContextFlag = 0;
-    krb5_error_code	rc = 0;
+    krb5_error_code	rc = -1;
     krb5_flags          flags = 0;
 
     if (pkrb5_init_context == NULL)
@@ -132,7 +132,7 @@ khm_krb5_initialize(khm_handle ident,
                 if(UnicodeStrToAnsi(ccname, sizeof(ccname), wccname) == 0)
                     break;
 
-                if((*pkrb5_cc_resolve)(*ctx, ccname, cache)) {
+                if(rc = (*pkrb5_cc_resolve)(*ctx, ccname, cache)) {
                     functionName = "krb5_cc_resolve()";
                     freeContextFlag = 1;
                     goto on_error;
