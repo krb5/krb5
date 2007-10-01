@@ -592,7 +592,7 @@ BEGIN
     IDS_CFG_GENERAL_SHORT   "General"
     IDS_ACTION_NEW_CRED     "Obtain &new credentials ..."
     IDS_ACTION_PASSWD_ID    "Change &password"
-    IDS_ACTION_CHOOSE_COLS  "View columns"
+    IDS_ACTION_CHOOSE_COLS  "Select columns"
     IDS_ACTION_DEBUG_WINDOW "Debug window"
     IDS_ACTION_VIEW_REFRESH "Refresh view"
     IDS_MENU_LAYOUT         "Layout"
@@ -861,6 +861,7 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
 
 
 
