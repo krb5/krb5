@@ -102,6 +102,5 @@ clean::
 !if defined(INCFILES)
 	$(RM) $(INCFILES)
 !endif
-	if exist vc70.pdb  $(RM) vc70.pdb
-	if exist vc80.pdb  $(RM) vc80.pdb
+
 

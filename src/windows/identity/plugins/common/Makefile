@@ -39,8 +39,6 @@ all: mkdirs $(INCFILES) $(OBJFILES)
 clean::
 	if exist "$(INCDIR)" $(RM) $(INCFILES)
 	if exist "$(LIBDIR)" $(RM) $(OBJFILES)
-	if exist vc70.pdb  $(RM) vc70.pdb
-	if exist vc80.pdb  $(RM) vc80.pdb
 
 {}.c{$(LIBDIR)}.obj:
 	$(C2OBJ)
