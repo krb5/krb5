@@ -227,6 +227,7 @@ while (! $d->eof()) {
         next LINE2;
     }
     s/[ \t]*//g;
+    s/@[0-9]+//;
     my($xconv);
     if (/PRIVATE/ || /INTERNAL/) {
 	$xconv = "PRIVATE";
