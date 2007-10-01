@@ -312,15 +312,23 @@ UnicodeToANSI(LPTSTR lpInputString, LPSTR lpszOutputString, int nOutStringLen)
         {
             return FALSE;
         } else {
-            WideCharToMultiByte(CP_ACP, 0, (LPCWSTR) lpInputString, -1,
-                                lpszOutputString, nOutStringLen, NULL, NULL);
+            if (WideCharToMultiByte(CP_ACP, 
+				    WC_NO_BEST_FIT_CHARS | WC_COMPOSITECHECK, 
+				    (LPCWSTR) lpInputString, -1,
+				    lpszOutputString, 
+				    nOutStringLen, NULL, NULL) == 0)
+		return FALSE;
         }
     } 
     else if (((LPBYTE) lpInputString)[1] == '\0')
     {
         // Looks like unicode, better translate it
-        WideCharToMultiByte(CP_ACP, 0, (LPCWSTR) lpInputString, -1,
-                            lpszOutputString, nOutStringLen, NULL, NULL);
+        if (WideCharToMultiByte(CP_ACP, 
+				WC_NO_BEST_FIT_CHARS | WC_COMPOSITECHECK, 
+				(LPCWSTR) lpInputString, -1,
+				lpszOutputString, 
+				nOutStringLen, NULL, NULL) == 0)
+	    return FALSE;
     }
     else
         lstrcpyA(lpszOutputString, (LPSTR) lpInputString);
@@ -378,8 +386,8 @@ UnicodeStringToMITPrinc(UNICODE_STRING *service, WCHAR *realm, krb5_context cont
     wcscat(princbuf, L"@");
     wcscat(princbuf, realm);
     if (UnicodeToANSI(princbuf, aname, sizeof(aname))) {
-        krb5_parse_name(context, aname, principal);
-        return TRUE;
+        if (krb5_parse_name(context, aname, principal) == 0)
+	    return TRUE;
     }
     return FALSE;
 }
@@ -404,8 +412,8 @@ KerbExternalNameToMITPrinc(KERB_EXTERNAL_NAME *msprinc, WCHAR *realm, krb5_conte
     wcscat(princbuf, L"@");
     wcscat(princbuf, realm);
     if (UnicodeToANSI(princbuf, aname, sizeof(aname))) {
-        krb5_parse_name(context, aname, principal);
-        return TRUE;
+        if (krb5_parse_name(context, aname, principal) == 0)
+	    return TRUE;
     }
     return FALSE;
 }
@@ -563,7 +571,7 @@ MSCredToMITCred(KERB_EXTERNAL_TICKET *msticket, UNICODE_STRING ClientRealm,
 
 #ifdef HAVE_CACHE_INFO_EX2
 /* CacheInfoEx2ToMITCred is used when we do not need the real ticket */
-static void
+static BOOL
 CacheInfoEx2ToMITCred(KERB_TICKET_CACHE_INFO_EX2 *info,
                       krb5_context context, krb5_creds *creds)
 {
@@ -574,13 +582,15 @@ CacheInfoEx2ToMITCred(KERB_TICKET_CACHE_INFO_EX2 *info,
     // construct Client Principal
     wcsncpy(wrealm, info->ClientRealm.Buffer, info->ClientRealm.Length/sizeof(WCHAR));
     wrealm[info->ClientRealm.Length/sizeof(WCHAR)]=0;
-    UnicodeStringToMITPrinc(&info->ClientName, wrealm, context, &creds->client);
+    if (!UnicodeStringToMITPrinc(&info->ClientName, wrealm, context, &creds->client))
+	return FALSE;
 
     // construct Service Principal
     wcsncpy(wrealm, info->ServerRealm.Buffer,
             info->ServerRealm.Length/sizeof(WCHAR));
     wrealm[info->ServerRealm.Length/sizeof(WCHAR)]=0;
-    UnicodeStringToMITPrinc(&info->ServerName, wrealm, context, &creds->server);
+    if (!UnicodeStringToMITPrinc(&info->ServerName, wrealm, context, &creds->server))
+	return FALSE;
 
     creds->keyblock.magic = KV5M_KEYBLOCK;
     creds->keyblock.enctype = info->SessionKeyType;
@@ -595,6 +605,8 @@ CacheInfoEx2ToMITCred(KERB_TICKET_CACHE_INFO_EX2 *info,
      */
     creds->addresses = (krb5_address **)malloc(sizeof(krb5_address *));
     memset(creds->addresses, 0, sizeof(krb5_address *));
+
+    return TRUE;
 }
 #endif /* HAVE_CACHE_INFO_EX2 */
 
@@ -2303,8 +2315,11 @@ krb5_lcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
         }
 
         if ( data->flags & KRB5_TC_NOTICKET ) {
-             CacheInfoEx2ToMITCred( &lcursor->response.ex2->Tickets[lcursor->index++], 
-                                    context, creds);
+	    if (!CacheInfoEx2ToMITCred( &lcursor->response.ex2->Tickets[lcursor->index++], 
+					context, creds)) {
+                retval = KRB5_FCC_INTERNAL;
+                goto next_cred;
+	    }
             return KRB5_OK;
         } else {
             if (!GetMSCacheTicketFromCacheInfoEX2(data->LogonHandle, data->PackageId,
