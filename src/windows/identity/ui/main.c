@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2005 Massachusetts Institute of Technology
  *
+ * Copyright (2) 2007 Secure Endpoints Inc.
+ *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -173,6 +175,12 @@ khm_cmdline_dlg_proc(HWND hwnd,
         }
 
         return TRUE;
+
+    case WM_CLOSE:
+	
+	EndDialog(hwnd, KHM_ERROR_EXIT);
+    	
+	return TRUE;
     }
 
     return FALSE;
