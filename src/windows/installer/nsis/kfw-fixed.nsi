@@ -57,6 +57,7 @@ VIAddVersionKey "PrivateBuild" "Checked/Debug"
   !define KFW_COMPANY_NAME "Massachusetts Institute of Technology"
   !define KFW_PRODUCT_NAME "${PROGRAM_NAME}"
   !define KFW_REGKEY_ROOT  "Software\MIT\Kerberos\"
+  !define NIM_REGKEY_ROOT  "Software\MIT\NetIDMgr\"
   CRCCheck force
   !define REPLACEDLL_NOREGISTER
 
@@ -387,6 +388,30 @@ nid_done:
   WriteRegStr HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "DLLName" "kfwlogon.dll"
   WriteRegStr HKLM "Software\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" "Logon" "KFW_Logon_Event"
 
+  ; NetIdMgr Reg entries
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb5" "ImagePath" "$INSTDIR\bin\krb5cred.dll"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb5" "PluginList" "Krb5Cred,Krb5Ident"
+
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred" "Module" "MITKrb5"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred" "Description" "Kerberos v5 Credentials Provider"
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred" "Type"  1
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Cred" "Flags" 0
+  
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Module" "MITKrb5"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Description" "Kerberos v5 Identity Provider"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Dependencies" "Krb5Cred"
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Type"  2
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb5Ident" "Flags" 0
+
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" "ImagePath" "$INSTDIR\bin\krb4cred.dll"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Modules\MITKrb4" "PluginList" "Krb4Cred"
+
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Module" "MITKrb4"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Description" "Kerberos v4 Credentials Provider"
+  WriteRegStr HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Dependencies" "Krb5Cred"
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Type"  1
+  WriteRegDWORD HKLM "Software\MIT\NetIDMgr\PluginManager\Plugins\Krb4Cred" "Flags" 0
+  
   ;Write start menu entries
   CreateDirectory "$SMPROGRAMS\${PROGRAM_NAME}"
   SetOutPath "$INSTDIR\bin"
@@ -602,7 +627,7 @@ Section "KfW SDK" secSDK
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\SDK\${KFW_VERSION}" "MinorVersion" ${KFW_MINORVERSION}
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\SDK\${KFW_VERSION}" "PatchLevel" ${KFW_PATCHLEVEL}
   WriteRegDWORD HKLM "${KFW_REGKEY_ROOT}\SDK\${KFW_VERSION}" "PatchLevel" ${KFW_PATCHLEVEL}
-  
+
 SectionEnd
 
 ;----------------------
@@ -1350,6 +1375,17 @@ StartRemove:
   DeleteRegKey HKLM "${KFW_REGKEY_ROOT}\SDK"
   DeleteRegKey /ifempty HKLM "${KFW_REGKEY_ROOT}"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}"
+
+  ; NIM Registry Keys
+  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules\MITKrb5"
+  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules\MITKrb4"
+  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb5Cred"
+  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb5Ident"
+  DeleteRegKey HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins\Krb4Cred"
+  DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager\Modules"
+  DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager\Plugins"
+  DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}\PluginManager"
+  DeleteRegKey /ifempty HKLM "${NIM_REGKEY_ROOT}"
  
   ; WinLogon Event Notification
   DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\Winlogon\Notify\MIT_KFW"
