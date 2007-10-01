@@ -3562,7 +3562,7 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
             cw_update_selection_state(tbl);
-            cw_set_row_context(tbl, tbl->cursor_row);
+            cw_select_row(tbl, tbl->cursor_row, 0);
             InvalidateRect(hwnd, NULL, FALSE);
             break;
 
