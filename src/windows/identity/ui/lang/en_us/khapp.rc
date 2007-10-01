@@ -306,8 +306,8 @@ BEGIN
     EDITTEXT        IDC_CFG_STATE,128,129,120,12,ES_AUTOHSCROLL | ES_READONLY
     PUSHBUTTON      "&Enable ...",IDC_CFG_ENABLE,128,144,50,14,WS_DISABLED
     PUSHBUTTON      "&Disable ...",IDC_CFG_DISABLE,198,144,50,14,WS_DISABLED
-    PUSHBUTTON      "&Unregister plugin ...",IDC_CFG_UNREGISTER,87,161,72,14,WS_DISABLED
-    PUSHBUTTON      "&Register new plugin ...",IDC_CFG_REGISTER,169,161,79,14,NOT WS_VISIBLE | WS_DISABLED
+    PUSHBUTTON      "&Unregister plug-in ...",IDC_CFG_UNREGISTER,87,161,72,14,WS_DISABLED
+    PUSHBUTTON      "&Register new plug-in ...",IDC_CFG_REGISTER,169,161,79,14,NOT WS_VISIBLE | WS_DISABLED
 END
 
 IDD_CFG_IDENTITY DIALOGEX 0, 0, 255, 182
@@ -653,7 +653,7 @@ BEGIN
     IDS_NC_NEW_IDENT        "( New identity ... )"
     IDS_NC_CREDTEXT_ID_CHECKING "<font color=""grey"">%s (Checking...)</font>"
     IDS_ACTION_OPEN_APP     "Show Network Identity Manager window"
-    IDS_CTX_NEW_IDENT       "Obaining new identity"
+    IDS_CTX_NEW_IDENT       "Obtaining new identity"
     IDS_CTX_NEW_CREDS       "Obtaining new credentials"
     IDS_CTX_RENEW_CREDS     "Renewing credentials"
     IDS_CTX_PROC_NEW_IDENT  "Obtaining initial credentials for %1!s!"
@@ -669,8 +669,8 @@ BEGIN
     IDS_CFG_IDENTITIES_LONG "Global Identity settings"
     IDS_CFG_NOTIF_SHORT     "Notifications"
     IDS_CFG_NOTIF_LONG      "Notifications"
-    IDS_CFG_PLUGINS_SHORT   "Plugins"
-    IDS_CFG_PLUGINS_LONG    "Plugins and Modules"
+    IDS_CFG_PLUGINS_SHORT   "Plug-ins"
+    IDS_CFG_PLUGINS_LONG    "Plug-ins and Modules"
     IDS_CFG_IDENTITY_SHORT  "%s"
     IDS_CFG_IDENTITY_LONG   "Options for %s"
     IDS_CTX_DESTROY_CREDS   "Destroying credentials"
@@ -693,7 +693,7 @@ BEGIN
     IDS_CFG_IDS_IDENTITY    "Identity"
     IDS_ACTION_IMPORT       "Import Credentials"
     IDS_CTX_IMPORT          "Importing credentials from Windows"
-    IDS_CFG_PI_COL_PLUGINS  "Plugins"
+    IDS_CFG_PI_COL_PLUGINS  "Plug-ins"
     IDS_PISTATE_FAILUNK     "Unknown failure"
     IDS_PISTATE_FAILMAX     "Maximum failure count reached"
     IDS_PISTATE_FAILREG     "Not properly registered"
@@ -726,7 +726,7 @@ BEGIN
                             "This is quite possibly caused by the identity provider module failing to load properly."
     IDS_NC_REN_FAILED_TITLE "Failed to renew credentials"
     IDS_CW_DEFAULT          "(Default)"
-    IDS_ACTION_OPT_PLUGINS  "Plugins"
+    IDS_ACTION_OPT_PLUGINS  "Plug-ins"
     IDS_NC_SETDEF           "&Set as default identity"
     IDS_NC_ID_DEF           "<p>This identity is the default</p>"
     IDS_NC_ID_WDEF          "<p>Will be the default. (<a id=""NotDef"">Don't make default</a>)</p>"
@@ -745,17 +745,17 @@ BEGIN
     IDS_CFG_IT_MOD          "Changes need to be applied"
     IDS_CFG_IT_APP          "Changes have been applied"
     IDS_CFG_IT_NONE         "No changes"
-    IDS_CFG_NODESC          "(Description for plugin %s is not available)"
-    IDS_CFG_P_DELCNFT       "About to disable plugin %s"
-    IDS_CFG_P_DELCNFM       "Are you sure you want to disable plugin %s ?\n\nOnce disabled, the services provided by the plugin will no longer be available. In addition, any other plugins that depend on this plugin will also become non functional.\n\nNetwork Identity Manager will need to be restarted for the plugin to be deactivated."
-    IDS_CFG_P_DELCNFS       "The following plugins depend on this plugin : %s"
-    IDS_CFG_P_DELNDEP       "No other plugins depend on this plugin."
-    IDS_CFG_P_ENBCNFT       "About to enable plugin %s"
-    IDS_CFG_P_ENBCNFM       "The plugin %s will be marked as enabled.  The plugin will be come active the next time Network Identity Manager is started."
+    IDS_CFG_NODESC          "(Description for plug-in %s is not available)"
+    IDS_CFG_P_DELCNFT       "About to disable plug-in %s"
+    IDS_CFG_P_DELCNFM       "Are you sure you want to disable plug-in %s ?\n\nOnce disabled, the services provided by the plug-in will no longer be available. In addition, any other plug-ins that depend on this plug-in will also become non functional.\n\nNetwork Identity Manager will need to be restarted for the plug-in to be deactivated."
+    IDS_CFG_P_DELCNFS       "The following plug-ins depend on this plug-in : %s"
+    IDS_CFG_P_DELNDEP       "No other plug-ins depend on this plug-in."
+    IDS_CFG_P_ENBCNFT       "About to enable plug-in %s"
+    IDS_CFG_P_ENBCNFM       "The plug-in %s will be marked as enabled.  The plug-in will be come active the next time Network Identity Manager is started."
     IDS_PISTATE_FAILINIT    "Failed to initialize"
-    IDS_CFG_P_UNRCNFT       "Unregistering plugin %s"
-    IDS_CFG_P_UNRCNFM       "Are you sure you want to unregister plugin %s? In addition to this plugin, any other plugins that are provided by the same module will also be unregistered.\n\nThe plugin will no longer be loaded for subsequent sessions of Network Identity Manager."
-    IDS_CFG_P_UNRCNFS       "Note that if the plugin was registered by a seprate installer, it should be unregistered by the same installer and not through Network Identity Manager.\n\nThe following plugins will be unregistered: %s"
+    IDS_CFG_P_UNRCNFT       "Unregistering plug-in %s"
+    IDS_CFG_P_UNRCNFM       "Are you sure you want to unregister plug-in %s? In addition to this plug-in, any other plug-ins that are provided by the same module will also be unregistered.\n\nThe plug-in will no longer be loaded for subsequent sessions of Network Identity Manager."
+    IDS_CFG_P_UNRCNFS       "Note that if the plug-in was registered by a separate installer, it should be unregistered by the same installer and not through Network Identity Manager.\n\nThe following plug-ins will be unregistered: %s"
     IDS_ACTION_LAYOUT_CUST  "Custom"
     IDS_APR_HEADER_TEXT     "Header text"
 END
@@ -814,8 +814,8 @@ BEGIN
     IDS_CTX_DESTROY_ID      "Destroying identity %1!s!"
     IDS_NCN_IDENT_INVALID   "Identity %s is invalid."
     IDS_NCN_IDENT_CHECKING  "Checking identity %s ..."
-    IDS_NCN_IDENT_UNKNOWN   "Validity of identity %s coudn't be determined."
-    IDS_REMOTE_FAIL         "The instance of Network Identity Manager that is already running is not responding to the remote request properly.  Please check if you are running the latest version of Network Identity Manger software included with MIT Kerberos for Windows."
+    IDS_NCN_IDENT_UNKNOWN   "Validity of identity %s couldn't be determined."
+    IDS_REMOTE_FAIL         "The instance of Network Identity Manager that is already running is not responding to the remote request properly.  Please check if you are running the latest version of Network Identity Manager software included with MIT Kerberos for Windows."
     IDS_REMOTE_FAIL_TITLE   "Failed to communicate with Network Identity Manager"
     IDS_IDACTION_NEW        "Obtain new credentials for %s"
     IDS_IDACTIONT_NEW       "New credentials for %s"

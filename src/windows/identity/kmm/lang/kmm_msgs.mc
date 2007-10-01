@@ -106,7 +106,7 @@ Module initialization entry point returned failure code [%1!d!]
 MessageId=
 SymbolicName=MSG_IM_NO_PLUGINS
 Language=English
-No plugins were registerd by the module
+No plug-ins were registered by the module
 .
 
 MessageId=
@@ -132,43 +132,43 @@ The following information may help resolve this issue:
 MessageId=
 SymbolicName=MSG_IP_TASK_DESC
 Language=English
-Initializing plugin [%1]
+Initializing plug-in [%1]
 .
 
 MessageId=
 SymbolicName=MSG_IP_GET_CONFIG
 Language=English
-Can't get configuration for plugins
+Can't get configuration for plug-ins
 .
 
 MessageId=
 SymbolicName=MSG_IP_NOT_REGISTERED
 Language=English
-The plugin is not registered
+The plug-in is not registered
 .
 
 MessageId=
 SymbolicName=MSG_IP_DISABLED
 Language=English
-The plugin is disabled
+The plug-in is disabled
 .
 
 MessageId=
 SymbolicName=MSG_IP_HOLD
 Language=English
-Placing plugin [%1] on hold
+Placing plug-in [%1] on hold
 .
 
 MessageId=
 SymbolicName=MSG_IP_STATE
 Language=English
-Leaving plugin [%1] in state [%2!d!]
+Leaving plug-in [%1] in state [%2!d!]
 .
 
 MessageId=
 SymbolicName=MSG_IP_EXITING
 Language=English
-The plugin [%1] is in error state [%2!d!].  Exiting plugin.
+The plug-in [%1] is in error state [%2!d!].  Exiting plug-in.
 .
 
 MessageId=
@@ -216,37 +216,37 @@ The module was compile for API version %1!d!.  However the current API version i
 MessageId=
 SymbolicName=MSG_PB_START
 Language=English
-Starting plugin [%1!s!]
+Starting plug-in [%1!s!]
 .
 
 MessageId=
 SymbolicName=MSG_PB_INVALID_CODE_PTR
 Language=English
-The plugin is no longer valid.  This maybe because the module containing the plugin was unloaded.
+The plug-in is no longer valid.  This maybe because the module containing the plug-in was unloaded.
 .
 
 MessageId=
 SymbolicName=MSG_PB_INIT_RV
 Language=English
-Initialization of the plugin returned code %1!d!.
+Initialization of the plug-in returned code %1!d!.
 .
 
 MessageId=
 SymbolicName=MSG_PB_INIT_FAIL
 Language=English
-Initialization of the %1!s! plugin failed.  The plugin will be unloaded and any functionality provided will not be available.
+Initialization of the %1!s! plug-in failed.  The plug-in will be unloaded and any functionality provided will not be available.
 .
 
 MessageId=
 SymbolicName=MSG_PB_INIT_FAIL_S
 Language=English
-Plugin %1!s! failed to initialize
+Plug-in %1!s! failed to initialize
 .
 
 MessageId=
 SymbolicName=MSG_PB_INIT_FAIL_G
 Language=English
-Details for plugin:
+Details for plug-in:
 Description: %2!s!
 Module: %3!s!
 Support: %4!s!
@@ -255,5 +255,5 @@ Support: %4!s!
 MessageId=
 SymbolicName=MSG_PB_INIT_DONE
 Language=English
-Plugin running
+Plug-in running
 .
