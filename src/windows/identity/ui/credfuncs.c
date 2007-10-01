@@ -555,6 +555,11 @@ void khm_cred_set_default(void)
     khui_context_release(&ctx);
 }
 
+void khm_cred_set_default_identity(khm_handle identity)
+{
+    kcdb_identity_set_default(identity);
+}
+
 void khm_cred_destroy_creds(khm_boolean sync, khm_boolean quiet)
 {
     khui_action_context * pctx;

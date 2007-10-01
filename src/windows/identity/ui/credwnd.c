@@ -5714,6 +5714,136 @@ khm_credwnd_proc(HWND hwnd,
     return DefWindowProc(hwnd,uMsg,wParam,lParam);
 }
 
+void
+khm_measure_identity_menu_item(HWND hwnd, LPMEASUREITEMSTRUCT lpm, khui_action * act)
+{
+    wchar_t * cap;
+    HDC hdc;
+    SIZE sz;
+    size_t len;
+    HFONT hf_old;
+
+    sz.cx = MENU_SIZE_ICON_X;
+    sz.cy = MENU_SIZE_ICON_Y;
+
+    cap = act->caption;
+#ifdef DEBUG
+    assert(cap);
+#endif
+    hdc = GetDC(khm_hwnd_main);
+#ifdef DEBUG
+    assert(hdc);
+#endif
+
+    StringCchLength(cap, KHUI_MAXCCH_NAME, &len);
+
+    hf_old = SelectFont(hdc, (HFONT) GetStockObject(DEFAULT_GUI_FONT));
+
+    GetTextExtentPoint32(hdc, cap, (int) len, &sz);
+
+    SelectFont(hdc, hf_old);
+
+    ReleaseDC(khm_hwnd_main, hdc);
+
+    lpm->itemWidth = sz.cx + sz.cy * 3 / 2 + GetSystemMetrics(SM_CXSMICON);
+    lpm->itemHeight = sz.cy * 3 / 2;
+}
+
+void
+khm_draw_identity_menu_item(HWND hwnd, LPDRAWITEMSTRUCT lpd, khui_action * act)
+{
+    khui_credwnd_tbl * tbl;
+    khm_handle ident;
+    khm_size i;
+    size_t count = 0;
+    COLORREF old_clr;
+    wchar_t * cap;
+    size_t len;
+    int margin;
+    SIZE sz;
+    HBRUSH hbr;
+    COLORREF text_clr;
+    khm_int32 idflags;
+    khm_int32 expflags;
+
+    tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
+    if (tbl == NULL)
+        return;
+
+    ident = act->data;
+    cap = act->caption;
+#ifdef DEBUG
+    assert(ident != NULL);
+    assert(cap != NULL);
+#endif
+
+    for (i=0; i < tbl->n_idents; i++) {
+        if (kcdb_identity_is_equal(tbl->idents[i].ident, ident)) {
+            count = tbl->idents[i].credcount;
+            break;
+        }
+    }
+
+    expflags = cw_get_buf_exp_flags(tbl, ident);
+
+    text_clr = tbl->cr_hdr_normal;
+
+    if (lpd->itemState & (ODS_HOTLIGHT | ODS_SELECTED)) {
+        hbr = GetSysColorBrush(COLOR_HIGHLIGHT);
+        text_clr = GetSysColor(COLOR_HIGHLIGHTTEXT);
+    } else if (count == 0) {
+        hbr = tbl->hb_hdr_bg;
+    } else if (expflags == CW_EXPSTATE_EXPIRED) {
+        hbr = tbl->hb_hdr_bg_exp;
+    } else if (expflags == CW_EXPSTATE_WARN) {
+        hbr = tbl->hb_hdr_bg_warn;
+    } else if (expflags == CW_EXPSTATE_CRITICAL) {
+        hbr = tbl->hb_hdr_bg_crit;
+    } else {
+        hbr = tbl->hb_hdr_bg_cred;
+    }
+
+    FillRect(lpd->hDC, &lpd->rcItem, hbr);
+
+    SetBkMode(lpd->hDC, TRANSPARENT);
+
+    old_clr = SetTextColor(lpd->hDC, text_clr);
+
+    StringCchLength(cap, KHUI_MAXCCH_NAME, &len);
+
+    GetTextExtentPoint32(lpd->hDC, cap, (int) len, &sz);
+    margin = sz.cy / 4;
+
+    TextOut(lpd->hDC, lpd->rcItem.left + margin * 2 + GetSystemMetrics(SM_CXSMICON),
+            lpd->rcItem.top + margin, cap, (int) len);
+
+    SetTextColor(lpd->hDC, old_clr);
+
+    kcdb_identity_get_flags(ident, &idflags);
+
+    if (idflags & KCDB_IDENT_FLAG_DEFAULT) {
+        HICON hic;
+
+        hic = (HICON) LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_ENABLED),
+                                IMAGE_ICON,
+                                GetSystemMetrics(SM_CXSMICON),
+                                GetSystemMetrics(SM_CYSMICON),
+                                LR_DEFAULTCOLOR);
+        if (hic) {
+            DrawIconEx(lpd->hDC,
+                       lpd->rcItem.left + margin,
+                       lpd->rcItem.top + margin,
+                       hic,
+                       GetSystemMetrics(SM_CXSMICON),
+                       GetSystemMetrics(SM_CYSMICON),
+                       0,
+                       hbr,
+                       DI_NORMAL);
+            DestroyIcon(hic);
+        }
+    }
+}
+
 void 
 khm_register_credwnd_class(void) {
     WNDCLASSEX wcx;

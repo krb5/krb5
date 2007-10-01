@@ -139,19 +139,27 @@ void add_action_to_menu(HMENU hm, khui_action * act,
     } else {
         khui_menu_def * def;
 
-        khm_get_action_caption(act->cmd, buf, sizeof(buf));
+        if (act->type == KHUI_ACTIONTYPE_IDENTITY) {
+            mii.fMask = MIIM_FTYPE | MIIM_ID | MIIM_DATA;
+            mii.fType = MFT_OWNERDRAW;
 
-        if(khui_get_cmd_accel_string(act->cmd, accel, 
-                                     ARRAYLENGTH(accel))) {
-            StringCbCat(buf, sizeof(buf), L"\t");
-            StringCbCat(buf, sizeof(buf), accel);
+            mii.dwTypeData = 0;
+            mii.dwItemData = 0;
+        } else {
+            khm_get_action_caption(act->cmd, buf, sizeof(buf));
+
+            if(khui_get_cmd_accel_string(act->cmd, accel, 
+                                         ARRAYLENGTH(accel))) {
+                StringCbCat(buf, sizeof(buf), L"\t");
+                StringCbCat(buf, sizeof(buf), accel);
+            }
+
+            mii.fMask = MIIM_FTYPE | MIIM_STRING | MIIM_ID;
+            mii.fType = MFT_STRING;
+
+            mii.dwTypeData = buf;
+            mii.cch = (int) wcslen(buf);
         }
-
-        mii.fMask = MIIM_FTYPE | MIIM_STRING | MIIM_ID;
-        mii.fType = MFT_STRING;
-
-        mii.dwTypeData = buf;
-        mii.cch = (int) wcslen(buf);
 
         mii.wID = act->cmd;
 
@@ -391,48 +399,61 @@ LRESULT khm_menu_activate(int menu_id) {
 }
 
 LRESULT khm_menu_measure_item(WPARAM wParam, LPARAM lParam) {
-    /* all menu icons have a fixed size */
     LPMEASUREITEMSTRUCT lpm = (LPMEASUREITEMSTRUCT) lParam;
-    lpm->itemWidth = MENU_SIZE_ICON_X;
-    lpm->itemHeight = MENU_SIZE_ICON_Y;
+    khui_action * act;
+
+    act = khui_find_action(lpm->itemID);
+    if (act && act->type == KHUI_ACTIONTYPE_IDENTITY) {
+        khm_measure_identity_menu_item(khm_hwnd_main_cred, lpm, act);
+    } else {
+        lpm->itemWidth = MENU_SIZE_ICON_X;
+        lpm->itemHeight = MENU_SIZE_ICON_Y;
+    }
     return TRUE;
 }
 
 LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lParam) {
     LPDRAWITEMSTRUCT lpd;
     khui_action * act;
-    int resid;
-    int iidx;
-    UINT style;
 
     lpd = (LPDRAWITEMSTRUCT) lParam;
     act = khui_find_action(lpd->itemID);
 
-    resid = 0;
-    if((lpd->itemState & ODS_DISABLED) || (lpd->itemState & ODS_GRAYED)) {
-        resid = act->ib_icon_dis;
-    }
-    if(!resid)
-        resid = act->ib_icon;
+    if (act && act->type == KHUI_ACTIONTYPE_IDENTITY) {
 
-    if(!resid) /* nothing to draw */
-        return TRUE;
+        khm_draw_identity_menu_item(khm_hwnd_main_cred, lpd, act);
+
+    } else {
+        int resid;
+        int iidx;
+        UINT style;
+
+        resid = 0;
+        if((lpd->itemState & ODS_DISABLED) || (lpd->itemState & ODS_GRAYED)) {
+            resid = act->ib_icon_dis;
+        }
+        if(!resid)
+            resid = act->ib_icon;
+
+        if(!resid) /* nothing to draw */
+            return TRUE;
 
     
-    iidx = khui_get_icon_index(resid);
-    if(iidx == -1)
-        return TRUE;
+        iidx = khui_get_icon_index(resid);
+        if(iidx == -1)
+            return TRUE;
 
 
-    style = ILD_TRANSPARENT;
-    if(lpd->itemState & ODS_HOTLIGHT || lpd->itemState & ODS_SELECTED) {
-        style |= ILD_SELECTED;
-    }
+        style = ILD_TRANSPARENT;
+        if(lpd->itemState & ODS_HOTLIGHT || lpd->itemState & ODS_SELECTED) {
+            style |= ILD_SELECTED;
+        }
     
-    khui_ilist_draw(il_icon, 
-                    iidx, 
-                    lpd->hDC, 
-                    lpd->rcItem.left, lpd->rcItem.top, style);
+        khui_ilist_draw(il_icon, 
+                        iidx, 
+                        lpd->hDC, 
+                        lpd->rcItem.left, lpd->rcItem.top, style);
+    }
 
     return TRUE;
 }
@@ -636,6 +657,7 @@ struct identity_action_map {
     khm_int32  renew_cmd;
     khm_int32  destroy_cmd;
     khm_int32  new_cmd;
+    khm_int32  setdef_cmd;
     int        refreshcycle;
 };
 
@@ -727,6 +749,19 @@ create_identity_cmd_map(khm_handle ident) {
         khui_action_create(actionname, caption, tooltip, NULL,
                            KHUI_ACTIONTYPE_TRIGGER, NULL);
 
+    /* set default */
+    GETFORMAT(IDS_IDACTIONT_SETDEF);
+    EXPFORMAT(tooltip, idname);
+
+    GETFORMAT(IDS_IDACTION_SETDEF);
+    EXPFORMAT(caption, idname);
+
+    StringCbPrintf(actionname, sizeof(actionname), L"E:%s", idname);
+
+    actmap->setdef_cmd =
+        khui_action_create(actionname, caption, tooltip, ident,
+                           KHUI_ACTIONTYPE_IDENTITY, NULL);
+
     actmap->refreshcycle = idcmd_refreshcycle;
 
 #undef GETFORMAT
@@ -749,9 +784,13 @@ purge_identity_cmd_map(void) {
 
             khui_action_delete(id_action_map[i].renew_cmd);
             khui_action_delete(id_action_map[i].destroy_cmd);
+            khui_action_delete(id_action_map[i].new_cmd);
+            khui_action_delete(id_action_map[i].setdef_cmd);
 
             id_action_map[i].renew_cmd = 0;
             id_action_map[i].destroy_cmd = 0;
+            id_action_map[i].new_cmd = 0;
+            id_action_map[i].setdef_cmd = 0;
         }
     }
 }
@@ -799,6 +838,18 @@ khm_get_identity_destroy_action(khm_handle ident) {
 }
 
 khm_int32
+khm_get_identity_setdef_action(khm_handle ident) {
+    struct identity_action_map * map;
+
+    map = get_identity_cmd_map(ident);
+
+    if (map)
+        return map->setdef_cmd;
+    else
+        return 0;
+}
+
+khm_int32
 khm_get_identity_new_creds_action(khm_handle ident) {
     struct identity_action_map * map;
 
@@ -814,6 +865,7 @@ void
 khm_refresh_identity_menus(void) {
     khui_menu_def * renew_def = NULL;
     khui_menu_def * dest_def = NULL;
+    khui_menu_def * setdef_def = NULL;
     wchar_t * idlist = NULL;
     wchar_t * idname = NULL;
     khm_size cb = 0;
@@ -823,10 +875,14 @@ khm_refresh_identity_menus(void) {
     khm_handle csp_cw = NULL;
     khm_int32 idflags;
     khm_int32 def_sticky = 0;
+    khm_int32 all_identities = 0;
     khm_boolean sticky_done = FALSE;
+    khm_boolean added_dest = FALSE;
+    khm_boolean added_setdef = FALSE;
 
     if (KHM_SUCCEEDED(khc_open_space(NULL, L"CredWindow", 0, &csp_cw))) {
         khc_read_int32(csp_cw, L"DefaultSticky", &def_sticky);
+        khc_read_int32(csp_cw, L"ViewAllIdents", &all_identities);
         khc_close_space(csp_cw);
         csp_cw = NULL;
     }
@@ -843,7 +899,7 @@ khm_refresh_identity_menus(void) {
         idlist = NULL;
         cb = 0;
 
-        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE | KCDB_IDENT_FLAG_EMPTY,
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE,
                                 KCDB_IDENT_FLAG_ACTIVE,
                                 NULL,
                                 &cb,
@@ -856,7 +912,7 @@ khm_refresh_identity_menus(void) {
         assert(idlist);
 #endif
 
-        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE | KCDB_IDENT_FLAG_EMPTY,
+        rv = kcdb_identity_enum(KCDB_IDENT_FLAG_ACTIVE,
                                 KCDB_IDENT_FLAG_ACTIVE,
                                 idlist,
                                 &cb,
@@ -874,23 +930,13 @@ khm_refresh_identity_menus(void) {
 
     } while(TRUE);
 
-    if (idlist != NULL && n_idents > 0) {
-        khui_enable_action(KHUI_MENU_RENEW_CRED, TRUE);
-        khui_enable_action(KHUI_MENU_DESTROY_CRED, TRUE);
-        khui_enable_action(KHUI_ACTION_RENEW_CRED, TRUE);
-        khui_enable_action(KHUI_ACTION_DESTROY_CRED, TRUE);
-    } else {
-        khui_enable_action(KHUI_MENU_RENEW_CRED, FALSE);
-        khui_enable_action(KHUI_MENU_DESTROY_CRED, FALSE);
-        khui_enable_action(KHUI_ACTION_RENEW_CRED, FALSE);
-        khui_enable_action(KHUI_ACTION_DESTROY_CRED, FALSE);
-    }
-
     renew_def = khui_find_menu(KHUI_MENU_RENEW_CRED);
     dest_def = khui_find_menu(KHUI_MENU_DESTROY_CRED);
+    setdef_def = khui_find_menu(KHUI_MENU_SETDEF);
 #ifdef DEBUG
     assert(renew_def);
     assert(dest_def);
+    assert(setdef_def);
 #endif
 
     t = khui_menu_get_size(renew_def);
@@ -902,6 +948,12 @@ khm_refresh_identity_menus(void) {
     t = khui_menu_get_size(dest_def);
     while(t) {
         khui_menu_remove_action(dest_def, 0);
+        t--;
+    }
+
+    t = khui_menu_get_size(setdef_def);
+    while(t) {
+        khui_menu_remove_action(setdef_def, 0);
         t--;
     }
 
@@ -924,14 +976,6 @@ khm_refresh_identity_menus(void) {
             continue;
         }
 
-        khui_menu_insert_action(renew_def, 1000,
-                                khm_get_identity_renew_action(identity),
-                                0);
-
-        khui_menu_insert_action(dest_def, 1000,
-                                khm_get_identity_destroy_action(identity),
-                                0);
-
         idflags = 0;
         kcdb_identity_get_flags(identity, &idflags);
 
@@ -939,12 +983,56 @@ khm_refresh_identity_menus(void) {
             kcdb_identity_set_flags(identity,
                                     KCDB_IDENT_FLAG_STICKY,
                                     KCDB_IDENT_FLAG_STICKY);
+            idflags |= KCDB_IDENT_FLAG_STICKY;
             sticky_done = TRUE;
         }
+
+        if (!(idflags & KCDB_IDENT_FLAG_EMPTY)) {
+            khui_menu_insert_action(renew_def, 1000,
+                                    khm_get_identity_renew_action(identity),
+                                    0);
+
+            khui_menu_insert_action(dest_def, 1000,
+                                    khm_get_identity_destroy_action(identity),
+                                    0);
+            added_dest = TRUE;
+        }
+
+        if (all_identities ||
+            !(idflags & KCDB_IDENT_FLAG_EMPTY) ||
+            (idflags & KCDB_IDENT_FLAG_STICKY)) {
+
+            khui_menu_insert_action(setdef_def, 1000,
+                                    khm_get_identity_setdef_action(identity),
+                                    0);
+            added_setdef = TRUE;
+        }
+
+        kcdb_identity_release(identity);
     }
 
-    if (idlist)
+    if (idlist) {
         PFREE(idlist);
+        idlist = NULL;
+    }
+
+    if (added_dest) {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, TRUE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, TRUE);
+    } else {
+        khui_enable_action(KHUI_MENU_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_MENU_DESTROY_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_RENEW_CRED, FALSE);
+        khui_enable_action(KHUI_ACTION_DESTROY_CRED, FALSE);
+    }
+
+    if (added_setdef) {
+        khui_enable_action(KHUI_MENU_SETDEF, TRUE);
+    } else {
+        khui_enable_action(KHUI_MENU_SETDEF, FALSE);
+    }
 
     purge_identity_cmd_map();
 
@@ -1000,6 +1088,12 @@ khm_check_identity_menu_action(khm_int32 act_id) {
             if (id_action_map[i].new_cmd == act_id) {
                 khm_cred_obtain_new_creds_for_ident(id_action_map[i].identity,
                                                     NULL);
+                return TRUE;
+            }
+
+            if (id_action_map[i].setdef_cmd == act_id) {
+                khm_cred_set_default_identity(id_action_map[i].identity);
+
                 return TRUE;
             }
         }
