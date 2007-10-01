@@ -683,7 +683,11 @@ void kmmint_init_module(kmm_module_i * m) {
         m->path = PMALLOC(sz);
         khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, m->path, &sz);
     } else {
-        _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
+	/* 
+	 * If there is no image path, then the module has not been 
+	 * installed.  Do not report an error and bother the user.
+	 *   _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
+	 */
 
         m->state = KMM_MODULE_STATE_FAIL_NOT_REGISTERED;
         goto _exit;
