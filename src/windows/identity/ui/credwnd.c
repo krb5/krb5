@@ -1445,7 +1445,6 @@ cw_update_outline(khui_credwnd_tbl * tbl)
     khm_size cbbuf;
     khm_int32 flags;
     int selected;
-    khm_int32 expstate = 0;
 
     /*  this is called after calling cw_update_creds, so we assume
         that the credentials are all loaded and sorted according to
@@ -1715,7 +1714,6 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                 if (flags) {
                     ol->flags |= flags;
                     ol->flags |= KHUI_CW_O_SHOWFLAG;
-		    expstate |= flags;
                 } else if (grouping[j] == tbl->n_cols - 1) {
                     /* if we aren't showing any creds under this
                        outline level, we should also show any
@@ -1994,17 +1992,34 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         tbl->cursor_row = 0;
 
 _exit:
-    /* note that the expstate is derived from whether or not 
-     * we have expiration states set for any active identities */
-    if (n_creds == 0)
-        khm_notify_icon_expstate(KHM_NOTIF_EMPTY);
-    else if ((expstate & CW_EXPSTATE_EXPIRED) == CW_EXPSTATE_EXPIRED)
-        khm_notify_icon_expstate(KHM_NOTIF_EXP);
-    else if ((expstate & CW_EXPSTATE_WARN) == CW_EXPSTATE_WARN ||
-             (expstate & CW_EXPSTATE_CRITICAL) == CW_EXPSTATE_CRITICAL)
-        khm_notify_icon_expstate(KHM_NOTIF_WARN);
-    else
-        khm_notify_icon_expstate(KHM_NOTIF_OK);
+
+    {
+        khm_handle def_ident = NULL;
+        khm_int32 def_expstate = 0;
+        khm_boolean def_empty = TRUE;
+
+        kcdb_identity_get_default(&def_ident);
+        if (def_ident) {
+            khui_credwnd_ident * cwi;
+
+            cwi = cw_find_ident(tbl, def_ident);
+            if (cwi) {
+                def_empty = (cwi->id_credcount == 0);
+            }
+
+            def_expstate = cw_get_buf_exp_flags(tbl, def_ident);
+        }
+
+        if (def_empty)
+            khm_notify_icon_expstate(KHM_NOTIF_EMPTY);
+        else if ((def_expstate & CW_EXPSTATE_EXPIRED) == CW_EXPSTATE_EXPIRED)
+            khm_notify_icon_expstate(KHM_NOTIF_EXP);
+        else if ((def_expstate & CW_EXPSTATE_WARN) == CW_EXPSTATE_WARN ||
+                 (def_expstate & CW_EXPSTATE_CRITICAL) == CW_EXPSTATE_CRITICAL)
+            khm_notify_icon_expstate(KHM_NOTIF_WARN);
+        else
+            khm_notify_icon_expstate(KHM_NOTIF_OK);
+    }
 }
 
 void 
