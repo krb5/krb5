@@ -2387,6 +2387,8 @@ cw_insert_header_cols(khui_credwnd_tbl * tbl) {
 #define CW_ER_GREY  1
 #define CW_ER_SEL   2
 
+#pragma warning(push)
+#pragma warning(disable: 4701)
 void 
 cw_erase_rect(HDC hdc, 
               khui_credwnd_tbl * tbl, 
@@ -2433,7 +2435,7 @@ cw_erase_rect(HDC hdc,
     if(!rie) {
         FillRect(hdc, r_erase, hbr);
     } else {
-        HDC hdcb = CreateCompatibleDC(hdc);
+	HDC hdcb = CreateCompatibleDC(hdc);
         HBITMAP hbmold = SelectObject(hdcb, tbl->kbm_logo_shade.hbmp);
         
         BitBlt(hdc, ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top,
@@ -2467,6 +2469,7 @@ cw_erase_rect(HDC hdc,
         }
     }
 }
+#pragma warning(pop)
 
 void 
 cw_draw_header(HDC hdc, 
