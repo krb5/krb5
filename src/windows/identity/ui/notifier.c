@@ -114,6 +114,12 @@ alerter_wnd_data * khui_alert_windows = NULL;
 /* Notification icon for when there are no alerts to be displayed */
 int  iid_normal = IDI_NOTIFY_NONE;
 
+/* Tooltip to use when there are no alerts to be displayed */
+wchar_t tip_normal[128] = L"";
+
+/* Current notifier severity level */
+khm_int32 notifier_severity = KHERR_NONE;
+
 /* The alert currently being displayed in a balloon */
 khui_alert * balloon_alert = NULL;
 
@@ -2829,9 +2835,11 @@ void khm_notify_icon_add(void) {
     ni.hIcon = LoadIcon(khm_hInstance, MAKEINTRESOURCE(iid_normal));
     ni.uCallbackMessage = KHUI_WM_NOTIFIER;
     LoadString(khm_hInstance, IDS_NOTIFY_PREFIX, buf, ARRAYLENGTH(buf));
-    StringCbCopy(ni.szTip, sizeof(ni.szTip), buf);
+    StringCbCopy(tip_normal, sizeof(tip_normal), buf);
     LoadString(khm_hInstance, IDS_NOTIFY_READY, buf, ARRAYLENGTH(buf));
-    StringCbCat(ni.szTip, sizeof(ni.szTip), buf);
+    StringCbCat(tip_normal, sizeof(tip_normal), buf);
+
+    StringCbCopy(ni.szTip, sizeof(ni.szTip), tip_normal);
 
     Shell_NotifyIcon(NIM_ADD, &ni);
 
@@ -2942,17 +2950,45 @@ void khm_notify_icon_change(khm_int32 severity) {
     ni.uID = KHUI_NOTIFY_ICON_ID;
     ni.uFlags = NIF_ICON | NIF_TIP;
     ni.hIcon = LoadIcon(khm_hInstance, MAKEINTRESOURCE(iid));
-    LoadString(khm_hInstance, IDS_NOTIFY_PREFIX, buf, ARRAYLENGTH(buf));
-    StringCbCopy(ni.szTip, sizeof(ni.szTip), buf);
-    if(severity == KHERR_NONE)
-        LoadString(khm_hInstance, IDS_NOTIFY_READY, buf, ARRAYLENGTH(buf));
-    else
+
+    if (severity == KHERR_NONE) {
+        StringCbCopy(ni.szTip, sizeof(ni.szTip), tip_normal);
+    } else {
+        LoadString(khm_hInstance, IDS_NOTIFY_PREFIX, buf, ARRAYLENGTH(buf));
+        StringCbCopy(ni.szTip, sizeof(ni.szTip), buf);
         LoadString(khm_hInstance, IDS_NOTIFY_ATTENTION, buf, ARRAYLENGTH(buf));
-    StringCbCat(ni.szTip, sizeof(ni.szTip), buf);
+        StringCbCat(ni.szTip, sizeof(ni.szTip), buf);
+    }
 
     Shell_NotifyIcon(NIM_MODIFY, &ni);
 
     DestroyIcon(ni.hIcon);
+
+    notifier_severity = severity;
+}
+
+void khm_notify_icon_tooltip(wchar_t * s) {
+    wchar_t buf[256];
+
+    LoadString(khm_hInstance, IDS_NOTIFY_PREFIX, buf, ARRAYLENGTH(buf));
+    StringCbCat(buf, sizeof(buf), s);
+
+    StringCbCopy(tip_normal, sizeof(tip_normal), buf);
+
+    if (notifier_severity == KHERR_NONE) {
+        NOTIFYICONDATA ni;
+
+        ZeroMemory(&ni, sizeof(ni));
+
+        ni.cbSize = sizeof(ni);
+        ni.hWnd = hwnd_notifier;
+        ni.uID = KHUI_NOTIFY_ICON_ID;
+        ni.uFlags = NIF_TIP;
+
+        StringCbCopy(ni.szTip, sizeof(ni.szTip), tip_normal);
+
+        Shell_NotifyIcon(NIM_MODIFY, &ni);
+    }
 }
 
 void khm_notify_icon_remove(void) {
@@ -3136,29 +3172,3 @@ void khm_exit_notifier(void)
     notifier_ready = FALSE;
 }
 
-/***** testing *****/
-
-void
-create_test_alerts(void) {
-
-    khui_alert * a;
-    int i;
-
-    for (i=0; i < 50; i++) {
-        wchar_t buf[128];
-
-        StringCbPrintf(buf, sizeof(buf), L"Foo bar baz.  This is alert number %d", i);
-        khui_alert_create_simple(L"Title", buf, KHERR_INFO, &a);
-        khui_alert_set_type(a, KHUI_ALERTTYPE_PLUGIN);
-        khui_alert_set_suggestion(a, L"This is a suggestion.  It is kinda long to see if the word wrapping actually works as we expect it to.  Just in case, here's a line feed.\n\nDoes this show up on a different line? Cool!");
-
-        khui_alert_add_command(a, KHUI_ACTION_NEW_CRED);
-        khui_alert_add_command(a, KHUI_ACTION_CLOSE_APP);
-        khui_alert_add_command(a, KHUI_ACTION_PROPERTIES);
-        khui_alert_add_command(a, KHUI_ACTION_OPEN_APP);
-        khui_alert_add_command(a, KHUI_ACTION_VIEW_REFRESH);
-
-        khui_alert_show(a);
-        khui_alert_release(a);
-    }
-}

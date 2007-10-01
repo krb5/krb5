@@ -3575,11 +3575,30 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         else if (m->subtype == KMSG_KCDB_IDENT && 
                  m->uparam == KCDB_OP_NEW_DEFAULT) {
+            wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
+            khm_size cb;
+            khm_handle defid = NULL;
 
             cw_update_outline(tbl);
             cw_update_extents(tbl, TRUE);
             InvalidateRect(hwnd, NULL, FALSE);
 
+            if (KHM_SUCCEEDED(kcdb_identity_get_default(&defid)) &&
+                defid != NULL &&
+                KHM_SUCCEEDED(kcdb_identity_get_name(defid, idname, &cb)) &&
+                idname[0] != L'\0') {
+
+                khm_notify_icon_tooltip(idname);
+
+            } else {
+
+                LoadString(khm_hInstance, IDS_NOTIFY_READY,
+                           idname, ARRAYLENGTH(idname));
+                khm_notify_icon_tooltip(idname);
+            }
+
+            if (defid)
+                kcdb_identity_release(defid);
         }
         else if (m->subtype == KMSG_KCDB_ATTRIB &&
                  (m->uparam == KCDB_OP_INSERT ||
