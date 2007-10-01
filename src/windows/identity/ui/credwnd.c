@@ -963,7 +963,7 @@ cw_credset_iter_func(khm_handle cred, void * rock) {
 
             cb = sizeof(cwi->credtype_name);
             if (KHM_FAILED(kcdb_identity_get_attr(ident, KCDB_ATTR_TYPE_NAME, NULL,
-                                                  &cwi->credtype, &cb))) {
+                                                  &cwi->credtype_name, &cb))) {
                 cb = sizeof(cwi->credtype_name);
                 kcdb_credtype_describe(cwi->credtype, cwi->credtype_name,
                                        &cb, KCDB_TS_SHORT);
