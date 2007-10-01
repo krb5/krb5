@@ -831,7 +831,7 @@ int check_cc_ccache_store_credentials() {
 	if (&creds_union) { release_v5_creds_union(&creds_union); }
 	
 	// try with bad params
-	check_once_cc_ccache_store_credentials(ccache, NULL, ccErrInvalidCredentials, "NULL creds param");
+	check_once_cc_ccache_store_credentials(ccache, NULL, ccErrBadParam, "NULL creds param");
 	
 	// invalid creds
 	if (!err) {
@@ -843,7 +843,7 @@ int check_cc_ccache_store_credentials() {
 			free(creds_union.credentials.credentials_v5->client);
 			creds_union.credentials.credentials_v5->client = NULL;
 		}
-		check_once_cc_ccache_store_credentials(ccache, &creds_union, ccErrInvalidCredentials, "invalid creds (NULL client string)");
+		check_once_cc_ccache_store_credentials(ccache, &creds_union, ccErrBadParam, "invalid creds (NULL client string)");
 	}
 	
 	if (&creds_union) { release_v5_creds_union(&creds_union); }
@@ -898,8 +898,9 @@ cc_int32 check_once_cc_ccache_store_credentials(cc_ccache_t ccache, const cc_cre
 	cc_credentials_iterator_t creds_iterator = NULL;
 	cc_credentials_t creds = NULL;
 		
-	cc_int32 possible_return_values[5] = {
+	cc_int32 possible_return_values[6] = {
 		ccNoError, 
+		ccErrBadParam, 
 		ccErrInvalidCCache, 
 		ccErrInvalidCredentials, 
 		ccErrBadCredentialsVersion, 
@@ -1006,10 +1007,10 @@ int check_cc_ccache_remove_credentials() {
 	}
 
 	// NULL param
-	check_once_cc_ccache_remove_credentials(ccache, NULL, ccErrInvalidCredentials, "NULL creds in param");
+	check_once_cc_ccache_remove_credentials(ccache, NULL, ccErrBadParam, "NULL creds in param");
 	
 	// non-existent creds (remove same one twice)
-	check_once_cc_ccache_remove_credentials(ccache, creds_array[0], ccErrCredentialsNotFound, "removed same creds twice");
+	check_once_cc_ccache_remove_credentials(ccache, creds_array[0], ccErrInvalidCredentials, "removed same creds twice");
 	
 	// non-existent ccache
 	if (ccache) { 
@@ -1049,8 +1050,9 @@ cc_int32 check_once_cc_ccache_remove_credentials(cc_ccache_t ccache, cc_credenti
 	cc_credentials_iterator_t creds_iterator = NULL;
 	cc_credentials_t creds = NULL;
 		
-	cc_int32 possible_return_values[5] = {
+	cc_int32 possible_return_values[6] = {
 		ccNoError, 
+		ccErrBadParam, 
 		ccErrInvalidCCache, 
 		ccErrInvalidCredentials, 
 		ccErrCredentialsNotFound, 
@@ -1156,7 +1158,7 @@ int check_cc_ccache_new_credentials_iterator() {
 	}
 	
 	if (!err) {
-		check_once_cc_ccache_new_credentials_iterator(ccache, &creds_iterator, ccErrCCacheNotFound, "invalid ccache");
+		check_once_cc_ccache_new_credentials_iterator(ccache, &creds_iterator, ccErrInvalidCCache, "invalid ccache");
 	}
 	
 	if (creds_iterator) { 
@@ -1178,11 +1180,12 @@ int check_cc_ccache_new_credentials_iterator() {
 cc_int32 check_once_cc_ccache_new_credentials_iterator(cc_ccache_t ccache, cc_credentials_iterator_t *iterator, cc_int32 expected_err, const char *description) {
 	cc_int32 err = ccNoError;
 	
-	cc_int32 possible_return_values[4] = {
+	cc_int32 possible_return_values[5] = {
 		ccNoError, 
 		ccErrBadParam, 
 		ccErrNoMem, 
 		ccErrCCacheNotFound, 
+		ccErrInvalidCCache, 
 	};
 
     BEGIN_CHECK_ONCE(description);
@@ -1489,7 +1492,7 @@ int check_cc_ccache_get_last_default_time() {
 	}
 	
 	if (!err) {
-		check_once_cc_ccache_get_last_default_time(ccache_1, &last_time_1, ccErrCCacheNotFound, "destroyed ccache");
+		check_once_cc_ccache_get_last_default_time(ccache_1, &last_time_1, ccErrInvalidCCache, "destroyed ccache");
 	}
 	
 	if (ccache_1) { cc_ccache_release(ccache_1); }
@@ -1553,7 +1556,7 @@ int check_cc_ccache_move() {
 
 	// NULL param
 	if (!err) {
-		check_once_cc_ccache_move(destination, NULL, ccErrInvalidCCache, "NULL destination param");
+		check_once_cc_ccache_move(destination, NULL, ccErrBadParam, "NULL destination param");
 	}
 	
 	// non-existent ccache
@@ -1586,8 +1589,9 @@ cc_int32 check_once_cc_ccache_move(cc_ccache_t source, cc_ccache_t destination, 
 	cc_string_t src_principal = NULL;
 	cc_string_t dst_principal = NULL;
 	
-	cc_int32 possible_return_values[3] = {
+	cc_int32 possible_return_values[4] = {
 		ccNoError, 
+		ccErrBadParam, 
 		ccErrInvalidCCache, 
 		ccErrCCacheNotFound,
 	};
@@ -1717,7 +1721,7 @@ int check_cc_ccache_compare() {
 	}
 	equal = 0;
 	check_once_cc_ccache_compare(ccache_a, ccache_b, &equal, ccNoError, "compare different ccaches");
-	check_once_cc_ccache_compare(ccache_a, NULL, &equal, ccErrInvalidCCache, "NULL compare_to ccache");
+	check_once_cc_ccache_compare(ccache_a, NULL, &equal, ccErrBadParam, "NULL compare_to ccache");
 	check_once_cc_ccache_compare(ccache_a, ccache_b, NULL, ccErrBadParam, "NULL out param");
 
 	if (ccache_a) { cc_ccache_release(ccache_a); }

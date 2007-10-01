@@ -11,11 +11,11 @@ int check_cc_initialize() {
 	BEGIN_TEST("cc_initialize");
 	
 	// try every api_version
-	err = check_once_cc_initialize(&context, ccapi_version_2, NULL, NULL, 11, NULL);                 // err == CC_NOT_SUPP, not reflected in documentation rev 8
-	err = check_once_cc_initialize(&context, ccapi_version_3, NULL, NULL, ccNoError, NULL);   	   // !err                                    
-	err = check_once_cc_initialize(&context, ccapi_version_4, NULL, NULL, ccNoError, NULL);   	   //        "                                            
-	err = check_once_cc_initialize(&context, ccapi_version_5, NULL, NULL, ccNoError, NULL);   	   //        "                                            
-	err = check_once_cc_initialize(&context, ccapi_version_6, NULL, NULL, ccNoError, NULL);   	   //        "                                            
+	err = check_once_cc_initialize(&context, ccapi_version_2, NULL, NULL, 11, "cc_initialize with ccapi_version_2");                 // err == CC_NOT_SUPP, not reflected in documentation rev 8
+	err = check_once_cc_initialize(&context, ccapi_version_3, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_3");   	   // !err                                    
+	err = check_once_cc_initialize(&context, ccapi_version_4, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_4");   	   //        "                                            
+	err = check_once_cc_initialize(&context, ccapi_version_5, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_5");   	   //        "                                            
+	err = check_once_cc_initialize(&context, ccapi_version_6, NULL, NULL, ccNoError, "cc_initialize with ccapi_version_6");   	   //        "                                            
 	
 	// try bad api_version
 	err = check_once_cc_initialize(&context, INT_MAX,         NULL, NULL, ccErrBadAPIVersion, NULL); // err == ccErrBadAPIVersion                             
@@ -665,7 +665,7 @@ int check_cc_context_create_ccache() {
 		}
 				
 		// try bad parameters
-		err = check_once_cc_context_create_ccache(context, NULL, cc_credentials_v5, "foo@BAR.ORG", &ccache, ccErrBadName, "NULL name");                    // NULL name
+		err = check_once_cc_context_create_ccache(context, NULL, cc_credentials_v5, "foo@BAR.ORG", &ccache, ccErrBadParam, "NULL name");                    // NULL name
 		err = check_once_cc_context_create_ccache(context, "name", cc_credentials_v4_v5, "foo@BAR.ORG", &ccache, ccErrBadCredentialsVersion, "invalid creds_vers"); // invalid creds_vers
 		err = check_once_cc_context_create_ccache(context, "name", cc_credentials_v5, NULL, &ccache, ccErrBadParam, "NULL principal");                          // NULL principal
 		err = check_once_cc_context_create_ccache(context, "name", cc_credentials_v5, "foo@BAR.ORG", NULL, ccErrBadParam, "NULL ccache");                    // NULL ccache
@@ -1031,7 +1031,7 @@ int check_cc_context_compare(){
 
 	check_once_cc_context_compare(context_a, context_a, &equal, ccNoError, "valid params, same contexts");
 	check_once_cc_context_compare(context_a, context_b, &equal, ccNoError, "valid params, different contexts");
-	check_once_cc_context_compare(context_a, NULL, &equal, ccErrInvalidContext, "NULL compare_to context");
+	check_once_cc_context_compare(context_a, NULL, &equal, ccErrBadParam, "NULL compare_to context");
 	check_once_cc_context_compare(context_a, context_b, NULL, ccErrBadParam, "NULL out param");
 
 	if (context_a) { cc_context_release(context_a); }
