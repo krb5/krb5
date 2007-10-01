@@ -615,7 +615,7 @@ kmm_get_plugin_state(wchar_t * plugin);
 KHMEXP khm_int32   KHMAPI 
 kmm_get_plugin_config(wchar_t * plugin, khm_int32 flags, khm_handle * result);
 
-/*! \brief Obtain the configuration space or a named module
+/*! \brief Obtain the configuration space for a named module
 
     The named module does not have to actually exist.  Configuration
     spaces for modules are based on the basename of the module
