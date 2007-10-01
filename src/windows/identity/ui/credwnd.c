@@ -3603,6 +3603,8 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             cw_update_extents(tbl, TRUE);
             InvalidateRect(hwnd, NULL, FALSE);
 
+            cb = sizeof(idname);
+
             if (KHM_SUCCEEDED(kcdb_identity_get_default(&defid)) &&
                 defid != NULL &&
                 KHM_SUCCEEDED(kcdb_identity_get_name(defid, idname, &cb)) &&
