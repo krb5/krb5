@@ -3125,7 +3125,8 @@ get_default_file_cache_for_identity(const wchar_t * idname,
     escape_string_for_filename(idname, escf, sizeof(escf));
     GetTempPath(ARRAYLENGTH(tmppath), tmppath);
 
-    StringCbPrintf(tccname, sizeof(tccname), L"FILE:%s\\krb5cc.%s", tmppath, escf);
+    /* The path returned by GetTempPath always ends in a backslash. */
+    StringCbPrintf(tccname, sizeof(tccname), L"FILE:%skrb5cc.%s", tmppath, escf);
     StringCbLength(tccname, sizeof(tccname), &cb);
     cb += sizeof(wchar_t);
 
@@ -3209,7 +3210,7 @@ khm_krb5_get_identity_default_ccache(khm_handle ident, wchar_t * buf, khm_size *
 
 khm_int32
 khm_krb5_get_identity_default_ccacheA(khm_handle ident, char * buf, khm_size * pcb) {
-    wchar_t wccname[MAX_PATH];
+    wchar_t wccname[KRB5_MAXCCH_CCNAME];
     khm_size cbcc;
     khm_int32 rv;
 
