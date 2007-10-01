@@ -2039,10 +2039,22 @@ k5_msg_cred_dialog(khm_int32 msg_type,
 
             /* if the fiber is already in a kinit, cancel it */
             if(g_fjob.state == FIBER_STATE_KINIT) {
+                khm_boolean clear_prompts = TRUE;
+
+                khui_cw_lock_nc(nc);
+                if (nc->n_identities > 0 &&
+                    kcdb_identity_is_equal(nc->identities[0], g_fjob.identity)) {
+                    clear_prompts = FALSE;
+                }
+                khui_cw_unlock_nc(nc);
+
                 g_fjob.command = FIBER_CMD_CANCEL;
                 SwitchToFiber(k5_kinit_fiber);
                 /* we get here when the cancel operation completes */
                 k5_free_kinit_job();
+
+                if (clear_prompts)
+                    khui_cw_clear_prompts(nc);
             }
 
             khui_cw_lock_nc(nc);
