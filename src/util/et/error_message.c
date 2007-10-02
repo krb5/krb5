@@ -338,17 +338,17 @@ remove_error_table(const struct error_table * et)
     if (merr)
 	return merr;
 
-    /* Remove the first occurrance we can find.  Prefer dynamic
+    /* Remove the entry that matches the error table instance.  Prefer dynamic
        entries, but if there are none, check for a static one too.  */
     for (del = &et_list_dynamic; *del; del = &(*del)->next)
-	if ((*del)->table->base == et->base) {
+	if ((*del)->table == et) {
 	    /*@only@*/ struct dynamic_et_list *old = *del;
 	    *del = old->next;
 	    free (old);
 	    return k5_mutex_unlock(&et_list_lock);
 	}
     for (el = &_et_list; *el; el = &(*el)->next)
-	if ((*el)->table != NULL && (*el)->table->base == et->base) {
+	if ((*el)->table == et) {
 	    struct et_list *old = *el;
 	    *el = old->next;
 	    old->next = NULL;
