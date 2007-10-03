@@ -4,16 +4,16 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Credentials Cache API  "
+PROJECT_NAME           = "Credentials Cache API   "
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = .
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
-ABBREVIATE_BRIEF       = "The $name class  " \
-                         "The $name widget  " \
-                         "The $name file  " \
+ABBREVIATE_BRIEF       = "The $name class   " \
+                         "The $name widget   " \
+                         "The $name file   " \
                          is \
                          provides \
                          specifies \
@@ -80,12 +80,12 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = YES
-WARN_FORMAT            = "$file:$line: $text  "
+WARN_FORMAT            = "$file:$line: $text   "
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../../src/include/CredentialsCache.h
+INPUT                  = ../../Sources/include/CredentialsCache.h
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cc \

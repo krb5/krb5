@@ -730,7 +730,8 @@ struct cc_context_f {
      * \param in_context the context object for the cache collection.
      * \param in_name the name of the ccache to open.
      * \param out_ccache on exit, a ccache object for the ccache
-     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \return On success, #ccNoError.  If no ccache named \a in_name exists, 
+     * #ccErrCCacheNotFound. On failure, an error code representing the failure.
      * \brief \b cc_context_open_ccache(): Open a ccache.
      * 
      * Opens an already existing ccache identified by its name. It returns a reference 
@@ -747,7 +748,8 @@ struct cc_context_f {
      /*!
       * \param in_context the context object for the cache collection.
       * \param out_ccache on exit, a ccache object for the default ccache
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
+      * \return On success, #ccNoError.  If no default ccache exists, 
+      * #ccErrCCacheNotFound. On failure, an error code representing the failure.
       * \brief \b cc_context_open_default_ccache(): Open the default ccache.
       * 
       * Opens the default ccache. It returns a reference to the ccache in *ccache.
@@ -878,7 +880,8 @@ struct cc_context_f {
       * \return On success, #ccNoError.  On failure, an error code representing the failure.
       * \brief \b cc_context_lock(): Lock the cache collection.
       *
-      * Attempts to acquire a lock for the ccache collection. Allowed values for lock_type are:
+      * Attempts to acquire an advisory lock for the ccache collection. Allowed values 
+      * for lock_type are:
       * 
       * \li cc_lock_read: a read lock.
       * \li cc_lock_write: a write lock
@@ -906,8 +909,8 @@ struct cc_context_f {
       * \note All locks are advisory.  For example, callers which do not call 
       * cc_context_lock() and cc_context_unlock() will not be prevented from writing 
       * to the cache collection when you have a read lock.  This is because the CCAPI
-      * locking was added later and thus adding mandatory locks would have changed the
-      * user experience and performance of existing applications.
+      * locking was added after the first release and thus adding mandatory locks would 
+      * have changed the user experience and performance of existing applications.
       */
      cc_int32 (*lock) (cc_context_t in_context,
                       cc_uint32    in_lock_type,
@@ -1148,7 +1151,7 @@ struct cc_ccache_f {
      * \return On success, #ccNoError.  On failure, an error code representing the failure.
      * \brief \b cc_ccache_lock(): Lock a ccache.
      *
-     * Attempts to acquire a lock for a ccache. Allowed values for lock_type are:
+     * Attempts to acquire an advisory lock for a ccache. Allowed values for lock_type are:
      * 
      * \li cc_lock_read: a read lock.
      * \li cc_lock_write: a write lock
@@ -1170,8 +1173,8 @@ struct cc_ccache_f {
      * \note All locks are advisory.  For example, callers which do not call 
      * cc_ccache_lock() and cc_ccache_unlock() will not be prevented from writing 
      * to the ccache when you have a read lock.  This is because the CCAPI
-     * locking was added later and thus adding mandatory locks would have changed the
-     * user experience and performance of existing applications.
+     * locking was added after the first release and thus adding mandatory locks would 
+     * have changed the user experience and performance of existing applications.
      */
     cc_int32 (*lock) (cc_ccache_t io_ccache,
                       cc_uint32   in_lock_type,
@@ -1201,7 +1204,8 @@ struct cc_ccache_f {
     /*!
      * \param in_ccache a cache object.
      * \param out_change_time on exit, the last time the ccache changed.
-     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \return On success, #ccNoError.  If the ccache was never the default ccache,
+     * #ccErrNeverDefault.  Otherwise, an error code representing the failure.
      * \brief \b cc_ccache_get_change_time(): Get the last time a ccache changed.
      * 
      * This function returns the time of the most recent change made to a ccache. 
@@ -1242,7 +1246,8 @@ struct cc_ccache_f {
      * \param in_credentials_version the credentials version to get the time offset for.
      * \param out_time_offset on exit, the KDC time offset for \a in_ccache for credentials version
      * \a in_credentials_version.
-     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \return On success, #ccNoError if a time offset was obtained or #ccErrTimeOffsetNotSet 
+     * if a time offset has not been set.  On failure, an error code representing the failure.
      * \brief \b cc_ccache_get_kdc_time_offset(): Get the KDC time offset for credentials in a ccache.
      * \sa set_kdc_time_offset, clear_kdc_time_offset
      * 
@@ -1371,7 +1376,9 @@ struct cc_ccache_iterator_f {
     /*!
      * \param in_ccache_iterator a ccache iterator object.
      * \param out_ccache on exit, the next ccache in the cache collection.
-     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \return On success, #ccNoError if the next ccache in the cache collection was 
+     * obtained or #ccIteratorEnd if there are no more ccaches.  
+     * On failure, an error code representing the failure.
      * \brief \b cc_ccache_iterator_next(): Get the next ccache in the cache collection.
      */
     cc_int32 (*next) (cc_ccache_iterator_t  in_ccache_iterator,
@@ -1402,7 +1409,9 @@ struct cc_credentials_iterator_f {
     /*!
      * \param in_credentials_iterator a credentials iterator object.
      * \param out_credentials on exit, the next credentials in the ccache.
-     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \return On success, #ccNoError if the next credential in the ccache was obtained
+     * or #ccIteratorEnd if there are no more credentials.  
+     * On failure, an error code representing the failure.
      * \brief \b cc_credentials_iterator_next(): Get the next credentials in the ccache.
      */
     cc_int32 (*next) (cc_credentials_iterator_t  in_credentials_iterator,
@@ -1429,6 +1438,7 @@ struct cc_credentials_iterator_f {
  * \param out_vendor if non-NULL, on exit contains a pointer to a read-only C string which 
  * contains a string describing the vendor which implemented the credentials cache API.
  * \return On success, #ccNoError.  On failure, an error code representing the failure.
+ * May return CCAPI v2 error CC_BAD_API_VERSION if #ccapi_version_2 is passed in.
  * \brief Initialize a new cc_context.
  */
 CCACHE_API cc_int32 cc_initialize (cc_context_t  *out_context,
