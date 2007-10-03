@@ -112,6 +112,7 @@ gss_cred_id_t *		d_cred;
 
 {
     OM_uint32		status, temp_status, temp_minor_status;
+    OM_uint32		temp_ret_flags = 0;
     gss_union_ctx_id_t	union_ctx_id;
     gss_union_cred_t	union_cred;
     gss_cred_id_t	input_cred_handle = GSS_C_NO_CREDENTIAL;
@@ -202,7 +203,7 @@ gss_cred_id_t *		d_cred;
 						  &internal_name,
 						  mech_type,
 						  output_token,
-						  ret_flags,
+						  &temp_ret_flags,
 						  time_rec,
 					d_cred ? &tmp_d_cred : NULL);
 
@@ -245,7 +246,7 @@ gss_cred_id_t *		d_cred;
 	    }
 
 	    /* Ensure we're returning correct creds format */
-	    if ((ret_flags && GSS_C_DELEG_FLAG) &&
+	    if ((temp_ret_flags & GSS_C_DELEG_FLAG) &&
 		tmp_d_cred != GSS_C_NO_CREDENTIAL) {
 		gss_union_cred_t d_u_cred = NULL;
 
@@ -329,6 +330,8 @@ gss_cred_id_t *		d_cred;
 	    if (src_name == NULL && tmp_src_name != NULL)
 		(void) gss_release_name(&temp_minor_status,
 					&tmp_src_name);
+	    if (ret_flags != NULL)
+		*ret_flags = temp_ret_flags;
 	    return	(status);
     } else {
 
