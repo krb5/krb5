@@ -1903,7 +1903,6 @@ krb5_fcc_next_cred(krb5_context context, krb5_ccache id, krb5_cc_cursor *cursor,
      TCHECK(kret);
      
      fcursor->pos = fcc_lseek(d, (off_t) 0, SEEK_CUR);
-     cursor = (krb5_cc_cursor *) fcursor;
 
 lose:
      MAYBE_CLOSE (context, id, kret);
