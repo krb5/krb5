@@ -1980,7 +1980,7 @@ typedef struct _krb5int_access {
 	(const krb5_data *output, krb5_kdc_req **rep);
     krb5_error_code (*encode_krb5_kdc_req_body)
 	(const krb5_kdc_req *rep, krb5_data **code);
-    void KRB5_CALLCONV (*krb5_free_kdc_req)
+    void (KRB5_CALLCONV *krb5_free_kdc_req)
 	(krb5_context, krb5_kdc_req * );
     void (*krb5int_set_prompt_types)
 	(krb5_context, krb5_prompt_type *);
