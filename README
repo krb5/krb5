@@ -82,30 +82,112 @@ krb5-1.6.3 changes by ticket ID
 3334    libkrb5 treats all KDC errors as terminal
 4950    gc_frm_kdc doesn't adjust use_conf_ktypes in referrals case
 5471    krb5_ktfile_get_entry() can invalidate keytab file handle
-5542    Optimize file/directory pruning
-5548    Look for unix find command in multiple places
+5542    Optimize file/directory pruning in KfW build script
+5548    Look for unix find command in multiple places in KfW build script
 5577    MSI Deployment Guide
 5581    Build fails in lib/gssapi/spnego
 5584    NIM Changes Post KFW 3.2
-5604    NIM update inconsistency when deleting credentials
+5604    NIM credential display doesn't update when credential deleted
 5607    NIM GUI: Default identity display should not have a background color
-5609    NIM GUI picture does not track tray icon
+5609    NIM watermark does not track tray icon
 5613    NIM GUI: views jump around on the screen
 5617    Add PKINIT support
 5623    NIM: apply does not update saved values of general identities cfg page
 5624    krb5_fcc_generate_new() doesn't work with mkstemp()
+5625    KRB5_CALLCONV must be specified inside parens
 5629    gss_init_sec_context does not release output token buffer when
         used with spnego mech
 5636    remove unused src/windows/identity/uilib/Makefile.w2k
 5645    export krb5_get_profile
 5653    compilation failure with IRIX native compiler
 5666    read_entropy_from_device on partial read will not fill buffer
+5673    NIM: resource leak in khui_action_trigger()
+5674    NIM: Identity Configuration Panel Fixes
+5675    NIM: New command-line options --hide and --show / new
+        command-line help dialog
+5676    NIM: APP: Redesigned Color Schemas
+5677    NIM: BUG: APP: Identity right click selection failure and
+        context menu keyboard events were ignored
+5678    NIM: BUG: APP: WM_TIMER messages if received after timer event
+        is canceled results in invalid data access
+5679    NIM: BUG: APP: Filler columns should not be resizeable
+5680    NIM: BUG: APP: WM_PAINT messages received without update
+        regions results in incorrect window repainting behavior
+5681    NIM: BUG: APP: Fix Cursor Position and Selection Usability Issues
+5682    NIM: remove unused code from ui/credwnd.c
+5683    NIM: support include files in schemas
+5684    NIM: Keep API release documentation up to date
+5685    NIM: FEATURE: API: Add Identity Provider Pre-Process Message
+        to trigger immediate identity selection
+5686    NIM: BUG: LIB: khcint_remove_space() frees memory too soon
+        resulting in potential invalid memory access
+5687    NIM: BUG: KRB5: External changes to default identity ccache
+        are improperly reflected by krb5 provider
+5688    NIM: Reposition New Credentials Dialog if necessary
+5689    NIM: BUG: APP: Revert ticket 5604
+5690    NIM: version update
+5696    NIM: FEATURE: ALL: 64-bit Windows Support and Removal of
+        Compile Time Warnings
 5697    make ccache handle referrals better
+5698    Windows: Add support for 64-bit CCAPI DLL name: krbcc64s.exe
 5700    -S sname option for kvno
+5701    NIM: APP: remove unused preprocessor symbols from resource files
+5702    NIM: LIB: a small source code readability change
+5703    NIM: BUG: KRB5: FILE ccache support did not make use of
+        OPENCLOSE flags
 5704    new warnings in pkinit code (patch needs review)
+5705    GSS-API Win64 support: Access Leash API via leashw64.dll
 5706    fix CVE-2007-3999, CVE-2007-4743 svc_auth_gss.c buffer overflow
 5707    fix CVE-2007-4000 modify_policy vulnerability
 5708    krb5_fcc_generate_new is non-functional
+5710    Build 64-bit Windows gss.exe (gui version of gss-client.exe)
+        now that 64-bit CCAPI is available
+5711    KFW: Add MSI installer for 64-bit AMD64
+5713    64-bit Windows krb5int_cc_default calls to Leash API must use
+        leashw64.dll
+5719    NIM: FEATURE: APP: Add View->All Identities
+5724    NIM: FEATURE: APP: Add Notification Icon Default Identity Context Menu
+5751    KFW: permit administrative installs using MSI installation package
+5753    NIM: BUG: APP: Do not report errors for modules that are not installed
+5756    NIM: BUG: SRC: Windows\Identity Makefile "clean" more
+5759    NIM: APP: BUG: restore HideWatermark functionality
+5763    NIM: BUG: khm_krb5_initialize() failed to return error code
+5764    NIM: BUG: Restore Copyright removed in revision 19855
+5766    MSLSA krb5_cc module fails to check success of UNICODE string
+        conversions
+5768    set svn:eol-style property on a bunch of files
+5772    NIM: BUG: SRC: Increase size of max ccache name buffers and
+        remove extraneous trailing path component separators
+5773    NIM: BUG: KMM: Ensure proper buffer length for registry
+        multi-string reads; avoid error reports for modules without config
+        data; avoid race when sending thread quit message
+5779    NIM: BUG: LIB: optimize khui_find_action()
+5780    NIM: FEATURE: APP: Notification Icon Tooltip now includes
+        default identity name
+5782    NIM: APP: BUG: Initial cursor position does not track selected identity
+5783    NIM: APP: BUG: Identities without identity credentials are
+        listed as having credentials
+5787    NIM: BUG: APP: Spell Check
+5788    NIM: BUG: APP: Provide keyboard accelerator for switching
+        between advanced and basic obtain new credentials dialog modes
+5789    NIM: documentation updates for KFW 3.2.2
+5790    NIM: SRC: disable potential uninitialized variable warning
+5791    Add static ordinals to DLL exports
+5792    NIM: BUG: LIB: deadlock in kmq
+5793    NIM: BUG: APP: leaking prompts in obtain new credentials dialog
+5794    NIM: BUG: APP: Change View->Choose Columns to View->Select
+        Columns to match standard windows style
+5795    NIM: BUG: APP: store credential type in the correct field of
+        the khui_credwnd_identity structure
+5796    NIM: BUG: APP: change notification icon state to track default
+        identity only
+5797    NIM: BUG: APP: notification icon tooltip wrong string
+5798    NIM: BUG: APP: command-line options window doesn't process
+        WM_CLOSE messages
+5800    krb5_get_init_creds_opt_alloc needs to initialize the opt structure
+5801    remove error tables by pointer
+5802    libgssapi mechglue doesn't always store delegated credentials
+5803    fix pkinit module deps for krb5-1.6.x
 
 Major changes in krb5-1.6.2
 ---------------------------
