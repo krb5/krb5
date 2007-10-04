@@ -603,7 +603,7 @@ void kadmin_unlock(argc, argv)
 
     if (!locked)
 	return;
-    retval = kadm5_lock(handle);
+    retval = kadm5_unlock(handle);
     if (retval) {
 	com_err("unlock", retval, "");
 	return;
