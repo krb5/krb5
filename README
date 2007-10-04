@@ -80,6 +80,7 @@ krb5-1.6.3 changes by ticket ID
 -------------------------------
 
 3334    libkrb5 treats all KDC errors as terminal
+4136    kadmin_unlock() calls kadm5_lock() instead of kadm5_unlock()
 4950    gc_frm_kdc doesn't adjust use_conf_ktypes in referrals case
 5471    krb5_ktfile_get_entry() can invalidate keytab file handle
 5542    Optimize file/directory pruning in KfW build script
