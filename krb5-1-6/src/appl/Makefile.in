@@ -1,0 +1,7 @@
+thisconfigdir=.
+myfulldir=appl
+mydir=.
+BUILDTOP=$(REL)..
+
+LOCAL_SUBDIRS= sample simple user_user gss-sample
+

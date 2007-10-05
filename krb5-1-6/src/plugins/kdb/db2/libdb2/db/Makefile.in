@@ -1,0 +1,11 @@
+thisconfigdir=./..
+myfulldir=plugins/kdb/db2/libdb2/db
+mydir=db
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+STLIBOBJS=db.o
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+@libobj_frag@

@@ -1,0 +1,74 @@
+# Hack around Solaris 9 kernel race condition that causes last output
+# from a pty to get dropped.
+if { $PRIOCNTL_HACK } {
+    catch {exec priocntl -s -c FX -m 30 -p 30 -i pid [getpid]}
+    rename spawn oldspawn
+    proc spawn { args } {
+	upvar 1 spawn_id spawn_id
+	set newargs {}
+	set inflags 1
+	set eatnext 0
+	foreach arg $args {
+	    if { $arg == "-ignore" \
+		     || $arg == "-open" \
+		     || $arg == "-leaveopen" } {
+		lappend newargs $arg
+		set eatnext 1
+		continue
+	    }
+	    if [string match "-*" $arg] {
+		lappend newargs $arg
+		continue
+	    }
+	    if { $eatnext } {
+		set eatnext 0
+		lappend newargs $arg
+		continue
+	    }
+	    if { $inflags } {
+		set inflags 0
+		set newargs [concat $newargs {priocntl -e -c FX -p 0}]
+	    }
+	    lappend newargs $arg
+	}
+	set pid [eval oldspawn $newargs]
+	return $pid
+    }
+}
+
+#
+# kpasswd_version -- extract and print the version number of kpasswd
+#
+
+proc kpasswd_version {} {
+	global KPASSWD
+	catch "exec ident $KPASSWD" tmp
+	if [regexp {Id: kpasswd.c,v ([0-9]+\.[0-9]+)} $tmp \
+		dummy version] then {
+		clone_output "$KPASSWD version $version\n"
+	} else {
+		clone_output "$KPASSWD version <unknown>\n"
+	}
+}
+#
+# kpasswd_load -- loads the program
+#
+proc kpasswd_load {} {
+	#
+}
+
+# kpasswd_exit -- clean up and exit
+proc kpasswd_exit {} {
+	#
+}
+
+#
+# kpasswd_start -- start kpasswd running
+#
+proc kpasswd_start { args } {
+	global KPASSWD
+	global spawn_id
+
+	verbose "% $KPASSWD $args" 1
+	eval spawn $KPASSWD $args
+}

@@ -1,0 +1,10 @@
+K5_AC_INIT(configure.in)
+enable_shared=yes
+build_dynobj=yes
+CONFIG_RULES
+AC_CHECK_HEADERS(Python.h python2.3/Python.h)
+dnl AC_CHECK_LIB(python2.3)
+
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+V5_AC_OUTPUT_MAKEFILE

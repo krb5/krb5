@@ -1,0 +1,35 @@
+<html>
+
+<head>
+<title>Network Identity Manager Concepts: Identity</title>
+<meta name="description" content="NetIDMgr Concepts: Identity">
+<meta name="keywords" content="identity,concepts">
+<link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+
+<body>
+
+<h1>Network Identity Manager Concepts: Identity</h1>
+<p>While there are many approaches to defining what an identity is, as far as the 
+Network Identity Manager (NetIDMgr) is concerned, an identity is the unique user 
+identifier that is accepted by a network service. Each credential that is managed 
+by NetIDMgr is assumed to map to a single identity. The collection of credentials 
+that map to a single identity is considered to belong to that identity. </p>
+<p></p>
+<a name="default_identity"></a>
+<h3>Default Identity</h3>
+<p>The default identity is the identity that will be used by applications when a 
+specific identity is not requested. The Kerberos v5 plug-in will mark the 
+credential cache that contains the default identity as the default credentials cache 
+for the current logon session.</p>
+<p>Most applications that implement GSS-API or Kerberos v5 authentication assume 
+that there is only one Kerberos v5 credential cache and one identity in use by 
+the user at a time.&nbsp; These applications use the default identity.&nbsp; In 
+general, if the application does not have a configuration option permitting the 
+specification of a Kerberos v5 principal, the default identity will be used.</p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

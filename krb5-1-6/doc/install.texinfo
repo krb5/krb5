@@ -1,0 +1,1456 @@
+\input texinfo-suppl.tex        % contains @doubleleftarrow{} definition
+                                % this line must come *before* \input texinfo
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@c guide
+@setfilename krb5-install.info
+@settitle Kerberos V5 Installation Guide
+@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
+@c %**end of header
+
+@paragraphindent 0
+@iftex
+@parskip 6pt plus 6pt
+@end iftex
+
+@dircategory Kerberos
+@direntry
+* krb5-install: (krb5-install).         Kerberos V5 Installation Guide
+@end direntry
+
+@include definitions.texinfo
+@set EDITION 1.1
+
+@finalout                               @c don't print black warning boxes
+
+@titlepage
+@title @value{PRODUCT} Installation Guide
+@subtitle Release:  @value{RELEASE}
+@subtitle Document Edition:  @value{EDITION}
+@subtitle Last updated:  @value{UPDATED}
+@author @value{COMPANY}
+
+@page
+@vskip 0pt plus 1filll
+
+@end titlepage
+
+@node Top, Copyright, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+
+@ifinfo
+This file documents how to install the @value{RELEASE} release of
+@value{PRODUCT}.
+
+@end ifinfo
+
+@c The master menu is updated using emacs19's M-x texinfo-all-menus-update
+@c function.  Don't forget to run M-x texinfo-every-node-update after
+@c you add a new section or subsection, or after you've rearranged the
+@c order of sections or subsections.  Also, don't forget to add an @node
+@c comand before each @section or @subsection!  All you need to enter
+@c is:
+@c
+@c @node New Section Name
+
+@c @section New Section Name
+@c
+@c M-x texinfo-every-node-update will take care of calculating the
+@c node's forward and back pointers.
+@c
+@c ---------------------------------------------------------------------
+
+@menu
+* Copyright::                   
+* Introduction::                
+* Realm Configuration Decisions::  
+* Building Kerberos V5::        
+* Installing Kerberos V5::      
+* Upgrading Existing Kerberos V5 Installations::  
+* Bug Reports for Kerberos V5::  
+@end menu
+
+@node Copyright, Introduction, Top, Top
+@unnumbered Copyright
+@include copyright.texinfo
+
+@node Introduction, Realm Configuration Decisions, Copyright, Top
+@chapter Introduction
+
+@menu
+* What is Kerberos and How Does it Work?::  
+* Why Should I use Kerberos?::  
+* Please Read the Documentation::  
+* Overview of This Guide::      
+@end menu
+
+@node What is Kerberos and How Does it Work?, Why Should I use Kerberos?, Introduction, Introduction
+@section What is Kerberos and How Does it Work?
+
+@value{PRODUCT} is based on the Kerberos authentication system developed
+at MIT.  Under Kerberos, a client (generally either a user or a service)
+sends a request for a ticket to the Key Distribution Center (KDC).  The
+KDC creates a @dfn{ticket-granting ticket} (TGT) for the client,
+encrypts it using the client's password as the key, and sends the
+encrypted TGT back to the client.  The client then attempts to decrypt
+the TGT, using its password.  If the client successfully decrypts the
+TGT (@i{i.e.}, if the client gave the correct password), it keeps the
+decrypted TGT, which indicates proof of the client's identity.
+
+The TGT, which expires at a specified time, permits the client to obtain
+additional tickets, which give permission for specific services.  The
+requesting and granting of these additional tickets is user-transparent.
+
+@node Why Should I use Kerberos?, Please Read the Documentation, What is Kerberos and How Does it Work?, Introduction
+@section Why Should I use Kerberos?
+
+Since Kerberos negotiates authenticated, and optionally encrypted,
+communications between two points anywhere on the Internet, it provides
+a layer of security that is not dependent on which side of a firewall
+either client is on.  Since studies have shown that half of the computer
+security breaches in industry happen from @i{inside} firewalls,
+@value{PRODUCT} from @value{COMPANY} will play a vital role in the
+security of your network.
+
+@node Please Read the Documentation, Overview of This Guide, Why Should I use Kerberos?, Introduction
+@section Please Read the Documentation
+
+As with any software package that uses a centrallized database, the
+installation procedure is somewhat involved, and requires forethought
+and planning.  @value{COMPANY} has attempted to make this
+@value{PRODUCT} Installation Guide as concise as possible, rather than
+making it an exhaustive description of the details of Kerberos.
+@ifset CYGNUS
+Consequently, everything in this guide appears because @value{COMPANY}
+believes that it is important.  Please read and follow these
+instructions carefully, and if there is anything you do not understand
+or are not sure of, please don't hesitate to call us.
+@end ifset
+@ifset MIT
+Consequently, everything in this guide appears because @value{COMPANY}
+believes that it is important.  Please read and follow these
+instructions carefully.
+@end ifset
+
+@include document-list.texinfo
+
+@node Overview of This Guide,  , Please Read the Documentation, Introduction
+@section Overview of This Guide
+
+@noindent
+The next chapter describes the decisions you need to make before
+installing @value{PRODUCT}.
+
+@noindent
+Chapter three provided instructions for building the Kerberos sources.
+
+@noindent
+Chapter four describes installation procedures for each class of
+Kerberos machines:
+
+@enumerate
+@item
+Key Distribution Centers (KDCs).
+
+@enumerate A
+@item
+The Master KDC.
+
+@item
+Slave KDCs.
+@end enumerate
+
+@item
+UNIX client machines
+
+@item
+UNIX application server machines
+@end enumerate
+
+@noindent
+Note that a machine can be both a client machine and an application
+server.
+
+@noindent
+Chapter five describes procedure for updating previous installations of
+@value{PRODUCT}.
+
+@noindent
+Chapter six describes our problem reporting system.
+
+@node Realm Configuration Decisions, Building Kerberos V5, Introduction, Top
+@chapter Realm Configuration Decisions
+
+Before installing @value{PRODUCT}, it is necessary to consider the
+following issues:
+
+@itemize @bullet
+@item
+The name of your Kerberos realm (or the name of each realm, if you need
+more than one).
+
+@item
+How you will map your hostnames onto Kerberos realms.
+
+@item
+Which ports your KDC and and kadmin (database access) services will use.
+
+@item
+How many slave KDCs you need and where they should be located.
+
+@item
+The hostnames of your master and slave KDCs.
+
+@item
+How frequently you will propagate the database from the master KDC to
+the slave KDCs.
+
+@item
+Whether you need backward compatibility with Kerberos V4.
+@end itemize
+
+@menu
+* Kerberos Realms::             
+* Mapping Hostnames onto Kerberos Realms::  
+* Ports for the KDC and Admin Services::  
+* Slave KDCs::                  
+* Hostnames for the Master and Slave KDCs::  
+* Database Propagation::        
+@end menu
+
+@node Kerberos Realms, Mapping Hostnames onto Kerberos Realms, Realm Configuration Decisions, Realm Configuration Decisions
+@section Kerberos Realms
+
+Although your Kerberos realm can be any ASCII string, convention is to
+make it the same as your domain name, in upper-case letters.  For
+example, hosts in the domain @value{SECONDDOMAIN} would be in the
+Kerberos realm @value{SECONDREALM}.
+
+If you need multiple Kerberos realms, @value{COMPANY} recommends that
+you use descriptive names which end with your domain name, such as
+BOSTON.@value{SECONDREALM} and HOUSTON.@value{SECONDREALM}.
+
+@node Mapping Hostnames onto Kerberos Realms, Ports for the KDC and Admin Services, Kerberos Realms, Realm Configuration Decisions
+@section Mapping Hostnames onto Kerberos Realms
+
+@include dnstxt.texinfo
+
+@node Ports for the KDC and Admin Services, Slave KDCs, Mapping Hostnames onto Kerberos Realms, Realm Configuration Decisions
+@section Ports for the KDC and Admin Services
+
+The default ports used by Kerberos are port @value{DefaultPort} for the
+KDC@footnote{Kerberos V4 used port @value{DefaultSecondPort}.  If
+necessary, you can run on both ports for backward compatibility.}  and
+port @value{DefaultKadmindPort} for the admin server.  You can, however,
+choose to run on other ports, as long as they are specified in each
+host's @code{/etc/services} and @code{krb5.conf} files, and the
+@code{kdc.conf} file on each KDC.  For a more thorough treatment of
+port numbers used by the @value{PRODUCT} programs, refer to the
+``Configuring Your Firewall to Work With @value{PRODUCT}'' section of
+the @cite{@value{PRODUCT} System Administrator's Guide}.
+
+@node Slave KDCs, Hostnames for the Master and Slave KDCs, Ports for the KDC and Admin Services, Realm Configuration Decisions
+@section Slave KDCs
+
+Slave KDCs provide an additional source of Kerberos ticket-granting
+services in the event of inaccessibility of the master KDC.  The number
+of slave KDCs you need and the decision of where to place them, both
+physically and logically, depends on the specifics of your network.
+
+All of the Kerberos authentication on your network requires that each
+client be able to contact a KDC.  Therefore, you need to anticipate any
+likely reason a KDC might be unavailable and have a slave KDC to take up
+the slack.
+
+Some considerations include:
+
+@itemize @bullet
+@item
+Have at least one slave KDC as a backup, for when the master KDC is
+down, is being upgraded, or is otherwise unavailable.
+
+@item
+If your network is split such that a network outage is likely to cause a
+network partition (some segment or segments of the network to become cut
+off or isolated from other segments), have a slave KDC accessible to
+each segment.
+
+@item
+If possible, have at least one slave KDC in a different building from
+the master, in case of power outages, fires, or other localized
+disasters.
+@end itemize
+
+
+
+@node Hostnames for the Master and Slave KDCs, Database Propagation, Slave KDCs, Realm Configuration Decisions
+@section Hostnames for the Master and Slave KDCs
+
+@include dnssrv.texinfo
+
+@node Database Propagation,  , Hostnames for the Master and Slave KDCs, Realm Configuration Decisions
+@section Database Propagation
+
+The Kerberos database resides on the master KDC, and must be propagated
+regularly (usually by a cron job) to the slave KDCs.  In deciding how
+frequently the propagation should happen, you will need to balance the
+amount of time the propagation takes against the maximum reasonable
+amount of time a user should have to wait for a password change to take
+effect.
+
+If the propagation time is longer than this maximum reasonable time
+(@i{e.g.,} you have a particularly large database, you have a lot of
+slaves, or you experience frequent network delays), you may wish to
+cut down on your propagation delay by performing the propagation in
+parallel.  To do this, have the master KDC propagate the database to one
+set of slaves, and then have each of these slaves propagate the database
+to additional slaves.
+
+@node Building Kerberos V5, Installing Kerberos V5, Realm Configuration Decisions, Top
+@chapter Building @value{PRODUCT}
+
+@include build.texinfo
+
+@node Installing Kerberos V5, Upgrading Existing Kerberos V5 Installations, Building Kerberos V5, Top
+@chapter Installing @value{PRODUCT}
+
+The sections of this chapter describe procedures for installing
+@value{PRODUCT} on:
+
+@enumerate
+@item
+The KDCs
+
+@item
+UNIX client machines
+
+@item
+UNIX Application Servers
+@end enumerate
+
+@menu
+* Installing KDCs::             
+* Installing and Configuring UNIX Client Machines::  
+* UNIX Application Servers::    
+@end menu
+
+@node Installing KDCs, Installing and Configuring UNIX Client Machines, Installing Kerberos V5, Installing Kerberos V5
+@section Installing KDCs
+
+The Key Distribution Centers (KDCs) issue Kerberos tickets.  Each KDC
+contains a copy of the Kerberos database.  The master KDC contains the
+master copy of the database, which it propagates to the slave KDCs at
+regular intervals.  All database changes (such as password changes) are
+made on the master KDC.
+
+Slave KDCs provide Kerberos ticket-granting services, but not database
+administration.  This allows clients to continue to obtain tickets when
+the master KDC is unavailable.
+
+@value{COMPANY} recommends that you install all of your KDCs to be able
+to function as either the master or one of the slaves.  This will enable
+you to easily switch your master KDC with one of the slaves if
+necessary.  (@xref{Switching Master and Slave KDCs}.)  This installation
+procedure is based on that recommendation.
+
+@menu
+* Install the Master KDC::      
+* Install the Slave KDCs::      
+* Back on the Master KDC::      
+* Finish Installing the Slave KDCs::  
+* Add Kerberos Principals to the Database::  
+* Limit Access to the KDCs::    
+* Switching Master and Slave KDCs::  
+@end menu
+
+@node Install the Master KDC, Install the Slave KDCs, Installing KDCs, Installing KDCs
+@subsection Install the Master KDC
+
+This installation procedure will require you to go back and forth a
+couple of times between the master KDC and each of the slave KDCs.  The
+first few steps must be done on the master KDC.
+
+@menu
+* Edit the Configuration Files::  
+* krb5.conf::                   
+* kdc.conf::                    
+* Create the Database::         
+* Add Administrators to the Acl File::  
+* Add Administrators to the Kerberos Database::  
+* Create a kadmind Keytab (optional)::  
+* Start the Kerberos Daemons::  
+@end menu
+
+@node Edit the Configuration Files, krb5.conf, Install the Master KDC, Install the Master KDC
+@subsubsection Edit the Configuration Files
+
+Modify the configuration files, @code{/etc/krb5.conf} and
+@code{@value{ROOTDIR}/var/krb5kdc/kdc.conf} to reflect the correct
+information (such as the hostnames and realm name) for your realm.
+@value{COMPANY} recommends that you keep @code{krb5.conf} in @code{/etc}.
+
+Most of the tags in the configuration have default values that will
+work well for most sites.  There are some tags in the @code{krb5.conf}
+file whose values must be specified, and this section will explain
+those as well as give an overview of all of the sections in both
+configuration files.  For more information on changing defaults with
+the configuration files, see the @value{PRODUCT} System Administrator's
+Guide sections on configuration files. 
+
+@node krb5.conf, kdc.conf, Edit the Configuration Files, Install the Master KDC
+@subsubsection krb5.conf
+
+@include krb5conf.texinfo
+
+If you are not using DNS TXT records, you must specify the
+@code{default_realm} in the @code{libdefaults} section.  If you are not
+using DNS SRV records, you must include the @code{kdc} tag for each
+realm in the @code{realms} section.  To communicate with the kadmin
+server in each realm, the @code{admin_server} tag must be set in the
+@code{realms} section.  If your domain name and realm name are not the
+same, you must provide a translation in @code{domain_realm}.  It is
+also higly recommeneded that you create a @code{[logging]} stanza if
+the computer will be functioning as a KDC so that the KDC and kadmind
+will generate logging output.
+
+An example @code{krb5.conf} file:
+
+@smallexample
+@group
+[libdefaults]
+    default_realm = @value{PRIMARYREALM}
+
+[realms]
+    @value{PRIMARYREALM} = @{
+    	kdc = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
+    	kdc = @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
+    	kdc = @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+    	admin_server = @value{KDCSERVER}.@value{PRIMARYDOMAIN}
+    @{
+
+[logging]
+    kdc = FILE:/var/log/krb5kdc.log
+    admin_server = FILE:/var/log/kadmin.log
+    default = FILE:/var/log/krb5lib.log
+@end group
+@end smallexample
+
+@node kdc.conf, Create the Database, krb5.conf, Install the Master KDC
+@subsubsection kdc.conf
+
+@include kdcconf.texinfo
+
+@node Create the Database, Add Administrators to the Acl File, kdc.conf, Install the Master KDC
+@subsubsection Create the Database
+
+You will use the @code{kdb5_util} command @emph{on the Master KDC} to
+create the Kerberos database and the optional stash file.  The
+@dfn{stash file} is a local copy of the master key that resides in
+encrypted form on the KDC's local disk.  The stash file is used to
+authenticate the KDC to itself automatically before starting the
+@code{kadmind} and @code{krb5kdc} daemons (@i{e.g.,} as part of the
+machine's boot sequence).  The stash file, like the keytab file
+(see @xref{The Keytab File}, for more information) is a potential
+point-of-entry for a break-in,
+and if compromised, would allow unrestricted access to the Kerberos
+database.  If you choose to install a stash file, it should be readable
+only by root, and should exist only on the KDC's local disk.  The file
+should not be part of any backup of the machine, unless access to the
+backup data is secured as tightly as access to the master password
+itself.
+
+If you choose not to install a stash file, the KDC will prompt you for
+the master key each time it starts up.  This means that the KDC will
+not be able to start automatically, such as after a system reboot.
+
+Note that @code{kdb5_util} will prompt you for the master key for the
+Kerberos database.  This key can be any string.  A good key is one you
+can remember, but that no one else can guess.  Examples of bad keys are
+words that can be found in a dictionary, any common or popular name,
+especially a famous person (or cartoon character), your username in any
+form (@i{e.g.}, forward, backward, repeated twice, @i{etc.}), and any of
+the sample keys that appear in this manual.  One example of a key which
+might be good if it did not appear in this manual is ``MITiys4K5!'',
+which represents the sentence ``MIT is your source for Kerberos 5!''
+(It's the first letter of each word, substituting the numeral ``4'' for
+the word ``for'', and includes the punctuation mark at the end.)
+
+The following is an example of how to create a Kerberos database and
+stash file on the master KDC, using the @code{kdb5_util} command.  (The
+line that begins with @result{} is a continuation of the previous line.)
+Replace @i{@value{PRIMARYREALM}} with the name of your Kerberos realm.
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kdb5_util create -r @value{PRIMARYREALM} -s
+@b{Initializing database '@value{ROOTDIR}/var/krb5kdc/principal' for
+@result{} realm '@value{PRIMARYREALM}',
+master key name 'K/M@@@value{PRIMARYREALM}'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.}
+@iftex
+@b{Enter KDC database master key:}  @i{@doubleleftarrow{} Type the master password.}
+@b{Re-enter KDC database master key to verify:}  @i{@doubleleftarrow{} Type it again.}
+@end iftex
+@ifinfo
+@b{Enter KDC database master key:}  @i{<= Type the master password.}
+@b{Re-enter KDC database master key to verify:}  @i{<= Type it again.}
+@end ifinfo
+@ifhtml
+@b{Enter KDC database master key:}  @i{<= Type the master password.}
+@b{Re-enter KDC database master key to verify:}  @i{<= Type it again.}
+@end ifhtml
+@b{shell%}
+@end group
+@end smallexample
+
+This will create five files in the directory specified in your
+@code{kdc.conf} file:  two Kerberos database files, @code{principal.db},
+and @code{principal.ok}; the Kerberos administrative database file,
+@code{principal.kadm5}; the administrative database lock file,
+@code{principal.kadm5.lock}; and the stash file, @code{.k5stash}.  (The
+default directory is @code{@value{ROOTDIR}/var/krb5kdc}.)  If you do not
+want a stash file, run the above command without the @code{-s} option.
+
+@node Add Administrators to the Acl File, Add Administrators to the Kerberos Database, Create the Database, Install the Master KDC
+@subsubsection Add Administrators to the Acl File
+
+Next, you need create an Access Control List (acl) file, and put the
+Kerberos principal of at least one of the administrators into it.  This
+file is used by the @code{kadmind} daemon to control which principals
+may view and make privileged modifications to the Kerberos database
+files.  The filename should match the value you have set for
+``acl_file'' in your @code{kdc.conf} file.  The default file name is
+@samp{@value{DefaultAclFile}}.
+
+@include kadm5acl.texinfo
+
+@node Add Administrators to the Kerberos Database, Create a kadmind Keytab (optional), Add Administrators to the Acl File, Install the Master KDC
+@subsubsection Add Administrators to the Kerberos Database
+
+Next you need to add administrative principals to the Kerberos database.
+(You must add at least one now.)  To do this, use @code{kadmin.local}
+@emph{on the master KDC}.  The administrative principals you create
+should be the ones you added to the ACL file.  (See @xref{Add
+Administrators to the Acl File}.)  In the following example, the
+administration principal @code{admin/admin} is created:
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kadmin.local
+@b{kadmin.local:} addprinc admin/admin@@@value{PRIMARYREALM}
+@b{NOTICE: no policy specified for "admin/admin@@@value{PRIMARYREALM}";
+assigning "default".}
+@iftex
+@b{Enter password for principal admin/admin@@@value{PRIMARYREALM}:}  @i{@doubleleftarrow{} Enter a password.}
+Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{@doubleleftarrow{} Type it again.}
+@end iftex
+@ifinfo
+@b{Enter password for principal admin/admin@@@value{PRIMARYREALM}:}  @i{<= Enter a password.}
+Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{<= Type it again.}
+@end ifinfo
+@ifhtml
+@b{Enter password for principal admin/admin@@@value{PRIMARYREALM}:}  @i{<= Enter a password.}
+Re-enter password for principal admin/admin@@@value{PRIMARYREALM}:  @i{<= Type it again.}
+@end ifhtml
+@b{Principal "admin/admin@@@value{PRIMARYREALM}" created.
+kadmin.local:}
+@end group
+@end smallexample
+
+
+
+@node Create a kadmind Keytab (optional), Start the Kerberos Daemons, Add Administrators to the Kerberos Database, Install the Master KDC
+@subsubsection Create a kadmind Keytab (optional)
+
+The kadmind keytab is the key that the legacy admininstration daemons
+@code{kadmind4} and @code{v5passwdd} will use to decrypt
+administrators' or clients' Kerberos tickets to determine whether or
+not they should have access to the database.  You need to create the
+kadmin keytab with entries for the principals @code{kadmin/admin} and
+@code{kadmin/changepw}.  (These principals are placed in the Kerberos
+database automatically when you create it.)  To create the kadmin
+keytab, run @code{kadmin.local} and use the @code{ktadd} command, as
+in the following example.  (The line beginning with @result{} is a
+continuation of the previous line.):
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kadmin.local
+@b{kadmin.local:} ktadd -k @value{ROOTDIR}/var/krb5kdc/kadm5.keytab
+@result{} kadmin/admin kadmin/changepw 
+@b{ Entry for principal kadmin/admin with kvno 5, encryption
+	type Triple DES cbc mode with HMAC/sha1 added to keytab
+	WRFILE:/usr/local/var/krb5kdc/kadm5.keytab.
+Entry for principal kadmin/admin with kvno 5, encryption type DES cbc mode
+	with CRC-32 added to keytab
+	WRFILE:/usr/local/var/krb5kdc/kadm5.keytab.
+Entry for principal kadmin/changepw with kvno 5, encryption
+	type Triple DES cbc mode with HMAC/sha1 added to keytab
+	WRFILE:/usr/local/var/krb5kdc/kadm5.keytab.
+Entry for principal kadmin/changepw with kvno 5,
+	encryption type DES cbc mode with CRC-32 added to keytab
+	WRFILE:/usr/local/var/krb5kdc/kadm5.keytab.
+kadmin.local:} quit
+@b{shell%}
+@end group
+@end smallexample
+
+@noindent
+As specified in the @samp{-k} argument, @code{ktadd} will save the
+extracted keytab as @* @code{@value{ROOTDIR}/var/krb5kdc/kadm5.keytab}.
+The filename you use must be the one specified in your @code{kdc.conf}
+file.
+
+@need 2000
+@node Start the Kerberos Daemons,  , Create a kadmind Keytab (optional), Install the Master KDC
+@subsubsection Start the Kerberos Daemons on the Master KDC
+
+At this point, you are ready to start the Kerberos daemons on the Master
+KDC.  To do so, type:
+
+@smallexample
+@b{shell%} @value{ROOTDIR}/sbin/krb5kdc
+@b{shell%} @value{ROOTDIR}/sbin/kadmind
+@end smallexample
+
+@noindent
+Each daemon will fork and run in the background.  Assuming you want
+these daemons to start up automatically at boot time, you can add them
+to the KDC's @code{/etc/rc} or @code{/etc/inittab} file.  You need to
+have a stash file in order to do this.
+
+You can verify that they started properly by checking for their startup
+messages in the logging locations you defined in @code{/etc/krb5.conf}.
+(@xref{Edit the Configuration Files}.)  For example:
+
+@smallexample
+@b{shell%} tail /var/log/krb5kdc.log
+Dec 02 12:35:47 beeblebrox krb5kdc[3187](info): commencing operation
+@b{shell%} tail /var/log/kadmin.log
+Dec 02 12:35:52 beeblebrox kadmind[3189](info): starting
+@end smallexample
+
+Any errors the daemons encounter while starting will also be listed in
+the logging output.
+
+
+@node Install the Slave KDCs, Back on the Master KDC, Install the Master KDC, Installing KDCs
+@subsection Install the Slave KDCs
+
+You are now ready to start configuring the slave KDCs.  Assuming you are
+setting the KDCs up so that you can easily switch the master KDC with
+one of the slaves, you should perform each of these steps on the master
+KDC as well as the slave KDCs, unless these instructions specify
+otherwise.
+
+
+@menu
+* Create Host Keys for the Slave KDCs::  
+* Extract Host Keytabs for the KDCs::  
+* Set Up the Slave KDCs for Database Propagation::  
+@end menu
+
+@node Create Host Keys for the Slave KDCs, Extract Host Keytabs for the KDCs, Install the Slave KDCs, Install the Slave KDCs
+@subsubsection Create Host Keys for the Slave KDCs
+
+Each KDC needs a host principal in the Kerberos database.  You can enter
+these from any host, once the @code{kadmind} daemon is running.  For
+example, if your master KDC were called
+@value{KDCSERVER}.@value{PRIMARYDOMAIN}, and you had two KDC slaves
+named @value{KDCSLAVE1}.@value{PRIMARYDOMAIN} and
+@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}, you would type the following:
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kadmin
+@b{kadmin:} addprinc -randkey host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}
+@b{NOTICE: no policy specified for "host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
+assigning "default"
+Principal "host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.
+kadmin:} addprinc -randkey host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
+@b{NOTICE: no policy specified for "host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
+assigning "default"
+Principal "host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.}
+@b{kadmin:} addprinc -randkey host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+@b{NOTICE: no policy specified for "host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}";
+assigning "default"
+Principal "host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}" created.
+kadmin:}
+@end group
+@end smallexample
+
+@noindent
+It is not actually necessary to have the master KDC server in the
+Kerberos database, but it can be handy if:
+
+@itemize @bullet
+@item
+anyone will be logging into the machine as something other than root
+
+@item
+you want to be able to swap the master KDC with one of the slaves if
+necessary.
+@end itemize
+
+@node Extract Host Keytabs for the KDCs, Set Up the Slave KDCs for Database Propagation, Create Host Keys for the Slave KDCs, Install the Slave KDCs
+@subsubsection Extract Host Keytabs for the KDCs
+
+Each KDC (including the master) needs a keytab to decrypt tickets.
+Ideally, you should extract each keytab locally on its own KDC.  If this
+is not feasible, you should use an encrypted session to send them across
+the network.  To extract a keytab on a KDC called
+@value{KDCSERVER}.@value{PRIMARYDOMAIN}, you would execute the following
+command:
+
+@smallexample
+@group
+@b{kadmin:} ktadd host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}
+@b{kadmin: Entry for principal host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
+     kvno 1, encryption type DES-CBC-CRC added to keytab
+     WRFILE:/etc/krb5.keytab.
+kadmin:}
+@end group
+@end smallexample
+
+@noindent
+Note that the principal must exist in the Kerberos database in order to
+extract the keytab.
+
+@node Set Up the Slave KDCs for Database Propagation,  , Extract Host Keytabs for the KDCs, Install the Slave KDCs
+@subsubsection Set Up the Slave KDCs for Database Propagation
+
+The database is propagated from the master KDC to the slave KDCs via the
+@code{kpropd} daemon.  To set up propagation, create a file on each KDC,
+named @code{@value{ROOTDIR}/var/krb5kdc/kpropd.acl}, containing the
+principals for each of the KDCs.
+@need 1200
+For example, if the master KDC were
+@code{@value{KDCSERVER}.@value{PRIMARYDOMAIN}}, the slave KDCs were
+@code{@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}} and
+@code{@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}}, and the realm were
+@code{@value{PRIMARYREALM}}, then the file's contents would be:
+
+@smallexample
+@group
+host/@value{KDCSERVER}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+host/@value{KDCSLAVE1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
+@end group
+@end smallexample
+ 
+@need 1000
+Then, add the following lines to @code{/etc/inetd.conf} file on each KDC
+(the line beginnng with @result{} is a continuation of the previous
+line):
+
+@smallexample
+@group
+krb5_prop stream tcp nowait root @value{ROOTDIR}/sbin/kpropd kpropd
+eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind 
+@result{} klogind -k -c -e
+@end group
+@end smallexample
+
+@noindent
+The first line sets up the @code{kpropd} database propagation daemon.
+The second line sets up the @code{eklogin} daemon, allowing
+Kerberos-authenticated, encrypted rlogin to the KDC.
+
+You also need to add the following lines to @code{/etc/services} on each
+KDC:
+
+@smallexample
+@group
+kerberos        88/udp      kdc       # Kerberos authentication (udp)
+kerberos        88/tcp      kdc       # Kerberos authentication (tcp)
+krb5_prop       754/tcp               # Kerberos slave propagation
+kerberos-adm    749/tcp               # Kerberos 5 admin/changepw (tcp)
+kerberos-adm    749/udp               # Kerberos 5 admin/changepw (udp)
+eklogin         2105/tcp              # Kerberos encrypted rlogin
+@end group
+@end smallexample
+
+@node Back on the Master KDC, Finish Installing the Slave KDCs, Install the Slave KDCs, Installing KDCs
+@subsection Back on the Master KDC
+
+Now that the slave KDCs are able to accept database propagation, you'll
+need to propagate the database to each of them.
+
+@menu
+* Propagate the Database to Each Slave KDC::  
+@end menu
+
+@node Propagate the Database to Each Slave KDC,  , Back on the Master KDC, Back on the Master KDC
+@subsubsection Propagate the Database to Each Slave KDC
+
+First, create a dump of the database on the master KDC, as follows:
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/kdb5_util dump @value{ROOTDIR}/var/krb5kdc/slave_datatrans
+@b{shell%}
+@end group
+@end smallexample
+
+Next, you need to manually propagate the database to each slave KDC, as
+in the following example.  (The lines beginning with @result{} are
+continuations of the previous line.):
+
+@smallexample
+@group
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans
+@result{} @value{KDCSLAVE1}.@value{PRIMARYDOMAIN}
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans
+@result{} @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}
+@end group
+@end smallexample
+
+You will need a script to dump and propagate the database.  The
+following is an example of a bourne shell script that will do this.
+(Note that the line that begins with @result{} is a continuation of the
+previous line.  Remember that you need to replace @value{ROOTDIR} with
+the name of the directory in which you installed @value{PRODUCT}.)
+
+@smallexample
+@group
+#!/bin/sh
+
+kdclist = "@value{KDCSLAVE1}.@value{PRIMARYDOMAIN} @value{KDCSLAVE2}.@value{PRIMARYDOMAIN}"
+
+@value{ROOTDIR}/sbin/kdb5_util "dump
+@result{} @value{ROOTDIR}/var/krb5kdc/slave_datatrans"
+
+for kdc in $kdclist
+do
+@value{ROOTDIR}/sbin/kprop -f @value{ROOTDIR}/var/krb5kdc/slave_datatrans $kdc
+done
+@end group
+@end smallexample
+
+@noindent
+You will need to set up a cron job to run this script at the intervals
+you decided on earlier (@xref{Database Propagation}.)
+
+@node Finish Installing the Slave KDCs, Add Kerberos Principals to the Database, Back on the Master KDC, Installing KDCs
+@subsection Finish Installing the Slave KDCs
+
+Now that the slave KDCs have copies of the Kerberos database, you can
+create stash files for them and start the @code{krb5kdc} daemon.
+
+@menu
+* Create Stash Files on the Slave KDCs::  
+* Start the krb5kdc Daemon on Each KDC::  
+@end menu
+
+@node Create Stash Files on the Slave KDCs, Start the krb5kdc Daemon on Each KDC, Finish Installing the Slave KDCs, Finish Installing the Slave KDCs
+@subsubsection Create Stash Files on the Slave KDCs
+
+Create stash files, by issuing the following commands on each slave KDC:
+
+@smallexample
+@group
+@b{shell%} kdb5_util stash
+@b{kdb5_util: Cannot find/read stored master key while reading master key
+kdb5_util: Warning: proceeding without master key}
+@iftex
+@b{Enter KDC database master key:}  @i{@doubleleftarrow{} Enter the database master key.}
+@end iftex
+@ifinfo
+@b{Enter KDC database master key:}  @i{<= Enter the database master key.}
+@end ifinfo
+@ifhtml
+@b{Enter KDC database master key:}  @i{<= Enter the database master key.}
+@end ifhtml
+@b{shell%}
+@end group
+@end smallexample
+
+As mentioned above, the stash file is necessary for your KDCs to be able
+authenticate to themselves, such as when they reboot.  You could run
+your KDCs without stash files, but you would then need to type in the
+Kerberos database master key by hand every time you start a KDC daemon.
+
+@node Start the krb5kdc Daemon on Each KDC,  , Create Stash Files on the Slave KDCs, Finish Installing the Slave KDCs
+@subsubsection Start the krb5kdc Daemon on Each KDC
+
+The final step in configuing your slave KDCs is to run the KDC daemon:
+
+@smallexample
+@group
+@b{shell%} @value{ROOTDIR}/sbin/krb5kdc
+@end group
+@end smallexample
+
+As with the master KDC, you will probably want to add this command to
+the KDCs' @code{/etc/rc} or @code{/etc/inittab} files, so they will
+start the krb5kdc daemon automatically at boot time.
+
+@node Add Kerberos Principals to the Database, Limit Access to the KDCs, Finish Installing the Slave KDCs, Installing KDCs
+@subsection Add Kerberos Principals to the Database
+
+@need 1800
+Once your KDCs are set up and running, you are ready to use
+@code{kadmin} to load principals for your users, hosts, and other
+services into the Kerberos database.  This procedure is described fully in the
+``Adding or Modifying Principals'' section of the @value{PRODUCT} System
+Administrator's Guide.  (@xref{Create Host Keys for the Slave KDCs}, for a
+brief description.)  The keytab is generated by running @code{kadmin}
+and issuing the @code{ktadd} command.
+
+@node Limit Access to the KDCs, Switching Master and Slave KDCs, Add Kerberos Principals to the Database, Installing KDCs
+@subsection Limit Access to the KDCs
+
+To limit the possibility that your Kerberos database could be
+compromised, @value{COMPANY} recommends that each KDC be a dedicated
+host, with limited access.  If your KDC is also a file server, FTP
+server, Web server, or even just a client machine, someone who obtained
+root access through a security hole in any of those areas could gain
+access to the Kerberos database.
+
+@need 4700
+@value{COMPANY} recommends that your KDCs use the following
+@code{/etc/inetd.conf} file.  (Note:  each line beginning with @result{}
+is a continuation of the previous line.):
+
+@smallexample
+@group
+#
+# Configuration file for inetd(1M).  See inetd.conf(4).
+#
+# To re-configure the running inetd process, edit this file, then
+# send the inetd process a SIGHUP.
+#
+# Syntax for socket-based Internet services:
+#  <service_name> <socket_type> <proto> <flags> <user> 
+@result{} <server_pathname> <args>
+#
+# Syntax for TLI-based Internet services:
+#
+#  <service_name> tli <proto> <flags> <user> <server_pathname> <args>
+#
+# Ftp and telnet are standard Internet services.
+#
+# This machine is a secure Kerberos Key Distribution Center (KDC).  
+# Services are limited.
+#
+#
+# Time service is used for clock synchronization.
+#
+time    stream  tcp     nowait  root    internal
+time    dgram   udp     wait    root    internal
+#
+# Limited Kerberos services
+#
+krb5_prop stream tcp nowait root @value{ROOTDIR}/sbin/kpropd  kpropd
+eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind 
+@result{} klogind -5 -c -e
+@end group
+@end smallexample
+
+@node Switching Master and Slave KDCs,  , Limit Access to the KDCs, Installing KDCs
+@subsection Switching Master and Slave KDCs
+
+You may occasionally want to use one of your slave KDCs as the master.
+This might happen if you are upgrading the master KDC, or if your master
+KDC has a disk crash.
+
+Assuming you have configured all of your KDCs to be able to function as
+either the master KDC or a slave KDC (as this document recommends), all
+you need to do to make the changeover is:
+
+If the master KDC is still running, do the following on the @emph{old}
+master KDC:
+
+@enumerate
+@item
+Kill the @code{kadmind} process.
+
+@item
+Disable the cron job that propagates the database.
+
+@item
+Run your database propagation script manually, to ensure that the slaves
+all have the latest copy of the database.  (@xref{Propagate the Database
+to Each Slave KDC}.)  If there is a need to preserve per-principal
+policy information from the database, you should do a ``kdb5_util dump
+-ov'' in order to preserve that information and propogate that dump file
+securely by some means to the slave so that its database has the correct
+state of the per-principal policy information.
+@end enumerate
+
+On the @emph{new} master KDC:
+
+@enumerate
+@item
+Create a database keytab.  (@xref{Create a kadmind Keytab (optional)}.)
+
+@item
+Start the @code{kadmind} daemon.  (@xref{Start the Kerberos Daemons}.)
+
+@item
+Set up the cron job to propagate the database.  (@xref{Propagate the
+Database to Each Slave KDC}.)
+
+@item
+Switch the CNAMEs of the old and new master KDCs.  (If you don't do
+this, you'll need to change the @code{krb5.conf} file on every client
+machine in your Kerberos realm.)
+
+@end enumerate
+
+@node Installing and Configuring UNIX Client Machines, UNIX Application Servers, Installing KDCs, Installing Kerberos V5
+@section Installing and Configuring UNIX Client Machines
+
+Client machine installation is much more straightforward than
+installation of the KDCs.
+
+@menu
+* Client Programs::             
+* Client Machine Configuration Files::  
+@end menu
+
+@node Client Programs, Client Machine Configuration Files, Installing and Configuring UNIX Client Machines, Installing and Configuring UNIX Client Machines
+@subsection Client Programs
+
+The Kerberized client programs are @code{login.krb5}, @code{rlogin},
+@code{telnet}, @code{ftp}, @code{rcp}, @code{rsh}, @code{kinit},
+@code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu}, and
+@code{krb524init}.  All of these programs are in the directory
+@code{@value{ROOTDIR}/bin}, except for @code{login.krb5} which is in
+@code{@value{ROOTDIR}/sbin}.
+
+You will probably want to have your users put @code{@value{ROOTDIR}/bin}
+ahead of @code{/bin} and @code{/usr/bin} in their paths, so they will by
+default get the @value{PRODUCT} versions of @code{rlogin},
+@code{telnet}, @code{ftp}, @code{rcp}, and @code{rsh}.
+
+@value{COMPANY} recommends that you use @code{login.krb5} in place of
+@code{/bin/login} to give your users a single-sign-on system.  You will
+need to make sure your users know to use their Kerberos passwords when
+they log in.
+
+You will also need to educate your users to use the ticket management
+programs @code{kinit},
+@c @code{krb524init}, 
+@code{klist}, @code{kdestroy}, and to use the Kerberos programs
+@c @code{pfrom},
+@code{ksu}, and @code{kpasswd} in place of their non-Kerberos
+counterparts
+@c @code{from}
+@code{su}, @code{passwd}, and @code{rdist}.
+
+@node Client Machine Configuration Files,  , Client Programs, Installing and Configuring UNIX Client Machines
+@subsection Client Machine Configuration Files
+
+Each machine running Kerberos must have a @code{/etc/krb5.conf} file.
+(@xref{krb5.conf}.)
+
+@need 4000
+Also, for most UNIX systems, you must add the appropriate Kerberos
+services to each client machine's @code{/etc/services} file.  If you are
+using the default configuration for @value{PRODUCT}, you should be able
+to just insert the following code:
+
+@smallexample
+@group
+#
+# Note --- if you are using Kerberos V4 and you either:
+#
+#    (a) haven't converted all your master or slave KDCs to V5, or
+#
+#    (b) are worried about inter-realm interoperability with other KDC's
+#        that are still using V4 
+#
+# you will need to switch the "kerberos" service to port 750 and create a
+# "kerberos-sec" service on port 88.
+#
+kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
+kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
+klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
+kshell        @value{DefaultKshellPort}/tcp   cmd    # and remote shell
+kerberos-adm  @value{DefaultKadmindPort}/tcp          # Kerberos 5 admin/changepw
+kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changepw
+krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
+@c kpop          1109/tcp         # Pop with Kerberos
+eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin
+krb524        @value{DefaultKrb524Port}/tcp         # Kerberos 5 to 4 ticket translator
+@end group
+@end smallexample
+
+@noindent As described in the comments in the above code, if your master
+KDC or any of your slave KDCs is running Kerberos V4, (or if you will be
+authenticating to any Kerberos V4 KDCs in another realm) you will need
+to switch the port number for @code{kerberos} to 750 and create a
+@code{kerberos-sec} service (tcp and udp) on port 88, so the Kerberos
+V4 KDC(s) will continue to work properly.
+
+@menu
+* Mac OS X Configuration::      
+@end menu
+
+@node Mac OS X Configuration,  , Client Machine Configuration Files, Client Machine Configuration Files
+@subsubsection Mac OS X Configuration
+
+To install Kerberos V5 on Mac OS X and Mac OS X Server, follow the 
+directions for generic Unix-based OS's, except for the 
+@code{/etc/services} updates described above.  
+
+Mac OS X and Mac OS X Server use a database called NetInfo to store
+the contents of files normally found in @code{/etc}.  Instead of
+modifying @code{/etc/services}, you should run the following commands
+to add the Kerberos service entries to NetInfo:
+
+@smallexample
+@group
+$ niutil -create . /services/kerberos
+$ niutil -createprop . /services/kerberos name kerberos kdc
+$ niutil -createprop . /services/kerberos port 750
+$ niutil -createprop . /services/kerberos protocol tcp udp
+$ niutil -create . /services/krbupdate
+$ niutil -createprop . /services/krbupdate name krbupdate kreg
+$ niutil -createprop . /services/krbupdate port 760
+$ niutil -createprop . /services/krbupdate protocol tcp
+$ niutil -create . /services/kpasswd
+$ niutil -createprop . /services/kpasswd name kpasswd kpwd
+$ niutil -createprop . /services/kpasswd port 761
+$ niutil -createprop . /services/kpasswd protocol tcp
+$ niutil -create . /services/klogin
+$ niutil -createprop . /services/klogin port 543
+$ niutil -createprop . /services/klogin protocol tcp
+$ niutil -create . /services/eklogin
+$ niutil -createprop . /services/eklogin port 2105
+$ niutil -createprop . /services/eklogin protocol tcp
+$ niutil -create . /services/kshell
+$ niutil -createprop . /services/kshell name kshell krcmd
+$ niutil -createprop . /services/kshell port 544
+$ niutil -createprop . /services/kshell protocol tcp
+@end group
+@end smallexample
+
+In addition to adding services to NetInfo, you must also modify the
+resolver configuration in NetInfo so that the machine resolves its own
+hostname as a FQDN (fully qualified domain name).  By default, Mac OS X
+and Mac OS X Server machines query NetInfo to resolve hostnames before
+falling back to DNS.  Because NetInfo has an unqualified name for all
+the machines in the NetInfo database, the machine's own hostname will
+resolve to an unqualified name.  Kerberos needs a FQDN to look up keys
+in the machine's keytab file.
+
+Fortunately, you can change the @code{lookupd} caching order to query
+DNS first.  Run the following NetInfo commands and reboot the machine:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder CacheAgent DNSAgent
+ NIAgent NILAgent
+@end group
+@end smallexample
+
+Once you have rebooted, you can verify that the resolver now behaves
+correctly.  Compile the Kerberos 5 distribution and run:
+
+@smallexample
+@group
+$ cd .../src/tests/resolve
+$ ./resolve
+@end group
+@end smallexample
+
+This will tell you whether or not your machine returns FQDNs on name
+lookups.  If the test still fails, you can also try turning off DNS
+caching.  Run the following commands and reboot:
+
+@smallexample
+@group
+$ niutil -create . /locations/lookupd/hosts
+$ niutil -createprop . /locations/lookupd/hosts LookupOrder DNSAgent
+ CacheAgent NIAgent NILAgent
+@end group
+@end smallexample
+
+The remainder of the setup of a Mac OS X client machine or application
+server should be the same as for other UNIX-based systems.
+
+@node UNIX Application Servers,  , Installing and Configuring UNIX Client Machines, Installing Kerberos V5
+@section UNIX Application Servers
+
+An application server is a host that provides one or more services over
+the network.  Application servers can be ``secure'' or ``insecure.''  A
+``secure'' host is set up to require authentication from every client
+connecting to it.  An ``insecure'' host will still provide Kerberos
+authentication, but will also allow unauthenticated clients to connect.
+
+If you have @value{PRODUCT} installed on all of your client machines,
+@value{COMPANY} recommends that you make your hosts secure, to take
+advantage of the security that Kerberos authentication affords.
+However, if you have some clients that do not have @value{PRODUCT}
+installed, you can run an insecure server, and still take advantage of
+@value{PRODUCT}'s single sign-on capability.
+
+@menu
+* Server Programs::             
+* Server Configuration Files::  
+* The Keytab File::             
+* Some Advice about Secure Hosts::  
+@end menu
+
+@node Server Programs, Server Configuration Files, UNIX Application Servers, UNIX Application Servers
+@subsection Server Programs
+
+Just as @value{PRODUCT} provided its own Kerberos-enhanced versions of
+client UNIX network programs, @value{PRODUCT} also provides
+Kerberos-enhanced versions of server UNIX network daemons.  These are
+@code{ftpd}, @code{klogind}, @code{kshd}, and @code{telnetd}.
+@c @code{popper}, 
+These programs are installed in the directory
+@code{@value{ROOTDIR}/sbin}.  You may want to add this directory to
+root's path.
+
+@node Server Configuration Files, The Keytab File, Server Programs, UNIX Application Servers
+@subsection Server Configuration Files
+
+For a @emph{secure} server, make the following changes to
+@code{/etc/inetd.conf}:
+
+Find and comment out any lines for the services @code{ftp},
+@code{telnet}, @code{shell}, @code{login}, and @code{exec}.
+
+@need 1800
+Add the following lines.  (Note:  each line beginning with @result{} is
+a continuation of the previous line.)
+
+@smallexample
+@group
+klogin  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
+@result{} klogind -k -c
+eklogin stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
+@result{} klogind -k -c -e
+kshell  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/kshd
+@result{} kshd -k -c -A
+ftp     stream  tcp  nowait  root  @value{ROOTDIR}/sbin/ftpd
+@result{} ftpd -a
+telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
+@result{} telnetd -a valid
+@end group
+@end smallexample
+
+For an @emph{insecure} server, make the following changes instead to
+@code{/etc/inetd.conf}:
+
+@need 1800
+Find and comment out any lines for the services @code{ftp} and
+@code{telnet}.
+
+Add the following lines.  (Note:  each line beginning with @result{} is
+a continuation of the previous line.)
+@smallexample
+@group
+klogin  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
+@result{} klogind -k -c
+eklogin stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
+@result{} klogind -k -c -e
+kshell  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/kshd
+@result{} kshd -k -c -A
+ftp     stream  tcp  nowait  root  @value{ROOTDIR}/sbin/ftpd
+@result{} ftpd
+telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
+@result{} telnetd -a none
+@end group
+@end smallexample
+
+@node The Keytab File, Some Advice about Secure Hosts, Server Configuration Files, UNIX Application Servers
+@subsection The Keytab File
+
+All Kerberos server machines need a @dfn{keytab} file, called
+@code{/etc/krb5.keytab}, to authenticate to the KDC.  The keytab file is
+an encrypted, local, on-disk copy of the host's key.  The keytab file,
+like the stash file (@ref{Create the Database}) is a potential
+point-of-entry for a break-in, and if compromised, would allow
+unrestricted access to its host.  The keytab file should be readable
+only by root, and should exist only on the machine's local disk.  The
+file should not be part of any backup of the machine, unless access to
+the backup data is secured as tightly as access to the machine's root
+password itself.
+
+In order to generate a keytab for a host, the host must have a principal
+in the Kerberos database.  The procedure for adding hosts to the
+database is described fully in the ``Adding or Modifying Principals''
+section of the @cite{@value{PRODUCT} System Administrator's Guide}.
+@xref{Create Host Keys for the Slave KDCs}. for a brief description.)
+The keytab is generated by running @code{kadmin} and issuing the
+@code{ktadd} command.
+
+@need 1100
+For example, to generate a keytab file to allow the host
+trillium.@value{PRIMARYDOMAIN} to authenticate for the services
+@code{host}, @code{ftp}, and @code{pop}, the administrator
+@code{@value{ADMINUSER}} would issue the command (on
+trillium.@value{PRIMARYDOMAIN}):
+
+@smallexample
+@group
+@b{trillium%} @value{ROOTDIR}/sbin/kadmin
+@b{kadmin5:} ktadd host/trillium.@value{PRIMARYDOMAIN} ftp/trillium.@value{PRIMARYDOMAIN}
+@result{} pop/trillium.@value{PRIMARYDOMAIN}
+@b{kadmin: Entry for principal host/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
+kvno 3, encryption type DES-CBC-CRC added to keytab
+WRFILE:/etc/krb5.keytab.
+kadmin: Entry for principal ftp/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
+kvno 3, encryption type DES-CBC-CRC added to keytab
+WRFILE:/etc/krb5.keytab.
+kadmin: Entry for principal pop/trillium.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM} with
+kvno 3, encryption type DES-CBC-CRC added to keytab
+WRFILE:/etc/krb5.keytab.
+kadmin5:} quit
+@b{trillium%}
+@end group
+@end smallexample
+
+If you generate the keytab file on another host, you need to get a copy
+of the keytab file onto the destination host (@code{trillium}, in the
+above example) without sending it unencrypted over the network.  If you
+have installed the @value{PRODUCT} client programs, you can use
+encrypted @code{rcp}.
+
+@node Some Advice about Secure Hosts,  , The Keytab File, UNIX Application Servers
+@subsection Some Advice about Secure Hosts
+
+@value{PRODUCT} can protect your host from certain types of break-ins,
+but it is possible to install @value{PRODUCT} and still leave your host
+vulnerable to attack.  Obviously an installation guide is not the place
+to try to include an exhaustive list of countermeasures for every
+possible attack, but it is worth noting some of the larger holes and how
+to close them.
+
+As stated earlier in this section, @value{COMPANY} recommends that on a
+secure host, you disable the standard @code{ftp}, @code{login},
+@code{telnet}, @code{shell}, and @code{exec} services in
+@code{/etc/inetd.conf}.  We also recommend that secure hosts have an empty
+@code{/etc/hosts.equiv} file and that there not be a @code{.rhosts} file
+in @code{root}'s home directory.  You can grant Kerberos-authenticated
+root access to specific Kerberos principals by placing those principals
+in the file @code{.k5login} in root's home directory.
+
+We recommend that backups of secure machines exclude the keytab file
+(@code{/etc/krb5.keytab}).  If this is not possible, the backups should
+at least be done locally, rather than over a network, and the backup
+tapes should be physically secured.
+
+Finally, the keytab file and any programs run by root, including the
+@value{PRODUCT} binaries, should be kept on local disk.  The keytab file
+should be readable only by root.
+
+@node Upgrading Existing Kerberos V5 Installations, Bug Reports for Kerberos V5, Installing Kerberos V5, Top
+@chapter Upgrading Existing @value{PRODUCT} Installations
+
+If you already have an existing Kerberos database that you created with
+a prior release of Kerberos 5, you can upgrade it to work with the
+current release with the @code{kdb5_util} command.  It is only
+necessary to perform this dump/undump procedure if you were running a
+krb5-1.0.x KDC and are migrating to a krb5-1.1.x or newer KDC or if you
+were running a krb5-1.1.x KDC and are migrating to a krb5-1.2.x or newer
+KDC.  The process for upgrading a Master KDC involves the following
+steps:
+
+@enumerate
+
+@item Stop your current KDC and administration
+server processes, if any.
+
+@item Dump your existing Kerberos database to an ASCII file with 
+@code{kdb5_util}'s ``dump'' command:
+
+@smallexample
+@group
+@b{shell%} cd @value{ROOTDIR}/var/krb5kdc
+@b{shell%} kdb5_util dump old-kdb-dump
+@b{shell%} kdb5_util dump -ov old-kdb-dump.ov
+@b{shell%}
+@end group
+@end smallexample
+
+@item Create a new Master KDC installation (@xref{Install the Master
+KDC}.).  If you have a stash file for your current database, choose any
+new master password but then copy your existing stash file to the
+location specified by your kdc.conf; if you do not have a stash file for
+your current database, you must choose the same master password.
+
+@item Load your old Kerberos database into the new system with
+@code{kdb5_util}'s ``load'' command:
+
+@smallexample
+@group
+@b{shell%} cd @value{ROOTDIR}/var/krb5kdc
+@b{shell%} kdb5_util load old-kdb-dump
+@b{shell%} kdb5_util load -update old-kdb-dump.ov
+@b{shell%}
+@end group
+@end smallexample
+
+@end enumerate
+
+The ``dump -ov'' and ``load -update'' commands are necessary in order to
+preserve per-principal policy information, since the default dump format
+filters out that information.  If you omit those steps, the loaded
+database database will lose the policy information for each principal
+that has a policy.
+
+To update a Slave KDC, you must stop the old server processes on the
+Slave KDC, install the new server binaries, reload the most recent slave
+dump file, and re-start the server processes.
+
+@menu
+* Upgrading to Triple-DES and RC4 Encryption Keys::  
+@end menu
+
+@node Upgrading to Triple-DES and RC4 Encryption Keys,  , Upgrading Existing Kerberos V5 Installations, Upgrading Existing Kerberos V5 Installations
+@section Upgrading to Triple-DES Encryption Keys
+
+Beginning with the 1.2 release from @value{COMPANY}, Kerberos includes
+a stronger encryption algorithm called ``triple DES'' -- essentially,
+three applications of the basic DES encryption algorithm, greatly
+increasing the resistance to a brute-force search for the key by an
+attacker.  This algorithm is more secure, but encryption is much
+slower.
+
+Release 1.1 had some support for triple-DES service keys, but with
+release 1.2 we have added support for user keys and session keys as
+well.  Release 1.0 had very little support for multiple cryptosystems,
+and some of that software may not function properly in an environment
+using triple-DES as well as plain DES.
+
+In the 1.3 release from @value{COMPANY}, Kerberos also includes the RC4
+encryption alogorithm, a stream cipher symmetric key algorithm
+developed in 1987 by Ronald Rivest at RSA Data Security.  Please note
+that RC4 is not part of the IETF standard.
+
+Because of the way the MIT Kerberos database is structured, the KDC
+will assume that a service supports only those encryption types for
+which keys are found in the database.  Thus, if a service has only a
+single-DES key in the database, the KDC will not issue tickets for that
+service that use triple-DES or RC4 session keys; it will instead issue
+only single-DES session keys, even if other services are already
+capable of using triple-DES or RC4.  So if you make sure your
+application server software is updated before adding a triple-DES or
+RC4 key for the service, clients should be able to talk to services at
+all times during the updating process.
+
+Normally, the listed @code{supported_enctypes} in @code{kdc.conf} are
+all used when a new key is generated.  You can control this with
+command-line flags to @code{kadmin} and @code{kadmin.local}.  You may
+want to exclude triple-DES and RC4 by default until you have updated a
+lot of your application servers, and then change the default to include
+triple-DES and RC4.  We recommend that you always include
+@code{des-cbc-crc} in the default list.
+
+@node Bug Reports for Kerberos V5,  , Upgrading Existing Kerberos V5 Installations, Top
+@chapter Bug Reports for @value{PRODUCT}
+
+@include send-pr.texinfo
+
+@contents
+@bye

@@ -1,0 +1,43 @@
+thisconfigdir=.
+myfulldir=plugins/kdb/db2/libdb2
+mydir=.
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCAL_SUBDIRS=hash btree db mpool recno clib test
+
+LIBBASE=db
+LIBMAJOR=1
+LIBMINOR=1
+STOBJLISTS=hash/OBJS.ST btree/OBJS.ST db/OBJS.ST mpool/OBJS.ST \
+	recno/OBJS.ST clib/OBJS.ST
+SUBDIROBJLISTS=$(STOBJLISTS)
+RELDIR=../plugins/kdb/db2/libdb2
+
+HDRDIR=$(BUILDTOP)/include
+HDRS =	$(HDRDIR)/db.h $(HDRDIR)/db-config.h $(HDRDIR)/db-ndbm.h
+
+AUTOCONF_HEADER=$(srcdir)/include/config.h.in
+
+all-unix:: includes all-libs
+all-prerecurse: include/config.h include/db-config.h
+clean-unix:: clean-libs clean-includes
+
+includes:: $(HDRS)
+
+$(HDRDIR)/db.h: $(srcdir)/include/db.h
+	$(CP) $(srcdir)/include/db.h $@
+$(HDRDIR)/db-config.h: include/db-config.h
+	$(CP) include/db-config.h $@
+$(HDRDIR)/db-ndbm.h: $(srcdir)/include/db-ndbm.h
+	$(CP) $(srcdir)/include/db-ndbm.h $@
+
+include/config.h include/db-config.h: include/generated.stmp
+include/generated.stmp: $(srcdir)/include/config.h.in $(srcdir)/include/db-config.h.in
+	cd $(thisconfigdir) && $(SHELL) config.status
+$(srcdir)/include/config.h.in: @MAINT@ $(srcdir)/include/autoconf.stmp
+$(srcdir)/include/autoconf.stmp: $(srcdir)/configure.in $(SRCTOP)/aclocal.m4
+	cd $(srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
+	touch $(srcdir)/include/autoconf.stmp
+
+clean-includes::
+	$(RM) $(HDRS) include/*.stmp
+@lib_frag@

@@ -1,0 +1,4 @@
+These documentation files are old --- and refer to the Kerberos V4 
+implementation.  They are included because the equivalent V5 documentation
+set have not been written yet, and the concepts contained in these documents
+may be helpful.

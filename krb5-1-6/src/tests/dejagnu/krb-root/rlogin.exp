@@ -1,0 +1,320 @@
+# Kerberos rlogin test.
+# This is a DejaGnu test script.
+# This script tests Kerberos rlogin.
+# Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
+
+# Find the programs we need.  We use the binaries from the build tree
+# if they exist.  If they do not, then they must be in PATH.  We
+# expect $objdir to be .../kerberos/src.
+
+if ![info exists KRLOGIN] {
+    set KRLOGIN [findfile $objdir/../../appl/bsd/rlogin]
+}
+
+if ![info exists KRLOGIND] {
+    set KRLOGIND [findfile $objdir/../../appl/bsd/klogind]
+}
+
+if ![info exists LOGINKRB5] {
+    set LOGINKRB5 [findfile $objdir/../../appl/bsd/login.krb5]
+}
+
+# Start up a root shell.
+if ![setup_root_shell rlogin] {
+    return
+}
+
+# Make sure .k5login is reasonable.
+if ![check_k5login rlogin] {
+    stop_root_shell
+    return
+}
+
+# Set up the kerberos database.
+if {![get_hostname] \
+    || ![setup_kerberos_files] \
+    || ![setup_kerberos_env] \
+    || ![setup_kerberos_db 0]} {
+    stop_root_shell
+    return
+}
+
+# A procedure to start up the rlogin daemon.
+
+proc start_rlogin_daemon { option } {
+    global REALMNAME
+    global KRLOGIND
+    global LOGINKRB5
+    global ROOT_PROMPT
+    global tmppwd
+    global hostname
+    global rlogin_spawn_id
+    global krlogind_pid
+    global portbase
+
+    # The -p argument tells it to accept a single connection, so we
+    # don't need to use inetd.  The 3543 is the port to listen at.
+    # Note that tmppwd here is a shell variable, which is set in
+    # setup_root_shell, not a TCL variable.  The sh -c is to workaround
+    # the broken controlling tty handling in hpux, and shouldn't hurt
+    # anything else.
+    send -i $rlogin_spawn_id "sh -c \"$KRLOGIND -k -c -D [expr 8 + $portbase] -S \$tmppwd/srvtab -M $REALMNAME -L $LOGINKRB5 $option\" &\r"
+    expect {
+	-i $rlogin_spawn_id 
+	-re "$ROOT_PROMPT" { }
+	timeout {
+	    send_error "ERROR: timeout from rlogin $hostname -l root\n"
+	    return
+	}
+	eof {
+	    send_error "ERROR: eof from rlogin $hostname -l root\n"
+	    return
+	}
+    }
+    send -i $rlogin_spawn_id "echo \$!\r"
+    expect {
+	-i $rlogin_spawn_id
+	-re "\[0-9\]+" {
+	    set krlogind_pid $expect_out(0,string)
+	    verbose "krlogind process ID is $krlogind_pid"
+	}
+	timeout {
+	    send_error "ERROR: timeout from rlogin $hostname -l root\n"
+	    return
+	}
+	eof {
+	    send_error "ERROR: eof from rlogin $hostname -l root\n"
+	    return
+	}
+    }
+    expect {
+	-i $rlogin_spawn_id
+	-re "$ROOT_PROMPT" { }
+	timeout {
+	    send_error "ERROR: timeout from rlogin $hostname -l root\n"
+	    return
+	}
+	eof {
+	    send_error "ERROR: eof from rlogin $hostname -l root\n"
+	    return
+	}
+    }
+
+    # Give the rlogin daemon a few seconds to get set up.
+    sleep 2
+}
+
+# A procedure to stop the rlogin daemon.
+
+proc stop_rlogin_daemon { } {
+    global krlogind_pid
+
+    if [info exists krlogind_pid] {
+	catch "exec kill $krlogind_pid"
+	unset krlogind_pid
+    }
+}
+
+# Wrap the tests in a procedure, so that we can kill the daemons if
+# we get some sort of error.
+
+proc rlogin_test { } {
+    global REALMNAME
+    global KRLOGIN
+    global BINSH
+    global SHELL_PROMPT
+    global KEY
+    global hostname
+    global hostname
+    global env
+    global portbase
+
+    # Start up the kerberos and kadmind daemons and get a srvtab and a
+    # ticket file.
+    if {![start_kerberos_daemons 0] \
+        || ![add_kerberos_key host/$hostname 0] \
+        || ![setup_srvtab 0] \
+	|| ![add_kerberos_key $env(USER) 0] \
+	|| ![kinit $env(USER) $env(USER)$KEY 0]} {
+	return
+    }
+
+    # Start up the rlogin daemon.
+    start_rlogin_daemon -k
+
+    # Make an rlogin connection.
+    spawn $KRLOGIN $hostname -k $REALMNAME -D [expr 8 + $portbase]
+
+    expect_after {
+	timeout {
+	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	"onnection closed." {
+	    fail "$testname (connection closed)"
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    catch "expect_after"
+	    return
+	}
+    }
+
+    set testname "rlogin"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    # Switch to /bin/sh to try to avoid confusion from the shell
+    # prompt.
+    set testname "shell"
+    send "$BINSH\r"
+    expect -re "$SHELL_PROMPT"
+
+    set testname "date"
+    send "date\r"
+    expect "date"
+    expect {
+	-re "\[A-Za-z0-9 :\]+\[\r\n\]+" {
+	    if [check_date $expect_out(0,string)] {
+		pass "date"
+	    } else {
+		fail "date"
+	    }
+	}
+    }
+    expect -re "$SHELL_PROMPT"
+
+    set testname "exit"
+    send "exit\r"
+    expect -re "$SHELL_PROMPT"
+    send "exit\r"
+    expect {
+	"onnection closed." {
+	    pass $testname
+	}
+    }
+    # This last expect seems useless, but without it the rlogin process
+    # sometimes hangs on HP-UX, in a tcsetattr call with TCSADRAIN.
+    expect {
+        "\r" { }
+    }
+
+    expect_after
+
+    if [check_exit_status "exit status"] {
+	pass "exit status"
+    }
+
+    # The rlogin daemon should have stopped, but we have no easy way
+    # of checking whether it actually did.  Kill it just in case.
+    stop_rlogin_daemon
+
+    # Try an encrypted connection.
+    start_rlogin_daemon -e
+    spawn $KRLOGIN $hostname -x -k $REALMNAME -D [expr 8 + $portbase]
+
+    expect_after {
+	timeout {
+	    fail "$testname (timeout)"
+	    catch "expect_after"
+	    return
+	}
+	"onnection closed" {
+	    fail "$testname (connection closed)"
+	    catch "expect_after"
+	    return
+	}
+	eof {
+	    fail "$testname (eof)"
+	    catch "expect_after"
+	    return
+	}
+    }
+
+    set testname "encrypted rlogin"
+    expect -re "encrypting .* transmissions"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    # Switch to /bin/sh to try to avoid confusion from the shell
+    # prompt.
+    set testname "shell"
+    send "$BINSH\r"
+    expect -re "$SHELL_PROMPT"
+
+    # Make sure the encryption is not destroying the text.
+    set testname "echo"
+    send "echo hello\r"
+    expect "echo hello"
+    expect "hello"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    # Send some characters which might cause an interrupt, and then
+    # make sure we can still talk to the shell.
+    set testname "interrupt characters"
+    send "\003\177\034\r"
+    expect -re "$SHELL_PROMPT"
+    send "echo hello\r"
+    expect "echo hello"
+    expect "hello"
+    expect {
+	-re "$SHELL_PROMPT" {
+	    pass $testname
+	}
+    }
+
+    set testname "~."
+    send "~."
+    expect {
+	"Closed connection.\r" {
+	    pass $testname
+	}
+	"onnection closed" {
+	    pass $testname
+	}
+    }
+
+    expect_after
+
+    if [check_exit_status "exit status"] {
+	pass "exit status"
+    }
+
+    # The rlogin daemon should have stopped, but we have no easy way
+    # of checking whether it actually did.  Kill it just in case.
+    stop_rlogin_daemon
+}
+
+# Run the test.  Logging in sometimes takes a while, so increase the
+# timeout.
+set oldtimeout $timeout
+set timeout 60
+set status [catch rlogin_test msg]
+set timeout $oldtimeout
+
+# Shut down the kerberos daemons, the rlogin daemon, and the root
+# process.
+stop_kerberos_daemons
+
+stop_rlogin_daemon
+
+stop_root_shell
+
+if { $status != 0 } {
+    send_error "ERROR: error in rlogin.exp\n"
+    send_error "$msg\n"
+    exit 1
+}

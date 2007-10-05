@@ -1,0 +1,21 @@
+LIBRARY         KGINA
+
+DESCRIPTION     'Alternate Windows NT Logon GUI'
+
+EXPORTS
+; Version 1.0
+        WlxNegotiate
+        WlxInitialize
+        WlxDisplaySASNotice
+        WlxLoggedOutSAS
+        WlxActivateUserShell
+        WlxLoggedOnSAS
+        WlxDisplayLockedNotice
+        WlxWkstaLockedSAS
+        WlxIsLockOk
+        WlxIsLogoffOk
+        WlxLogoff
+        WlxShutdown
+; Version 1.1
+	WlxScreenSaverNotify
+	WlxStartApplication

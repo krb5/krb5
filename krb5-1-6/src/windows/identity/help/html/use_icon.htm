@@ -1,0 +1,74 @@
+<html>
+<head>
+  <title>Network Identity Manager Notification Icon</title>
+  <meta name="description" content="NetIDMgr Notification Icon">
+  <meta name="keywords" content="icon, netidmgr, notification, tray">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager Notification Icon</h1>
+<h3>Visual Representation of Identity State Information</h3>
+
+<p>When Network Identity Manager is running, an icon will appear in the taskbar notification area.&nbsp;  The icon will change to reflect the current state of
+the managed credentials.</p>
+
+<p>The icons and their meanings are described below:</p>
+
+<table width="100%" border="1">
+
+<tr>
+<td><img src="images/appicon_empty.png" /></td>
+<td>There are no managed credentials for any identity.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_good.png" /></td>
+<td>There are valid credentials for all the identities.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_warnexp.png" /></td> <td>Some of the
+credentials will expire in the next few minutes.  This icon will be
+displayed even if automatic renewals are enabled.  In this case, the
+credentials in question may get renewed before they expire, and the
+icon will change to reflect this change.</td> </tr>
+
+<tr>
+<td><img src="images/appicon_expired.png" /></td>
+<td>At least one identity's credentials have expired.</td>
+</tr>
+
+<tr>
+<td><img src="images/appicon_warning.png" /></td> <td>A warning
+message is waiting to be displayed.  Click the icon to view the
+warning message.</td> </tr>
+
+</table>
+
+<h3>Notification Icon Menu</h3>
+<p>Clicking on the notification with the second mouse button displays a menu 
+(see right) which contains the most commonly used Network Identity Manager 
+operations.&nbsp; </p>
+
+<ul>
+  <li><a href="act_new_creds.htm">Obtaining new credentials</a></li>
+  <li><a href="act_renew_creds.htm">Renew credentials</a></li>
+  <li><a href="act_import_creds.htm">Import credentials from the Microsoft Logon 
+	Session cache</a></li>
+  <li><a href="act_destroy_creds.htm">Destroying credentials</a></li>
+  <li><a href="act_set_default.htm">Setting the Default Identity</a></li>
+	<li><a href="act_chpw.htm">Change password</a></li>
+</ul>
+
+<div class="sidebar">
+<img src="images/notification_icon_menu.png" />
+<p class="caption">Figure 1. Notification Icon Menu</p>
+</div>
+<p></p>
+<h3>Notification Icon Default Action</h3>
+
+<p>Clicking on the icon with the first mouse button will open or close the Network Identity Manager application window or open the Obtain New Credentials dialog based upon the current configuration.  The behavior can be adjusted from the Options-&gt;General page.  Clicking with the second mouse button will display a menu of commands.</p>
+
+</body>
+</html>

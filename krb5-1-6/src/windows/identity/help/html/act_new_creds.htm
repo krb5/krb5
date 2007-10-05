@@ -1,0 +1,118 @@
+<html>
+<head>
+  <title>Network Identity Manager - New Credentials</title>
+  <meta name="description" content="obtain new credentials">
+  <meta name="keywords" content="new creds">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+  
+  <Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="Obtaining New Credentials">
+<param name="Keyword" value="Ctrl + N">
+<param name="Keyword" value="New Credentials Dialog">
+<param name="Keyword" value="Kerberos v5 ticket flags">
+<param name="Keyword" value="Changing Passwords">
+<param name="Keyword" value="Obtain New Credentials at Startup">
+</OBJECT>
+</head>
+<body>
+
+<h1>a Network Identity Manager - New Credentials</h1>
+
+<p>The new credentials dialog can be invoked from the <a
+href="menu_credential.htm">Credentials</a> menu, by typing <span
+class="pre">Ctrl + N</span>, using the context menu in the credentials
+window or using the context menu in the NetIDMgr icon in the system
+notification area.
+</p>
+
+<p>Once invoked, you will be presented with a dialog similar to the
+following:
+</p>
+
+<p>
+<img src="images/screen_new_creds.png" alt="New credentials dialog"/>
+<p class="caption">New credentials dialog with a valid identity
+selected.</p> 
+
+<p>If the Kerberos v5 identity provider is used, the dialog will ask
+for a username and a realm to determine the identity for which new
+credentials will be obtained for.  Depending on the selected identity,
+you may be required to provide a password or other form of
+authentication for new credentials to be obtained.
+</p>
+
+<p>Below the prompts is the credentials summary window.  This window
+provides an overview of the credentials that will be obtained when the
+dialog is completed.
+</p>
+
+<h3>Expanded view</h3>
+
+<p>If you click any of the credentials type hyperlinks in the
+credentials summary window or select the <span class="pre">&gt;&gt;</span> button, the dialog will switch to the expanded view.
+An example of this is shown below:
+</p>
+
+<p>
+<img src="images/screen_new_creds_exp.png"
+alt="Expanded new credentials window" />
+
+<p class="caption">Expanded view of the new credentials dialog</p>
+
+<p>
+The expanded view provides access to additional options available for
+each credential provider.  For example, the Kerberos v5 credentials
+provider allows you to set the lifetime of the obtained Kerberos
+ticket as well as ticket flags such as <i>renewable</i> or
+<i>forwardable</i>.
+</p>
+<p>
+<i>Note that the above screenshot is
+from an instance of NetIDMgr with Kerberos v5, Kerberos v4, OpenAFS and 
+Kerberized Certificate Authority providers with a Kerberos v5 identity provider.  Actual display may be
+different depending on the providers that are active.</i></p>
+
+<h3>Credentials summary window</h3>
+
+<p>The credentials summary window provides an overview of the
+credentials that will be obtained after the successful completion of
+the new credentials dialog.  The window contains hyperlinks that will
+take you to the corresponding credentials option panels where you will
+be able to set additional options for each type.
+</p>
+
+<p>If there is a problem with the selected identity, the credentials
+window will display a message describing the problem.  For example:
+</p>
+
+<p>
+<img src="images/screen_new_creds_err01.png" alt="Credentials summary window showing an invalid identity" />
+</p>
+
+<p>
+The above is an example of what you would see if the provided identity
+is invalid.  Once the identity provider (in this case, Kerberos v5)
+indicates that the identity is invalid, it will be displayed as above
+along with a brief description of why the identity was found to be
+invalid.  Here, the Kerberos v5 identity provider is reporting that the
+specified principal does not exist in the Kerberos database.
+</p>
+
+<h3>Additional notes</h3>
+
+<p>The new credentials dialog can be invoked from the command line using
+the <span class="pre"> -i </span> or <span class="pre"> --kinit
+</span> command line option.  Additionally, if you specify the <span
+class="pre"> -a </span> or <span class="pre"> --autoinit </span>
+command line option, the new credentials dialog will be displayed if
+there are no credentials available.
+</p>
+
+<p>
+Setting the <span class="pre">Obtain new credentials at startup (if none are present)</span> option in the <span
+class="pre">General</span> configuration panel causes NetIDMgr to behave as if 
+the <span class="pre">--autoinit</span> option is specified at each execution.
+</p>
+
+</body>
+</html>

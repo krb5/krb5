@@ -1,0 +1,266 @@
+The free functions deal with deallocation of memory that has been
+allocated by various routines. It is recommended that the developer use
+these routines as they will know about the contents of the structures.
+
+\begin{funcdecl}{krb5_xfree}{void}{\funcinout}
+\funcarg{void *}{ptr}
+\end{funcdecl}
+
+Frees the pointer \funcarg{ptr}. This is a wrapper macro to
+\funcname{free} that is designed to keep lint ``happy.''
+
+\begin{funcdecl}{krb5_free_data}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_data *}{val}
+\end{funcdecl}
+
+Frees the data structure \funcparam{val}, including the pointer
+\funcparam{val} which has been allocate by any of numerous routines.
+
+
+\begin{funcdecl}{krb5_free_princial}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_principal}{val}
+\end{funcdecl}
+
+Frees the pwd_data \funcparam{val} that has been allocated from
+\funcname{krb5_copy_principal}. 
+
+\begin{funcdecl}{krb5_free_authenticator}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_authenticator *}{val}
+\end{funcdecl}
+
+Frees the authenticator \funcparam{val}, including the pointer
+\funcparam{val}. 
+
+\begin{funcdecl}{krb5_free_authenticator_contents}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_authenticator *}{val}
+\end{funcdecl}
+
+Frees the authenticator contents of \funcparam{val}. The pointer 
+\funcparam{val} is not freed.
+
+
+\begin{funcdecl}{krb5_free_addresses}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_address **}{val}
+\end{funcdecl}
+
+Frees the series of addresses \funcparam{*val} that have been allocated from
+\funcname{krb5_copy_addresses}. 
+
+\begin{funcdecl}{krb5_free_address}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_address *}{val}
+\end{funcdecl}
+
+Frees the address \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_authdata}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_authdata **}{val}
+\end{funcdecl}
+
+Frees the authdata structure pointed to by \funcparam{val} that has been
+allocated from 
+\funcname{krb5_copy_authdata}. 
+
+\begin{funcdecl}{krb5_free_enc_tkt_part}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_enc_tkt_part *}{val}
+\end{funcdecl}
+
+Frees \funcparam{val} that has been allocated from
+\funcname{krb5_enc_tkt_part} and \funcname{krb5_decrypt_tkt_part}.
+
+\begin{funcdecl}{krb5_free_ticket}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ticket *}{val}
+\end{funcdecl}
+
+Frees the ticket \funcparam{val} that has been allocated from
+\funcname{krb5_copy_ticket} and other routines.
+
+\begin{funcdecl}{krb5_free_tickets}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ticket **}{val}
+\end{funcdecl}
+
+Frees the tickets pointed to by \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_kdc_req}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_kdc_req *}{val}
+\end{funcdecl}
+
+Frees the kdc_req \funcparam{val} and all substructures. The pointer
+\funcparam{val} is freed as well.
+
+\begin{funcdecl}{krb5_free_kdc_rep}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_kdc_rep *}{val}
+\end{funcdecl}
+
+Frees the kdc_rep \funcparam{val} that has been allocated from
+\funcname{krb5_get_in_tkt}. 
+
+\begin{funcdecl}{krb5_free_kdc_rep_part}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_enc_kdc_rep_part *}{val}
+\end{funcdecl}
+
+Frees the kdc_rep_part \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_error}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_error *}{val}
+\end{funcdecl}
+
+Frees the error \funcparam{val} that has been allocated from
+\funcname{krb5_read_error} or \funcname{krb5_sendauth}. 
+
+\begin{funcdecl}{krb5_free_ap_req}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ap_req *}{val}
+\end{funcdecl}
+
+Frees the ap_req \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_ap_rep}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ap_rep *}{val}
+\end{funcdecl}
+
+Frees the ap_rep \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_safe}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_safe *}{val}
+\end{funcdecl}
+
+Frees the safe application data \funcparam{val} that is allocated with
+\funcparam{decode_krb5_safe}. 
+
+
+\begin{funcdecl}{krb5_free_priv}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_priv *}{val}
+\end{funcdecl}
+
+Frees the private data  \funcparam{val} that has been allocated from
+\funcname{decode_krb5_priv}. 
+
+\begin{funcdecl}{krb5_free_priv_enc_part}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_priv_enc_part *}{val}
+\end{funcdecl}
+
+Frees the private encoded part \funcparam{val} that has been allocated from
+\funcname{decode_krb5_enc_priv_part}. 
+
+\begin{funcdecl}{krb5_free_cred}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_cred *}{val}
+\end{funcdecl}
+
+Frees the credential \funcparam{val}.
+
+\begin{funcdecl}{krb5_free_creds}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_creds *}{val}
+\end{funcdecl}
+
+Calls \funcname{krb5_free_cred_contents} with \funcparam{val} as the
+argument. \funcparam{val} is freed as well.
+
+\begin{funcdecl}{krb5_free_cred_contents}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_creds *}{val}
+\end{funcdecl}
+
+The function zeros out the session key stored in the credential and then
+frees the credentials structures. The argument \funcparam{val} is
+{\bf not} freed.
+
+
+\begin{funcdecl}{krb5_free_cred_enc_part}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_cred_enc_part *}{val}
+\end{funcdecl}
+
+Frees the addresses and ticket_info elements of
+\funcparam{val}. \funcparam{val} is {\bf not} freed by this routine.
+
+\begin{funcdecl}{krb5_free_checksum}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_checksum *}{val}
+\end{funcdecl}
+
+The checksum and the pointer \funcparam{val} are both freed. 
+
+\begin{funcdecl}{krb5_free_keyblock}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_keyblock *}{val}
+\end{funcdecl}
+
+The keyblock contents of \funcparam{val} are zeroed and the memory
+freed. The pointer \funcparam{val} is freed as well.
+
+\begin{funcdecl}{krb5_free_pa_data}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_pa_data **}{val}
+\end{funcdecl}
+
+Frees the contents of \funcparam{*val}. \funcparam{val} is freed as
+well.
+
+\begin{funcdecl}{krb5_free_ap_rep_enc_part}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ap_rep_enc_part *}{val}
+\end{funcdecl}
+
+Frees the subkey keyblock (if set) as well as \funcparam{val} that has
+been allocated from \funcname{krb5_rd_rep} or \funcname{krb5_send_auth}.
+
+\begin{funcdecl}{krb5_free_tkt_authent}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_tkt_authent *}{val}
+\end{funcdecl}
+
+Frees the ticket and authenticator portions of \funcparam{val}. The
+pointer \funcparam{val} is freed as well.
+
+\begin{funcdecl}{krb5_free_pwd_data}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{passwd_pwd_data *}{val}
+\end{funcdecl}
+
+Frees the pwd_data \funcparam{val} that has been allocated from
+\funcname{decode_krb5_pwd_data}. 
+
+\begin{funcdecl}{krb5_free_pwd_sequences}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{passwd_phrase_element **}{val}
+\end{funcdecl}
+
+Frees the passwd_phrase_element \funcparam{val}. This is usually called
+from \funcname{krb5_free_pwd_data}.
+
+\begin{funcdecl}{krb5_free_realm_tree}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_principal *}{realms}
+\end{funcdecl}
+
+Frees the realms tree \funcparam{realms} returned by
+\funcname{krb5_walk_realm_tree}.
+
+\begin{funcdecl}{krb5_free_tgt_creds}{void}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_creds **}{tgts}
+\end{funcdecl}
+
+Frees the TGT credentials \funcparam{tgts} returned by
+\funcname{krb5_get_cred_from_kdc}.
+

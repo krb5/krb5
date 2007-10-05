@@ -1,0 +1,11 @@
+thisconfigdir=./..
+myfulldir=plugins/kdb/db2/libdb2/clib
+mydir=clib
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+STLIBOBJS=@MEMMOVE_OBJ@ @MKSTEMP_OBJ@ @STRERROR_OBJ@
+
+LOCALINCLUDES=-I../include
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+@libobj_frag@

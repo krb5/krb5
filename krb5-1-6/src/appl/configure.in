@@ -1,0 +1,21 @@
+K5_AC_INIT(configure.in)
+CONFIG_RULES
+KRB5_AC_INET6
+AC_PROG_INSTALL
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h)
+AC_C_CONST
+dnl gss-misc.c needs this:
+AC_CHECK_HEADERS(sys/time.h time.h)
+dnl
+dnl Kludge for simple server --- FIXME is this the best way to do this?
+dnl
+if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
+	AC_DEFINE(BROKEN_STREAMS_SOCKETS,1,[Define if socket can't be bound to 0.0.0.0])
+fi
+dnl
+dnl
+KRB5_GETSOCKNAME_ARGS
+KRB5_GETPEERNAME_ARGS
+KRB5_BUILD_PROGRAM
+AC_CONFIG_SUBDIRS(libpty bsd gssftp telnet)
+V5_AC_OUTPUT_MAKEFILE(. sample sample/sclient sample/sserver simple simple/client simple/server gss-sample user_user)

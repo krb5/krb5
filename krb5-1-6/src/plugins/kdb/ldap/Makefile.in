@@ -1,0 +1,65 @@
+thisconfigdir=../../..
+myfulldir=plugins/kdb/ldap
+mydir=plugins/kdb/ldap
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS =
+MODULE_INSTALL_DIR = $(KRB5_DB_MODULE_DIR)
+
+LOCAL_SUBDIRS= libkdb_ldap ldap_util
+
+LOCALINCLUDES = -I../../../lib/kdb -I$(srcdir)/../../../lib/kdb \
+	-I$(srcdir)/libkdb_ldap
+
+LIBBASE=kldap
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+RELDIR=../plugins/kdb/ldap
+# Depends on libk5crypto and libkrb5
+# Also on gssrpc, for xdr stuff.
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libkdb_ldap$(SHLIBEXT) \
+	$(GSSRPC_DEPLIBS) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT) \
+	$(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(SHLIBEXT)
+SHLIB_EXPLIBS= -lkdb_ldap $(GSSRPC_LIBS) -lkrb5 -lcom_err -lk5crypto -lkrb5support $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+$(TOPLIBD)/libkdb_ldap$(SHLIBEXT): all-recurse
+
+SRCS= 	$(srcdir)/ldap_exp.c
+
+STOBJLISTS=OBJS.ST
+STLIBOBJS= ldap_exp.o
+
+all-unix:: $(LIBBASE)$(SO_EXT)
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs
+
+@libnover_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+ldap_exp.so ldap_exp.po $(OUTPRE)ldap_exp.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  $(srcdir)/libkdb_ldap/kdb_ldap.h $(srcdir)/libkdb_ldap/ldap_krbcontainer.h \
+  $(srcdir)/libkdb_ldap/ldap_principal.h $(srcdir)/libkdb_ldap/ldap_pwd_policy.h \
+  $(srcdir)/libkdb_ldap/ldap_realm.h $(srcdir)/libkdb_ldap/ldap_tkt_policy.h \
+  ldap_exp.c

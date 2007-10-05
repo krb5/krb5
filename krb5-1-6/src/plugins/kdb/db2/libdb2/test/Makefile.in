@@ -1,0 +1,36 @@
+thisconfigdir=./..
+myfulldir=plugins/kdb/db2/libdb2/test
+mydir=test
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+
+FCTSH = @FCTSH@
+TMPDIR=.
+
+LOCALINCLUDES=	-I. -I$(srcdir)/../include -I../include -I$(srcdir)/../mpool \
+		-I$(srcdir)/../btree -I$(srcdir)/../hash -I$(srcdir)/../db
+
+PROG_LIBPATH=-L..
+PROG_RPATH=$(KRB5_LIBDIR)
+
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+
+DB_LIB		= -ldb
+DB_DEPLIB	= ../libdb$(DEPLIBEXT)
+
+all::
+
+dbtest: dbtest.o $(DB_DEPLIB)
+	$(CC_LINK) -o $@ dbtest.o $(STRERROR_OBJ) $(DB_LIB)
+
+check:: dbtest
+	$(KRB5_RUN_ENV) srcdir=$(srcdir) TMPDIR=$(TMPDIR) $(VALGRIND) $(FCTSH) $(srcdir)/run.test
+
+bttest.o: $(srcdir)/btree.tests/main.c
+	$(CC) $(ALL_CFLAGS) -c $(srcdir)/btree.tests/main.c -o $@
+
+bttest: bttest.o $(DB_DEPLIB)
+	$(CC_LINK) -o $@ bttest.o $(STRERROR_OBJ) $(DB_LIB)
+
+clean-unix::
+	$(RM) dbtest.o dbtest __dbtest
+	$(RM) bttest.o bttest

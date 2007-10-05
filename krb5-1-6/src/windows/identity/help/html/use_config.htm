@@ -1,0 +1,306 @@
+<html>
+
+<head>
+<title>Network Identity Manager - Configuration</title>
+<meta name="description" content>
+<meta name="keywords" content="configuration">
+<link rel="stylesheet" type="text/css" href="nidmgr.css">
+<Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="Configuration">
+<param name="Keyword" value="General Options">
+<param name="Keyword" value="Appearance Options">
+<param name="Keyword" value="Notification Options">
+<param name="Keyword" value="Plug-in Management">
+<param name="Keyword" value="Kerberos v5 Configuration">
+<param name="Keyword" value="Kerberos v4 Configuration">
+<param name="Keyword" value="Identity Default Configuration">
+<param name="Keyword" value="Identity Configuration">
+</OBJECT>
+<style>
+<!--
+ li.MsoNormal
+	{mso-style-parent:"";
+	margin-bottom:.0001pt;
+	text-autospace:none;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	margin-left:0pt; margin-right:0pt; margin-top:0pt}
+-->
+</style>
+</head>
+
+<body>
+
+<h1>Network Identity Manager - Configuration</h1>
+<p>All Network Identity Manager configuration options can be accessed via the
+<span class="pre">Options</span> menu. The available configuration panels are:
+</p>
+<ul>
+	<li>
+	<p><span class="title">General</span>: General application options for NetIDMgr.</p>
+	</li>
+	<li>
+	<p><span class="title">Appearance</span>: Allows you to set the font used by 
+	NetIDMgr.</p>
+	</li>
+	<li>
+	<p><span class="title">Identities</span>: Default settings for all identities 
+	and settings for each identity. Details <a href="#cfg_idents">below</a>.</p>
+	</li>
+	<li>
+	<p><span class="title">Notifications</span>: Notification and timer options. 
+	NetIDMgr can issue warnings when credentials are about to expire. This configuration 
+	panel allows you to set the thresholds at which these warnings are issued. For 
+	example, if the warning timeout is set for 10 minutes, NetIDMgr will issue a 
+	warning 10 minutes before a credential expires.</p>
+	<p>The panel also allows you to control the credentials renew timer. If the 
+	timer is disabled, NetIDMgr will not automatically attempt to renew credentials. 
+	If the <span class="pre">Renew at half life intervals when possible</span> option 
+	is set, then the timer will expire after the credential has less than half its 
+	lifetime left. If the renewal operation fails, it will attempt another renwal 
+	after half of the remaining liftime is over (i.e. when the credential has less 
+	than 1/4 of its original lifetime left) and so on. </p>
+	</li>
+	<li>
+	<p><span class="title">Plug-ins</span>: Enable/disable and check the status of 
+	registered plug-ins. Enabling or disabling a plug-in only takes effect after 
+	a restart of NetIDMgr.</p>
+	</li>
+	<li>
+	<p><span class="title">Kerberos v5</span>: Kerberos v5 Credential Provider Configuration</p>
+	</li>
+	<li>
+	<p><span class="title">Kerberos v4</span>: Kerberos v4 Credential Provider Configuration</p>
+	</li>
+</ul>
+<p></p>
+<h3>General Options</h3>
+<p>The General options dialog, accessed via the Options menu, allows you to configure 
+operational properties specific to the NetIdMgr application.</p>
+<p><img src="images/screen_config_general.png" /> </p>
+<p>The <b>Obtain new credentials at startup (if none are present)</b> checkbox will 
+determine whether or not NetIdMgr will display the New Credentials dialog at startup 
+when no valid credentials exist.</p>
+<p>The <b>Destroy all credentials on exit </b>option can be used to empty all of 
+the credential caches when the NetIdMgr is terminated.</p>
+<p>The <b>Run NetIdMgr in taskbar notification area after window close </b>checkbox 
+determines the behavior of the window close button. When checked, NetIdMgr will 
+close the window but will continue running and can be accessed from the taskbar 
+notification area. When unchecked, NetIdMgr will behave as if File-&gt;Exit was selected 
+from the menu.</p>
+<p><b>Clicking on the notification icon</b> can be configured to either Show Network 
+Identity Manager or Obtain New Credentials. This option controls which menu item 
+on the notification icon menu is the default action.</p>
+<p>The <b>Monitor network connectivity</b> option determines whether or not NetIdMgr 
+monitors the configuration of IP addresses on the machine. When IP addresses are 
+added or removed and this feature is activated, the NetIdMgr will probe the identity 
+management servers (e.g., Kerberos Key Distribution Centers) to determine if they 
+are reachable and if so will automatically obtain credentials.</p>
+<p>The <b>Log trace events to trace log at the following location</b> option is 
+used to activate a log file that can be used to help debug the behavior of NetIdMgr 
+and its plug-ins. Press the <b>Show log</b> button to view the log file in Windows 
+Notepad. </p>
+
+<h3>Appearance Options</h3>
+<p>The Appearance Options page can be used to select an alternate typeface to be 
+used when displaying credentials in the NetIdMgr.</p>
+<p><img src="images/screen_config_appearance.png" /> </p>
+
+
+<a name="cfg_idents"></a>
+<h3>Configuration of default settings for all identities</h3>
+<p>The <span class="pre">Identities</span> configuration panel allows you to set 
+the defaults that will be used for all identities. However, most of the settings 
+displayed here can be overridden with specific per-identity settings. </p>
+<p>The panel will have a number of sub panels (or tabs) corresponding to each plug-in 
+that maintains per-identity configuration. </p>
+<p>A list of identities for which configuration information is maintained will be 
+shown under the main <span class="pre">Identities</span> configuration panel name. 
+Each of these correspond to a <a href="#cfg_ident">per identity</a> configuration 
+panel. </p>
+<p>Note that adding or removing an identity in the configuration panel only has 
+the effect of adding or removing the identity to or from the list of identities 
+for which configuration information is maintained. </p>
+
+<h4>Global Identity Settings</h4>
+<p><img src="images/screen_config_idents.png" /> </p>
+<p class="MsoNormal">There are three general settings that can be used to set 
+global defaults.</p>
+<p class="MsoNormal">The <b>Monitor credential expiration</b> setting determines 
+whether or not NetIdMgr should monitor the credential lifetimes and issue 
+expiration notifications.&nbsp;&nbsp; This value is used as the default for all new 
+identities.</p>
+<p class="MsoNormal">The <b>Automatically renew</b> setting determines if <i>
+renewable</i> credentials are automatically renewed prior to expiration.&nbsp; This 
+value is used as the default for all new identities.</p>
+<p class="MsoNormal">The <b>Always show in the credentials list (Pinned)</b> 
+setting determines whether new identities are always pinned within the 
+credentials list.&nbsp; A pinned identity will always be displayed regardless of 
+whether or not there are credentials associated with it.</p>
+
+<h4>Global Kerberos v5 Identity Settings</h4>
+<p><img src="images/screen_config_global_krb5.png" /> </p>
+<p class="MsoNormal">The global Kerberos v5 settings define default credential 
+lifetimes and minimum and maximum values for use in constructing the slider 
+controls used to set the lifetimes.&nbsp; </p>
+<p class="MsoNormal">There are two expiration times associated with Kerberos 
+tickets.&nbsp; The first specifies the length of the time period during which the 
+tickets are valid for use.&nbsp; The second specifies the length of the renewable 
+lifetime.&nbsp; Valid Kerberos tickets may have their valid use lifetime repeatedly 
+extended up until the renewable lifetime expires.&nbsp; The settings on this page are 
+used to configure default lifetime values for NetIdMgr to use when requesting 
+Kerberos tickets from the Kerberos server (key distribution center).&nbsp; The 
+Kerberos server may issue tickets with shorter lifetimes than were requested.</p>
+<p class="MsoNormal">The <b>Renewable</b>, <b>Forwardable</b>, and <b>
+Addressless</b> options determine whether or not new identities default to 
+obtaining Kerberos v5 tickets with these options.</p>
+<p class="MsoNormal">When <b>Forwardable </b>tickets are received from the 
+Kerberos Server, these tickets can be forwarded to a remote host when you 
+connect via telnet, ssh, ftp, rlogin, or similar applications.&nbsp; When tickets are 
+forwarded, there is no need to obtain Kerberos tickets again to access 
+Kerberized services on the remote host.&nbsp;&nbsp; <b>Forwardable</b> tickets are often 
+required when authenticating to a remote host using ssh or ftp when the remote 
+host requires the ability to authenticate to a remote file system such as AFS.</p>
+<p class="MsoNormal">When <b>Renewable</b> tickets are received from the 
+Kerberos Server, the ticket lifetimes may be renewed without prompting the user 
+for her password.&nbsp; This allows Kerberos tickets to be issued with short 
+lifetimes allowing compromised accounts to be disabled on short notice without 
+requiring the user to enter a password every few hours.&nbsp; When combined with <b>
+Automatic Ticket Renewal</b>, NetIdMgr can maintain valid tickets for a week, a 
+month, or longer by automatically renewing tickets prior to their expiration.&nbsp; 
+The ability to renew tickets without a password is limited by the ticket’s 
+renewable lifetime as issued by the Kerberos Server.</p>
+<p class="MsoNormal">When <b>Addressless</b> is selected, the tickets do not 
+contain IP address information.&nbsp; This enables the tickets to be used from behind 
+Network Address Translators which are frequently found in Cable and DSL Modems.</p>
+<p class="MsoNormal">The minimum and maximum ranges are used by the ticket 
+initialization dialog box when constructing the Lifetime and Renewable Lifetime 
+sliders.&nbsp; These sliders can be used to modify the requested ticket lifetimes 
+when Kerberos tickets are initialized.</p>
+
+<h4>Global Kerberos v4 Identity Settings</h4>
+<p><img src="images/screen_config_global_krb4.png" /> </p>
+<p class="MsoNormal">When the <b>Obtain Kerberos v4 credentials</b> button is 
+checked, NetIdMgr will attempt to retrieve Kerberos v4 credentials when ticket 
+initialization, renewal, or importation is performed. &nbsp;Kerberos realms are 
+increasingly configured to support only Kerberos v5 (e.g., Windows Active 
+Directory Domains.)&nbsp; If the realms you use do not support Kerberos v4 it is 
+suggested that this button be unchecked.</p>
+<p class="MsoNormal">Be aware that only the default identity can obtain Kerberos 
+v4 credentials.&nbsp;&nbsp; This limitation is due to the inability of Kerberos v4 
+applications on Microsoft Windows to specify a credentials cache. </p>
+
+
+<a name="cfg_ident"></a>
+<h3>Per identity configuration</h3>
+<p>You can access the per-identity configuration panel for a specific identity by 
+selecting the identity name from the list of configuration panels in the configuration 
+dialog. </p>
+<p>These panels are similar to the <span class="pre">Identities</span> configuration 
+panel, but they change per-identity settings. Changes you make in these panels will 
+override the defaults set in the <span class="pre">Identities</span> panel. </p>
+<h4>Per identity General Configuration</h4>
+<p><img src="images/screen_config_ident.png" /> </p>
+<p class="MsoNormal">The General page contains a <b>Remove Identity</b> button 
+that can be used to delete this Identity from the Network Identity Manager.</p>
+
+<h4>Per identity Kerberos v5 Configuration</h4>
+
+<p><img src="images/screen_config_ident_krb5.png" /> </p>
+<p class="MsoNormal">The Kerberos v5 page displays the name of the credential 
+cache currently associated with the Identity.</p>
+
+<h4>Per identity Kerberos v4 Configuration</h4>
+
+<p><img src="images/screen_config_ident_krb4.png" /></p>
+<p class="MsoNormal">The Kerberos v4 page is optional and may not appear on all 
+systems.&nbsp; Only one identity can obtain Kerberos v4 credentials at a time.&nbsp; </p>
+
+<h3>Notification Configuration</h3>
+
+<p><img src="images/screen_config_notifications.png" /> </p>
+<p class="MsoNormal">The <b>Renew automatically at</b> check box determines 
+whether or not renewable tickets will be renewed by NetIdMgr when they reach the 
+specified time remaining.&nbsp;&nbsp; </p>
+<p class="MsoNormal">The <b>Initial warning at</b> check box determines whether 
+or not a warning will be issued when the specified time remaining is reached.</p>
+<p class="MsoNormal">The <b>Final warning at</b> check box determines whether or 
+not a warning will be issued when the specified time remaining is reached.</p>
+<p class="MsoNormal">Notifications are performed in two ways.&nbsp; First, icons are 
+displayed next to the affected credentials in the flags column of the display.&nbsp; 
+Second, a balloon tip is displayed off of the NetIdMgr taskbar notification area 
+icon.</p>
+
+<h3>Plug-in Configuration</h3>
+<p><img src="images/screen_config_plug_ins.png" /> </p>
+<p><span style="font-size: 10.0pt; font-family: Times New Roman">The Plug-ins 
+and Modules page provides status information on the currently loaded plug-ins 
+and modules include a description of their purpose; whether or not it was loaded 
+properly; which other modules are required; and what organization developed it.
+</span> </p>
+
+<h4>Kerberos v5 Plug-in Configuration</h4>
+
+<p><img src="images/screen_config_plug_in_krb5.png" /> </p>
+<p class="MsoNormal">The <b>Kerberos v5 Configuration</b> tab allows you to 
+alter the behavior of&nbsp; the Kerberos v5 identity provider.&nbsp; </p>
+<p class="MsoNormal">In the <b>Default Realm</b> field, select a Kerberos realm 
+from the dropdown list.</p>
+<p class="MsoBodyTextIndent2" style="text-indent:0pt">The <b>Include all 
+configured realms in New Credentials realm list</b> determines whether all of 
+the realms declared in the Kerberos v5 Configuration file are included in the 
+realms list of the <b>Obtain New Credentials</b> dialog.&nbsp; If disabled, only the 
+realms previously used to obtain credentials are displayed.</p>
+<p class="MsoBodyTextIndent2" style="text-indent:0pt">The <b>Configuration File
+</b>field displays the path to the Kerberos v5 configuration file, krb5.ini.</p>
+<p class="MsoNormal"><span style="display: none">The Kerberos libraries depend 
+on configuration files for their proper operation.&nbsp; When <b>Create file if 
+missing </b>is checked, NetIdMgr will construct replacements for missing 
+configuration files upon startup.&nbsp; This is performed by extracting Kerberos 
+configuration information from the local Windows registry and the Domain Name 
+System.&nbsp; The contents of the created file may then be edited using the <b>
+Kerberos Properties Dialog</b>.&nbsp; [This functionality is not available in this 
+release.]</span></p>
+<p class="MsoNormal">The field labeled <b>Host Name</b> displays the name of 
+your local machine.&nbsp; The <b>Domain Name</b> field displays the domain to which 
+your local machine currently belongs.&nbsp;</p>
+<p class="MsoNormal">The <b>Import Tickets</b> listbox allows you to configure 
+how NetIdMgr interacts with the Microsoft Kerberos Authentication Provider.&nbsp; 
+NetIdMgr will automatically import Kerberos Tickets from the Microsoft LSA at 
+startup depending upon the selected option and whether or not the Kerberos 
+Authentication Provider was used for Windows Logon authorization.&nbsp; </p>
+<ul style="margin-top: 0pt; margin-bottom: 0pt" type="disc">
+	<li class="MsoNormal"><b>Never</b> means do not import tickets from the 
+	MSLSA; </li>
+	<li class="MsoNormal"><b>Always</b> means do import tickets from the MSLSA; 
+	and </li>
+	<li class="MsoNormal"><b>Only when the Principal matches</b> means import 
+	tickets from the MSLSA only if the MSLSA Kerberos principal belongs to the 
+	Default Realm.</li>
+</ul>
+<p class="MsoNormal">When the Windows Logon identity is imported and is 
+configured as the default identity, the MIT credential cache will be used in 
+preference to the MSLSA credential cache.</p>
+
+<h4>Kerberos v5 Realm Configuration</h4>
+<p><img src="images/screen_config_plug_in_krb5_realm.png" /> </p>
+
+<h4>Kerberos v5 Credential Cache Configuration</h4>
+<p><img src="images/screen_config_plug_in_krb5_ccache.png" /> </p>
+<p class="MsoNormal">The Kerberos Realm Configuration dialog can be used to 
+manage the contents of the [Realms] and [Domain_Realm] sections of the Kerberos 
+v5 configuration file.</p>
+
+<h4>Kerberos v4 Plug-in Configuration</h4>
+<p><img src="images/screen_config_plug_in_krb4.png" /> </p>
+<p class="MsoBodyTextIndent2" style="text-indent:0pt">Here, you can specify the 
+name of the in-memory cache used to store the Kerberos v4 tickets.&nbsp; The format 
+of the name is “API:” followed by the cache name.&nbsp; Disk caches are not supported 
+by Kerberos for Windows.</p>
+<p class="MsoNormal">The paths to the Kerberos v4 configuration files: krb.con 
+and krbrealm.con may be viewed from this dialog.&nbsp; The default is to store the 
+configuration files in the Windows directory.</p>
+
+</body>
+
+</html>

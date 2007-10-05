@@ -1,0 +1,308 @@
+thisconfigdir=.
+myfulldir=plugins/kdb/ldap/libkdb_ldap
+mydir=.
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+# Lots of ugliness here because of duplicated symbol names.
+# Can I just punt the duplicates and import from libkdb5, or
+# is keeping them separate important?
+DEFINES = \
+	-Dkrb5_dbe_lookup_last_pwd_change=kdb_ldap_dbe_lookup_last_pwd_change \
+	-Dkrb5_dbe_lookup_mod_princ_data=kdb_ldap_dbe_lookup_mod_princ_data \
+	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
+	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
+	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
+	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
+DEFS=
+
+LOCALINCLUDES = -I$(SRCTOP)/lib/kdb -I$(SRCTOP)/lib/krb5/asn.1
+
+LIBBASE=kdb_ldap
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=../plugins/kdb/ldap/libkdb_ldap
+# Depends on libk5crypto and libkrb5
+# Also on gssrpc, for xdr stuff.
+SHLIB_EXPDEPS = \
+	$(GSSRPC_DEPLIBS) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(SUPPORT_DEPLIB) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS= $(GSSRPC_LIBS) -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) @LDAP_LIBS@ $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+LIBINITFUNC= kldap_init_fn
+LIBFINIFUNC=
+
+SRCS= 	$(srcdir)/kdb_ldap.c \
+	$(srcdir)/kdb_ldap_conn.c \
+	$(srcdir)/ldap_realm.c \
+	$(srcdir)/ldap_create.c \
+	$(srcdir)/ldap_krbcontainer.c \
+	$(srcdir)/ldap_principal.c \
+	$(srcdir)/ldap_principal2.c \
+	$(srcdir)/ldap_pwd_policy.c \
+	$(srcdir)/ldap_misc.c \
+	$(srcdir)/ldap_handle.c \
+	$(srcdir)/ldap_tkt_policy.c \
+	$(srcdir)/ldap_services.c \
+	$(srcdir)/ldap_service_rights.c \
+	$(srcdir)/princ_xdr.c \
+	$(srcdir)/ldap_fetch_mkey.c \
+	$(srcdir)/ldap_service_stash.c \
+	$(srcdir)/kdb_xdr.c \
+	$(srcdir)/ldap_err.c
+
+STOBJLISTS=OBJS.ST
+STLIBOBJS= kdb_ldap.o \
+	kdb_ldap_conn.o \
+	ldap_realm.o \
+	ldap_create.o \
+	ldap_krbcontainer.o \
+	ldap_principal.o \
+	ldap_principal2.o \
+	ldap_pwd_policy.o \
+	ldap_misc.o \
+	ldap_handle.o \
+	ldap_tkt_policy.o \
+	ldap_services.o \
+	ldap_service_rights.o \
+	princ_xdr.o \
+	ldap_fetch_mkey.o \
+	ldap_service_stash.o \
+	kdb_xdr.o \
+	ldap_err.o
+
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-liblinks clean-libobjs clean-libs
+
+@lib_frag@
+@libobj_frag@
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+kdb_ldap.so kdb_ldap.po $(OUTPRE)kdb_ldap.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.c kdb_ldap.h ldap_err.h ldap_krbcontainer.h \
+  ldap_misc.h ldap_realm.h ldap_services.h
+kdb_ldap_conn.so kdb_ldap_conn.po $(OUTPRE)kdb_ldap_conn.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h kdb_ldap_conn.c ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_service_stash.h \
+  ldap_services.h
+ldap_realm.so ldap_realm.po $(OUTPRE)ldap_realm.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_principal.h ldap_realm.c \
+  ldap_realm.h ldap_services.h ldap_tkt_policy.h
+ldap_create.so ldap_create.po $(OUTPRE)ldap_create.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_create.c ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_principal.h ldap_realm.h \
+  ldap_services.h ldap_tkt_policy.h
+ldap_krbcontainer.so ldap_krbcontainer.po $(OUTPRE)ldap_krbcontainer.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.c \
+  ldap_krbcontainer.h ldap_main.h ldap_misc.h ldap_realm.h \
+  ldap_services.h
+ldap_principal.so ldap_principal.po $(OUTPRE)ldap_principal.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_principal.c ldap_principal.h \
+  ldap_realm.h ldap_services.h ldap_tkt_policy.h princ_xdr.h
+ldap_principal2.so ldap_principal2.po $(OUTPRE)ldap_principal2.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_principal.h ldap_principal2.c \
+  ldap_pwd_policy.h ldap_realm.h ldap_services.h ldap_tkt_policy.h \
+  princ_xdr.h
+ldap_pwd_policy.so ldap_pwd_policy.po $(OUTPRE)ldap_pwd_policy.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_pwd_policy.c ldap_pwd_policy.h \
+  ldap_realm.h ldap_services.h
+ldap_misc.so ldap_misc.po $(OUTPRE)ldap_misc.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_krbcontainer.h ldap_misc.c \
+  ldap_misc.h ldap_realm.h ldap_services.h
+ldap_handle.so ldap_handle.po $(OUTPRE)ldap_handle.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_handle.c ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
+ldap_tkt_policy.so ldap_tkt_policy.po $(OUTPRE)ldap_tkt_policy.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h \
+  ldap_tkt_policy.c ldap_tkt_policy.h
+ldap_services.so ldap_services.po $(OUTPRE)ldap_services.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_services.c \
+  ldap_services.h
+ldap_service_rights.so ldap_service_rights.po $(OUTPRE)ldap_service_rights.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_err.h ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_service_rights.c \
+  ldap_services.h
+princ_xdr.so princ_xdr.po $(OUTPRE)princ_xdr.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h $(SRCTOP)/include/gssrpc/auth_gss.h \
+  $(SRCTOP)/include/gssrpc/auth_unix.h $(SRCTOP)/include/gssrpc/clnt.h \
+  $(SRCTOP)/include/gssrpc/rename.h $(SRCTOP)/include/gssrpc/rpc.h \
+  $(SRCTOP)/include/gssrpc/rpc_msg.h $(SRCTOP)/include/gssrpc/svc.h \
+  $(SRCTOP)/include/gssrpc/svc_auth.h $(SRCTOP)/include/gssrpc/xdr.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_krbcontainer.h ldap_principal.h ldap_realm.h \
+  ldap_tkt_policy.h princ_xdr.c princ_xdr.h
+ldap_fetch_mkey.so ldap_fetch_mkey.po $(OUTPRE)ldap_fetch_mkey.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_fetch_mkey.c ldap_handle.h ldap_krbcontainer.h \
+  ldap_main.h ldap_misc.h ldap_realm.h ldap_services.h
+ldap_service_stash.so ldap_service_stash.po $(OUTPRE)ldap_service_stash.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h $(SRCTOP)/lib/kdb/kdb5.h \
+  kdb_ldap.h ldap_handle.h ldap_krbcontainer.h ldap_main.h \
+  ldap_misc.h ldap_realm.h ldap_service_stash.c ldap_service_stash.h \
+  ldap_services.h
+kdb_xdr.so kdb_xdr.po $(OUTPRE)kdb_xdr.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/kdb.h $(SRCTOP)/include/krb5.h $(SRCTOP)/include/krb5/locate_plugin.h \
+  $(SRCTOP)/include/krb5/preauth_plugin.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h kdb_xdr.c kdb_xdr.h
+ldap_err.so ldap_err.po $(OUTPRE)ldap_err.$(OBJEXT): \
+  $(BUILDTOP)/include/kdb5_err.h $(COM_ERR_DEPS) ldap_err.c \
+  ldap_err.h

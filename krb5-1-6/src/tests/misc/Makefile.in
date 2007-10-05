@@ -1,0 +1,35 @@
+thisconfigdir=./..
+myfulldir=tests/misc
+mydir=misc
+BUILDTOP=$(REL)..$(S)..
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+OBJS=test_getpw.o
+SRCS=$(srcdir)/test_getpw.c
+
+all:: test_getpw
+
+check:: test_getpw
+	$(RUN_SETUP) $(VALGRIND) ./test_getpw
+
+test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)
+
+test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
+	$(CC_LINK) $(ALL_CFLAGS) -o test_getsockname $(OUTPRE)test_getsockname.$(OBJEXT) $(LIBS)
+
+install::
+
+clean::
+	$(RM) test_getpw
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)test_getpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  test_getpw.c

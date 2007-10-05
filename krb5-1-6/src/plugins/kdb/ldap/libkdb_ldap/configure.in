@@ -1,0 +1,36 @@
+K5_AC_INIT(configure.in)
+CONFIG_RULES
+AC_CHECK_HEADERS(unistd.h)
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+
+AC_CHECK_FUNCS(srand48 srand srandom umask)
+
+LDAP_OKAY=1
+AC_CHECK_HEADERS([ldap.h], :, [LDAP_OKAY=0; AC_MSG_WARN([ldap.h not found])])
+AC_CHECK_HEADERS([lber.h], :, [LDAP_OKAY=0; AC_MSG_WARN([lber.h not found])])
+AC_CHECK_LIB(ldap, ldap_init, :, [LDAP_OKAY=0; AC_MSG_WARN([libldap not found])])
+if test "$LDAP_OKAY" = "0"; then 
+    AC_ERROR("LDAP libraries missing - skipping LDAP database module")
+fi
+BER_OKAY=0
+AC_CHECK_LIB(ldap, ber_init, [BER_OKAY=1])
+if test "$BER_OKAY" = "1"; then 
+	LDAP_LIBS='-lldap'
+else
+	AC_CHECK_LIB(lber, ber_init, [BER_OKAY=1], [AC_MSG_WARN([libber not found])])
+	if test "$BER_OKAY" = "1"; then 
+		LDAP_LIBS='-lldap -llber'
+	else
+		AC_ERROR("BER library missing - skipping LDAP database module")
+	fi
+fi
+AC_SUBST(LDAP_LIBS)
+
+KRB5_RUN_FLAGS
+dnl The following is for check...
+KRB5_BUILD_PROGRAM
+KRB5_BUILD_LIBOBJS
+KRB5_BUILD_LIBRARY_WITH_DEPS
+dnl
+V5_AC_OUTPUT_MAKEFILE

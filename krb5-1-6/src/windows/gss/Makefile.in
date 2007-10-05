@@ -1,0 +1,52 @@
+# makefile: Constructs the Kerberos for Windows ticket manager
+# Works for both k4 and k5 releases.
+#
+OBJS	= $(OUTPRE)gss.obj $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj
+RESFILE = $(OUTPRE)gss.res
+XOBJS	= $(RESFILE)
+
+##### Options
+# Set NODEBUG if building release instead of debug
+BUILDTOP=..\..
+
+!if defined(KRB5_KFW_COMPILE)
+KFWINC= /I$(BUILDTOP)\..\..\krbcc\include
+!if ( "$(CPU)" == "i386" )
+KFWLIB= $(BUILDTOP)\..\..\..\..\target\lib\$(CPU)\$(OUTPRE_DBG)\krbcc32.lib
+!else
+KFWLIB= $(BUILDTOP)\..\..\..\..\target\lib\$(CPU)\$(OUTPRE_DBG)\krbcc64.lib
+!endif
+!endif
+LOCALINCLUDES= /I$(BUILDTOP) /I$(BUILDTOP)\include /I$(BUILDTOP)\include\krb5 $(KFWINC)
+
+##### RC Compiler
+RFLAGS	= $(LOCALINCLUDES)
+RCFLAGS	= $(RFLAGS) -D_WIN32 -DGSS_APP
+
+##### Linker
+LINK	= link
+LIBS	= $(GLIB) $(CLIB) $(WLIB)
+SYSLIBS	= kernel32.lib ws2_32.lib user32.lib gdi32.lib comdlg32.lib comctl32.lib
+LFLAGS	= /nologo $(LOPTS)
+
+all:: Makefile $(OUTPRE)gss.exe
+
+$(OUTPRE)gss.exe: gss.def $(OBJS) $(XOBJS) $(LIBS)
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(XOBJS) \
+	  $(LIBS) $(SYSLIBS) $(KFWLIB) $(SCLIB)
+
+$(OBJS) $(XOBJS): gss.h
+
+$(RESFILE): ..\version.rc
+
+install::
+	copy $(OUTPRE)gss.exe ..\floppy
+
+clean:: 
+	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
+	if exist ..\floppy\gss.exe del ..\floppy\gss.exe
+	if exist $(OUTPRE)*.obj del $(OUTPRE)*.obj
+	if exist $(OUTPRE)*.res del $(OUTPRE)*.res
+	if exist $(OUTPRE)*.map del $(OUTPRE)*.map
+	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
+	if exist *.err del *.err

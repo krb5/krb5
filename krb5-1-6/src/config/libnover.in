@@ -1,0 +1,112 @@
+### config/libnover.in
+# *** keep this in sync with lib.in
+#
+# Makefile fragment that creates shared libraries sans version
+# info (plugin modules).
+#
+# The following variables must be set in the Makefile.in:
+#
+# LIBBASE	library name without "lib" or extension
+# STOBJLISTS	list of files, each of which is an OBJS.ST created by
+#			libobj.in; *DO NOT* use ./OBJS.ST for the current
+#			directory as that will cause some makes to lose.
+# SHLIB_EXPDEPS	list of libraries that this one has explicit
+#			dependencies on, pref. in the form libfoo$(SHLIBEXT)
+# SHLIB_EXPLIBS	list of libraries that this one has explicit
+#			dependencies on, in "-lfoo" form.
+# SHLIB_DIRS	list of directories where $(SHLIB_EXPLIBS) can be
+#			found, in the form -Ldir1 -Ldir2 ...
+#			since there are very few systems where -L is the
+#			wrong thing (notable exception of SunOS but we
+#			deal with it...)
+# SHLIB_RDIRS	rpath directories to search; given in the
+#			form dir1:dir2 ...
+# RELDIR	path to this directory relative to $(TOPLIBD)
+
+LIBPREFIX=
+
+# STOBJLISTS=dir1/OBJS.ST dir2/OBJS.ST etc...
+SHOBJLISTS=$(STOBJLISTS:.ST=.SH)
+
+dummy-target-1 $(SUBDIROBJLISTS) $(SUBDIROBJLISTS:.ST=.SH) $(SUBDIROBJLISTS:.ST=.PF): all-recurse
+
+# Gets invoked as $(PARSE_OBJLISTS) list-of-OBJS.*-files
+PARSE_OBJLISTS= set -x && $(PERL) -p -e 'BEGIN { $$SIG{__WARN__} = sub {die @_} }; $$e=$$ARGV; $$e =~ s/OBJS\...$$//; s/^/ /; s/ $$//; s/ / $$e/g;'
+
+SHLIBVEXT=$(SHLIBEXT)
+LIBLIST=$(LIBBASE)$(DYNOBJEXT)
+LIBINSTLIST=install-shared
+
+$(LIBBASE)$(DYNOBJEXT): $(SHOBJLISTS) $(DYNOBJ_EXPDEPS) $(SHLIB_EXPORT_FILE_DEP)
+	$(RM) $@
+	@echo "building dynamic $(LIBBASE) object"
+	set -x; objlist=`$(PARSE_OBJLISTS) $(SHOBJLISTS)` && $(MAKE_DYNOBJ_COMMAND)
+
+binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
+	echo >  binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
+	echo >> binutils.versions "$(LIBBASE)_$(LIBMAJOR)_MIT {"
+	sed  >> binutils.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
+	echo >> binutils.versions "};"
+
+osf1.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) osf1.tmp osf1.exports
+	sed "s/^/-exported_symbol /" < $(SHLIB_EXPORT_FILE) > osf1.tmp
+	for f in . $(LIBINITFUNC); do \
+	  if test "$$f" != "." ; then \
+	    echo " -init $$f"__auxinit >> osf1.tmp; \
+	  else :; fi; \
+	done
+	a=""; \
+	for f in . $(LIBFINIFUNC); do \
+	  if test "$$f" != "." ; then \
+	    a="-fini $$f $$a"; \
+	  else :; fi; \
+	done; echo " $$a" >> osf1.tmp; \
+	mv -f osf1.tmp osf1.exports
+
+hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) hpux10.tmp hpux10.exports
+	sed "s/^/+e /" < $(SHLIB_EXPORT_FILE) > hpux10.tmp
+	a=""; \
+	for f in . $(LIBFINIFUNC); do \
+	  if test "$$f" != .; then \
+	    a="+I $${f}__auxfini $$a"; \
+	  else :; fi; \
+	done; echo "$$a" >> hpux10.tmp
+	echo "+e errno" >> hpux10.tmp
+	mv -f hpux10.tmp hpux10.exports
+
+darwin.exports: $(SHLIB_EXPORT_FILE) Makefile
+	$(RM) darwin.exports
+	sed "s/^/_/" < $(SHLIB_EXPORT_FILE) > darwin.exports
+
+$(TOPLIBD)/$(LIBBASE)$(SHLIBEXT): $(LIBBASE)$(SHLIBEXT)
+	$(RM) $@
+	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/$(LIBBASE)$(SHLIBEXT) .)
+
+all-libs: $(LIBBASE)$(DYNOBJEXT) # $(LIBLIST)
+
+clean-libs:
+	$(RM) $(LIBBASE)$(SHLIBEXT)
+	$(RM) binutils.versions osf1.exports
+
+install-libs: $(LIBINSTLIST)
+install-shared:
+	$(RM) $(DESTDIR)$(MODULE_INSTALL_DIR)/$(LIBBASE)$(DYNOBJEXT)
+	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(MODULE_INSTALL_DIR)
+
+Makefile: $(SRCTOP)/config/libnover.in
+$(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
+
+# Use the following if links need to be made to $(TOPLIBD):
+# all-unix:: all-liblinks
+# install-unix:: install-libs
+# clean-unix:: clean-liblinks clean-libs
+
+# Use the following if links need not be made:
+# all-unix:: all-libs
+# install-unix:: install-libs
+# clean-unix:: clean-libs
+
+###
+### end config/libnovers.in

@@ -1,0 +1,76 @@
+#
+# Copyright 1993-1994 OpenVision Technologies, Inc., All Rights Reserved.
+#
+# String table of messages for kpasswd
+
+
+error_table kpws
+
+# /* M1 */
+error_code KPW_STR_USAGE, "Usage: kpasswd [principal_name]."
+
+error_code KPW_STR_PRIN_UNKNOWN,
+	"Kerberos principal name %s is not recognized."
+#       /* <name> */
+
+# /* M2 */
+error_code KPW_STR_WHILE_LOOKING_AT_CC,
+	"while reading principal name from credential cache."
+
+# /* M4 */ 
+error_code KPW_STR_OLD_PASSWORD_INCORRECT,
+	"Old Kerberos password is incorrect. Please try again."
+
+# /* M5 */
+error_code KPW_STR_CANT_OPEN_ADMIN_SERVER,
+"Cannot establish a session with the Kerberos administrative server for\n\
+realm %s. %s."
+# /* <realm-name>, <Specific error message from admin server library>. */
+
+# /* M6 */
+error_code KPW_STR_NEW_PASSWORD_MISMATCH,
+	"New passwords do not match - password not changed.\n"
+
+# /* M7 */
+error_code KPW_STR_PASSWORD_CHANGED, "Kerberos password changed.\n"
+
+# /* M13 */
+error_code KPW_STR_PASSWORD_NOT_CHANGED, "Password not changed."
+
+error_code KPW_STR_PARSE_NAME, "when parsing name %s."
+error_code KPW_STR_UNPARSE_NAME, "when unparsing name."
+error_code KPW_STR_NOT_IN_PASSWD_FILE,	"Unable to identify user from password file."
+
+# /* M3 */
+error_code KPW_STR_CHANGING_PW_FOR, "Changing password for %s."
+# /* principal@realm */
+
+error_code KPW_STR_OLD_PASSWORD_PROMPT, "Old password"
+error_code KPW_STR_WHILE_READING_PASSWORD, "while reading new password."
+
+# /* M4 */
+error_code KPW_STR_NO_PASSWORD_READ,
+"You must type a password. Passwords must be at least one character long."
+
+# /* M14 */
+error_code KPW_STR_WHILE_TRYING_TO_CHANGE, "while trying to change password."
+
+error_code KPW_STR_WHILE_DESTROYING_ADMIN_SESSION,
+"while closing session with admin server and destroying tickets."
+
+error_code KPW_STR_WHILE_FREEING_PRINCIPAL,
+"while freeing admin principal entry"
+
+error_code KPW_STR_WHILE_FREEING_POLICY,
+"while freeing admin policy entry"
+
+error_code KPW_STR_CANT_GET_POLICY_INFO,
+"Could not get password policy information for principal %s."
+# /* principal@realm */
+
+error_code KPW_STR_POLICY_EXPLANATION,
+"%s's password is controlled by the policy %s, which\nrequires a minimum of %u characters from at least %u classes (the five classes\nare lowercase, uppercase, numbers, punctuation, and all other characters)."
+# /* principal_name policy_name min_length min_classes */
+
+end
+

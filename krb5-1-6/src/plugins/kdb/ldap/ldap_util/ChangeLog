@@ -1,0 +1,12 @@
+2006-04-08  Ken Raeburn  <raeburn@mit.edu>
+
+	* getdate.c: Deleted.
+	* Makefile.in ($(PROG)): Link against getdate.o from cli
+	directory.
+
+2006-03-17  Ken Raeburn  <raeburn@mit.edu>
+
+	* Makefile.in (LOCALINCLUDES): Look for kdb ldap headers in new
+	location.
+	(KDB_DEP_LIB): Refer to kdb ldap library under new name.
+

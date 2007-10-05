@@ -1,0 +1,11 @@
+krb5-libs
+krb5-admin
+krb5-kdc
+krb5-clients
+krb5-appl
+krb5-doc
+krb5-misc
+krb5-build
+pty
+telnet
+test

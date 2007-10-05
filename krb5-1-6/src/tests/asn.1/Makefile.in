@@ -1,0 +1,106 @@
+thisconfigdir=./..
+myfulldir=tests/asn.1
+mydir=asn.1
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@
+
+SRCS= $(srcdir)/krb5_encode_test.c $(srcdir)/krb5_encode_test.c \
+	$(srcdir)/ktest.c $(srcdir)/ktest_equal.c $(srcdir)/utility.c \
+	$(srcdir)/trval.c
+
+all:: krb5_encode_test krb5_decode_test trval
+
+LOCALINCLUDES = -I$(srcdir)/../../lib/krb5/asn.1
+
+ENCOBJS = krb5_encode_test.o ktest.o ktest_equal.o utility.o trval.o
+
+krb5_encode_test: $(ENCOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o krb5_encode_test $(ENCOBJS) $(KRB5_BASE_LIBS)
+
+DECOBJS = krb5_decode_test.o ktest.o ktest_equal.o utility.o
+
+krb5_decode_test: $(DECOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o krb5_decode_test $(DECOBJS) $(KRB5_BASE_LIBS)
+
+trval: $(srcdir)/trval.c
+	$(CC) -o trval $(ALL_CFLAGS) -DSTANDALONE $(srcdir)/trval.c
+
+check:: krb5_decode_test krb5_encode_test
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
+	$(RM) test.out
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
+	cmp test.out $(srcdir)/reference_encode.out
+	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+		export KRB5_CONFIG ;\
+		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > test.out
+	cmp test.out $(srcdir)/trval_reference.out
+	$(RM) test.out	
+
+install::
+
+clean::
+	rm -f *~ *.o krb5_encode_test krb5_decode_test test.out trval
+
+
+################ Dependencies ################
+krb5_decode_test.o: ktest.h utility.h ktest_equal.h debug.h
+krb5_encode_test.o: utility.h ktest.h debug.h
+trval.o: trval.c
+ktest.o: ktest.h utility.h
+ktest_equal.o: ktest_equal.h
+#utility.o: utility.h
+#utility.h: krbasn1.h asn1buf.h
+##############################################
+
+# +++ Dependency line eater +++
+# 
+# Makefile dependencies follow.  This must be the last section in
+# the Makefile.in file
+#
+$(OUTPRE)krb5_encode_test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/lib/krb5/asn.1/asn1buf.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h \
+  debug.h krb5_encode_test.c ktest.h utility.h
+$(OUTPRE)ktest.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/lib/krb5/asn.1/asn1buf.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h \
+  ktest.c ktest.h utility.h
+$(OUTPRE)ktest_equal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  ktest_equal.c ktest_equal.h
+$(OUTPRE)utility.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  $(SRCTOP)/lib/krb5/asn.1/asn1buf.h $(SRCTOP)/lib/krb5/asn.1/krbasn1.h \
+  utility.c utility.h
+$(OUTPRE)trval.$(OBJEXT): trval.c

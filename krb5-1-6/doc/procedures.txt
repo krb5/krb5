@@ -1,0 +1,159 @@
+		    MIT Kerberos Development Team
+			      Procedures
+
+This is a draft of current procedures used by the MIT Kerberos
+Development Team.  They will be refined at some later point.
+
+---Tom
+
+RELEASE BRANCH HYGIENE
+======================
+
+No changes should be committed to a release branch except by the
+release engineer or other approved person.  Changes to be included on
+the release branch must first be committed to the trunk, and must have
+an associated RT ticket.  This ticket should have its "target_version"
+keyword set to the release that the change is targeted at, and should
+have the "pullup" tag set.  This ticket should clearly document the
+changes that are to be pulled up to the release branch; the
+recommended way to do this is to ensure the the subversion  commit operations
+corresponding to the changes have automatically updated the ticket --
+see the following section.  The release engineer will pull up the
+change to the release branch and set the "version_fixed" keyword on
+the ticket.
+
+USING Subversion COMMITS TO CREATE/UPDATE RT TICKETS
+=============================================
+
+The following instructions were written for cvs but also work for Subversion.
+
+To: krbdev@mit.edu
+Subject: Important: handling commit interactions with bug database
+Message-Id: <20020917204852.4AEFE151FEF@industrial-algebra.mit.edu>
+Date: Tue, 17 Sep 2002 16:48:52 -0400 (EDT)
+From: hartmans@MIT.EDU (Sam Hartman)
+
+Hi.  I've just deployed the integration between the RT bug tracking
+system and our CVS repository.
+
+Per previous discussion, we're moving to a model where any non-trivial
+functionality change needs to be accompanied by a ticket open in the
+bug database.  This will allow us to generate better release notes.
+To accomplish this we have created a syntax for manipulating tickets
+along with commits.  If you are someone who has commit access but is
+not at MIT your commits MUST create or update a ticket.
+
+To manipulate tickets you add some header lines to the top of your log
+message.  The lines can be of the form header: value or rt-header:
+value.  I'll show them without the rt-prefix.
+
+Updating a ticket
+=================
+
+To update a ticket, you include a 
+ ticket: or rt-ticket: line  in your log.  For example:
+
+ticket: 1164
+
+Return errno not retval when getpeername fails.
+
+By default when you update a ticket:
+
+* the ticket is assigned to you
+* The ticket is closed
+
+If these defaults are not appropriate for your action you can override
+them; see below.
+
+Creating a ticket
+=================
+
+You can also create a ticket at the same time as you commit. All you
+have to do is use new instead of a ticket number in a ticket line.
+However you almost certainly want to at least set the  subject.
+
+ticket: new
+subject: Add AES support
+
+Add an implementation of AES to libk5crypto.
+
+In addition to closing the ticket and marking you as the owner of a
+ticket, creating a new ticket makes you the requester of the ticket.
+
+OTher Things to Change
+======================
+
+
+The following additional commands are supported:
+
+* subject: changes the subject of ticket
+* status: [open|resolved|new|stalled]
+* owner: [username|nobody]
+* cc: [email address]
+* Component: change component of ticket [krb5-libs etc]
+* Version_Reported: 
+* Target_Version:
+* Tags: [enhancement|nochange|noresource|pullup]
+
+You could set version_fixed, but it is wrong to do so.
+
+
+Also, note that you can update multiple tickets in one log message;
+updates apply to the most recent ticket: command.
+
+MEANINGS OF RT TAGS AND VERSIONS
+================================
+
+To: krbdev@mit.edu
+Subject: Meaning of RT tags and versions
+Message-Id: <20020821205804.5764E151FEF@industrial-algebra.mit.edu>
+Date: Wed, 21 Aug 2002 16:58:04 -0400 (EDT)
+From: hartmans@MIT.EDU (Sam Hartman)
+
+We're in the middle of migrating away from Gnats for bug tracking and
+to RT.  I sent out some mail describing the bug tracking process we
+were going to use at the beginning of the summer and wanted to follow
+up on that with definitions of fields in the  tickets.
+
+Tickets have three version numbers associated with them:
+version_reported, version_fixed, and target_version.  The
+version_reported should be filled in by the submitter if they are
+using the web interface or by the first person  to edit the bug with
+the web interface; it is the version of Kerberos the bug first
+appeared in.
+
+The version_fixed field is set during the release process; you should
+never change this field  unless you are a release engineer and even
+then you'll probably be using automated scripts.
+
+The target_version field is the version of the software we plan to fix
+a bug in.  It is generally updated after release planning meetings,
+although it is reasonable for people with commit access to update this
+if they believe a particular issues should be considered for the
+specified target version.  If we notice a lot of issues we don't have
+time to deal with, we will drop the target versions as the release
+approaches.
+
+There are several tags that can be set on a ticket as well.
+
+The first tag is the enhancement tag; this roughly corresponds to the
+Gnats classification as change-request, distinguished from sw-bug.
+
+
+The next tag is the nochange tag.  This indicates that the ticket has
+been (or will be) closed with no code change and thus should not be
+processed by the next round of release scripts.  This is appropriate
+for tickets where the requester is mistaken or where no bug/change
+exists.
+
+The final tag is the noresource tag; this indicates that MIT does not
+have resources to dedicate to the problem/feature.  We'll set this tag
+on tickets when we evaluate them in release planning discussions so
+that we do not have to continue thinking about then at each
+consecutive release.  In general, if we feel an issue is not a
+problem, we'll just close the ticket.  However if we agree that in an
+ideal world the issue would be fixed but don't ever expect to be able
+to fix it ourselves, we'll set the noresource tag and forget the issue
+unless someone replies to it with a patch or proposed solution.
+
+--Sam

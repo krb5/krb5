@@ -1,0 +1,112 @@
+=pod
+
+=head1 NAME
+
+Yarrow_Init, Yarrow_Poll, Yarrow_Input, Yarrow_Status, Yarrow_Output, Yarrow_New_Source, Yarrow_Register_Source_Estimator, Yarrow Final - cryptographic pseudo-random number generator
+
+=head1 SYNOPSIS
+
+int Yarrow_Init(Yarrow_CTX *y, const char *filename);
+
+int Yarrow_New_Source(Yarrow_CTX* y, unsigned* source_id);
+
+int Yarrow_Poll(Yarrow_CTX *y, unsigned source_id)
+
+int Yarrow_Input( Yarrow_CTX* y, unsigned source_id,
+       const void* sample, size_t size,
+       size_t entropy_bits);
+
+int Yarrow_Status(Yarrow_CTX* y, int *num_sources,
+       unsigned *source_id, size_t *entropy_bits,
+       size_t *entropy_max);
+
+int Yarrow_Output(Yarrow_CTX* y, void* out, size_t size);
+
+int Yarrow_Register_Source_Estimator(Yarrow_CTX* y,
+       unsigned source_id,
+       size_t (*estimator)(const void* sample,
+                           size_t size));
+
+int Yarrow_Final(Yarrow_CTX* y);
+
+=head1 DESCRIPTION
+
+Yarrow_Init() initializes a B<Yarrow_CTX> structure. B<filename> can
+be NULL, or the path to a seed file that Yarrow will use to store the
+PRNG state for use in later sessions.  Returns B<YARROW_OK> if the
+PRNG is seeded on exit, or B<YARROW_NOT_SEEDED> if the PRNG is not yet
+seeded.
+
+Yarrow_New_Source() associates entropy sources such as keyboard input,
+mouse movements and other unpredictable events with a
+B<Yarrow_CTX>. The function assigns a unique number to the new source,
+and places it in B<source_id>.
+
+Yarrow_Poll() gathers entropy from the state of the machine and adds
+it to the source B<source_id>.  The source has to be allocated by the
+user with Yarrow_New_Source.  Returns B<YARROW_OK> if the PRNG is
+seeded on exit, or B<YARROW_NOT_SEEDED> if the PRNG is not yet seeded.
+
+Yarrow_Input() is used to add randomness from the source B<source_id>
+to the PRNG. It reads B<size> bytes at the address B<sample>. An
+estimate of the entropy in bits contained in the sample must be
+specified as B<entropy_bits>.
+
+Yarrow_Status() returns B<YARROW_OK> if the PRNG has enough entropy to
+produce output, and B<YARROW_NOT_SEEDED> if calls to Yarrow_Output()
+would fail.
+
+If num_sources is not NULL, the number of entropy sources that still
+need to be seeded is returned in B<*num_sources>.
+
+If source_id is not NULL, the entropy source that is closest to its
+threshold is returned in B<*source_id>.  B<*source_id> is set to -1 if
+no sources have either reached their threshold or not collected any
+entropy yet.
+
+If not NULL, B<*entropy_bits> is set to the current number of bits for
+the source B<*source_id>, and B<*entropy_max> to the threshold.
+
+Yarrow_Output() generates B<size> bytes of cryptographically strong
+pseudo-random output and places them at B<out>. The return value must
+always be checked. If an error occurs, the PRNG may produce
+predictable data or no output at all.
+
+Yarrow_Register_Source_Estimator() registers an entropy estimator
+for B<source_id>. An entropy estimator is a function that tries to
+estimate the entropy in a sample and returns the entropy in bits
+in order to detect abnormal situations in which the samples have a very
+low entropy.
+
+Yarrow_Final() writes the PRNG state to the seed file and erases it
+from memory.
+
+=head1 RETURN VALUES
+
+All functions return B<YARROW_OK> on success. Error conditions are reported
+as follows:
+
+ YARROW_FAIL              generic failure
+ YARROW_NOT_INIT          YarrowInit() hasn't been called
+ YARROW_ALREADY_INIT      YarrowInit() has already been called
+ YARROW_NO_DRIVER         driver doesn't exist
+ YARROW_CANT_OPEN         can't open driver
+ YARROW_BAD_SOURCE        invalid source id
+ YARROW_TOO_MANY_SOURCES  can't create any more source IDs
+ YARROW_BAD_ARG           invalid argument
+ YARROW_ACCESS            insufficient privileges
+ YARROW_NOMEM             out of memory
+ YARROW_NORSRC            a resource (apart from memory) is exhausted
+ YARROW_NOT_SEEDED        not enough entropy to generate output
+ YARROW_LOCKING           locking error
+ YARROW_NO_STATE          there is no state to load 
+ YARROW_STATE_ERROR       error with state load or save
+ YARROW_NOT_IMPL          not implemented
+
+=head1 AUTHORS
+
+Yarrow was designed by John Kelsey, Bruce Schneier and Niels Ferguson
+of Counterpane Systems. This implementation is (C) 2000 by
+Zero-Knowledge Systems Inc.
+
+=cut
