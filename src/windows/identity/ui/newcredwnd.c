@@ -2426,7 +2426,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                      (d->nc->prompts[i]->def ? 
                       d->nc->prompts[i]->def : L""),
                      WS_CHILD | WS_TABSTOP |
-                     WS_BORDER |
+                     WS_BORDER | ES_AUTOHSCROLL |
                      ((d->nc->prompts[i]->flags & 
                        KHUI_NCPROMPT_FLAG_HIDDEN)? ES_PASSWORD:0),
                      er.left, er.top,

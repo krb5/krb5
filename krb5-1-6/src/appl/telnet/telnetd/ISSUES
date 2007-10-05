@@ -1,7 +1,0 @@
-Issues to be dealt with in telnetd:
-
-Debug mode won't do ipv6.
-
-FIX: Rewrite listener setup code in main after argument parsing.
-
-Needs auditing.

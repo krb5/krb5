@@ -194,6 +194,9 @@
         <File name="kfw.wxs"                from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
         <File name="Makefile"               from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
         <File name="property.wxi"           from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
+        <File name="platform.wxi"           from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
+        <File name="runtime.wxi"            from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
+        <File name="runtime_debug.wxi"      from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
         <File name="site-local-tagged.wxi"  from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
         <File name="bannrbmp.bmp"           from="auth\krb5\src\windows\installer\wix\Binary\"  to="\install\wix\Binary" />
         <File name="completi.ico"           from="auth\krb5\src\windows\installer\wix\Binary\"  to="\install\wix\Binary" />
