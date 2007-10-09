@@ -53,8 +53,28 @@ typedef struct _krb5_ktfile_data {
     FILE *openf;		/* open file, if any. */
     char iobuf[BUFSIZ];		/* so we can zap it later */
     int	version;		/* Version number of keytab */
+    unsigned int iter_count;	/* Number of active iterators */
+    long start_offset;		/* Starting offset after version */
     k5_mutex_t lock;		/* Protect openf, version */
 } krb5_ktfile_data;
+
+/*
+ * Some limitations:
+ *
+ * If the file OPENF is left open between calls, we have an iterator
+ * active, and OPENF is opened in read-only mode.  So, no changes
+ * can be made via that handle.
+ *
+ * An advisory file lock is used while the file is open.  Thus,
+ * multiple handles on the same underlying file cannot be used without
+ * disrupting the locking in effect.
+ *
+ * The start_offset field is only valid if the file is open.  It will
+ * almost certainly always be the same constant.  It's used so that
+ * if an iterator is active, and we start another one, we don't have
+ * to seek back to the start and re-read the version number to set
+ * the position for the iterator.
+ */
 
 /*
  * Macros
@@ -64,6 +84,8 @@ typedef struct _krb5_ktfile_data {
 #define KTFILEP(id) (((krb5_ktfile_data *)(id)->data)->openf)
 #define KTFILEBUFP(id) (((krb5_ktfile_data *)(id)->data)->iobuf)
 #define KTVERSION(id) (((krb5_ktfile_data *)(id)->data)->version)
+#define KTITERS(id) (((krb5_ktfile_data *)(id)->data)->iter_count)
+#define KTSTARTOFF(id) (((krb5_ktfile_data *)(id)->data)->start_offset)
 #define KTLOCK(id) k5_mutex_lock(&((krb5_ktfile_data *)(id)->data)->lock)
 #define KTUNLOCK(id) k5_mutex_unlock(&((krb5_ktfile_data *)(id)->data)->lock)
 #define KTCHECKLOCK(id) k5_mutex_assert_locked(&((krb5_ktfile_data *)(id)->data)->lock)
@@ -208,6 +230,7 @@ krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
     (void) strcpy(data->name, name);
     data->openf = 0;
     data->version = 0;
+    data->iter_count = 0;
 
     (*id)->data = (krb5_pointer)data;
     (*id)->magic = KV5M_KEYTAB;
@@ -255,15 +278,27 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
     int found_wrong_kvno = 0;
     krb5_boolean similar;
     int kvno_offset = 0;
+    int was_open;
 
     kerror = KTLOCK(id);
     if (kerror)
 	return kerror;
 
-    /* Open the keyfile for reading */
-    if ((kerror = krb5_ktfileint_openr(context, id))) {
-	KTUNLOCK(id);
-	return(kerror);
+    if (KTFILEP(id) != NULL) {
+	was_open = 1;
+
+	if (fseek(KTFILEP(id), KTSTARTOFF(id), SEEK_SET) == -1) {
+	    KTUNLOCK(id);
+	    return errno;
+	}
+    } else {
+	was_open = 0;
+
+	/* Open the keyfile for reading */
+	if ((kerror = krb5_ktfileint_openr(context, id))) {
+	    KTUNLOCK(id);
+	    return(kerror);
+	}
     }
     
     /* 
@@ -370,12 +405,13 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
 	      kerror = KRB5_KT_NOTFOUND;
     }
     if (kerror) {
-	(void) krb5_ktfileint_close(context, id);
+	if (was_open == 0)
+	    (void) krb5_ktfileint_close(context, id);
 	KTUNLOCK(id);
 	krb5_kt_free_entry(context, &cur_entry);
 	return kerror;
     }
-    if ((kerror = krb5_ktfileint_close(context, id)) != 0) {
+    if (was_open == 0 && (kerror = krb5_ktfileint_close(context, id)) != 0) {
 	KTUNLOCK(id);
 	krb5_kt_free_entry(context, &cur_entry);
 	return kerror;
@@ -430,18 +466,28 @@ krb5_ktfile_start_seq_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *
     if (retval)
 	return retval;
 
-    if ((retval = krb5_ktfileint_openr(context, id))) {
-	KTUNLOCK(id);
-	return retval;
+    if (KTITERS(id) == 0) {
+	if ((retval = krb5_ktfileint_openr(context, id))) {
+	    KTUNLOCK(id);
+	    return retval;
+	}
     }
 
     if (!(fileoff = (long *)malloc(sizeof(*fileoff)))) {
-	krb5_ktfileint_close(context, id);
+	if (KTITERS(id) == 0)
+	    krb5_ktfileint_close(context, id);
 	KTUNLOCK(id);
 	return ENOMEM;
     }
-    *fileoff = ftell(KTFILEP(id));
+    *fileoff = KTSTARTOFF(id);
     *cursorp = (krb5_kt_cursor)fileoff;
+    KTITERS(id)++;
+    if (KTITERS(id) == 0) {
+	/* Wrapped?!  */
+	KTITERS(id)--;
+	KTUNLOCK(id);
+	return KRB5_KT_IOERR;	/* XXX */
+    }
     KTUNLOCK(id);
 
     return 0;
@@ -490,7 +536,11 @@ krb5_ktfile_end_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *cursor
 
     krb5_xfree(*cursor);
     KTLOCK(id);
-    kerror = krb5_ktfileint_close(context, id);
+    KTITERS(id)--;
+    if (KTFILEP(id) != NULL && KTITERS(id) == 0)
+	kerror = krb5_ktfileint_close(context, id);
+    else
+	kerror = 0;
     KTUNLOCK(id);
     return kerror;
 }
@@ -810,6 +860,7 @@ krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
     (void) strcpy(data->name, name);
     data->openf = 0;
     data->version = 0;
+    data->iter_count = 0;
 
     (*id)->data = (krb5_pointer)data;
     (*id)->magic = KV5M_KEYTAB;
@@ -829,6 +880,11 @@ krb5_ktfile_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     retval = KTLOCK(id);
     if (retval)
 	return retval;
+    if (KTFILEP(id)) {
+	/* Iterator(s) active -- no changes.  */
+	KTUNLOCK(id);
+	return KRB5_KT_IOERR;	/* XXX */
+    }
     if ((retval = krb5_ktfileint_openw(context, id))) {
 	KTUNLOCK(id);
 	return retval;
@@ -857,6 +913,11 @@ krb5_ktfile_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
     kerror = KTLOCK(id);
     if (kerror)
 	return kerror;
+    if (KTFILEP(id)) {
+	/* Iterator(s) active -- no changes.  */
+	KTUNLOCK(id);
+	return KRB5_KT_IOERR;	/* XXX */
+    }
 
     if ((kerror = krb5_ktfileint_openw(context, id))) {
 	KTUNLOCK(id);
@@ -1129,6 +1190,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	    return KRB5_KEYTAB_BADVNO;
 	}
     }
+    KTSTARTOFF(id) = ftell(KTFILEP(id));
     return 0;
 }
 
@@ -1439,7 +1501,7 @@ krb5_ktfileint_write_entry(krb5_context context, krb5_keytab id, krb5_keytab_ent
     krb5_timestamp timestamp;
     krb5_int32	princ_type;
     krb5_int32  size_needed;
-    krb5_int32  commit_point;
+    krb5_int32  commit_point = -1;
     int		i;
 
     KTCHECKLOCK(id);

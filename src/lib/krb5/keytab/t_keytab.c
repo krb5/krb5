@@ -98,9 +98,9 @@ static void kt_test(krb5_context context, const char *name)
      const char *type;
      char buf[BUFSIZ];
      char *p;
-     krb5_keytab_entry kent;
+     krb5_keytab_entry kent, kent2;
      krb5_principal princ;
-     krb5_kt_cursor cursor;
+     krb5_kt_cursor cursor, cursor2;
      int cnt;
 
      kret = krb5_kt_resolve(context, name, &kt);
@@ -304,6 +304,41 @@ static void kt_test(krb5_context context, const char *name)
      krb5_free_keytab_entry_contents(context, &kent);
 
 
+     /* Try lookup with active iterators.  */
+     kret = krb5_kt_start_seq_get(context, kt, &cursor);
+     CHECK(kret, "Start sequence get(2)");
+     kret = krb5_kt_start_seq_get(context, kt, &cursor2);
+     CHECK(kret, "Start sequence get(3)");
+     kret = krb5_kt_next_entry(context, kt, &kent, &cursor);
+     CHECK(kret, "getting next entry(2)");
+     krb5_free_keytab_entry_contents(context, &kent);
+     kret = krb5_kt_next_entry(context, kt, &kent, &cursor);
+     CHECK(kret, "getting next entry(3)");
+     kret = krb5_kt_next_entry(context, kt, &kent2, &cursor2);
+     CHECK(kret, "getting next entry(4)");
+     krb5_free_keytab_entry_contents(context, &kent2);
+     kret = krb5_kt_get_entry(context, kt, kent.principal, 0, 0, &kent2);
+     CHECK(kret, "looking up principal(2)");
+     krb5_free_keytab_entry_contents(context, &kent2);
+     kret = krb5_kt_next_entry(context, kt, &kent2, &cursor2);
+     CHECK(kret, "getting next entry(5)");
+     if (!krb5_principal_compare(context, kent.principal, kent2.principal)) {
+	 fprintf(stderr, "iterators not in sync\n");
+	 exit(1);
+     }
+     krb5_free_keytab_entry_contents(context, &kent);
+     krb5_free_keytab_entry_contents(context, &kent2);
+     kret = krb5_kt_next_entry(context, kt, &kent, &cursor);
+     CHECK(kret, "getting next entry(6)");
+     kret = krb5_kt_next_entry(context, kt, &kent2, &cursor2);
+     CHECK(kret, "getting next entry(7)");
+     krb5_free_keytab_entry_contents(context, &kent);
+     krb5_free_keytab_entry_contents(context, &kent2);
+     kret = krb5_kt_end_seq_get(context, kt, &cursor);
+     CHECK(kret, "ending sequence get(1)");
+     kret = krb5_kt_end_seq_get(context, kt, &cursor2);
+     CHECK(kret, "ending sequence get(2)");
+
      /* Try to lookup specified enctype and kvno  - that does not exist*/
 
      kret = krb5_kt_get_entry(context, kt, princ, 3, 1, &kent);
@@ -311,10 +346,8 @@ static void kt_test(krb5_context context, const char *name)
 	     CHECK(kret, "looking up specific principal, kvno, enctype");
      }
 
-
-
-
      krb5_free_principal(context, princ);
+
 
      /* =========================   krb5_kt_remove_entry =========== */
      /* Lookup the keytab entry w/ 2 kvno - and delete version 2 - 
