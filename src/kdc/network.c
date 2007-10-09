@@ -403,9 +403,11 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
     if (addr->sa_family == AF_INET6) {
 #ifdef IPV6_V6ONLY
 	if (setv6only(sock, 1))
-	    com_err(data->prog, errno, "setsockopt(IPV6_V6ONLY,1) failed");
+	    com_err(data->prog, errno, "setsockopt(%d,IPV6_V6ONLY,1) failed",
+		    sock);
 	else
-	    com_err(data->prog, 0, "setsockopt(IPV6_V6ONLY,1) worked");
+	    com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
+		    sock);
 #else
 	krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
 #endif /* IPV6_V6ONLY */
@@ -596,9 +598,11 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 	if (addr->sa_family == AF_INET6) {
 #ifdef IPV6_V6ONLY
 	    if (setv6only(sock, 1))
-		com_err(data->prog, errno, "setsockopt(IPV6_V6ONLY,1) failed");
+		com_err(data->prog, errno,
+			"setsockopt(%d,IPV6_V6ONLY,1) failed", sock);
 	    else
-		com_err(data->prog, 0, "setsockopt(IPV6_V6ONLY,1) worked");
+		com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
+			sock);
 #else
 	    krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
 #endif /* IPV6_V6ONLY */
@@ -682,6 +686,10 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
 #endif
 #ifdef AF_DLI /* Direct Link Interface - DEC Ultrix/OSF1 link layer? */
     case AF_DLI:
+	return 0;
+#endif
+#ifdef AF_APPLETALK
+    case AF_APPLETALK:
 	return 0;
 #endif
     default:
