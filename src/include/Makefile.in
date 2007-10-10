@@ -30,7 +30,7 @@ K5_ET_HEADERS = \
 BUILT_HEADERS = osconf.h
 
 all-unix:: autoconf.h $(BUILT_HEADERS)
-all-windows:: autoconf.h $(BUILT_HEADERS)
+all-windows:: autoconf.h $(BUILT_HEADERS) verify-calling-conventions-krb5
 
 all-unix:: @MAINT@ verify-calling-conventions-krb5
 
@@ -94,10 +94,14 @@ krb5.stamp: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 verify-calling-conventions-krb5: private-and-public-decls
 	$(PERL) -w $(SRCTOP)/util/def-check.pl private-and-public-decls $(SRCTOP)/lib/krb5_32.def
 
+##DOS##!if 0
 HEADERS_TO_CHECK = krb5/krb5.h $(srcdir)/k5-int.h $(srcdir)/krb5/preauth_plugin.h
 
 private-and-public-decls: $(HEADERS_TO_CHECK)
 	cat $(HEADERS_TO_CHECK) > $@
+##DOS##!endif
+##DOS##private-and-public-decls:
+##DOS##	copy krb5\krb5.h+k5-int.h+krb5\preauth_plugin.h $@
 
 #
 # Build the error table include files:
