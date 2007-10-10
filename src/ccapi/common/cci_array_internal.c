@@ -277,6 +277,9 @@ cc_int32 cci_array_move (cci_array_t  io_array,
             move_to = in_new_position + 1;
             move_count = in_position - in_new_position;     
             real_new_position = in_new_position;
+            
+        } else {
+            real_new_position = in_new_position;
         }
         
         if (move_count > 0) {
