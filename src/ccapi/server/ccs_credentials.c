@@ -37,6 +37,7 @@ struct ccs_credentials_d ccs_credentials_initializer = { NULL, NULL };
 
 cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
                               cci_stream_t            in_stream,
+                              cc_uint32               in_ccache_version,
                               ccs_credentials_list_t  io_credentials_list)
 {
     cc_int32 err = ccNoError;
@@ -56,6 +57,11 @@ cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
     
     if (!err) {
         err = cci_cred_union_read (&credentials->cred_union, in_stream);
+    }
+    
+    if (!err && !(credentials->cred_union->version & in_ccache_version)) {
+        /* ccache does not have a principal set for this credentials version */
+        err = cci_check_error (ccErrBadCredentialsVersion);
     }
     
     if (!err) {

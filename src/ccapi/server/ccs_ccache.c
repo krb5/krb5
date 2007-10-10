@@ -687,6 +687,7 @@ static cc_int32 ccs_ccache_store_credentials (ccs_ccache_t           io_ccache,
     
     if (!err) {
         err = ccs_credentials_new (&credentials, in_request_data, 
+                                   io_ccache->creds_version, 
                                    io_ccache->credentials);
     }
     

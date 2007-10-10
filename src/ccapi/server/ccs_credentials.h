@@ -32,6 +32,7 @@
 
 cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
                               cci_stream_t            in_stream,
+                              cc_uint32               in_ccache_version,
                               ccs_credentials_list_t  io_credentials_list);
 
 cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials);
