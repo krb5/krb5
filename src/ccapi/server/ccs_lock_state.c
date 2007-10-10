@@ -154,30 +154,30 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
                                             cc_uint64        in_pending_lock_index)
 {
     cc_int32 err = ccNoError;
-    
+    ccs_lock_t pending_lock = NULL;
+    cc_uint32 type = 0;
+
     if (!io_lock_state) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        if (in_pending_lock_index < io_lock_state->first_pending_lock_index ||
-            in_pending_lock_index >= ccs_lock_array_count (io_lock_state->locks)) {
+        pending_lock = ccs_lock_array_object_at_index (io_lock_state->locks, 
+                                                       in_pending_lock_index);
+        if (!pending_lock || in_pending_lock_index < io_lock_state->first_pending_lock_index) {
             err = cci_check_error (ccErrBadParam);
         }
     }
     
     if (!err) {
-        ccs_lock_t pending_lock = ccs_lock_array_object_at_index (io_lock_state->locks,
-                                                                  in_pending_lock_index);
-        cc_uint32 type = 0;
+        err = ccs_lock_type (pending_lock, &type);
+    }
+    
+    if (!err && (type == cc_lock_upgrade || type == cc_lock_downgrade)) {
+        /* lock upgrades or downgrades.  Find the old lock and remove it. */
         ccs_pipe_t pending_client_pipe = CCS_PIPE_NULL;
         
-        err = ccs_lock_type (pending_lock, &type);
-        
-        if (!err) {
-            err = ccs_lock_client_pipe (pending_lock, &pending_client_pipe);
-        }
+        err = ccs_lock_client_pipe (pending_lock, &pending_client_pipe);
 
-        if (!err && (type == cc_lock_upgrade || type == cc_lock_downgrade)) {
-            /* lock upgrades or downgrades.  Find the old lock and remove it. */
+        if (!err) {
             cc_uint64 i;
             
             for (i = 0; !err && i < io_lock_state->first_pending_lock_index; i++) {
@@ -197,9 +197,9 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
         }
     }
     
-    if (!err) {
+    if (!err) {        
         cc_uint64 new_lock_index = 0;
-        
+
         err = ccs_lock_array_move (io_lock_state->locks, 
                                    in_pending_lock_index, 
                                    io_lock_state->first_pending_lock_index,
@@ -208,8 +208,7 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
     }
     
     if (!err) {
-        ccs_lock_t lock = ccs_lock_array_object_at_index (io_lock_state->locks, 0);
-        err = ccs_lock_grant_lock (lock);
+        err = ccs_lock_grant_lock (pending_lock);
     }
     
     return cci_check_error (err);    
@@ -411,7 +410,7 @@ cc_int32 ccs_lock_state_add (ccs_lock_state_t  io_lock_state,
     }
     
     if (!err) {
-        if (!can_grant_lock_now && !in_block) {
+        if (!can_grant_lock_now && (in_block == cc_lock_noblock)) {
             err = cci_check_error (io_lock_state->pending_lock_err);
             
         } else {
