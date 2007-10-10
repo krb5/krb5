@@ -15,6 +15,8 @@ function run_test {
 printf "\nBeginning test of CCAPI...\n"
 printf "\nThese tests are based on the CCAPI v3 revision 8 draft documentation.\n"
 
+run_test simple_lock_test
+
 run_test test_constants
 
 run_test test_cc_initialize

@@ -20,7 +20,7 @@ TEST_NAMES = test_constants test_cc_initialize test_cc_context_get_version test_
 
 TEST_OBJECTS = $(patsubst %,$(OBJDIR)/%.o,$(TEST_NAMES))
 
-all: setup-test-dir build-base build-tests link-tests copy-script success-message
+all: setup-test-dir simple_lock_test build-base build-tests link-tests copy-script success-message
 
 # compile base files used by all tests
 build-base: $(OBJECTS)
@@ -28,7 +28,7 @@ build-base: $(OBJECTS)
 # compile each test
 build-tests: $(TEST_OBJECTS)
 
-# rule to compile files in src directory
+# rule to compile src files
 $(OBJDIR)/%.o: %.c
 	$(CC) -c -o $@ $<
 
@@ -44,6 +44,9 @@ link-tests: $(TEST_NAMES)
 
 $(TEST_NAMES): $(TEST_OBJECTS)
 	$(CC) -o $(TESTDIR)/$@ $(OBJDIR)/$@.o $(OBJECTS) $(LIBS)
+
+simple_lock_test:
+	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c $(LIBS)
 
 copy-script:
 	cp $(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)
