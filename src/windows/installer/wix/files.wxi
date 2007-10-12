@@ -957,7 +957,7 @@
     </Directory>
     
     <Directory Id="ProgramMenuFolder">
-        <Directory Id="dirShortcut" LongName="$(loc.ProductName)" Name="KFW">
+        <Directory Id="dirShortcut" LongName="$(var.BaseProductName)" Name="KFW">
         </Directory>
     </Directory>
     <Directory Id="StartupFolder">
