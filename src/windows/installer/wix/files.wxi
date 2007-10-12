@@ -26,7 +26,7 @@
   -->
 <Include xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
 <Directory Id="TARGETDIR" Name="SourceDir">
-    <Directory Id="SystemFolder" SourceName="System">
+    <Directory Id="$(var.PISystemFolder)" SourceName="System">
         <Component Win64="$(var.Win64)" Id="cmf_kfwlogon_DLL" Guid="$(var.cmf_kfwlogon_DLL_guid)">
              <File Id="filekfwlogon_DLL" Name="kfwlogon.dll" LongName="kfwlogon.dll" KeyPath="yes" DiskId="1" src="$(var.BinDir)kfwlogon.dll" />
              <Registry Id="reg_kfwlogon01" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Action="createKeyAndRemoveKeyOnUninstall" />
@@ -36,10 +36,10 @@
              <Registry Id="reg_kfwlogon05" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="DLLName" Type="string" Value="[#filekfwlogon_DLL]" />
              <Registry Id="reg_kfwlogon06" Root="HKLM" Key="SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon\Notify\MIT_KFW" Name="Logon" Type="string" Value="KFW_Logon_Event" />
              <Registry Id="reg_kfwlogon07" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Action="createKeyAndRemoveKeyOnUninstall" />
-             <Registry Id="reg_kfwlogon08" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="AuthentProviderPath" Type="expandable" Value="[SystemFolder]kfwlogon.dll"/>
+             <Registry Id="reg_kfwlogon08" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="AuthentProviderPath" Type="expandable" Value="[$(var.PISystemFolder)]kfwlogon.dll"/>
              <Registry Id="reg_kfwlogon09" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider"/>
              <Registry Id="reg_kfwlogon10" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="VerboseLogging" Type="integer" Value="10"/>
-             <Registry Id="reg_kfwlogon11" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="ProviderPath" Type="expandable" Value="[SystemFolder]kfwlogon.dll"/>
+             <Registry Id="reg_kfwlogon11" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="ProviderPath" Type="expandable" Value="[$(var.PISystemFolder)]kfwlogon.dll"/>
              <Registry Id="reg_kfwlogon12" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Class" Type="integer" Value="2" />
              <Registry Id="reg_kfwlogon13" Root="HKLM" Key="SYSTEM\CurrentControlSet\Services\MIT Kerberos\NetworkProvider" Name="Name" Type="string" Value="MIT Kerberos"/>
          </Component>
@@ -53,7 +53,7 @@
          </Component>
      <?endif?>
      </Directory>
-    <Directory Id="ProgramFilesFolder">
+    <Directory Id="$(var.PIProgramFilesFolder)">
         <Directory Id="dirMIT" Name="MIT" SourceName=".">
             <Directory Id="KERBEROSDIR" Name="Kerberos">
                 <Directory Id="dirbin" Name="bin" src="$(var.BinDir)">

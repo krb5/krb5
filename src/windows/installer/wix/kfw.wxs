@@ -46,10 +46,11 @@
             Description="$(var.ProductName)"
             Comments="$(var.ProductFullName)"
             Manufacturer="$(loc.Manufacturer)"
-            InstallerVersion="110"
+            InstallerVersion="$(var.InstallerVersion)"
             Languages="$(var.Language)"
             Compressed="yes"
-            SummaryCodepage="$(var.CodePage)" 
+            SummaryCodepage="$(var.CodePage)"
+            Platforms="$(var.Platform)" 
             />
         
         <?include lang\ui_$(var.BuildLang).wxi?>
@@ -62,6 +63,11 @@
         <Condition Message="$(loc.OsVersionRequired)">VersionNT &gt;= 500</Condition>
         <Condition Message="$(loc.CMNotSelected)">USELEASH Or USENETIDMGR</Condition>
         <Condition Message="$(loc.CMDupSelected)">Not (USELEASH And USENETIDMGR)</Condition>
+        <?if $(var.Platform) = "x64" ?>
+            <Condition Message="$(loc.StrPlatform64)">
+                <![CDATA[VersionNT64]]>
+            </Condition>
+        <?endif?>
 
         <!-- Custom actions -->
         <Binary Id="binCustom" src="custom\custom.dll" />
