@@ -551,7 +551,7 @@ MSIDLLEXPORT UninstallNsisInstallation( MSIHANDLE hInstall )
 	sInfo.cb = sizeof(sInfo);
 	sInfo.lpReserved = NULL;
 	sInfo.lpDesktop = _T("");
-	sInfo.lpTitle = _T("Foo");
+	sInfo.lpTitle = _T("NSIS Uninstaller for Kerberos for Windows");
 	sInfo.dwX = 0;
 	sInfo.dwY = 0;
 	sInfo.dwXSize = 0;
@@ -578,11 +578,24 @@ MSIDLLEXPORT UninstallNsisInstallation( MSIHANDLE hInstall )
 		NULL,
 		&sInfo,
 		&pInfo)) {
-			pInfo.hProcess = NULL;
-			pInfo.hThread = NULL;
-			rv = 40;
-			goto _cleanup;
-		};
+            DWORD lastError = GetLastError();
+            MSIHANDLE hRecord;
+
+            hRecord = MsiCreateRecord(4);
+            MsiRecordClearData(hRecord);
+            MsiRecordSetInteger(hRecord, 1, ERR_NSS_FAILED_CP);
+            MsiRecordSetString(hRecord, 2, strPathUninst);
+            MsiRecordSetInteger(hRecord, 3, lastError);
+
+            MsiProcessMessage( hInstall, INSTALLMESSAGE_ERROR, hRecord );
+	
+            MsiCloseHandle( hRecord );
+
+            pInfo.hProcess = NULL;
+            pInfo.hThread = NULL;
+            rv = 40;
+            goto _cleanup;
+        };
 
 	// Create a job object to contain the NSIS uninstall process tree
 
@@ -630,8 +643,8 @@ _cleanup:
 	if(hJob) CloseHandle(hJob);
 	if(strPathUninst) delete strPathUninst;
 
-	if(rv != ERROR_SUCCESS) {
-        ShowMsiError( hInstall, ERR_NSS_FAILED, rv );
+	if(rv != ERROR_SUCCESS && rv != 40) {
+            ShowMsiError( hInstall, ERR_NSS_FAILED, rv );
 	}
 	return rv;
 }

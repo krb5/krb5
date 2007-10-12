@@ -40,7 +40,7 @@
     <Property Id="ComponentDownload">http://web.mit.edu/kerberos</Property>
 
     <Property Id="UPGRADENSIS">
-        <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="file"/>
+        <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="raw"/>
     </Property>
     
     <Property Id="NSISVERSION">

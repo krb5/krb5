@@ -1165,6 +1165,7 @@
       <Error Id="4005">Custom action failed. Phase [2]</Error>
       <Error Id="4006">Failed to determine running processes. Status [2]</Error>
       <Error Id="4007">Failed to install Kerberos network provider.  Status [2]</Error>
+      <Error Id="4008">NSIS Uninstallation failed to initialize.  Uninstaller path [2] returned error [3]</Error>
       <AdminUISequence>
         <Show Dialog="FatalError" OnExit="error" />
         <Show Dialog="UserExit" OnExit="cancel" />
