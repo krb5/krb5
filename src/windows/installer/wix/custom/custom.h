@@ -79,3 +79,4 @@ MSIDLLEXPORT UninstallNetProvider ( MSIHANDLE );
 #define ERR_ABORT       4004
 #define ERR_PROC_LIST   4006
 #define ERR_NPI_FAILED  4007
+#define ERR_NSS_FAILED_CP 4008
