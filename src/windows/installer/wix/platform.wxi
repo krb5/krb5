@@ -3,6 +3,9 @@
 <!-- Platform specific GUID's and other definitions -->
 <?if $(var.Platform) = "x64" ?>
         <?define UpgradeCode="6DA9CD86-6028-4852-8C94-452CAC229244"?>
+        <?define PISystemFolder="System64Folder"?>
+        <?define PIProgramFilesFolder="ProgramFiles64Folder"?>
+
         <?define cmf_kfwlogon_DLL_guid="CFC0B7C9-9A59-4022-89B3-25E0941D0369"?>
         <?define cmf_kfwcpcc_EXE_guid="83F51B6D-F3C6-44cf-AC91-D1D6498FFA44"?>
         <?define cmp_ClientSystemDebug_guid="7B25B1E0-A22A-43c7-BA97-C30FCA3B1230"?>
@@ -46,20 +49,20 @@
         <?define csc_leash32_exe_guid="9D43350A-A8AE-4405-AB82-64E90E5A1A70"?>
         <?define rcm_leash_1_guid="7E5517FF-FB76-431f-A92B-2895C9BE7E98"?>
         <?define rcm_leash_2_guid="008208AC-46BE-4ca4-BEA7-8FCAAD8BA7C3"?>
-        <?define rcm_leash_3_guid="008208AC-46BE-4ca4-BEA7-8FCAAD8BA7C3"?>
+        <?define rcm_leash_3_guid="66D97178-E735-499b-961F-C7B8B8074E1A"?>
         <?define rcm_leash_4_guid="D20180CC-B68D-4a6d-95E4-5EB07B9EADCD"?>
         <?define rcm_leash_5_guid="AF3B73AE-86ED-42f5-987A-9831B8799D2F"?>
         <?define rcm_leash_6_guid="0C72D4F8-096B-4295-8F0A-6B5723A8593D"?>
         <?define csc_LeashStartup_guid="228192C5-D847-4c46-A726-0E8211742349"?>
-        <?define cmf_leash32_hlp_guid="228192C5-D847-4c46-A726-0E8211742349"?>
+        <?define cmf_leash32_hlp_guid="EF1B0ED6-9C01-4adb-9F11-C3FF07F669D5"?>
         <?define cmf_leash32_chm_guid="769B54EB-9B96-4abe-9B72-9EF346C8C03D"?>
         <?define cmf_leashw32_dll_guid="7222B9E1-EE70-4ccb-929F-43D45574AA83"?>
         <?define cmf_leashw32_dll_name="leashw64.dll"?>
         <?define rcm_leashdll_1_guid="64BC62DF-F1D6-423a-B4E0-E75E214BAC26"?>
-        <?define rcm_leashdll_2_guid="64BC62DF-F1D6-423a-B4E0-E75E214BAC26"?>
-        <?define rcm_leashdll_3_guid="64BC62DF-F1D6-423a-B4E0-E75E214BAC26"?>
+        <?define rcm_leashdll_2_guid="2CEF4DC7-684B-4a53-9053-5EB26264B009"?>
+        <?define rcm_leashdll_3_guid="D93DE8B4-919E-48ef-812D-BFCC26460608"?>
         <?define rcm_leashdll_4_guid="989B5FC5-63DC-47d6-BBBC-EE1B355127F6"?>
-        <?define rcm_leashdll_5_guid="989B5FC5-63DC-47d6-BBBC-EE1B355127F6"?>
+        <?define rcm_leashdll_5_guid="BF38025F-ED64-4dde-8BDD-250C1BB73909"?>
         <?define rcm_leashdll_6_guid="AC35CE64-9D8D-4a21-AB1F-18803C69E7B4"?>
         <?define rcm_leashdll_7_guid="02014C27-BAC8-4b86-95F8-43F9BF55064A"?>
         <?define rcm_leashdll_8_guid="DE70F57C-D3F8-4c1d-B868-A77DA04D9DD3"?>
@@ -95,6 +98,9 @@
         <?define cmf_bin_debug_guid="F3432C85-89D9-4bd6-BD82-4ED49A118338"?>
 <?elseif $(var.Platform) = "Intel"?>
         <?define UpgradeCode="61211594-AAA1-4A98-A299-757326763CC7"?>
+        <?define PISystemFolder="SystemFolder"?>
+        <?define PIProgramFilesFolder="ProgramFilesFolder"?>
+
         <?define cmf_kfwlogon_DLL_guid="2F104FEB-2D61-458A-BAE3-B153F151E728"?>
         <?define cmf_kfwcpcc_EXE_guid="C3284E7A-3665-45A6-B64E-C909B1D1BAA6"?>
         <?define cmp_ClientSystemDebug_guid="2D13ED48-53C2-4878-B196-2AD7F4100998"?>

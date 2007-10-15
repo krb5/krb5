@@ -25,8 +25,10 @@
   or implied warranty.
   
   -->
-    <String Id="ProductName">Kerberos for Windows</String>
-    <String Id="ProductNameShort">KFW</String>
+    <String Id="ProductName64">Kerberos for Windows (64-bit)</String>
+    <String Id="ProductNameShort64">KFW64</String>
+    <String Id="ProductName">Kerberos for Windows (32-bit)</String>
+    <String Id="ProductNameShort">KFW32</String>
     <String Id="ProductMIT">MIT</String>
     <String Id="ProductDebug">Debug/Checked</String>
     <String Id="ProductBeta">Beta</String>
@@ -61,4 +63,6 @@
 
     <String Id="ARPComments">Build of</String>
 
+    <String Id="StrPlatform64">This build of Kerberos for Windows is for 64-bit Windows versions.  Please install the 32-bit version on this operating system.</String>
+    <String Id="StrPlatformNot64">This build of Kerberos for Windows is for 32-bit Windows versions.  Please install the 64-bit version on this operating system.</String>
 </WixLocalization>
