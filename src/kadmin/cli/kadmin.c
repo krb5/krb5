@@ -651,7 +651,7 @@ void kadmin_delprinc(argc, argv)
     krb5_free_principal(context, princ);
     if (retval) {
 	com_err("delete_principal", retval,
-		"while deleteing principal \"%s\"", canon);
+		"while deleting principal \"%s\"", canon);
 	free(canon);
 	return;
     }
