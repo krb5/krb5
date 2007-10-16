@@ -160,8 +160,8 @@ krb5-1.6.3 changes by ticket ID
 5772    NIM: BUG: SRC: Increase size of max ccache name buffers and
         remove extraneous trailing path component separators
 5773    NIM: BUG: KMM: Ensure proper buffer length for registry
-        multi-string reads; avoid error reports for modules without config
-        data; avoid race when sending thread quit message
+        multi-string reads; avoid error reports for modules without
+        config data; avoid race when sending thread quit message
 5779    NIM: BUG: LIB: optimize khui_find_action()
 5780    NIM: FEATURE: APP: Notification Icon Tooltip now includes
         default identity name
@@ -189,6 +189,11 @@ krb5-1.6.3 changes by ticket ID
 5801    remove error tables by pointer
 5802    libgssapi mechglue doesn't always store delegated credentials
 5803    fix pkinit module deps for krb5-1.6.x
+5808    KfW Build: add new installer build files to copyfiles.xml.
+5809    NIM: BUG: APP: New edit controls should be marked ES_AUTOHSCROLL
+5820    KFW: BUG: WIX: Improve Usability of multiple architecture MSI
+        installations, remove non-unique GUID component identifiers,
+        and include Beta ID in the package name
 
 Major changes in krb5-1.6.2
 ---------------------------
