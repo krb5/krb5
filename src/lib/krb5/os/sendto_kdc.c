@@ -671,6 +671,12 @@ start_connection (struct conn_state *state,
 	dprint("socket: %m creating with af %d\n", state->err, ai->ai_family);
 	return -1;		/* try other hosts */
     }
+    if (fd > FD_SETSIZE) {
+	close(fd);
+	state->err = EMFILE;
+	dprint("socket: fd %d too high\n", fd);
+	return -1;
+    }
     /* Make it non-blocking.  */
     if (ai->ai_socktype == SOCK_STREAM) {
 	static const int one = 1;
