@@ -127,6 +127,8 @@ krb5-1.6.3 changes by ticket ID
 5688    NIM: Reposition New Credentials Dialog if necessary
 5689    NIM: BUG: APP: Revert ticket 5604
 5690    NIM: version update
+5692    KFW: KFWLOGON: avoid missing symbol errors when building with
+        VS 2005
 5696    NIM: FEATURE: ALL: 64-bit Windows Support and Removal of
         Compile Time Warnings
 5697    make ccache handle referrals better
@@ -194,6 +196,7 @@ krb5-1.6.3 changes by ticket ID
 5820    KFW: BUG: WIX: Improve Usability of multiple architecture MSI
         installations, remove non-unique GUID component identifiers,
         and include Beta ID in the package name
+5823    KFW: BUG: WIX: Beta value hard coded
 
 Major changes in krb5-1.6.2
 ---------------------------
