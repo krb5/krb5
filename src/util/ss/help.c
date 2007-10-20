@@ -73,6 +73,7 @@ got_it:
     switch (child = fork()) {
     case -1:
 	ss_perror(sci_idx, errno, "Can't fork for pager");
+	close(fd);
 	return;
     case 0:
 	(void) dup2(fd, 0); /* put file on stdin */
