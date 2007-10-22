@@ -71,6 +71,11 @@ __rec_open(fname, flags, mode, openinfo, dflags)
 	if (fname != NULL && (rfd = open(fname, flags | O_BINARY, mode)) < 0)
 		return (NULL);
 
+	if (fname != NULL && fcntl(rfd, F_SETFD, 1) == -1) {
+		close(rfd);
+		return NULL;
+	}
+
 	/* Create a btree in memory (backed by disk). */
 	dbp = NULL;
 	if (openinfo) {

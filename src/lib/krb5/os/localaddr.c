@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/localaddr.c
  *
- * Copyright 1990,1991,2000,2001,2002,2004 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2000,2001,2002,2004,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -363,6 +363,7 @@ get_linux_ipv6_addrs ()
 	int i;
 	unsigned int addrbyte[16];
 
+	set_cloexec_file(f);
 	while (fscanf(f,
 		      "%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x%2x"
 		      " %2x %2x %2x %2x %20s\n",
@@ -543,6 +544,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	    Tperror ("socket");
 	    continue;
 	}
+	set_cloexec_fd(P.sock);
 
 	P.lifnum.lifn_family = P.af;
 	P.lifnum.lifn_flags = 0;
@@ -718,6 +720,7 @@ foreach_localaddr (/*@null@*/ void *data,
 	    Tperror ("socket");
 	    continue;
 	}
+	set_cloexec_fd(P.sock);
 
 	code = ioctl (P.sock, SIOCGLIFNUM, &P.if_num);
 	if (code) {
@@ -939,6 +942,7 @@ foreach_localaddr (/*@null@*/ void *data,
     s = socket (USE_AF, USE_TYPE, USE_PROTO);
     if (s < 0)
 	return SOCKET_ERRNO;
+    set_cloexec_fd(s);
 
     retval = get_ifreq_array(&buf, &n, s);
     if (retval) {
@@ -1450,6 +1454,7 @@ static struct hostent *local_addr_fallback_kludge()
 	sock = socket(AF_INET, SOCK_DGRAM, 0);
 	if (sock == INVALID_SOCKET)
 		return NULL;
+	set_cloexec_fd(sock);
 
 	/* connect to arbitrary port and address (NOT loopback) */
 	addr.sin_family = AF_INET;

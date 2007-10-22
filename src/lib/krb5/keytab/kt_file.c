@@ -1156,6 +1156,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
 	    }
 	}
     }
+    set_cloexec_file(KTFILEP(id));
     if ((kerror = krb5_lock_file(context, fileno(KTFILEP(id)), mode))) {
 	(void) fclose(KTFILEP(id));
 	KTFILEP(id) = 0;

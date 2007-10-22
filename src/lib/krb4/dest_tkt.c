@@ -1,7 +1,7 @@
 /*
  * lib/krb4/dest_tkt.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001, 2007 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -32,6 +32,7 @@
 
 #include "k5-util.h"
 #define do_seteuid krb5_seteuid
+#include "k5-platform.h"
 
 #ifdef TKT_SHMEM
 #include <sys/param.h>
@@ -102,6 +103,7 @@ dest_tkt()
 	ret = (errno == ENOENT) ? RET_TKFIL : KFAILURE;
 	goto out;
     }
+    set_cloexec_fd(fd);
     /*
      * Do some additional paranoid things.  The worst-case situation
      * is that a user may be fooled into opening a non-regular file

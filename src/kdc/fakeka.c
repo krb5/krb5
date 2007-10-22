@@ -1226,6 +1226,7 @@ char **argv;
     s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s < 0)
 	perrorexit("Couldn't create socket");
+    set_cloexec_fd(s);
 
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = 0;

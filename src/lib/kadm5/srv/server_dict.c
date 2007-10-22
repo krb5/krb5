@@ -102,8 +102,11 @@ int init_dict(kadm5_config_params *params)
 	 } else
 	      return errno;
     }
-    if (fstat(fd, &sb) == -1) 
+    set_cloexec_fd(fd);
+    if (fstat(fd, &sb) == -1) {
+	close(fd);
 	return errno;
+    }
     if ((word_block = (char *) malloc(sb.st_size + 1)) == NULL)
 	return errno;
     if (read(fd, word_block, sb.st_size) != sb.st_size)

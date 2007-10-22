@@ -209,6 +209,7 @@ krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
 		    return OSA_ADB_NOLOCKFILE;
 	       }
 	  }
+	  set_cloexec_file(lockp->lockinfo.lockfile);
 	  lockp->lockinfo.lockmode = lockp->lockinfo.lockcnt = 0;
      }
 
@@ -353,6 +354,9 @@ krb5_error_code osa_adb_release_lock(osa_adb_db_t db)
 	       /* now we need to create the file since it does not exist */
                fd = THREEPARAMOPEN(db->lock->filename,O_RDWR | O_CREAT | O_EXCL,
                                    0600);
+	       if (fd < 0)
+		   return OSA_ADB_NOLOCKFILE;
+	       set_cloexec_fd(fd);
 	       if ((db->lock->lockfile = fdopen(fd, "w+")) == NULL)
 		    return OSA_ADB_NOLOCKFILE;
 	  } else if ((ret = krb5_lock_file(db->lock->context,

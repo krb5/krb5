@@ -470,6 +470,8 @@ print_buffer_bin(unsigned char *buf, unsigned int len, char *filename)
     if ((f = fopen(filename, "w")) == NULL)
 	return;
 
+    set_cloexec_file(f);
+
     for (i = 0; i < len; i++)
 	fputc(buf[i], f);
 

@@ -1,7 +1,7 @@
 /*
  * plugins/locate/python/py-locate.c
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -104,6 +104,7 @@ my_init (void)
 				   SCRIPT_PATH, strerror(errno));
 	return -1;
     }
+    set_cloexec_file(f);
     PyRun_SimpleFile (f, SCRIPT_PATH);
     fclose(f);
     mainmodule = PyModule_GetDict(PyImport_AddModule("__main__"));

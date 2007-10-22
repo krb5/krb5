@@ -1,7 +1,7 @@
 /*
  * lib/krb4/log.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute of
+ * Copyright 1985, 1986, 1987, 1988, 2007 by the Massachusetts Institute of
  * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -43,6 +43,7 @@
 
 #include "krb4int.h"
 #include <klog.h>
+#include "k5-platform.h"
 
 static char *log_name = KRBLOG;
 #if 0
@@ -80,6 +81,7 @@ void krb_log(const char *format,...)
     va_start(args, format);
 
     if ((logfile = fopen(log_name,"a")) != NULL) {
+	set_cloexec_file(logfile);
 	(void) time(&now);
 	tm = localtime(&now);
 
@@ -128,6 +130,7 @@ krb_new_log(t,string)
 
     if (!is_open) {
         if ((logfile = fopen(log_name,"a")) == NULL) return(1);
+	set_cloexec_file(logfile);
         is_open = 1;
     }
 

@@ -49,6 +49,7 @@ static char sccsid[] = "@(#)svc_udp.c 1.24 87/08/11 Copyr 1984 Sun Micro";
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+#include "k5-platform.h"
 
 
 #define rpc_buffer(xprt) ((xprt)->xp_p1)
@@ -118,6 +119,7 @@ svcudp_bufcreate(
 			perror("svcudp_create: socket creation problem");
 			return ((SVCXPRT *)NULL);
 		}
+		set_cloexec_fd(sock);
 		madesock = TRUE;
 	}
 	memset((char *)&addr, 0, sizeof (addr));

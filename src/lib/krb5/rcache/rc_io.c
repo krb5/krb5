@@ -143,6 +143,7 @@ krb5_rc_io_creat(krb5_context context, krb5_rc_iostuff *d, char **fn)
 	    goto cleanup;
 	}
     }
+    set_cloexec_fd(d->fd);
     retval = krb5_rc_io_write(context, d, (krb5_pointer)&rc_vno,
 			      sizeof(rc_vno));
     if (retval)
@@ -239,6 +240,7 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
 	    goto cleanup;
 	}
     }
+    set_cloexec_fd(d->fd);
 
     do_not_unlink = 0;
     retval = krb5_rc_io_read(context, d, (krb5_pointer) &rc_vno,
@@ -341,6 +343,7 @@ krb5_rc_io_move(krb5_context context, krb5_rc_iostuff *new1,
     (void) krb5_rc_io_close(context, new1);
     new1->fn = fn;
     new1->fd = dup(old->fd);
+    set_cloexec_fd(new1->fd);
     return 0;
 #endif
 }

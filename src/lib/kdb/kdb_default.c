@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_helper.c
  *
- * Copyright 1995 by the Massachusetts Institute of Technology. 
+ * Copyright 1995, 2007 by the Massachusetts Institute of Technology. 
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -175,6 +175,7 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
 				error_message (e), keyfile);
 	return e;
     }
+    set_cloexec_file(kf);
     enctype = key->enctype;
     if ((fwrite((krb5_pointer) &enctype,
 		2, 1, kf) != 1) ||
@@ -222,6 +223,7 @@ krb5_db_def_fetch_mkey( krb5_context   context,
     if (!(kf = fopen((db_args) ? db_args : defkeyfile, "r")))
 #endif
 	return KRB5_KDB_CANTREAD_STORED;
+    set_cloexec_file(kf);
 
     if (fread((krb5_pointer) &enctype, 2, 1, kf) != 1) {
 	retval = KRB5_KDB_CANTREAD_STORED;

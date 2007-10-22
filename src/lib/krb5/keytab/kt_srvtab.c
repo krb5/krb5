@@ -1,7 +1,7 @@
 /*
  * lib/krb5/keytab/srvtab/kts_resolv.c
  *
- * Copyright 1990,1991,2002 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2002,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -411,6 +411,7 @@ krb5_ktsrvint_open(krb5_context context, krb5_keytab id)
     KTFILEP(id) = fopen(KTFILENAME(id), READ_MODE);
     if (!KTFILEP(id))
 	return errno;
+    set_cloexec_file(KTFILEP(id));
     return 0;
 }
 

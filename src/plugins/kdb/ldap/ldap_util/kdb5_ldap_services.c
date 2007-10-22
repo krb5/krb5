@@ -1094,6 +1094,7 @@ rem_service_entry_from_file(argc, argv, file_name, service_object)
 	com_err(me, errno, "while deleting entry from file %s", file_name);
 	goto cleanup;
     }
+    set_cloexec_file(pfile);
 
     /* Create a new file with the extension .tmp */
     tmp_file = (char *)malloc(strlen(file_name) + 4 + 1);
@@ -1775,6 +1776,7 @@ kdb5_ldap_set_service_password(argc, argv)
 	com_err(me, errno, "Failed to open file %s", file_name);
 	goto cleanup;
     }
+    set_cloexec_file(pfile);
 
     while (fgets(line, MAX_LEN, pfile) != NULL) {
 	if ((str = strstr(line, service_object)) != NULL) {
@@ -1818,7 +1820,7 @@ kdb5_ldap_set_service_password(argc, argv)
 	    com_err(me, errno, "Error creating file %s", tmp_file);
 	    goto cleanup;
 	}
-
+	set_cloexec_file(newfile);
 
 	fseek(pfile, 0, SEEK_SET);
 	while (fgets(line, MAX_LEN, pfile) != NULL) {
@@ -2033,7 +2035,7 @@ done:
     }
     memset(passwd, 0, passwd_len);
 
-    /* TODO: file lock for the service passowrd file */
+    /* TODO: file lock for the service password file */
 
     /* set password in the file */
     old_mode = umask(0177);
@@ -2043,6 +2045,7 @@ done:
 		strerror (errno));
 	goto cleanup;
     }
+    set_cloexec_file(pfile);
     rewind (pfile);
     umask(old_mode);
 
@@ -2095,6 +2098,7 @@ done:
 	    fclose(pfile);
 	    goto cleanup;
 	}
+	set_cloexec_file(newfile);
 
 	fseek(pfile, 0, SEEK_SET);
 	while (fgets(line, MAX_LEN, pfile) != NULL) {

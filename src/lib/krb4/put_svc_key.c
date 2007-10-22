@@ -32,6 +32,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include "k5-platform.h"
 
 #define KEYSZ sizeof(C_Block)
 /* strict put_svc_key.
@@ -58,6 +59,7 @@ put_svc_key(sfile,name,inst,realm,newvno,key)
 
 	if ((fd = open(sfile, O_RDWR)) < 0)
 		return KFAILURE;
+	set_cloexec_fd(fd);
 
 	while(getst(fd,fname,SNAME_SZ) > 0) {
 		getst(fd,finst,INST_SZ);

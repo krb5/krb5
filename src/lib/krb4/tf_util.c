@@ -1,7 +1,7 @@
 /*
  * lib/krb4/tf_util.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001, 2007 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -419,6 +419,8 @@ int KRB5_CALLCONV tf_init(tf_name, rw)
 	return KFAILURE;
     sfp = fopen(shmidname, "r");	/* only need read/write on the
 					   actual tickets */
+    if (sfp != 0)
+	set_cloexec_file(sfp);
     if (me != metoo && do_seteuid(metoo) < 0)
 	return KFAILURE;
     if (sfp == 0) {
@@ -512,6 +514,8 @@ int KRB5_CALLCONV tf_init(tf_name, rw)
 	if (me != metoo && do_seteuid(me) < 0)
 	    return KFAILURE;
 	fd = open(tf_name, O_RDWR, 0600);
+	if (fd >= 0)
+	    set_cloexec_fd(fd);
 	if (me != metoo && do_seteuid(metoo) < 0)
 	    return KFAILURE;
 	if (fd < 0) {
@@ -572,6 +576,8 @@ int KRB5_CALLCONV tf_init(tf_name, rw)
     if (me != metoo && do_seteuid(me) < 0)
 	return KFAILURE;
     fd = open(tf_name, O_RDONLY, 0600);
+    if (fd >= 0)
+	set_cloexec_fd(fd);
     if (me != metoo && do_seteuid(metoo) < 0)
 	return KFAILURE;
     if (fd < 0) {

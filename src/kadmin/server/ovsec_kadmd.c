@@ -362,6 +362,7 @@ int main(int argc, char *argv[])
 	  krb5_klog_close(context);	  
 	  exit(1);
      }
+     set_cloexec_fd(s);
 
      if ((schpw = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	 const char *e_txt = krb5_get_error_message (context, ret);
@@ -374,6 +375,7 @@ int main(int argc, char *argv[])
 	 krb5_klog_close(context);
 	 exit(1);
      }
+     set_cloexec_fd(schpw);
 
 #ifdef SO_REUSEADDR
      /* the old admin server turned on SO_REUSEADDR for non-default
@@ -1192,6 +1194,7 @@ void do_schpw(int s1, kadm5_config_params *params)
 	krb5_klog_close(context);	  
 	exit(1);
     }
+    set_cloexec_fd(s2);
 
     if (connect(s2, (struct sockaddr *) &from, sizeof(from)) < 0) {
 	krb5_klog_syslog(LOG_ERR, "chpw: Couldn't connect to client: %s",

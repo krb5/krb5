@@ -77,6 +77,7 @@ krb5_ldap_readpassword(context, ldap_context, password)
 	krb5_set_error_message (context, st, "%s", errbuf);
 	goto rp_exit;
     }
+    set_cloexec_file(fptr);
 
     /* get the record from the file */
     while (fgets(line, RECORDLEN, fptr)!= NULL) {

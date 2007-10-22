@@ -369,6 +369,7 @@ errcode_t profile_update_file_data(prf_data_t data)
 			retval = ENOENT;
 		return retval;
 	}
+	set_cloexec_file(f);
 	data->upd_serial++;
 	data->flags &= PROFILE_FILE_SHARED;
 	if (rw_access(data->filespec))
@@ -428,6 +429,7 @@ static errcode_t write_data_to_file(prf_data_t data, const char *outfile,
 		goto errout;
 	}
 
+	set_cloexec_file(f);
 	profile_write_tree_file(data->root, f);
 	if (fclose(f) != 0) {
 		retval = errno;

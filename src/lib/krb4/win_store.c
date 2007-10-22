@@ -75,6 +75,8 @@ krb__get_cnffile()
 		cnfname, sizeof(cnfname) - 1, KERBEROS_INI);
 
 	cnffile = fopen(cnfname, "r");
+	if (cnffile)
+	    set_cloexec_file(cnffile);
 
 	return cnffile;
 }
@@ -109,6 +111,8 @@ krb__get_realmsfile()
 		realmsname, sizeof(realmsname) - 1, KERBEROS_INI);
 
 	realmsfile = fopen(realmsname, "r");
+	if (realmsfile)
+	    set_cloexec_file(realmsfile);
 
 	return realmsfile;
 }

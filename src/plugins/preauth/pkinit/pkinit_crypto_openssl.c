@@ -3736,6 +3736,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
 		 idopts->cert_filename, errno);
 	goto cleanup;
     }
+    set_cloexec_file(fp);
 
     p12 = d2i_PKCS12_fp(fp, NULL);
     fclose(fp);

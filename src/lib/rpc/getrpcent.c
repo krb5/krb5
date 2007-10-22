@@ -125,9 +125,11 @@ SETRPCENT_TYPE setrpcent(int f)
 
 	if (d == 0)
 		return;
-	if (d->rpcf == NULL)
+	if (d->rpcf == NULL) {
 		d->rpcf = fopen(RPCDB, "r");
-	else
+		if (d->rpcf)
+		    set_cloexec_file(d->rpcf);
+	} else
 		rewind(d->rpcf);
 	if (d->current)
 		free(d->current);
@@ -162,9 +164,12 @@ getrpcent(void)
 
 	if (d == 0)
 		return(NULL);
-	if (d->rpcf == NULL && (d->rpcf = fopen(RPCDB, "r")) == NULL)
+	if (d->rpcf == NULL) {
+	    if ((d->rpcf = fopen(RPCDB, "r")) == NULL)
 		return (NULL);
-    if (fgets(d->line, BUFSIZ, d->rpcf) == NULL)
+	    set_cloexec_file(d->rpcf);
+	}
+	if (fgets(d->line, BUFSIZ, d->rpcf) == NULL)
 		return (NULL);
 	return interpret(d->line, strlen(d->line));
 }

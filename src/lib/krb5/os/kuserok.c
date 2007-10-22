@@ -1,7 +1,7 @@
 /*
  * lib/krb5/os/kuserok.c
  *
- * Copyright 1990,1993 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1993,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -110,6 +110,7 @@ krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser)
 	free(princname);
 	return(FALSE);
     }
+    set_cloexec_file(fp);
     /*
      * For security reasons, the .k5login file must be owned either by
      * the user himself, or by root.  Otherwise, don't grant access.

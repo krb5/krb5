@@ -59,6 +59,7 @@ static char sccsid[] = "@(#)pmap_rmt.c 1.21 87/08/27 Copyr 1984 Sun Micro";
 #include <arpa/inet.h>
 #define MAX_BROADCAST_SIZE 1400
 #include <string.h>
+#include "k5-platform.h"	/* set_cloexec_fd */
 
 static struct timeval timeout = { 3, 0 };
 
@@ -278,6 +279,7 @@ clnt_broadcast(
 		stat = RPC_CANTSEND;
 		goto done_broad;
 	}
+	set_cloexec_fd(sock);
 #ifdef SO_BROADCAST
 	if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *) &on,
 		       sizeof (on)) < 0) {

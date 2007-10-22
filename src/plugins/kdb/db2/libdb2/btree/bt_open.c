@@ -425,6 +425,7 @@ tmp()
 #endif
 	if ((fd = mkstemp(path)) != -1)
 		(void)unlink(path);
+	set_cloexec_fd(fd);
 #ifdef SIG_BLOCK
 	(void)sigprocmask(SIG_SETMASK, &oset, NULL);
 #else

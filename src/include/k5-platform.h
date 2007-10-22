@@ -47,6 +47,8 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #ifdef _WIN32
 #define CAN_COPY_VA_LIST
@@ -752,6 +754,52 @@ load_64_n (const unsigned char *p)
 	(*(OUT) = getpwuid(UID), *(OUT) == NULL ? -1 : 0)
 #endif
 
+/* Ensure, if possible, that the indicated file descriptor won't be
+   kept open if we exec another process (e.g., launching a ccapi
+   server).  If we don't know how to do it... well, just go about our
+   business.  Probably most callers won't check the return status
+   anyways.  */
+
+#if 0
+static inline int
+set_cloexec_fd(int fd)
+{
+#if defined(F_SETFD)
+# ifdef FD_CLOEXEC
+    if (fcntl(fd, F_SETFD, FD_CLOEXEC) != 0)
+	return errno;
+# else
+    if (fcntl(fd, F_SETFD, 1) != 0)
+	return errno;
+# endif
+#endif
+    return 0;
+}
+
+static inline int
+set_cloexec_file(FILE *f)
+{
+    return set_cloexec_fd(fileno(f));
+}
+#else
+/* Macros make the Sun compiler happier, and all variants of this do a
+   single evaluation of the argument, and fcntl and fileno should
+   produce reasonable error messages on type mismatches, on any system
+   with F_SETFD.  */
+#ifdef F_SETFD
+# ifdef FD_CLOEXEC
+#  define set_cloexec_fd(FD)	(fcntl((FD), F_SETFD, FD_CLOEXEC) ? errno : 0)
+# else
+#  define set_cloexec_fd(FD)	(fcntl((FD), F_SETFD, 1) ? errno : 0)
+# endif
+#else
+# define set_cloexec_fd(FD)	((FD),0)
+#endif
+#define set_cloexec_file(F)	set_cloexec_fd(fileno(F))
+#endif
+
+
+
 /* Since the original ANSI C spec left it undefined whether or
    how you could copy around a va_list, C 99 added va_copy.
    For old implementations, let's do our best to fake it.
@@ -891,5 +939,7 @@ extern int asprintf(char **, const char *, ...)
 extern int krb5int_mkstemp(char *);
 #define mkstemp krb5int_mkstemp
 #endif
+
+
 
 #endif /* K5_PLATFORM_H */

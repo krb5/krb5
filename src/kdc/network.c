@@ -402,6 +402,7 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
 		paddr(addr));
 	return -1;
     }
+    set_cloexec_fd(sock);
     if (sock > FD_SETSIZE) {
 	close(sock);
 	com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
@@ -606,6 +607,7 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 		    port, haddrbuf);
 	    return 1;
 	}
+	set_cloexec_fd(sock);
 #ifdef KRB5_USE_INET6
 	if (addr->sa_family == AF_INET6) {
 #ifdef IPV6_V6ONLY
@@ -1110,6 +1112,7 @@ static void accept_tcp_connection(struct connection *conn, const char *prog,
     s = accept(conn->fd, addr, &addrlen);
     if (s < 0)
 	return;
+    set_cloexec_fd(s);
     if (s > FD_SETSIZE) {
 	close(s);
 	return;

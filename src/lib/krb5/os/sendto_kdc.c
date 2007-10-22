@@ -677,6 +677,7 @@ start_connection (struct conn_state *state,
 	dprint("socket: fd %d too high\n", fd);
 	return -1;
     }
+    set_cloexec_fd(fd);
     /* Make it non-blocking.  */
     if (ai->ai_socktype == SOCK_STREAM) {
 	static const int one = 1;

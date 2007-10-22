@@ -1,7 +1,7 @@
 /*
  * lib/krb4/kuserok.c
  *
- * Copyright 1987, 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1987, 1988, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,6 +45,7 @@
 /* just for F_OK for sco */
 #include <sys/unistd.h>
 #endif
+#include "k5-platform.h"
 
 #ifndef HAVE_SETEUID
 #ifdef HAVE_SETRESUID
@@ -135,6 +136,7 @@ kuserok(kdata, luser)
 	  return(NOTOK);
 	}
     }
+    set_cloexec_file(fp);
     /*
      * security:  if the user does not own his own .klogin file,
      * do not grant access

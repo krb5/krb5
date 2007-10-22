@@ -41,6 +41,8 @@ krb__v5_get_file(s)
 					&full_name);
 	    if (retval == 0 && full_name && full_name[0]) {
 		cnffile = fopen(full_name[0],"r");
+		if (cnffile)
+		    set_cloexec_file(cnffile);
 		for (cpp = full_name; *cpp; cpp++) 
 		    krb5_xfree(*cpp);
 		krb5_xfree(full_name);
@@ -97,6 +99,8 @@ krb__get_cnffile()
 #ifdef ATHENA_CONF_FALLBACK
 	if (!cnffile) cnffile = fopen(KRB_FB_CONF,"r");
 #endif
+	if (cnffile)
+	    set_cloexec_file(cnffile);
 	return cnffile;
 }
 
@@ -117,7 +121,8 @@ krb__get_realmsfile()
 	if (!realmsfile) realmsfile = fopen(KRB_FB_RLM_TRANS, "r");
 #endif
 
+	if (realmsfile)
+	    set_cloexec_file(realmsfile);
+
 	return realmsfile;
 }
-
-

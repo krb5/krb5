@@ -52,6 +52,7 @@ int ss_pager_create()
 		 * "write" side.
 		 */
 		(void) close(filedes[0]);
+		set_cloexec_fd(filedes[1]);
 		return(filedes[1]);
 	}
 }
@@ -60,6 +61,8 @@ int ss_pager_create()
 {
     int fd;
     fd = open("/dev/tty", O_WRONLY, 0);
+    if (fd >= 0)
+	set_cloexec_fd(fd);
     return fd;
 }
 #endif

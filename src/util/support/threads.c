@@ -1,7 +1,7 @@
 /*
  * util/support/threads.c
  *
- * Copyright 2004,2005,2006 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005,2006,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -424,7 +424,9 @@ int krb5int_thread_support_init (void)
     /*    stats_logfile = stderr; */
     stats_logfile = fopen("/dev/tty", "w+");
     if (stats_logfile == NULL)
-      stats_logfile = stderr;
+	stats_logfile = stderr;
+    else
+	set_cloexec_file(stats_logfile);
 #endif
 
 #ifndef ENABLE_THREADS

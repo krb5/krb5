@@ -1,7 +1,7 @@
 /*
  * tf_shm.c
  *
- * Copyright 1988 by the Massachusetts Institute of Technology.
+ * Copyright 1988, 2007 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
@@ -86,7 +86,8 @@ char *file_name;
 	    perror("krb_shm_create file");
 	(void) shmctl(shmid, IPC_RMID, 0);
 	return(KFAILURE);		/* XXX */
-    } 
+    }
+    set_cloexec_file(sfile);
     if (fchmod(fileno(sfile),0600) < 0) {
 	if (krb_debug)
 	    perror("krb_shm_create fchmod");
@@ -147,6 +148,7 @@ char *file;
 		perror("cannot open shared memory file");
 	    return(KFAILURE);		/* XXX */
 	}
+	set_cloexec_file(sfile);
 	if (fscanf(sfile,"%d",&shmid) == 1) {
 		if (shmctl(shmid,IPC_RMID,0) != 0) {
 		    if (krb_debug)

@@ -68,7 +68,7 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     func = signal(SIGINT, SIG_IGN);
 #endif
 
-    fd = ss_pager_create();
+    fd = ss_pager_create();	/* FD_CLOEXEC set */
     output = fdopen(fd, "w");
 
 #ifdef POSIX_SIGNALS

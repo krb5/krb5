@@ -1,7 +1,7 @@
 /*
  * lib/kadm5/srv/server_acl.c
  *
- * Copyright 1995-2004 by the Massachusetts Institute of Technology.
+ * Copyright 1995-2004, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -484,6 +484,7 @@ kadm5int_acl_load_acl_file()
     /* Open the ACL file for read */
     afp = fopen(acl_acl_file, "r");
     if (afp) {
+	set_cloexec_file(afp);
 	alineno = 1;
 	aentpp = &acl_list_head;
 

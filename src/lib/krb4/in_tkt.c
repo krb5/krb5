@@ -1,7 +1,7 @@
 /*
  * lib/krb4/in_tkt.c
  *
- * Copyright 1985, 1986, 1987, 1988, 2000, 2001 by the Massachusetts
+ * Copyright 1985, 1986, 1987, 1988, 2000, 2001, 2007 by the Massachusetts
  * Institute of Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -49,6 +49,7 @@ extern int krb_debug;
 
 #include "k5-util.h"
 #define do_seteuid krb5_seteuid
+#include "k5-platform.h"
 
 #ifndef O_SYNC
 #define O_SYNC 0
@@ -94,6 +95,8 @@ in_tkt(pname,pinst)
 	    return KFAILURE;
 	/* file already exists, and permissions appear ok, so nuke it */
 	fd = open(file, O_RDWR|O_SYNC, 0);
+	if (fd >= 0)
+	    set_cloexec_fd(fd);
 	(void)unlink(file);
 	if (me != metoo && do_seteuid(metoo) < 0)
 	    return KFAILURE;
@@ -153,6 +156,8 @@ in_tkt(pname,pinst)
        ticket file.  */
     mask = umask(077);
     tktfile = open(file, O_RDWR|O_SYNC|O_CREAT|O_EXCL, 0600);
+    if (tktfile >= 0)
+	set_cloexec_fd(tktfile);
     umask(mask);
     if (me != metoo) {
 	if (do_seteuid(metoo) < 0) {

@@ -1,7 +1,7 @@
 /*
  * lib/krb4/kadm_net.c
  *
- * Copyright 1988, 2002 by the Massachusetts Institute of Technology.
+ * Copyright 1988, 2002, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -267,6 +267,7 @@ int kadm_cli_conn(Kadm_Client *client_parm)
     if ((client_parm->admin_fd =
 	 socket(client_parm->admin_addr.sin_family, SOCK_STREAM,0)) < 0)
 	return KADM_NO_SOCK;		/* couldnt create the socket */
+    set_cloexec_fd(client_parm->admin_fd);
     if (SOCKET_CONNECT(client_parm->admin_fd,
 		(struct sockaddr *) & client_parm->admin_addr,
 		sizeof(client_parm->admin_addr))) {

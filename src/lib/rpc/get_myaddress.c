@@ -90,6 +90,7 @@ get_myaddress(struct sockaddr_in *addr)
 	    perror("get_myaddress: socket");
 	    exit(1);
 	}
+	set_cloexec_fd(s);
 	ifc.ifc_len = sizeof (buf);
 	ifc.ifc_buf = buf;
 	if (ioctl(s, SIOCGIFCONF, (char *)&ifc) < 0) {

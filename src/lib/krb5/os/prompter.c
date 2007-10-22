@@ -60,6 +60,7 @@ krb5_prompter_posix(
     fd = dup(STDIN_FILENO);
     if (fd < 0)
 	return KRB5_LIBOS_CANTREADPWD;
+    set_cloexec_fd(fd);
     fp = fdopen(fd, "r");
     if (fp == NULL)
 	goto cleanup;

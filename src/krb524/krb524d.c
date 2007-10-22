@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2002, 2007 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -229,6 +229,7 @@ int main(argc, argv)
 	com_err(whoami, errno, "creating main socket");
 	cleanup_and_exit(1, context);
     }
+    set_cloexec_fd(s);
     if ((ret = bind(s, (struct sockaddr *) &saddr,
 		    sizeof(struct sockaddr_in))) < 0) {
 	com_err(whoami, errno, "binding main socket");

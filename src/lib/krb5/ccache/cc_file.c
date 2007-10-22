@@ -1252,6 +1252,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
 	    return krb5_fcc_interpret (context, errno);
 	}
     }
+    set_cloexec_fd(f);
 
     data->mode = mode;
 
@@ -1560,6 +1561,7 @@ krb5_fcc_destroy(krb5_context context, krb5_ccache id)
 	      kret = krb5_fcc_interpret(context, errno);
 	      goto cleanup;
 	  }
+	  set_cloexec_fd(ret);
 	  data->file = ret;
      }
      else
@@ -1980,6 +1982,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
          k5_mutex_unlock(&krb5int_cc_file_mutex);
 	 return krb5_fcc_interpret(context, errno);
      }
+     set_cloexec_fd(ret);
 
      /* Allocate memory */
      data = (krb5_pointer) malloc(sizeof(krb5_fcc_data));

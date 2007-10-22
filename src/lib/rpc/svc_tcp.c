@@ -49,6 +49,7 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 #include <errno.h>
 #include <stdlib.h>
 #include "autoconf.h"
+#include "k5-platform.h"	/* set_cloexec_fd */
 /*extern bool_t abort();
 extern errno;
 */
@@ -143,6 +144,7 @@ svctcp_create(
 			perror("svctcp_.c - udp socket creation problem");
 			return ((SVCXPRT *)NULL);
 		}
+		set_cloexec_fd(sock);
 		madesock = TRUE;
 	}
 	memset((char *)&addr, 0, sizeof (addr));
@@ -261,6 +263,7 @@ rendezvous_request(
 			goto again;
 	       return (FALSE);
 	}
+	set_cloexec_fd(sock);
 	if (getsockname(sock, &laddr, &llen) < 0)
 	     return (FALSE);
 	

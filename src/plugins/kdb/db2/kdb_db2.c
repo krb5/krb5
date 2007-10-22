@@ -1,7 +1,7 @@
 /*
  * lib/kdb/kdb_db2.c
  *
- * Copyright 1997,2006 by the Massachusetts Institute of Technology.
+ * Copyright 1997,2006,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -332,6 +332,7 @@ krb5_db2_db_init(krb5_context context)
 	    goto err_out;
 	}
     }
+    set_cloexec_fd(db_ctx->db_lf_file);
     db_ctx->db_inited++;
 
     if ((retval = krb5_db2_db_get_age(context, NULL, &db_ctx->db_lf_time)))
@@ -754,6 +755,7 @@ destroy_file_suffix(char *dbname, char *suffix)
 	free(filename);
 	return errno;
     }
+    set_cloexec_fd(fd);
     /* fstat() will probably not fail unless using a remote filesystem
      * (which is inappropriate for the kerberos database) so this check
      * is mostly paranoia.  */
@@ -1719,6 +1721,7 @@ krb5_db2_db_rename(context, from, to)
 	retval = errno;
 	goto errout;
     }
+    set_cloexec_fd(db_ctx->db_lf_file);
 
     db_ctx->db_inited = 1;
 

@@ -423,6 +423,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 		    if (cp[4] == ':' || cp[4] == '=') {
 			f = fopen(&cp[5], (cp[4] == ':') ? "a+" : "w");
 			if (f) {
+			    set_cloexec_file(f);
 			    log_control.log_entries[i].lfu_filep = f;
 			    log_control.log_entries[i].log_type = K_LOG_FILE;
 			    log_control.log_entries[i].lfu_fname = &cp[5];
@@ -605,6 +606,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 		    log_control.log_entries[i].ldu_filep =
 			CONSOLE_OPEN("a+");
 		    if (log_control.log_entries[i].ldu_filep) {
+			set_cloexec_file(log_control.log_entries[i].ldu_filep);
 			log_control.log_entries[i].log_type = K_LOG_CONSOLE;
 			log_control.log_entries[i].ldu_devname = "console";
 		    }
@@ -620,6 +622,7 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
 			log_control.log_entries[i].ldu_filep = 
 			    DEVICE_OPEN(&cp[7], "w");
 			if (log_control.log_entries[i].ldu_filep) {
+			    set_cloexec_file(log_control.log_entries[i].ldu_filep);
 			    log_control.log_entries[i].log_type = K_LOG_DEVICE;
 			    log_control.log_entries[i].ldu_devname = &cp[7];
 			}
@@ -956,6 +959,7 @@ krb5_klog_reopen(krb5_context kcontext)
 	     */
 	    f = fopen(log_control.log_entries[lindex].lfu_fname, "a+");
 	    if (f) {
+		set_cloexec_file(f);
 		log_control.log_entries[lindex].lfu_filep = f;
 	    } else {
 		fprintf(stderr, "Couldn't open log file %s: %s\n",

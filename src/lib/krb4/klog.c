@@ -1,7 +1,7 @@
 /*
  * lib/krb4/klog.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute of
+ * Copyright 1985, 1986, 1987, 1988, 2007 by the Massachusetts Institute of
  * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -36,6 +36,7 @@
 
 #include "krb4int.h"
 #include <klog.h>
+#include "k5-platform.h"
 
 static char *log_name = KRBLOG;
 static char logtxt[1000];
@@ -98,6 +99,7 @@ char * klog(type,format,a1,a2,a3,a4,a5,a6,a7,a8,a9,a0)
 
     if ((logfile = fopen(log_name,"a")) == NULL)
         return(logtxt);
+    set_cloexec_file(logfile);
 
     (void) time(&now);
     tm = localtime(&now);

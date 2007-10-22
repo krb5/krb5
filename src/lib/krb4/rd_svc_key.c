@@ -1,7 +1,7 @@
 /*
  * rd_svc_key.c
  *
- * Copyright 1985, 1986, 1987, 1988 by the Massachusetts Institute
+ * Copyright 1985, 1986, 1987, 1988, 2007 by the Massachusetts Institute
  * of Technology.
  *
  * For copying and distribution information, please see the file
@@ -283,6 +283,7 @@ get_service_key(service,instance,realm,kvno,file,key)
 
     if ((stab = open(file, 0, 0)) < 0)
         return(KFAILURE);
+    set_cloexec_fd(stab);
 
     wcard = (instance[0] == '*') && (instance[1] == '\0');
     /* get current realm if not passed in */
