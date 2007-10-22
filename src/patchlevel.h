@@ -53,6 +53,6 @@
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 6
 #define KRB5_PATCHLEVEL 3
-/* #undef KRB5_RELTAIL */
+#define KRB5_RELTAIL "kfw-3.2.2"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "tags/krb5-1-6-3-final"
+#define KRB5_RELTAG "tags/kfw-3_2_2-final"
