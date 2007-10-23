@@ -6,8 +6,6 @@ AC_CHECK_HEADERS(unistd.h)
 AC_TYPE_MODE_T
 AC_TYPE_OFF_T
 
-AC_CHECK_FUNCS()
-
 # XXX This is incorrect, but should cause -lcrypto to be included by default
 AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
 
