@@ -1,0 +1,11 @@
+thisconfigdir=../../..
+myfulldir=ccapi/lib/unix
+mydir=ccapi/lib/unix
+BUILDTOP=$(REL)..$(S)..$(S)..
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+
+# +++ Dependency line eater +++

@@ -1,0 +1,10 @@
+thisconfigdir=..
+myfulldir=ccapi
+mydir=ccapi
+BUILDTOP=$(REL)..
+
+LOCAL_SUBDIRS= common lib server
+
+all-unix::
+
+# +++ Dependency line eater +++

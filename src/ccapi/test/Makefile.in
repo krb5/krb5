@@ -1,0 +1,58 @@
+thisconfigdir=../..
+myfulldir=ccapi/test
+mydir=ccapi/test
+
+# run with "make all" to create CCAPI tests in "/tmp/ccapi_test"
+# run resulting tests with "sh test_ccapi.sh"
+
+LIBS = -lkrb5
+
+SRCDIR = src
+DSTROOT = /tmp
+OBJDIR = $(DSTROOT)/ccapi_intermediates
+DSTDIR = $(DSTROOT)/ccapi_test
+TESTDIR = $(DSTDIR)/tests
+
+SCRIPT_NAME = test_ccapi.sh
+
+OBJECTS = test_ccapi_ccache.o test_ccapi_check.o test_ccapi_constants.o test_ccapi_context.o test_ccapi_globals.o test_ccapi_iterators.o test_ccapi_log.o test_ccapi_util.o
+_OBJECTS = $(OBJECTS:.o=)
+
+TEST_OBJECTS = test_constants.o test_cc_initialize.o test_cc_context_get_version.o test_cc_context_release.o test_cc_context_get_change_time.o test_cc_context_get_default_ccache_name.o test_cc_context_open_ccache.o test_cc_context_open_default_ccache.o test_cc_context_create_ccache.o test_cc_context_create_default_ccache.o test_cc_context_create_new_ccache.o test_cc_context_new_ccache_iterator.o test_cc_context_compare.o test_cc_ccache_release.o test_cc_ccache_destroy.o test_cc_ccache_set_default.o test_cc_ccache_get_credentials_version.o test_cc_ccache_get_name.o test_cc_ccache_get_principal.o test_cc_ccache_set_principal.o test_cc_ccache_store_credentials.o test_cc_ccache_remove_credentials.o test_cc_ccache_new_credentials_iterator.o test_cc_ccache_get_change_time.o test_cc_ccache_get_last_default_time.o test_cc_ccache_move.o test_cc_ccache_compare.o test_cc_ccache_get_kdc_time_offset.o test_cc_ccache_set_kdc_time_offset.o test_cc_ccache_clear_kdc_time_offset.o test_cc_ccache_iterator_next.o test_cc_credentials_iterator_next.o
+TEST_NAMES = $(TEST_OBJECTS:.o=)
+
+all: setup-test-dir simple_lock_test build-base build-tests link-tests copy-script success-message
+
+# compile base files used by all tests
+build-base: $(OBJECTS)
+
+# compile each test
+build-tests: $(TEST_OBJECTS)
+
+# Make a build directory
+setup-test-dir:
+	@echo "Removing old destination directory... $(DSTDIR)"
+	if [ -d "$(DSTDIR)" ]; then chmod -R u+w "$(DSTDIR)" && rm -rf "$(DSTDIR)"; fi
+	mkdir -p "$(TESTDIR)"
+	if [ -d "$(OBJDIR)" ]; then chmod -R u+w "$(OBJDIR)" && rm -rf "$(OBJDIR)"; fi
+	mkdir -p "$(OBJDIR)"
+
+link-tests: $(TEST_NAMES)
+
+$(TEST_NAMES): $(TEST_OBJECTS)
+	$(CC) -o $(TESTDIR)/$@ $(OBJDIR)/$@.o $(OBJECTS) $(LIBS)
+
+simple_lock_test:
+	$(CC) -o $(TESTDIR)/simple_lock_test simple_lock_test.c $(LIBS)
+
+copy-script:
+	cp $(SCRIPT_NAME) $(DSTDIR)/$(SCRIPT_NAME)
+
+success-message:
+	@echo
+	@echo "CCAPI tests created in $(DSTDIR)"
+
+.PHONY: clean
+
+clean:
+	-rm -rf "$(OBJDIR)"
