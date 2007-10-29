@@ -33,6 +33,7 @@
 
 #if defined(_WIN32)
 #include <winsock.h>
+#include "win-mac.h"
 #else
 #include <stdint.h>
 #endif
