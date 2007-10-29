@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -25,19 +25,15 @@
  */
 
 #include "cci_common.h"
-
-#if TARGET_OS_MAC 
-#include <architecture/byte_order.h>
+#include "k5-platform.h"	/* for byte swapping */
 
 #if !defined(htonll)
-#define htonll(x) OSSwapHostToBigInt64(x)
+#define htonll(x) k5_htonll(x)
 #endif
 
 #if !defined(ntohll)
-#define ntohll(x) OSSwapBigToHostInt64(x)
+#define ntohll(x) k5_ntohll(x)
 #endif
-
-#endif /* TARGET_OS_MAC */
 
 struct cci_stream_d {
     char *data;
