@@ -160,14 +160,19 @@ FAKELIBDIR=$(FAKEPREFIX)/lib
 ALL_CFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
 	-DKRB5_DEPRECATED=1 \
 	$(CPPFLAGS) $(CFLAGS) $(PTHREAD_CFLAGS)
+ALL_CXXFLAGS = $(DEFS) $(DEFINES) $(KRB_INCLUDES) $(LOCALINCLUDES) \
+	-DKRB5_DEPRECATED=1 \
+	$(CPPFLAGS) $(CXXFLAGS) $(PTHREAD_CFLAGS)
 
 CFLAGS = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
 PTHREAD_LIBS = @PTHREAD_LIBS@
 THREAD_LINKOPTS = $(PTHREAD_CFLAGS) $(PTHREAD_LIBS)
 CPPFLAGS = @CPPFLAGS@
 DEFS = @DEFS@
 CC = @CC@
+CXX = @CXX@
 LD = $(PURE) @LD@
 DEPLIBS = @DEPLIBS@
 KRB_INCLUDES = -I$(BUILDTOP)/include -I$(SRCTOP)/include
@@ -457,9 +462,14 @@ COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
 
 # rule to make object files
 #
-.SUFFIXES: .c .o
+.SUFFIXES: .cpp .c .o
 .c.o:
 	$(CC) $(ALL_CFLAGS) -c $<
+# Use .cpp because that's what autoconf uses in its test.
+# If the compiler doesn't accept a .cpp suffix here, it wouldn't
+# have accepted it when autoconf tested it.
+.cpp.o:
+	$(CXX) $(ALL_CXXFLAGS) -c $<
 
 # ss command table rules
 #

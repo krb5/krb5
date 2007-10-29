@@ -11,8 +11,10 @@ SRCS=$(srcdir)/test_getpw.c
 
 all:: test_getpw
 
-check:: test_getpw
+check:: test_getpw test_cxx_krb5 test_cxx_gss
 	$(RUN_SETUP) $(VALGRIND) ./test_getpw
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_krb5
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_gss
 
 test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)
@@ -20,10 +22,20 @@ test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
 test_getsockname: $(OUTPRE)test_getsockname.$(OBJEXT)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getsockname $(OUTPRE)test_getsockname.$(OBJEXT) $(LIBS)
 
+CXX_LINK=$(CC_LINK) # hack!
+test_cxx_krb5 test_cxx_gss: CC=$(CXX)
+test_cxx_krb5: $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_DEPLIB)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_LIB) $(LIBS)
+test_cxx_gss: $(OUTPRE)test_cxx_gss.$(OBJEXT)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_gss $(OUTPRE)test_cxx_gss.$(OBJEXT) $(LIBS)
+
+test_cxx_krb5.$(OBJEXT): test_cxx_krb5.cpp
+test_cxx_gss.$(OBJEXT): test_cxx_gss.cpp
+
 install::
 
 clean::
-	$(RM) test_getpw
+	$(RM) test_getpw test_cxx_krb5 test_cxx_gss *.o
 
 # +++ Dependency line eater +++
 # 
