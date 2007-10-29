@@ -54,6 +54,10 @@
 #define CAN_COPY_VA_LIST
 #endif
 
+#if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
+#include <TargetConditionals.h>
+#endif
+
 /* Initialization and finalization function support for libraries.
 
    At top level, before the functions are defined or even declared:
@@ -510,6 +514,12 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 #  define SWAP64		bswap_64
 # endif
 #endif
+#if TARGET_OS_MAC
+# include <architecture/byte_order.h>
+# define SWAP16			OSSwapInt16
+# define SWAP32			OSSwapInt32
+# define SWAP64			OSSwapInt64
+#endif
 
 static inline void
 store_16_be (unsigned int val, unsigned char *p)
@@ -696,6 +706,24 @@ load_64_n (const unsigned char *p)
     UINT64_TYPE n;
     memcpy(&n, p, 8);
     return n;
+}
+
+/* Assume for simplicity that these swaps are identical.  */
+static inline UINT64_TYPE
+k5_htonll (UINT64_TYPE val)
+{
+#ifdef K5_BE
+    return val;
+#elif defined K5_LE && defined SWAP64
+    return SWAP64 (val);
+#else
+    return load_64_be ((unsigned char *)&val);
+#endif
+}
+static inline UINT64_TYPE
+k5_ntohll (UINT64_TYPE val)
+{
+    return k5_htonll (val);
 }
 
 /* Make the interfaces to getpwnam and getpwuid consistent.
