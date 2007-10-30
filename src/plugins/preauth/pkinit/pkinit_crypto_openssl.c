@@ -36,6 +36,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "k5-platform.h"
+
 /*
  * Q: What is this SILLYDECRYPT stuff about?
  * A: When using the ActivCard Linux pkcs11 library (v2.0.1),
