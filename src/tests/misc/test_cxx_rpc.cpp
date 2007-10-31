@@ -1,4 +1,4 @@
-// Test that the krb5.h header is compatible with C++ application code.
+// Test that the rpc.h header is compatible with C++ application code.
 
 #include "gssrpc/rpc.h"
 
