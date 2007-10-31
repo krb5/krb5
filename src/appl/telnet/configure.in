@@ -36,7 +36,7 @@ AC_FUNC_VFORK
 AC_HEADER_STDARG
 case $krb5_cv_host in
 *-*-solaris*)
-	if test "$krb5_cv_prog_gcc" = yes; then
+	if test "$ac_cv_c_compiler_gnu" = yes; then
 		# Solaris 8 at least has curses.h that is noisy under gcc
 		ac_cv_header_curses_h=yes
 	fi

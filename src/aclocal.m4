@@ -594,7 +594,6 @@ dnl
 AC_DEFUN(WITH_CC,[dnl
 AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
-krb5_cv_prog_gcc=$ac_cv_c_compiler_gnu
 if test $ac_cv_c_compiler_gnu = yes ; then
      HAVE_GCC=yes
      else HAVE_GCC=
