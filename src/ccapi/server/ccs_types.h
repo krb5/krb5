@@ -27,6 +27,10 @@
 #ifndef CCS_TYPES_H
 #define CCS_TYPES_H
 
+#ifdef WIN32
+#pragma warning ( disable : 4068)
+#endif
+
 #include "cci_types.h"
 
 struct cci_array_d;
@@ -51,6 +55,7 @@ typedef mach_port_t ccs_pipe_t;  /* Mach IPC port */
 #else
 
 #ifdef WIN32
+/* On Windows, a pipe is the name of the endpoint to which to send the reply: */
 typedef char* ccs_pipe_t;
 #define CCS_PIPE_NULL (char*)NULL
 
