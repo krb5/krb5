@@ -11,10 +11,11 @@ SRCS=$(srcdir)/test_getpw.c
 
 all:: test_getpw
 
-check:: test_getpw test_cxx_krb5 test_cxx_gss
+check:: test_getpw test_cxx_krb5 test_cxx_gss test_cxx_rpc
 	$(RUN_SETUP) $(VALGRIND) ./test_getpw
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_krb5
 	$(RUN_SETUP) $(VALGRIND) ./test_cxx_gss
+	$(RUN_SETUP) $(VALGRIND) ./test_cxx_rpc
 
 test_getpw: $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) $(ALL_CFLAGS) -o test_getpw $(OUTPRE)test_getpw.$(OBJEXT) $(SUPPORT_LIB)
@@ -26,9 +27,12 @@ test_cxx_krb5: $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_DEPLIB)
 	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_krb5 $(OUTPRE)test_cxx_krb5.$(OBJEXT) $(KRB5_LIB) $(LIBS)
 test_cxx_gss: $(OUTPRE)test_cxx_gss.$(OBJEXT)
 	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_gss $(OUTPRE)test_cxx_gss.$(OBJEXT) $(LIBS)
+test_cxx_rpc: $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_DEPLIBS)
+	$(CXX_LINK) $(ALL_CXXFLAGS) -o test_cxx_rpc $(OUTPRE)test_cxx_rpc.$(OBJEXT) $(GSSRPC_LIBS) $(LIBS)
 
 test_cxx_krb5.$(OBJEXT): test_cxx_krb5.cpp
 test_cxx_gss.$(OBJEXT): test_cxx_gss.cpp
+test_cxx_rpc.$(OBJEXT): test_cxx_rpc.cpp
 
 install::
 

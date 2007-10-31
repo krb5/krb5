@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include "krb5.h"
+#include "krb5/locate_plugin.h"
+#include "profile.h"
 
 int main (int argc, char *argv[])
 {
