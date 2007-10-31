@@ -309,6 +309,7 @@ EXEEXT =
 
 
 CC_LINK=@CC_LINK@
+CXX_LINK=@CXX_LINK@
 
 # prefix (with no spaces after) for rpath flag to cc
 RPATH_FLAG=@RPATH_FLAG@
