@@ -588,12 +588,15 @@ dnl
 dnl
 AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
 AC_BEFORE([$0],[AC_PROG_CC])
+AC_BEFORE([$0],[AC_PROG_CXX])
 krb5_ac_cflags_set=${CFLAGS+set}
+krb5_ac_cxxflags_set=${CXXFLAGS+set}
 ])
 dnl
 AC_DEFUN(WITH_CC,[dnl
 AC_REQUIRE([KRB5_AC_CHECK_FOR_CFLAGS])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
+AC_REQUIRE([AC_PROG_CXX])dnl
 if test $ac_cv_c_compiler_gnu = yes ; then
      HAVE_GCC=yes
      else HAVE_GCC=
@@ -609,14 +612,14 @@ if test "$GCC" = yes; then
 fi])
 # maybe add -Waggregate-return, or can we assume that actually works by now?
 # -Wno-long-long, if needed, for k5-platform.h without inttypes.h etc.
-extra_gcc_warn_opts="-Wall -Wmissing-prototypes -Wcast-qual \
- -Wcast-align -Wconversion -Wshadow"
+extra_gcc_warn_opts="-Wall -Wcast-qual -Wcast-align -Wconversion -Wshadow"
+# -Wmissing-prototypes
 if test "$GCC" = yes ; then
   if test "x$krb5_ac_cflags_set" = xset ; then
     AC_MSG_NOTICE(not adding extra gcc warning flags because CFLAGS was set)
   else
     AC_MSG_NOTICE(adding extra warning flags for gcc)
-    CFLAGS="$CFLAGS $extra_gcc_warn_opts"
+    CFLAGS="$CFLAGS $extra_gcc_warn_opts -Wmissing-prototypes"
     if test "`uname -s`" = Darwin ; then
       AC_MSG_NOTICE(skipping pedantic warnings on Darwin)
     elif test "`uname -s`" = Linux ; then
@@ -624,6 +627,16 @@ if test "$GCC" = yes ; then
     else
       CFLAGS="$CFLAGS -pedantic"
     fi
+    if test "$ac_cv_cxx_compiler_gnu" = yes; then
+      if test "x$krb5_ac_cxxflags_set" = xset ; then
+        AC_MSG_NOTICE(not adding extra g++ warnings because CXXFLAGS was sent)
+      else
+        AC_MSG_NOTICE(adding extra warning flags for g++)
+        CXXFLAGS="$CXXFLAGS $extra_gcc_warn_opts"
+      fi
+    fi
+    # Currently, G++ does not support -Wno-format-zero-length.
+    # So only add it to CFLAGS.
     AC_CACHE_CHECK([if GCC supports -Wno-format-zero-length],
     		   krb5_cv_gcc_Wno_format_zero_length,
     [# first try without, then with

@@ -1057,8 +1057,6 @@ AC_SUBST(ldap_plugin_dir)
 
 AC_CHECK_HEADERS(Python.h python2.3/Python.h)
 
-AC_PROG_CXX
-
 dnl
 dnl Kludge for simple server --- FIXME is this the best way to do this?
 dnl
