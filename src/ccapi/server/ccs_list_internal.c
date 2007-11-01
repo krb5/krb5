@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -68,7 +68,9 @@ static cc_int32 ccs_list_iterator_update (ccs_list_iterator_t  io_list_iterator,
                                           ccs_list_action_enum in_action,
                                           cc_uint64 in_object_index);
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -406,7 +408,9 @@ cc_int32 ccs_list_push_front (ccs_list_t       io_list,
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

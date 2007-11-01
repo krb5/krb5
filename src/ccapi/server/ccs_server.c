@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -70,7 +70,9 @@ int main (int argc, const char *argv[])
     return cci_check_error (err) ? 1 : 0;
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -80,7 +82,9 @@ cc_int32 ccs_server_new_identifier (cci_identifier_t *out_identifier)
                                                 g_server_id));
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -192,7 +196,9 @@ cc_int32 ccs_server_client_is_valid (ccs_pipe_t  in_client_pipe,
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -297,7 +303,9 @@ static cc_int32 ccs_server_request_demux (ccs_pipe_t              in_client_pipe
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -43,8 +43,6 @@
 #else
 #include "win-mac.h"
 #define VECTOR_FUNCTIONS_INITIALIZER
-/* hide "#pragma mark" warnings on Windows */
-#pragma warning (disable: 4068)
 #endif
 
 #define k_cci_context_initial_ccache_name "Initial default ccache"

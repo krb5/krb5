@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -75,7 +75,9 @@ cc_context_f cci_context_f_initializer = {
 static cc_int32 cci_context_sync (cci_context_t in_context, 
                                   cc_uint32     in_launch);
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 MAKE_INIT_FUNCTION(cci_thread_init);
 
@@ -96,7 +98,9 @@ static int cci_thread_init (void)
     return err;
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -172,7 +176,9 @@ cc_int32 cc_initialize (cc_context_t  *out_context,
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -739,7 +745,9 @@ cc_int32 ccapi_context_compare (cc_context_t  in_context,
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

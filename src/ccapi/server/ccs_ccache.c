@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -261,7 +261,9 @@ cc_int32 ccs_ccache_release (ccs_ccache_t io_ccache)
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -303,7 +305,9 @@ cc_int32 ccs_ccache_compare_name (ccs_ccache_t  in_ccache,
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -419,7 +423,9 @@ cc_int32 ccs_ccache_notify_default_state_changed (ccs_ccache_t           io_ccac
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -442,7 +448,9 @@ cc_int32 ccs_ccache_find_credentials_iterator (ccs_ccache_t                in_cc
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -479,8 +487,10 @@ cc_int32 ccs_ccache_write_name (ccs_ccache_t in_ccache,
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
 #pragma mark -- IPC Messages --
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -1087,7 +1097,9 @@ static cc_int32 ccs_ccache_clear_kdc_time_offset (ccs_ccache_t           io_ccac
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

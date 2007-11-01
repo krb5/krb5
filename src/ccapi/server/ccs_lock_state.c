@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -89,7 +89,9 @@ cc_int32 ccs_lock_state_release (ccs_lock_state_t io_lock_state)
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -214,7 +216,9 @@ static cc_int32 ccs_lock_status_grant_lock (ccs_lock_state_t io_lock_state,
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -364,7 +368,9 @@ static cc_int32 ccs_lock_status_try_to_grant_pending_locks (ccs_lock_state_t io_
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

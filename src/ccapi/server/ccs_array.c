@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -80,7 +80,9 @@ cc_int32 ccs_client_array_remove (ccs_client_array_t io_array,
     return cci_array_remove (io_array, in_position);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -144,7 +146,9 @@ cc_int32 ccs_lock_array_move (ccs_lock_array_t  io_array,
     return cci_array_move (io_array, in_position, in_new_position, out_real_new_position);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -199,7 +203,9 @@ cc_int32 ccs_callback_array_remove (ccs_callback_array_t io_array,
     return cci_array_remove (io_array, in_position);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 
 /* ------------------------------------------------------------------------ */

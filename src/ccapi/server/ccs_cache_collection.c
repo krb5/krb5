@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -126,7 +126,9 @@ cc_int32 ccs_cache_collection_compare_identifier (ccs_cache_collection_t  in_cac
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -208,7 +210,9 @@ static cc_int32 ccs_cache_collection_invalidate_change_callback (ccs_callback_ow
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -250,7 +254,9 @@ static cc_int32 ccs_cache_collection_find_ccache_by_name (ccs_cache_collection_t
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -323,7 +329,9 @@ cc_int32 ccs_cache_collection_destroy_ccache (ccs_cache_collection_t  io_cache_c
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -346,7 +354,9 @@ cc_int32 ccs_cache_collection_find_ccache_iterator (ccs_cache_collection_t  in_c
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -388,7 +398,9 @@ cc_int32 ccs_cache_collection_find_credentials_iterator (ccs_cache_collection_t 
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -528,8 +540,10 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
     return cci_check_error (err);
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
 #pragma mark -- IPC Messages --
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -981,7 +995,9 @@ static cc_int32 ccs_cache_collection_unlock (ccs_pipe_t             in_client_pi
     return cci_check_error (err);    
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -90,7 +90,9 @@ static cc_int32 cci_array_resize (cci_array_t io_array,
     return cci_check_error (err); 
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -168,7 +170,9 @@ cci_array_object_t cci_array_object_at_index (cci_array_t io_array,
     }
 }
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
     
 /* ------------------------------------------------------------------------ */
 

@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -45,7 +45,9 @@ cc_int32 ccs_client_array_insert (ccs_client_array_t io_array,
 cc_int32 ccs_client_array_remove (ccs_client_array_t io_array,
                                   cc_uint64          in_position);
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 cc_int32 ccs_lock_array_new (ccs_lock_array_t *out_array);
 
@@ -68,7 +70,9 @@ cc_int32 ccs_lock_array_move (ccs_lock_array_t  io_array,
                               cc_uint64         in_new_position,
                               cc_uint64        *out_real_new_position);
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 cc_int32 ccs_callback_array_new (ccs_callback_array_t *out_array);
 
@@ -86,7 +90,9 @@ cc_int32 ccs_callback_array_insert (ccs_callback_array_t io_array,
 cc_int32 ccs_callback_array_remove (ccs_callback_array_t io_array,
 				    cc_uint64           in_position);
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 cc_int32 ccs_callbackref_array_new (ccs_callbackref_array_t *out_array);
 

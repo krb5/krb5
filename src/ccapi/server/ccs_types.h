@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2006 Massachusetts Institute of Technology.
+ * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -43,7 +43,9 @@ typedef struct cci_array_d *ccs_callbackref_array_t;
 
 typedef struct cci_array_d *ccs_lock_array_t;
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 /* ccs_os_pipe_t is IPC-specific so it's special cased here */
 
@@ -65,7 +67,9 @@ typedef int ccs_pipe_t; /* Unix domain socket */
 
 #endif
 #endif
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 struct ccs_callback_d;
 typedef struct ccs_callback_d *ccs_callback_t;
@@ -81,7 +85,9 @@ typedef struct ccs_list_iterator_d *ccs_ccache_list_iterator_t;
 typedef struct ccs_list_d *ccs_credentials_list_t;
 typedef struct ccs_list_iterator_d *ccs_credentials_list_iterator_t;
 
+#ifdef TARGET_OS_MAC
 #pragma mark -
+#endif
 
 struct ccs_client_d;
 typedef struct ccs_client_d *ccs_client_t;
