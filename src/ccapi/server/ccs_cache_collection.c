@@ -24,6 +24,7 @@
  * or implied warranty.
  */
 
+#include "k5-platform.h"	/* pull in asprintf decl/defn */
 #include "ccs_common.h"
 
 struct ccs_cache_collection_d {
@@ -518,7 +519,7 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
 	if (!err) {
 	    err = ccs_ccache_notify_default_state_changed (old_default,
 							   io_cache_collection,
-							   FALSE /* no longer default */);
+							   0 /* no longer default */);
 	}
 	
 	if (!err) {
@@ -529,7 +530,7 @@ cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  io_cac
 	if (!err) {
 	    err = ccs_ccache_notify_default_state_changed (new_default,
 							   io_cache_collection,
-							   TRUE /* now default */);
+							   1 /* now default */);
 	}
 	
 	if (!err) {
