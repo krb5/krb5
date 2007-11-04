@@ -36,6 +36,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "k5-platform.h"
+
 #include "pkinit.h"
 
 #define FAKECERT
