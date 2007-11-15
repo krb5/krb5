@@ -27,6 +27,10 @@
 #include "cci_common.h"
 #include "cci_array_internal.h"
 
+#ifdef WIN32
+#include "k5-platform.h"
+#endif
+
 /* ------------------------------------------------------------------------ */
 
 struct cci_array_d {
