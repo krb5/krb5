@@ -423,6 +423,10 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define SIZE_MAX ((size_t)((size_t)0 - 1))
 #endif
 
+#ifndef UINT64_MAX
+# define UINT64_MAX ((UINT64_TYPE)((UINT64_TYPE)0 - 1))
+#endif
+
 /* Read and write integer values as (unaligned) octet strings in
    specific byte orders.  Add per-platform optimizations as
    needed.  */
