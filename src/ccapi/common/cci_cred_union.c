@@ -26,6 +26,10 @@
 
 #include "cci_common.h"
 
+#ifdef WIN32
+#pragma warning ( disable : 4068)
+#endif
+
 #pragma mark - 
 
 /* ------------------------------------------------------------------------ */

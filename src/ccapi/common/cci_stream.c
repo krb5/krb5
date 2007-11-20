@@ -27,6 +27,10 @@
 #include "cci_common.h"
 #include "k5-platform.h"	/* for byte swapping */
 
+#ifdef WIN32
+#pragma warning ( disable : 4068)
+#endif
+
 #if !defined(htonll)
 #define htonll(x) k5_htonll(x)
 #endif
