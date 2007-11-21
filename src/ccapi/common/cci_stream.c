@@ -27,10 +27,6 @@
 #include "cci_common.h"
 #include "k5-platform.h"	/* for byte swapping */
 
-#ifdef WIN32
-#pragma warning ( disable : 4068)
-#endif
-
 #if !defined(htonll)
 #define htonll(x) k5_htonll(x)
 #endif
@@ -157,7 +153,9 @@ const char *cci_stream_data (cci_stream_t in_stream)
     return in_stream ? in_stream->data : NULL;
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -221,7 +219,9 @@ cc_uint32 cci_stream_write (cci_stream_t  io_stream,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -282,7 +282,9 @@ cc_uint32 cci_stream_write_string (cci_stream_t  io_stream,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -323,7 +325,9 @@ cc_uint32 cci_stream_write_int32 (cci_stream_t io_stream,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -364,7 +368,9 @@ cc_uint32 cci_stream_write_uint32 (cci_stream_t io_stream,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -406,7 +412,9 @@ cc_uint32 cci_stream_write_int64 (cci_stream_t io_stream,
 }
 
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -447,7 +455,9 @@ cc_uint32 cci_stream_write_uint64 (cci_stream_t io_stream,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 

@@ -26,11 +26,9 @@
 
 #include "cci_common.h"
 
-#ifdef WIN32
-#pragma warning ( disable : 4068)
+#ifdef TARGET_OS_MAC
+#pragma mark -
 #endif
-
-#pragma mark - 
 
 /* ------------------------------------------------------------------------ */
 
@@ -199,7 +197,9 @@ static cc_uint32 cci_credentials_v4_write (cc_credentials_v4_t *in_v4creds,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -302,7 +302,9 @@ static cc_uint32 cci_cc_data_write (cc_data      *in_ccdata,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -399,7 +401,9 @@ static cc_uint32 cci_cc_data_array_write (cc_data      **in_ccdata_array,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
@@ -584,7 +588,9 @@ static cc_uint32 cci_credentials_v5_write (cc_credentials_v5_t *in_v5creds,
     return cci_check_error (err);
 }
 
-#pragma mark - 
+#ifdef TARGET_OS_MAC
+#pragma mark -
+#endif
 
 /* ------------------------------------------------------------------------ */
 
