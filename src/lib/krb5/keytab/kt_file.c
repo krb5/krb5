@@ -486,6 +486,8 @@ krb5_ktfile_start_seq_get(krb5_context context, krb5_keytab id, krb5_kt_cursor *
 	/* Wrapped?!  */
 	KTITERS(id)--;
 	KTUNLOCK(id);
+	krb5_set_error_message(context, KRB5_KT_IOERR,
+			       "Too many keytab iterators active");
 	return KRB5_KT_IOERR;	/* XXX */
     }
     KTUNLOCK(id);
@@ -884,6 +886,8 @@ krb5_ktfile_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
     if (KTFILEP(id)) {
 	/* Iterator(s) active -- no changes.  */
 	KTUNLOCK(id);
+	krb5_set_error_message(context, KRB5_KT_IOERR,
+			       "Cannot change keytab with keytab iterators active");
 	return KRB5_KT_IOERR;	/* XXX */
     }
     if ((retval = krb5_ktfileint_openw(context, id))) {
@@ -917,6 +921,8 @@ krb5_ktfile_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
     if (KTFILEP(id)) {
 	/* Iterator(s) active -- no changes.  */
 	KTUNLOCK(id);
+	krb5_set_error_message(context, KRB5_KT_IOERR,
+			       "Cannot change keytab with keytab iterators active");
 	return KRB5_KT_IOERR;	/* XXX */
     }
 
