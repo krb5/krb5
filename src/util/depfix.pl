@@ -214,6 +214,7 @@ my $buf = '';
 while (<STDIN>) {
     # Strip newline.
     chop;
+    next if /^\s*#/;
     # Do directory-specific path substitutions on each filename read.
     $_ = &do_subs($_);
     if (m/\\$/) {
