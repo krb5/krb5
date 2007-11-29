@@ -1212,17 +1212,28 @@ khm_show_main_window(void) {
         if (hw != khm_hwnd_main)
             SetForegroundWindow(khm_hwnd_main);
     }
-
-    if (khm_nCmdShow == SW_SHOWMINIMIZED ||
+    /*
+     * We test for the values of khm_nCmdShow that
+     * can be set at process startup.  They will 
+     * only be seen the first time this function is 
+     * called.  After the first time, the value of
+     * khm_nCmdShow will always be SW_RESTORE.
+     * When one of the minimized values is set, 
+     * khm_show_main_window() will not be called
+     * unless the user initiates a request to show
+     * the window.
+     */
+    else if (khm_nCmdShow == SW_SHOWMINIMIZED ||
         khm_nCmdShow == SW_SHOWMINNOACTIVE ||
         khm_nCmdShow == SW_MINIMIZE) {
-        khm_hide_main_window();
-    } else {
-        ShowWindow(khm_hwnd_main, khm_nCmdShow);
-        UpdateWindow(khm_hwnd_main);
 
-        khm_cred_refresh();
+        khm_nCmdShow = SW_SHOW;
     }
+
+    ShowWindow(khm_hwnd_main, khm_nCmdShow);
+    UpdateWindow(khm_hwnd_main);
+    
+    khm_cred_refresh();
 
     khm_nCmdShow = SW_RESTORE;
 }
