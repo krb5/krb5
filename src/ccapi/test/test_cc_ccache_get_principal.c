@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <limits.h>
-#include <Kerberos/Kerberos.h>
 
 #include "test_ccapi_check.h"
 #include "test_ccapi_constants.h"
