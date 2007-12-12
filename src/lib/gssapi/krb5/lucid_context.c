@@ -231,7 +231,7 @@ make_external_lucid_ctx_v1(
 	    				&lctx->cfx_kd.ctx_key)))
 	    goto error_out;
 	if (gctx->have_acceptor_subkey) {
-	    if ((retval = copy_keyblock_to_lucid_key(gctx->enc,
+	    if ((retval = copy_keyblock_to_lucid_key(gctx->acceptor_subkey,
 	    				&lctx->cfx_kd.acceptor_subkey)))
 		goto error_out;
 	    lctx->cfx_kd.have_acceptor_subkey = 1;
