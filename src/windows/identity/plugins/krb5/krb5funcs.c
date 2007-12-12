@@ -978,8 +978,8 @@ _exit:
     if (cc_ctx)
         (*pcc_shutdown)(&cc_ctx);
 
-    kcdb_credset_collect(NULL, krb5_credset, NULL, credtype_id_krb5, NULL);
     tc_set_ident_data(&idl);
+    kcdb_credset_collect(NULL, krb5_credset, NULL, credtype_id_krb5, NULL);
     tc_free_idlist(&idl);
 
     return(code);
