@@ -185,8 +185,7 @@ krb5_def_store_mkey(context, keyfile, mname, key, master_pwd)
 		kf) != key->length)) {
 	retval = errno;
 	(void) fclose(kf);
-    }
-    if (fclose(kf) == EOF)
+    } else if (fclose(kf) == EOF)
 	retval = errno;
 #if HAVE_UMASK
     (void) umask(oumask);
