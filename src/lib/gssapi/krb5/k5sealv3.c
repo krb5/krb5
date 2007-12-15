@@ -248,7 +248,6 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 	plain.data = 0;
 	if (err) {
 	    zap(outbuf,bufsize);
-	    free(outbuf);
 	    goto error;
 	}
 	if (sum.length != ctx->cksum_size)
