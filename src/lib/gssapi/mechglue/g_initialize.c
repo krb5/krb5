@@ -208,7 +208,7 @@ gss_OID_set *mechSet;
 				free((*mechSet)->elements[j].elements);
 			}
 			free((*mechSet)->elements);
-			free(mechSet);
+			free(*mechSet);
 			*mechSet = NULL;
 			return (GSS_S_FAILURE);
 		}
