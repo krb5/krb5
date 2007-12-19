@@ -304,7 +304,7 @@ static char * v4_klog( int type, const char *format, ...)
 }
 
 static
-int krb4_sendto(const char *msg, int len)
+int set_response(const char *msg, int len)
 {
     if (  !(response = (krb5_data *) malloc( sizeof *response))) {
 	return ENOMEM;
@@ -800,7 +800,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    krb4_sendto((char *) rpkt->dat, rpkt->length);
+	    set_response((char *) rpkt->dat, rpkt->length);
 	    memset(&a_name_data, 0, sizeof(a_name_data));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
@@ -977,7 +977,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    krb4_sendto((char *) rpkt->dat, rpkt->length);
+	    set_response((char *) rpkt->dat, rpkt->length);
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
@@ -1022,7 +1022,7 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
     strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    krb4_sendto((char *) e_pkt->dat, e_pkt->length);
+    set_response((char *) e_pkt->dat, e_pkt->length);
 
 }
 
