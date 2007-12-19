@@ -82,19 +82,17 @@ static char * v4_klog (int, const char *, ...)
     ;
 #define klog v4_klog
 
-/* take this out when we don't need it anymore */
-static int krbONE = 1;
-/* XXX inline former contents of krb_conf.h for now */
 /* Byte ordering */
-extern int krbONE;
-#define		HOST_BYTE_ORDER	(* (char *) &krbONE)
-#define		MSB_FIRST		0	/* 68000, IBM RT/PC */
-#define		LSB_FIRST		1	/* Vax, PC8086 */
-
-static int     f;
-
-/* XXX several files in libkdb know about this */
-static char *progname;
+/*#define		MSB_FIRST		0	/ * 68000, IBM RT/PC */
+/*#define		LSB_FIRST		1	/ * Vax, PC8086 */
+#if defined K5_LE
+# define HOST_BYTE_ORDER 1
+#elif defined K5_BE
+# define HOST_BYTE_ORDER 0
+#else
+static int krbONE = 1;
+# define HOST_BYTE_ORDER (* (char *) &krbONE)
+#endif
 
 #ifndef BACKWARD_COMPAT
 static Key_schedule master_key_schedule;
@@ -306,8 +304,7 @@ static char * v4_klog( int type, const char *format, ...)
 }
 
 static
-int krb4_sendto(int s, const char *msg, int len, int flags,
-		const struct sockaddr *to, int to_len)
+int krb4_sendto(const char *msg, int len)
 {
     if (  !(response = (krb5_data *) malloc( sizeof *response))) {
 	return ENOMEM;
@@ -803,8 +800,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(req_name_ptr, req_inst_ptr,
 		req_realm_ptr, req_time_ws, 0, a_name_data.exp_date,
 		a_name_data.key_version, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+	    krb4_sendto((char *) rpkt->dat, rpkt->length);
 	    memset(&a_name_data, 0, sizeof(a_name_data));
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
@@ -981,8 +977,7 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = create_auth_reply(ad->pname, ad->pinst,
 				     ad->prealm, time_ws,
 				     0, 0, 0, ciph);
-	    krb4_sendto(f, (char *) rpkt->dat, rpkt->length, 0,
-		   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+	    krb4_sendto((char *) rpkt->dat, rpkt->length);
 	    memset(&s_name_data, 0, sizeof(s_name_data));
 	    break;
 	}
@@ -1027,8 +1022,7 @@ kerb_err_reply(struct sockaddr_in *client, KTEXT pkt, long int err, char *string
     strncat(e_msg, string, sizeof(e_msg) - 1 - 19);
     cr_err_reply(e_pkt, req_name_ptr, req_inst_ptr, req_realm_ptr,
 		 req_time_ws, err, e_msg);
-    krb4_sendto(f, (char *) e_pkt->dat, e_pkt->length, 0,
-	   (struct sockaddr *) client, sizeof (struct sockaddr_in));
+    krb4_sendto((char *) e_pkt->dat, e_pkt->length);
 
 }
 
