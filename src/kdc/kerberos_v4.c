@@ -650,8 +650,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
     /* check packet version */
     if (req_version != KRB_PROT_VERSION) {
 	lt = klog(L_KRB_PERR,
-	"KRB prot version mismatch: KRB =%d request = %d",
-		  KRB_PROT_VERSION, req_version, 0);
+		  "KRB prot version mismatch: KRB =%d request = %d",
+		  KRB_PROT_VERSION, req_version);
 	/* send an error reply */
 	req_name_ptr = req_inst_ptr = req_realm_ptr = "";
 	kerb_err_reply(client, pkt, KERB_ERR_PKT_VER, lt);
@@ -708,8 +708,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    rpkt = &rpkt_st;
 
 	    klog(L_INI_REQ,
-	    "Initial ticket request Host: %s User: \"%s\" \"%s\"",
-	       inet_ntoa(client_host), req_name_ptr, req_inst_ptr, 0);
+		 "Initial ticket request Host: %s User: \"%s\" \"%s\"",
+		 inet_ntoa(client_host), req_name_ptr, req_inst_ptr);
 
 	    if ((i = check_princ(req_name_ptr, req_inst_ptr, 0,
 				 &a_name_data, &k5key, 0, &ck5life))) {
@@ -723,8 +723,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    tk->length = 0;	/* init */
 	    if (strcmp(service, "krbtgt"))
 		klog(L_NTGT_INTK,
-		    "INITIAL request from %s.%s for %s.%s", req_name_ptr,
-		    req_inst_ptr, service, instance, 0);
+		     "INITIAL request from %s.%s for %s.%s", req_name_ptr,
+		     req_inst_ptr, service, instance);
 	    /* this does all the checking */
 	    if ((i = check_princ(service, instance, lifetime,
 				 &s_name_data, &k5key, 1, &sk5life))) {
@@ -903,8 +903,8 @@ kerberos_v4(struct sockaddr_in *client, KTEXT pkt)
 	    str_length_check(instance, INST_SZ);
 
 	    klog(L_APPL_REQ, "APPL Request %s.%s@%s on %s for %s.%s",
-	     ad->pname, ad->pinst, ad->prealm,
-	     inet_ntoa(client_host), service, instance, 0);
+		 ad->pname, ad->pinst, ad->prealm,
+		 inet_ntoa(client_host), service, instance);
 	    req_name_ptr = ad->pname;
 	    req_inst_ptr = ad->pinst;
 	    req_realm_ptr = ad->prealm;
@@ -1044,7 +1044,7 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
 			   issrv, k5life);
     klog(L_ALL_REQ,
 	 "Principal: \"%s\", Instance: \"%s\" Lifetime = %d n = %d",
-	 p_name, instance, lifetime, n, 0);
+	 p_name, instance, lifetime, n);
     
     if (n < 0) {
 	lt = klog(L_KRB_PERR, "Database unavailable!");
@@ -1059,14 +1059,13 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
      */
     if (n == 0) {
 	/* service unknown, log error, skip to next request */
-	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", p_name,
-	    instance, 0);
+	lt = klog(L_ERR_UNK, "UNKNOWN \"%s\" \"%s\"", p_name, instance);
 	return KERB_ERR_PRINCIPAL_UNKNOWN;
     }
     if (more) {
 	/* not unique, log error */
 	lt = klog(L_ERR_NUN, "Principal NOT UNIQUE \"%s\" \"%s\"",
-		  p_name, instance, 0);
+		  p_name, instance);
 	return KERB_ERR_PRINCIPAL_NOT_UNIQUE;
     }
 
@@ -1116,8 +1115,7 @@ check_princ(char *p_name, char *instance, int lifetime, Principal *p,
     if (k5key->contents != NULL && K4KDC_ENCTYPE_OK(k5key->enctype)) {
 	if ((p->key_low == 0) && (p->key_high == 0)) {
 	    /* User has a null key */
-	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name,
-		      instance, 0);
+	    lt = klog(L_ERR_NKY, "Null key \"%s\" \"%s\"", p_name, instance);
 	    return KERB_ERR_NULL_KEY;
 	}
     }
