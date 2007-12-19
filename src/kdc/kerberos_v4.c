@@ -83,7 +83,7 @@ static char * v4_klog (int, const char *, ...)
 #define klog v4_klog
 
 /* take this out when we don't need it anymore */
-int krbONE = 1;
+static int krbONE = 1;
 /* XXX inline former contents of krb_conf.h for now */
 /* Byte ordering */
 extern int krbONE;
@@ -91,10 +91,10 @@ extern int krbONE;
 #define		MSB_FIRST		0	/* 68000, IBM RT/PC */
 #define		LSB_FIRST		1	/* Vax, PC8086 */
 
-int     f;
+static int     f;
 
 /* XXX several files in libkdb know about this */
-char *progname;
+static char *progname;
 
 #ifndef BACKWARD_COMPAT
 static Key_schedule master_key_schedule;
@@ -149,8 +149,8 @@ static void hang(void);
 
 static krb5_data *response;
 
-void kerberos_v4 (struct sockaddr_in *, KTEXT);
-void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
+static void kerberos_v4 (struct sockaddr_in *, KTEXT);
+static void kerb_err_reply (struct sockaddr_in *, KTEXT, long, char *);
 static int set_tgtkey (char *, krb5_kvno, krb5_boolean);
 
 /* Attributes converted from V5 to V4 - internal representation */
