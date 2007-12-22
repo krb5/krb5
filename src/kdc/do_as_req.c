@@ -1,7 +1,7 @@
 /*
  * kdc/do_as_req.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -118,8 +118,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     limit_string(sname);
     
     c_nprincs = 1;
-    if ((errcode = krb5_db_get_principal(kdc_context, request->client,
-					 &client, &c_nprincs, &more))) {
+    if ((errcode = get_principal(kdc_context, request->client,
+				 &client, &c_nprincs, &more))) {
 	status = "LOOKING_UP_CLIENT";
 	c_nprincs = 0;
 	goto errout;
@@ -139,8 +139,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
     
     s_nprincs = 1;
-    if ((errcode = krb5_db_get_principal(kdc_context, request->server, &server,
-					 &s_nprincs, &more))) {
+    if ((errcode = get_principal(kdc_context, request->server, &server,
+				 &s_nprincs, &more))) {
 	status = "LOOKING_UP_SERVER";
 	goto errout;
     }

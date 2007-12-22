@@ -441,8 +441,10 @@ kerb_get_principal(char *name, char *inst, /* could have wild cards */
 					  local_realm, &search)))
 	return(0);
 
-    if ((retval = krb5_db_get_principal(kdc_context, search, &entries, 
-					&nprinc, &more5))) {
+    /* The krb4 support in the KDC is not thread-safe yet, so maintain
+       the global lock until that gets fixed.  */
+    if ((retval = get_principal_locked(kdc_context, search, &entries, 
+				       &nprinc, &more5))) {
         krb5_free_principal(kdc_context, search);
         return(0);
     }

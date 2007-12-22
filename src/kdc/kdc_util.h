@@ -1,7 +1,7 @@
 /*
  * kdc/kdc_util.h
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2007 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -167,6 +167,17 @@ krb5_error_code free_padata_context
 krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);
 void kdc_insert_lookaside (krb5_data *, krb5_data *);
 void kdc_free_lookaside(krb5_context);
+
+/* kdc_util.c */
+krb5_error_code
+get_principal_locked (krb5_context kcontext,
+		      krb5_const_principal search_for,
+		      krb5_db_entry *entries, int *nentries,
+		      krb5_boolean *more);
+krb5_error_code
+get_principal (krb5_context kcontext,
+	       krb5_const_principal search_for,
+	       krb5_db_entry *entries, int *nentries, krb5_boolean *more);
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))
