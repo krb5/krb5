@@ -2,6 +2,7 @@
 <!--
 
   Copyright (C) 2004, 2005, 2006 by the Massachusetts Institute of Technology.
+  Copyright (C) 2007 Secure Endpoints Inc.
   All rights reserved.
  
   Export of this software from the United States of America may
@@ -40,11 +41,11 @@
     <Property Id="ComponentDownload">http://web.mit.edu/kerberos</Property>
 
     <Property Id="UPGRADENSIS">
-        <RegistrySearch Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="raw"/>
+        <RegistrySearch Win64="$(var.Win64)" Id="regsrch_NSIS" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="UninstallString" Type="raw"/>
     </Property>
     
     <Property Id="NSISVERSION">
-        <RegistrySearch Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
+        <RegistrySearch Win64="$(var.Win64)" Id="regsrch_NSISV" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Kerberos for Windows" Name="DisplayVersion" Type="raw" />
     </Property>
 
     <Property Id="CantRemoveNSISError">$(loc.CantRemoveNSIS)</Property>
