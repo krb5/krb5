@@ -213,7 +213,8 @@ cc_int32 ccs_callback_is_for_client_pipe (ccs_callback_t  in_callback,
     if (!out_is_for_client_pipe         ) { err = cci_check_error (ccErrBadParam); }
     
     if (!err) {
-        *out_is_for_client_pipe = (in_callback->client_pipe == in_client_pipe);
+        err = ccs_pipe_compare (in_callback->client_pipe, in_client_pipe, 
+                                out_is_for_client_pipe);
     }
     
     return cci_check_error (err);    

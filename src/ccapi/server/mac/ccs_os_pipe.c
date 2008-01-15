@@ -39,6 +39,25 @@ cc_int32 ccs_os_pipe_valid (ccs_pipe_t in_pipe)
 
 /* ------------------------------------------------------------------------ */
 
+cc_int32 ccs_os_pipe_compare (ccs_pipe_t  in_pipe,
+                              ccs_pipe_t  in_compare_to_pipe,
+                              cc_uint32  *out_equal)
+{
+    cc_int32 err = ccNoError;
+    
+    if (!in_pipe           ) { err = cci_check_error (ccErrBadParam); }
+    if (!in_compare_to_pipe) { err = cci_check_error (ccErrBadParam); }
+    if (!out_equal         ) { err = cci_check_error (ccErrBadParam); }
+    
+    if (!err) {
+        *out_equal = (in_pipe == in_compare_to_pipe);
+    }
+    
+    return cci_check_error (err);    
+}
+
+/* ------------------------------------------------------------------------ */
+
 cc_int32 ccs_os_pipe_copy (ccs_pipe_t *out_pipe,
 			   ccs_pipe_t  in_pipe)
 {
