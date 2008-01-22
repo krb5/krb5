@@ -1,0 +1,39 @@
+;LIBRARY		COMERR32
+HEAPSIZE	8192
+
+EXPORTS
+    cci_debug_printf
+    
+    cc_initialize
+
+	cci_string_new
+	cci_string_d_initializer
+	ccapi_string_release
+
+    cci_credentials_iterator_new 
+    cci_credentials_iterator_write 
+
+    cci_ccache_iterator_new 
+    cci_ccache_iterator_write 
+
+    ccapi_ccache_iterator_release 
+    ccapi_ccache_iterator_next 
+    ccapi_ccache_iterator_clone     
+
+    ccapi_credentials_iterator_release 
+    ccapi_credentials_iterator_next 
+    ccapi_credentials_iterator_clone
+    
+;debugging:
+    _cci_check_error
+    cci_os_ipc
+    cci_os_ipc_msg
+    cci_os_ipc_thread_init
+    cci_stream_data
+    cci_stream_write
+    cci_stream_new
+    
+    ccs_authenticate
+    
+	    
+	
