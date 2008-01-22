@@ -3,6 +3,8 @@ CO      = ..\common
 COWIN   = $(CO)\win
 LIBDIR  = ..\lib
 LIBWIN  = $(LIBDIR)\win
+SRV     = ..\server
+SRVWIN  = ..\server\win
 
 !include <Win32.Mak>
 
@@ -24,26 +26,36 @@ OBJEXT = obj
 TESTDIR = $(DSTROOT)\tests
 TESTEXT = exe
 DSTDIR = $(DSTROOT)\ccapi_tests
-PINGOBJS = pingtest.obj ccs_request_c.obj 
+
+PINGOBJS = pingtest.obj 
 SIMPLEOBJS = simple_lock_test.obj
 
-OBJS =  cci_debugging.$(OBJEXT) \
-        ccs_request_c.obj \
-        cci_os_debugging.$(OBJEXT) \
-        win-utils.obj \
-        ccapi_os_ipc.obj \
-        cci_stream.obj
+comobjs =   cci_debugging.obj cci_stream.obj
+cowobjs =   cci_os_debugging.obj 
+libobjs =   ccs_request_c.obj
         
 #all: build-base simple_lock_test pingtest 
 all: build-base pingtest 
 
 # compile base files used by all tests
-build-base: $(OBJS)
+build-base: $(comobjs) $(libobjs) $(srvobjs)
     @echo "Base objects built."
 
 # rule to compile src files
 .c.obj:
     $(cc) $(cdebug) $(cflags) /Fo$(OBJDIR)\$(*B).$(OBJEXT) $(SRC)\$(*B).c
+
+$(comobjs) : $(CO)\$(*B).c
+   $(cc) $(cdebug) $(cflags) $(CO)\$(*B).c
+
+$(cowobjs) : $(COWIN)\$(*B).c
+   $(cc) $(cdebug) $(cflags) $(COWIN)\$(*B).c
+
+$(libobjs) : $(LIBWIN)\$(*B).c
+   $(cc) $(cdebug) $(cflags) $(LIBWIN)\$(*B).c
+
+#$(srvobjs) : $(SRVWIN)\$*.c
+#   $(cc) $(cdebug) $(cflags) $(SRVWIN)\$*.c
 
 simple_lock_test: simple_lock_test.obj $(OBJS)
 	@echo R3+ Build $(*B) in $(TESTDIR)
@@ -55,8 +67,7 @@ simple_lock_test: simple_lock_test.obj $(OBJS)
 pingtest: pingtest.obj
 	@echo R4+ Build $(*B) in $(TESTDIR)
     $(cc) $(cdebug) $(cflags) $(*B).c
-#    $(link) $(linkdebug) $(conflags) -out:$(*B).exe $(*B).obj \
-    $(link) $(linkdebug) $(conflags) -out:$(*B).exe $(PINGOBJS) \
+    $(link) $(linkdebug) $(conflags) -out:$(*B).exe $(PINGOBJS) $(libobjs) $(srvobjs) \
         $(LIBS) rpcrt4.lib
 	@echo R4- Built $(*B) in $(TESTDIR)
 
