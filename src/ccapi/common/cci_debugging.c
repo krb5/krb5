@@ -1,7 +1,7 @@
 /*
  * $Header$
  *
- * Copyright 2007, 2008 Massachusetts Institute of Technology.
+ * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -27,12 +27,6 @@
 #include "cci_common.h"
 #include "cci_os_debugging.h"
 
-#ifdef WIN32
-char*   eol = "\n";
-#else
-char*   eol = "";
-#endif
-
 /* ------------------------------------------------------------------------ */
 
 cc_int32 _cci_check_error (cc_int32    in_error, 
@@ -42,8 +36,8 @@ cc_int32 _cci_check_error (cc_int32    in_error,
 {
     /* Do not log for flow control errors or when there is no error at all */
     if (in_error != ccNoError && in_error != ccIteratorEnd) {
-        cci_debug_printf ("%s() got %d at %s: %d%s", in_function, 
-                          in_error, in_file, in_line, eol);
+        cci_debug_printf ("%s() got %d at %s: %d", in_function, 
+                          in_error, in_file, in_line);
     }
     
     return in_error;    
