@@ -81,6 +81,12 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
 
 MAKE_INIT_FUNCTION(cci_thread_init);
 
+#ifdef WIN32
+void cci_thread_init_helper() {
+    cci_thread_init__auxinit();
+    }
+#endif
+
 /* ------------------------------------------------------------------------ */
 
 static int cci_thread_init (void)
